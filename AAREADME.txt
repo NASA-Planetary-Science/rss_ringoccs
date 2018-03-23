@@ -17,7 +17,7 @@ Developers:
     Richard G. French (Cassini RSS Team Leader) rfrench@wellesley.edu
     Jolene Fong, Research Assistant, Wellesley College
     Ryan Maguire, Research Assistant, Wellesley College
-    Glenn Steranka, Research Asistant, Wellesley College
+    Glenn Steranka, Research Assistant, Wellesley College
 
 System requirements:
   This software and installation have been tested on the following operating systems:

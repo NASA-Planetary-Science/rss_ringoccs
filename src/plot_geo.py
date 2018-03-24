@@ -122,7 +122,7 @@ check1.on_clicked(func1)
 check2.on_clicked(func2)
 check3.on_clicked(func3)
 
-plotfile = 'plot_geo.jpg'
+plotfile = '../figs/plot_geo.jpg'
 now = datetime.datetime.now()
 str_now = str(now)
 plt.show()

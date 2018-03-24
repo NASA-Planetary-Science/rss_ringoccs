@@ -1,8 +1,10 @@
 # plot_geo.py
 #
+# plot selected entries from a geometry file (eventually, a geo instance)
+# with option to click on/off individual plots, using checkboxes
 #
-# plot a geometry file (eventually, a geo instance)
-
+# Revisions:
+#   2018 Mar 23 - rfrench - original version
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -12,6 +14,7 @@ import os
 import datetime
 
 program = 'plot_geo.py'
+
 infile = '../output/Rev07E_RSS_2005_123_X43_E/RSS_2005_123_X43_E_GEO.TAB'
 spm,ret,scet,rkm,londeg,azdeg,Bdeg,D,ripdot,ripazdot,Fkm,impact,X,Y,Z,Xdot,Ydot,Zdot= np.loadtxt(infile,delimiter=',',unpack=True)
 
@@ -130,6 +133,5 @@ ax = fig.add_axes([0,0,1,1])
 plt.text(0.5,0.03,str_now[:-7]+'    '+program+' '+os.getcwd()+'/'+plotfile,verticalalignment='bottom',\
         horizontalalignment='center',transform=ax.transAxes, fontsize=8)
 ax.set_axis_off()
-
 
 fig.savefig(plotfile)

@@ -1,11 +1,11 @@
 """
 
-example_end_to_end_script.py
+example_end_to_end_and_quick_look_script.py
 
 Purpose: Example of a possible end-to-end run. Produces a calibration file
 
 Revisions:
-      example_end_to_end_script.py
+      example_end_to_end_and_quick_look_script.py
    Mar 20 2018 - gsteranka - Original version
 """
 

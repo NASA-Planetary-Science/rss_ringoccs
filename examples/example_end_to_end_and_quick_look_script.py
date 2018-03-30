@@ -50,7 +50,7 @@ kernels = [kernels_dir + this_kernel for this_kernel in kernel_files]
 # NormDiff input in quick-look steps
 dr_km_desired = 0.25
 rho_km_range = [70000, 155000]
-res_km = 'I do nothing yet'
+res_km = 1.0
 window_type = 'I do nothing yet'
 
 # **END OF USER INPUT**

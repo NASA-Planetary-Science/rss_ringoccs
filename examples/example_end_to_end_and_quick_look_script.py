@@ -80,5 +80,6 @@ norm_diff_inst = NormDiff(rsr_file, dr_km_desired, rho_km_range, res_km,
                           window_type, geo_file, cal_file)
 norm_diff_inst.save_obs(obs_file)
 
-# Put diffraction correction code here
+# After making obs file, you can repeat this step as much as needed
+# without repeating any of the above
 diffraction_correction(obs_file, res_km, out_file)

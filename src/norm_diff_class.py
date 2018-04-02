@@ -125,6 +125,7 @@ class NormDiff(object):
         f_offset_fit_cal = np.asarray(cal[4][:])
         rho_km_cal = rho_interp_func(spm_cal)
 
+        # If specified rho range that cal file can't cover
         if (spm_range[0]<min(spm_cal)) | (spm_range[1]>max(spm_cal)):
             print('ERROR (NormDiff): Specified cal file is missing \n'
                   +'points required to pre-process points in rho_km_range.\n'

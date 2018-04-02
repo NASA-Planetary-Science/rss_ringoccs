@@ -30,14 +30,17 @@ def pre_resample(rho_km, vec, freq):
     """Sub-function inside of resample_IQ to put vectors to uniform spaced
     radius at a similar spacing as raw resolution"""
 
+    # Average radius spacing over region
     ts_avg = (rho_km[-1]  - rho_km[0])/float(len(rho_km) - 1)
     p = 1
     q = round(1.0/(ts_avg*freq))
     dr_grid = float(p)/(q*freq)
 
+    # Uniform radius grid at near-raw resolution to interpolate to
     n_pts = round((rho_km[-1] - rho_km[0])/dr_grid)
     rho_grid = rho_km[0] + dr_grid*np.arange(n_pts)
 
+    # Interpolate to near-raw resolution
     vec_grid_interp = interp1d(rho_km, vec, kind='linear',
                                fill_value='extrapolate')
     vec_grid = vec_grid_interp(rho_grid)
@@ -80,11 +83,13 @@ def resample_IQ(rho_km, IQ_c, dr_desired, dr_km_tol=0.01, TEST=False):
     I_c = np.real(IQ_c)
     Q_c = np.imag(IQ_c)
 
+    # Pre-resampling steps. Interpolates to uniform radius at near-raw spacing
     (rho_km_uniform, I_c_uniform, p, q) = pre_resample(rho_km, I_c,
                                                        1.0/dr_desired)
     (rho_km_uniform, Q_c_uniform, p, q) = pre_resample(rho_km, Q_c,
                                                        1.0/dr_desired)
 
+    # Downsample by factor q to desired final spacing
     I_c_desired = signal.resample_poly(I_c_uniform, p, q)
     Q_c_desired = signal.resample_poly(Q_c_uniform, p, q)
 

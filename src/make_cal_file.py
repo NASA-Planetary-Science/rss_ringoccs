@@ -50,11 +50,11 @@ def make_cal_file(cal_file, fit_inst, norm_inst, geo_inst, dt_cal=1.0):
     n_pts_cal = round((spm_geo[-1] - spm_geo[0])/dt_cal) + 1
     spm_cal = spm_geo[0] + dt_cal*np.arange(n_pts_cal)
 
-    # Evaluate f_sky_pred at SPM_cal
+    # Evaluate f_sky_pred at spm_cal
     f_sky_pred_func = interp1d(f_spm, f_sky_pred, fill_value='extrapolate')
     f_sky_pred_cal = f_sky_pred_func(spm_cal)
 
-    # Evaluate f_sky_resid_fit at SPM_cal
+    # Evaluate f_sky_resid_fit at spm_cal
     f_sky_resid_fit_func = interp1d(f_spm, f_sky_resid_fit,
                                     fill_value='extrapolate')
     f_sky_resid_fit_cal = f_sky_resid_fit_func(spm_cal)

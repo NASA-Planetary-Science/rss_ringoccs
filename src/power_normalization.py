@@ -87,6 +87,7 @@ class Normalization(object):
         self.__spm_raw = spm_raw
         self.__IQ_c_raw = IQ_c_raw
 
+        # Function to interpolate spm to rho values in km
         rho_interp_func = interp1d(np.asarray(geo_inst.t_oet_spm_vals),
                                    np.asarray(geo_inst.rho_km_vals),
                                    fill_value='extrapolate')
@@ -207,6 +208,7 @@ class Normalization(object):
             np.logical_and(knots_km>min(rho_km_vals_free),
                            knots_km<max(rho_km_vals_free)))
 
+        # If specified times don't have freespace region, you can't make a fit
         if len(knots_km_where) == 0:
             print('ERROR (Normalization.get_spline_fit): No specified times \n'+
                   'fall within freespace range. Freespace ranges are '+

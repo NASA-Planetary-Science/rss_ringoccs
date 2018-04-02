@@ -440,6 +440,7 @@ class RSRReader(object):
         Q_m = np.reshape(Q_array,-1)
         IQ_m = I_m + 1j*Q_m
 
+        # Decimate 16kHz file to 1kHz spacing if specified
         if decimate_16khz_to_1khz & (self.sample_rate_khz == 16):
             IQ_m = decimate(IQ_m, 4, zero_phase=True)
             IQ_m = decimate(IQ_m, 4, zero_phase=True)

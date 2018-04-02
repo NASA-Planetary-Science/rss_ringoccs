@@ -68,6 +68,7 @@ def calc_freq_offset(spm_vals, IQ_m, dt_freq=8.192, spm_range=None, TEST=False):
     # to refine the peak
     cont_fft_freq_range = 5.0
 
+    # start and end of where to get frequency offset
     start_ind = int(min(np.argwhere(abs(spm_vals - spm_range[0])
                                     <= dt_raw)))
     end_ind = int(max(np.argwhere(abs(spm_vals - spm_range[1]) <= dt_raw)))
@@ -135,6 +136,7 @@ def __find_peak_freq(spm,IQ_m, cont_fft_freq_range):
             This value is the extracted frequency offset
             """
 
+    # Number of pts per FFT in each pass to refine peak frequency
     cont_fft_num_pass1 = 1000
     cont_fft_num_pass2 = 2000
     cont_fft_num_pass3 = 20

@@ -27,6 +27,8 @@ Revisions:
                             inversion inputs as attributes
    Mar 30 2018 - gsteranka - Edited reading in of geometry file to read in csv
                              format
+   Apr 04 2018 - gsteranka - p_norm_vals is normalization of IQ_c_desired, not
+                             IQ_m_desired
 """
 
 import numpy as np
@@ -163,7 +165,7 @@ class NormDiff(object):
         p_free_interp_func = interp1d(rho_km_cal, p_free_cal)
         p_free = p_free_interp_func(rho_km_desired)
 
-        p_norm_vals = (abs(IQ_m_desired)**2)/p_free
+        p_norm_vals = (abs(IQ_c_desired)**2)/p_free
         phase_rad_vals = np.arctan2(np.imag(IQ_c_desired),
                                     np.real(IQ_c_desired))
 

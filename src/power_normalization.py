@@ -32,6 +32,8 @@ Revisions:
    Apr 04 2018 - gsteranka - Downsample IQ_c_raw instead of p_obs_raw. This
                              accompanies the recent change in
                              norm_diff_class.py
+   Apr 04 2018 - gsteranka - In loop to make knots_spm and knots_rho, change i
+                             index to int(i)
 """
 
 import numpy as np
@@ -223,7 +225,7 @@ class Normalization(object):
         knots_spm = np.zeros(n_knots_km)
         knots_rho = np.zeros(n_knots_km)
         for i in knots_km_where:#range(n_knots_km):
-            _ind = np.argmin(abs(rho_km_vals_free - knots_km[i]))
+            _ind = np.argmin(abs(rho_km_vals_free - knots_km[int(i)]))
             knots_spm[i] = spm_vals_free[_ind]
             knots_rho[i] = rho_km_vals_free[_ind]
 

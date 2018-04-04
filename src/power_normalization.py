@@ -29,6 +29,9 @@ Revisions:
                              beyond the input times to make a spline fit for.
                              Added error check if no input points fall within
                              specified freespace regions
+   Apr 04 2018 - gsteranka - Downsample IQ_c_raw instead of p_obs_raw. This
+                             accompanies the recent change in
+                             norm_diff_class.py
 """
 
 import numpy as np
@@ -132,8 +135,8 @@ class Normalization(object):
         q = round(dt_down / dt_raw)
 
         # Downsample raw power by factor of q
-        p_obs_raw = np.absolute(self.__IQ_c_raw)**2
-        p_obs_down = signal.resample_poly(p_obs_raw, 1, q)
+        IQ_c_down = signal.resample_poly(self.__IQ_c_raw, 1, q)
+        p_obs_down = abs(IQ_c_down)**2
 
         # New SPM, rho, and p_obs, at the downsampled resolution
         spm_vals_down = np.linspace(self.__spm_raw[0], self.__spm_raw[-1],

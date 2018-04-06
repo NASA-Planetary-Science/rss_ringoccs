@@ -98,7 +98,16 @@ class Normalization(object):
                                    fill_value='extrapolate')
         self.__rho_interp_func = rho_interp_func
 
-        # Default arguments for spline fit
+        # Default arguments for spline fit. Chosen because:
+        #     k: Order higher than 2 gives too much freedom to spline fit.
+        #     knots_km: By experimentation, these tend to give the most
+        #               consistently good spline fits. Sometimes need to
+        #               adjust if a file's free space power cuts off sooner
+        #               or begins later than expected
+        #     freespace_km: These regions are always free space and
+        #                   uninterrupted by diffraction pattern or an
+        #                   eccentric ringlet. These accompany the default
+        #                   knots
         self._k = 2
         self._knots_km = np.array([70445., 87400., 117730., 119950., 133550.,
                                    194269.])
@@ -136,7 +145,9 @@ class Normalization(object):
         dt_raw = self.__spm_raw[1] - self.__spm_raw[0]
         q = round(dt_down / dt_raw)
 
-        # Downsample raw power by factor of q
+        # Downsample IQ_c by factor of q and not power because this is to
+        # match the resampling done in norm_diff_class.py, where it also
+        # resamples IQ_c
         IQ_c_down = signal.resample_poly(self.__IQ_c_raw, 1, q)
         p_obs_down = abs(IQ_c_down)**2
 
@@ -234,9 +245,13 @@ class Normalization(object):
             print(knots_spm)
             print(knots_rho)
 
-        # Make and evaluate the spline fit
-        spline_rep = splrep(spm_vals_free, p_obs_free,
-                            k=k, t=knots_spm)
+        # Make and evaluate the spline fit. Sort spm_vals_free and p_obs_free
+        # in case it's ingress, since indices were gotten from rho values,
+        # which are not in order for ingress
+        ind_sort = np.argsort(spm_vals_free)
+        ind_knot_sort = np.argsort(knots_spm)
+        spline_rep = splrep(spm_vals_free[ind_sort], p_obs_free[ind_sort],
+                            k=k, t=knots_spm[ind_knot_sort])
         spline_fit = splev(spm_fit, spline_rep)
 
         return spline_fit

@@ -165,6 +165,11 @@ class NormDiff(object):
         p_free_interp_func = interp1d(rho_km_cal, p_free_cal)
         p_free = p_free_interp_func(rho_km_desired)
 
+        # Construct power from IQ_c_desired and not IQ_m_desired or resampled
+        # power, because p_free was constructed from downsampled IQ_c. It's
+        # important to not use IQ_m_desired because I and Q each vary
+        # sinusoidally, meaning that if you resample too much, they get
+        # averaged to near zero.
         p_norm_vals = (abs(IQ_c_desired)**2)/p_free
         phase_rad_vals = np.arctan2(np.imag(IQ_c_desired),
                                     np.real(IQ_c_desired))

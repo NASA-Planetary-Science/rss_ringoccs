@@ -9,8 +9,8 @@ NOTE: This was made for the 1kHz rev7E X43 file, which is unfortunately not
       available online. To run this on the 16kHz file, go to the cors_0105
       directory online, and download "s10sroe2005123_0740nnnx43rd.2a2". Then
       use that file as "rsr_file", and you probably want to specify the
-      "decimate_16khz_to_1khz" keyword in "rsr_inst.get_IQ", because otherwise
-      it will take a really long time to run.
+      "decimate_16khz_to_1khz" keyword in "rsr_inst.get_IQ" and the norm_inst
+      definition, because otherwise it will take a really long time to run.
 
 Revisions:
       example_end_to_end_and_quick_look_script.py

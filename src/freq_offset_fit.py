@@ -119,6 +119,10 @@ class FreqOffsetFit(object):
                            [194400, np.inf]]
         """
 
+        # By default, exclude radii inside of Saturn, the B ring, and far
+        # outside of rings where sometimes the signal drops off. Only these
+        # regions are overly noisy at the default 8.192 second spacing in
+        # the frequency offset from FreqOffset class.
         if rho_exclude is None:
             rho_exclude = [[0, 70000], [91900, 94000], [98000, 118000],
                            [194400, np.inf]]

@@ -19,8 +19,8 @@ Is fun :smile:
 
 ## How to (Get) Help
 
-## Citing rss_ringocss
-If the use of rss_rings is used in a publication, please consider citing rss_ringoccs using the DOI:10.5281/zenodo.1226748
+## Citing rss_ringoccs
+If you use rss_ringoccs as the basis of a publication, please consider citing rss_ringoccs using the DOI:10.5281/zenodo.1226748
 
 ## Known Working Environments
 

@@ -20,7 +20,7 @@ Is fun :smile:
 ## How to (Get) Help
 
 ## Citing rss_ringocss
-If the use of rss_rings is used in a publication, please consider citing rss_ringoccs using the zenodo DOI badge: 10.5281/zenodo.1226748
+If the use of rss_rings is used in a publication, please consider citing rss_ringoccs using the DOI:10.5281/zenodo.1226748
 
 ## Known Working Environments
 

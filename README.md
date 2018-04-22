@@ -1,6 +1,7 @@
 # rss_ringoccs
+rss_ringoccs is a set of Python-based tools for Cassini Radio Science (RSS) ring occultation analysis
 
-## Some fun stuff about Cassini
+## Introduction
 
 It's a spaceship.
 
@@ -10,7 +11,16 @@ It's a spaceship.
 1. Table
    1. Yeah!
 
-# Math
+## Installation
 Is fun :smile:
 
 :smile:
+## Documentation
+
+## How to (Get) Help
+
+## Citing rss_ringocss
+
+## Known Working Environments
+
+## Acknowledgements

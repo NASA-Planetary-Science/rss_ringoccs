@@ -1,4 +1,4 @@
-rss_ringoccs/figs/AAREADME_figss.txt
+rss_ringoccs/figs/AAREADME_figs.txt
 
 Revisions:
   2018 May 08 - rfrench - original version

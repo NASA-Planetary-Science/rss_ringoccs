@@ -10,9 +10,12 @@ The purpose of rss_ringoccs is to enable scientists to produce "on demand" radia
 Detailed installation instructions are contained in https://github.com/NASA-Planetary-Science/rss_ringoccs/tree/master/docs/Introduction_to_rss_ringoccs.pdf 
 
 Streamlined installation instructions are provided in https://github.com/NASA-Planetary-Science/rss_ringoccs/tree/master/docs/Quick_Start_Installation_Guide_for_rss_ringoccs.pdf 
+
 ## Documentation
 All documentation for the rss_ringoccs package is located in the https://github.com/NASA-Planetary-Science/rss_ringoccs/tree/master/docs
 directory. We recommend that you start with Introduction_to_rss_ringoccs.pdf.
+
+Tutorials in the form of Jupyter notebooks are located in https://github.com/NASA-Planetary-Science/rss_ringoccs/tree/master/tutorials
 
 ## How to (Get) Help
 If you have trouble with installation or execution of the rss_ringoccs package, we encourage you to post a issue to https://github.com/NASA-Planetary-Science/rss_ringoccs/issues. We will attempt to respond promptly, and ther users will benefit. Alternatively, you can write email directly to Richard French: rfrench_at_wellesley.edu.

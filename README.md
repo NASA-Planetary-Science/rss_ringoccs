@@ -25,3 +25,4 @@ If you use rss_ringoccs as the basis of a publication, please consider citing rs
 ## Known Working Environments
 
 ## Acknowledgements
+This work was supported by the NASA/JPL Cassini mission. We are especially grateful to Linda Spilker and Kathryn Weld for their encouragement and support.

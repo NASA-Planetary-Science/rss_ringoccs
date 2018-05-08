@@ -6,7 +6,9 @@ rss_ringoccs is a set of Python-based tools for Cassini Radio Science (RSS) ring
 
 
 ## Installation
-Detailed installation instructions are contained in https://github.com/NASA-Planetary-Science/rss_ringoccs/tree/master/docs/Introduction_to_rss_ringoccs.pdf document. Streamlined installation instructions are provided in https://github.com/NASA-Planetary-Science/rss_ringoccs/tree/master/docs/Quick_Start_Installation_Guide_for_rss_ringoccs.pdf. 
+Detailed installation instructions are contained in https://github.com/NASA-Planetary-Science/rss_ringoccs/tree/master/docs/Introduction_to_rss_ringoccs.pdf document. 
+
+Streamlined installation instructions are provided in https://github.com/NASA-Planetary-Science/rss_ringoccs/tree/master/docs/Quick_Start_Installation_Guide_for_rss_ringoccs.pdf. 
 ## Documentation
 All documentation for the rss_ringoccs package is located in the https://github.com/NASA-Planetary-Science/rss_ringoccs/tree/master/docs
 directory. We recommend that you start with Introduction_to_rss_ringoccs.pdf.

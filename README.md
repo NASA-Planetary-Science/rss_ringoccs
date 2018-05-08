@@ -15,7 +15,7 @@ does an excellent job of reproducing existing RSS processed ring occultation
 data already present on NASA's PDS Ring-Moons Node, but we make no claim to      
 having achieved the state-of-the-art in every respect. We encourage users to     
 augment our algorithms and to report on those improvements, so that they can be  
-incorporated in future editions of rss_ringoccs.
+incorporated in future editions of rss_ringoccs. 
 
 ## Installation
 Detailed installation instructions are contained in https://github.com/NASA-Planetary-Science/rss_ringoccs/tree/master/docs/Introduction_to_rss_ringoccs.pdf 

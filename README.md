@@ -20,6 +20,11 @@ If you use rss_ringoccs as the basis of a publication, please consider
 citing rss_ringoccs using the DOI:10.5281/zenodo.1226748
 
 ## Known Working Environments
+The rss_ringoccs package was develped and tested on several unix-based operating systems, including MacOS 10.13.4 and Linux distributions Ubantu xx.yy, Debian.zz, others....
+
+rss_ringoccs is written in Python 3 but runs under Python 2.7 as well. For future compatibility, we strongly encourage users to run the code under Python 3. We have tested the code under the following Python distributions:
+
+Enthought Deployment Manager -- https://www.enthought.com -- Python 3.5.2
 
 ## Acknowledgements
 This work was supported by the NASA/JPL Cassini mission. We are especially grateful 

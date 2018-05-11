@@ -9,32 +9,41 @@ Purpose: Makes a fit to the frequency offset made from freq_offset.py, using
 
 Revisions:
       gjs_freq_offset_fit.py
-   Feb 21 2018 - gsteranka - Original version
+   2018 Feb 21 - gsteranka - Original version
       gjs_freq_offset_fit_v2.py
-   Mar 06 2018 - gsteranka - Edited to define all attributes during
+   2018 Mar 06 - gsteranka - Edited to define all attributes during
                              instantiation
-   Mar 07 2018 - gsteranka - Eliminated freq_offset_inst input in favor of
+   2018 Mar 07 - gsteranka - Eliminated freq_offset_inst input in favor of
                              f_SPM and f_offset inputs. This is consistent
                              with how gjs_freq_offset_v2.py now works
       freq_offset_fit.py
-   Mar 20 2018 - gsteranka - Copy to official version and remove debug steps
-   Mar 20 2018 - gsteranka - Added get_f_offset_fit method, and an error check
+   2018 Mar 20 - gsteranka - Copy to official version and remove debug steps
+   2018 Mar 20 - gsteranka - Added get_f_offset_fit method, and an error check
                              if all points fall inside of rho exclusion zone
-   Apr 27 2018 - gsteranka - Added TEST keyword to __init__ and
+   2018 Apr 27 - gsteranka - Added TEST keyword to __init__ and
                              set_f_sky_resid_fit methods to plot observed
                              residual frequency, points used as freespace to
                              fit over, and the resulting fit
+   2018 May 03 - gsteranka - Check if behind Saturn's ionosphere before fitting
+   2018 May 08 - gsteranka - Added "spm_include" keyword to set_f_sky_resid_fit
+                             method to optionally replace the rho_exclude
+                             input. Added GUI for residual frequency fit, and
+                             it defaults to using it
 """
 
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import numpy as np
 from numpy.polynomial import polynomial as poly
+import pdb
 from scipy.interpolate import interp1d
 import spiceypy.spiceypy as spice
 import sys
 
+from tkinter import Tk
+
 from calc_f_sky_recon import calc_f_sky_recon
 from cassini_blocked import cassini_blocked
+from f_resid_fit_gui import FResidFitGui
 
 class FreqOffsetFit(object):
     """Class to make a fit to extracted frequency offset. Uses predicted sky
@@ -65,8 +74,8 @@ class FreqOffsetFit(object):
         """
 
     def __init__(self, rsr_inst, geo_inst, f_spm, f_offset,
-                 f_uso, kernels, k=9, rho_exclude=None,
-                 TEST=False):
+            f_uso, kernels, k=9, rho_exclude=None, spm_include=None,
+            USE_GUI=True, TEST=False):
         """Define all attributes associated with data set, and make a fit to
         frequency offset using the default parameters
 
@@ -83,6 +92,13 @@ class FreqOffsetFit(object):
             rho_exclude (list): Set of radius regions to exclude when making
                 fit to residual frequency. Specify in km. Default is to
                 exclude B ring region
+            spm_include (list): Set of SPM regions to include when making fit
+                to residual frequency. By default, only rho_exclude is used.
+                If this keyword is specified, it overrides anything input to
+                rho_exclude keyword. This is meant as an optional replacement
+                of rho_exclude
+            USE_GUI (bool): Use the interactive GUI to make a residual
+                frequency fit. This is highly recommended
             TEST (bool): Optional test plot
         """
 
@@ -94,9 +110,9 @@ class FreqOffsetFit(object):
         # frequency and its fit
         self.__f_spm = np.asarray(f_spm)
         self.__f_offset = np.asarray(f_offset)
-        (f_spm, self.__f_sky_pred) = rsr_inst.get_f_sky_pred(f_spm=self.__f_spm)
+        f_spm, self.__f_sky_pred = rsr_inst.get_f_sky_pred(f_spm=self.__f_spm)
         self.__f_sky_recon = calc_f_sky_recon(self.__f_spm, rsr_inst, 'Cassini',
-                                                f_uso, kernels)
+            f_uso, kernels)
 
         # Interpolate geometry file rho's to rho's for f_spm and
         # spm_vals (raw resolution)
@@ -107,13 +123,15 @@ class FreqOffsetFit(object):
 
         # Set attributes for residual frequency fit, and the
         # new frequency offset fit
-        self.set_f_sky_resid_fit(k=k, rho_exclude=rho_exclude, TEST=TEST)
+        self.set_f_sky_resid_fit(k=k, rho_exclude=rho_exclude,
+            spm_include=spm_include, USE_GUI=USE_GUI, TEST=TEST)
 
         # Get I and Q from RSR object
         (self.__spm_vals, self.__IQ_m) = rsr_inst.get_IQ()
 
 
-    def set_f_sky_resid_fit(self, k=9, rho_exclude=None, TEST=False):
+    def set_f_sky_resid_fit(self, k=9, rho_exclude=None, spm_include=None,
+            USE_GUI=True, TEST=False):
         """Calculate fit to residual sky frequency. Sets attributes
         __f_sky_resid_fit, and updates __f_offset_fit with the new residual
         frequency fit
@@ -123,6 +141,13 @@ class FreqOffsetFit(object):
             rho_exclude (list): Set of radius regions to exclude when making
                 fit to residual frequency. Specify in km. Default is to
                 exclude B ring region
+            spm_include (list): Set of SPM regions to include when making fit
+                to residual frequency. By default, only rho_exclude is used.
+                If this keyword is specified, it overrides anything input to
+                rho_exclude keyword. This is meant as an optional replacement
+                of rho_exclude
+            USE_GUI (bool): Use the interactive GUI to make a residual
+                frequency fit. This is highly recommended
             TEST (bool): Optional test plot
 
         Example rho_exclude input, where each separate bracket contains a
@@ -137,7 +162,7 @@ class FreqOffsetFit(object):
         # the frequency offset from FreqOffset class.
         if rho_exclude is None:
             rho_exclude = [[0, 70000], [91900, 94000], [98000, 118000],
-                           [194400, np.inf]]
+                [194400, np.inf]]
 
         f_rho = self.__f_rho
         f_spm = self.__f_spm
@@ -146,23 +171,32 @@ class FreqOffsetFit(object):
         # for by error in predicted spacecraft trajectory
         f_sky_resid = self.__f_offset - (self.__f_sky_recon - self.__f_sky_pred)
 
-        # Determine if Cassini blocked by Saturn. Important for chord
-        #     occultations
-        #is_blocked = cassini_blocked(f_spm, self.__rsr_inst, self.__kernels)
+        # Determine if Cassini blocked by Saturn's ionosophere. Important for
+        #     chord occultations
+        is_blocked_atm, is_blocked_ion = cassini_blocked(f_spm, self.__rsr_inst,
+            self.__kernels)
 
         # Array of indices to include
         ind = []
         for i in range(len(rho_exclude)-1):
             ind.append(np.argwhere((f_rho > rho_exclude[i][1]) &
-                                 (f_rho < rho_exclude[i+1][0])))
-#             ind.append(np.argwhere((f_rho > rho_exclude[i][1]) &
-#                 (f_rho < rho_exclude[i+1][0]) &
-#                 (np.invert(is_blocked))))
+                (f_rho < rho_exclude[i+1][0]) &
+                (np.invert(is_blocked_ion))))
         ind = np.reshape(np.concatenate(ind), -1)
+
+        # If user specified spm_include argument that overrides the rho_exclude
+        #     argument
+        if spm_include is not None:
+            ind = []
+            for i in range(len(spm_include)):
+                ind.append(np.argwhere((f_spm >= spm_include[i][0]) &
+                    (f_spm <= spm_include[i][1]) &
+                    (np.invert(is_blocked_ion))))
+            ind = np.reshape(np.concatenate(ind), -1)
 
         if len(ind) == 0:
             print('ERROR (FreqOffsetFit.set_f_sky_resid_fit): All specified \n'
-                  +'points fall withint specified rho exclusion zone')
+                +'points fall withint specified rho exclusion zone')
             sys.exit()
 
         # When fitting, use x values adjusted to range over [-1, 1]
@@ -178,20 +212,46 @@ class FreqOffsetFit(object):
         # Update frequency offset fit attribute for new residual sky
         # frequency fit
         self.__f_offset_fit = self.__f_sky_resid_fit + (self.__f_sky_recon -
-                                                        self.__f_sky_pred)
+            self.__f_sky_pred)
 
         if TEST:
-            plt.figure(1, figsize=(11, 8.5))
+            ylim = [min(f_sky_resid[ind]) - 10.0, max(f_sky_resid[ind]) + 10.0]
+
+            fig1 = plt.figure(1, figsize=(11, 8.5))
             plt.subplot(211)
-            plt.plot(f_spm, f_sky_resid, 'g')
-            plt.plot(f_spm[ind], f_sky_resid[ind], 'bo')
-            plt.plot(f_spm, self.__f_sky_resid_fit, 'r')
+            plt.plot(f_spm, f_sky_resid, 'g', label='Data')
+            plt.plot(f_spm[ind], f_sky_resid[ind], 'bo', label='Fitted Data')
+            plt.plot(f_spm[is_blocked_ion], f_sky_resid[is_blocked_ion], 'mo',
+                label='Ionosphere Occult.')
+            plt.plot(f_spm, self.__f_sky_resid_fit, 'r', label='Fit')
+            plt.ylim(ylim)
+            plt.title('$f_{resid}(t)$')
+            plt.xlabel('SPM')
+            plt.ylabel('Hz')
+            plt.legend()
 
             plt.subplot(212)
             plt.plot(f_rho, f_sky_resid, 'g')
             plt.plot(f_rho[ind], f_sky_resid[ind], 'bo')
+            plt.plot(f_rho[is_blocked_ion], f_sky_resid[is_blocked_ion], 'mo')
             plt.plot(f_rho, self.__f_sky_resid_fit, 'r')
+            plt.ylim(ylim)
+            plt.title('$f_{resid}(\\rho)$')
+            plt.xlabel('km')
+            plt.ylabel('Hz')
             plt.show()
+
+        if USE_GUI:
+            root = Tk()
+            f_resid_fit_gui_inst = FResidFitGui(root, self, f_spm, f_sky_resid)
+            root.geometry('900x700+500+150')
+            while True:
+                try:
+                    root.mainloop()
+                    break
+                except UnicodeDecodeError:
+                    pass
+            self.__f_sky_resid_fit = f_resid_fit_gui_inst.yfit
 
 
     def get_f_sky_pred(self):
@@ -248,7 +308,7 @@ class FreqOffsetFit(object):
         npts = round((self.__f_spm[-1] - self.__f_spm[0])/dt)
         f_spm_interp = self.__f_spm[0] + dt*np.arange(npts)
         f_offset_fit_function = interp1d(self.__f_spm, f_offset_fit,
-                                         fill_value='extrapolate')
+            fill_value='extrapolate')
         f_offset_fit_interp = f_offset_fit_function(f_spm_interp)
 
         # Integration of frequency offset fit to get phase detrending function.
@@ -256,7 +316,7 @@ class FreqOffsetFit(object):
         f_detrend_interp = np.cumsum(f_offset_fit_interp)*dt
         f_detrend_interp_rad = f_detrend_interp*spice.twopi()
         f_detrend_rad_function = interp1d(f_spm_interp, f_detrend_interp_rad,
-                                          fill_value='extrapolate')
+            fill_value='extrapolate')
         f_detrend_rad = f_detrend_rad_function(spm_vals)
 
         # Apply detrending function

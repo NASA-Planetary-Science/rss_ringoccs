@@ -11,7 +11,7 @@ and occultation direction (I for ingress, E for egress).
 
 Example:
 
-Rev007E_RSS_2005_123_X43_E/
+Rev007E/Rev007E_RSS_2005_123_X43_E/
 
   Rev:  7
   Occultation type: E (egress)

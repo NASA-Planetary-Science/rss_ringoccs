@@ -20,7 +20,10 @@ import numpy as np
 import pdb
 import spiceypy as spice
 
-from spm_to_et import spm_to_et
+try:
+    from spm_to_et import spm_to_et
+except ImportError:
+    from .spm_to_et import spm_to_et
 
 
 def cassini_blocked(spm_vals, rsr_inst, kernels, TEST=False):

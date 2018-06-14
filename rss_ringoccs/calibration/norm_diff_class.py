@@ -60,41 +60,24 @@ Revisions:
                              rho_dot, but I find this is liable to slight
                              interpolation error which causes it to be off by
                              a bit. I now use rho_km_vals directly
-   2018 May 23 - gsteranka - Edited to read cal file as a csv, rather than
-                             white-space delimited. Also added the
-                             t_ret_et_vals, t_set_et_vals, and phi_rl_rad_vals
-                             attributes
-   2018 Jun 04 - gsteranka - Added history attribute and __set_history() method
-   2018 Jun 11 - gsteranka - Accept rsr_inst, geo_inst, and cal_inst instead of
-                             the files for all of those. "cal_inst" can be made
-                             from Calibration class calibration_class.py if you
-                             haven't made a cal file yet, or from MakeCalInst
-                             in make_cal_inst.py if you have made a cal file
-                             already
 """
 
 import numpy as np
-import os
-import platform
+import pandas as pd
 from scipy.interpolate import interp1d
 import spiceypy as spice
 import sys
-import time
 
 try:
     from rsr_reader import RSRReader
     from resample_IQ import resample_IQ
-    from spm_to_et import spm_to_et
 except ImportError:
     from ..rsr_reader.rsr_reader import RSRReader
     from .resample_IQ import resample_IQ
-    from .spm_to_et import spm_to_et
 
 
 class NormDiff(object):
-    """
-    Purpose:
-    Produce a normalized diffraction pattern using a previously made
+    """Produce a normalized diffraction pattern using a previously made
     calibration file (cal_file). Contains everything needed for Fresnel
     Inversion as attributes.
 
@@ -113,60 +96,45 @@ class NormDiff(object):
         F_km_vals (np.ndarray): Fresnel scale, in km
         f_sky_hz_vals (np.ndarray): Predicted sky frequency, in Hz.
         phi_rad_vals (np.ndarray): Observed ring azimuth, in radians
-        phi_rl_rad_vals (np.ndarray): Ring longitude, in radians
-        t_ret_et_vals (np.ndarray): Ring event time
-        t_set_et_vals (np.ndarray): Spacecraft event time
         rho_dot_kms_vals (np.ndarray): Ring intercept point velocity
         end_of_chord_ing (int): Index number of final ingress portion of chord
             occultation. Set to "None" if "is_chord" keyword is False
-        history (dict): Recorded information about the run
     """
 
-    def __init__(self, rsr_inst, dr_km, geo_inst, cal_inst, dr_km_tol=0.01,
-            is_chord=False):
+    def __init__(self, rsr_file, dr_km, geo_file, cal_file, dr_km_tol=0.01,
+            decimate_16khz_to_1khz=False, is_chord=False):
         """
-        Purpose:
         Instantiation defines all attributes of instance.
 
         Args:
-            rsr_inst: Instance of the RSRReader class. Linked to the full
-                path name of RSR file to process
+            rsr_file (str): Full path name of RSR file to process
             dr_km (float): Desired final radial spacing of processed data, in km
-            geo_inst (str): Instance of Geometry class linked to rsr_inst input
-            cal_inst: Calibration instance linked to rsr_inst input. Made using
-                Calibration class if you haven't made a cal_file yet, and made
-                using MakeCalInst class if you have made a cal_file
+            geo_file (str): Full path name of a geoemtry file corresponding to
+            rsr_file
+            cal_file (str): Full path name of a calibration file corresponding to
+                rsr_file
             dr_km_tol (float): Optional keyword argument, in km, that specifies the
                 maximum distance the starting point of the final set of radius
                 values can be away from an integer number of dr_km. For example, if
                 you say dr_km_tol=0.01 and dr_km=0.25, the starting point of the
                 final set of rho values could be 70000.26 km, but not 70000.261 km
+            decimate_16khz_to_1khz (bool): Optional boolean keyword argument that
+                specifies whether or not to decimate a 16khz sample rate file down
+                to 1khz sample rate. Can only specify when rsr_file is 16khz. Value
+                of this should match what you said in RSRfile.get_IQ method when you
+                initially made the calibration file. Defualt is False
             is_chord (bool): Set as True if the occultation is a chord occultation
-
-        Dependencies:
-            [1] RSRReader
-            [2] resample_IQ
-            [3] spm_to_et
-            [4] numpy
-            [5] os
-            [6] platform
-            [7] scipy.interpolate
-            [8] spiceypy
-            [9] sys
-            [10] time
-
-        Warnings:
-            [1] Be sure to set decimate_16khz_to_1khz=True when making rsr_inst
-                if you did so before doing the previous processing steps to make
-                GEO and CAL files. Otherwise, (1) it will take forever, and
-                (2) the power will not normalize correctly.
-            [2] If it's a chord occultation, you will get problems if you don't
-                set is_chord=True
         """
 
-        spm_geo = geo_inst.t_oet_spm_vals
-        rho_km_geo = geo_inst.rho_km_vals
-        rho_dot_kms_geo = geo_inst.rho_dot_kms_vals
+        # Read geometry file for radius-SPM conversion
+        geo = pd.read_csv(geo_file, header=None)
+        spm_geo = np.asarray(geo[0][:])
+        rho_km_geo = np.asarray(geo[3][:])
+        B_rad_geo = np.asarray(geo[6][:]) * spice.rpd()
+        D_km_geo = np.asarray(geo[7][:])
+        phi_rad_geo = np.asarray(geo[5][:]) * spice.rpd()
+        rho_dot_kms_geo = np.asarray(geo[8][:])
+        F_km_geo = np.asarray(geo[10][:])
 
         # First element has crazy value due to how rho_dot is calculated, so
         #     eliminate it in favor of next element
@@ -204,14 +172,18 @@ class NormDiff(object):
             spm_range = [spm_start, spm_end]
             spm_range = [min(spm_range), max(spm_range)]
 
+        rsr_inst = RSRReader(rsr_file,
+            decimate_16khz_to_1khz=decimate_16khz_to_1khz)
         spm_vals = rsr_inst.spm_vals
         IQ_m = rsr_inst.IQ_m
         rho_km_vals = rho_interp_func(spm_vals)
 
-        spm_cal = cal_inst.t_oet_spm_vals
-        f_sky_pred_cal = cal_inst.f_sky_pred_vals
-        p_free_cal = cal_inst.p_free_vals
-        f_offset_fit_cal = cal_inst.f_offset_fit_vals
+        cal = pd.read_csv(cal_file, delim_whitespace=True, header=None)
+
+        spm_cal = np.asarray(cal[0][:])
+        f_sky_pred_cal = np.asarray(cal[1][:])
+        p_free_cal = np.asarray(cal[3][:])
+        f_offset_fit_cal = np.asarray(cal[4][:])
         rho_km_cal = rho_interp_func(spm_cal)
 
         # If specified rho range that cal file can't cover
@@ -245,7 +217,7 @@ class NormDiff(object):
         if not is_chord:
             rho_km_desired, IQ_c_desired = resample_IQ(rho_km_vals, IQ_c, dr_km,
                 dr_km_tol=dr_km_tol)
-
+            
             # Interpolate freespace power (spline fit) to rho_km_desired
             p_free_interp_func = interp1d(rho_km_cal, p_free_cal,
                 fill_value='extrapolate')
@@ -301,19 +273,18 @@ class NormDiff(object):
 
             end_of_chord_ing = len(rho_km_ing) - 1
 
-
-        self.__set_history(rsr_inst, dr_km, geo_inst, cal_inst, dr_km_tol)
         self.__set_attributes(rho_km_desired, spm_desired, p_norm_vals,
             phase_rad_vals,
-            spm_geo, rho_dot_kms_geo, geo_inst,
-            rho_km_cal, f_sky_pred_cal, rsr_inst,
-            end_of_chord_ing=end_of_chord_ing)
+            spm_geo, B_rad_geo, D_km_geo, F_km_geo,
+            phi_rad_geo, rho_dot_kms_geo,
+            rho_km_cal, f_sky_pred_cal, end_of_chord_ing=end_of_chord_ing)
 
 
     def __set_attributes(self, rho_km_desired, spm_desired, p_norm_vals,
             phase_rad_vals,
-            spm_geo, rho_dot_kms_geo, geo_inst,
-            rho_km_cal, f_sky_pred_cal, rsr_inst, end_of_chord_ing=None):
+            spm_geo, B_rad_geo, D_km_geo, F_km_geo, phi_rad_geo,
+            rho_dot_kms_geo,
+            rho_km_cal, f_sky_pred_cal, end_of_chord_ing=None):
         """
         Private method called by __init__ to set attributes of the
         instance
@@ -323,14 +294,6 @@ class NormDiff(object):
         self.spm_vals = spm_desired
         self.p_norm_vals = p_norm_vals
         self.phase_rad_vals = phase_rad_vals
-
-        B_rad_geo = geo_inst.B_deg_vals*spice.rpd()
-        D_km_geo = geo_inst.D_km_vals
-        phi_rad_geo = geo_inst.phi_ora_deg_vals*spice.rpd()
-        F_km_geo = geo_inst.F_km_vals
-        t_ret_geo = geo_inst.t_ret_spm_vals
-        t_set_geo = geo_inst.t_set_spm_vals
-        phi_rl_rad_geo = geo_inst.phi_rl_deg_vals*spice.rpd()
 
         # Ring opening angle at final spacing
         B_rad_func = interp1d(spm_geo, B_rad_geo, fill_value='extrapolate')
@@ -353,21 +316,6 @@ class NormDiff(object):
         phi_rad_func = interp1d(spm_geo, phi_rad_geo, fill_value='extrapolate')
         self.phi_rad_vals = phi_rad_func(spm_desired)
 
-        # Ring Event Time at final spacing
-        t_ret_func = interp1d(spm_geo, t_ret_geo, fill_value='extrapolate')
-        self.t_ret_et_vals = spm_to_et(t_ret_func(spm_desired), rsr_inst.doy,
-            rsr_inst.year)
-
-        # Spacecraft Event Time at final spacing
-        t_set_func = interp1d(spm_geo, t_set_geo, fill_value='extrapolate')
-        self.t_set_et_vals = spm_to_et(t_set_func(spm_desired), rsr_inst.doy,
-            rsr_inst.year)
-
-        # Ring longitude at final spacing
-        phi_rl_rad_func = interp1d(spm_geo, phi_rl_rad_geo,
-            fill_value='extrapolate')
-        self.phi_rl_rad_vals = phi_rl_rad_func(spm_desired)
-
         # RIP velocity at final spacing
         rho_dot_kms_func = interp1d(spm_geo, rho_dot_kms_geo,
             fill_value='extrapolate')
@@ -376,20 +324,53 @@ class NormDiff(object):
         self.end_of_chord_ing = end_of_chord_ing
 
 
-    def __set_history(self, rsr_inst, dr_km, geo_inst, cal_inst, dr_km_tol):
+    def save_obs(self, obs_file):
+        """
+        Save an obs file, which contains all of the attributes in the
+        instance, and therefore has everything needed for Fresnel Inversion
 
-        input_var_dict = {'rsr_inst': rsr_inst.history, 'dr_km': dr_km,
-            'geo_file': geo_inst.history, 'cal_inst': cal_inst.history}
-        input_kw_dict = {'dr_km_tol': dr_km_tol}
-        hist_dict = {'user name': os.getlogin(),
-            'host name': os.uname().nodename,
-            'run date': time.ctime() + ' ' + time.tzname[0],
-            'python version': platform.python_version(),
-            'operating system': os.uname().sysname,
-            'source file': __file__,
-            'input variables': input_var_dict,
-            'input keywords':input_kw_dict}
-        self.history = hist_dict
+        Args:
+            obs_file (str): Full path name of obs file to be created
+        """
+
+        # Save obs file with absolute value of rho dot. With this  and
+        #     increasing rho_km_desired, ingress files can be put into
+        #     inversion code without any error checks to differentiate
+        #     from  egress
+        if self.end_of_chord_ing is None:
+            np.savetxt(obs_file,
+                np.c_[self.rho_km_vals, self.spm_vals,
+                    self.p_norm_vals, self.phase_rad_vals,
+                    self.B_rad_vals, self.D_km_vals, self.F_km_vals,
+                    self.f_sky_hz_vals, self.phi_rad_vals,
+                    self.rho_dot_kms_vals],
+                fmt='%32.16f '*10)
+        else:
+            obs_file_1 = obs_file[0:-4] + '_I' + obs_file[-4:]
+            obs_file_2 = obs_file[0:-4] + '_E' + obs_file[-4:]
+
+            print('DETECTED CHORD OCCULTATION. SPLITTING INTO TWO FILES:')
+            print(obs_file_1 + '\n' + obs_file_2)
+
+            ind1 = self.end_of_chord_ing
+            ind2 = self.end_of_chord_ing + 1
+
+            np.savetxt(obs_file_1,
+                np.c_[self.rho_km_vals[0:ind1], self.spm_vals[0:ind1],
+                    self.p_norm_vals[0:ind1], self.phase_rad_vals[0:ind1],
+                    self.B_rad_vals[0:ind1], self.D_km_vals[0:ind1],
+                    self.F_km_vals[0:ind1], self.f_sky_hz_vals[0:ind1],
+                    self.phi_rad_vals[0:ind1],
+                    abs(self.rho_dot_kms_vals[0:ind1])],
+                fmt='%32.16f '*10)
+            np.savetxt(obs_file_2,
+                np.c_[self.rho_km_vals[ind2:], self.spm_vals[ind2:],
+                    self.p_norm_vals[ind2:], self.phase_rad_vals[ind2:],
+                    self.B_rad_vals[ind2:], self.D_km_vals[ind2:],
+                    self.F_km_vals[ind2:], self.f_sky_hz_vals[ind2:],
+                    self.phi_rad_vals[ind2:],
+                    abs(self.rho_dot_kms_vals[ind2:])],
+                fmt='%32.16f '*10)
 
 
 if __name__ == '__main__':

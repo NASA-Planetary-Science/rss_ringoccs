@@ -12,6 +12,7 @@ Revisions:
    2018 May 08 - gsteranka - Edited to be able to specify multiple x ranges
       f_resid_fit_gui.py
    2018 May 08 - gsteranka - copied from prev version
+   2018 May 30 - gsteranka - Make decent initial guess at fit
 """
 
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg,
@@ -106,8 +107,8 @@ class FResidFitGui(Frame):
         self.pack(fill=tkinter.BOTH, expand=1)
 
         self.fit_deg = 3
-        self.xlim = [[min(self.x), max(self.x)]]
-        self.yfit = self._get_fit()
+        self.xlim = self.fit_inst._spm_include
+        dummy, self.yfit = self.fit_inst.get_f_sky_resid_fit()
 
         self.ind = np.arange(len(self.x))
         self.not_ind = None

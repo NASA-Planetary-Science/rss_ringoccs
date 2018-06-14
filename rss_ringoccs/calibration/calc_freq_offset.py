@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 
-freq_offset.py
+calc_freq_offset.py
 
 Purpose: Calculate frequency offset at a specified time spacing. Returns
          spm_vals and freq_offset_vals at the specified spacing
@@ -16,12 +16,33 @@ Revisions:
                               be organized as functions instead of in a class
       freq_offset.py
    2018 Mar 20 - gsteranka - Copy to official version and remove debug steps
+      freq_offset_multiprocessing.py
+   2018 May 24 - gsteranka - Edited to have multiprocessing capabilities
+   2018 May 29 - gsteranka - Changed "n_cores" keyword to "cpu_count", and made
+                             default value equal to number of cores on computer
+                             being used (multiprocessing.cpu_count)
+      calc_freq_offset.py
+   2018 May 29 - gsteranka - Copied to version to be used publicly
+   2018 May 29 - gsteranka - Added freq_offset_file keyword. If specified,
+                             saves text file of frequency offset data
+   2018 May 30 - gsteranka - Added history_dict output
 """
 
+from multiprocessing import Process
+from multiprocessing import Queue
+import multiprocessing
 import numpy as np
+import os
+import platform
+import sys
+import time
 
-def calc_freq_offset(rsr_inst, dt_freq=8.192, spm_range=None, TEST=False):
-    """Primary function to run. Calculates frequency offset given a set of
+def calc_freq_offset(rsr_inst, dt_freq=8.192, spm_range=None,
+        cpu_count=multiprocessing.cpu_count(), freq_offset_file=None,
+        TEST=False):
+    """
+    Purpose:
+    Primary function to run. Calculates frequency offset given a set of
     spm_vals and IQ_m, which can be gotten from RSRReader.get_IQ().
 
     Example:
@@ -48,13 +69,43 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192, spm_range=None, TEST=False):
             which to extract frequency offset. Default is full range of spm_vals
         TEST (bool): Optional testing argument that, if True, prints requested
             and actual start and end times
+        cpu_count (int): Number of cores to use in calculations. Generally, more
+            cores makes it faster up to a certain point. You eventually start
+            seeing diminishing returns
+        freq_offset_file (str): File name to save frequency offset SPM and
+            data. If set to None, no file is saved
 
-    Returns:
+    Outputs:
         f_spm (np.ndarray): Set of SPM values corresponding to the extracted
             frequency offset at time spacing dt_freq
         f_offset (np.ndarray): Extracted frequency offset at time spacing
             dt_freq
+        history_dict (dict): Dictionary that recorded information about the run
+
+    Dependencies:
+        [1] RSRReader
+        [2] multiprocessing
+        [3] numpy
+        [4] os
+        [5] platform
+        [6] sys
+        [7] time
+
+    Warnings:
+        [1] If dt_freq is too low, there will be few points to fit over when
+            you're constructing a fit to residual frequency, meaning the fit
+            may not be as good
+        [2] If dt_freq is too high, then you will need to exclude more regions
+            when making a fit to residual frequency
+        [3] If you make cpu_count more than the number of cores you have on
+            your computer, you don't see any performance difference from when
+            you use the max number of cores, but just the same, we don't
+            recommend making it greater than your total number of cores.
         """
+
+    # Record info about the call
+    history_dict = __get_history(rsr_inst, dt_freq, spm_range, cpu_count,
+        freq_offset_file)
 
     spm_vals = rsr_inst.spm_vals
     IQ_m = rsr_inst.IQ_m
@@ -98,28 +149,66 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192, spm_range=None, TEST=False):
 
     # Arrays that will contain final SPM and frequency offset
     n_loops = int(len(spm_vals) / pts_per_fft)
-    f_spm = np.zeros(n_loops)
-    f_offset = np.zeros(n_loops)
 
-    print('SPM, frequency offset')
+    #print('SPM, frequency offset')
 
-    for i in range(n_loops):
+    # Multiprocessing step
+    results = []
+    queues = [Queue() for i in range(cpu_count)]
+    n_per_core = int(np.floor(n_loops/cpu_count))
+    loop_args = [(i*n_per_core, (i+1)*n_per_core, spm_vals, IQ_m,
+        pts_per_fft, cont_fft_freq_range, queues[i]) for i in range(cpu_count)]
+    jobs = [Process(target=__loop, args=(a)) for a in loop_args]
+    for j in jobs: j.start()
+    for q in queues: results.append(q.get())
+    for j in jobs: j.join()
+    results_hstack = np.hstack(results)
+    f_spm = results_hstack[0]
+    f_offset = results_hstack[1]
+
+    print('\n')
+
+    if freq_offset_file is not None:
+        np.savetxt(freq_offset_file, np.c_[f_spm, f_offset],
+            fmt='%32.16f %32.16f')
+
+    return f_spm, f_offset, history_dict
+
+
+def __loop(i_start, i_end, spm_vals, IQ_m, pts_per_fft, cont_fft_freq_range,
+        queue=0):
+    """
+    Function to perform loop. Made a separate function to perform
+    multiprocessing, which runs the loop over different ranges all concurrently
+    """
+
+    f_spm = np.zeros(len(range(i_start, i_end)))
+    f_offset = np.zeros(len(range(i_start, i_end)))
+    i_iter = 0
+
+    for i in range(i_start, i_end):
         _spm = spm_vals[i*pts_per_fft:(i+1)*pts_per_fft]
         _IQ_m = IQ_m[i*pts_per_fft:(i+1)*pts_per_fft]
 
         _spm_avg = np.mean(_spm)
         _freq = __find_peak_freq(_spm, _IQ_m, cont_fft_freq_range)
 
-        print('%24.16f %24.16f' % (_spm_avg, _freq))
+        #print('%24.16f %24.16f' % (_spm_avg, _freq))
+        sys.stdout.write('\r' + str(i_iter + 1) + ' of '
+            + str(len(range(i_start, i_end))) + ' points')
+        sys.stdout.flush()
 
-        f_spm[i] = _spm_avg
-        f_offset[i] = _freq
+        f_spm[i_iter] = _spm_avg
+        f_offset[i_iter] = _freq
+        i_iter += 1
 
-    return f_spm, f_offset
+    queue.put([f_spm, f_offset])
 
 
 def __find_peak_freq(spm,IQ_m, cont_fft_freq_range):
-    """Routine called by calc_freq_offset to find peak frequency. Makes 3
+    """
+    Purpose:
+    Routine called by calc_freq_offset to find peak frequency. Makes 3
     passes over power spectrum, each at successively finer spacing, to find
     a more accurate frequency offset.
 
@@ -132,11 +221,11 @@ def __find_peak_freq(spm,IQ_m, cont_fft_freq_range):
             for a more refined peak frequency. Set to 5 at top of primary
             function calc_freq_offset
 
-    Returns:
+    Outputs:
         freq_max_pass3 (float): Frequency of maximum power in the power
             spectrum after the 3rd pass of refining the peak frequency.
             This value is the extracted frequency offset
-            """
+    """
 
     # Number of pts per FFT in each pass to refine peak frequency
     cont_fft_num_pass1 = 1000
@@ -190,7 +279,9 @@ def __find_peak_freq(spm,IQ_m, cont_fft_freq_range):
 
 
 def __refine_peak_freq(IQ_m_weight, freq_c, dt):
-    """Called by __find_peak_freq to refine peak frequency.
+    """
+    Purpose:
+    Called by __find_peak_freq to refine peak frequency.
 
     Args:
         IQ_m_weight (np.ndarray): Weighted raw measured complex signal
@@ -198,8 +289,9 @@ def __refine_peak_freq(IQ_m_weight, freq_c, dt):
             frequency from the last pass
         dt (float): Time spacing of the  IQ_m_weight entries
 
-    Returns:
-        freq_max (float): Frequency of maximum power"""
+    Outputs:
+        freq_max (float): Frequency of maximum power
+    """
 
     n = len(IQ_m_weight)
     pow_c = np.zeros(len(freq_c))
@@ -213,6 +305,25 @@ def __refine_peak_freq(IQ_m_weight, freq_c, dt):
     freq_max = freq_c[ind_max]
 
     return freq_max
+
+
+def __get_history(rsr_inst, dt_freq, spm_range, cpu_count, freq_offset_file):
+    """
+    Record information about the run's history
+    """
+
+    input_var_dict = {'rsr_inst': rsr_inst.history}
+    input_kw_dict = {'dt_freq': dt_freq, 'spm_range': spm_range,
+        'cpu_count': cpu_count, 'freq_offset_file': freq_offset_file}
+    hist_dict = {'user name': os.getlogin(),
+        'host name': os.uname().nodename,
+        'run date': time.ctime() + ' ' + time.tzname[0],
+        'python version': platform.python_version(),
+        'operating system': os.uname().sysname,
+        'source file': __file__,
+        'input variables': input_var_dict,
+        'input keywords':input_kw_dict}
+    return hist_dict
 
 
 if __name__ == '__main__':

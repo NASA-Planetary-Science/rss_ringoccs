@@ -94,9 +94,9 @@ class PowerFitGui(Frame):
         self.y = p_obs_down
         self.xfit = spm_fit
 
-        self.fit_deg = 1
-        self.xlim = [[min(self.x), max(self.x)]]
-        self.knots_spm = [min(self.x) + 2.0, max(self.x) - 2.0]
+        self.fit_deg = norm_inst._k
+        self.xlim = norm_inst._freespace_spm
+        self.knots_spm = norm_inst._knots_spm
         self.yfit = self._get_fit()
 
         self.ind = np.arange(len(self.x))

@@ -35,16 +35,18 @@ Revisions:
                              year, and doy attributes
    2018 May 09 - gsteranka - Added freespace_spm and knots_spm keywords
    2018 May 11 - gsteranka - Added _freespace_spm and _knots_spm attributes
+   2018 Jun 04 - gsteranka - Added history attribute and __set_history() method
 """
 
-import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
+import os
+import platform
 from scipy import signal
 from scipy.interpolate import interp1d
 from scipy.interpolate import splrep
 from scipy.interpolate import splev
 import sys
+import time
 
 from tkinter import Tk
 
@@ -91,10 +93,12 @@ class Normalization(object):
         kernels (list): List of kernels used for geometry
         __spm_raw (np.ndarray): Raw resolution SPM values
         _spm_fit (np.ndarray): SPM values that spline fit was evaluated at
+        history (dict): Recorded information about the run
     """
 
     def __init__(self, spm_raw, IQ_c_raw, geo_inst, rsr_inst, TEST=False):
         """
+        Purpose:
         Instantiation defines raw resolution SPM, frequency corrected I
         and Q, and a function to interpolate radius to any SPM value. These
         are set as attributes
@@ -107,9 +111,27 @@ class Normalization(object):
                 t_oet_spm and rho_km_vals. Can create mock version from a
                 geometry file using geo_file_into_instance.py
             TEST (bool): Optional boolean argument that, if True, prints out
-                intermediate values"""
+                intermediate values
+
+        Dependencies:
+            [1] RSRReader
+            [2] Geometry
+            [3] numpy
+            [4] scipy
+            [5] os
+            [6] platform
+            [7] sys
+            [8] time
+
+        Warnings:
+            [1] If IQ signal is not properly frequency-corrected (i.e. if the
+                residual frequency fit from the FreqOffsetFit class is bad),
+                then you will get problems in this routine, since it
+                downsamples the signal.
+        """
 
         self.__rsr_inst = rsr_inst
+        self.__geo_inst = geo_inst
         self.kernels = geo_inst.kernels
 
         self.__spm_raw = spm_raw
@@ -131,8 +153,9 @@ class Normalization(object):
         #                   eccentric ringlet. These accompany the default
         #                   knots
         self._k = 2
-        self._knots_km = np.array([70445., 87400., 117730., 119950., 133550.,
-            194269.])
+        #self._knots_km = np.array([70445., 87400., 117730., 119950., 133550.,
+        #    194269.])
+        self._knots_km = [70445., 87400., 117730., 119950., 133550., 194269.]
         self._dt_down = 0.5
         self._freespace_km = [[69100.0, 73500], [87350.0, 87450.0],
             [117690.0, 117780.0], [119850.0, 120020.0],
@@ -156,6 +179,8 @@ class Normalization(object):
             for i in range(10):
                 print(self.__spm_raw[i*sample_rate_hz],
                     self.__rho_interp_func(self.__spm_raw[i*sample_rate_hz]))
+
+        self.__set_history()
 
 
     def __downsample_IQ(self, dt_down, TEST=False):
@@ -198,34 +223,55 @@ class Normalization(object):
     def get_spline_fit(self, spm_fit=None, k=None, knots_km=None,
             dt_down=None, freespace_km=None, freespace_spm=None,
             knots_spm=None, USE_GUI=True, TEST=False):
-        """Make spline fit to observed downsampled power at specified set
+        """
+        Purpose:
+        Make spline fit to observed downsampled power at specified set
         of times spm_fit. Specified keyword arguments will override the
         corresponding defaults set in __init__
 
         Args:
             spm_fit (np.ndarray): SPM values to evaluate the spline fit at
             k (int): Order of the spline fit. Default order is 2
-            knots_km (list): List of knots for the spline fit. Should only
-                be at places where there is data. Specify in km
+
             dt_down (float): Time spacing to downsample to before making
                 a spline fit
-            freespace_km (list): Set of radius values, in km, to treat as
-                free space. These are the regions that the spline fit is made
-                to. Specify in km. Be sure to include a region for each knot
-                specified
             freespace_spm (list): Set of SPM values to treat as free space.
                 Meant as an optional replacement for freespace_km. Setting this
                 will override the freespace_km keyword
             knots_spm (list): List of knots for the spline fit. Same as
                 knots_km, but in SPM instead of radius. Specifying this
                 overrides knots_km
+            freespace_km (list): Set of radius values, in km, to treat as
+                free space. These are the regions that the spline fit is made
+                to. Specify in km. Be sure to include a region for each knot
+                specified
+            knots_km (list): List of knots for the spline fit. Should only
+                be at places where there is data. Specify in km
             USE_GUI (bool): Use the interactive GUI to make a spline fit to
                 power. This is highly recommended
             TEST (bool): If True, print out intermediate values
 
-        Returns:
+        Outputs:
+            spm_fit: SPM values for the spline_fit output
             spline_fit: Spline fit to observed power at the specified times
-                spm_fit"""
+                spm_fit
+
+        Dependencies:
+            [1] PowerFitGui
+            [2] cassini_blocked
+            [3] numpy
+            [4] scipy
+            [5] sys
+            [6] os
+            [7] platform
+            [8] time
+
+        Notes:
+            [1] HIGHLY RECOMMENDED to use freespace_spm and knots_spm in
+                addition to the GUI, rather than using freespace_km and
+                knots_km. Much easier to tinker with the fit using SPM
+                and the GUI
+        """
 
         # Update defaults if any keyword arguments were specified
         if spm_fit is not None:
@@ -343,30 +389,6 @@ class Normalization(object):
             k=k, t=knots_spm_data[ind_knot_sort])
         spline_fit = splev(spm_fit, spline_rep)
 
-        # Plot power with marked freespace power points, and the spline fit.
-        #     Include one plot as function of SPM and another as function of
-        #     rho, which can help clarify some chord occultations.
-        if TEST:
-            rho_km_fit = self.__rho_interp_func(spm_fit)
-
-            plt.figure(1, figsize=(11, 8.5))
-            plt.subplot(211)
-            plt.plot(spm_vals_down, p_obs_down, 'g', label='P')
-            plt.plot(spm_vals_free, p_obs_free, 'bo', label='P$_{free}$')
-            plt.plot(spm_fit, spline_fit, 'r', label='Spline')
-            plt.ylim([-1e6, max(p_obs_down)])
-            plt.title('$P(t)$')
-            plt.legend()
-
-            plt.subplot(212)
-            plt.plot(rho_km_vals_down, p_obs_down, 'g', label='P')
-            plt.plot(rho_km_vals_free, p_obs_free, 'bo', label='P$_{free}$')
-            plt.plot(rho_km_fit, spline_fit, 'r', label='Spline')
-            plt.ylim([-1e6, max(p_obs_down)])
-            plt.title('$P(\\rho)$')
-            plt.legend()
-            plt.show()
-
         if USE_GUI:
             root = Tk()
             power_fit_gui_inst = PowerFitGui(root, self, spm_vals_down,
@@ -379,11 +401,32 @@ class Normalization(object):
                 except UnicodeDecodeError:
                     pass
             spline_fit = power_fit_gui_inst.yfit
-            self._k = power_fit_gui_inst.fit_deg
-            self._knots_spm = power_fit_gui_inst.knots_spm
-            self._freespace_spm = power_fit_gui_inst.xlim
 
+        self.__set_history()
         return spm_fit, spline_fit
+
+
+    def __set_history(self):
+        """
+        Record info about the run's history
+        """
+
+        input_var_dict = {'spm_raw': self.__spm_raw,
+            'IQ_c_raw': self.__IQ_c_raw, 'geo_inst': self.__geo_inst.history,
+            'rsr_inst': self.__rsr_inst.history}
+        input_kw_dict = {'spm_fit': self._spm_fit, 'k': self._k,
+            'knots_km': self._knots_km, 'dt_down': self._dt_down,
+            'freespace_km': self._freespace_km,
+            'freespace_spm': self._freespace_spm, 'knots_spm': self._knots_spm}
+        hist_dict = {'user name': os.getlogin(),
+            'host name': os.uname().nodename,
+            'run date': time.ctime() + ' ' + time.tzname[0],
+            'python version': platform.python_version(),
+            'operating system': os.uname().sysname,
+            'source file': __file__,
+            'input variables': input_var_dict,
+            'input keywords':input_kw_dict}
+        self.history = hist_dict
 
 
 if __name__ == '__main__':

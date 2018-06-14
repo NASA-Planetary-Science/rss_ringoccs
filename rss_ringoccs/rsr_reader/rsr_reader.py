@@ -31,6 +31,7 @@ Revisions:
    2018 Mar 21 - gsteranka - Added keyword argument in get_IQ method to
                              decimate 16kHz files to 1kHz sampling if True
    2018 May 08 - gsteranla - Added input checks
+   2018 May 30 - gsteranka - Added history attribute
 
 *************************VARIABLES*************************
 NAME - TYPE - scalar/array - PURPOSE
@@ -45,10 +46,11 @@ spm_vals - float - array - Seconds past midnight of data measurements
 
 import numpy as np
 import os
-import pdb
+import platform
 from scipy.signal import decimate
 import struct
 import sys
+import time
 
 class RSRReader(object):
     """
@@ -77,6 +79,7 @@ class RSRReader(object):
             spacecraft for this event
         band (bytes): Name of the wavelength of transmission (S, X, or Ka)
         sample_rate_khz (int): Sample rate, in kHz, of transmission (1 or 16)
+        history (dict): Dictionary recording parameters of the run
     """
 
     # Define field names and format variables used in each method
@@ -166,6 +169,7 @@ class RSRReader(object):
 
     def __init__(self,rsr_file, decimate_16khz_to_1khz=False, TEST=False):
         """
+        Purpose:
         Sets full path name of RSR file as an attribute to the instance, and
         reads the header of the RSR file, which sets the RSR header attributes
         spm_vals, doy, year, dsn, band, sample_rate_khz. Also sets private
@@ -181,6 +185,21 @@ class RSRReader(object):
                 private attribute __decimate_16khz_to_1khz
             TEST (bool): Optional boolean variable which, when set to True,
                 prints the header attributes that were set
+
+        Dependencies:
+            [1] RSRReader
+            [2] numpy
+            [3] os
+            [4] platform
+            [5] scipy.signal.decimate
+            [6] struct
+            [7] sys
+            [8] time
+
+        Warnings:
+            [1] If you try setting decimate_16khz_to_1khz=True for a 1kHz file,
+                it will just ignore you
+            [2] 16kHz files will take a few minutes to read
         """
 
         # Ensure TEST is Boolean
@@ -190,6 +209,12 @@ class RSRReader(object):
             TEST = False
 
         self.rsr_file = rsr_file
+
+        # Default argment for __set_IQ
+        self.__decimate_16khz_to_1khz = decimate_16khz_to_1khz
+
+        # Record information about the run
+        self.__set_history()
 
         # Length of SFDU header, and a function to read the header in the
         # proper format
@@ -242,9 +267,6 @@ class RSRReader(object):
         # Set attributes for later reading of rest of RSR file
         self.__n_pts_per_sfdu = n_pts_per_sfdu
         self.__n_sfdu = n_sfdu
-
-        # Default argment for __set_IQ
-        self.__decimate_16khz_to_1khz = decimate_16khz_to_1khz
 
         if TEST:
             print('First 10 raw SPM:')
@@ -315,11 +337,19 @@ class RSRReader(object):
             TEST (bool): Print the first few predicted sky frequency values if
                 set to True
 
-        Returns:
+        Outputs:
             f_spm (np.ndarray): Array of SPM values that predicted sky frequency
                 was evaluated at.
             f_sky_pred (np.ndarray): Predicted sky frequency, calculated from
                 the polynomial coefficients in the RSR file
+
+        Dependencies:
+            [1] numpy
+            [2] struct
+            [3] sys
+
+        Warnings:
+            [1] Will take a few minutes to run for 16kHz files
         """
 
         # Ensure TEST is Boolean
@@ -497,14 +527,26 @@ class RSRReader(object):
         self.IQ_m = IQ_m
 
 
+    def __set_history(self):
+        """
+        Set Python dictionary recording information about the run as the
+        history attribute
+        """
+        input_var_dict = {'rsr_file': self.rsr_file}
+        input_kw_dict = {
+            'decimate_16khz_to_1khz': self.__decimate_16khz_to_1khz}
+        history_dict = {'user name': os.getlogin(),
+            'host name': os.uname().nodename,
+            'run date': time.ctime() + ' ' + time.tzname[0],
+            'python version': platform.python_version(),
+            'operating system': os.uname().sysname,
+            'source file': __file__,
+            'input variables': input_var_dict,
+            'input keywords':input_kw_dict}
+        self.history = history_dict
+
+
 if __name__ == '__main__':
-    #rsr_file = 'thisisnotarealfile.txt'
     rsr_file = '../../../data/s10-rev07-rsr-data/S10EAOE2005_123_0740NNNX43D.2A1'
     #rsr_file = '../../../data/s10-rev07-rsr-data/s10sroe2005123_0740nnnx43rd.2a2'
     rsr_inst = RSRReader(rsr_file)
-
-    #f_spm = ['Bob', 'Sam', 'David']
-    #f_spm = [float(i) for i in range(1000)]
-    #f_spm = np.array(['Bob', 'Sam', 'David'])
-    #f_spm, f_sky_pred = rsr_inst.get_f_sky_pred(f_spm=f_spm)
-    pdb.set_trace()

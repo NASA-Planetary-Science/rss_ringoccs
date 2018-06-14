@@ -1,25 +1,28 @@
 """
-    Package Name:
+    Module Name:
         diffcorr
     Purpose:
         Provide functions and classes that aid in the process of
-        diffraction Correction / Fresnel Inversion. Additional
+        Diffraction Correction / Fresnel Inversion. Additional
         functions for the purpose of forward modelling of
-        reconstructed data and diffraction modelling exists.
+        reconstructed data and diffraction modelling are included.
         Several low-level functions that perform error checks for
-        the main functions are also included.
+        the main functions also exist, as well as functions that
+        enable running shell scripts in Python.
     
     Window (Taper) Functions:
         rect................Rectangular window.
         coss................Squared cossine window.
+        kb20................Kaiser-Bessel 2.0 window.
         kb25................Kaiser-Bessel 2.5 window.
         kb35................Kaiser-Bessel 3.5 window.
-        kbmd................Modified Kaiser-Bessel 2.5 window.
+        kbmd20..............Modified Kaiser-Bessel 2.0 window.
+        kbmd25..............Modified Kaiser-Bessel 2.5 window.
 
     Error Checks:
         check_boole.........Checks for Boolean input.
         check_ternary.......Checks for Ternary input.
-        check_pos_real......Checks if an input is positive and real.
+        check_pos_real......Checks for a single positive real input.
         check_real..........Checks if input is real (Number/Array).
         check_complex.......Checks if input is complex.
     
@@ -54,8 +57,5 @@
                             allowed range of processing.
 """
 
-from .misc_tools import *
-from .window_funcs import *
-from .misc_funcs import *
-from .diffraction_correction import *
+from .diffcorr import *
 

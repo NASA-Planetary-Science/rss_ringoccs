@@ -175,9 +175,9 @@ KERNELS_TO_LOAD = (		'$A/050606R_SCPSE_05114_05132.bsp'
 						'$A/171106R_SCPSE_17224_17258.bsp'
 						'$B/naif0012.tls'
 						'$C/de430.bsp'
-						'$D/earthstns_itrf93_050714.bsp'
 						'$D/dss_17_prelim_itrf93_161110.bsp'
 						'$D/dss_35_36_prelim_itrf93_140620.bsp'
+						'$D/earthstns_itrf93_050714.bsp'
 						'$E/earth_000101_180901_180610.bpc'
 						'$F/cpck26Feb2009.tpc')
 

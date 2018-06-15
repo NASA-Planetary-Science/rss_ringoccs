@@ -19,7 +19,10 @@ import numpy as np
 import pdb
 import spiceypy as spice
 
-from et_to_spm import et_to_spm
+try:
+    from et_to_spm import et_to_spm
+except ImportError:
+    from .et_to_spm import et_to_spm
 
 
 def make_dlp_file(norm_diff_inst, dlp_file_name):

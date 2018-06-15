@@ -179,7 +179,7 @@ KERNELS_TO_LOAD = (		'$A/050606R_SCPSE_05114_05132.bsp'
 						'$D/dss_35_36_prelim_itrf93_140620.bsp'
 						'$F/cpck26Feb2009.tpc'
                         '$D/earthstns_itrf93_050714.bsp'
-						'$E/earth_000101_180905_180614.bpc'
+						'$E/earth_000101_180905_180614.bpc')
 
 
 
@@ -201,3 +201,9 @@ KERNELS_TO_LOAD = ( '$A/*' spacecraft trajectory kernels,
                         '$B/naif0009.tls'
 						'$D/earthstns_itrf93_050714.bsp'
 					)
+
+						'$E/earth_000101_180901_180610.bpc'
+                        '$F/cpck26Feb2009.tpc'
+                        '$B/naif0009.tls'
+                        '$D/earthstns_itrf93_050714.bsp'
+                        '$C/de421.bsp'

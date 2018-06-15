@@ -88,7 +88,7 @@ try:
 except ImportError:
     from ..rsr_reader.rsr_reader import RSRReader
     from .resample_IQ import resample_IQ
-    from .spm_to_et import spm_to_et
+    from ..tools.spm_to_et import spm_to_et
 
 
 class NormDiff(object):

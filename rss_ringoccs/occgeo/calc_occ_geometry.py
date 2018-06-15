@@ -22,8 +22,8 @@ import os
 import platform
 import spiceypy as spice
 import numpy as np
-from spm_to_et import spm_to_et
-from et_to_spm import et_to_spm
+from ..tools.spm_to_et import spm_to_et
+from ..tools.et_to_spm import et_to_spm
 import pdb
 
 #SPACECRAFT              = 'Cassini'

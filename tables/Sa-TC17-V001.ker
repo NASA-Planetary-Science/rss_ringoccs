@@ -1,11 +1,11 @@
 \begindata
 
-PATH_VALUES		= ( '../kernels/pub/naif/CASSINI/kernels/spk'
-					'../kernels/pub/naif/CASSINI/kernels/lsk'
-					'../kernels/pub/naif/generic_kernels/spk/planets'
-					'../kernels/pub/naif/generic_kernels/spk/stations'
-					'../kernels/pub/naif/generic_kernels/pck'
-					'../kernels/pub/naif/CASSINI/kernels/pck')
+PATH_VALUES		= ( '../../kernels/pub/naif/CASSINI/kernels/spk'
+					'../../kernels/pub/naif/CASSINI/kernels/lsk'
+					'../../kernels/pub/naif/generic_kernels/spk/planets'
+					'../../kernels/pub/naif/generic_kernels/spk/stations'
+					'../../kernels/pub/naif/generic_kernels/pck'
+					'../../kernels/pub/naif/CASSINI/kernels/pck')
 
 PATH_SYMBOLS 	= ('A', 'B', 'C', 'D', 'E', 'F')
 

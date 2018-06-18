@@ -167,7 +167,8 @@ class RSRReader(object):
         + __sh_field_names + __data_field_names)
 
 
-    def __init__(self,rsr_file, decimate_16khz_to_1khz=False, TEST=False):
+    def __init__(self,rsr_file, decimate_16khz_to_1khz=False,
+            TEST=False):
         """
         Purpose:
         Sets full path name of RSR file as an attribute to the instance, and
@@ -442,7 +443,7 @@ class RSRReader(object):
         return f_spm, f_sky_pred
 
 
-    def __set_IQ(self, TEST=False):
+    def __set_IQ(self, spm_range, TEST=False):
         """
         Read full RSR file to find the raw measured I and Q over the
         specified spm_range of the file. Returns raw SPM values over the

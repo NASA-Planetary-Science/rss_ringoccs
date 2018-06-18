@@ -71,6 +71,8 @@ Revisions:
                              haven't made a cal file yet, or from MakeCalInst
                              in make_cal_inst.py if you have made a cal file
                              already
+   2018 Jun 18 - gsteranka - Added kernels input. Only needs to be leap second
+                             kernel
 """
 
 import numpy as np
@@ -122,8 +124,8 @@ class NormDiff(object):
         history (dict): Recorded information about the run
     """
 
-    def __init__(self, rsr_inst, dr_km, geo_inst, cal_inst, dr_km_tol=0.01,
-            is_chord=False):
+    def __init__(self, rsr_inst, dr_km, geo_inst, cal_inst, kernels=None,
+            dr_km_tol=0.01, is_chord=False):
         """
         Purpose:
         Instantiation defines all attributes of instance.
@@ -136,6 +138,8 @@ class NormDiff(object):
             cal_inst: Calibration instance linked to rsr_inst input. Made using
                 Calibration class if you haven't made a cal_file yet, and made
                 using MakeCalInst class if you have made a cal_file
+            kernels (list or str): List of full path name to kernels. Only
+                to have a leap seconds kernel (naif****.tls)
             dr_km_tol (float): Optional keyword argument, in km, that specifies the
                 maximum distance the starting point of the final set of radius
                 values can be away from an integer number of dr_km. For example, if
@@ -306,14 +310,15 @@ class NormDiff(object):
         self.__set_attributes(rho_km_desired, spm_desired, p_norm_vals,
             phase_rad_vals,
             spm_geo, rho_dot_kms_geo, geo_inst,
-            rho_km_cal, f_sky_pred_cal, rsr_inst,
+            rho_km_cal, f_sky_pred_cal, rsr_inst, kernels,
             end_of_chord_ing=end_of_chord_ing)
 
 
     def __set_attributes(self, rho_km_desired, spm_desired, p_norm_vals,
             phase_rad_vals,
             spm_geo, rho_dot_kms_geo, geo_inst,
-            rho_km_cal, f_sky_pred_cal, rsr_inst, end_of_chord_ing=None):
+            rho_km_cal, f_sky_pred_cal, rsr_inst, kernels,
+            end_of_chord_ing=None):
         """
         Private method called by __init__ to set attributes of the
         instance
@@ -356,12 +361,12 @@ class NormDiff(object):
         # Ring Event Time at final spacing
         t_ret_func = interp1d(spm_geo, t_ret_geo, fill_value='extrapolate')
         self.t_ret_et_vals = spm_to_et(t_ret_func(spm_desired), rsr_inst.doy,
-            rsr_inst.year)
+            rsr_inst.year, kernels=kernels)
 
         # Spacecraft Event Time at final spacing
         t_set_func = interp1d(spm_geo, t_set_geo, fill_value='extrapolate')
         self.t_set_et_vals = spm_to_et(t_set_func(spm_desired), rsr_inst.doy,
-            rsr_inst.year)
+            rsr_inst.year, kernels=kernels)
 
         # Ring longitude at final spacing
         phi_rl_rad_func = interp1d(spm_geo, phi_rl_rad_geo,

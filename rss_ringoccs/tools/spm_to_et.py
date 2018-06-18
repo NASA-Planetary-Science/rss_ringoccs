@@ -12,10 +12,11 @@ Revisions:
       spm_to_et.py
    2018 Mar 20 - gsteranka - Copy to official version and remove
                              debug steps
+    2018 Jun 18 - jfong - remove 'from spiceypy' from import spicepy as spice
 """
 
 import numpy as np
-from spiceypy import spiceypy as spice
+import spiceypy as spice
 
 def spm_to_et(spm, doy, year, kernels=None):
     """

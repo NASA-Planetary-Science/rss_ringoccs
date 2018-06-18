@@ -443,7 +443,7 @@ class RSRReader(object):
         return f_spm, f_sky_pred
 
 
-    def __set_IQ(self, spm_range, TEST=False):
+    def __set_IQ(self, TEST=False):
         """
         Read full RSR file to find the raw measured I and Q over the
         specified spm_range of the file. Returns raw SPM values over the

@@ -44,6 +44,6 @@ def et_to_spm(et_vals, kernels=None):
 		spm_vals_cont[ind+1:] = spm_vals[ind+1:] + spm_brk
 		spm_vals = spm_vals_cont
 	
-	return spm_vals
+	return np.array(spm_vals)
 
 

@@ -17,13 +17,14 @@ Revisions:
                              delimited
    2018 Jun 11 - gsteranka - Accept instance of the Calibration class in
                              calibration_class.py
+   2018 Jun 18 - gsteranka - Added spm_range keyword
 """
 
 import numpy as np
 from scipy.interpolate import interp1d
 import spiceypy as spice
 
-def make_cal_file(cal_inst, cal_file):
+def make_cal_file(cal_inst, cal_file, spm_range=None):
     """
     Purpose:
     Save a cal file from extracted data
@@ -31,6 +32,7 @@ def make_cal_file(cal_inst, cal_file):
     Args:
         cal_inst: Instance of Calibration class
         cal_file (str): Full path name of cal file to be made
+        spm_range (list): Range of SPM values to save file for
     """
 
     spm_cal = cal_inst.t_oet_spm_vals
@@ -39,8 +41,13 @@ def make_cal_file(cal_inst, cal_file):
     p_free_cal = cal_inst.p_free_vals
     f_offset_fit_cal = cal_inst.f_offset_fit_vals
 
-    np.savetxt(cal_file, np.c_[spm_cal, f_sky_pred_cal, f_sky_resid_fit_cal,
-        p_free_cal, f_offset_fit_cal], fmt='%32.16f, '*4 + '%32.16f')
+    if spm_range is None:
+        spm_range = [min(spm_cal), max(spm_cal)]
+    ind = (spm_cal >= spm_range[0]) & (spm_cal <= spm_range[1])
+
+    np.savetxt(cal_file, np.c_[spm_cal[ind], f_sky_pred_cal[ind],
+        f_sky_resid_fit_cal[ind], p_free_cal[ind], f_offset_fit_cal[ind]],
+        fmt='%32.16f, '*4 + '%32.16f')
 
     return None
 

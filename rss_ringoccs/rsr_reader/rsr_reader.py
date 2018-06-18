@@ -32,7 +32,6 @@ Revisions:
                              decimate 16kHz files to 1kHz sampling if True
    2018 May 08 - gsteranla - Added input checks
    2018 May 30 - gsteranka - Added history attribute
-   2018 Jun 18 - gsteranka - Re-added spm_range keyword to __init__
 
 *************************VARIABLES*************************
 NAME - TYPE - scalar/array - PURPOSE
@@ -168,7 +167,7 @@ class RSRReader(object):
         + __sh_field_names + __data_field_names)
 
 
-    def __init__(self,rsr_file, spm_range=None, decimate_16khz_to_1khz=False,
+    def __init__(self,rsr_file, decimate_16khz_to_1khz=False,
             TEST=False):
         """
         Purpose:
@@ -179,7 +178,6 @@ class RSRReader(object):
 
         Args:
             rsr_file (str): Full path name of a raw RSR file to read
-            spm_range (list): List of minimum and maximum SPM range to read
             decimate_16khz_to_1khz (bool): Optional Boolean argument which, if
                 set to True, decimates 16kHz files down to 1kHz sampling rate.
                 Note that this is a sticky keyword - if you set it to True, it
@@ -267,10 +265,6 @@ class RSRReader(object):
         self.band = sfdu_hdr_dict['sh_dl_band']
         self.sample_rate_khz = sfdu_hdr_dict['sh_sample_rate']
 
-        # Do full occultation if no specified spm_range
-        if spm_range is None:
-            spm_range = [min(spm_vals), max(spm_vals)]
-
         # Set attributes for later reading of rest of RSR file
         self.__n_pts_per_sfdu = n_pts_per_sfdu
         self.__n_sfdu = n_sfdu
@@ -283,7 +277,7 @@ class RSRReader(object):
                 + str(self.dsn) + ', ' + str(self.band) + ', '
                 + str(self.sample_rate_khz))
 
-        self.__set_IQ(spm_range, TEST=TEST)
+        self.__set_IQ(TEST=TEST)
 
 
     def __set_sfdu_unpack(self, spm_range):
@@ -481,6 +475,7 @@ class RSRReader(object):
 
         decimate_16khz_to_1khz = self.__decimate_16khz_to_1khz
 
+        spm_range = [min(spm_vals), max(spm_vals)]
         self.__set_sfdu_unpack(spm_range)
 
         # Reduce SPM array to match the I and Q arrays to be made

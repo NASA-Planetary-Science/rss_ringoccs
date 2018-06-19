@@ -536,14 +536,14 @@ class RSRReader(object):
         input_var_dict = {'rsr_file': self.rsr_file}
         input_kw_dict = {
             'decimate_16khz_to_1khz': self.__decimate_16khz_to_1khz}
-        history_dict = {'user name': os.getlogin(),
-            'host name': os.uname().nodename,
-            'run date': time.ctime() + ' ' + time.tzname[0],
-            'python version': platform.python_version(),
-            'operating system': os.uname().sysname,
-            'source file': __file__,
-            'input variables': input_var_dict,
-            'input keywords':input_kw_dict}
+        history_dict = {'User Name': os.getlogin(),
+            'Host Name': os.uname().nodename,
+            'Run Date': time.ctime() + ' ' + time.tzname[0],
+            'Python Version': platform.python_version(),
+            'Operating System': os.uname().sysname,
+            'Source File': __file__,
+            'Input Variables': input_var_dict,
+            'Input Keywords':input_kw_dict}
         self.history = history_dict
 
 

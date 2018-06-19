@@ -3,3 +3,4 @@
 kernels/
 output/
 __pycache__
+*~

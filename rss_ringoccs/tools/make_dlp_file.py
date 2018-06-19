@@ -65,7 +65,6 @@ def make_dlp_file(norm_diff_inst, dlp_file_name, spm_range=None):
                 max(norm_diff_inst.spm_vals)]
         ind = ((norm_diff_inst.spm_vals >= spm_range[0]) &
             (norm_diff_inst.spm_vals <= spm_range[1]))
-        pdb.set_trace()
 
         np.savetxt(dlp_file_name,
             np.c_[norm_diff_inst.rho_km_vals[ind], TEMP[ind], TEMP[ind],

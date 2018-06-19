@@ -97,13 +97,13 @@ class Calibration(object):
             'norm_inst': norm_inst.history, 'geo_inst': geo_inst.history}
         input_kw_dict = {'dt_cal': dt_cal}
 
-        hist_dict = {'user name': os.getlogin(),
-            'host name': os.uname().nodename,
-            'run date': time.ctime() + ' ' + time.tzname[0],
-            'python version': platform.python_version(),
-            'operating system': os.uname().sysname,
-            'source file': __file__,
-            'input variables': input_var_dict,
-            'input keywords': input_kw_dict}
+        hist_dict = {'User Name': os.getlogin(),
+            'Host Name': os.uname().nodename,
+            'Run Date': time.ctime() + ' ' + time.tzname[0],
+            'Python Version': platform.python_version(),
+            'Operating System': os.uname().sysname,
+            'Source File': __file__,
+            'Input Variables': input_var_dict,
+            'Input Keywords': input_kw_dict}
 
         self.history = hist_dict

@@ -386,14 +386,14 @@ class NormDiff(object):
         input_var_dict = {'rsr_inst': rsr_inst.history, 'dr_km': dr_km,
             'geo_file': geo_inst.history, 'cal_inst': cal_inst.history}
         input_kw_dict = {'dr_km_tol': dr_km_tol}
-        hist_dict = {'user name': os.getlogin(),
-            'host name': os.uname().nodename,
-            'run date': time.ctime() + ' ' + time.tzname[0],
-            'python version': platform.python_version(),
-            'operating system': os.uname().sysname,
-            'source file': __file__,
-            'input variables': input_var_dict,
-            'input keywords':input_kw_dict}
+        hist_dict = {'User Name': os.getlogin(),
+            'Host Name': os.uname().nodename,
+            'Run Date': time.ctime() + ' ' + time.tzname[0],
+            'Python Version': platform.python_version(),
+            'Operating System': os.uname().sysname,
+            'Source File': __file__,
+            'Input Variables': input_var_dict,
+            'Input Keywords':input_kw_dict}
         self.history = hist_dict
 
 

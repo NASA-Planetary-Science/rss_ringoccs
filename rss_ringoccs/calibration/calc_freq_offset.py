@@ -315,14 +315,14 @@ def __get_history(rsr_inst, dt_freq, spm_range, cpu_count, freq_offset_file):
     input_var_dict = {'rsr_inst': rsr_inst.history}
     input_kw_dict = {'dt_freq': dt_freq, 'spm_range': spm_range,
         'cpu_count': cpu_count, 'freq_offset_file': freq_offset_file}
-    hist_dict = {'user name': os.getlogin(),
-        'host name': os.uname().nodename,
-        'run date': time.ctime() + ' ' + time.tzname[0],
-        'python version': platform.python_version(),
-        'operating system': os.uname().sysname,
-        'source file': __file__,
-        'input variables': input_var_dict,
-        'input keywords':input_kw_dict}
+    hist_dict = {'User Name': os.getlogin(),
+        'Host Name': os.uname().nodename,
+        'Run Date': time.ctime() + ' ' + time.tzname[0],
+        'Python Version': platform.python_version(),
+        'Operating System': os.uname().sysname,
+        'Source File': __file__,
+        'Input Variables': input_var_dict,
+        'Input Keywords':input_kw_dict}
     return hist_dict
 
 

@@ -119,7 +119,7 @@ def rsr_header(rsr_file):
         with open(rsr_file, 'rb') as f:
             sfdu_hdr_raw = f.read(struct_hdr_len)
     except FileNotFoundError as err:
-        print('File not found! {}',format(err))
+        print('ERROR (rsr_header): File not found! {}',format(err))
         sys.exit()
 
     # Unpack SFDU header

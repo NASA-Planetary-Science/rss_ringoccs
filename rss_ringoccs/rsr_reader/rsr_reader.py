@@ -44,6 +44,9 @@ spm_range - float - array - Range of SPM to read data from RSR file
 spm_vals - float - array - Seconds past midnight of data measurements
 """
 
+import multiprocessing
+from multiprocessing import Process
+from multiprocessing import Queue
 import numpy as np
 import os
 import platform
@@ -168,7 +171,7 @@ class RSRReader(object):
 
 
     def __init__(self,rsr_file, decimate_16khz_to_1khz=False,
-            TEST=False):
+            cpu_count=multiprocessing.cpu_count(), TEST=False):
         """
         Purpose:
         Sets full path name of RSR file as an attribute to the instance, and
@@ -211,8 +214,9 @@ class RSRReader(object):
 
         self.rsr_file = rsr_file
 
-        # Default argment for __set_IQ
+        # Default argment for __set_IQ and cpu_count
         self.__decimate_16khz_to_1khz = decimate_16khz_to_1khz
+        self.__cpu_count = cpu_count
 
         # Record information about the run
         self.__set_history()
@@ -482,27 +486,23 @@ class RSRReader(object):
         spm_vals = self.spm_vals[self.__n_pts_per_sfdu*self.__start_sfdu:
             self.__n_pts_per_sfdu*(self.__end_sfdu+1)]
 
-        I_array = []
-        Q_array = []
-        for i_sfdu in range(self.__start_sfdu, self.__end_sfdu+1):
-            sfdu = self.__rsr_struct[i_sfdu*self.__sfdu_len:
-                i_sfdu*self.__sfdu_len + self.__sfdu_len]
-
-            # If EOF is reached
-            if len(sfdu) == 0:
-                break
-
-            # Unpack SFDU into readable format
-            s = self.__sfdu_unpack(sfdu)
-            s_dict = dict(zip(self.__field_names, s))
-
-            I_array.append(s[-2*self.__n_pts_per_sfdu+1::2])
-            Q_array.append(s[-2*self.__n_pts_per_sfdu::2])
-
-        # Raw measured I and Q
-        I_m = np.reshape(I_array,-1)
-        Q_m = np.reshape(Q_array,-1)
-        IQ_m = I_m + 1j*Q_m
+        # Multiprocessing to retrieve data from RSR file
+        results = []
+        queues = [Queue() for i in range(self.__cpu_count)]
+        n_loops = self.__end_sfdu - self.__start_sfdu + 1
+        n_per_core = int(np.floor(n_loops/self.__cpu_count))
+        loop_args = [(i*n_per_core, (i+1)*n_per_core, n_loops,
+            queues[i]) for i in range(self.__cpu_count)]
+        loop_args[-1] = ((self.__cpu_count-1)*n_per_core,
+            self.__end_sfdu + 1, n_loops, queues[-1])
+        jobs = [Process(target=self.__loop, args=(a)) for a in loop_args]
+        for j in jobs: j.start()
+        for q in queues: results.append(q.get())
+        for j in jobs: j.join()
+        IQ_m = results[0]
+        #results_hstack = np.hstack(results)
+        #IQ_m = results_hstack
+        print('\n')
 
         # Decimate 16kHz file to 1kHz spacing if specified
         if decimate_16khz_to_1khz & (self.sample_rate_khz == 16):
@@ -528,6 +528,50 @@ class RSRReader(object):
         self.IQ_m = IQ_m
 
 
+    def __loop(self, i_start, i_end, n_loops, queue=0):
+        """
+        Function to perform loop for multiprocessing
+        """
+
+        #I_array = []
+        #Q_array = []
+        I_array = np.zeros(len(range(i_start, i_end))*self.__n_pts_per_sfdu)
+        Q_array = np.zeros(len(range(i_start, i_end))*self.__n_pts_per_sfdu)
+        i_iter = 0
+        for i_sfdu in range(i_start, i_end):
+            sfdu = self.__rsr_struct[i_sfdu*self.__sfdu_len:
+                i_sfdu*self.__sfdu_len + self.__sfdu_len]
+
+            # If EOF is reached
+            if len(sfdu) == 0:
+                break
+
+            # Unpack SFDU into readable format
+            s = self.__sfdu_unpack(sfdu)
+            s_dict = dict(zip(self.__field_names, s))
+
+            #I_array.append(s[-2*self.__n_pts_per_sfdu+1::2])
+            #Q_array.append(s[-2*self.__n_pts_per_sfdu::2])
+
+            I_array[i_iter*self.__n_pts_per_sfdu:
+                (i_iter+1)*self.__n_pts_per_sfdu] = (
+                s[-2*self.__n_pts_per_sfdu+1::2])
+            Q_array[i_iter*self.__n_pts_per_sfdu:
+                (i_iter+1)*self.__n_pts_per_sfdu] = (
+                s[-2*self.__n_pts_per_sfdu::2])
+
+            #sys.stdout.write('\r' + str(i_sfdu+1) + ' of '
+            #    + str(n_loops))
+            #sys.stdout.flush()
+
+        #I_m = np.reshape(I_array, -1)
+        #Q_m = np.reshape(Q_array, -1)
+        #IQ_m = I_m + 1j*Q_m
+        #queue.put(IQ_m)
+
+        queue.put(I_array + 1j*Q_array)
+
+
     def __set_history(self):
         """
         Set Python dictionary recording information about the run as the
@@ -548,6 +592,7 @@ class RSRReader(object):
 
 
 if __name__ == '__main__':
-    rsr_file = '../../../data/s10-rev07-rsr-data/S10EAOE2005_123_0740NNNX43D.2A1'
-    #rsr_file = '../../../data/s10-rev07-rsr-data/s10sroe2005123_0740nnnx43rd.2a2'
+
+    rsr_file = '../../../../../data/s10-rev07-rsr-data/S10EAOE2005_123_0740NNNX43D.2A1'
+    #rsr_file = '../../../../../data/s10-rev07-rsr-data/s10sroe2005123_0740nnnx43rd.2a2'
     rsr_inst = RSRReader(rsr_file)

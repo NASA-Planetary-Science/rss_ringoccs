@@ -187,6 +187,8 @@ class RSRReader(object):
                 will be True for any subsequent calls from the instance until
                 you explicitly set it to False. This keyword is linked to the
                 private attribute __decimate_16khz_to_1khz
+            cpu_count (int): Number of cores to use when reading data in from
+                file. Default is number of cores on your computer
             TEST (bool): Optional boolean variable which, when set to True,
                 prints the header attributes that were set
 
@@ -212,6 +214,11 @@ class RSRReader(object):
                 'False')
             TEST = False
 
+        if type(cpu_count) != int:
+            print('WARNING (RSRReader): cpu_count keyword should be an '
+                + 'integer. Setting to number of cores on your computer.')
+            cpu_count = multiprocessing.cpu_count()
+
         self.rsr_file = rsr_file
 
         # Default argment for __set_IQ and cpu_count
@@ -235,7 +242,7 @@ class RSRReader(object):
                 sfdu_hdr_raw = f.read(struct_hdr_len)
                 f.close()
         except FileNotFoundError as err:
-            print('File not found! {}'.format(err))
+            print('ERROR (RSRReader): File not found! {}'.format(err))
             sys.exit()
 
         # Unpack SFDU header

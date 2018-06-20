@@ -37,6 +37,8 @@ import platform
 import sys
 import time
 
+from ..rsr_reader.rsr_reader import RSRReader
+
 def calc_freq_offset(rsr_inst, dt_freq=8.192, spm_range=None,
         cpu_count=multiprocessing.cpu_count(), freq_offset_file=None,
         TEST=False):
@@ -97,11 +99,33 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192, spm_range=None,
             may not be as good
         [2] If dt_freq is too high, then you will need to exclude more regions
             when making a fit to residual frequency
+        [3] Recommended that dt_freq is a power of 2 divided by 1000 (such
+            as 8.192 seconds, since 8192 is a power of 2)
         [3] If you make cpu_count more than the number of cores you have on
             your computer, you don't see any performance difference from when
             you use the max number of cores, but just the same, we don't
             recommend making it greater than your total number of cores.
         """
+
+    if type(rsr_inst) != RSRReader:
+        print('ERROR (calc_freq_offset): rsr_inst input must be an instance of '
+            + 'the RSRReader class')
+        sys.exit()
+
+    if (type(dt_freq) != float) and (type(dt_freq) != int):
+        print('ERROR (calc_freq_offset): dt_freq input must be a float or'
+            + 'integer')
+        sys.exit()
+
+    if type(cpu_count) != int:
+        print('WARNING (calc_freq_offset): cpu_count input must be an integer. '
+            + 'Setting equal to number of cores on computer.')
+        cpu_count = multiprocessing.cpu_count()
+
+    if type(TEST) != bool:
+        print('WARNING (calc_freq_offset): TEST keyword must be boolean. '
+            + 'Assuming False')
+        TEST = False
 
     # Record info about the call
     history_dict = __get_history(rsr_inst, dt_freq, spm_range, cpu_count,

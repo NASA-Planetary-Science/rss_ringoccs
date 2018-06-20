@@ -500,8 +500,6 @@ class RSRReader(object):
         for q in queues: results.append(q.get())
         for j in jobs: j.join()
         IQ_m = results[0]
-        #results_hstack = np.hstack(results)
-        #IQ_m = results_hstack
         print('\n')
 
         # Decimate 16kHz file to 1kHz spacing if specified
@@ -533,8 +531,6 @@ class RSRReader(object):
         Function to perform loop for multiprocessing
         """
 
-        #I_array = []
-        #Q_array = []
         I_array = np.zeros(len(range(i_start, i_end))*self.__n_pts_per_sfdu)
         Q_array = np.zeros(len(range(i_start, i_end))*self.__n_pts_per_sfdu)
         i_iter = 0
@@ -550,24 +546,12 @@ class RSRReader(object):
             s = self.__sfdu_unpack(sfdu)
             s_dict = dict(zip(self.__field_names, s))
 
-            #I_array.append(s[-2*self.__n_pts_per_sfdu+1::2])
-            #Q_array.append(s[-2*self.__n_pts_per_sfdu::2])
-
             I_array[i_iter*self.__n_pts_per_sfdu:
                 (i_iter+1)*self.__n_pts_per_sfdu] = (
                 s[-2*self.__n_pts_per_sfdu+1::2])
             Q_array[i_iter*self.__n_pts_per_sfdu:
                 (i_iter+1)*self.__n_pts_per_sfdu] = (
                 s[-2*self.__n_pts_per_sfdu::2])
-
-            #sys.stdout.write('\r' + str(i_sfdu+1) + ' of '
-            #    + str(n_loops))
-            #sys.stdout.flush()
-
-        #I_m = np.reshape(I_array, -1)
-        #Q_m = np.reshape(Q_array, -1)
-        #IQ_m = I_m + 1j*Q_m
-        #queue.put(IQ_m)
 
         queue.put(I_array + 1j*Q_array)
 

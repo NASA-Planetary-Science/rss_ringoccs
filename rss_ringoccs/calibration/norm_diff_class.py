@@ -73,6 +73,9 @@ Revisions:
                              already
    2018 Jun 18 - gsteranka - Added kernels input. Only needs to be leap second
                              kernel
+   2018 Jun 21 - gsteranka - Change spacecraft event time and ring event time
+                             attributes to SPM instead of et. Removed kernels
+                             input
 """
 
 import numpy as np
@@ -86,11 +89,9 @@ import time
 try:
     from rsr_reader import RSRReader
     from resample_IQ import resample_IQ
-    from spm_to_et import spm_to_et
 except ImportError:
     from ..rsr_reader.rsr_reader import RSRReader
     from .resample_IQ import resample_IQ
-    from ..tools.spm_to_et import spm_to_et
 
 
 class NormDiff(object):
@@ -116,8 +117,8 @@ class NormDiff(object):
         f_sky_hz_vals (np.ndarray): Predicted sky frequency, in Hz.
         phi_rad_vals (np.ndarray): Observed ring azimuth, in radians
         phi_rl_rad_vals (np.ndarray): Ring longitude, in radians
-        t_ret_et_vals (np.ndarray): Ring event time
-        t_set_et_vals (np.ndarray): Spacecraft event time
+        t_ret_spm_vals (np.ndarray): Ring event time in SPM
+        t_set_spm_vals (np.ndarray): Spacecraft event time in SPM
         rho_dot_kms_vals (np.ndarray): Ring intercept point velocity
         rho_corr_pole_km_vals (np.ndarray): Radius correction due to Saturn's
             pole direction
@@ -130,7 +131,7 @@ class NormDiff(object):
         history (dict): Recorded information about the run
     """
 
-    def __init__(self, rsr_inst, dr_km, geo_inst, cal_inst, kernels=None,
+    def __init__(self, rsr_inst, dr_km, geo_inst, cal_inst,
             dr_km_tol=0.01, is_chord=False):
         """
         Purpose:
@@ -144,8 +145,6 @@ class NormDiff(object):
             cal_inst: Calibration instance linked to rsr_inst input. Made using
                 Calibration class if you haven't made a cal_file yet, and made
                 using MakeCalInst class if you have made a cal_file
-            kernels (list or str): List of full path name to kernels. Only
-                to have a leap seconds kernel (naif****.tls)
             dr_km_tol (float): Optional keyword argument, in km, that specifies the
                 maximum distance the starting point of the final set of radius
                 values can be away from an integer number of dr_km. For example, if
@@ -320,14 +319,14 @@ class NormDiff(object):
         self.__set_attributes(rho_km_desired, spm_desired, p_norm_vals,
             phase_rad_vals,
             spm_geo, rho_dot_kms_geo, geo_inst,
-            rho_km_cal, f_sky_pred_cal, rsr_inst, kernels,
+            rho_km_cal, f_sky_pred_cal, rsr_inst,
             end_of_chord_ing=end_of_chord_ing)
 
 
     def __set_attributes(self, rho_km_desired, spm_desired, p_norm_vals,
             phase_rad_vals,
             spm_geo, rho_dot_kms_geo, geo_inst,
-            rho_km_cal, f_sky_pred_cal, rsr_inst, kernels,
+            rho_km_cal, f_sky_pred_cal, rsr_inst,
             end_of_chord_ing=None):
         """
         Private method called by __init__ to set attributes of the
@@ -372,13 +371,11 @@ class NormDiff(object):
 
         # Ring Event Time at final spacing
         t_ret_func = interp1d(spm_geo, t_ret_geo, fill_value='extrapolate')
-        self.t_ret_et_vals = spm_to_et(t_ret_func(spm_desired), rsr_inst.doy,
-            rsr_inst.year, kernels=kernels)
+        self.t_ret_spm_vals = t_ret_func(spm_desired)
 
         # Spacecraft Event Time at final spacing
         t_set_func = interp1d(spm_geo, t_set_geo, fill_value='extrapolate')
-        self.t_set_et_vals = spm_to_et(t_set_func(spm_desired), rsr_inst.doy,
-            rsr_inst.year, kernels=kernels)
+        self.t_set_spm_vals = t_set_func(spm_desired)
 
         # Ring longitude at final spacing
         phi_rl_rad_func = interp1d(spm_geo, phi_rl_rad_geo,

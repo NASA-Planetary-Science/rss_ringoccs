@@ -33,6 +33,8 @@ Revisions:
                              use of GUI to make initial guess at fit. Eliminated
                              rho_exclude keyword
    2018 Jun 05 - gsteranka - Added sc_name keyword. Default is Cassini
+   2018 Jun 21 - gsteranka - Switch "k" input to "poly_order", and "_k"
+                             attribute to "_poly_order"
 """
 
 import numpy as np
@@ -65,12 +67,12 @@ class FreqOffsetFit(object):
         >>> (f_spm, f_offset) = (f_spm, f_offset) = \
                 calc_freq_offset(spm_vals, IQ_m)
         >>> fit_inst = FreqOffsetFit(rsr_inst, geo_inst, f_spm, f_offset, \
-                f_uso, kernels, k=k, rho_exclude=rho_exclude)
+                f_uso, kernels, poly_order=poly_order, rho_exclude=rho_exclude)
         >>> (spm_vals, IQ_c) = fit_inst.get_IQ_c(spm_vals=spm_vals, IQ_m=IQ_m)
 
     Attributes:
         _spm_include (list): Linked to the input range spm_include
-        _k (int): Linked to the input fit order k
+        _poly_order (int): Linked to the input fit order poly_order
         __geo_inst: Instance of Geometry class
         __f_uso (float): USO frequency used
         __USE_GUI (bool): Linked to USE_GUI input
@@ -90,7 +92,7 @@ class FreqOffsetFit(object):
         """
 
     def __init__(self, rsr_inst, geo_inst, f_spm, f_offset,
-            f_uso, k=9, spm_include=None, sc_name='Cassini',
+            f_uso, poly_order=9, spm_include=None, sc_name='Cassini',
             USE_GUI=True, TEST=False):
         """
         Purpose:
@@ -105,7 +107,8 @@ class FreqOffsetFit(object):
                 extracted at
             f_offset (np.ndarray): Extracted frequency offset
             f_uso (float): USO frequency for the data set
-            k (int): Order of the polynomial fit made to residual frequency
+            poly_order (int): Order of the polynomial fit made to residual
+                frequency
             rho_exclude (list): Set of radius regions to exclude when making
                 fit to residual frequency. Specify in km. Default is to
                 exclude B ring region
@@ -165,19 +168,15 @@ class FreqOffsetFit(object):
 
         # Set attributes for residual frequency fit, and the
         # new frequency offset fit
-#         self.set_f_sky_resid_fit(k=k, rho_exclude=rho_exclude,
-#             spm_include=spm_include, USE_GUI=USE_GUI, TEST=TEST)
-        self.set_f_sky_resid_fit(k=k, spm_include=spm_include, USE_GUI=USE_GUI,
-            TEST=TEST)
+        self.set_f_sky_resid_fit(poly_order=poly_order, spm_include=spm_include,
+            USE_GUI=USE_GUI, TEST=TEST)
 
         # Get I and Q from RSR object
         self.__spm_vals = rsr_inst.spm_vals
         self.__IQ_m = rsr_inst.IQ_m
 
 
-#     def set_f_sky_resid_fit(self, k=9, rho_exclude=None, spm_include=None,
-#             USE_GUI=True, TEST=False)
-    def set_f_sky_resid_fit(self, k=9, spm_include=None, USE_GUI=True,
+    def set_f_sky_resid_fit(self, poly_order=9, spm_include=None, USE_GUI=True,
             TEST=False):
         """
         Purpose:
@@ -186,7 +185,7 @@ class FreqOffsetFit(object):
         frequency fit
 
         Args:
-            k (int): Order of polynomial fit made to residual frequency
+            poly_order (int): Order of polynomial fit made to residual frequency
             rho_exclude (list): Set of radius regions to exclude when making
                 fit to residual frequency. Specify in km. Default is to
                 exclude B ring region
@@ -215,7 +214,7 @@ class FreqOffsetFit(object):
         """
 
         # Attributes keeping track of input
-        self._k = k
+        self._poly_order = poly_order
         self.__USE_GUI = USE_GUI
 
         # By default, exclude radii inside of Saturn, the B ring, and far
@@ -278,7 +277,7 @@ class FreqOffsetFit(object):
         spm_temp = (f_spm - f_spm[int(npts/2)])/max(f_spm - f_spm[int(npts/2)])
 
         # Coefficients for least squares fit, and evaluation of coefficients
-        coef = poly.polyfit(spm_temp[ind], f_sky_resid[ind], k)
+        coef = poly.polyfit(spm_temp[ind], f_sky_resid[ind], poly_order)
         f_sky_resid_fit = poly.polyval(spm_temp, coef)
 
         self.__f_sky_resid_fit = f_sky_resid_fit
@@ -395,8 +394,8 @@ class FreqOffsetFit(object):
         #     input_var_dict with self.__geo_inst.history
         input_var_dict = {'rsr_inst': self.__rsr_inst.history,
             'geo_inst': self.__geo_inst.history, 'f_uso': self.__f_uso}
-        input_kw_dict = {'k': self._k, 'spm_include': self._spm_include,
-            'USE_GUI': self.__USE_GUI}
+        input_kw_dict = {'poly_order': self._poly_order,
+            'spm_include': self._spm_include, 'USE_GUI': self.__USE_GUI}
         hist_dict = {'User Name': os.getlogin(),
             'Host Name': os.uname().nodename,
             'Run Date': time.ctime() + ' ' + time.tzname[0],

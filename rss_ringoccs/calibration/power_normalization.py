@@ -64,11 +64,13 @@ class Normalization(object):
 
     Example:
         >>> fit_inst = FreqOffsetFit(rsr_inst, geo_inst, f_spm, f_offset, \
-                f_uso, kernels, k=k, rho_exclude=rho_exclude)
+                f_uso, kernels, spline_order=spline_order,
+                rho_exclude=rho_exclude)
         >>> (spm_raw, IQ_c_raw) = fit_inst.get_IQ_c()
         >>> norm_inst = Normalization(spm_raw, IQ_c_raw, geo_inst)
         >>> spm_fit = np.arange(spm_raw[0], spm_raw[-1], 1.0)
-        >>> spline_fit = norm_inst.get_spline_fit(spm_fit, k=k, \
+        >>> spline_fit = norm_inst.get_spline_fit(spm_fit,
+                spline_order=spline_order, \
                 knots_km=knots_km, dt_down=dt_down, \
                 freespace_km=freespace_km, TEST=TEST)
 
@@ -82,7 +84,7 @@ class Normalization(object):
         _freespace_spm (list): SPM version of _freespace_km. Use this one if
             it's not None. Overrides _freespace_km
         __IQ_c_raw (np.ndarray): Raw resolution frequency corrected I and Q
-        _k (int): Order of the spline fit. Default order is 2
+        _spline_order (int): Order of the spline fit. Default order is 2
         _knots_km (list): List of knots for the spline fit. Should only
                 be at places where there is data. Specify in km
         _knots_spm (list): SPM versino of _knots_km. Use this one if it's not
@@ -143,7 +145,8 @@ class Normalization(object):
         self.__rho_interp_func = rho_interp_func
 
         # Default arguments for spline fit. Chosen because:
-        #     k: Order higher than 2 gives too much freedom to spline fit.
+        #     spline_order: Order higher than 2 gives too much freedom to
+        #                   spline fit.
         #     knots_km: By experimentation, these tend to give the most
         #               consistently good spline fits. Sometimes need to
         #               adjust if a file's free space power cuts off sooner
@@ -152,7 +155,7 @@ class Normalization(object):
         #                   uninterrupted by diffraction pattern or an
         #                   eccentric ringlet. These accompany the default
         #                   knots
-        self._k = 2
+        self._spline_order = 2
         #self._knots_km = np.array([70445., 87400., 117730., 119950., 133550.,
         #    194269.])
         self._knots_km = [70445., 87400., 117730., 119950., 133550., 194269.]
@@ -220,7 +223,7 @@ class Normalization(object):
         return spm_vals_down, rho_km_vals_down, p_obs_down
 
 
-    def get_spline_fit(self, spm_fit=None, k=None, knots_km=None,
+    def get_spline_fit(self, spm_fit=None, spline_order=None, knots_km=None,
             dt_down=None, freespace_km=None, freespace_spm=None,
             knots_spm=None, USE_GUI=True, TEST=False):
         """
@@ -231,7 +234,7 @@ class Normalization(object):
 
         Args:
             spm_fit (np.ndarray): SPM values to evaluate the spline fit at
-            k (int): Order of the spline fit. Default order is 2
+            spline_order (int): Order of the spline fit. Default order is 2
 
             dt_down (float): Time spacing to downsample to before making
                 a spline fit
@@ -276,8 +279,8 @@ class Normalization(object):
         # Update defaults if any keyword arguments were specified
         if spm_fit is not None:
             self._spm_fit = spm_fit
-        if k is not None:
-            self._k = k
+        if spline_order is not None:
+            self._spline_order = spline_order
         if knots_km is not None:
             self._knots_km = knots_km
         if dt_down is not None:
@@ -291,7 +294,7 @@ class Normalization(object):
 
         # Use whatever most up-to-date arguments are
         spm_fit = self._spm_fit
-        k = self._k
+        spline_order = self._spline_order
         knots_km = self._knots_km
         dt_down = self._dt_down
         freespace_km = self._freespace_km
@@ -386,7 +389,7 @@ class Normalization(object):
         ind_sort = np.argsort(spm_vals_free)
         ind_knot_sort = np.argsort(knots_spm_data)
         spline_rep = splrep(spm_vals_free[ind_sort], p_obs_free[ind_sort],
-            k=k, t=knots_spm_data[ind_knot_sort])
+            k=spline_order, t=knots_spm_data[ind_knot_sort])
         spline_fit = splev(spm_fit, spline_rep)
 
         if USE_GUI:
@@ -413,7 +416,8 @@ class Normalization(object):
 
         input_var_dict = {'geo_inst': self.__geo_inst.history,
             'rsr_inst': self.__rsr_inst.history}
-        input_kw_dict = {'spm_fit': self._spm_fit, 'k': self._k,
+        input_kw_dict = {'spm_fit': self._spm_fit,
+            'spline_order': self._spline_order,
             'knots_km': self._knots_km, 'dt_down': self._dt_down,
             'freespace_km': self._freespace_km,
             'freespace_spm': self._freespace_spm, 'knots_spm': self._knots_spm}

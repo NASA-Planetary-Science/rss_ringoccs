@@ -94,7 +94,7 @@ class PowerFitGui(Frame):
         self.y = p_obs_down
         self.xfit = spm_fit
 
-        self.fit_deg = norm_inst._k
+        self.fit_deg = norm_inst._spline_order
         self.xlim = norm_inst._freespace_spm
         self.knots_spm = norm_inst._knots_spm
         self.yfit = self._get_fit()
@@ -184,8 +184,8 @@ class PowerFitGui(Frame):
         """
 
         spm_fit, spline_fit = self.norm_inst.get_spline_fit(spm_fit=self.xfit,
-            k=self.fit_deg, knots_spm=self.knots_spm, freespace_spm=self.xlim,
-            USE_GUI=False)
+            spline_order=self.fit_deg, knots_spm=self.knots_spm,
+            freespace_spm=self.xlim, USE_GUI=False)
         return spline_fit
 
     def plot_data(self):

@@ -40,10 +40,6 @@ def make_dlp_file(norm_diff_inst, dlp_file_name, spm_range=None):
 
     mu = np.sin(abs(norm_diff_inst.B_rad_vals))
 
-    # Filler arrays while we don't yet have these values
-    n_pts = len(norm_diff_inst.rho_km_vals)
-    TEMP = np.zeros(n_pts) - 999
-
     if norm_diff_inst.end_of_chord_ing is None:
 
         if spm_range is None:

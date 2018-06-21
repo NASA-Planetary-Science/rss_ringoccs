@@ -119,6 +119,12 @@ class NormDiff(object):
         t_ret_et_vals (np.ndarray): Ring event time
         t_set_et_vals (np.ndarray): Spacecraft event time
         rho_dot_kms_vals (np.ndarray): Ring intercept point velocity
+        rho_corr_pole_km_vals (np.ndarray): Radius correction due to Saturn's
+            pole direction
+        rho_corr_timing_km_vals (np.ndarray): Radius correction due to timing
+            offset
+        tau_threshold_vals (np.ndarray): Threshold optical depth assuming 1km
+            desired resolution
         end_of_chord_ing (int): Index number of final ingress portion of chord
             occultation. Set to "None" if "is_chord" keyword is False
         history (dict): Recorded information about the run
@@ -166,6 +172,10 @@ class NormDiff(object):
                 (2) the power will not normalize correctly.
             [2] If it's a chord occultation, you will get problems if you don't
                 set is_chord=True
+            [3] Radius correction due to pole direction and timing offset not
+                yet implemented, so the corresponding attributes
+                (rho_corr_pole_km_vals and rho_corr_timing_km_vals) are set
+                to arrays of -999 right now
         """
 
         spm_geo = geo_inst.t_oet_spm_vals
@@ -336,6 +346,8 @@ class NormDiff(object):
         t_ret_geo = geo_inst.t_ret_spm_vals
         t_set_geo = geo_inst.t_set_spm_vals
         phi_rl_rad_geo = geo_inst.phi_rl_deg_vals*spice.rpd()
+        #rho_corr_pole_km_geo = geo_inst.rho_corr_pole_km_vals
+        #rho_corr_timing_km_geo = geo_inst.rho_corr_timing_km_vals
 
         # Ring opening angle at final spacing
         B_rad_func = interp1d(spm_geo, B_rad_geo, fill_value='extrapolate')
@@ -377,6 +389,20 @@ class NormDiff(object):
         rho_dot_kms_func = interp1d(spm_geo, rho_dot_kms_geo,
             fill_value='extrapolate')
         self.rho_dot_kms_vals = rho_dot_kms_func(spm_desired)
+
+        # Radius correction due to Saturn's pole direction at final spacing
+        #rho_corr_pole_km_func = interp1d(spm_geo, rho_corr_pole_km_geo,
+        #    fill_value='extrapolate')
+        #self.rho_corr_pole_km_vals = rho_corr_pole_km_func(spm_desired)
+        self.rho_corr_pole_km_vals = np.zeros(len(spm_desired)) - 999
+
+        # Radius correction due to timing offset at final spacing
+        #rho_corr_timing_km_func = interp1d(spm_geo, rho_corr_timing_km_geo,
+        #    fill_value='extrapolate')
+        #self.rho_corr_timing_km_vals = rho_corr_timing_km_func(spm_desired)
+        self.rho_corr_timing_km_vals = np.zeros(len(spm_desired)) - 999
+
+        self.tau_threshold_vals = np.zeros(len(spm_desired)) - 999
 
         self.end_of_chord_ing = end_of_chord_ing
 

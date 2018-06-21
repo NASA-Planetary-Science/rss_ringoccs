@@ -411,8 +411,7 @@ class Normalization(object):
         Record info about the run's history
         """
 
-        input_var_dict = {'spm_raw': self.__spm_raw,
-            'IQ_c_raw': self.__IQ_c_raw, 'geo_inst': self.__geo_inst.history,
+        input_var_dict = {'geo_inst': self.__geo_inst.history,
             'rsr_inst': self.__rsr_inst.history}
         input_kw_dict = {'spm_fit': self._spm_fit, 'k': self._k,
             'knots_km': self._knots_km, 'dt_down': self._dt_down,

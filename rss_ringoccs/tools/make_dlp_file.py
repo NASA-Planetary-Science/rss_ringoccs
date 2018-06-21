@@ -20,12 +20,6 @@ import numpy as np
 import pdb
 import spiceypy as spice
 
-try:
-    from et_to_spm import et_to_spm
-except ImportError:
-    from .et_to_spm import et_to_spm
-
-
 def make_dlp_file(norm_diff_inst, dlp_file_name, spm_range=None):
     """
     Write a DLP file from an instance of the associated class to a file of
@@ -52,14 +46,6 @@ def make_dlp_file(norm_diff_inst, dlp_file_name, spm_range=None):
 
     if norm_diff_inst.end_of_chord_ing is None:
 
-        # et_to_spm function only takes spm increasing
-        try:
-            t_ret_spm_vals = et_to_spm(norm_diff_inst.t_ret_et_vals)
-            t_set_spm_vals = et_to_spm(norm_diff_inst.t_set_et_vals)
-        except TypeError:
-            t_ret_spm_vals = (et_to_spm(norm_diff_inst.t_ret_et_vals[::-1]))[::-1]
-            t_set_spm_vals = (et_to_spm(norm_diff_inst.t_set_et_vals[::-1]))[::-1]
-
         if spm_range is None:
             spm_range = [min(norm_diff_inst.spm_vals),
                 max(norm_diff_inst.spm_vals)]
@@ -76,7 +62,8 @@ def make_dlp_file(norm_diff_inst, dlp_file_name, spm_range=None):
                 norm_diff_inst.phase_rad_vals[ind]*spice.dpr(),
                 norm_diff_inst.tau_threshold_vals[ind],
                 norm_diff_inst.spm_vals[ind],
-                t_ret_spm_vals[ind], t_set_spm_vals[ind],
+                norm_diff_inst.t_ret_spm_vals[ind],
+                norm_diff_inst.t_set_spm_vals[ind],
                 norm_diff_inst.B_rad_vals[ind]*spice.dpr()],
             fmt=fmt_str)
     else:
@@ -100,18 +87,6 @@ def make_dlp_file(norm_diff_inst, dlp_file_name, spm_range=None):
         ind_egr = ((norm_diff_inst.spm_vals >= spm_range[1][0])
             & (norm_diff_inst.spm_vals <= spm_range[1][1]))
 
-        # et_to_spm function only takes spm increasing
-        t_ret_et_vals_ing = norm_diff_inst.t_ret_et_vals[ind_ing]
-        t_ret_et_vals_ing_reverse = t_ret_et_vals_ing[::-1]
-        t_ret_spm_vals_ing_reverse = et_to_spm(t_ret_et_vals_ing_reverse)
-        t_ret_spm_vals_ing = t_ret_spm_vals_ing_reverse[::-1]
-
-        # et_to_spm function only takes spm increasing
-        t_set_et_vals_ing = norm_diff_inst.t_set_et_vals[ind_ing]
-        t_set_et_vals_ing_reverse = t_set_et_vals_ing[::-1]
-        t_set_spm_vals_ing_reverse = et_to_spm(t_set_et_vals_ing_reverse)
-        t_set_spm_vals_ing = t_set_spm_vals_ing_reverse[::-1]
-
         np.savetxt(dlp_file_name_1,
             np.c_[norm_diff_inst.rho_km_vals[ind_ing],
                 norm_diff_inst.rho_corr_pole_km_vals[ind_ing],
@@ -122,7 +97,8 @@ def make_dlp_file(norm_diff_inst, dlp_file_name, spm_range=None):
                 norm_diff_inst.phase_rad_vals[ind_ing]*spice.dpr(),
                 norm_diff_inst.tau_threshold_vals[ind_ing],
                 norm_diff_inst.spm_vals[ind_ing],
-                t_ret_spm_vals_ing, t_set_spm_vals_ing,
+                norm_diff_inst.t_ret_spm_vals[ind_ing],
+                norm_diff_inst.t_set_spm_vals[ind_ing],
                 norm_diff_inst.B_rad_vals[ind_ing]*spice.dpr()],
             fmt=fmt_str)
 
@@ -136,7 +112,7 @@ def make_dlp_file(norm_diff_inst, dlp_file_name, spm_range=None):
                 norm_diff_inst.phase_rad_vals[ind_egr]*spice.dpr(),
                 norm_diff_inst.tau_threshold_vals[ind_egr],
                 norm_diff_inst.spm_vals[ind_egr],
-                et_to_spm(norm_diff_inst.t_ret_et_vals[ind_egr]),
-                et_to_spm(norm_diff_inst.t_set_et_vals[ind_egr]),
+                norm_diff_inst.t_ret_spm_vals[ind_egr],
+                norm_diff_inst.t_set_spm_vals[ind_egr],
                 norm_diff_inst.B_rad_vals[ind_egr]*spice.dpr()],
             fmt=fmt_str)

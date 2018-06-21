@@ -506,7 +506,7 @@ class RSRReader(object):
         for j in jobs: j.start()
         for q in queues: results.append(q.get())
         for j in jobs: j.join()
-        IQ_m = results[0]
+        IQ_m = np.hstack(results)
         print('\n')
 
         # Decimate 16kHz file to 1kHz spacing if specified

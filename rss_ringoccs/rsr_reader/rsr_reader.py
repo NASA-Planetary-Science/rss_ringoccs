@@ -560,6 +560,8 @@ class RSRReader(object):
                 (i_iter+1)*self.__n_pts_per_sfdu] = (
                 s[-2*self.__n_pts_per_sfdu::2])
 
+            i_iter += 1
+
         queue.put(I_array + 1j*Q_array)
 
 

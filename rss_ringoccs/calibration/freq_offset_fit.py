@@ -90,7 +90,7 @@ class FreqOffsetFit(object):
         """
 
     def __init__(self, rsr_inst, geo_inst, f_spm, f_offset,
-            f_uso, kernels, k=9, spm_include=None, sc_name='Cassini',
+            f_uso, k=9, spm_include=None, sc_name='Cassini',
             USE_GUI=True, TEST=False):
         """
         Purpose:
@@ -105,7 +105,6 @@ class FreqOffsetFit(object):
                 extracted at
             f_offset (np.ndarray): Extracted frequency offset
             f_uso (float): USO frequency for the data set
-            kernels (list): List of reconstructed kernels for the event
             k (int): Order of the polynomial fit made to residual frequency
             rho_exclude (list): Set of radius regions to exclude when making
                 fit to residual frequency. Specify in km. Default is to
@@ -134,14 +133,15 @@ class FreqOffsetFit(object):
             [1] If you don't use the GUI the first time you run a data set,
                 then the resulting residual frequency fit is liable to be bad
                 due to eccentric ringlets
-            [2] Inputting an incorrect or incomplete set of kernels will give
-                you a cryptic error message from spiceypy routines
+            [2] Inputting an incorrect or incomplete set of kernels to Geometry
+                routine before running this will give you a cryptic error
+                message from spiceypy routines
         """
 
         # Keep the RSRReader instance, kernels, Geometry instance, and f_USO
         #     as attributes
         self.__rsr_inst = rsr_inst
-        self.__kernels = kernels
+        self.__kernels = geo_inst.kernels
         self.__geo_inst = geo_inst
         self.__f_uso = f_uso
 
@@ -151,7 +151,7 @@ class FreqOffsetFit(object):
         self.__f_offset = np.asarray(f_offset)
         f_spm, self.__f_sky_pred = rsr_inst.get_f_sky_pred(f_spm=self.__f_spm)
         self.__f_sky_recon = calc_f_sky_recon(self.__f_spm, rsr_inst, sc_name,
-            f_uso, kernels)
+            f_uso, self.__kernels)
 
         # Interpolate geometry file rho's to rho's for f_spm and
         # spm_vals (raw resolution)
@@ -394,8 +394,7 @@ class FreqOffsetFit(object):
         # TODO (gsteranka): Replace entry to 'geo_inst' category of
         #     input_var_dict with self.__geo_inst.history
         input_var_dict = {'rsr_inst': self.__rsr_inst.history,
-            'geo_inst': 'I need to update this', 'f_uso': self.__f_uso,
-            'kernels': self.__kernels}
+            'geo_inst': self.__geo_inst.history, 'f_uso': self.__f_uso}
         input_kw_dict = {'k': self._k, 'spm_include': self._spm_include,
             'USE_GUI': self.__USE_GUI}
         hist_dict = {'User Name': os.getlogin(),

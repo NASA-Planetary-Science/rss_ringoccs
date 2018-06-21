@@ -391,15 +391,15 @@ class NormDiff(object):
         #rho_corr_pole_km_func = interp1d(spm_geo, rho_corr_pole_km_geo,
         #    fill_value='extrapolate')
         #self.rho_corr_pole_km_vals = rho_corr_pole_km_func(spm_desired)
-        self.rho_corr_pole_km_vals = np.zeros(len(spm_desired)) - 999
+        self.rho_corr_pole_km_vals = np.zeros(len(spm_desired))
 
         # Radius correction due to timing offset at final spacing
         #rho_corr_timing_km_func = interp1d(spm_geo, rho_corr_timing_km_geo,
         #    fill_value='extrapolate')
         #self.rho_corr_timing_km_vals = rho_corr_timing_km_func(spm_desired)
-        self.rho_corr_timing_km_vals = np.zeros(len(spm_desired)) - 999
+        self.rho_corr_timing_km_vals = np.zeros(len(spm_desired))
 
-        self.tau_threshold_vals = np.zeros(len(spm_desired)) - 999
+        self.tau_threshold_vals = np.zeros(len(spm_desired))
 
         self.end_of_chord_ing = end_of_chord_ing
 

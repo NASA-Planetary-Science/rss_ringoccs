@@ -174,7 +174,7 @@ class FResidFitGui(Frame):
         adjust_deg(), adjust_range(), and revert_range()
         """
 
-        self.fit_inst.set_f_sky_resid_fit(k=self.fit_deg,
+        self.fit_inst.set_f_sky_resid_fit(poly_order=self.fit_deg,
             spm_include=self.xlim, USE_GUI=False)
         _x, f_sky_resid_fit = self.fit_inst.get_f_sky_resid_fit()
         return f_sky_resid_fit

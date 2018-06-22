@@ -345,6 +345,7 @@ def __get_history(rsr_inst, dt_freq, spm_range, cpu_count, freq_offset_file):
         'Python Version': platform.python_version(),
         'Operating System': os.uname().sysname,
         'Source File': __file__,
+        'Source Directory': __file__.rsplit('/',1)[0] +'/',
         'Input Variables': input_var_dict,
         'Input Keywords':input_kw_dict}
     return hist_dict

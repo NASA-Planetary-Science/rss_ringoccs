@@ -402,6 +402,7 @@ class FreqOffsetFit(object):
             'Python Version': platform.python_version(),
             'Operating System': os.uname().sysname,
             'Source File': __file__,
+            'Source Directory': __file__.rsplit('/',1)[0] +'/',
             'Input Variables': input_var_dict,
             'Input Keywords':input_kw_dict}
         self.history = hist_dict

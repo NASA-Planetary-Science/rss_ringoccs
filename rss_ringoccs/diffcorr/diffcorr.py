@@ -62,7 +62,9 @@ import spiceypy as spice
 import numpy as np
 import pandas as pd
 import time
+import os
 import sys
+import platform
 import subprocess
 from scipy.special import lambertw, iv, erf
 from scipy import interpolate
@@ -1573,7 +1575,7 @@ def get_range_actual(rho,rng,w_vals):
     rho_max     = np.min([rho_max_lim,rho_end])
     start       = int(np.min((rho >= rho_min).nonzero()))
     finish      = int(np.max((rho <= rho_max).nonzero()))
-    n_used      = finish - start
+    n_used      = 1 + (finish - start)
     return start, n_used
 
 def freq_wav(freqwav):
@@ -2077,7 +2079,7 @@ def window_width(res,normeq,fsky,fres,rho_dot,sigma=False,bfac=True):
         w_vals = 2.0*normeq*fres*fres/res
     return w_vals
 
-def fresnel_forward_fast(rho_vals,F_vals,phi_rad_vals,b_rad_vals,d_vals,
+def fresnel_forward_fast(rho_vals,F_vals,phi_rad_vals,B_rad_vals,d_vals,
     T_vals,lambda_vals,w_vals,dx,wtype,start,n_used,Normalize=True):
     """
         Procedure: fresnel_forward_fast
@@ -2090,7 +2092,7 @@ def fresnel_forward_fast(rho_vals,F_vals,phi_rad_vals,b_rad_vals,d_vals,
             rho_vals:        Ring radius, in kilometers.
             F_vals:          Fresnel scale, in kilometers.
             phi_rad_vals:    Ring azimuth angle, in radians.
-            b_rad_vals:      Ring opening angle, in radians.
+            B_rad_vals:      Ring opening angle, in radians.
             lambda_sky_vals: Wavelength of recieved signal, in kilometers.
             D_vals:          Spacecraft-RIP distance, in kilometers.
             dx:              Sampling spacing, in kilometers.
@@ -2117,7 +2119,7 @@ def fresnel_forward_fast(rho_vals,F_vals,phi_rad_vals,b_rad_vals,d_vals,
     nw_fwd    = np.ceil(w_max / (2. * dx))
     start_fwd = int(start + nw_fwd)
     n_fwd     = int(n_used - 2 * nw_fwd)
-    cosb      = np.cos(b_rad_vals)
+    cosb      = np.cos(B_rad_vals)
     cosphi0   = np.cos(phi_rad_vals)
     sinphi0   = np.sin(phi_rad_vals)
 
@@ -2169,7 +2171,7 @@ def fresnel_forward_fast(rho_vals,F_vals,phi_rad_vals,b_rad_vals,d_vals,
         % (i,n_used,nw,loop))
     return T_hat_fwd_vals
 
-def fresnel_forward(rho_vals,F_vals,phi_rad_vals,b_rad_vals,d_vals,
+def fresnel_forward(rho_vals,F_vals,phi_rad_vals,B_rad_vals,d_vals,
     T_vals,lambda_vals,w_vals,dx,wtype,start,n_used,Normalize=True):
     """
         Procedure: fresnel_forward
@@ -2218,7 +2220,7 @@ def fresnel_forward(rho_vals,F_vals,phi_rad_vals,b_rad_vals,d_vals,
         r      = rho_vals[crange]
         r0     = rho_vals[center]
         d      = d_vals[center]
-        b      = b_rad_vals[center]
+        b      = B_rad_vals[center]
         phi0   = phi_rad_vals[center]
         kD     = kD_vals[center]
         dphi_s_rad = psi_factor(r,r0,b,phi0)
@@ -2250,7 +2252,7 @@ def fresnel_forward(rho_vals,F_vals,phi_rad_vals,b_rad_vals,d_vals,
     % (i,n_used,nw,loop))
     return T_hat_fwd_vals
 
-def fresnel_inversion_fast(rho_vals,F_vals,phi_rad_vals,b_rad_vals,d_vals,
+def fresnel_inversion_fast(rho_vals,F_vals,phi_rad_vals,B_rad_vals,d_vals,
     T_hat_vals,lambda_vals,w_vals,dx,wtype,start,n_used,Normalize=True):
     """
         Function:  fresnel_inversion
@@ -2287,7 +2289,7 @@ def fresnel_inversion_fast(rho_vals,F_vals,phi_rad_vals,b_rad_vals,d_vals,
     """
     # Compute necessary variables.
     kD_vals   = 2. * np.pi * d_vals / lambda_vals
-    cosb      = np.cos(b_rad_vals)
+    cosb      = np.cos(B_rad_vals)
     cosphi0   = np.cos(phi_rad_vals)
     sinphi0   = np.sin(phi_rad_vals)
     # Define functions
@@ -2357,7 +2359,7 @@ def fresnel_inversion_fast(rho_vals,F_vals,phi_rad_vals,b_rad_vals,d_vals,
     #% (i,n_used,nw,loop))
     return T_vals
 
-def fresnel_inversion(rho_vals, F_vals, phi_rad_vals, b_rad_vals,d_vals,
+def fresnel_inversion(rho_vals, F_vals, phi_rad_vals, B_rad_vals,d_vals,
     T_hat_vals, lambda_vals, w_vals, dx, wtype, start, n_used, Normalize=True):
     """
         Function:
@@ -2413,7 +2415,7 @@ def fresnel_inversion(rho_vals, F_vals, phi_rad_vals, b_rad_vals,d_vals,
         r      = rho_vals[crange]
         r0     = rho_vals[center]
         d      = d_vals[center]
-        b      = b_rad_vals[center]
+        b      = B_rad_vals[center]
         phi0   = phi_rad_vals[center]
         kD     = kD_vals[center]
         dphi_s_rad = psi_factor(r,r0,b,phi0)
@@ -2466,8 +2468,8 @@ class extract_csv_data(object):
             phi_rad_vals:       Ring azimuth angle, in radians.
             p_norm_vals:        Normalized raw power.
             phase_rad_vals:     Difracted phase, in radians.
-            b_rad_vals:         Ring opening angle, in radians.
-            d_km_vals:          Distance from the spacecraft to the
+            B_rad_vals:         Ring opening angle, in radians.
+            D_km_vals:          Distance from the spacecraft to the
                                 ring intercept point, in kilometers.
             f_sky_hz_vals:      The frequency of the recieved
                                 singals, in Hertz.
@@ -2476,37 +2478,49 @@ class extract_csv_data(object):
     """
 
     def __init__(self,geodata,caldata,dlpdata,
-        occ,taudata=False,verbose=True):
+        occ=False,taudata=False,verbose=True):
 
+        self.geodata            = None
+        self.caldata            = None
+        self.dlpdata            = None
+        self.taudata            = None
+        self.occ                = None
         self.rho_km_vals        = None
         self.phi_rad_vals       = None
         self.p_norm_vals        = None
         self.phase_rad_vals     = None
-        self.b_rad_vals         = None
-        self.d_km_vals          = None
+        self.B_rad_vals         = None
+        self.D_km_vals          = None
         self.f_sky_hz_vals      = None
         self.rho_dot_kms_vals   = None
         self.power_vals         = None
         self.phase_vals         = None
         self.tau_vals           = None
         self.tau_rho            = None
+        self.history            = None
+
+        self.geodata            = geodata
+        self.caldata            = caldata
+        self.dlpdata            = dlpdata
+        self.taudata            = taudata
 
         if (type(geodata) != type("Hi!")):
-            raise ValueError(
+            raise TypeError(
                 "geodata must be a string: '/path/to/geodata'")
         if (type(caldata) != type("Hi!")):
-            raise ValueError(
+            raise TypeError(
                 "caldata must be a string: '/path/to/caldata'")
         if (type(dlpdata) != type("Hi!")):
             raise TypeError(
                 "dlpdata must be a string: '/path/to/dlpdata'")
-        if (type(occ) != type("Hi!")):
-            raise TypeError(
-                "occ must be a string: 'egress' or 'ingress'")
-        else:occ=occ.replace(" ","").replace("'","").replace('"',"").lower()
-        if (occ != 'ingress') and (occ != 'egress'):
-            raise ValueError(
-                "occ must be either 'ingress' or 'egress'")
+        if (occ != False):
+            if (type(occ) != type("Hi!")):
+                raise TypeError(
+                    "occ must be a string: 'egress' or 'ingress'")
+            else:occ=occ.replace(" ","").replace("'","").replace('"',"").lower()
+            if (occ != 'ingress') and (occ != 'egress'):
+                raise ValueError(
+                    "occ must be either 'ingress' or 'egress'")
 
         tauboole = check_boole(taudata)
         if not tauboole:
@@ -2520,7 +2534,7 @@ class extract_csv_data(object):
                 tpdeg   = tau_dat[...,6]
                 tbdeg   = tau_dat[...,11]
         elif (bool(taudata) == True):
-            raise ValueError(
+            raise TypeError(
                 "taudata must be a string: '/path/to/taudata'")
         else: pass
 
@@ -2529,66 +2543,91 @@ class extract_csv_data(object):
         dlp_dat = self.__get_dlp(dlpdata,verbose=verbose)
 
         if verbose: print("Retrieving Variables...")
-        rho_km_vals = dlp_dat[...,0]
+        rho_km_vals = np.array(dlp_dat.rho_km_vals)
         rhotype     = check_real(rho_km_vals)
         if not rhotype:
-            raise ValueError(
+            raise TypeError(
                 "Bad DLP Input: rho_km_vals must be real valued.")
         elif (np.min(rho_km_vals) < 0.0):
             raise ValueError(
                 "Bad DLP Input: rho_km_vals has negative values.")
         else: rhotype
-        phi_deg_vals = dlp_dat[...,4]
-        raw_tau_vals = dlp_dat[...,5]
+        phi_deg_vals = np.array(dlp_dat.phi_deg_vals)
+        raw_tau_vals = np.array(dlp_dat.raw_tau_vals)
         tautype      = check_real(raw_tau_vals)
         if not tautype:
-            raise ValueError(
+            raise TypeError(
                 "Bad DLP Input: raw_tau_vals must be real valued.")
         else: del tautype
 
-        phase_deg_vals = dlp_dat[...,6]
-        b_deg_vals     = dlp_dat[...,11]
-        geo_rho = geo_dat[...,3]
-        geo_d   = geo_dat[...,7]
-        rhotype = check_real(geo_rho)
-        dtype   = check_real(geo_d)
+        phase_deg_vals  = np.array(dlp_dat.phase_deg_vals)
+        B_deg_vals      = np.array(dlp_dat.B_deg_vals)
+        geo_rho         = np.array(geo_dat.rho_km_vals)
+        geo_D           = np.array(geo_dat.D_km_vals)
+        rhotype         = check_real(geo_rho)
+        dtype           = check_real(geo_D)
         if not rhotype:
-            raise ValueError(
+            raise TypeError(
                 "Bad GEO Input: geo_rho must be real valued.")
         elif (np.min(geo_rho) < 0.0):
             raise ValueError(
                 "Bad GEO Input: geo_rho has negative values.")
         else: del rhotype
         if not dtype:
+            raise TypeError(
+                "Bad GEO Input: geo_D must be real valued.")
+        elif (np.min(geo_D) < 0.0):
             raise ValueError(
-                "Bad GEO Input: geo_d must be real valued.")
-        elif (np.min(geo_d) < 0.0):
-            raise ValueError(
-                "Bad GEO Input: geo_d has negative values.")
+                "Bad GEO Input: geo_D has negative values.")
         else: del dtype
 
-        geo_drho       = geo_dat[...,8]
-        f_sky_raw_vals = cal_dat[...,1]
+        geo_drho       = np.array(geo_dat.rho_dot_kms_vals)
+        f_sky_raw_vals = np.array(cal_dat.f_sky_pred_vals)
         freqtype       = check_real(f_sky_raw_vals)
         if not freqtype:
-            raise ValueError(
+            raise TypeError(
                 "Bad CAL Input: f_sky_raw_vals must be real valued.")
         elif (np.min(f_sky_raw_vals) < 0.0):
             raise ValueError(
                 "Bad CAL Input: f_sky_raw_vals has negative values.")
         else: del freqtype
+
         if verbose: print("Computing Variables...")
         phi_rad_vals   = phi_deg_vals*spice.rpd()
         phase_rad_vals = phase_deg_vals*spice.rpd()
-        b_rad_vals     = b_deg_vals*spice.rpd()
-        raw_mu         = np.sin(np.abs(b_rad_vals))
+        B_rad_vals     = B_deg_vals*spice.rpd()
+        raw_mu         = np.sin(np.abs(B_rad_vals))
         p_norm_vals    = np.exp(-raw_tau_vals/raw_mu)
 
         if (occ == 'ingress'):
             crange = (geo_drho < 0.0).nonzero()
         elif (occ == 'egress'):
             crange = (geo_drho > 0.0).nonzero()
-        else: raise ValueError("Illegal occ input")
+        else:
+            crange_e = (geo_drho < 0.0).nonzero()
+            crange_i = (geo_drho > 0.0).nonzero()
+            n_e      = np.size(crange_e)
+            n_i      = np.size(crange_i)
+            if (n_e != 0) and (n_i !=0):
+                raise ValueError(
+                    "rho_dot_kms_vals has positive and negative values.\
+                    This is likely a chord occultation. Set occ='ingress'\
+                    to examine the ingress portion, and occ='egress'\
+                    for the egress porition.")
+            elif (n_e == 0) and (n_i == 0):
+                raise ValueError(
+                    "rho_dot_kms_vals is either empty or zero for all points.")
+            elif (n_e != 0) and (n_i == 0):
+                crange = crange_e
+                occ    = 'egress'
+                del n_e, n_i, crange_e, crange_i
+            elif (n_e == 0) and (n_i != 0):
+                crange = crange_i
+                occ    = 'ingress'
+                del n_e, n_i, crange_e, crange_i
+            else: raise TypeError("Bad Input: GEO DATA")
+        
+        self.occ    = occ
         
         if (np.size(crange) == 0):
             if (occ == 'ingress'):
@@ -2602,7 +2641,7 @@ class extract_csv_data(object):
         if verbose: print("Interpolating Data...")
         geo_rho          = geo_rho[crange]
         geo_drho         = geo_drho[crange]
-        geo_d            = geo_d[crange]
+        geo_D            = geo_D[crange]
         rmin             = np.min(geo_rho)
         rmax             = np.max(geo_rho)
         rstart           = int(np.min((rho_km_vals-rmin>=0.0).nonzero()))
@@ -2610,10 +2649,10 @@ class extract_csv_data(object):
         rho_km_vals      = rho_km_vals[rstart:rfin+1]
         phi_rad_vals     = phi_rad_vals[rstart:rfin+1]
         phase_rad_vals   = phase_rad_vals[rstart:rfin+1]
-        b_rad_vals       = b_rad_vals[rstart:rfin+1]
+        B_rad_vals       = B_rad_vals[rstart:rfin+1]
         p_norm_vals      = p_norm_vals[rstart:rfin+1]
-        d_km_interp      = interpolate.interp1d(geo_rho,geo_d,kind='linear')
-        d_km_vals        = d_km_interp(rho_km_vals)
+        d_km_interp      = interpolate.interp1d(geo_rho,geo_D,kind='linear')
+        D_km_vals        = d_km_interp(rho_km_vals)
         rho_dot_interp   = interpolate.interp1d(geo_rho,geo_drho,kind='linear')
         rho_dot_kms_vals = rho_dot_interp(rho_km_vals)
         n_rho_vals       = np.size(rho_km_vals)
@@ -2644,8 +2683,8 @@ class extract_csv_data(object):
         self.phi_rad_vals     = phi_rad_vals
         self.p_norm_vals      = p_norm_vals
         self.phase_rad_vals   = phase_rad_vals
-        self.b_rad_vals       = b_rad_vals
-        self.d_km_vals        = d_km_vals
+        self.B_rad_vals       = B_rad_vals
+        self.D_km_vals        = D_km_vals
         self.f_sky_hz_vals    = f_sky_hz_vals
         self.rho_dot_kms_vals = rho_dot_kms_vals
         if not tauboole:
@@ -2655,22 +2694,69 @@ class extract_csv_data(object):
             self.tau_rho    = tau_rho
 
         if verbose: print("Data Extraction Complete.")
+        
+        self.history    = self.__write_hist_dict()
 
     def __get_geo(self,geodata,verbose=True):
         if verbose: print("Extracting Geo Data...")
-        dfg = np.genfromtxt(geodata, delimiter=',')
+        dfg = pd.read_csv(geodata, delimiter=',',
+            names=[
+                "t_oet_spm_vals",
+				"t_ret_spm_vals",
+				"t_set_spm_vals",
+				"rho_km_vals",
+				"phi_rl_deg_vals",
+				"phi_ora_deg_vals",
+				"B_deg_vals",
+				"D_km_vals",
+				"rho_dot_kms_vals",
+				"phi_rl_dot_kms_vals",
+				"F_km_vals",
+				"R_imp_km_vals",
+				"rx_km_vals",
+			    "ry_km_vals",
+				"rz_km_vals",
+				"vx_kms_vals",
+				"vy_kms_vals",
+				"vz_kms_vals"
+                ]
+            )
+
         if verbose: print("Geo Data Complete.")
         return dfg
 
     def __get_cal(self,caldata,verbose=True):
         if verbose: print("Extracting Cal Data...")
-        dfc = np.genfromtxt(caldata, delimiter=',')
+        dfc = pd.read_csv(caldata, delimiter=',',
+            names=[
+                "spm_vals",
+                "f_sky_pred_vals",
+                "f_sky_resid_fit_vals",
+                "p_free_vals"
+                ]
+            )
         if verbose: print("Cal Data Complete.")
         return dfc
 
     def __get_dlp(self,dlpdata,verbose=True):
         if verbose: print("Extracting DLP Data...")
-        dfd = np.genfromtxt(dlpdata, delimiter=',')
+        dfd = pd.read_csv(dlpdata, delimiter=',',
+            names=[
+                "rho_km_vals",
+                "rho_km_pole_corr_vals",
+                "rho_km_offsett_vals",
+                "phi_rl_deg_vals",
+                "phi_deg_vals",
+                "raw_tau_vals",
+                "phase_deg_vals",
+                "raw_tau_thresh_vals",
+                "spm_vals",
+                "t_ret_spm_vals",
+                "t_set_spm_vals",
+                "B_deg_vals"
+            ]
+        )
+
         if verbose: print("DLP Data Complete")
         return dfd
     
@@ -2679,6 +2765,39 @@ class extract_csv_data(object):
         dft = np.genfromtxt(taudata, delimiter=',')
         if verbose: print("Tau Data Complete.")
         return dft
+
+    def __write_hist_dict(self):
+        """
+        This creates a history dictionary.
+
+        Returns:
+            geo_hist (dict): Dictionary with "user name", "host name",
+                    "run date", "python version", "operating system",
+                    "source file", "input variables", and "input keywords".
+        """
+        user_name = os.getlogin()
+        host_name = os.uname()[1]
+        run_date  = time.ctime() + ' ' + time.tzname[0]
+        python_v  = platform.python_version()
+        opsys     = os.uname()[0]
+        src_file  = __file__.split('/')[-1]
+        src_dir   = __file__.rsplit('/',1)[0] +'/'
+
+        csv_hist = {
+            "User Name"         : user_name,
+            "Host Name"         : host_name,
+            "Run Date"          : run_date,
+            "Python Version"    : python_v,
+            "Operating System"  : opsys,
+            "Source Directory"  : src_dir,
+            "Source File"       : src_file,
+            "Input Variables"   : {
+            },
+            "Input Keywords"    : {
+
+            }
+        }
+        return csv_hist
 
 class pure_csv_reader(object):
     def __init__(self,dat):
@@ -2689,9 +2808,9 @@ class pure_csv_reader(object):
         self.phase_rad_vals   = np.array(df.phase_rad_vals)
         self.p_norm_vals      = np.array(df.p_norm_vals)
         self.phi_rad_vals     = np.array(df.phi_rad_vals)
-        self.b_rad_vals       = np.array(df.b_rad_vals)
+        self.B_rad_vals       = np.array(df.B_rad_vals)
         self.f_sky_hz_vals    = np.array(df.f_sky_hz_vals)
-        self.d_km_vals        = np.array(df.d_km_vals)
+        self.D_km_vals        = np.array(df.D_km_vals)
         self.rho_dot_kms_vals = np.array(df.rho_dot_kms_vals)
 
 class rec_data(object):
@@ -2726,8 +2845,8 @@ class rec_data(object):
         self.rho_km_vals        = None
         self.p_norm_vals        = None
         self.phase_rad_vals     = None
-        self.b_rad_vals         = None
-        self.d_km_vals          = None
+        self.B_rad_vals         = None
+        self.D_km_vals          = None
         self.f_sky_hz_vals      = None
         self.phi_rad_vals       = None
         self.rho_dot_kms_vals   = None
@@ -2738,8 +2857,9 @@ class rec_data(object):
         self.lambda_sky_km_vals = None
         self.dx_km              = None
         self.norm_eq            = None
+        self.history            = None
 
-
+        self.history   = NormDiff.history
         self.res   = res
         self.wtype = wtype.replace(" ", "").lower()
 
@@ -2754,18 +2874,18 @@ class rec_data(object):
         self.T_hat_vals         = np.sqrt(np.abs(self.p_norm_vals)) * \
             np.exp(1j * self.phase_rad_vals)
         self.F_km_vals          = fresnel_scale(self.lambda_sky_km_vals,
-            self.d_km_vals,self.phi_rad_vals,self.b_rad_vals)
+            self.D_km_vals,self.phi_rad_vals,self.B_rad_vals)
         self.norm_eq            = get_norm_eq(self.wtype)
         self.w_km_vals          = window_width(self.res,self.norm_eq,
             self.f_sky_hz_vals,self.F_km_vals,self.rho_dot_kms_vals,bfac=bfac)
-        self.mu_vals            = np.sin(np.abs(self.b_rad_vals))
+        self.mu_vals            = np.sin(np.abs(self.B_rad_vals))
     
     def __set_attributes(self, NormDiff):
         self.rho_km_vals      = NormDiff.rho_km_vals
         self.p_norm_vals      = NormDiff.p_norm_vals
         self.phase_rad_vals   = -NormDiff.phase_rad_vals
-        self.b_rad_vals		  = NormDiff.b_rad_vals
-        self.d_km_vals		  = NormDiff.d_km_vals
+        self.B_rad_vals		  = NormDiff.B_rad_vals
+        self.D_km_vals		  = NormDiff.D_km_vals
         self.f_sky_hz_vals    = NormDiff.f_sky_hz_vals
         self.phi_rad_vals     = NormDiff.phi_rad_vals
         self.rho_dot_kms_vals = NormDiff.rho_dot_kms_vals
@@ -2781,13 +2901,13 @@ class rec_data(object):
         if (np.size(self.phi_rad_vals) != N_RHO):
             print("Bad Input: len(phi_rad_vals) != len(rho_km_vals)")
             error_code += 4
-        if (np.size(self.b_rad_vals) != N_RHO):
+        if (np.size(self.B_rad_vals) != N_RHO):
             print("Bad Input: len(B_rad_vals) != (rho_km_vals)")
             error_code += 8
         if (np.size(self.f_sky_hz_vals) != N_RHO):
             print("Bad Input: len(f_sky_Hz_vals) != len(rho_km_vals)")
             error_code += 16
-        if (np.size(self.d_km_vals) != N_RHO):
+        if (np.size(self.D_km_vals) != N_RHO):
             print("Bad Input: len(D_km_vals) != len(rho_km_vals)")
             error_code += 32
         if (np.size(self.rho_dot_kms_vals) != N_RHO):
@@ -2808,15 +2928,16 @@ class rec_data(object):
             self.phase_rad_vals   = self.phase_rad_vals[::-1]
             self.p_norm_vals      = self.p_norm_vals[::-1]
             self.phi_rad_vals     = self.phi_rad_vals[::-1]
-            self.b_rad_vals       = self.b_rad_vals[::-1]
+            self.B_rad_vals       = self.B_rad_vals[::-1]
             self.f_sky_hz_vals    = self.f_sky_hz_vals[::-1]
-            self.d_km_vals        = self.d_km_vals[::-1]
+            self.D_km_vals        = self.D_km_vals[::-1]
             self.rho_dot_kms_vals = np.abs(self.rho_dot_kms_vals[::-1])
 
 class diffraction_correction(object):
 
     def __init__(self,dat,res,rng="all",wtype="kb25",dir="",rev="",
-        fwd=False,norm=True,fast=True,verbose=True,bfac=True,fft=False):
+        fwd=False,norm=True,verbose=True,bfac=True,fft=False,
+        psitype="full"):
         t1       = time.time()
 
         self.res                = None
@@ -2825,8 +2946,8 @@ class diffraction_correction(object):
         self.rho_km_vals        = None
         self.p_norm_vals        = None
         self.phase_rad_vals     = None
-        self.b_rad_vals         = None
-        self.d_km_vals          = None
+        self.B_rad_vals         = None
+        self.D_km_vals          = None
         self.f_sky_hz_vals      = None
         self.phi_rad_vals       = None
         self.rho_dot_kms_vals   = None
@@ -2847,73 +2968,67 @@ class diffraction_correction(object):
         self.T_hat_fwd_vals     = None
         self.phase_fwd_vals     = None
         self.norm               = None
-        self.fast               = None
         self.fwd                = None
         self.fft                = None
+        self.bfac               = None
+        self.psitype            = None
+        self.history            = None
+        self.dathist            = None
 
-        self.res   = res
-        self.wtype = wtype
-        self.rng   = rng
-        self.norm  = norm
-        self.fast  = fast
-        self.fwd   = fwd
-        self.fft   = fft
+        self.res        = res
+        self.wtype      = wtype
+        self.rng        = rng
+        self.norm       = norm
+        self.fwd        = fwd
+        self.fft        = fft
+        self.bfac       = bfac
+        self.psitype    = psitype
 
-        recdata    = rec_data(dat, res, wtype,bfac=bfac)
+        recdata = rec_data(dat, res, wtype,bfac=bfac)
+
         self.__set_dc_attributes(recdata)
+
+        del recdata
+
         self.__compute_dc_attributes(rng)
+        self.__trim_inputs()
 
         if verbose:
-            if fast:
-                if norm:
-                    self.T_vals = self.__fresnel_inversion_fast_norm_verbose()
-                else:
-                    self.T_vals = self.__fresnel_inversion_fast_no_norm_verbose()
+            if (psitype == "full"):
+                if norm: self.T_vals = self.__finv_n_v()
+                else:    self.T_vals = self.__finv_v()
+                if fwd:
+                    if norm: self.T_hat_fwd_vals = self.__ffwd_n_v()
+                    else:    self.T_hat_fwd_vals = self.__ffwd_v()
+                    self.p_norm_fwd_vals = power_func(self.T_hat_fwd_vals)
+                    self.phase_fwd_vals  = phase_func(self.T_hat_fwd_vals)
             else:
-                if norm:
-                    self.T_vals = self.__fresnel_inversion_norm_verbose()
-                else:
-                    self.T_vals = self.__fresnel_inversion_no_norm_verbose()
-
-            if fwd:
-                if fast:
-                    if norm:
-                        self.T_hat_fwd_vals = self.__fresnel_forward_fast_norm()
-                    else:
-                        self.T_hat_fwd_vals = self.__fresnel_forward_fast_no_norm()
-                else:
-                    if norm:
-                        self.T_hat_fwd_vals = self.__fresnel_forward_norm_verbose()
-                    else:
-                        self.T_hat_fwd_vals = self.__fresnel_forward_no_norm_verbose()
-                self.p_norm_fwd_vals = power_func(self.T_hat_fwd_vals)
-                self.phase_fwd_vals  = phase_func(self.T_hat_fwd_vals)  
+                if norm: self.T_vals = self.__finv_n_p_v(psitype)
+                else:    self.T_vals = self.__finv_p_v(psitype)
+                if fwd:
+                    if norm: self.T_hat_fwd_vals = self.__ffwd_n_v()
+                    else:    self.T_hat_fwd_vals = self.__ffwd_v()
+                    self.p_norm_fwd_vals = power_func(self.T_hat_fwd_vals)
+                    self.phase_fwd_vals  = phase_func(self.T_hat_fwd_vals)
         else:
-            if fast:
-                if norm:
-                    self.T_vals = self.__fresnel_inversion_fast_norm()
-                else:
-                    self.T_vals = self.__fresnel_inversion_fast_no_norm()
+            if not psitype:
+                if norm: self.T_vals = self.__finv_n()
+                else:    self.T_vals = self.__finv()
+                if fwd:
+                    if norm: self.T_hat_fwd_vals = self.__ffwd_n()
+                    else:    self.T_hat_fwd_vals = self.__ffwd()
+                    self.p_norm_fwd_vals = power_func(self.T_hat_fwd_vals)
+                    self.phase_fwd_vals  = phase_func(self.T_hat_fwd_vals)
             else:
-                if norm:
-                    self.T_vals = self.__fresnel_inversion_norm()
-                else:
-                    self.T_vals = self.__fresnel_inversion_no_norm()
+                if norm: self.T_vals = self.__finv_n_p(psitype)
+                else:    self.T_vals = self.__finv_p(psitype)
+                if fwd:
+                    if norm: self.T_hat_fwd_vals = self.__ffwd_n()
+                    else:    self.T_hat_fwd_vals = self.__ffwd()
+                    self.p_norm_fwd_vals = power_func(self.T_hat_fwd_vals)
+                    self.phase_fwd_vals  = phase_func(self.T_hat_fwd_vals)
 
-            if fwd:
-                if fast:
-                    if norm:
-                        self.T_hat_fwd_vals = self.__fresnel_forward_fast_norm()
-                    else:
-                        self.T_hat_fwd_vals = self.__fresnel_forward_fast_no_norm()
-                else:
-                    if norm:
-                        self.T_hat_fwd_vals = self.__fresnel_forward_norm()
-                    else:
-                        self.T_hat_fwd_vals = self.__fresnel_forward_no_norm()
-                self.p_norm_fwd_vals = power_func(self.T_hat_fwd_vals)
-                self.phase_fwd_vals  = -phase_func(self.T_hat_fwd_vals)
-         
+        del verbose, psitype, norm
 
         self.power_vals = power_func(self.T_vals)
         self.phase_vals = -phase_func(self.T_vals)
@@ -2921,7 +3036,12 @@ class diffraction_correction(object):
 
         self.__trim_attributes(fwd)
 
+        del fwd
+
+        self.history = self.__write_hist_dict()
+
         t2 = time.time()
+        sys.stdout.write("\033[K")
         print("Computation Time: ",t2-t1,end="\r")
 
     def __rect(w_in, dx):
@@ -2970,24 +3090,14 @@ class diffraction_correction(object):
         w_func = (iv(0.0,alpha*np.sqrt((1.0-(2.0*x/w_in)**2)))-1)/(iv(0.0,alpha)-1)
         return w_func
 
-    __func_dict = {
-        "__rect" : {"func" : __rect, "normeq" : 1.00000000},
-        "__coss" : {"func" : __coss, "normeq" : 1.50000000},
-        "__kb20" : {"func" : __kb20, "normeq" : 1.49634231},
-        "__kb25" : {"func" : __kb25, "normeq" : 1.65191895},
-        "__kb35" : {"func" : __kb35, "normeq" : 1.92844639},
-        "__kbmd20" : {"func" : __kbmd20, "normeq" : 1.52048174},
-        "__kbmd25" : {"func" : __kbmd25, "normeq" : 1.65994218}
-        }
-
     def __set_dc_attributes(self,recdata):
         self.res                = recdata.res
         self.wtype              = recdata.wtype
         self.rho_km_vals        = recdata.rho_km_vals
         self.p_norm_vals        = recdata.p_norm_vals
         self.phase_rad_vals     = recdata.phase_rad_vals
-        self.b_rad_vals         = recdata.b_rad_vals
-        self.d_km_vals          = recdata.d_km_vals
+        self.B_rad_vals         = recdata.B_rad_vals
+        self.D_km_vals          = recdata.D_km_vals
         self.f_sky_hz_vals      = recdata.f_sky_hz_vals
         self.phi_rad_vals       = recdata.phi_rad_vals
         self.rho_dot_kms_vals   = recdata.rho_dot_kms_vals
@@ -2998,11 +3108,12 @@ class diffraction_correction(object):
         self.lambda_sky_km_vals = recdata.lambda_sky_km_vals
         self.dx_km              = recdata.dx_km
         self.norm_eq            = recdata.norm_eq
+        self.dathist            = recdata.history
     
     def __compute_dc_attributes(self,rng):
         self.rng               = get_range_request(rng)
-        self.start,self.n_used = get_range_actual(self.rho_km_vals,self.rng,
-            self.w_km_vals)
+        self.start,self.n_used = get_range_actual(self.rho_km_vals,
+            self.rng,self.w_km_vals)
     
     def __trim_attributes(self,fwd):
         start  = self.start
@@ -3012,8 +3123,8 @@ class diffraction_correction(object):
         self.rho_km_vals         = self.rho_km_vals[crange]
         self.p_norm_vals         = self.p_norm_vals[crange]
         self.phase_rad_vals      = self.phase_rad_vals[crange]
-        self.b_rad_vals          = self.b_rad_vals[crange]
-        self.d_km_vals           = self.d_km_vals[crange]
+        self.B_rad_vals          = self.B_rad_vals[crange]
+        self.D_km_vals           = self.D_km_vals[crange]
         self.f_sky_hz_vals       = self.f_sky_hz_vals[crange]
         self.phi_rad_vals        = self.phi_rad_vals[crange]
         self.rho_dot_kms_vals    = self.rho_dot_kms_vals[crange]
@@ -3032,21 +3143,26 @@ class diffraction_correction(object):
             self.phase_fwd_vals  = self.phase_fwd_vals[crange]
     
     def __trim_inputs(self):
-        start  = self.start
-        n_used = self.n_used
-        w   = np.max(self.w_km_vals[start:start+n_used])
-        nst = np.min((self.rho_km_vals>=(self.rho_km_vals[start]-w)).nonzero())
-        nen = np.max((self.rho_km_vals<=(self.rho_km_vals[start]+w)).nonzero())
-        nreq   = nen - nst
-        crange = np.array(range(0,nst))+nreq+1
-        print(np.size(self.rho_km_vals))
+        start   = self.start
+        n_used  = self.n_used
+        rho     = self.rho_km_vals
+        rstart  = rho[start]
+        rfin    = rho[start+n_used+1]
+        w_vals  = self.w_km_vals
+        w       = np.ceil(np.max(w_vals[start:start+n_used+1])/2.0)
+        nst = np.min((rho>=(rstart-w)).nonzero())
+        nen = np.max((rho<=(rfin+w)).nonzero())
+
+        del n_used, rho, rstart, rfin, w_vals, w
+
+        nreq   = 1 + (nen - nst)
+        crange = np.arange(nst)+nreq
         self.rho_km_vals         = self.rho_km_vals[crange]
-        print(np.size(self.rho_km_vals))
         self.start               = start-nreq
         self.p_norm_vals         = self.p_norm_vals[crange]
         self.phase_rad_vals      = self.phase_rad_vals[crange]
-        self.b_rad_vals          = self.b_rad_vals[crange]
-        self.d_km_vals           = self.d_km_vals[crange]
+        self.B_rad_vals          = self.B_rad_vals[crange]
+        self.D_km_vals           = self.D_km_vals[crange]
         self.f_sky_hz_vals       = self.f_sky_hz_vals[crange]
         self.phi_rad_vals        = self.phi_rad_vals[crange]
         self.rho_dot_kms_vals    = self.rho_dot_kms_vals[crange]
@@ -3055,6 +3171,8 @@ class diffraction_correction(object):
         self.w_km_vals           = self.w_km_vals[crange]
         self.mu_vals             = self.mu_vals[crange]
         self.lambda_sky_km_vals  = self.lambda_sky_km_vals[crange]
+
+        del nreq, crange
 
     def __fresinv(self,T_hat,ker,dx,f_scale):
         T = np.sum(ker * T_hat) * dx * (1.0+1.0j) / (2.0 * f_scale)
@@ -3089,8 +3207,9 @@ class diffraction_correction(object):
     def __normalize(self,r,w_func,f_scale):
         x         = r-np.mean(r)
         drho      = r[1]-r[0]
-        psi       = (np.pi / 2.0) * ((x / f_scale)**2)
-        ker       = np.exp(1j * psi)
+        f_scale   = f_scale
+        psi       = (np.pi / 2.0) * ((x / f_scale)*(x / f_scale))
+        ker       = np.exp(-1j * psi)
         T1        = np.abs(np.sum(w_func * ker) * drho)
         norm_fact = np.sqrt(2.0) * f_scale / T1
         return norm_fact
@@ -3106,13 +3225,23 @@ class diffraction_correction(object):
         y2 = phi-f1/f2-f3/f4
         return y2
 
-    def __fresnel_inversion_fast_norm(self):
+    __func_dict = {
+        "__rect" : {"func" : __rect, "normeq" : 1.00000000},
+        "__coss" : {"func" : __coss, "normeq" : 1.50000000},
+        "__kb20" : {"func" : __kb20, "normeq" : 1.49634231},
+        "__kb25" : {"func" : __kb25, "normeq" : 1.65191895},
+        "__kb35" : {"func" : __kb35, "normeq" : 1.92844639},
+        "__kbmd20" : {"func" : __kbmd20, "normeq" : 1.52048174},
+        "__kbmd25" : {"func" : __kbmd25, "normeq" : 1.65994218}
+        }
+
+    def __finv_n(self):
         # Retrieve variables.
         w_vals       = self.w_km_vals
         rho_vals     = self.rho_km_vals
         phi_rad_vals = self.phi_rad_vals
-        d_vals       = self.d_km_vals
-        b_rad_vals   = self.b_rad_vals
+        d_vals       = self.D_km_vals
+        B_rad_vals   = self.B_rad_vals
         lambda_vals  = self.lambda_sky_km_vals
         T_hat_vals   = self.T_hat_vals
         F_vals       = self.F_km_vals
@@ -3123,7 +3252,7 @@ class diffraction_correction(object):
         dx           = self.dx_km
         # Compute necessary variables.
         kD_vals   = 2. * np.pi * d_vals / lambda_vals
-        cosb      = np.cos(b_rad_vals)
+        cosb      = np.cos(B_rad_vals)
         cosphi0   = np.cos(phi_rad_vals)
         sinphi0   = np.sin(phi_rad_vals)
         dsq       = d_vals*d_vals
@@ -3225,13 +3354,13 @@ class diffraction_correction(object):
             T_vals[center] *= nrm(r,w_func,F)
         return T_vals
 
-    def __fresnel_inversion_fast_no_norm(self):
+    def __finv(self):
         # Retrieve variables.
         w_vals       = self.w_km_vals
         rho_vals     = self.rho_km_vals
         phi_rad_vals = self.phi_rad_vals
-        d_vals       = self.d_km_vals
-        b_rad_vals   = self.b_rad_vals
+        d_vals       = self.D_km_vals
+        B_rad_vals   = self.B_rad_vals
         lambda_vals  = self.lambda_sky_km_vals
         T_hat_vals   = self.T_hat_vals
         F_vals       = self.F_km_vals
@@ -3242,7 +3371,7 @@ class diffraction_correction(object):
         dx           = self.dx_km
         # Compute necessary variables.
         kD_vals   = 2. * np.pi * d_vals / lambda_vals
-        cosb      = np.cos(b_rad_vals)
+        cosb      = np.cos(B_rad_vals)
         cosphi0   = np.cos(phi_rad_vals)
         sinphi0   = np.sin(phi_rad_vals)
         dsq       = d_vals*d_vals
@@ -3340,13 +3469,13 @@ class diffraction_correction(object):
             T_vals[center] = finv(T_hat,ker,dx,F)
         return T_vals
 
-    def __fresnel_inversion_fast_norm_verbose(self):
+    def __finv_n_v(self):
         # Retrieve variables.
         w_vals       = self.w_km_vals
         rho_vals     = self.rho_km_vals
         phi_rad_vals = self.phi_rad_vals
-        d_vals       = self.d_km_vals
-        b_rad_vals   = self.b_rad_vals
+        d_vals       = self.D_km_vals
+        B_rad_vals   = self.B_rad_vals
         lambda_vals  = self.lambda_sky_km_vals
         T_hat_vals   = self.T_hat_vals
         F_vals       = self.F_km_vals
@@ -3357,7 +3486,7 @@ class diffraction_correction(object):
         dx           = self.dx_km
         # Compute necessary variables.
         kD_vals   = 2. * np.pi * d_vals / lambda_vals
-        cosb      = np.cos(b_rad_vals)
+        cosb      = np.cos(B_rad_vals)
         cosphi0   = np.cos(phi_rad_vals)
         sinphi0   = np.sin(phi_rad_vals)
         dsq       = d_vals*d_vals
@@ -3461,13 +3590,13 @@ class diffraction_correction(object):
             % (i,n_used,nw,loop),end="\r")
         return T_vals
 
-    def __fresnel_inversion_fast_no_norm_verbose(self):
+    def __finv_v(self):
         # Retrieve variables.
         w_vals       = self.w_km_vals
         rho_vals     = self.rho_km_vals
         phi_rad_vals = self.phi_rad_vals
-        d_vals       = self.d_km_vals
-        b_rad_vals   = self.b_rad_vals
+        d_vals       = self.D_km_vals
+        B_rad_vals   = self.B_rad_vals
         lambda_vals  = self.lambda_sky_km_vals
         T_hat_vals   = self.T_hat_vals
         F_vals       = self.F_km_vals
@@ -3477,8 +3606,8 @@ class diffraction_correction(object):
         n_used       = self.n_used
         dx           = self.dx_km
         # Compute necessary variables.
-        kD_vals   = 2. * np.pi * d_vals / lambda_vals
-        cosb      = np.cos(b_rad_vals)
+        kD_vals   = 2.0 * np.pi * d_vals / lambda_vals
+        cosb      = np.cos(B_rad_vals)
         cosphi0   = np.cos(phi_rad_vals)
         sinphi0   = np.sin(phi_rad_vals)
         dsq       = d_vals*d_vals
@@ -3569,21 +3698,260 @@ class diffraction_correction(object):
                     break
             
             # Compute psi and then compute the forward model.
-            psi_vals = kD * psif(r,r0,d,cb,cp,sp,cp0,sp0)
-            ker      = w_func*np.exp(-1j*psi_vals)
-            T_hat    = T_hat_vals[crange]
-            F        = F_vals[center]
+            psi_vals       = kD * psif(r,r0,d,cb,cp,sp,cp0,sp0)
+            ker            = w_func*np.exp(-1j*psi_vals)
+            T_hat          = T_hat_vals[crange]
+            F              = F_vals[center]
             T_vals[center] = finv(T_hat,ker,dx,F)
             print("Pt: %d  Tot: %d  Width: %d  Psi Iters: %d  Fast Inversion" \
             % (i,n_used,nw,loop),end="\r")
         return T_vals
+
+    def __finv_p(self,psitype):
+        # Retrieve variables.
+        w_vals       = self.w_km_vals
+        rho_vals     = self.rho_km_vals
+        phi_rad_vals = self.phi_rad_vals
+        d_vals       = self.D_km_vals
+        B_rad_vals   = self.B_rad_vals
+        lambda_vals  = self.lambda_sky_km_vals
+        T_hat_vals   = self.T_hat_vals
+        F_vals       = self.F_km_vals
+        fft          = self.fft
+        wtype        = "%s%s" % ("__",self.wtype)
+        start        = self.start
+        n_used       = self.n_used
+        dx           = self.dx_km
+        # Compute necessary variables.
+        kD_vals   = 2. * np.pi * d_vals / lambda_vals
+        # Define functions
+        fw        = self.__func_dict[wtype]["func"]
+        if fft:
+           finv   = self.__fresinvfft
+        else: 
+            finv  = self.__fresinv
+        # Calculate the corrected complex amplitude, point by point
+        T_vals    = T_hat_vals * 0.0
+        for i in np.arange(n_used):
+            center = start+i
+            r0     = rho_vals[center]
+            kD     = kD_vals[center]
+            w      = w_vals[center]
+            w_init = w
+            w_func = fw(w,dx)
+            nw     = np.size(w_func)
+            crange = np.arange(int(center-(nw-1)/2),int(1+center+(nw-1)/2))
+            r      = rho_vals[crange]
+            F      = F_vals[center]
+            x      = (r-r0)/F
+
+            # Compute psi and then compute the forward model.
+            psi_vals = (np.pi/2.0)*(x*x)
+            ker      = w_func*np.exp(-1j*psi_vals)
+            T_hat    = T_hat_vals[crange]
+            T_vals[center] = finv(T_hat,ker,dx,F)
+        return T_vals
+
+    def __finv_p_v(self,psitype):
+        # Retrieve variables.
+        w_vals       = self.w_km_vals
+        rho_vals     = self.rho_km_vals
+        phi_rad_vals = self.phi_rad_vals
+        d_vals       = self.D_km_vals
+        B_rad_vals   = self.B_rad_vals
+        lambda_vals  = self.lambda_sky_km_vals
+        T_hat_vals   = self.T_hat_vals
+        F_vals       = self.F_km_vals
+        fft          = self.fft
+        wtype        = "%s%s" % ("__",self.wtype)
+        start        = self.start
+        n_used       = self.n_used
+        dx           = self.dx_km
+        # Compute necessary variables.
+        kD_vals   = 2. * np.pi * d_vals / lambda_vals
+        # Define functions
+        fw        = self.__func_dict[wtype]["func"]
+        if fft:
+           finv   = self.__fresinvfft
+        else: 
+            finv  = self.__fresinv
+        # Calculate the corrected complex amplitude, point by point
+        T_vals    = T_hat_vals * 0.0
+        for i in np.arange(n_used):
+            center = start+i
+            r0     = rho_vals[center]
+            kD     = kD_vals[center]
+            w      = w_vals[center]
+            w_init = w
+            w_func = fw(w,dx)
+            nw     = np.size(w_func)
+            crange = np.arange(int(center-(nw-1)/2),int(1+center+(nw-1)/2))
+            r      = rho_vals[crange]
+            F      = F_vals[center]
+            x      = (r-r0)/F
+
+            # Compute psi and then compute the forward model.
+            psi_vals = (np.pi/2.0)*(x*x)
+            ker      = w_func*np.exp(-1j*psi_vals)
+            T_hat    = T_hat_vals[crange]
+            T_vals[center] = finv(T_hat,ker,dx,F)
+            print("Pt: %d  Tot: %d  Width: %d Fast Inversion - Quadratic" \
+            % (i,n_used,nw),end="\r")
+        return T_vals
+
+    def __finv_n_p(self,psitype):
+        # Retrieve variables.
+        w_vals       = self.w_km_vals
+        rho_vals     = self.rho_km_vals
+        phi_rad_vals = self.phi_rad_vals
+        d_vals       = self.D_km_vals
+        B_rad_vals   = self.B_rad_vals
+        lambda_vals  = self.lambda_sky_km_vals
+        T_hat_vals   = self.T_hat_vals
+        F_vals       = self.F_km_vals
+        fft          = self.fft
+        wtype        = "%s%s" % ("__",self.wtype)
+        start        = self.start
+        n_used       = self.n_used
+        dx           = self.dx_km
+        # Compute necessary variables.
+        kD_vals   = 2.0 * np.pi * d_vals / lambda_vals
+        # Define functions
+        fw        = self.__func_dict[wtype]["func"]
+        nrm       = self.__normalize
+        if fft:
+           finv   = self.__fresinvfft
+        else: 
+            finv  = self.__fresinv
+        # Calculate the corrected complex amplitude, point by point
+        T_vals    = T_hat_vals * 0.0
+        for i in np.arange(n_used):
+            center = start+i
+            r0     = rho_vals[center]
+            kD     = kD_vals[center]
+            w      = w_vals[center]
+            w_init = w
+            w_func = fw(w,dx)
+            nw     = np.size(w_func)
+            crange = np.arange(int(center-(nw-1)/2),int(1+center+(nw-1)/2))
+            r      = rho_vals[crange]
+            F      = F_vals[center]
+            B      = B_rad_vals[center]
+            phi    = phi_rad_vals[center]
+            D      = d_vals[center]
+            kD     = kD_vals[center]
+            afac   = np.cos(B)*np.cos(phi)
+            if (psitype == 'taylor'):
+                x      = (r-r0)/D
+            else:
+                x      = (r-r0)/F
+
+            # Compute psi and then compute the forward model.
+            if (psitype == 'taylor'):
+                psi_vals    = (kD/2.0)*(1.0-afac*afac)*x*x
+            else:
+                psi_vals    = (np.pi/2.0)*x*x
+            ker             = w_func*np.exp(-1j*psi_vals)
+            T_hat           = T_hat_vals[crange]
+            T_vals[center]  = finv(T_hat,ker,dx,F)
+            #T_vals[center] *= nrm(r,w_func,F)
+        return T_vals
+
+    def __finv_n_p_v(self,psitype):
+        # Retrieve variables.
+        w_vals       = self.w_km_vals
+        rho_vals     = self.rho_km_vals
+        phi_rad_vals = self.phi_rad_vals
+        d_vals       = self.D_km_vals
+        B_rad_vals   = self.B_rad_vals
+        lambda_vals  = self.lambda_sky_km_vals
+        T_hat_vals   = self.T_hat_vals
+        F_vals       = self.F_km_vals
+        fft          = self.fft
+        wtype        = "%s%s" % ("__",self.wtype)
+        start        = self.start
+        n_used       = self.n_used
+        dx           = self.dx_km
+        # Compute necessary variables.
+        kD_vals   = 2. * np.pi * d_vals / lambda_vals
+        # Define functions
+        fw        = self.__func_dict[wtype]["func"]
+        nrm       = self.__normalize
+        if fft:
+           finv   = self.__fresinvfft
+        else: 
+            finv  = self.__fresinv
+        # Calculate the corrected complex amplitude, point by point
+        T_vals    = T_hat_vals * 0.0
+        for i in np.arange(n_used):
+            center = start+i
+            r0     = rho_vals[center]
+            kD     = kD_vals[center]
+            w      = w_vals[center]
+            w_init = w
+            w_func = fw(w,dx)
+            nw     = np.size(w_func)
+            crange = np.arange(int(center-(nw-1)/2),int(1+center+(nw-1)/2))
+            r      = rho_vals[crange]
+            F      = F_vals[center]
+            x      = (r-r0)/F
+
+            # Compute psi and then compute the forward model.
+            psi_vals        = (np.pi/2.0)*(x*x)
+            ker             = w_func*np.exp(-1j*psi_vals)
+            T_hat           = T_hat_vals[crange]
+            T_vals[center]  = finv(T_hat,ker,dx,F)
+            T_vals[center] *= nrm(r,w_func,F)
+            print("Pt: %d  Tot: %d  Width: %d Fast Inversion - Quadratic" \
+            % (i,n_used,nw),end="\r")
+        return T_vals
+
+    def __write_hist_dict(self):
+        """
+        This creates a history dictionary.
+
+        Returns:
+            geo_hist (dict): Dictionary with "user name", "host name",
+                    "run date", "python version", "operating system",
+                    "source file", "input variables", and "input keywords".
+        """
+        user_name = os.getlogin()
+        host_name = os.uname()[1]
+        run_date  = time.ctime() + ' ' + time.tzname[0]
+        python_v  = platform.python_version()
+        opsys     = os.uname()[0]
+        src_file  = __file__.split('/')[-1]
+        src_dir   = __file__.rsplit('/',1)[0] +'/'
+        rngreq    = (np.min(self.rng),np.max(self.rng))
+
+        tau_hist = {
+            "User Name"         : user_name,
+            "Host Name"         : host_name,
+            "Run Date"          : run_date,
+            "Python Version"    : python_v,
+            "Operating System"  : opsys,
+            "Source Directory"  : src_dir,
+            "Source File"       : src_file,
+            "Input Variables"   : {
+                "NormDiff Dictionary": self.dathist},
+            "Input Keywords"    : {
+                "b Factor"                      : self.bfac,
+                "Resolution (km)"               : self.res,
+                "Tapering Function"             : self.wtype,
+                "Requested Radius (km)"         : rngreq,
+                "Normalization"                 : self.norm,
+                "Forward Model Data"            : self.fwd,
+                "FFT's Used"                    : self.fft,
+                "Psi Approximation"             : self.psitype},
+        }
+        return tau_hist
 
 class compare_tau(object):
     def __init__(self,geodata,caldata,dlpdata,taudata,occ,res,
         rng='all',wtype="kb25",bfac=True,fft=False,verbose=True,
         norm=True):
         data             = extract_csv_data(geodata,caldata,dlpdata,
-            occ,taudata=taudata,verbose=verbose,)
+            occ,taudata=taudata,verbose=verbose)
         
         tau_power   = data.power_vals
         tau_phase   = data.phase_vals
@@ -3683,3 +4051,89 @@ class find_optimal_resolution(object):
         self.l2fft   = l2fft
         self.resint  = resint
         self.resfft  = resfft
+
+class delta_impulse_diffraction(object):
+    def __init__(self,geo,cal,dlp,res,rho,occ=False,wtype='kb25',rng='all',
+        fwd=False,norm=True,fast=True,verbose=True,bfac=True,fft=False,
+        psitype=False):
+    
+        data = extract_csv_data(geo,cal,dlp,
+            occ=occ,verbose=verbose)
+        
+        self.__set_attributes(data)
+
+        r        = self.rho_km_vals
+        nstar    = np.min((r-rho>=0).nonzero())
+        rstar    = r[nstar]
+        phi      = self.phi_rad_vals
+        phistar  = phi[nstar]
+        b        = self.B_rad_vals
+        d        = self.D_km_vals
+        Lambda   = freq_wav(self.f_sky_hz_vals)
+        F        = fresnel_scale(Lambda,d,phi,b)
+        kD       = 2.0 * np.pi * d / Lambda
+        if (not psitype):
+            psi_vals = kD*psi(rstar,r,d,b,phistar,phi)
+        else:
+            psi_vals = (np.pi/2.0)*((r-rstar)/F)*((r-rstar)/F)
+        
+        self.nstar    = nstar
+        self.kD       = kD
+        self.d        = d
+        self.r        = r
+        self.F        = F
+        self.psi_vals = psi_vals
+
+        T_hat_vals     = (1.0-1.0j)*np.exp(1j*psi_vals)/(2.0*F)
+        p_norm_vals    = np.abs(T_hat_vals)*np.abs(T_hat_vals)
+        phase_rad_vals = -np.arctan2(np.imag(T_hat_vals),np.real(T_hat_vals))
+
+        self.p_norm_vals    = p_norm_vals
+        self.phase_rad_vals = phase_rad_vals
+
+        data = self
+
+        recdata = diffraction_correction(data,res,rng=rng,
+            wtype=wtype,fwd=fwd,norm=norm,verbose=verbose,
+            bfac=bfac,fft=fft,psitype=psitype)
+
+        self.rho_star           = rho
+        self.rho_km_vals        = recdata.rho_km_vals
+        self.p_norm_vals        = recdata.p_norm_vals
+        self.phase_rad_vals     = recdata.phase_rad_vals
+        self.B_rad_vals         = recdata.B_rad_vals
+        self.D_km_vals          = recdata.D_km_vals
+        self.f_sky_hz_vals      = recdata.f_sky_hz_vals
+        self.phi_rad_vals       = recdata.phi_rad_vals
+        self.rho_dot_kms_vals   = recdata.rho_dot_kms_vals
+        self.T_hat_vals         = recdata.T_hat_vals
+        self.res                = recdata.res
+        self.wtype              = recdata.wtype
+        self.rng                = recdata.rng
+        self.F_km_vals          = recdata.F_km_vals
+        self.w_km_vals          = recdata.w_km_vals
+        self.mu_vals            = recdata.mu_vals
+        self.lambda_sky_km_vals = recdata.lambda_sky_km_vals
+        self.dx_km              = recdata.dx_km
+        self.norm_eq            = recdata.norm_eq
+        self.n_used             = recdata.n_used
+        self.start              = recdata.start
+        self.T_vals             = recdata.T_vals
+        self.power_vals         = recdata.power_vals
+        self.tau_vals           = recdata.tau_vals
+        self.phase_vals         = recdata.phase_vals
+        self.p_norm_fwd_vals    = None
+        self.T_hat_fwd_vals     = None
+        self.phase_fwd_vals     = None
+        self.norm               = recdata.norm
+        self.fast               = recdata.fast
+        self.fwd                = recdata.fwd
+        self.fft                = recdata.fft
+
+    def __set_attributes(self, NormDiff):
+        self.rho_km_vals      = NormDiff.rho_km_vals
+        self.B_rad_vals		  = NormDiff.B_rad_vals
+        self.D_km_vals		  = NormDiff.D_km_vals
+        self.f_sky_hz_vals    = NormDiff.f_sky_hz_vals
+        self.phi_rad_vals     = NormDiff.phi_rad_vals
+        self.rho_dot_kms_vals = NormDiff.rho_dot_kms_vals

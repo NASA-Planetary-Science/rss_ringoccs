@@ -223,17 +223,17 @@ class Normalization(object):
         return spm_vals_down, rho_km_vals_down, p_obs_down
 
 
-    def get_spline_fit(self, spm_fit=None, spline_order=None, knots_km=None,
+    def get_spline_fit(self, spline_order=None, knots_km=None,
             dt_down=None, freespace_km=None, freespace_spm=None,
             knots_spm=None, USE_GUI=True, TEST=False):
         """
         Purpose:
         Make spline fit to observed downsampled power at specified set
-        of times spm_fit. Specified keyword arguments will override the
-        corresponding defaults set in __init__
+        of times self._spm_fit, which are equal to geometry times. Specified
+        keyword arguments will override the corresponding defaults set in
+        __init__
 
         Args:
-            spm_fit (np.ndarray): SPM values to evaluate the spline fit at
             spline_order (int): Order of the spline fit. Default order is 2
 
             dt_down (float): Time spacing to downsample to before making
@@ -276,9 +276,10 @@ class Normalization(object):
                 and the GUI
         """
 
+        # SPM values to evaluate spline fit at
+        spm_fit = self._spm_fit
+
         # Update defaults if any keyword arguments were specified
-        if spm_fit is not None:
-            self._spm_fit = spm_fit
         if spline_order is not None:
             self._spline_order = spline_order
         if knots_km is not None:
@@ -293,7 +294,6 @@ class Normalization(object):
             self._knots_spm = knots_spm
 
         # Use whatever most up-to-date arguments are
-        spm_fit = self._spm_fit
         spline_order = self._spline_order
         knots_km = self._knots_km
         dt_down = self._dt_down

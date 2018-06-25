@@ -289,7 +289,8 @@ class FreqOffsetFit(object):
 
         if USE_GUI:
             root = Tk()
-            f_resid_fit_gui_inst = FResidFitGui(root, self, f_spm, f_sky_resid)
+            f_resid_fit_gui_inst = FResidFitGui(root, self, f_spm, f_rho,
+                f_sky_resid)
             root.geometry('900x700+500+150')
             while True:
                 try:

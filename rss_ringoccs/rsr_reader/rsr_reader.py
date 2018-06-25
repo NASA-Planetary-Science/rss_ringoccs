@@ -32,6 +32,8 @@ Revisions:
                              decimate 16kHz files to 1kHz sampling if True
    2018 May 08 - gsteranla - Added input checks
    2018 May 30 - gsteranka - Added history attribute
+   2018 Jun 25 - gsteranka - Fixed bug with 16kHz file not getting sky frequency
+                             correctly
 
 *************************VARIABLES*************************
 NAME - TYPE - scalar/array - PURPOSE
@@ -49,6 +51,7 @@ from multiprocessing import Process
 from multiprocessing import Queue
 import numpy as np
 import os
+import pdb
 import platform
 from scipy.signal import decimate
 import struct
@@ -304,14 +307,16 @@ class RSRReader(object):
         """
 
         # Specify which SFDUs you want to read
-        start_spm_ind = np.argmin(abs(self.spm_vals - spm_range[0]))
-        end_spm_ind = np.argmin(abs(self.spm_vals - spm_range[1]))
+        if self.sample_rate_khz == 1:
+            start_spm_ind = np.argmin(abs(self.spm_vals - spm_range[0]))
+            end_spm_ind = np.argmin(abs(self.spm_vals - spm_range[1]))
+        elif self.sample_rate_khz == 16:
+            start_spm_ind = np.argmin(abs(self.__spm_16khz - spm_range[0]))
+            end_spm_ind = np.argmin(abs(self.__spm_16khz - spm_range[1]))
         start_sfdu = int(start_spm_ind / self.__n_pts_per_sfdu)
         end_sfdu = int(end_spm_ind / self.__n_pts_per_sfdu)
         if end_sfdu > self.__n_sfdu:
             end_sfdu = self.__n_sfdu
-        spm_vals = self.spm_vals[self.__n_pts_per_sfdu*start_sfdu:
-            self.__n_pts_per_sfdu*end_sfdu]
 
         # Format in which to read rest of RSR file one SFDU at a time
         data_format = (self.__data_header_format
@@ -370,7 +375,14 @@ class RSRReader(object):
                 + 'False')
             TEST = False
 
-        spm_vals = self.spm_vals
+        if self.sample_rate_khz == 1:
+            spm_vals = self.spm_vals
+        elif self.sample_rate_khz == 16:
+            spm_vals = self.__spm_16khz
+        else:
+            print('ERROR (RSRReader.f_sky_pred()): Sample rate must be either'
+                + '16kHz or 1kHz')
+            sys.exit()
 
         # Default 1 second spacing over range of spm_vals
         if f_spm is None:
@@ -445,6 +457,10 @@ class RSRReader(object):
                 - freq_poly1_array[_time_ind]
                 - freq_poly2_array[_time_ind]*_msec
                 - freq_poly3_array[_time_ind]*(_msec**2))
+            if TEST and (i < 10):
+                print(_msec, f_spm[i], _time_ind, time_stamp_array[_time_ind],
+                    freq_poly1_array[_time_ind], freq_poly2_array[_time_ind],
+                    freq_poly3_array[_time_ind])
 
         if TEST:
             for i in range(10):
@@ -477,6 +493,10 @@ class RSRReader(object):
             TEST = False
 
         spm_vals = self.spm_vals
+
+        # Record what original SPM values were
+        if self.sample_rate_khz == 16:
+            self.__spm_16khz = spm_vals
 
         # Ensure that input is a Boolean
         if type(self.__decimate_16khz_to_1khz) != bool:
@@ -589,4 +609,7 @@ if __name__ == '__main__':
 
     rsr_file = '../../../../../data/s10-rev07-rsr-data/S10EAOE2005_123_0740NNNX43D.2A1'
     #rsr_file = '../../../../../data/s10-rev07-rsr-data/s10sroe2005123_0740nnnx43rd.2a2'
-    rsr_inst = RSRReader(rsr_file)
+    rsr_inst = RSRReader(rsr_file, decimate_16khz_to_1khz=True)
+    f_spm = np.arange(30500, 40000, 0.5)
+    f_spm, f_sky_pred = rsr_inst.get_f_sky_pred(f_spm=f_spm, TEST=True)
+    pdb.set_trace()

@@ -68,6 +68,7 @@ import platform
 import subprocess
 from scipy.special import lambertw, iv, erf
 from scipy import interpolate
+import pdb
 
 class __valid_types:
     """
@@ -2628,7 +2629,7 @@ class extract_csv_data(object):
             else: raise TypeError("Bad Input: GEO DATA")
         
         self.occ    = occ
-        
+
         if (np.size(crange) == 0):
             if (occ == 'ingress'):
                 mes = "rho_dot_kms_vals is never negative."
@@ -2857,9 +2858,7 @@ class rec_data(object):
         self.lambda_sky_km_vals = None
         self.dx_km              = None
         self.norm_eq            = None
-        self.history            = None
 
-        self.history   = NormDiff.history
         self.res   = res
         self.wtype = wtype.replace(" ", "").lower()
 
@@ -2983,6 +2982,7 @@ class diffraction_correction(object):
         self.fft        = fft
         self.bfac       = bfac
         self.psitype    = psitype
+        self.dathist    = dat.history
 
         recdata = rec_data(dat, res, wtype,bfac=bfac)
 
@@ -3028,15 +3028,13 @@ class diffraction_correction(object):
                     self.p_norm_fwd_vals = power_func(self.T_hat_fwd_vals)
                     self.phase_fwd_vals  = phase_func(self.T_hat_fwd_vals)
 
-        del verbose, psitype, norm
-
         self.power_vals = power_func(self.T_vals)
         self.phase_vals = -phase_func(self.T_vals)
         self.tau_vals   = tau_func(self.T_vals,self.mu_vals)
 
         self.__trim_attributes(fwd)
 
-        del fwd
+        del fwd, verbose, psitype, norm
 
         self.history = self.__write_hist_dict()
 
@@ -3108,7 +3106,6 @@ class diffraction_correction(object):
         self.lambda_sky_km_vals = recdata.lambda_sky_km_vals
         self.dx_km              = recdata.dx_km
         self.norm_eq            = recdata.norm_eq
-        self.dathist            = recdata.history
     
     def __compute_dc_attributes(self,rng):
         self.rng               = get_range_request(rng)

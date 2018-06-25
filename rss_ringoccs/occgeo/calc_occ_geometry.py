@@ -15,6 +15,7 @@ Revisions:
                         - generalize planet and spacecraft
     2018 Jun 13 - jfong - use np.arctan2 instead of spice.vsep in 
                           xform_J2000_to_ring_plane_frame()
+    2018 Jun 19 - jfong - 
 '''
 
 import time
@@ -51,8 +52,10 @@ class Geometry(object):
 
         self.kernels = kernels
         self.input_vars = {
-                "rsr_inst": None, #rsr_inst.history,
-                "kernels": kernels
+                "rsr_inst": rsr_inst.history, #rsr_inst.history,
+                "kernels": kernels,
+                "planet": planet,
+                "spacecraft":spacecraft
                 }
         self.input_kwds = {
                 "pt_per_sec": pt_per_sec
@@ -143,11 +146,15 @@ class Geometry(object):
         self.vy_kms_vals = np.stack(R_sc_dot_kms_vals)[:,1]
         self.vz_kms_vals = np.stack(R_sc_dot_kms_vals)[:,2]
 
+
+#        self.rho_corr_pole_km_vals = 
+#        self.rho_corr_timing_km_vals =
+
 #        self.nhat_p = nhat_p
 #        self.t_oet_et_vals = t_oet_et_vals
 #        self.t_set_et_vals = t_set_et_vals
 #        self.t_ret_et_vals = t_ret_et_vals
-        self.alt_deg_vals = alt_deg_vals
+#        self.alt_deg_vals = alt_deg_vals
 #
 #        self.get_saturn_occ_times()
 #        a, b, c = self.get_dsn_info()
@@ -168,17 +175,19 @@ class Geometry(object):
         run_date = time.ctime() + ' ' + time.tzname[0] 
         python_version = platform.python_version() 
         operating_system = os.uname()[0]          
-        src_file = __file__ 
+        src_dir = __file__.rsplit('/',1)[0] +'/'
+        src_file = __file__.split('/')[-1]
 
         geo_hist = {
-                           "user name": user_name,
-                           "host name": host_name,
-                            "run date": run_date,
-                      "python version": python_version,
-                    "operating system": operating_system,
-                         "source file": src_file,
-                     "input variables": self.input_vars,
-                      "input keywords": self.input_kwds                                                }
+                           "User Name": user_name,
+                           "Host Name": host_name,
+                            "Run Date": run_date,
+                      "Python Version": python_version,
+                    "Operating System": operating_system,
+                    "Source Directory": src_dir,
+                         "Source File": src_file,
+                     "Input Variables": self.input_vars,
+                      "Input Keywords": self.input_kwds                                                }
         return geo_hist
 
     def get_rev(self):

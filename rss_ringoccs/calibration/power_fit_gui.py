@@ -183,7 +183,7 @@ class PowerFitGui(Frame):
         adjust_range_and_knots(), and revert_range()
         """
 
-        spm_fit, spline_fit = self.norm_inst.get_spline_fit(spm_fit=self.xfit,
+        spm_fit, spline_fit = self.norm_inst.get_spline_fit(
             spline_order=self.fit_deg, knots_spm=self.knots_spm,
             freespace_spm=self.xlim, USE_GUI=False)
         return spline_fit

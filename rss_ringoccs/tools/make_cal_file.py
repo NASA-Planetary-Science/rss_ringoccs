@@ -19,6 +19,7 @@ Revisions:
                              calibration_class.py
    2018 Jun 18 - gsteranka - Added spm_range keyword
    2018 Jun 21 - gsteranka - Removed frequency offset fit from CAL file
+   2018 Jun 26 - gsteranka - Re-added frequency offset fit column
 """
 
 import numpy as np
@@ -37,17 +38,18 @@ def make_cal_file(cal_inst, cal_file, spm_range=None):
     """
 
     spm_cal = cal_inst.t_oet_spm_vals
-    f_sky_pred_cal = cal_inst.f_sky_pred_vals
+    f_sky_pred_cal = cal_inst.f_sky_hz_vals
     f_sky_resid_fit_cal = cal_inst.f_sky_resid_fit_vals
     p_free_cal = cal_inst.p_free_vals
+    f_offset_fit_cal = cal_inst.f_offset_fit_vals
 
     if spm_range is None:
         spm_range = [min(spm_cal), max(spm_cal)]
     ind = (spm_cal >= spm_range[0]) & (spm_cal <= spm_range[1])
 
     np.savetxt(cal_file, np.c_[spm_cal[ind], f_sky_pred_cal[ind],
-        f_sky_resid_fit_cal[ind], p_free_cal[ind]],
-        fmt='%32.16f, '*3 + '%32.16f')
+        f_sky_resid_fit_cal[ind], p_free_cal[ind], f_offset_fit_cal[ind]],
+        fmt='%32.16f, '*4 + '%32.16f')
 
     return None
 

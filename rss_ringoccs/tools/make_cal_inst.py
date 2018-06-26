@@ -25,7 +25,7 @@ class MakeCalInst(object):
 
     Attributes:
         t_oet_spm_vals (np.ndarray): SPM values from calibration file
-        f_sky_pred_vals (np.ndarray): Predicted sky frequency values from
+        f_sky_hz_vals (np.ndarray): Predicted sky frequency values from
             calibration file
         f_sky_resid_fit_vals (np.ndarray): Fit to residual frequency from
             calibration file
@@ -34,6 +34,10 @@ class MakeCalInst(object):
         f_offset_fit_vals (np.ndarray): Fit to frequency offset from
             calibration files
         history (dict): Dictionary with information of the run
+
+    Notes:
+        [1] Works on 5-COLUMN CAL FILES ONLY!!! Need the 5th column of
+            frequency offset fit to avoid running whole fit routine again
     """
 
     def __init__(self, cal_file):
@@ -51,7 +55,7 @@ class MakeCalInst(object):
         f_offset_fit_vals = cal[:, 4]
 
         self.t_oet_spm_vals = t_oet_spm_vals
-        self.f_sky_pred_vals = f_sky_pred_vals
+        self.f_sky_hz_vals = f_sky_pred_vals
         self.f_sky_resid_fit_vals = f_sky_resid_fit_vals
         self.p_free_vals = p_free_vals
         self.f_offset_fit_vals = f_offset_fit_vals

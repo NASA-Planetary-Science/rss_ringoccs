@@ -80,8 +80,9 @@ class Calibration(object):
 
         # Evaluate spline fit at spm_cal. Assumes you already made a
         #     satisfactory spline fit
-        dummy_spm, p_free_cal = norm_inst.get_spline_fit(spm_fit=spm_cal,
-        USE_GUI=False)
+        dummy_spm, _p_free = norm_inst.get_spline_fit(USE_GUI=False)
+        p_free_cal_func = interp1d(dummy_spm, _p_free)
+        p_free_cal = p_free_cal_func(spm_cal)
 
         self.t_oet_spm_vals = spm_cal
         self.f_sky_hz_vals = f_sky_pred_cal

@@ -15,7 +15,8 @@ Revisions:
                         - generalize planet and spacecraft
     2018 Jun 13 - jfong - use np.arctan2 instead of spice.vsep in 
                           xform_J2000_to_ring_plane_frame()
-    2018 Jun 19 - jfong - 
+    2018 Jun 26 - jfong - add radius_above kwd to get_saturn_occ_times
+                        - make get_saturn_occ_times a function instead of method
 '''
 
 import time
@@ -302,37 +303,42 @@ class Geometry(object):
         B_deg_start = calc_B_deg(et_start, dsn, nhat_p)
 
         return B_deg_start
-    def get_saturn_occ_times(self):
-        et_vals = self.t_set_et_vals
-        dsn = self.dsn
 
-        npts = len(et_vals)
-        
-        abcorr = 'CN'
+def get_saturn_occ_times(t_set_et_vals, dsn, radius_above=500., kernels=None):
+    """
+    radius_above kwd for kilmoeters above saturn radius. if not given, default to 500km (atmosphere)
+    """
+    if kernels:
+        load_kernels(kernels)
 
-        # Get original body radii
-        dim, BODY699_RADII = spice.bodvrd('SATURN', 'RADII', 3)
-        
-        # Add atmosphere + ionosphere to radii
-        #    use only ionosphere radii for a conservative estimate
-#        BODY699_ATM = [rho699 + 500.0 for rho699 in BODY699_RADII]
-        BODY699_ION = [rho699 + 5000.0 for rho699 in BODY699_RADII]
+    et_vals = t_set_et_vals
 
-        # Use atmospheric radii in kernel pool
-        spice.pdpool('BODY699_RADII', BODY699_ION)
+    npts = len(et_vals)
+    
+    abcorr = 'CN'
 
-        et_blocked = []
-        for n in range(npts):
-            et = et_vals[n]
-            occ_code_ion = spice.occult('Saturn', 'ELLIPSOID', 
-                    'IAU_SATURN', 'Cassini', 'POINT', ' ', abcorr, dsn, et)
-            if occ_code_ion != 0:
-                et_blocked.append(et)
+    # Get original body radii
+    dim, BODY699_RADII = spice.bodvrd('SATURN', 'RADII', 3)
+    
+    # Add atmosphere + ionosphere to radii
+    #    use only ionosphere radii for a conservative estimate
+    BODY699_new = [rho699 + radius_above for rho699 in BODY699_RADII]
 
-        spm_blocked = et_to_spm(et_blocked)
+    # Use atmospheric radii in kernel pool
+    spice.pdpool('BODY699_RADII', BODY699_new)
+
+    et_blocked = []
+    for n in range(npts):
+        et = et_vals[n]
+        occ_code_ion = spice.occult('Saturn', 'ELLIPSOID', 
+                'IAU_SATURN', 'Cassini', 'POINT', ' ', abcorr, dsn, et)
+        if occ_code_ion != 0:
+            et_blocked.append(et)
+
+    spm_blocked = et_to_spm(et_blocked)
 
 
-        return spm_blocked
+    return spm_blocked
     
 def calc_rho_km(et_vals, planet, spacecraft, dsn, kernels=None):
     rho_vec, t_ret = calc_rho_vec_km(et_vals, planet, spacecraft, dsn,

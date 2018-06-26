@@ -19,6 +19,7 @@ Revisions:
                              calibration_class.py
    2018 Jun 18 - gsteranka - Added spm_range keyword
    2018 Jun 21 - gsteranka - Removed frequency offset fit from CAL file
+   2018 Jun 26 - gsteranka - Re-added frequency offset fit column
 """
 
 import numpy as np

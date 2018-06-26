@@ -20,6 +20,7 @@ from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg,
 from matplotlib.figure import Figure
 import numpy as np
 import pdb
+from scipy.interpolate import interp1d
 
 import tkinter
 from tkinter import Tk, IntVar, StringVar
@@ -87,13 +88,14 @@ class FResidFitGui(Frame):
             used to access the fit after the program is closed
     """
 
-    def __init__(self, parent, fit_inst, x, y):
+    def __init__(self, parent, fit_inst, x, x_rho, y):
 
         Frame.__init__(self, parent)
 
         self.parent = parent
         self.fit_inst = fit_inst
         self.x = x
+        self.x_rho = x_rho
         self.y = y
         self.initUI()
 
@@ -180,6 +182,15 @@ class FResidFitGui(Frame):
         return f_sky_resid_fit
 
 
+    def _get_rho_tick_labels(self, spm_tick_labels):
+        """
+        Given tick labels in SPM, get the new tick labels in radius
+        """
+        spm_to_rho_func = interp1d(self.x, self.x_rho)
+        rho_tick_labels = spm_to_rho_func(spm_tick_labels)
+        return ['%.1f' % rho_tick_label for rho_tick_label in rho_tick_labels]
+
+
     def plot_data(self):
         """
         Make the original matplotlib.pyplot plot on the canvas. Called by
@@ -190,7 +201,17 @@ class FResidFitGui(Frame):
         self.ax.plot(self.x, self.yfit, color='r')
         self.ax.set_xlabel('SPM')
         self.ax.set_ylabel('Hz')
-        self.ax.set_title('Residual Frequency')
+
+        ax_rho_ticks = (self.ax.get_xticks())[
+            (self.ax.get_xticks() >= min(self.x))
+            & (self.ax.get_xticks() <= max(self.x))]
+        self.ax_rho = self.ax.twiny()
+        self.ax_rho.set_xlim(self.ax.get_xlim())
+        self.ax_rho.set_xticks(ax_rho_ticks)
+        self.ax_rho.set_xticklabels(self._get_rho_tick_labels(
+            ax_rho_ticks))
+        self.ax_rho.set_xlabel('Rho (km)')
+
         self.canvas = FigureCanvasTkAgg(self.f, master=self.parent)
         self.canvas.show()
         self.canvas.get_tk_widget().pack(side=tkinter.TOP, fill=tkinter.BOTH,
@@ -232,7 +253,6 @@ class FResidFitGui(Frame):
 
         self.ax.set_xlabel('SPM')
         self.ax.set_ylabel('Hz')
-        self.ax.set_title('Residual Frequency')
         self.canvas.show()
 
 

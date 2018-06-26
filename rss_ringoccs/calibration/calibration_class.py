@@ -28,7 +28,7 @@ class Calibration(object):
 
     Attributes:
         t_oet_spm_vals (np.ndarray): SPM values from calibration file
-        f_sky_pred_vals (np.ndarray): Predicted sky frequency values from
+        f_sky_hz_vals (np.ndarray): Predicted sky frequency values from
             calibration file
         f_sky_resid_fit_vals (np.ndarray): Fit to residual frequency from
             calibration file
@@ -84,7 +84,7 @@ class Calibration(object):
         USE_GUI=False)
 
         self.t_oet_spm_vals = spm_cal
-        self.f_sky_pred_vals = f_sky_pred_cal
+        self.f_sky_hz_vals = f_sky_pred_cal
         self.f_sky_resid_fit_vals = f_sky_resid_fit_cal
         self.p_free_vals = p_free_cal
         self.f_offset_fit_vals = f_offset_fit_cal

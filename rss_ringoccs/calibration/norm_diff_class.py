@@ -222,7 +222,7 @@ class NormDiff(object):
         rho_km_vals = rho_interp_func(spm_vals)
 
         spm_cal = cal_inst.t_oet_spm_vals
-        f_sky_pred_cal = cal_inst.f_sky_pred_vals
+        f_sky_pred_cal = cal_inst.f_sky_hz_vals
         p_free_cal = cal_inst.p_free_vals
         f_offset_fit_cal = cal_inst.f_offset_fit_vals
         rho_km_cal = rho_interp_func(spm_cal)

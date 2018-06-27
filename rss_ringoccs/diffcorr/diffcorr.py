@@ -2703,6 +2703,7 @@ class extract_csv_data(object):
         self.t_set_spm_vals          = t_set_spm_vals
         self.rho_corr_pole_km_vals      = rho_corr_pole_km_vals
         self.rho_corr_timing_km_vals = rho_corr_timing_km_vals
+        self.phi_rl_rad_vals         = phi_rl_rad_vals
 
     def __compute_variables(self,occ,verbose):
         if verbose: print("Computing Variables...")

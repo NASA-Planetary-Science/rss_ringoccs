@@ -3307,7 +3307,7 @@ class diffraction_correction(object):
         if not check_boole(verbose):
             raise TypeError("verbose must be Boolean: True/False")
         if (type(wtype) != type("Hi")):
-            rase TypeError("wtype must be a string: 'coss' )
+            raise TypeError("wtype must be a string: 'coss'")
 
         recdata                 = rec_data(dat,res,wtype,bfac=bfac)
         self.res                = res
@@ -3389,6 +3389,7 @@ class diffraction_correction(object):
         self.power_vals = power_func(self.T_vals)
         self.phase_vals = -phase_func(self.T_vals)
         self.tau_vals   = tau_func(self.T_vals,self.mu_vals)
+        self.tau_threshold_vals = np.zeros(np.size(self.rho_km_vals))
 
         self.__trim_attributes(self.fwd)
         del verbose

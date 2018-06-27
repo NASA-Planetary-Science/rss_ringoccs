@@ -230,7 +230,6 @@ class NormDiff(object):
             spm_vals = spm_vals[_ind]
             IQ_m = IQ_m[_ind]
             rho_km_vals = rho_km_vals[_ind]
-            pdb.set_trace()
 
         # Inteprolate frequency offset to finer spacing in preparation
         #     for integration

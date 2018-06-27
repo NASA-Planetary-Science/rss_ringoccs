@@ -2746,22 +2746,22 @@ class extract_csv_data(object):
         dfg = pd.read_csv(geodata, delimiter=',',
             names=[
                 "t_oet_spm_vals",
-				"t_ret_spm_vals",
-				"t_set_spm_vals",
-				"rho_km_vals",
-				"phi_rl_deg_vals",
-				"phi_ora_deg_vals",
-				"B_deg_vals",
-				"D_km_vals",
-				"rho_dot_kms_vals",
-				"phi_rl_dot_kms_vals",
-				"F_km_vals",
-				"R_imp_km_vals",
-				"rx_km_vals",
-			    "ry_km_vals",
-				"rz_km_vals",
-				"vx_kms_vals",
-				"vy_kms_vals",
+            	"t_ret_spm_vals",
+            	"t_set_spm_vals",
+            	"rho_km_vals",
+            	"phi_rl_deg_vals",
+            	"phi_ora_deg_vals",
+            	"B_deg_vals",
+            	"D_km_vals",
+            	"rho_dot_kms_vals",
+            	"phi_rl_dot_kms_vals",
+            	"F_km_vals",
+            	"R_imp_km_vals",
+            	"rx_km_vals",
+                "ry_km_vals",
+            	"rz_km_vals",
+            	"vx_kms_vals",
+            	"vy_kms_vals",
 				"vz_kms_vals"
                 ]
             )
@@ -2787,8 +2787,8 @@ class extract_csv_data(object):
         dfd = pd.read_csv(dlpdata, delimiter=',',
             names=[
                 "rho_km_vals",
-                "rho_km_pole_corr_vals",
-                "rho_km_offsett_vals",
+                "rho_corr_pole_vals",
+                "rho_corr_timing_km_vals",
                 "phi_rl_deg_vals",
                 "phi_deg_vals",
                 "raw_tau_vals",
@@ -3186,18 +3186,22 @@ class diffraction_correction(object):
         self.psitype            = None
         self.history            = None
         self.dathist            = None
-
-        self.res        = res
-        self.wtype      = wtype
-        self.rng        = rng
-        self.norm       = norm
-        self.fwd        = fwd
-        self.fft        = fft
-        self.bfac       = bfac
-        self.psitype    = psitype
-        self.dathist    = dat.history
+        self.tau_threshold_vals = None
+        self.t_ret_spm_vals     = None
+        self.t_oet_spm_vals     = None
+        self.t_set_spm_vals     = None
 
         recdata                 = rec_data(dat,res,wtype,bfac=bfac)
+
+        self.res                = res
+        self.wtype              = wtype
+        self.rng                = rng
+        self.norm               = norm
+        self.fwd                = fwd
+        self.fft                = fft
+        self.bfac               = bfac
+        self.psitype            = psitype
+        self.dathist            = dat.history
         self.res                = recdata.res
         self.wtype              = recdata.wtype
         self.rho_km_vals        = recdata.rho_km_vals
@@ -3215,45 +3219,45 @@ class diffraction_correction(object):
         self.lambda_sky_km_vals = recdata.lambda_sky_km_vals
         self.dx_km              = recdata.dx_km
         self.norm_eq            = recdata.norm_eq
-        del recdata
 
-        self.rng                = get_range_request(rng)
+        del recdata,res,wtype,rng,norm,fwd,fft,bfac,psitype
+
+        self.rng                = get_range_request(self.rng)
         self.start,self.n_used  = get_range_actual(self.rho_km_vals,
             self.rng,self.w_km_vals)
 
-        #self.__trim_inputs()
-
+        self.__trim_inputs()
         if verbose:
-            if (psitype == "full"):
-                if norm: self.T_vals = self.__finv_n_v()
+            if (self.psitype == "full"):
+                if self.norm: self.T_vals = self.__finv_n_v()
                 else:    self.T_vals = self.__finv_v()
-                if fwd:
-                    if norm: self.T_hat_fwd_vals = self.__ffwd_n_v()
+                if self.fwd:
+                    if self.norm: self.T_hat_fwd_vals = self.__ffwd_n_v()
                     else:    self.T_hat_fwd_vals = self.__ffwd_v()
                     self.p_norm_fwd_vals = power_func(self.T_hat_fwd_vals)
                     self.phase_fwd_vals  = phase_func(self.T_hat_fwd_vals)
             else:
-                if norm: self.T_vals = self.__finv_n_p_v(psitype)
-                else:    self.T_vals = self.__finv_p_v(psitype)
-                if fwd:
-                    if norm: self.T_hat_fwd_vals = self.__ffwd_n_v()
+                if self.norm: self.T_vals = self.__finv_n_p_v(self.psitype)
+                else:    self.T_vals = self.__finv_p_v(self.psitype)
+                if self.fwd:
+                    if self.norm: self.T_hat_fwd_vals = self.__ffwd_n_v()
                     else:    self.T_hat_fwd_vals = self.__ffwd_v()
                     self.p_norm_fwd_vals = power_func(self.T_hat_fwd_vals)
                     self.phase_fwd_vals  = phase_func(self.T_hat_fwd_vals)
         else:
-            if not psitype:
-                if norm: self.T_vals = self.__finv_n()
+            if (self.psitype == "full"):
+                if self.norm: self.T_vals = self.__finv_n()
                 else:    self.T_vals = self.__finv()
-                if fwd:
-                    if norm: self.T_hat_fwd_vals = self.__ffwd_n()
+                if self.fwd:
+                    if self.norm: self.T_hat_fwd_vals = self.__ffwd_n()
                     else:    self.T_hat_fwd_vals = self.__ffwd()
                     self.p_norm_fwd_vals = power_func(self.T_hat_fwd_vals)
                     self.phase_fwd_vals  = phase_func(self.T_hat_fwd_vals)
             else:
-                if norm: self.T_vals = self.__finv_n_p(psitype)
-                else:    self.T_vals = self.__finv_p(psitype)
-                if fwd:
-                    if norm: self.T_hat_fwd_vals = self.__ffwd_n()
+                if self.norm: self.T_vals = self.__finv_n_p(self.psitype)
+                else:    self.T_vals = self.__finv_p(self.psitype)
+                if self.fwd:
+                    if self.norm: self.T_hat_fwd_vals = self.__ffwd_n()
                     else:    self.T_hat_fwd_vals = self.__ffwd()
                     self.p_norm_fwd_vals = power_func(self.T_hat_fwd_vals)
                     self.phase_fwd_vals  = phase_func(self.T_hat_fwd_vals)
@@ -3262,9 +3266,8 @@ class diffraction_correction(object):
         self.phase_vals = -phase_func(self.T_vals)
         self.tau_vals   = tau_func(self.T_vals,self.mu_vals)
 
-        self.__trim_attributes(fwd)
-
-        del fwd, verbose, psitype, norm
+        self.__trim_attributes(self.fwd)
+        del verbose
 
         self.history = self.__write_hist_dict()
         t2 = time.time()
@@ -4133,7 +4136,8 @@ class diffraction_correction(object):
             "Source Directory"  : src_dir,
             "Source File"       : src_file,
             "Input Variables"   : {
-                "NormDiff Dictionary": self.dathist},
+                "norm_inst": self.dathist,
+                "res"      : self.res},
             "Input Keywords"    : {
                 "b Factor"                      : self.bfac,
                 "Resolution (km)"               : self.res,
@@ -4255,8 +4259,8 @@ class find_optimal_resolution(object):
 
 class delta_impulse_diffraction(object):
     def __init__(self,geo,lambda_km,res,rho,dx_km_desired=0.25,
-        occ=False,wtype='kb25',fwd=False,norm=True,
-        fast=True,verbose=True,bfac=True,fft=False,psitype=False):
+        occ=False,wtype='kb25',fwd=False,norm=True,bfac=True,
+        verbose=True,fft=False,psitype='all',usefres=False):
     
         data = self.__get_geo(geo,verbose=verbose)
         self.__retrieve_variables(data,verbose)
@@ -4273,13 +4277,24 @@ class delta_impulse_diffraction(object):
         d        = self.D_km_vals
         F        = fresnel_scale(lambda_km,d,phi,b)
         kD       = 2.0 * np.pi * d / lambda_km
-        psi_vals = kD*psi(rstar,r,d,b,phistar,phi)
-        """
-        if (not psitype):
+
+        if not check_boole(fwd):
+            raise TypeError("fwd must be Boolean: True/False")
+        if not check_boole(norm):
+            raise TypeError("norm must be Boolean: True/False")
+        if not check_boole(bfac):
+            raise TypeError("bfac must be Boolean: True/False")
+        if not check_boole(fft):
+            raise TypeError("fft must be Boolean: True/False")
+        if not check_boole(verbose):
+            raise TypeError("verbose must be Boolean: True/False")
+        if not check_boole(usefres):
+            raise TypeError("usefres must be Boolean: True/False")
+
+        if (usefres == True):
             psi_vals = kD*psi(r,rstar,d,b,phi,phistar)
         else:
             psi_vals = (np.pi/2.0)*((r-rstar)/F)*((r-rstar)/F)
-        """
 
         T_hat_vals     = (1.0-1.0j)*np.exp(1j*psi_vals)/(2.0*F)
         p_norm_vals    = np.abs(T_hat_vals)*np.abs(T_hat_vals)
@@ -4289,6 +4304,7 @@ class delta_impulse_diffraction(object):
         self.p_norm_vals    = p_norm_vals
         self.phase_rad_vals = phase_rad_vals
         self.f_sky_hz_vals  = freq_wav(lambda_vals)
+        self.nstar          = nstar
         self.history        = "Bob"
 
         data = self

@@ -10,6 +10,8 @@ Purpose: Create an instance for calibration parameters. Just for NormDiff class,
 Revisions:
         make_cal_inst.py
     2018 Jun 11 - gsteranka - Original version
+    2018 Jun 27 - gsteranka - Adjust to sky frequency in CAL has frequency
+                              offset fit added on top of it
 """
 
 import numpy as np
@@ -40,7 +42,7 @@ class MakeCalInst(object):
             frequency offset fit to avoid running whole fit routine again
     """
 
-    def __init__(self, cal_file):
+    def __init__(self, cal_file, rsr_inst):
         """
         Args:
             cal_file (str): Full path name of calibration file
@@ -49,13 +51,16 @@ class MakeCalInst(object):
         cal = np.loadtxt(cal_file, delimiter=',')
 
         t_oet_spm_vals = cal[:, 0]
-        f_sky_pred_vals = cal[:, 1]
+        f_sky_hz_vals = cal[:, 1]
         f_sky_resid_fit_vals = cal[:, 2]
         p_free_vals = cal[:, 3]
-        f_offset_fit_vals = cal[:, 4]
+
+        dummy_spm, f_sky_pred_file_vals = rsr_inst.get_f_sky_pred(
+            f_spm=t_oet_spm_vals)
+        f_offset_fit_vals = f_sky_hz_vals - f_sky_pred_file_vals
 
         self.t_oet_spm_vals = t_oet_spm_vals
-        self.f_sky_hz_vals = f_sky_pred_vals
+        self.f_sky_hz_vals = f_sky_hz_vals
         self.f_sky_resid_fit_vals = f_sky_resid_fit_vals
         self.p_free_vals = p_free_vals
         self.f_offset_fit_vals = f_offset_fit_vals

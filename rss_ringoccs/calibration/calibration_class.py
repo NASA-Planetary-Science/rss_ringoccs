@@ -8,6 +8,9 @@ Purpose: Class for calibration parameters. This doesn't really do anything. It
 Revisions:
         calibration_class.py
     2018 Jun 11 - gsteranka - Original version
+    2018 Jun 27 - gsteranka - Adjust so sky frequency as frequency offset fit
+                              added on top of predicted sky frequency from
+                              RSR file
 """
 
 
@@ -85,10 +88,9 @@ class Calibration(object):
         p_free_cal = p_free_cal_func(spm_cal)
 
         self.t_oet_spm_vals = spm_cal
-        self.f_sky_hz_vals = f_sky_pred_cal
+        self.f_sky_hz_vals = f_sky_pred_cal + f_offset_fit_cal
         self.f_sky_resid_fit_vals = f_sky_resid_fit_cal
         self.p_free_vals = p_free_cal
-        self.f_offset_fit_vals = f_offset_fit_cal
         self.__set_history(fit_inst, norm_inst, geo_inst, dt_cal)
 
 

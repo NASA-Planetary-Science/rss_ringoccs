@@ -3032,29 +3032,27 @@ class rec_data(object):
         self.phi_rad_vals     = NormDiff.phi_rad_vals
         self.rho_dot_kms_vals = NormDiff.rho_dot_kms_vals
         try:
-            self.t_oet_spm_vals             = NormDiff.t_oet_spm_vals         
-            self.t_ret_spm_vals             = NormDiff.t_ret_spm_vals         
-            self.t_set_spm_vals             = NormDiff.t_set_spm_vals         
-            self.rho_corr_pole_km_vals      = NormDiff.rho_corr_pole_km_vals
-            self.rho_corr_timing_km_vals    = NormDiff.rho_corr_timing_km_vals
-            self.phi_rl_rad_vals            = NormDiff.phi_rl_rad_vals
+            self.t_oet_spm_vals          = NormDiff.t_oet_spm_vals         
+            self.t_ret_spm_vals          = NormDiff.t_ret_spm_vals         
+            self.t_set_spm_vals          = NormDiff.t_set_spm_vals         
+            self.rho_corr_pole_km_vals   = NormDiff.rho_corr_pole_km_vals
+            self.rho_corr_timing_km_vals = NormDiff.rho_corr_timing_km_vals
+            self.phi_rl_rad_vals         = NormDiff.phi_rl_rad_vals
         except AttributeError:
-            self.t_oet_spm_vals             = NormDiff.spm_vals
-            self.t_ret_spm_vals             = NormDiff.t_ret_spm_vals         
-            self.t_set_spm_vals             = NormDiff.t_set_spm_vals         
-            self.rho_corr_pole_km_vals      = NormDiff.rho_corr_pole_km_vals
-            self.rho_corr_timing_km_vals    = NormDiff.rho_corr_timing_km_vals
-            self.phi_rl_rad_vals            = NormDiff.phi_rl_rad_vals
+            self.t_oet_spm_vals          = NormDiff.spm_vals
+            self.t_ret_spm_vals          = NormDiff.t_ret_spm_vals         
+            self.t_set_spm_vals          = NormDiff.t_set_spm_vals         
+            self.rho_corr_pole_km_vals   = NormDiff.rho_corr_pole_km_vals
+            self.rho_corr_timing_km_vals = NormDiff.rho_corr_timing_km_vals
+            self.phi_rl_rad_vals         = NormDiff.phi_rl_rad_vals
         except AttributeError:
             print("Certain Variables Unavailable")
-            self.t_oet_spm_vals             = None
-            self.t_ret_spm_vals             = None
-            self.t_set_spm_vals             = None
-            self.rho_corr_pole_km_vals      = None
-            self.rho_corr_timing_km_vals    = None
-            self.phi_rl_rad_vals            = None
-
-
+            self.t_oet_spm_vals          = None
+            self.t_ret_spm_vals          = None
+            self.t_set_spm_vals          = None
+            self.rho_corr_pole_km_vals   = None
+            self.rho_corr_timing_km_vals = None
+            self.phi_rl_rad_vals         = None
     
     def __error_check(self,N_RHO):
         error_code = 0
@@ -3294,8 +3292,22 @@ class diffraction_correction(object):
         self.t_oet_spm_vals             = None
         self.t_ret_spm_vals             = None
         self.t_set_spm_vals             = None
-        self.rho_corr_pole_km_vals         = None
+        self.rho_corr_pole_km_vals      = None
         self.rho_corr_timing_km_vals    = None
+        self.phi_rl_rad_vals            = None
+
+        if not check_boole(fwd):
+            raise TypeError("fwd must be Boolean: True/False")
+        if not check_boole(norm):
+            raise TypeError("norm must be Boolean: True/False")
+        if not check_boole(bfac):
+            raise TypeError("bfac must be Boolean: True/False")
+        if not check_boole(fft):
+            raise TypeError("fft must be Boolean: True/False")
+        if not check_boole(verbose):
+            raise TypeError("verbose must be Boolean: True/False")
+        if (type(wtype) != type("Hi")):
+            rase TypeError("wtype must be a string: 'coss' )
 
         recdata                 = rec_data(dat,res,wtype,bfac=bfac)
         self.res                = res
@@ -3328,8 +3340,9 @@ class diffraction_correction(object):
         self.t_oet_spm_vals          = recdata.t_oet_spm_vals         
         self.t_ret_spm_vals          = recdata.t_ret_spm_vals         
         self.t_set_spm_vals          = recdata.t_set_spm_vals         
-        self.rho_corr_pole_km_vals      = recdata.rho_corr_pole_km_vals     
+        self.rho_corr_pole_km_vals   = recdata.rho_corr_pole_km_vals     
         self.rho_corr_timing_km_vals = recdata.rho_corr_timing_km_vals
+        self.phi_rl_rad_vals         = recdata.phi_rl_rad_vals
 
         del recdata,res,wtype,rng,norm,fwd,fft,bfac,psitype
 
@@ -3390,23 +3403,29 @@ class diffraction_correction(object):
         n_used = self.n_used
         crange = np.arange(n_used)+start
 
-        self.rho_km_vals         = self.rho_km_vals[crange]
-        self.p_norm_vals         = self.p_norm_vals[crange]
-        self.phase_rad_vals      = self.phase_rad_vals[crange]
-        self.B_rad_vals          = self.B_rad_vals[crange]
-        self.D_km_vals           = self.D_km_vals[crange]
-        self.f_sky_hz_vals       = self.f_sky_hz_vals[crange]
-        self.phi_rad_vals        = self.phi_rad_vals[crange]
-        self.rho_dot_kms_vals    = self.rho_dot_kms_vals[crange]
-        self.T_hat_vals          = self.T_hat_vals[crange]
-        self.F_km_vals           = self.F_km_vals[crange]
-        self.w_km_vals           = self.w_km_vals[crange]
-        self.mu_vals             = self.mu_vals[crange]
-        self.lambda_sky_km_vals  = self.lambda_sky_km_vals[crange]
-        self.T_vals              = self.T_vals[crange]
-        self.power_vals          = self.power_vals[crange]
-        self.tau_vals            = self.tau_vals[crange]
-        self.phase_vals          = self.phase_vals[crange]
+        self.rho_km_vals             = self.rho_km_vals[crange]
+        self.p_norm_vals             = self.p_norm_vals[crange]
+        self.phase_rad_vals          = self.phase_rad_vals[crange]
+        self.B_rad_vals              = self.B_rad_vals[crange]
+        self.D_km_vals               = self.D_km_vals[crange]
+        self.f_sky_hz_vals           = self.f_sky_hz_vals[crange]
+        self.phi_rad_vals            = self.phi_rad_vals[crange]
+        self.rho_dot_kms_vals        = self.rho_dot_kms_vals[crange]
+        self.T_hat_vals              = self.T_hat_vals[crange]
+        self.F_km_vals               = self.F_km_vals[crange]
+        self.w_km_vals               = self.w_km_vals[crange]
+        self.mu_vals                 = self.mu_vals[crange]
+        self.lambda_sky_km_vals      = self.lambda_sky_km_vals[crange]
+        self.T_vals                  = self.T_vals[crange]
+        self.power_vals              = self.power_vals[crange]
+        self.tau_vals                = self.tau_vals[crange]
+        self.phase_vals              = self.phase_vals[crange]
+        self.t_oet_spm_vals          = self.t_oet_spm_vals[crange]
+        self.t_ret_spm_vals          = self.t_ret_spm_vals[crange]
+        self.t_set_spm_vals          = self.t_set_spm_vals[crange] 
+        self.rho_corr_pole_km_vals   = self.rho_corr_pole_km_vals[crange]    
+        self.rho_corr_timing_km_vals = self.rho_corr_timing_km_vals[crange]
+        self.phi_rl_rad_vals         = self.phi_rl_rad_vals[crange]
         if fwd:
             self.p_norm_fwd_vals = self.p_norm_fwd_vals[crange]
             self.T_hat_fwd_vals  = self.T_hat_fwd_vals[crange]

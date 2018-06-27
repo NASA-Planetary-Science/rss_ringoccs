@@ -2506,107 +2506,162 @@ class extract_csv_data(object):
         self.taudata            = taudata
 
         if (type(geodata) != type("Hi!")):
-            raise TypeError(
-                "geodata must be a string: '/path/to/geodata'")
+            raise TypeError("geodata must be a string: '/path/to/geodata'")
         if (type(caldata) != type("Hi!")):
-            raise TypeError(
-                "caldata must be a string: '/path/to/caldata'")
+            raise TypeError("caldata must be a string: '/path/to/caldata'")
         if (type(dlpdata) != type("Hi!")):
-            raise TypeError(
-                "dlpdata must be a string: '/path/to/dlpdata'")
+            raise TypeError("dlpdata must be a string: '/path/to/dlpdata'")
         if (occ != False):
             if (type(occ) != type("Hi!")):
-                raise TypeError(
-                    "occ must be a string: 'egress' or 'ingress'")
+                raise TypeError("occ must be a string: 'egress' or 'ingress'")
             else:occ=occ.replace(" ","").replace("'","").replace('"',"").lower()
             if (occ != 'ingress') and (occ != 'egress'):
-                raise ValueError(
-                    "occ must be either 'ingress' or 'egress'")
-
-        tauboole = check_boole(taudata)
-        if not tauboole:
-            if (type(taudata) != type("Hi!")):
-                raise TypeError(
-                    "taudata must be a string: '/path/to/taudata'")
-            else:
-                tau_dat = self.__get_tau(taudata,verbose=verbose)
-                tr      = tau_dat[...,0]
-                tt      = tau_dat[...,5]
-                tpdeg   = tau_dat[...,6]
-                tbdeg   = tau_dat[...,11]
-        elif (bool(taudata) == True):
-            raise TypeError(
-                "taudata must be a string: '/path/to/taudata'")
-        else: pass
+                raise ValueError("occ must be either 'ingress' or 'egress'")
 
         geo_dat = self.__get_geo(geodata,verbose=verbose)
         cal_dat = self.__get_cal(caldata,verbose=verbose)
         dlp_dat = self.__get_dlp(dlpdata,verbose=verbose)
 
+        self.__retrieve_variables(geo_dat,cal_dat,dlp_dat,verbose)
+        self.__compute_variables(occ,verbose)
+        self.__interpolate_variables(verbose)
+        self.__del_attributes()
+
+        if not check_boole(taudata):
+            if (type(taudata) != type("Hi!")):
+                raise TypeError("taudata must be a string: '/path/to/taudata'")
+            else:
+                tau_dat         = self.__get_tau(taudata,verbose=verbose)
+                rho_km_vals     = self.rho_km_vals
+                tr              = tau_dat.rho_km_vals
+                tt              = tau_dat.raw_tau_vals
+                tpdeg           = tau_dat.phase_deg_vals
+                tbdeg           = tau_dat.B_deg_vals
+                rmin            = np.min(tr)
+                rmax            = np.max(tr)
+                rstart          = int(np.min((rho_km_vals-rmin>=0).nonzero()))
+                rfin            = int(np.max((rmax-rho_km_vals>=0).nonzero()))
+                tau_rho         = rho_km_vals[rstart:rfin+1]
+                tbrad           = tbdeg*spice.rpd()
+                tprad           = tpdeg*spice.rpd()
+                tm              = np.sin(np.abs(tbrad))
+                tt_interp       = interpolate.interp1d(tr,tt,kind='linear')
+                tphase_interp   = interpolate.interp1d(tr,tprad,kind='linear')
+                phase_vals      = tphase_interp(tau_rho)
+                tau_vals        = tt_interp(tau_rho)
+                tm_interp       = interpolate.interp1d(tr,tm,kind='linear')
+                tmu             = tm_interp(tau_rho)
+                power_vals      = np.exp(-tau_vals/tmu)
+                self.power_vals = power_vals
+                self.tau_vals   = tau_vals
+                self.phase_vals = phase_vals
+                self.tau_rho    = tau_rho
+        elif (bool(taudata) == True):
+            raise TypeError("taudata must be a string: '/path/to/taudata'")
+        else: pass
+
+        if verbose: print("Data Extraction Complete.")
+        if verbose: print("Writing History...")
+        self.history    = self.__write_hist_dict()
+        if verbose: print("History Complete.")
+
+    def __retrieve_variables(self,geo_dat,cal_dat,dlp_dat,verbose):
         if verbose: print("Retrieving Variables...")
         rho_km_vals = np.array(dlp_dat.rho_km_vals)
         rhotype     = check_real(rho_km_vals)
         if not rhotype:
-            raise TypeError(
-                "Bad DLP Input: rho_km_vals must be real valued.")
+            raise TypeError("Bad DLP: rho_km_vals not real valued.")
         elif (np.min(rho_km_vals) < 0.0):
-            raise ValueError(
-                "Bad DLP Input: rho_km_vals has negative values.")
-        else: rhotype
-        phi_deg_vals = np.array(dlp_dat.phi_deg_vals)
-        raw_tau_vals = np.array(dlp_dat.raw_tau_vals)
-        tautype      = check_real(raw_tau_vals)
+            raise ValueError("Bad DLP: rho_km_vals has negative values.")
+        else: del rhotype
+        
+        phi_deg_vals    = np.array(dlp_dat.phi_deg_vals)
+        phitype         = check_real(phi_deg_vals)
+        if not phitype:
+            raise TypeError("Bad DLP: phi_deg_vals not real valued.")
+        elif (np.max(np.abs(phi_deg_vals)) > 360.0):
+            raise ValueError("Bad DLP: max{|phi_deg_vals|} > 360")
+        else: del phitype
+
+        raw_tau_vals    = np.array(dlp_dat.raw_tau_vals)
+        tautype         = check_real(raw_tau_vals)
         if not tautype:
-            raise TypeError(
-                "Bad DLP Input: raw_tau_vals must be real valued.")
+            raise TypeError("Bad DLP: raw_tau_vals not real valued.")
         else: del tautype
 
         phase_deg_vals  = np.array(dlp_dat.phase_deg_vals)
-        B_deg_vals      = np.array(dlp_dat.B_deg_vals)
-        geo_rho         = np.array(geo_dat.rho_km_vals)
-        geo_D           = np.array(geo_dat.D_km_vals)
-        rhotype         = check_real(geo_rho)
-        dtype           = check_real(geo_D)
-        if not rhotype:
-            raise TypeError(
-                "Bad GEO Input: geo_rho must be real valued.")
-        elif (np.min(geo_rho) < 0.0):
-            raise ValueError(
-                "Bad GEO Input: geo_rho has negative values.")
-        else: del rhotype
-        if not dtype:
-            raise TypeError(
-                "Bad GEO Input: geo_D must be real valued.")
-        elif (np.min(geo_D) < 0.0):
-            raise ValueError(
-                "Bad GEO Input: geo_D has negative values.")
-        else: del dtype
+        phasetype       = check_real(phase_deg_vals)
+        if not phasetype:
+            raise TypeError("Bad DLP: phase_deg_vals not real valued.")
+        elif (np.max(np.abs(phase_deg_vals)) > 360.0):
+            raise ValueError("Bad DLP: max{|phase_deg_vals|} > 360")
+        else: del phasetype
+    
+        B_deg_vals  = np.array(dlp_dat.B_deg_vals)
+        Btype       = check_real(B_deg_vals)
+        if not Btype:
+            raise TypeError("Bad DLP: B_deg_vals not real valued.")
+        elif (np.max(np.abs(phi_deg_vals)) > 360.0):
+            raise ValueError("Bad DLP: max{|B_deg_vals|} > 360")
+        else: del Btype
 
-        geo_drho       = np.array(geo_dat.rho_dot_kms_vals)
+        geo_rho = np.array(geo_dat.rho_km_vals)
+        rhotype = check_real(geo_rho)
+        if not rhotype:
+            raise TypeError("Bad GEO: rho_km_vals not real valued.")
+        elif (np.min(rho_km_vals) < 0.0):
+            raise ValueError("Bad GEO: rho_km_vals has negative values.")
+        else: del rhotype
+
+        geo_D   = np.array(geo_dat.D_km_vals)
+        Dtype   = check_real(geo_D)
+        if not Dtype:
+            raise TypeError("Bad GEO: D_km_vals not real valued.")
+        elif (np.min(rho_km_vals) < 0.0):
+            raise ValueError("Bad GEO: D_km_vals has negative values.")
+        else: del Dtype
+
+        geo_drho    = np.array(geo_dat.rho_dot_kms_vals)
+        drhotype    = check_real(geo_D)
+        if not drhotype:
+            raise TypeError("Bad GEO: rho_dot_kms_vals not real valued.")
+        else: del drhotype
+
         f_sky_raw_vals = np.array(cal_dat.f_sky_pred_vals)
         freqtype       = check_real(f_sky_raw_vals)
         if not freqtype:
-            raise TypeError(
-                "Bad CAL Input: f_sky_raw_vals must be real valued.")
+            raise TypeError("Bad CAL: f_sky_raw_vals not real valued.")
         elif (np.min(f_sky_raw_vals) < 0.0):
-            raise ValueError(
-                "Bad CAL Input: f_sky_raw_vals has negative values.")
+            raise ValueError("Bad CAL: f_sky_raw_vals has negative values.")
+        elif (np.min(f_sky_raw_vals) < 10000.0):
+            raise ValueError("Bad CAL: f_sky_raw_vals less than 1e4 Hz.")
         else: del freqtype
 
-        if verbose: print("Computing Variables...")
-        phi_rad_vals   = phi_deg_vals*spice.rpd()
-        phase_rad_vals = phase_deg_vals*spice.rpd()
-        B_rad_vals     = B_deg_vals*spice.rpd()
-        raw_mu         = np.sin(np.abs(B_rad_vals))
-        p_norm_vals    = np.exp(-raw_tau_vals/raw_mu)
+        self.rho_km_vals    =   rho_km_vals
+        self.phi_deg_vals   =   phi_deg_vals
+        self.raw_tau_vals   =   raw_tau_vals
+        self.phase_deg_vals =   phase_deg_vals
+        self.B_deg_vals     =   B_deg_vals
+        self.geo_rho        =   geo_rho
+        self.geo_D          =   geo_D
+        self.geo_drho       =   geo_drho
+        self.f_sky_raw_vals =   f_sky_raw_vals
 
-        if (occ == 'ingress'):
-            crange = (geo_drho < 0.0).nonzero()
-        elif (occ == 'egress'):
-            crange = (geo_drho > 0.0).nonzero()
+    def __compute_variables(self,occ,verbose):
+        if verbose: print("Computing Variables...")
+        phi_rad_vals    = self.phi_deg_vals*spice.rpd()
+        phase_rad_vals  = self.phase_deg_vals*spice.rpd()
+        B_rad_vals      = self.B_deg_vals*spice.rpd()
+        raw_mu          = np.sin(np.abs(B_rad_vals))
+        raw_tau_vals    = self.raw_tau_vals
+        geo_drho        = self.geo_drho
+        p_norm_vals     = np.exp(-raw_tau_vals/raw_mu)
+
+        if (occ == 'ingress'):  crange = (geo_drho < 0.0).nonzero()
+        elif (occ == 'egress'): crange = (geo_drho > 0.0).nonzero()
         else:
-            crange_e = (geo_drho < 0.0).nonzero()
-            crange_i = (geo_drho > 0.0).nonzero()
+            crange_e = (geo_drho > 0.0).nonzero()
+            crange_i = (geo_drho < 0.0).nonzero()
             n_e      = np.size(crange_e)
             n_i      = np.size(crange_i)
             if (n_e != 0) and (n_i !=0):
@@ -2616,42 +2671,49 @@ class extract_csv_data(object):
                     to examine the ingress portion, and occ='egress'\
                     for the egress porition.")
             elif (n_e == 0) and (n_i == 0):
-                raise ValueError(
-                    "rho_dot_kms_vals is either empty or zero for all points.")
+                raise ValueError("rho_dot_kms_vals is either empty or zero.")
             elif (n_e != 0) and (n_i == 0):
                 crange = crange_e
                 occ    = 'egress'
-                del n_e, n_i, crange_e, crange_i
             elif (n_e == 0) and (n_i != 0):
                 crange = crange_i
                 occ    = 'ingress'
-                del n_e, n_i, crange_e, crange_i
             else: raise TypeError("Bad Input: GEO DATA")
-        
-        self.occ    = occ
+            del n_e, n_i, crange_e, crange_i
 
         if (np.size(crange) == 0):
             if (occ == 'ingress'):
                 mes = "rho_dot_kms_vals is never negative."
             elif (occ == 'egress'):
                 mes = "rho_dot_kms_vals is never positive."
-            else: raise ValueError("Illegal occ input")
-            raise ValueError(
-                "Bad occ Input: '%s'. %s" % (occ,mes))
-                
+            else: raise ValueError("Bad occ input: Set 'egress' or 'ingress'")
+            raise ValueError("Bad occ Input: '%s': %s" % (occ,mes))
+        
+        self.occ            = occ
+        self.crange         = crange
+        self.p_norm_vals    = p_norm_vals
+        self.B_rad_vals     = B_rad_vals
+        self.phase_rad_vals = phase_rad_vals
+        self.phi_rad_vals   = phi_rad_vals
+        self.raw_mu         = raw_mu
+
+    def __interpolate_variables(self,verbose):
         if verbose: print("Interpolating Data...")
-        geo_rho          = geo_rho[crange]
-        geo_drho         = geo_drho[crange]
-        geo_D            = geo_D[crange]
+        crange           = self.crange
+        rho_km_vals      = self.rho_km_vals
+        f_sky_raw_vals   = self.f_sky_raw_vals
+        geo_rho          = self.geo_rho[crange]
+        geo_drho         = self.geo_drho[crange]
+        geo_D            = self.geo_D[crange]
         rmin             = np.min(geo_rho)
         rmax             = np.max(geo_rho)
         rstart           = int(np.min((rho_km_vals-rmin>=0.0).nonzero()))
         rfin             = int(np.max((rmax-rho_km_vals>=0.0).nonzero()))
         rho_km_vals      = rho_km_vals[rstart:rfin+1]
-        phi_rad_vals     = phi_rad_vals[rstart:rfin+1]
-        phase_rad_vals   = phase_rad_vals[rstart:rfin+1]
-        B_rad_vals       = B_rad_vals[rstart:rfin+1]
-        p_norm_vals      = p_norm_vals[rstart:rfin+1]
+        phi_rad_vals     = self.phi_rad_vals[rstart:rfin+1]
+        phase_rad_vals   = self.phase_rad_vals[rstart:rfin+1]
+        B_rad_vals       = self.B_rad_vals[rstart:rfin+1]
+        p_norm_vals      = self.p_norm_vals[rstart:rfin+1]
         d_km_interp      = interpolate.interp1d(geo_rho,geo_D,kind='linear')
         D_km_vals        = d_km_interp(rho_km_vals)
         rho_dot_interp   = interpolate.interp1d(geo_rho,geo_drho,kind='linear')
@@ -2663,22 +2725,8 @@ class extract_csv_data(object):
         fsky_interp      = interpolate.interp1d(frange,f_sky_raw_vals,kind='linear')
         f_sky_hz_vals    = fsky_interp(xrange)
 
-        if not tauboole:
-            rmin          = np.min(tr)
-            rmax          = np.max(tr)
-            rstart        = int(np.min((rho_km_vals-rmin>=0).nonzero()))
-            rfin          = int(np.max((rmax-rho_km_vals>=0).nonzero()))
-            tau_rho       = rho_km_vals[rstart:rfin+1]
-            tbrad         = tbdeg*spice.rpd()
-            tprad         = tpdeg*spice.rpd()
-            tm            = np.sin(np.abs(tbrad))
-            tt_interp     = interpolate.interp1d(tr,tt,kind='linear')
-            tphase_interp = interpolate.interp1d(tr,tprad,kind='linear')
-            phase_vals    = tphase_interp(tau_rho)
-            tau_vals      = tt_interp(tau_rho)
-            tm_interp     = interpolate.interp1d(tr,tm,kind='linear')
-            tmu           = tm_interp(tau_rho)
-            power_vals    = np.exp(-tau_vals/tmu)
+        del f_sky_raw_vals,geo_rho,geo_drho,geo_D,rmin,rmax,rstart,rfin
+        del rho_dot_interp,n_rho_vals,n_f_vals,frange,xrange,fsky_interp
         
         self.rho_km_vals      = rho_km_vals
         self.phi_rad_vals     = phi_rad_vals
@@ -2688,15 +2736,10 @@ class extract_csv_data(object):
         self.D_km_vals        = D_km_vals
         self.f_sky_hz_vals    = f_sky_hz_vals
         self.rho_dot_kms_vals = rho_dot_kms_vals
-        if not tauboole:
-            self.power_vals = power_vals
-            self.tau_vals   = tau_vals
-            self.phase_vals = phase_vals
-            self.tau_rho    = tau_rho
 
-        if verbose: print("Data Extraction Complete.")
-        
-        self.history    = self.__write_hist_dict()
+    def __del_attributes(self):
+        del self.phi_deg_vals,self.raw_tau_vals,self.phase_deg_vals,self.raw_mu
+        del self.B_deg_vals,self.geo_rho,self.geo_D,self.geo_drho,self.crange
 
     def __get_geo(self,geodata,verbose=True):
         if verbose: print("Extracting Geo Data...")
@@ -2763,8 +2806,24 @@ class extract_csv_data(object):
     
     def __get_tau(self,taudata,verbose=True):
         if verbose: print("Extracting Tau Data...")
-        dft = np.genfromtxt(taudata, delimiter=',')
-        if verbose: print("Tau Data Complete.")
+        dft = pd.read_csv(taudata, delimiter=',',
+            names=[
+                "rho_km_vals",
+                "rho_km_pole_corr_vals",
+                "rho_km_offsett_vals",
+                "phi_rl_deg_vals",
+                "phi_deg_vals",
+                "raw_tau_vals",
+                "phase_deg_vals",
+                "raw_tau_thresh_vals",
+                "spm_vals",
+                "t_ret_spm_vals",
+                "t_set_spm_vals",
+                "B_deg_vals"
+            ]
+        )
+
+        if verbose: print("Tau Data Complete")
         return dft
 
     def __write_hist_dict(self):
@@ -2793,9 +2852,13 @@ class extract_csv_data(object):
             "Source Directory"  : src_dir,
             "Source File"       : src_file,
             "Input Variables"   : {
+                "GEO"   :   self.geodata,
+                "CAL"   :   self.caldata,
+                "DLP"   :   self.dlpdata
             },
             "Input Keywords"    : {
-
+                "TAU"       :   self.taudata,
+                "OCC"       :   self.occ
             }
         }
         return csv_hist
@@ -2933,10 +2996,160 @@ class rec_data(object):
             self.rho_dot_kms_vals = np.abs(self.rho_dot_kms_vals[::-1])
 
 class diffraction_correction(object):
+    """
+        Class:
+            diffraction_correction
+        Purpose:
+            Perform diffraction correction for a ring occultation
+            on a data set that is a near radially symmetric function
+            of the ring radius, or ring intercept point (RIP).
+        Arguments:
+            dat:    
+                The data set, usually an instance of the NormDiff
+                class from the rss_ringoccs Calibration subpackage.
+                This instance MUST contain the following attributes
+                and MUST have the same names.
+                    rho_km_vals:      Ring Radius (km)
+                    phi_rad_vals:     Ring Azimuth Angle (Radians)
+                    p_norm_vals:      Normalized Power
+                    phase_rad_vals:   Phase (Radians)
+                    B_rad_vals:       Elevation Angle (Radians)
+                    D_km_vals:        RIP-Distance (km)
+                    f_sky_hz_vals:    Sky Frequency (Hertz)
+                    rho_dot_kms_vals: RIP-velocity (km/s)
+                    history:          History dictionary
+            res:    
+                The requested resolution for processing (km). This
+                must be a positive real number, that is, a positive
+                floating point number or integer.
+        Keywords:
+            rng:    
+                The request range for diffraction correction.
+                Preferred input is rng = [a,b]. Arrays are
+                allowed and the range will be set as:
+                    rng = [MIN(array),MAX(array)]
+                Finally, certain strings containing a few of the
+                regions of interests within the rings of Saturn
+                are allowed. Permissible strings are:
+                    'maxwell', 'titan', 'huygens', and 'encke'.
+                Strings are neither case nor space sensitive.
+                For other planets use rng = [a,b]. Default value
+                is set to 'all' which processing [65,000,140,000]
+                Values MUST be set in kilometers.
+            wtype:  
+                The requested tapering function for diffraction
+                correction. A string with several allowed inputs:
+                    'rect'      Rectangular Window.
+                    'coss'      Squares Cosine Window.
+                    'kb20'      Kaiser-Bessel 2.0 Window.
+                    'kb25'      Kaiser-Bessel 2.5 Window.
+                    'kb35'      Kaiser-Bessel 3.5 Window.
+                    'kbmd20'    Modified kb20 Window.
+                    'kbmd25'    Modified kb25 Window.
+                The variable is neither case nor space sensitive.
+                Default window is set to 'kb25'
+            fwd:    
+                A Boolean for determining whether or not
+                forward modelling will be computed. This is good
+                starting point for deciding if the diffraction
+                correction is physically significant or valid. If
+                the reconstruction is good, the forward model
+                should reproduce the p_norm_vals attribute from
+                the input dat instance. Default is set to False.
+            norm:
+                A Boolean for determining whether or not the
+                reconstructed complex transmittance is normalize
+                by the window width. This normalization is the
+                complex transmittance that is computed by using
+                free space divided by the complex transmittance
+                that is computed using free space weighted by the
+                selected tapering function. Default is True.
+            bfac:
+                A Boolean for determining whether or not the
+                'b' factor in the window width computation is
+                used. This is equivalent to setting the Allen
+                Deviation from the spacecraft to a positive value
+                or to zero. If set to False, the Allen Deviation
+                is assumed to be zero. If set to True the Allen
+                Deviation is set to 2e-13. If set to a positive
+                real number, the Allen Deviation will be assumed
+                to be that real number. Default is True.
+            fft:    
+                A Boolean for determining whether or not FFT's will
+                be used for computing the complex transmittance. The
+                use of FFT's assumes that the geometry of the system
+                is such that the integral that is used to compute the
+                complex transmittance is of the form of a
+                convolution, and that the convolution theorem may be
+                applied to it. Default is set to False.
+            psitype:
+                A string for determining what approximation to the
+                geometrical 'psi' function is used. Several strings
+                are allowed:
+                    'full'      No Approximation is applied.
+                    'taylor2'   Second order Taylor Series.
+                    'taylor3'   Third order Taylor Series.
+                    'taylor4'   Fourth order Taylor Series.
+                    'MTR2'      Second Order Series from MTR86.
+                    'MTR3'      Third Order Series from MTR86.
+                    'MTR4'      Fourth Order Series from MTR86.
+                The variable is neither case nor space sensitive.
+                Default is set to 'full'.
+            verbose:
+                A Boolean for determining if various pieces of
+                information are printed to the screen or not.
+                Default is False.
+        Outputs:
+            T_hat_vals:
+                Complex transmittance of the diffracted data.
+            F_km_vals:
+                Fresnel scale (km).
+            w_km_vals:
+                Window width as a function of ring radius (km).
+            mu_vals:
+                The sine of the elevation angle.
+            lambda_sky_km_vals:
+                Wavelength of the recieved signal (km).
+            dx_km:  
+                Radial spacing between points (km).
+            norm_eq:        
+                Normalized equivalent width of the window function.
+            n_used:
+                Number of points that were processed (integer).
+            start:
+                Starting point used for processing (integer).
+            T_vals:
+                Complex transmittance of reconstructed data.
+            power_vals:
+                Normalized power of the reconstructed data.
+            tau_vals:
+                Normalized optical depth of the reconstructed data.
+            phase_vals:
+                Phase of the reconstructed data (Radians).
+            p_norm_fwd_vals:
+                Normalized power of forward model (fwd=True).
+            T_hat_fwd_vals:
+                Complex transmittance of forward model (fwd=True).
+            phase_fwd_vals:
+                Phase of forward model (fwd=True).
+            history:
+                History dictionary of the runtime OS settings.
+        Dependencies:
+            [1] numpy
+            [2] scipy
+            [3] diffcorr
+            [4] 
+        Notes:
+            [1] 
+        References:
 
-    def __init__(self,dat,res,rng="all",wtype="kb25",dir="",rev="",
-        fwd=False,norm=True,verbose=True,bfac=True,fft=False,
-        psitype="full"):
+        Examples:
+
+        History:
+            Created: RJM - 2018/05/16 5:40 P.M.
+    """
+    def __init__(self,dat,res,rng="all",wtype="kb25",fwd=False,
+        norm=True,bfac=True,fft=False,psitype="full",verbose=True):
         t1       = time.time()
 
         self.res                = None
@@ -2984,14 +3197,31 @@ class diffraction_correction(object):
         self.psitype    = psitype
         self.dathist    = dat.history
 
-        recdata = rec_data(dat, res, wtype,bfac=bfac)
-
-        self.__set_dc_attributes(recdata)
-
+        recdata                 = rec_data(dat,res,wtype,bfac=bfac)
+        self.res                = recdata.res
+        self.wtype              = recdata.wtype
+        self.rho_km_vals        = recdata.rho_km_vals
+        self.p_norm_vals        = recdata.p_norm_vals
+        self.phase_rad_vals     = recdata.phase_rad_vals
+        self.B_rad_vals         = recdata.B_rad_vals
+        self.D_km_vals          = recdata.D_km_vals
+        self.f_sky_hz_vals      = recdata.f_sky_hz_vals
+        self.phi_rad_vals       = recdata.phi_rad_vals
+        self.rho_dot_kms_vals   = recdata.rho_dot_kms_vals
+        self.T_hat_vals         = recdata.T_hat_vals
+        self.F_km_vals          = recdata.F_km_vals
+        self.w_km_vals          = recdata.w_km_vals
+        self.mu_vals            = recdata.mu_vals
+        self.lambda_sky_km_vals = recdata.lambda_sky_km_vals
+        self.dx_km              = recdata.dx_km
+        self.norm_eq            = recdata.norm_eq
         del recdata
 
-        self.__compute_dc_attributes(rng)
-        self.__trim_inputs()
+        self.rng                = get_range_request(rng)
+        self.start,self.n_used  = get_range_actual(self.rho_km_vals,
+            self.rng,self.w_km_vals)
+
+        #self.__trim_inputs()
 
         if verbose:
             if (psitype == "full"):
@@ -3037,10 +3267,66 @@ class diffraction_correction(object):
         del fwd, verbose, psitype, norm
 
         self.history = self.__write_hist_dict()
-
         t2 = time.time()
         sys.stdout.write("\033[K")
         print("Computation Time: ",t2-t1,end="\r")
+    
+    def __trim_attributes(self,fwd):
+        start  = self.start
+        n_used = self.n_used
+        crange = np.arange(n_used)+start
+
+        self.rho_km_vals         = self.rho_km_vals[crange]
+        self.p_norm_vals         = self.p_norm_vals[crange]
+        self.phase_rad_vals      = self.phase_rad_vals[crange]
+        self.B_rad_vals          = self.B_rad_vals[crange]
+        self.D_km_vals           = self.D_km_vals[crange]
+        self.f_sky_hz_vals       = self.f_sky_hz_vals[crange]
+        self.phi_rad_vals        = self.phi_rad_vals[crange]
+        self.rho_dot_kms_vals    = self.rho_dot_kms_vals[crange]
+        self.T_hat_vals          = self.T_hat_vals[crange]
+        self.F_km_vals           = self.F_km_vals[crange]
+        self.w_km_vals           = self.w_km_vals[crange]
+        self.mu_vals             = self.mu_vals[crange]
+        self.lambda_sky_km_vals  = self.lambda_sky_km_vals[crange]
+        self.T_vals              = self.T_vals[crange]
+        self.power_vals          = self.power_vals[crange]
+        self.tau_vals            = self.tau_vals[crange]
+        self.phase_vals          = self.phase_vals[crange]
+        if fwd:
+            self.p_norm_fwd_vals = self.p_norm_fwd_vals[crange]
+            self.T_hat_fwd_vals  = self.T_hat_fwd_vals[crange]
+            self.phase_fwd_vals  = self.phase_fwd_vals[crange]
+    
+    def __trim_inputs(self):
+        start   = self.start
+        n_used  = self.n_used
+        rho     = self.rho_km_vals
+        rstart  = rho[start]
+        rfin    = rho[start+n_used+1]
+        w_vals  = self.w_km_vals
+        w       = np.ceil(np.max(w_vals[start:start+n_used+1])/2.0)
+        nst     = np.min((rho>=(rstart-w)).nonzero())
+        nen     = np.max((rho<=(rfin+w)).nonzero())
+        del n_used, rho, rstart, rfin, w_vals, w
+
+        nreq   = 1 + (nen - nst)
+        crange = np.arange(nreq)+nst
+        self.rho_km_vals         = self.rho_km_vals[crange]
+        self.start               = start-nst
+        self.p_norm_vals         = self.p_norm_vals[crange]
+        self.phase_rad_vals      = self.phase_rad_vals[crange]
+        self.B_rad_vals          = self.B_rad_vals[crange]
+        self.D_km_vals           = self.D_km_vals[crange]
+        self.f_sky_hz_vals       = self.f_sky_hz_vals[crange]
+        self.phi_rad_vals        = self.phi_rad_vals[crange]
+        self.rho_dot_kms_vals    = self.rho_dot_kms_vals[crange]
+        self.T_hat_vals          = self.T_hat_vals[crange]
+        self.F_km_vals           = self.F_km_vals[crange]
+        self.w_km_vals           = self.w_km_vals[crange]
+        self.mu_vals             = self.mu_vals[crange]
+        self.lambda_sky_km_vals  = self.lambda_sky_km_vals[crange]
+        del nreq, crange
 
     def __rect(w_in, dx):
         nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
@@ -3087,89 +3373,6 @@ class diffraction_correction(object):
         alpha  = 2.5 * np.pi
         w_func = (iv(0.0,alpha*np.sqrt((1.0-(2.0*x/w_in)**2)))-1)/(iv(0.0,alpha)-1)
         return w_func
-
-    def __set_dc_attributes(self,recdata):
-        self.res                = recdata.res
-        self.wtype              = recdata.wtype
-        self.rho_km_vals        = recdata.rho_km_vals
-        self.p_norm_vals        = recdata.p_norm_vals
-        self.phase_rad_vals     = recdata.phase_rad_vals
-        self.B_rad_vals         = recdata.B_rad_vals
-        self.D_km_vals          = recdata.D_km_vals
-        self.f_sky_hz_vals      = recdata.f_sky_hz_vals
-        self.phi_rad_vals       = recdata.phi_rad_vals
-        self.rho_dot_kms_vals   = recdata.rho_dot_kms_vals
-        self.T_hat_vals         = recdata.T_hat_vals
-        self.F_km_vals          = recdata.F_km_vals
-        self.w_km_vals          = recdata.w_km_vals
-        self.mu_vals            = recdata.mu_vals
-        self.lambda_sky_km_vals = recdata.lambda_sky_km_vals
-        self.dx_km              = recdata.dx_km
-        self.norm_eq            = recdata.norm_eq
-    
-    def __compute_dc_attributes(self,rng):
-        self.rng               = get_range_request(rng)
-        self.start,self.n_used = get_range_actual(self.rho_km_vals,
-            self.rng,self.w_km_vals)
-    
-    def __trim_attributes(self,fwd):
-        start  = self.start
-        n_used = self.n_used
-        crange = np.arange(n_used)+start
-
-        self.rho_km_vals         = self.rho_km_vals[crange]
-        self.p_norm_vals         = self.p_norm_vals[crange]
-        self.phase_rad_vals      = self.phase_rad_vals[crange]
-        self.B_rad_vals          = self.B_rad_vals[crange]
-        self.D_km_vals           = self.D_km_vals[crange]
-        self.f_sky_hz_vals       = self.f_sky_hz_vals[crange]
-        self.phi_rad_vals        = self.phi_rad_vals[crange]
-        self.rho_dot_kms_vals    = self.rho_dot_kms_vals[crange]
-        self.T_hat_vals          = self.T_hat_vals[crange]
-        self.F_km_vals           = self.F_km_vals[crange]
-        self.w_km_vals           = self.w_km_vals[crange]
-        self.mu_vals             = self.mu_vals[crange]
-        self.lambda_sky_km_vals  = self.lambda_sky_km_vals[crange]
-        self.T_vals              = self.T_vals[crange]
-        self.power_vals          = self.power_vals[crange]
-        self.tau_vals            = self.tau_vals[crange]
-        self.phase_vals          = self.phase_vals[crange]
-        if fwd:
-            self.p_norm_fwd_vals = self.p_norm_fwd_vals[crange]
-            self.T_hat_fwd_vals  = self.T_hat_fwd_vals[crange]
-            self.phase_fwd_vals  = self.phase_fwd_vals[crange]
-    
-    def __trim_inputs(self):
-        start   = self.start
-        n_used  = self.n_used
-        rho     = self.rho_km_vals
-        rstart  = rho[start]
-        rfin    = rho[start+n_used+1]
-        w_vals  = self.w_km_vals
-        w       = np.ceil(np.max(w_vals[start:start+n_used+1])/2.0)
-        nst = np.min((rho>=(rstart-w)).nonzero())
-        nen = np.max((rho<=(rfin+w)).nonzero())
-
-        del n_used, rho, rstart, rfin, w_vals, w
-
-        nreq   = 1 + (nen - nst)
-        crange = np.arange(nst)+nreq
-        self.rho_km_vals         = self.rho_km_vals[crange]
-        self.start               = start-nreq
-        self.p_norm_vals         = self.p_norm_vals[crange]
-        self.phase_rad_vals      = self.phase_rad_vals[crange]
-        self.B_rad_vals          = self.B_rad_vals[crange]
-        self.D_km_vals           = self.D_km_vals[crange]
-        self.f_sky_hz_vals       = self.f_sky_hz_vals[crange]
-        self.phi_rad_vals        = self.phi_rad_vals[crange]
-        self.rho_dot_kms_vals    = self.rho_dot_kms_vals[crange]
-        self.T_hat_vals          = self.T_hat_vals[crange]
-        self.F_km_vals           = self.F_km_vals[crange]
-        self.w_km_vals           = self.w_km_vals[crange]
-        self.mu_vals             = self.mu_vals[crange]
-        self.lambda_sky_km_vals  = self.lambda_sky_km_vals[crange]
-
-        del nreq, crange
 
     def __fresinv(self,T_hat,ker,dx,f_scale):
         T = np.sum(ker * T_hat) * dx * (1.0+1.0j) / (2.0 * f_scale)
@@ -3489,20 +3692,20 @@ class diffraction_correction(object):
         dsq       = d_vals*d_vals
         rsq       = rho_vals*rho_vals
         # Define functions
-        fw        = self.__func_dict[wtype]["func"]
-        psifac    = self.__psifacfast
+        fw          = self.__func_dict[wtype]["func"]
+        psifac      = self.__psifacfast
         if fft:
-           finv   = self.__fresinvfft
+           finv     = self.__fresinvfft
         else: 
-            finv  = self.__fresinv
-        psif      = self.__psifast
-        nrm       = self.__normalize
+            finv    = self.__fresinv
+        psif        = self.__psifast
+        nrm         = self.__normalize
         # Calculate the corrected complex amplitude, point by point
-        T_vals    = T_hat_vals * 0.0
-        w_init    = w_vals[start]
-        w_func    = fw(w_init,dx)
-        nw        = np.size(w_func)
-        phi_s_rad1 = phi_rad_vals[start]
+        T_vals      = T_hat_vals * 0.0
+        w_init      = w_vals[start]
+        w_func      = fw(w_init,dx)
+        nw          = np.size(w_func)
+        phi_s_rad1  = phi_rad_vals[start]
         for i in np.arange(n_used):
             center = start+i
             r0     = rho_vals[center]
@@ -3944,16 +4147,17 @@ class diffraction_correction(object):
         return tau_hist
 
 class compare_tau(object):
-    def __init__(self,geodata,caldata,dlpdata,taudata,occ,res,
+    def __init__(self,geodata,caldata,dlpdata,taudata,res,occ=False,
         rng='all',wtype="kb25",bfac=True,fft=False,verbose=True,
         norm=True):
-        data             = extract_csv_data(geodata,caldata,dlpdata,
-            occ,taudata=taudata,verbose=verbose)
+        data    = extract_csv_data(geodata,caldata,dlpdata,
+            occ=occ,taudata=taudata,verbose=verbose)
         
         tau_power   = data.power_vals
         tau_phase   = data.phase_vals
         tau_tau     = data.tau_vals
-        rec         = diffraction_correction(data,res,rng=rng,bfac=bfac,wtype=wtype,fft=fft,verbose=verbose,norm=norm)
+        rec         = diffraction_correction(data,res,rng=rng,bfac=bfac,
+            wtype=wtype,fft=fft,verbose=verbose,norm=norm)
         tr          = data.tau_rho
         rho_km_vals = rec.rho_km_vals
         rmin        = np.min(tr)
@@ -4050,43 +4254,42 @@ class find_optimal_resolution(object):
         self.resfft  = resfft
 
 class delta_impulse_diffraction(object):
-    def __init__(self,geo,cal,dlp,res,rho,occ=False,wtype='kb25',rng='all',
-        fwd=False,norm=True,fast=True,verbose=True,bfac=True,fft=False,
-        psitype=False):
+    def __init__(self,geo,lambda_km,res,rho,dx_km_desired=0.25,
+        occ=False,wtype='kb25',fwd=False,norm=True,
+        fast=True,verbose=True,bfac=True,fft=False,psitype=False):
     
-        data = extract_csv_data(geo,cal,dlp,
-            occ=occ,verbose=verbose)
-        
-        self.__set_attributes(data)
+        data = self.__get_geo(geo,verbose=verbose)
+        self.__retrieve_variables(data,verbose)
+        self.__compute_variables(dx_km_desired,occ,verbose)
+        self.__interpolate_variables(verbose)
 
         r        = self.rho_km_vals
+        rng      = [rho-10.0*res,rho+10.0*res]
         nstar    = np.min((r-rho>=0).nonzero())
         rstar    = r[nstar]
         phi      = self.phi_rad_vals
         phistar  = phi[nstar]
         b        = self.B_rad_vals
         d        = self.D_km_vals
-        Lambda   = freq_wav(self.f_sky_hz_vals)
-        F        = fresnel_scale(Lambda,d,phi,b)
-        kD       = 2.0 * np.pi * d / Lambda
+        F        = fresnel_scale(lambda_km,d,phi,b)
+        kD       = 2.0 * np.pi * d / lambda_km
+        psi_vals = kD*psi(rstar,r,d,b,phistar,phi)
+        """
         if (not psitype):
-            psi_vals = kD*psi(rstar,r,d,b,phistar,phi)
+            psi_vals = kD*psi(r,rstar,d,b,phi,phistar)
         else:
             psi_vals = (np.pi/2.0)*((r-rstar)/F)*((r-rstar)/F)
-        
-        self.nstar    = nstar
-        self.kD       = kD
-        self.d        = d
-        self.r        = r
-        self.F        = F
-        self.psi_vals = psi_vals
+        """
 
         T_hat_vals     = (1.0-1.0j)*np.exp(1j*psi_vals)/(2.0*F)
         p_norm_vals    = np.abs(T_hat_vals)*np.abs(T_hat_vals)
         phase_rad_vals = -np.arctan2(np.imag(T_hat_vals),np.real(T_hat_vals))
 
+        lambda_vals         = np.zeros(np.size(self.rho_km_vals))+lambda_km
         self.p_norm_vals    = p_norm_vals
         self.phase_rad_vals = phase_rad_vals
+        self.f_sky_hz_vals  = freq_wav(lambda_vals)
+        self.history        = "Bob"
 
         data = self
 
@@ -4123,14 +4326,159 @@ class delta_impulse_diffraction(object):
         self.T_hat_fwd_vals     = None
         self.phase_fwd_vals     = None
         self.norm               = recdata.norm
-        self.fast               = recdata.fast
         self.fwd                = recdata.fwd
         self.fft                = recdata.fft
 
-    def __set_attributes(self, NormDiff):
-        self.rho_km_vals      = NormDiff.rho_km_vals
-        self.B_rad_vals		  = NormDiff.B_rad_vals
-        self.D_km_vals		  = NormDiff.D_km_vals
-        self.f_sky_hz_vals    = NormDiff.f_sky_hz_vals
-        self.phi_rad_vals     = NormDiff.phi_rad_vals
-        self.rho_dot_kms_vals = NormDiff.rho_dot_kms_vals
+    def __get_geo(self,geodata,verbose):
+        if verbose: print("Extracting Geo Data...")
+        dfg = pd.read_csv(geodata, delimiter=',',
+            names=[
+                "t_oet_spm_vals",
+				"t_ret_spm_vals",
+				"t_set_spm_vals",
+				"rho_km_vals",
+				"phi_rl_deg_vals",
+				"phi_ora_deg_vals",
+				"B_deg_vals",
+				"D_km_vals",
+				"rho_dot_kms_vals",
+				"phi_rl_dot_kms_vals",
+				"F_km_vals",
+				"R_imp_km_vals",
+				"rx_km_vals",
+			    "ry_km_vals",
+				"rz_km_vals",
+				"vx_kms_vals",
+				"vy_kms_vals",
+				"vz_kms_vals"
+                ]
+            )
+        if verbose: print("Geo Data Complete.")
+        return dfg
+
+    def __retrieve_variables(self,geo_dat,verbose):
+        if verbose: print("Retrieving Variables...")
+        geo_rho = np.array(geo_dat.rho_km_vals)
+        rhotype = check_real(geo_rho)
+        if not rhotype:
+            raise TypeError("Bad GEO: rho_km_vals not real valued.")
+        elif (np.min(geo_rho) < 0.0):
+            raise ValueError("Bad GEO: rho_km_vals has negative values.")
+        else: del rhotype
+
+        geo_D   = np.array(geo_dat.D_km_vals)
+        Dtype   = check_real(geo_D)
+        if not Dtype:
+            raise TypeError("Bad GEO: D_km_vals not real valued.")
+        elif (np.min(geo_D) < 0.0):
+            raise ValueError("Bad GEO: D_km_vals has negative values.")
+        else: del Dtype
+
+        geo_drho    = np.array(geo_dat.rho_dot_kms_vals)
+        drhotype    = check_real(geo_drho)
+        if not drhotype:
+            raise TypeError("Bad GEO: rho_dot_kms_vals not real valued.")
+        else: del drhotype
+
+        geo_phi = np.array(geo_dat.phi_ora_deg_vals)
+        phitype = check_real(geo_phi)
+        if not phitype:
+            raise TypeError("Bad GEO: phi_deg_ora_vals not real valued.")
+        elif (np.max(np.abs(geo_phi)) > 360.0):
+            raise ValueError("Bad GEO: phi_deg_ora_vals > 360")
+        else: del phitype
+
+        geo_B = np.array(geo_dat.B_deg_vals)
+        Btype = check_real(geo_B)
+        if not Btype:
+            raise TypeError("Bad GEO: B_deg_vals not real valued.")
+        elif (np.max(np.abs(geo_B)) > 360.0):
+            raise ValueError("Bad GEO: B_de2g_vals > 360")
+        else: del Btype
+
+        self.geo_rho    = geo_rho
+        self.geo_D      = geo_D
+        self.geo_drho   = geo_drho
+        self.geo_phi    = geo_phi
+        self.geo_B      = geo_B
+
+    def __compute_variables(self,dx_km_desired,occ,verbose):
+        if verbose: print("Computing Variables...")
+        geo_drho        = self.geo_drho
+
+        if (occ == 'ingress'):  crange = (geo_drho < 0.0).nonzero()
+        elif (occ == 'egress'): crange = (geo_drho > 0.0).nonzero()
+        else:
+            crange_e = (geo_drho > 0.0).nonzero()
+            crange_i = (geo_drho < 0.0).nonzero()
+            n_e      = np.size(crange_e)
+            n_i      = np.size(crange_i)
+            if (n_e != 0) and (n_i !=0):
+                raise ValueError(
+                    "rho_dot_kms_vals has positive and negative values.\
+                    This is likely a chord occultation. Set occ='ingress'\
+                    to examine the ingress portion, and occ='egress'\
+                    for the egress porition.")
+            elif (n_e == 0) and (n_i == 0):
+                raise ValueError("rho_dot_kms_vals is either empty or zero.")
+            elif (n_e != 0) and (n_i == 0):
+                crange = crange_e
+                occ    = 'egress'
+            elif (n_e == 0) and (n_i != 0):
+                crange = crange_i
+                occ    = 'ingress'
+            else: raise TypeError("Bad Input: GEO DATA")
+            del n_e, n_i, crange_e, crange_i
+
+        if (np.size(crange) == 0):
+            if (occ == 'ingress'):
+                mes = "rho_dot_kms_vals is never negative."
+            elif (occ == 'egress'):
+                mes = "rho_dot_kms_vals is never positive."
+            else: raise ValueError("Bad occ input: Set 'egress' or 'ingress'")
+            raise ValueError("Bad occ Input: '%s': %s" % (occ,mes))
+
+        geo_rho             = self.geo_rho[crange]
+        geo_D               = self.geo_D[crange]
+        geo_drho            = self.geo_drho[crange]
+        geo_phi             = self.geo_phi[crange]
+        geo_B               = self.geo_B[crange]
+        rmin                = np.min(geo_rho)
+        rmax                = np.max(geo_rho)
+        rho_km_vals         = np.arange(rmin,rmax,dx_km_desired)
+        self.rho_km_vals    = rho_km_vals
+        self.geo_rho        = geo_rho
+        self.geo_D          = geo_D
+        self.geo_drho       = geo_drho
+        self.geo_phi        = geo_phi
+        self.geo_B          = geo_B
+        del rmin,rmax,geo_rho,geo_D,geo_drho,geo_phi,geo_B,rho_km_vals
+
+    def __interpolate_variables(self,verbose):
+        if verbose: print("Interpolating Data...")
+        rho_km_vals      = self.rho_km_vals
+        geo_rho          = self.geo_rho
+        geo_drho         = self.geo_drho
+        geo_D            = self.geo_D
+        geo_phi          = self.geo_phi
+        geo_B            = self.geo_B
+        D_km_interp      = interpolate.interp1d(geo_rho,geo_D,kind='linear')
+        D_km_vals        = D_km_interp(rho_km_vals)
+        rho_dot_interp   = interpolate.interp1d(geo_rho,geo_drho,kind='linear')
+        rho_dot_kms_vals = rho_dot_interp(rho_km_vals)
+        phi_deg_interp   = interpolate.interp1d(geo_rho,geo_phi,kind='linear')
+        phi_deg_vals     = phi_deg_interp(rho_km_vals)
+        B_deg_interp     = interpolate.interp1d(geo_rho,geo_B,kind='linear')
+        B_deg_vals       = B_deg_interp(rho_km_vals)
+
+        phi_rad_vals     = phi_deg_vals*spice.rpd()
+        B_rad_vals       = B_deg_vals*spice.rpd()
+
+        del geo_rho,geo_drho,geo_D,geo_phi,geo_B,D_km_interp,rho_dot_interp
+        del phi_deg_vals,phi_deg_interp,B_deg_interp,B_deg_vals
+        
+        self.rho_km_vals      = rho_km_vals
+        self.phi_rad_vals     = phi_rad_vals
+        self.B_rad_vals       = B_rad_vals
+        self.D_km_vals        = D_km_vals
+        self.rho_dot_kms_vals = rho_dot_kms_vals

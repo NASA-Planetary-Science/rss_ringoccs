@@ -2501,7 +2501,7 @@ class extract_csv_data(object):
         self.t_oet_spm_vals             = None
         self.t_ret_spm_vals             = None
         self.t_set_spm_vals             = None
-        self.rho_corr_pole_vals         = None
+        self.rho_corr_pole_km_vals         = None
         self.rho_corr_timing_km_vals    = None
         self.history                    = None
 
@@ -2635,12 +2635,12 @@ class extract_csv_data(object):
             raise ValueError("Bad DLP: t_oet_spm_vals has negative values.")
         else: del ttype
 
-        rho_corr_pole_vals  = np.array(dlp_dat.rho_corr_pole_vals)
-        rtype           = check_real(rho_corr_pole_vals)
+        rho_corr_pole_km_vals  = np.array(dlp_dat.rho_corr_pole_km_vals)
+        rtype           = check_real(rho_corr_pole_km_vals)
         if not rtype:
-            raise TypeError("Bad DLP: rho_corr_pole_vals not real valued.")
-        elif (np.min(rho_corr_pole_vals) < 0.0):
-            raise ValueError("Bad DLP: rho_corr_pole_vals has negative values.")
+            raise TypeError("Bad DLP: rho_corr_pole_km_vals not real valued.")
+        elif (np.min(rho_corr_pole_km_vals) < 0.0):
+            raise ValueError("Bad DLP: rho_corr_pole_km_vals has negative values.")
         else: del rtype
 
         rho_corr_timing_km_vals = np.array(dlp_dat.rho_corr_timing_km_vals)
@@ -2861,7 +2861,7 @@ class extract_csv_data(object):
         dfd = pd.read_csv(dlpdata, delimiter=',',
             names=[
                 "rho_km_vals",
-                "rho_corr_pole_vals",
+                "rho_corr_pole_km_vals",
                 "rho_corr_timing_km_vals",
                 "phi_rl_deg_vals",
                 "phi_deg_vals",

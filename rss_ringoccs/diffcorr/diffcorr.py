@@ -2750,8 +2750,14 @@ class extract_csv_data(object):
 
     def __interpolate_variables(self,verbose):
         if verbose: print("Interpolating Data...")
-        crange           = self.crange
-        rho_km_vals      = self.rho_km_vals
+        crange                  = self.crange
+        rho_km_vals             = self.rho_km_vals
+        t_set_spm_vals          = self.t_set_spm_vals
+        t_ret_spm_vals          = self.t_ret_spm_vals
+        t_oet_spm_vals          = self.t_oet_spm_vals
+        rho_corr_pole_vals      = self.rho_corr_pole_vals
+        rho_corr_timing_km_vals = self.rho_corr_timing_km_vals
+
         f_sky_raw_vals   = self.f_sky_raw_vals
         geo_rho          = self.geo_rho[crange]
         geo_drho         = self.geo_drho[crange]
@@ -2776,17 +2782,28 @@ class extract_csv_data(object):
         fsky_interp      = interpolate.interp1d(frange,f_sky_raw_vals,kind='linear')
         f_sky_hz_vals    = fsky_interp(xrange)
 
+        t_ret_spm_vals          = t_ret_spm_vals[rstart:rfin+1]
+        t_set_spm_vals          = t_set_spm_vals[rstart:rfin+1]
+        t_oet_spm_vals          = t_oet_spm_vals[rstart:rfin+1]
+        rho_corr_pole_vals      = rho_corr_pole_vals[rstart:rfin+1]
+        rho_corr_timing_km_vals = rho_corr_timing_km_vals[rstart:rfin+1]
+
         del f_sky_raw_vals,geo_rho,geo_drho,geo_D,rmin,rmax,rstart,rfin
         del rho_dot_interp,n_rho_vals,n_f_vals,frange,xrange,fsky_interp
         
-        self.rho_km_vals      = rho_km_vals
-        self.phi_rad_vals     = phi_rad_vals
-        self.p_norm_vals      = p_norm_vals
-        self.phase_rad_vals   = phase_rad_vals
-        self.B_rad_vals       = B_rad_vals
-        self.D_km_vals        = D_km_vals
-        self.f_sky_hz_vals    = f_sky_hz_vals
-        self.rho_dot_kms_vals = rho_dot_kms_vals
+        self.rho_km_vals        = rho_km_vals
+        self.phi_rad_vals       = phi_rad_vals
+        self.p_norm_vals        = p_norm_vals
+        self.phase_rad_vals     = phase_rad_vals
+        self.B_rad_vals         = B_rad_vals
+        self.D_km_vals          = D_km_vals
+        self.f_sky_hz_vals      = f_sky_hz_vals
+        self.rho_dot_kms_vals   = rho_dot_kms_vals
+        t_set_spm_vals          = t_set_spm_vals
+        t_ret_spm_vals          = t_ret_spm_vals
+        t_oet_spm_vals          = t_oet_spm_vals
+        rho_corr_pole_vals      = rho_corr_pole_vals
+        rho_corr_timing_km_vals = rho_corr_timing_km_vals
 
     def __del_attributes(self):
         del self.phi_deg_vals,self.raw_tau_vals,self.phase_deg_vals,self.raw_mu
@@ -3014,6 +3031,7 @@ class rec_data(object):
             self.rho_corr_pole_vals         = NormDiff.rho_corr_pole_vals     
             self.rho_corr_timing_km_vals    = NormDiff.rho_corr_timing_km_vals
         except AttributeError:
+            print("Certain Variables Unavailable")
             self.t_oet_spm_vals             = None
             self.t_ret_spm_vals             = None
             self.t_set_spm_vals             = None
@@ -3289,6 +3307,12 @@ class diffraction_correction(object):
         self.lambda_sky_km_vals = recdata.lambda_sky_km_vals
         self.dx_km              = recdata.dx_km
         self.norm_eq            = recdata.norm_eq
+
+        self.t_oet_spm_vals          = recdata.t_oet_spm_vals         
+        self.t_ret_spm_vals          = recdata.t_ret_spm_vals         
+        self.t_set_spm_vals          = recdata.t_set_spm_vals         
+        self.rho_corr_pole_vals      = recdata.rho_corr_pole_vals     
+        self.rho_corr_timing_km_vals = recdata.rho_corr_timing_km_vals
 
         del recdata,res,wtype,rng,norm,fwd,fft,bfac,psitype
 

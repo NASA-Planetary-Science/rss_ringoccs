@@ -2651,6 +2651,12 @@ class extract_csv_data(object):
             raise ValueError("Bad DLP: rho_corr_timing_km_vals has negative values.")
         else: del rtype
 
+        phi_rl_rad_vals  = np.array(dlp_dat.phi_rl_rad_vals)
+        ptype           = check_real(phi_rl_rad_vals)
+        if not ptype:
+            raise TypeError("Bad DLP: phi_rl_rad_vals not real valued.")
+        else: del ptype
+
         geo_rho = np.array(geo_dat.rho_km_vals)
         rhotype = check_real(geo_rho)
         if not rhotype:
@@ -3028,15 +3034,25 @@ class rec_data(object):
             self.t_oet_spm_vals             = NormDiff.t_oet_spm_vals         
             self.t_ret_spm_vals             = NormDiff.t_ret_spm_vals         
             self.t_set_spm_vals             = NormDiff.t_set_spm_vals         
-            self.rho_corr_pole_vals         = NormDiff.rho_corr_pole_vals     
+            self.rho_corr_pole_km_vals      = NormDiff.rho_corr_pole_km_vals
             self.rho_corr_timing_km_vals    = NormDiff.rho_corr_timing_km_vals
+            self.phi_rl_rad_vals            = NormDiff.phi_rl_rad_vals
+        except AttributeError:
+            self.t_oet_spm_vals             = NormDiff.spm_vals
+            self.t_ret_spm_vals             = NormDiff.t_ret_spm_vals         
+            self.t_set_spm_vals             = NormDiff.t_set_spm_vals         
+            self.rho_corr_pole_km_vals      = NormDiff.rho_corr_pole_km_vals
+            self.rho_corr_timing_km_vals    = NormDiff.rho_corr_timing_km_vals
+            self.phi_rl_rad_vals            = NormDiff.phi_rl_rad_vals
         except AttributeError:
             print("Certain Variables Unavailable")
             self.t_oet_spm_vals             = None
             self.t_ret_spm_vals             = None
             self.t_set_spm_vals             = None
-            self.rho_corr_pole_vals         = None
+            self.rho_corr_pole_km_vals      = None
             self.rho_corr_timing_km_vals    = None
+            self.phi_rl_rad_vals            = None
+
 
     
     def __error_check(self,N_RHO):

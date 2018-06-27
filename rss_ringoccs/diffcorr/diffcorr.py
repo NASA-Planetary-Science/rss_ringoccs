@@ -2481,24 +2481,30 @@ class extract_csv_data(object):
     def __init__(self,geodata,caldata,dlpdata,
         occ=False,taudata=False,verbose=True):
 
-        self.geodata            = None
-        self.caldata            = None
-        self.dlpdata            = None
-        self.taudata            = None
-        self.occ                = None
-        self.rho_km_vals        = None
-        self.phi_rad_vals       = None
-        self.p_norm_vals        = None
-        self.phase_rad_vals     = None
-        self.B_rad_vals         = None
-        self.D_km_vals          = None
-        self.f_sky_hz_vals      = None
-        self.rho_dot_kms_vals   = None
-        self.power_vals         = None
-        self.phase_vals         = None
-        self.tau_vals           = None
-        self.tau_rho            = None
-        self.history            = None
+        self.geodata                    = None
+        self.caldata                    = None
+        self.dlpdata                    = None
+        self.taudata                    = None
+        self.occ                        = None
+        self.rho_km_vals                = None
+        self.phi_rad_vals               = None
+        self.p_norm_vals                = None
+        self.phase_rad_vals             = None
+        self.B_rad_vals                 = None
+        self.D_km_vals                  = None
+        self.f_sky_hz_vals              = None
+        self.rho_dot_kms_vals           = None
+        self.power_vals                 = None
+        self.phase_vals                 = None
+        self.tau_vals                   = None
+        self.tau_rho                    = None
+        self.t_oet_spm_vals             = None
+        self.t_ret_spm_vals             = None
+        self.t_set_spm_vals             = None
+        self.rho_corr_pole_vals         = None
+        self.rho_corr_timing_km_vals    = None
+        self.history                    = None
+
 
         self.geodata            = geodata
         self.caldata            = caldata
@@ -2605,6 +2611,46 @@ class extract_csv_data(object):
             raise ValueError("Bad DLP: max{|B_deg_vals|} > 360")
         else: del Btype
 
+        t_ret_spm_vals  = np.array(dlp_dat.t_ret_spm_vals)
+        ttype           = check_real(t_ret_spm_vals)
+        if not ttype:
+            raise TypeError("Bad DLP: t_ret_spm_vals not real valued.")
+        elif (np.min(t_ret_spm_vals) < 0.0):
+            raise ValueError("Bad DLP: t_ret_spm_vals has negative values.")
+        else: del ttype
+
+        t_set_spm_vals  = np.array(dlp_dat.t_set_spm_vals)
+        ttype           = check_real(t_set_spm_vals)
+        if not ttype:
+            raise TypeError("Bad DLP: t_set_spm_vals not real valued.")
+        elif (np.min(t_ret_spm_vals) < 0.0):
+            raise ValueError("Bad DLP: t_set_spm_vals has negative values.")
+        else: del ttype
+
+        t_oet_spm_vals  = np.array(dlp_dat.t_oet_spm_vals)
+        ttype           = check_real(t_oet_spm_vals)
+        if not ttype:
+            raise TypeError("Bad DLP: t_oet_spm_vals not real valued.")
+        elif (np.min(t_ret_spm_vals) < 0.0):
+            raise ValueError("Bad DLP: t_oet_spm_vals has negative values.")
+        else: del ttype
+
+        rho_corr_pole_vals  = np.array(dlp_dat.rho_corr_pole_vals)
+        rtype           = check_real(rho_corr_pole_vals)
+        if not rtype:
+            raise TypeError("Bad DLP: rho_corr_pole_vals not real valued.")
+        elif (np.min(rho_corr_pole_vals) < 0.0):
+            raise ValueError("Bad DLP: rho_corr_pole_vals has negative values.")
+        else: del rtype
+
+        rho_corr_timing_km_vals = np.array(dlp_dat.rho_corr_timing_km_vals)
+        rtype                   = check_real(rho_corr_pole_vals)
+        if not rtype:
+            raise TypeError("Bad DLP: rho_corr_timing_km_vals not real valued.")
+        elif (np.min(rho_corr_timing_km_vals) < 0.0):
+            raise ValueError("Bad DLP: rho_corr_timing_km_vals has negative values.")
+        else: del rtype
+
         geo_rho = np.array(geo_dat.rho_km_vals)
         rhotype = check_real(geo_rho)
         if not rhotype:
@@ -2637,15 +2683,20 @@ class extract_csv_data(object):
             raise ValueError("Bad CAL: f_sky_raw_vals less than 1e4 Hz.")
         else: del freqtype
 
-        self.rho_km_vals    =   rho_km_vals
-        self.phi_deg_vals   =   phi_deg_vals
-        self.raw_tau_vals   =   raw_tau_vals
-        self.phase_deg_vals =   phase_deg_vals
-        self.B_deg_vals     =   B_deg_vals
-        self.geo_rho        =   geo_rho
-        self.geo_D          =   geo_D
-        self.geo_drho       =   geo_drho
-        self.f_sky_raw_vals =   f_sky_raw_vals
+        self.rho_km_vals             = rho_km_vals
+        self.phi_deg_vals            = phi_deg_vals
+        self.raw_tau_vals            = raw_tau_vals
+        self.phase_deg_vals          = phase_deg_vals
+        self.B_deg_vals              = B_deg_vals
+        self.geo_rho                 = geo_rho
+        self.geo_D                   = geo_D
+        self.geo_drho                = geo_drho
+        self.f_sky_raw_vals          = f_sky_raw_vals
+        self.t_oet_spm_vals          = t_oet_spm_vals
+        self.t_ret_spm_vals          = t_ret_spm_vals
+        self.t_set_spm_vals          = t_set_spm_vals
+        self.rho_corr_pole_vals      = rho_corr_pole_vals
+        self.rho_corr_timing_km_vals = rho_corr_timing_km_vals
 
     def __compute_variables(self,occ,verbose):
         if verbose: print("Computing Variables...")
@@ -2794,7 +2845,7 @@ class extract_csv_data(object):
                 "raw_tau_vals",
                 "phase_deg_vals",
                 "raw_tau_thresh_vals",
-                "spm_vals",
+                "t_oet_spm_vals",
                 "t_ret_spm_vals",
                 "t_set_spm_vals",
                 "B_deg_vals"
@@ -2904,23 +2955,28 @@ class rec_data(object):
                 NormDiff: Instance of the class NormDiff containing 
         """
 
-        self.res                = None
-        self.wtype              = None
-        self.rho_km_vals        = None
-        self.p_norm_vals        = None
-        self.phase_rad_vals     = None
-        self.B_rad_vals         = None
-        self.D_km_vals          = None
-        self.f_sky_hz_vals      = None
-        self.phi_rad_vals       = None
-        self.rho_dot_kms_vals   = None
-        self.T_hat_vals         = None
-        self.F_km_vals          = None
-        self.w_km_vals          = None
-        self.mu_vals            = None
-        self.lambda_sky_km_vals = None
-        self.dx_km              = None
-        self.norm_eq            = None
+        self.res                        = None
+        self.wtype                      = None
+        self.rho_km_vals                = None
+        self.p_norm_vals                = None
+        self.phase_rad_vals             = None
+        self.B_rad_vals                 = None
+        self.D_km_vals                  = None
+        self.f_sky_hz_vals              = None
+        self.phi_rad_vals               = None
+        self.rho_dot_kms_vals           = None
+        self.T_hat_vals                 = None
+        self.F_km_vals                  = None
+        self.w_km_vals                  = None
+        self.mu_vals                    = None
+        self.lambda_sky_km_vals         = None
+        self.dx_km                      = None
+        self.norm_eq                    = None
+        self.t_oet_spm_vals             = None
+        self.t_ret_spm_vals             = None
+        self.t_set_spm_vals             = None
+        self.rho_corr_pole_vals         = None
+        self.rho_corr_timing_km_vals    = None
 
         self.res   = res
         self.wtype = wtype.replace(" ", "").lower()
@@ -2951,6 +3007,19 @@ class rec_data(object):
         self.f_sky_hz_vals    = NormDiff.f_sky_hz_vals
         self.phi_rad_vals     = NormDiff.phi_rad_vals
         self.rho_dot_kms_vals = NormDiff.rho_dot_kms_vals
+        try:
+            self.t_oet_spm_vals             = NormDiff.t_oet_spm_vals         
+            self.t_ret_spm_vals             = NormDiff.t_ret_spm_vals         
+            self.t_set_spm_vals             = NormDiff.t_set_spm_vals         
+            self.rho_corr_pole_vals         = NormDiff.rho_corr_pole_vals     
+            self.rho_corr_timing_km_vals    = NormDiff.rho_corr_timing_km_vals
+        except AttributeError:
+            self.t_oet_spm_vals             = None
+            self.t_ret_spm_vals             = None
+            self.t_set_spm_vals             = None
+            self.rho_corr_pole_vals         = None
+            self.rho_corr_timing_km_vals    = None
+
     
     def __error_check(self,N_RHO):
         error_code = 0
@@ -3152,47 +3221,48 @@ class diffraction_correction(object):
         norm=True,bfac=True,fft=False,psitype="full",verbose=True):
         t1       = time.time()
 
-        self.res                = None
-        self.wtype              = None
-        self.rng                = None
-        self.rho_km_vals        = None
-        self.p_norm_vals        = None
-        self.phase_rad_vals     = None
-        self.B_rad_vals         = None
-        self.D_km_vals          = None
-        self.f_sky_hz_vals      = None
-        self.phi_rad_vals       = None
-        self.rho_dot_kms_vals   = None
-        self.T_hat_vals         = None
-        self.F_km_vals          = None
-        self.w_km_vals          = None
-        self.mu_vals            = None
-        self.lambda_sky_km_vals = None
-        self.dx_km              = None
-        self.norm_eq            = None
-        self.n_used             = None
-        self.start              = None
-        self.T_vals             = None
-        self.power_vals         = None
-        self.tau_vals           = None
-        self.phase_vals         = None
-        self.p_norm_fwd_vals    = None
-        self.T_hat_fwd_vals     = None
-        self.phase_fwd_vals     = None
-        self.norm               = None
-        self.fwd                = None
-        self.fft                = None
-        self.bfac               = None
-        self.psitype            = None
-        self.history            = None
-        self.dathist            = None
-        self.tau_threshold_vals = None
-        self.t_ret_spm_vals     = None
-        self.t_oet_spm_vals     = None
-        self.t_set_spm_vals     = None
+        self.res                        = None
+        self.wtype                      = None
+        self.rng                        = None
+        self.rho_km_vals                = None
+        self.p_norm_vals                = None
+        self.phase_rad_vals             = None
+        self.B_rad_vals                 = None
+        self.D_km_vals                  = None
+        self.f_sky_hz_vals              = None
+        self.phi_rad_vals               = None
+        self.rho_dot_kms_vals           = None
+        self.T_hat_vals                 = None
+        self.F_km_vals                  = None
+        self.w_km_vals                  = None
+        self.mu_vals                    = None
+        self.lambda_sky_km_vals         = None
+        self.dx_km                      = None
+        self.norm_eq                    = None
+        self.n_used                     = None
+        self.start                      = None
+        self.T_vals                     = None
+        self.power_vals                 = None
+        self.tau_vals                   = None
+        self.phase_vals                 = None
+        self.p_norm_fwd_vals            = None
+        self.T_hat_fwd_vals             = None
+        self.phase_fwd_vals             = None
+        self.norm                       = None
+        self.fwd                        = None
+        self.fft                        = None
+        self.bfac                       = None
+        self.psitype                    = None
+        self.history                    = None
+        self.dathist                    = None
+        self.tau_threshold_vals         = None
+        self.t_oet_spm_vals             = None
+        self.t_ret_spm_vals             = None
+        self.t_set_spm_vals             = None
+        self.rho_corr_pole_vals         = None
+        self.rho_corr_timing_km_vals    = None
 
         recdata                 = rec_data(dat,res,wtype,bfac=bfac)
-
         self.res                = res
         self.wtype              = wtype
         self.rng                = rng

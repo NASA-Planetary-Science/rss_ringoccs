@@ -2644,7 +2644,7 @@ class extract_csv_data(object):
         else: del rtype
 
         rho_corr_timing_km_vals = np.array(dlp_dat.rho_corr_timing_km_vals)
-        rtype                   = check_real(rho_corr_pole_vals)
+        rtype                   = check_real(rho_corr_pole_km_vals)
         if not rtype:
             raise TypeError("Bad DLP: rho_corr_timing_km_vals not real valued.")
         elif (np.min(rho_corr_timing_km_vals) < 0.0):
@@ -2701,7 +2701,7 @@ class extract_csv_data(object):
         self.t_oet_spm_vals          = t_oet_spm_vals
         self.t_ret_spm_vals          = t_ret_spm_vals
         self.t_set_spm_vals          = t_set_spm_vals
-        self.rho_corr_pole_vals      = rho_corr_pole_vals
+        self.rho_corr_pole_km_vals      = rho_corr_pole_km_vals
         self.rho_corr_timing_km_vals = rho_corr_timing_km_vals
 
     def __compute_variables(self,occ,verbose):
@@ -2761,7 +2761,7 @@ class extract_csv_data(object):
         t_set_spm_vals          = self.t_set_spm_vals
         t_ret_spm_vals          = self.t_ret_spm_vals
         t_oet_spm_vals          = self.t_oet_spm_vals
-        rho_corr_pole_vals      = self.rho_corr_pole_vals
+        rho_corr_pole_km_vals      = self.rho_corr_pole_km_vals
         rho_corr_timing_km_vals = self.rho_corr_timing_km_vals
 
         f_sky_raw_vals   = self.f_sky_raw_vals
@@ -2791,7 +2791,7 @@ class extract_csv_data(object):
         t_ret_spm_vals          = t_ret_spm_vals[rstart:rfin+1]
         t_set_spm_vals          = t_set_spm_vals[rstart:rfin+1]
         t_oet_spm_vals          = t_oet_spm_vals[rstart:rfin+1]
-        rho_corr_pole_vals      = rho_corr_pole_vals[rstart:rfin+1]
+        rho_corr_pole_km_vals      = rho_corr_pole_km_vals[rstart:rfin+1]
         rho_corr_timing_km_vals = rho_corr_timing_km_vals[rstart:rfin+1]
 
         del f_sky_raw_vals,geo_rho,geo_drho,geo_D,rmin,rmax,rstart,rfin
@@ -2808,7 +2808,7 @@ class extract_csv_data(object):
         t_set_spm_vals          = t_set_spm_vals
         t_ret_spm_vals          = t_ret_spm_vals
         t_oet_spm_vals          = t_oet_spm_vals
-        rho_corr_pole_vals      = rho_corr_pole_vals
+        rho_corr_pole_km_vals      = rho_corr_pole_km_vals
         rho_corr_timing_km_vals = rho_corr_timing_km_vals
 
     def __del_attributes(self):
@@ -2998,7 +2998,7 @@ class rec_data(object):
         self.t_oet_spm_vals             = None
         self.t_ret_spm_vals             = None
         self.t_set_spm_vals             = None
-        self.rho_corr_pole_vals         = None
+        self.rho_corr_pole_km_vals         = None
         self.rho_corr_timing_km_vals    = None
 
         self.res   = res
@@ -3293,7 +3293,7 @@ class diffraction_correction(object):
         self.t_oet_spm_vals             = None
         self.t_ret_spm_vals             = None
         self.t_set_spm_vals             = None
-        self.rho_corr_pole_vals         = None
+        self.rho_corr_pole_km_vals         = None
         self.rho_corr_timing_km_vals    = None
 
         recdata                 = rec_data(dat,res,wtype,bfac=bfac)
@@ -3327,7 +3327,7 @@ class diffraction_correction(object):
         self.t_oet_spm_vals          = recdata.t_oet_spm_vals         
         self.t_ret_spm_vals          = recdata.t_ret_spm_vals         
         self.t_set_spm_vals          = recdata.t_set_spm_vals         
-        self.rho_corr_pole_vals      = recdata.rho_corr_pole_vals     
+        self.rho_corr_pole_km_vals      = recdata.rho_corr_pole_km_vals     
         self.rho_corr_timing_km_vals = recdata.rho_corr_timing_km_vals
 
         del recdata,res,wtype,rng,norm,fwd,fft,bfac,psitype

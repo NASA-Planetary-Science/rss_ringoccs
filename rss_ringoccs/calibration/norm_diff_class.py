@@ -76,10 +76,13 @@ Revisions:
    2018 Jun 21 - gsteranka - Change spacecraft event time and ring event time
                              attributes to SPM instead of et. Removed kernels
                              input
+   2018 Jun 27 - gsteranka - Adjust CAL file use so sky frequency column has
+                             frequency offset fit added to it
 """
 
 import numpy as np
 import os
+import pdb
 import platform
 from scipy.interpolate import interp1d
 import spiceypy as spice
@@ -199,23 +202,8 @@ class NormDiff(object):
         # Function to convert SPM to rho
         rho_interp_func = interp1d(spm_geo, rho_km_geo, fill_value='extrapolate')
 
-        # Rho range to save files
-        rho_km_range = [min(rho_km_geo), max(rho_km_geo)]
-
-        # Find SPM range corresponding to rho range. Bottom-most line of this
-        #     block is to handle ingress files
-        if not is_chord:
-            spm_start = max(spm_geo[rho_km_geo <= rho_km_range[0]])
-            spm_end = min(spm_geo[rho_km_geo >= rho_km_range[1]])
-            spm_range = [spm_start, spm_end]
-            spm_range = [min(spm_range), max(spm_range)]
-        else:
-            _ind = ((rho_km_geo >= rho_km_range[0]) &
-                (rho_km_geo <= rho_km_range[1]))
-            spm_start = min(spm_geo[_ind])
-            spm_end = max(spm_geo[_ind])
-            spm_range = [spm_start, spm_end]
-            spm_range = [min(spm_range), max(spm_range)]
+        # SPM range of geo_inst (pretty much always the full occultation)
+        spm_range = [min(spm_geo), max(spm_geo)]
 
         spm_vals = rsr_inst.spm_vals
         IQ_m = rsr_inst.IQ_m
@@ -224,17 +212,25 @@ class NormDiff(object):
         spm_cal = cal_inst.t_oet_spm_vals
         f_sky_pred_cal = cal_inst.f_sky_hz_vals
         p_free_cal = cal_inst.p_free_vals
-        f_offset_fit_cal = cal_inst.f_offset_fit_vals
+        dummy_spm, f_sky_pred_file = rsr_inst.get_f_sky_pred(f_spm=spm_cal)
+        f_offset_fit_cal = f_sky_pred_cal - f_sky_pred_file
         rho_km_cal = rho_interp_func(spm_cal)
 
-        # If specified rho range that cal file can't cover
+        # If that cal file can't cover entire SPM range from geo_inst
         if (spm_range[0]<min(spm_cal)) | (spm_range[1]>max(spm_cal)):
-            print('ERROR (NormDiff): Specified cal file is missing \n'
-                + 'points required to pre-process points in rho_km_range.\n'
-                + 'Calibration file rho range is '+str(min(rho_km_cal))+'km, '
-                + str(max(rho_km_cal))+'km, while specified rho_km_range is \n'
-                + str(rho_km_range[0])+'km, '+str(rho_km_range[1])+'km')
-            sys.exit()
+            print('\nWARNING (NormDiff): Specified cal file is missing '
+                + 'points required to pre-process points in SPM range of '
+                + 'geo_inst. Calibration SPM range is ['
+                + str(min(spm_cal))+', ' + str(max(spm_cal))
+                +'], while geo_inst SPM range is ['
+                + str(min(spm_geo))+', '+str(max(spm_geo))+']. Reducing to '
+                + 'SPM range of CAL file')
+            _ind = ((spm_vals >= min(spm_cal)) &
+                (spm_vals <= max(spm_cal))).nonzero()
+            spm_vals = spm_vals[_ind]
+            IQ_m = IQ_m[_ind]
+            rho_km_vals = rho_km_vals[_ind]
+            pdb.set_trace()
 
         # Inteprolate frequency offset to finer spacing in preparation
         #     for integration

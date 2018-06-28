@@ -78,6 +78,7 @@ Revisions:
                              input
    2018 Jun 27 - gsteranka - Adjust CAL file use so sky frequency column has
                              frequency offset fit added to it
+   2018 Jun 28 - gsteranka - Change spm_vals attribute to t_oet_spm_vals
 """
 
 import numpy as np
@@ -107,7 +108,7 @@ class NormDiff(object):
     Attributes:
         rho_km_vals (np.ndarray): Ring intercept radius values, in km,
             at final spacing specified in dr_km
-        spm_vals (np.ndarray): Set of SPM values corresponding to
+        t_oet_spm_vals (np.ndarray): Set of SPM values corresponding to
             rho_km_desired
         p_norm_vals (np.ndarray): Power normalized to 1. This is the diffraction
             pattern that is input to the Fresnel inversion step
@@ -329,7 +330,7 @@ class NormDiff(object):
         """
 
         self.rho_km_vals = rho_km_desired
-        self.spm_vals = spm_desired
+        self.t_oet_spm_vals = spm_desired
         self.p_norm_vals = p_norm_vals
         self.phase_rad_vals = phase_rad_vals
 

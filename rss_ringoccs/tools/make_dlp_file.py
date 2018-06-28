@@ -14,6 +14,8 @@ Revisions:
                               corrected this for chord occultations, but forgot
                               to do the same for non-chord
     2018 Jun 18 - gsteranka - Added spm_range keyword
+    2018 Jun 28 - gsteranka - Account for spm_vals of NormDiff class being
+                              changed to t_oet_spm_vals
 """
 
 import numpy as np
@@ -57,7 +59,7 @@ def make_dlp_file(norm_diff_inst, dlp_file_name, spm_range=None):
                 -mu[ind]*np.log(norm_diff_inst.p_norm_vals[ind]),
                 norm_diff_inst.phase_rad_vals[ind]*spice.dpr(),
                 norm_diff_inst.tau_threshold_vals[ind],
-                norm_diff_inst.spm_vals[ind],
+                norm_diff_inst.t_oet_spm_vals[ind],
                 norm_diff_inst.t_ret_spm_vals[ind],
                 norm_diff_inst.t_set_spm_vals[ind],
                 norm_diff_inst.B_rad_vals[ind]*spice.dpr()],

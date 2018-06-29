@@ -11,6 +11,7 @@ Revisions:
                         - debug for occs longer than a day
     2018 Jun 28 - jfong - add ref_doy keyword; if set, calculate spm relative
                           to ref_doy
+    2018 Jun 29 - jfong - found bug in calculating ibrk that caused wrapping
 """
 
 import numpy as np
@@ -40,20 +41,20 @@ def et_to_spm(et_vals, kernels=None, ref_doy=None):
         minute = float(utc_str[12:14])
         second = float(utc_str[15:])
         spm = hour*3600. + minute*60. + second
-        print(utc_str, hour, minute, second, spm)
         spm_vals.append(spm)
+
 
     # Check if event goes through midnight
     dr_vals = spm_vals - np.roll(spm_vals, 1)
-#    ibrk = np.argwhere(dr_vals[1:] < 0)
+#    ibrk = np.argwhere(dr_vals < 0)
     ibrk = np.argwhere(dr_vals[1:] < 0)
 
     if ibrk.size > 0:
         spm_vals_cont = np.asarray(spm_vals)
         for index in range(len(ibrk)):
             ind = ibrk[index][0] 
-            spm_brk = spm_vals[ind-1]
-            spm_vals_cont[ind:] = spm_vals_cont[ind:] + spm_brk
+            spm_brk = spm_vals[ind]
+            spm_vals_cont[ind+1:] = spm_vals_cont[ind+1:] + spm_brk
         spm_vals = spm_vals_cont
 
     if ref_doy:

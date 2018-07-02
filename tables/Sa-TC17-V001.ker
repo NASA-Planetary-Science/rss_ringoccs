@@ -179,7 +179,7 @@ KERNELS_TO_LOAD = (		'$A/050606R_SCPSE_05114_05132.bsp'
 						'$D/dss_35_36_prelim_itrf93_140620.bsp'
 						'$F/cpck26Feb2009.tpc'
                         '$D/earthstns_itrf93_050714.bsp'
-						'$E/earth_000101_180915_180624.bpc')
+						'$F/earth_000101_180919_180629.bpc')
 
 
 
@@ -213,3 +213,5 @@ KERNELS_TO_LOAD = ( '$A/*' spacecraft trajectory kernels,
 			
 						'$E/earth_000101_180912_180621.bpc')
 							- also no longer available
+						- use permanent earth pck file: pub/naif/CASSINI/kernels/pck/earth_000101_180919_180629.bpc
+

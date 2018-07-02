@@ -2653,7 +2653,7 @@ class diffraction_correction(object):
             sp0    = sinphi0[center]
             kD     = kD_vals[center]
             w      = w_vals[center]
-            if (w_init - w>= 2.0*dx):
+            if (np.abs(w_init - w)>= 2.0*dx):
                 w_init     = w
                 w_func     = fw(w,dx)
                 nw         = np.size(w_func)
@@ -2771,7 +2771,7 @@ class diffraction_correction(object):
             sp0    = sinphi0[center]
             kD     = kD_vals[center]
             w      = w_vals[center]
-            if (w_init - w>= 2.0*dx):
+            if (np.abs(w_init - w)>= 2.0*dx):
                 w_init     = w
                 w_func     = fw(w,dx)
                 nw         = np.size(w_func)
@@ -2855,12 +2855,12 @@ class diffraction_correction(object):
         n_used       = self.n_used
         dx           = self.dx_km
         # Compute necessary variables.
-        kD_vals   = 2. * np.pi * d_vals / lambda_vals
-        cosb      = np.cos(B_rad_vals)
-        cosphi0   = np.cos(phi_rad_vals)
-        sinphi0   = np.sin(phi_rad_vals)
-        dsq       = d_vals*d_vals
-        rsq       = rho_vals*rho_vals
+        kD_vals     = 2. * np.pi * d_vals / lambda_vals
+        cosb        = np.cos(B_rad_vals)
+        cosphi0     = np.cos(phi_rad_vals)
+        sinphi0     = np.sin(phi_rad_vals)
+        dsq         = d_vals*d_vals
+        rsq         = rho_vals*rho_vals
         # Define functions
         fw          = self.__func_dict[wtype]["func"]
         psifac      = self.__psifacfast
@@ -2875,6 +2875,7 @@ class diffraction_correction(object):
         w_init      = w_vals[start]
         w_func      = fw(w_init,dx)
         nw          = np.size(w_func)
+        pdb.set_trace()
         phi_s_rad1  = phi_rad_vals[start]
         for i in np.arange(n_used):
             center = start+i
@@ -2887,7 +2888,7 @@ class diffraction_correction(object):
             sp0    = sinphi0[center]
             kD     = kD_vals[center]
             w      = w_vals[center]
-            if (w_init - w>= 2.0*dx):
+            if (np.abs(w_init - w)>= 2.0*dx):
                 w_init     = w
                 w_func     = fw(w,dx)
                 nw         = np.size(w_func)
@@ -3007,7 +3008,7 @@ class diffraction_correction(object):
             sp0    = sinphi0[center]
             kD     = kD_vals[center]
             w      = w_vals[center]
-            if (w_init - w>= 2.0*dx):
+            if (np.abs(w_init - w)>= 2.0*dx):
                 w_init     = w
                 w_func     = fw(w,dx)
                 nw         = np.size(w_func)
@@ -3499,8 +3500,6 @@ class delta_impulse_diffraction(object):
                     break
                 if verbose: print("Psi Iter: %d" % loop)
             psi_vals = kD * psi_fast(r,r0,d,cb,cp,sp,cp0,sp0)
-        
-        pdb.set_trace()
 
         T_hat_vals     = (1.0-1.0j)*np.exp(1j*psi_vals)/(2.0*F)
         p_norm_vals    = np.abs(T_hat_vals)*np.abs(T_hat_vals)

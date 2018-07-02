@@ -23,7 +23,7 @@ import pdb
 from scipy.interpolate import interp1d
 
 import tkinter
-from tkinter import Tk, IntVar, StringVar
+from tkinter import Tk, IntVar, StringVar, messagebox
 from tkinter.ttk import Frame, Combobox, Label, Button, Entry, LabelFrame
 
 
@@ -56,6 +56,7 @@ class FResidFitGui(Frame):
         fit_inst: Instance of the FreqOffsetFit class
         ind (np.ndarray): Index numbers to the "x" attribute of the regions
             being fit (specified by the "xlim" attribute)
+        is_chord (bool): Record if occultation is a chord occultation
         knots_entry: Entry box for specifying the knots used in the fit
             Changing the entry to this box changes the "knots_spm" attribute
             (see below)
@@ -86,6 +87,11 @@ class FResidFitGui(Frame):
         y (np.ndarray): The input y values (residual frequency in Hz)
         yfit (np.ndarray): Resulting fit from the GUI. This is the attribute
             used to access the fit after the program is closed
+
+    Notes:
+        [1] Will spit out cryptic error messages at you after you press "OK"
+            and then press either yes or no in the dialogue box. I don't know
+            how to stop these, but they seem to be pretty harmless
     """
 
     def __init__(self, parent, fit_inst, x, x_rho, y):
@@ -166,7 +172,8 @@ class FResidFitGui(Frame):
         revert_xrange_btn.pack()
 
         # Quit application if fit is okay
-        quit_btn = Button(self, text='OK', command=self.quit)
+        quit_btn = Button(self, text='OK')
+        quit_btn.bind('<Button-1>', self.quit_app)
         quit_btn.pack()
 
 
@@ -197,19 +204,28 @@ class FResidFitGui(Frame):
         initUI()
         """
 
+        # Plot residual frequency and fit
         self.ax.plot(self.x, self.y, color='g')
         self.ax.plot(self.x, self.yfit, color='r')
         self.ax.set_xlabel('SPM')
         self.ax.set_ylabel('Hz')
 
-        ax_rho_ticks = (self.ax.get_xticks())[
-            (self.ax.get_xticks() >= min(self.x))
-            & (self.ax.get_xticks() <= max(self.x))]
+        # Make rho axis on upper x-axis
         self.ax_rho = self.ax.twiny()
-        self.ax_rho.set_xlim(self.ax.get_xlim())
-        self.ax_rho.set_xticks(ax_rho_ticks)
-        self.ax_rho.set_xticklabels(self._get_rho_tick_labels(
-            ax_rho_ticks))
+        rho_diff = np.diff(self.x_rho)
+        if (np.any(rho_diff > 0)) & (np.any(rho_diff < 0)):
+            self.is_chord = True
+            ax_rho_ticks = (self.ax.get_xticks())[
+                (self.ax.get_xticks() >= min(self.x))
+                & (self.ax.get_xticks() <= max(self.x))]
+            self.ax_rho.set_xlim(self.ax.get_xlim())
+            self.ax_rho.set_xticks(ax_rho_ticks)
+            self.ax_rho.set_xticklabels(self._get_rho_tick_labels(
+                ax_rho_ticks))
+            self.ax_rho.set_xlabel('Rho (km)')
+        else:
+            self.is_chord = False
+            self.ax_rho.plot(self.x_rho, self.y, alpha=0)
         self.ax_rho.set_xlabel('Rho (km)')
 
         self.canvas = FigureCanvasTkAgg(self.f, master=self.parent)
@@ -237,6 +253,18 @@ class FResidFitGui(Frame):
         self.ax.plot(self.x[ind], self.y[ind], color='g')
         self.ax.plot(self.x, self.yfit, color='r')
         self.ax.set_ylim([min(self.y[ind]) - 1.0, max(self.y[ind]) + 1.0])
+
+        if self.is_chord:
+            ax_rho_ticks = (self.ax.get_xticks())[
+                (self.ax.get_xticks() >= min(self.x))
+                & (self.ax.get_xticks() <= max(self.x))]
+            self.ax_rho.set_xlim(self.ax.get_xlim())
+            self.ax_rho.set_xticks(ax_rho_ticks)
+            self.ax_rho.set_xticklabels(self._get_rho_tick_labels(
+                ax_rho_ticks))
+        else:
+            self.ax_rho.plot(self.x_rho, self.y, alpha=0)
+        self.ax_rho.set_xlabel('Rho (km)')
 
         y_arrow = np.mean(self.ax.get_ylim())
         for i in range(len(self.xlim)):
@@ -318,6 +346,19 @@ class FResidFitGui(Frame):
         new_yfit = self._get_fit()
         self.yfit = new_yfit
         self.update_plot()
+
+
+    def quit_app(self, e):
+
+        ret = messagebox.askquestion('Question', 'Are you sure of this fit? '
+            + 'If not, then click "No", adjust the fit parameters, and '
+            + 'REMEMBER TO HIT THE "Set Fit Range (SPM)" BUTTON!!!')
+
+        if ret == 'yes':
+            self.quit()
+            self.parent.destroy()
+        else:
+            return
 
 
 if __name__ == '__main__':

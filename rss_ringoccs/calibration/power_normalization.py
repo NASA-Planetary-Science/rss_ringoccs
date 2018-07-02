@@ -406,7 +406,7 @@ class Normalization(object):
         if USE_GUI:
             root = Tk()
             power_fit_gui_inst = PowerFitGui(root, self, spm_vals_down,
-                p_obs_down, spm_fit)
+                rho_km_vals_down, p_obs_down, spm_fit)
             root.geometry('900x700+500+150')
             while True:
                 try:

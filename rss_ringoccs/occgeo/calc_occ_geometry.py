@@ -17,6 +17,7 @@ Revisions:
                           xform_J2000_to_ring_plane_frame()
     2018 Jun 26 - jfong - add radius_above kwd to get_saturn_occ_times
                         - make get_saturn_occ_times a function instead of method
+    2018 Jun 27 - jfong - get_saturn_occ_times now outputs et instead of spm
 '''
 
 import time
@@ -335,10 +336,10 @@ def get_saturn_occ_times(t_set_et_vals, dsn, radius_above=500., kernels=None):
         if occ_code_ion != 0:
             et_blocked.append(et)
 
-    spm_blocked = et_to_spm(et_blocked)
+    #spm_blocked = et_to_spm(et_blocked)
 
 
-    return spm_blocked
+    return np.asarray(et_blocked)
     
 def calc_rho_km(et_vals, planet, spacecraft, dsn, kernels=None):
     rho_vec, t_ret = calc_rho_vec_km(et_vals, planet, spacecraft, dsn,
@@ -467,6 +468,8 @@ def calc_set_et(t_oet_et_vals, spacecraft, dsn, kernels=None):
     Returns:
         t_set_et_vals (np.ndarray): Array of spacecraft event times in ET sec.
     """
+    if kernels:
+        load_kernels(kernels)
 
     npts = len(t_oet_et_vals)
     t_set_et_vals = np.zeros(npts)

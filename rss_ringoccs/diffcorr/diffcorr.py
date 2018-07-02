@@ -1231,7 +1231,7 @@ def psi_d1_phi_fast(r,r0,d,cb,cp,sp,cp0,sp0):
     psi_d1_phi_vals = (2.0*v1 + v2) / (2.0 * np.sqrt(1.0 + 2.0*xi + eta)) - v1
     return psi_d1_phi_vals
 
-def psi_d1_phi(object):
+def psi_d1_phi(r,r0,d,b,phi,phi0):
     """
         Function: psi_d1_phi
         Purpose:  Calculate dpsi/dphi from geometry variables.

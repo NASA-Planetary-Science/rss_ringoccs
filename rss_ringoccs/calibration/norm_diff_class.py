@@ -81,6 +81,7 @@ Revisions:
    2018 Jun 28 - gsteranka - Change spm_vals attribute to t_oet_spm_vals
 """
 
+import copy
 import numpy as np
 import os
 import pdb
@@ -315,14 +316,14 @@ class NormDiff(object):
         self.__set_attributes(rho_km_desired, spm_desired, p_norm_vals,
             phase_rad_vals,
             spm_geo, rho_dot_kms_geo, geo_inst,
-            rho_km_cal, f_sky_pred_cal, rsr_inst,
+            spm_cal, f_sky_pred_cal, rsr_inst,
             end_of_chord_ing=end_of_chord_ing)
 
 
     def __set_attributes(self, rho_km_desired, spm_desired, p_norm_vals,
             phase_rad_vals,
             spm_geo, rho_dot_kms_geo, geo_inst,
-            rho_km_cal, f_sky_pred_cal, rsr_inst,
+            spm_cal, f_sky_pred_cal, rsr_inst,
             end_of_chord_ing=None):
         """
         Private method called by __init__ to set attributes of the
@@ -357,7 +358,7 @@ class NormDiff(object):
         self.F_km_vals = F_km_func(spm_desired)
 
         # Sky frequency at final spacing
-        f_sky_pred_func = interp1d(rho_km_cal, f_sky_pred_cal,
+        f_sky_pred_func = interp1d(spm_cal, f_sky_pred_cal,
             fill_value='extrapolate')
         self.f_sky_hz_vals = f_sky_pred_func(spm_desired)
 
@@ -415,6 +416,111 @@ class NormDiff(object):
             'Input Variables': input_var_dict,
             'Input Keywords':input_kw_dict}
         self.history = hist_dict
+
+
+    def chord_split(self):
+        """
+        Split chord occultation instance into an ingress instance and an egress
+        instance, and return them.
+
+        Returns:
+            norm_diff_inst_ing: Ingress instance
+            norm_diff_inst_egr: Egress instance
+
+        Notes:
+            [1] Is it bad practice to create separate copies of the instances
+                and return them? Not sure what else to do.
+        """
+
+        if self.end_of_chord_ing is None:
+            print('WARNING (NormDiff.chord_split()): Not a chord occultation, '+
+                'so can\'t split. Ignoring call to this method, returning None')
+            return None
+
+        # Record all attribute names
+        rho_km_vals = self.rho_km_vals
+        t_oet_spm_vals = self.t_oet_spm_vals
+        p_norm_vals = self.p_norm_vals
+        phase_rad_vals = self.phase_rad_vals
+        B_rad_vals = self.B_rad_vals
+        D_km_vals = self.D_km_vals
+        F_km_vals = self.F_km_vals
+        f_sky_hz_vals = self.f_sky_hz_vals
+        phi_rad_vals = self.phi_rad_vals
+        phi_rl_rad_vals = self.phi_rl_rad_vals
+        t_ret_spm_vals = self.t_ret_spm_vals
+        t_set_spm_vals = self.t_set_spm_vals
+        rho_dot_kms_vals = self.rho_dot_kms_vals
+        rho_corr_pole_km_vals = self.rho_corr_pole_km_vals
+        rho_corr_timing_km_vals = self.rho_corr_timing_km_vals
+        tau_threshold_vals = self.tau_threshold_vals
+        end_of_chord_ing = self.end_of_chord_ing
+        history = self.history
+
+        norm_diff_inst_ing = copy.deepcopy(self)
+        norm_diff_inst_egr = copy.deepcopy(self)
+
+        ind = end_of_chord_ing
+
+        # Ingress instance
+        norm_diff_inst_ing.rho_km_vals = rho_km_vals[0:ind]
+        norm_diff_inst_ing.t_oet_spm_vals = (
+            t_oet_spm_vals[0:ind])
+        norm_diff_inst_ing.p_norm_vals = p_norm_vals[0:ind]
+        norm_diff_inst_ing.phase_rad_vals = phase_rad_vals[0:ind]
+        norm_diff_inst_ing.B_rad_vals = B_rad_vals[0:ind]
+        norm_diff_inst_ing.D_km_vals = D_km_vals[0:ind]
+        norm_diff_inst_ing.F_km_vals = F_km_vals[0:ind]
+        norm_diff_inst_ing.f_sky_hz_vals = (
+            f_sky_hz_vals[0:ind])
+        norm_diff_inst_ing.phi_rad_vals = phi_rad_vals[0:ind]
+        norm_diff_inst_ing.phi_rl_rad_vals = (
+            phi_rl_rad_vals[0:ind])
+        norm_diff_inst_ing.t_ret_spm_vals = (
+            t_ret_spm_vals[0:ind])
+        norm_diff_inst_ing.t_set_spm_vals = (
+            t_set_spm_vals[0:ind])
+        norm_diff_inst_ing.rho_dot_kms_vals = (
+            rho_dot_kms_vals[0:ind])
+        norm_diff_inst_ing.rho_corr_pole_km_vals = (
+            rho_corr_pole_km_vals[0:ind])
+        norm_diff_inst_ing.rho_corr_timing_km_vals = (
+            rho_corr_timing_km_vals[0:ind])
+        norm_diff_inst_ing.tau_threshold_vals = (
+            tau_threshold_vals[0:ind])
+        norm_diff_inst_ing.end_of_chord_ing = None
+        norm_diff_inst_ing.history = history
+
+        # Egress instance
+        norm_diff_inst_egr.rho_km_vals = rho_km_vals[ind+1:]
+        norm_diff_inst_egr.t_oet_spm_vals = (
+            t_oet_spm_vals[ind+1:])
+        norm_diff_inst_egr.p_norm_vals = p_norm_vals[ind+1:]
+        norm_diff_inst_egr.phase_rad_vals = phase_rad_vals[ind+1:]
+        norm_diff_inst_egr.B_rad_vals = B_rad_vals[ind+1:]
+        norm_diff_inst_egr.D_km_vals = D_km_vals[ind+1:]
+        norm_diff_inst_egr.F_km_vals = F_km_vals[ind+1:]
+        norm_diff_inst_egr.f_sky_hz_vals = (
+            f_sky_hz_vals[ind+1:])
+        norm_diff_inst_egr.phi_rad_vals = phi_rad_vals[ind+1:]
+        norm_diff_inst_egr.phi_rl_rad_vals = (
+            phi_rl_rad_vals[ind+1:])
+        norm_diff_inst_egr.t_ret_spm_vals = (
+            t_ret_spm_vals[ind+1:])
+        norm_diff_inst_egr.t_set_spm_vals = (
+            t_set_spm_vals[ind+1:])
+        norm_diff_inst_egr.rho_dot_kms_vals = (
+            rho_dot_kms_vals[ind+1:])
+        norm_diff_inst_egr.rho_corr_pole_km_vals = (
+            rho_corr_pole_km_vals[ind+1:])
+        norm_diff_inst_egr.rho_corr_timing_km_vals = (
+            rho_corr_timing_km_vals[ind+1:])
+        norm_diff_inst_egr.tau_threshold_vals = (
+            tau_threshold_vals[ind+1:])
+        norm_diff_inst_egr.end_of_chord_ing = None
+        norm_diff_inst_egr.history = history
+
+        return norm_diff_inst_ing, norm_diff_inst_egr
 
 
 if __name__ == '__main__':

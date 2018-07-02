@@ -87,7 +87,6 @@ import os
 import pdb
 import platform
 from scipy.interpolate import interp1d
-import spiceypy as spice
 import sys
 import time
 
@@ -165,7 +164,6 @@ class NormDiff(object):
             [5] os
             [6] platform
             [7] scipy.interpolate
-            [8] spiceypy
             [9] sys
             [10] time
 
@@ -244,7 +242,7 @@ class NormDiff(object):
 
         # Integrate frequency offset to detrend IQ_m
         f_detrend_interp = np.cumsum(f_offset_fit_interp)*dt
-        f_detrend_interp_rad = f_detrend_interp * spice.twopi()
+        f_detrend_interp_rad = f_detrend_interp*(2.0*np.pi)
         f_detrend_rad_func = interp1d(spm_cal_interp, f_detrend_interp_rad,
             fill_value='extrapolate')
         f_detrend_rad = f_detrend_rad_func(spm_vals)
@@ -335,13 +333,13 @@ class NormDiff(object):
         self.p_norm_vals = p_norm_vals
         self.phase_rad_vals = phase_rad_vals
 
-        B_rad_geo = geo_inst.B_deg_vals*spice.rpd()
+        B_rad_geo = np.radians(geo_inst.B_deg_vals)
         D_km_geo = geo_inst.D_km_vals
-        phi_rad_geo = geo_inst.phi_ora_deg_vals*spice.rpd()
+        phi_rad_geo = np.radians(geo_inst.phi_ora_deg_vals)
         F_km_geo = geo_inst.F_km_vals
         t_ret_geo = geo_inst.t_ret_spm_vals
         t_set_geo = geo_inst.t_set_spm_vals
-        phi_rl_rad_geo = geo_inst.phi_rl_deg_vals*spice.rpd()
+        phi_rl_rad_geo = np.radians(geo_inst.phi_rl_deg_vals)
         #rho_corr_pole_km_geo = geo_inst.rho_corr_pole_km_vals
         #rho_corr_timing_km_geo = geo_inst.rho_corr_timing_km_vals
 

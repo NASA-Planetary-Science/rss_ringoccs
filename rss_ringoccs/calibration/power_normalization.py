@@ -390,7 +390,18 @@ class Normalization(object):
         ind_knot_sort = np.argsort(knots_spm_data)
         spline_rep = splrep(spm_vals_free[ind_sort], p_obs_free[ind_sort],
             k=spline_order, t=knots_spm_data[ind_knot_sort])
-        spline_fit = splev(spm_fit, spline_rep)
+        spline_fit = splev(spm_fit, spline_rep, ext=1)
+
+        # Set values outside of SPM values in splrep to the exterior-most spline
+        #     values
+        min_fit_ind = np.max(((spline_fit == 0)
+            & (spm_fit <= min(spm_vals_free[ind_sort]))).nonzero())
+        max_fit_ind = np.min(((spline_fit == 0)
+            & (spm_fit >= max(spm_vals_free[ind_sort]))).nonzero())
+        spline_fit[0:min_fit_ind+1] = (np.zeros(len(spline_fit[0:min_fit_ind+1]))
+            + spline_fit[min_fit_ind+1])
+        spline_fit[max_fit_ind:] = (np.zeros(len(spline_fit[max_fit_ind:]))
+            + spline_fit[max_fit_ind-1])
 
         if USE_GUI:
             root = Tk()

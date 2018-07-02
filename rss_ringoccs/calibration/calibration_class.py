@@ -18,7 +18,6 @@ import numpy as np
 import os
 import platform
 from scipy.interpolate import interp1d
-import spiceypy as spice
 import time
 
 
@@ -53,8 +52,8 @@ class Calibration(object):
 
         spm_geo = np.asarray(geo_inst.t_oet_spm_vals)
         rho_km_geo = np.asarray(geo_inst.rho_km_vals)
-        phi_rad_vals = np.asarray(geo_inst.phi_ora_deg_vals)*spice.rpd()
-        B_rad_vals = np.asarray(geo_inst.B_deg_vals)*spice.rpd()
+        phi_rad_vals = np.radians(np.asarray(geo_inst.phi_ora_deg_vals))
+        B_rad_vals = np.radians(np.asarray(geo_inst.B_deg_vals))
         D_km_vals = np.asarray(geo_inst.D_km_vals)
         rho_dot_kms_vals = np.asarray(geo_inst.rho_dot_kms_vals)
         F_km_vals = np.asarray(geo_inst.F_km_vals)

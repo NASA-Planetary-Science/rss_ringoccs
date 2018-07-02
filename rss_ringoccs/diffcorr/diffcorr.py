@@ -2877,7 +2877,6 @@ class diffraction_correction(object):
         w_init      = w_vals[start]
         w_func      = fw(w_init,dx)
         nw          = np.size(w_func)
-        pdb.set_trace()
         phi_s_rad1  = phi_rad_vals[start]
         for i in np.arange(n_used):
             center = start+i

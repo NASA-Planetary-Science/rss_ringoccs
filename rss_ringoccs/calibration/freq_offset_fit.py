@@ -42,7 +42,6 @@ from numpy.polynomial import polynomial as poly
 import os
 import platform
 from scipy.interpolate import interp1d
-import spiceypy.spiceypy as spice
 import sys
 import time
 
@@ -375,7 +374,7 @@ class FreqOffsetFit(object):
         # Integration of frequency offset fit to get phase detrending function.
         # Then interpolated to same SPM as I and Q
         f_detrend_interp = np.cumsum(f_offset_fit_interp)*dt
-        f_detrend_interp_rad = f_detrend_interp*spice.twopi()
+        f_detrend_interp_rad = f_detrend_interp*(2.0*np.pi)
         f_detrend_rad_function = interp1d(f_spm_interp, f_detrend_interp_rad,
             fill_value='extrapolate')
         f_detrend_rad = f_detrend_rad_function(spm_vals)

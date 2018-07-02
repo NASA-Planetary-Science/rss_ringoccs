@@ -401,7 +401,7 @@ def make_executable(path):
     mode |= (mode & 0o444) >> 2    # copy R bits to X
     os.chmod(path, mode)
 
-def make_summary_file():
+def create_summary_doc():
     LaTeXFile       = r'''\documentclass{article}
     \title{test}
     \author{Ryan Maguire}

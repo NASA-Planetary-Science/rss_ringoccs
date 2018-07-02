@@ -71,7 +71,7 @@ import pdb
 sys.path.append("../../")
 from rss_ringoccs.tools import check_boole,check_ternary
 from rss_ringoccs.tools import check_real,check_pos_real
-from rss_ringoccs.tools import check_complex
+from rss_ringoccs.tools import check_complex,get_geo
 
 region_dict = {
     'maxwell'       : [87410.0,87610.0],
@@ -140,7 +140,7 @@ def compute_norm_eq(w_func):
             Created: RJM - 2018/05/16 3:54 P.M.
     """
     if not check_real(w_func):
-        sys.exit("Input must be real valued")
+        raise TypeError("Input must be real valued")
     nw      = np.size(w_func)
     normeq  = nw*(np.sum(w_func**2)) / (np.sum(w_func)**2)
     return normeq
@@ -190,7 +190,7 @@ def resolution_inverse(x):
             Translated from IDL: RJM - 2018/05/15 1:49 P.M.
     """
     if (not check_real(x)) and (not check_complex(x)):
-        sys.exit("Input must be real or complex")
+        raise TypeError("Input must be real or complex")
     f = ((x - 1) * lambertw(np.exp(x / (1 - x)) * x / (1 - x)) + x) / (x - 1)
     return f
 
@@ -691,7 +691,7 @@ def rect(w_in, dx):
     tw  = check_pos_real(w_in)
     tdx = check_pos_real(dx)
     if (not tdx) or (not tw):
-        sys.exit("Input must be two positive real numbers")
+        raise ValueError("Input must be two positive real numbers")
     nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
     w_func = np.zeros(nw_pts) + 1.0
     return w_func
@@ -1468,11 +1468,11 @@ def psi_factor(r,r0,b,phi0):
         sys.exit("b must be real valued")
     if (not check_real(phi0)):
         sys.exit("phi0 must be real valued")
-        cb      = np.cos(b)
-        sp0     = np.sin(phi0)
-        cp0     = np.cos(phi0)
-        factor  = ((cb**2) * cp0 * sp0 / (1.0 - (cb**2) * (sp0**2))) * (r - r0) / r0
-        return factor
+    cb      = np.cos(b)
+    sp0     = np.sin(phi0)
+    cp0     = np.cos(phi0)
+    factor  = ((cb**2) * cp0 * sp0 / (1.0 - (cb**2) * (sp0**2))) * (r - r0) / r0
+    return factor
 
 def psi_fast(r,r0,d,cb,cp,sp,cp0,sp0):
     """
@@ -1543,7 +1543,7 @@ def psi(r,r0,d,b,phi,phi0):
     sp0  = np.sin(phi0)
     cp0  = np.cos(phi0)
     xi   = (cb / d) * (r0*cp0 - r*cp)
-    eta  = ((r0**2) + (r**2) - 2.0 * r * r0 * (sp*sp0 + cp*cp0)) / (d**2)
+    eta  = ((r0*r0) + (r*r) - 2.0 * r * r0 * (sp*sp0 + cp*cp0)) / (d*d)
     psi_vals   = np.sqrt(1.0 + 2.0 * xi + eta) - (1.0 + xi)
     return psi_vals
 
@@ -2111,13 +2111,13 @@ class rec_data(object):
             print("Bad Input: len(D_km_vals) != len(rho_km_vals)")
             error_code += 64
         if (error_code != 0):
-            sys.exit("Bad input. Read error message.")
+            raise ValueError("Bad input. Read error message.")
 
     def __get_occ_type(self):
         drho = [np.min(self.rho_dot_kms_vals),np.max(self.rho_dot_kms_vals)]
         dx   = self.rho_km_vals[1]-self.rho_km_vals[0]
         if (drho[0] < 0) and (drho[1] > 0):
-            sys.exit("drho/dt had positive and negative values.")
+            raise ValueError("drho/dt had positive and negative values.")
         if (dx > 0) and (drho[1] < 0):
             self.rho_dot_kms_vals=np.abs(self.rho_dot_kms_vals)
         if (dx < 0):
@@ -3425,23 +3425,22 @@ class find_optimal_resolution(object):
 class delta_impulse_diffraction(object):
     def __init__(self,geo,lambda_km,res,rho,dx_km_desired=0.25,
         occ=False,wtype='kb25',fwd=False,norm=True,bfac=True,
-        verbose=True,fft=False,psitype='all',usefres=False):
+        verbose=True,fft=False,psitype='full',usefres=False):
     
         data = get_geo(geo,verbose=verbose)
         self.__retrieve_variables(data,verbose)
         self.__compute_variables(dx_km_desired,occ,verbose)
         self.__interpolate_variables(verbose)
 
-        r        = self.rho_km_vals
-        rng      = [rho-10.0*res,rho+10.0*res]
-        nstar    = np.min((r-rho>=0).nonzero())
-        rstar    = r[nstar]
-        phi      = self.phi_rad_vals
-        phistar  = phi[nstar]
+        r0       = self.rho_km_vals
         b        = self.B_rad_vals
         d        = self.D_km_vals
+        phi      = self.phi_rad_vals
+        rng      = [rho-10.0*res,rho+10.0*res]
+        nstar    = np.min((r0-rho>=0).nonzero())
+        r        = r0[nstar]
+        phistar  = phi[nstar]
         F        = fresnel_scale(lambda_km,d,phi,b)
-        kD       = 2.0 * np.pi * d / lambda_km
 
         if not check_boole(fwd):
             raise TypeError("fwd must be Boolean: True/False")
@@ -3455,11 +3454,53 @@ class delta_impulse_diffraction(object):
             raise TypeError("verbose must be Boolean: True/False")
         if not check_boole(usefres):
             raise TypeError("usefres must be Boolean: True/False")
+        if (type(psitype) != type("Hi!")):
+            raise TypeError("psitype must be a string: 'taylor', 'full', etc.")
 
         if (usefres == True):
-            psi_vals = kD*psi(r,rstar,d,b,phi,phistar)
+            psi_vals = (np.pi/2.0)*((r0-r)/F)*((r0-r)/F)
         else:
-            psi_vals = (np.pi/2.0)*((r-rstar)/F)*((r-rstar)/F)
+            kD          = 2.0 * np.pi * d[nstar] / lambda_km
+            dphi_s_rad  = psi_factor(r0,r,b,phi)
+            phi_s_rad   = phi - dphi_s_rad
+            cb          = np.cos(b)
+            cp0         = np.cos(phi)
+            sp0         = np.sin(phi)
+            cp          = np.cos(phi_s_rad)
+            sp          = np.sin(phi_s_rad)
+            d2          = d*d
+            r2          = r*r
+            r02         = r0*r0
+
+            loop        = 0
+            dphi_s_rad1 = dphi_s_rad  
+            dphi_s_rad  = 0
+
+            # Perform Newton-Raphson on phi.
+            while (np.max(np.abs(dphi_s_rad)) > 1.e-8):
+                xi         = (cb / d) * (r0*cp0 - r*cp)
+                eta        = (r02 + r2 - 2.0*r*r0*(sp*sp0 + cp*cp0)) / d2
+                v1         = r * cb * sp / d
+                v2         = 2.0 * r * r0 * (sp*cp0 - sp0*cp) / (d2)
+                v3         = 2.0*v1 + v2
+                v4         = np.sqrt(1.0 + 2.0*xi + eta)
+                v5         = r * cb * cp / d
+                v6         = 2.0 * r * r0 * (sp*sp0 + cp*cp0) / d2
+                dphia      = (2.0*v5 + v6)/(2.0 * v4)
+                dphib      = v5 + (2.0*v1 + v2)*(2.0*v1 + v2)/(4.0*(v4*v4*v4))
+                psi_d1     = v3 / (2.0 * v4) - v1
+                psi_d2     = dphia - dphib
+                dphi_s_rad = -psi_d1 / psi_d2
+                phi_s_rad += dphi_s_rad
+                cp         = np.cos(phi_s_rad)
+                sp         = np.sin(phi_s_rad)
+                loop      += 1
+                if loop > 5:
+                    break
+                if verbose: print("Psi Iter: %d" % loop)
+            psi_vals = kD * psi_fast(r,r0,d,cb,cp,sp,cp0,sp0)
+        
+        pdb.set_trace()
 
         T_hat_vals     = (1.0-1.0j)*np.exp(1j*psi_vals)/(2.0*F)
         p_norm_vals    = np.abs(T_hat_vals)*np.abs(T_hat_vals)

@@ -775,16 +775,12 @@ class extract_csv_data(object):
         rtype           = check_real(rho_corr_pole_km_vals)
         if not rtype:
             raise TypeError("Bad DLP: rho_corr_pole_km_vals not real valued.")
-        elif (np.min(rho_corr_pole_km_vals) < 0.0):
-            raise ValueError("Bad DLP: rho_corr_pole_km_vals has negative values.")
         else: del rtype
 
         rho_corr_timing_km_vals = np.array(dlp_dat.rho_corr_timing_km_vals)
         rtype                   = check_real(rho_corr_pole_km_vals)
         if not rtype:
             raise TypeError("Bad DLP: rho_corr_timing_km_vals not real valued.")
-        elif (np.min(rho_corr_timing_km_vals) < 0.0):
-            raise ValueError("Bad DLP: rho_corr_timing_km_vals has negative values.")
         else: del rtype
 
         phi_rl_deg_vals  = np.array(dlp_dat.phi_rl_deg_vals)

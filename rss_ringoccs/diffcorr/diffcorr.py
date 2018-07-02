@@ -68,7 +68,9 @@ from scipy import interpolate
 from scipy.constants import speed_of_light
 import pdb
 
-sys.path.append("../../")
+dcfile = os.path.dirname(os.path.realpath(__file__))
+sys.path.append("%s/../../" % dcfile)
+del dcfile
 from rss_ringoccs.tools import check_boole,check_ternary
 from rss_ringoccs.tools import check_real,check_pos_real
 from rss_ringoccs.tools import check_complex,get_geo

@@ -1,12 +1,10 @@
 #!/usr/bin/env python
 """
 
-power_normalization_v2.py
+power_normalization.py
 
 Purpose: Normalize frequency-corrected power using a spline fit of specified
          order.
-
-NOTE: Dependent on final format of geometry instances ("geo_inst")
 
 Revisions:
       power_normalization.py
@@ -72,7 +70,7 @@ class Normalization(object):
         >>> spline_fit = norm_inst.get_spline_fit(spm_fit,
                 spline_order=spline_order, \
                 knots_km=knots_km, dt_down=dt_down, \
-                freespace_km=freespace_km, TEST=TEST)
+                freespace_km=freespace_km, verbose=verbose)
 
     Attributes:
         _dt_down (float): Time spacing to downsample to before making
@@ -98,7 +96,7 @@ class Normalization(object):
         history (dict): Recorded information about the run
     """
 
-    def __init__(self, spm_raw, IQ_c_raw, geo_inst, rsr_inst, TEST=False):
+    def __init__(self, spm_raw, IQ_c_raw, geo_inst, rsr_inst, verbose=False):
         """
         Purpose:
         Instantiation defines raw resolution SPM, frequency corrected I
@@ -112,7 +110,7 @@ class Normalization(object):
             geo_inst: Instance of geometry class. Contains attributes
                 t_oet_spm and rho_km_vals. Can create mock version from a
                 geometry file using geo_file_into_instance.py
-            TEST (bool): Optional boolean argument that, if True, prints out
+            verbose (bool): Optional boolean argument that, if True, prints out
                 intermediate values
 
         Dependencies:
@@ -156,8 +154,6 @@ class Normalization(object):
         #                   eccentric ringlet. These accompany the default
         #                   knots
         self._spline_order = 2
-        #self._knots_km = np.array([70445., 87400., 117730., 119950., 133550.,
-        #    194269.])
         self._knots_km = [70445., 87400., 117730., 119950., 133550., 194269.]
         self._dt_down = 0.5
         self._freespace_km = [[69100.0, 73500], [87350.0, 87450.0],
@@ -172,7 +168,7 @@ class Normalization(object):
         # Evaluate spline fit over geometry instance spm values by default
         self._spm_fit = geo_inst.t_oet_spm_vals
 
-        if TEST:
+        if verbose:
             sample_rate_hz = int(round(1.0/(self.__spm_raw[1] -
                 self.__spm_raw[0])))
             print('\nGeometry SPM, rho:')
@@ -186,14 +182,14 @@ class Normalization(object):
         self.__set_history()
 
 
-    def __downsample_IQ(self, dt_down, TEST=False):
+    def __downsample_IQ(self, dt_down, verbose=False):
         """
         Downsample complex signal to specified time spacing to avoid
         diffraction pattern ruining spline fit
 
         Args:
             dt_down (float): Time spacing to downsample to
-            TEST (bool): If True, prints downsampled results
+            verbose (bool): If True, prints downsampled results
 
         Returns:
             spm_vals_down (np.ndarray): SPM values after downsampling
@@ -215,7 +211,7 @@ class Normalization(object):
             num=len(p_obs_down))
         rho_km_vals_down = self.__rho_interp_func(spm_vals_down)
 
-        if TEST:
+        if verbose:
             print('\nDownsampled SPM, rho:')
             for i in range(10):
                 print(spm_vals_down[i], rho_km_vals_down[i])
@@ -225,7 +221,7 @@ class Normalization(object):
 
     def get_spline_fit(self, spline_order=None, knots_km=None,
             dt_down=None, freespace_km=None, freespace_spm=None,
-            knots_spm=None, USE_GUI=True, TEST=False):
+            knots_spm=None, USE_GUI=True, verbose=False):
         """
         Purpose:
         Make spline fit to observed downsampled power at specified set
@@ -252,7 +248,7 @@ class Normalization(object):
                 be at places where there is data. Specify in km
             USE_GUI (bool): Use the interactive GUI to make a spline fit to
                 power. This is highly recommended
-            TEST (bool): If True, print out intermediate values
+            verbose (bool): If True, print out intermediate values
 
         Outputs:
             spm_fit: SPM values for the spline_fit output
@@ -302,10 +298,15 @@ class Normalization(object):
         knots_spm = self._knots_spm
 
         # Downsample I and Q to the time spacing dt_down
+        if verbose:
+            print('Downsampling input IQ_c to ' + str(dt_down)
+                + 's time spacing')
         (spm_vals_down, rho_km_vals_down,
-         p_obs_down) = self.__downsample_IQ(dt_down, TEST=TEST)
+         p_obs_down) = self.__downsample_IQ(dt_down, verbose=verbose)
 
         # Determine if Cassini is behind Saturn
+        if verbose:
+            print('Finding where atmosphere and ionosphere occults spacecraft')
         is_blocked_atm, is_blocked_ion = cassini_blocked(spm_vals_down,
             self.__rsr_inst, self.kernels)
 
@@ -378,14 +379,16 @@ class Normalization(object):
                 knots_spm_data[i] = spm_vals_free[_ind]
                 knots_rho_data[i] = rho_km_vals_free[_ind]
 
-        if TEST:
+        if verbose:
             print('\nSelected knots:')
-            print(knots_spm_data)
-            print(knots_rho_data)
+            print('SPM: ', knots_spm_data)
+            print('Rho (km): ', knots_rho_data)
 
         # Make and evaluate the spline fit. Sort spm_vals_free and p_obs_free
         #     in case it's ingress, since indices were gotten from rho values,
         #     which are not in order for ingress
+        if verbose:
+            print('Evaluating spline fit')
         ind_sort = np.argsort(spm_vals_free)
         ind_knot_sort = np.argsort(knots_spm_data)
         spline_rep = splrep(spm_vals_free[ind_sort], p_obs_free[ind_sort],
@@ -404,6 +407,7 @@ class Normalization(object):
             + spline_fit[max_fit_ind-1])
 
         if USE_GUI:
+            print('Using GUI')
             root = Tk()
             power_fit_gui_inst = PowerFitGui(root, self, spm_vals_down,
                 rho_km_vals_down, p_obs_down, spm_fit)

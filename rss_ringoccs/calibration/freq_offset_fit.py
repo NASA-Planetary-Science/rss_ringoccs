@@ -56,6 +56,10 @@ except ImportError:
     from ..tools.cassini_blocked import cassini_blocked
     from .f_resid_fit_gui import FResidFitGui
 
+sys.path.append('../..')
+import rss_ringoccs as rss
+sys.path.remove('../..')
+
 class FreqOffsetFit(object):
     """Class to make a fit to extracted frequency offset. Uses predicted sky
     frequency, reconstructed sky frequency, and a fit to residual sky frequency
@@ -108,9 +112,6 @@ class FreqOffsetFit(object):
             f_uso (float): USO frequency for the data set
             poly_order (int): Order of the polynomial fit made to residual
                 frequency
-            rho_exclude (list): Set of radius regions to exclude when making
-                fit to residual frequency. Specify in km. Default is to
-                exclude B ring region
             sc_name (str): Name of spacecraft. Default is 'Cassini'
             spm_include (list): Set of SPM regions to include when making fit
                 to residual frequency. By default, only rho_exclude is used.
@@ -138,7 +139,43 @@ class FreqOffsetFit(object):
             [2] Inputting an incorrect or incomplete set of kernels to Geometry
                 routine before running this will give you a cryptic error
                 message from spiceypy routines
+            [3] Code will exit if no points fall within specified
+                spm_include regions
         """
+
+        if type(rsr_inst) != rss.rsr_reader.RSRReader:
+            sys.exit('ERROR (FreqOffsetFit): rsr_inst input must be an '
+                +'instance of the RSRReader class')
+
+        if type(geo_inst) != rss.occgeo.Geometry:
+            sys.exit('ERROR (FreqOffsetFIt): geo_inst input must be an '
+                + 'instance of the Geometry class')
+
+        if (type(f_uso) != float) & (type(f_uso) != int):
+            print('WARNING (FreqOffsetFit): f_uso input must be either an int '
+                +'or float. Ignoring current input and setting to '
+                + str(8427222034.34050))
+            f_uso = 8427222034.34050
+
+        if type(poly_order) != int:
+            print('WARNING (FreqOffsetFit): poly_order input must be an int. '
+                + 'Ignoring current input and setting to order 9')
+            poly_order = 9
+
+        if (type(spm_include) != list) & (spm_include is not None):
+            print('WARNING (FreqOffsetFit): spm_include input must be either '
+                + 'a list or None. Setting to None for default fit ranges')
+            spm_include = None
+
+        if type(USE_GUI) != bool:
+            print('WARNING (FreqOffsetFit): USE_GUI input must be boolean. '
+                + 'Ignoring current input and setting to True')
+            USE_GUI = True
+
+        if type(verbose) != bool:
+            print('WARNING (FreqOffsetFit): verbose input must be boolean. '
+                + 'Ignoring current input and setting to False')
+            verbose = False
 
         # Keep the RSRReader instance, kernels, Geometry instance, and f_USO
         #     as attributes
@@ -215,6 +252,26 @@ class FreqOffsetFit(object):
             spm_include = [[30250, 32600], [33520, 33890], [33990, 40200]]
         """
 
+        if type(poly_order) != int:
+            print('WARNING (FreqOffsetFit): poly_order input must be an int. '
+                + 'Ignoring current input and setting to order 9')
+            poly_order = 9
+
+        if (type(spm_include) != list) & (spm_include is not None):
+            print('WARNING (FreqOffsetFit): spm_include input must be either '
+                + 'a list or None. Setting to None for default fit ranges')
+            spm_include = None
+
+        if type(USE_GUI) != bool:
+            print('WARNING (FreqOffsetFit): USE_GUI input must be boolean. '
+                + 'Ignoring current input and setting to True')
+            USE_GUI = True
+
+        if type(verbose) != bool:
+            print('WARNING (FreqOffsetFit): verbose input must be boolean. '
+                + 'Ignoring current input and setting to False')
+            verbose = False
+
         # Attributes keeping track of input
         self._poly_order = poly_order
         self.__USE_GUI = USE_GUI
@@ -234,7 +291,17 @@ class FreqOffsetFit(object):
 
         # Residual frequency is amount of frequency offset not accounted
         # for by error in predicted spacecraft trajectory
-        f_sky_resid = self.__f_offset - (self.__f_sky_recon - self.__f_sky_pred)
+        try:
+            f_sky_resid = self.__f_offset - (self.__f_sky_recon - self.__f_sky_pred)
+        except ValueError:
+            sys.exit('ERROR (FreqOffsetFit): Couldn\'t subtract recostructed '
+                +'and predicted sky frequency from frequency offset. Likely '
+                +'that length of input f_spm doesn\'t match  length of input '
+                +'f_offset')
+        except TypeError:
+            sys.exit('ERROR (FreqOffsetFit): Couldn\'t subtract recostructed '
+                +'and predicted sky frequency from frequency offset. Likely '
+                +'that input f_offset isn\'t an array')
 
         # Determine if Cassini blocked by Saturn's ionosophere. Important for
         #     chord occultations
@@ -274,8 +341,8 @@ class FreqOffsetFit(object):
             self._spm_include = spm_include
 
         if len(ind) == 0:
-            print('ERROR (FreqOffsetFit.set_f_sky_resid_fit): All specified \n'
-                +'points fall withint specified rho exclusion zone')
+            print('ERROR (FreqOffsetFit.set_f_sky_resid_fit): All \n'
+                +'points fall outside of specified spm_include regions')
             sys.exit()
 
         # When fitting, use x values adjusted to range over [-1, 1]
@@ -364,6 +431,13 @@ class FreqOffsetFit(object):
             """
 
         if IQ_m is None:
+            spm_vals = self.__spm_vals
+            IQ_m = self.__IQ_m
+
+        if (type(spm_vals) != np.ndarray) | (type(IQ_m) != np.ndarray):
+            print('WARNING (FreqOffsetFit.get_IQ_c): spm_vals and IQ_m input '
+                + 'must both be numpy arrays. Ignoring input and using default '
+                + '(raw resolution)')
             spm_vals = self.__spm_vals
             IQ_m = self.__IQ_m
 

@@ -97,6 +97,10 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192, spm_range=None,
         [6] sys
         [7] time
 
+    Notes:
+        [1] Might get rid of spm_range keyword in the future, so don't rely
+            on it too much
+
     Warnings:
         [1] If dt_freq is too low, there will be few points to fit over when
             you're constructing a fit to residual frequency, meaning the fit
@@ -109,6 +113,10 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192, spm_range=None,
             your computer, you don't see any performance difference from when
             you use the max number of cores, but just the same, we don't
             recommend making it greater than your total number of cores.
+        [4] If spm_range is too narrow of an SPM range with a high dt_freq
+            value, you might get problems with the number of points calculated
+            being really low. Also might be problems with trying to divide
+            small number of points into too many processors
         """
 
     if type(rsr_inst) != RSRReader:
@@ -117,7 +125,7 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192, spm_range=None,
         sys.exit()
 
     if (type(dt_freq) != float) and (type(dt_freq) != int):
-        print('ERROR (calc_freq_offset): dt_freq input must be a float or'
+        print('ERROR (calc_freq_offset): dt_freq input must be a float or '
             + 'integer')
         sys.exit()
 
@@ -138,7 +146,12 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192, spm_range=None,
     spm_vals = rsr_inst.spm_vals
     IQ_m = rsr_inst.IQ_m
 
+    # Set spm_range to full length of occultation if no input or illegal input
     if spm_range is None:
+        spm_range = [spm_vals[0], spm_vals[-1]]
+    elif type(spm_range) != list:
+        print('WARNING (calc_freq_offset): spm_range input must be a list. '
+            + 'Ignoring input and using full SPM range')
         spm_range = [spm_vals[0], spm_vals[-1]]
 
     dt_raw = spm_vals[1] - spm_vals[0]
@@ -203,10 +216,20 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192, spm_range=None,
             print('%24.16f %32.16f' % (f_spm[i], f_offset[i]))
 
     if freq_offset_file is not None:
-        if verbose:
-            print('Saving results to ' + freq_offset_file)
-        np.savetxt(freq_offset_file, np.c_[f_spm, f_offset],
-            fmt='%32.16f %32.16f')
+        try:
+            if verbose:
+                print('Saving results to ' + freq_offset_file)
+            np.savetxt(freq_offset_file, np.c_[f_spm, f_offset],
+                fmt='%32.16f %32.16f')
+        except FileNotFoundError:
+            new_freq_offset_file = ('freq_offset_file'
+                + time.strftime('_%Y%m%d') + '.txt')
+            print('WARNING (calc_freq_offset): Directory path not found: '
+                + freq_offset_file + '. '
+                + 'Saving as ' + new_freq_offset_file + ' in current working '
+                + 'directory')
+            np.savetxt(new_freq_offset_file, np.c_[f_spm, f_offset],
+                fmt='%32.16f %32.16f')
 
     return f_spm, f_offset, history_dict
 
@@ -364,6 +387,8 @@ def __get_history(rsr_inst, dt_freq, spm_range, cpu_count, freq_offset_file):
 
 if __name__ == '__main__':
     rsr_file = '../../../../../data/s10-rev07-rsr-data/S10EAOE2005_123_0740NNNX43D.2A1'
+    spm_range = [30000, 31000]
     rsr_inst = RSRReader(rsr_file)
+    freq_offset_file = 'notadirectory/sonotgoingtobeafile.txt'
     f_spm, f_offset, history = calc_freq_offset(rsr_inst,
-        spm_range=[27600, 29000], verbose=True)
+        spm_range=spm_range, freq_offset_file=freq_offset_file)

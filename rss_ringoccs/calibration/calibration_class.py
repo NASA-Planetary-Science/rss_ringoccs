@@ -31,7 +31,7 @@ class Calibration(object):
     Attributes:
         t_oet_spm_vals (np.ndarray): SPM values from calibration file
         f_sky_hz_vals (np.ndarray): Predicted sky frequency values from
-            calibration file
+            calibration file, plus the fit to frequency offset
         f_sky_resid_fit_vals (np.ndarray): Fit to residual frequency from
             calibration file
         p_free_vals (np.ndarray): Freespace power spline fit values from
@@ -41,13 +41,15 @@ class Calibration(object):
         history (dict): Dictionary with information of the run
     """
 
-    def __init__(self, fit_inst, norm_inst, geo_inst, dt_cal=1.0):
+    def __init__(self, fit_inst, norm_inst, geo_inst, dt_cal=1.0,
+            verbose=False):
         """
         Args:
             fit_inst: Instance of the FreqOffsetFit class
             norm_inst: Instance of the Normalization class
             geo_inst: Instance of the Geometry class
             dt_cal (float): Desired time Spacing between points
+            verbose (bool): Print intermediate steps and results
         """
 
         spm_geo = np.asarray(geo_inst.t_oet_spm_vals)
@@ -58,13 +60,23 @@ class Calibration(object):
         rho_dot_kms_vals = np.asarray(geo_inst.rho_dot_kms_vals)
         F_km_vals = np.asarray(geo_inst.F_km_vals)
 
+        if verbose:
+            print('Getting predicted sky frequency, residual frequency fit, '
+                + 'and frequency offset fit')
         f_spm, f_sky_pred = fit_inst.get_f_sky_pred()
         f_spm, f_sky_resid_fit = fit_inst.get_f_sky_resid_fit()
         f_spm, f_offset_fit = fit_inst.get_f_offset_fit()
 
         # SPM for calibration parameters
+        if verbose:
+            print('Creating set of SPM at time spacing ' + str(dt_cal))
         n_pts_cal = round((spm_geo[-1] - spm_geo[0])/dt_cal) + 1
         spm_cal = spm_geo[0] + dt_cal*np.arange(n_pts_cal)
+
+        if verbose:
+            print('Interpolating predicted sky frequency, residual sky '
+                + 'frequency fit, and frequency offset fit to calibration '
+                + 'SPM. Evaluating spline fit at calibration SPM')
 
         # Evaluate f_sky_pred at spm_cal
         f_sky_pred_func = interp1d(f_spm, f_sky_pred, fill_value='extrapolate')

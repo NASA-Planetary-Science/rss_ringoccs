@@ -92,7 +92,7 @@ class FreqOffsetFit(object):
 
     def __init__(self, rsr_inst, geo_inst, f_spm, f_offset,
             f_uso, poly_order=9, spm_include=None, sc_name='Cassini',
-            USE_GUI=True, TEST=False):
+            USE_GUI=True, verbose=False):
         """
         Purpose:
         Define all attributes associated with data set, and make a fit to
@@ -119,7 +119,7 @@ class FreqOffsetFit(object):
                 of rho_exclude
             USE_GUI (bool): Use the interactive GUI to make a residual
                 frequency fit. This is highly recommended
-            TEST (bool): Optional test plot
+            verbose (bool): Optional test plot
 
         Dependencies:
             [1] RSRReader
@@ -149,6 +149,9 @@ class FreqOffsetFit(object):
 
         # Attributes for components of frequency offset, except for residual
         # frequency and its fit
+        if verbose:
+            print('Calculating predicted sky frequency from input rsr_inst and'
+                + 'reconstructed sky frequency from kernelsin in input geo_inst')
         self.__f_spm = np.asarray(f_spm)
         self.__f_offset = np.asarray(f_offset)
         f_spm, self.__f_sky_pred = rsr_inst.get_f_sky_pred(f_spm=self.__f_spm)
@@ -168,7 +171,7 @@ class FreqOffsetFit(object):
         # Set attributes for residual frequency fit, and the
         # new frequency offset fit
         self.set_f_sky_resid_fit(poly_order=poly_order, spm_include=spm_include,
-            USE_GUI=USE_GUI, TEST=TEST)
+            USE_GUI=USE_GUI, verbose=verbose)
 
         # Get I and Q from RSR object
         self.__spm_vals = rsr_inst.spm_vals
@@ -176,7 +179,7 @@ class FreqOffsetFit(object):
 
 
     def set_f_sky_resid_fit(self, poly_order=9, spm_include=None, USE_GUI=True,
-            TEST=False):
+            verbose=False):
         """
         Purpose:
         Calculate fit to residual sky frequency. Sets attributes
@@ -195,7 +198,7 @@ class FreqOffsetFit(object):
                 of rho_exclude
             USE_GUI (bool): Use the interactive GUI to make a residual
                 frequency fit. This is highly recommended
-            TEST (bool): Optional test plot
+            verbose (bool): Optional test plot
 
         Dependencies:
             [1] RSRReader
@@ -250,6 +253,8 @@ class FreqOffsetFit(object):
         # If user specified spm_include argument that overrides the rho_exclude
         #     argument
         if spm_include is not None:
+            if verbose:
+                print('Using specified fit parameters')
             self._spm_include = spm_include
             ind = []
             for i in range(len(spm_include)):
@@ -258,6 +263,8 @@ class FreqOffsetFit(object):
                     (np.invert(is_blocked_ion))))
             ind = np.reshape(np.concatenate(ind), -1)
         else:
+            if verbose:
+                print('Using default fit parameters')
             spm_include = []
             for i in range(len(rho_exclude)-1):
                 _ind = np.argwhere((f_rho > rho_exclude[i][1])
@@ -276,6 +283,8 @@ class FreqOffsetFit(object):
         spm_temp = (f_spm - f_spm[int(npts/2)])/max(f_spm - f_spm[int(npts/2)])
 
         # Coefficients for least squares fit, and evaluation of coefficients
+        if verbose:
+            print('Evaluating polynomial fit')
         coef = poly.polyfit(spm_temp[ind], f_sky_resid[ind], poly_order)
         f_sky_resid_fit = poly.polyval(spm_temp, coef)
 
@@ -287,6 +296,8 @@ class FreqOffsetFit(object):
             self.__f_sky_pred)
 
         if USE_GUI:
+            if verbose:
+                print('Using GUI to make a polynomial fit')
             root = Tk()
             f_resid_fit_gui_inst = FResidFitGui(root, self, f_spm, f_rho,
                 f_sky_resid)
@@ -358,7 +369,7 @@ class FreqOffsetFit(object):
 
         if len(spm_vals) != len(IQ_m):
             sys.exit('ERROR (FreqOffsetFit.get_IQ_c):'+
-                     '\n SPM and IQ_m input lengths don\'t match')
+                '\n SPM and IQ_m input lengths don\'t match')
 
         f_offset_fit = self.__f_offset_fit
 

@@ -97,6 +97,10 @@ except ImportError:
     from ..rsr_reader.rsr_reader import RSRReader
     from .resample_IQ import resample_IQ
 
+sys.path.append('../..')
+import rss_ringoccs as rss
+sys.path.remove('../..')
+
 
 class NormDiff(object):
     """
@@ -180,8 +184,48 @@ class NormDiff(object):
             [3] Radius correction due to pole direction and timing offset not
                 yet implemented, so the corresponding attributes
                 (rho_corr_pole_km_vals and rho_corr_timing_km_vals) are set
-                to arrays of -999 right now
+                to arrays of 0 right now. Same thing for the
+                tau_threshold_vals attribute
+            [4] Don't make dr_km something stupidly large. Like, 70000km, or
+                something on the order of a full occultation. Haven't tried it
+                yet, but it certainly won't go over well
         """
+
+        if type(rsr_inst) != rss.rsr_reader.RSRReader:
+            sys.exit('ERROR (NormDiff): rsr_inst input must be an instance of '
+                + 'the RSRReader class')
+
+        if type(geo_inst) != rss.occgeo.Geometry:
+            sys.exit('ERROR (NormDiff): geo_inst input must be an '
+                + 'instance of the Geometry class')
+
+        if ((type(cal_inst) != rss.calibration.Calibration)
+                & (type(cal_inst) != rss.tools.MakeCalInst)):
+            sys.exit('ERROR (NormDiff): cal_inst input must be an instance of '
+                + 'the Calibration class if you don\'t have a CAL file '
+                + 'pre-made. Can also be an instance of the MakeCalInst class '
+                + 'if you have a CAL file that you want to turn into an '
+                + 'instance')
+
+        if (type(dr_km) != float ) & (type(dr_km) != int):
+            sys.exit('ERROR (NormDiff): dr_km input must be either a float '
+                +'or int')
+
+        if (type(dr_km_tol) != float ) & (type(dr_km_tol) != int):
+            sys.exit('ERROR (NormDiff): dr_km_tol input must be either a '
+                +'float or int')
+
+        if type(verbose) != bool:
+            print('WARNING (NormDiff): verbose input must be one of '
+                + 'Python\'s built-in booleans (True or False). Setting to '
+                + 'False')
+            verbose = False
+
+        if type(is_chord) != bool:
+            print('WARNING (NormDiff): is_chord input must be one of '
+                + 'Python\'s built-in booleans (True or False). Setting to '
+                + 'False')
+            is_chord = False
 
         spm_geo = geo_inst.t_oet_spm_vals
         rho_km_geo = geo_inst.rho_km_vals
@@ -196,11 +240,29 @@ class NormDiff(object):
         #     specify it as one. Ignore very first and last elements because
         #     those sometimes go to crazy values
         rho_dot_trim = rho_dot_kms_geo[1:-2]
-        if (len(rho_dot_trim[rho_dot_trim > 0]) != 0) & (
-                (len(rho_dot_trim[rho_dot_trim < 0]) != 0)) & (
-                is_chord is False):
-            print('WARNING: possible chord occultation detected, but is_chord '
-                + 'is False. Did you forget to set is_chord=True?')
+        if (np.any(rho_dot_trim > 0) & np.any(rho_dot_trim < 0)
+                & (is_chord is False)):
+            while True:
+                user_warning_input = input('WARNING: possible chord '
+                    + 'occultation detected, but is_chord is False. Did you '
+                    + 'forget to set is_chord=True? (y/n): ')
+                if user_warning_input == 'y':
+                    is_chord = True
+                    break
+                if user_warning_input == 'n':
+                    break
+
+        # In case user specified is_chord=True when it actually isn't
+        if ((np.all(rho_dot_trim > 0) | np.all(rho_dot_trim < 0))
+                & (is_chord is True)):
+            while True:
+                user_warning_input = input('WARNING: Likely not a chord. '
+                    + 'Did you mean to say is_chord=False? (y/n): ')
+                if user_warning_input == 'y':
+                    is_chord = False
+                    break
+                if user_warning_input == 'n':
+                    break
 
         # Function to convert SPM to rho
         rho_interp_func = interp1d(spm_geo, rho_km_geo, fill_value='extrapolate')

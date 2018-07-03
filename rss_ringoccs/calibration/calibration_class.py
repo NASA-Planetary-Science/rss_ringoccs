@@ -18,8 +18,12 @@ import numpy as np
 import os
 import platform
 from scipy.interpolate import interp1d
+import sys
 import time
 
+sys.path.append('../..')
+import rss_ringoccs as rss
+sys.path.remove('../..')
 
 class Calibration(object):
     """
@@ -51,6 +55,29 @@ class Calibration(object):
             dt_cal (float): Desired time Spacing between points
             verbose (bool): Print intermediate steps and results
         """
+
+        if type(fit_inst) != rss.calibration.FreqOffsetFit:
+            sys.exit('ERROR (Calibration): fit_inst input needs to be an '
+                + 'instance of the FreqOffsetFit class')
+
+        if type(norm_inst) != rss.calibration.Normalization:
+            sys.exit('ERROR (Calibration): norm_inst input needs to be an '
+                + 'instance of the Normalization class')
+
+        if type(geo_inst) != rss.occgeo.Geometry:
+            sys.exit('ERROR (Calibration): geo_inst input needs to be an '
+                + 'instance of the Geometry class')
+
+        if (type(dt_cal) != float) & (type(dt_cal) != int):
+            print('WARNING (Calibration): dt_cal input must be either a '
+                + 'float or an integer. Setting to default of 1.0')
+            dt_cal = 1.0
+
+        if type(verbose) != bool:
+            print('WARNING (Calibration): verbose input must be one of '
+                + 'Python\'s built-in booleans (True or False). Setting to '
+                + 'False')
+            verbose = False
 
         spm_geo = np.asarray(geo_inst.t_oet_spm_vals)
         rho_km_geo = np.asarray(geo_inst.rho_km_vals)

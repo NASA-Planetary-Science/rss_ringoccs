@@ -136,7 +136,7 @@ class NormDiff(object):
     """
 
     def __init__(self, rsr_inst, dr_km, geo_inst, cal_inst,
-            dr_km_tol=0.01, is_chord=False):
+            dr_km_tol=0.01, is_chord=False, verbose=False):
         """
         Purpose:
         Instantiation defines all attributes of instance.
@@ -149,12 +149,15 @@ class NormDiff(object):
             cal_inst: Calibration instance linked to rsr_inst input. Made using
                 Calibration class if you haven't made a cal_file yet, and made
                 using MakeCalInst class if you have made a cal_file
-            dr_km_tol (float): Optional keyword argument, in km, that specifies the
-                maximum distance the starting point of the final set of radius
-                values can be away from an integer number of dr_km. For example, if
-                you say dr_km_tol=0.01 and dr_km=0.25, the starting point of the
-                final set of rho values could be 70000.26 km, but not 70000.261 km
-            is_chord (bool): Set as True if the occultation is a chord occultation
+            dr_km_tol (float): Optional keyword argument, in km, that specifies
+                the maximum distance the starting point of the final set of
+                radius values can be away from an integer number of dr_km. For
+                example, if you say dr_km_tol=0.01 and dr_km=0.25, the starting
+                point of the final set of rho values could be 70000.26 km, but
+                not 70000.261 km
+            is_chord (bool): Set as True if the occultation is a chord
+                occultation
+            verbose (bool): Print intermediate steps and results
 
         Dependencies:
             [1] RSRReader
@@ -212,6 +215,9 @@ class NormDiff(object):
         spm_cal = cal_inst.t_oet_spm_vals
         f_sky_pred_cal = cal_inst.f_sky_hz_vals
         p_free_cal = cal_inst.p_free_vals
+
+        if verbose:
+            print('Calculating predicted sky frequency from input rsr_inst')
         dummy_spm, f_sky_pred_file = rsr_inst.get_f_sky_pred(f_spm=spm_cal)
         f_offset_fit_cal = f_sky_pred_cal - f_sky_pred_file
         rho_km_cal = rho_interp_func(spm_cal)
@@ -233,6 +239,9 @@ class NormDiff(object):
 
         # Inteprolate frequency offset to finer spacing in preparation
         #     for integration
+        if verbose:
+            print('Interpolating and integrating frequency offset, and '
+                + 'applying to IQ_m')
         dt = 0.1
         n_pts = round((spm_cal[-1] - spm_cal[0])/dt)
         spm_cal_interp = spm_cal[0] + dt*np.arange(n_pts)
@@ -249,6 +258,9 @@ class NormDiff(object):
 
         # Detrend raw measured I and Q
         IQ_c = IQ_m*np.exp(-1j*f_detrend_rad)
+
+        if verbose:
+            print('Interpolating and setting attributes')
 
         if not is_chord:
             rho_km_desired, IQ_c_desired = resample_IQ(rho_km_vals, IQ_c, dr_km,

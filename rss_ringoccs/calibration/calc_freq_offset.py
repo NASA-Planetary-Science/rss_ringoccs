@@ -37,11 +37,15 @@ import platform
 import sys
 import time
 
-from ..rsr_reader.rsr_reader import RSRReader
+try:
+    from ..rsr_reader.rsr_reader import RSRReader
+except SystemError:
+    sys.path.append('../rsr_reader')
+    from rsr_reader import RSRReader
 
 def calc_freq_offset(rsr_inst, dt_freq=8.192, spm_range=None,
         cpu_count=multiprocessing.cpu_count(), freq_offset_file=None,
-        TEST=False):
+        verbose=False):
     """
     Purpose:
     Primary function to run. Calculates frequency offset given a set of
@@ -55,7 +59,7 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192, spm_range=None,
         >>> # Calculate frequency offset
         >>> from freq_offset import calc_freq_offset
         >>> f_spm, f_offset = calc_freq_offset(rsr_inst, \
-                dt_freq=dt_freq, spm_range=spm_range, TEST=TEST)
+                dt_freq=dt_freq, spm_range=spm_range, verbose=verbose)
 
     Args:
         spm_vals (np.ndarray): Set of raw resolution SPM values that data was
@@ -69,8 +73,8 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192, spm_range=None,
             1.024 sec, etc.)
         spm_range (list): Optional 2-element list of range of spm_vals over
             which to extract frequency offset. Default is full range of spm_vals
-        TEST (bool): Optional testing argument that, if True, prints requested
-            and actual start and end times
+        verbose (bool): Optional testing argument that, if True, prints
+            requested and actual start and end times
         cpu_count (int): Number of cores to use in calculations. Generally, more
             cores makes it faster up to a certain point. You eventually start
             seeing diminishing returns
@@ -122,10 +126,10 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192, spm_range=None,
             + 'Setting equal to number of cores on computer.')
         cpu_count = multiprocessing.cpu_count()
 
-    if type(TEST) != bool:
-        print('WARNING (calc_freq_offset): TEST keyword must be boolean. '
+    if type(verbose) != bool:
+        print('WARNING (calc_freq_offset): verbose keyword must be boolean. '
             + 'Assuming False')
-        TEST = False
+        verbose = False
 
     # Record info about the call
     history_dict = __get_history(rsr_inst, dt_freq, spm_range, cpu_count,
@@ -150,7 +154,7 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192, spm_range=None,
         <= dt_raw)))
     end_ind = int(max(np.argwhere(abs(spm_vals - spm_range[1]) <= dt_raw)))
 
-    if TEST:
+    if verbose:
         print('Requested start and end times:')
         print('%24.16f %24.16f\n' % (spm_vals[start_ind], spm_vals[end_ind]))
 
@@ -163,7 +167,7 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192, spm_range=None,
         if end_ind > (len(spm_vals)-1):
             end_ind -= pts_per_fft
 
-    if TEST:
+    if verbose:
         print('Actual start and end times:')
         print('%24.16f %24.16f\n' % (spm_vals[start_ind], spm_vals[end_ind]))
 
@@ -174,7 +178,8 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192, spm_range=None,
     # Arrays that will contain final SPM and frequency offset
     n_loops = int(len(spm_vals) / pts_per_fft)
 
-    #print('SPM, frequency offset')
+    if verbose:
+        print('Beginning calculation of frequency offset')
 
     # Multiprocessing step
     results = []
@@ -192,7 +197,14 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192, spm_range=None,
 
     print('\n')
 
+    if verbose:
+        print('First 10 SPM, frequency offset (Hz):')
+        for i in range(10):
+            print('%24.16f %32.16f' % (f_spm[i], f_offset[i]))
+
     if freq_offset_file is not None:
+        if verbose:
+            print('Saving results to ' + freq_offset_file)
         np.savetxt(freq_offset_file, np.c_[f_spm, f_offset],
             fmt='%32.16f %32.16f')
 
@@ -217,7 +229,6 @@ def __loop(i_start, i_end, spm_vals, IQ_m, pts_per_fft, cont_fft_freq_range,
         _spm_avg = np.mean(_spm)
         _freq = __find_peak_freq(_spm, _IQ_m, cont_fft_freq_range)
 
-        #print('%24.16f %24.16f' % (_spm_avg, _freq))
         sys.stdout.write('\r' + str(i_iter + 1) + ' of '
             + str(len(range(i_start, i_end))) + ' points')
         sys.stdout.flush()
@@ -352,4 +363,7 @@ def __get_history(rsr_inst, dt_freq, spm_range, cpu_count, freq_offset_file):
 
 
 if __name__ == '__main__':
-    pass
+    rsr_file = '../../../../../data/s10-rev07-rsr-data/S10EAOE2005_123_0740NNNX43D.2A1'
+    rsr_inst = RSRReader(rsr_file)
+    f_spm, f_offset, history = calc_freq_offset(rsr_inst,
+        spm_range=[27600, 29000], verbose=True)

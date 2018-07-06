@@ -38,6 +38,7 @@ Revisions:
 
 import numpy as np
 import os
+import pdb
 import platform
 from scipy import signal
 from scipy.interpolate import interp1d
@@ -47,6 +48,10 @@ import sys
 import time
 
 from tkinter import Tk
+
+sys.path.append('../..')
+import rss_ringoccs as rss
+sys.path.remove('../..')
 
 try:
     from cassini_blocked import cassini_blocked
@@ -104,9 +109,11 @@ class Normalization(object):
         are set as attributes
 
         Args:
-            spm_raw (np.ndarray): Raw resolution array of SPM values
+            spm_raw (np.ndarray): Raw resolution array of SPM values. Get from
+                using get_IQ_c() method of the FreqOffsetFit class
             IQ_c_raw (np.ndarray): Frequency corrected complex signal at
-                raw resolution
+                raw resolution. Get from using get_IQ_c() method of the
+                FreqOffsetFit class
             geo_inst: Instance of geometry class. Contains attributes
                 t_oet_spm and rho_km_vals. Can create mock version from a
                 geometry file using geo_file_into_instance.py
@@ -129,6 +136,28 @@ class Normalization(object):
                 then you will get problems in this routine, since it
                 downsamples the signal.
         """
+
+        if len(spm_raw) != len(IQ_c_raw):
+            print('ERROR (Normalization): Input arrays not the same length. '
+                + 'Input should be from the get_IQ_c() method of the '
+                + 'FreqOffsetFit class')
+        elif (type(spm_raw) != np.ndarray) | (type(IQ_c_raw) != np.ndarray):
+            print('ERROR (Normalization): Input arrays must be numpy arrays. '
+                + 'Input should be from the get_IQ_c() method of the '
+                + 'FreqOffsetFit class')
+
+        if type(geo_inst) != rss.occgeo.Geometry:
+            sys.exit('ERROR (Normalization): geo_inst input must be an '
+                + 'instance of the Geometry class')
+
+        if type(rsr_inst) != rss.rsr_reader.RSRReader:
+            sys.exit('ERROR (Normalization): rsr_inst input must be an '
+                +'instance of the RSRReader class')
+
+        if type(verbose) != bool:
+            print('WARNING (Normalization): verbose input must be boolean. '
+                + 'Ignoring current input and setting to False')
+            verbose = False
 
         self.__rsr_inst = rsr_inst
         self.__geo_inst = geo_inst
@@ -266,11 +295,21 @@ class Normalization(object):
             [8] time
 
         Notes:
-            [1] HIGHLY RECOMMENDED to use freespace_spm and knots_spm in
-                addition to the GUI, rather than using freespace_km and
-                knots_km. Much easier to tinker with the fit using SPM
-                and the GUI
+            [1] HIGHLY RECOMMENDED to use either (1) the GUI, or
+                (2) freespace_spm and knots_spm. HIGHLY DISCOURAGED to use
+                freespace_km and knots_km. Much easier to tinker with the fit
+                using SPM and the GUI
         """
+
+        if type(USE_GUI) != bool:
+            print('WARNING (Normalization): USE_GUI input must be boolean. '
+                  + 'Ignoring current input and setting to True')
+            USE_GUI = True
+
+        if type(verbose) != bool:
+            print('WARNING (Normalization): verbose input must be boolean. '
+                  + 'Ignoring current input and setting to False')
+            verbose = False
 
         # SPM values to evaluate spline fit at
         spm_fit = self._spm_fit
@@ -301,8 +340,16 @@ class Normalization(object):
         if verbose:
             print('Downsampling input IQ_c to ' + str(dt_down)
                 + 's time spacing')
-        (spm_vals_down, rho_km_vals_down,
-         p_obs_down) = self.__downsample_IQ(dt_down, verbose=verbose)
+        try:
+            (spm_vals_down, rho_km_vals_down,
+                p_obs_down) = self.__downsample_IQ(dt_down, verbose=verbose)
+        except TypeError:
+            print('WARNING (Normalization.get_spline_fit): dt_down must be '
+                +'either int or float. Reverting to the default of 0.5s')
+            self._dt_down = 0.5
+            dt_down = 0.5
+            (spm_vals_down, rho_km_vals_down,
+                p_obs_down) = self.__downsample_IQ(dt_down, verbose=verbose)
 
         # Determine if Cassini is behind Saturn
         if verbose:
@@ -310,21 +357,35 @@ class Normalization(object):
         is_blocked_atm, is_blocked_ion = cassini_blocked(spm_vals_down,
             self.__rsr_inst, self.kernels)
 
-         # Define freespace regions
-        ind_free = []
-        for i in range(len(freespace_km)):
-            ind_free.append(np.argwhere((rho_km_vals_down > freespace_km[i][0])
-                & (rho_km_vals_down < freespace_km[i][1])
-                & (np.invert(is_blocked_atm))))
-        ind_free = np.reshape(np.concatenate(ind_free), -1)
+        # Define freespace regions. Overridden if freespace_spm is not None
+        ind_free = self.__get_default_freespace_ind(rho_km_vals_down,
+            freespace_km, is_blocked_atm)
 
-        if freespace_spm is not None:
-            ind_free = []
-            for i in range(len(freespace_spm)):
-                ind_free.append(np.argwhere((spm_vals_down > freespace_spm[i][0])
-                    & (spm_vals_down < freespace_spm[i][1])
-                    & (np.invert(is_blocked_atm))))
-            ind_free = np.reshape(np.concatenate(ind_free), -1)
+        # Override default freespace values above
+        try:
+            if freespace_spm is not None:
+                ind_free = []
+                for i in range(len(freespace_spm)):
+                    ind_free.append(np.argwhere((spm_vals_down > freespace_spm[i][0])
+                        & (spm_vals_down < freespace_spm[i][1])
+                        & (np.invert(is_blocked_atm))))
+                ind_free = np.reshape(np.concatenate(ind_free), -1)
+        except TypeError:
+            print('WARNING (Normalization.get_spline_fit): Illegal input for '
+                + 'freespace_spm. Reverting to default freespace regions')
+            self._freespace_spm = None
+            freespace_spm = None
+            ind_free = self.__get_default_freespace_ind(rho_km_vals_down,
+                freespace_km, is_blocked_atm)
+
+        if np.all(ind_free == False):
+            print('WARNING (Normalization.get_spline_fit): No SPM values fall '
+                + 'within input freespace_spm regions. Returning to default '
+                + 'freespace regions')
+            self._freespace_spm = None
+            freespace_spm = None
+            ind_free = self.__get_default_freespace_ind(rho_km_vals_down,
+                freespace_km, is_blocked_atm)
 
         # Limit downsampled data to freespace regions
         spm_vals_free = spm_vals_down[ind_free]
@@ -336,24 +397,26 @@ class Normalization(object):
             knots_km_where = np.argwhere(
                 np.logical_and(knots_km>min(rho_km_vals_free),
                     knots_km<max(rho_km_vals_free)))
-            
+
             # Can't make fit if no specified knots lie in freespace regions
             if len(knots_km_where) == 0:
-                print('ERROR (Normalization.get_spline_fit): No specified '
-                    + 'knots \n'
-                    + 'fall within freespace range. Freespace ranges are '
-                    + str(freespace_km))
-                sys.exit()
+                print('WARNING (Normalization.get_spline_fit): No default '
+                    + 'knots fall within freespace range. Adjust freespace_spm'
+                    + 'input. For now, returning to default freespace range')
+                self._freespace_spm = None
+                freespace_spm = None
+                ind_free = self.__get_default_freespace_ind(rho_km_vals_down,
+                    freespace_km, is_blocked_atm)
+                spm_vals_free = spm_vals_down[ind_free]
+                rho_km_vals_free = rho_km_vals_down[ind_free]
+                p_obs_free = p_obs_down[ind_free]
+                knots_km_where = np.argwhere(
+                    np.logical_and(knots_km>min(rho_km_vals_free),
+                        knots_km<max(rho_km_vals_free)))
 
             # Select data points closest to selected knots
-            n_knots_km = len(knots_km_where)
-            knots_spm_data = np.zeros(n_knots_km)
-            knots_rho_data = np.zeros(n_knots_km)
-            for i in range(n_knots_km):
-                _knot_km = knots_km[int(knots_km_where[i])]
-                _ind = np.argmin(abs(rho_km_vals_free - _knot_km))
-                knots_spm_data[i] = spm_vals_free[_ind]
-                knots_rho_data[i] = rho_km_vals_free[_ind]
+            knots_spm_data, knots_rho_data = self.__get_ind_from_knots('RHO_KM',
+                knots_km_where, knots_km, spm_vals_free, rho_km_vals_free)
 
         # Find knots in range of specified SPM
         else:
@@ -361,23 +424,34 @@ class Normalization(object):
                 np.logical_and(knots_spm>min(spm_vals_free),
                     knots_spm<max(spm_vals_free)))
 
+            # Input for __get_ind_from_knots
+            type_of_knot = 'SPM'
+            knots_where_input = knots_spm_where
+            knots_input = knots_spm
+
             # Can't make fit if no specified knots lie in freespace regions
             if len(knots_spm_where) == 0:
-                print('ERROR (Normalization.get_spline_fit): No specified '
-                    + 'times \n'
-                    + 'fall within freespace range. reespace ranges are '
-                    + str(freespace_spm))
-                sys.exit()
+                print('WARNING (Normalization.get_spline_fit): No specified '
+                    + 'knots fall within freespace range. Returning to '
+                    + 'default knots. Freespace ranges are currently: '
+                    + '\n\tfreespace_spm = ' + str(freespace_spm)
+                    + '\n\tfreespace_km = ' + str(freespace_km))
+                self._knots_spm = None
+                knots_spm = None
+                knots_km_where = np.argwhere(
+                    np.logical_and(knots_km>min(rho_km_vals_free),
+                        knots_km<max(rho_km_vals_free)))
+
+                # Input for __get_ind_from_knots if no specified knots lie
+                #     in freespace regions
+                type_of_knot = 'RHO_KM'
+                knots_where_input = knots_km_where
+                knots_input = knots_km
 
             # Select data points closest to selected knots
-            n_knots_spm = len(knots_spm_where)
-            knots_spm_data = np.zeros(n_knots_spm)
-            knots_rho_data = np.zeros(n_knots_spm)
-            for i in range(n_knots_spm):
-                _knot_spm = knots_spm[int(knots_spm_where[i])]
-                _ind = np.argmin(abs(spm_vals_free - _knot_spm))
-                knots_spm_data[i] = spm_vals_free[_ind]
-                knots_rho_data[i] = rho_km_vals_free[_ind]
+            knots_spm_data, knots_rho_data = self.__get_ind_from_knots(
+                type_of_knot, knots_where_input, knots_input, spm_vals_free,
+                rho_km_vals_free)
 
         if verbose:
             print('\nSelected knots:')
@@ -391,9 +465,19 @@ class Normalization(object):
             print('Evaluating spline fit')
         ind_sort = np.argsort(spm_vals_free)
         ind_knot_sort = np.argsort(knots_spm_data)
-        spline_rep = splrep(spm_vals_free[ind_sort], p_obs_free[ind_sort],
-            k=spline_order, t=knots_spm_data[ind_knot_sort])
-        spline_fit = splev(spm_fit, spline_rep, ext=1)
+        try:
+            spline_rep = splrep(spm_vals_free[ind_sort], p_obs_free[ind_sort],
+                k=spline_order, t=knots_spm_data[ind_knot_sort])
+            spline_fit = splev(spm_fit, spline_rep, ext=1)
+        except TypeError:
+            print('WARNING (Normalization.get_spline_fit): Given degree of the '
+                + 'spline (k=6) is not supported (1<=k<=5). Reverting to '
+                + 'degree 2')
+            self._spline_order = 2
+            spline_order = 2
+            spline_rep = splrep(spm_vals_free[ind_sort], p_obs_free[ind_sort],
+                k=spline_order, t=knots_spm_data[ind_knot_sort])
+            spline_fit = splev(spm_fit, spline_rep, ext=1)
 
         # Set values outside of SPM values in splrep to the exterior-most spline
         #     values
@@ -422,6 +506,46 @@ class Normalization(object):
 
         self.__set_history()
         return spm_fit, spline_fit
+
+
+    def __get_default_freespace_ind(self, rho_km_vals_down, freespace_km,
+            is_blocked_atm):
+        """
+        Define default freespace regions. Overridden if freespace_spm is not
+        None, or if there's an error in the input
+        """
+
+        # Define freespace regions. Overridden if freespace_spm is not None
+        ind_free = []
+        for i in range(len(freespace_km)):
+            ind_free.append(np.argwhere((rho_km_vals_down > freespace_km[i][0])
+                & (rho_km_vals_down < freespace_km[i][1])
+                & (np.invert(is_blocked_atm))))
+        ind_free = np.reshape(np.concatenate(ind_free), -1)
+
+        return ind_free
+
+
+    def __get_ind_from_knots(self, type_of_input, knots_where, knots,
+            spm_vals_free, rho_km_vals_free):
+        """
+        Get data points closest to selected knots
+        """
+
+        # Select data points closest to selected knots
+        n_knots = len(knots_where)
+        knots_spm_data = np.zeros(n_knots)
+        knots_rho_data = np.zeros(n_knots)
+        for i in range(n_knots):
+            _knot = knots[int(knots_where[i])]
+            if type_of_input == 'SPM':
+                _ind = np.argmin(abs(spm_vals_free - _knot))
+            elif type_of_input == 'RHO_KM':
+                _ind = np.argmin(abs(rho_km_vals_free - _knot))
+            knots_spm_data[i] = spm_vals_free[_ind]
+            knots_rho_data[i] = rho_km_vals_free[_ind]
+
+        return knots_spm_data, knots_rho_data
 
 
     def __set_history(self):

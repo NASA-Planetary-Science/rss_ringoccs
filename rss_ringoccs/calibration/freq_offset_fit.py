@@ -90,6 +90,9 @@ class FreqOffsetFit(object):
         __f_sky_resid_fit (np.ndarray): Fit to observed residual frequency
         __spm_vals (np.ndarray): SPM values at raw resolution over
             full data set
+        _rho_exclude (list): Set of radius regions to exclude when making
+            fit to residual frequency. Specify in km. Default is to
+            exclude B ring region
         __IQ_m (np.ndarray): Raw measured complex signal over full data set
         history (dict): Recorded information about the run
         """
@@ -205,6 +208,10 @@ class FreqOffsetFit(object):
         # Attribute keeping track of fit parameter
         self._spm_include = spm_include
 
+        # Default fit ranges
+        self._rho_exclude = [[0, 70000], [91900, 94000], [98000, 118000],
+            [194400, np.inf]]
+
         # Set attributes for residual frequency fit, and the
         # new frequency offset fit
         self.set_f_sky_resid_fit(poly_order=poly_order, spm_include=spm_include,
@@ -225,9 +232,6 @@ class FreqOffsetFit(object):
 
         Args:
             poly_order (int): Order of polynomial fit made to residual frequency
-            rho_exclude (list): Set of radius regions to exclude when making
-                fit to residual frequency. Specify in km. Default is to
-                exclude B ring region
             spm_include (list): Set of SPM regions to include when making fit
                 to residual frequency. By default, only rho_exclude is used.
                 If this keyword is specified, it overrides anything input to
@@ -282,9 +286,7 @@ class FreqOffsetFit(object):
         #     the frequency offset from FreqOffset class. This is the initial
         #     guess for regions to fit over. User adjusts using spm_include
         #     keyword
-        #if rho_exclude is None:
-        rho_exclude = [[0, 70000], [91900, 94000], [98000, 118000],
-            [194400, np.inf]]
+        rho_exclude = self._rho_exclude
 
         f_rho = self.__f_rho
         f_spm = self.__f_spm
@@ -475,8 +477,6 @@ class FreqOffsetFit(object):
         Record information about the run and how to reproduce it.
         """
 
-        # TODO (gsteranka): Replace entry to 'geo_inst' category of
-        #     input_var_dict with self.__geo_inst.history
         input_var_dict = {'rsr_inst': self.__rsr_inst.history,
             'geo_inst': self.__geo_inst.history, 'f_uso': self.__f_uso}
         input_kw_dict = {'poly_order': self._poly_order,

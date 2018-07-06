@@ -266,15 +266,15 @@ class FResidFitGui(Frame):
             self.ax_rho.plot(self.x_rho, self.y, alpha=0)
         self.ax_rho.set_xlabel('Rho (km)')
 
-        y_arrow = np.mean(self.ax.get_ylim())
-        for i in range(len(self.xlim)):
-            self.ax.axvline(self.xlim[i][0], color='b')
-            self.ax.axvline(self.xlim[i][1], color='b')
-            _x_arrow = float(self.xlim[i][0])
-            _dx_arrow = float(np.diff(self.xlim[i]))
-            self.ax.arrow(_x_arrow, y_arrow, _dx_arrow, 0,
-                color='b', head_width=0.1, head_length=50,
-                length_includes_head=True)
+#         y_arrow = np.mean(self.ax.get_ylim())
+#         for i in range(len(self.xlim)):
+#             self.ax.axvline(self.xlim[i][0], color='b')
+#             self.ax.axvline(self.xlim[i][1], color='b')
+#             _x_arrow = float(self.xlim[i][0])
+#             _dx_arrow = float(np.diff(self.xlim[i]))
+#             self.ax.arrow(_x_arrow, y_arrow, _dx_arrow, 0,
+#                 color='b', head_width=0.1, head_length=50,
+#                 length_includes_head=True)
 
         if not_ind is not None:
             self.ax.plot(self.x[not_ind], self.y[not_ind], color='g', alpha=0.1)
@@ -305,14 +305,20 @@ class FResidFitGui(Frame):
         "set_xrange_btn" variable in initUI()
         """
 
-        xlim_entry = self.xlim_entry.get()
-        xlim = []
-        split1 = xlim_entry.split(';')
-        for i in range(len(split1)):
-            split2 = (split1[i]).split(',')
-            _xlim = [float(split2[0]), float(split2[1])]
-            xlim.append(_xlim)
-        self.xlim = xlim
+        try:
+            xlim_entry = self.xlim_entry.get()
+            xlim = []
+            split1 = xlim_entry.split(';')
+            for i in range(len(split1)):
+                split2 = (split1[i]).split(',')
+                _xlim = [float(split2[0]), float(split2[1])]
+                xlim.append(_xlim)
+            self.xlim = xlim
+        except ValueError:
+            print('WARNING (FResidFitGui.adjust_range): Illegal input in the '
+                + '"Fit range (SPM)" text box. Returning to default fit ranges')
+            self.revert_range()
+            return
 
         ind = []
         for i in range(len(xlim)):
@@ -340,9 +346,15 @@ class FResidFitGui(Frame):
         "Reset fit range" button. Bound to the "revert_xrange_btn" in initUI()
         """
 
-        self.xlim = [[min(self.x), max(self.x)]]
+        rho_exclude = self.fit_inst._rho_exclude
+        self.xlim = []
+        for i in range(len(rho_exclude)-1):
+            self.xlim.append(
+                [self.x[np.argmin(abs(self.x_rho - rho_exclude[i][1]))],
+                self.x[np.argmin(abs(self.x_rho - rho_exclude[i+1][0]))]])
         self.ind = np.arange(len(self.x))
         self.not_ind = None
+
         new_yfit = self._get_fit()
         self.yfit = new_yfit
         self.update_plot()

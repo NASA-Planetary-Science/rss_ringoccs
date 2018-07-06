@@ -180,6 +180,12 @@ class FreqOffsetFit(object):
                 + 'Ignoring current input and setting to False')
             verbose = False
 
+        if sc_name != 'Cassini':
+            print('WARNING (FreqOffsetFit): Spacecraft other than Cassini '
+                + 'are not implemented/tested yet. Setting sc_name input '
+                + 'to "Cassini"')
+            sc_name = 'Cassini'
+
         # Keep the RSRReader instance, kernels, Geometry instance, and f_USO
         #     as attributes
         self.__rsr_inst = rsr_inst
@@ -402,19 +408,15 @@ class FreqOffsetFit(object):
         return self.__f_spm, self.__f_offset_fit
 
 
-    def get_IQ_c(self, spm_vals=None, IQ_m=None):
+    def get_IQ_c(self):
         """
         Purpose:
         Apply frequency offset fit to raw measured signal. Can supply
         SPM and IQ_m input if desired, otherwise the default is raw
-        resolution
-
-        Args:
-            spm_vals (np.ndarray): SPM values corresponding to complex signal
-                you're frequency correcting. Default is raw resolution from
-                rsr_inst
-            IQ_m (np.ndarray): Complex signal you're frequency correcting.
-                Default is raw resolution from rsr_inst
+        resolution. Raw resolution is made mandatory for this because if
+        you decimate to lower sample rate here, then the power normalization
+        will only work in the future if you downsample by the exact same amount
+        when you do power normalization.
 
         Outputs:
             spm_vals (np.ndarray): SPM values of the returned frequency
@@ -424,17 +426,11 @@ class FreqOffsetFit(object):
         Dependencies:
             [1] numpy
             [2] scipy.interpolate
+        """
 
-        Warnings:
-            [1] If you resample IQ_m before frequency correcting it, you risk
-                making the unnormalized signal much lower than it would
-                otherwise be. Highly recommended to just use the default raw
-                resolution spm_vals and IQ_m
-            """
-
-        if IQ_m is None:
-            spm_vals = self.__spm_vals
-            IQ_m = self.__IQ_m
+        # Complex signal to frequency correct, and corresponding SPM values
+        spm_vals = self.__spm_vals
+        IQ_m = self.__IQ_m
 
         if (type(spm_vals) != np.ndarray) | (type(IQ_m) != np.ndarray):
             print('WARNING (FreqOffsetFit.get_IQ_c): spm_vals and IQ_m input '

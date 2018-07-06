@@ -79,17 +79,16 @@ class Normalization(object):
 
     Attributes:
         _dt_down (float): Time spacing to downsample to before making
-                a spline fit
-        _freespace_km (list): Set of radius values, in km, to treat as
-                free space. These are the regions that the spline fit is made
-                to. Specify in km. Be sure to include a region for each knot
-                specified
+            a spline fit
+        _freespace_km (list): Set of default radius values, in km, to treat as
+            free space. These are the regions that the spline fit is made
+            to. Specify in km. Be sure to include a region for each knot
+            specified
         _freespace_spm (list): SPM version of _freespace_km. Use this one if
             it's not None. Overrides _freespace_km
         __IQ_c_raw (np.ndarray): Raw resolution frequency corrected I and Q
         _spline_order (int): Order of the spline fit. Default order is 2
-        _knots_km (list): List of knots for the spline fit. Should only
-                be at places where there is data. Specify in km
+        _knots_km (list): List of default knot positions for the spline fit
         _knots_spm (list): SPM versino of _knots_km. Use this one if it's not
             None. Overrides _knots_km
         __rho_interp_func (scipy.interpolate.interpolate.interp1d): interp1d
@@ -248,9 +247,8 @@ class Normalization(object):
         return spm_vals_down, rho_km_vals_down, p_obs_down
 
 
-    def get_spline_fit(self, spline_order=None, knots_km=None,
-            dt_down=None, freespace_km=None, freespace_spm=None,
-            knots_spm=None, USE_GUI=True, verbose=False):
+    def get_spline_fit(self, spline_order=None, dt_down=None,
+            freespace_spm=None, knots_spm=None, USE_GUI=True, verbose=False):
         """
         Purpose:
         Make spline fit to observed downsampled power at specified set
@@ -269,12 +267,6 @@ class Normalization(object):
             knots_spm (list): List of knots for the spline fit. Same as
                 knots_km, but in SPM instead of radius. Specifying this
                 overrides knots_km
-            freespace_km (list): Set of radius values, in km, to treat as
-                free space. These are the regions that the spline fit is made
-                to. Specify in km. Be sure to include a region for each knot
-                specified
-            knots_km (list): List of knots for the spline fit. Should only
-                be at places where there is data. Specify in km
             USE_GUI (bool): Use the interactive GUI to make a spline fit to
                 power. This is highly recommended
             verbose (bool): If True, print out intermediate values
@@ -295,10 +287,14 @@ class Normalization(object):
             [8] time
 
         Notes:
-            [1] HIGHLY RECOMMENDED to use either (1) the GUI, or
-                (2) freespace_spm and knots_spm. HIGHLY DISCOURAGED to use
-                freespace_km and knots_km. Much easier to tinker with the fit
-                using SPM and the GUI
+            [1] HIGHLY RECOMMENDED to use the GUI if you haven't done the
+                occultation before. Much easier to tinker with the fit this way
+
+        Warnings:
+            [1] If you make dt_down outrageously large, like 1000s, than
+                you'll have a hard time making a good fit. If you make it
+                longer than the length of the occultation, like 20000s,
+                than you'll probably get an error
         """
 
         if type(USE_GUI) != bool:
@@ -317,12 +313,12 @@ class Normalization(object):
         # Update defaults if any keyword arguments were specified
         if spline_order is not None:
             self._spline_order = spline_order
-        if knots_km is not None:
-            self._knots_km = knots_km
+        #if knots_km is not None:
+        #    self._knots_km = knots_km
         if dt_down is not None:
             self._dt_down = dt_down
-        if freespace_km is not None:
-            self._freespace_km = freespace_km
+        #if freespace_km is not None:
+        #    self._freespace_km = freespace_km
         if freespace_spm is not None:
             self._freespace_spm = freespace_spm
         if knots_spm is not None:
@@ -471,7 +467,7 @@ class Normalization(object):
             spline_fit = splev(spm_fit, spline_rep, ext=1)
         except TypeError:
             print('WARNING (Normalization.get_spline_fit): Given degree of the '
-                + 'spline (k=6) is not supported (1<=k<=5). Reverting to '
+                + 'spline (k) is not supported (1<=k<=5). Reverting to '
                 + 'degree 2')
             self._spline_order = 2
             spline_order = 2
@@ -557,8 +553,9 @@ class Normalization(object):
             'rsr_inst': self.__rsr_inst.history}
         input_kw_dict = {'spm_fit': self._spm_fit,
             'spline_order': self._spline_order,
-            'knots_km': self._knots_km, 'dt_down': self._dt_down,
-            'freespace_km': self._freespace_km,
+            #'knots_km': self._knots_km,
+            'dt_down': self._dt_down,
+            #'freespace_km': self._freespace_km,
             'freespace_spm': self._freespace_spm, 'knots_spm': self._knots_spm}
         hist_dict = {'User Name': os.getlogin(),
             'Host Name': os.uname().nodename,

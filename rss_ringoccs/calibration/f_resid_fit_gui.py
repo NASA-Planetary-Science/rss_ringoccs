@@ -95,6 +95,14 @@ class FResidFitGui(Frame):
     """
 
     def __init__(self, parent, fit_inst, x, x_rho, y):
+        """
+        Args:
+            parent: tkinter.Tk instance
+            fit_inst: Instance of the FreqOffsetFit class
+            x: SPM values of the residual frequency (y)
+            x_rho: Radius values corresponding to x
+            y: Residual frequency values in Hz
+        """
 
         Frame.__init__(self, parent)
 
@@ -114,13 +122,18 @@ class FResidFitGui(Frame):
         self.parent.title('FResidFitGui')
         self.pack(fill=tkinter.BOTH, expand=1)
 
+        # Default fit
         self.fit_deg = 3
         self.xlim = self.fit_inst._spm_include
         dummy, self.yfit = self.fit_inst.get_f_sky_resid_fit()
 
+        # Indices inside and outside of freespace. Starts off with all
+        #     highlighted like they're inside of freespace regions, despite
+        #     the original default
         self.ind = np.arange(len(self.x))
         self.not_ind = None
 
+        # Figure to plot on
         self.f = Figure(figsize=(5, 4))
         self.ax = self.f.add_subplot(111)
 
@@ -144,6 +157,7 @@ class FResidFitGui(Frame):
         lbl = Label(fit_order_frame, textvariable=self.lvar)
         lbl.grid(row=0, column=1)
 
+        # Put fit order box on the window
         fit_order_frame.pack(side=tkinter.LEFT, padx=15)
 
         # Frame for fit range entry
@@ -159,6 +173,7 @@ class FResidFitGui(Frame):
         xrange_btn_lbl = Label(fit_range_frame, text='min1, max1 ; min2, max2...')
         xrange_btn_lbl.grid(row=1, column=0)
 
+        # Put fit range box on the window
         fit_range_frame.pack()
 
         # Button to use the x range entered in the box
@@ -192,6 +207,9 @@ class FResidFitGui(Frame):
     def _get_rho_tick_labels(self, spm_tick_labels):
         """
         Given tick labels in SPM, get the new tick labels in radius
+
+        Args:
+            spm_tick_labels (list): SPM tick labels to get radius matches for
         """
         spm_to_rho_func = interp1d(self.x, self.x_rho)
         rho_tick_labels = spm_to_rho_func(spm_tick_labels)
@@ -228,11 +246,13 @@ class FResidFitGui(Frame):
             self.ax_rho.plot(self.x_rho, self.y, alpha=0)
         self.ax_rho.set_xlabel('Rho (km)')
 
+        # Show the canvas
         self.canvas = FigureCanvasTkAgg(self.f, master=self.parent)
         self.canvas.show()
         self.canvas.get_tk_widget().pack(side=tkinter.TOP, fill=tkinter.BOTH,
             expand=1)
 
+        # Put the matplotlib toolbar on the screen
         self.toolbar = NavigationToolbar2TkAgg(self.canvas, self.parent)
         self.toolbar.update()
         self.canvas._tkcanvas.pack(side=tkinter.TOP, fill=tkinter.BOTH,
@@ -246,14 +266,17 @@ class FResidFitGui(Frame):
         adjust_range(), and revert_range()
         """
 
+        # Indices to make highlighted or dimmed based on the freespace regions
         ind = self.ind
         not_ind = self.not_ind
 
+        # Plot the residual frequency within the freespace regions and its fit
         self.ax.cla()
         self.ax.plot(self.x[ind], self.y[ind], color='g')
         self.ax.plot(self.x, self.yfit, color='r')
         self.ax.set_ylim([min(self.y[ind]) - 1.0, max(self.y[ind]) + 1.0])
 
+        # Plot the radius scale on the upper x-axis
         if self.is_chord:
             ax_rho_ticks = (self.ax.get_xticks())[
                 (self.ax.get_xticks() >= min(self.x))
@@ -266,6 +289,10 @@ class FResidFitGui(Frame):
             self.ax_rho.plot(self.x_rho, self.y, alpha=0)
         self.ax_rho.set_xlabel('Rho (km)')
 
+        # Blue vertical lines to designate where the freespace regions are. Not
+        #     doing anymore because I think it looks bad, and doesn't really
+        #     help any since it's easy enough to look at the entered values
+        #     for fit range and find where they are on the x-axis
 #         y_arrow = np.mean(self.ax.get_ylim())
 #         for i in range(len(self.xlim)):
 #             self.ax.axvline(self.xlim[i][0], color='b')
@@ -276,6 +303,7 @@ class FResidFitGui(Frame):
 #                 color='b', head_width=0.1, head_length=50,
 #                 length_includes_head=True)
 
+        # Plot the residual frequency outside of the freespace regions
         if not_ind is not None:
             self.ax.plot(self.x[not_ind], self.y[not_ind], color='g', alpha=0.1)
 
@@ -286,25 +314,35 @@ class FResidFitGui(Frame):
 
     def adjust_deg(self, e):
         """
+        Purpose:
         Adjust the degree of the fit if you adjusted the "Fit order" combobox.
         Bound to the "combo" variable in initUI()
+
+        Args:
+            e: Event received from selecting a fit order from the drop-down menu
         """
 
+        # Set attribute for the new fit order
         new_deg = e.widget
         self.lvar.set(new_deg.get())
         self.fit_deg = int(new_deg.get())
 
+        # Adjust the fit and re-plot
         self.yfit = self._get_fit()
         self.update_plot()
 
 
     def adjust_range(self):
         """
+        Purpose:
         Adjust ranges to fit over if you changed what's entered in the text
         box and then press the "Set fit range (SPM)" button. Bound to the
         "set_xrange_btn" variable in initUI()
         """
 
+        # Get the freespace region entry from the textbox, using semicolons to
+        #     separate different regions, and commas to separate the minimum
+        #     and maximum within a region
         try:
             xlim_entry = self.xlim_entry.get()
             xlim = []
@@ -320,6 +358,7 @@ class FResidFitGui(Frame):
             self.revert_range()
             return
 
+        # New indices of self.x falling inside of freespace regions
         ind = []
         for i in range(len(xlim)):
             ind.append(np.argwhere((self.x >= xlim[i][0]) &
@@ -327,6 +366,7 @@ class FResidFitGui(Frame):
         ind = np.reshape(np.concatenate(ind), -1)
         self.ind = ind
 
+        # New indices of self.x falling outside of freespace regions
         not_ind = []
         not_ind.append(np.argwhere(self.x < xlim[0][0]))
         for i in range(len(xlim)-1):
@@ -335,6 +375,7 @@ class FResidFitGui(Frame):
         not_ind = np.reshape(np.concatenate(not_ind), -1)
         self.not_ind = not_ind
 
+        # Make a new fit and plot it
         new_yfit = self._get_fit()
         self.yfit = new_yfit
         self.update_plot()
@@ -342,10 +383,13 @@ class FResidFitGui(Frame):
 
     def revert_range(self):
         """
+        Purpose:
         Revert to the original range and knots to fit over if you press the
         "Reset fit range" button. Bound to the "revert_xrange_btn" in initUI()
         """
 
+        # Get default radii exclusion zones from the instance of FreqOffsetFit
+        #     and set the xlim, ind, and not_ind attributes accordingly
         rho_exclude = self.fit_inst._rho_exclude
         self.xlim = []
         for i in range(len(rho_exclude)-1):
@@ -355,17 +399,26 @@ class FResidFitGui(Frame):
         self.ind = np.arange(len(self.x))
         self.not_ind = None
 
+        # Make the new fit and plot it
         new_yfit = self._get_fit()
         self.yfit = new_yfit
         self.update_plot()
 
 
     def quit_app(self, e):
+        """
+        Purpose:
+        Called when you hit the "OK" button. Makes sure that you really want
+        to exit the GUI
+        """
 
+        # Check if you really want to exit the GUI, and gives a firm reminder
+        #     to set fit parameters before continuing
         ret = messagebox.askquestion('Question', 'Are you sure of this fit? '
             + 'If not, then click "No", adjust the fit parameters, and '
             + 'REMEMBER TO HIT THE "Set Fit Range (SPM)" BUTTON!!!')
 
+        # Destroy GUI if yes, return to GUI if no
         if ret == 'yes':
             self.quit()
             self.parent.destroy()

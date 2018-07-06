@@ -17,7 +17,12 @@ Revisions:
 import numpy as np
 import os
 import platform
+import sys
 import time
+
+sys.path.append('../..')
+from rss_ringoccs.rsr_reader.rsr_reader import RSRReader
+sys.path.remove('../..')
 
 
 class MakeCalInst(object):
@@ -37,18 +42,23 @@ class MakeCalInst(object):
             calibration files
         history (dict): Dictionary with information of the run
 
-    Notes:
-        [1] Works on 5-COLUMN CAL FILES ONLY!!! Need the 5th column of
-            frequency offset fit to avoid running whole fit routine again
     """
 
     def __init__(self, cal_file, rsr_inst):
         """
         Args:
             cal_file (str): Full path name of calibration file
+            rsr_inst: Instace of the RSRReader class
         """
 
-        cal = np.loadtxt(cal_file, delimiter=',')
+        try:
+            cal = np.loadtxt(cal_file, delimiter=',')
+        except FileNotFoundError:
+            sys.exit('ERROR (MakeCalInst): File not found')
+
+        if type(rsr_inst) != RSRReader:
+            sys.exit('ERROR (MakeCalInst): rsr_inst input needs to be an '
+                + 'instance of the RSRReader class')
 
         t_oet_spm_vals = cal[:, 0]
         f_sky_hz_vals = cal[:, 1]

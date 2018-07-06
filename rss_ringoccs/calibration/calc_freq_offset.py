@@ -43,7 +43,7 @@ except SystemError:
     sys.path.append('../rsr_reader')
     from rsr_reader import RSRReader
 
-def calc_freq_offset(rsr_inst, dt_freq=8.192, spm_range=None,
+def calc_freq_offset(rsr_inst, dt_freq=8.192,
         cpu_count=multiprocessing.cpu_count(), freq_offset_file=None,
         verbose=False):
     """
@@ -59,7 +59,7 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192, spm_range=None,
         >>> # Calculate frequency offset
         >>> from freq_offset import calc_freq_offset
         >>> f_spm, f_offset = calc_freq_offset(rsr_inst, \
-                dt_freq=dt_freq, spm_range=spm_range, verbose=verbose)
+                dt_freq=dt_freq, verbose=verbose)
 
     Args:
         spm_vals (np.ndarray): Set of raw resolution SPM values that data was
@@ -71,8 +71,6 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192, spm_range=None,
             a power of 2 when it's multiplied by the sample rate in Hz (so for
             1kHz files, typical values would be 0.128 sec, 0.256 sec, 0.512 sec,
             1.024 sec, etc.)
-        spm_range (list): Optional 2-element list of range of spm_vals over
-            which to extract frequency offset. Default is full range of spm_vals
         verbose (bool): Optional testing argument that, if True, prints
             requested and actual start and end times
         cpu_count (int): Number of cores to use in calculations. Generally, more
@@ -97,10 +95,6 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192, spm_range=None,
         [6] sys
         [7] time
 
-    Notes:
-        [1] Might get rid of spm_range keyword in the future, so don't rely
-            on it too much
-
     Warnings:
         [1] If dt_freq is too low, there will be few points to fit over when
             you're constructing a fit to residual frequency, meaning the fit
@@ -113,10 +107,9 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192, spm_range=None,
             your computer, you don't see any performance difference from when
             you use the max number of cores, but just the same, we don't
             recommend making it greater than your total number of cores.
-        [4] If spm_range is too narrow of an SPM range with a high dt_freq
-            value, you might get problems with the number of points calculated
-            being really low. Also might be problems with trying to divide
-            small number of points into too many processors
+        [4] If dt_freq is really high, you might get problems with the number
+            of points calculated being really low. Also might be problems with
+            trying to divide small number of points into too many processors
         """
 
     if type(rsr_inst) != RSRReader:
@@ -140,19 +133,14 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192, spm_range=None,
         verbose = False
 
     # Record info about the call
-    history_dict = __get_history(rsr_inst, dt_freq, spm_range, cpu_count,
+    history_dict = __get_history(rsr_inst, dt_freq, cpu_count,
         freq_offset_file)
 
     spm_vals = rsr_inst.spm_vals
     IQ_m = rsr_inst.IQ_m
 
     # Set spm_range to full length of occultation if no input or illegal input
-    if spm_range is None:
-        spm_range = [spm_vals[0], spm_vals[-1]]
-    elif type(spm_range) != list:
-        print('WARNING (calc_freq_offset): spm_range input must be a list. '
-            + 'Ignoring input and using full SPM range')
-        spm_range = [spm_vals[0], spm_vals[-1]]
+    spm_range = [spm_vals[0], spm_vals[-1]]
 
     dt_raw = spm_vals[1] - spm_vals[0]
     sample_rate_hz = round(1.0 / dt_raw)
@@ -365,13 +353,13 @@ def __refine_peak_freq(IQ_m_weight, freq_c, dt):
     return freq_max
 
 
-def __get_history(rsr_inst, dt_freq, spm_range, cpu_count, freq_offset_file):
+def __get_history(rsr_inst, dt_freq, cpu_count, freq_offset_file):
     """
     Record information about the run's history
     """
 
     input_var_dict = {'rsr_inst': rsr_inst.history}
-    input_kw_dict = {'dt_freq': dt_freq, 'spm_range': spm_range,
+    input_kw_dict = {'dt_freq': dt_freq,
         'cpu_count': cpu_count, 'freq_offset_file': freq_offset_file}
     hist_dict = {'User Name': os.getlogin(),
         'Host Name': os.uname().nodename,
@@ -387,8 +375,8 @@ def __get_history(rsr_inst, dt_freq, spm_range, cpu_count, freq_offset_file):
 
 if __name__ == '__main__':
     rsr_file = '../../../../../data/s10-rev07-rsr-data/S10EAOE2005_123_0740NNNX43D.2A1'
-    spm_range = [30000, 31000]
+    #spm_range = [30000, 31000]
     rsr_inst = RSRReader(rsr_file)
     freq_offset_file = 'notadirectory/sonotgoingtobeafile.txt'
     f_spm, f_offset, history = calc_freq_offset(rsr_inst,
-        spm_range=spm_range, freq_offset_file=freq_offset_file)
+        freq_offset_file=freq_offset_file)

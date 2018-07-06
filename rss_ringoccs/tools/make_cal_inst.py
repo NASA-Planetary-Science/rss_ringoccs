@@ -7,6 +7,13 @@ Purpose: Create an instance for calibration parameters. Just for NormDiff class,
          a replacement for the "Calibration" class in calibration_class.py if
          you have already made a calibration file
 
+WHERE TO GET NECESSARY INPUT:
+    cal_file: Output from the PDS3 CAL file writer. This isn't currently on
+        GitHub, but you can find it under the TC2017 directory at
+        TC2017/jfong/programs/occgeo/jwf_pds3_cal_series_v2.py
+    rsr_inst: Use an instance of the RSRReader class, found inside of
+        rss_ringoccs/rsr_reader/rsr_reader.py
+
 Revisions:
         make_cal_inst.py
     2018 Jun 11 - gsteranka - Original version
@@ -41,7 +48,6 @@ class MakeCalInst(object):
         f_offset_fit_vals (np.ndarray): Fit to frequency offset from
             calibration files
         history (dict): Dictionary with information of the run
-
     """
 
     def __init__(self, cal_file, rsr_inst):
@@ -78,6 +84,9 @@ class MakeCalInst(object):
 
 
     def __set_history(self, cal_file):
+        """
+        Set history attribute
+        """
 
         input_var_dict = {'cal_file': cal_file}
 

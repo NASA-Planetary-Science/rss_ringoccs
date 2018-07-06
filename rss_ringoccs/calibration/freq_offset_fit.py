@@ -7,6 +7,15 @@ Purpose: Makes a fit to the frequency offset made from freq_offset.py, using
          the frequency offset, predicted sky frequency, reconstructed sky
          frequency, and a fit to residual frequency.
 
+WHERE TO GET NECESSARY INPUT:
+    rsr_inst: Use an instance of the RSRReader class, found inside of
+        rss_ringoccs/rsr_reader/rsr_reader.py
+    geo_inst: Use an instance of the Geometry class, found inside of
+        rss_ringoccs/occgeo/calc_occ_geometry.py
+    f_spm, f_offset: Use the output of the calc_freq_offset function, found
+        inside of rss_ringoccs/calibration/calc_freq_offset.py
+    f_uso: 8427222034.34050 (can use this for any occultation)
+
 Revisions:
       gjs_freq_offset_fit.py
    2018 Feb 21 - gsteranka - Original version
@@ -107,8 +116,8 @@ class FreqOffsetFit(object):
 
         Args:
             rsr_inst: Instance of the RSRReader class
-            geo_inst: Instance of geometry class. Contains attributes t_oet_spm
-                and rho_km_vals
+            geo_inst: Instance of geometry class. Contains attributes
+                t_oet_spm_vals and rho_km_vals
             f_spm (np.ndarray): SPM array that frequency offset was
                 extracted at
             f_offset (np.ndarray): Extracted frequency offset
@@ -258,7 +267,7 @@ class FreqOffsetFit(object):
 
         Notes:
         [1] Here is an example spm_include input, where each separate bracket
-        contains a region that we want to include when fitting:
+            contains a region that we want to include when fitting:
             spm_include = [[30250, 32600], [33520, 33890], [33990, 40200]]
         """
 
@@ -470,7 +479,9 @@ class FreqOffsetFit(object):
 
     def __set_history(self):
         """
-        Record information about the run and how to reproduce it.
+        Purpose:
+        Set history attribute, which records information about the run and how
+        to reproduce it
         """
 
         input_var_dict = {'rsr_inst': self.__rsr_inst.history,

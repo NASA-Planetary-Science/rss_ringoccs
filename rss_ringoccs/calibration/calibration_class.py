@@ -5,6 +5,14 @@ calibration_class.py
 Purpose: Class for calibration parameters. This doesn't really do anything. It
          just puts everything calibration-related into one place
 
+WHERE TO GET NECESSARY INPUT:
+    fit_inst: Use an instance of the FreqOffsetFit class, found inside of
+        rss_ringoccs/calibration/freq_offset_fit.py
+    norm_inst: Use an instance of the Normalization class, found inside of
+        rss_ringoccs/calibration/power_normalization.py
+    geo_inst: Use an instance of the Geometry class, found inside of
+        rss_ringoccs/occgeo/calc_occ_geometry.py
+
 Revisions:
         calibration_class.py
     2018 Jun 11 - gsteranka - Original version
@@ -49,11 +57,21 @@ class Calibration(object):
             verbose=False):
         """
         Args:
-            fit_inst: Instance of the FreqOffsetFit class
-            norm_inst: Instance of the Normalization class
-            geo_inst: Instance of the Geometry class
+            fit_inst: Instance of the FreqOffsetFit class. Used for the
+                frequency offset fit and the residual frequency fit
+            norm_inst: Instance of the Normalization class. Used for the power
+                normalizing spline fit
+            geo_inst: Instance of the Geometry class. Used for various
+                geometry parameters
             dt_cal (float): Desired time Spacing between points
             verbose (bool): Print intermediate steps and results
+
+        Dependencies:
+            [1] FreqOffsetFit
+            [2] Normalization
+            [3] Geometry
+            [4] scipy
+            [5] numpy
         """
 
         if type(fit_inst) != rss.calibration.FreqOffsetFit:
@@ -133,6 +151,19 @@ class Calibration(object):
 
 
     def __set_history(self, fit_inst, norm_inst, geo_inst, dt_cal):
+        """
+        Purpose:
+        Set history attribute of the class
+
+        Args:
+            fit_inst: Instance of the FreqOffsetFit class. Used for the
+                frequency offset fit and the residual frequency fit
+            norm_inst: Instance of the Normalization class. Used for the power
+                normalizing spline fit
+            geo_inst: Instance of the Geometry class. Used for various
+                geometry parameters
+            dt_cal (float): Desired time Spacing between points
+        """
 
         input_var_dict = {'fit_inst': fit_inst.history,
             'norm_inst': norm_inst.history, 'geo_inst': geo_inst.history}

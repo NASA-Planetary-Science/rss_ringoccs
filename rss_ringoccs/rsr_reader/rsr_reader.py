@@ -3,7 +3,12 @@
 
 rsr_reader.py
 
-Purpose: Class to create an instance linked to an RSR file.
+Purpose: Class to create an instance linked to an RSR file
+
+WHERE TO GET NECESSARY INPUT:
+    rsr_file: Use the shell script in the "data" directory in
+        your GitHub clone directory to download RSR files. Use the full path
+        name of one of these RSR files for this input
 
 Revisions:
       gjs_rsr_reader_v2.py
@@ -34,6 +39,7 @@ Revisions:
    2018 May 30 - gsteranka - Added history attribute
    2018 Jun 25 - gsteranka - Fixed bug with 16kHz file not getting sky frequency
                              correctly
+   2018 Jul 06 - gsteranka - Switch default decimate_16khz_to_1khz value to True
 
 *************************VARIABLES*************************
 NAME - TYPE - scalar/array - PURPOSE
@@ -60,22 +66,19 @@ import time
 
 class RSRReader(object):
     """
+    Purpose:
     Reads the header of a raw RSR file when you first create an instance.
-    Then reads the full RSR file to calculate predicted sky frequency at the
-    specified times, or reads the full RSR file to read the raw measured I
-    and Q values.
+    Then reads the full RSR file to read in the raw measured I and Q values
+    (the complex signal)
 
     Example:
-        >>> # Define instance and set header attributes
+        >>> # Define instance and set header attributes, and read in raw data
         >>> rsr_inst = RSRReader(rsr_file)
         >>>
         >>>  # Get predicted sky frequency at chosen SPM values f_spm
         >>> f_spm_returned, f_sky_pred = rsr_inst.get_f_sky_pred(f_spm=f_spm)
-        >>>
-        >>> # Get raw measured I and Q, and raw SPM, over specified spm_range
-        >>> spm_vals, IQ_m = rsr_inst.get_IQ(spm_range=spm_range)
 
-    Data attributes:
+    Attributes:
         rsr_file (str): Full path name of a raw RSR file to read
         spm_vals (np.ndarray): Seconds Past Midnight array of times over
             entire rsr file
@@ -173,7 +176,7 @@ class RSRReader(object):
         + __sh_field_names + __data_field_names)
 
 
-    def __init__(self,rsr_file, decimate_16khz_to_1khz=False,
+    def __init__(self,rsr_file, decimate_16khz_to_1khz=True,
             cpu_count=multiprocessing.cpu_count(), verbose=False):
         """
         Purpose:
@@ -183,7 +186,9 @@ class RSRReader(object):
         attributes for reading the RSR file later in the "get" methods.
 
         Args:
-            rsr_file (str): Full path name of a raw RSR file to read
+            rsr_file (str): Full path name of a raw RSR file to read. RSR files
+                can be downloaded using the shell script in the "data"
+                directory of your GitHub clone
             decimate_16khz_to_1khz (bool): Optional Boolean argument which, if
                 set to True, decimates 16kHz files down to 1kHz sampling rate.
                 Note that this is a sticky keyword - if you set it to True, it
@@ -208,7 +213,7 @@ class RSRReader(object):
         Warnings:
             [1] If you try setting decimate_16khz_to_1khz=True for a 1kHz file,
                 it will just ignore you
-            [2] 16kHz files will take a few minutes to read
+            [2] 16kHz files will take a few minutes to read and decimate
         """
 
         # Ensure verbose is Boolean
@@ -372,6 +377,8 @@ class RSRReader(object):
 
         Warnings:
             [1] Will take a few minutes to run for 16kHz files
+            [2] If you try hard enough, you'll probably be able to get an
+                error message from the f_spm input
         """
 
         # Ensure verbose is Boolean
@@ -484,11 +491,11 @@ class RSRReader(object):
     def __set_IQ(self, verbose=False):
         """
         Read full RSR file to find the raw measured I and Q over the
-        specified spm_range of the file. Returns raw SPM values over the
-        specified time range and the raw measured I and Q values.
+        specified spm_range of the file. Adds attributes for raw SPM values
+        over the specified time range and the raw measured I and Q values.
 
         Args:
-            verbose (bool): If True, print first 10 raw measured I and Q
+            verbose (bool): If True, print steps and intermediate results
 
         Adds attributes:
             spm_vals (np.ndarray): Raw resolution SPM values over specified
@@ -570,7 +577,15 @@ class RSRReader(object):
 
     def __loop(self, i_start, i_end, n_loops, queue=0):
         """
+        Purpose:
         Function to perform loop for multiprocessing
+
+        Args:
+            i_start (int): SFDU number to start indexing at
+            i_end (int): SFDU number to stop indexing at
+            n_loops (int): Number of loops that this for loop will go through
+                for each processor
+            queue: multiprocessing.Queue instance
         """
 
         I_array = np.zeros(len(range(i_start, i_end))*self.__n_pts_per_sfdu)
@@ -602,6 +617,7 @@ class RSRReader(object):
 
     def __set_history(self):
         """
+        Purpose:
         Set Python dictionary recording information about the run as the
         history attribute
         """

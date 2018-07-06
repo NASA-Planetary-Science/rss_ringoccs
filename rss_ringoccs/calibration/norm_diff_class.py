@@ -7,6 +7,20 @@ Purpose: Apply previously made calibration file to calibrate raw data
          (frequency correct and normalize), which produces the diffraction
          pattern given to Fresnel Inversion code.
 
+WHERE TO GET NECESSARY INPUT:
+    rsr_inst: Use an instance of the RSRReader class, found inside of
+        rss_ringoccs/rsr_reader/rsr_reader.py
+    dr_km: Can be any integer, but some recommended typical values are
+        0.5, 0.1, 0.25, 0.5, and 1.0
+    geo_inst: Use an instance of the Geometry class, found inside of
+        rss_ringoccs/occgeo/calc_occ_geometry.py
+    cal_inst: If you don't have a CAL file already made, use an instance of
+        the Calibration class, found inside of
+        rss_ringoccs/calibration/calibration_class.py. If you already have a
+        CAL file made and just want to use what's inside of that, then use an
+        instance of the MakeCalInst class, found inside of
+        rss_ringoccs/tools/make_cal_inst.py
+
 Revisions:
       gjs_produce_normalized_diffraction_pattern.py
    2018 Mar 07 - gsteranka - Original version. Tentative rough draft, since
@@ -149,7 +163,7 @@ class NormDiff(object):
             rsr_inst: Instance of the RSRReader class. Linked to the full
                 path name of RSR file to process
             dr_km (float): Desired final radial spacing of processed data, in km
-            geo_inst (str): Instance of Geometry class linked to rsr_inst input
+            geo_inst: Instance of Geometry class linked to rsr_inst input
             cal_inst: Calibration instance linked to rsr_inst input. Made using
                 Calibration class if you haven't made a cal_file yet, and made
                 using MakeCalInst class if you have made a cal_file
@@ -398,8 +412,29 @@ class NormDiff(object):
             spm_cal, f_sky_pred_cal, rsr_inst,
             end_of_chord_ing=None):
         """
+        Purpose:
         Private method called by __init__ to set attributes of the
         instance
+
+        Args:
+            rho_km_desired (np.ndarray): Radius values at final spacing
+            spm_desired (np.ndarray): SPM values evaluated at rho_km_desired
+            p_norm_vals (np.ndarray): Normalized power evaluated at
+                rho_km_desired
+            phase_rad_vals (np.ndarray): Drift-corrected phase in radians
+                evaluated at rho_km_desired
+            spm_geo (np.ndarray): SPM values of geometry parameters
+            rho_dot_kms_geo (np.ndarray): Radial velocity evaluated at spm_geo
+            geo_inst: Instance of the Geometry class
+            spm_cal (np.ndarray): SPM values of the calibration parameters
+            f_sky_pred_cal (np.ndarray): Sky frequency values listed in
+                calibration, which has the frequency offset added on top of the
+                values read straight from the RSR file using
+                RSRReader.get_f_sky_pred
+            rsr_inst: Instance of the RSRReader class
+            end_of_chord_ing (int or None): Index of the end of the ingress
+                portion of a chord occultation. Set to None if the
+                occultation's not chord
         """
 
         self.rho_km_vals = rho_km_desired
@@ -474,6 +509,10 @@ class NormDiff(object):
 
 
     def __set_history(self, rsr_inst, dr_km, geo_inst, cal_inst, dr_km_tol):
+        """
+        Purpose:
+        Set history attribute
+        """
 
         input_var_dict = {'rsr_inst': rsr_inst.history, 'dr_km': dr_km,
             'geo_file': geo_inst.history, 'cal_inst': cal_inst.history}
@@ -492,6 +531,7 @@ class NormDiff(object):
 
     def chord_split(self):
         """
+        Purpose:
         Split chord occultation instance into an ingress instance and an egress
         instance, and return them.
 
@@ -501,7 +541,8 @@ class NormDiff(object):
 
         Notes:
             [1] Is it bad practice to create separate copies of the instances
-                and return them? Not sure what else to do.
+                and return them? Not sure what else to do. I think it's okay,
+                for whatever that's worth
         """
 
         if self.end_of_chord_ing is None:

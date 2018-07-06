@@ -6,6 +6,15 @@ power_normalization.py
 Purpose: Normalize frequency-corrected power using a spline fit of specified
          order.
 
+WHERE TO GET NECESSARY INPUT:
+    spm_raw, IQ_c_raw: Use the output of the "get_IQ_c" method in the
+        FreqOffsetFit class, found in
+        rss_ringoccs/calibration/freq_offset_fit.py
+    geo_inst: Use an instance of the Geometry class, found inside of
+        rss_ringoccs/occgeo/calc_occ_geometry.py
+    rsr_inst: Use an instance of the RSRReader class, found inside of
+        rss_ringoccs/rsr_reader/rsr_reader.py
+
 Revisions:
       power_normalization.py
    2018 Mar 20 - gsteranka - Edited to get rid of debug steps
@@ -212,6 +221,7 @@ class Normalization(object):
 
     def __downsample_IQ(self, dt_down, verbose=False):
         """
+        Purpose:
         Downsample complex signal to specified time spacing to avoid
         diffraction pattern ruining spline fit
 
@@ -507,8 +517,16 @@ class Normalization(object):
     def __get_default_freespace_ind(self, rho_km_vals_down, freespace_km,
             is_blocked_atm):
         """
+        Purpose:
         Define default freespace regions. Overridden if freespace_spm is not
         None, or if there's an error in the input
+
+        Args:
+            rho_km_vals_down (np.ndarray): Ring radius values downsampled from
+                raw resolution
+            freespace_km (list): Default ring regions to include in a fit
+            is_blocked_atm (np.ndarray): Indices of rho_km_vals_down to ignore
+                due to atmosphere or ionosphere occultation
         """
 
         # Define freespace regions. Overridden if freespace_spm is not None
@@ -525,7 +543,18 @@ class Normalization(object):
     def __get_ind_from_knots(self, type_of_input, knots_where, knots,
             spm_vals_free, rho_km_vals_free):
         """
+        Purpose:
         Get data points closest to selected knots
+
+        Args:
+            type_if_input (str): Whether knots_where and knots is input in SPM
+                or radius. Is always either "SPM" or "RHO_KM"
+            knots_where (np.ndarray): Indices of "knots" that are within the
+                specified SPM regions
+            knots (list): Specified knots to use in the spline fit
+            spm_vals_free (np.ndarray): SPM values in the freespace regions
+            rho_km_vals_free (np.ndarray): Radius values in the freespace
+                regions
         """
 
         # Select data points closest to selected knots
@@ -546,6 +575,7 @@ class Normalization(object):
 
     def __set_history(self):
         """
+        Purpose:
         Record info about the run's history
         """
 

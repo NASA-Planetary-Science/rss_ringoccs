@@ -137,12 +137,12 @@ class PowerFitGui(Frame):
         combo = Combobox(fit_order_frame, textvariable=self.cvar)
         combo.bind('<<ComboboxSelected>>', self.adjust_deg)
         combo['values'] = [1, 2, 3, 4, 5]
-        combo.current(0)
+        combo.current(1)
         combo.grid(row=0, column=0)
 
         # Variable outside of box that says current fit order
         self.lvar = IntVar()
-        self.lvar.set('1')
+        self.lvar.set('2')
         lbl = Label(fit_order_frame, textvariable=self.lvar)
         lbl.grid(row=0, column=1)
 
@@ -183,7 +183,6 @@ class PowerFitGui(Frame):
         revert_xrange_btn.pack()
 
         # Button to press when you're content with the fit and want to continue
-        #ok_btn = Button(self, text='OK', command=self.quit)
         ok_btn = Button(self, text='OK')
         ok_btn.bind('<Button-1>', self.quit_app)
         ok_btn.pack(side=tkinter.LEFT, padx=120)
@@ -301,14 +300,22 @@ class PowerFitGui(Frame):
         button. Bound to the "set_xrange_btn" variable in initUI()
         """
 
-        xlim_entry = self.xlim_entry.get()
-        xlim = []
-        split1 = xlim_entry.split(';')
-        for i in range(len(split1)):
-            split2 = (split1[i]).split(',')
-            _xlim = [float(split2[0]), float(split2[1])]
-            xlim.append(_xlim)
-        self.xlim = xlim
+        try:
+            xlim_entry = self.xlim_entry.get()
+            xlim = []
+            split1 = xlim_entry.split(';')
+            for i in range(len(split1)):
+                split2 = (split1[i]).split(',')
+                _xlim = [float(split2[0]), float(split2[1])]
+                xlim.append(_xlim)
+            self.xlim = xlim
+        except ValueError:
+            print('WARNING (PowerFitGui.adjust_range_and_knots): Illegal input '
+                + 'for "Fit ranges" text box. Reverting to original fit. '
+                + 'Did you forget to enter a value before pressing the "Set '
+                + 'fit ranges and knots (SPM)" button?')
+            self.revert_range()
+            return
 
         ind = []
         for i in range(len(xlim)):
@@ -322,12 +329,21 @@ class PowerFitGui(Frame):
         for i in range(len(xlim)-1):
             not_ind.append(np.argwhere((self.x > xlim[i][1]) &
                 (self.x < xlim[i+1][0])))
+        not_ind.append(np.argwhere(self.x > xlim[-1][1]))
         not_ind = np.reshape(np.concatenate(not_ind), -1)
         self.not_ind = not_ind
 
-        knots_entry = self.knots_entry.get()
-        knots_entry_split = knots_entry.split(',')
-        self.knots_spm = [float(knot) for knot in knots_entry_split]
+        try:
+            knots_entry = self.knots_entry.get()
+            knots_entry_split = knots_entry.split(',')
+            self.knots_spm = [float(knot) for knot in knots_entry_split]
+        except ValueError:
+            print('WARNING (PowerFitGui.adjust_range_and_knots): Illegal '
+                + 'input for knots. Reverting to original fit. '
+                + 'Did you forget to enter a value in the "Knots" text box '
+                + 'before hitting the "Set fit range and knots (SPM)" button?')
+            self.revert_range()
+            return
 
         new_yfit = self._get_fit()
         self.yfit = new_yfit
@@ -341,10 +357,17 @@ class PowerFitGui(Frame):
         "revert_xrange_btn" in initUI()
         """
 
-        self.xlim = [[min(self.x), max(self.x)]]
+        freespace_km = self.norm_inst._freespace_km
+        self.xlim = []
+        for _range in freespace_km:
+            self.xlim.append([self.x[np.argmin(abs(self.x_rho - _range[0]))],
+                self.x[np.argmin(abs(self.x_rho - _range[1]))]])
+        self.knots_spm = []
+        for _knot_km in self.norm_inst._knots_km:
+            self.knots_spm.append(self.x[np.argmin(abs(self.x_rho - _knot_km))])
         self.ind = np.arange(len(self.x))
         self.not_ind = None
-        self.knots_spm = [min(self.x) + 2.0, max(self.x) - 2.0]
+
         new_yfit = self._get_fit()
         self.yfit = new_yfit
         self.update_plot()

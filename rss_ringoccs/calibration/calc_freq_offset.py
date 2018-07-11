@@ -6,6 +6,10 @@ calc_freq_offset.py
 Purpose: Calculate frequency offset at a specified time spacing. Returns
          spm_vals and freq_offset_vals at the specified spacing
 
+WHERE TO GET NECESSARY INPUT:
+    rsr_inst: Use an instance of the RSRReader class, found inside of
+        rss_ringoccs/rsr_reader/rsr_reader.py
+
 Revisions:
       gjs_freq_offset.py
    2018 Feb 20 - gsteranka - Original version
@@ -37,45 +41,47 @@ import platform
 import sys
 import time
 
-from ..rsr_reader.rsr_reader import RSRReader
+try:
+    from ..rsr_reader.rsr_reader import RSRReader
+except SystemError:
+    sys.path.append('../rsr_reader')
+    from rsr_reader import RSRReader
 
-def calc_freq_offset(rsr_inst, dt_freq=8.192, spm_range=None,
+def calc_freq_offset(rsr_inst, dt_freq=8.192,
         cpu_count=multiprocessing.cpu_count(), freq_offset_file=None,
-        TEST=False):
+        verbose=False):
     """
     Purpose:
     Primary function to run. Calculates frequency offset given a set of
-    spm_vals and IQ_m, which can be gotten from RSRReader.get_IQ().
+    spm_vals and IQ_m, which can be gotten from the RSRReader class
 
     Example:
         >>> # Get RSR file info
-        >>> from rsr_reader import RSRReader
-        >>> rsr_inst = RSRReader(rsr_file)
+        >>> import rss_ringoccs as rss
+        >>> rsr_inst = rss.rsr_reader.RSRReader(rsr_file)
         >>>
         >>> # Calculate frequency offset
         >>> from freq_offset import calc_freq_offset
-        >>> f_spm, f_offset = calc_freq_offset(rsr_inst, \
-                dt_freq=dt_freq, spm_range=spm_range, TEST=TEST)
+        >>> f_spm, f_offset, history = rss.calibration.calc_freq_offset(
+                rsr_inst, dt_freq=dt_freq, verbose=verbose)
 
     Args:
-        spm_vals (np.ndarray): Set of raw resolution SPM values that data was
-            recorded at
-        IQ_m (np.ndarray): Raw measured complex signal corresponding to
-            spm_vals
+        rsr_inst: Instance of the RSRReader class. Used for the spm_vals
+            attribute (raw resolution SPM values that the data was recorded at)
+            and the IQ_m attribute (raw measured complex signal corresponding
+            to spm_vals)
         dt_freq (float): Optional argument for time spacing at which to extract
             frequency offset. Determines length of FFT to do so. Typically gives
             a power of 2 when it's multiplied by the sample rate in Hz (so for
             1kHz files, typical values would be 0.128 sec, 0.256 sec, 0.512 sec,
             1.024 sec, etc.)
-        spm_range (list): Optional 2-element list of range of spm_vals over
-            which to extract frequency offset. Default is full range of spm_vals
-        TEST (bool): Optional testing argument that, if True, prints requested
-            and actual start and end times
+        verbose (bool): Optional testing argument that, if True, prints
+            intermediate steps and results
         cpu_count (int): Number of cores to use in calculations. Generally, more
             cores makes it faster up to a certain point. You eventually start
             seeing diminishing returns
         freq_offset_file (str): File name to save frequency offset SPM and
-            data. If set to None, no file is saved
+            data. If set to None (default), no file is saved
 
     Outputs:
         f_spm (np.ndarray): Set of SPM values corresponding to the extracted
@@ -94,17 +100,19 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192, spm_range=None,
         [7] time
 
     Warnings:
-        [1] If dt_freq is too low, there will be few points to fit over when
+        [1] If dt_freq is too high, there will be few points to fit over when
             you're constructing a fit to residual frequency, meaning the fit
-            may not be as good
-        [2] If dt_freq is too high, then you will need to exclude more regions
+            may not be as good. If it's really high, you might also run into
+            problems with trying to divide a small number of points into too
+            many processors
+        [2] If dt_freq is too low, then you will need to exclude more regions
             when making a fit to residual frequency
         [3] Recommended that dt_freq is a power of 2 divided by 1000 (such
             as 8.192 seconds, since 8192 is a power of 2)
         [3] If you make cpu_count more than the number of cores you have on
             your computer, you don't see any performance difference from when
             you use the max number of cores, but just the same, we don't
-            recommend making it greater than your total number of cores.
+            recommend making it greater than your total number of cores
         """
 
     if type(rsr_inst) != RSRReader:
@@ -113,7 +121,7 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192, spm_range=None,
         sys.exit()
 
     if (type(dt_freq) != float) and (type(dt_freq) != int):
-        print('ERROR (calc_freq_offset): dt_freq input must be a float or'
+        print('ERROR (calc_freq_offset): dt_freq input must be a float or '
             + 'integer')
         sys.exit()
 
@@ -122,20 +130,20 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192, spm_range=None,
             + 'Setting equal to number of cores on computer.')
         cpu_count = multiprocessing.cpu_count()
 
-    if type(TEST) != bool:
-        print('WARNING (calc_freq_offset): TEST keyword must be boolean. '
+    if type(verbose) != bool:
+        print('WARNING (calc_freq_offset): verbose keyword must be boolean. '
             + 'Assuming False')
-        TEST = False
+        verbose = False
 
     # Record info about the call
-    history_dict = __get_history(rsr_inst, dt_freq, spm_range, cpu_count,
+    history_dict = __get_history(rsr_inst, dt_freq, cpu_count,
         freq_offset_file)
 
     spm_vals = rsr_inst.spm_vals
     IQ_m = rsr_inst.IQ_m
 
-    if spm_range is None:
-        spm_range = [spm_vals[0], spm_vals[-1]]
+    # Set spm_range to full length of occultation if no input or illegal input
+    spm_range = [spm_vals[0], spm_vals[-1]]
 
     dt_raw = spm_vals[1] - spm_vals[0]
     sample_rate_hz = round(1.0 / dt_raw)
@@ -150,7 +158,7 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192, spm_range=None,
         <= dt_raw)))
     end_ind = int(max(np.argwhere(abs(spm_vals - spm_range[1]) <= dt_raw)))
 
-    if TEST:
+    if verbose:
         print('Requested start and end times:')
         print('%24.16f %24.16f\n' % (spm_vals[start_ind], spm_vals[end_ind]))
 
@@ -163,7 +171,7 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192, spm_range=None,
         if end_ind > (len(spm_vals)-1):
             end_ind -= pts_per_fft
 
-    if TEST:
+    if verbose:
         print('Actual start and end times:')
         print('%24.16f %24.16f\n' % (spm_vals[start_ind], spm_vals[end_ind]))
 
@@ -174,7 +182,8 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192, spm_range=None,
     # Arrays that will contain final SPM and frequency offset
     n_loops = int(len(spm_vals) / pts_per_fft)
 
-    #print('SPM, frequency offset')
+    if verbose:
+        print('Beginning calculation of frequency offset')
 
     # Multiprocessing step
     results = []
@@ -192,9 +201,26 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192, spm_range=None,
 
     print('\n')
 
+    if verbose:
+        print('First 10 SPM, frequency offset (Hz):')
+        for i in range(10):
+            print('%24.16f %32.16f' % (f_spm[i], f_offset[i]))
+
     if freq_offset_file is not None:
-        np.savetxt(freq_offset_file, np.c_[f_spm, f_offset],
-            fmt='%32.16f %32.16f')
+        try:
+            if verbose:
+                print('Saving results to ' + freq_offset_file)
+            np.savetxt(freq_offset_file, np.c_[f_spm, f_offset],
+                fmt='%32.16f %32.16f')
+        except FileNotFoundError:
+            new_freq_offset_file = ('freq_offset_file'
+                + time.strftime('_%Y%m%d') + '.txt')
+            print('WARNING (calc_freq_offset): Directory path not found: '
+                + freq_offset_file + '. '
+                + 'Saving as ' + new_freq_offset_file + ' in current working '
+                + 'directory')
+            np.savetxt(new_freq_offset_file, np.c_[f_spm, f_offset],
+                fmt='%32.16f %32.16f')
 
     return f_spm, f_offset, history_dict
 
@@ -202,8 +228,23 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192, spm_range=None,
 def __loop(i_start, i_end, spm_vals, IQ_m, pts_per_fft, cont_fft_freq_range,
         queue=0):
     """
+    Purpose:
     Function to perform loop. Made a separate function to perform
     multiprocessing, which runs the loop over different ranges all concurrently
+
+    Args:
+        i_start (int): Integer number of points per FFT of the starting index
+            of spm_vals and IQ_m
+        i_end (int): Final index number in the loop
+        spm_vals (np.ndarray): Raw resolution SPM values. Taken from rsr_inst
+            (which is an instance of the RSRReader class)
+        IQ_m (np.ndarray): Raw resolution complex signal. Taken from rsr_inst
+            (which is an instance of the RSRReader class)
+        pts_per_fft (int): Number of points per FFT
+        cont_fft_freq_range (int): Range surrounding the peak frequency that
+            the continuous FFT searches to refine the peak's location.
+            Hard-coded to 5Hz
+        queue: Instance of multiprocessing.Queue
     """
 
     f_spm = np.zeros(len(range(i_start, i_end)))
@@ -217,7 +258,6 @@ def __loop(i_start, i_end, spm_vals, IQ_m, pts_per_fft, cont_fft_freq_range,
         _spm_avg = np.mean(_spm)
         _freq = __find_peak_freq(_spm, _IQ_m, cont_fft_freq_range)
 
-        #print('%24.16f %24.16f' % (_spm_avg, _freq))
         sys.stdout.write('\r' + str(i_iter + 1) + ' of '
             + str(len(range(i_start, i_end))) + ' points')
         sys.stdout.flush()
@@ -242,7 +282,7 @@ def __find_peak_freq(spm,IQ_m, cont_fft_freq_range):
         IQ_m (np.ndarray): Raw measured complex signal to get the power
             spectrum from
         cont_fft_freq_range (float): Range surrouding peak frequency to look
-            for a more refined peak frequency. Set to 5 at top of primary
+            for a more refined peak frequency. Set to 5Hz at top of primary
             function calc_freq_offset
 
     Outputs:
@@ -331,13 +371,22 @@ def __refine_peak_freq(IQ_m_weight, freq_c, dt):
     return freq_max
 
 
-def __get_history(rsr_inst, dt_freq, spm_range, cpu_count, freq_offset_file):
+def __get_history(rsr_inst, dt_freq, cpu_count, freq_offset_file):
     """
+    Purpose:
     Record information about the run's history
+
+    Args:
+        rsr_inst: Instance of the RSRReader class
+        dt_freq (int): Time spacing of frequency offset output
+        cpu_count (int): Number of cores used to perform frequency offset
+            calculation
+        freq_offset_file (str): Full path name of file to save results to.
+            No file saved if set to None
     """
 
     input_var_dict = {'rsr_inst': rsr_inst.history}
-    input_kw_dict = {'dt_freq': dt_freq, 'spm_range': spm_range,
+    input_kw_dict = {'dt_freq': dt_freq,
         'cpu_count': cpu_count, 'freq_offset_file': freq_offset_file}
     hist_dict = {'User Name': os.getlogin(),
         'Host Name': os.uname().nodename,
@@ -352,4 +401,9 @@ def __get_history(rsr_inst, dt_freq, spm_range, cpu_count, freq_offset_file):
 
 
 if __name__ == '__main__':
-    pass
+    rsr_file = '../../../../../data/s10-rev07-rsr-data/S10EAOE2005_123_0740NNNX43D.2A1'
+    #spm_range = [30000, 31000]
+    rsr_inst = RSRReader(rsr_file)
+    freq_offset_file = 'notadirectory/sonotgoingtobeafile.txt'
+    f_spm, f_offset, history = calc_freq_offset(rsr_inst,
+        freq_offset_file=freq_offset_file)

@@ -76,15 +76,18 @@ from rss_ringoccs.tools import check_real,check_pos_real
 from rss_ringoccs.tools import check_complex,get_geo
 
 region_dict = {
-    'maxwell'       : [87410.0,87610.0],
-    'maxwellringlet': [87410.0,87610.0],
-    'titan'         : [77870.0,77930.0],
-    'titanringlet'  : [77870.0,77930.0],
-    'huygens'       : [117650.0,117950.0],
-    'huygensringlet': [117650.0,117950.0],
-    'encke'         : [132900.0,134200.0],
-    'enckegap'      : [132900.0,134200.0],
-    'all'           : [65000.0,145000.0]
+    'all'               : [65000.0,145000.0],
+    'cringripples'      : [77690.0,77760.0],
+    'encke'             : [132900.0,134200.0],
+    'enckegap'          : [132900.0,134200.0],
+    'janus'             : [96200.0,96800.0],
+    'janusepimetheus'   : [96200.0,96800.0],
+    'maxwell'           : [87410.0,87610.0],
+    'maxwellringlet'    : [87410.0,87610.0],
+    'titan'             : [77870.0,77930.0],
+    'titanringlet'      : [77870.0,77930.0],
+    'huygens'           : [117650.0,117950.0],
+    'huygensringlet'    : [117650.0,117950.0]
     }
 
 def compute_norm_eq(w_func):
@@ -285,20 +288,24 @@ def get_range_request(rngreq):
         if (reg in region_dict):
             rng = np.array(region_dict[reg])
         else:
-            print("Illegal range request. Allowed strings are:")
-            print("'maxwell', 'titan', 'huygens', 'encke', or 'all'")
-            rngreq = input("Please enter requested range string: ")
-            rngreq = rngreq.replace(" ","").lower()
-            rngreq = rngreq.replace("'","")
-            rngreq = rngreq.replace('"',"")
-            rng    = np.array(region_dict[rngreq])
+            rngreq = ""
+            while(not (rngreq in region_dict)):
+                print("Illegal range request.\nAllowed strings are:")
+                for key in region_dict: print(key)
+                rngreq = input("Please enter requested range string: ")
+                rngreq = rngreq.replace(" ","").lower()
+                rngreq = rngreq.replace("'","")
+                rngreq = rngreq.replace('"',"")
+            rng = np.array(region_dict[rngreq])
     elif (np.size(rngreq) < 2):
         print("You only provided one range value. I need two.")
         start  = input("Enter starting radius (in Kilometers): ")
-        start  = float(start)
         finish = input("Enter final radius (in Kilometers): ")
+        start.replace(" ","").replace("'","").replace('"',"").lower()
+        finish.replace(" ","").replace("'","").replace('"',"").lower()
+        start  = float(start)
         finish = float(finish)
-        rng    = np.array([start,finish])
+        rng = np.array([start,finish])
     else:
         rng = np.array([np.float(np.min(rngreq)),np.float(np.max(rngreq))])
     return rng
@@ -1209,7 +1216,7 @@ def fresnel_scale(Lambda,d,phi,b,DEG=False):
     fres = np.sqrt(0.5 * Lambda * d * (1 - (cb**2) * (sp**2)) / (sb**2))
     return fres
 
-def psi_d1_phi_fast(r,r0,d,cb,cp,sp,cp0,sp0):
+def psi_d1_phi_fast(r,r0,d,cb,cp,sp,cp0,sp0,error_check=True):
     """
         Function:
             psi_d1_phi_fast
@@ -1228,22 +1235,24 @@ def psi_d1_phi_fast(r,r0,d,cb,cp,sp,cp0,sp0):
         History:
             Translated from IDL: RJM - 2018/05/15 5:36 P.M.
     """
-    if (not check_real(r)):
-        sys.exit("r must be real valued")
-    if (not check_real(r0)):
-        sys.exit("r0 must be real valued")
-    if (not check_real(d)):
-        sys.exit("d must be real valued")
-    if (not check_real(cb)):
-        sys.exit("cos(b) must be real valued")
-    if (not check_real(cp)):
-        sys.exit("cos(phi) must be real valued")
-    if (not check_real(sp)):
-        sys.exit("sin(phi) must be real valued")
-    if (not check_real(cp0)):
-        sys.exit("cos(phi0) must be real valued")
-    if (not check_real(sp0)):
-        sys.exit("sin(phi0) must be real valued")
+    if error_check:
+        if (not check_real(r)):
+            sys.exit("r must be real valued")
+        if (not check_real(r0)):
+            sys.exit("r0 must be real valued")
+        if (not check_real(d)):
+            sys.exit("d must be real valued")
+        if (not check_real(cb)):
+            sys.exit("cos(b) must be real valued")
+        if (not check_real(cp)):
+            sys.exit("cos(phi) must be real valued")
+        if (not check_real(sp)):
+            sys.exit("sin(phi) must be real valued")
+        if (not check_real(cp0)):
+            sys.exit("cos(phi0) must be real valued")
+        if (not check_real(sp0)):
+            sys.exit("sin(phi0) must be real valued")
+    else: pass
     xi   = (cb / d) * (r0*cp0 - r*cp)
     eta  = (r0**2 + r**2 - 2.0*r*r0*(sp*sp0 + cp*cp0)) / (d**2)
     v1   = r * cb * sp / d
@@ -1289,7 +1298,7 @@ def psi_d1_phi(r,r0,d,b,phi,phi0):
     psi_d1_phi_vals = (2.0*v1 + v2) / (2.0 * np.sqrt(1.0 + 2.0*xi + eta)) - v1
     return psi_d1_phi_vals
 
-def psi_d2_phi_fast(r,r0,d,cb,cp,sp,cp0,sp0):
+def psi_d2_phi_fast(r,r0,d,cb,cp,sp,cp0,sp0,error_check=True):
     """
         Function: psi_d2_phi_fast
         Purpose:  Calculate second derivative of psi with respect to phi from
@@ -1306,30 +1315,32 @@ def psi_d2_phi_fast(r,r0,d,cb,cp,sp,cp0,sp0):
         History:
             Translated from IDL: RJM - 2018/05/15 7:21 P.M.
     """
-    if (not check_real(r)):
-        sys.exit("r must be real valued")
-    if (not check_real(r0)):
-        sys.exit("r0 must be real valued")
-    if (not check_real(d)):
-        sys.exit("d must be real valued")
-    if (not check_real(cb)):
-        sys.exit("cos(b) must be real valued")
-    if (not check_real(cp)):
-        sys.exit("cos(phi) must be real valued")
-    if (not check_real(sp)):
-        sys.exit("sin(phi) must be real valued")
-    if (not check_real(cp0)):
-        sys.exit("cos(phi0) must be real valued")
-    if (not check_real(sp0)):
-        sys.exit("sin(phi0) must be real valued")
+    if error_check:
+        if (not check_real(r)):
+            sys.exit("r must be real valued")
+        if (not check_real(r0)):
+            sys.exit("r0 must be real valued")
+        if (not check_real(d)):
+            sys.exit("d must be real valued")
+        if (not check_real(cb)):
+            sys.exit("cos(b) must be real valued")
+        if (not check_real(cp)):
+            sys.exit("cos(phi) must be real valued")
+        if (not check_real(sp)):
+            sys.exit("sin(phi) must be real valued")
+        if (not check_real(cp0)):
+            sys.exit("cos(phi0) must be real valued")
+        if (not check_real(sp0)):
+            sys.exit("sin(phi0) must be real valued")
+    else: pass
     xi    = (cb / d) * (r0*cp0 - r*cp)
-    eta   = ((r0**2) + (r**2) - 2.0*r*r0*(sp*sp0 + cp*cp0)) / (d**2)
+    eta   = ((r0**2) + (r**2) - 2.0*r*r0*(sp*sp0 + cp*cp0)) / (d*d)
     v1    = r * cb * cp / d
-    v2    = 2.0 * r * r0 * (sp*sp0 + cp*cp0) / (d**2)
+    v2    = 2.0 * r * r0 * (sp*sp0 + cp*cp0) / (d*d)
     v3    = r * cb * sp / d
-    v4    = 2.0 * r * r0 * (sp*cp0 - sp0*cp) / (d**2)
+    v4    = 2.0 * r * r0 * (sp*cp0 - sp0*cp) / (d*d)
     dphia = (2.0*v1 + v2)/(2.0 * np.sqrt(1.0 + 2.0*xi + eta))
-    dphib = v1 + ((2.0*v3 + v4)**2)/(4.0 * (np.sqrt(1.0 + 2.0*xi + eta)**3))
+    dphib = v1+((2.0*v3 + v4)*(2.0*v3 + v4))/(4.0*(np.sqrt(1.0+2.0*xi+eta)**3))
     psi_d2_phi_vals = dphia - dphib
     return psi_d2_phi_vals
 
@@ -1866,8 +1877,6 @@ def fresnel_inversion(rho_vals,F_vals,phi_rad_vals,B_rad_vals,d_vals,
     cosb      = np.cos(B_rad_vals)
     cosphi0   = np.cos(phi_rad_vals)
     sinphi0   = np.sin(phi_rad_vals)
-    dsq       = d_vals*d_vals
-    rsq       = rho_vals*rho_vals
     # Define functions
     fw        = func_dict[wtype]["func"]
     psifac    = psi_factor_fast
@@ -1887,64 +1896,40 @@ def fresnel_inversion(rho_vals,F_vals,phi_rad_vals,B_rad_vals,d_vals,
         for i in np.arange(n_used):
             center = start+i
             r0     = rho_vals[center]
-            r02    = rsq[center]
             d      = d_vals[center]
-            d2     = dsq[center]
             cb     = cosb[center]
             cp0    = cosphi0[center]
             sp0    = sinphi0[center]
             kD     = kD_vals[center]
             w      = w_vals[center]
+            F      = F_vals[center]
             if (np.abs(w_init - w)>= 2.0*dx):
                 w_init     = w
-                w_func     = fw(w,dx)
+                w_func     = fw(w,dx,error_check=False)
                 nw         = np.size(w_func)
                 crange     = np.arange(int(center-(nw-1)/2),int(1+center+(nw-1)/2))
                 r          = rho_vals[crange]
-                r2         = rsq[crange]
-                dphi_s_rad = psifac(r,r0,cb,cp0,sp0)
+                dphi_s_rad = psifac(r,r0,cb,cp0,sp0,error_check=False)
                 phi_s_rad  = phi_rad_vals[center] - dphi_s_rad
                 cp         = np.cos(phi_s_rad)
                 sp         = np.sin(phi_s_rad)
             else:
                 crange     = np.arange(int(center-(nw-1)/2),int(1+center+(nw-1)/2))
                 r          = rho_vals[crange]
-                r2         = rsq[crange]
                 phi_s_rad  = phi_s_rad1
                 cp         = np.cos(phi_s_rad)
                 sp         = np.sin(phi_s_rad)
-                xi         = (cb / d) * (r0*cp0 - r*cp)
-                eta        = (r02 + r2 - 2.0*r*r0*(sp*sp0 + cp*cp0)) / d2
-                v1         = r * cb * sp / d
-                v2         = 2.0 * r * r0 * (sp*cp0 - sp0*cp) / (d2)
-                v3         = 2.0*v1 + v2
-                v4         = np.sqrt(1.0 + 2.0*xi + eta)
-                v5         = r * cb * cp / d
-                v6         = 2.0 * r * r0 * (sp*sp0 + cp*cp0) / d2
-                dphia      = (2.0*v5 + v6)/(2.0 * v4)
-                dphib      = v5 + (2.0*v1 + v2)*(2.0*v1 + v2)/(4.0*(v4*v4*v4))
-                psi_d1     = v3 / (2.0 * v4) - v1
-                psi_d2     = dphia - dphib
+                psi_d1     = psi_d1_phi_fast(r,r0,d,cb,cp,sp,cp0,sp0,error_check=False)
+                psi_d2     = psi_d2_phi_fast(r,r0,d,cb,cp,sp,cp0,sp0,error_check=False)
                 dphi_s_rad = -psi_d1 / psi_d2
                 phi_s_rad += dphi_s_rad
                 cp         = np.cos(phi_s_rad)
                 sp         = np.sin(phi_s_rad)
-            phi_s_rad1 = phi_s_rad
             loop = 0
             # Perform Newton-Raphson on phi.
             while (np.max(np.abs(dphi_s_rad)) > 1.e-8):
-                xi         = (cb / d) * (r0*cp0 - r*cp)
-                eta        = (r02 + r2 - 2.0*r*r0*(sp*sp0 + cp*cp0)) / d2
-                v1         = r * cb * sp / d
-                v2         = 2.0 * r * r0 * (sp*cp0 - sp0*cp) / (d2)
-                v3         = 2.0*v1 + v2
-                v4         = np.sqrt(1.0 + 2.0*xi + eta)
-                v5         = r * cb * cp / d
-                v6         = 2.0 * r * r0 * (sp*sp0 + cp*cp0) / d2
-                dphia      = (2.0*v5 + v6)/(2.0 * v4)
-                dphib      = v5 + (2.0*v1 + v2)*(2.0*v1 + v2)/(4.0*(v4*v4*v4))
-                psi_d1     = v3 / (2.0 * v4) - v1
-                psi_d2     = dphia - dphib
+                psi_d1     = psi_d1_phi_fast(r,r0,d,cb,cp,sp,cp0,sp0,error_check=False)
+                psi_d2     = psi_d2_phi_fast(r,r0,d,cb,cp,sp,cp0,sp0,error_check=False)
                 dphi_s_rad = -psi_d1 / psi_d2
                 phi_s_rad += dphi_s_rad
                 cp         = np.cos(phi_s_rad)
@@ -1952,18 +1937,17 @@ def fresnel_inversion(rho_vals,F_vals,phi_rad_vals,B_rad_vals,d_vals,
                 loop      += 1
                 if loop > 5:
                     break
-            
+            phi_s_rad1 = phi_s_rad
             # Compute psi and then compute the forward model.
-            psi_vals = kD * psif(r,r0,d,cb,cp,sp,cp0,sp0)
-            F        = F_vals[center]
-            # psi_vals = (np.pi/2.0)*(((r-r0)/F)*((r-r0)/F))
+            psi_vals = kD * psif(r,r0,d,cb,cp,sp,cp0,sp0,error_check=False)
             ker      = w_func*np.exp(-1j*psi_vals)
             T_hat    = T_hat_vals[crange]
             
             T_vals[center] = finv(T_hat,ker,dx,F)
-            if norm:T_vals[center] *= nrm(r,w_func,F)
-            if verbose:print("Pt: %d  Tot: %d  Width: %d \
-                Psi Iters: %d  Fast Inversion" % (i,n_used,nw,loop),end="\r")
+            if norm:T_vals[center] *= nrm(r,w_func,F,error_check=False)
+            if verbose:
+                print("Pt: %d  Tot: %d  Width: %d  Psi Iters: %d  Inversion"\
+                % (i,n_used,nw,loop),end="\r")
     elif psitype == "taylor2":
         for i in np.arange(n_used):
             center = start+i
@@ -2085,7 +2069,6 @@ class rec_data(object):
             except AttributeError:
                 pass
 
-    
     def __error_check(self,N_RHO):
         error_code = 0
         if (np.size(self.phase_rad_vals) != N_RHO):
@@ -2531,35 +2514,22 @@ class compare_tau(object):
             wtype=wtype,fft=fft,verbose=verbose,norm=norm)
         tr          = data.tau_rho
         rho_km_vals = rec.rho_km_vals
-        rmin        = np.min(tr)
-        rmax        = np.max(tr)
-        rstart      = int(np.min((rho_km_vals-rmin>=0).nonzero()))
-        rfin        = int(np.max((rmax-rho_km_vals>=0).nonzero()))
-
-        rho_km_vals = rec.rho_km_vals[rstart:rfin+1]
-        power_vals  = rec.power_vals[rstart:rfin+1]
-        phase_vals  = rec.phase_vals[rstart:rfin+1]
-        tau_vals    = rec.tau_vals[rstart:rfin+1]
-
+        tau_rmin    = np.min(tr)
+        tau_rmax    = np.max(tr)
+        tau_rstart  = int(np.min((rho_km_vals-rmin>=0).nonzero()))
+        tau_rfin    = int(np.max((rmax-rho_km_vals>=0).nonzero()))
         rmin        = np.min(rho_km_vals)
         rmax        = np.max(rho_km_vals)
         rstart      = int(np.min((tr-rmin>=0).nonzero()))
         rfin        = int(np.max((rmax-tr>=0).nonzero()))
 
-        tau_power   = tau_power[rstart:rfin+1]
-        tau_phase   = tau_phase[rstart:rfin+1]
-        tau_tau     = tau_tau[rstart:rfin+1]
-
-        wtype       = rec.wtype
-        res         = rec.res
-
-        self.rho_km_vals = rho_km_vals
-        self.power_vals  = power_vals
-        self.tau_vals    = tau_vals
-        self.phase_vals  = phase_vals
-        self.tau_power   = tau_power
-        self.tau_tau     = tau_tau
-        self.tau_phase   = tau_phase
+        self.rho_km_vals = rec.rho_km_vals[rstart:rfin+1]
+        self.power_vals  = rec.power_vals[rstart:rfin+1]
+        self.tau_vals    = rec.tau_vals[rstart:rfin+1]
+        self.phase_vals  = rec.phase_vals[rstart:rfin+1]
+        self.tau_power   = tau_power[tau_rstart:tau_rfin+1]
+        self.tau_tau     = tau_tau[tau_rstart:tau_rfin+1]
+        self.tau_phase   = tau_phase[tau_rstart:tau_rfin+1]
         self.wtype       = wtype
         self.res         = res
 

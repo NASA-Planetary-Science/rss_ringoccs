@@ -2321,6 +2321,7 @@ class diffraction_correction(object):
         self.fft                        = None
         self.bfac                       = None
         self.psitype                    = None
+        self.verbose                    = None
         self.history                    = None
         self.dathist                    = None
         self.tau_threshold_vals         = None
@@ -2353,6 +2354,7 @@ class diffraction_correction(object):
         self.fft                = fft
         self.bfac               = bfac
         self.psitype            = psitype
+        self.verbose            = verbose
         self.dathist            = dat.history
         self.res                = recdata.res
         self.wtype              = recdata.wtype
@@ -2618,6 +2620,8 @@ class diffraction_correction(object):
         T_hat_vals   = self.T_hat_vals
         F_vals       = self.F_km_vals
         fft          = self.fft
+        verbose      = self.verbose
+        norm         = self.norm
         wtype        = "%s%s" % ("__",self.wtype)
         start        = self.start
         n_used       = self.n_used
@@ -2723,7 +2727,9 @@ class diffraction_correction(object):
             T_hat    = T_hat_vals[crange]
             
             T_vals[center] = finv(T_hat,ker,dx,F)
-            T_vals[center] *= nrm(r,w_func,F)
+            if norm:T_vals[center] *= nrm(r,w_func,F)
+            if verbose:print("Pt: %d  Tot: %d  Width: %d \
+                Psi Iters: %d  Fast Inversion" % (i,n_used,nw,loop),end="\r")
         return T_vals
 
     def __finv(self):
@@ -2839,127 +2845,6 @@ class diffraction_correction(object):
             T_hat    = T_hat_vals[crange]
             F        = F_vals[center]
             T_vals[center] = finv(T_hat,ker,dx,F)
-        return T_vals
-
-    def __finv_n_v(self):
-        # Retrieve variables.
-        w_vals       = self.w_km_vals
-        rho_vals     = self.rho_km_vals
-        phi_rad_vals = self.phi_rad_vals
-        d_vals       = self.D_km_vals
-        B_rad_vals   = self.B_rad_vals
-        lambda_vals  = self.lambda_sky_km_vals
-        T_hat_vals   = self.T_hat_vals
-        F_vals       = self.F_km_vals
-        fft          = self.fft
-        wtype        = "%s%s" % ("__",self.wtype)
-        start        = self.start
-        n_used       = self.n_used
-        dx           = self.dx_km
-        # Compute necessary variables.
-        kD_vals     = 2. * np.pi * d_vals / lambda_vals
-        cosb        = np.cos(B_rad_vals)
-        cosphi0     = np.cos(phi_rad_vals)
-        sinphi0     = np.sin(phi_rad_vals)
-        dsq         = d_vals*d_vals
-        rsq         = rho_vals*rho_vals
-        # Define functions
-        fw          = self.__func_dict[wtype]["func"]
-        psifac      = self.__psifacfast
-        if fft:
-           finv     = self.__fresinvfft
-        else: 
-            finv    = self.__fresinv
-        psif        = self.__psifast
-        nrm         = self.__normalize
-        # Calculate the corrected complex amplitude, point by point
-        T_vals      = T_hat_vals * 0.0
-        w_init      = w_vals[start]
-        w_func      = fw(w_init,dx)
-        nw          = np.size(w_func)
-        phi_s_rad1  = phi_rad_vals[start]
-        for i in np.arange(n_used):
-            center = start+i
-            r0     = rho_vals[center]
-            r02    = rsq[center]
-            d      = d_vals[center]
-            d2     = dsq[center]
-            cb     = cosb[center]
-            cp0    = cosphi0[center]
-            sp0    = sinphi0[center]
-            kD     = kD_vals[center]
-            w      = w_vals[center]
-            if (np.abs(w_init - w)>= 2.0*dx):
-                w_init     = w
-                w_func     = fw(w,dx)
-                nw         = np.size(w_func)
-                crange     = np.arange(int(center-(nw-1)/2),int(1+center+(nw-1)/2))
-                r          = rho_vals[crange]
-                r2         = rsq[crange]
-                dphi_s_rad = psifac(r,r0,cb,cp0,sp0)
-                phi_s_rad  = phi_rad_vals[center] - dphi_s_rad
-                cp         = np.cos(phi_s_rad)
-                sp         = np.sin(phi_s_rad)
-            else:
-                crange     = np.arange(int(center-(nw-1)/2),int(1+center+(nw-1)/2))
-                r          = rho_vals[crange]
-                r2         = rsq[crange]
-                phi_s_rad  = phi_s_rad1
-                cp         = np.cos(phi_s_rad)
-                sp         = np.sin(phi_s_rad)
-                xi         = (cb / d) * (r0*cp0 - r*cp)
-                eta        = (r02 + r2 - 2.0*r*r0*(sp*sp0 + cp*cp0)) / d2
-                v1         = r * cb * sp / d
-                v2         = 2.0 * r * r0 * (sp*cp0 - sp0*cp) / (d2)
-                v3         = 2.0*v1 + v2
-                v4         = np.sqrt(1.0 + 2.0*xi + eta)
-                v5         = r * cb * cp / d
-                v6         = 2.0 * r * r0 * (sp*sp0 + cp*cp0) / d2
-                dphia      = (2.0*v5 + v6)/(2.0 * v4)
-                dphib      = v5 + (2.0*v1 + v2)*(2.0*v1 + v2)/(4.0*(v4*v4*v4))
-                psi_d1     = v3 / (2.0 * v4) - v1
-                psi_d2     = dphia - dphib
-                dphi_s_rad = -psi_d1 / psi_d2
-                phi_s_rad += dphi_s_rad
-                cp         = np.cos(phi_s_rad)
-                sp         = np.sin(phi_s_rad)
-
-            phi_s_rad1 = phi_s_rad
-            loop = 0
-
-            # Perform Newton-Raphson on phi.
-            while (np.max(np.abs(dphi_s_rad)) > 1.e-8):
-                xi         = (cb / d) * (r0*cp0 - r*cp)
-                eta        = (r02 + r2 - 2.0*r*r0*(sp*sp0 + cp*cp0)) / d2
-                v1         = r * cb * sp / d
-                v2         = 2.0 * r * r0 * (sp*cp0 - sp0*cp) / (d2)
-                v3         = 2.0*v1 + v2
-                v4         = np.sqrt(1.0 + 2.0*xi + eta)
-                v5         = r * cb * cp / d
-                v6         = 2.0 * r * r0 * (sp*sp0 + cp*cp0) / d2
-                dphia      = (2.0*v5 + v6)/(2.0 * v4)
-                dphib      = v5 + (2.0*v1 + v2)*(2.0*v1 + v2)/(4.0*(v4*v4*v4))
-                psi_d1     = v3 / (2.0 * v4) - v1
-                psi_d2     = dphia - dphib
-                dphi_s_rad = -psi_d1 / psi_d2
-                phi_s_rad += dphi_s_rad
-                cp         = np.cos(phi_s_rad)
-                sp         = np.sin(phi_s_rad)
-                loop      += 1
-                if loop > 5:
-                    break
-            
-            # Compute psi and then compute the forward model.
-            psi_vals = kD * psif(r,r0,d,cb,cp,sp,cp0,sp0)
-            F        = F_vals[center]
-            #psi_vals = (np.pi/2.0)*(((r-r0)/F)*((r-r0)/F))
-            ker      = w_func*np.exp(-1j*psi_vals)
-            T_hat    = T_hat_vals[crange]
-            
-            T_vals[center] = finv(T_hat,ker,dx,F)
-            T_vals[center] *= nrm(r,w_func,F)
-            print("Pt: %d  Tot: %d  Width: %d  Psi Iters: %d  Fast Inversion" \
-            % (i,n_used,nw,loop),end="\r")
         return T_vals
 
     def __finv_v(self):
@@ -3244,6 +3129,7 @@ class diffraction_correction(object):
         start        = self.start
         n_used       = self.n_used
         dx           = self.dx_km
+        psitype      = self.psitype
         # Compute necessary variables.
         kD_vals   = 2. * np.pi * d_vals / lambda_vals
         # Define functions
@@ -3269,6 +3155,7 @@ class diffraction_correction(object):
             x      = (r-r0)/F
 
             # Compute psi and then compute the forward model.
+
             psi_vals        = (np.pi/2.0)*(x*x)
             ker             = w_func*np.exp(-1j*psi_vals)
             T_hat           = T_hat_vals[crange]

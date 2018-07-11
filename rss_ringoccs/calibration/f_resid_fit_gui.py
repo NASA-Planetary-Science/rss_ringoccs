@@ -244,6 +244,10 @@ class FResidFitGui(Frame):
         else:
             self.is_chord = False
             self.ax_rho.plot(self.x_rho, self.y, alpha=0)
+            # Reverse x-axis if ingress
+            if np.all(rho_diff < 0):
+                xlim_rho = self.ax_rho.get_xlim()
+                self.ax_rho.set_xlim([xlim_rho[1], xlim_rho[0]])
         self.ax_rho.set_xlabel('Rho (km)')
 
         # Show the canvas

@@ -287,6 +287,11 @@ class RSRReader(object):
         self.band = sfdu_hdr_dict['sh_dl_band']
         self.sample_rate_khz = sfdu_hdr_dict['sh_sample_rate']
 
+        # DSS-74 files have the regular year and DOY set to 0
+        if self.year == 0:
+            self.year = sfdu_hdr_dict['sh_sfdu_year']
+            self.doy = sfdu_hdr_dict['sh_sfdu_doy']
+
         # Set attributes for later reading of rest of RSR file
         self.__n_pts_per_sfdu = n_pts_per_sfdu
         self.__n_sfdu = n_sfdu

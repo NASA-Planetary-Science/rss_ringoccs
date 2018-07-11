@@ -487,14 +487,20 @@ class Normalization(object):
 
         # Set values outside of SPM values in splrep to the exterior-most spline
         #     values
-        min_fit_ind = np.max(((spline_fit == 0)
-            & (spm_fit <= min(spm_vals_free[ind_sort]))).nonzero())
-        max_fit_ind = np.min(((spline_fit == 0)
-            & (spm_fit >= max(spm_vals_free[ind_sort]))).nonzero())
-        spline_fit[0:min_fit_ind+1] = (np.zeros(len(spline_fit[0:min_fit_ind+1]))
-            + spline_fit[min_fit_ind+1])
-        spline_fit[max_fit_ind:] = (np.zeros(len(spline_fit[max_fit_ind:]))
-            + spline_fit[max_fit_ind-1])
+        try:
+            min_fit_ind = np.max(((spline_fit == 0)
+                & (spm_fit <= min(spm_vals_free[ind_sort]))).nonzero())
+            spline_fit[0:min_fit_ind+1] = (np.zeros(len(spline_fit[0:min_fit_ind+1]))
+                + spline_fit[min_fit_ind+1])
+        except ValueError:
+            pass
+        try:
+            max_fit_ind = np.min(((spline_fit == 0)
+                & (spm_fit >= max(spm_vals_free[ind_sort]))).nonzero())
+            spline_fit[max_fit_ind:] = (np.zeros(len(spline_fit[max_fit_ind:]))
+                + spline_fit[max_fit_ind-1])
+        except ValueError:
+            pass
 
         if USE_GUI:
             print('Using GUI')

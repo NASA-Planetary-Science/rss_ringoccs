@@ -16,9 +16,10 @@ from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg,
     NavigationToolbar2TkAgg)
 from matplotlib.figure import Figure
 import numpy as np
+from scipy.interpolate import interp1d
 
 import tkinter
-from tkinter import Tk, IntVar, StringVar
+from tkinter import Tk, IntVar, StringVar, messagebox
 from tkinter.ttk import Frame, Combobox, Label, Button, Entry, LabelFrame
 
 class PowerFitGui(Frame):
@@ -37,6 +38,7 @@ class PowerFitGui(Frame):
             fit. Downsampling is done using scipy.signal.resample_poly in
             the Normalization class. Downsampled to the spacing "dt_down" in
             the Normalization class (1/2 second by default).
+        rho_km_vals_down (np.ndarray): Rho values corresponding to spm_vals_down
         p_obs_down (np.ndarray): Array of downsampled power values to fit.
             Gotten from downsampling frequency-corrected complex samples
         spm_fit (np.ndarray): SPM values to evaluate the fit for
@@ -50,6 +52,7 @@ class PowerFitGui(Frame):
         fit_deg (int): Degree of the spline fit. Starts off at 1
         ind (np.ndarray): Index numbers to the "x" attribute of the regions
             being fit (specified by the "xlim" attribute)
+        is_chord (bool): True if chord occultation, False if not
         knots_entry: Entry box for specifying the knots used in the fit.
             Changing the entry to this box changes the "knots_spm" attribute
             (see below)
@@ -68,6 +71,7 @@ class PowerFitGui(Frame):
         toolbar: Matplotlib.pyplot toolbar that appears below the
             matplotlib.pyplot plot
         x (np.ndarray): The input spm_vals_down values
+        x_rho (np.ndarray): The input rho_km_vals_down values
         xfit (np.ndarray): The input spm_fit values
         xlim (list): Set of regions to make the fit over. Starts off as the
             full range of SPM. Adjustable in the GUI, in the box labeled
@@ -82,15 +86,34 @@ class PowerFitGui(Frame):
         y (np.ndarray): The input p_obs_down values
         yfit (np.ndarray): Resulting fit from the GUI. This is the attribute
             used to access the fit after the program is closed
-        
+
+    Notes:
+        [1] Will spit out cryptic error messages at you after you press "OK"
+            and then press either yes or no in the dialogue box. I don't know
+            how to stop these, but they seem to be pretty harmless
     """
 
-    def __init__(self, parent, norm_inst, spm_vals_down, p_obs_down, spm_fit):
+    def __init__(self, parent, norm_inst, spm_vals_down, rho_km_vals_down,
+            p_obs_down, spm_fit):
+        """
+        Args:
+            parent: tkinter.Tk instance
+            norm_inst: Instance of the Normalization class
+            spm_vals_down (np.ndarray): SPM values downsampled from raw
+                resolution
+            rho_km_vals_down (np.ndarray): Radius values corresponding to
+                spm_vals_down
+            p_obs_down (np.ndarray): Unnormalized power evaluated at
+                spm_vals_down. Gotten from downsampling IQ_c and then
+                calculating power as abs(IQ_c)**2
+            spm_fit (np.ndarray): SPM values to evaluate the spline fit at
+        """
 
         Frame.__init__(self, parent)
 
         self.norm_inst = norm_inst
         self.x = spm_vals_down
+        self.x_rho = rho_km_vals_down
         self.y = p_obs_down
         self.xfit = spm_fit
 
@@ -111,7 +134,7 @@ class PowerFitGui(Frame):
         Initialize the user interface. Called by __init__()
         """
 
-        self.parent.title('fit_example')
+        self.parent.title('PowerFitGui')
         self.pack(fill=tkinter.BOTH, expand=1)
 
         self.f = Figure(figsize=(5, 4))
@@ -121,18 +144,19 @@ class PowerFitGui(Frame):
 
         self.cvar = IntVar()
 
+        # Frame to put fit order box in
         fit_order_frame = LabelFrame(self, text='Fit Order')
 
         # Box to select fit order
         combo = Combobox(fit_order_frame, textvariable=self.cvar)
         combo.bind('<<ComboboxSelected>>', self.adjust_deg)
         combo['values'] = [1, 2, 3, 4, 5]
-        combo.current(0)
+        combo.current(1)
         combo.grid(row=0, column=0)
 
         # Variable outside of box that says current fit order
         self.lvar = IntVar()
-        self.lvar.set('1')
+        self.lvar.set('2')
         lbl = Label(fit_order_frame, textvariable=self.lvar)
         lbl.grid(row=0, column=1)
 
@@ -163,7 +187,7 @@ class PowerFitGui(Frame):
         fit_info_frame.pack(pady=15)
 
         # Button to use the x range entered in the box
-        set_xrange_btn = Button(self, text='Set fit range and knots',
+        set_xrange_btn = Button(self, text='Set fit range and knots (SPM)',
             command=self.adjust_range_and_knots)
         set_xrange_btn.pack()
 
@@ -173,12 +197,14 @@ class PowerFitGui(Frame):
         revert_xrange_btn.pack()
 
         # Button to press when you're content with the fit and want to continue
-        ok_btn = Button(self, text='OK', command=self.quit)
+        ok_btn = Button(self, text='OK')
+        ok_btn.bind('<Button-1>', self.quit_app)
         ok_btn.pack(side=tkinter.LEFT, padx=120)
 
 
     def _get_fit(self):
         """
+        Purpose:
         Get the spline fit to power. Called by __init__(), adjust_deg(),
         adjust_range_and_knots(), and revert_range()
         """
@@ -188,21 +214,58 @@ class PowerFitGui(Frame):
             freespace_spm=self.xlim, USE_GUI=False)
         return spline_fit
 
+
+    def _get_rho_tick_labels(self, spm_tick_labels):
+        """
+        Purpose:
+        Given tick labels in SPM, get the new tick labels in radius
+
+        Args:
+            spm_tick_labels (list): SPM tick labels to get corresponding
+                radius values
+        """
+        spm_to_rho_func = interp1d(self.x, self.x_rho)
+        rho_tick_labels = spm_to_rho_func(spm_tick_labels)
+        return ['%.1f' % rho_tick_label for rho_tick_label in rho_tick_labels]
+
+
     def plot_data(self):
         """
+        Purpose:
         Make the original matplotlib.pyplot plot on the canvas. Called by
         initUI()
         """
 
+        # Plot power and its default fit
         self.ax.plot(self.x, self.y, color='b')
         self.ax.plot(self.xfit, self.yfit, color='r')
-        self.ax.set_title('Power')
         self.ax.set_xlabel('SPM')
+
+        # Plot radius scale on upper x-axis
+        self.ax_rho = self.ax.twiny()
+        rho_diff = np.diff(self.x_rho)
+        if (np.any(rho_diff > 0)) & (np.any(rho_diff < 0)):
+            self.is_chord = True
+            ax_rho_ticks = (self.ax.get_xticks())[
+                (self.ax.get_xticks() >= min(self.x))
+                & (self.ax.get_xticks() <= max(self.x))]
+            self.ax_rho.set_xlim(self.ax.get_xlim())
+            self.ax_rho.set_xticks(ax_rho_ticks)
+            self.ax_rho.set_xticklabels(self._get_rho_tick_labels(
+                ax_rho_ticks))
+            self.ax_rho.set_xlabel('Rho (km)')
+        else:
+            self.is_chord = False
+            self.ax_rho.plot(self.x_rho, self.y, alpha=0)
+        self.ax_rho.set_xlabel('Rho (km)')
+
+        # Show the canvas
         self.canvas = FigureCanvasTkAgg(self.f, master=self.parent)
         self.canvas.show()
         self.canvas.get_tk_widget().pack(side=tkinter.TOP, fill=tkinter.BOTH,
             expand=1)
 
+        # Matplotlib toolbar
         self.toolbar = NavigationToolbar2TkAgg(self.canvas, self.parent)
         self.toolbar.update()
         self.canvas._tkcanvas.pack(side=tkinter.TOP, fill=tkinter.BOTH,
@@ -211,54 +274,86 @@ class PowerFitGui(Frame):
 
     def update_plot(self):
         """
+        Purpose:
         Update the plot if an event happened (namely, you pressed a button or
         entered something new into a box). Called by adjust_deg(),
         adjust_range_and_knots(), and revert_range()
         """
 
+        # Indices inside or outside of freespace range
         ind = self.ind
         not_ind = self.not_ind
 
+        # plot power within freespace range and its fit
         self.ax.cla()
         self.ax.plot(self.x[ind], self.y[ind], color='b')
         self.ax.plot(self.xfit, self.yfit, color='r')
         if not_ind is not None:
             self.ax.plot(self.x[not_ind], self.y[not_ind], color='b', alpha=0.1)
-        self.ax.set_title('Power')
+
+        # Plot radius scale on upper x-axis
+        if self.is_chord:
+            ax_rho_ticks = (self.ax.get_xticks())[
+                (self.ax.get_xticks() >= min(self.x))
+                & (self.ax.get_xticks() <= max(self.x))]
+            self.ax_rho.set_xlim(self.ax.get_xlim())
+            self.ax_rho.set_xticks(ax_rho_ticks)
+            self.ax_rho.set_xticklabels(self._get_rho_tick_labels(
+                ax_rho_ticks))
+        else:
+            self.ax_rho.plot(self.x_rho, self.y, alpha=0)
+        self.ax_rho.set_xlabel('Rho (km)')
+
         self.ax.set_xlabel('SPM')
         self.canvas.show()
 
 
     def adjust_deg(self, e):
         """
+        Purpose:
         Adjust the degree of the fit if you adjusted the "Fit order" combobox.
         Bound to the "combo" variable in initUI()
         """
 
+        # Get the new fit degree
         new_deg = e.widget
         self.lvar.set(new_deg.get())
         self.fit_deg = int(new_deg.get())
 
+        # Get new fit and plot it
         self.yfit = self._get_fit()
         self.update_plot()
 
 
     def adjust_range_and_knots(self):
         """
+        Purpose:
         Adjust ranges to fit over and the knots used if you changed what's
         entered in the text boxes and press the "Set fit range and knots"
         button. Bound to the "set_xrange_btn" variable in initUI()
         """
 
-        xlim_entry = self.xlim_entry.get()
-        xlim = []
-        split1 = xlim_entry.split(';')
-        for i in range(len(split1)):
-            split2 = (split1[i]).split(',')
-            _xlim = [float(split2[0]), float(split2[1])]
-            xlim.append(_xlim)
-        self.xlim = xlim
+        # Get new freespace regions, using semicolons to separate regions
+        #     and commas to separate minimum and maximum within a region.
+        #     Revert to original fit if it fails
+        try:
+            xlim_entry = self.xlim_entry.get()
+            xlim = []
+            split1 = xlim_entry.split(';')
+            for i in range(len(split1)):
+                split2 = (split1[i]).split(',')
+                _xlim = [float(split2[0]), float(split2[1])]
+                xlim.append(_xlim)
+            self.xlim = xlim
+        except ValueError:
+            print('WARNING (PowerFitGui.adjust_range_and_knots): Illegal input '
+                + 'for "Fit ranges" text box. Reverting to original fit. '
+                + 'Did you forget to enter a value before pressing the "Set '
+                + 'fit ranges and knots (SPM)" button?')
+            self.revert_range()
+            return
 
+        # Indices within freespace regions
         ind = []
         for i in range(len(xlim)):
             ind.append(np.argwhere((self.x >= xlim[i][0]) &
@@ -266,18 +361,31 @@ class PowerFitGui(Frame):
         ind = np.reshape(np.concatenate(ind), -1)
         self.ind = ind
 
+        # Indices outside of freespace regions
         not_ind = []
         not_ind.append(np.argwhere(self.x < xlim[0][0]))
         for i in range(len(xlim)-1):
             not_ind.append(np.argwhere((self.x > xlim[i][1]) &
                 (self.x < xlim[i+1][0])))
+        not_ind.append(np.argwhere(self.x > xlim[-1][1]))
         not_ind = np.reshape(np.concatenate(not_ind), -1)
         self.not_ind = not_ind
 
-        knots_entry = self.knots_entry.get()
-        knots_entry_split = knots_entry.split(',')
-        self.knots_spm = [float(knot) for knot in knots_entry_split]
+        # Get new knot values from user entry. Revert to original fit if it
+        #     fails
+        try:
+            knots_entry = self.knots_entry.get()
+            knots_entry_split = knots_entry.split(',')
+            self.knots_spm = [float(knot) for knot in knots_entry_split]
+        except ValueError:
+            print('WARNING (PowerFitGui.adjust_range_and_knots): Illegal '
+                + 'input for knots. Reverting to original fit. '
+                + 'Did you forget to enter a value in the "Knots" text box '
+                + 'before hitting the "Set fit range and knots (SPM)" button?')
+            self.revert_range()
+            return
 
+        # Update fit and plot it
         new_yfit = self._get_fit()
         self.yfit = new_yfit
         self.update_plot()
@@ -285,18 +393,49 @@ class PowerFitGui(Frame):
 
     def revert_range(self):
         """
+        Purpose:
         Revert to the original range and knots to fit over if you press the
         "Reset fit range and knots" button. Bound to the
         "revert_xrange_btn" in initUI()
         """
 
-        self.xlim = [[min(self.x), max(self.x)]]
+        # Get default freespace ranges from Normalization instance, and update
+        #     xlim, ind, not_ind, and knots_spm attributes accordingly
+        freespace_km = self.norm_inst._freespace_km
+        self.xlim = []
+        for _range in freespace_km:
+            self.xlim.append([self.x[np.argmin(abs(self.x_rho - _range[0]))],
+                self.x[np.argmin(abs(self.x_rho - _range[1]))]])
+        self.knots_spm = []
+        for _knot_km in self.norm_inst._knots_km:
+            self.knots_spm.append(self.x[np.argmin(abs(self.x_rho - _knot_km))])
         self.ind = np.arange(len(self.x))
         self.not_ind = None
-        self.knots_spm = [min(self.x) + 2.0, max(self.x) - 2.0]
+
+        # Update fit and plot it
         new_yfit = self._get_fit()
         self.yfit = new_yfit
         self.update_plot()
+
+
+    def quit_app(self, e):
+        """
+        Called when you hit the "OK" button. Makes sure that you really want
+        to exit the GUI
+        """
+
+        # Check if you really want to exit the GUI, and gives a firm reminder
+        #     to set fit parameters before continuing
+        ret = messagebox.askquestion('Question', 'Are you sure of this fit? '
+            + 'If not, then click "No", adjust the fit parameters, and '
+            + 'REMEMBER TO HIT THE "Set fit range and knots (SPM)" BUTTON!!!')
+
+        # Destroy GUI if yes, return to GUI if no
+        if ret == 'yes':
+            self.quit()
+            self.parent.destroy()
+        else:
+            return
 
 
 if __name__ == '__main__':

@@ -5,6 +5,17 @@ f_resid_fit_gui.py
 Purpose: Copied from fit_example_resid_fit.py and edited to use residual
          frequency. Edited to use inside of freq_offset_fit.py
 
+Notes on text box entry:
+    [1] In the "Fit range (SPM)" text box, you need to separate freespace
+        regions by a semicolon, and separate the minimum and maximum in each
+        freespace region by a comma. For example, if you want to use the
+        freespace regions as [30500, 33000], [36000, 37000], and
+        [38000, 40000], then the entry into the textbox would be:
+        "30500, 33000 ; 36000, 37000 ; 38000, 40000"
+    [2] Be sure to hit the "Set fit range (SPM) button before continuing (if
+        you want to adjust the default fit). In case you forgot, another window
+        pops up making sure you really want to continue
+
 Revisions:
       fit_example.py
   2018 Mar 28 - gsteranka - Original version
@@ -57,15 +68,6 @@ class FResidFitGui(Frame):
         ind (np.ndarray): Index numbers to the "x" attribute of the regions
             being fit (specified by the "xlim" attribute)
         is_chord (bool): Record if occultation is a chord occultation
-        knots_entry: Entry box for specifying the knots used in the fit
-            Changing the entry to this box changes the "knots_spm" attribute
-            (see below)
-        knots_spm (list): Knots of the fit. Adjustable in the GUI in the box
-            labeled "Knots". Each knot must be separated by a comma. For
-            example, if you wanted to use the SPM knots 31000, 36500, and
-            39000, then you would just enter "31000, 36500, 39000" (without
-            the quotation marks). I usually use one knot per region being fit,
-            which in this case is the regions in the "xlim" attribute (below)
         lvar: Variable for the label next to the combo box for selecting fit
             order
         not_ind (np.ndarray): Index numbers of the "x" attribute of the regions

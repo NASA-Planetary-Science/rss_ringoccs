@@ -5,6 +5,18 @@ power_fit_gui.py
 Purpose: Copied from fit_example_power_norm.py and edited to use in
          power_normalization_v2.py. 
 
+Notes on text box entry:
+    [1] In the "Fit ranges" text box, you need to separate freespace
+        regions by a semicolon, and separate the minimum and maximum in each
+        freespace region by a comma. For example, if you want to use the
+        freespace regions as [30500, 33000], [36000, 37000], and
+        [38000, 40000], then the entry into the textbox would be:
+        "30500, 33000 ; 36000, 37000 ; 38000, 40000"
+    [2] In the "Knots" text box, you need to separate knots by a comma. For
+        example, if you want to use the SPM knots 31000, 36500, and 39000,
+        then you would just enter "31000, 36500, 39000"
+    [3] I usually have one knot per freespace region
+
 Revisions:
         fit_example_power_norm.py
     2018 May 09 - gsteranka - Original version

@@ -40,6 +40,22 @@ class Calibration(object):
     Use this if you haven't made a calibration file yet. If you have made a
     calibration file, use the "MakeCalInst" class instead.
 
+    Example:
+        >>> rsr_inst = rss.rsr_reader.RSRReader(rsr_file)
+        >>> geo_inst = rss.occgeo.Geometry(rsr_inst, 'Saturn', 'Cassini',
+                kernels)
+        >>> fit_inst = rss.calibration.FreqOffsetFit(rsr_inst, geo_inst, f_spm,
+                f_offset, f_uso, kernels, poly_order=poly_order,
+                spm_include=spm_include)
+        >>> spm_raw, IQ_c_raw = fit_inst.get_IQ_c()
+        >>> norm_inst = rss.calibration.Normalization(spm_raw, IQ_c_raw,
+                geo_inst, rsr_inst)
+        >>> spm_fit, spline_fit = norm_inst.get_spline_fit(
+                spline_order=spline_order, knots_spm=knots_spm,
+                dt_down=dt_down, freespace_spm=freespace_spm, verbose=verbose)
+        >>> cal_inst = rss.calibration.Calibration(fit_inst, norm_inst, geo_inst,
+                dt_cal=dt_cal, verbose=verbose)
+
     Attributes:
         t_oet_spm_vals (np.ndarray): SPM values from calibration file
         f_sky_hz_vals (np.ndarray): Predicted sky frequency values from

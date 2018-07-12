@@ -73,7 +73,7 @@ class RSRReader(object):
 
     Example:
         >>> # Define instance and set header attributes, and read in raw data
-        >>> rsr_inst = RSRReader(rsr_file)
+        >>> rsr_inst = rss.rsr_reader.RSRReader(rsr_file)
         >>>
         >>>  # Get predicted sky frequency at chosen SPM values f_spm
         >>> f_spm_returned, f_sky_pred = rsr_inst.get_f_sky_pred(f_spm=f_spm)

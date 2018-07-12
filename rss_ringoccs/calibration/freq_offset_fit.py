@@ -75,12 +75,15 @@ class FreqOffsetFit(object):
     to do so.
 
     Example:
-        >>> rsr_inst = RSRReader(rsr_file)
-        >>> (f_spm, f_offset) = (f_spm, f_offset) = \
-                calc_freq_offset(spm_vals, IQ_m)
-        >>> fit_inst = FreqOffsetFit(rsr_inst, geo_inst, f_spm, f_offset, \
-                f_uso, kernels, poly_order=poly_order, rho_exclude=rho_exclude)
-        >>> (spm_vals, IQ_c) = fit_inst.get_IQ_c(spm_vals=spm_vals, IQ_m=IQ_m)
+        >>> rsr_inst = rss.rsr_reader.RSRReader(rsr_file)
+        >>> geo_inst = rss.occgeo.Geometry(rsr_inst, 'Saturn', 'Cassini',
+                kernels)
+        >>> f_spm, f_offset =
+                rss.calibration.calc_freq_offset(rsr_inst)
+        >>> fit_inst = rss.calibration.FreqOffsetFit(rsr_inst, geo_inst, f_spm,
+                f_offset, f_uso, kernels, poly_order=poly_order,
+                spm_include=spm_include)
+        >>> spm_vals, IQ_c = fit_inst.get_IQ_c(spm_vals=spm_vals, IQ_m=IQ_m)
 
     Attributes:
         _spm_include (list): Linked to the input range spm_include

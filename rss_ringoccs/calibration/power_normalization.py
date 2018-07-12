@@ -75,16 +75,18 @@ class Normalization(object):
     data uniformly spaced in time at raw resolution.
 
     Example:
-        >>> fit_inst = FreqOffsetFit(rsr_inst, geo_inst, f_spm, f_offset, \
-                f_uso, kernels, spline_order=spline_order,
-                rho_exclude=rho_exclude)
-        >>> (spm_raw, IQ_c_raw) = fit_inst.get_IQ_c()
-        >>> norm_inst = Normalization(spm_raw, IQ_c_raw, geo_inst)
-        >>> spm_fit = np.arange(spm_raw[0], spm_raw[-1], 1.0)
-        >>> spline_fit = norm_inst.get_spline_fit(spm_fit,
-                spline_order=spline_order, \
-                knots_km=knots_km, dt_down=dt_down, \
-                freespace_km=freespace_km, verbose=verbose)
+        >>> rsr_inst = rss.rsr_reader.RSRReader(rsr_file)
+        >>> geo_inst = rss.occgeo.Geometry(rsr_inst, 'Saturn', 'Cassini',
+                kernels)
+        >>> fit_inst = rss.calibration.FreqOffsetFit(rsr_inst, geo_inst, f_spm,
+                f_offset, f_uso, kernels, poly_order=poly_order,
+                spm_include=spm_include)
+        >>> spm_raw, IQ_c_raw = fit_inst.get_IQ_c()
+        >>> norm_inst = rss.calibration.Normalization(spm_raw, IQ_c_raw,
+                geo_inst, rsr_inst)
+        >>> spm_fit, spline_fit = norm_inst.get_spline_fit(
+                spline_order=spline_order, knots_spm=knots_spm,
+                dt_down=dt_down, freespace_spm=freespace_spm, verbose=verbose)
 
     Attributes:
         _dt_down (float): Time spacing to downsample to before making

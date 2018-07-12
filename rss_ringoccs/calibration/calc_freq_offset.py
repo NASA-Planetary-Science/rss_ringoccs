@@ -57,11 +57,9 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192,
 
     Example:
         >>> # Get RSR file info
-        >>> import rss_ringoccs as rss
         >>> rsr_inst = rss.rsr_reader.RSRReader(rsr_file)
         >>>
         >>> # Calculate frequency offset
-        >>> from freq_offset import calc_freq_offset
         >>> f_spm, f_offset, history = rss.calibration.calc_freq_offset(
                 rsr_inst, dt_freq=dt_freq, verbose=verbose)
 

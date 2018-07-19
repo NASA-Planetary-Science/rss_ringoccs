@@ -57,4 +57,6 @@
                             allowed range of processing.
 """
 
+try:from .advanced_tools import *
+except ModuleNotFoundError:pass
 from .diffcorr import *

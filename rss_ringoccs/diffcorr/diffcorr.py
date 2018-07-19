@@ -18,13 +18,6 @@
         kb35................Kaiser-Bessel 3.5 window.
         kbmd20..............Modified Kaiser-Bessel 2.0 window.
         kbmd25..............Modified Kaiser-Bessel 2.5 window.
-
-    Error Checks:
-        check_boole.........Checks for Boolean input.
-        check_ternary.......Checks for Ternary input.
-        check_pos_real......Checks for a single positive real input.
-        check_real..........Checks if input is real (Number/Array).
-        check_complex.......Checks if input is complex.
     
     Special Functions:
         fresnel_sin.........The Fresnel sine integral.
@@ -56,7 +49,6 @@
                             request, and a window width, compute the
                             allowed range of processing.
 """
-
 # Import dependencies for the diffcorrpy module
 import time
 import os
@@ -66,14 +58,9 @@ import numpy as np
 from scipy.special import lambertw, iv, erf
 from scipy import interpolate
 from scipy.constants import speed_of_light
-import pdb
-
-dcfile = os.path.dirname(os.path.realpath(__file__))
-sys.path.append("%s/../../" % dcfile)
-del dcfile
+sys.path.append("%s/../../" % os.path.dirname(os.path.realpath(__file__)))
 from rss_ringoccs.tools import check_boole,check_ternary
-from rss_ringoccs.tools import check_real,check_pos_real
-from rss_ringoccs.tools import check_complex,get_geo
+from rss_ringoccs.tools import check_real,check_pos_real,check_complex
 
 region_dict = {
     'all'               : [65000.0,145000.0],
@@ -1216,51 +1203,7 @@ def fresnel_scale(Lambda,d,phi,b,DEG=False):
     fres = np.sqrt(0.5 * Lambda * d * (1 - (cb**2) * (sp**2)) / (sb**2))
     return fres
 
-def psi_d1_phi_fast(r,r0,d,cb,cp,sp,cp0,sp0,error_check=True):
-    """
-        Function:
-            psi_d1_phi_fast
-        Purpose:
-            Calculate dpsi/dphi from geometry variables using
-            previously computed sines and cosines.
-        Variables:
-            r:    Ring radius variable (Integrated over). km.
-            r0:   Ring intercept point. km.
-            d:    RIP-Spacecraft distance. km.
-            cb:   The cosine of the ring opening angle.
-            cp:   The cosine of the ring azimuth angle (variable).
-            sp:   The sine of the ring azimuth angle (variable).
-            cp0:  The cosine of the ring azimuth angle (value).
-            sp0:  The sine of the ring azimuth angle (value).
-        History:
-            Translated from IDL: RJM - 2018/05/15 5:36 P.M.
-    """
-    if error_check:
-        if (not check_real(r)):
-            sys.exit("r must be real valued")
-        if (not check_real(r0)):
-            sys.exit("r0 must be real valued")
-        if (not check_real(d)):
-            sys.exit("d must be real valued")
-        if (not check_real(cb)):
-            sys.exit("cos(b) must be real valued")
-        if (not check_real(cp)):
-            sys.exit("cos(phi) must be real valued")
-        if (not check_real(sp)):
-            sys.exit("sin(phi) must be real valued")
-        if (not check_real(cp0)):
-            sys.exit("cos(phi0) must be real valued")
-        if (not check_real(sp0)):
-            sys.exit("sin(phi0) must be real valued")
-    else: pass
-    xi   = (cb / d) * (r0*cp0 - r*cp)
-    eta  = (r0**2 + r**2 - 2.0*r*r0*(sp*sp0 + cp*cp0)) / (d**2)
-    v1   = r * cb * sp / d
-    v2   = 2.0 * r * r0 * (sp*cp0 - sp0*cp) / (d**2)
-    psi_d1_phi_vals = (2.0*v1 + v2) / (2.0 * np.sqrt(1.0 + 2.0*xi + eta)) - v1
-    return psi_d1_phi_vals
-
-def psi_d1_phi(r,r0,d,b,phi,phi0):
+def psi_d1_phi(r,r0,d,b,phi,phi0,error_check=True):
     """
         Function: psi_d1_phi
         Purpose:  Calculate dpsi/dphi from geometry variables.
@@ -1274,18 +1217,20 @@ def psi_d1_phi(r,r0,d,b,phi,phi0):
         History:
             Translated from IDL: RJM - 2018/05/15 7:06 P.M.
     """
-    if (not check_real(r)):
-        sys.exit("r must be real valued")
-    if (not check_real(r0)):
-        sys.exit("r0 must be real valued")
-    if (not check_real(d)):
-        sys.exit("d must be real valued")
-    if (not check_real(b)):
-        sys.exit("b must be real valued")
-    if (not check_real(phi)):
-        sys.exit("phi must be real valued")
-    if (not check_real(phi0)):
-        sys.exit("phi0 must be real valued")
+    if error_check:
+        if (not check_real(r)):
+            sys.exit("r must be real valued")
+        if (not check_real(r0)):
+            sys.exit("r0 must be real valued")
+        if (not check_real(d)):
+            sys.exit("d must be real valued")
+        if (not check_real(b)):
+            sys.exit("b must be real valued")
+        if (not check_real(phi)):
+            sys.exit("phi must be real valued")
+        if (not check_real(phi0)):
+            sys.exit("phi0 must be real valued")
+    else: pass
     cb   = np.cos(b)
     sp   = np.sin(phi)
     cp   = np.cos(phi)
@@ -1298,53 +1243,7 @@ def psi_d1_phi(r,r0,d,b,phi,phi0):
     psi_d1_phi_vals = (2.0*v1 + v2) / (2.0 * np.sqrt(1.0 + 2.0*xi + eta)) - v1
     return psi_d1_phi_vals
 
-def psi_d2_phi_fast(r,r0,d,cb,cp,sp,cp0,sp0,error_check=True):
-    """
-        Function: psi_d2_phi_fast
-        Purpose:  Calculate second derivative of psi with respect to phi from
-        geometry variables using previously computed sines and cosines.
-        Variables:
-            r:    Ring radius variable (Integrated over). km.
-            r0:   Ring intercept point. km.
-            d:    RIP-Spacecraft distance. km.
-            cb:   The cosine of the ring opening angle.
-            cp:   The cosine of the ring azimuth angle (variable).
-            sp:   The sine of the ring azimuth angle (variable).
-            cp0:  The cosine of the ring azimuth angle (value).
-            sp0:  The sine of the ring azimuth angle (value).
-        History:
-            Translated from IDL: RJM - 2018/05/15 7:21 P.M.
-    """
-    if error_check:
-        if (not check_real(r)):
-            sys.exit("r must be real valued")
-        if (not check_real(r0)):
-            sys.exit("r0 must be real valued")
-        if (not check_real(d)):
-            sys.exit("d must be real valued")
-        if (not check_real(cb)):
-            sys.exit("cos(b) must be real valued")
-        if (not check_real(cp)):
-            sys.exit("cos(phi) must be real valued")
-        if (not check_real(sp)):
-            sys.exit("sin(phi) must be real valued")
-        if (not check_real(cp0)):
-            sys.exit("cos(phi0) must be real valued")
-        if (not check_real(sp0)):
-            sys.exit("sin(phi0) must be real valued")
-    else: pass
-    xi    = (cb / d) * (r0*cp0 - r*cp)
-    eta   = ((r0**2) + (r**2) - 2.0*r*r0*(sp*sp0 + cp*cp0)) / (d*d)
-    v1    = r * cb * cp / d
-    v2    = 2.0 * r * r0 * (sp*sp0 + cp*cp0) / (d*d)
-    v3    = r * cb * sp / d
-    v4    = 2.0 * r * r0 * (sp*cp0 - sp0*cp) / (d*d)
-    dphia = (2.0*v1 + v2)/(2.0 * np.sqrt(1.0 + 2.0*xi + eta))
-    dphib = v1+((2.0*v3 + v4)*(2.0*v3 + v4))/(4.0*(np.sqrt(1.0+2.0*xi+eta)**3))
-    psi_d2_phi_vals = dphia - dphib
-    return psi_d2_phi_vals
-
-def psi_d2_phi(r,r0,d,b,phi,phi0):
+def psi_d2_phi(r,r0,d,b,phi,phi0,error_check=True):
     """
         Function: psi_d2_phi_fast
         Purpose:  Calculate second derivative of psi with respect to phi from
@@ -1361,18 +1260,20 @@ def psi_d2_phi(r,r0,d,b,phi,phi0):
         History:
             Translated from IDL: RJM - 2018/05/15 5:36 P.M.
     """
-    if (not check_real(r)):
-        sys.exit("r must be real valued")
-    if (not check_real(r0)):
-        sys.exit("r0 must be real valued")
-    if (not check_real(d)):
-        sys.exit("d must be real valued")
-    if (not check_real(b)):
-        sys.exit("b must be real valued")
-    if (not check_real(phi)):
-        sys.exit("phi must be real valued")
-    if (not check_real(phi0)):
-        sys.exit("phi0 must be real valued")
+    if error_check:
+        if (not check_real(r)):
+            sys.exit("r must be real valued")
+        if (not check_real(r0)):
+            sys.exit("r0 must be real valued")
+        if (not check_real(d)):
+            sys.exit("d must be real valued")
+        if (not check_real(b)):
+            sys.exit("b must be real valued")
+        if (not check_real(phi)):
+            sys.exit("phi must be real valued")
+        if (not check_real(phi0)):
+            sys.exit("phi0 must be real valued")
+    else: pass
     cb   = np.cos(b)
     sp   = np.sin(phi)
     cp   = np.cos(phi)
@@ -1416,7 +1317,7 @@ def fresnel_transform(T,ker,DX,f_scale):
     T_hat = np.sum(ker * T) * DX * (1.0-1.0j) / (2. * f_scale)
     return T_hat
 
-def fresnel_inverse(T_hat,ker,dx,f_scale, error_check=True):
+def fresnel_inverse(T_hat,ker,dx,f_scale,error_check=True):
     """
         Function: fresnel_transform
         Purpose:  Compute the approximate inverse of a Fresnel transform.
@@ -1454,35 +1355,6 @@ def fresnel_inverse_fft(T_hat,ker,dx,f_scale):
     T               = inv_t_hat[int((nw-1)/2)]
     return T
 
-def psi_factor_fast(r,r0,cb,cp0,sp0,error_check=True):
-    """
-        Function: psi_factor_fast
-        Purpose:  Calculate the first iteration of Newton-Raphson for psi with
-            respect to phi using previously calculated sines and cosines.
-        Variables:
-            r:   Ring radius variable.
-            r0:  Ring intercept point.
-            cb:  Cosine of ring opening angle.
-            cp0: Cosine of ring azimuth angle.
-            sp0: Sine of ring azimuth angle.
-        History:
-            Translated from IDL: RJM - Rough Draft - 2018/05/15 7:35 P.M.
-    """
-    if error_check:
-        if (not check_real(r)):
-            sys.exit("r must be real valued")
-        if (not check_real(r0)):
-            sys.exit("r0 must be real valued")
-        if (not check_real(cb)):
-            sys.exit("cos(b) must be real valued")
-        if (not check_real(cp0)):
-            sys.exit("cos(phi0) must be real valued")
-        if (not check_real(sp0)):
-            sys.exit("sin(phi0) must be real valued")
-    else:pass
-    factor  = ((cb*cb) * cp0 * sp0 / (1.0 - (cb*cb) * (sp0*sp0))) * (r - r0) / r0
-    return factor
-
 def psi_factor(r,r0,b,phi0,error_check=True):
     """
         Function: psi_factor_fast
@@ -1512,46 +1384,7 @@ def psi_factor(r,r0,b,phi0,error_check=True):
     factor  = ((cb*cb) * cp0 * sp0 / (1.0 - (cb*cb) * (sp0*sp0))) * (r - r0) / r0
     return factor
 
-def psi_fast(r,r0,d,cb,cp,sp,cp0,sp0,error_check=True):
-    """
-        Function: psi_fast
-        Purpose:  Calculate psi from geometry variables.
-        Variables:
-            r:   Ring radius variable.
-            r0:  Ring intercept point.
-            D:   RIP-Spacecraft distance.
-            cb:  Cosine of ring opening angle.
-            cp:  Cosine of ring azimuth angle (variable).
-            sp:  Sine of ring azimuth angle (variable).
-            cp0: Cosine of ring azimuth angle (value).
-            sp0: Sine of ring azimuth angle (value).
-        History:
-            Translated from IDL: RJM - 2018/05/15 7:48 P.M.
-    """
-    if error_check:
-        if (not check_real(r)):
-            sys.exit("r must be real valued")
-        if (not check_real(r0)):
-            sys.exit("r0 must be real valued")
-        if (not check_real(d)):
-            sys.exit("d must be real valued")
-        if (not check_real(cb)):
-            sys.exit("cos(b) must be real valued")
-        if (not check_real(cp)):
-            sys.exit("cos(phi) must be real valued")
-        if (not check_real(sp)):
-            sys.exit("sin(phi) must be real valued")
-        if (not check_real(cp0)):
-            sys.exit("cos(phi0) must be real valued")
-        if (not check_real(sp0)):
-            sys.exit("sin(phi0) must be real valued")
-    else: pass
-    xi   = (cb / d) * (r0*cp0 - r*cp)
-    eta  = ((r0*r0) + (r*r) - 2.0 * r * r0 * (sp*sp0 + cp*cp0)) / (d*d)
-    psi_vals   = np.sqrt(1.0 + 2.0 * xi + eta) - (1.0 + xi)
-    return psi_vals
-
-def psi(r,r0,d,b,phi,phi0):
+def psi(r,r0,d,b,phi,phi0,error_check=True):
     """
         Function: psi_fast
         Purpose:  Calculate psi from geometry variables.
@@ -1565,18 +1398,20 @@ def psi(r,r0,d,b,phi,phi0):
         History:
             Translated from IDL: RJM - 2018/05/15 7:48 P.M.
     """
-    if (not check_real(r)):
-        sys.exit("r must be real valued")
-    if (not check_real(r0)):
-        sys.exit("r0 must be real valued")
-    if (not check_real(d)):
-        sys.exit("d must be real valued")
-    if (not check_real(b)):
-        sys.exit("b must be real valued")
-    if (not check_real(phi)):
-        sys.exit("phi must be real valued")
-    if (not check_real(phi0)):
-        sys.exit("phi0 must be real valued")
+    if error_check:
+        if (not check_real(r)):
+            sys.exit("r must be real valued")
+        if (not check_real(r0)):
+            sys.exit("r0 must be real valued")
+        if (not check_real(d)):
+            sys.exit("d must be real valued")
+        if (not check_real(b)):
+            sys.exit("b must be real valued")
+        if (not check_real(phi)):
+            sys.exit("phi must be real valued")
+        if (not check_real(phi0)):
+            sys.exit("phi0 must be real valued")
+    else: pass
     cb   = np.cos(b)
     sp   = np.sin(phi)
     cp   = np.cos(phi)
@@ -1587,7 +1422,7 @@ def psi(r,r0,d,b,phi,phi0):
     psi_vals   = np.sqrt(1.0 + 2.0 * xi + eta) - (1.0 + xi)
     return psi_vals
 
-def normalize(r,w_func,f_scale,error_check=True):
+def normalize(r,psi,w_func,f_scale,error_check=True):
     """
         Function: normalize
         Purpose:  Compute the normalization factor used in the Fresnel
@@ -1611,10 +1446,7 @@ def normalize(r,w_func,f_scale,error_check=True):
         if (np.size(r) < 2.0):
             sys.exit("RHO needs to have at least 2 points")
     else: pass
-    x         = r-np.mean(r)
     drho      = r[1]-r[0]
-    f_scale   = f_scale
-    psi       = (np.pi / 2.0) * ((x / f_scale)*(x / f_scale))
     ker       = np.exp(-1j * psi)
     T1        = np.abs(np.sum(w_func * ker) * drho)
     norm_fact = np.sqrt(2.0) * f_scale / T1
@@ -1663,100 +1495,9 @@ def window_width(res,normeq,fsky,fres,rho_dot,sigma=False,bfac=True):
         w_vals = 2.0*normeq*fres*fres/res
     return w_vals
 
-def fresnel_forward_fast(rho_vals,F_vals,phi_rad_vals,B_rad_vals,d_vals,
-    T_vals,lambda_vals,w_vals,dx,wtype,start,n_used,Normalize=True):
-    """
-        Procedure: fresnel_forward_fast
-        Purpose:   Computes the forward model of diffraction from reconstructed
-            data using a 'fast' method to speed up computation time. This is
-            achieved by computing cosine and sine functions in the outer for
-            loop, and then passing these computed values into the functions
-            that need them.
-        Variables:
-            rho_vals:        Ring radius, in kilometers.
-            F_vals:          Fresnel scale, in kilometers.
-            phi_rad_vals:    Ring azimuth angle, in radians.
-            B_rad_vals:      Ring opening angle, in radians.
-            lambda_sky_vals: Wavelength of recieved signal, in kilometers.
-            D_vals:          Spacecraft-RIP distance, in kilometers.
-            dx:              Sampling spacing, in kilometers.
-            T_vals:          Reconstructed complex transmittance.
-            w_vals:          Window width, in kilometers.
-            wtype:           Window used in reconstruction, string.
-            start:           Starting point of reconstructed data.
-            n_used:          Number of reconstructed points.
-        Keywords:
-            Normalize: Parameter for normalizing the complex transmittance by
-                the window function that is used. Default is True. Set to False
-                to skip this feature.
-        Output:
-            phase_fwd_vals  - Phase of the forward model, in radians.
-            T_hat_fwd_vals  - Complex transmittance of forward model.
-            p_norm_fwd_vals - Normalized power of forward model, unitless.
-        History:
-            Translated from IDL: RJM - 2018/05/14 5:06 P.M.
-    """
-
-    # Compute necessary variables.
-    kD_vals   = 2. * np.pi * d_vals / lambda_vals
-    w_max     = np.max(w_vals[start:start + n_used])
-    nw_fwd    = np.ceil(w_max / (2. * dx))
-    start_fwd = int(start + nw_fwd)
-    n_fwd     = int(n_used - 2 * nw_fwd)
-    cosb      = np.cos(B_rad_vals)
-    cosphi0   = np.cos(phi_rad_vals)
-    sinphi0   = np.sin(phi_rad_vals)
-
-    # Compute forward model, point by point.
-    T_hat_fwd_vals = T_vals * 0.0
-    for i in range(n_fwd):
-        center = start_fwd + i
-        w      = w_vals[center]
-        w_func = func_dict[wtype]["func"](w,dx)
-        nw     = np.size(w_func)
-        crange = np.array(range(int(center-(nw-1)/2),int(1+center+(nw-1)/2)))
-        r      = rho_vals[crange]
-        r0     = rho_vals[center]
-        d      = d_vals[center]
-        cb     = cosb[center]
-        cp0    = cosphi0[center]
-        sp0    = sinphi0[center]
-        kD     = kD_vals[center]
-        dphi_s_rad = psi_factor_fast(r,r0,cb,cp0,sp0)
-        phi_s_rad  = phi_rad_vals[center] - dphi_s_rad
-        loop = 0
-
-        # Perform Newton-Raphson on phi.
-        while (np.max(np.abs(dphi_s_rad)) > 1.e-10):
-            cp         = np.cos(phi_s_rad)
-            sp         = np.sin(phi_s_rad)
-            psi_d1     = kD * psi_d1_phi_fast(r,r0,d,cb,cp,sp,cp0,sp0)
-            psi_d2     = kD * psi_d2_phi_fast(r,r0,d,cb,cp,sp,cp0,sp0)
-            dphi_s_rad = -psi_d1 / psi_d2
-            phi_s_rad += dphi_s_rad
-            loop      += 1
-            if loop > 5:
-                break
-
-        # Compute psi and then compute the forward model.
-        cp       = np.cos(phi_s_rad)
-        sp       = np.sin(phi_s_rad)
-        psi_vals = kD * psi_fast(r,r0,d,cb,cp,sp,cp0,sp0)
-        ker      = wker(w_func,psi_vals)
-        T        = T_vals[crange]
-        F        = F_vals[center]
-        T_hat_fwd_vals[center] = fresnel_transform(T,ker,dx,F)
-        if Normalize:
-            norm_factor = normalize(r,w_func,F)
-            T_hat_fwd_vals[center] *= norm_factor
-        print("Pt: %d  Tot: %d  Width: %d  Psi Iters: %d  Fast Forward" \
-        % (i,n_used,nw,loop),end="\r")
-    print("Pt: %d  Tot: %d  Width: %d  Psi Iters: %d  Fast Forward" \
-        % (i,n_used,nw,loop))
-    return T_hat_fwd_vals
-
 def fresnel_forward(rho_vals,F_vals,phi_rad_vals,B_rad_vals,d_vals,
-    T_vals,lambda_vals,w_vals,dx,wtype,start,n_used,Normalize=True):
+    T_vals,lambda_vals,w_vals,dx,wtype,start,n_used,norm=True,fft=False,
+    verbose=True,psitype='full'):
     """
         Procedure: fresnel_forward
         Purpose:   Computes the forward model of diffraction from a set of
@@ -1785,94 +1526,11 @@ def fresnel_forward(rho_vals,F_vals,phi_rad_vals,B_rad_vals,d_vals,
         History:
             Translated from IDL: RJM - 2018/05/14 5:06 P.M.
     """
-
     # Compute necessary variables.
-    kD_vals   = 2. * np.pi * d_vals / lambda_vals
     w_max     = np.max(w_vals[start:start + n_used])
-    nw_fwd    = np.ceil(w_max / (2. * dx))
+    nw_fwd    = int(np.ceil(w_max / (2.0 * dx)))
     start_fwd = int(start + nw_fwd)
     n_fwd     = int(n_used - 2 * nw_fwd)
-
-    # Compute forward model, point by point.
-    T_hat_fwd_vals = T_vals * 0.0
-    for i in range(n_fwd):
-        center = start_fwd + i
-        w      = w_vals[center]
-        w_func = func_dict[wtype]["func"](w,dx)
-        nw     = np.size(w_func)
-        crange = np.array(range(int(center-(nw-1)/2),int(1+center+(nw-1)/2)))
-        r      = rho_vals[crange]
-        r0     = rho_vals[center]
-        d      = d_vals[center]
-        b      = B_rad_vals[center]
-        phi0   = phi_rad_vals[center]
-        kD     = kD_vals[center]
-        dphi_s_rad = psi_factor(r,r0,b,phi0)
-        phi_s_rad  = phi0 - dphi_s_rad
-        loop = 0
-
-        # Perform Newton-Raphson on phi.
-        while (np.max(np.abs(dphi_s_rad)) > 1.e-10):
-            psi_d1     = kD * psi_d1_phi(r,r0,d,b,phi_s_rad,phi0)
-            psi_d2     = kD * psi_d2_phi(r,r0,d,b,phi_s_rad,phi0)
-            dphi_s_rad = -psi_d1 / psi_d2
-            phi_s_rad += dphi_s_rad
-            loop      += 1
-            if loop > 5:
-                break
-
-        # Compute psi and then compute the forward model.
-        psi_vals = kD * psi(r,r0,d,b,phi_s_rad,phi0)
-        ker      = wker(w_func,psi_vals)
-        T        = T_vals[crange]
-        F        = F_vals[center]
-        T_hat_fwd_vals[center] = fresnel_transform(T,ker,dx,F)
-        if Normalize:
-            norm_factor = normalize(r,w_func,F)
-            T_hat_fwd_vals[center] *= norm_factor
-        print("Pt: %d  Tot: %d  Width: %d  Psi Iters: %d  Normal Forward" \
-        % (i,n_used,nw,loop),end="\r")
-    print("Pt: %d  Tot: %d  Width: %d  Psi Iters: %d  Normal Forward" \
-    % (i,n_used,nw,loop))
-    return T_hat_fwd_vals
-
-def fresnel_inversion(rho_vals,F_vals,phi_rad_vals,B_rad_vals,d_vals,
-    T_hat_vals,lambda_vals,w_vals,dx,wtype,start,n_used,norm=True,fft=False,
-    verbose=True,psitype='full'):
-    """
-        Function:  fresnel_inversion
-        Purpose:   Computes the fresnel inversion from a set of diffracted data
-            using a 'fast' method to speed up computation time. This is
-            achieved by computing cosine and sine function in the outer for
-            loop, and then passing these computed values into the functions
-            that need them. The normal version passes the arguments to the
-            functions, and then cosines and sines are computed within the
-            function. For small data sets or coarser resolutions, the normal
-            version is faster. Both the normal and fast versions output
-            completely identical results.
-        Variables:
-            rho_vals:        Ring radius, in kilometers.
-            F_vals:          Fresnel scale, in kilometers.
-            phi_rad_vals:    Ring azimuth angle, in radians.
-            B_rad_vals:      Ring opening angle, in radians.
-            lambda_sky_vals: Wavelength of recieved signal, in kilometers.
-            D_vals:          Spacecraft-RIP distance, in kilometers.
-            dx:              Sampling spacing, in kilometers.
-            T_vals:          Reconstructed complex transmittance.
-            w_vals:          Window width, in kilometers.
-            wtype:           Window used in reconstruction, string.
-            start:           Starting point of reconstructed data.
-            n_used:          Number of reconstructed points.
-        Keywords:
-            Normalize: Parameter for normalizing the complex transmittance by
-                the window function that is used. Default is True. Set to False
-                to skip this feature.
-        Output:
-            T_vals  - Reconstructed Complex transmittance.
-        History:
-            Translated from IDL: RJM - 2018/05/16 6:26 A.M.
-    """
-    # Compute necessary variables.
     kD_vals   = 2.0*np.pi*d_vals/lambda_vals
     cosb      = np.cos(B_rad_vals)
     cosphi0   = np.cos(phi_rad_vals)
@@ -1887,14 +1545,14 @@ def fresnel_inversion(rho_vals,F_vals,phi_rad_vals,B_rad_vals,d_vals,
         finv  = fresnel_inverse
     nrm       = normalize
     # Calculate the corrected complex amplitude, point by point
-    T_vals    = T_hat_vals * 0.0
-    w_init    = w_vals[start]
-    w_func    = fw(w_init,dx)
-    nw        = np.size(w_func)
-    phi_s_rad1 = phi_rad_vals[start]
+    T_hat_fwd_vals  = T_vals * 0.0
+    w_init          = w_vals[start_fwd]
+    w_func          = fw(w_init,dx)
+    nw              = np.size(w_func)
+    phi_s_rad1      = phi_rad_vals[start_fwd]
     if psitype == 'full':
-        for i in np.arange(n_used):
-            center = start+i
+        for i in np.arange(n_fwd):
+            center = start_fwd+i
             r0     = rho_vals[center]
             d      = d_vals[center]
             cb     = cosb[center]
@@ -1939,18 +1597,18 @@ def fresnel_inversion(rho_vals,F_vals,phi_rad_vals,B_rad_vals,d_vals,
                     break
             phi_s_rad1 = phi_s_rad
             # Compute psi and then compute the forward model.
-            psi_vals = kD * psif(r,r0,d,cb,cp,sp,cp0,sp0,error_check=False)
-            ker      = w_func*np.exp(-1j*psi_vals)
-            T_hat    = T_hat_vals[crange]
+            psi_vals    = kD * psif(r,r0,d,cb,cp,sp,cp0,sp0,error_check=False)
+            ker         = w_func*np.exp(-1j*psi_vals)
+            T           = T_vals[crange]
             
-            T_vals[center] = finv(T_hat,ker,dx,F)
-            if norm:T_vals[center] *= nrm(r,w_func,F,error_check=False)
+            T_hat_fwd_vals[center] = finv(T_hat,ker,dx,F)
+            if norm:T_hat_fwd_vals[center] *= nrm(r,w_func,F,error_check=False)
             if verbose:
                 print("Pt: %d  Tot: %d  Width: %d  Psi Iters: %d  Inversion"\
                 % (i,n_used,nw,loop),end="\r")
     elif psitype == "taylor2":
-        for i in np.arange(n_used):
-            center = start+i
+        for i in np.arange(n_fwd):
+            center = start_fwd+i
             r0     = rho_vals[center]
             kD     = kD_vals[center]
             w      = w_vals[center]
@@ -1964,11 +1622,207 @@ def fresnel_inversion(rho_vals,F_vals,phi_rad_vals,B_rad_vals,d_vals,
 
             # Compute psi and then compute the forward model.
             psi_vals = (np.pi/2.0)*(x*x)
-            ker      = w_func*np.exp(-1j*psi_vals)
+            ker      = w_func*np.exp(1j*psi_vals)
             T_hat    = T_hat_vals[crange]
             T_vals[center] = finv(T_hat,ker,dx,F)
-            if verbose:print("Pt: %d  Tot: %d  Width: %d \
-                Psi Iters: %d  Fast Inversion" % (i,n_used,nw,loop),end="\r")
+            if verbose:
+                print("Pt: %d  Tot: %d  Width: %d  Psi Iters: %d  Inversion"\
+                % (i,n_used,nw,loop),end="\r")
+    return T_hat_fwd_vals
+
+def fresnel_inversion(rho_vals,F_vals,phi_rad_vals,B_vals,D_vals,
+    T_hat_vals,lambda_vals,w_vals,dx,wtype,start,n_used,norm=True,fft=False,
+    verbose=True,psitype='full'):
+    """
+        Function:  fresnel_inversion
+        Purpose:   Computes the fresnel inversion from a set of diffracted data
+            using a 'fast' method to speed up computation time. This is
+            achieved by computing cosine and sine function in the outer for
+            loop, and then passing these computed values into the functions
+            that need them. The normal version passes the arguments to the
+            functions, and then cosines and sines are computed within the
+            function. For small data sets or coarser resolutions, the normal
+            version is faster. Both the normal and fast versions output
+            completely identical results.
+        Variables:
+            rho_vals:        Ring radius, in kilometers.
+            F_vals:          Fresnel scale, in kilometers.
+            phi_rad_vals:    Ring azimuth angle, in radians.
+            B_rad_vals:      Ring opening angle, in radians.
+            lambda_sky_vals: Wavelength of recieved signal, in kilometers.
+            D_vals:          Spacecraft-RIP distance, in kilometers.
+            dx:              Sampling spacing, in kilometers.
+            T_vals:          Reconstructed complex transmittance.
+            w_vals:          Window width, in kilometers.
+            wtype:           Window used in reconstruction, string.
+            start:           Starting point of reconstructed data.
+            n_used:          Number of reconstructed points.
+        Keywords:
+            Normalize: Parameter for normalizing the complex transmittance by
+                the window function that is used. Default is True. Set to False
+                to skip this feature.
+        Output:
+            T_vals  - Reconstructed Complex transmittance.
+        History:
+            Translated from IDL: RJM - 2018/05/16 6:26 A.M.
+    """
+    # Compute necessary variables.
+    kD_vals   = 2.0*np.pi*D_vals/lambda_vals
+    # Define functions
+    fw        = func_dict[wtype]["func"]
+    nrm       = normalize
+    if fft:
+       finv   = fresnel_inverse_fft
+    else: 
+        finv  = fresnel_inverse
+    # Calculate the corrected complex amplitude, point by point
+    T_vals    = T_hat_vals * 0.0
+    w_init    = w_vals[start]
+    w_func    = fw(w_init,dx)
+    nw        = np.size(w_func)
+    crange    = np.arange(int(start-(nw-1)/2),int(1+start+(nw-1)/2))
+    phi_s_rad1 = phi_rad_vals[start]
+    if psitype == 'taylor2':
+        for i in np.arange(n_used):
+            center      = start+i
+            r0          = rho_vals[center]
+            w           = w_vals[center]
+            w_func      = fw(w,dx,error_check=False)
+            nw          = np.size(w_func)
+            crange      = np.arange(int(center-(nw-1)/2),int(1+center+(nw-1)/2))
+            r           = rho_vals[crange]
+            F           = F_vals[center]
+            x           = (r-r0)/F
+            psi_vals    = (np.pi/2.0)*x*x
+            ker         = w_func*np.exp(-1j*psi_vals)
+            T_hat       = T_hat_vals[crange]
+            
+            T_vals[center] = finv(T_hat,ker,dx,F)
+            if norm:T_vals[center] *= nrm(r,w_func,F,error_check=False)
+            if verbose:
+                print("Pt: %d  Tot: %d  Width: %d  Inversion"\
+                % (i,n_used,nw),end="\r")
+    elif (psitype == 'mtr2') or (psitype == 'mtr3') or (psitype == 'mtr4'):
+        for i in np.arange(n_used):
+            center = start+i
+            r0     = rho_vals[center]
+            d      = D_vals[center]
+            b      = B_vals[center]
+            phi0   = phi_rad_vals[center]
+            kD     = kD_vals[center]
+            w      = w_vals[center]
+            F      = F_vals[center]
+            if (np.abs(w_init - w)>= 2.0*dx):
+                w_init     = w
+                w_func     = fw(w,dx,error_check=False)
+                nw         = np.size(w_func)
+                crange     = np.arange(int(center-(nw-1)/2),int(1+center+(nw-1)/2))
+                r          = rho_vals[crange]
+                dphi_s_rad = psi_factor(r,r0,b,phi0,error_check=False)
+                phi_s_rad  = phi_rad_vals[center] - dphi_s_rad
+            else:
+                crange    += 1
+                r          = rho_vals[crange]
+                phi_s_rad  = phi_s_rad1
+                psi_d1     = psi_d1_phi(r,r0,d,b,phi_s_rad,phi0,error_check=False)
+                psi_d2     = psi_d2_phi(r,r0,d,b,phi_s_rad,phi0,error_check=False)
+                dphi_s_rad = -psi_d1 / psi_d2
+                phi_s_rad += dphi_s_rad
+            loop = 0
+            # Perform Newton-Raphson on phi.
+            while (np.max(np.abs(dphi_s_rad)) > 1.e-8):
+                psi_d1     = psi_d1_phi(r,r0,d,b,phi_s_rad,phi0,error_check=False)
+                psi_d2     = psi_d2_phi(r,r0,d,b,phi_s_rad,phi0,error_check=False)
+                dphi_s_rad = -psi_d1 / psi_d2
+                phi_s_rad += dphi_s_rad
+                loop      += 1
+                if loop > 5:
+                    break
+            phi_s_rad1 = phi_s_rad
+
+            # Compute psi and then compute averages and differences across psi.
+            psi_full   = kD * psi(r,r0,d,b,phi_s_rad,phi0,error_check=True)
+            n1         = 0                                 #Left Endpoint
+            n2         = np.min((r0-w/4<=r).nonzero())     #Left midpoint
+            n3         = np.max((r0+w/4>=r).nonzero())     #Right midpoint
+            n4         = nw-1                              #Right endpoint
+            d_psi_half = psi_full[n3]-psi_full[n2]         #Midpoint difference
+            d_psi_full = psi_full[n4] - psi_full[n1]       #Endpoint difference
+            a_psi_half = (psi_full[n3]+psi_full[n2])/2     #Midpoint average
+            a_psi_full = (psi_full[n1]+psi_full[n4])/2     #Endpoint average
+            x          = (r-r0)
+            w          = np.max(x)-np.min(x)
+
+            #Compute coefficients for the polynomial expansion
+            c1  = (8.0*d_psi_half-d_psi_full)/(3.0*w)           #Linear term
+            c2  = 4.0*(16.0*a_psi_half-a_psi_full)/(3.0*w*w)    #Quadratic term
+            c3  = 16.0*(d_psi_full-2.0*d_psi_half)/(3.0*w*w*w)  #Cubic term
+            c4  = 64.0*(a_psi_full-4.0*a_psi_half)/(3.0*w*w*w*w)#Quartic term
+
+            psi_vals = c1*x + c2*x*x        #Second order appoximation
+            if (psitype == 'mtr3'):
+                psi_vals += c3*x*x*x        #Third order approximation
+            if psitype == 'mtr4':
+                psi_vals += (c3+c4*x)*x*x*x #Fourth order approximation
+
+            ker      = w_func*np.exp(-1j*psi_vals)
+            T_hat    = T_hat_vals[crange]
+            
+            T_vals[center] = finv(T_hat,ker,dx,F)
+            if norm:T_vals[center] *= nrm(r,w_func,F,error_check=False)
+            if verbose:
+                print("Pt: %d  Tot: %d  Width: %d  Psi Iters: %d  Inversion"\
+                % (i,n_used,nw,loop),end="\r")
+    elif psitype == 'full':
+        for i in np.arange(n_used):
+            center = start+i
+            r0     = rho_vals[center]
+            d      = D_vals[center]
+            b      = B_vals[center]
+            phi0   = phi_rad_vals[center]
+            kD     = kD_vals[center]
+            w      = w_vals[center]
+            F      = F_vals[center]
+            if (np.abs(w_init - w)>= 2.0*dx):
+                w_init     = w
+                w_func     = fw(w,dx,error_check=False)
+                nw         = np.size(w_func)
+                crange     = np.arange(int(center-(nw-1)/2),int(1+center+(nw-1)/2))
+                r          = rho_vals[crange]
+                dphi_s_rad = psi_factor(r,r0,b,phi0,error_check=False)
+                phi_s_rad  = phi_rad_vals[center] - dphi_s_rad
+            else:
+                crange    += 1
+                r          = rho_vals[crange]
+                phi_s_rad  = phi_s_rad1
+                psi_d1     = psi_d1_phi(r,r0,d,b,phi_s_rad,phi0,error_check=False)
+                psi_d2     = psi_d2_phi(r,r0,d,b,phi_s_rad,phi0,error_check=False)
+                dphi_s_rad = -psi_d1 / psi_d2
+                phi_s_rad += dphi_s_rad
+            loop = 0
+            # Perform Newton-Raphson on phi.
+            while (np.max(np.abs(dphi_s_rad)) > 1.e-10):
+                psi_d1     = psi_d1_phi(r,r0,d,b,phi_s_rad,phi0,error_check=False)
+                psi_d2     = psi_d2_phi(r,r0,d,b,phi_s_rad,phi0,error_check=False)
+                dphi_s_rad = -psi_d1 / psi_d2
+                phi_s_rad += dphi_s_rad
+                loop      += 1
+                if loop > 5:
+                    break
+            phi_s_rad1 = phi_s_rad
+
+            # Compute psi and then compute averages and differences across psi.
+            psi_vals = kD * psi(r,r0,d,b,phi_s_rad,phi0,error_check=True)
+            ker      = w_func*np.exp(-1j*psi_vals)
+            T_hat    = T_hat_vals[crange]
+            
+            T_vals[center] = finv(T_hat,ker,dx,F)
+            if norm:
+                T_vals[center] *= nrm(r,psi_vals,w_func,F,error_check=False)
+            if verbose:
+                print("Pt: %d  Tot: %d  Width: %d  Psi Iters: %d  Inversion"\
+                % (i,n_used,nw,loop),end="\r")
+    else: raise TypeError("Illegal psitype: %s" % psitype)
     return T_vals
 
 class rec_data(object):
@@ -2378,7 +2232,11 @@ class diffraction_correction(object):
             self.w_km_vals,self.dx_km,wtype,self.start,self.n_used,
             norm=norm,fft=fft,verbose=verbose,psitype=psitype)
         if self.fwd:
-            self.T_hat_fwd_vals  = self.__ffwd_n_v()
+            self.T_hat_fwd_vals = fresnel_forward(self.rho_km_vals,
+                self.F_km_vals,self.phi_rad_vals,self.B_rad_vals,
+                self.D_km_vals,self.T_vals,self.lambda_sky_km_vals,
+                self.w_km_vals,self.dx_km,wtype,self.start,self.n_used,
+                norm=norm,fft=fft,verbose=verbose,psitype=psitype)
             self.p_norm_fwd_vals = power_func(self.T_hat_fwd_vals)
             self.phase_fwd_vals  = phase_func(self.T_hat_fwd_vals)
 
@@ -2499,350 +2357,3 @@ class diffraction_correction(object):
                 "Psi Approximation"             : self.psitype},
         }
         return tau_hist
-
-class compare_tau(object):
-    def __init__(self,geodata,caldata,dlpdata,taudata,res,occ=False,
-        rng='all',wtype="kb25",bfac=True,fft=False,verbose=True,
-        norm=True):
-        data    = extract_csv_data(geodata,caldata,dlpdata,
-            occ=occ,taudata=taudata,verbose=verbose)
-        
-        tau_power   = data.power_vals
-        tau_phase   = data.phase_vals
-        tau_tau     = data.tau_vals
-        rec         = diffraction_correction(data,res,rng=rng,bfac=bfac,
-            wtype=wtype,fft=fft,verbose=verbose,norm=norm)
-        tr          = data.tau_rho
-        rho_km_vals = rec.rho_km_vals
-        tau_rmin    = np.min(tr)
-        tau_rmax    = np.max(tr)
-        tau_rstart  = int(np.min((rho_km_vals-rmin>=0).nonzero()))
-        tau_rfin    = int(np.max((rmax-rho_km_vals>=0).nonzero()))
-        rmin        = np.min(rho_km_vals)
-        rmax        = np.max(rho_km_vals)
-        rstart      = int(np.min((tr-rmin>=0).nonzero()))
-        rfin        = int(np.max((rmax-tr>=0).nonzero()))
-
-        self.rho_km_vals = rec.rho_km_vals[rstart:rfin+1]
-        self.power_vals  = rec.power_vals[rstart:rfin+1]
-        self.tau_vals    = rec.tau_vals[rstart:rfin+1]
-        self.phase_vals  = rec.phase_vals[rstart:rfin+1]
-        self.tau_power   = tau_power[tau_rstart:tau_rfin+1]
-        self.tau_tau     = tau_tau[tau_rstart:tau_rfin+1]
-        self.tau_phase   = tau_phase[tau_rstart:tau_rfin+1]
-        self.wtype       = wtype
-        self.res         = res
-
-class find_optimal_resolution(object):
-    def __init__(self,geo,cal,dlp,tau,occ,sres,dres,nres,
-        rng='all',wlst=['kb25'],verbose=True):
-        self.linfint = None
-        self.l2int   = None
-        self.linffft = None
-        self.l2fft   = None
-
-        nwins   = np.size(wlst)
-        linfint = np.zeros((nwins,nres))
-        l2int   = np.zeros((nwins,nres))
-        linffft = np.zeros((nwins,nres))
-        l2fft   = np.zeros((nwins,nres))
-        resint  = np.zeros((nwins))
-        resfft  = np.zeros((nwins))
-        eres    = sres + (nres-1)*dres
-
-        res         = sres
-        data        = extract_csv_data(geo,cal,dlp,occ,taudata=tau,verbose=verbose)
-        tr          = data.tau_rho
-        tau_power   = data.power_vals
-        rec         = diffraction_correction(data,res,rng=rng,wtype="kb35",verbose=False)
-        rho_km_vals = rec.rho_km_vals
-        power_vals  = rec.power_vals
-        rmin        = np.min(rho_km_vals)
-        rmax        = np.max(rho_km_vals)
-        rstart      = int(np.min((tr-rmin>=0).nonzero()))
-        rfin        = int(np.max((rmax-tr>=0).nonzero()))
-        tau_power   = tau_power[rstart:rfin+1]
-        sys.stdout.write("\033[K")
-        for i in np.arange(nres):
-            for j in range(nwins):
-                wtype        = wlst[j]       
-                recint       = diffraction_correction(data,res,rng=rng,wtype=wtype,fft=False)
-                p_int        = recint.power_vals
-                linf         = np.max(np.abs(p_int - tau_power))
-                l2           = np.sqrt(np.sum(np.abs(p_int-tau_power)**2)*recint.dx_km)
-                linfint[j,i] = linf
-                l2int[j,i]   = l2
-
-                recfft       = diffraction_correction(data,res,rng=rng,wtype=wtype,fft=True)
-                p_fft        = recfft.power_vals
-                linf         = np.max(np.abs(p_fft - tau_power))
-                l2           = np.sqrt(np.sum(np.abs(p_fft-tau_power)**2)*recint.dx_km)
-                linffft[j,i] = linf
-                l2fft[j,i]   = l2
-                sys.stdout.write("\033[K")
-                if verbose:
-                    printmes = ('Res:',res,'Max:',eres,"WTYPE:",wtype)
-                    print("%s %f %s %f %s %s" % printmes)
-            res += dres
-        for j in range(nwins):
-            resint[j] = sres+dres*np.min((linfint[j,...] == np.min(linfint[j,...])).nonzero())
-            resfft[j] = sres+dres*np.min((linffft[j,...] == np.min(linffft[j,...])).nonzero())
-        self.linfint = linfint
-        self.l2int   = l2int
-        self.linffft = linffft
-        self.l2fft   = l2fft
-        self.resint  = resint
-        self.resfft  = resfft
-
-class delta_impulse_diffraction(object):
-    def __init__(self,geo,lambda_km,res,rho,dx_km_desired=0.25,
-        occ=False,wtype='kb25',fwd=False,norm=True,bfac=True,
-        verbose=True,fft=False,psitype='full',usefres=False):
-    
-        data = get_geo(geo,verbose=verbose)
-        self.__retrieve_variables(data,verbose)
-        self.__compute_variables(dx_km_desired,occ,verbose)
-        self.__interpolate_variables(verbose)
-
-        r0       = self.rho_km_vals
-        b        = self.B_rad_vals
-        d        = self.D_km_vals
-        phi      = self.phi_rad_vals
-        rng      = [rho-10.0*res,rho+10.0*res]
-        nstar    = np.min((r0-rho>=0).nonzero())
-        r        = r0[nstar]
-        phistar  = phi[nstar]
-        F        = fresnel_scale(lambda_km,d,phi,b)
-
-        if not check_boole(fwd):
-            raise TypeError("fwd must be Boolean: True/False")
-        if not check_boole(norm):
-            raise TypeError("norm must be Boolean: True/False")
-        if not check_boole(bfac):
-            raise TypeError("bfac must be Boolean: True/False")
-        if not check_boole(fft):
-            raise TypeError("fft must be Boolean: True/False")
-        if not check_boole(verbose):
-            raise TypeError("verbose must be Boolean: True/False")
-        if not check_boole(usefres):
-            raise TypeError("usefres must be Boolean: True/False")
-        if (type(psitype) != type("Hi!")):
-            raise TypeError("psitype must be a string: 'taylor', 'full', etc.")
-
-        if (usefres == True):
-            psi_vals = (np.pi/2.0)*((r0-r)/F)*((r0-r)/F)
-        else:
-            kD          = 2.0 * np.pi * d[nstar] / lambda_km
-            dphi_s_rad  = psi_factor(r0,r,b,phi)
-            phi_s_rad   = phi - dphi_s_rad
-            cb          = np.cos(b)
-            cp0         = np.cos(phi)
-            sp0         = np.sin(phi)
-            cp          = np.cos(phi_s_rad)
-            sp          = np.sin(phi_s_rad)
-            d2          = d*d
-            r2          = r*r
-            r02         = r0*r0
-
-            loop        = 0
-            dphi_s_rad1 = dphi_s_rad  
-            dphi_s_rad  = 0
-
-            # Perform Newton-Raphson on phi.
-            while (np.max(np.abs(dphi_s_rad)) > 1.e-8):
-                xi         = (cb / d) * (r0*cp0 - r*cp)
-                eta        = (r02 + r2 - 2.0*r*r0*(sp*sp0 + cp*cp0)) / d2
-                v1         = r * cb * sp / d
-                v2         = 2.0 * r * r0 * (sp*cp0 - sp0*cp) / (d2)
-                v3         = 2.0*v1 + v2
-                v4         = np.sqrt(1.0 + 2.0*xi + eta)
-                v5         = r * cb * cp / d
-                v6         = 2.0 * r * r0 * (sp*sp0 + cp*cp0) / d2
-                dphia      = (2.0*v5 + v6)/(2.0 * v4)
-                dphib      = v5 + (2.0*v1 + v2)*(2.0*v1 + v2)/(4.0*(v4*v4*v4))
-                psi_d1     = v3 / (2.0 * v4) - v1
-                psi_d2     = dphia - dphib
-                dphi_s_rad = -psi_d1 / psi_d2
-                phi_s_rad += dphi_s_rad
-                cp         = np.cos(phi_s_rad)
-                sp         = np.sin(phi_s_rad)
-                loop      += 1
-                if loop > 5:
-                    break
-                if verbose: print("Psi Iter: %d" % loop)
-            psi_vals = kD * psi_fast(r,r0,d,cb,cp,sp,cp0,sp0)
-
-        T_hat_vals     = (1.0-1.0j)*np.exp(1j*psi_vals)/(2.0*F)
-        p_norm_vals    = np.abs(T_hat_vals)*np.abs(T_hat_vals)
-        phase_rad_vals = -np.arctan2(np.imag(T_hat_vals),np.real(T_hat_vals))
-
-        lambda_vals         = np.zeros(np.size(self.rho_km_vals))+lambda_km
-        self.p_norm_vals    = p_norm_vals
-        self.phase_rad_vals = phase_rad_vals
-        self.f_sky_hz_vals  = freq_wav(lambda_vals)
-        self.nstar          = nstar
-        self.history        = "Bob"
-
-        data = self
-
-        recdata = diffraction_correction(data,res,rng=rng,
-            wtype=wtype,fwd=fwd,norm=norm,verbose=verbose,
-            bfac=bfac,fft=fft,psitype=psitype)
-
-        self.rho_star           = rho
-        self.rho_km_vals        = recdata.rho_km_vals
-        self.p_norm_vals        = recdata.p_norm_vals
-        self.phase_rad_vals     = recdata.phase_rad_vals
-        self.B_rad_vals         = recdata.B_rad_vals
-        self.D_km_vals          = recdata.D_km_vals
-        self.f_sky_hz_vals      = recdata.f_sky_hz_vals
-        self.phi_rad_vals       = recdata.phi_rad_vals
-        self.rho_dot_kms_vals   = recdata.rho_dot_kms_vals
-        self.T_hat_vals         = recdata.T_hat_vals
-        self.res                = recdata.res
-        self.wtype              = recdata.wtype
-        self.rng                = recdata.rng
-        self.F_km_vals          = recdata.F_km_vals
-        self.w_km_vals          = recdata.w_km_vals
-        self.mu_vals            = recdata.mu_vals
-        self.lambda_sky_km_vals = recdata.lambda_sky_km_vals
-        self.dx_km              = recdata.dx_km
-        self.norm_eq            = recdata.norm_eq
-        self.n_used             = recdata.n_used
-        self.start              = recdata.start
-        self.T_vals             = recdata.T_vals
-        self.power_vals         = recdata.power_vals
-        self.tau_vals           = recdata.tau_vals
-        self.phase_vals         = recdata.phase_vals
-        self.p_norm_fwd_vals    = None
-        self.T_hat_fwd_vals     = None
-        self.phase_fwd_vals     = None
-        self.norm               = recdata.norm
-        self.fwd                = recdata.fwd
-        self.fft                = recdata.fft
-
-    def __retrieve_variables(self,geo_dat,verbose):
-        if verbose: print("Retrieving Variables...")
-        geo_rho = np.array(geo_dat.rho_km_vals)
-        rhotype = check_real(geo_rho)
-        if not rhotype:
-            raise TypeError("Bad GEO: rho_km_vals not real valued.")
-        elif (np.min(geo_rho) < 0.0):
-            raise ValueError("Bad GEO: rho_km_vals has negative values.")
-        else: del rhotype
-
-        geo_D   = np.array(geo_dat.D_km_vals)
-        Dtype   = check_real(geo_D)
-        if not Dtype:
-            raise TypeError("Bad GEO: D_km_vals not real valued.")
-        elif (np.min(geo_D) < 0.0):
-            raise ValueError("Bad GEO: D_km_vals has negative values.")
-        else: del Dtype
-
-        geo_drho    = np.array(geo_dat.rho_dot_kms_vals)
-        drhotype    = check_real(geo_drho)
-        if not drhotype:
-            raise TypeError("Bad GEO: rho_dot_kms_vals not real valued.")
-        else: del drhotype
-
-        geo_phi = np.array(geo_dat.phi_ora_deg_vals)
-        phitype = check_real(geo_phi)
-        if not phitype:
-            raise TypeError("Bad GEO: phi_deg_ora_vals not real valued.")
-        elif (np.max(np.abs(geo_phi)) > 360.0):
-            raise ValueError("Bad GEO: phi_deg_ora_vals > 360")
-        else: del phitype
-
-        geo_B = np.array(geo_dat.B_deg_vals)
-        Btype = check_real(geo_B)
-        if not Btype:
-            raise TypeError("Bad GEO: B_deg_vals not real valued.")
-        elif (np.max(np.abs(geo_B)) > 360.0):
-            raise ValueError("Bad GEO: B_de2g_vals > 360")
-        else: del Btype
-
-        self.geo_rho    = geo_rho
-        self.geo_D      = geo_D
-        self.geo_drho   = geo_drho
-        self.geo_phi    = geo_phi
-        self.geo_B      = geo_B
-
-    def __compute_variables(self,dx_km_desired,occ,verbose):
-        if verbose: print("Computing Variables...")
-        geo_drho        = self.geo_drho
-
-        if (occ == 'ingress'):  crange = (geo_drho < 0.0).nonzero()
-        elif (occ == 'egress'): crange = (geo_drho > 0.0).nonzero()
-        else:
-            crange_e = (geo_drho > 0.0).nonzero()
-            crange_i = (geo_drho < 0.0).nonzero()
-            n_e      = np.size(crange_e)
-            n_i      = np.size(crange_i)
-            if (n_e != 0) and (n_i !=0):
-                raise ValueError(
-                    "rho_dot_kms_vals has positive and negative values.\
-                    This is likely a chord occultation. Set occ='ingress'\
-                    to examine the ingress portion, and occ='egress'\
-                    for the egress porition.")
-            elif (n_e == 0) and (n_i == 0):
-                raise ValueError("rho_dot_kms_vals is either empty or zero.")
-            elif (n_e != 0) and (n_i == 0):
-                crange = crange_e
-                occ    = 'egress'
-            elif (n_e == 0) and (n_i != 0):
-                crange = crange_i
-                occ    = 'ingress'
-            else: raise TypeError("Bad Input: GEO DATA")
-            del n_e, n_i, crange_e, crange_i
-
-        if (np.size(crange) == 0):
-            if (occ == 'ingress'):
-                mes = "rho_dot_kms_vals is never negative."
-            elif (occ == 'egress'):
-                mes = "rho_dot_kms_vals is never positive."
-            else: raise ValueError("Bad occ input: Set 'egress' or 'ingress'")
-            raise ValueError("Bad occ Input: '%s': %s" % (occ,mes))
-
-        geo_rho             = self.geo_rho[crange]
-        geo_D               = self.geo_D[crange]
-        geo_drho            = self.geo_drho[crange]
-        geo_phi             = self.geo_phi[crange]
-        geo_B               = self.geo_B[crange]
-        rmin                = np.min(geo_rho)
-        rmax                = np.max(geo_rho)
-        rho_km_vals         = np.arange(rmin,rmax,dx_km_desired)
-        self.rho_km_vals    = rho_km_vals
-        self.geo_rho        = geo_rho
-        self.geo_D          = geo_D
-        self.geo_drho       = geo_drho
-        self.geo_phi        = geo_phi
-        self.geo_B          = geo_B
-        del rmin,rmax,geo_rho,geo_D,geo_drho,geo_phi,geo_B,rho_km_vals
-
-    def __interpolate_variables(self,verbose):
-        if verbose: print("Interpolating Data...")
-        rho_km_vals      = self.rho_km_vals
-        geo_rho          = self.geo_rho
-        geo_drho         = self.geo_drho
-        geo_D            = self.geo_D
-        geo_phi          = self.geo_phi
-        geo_B            = self.geo_B
-        D_km_interp      = interpolate.interp1d(geo_rho,geo_D,kind='linear')
-        D_km_vals        = D_km_interp(rho_km_vals)
-        rho_dot_interp   = interpolate.interp1d(geo_rho,geo_drho,kind='linear')
-        rho_dot_kms_vals = rho_dot_interp(rho_km_vals)
-        phi_deg_interp   = interpolate.interp1d(geo_rho,geo_phi,kind='linear')
-        phi_deg_vals     = phi_deg_interp(rho_km_vals)
-        B_deg_interp     = interpolate.interp1d(geo_rho,geo_B,kind='linear')
-        B_deg_vals       = B_deg_interp(rho_km_vals)
-        phi_rad_vals     = np.deg2rad(phi_deg_vals)
-        B_rad_vals       = np.deg2rad(B_deg_vals)
-
-        del geo_rho,geo_drho,geo_D,geo_phi,geo_B,D_km_interp,rho_dot_interp
-        del phi_deg_vals,phi_deg_interp,B_deg_interp,B_deg_vals
-        
-        self.rho_km_vals      = rho_km_vals
-        self.phi_rad_vals     = phi_rad_vals
-        self.B_rad_vals       = B_rad_vals
-        self.D_km_vals        = D_km_vals
-        self.rho_dot_kms_vals = rho_dot_kms_vals

@@ -291,6 +291,7 @@ class diffraction_correction(object):
         self.p_norm_fwd_vals    = None  # Forward Power
         self.T_hat_fwd_vals     = None  # Forward Transmittance
         self.phase_fwd_vals     = None  # Forward Phase
+        self.verbose            = None  # Use of verbose (Boolean)
         self.norm               = None  # Normalization (Boolean)
         self.fwd                = None  # Forward (Boolean)
         self.fft                = None  # Use of FFT's (Boolean)
@@ -304,6 +305,7 @@ class diffraction_correction(object):
         self.wtype      = wtype         # Window Type (String)
         self.rngreq     = rng           # Requested Range
         self.norm       = norm          # Normalization (Boolean)
+        self.verbose    = verbose       # Use of verbose (Boolean)
         self.fwd        = fwd           # Forward (Boolean)
         self.fft        = fft           # Use of FFT's (Boolean)
         self.bfac       = bfac          # Use of b factor (Boolean)
@@ -335,18 +337,17 @@ class diffraction_correction(object):
         # Remove rec_data instance and keywords for memory and clarity.
         del recdata
 
+        # From the requested range, extract array of the form [a,b]
         if (type(rng) == type('Hello')):
-            reg = rng.replace(" ","").lower()
-            if (reg in region_dict):
-                self.rng = np.array(region_dict[reg])
+            rng = rng.replace(" ","").lower()
+            if (rng in region_dict): self.rng = np.array(region_dict[rng])
             else:
-                print("Illegal range request.\nAllowed strings are:")
-                for key in region_dict: print(key)
-                raise ValueError("Illegal String. See list for valid strings.")
-        elif (np.size(self.rngreq) < 2):
+                erm = ""
+                for key in region_dict: erm = "%s%s\n" % (erm,key)
+                raise ValueError("Illegal Range. Allowed Strings:\n%s"%erm)
+        elif (np.size(rng) < 2):
             raise TypeError("Only one value given for range. Use rng = [a,b]")
-        else:
-            self.rng = np.array([np.min(self.rngreq),np.max(self.rngreq)])
+        else:   self.rng = np.array([np.min(rng),np.max(rng)])
 
         # Compute the starting point and the number of points used.
         rho         = self.rho_km_vals          # Ring radius.
@@ -360,7 +361,7 @@ class diffraction_correction(object):
         rho_start   = rho[np.min((rho >= np.min(self.rng)).nonzero())]
         rho_end     = rho[np.max((rho <= np.max(self.rng)).nonzero())]
 
-        # Compute the start and endpoint of reconstruction.
+        # Compute the start and end point for reconstruction.
         rho_min     = np.max([rho_min_lim,rho_start])
         rho_max     = np.min([rho_max_lim,rho_end])
         self.start  = int(np.min((rho >= rho_min).nonzero()))
@@ -368,13 +369,12 @@ class diffraction_correction(object):
         self.n_used = 1 + (self.finish - self.start)
 
         # Delete unnecessary variables for clarity and memory.
-        del rho,w_max,rho_min_lim,rho_max_lim,rho_start,rho_end,rho_min,rho_max
+        del rho,w_max,rho_min_lim,rho_max_lim,rho_start,rho_end
+        del rho_min,rho_max,rng,norm,fwd,fft,bfac,psitype,verbose
 
         #self.__trim_inputs()
-
-        if verbose: self.T_vals = self.__finv_v()
-        else: self.T_vals = self.__finv()
-        if fwd:
+        self.T_vals = self.__finv()
+        if self.fwd:
             if norm: self.T_hat_fwd_vals = self.__ffwd_n_v()
             else:    self.T_hat_fwd_vals = self.__ffwd_v()
             self.p_norm_fwd_vals = power_func(self.T_hat_fwd_vals)
@@ -387,9 +387,7 @@ class diffraction_correction(object):
         tau[crange]     = -self.mu_vals[crange] * np.log(np.abs(self.power_vals[crange]))
         self.tau_vals   = tau
 
-        self.__trim_attributes(fwd)
-
-        del fwd, verbose, psitype, norm
+        self.__trim_attributes(self.fwd)
 
         self.history = self.__write_hist_dict()
 
@@ -528,6 +526,13 @@ class diffraction_correction(object):
     def __normalize_do_nothing(self,x,y,z):
         return 1
 
+    def __verbose_print(self,i,n_used,nw,loop):
+        print("Pt: %d  Tot: %d  Width: %d  Psi Iters: %d  Fast Inversion" \
+            % (i,n_used,nw,loop),end="\r")
+    
+    def __verbose_do_nothing(self,i,n_used,nw,loop):
+        pass
+
     __func_dict = {
         "__rect" : {"func" : __rect, "normeq" : 1.00000000},
         "__coss" : {"func" : __coss, "normeq" : 1.50000000},
@@ -549,6 +554,7 @@ class diffraction_correction(object):
         T_hat_vals      = self.T_hat_vals
         F_vals          = self.F_km_vals
         fft             = self.fft
+        verbose         = self.verbose
         wtype           = "%s%s" % ("__",self.wtype)
         start           = self.start
         n_used          = self.n_used
@@ -568,6 +574,8 @@ class diffraction_correction(object):
         else:           finv    = self.__fresinv
         if self.norm:   nrm     = self.__normalize
         else:           nrm     = self.__normalize_do_nothing
+        if verbose:     vrb     = self.__verbose_print
+        else:           vrb     = self.__verbose_do_nothing
         # Calculate the corrected complex amplitude, point by point
         T_vals     = T_hat_vals * 0.0
         w_init     = w_vals[start]
@@ -656,128 +664,7 @@ class diffraction_correction(object):
             
             T_vals[center]   = finv(T_hat,ker,dx,F)
             T_vals[center]  *= nrm(r,w_func,F)
-        return T_vals
-
-    def __finv_v(self):
-        # Retrieve variables.
-        w_vals          = self.w_km_vals
-        rho_vals        = self.rho_km_vals
-        phi_rad_vals    = self.phi_rad_vals
-        d_vals          = self.D_km_vals
-        B_rad_vals      = self.B_rad_vals
-        lambda_vals     = self.lambda_sky_km_vals
-        T_hat_vals      = self.T_hat_vals
-        F_vals          = self.F_km_vals
-        fft             = self.fft
-        wtype           = "%s%s" % ("__",self.wtype)
-        start           = self.start
-        n_used          = self.n_used
-        dx              = self.dx_km
-        # Compute necessary variables.
-        kD_vals         = 2.0 * np.pi * d_vals / lambda_vals
-        cosb            = np.cos(B_rad_vals)
-        cosb_D          = cosb/d_vals
-        cosb2           = cosb*cosb
-        cosphi0         = np.cos(phi_rad_vals)
-        sinphi0         = np.sin(phi_rad_vals)
-        dsq             = d_vals*d_vals
-        rsq             = rho_vals*rho_vals
-        # Define functions
-        fw              = self.__func_dict[wtype]["func"]
-        if fft:         finv    = self.__fresinvfft
-        else:           finv    = self.__fresinv
-        if self.norm:   nrm     = self.__normalize
-        else:           nrm     = self.__normalize_do_nothing
-        # Calculate the corrected complex amplitude, point by point
-        T_vals     = T_hat_vals * 0.0
-        w_init     = w_vals[start]
-        w_func     = fw(w_init,dx)
-        nw         = np.size(w_func)
-        crange     = np.arange(int(start-(nw-1)/2),int(1+start+(nw-1)/2))-1
-        phi_s_rad1 = phi_rad_vals[start]
-        for i in np.arange(n_used):
-            center = start+i
-            r0     = rho_vals[center]
-            r02    = rsq[center]
-            d2     = dsq[center]
-            cb_d   = cosb_D[center]
-            cb2    = cosb2[center]
-            cp0    = cosphi0[center]
-            sp0    = sinphi0[center]
-            kD     = kD_vals[center]
-            w      = w_vals[center]
-            if (w_init - w>= 2.0*dx):
-                w_init     = w
-                w_func     = fw(w,dx)
-                nw         = np.size(w_func)
-                crange     = np.arange(int(center-(nw-1)/2),int(1+center+(nw-1)/2))
-                r          = rho_vals[crange]
-                r2         = rsq[crange]
-                dphi_s_rad = ((cb2)*cp0*sp0/(1.0-(cb2) * (sp0*sp0))) * (r - r0) / r0
-                phi_s_rad  = phi_rad_vals[center] - dphi_s_rad
-                cp         = np.cos(phi_s_rad)
-                sp         = np.sin(phi_s_rad)
-            else:
-                crange    +=1
-                r          = rho_vals[crange]
-                r2         = rsq[crange]
-                phi_s_rad  = phi_s_rad1
-                cp         = np.cos(phi_s_rad)
-                sp         = np.sin(phi_s_rad)
-                xi         = (cb_d) * (r0*cp0 - r*cp)
-                eta        = (r02 + r2 - 2.0*r*r0*(sp*sp0 + cp*cp0)) / d2
-                v1         = r * cb_d * sp
-                v2         = 2.0 * r * r0 * (sp*cp0 - sp0*cp) / d2
-                v3         = 2.0*v1 + v2
-                v4         = np.sqrt(1.0 + 2.0*xi + eta)
-                v5         = r * cb_d * cp
-                v6         = 2.0 * r * r0 * (sp*sp0 + cp*cp0) / d2
-                dphia      = (2.0*v5 + v6)/(2.0 * v4)
-                dphib      = v5 + (2.0*v1 + v2)*(2.0*v1 + v2)/(4.0*(v4*v4*v4))
-                psi_d1     = v3 / (2.0 * v4) - v1
-                psi_d2     = dphia - dphib
-                dphi_s_rad = -psi_d1 / psi_d2
-                phi_s_rad += dphi_s_rad
-                cp         = np.cos(phi_s_rad)
-                sp         = np.sin(phi_s_rad)
-
-            loop = 0
-
-            # Perform Newton-Raphson on phi.
-            while (np.max(np.abs(dphi_s_rad)) > 1.e-8):
-                xi         = (cb_d) * (r0*cp0 - r*cp)
-                eta        = (r02 + r2 - 2.0*r*r0*(sp*sp0 + cp*cp0)) / d2
-                v1         = r * cb_d * sp
-                v2         = 2.0 * r * r0 * (sp*cp0 - sp0*cp) / d2
-                v3         = 2.0*v1 + v2
-                v4         = np.sqrt(1.0 + 2.0*xi + eta)
-                v5         = r * cb_d * cp
-                v6         = 2.0 * r * r0 * (sp*sp0 + cp*cp0) / d2
-                dphia      = (2.0*v5 + v6)/(2.0 * v4)
-                dphib      = v5 + (2.0*v1 + v2)*(2.0*v1 + v2)/(4.0*(v4*v4*v4))
-                psi_d1     = v3 / (2.0 * v4) - v1
-                psi_d2     = dphia - dphib
-                dphi_s_rad = -psi_d1 / psi_d2
-                phi_s_rad += dphi_s_rad
-                cp         = np.cos(phi_s_rad)
-                sp         = np.sin(phi_s_rad)
-                loop      += 1
-                if loop > 5:
-                    break
-            phi_s_rad1 = phi_s_rad
-            
-            # Compute psi and then compute the forward model.
-            xi       = (cb_d) * (r0*cp0 - r*cp)
-            eta      = ((r0*r0) + (r*r) - 2.0 * r * r0 * (sp*sp0 + cp*cp0)) / d2
-            psi_vals = kD * (np.sqrt(1.0 + 2.0 * xi + eta) - (1.0 + xi))
-            F        = F_vals[center]
-            ker      = w_func*np.exp(-1j*psi_vals)
-            T_hat    = T_hat_vals[crange]
-            
-            T_vals[center]   = finv(T_hat,ker,dx,F)
-            T_vals[center]  *= nrm(r,w_func,F)
-            print("Pt: %d  Tot: %d  Width: %d  Psi Iters: %d  Fast Inversion" \
-            % (i,n_used,nw,loop),end="\r")
+            vrb(i,n_used,nw,loop)
         return T_vals
 
     def __write_hist_dict(self):

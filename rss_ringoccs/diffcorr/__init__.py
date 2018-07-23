@@ -59,4 +59,12 @@
 
 try:from .advanced_tools import *
 except ModuleNotFoundError:pass
+try:from .misc_functions import *
+except ModuleNotFoundError:pass
+try:from .physic_functions import *
+except ModuleNotFoundError:pass
+try:from .special_functions import *
+except ModuleNotFoundError:pass
+try:from .window_functions import *
+except ModuleNotFoundError:pass
 from .diffcorr import *

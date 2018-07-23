@@ -10,6 +10,7 @@
         the main functions also exist, as well as functions that
         enable running shell scripts in Python.
 """
+
 # Import dependencies for the diffcorr module
 import time,os,platform
 import numpy as np

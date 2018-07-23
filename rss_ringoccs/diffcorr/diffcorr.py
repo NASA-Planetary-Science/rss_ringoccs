@@ -49,7 +49,7 @@
                             request, and a window width, compute the
                             allowed range of processing.
 """
-# Import dependencies for the diffcorrpy module
+# Import dependencies for the diffcorr module
 import time,os,sys,platform
 import numpy as np
 from scipy.special import lambertw, iv
@@ -208,7 +208,7 @@ class rec_data(object):
         sp                      = np.sin(self.phi_rad_vals)
         self.F_km_vals          = np.sqrt(0.5 * self.lambda_sky_km_vals *\
             self.D_km_vals * (1 - (cb*cb) * (sp*sp)) / (sb*sb))
-        self.norm_eq            = self.__func_dict[wtype]["normeq"]
+        self.norm_eq            = self.__func_dict[wtype]
 
         if bfac:
             if (not sigma):
@@ -225,10 +225,19 @@ class rec_data(object):
         else:
             self.w_km_vals = 2.0*self.norm_eq*self.F_km_vals*self.F_km_vals/res
 
+    __func_dict = {
+        "rect"      : 1.00000000,
+        "coss"      : 1.50000000,
+        "kb20"      : 1.49634231,
+        "kb25"      : 1.65191895,
+        "kb35"      : 1.92844639,
+        "kbmd20"    : 1.52048174,
+        "kbmd25"    : 1.65994218}
+
 class diffraction_correction(object):
 
     def __init__(self,dat,res,rng="all",wtype="kb25",fwd=False,
-        norm=True,verbose=True,bfac=True,fft=False,psitype="full"):
+        norm=True,verbose=False,bfac=True,fft=False,psitype="full"):
         t1       = time.time()
 
         if not check_pos_real(res):
@@ -253,56 +262,56 @@ class diffraction_correction(object):
         else: del tr
 
         # Define/list all attributes of the class, setting to None.
-        self.res                = None
-        self.wtype              = None
-        self.rng                = None
-        self.rngreq             = None
-        self.rho_km_vals        = None
-        self.p_norm_vals        = None
-        self.phase_rad_vals     = None
-        self.B_rad_vals         = None
-        self.D_km_vals          = None
-        self.f_sky_hz_vals      = None
-        self.phi_rad_vals       = None
-        self.rho_dot_kms_vals   = None
-        self.T_hat_vals         = None
-        self.F_km_vals          = None
-        self.w_km_vals          = None
-        self.mu_vals            = None
-        self.lambda_sky_km_vals = None
-        self.dx_km              = None
-        self.norm_eq            = None
-        self.n_used             = None
-        self.start              = None
-        self.finish             = None
-        self.T_vals             = None
-        self.power_vals         = None
-        self.tau_vals           = None
-        self.phase_vals         = None
-        self.p_norm_fwd_vals    = None
-        self.T_hat_fwd_vals     = None
-        self.phase_fwd_vals     = None
-        self.norm               = None
-        self.fwd                = None
-        self.fft                = None
-        self.bfac               = None
-        self.psitype            = None
-        self.history            = None
-        self.dathist            = None
+        self.res                = None  # Resolution (km)
+        self.wtype              = None  # Window Type
+        self.rng                = None  # Reconstructed Range (km)
+        self.rngreq             = None  # Requested Range
+        self.rho_km_vals        = None  # Ring Radius (km)
+        self.p_norm_vals        = None  # Normalized Power
+        self.phase_rad_vals     = None  # Phase (Radians)
+        self.B_rad_vals         = None  # Elevation Angle (Radians)
+        self.D_km_vals          = None  # RIP Distance (km)
+        self.f_sky_hz_vals      = None  # Signal Frequency (Hz)
+        self.phi_rad_vals       = None  # Azimuthal Angle (Radians)
+        self.rho_dot_kms_vals   = None  # RIP Velocity (km/s)
+        self.T_hat_vals         = None  # Complex Transmittance
+        self.F_km_vals          = None  # Fresnel Scale (km)
+        self.w_km_vals          = None  # Window Width (km)
+        self.mu_vals            = None  # sin(|B|)
+        self.lambda_sky_km_vals = None  # Signal Wavelength (km)
+        self.dx_km              = None  # Sampling Distance (km)
+        self.norm_eq            = None  # Normalized Equivalent Width
+        self.n_used             = None  # Number of points used
+        self.start              = None  # Starting point
+        self.finish             = None  # Final point
+        self.T_vals             = None  # Reconstructed Transmittance
+        self.power_vals         = None  # Reconstructed power
+        self.tau_vals           = None  # Reconstructed optical depth
+        self.phase_vals         = None  # Reconstructed phase
+        self.p_norm_fwd_vals    = None  # Forward Power
+        self.T_hat_fwd_vals     = None  # Forward Transmittance
+        self.phase_fwd_vals     = None  # Forward Phase
+        self.norm               = None  # Normalization (Boolean)
+        self.fwd                = None  # Forward (Boolean)
+        self.fft                = None  # Use of FFT's (Boolean)
+        self.bfac               = None  # Use of b factor (Boolean)
+        self.psitype            = None  # Psitype used (String)
+        self.history            = None  # History of Inputs
+        self.dathist            = None  # History from rec_data
 
         # Assign keywords/arguments to their corresponding attribute.
-        self.res        = res
-        self.wtype      = wtype
-        self.rngreq     = rng
-        self.norm       = norm
-        self.fwd        = fwd
-        self.fft        = fft
-        self.bfac       = bfac
-        self.psitype    = psitype
-        self.dathist    = dat.history
+        self.res        = res           # Resolution (km)
+        self.wtype      = wtype         # Window Type (String)
+        self.rngreq     = rng           # Requested Range
+        self.norm       = norm          # Normalization (Boolean)
+        self.fwd        = fwd           # Forward (Boolean)
+        self.fft        = fft           # Use of FFT's (Boolean)
+        self.bfac       = bfac          # Use of b factor (Boolean)
+        self.psitype    = psitype       # Psitype used (String)
+        self.dathist    = dat.history   # rec_data History
 
         # Create an instance of the rec_data class, containing data.
-        recdata = rec_data(dat, res, wtype,bfac=bfac)
+        recdata = rec_data(dat, res, wtype, bfac=bfac)
 
         # Save the attributes from the rec_data instance.
         self.res                = recdata.res
@@ -324,10 +333,10 @@ class diffraction_correction(object):
         self.norm_eq            = recdata.norm_eq
 
         # Remove rec_data instance and keywords for memory and clarity.
-        del recdata,res,wtype,rng,bfac
+        del recdata
 
-        if (type(self.rngreq) == type('Hello')):
-            reg = self.rngreq.replace(" ","").lower()
+        if (type(rng) == type('Hello')):
+            reg = rng.replace(" ","").lower()
             if (reg in region_dict):
                 self.rng = np.array(region_dict[reg])
             else:

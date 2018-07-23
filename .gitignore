@@ -5,8 +5,8 @@ output/
 data/
 __pycache__
 *~
-diffcorr/advanced_tools.py
-diffcorr/misc_functions.py
-diffcorr/physics_functions.py
-diffcorr/special_functions.py
-diffcorr/window_functions.py
+rss_ringoccs/diffcorr/advanced_tools.py
+rss_ringoccs/diffcorr/misc_functions.py
+rss_ringoccs/diffcorr/physics_functions.py
+rss_ringoccs/diffcorr/special_functions.py
+rss_ringoccs/diffcorr/window_functions.py

@@ -57,14 +57,37 @@
                             allowed range of processing.
 """
 
-try:from .advanced_tools import *
+# Import advanced tools used for optimization and modeling.
+try:
+    from .advanced_tools import compare_tau,find_optimal_resolution
+    from .advanced_tools import delta_impulse_diffraction
 except ModuleNotFoundError:pass
-try:from .misc_functions import *
+
+# Import miscellaneous tools used for range and normalized equivalent width.
+try:
+    from .misc_functions import get_range_request,get_norm_eq,get_range_actual
 except ModuleNotFoundError:pass
-try:from .physic_functions import *
+
+# Import functions that pertain to physics and diffraction theory.
+try:
+    from .physics_functions import power_func,phase_func,tau_func,wker
+    from .physics_functions import freq_wav,fresnel_forward,fresnel_inverse
+    from .physics_functions import compute_norm_eq,fresnel_scale,psi_factor
+    from .physics_functions import psi_d1_phi,psi_d2_phi,fresnel_transform
+    from .physics_functions import fresnel_inverse,fresnel_inverse_fft,psi
 except ModuleNotFoundError:pass
-try:from .special_functions import *
+
+# Import special mathematical functions that are used in diffraction theory.
+try:
+    from .special_functions import resolution_inverse,sq_well_solve
+    from .special_functions import fresnel_cos,fresnel_sin
 except ModuleNotFoundError:pass
-try:from .window_functions import *
+
+# Import taper/window functions used in reconstruction and modeling.
+try:
+    from .window_functions import rect,coss,kb20,kb25,kb35,kbmd20,kbmd25
+    from .window_functions import kbal,window_width,normalize
 except ModuleNotFoundError:pass
-from .diffcorr import *
+
+# Import the main classes used in diffraction reconstruction.
+from .diffraction_correction import diffraction_correction,rec_data

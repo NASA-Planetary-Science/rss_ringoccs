@@ -37,9 +37,10 @@ Revisions:
                              decimate 16kHz files to 1kHz sampling if True
    2018 May 08 - gsteranla - Added input checks
    2018 May 30 - gsteranka - Added history attribute
-   2018 Jun 25 - gsteranka - Fixed bug with 16kHz file not getting sky frequency
-                             correctly
-   2018 Jul 06 - gsteranka - Switch default decimate_16khz_to_1khz value to True
+   2018 Jun 25 - gsteranka - Fixed bug with 16kHz file not getting sky
+                             frequency correctly
+   2018 Jul 06 - gsteranka - Switch default decimate_16khz_to_1khz value to
+                             True
 
 *************************VARIABLES*************************
 NAME - TYPE - scalar/array - PURPOSE
@@ -63,6 +64,7 @@ from scipy.signal import decimate
 import struct
 import sys
 import time
+
 
 class RSRReader(object):
     """
@@ -144,25 +146,25 @@ class RSRReader(object):
         'sh_fgain_if_bandwidth',
         'sh_frov_flag',
         'sh_attenuation',
-        'sh_adc_rms','sh_adc_peak',
-        'sh_year','sh_doy','sh_seconds',
+        'sh_adc_rms', 'sh_adc_peak',
+        'sh_year', 'sh_doy', 'sh_seconds',
         'sh_bits_per_sample',
         'sh_data_error',
         'sh_sample_rate',
         'sh_ddc_lo',
-        'sh_rfif_lo','sh_sfdu_year','sh_sfdu_doy','sh_sfdu_seconds',
-        'sh_predicts_time_shift','sh_predicts_freq_override',
-        'sh_predicts_freq_rate','sh_predicts_freq_offset',
+        'sh_rfif_lo', 'sh_sfdu_year', 'sh_sfdu_doy', 'sh_sfdu_seconds',
+        'sh_predicts_time_shift', 'sh_predicts_freq_override',
+        'sh_predicts_freq_rate', 'sh_predicts_freq_offset',
         'sh_sub_channel_freq',
-        'sh_rf_freq_point_1','sh_rf_freq_point_2','sh_rf_freq_point_3',
-        'sh_schan_freq_point_1','sh_schan_freq_point_2',
+        'sh_rf_freq_point_1', 'sh_rf_freq_point_2', 'sh_rf_freq_point_3',
+        'sh_schan_freq_point_1', 'sh_schan_freq_point_2',
         'sh_schan_freq_point_3',
-        'sh_schan_freq_poly_coef_1','sh_schan_freq_poly_coef_2',
+        'sh_schan_freq_poly_coef_1', 'sh_schan_freq_poly_coef_2',
         'sh_schan_freq_poly_coef_3',
         'sh_schan_accum_phase',
-        'sh_schan_phase_poly_coef_1','sh_schan_phase_poly_coef_2',
-        'sh_schan_phase_poly_coef_3','sh_schan_phase_poly_coef_4',
-        'sh_reserved2a','sh_reserved2b']
+        'sh_schan_phase_poly_coef_1', 'sh_schan_phase_poly_coef_2',
+        'sh_schan_phase_poly_coef_3', 'sh_schan_phase_poly_coef_4',
+        'sh_reserved2a', 'sh_reserved2b']
     __sh_format = 'hh'+'BBh'+'hBB'+'BBcBHccBBbBBBBBHHIBBHHHHH'+22*'d'
 
     # Data
@@ -175,8 +177,7 @@ class RSRReader(object):
     __field_names = (__sfdu_field_names + __ha_field_names + __ph_field_names
         + __sh_field_names + __data_field_names)
 
-
-    def __init__(self,rsr_file, decimate_16khz_to_1khz=True,
+    def __init__(self, rsr_file, decimate_16khz_to_1khz=True,
             cpu_count=multiprocessing.cpu_count(), verbose=False):
         """
         Purpose:
@@ -249,7 +250,7 @@ class RSRReader(object):
 
         # Open first header of SFDU and put into format for unpacking below
         try:
-            with open(self.rsr_file,'rb') as f:
+            with open(self.rsr_file, 'rb') as f:
                 sfdu_hdr_raw = f.read(struct_hdr_len)
                 f.close()
         except FileNotFoundError as err:
@@ -260,7 +261,7 @@ class RSRReader(object):
         sfdu_hdr = struct_unpack_hdr(sfdu_hdr_raw)
 
         # Able to use field names to reference parts of SFDU header
-        sfdu_hdr_dict = dict(zip(self.__field_names,sfdu_hdr))
+        sfdu_hdr_dict = dict(zip(self.__field_names, sfdu_hdr))
 
         # Find number of SFDU in file, and number of points per SFDU
         rsr_size = os.path.getsize(self.rsr_file)
@@ -308,14 +309,13 @@ class RSRReader(object):
             print('Reading RSR data and setting the IQ_m attribute')
         self.__set_IQ(verbose=verbose)
 
-
     def __set_sfdu_unpack(self, spm_range):
         """
         Set private attribute __sfdu_unpack, which is used to unpack the
         RSR file one SFDU at a time. Also sets attributes for the start and
         end SFDU to read. Not included in __init__ because it's not necessary
         for reading the header information
-        
+
         Args:
             spm_range (list): 2-element array of range of SPM values to read
                 over. Passed from either set_f_sky_pred or set_IQ
@@ -344,7 +344,7 @@ class RSRReader(object):
         sfdu_unpack = struct.Struct(rsr_fmt).unpack_from
 
         # Define structure of RSR
-        with open(self.rsr_file,'rb') as f:
+        with open(self.rsr_file, 'rb') as f:
             rsr_struct = f.read()
             f.close()
 
@@ -355,13 +355,12 @@ class RSRReader(object):
         self.__end_sfdu = end_sfdu
         self.__sfdu_len = sfdu_len
 
-
     def get_f_sky_pred(self, f_spm=None, verbose=False):
         """
         Calculate predicted sky frequency at user-defined times using
         polynomial coefficients in each SFDU. Returns f_spm and
         f_sky_pred
-        
+
         Args:
             f_spm (np.ndarray): Array of SPM values to evaluate predicted
                 sky frequency at. Default is at 1 second spacing over entire
@@ -370,8 +369,8 @@ class RSRReader(object):
                 if set to True
 
         Outputs:
-            f_spm (np.ndarray): Array of SPM values that predicted sky frequency
-                was evaluated at.
+            f_spm (np.ndarray): Array of SPM values that predicted sky
+                frequency was evaluated at.
             f_sky_pred (np.ndarray): Predicted sky frequency, calculated from
                 the polynomial coefficients in the RSR file
 
@@ -403,7 +402,7 @@ class RSRReader(object):
 
         # Default 1 second spacing over range of spm_vals
         if f_spm is None:
-            f_spm = np.arange(min(spm_vals),max(spm_vals),1.0)
+            f_spm = np.arange(min(spm_vals), max(spm_vals), 1.0)
 
         # Input f_spm needs to be a numpy array
         if type(f_spm) != np.ndarray:
@@ -422,10 +421,10 @@ class RSRReader(object):
         # Set up unpacking of full RSR. Catch error if f_spm is not array of
         #     floats/integers
         try:
-            spm_range = [min(f_spm),max(f_spm)]
+            spm_range = [min(f_spm), max(f_spm)]
             self.__set_sfdu_unpack(spm_range)
         except TypeError as err:
-            print('f_spm must be an array of floats or integers: '+
+            print('f_spm must be an array of floats or integers: ' +
                 '{}'.format(err))
             sys.exit()
 
@@ -440,7 +439,7 @@ class RSRReader(object):
         freq_poly3_array = np.zeros(self.__end_sfdu - self.__start_sfdu + 1)
         time_stamp_array = np.zeros(self.__end_sfdu - self.__start_sfdu + 1)
         n_iter = 0
-        for i_sfdu in range(self.__start_sfdu,self.__end_sfdu+1):
+        for i_sfdu in range(self.__start_sfdu, self.__end_sfdu+1):
             sfdu = self.__rsr_struct[i_sfdu*self.__sfdu_len:
                 i_sfdu*self.__sfdu_len + self.__sfdu_len]
 
@@ -460,7 +459,7 @@ class RSRReader(object):
             freq_poly1_array[n_iter] = s_dict['sh_schan_freq_poly_coef_1']
             freq_poly2_array[n_iter] = s_dict['sh_schan_freq_poly_coef_2']
             freq_poly3_array[n_iter] = s_dict['sh_schan_freq_poly_coef_3']
-            time_stamp_array[n_iter] = round(_time_stamp,round_decimal)
+            time_stamp_array[n_iter] = round(_time_stamp, round_decimal)
 
             n_iter += 1
 
@@ -487,11 +486,10 @@ class RSRReader(object):
 
         if verbose:
             for i in range(10):
-                print('%24.16f    %30.16f' % (f_spm[i],f_sky_pred[i]))
+                print('%24.16f    %30.16f' % (f_spm[i], f_sky_pred[i]))
 
         # Return f_spm and evaluated predicted sky frequency
         return f_spm, f_sky_pred
-
 
     def __set_IQ(self, verbose=False):
         """
@@ -523,7 +521,7 @@ class RSRReader(object):
 
         # Ensure that input is a Boolean
         if type(self.__decimate_16khz_to_1khz) != bool:
-            print('WARNING (RSRReader.get_IQ): Expected Boolean input for '+
+            print('WARNING (RSRReader.get_IQ): Expected Boolean input for ' +
                 'decimate_16khz_to_1khz keyword. Ignoring input')
             self.__decimate_16khz_to_1khz = False
 
@@ -546,9 +544,12 @@ class RSRReader(object):
         loop_args[-1] = ((self.__cpu_count-1)*n_per_core,
             self.__end_sfdu + 1, n_loops, queues[-1])
         jobs = [Process(target=self.__loop, args=(a)) for a in loop_args]
-        for j in jobs: j.start()
-        for q in queues: results.append(q.get())
-        for j in jobs: j.join()
+        for j in jobs:
+            j.start()
+        for q in queues:
+            results.append(q.get())
+        for j in jobs:
+            j.join()
         IQ_m = np.hstack(results)
         print('\n')
 
@@ -574,11 +575,10 @@ class RSRReader(object):
                 print('%24.16f %15i %15i' %
                     (spm_vals[i], np.real(IQ_m[i]), np.imag(IQ_m[i])))
 
-        # Set spm_vals attribute corresponding to speified spm_range and the raw
-        # measured I and Q
+        # Set spm_vals attribute corresponding to speified spm_range and the
+        #     raw measured I and Q
         self.spm_vals = spm_vals
         self.IQ_m = IQ_m
-
 
     def __loop(self, i_start, i_end, n_loops, queue=0):
         """
@@ -619,7 +619,6 @@ class RSRReader(object):
 
         queue.put(I_array + 1j*Q_array)
 
-
     def __set_history(self):
         """
         Purpose:
@@ -635,16 +634,18 @@ class RSRReader(object):
             'Python Version': platform.python_version(),
             'Operating System': os.uname().sysname,
             'Source File': __file__.split('/')[-1],
-            'Source Directory': __file__.rsplit('/',1)[0] +'/',
+            'Source Directory': __file__.rsplit('/', 1)[0] + '/',
             'Input Variables': input_var_dict,
-            'Input Keywords':input_kw_dict}
+            'Input Keywords': input_kw_dict}
         self.history = history_dict
 
 
 if __name__ == '__main__':
 
-    rsr_file = '../../../../../data/s10-rev07-rsr-data/S10EAOE2005_123_0740NNNX43D.2A1'
-    #rsr_file = '../../../../../data/s10-rev07-rsr-data/s10sroe2005123_0740nnnx43rd.2a2'
+    rsr_file = ('../../../../../data/s10-rev07-rsr-data/'
+        + 'S10EAOE2005_123_0740NNNX43D.2A1')
+    #rsr_file = ('../../../../../data/s10-rev07-rsr-data/'
+    #    +'s10sroe2005123_0740nnnx43rd.2a2')
     rsr_inst = RSRReader(rsr_file, decimate_16khz_to_1khz=True, verbose=True)
     f_spm = np.arange(30500, 40000, 0.5)
     f_spm, f_sky_pred = rsr_inst.get_f_sky_pred(f_spm=f_spm, verbose=True)

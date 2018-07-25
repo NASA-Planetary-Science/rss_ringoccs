@@ -136,10 +136,10 @@ class NormDiff(object):
         >>> spm_fit, spline_fit = norm_inst.get_spline_fit(
                 spline_order=spline_order, knots_spm=knots_spm,
                 dt_down=dt_down, freespace_spm=freespace_spm, verbose=verbose)
-        >>> cal_inst = rss.calibration.Calibration(fit_inst, norm_inst, geo_inst,
-                dt_cal=dt_cal, verbose=verbose)
-        >>> norm_diff_inst = rss.calibration.NormDiff(rsr_inst, dr_km, geo_inst,
-                cal_inst, dr_km_tol=dr_km_tol, is_chord=is_chord,
+        >>> cal_inst = rss.calibration.Calibration(fit_inst, norm_inst,
+                geo_inst, dt_cal=dt_cal, verbose=verbose)
+        >>> norm_diff_inst = rss.calibration.NormDiff(rsr_inst, dr_km,
+                geo_inst, cal_inst, dr_km_tol=dr_km_tol, is_chord=is_chord,
                 verbose=verbose)
 
     Attributes:
@@ -147,8 +147,8 @@ class NormDiff(object):
             at final spacing specified in dr_km
         t_oet_spm_vals (np.ndarray): Set of SPM values corresponding to
             rho_km_desired
-        p_norm_vals (np.ndarray): Power normalized to 1. This is the diffraction
-            pattern that is input to the Fresnel inversion step
+        p_norm_vals (np.ndarray): Power normalized to 1. This is the
+            diffraction pattern that is input to the Fresnel inversion step
         phase_rad_vals (np.ndarray): Phase of the complex signal, in radians.
             This is the other part of the diffraction pattern that is input to
             the Fresnel Inversion step
@@ -181,7 +181,8 @@ class NormDiff(object):
         Args:
             rsr_inst: Instance of the RSRReader class. Linked to the full
                 path name of RSR file to process
-            dr_km (float): Desired final radial spacing of processed data, in km
+            dr_km (float): Desired final radial spacing of processed data,
+                in km
             geo_inst: Instance of Geometry class linked to rsr_inst input
             cal_inst: Calibration instance linked to rsr_inst input. Made using
                 Calibration class if you haven't made a cal_file yet, and made
@@ -209,9 +210,9 @@ class NormDiff(object):
 
         Warnings:
             [1] Be sure to set decimate_16khz_to_1khz=True when making rsr_inst
-                if you did so before doing the previous processing steps to make
-                GEO and CAL files. Otherwise, (1) it will take forever, and
-                (2) the power will not normalize correctly.
+                if you did so before doing the previous processing steps to
+                make GEO and CAL files. Otherwise, (1) it will take forever,
+                and (2) the power will not normalize correctly.
             [2] If it's a chord occultation, you will get problems if you don't
                 set is_chord=True
             [3] Radius correction due to pole direction and timing offset not
@@ -240,13 +241,13 @@ class NormDiff(object):
                 + 'if you have a CAL file that you want to turn into an '
                 + 'instance')
 
-        if (type(dr_km) != float ) & (type(dr_km) != int):
+        if (type(dr_km) != float) & (type(dr_km) != int):
             sys.exit('ERROR (NormDiff): dr_km input must be either a float '
-                +'or int')
+                + 'or int')
 
-        if (type(dr_km_tol) != float ) & (type(dr_km_tol) != int):
+        if (type(dr_km_tol) != float) & (type(dr_km_tol) != int):
             sys.exit('ERROR (NormDiff): dr_km_tol input must be either a '
-                +'float or int')
+                + 'float or int')
 
         if type(verbose) != bool:
             print('WARNING (NormDiff): verbose input must be one of '
@@ -298,7 +299,8 @@ class NormDiff(object):
                     break
 
         # Function to convert SPM to rho
-        rho_interp_func = interp1d(spm_geo, rho_km_geo, fill_value='extrapolate')
+        rho_interp_func = interp1d(spm_geo, rho_km_geo,
+            fill_value='extrapolate')
 
         # SPM range of geo_inst (pretty much always the full occultation)
         spm_range = [min(spm_geo), max(spm_geo)]
@@ -318,14 +320,14 @@ class NormDiff(object):
         rho_km_cal = rho_interp_func(spm_cal)
 
         # If that cal file can't cover entire SPM range from geo_inst
-        if (spm_range[0]<min(spm_cal)) | (spm_range[1]>max(spm_cal)):
+        if (spm_range[0] < min(spm_cal)) | (spm_range[1] > max(spm_cal)):
             print('\nWARNING (NormDiff): Specified cal file is missing '
                 + 'points required to pre-process points in SPM range of '
                 + 'geo_inst. Calibration SPM range is ['
                 + str(min(spm_cal))+', ' + str(max(spm_cal))
-                +'], while geo_inst SPM range is ['
-                + str(min(spm_geo))+', '+str(max(spm_geo))+']. Reducing to '
-                + 'SPM range of CAL file')
+                + '], while geo_inst SPM range is ['
+                + str(min(spm_geo)) + ', ' + str(max(spm_geo)) + ']. Reducing '
+                + 'to SPM range of CAL file')
             _ind = ((spm_vals >= min(spm_cal)) &
                 (spm_vals <= max(spm_cal))).nonzero()
             spm_vals = spm_vals[_ind]
@@ -358,14 +360,14 @@ class NormDiff(object):
             print('Interpolating and setting attributes')
 
         if not is_chord:
-            rho_km_desired, IQ_c_desired = resample_IQ(rho_km_vals, IQ_c, dr_km,
-                dr_km_tol=dr_km_tol)
+            rho_km_desired, IQ_c_desired = resample_IQ(rho_km_vals, IQ_c,
+                dr_km, dr_km_tol=dr_km_tol)
 
             # Interpolate freespace power (spline fit) to rho_km_desired
             p_free_interp_func = interp1d(rho_km_cal, p_free_cal,
                 fill_value='extrapolate')
             p_free = p_free_interp_func(rho_km_desired)
-            
+
             # Construct power from IQ_c_desired and not IQ_m_desired or
             #     resampled power, because p_free was constructed from
             #     downsampled IQ_c. It's important to not use IQ_m_desired
@@ -374,7 +376,7 @@ class NormDiff(object):
             p_norm_vals = (abs(IQ_c_desired)**2)/p_free
             phase_rad_vals = np.arctan2(np.imag(IQ_c_desired),
                 np.real(IQ_c_desired))
-            
+
             spm_desired_func = interp1d(rho_km_geo, spm_geo,
                 fill_value='extrapolate')
             spm_desired = spm_desired_func(rho_km_desired)
@@ -416,14 +418,12 @@ class NormDiff(object):
 
             end_of_chord_ing = len(rho_km_ing) - 1
 
-
         self.__set_history(rsr_inst, dr_km, geo_inst, cal_inst, dr_km_tol)
         self.__set_attributes(rho_km_desired, spm_desired, p_norm_vals,
             phase_rad_vals,
             spm_geo, rho_dot_kms_geo, geo_inst,
             spm_cal, f_sky_pred_cal, rsr_inst,
             end_of_chord_ing=end_of_chord_ing)
-
 
     def __set_attributes(self, rho_km_desired, spm_desired, p_norm_vals,
             phase_rad_vals,
@@ -468,8 +468,6 @@ class NormDiff(object):
         t_ret_geo = geo_inst.t_ret_spm_vals
         t_set_geo = geo_inst.t_set_spm_vals
         phi_rl_rad_geo = np.radians(geo_inst.phi_rl_deg_vals)
-        #rho_corr_pole_km_geo = geo_inst.rho_corr_pole_km_vals
-        #rho_corr_timing_km_geo = geo_inst.rho_corr_timing_km_vals
 
         # Ring opening angle at final spacing
         B_rad_func = interp1d(spm_geo, B_rad_geo, fill_value='extrapolate')
@@ -511,21 +509,14 @@ class NormDiff(object):
         self.rho_dot_kms_vals = rho_dot_kms_func(spm_desired)
 
         # Radius correction due to Saturn's pole direction at final spacing
-        #rho_corr_pole_km_func = interp1d(spm_geo, rho_corr_pole_km_geo,
-        #    fill_value='extrapolate')
-        #self.rho_corr_pole_km_vals = rho_corr_pole_km_func(spm_desired)
         self.rho_corr_pole_km_vals = np.zeros(len(spm_desired))
 
         # Radius correction due to timing offset at final spacing
-        #rho_corr_timing_km_func = interp1d(spm_geo, rho_corr_timing_km_geo,
-        #    fill_value='extrapolate')
-        #self.rho_corr_timing_km_vals = rho_corr_timing_km_func(spm_desired)
         self.rho_corr_timing_km_vals = np.zeros(len(spm_desired))
 
         self.tau_threshold_vals = np.zeros(len(spm_desired))
 
         self.end_of_chord_ing = end_of_chord_ing
-
 
     def __set_history(self, rsr_inst, dr_km, geo_inst, cal_inst, dr_km_tol):
         """
@@ -542,11 +533,10 @@ class NormDiff(object):
             'Python Version': platform.python_version(),
             'Operating System': os.uname().sysname,
             'Source File': __file__.split('/')[-1],
-            'Source Directory': __file__.rsplit('/',1)[0] +'/',
+            'Source Directory': __file__.rsplit('/', 1)[0] + '/',
             'Input Variables': input_var_dict,
-            'Input Keywords':input_kw_dict}
+            'Input Keywords': input_kw_dict}
         self.history = hist_dict
-
 
     def chord_split(self):
         """
@@ -565,8 +555,9 @@ class NormDiff(object):
         """
 
         if self.end_of_chord_ing is None:
-            print('WARNING (NormDiff.chord_split()): Not a chord occultation, '+
-                'so can\'t split. Ignoring call to this method, returning None')
+            print('WARNING (NormDiff.chord_split()): Not a chord occultation, '
+                + 'so can\'t split. Ignoring call to this method, '
+                + 'returning None')
             return None
 
         # Record all attribute names

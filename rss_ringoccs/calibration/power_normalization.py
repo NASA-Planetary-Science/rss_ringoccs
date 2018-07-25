@@ -25,7 +25,8 @@ Revisions:
                              specified freespace regions
    2018 Apr 04 - gsteranka - In initial downsampling step before resample_poly,
                              downsample IQ_c_raw instead of p_obs_raw. This
-                             accompanies the recent change in norm_diff_class.py
+                             accompanies the recent change in
+                             norm_diff_class.py
    2018 Apr 04 - gsteranka - In loop to make knots_spm and knots_rho, change i
                              index to int(i)
    2018 Apr 05 - gsteranka - Added index sorting right before splrep to take
@@ -68,6 +69,7 @@ try:
 except ImportError:
     from ..tools.cassini_blocked import cassini_blocked
     from .power_fit_gui import PowerFitGui
+
 
 class Normalization(object):
     """
@@ -162,7 +164,7 @@ class Normalization(object):
 
         if type(rsr_inst) != rss.rsr_reader.RSRReader:
             sys.exit('ERROR (Normalization): rsr_inst input must be an '
-                +'instance of the RSRReader class')
+                + 'instance of the RSRReader class')
 
         if type(verbose) != bool:
             print('WARNING (Normalization): verbose input must be boolean. '
@@ -220,7 +222,6 @@ class Normalization(object):
 
         self.__set_history()
 
-
     def __downsample_IQ(self, dt_down, verbose=False):
         """
         Purpose:
@@ -257,7 +258,6 @@ class Normalization(object):
                 print(spm_vals_down[i], rho_km_vals_down[i])
 
         return spm_vals_down, rho_km_vals_down, p_obs_down
-
 
     def get_spline_fit(self, spline_order=None, dt_down=None,
             freespace_spm=None, knots_spm=None, USE_GUI=True, verbose=False):
@@ -325,12 +325,8 @@ class Normalization(object):
         # Update defaults if any keyword arguments were specified
         if spline_order is not None:
             self._spline_order = spline_order
-        #if knots_km is not None:
-        #    self._knots_km = knots_km
         if dt_down is not None:
             self._dt_down = dt_down
-        #if freespace_km is not None:
-        #    self._freespace_km = freespace_km
         if freespace_spm is not None:
             self._freespace_spm = freespace_spm
         if knots_spm is not None:
@@ -353,7 +349,7 @@ class Normalization(object):
                 p_obs_down) = self.__downsample_IQ(dt_down, verbose=verbose)
         except TypeError:
             print('WARNING (Normalization.get_spline_fit): dt_down must be '
-                +'either int or float. Reverting to the default of 0.5s')
+                + 'either int or float. Reverting to the default of 0.5s')
             self._dt_down = 0.5
             dt_down = 0.5
             (spm_vals_down, rho_km_vals_down,
@@ -374,7 +370,8 @@ class Normalization(object):
             if freespace_spm is not None:
                 ind_free = []
                 for i in range(len(freespace_spm)):
-                    ind_free.append(np.argwhere((spm_vals_down > freespace_spm[i][0])
+                    ind_free.append(np.argwhere(
+                        (spm_vals_down > freespace_spm[i][0])
                         & (spm_vals_down < freespace_spm[i][1])
                         & (np.invert(is_blocked_atm))))
                 ind_free = np.reshape(np.concatenate(ind_free), -1)
@@ -386,7 +383,7 @@ class Normalization(object):
             ind_free = self.__get_default_freespace_ind(rho_km_vals_down,
                 freespace_km, is_blocked_atm)
 
-        if np.all(ind_free == False):
+        if np.all(ind_free is False):
             print('WARNING (Normalization.get_spline_fit): No SPM values fall '
                 + 'within input freespace_spm regions. Returning to default '
                 + 'freespace regions')
@@ -403,8 +400,8 @@ class Normalization(object):
         # Find knots in range of specified radii
         if knots_spm is None:
             knots_km_where = np.argwhere(
-                np.logical_and(knots_km>min(rho_km_vals_free),
-                    knots_km<max(rho_km_vals_free)))
+                np.logical_and(knots_km > min(rho_km_vals_free),
+                    knots_km < max(rho_km_vals_free)))
 
             # Can't make fit if no specified knots lie in freespace regions
             if len(knots_km_where) == 0:
@@ -419,18 +416,19 @@ class Normalization(object):
                 rho_km_vals_free = rho_km_vals_down[ind_free]
                 p_obs_free = p_obs_down[ind_free]
                 knots_km_where = np.argwhere(
-                    np.logical_and(knots_km>min(rho_km_vals_free),
-                        knots_km<max(rho_km_vals_free)))
+                    np.logical_and(knots_km > min(rho_km_vals_free),
+                        knots_km < max(rho_km_vals_free)))
 
             # Select data points closest to selected knots
-            knots_spm_data, knots_rho_data = self.__get_ind_from_knots('RHO_KM',
-                knots_km_where, knots_km, spm_vals_free, rho_km_vals_free)
+            knots_spm_data, knots_rho_data = self.__get_ind_from_knots(
+                'RHO_KM', knots_km_where, knots_km, spm_vals_free,
+                rho_km_vals_free)
 
         # Find knots in range of specified SPM
         else:
             knots_spm_where = np.argwhere(
-                np.logical_and(knots_spm>min(spm_vals_free),
-                    knots_spm<max(spm_vals_free)))
+                np.logical_and(knots_spm > min(spm_vals_free),
+                    knots_spm < max(spm_vals_free)))
 
             # Input for __get_ind_from_knots
             type_of_knot = 'SPM'
@@ -447,8 +445,8 @@ class Normalization(object):
                 self._knots_spm = None
                 knots_spm = None
                 knots_km_where = np.argwhere(
-                    np.logical_and(knots_km>min(rho_km_vals_free),
-                        knots_km<max(rho_km_vals_free)))
+                    np.logical_and(knots_km > min(rho_km_vals_free),
+                        knots_km < max(rho_km_vals_free)))
 
                 # Input for __get_ind_from_knots if no specified knots lie
                 #     in freespace regions
@@ -478,8 +476,8 @@ class Normalization(object):
                 k=spline_order, t=knots_spm_data[ind_knot_sort])
             spline_fit = splev(spm_fit, spline_rep, ext=1)
         except TypeError:
-            print('WARNING (Normalization.get_spline_fit): Given degree of the '
-                + 'spline (k) is not supported (1<=k<=5). Reverting to '
+            print('WARNING (Normalization.get_spline_fit): Given degree of '
+                + 'the spline (k) is not supported (1<=k<=5). Reverting to '
                 + 'degree 2')
             self._spline_order = 2
             spline_order = 2
@@ -487,12 +485,13 @@ class Normalization(object):
                 k=spline_order, t=knots_spm_data[ind_knot_sort])
             spline_fit = splev(spm_fit, spline_rep, ext=1)
 
-        # Set values outside of SPM values in splrep to the exterior-most spline
-        #     values
+        # Set values outside of SPM values in splrep to the exterior-most
+        #     spline values
         try:
             min_fit_ind = np.max(((spline_fit == 0)
                 & (spm_fit <= min(spm_vals_free[ind_sort]))).nonzero())
-            spline_fit[0:min_fit_ind+1] = (np.zeros(len(spline_fit[0:min_fit_ind+1]))
+            spline_fit[0:min_fit_ind+1] = (
+                np.zeros(len(spline_fit[0:min_fit_ind+1]))
                 + spline_fit[min_fit_ind+1])
         except ValueError:
             pass
@@ -521,7 +520,6 @@ class Normalization(object):
         self.__set_history()
         return spm_fit, spline_fit
 
-
     def __get_default_freespace_ind(self, rho_km_vals_down, freespace_km,
             is_blocked_atm):
         """
@@ -546,7 +544,6 @@ class Normalization(object):
         ind_free = np.reshape(np.concatenate(ind_free), -1)
 
         return ind_free
-
 
     def __get_ind_from_knots(self, type_of_input, knots_where, knots,
             spm_vals_free, rho_km_vals_free):
@@ -580,7 +577,6 @@ class Normalization(object):
 
         return knots_spm_data, knots_rho_data
 
-
     def __set_history(self):
         """
         Purpose:
@@ -591,9 +587,7 @@ class Normalization(object):
             'rsr_inst': self.__rsr_inst.history}
         input_kw_dict = {'spm_fit': self._spm_fit,
             'spline_order': self._spline_order,
-            #'knots_km': self._knots_km,
             'dt_down': self._dt_down,
-            #'freespace_km': self._freespace_km,
             'freespace_spm': self._freespace_spm, 'knots_spm': self._knots_spm}
         hist_dict = {'User Name': os.getlogin(),
             'Host Name': os.uname().nodename,
@@ -601,9 +595,9 @@ class Normalization(object):
             'Python Version': platform.python_version(),
             'Operating System': os.uname().sysname,
             'Source File': __file__.split('/')[-1],
-            'Source Directory': __file__.rsplit('/',1)[0] +'/',
+            'Source Directory': __file__.rsplit('/', 1)[0] + '/',
             'Input Variables': input_var_dict,
-            'Input Keywords':input_kw_dict}
+            'Input Keywords': input_kw_dict}
         self.history = hist_dict
 
 

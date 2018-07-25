@@ -47,6 +47,7 @@ except SystemError:
     sys.path.append('../rsr_reader')
     from rsr_reader import RSRReader
 
+
 def calc_freq_offset(rsr_inst, dt_freq=8.192,
         cpu_count=multiprocessing.cpu_count(), freq_offset_file=None,
         verbose=False):
@@ -69,15 +70,15 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192,
             and the IQ_m attribute (raw measured complex signal corresponding
             to spm_vals)
         dt_freq (float): Optional argument for time spacing at which to extract
-            frequency offset. Determines length of FFT to do so. Typically gives
-            a power of 2 when it's multiplied by the sample rate in Hz (so for
-            1kHz files, typical values would be 0.128 sec, 0.256 sec, 0.512 sec,
-            1.024 sec, etc.)
+            frequency offset. Determines length of FFT to do so. Typically
+            gives a power of 2 when it's multiplied by the sample rate in Hz
+            (so for 1kHz files, typical values would be 0.128 sec, 0.256 sec,
+            0.512 sec, 1.024 sec, etc.)
         verbose (bool): Optional testing argument that, if True, prints
             intermediate steps and results
-        cpu_count (int): Number of cores to use in calculations. Generally, more
-            cores makes it faster up to a certain point. You eventually start
-            seeing diminishing returns
+        cpu_count (int): Number of cores to use in calculations. Generally,
+            more cores makes it faster up to a certain point. You eventually
+            start seeing diminishing returns
         freq_offset_file (str): File name to save frequency offset SPM and
             data. If set to None (default), no file is saved
 
@@ -114,8 +115,8 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192,
         """
 
     if type(rsr_inst) != RSRReader:
-        print('ERROR (calc_freq_offset): rsr_inst input must be an instance of '
-            + 'the RSRReader class')
+        print('ERROR (calc_freq_offset): rsr_inst input must be an instance '
+            + 'of the RSRReader class')
         sys.exit()
 
     if (type(dt_freq) != float) and (type(dt_freq) != int):
@@ -124,8 +125,8 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192,
         sys.exit()
 
     if type(cpu_count) != int:
-        print('WARNING (calc_freq_offset): cpu_count input must be an integer. '
-            + 'Setting equal to number of cores on computer.')
+        print('WARNING (calc_freq_offset): cpu_count input must be an '
+            + 'integer. Setting equal to number of cores on computer.')
         cpu_count = multiprocessing.cpu_count()
 
     if type(verbose) != bool:
@@ -190,9 +191,12 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192,
     loop_args = [(i*n_per_core, (i+1)*n_per_core, spm_vals, IQ_m,
         pts_per_fft, cont_fft_freq_range, queues[i]) for i in range(cpu_count)]
     jobs = [Process(target=__loop, args=(a)) for a in loop_args]
-    for j in jobs: j.start()
-    for q in queues: results.append(q.get())
-    for j in jobs: j.join()
+    for j in jobs:
+        j.start()
+    for q in queues:
+        results.append(q.get())
+    for j in jobs:
+        j.join()
     results_hstack = np.hstack(results)
     f_spm = results_hstack[0]
     f_offset = results_hstack[1]
@@ -267,7 +271,7 @@ def __loop(i_start, i_end, spm_vals, IQ_m, pts_per_fft, cont_fft_freq_range,
     queue.put([f_spm, f_offset])
 
 
-def __find_peak_freq(spm,IQ_m, cont_fft_freq_range):
+def __find_peak_freq(spm, IQ_m, cont_fft_freq_range):
     """
     Purpose:
     Routine called by calc_freq_offset to find peak frequency. Makes 3
@@ -299,7 +303,7 @@ def __find_peak_freq(spm,IQ_m, cont_fft_freq_range):
     dt_raw = spm[1] - spm[0]
 
     # Hamming window
-    weight = 0.5*(1.0 - np.cos(2.0*np.pi*np.arange(pts_per_fft)/
+    weight = 0.5 * (1.0 - np.cos(2.0 * np.pi * np.arange(pts_per_fft) /
         (pts_per_fft-1)))
     IQ_m_weight = IQ_m * weight
 
@@ -321,8 +325,8 @@ def __find_peak_freq(spm,IQ_m, cont_fft_freq_range):
     # Frequency centered at the maximum frequency for first pass of
     # refining max frequency.
     freq_c1 = (freq_max - cont_fft_freq_range +
-        np.arange(cont_fft_num_pass1)*
-        (2.0*cont_fft_freq_range/cont_fft_num_pass1))
+        np.arange(cont_fft_num_pass1) *
+        (2.0 * cont_fft_freq_range / cont_fft_num_pass1))
     freq_max_pass1 = __refine_peak_freq(IQ_m_weight, freq_c1, dt_raw)
 
     # Refine max frequency with a second pass
@@ -333,8 +337,8 @@ def __find_peak_freq(spm,IQ_m, cont_fft_freq_range):
     # Refine max frequency with a third pass
     freq_step = 1.0 / cont_fft_num_pass2
     freq_c3 = (freq_max_pass2 - freq_step +
-        np.arange(cont_fft_num_pass3)*
-        (2.0*freq_step/cont_fft_num_pass3))
+        np.arange(cont_fft_num_pass3) *
+        (2.0 * freq_step/cont_fft_num_pass3))
     freq_max_pass3 = __refine_peak_freq(IQ_m_weight, freq_c3, dt_raw)
 
     return freq_max_pass3
@@ -392,14 +396,15 @@ def __get_history(rsr_inst, dt_freq, cpu_count, freq_offset_file):
         'Python Version': platform.python_version(),
         'Operating System': os.uname().sysname,
         'Source File': __file__.split('/')[-1],
-        'Source Directory': __file__.rsplit('/',1)[0] +'/',
+        'Source Directory': __file__.rsplit('/', 1)[0] + '/',
         'Input Variables': input_var_dict,
-        'Input Keywords':input_kw_dict}
+        'Input Keywords': input_kw_dict}
     return hist_dict
 
 
 if __name__ == '__main__':
-    rsr_file = '../../../../../data/s10-rev07-rsr-data/S10EAOE2005_123_0740NNNX43D.2A1'
+    rsr_file = ('../../../../../data/s10-rev07-rsr-data/'
+        + 'S10EAOE2005_123_0740NNNX43D.2A1')
     #spm_range = [30000, 31000]
     rsr_inst = RSRReader(rsr_file)
     freq_offset_file = 'notadirectory/sonotgoingtobeafile.txt'

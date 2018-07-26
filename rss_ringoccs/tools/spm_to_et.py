@@ -12,16 +12,26 @@ Revisions:
       spm_to_et.py
    2018 Mar 20 - gsteranka - Copy to official version and remove
                              debug steps
-    2018 Jun 18 - jfong - remove 'from spiceypy' from import spicepy as spice
+    2018 Jul 23 - jfong - add input error checks (doy and year can't be 0)
+    
 """
 
 import numpy as np
 import spiceypy as spice
+import sys
 
 def spm_to_et(spm, doy, year, kernels=None):
     """
     Function to calculate ephemeris time from given SPM
     """
+
+    if doy == 0:
+        sys.exit('WARNING (spm_to_et): input doy is 0!')
+    
+    if year == 0:
+        sys.exit('WARNING (spm_to_et): input year is 0!')
+
+
 
     # Leap seconds kernel
     if kernels is None:

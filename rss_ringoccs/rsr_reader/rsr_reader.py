@@ -291,6 +291,7 @@ class RSRReader(object):
         # DSS-74 files have the regular year and DOY set to 0
         if self.year == 0:
             self.year = sfdu_hdr_dict['sh_sfdu_year']
+        if self.doy == 0:
             self.doy = sfdu_hdr_dict['sh_sfdu_doy']
 
         # Set attributes for later reading of rest of RSR file

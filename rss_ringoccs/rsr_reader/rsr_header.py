@@ -149,6 +149,11 @@ def rsr_header(rsr_file):
         'band': sfdu_hdr_dict['sh_dl_band'],
         'sample_rate_khz': sfdu_hdr_dict['sh_sample_rate']}
 
+    if out_dict['year'] == 0:
+        out_dict['year'] = sfdu_hdr_dict['sh_sfdu_year']
+    if out_dict['doy'] == 0:
+        out_dict['doy'] = sfdu_hdr_dict['sh_sfdu_doy']
+
     return out_dict
 
 

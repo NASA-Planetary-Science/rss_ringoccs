@@ -7,6 +7,13 @@ Purpose: Create an instance for calibration parameters. Just for NormDiff class,
          a replacement for the "Calibration" class in calibration_class.py if
          you have already made a calibration file
 
+WHERE TO GET NECESSARY INPUT:
+    cal_file: Output from the PDS3 CAL file writer. This isn't currently on
+        GitHub, but you can find it under the TC2017 directory at
+        TC2017/jfong/programs/occgeo/jwf_pds3_cal_series_v2.py
+    rsr_inst: Use an instance of the RSRReader class, found inside of
+        rss_ringoccs/rsr_reader/rsr_reader.py
+
 Revisions:
         make_cal_inst.py
     2018 Jun 11 - gsteranka - Original version
@@ -17,7 +24,12 @@ Revisions:
 import numpy as np
 import os
 import platform
+import sys
 import time
+
+sys.path.append('../..')
+from rss_ringoccs.rsr_reader.rsr_reader import RSRReader
+sys.path.remove('../..')
 
 
 class MakeCalInst(object):
@@ -36,19 +48,23 @@ class MakeCalInst(object):
         f_offset_fit_vals (np.ndarray): Fit to frequency offset from
             calibration files
         history (dict): Dictionary with information of the run
-
-    Notes:
-        [1] Works on 5-COLUMN CAL FILES ONLY!!! Need the 5th column of
-            frequency offset fit to avoid running whole fit routine again
     """
 
     def __init__(self, cal_file, rsr_inst):
         """
         Args:
             cal_file (str): Full path name of calibration file
+            rsr_inst: Instace of the RSRReader class
         """
 
-        cal = np.loadtxt(cal_file, delimiter=',')
+        try:
+            cal = np.loadtxt(cal_file, delimiter=',')
+        except FileNotFoundError:
+            sys.exit('ERROR (MakeCalInst): File not found')
+
+        if type(rsr_inst) != RSRReader:
+            sys.exit('ERROR (MakeCalInst): rsr_inst input needs to be an '
+                + 'instance of the RSRReader class')
 
         t_oet_spm_vals = cal[:, 0]
         f_sky_hz_vals = cal[:, 1]
@@ -68,6 +84,9 @@ class MakeCalInst(object):
 
 
     def __set_history(self, cal_file):
+        """
+        Set history attribute
+        """
 
         input_var_dict = {'cal_file': cal_file}
 

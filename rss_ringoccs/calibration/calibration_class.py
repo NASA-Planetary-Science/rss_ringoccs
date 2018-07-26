@@ -5,6 +5,14 @@ calibration_class.py
 Purpose: Class for calibration parameters. This doesn't really do anything. It
          just puts everything calibration-related into one place
 
+WHERE TO GET NECESSARY INPUT:
+    fit_inst: Use an instance of the FreqOffsetFit class, found inside of
+        rss_ringoccs/calibration/freq_offset_fit.py
+    norm_inst: Use an instance of the Normalization class, found inside of
+        rss_ringoccs/calibration/power_normalization.py
+    geo_inst: Use an instance of the Geometry class, found inside of
+        rss_ringoccs/occgeo/calc_occ_geometry.py
+
 Revisions:
         calibration_class.py
     2018 Jun 11 - gsteranka - Original version
@@ -18,8 +26,12 @@ import numpy as np
 import os
 import platform
 from scipy.interpolate import interp1d
+import sys
 import time
 
+sys.path.append('../..')
+import rss_ringoccs as rss
+sys.path.remove('../..')
 
 class Calibration(object):
     """
@@ -27,6 +39,22 @@ class Calibration(object):
     Clump together everything calibration-related into a calibration instance.
     Use this if you haven't made a calibration file yet. If you have made a
     calibration file, use the "MakeCalInst" class instead.
+
+    Example:
+        >>> rsr_inst = rss.rsr_reader.RSRReader(rsr_file)
+        >>> geo_inst = rss.occgeo.Geometry(rsr_inst, 'Saturn', 'Cassini',
+                kernels)
+        >>> fit_inst = rss.calibration.FreqOffsetFit(rsr_inst, geo_inst, f_spm,
+                f_offset, f_uso, kernels, poly_order=poly_order,
+                spm_include=spm_include)
+        >>> spm_raw, IQ_c_raw = fit_inst.get_IQ_c()
+        >>> norm_inst = rss.calibration.Normalization(spm_raw, IQ_c_raw,
+                geo_inst, rsr_inst)
+        >>> spm_fit, spline_fit = norm_inst.get_spline_fit(
+                spline_order=spline_order, knots_spm=knots_spm,
+                dt_down=dt_down, freespace_spm=freespace_spm, verbose=verbose)
+        >>> cal_inst = rss.calibration.Calibration(fit_inst, norm_inst, geo_inst,
+                dt_cal=dt_cal, verbose=verbose)
 
     Attributes:
         t_oet_spm_vals (np.ndarray): SPM values from calibration file
@@ -45,12 +73,45 @@ class Calibration(object):
             verbose=False):
         """
         Args:
-            fit_inst: Instance of the FreqOffsetFit class
-            norm_inst: Instance of the Normalization class
-            geo_inst: Instance of the Geometry class
+            fit_inst: Instance of the FreqOffsetFit class. Used for the
+                frequency offset fit and the residual frequency fit
+            norm_inst: Instance of the Normalization class. Used for the power
+                normalizing spline fit
+            geo_inst: Instance of the Geometry class. Used for various
+                geometry parameters
             dt_cal (float): Desired time Spacing between points
             verbose (bool): Print intermediate steps and results
+
+        Dependencies:
+            [1] FreqOffsetFit
+            [2] Normalization
+            [3] Geometry
+            [4] scipy
+            [5] numpy
         """
+
+        if type(fit_inst) != rss.calibration.FreqOffsetFit:
+            sys.exit('ERROR (Calibration): fit_inst input needs to be an '
+                + 'instance of the FreqOffsetFit class')
+
+        if type(norm_inst) != rss.calibration.Normalization:
+            sys.exit('ERROR (Calibration): norm_inst input needs to be an '
+                + 'instance of the Normalization class')
+
+        if type(geo_inst) != rss.occgeo.Geometry:
+            sys.exit('ERROR (Calibration): geo_inst input needs to be an '
+                + 'instance of the Geometry class')
+
+        if (type(dt_cal) != float) & (type(dt_cal) != int):
+            print('WARNING (Calibration): dt_cal input must be either a '
+                + 'float or an integer. Setting to default of 1.0')
+            dt_cal = 1.0
+
+        if type(verbose) != bool:
+            print('WARNING (Calibration): verbose input must be one of '
+                + 'Python\'s built-in booleans (True or False). Setting to '
+                + 'False')
+            verbose = False
 
         spm_geo = np.asarray(geo_inst.t_oet_spm_vals)
         rho_km_geo = np.asarray(geo_inst.rho_km_vals)
@@ -106,6 +167,19 @@ class Calibration(object):
 
 
     def __set_history(self, fit_inst, norm_inst, geo_inst, dt_cal):
+        """
+        Purpose:
+        Set history attribute of the class
+
+        Args:
+            fit_inst: Instance of the FreqOffsetFit class. Used for the
+                frequency offset fit and the residual frequency fit
+            norm_inst: Instance of the Normalization class. Used for the power
+                normalizing spline fit
+            geo_inst: Instance of the Geometry class. Used for various
+                geometry parameters
+            dt_cal (float): Desired time Spacing between points
+        """
 
         input_var_dict = {'fit_inst': fit_inst.history,
             'norm_inst': norm_inst.history, 'geo_inst': geo_inst.history}

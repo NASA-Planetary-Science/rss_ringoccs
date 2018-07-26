@@ -5,6 +5,17 @@ f_resid_fit_gui.py
 Purpose: Copied from fit_example_resid_fit.py and edited to use residual
          frequency. Edited to use inside of freq_offset_fit.py
 
+Notes on text box entry:
+    [1] In the "Fit range (SPM)" text box, you need to separate freespace
+        regions by a semicolon, and separate the minimum and maximum in each
+        freespace region by a comma. For example, if you want to use the
+        freespace regions as [30500, 33000], [36000, 37000], and
+        [38000, 40000], then the entry into the textbox would be:
+        "30500, 33000 ; 36000, 37000 ; 38000, 40000"
+    [2] Be sure to hit the "Set fit range (SPM) button before continuing (if
+        you want to adjust the default fit). In case you forgot, another window
+        pops up making sure you really want to continue
+
 Revisions:
       fit_example.py
   2018 Mar 28 - gsteranka - Original version
@@ -57,15 +68,6 @@ class FResidFitGui(Frame):
         ind (np.ndarray): Index numbers to the "x" attribute of the regions
             being fit (specified by the "xlim" attribute)
         is_chord (bool): Record if occultation is a chord occultation
-        knots_entry: Entry box for specifying the knots used in the fit
-            Changing the entry to this box changes the "knots_spm" attribute
-            (see below)
-        knots_spm (list): Knots of the fit. Adjustable in the GUI in the box
-            labeled "Knots". Each knot must be separated by a comma. For
-            example, if you wanted to use the SPM knots 31000, 36500, and
-            39000, then you would just enter "31000, 36500, 39000" (without
-            the quotation marks). I usually use one knot per region being fit,
-            which in this case is the regions in the "xlim" attribute (below)
         lvar: Variable for the label next to the combo box for selecting fit
             order
         not_ind (np.ndarray): Index numbers of the "x" attribute of the regions
@@ -95,6 +97,14 @@ class FResidFitGui(Frame):
     """
 
     def __init__(self, parent, fit_inst, x, x_rho, y):
+        """
+        Args:
+            parent: tkinter.Tk instance
+            fit_inst: Instance of the FreqOffsetFit class
+            x: SPM values of the residual frequency (y)
+            x_rho: Radius values corresponding to x
+            y: Residual frequency values in Hz
+        """
 
         Frame.__init__(self, parent)
 
@@ -114,13 +124,18 @@ class FResidFitGui(Frame):
         self.parent.title('FResidFitGui')
         self.pack(fill=tkinter.BOTH, expand=1)
 
+        # Default fit
         self.fit_deg = 3
         self.xlim = self.fit_inst._spm_include
         dummy, self.yfit = self.fit_inst.get_f_sky_resid_fit()
 
+        # Indices inside and outside of freespace. Starts off with all
+        #     highlighted like they're inside of freespace regions, despite
+        #     the original default
         self.ind = np.arange(len(self.x))
         self.not_ind = None
 
+        # Figure to plot on
         self.f = Figure(figsize=(5, 4))
         self.ax = self.f.add_subplot(111)
 
@@ -144,6 +159,7 @@ class FResidFitGui(Frame):
         lbl = Label(fit_order_frame, textvariable=self.lvar)
         lbl.grid(row=0, column=1)
 
+        # Put fit order box on the window
         fit_order_frame.pack(side=tkinter.LEFT, padx=15)
 
         # Frame for fit range entry
@@ -159,6 +175,7 @@ class FResidFitGui(Frame):
         xrange_btn_lbl = Label(fit_range_frame, text='min1, max1 ; min2, max2...')
         xrange_btn_lbl.grid(row=1, column=0)
 
+        # Put fit range box on the window
         fit_range_frame.pack()
 
         # Button to use the x range entered in the box
@@ -192,6 +209,9 @@ class FResidFitGui(Frame):
     def _get_rho_tick_labels(self, spm_tick_labels):
         """
         Given tick labels in SPM, get the new tick labels in radius
+
+        Args:
+            spm_tick_labels (list): SPM tick labels to get radius matches for
         """
         spm_to_rho_func = interp1d(self.x, self.x_rho)
         rho_tick_labels = spm_to_rho_func(spm_tick_labels)
@@ -226,13 +246,19 @@ class FResidFitGui(Frame):
         else:
             self.is_chord = False
             self.ax_rho.plot(self.x_rho, self.y, alpha=0)
+            # Reverse x-axis if ingress
+            if np.all(rho_diff < 0):
+                xlim_rho = self.ax_rho.get_xlim()
+                self.ax_rho.set_xlim([xlim_rho[1], xlim_rho[0]])
         self.ax_rho.set_xlabel('Rho (km)')
 
+        # Show the canvas
         self.canvas = FigureCanvasTkAgg(self.f, master=self.parent)
         self.canvas.show()
         self.canvas.get_tk_widget().pack(side=tkinter.TOP, fill=tkinter.BOTH,
             expand=1)
 
+        # Put the matplotlib toolbar on the screen
         self.toolbar = NavigationToolbar2TkAgg(self.canvas, self.parent)
         self.toolbar.update()
         self.canvas._tkcanvas.pack(side=tkinter.TOP, fill=tkinter.BOTH,
@@ -246,14 +272,17 @@ class FResidFitGui(Frame):
         adjust_range(), and revert_range()
         """
 
+        # Indices to make highlighted or dimmed based on the freespace regions
         ind = self.ind
         not_ind = self.not_ind
 
+        # Plot the residual frequency within the freespace regions and its fit
         self.ax.cla()
         self.ax.plot(self.x[ind], self.y[ind], color='g')
         self.ax.plot(self.x, self.yfit, color='r')
         self.ax.set_ylim([min(self.y[ind]) - 1.0, max(self.y[ind]) + 1.0])
 
+        # Plot the radius scale on the upper x-axis
         if self.is_chord:
             ax_rho_ticks = (self.ax.get_xticks())[
                 (self.ax.get_xticks() >= min(self.x))
@@ -266,16 +295,21 @@ class FResidFitGui(Frame):
             self.ax_rho.plot(self.x_rho, self.y, alpha=0)
         self.ax_rho.set_xlabel('Rho (km)')
 
-        y_arrow = np.mean(self.ax.get_ylim())
-        for i in range(len(self.xlim)):
-            self.ax.axvline(self.xlim[i][0], color='b')
-            self.ax.axvline(self.xlim[i][1], color='b')
-            _x_arrow = float(self.xlim[i][0])
-            _dx_arrow = float(np.diff(self.xlim[i]))
-            self.ax.arrow(_x_arrow, y_arrow, _dx_arrow, 0,
-                color='b', head_width=0.1, head_length=50,
-                length_includes_head=True)
+        # Blue vertical lines to designate where the freespace regions are. Not
+        #     doing anymore because I think it looks bad, and doesn't really
+        #     help any since it's easy enough to look at the entered values
+        #     for fit range and find where they are on the x-axis
+#         y_arrow = np.mean(self.ax.get_ylim())
+#         for i in range(len(self.xlim)):
+#             self.ax.axvline(self.xlim[i][0], color='b')
+#             self.ax.axvline(self.xlim[i][1], color='b')
+#             _x_arrow = float(self.xlim[i][0])
+#             _dx_arrow = float(np.diff(self.xlim[i]))
+#             self.ax.arrow(_x_arrow, y_arrow, _dx_arrow, 0,
+#                 color='b', head_width=0.1, head_length=50,
+#                 length_includes_head=True)
 
+        # Plot the residual frequency outside of the freespace regions
         if not_ind is not None:
             self.ax.plot(self.x[not_ind], self.y[not_ind], color='g', alpha=0.1)
 
@@ -286,34 +320,51 @@ class FResidFitGui(Frame):
 
     def adjust_deg(self, e):
         """
+        Purpose:
         Adjust the degree of the fit if you adjusted the "Fit order" combobox.
         Bound to the "combo" variable in initUI()
+
+        Args:
+            e: Event received from selecting a fit order from the drop-down menu
         """
 
+        # Set attribute for the new fit order
         new_deg = e.widget
         self.lvar.set(new_deg.get())
         self.fit_deg = int(new_deg.get())
 
+        # Adjust the fit and re-plot
         self.yfit = self._get_fit()
         self.update_plot()
 
 
     def adjust_range(self):
         """
+        Purpose:
         Adjust ranges to fit over if you changed what's entered in the text
         box and then press the "Set fit range (SPM)" button. Bound to the
         "set_xrange_btn" variable in initUI()
         """
 
-        xlim_entry = self.xlim_entry.get()
-        xlim = []
-        split1 = xlim_entry.split(';')
-        for i in range(len(split1)):
-            split2 = (split1[i]).split(',')
-            _xlim = [float(split2[0]), float(split2[1])]
-            xlim.append(_xlim)
-        self.xlim = xlim
+        # Get the freespace region entry from the textbox, using semicolons to
+        #     separate different regions, and commas to separate the minimum
+        #     and maximum within a region
+        try:
+            xlim_entry = self.xlim_entry.get()
+            xlim = []
+            split1 = xlim_entry.split(';')
+            for i in range(len(split1)):
+                split2 = (split1[i]).split(',')
+                _xlim = [float(split2[0]), float(split2[1])]
+                xlim.append(_xlim)
+            self.xlim = xlim
+        except ValueError:
+            print('WARNING (FResidFitGui.adjust_range): Illegal input in the '
+                + '"Fit range (SPM)" text box. Returning to default fit ranges')
+            self.revert_range()
+            return
 
+        # New indices of self.x falling inside of freespace regions
         ind = []
         for i in range(len(xlim)):
             ind.append(np.argwhere((self.x >= xlim[i][0]) &
@@ -321,6 +372,7 @@ class FResidFitGui(Frame):
         ind = np.reshape(np.concatenate(ind), -1)
         self.ind = ind
 
+        # New indices of self.x falling outside of freespace regions
         not_ind = []
         not_ind.append(np.argwhere(self.x < xlim[0][0]))
         for i in range(len(xlim)-1):
@@ -329,6 +381,7 @@ class FResidFitGui(Frame):
         not_ind = np.reshape(np.concatenate(not_ind), -1)
         self.not_ind = not_ind
 
+        # Make a new fit and plot it
         new_yfit = self._get_fit()
         self.yfit = new_yfit
         self.update_plot()
@@ -336,24 +389,42 @@ class FResidFitGui(Frame):
 
     def revert_range(self):
         """
+        Purpose:
         Revert to the original range and knots to fit over if you press the
         "Reset fit range" button. Bound to the "revert_xrange_btn" in initUI()
         """
 
-        self.xlim = [[min(self.x), max(self.x)]]
+        # Get default radii exclusion zones from the instance of FreqOffsetFit
+        #     and set the xlim, ind, and not_ind attributes accordingly
+        rho_exclude = self.fit_inst._rho_exclude
+        self.xlim = []
+        for i in range(len(rho_exclude)-1):
+            self.xlim.append(
+                [self.x[np.argmin(abs(self.x_rho - rho_exclude[i][1]))],
+                self.x[np.argmin(abs(self.x_rho - rho_exclude[i+1][0]))]])
         self.ind = np.arange(len(self.x))
         self.not_ind = None
+
+        # Make the new fit and plot it
         new_yfit = self._get_fit()
         self.yfit = new_yfit
         self.update_plot()
 
 
     def quit_app(self, e):
+        """
+        Purpose:
+        Called when you hit the "OK" button. Makes sure that you really want
+        to exit the GUI
+        """
 
+        # Check if you really want to exit the GUI, and gives a firm reminder
+        #     to set fit parameters before continuing
         ret = messagebox.askquestion('Question', 'Are you sure of this fit? '
             + 'If not, then click "No", adjust the fit parameters, and '
             + 'REMEMBER TO HIT THE "Set Fit Range (SPM)" BUTTON!!!')
 
+        # Destroy GUI if yes, return to GUI if no
         if ret == 'yes':
             self.quit()
             self.parent.destroy()

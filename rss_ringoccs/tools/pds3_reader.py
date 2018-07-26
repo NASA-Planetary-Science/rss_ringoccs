@@ -1,12 +1,11 @@
 
 """
-jwf_pds3_reader.py
+pds3_reader.py
 
 Purpose: Read legal PDS3 label files.
 
 Revisions:
-    2018 Jun 5 - jfong - original
-    2018 Jun 6 - jfong - translate rgf_pds3_read_series.pro
+    2018 Jul 23 - jfong - copied from jwf_pds3_reader.py
 """
 import pdb
 import numpy as np
@@ -26,6 +25,10 @@ class PDS3Reader():
         record_bytes, ind_rb = self.find_keyword_value(line_list_lbl, 'RECORD_BYTES')
         file_records, ind_fr = self.find_keyword_value(line_list_lbl, 'FILE_RECORDS')
         columns, ind_col = self.find_keyword_value(line_list_lbl, 'COLUMNS')
+        frequency_band, ind_band = self.find_keyword_value(line_list_lbl, 'FREQUENCY_BAND')
+        if frequency_band=='END':
+            frequency_band, ind_band = self.find_keyword_value(line_list_lbl, 'BAND_NAME')
+
 
         obj_type, ind_obj = self.find_keyword_value(line_list_lbl, 'OBJECT')
 
@@ -59,7 +62,7 @@ class PDS3Reader():
             if data_type != 'ASCII_REAL':
                 print('TROUBLE! Cannot handle data_type = ', data_type)
                 pdb.set_trace()
-        series = SeriesReader(infile_lbl, names, record_bytes, file_records)
+        series = SeriesReader(infile_lbl, names, record_bytes, file_records, frequency_band)
 
         self.series = series
         
@@ -83,7 +86,7 @@ class PDS3Reader():
         return keyword, value
 
 class SeriesReader():
-    def __init__(self, infile_lbl, names, record_bytes, file_records):
+    def __init__(self, infile_lbl, names, record_bytes, file_records, frequency_band):
 
         infile_tab = str.replace(infile_lbl, 'LBL', 'TAB')
         product_id = infile_tab.split('/')[-1]
@@ -91,6 +94,7 @@ class SeriesReader():
         self.RECORD_BYTES = record_bytes
         self.FILE_RECORDS = file_records
         self.PRODUCT_ID = product_id
+        self.FREQUENCY_BAND = frequency_band
 
         column_list = []
 
@@ -119,12 +123,41 @@ class SeriesReader():
         self.convert_dict_to_attr(data_dict)
     
     def convert_dict_to_attr(self, input_dict):
+        tc_naming_conventions = {
+                'OBSERVED_EVENT_TIME': 't_oet_spm_vals'
+                , 'RING_EVENT_TIME': 't_ret_spm_vals'
+                , 'SPACECRAFT_EVENT_TIME': 't_set_spm_vals'
+                , 'RING_RADIUS': 'rho_km_vals'
+                , 'RING_LONGITUDE': 'phi_rl_deg_vals'
+                , 'OBSERVED_RING_AZIMUTH': 'phi_ora_deg_vals'
+                , 'OBSERVED_RING_ELEVATION': 'B_deg_vals'
+                , 'SPACECRAFT_TO_RING_INTERCEPT_DISTANCE': 'D_km_vals'
+                , 'RING_INTERCEPT_RADIAL_VELOCITY': 'rho_dot_kms_vals'
+                , 'RING_INTERCEPT_AZIMUTHAL_VELOCITY': 'phi_rl_dot_kms_vals'
+                , 'FRESNEL_SCALE': 'F_km_vals'
+                , 'IMPACT_RADIUS': 'R_imp_km_vals'
+                , 'SPACECRAFT_POSITION_X': 'rx_km_vals'
+                , 'SPACECRAFT_POSITION_Y': 'ry_km_vals'
+                , 'SPACECRAFT_POSITION_Z': 'rz_km_vals'
+                , 'SPACECRAFT_VELOCITY_X': 'vx_kms_vals'
+                , 'SPACECRAFT_VELOCITY_Y': 'vy_kms_vals'
+                , 'SPACECRAFT_VELOCITY_Z': 'vz_kms_vals'
+                , 'SKY_FREQUENCY': 'f_sky_hz_vals'
+                , 'RESIDUAL_FREQUENCY': 'f_sky_resid_fit_vals'
+                , 'FREE_SPACE_POWER': 'p_free_vals'
+                , 'RADIUS_CORRECTION_DUE_TO_IMPROVED_POLE': 'rho_corr_pole_km_vals'
+                , 'RADIUS_CORRECTION_DUE_TO_TIMING_OFFSET': 'rho_corr_timing_km_vals'
+                , 'NORMAL_OPTICAL_DEPTH': 'tau_vals'
+                , 'NORMAL_OPTICAL_DEPTH_THRESHOLD': 'tau_threshold_vals'
+                , 'PHASE_SHIFT': 'phase_deg_vals'
+                }
         for key in input_dict:
             attr_name0 = str.replace(key.strip('"'), ' ', '_')
             attr_name = str.replace(attr_name0, '-', '_')
+            attr_name_output = tc_naming_conventions[attr_name]
             attr_input = np.asarray(input_dict[key])
 
-            setattr(self, attr_name, attr_input)
+            setattr(self, attr_name_output, attr_input)
     
 
         return None

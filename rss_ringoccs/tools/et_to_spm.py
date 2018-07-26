@@ -66,7 +66,7 @@ def et_to_spm(et_vals, kernels=None, ref_doy=None):
             print("TROUBLE! Reference doy is after the first entry of et_vals!")
             pdb.set_trace()
         else:
-            spm_vals = spm_vals + days_past*24.*60.*60.
+            spm_vals = np.asarray(spm_vals) + days_past*24.*60.*60.
         
 
     return np.array(spm_vals)

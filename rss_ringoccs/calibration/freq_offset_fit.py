@@ -7,6 +7,15 @@ Purpose: Makes a fit to the frequency offset made from freq_offset.py, using
          the frequency offset, predicted sky frequency, reconstructed sky
          frequency, and a fit to residual frequency.
 
+WHERE TO GET NECESSARY INPUT:
+    rsr_inst: Use an instance of the RSRReader class, found inside of
+        rss_ringoccs/rsr_reader/rsr_reader.py
+    geo_inst: Use an instance of the Geometry class, found inside of
+        rss_ringoccs/occgeo/calc_occ_geometry.py
+    f_spm, f_offset: Use the output of the calc_freq_offset function, found
+        inside of rss_ringoccs/calibration/calc_freq_offset.py
+    f_uso: 8427222034.34050 (can use this for any occultation)
+
 Revisions:
       gjs_freq_offset_fit.py
    2018 Feb 21 - gsteranka - Original version
@@ -30,8 +39,8 @@ Revisions:
                              input. Added GUI for residual frequency fit, and
                              it defaults to using it
    2018 May 30 - gsteranka - Added _spm_include and _k attributes, and edited
-                             use of GUI to make initial guess at fit. Eliminated
-                             rho_exclude keyword
+                             use of GUI to make initial guess at fit.
+                             Eliminated rho_exclude keyword
    2018 Jun 05 - gsteranka - Added sc_name keyword. Default is Cassini
    2018 Jun 21 - gsteranka - Switch "k" input to "poly_order", and "_k"
                              attribute to "_poly_order"
@@ -56,18 +65,26 @@ except ImportError:
     from ..tools.cassini_blocked import cassini_blocked
     from .f_resid_fit_gui import FResidFitGui
 
+sys.path.append('../..')
+import rss_ringoccs as rss
+sys.path.remove('../..')
+
+
 class FreqOffsetFit(object):
     """Class to make a fit to extracted frequency offset. Uses predicted sky
     frequency, reconstructed sky frequency, and a fit to residual sky frequency
     to do so.
 
     Example:
-        >>> rsr_inst = RSRReader(rsr_file)
-        >>> (f_spm, f_offset) = (f_spm, f_offset) = \
-                calc_freq_offset(spm_vals, IQ_m)
-        >>> fit_inst = FreqOffsetFit(rsr_inst, geo_inst, f_spm, f_offset, \
-                f_uso, kernels, poly_order=poly_order, rho_exclude=rho_exclude)
-        >>> (spm_vals, IQ_c) = fit_inst.get_IQ_c(spm_vals=spm_vals, IQ_m=IQ_m)
+        >>> rsr_inst = rss.rsr_reader.RSRReader(rsr_file)
+        >>> geo_inst = rss.occgeo.Geometry(rsr_inst, 'Saturn', 'Cassini',
+                kernels)
+        >>> f_spm, f_offset =
+                rss.calibration.calc_freq_offset(rsr_inst)
+        >>> fit_inst = rss.calibration.FreqOffsetFit(rsr_inst, geo_inst, f_spm,
+                f_offset, f_uso, kernels, poly_order=poly_order,
+                spm_include=spm_include)
+        >>> spm_vals, IQ_c = fit_inst.get_IQ_c(spm_vals=spm_vals, IQ_m=IQ_m)
 
     Attributes:
         _spm_include (list): Linked to the input range spm_include
@@ -86,6 +103,9 @@ class FreqOffsetFit(object):
         __f_sky_resid_fit (np.ndarray): Fit to observed residual frequency
         __spm_vals (np.ndarray): SPM values at raw resolution over
             full data set
+        _rho_exclude (list): Set of radius regions to exclude when making
+            fit to residual frequency. Specify in km. Default is to
+            exclude B ring region
         __IQ_m (np.ndarray): Raw measured complex signal over full data set
         history (dict): Recorded information about the run
         """
@@ -100,17 +120,14 @@ class FreqOffsetFit(object):
 
         Args:
             rsr_inst: Instance of the RSRReader class
-            geo_inst: Instance of geometry class. Contains attributes t_oet_spm
-                and rho_km_vals
+            geo_inst: Instance of geometry class. Contains attributes
+                t_oet_spm_vals and rho_km_vals
             f_spm (np.ndarray): SPM array that frequency offset was
                 extracted at
             f_offset (np.ndarray): Extracted frequency offset
             f_uso (float): USO frequency for the data set
             poly_order (int): Order of the polynomial fit made to residual
                 frequency
-            rho_exclude (list): Set of radius regions to exclude when making
-                fit to residual frequency. Specify in km. Default is to
-                exclude B ring region
             sc_name (str): Name of spacecraft. Default is 'Cassini'
             spm_include (list): Set of SPM regions to include when making fit
                 to residual frequency. By default, only rho_exclude is used.
@@ -138,7 +155,49 @@ class FreqOffsetFit(object):
             [2] Inputting an incorrect or incomplete set of kernels to Geometry
                 routine before running this will give you a cryptic error
                 message from spiceypy routines
+            [3] Code will exit if no points fall within specified
+                spm_include regions
         """
+
+        if type(rsr_inst) != rss.rsr_reader.RSRReader:
+            sys.exit('ERROR (FreqOffsetFit): rsr_inst input must be an '
+                + 'instance of the RSRReader class')
+
+        if type(geo_inst) != rss.occgeo.Geometry:
+            sys.exit('ERROR (FreqOffsetFIt): geo_inst input must be an '
+                + 'instance of the Geometry class')
+
+        if (type(f_uso) != float) & (type(f_uso) != int):
+            print('WARNING (FreqOffsetFit): f_uso input must be either an int '
+                + 'or float. Ignoring current input and setting to '
+                + str(8427222034.34050))
+            f_uso = 8427222034.34050
+
+        if type(poly_order) != int:
+            print('WARNING (FreqOffsetFit): poly_order input must be an int. '
+                + 'Ignoring current input and setting to order 9')
+            poly_order = 9
+
+        if (type(spm_include) != list) & (spm_include is not None):
+            print('WARNING (FreqOffsetFit): spm_include input must be either '
+                + 'a list or None. Setting to None for default fit ranges')
+            spm_include = None
+
+        if type(USE_GUI) != bool:
+            print('WARNING (FreqOffsetFit): USE_GUI input must be boolean. '
+                + 'Ignoring current input and setting to True')
+            USE_GUI = True
+
+        if type(verbose) != bool:
+            print('WARNING (FreqOffsetFit): verbose input must be boolean. '
+                + 'Ignoring current input and setting to False')
+            verbose = False
+
+        if sc_name != 'Cassini':
+            print('WARNING (FreqOffsetFit): Spacecraft other than Cassini '
+                + 'are not implemented/tested yet. Setting sc_name input '
+                + 'to "Cassini"')
+            sc_name = 'Cassini'
 
         # Keep the RSRReader instance, kernels, Geometry instance, and f_USO
         #     as attributes
@@ -151,7 +210,8 @@ class FreqOffsetFit(object):
         # frequency and its fit
         if verbose:
             print('Calculating predicted sky frequency from input rsr_inst and'
-                + 'reconstructed sky frequency from kernelsin in input geo_inst')
+                + 'reconstructed sky frequency from kernelsin in input '
+                + 'geo_inst')
         self.__f_spm = np.asarray(f_spm)
         self.__f_offset = np.asarray(f_offset)
         f_spm, self.__f_sky_pred = rsr_inst.get_f_sky_pred(f_spm=self.__f_spm)
@@ -168,15 +228,18 @@ class FreqOffsetFit(object):
         # Attribute keeping track of fit parameter
         self._spm_include = spm_include
 
+        # Default fit ranges
+        self._rho_exclude = [[0, 70000], [91900, 94000], [98000, 118000],
+            [194400, np.inf]]
+
         # Set attributes for residual frequency fit, and the
         # new frequency offset fit
-        self.set_f_sky_resid_fit(poly_order=poly_order, spm_include=spm_include,
-            USE_GUI=USE_GUI, verbose=verbose)
+        self.set_f_sky_resid_fit(poly_order=poly_order,
+            spm_include=spm_include, USE_GUI=USE_GUI, verbose=verbose)
 
         # Get I and Q from RSR object
         self.__spm_vals = rsr_inst.spm_vals
         self.__IQ_m = rsr_inst.IQ_m
-
 
     def set_f_sky_resid_fit(self, poly_order=9, spm_include=None, USE_GUI=True,
             verbose=False):
@@ -187,10 +250,8 @@ class FreqOffsetFit(object):
         frequency fit
 
         Args:
-            poly_order (int): Order of polynomial fit made to residual frequency
-            rho_exclude (list): Set of radius regions to exclude when making
-                fit to residual frequency. Specify in km. Default is to
-                exclude B ring region
+            poly_order (int): Order of polynomial fit made to residual
+                frequency
             spm_include (list): Set of SPM regions to include when making fit
                 to residual frequency. By default, only rho_exclude is used.
                 If this keyword is specified, it overrides anything input to
@@ -211,9 +272,29 @@ class FreqOffsetFit(object):
 
         Notes:
         [1] Here is an example spm_include input, where each separate bracket
-        contains a region that we want to include when fitting:
+            contains a region that we want to include when fitting:
             spm_include = [[30250, 32600], [33520, 33890], [33990, 40200]]
         """
+
+        if type(poly_order) != int:
+            print('WARNING (FreqOffsetFit): poly_order input must be an int. '
+                + 'Ignoring current input and setting to order 9')
+            poly_order = 9
+
+        if (type(spm_include) != list) & (spm_include is not None):
+            print('WARNING (FreqOffsetFit): spm_include input must be either '
+                + 'a list or None. Setting to None for default fit ranges')
+            spm_include = None
+
+        if type(USE_GUI) != bool:
+            print('WARNING (FreqOffsetFit): USE_GUI input must be boolean. '
+                + 'Ignoring current input and setting to True')
+            USE_GUI = True
+
+        if type(verbose) != bool:
+            print('WARNING (FreqOffsetFit): verbose input must be boolean. '
+                + 'Ignoring current input and setting to False')
+            verbose = False
 
         # Attributes keeping track of input
         self._poly_order = poly_order
@@ -225,21 +306,30 @@ class FreqOffsetFit(object):
         #     the frequency offset from FreqOffset class. This is the initial
         #     guess for regions to fit over. User adjusts using spm_include
         #     keyword
-        #if rho_exclude is None:
-        rho_exclude = [[0, 70000], [91900, 94000], [98000, 118000],
-            [194400, np.inf]]
+        rho_exclude = self._rho_exclude
 
         f_rho = self.__f_rho
         f_spm = self.__f_spm
 
         # Residual frequency is amount of frequency offset not accounted
         # for by error in predicted spacecraft trajectory
-        f_sky_resid = self.__f_offset - (self.__f_sky_recon - self.__f_sky_pred)
+        try:
+            f_sky_resid = self.__f_offset - (self.__f_sky_recon -
+                self.__f_sky_pred)
+        except ValueError:
+            sys.exit('ERROR (FreqOffsetFit): Couldn\'t subtract recostructed '
+                + 'and predicted sky frequency from frequency offset. Likely '
+                + 'that length of input f_spm doesn\'t match  length of input '
+                + 'f_offset')
+        except TypeError:
+            sys.exit('ERROR (FreqOffsetFit): Couldn\'t subtract recostructed '
+                + 'and predicted sky frequency from frequency offset. Likely '
+                + 'that input f_offset isn\'t an array')
 
         # Determine if Cassini blocked by Saturn's ionosophere. Important for
         #     chord occultations
-        is_blocked_atm, is_blocked_ion = cassini_blocked(f_spm, self.__rsr_inst,
-            self.__kernels)
+        is_blocked_atm, is_blocked_ion = cassini_blocked(f_spm,
+            self.__rsr_inst, self.__kernels)
 
         # Array of indices to include by default. Overridden by spm_include
         #     keyword
@@ -274,8 +364,8 @@ class FreqOffsetFit(object):
             self._spm_include = spm_include
 
         if len(ind) == 0:
-            print('ERROR (FreqOffsetFit.set_f_sky_resid_fit): All specified \n'
-                +'points fall withint specified rho exclusion zone')
+            print('ERROR (FreqOffsetFit.set_f_sky_resid_fit): All \n'
+                + 'points fall outside of specified spm_include regions')
             sys.exit()
 
         # When fitting, use x values adjusted to range over [-1, 1]
@@ -312,40 +402,31 @@ class FreqOffsetFit(object):
         # Set history attribute
         self.__set_history()
 
-
     def get_f_sky_pred(self):
         """Returns predicted sky frequency and SPM it was evaluated at"""
         return self.__f_spm, self.__f_sky_pred
-
 
     def get_f_sky_recon(self):
         """Returns reconstructed sky frequency and SPM it was evaluated at"""
         return self.__f_spm, self.__f_sky_recon
 
-
     def get_f_sky_resid_fit(self):
         """Returns fit to residual frequency"""
         return self.__f_spm, self.__f_sky_resid_fit
-
 
     def get_f_offset_fit(self):
         """Returns fit to frequency offset"""
         return self.__f_spm, self.__f_offset_fit
 
-
-    def get_IQ_c(self, spm_vals=None, IQ_m=None):
+    def get_IQ_c(self):
         """
         Purpose:
         Apply frequency offset fit to raw measured signal. Can supply
         SPM and IQ_m input if desired, otherwise the default is raw
-        resolution
-
-        Args:
-            spm_vals (np.ndarray): SPM values corresponding to complex signal
-                you're frequency correcting. Default is raw resolution from
-                rsr_inst
-            IQ_m (np.ndarray): Complex signal you're frequency correcting.
-                Default is raw resolution from rsr_inst
+        resolution. Raw resolution is made mandatory for this because if
+        you decimate to lower sample rate here, then the power normalization
+        will only work in the future if you downsample by the exact same amount
+        when you do power normalization.
 
         Outputs:
             spm_vals (np.ndarray): SPM values of the returned frequency
@@ -355,21 +436,22 @@ class FreqOffsetFit(object):
         Dependencies:
             [1] numpy
             [2] scipy.interpolate
+        """
 
-        Warnings:
-            [1] If you resample IQ_m before frequency correcting it, you risk
-                making the unnormalized signal much lower than it would
-                otherwise be. Highly recommended to just use the default raw
-                resolution spm_vals and IQ_m
-            """
+        # Complex signal to frequency correct, and corresponding SPM values
+        spm_vals = self.__spm_vals
+        IQ_m = self.__IQ_m
 
-        if IQ_m is None:
+        if (type(spm_vals) != np.ndarray) | (type(IQ_m) != np.ndarray):
+            print('WARNING (FreqOffsetFit.get_IQ_c): spm_vals and IQ_m input '
+                + 'must both be numpy arrays. Ignoring input and using '
+                + 'default (raw resolution)')
             spm_vals = self.__spm_vals
             IQ_m = self.__IQ_m
 
         if len(spm_vals) != len(IQ_m):
-            sys.exit('ERROR (FreqOffsetFit.get_IQ_c):'+
-                '\n SPM and IQ_m input lengths don\'t match')
+            sys.exit('ERROR (FreqOffsetFit.get_IQ_c):'
+                + '\n SPM and IQ_m input lengths don\'t match')
 
         f_offset_fit = self.__f_offset_fit
 
@@ -395,14 +477,13 @@ class FreqOffsetFit(object):
 
         return spm_vals, IQ_c
 
-
     def __set_history(self):
         """
-        Record information about the run and how to reproduce it.
+        Purpose:
+        Set history attribute, which records information about the run and how
+        to reproduce it
         """
 
-        # TODO (gsteranka): Replace entry to 'geo_inst' category of
-        #     input_var_dict with self.__geo_inst.history
         input_var_dict = {'rsr_inst': self.__rsr_inst.history,
             'geo_inst': self.__geo_inst.history, 'f_uso': self.__f_uso}
         input_kw_dict = {'poly_order': self._poly_order,
@@ -413,9 +494,9 @@ class FreqOffsetFit(object):
             'Python Version': platform.python_version(),
             'Operating System': os.uname().sysname,
             'Source File': __file__.split('/')[-1],
-            'Source Directory': __file__.rsplit('/',1)[0] +'/',
+            'Source Directory': __file__.rsplit('/', 1)[0] + '/',
             'Input Variables': input_var_dict,
-            'Input Keywords':input_kw_dict}
+            'Input Keywords': input_kw_dict}
         self.history = hist_dict
 
 

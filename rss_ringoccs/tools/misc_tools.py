@@ -403,19 +403,19 @@ def make_executable(path):
 
 def create_summary_doc(pdfdir,pdffil,outfilename):
     LaTeXFile       = r'''\documentclass{article}
-\usepackage{geometry}
-\geometry{a4paper, margin = 1.0in}
-\usepackage[T1]{fontenc}
-\usepackage{graphicx,float}
-\graphicspath{{%s}}
-\usepackage[dvipsnames]{xcolor}
-\usepackage{mathtools,esint,mathrsfs}
-\usepackage{amsthm,amsfonts,upgreek}
-\usepackage{wrapfig}
-\usepackage[font=scriptsize]{subcaption}
-\usepackage[font={scriptsize,it}]{caption}
-\usepackage{hyperref}
-\hypersetup{
+    \usepackage{geometry}
+    \geometry{a4paper, margin = 1.0in}
+    \usepackage[T1]{fontenc}
+    \usepackage{graphicx,float}
+    \graphicspath{{%s}}
+    \usepackage[dvipsnames]{xcolor}
+    \usepackage{mathtools,esint,mathrsfs}
+    \usepackage{amsthm,amsfonts,upgreek}
+    \usepackage{wrapfig}
+    \usepackage[font=scriptsize]{subcaption}
+    \usepackage[font={scriptsize,it}]{caption}
+    \usepackage{hyperref}
+    \hypersetup{
     colorlinks=true,linkcolor=blue,filecolor=magenta,
     urlcolor=Cerulean,citecolor=SkyBlue}                           
     \title{test}

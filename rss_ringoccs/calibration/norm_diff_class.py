@@ -7,6 +7,20 @@ Purpose: Apply previously made calibration file to calibrate raw data
          (frequency correct and normalize), which produces the diffraction
          pattern given to Fresnel Inversion code.
 
+WHERE TO GET NECESSARY INPUT:
+    rsr_inst: Use an instance of the RSRReader class, found inside of
+        rss_ringoccs/rsr_reader/rsr_reader.py
+    dr_km: Can be any integer, but some recommended typical values are
+        0.5, 0.1, 0.25, 0.5, and 1.0
+    geo_inst: Use an instance of the Geometry class, found inside of
+        rss_ringoccs/occgeo/calc_occ_geometry.py
+    cal_inst: If you don't have a CAL file already made, use an instance of
+        the Calibration class, found inside of
+        rss_ringoccs/calibration/calibration_class.py. If you already have a
+        CAL file made and just want to use what's inside of that, then use an
+        instance of the MakeCalInst class, found inside of
+        rss_ringoccs/tools/make_cal_inst.py
+
 Revisions:
       gjs_produce_normalized_diffraction_pattern.py
    2018 Mar 07 - gsteranka - Original version. Tentative rough draft, since
@@ -97,6 +111,10 @@ except ImportError:
     from ..rsr_reader.rsr_reader import RSRReader
     from .resample_IQ import resample_IQ
 
+sys.path.append('../..')
+import rss_ringoccs as rss
+sys.path.remove('../..')
+
 
 class NormDiff(object):
     """
@@ -105,13 +123,32 @@ class NormDiff(object):
     calibration file (cal_file). Contains everything needed for Fresnel
     Inversion as attributes.
 
+    Example:
+        >>> rsr_inst = rss.rsr_reader.RSRReader(rsr_file)
+        >>> geo_inst = rss.occgeo.Geometry(rsr_inst, 'Saturn', 'Cassini',
+                kernels)
+        >>> fit_inst = rss.calibration.FreqOffsetFit(rsr_inst, geo_inst, f_spm,
+                f_offset, f_uso, kernels, poly_order=poly_order,
+                spm_include=spm_include)
+        >>> spm_raw, IQ_c_raw = fit_inst.get_IQ_c()
+        >>> norm_inst = rss.calibration.Normalization(spm_raw, IQ_c_raw,
+                geo_inst, rsr_inst)
+        >>> spm_fit, spline_fit = norm_inst.get_spline_fit(
+                spline_order=spline_order, knots_spm=knots_spm,
+                dt_down=dt_down, freespace_spm=freespace_spm, verbose=verbose)
+        >>> cal_inst = rss.calibration.Calibration(fit_inst, norm_inst,
+                geo_inst, dt_cal=dt_cal, verbose=verbose)
+        >>> norm_diff_inst = rss.calibration.NormDiff(rsr_inst, dr_km,
+                geo_inst, cal_inst, dr_km_tol=dr_km_tol, is_chord=is_chord,
+                verbose=verbose)
+
     Attributes:
         rho_km_vals (np.ndarray): Ring intercept radius values, in km,
             at final spacing specified in dr_km
         t_oet_spm_vals (np.ndarray): Set of SPM values corresponding to
             rho_km_desired
-        p_norm_vals (np.ndarray): Power normalized to 1. This is the diffraction
-            pattern that is input to the Fresnel inversion step
+        p_norm_vals (np.ndarray): Power normalized to 1. This is the
+            diffraction pattern that is input to the Fresnel inversion step
         phase_rad_vals (np.ndarray): Phase of the complex signal, in radians.
             This is the other part of the diffraction pattern that is input to
             the Fresnel Inversion step
@@ -144,8 +181,9 @@ class NormDiff(object):
         Args:
             rsr_inst: Instance of the RSRReader class. Linked to the full
                 path name of RSR file to process
-            dr_km (float): Desired final radial spacing of processed data, in km
-            geo_inst (str): Instance of Geometry class linked to rsr_inst input
+            dr_km (float): Desired final radial spacing of processed data,
+                in km
+            geo_inst: Instance of Geometry class linked to rsr_inst input
             cal_inst: Calibration instance linked to rsr_inst input. Made using
                 Calibration class if you haven't made a cal_file yet, and made
                 using MakeCalInst class if you have made a cal_file
@@ -172,16 +210,56 @@ class NormDiff(object):
 
         Warnings:
             [1] Be sure to set decimate_16khz_to_1khz=True when making rsr_inst
-                if you did so before doing the previous processing steps to make
-                GEO and CAL files. Otherwise, (1) it will take forever, and
-                (2) the power will not normalize correctly.
+                if you did so before doing the previous processing steps to
+                make GEO and CAL files. Otherwise, (1) it will take forever,
+                and (2) the power will not normalize correctly.
             [2] If it's a chord occultation, you will get problems if you don't
                 set is_chord=True
             [3] Radius correction due to pole direction and timing offset not
                 yet implemented, so the corresponding attributes
                 (rho_corr_pole_km_vals and rho_corr_timing_km_vals) are set
-                to arrays of -999 right now
+                to arrays of 0 right now. Same thing for the
+                tau_threshold_vals attribute
+            [4] Don't make dr_km something stupidly large. Like, 70000km, or
+                something on the order of a full occultation. Haven't tried it
+                yet, but it certainly won't go over well
         """
+
+        if type(rsr_inst) != rss.rsr_reader.RSRReader:
+            sys.exit('ERROR (NormDiff): rsr_inst input must be an instance of '
+                + 'the RSRReader class')
+
+        if type(geo_inst) != rss.occgeo.Geometry:
+            sys.exit('ERROR (NormDiff): geo_inst input must be an '
+                + 'instance of the Geometry class')
+
+        if ((type(cal_inst) != rss.calibration.Calibration)
+                & (type(cal_inst) != rss.tools.MakeCalInst)):
+            sys.exit('ERROR (NormDiff): cal_inst input must be an instance of '
+                + 'the Calibration class if you don\'t have a CAL file '
+                + 'pre-made. Can also be an instance of the MakeCalInst class '
+                + 'if you have a CAL file that you want to turn into an '
+                + 'instance')
+
+        if (type(dr_km) != float) & (type(dr_km) != int):
+            sys.exit('ERROR (NormDiff): dr_km input must be either a float '
+                + 'or int')
+
+        if (type(dr_km_tol) != float) & (type(dr_km_tol) != int):
+            sys.exit('ERROR (NormDiff): dr_km_tol input must be either a '
+                + 'float or int')
+
+        if type(verbose) != bool:
+            print('WARNING (NormDiff): verbose input must be one of '
+                + 'Python\'s built-in booleans (True or False). Setting to '
+                + 'False')
+            verbose = False
+
+        if type(is_chord) != bool:
+            print('WARNING (NormDiff): is_chord input must be one of '
+                + 'Python\'s built-in booleans (True or False). Setting to '
+                + 'False')
+            is_chord = False
 
         spm_geo = geo_inst.t_oet_spm_vals
         rho_km_geo = geo_inst.rho_km_vals
@@ -196,14 +274,33 @@ class NormDiff(object):
         #     specify it as one. Ignore very first and last elements because
         #     those sometimes go to crazy values
         rho_dot_trim = rho_dot_kms_geo[1:-2]
-        if (len(rho_dot_trim[rho_dot_trim > 0]) != 0) & (
-                (len(rho_dot_trim[rho_dot_trim < 0]) != 0)) & (
-                is_chord is False):
-            print('WARNING: possible chord occultation detected, but is_chord '
-                + 'is False. Did you forget to set is_chord=True?')
+        if (np.any(rho_dot_trim > 0) & np.any(rho_dot_trim < 0)
+                & (is_chord is False)):
+            while True:
+                user_warning_input = input('WARNING: possible chord '
+                    + 'occultation detected, but is_chord is False. Did you '
+                    + 'forget to set is_chord=True? (y/n): ')
+                if user_warning_input == 'y':
+                    is_chord = True
+                    break
+                if user_warning_input == 'n':
+                    break
+
+        # In case user specified is_chord=True when it actually isn't
+        if ((np.all(rho_dot_trim > 0) | np.all(rho_dot_trim < 0))
+                & (is_chord is True)):
+            while True:
+                user_warning_input = input('WARNING: Likely not a chord. '
+                    + 'Did you mean to say is_chord=False? (y/n): ')
+                if user_warning_input == 'y':
+                    is_chord = False
+                    break
+                if user_warning_input == 'n':
+                    break
 
         # Function to convert SPM to rho
-        rho_interp_func = interp1d(spm_geo, rho_km_geo, fill_value='extrapolate')
+        rho_interp_func = interp1d(spm_geo, rho_km_geo,
+            fill_value='extrapolate')
 
         # SPM range of geo_inst (pretty much always the full occultation)
         spm_range = [min(spm_geo), max(spm_geo)]
@@ -223,14 +320,14 @@ class NormDiff(object):
         rho_km_cal = rho_interp_func(spm_cal)
 
         # If that cal file can't cover entire SPM range from geo_inst
-        if (spm_range[0]<min(spm_cal)) | (spm_range[1]>max(spm_cal)):
+        if (spm_range[0] < min(spm_cal)) | (spm_range[1] > max(spm_cal)):
             print('\nWARNING (NormDiff): Specified cal file is missing '
                 + 'points required to pre-process points in SPM range of '
                 + 'geo_inst. Calibration SPM range is ['
                 + str(min(spm_cal))+', ' + str(max(spm_cal))
-                +'], while geo_inst SPM range is ['
-                + str(min(spm_geo))+', '+str(max(spm_geo))+']. Reducing to '
-                + 'SPM range of CAL file')
+                + '], while geo_inst SPM range is ['
+                + str(min(spm_geo)) + ', ' + str(max(spm_geo)) + ']. Reducing '
+                + 'to SPM range of CAL file')
             _ind = ((spm_vals >= min(spm_cal)) &
                 (spm_vals <= max(spm_cal))).nonzero()
             spm_vals = spm_vals[_ind]
@@ -263,14 +360,14 @@ class NormDiff(object):
             print('Interpolating and setting attributes')
 
         if not is_chord:
-            rho_km_desired, IQ_c_desired = resample_IQ(rho_km_vals, IQ_c, dr_km,
-                dr_km_tol=dr_km_tol)
+            rho_km_desired, IQ_c_desired = resample_IQ(rho_km_vals, IQ_c,
+                dr_km, dr_km_tol=dr_km_tol)
 
             # Interpolate freespace power (spline fit) to rho_km_desired
             p_free_interp_func = interp1d(rho_km_cal, p_free_cal,
                 fill_value='extrapolate')
             p_free = p_free_interp_func(rho_km_desired)
-            
+
             # Construct power from IQ_c_desired and not IQ_m_desired or
             #     resampled power, because p_free was constructed from
             #     downsampled IQ_c. It's important to not use IQ_m_desired
@@ -279,7 +376,7 @@ class NormDiff(object):
             p_norm_vals = (abs(IQ_c_desired)**2)/p_free
             phase_rad_vals = np.arctan2(np.imag(IQ_c_desired),
                 np.real(IQ_c_desired))
-            
+
             spm_desired_func = interp1d(rho_km_geo, spm_geo,
                 fill_value='extrapolate')
             spm_desired = spm_desired_func(rho_km_desired)
@@ -321,7 +418,6 @@ class NormDiff(object):
 
             end_of_chord_ing = len(rho_km_ing) - 1
 
-
         self.__set_history(rsr_inst, dr_km, geo_inst, cal_inst, dr_km_tol)
         self.__set_attributes(rho_km_desired, spm_desired, p_norm_vals,
             phase_rad_vals,
@@ -329,15 +425,35 @@ class NormDiff(object):
             spm_cal, f_sky_pred_cal, rsr_inst,
             end_of_chord_ing=end_of_chord_ing)
 
-
     def __set_attributes(self, rho_km_desired, spm_desired, p_norm_vals,
             phase_rad_vals,
             spm_geo, rho_dot_kms_geo, geo_inst,
             spm_cal, f_sky_pred_cal, rsr_inst,
             end_of_chord_ing=None):
         """
+        Purpose:
         Private method called by __init__ to set attributes of the
         instance
+
+        Args:
+            rho_km_desired (np.ndarray): Radius values at final spacing
+            spm_desired (np.ndarray): SPM values evaluated at rho_km_desired
+            p_norm_vals (np.ndarray): Normalized power evaluated at
+                rho_km_desired
+            phase_rad_vals (np.ndarray): Drift-corrected phase in radians
+                evaluated at rho_km_desired
+            spm_geo (np.ndarray): SPM values of geometry parameters
+            rho_dot_kms_geo (np.ndarray): Radial velocity evaluated at spm_geo
+            geo_inst: Instance of the Geometry class
+            spm_cal (np.ndarray): SPM values of the calibration parameters
+            f_sky_pred_cal (np.ndarray): Sky frequency values listed in
+                calibration, which has the frequency offset added on top of the
+                values read straight from the RSR file using
+                RSRReader.get_f_sky_pred
+            rsr_inst: Instance of the RSRReader class
+            end_of_chord_ing (int or None): Index of the end of the ingress
+                portion of a chord occultation. Set to None if the
+                occultation's not chord
         """
 
         self.rho_km_vals = rho_km_desired
@@ -352,8 +468,6 @@ class NormDiff(object):
         t_ret_geo = geo_inst.t_ret_spm_vals
         t_set_geo = geo_inst.t_set_spm_vals
         phi_rl_rad_geo = np.radians(geo_inst.phi_rl_deg_vals)
-        #rho_corr_pole_km_geo = geo_inst.rho_corr_pole_km_vals
-        #rho_corr_timing_km_geo = geo_inst.rho_corr_timing_km_vals
 
         # Ring opening angle at final spacing
         B_rad_func = interp1d(spm_geo, B_rad_geo, fill_value='extrapolate')
@@ -395,23 +509,20 @@ class NormDiff(object):
         self.rho_dot_kms_vals = rho_dot_kms_func(spm_desired)
 
         # Radius correction due to Saturn's pole direction at final spacing
-        #rho_corr_pole_km_func = interp1d(spm_geo, rho_corr_pole_km_geo,
-        #    fill_value='extrapolate')
-        #self.rho_corr_pole_km_vals = rho_corr_pole_km_func(spm_desired)
         self.rho_corr_pole_km_vals = np.zeros(len(spm_desired))
 
         # Radius correction due to timing offset at final spacing
-        #rho_corr_timing_km_func = interp1d(spm_geo, rho_corr_timing_km_geo,
-        #    fill_value='extrapolate')
-        #self.rho_corr_timing_km_vals = rho_corr_timing_km_func(spm_desired)
         self.rho_corr_timing_km_vals = np.zeros(len(spm_desired))
 
         self.tau_threshold_vals = np.zeros(len(spm_desired))
 
         self.end_of_chord_ing = end_of_chord_ing
 
-
     def __set_history(self, rsr_inst, dr_km, geo_inst, cal_inst, dr_km_tol):
+        """
+        Purpose:
+        Set history attribute
+        """
 
         input_var_dict = {'rsr_inst': rsr_inst.history, 'dr_km': dr_km,
             'geo_file': geo_inst.history, 'cal_inst': cal_inst.history}
@@ -422,14 +533,14 @@ class NormDiff(object):
             'Python Version': platform.python_version(),
             'Operating System': os.uname().sysname,
             'Source File': __file__.split('/')[-1],
-            'Source Directory': __file__.rsplit('/',1)[0] +'/',
+            'Source Directory': __file__.rsplit('/', 1)[0] + '/',
             'Input Variables': input_var_dict,
-            'Input Keywords':input_kw_dict}
+            'Input Keywords': input_kw_dict}
         self.history = hist_dict
-
 
     def chord_split(self):
         """
+        Purpose:
         Split chord occultation instance into an ingress instance and an egress
         instance, and return them.
 
@@ -439,12 +550,14 @@ class NormDiff(object):
 
         Notes:
             [1] Is it bad practice to create separate copies of the instances
-                and return them? Not sure what else to do.
+                and return them? Not sure what else to do. I think it's okay,
+                for whatever that's worth
         """
 
         if self.end_of_chord_ing is None:
-            print('WARNING (NormDiff.chord_split()): Not a chord occultation, '+
-                'so can\'t split. Ignoring call to this method, returning None')
+            print('WARNING (NormDiff.chord_split()): Not a chord occultation, '
+                + 'so can\'t split. Ignoring call to this method, '
+                + 'returning None')
             return None
 
         # Record all attribute names

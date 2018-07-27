@@ -3,7 +3,7 @@
 power_fit_gui.py
 
 Purpose: Copied from fit_example_power_norm.py and edited to use in
-         power_normalization_v2.py. 
+         power_normalization_v2.py.
 
 Notes on text box entry:
     [1] In the "Fit ranges" text box, you need to separate freespace
@@ -35,6 +35,7 @@ import tkinter
 from tkinter import Tk, IntVar, StringVar, messagebox
 from tkinter.ttk import Frame, Combobox, Label, Button, Entry, LabelFrame
 
+
 class PowerFitGui(Frame):
     """
     Class for a GUI to make a spline fit to power. Includes buttons to adjust
@@ -51,7 +52,8 @@ class PowerFitGui(Frame):
             fit. Downsampling is done using scipy.signal.resample_poly in
             the Normalization class. Downsampled to the spacing "dt_down" in
             the Normalization class (1/2 second by default).
-        rho_km_vals_down (np.ndarray): Rho values corresponding to spm_vals_down
+        rho_km_vals_down (np.ndarray): Rho values corresponding to
+            spm_vals_down
         p_obs_down (np.ndarray): Array of downsampled power values to fit.
             Gotten from downsampling frequency-corrected complex samples
         spm_fit (np.ndarray): SPM values to evaluate the fit for
@@ -141,7 +143,6 @@ class PowerFitGui(Frame):
         self.parent = parent
         self.initUI()
 
-
     def initUI(self):
         """
         Initialize the user interface. Called by __init__()
@@ -214,7 +215,6 @@ class PowerFitGui(Frame):
         ok_btn.bind('<Button-1>', self.quit_app)
         ok_btn.pack(side=tkinter.LEFT, padx=120)
 
-
     def _get_fit(self):
         """
         Purpose:
@@ -226,7 +226,6 @@ class PowerFitGui(Frame):
             spline_order=self.fit_deg, knots_spm=self.knots_spm,
             freespace_spm=self.xlim, USE_GUI=False)
         return spline_fit
-
 
     def _get_rho_tick_labels(self, spm_tick_labels):
         """
@@ -240,7 +239,6 @@ class PowerFitGui(Frame):
         spm_to_rho_func = interp1d(self.x, self.x_rho)
         rho_tick_labels = spm_to_rho_func(spm_tick_labels)
         return ['%.1f' % rho_tick_label for rho_tick_label in rho_tick_labels]
-
 
     def plot_data(self):
         """
@@ -288,7 +286,6 @@ class PowerFitGui(Frame):
         self.canvas._tkcanvas.pack(side=tkinter.TOP, fill=tkinter.BOTH,
             expand=1)
 
-
     def update_plot(self):
         """
         Purpose:
@@ -306,7 +303,8 @@ class PowerFitGui(Frame):
         self.ax.plot(self.x[ind], self.y[ind], color='b')
         self.ax.plot(self.xfit, self.yfit, color='r')
         if not_ind is not None:
-            self.ax.plot(self.x[not_ind], self.y[not_ind], color='b', alpha=0.1)
+            self.ax.plot(self.x[not_ind], self.y[not_ind], color='b',
+                alpha=0.1)
 
         # Plot radius scale on upper x-axis
         if self.is_chord:
@@ -324,7 +322,6 @@ class PowerFitGui(Frame):
         self.ax.set_xlabel('SPM')
         self.canvas.show()
 
-
     def adjust_deg(self, e):
         """
         Purpose:
@@ -340,7 +337,6 @@ class PowerFitGui(Frame):
         # Get new fit and plot it
         self.yfit = self._get_fit()
         self.update_plot()
-
 
     def adjust_range_and_knots(self):
         """
@@ -363,10 +359,10 @@ class PowerFitGui(Frame):
                 xlim.append(_xlim)
             self.xlim = xlim
         except ValueError:
-            print('WARNING (PowerFitGui.adjust_range_and_knots): Illegal input '
-                + 'for "Fit ranges" text box. Reverting to original fit. '
-                + 'Did you forget to enter a value before pressing the "Set '
-                + 'fit ranges and knots (SPM)" button?')
+            print('WARNING (PowerFitGui.adjust_range_and_knots): Illegal '
+                + 'input for "Fit ranges" text box. Reverting to original '
+                + 'fit. Did you forget to enter a value before pressing '
+                + 'the "Set fit ranges and knots (SPM)" button?')
             self.revert_range()
             return
 
@@ -381,9 +377,9 @@ class PowerFitGui(Frame):
         # Indices outside of freespace regions
         not_ind = []
         not_ind.append(np.argwhere(self.x < xlim[0][0]))
-        for i in range(len(xlim)-1):
+        for i in range(len(xlim) - 1):
             not_ind.append(np.argwhere((self.x > xlim[i][1]) &
-                (self.x < xlim[i+1][0])))
+                (self.x < xlim[i + 1][0])))
         not_ind.append(np.argwhere(self.x > xlim[-1][1]))
         not_ind = np.reshape(np.concatenate(not_ind), -1)
         self.not_ind = not_ind
@@ -407,7 +403,6 @@ class PowerFitGui(Frame):
         self.yfit = new_yfit
         self.update_plot()
 
-
     def revert_range(self):
         """
         Purpose:
@@ -425,7 +420,8 @@ class PowerFitGui(Frame):
                 self.x[np.argmin(abs(self.x_rho - _range[1]))]])
         self.knots_spm = []
         for _knot_km in self.norm_inst._knots_km:
-            self.knots_spm.append(self.x[np.argmin(abs(self.x_rho - _knot_km))])
+            self.knots_spm.append(
+                self.x[np.argmin(abs(self.x_rho - _knot_km))])
         self.ind = np.arange(len(self.x))
         self.not_ind = None
 
@@ -433,7 +429,6 @@ class PowerFitGui(Frame):
         new_yfit = self._get_fit()
         self.yfit = new_yfit
         self.update_plot()
-
 
     def quit_app(self, e):
         """

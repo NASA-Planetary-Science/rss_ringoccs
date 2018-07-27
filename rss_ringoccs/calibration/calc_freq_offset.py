@@ -146,7 +146,7 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192,
 
     dt_raw = spm_vals[1] - spm_vals[0]
     sample_rate_hz = round(1.0 / dt_raw)
-    pts_per_fft = int(dt_freq*sample_rate_hz)
+    pts_per_fft = int(dt_freq * sample_rate_hz)
 
     # Range surrounding peak frequency that continuous FFT searches
     #     to refine the peak
@@ -167,7 +167,7 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192,
     if remainder_pts != 0:
         end_ind -= remainder_pts
         end_ind += pts_per_fft
-        if end_ind > (len(spm_vals)-1):
+        if end_ind > (len(spm_vals) - 1):
             end_ind -= pts_per_fft
 
     if verbose:
@@ -187,8 +187,8 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192,
     # Multiprocessing step
     results = []
     queues = [Queue() for i in range(cpu_count)]
-    n_per_core = int(np.floor(n_loops/cpu_count))
-    loop_args = [(i*n_per_core, (i+1)*n_per_core, spm_vals, IQ_m,
+    n_per_core = int(np.floor(n_loops / cpu_count))
+    loop_args = [(i * n_per_core, (i + 1) * n_per_core, spm_vals, IQ_m,
         pts_per_fft, cont_fft_freq_range, queues[i]) for i in range(cpu_count)]
     jobs = [Process(target=__loop, args=(a)) for a in loop_args]
     for j in jobs:
@@ -254,8 +254,8 @@ def __loop(i_start, i_end, spm_vals, IQ_m, pts_per_fft, cont_fft_freq_range,
     i_iter = 0
 
     for i in range(i_start, i_end):
-        _spm = spm_vals[i*pts_per_fft:(i+1)*pts_per_fft]
-        _IQ_m = IQ_m[i*pts_per_fft:(i+1)*pts_per_fft]
+        _spm = spm_vals[i * pts_per_fft:(i + 1) * pts_per_fft]
+        _IQ_m = IQ_m[i * pts_per_fft:(i + 1) * pts_per_fft]
 
         _spm_avg = np.mean(_spm)
         _freq = __find_peak_freq(_spm, _IQ_m, cont_fft_freq_range)
@@ -304,16 +304,16 @@ def __find_peak_freq(spm, IQ_m, cont_fft_freq_range):
 
     # Hamming window
     weight = 0.5 * (1.0 - np.cos(2.0 * np.pi * np.arange(pts_per_fft) /
-        (pts_per_fft-1)))
+        (pts_per_fft - 1)))
     IQ_m_weight = IQ_m * weight
 
     # Take FFT and get the power spectrum
     IQ_m_fft = np.fft.fft(IQ_m_weight)
-    power = (np.absolute(IQ_m_fft)**2) / (pts_per_fft**2)
+    power = (np.absolute(IQ_m_fft) ** 2) / (pts_per_fft ** 2)
 
     # Array of frequency values corresponding to "power" array
-    freq_half_length = int(pts_per_fft/2)
-    freq_min = 1.0 / (pts_per_fft*dt_raw)
+    freq_half_length = int(pts_per_fft / 2)
+    freq_min = 1.0 / (pts_per_fft * dt_raw)
     freq1 = np.arange(freq_half_length) * freq_min
     freq2 = (np.arange(freq_half_length) - freq_half_length) * freq_min
     freq = np.concatenate((freq1, freq2))
@@ -331,14 +331,14 @@ def __find_peak_freq(spm, IQ_m, cont_fft_freq_range):
 
     # Refine max frequency with a second pass
     freq_c2 = (freq_max_pass1 - 1.0 +
-        np.arange(cont_fft_num_pass2)*(2.0/cont_fft_num_pass2))
+        np.arange(cont_fft_num_pass2) * (2.0 / cont_fft_num_pass2))
     freq_max_pass2 = __refine_peak_freq(IQ_m_weight, freq_c2, dt_raw)
 
     # Refine max frequency with a third pass
     freq_step = 1.0 / cont_fft_num_pass2
     freq_c3 = (freq_max_pass2 - freq_step +
         np.arange(cont_fft_num_pass3) *
-        (2.0 * freq_step/cont_fft_num_pass3))
+        (2.0 * freq_step / cont_fft_num_pass3))
     freq_max_pass3 = __refine_peak_freq(IQ_m_weight, freq_c3, dt_raw)
 
     return freq_max_pass3
@@ -363,9 +363,9 @@ def __refine_peak_freq(IQ_m_weight, freq_c, dt):
     pow_c = np.zeros(len(freq_c))
     for i in range(len(freq_c)):
         theta = 2.0 * np.pi * freq_c[i] * dt
-        zexk = np.exp(-1j*theta*(np.arange(n) + 1))
-        sum_zexk = np.sum(IQ_m_weight*zexk) + 1.0
-        pow_c[i] = (np.absolute(sum_zexk)**2)/(n**2)
+        zexk = np.exp(-1j * theta * (np.arange(n) + 1))
+        sum_zexk = np.sum(IQ_m_weight * zexk) + 1.0
+        pow_c[i] = (np.absolute(sum_zexk) ** 2) / (n ** 2)
 
     ind_max = np.argmax(pow_c)
     freq_max = freq_c[ind_max]

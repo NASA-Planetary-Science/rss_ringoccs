@@ -334,9 +334,9 @@ class FreqOffsetFit(object):
         # Array of indices to include by default. Overridden by spm_include
         #     keyword
         ind = []
-        for i in range(len(rho_exclude)-1):
+        for i in range(len(rho_exclude) - 1):
             ind.append(np.argwhere((f_rho > rho_exclude[i][1]) &
-                (f_rho < rho_exclude[i+1][0]) &
+                (f_rho < rho_exclude[i + 1][0]) &
                 (np.invert(is_blocked_ion))))
         ind = np.reshape(np.concatenate(ind), -1)
 
@@ -356,9 +356,9 @@ class FreqOffsetFit(object):
             if verbose:
                 print('Using default fit parameters')
             spm_include = []
-            for i in range(len(rho_exclude)-1):
+            for i in range(len(rho_exclude) - 1):
                 _ind = np.argwhere((f_rho > rho_exclude[i][1])
-                    & (f_rho < rho_exclude[i+1][0]))
+                    & (f_rho < rho_exclude[i + 1][0]))
                 spm_include.append([float(min(f_spm[_ind])),
                     float(max(f_spm[_ind]))])
             self._spm_include = spm_include
@@ -370,7 +370,8 @@ class FreqOffsetFit(object):
 
         # When fitting, use x values adjusted to range over [-1, 1]
         npts = len(f_spm)
-        spm_temp = (f_spm - f_spm[int(npts/2)])/max(f_spm - f_spm[int(npts/2)])
+        spm_temp = ((f_spm - f_spm[int(npts / 2)])
+            / max(f_spm - f_spm[int(npts / 2)]))
 
         # Coefficients for least squares fit, and evaluation of coefficients
         if verbose:
@@ -458,22 +459,22 @@ class FreqOffsetFit(object):
         # Interpolate frequeny offset fit to 0.1 second spacing, since
         # this makes the integration later more accurate
         dt = 0.1
-        npts = round((self.__f_spm[-1] - self.__f_spm[0])/dt)
-        f_spm_interp = self.__f_spm[0] + dt*np.arange(npts)
+        npts = round((self.__f_spm[-1] - self.__f_spm[0]) / dt)
+        f_spm_interp = self.__f_spm[0] + dt * np.arange(npts)
         f_offset_fit_function = interp1d(self.__f_spm, f_offset_fit,
             fill_value='extrapolate')
         f_offset_fit_interp = f_offset_fit_function(f_spm_interp)
 
         # Integration of frequency offset fit to get phase detrending function.
         # Then interpolated to same SPM as I and Q
-        f_detrend_interp = np.cumsum(f_offset_fit_interp)*dt
-        f_detrend_interp_rad = f_detrend_interp*(2.0*np.pi)
+        f_detrend_interp = np.cumsum(f_offset_fit_interp) * dt
+        f_detrend_interp_rad = f_detrend_interp * (2.0 * np.pi)
         f_detrend_rad_function = interp1d(f_spm_interp, f_detrend_interp_rad,
             fill_value='extrapolate')
         f_detrend_rad = f_detrend_rad_function(spm_vals)
 
         # Apply detrending function
-        IQ_c = IQ_m*np.exp(-1j*f_detrend_rad)
+        IQ_c = IQ_m * np.exp(-1j * f_detrend_rad)
 
         return spm_vals, IQ_c
 

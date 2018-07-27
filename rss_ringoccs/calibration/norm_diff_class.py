@@ -525,7 +525,7 @@ class NormDiff(object):
         """
 
         input_var_dict = {'rsr_inst': rsr_inst.history, 'dr_km': dr_km,
-            'geo_file': geo_inst.history, 'cal_inst': cal_inst.history}
+            'geo_inst': geo_inst.history, 'cal_inst': cal_inst.history}
         input_kw_dict = {'dr_km_tol': dr_km_tol}
         hist_dict = {'User Name': os.getlogin(),
             'Host Name': os.uname().nodename,

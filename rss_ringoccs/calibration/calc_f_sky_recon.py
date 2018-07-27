@@ -13,8 +13,9 @@ Revisions:
       gjs_calc_f_sky_recon.py
    2018 Feb 22 - gsteranka - Original version
       gjs_calc_f_sky_recon_v2.py
-   2018 Mar 06 - gsteranka - Edited to be a set of functions instead of a class,
-                             and to take SPM directly, instead of ephemeris time
+   2018 Mar 06 - gsteranka - Edited to be a set of functions instead of a
+                             class, and to take SPM directly, instead of
+                             ephemeris time
       calc_f_sky_recon.py
    2018 Mar 20 - gsteranka - Copy to official version and remove debug steps
 """
@@ -29,30 +30,30 @@ except ImportError:
     from ..tools.spm_to_et import spm_to_et
 
 # Product of the gravitational constant by the Sun mass
-MUS    = 1.3271244002331E+11
+MUS = 1.3271244002331E+11
 
 # Parameter of the General Relativity Theory
-GAMMA  = 1.0000000000000E+00
+GAMMA = 1.0000000000000E+00
 
 # Factor (1+gamma)*mus/clight**3
-LTfac  = 9.8509818970128E-06
+LTfac = 9.8509818970128E-06
 
 # see derpt.f for assignment of IDs
-ID_SSB  = [1,2,399,4,5,6,7,8,9,10,301,606]
+ID_SSB = [1, 2, 399, 4, 5, 6, 7, 8, 9, 10, 301, 606]
 
-GM_SSB  =  [
-    2.2032080000000E+04, #1
-    3.2485859900000E+05, #
-    3.9860043600000E+05, #399
-    4.2828314000000E+04, #4
-    1.2671276786300E+08, #5
-    3.7940626063000E+07, #6
-    5.7945490070000E+06, #7
-    6.8365340640000E+06, #8
-    9.8160100000000E+02, #9
-    1.3271244002331E+11, #10
-    4.9027990000000E+03, #301
-    8.9781370309840E+03] #606 (Titan) from cpck30Mar2016.tpc
+GM_SSB = [
+    2.2032080000000E+04,  # 1
+    3.2485859900000E+05,  #
+    3.9860043600000E+05,  # 399
+    4.2828314000000E+04,  # 4
+    1.2671276786300E+08,  # 5
+    3.7940626063000E+07,  # 6
+    5.7945490070000E+06,  # 7
+    6.8365340640000E+06,  # 8
+    9.8160100000000E+02,  # 9
+    1.3271244002331E+11,  # 10
+    4.9027990000000E+03,  # 301
+    8.9781370309840E+03]  # 606 (Titan) from cpck30Mar2016.tpc
 
 
 def calc_f_sky_recon(f_spm, rsr_inst, sc_name, f_uso, kernels, TEST=False):
@@ -151,7 +152,7 @@ def derpt(et, code):
 
     ref = 'ECLIPJ2000'
     # Index for Solar System Barycenter
-    SSB     =       0
+    SSB = 0
     abcorr = 'NONE'
 
     [SI, _lt] = spice.spkez(code, et, ref, abcorr, SSB)

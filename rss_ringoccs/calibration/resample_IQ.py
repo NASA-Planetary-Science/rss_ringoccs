@@ -34,6 +34,7 @@ import numpy as np
 from scipy import signal
 from scipy.interpolate import interp1d
 
+
 def pre_resample(rho_km, vec, freq):
     """
     Sub-function inside of resample_IQ to put vectors to uniform spaced
@@ -42,15 +43,15 @@ def pre_resample(rho_km, vec, freq):
     """
 
     # Average radius spacing over region
-    ts_avg = abs(rho_km[-1]  - rho_km[0])/float(len(rho_km) - 1)
+    ts_avg = abs(rho_km[-1] - rho_km[0]) / float(len(rho_km) - 1)
     p = 1
-    q = int(round(1.0/(ts_avg*freq)))
-    dr_grid = float(p)/(q*freq)
+    q = int(round(1.0 / (ts_avg * freq)))
+    dr_grid = float(p) / (q * freq)
 
     # Uniform radius grid at near-raw resolution to which to interpolate.
     #     For ingress, this implicitly reverses radius scale!
-    n_pts = round(abs(rho_km[-1] - rho_km[0])/dr_grid)
-    rho_grid = min(rho_km) + dr_grid*np.arange(n_pts)
+    n_pts = round(abs(rho_km[-1] - rho_km[0]) / dr_grid)
+    rho_grid = min(rho_km) + dr_grid * np.arange(n_pts)
 
     # Interpolate to near-raw resolution. For ingress, this implicitly
     #     reverses radius scale!
@@ -116,15 +117,16 @@ def resample_IQ(rho_km, IQ_c, dr_desired, dr_km_tol=0.01, TEST=False):
 
     # Pre-resampling steps. Interpolates to uniform radius at near-raw spacing
     rho_km_uniform, I_c_uniform, p, q = pre_resample(rho_km, I_c,
-        1.0/dr_desired)
+        1.0 / dr_desired)
     rho_km_uniform, Q_c_uniform, p, q = pre_resample(rho_km, Q_c,
-        1.0/dr_desired)
+        1.0 / dr_desired)
 
     # Downsample by factor q to desired final spacing
     I_c_desired = signal.resample_poly(I_c_uniform, p, q)
     Q_c_desired = signal.resample_poly(Q_c_uniform, p, q)
 
-    rho_km_desired = rho_km_uniform[0] + dr_desired*np.arange(len(I_c_desired))
+    rho_km_desired = (rho_km_uniform[0]
+        + dr_desired * np.arange(len(I_c_desired)))
 
     if TEST:
         print('First 10 rho, I_c, Q_c:')
@@ -132,7 +134,7 @@ def resample_IQ(rho_km, IQ_c, dr_desired, dr_km_tol=0.01, TEST=False):
             print('%24.16f %24.16f %24.16f' %
                 (rho_km_desired[i], I_c_desired[i], Q_c_desired[i]))
 
-    return rho_km_desired, I_c_desired + 1j*Q_c_desired
+    return rho_km_desired, I_c_desired + 1j * Q_c_desired
 
 
 if __name__ == '__main__':

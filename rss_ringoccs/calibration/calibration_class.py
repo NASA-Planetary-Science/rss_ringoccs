@@ -33,6 +33,7 @@ sys.path.append('../..')
 import rss_ringoccs as rss
 sys.path.remove('../..')
 
+
 class Calibration(object):
     """
     Purpose:
@@ -53,8 +54,8 @@ class Calibration(object):
         >>> spm_fit, spline_fit = norm_inst.get_spline_fit(
                 spline_order=spline_order, knots_spm=knots_spm,
                 dt_down=dt_down, freespace_spm=freespace_spm, verbose=verbose)
-        >>> cal_inst = rss.calibration.Calibration(fit_inst, norm_inst, geo_inst,
-                dt_cal=dt_cal, verbose=verbose)
+        >>> cal_inst = rss.calibration.Calibration(fit_inst, norm_inst,
+                geo_inst, dt_cal=dt_cal, verbose=verbose)
 
     Attributes:
         t_oet_spm_vals (np.ndarray): SPM values from calibration file
@@ -131,8 +132,8 @@ class Calibration(object):
         # SPM for calibration parameters
         if verbose:
             print('Creating set of SPM at time spacing ' + str(dt_cal))
-        n_pts_cal = round((spm_geo[-1] - spm_geo[0])/dt_cal) + 1
-        spm_cal = spm_geo[0] + dt_cal*np.arange(n_pts_cal)
+        n_pts_cal = round((spm_geo[-1] - spm_geo[0]) / dt_cal) + 1
+        spm_cal = spm_geo[0] + dt_cal * np.arange(n_pts_cal)
 
         if verbose:
             print('Interpolating predicted sky frequency, residual sky '
@@ -165,7 +166,6 @@ class Calibration(object):
         self.p_free_vals = p_free_cal
         self.__set_history(fit_inst, norm_inst, geo_inst, dt_cal)
 
-
     def __set_history(self, fit_inst, norm_inst, geo_inst, dt_cal):
         """
         Purpose:
@@ -191,7 +191,7 @@ class Calibration(object):
             'Python Version': platform.python_version(),
             'Operating System': os.uname().sysname,
             'Source File': __file__.split('/')[-1],
-            'Source Directory': __file__.rsplit('/',1)[0] +'/',
+            'Source Directory': __file__.rsplit('/', 1)[0] + '/',
             'Input Variables': input_var_dict,
             'Input Keywords': input_kw_dict}
 

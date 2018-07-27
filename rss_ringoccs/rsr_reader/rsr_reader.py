@@ -107,11 +107,11 @@ class RSRReader(object):
         'sfdu_data_desription1', 'sfdu_data_desription2',
         'sfdu_data_desription3', 'sfdu_data_desription4',
         'sfdu_length']
-    __sfdu_format = 'cccc'+'c'+'c'+'cc'+'cccc'+'Q'
+    __sfdu_format = 'cccc' + 'c' + 'c' + 'cc' + 'cccc' + 'Q'
 
     # Header Aggregation
     __ha_field_names = ['ha_type', 'ha_length']
-    __ha_format = 'H'+'H'
+    __ha_format = 'H' + 'H'
 
     # Primary Header
     __ph_field_names = [
@@ -121,7 +121,7 @@ class RSRReader(object):
         'ph_data_minor',
         'ph_mission_ID',
         'ph_format_code']
-    __ph_format = 'H'+'H'+'B'+'B'+'B'+'B'
+    __ph_format = 'H' + 'H' + 'B' + 'B' + 'B' + 'B'
 
     # Secondary Header
     __sh_field_names = [
@@ -165,7 +165,7 @@ class RSRReader(object):
         'sh_schan_phase_poly_coef_1', 'sh_schan_phase_poly_coef_2',
         'sh_schan_phase_poly_coef_3', 'sh_schan_phase_poly_coef_4',
         'sh_reserved2a', 'sh_reserved2b']
-    __sh_format = 'hh'+'BBh'+'hBB'+'BBcBHccBBbBBBBBHHIBBHHHHH'+22*'d'
+    __sh_format = 'hh' + 'BBh' + 'hBB' + 'BBcBHccBBbBBBBBHHIBBHHHHH' + 22 * 'd'
 
     # Data
     __data_field_names = [
@@ -270,21 +270,21 @@ class RSRReader(object):
         sh_bits_per_sample = sfdu_hdr_dict['sh_bits_per_sample']
         bytes_per_sample = sh_bits_per_sample / 8
         data_length_per_sfdu = sfdu_hdr_dict['Data_length']
-        n_pts_per_sfdu = np.int(data_length_per_sfdu / (2*bytes_per_sample))
+        n_pts_per_sfdu = np.int(data_length_per_sfdu / (2 * bytes_per_sample))
 
         # Get array of SPM values for whole file
         sh_sample_rate_hz = sfdu_hdr_dict['sh_sample_rate'] * 1000.0
         sh_sfdu_seconds = sfdu_hdr_dict['sh_sfdu_seconds']
         dt = 1.0 / sh_sample_rate_hz
-        end_spm_of_rsr = sh_sfdu_seconds + n_pts_per_sfdu*n_sfdu*dt
-        n_pts = round((end_spm_of_rsr - sh_sfdu_seconds)/dt)
-        spm_vals = float(sh_sfdu_seconds) + dt*np.arange(n_pts)
+        end_spm_of_rsr = sh_sfdu_seconds + n_pts_per_sfdu * n_sfdu * dt
+        n_pts = round((end_spm_of_rsr - sh_sfdu_seconds) / dt)
+        spm_vals = float(sh_sfdu_seconds) + dt * np.arange(n_pts)
 
         # Set RSR header attributes
         self.spm_vals = spm_vals
         self.doy = sfdu_hdr_dict['sh_doy']
         self.year = sfdu_hdr_dict['sh_year']
-        self.dsn = 'DSS-'+str(sfdu_hdr_dict['sh_dss_id'])
+        self.dsn = 'DSS-' + str(sfdu_hdr_dict['sh_dss_id'])
         self.band = sfdu_hdr_dict['sh_dl_band']
         self.sample_rate_khz = sfdu_hdr_dict['sh_sample_rate']
 
@@ -336,7 +336,7 @@ class RSRReader(object):
 
         # Format in which to read rest of RSR file one SFDU at a time
         data_format = (self.__data_header_format
-            + np.int(self.__n_pts_per_sfdu)*'hh')
+            + np.int(self.__n_pts_per_sfdu) * 'hh')
 
         # Format to read RSR file in
         rsr_fmt = (self.__endian + self.__sfdu_format + self.__ha_format
@@ -440,9 +440,9 @@ class RSRReader(object):
         freq_poly3_array = np.zeros(self.__end_sfdu - self.__start_sfdu + 1)
         time_stamp_array = np.zeros(self.__end_sfdu - self.__start_sfdu + 1)
         n_iter = 0
-        for i_sfdu in range(self.__start_sfdu, self.__end_sfdu+1):
-            sfdu = self.__rsr_struct[i_sfdu*self.__sfdu_len:
-                i_sfdu*self.__sfdu_len + self.__sfdu_len]
+        for i_sfdu in range(self.__start_sfdu, self.__end_sfdu + 1):
+            sfdu = self.__rsr_struct[i_sfdu * self.__sfdu_len:
+                i_sfdu * self.__sfdu_len + self.__sfdu_len]
 
             # If end of file reached
             if len(sfdu) == 0:
@@ -453,7 +453,7 @@ class RSRReader(object):
             s_dict = dict(zip(self.__field_names, s))
 
             # Beginning of time range for frequency polynomials for this SFDU
-            _time_stamp = spm_vals[i_sfdu*self.__n_pts_per_sfdu]
+            _time_stamp = spm_vals[i_sfdu * self.__n_pts_per_sfdu]
 
             rfif_lo_array[n_iter] = s_dict['sh_rfif_lo']
             ddc_lo_array[n_iter] = s_dict['sh_ddc_lo']
@@ -476,10 +476,10 @@ class RSRReader(object):
 
             _msec = f_spm[i] - f_spm[i].astype(int)
             f_sky_pred[i] = ((rfif_lo_array[_time_ind]
-                + ddc_lo_array[_time_ind])*1.0e6
+                + ddc_lo_array[_time_ind]) * 1.0e6
                 - freq_poly1_array[_time_ind]
-                - freq_poly2_array[_time_ind]*_msec
-                - freq_poly3_array[_time_ind]*(_msec**2))
+                - freq_poly2_array[_time_ind] * _msec
+                - freq_poly3_array[_time_ind] * (_msec ** 2))
             if verbose and (i < 10):
                 print(_msec, f_spm[i], _time_ind, time_stamp_array[_time_ind],
                     freq_poly1_array[_time_ind], freq_poly2_array[_time_ind],
@@ -532,17 +532,17 @@ class RSRReader(object):
         self.__set_sfdu_unpack(spm_range)
 
         # Reduce SPM array to match the I and Q arrays to be made
-        spm_vals = self.spm_vals[self.__n_pts_per_sfdu*self.__start_sfdu:
-            self.__n_pts_per_sfdu*(self.__end_sfdu+1)]
+        spm_vals = self.spm_vals[self.__n_pts_per_sfdu * self.__start_sfdu:
+            self.__n_pts_per_sfdu * (self.__end_sfdu + 1)]
 
         # Multiprocessing to retrieve data from RSR file
         results = []
         queues = [Queue() for i in range(self.__cpu_count)]
         n_loops = self.__end_sfdu - self.__start_sfdu + 1
-        n_per_core = int(np.floor(n_loops/self.__cpu_count))
-        loop_args = [(i*n_per_core, (i+1)*n_per_core, n_loops,
+        n_per_core = int(np.floor(n_loops / self.__cpu_count))
+        loop_args = [(i * n_per_core, (i + 1) * n_per_core, n_loops,
             queues[i]) for i in range(self.__cpu_count)]
-        loop_args[-1] = ((self.__cpu_count-1)*n_per_core,
+        loop_args[-1] = ((self.__cpu_count - 1) * n_per_core,
             self.__end_sfdu + 1, n_loops, queues[-1])
         jobs = [Process(target=self.__loop, args=(a)) for a in loop_args]
         for j in jobs:
@@ -564,8 +564,8 @@ class RSRReader(object):
             IQ_m = decimate(IQ_m, 4, zero_phase=True)
 
             n_pts = len(IQ_m)
-            dt = 1.0/float(1000)
-            spm_vals = spm_vals[0] + dt*np.arange(n_pts)
+            dt = 1.0 / float(1000)
+            spm_vals = spm_vals[0] + dt * np.arange(n_pts)
         elif decimate_16khz_to_1khz & (self.sample_rate_khz == 1):
             print('WARNING (RSRReader.get_IQ): Cannot decimate a 1 kHz file '
                 + 'any further. Skipping extra decimation')
@@ -594,12 +594,12 @@ class RSRReader(object):
             queue: multiprocessing.Queue instance
         """
 
-        I_array = np.zeros(len(range(i_start, i_end))*self.__n_pts_per_sfdu)
-        Q_array = np.zeros(len(range(i_start, i_end))*self.__n_pts_per_sfdu)
+        I_array = np.zeros(len(range(i_start, i_end)) * self.__n_pts_per_sfdu)
+        Q_array = np.zeros(len(range(i_start, i_end)) * self.__n_pts_per_sfdu)
         i_iter = 0
         for i_sfdu in range(i_start, i_end):
-            sfdu = self.__rsr_struct[i_sfdu*self.__sfdu_len:
-                i_sfdu*self.__sfdu_len + self.__sfdu_len]
+            sfdu = self.__rsr_struct[i_sfdu * self.__sfdu_len:
+                i_sfdu * self.__sfdu_len + self.__sfdu_len]
 
             # If EOF is reached
             if len(sfdu) == 0:
@@ -609,16 +609,16 @@ class RSRReader(object):
             s = self.__sfdu_unpack(sfdu)
             s_dict = dict(zip(self.__field_names, s))
 
-            I_array[i_iter*self.__n_pts_per_sfdu:
-                (i_iter+1)*self.__n_pts_per_sfdu] = (
-                s[-2*self.__n_pts_per_sfdu+1::2])
-            Q_array[i_iter*self.__n_pts_per_sfdu:
-                (i_iter+1)*self.__n_pts_per_sfdu] = (
-                s[-2*self.__n_pts_per_sfdu::2])
+            I_array[i_iter * self.__n_pts_per_sfdu:
+                (i_iter + 1) * self.__n_pts_per_sfdu] = (
+                s[-2 * self.__n_pts_per_sfdu + 1::2])
+            Q_array[i_iter * self.__n_pts_per_sfdu:
+                (i_iter + 1) * self.__n_pts_per_sfdu] = (
+                s[-2 * self.__n_pts_per_sfdu::2])
 
             i_iter += 1
 
-        queue.put(I_array + 1j*Q_array)
+        queue.put(I_array + 1j * Q_array)
 
     def __set_history(self):
         """

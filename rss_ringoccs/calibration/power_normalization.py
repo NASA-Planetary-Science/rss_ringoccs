@@ -210,15 +210,15 @@ class Normalization(object):
         self._spm_fit = geo_inst.t_oet_spm_vals
 
         if verbose:
-            sample_rate_hz = int(round(1.0/(self.__spm_raw[1] -
+            sample_rate_hz = int(round(1.0 / (self.__spm_raw[1] -
                 self.__spm_raw[0])))
             print('\nGeometry SPM, rho:')
             for i in range(10):
                 print(geo_inst.t_oet_spm_vals[i], geo_inst.rho_km_vals[i])
             print('\nRaw resolution SPM, rho at 1 sec. interval:')
             for i in range(10):
-                print(self.__spm_raw[i*sample_rate_hz],
-                    self.__rho_interp_func(self.__spm_raw[i*sample_rate_hz]))
+                print(self.__spm_raw[i * sample_rate_hz],
+                    self.__rho_interp_func(self.__spm_raw[i * sample_rate_hz]))
 
         self.__set_history()
 
@@ -490,16 +490,16 @@ class Normalization(object):
         try:
             min_fit_ind = np.max(((spline_fit == 0)
                 & (spm_fit <= min(spm_vals_free[ind_sort]))).nonzero())
-            spline_fit[0:min_fit_ind+1] = (
-                np.zeros(len(spline_fit[0:min_fit_ind+1]))
-                + spline_fit[min_fit_ind+1])
+            spline_fit[0:min_fit_ind + 1] = (
+                np.zeros(len(spline_fit[0:min_fit_ind + 1]))
+                + spline_fit[min_fit_ind + 1])
         except ValueError:
             pass
         try:
             max_fit_ind = np.min(((spline_fit == 0)
                 & (spm_fit >= max(spm_vals_free[ind_sort]))).nonzero())
             spline_fit[max_fit_ind:] = (np.zeros(len(spline_fit[max_fit_ind:]))
-                + spline_fit[max_fit_ind-1])
+                + spline_fit[max_fit_ind - 1])
         except ValueError:
             pass
 

@@ -115,7 +115,6 @@ class FResidFitGui(Frame):
         self.y = y
         self.initUI()
 
-
     def initUI(self):
         """
         Initialize the user interface. Called by __init__()
@@ -172,7 +171,8 @@ class FResidFitGui(Frame):
         self.xlim_entry.grid(row=0, column=0)
 
         # Description of x range entry
-        xrange_btn_lbl = Label(fit_range_frame, text='min1, max1 ; min2, max2...')
+        xrange_btn_lbl = Label(fit_range_frame,
+            text='min1, max1 ; min2, max2...')
         xrange_btn_lbl.grid(row=1, column=0)
 
         # Put fit range box on the window
@@ -193,7 +193,6 @@ class FResidFitGui(Frame):
         quit_btn.bind('<Button-1>', self.quit_app)
         quit_btn.pack()
 
-
     def _get_fit(self):
         """
         Get the polynomial fit to residual frequency. Called by __init__(),
@@ -205,7 +204,6 @@ class FResidFitGui(Frame):
         _x, f_sky_resid_fit = self.fit_inst.get_f_sky_resid_fit()
         return f_sky_resid_fit
 
-
     def _get_rho_tick_labels(self, spm_tick_labels):
         """
         Given tick labels in SPM, get the new tick labels in radius
@@ -216,7 +214,6 @@ class FResidFitGui(Frame):
         spm_to_rho_func = interp1d(self.x, self.x_rho)
         rho_tick_labels = spm_to_rho_func(spm_tick_labels)
         return ['%.1f' % rho_tick_label for rho_tick_label in rho_tick_labels]
-
 
     def plot_data(self):
         """
@@ -264,7 +261,6 @@ class FResidFitGui(Frame):
         self.canvas._tkcanvas.pack(side=tkinter.TOP, fill=tkinter.BOTH,
             expand=1)
 
-
     def update_plot(self):
         """
         Update the plot if an event happened (namely, you pressed a button or
@@ -311,12 +307,12 @@ class FResidFitGui(Frame):
 
         # Plot the residual frequency outside of the freespace regions
         if not_ind is not None:
-            self.ax.plot(self.x[not_ind], self.y[not_ind], color='g', alpha=0.1)
+            self.ax.plot(self.x[not_ind], self.y[not_ind], color='g',
+                alpha=0.1)
 
         self.ax.set_xlabel('SPM')
         self.ax.set_ylabel('Hz')
         self.canvas.show()
-
 
     def adjust_deg(self, e):
         """
@@ -325,7 +321,8 @@ class FResidFitGui(Frame):
         Bound to the "combo" variable in initUI()
 
         Args:
-            e: Event received from selecting a fit order from the drop-down menu
+            e: Event received from selecting a fit order from the
+               drop-down menu
         """
 
         # Set attribute for the new fit order
@@ -336,7 +333,6 @@ class FResidFitGui(Frame):
         # Adjust the fit and re-plot
         self.yfit = self._get_fit()
         self.update_plot()
-
 
     def adjust_range(self):
         """
@@ -360,7 +356,8 @@ class FResidFitGui(Frame):
             self.xlim = xlim
         except ValueError:
             print('WARNING (FResidFitGui.adjust_range): Illegal input in the '
-                + '"Fit range (SPM)" text box. Returning to default fit ranges')
+                + '"Fit range (SPM)" text box. Returning to default '
+                + 'fit ranges')
             self.revert_range()
             return
 
@@ -375,9 +372,9 @@ class FResidFitGui(Frame):
         # New indices of self.x falling outside of freespace regions
         not_ind = []
         not_ind.append(np.argwhere(self.x < xlim[0][0]))
-        for i in range(len(xlim)-1):
+        for i in range(len(xlim) - 1):
             not_ind.append(np.argwhere((self.x > xlim[i][1]) &
-                (self.x < xlim[i+1][0])))
+                (self.x < xlim[i + 1][0])))
         not_ind = np.reshape(np.concatenate(not_ind), -1)
         self.not_ind = not_ind
 
@@ -385,7 +382,6 @@ class FResidFitGui(Frame):
         new_yfit = self._get_fit()
         self.yfit = new_yfit
         self.update_plot()
-
 
     def revert_range(self):
         """
@@ -398,10 +394,10 @@ class FResidFitGui(Frame):
         #     and set the xlim, ind, and not_ind attributes accordingly
         rho_exclude = self.fit_inst._rho_exclude
         self.xlim = []
-        for i in range(len(rho_exclude)-1):
+        for i in range(len(rho_exclude) - 1):
             self.xlim.append(
                 [self.x[np.argmin(abs(self.x_rho - rho_exclude[i][1]))],
-                self.x[np.argmin(abs(self.x_rho - rho_exclude[i+1][0]))]])
+                self.x[np.argmin(abs(self.x_rho - rho_exclude[i + 1][0]))]])
         self.ind = np.arange(len(self.x))
         self.not_ind = None
 
@@ -409,7 +405,6 @@ class FResidFitGui(Frame):
         new_yfit = self._get_fit()
         self.yfit = new_yfit
         self.update_plot()
-
 
     def quit_app(self, e):
         """

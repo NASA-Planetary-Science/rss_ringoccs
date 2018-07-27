@@ -324,7 +324,7 @@ class NormDiff(object):
             print('\nWARNING (NormDiff): Specified cal file is missing '
                 + 'points required to pre-process points in SPM range of '
                 + 'geo_inst. Calibration SPM range is ['
-                + str(min(spm_cal))+', ' + str(max(spm_cal))
+                + str(min(spm_cal)) + ', ' + str(max(spm_cal))
                 + '], while geo_inst SPM range is ['
                 + str(min(spm_geo)) + ', ' + str(max(spm_geo)) + ']. Reducing '
                 + 'to SPM range of CAL file')
@@ -340,21 +340,21 @@ class NormDiff(object):
             print('Interpolating and integrating frequency offset, and '
                 + 'applying to IQ_m')
         dt = 0.1
-        n_pts = round((spm_cal[-1] - spm_cal[0])/dt)
-        spm_cal_interp = spm_cal[0] + dt*np.arange(n_pts)
+        n_pts = round((spm_cal[-1] - spm_cal[0]) / dt)
+        spm_cal_interp = spm_cal[0] + dt * np.arange(n_pts)
         f_offset_fit_func = interp1d(spm_cal, f_offset_fit_cal,
             fill_value='extrapolate')
         f_offset_fit_interp = f_offset_fit_func(spm_cal_interp)
 
         # Integrate frequency offset to detrend IQ_m
-        f_detrend_interp = np.cumsum(f_offset_fit_interp)*dt
-        f_detrend_interp_rad = f_detrend_interp*(2.0*np.pi)
+        f_detrend_interp = np.cumsum(f_offset_fit_interp) * dt
+        f_detrend_interp_rad = f_detrend_interp * (2.0 * np.pi)
         f_detrend_rad_func = interp1d(spm_cal_interp, f_detrend_interp_rad,
             fill_value='extrapolate')
         f_detrend_rad = f_detrend_rad_func(spm_vals)
 
         # Detrend raw measured I and Q
-        IQ_c = IQ_m*np.exp(-1j*f_detrend_rad)
+        IQ_c = IQ_m * np.exp(-1j * f_detrend_rad)
 
         if verbose:
             print('Interpolating and setting attributes')
@@ -373,7 +373,7 @@ class NormDiff(object):
             #     downsampled IQ_c. It's important to not use IQ_m_desired
             #     because I and Q each vary sinusoidally, meaning that if you
             #     resample too much, they get averaged to near zero.
-            p_norm_vals = (abs(IQ_c_desired)**2)/p_free
+            p_norm_vals = (abs(IQ_c_desired) ** 2) / p_free
             phase_rad_vals = np.arctan2(np.imag(IQ_c_desired),
                 np.real(IQ_c_desired))
 
@@ -406,8 +406,8 @@ class NormDiff(object):
             p_free_ing = np.interp(spm_ing, spm_cal, p_free_cal)
             p_free_egr = np.interp(spm_egr, spm_cal, p_free_cal)
 
-            p_norm_ing = (abs(IQ_c_ing)**2)/p_free_ing
-            p_norm_egr = (abs(IQ_c_egr)**2)/p_free_egr
+            p_norm_ing = (abs(IQ_c_ing) ** 2) / p_free_ing
+            p_norm_egr = (abs(IQ_c_egr) ** 2) / p_free_egr
             phase_rad_ing = np.arctan2(np.imag(IQ_c_ing), np.real(IQ_c_ing))
             phase_rad_egr = np.arctan2(np.imag(IQ_c_egr), np.real(IQ_c_egr))
 
@@ -615,31 +615,31 @@ class NormDiff(object):
         norm_diff_inst_ing.history = history
 
         # Egress instance
-        norm_diff_inst_egr.rho_km_vals = rho_km_vals[ind+1:]
+        norm_diff_inst_egr.rho_km_vals = rho_km_vals[ind + 1:]
         norm_diff_inst_egr.t_oet_spm_vals = (
-            t_oet_spm_vals[ind+1:])
-        norm_diff_inst_egr.p_norm_vals = p_norm_vals[ind+1:]
-        norm_diff_inst_egr.phase_rad_vals = phase_rad_vals[ind+1:]
-        norm_diff_inst_egr.B_rad_vals = B_rad_vals[ind+1:]
-        norm_diff_inst_egr.D_km_vals = D_km_vals[ind+1:]
-        norm_diff_inst_egr.F_km_vals = F_km_vals[ind+1:]
+            t_oet_spm_vals[ind + 1:])
+        norm_diff_inst_egr.p_norm_vals = p_norm_vals[ind + 1:]
+        norm_diff_inst_egr.phase_rad_vals = phase_rad_vals[ind + 1:]
+        norm_diff_inst_egr.B_rad_vals = B_rad_vals[ind + 1:]
+        norm_diff_inst_egr.D_km_vals = D_km_vals[ind + 1:]
+        norm_diff_inst_egr.F_km_vals = F_km_vals[ind + 1:]
         norm_diff_inst_egr.f_sky_hz_vals = (
-            f_sky_hz_vals[ind+1:])
-        norm_diff_inst_egr.phi_rad_vals = phi_rad_vals[ind+1:]
+            f_sky_hz_vals[ind + 1:])
+        norm_diff_inst_egr.phi_rad_vals = phi_rad_vals[ind + 1:]
         norm_diff_inst_egr.phi_rl_rad_vals = (
-            phi_rl_rad_vals[ind+1:])
+            phi_rl_rad_vals[ind + 1:])
         norm_diff_inst_egr.t_ret_spm_vals = (
-            t_ret_spm_vals[ind+1:])
+            t_ret_spm_vals[ind + 1:])
         norm_diff_inst_egr.t_set_spm_vals = (
-            t_set_spm_vals[ind+1:])
+            t_set_spm_vals[ind + 1:])
         norm_diff_inst_egr.rho_dot_kms_vals = (
-            rho_dot_kms_vals[ind+1:])
+            rho_dot_kms_vals[ind + 1:])
         norm_diff_inst_egr.rho_corr_pole_km_vals = (
-            rho_corr_pole_km_vals[ind+1:])
+            rho_corr_pole_km_vals[ind + 1:])
         norm_diff_inst_egr.rho_corr_timing_km_vals = (
-            rho_corr_timing_km_vals[ind+1:])
+            rho_corr_timing_km_vals[ind + 1:])
         norm_diff_inst_egr.tau_threshold_vals = (
-            tau_threshold_vals[ind+1:])
+            tau_threshold_vals[ind + 1:])
         norm_diff_inst_egr.end_of_chord_ing = None
         norm_diff_inst_egr.history = history
 

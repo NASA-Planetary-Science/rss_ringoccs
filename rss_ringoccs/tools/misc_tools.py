@@ -704,7 +704,7 @@ def get_dlp(dlpdata,verbose=True):
             "phi_ora_deg_vals",
             "raw_tau_vals",
             "phase_deg_vals",
-            "raw_tau_thresh_vals",
+            "tau_threshold_vals",
             "t_oet_spm_vals",
             "t_ret_spm_vals",
             "t_set_spm_vals",
@@ -725,7 +725,7 @@ def get_tau(taudata,verbose=True):
             "phi_ora_deg_vals",
             "raw_tau_vals",
             "phase_deg_vals",
-            "raw_tau_thresh_vals",
+            "tau_threshold_vals",
             "spm_vals",
             "t_ret_spm_vals",
             "t_set_spm_vals",
@@ -790,6 +790,8 @@ class extract_csv_data(object):
         self.t_set_spm_vals          = None
         self.rho_corr_pole_km_vals   = None
         self.rho_corr_timing_km_vals = None
+        self.phi_rl_rad_vals         = None  # Ring Longitude (Radians)
+        self.tau_threshold_vals      = None  # Threshold Optical Depth
         self.history                 = None
 
         if (type(geodata) != type("Hi!")):
@@ -938,6 +940,12 @@ class extract_csv_data(object):
             raise TypeError("Bad DLP: phi_rl_deg_vals not real valued.")
         else: del ptype
 
+        tau_threshold_vals  = np.array(dlp_dat.tau_threshold_vals)
+        ttype               = check_real(tau_threshold_vals)
+        if not ttype:
+            raise TypeError("Bad DLP: tau_threshold_vals not real valued.")
+        else: del ttype
+
         geo_rho = np.array(geo_dat.rho_km_vals)
         rhotype = check_real(geo_rho)
         if not rhotype:
@@ -985,6 +993,7 @@ class extract_csv_data(object):
         self.rho_corr_pole_km_vals   = rho_corr_pole_km_vals
         self.rho_corr_timing_km_vals = rho_corr_timing_km_vals
         self.phi_rl_deg_vals         = phi_rl_deg_vals
+        self.tau_threshold_vals      = tau_threshold_vals
 
     def __compute_variables(self,occ,verbose):
         if verbose: print("Computing Variables...")

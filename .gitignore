@@ -5,8 +5,3 @@ output/
 data/
 __pycache__
 *~
-advanced_tools.py
-misc_functions.py
-physics_functions.py
-special_functions.py
-window_functions.py

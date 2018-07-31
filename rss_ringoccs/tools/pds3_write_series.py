@@ -8,6 +8,9 @@ Purpose: Functions for getting PDS3 label file information and writing PDS3
 Revisions:
     2018 Jul 23 - jfong - copied from jwf_pds3_write_series_v3.py
                         - copy over write_history_text()
+    2018 Jul 27 - jfong - get rid of comma for kernels if only one listed
+                        - debug history loop (extra instance)
+                        - add error range for constant sampling interval check
 '''
 import numpy as np
 import pdb
@@ -63,7 +66,12 @@ def pds3_write_series_lbl(str_lbl, out_lbl_file):
         nkern = len(kernel_val_list)
         for i in range(nkern):
             if i == 0:
-                f.write(kernel_kwd.ljust(npad0) + eq + kernel_val_list[i] + ',' + cr)
+                if nkern == 1:
+                    app = ''
+                else:
+                    app = ','
+                f.write(kernel_kwd.ljust(npad0) + eq + kernel_val_list[i]
+                        + app + cr)
             elif i == (nkern-1):
                 f.write(kern_pad + kernel_val_list[i] + cr)
             else:
@@ -128,6 +136,7 @@ def pds3_write_series_lbl(str_lbl, out_lbl_file):
 
   # check if hist_list_keys covers all input instances from start
   #     of processing to this point in history
+   
     n_extrahist = len(hist_list_keys)
     for extra in range(1,n_extrahist):
         exkey = hist_dict[hist_list_kwd[extra]][hist_list_keys[extra]][
@@ -413,13 +422,23 @@ def get_ISOD_str(spm_start, year, doy):
 def get_sampling_interval(sampling_param):
     dr_start = sampling_param[1] - sampling_param[0]
     dr_end = sampling_param[-1] - sampling_param[-2]
-    if dr_start != dr_end:
+    err = 0.001
+    dr_end_bounds = [dr_end - err, dr_end + err]
+    if dr_start > dr_end_bounds[0] and dr_start < dr_end_bounds[1]:
+        dr = dr_start
+    else:
         print('TROUBLE! sampling interval is not constant!')
         print('\tdr_start, dr_end = ', dr_start, dr_end)
         dr = dr_start
         pdb.set_trace()
-    else:
-        dr = dr_start
+
+    #if dr_start != dr_end:
+    #    print('TROUBLE! sampling interval is not constant!')
+    #    print('\tdr_start, dr_end = ', dr_start, dr_end)
+    #    dr = dr_start
+    #    pdb.set_trace()
+    #else:
+    #    dr = dr_start
     return str(dr)
 
 def get_spm_ref_time(year, doy):

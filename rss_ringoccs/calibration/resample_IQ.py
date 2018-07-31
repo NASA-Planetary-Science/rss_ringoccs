@@ -62,7 +62,7 @@ def pre_resample(rho_km, vec, freq):
     return rho_grid, vec_grid, p, q
 
 
-def resample_IQ(rho_km, IQ_c, dr_desired, dr_km_tol=0.01, TEST=False):
+def resample_IQ(rho_km, IQ_c, dr_desired, dr_km_tol=0.01, verbose=False):
     """
     Function to resample I and Q to uniformly spaced radius. Based off of
     Matlab's resample function
@@ -72,7 +72,7 @@ def resample_IQ(rho_km, IQ_c, dr_desired, dr_km_tol=0.01, TEST=False):
                 f_USO, kernels, k=k, rho_exclude=rho_exclude)
         >>> (spm_raw, IQ_c_raw) = fit_inst.get_IQ_c()
         >>> (rho_km_desired, IQ_c_resampled) = resample_IQ(rho_km_raw, \
-                IQ_c_raw, dr_desired, dr_km_tol=dr_km_tol, TEST=TEST)
+                IQ_c_raw, dr_desired, dr_km_tol=dr_km_tol, verbose=verbose)
 
     Args:
         rho_km (np.ndarray): Set of ring intercept point values at initial
@@ -85,7 +85,7 @@ def resample_IQ(rho_km, IQ_c, dr_desired, dr_km_tol=0.01, TEST=False):
             set of rho values more regular-looking. For example, if you say
             dr_km_tol=0.01 with a dr_desired of 0.25, your final set of rho
             values might look something like [70000.26, 70000.51, ...]
-        TEST (bool): Testing variable to print out the first few resampled
+        verbose (bool): Testing variable to print out the first few resampled
             results
     """
 
@@ -128,14 +128,10 @@ def resample_IQ(rho_km, IQ_c, dr_desired, dr_km_tol=0.01, TEST=False):
     rho_km_desired = (rho_km_uniform[0]
         + dr_desired * np.arange(len(I_c_desired)))
 
-    if TEST:
+    if verbose:
         print('First 10 rho, I_c, Q_c:')
         for i in range(10):
             print('%24.16f %24.16f %24.16f' %
                 (rho_km_desired[i], I_c_desired[i], Q_c_desired[i]))
 
     return rho_km_desired, I_c_desired + 1j * Q_c_desired
-
-
-if __name__ == '__main__':
-    pass

@@ -262,6 +262,7 @@ class rec_data(object):
         self.rho_corr_pole_km_vals      = None  # RIP Pole Corrections (km)
         self.rho_corr_timing_km_vals    = None  # RIP Timing corrections (km)
         self.phi_rl_rad_vals            = None  # Ring Longitude (Radians)
+        self.tau_threshold_vals         = None  # Threshold Optical Depth
 
         # Retrieve variables from the NormDiff class, setting as attributes.
         self.res                        = res
@@ -279,6 +280,7 @@ class rec_data(object):
         self.rho_corr_pole_km_vals      = NormDiff.rho_corr_pole_km_vals
         self.rho_corr_timing_km_vals    = NormDiff.rho_corr_timing_km_vals
         self.phi_rl_rad_vals            = NormDiff.phi_rl_rad_vals
+        self.tau_threshold_vals         = NormDiff.tau_threshold_vals
 
         # Compute mu: Sin(|B|)
         self.mu_vals = np.sin(np.abs(self.B_rad_vals))
@@ -391,43 +393,50 @@ class diffraction_correction(object):
         else: del tr
 
         # Define/list all attributes of the class, setting to None.
-        self.res                = None  # Resolution (km)
-        self.wtype              = None  # Window Type
-        self.rng                = None  # Reconstructed Range (km)
-        self.rngreq             = None  # Requested Range
-        self.rho_km_vals        = None  # Ring Radius (km)
-        self.p_norm_vals        = None  # Normalized Power
-        self.phase_rad_vals     = None  # Phase (Radians)
-        self.B_rad_vals         = None  # Elevation Angle (Radians)
-        self.D_km_vals          = None  # RIP Distance (km)
-        self.f_sky_hz_vals      = None  # Signal Frequency (Hz)
-        self.phi_rad_vals       = None  # Azimuthal Angle (Radians)
-        self.rho_dot_kms_vals   = None  # RIP Velocity (km/s)
-        self.T_hat_vals         = None  # Complex Transmittance
-        self.F_km_vals          = None  # Fresnel Scale (km)
-        self.w_km_vals          = None  # Window Width (km)
-        self.mu_vals            = None  # sin(|B|)
-        self.lambda_sky_km_vals = None  # Signal Wavelength (km)
-        self.dx_km              = None  # Sampling Distance (km)
-        self.norm_eq            = None  # Normalized Equivalent Width
-        self.n_used             = None  # Number of points used
-        self.start              = None  # Starting point
-        self.finish             = None  # Final point
-        self.T_vals             = None  # Reconstructed Transmittance
-        self.power_vals         = None  # Reconstructed power
-        self.tau_vals           = None  # Reconstructed optical depth
-        self.phase_vals         = None  # Reconstructed phase
-        self.p_norm_fwd_vals    = None  # Forward Power
-        self.T_hat_fwd_vals     = None  # Forward Transmittance
-        self.phase_fwd_vals     = None  # Forward Phase
-        self.verbose            = None  # Use of verbose (Boolean)
-        self.norm               = None  # Normalization (Boolean)
-        self.fwd                = None  # Forward (Boolean)
-        self.fft                = None  # Use of FFT's (Boolean)
-        self.bfac               = None  # Use of b factor (Boolean)
-        self.psitype            = None  # Psitype used (String)
-        self.history            = None  # History of Inputs
-        self.dathist            = None  # History from rec_data
+        self.res                        = None  # Resolution (km)
+        self.wtype                      = None  # Window Type
+        self.rng                        = None  # Reconstructed Range (km)
+        self.rngreq                     = None  # Requested Range
+        self.rho_km_vals                = None  # Ring Radius (km)
+        self.p_norm_vals                = None  # Normalized Power
+        self.phase_rad_vals             = None  # Phase (Radians)
+        self.B_rad_vals                 = None  # Elevation Angle (Radians)
+        self.D_km_vals                  = None  # RIP Distance (km)
+        self.f_sky_hz_vals              = None  # Signal Frequency (Hz)
+        self.phi_rad_vals               = None  # Azimuthal Angle (Radians)
+        self.rho_dot_kms_vals           = None  # RIP Velocity (km/s)
+        self.T_hat_vals                 = None  # Complex Transmittance
+        self.F_km_vals                  = None  # Fresnel Scale (km)
+        self.w_km_vals                  = None  # Window Width (km)
+        self.mu_vals                    = None  # sin(|B|)
+        self.lambda_sky_km_vals         = None  # Signal Wavelength (km)
+        self.dx_km                      = None  # Sampling Distance (km)
+        self.norm_eq                    = None  # Normalized Equivalent Width
+        self.n_used                     = None  # Number of points used
+        self.start                      = None  # Starting point
+        self.finish                     = None  # Final point
+        self.T_vals                     = None  # Reconstructed Transmittance
+        self.power_vals                 = None  # Reconstructed power
+        self.tau_vals                   = None  # Reconstructed optical depth
+        self.phase_vals                 = None  # Reconstructed phase
+        self.p_norm_fwd_vals            = None  # Forward Power
+        self.T_hat_fwd_vals             = None  # Forward Transmittance
+        self.phase_fwd_vals             = None  # Forward Phase
+        self.verbose                    = None  # Use of verbose (Boolean)
+        self.norm                       = None  # Normalization (Boolean)
+        self.fwd                        = None  # Forward (Boolean)
+        self.fft                        = None  # Use of FFT's (Boolean)
+        self.bfac                       = None  # Use of b factor (Boolean)
+        self.psitype                    = None  # Psitype used (String)
+        self.t_oet_spm_vals             = None  # Observed event time (Seconds)
+        self.t_ret_spm_vals             = None  # Ring event time (Seconds)
+        self.t_set_spm_vals             = None  # Spacecraft time (Seconds)
+        self.rho_corr_pole_km_vals      = None  # RIP pole correction (km)
+        self.rho_corr_timing_km_vals    = None  # RIP timing correction (km)
+        self.phi_rl_rad_vals            = None  # Ring Longitude (Radians)
+        self.tau_threshold_vals         = None  # Threshold Optical Depth
+        self.history                    = None  # History of Inputs
+        self.dathist                    = None  # History from rec_data
 
         # Assign keywords/arguments to their corresponding attribute.
         self.res        = res           # Resolution (km)
@@ -445,23 +454,30 @@ class diffraction_correction(object):
         recdata = rec_data(dat, res, wtype, bfac=bfac)
 
         # Save the attributes from the rec_data instance.
-        self.res                = recdata.res
-        self.wtype              = recdata.wtype
-        self.rho_km_vals        = recdata.rho_km_vals
-        self.p_norm_vals        = recdata.p_norm_vals
-        self.phase_rad_vals     = recdata.phase_rad_vals
-        self.B_rad_vals         = recdata.B_rad_vals
-        self.D_km_vals          = recdata.D_km_vals
-        self.f_sky_hz_vals      = recdata.f_sky_hz_vals
-        self.phi_rad_vals       = recdata.phi_rad_vals
-        self.rho_dot_kms_vals   = recdata.rho_dot_kms_vals
-        self.T_hat_vals         = recdata.T_hat_vals
-        self.F_km_vals          = recdata.F_km_vals
-        self.w_km_vals          = recdata.w_km_vals
-        self.mu_vals            = recdata.mu_vals
-        self.lambda_sky_km_vals = recdata.lambda_sky_km_vals
-        self.dx_km              = recdata.dx_km
-        self.norm_eq            = recdata.norm_eq
+        self.res                        = recdata.res
+        self.wtype                      = recdata.wtype
+        self.rho_km_vals                = recdata.rho_km_vals
+        self.p_norm_vals                = recdata.p_norm_vals
+        self.phase_rad_vals             = recdata.phase_rad_vals
+        self.B_rad_vals                 = recdata.B_rad_vals
+        self.D_km_vals                  = recdata.D_km_vals
+        self.f_sky_hz_vals              = recdata.f_sky_hz_vals
+        self.phi_rad_vals               = recdata.phi_rad_vals
+        self.rho_dot_kms_vals           = recdata.rho_dot_kms_vals
+        self.T_hat_vals                 = recdata.T_hat_vals
+        self.F_km_vals                  = recdata.F_km_vals
+        self.w_km_vals                  = recdata.w_km_vals
+        self.mu_vals                    = recdata.mu_vals
+        self.lambda_sky_km_vals         = recdata.lambda_sky_km_vals
+        self.dx_km                      = recdata.dx_km
+        self.norm_eq                    = recdata.norm_eq
+        self.t_oet_spm_vals             = recdata.t_oet_spm_vals
+        self.t_ret_spm_vals             = recdata.t_ret_spm_vals
+        self.t_set_spm_vals             = recdata.t_set_spm_vals
+        self.rho_corr_pole_km_vals      = recdata.rho_corr_pole_km_vals
+        self.rho_corr_timing_km_vals    = recdata.rho_corr_timing_km_vals
+        self.phi_rl_rad_vals            = recdata.phi_rl_rad_vals
+        self.tau_threshold_vals         = recdata.tau_threshold_vals
 
         # Remove rec_data instance and keywords for memory and clarity.
         del recdata
@@ -618,23 +634,30 @@ class diffraction_correction(object):
         n_used = self.n_used                # Number of point used.
         crange = np.arange(n_used)+start    # Processed range.
 
-        self.rho_km_vals         = self.rho_km_vals[crange]
-        self.p_norm_vals         = self.p_norm_vals[crange]
-        self.phase_rad_vals      = self.phase_rad_vals[crange]
-        self.B_rad_vals          = self.B_rad_vals[crange]
-        self.D_km_vals           = self.D_km_vals[crange]
-        self.f_sky_hz_vals       = self.f_sky_hz_vals[crange]
-        self.phi_rad_vals        = self.phi_rad_vals[crange]
-        self.rho_dot_kms_vals    = self.rho_dot_kms_vals[crange]
-        self.T_hat_vals          = self.T_hat_vals[crange]
-        self.F_km_vals           = self.F_km_vals[crange]
-        self.w_km_vals           = self.w_km_vals[crange]
-        self.mu_vals             = self.mu_vals[crange]
-        self.lambda_sky_km_vals  = self.lambda_sky_km_vals[crange]
-        self.T_vals              = self.T_vals[crange]
-        self.power_vals          = self.power_vals[crange]
-        self.tau_vals            = self.tau_vals[crange]
-        self.phase_vals          = self.phase_vals[crange]
+        self.rho_km_vals                = self.rho_km_vals[crange]
+        self.p_norm_vals                = self.p_norm_vals[crange]
+        self.phase_rad_vals             = self.phase_rad_vals[crange]
+        self.B_rad_vals                 = self.B_rad_vals[crange]
+        self.D_km_vals                  = self.D_km_vals[crange]
+        self.f_sky_hz_vals              = self.f_sky_hz_vals[crange]
+        self.phi_rad_vals               = self.phi_rad_vals[crange]
+        self.rho_dot_kms_vals           = self.rho_dot_kms_vals[crange]
+        self.T_hat_vals                 = self.T_hat_vals[crange]
+        self.F_km_vals                  = self.F_km_vals[crange]
+        self.w_km_vals                  = self.w_km_vals[crange]
+        self.mu_vals                    = self.mu_vals[crange]
+        self.lambda_sky_km_vals         = self.lambda_sky_km_vals[crange]
+        self.T_vals                     = self.T_vals[crange]
+        self.power_vals                 = self.power_vals[crange]
+        self.tau_vals                   = self.tau_vals[crange]
+        self.phase_vals                 = self.phase_vals[crange]
+        self.t_oet_spm_vals             = self.t_oet_spm_vals[crange]
+        self.t_ret_spm_vals             = self.t_ret_spm_vals[crange]
+        self.t_set_spm_vals             = self.t_set_spm_vals[crange]
+        self.rho_corr_pole_km_vals      = self.rho_corr_pole_km_vals[crange]
+        self.rho_corr_timing_km_vals    = self.rho_corr_timing_km_vals[crange]
+        self.phi_rl_rad_vals            = self.phi_rl_rad_vals[crange]
+        self.tau_threshold_vals         = self.tau_threshold_vals[crange]
 
         #If the forward model was run, trim those attributes as well.
         if fwd:
@@ -743,41 +766,51 @@ class diffraction_correction(object):
         if verbose:     vrb     = self.__verbose_print
         else:           vrb     = self.__verbose_do_nothing
         # Calculate the corrected complex amplitude, point by point
-        T_vals     = T_hat_vals * 0.0
-        center     = start
-        w_init     = w_vals[center]
-        w_func     = fw(w_init,dx)
-        nw         = np.size(w_func)
+        T_vals     = T_hat_vals * 0.0   # Empty array for complex transmittance
+        center     = start              # Center of first window (km)
+        w_init     = w_vals[center]     # Window width of first point (km)
+        w_func     = fw(w_init,dx)      # Requested window function
+        nw         = np.size(w_func)    # Number of points in first window
+
+        # Computed range about the first point
         crange     = np.arange(int(center-(nw-1)/2),int(1+center+(nw-1)/2))-1
-        phi_s_rad  = phi_rad_vals[center]
-        cp         = np.cos(phi_s_rad)
-        sp         = np.sin(phi_s_rad)
+        phi_s_rad  = phi_rad_vals[center]   # phi0 of first point
+        cp         = np.cos(phi_s_rad)      # Cos(phi0)
+        sp         = np.sin(phi_s_rad)      # Sin(phi0)
+
+        # Factor used for first Newton-Raphson iteration
         dphi_fac   = ((cosb2)*cosphi0*sinphi0/(1.0-(cosb2)*(sinphi0*sinphi0)))
         for i in np.arange(n_used):
-            r0          = rho_vals[center]
-            r02         = rsq[center]
-            d2          = dsq[center]
-            cb_d        = cosb_D[center]
-            cb2         = cosb2[center]
-            cp0         = cosphi0[center]
-            sp0         = sinphi0[center]
-            kD          = kD_vals[center]
-            w           = w_vals[center]
+            r0          = rho_vals[center]  # Point being reconstructed (km)
+            r02         = rsq[center]       # Square or r0 (km)
+            d2          = dsq[center]       # Spacecraft-RIP distance (km)
+            cb_d        = cosb_D[center]    # Cos(B) / D
+            cb2         = cosb2[center]     # Square of Cos(B)
+            cp0         = cosphi0[center]   # Cos(phi0)
+            sp0         = sinphi0[center]   # Sin(phi0)
+            kD          = kD_vals[center]   # kD = 2 * Pi * D / lambda
+            w           = w_vals[center]    # Current point window width (km)
             if (np.abs(w_init - w)>= 2.0*dx):
-                w_init     = w
-                w_func     = fw(w,dx)
-                nw         = np.size(w_func)
-                crange     = np.arange(center-(nw-1)/2,1+center+(nw-1)/2)
-                r          = rho_vals[crange]
-                r2         = rsq[crange]
+                w_init = w                  # Reset window width
+                w_func = fw(w,dx)           # Reset window function
+                nw     = np.size(w_func)    # Reset number of window points
+
+                # Computed range for current point
+                crange = np.arange(int(center-(nw-1)/2),int(1+center+(nw-1)/2))
+                r      = rho_vals[crange]   # Computed range for rho
+                r2     = rsq[crange]        # Square of r
+
+                # First iteration of Newton-Raphson
                 dphi_s_rad = dphi_fac[center] * (r - r0) / r0
                 phi_s_rad  = phi_rad_vals[center] - dphi_s_rad
                 cp         = np.cos(phi_s_rad)
                 sp         = np.sin(phi_s_rad)
             else:
-                crange    +=1
-                r          = rho_vals[crange]
-                r2         = rsq[crange]
+                crange    +=1                   # Adjust crange by 1
+                r          = rho_vals[crange]   # Computed range for rho
+                r2         = rsq[crange]        # Square of r
+
+                # Compute Newton-Raphson on psi for the phi variable
                 xi         = cb_d * (r0 * cp0 - r * cp)
                 eta        = (r02 + r2 - 2.0*r*r0*(sp*sp0 + cp*cp0)) / d2
                 v1         = r * cb_d * sp
@@ -794,8 +827,8 @@ class diffraction_correction(object):
                 cp         = np.cos(phi_s_rad)
                 sp         = np.sin(phi_s_rad)
 
-            loop = 0
-            # Perform Newton-Raphson on phi.
+            loop = 0    # Number of iterations for Newton-Raphson
+            # Perform Newton-Raphson on phi
             while (np.max(np.abs(dphi_s_rad)) > 1.e-10):
                 xi         = cb_d * (r0 * cp0 - r * cp)
                 eta        = (r02 + r2 - 2.0*r*r0*(sp*sp0 + cp*cp0)) / d2
@@ -812,11 +845,10 @@ class diffraction_correction(object):
                 phi_s_rad += dphi_s_rad
                 cp         = np.cos(phi_s_rad)
                 sp         = np.sin(phi_s_rad)
-                loop      += 1
-                if loop > 5:
-                    break
+                loop      += 1  # Add one to loop variable for each iteration
+                if loop > 5:    break
  
-            # Compute psi and then compute the forward model.
+            # Compute psi and then compute kernel function
             xi       = cb_d * (r0 * cp0 - r * cp)
             eta      = ((r02) + (r2) - 2.0 * r * r0 * (sp*sp0 + cp*cp0)) / d2
             psi_vals = kD * (np.sqrt(1.0 + 2.0 * xi + eta) - (1.0 + xi))
@@ -824,10 +856,11 @@ class diffraction_correction(object):
             ker      = w_func*np.exp(-1j*psi_vals)
             T_hat    = T_hat_vals[crange]
             
+            # Compute 'approximate' Fresnel Inversion for current point
             T_vals[center]   = finv(T_hat,ker,dx,F)
             T_vals[center]  *= nrm(dx,w_func,psi_vals,F)
-            center          += 1
-            vrb(i,n_used,nw,loop)
+            center          += 1    # Move center to next point
+            vrb(i,n_used,nw,loop)   # If verbose, print current status
         self.phi_s = phi_s_rad
         return T_vals
 

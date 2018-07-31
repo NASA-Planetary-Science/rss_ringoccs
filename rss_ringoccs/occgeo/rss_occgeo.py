@@ -13,12 +13,21 @@ Revisions:
                           ring_profile_direction and
                           revolution_number attributes and methods
     2018 Jul 16 - jfong - add beta_vals attribute
+    2018 Jul 26 - jfong - remove write_history_dict() import
+                        - add __write_history_dict method
+    2018 Jul 27 - jfong - remove __write_history_dict method and use 
+                          write_history_dict() again, which now requires
+                          source file as an additional input
 """
 import sys
+import time
+import os
+import platform
+
 from ..tools.spm_to_et import spm_to_et
 from ..tools.et_to_spm import et_to_spm
-from ..tools.write_history_dict import write_history_dict
 from ..tools.date_to_rev import date_to_rev
+from ..tools.write_history_dict import write_history_dict
 from .calc_elevation_deg import calc_elevation_deg
 from .get_pole import get_pole
 from .calc_rho_vec_km import calc_rho_vec_km
@@ -283,7 +292,7 @@ class Geometry(object):
         input_kwds = {
                 "pt_per_sec": pt_per_sec
                 }
-        self.history = write_history_dict(input_vars, input_kwds)
+        self.history = write_history_dict(input_vars, input_kwds, __file__)
 
     def get_naif_version(self):
         """

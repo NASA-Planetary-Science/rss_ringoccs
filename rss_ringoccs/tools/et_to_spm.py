@@ -12,6 +12,7 @@ Revisions:
     2018 Jun 28 - jfong - add ref_doy keyword; if set, calculate spm relative
                           to ref_doy
     2018 Jun 29 - jfong - found bug in calculating ibrk that caused wrapping
+    2018 Jul 30 - jfong - allow et_vals to be a float
 """
 
 import numpy as np
@@ -26,7 +27,13 @@ def et_to_spm(et_vals, kernels=None, ref_doy=None):
         for kernel in kernels:
             spice.furnsh(kernel)
 
-    npts = len(et_vals)
+    try:
+        npts = len(et_vals)
+    except TypeError:
+        et_vals = [et_vals]
+        npts = len(et_vals)
+
+#    npts = len(et_vals)
 
     spm_vals = []
 

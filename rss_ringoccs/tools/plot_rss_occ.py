@@ -21,7 +21,6 @@ rings_km = [74490., 91983., 117516., 122052., 136774., 139826.]
 
 def plot_rss_occ(pdf, B_deg_mean, phi_ora_deg_vals, rho_km_vals, 
         t_oet_spm_vals):
-    # Add current day to figname
 
     # Initialize 3D subplot with no axes or gridlines
     az = 0.

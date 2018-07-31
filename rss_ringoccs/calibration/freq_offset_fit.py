@@ -48,22 +48,17 @@ Revisions:
 
 import numpy as np
 from numpy.polynomial import polynomial as poly
-import os
-import platform
+#import os
+#import platform
 from scipy.interpolate import interp1d
 import sys
-import time
+#import time
 
 from tkinter import Tk
 
-try:
-    from calc_f_sky_recon import calc_f_sky_recon
-    from cassini_blocked import cassini_blocked
-    from f_resid_fit_gui import FResidFitGui
-except ImportError:
-    from .calc_f_sky_recon import calc_f_sky_recon
-    from ..tools.cassini_blocked import cassini_blocked
-    from .f_resid_fit_gui import FResidFitGui
+from .calc_f_sky_recon import calc_f_sky_recon
+from ..tools.cassini_blocked import cassini_blocked
+from .f_resid_fit_gui import FResidFitGui
 
 sys.path.append('../..')
 import rss_ringoccs as rss
@@ -142,11 +137,8 @@ class FreqOffsetFit(object):
             [1] RSRReader
             [2] Geometry
             [3] numpy
-            [4] os
-            [5] platform
-            [6] scipy.interpolate
-            [7] sys
-            [8] time
+            [4] scipy.interpolate
+            [5] sys
 
         Warnings:
             [1] If you don't use the GUI the first time you run a data set,
@@ -157,6 +149,10 @@ class FreqOffsetFit(object):
                 message from spiceypy routines
             [3] Code will exit if no points fall within specified
                 spm_include regions
+
+        References:
+            Cassini Radio Science User's Guide:
+            https://pds-rings.seti.org/cassini/rss/Cassini%20Radio%20Science%20Users%20Guide%20-%204%20Sep%202014.pdf
         """
 
         if type(rsr_inst) != rss.rsr_reader.RSRReader:
@@ -233,7 +229,7 @@ class FreqOffsetFit(object):
             [194400, np.inf]]
 
         # Set attributes for residual frequency fit, and the
-        # new frequency offset fit
+        #     new frequency offset fit
         self.set_f_sky_resid_fit(poly_order=poly_order,
             spm_include=spm_include, USE_GUI=USE_GUI, verbose=verbose)
 
@@ -266,9 +262,6 @@ class FreqOffsetFit(object):
             [2] Geometry
             [3] FResidFitGui
             [4] numpy
-            [5] os
-            [6] platform
-            [7] time
 
         Notes:
         [1] Here is an example spm_include input, where each separate bracket
@@ -342,7 +335,8 @@ class FreqOffsetFit(object):
 
         # If user specified spm_include argument that overrides the rho_exclude
         #     argument
-        if spm_include is not None:
+        #if spm_include is not None:
+        if spm_include:
             if verbose:
                 print('Using specified fit parameters')
             self._spm_include = spm_include
@@ -489,17 +483,15 @@ class FreqOffsetFit(object):
             'geo_inst': self.__geo_inst.history, 'f_uso': self.__f_uso}
         input_kw_dict = {'poly_order': self._poly_order,
             'spm_include': self._spm_include, 'USE_GUI': self.__USE_GUI}
-        hist_dict = {'User Name': os.getlogin(),
-            'Host Name': os.uname().nodename,
-            'Run Date': time.ctime() + ' ' + time.tzname[0],
-            'Python Version': platform.python_version(),
-            'Operating System': os.uname().sysname,
-            'Source File': __file__.split('/')[-1],
-            'Source Directory': __file__.rsplit('/', 1)[0] + '/',
-            'Input Variables': input_var_dict,
-            'Input Keywords': input_kw_dict}
+#         hist_dict = {'User Name': os.getlogin(),
+#             'Host Name': os.uname().nodename,
+#             'Run Date': time.ctime() + ' ' + time.tzname[0],
+#             'Python Version': platform.python_version(),
+#             'Operating System': os.uname().sysname,
+#             'Source File': __file__.split('/')[-1],
+#             'Source Directory': __file__.rsplit('/', 1)[0] + '/',
+#             'Input Variables': input_var_dict,
+#             'Input Keywords': input_kw_dict}
+        hist_dict = rss.tools.write_history_dict.write_history_dict(
+            input_var_dict, input_kw_dict, __file__)
         self.history = hist_dict
-
-
-if __name__ == '__main__':
-    pass

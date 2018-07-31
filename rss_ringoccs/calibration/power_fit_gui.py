@@ -448,7 +448,3 @@ class PowerFitGui(Frame):
             self.parent.destroy()
         else:
             return
-
-
-if __name__ == '__main__':
-    pass

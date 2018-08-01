@@ -7,315 +7,6 @@ import numpy as np
 import pandas as pd
 from scipy import interpolate
 
-def check_boole(boo):
-    """
-        Function:
-            check_boole
-        Purpose:
-            Check if an input is Boolean.
-        Variables:
-            boo:    Any valid input (Int, float, string, list, etc).
-        Outputs:
-            bout:   A Boolean (True or False), depending on whether
-                    or not boo is Boolean.
-        Dependencies:
-            [1] numpy
-        Notes:
-            If the input is not in the rtypes list, this function
-            returns False. Even if the input is a list like [0] or
-            [1], which looks Boolean, the function will return False.
-        References:
-            [1] https://en.wikipedia.org/wiki/Boolean_data_type
-        Examples:
-            Check several inputs and see if they're Boolean.
-                In [1]: import diffcorr as dc
-                In [2]: dc.check_boole(1)
-                Out[2]: True
-                In [3]: dc.check_boole(2)
-                Out[3]: False
-                In [4]: dc.check_boole(0)
-                Out[4]: True
-                In [5]: dc.check_boole(-1)
-                Out[5]: False
-                In [6]: dc.check_boole(True)
-                Out[6]: True
-                In [7]: dc.check_boole(False)
-                Out[7]: True
-                In [8]: dc.check_boole(1.5)
-                Out[8]: False
-                In [9]: dc.check_boole(1+1j)
-                Out[9]: False
-                In [10]: dc.check_boole([1])
-                Out[10]: False
-                In [11]: dc.check_boole([0,1])
-                Out[11]: False
-        History:
-            Translated from IDL: RJM - 2018/05/14 1:14 P.M.
-            Allow True and False inputs: RJM - 2018/05/16 1:15 P.M.
-    """
-    tb = type(boo)
-    btypes = [type(0),type(np.intc(0)),type(np.intp(0)),
-        type(np.int8(0)),type(np.int16(0)),type(np.int32(0)),
-        type(np.int64(0)),type(True)]
-    if not (tb in btypes):
-        bout = False
-    elif (np.size(boo) != 1):
-        bout = False
-    elif (boo != 0) and (boo != 1) and (boo != True) and (boo != False):
-        bout = False
-    else:
-        bout = True
-    del tb, btypes
-    return bout
-
-def check_ternary(ter):
-    """
-        Function:
-            check_ternary
-        Purpose:
-            Check if an input is ternary.
-        Variables:
-            ter:    Any valid input (Int, float, string, list, etc).
-        Outputs:
-            tout:   A Boolean (True or False), depending on whether
-                    or not boo is Ternary.
-        Dependencies:
-            [1] numpy
-        Notes:
-            If the input is not in the rtypes list, this function
-            returns False. Even if the input is a list like [0] or
-            [1], which looks Boolean, the function will return False.
-        References:
-            [1] https://en.wikipedia.org/wiki/Three-valued_logic
-        Examples:
-            Check if several types are Ternary:
-                In [1]: import diffcorr as dc
-                In [2]: dc.check_ternary(1)
-                Out[2]: True
-                In [3]: dc.check_ternary(0)
-                Out[3]: True
-                In [4]: dc.check_ternary(2)
-                Out[4]: True
-                In [5]: dc.check_ternary(3)
-                Out[5]: False
-                In [6]: dc.check_ternary(2.5)
-                Out[6]: False
-                In [7]: dc.check_ternary(-1)
-                Out[7]: False
-                In [8]: dc.check_ternary([0])
-                Out[8]: False
-                In [9]: dc.check_ternary([0,1])
-                Out[9]: False
-                In [10]: dc.check_ternary(1+1j)
-                Out[10]: False
-        History:
-            Translated from IDL: RJM - 2018/05/14 1:36 P.M.
-    """
-    tt = type(ter)
-    ttypes = [type(0),type(np.intc(0)),type(np.intp(0)),
-        type(np.int8(0)),type(np.int16(0)),type(np.int32(0)),
-        type(np.int64(0))]
-    if not (tt in ttypes):
-        tout = False
-    elif (np.size(ter) != 1):
-        tout = False
-    elif (ter != 0) and (ter != 1) and (ter != 2):
-        tout = False
-    else:
-        tout = True
-    del tt, ttypes
-    return tout
-
-def check_pos_real(pos):
-    """
-        Function:
-            check_pos_real
-        Purpose:
-            Check if an input is a SINGLE positive number.
-        Variables:
-            pos:    Any valid input (Int, float, string, list, etc).
-        Outputs:
-            pout:   A Boolean (True or False), depending on whether
-                    or not pos is a SINGLE positive real number.
-        Dependencies:
-            [1] numpy
-        Notes:
-            If the input is not in the rtypes list, this function
-            returns False. Even if the input is a list like [0] or
-            [1], which looks positive and real, the function will
-            return False.
-        References:
-            [1] John Stillwell, The Real Numbers:
-                An Introduction to Set Theory and Analysis,
-                Springer International Publishing, 2013
-            [2] https://en.wikipedia.org/wiki/Real_number
-        Examples:
-            Check if several types are positive real numbers.
-                In [1]: import diffcorr as dc
-                In [2]: import numpy as np
-                In [3]: dc.check_pos_real(0)
-                Out[3]: False
-                In [4]: dc.check_pos_real(1)
-                Out[4]: True
-                In [5]: dc.check_pos_real(1.5)
-                Out[5]: True
-                In [6]: dc.check_pos_real(-2)
-                Out[6]: False
-                In [7]: dc.check_pos_real(np.pi)
-                Out[7]: True
-                In [8]: dc.check_pos_real([0])
-                Out[8]: False
-                In [9]: dc.check_pos_real([2])
-                Out[9]: False
-                In [10]: dc.check_pos_real(np.array([1,2,np.pi]))
-                Out[10]: False
-            In the last example, note the np.array([1,2,np.pi]) is a
-            legal array, and an array of real numbers. However, 
-            check_pos_real only returns True if the input is a single
-            real number. That example is an array of three numbers.
-        History:
-            Translated from IDL: RJM - 2018/05/14 1:30 P.M.
-    """
-    tp = type(pos)
-    rtypes = [type(0),type(0.),type(np.intc(0)),type(np.intp(0)),
-        type(np.int8(0)),type(np.int16(0)),type(np.int32(0)),
-        type(np.int64(0)),type(np.float16(0)),type(np.float32(0)),
-        type(np.float64(0))]
-    if not (tp in rtypes):
-        pout = False
-    elif (np.size(pos) != 1):
-        pout = False
-    elif (pos <= 0):
-        pout = False
-    else:
-        pout = True
-    del tp, rtypes
-    return pout
-
-def check_real(rea):
-    """
-        Function:
-            check_real
-        Purpose:
-            Check if an input is real valued.
-        Variables:
-            rea:    Any valid input (Int, float, string, list, etc).
-        Outputs:
-            rout:   A Boolean (True or False), depending on whether
-                    or not rea is real real valued.
-        Dependencies:
-            [1] numpy
-        Notes:
-            If the input is not in the rtypes list, this function
-            returns False. Even if the input is a list like [0] or
-            [1], which looks real valued, the function will return
-            False.
-        References:
-            [1] John Stillwell, The Real Numbers:
-                An Introduction to Set Theory and Analysis,
-                Springer International Publishing, 2013
-            [2] https://en.wikipedia.org/wiki/Real_number
-        Examples:
-            Check if several types are real valued:
-                In [1]: import diffcorr as dc
-                In [2]: import numpy as np
-                In [3]: dc.check_real(0)
-                Out[3]: True
-                In [4]: dc.check_real(-1)
-                Out[4]: True
-                In [5]: dc.check_real('bob')
-                Out[5]: False
-                In [6]: dc.check_real(1+1j)
-                Out[6]: False
-                In [7]: dc.check_real([1,2])
-                Out[7]: False
-                In [8]: dc.check_real(np.array([1,2,3+1j]))
-                Out[8]: False
-                In [9]: dc.check_real(np.array([1,2,3+0j]))
-                Out[9]: True
-                In [10]: dc.check_real(np.array([1,2,np.pi]))
-                Out[10]: True
-        History:
-            Translated from IDL: RJM - 2018/05/15 11:56 P.M.
-    """
-    tr = type(rea)
-    rtypes = [type(0),type(0.),type(np.intc(0)),type(np.intp(0)),
-        type(np.int8(0)),type(np.int16(0)),type(np.int32(0)),
-        type(np.int64(0)),type(np.array(0)),type(np.float16(0)),
-        type(np.float32(0)),type(np.float64(0)),type(np.arange(10))]
-    if not (tr in rtypes):
-        rout = False
-    elif (np.size(rea) == 1):
-        if not (np.real(rea) == rea): 
-            rout = False
-        else:
-            rout = True
-    else:
-        if not (np.real(rea) == rea).all():
-            rout = False
-        else:
-            rout = True
-    del tr, rtypes
-    return rout
-
-def check_complex(com):
-    """
-        Function:
-            check_complex
-        Purpose:
-            Check if an input is purely complex valued.
-        Variables:
-            com:    Any valid input (Int, float, string, list, etc).
-        Outputs:
-            cout:   A Boolean (True or False), depending on whether
-                    or not rea is real real valued.
-        Dependencies:
-            [1] numpy
-        Notes:
-            If the input is not in the ctypes list, this function
-            returns False. Even if the input is a list like [1j] or
-            [1+1j], which looks real valued, the function will return
-            False.
-            [1] Paul Nahin, An Imaginary Tale: The Story of i,
-                Princeton Publishing, 1998
-            [2] https://en.wikipedia.org/wiki/Complex_number
-        Examples:
-            Check if several types are complex valued.
-            In [1]: import diffcorr as dc
-            In [2]: import numpy as np
-            In [3]: dc.check_complex(0)
-            Out[3]: False
-            In [4]: dc.check_complex(0+1j)
-            Out[4]: True
-            In [5]: dc.check_complex(np.pi+1j)
-            Out[5]: True
-            In [6]: dc.check_complex(np.array([0,1,1+1j]))
-            Out[6]: True
-            In [7]: dc.check_complex(np.array([0,1,1]))
-            Out[7]: False
-            In [8]: dc.check_complex('Bob')
-            Out[8]: False
-        History:
-            Translated from IDL: RJM - 2018/05/15 12:08 P.M.
-    """
-    tr = type(com)
-    ctypes = [type(np.complex(0)),type(np.complex64(0)),
-        type(np.complex128(0)),type(np.arange(10))]
-    if not (tr in ctypes):
-        cout = False
-    elif (np.size(com) == 1):
-        if (np.imag(com) == 0):
-            cout = False
-        else:
-            cout = True    
-    else:
-        if (np.imag(com) == 0).all():
-            cout = False
-        else:
-            cout = True
-    del tr, ctypes
-    return cout
-
 def shell_execute(script):
     """
         Function:
@@ -704,7 +395,7 @@ def get_dlp(dlpdata,verbose=True):
             "phi_ora_deg_vals",
             "raw_tau_vals",
             "phase_deg_vals",
-            "tau_threshold_vals",
+            "raw_tau_threshold_vals",
             "t_oet_spm_vals",
             "t_ret_spm_vals",
             "t_set_spm_vals",
@@ -725,7 +416,7 @@ def get_tau(taudata,verbose=True):
             "phi_ora_deg_vals",
             "raw_tau_vals",
             "phase_deg_vals",
-            "tau_threshold_vals",
+            "raw_tau_threshold_vals",
             "spm_vals",
             "t_ret_spm_vals",
             "t_set_spm_vals",
@@ -765,47 +456,14 @@ class extract_csv_data(object):
                                 radius, in kilometers per second.
     """
 
-    def __init__(self,geodata,caldata,dlpdata,
-        occ=False,taudata=False,verbose=True):
+    def __init__(self,geodata,caldata,dlpdata,taudata=False,verbose=True):
 
-        self.geodata                 = None
-        self.caldata                 = None
-        self.dlpdata                 = None
-        self.taudata                 = None
-        self.occ                     = None
-        self.rho_km_vals             = None
-        self.phi_rad_vals            = None
-        self.p_norm_vals             = None
-        self.phase_rad_vals          = None
-        self.B_rad_vals              = None
-        self.D_km_vals               = None
-        self.f_sky_hz_vals           = None
-        self.rho_dot_kms_vals        = None
-        self.power_vals              = None
-        self.phase_vals              = None
-        self.tau_vals                = None
-        self.tau_rho                 = None
-        self.t_oet_spm_vals          = None
-        self.t_ret_spm_vals          = None
-        self.t_set_spm_vals          = None
-        self.rho_corr_pole_km_vals   = None
-        self.rho_corr_timing_km_vals = None
-        self.phi_rl_rad_vals         = None  # Ring Longitude (Radians)
-        self.tau_threshold_vals      = None  # Threshold Optical Depth
-        self.history                 = None
-
-        if (type(geodata) != type("Hi!")):
+        if (not isinstance(geodata,str)):
             raise TypeError("geodata must be a string: '/path/to/geodata'")
-        if (type(caldata) != type("Hi!")):
+        if (not isinstance(caldata,str)):
             raise TypeError("caldata must be a string: '/path/to/caldata'")
-        if (type(dlpdata) != type("Hi!")):
+        if (not isinstance(dlpdata,str)):
             raise TypeError("dlpdata must be a string: '/path/to/dlpdata'")
-        if (occ != False):
-            if (type(occ) != type("Hi!")):
-                raise TypeError("occ must be a string: 'egress' or 'ingress'")
-            else:occ=occ.replace(" ","").replace("'","").replace('"',"").lower()
-            if (occ != 'ingress') and (occ != 'egress'):
-                raise ValueError("occ must be either 'ingress' or 'egress'")
 
         self.geodata = geodata
         self.caldata = caldata
@@ -816,12 +474,12 @@ class extract_csv_data(object):
         dlp_dat      = get_dlp(dlpdata,verbose=verbose)
 
         self.__retrieve_variables(geo_dat,cal_dat,dlp_dat,verbose)
-        self.__compute_variables(occ,verbose)
+        self.__compute_variables(verbose)
         self.__interpolate_variables(verbose)
         self.__del_attributes()
 
-        if not check_boole(taudata):
-            if (type(taudata) != type("Hi!")):
+        if (not isinstance(taudata,bool)):
+            if (not isinstance(taudata,bool)):
                 raise TypeError("taudata must be a string: '/path/to/taudata'")
             else:
                 tau_dat         = get_tau(taudata,verbose=verbose)
@@ -851,7 +509,8 @@ class extract_csv_data(object):
                 self.tau_rho    = tau_rho
         elif (bool(taudata) == True):
             raise TypeError("taudata must be a string: '/path/to/taudata'")
-        else: pass
+        else:
+            pass
 
         if verbose: print("Data Extraction Complete.")
         if verbose: print("Writing History...")
@@ -860,123 +519,184 @@ class extract_csv_data(object):
 
     def __retrieve_variables(self,geo_dat,cal_dat,dlp_dat,verbose):
         if verbose: print("Retrieving Variables...")
+
+        # Run an error check on rho_km_vals
         rho_km_vals = np.array(dlp_dat.rho_km_vals)
-        rhotype     = check_real(rho_km_vals)
-        if not rhotype:
-            raise TypeError("Bad DLP: rho_km_vals not real valued.")
+        if not isinstance(rho_km_vals, np.ndarray):
+            raise TypeError("Bad DLP: rho_km_vals must be a numpy array")
+        elif (not np.isreal(rho_km_vals).all()):
+            raise ValueError("Bad DLP: rho_km_vals must be real valued")
         elif (np.min(rho_km_vals) < 0.0):
-            raise ValueError("Bad DLP: rho_km_vals has negative values.")
-        else: del rhotype
+            raise ValueError("Bad DLP: rho_km_vals has negative values")
+        else:
+            pass
         
-        phi_ora_deg_vals    = np.array(dlp_dat.phi_ora_deg_vals)
-        phitype         = check_real(phi_ora_deg_vals)
-        if not phitype:
-            raise TypeError("Bad DLP: phi_ora_deg_vals not real valued.")
+        # Run an error check on phi_ora_deg_vals
+        phi_ora_deg_vals = np.array(dlp_dat.phi_ora_deg_vals)
+        if not isinstance(phi_ora_deg_vals, np.ndarray):
+            raise TypeError("Bad DLP: phi_ora_deg_vals must be a numpy array")
+        elif (not np.isreal(phi_ora_deg_vals).all()):
+            raise ValueError("Bad DLP: phi_ora_deg_vals must be real valued")
         elif (np.max(np.abs(phi_ora_deg_vals)) > 360.0):
             raise ValueError("Bad DLP: max{|phi_ora_deg_vals|} > 360")
-        else: del phitype
+        else:
+            pass
 
-        raw_tau_vals    = np.array(dlp_dat.raw_tau_vals)
-        tautype         = check_real(raw_tau_vals)
-        if not tautype:
-            raise TypeError("Bad DLP: raw_tau_vals not real valued.")
-        else: del tautype
+        # Run an error check on raw_tau_vals
+        raw_tau_vals = np.array(dlp_dat.raw_tau_vals)
+        if (not isinstance(raw_tau_vals, np.ndarray)):
+            raise TypeError("Bad DLP: raw_tau_vals must be a numpy array")
+        elif (not np.isreal(raw_tau_vals).all()):
+            raise ValueError("raw_tau_vals must be real valued")
+        else:
+            pass
 
-        phase_deg_vals  = np.array(dlp_dat.phase_deg_vals)
-        phasetype       = check_real(phase_deg_vals)
-        if not phasetype:
-            raise TypeError("Bad DLP: phase_deg_vals not real valued.")
+        # Run an error check on phase_deg_vals
+        phase_deg_vals = np.array(dlp_dat.phase_deg_vals)
+        if (not isinstance(phase_deg_vals,np.ndarray)):
+            raise TypeError("Bad DLP: phase_deg_vals must be a numpy array")
+        elif (not np.isreal(phase_deg_vals).all()):
+            raise ValueError("Bad DLP: phase_deg_vals must be real valued")
         elif (np.max(np.abs(phase_deg_vals)) > 360.0):
             raise ValueError("Bad DLP: max{|phase_deg_vals|} > 360")
-        else: del phasetype
+        else:
+            pass
     
-        B_deg_vals  = np.array(dlp_dat.B_deg_vals)
-        Btype       = check_real(B_deg_vals)
-        if not Btype:
-            raise TypeError("Bad DLP: B_deg_vals not real valued.")
+        # Run an error check on B_deg_vals
+        B_deg_vals = np.array(dlp_dat.B_deg_vals)
+        if (not isinstance(B_deg_vals,np.ndarray)):
+            raise TypeError("Bad DLP: B_deg_vals must be a numpy array")
+        elif (not np.isreal(B_deg_vals).all()):
+            raise ValueError("Bad DLP: B_deg_vals must be real valued")
         elif (np.max(np.abs(phi_ora_deg_vals)) > 360.0):
             raise ValueError("Bad DLP: max{|B_deg_vals|} > 360")
-        else: del Btype
+        else:
+            pass
 
-        t_ret_spm_vals  = np.array(dlp_dat.t_ret_spm_vals)
-        ttype           = check_real(t_ret_spm_vals)
-        if not ttype:
-            raise TypeError("Bad DLP: t_ret_spm_vals not real valued.")
+        # Run an error check on t_ret_spm_vals
+        t_ret_spm_vals = np.array(dlp_dat.t_ret_spm_vals)
+        if (not isinstance(t_ret_spm_vals,np.ndarray)):
+            raise TypeError("Bad DLP: t_ret_spm_vals must be a numpy array")
+        elif (not np.isreal(t_ret_spm_vals).all()):
+            raise ValueError("Bad DLP: t_ret_spm_vals must be real valued")
         elif (np.min(t_ret_spm_vals) < 0.0):
             raise ValueError("Bad DLP: t_ret_spm_vals has negative values.")
-        else: del ttype
+        else:
+            pass
 
-        t_set_spm_vals  = np.array(dlp_dat.t_set_spm_vals)
-        ttype           = check_real(t_set_spm_vals)
-        if not ttype:
-            raise TypeError("Bad DLP: t_set_spm_vals not real valued.")
+        # Run an error check on t_set_spm_vals
+        t_set_spm_vals = np.array(dlp_dat.t_set_spm_vals)
+        if (not isinstance(t_set_spm_vals,np.ndarray)):
+            raise TypeError("Bad DLP: t_set_spm_vals must be a numpy array")
+        elif (not np.isreal(t_set_spm_vals).all()):
+            raise ValueError("Bad DLP: t_set_spm_vals must be real valued")
         elif (np.min(t_ret_spm_vals) < 0.0):
             raise ValueError("Bad DLP: t_set_spm_vals has negative values.")
-        else: del ttype
+        else:
+            pass
 
-        t_oet_spm_vals  = np.array(dlp_dat.t_oet_spm_vals)
-        ttype           = check_real(t_oet_spm_vals)
-        if not ttype:
-            raise TypeError("Bad DLP: t_oet_spm_vals not real valued.")
+        # Run an error check on t_oet_spm_vals
+        t_oet_spm_vals = np.array(dlp_dat.t_oet_spm_vals)
+        if (not isinstance(t_oet_spm_vals, np.ndarray)):
+            raise TypeError("Bad DLP: t_oet_spm_vals must be a numpy array")
+        elif (not np.isreal(t_oet_spm_vals).all()):
+            raise ValueError("Bad DLP: t_oet_spm_vals must be real valued")
         elif (np.min(t_ret_spm_vals) < 0.0):
-            raise ValueError("Bad DLP: t_oet_spm_vals has negative values.")
-        else: del ttype
+            raise ValueError("Bad DLP: t_oet_spm_vals has negative values")
+        else:
+            pass
 
-        rho_corr_pole_km_vals  = np.array(dlp_dat.rho_corr_pole_km_vals)
-        rtype           = check_real(rho_corr_pole_km_vals)
-        if not rtype:
-            raise TypeError("Bad DLP: rho_corr_pole_km_vals not real valued.")
-        else: del rtype
+        # Run an error check on rho_corr_pole_km_vals
+        rho_corr_pole_km_vals = np.array(dlp_dat.rho_corr_pole_km_vals)
+        if (not isinstance(rho_corr_pole_km_vals, np.ndarray)):
+            raise TypeError(
+                "Bad DLP: rho_corr_pole_km_vals must be a numpy array"
+            )
+        elif (not np.isreal(rho_corr_pole_km_vals).all()):
+            raise ValueError(
+                "Bad DLP: rho_corr_pole_km_vals must be real valued"
+            )
+        else:
+            pass
 
+        # Run an error check on rho_corr_timing_km_vals
         rho_corr_timing_km_vals = np.array(dlp_dat.rho_corr_timing_km_vals)
-        rtype                   = check_real(rho_corr_pole_km_vals)
-        if not rtype:
-            raise TypeError("Bad DLP: rho_corr_timing_km_vals not real valued.")
-        else: del rtype
+        if (not isinstance(rho_corr_timing_km_vals, np.ndarray)):
+            raise TypeError(
+                "Bad DLP: rho_corr_timing_km_vals must be a numpy array"
+            )
+        elif (not np.isreal(rho_corr_timing_km_vals).all()):
+            raise ValueError(
+                "Bad DLP: rho_corr_timing_km_vals must be real valued"
+            )
+        else:
+            pass
 
-        phi_rl_deg_vals  = np.array(dlp_dat.phi_rl_deg_vals)
-        ptype           = check_real(phi_rl_deg_vals)
-        if not ptype:
-            raise TypeError("Bad DLP: phi_rl_deg_vals not real valued.")
-        else: del ptype
+        # Run an error check on phi_rl_deg_vals
+        phi_rl_deg_vals = np.array(dlp_dat.phi_rl_deg_vals)
+        if (not isinstance(phi_rl_deg_vals, np.ndarray)):
+            raise TypeError("Bad DLP: phi_rl_deg_vals must be a numpy array")
+        elif (not np.isreal(phi_rl_deg_vals).all()):
+            raise ValueError("Bad DLP: phi_rl_deg_vals must be real valued")
+        else:
+            pass
 
-        tau_threshold_vals  = np.array(dlp_dat.tau_threshold_vals)
-        ttype               = check_real(tau_threshold_vals)
-        if not ttype:
-            raise TypeError("Bad DLP: tau_threshold_vals not real valued.")
-        else: del ttype
+        # Run an error check on raw_tau_threshold_vals
+        raw_tau_threshold_vals = np.array(dlp_dat.raw_tau_threshold_vals)
+        if (not isinstance(raw_tau_threshold_vals, np.ndarray)):
+            raise TypeError(
+                "Bad DLP: raw_tau_threshold_vals must be a numpy array"
+            )
+        elif (not np.isreal(raw_tau_threshold_vals).all()):
+            raise ValueError(
+                "Bad DLP: raw_tau_threshold_vals must be real valued"
+            )
+        else:
+            pass
 
+        # Run an error check on geo_rho
         geo_rho = np.array(geo_dat.rho_km_vals)
-        rhotype = check_real(geo_rho)
-        if not rhotype:
-            raise TypeError("Bad GEO: rho_km_vals not real valued.")
-        elif (np.min(rho_km_vals) < 0.0):
+        if (not isinstance(geo_rho, np.ndarray)):
+            raise TypeError("Bad GEO: rho_km_vals must be a numpy array")
+        elif (not np.isreal(geo_rho).all()):
+            raise ValueError("Bad GEO: rho_km_vals must be real valued")
+        elif (np.min(geo_rho) < 0.0):
             raise ValueError("Bad GEO: rho_km_vals has negative values.")
-        else: del rhotype
+        else:
+            pass
 
+        # Run an error check on geo_D
         geo_D   = np.array(geo_dat.D_km_vals)
-        Dtype   = check_real(geo_D)
-        if not Dtype:
-            raise TypeError("Bad GEO: D_km_vals not real valued.")
-        elif (np.min(rho_km_vals) < 0.0):
+        if (not isinstance(geo_D, np.ndarray)):
+            raise TypeError("Bad GEO: D_km_vals must be a numpy array")
+        elif (not np.isreal(geo_D).all()):
+            raise ValueError("Bad GEO: D_km_vals must be real valued")
+        elif (np.min(geo_D) < 0.0):
             raise ValueError("Bad GEO: D_km_vals has negative values.")
-        else: del Dtype
+        else:
+            pass
 
+        # Run an error check on geo_drho
         geo_drho    = np.array(geo_dat.rho_dot_kms_vals)
-        drhotype    = check_real(geo_D)
-        if not drhotype:
-            raise TypeError("Bad GEO: rho_dot_kms_vals not real valued.")
-        else: del drhotype
+        if (not isinstance(geo_drho, np.ndarray)):
+            raise TypeError("Bad GEO: rho_dot_kms_vals must be a numpy array")
+        elif (not np.isreal(geo_drho).all()):
+            raise ValueError("Bad GEO: rho_dot_kms_vals must be real valued")
+        else:
+            pass
 
+        # Run an error check on f_sky_raw_vals
         f_sky_raw_vals = np.array(cal_dat.f_sky_pred_vals)
-        freqtype       = check_real(f_sky_raw_vals)
-        if not freqtype:
-            raise TypeError("Bad CAL: f_sky_raw_vals not real valued.")
+        if (not isinstance(f_sky_raw_vals, np.ndarray)):
+            raise TypeError("Bad CAL: f_sky_raw_vals must be a numpy array")
+        elif (not np.isreal(f_sky_raw_vals).all()):
+            raise ValueError("Bad CAL: f_sky_raw_vals must be real valued")
         elif (np.min(f_sky_raw_vals) < 0.0):
             raise ValueError("Bad CAL: f_sky_raw_vals has negative values.")
         elif (np.min(f_sky_raw_vals) < 10000.0):
             raise ValueError("Bad CAL: f_sky_raw_vals less than 1e4 Hz.")
-        else: del freqtype
+        else:
+            pass
 
         self.rho_km_vals             = rho_km_vals
         self.phi_ora_deg_vals        = phi_ora_deg_vals
@@ -986,16 +706,18 @@ class extract_csv_data(object):
         self.geo_rho                 = geo_rho
         self.geo_D                   = geo_D
         self.geo_drho                = geo_drho
-        self.f_sky_raw_vals          = f_sky_raw_vals
-        self.t_oet_spm_vals          = t_oet_spm_vals
-        self.t_ret_spm_vals          = t_ret_spm_vals
-        self.t_set_spm_vals          = t_set_spm_vals
+
+        # Set time and frequency attributes.
+        self.f_sky_raw_vals = f_sky_raw_vals
+        self.t_oet_spm_vals = t_oet_spm_vals
+        self.t_ret_spm_vals = t_ret_spm_vals
+        self.t_set_spm_vals = t_set_spm_vals
         self.rho_corr_pole_km_vals   = rho_corr_pole_km_vals
         self.rho_corr_timing_km_vals = rho_corr_timing_km_vals
         self.phi_rl_deg_vals         = phi_rl_deg_vals
-        self.tau_threshold_vals      = tau_threshold_vals
+        self.raw_tau_threshold_vals  = raw_tau_threshold_vals
 
-    def __compute_variables(self,occ,verbose):
+    def __compute_variables(self,verbose):
         if verbose: print("Computing Variables...")
         phi_rad_vals    = np.deg2rad(self.phi_ora_deg_vals)
         phi_rl_rad_vals = np.deg2rad(self.phi_rl_deg_vals)
@@ -1005,6 +727,34 @@ class extract_csv_data(object):
         raw_tau_vals    = self.raw_tau_vals
         geo_drho        = self.geo_drho
         p_norm_vals     = np.exp(-raw_tau_vals/raw_mu)
+
+        rho_km_vals = self.rho_km_vals
+        t_oet_spm_vals = self.t_oet_spm_vals
+
+        if (np.size(rho_km_vals) != np.size(t_oet_spm_vals)):
+            raise ValueError("len(rho_km_vals) != len(t_oet_spm_vals")
+
+        dr = np.zeros(np.size(rho_km_vals) - 1)
+        dt = np.zeros(np.size(t_oet_spm_vals)-1)
+
+        for i in range(np.size(rho_km_vals) - 1):
+            dr[i] = rho_km_vals[i+1] - rho_km_vals[i]
+            dt[i] = t_oet_spm_vals[i+1] - t_oet_spm_vals[i]
+        
+        drdt = dr/dt
+
+        if (np.min(drdt) < 0.0) and (np.max (drdt) > 0.0):
+            raise ValueError(
+                "Bad DLP: drho/dt has positive and negative values."
+            )
+        elif (np.size((drdt == 0).nonzero()) != 0):
+            raise ValueError("Bad DLP: drho/dt has zero valued elements.")
+        elif (drdt < 0.0).all():
+            occ = 'ingress'
+        elif (drdt > 0.0).all():
+            occ = 'egress'
+        else:
+            raise ValueError("Bad DLP: drho/dt has incompatible elements")
 
         if (occ == 'ingress'):  crange = (geo_drho < 0.0).nonzero()
         elif (occ == 'egress'): crange = (geo_drho > 0.0).nonzero()

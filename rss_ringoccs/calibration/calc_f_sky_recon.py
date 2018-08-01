@@ -9,6 +9,11 @@ Purpose: Calculate sky frequency from the reconstructed event kernels.
 NOTE: Since this was copied directly with little idea of what is actually
       happening, the style looks horrible. Sorry about that
 
+References:
+    This comes from casrss2.fltops.jpl.nasa.gov:~njr/programs/predicts
+    It contains a version of Nicole's PREDICTS program, which calculates
+    predicted sky frequencies
+
 Revisions:
       gjs_calc_f_sky_recon.py
    2018 Feb 22 - gsteranka - Original version
@@ -24,10 +29,10 @@ import numpy as np
 from spiceypy import spiceypy as spice
 import sys
 
-try:
-    from spm_to_et import spm_to_et
-except ImportError:
-    from ..tools.spm_to_et import spm_to_et
+#try:
+#    from spm_to_et import spm_to_et
+#except ImportError:
+from ..tools.spm_to_et import spm_to_et
 
 # Product of the gravitational constant by the Sun mass
 MUS = 1.3271244002331E+11
@@ -60,13 +65,19 @@ def calc_f_sky_recon(f_spm, rsr_inst, sc_name, f_uso, kernels, TEST=False):
     """Primary function to calculate sky frequency at the requested times f_spm
 
     Args:
-        f_spm (np.ndarray): SPM values to evaluate sky frequency at
-        rsr_inst: Instance of RSRReader class
-        sc_name (str): Name of spacecraft to get sky frequency for. In our
-            case, this should always be 'Cassini'
-        f_uso (float): USO sky frequency for the event and the right band
-        kernels (list): String list of full path name to set of kernels
-        TEST (bool): Print intermediate values if set to True
+        f_spm (np.ndarray):
+            SPM values to evaluate sky frequency at
+        rsr_inst:
+            Instance of RSRReader class
+        sc_name (str):
+            Name of spacecraft to get sky frequency for. In our case,
+            this should always be 'Cassini'
+        f_uso (float):
+            USO sky frequency for the event and the right band
+        kernels (list):
+            String list of full path name to set of kernels
+        TEST (bool):
+            Print intermediate values if set to True
         """
 
     spice.kclear()
@@ -172,7 +183,3 @@ def derpt(et, code):
     B = (PHII + 0.5*SIDOT2)/(spice.clight()**2) - LSEC
 
     return B
-
-
-if __name__ == '__main__':
-    pass

@@ -47,15 +47,12 @@ Revisions:
 """
 
 import numpy as np
-import os
 import pdb
-import platform
 from scipy import signal
 from scipy.interpolate import interp1d
 from scipy.interpolate import splrep
 from scipy.interpolate import splev
 import sys
-import time
 
 from tkinter import Tk
 
@@ -63,12 +60,12 @@ sys.path.append('../..')
 import rss_ringoccs as rss
 sys.path.remove('../..')
 
-try:
-    from cassini_blocked import cassini_blocked
-    from power_fit_gui import PowerFitGui
-except ImportError:
-    from ..tools.cassini_blocked import cassini_blocked
-    from .power_fit_gui import PowerFitGui
+#try:
+#    from cassini_blocked import cassini_blocked
+#    from power_fit_gui import PowerFitGui
+#except ImportError:
+from ..tools.cassini_blocked import cassini_blocked
+from .power_fit_gui import PowerFitGui
 
 
 class Normalization(object):
@@ -137,10 +134,7 @@ class Normalization(object):
             [2] Geometry
             [3] numpy
             [4] scipy
-            [5] os
-            [6] platform
-            [7] sys
-            [8] time
+            [5] sys
 
         Warnings:
             [1] If IQ signal is not properly frequency-corrected (i.e. if the
@@ -158,15 +152,18 @@ class Normalization(object):
                 + 'Input should be from the get_IQ_c() method of the '
                 + 'FreqOffsetFit class')
 
-        if type(geo_inst) != rss.occgeo.Geometry:
+        #if type(geo_inst) != rss.occgeo.Geometry:
+        if not isinstance(geo_inst, rss.occgeo.Geometry):
             sys.exit('ERROR (Normalization): geo_inst input must be an '
                 + 'instance of the Geometry class')
 
-        if type(rsr_inst) != rss.rsr_reader.RSRReader:
+        #if type(rsr_inst) != rss.rsr_reader.RSRReader:
+        if not isinstance(rsr_inst, rss.rsr_reader.RSRReader):
             sys.exit('ERROR (Normalization): rsr_inst input must be an '
                 + 'instance of the RSRReader class')
 
-        if type(verbose) != bool:
+        #if type(verbose) != bool:
+        if not isinstance(verbose, bool):
             print('WARNING (Normalization): verbose input must be boolean. '
                 + 'Ignoring current input and setting to False')
             verbose = False
@@ -183,17 +180,9 @@ class Normalization(object):
             np.asarray(geo_inst.rho_km_vals), fill_value='extrapolate')
         self.__rho_interp_func = rho_interp_func
 
-        # Default arguments for spline fit. Chosen because:
-        #     spline_order: Order higher than 2 gives too much freedom to
-        #                   spline fit.
-        #     knots_km: By experimentation, these tend to give the most
-        #               consistently good spline fits. Sometimes need to
-        #               adjust if a file's free space power cuts off sooner
-        #               or begins later than expected
-        #     freespace_km: These regions are always free space and
-        #                   uninterrupted by diffraction pattern or an
-        #                   eccentric ringlet. These accompany the default
-        #                   knots
+        # Default arguments for spline fit. Mentioned in docstring for
+        #     get_spline_fit method, under the descriptions for the inputs
+        #     spline_order, freespace_spm, and knots_spm
         self._spline_order = 2
         self._knots_km = [70445., 87400., 117730., 119950., 133550., 194269.]
         self._dt_down = 0.5
@@ -270,15 +259,19 @@ class Normalization(object):
 
         Args:
             spline_order (int): Order of the spline fit. Default order is 2
-
+                because any order higher than this gives the splien fit too
+                much freedom
             dt_down (float): Time spacing to downsample to before making
                 a spline fit
             freespace_spm (list): Set of SPM values to treat as free space.
-                Meant as an optional replacement for freespace_km. Setting this
-                will override the freespace_km keyword
-            knots_spm (list): List of knots for the spline fit. Same as
-                knots_km, but in SPM instead of radius. Specifying this
-                overrides knots_km
+                Meant as an optional replacement for the defaults specified by
+                the _freespace_km attribute. Setting this will override the
+                default. Defaults were chosen based on what works for rev7E
+            knots_spm (list): List of knots for the spline fit in SPM (on the
+                bottom of the GUI x axis). Specifying this overrides knots_km.
+                The _knots_km  attribute gives the default knots, which were
+                chosen based on what worked for rev7E. Specifying knots_spm
+                keyword overrides the default.
             USE_GUI (bool): Use the interactive GUI to make a spline fit to
                 power. This is highly recommended
             verbose (bool): If True, print out intermediate values
@@ -294,9 +287,6 @@ class Normalization(object):
             [3] numpy
             [4] scipy
             [5] sys
-            [6] os
-            [7] platform
-            [8] time
 
         Notes:
             [1] HIGHLY RECOMMENDED to use the GUI if you haven't done the
@@ -309,12 +299,14 @@ class Normalization(object):
                 than you'll probably get an error
         """
 
-        if type(USE_GUI) != bool:
+        #if type(USE_GUI) != bool:
+        if not isinstance(USE_GUI, bool):
             print('WARNING (Normalization): USE_GUI input must be boolean. '
                   + 'Ignoring current input and setting to True')
             USE_GUI = True
 
-        if type(verbose) != bool:
+        #if type(verbose) != bool:
+        if not isinstance(verbose, bool):
             print('WARNING (Normalization): verbose input must be boolean. '
                   + 'Ignoring current input and setting to False')
             verbose = False
@@ -326,6 +318,7 @@ class Normalization(object):
         if spline_order is not None:
             self._spline_order = spline_order
         if dt_down is not None:
+            dt_down = abs(dt_down)
             self._dt_down = dt_down
         if freespace_spm is not None:
             self._freespace_spm = freespace_spm
@@ -589,17 +582,15 @@ class Normalization(object):
             'spline_order': self._spline_order,
             'dt_down': self._dt_down,
             'freespace_spm': self._freespace_spm, 'knots_spm': self._knots_spm}
-        hist_dict = {'User Name': os.getlogin(),
-            'Host Name': os.uname().nodename,
-            'Run Date': time.ctime() + ' ' + time.tzname[0],
-            'Python Version': platform.python_version(),
-            'Operating System': os.uname().sysname,
-            'Source File': __file__.split('/')[-1],
-            'Source Directory': __file__.rsplit('/', 1)[0] + '/',
-            'Input Variables': input_var_dict,
-            'Input Keywords': input_kw_dict}
+#         hist_dict = {'User Name': os.getlogin(),
+#             'Host Name': os.uname().nodename,
+#             'Run Date': time.ctime() + ' ' + time.tzname[0],
+#             'Python Version': platform.python_version(),
+#             'Operating System': os.uname().sysname,
+#             'Source File': __file__.split('/')[-1],
+#             'Source Directory': __file__.rsplit('/', 1)[0] + '/',
+#             'Input Variables': input_var_dict,
+#             'Input Keywords': input_kw_dict}
+        hist_dict = rss.tools.write_history_dict.write_history_dict(
+            input_var_dict, input_kw_dict, __file__)
         self.history = hist_dict
-
-
-if __name__ == '__main__':
-    pass

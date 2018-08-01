@@ -97,19 +97,16 @@ Revisions:
 
 import copy
 import numpy as np
-import os
 import pdb
-import platform
 from scipy.interpolate import interp1d
 import sys
-import time
 
-try:
-    from rsr_reader import RSRReader
-    from resample_IQ import resample_IQ
-except ImportError:
-    from ..rsr_reader.rsr_reader import RSRReader
-    from .resample_IQ import resample_IQ
+#try:
+#    from rsr_reader import RSRReader
+#    from resample_IQ import resample_IQ
+#except ImportError:
+from ..rsr_reader.rsr_reader import RSRReader
+from .resample_IQ import resample_IQ
 
 sys.path.append('../..')
 import rss_ringoccs as rss
@@ -202,11 +199,8 @@ class NormDiff(object):
             [2] resample_IQ
             [3] spm_to_et
             [4] numpy
-            [5] os
-            [6] platform
             [7] scipy.interpolate
             [9] sys
-            [10] time
 
         Warnings:
             [1] Be sure to set decimate_16khz_to_1khz=True when making rsr_inst
@@ -527,15 +521,17 @@ class NormDiff(object):
         input_var_dict = {'rsr_inst': rsr_inst.history, 'dr_km': dr_km,
             'geo_inst': geo_inst.history, 'cal_inst': cal_inst.history}
         input_kw_dict = {'dr_km_tol': dr_km_tol}
-        hist_dict = {'User Name': os.getlogin(),
-            'Host Name': os.uname().nodename,
-            'Run Date': time.ctime() + ' ' + time.tzname[0],
-            'Python Version': platform.python_version(),
-            'Operating System': os.uname().sysname,
-            'Source File': __file__.split('/')[-1],
-            'Source Directory': __file__.rsplit('/', 1)[0] + '/',
-            'Input Variables': input_var_dict,
-            'Input Keywords': input_kw_dict}
+#         hist_dict = {'User Name': os.getlogin(),
+#             'Host Name': os.uname().nodename,
+#             'Run Date': time.ctime() + ' ' + time.tzname[0],
+#             'Python Version': platform.python_version(),
+#             'Operating System': os.uname().sysname,
+#             'Source File': __file__.split('/')[-1],
+#             'Source Directory': __file__.rsplit('/', 1)[0] + '/',
+#             'Input Variables': input_var_dict,
+#             'Input Keywords': input_kw_dict}
+        hist_dict = rss.tools.write_history_dict.write_history_dict(
+            input_var_dict, input_kw_dict, __file__)
         self.history = hist_dict
 
     def chord_split(self):
@@ -644,7 +640,3 @@ class NormDiff(object):
         norm_diff_inst_egr.history = history
 
         return norm_diff_inst_ing, norm_diff_inst_egr
-
-
-if __name__ == '__main__':
-    pass

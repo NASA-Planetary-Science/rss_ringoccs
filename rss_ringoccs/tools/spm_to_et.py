@@ -13,12 +13,14 @@ Revisions:
    2018 Mar 20 - gsteranka - Copy to official version and remove
                              debug steps
     2018 Jul 23 - jfong - add input error checks (doy and year can't be 0)
+    2018 Jul 30 - jfong - allow float inputs for spm (in addition to array)
     
 """
 
 import numpy as np
 import spiceypy as spice
 import sys
+import pdb
 
 def spm_to_et(spm, doy, year, kernels=None):
     """
@@ -33,6 +35,7 @@ def spm_to_et(spm, doy, year, kernels=None):
 
 
 
+
     # Leap seconds kernel
     if kernels is None:
         kernels = '../../../kernels/naif0012.tls'
@@ -40,15 +43,20 @@ def spm_to_et(spm, doy, year, kernels=None):
     spice.kclear()
     spice.furnsh(kernels)
 
-    n_pts = len(spm)
-
-    et_sec_vals = np.zeros(n_pts)
-
     hours = (spm / 3600.0).astype(int)
     remainder_spm = (spm - hours*3600.0).astype(int)
     minutes = (remainder_spm / 60.0).astype(int)
     seconds = spm - hours*3600.0 - minutes*60.0
 
+    try:
+        n_pts = len(spm)
+    except TypeError:
+        n_pts = len([spm])
+        hours = [hours]
+        minutes = [minutes]
+        seconds = [seconds]
+
+    et_sec_vals = np.zeros(n_pts)
     # Test if it's a leap year
     if (year % 4) == 0:
         days_per_year = 366

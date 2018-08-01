@@ -52,14 +52,19 @@ spacecraft = 'Cassini'
 # CHANGE THIS FOR WHICH RSR FILES YOU WANT
 # Change RSR files here
 rsr_file_dir = '../../../../data/'
-rsr_file_list = [#'s10-rev07-rsr-data/S10EAOE2005_123_0740NNNX43D.2A1']#,
-    #'s10-rev07-rsr-data/S10EAOE2005_123_0740NNNK34D.1B1']#,
-    #'s10-rev07-rsr-data/S10EAOI2005_123_0230NNNX26D.3A1']#,
-    #'s36-rev54-rsr-data/S36SROI2007353_0220NNNX63RD.1A1']#,
-    #'s36-rev56-rsr-data/S36SROI2008015_2105NNNX63RD.1A1']#,
+rsr_file_list = [#'s10-rev07-rsr-data/S10EAOE2005_123_0740NNNX43D.2A1',
+    #'s10-rev07-rsr-data/S10EAOE2005_123_0740NNNK34D.1B1',
+    #'s10-rev07-rsr-data/S10EAOE2005_123_0740NNNS43D.2B1',
+    #'s10-rev07-rsr-data/S10EAOI2005_123_0230NNNX26D.3A1',
+    's10-rev07-rsr-data/S10EAOI2005_123_0230NNNK26D.3B1',
+    #'s36-rev54-rsr-data/S36SROI2007353_0220NNNX63RD.1A1',
+    #'s36-rev54-rsr-data/S36SROI2007353_0220NNNK55RD.2B1',
+    #'s36-rev54-rsr-data/S36SROI2007353_0220NNNS63RD.1B1',
+    #'s36-rev56-rsr-data/S36SROI2008015_2105NNNX63RD.1A1',
     #'cors_0112/sroc1_159/rsr/s11sroe2005159_1715nnnx14rd.2a2',
-    #'cors_0113/sroc1_159/rsr/s11sroe2005159_1715nnnx55rd.1a2']
-    'cors_0326/sroc12_169/rsr/S60SROE2010170_0330NNNK34RV.1N2']
+    #'cors_0113/sroc1_159/rsr/s11sroe2005159_1715nnnx55rd.1a2'
+    #'cors_0326/sroc12_169/rsr/S60SROE2010170_0330NNNK34RV.1N2'
+    ]
 rsr_files = [rsr_file_dir + rsr_file for rsr_file in rsr_file_list]
 
 kernels = '../tables/Sa-TC17-V001.ker'
@@ -143,7 +148,6 @@ def write_power_norm_fit_parameters(norm_inst, power_norm_fit_parameters_file):
     file_object.close()
 
 
-# TODO (gsteranka): Test on both km and meters input
 def res_km_str_to_float(res_km_str_vals):
 
     res_km_vals = []

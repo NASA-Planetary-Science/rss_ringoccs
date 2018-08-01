@@ -3,6 +3,7 @@ import time
 import numpy as np
 from scipy.special import lambertw, iv
 from scipy.constants import speed_of_light
+from rss_ringoccs.tools.write_history_dict import write_history_dict
 
 # Dictionary containing regions of interest within the Saturnian Rings.
 region_dict = {
@@ -37,6 +38,12 @@ class DiffractionCorrection(object):
             raise ValueError("res must be a positive floating point number")
         if not isinstance(wtype, str):
             raise TypeError("wtype must be a string. Ex: 'coss'")
+        elif not (wtype in self.__func_dict):
+            erm = ""
+            for key in self.__func_dict:
+                erm = "%s%s\n" % (erm, key)
+            raise ValueError("\nIllegal string used for wtype.\n"
+                             "\rAllowed Strings:\n%s" % erm)
         if not isinstance(fwd, bool):
             raise TypeError("fwd must be Boolean: True/False")
         if not isinstance(norm, bool):
@@ -105,6 +112,7 @@ class DiffractionCorrection(object):
         self.fwd        = fwd
         self.fft        = fft
         self.bfac       = bfac
+        self.sigma      = sigma
         self.psitype    = psitype.replace(" ", "").lower()
 
         # Retrieve variables from the NormDiff class, setting as attributes.
@@ -232,9 +240,12 @@ class DiffractionCorrection(object):
         # self.__trim_inputs()
         self.T_vals = self.__finv()
         if self.fwd:
-            self.T_hat_fwd_vals     = self.__ffwd()
-            self.p_norm_fwd_vals    = power_func(self.T_hat_fwd_vals)
-            self.phase_fwd_vals     = phase_func(self.T_hat_fwd_vals)
+            self.T_hat_fwd_vals  = self.__ffwd()
+            self.p_norm_fwd_vals = np.abs(
+                self.T_hat_fwd_vals*self.T_hat_fwd_vals
+            )
+            self.phase_fwd_vals = -np.arctan2(np.imag(self.T_hat_fwd_vals),
+                                              np.real(self.T_hat_fwd_vals))
 
         self.power_vals = np.abs(self.T_vals*self.T_vals)
         self.phase_vals = -np.arctan2(np.imag(self.T_vals),np.real(self.T_vals))
@@ -245,6 +256,25 @@ class DiffractionCorrection(object):
         self.tau_vals   = tau
 
         self.__trim_attributes(self.fwd)
+
+        input_vars = {
+            "Diffraction Data": NormDiff,
+            "Resolution (km)":  self.res,
+        }
+
+        input_kwds = {
+            "Requested Range":      self.rngreq,
+            "Requested Window":     self.wtype,
+            "Use of Forward Model": self.fwd,
+            "Use of Normalization": self.norm,
+            "Use of Verbose":       self.verbose,
+            "Use of b-factor":      self.bfac,
+            "sigma value":          self.sigma,
+            "Use of FFT":           self.fft,
+            "Psi Approximation":    self.psitype
+        }
+
+        self.history = write_history_dict(input_vars, input_kwds, __file__)
 
         t2 = time.time()
         print("Computation Time: ",t2-t1,end="\r")
@@ -423,8 +453,8 @@ class DiffractionCorrection(object):
         return T
 
     # Window Normalization Function.
-    def __normalize(self,dx,w_func,ker,f_scale):
-        T1        = np.abs(np.sum(w_func * ker) * dx)   # Freespace Integral
+    def __normalize(self,dx,ker,f_scale):
+        T1        = np.abs(np.sum(ker) * dx)   # Freespace Integral
         norm_fact = np.sqrt(2.0) * f_scale / T1         # Normalization Factor
         return norm_fact
 
@@ -607,7 +637,7 @@ class DiffractionCorrection(object):
 
                 # If normalization has been set, normalize the reconstruction
                 if norm:
-                    T_vals[center] *= nrm(dx_km, w_func, ker, F)
+                    T_vals[center] *= nrm(dx_km, ker, F)
                 if verbose:
                     print("Pt: %d  Tot: %d  Width: %d  Psi Iters: %d Inversion"
                           % (i, n_used, nw, loop), end="\r")
@@ -756,10 +786,309 @@ class DiffractionCorrection(object):
 
                 # If normalization has been set, normalize the reconstruction
                 if norm:
-                    T_vals[center] *= nrm(dx_km, w_func, ker, F)
+                    T_vals[center] *= nrm(dx_km, ker, F)
                 if verbose:
                     print("Pt: %d  Tot: %d  Width: %d  Psi Iters: %d Inversion"
                           % (i, n_used, nw, loop), end="\r")
         self.phi_s = phi_s_rad
         self.psi_s = psi_vals
         return T_vals
+
+    def __ffwd(self):
+        # Retrieve Ring Radius.
+        rho_km_vals = self.rho_km_vals
+
+        # Retrieve ring azimuth angle.
+        phi_rad_vals = self.phi_rad_vals
+
+        # Retrieve window width, RIP distance, and Fresnel scale.
+        w_km_vals = self.w_km_vals
+        d_km_vals = self.D_km_vals
+        F_km_vals = self.F_km_vals
+
+        # Retrieve opening angle and complex transmittance
+        B_rad_vals = self.B_rad_vals
+
+        # Retrieve wavelength of transmitted signal
+        lambda_km_vals = self.lambda_sky_km_vals
+
+        # Retrieve FFT Boolean
+        fft = self.fft
+
+        # Retrieve psi approximation and verbose Boolean
+        psitype = self.psitype
+        verbose = self.verbose
+
+        # Retrieve norm Boolean.
+        norm = self.norm
+
+        # Retrieve requested window type, starting point, and sample spacing.
+        wtype = self.wtype
+        start = self.start
+        dx_km = self.dx_km
+
+        # Retrieve number of points used.
+        n_used = self.n_used
+
+        w_max     = np.max(w_km_vals[start:start + n_used])
+        nw_fwd    = int(np.ceil(w_max / (2.0 * dx_km)))
+        start_fwd = int(start + nw_fwd)
+        n_fwd     = int(n_used - 2 * nw_fwd)
+
+        # Compute product of wavenumber and RIP distance.
+        kD_vals = 2.0 * np.pi * d_km_vals / lambda_km_vals
+
+        # Compute Cosine of opening angle.
+        cosb = np.cos(B_rad_vals)
+
+        # Precompute variables for speed.
+        cosbD = cosb/d_km_vals
+        cosb2 = cosb*cosb
+
+        # Compute cosine and sine of ring azimuth angle.
+        cosphi0 = np.cos(phi_rad_vals)
+        sinphi0 = np.sin(phi_rad_vals)
+
+        # Precompute squares of variables for speed.
+        dsq = d_km_vals*d_km_vals
+        rsq = rho_km_vals*rho_km_vals
+
+        # Define window function.
+        fw = self.__func_dict[wtype]["func"]
+
+        # Define normalization function.
+        nrm = self.__normalize
+
+        # Set inverse function to FFT or Integration.
+        if fft:
+            finv = self.__fresinvfft
+        else:
+            finv = self.__fresinv
+
+        # Set psi approximation.
+        if (psitype == 'full'):
+            psif = self.__psi_func
+        elif (psitype == 'mtr4'):
+            psif = self.__psi_quartic
+        else:
+            psif = self.__psi_func
+
+        # Create an empty array for reconstructed complex transmittance.
+        T_vals = self.T_vals
+        T_hat_fwd_vals = 0.0 * T_vals
+
+        # Set the first computed point to the 'start' variable.
+        center = start_fwd
+
+        # Compute first window width and window function.
+        w_init = w_km_vals[center]
+        w_func = fw(w_init, dx_km)
+
+        # Compute number of points in window function
+        nw = np.size(w_func)
+
+        # Computed range about the first point
+        crange = np.arange(int(center-(nw-1)/2), int(1+center+(nw-1)/2))-1
+
+        # Compute first approximation for stationary phase.
+        phi_s_rad = phi_rad_vals[center]
+
+        # Compute Cosines and Sines of first approximation.
+        cp = np.cos(phi_s_rad)
+        sp = np.sin(phi_s_rad)
+
+        # Factor used for first Newton-Raphson iteration
+        dphi_fac = (cosb2*cosphi0*sinphi0/(1.0-cosb2*sinphi0*sinphi0))
+        if (psitype == 'fresnel'):
+            for i in np.arange(n_fwd):
+                # Current point being computed.
+                center = start_fwd+i
+
+                # Ring radius of current point.
+                r0 = rho_km_vals[center]
+
+                # Window width for current point.
+                w = w_km_vals[center]
+
+                # Window function for current point.
+                w_func = fw(w, dx_km)
+
+                # Number of points in current window.
+                nw = np.size(w_func)
+
+                # Computed range of points.
+                crange = np.arange(int(center-(nw-1)/2),
+                                   int(1+center+(nw-1)/2))-1
+
+                # Computed ring radius range and Fresnel scale.
+                r = rho_km_vals[crange]
+                F = F_km_vals[center]
+
+                # Compute psi for with stationary phase value
+                psi_vals = (np.pi/2.0)*((r-r0)/F)*((r-r0)/F)
+
+                # Compute kernel function for Fresnel inverse
+                ker = w_func*np.exp(-1j*psi_vals)
+
+                # Range of diffracted data that falls inside the window
+                T = T_vals[crange]
+
+                # Compute 'approximate' Fresnel Inversion for current point
+                T_hat_fwd_vals[center] = finv(T_hat, ker, dx_km, F)
+
+                # If normalization has been set, normalize the reconstruction
+                if norm:
+                    T_hat_fwd_vals[center] *= nrm(dx_km, ker, F)
+                if verbose:
+                    print("Pt: %d  Tot: %d  Width: %d  Psi Iters: %d Inversion"
+                          % (i, n_fwd, nw, loop), end="\r")
+        else:
+            for i in np.arange(n_fwd):
+                # Current point being computed.
+                center = start_fwd+i
+
+                # Compute current radius and RIP distance.
+                r0 = rho_km_vals[center]
+                d2 = dsq[center]
+
+                # Compute square of ring radius.
+                r02 = rsq[center]
+
+                # Precomputed variables for speed.
+                cbd = cosbD[center]
+                cb2 = cosb2[center]
+                cp0 = cosphi0[center]
+                sp0 = sinphi0[center]
+
+                # Compute product of wavenumber and RIP Distance.
+                kD = kD_vals[center]
+
+                # Current window width and Fresnel scale.
+                w = w_km_vals[center]
+                F = F_km_vals[center]
+
+                # If the window width has changed, recompute variables.
+                if (np.abs(w_init - w) >= 2.0 * dx_km):
+                    # Reset w_init and recompute window function.
+                    w_init = w
+                    w_func = fw(w, dx_km)
+
+                    # Reset number of window points
+                    nw = np.size(w_func)
+
+                    # Computed range for current point
+                    crange = np.arange(int(center-(nw-1)/2),
+                                       int(1+center+(nw-1)/2))
+
+                    # Ajdust ring radius by dx_km.
+                    r = rho_km_vals[crange]
+
+                    # Compute square of ring radius.
+                    r2 = rsq[crange]
+
+                    # First iteration of Newton-Raphson.
+                    dphi_s_rad = dphi_fac[center] * (r - r0) / r0
+
+                    # Compute new angle.
+                    phi_s_rad = phi_rad_vals[center] - dphi_s_rad
+
+                    # Compute Sines and Cosines of new angle.
+                    cp = np.cos(phi_s_rad)
+                    sp = np.sin(phi_s_rad)
+
+                # If the window width has not changed, perform Newton-Raphson.
+                else:
+                    # Adjust computed range by dx_km.
+                    crange += 1
+
+                    # Ajdust ring radius by dx_km.
+                    r = rho_km_vals[crange]
+
+                    # Compute square of ring radius.
+                    r2 = rsq[crange]
+
+                    # Compute Xi variable (MTR86 Equation 4b).
+                    xi = cbd * (r0 * cp0 - r * cp)
+
+                    # Compute Eta variable (MTR86 Equation 4c).
+                    eta = (r02 + r2 - 2.0*r*r0*(sp*sp0 + cp*cp0)) / d2
+
+                    # Compute intermediate variables for partial derivatives.
+                    v1 = r * cbd * sp
+                    v2 = 2.0 * r * r0 * (sp*cp0 - sp0*cp) / d2
+                    v4 = np.sqrt(1.0 + 2.0*xi + eta)
+                    v5 = cbd * r * cp
+                    v6 = 2.0 * r * r0 * (sp*sp0 + cp*cp0) / d2
+
+                    # Compute variables used for second partial derivative.
+                    dphia = (2.0*v5 + v6)/(2.0 * v4)
+                    dphib = v5 + (2.0*v1 + v2)*(2.0*v1 + v2)/(4.0*(v4*v4*v4))
+
+                    # Compute First and Second Partial Derivatives of psi
+                    psi_d1 = (2.0*v1 + v2) / (2.0 * v4) - v1
+                    psi_d2 = dphia - dphib
+
+                    # Compute Newton-Raphson perturbation
+                    dphi_s_rad = -psi_d1 / psi_d2
+                    phi_s_rad += dphi_s_rad
+
+                    # Compute Cosines and Sines new angle
+                    cp = np.cos(phi_s_rad)
+                    sp = np.sin(phi_s_rad)
+
+                loop = 0
+                # Perform Newton-Raphson on phi.
+                while (np.max(np.abs(dphi_s_rad)) > 1.e-10):
+                    # Compute Xi variable (MTR86 Equation 4b).
+                    xi = cbd * (r0 * cp0 - r * cp)
+
+                    # Compute Eta variable (MTR86 Equation 4c).
+                    eta = (r02 + r2 - 2.0*r*r0*(sp*sp0 + cp*cp0)) / d2
+
+                    # Compute intermediate variables for partial derivatives.
+                    v1 = r * cbd * sp
+                    v2 = 2.0 * r * r0 * (sp*cp0 - sp0*cp) / d2
+                    v4 = np.sqrt(1.0 + 2.0*xi + eta)
+                    v5 = cbd * r * cp
+                    v6 = 2.0 * r * r0 * (sp*sp0 + cp*cp0) / d2
+
+                    # Compute variables used for second partial derivative.
+                    dphia = (2.0*v5 + v6)/(2.0 * v4)
+                    dphib = v5 + (2.0*v1 + v2)*(2.0*v1 + v2)/(4.0*(v4*v4*v4))
+
+                    # Compute First and Second Partial Derivatives of psi
+                    psi_d1 = (2.0*v1 + v2) / (2.0 * v4) - v1
+                    psi_d2 = dphia - dphib
+
+                    # Compute Newton-Raphson perturbation
+                    dphi_s_rad = -psi_d1 / psi_d2
+                    phi_s_rad += dphi_s_rad
+
+                    # Compute Cosines and Sines new angle
+                    cp = np.cos(phi_s_rad)
+                    sp = np.sin(phi_s_rad)
+
+                    # Add one to loop variable for each iteration
+                    loop += 1
+                    if loop > 5:
+                        break
+
+                # Compute psi for with stationary phase value
+                psi_vals = psif(kD, r, r0, cbd, d2, cp0, sp0, cp, sp, w, nw)
+
+                # Compute kernel function for Fresnel inverse
+                ker = w_func*np.exp(1j*psi_vals)
+
+                # Range of diffracted data that falls inside the window
+                T = T_vals[crange]
+
+                # Compute 'approximate' Fresnel Inversion for current point
+                T_hat_fwd_vals[center] = finv(T, ker, dx_km, F)
+
+                # If normalization has been set, normalize the reconstruction
+                if norm:
+                    T_hat_fwd_vals[center] *= nrm(dx_km, ker, F)
+                if verbose:
+                    print("Pt: %d  Tot: %d  Width: %d  Psi Iters: %d Forward"
+                          % (i, n_fwd, nw, loop), end="\r")
+        return T_hat_fwd_vals

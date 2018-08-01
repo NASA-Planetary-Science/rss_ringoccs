@@ -1,4 +1,6 @@
 import numpy as np
+from scipy.special import erf
+
 from math import factorial
 
 def savitzky_golay(y, window_size, order, deriv=0, rate=1):
@@ -71,7 +73,6 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
     lastvals = y[-1] + np.abs(y[-half_window-1:-1][::-1] - y[-1])
     y = np.concatenate((firstvals, y, lastvals))
     return np.convolve( m[::-1], y, mode='valid')
-
 
 def resolution_inverse(x):
     """
@@ -168,11 +169,11 @@ def fresnel_cos(x_in):
             Translated from IDL:     RJM - 2018/05/14 2:13 P.M.
             Allow complex arguments: RJM - 2018/05/16 1:25 P.M.
     """
-    if (not check_real(x_in)) and (not check_complex(x_in)):
+    if (not isinstance(x_in, np.ndarray)):
         raise TypeError("Input must be real or complex.")
     f_cos = ((1-1j)/4.0)*erf((1+1j)*x_in*np.sqrt(np.pi)/2.0)+\
         ((1+1j)/4.0)*erf((1-1j)*x_in*np.sqrt(np.pi) / 2.0)
-    if (not check_complex(x_in)):
+    if (np.isreal(x_in).all()):
         f_cos = np.real(f_cos)
     return f_cos
 
@@ -222,11 +223,11 @@ def fresnel_sin(x_in):
             Translated from IDL: RJM - 2018/05/14 3:53 P.M.
             Allow complex arguments: RJM - 2018/05/16 1:26 P.M.
     """
-    if (not check_real(x_in)) and (not check_complex(x_in)):
+    if (not isinstance(x_in, np.ndarray)):
         raise TypeError("Input must be real or complex.")
     f_sin = ((1+1j)/4.0)*erf((1+1j)*x_in*np.sqrt(np.pi)/2.0)+\
     ((1-1j)/4.0)*erf((1-1j)*x_in*np.sqrt(np.pi)/2.0)
-    if (not check_complex(x_in)):
+    if (np.isreal(x_in).all()):
         f_sin = np.real(f_sin)
     return f_sin
 
@@ -246,14 +247,37 @@ def sq_well_solve(x,a,b,F,Inverted=False):
         History:
             Translated from IDL: RJM - 2018/05/15 8:03 P.M.
     """
-    if (not check_real(a)) or (not check_real(b)):
-        sys.exit("Endpoints must be real valued")
-    if (np.size(a) != 1) or (np.size(b) != 1):
-        sys.exit("a and b must be a single values")
-    if (not check_real(F)) or (np.size(F) != 1):
-        sys.exit("F must be a single real value.")
-    if (not check_real(x)):
-        sys.exit("x must be real valued.")
+    if (np.size(a) != 1):
+        raise TypeError("Endpoints must be floating point numbers")
+    elif (not isinstance(a,float)):
+        try:
+            a = float(a)
+        except TypeError:
+            raise TypeError("Endpoints must be floating point numbers")
+    elif (not np.isreal(a)):
+        raise ValueError("Endpoints must be real valued")
+    if (np.size(b) != 1):
+        raise TypeError("Endpoints must be floating point numbers")
+    elif (not isinstance(b,float)):
+        try:
+            b = float(b)
+        except TypeError:
+            raise TypeError("Endpoints must be floating point numbers")
+    elif (not np.isreal(b)):
+        raise ValueError("Endpoints must be real valued")
+    if (np.size(F) != 1):
+        raise TypeError("Endpoints must be floating point numbers")
+    elif (not isinstance(F,float)):
+        try:
+            F = float(F)
+        except TypeError:
+            raise TypeError("Endpoints must be floating point numbers")
+    elif (not np.isreal(F)):
+        raise ValueError("Endpoints must be real valued")
+    if (not isinstance(x, np.ndarray)):
+        raise TypeError("Independant variable must be a numpy array")
+    elif (not np.isreal(x).all()):
+        raise ValueError("Independent variable must be real valued")
     H = ((1 - 1j) / 2.) * (fresnel_cos((b - x) / F) - fresnel_cos((a - x) / F)\
     + 1j*(fresnel_sin((b - x) / F) - fresnel_sin((a - x) / F)))
     if not Inverted:

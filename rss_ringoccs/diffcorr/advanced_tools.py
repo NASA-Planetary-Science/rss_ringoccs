@@ -6,8 +6,7 @@ from scipy import interpolate
 dcfile = os.path.dirname(os.path.realpath(__file__))
 sys.path.append("%s/../../" % dcfile)
 del dcfile
-from .diffraction_correction import diffraction_correction
-from rss_ringoccs.tools import check_boole,check_real
+from .diffraction_correction import DiffractionCorrection
 from rss_ringoccs.tools import get_geo,extract_csv_data
 
 class compare_tau(object):
@@ -20,7 +19,7 @@ class compare_tau(object):
         tau_power   = data.power_vals
         tau_phase   = data.phase_vals
         tau_tau     = data.tau_vals
-        rec         = diffraction_correction(data,res,rng=rng,
+        rec         = DiffractionCorrection(data,res,rng=rng,
             bfac=bfac,wtype=wtype,fft=fft,verbose=verbose,norm=norm)
         rho_km_vals = rec.rho_km_vals
         rmin,rmax = np.min(rho_km_vals),np.max(rho_km_vals)
@@ -58,7 +57,7 @@ class find_optimal_resolution(object):
         data        = extract_csv_data(geo,cal,dlp,occ,taudata=tau,verbose=verbose)
         tr          = data.tau_rho
         tau_power   = data.power_vals
-        rec         = diffraction_correction(data,res,rng=rng,wtype="kb35",verbose=False)
+        rec         = DiffractionCorrection(data,res,rng=rng,wtype="kb35",verbose=False)
         rho_km_vals = rec.rho_km_vals
         power_vals  = rec.power_vals
         rmin        = np.min(rho_km_vals)
@@ -70,14 +69,14 @@ class find_optimal_resolution(object):
         for i in np.arange(nres):
             for j in range(nwins):
                 wtype        = wlst[j]       
-                recint       = diffraction_correction(data,res,rng=rng,wtype=wtype,fft=False)
+                recint       = DiffractionCorrection(data,res,rng=rng,wtype=wtype,fft=False)
                 p_int        = recint.power_vals
                 linf         = np.max(np.abs(p_int - tau_power))
                 l2           = np.sqrt(np.sum(np.abs(p_int-tau_power)**2)*recint.dx_km)
                 linfint[j,i] = linf
                 l2int[j,i]   = l2
 
-                recfft       = diffraction_correction(data,res,rng=rng,wtype=wtype,fft=True)
+                recfft       = DiffractionCorrection(data,res,rng=rng,wtype=wtype,fft=True)
                 p_fft        = recfft.power_vals
                 linf         = np.max(np.abs(p_fft - tau_power))
                 l2           = np.sqrt(np.sum(np.abs(p_fft-tau_power)**2)*recint.dx_km)
@@ -103,20 +102,29 @@ class delta_impulse_diffraction(object):
         occ=False,wtype='kb25',fwd=False,norm=True,bfac=True,
         verbose=True,fft=False,psitype='full',usefres=False):
 
-        if not check_boole(fwd):
+        if (not isinstance(res, float)) or (not isinstance(res, int)):
+            try:
+                res = float(res)
+            except TypeError:
+                raise TypeError("res must be a positive floating point number")
+        if (res <= 0.0):
+            raise ValueError("res must be a positive floating point number")
+        if not isinstance(wtype, str):
+            raise TypeError("wtype must be a string. Ex: 'coss'")
+        if not isinstance(fwd, bool):
             raise TypeError("fwd must be Boolean: True/False")
-        if not check_boole(norm):
+        if not isinstance(norm, bool):
             raise TypeError("norm must be Boolean: True/False")
-        if not check_boole(bfac):
+        if not isinstance(bfac, bool):
             raise TypeError("bfac must be Boolean: True/False")
-        if not check_boole(fft):
+        if not isinstance(fft, bool):
             raise TypeError("fft must be Boolean: True/False")
-        if not check_boole(verbose):
+        if not isinstance(verbose, bool):
             raise TypeError("verbose must be Boolean: True/False")
-        if not check_boole(usefres):
+        if not isinstance(psitype, str):
+            raise TypeError("psitype must be a string. Ex: 'full'")
+        if not isinstance(verbose, bool):
             raise TypeError("usefres must be Boolean: True/False")
-        if (type(psitype) != type("Hi!")):
-            raise TypeError("psitype must be a string: 'taylor', 'full', etc.")
     
         data = get_geo(geo,verbose=verbose)
         self.__retrieve_variables(data,verbose)

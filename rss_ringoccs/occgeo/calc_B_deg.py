@@ -6,10 +6,12 @@ Purpose: Calculate ring opening angle, or the observed ring elevation.
 
 Revisions:
     2018 Jul 09 - jfong - original
+    2018 Jul 26 - jfong - add check for et_vals float input
 """
 
 import numpy as np
 import spiceypy as spice
+import pdb
 
 
 def calc_B_deg(et_vals, spacecraft, dsn, nhat_p, kernels=None):
@@ -30,7 +32,14 @@ def calc_B_deg(et_vals, spacecraft, dsn, nhat_p, kernels=None):
         spice.kclear()
         for kernel in kernels:
             spice.furnsh(kernel)
-    npts = len(et_vals)
+    try:
+        npts = len(et_vals)
+    except TypeError:
+#        et = et_vals
+#        et_vals = []
+#        et_vals.append(et)
+        npts = len([et])
+
     B_deg_vals = np.zeros(npts)
 
     for n in range(npts):

@@ -5,6 +5,8 @@ Purpose: Create dictionary of processing history for an instance.
 
 Revisions:
     2018 Jul 11 - jfong - original
+    2018 Jul 27 - jfong - add source_file input (otherwise, source file will
+                          be write_history_dict.py)
 """
 
 import sys
@@ -13,7 +15,7 @@ import os
 import platform
 
 
-def write_history_dict(input_vars, input_kwds):
+def write_history_dict(input_vars, input_kwds, source_file):
     """
     This creates a dictionary of processing history for an instance.
 
@@ -24,6 +26,7 @@ def write_history_dict(input_vars, input_kwds):
         input_kwds (dict):  Dictionary of all input keywords to the instance.
                             For inputs that are instances, use the history
                             dictionary from that instance.
+        source_file (str):  Full path to the script used to run the instance.
 
     Output:
         history (dict):     Dictionary with keys:
@@ -48,8 +51,8 @@ def write_history_dict(input_vars, input_kwds):
     run_date = time.ctime() + ' ' + time.tzname[0]
     python_version = platform.python_version()
     operating_system = os.uname()[0]
-    src_dir = __file__.rsplit('/',1)[0] +'/'
-    src_file = __file__.split('/')[-1]
+    src_dir = source_file.rsplit('/',1)[0] +'/'
+    src_file = source_file.split('/')[-1]
 
     history = {
             "User Name": user_name,

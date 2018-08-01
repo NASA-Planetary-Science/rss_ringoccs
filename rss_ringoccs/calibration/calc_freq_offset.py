@@ -36,16 +36,21 @@ from multiprocessing import Process
 from multiprocessing import Queue
 import multiprocessing
 import numpy as np
-import os
-import platform
+#import os
+#import platform
 import sys
 import time
 
 try:
     from ..rsr_reader.rsr_reader import RSRReader
+    from ..tools.write_history_dict import write_history_dict
 except SystemError:
     sys.path.append('../rsr_reader')
     from rsr_reader import RSRReader
+    sys.path.remove('../rsr_reader')
+    sys.path.append('../tools')
+    from write_history_dict import write_history_dict
+    sys.path.remove('../tools')
 
 
 def calc_freq_offset(rsr_inst, dt_freq=8.192,
@@ -93,10 +98,8 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192,
         [1] RSRReader
         [2] multiprocessing
         [3] numpy
-        [4] os
-        [5] platform
-        [6] sys
-        [7] time
+        [4] sys
+        [5] time
 
     Warnings:
         [1] If dt_freq is too high, there will be few points to fit over when
@@ -112,24 +115,32 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192,
             your computer, you don't see any performance difference from when
             you use the max number of cores, but just the same, we don't
             recommend making it greater than your total number of cores
+
+    References:
+        Cassini Radio Science User's Guide:
+        https://pds-rings.seti.org/cassini/rss/Cassini%20Radio%20Science%20Users%20Guide%20-%204%20Sep%202014.pdf
         """
 
-    if type(rsr_inst) != RSRReader:
+    #if type(rsr_inst) != RSRReader:
+    if not isinstance(rsr_inst, RSRReader):
         print('ERROR (calc_freq_offset): rsr_inst input must be an instance '
             + 'of the RSRReader class')
         sys.exit()
 
-    if (type(dt_freq) != float) and (type(dt_freq) != int):
+    #if (type(dt_freq) != float) and (type(dt_freq) != int):
+    if (not isinstance(dt_freq, float)) and (not isinstance(dt_freq, int)):
         print('ERROR (calc_freq_offset): dt_freq input must be a float or '
             + 'integer')
         sys.exit()
 
-    if type(cpu_count) != int:
+    #if type(cpu_count) != int:
+    if not isinstance(cpu_count, int):
         print('WARNING (calc_freq_offset): cpu_count input must be an '
             + 'integer. Setting equal to number of cores on computer.')
         cpu_count = multiprocessing.cpu_count()
 
-    if type(verbose) != bool:
+    #if type(verbose) != bool:
+    if not isinstance(verbose, bool):
         print('WARNING (calc_freq_offset): verbose keyword must be boolean. '
             + 'Assuming False')
         verbose = False
@@ -201,6 +212,8 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192,
     f_spm = results_hstack[0]
     f_offset = results_hstack[1]
 
+    # If not here, then there's no new line made after the print-outs from the
+    #     above loop
     print('\n')
 
     if verbose:
@@ -208,7 +221,8 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192,
         for i in range(10):
             print('%24.16f %32.16f' % (f_spm[i], f_offset[i]))
 
-    if freq_offset_file is not None:
+    #if freq_offset_file is not None:
+    if freq_offset_file:
         try:
             if verbose:
                 print('Saving results to ' + freq_offset_file)
@@ -390,23 +404,14 @@ def __get_history(rsr_inst, dt_freq, cpu_count, freq_offset_file):
     input_var_dict = {'rsr_inst': rsr_inst.history}
     input_kw_dict = {'dt_freq': dt_freq,
         'cpu_count': cpu_count, 'freq_offset_file': freq_offset_file}
-    hist_dict = {'User Name': os.getlogin(),
-        'Host Name': os.uname().nodename,
-        'Run Date': time.ctime() + ' ' + time.tzname[0],
-        'Python Version': platform.python_version(),
-        'Operating System': os.uname().sysname,
-        'Source File': __file__.split('/')[-1],
-        'Source Directory': __file__.rsplit('/', 1)[0] + '/',
-        'Input Variables': input_var_dict,
-        'Input Keywords': input_kw_dict}
+#     hist_dict = {'User Name': os.getlogin(),
+#         'Host Name': os.uname().nodename,
+#         'Run Date': time.ctime() + ' ' + time.tzname[0],
+#         'Python Version': platform.python_version(),
+#         'Operating System': os.uname().sysname,
+#         'Source File': __file__.split('/')[-1],
+#         'Source Directory': __file__.rsplit('/', 1)[0] + '/',
+#         'Input Variables': input_var_dict,
+#         'Input Keywords': input_kw_dict}
+    hist_dict = write_history_dict(input_var_dict, input_kw_dict, __file__)
     return hist_dict
-
-
-if __name__ == '__main__':
-    rsr_file = ('../../../../../data/s10-rev07-rsr-data/'
-        + 'S10EAOE2005_123_0740NNNX43D.2A1')
-    #spm_range = [30000, 31000]
-    rsr_inst = RSRReader(rsr_file)
-    freq_offset_file = 'notadirectory/sonotgoingtobeafile.txt'
-    f_spm, f_offset, history = calc_freq_offset(rsr_inst,
-        freq_offset_file=freq_offset_file)

@@ -107,6 +107,8 @@ def plot_summary_doc(geo_inst, cal_inst, dlp_inst, tau_inst, outfig):
         # Plot page 2  -- Earth-view and north-pole view of Saturn + occ tracks
         pdf = plot_rss_occ(pdf, B_mean, phi_ora_deg, rho_km, t_oet_spm_geo)
         plt.close()
+        pdf = plot_rss_occ(pdf, 90., phi_ora_deg, rho_km, t_oet_spm_geo)
+        plt.close()
         # Plot page 3 -- geometry params as a function of ring radius
         nrow = 3
         ncol = 2

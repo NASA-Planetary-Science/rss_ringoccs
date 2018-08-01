@@ -1,11 +1,10 @@
 import subprocess
 import os
-import sys
 import time
-import platform
 import numpy as np
 import pandas as pd
 from scipy import interpolate
+from .write_history_dict import write_history_dict
 
 def shell_execute(script):
     """
@@ -25,7 +24,6 @@ def shell_execute(script):
                         system details.
         Dependencies:
             [1] subprocess
-            [2] sys
         Notes:
             This routine has only been tested using scripts written
             in Bash, and on standard Unix commands.
@@ -52,8 +50,8 @@ def shell_execute(script):
     """
     string = ""
     for x in script:
-        if (type(x) != type("Hi")):
-            sys.exit("Input must be a list of strings")
+        if (not isinstance(x, str)):
+            raise TypeError("Input must be a list of strings")
         else:
             string = "%s %s" % (string,x)
     Process=subprocess.Popen([string],shell=True)
@@ -456,7 +454,7 @@ class extract_csv_data(object):
                                 radius, in kilometers per second.
     """
 
-    def __init__(self,geodata,caldata,dlpdata,taudata=False,verbose=True):
+    def __init__(self,geodata,caldata,dlpdata,taudata=None,verbose=True):
 
         if (not isinstance(geodata,str)):
             raise TypeError("geodata must be a string: '/path/to/geodata'")
@@ -465,21 +463,24 @@ class extract_csv_data(object):
         if (not isinstance(dlpdata,str)):
             raise TypeError("dlpdata must be a string: '/path/to/dlpdata'")
 
+        # Save inputs as attributes.
         self.geodata = geodata
         self.caldata = caldata
         self.dlpdata = dlpdata
         self.taudata = taudata
-        geo_dat      = get_geo(geodata,verbose=verbose)
-        cal_dat      = get_cal(caldata,verbose=verbose)
-        dlp_dat      = get_dlp(dlpdata,verbose=verbose)
+
+        # Extract GEO, CAL, and DLP data.
+        geo_dat = get_geo(geodata,verbose=verbose)
+        cal_dat = get_cal(caldata,verbose=verbose)
+        dlp_dat = get_dlp(dlpdata,verbose=verbose)
 
         self.__retrieve_variables(geo_dat,cal_dat,dlp_dat,verbose)
         self.__compute_variables(verbose)
         self.__interpolate_variables(verbose)
         self.__del_attributes()
 
-        if (not isinstance(taudata,bool)):
-            if (not isinstance(taudata,bool)):
+        if (not isinstance(taudata,type(None))):
+            if (not isinstance(taudata,str)):
                 raise TypeError("taudata must be a string: '/path/to/taudata'")
             else:
                 tau_dat         = get_tau(taudata,verbose=verbose)
@@ -507,15 +508,22 @@ class extract_csv_data(object):
                 self.tau_vals   = tau_vals
                 self.phase_vals = phase_vals
                 self.tau_rho    = tau_rho
-        elif (bool(taudata) == True):
-            raise TypeError("taudata must be a string: '/path/to/taudata'")
-        else:
-            pass
 
         if verbose: print("Data Extraction Complete.")
         if verbose: print("Writing History...")
-        self.history    = self.__write_hist_dict()
+
+        input_vars = {
+            "GEO Data":self.geodata,
+            "CAL Data":self.caldata,
+            "DLP Data":self.dlpdata
+            }
+        input_kwds = {
+            "TAU Data":         self.taudata,
+            "Use of Verbose":  verbose
+            }
+        self.history = write_history_dict(input_vars, input_kwds, __file__)
         if verbose: print("History Complete.")
+        if verbose: print("Extract CSV Data Complete.")
 
     def __retrieve_variables(self,geo_dat,cal_dat,dlp_dat,verbose):
         if verbose: print("Retrieving Variables...")
@@ -858,48 +866,11 @@ class extract_csv_data(object):
         del self.phi_ora_deg_vals,self.raw_tau_vals
         del self.phase_deg_vals,self.raw_mu,self.B_deg_vals
         del self.geo_rho,self.geo_D,self.geo_drho,self.crange
-
-    def __write_hist_dict(self):
-        """
-        This creates a history dictionary.
-
-        Returns:
-            geo_hist (dict): Dictionary with "user name", "host name",
-                    "run date", "python version", "operating system",
-                    "source file", "input variables", and "input keywords".
-        """
-        user_name = os.getlogin()
-        host_name = os.uname()[1]
-        run_date  = time.ctime() + ' ' + time.tzname[0]
-        python_v  = platform.python_version()
-        opsys     = os.uname()[0]
-        src_file  = __file__.split('/')[-1]
-        src_dir   = __file__.rsplit('/',1)[0] +'/'
-
-        csv_hist = {
-            "User Name"         : user_name,
-            "Host Name"         : host_name,
-            "Run Date"          : run_date,
-            "Python Version"    : python_v,
-            "Operating System"  : opsys,
-            "Source Directory"  : src_dir,
-            "Source File"       : src_file,
-            "Input Variables"   : {
-                "GEO"   :   self.geodata,
-                "CAL"   :   self.caldata,
-                "DLP"   :   self.dlpdata
-            },
-            "Input Keywords"    : {
-                "TAU"       :   self.taudata,
-                "OCC"       :   self.occ
-            }
-        }
-        return csv_hist
     
 class pure_csv_reader(object):
     def __init__(self,dat):
-        if (type(dat) != type("Hi!")):
-            sys.exit("Text file must be a string.")
+        if (not isinstance(dat, str)):
+            raise TypeError("Text file must be a string.")
         df = pd.read_csv(dat)
         self.rho_km_vals      = np.array(df.rho_km_vals)
         self.phase_rad_vals   = np.array(df.phase_rad_vals)

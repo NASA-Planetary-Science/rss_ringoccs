@@ -1,3 +1,6 @@
+import numpy as np
+from scipy.special import lambertw, iv
+
 def rect(w_in, dx, error_check=True):
     """
         Function:
@@ -432,34 +435,9 @@ def window_width(res,normeq,fsky,fres,rho_dot,sigma=False,bfac=True):
         w_vals = 2.0*normeq*fres*fres/res
     return w_vals
 
-def normalize(r,psi,w_func,f_scale,error_check=True):
-    """
-        Function: normalize
-        Purpose:  Compute the normalization factor used in the Fresnel
-            Inversion process.
-        Variables:
-            r:       Rind radius.
-            w_func:  The window (taper) function.
-            f_scale: The Fresnel scale.
-        History:
-            Translated from IDL: RJM - 2018/05/15 8:21 P.M.
-    """
-    if error_check:
-        if (not check_real(r)):
-            sys.exit("RHO must be real valued")
-        if (not check_real(w_func)):
-            sys.exit("W_FUNC must be real valued")
-        if (not check_pos_real(f_scale)):
-            sys.exit("F_SCALE must be a positive real number")
-        if (np.size(r) != np.size(w_func)):
-            sys.exit("RHO and W_FUNC have a different number of points")
-        if (np.size(r) < 2.0):
-            sys.exit("RHO needs to have at least 2 points")
-    else: pass
-    drho      = r[1]-r[0]
-    ker       = np.exp(-1j * psi)
-    T1        = np.abs(np.sum(w_func * ker) * drho)
-    norm_fact = np.sqrt(2.0) * f_scale / T1
+def normalize(dx,ker,f_scale,error_check=True):
+    T1        = np.abs(np.sum(ker) * dx)   # Freespace Integral
+    norm_fact = np.sqrt(2.0) * f_scale / T1         # Normalization Factor
     return norm_fact
 
 func_dict = {

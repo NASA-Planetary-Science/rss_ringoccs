@@ -152,36 +152,36 @@ class FreqOffsetFit(object):
             https://pds-rings.seti.org/cassini/rss/Cassini%20Radio%20Science%20Users%20Guide%20-%204%20Sep%202014.pdf
         """
 
-        if type(rsr_inst) != rss.rsr_reader.RSRReader:
+        if not isinstance(rsr_inst, rss.rsr_reader.RSRReader):
             sys.exit('ERROR (FreqOffsetFit): rsr_inst input must be an '
                 + 'instance of the RSRReader class')
 
-        if type(geo_inst) != rss.occgeo.Geometry:
+        if not isinstance(geo_inst, rss.occgeo.Geometry):
             sys.exit('ERROR (FreqOffsetFIt): geo_inst input must be an '
                 + 'instance of the Geometry class')
 
-        if (type(f_uso) != float) & (type(f_uso) != int):
+        if (not isinstance(f_uso, float)) & (not isinstance(f_uso, int)):
             print('WARNING (FreqOffsetFit): f_uso input must be either an int '
                 + 'or float. Ignoring current input and setting to '
                 + str(8427222034.34050))
             f_uso = 8427222034.34050
 
-        if type(poly_order) != int:
+        if not isinstance(poly_order, int):
             print('WARNING (FreqOffsetFit): poly_order input must be an int. '
                 + 'Ignoring current input and setting to order 9')
             poly_order = 9
 
-        if (type(spm_include) != list) & (spm_include is not None):
+        if (not isinstance(spm_include, list)) & (spm_include is not None):
             print('WARNING (FreqOffsetFit): spm_include input must be either '
                 + 'a list or None. Setting to None for default fit ranges')
             spm_include = None
 
-        if type(USE_GUI) != bool:
+        if not isinstance(USE_GUI, bool):
             print('WARNING (FreqOffsetFit): USE_GUI input must be boolean. '
                 + 'Ignoring current input and setting to True')
             USE_GUI = True
 
-        if type(verbose) != bool:
+        if not isinstance(verbose, bool):
             print('WARNING (FreqOffsetFit): verbose input must be boolean. '
                 + 'Ignoring current input and setting to False')
             verbose = False
@@ -266,22 +266,22 @@ class FreqOffsetFit(object):
             spm_include = [[30250, 32600], [33520, 33890], [33990, 40200]]
         """
 
-        if type(poly_order) != int:
+        if not isinstance(poly_order, int):
             print('WARNING (FreqOffsetFit): poly_order input must be an int. '
                 + 'Ignoring current input and setting to order 9')
             poly_order = 9
 
-        if (type(spm_include) != list) & (spm_include is not None):
+        if (not isinstance(spm_include, list)) & (spm_include is not None):
             print('WARNING (FreqOffsetFit): spm_include input must be either '
                 + 'a list or None. Setting to None for default fit ranges')
             spm_include = None
 
-        if type(USE_GUI) != bool:
+        if not isinstance(USE_GUI, bool):
             print('WARNING (FreqOffsetFit): USE_GUI input must be boolean. '
                 + 'Ignoring current input and setting to True')
             USE_GUI = True
 
-        if type(verbose) != bool:
+        if not isinstance(verbose, bool):
             print('WARNING (FreqOffsetFit): verbose input must be boolean. '
                 + 'Ignoring current input and setting to False')
             verbose = False
@@ -432,17 +432,6 @@ class FreqOffsetFit(object):
         # Complex signal to frequency correct, and corresponding SPM values
         spm_vals = self.__spm_vals
         IQ_m = self.__IQ_m
-
-        if (type(spm_vals) != np.ndarray) | (type(IQ_m) != np.ndarray):
-            print('WARNING (FreqOffsetFit.get_IQ_c): spm_vals and IQ_m input '
-                + 'must both be numpy arrays. Ignoring input and using '
-                + 'default (raw resolution)')
-            spm_vals = self.__spm_vals
-            IQ_m = self.__IQ_m
-
-        if len(spm_vals) != len(IQ_m):
-            sys.exit('ERROR (FreqOffsetFit.get_IQ_c):'
-                + '\n SPM and IQ_m input lengths don\'t match')
 
         f_offset_fit = self.__f_offset_fit
 

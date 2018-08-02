@@ -84,26 +84,37 @@ class Normalization(object):
                 dt_down=dt_down, freespace_spm=freespace_spm, verbose=verbose)
 
     Attributes:
-        _dt_down (float): Time spacing to downsample to before making
-            a spline fit
-        _freespace_km (list): Set of default radius values, in km, to treat as
+        _dt_down (float):
+            Time spacing to downsample to before making a spline fit
+        _freespace_km (list):
+            Set of default radius values, in km, to treat as
             free space. These are the regions that the spline fit is made
             to. Specify in km. Be sure to include a region for each knot
             specified
-        _freespace_spm (list): SPM version of _freespace_km. Use this one if
+        _freespace_spm (list):
+            SPM version of _freespace_km. Use this one if
             it's not None. Overrides _freespace_km
-        __IQ_c_raw (np.ndarray): Raw resolution frequency corrected I and Q
-        _spline_order (int): Order of the spline fit. Default order is 2
-        _knots_km (list): List of default knot positions for the spline fit
-        _knots_spm (list): SPM versino of _knots_km. Use this one if it's not
+        __IQ_c_raw (np.ndarray):
+            Raw resolution frequency corrected I and Q
+        _spline_order (int):
+            Order of the spline fit. Default order is 2
+        _knots_km (list):
+            List of default knot positions for the spline fit
+        _knots_spm (list):
+            SPM versino of _knots_km. Use this one if it's not
             None. Overrides _knots_km
-        __rho_interp_func (scipy.interpolate.interpolate.interp1d): interp1d
-            function to get set of rho values in km for a set of SPM
-        __rsr_inst: Instance of the RSRReader class
-        kernels (list): List of kernels used for geometry
-        __spm_raw (np.ndarray): Raw resolution SPM values
-        _spm_fit (np.ndarray): SPM values that spline fit was evaluated at
-        history (dict): Recorded information about the run
+        __rho_interp_func (scipy.interpolate.interpolate.interp1d):
+            interp1d function to get set of rho values in km for a set of SPM
+        __rsr_inst:
+            Instance of the RSRReader class
+        kernels (list):
+            List of kernels used for geometry
+        __spm_raw (np.ndarray):
+            Raw resolution SPM values
+        _spm_fit (np.ndarray):
+            SPM values that spline fit was evaluated at
+        history (dict):
+            Recorded information about the run
     """
 
     def __init__(self, spm_raw, IQ_c_raw, geo_inst, rsr_inst, verbose=False):
@@ -114,15 +125,19 @@ class Normalization(object):
         are set as attributes
 
         Args:
-            spm_raw (np.ndarray): Raw resolution array of SPM values. Get from
+            spm_raw (np.ndarray):
+                Raw resolution array of SPM values. Get from
                 using get_IQ_c() method of the FreqOffsetFit class
-            IQ_c_raw (np.ndarray): Frequency corrected complex signal at
+            IQ_c_raw (np.ndarray):
+                Frequency corrected complex signal at
                 raw resolution. Get from using get_IQ_c() method of the
                 FreqOffsetFit class
-            geo_inst: Instance of geometry class. Contains attributes
+            geo_inst:
+                Instance of geometry class. Contains attributes
                 t_oet_spm and rho_km_vals. Can create mock version from a
                 geometry file using geo_file_into_instance.py
-            verbose (bool): Optional boolean argument that, if True, prints out
+            verbose (bool):
+                Optional boolean argument that, if True, prints out
                 intermediate values
 
         Dependencies:
@@ -211,13 +226,18 @@ class Normalization(object):
         diffraction pattern ruining spline fit
 
         Args:
-            dt_down (float): Time spacing to downsample to
-            verbose (bool): If True, prints downsampled results
+            dt_down (float):
+                Time spacing to downsample to
+            verbose (bool):
+                If True, prints downsampled results
 
         Returns:
-            spm_vals_down (np.ndarray): SPM values after downsampling
-            rho_km_vals_down (np.ndarray): Rho values after downsampling
-            p_obs_down (np.ndarray): Observed power after downsampling"""
+            spm_vals_down (np.ndarray):
+                SPM values after downsampling
+            rho_km_vals_down (np.ndarray):
+                Rho values after downsampling
+            p_obs_down (np.ndarray):
+                Observed power after downsampling"""
 
         # Downsampling coefficient q
         dt_raw = self.__spm_raw[1] - self.__spm_raw[0]
@@ -251,28 +271,34 @@ class Normalization(object):
         __init__
 
         Args:
-            spline_order (int): Order of the spline fit. Default order is 2
+            spline_order (int):
+                Order of the spline fit. Default order is 2
                 because any order higher than this gives the splien fit too
                 much freedom
-            dt_down (float): Time spacing to downsample to before making
-                a spline fit
-            freespace_spm (list): Set of SPM values to treat as free space.
+            dt_down (float):
+                Time spacing to downsample to before making a spline fit
+            freespace_spm (list):
+                Set of SPM values to treat as free space.
                 Meant as an optional replacement for the defaults specified by
                 the _freespace_km attribute. Setting this will override the
                 default. Defaults were chosen based on what works for rev7E
-            knots_spm (list): List of knots for the spline fit in SPM (on the
+            knots_spm (list):
+                List of knots for the spline fit in SPM (on the
                 bottom of the GUI x axis). Specifying this overrides knots_km.
                 The _knots_km  attribute gives the default knots, which were
                 chosen based on what worked for rev7E. Specifying knots_spm
                 keyword overrides the default.
-            USE_GUI (bool): Use the interactive GUI to make a spline fit to
+            USE_GUI (bool):
+                Use the interactive GUI to make a spline fit to
                 power. This is highly recommended
-            verbose (bool): If True, print out intermediate values
+            verbose (bool):
+                If True, print out intermediate values
 
         Outputs:
-            spm_fit: SPM values for the spline_fit output
-            spline_fit: Spline fit to observed power at the specified times
-                spm_fit
+            spm_fit:
+                SPM values for the spline_fit output
+            spline_fit:
+                Spline fit to observed power at the specified times spm_fit
 
         Dependencies:
             [1] PowerFitGui
@@ -512,10 +538,12 @@ class Normalization(object):
         None, or if there's an error in the input
 
         Args:
-            rho_km_vals_down (np.ndarray): Ring radius values downsampled from
-                raw resolution
-            freespace_km (list): Default ring regions to include in a fit
-            is_blocked_atm (np.ndarray): Indices of rho_km_vals_down to ignore
+            rho_km_vals_down (np.ndarray):
+                Ring radius values downsampled from raw resolution
+            freespace_km (list):
+                Default ring regions to include in a fit
+            is_blocked_atm (np.ndarray):
+                Indices of rho_km_vals_down to ignore
                 due to atmosphere or ionosphere occultation
         """
 
@@ -536,14 +564,17 @@ class Normalization(object):
         Get data points closest to selected knots
 
         Args:
-            type_if_input (str): Whether knots_where and knots is input in SPM
+            type_if_input (str):
+                Whether knots_where and knots is input in SPM
                 or radius. Is always either "SPM" or "RHO_KM"
-            knots_where (np.ndarray): Indices of "knots" that are within the
-                specified SPM regions
-            knots (list): Specified knots to use in the spline fit
-            spm_vals_free (np.ndarray): SPM values in the freespace regions
-            rho_km_vals_free (np.ndarray): Radius values in the freespace
-                regions
+            knots_where (np.ndarray):
+                Indices of "knots" that are within the specified SPM regions
+            knots (list):
+                Specified knots to use in the spline fit
+            spm_vals_free (np.ndarray):
+                SPM values in the freespace regions
+            rho_km_vals_free (np.ndarray):
+                Radius values in the freespace regions
         """
 
         # Select data points closest to selected knots

@@ -55,30 +55,38 @@ class Calibration(object):
                 geo_inst, dt_cal=dt_cal, verbose=verbose)
 
     Attributes:
-        t_oet_spm_vals (np.ndarray): SPM values from calibration file
-        f_sky_hz_vals (np.ndarray): Predicted sky frequency values from
+        t_oet_spm_vals (np.ndarray):
+            SPM values from calibration file
+        f_sky_hz_vals (np.ndarray):
+            Predicted sky frequency values from
             calibration file, plus the fit to frequency offset
-        f_sky_resid_fit_vals (np.ndarray): Fit to residual frequency from
-            calibration file
-        p_free_vals (np.ndarray): Freespace power spline fit values from
-            calibration file
-        f_offset_fit_vals (np.ndarray): Fit to frequency offset from
-            calibration files
-        history (dict): Dictionary with information of the run
+        f_sky_resid_fit_vals (np.ndarray):
+            Fit to residual frequency from calibration file
+        p_free_vals (np.ndarray):
+            Freespace power spline fit values from calibration file
+        f_offset_fit_vals (np.ndarray):
+            Fit to frequency offset from calibration files
+        history (dict):
+            Dictionary with information of the run
     """
 
     def __init__(self, fit_inst, norm_inst, geo_inst, dt_cal=1.0,
             verbose=False):
         """
         Args:
-            fit_inst: Instance of the FreqOffsetFit class. Used for the
+            fit_inst:
+                Instance of the FreqOffsetFit class. Used for the
                 frequency offset fit and the residual frequency fit
-            norm_inst: Instance of the Normalization class. Used for the power
+            norm_inst:
+                Instance of the Normalization class. Used for the power
                 normalizing spline fit
-            geo_inst: Instance of the Geometry class. Used for various
+            geo_inst:
+                Instance of the Geometry class. Used for various
                 geometry parameters
-            dt_cal (float): Desired time Spacing between points
-            verbose (bool): Print intermediate steps and results
+            dt_cal (float):
+                Desired time Spacing between points
+            verbose (bool):
+                Print intermediate steps and results
 
         Dependencies:
             [1] FreqOffsetFit
@@ -170,13 +178,17 @@ class Calibration(object):
         Set history attribute of the class
 
         Args:
-            fit_inst: Instance of the FreqOffsetFit class. Used for the
+            fit_inst:
+                Instance of the FreqOffsetFit class. Used for the
                 frequency offset fit and the residual frequency fit
-            norm_inst: Instance of the Normalization class. Used for the power
+            norm_inst:
+                Instance of the Normalization class. Used for the power
                 normalizing spline fit
-            geo_inst: Instance of the Geometry class. Used for various
+            geo_inst:
+                Instance of the Geometry class. Used for various
                 geometry parameters
-            dt_cal (float): Desired time Spacing between points
+            dt_cal (float):
+                Desired time Spacing between points
         """
 
         input_var_dict = {'fit_inst': fit_inst.history,

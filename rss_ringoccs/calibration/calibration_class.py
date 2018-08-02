@@ -88,29 +88,24 @@ class Calibration(object):
             [5] numpy
         """
 
-        #if type(fit_inst) != rss.calibration.FreqOffsetFit:
         if not isinstance(fit_inst, rss.calibration.FreqOffsetFit):
             sys.exit('ERROR (Calibration): fit_inst input needs to be an '
                 + 'instance of the FreqOffsetFit class')
 
-        #if type(norm_inst) != rss.calibration.Normalization:
         if not isinstance(norm_inst, rss.calibration.Normalization):
             sys.exit('ERROR (Calibration): norm_inst input needs to be an '
                 + 'instance of the Normalization class')
 
-        #if type(geo_inst) != rss.occgeo.Geometry:
         if not isinstance(geo_inst, rss.occgeo.Geometry):
             sys.exit('ERROR (Calibration): geo_inst input needs to be an '
                 + 'instance of the Geometry class')
 
-        #if (type(dt_cal) != float) & (type(dt_cal) != int):
         dt_cal = abs(dt_cal)
         if (not isinstance(dt_cal, float)) and (not isinstance(dt_cal, int)):
             print('WARNING (Calibration): dt_cal input must be either a '
                 + 'float or an integer. Setting to default of 1.0')
             dt_cal = 1.0
 
-        #if type(verbose) != bool:
         if not isinstance(verbose, bool):
             print('WARNING (Calibration): verbose input must be one of '
                 + 'Python\'s built-in booleans (True or False). Setting to '
@@ -187,16 +182,6 @@ class Calibration(object):
         input_var_dict = {'fit_inst': fit_inst.history,
             'norm_inst': norm_inst.history, 'geo_inst': geo_inst.history}
         input_kw_dict = {'dt_cal': dt_cal}
-
-#         hist_dict = {'User Name': os.getlogin(),
-#             'Host Name': os.uname().nodename,
-#             'Run Date': time.ctime() + ' ' + time.tzname[0],
-#             'Python Version': platform.python_version(),
-#             'Operating System': os.uname().sysname,
-#             'Source File': __file__.split('/')[-1],
-#             'Source Directory': __file__.rsplit('/', 1)[0] + '/',
-#             'Input Variables': input_var_dict,
-#             'Input Keywords': input_kw_dict}
         hist_dict = rss.tools.write_history_dict.write_history_dict(
             input_var_dict, input_kw_dict, __file__)
 

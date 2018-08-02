@@ -222,15 +222,26 @@ class RSRReader(object):
         """
 
         # Ensure verbose is Boolean
-        if type(verbose) != bool:
+        #if type(verbose) != bool:
+        if not isinstance(verbose, bool):
             print('WARNING (RSRReader): verbose input should be Boolean. '
-                + 'Assuming False')
+                + 'Assuming False. If you\'re trying to use 1 or 0, then you '
+                +'should use the built-in Python booleans instead')
             verbose = False
 
-        if type(cpu_count) != int:
+        #if type(cpu_count) != int:
+        if not isinstance(cpu_count, int):
             print('WARNING (RSRReader): cpu_count keyword should be an '
                 + 'integer. Setting to number of cores on your computer.')
             cpu_count = multiprocessing.cpu_count()
+
+        #if type(self.__decimate_16khz_to_1khz) != bool:
+        if not isinstance(decimate_16khz_to_1khz, bool):
+            print('WARNING (RSRReader.get_IQ): Expected Boolean input for '
+                + 'decimate_16khz_to_1khz keyword. Ignoring input. If you\'re '
+                + 'trying to use 1 or 0, then you should use the built-in '
+                + 'Python booleans instead')
+            decimate_16khz_to_1khz = False
 
         self.rsr_file = rsr_file
 
@@ -396,9 +407,11 @@ class RSRReader(object):
         """
 
         # Ensure verbose is Boolean
-        if type(verbose) != bool:
+        #if type(verbose) != bool:
+        if not isinstance(verbose, bool):
             print('WARNING (RSRReader): verbose input should be Boolean. '
-                + 'Assuming False')
+                + 'Assuming False. If you\'re trying to use 1 or 0, then you '
+                +'should use the built-in Python booleans instead')
             verbose = False
 
         if self.sample_rate_khz == 1:
@@ -415,7 +428,8 @@ class RSRReader(object):
             f_spm = np.arange(min(spm_vals), max(spm_vals), 1.0)
 
         # Input f_spm needs to be a numpy array
-        if type(f_spm) != np.ndarray:
+        #if type(f_spm) != np.ndarray:
+        if not isinstance(f_spm, np.ndarray):
             print('ERROR (RSRReader.get_f_sky_pred): f_spm must be a numpy '
                 + 'array')
             sys.exit()
@@ -521,10 +535,10 @@ class RSRReader(object):
         """
 
         # Ensure verbose is Boolean
-        if type(verbose) != bool:
-            print('WARNING (RSRReader): verbose input should be Boolean. '
-                + 'Assuming False')
-            verbose = False
+#         if type(verbose) != bool:
+#             print('WARNING (RSRReader): verbose input should be Boolean. '
+#                 + 'Assuming False')
+#             verbose = False
 
         spm_vals = self.spm_vals
 
@@ -533,10 +547,10 @@ class RSRReader(object):
             self.__spm_16khz = spm_vals
 
         # Ensure that input is a Boolean
-        if type(self.__decimate_16khz_to_1khz) != bool:
-            print('WARNING (RSRReader.get_IQ): Expected Boolean input for ' +
-                'decimate_16khz_to_1khz keyword. Ignoring input')
-            self.__decimate_16khz_to_1khz = False
+#         if type(self.__decimate_16khz_to_1khz) != bool:
+#             print('WARNING (RSRReader.get_IQ): Expected Boolean input for ' +
+#                 'decimate_16khz_to_1khz keyword. Ignoring input')
+#             self.__decimate_16khz_to_1khz = False
 
         decimate_16khz_to_1khz = self.__decimate_16khz_to_1khz
 

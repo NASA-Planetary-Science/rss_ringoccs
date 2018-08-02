@@ -47,36 +47,54 @@ class FResidFitGui(Frame):
     set to True (which is the default).
 
     Args:
-        parent (tkinter.Tk): Instance of tkinter.Tk class. This is the parent
+        parent (tkinter.Tk):
+            Instance of tkinter.Tk class. This is the parent
             that the GUI is based on
-        fit_inst: Instance of the FreqOffsetFit class
-        x (np.ndarray): Array of SPM values for residual frequency. Inside of
+        fit_inst:
+            Instance of the FreqOffsetFit class
+        x (np.ndarray):
+            Array of SPM values for residual frequency. Inside of
             FreqOffsetFit, this is the "f_spm" variable inside the
             set_f_sky_resid_fit() method
-        y (np.ndarray): Array of residual frequency values. Inside of
+        y (np.ndarray):
+            Array of residual frequency values. Inside of
             FreqOffsetFit, this is the "f_sky_resid" variable in the
             set_f_sky_resid_fit() method
 
     Attributes:
-        ax: Axes instance corresponding to the matplotlib.pyplot figure on
+        ax:
+            Axes instance corresponding to the matplotlib.pyplot figure on
             the GUI
-        canvas: Canvas on which the matplotlib.pyplot and the widgets are put
-        cvar: Text variable in the combo box for selecting fit order
-        f: Matplotlib.pyplot figure on the GUI
-        fit_deg (int): Degree of the polynomial fit. Starts off at 3
-        fit_inst: Instance of the FreqOffsetFit class
-        ind (np.ndarray): Index numbers to the "x" attribute of the regions
+        canvas:
+            Canvas on which the matplotlib.pyplot and the widgets are put
+        cvar:
+            Text variable in the combo box for selecting fit order
+        f:
+            Matplotlib.pyplot figure on the GUI
+        fit_deg (int):
+            Degree of the polynomial fit. Starts off at 3
+        fit_inst:
+            Instance of the FreqOffsetFit class
+        ind (np.ndarray):
+            Index numbers to the "x" attribute of the regions
             being fit (specified by the "xlim" attribute)
-        is_chord (bool): Record if occultation is a chord occultation
-        lvar: Variable for the label next to the combo box for selecting fit
+        is_chord (bool):
+            Record if occultation is a chord occultation
+        lvar:
+            Variable for the label next to the combo box for selecting fit
             order
-        not_ind (np.ndarray): Index numbers of the "x" attribute of the regions
+        not_ind (np.ndarray):
+            Index numbers of the "x" attribute of the regions
             not being fit (specified by the "xlim" attribute)
-        parent (tkinter.Tk): Input parent
-        toolbar: Matplotlib.pyplot toolbar that appears below the
+        parent (tkinter.Tk):
+            Input parent
+        toolbar:
+            Matplotlib.pyplot toolbar that appears below the
             matplotlib.pyplot plot
-        x (np.ndarray): The input x values (SPM)
-        xlim (list): Set of regions to make the fit over. Starts off as the
+        x (np.ndarray):
+            The input x values (SPM)
+        xlim (list):
+            Set of regions to make the fit over. Starts off as the
             full range of SPM. Adjustable in the GUI, in the box labeled
             "Fit range (SPM)". To specify, separate minimum and maximum values
             by a comma, and separate ranges by a semicolon. For example, if you
@@ -84,10 +102,13 @@ class FResidFitGui(Frame):
             [36000, 37000], and [38000, 40000], then you would enter into the
             box: "30500, 33000 ; 36000, 37000 ; 38000, 40000" (without the
             quotation marks)
-        xlim_entry: Entry box for specifying regions to make the fit over.
+        xlim_entry:
+            Entry box for specifying regions to make the fit over.
             Entering into this box changes the "xlim" attribute (see above)
-        y (np.ndarray): The input y values (residual frequency in Hz)
-        yfit (np.ndarray): Resulting fit from the GUI. This is the attribute
+        y (np.ndarray):
+            The input y values (residual frequency in Hz)
+        yfit (np.ndarray):
+            Resulting fit from the GUI. This is the attribute
             used to access the fit after the program is closed
 
     Notes:
@@ -99,11 +120,16 @@ class FResidFitGui(Frame):
     def __init__(self, parent, fit_inst, x, x_rho, y):
         """
         Args:
-            parent: tkinter.Tk instance
-            fit_inst: Instance of the FreqOffsetFit class
-            x: SPM values of the residual frequency (y)
-            x_rho: Radius values corresponding to x
-            y: Residual frequency values in Hz
+            parent:
+                tkinter.Tk instance
+            fit_inst:
+                Instance of the FreqOffsetFit class
+            x:
+                SPM values of the residual frequency (y)
+            x_rho:
+                Radius values corresponding to x
+            y:
+                Residual frequency values in Hz
         """
 
         Frame.__init__(self, parent)
@@ -209,7 +235,8 @@ class FResidFitGui(Frame):
         Given tick labels in SPM, get the new tick labels in radius
 
         Args:
-            spm_tick_labels (list): SPM tick labels to get radius matches for
+            spm_tick_labels (list):
+                SPM tick labels to get radius matches for
         """
         spm_to_rho_func = interp1d(self.x, self.x_rho)
         rho_tick_labels = spm_to_rho_func(spm_tick_labels)
@@ -321,8 +348,9 @@ class FResidFitGui(Frame):
         Bound to the "combo" variable in initUI()
 
         Args:
-            e: Event received from selecting a fit order from the
-               drop-down menu
+            e:
+                Event received from selecting a fit order from the
+                drop-down menu
         """
 
         # Set attribute for the new fit order

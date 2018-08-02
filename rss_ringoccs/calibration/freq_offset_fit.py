@@ -79,27 +79,43 @@ class FreqOffsetFit(object):
         >>> spm_vals, IQ_c = fit_inst.get_IQ_c(spm_vals=spm_vals, IQ_m=IQ_m)
 
     Attributes:
-        _spm_include (list): Linked to the input range spm_include
-        _poly_order (int): Linked to the input fit order poly_order
-        __geo_inst: Instance of Geometry class
-        __f_uso (float): USO frequency used
-        __USE_GUI (bool): Linked to USE_GUI input
-        __f_spm (np.ndarray): SPM values that all sky frequencies are
+        _spm_include (list):
+            Linked to the input range spm_include
+        _poly_order (int):
+            Linked to the input fit order poly_order
+        __geo_inst:
+            Instance of Geometry class
+        __f_uso (float):
+            USO frequency used
+        __USE_GUI (bool):
+            Linked to USE_GUI input
+        __f_spm (np.ndarray):
+            SPM values that all sky frequencies are
             evaluated at
-        __f_rho (np.ndarray): Rho values that all sky frequencies are
+        __f_rho (np.ndarray):
+            Rho values that all sky frequencies are
             evaluated at
-        __f_offset (np.ndarray): Extracted frequency offset
-        __f_offset_fit (np.ndarray): Fit to extracted frequency offset
-        __f_sky_pred (np.ndarray): Predicted sky frequency
-        __f_sky_recon (np.ndarray): Reconstructed sky frequency
-        __f_sky_resid_fit (np.ndarray): Fit to observed residual frequency
-        __spm_vals (np.ndarray): SPM values at raw resolution over
+        __f_offset (np.ndarray):
+            Extracted frequency offset
+        __f_offset_fit (np.ndarray):
+            Fit to extracted frequency offset
+        __f_sky_pred (np.ndarray):
+            Predicted sky frequency
+        __f_sky_recon (np.ndarray):
+            Reconstructed sky frequency
+        __f_sky_resid_fit (np.ndarray):
+            Fit to observed residual frequency
+        __spm_vals (np.ndarray):
+            SPM values at raw resolution over
             full data set
-        _rho_exclude (list): Set of radius regions to exclude when making
+        _rho_exclude (list):
+            Set of radius regions to exclude when making
             fit to residual frequency. Specify in km. Default is to
             exclude B ring region
-        __IQ_m (np.ndarray): Raw measured complex signal over full data set
-        history (dict): Recorded information about the run
+        __IQ_m (np.ndarray):
+            Raw measured complex signal over full data set
+        history (dict):
+            Recorded information about the run
         """
 
     def __init__(self, rsr_inst, geo_inst, f_spm, f_offset,
@@ -111,24 +127,34 @@ class FreqOffsetFit(object):
         frequency offset using the default parameters
 
         Args:
-            rsr_inst: Instance of the RSRReader class
-            geo_inst: Instance of geometry class. Contains attributes
+            rsr_inst:
+                Instance of the RSRReader class
+            geo_inst:
+                Instance of geometry class. Contains attributes
                 t_oet_spm_vals and rho_km_vals
-            f_spm (np.ndarray): SPM array that frequency offset was
+            f_spm (np.ndarray):
+                SPM array that frequency offset was
                 extracted at
-            f_offset (np.ndarray): Extracted frequency offset
-            f_uso (float): USO frequency for the data set
-            poly_order (int): Order of the polynomial fit made to residual
+            f_offset (np.ndarray):
+                Extracted frequency offset
+            f_uso (float):
+                USO frequency for the data set
+            poly_order (int):
+                Order of the polynomial fit made to residual
                 frequency
-            sc_name (str): Name of spacecraft. Default is 'Cassini'
-            spm_include (list): Set of SPM regions to include when making fit
+            sc_name (str):
+                Name of spacecraft. Default is 'Cassini'
+            spm_include (list):
+                Set of SPM regions to include when making fit
                 to residual frequency. By default, only rho_exclude is used.
                 If this keyword is specified, it overrides anything input to
                 rho_exclude keyword. This is meant as an optional replacement
                 of rho_exclude
-            USE_GUI (bool): Use the interactive GUI to make a residual
+            USE_GUI (bool):
+                Use the interactive GUI to make a residual
                 frequency fit. This is highly recommended
-            verbose (bool): Optional test plot
+            verbose (bool):
+                Optional test plot
 
         Dependencies:
             [1] RSRReader
@@ -243,16 +269,20 @@ class FreqOffsetFit(object):
         frequency fit
 
         Args:
-            poly_order (int): Order of polynomial fit made to residual
+            poly_order (int):
+                Order of polynomial fit made to residual
                 frequency
-            spm_include (list): Set of SPM regions to include when making fit
+            spm_include (list):
+                Set of SPM regions to include when making fit
                 to residual frequency. By default, only rho_exclude is used.
                 If this keyword is specified, it overrides anything input to
                 rho_exclude keyword. This is meant as an optional replacement
                 of rho_exclude
-            USE_GUI (bool): Use the interactive GUI to make a residual
+            USE_GUI (bool):
+                Use the interactive GUI to make a residual
                 frequency fit. This is highly recommended
-            verbose (bool): Optional test plot
+            verbose (bool):
+                Optional test plot
 
         Dependencies:
             [1] RSRReader
@@ -420,9 +450,11 @@ class FreqOffsetFit(object):
         when you do power normalization.
 
         Outputs:
-            spm_vals (np.ndarray): SPM values of the returned frequency
+            spm_vals (np.ndarray):
+                SPM values of the returned frequency
                 corrected complex signal
-            IQ_c (np.ndarray): Frequency corrected complex signal
+            IQ_c (np.ndarray):
+                Frequency corrected complex signal
 
         Dependencies:
             [1] numpy

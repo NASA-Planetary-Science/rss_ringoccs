@@ -187,18 +187,22 @@ class RSRReader(object):
         attributes for reading the RSR file later in the "get" methods.
 
         Args:
-            rsr_file (str): Full path name of a raw RSR file to read. RSR files
+            rsr_file (str):
+                Full path name of a raw RSR file to read. RSR files
                 can be downloaded using the shell script in the "data"
                 directory of your GitHub clone
-            decimate_16khz_to_1khz (bool): Optional Boolean argument which, if
+            decimate_16khz_to_1khz (bool):
+                Optional Boolean argument which, if
                 set to True, decimates 16kHz files down to 1kHz sampling rate.
                 Note that this is a sticky keyword - if you set it to True, it
                 will be True for any subsequent calls from the instance until
                 you explicitly set it to False. This keyword is linked to the
                 private attribute __decimate_16khz_to_1khz
-            cpu_count (int): Number of cores to use when reading data in from
+            cpu_count (int):
+                Number of cores to use when reading data in from
                 file. Default is number of cores on your computer
-            verbose (bool): Optional boolean variable which, when set to True,
+            verbose (bool):
+                Optional boolean variable which, when set to True,
                 prints the header attributes that were set
 
         Dependencies:
@@ -318,7 +322,8 @@ class RSRReader(object):
         for reading the header information
 
         Args:
-            spm_range (list): 2-element array of range of SPM values to read
+            spm_range (list):
+                2-element array of range of SPM values to read
                 over. Passed from either set_f_sky_pred or set_IQ
         """
 
@@ -363,16 +368,20 @@ class RSRReader(object):
         f_sky_pred
 
         Args:
-            f_spm (np.ndarray): Array of SPM values to evaluate predicted
+            f_spm (np.ndarray):
+                Array of SPM values to evaluate predicted
                 sky frequency at. Default is at 1 second spacing over entire
                 data set.
-            verbose (bool): Print the first few predicted sky frequency values
+            verbose (bool):
+                Print the first few predicted sky frequency values
                 if set to True
 
         Outputs:
-            f_spm (np.ndarray): Array of SPM values that predicted sky
+            f_spm (np.ndarray):
+                Array of SPM values that predicted sky
                 frequency was evaluated at.
-            f_sky_pred (np.ndarray): Predicted sky frequency, calculated from
+            f_sky_pred (np.ndarray):
+                Predicted sky frequency, calculated from
                 the polynomial coefficients in the RSR file
 
         Dependencies:
@@ -499,12 +508,15 @@ class RSRReader(object):
         over the specified time range and the raw measured I and Q values.
 
         Args:
-            verbose (bool): If True, print steps and intermediate results
+            verbose (bool):
+                If True, print steps and intermediate results
 
         Adds attributes:
-            spm_vals (np.ndarray): Raw resolution SPM values over specified
+            spm_vals (np.ndarray):
+                Raw resolution SPM values over specified
                 spm_range
-            IQ_m (np.ndarray): Raw measured complex signal over the specified
+            IQ_m (np.ndarray):
+                Raw measured complex signal over the specified
                 spm_range
         """
 
@@ -587,11 +599,15 @@ class RSRReader(object):
         Function to perform loop for multiprocessing
 
         Args:
-            i_start (int): SFDU number to start indexing at
-            i_end (int): SFDU number to stop indexing at
-            n_loops (int): Number of loops that this for loop will go through
+            i_start (int):
+                SFDU number to start indexing at
+            i_end (int):
+                SFDU number to stop indexing at
+            n_loops (int):
+                Number of loops that this for loop will go through
                 for each processor
-            queue: multiprocessing.Queue instance
+            queue:
+                multiprocessing.Queue instance
         """
 
         I_array = np.zeros(len(range(i_start, i_end)) * self.__n_pts_per_sfdu)
@@ -639,15 +655,3 @@ class RSRReader(object):
             'Input Variables': input_var_dict,
             'Input Keywords': input_kw_dict}
         self.history = history_dict
-
-
-if __name__ == '__main__':
-
-    rsr_file = ('../../../../../data/s10-rev07-rsr-data/'
-        + 'S10EAOE2005_123_0740NNNX43D.2A1')
-    #rsr_file = ('../../../../../data/s10-rev07-rsr-data/'
-    #    +'s10sroe2005123_0740nnnx43rd.2a2')
-    rsr_inst = RSRReader(rsr_file, decimate_16khz_to_1khz=True, verbose=True)
-    f_spm = np.arange(30500, 40000, 0.5)
-    f_spm, f_sky_pred = rsr_inst.get_f_sky_pred(f_spm=f_spm, verbose=True)
-    pdb.set_trace()

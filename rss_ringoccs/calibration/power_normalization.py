@@ -60,10 +60,6 @@ sys.path.append('../..')
 import rss_ringoccs as rss
 sys.path.remove('../..')
 
-#try:
-#    from cassini_blocked import cassini_blocked
-#    from power_fit_gui import PowerFitGui
-#except ImportError:
 from ..tools.cassini_blocked import cassini_blocked
 from .power_fit_gui import PowerFitGui
 
@@ -152,17 +148,14 @@ class Normalization(object):
                 + 'Input should be from the get_IQ_c() method of the '
                 + 'FreqOffsetFit class')
 
-        #if type(geo_inst) != rss.occgeo.Geometry:
         if not isinstance(geo_inst, rss.occgeo.Geometry):
             sys.exit('ERROR (Normalization): geo_inst input must be an '
                 + 'instance of the Geometry class')
 
-        #if type(rsr_inst) != rss.rsr_reader.RSRReader:
         if not isinstance(rsr_inst, rss.rsr_reader.RSRReader):
             sys.exit('ERROR (Normalization): rsr_inst input must be an '
                 + 'instance of the RSRReader class')
 
-        #if type(verbose) != bool:
         if not isinstance(verbose, bool):
             print('WARNING (Normalization): verbose input must be boolean. '
                 + 'Ignoring current input and setting to False')
@@ -299,13 +292,11 @@ class Normalization(object):
                 than you'll probably get an error
         """
 
-        #if type(USE_GUI) != bool:
         if not isinstance(USE_GUI, bool):
             print('WARNING (Normalization): USE_GUI input must be boolean. '
                   + 'Ignoring current input and setting to True')
             USE_GUI = True
 
-        #if type(verbose) != bool:
         if not isinstance(verbose, bool):
             print('WARNING (Normalization): verbose input must be boolean. '
                   + 'Ignoring current input and setting to False')
@@ -582,15 +573,6 @@ class Normalization(object):
             'spline_order': self._spline_order,
             'dt_down': self._dt_down,
             'freespace_spm': self._freespace_spm, 'knots_spm': self._knots_spm}
-#         hist_dict = {'User Name': os.getlogin(),
-#             'Host Name': os.uname().nodename,
-#             'Run Date': time.ctime() + ' ' + time.tzname[0],
-#             'Python Version': platform.python_version(),
-#             'Operating System': os.uname().sysname,
-#             'Source File': __file__.split('/')[-1],
-#             'Source Directory': __file__.rsplit('/', 1)[0] + '/',
-#             'Input Variables': input_var_dict,
-#             'Input Keywords': input_kw_dict}
         hist_dict = rss.tools.write_history_dict.write_history_dict(
             input_var_dict, input_kw_dict, __file__)
         self.history = hist_dict

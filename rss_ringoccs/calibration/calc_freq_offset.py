@@ -36,8 +36,6 @@ from multiprocessing import Process
 from multiprocessing import Queue
 import multiprocessing
 import numpy as np
-#import os
-#import platform
 import sys
 import time
 
@@ -121,25 +119,21 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192,
         https://pds-rings.seti.org/cassini/rss/Cassini%20Radio%20Science%20Users%20Guide%20-%204%20Sep%202014.pdf
         """
 
-    #if type(rsr_inst) != RSRReader:
     if not isinstance(rsr_inst, RSRReader):
         print('ERROR (calc_freq_offset): rsr_inst input must be an instance '
             + 'of the RSRReader class')
         sys.exit()
 
-    #if (type(dt_freq) != float) and (type(dt_freq) != int):
     if (not isinstance(dt_freq, float)) and (not isinstance(dt_freq, int)):
         print('ERROR (calc_freq_offset): dt_freq input must be a float or '
             + 'integer')
         sys.exit()
 
-    #if type(cpu_count) != int:
     if not isinstance(cpu_count, int):
         print('WARNING (calc_freq_offset): cpu_count input must be an '
             + 'integer. Setting equal to number of cores on computer.')
         cpu_count = multiprocessing.cpu_count()
 
-    #if type(verbose) != bool:
     if not isinstance(verbose, bool):
         print('WARNING (calc_freq_offset): verbose keyword must be boolean. '
             + 'Assuming False')
@@ -221,7 +215,6 @@ def calc_freq_offset(rsr_inst, dt_freq=8.192,
         for i in range(10):
             print('%24.16f %32.16f' % (f_spm[i], f_offset[i]))
 
-    #if freq_offset_file is not None:
     if freq_offset_file:
         try:
             if verbose:
@@ -404,14 +397,5 @@ def __get_history(rsr_inst, dt_freq, cpu_count, freq_offset_file):
     input_var_dict = {'rsr_inst': rsr_inst.history}
     input_kw_dict = {'dt_freq': dt_freq,
         'cpu_count': cpu_count, 'freq_offset_file': freq_offset_file}
-#     hist_dict = {'User Name': os.getlogin(),
-#         'Host Name': os.uname().nodename,
-#         'Run Date': time.ctime() + ' ' + time.tzname[0],
-#         'Python Version': platform.python_version(),
-#         'Operating System': os.uname().sysname,
-#         'Source File': __file__.split('/')[-1],
-#         'Source Directory': __file__.rsplit('/', 1)[0] + '/',
-#         'Input Variables': input_var_dict,
-#         'Input Keywords': input_kw_dict}
     hist_dict = write_history_dict(input_var_dict, input_kw_dict, __file__)
     return hist_dict

@@ -48,11 +48,8 @@ Revisions:
 
 import numpy as np
 from numpy.polynomial import polynomial as poly
-#import os
-#import platform
 from scipy.interpolate import interp1d
 import sys
-#import time
 
 from tkinter import Tk
 
@@ -335,7 +332,6 @@ class FreqOffsetFit(object):
 
         # If user specified spm_include argument that overrides the rho_exclude
         #     argument
-        #if spm_include is not None:
         if spm_include:
             if verbose:
                 print('Using specified fit parameters')
@@ -483,15 +479,6 @@ class FreqOffsetFit(object):
             'geo_inst': self.__geo_inst.history, 'f_uso': self.__f_uso}
         input_kw_dict = {'poly_order': self._poly_order,
             'spm_include': self._spm_include, 'USE_GUI': self.__USE_GUI}
-#         hist_dict = {'User Name': os.getlogin(),
-#             'Host Name': os.uname().nodename,
-#             'Run Date': time.ctime() + ' ' + time.tzname[0],
-#             'Python Version': platform.python_version(),
-#             'Operating System': os.uname().sysname,
-#             'Source File': __file__.split('/')[-1],
-#             'Source Directory': __file__.rsplit('/', 1)[0] + '/',
-#             'Input Variables': input_var_dict,
-#             'Input Keywords': input_kw_dict}
         hist_dict = rss.tools.write_history_dict.write_history_dict(
             input_var_dict, input_kw_dict, __file__)
         self.history = hist_dict

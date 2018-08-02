@@ -215,37 +215,38 @@ class NormDiff(object):
                 yet, but it certainly won't go over well
         """
 
-        if type(rsr_inst) != rss.rsr_reader.RSRReader:
+        if not isinstance(rsr_inst, rss.rsr_reader.RSRReader):
             sys.exit('ERROR (NormDiff): rsr_inst input must be an instance of '
                 + 'the RSRReader class')
 
-        if type(geo_inst) != rss.occgeo.Geometry:
+        if not isinstance(geo_inst, rss.occgeo.Geometry):
             sys.exit('ERROR (NormDiff): geo_inst input must be an '
                 + 'instance of the Geometry class')
 
-        if ((type(cal_inst) != rss.calibration.Calibration)
-                & (type(cal_inst) != rss.tools.MakeCalInst)):
+        if ((not isinstance(cal_inst, rss.calibration.Calibration))
+                & (not isinstance(cal_inst, rss.tools.MakeCalInst))):
             sys.exit('ERROR (NormDiff): cal_inst input must be an instance of '
                 + 'the Calibration class if you don\'t have a CAL file '
                 + 'pre-made. Can also be an instance of the MakeCalInst class '
                 + 'if you have a CAL file that you want to turn into an '
                 + 'instance')
 
-        if (type(dr_km) != float) & (type(dr_km) != int):
+        if (not isinstance(dr_km, float)) & (not isinstance(dr_km, int)):
             sys.exit('ERROR (NormDiff): dr_km input must be either a float '
                 + 'or int')
 
-        if (type(dr_km_tol) != float) & (type(dr_km_tol) != int):
+        if ((not isinstance(dr_km_tol, float))
+                & (not isinstance(dr_km_tol, int))):
             sys.exit('ERROR (NormDiff): dr_km_tol input must be either a '
                 + 'float or int')
 
-        if type(verbose) != bool:
+        if not isinstance(verbose, bool):
             print('WARNING (NormDiff): verbose input must be one of '
                 + 'Python\'s built-in booleans (True or False). Setting to '
                 + 'False')
             verbose = False
 
-        if type(is_chord) != bool:
+        if not isinstance(is_chord, bool):
             print('WARNING (NormDiff): is_chord input must be one of '
                 + 'Python\'s built-in booleans (True or False). Setting to '
                 + 'False')

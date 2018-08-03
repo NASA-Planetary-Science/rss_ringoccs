@@ -4,3 +4,5 @@ kernels/naif/
 output/
 __pycache__
 *~
+
+examples/

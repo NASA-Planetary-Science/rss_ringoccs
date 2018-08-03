@@ -20,8 +20,8 @@ do
 	if [ ! -e $dirfil ]
 	then
     		echo Current File $dirfil does not locally exist. Fetching.
-		if curl --output /dev/null --silent --head --fail "$url"; then
- 			echo "URL exists: $url"
+		if curl --output /dev/null --silent --head --fail "$webdirfil"; then
+ 			echo "URL exists: $webdirfil"
 			curl --create-dirs -o $dirfil $webdirfil
 		else
 			echo "URL does not exist: $webdirfil"

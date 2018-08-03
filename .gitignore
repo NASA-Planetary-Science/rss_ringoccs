@@ -1,6 +1,5 @@
 .DS_Store*
 *.pyc
-<<<<<<< HEAD
 kernels/
 output/
 data/

@@ -448,7 +448,6 @@ class DiffractionCorrection(object):
         return T
 
     # FFT Approximation of Fresnel Inverse (MTR86 Equation 15)
-<<<<<<< HEAD
     def __fresinvfft(self,T_hat,ker,dx,f_scale):
         nw              = np.size(T_hat)
         fft_t_hat       = np.fft.fft(T_hat)

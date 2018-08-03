@@ -29,9 +29,6 @@ import numpy as np
 from spiceypy import spiceypy as spice
 import sys
 
-#try:
-#    from spm_to_et import spm_to_et
-#except ImportError:
 from ..tools.spm_to_et import spm_to_et
 
 # Product of the gravitational constant by the Sun mass

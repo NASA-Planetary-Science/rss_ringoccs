@@ -187,18 +187,22 @@ class RSRReader(object):
         attributes for reading the RSR file later in the "get" methods.
 
         Args:
-            rsr_file (str): Full path name of a raw RSR file to read. RSR files
+            rsr_file (str):
+                Full path name of a raw RSR file to read. RSR files
                 can be downloaded using the shell script in the "data"
                 directory of your GitHub clone
-            decimate_16khz_to_1khz (bool): Optional Boolean argument which, if
+            decimate_16khz_to_1khz (bool):
+                Optional Boolean argument which, if
                 set to True, decimates 16kHz files down to 1kHz sampling rate.
                 Note that this is a sticky keyword - if you set it to True, it
                 will be True for any subsequent calls from the instance until
                 you explicitly set it to False. This keyword is linked to the
                 private attribute __decimate_16khz_to_1khz
-            cpu_count (int): Number of cores to use when reading data in from
+            cpu_count (int):
+                Number of cores to use when reading data in from
                 file. Default is number of cores on your computer
-            verbose (bool): Optional boolean variable which, when set to True,
+            verbose (bool):
+                Optional boolean variable which, when set to True,
                 prints the header attributes that were set
 
         Dependencies:
@@ -218,15 +222,26 @@ class RSRReader(object):
         """
 
         # Ensure verbose is Boolean
-        if type(verbose) != bool:
+        #if type(verbose) != bool:
+        if not isinstance(verbose, bool):
             print('WARNING (RSRReader): verbose input should be Boolean. '
-                + 'Assuming False')
+                + 'Assuming False. If you\'re trying to use 1 or 0, then you '
+                +'should use the built-in Python booleans instead')
             verbose = False
 
-        if type(cpu_count) != int:
+        #if type(cpu_count) != int:
+        if not isinstance(cpu_count, int):
             print('WARNING (RSRReader): cpu_count keyword should be an '
                 + 'integer. Setting to number of cores on your computer.')
             cpu_count = multiprocessing.cpu_count()
+
+        #if type(self.__decimate_16khz_to_1khz) != bool:
+        if not isinstance(decimate_16khz_to_1khz, bool):
+            print('WARNING (RSRReader.get_IQ): Expected Boolean input for '
+                + 'decimate_16khz_to_1khz keyword. Ignoring input. If you\'re '
+                + 'trying to use 1 or 0, then you should use the built-in '
+                + 'Python booleans instead')
+            decimate_16khz_to_1khz = False
 
         self.rsr_file = rsr_file
 
@@ -318,7 +333,8 @@ class RSRReader(object):
         for reading the header information
 
         Args:
-            spm_range (list): 2-element array of range of SPM values to read
+            spm_range (list):
+                2-element array of range of SPM values to read
                 over. Passed from either set_f_sky_pred or set_IQ
         """
 
@@ -363,16 +379,20 @@ class RSRReader(object):
         f_sky_pred
 
         Args:
-            f_spm (np.ndarray): Array of SPM values to evaluate predicted
+            f_spm (np.ndarray):
+                Array of SPM values to evaluate predicted
                 sky frequency at. Default is at 1 second spacing over entire
                 data set.
-            verbose (bool): Print the first few predicted sky frequency values
+            verbose (bool):
+                Print the first few predicted sky frequency values
                 if set to True
 
         Outputs:
-            f_spm (np.ndarray): Array of SPM values that predicted sky
+            f_spm (np.ndarray):
+                Array of SPM values that predicted sky
                 frequency was evaluated at.
-            f_sky_pred (np.ndarray): Predicted sky frequency, calculated from
+            f_sky_pred (np.ndarray):
+                Predicted sky frequency, calculated from
                 the polynomial coefficients in the RSR file
 
         Dependencies:
@@ -387,9 +407,11 @@ class RSRReader(object):
         """
 
         # Ensure verbose is Boolean
-        if type(verbose) != bool:
+        #if type(verbose) != bool:
+        if not isinstance(verbose, bool):
             print('WARNING (RSRReader): verbose input should be Boolean. '
-                + 'Assuming False')
+                + 'Assuming False. If you\'re trying to use 1 or 0, then you '
+                +'should use the built-in Python booleans instead')
             verbose = False
 
         if self.sample_rate_khz == 1:
@@ -406,7 +428,8 @@ class RSRReader(object):
             f_spm = np.arange(min(spm_vals), max(spm_vals), 1.0)
 
         # Input f_spm needs to be a numpy array
-        if type(f_spm) != np.ndarray:
+        #if type(f_spm) != np.ndarray:
+        if not isinstance(f_spm, np.ndarray):
             print('ERROR (RSRReader.get_f_sky_pred): f_spm must be a numpy '
                 + 'array')
             sys.exit()
@@ -499,20 +522,23 @@ class RSRReader(object):
         over the specified time range and the raw measured I and Q values.
 
         Args:
-            verbose (bool): If True, print steps and intermediate results
+            verbose (bool):
+                If True, print steps and intermediate results
 
         Adds attributes:
-            spm_vals (np.ndarray): Raw resolution SPM values over specified
+            spm_vals (np.ndarray):
+                Raw resolution SPM values over specified
                 spm_range
-            IQ_m (np.ndarray): Raw measured complex signal over the specified
+            IQ_m (np.ndarray):
+                Raw measured complex signal over the specified
                 spm_range
         """
 
         # Ensure verbose is Boolean
-        if type(verbose) != bool:
-            print('WARNING (RSRReader): verbose input should be Boolean. '
-                + 'Assuming False')
-            verbose = False
+#         if type(verbose) != bool:
+#             print('WARNING (RSRReader): verbose input should be Boolean. '
+#                 + 'Assuming False')
+#             verbose = False
 
         spm_vals = self.spm_vals
 
@@ -521,10 +547,10 @@ class RSRReader(object):
             self.__spm_16khz = spm_vals
 
         # Ensure that input is a Boolean
-        if type(self.__decimate_16khz_to_1khz) != bool:
-            print('WARNING (RSRReader.get_IQ): Expected Boolean input for ' +
-                'decimate_16khz_to_1khz keyword. Ignoring input')
-            self.__decimate_16khz_to_1khz = False
+#         if type(self.__decimate_16khz_to_1khz) != bool:
+#             print('WARNING (RSRReader.get_IQ): Expected Boolean input for ' +
+#                 'decimate_16khz_to_1khz keyword. Ignoring input')
+#             self.__decimate_16khz_to_1khz = False
 
         decimate_16khz_to_1khz = self.__decimate_16khz_to_1khz
 
@@ -587,11 +613,15 @@ class RSRReader(object):
         Function to perform loop for multiprocessing
 
         Args:
-            i_start (int): SFDU number to start indexing at
-            i_end (int): SFDU number to stop indexing at
-            n_loops (int): Number of loops that this for loop will go through
+            i_start (int):
+                SFDU number to start indexing at
+            i_end (int):
+                SFDU number to stop indexing at
+            n_loops (int):
+                Number of loops that this for loop will go through
                 for each processor
-            queue: multiprocessing.Queue instance
+            queue:
+                multiprocessing.Queue instance
         """
 
         I_array = np.zeros(len(range(i_start, i_end)) * self.__n_pts_per_sfdu)
@@ -639,15 +669,3 @@ class RSRReader(object):
             'Input Variables': input_var_dict,
             'Input Keywords': input_kw_dict}
         self.history = history_dict
-
-
-if __name__ == '__main__':
-
-    rsr_file = ('../../../../../data/s10-rev07-rsr-data/'
-        + 'S10EAOE2005_123_0740NNNX43D.2A1')
-    #rsr_file = ('../../../../../data/s10-rev07-rsr-data/'
-    #    +'s10sroe2005123_0740nnnx43rd.2a2')
-    rsr_inst = RSRReader(rsr_file, decimate_16khz_to_1khz=True, verbose=True)
-    f_spm = np.arange(30500, 40000, 0.5)
-    f_spm, f_sky_pred = rsr_inst.get_f_sky_pred(f_spm=f_spm, verbose=True)
-    pdb.set_trace()

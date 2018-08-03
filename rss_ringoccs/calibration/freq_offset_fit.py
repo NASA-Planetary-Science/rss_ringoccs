@@ -500,6 +500,6 @@ class FreqOffsetFit(object):
             'geo_inst': self.__geo_inst.history, 'f_uso': self.__f_uso}
         input_kw_dict = {'poly_order': self._poly_order,
             'spm_include': self._spm_include, 'USE_GUI': self.__USE_GUI}
-        hist_dict = rss.tools.write_history_dict.write_history_dict(
+        hist_dict = rss.tools.write_history_dict(
             input_var_dict, input_kw_dict, __file__)
         self.history = hist_dict

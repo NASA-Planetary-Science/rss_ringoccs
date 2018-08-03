@@ -1,8 +1,8 @@
 .DS_Store*
 *.pyc
-kernels/naif/
+<<<<<<< HEAD
+kernels/
 output/
+data/
 __pycache__
 *~
-
-examples/

@@ -171,6 +171,8 @@ class NormDiff(object):
             Radius correction due to Saturn's pole direction
         rho_corr_timing_km_vals (np.ndarray):
             Radius correction due to timing offset
+        raw_tau_threshold_vals (np.ndarray):
+            Threshold optical depth assuming 1km desired resolution
         tau_threshold_vals (np.ndarray):
             Threshold optical depth assuming 1km desired resolution
         end_of_chord_ing (int):
@@ -230,7 +232,7 @@ class NormDiff(object):
                 yet implemented, so the corresponding attributes
                 (rho_corr_pole_km_vals and rho_corr_timing_km_vals) are set
                 to arrays of 0 right now. Same thing for the
-                tau_threshold_vals attribute
+                raw_tau_threshold_vals attribute
             [4] Don't make dr_km something stupidly large. Like, 70000km, or
                 something on the order of a full occultation. Haven't tried it
                 yet, but it certainly won't go over well
@@ -535,6 +537,7 @@ class NormDiff(object):
         # Radius correction due to timing offset at final spacing
         self.rho_corr_timing_km_vals = np.zeros(len(spm_desired))
 
+        self.raw_tau_threshold_vals = np.zeros(len(spm_desired))
         self.tau_threshold_vals = np.zeros(len(spm_desired))
 
         self.end_of_chord_ing = end_of_chord_ing
@@ -548,7 +551,7 @@ class NormDiff(object):
         input_var_dict = {'rsr_inst': rsr_inst.history, 'dr_km': dr_km,
             'geo_inst': geo_inst.history, 'cal_inst': cal_inst.history}
         input_kw_dict = {'dr_km_tol': dr_km_tol}
-        hist_dict = rss.tools.write_history_dict.write_history_dict(
+        hist_dict = rss.tools.write_history_dict(
             input_var_dict, input_kw_dict, __file__)
         self.history = hist_dict
 
@@ -592,6 +595,7 @@ class NormDiff(object):
         rho_dot_kms_vals = self.rho_dot_kms_vals
         rho_corr_pole_km_vals = self.rho_corr_pole_km_vals
         rho_corr_timing_km_vals = self.rho_corr_timing_km_vals
+        raw_tau_threshold_vals = self.raw_tau_threshold_vals
         tau_threshold_vals = self.tau_threshold_vals
         end_of_chord_ing = self.end_of_chord_ing
         history = self.history
@@ -625,6 +629,8 @@ class NormDiff(object):
             rho_corr_pole_km_vals[0:ind])
         norm_diff_inst_ing.rho_corr_timing_km_vals = (
             rho_corr_timing_km_vals[0:ind])
+        norm_diff_inst_ing.raw_tau_threshold_vals = (
+            raw_tau_threshold_vals[0:ind])
         norm_diff_inst_ing.tau_threshold_vals = (
             tau_threshold_vals[0:ind])
         norm_diff_inst_ing.end_of_chord_ing = None
@@ -654,6 +660,8 @@ class NormDiff(object):
             rho_corr_pole_km_vals[ind + 1:])
         norm_diff_inst_egr.rho_corr_timing_km_vals = (
             rho_corr_timing_km_vals[ind + 1:])
+        norm_diff_inst_egr.raw_tau_threshold_vals = (
+            raw_tau_threshold_vals[ind + 1:])
         norm_diff_inst_egr.tau_threshold_vals = (
             tau_threshold_vals[ind + 1:])
         norm_diff_inst_egr.end_of_chord_ing = None

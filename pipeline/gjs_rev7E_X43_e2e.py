@@ -5,15 +5,6 @@ gjs_rev7E_X43_e2e.py
 Purpose: Perform entire end-to-end process on rev7E X43 file taken from PDS
     node online
 
-BEFORE RUNNING:
-    [1] Run the get_kernels.sh script in the kernels/ directory:
-        "./get_kernels.sh"
-    [2] Download 16kHz rev7E X43 RSR file at
-        https://atmos.nmsu.edu/PDS/data/cors_0105/sroc1_123/rsr/
-        It's the "s10sroe2005123_0740nnnx43rd.2a2" file. We recommend
-        you put it in the data/ directory
-    [3] Adjust the rsr_file_dir to wherever you put the RSR file from step 2
-
 Revisions:
         gjs_rev7E_X43_e2e.py
     2018 Aug 02 - gsteranka - Original version
@@ -35,8 +26,7 @@ from pds3_dlp_series import write_dlp_series
 from pds3_tau_series import write_tau_series
 sys.path.remove('../rss_ringoccs/tools')
 
-rsr_file_dir = '../../../../data/s10-rev07-rsr-data/'
-rsr_file = rsr_file_dir + 's10sroe2005123_0740nnnx43rd.2a2'
+rsr_file = '../data/cors_0105/sroc1_123/rsr/s10sroe2005123_0740nnnx43rd.2a2'
 
 kernels = '../tables/Sa-TC17-V001.ker'
 
@@ -102,6 +92,12 @@ def write_power_norm_fit_parameters(norm_inst, power_norm_fit_parameters_file):
     pickle.dump(fit_param_dict, file_object)
     file_object.close()
 
+# Download RSR file and kernels if necessary
+os.system('cd ../data ; ./get_rev7E_X43_file.sh ; cd ../pipeline')
+os.system('cd ../kernels ; '
+    + './get_kernels.sh ../tables/list_of_kernels.txt ; '
+    +'cd ../pipeline')
+
 rsr_inst = rss.rsr_reader.RSRReader(rsr_file, verbose=verbose)
 
 rev_info = rss.tools.get_rev_info(rsr_inst, '007')
@@ -152,7 +148,7 @@ cal_inst = rss.calibration.Calibration(fit_inst, norm_inst, geo_inst,
 dlp_inst = rss.calibration.NormDiff(rsr_inst, dr_km_desired, geo_inst,
    cal_inst, verbose=verbose)
 
-tau_inst = rss.diffcorr.diffraction_correction(dlp_inst, res_km,
+tau_inst = rss.diffcorr.DiffractionCorrection(dlp_inst, res_km,
     rng=inversion_range, verbose=verbose)
 
 write_geo_series(rev_info, geo_inst, geo_file, output_directory, 'Egress')

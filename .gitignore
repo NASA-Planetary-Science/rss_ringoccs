@@ -1,6 +1,6 @@
 .DS_Store*
 *.pyc
-kernels/
+kernels/naif/
 output/
 data/
 __pycache__

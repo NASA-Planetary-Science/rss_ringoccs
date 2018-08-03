@@ -194,7 +194,7 @@ class Calibration(object):
         input_var_dict = {'fit_inst': fit_inst.history,
             'norm_inst': norm_inst.history, 'geo_inst': geo_inst.history}
         input_kw_dict = {'dt_cal': dt_cal}
-        hist_dict = rss.tools.write_history_dict.write_history_dict(
+        hist_dict = rss.tools.write_history_dict(
             input_var_dict, input_kw_dict, __file__)
 
         self.history = hist_dict

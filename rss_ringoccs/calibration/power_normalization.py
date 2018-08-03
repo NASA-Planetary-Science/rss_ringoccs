@@ -604,6 +604,6 @@ class Normalization(object):
             'spline_order': self._spline_order,
             'dt_down': self._dt_down,
             'freespace_spm': self._freespace_spm, 'knots_spm': self._knots_spm}
-        hist_dict = rss.tools.write_history_dict.write_history_dict(
+        hist_dict = rss.tools.write_history_dict(
             input_var_dict, input_kw_dict, __file__)
         self.history = hist_dict

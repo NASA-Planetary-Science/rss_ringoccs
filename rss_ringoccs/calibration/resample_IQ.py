@@ -75,18 +75,22 @@ def resample_IQ(rho_km, IQ_c, dr_desired, dr_km_tol=0.01, verbose=False):
                 IQ_c_raw, dr_desired, dr_km_tol=dr_km_tol, verbose=verbose)
 
     Args:
-        rho_km (np.ndarray): Set of ring intercept point values at initial
+        rho_km (np.ndarray):
+            Set of ring intercept point values at initial
             resolution before resampling
-        IQ_c (np.ndarray): Frequency corrected complex signal at initial
+        IQ_c (np.ndarray):
+            Frequency corrected complex signal at initial
             resolution before resampling
-        dr_desired (float): Desired final radial spacing to resample to
-        dr_km_tol (float): Maximum distance from an integer number of
+        dr_desired (float):
+            Desired final radial spacing to resample to
+        dr_km_tol (float):
+            Maximum distance from an integer number of
             dr_desired that the first rho value will be at. Makes the final
             set of rho values more regular-looking. For example, if you say
             dr_km_tol=0.01 with a dr_desired of 0.25, your final set of rho
             values might look something like [70000.26, 70000.51, ...]
-        verbose (bool): Testing variable to print out the first few resampled
-            results
+        verbose (bool):
+            Testing variable to print out the first few resampled results
     """
 
     rho_km_diff = np.diff(rho_km)

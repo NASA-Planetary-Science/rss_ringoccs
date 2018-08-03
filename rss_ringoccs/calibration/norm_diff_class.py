@@ -548,7 +548,7 @@ class NormDiff(object):
         input_var_dict = {'rsr_inst': rsr_inst.history, 'dr_km': dr_km,
             'geo_inst': geo_inst.history, 'cal_inst': cal_inst.history}
         input_kw_dict = {'dr_km_tol': dr_km_tol}
-        hist_dict = rss.tools.write_history_dict.write_history_dict(
+        hist_dict = rss.tools.write_history_dict(
             input_var_dict, input_kw_dict, __file__)
         self.history = hist_dict
 

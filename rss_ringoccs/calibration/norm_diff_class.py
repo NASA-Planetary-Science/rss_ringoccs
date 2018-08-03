@@ -173,6 +173,8 @@ class NormDiff(object):
             Radius correction due to timing offset
         raw_tau_threshold_vals (np.ndarray):
             Threshold optical depth assuming 1km desired resolution
+        tau_threshold_vals (np.ndarray):
+            Threshold optical depth assuming 1km desired resolution
         end_of_chord_ing (int):
             Index number of final ingress portion of chord
             occultation. Set to "None" if "is_chord" keyword is False
@@ -536,6 +538,7 @@ class NormDiff(object):
         self.rho_corr_timing_km_vals = np.zeros(len(spm_desired))
 
         self.raw_tau_threshold_vals = np.zeros(len(spm_desired))
+        self.tau_threshold_vals = np.zeros(len(spm_desired))
 
         self.end_of_chord_ing = end_of_chord_ing
 
@@ -593,6 +596,7 @@ class NormDiff(object):
         rho_corr_pole_km_vals = self.rho_corr_pole_km_vals
         rho_corr_timing_km_vals = self.rho_corr_timing_km_vals
         raw_tau_threshold_vals = self.raw_tau_threshold_vals
+        tau_threshold_vals = self.tau_threshold_vals
         end_of_chord_ing = self.end_of_chord_ing
         history = self.history
 
@@ -627,6 +631,8 @@ class NormDiff(object):
             rho_corr_timing_km_vals[0:ind])
         norm_diff_inst_ing.raw_tau_threshold_vals = (
             raw_tau_threshold_vals[0:ind])
+        norm_diff_inst_ing.tau_threshold_vals = (
+            tau_threshold_vals[0:ind])
         norm_diff_inst_ing.end_of_chord_ing = None
         norm_diff_inst_ing.history = history
 
@@ -656,6 +662,8 @@ class NormDiff(object):
             rho_corr_timing_km_vals[ind + 1:])
         norm_diff_inst_egr.raw_tau_threshold_vals = (
             raw_tau_threshold_vals[ind + 1:])
+        norm_diff_inst_egr.tau_threshold_vals = (
+            tau_threshold_vals[ind + 1:])
         norm_diff_inst_egr.end_of_chord_ing = None
         norm_diff_inst_egr.history = history
 

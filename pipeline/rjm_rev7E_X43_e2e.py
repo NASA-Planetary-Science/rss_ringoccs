@@ -45,13 +45,9 @@ shell_execute(['./get_rsr_file.sh',rsr_file_name,rsr_file_pds_dir,rsr_file_local
 
 rsr_file = rsr_file_local_dir + rsr_file_name
 
-list_of_kernels = "../tables/list_of_kernels.txt"
+list_of_kernels = "../tables/rev007_list_of_kernels.txt"
 
-os.system('cd ../kernels')
-
-shell_execute(["./get_kernels.sh",list_of_kernels])
-
-os.system('cd ../pipeline')
+os.system('cd ../kernels'; "./get_kernels.sh ../tables/rev007_list_of_kernels.txt"; "cd ../pipeline")
 
 kernels = '../tables/Sa-TC17-V001.ker'
 

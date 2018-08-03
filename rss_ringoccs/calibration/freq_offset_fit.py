@@ -48,11 +48,8 @@ Revisions:
 
 import numpy as np
 from numpy.polynomial import polynomial as poly
-#import os
-#import platform
 from scipy.interpolate import interp1d
 import sys
-#import time
 
 from tkinter import Tk
 
@@ -82,27 +79,43 @@ class FreqOffsetFit(object):
         >>> spm_vals, IQ_c = fit_inst.get_IQ_c(spm_vals=spm_vals, IQ_m=IQ_m)
 
     Attributes:
-        _spm_include (list): Linked to the input range spm_include
-        _poly_order (int): Linked to the input fit order poly_order
-        __geo_inst: Instance of Geometry class
-        __f_uso (float): USO frequency used
-        __USE_GUI (bool): Linked to USE_GUI input
-        __f_spm (np.ndarray): SPM values that all sky frequencies are
+        _spm_include (list):
+            Linked to the input range spm_include
+        _poly_order (int):
+            Linked to the input fit order poly_order
+        __geo_inst:
+            Instance of Geometry class
+        __f_uso (float):
+            USO frequency used
+        __USE_GUI (bool):
+            Linked to USE_GUI input
+        __f_spm (np.ndarray):
+            SPM values that all sky frequencies are
             evaluated at
-        __f_rho (np.ndarray): Rho values that all sky frequencies are
+        __f_rho (np.ndarray):
+            Rho values that all sky frequencies are
             evaluated at
-        __f_offset (np.ndarray): Extracted frequency offset
-        __f_offset_fit (np.ndarray): Fit to extracted frequency offset
-        __f_sky_pred (np.ndarray): Predicted sky frequency
-        __f_sky_recon (np.ndarray): Reconstructed sky frequency
-        __f_sky_resid_fit (np.ndarray): Fit to observed residual frequency
-        __spm_vals (np.ndarray): SPM values at raw resolution over
+        __f_offset (np.ndarray):
+            Extracted frequency offset
+        __f_offset_fit (np.ndarray):
+            Fit to extracted frequency offset
+        __f_sky_pred (np.ndarray):
+            Predicted sky frequency
+        __f_sky_recon (np.ndarray):
+            Reconstructed sky frequency
+        __f_sky_resid_fit (np.ndarray):
+            Fit to observed residual frequency
+        __spm_vals (np.ndarray):
+            SPM values at raw resolution over
             full data set
-        _rho_exclude (list): Set of radius regions to exclude when making
+        _rho_exclude (list):
+            Set of radius regions to exclude when making
             fit to residual frequency. Specify in km. Default is to
             exclude B ring region
-        __IQ_m (np.ndarray): Raw measured complex signal over full data set
-        history (dict): Recorded information about the run
+        __IQ_m (np.ndarray):
+            Raw measured complex signal over full data set
+        history (dict):
+            Recorded information about the run
         """
 
     def __init__(self, rsr_inst, geo_inst, f_spm, f_offset,
@@ -114,24 +127,34 @@ class FreqOffsetFit(object):
         frequency offset using the default parameters
 
         Args:
-            rsr_inst: Instance of the RSRReader class
-            geo_inst: Instance of geometry class. Contains attributes
+            rsr_inst:
+                Instance of the RSRReader class
+            geo_inst:
+                Instance of geometry class. Contains attributes
                 t_oet_spm_vals and rho_km_vals
-            f_spm (np.ndarray): SPM array that frequency offset was
+            f_spm (np.ndarray):
+                SPM array that frequency offset was
                 extracted at
-            f_offset (np.ndarray): Extracted frequency offset
-            f_uso (float): USO frequency for the data set
-            poly_order (int): Order of the polynomial fit made to residual
+            f_offset (np.ndarray):
+                Extracted frequency offset
+            f_uso (float):
+                USO frequency for the data set
+            poly_order (int):
+                Order of the polynomial fit made to residual
                 frequency
-            sc_name (str): Name of spacecraft. Default is 'Cassini'
-            spm_include (list): Set of SPM regions to include when making fit
+            sc_name (str):
+                Name of spacecraft. Default is 'Cassini'
+            spm_include (list):
+                Set of SPM regions to include when making fit
                 to residual frequency. By default, only rho_exclude is used.
                 If this keyword is specified, it overrides anything input to
                 rho_exclude keyword. This is meant as an optional replacement
                 of rho_exclude
-            USE_GUI (bool): Use the interactive GUI to make a residual
+            USE_GUI (bool):
+                Use the interactive GUI to make a residual
                 frequency fit. This is highly recommended
-            verbose (bool): Optional test plot
+            verbose (bool):
+                Optional test plot
 
         Dependencies:
             [1] RSRReader
@@ -155,36 +178,36 @@ class FreqOffsetFit(object):
             https://pds-rings.seti.org/cassini/rss/Cassini%20Radio%20Science%20Users%20Guide%20-%204%20Sep%202014.pdf
         """
 
-        if type(rsr_inst) != rss.rsr_reader.RSRReader:
+        if not isinstance(rsr_inst, rss.rsr_reader.RSRReader):
             sys.exit('ERROR (FreqOffsetFit): rsr_inst input must be an '
                 + 'instance of the RSRReader class')
 
-        if type(geo_inst) != rss.occgeo.Geometry:
+        if not isinstance(geo_inst, rss.occgeo.Geometry):
             sys.exit('ERROR (FreqOffsetFIt): geo_inst input must be an '
                 + 'instance of the Geometry class')
 
-        if (type(f_uso) != float) & (type(f_uso) != int):
+        if (not isinstance(f_uso, float)) & (not isinstance(f_uso, int)):
             print('WARNING (FreqOffsetFit): f_uso input must be either an int '
                 + 'or float. Ignoring current input and setting to '
                 + str(8427222034.34050))
             f_uso = 8427222034.34050
 
-        if type(poly_order) != int:
+        if not isinstance(poly_order, int):
             print('WARNING (FreqOffsetFit): poly_order input must be an int. '
                 + 'Ignoring current input and setting to order 9')
             poly_order = 9
 
-        if (type(spm_include) != list) & (spm_include is not None):
+        if (not isinstance(spm_include, list)) & (spm_include is not None):
             print('WARNING (FreqOffsetFit): spm_include input must be either '
                 + 'a list or None. Setting to None for default fit ranges')
             spm_include = None
 
-        if type(USE_GUI) != bool:
+        if not isinstance(USE_GUI, bool):
             print('WARNING (FreqOffsetFit): USE_GUI input must be boolean. '
                 + 'Ignoring current input and setting to True')
             USE_GUI = True
 
-        if type(verbose) != bool:
+        if not isinstance(verbose, bool):
             print('WARNING (FreqOffsetFit): verbose input must be boolean. '
                 + 'Ignoring current input and setting to False')
             verbose = False
@@ -246,16 +269,20 @@ class FreqOffsetFit(object):
         frequency fit
 
         Args:
-            poly_order (int): Order of polynomial fit made to residual
+            poly_order (int):
+                Order of polynomial fit made to residual
                 frequency
-            spm_include (list): Set of SPM regions to include when making fit
+            spm_include (list):
+                Set of SPM regions to include when making fit
                 to residual frequency. By default, only rho_exclude is used.
                 If this keyword is specified, it overrides anything input to
                 rho_exclude keyword. This is meant as an optional replacement
                 of rho_exclude
-            USE_GUI (bool): Use the interactive GUI to make a residual
+            USE_GUI (bool):
+                Use the interactive GUI to make a residual
                 frequency fit. This is highly recommended
-            verbose (bool): Optional test plot
+            verbose (bool):
+                Optional test plot
 
         Dependencies:
             [1] RSRReader
@@ -269,22 +296,22 @@ class FreqOffsetFit(object):
             spm_include = [[30250, 32600], [33520, 33890], [33990, 40200]]
         """
 
-        if type(poly_order) != int:
+        if not isinstance(poly_order, int):
             print('WARNING (FreqOffsetFit): poly_order input must be an int. '
                 + 'Ignoring current input and setting to order 9')
             poly_order = 9
 
-        if (type(spm_include) != list) & (spm_include is not None):
+        if (not isinstance(spm_include, list)) & (spm_include is not None):
             print('WARNING (FreqOffsetFit): spm_include input must be either '
                 + 'a list or None. Setting to None for default fit ranges')
             spm_include = None
 
-        if type(USE_GUI) != bool:
+        if not isinstance(USE_GUI, bool):
             print('WARNING (FreqOffsetFit): USE_GUI input must be boolean. '
                 + 'Ignoring current input and setting to True')
             USE_GUI = True
 
-        if type(verbose) != bool:
+        if not isinstance(verbose, bool):
             print('WARNING (FreqOffsetFit): verbose input must be boolean. '
                 + 'Ignoring current input and setting to False')
             verbose = False
@@ -335,7 +362,6 @@ class FreqOffsetFit(object):
 
         # If user specified spm_include argument that overrides the rho_exclude
         #     argument
-        #if spm_include is not None:
         if spm_include:
             if verbose:
                 print('Using specified fit parameters')
@@ -424,9 +450,11 @@ class FreqOffsetFit(object):
         when you do power normalization.
 
         Outputs:
-            spm_vals (np.ndarray): SPM values of the returned frequency
+            spm_vals (np.ndarray):
+                SPM values of the returned frequency
                 corrected complex signal
-            IQ_c (np.ndarray): Frequency corrected complex signal
+            IQ_c (np.ndarray):
+                Frequency corrected complex signal
 
         Dependencies:
             [1] numpy
@@ -436,17 +464,6 @@ class FreqOffsetFit(object):
         # Complex signal to frequency correct, and corresponding SPM values
         spm_vals = self.__spm_vals
         IQ_m = self.__IQ_m
-
-        if (type(spm_vals) != np.ndarray) | (type(IQ_m) != np.ndarray):
-            print('WARNING (FreqOffsetFit.get_IQ_c): spm_vals and IQ_m input '
-                + 'must both be numpy arrays. Ignoring input and using '
-                + 'default (raw resolution)')
-            spm_vals = self.__spm_vals
-            IQ_m = self.__IQ_m
-
-        if len(spm_vals) != len(IQ_m):
-            sys.exit('ERROR (FreqOffsetFit.get_IQ_c):'
-                + '\n SPM and IQ_m input lengths don\'t match')
 
         f_offset_fit = self.__f_offset_fit
 
@@ -483,15 +500,6 @@ class FreqOffsetFit(object):
             'geo_inst': self.__geo_inst.history, 'f_uso': self.__f_uso}
         input_kw_dict = {'poly_order': self._poly_order,
             'spm_include': self._spm_include, 'USE_GUI': self.__USE_GUI}
-#         hist_dict = {'User Name': os.getlogin(),
-#             'Host Name': os.uname().nodename,
-#             'Run Date': time.ctime() + ' ' + time.tzname[0],
-#             'Python Version': platform.python_version(),
-#             'Operating System': os.uname().sysname,
-#             'Source File': __file__.split('/')[-1],
-#             'Source Directory': __file__.rsplit('/', 1)[0] + '/',
-#             'Input Variables': input_var_dict,
-#             'Input Keywords': input_kw_dict}
         hist_dict = rss.tools.write_history_dict.write_history_dict(
             input_var_dict, input_kw_dict, __file__)
         self.history = hist_dict

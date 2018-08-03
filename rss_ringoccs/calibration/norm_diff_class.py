@@ -101,10 +101,6 @@ import pdb
 from scipy.interpolate import interp1d
 import sys
 
-#try:
-#    from rsr_reader import RSRReader
-#    from resample_IQ import resample_IQ
-#except ImportError:
 from ..rsr_reader.rsr_reader import RSRReader
 from .resample_IQ import resample_IQ
 
@@ -140,33 +136,48 @@ class NormDiff(object):
                 verbose=verbose)
 
     Attributes:
-        rho_km_vals (np.ndarray): Ring intercept radius values, in km,
+        rho_km_vals (np.ndarray):
+            Ring intercept radius values, in km,
             at final spacing specified in dr_km
-        t_oet_spm_vals (np.ndarray): Set of SPM values corresponding to
+        t_oet_spm_vals (np.ndarray):
+            Set of SPM values corresponding to
             rho_km_desired
-        p_norm_vals (np.ndarray): Power normalized to 1. This is the
+        p_norm_vals (np.ndarray):
+            Power normalized to 1. This is the
             diffraction pattern that is input to the Fresnel inversion step
-        phase_rad_vals (np.ndarray): Phase of the complex signal, in radians.
+        phase_rad_vals (np.ndarray):
+            Phase of the complex signal, in radians.
             This is the other part of the diffraction pattern that is input to
             the Fresnel Inversion step
-        B_rad_vals (np.ndarray): Ring opening angle of Saturn
-        D_km_vals (np.ndarray): Spacecraft-RIP (Ring Intercept Point) distance
-        F_km_vals (np.ndarray): Fresnel scale, in km
-        f_sky_hz_vals (np.ndarray): Predicted sky frequency, in Hz.
-        phi_rad_vals (np.ndarray): Observed ring azimuth, in radians
-        phi_rl_rad_vals (np.ndarray): Ring longitude, in radians
-        t_ret_spm_vals (np.ndarray): Ring event time in SPM
-        t_set_spm_vals (np.ndarray): Spacecraft event time in SPM
-        rho_dot_kms_vals (np.ndarray): Ring intercept point velocity
-        rho_corr_pole_km_vals (np.ndarray): Radius correction due to Saturn's
-            pole direction
-        rho_corr_timing_km_vals (np.ndarray): Radius correction due to timing
-            offset
-        tau_threshold_vals (np.ndarray): Threshold optical depth assuming 1km
-            desired resolution
-        end_of_chord_ing (int): Index number of final ingress portion of chord
+        B_rad_vals (np.ndarray):
+            Ring opening angle of Saturn
+        D_km_vals (np.ndarray):
+            Spacecraft-RIP (Ring Intercept Point) distance
+        F_km_vals (np.ndarray):
+            Fresnel scale, in km
+        f_sky_hz_vals (np.ndarray):
+            Predicted sky frequency, in Hz.
+        phi_rad_vals (np.ndarray):
+            Observed ring azimuth, in radians
+        phi_rl_rad_vals (np.ndarray):
+            Ring longitude, in radians
+        t_ret_spm_vals (np.ndarray):
+            Ring event time in SPM
+        t_set_spm_vals (np.ndarray):
+            Spacecraft event time in SPM
+        rho_dot_kms_vals (np.ndarray):
+            Ring intercept point velocity
+        rho_corr_pole_km_vals (np.ndarray):
+            Radius correction due to Saturn's pole direction
+        rho_corr_timing_km_vals (np.ndarray):
+            Radius correction due to timing offset
+        tau_threshold_vals (np.ndarray):
+            Threshold optical depth assuming 1km desired resolution
+        end_of_chord_ing (int):
+            Index number of final ingress portion of chord
             occultation. Set to "None" if "is_chord" keyword is False
-        history (dict): Recorded information about the run
+        history (dict):
+            Recorded information about the run
     """
 
     def __init__(self, rsr_inst, dr_km, geo_inst, cal_inst,
@@ -176,23 +187,29 @@ class NormDiff(object):
         Instantiation defines all attributes of instance.
 
         Args:
-            rsr_inst: Instance of the RSRReader class. Linked to the full
+            rsr_inst:
+                Instance of the RSRReader class. Linked to the full
                 path name of RSR file to process
-            dr_km (float): Desired final radial spacing of processed data,
+            dr_km (float):
+                Desired final radial spacing of processed data,
                 in km
-            geo_inst: Instance of Geometry class linked to rsr_inst input
-            cal_inst: Calibration instance linked to rsr_inst input. Made using
+            geo_inst:
+                Instance of Geometry class linked to rsr_inst input
+            cal_inst:
+                Calibration instance linked to rsr_inst input. Made using
                 Calibration class if you haven't made a cal_file yet, and made
                 using MakeCalInst class if you have made a cal_file
-            dr_km_tol (float): Optional keyword argument, in km, that specifies
+            dr_km_tol (float):
+                Optional keyword argument, in km, that specifies
                 the maximum distance the starting point of the final set of
                 radius values can be away from an integer number of dr_km. For
                 example, if you say dr_km_tol=0.01 and dr_km=0.25, the starting
                 point of the final set of rho values could be 70000.26 km, but
                 not 70000.261 km
-            is_chord (bool): Set as True if the occultation is a chord
-                occultation
-            verbose (bool): Print intermediate steps and results
+            is_chord (bool):
+                Set as True if the occultation is a chord occultation
+            verbose (bool):
+                Print intermediate steps and results
 
         Dependencies:
             [1] RSRReader
@@ -219,37 +236,38 @@ class NormDiff(object):
                 yet, but it certainly won't go over well
         """
 
-        if type(rsr_inst) != rss.rsr_reader.RSRReader:
+        if not isinstance(rsr_inst, rss.rsr_reader.RSRReader):
             sys.exit('ERROR (NormDiff): rsr_inst input must be an instance of '
                 + 'the RSRReader class')
 
-        if type(geo_inst) != rss.occgeo.Geometry:
+        if not isinstance(geo_inst, rss.occgeo.Geometry):
             sys.exit('ERROR (NormDiff): geo_inst input must be an '
                 + 'instance of the Geometry class')
 
-        if ((type(cal_inst) != rss.calibration.Calibration)
-                & (type(cal_inst) != rss.tools.MakeCalInst)):
+        if ((not isinstance(cal_inst, rss.calibration.Calibration))
+                & (not isinstance(cal_inst, rss.tools.MakeCalInst))):
             sys.exit('ERROR (NormDiff): cal_inst input must be an instance of '
                 + 'the Calibration class if you don\'t have a CAL file '
                 + 'pre-made. Can also be an instance of the MakeCalInst class '
                 + 'if you have a CAL file that you want to turn into an '
                 + 'instance')
 
-        if (type(dr_km) != float) & (type(dr_km) != int):
+        if (not isinstance(dr_km, float)) & (not isinstance(dr_km, int)):
             sys.exit('ERROR (NormDiff): dr_km input must be either a float '
                 + 'or int')
 
-        if (type(dr_km_tol) != float) & (type(dr_km_tol) != int):
+        if ((not isinstance(dr_km_tol, float))
+                & (not isinstance(dr_km_tol, int))):
             sys.exit('ERROR (NormDiff): dr_km_tol input must be either a '
                 + 'float or int')
 
-        if type(verbose) != bool:
+        if not isinstance(verbose, bool):
             print('WARNING (NormDiff): verbose input must be one of '
                 + 'Python\'s built-in booleans (True or False). Setting to '
                 + 'False')
             verbose = False
 
-        if type(is_chord) != bool:
+        if not isinstance(is_chord, bool):
             print('WARNING (NormDiff): is_chord input must be one of '
                 + 'Python\'s built-in booleans (True or False). Setting to '
                 + 'False')
@@ -430,22 +448,31 @@ class NormDiff(object):
         instance
 
         Args:
-            rho_km_desired (np.ndarray): Radius values at final spacing
-            spm_desired (np.ndarray): SPM values evaluated at rho_km_desired
-            p_norm_vals (np.ndarray): Normalized power evaluated at
-                rho_km_desired
-            phase_rad_vals (np.ndarray): Drift-corrected phase in radians
-                evaluated at rho_km_desired
-            spm_geo (np.ndarray): SPM values of geometry parameters
-            rho_dot_kms_geo (np.ndarray): Radial velocity evaluated at spm_geo
-            geo_inst: Instance of the Geometry class
-            spm_cal (np.ndarray): SPM values of the calibration parameters
-            f_sky_pred_cal (np.ndarray): Sky frequency values listed in
+            rho_km_desired (np.ndarray):
+                Radius values at final spacing
+            spm_desired (np.ndarray):
+                SPM values evaluated at rho_km_desired
+            p_norm_vals (np.ndarray):
+                Normalized power evaluated at rho_km_desired
+            phase_rad_vals (np.ndarray):
+                Drift-corrected phase in radians evaluated at rho_km_desired
+            spm_geo (np.ndarray):
+                SPM values of geometry parameters
+            rho_dot_kms_geo (np.ndarray):
+                Radial velocity evaluated at spm_geo
+            geo_inst:
+                Instance of the Geometry class
+            spm_cal (np.ndarray):
+                SPM values of the calibration parameters
+            f_sky_pred_cal (np.ndarray):
+                Sky frequency values listed in
                 calibration, which has the frequency offset added on top of the
                 values read straight from the RSR file using
                 RSRReader.get_f_sky_pred
-            rsr_inst: Instance of the RSRReader class
-            end_of_chord_ing (int or None): Index of the end of the ingress
+            rsr_inst:
+                Instance of the RSRReader class
+            end_of_chord_ing (int or None):
+                Index of the end of the ingress
                 portion of a chord occultation. Set to None if the
                 occultation's not chord
         """
@@ -521,15 +548,6 @@ class NormDiff(object):
         input_var_dict = {'rsr_inst': rsr_inst.history, 'dr_km': dr_km,
             'geo_inst': geo_inst.history, 'cal_inst': cal_inst.history}
         input_kw_dict = {'dr_km_tol': dr_km_tol}
-#         hist_dict = {'User Name': os.getlogin(),
-#             'Host Name': os.uname().nodename,
-#             'Run Date': time.ctime() + ' ' + time.tzname[0],
-#             'Python Version': platform.python_version(),
-#             'Operating System': os.uname().sysname,
-#             'Source File': __file__.split('/')[-1],
-#             'Source Directory': __file__.rsplit('/', 1)[0] + '/',
-#             'Input Variables': input_var_dict,
-#             'Input Keywords': input_kw_dict}
         hist_dict = rss.tools.write_history_dict.write_history_dict(
             input_var_dict, input_kw_dict, __file__)
         self.history = hist_dict
@@ -541,8 +559,10 @@ class NormDiff(object):
         instance, and return them.
 
         Returns:
-            norm_diff_inst_ing: Ingress instance
-            norm_diff_inst_egr: Egress instance
+            norm_diff_inst_ing:
+                Ingress instance
+            norm_diff_inst_egr:
+                Egress instance
 
         Notes:
             [1] Is it bad practice to create separate copies of the instances

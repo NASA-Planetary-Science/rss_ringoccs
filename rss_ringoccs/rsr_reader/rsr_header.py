@@ -107,7 +107,8 @@ def rsr_header(rsr_file):
     Read header of RSR file, given just its full path name
 
     args:
-        rsr_file (str): Full path name of RSR file
+        rsr_file (str):
+            Full path name of RSR file
     """
 
     struct_hdr_fmt = (__endian + __sfdu_format + __ha_format
@@ -156,10 +157,3 @@ def rsr_header(rsr_file):
         out_dict['doy'] = sfdu_hdr_dict['sh_sfdu_doy']
 
     return out_dict
-
-
-if __name__ == '__main__':
-    rsr_file = ('../../../data/s10-rev07-rsr-data/'
-        + 'S10EAOE2005_123_0740NNNX43D.2A1')
-    rsr_hdr = rsr_header(rsr_file)
-    pdb.set_trace()

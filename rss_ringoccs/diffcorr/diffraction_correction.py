@@ -103,35 +103,68 @@ class DiffractionCorrection(object):
         self.T_hat_fwd_vals = None
         self.phase_fwd_vals = None
 
-        # Assign keywords/arguments to their corresponding attribute.
-        self.res        = res
-        self.wtype      = wtype.replace(" ", "").lower()
-        self.rngreq     = rng
-        self.norm       = norm
-        self.verbose    = verbose
-        self.fwd        = fwd
-        self.fft        = fft
-        self.bfac       = bfac
-        self.sigma      = sigma
-        self.psitype    = psitype.replace(" ", "").lower()
+        # Assign resolution, forward, and FFT variables as attributes.
+        self.res = res
+        self.fwd = fwd
+        self.fft = fft
+
+        # Assing window type and Allen deviation variables as attributes.
+        self.wtype = wtype.replace(" ", "").lower()
+        self.sigma = sigma
+
+        # Assign normalization and b-factor variables as attributes.
+        self.norm = norm
+        self.bfac = bfac
+
+        # Assign requested range variable as an attribute.
+        self.rngreq = rng
+
+        # Assign verbose and psi approximation variables as attributes.
+        self.verbose = verbose
+        self.psitype = psitype.replace(" ", "").lower()
 
         # Retrieve variables from the NormDiff class, setting as attributes.
         try:
-            self.rho_km_vals                = NormDiff.rho_km_vals
-            self.p_norm_vals                = NormDiff.p_norm_vals
-            self.phase_rad_vals             = -NormDiff.phase_rad_vals
-            self.B_rad_vals		            = NormDiff.B_rad_vals
-            self.D_km_vals		            = NormDiff.D_km_vals
-            self.f_sky_hz_vals              = NormDiff.f_sky_hz_vals
-            self.phi_rad_vals               = NormDiff.phi_rad_vals
-            self.rho_dot_kms_vals           = NormDiff.rho_dot_kms_vals
-            self.t_oet_spm_vals             = NormDiff.t_oet_spm_vals  
-            self.t_ret_spm_vals             = NormDiff.t_ret_spm_vals         
-            self.t_set_spm_vals             = NormDiff.t_set_spm_vals         
+            # Ring radius and normalized power.
+            self.rho_km_vals = NormDiff.rho_km_vals
+            self.p_norm_vals = NormDiff.p_norm_vals
+            
+            # Phase of signal, negating do to mathematical conventions.
+            self.phase_rad_vals = -NormDiff.phase_rad_vals
+
+            # Ring opening angle.
+            self.B_rad_vals = NormDiff.B_rad_vals
+
+            # Spacecraft-to-Ring Intercept Point (RIP) distance.
+            self.D_km_vals = NormDiff.D_km_vals
+
+            # Ring azimuth angle.
+            self.phi_rad_vals = NormDiff.phi_rad_vals
+
+            # Frequency from the recieved signal.
+            self.f_sky_hz_vals = NormDiff.f_sky_hz_vals
+
+            # RIP velocity.
+            self.rho_dot_kms_vals = NormDiff.rho_dot_kms_vals
+
+            # Retrieve time variables (Earth, Ring, and Spacecraft ET).
+            self.t_oet_spm_vals = NormDiff.t_oet_spm_vals  
+            self.t_ret_spm_vals = NormDiff.t_ret_spm_vals         
+            self.t_set_spm_vals = NormDiff.t_set_spm_vals  
+
+            # Pole corrections in ring radius.       
             self.rho_corr_pole_km_vals      = NormDiff.rho_corr_pole_km_vals
+
+            # Timing corrections in ring radius.
             self.rho_corr_timing_km_vals    = NormDiff.rho_corr_timing_km_vals
+
+            # Ring longitude angle.
             self.phi_rl_rad_vals            = NormDiff.phi_rl_rad_vals
+
+            # Optical depth of diffraction profile.
             self.raw_tau_threshold_vals     = NormDiff.raw_tau_threshold_vals
+
+            # History from the NormDiff instance.
             self.dathist                    = NormDiff.history
         except AttributeError as errmes:
             raise AttributeError(
@@ -442,25 +475,47 @@ class DiffractionCorrection(object):
 
         del nreq, crange
 
-    # Definition of the Approximate Fresnel Inverse (MTR86 Equation 15)
     def __fresinv(self,T_hat,ker,dx,f_scale):
+        """
+            Approximation Fresnel Inverse (MTR86 Equation 15)
+        """
         T = np.sum(ker * T_hat) * dx * (1.0+1.0j) / (2.0 * f_scale)
         return T
 
     # FFT Approximation of Fresnel Inverse (MTR86 Equation 15)
-    def __fresinvfft(self,T_hat,ker,dx,f_scale):
-        nw              = np.size(T_hat)
-        fft_t_hat       = np.fft.fft(T_hat)
-        fft_conv        = np.fft.fft(ker)
-        inv_t_hat       = np.fft.ifftshift(np.fft.ifft(fft_t_hat*fft_conv))
-        inv_t_hat      *= dx*(1.0+1.0j)/(2.0*f_scale)
-        T               = inv_t_hat[int((nw-1)/2)+1]
+    def __fresinvfft(self, T_hat, ker, dx, f_scale):
+        """
+            FFT approximation of Fresnel Inverse (MTR86 Equation 15)
+        """
+
+        # Number of points in window.
+        nw = np.size(T_hat)
+
+        # FFT of data.
+        fft_t_hat = np.fft.fft(T_hat)
+
+        # FFT of weight Fresnel Kernel.
+        fft_conv = np.fft.fft(ker)
+
+        # Inverse FFT, assuming the convolution theorem is valid.
+        inv_t_hat = np.fft.ifftshift(np.fft.ifft(fft_t_hat*fft_conv))
+
+        # Scale factor outside of integral.
+        inv_t_hat *= dx*(1.0+1.0j)/(2.0*f_scale)
+
+        # Return midpoint value.
+        T = inv_t_hat[int((nw-1)/2)+1]
         return T
 
-    # Window Normalization Function.
-    def __normalize(self,dx,ker,f_scale):
-        T1        = np.abs(np.sum(ker) * dx)   # Freespace Integral
-        norm_fact = np.sqrt(2.0) * f_scale / T1         # Normalization Factor
+    def __normalize(self, dx, ker, f_scale):
+        """
+            Window normalization function.
+        """
+        # Freespace Integral
+        T1 = np.abs(np.sum(ker) * dx)
+
+        # Normalization Factor
+        norm_fact = np.sqrt(2.0) * f_scale / T1
         return norm_fact
 
     def __psi_func(self, kD, r, r0, cbd, d2, cp0, sp0, cp, sp, w, nw):
@@ -544,7 +599,7 @@ class DiffractionCorrection(object):
         psi_vals *= -1.0
         return psi_vals
 
-    def __ftrans(self,fwd):
+    def __ftrans(self, fwd):
         # Retrieve Ring Radius.
         rho_km_vals = self.rho_km_vals
 

@@ -163,7 +163,7 @@ cal_inst = rss.calibration.Calibration(fit_inst, norm_inst, geo_inst,
 dlp_inst = rss.calibration.NormDiff(rsr_inst, dr_km_desired, geo_inst,
    cal_inst, verbose=verbose)
 
-tau_inst = rss.diffcorr.diffraction_correction(dlp_inst, res_km,
+tau_inst = rss.diffcorr.DiffractionCorrection(dlp_inst, res_km,
     rng=inversion_range, verbose=verbose)
 
 write_geo_series(rev_info, geo_inst, geo_file, output_directory, 'Egress')

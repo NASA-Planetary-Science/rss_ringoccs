@@ -3,7 +3,7 @@ import numpy as np
 from scipy import interpolate
 from .diffraction_correction import DiffractionCorrection
 from .physics_functions import fresnel_forward, freq_wav
-from rss_ringoccs.tools import get_geo,extract_csv_data
+from rss_ringoccs.tools import get_geo, extract_csv_data
 
 class compare_tau(object):
     def __init__(self,geo,cal,dlp,tau,res,rng='all',

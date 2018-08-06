@@ -55,7 +55,7 @@ dlp_file = 'RSS_2005_123_X43_E_DLP'
 f_USO = 8427222034.34050
 dr_km_desired = 0.25
 res_km = 1.0
-inversion_range = [87400, 87700]
+inversion_range = [70000, 140000]
 tau_file = 'RSS_2005_123_X43_E_TAU_' + str(int(res_km*1000)) + 'M'
 verbose = True
 

@@ -1,5 +1,6 @@
 # Import dependencies for the diffcorr module
 import time
+import sys
 import numpy as np
 from scipy.special import lambertw, iv
 from scipy.constants import speed_of_light
@@ -29,6 +30,8 @@ class DiffractionCorrection(object):
                  fft=False, psitype="full"):
         t1 = time.time()
 
+        if verbose:
+            print("Running Error Check on Input Arguments...")
         if (not isinstance(res, float)) or (not isinstance(res, int)):
             try:
                 res = float(res)
@@ -96,6 +99,8 @@ class DiffractionCorrection(object):
         if (np.min(sigma) < 0.0):
             raise TypeError("sigma must be a positive floating point number.")
 
+        if verbose:
+            print("Assigning Inputs as Attributes...")
         # Set forward power variable to None in case it isn't defined later.
         self.p_norm_fwd_vals = None
 
@@ -124,6 +129,8 @@ class DiffractionCorrection(object):
         self.psitype = psitype.replace(" ", "").lower()
 
         # Retrieve variables from the NormDiff class, setting as attributes.
+        if verbose:
+            print("Retrieving Variables from NormDiff Instance...")
         try:
             # Ring radius and normalized power.
             self.rho_km_vals = NormDiff.rho_km_vals
@@ -167,13 +174,13 @@ class DiffractionCorrection(object):
             # History from the NormDiff instance.
             self.dathist                    = NormDiff.history
         except AttributeError as errmes:
-            raise AttributeError(
-                "NormDiff missing an attribute. %s" % errmes
-            )
+            raise AttributeError("NormDiff missing an attribute. %s" % errmes)
 
         # Compute mu: Sin(|B|)
         self.mu_vals = np.sin(np.abs(self.B_rad_vals))
 
+        if verbose:
+            print("Check Variables for Errors...")
         # Check that rho_km_vals is increasing and the rev isn't a chord occ.
         drho = [np.min(self.rho_dot_kms_vals),np.max(self.rho_dot_kms_vals)]
         dx   = self.rho_km_vals[1]-self.rho_km_vals[0]
@@ -208,6 +215,8 @@ class DiffractionCorrection(object):
         if (np.size(self.rho_dot_kms_vals) != n_rho):
             raise ValueError("Bad NormDiff: len(rho_dot) != len(rho)")
 
+        if verbose:
+            print("Computing Necessary Variables...")
         # Compute necessary variables for diffraction correction.
         self.lambda_sky_km_vals = speed_of_light*0.001 / self.f_sky_hz_vals
         self.dx_km              = self.rho_km_vals[1] - self.rho_km_vals[0]
@@ -230,10 +239,13 @@ class DiffractionCorrection(object):
             alpha = (omega*omega) * (sigma*sigma)/(2.0 * self.rho_dot_kms_vals)
             P     = res / (alpha * (self.F_km_vals*self.F_km_vals))
             # The inverse exists only if P>1.
-            if (np.min(P) < 1.0001):
-                raise ValueError("\nWarning: Bad Points!\n\
-                \rEither rho_dot_kms_vals, F_km_vals, or res_km is too\n\
-                \rsmall. Exclude points or request coarser resolution.")
+            if (np.min(P) <= 1.0):
+                raise ValueError(
+                    "\nWarning: Bad Points!\n\
+                    \rEither rho_dot_kms_vals, F_km_vals, or res_km is\n\
+                    \rtoo small, or sigma is too large. Request coarser\n\
+                    \rresolution or set bfac=False as a keyword."
+                )
             self.w_km_vals = self.norm_eq*np.abs(((P-1)*lambertw(
                 np.exp(P/(1-P))*P/(1-P))+P)/(P-1)/alpha)
         else:
@@ -276,14 +288,26 @@ class DiffractionCorrection(object):
         del rho_min,rho_max,rng,norm,fwd,fft,bfac,psitype,verbose
 
         # self.__trim_inputs()
+        if self.verbose:
+            print("Running Fresnel Inversion...")
         self.T_vals = self.__ftrans(fwd=False)
+        if self.verbose:
+            sys.stdout.write("\x1b[2K")
+            print("Inversion Complete.")
         if self.fwd:
+            if self.verbose:
+                print("Computing Forward Transform...")
             self.T_hat_fwd_vals  = self.__ftrans(fwd=True)
             self.p_norm_fwd_vals = np.abs(
                 self.T_hat_fwd_vals*self.T_hat_fwd_vals
             )
             self.phase_fwd_vals = -np.arctan2(np.imag(self.T_hat_fwd_vals),
                                               np.real(self.T_hat_fwd_vals))
+            if self.verbose:
+                sys.stdout.write("\x1b[2K")
+                print("Forward Transform Complete.")
+        if self.verbose:
+            print("Computing Power and Phase...")
 
         self.power_vals = np.abs(self.T_vals*self.T_vals)
         self.phase_vals = -np.arctan2(np.imag(self.T_vals),np.real(self.T_vals))
@@ -296,6 +320,9 @@ class DiffractionCorrection(object):
         self.tau_threshold_vals = np.zeros(np.size(self.rho_km_vals))
 
         self.__trim_attributes(self.fwd)
+
+        if self.verbose:
+            print("Writing History...")
 
         input_vars = {
             "Diffraction Data": NormDiff,
@@ -317,18 +344,24 @@ class DiffractionCorrection(object):
         self.history = write_history_dict(input_vars, input_kwds, __file__)
 
         t2 = time.time()
+        if self.verbose:
+            print("DiffractionCorrection Complete.")
         print("Computation Time: ",t2-t1,end="\r")
 
-    # Definition of the Rectangular window function.
     def __rect(w_in, dx):
+        """
+            Rectangular Window Function.
+        """
         # Window functions have an odd number of points.
         nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
         # Compute window function
         w_func = np.zeros(nw_pts) + 1.0
         return w_func
 
-    # Definition of the Squared Cosine window function.
     def __coss(w_in, dx):
+        """
+            Squared Cosine Window Function.
+        """
         # Window functions have an odd number of points.
         nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
         # Compute argument of window function.
@@ -337,8 +370,10 @@ class DiffractionCorrection(object):
         w_func = np.cos(np.pi * x / w_in)**2
         return w_func
 
-    # Definition of the Kaiser-Bessel 2.0 window function.
     def __kb20(w_in, dx):
+        """
+            Kaiser-Bessel 2.0 Window Function.
+        """
         # Window functions have an odd number of points.
         nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
         # Compute argument of window function.
@@ -349,8 +384,10 @@ class DiffractionCorrection(object):
         w_func = iv(0.0,alpha * np.sqrt((1.0 - (2.0 * x / w_in)**2)))/iv(0.0,alpha)
         return w_func
 
-    # Definition of the Kaiser-Bessel 2.5 window function.
     def __kb25(w_in, dx):
+        """
+            Kaiser-Bessel 2.5 Window Function.
+        """
         # Window functions have an odd number of points.
         nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
         # Compute argument of window function.
@@ -361,8 +398,10 @@ class DiffractionCorrection(object):
         w_func = iv(0.0,alpha * np.sqrt((1.0 - (2.0 * x / w_in)**2)))/iv(0.0,alpha)
         return w_func
 
-    # Definition of the Kaiser-Bessel 3.5 window function.
     def __kb35(w_in, dx):
+        """
+            Kaiser-Bessel 3.5 Window Function.
+        """
         # Window functions have an odd number of points.
         nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
         # Compute argument of window function.
@@ -373,8 +412,10 @@ class DiffractionCorrection(object):
         w_func = iv(0.0,alpha * np.sqrt((1.0 - (2.0 * x / w_in)**2)))/iv(0.0,alpha)
         return w_func
 
-    # Modified Kaiser-Bessel 2.0 window function.
     def __kbmd20(w_in, dx):
+        """
+            Modified Kaiser-Bessel 2.0 Window Function.
+        """
         # Window functions have an odd number of points.
         nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
         # Compute argument of window function.
@@ -385,8 +426,10 @@ class DiffractionCorrection(object):
         w_func = (iv(0.0,alpha*np.sqrt((1.0-(2.0*x/w_in)**2)))-1)/(iv(0.0,alpha)-1)
         return w_func
 
-    # Modified Kaiser-Bessel 2.5 window function.
     def __kbmd25(w_in, dx):
+        """
+            Modified Kaiser-Bessel 2.5 window function.
+        """
         # Window functions have an odd number of points.
         nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
         # Compute argument of window function.
@@ -445,38 +488,6 @@ class DiffractionCorrection(object):
             self.T_hat_fwd_vals  = self.T_hat_fwd_vals[crange]
             self.phase_fwd_vals  = self.phase_fwd_vals[crange]
     
-    def __trim_inputs(self):
-        start   = self.start
-        n_used  = self.n_used
-        rho     = self.rho_km_vals
-        rstart  = rho[start]
-        rfin    = rho[start+n_used+1]
-        w_vals  = self.w_km_vals
-        w       = np.ceil(np.max(w_vals[start:start+n_used+1])/2.0)
-        nst = np.min((rho>=(rstart-w)).nonzero())
-        nen = np.max((rho<=(rfin+w)).nonzero())
-
-        del n_used, rho, rstart, rfin, w_vals, w
-
-        nreq   = 1 + (nen - nst)
-        crange = np.arange(nst)+nreq
-        self.rho_km_vals         = self.rho_km_vals[crange]
-        self.start               = start-nreq
-        self.p_norm_vals         = self.p_norm_vals[crange]
-        self.phase_rad_vals      = self.phase_rad_vals[crange]
-        self.B_rad_vals          = self.B_rad_vals[crange]
-        self.D_km_vals           = self.D_km_vals[crange]
-        self.f_sky_hz_vals       = self.f_sky_hz_vals[crange]
-        self.phi_rad_vals        = self.phi_rad_vals[crange]
-        self.rho_dot_kms_vals    = self.rho_dot_kms_vals[crange]
-        self.T_hat_vals          = self.T_hat_vals[crange]
-        self.F_km_vals           = self.F_km_vals[crange]
-        self.w_km_vals           = self.w_km_vals[crange]
-        self.mu_vals             = self.mu_vals[crange]
-        self.lambda_sky_km_vals  = self.lambda_sky_km_vals[crange]
-
-        del nreq, crange
-
     def __fresinv(self,T_hat,ker,dx,f_scale):
         """
             Approximation Fresnel Inverse (MTR86 Equation 15)
@@ -484,7 +495,6 @@ class DiffractionCorrection(object):
         T = np.sum(ker * T_hat) * dx * (1.0+1.0j) / (2.0 * f_scale)
         return T
 
-    # FFT Approximation of Fresnel Inverse (MTR86 Equation 15)
     def __fresinvfft(self, T_hat, ker, dx, f_scale):
         """
             FFT approximation of Fresnel Inverse (MTR86 Equation 15)
@@ -560,47 +570,6 @@ class DiffractionCorrection(object):
         psi_vals = (c1 + c2*x)*x + (c3+c4*x)*x*x*x
         return psi_vals
 
-    def __psi_func_fwd(self, kD, r, r0, cbd, d2, cp0, sp0, cp, sp, w, nw):
-        # Compute Xi variable (MTR86 Equation 4b).
-        xi = cbd * (r0 * cp0 - r * cp)
-
-        # Compute Eta variable (MTR86 Equation 4c).
-        eta = (r0*r0 + r*r - 2.0*r*r0*(sp*sp0 + cp*cp0)) / d2
-
-        psi_vals = -kD * (np.sqrt(1.0 + 2.0 * xi + eta) - (1.0 + xi))
-        return psi_vals
-
-    def __psi_quartic_fwd(self, kD, r, r0, cbd, d2, cp0, sp0, cp, sp, w, nw):
-        # Compute psi.
-        psi_full = self.__psi_func(kD, r, r0, cbd, d2, cp0, sp0, cp, sp, w, nw)
-
-        # Compute shifted ring radius and window width.
-        x = (r-r0)
-        w = np.max(x)-np.min(x)
-
-        # Compute midpoints and endpoints.
-        n1 = 0
-        n2 = np.min((r0 - w/4 <= r).nonzero())
-        n3 = np.max((r0 + w/4 >= r).nonzero())
-        n4 = nw-1
-
-        # Compute variables for psi polynomials.
-        d_psi_half = psi_full[n3]-psi_full[n2]
-        d_psi_full = psi_full[n4] - psi_full[n1]
-        a_psi_half = (psi_full[n3]+psi_full[n2])/2
-        a_psi_full = (psi_full[n1]+psi_full[n4])/2
-
-        # Compute coefficients for the polynomial expansion.
-        c1 = (8.0*d_psi_half-d_psi_full)/(3.0*w)
-        c2 = 4.0*(16.0*a_psi_half-a_psi_full)/(3.0*w*w)
-        c3 = 16.0*(d_psi_full-2.0*d_psi_half)/(3.0*w*w*w)
-        c4 = 64.0*(a_psi_full-4.0*a_psi_half)/(3.0*w*w*w*w)
-
-        # Compute quartic psi approximation.
-        psi_vals = (c1 + c2*x)*x + (c3+c4*x)*x*x*x
-        psi_vals *= -1.0
-        return psi_vals
-
     def __ftrans(self, fwd):
         # Retrieve Ring Radius.
         rho_km_vals = self.rho_km_vals
@@ -658,15 +627,22 @@ class DiffractionCorrection(object):
         # Define window function.
         fw = self.__func_dict[wtype]["func"]
 
-        # Define normalization function.
+        # Define normalization function and verbose message.
         nrm = self.__normalize
+        mes = "Pt: %d  Tot: %d  Width: %d  Psi Iters: %d"
 
         # Set inverse function to FFT or Integration.
         if fft:
             finv = self.__fresinvfft
         else:
             finv = self.__fresinv
-
+        # Set psi approximation.
+        if (psitype == 'full'):
+            psif = self.__psi_func
+        elif (psitype == 'mtr4'):
+            psif = self.__psi_quartic
+        else:
+            psif = self.__psi_func
         # If forward transform, adjust starting point by half a window.
         if fwd:
             T_in = self.T_vals
@@ -677,25 +653,9 @@ class DiffractionCorrection(object):
             n_fwd = int(n_used - 2 * nw_fwd)
             start = start_fwd
             n_used = n_fwd
-            # Set psi approximation.
-            if (psitype == 'full'):
-                psif = self.__psi_func_fwd
-            elif (psitype == 'mtr4'):
-                psif = self.__psi_quartic_fwd
-            else:
-                psif = self.__psi_func_fwd
-            mes = "Pt: %d  Tot: %d  Width: %d  Psi Iters: %d Forward     "
         else:
             T_in = self.T_hat_vals
             T_out = T_in * 0.0
-            # Set psi approximation.
-            if (psitype == 'full'):
-                psif = self.__psi_func
-            elif (psitype == 'mtr4'):
-                psif = self.__psi_quartic
-            else:
-                psif = self.__psi_func
-            mes = "Pt: %d  Tot: %d  Width: %d  Psi Iters: %d Inversion   "
 
         # Set the first computed point to the 'start' variable.
         center = start
@@ -748,7 +708,10 @@ class DiffractionCorrection(object):
                 psi_vals = (np.pi/2.0)*((r-r0)/F)*((r-r0)/F)
 
                 # Compute kernel function for Fresnel inverse
-                ker = w_func*np.exp(-1j*psi_vals)
+                if fwd:
+                    ker = w_func*np.exp(1j*psi_vals)
+                else:
+                    ker = w_func*np.exp(-1j*psi_vals)
 
                 # Range of diffracted data that falls inside the window
                 T = T_in[crange]
@@ -896,7 +859,10 @@ class DiffractionCorrection(object):
                 psi_vals = psif(kD, r, r0, cbd, d2, cp0, sp0, cp, sp, w, nw)
 
                 # Compute kernel function for Fresnel inverse
-                ker = w_func*np.exp(-1j*psi_vals)
+                if fwd:
+                    ker = w_func*np.exp(1j*psi_vals)
+                else:
+                    ker = w_func*np.exp(-1j*psi_vals)
 
                 # Range of diffracted data that falls inside the window
                 T = T_in[crange]

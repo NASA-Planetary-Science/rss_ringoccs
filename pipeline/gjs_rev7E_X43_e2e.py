@@ -12,6 +12,7 @@ Revisions:
 
 import numpy as np
 import os
+import pdb
 import pickle
 import sys
 
@@ -29,6 +30,8 @@ sys.path.remove('../rss_ringoccs/tools')
 rsr_file = '../data/cors_0105/sroc1_123/rsr/s10sroe2005123_0740nnnx43rd.2a2'
 
 kernels = '../tables/Sa-TC17-V001.ker'
+kernels_list_file = '../tables/Rev007_list_of_kernels.txt'
+kernels_dir = '../kernels/'
 
 output_directory = '../output/rev7E_X43_e2e_output/'
 freq_offset_file = output_directory + 'freq_offset_file.txt'
@@ -94,9 +97,8 @@ def write_power_norm_fit_parameters(norm_inst, power_norm_fit_parameters_file):
 
 # Download RSR file and kernels if necessary
 os.system('cd ../data ; ./get_rev7E_X43_file.sh ; cd ../pipeline')
-os.system('cd ../kernels ; '
-    + './get_kernels.sh ../tables/list_of_kernels.txt ; '
-    +'cd ../pipeline')
+os.system('./get_kernels.sh %s %s ; echo "Kernels Complete"' %
+          (kernels_list_file,kernels_dir))
 
 rsr_inst = rss.rsr_reader.RSRReader(rsr_file, verbose=verbose)
 

@@ -15,7 +15,8 @@ import numpy as np
 import os
 import pickle
 import sys
-import pdb
+import matplotlib.pyplot as plt
+from matplotlib import gridspec
 sys.path.append('..')
 import rss_ringoccs as rss
 sys.path.remove('..')
@@ -174,3 +175,74 @@ write_geo_series(rev_info, geo_inst, geo_file, output_directory, 'Egress')
 write_cal_series(rev_info, cal_inst, cal_file, output_directory, 'Egress')
 write_dlp_series(rev_info, dlp_inst, dlp_file, output_directory, 'Egress')
 write_tau_series(rev_info, tau_inst, tau_file, output_directory, 'Egress')
+
+
+tau_data = -mu*np.log(p_smooth)
+# Make comparison plot.
+plt.figure(figsize=(8.5, 11))
+plt.suptitle("Rev007 E X43 - Maxwell Ringlet - 100m Resolution",size=14)
+gs = gridspec.GridSpec(2,2,wspace=0.0,hspace=0.0)
+
+plt.subplot(gs[0,0])
+plt.xlim(87460,87565)
+plt.ylim(-0.1,1.5)
+plt.tick_params(
+    axis='y', which='both', left=True, right=False,
+    labelleft=True, labelright=False
+)
+plt.tick_params(
+    axis='x', which='both', bottom=True, top=True,
+    labelbottom=False, labeltop=False
+)
+plt.ylabel('Intensity')
+plt.plot(tau_inst.rho_km_vals,tau_inst.p_norm_vals,label="Diffraction Profile")
+plt.legend()
+
+plt.subplot(gs[1,0])
+plt.xlim(87460,87565)
+plt.ylim(-0.1,3.9)
+plt.tick_params(
+    axis='y', which='both', left=True, right=False,
+    labelleft=True, labelright=False
+)
+plt.tick_params(
+    axis='x', which='both', bottom=True, top=True,
+    labelbottom=True, labeltop=False
+)
+plt.xlabel("Ring Radius (km)")
+plt.ylabel('Optical Depth')
+plt.plot(rec.rho_km_vals,tau_data,label="Diffraction Profile")
+plt.legend()
+
+plt.subplot(gs[0,1])
+plt.xlim(87460,87565)
+plt.ylim(-0.1,1.5)
+plt.tick_params(
+    axis='y', which='both', left=False, right=True,
+    labelleft=False, labelright=False
+)
+plt.tick_params(
+    axis='x', which='both', bottom=True, top=True,
+    labelbottom=False, labeltop=False
+)
+plt.plot(
+    rec.rho_km_vals,rec.power_vals,
+    label="Diffraction-Corrected Profile"
+)
+plt.legend()
+
+plt.subplot(gs[1,1])
+plt.xlim(87460,87565)
+plt.ylim(-0.1,3.9)
+plt.tick_params(
+    axis='y', which='both', left=False, right=True,
+    labelleft=False, labelright=False
+)
+plt.tick_params(
+    axis='x', which='both', bottom=True, top=True,
+    labelbottom=True, labeltop=False
+)
+plt.xlabel("Ring Radius (km)")
+plt.plot(rec.rho_km_vals,rec.tau_vals,label="Optical Depth")
+plt.legend()
+plt.show()

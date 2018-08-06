@@ -68,7 +68,7 @@ inversion_range = [87400, 87700]
 tau_file = 'RSS_2005_123_X43_E_TAU_' + str(int(res_km*1000)) + 'M'
 verbose = True
 
-# ***END OF USER INPUT***
+# ***END OF USER INPUT**
 
 
 def read_f_resid_fit_parameters(f_resid_fit_parameters_file):
@@ -111,7 +111,13 @@ def write_power_norm_fit_parameters(norm_inst, power_norm_fit_parameters_file):
     pickle.dump(fit_param_dict, file_object)
     file_object.close()
 
-rsr_inst = rss.rsr_reader.RSRReader(rsr_file, verbose=verbose, cpu_count=1)
+# Download RSR file and kernels if necessary
+os.system('cd ../data ; ./get_rev7E_X43_file.sh ; cd ../pipeline')
+os.system('cd ../kernels ; '
+    + './get_kernels.sh ../tables/list_of_kernels.txt ; '
+    +'cd ../pipeline')
+
+rsr_inst = rss.rsr_reader.RSRReader(rsr_file, verbose=verbose)
 
 rev_info = rss.tools.get_rev_info(rsr_inst, '007')
 
@@ -126,7 +132,7 @@ if os.path.exists(freq_offset_file):
     f_offset = freq_offset_file_vals[:, 1]
 else:
     f_spm, f_offset, freq_offset_history = rss.calibration.calc_freq_offset(
-        rsr_inst, freq_offset_file=freq_offset_file, verbose=verbose, cpu_count=1)
+        rsr_inst, freq_offset_file=freq_offset_file, verbose=verbose)
 
 if os.path.exists(f_resid_fit_parameters_file):
     k_f_resid, spm_include = read_f_resid_fit_parameters(

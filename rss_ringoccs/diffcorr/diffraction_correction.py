@@ -293,6 +293,8 @@ class DiffractionCorrection(object):
             np.abs(self.power_vals[crange]))
         self.tau_vals   = tau
 
+        self.tau_threshold_vals = np.zeros(np.size(self.rho_km_vals))
+
         self.__trim_attributes(self.fwd)
 
         input_vars = {

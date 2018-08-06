@@ -1,11 +1,9 @@
 """
     Script Name:
         rjm_rev7E_X43_e2e.py
-
     Purpose:
         Perform entire end-to-end process on rev7E X43 file taken
         from PDS node online.
-
     Revisions:
         2018/08/04 - rmaguire - Copied from gsteranka
         2018/08/06 - rmaguire - Edits to shell scripts.
@@ -177,14 +175,14 @@ write_dlp_series(rev_info, dlp_inst, dlp_file, output_directory, 'Egress')
 write_tau_series(rev_info, tau_inst, tau_file, output_directory, 'Egress')
 
 
-tau_data = -mu*np.log(p_smooth)
+tau_data = -tau_inst.mu_vals*np.log(tau_inst.p_norm_vals)
 # Make comparison plot.
 plt.figure(figsize=(8.5, 11))
-plt.suptitle("Rev007 E X43 - Maxwell Ringlet - 100m Resolution",size=14)
+plt.suptitle("Rev007 E X43 - Maxwell Ringlet - 1000m Resolution",size=14)
 gs = gridspec.GridSpec(2,2,wspace=0.0,hspace=0.0)
 
 plt.subplot(gs[0,0])
-plt.xlim(87460,87565)
+plt.xlim(87400,87600)
 plt.ylim(-0.1,1.5)
 plt.tick_params(
     axis='y', which='both', left=True, right=False,
@@ -199,7 +197,8 @@ plt.plot(tau_inst.rho_km_vals,tau_inst.p_norm_vals,label="Diffraction Profile")
 plt.legend()
 
 plt.subplot(gs[1,0])
-plt.xlim(87460,87565)
+plt.xlim(87400,87600)
+plt.xticks((87400, 87450, 87500, 87550), ("87400", "87450", "87500", "87550"))
 plt.ylim(-0.1,3.9)
 plt.tick_params(
     axis='y', which='both', left=True, right=False,
@@ -211,11 +210,11 @@ plt.tick_params(
 )
 plt.xlabel("Ring Radius (km)")
 plt.ylabel('Optical Depth')
-plt.plot(rec.rho_km_vals,tau_data,label="Diffraction Profile")
+plt.plot(tau_inst.rho_km_vals,tau_data,label="Diffracted Optical Depth")
 plt.legend()
 
 plt.subplot(gs[0,1])
-plt.xlim(87460,87565)
+plt.xlim(87400,87600)
 plt.ylim(-0.1,1.5)
 plt.tick_params(
     axis='y', which='both', left=False, right=True,
@@ -226,13 +225,14 @@ plt.tick_params(
     labelbottom=False, labeltop=False
 )
 plt.plot(
-    rec.rho_km_vals,rec.power_vals,
+    tau_inst.rho_km_vals,tau_inst.power_vals,
     label="Diffraction-Corrected Profile"
 )
 plt.legend()
 
 plt.subplot(gs[1,1])
-plt.xlim(87460,87565)
+plt.xlim(87400,87600)
+plt.xticks((87400, 87450, 87500, 87550), ("87400", "87450", "87500", "87550"))
 plt.ylim(-0.1,3.9)
 plt.tick_params(
     axis='y', which='both', left=False, right=True,
@@ -243,6 +243,6 @@ plt.tick_params(
     labelbottom=True, labeltop=False
 )
 plt.xlabel("Ring Radius (km)")
-plt.plot(rec.rho_km_vals,rec.tau_vals,label="Optical Depth")
+plt.plot(tau_inst.rho_km_vals,tau_inst.tau_vals,label="Corrected Optical Depth")
 plt.legend()
 plt.show()

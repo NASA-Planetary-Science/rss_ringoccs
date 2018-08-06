@@ -27,7 +27,6 @@ import pdb
 
 sys.path.append('..')
 import rss_ringoccs as rss
-from rss_ringoccs.tools import shell_execute
 sys.path.remove('..')
 
 sys.path.append('../rss_ringoccs/tools')
@@ -40,16 +39,18 @@ sys.path.remove('../rss_ringoccs/tools')
 rsr_file_name = 's10sroe2005123_0740nnnx43rd.2a2'
 rsr_file_pds_dir = 'co-s-rss-1-sroc1-v10/cors_0105/sroc1_123/rsr/'
 rsr_file_local_dir = "../data/"+rsr_file_pds_dir
-
-shell_execute(['./get_rsr_file.sh',rsr_file_name,rsr_file_pds_dir,rsr_file_local_dir])
-
-rsr_file = rsr_file_local_dir + rsr_file_name
-
 list_of_kernels = "../tables/rev007_list_of_kernels.txt"
+kernels_list_file = '../tables/rev007_list_of_kernels.txt'
+kernels_dir = '../kernels/'
 
-os.system('cd ../kernels'; "./get_kernels.sh ../tables/rev007_list_of_kernels.txt"; "cd ../pipeline")
-
-kernels = '../tables/Sa-TC17-V001.ker'
+print("Downloading RSR files...")
+os.system('./get_rsr_file.sh %s %s %s ; echo "RSR Complete"' %
+          (rsr_file_name,rsr_file_pds_dir,rsr_file_local_dir))
+print("Downloading kernels...")
+os.system('./get_kernels.sh %s %s ; echo "Kernels Complete"' %
+          (kernels_list_file,kernels_dir))
+rsr_file = rsr_file_local_dir + rsr_file_name
+kernels = '../tables/Rev007_meta_kernel.ker'
 
 output_directory = '../output/rev7E_X43_e2e_output/'
 freq_offset_file = output_directory + 'freq_offset_file.txt'
@@ -61,13 +62,10 @@ cal_file = 'RSS_2005_123_X43_E_CAL'
 dlp_file = 'RSS_2005_123_X43_E_DLP'
 
 f_USO = 8427222034.34050
-
 dr_km_desired = 0.25
 res_km = 1.0
 inversion_range = [87400, 87700]
-
 tau_file = 'RSS_2005_123_X43_E_TAU_' + str(int(res_km*1000)) + 'M'
-
 verbose = True
 
 # ***END OF USER INPUT***
@@ -113,7 +111,7 @@ def write_power_norm_fit_parameters(norm_inst, power_norm_fit_parameters_file):
     pickle.dump(fit_param_dict, file_object)
     file_object.close()
 
-rsr_inst = rss.rsr_reader.RSRReader(rsr_file, verbose=verbose)
+rsr_inst = rss.rsr_reader.RSRReader(rsr_file, verbose=verbose, cpu_count=1)
 
 rev_info = rss.tools.get_rev_info(rsr_inst, '007')
 
@@ -128,7 +126,7 @@ if os.path.exists(freq_offset_file):
     f_offset = freq_offset_file_vals[:, 1]
 else:
     f_spm, f_offset, freq_offset_history = rss.calibration.calc_freq_offset(
-        rsr_inst, freq_offset_file=freq_offset_file, verbose=verbose)
+        rsr_inst, freq_offset_file=freq_offset_file, verbose=verbose, cpu_count=1)
 
 if os.path.exists(f_resid_fit_parameters_file):
     k_f_resid, spm_include = read_f_resid_fit_parameters(

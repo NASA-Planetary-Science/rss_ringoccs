@@ -182,7 +182,8 @@ plt.suptitle("Rev007 E X43 - Maxwell Ringlet - 1000m Resolution",size=14)
 gs = gridspec.GridSpec(2,2,wspace=0.0,hspace=0.0)
 
 plt.subplot(gs[0,0])
-plt.xlim(87400,87600)
+plt.xlim(87400,87610)
+plt.xticks((87410, 87460, 87510, 87560), ("87410", "87460", "87510", "87560"))
 plt.ylim(-0.1,1.5)
 plt.tick_params(
     axis='y', which='both', left=True, right=False,
@@ -197,8 +198,8 @@ plt.plot(tau_inst.rho_km_vals,tau_inst.p_norm_vals,label="Diffraction Profile")
 plt.legend()
 
 plt.subplot(gs[1,0])
-plt.xlim(87400,87600)
-plt.xticks((87400, 87450, 87500, 87550), ("87400", "87450", "87500", "87550"))
+plt.xlim(87400,87610)
+plt.xticks((87410, 87460, 87510, 87560,87610), ("87410", "87460", "87510", "87560","87610"))
 plt.ylim(-0.1,3.9)
 plt.tick_params(
     axis='y', which='both', left=True, right=False,
@@ -214,7 +215,8 @@ plt.plot(tau_inst.rho_km_vals,tau_data,label="Diffracted Optical Depth")
 plt.legend()
 
 plt.subplot(gs[0,1])
-plt.xlim(87400,87600)
+plt.xlim(87400,87610)
+plt.xticks((87410, 87460, 87510, 87560), ("87410", "87460", "87510", "87560"))
 plt.ylim(-0.1,1.5)
 plt.tick_params(
     axis='y', which='both', left=False, right=True,
@@ -231,8 +233,8 @@ plt.plot(
 plt.legend()
 
 plt.subplot(gs[1,1])
-plt.xlim(87400,87600)
-plt.xticks((87400, 87450, 87500, 87550), ("87400", "87450", "87500", "87550"))
+plt.xlim(87400,87610)
+plt.xticks((87410, 87460, 87510, 87560), ("87410", "87460", "87510", "87560"))
 plt.ylim(-0.1,3.9)
 plt.tick_params(
     axis='y', which='both', left=False, right=True,

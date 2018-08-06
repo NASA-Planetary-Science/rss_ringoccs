@@ -160,19 +160,19 @@ class DiffractionCorrection(object):
             self.t_set_spm_vals = NormDiff.t_set_spm_vals  
 
             # Pole corrections in ring radius.       
-            self.rho_corr_pole_km_vals      = NormDiff.rho_corr_pole_km_vals
+            self.rho_corr_pole_km_vals = NormDiff.rho_corr_pole_km_vals
 
             # Timing corrections in ring radius.
-            self.rho_corr_timing_km_vals    = NormDiff.rho_corr_timing_km_vals
+            self.rho_corr_timing_km_vals = NormDiff.rho_corr_timing_km_vals
 
             # Ring longitude angle.
-            self.phi_rl_rad_vals            = NormDiff.phi_rl_rad_vals
+            self.phi_rl_rad_vals = NormDiff.phi_rl_rad_vals
 
             # Optical depth of diffraction profile.
-            self.raw_tau_threshold_vals     = NormDiff.raw_tau_threshold_vals
+            self.raw_tau_threshold_vals = NormDiff.raw_tau_threshold_vals
 
             # History from the NormDiff instance.
-            self.dathist                    = NormDiff.history
+            self.dathist = NormDiff.history
         except AttributeError as errmes:
             raise AttributeError("NormDiff missing an attribute. %s" % errmes)
 
@@ -717,7 +717,7 @@ class DiffractionCorrection(object):
                 T = T_in[crange]
 
                 # Compute 'approximate' Fresnel Inversion for current point
-                T_out[center] = finv(T_hat, ker, dx_km, F)
+                T_out[center] = finv(T, ker, dx_km, F)
 
                 # If normalization has been set, normalize the reconstruction
                 if norm:

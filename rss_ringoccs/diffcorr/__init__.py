@@ -8,7 +8,6 @@
         reconstructed data and diffraction modelling are included.
         Special mathematical functions and solutions to common
         problems in diffraction theory are also included.
-    
     Sub-Modules:
         advanced_tools:
             This submodule is good for modeling the geometry of a
@@ -37,54 +36,47 @@
                     Similar to delta_impulse_diffraction but with a
                     double slit (Two square wells) instaead of a
                     Dirac-Delta impulse function.
-        
         diffraction_correction:
-            This
-    Window (Taper) Functions:
-        rect................Rectangular window.
-        coss................Squared cossine window.
-        kb20................Kaiser-Bessel 2.0 window.
-        kb25................Kaiser-Bessel 2.5 window.
-        kb35................Kaiser-Bessel 3.5 window.
-        kbmd20..............Modified Kaiser-Bessel 2.0 window.
-        kbmd25..............Modified Kaiser-Bessel 2.5 window.
-
-    Error Checks:
-        check_boole.........Checks for Boolean input.
-        check_ternary.......Checks for Ternary input.
-        check_pos_real......Checks for a single positive real input.
-        check_real..........Checks if input is real (Number/Array).
-        check_complex.......Checks if input is complex.
-    
-    Special Functions:
-        fresnel_sin.........The Fresnel sine integral.
-        fresnel_cos.........The Fresnel cosine integral.
-        sq_well_solve.......Diffraction pattern through square well.
-
-    Mathematical Functions:
-        compute_norm_eq.....Computes the normalized equivalent width.
-        get_norm_eq.........Quickly retrieve pre-computed normalized
-                            equivalent widths from strings with the
-                            name of common window functions.
-        resolution_inverse..Computes the inverse of the function
-                            y = x/(exp(-x)+x-1)
-        power_func..........Compute power from complex transmittance.
-        phase_func..........Compute phase from complex transmittance.
-        tau_func............Compute normalized optical depth from the
-                            complex transmittance.
-        wker................Computes a weighted kernel function.
-        freq_wav............Convert frequency to wavelength, and
-                            vice-versa. Kilometers or Herts only.
-        fresnel_scale.......Compute the Fresnel scale.
-    
-    Miscellaneous Functions:
-        get_range_request...Computes an array of the form [a,b] from
-                            a given array, list, or from a set of
-                            allowed strings.
-        get_range_actual....Given an array of numbers (usually the
-                            radial range of the data), a range
-                            request, and a window width, compute the
-                            allowed range of processing.
+            This is the main sub-module in the entire subpackage.
+            Given a set of diffracted data and a requested resolution
+            (in kilometers), diffraction corrections will be
+            performed to produce a diffraction corrected profile.
+            This submodule comtains the following:
+                DiffractionCorrection (Class):
+                    Given a requested resolution and an instance of
+                    the NormDiff class (See Calibration subpackage),
+                    this produces a diffraction corrected profile.
+        physics_functions:
+        window_functions:
+            rect................Rectangular window.
+            coss................Squared cossine window.
+            kb20................Kaiser-Bessel 2.0 window.
+            kb25................Kaiser-Bessel 2.5 window.
+            kb35................Kaiser-Bessel 3.5 window.
+            kbmd20..............Modified Kaiser-Bessel 2.0 window.
+            kbmd25..............Modified Kaiser-Bessel 2.5 window.
+            get_range_actual....Given an array of numbers (usually the
+                                radial range of the data), a range
+                                request, and a window width, compute the
+                                allowed range of processing.
+        Special Functions:
+            fresnel_sin.........The Fresnel sine integral.
+            fresnel_cos.........The Fresnel cosine integral.
+            sq_well_solve.......Diffraction pattern through square well.
+            compute_norm_eq.....Computes the normalized equivalent width.
+            get_norm_eq.........Quickly retrieve pre-computed normalized
+                                equivalent widths from strings with the
+                                name of common window functions.
+            resolution_inverse..Computes the inverse of the function
+                                y = x/(exp(-x)+x-1)
+            power_func..........Compute power from complex transmittance.
+            phase_func..........Compute phase from complex transmittance.
+            tau_func............Compute normalized optical depth from the
+                                complex transmittance.
+            wker................Computes a weighted kernel function.
+            freq_wav............Convert frequency to wavelength, and
+                                vice-versa. Kilometers or Herts only.
+            fresnel_scale.......Compute the Fresnel scale.
 """
 
 # Import the main classes used in diffraction reconstruction.

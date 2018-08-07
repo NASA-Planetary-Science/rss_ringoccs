@@ -440,6 +440,51 @@ def normalize(dx,ker,f_scale,error_check=True):
     norm_fact = np.sqrt(2.0) * f_scale / T1         # Normalization Factor
     return norm_fact
 
+def get_range_actual(rho,rng,w_vals):
+    """
+        Function:
+            get_range_actual
+        Purpose:
+            Compute the possible allowed range for processing, taking
+            into consideration available data (rho) and the requested region.
+        Variables:
+            RHO:        Radial range of the data.
+            RANGE:      Requested start/end points for processing.
+            W_KM_VALS:  Window width as a function of ring radius.
+        Output:
+            START:  The allowed starting point for processing.
+            N_USED: The number of points allowed for processing.
+        History:
+            Translated from IDL: RJM - 2018/05/15 3:19 P.M.
+    """
+    if (not check_real(rho)):
+        sys.exit("Rho must be an array of real numbers")
+    if (np.min(rho) < 0.0):
+        sys.exit("Rho must be positive")
+    if (np.size(rng) != 2):
+        sys.exit("Range must have format rng = [a,b]")
+    if (not check_pos_real(np.min(rng))):
+        sys.exit("Range must be positive")
+    if (not check_real(w_vals)):
+        sys.exit("w_vals must be real")
+    if (np.min(w_vals) < 0.0): 
+        sys.exit("w_vals must be positive")
+    if (np.min(rng) > np.max(rho)):
+        sys.exit("Requested range GREATER than available data.")
+    if (np.max(rng) < np.min(rho)):
+        sys.exit("Requested range LESS than available data.")
+    w_max       = np.max(w_vals)
+    rho_min_lim = np.min(rho)+np.ceil(w_max/2.0)
+    rho_max_lim = np.max(rho)-np.ceil(w_max/2.0)
+    rho_start   = rho[np.min((rho >= np.min(rng)).nonzero())]
+    rho_end     = rho[np.max((rho <= np.max(rng)).nonzero())]
+    rho_min     = np.max([rho_min_lim,rho_start])
+    rho_max     = np.min([rho_max_lim,rho_end])
+    start       = int(np.min((rho >= rho_min).nonzero()))
+    finish      = int(np.max((rho <= rho_max).nonzero()))
+    n_used      = 1 + (finish - start)
+    return start, n_used
+
 func_dict = {
         "rect" :    {"func" : rect,     "normeq" : 1.00000000},
         "coss" :    {"func" : coss,     "normeq" : 1.50000000},

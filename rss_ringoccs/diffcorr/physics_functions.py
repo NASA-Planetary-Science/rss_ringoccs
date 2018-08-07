@@ -1,7 +1,6 @@
 import numpy as np
-from .window_functions import rect, coss, kb20, kb25, kb35, kbmd20, kbmd25
-from .window_functions import normalize, func_dict
-from scipy.constants import speed_of_light
+from . import window_functions as wf
+SPEED_OF_LIGHT_KM = 299792.458
 
 def power_func(T_in):
     """
@@ -199,7 +198,7 @@ def freq_wav(freqwav):
     elif (np.min(freqwav) <= 0):
         sys.exit("Input must be positive")
     else:
-        wavfreq = speed_of_light*0.001 / freqwav
+        wavfreq = SPEED_OF_LIGHT_KM / freqwav
     return wavfreq
 
 def fresnel_forward(rho_km_vals,F_km_vals,phi_rad_vals,B_rad_vals,D_km_vals,
@@ -257,10 +256,10 @@ def fresnel_forward(rho_km_vals,F_km_vals,phi_rad_vals,B_rad_vals,D_km_vals,
     rsq = rho_km_vals*rho_km_vals
 
     # Define window function.
-    fw = func_dict[wtype]["func"]
+    fw = wf.func_dict[wtype]["func"]
 
     # Define normalization function.
-    nrm = normalize
+    nrm = wf.normalize
 
     # Set inverse function to FFT or Integration.
     if fft:
@@ -541,8 +540,8 @@ def fresnel_inversion(rho_vals,F_vals,phi_rad_vals,B_vals,D_vals,
     # Compute necessary variables.
     kD_vals   = 2.0*np.pi*D_vals/lambda_vals
     # Define functions
-    fw        = func_dict[wtype]["func"]
-    nrm       = normalize
+    fw        = wf.func_dict[wtype]["func"]
+    nrm       = wf.normalize
     if fft:
        finv   = fresnel_inverse_fft
     else: 

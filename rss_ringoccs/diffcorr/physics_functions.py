@@ -1,6 +1,6 @@
 import numpy as np
 from . import window_functions as wf
-SPEED_OF_LIGHT_KM = 299792.458
+SPEED_OF_LIGHT_KM = 299792.4580
 
 def power_func(T_in):
     """

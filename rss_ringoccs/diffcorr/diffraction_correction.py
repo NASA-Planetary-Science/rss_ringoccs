@@ -3,8 +3,8 @@ import time
 import sys
 import numpy as np
 from scipy.special import lambertw, iv
-from scipy.constants import speed_of_light
 from rss_ringoccs.tools.write_history_dict import write_history_dict
+SPEED_OF_LIGHT_KM = 299792.4580
 
 # Dictionary containing regions of interest within the Saturnian Rings.
 region_dict = {
@@ -218,7 +218,7 @@ class DiffractionCorrection(object):
         if verbose:
             print("Computing Necessary Variables...")
         # Compute necessary variables for diffraction correction.
-        self.lambda_sky_km_vals = speed_of_light*0.001 / self.f_sky_hz_vals
+        self.lambda_sky_km_vals = SPEED_OF_LIGHT_KM / self.f_sky_hz_vals
         self.dx_km              = self.rho_km_vals[1] - self.rho_km_vals[0]
         self.T_hat_vals         = np.sqrt(np.abs(self.p_norm_vals))*np.exp(
             1j*self.phase_rad_vals)

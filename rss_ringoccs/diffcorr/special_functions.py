@@ -231,6 +231,17 @@ def fresnel_sin(x_in):
         f_sin = np.real(f_sin)
     return f_sin
 
+def single_slit_diffraction_solve(x, z, a):
+    f = np.sinc(a*x/z)*np.sinc(a*x/z)
+    return f
+
+def double_slit_diffraction_solve(x, z, a, d):
+    f1 = np.sinc(a*x/z)*np.sinc(a*x/z)
+    f2 = np.sin(2.0*np.pi*d*x/z)*np.sin(2.0*np.pi*d*x/z)
+    f3 = 4.0*np.sin(np.pi*d*x/z)*np.sin(np.pi*d*x/z)
+    f = f1*f2/f3
+    return f
+
 def sq_well_solve(x,a,b,F,Inverted=False):
     """
         Function:

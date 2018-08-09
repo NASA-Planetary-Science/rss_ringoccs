@@ -24,16 +24,13 @@ def et_to_spm(et_vals, kernels=None, ref_doy=None):
 
     if kernels:
         spice.kclear()
-        for kernel in kernels:
-            spice.furnsh(kernel)
+        spice.furnsh(kernels)
 
     try:
         npts = len(et_vals)
     except TypeError:
         et_vals = [et_vals]
         npts = len(et_vals)
-
-#    npts = len(et_vals)
 
     spm_vals = []
 
@@ -53,7 +50,6 @@ def et_to_spm(et_vals, kernels=None, ref_doy=None):
 
     # Check if event goes through midnight
     dr_vals = spm_vals - np.roll(spm_vals, 1)
-#    ibrk = np.argwhere(dr_vals < 0)
     ibrk = np.argwhere(dr_vals[1:] < 0)
 
     if ibrk.size > 0:

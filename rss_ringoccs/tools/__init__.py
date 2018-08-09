@@ -14,8 +14,4 @@ from .make_cal_inst import MakeCalInst
 from .pds3_reader import PDS3Reader
 from .date_to_rev import date_to_rev
 from .get_rev_info import get_rev_info
-from .pds3_geo_series import write_geo_series
-from .pds3_cal_series import write_cal_series
-from .pds3_dlp_series import write_dlp_series
-from .pds3_tau_series import write_tau_series
 from .write_history_dict import write_history_dict

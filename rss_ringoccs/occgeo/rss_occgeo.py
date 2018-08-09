@@ -189,7 +189,8 @@ class Geometry(object):
                     + 'not have valid attributes!')
 
         # Create new spm array with defined points per second
-        t_oet_spm_vals = self.__create_new_spm_arr(spm_raw, pt_per_sec)
+        step = 1./pt_per_sec
+        t_oet_spm_vals = self.__create_new_spm_arr(spm_raw, step)
         t_oet_et_vals = spm_to_et(t_oet_spm_vals, doy, year, kernels=kernels)
 
         # Interpolate to get sky frequency
@@ -245,7 +246,6 @@ class Geometry(object):
         if verbose:
             print('\t Calculating ring intercept velocities...')
         # Calculate ring intercept velocities
-        step = 1./pt_per_sec
         rho_dot_kms_vals, phi_rl_dot_kms_vals = calc_rip_velocity(rho_km_vals,
                 phi_rl_deg_vals, step)
 
@@ -337,7 +337,7 @@ class Geometry(object):
             prof_dir = '"BOTH"'
         return prof_dir
     
-    def __create_new_spm_arr(self, spm_raw, pt_per_sec):
+    def __create_new_spm_arr(self, spm_raw, step):
         """
         This returns a new spm array with pt_per_sec spacing.
 
@@ -345,12 +345,11 @@ class Geometry(object):
             spm_raw (np.ndarray): 
                 Array of SPMs at original spacing.
 
-            pt_per_sec (float64): 
-                Number of points calculated per second.
+            step (float64): 
+                Seconds per point.
         """
         spm_start = spm_raw[0]
         spm_end = spm_raw[-1]
-        step = 1./pt_per_sec
         t_oet_spm_vals = np.arange(spm_start, spm_end, step)
         return t_oet_spm_vals
 

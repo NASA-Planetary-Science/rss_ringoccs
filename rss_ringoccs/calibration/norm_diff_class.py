@@ -18,8 +18,8 @@ WHERE TO GET NECESSARY INPUT:
         the Calibration class, found inside of
         rss_ringoccs/calibration/calibration_class.py. If you already have a
         CAL file made and just want to use what's inside of that, then use an
-        instance of the MakeCalInst class, found inside of
-        rss_ringoccs/tools/make_cal_inst.py
+        instance of the CreateCalInst class, found inside of
+        rss_ringoccs/tools/cal_inst_from_file.py
 
 Revisions:
       gjs_produce_normalized_diffraction_pattern.py
@@ -82,9 +82,9 @@ Revisions:
    2018 Jun 11 - gsteranka - Accept rsr_inst, geo_inst, and cal_inst instead of
                              the files for all of those. "cal_inst" can be made
                              from Calibration class calibration_class.py if you
-                             haven't made a cal file yet, or from MakeCalInst
-                             in make_cal_inst.py if you have made a cal file
-                             already
+                             haven't made a cal file yet, or from CreateCalInst
+                             in cal_inst_from_file.py if you have made a cal
+                             file already
    2018 Jun 18 - gsteranka - Added kernels input. Only needs to be leap second
                              kernel
    2018 Jun 21 - gsteranka - Change spacecraft event time and ring event time
@@ -200,7 +200,7 @@ class NormDiff(object):
             cal_inst:
                 Calibration instance linked to rsr_inst input. Made using
                 Calibration class if you haven't made a cal_file yet, and made
-                using MakeCalInst class if you have made a cal_file
+                using CreateCalInst class if you have made a cal_file
             dr_km_tol (float):
                 Optional keyword argument, in km, that specifies
                 the maximum distance the starting point of the final set of
@@ -247,11 +247,11 @@ class NormDiff(object):
                 + 'instance of the Geometry class')
 
         if ((not isinstance(cal_inst, rss.calibration.Calibration))
-                & (not isinstance(cal_inst, rss.tools.MakeCalInst))):
+                & (not isinstance(cal_inst, rss.tools.CreateCalInst))):
             sys.exit('ERROR (NormDiff): cal_inst input must be an instance of '
                 + 'the Calibration class if you don\'t have a CAL file '
-                + 'pre-made. Can also be an instance of the MakeCalInst class '
-                + 'if you have a CAL file that you want to turn into an '
+                + 'pre-made. Can also be an instance of the CreateCalInst '
+                + 'class if you have a CAL file that you want to turn into an '
                 + 'instance')
 
         if (not isinstance(dr_km, float)) & (not isinstance(dr_km, int)):

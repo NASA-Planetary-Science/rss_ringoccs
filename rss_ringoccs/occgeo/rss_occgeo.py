@@ -151,8 +151,7 @@ class Geometry(object):
                 6) earth rotation and constants kernel
 
         Warnings:
-            [1] This code has only been vigorously tested for planet='Saturn'.
-            [2] SpiceyPy raises its own errors that may be cryptic.
+            [1] This code has only been tested for planet='Saturn'.
         """
 
         if verbose:
@@ -180,7 +179,8 @@ class Geometry(object):
             doy = rsr_inst.doy
             dsn = rsr_inst.dsn
             band = rsr_inst.band
-            spm_raw = rsr_inst.spm_vals
+            spm_start = rsr_inst.spm_vals[0]
+            spm_end = rsr_inst.spm_vals[-1]
             rsr_hist = rsr_inst.history
             (f_spm, f_sky) = rsr_inst.get_f_sky_pred()
 
@@ -190,7 +190,7 @@ class Geometry(object):
 
         # Create new spm array with defined points per second
         step = 1./pt_per_sec
-        t_oet_spm_vals = self.__create_new_spm_arr(spm_raw, step)
+        t_oet_spm_vals = np.arange(spm_start, spm_end, step)
         t_oet_et_vals = spm_to_et(t_oet_spm_vals, doy, year, kernels=kernels)
 
         # Interpolate to get sky frequency
@@ -273,9 +273,7 @@ class Geometry(object):
         beta_vals = calc_beta(B_deg_vals, phi_ora_deg_vals)
         B_eff_deg_vals = calc_B_eff_deg(B_deg_vals, phi_ora_deg_vals)
 
-        # Set attributes, making sure all geometry calculations are arrays
-        self.kernels = kernels
-        self.frequency_band = band
+        # Set attributes, first block contains the inputs to *GEO.TAB
         self.t_oet_spm_vals = np.asarray(t_oet_spm_vals)
         self.t_ret_spm_vals = np.asarray(t_ret_spm_vals)
         self.t_set_spm_vals = np.asarray(t_set_spm_vals)
@@ -294,8 +292,11 @@ class Geometry(object):
         self.vx_kms_vals = np.stack(R_sc_dot_kms_vals)[:, 0]
         self.vy_kms_vals = np.stack(R_sc_dot_kms_vals)[:, 1]
         self.vz_kms_vals = np.stack(R_sc_dot_kms_vals)[:, 2]
+
+        self.kernels = kernels
+        self.frequency_band = band
         self.elev_deg_vals = np.asarray(elev_deg_vals)
-        self.naif_toolkit_version = self.get_naif_version()
+        self.naif_toolkit_version = self.__get_naif_version()
         self.beta_vals = np.asarray(beta_vals)
         self.B_eff_deg_vals = np.asarray(B_eff_deg_vals)
 
@@ -314,7 +315,7 @@ class Geometry(object):
                 }
         self.history = write_history_dict(input_vars, input_kwds, __file__)
 
-    def get_naif_version(self):
+    def __get_naif_version(self):
         """
         This returns the NAIF toolkit version used.
         """
@@ -337,19 +338,4 @@ class Geometry(object):
             prof_dir = '"BOTH"'
         return prof_dir
     
-    def __create_new_spm_arr(self, spm_raw, step):
-        """
-        This returns a new spm array with pt_per_sec spacing.
-
-        Args:
-            spm_raw (np.ndarray): 
-                Array of SPMs at original spacing.
-
-            step (float64): 
-                Seconds per point.
-        """
-        spm_start = spm_raw[0]
-        spm_end = spm_raw[-1]
-        t_oet_spm_vals = np.arange(spm_start, spm_end, step)
-        return t_oet_spm_vals
 

@@ -1,6 +1,6 @@
 """
 
-make_cal_inst.py
+cal_inst_from_file.py
 
 Purpose: Create an instance for calibration parameters. Just for NormDiff class,
          for the purpose of making all inputs an instance of something. This is
@@ -19,6 +19,9 @@ Revisions:
     2018 Jun 11 - gsteranka - Original version
     2018 Jun 27 - gsteranka - Adjust to sky frequency in CAL has frequency
                               offset fit added on top of it
+    2018 Aug 10 - jfong - rename file to cal_inst_from_file.py from
+                          make_cal_inst.py
+                        - rename class to CreateCalInst from MakeCalInst
 """
 
 import numpy as np
@@ -32,7 +35,7 @@ from rss_ringoccs.rsr_reader.rsr_reader import RSRReader
 sys.path.remove('../..')
 
 
-class MakeCalInst(object):
+class CreateCalInst(object):
     """
     Purpose:
     Make a calibration instance using a calibration file

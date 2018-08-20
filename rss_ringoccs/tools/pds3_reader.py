@@ -18,16 +18,19 @@ class PDS3Reader():
         print('\nNow reading header:\n', infile_lbl)
         f = open(infile_lbl, 'r')
         for line in f:
-#            print(repr(line))
             line_list_lbl.append(line)
         f.close()
 
-        record_bytes, ind_rb = self.find_keyword_value(line_list_lbl, 'RECORD_BYTES')
-        file_records, ind_fr = self.find_keyword_value(line_list_lbl, 'FILE_RECORDS')
+        record_bytes, ind_rb = self.find_keyword_value(line_list_lbl,
+                'RECORD_BYTES')
+        file_records, ind_fr = self.find_keyword_value(line_list_lbl,
+                'FILE_RECORDS')
         columns, ind_col = self.find_keyword_value(line_list_lbl, 'COLUMNS')
-        frequency_band, ind_band = self.find_keyword_value(line_list_lbl, 'FREQUENCY_BAND')
+        frequency_band, ind_band = self.find_keyword_value(line_list_lbl, 
+                'FREQUENCY_BAND')
         if frequency_band=='END':
-            frequency_band, ind_band = self.find_keyword_value(line_list_lbl, 'BAND_NAME')
+            frequency_band, ind_band = self.find_keyword_value(line_list_lbl,
+                    'BAND_NAME')
 
 
         obj_type, ind_obj = self.find_keyword_value(line_list_lbl, 'OBJECT')
@@ -58,11 +61,13 @@ class PDS3Reader():
 
             units[n] = unit
 
-            data_type, ind_data_type = self.find_keyword_value(contents, 'DATA_TYPE')
+            data_type, ind_data_type = self.find_keyword_value(contents,
+                    'DATA_TYPE')
             if data_type != 'ASCII_REAL':
                 print('TROUBLE! Cannot handle data_type = ', data_type)
                 pdb.set_trace()
-        series = SeriesReader(infile_lbl, names, record_bytes, file_records, frequency_band)
+        series = SeriesReader(infile_lbl, names, record_bytes, file_records,
+                frequency_band)
 
         self.series = series
         
@@ -86,7 +91,8 @@ class PDS3Reader():
         return keyword, value
 
 class SeriesReader():
-    def __init__(self, infile_lbl, names, record_bytes, file_records, frequency_band):
+    def __init__(self, infile_lbl, names, record_bytes, file_records, 
+            frequency_band):
 
         infile_tab = str.replace(infile_lbl, 'LBL', 'TAB')
         product_id = infile_tab.split('/')[-1]
@@ -105,10 +111,6 @@ class SeriesReader():
         for n in range(len(names)):
             data_dict[names[n]] = []
 
-#        for n in range(len(names)):
-#            column_num = 'COLUMN'+str(n+1)
-#            column_list.append(column_num)
-#            setattr(self, column_num, None)
         print(infile_tab)
         print('\nNow reading table of data:\n', infile_tab)
         f = open(infile_tab, 'r')
@@ -145,8 +147,10 @@ class SeriesReader():
                 , 'SKY_FREQUENCY': 'f_sky_hz_vals'
                 , 'RESIDUAL_FREQUENCY': 'f_sky_resid_fit_vals'
                 , 'FREE_SPACE_POWER': 'p_free_vals'
-                , 'RADIUS_CORRECTION_DUE_TO_IMPROVED_POLE': 'rho_corr_pole_km_vals'
-                , 'RADIUS_CORRECTION_DUE_TO_TIMING_OFFSET': 'rho_corr_timing_km_vals'
+                , 'RADIUS_CORRECTION_DUE_TO_IMPROVED_POLE': 
+                        'rho_corr_pole_km_vals'
+                , 'RADIUS_CORRECTION_DUE_TO_TIMING_OFFSET':
+                        'rho_corr_timing_km_vals'
                 , 'NORMAL_OPTICAL_DEPTH': 'tau_vals'
                 , 'NORMAL_OPTICAL_DEPTH_THRESHOLD': 'tau_threshold_vals'
                 , 'PHASE_SHIFT': 'phase_deg_vals'

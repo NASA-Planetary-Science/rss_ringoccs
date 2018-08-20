@@ -38,7 +38,7 @@ def spm_to_et(spm, doy, year, kernels=None):
 
     # Leap seconds kernel
     if kernels is None:
-        kernels = '../../../kernels/naif0012.tls'
+        kernels = '../../kernels/naif/CASSINI/kernels/lsk/naif0012.tls'
 
     spice.kclear()
     spice.furnsh(kernels)
@@ -57,7 +57,8 @@ def spm_to_et(spm, doy, year, kernels=None):
         seconds = [seconds]
 
     et_sec_vals = np.zeros(n_pts)
-    # Test if it's a leap year
+
+    # Check for leap year
     if (year % 4) == 0:
         days_per_year = 366
     else:
@@ -69,7 +70,8 @@ def spm_to_et(spm, doy, year, kernels=None):
         doy_adjusted = doy + hours[i]/24
 
         # Adjust if day goes on to next year
-        this_year = (year + np.floor((doy_adjusted - 1)/days_per_year)).astype(int)
+        this_year = (year + 
+                np.floor((doy_adjusted - 1)/days_per_year)).astype(int)
         this_doy = (1 + (doy_adjusted-1) % days_per_year).astype(int)
 
         utc_str = (str(this_year) + '-' + str(this_doy).zfill(3) + 'T'
@@ -82,5 +84,3 @@ def spm_to_et(spm, doy, year, kernels=None):
     return et_sec_vals
 
 
-if __name__ == '__main__':
-    pass

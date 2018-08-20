@@ -12,7 +12,6 @@ region_dict = {
     'cringripples':    [77690.0, 77760.0],
     'encke':           [132900.0, 134200.0],
     'enckegap':        [132900.0, 134200.0],
-    'janus':           [96200.0, 96800.0],
     'janusepimetheus': [96200.0, 96800.0],
     'maxwell':         [87410.0, 87610.0],
     'maxwellringlet':  [87410.0, 87610.0],
@@ -31,7 +30,8 @@ class DiffractionCorrection(object):
         t1 = time.time()
 
         if verbose:
-            print("Running Error Check on Input Arguments...")
+            print("Processing Diffraction Correction:")
+            print("\tRunning Error Check on Input Arguments...")
         if (not isinstance(res, float)) or (not isinstance(res, int)):
             try:
                 res = float(res)
@@ -100,7 +100,7 @@ class DiffractionCorrection(object):
             raise TypeError("sigma must be a positive floating point number.")
 
         if verbose:
-            print("Assigning Inputs as Attributes...")
+            print("\tAssigning Inputs as Attributes...")
         # Set forward power variable to None in case it isn't defined later.
         self.p_norm_fwd_vals = None
 
@@ -130,7 +130,7 @@ class DiffractionCorrection(object):
 
         # Retrieve variables from the NormDiff class, setting as attributes.
         if verbose:
-            print("Retrieving Variables from NormDiff Instance...")
+            print("\tRetrieving Variables from NormDiff Instance...")
         try:
             # Ring radius and normalized power.
             self.rho_km_vals = NormDiff.rho_km_vals
@@ -180,7 +180,7 @@ class DiffractionCorrection(object):
         self.mu_vals = np.sin(np.abs(self.B_rad_vals))
 
         if verbose:
-            print("Check Variables for Errors...")
+            print("\tCheck Variables for Errors...")
         # Check that rho_km_vals is increasing and the rev isn't a chord occ.
         drho = [np.min(self.rho_dot_kms_vals),np.max(self.rho_dot_kms_vals)]
         dx   = self.rho_km_vals[1]-self.rho_km_vals[0]
@@ -216,7 +216,7 @@ class DiffractionCorrection(object):
             raise ValueError("Bad NormDiff: len(rho_dot) != len(rho)")
 
         if verbose:
-            print("Computing Necessary Variables...")
+            print("\tComputing Necessary Variables...")
         # Compute necessary variables for diffraction correction.
         self.lambda_sky_km_vals = SPEED_OF_LIGHT_KM / self.f_sky_hz_vals
         self.dx_km              = self.rho_km_vals[1] - self.rho_km_vals[0]
@@ -289,14 +289,14 @@ class DiffractionCorrection(object):
 
         # self.__trim_inputs()
         if self.verbose:
-            print("Running Fresnel Inversion...")
+            print("\tRunning Fresnel Inversion...")
         self.T_vals = self.__ftrans(fwd=False)
         if self.verbose:
             sys.stdout.write("\x1b[2K")
-            print("Inversion Complete.")
+            print("\tInversion Complete.")
         if self.fwd:
             if self.verbose:
-                print("Computing Forward Transform...")
+                print("\tComputing Forward Transform...")
             self.T_hat_fwd_vals  = self.__ftrans(fwd=True)
             self.p_norm_fwd_vals = np.abs(
                 self.T_hat_fwd_vals*self.T_hat_fwd_vals
@@ -307,22 +307,29 @@ class DiffractionCorrection(object):
                 sys.stdout.write("\x1b[2K")
                 print("Forward Transform Complete.")
         if self.verbose:
-            print("Computing Power and Phase...")
+            print("\tComputing Power and Phase...")
 
+        # Compute power and phase.
         self.power_vals = np.abs(self.T_vals*self.T_vals)
         self.phase_vals = -np.arctan2(np.imag(self.T_vals),np.real(self.T_vals))
-        crange          = (self.power_vals>0).nonzero()
-        tau             = np.zeros(np.size(self.power_vals))
-        tau[crange]     = -self.mu_vals[crange]*np.log(
+
+        # Compute regions of non-zero power.
+        crange = (self.power_vals>0).nonzero()
+
+        # Create empty array for normalized optical depth.
+        tau = np.zeros(np.size(self.power_vals))
+
+        # Compute the normalized optical depth.
+        tau[crange] = -self.mu_vals[crange]*np.log(
             np.abs(self.power_vals[crange]))
-        self.tau_vals   = tau
+        self.tau_vals = tau
 
         self.tau_threshold_vals = np.zeros(np.size(self.rho_km_vals))
 
         self.__trim_attributes(self.fwd)
 
         if self.verbose:
-            print("Writing History...")
+            print("\tWriting History...")
 
         input_vars = {
             "Diffraction Data": NormDiff,
@@ -345,7 +352,7 @@ class DiffractionCorrection(object):
 
         t2 = time.time()
         if self.verbose:
-            print("DiffractionCorrection Complete.")
+            print("\tDiffraction Correction Complete.")
         print("Computation Time: ",t2-t1,end="\r")
 
     def __rect(w_in, dx):

@@ -343,7 +343,8 @@ def create_summary_doc(pdfdir,pdffil,outfilename):
     shell_execute(['./%s.sh' % TexName])
 
 def get_geo(geodata,verbose=True):
-    if verbose: print("Extracting Geo Data...")
+    if verbose:
+        print("\tExtracting Geo Data...")
     dfg = pd.read_csv(geodata, delimiter=',',
         names=[
             "t_oet_spm_vals",
@@ -366,11 +367,13 @@ def get_geo(geodata,verbose=True):
 			"vz_kms_vals"
             ]
         )
-    if verbose: print("Geo Data Complete.")
+    if verbose:
+        print("\tGeo Data Complete.")
     return dfg
 
 def get_cal(caldata,verbose=True):
-    if verbose: print("Extracting Cal Data...")
+    if verbose:
+        print("\tExtracting Cal Data...")
     dfc = pd.read_csv(caldata, delimiter=',',
         names=[
             "spm_vals",
@@ -379,11 +382,13 @@ def get_cal(caldata,verbose=True):
             "p_free_vals"
             ]
         )
-    if verbose: print("Cal Data Complete.")
+    if verbose:
+        print("\tCal Data Complete.")
     return dfc
 
 def get_dlp(dlpdata,verbose=True):
-    if verbose: print("Extracting DLP Data...")
+    if verbose:
+        print("\tExtracting DLP Data...")
     dfd = pd.read_csv(dlpdata, delimiter=',',
         names=[
             "rho_km_vals",
@@ -400,11 +405,13 @@ def get_dlp(dlpdata,verbose=True):
             "B_deg_vals"
         ]
     )
-    if verbose: print("DLP Data Complete")
+    if verbose:
+        print("\tDLP Data Complete")
     return dfd
 
 def get_tau(taudata,verbose=True):
-    if verbose: print("Extracting Tau Data...")
+    if verbose:
+        print("\tExtracting Tau Data...")
     dft = pd.read_csv(taudata, delimiter=',',
         names=[
             "rho_km_vals",
@@ -421,10 +428,11 @@ def get_tau(taudata,verbose=True):
             "B_deg_vals"
         ]
     )
-    if verbose: print("Tau Data Complete")
+    if verbose:
+        print("\tTau Data Complete")
     return dft
 
-class extract_csv_data(object):
+class ExtractCSVData(object):
     """
         Class:
             csv_extract_data
@@ -469,6 +477,9 @@ class extract_csv_data(object):
         self.dlpdata = dlpdata
         self.taudata = taudata
 
+        if verbose:
+            print("Extracting Data from CSV Files:")
+
         # Extract GEO, CAL, and DLP data.
         geo_dat = get_geo(geodata,verbose=verbose)
         cal_dat = get_cal(caldata,verbose=verbose)
@@ -509,8 +520,10 @@ class extract_csv_data(object):
                 self.phase_vals = phase_vals
                 self.tau_rho    = tau_rho
 
-        if verbose: print("Data Extraction Complete.")
-        if verbose: print("Writing History...")
+        if verbose:
+            print("\tData Extraction Complete.")
+        if verbose:
+            print("\tWriting History...")
 
         input_vars = {
             "GEO Data":self.geodata,
@@ -522,11 +535,14 @@ class extract_csv_data(object):
             "Use of Verbose":  verbose
             }
         self.history = write_history_dict(input_vars, input_kwds, __file__)
-        if verbose: print("History Complete.")
-        if verbose: print("Extract CSV Data Complete.")
+        if verbose:
+            print("\tHistory Complete.")
+        if verbose:
+            print("\tExtract CSV Data Complete.")
 
     def __retrieve_variables(self,geo_dat,cal_dat,dlp_dat,verbose):
-        if verbose: print("Retrieving Variables...")
+        if verbose:
+            print("\tRetrieving Variables...")
 
         # Run an error check on rho_km_vals
         rho_km_vals = np.array(dlp_dat.rho_km_vals)
@@ -726,7 +742,8 @@ class extract_csv_data(object):
         self.raw_tau_threshold_vals  = raw_tau_threshold_vals
 
     def __compute_variables(self,verbose):
-        if verbose: print("Computing Variables...")
+        if verbose:
+            print("\tComputing Variables...")
         phi_rad_vals    = np.deg2rad(self.phi_ora_deg_vals)
         phi_rl_rad_vals = np.deg2rad(self.phi_rl_deg_vals)
         phase_rad_vals  = np.deg2rad(self.phase_deg_vals)
@@ -806,7 +823,7 @@ class extract_csv_data(object):
         self.raw_mu          = raw_mu
 
     def __interpolate_variables(self,verbose):
-        if verbose: print("Interpolating Data...")
+        if verbose: print("\tInterpolating Data...")
         crange                  = self.crange
         rho_km_vals             = self.rho_km_vals
         t_set_spm_vals          = self.t_set_spm_vals

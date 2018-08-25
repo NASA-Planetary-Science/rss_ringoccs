@@ -159,11 +159,16 @@ def kb25(w_in, dx, error_check=True):
             Lowercase variables: RJM - 2018/05/16 3:23 P.M.
     """
     if error_check:
-        tw  = check_pos_real(w_in)
-        tdx = check_pos_real(dx)
-        if (not tdx) or (not tw):
-            sys.exit("Input must be two positive real numbers")
-    else: pass
+        if not isinstance(w_in,float):
+            try:
+                w_in = float(w_in)
+            except TypeError:
+                raise TypeError("w_in must be a positive floating point number.")
+        if not isinstance(dx,float):
+            try:
+                dx = float(dx)
+            except TypeError:
+                raise TypeError("w_in must be a positive floating point number.")
     nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
     x      = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx
     alpha  = 2.5*np.pi

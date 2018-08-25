@@ -23,7 +23,158 @@ region_dict = {
 
 
 class DiffractionCorrection(object):
+    """
+        Class:
+            diffraction_correction
+        Purpose:
+            Perform diffraction correction for a ring occultation
+            on a data set that is a near radially symmetric function
+            of the ring radius, or ring intercept point (RIP).
+        Arguments:
+            dat:    
+                The data set, usually an instance of the NormDiff
+                class from the rss_ringoccs Calibration subpackage.
+                This instance MUST contain the following attributes
+                and MUST have the same names.
+                    rho_km_vals:      Ring Radius (km)
+                    phi_rad_vals:     Ring Azimuth Angle (Radians)
+                    p_norm_vals:      Normalized Power
+                    phase_rad_vals:   Phase (Radians)
+                    B_rad_vals:       Elevation Angle (Radians)
+                    D_km_vals:        RIP-Distance (km)
+                    f_sky_hz_vals:    Sky Frequency (Hertz)
+                    rho_dot_kms_vals: RIP-velocity (km/s)
+                    history:          History dictionary
+            res:    
+                The requested resolution for processing (km). This
+                must be a positive real number, that is, a positive
+                floating point number or integer.
+        Keywords:
+            rng:    
+                The request range for diffraction correction.
+                Preferred input is rng = [a,b]. Arrays are
+                allowed and the range will be set as:
+                    rng = [MIN(array),MAX(array)]
+                Finally, certain strings containing a few of the
+                regions of interests within the rings of Saturn
+                are allowed. Permissible strings are:
+                    'maxwell', 'titan', 'huygens', and 'encke'.
+                Strings are neither case nor space sensitive.
+                For other planets use rng = [a,b]. Default value
+                is set to 'all' which processing [65,000,140,000]
+                Values MUST be set in kilometers.
+            wtype:  
+                The requested tapering function for diffraction
+                correction. A string with several allowed inputs:
+                    'rect'      Rectangular Window.
+                    'coss'      Squares Cosine Window.
+                    'kb20'      Kaiser-Bessel 2.0 Window.
+                    'kb25'      Kaiser-Bessel 2.5 Window.
+                    'kb35'      Kaiser-Bessel 3.5 Window.
+                    'kbmd20'    Modified kb20 Window.
+                    'kbmd25'    Modified kb25 Window.
+                The variable is neither case nor space sensitive.
+                Default window is set to 'kb25'
+            fwd:    
+                A Boolean for determining whether or not
+                forward modelling will be computed. This is good
+                starting point for deciding if the diffraction
+                correction is physically significant or valid. If
+                the reconstruction is good, the forward model
+                should reproduce the p_norm_vals attribute from
+                the input dat instance. Default is set to False.
+            norm:
+                A Boolean for determining whether or not the
+                reconstructed complex transmittance is normalize
+                by the window width. This normalization is the
+                complex transmittance that is computed by using
+                free space divided by the complex transmittance
+                that is computed using free space weighted by the
+                selected tapering function. Default is True.
+            bfac:
+                A Boolean for determining whether or not the
+                'b' factor in the window width computation is
+                used. This is equivalent to setting the Allen
+                Deviation from the spacecraft to a positive value
+                or to zero. If set to False, the Allen Deviation
+                is assumed to be zero. If set to True the Allen
+                Deviation is set to 2e-13. If set to a positive
+                real number, the Allen Deviation will be assumed
+                to be that real number. Default is True.
+            fft:    
+                A Boolean for determining whether or not FFT's will
+                be used for computing the complex transmittance. The
+                use of FFT's assumes that the geometry of the system
+                is such that the integral that is used to compute the
+                complex transmittance is of the form of a
+                convolution, and that the convolution theorem may be
+                applied to it. Default is set to False.
+            psitype:
+                A string for determining what approximation to the
+                geometrical 'psi' function is used. Several strings
+                are allowed:
+                    'full'      No Approximation is applied.
+                    'taylor2'   Second order Taylor Series.
+                    'taylor3'   Third order Taylor Series.
+                    'taylor4'   Fourth order Taylor Series.
+                    'MTR2'      Second Order Series from MTR86.
+                    'MTR3'      Third Order Series from MTR86.
+                    'MTR4'      Fourth Order Series from MTR86.
+                The variable is neither case nor space sensitive.
+                Default is set to 'full'.
+            verbose:
+                A Boolean for determining if various pieces of
+                information are printed to the screen or not.
+                Default is False.
+        Outputs:
+            T_hat_vals:
+                Complex transmittance of the diffracted data.
+            F_km_vals:
+                Fresnel scale (km).
+            w_km_vals:
+                Window width as a function of ring radius (km).
+            mu_vals:
+                The sine of the elevation angle.
+            lambda_sky_km_vals:
+                Wavelength of the recieved signal (km).
+            dx_km:  
+                Radial spacing between points (km).
+            norm_eq:        
+                Normalized equivalent width of the window function.
+            n_used:
+                Number of points that were processed (integer).
+            start:
+                Starting point used for processing (integer).
+            T_vals:
+                Complex transmittance of reconstructed data.
+            power_vals:
+                Normalized power of the reconstructed data.
+            tau_vals:
+                Normalized optical depth of the reconstructed data.
+            phase_vals:
+                Phase of the reconstructed data (Radians).
+            p_norm_fwd_vals:
+                Normalized power of forward model (fwd=True).
+            T_hat_fwd_vals:
+                Complex transmittance of forward model (fwd=True).
+            phase_fwd_vals:
+                Phase of forward model (fwd=True).
+            history:
+                History dictionary of the runtime OS settings.
+        Dependencies:
+            [1] numpy
+            [2] scipy
+            [3] diffcorr
+            [4] 
+        Notes:
+            [1] 
+        References:
 
+        Examples:
+
+        History:
+            Created: RJM - 2018/05/16 5:40 P.M.
+    """
     def __init__(self, NormDiff, res, rng="all", wtype="kb25", fwd=False,
                  norm=True, verbose=False, bfac=True, sigma=2.e-13,
                  fft=False, psitype="full"):
@@ -217,18 +368,24 @@ class DiffractionCorrection(object):
 
         if verbose:
             print("\tComputing Necessary Variables...")
-        # Compute necessary variables for diffraction correction.
+        # Compute wavelength (km).
         self.lambda_sky_km_vals = SPEED_OF_LIGHT_KM / self.f_sky_hz_vals
-        self.dx_km              = self.rho_km_vals[1] - self.rho_km_vals[0]
-        self.T_hat_vals         = np.sqrt(np.abs(self.p_norm_vals))*np.exp(
+
+        # Compute sampling distance (km)
+        self.dx_km = self.rho_km_vals[1] - self.rho_km_vals[0]
+
+        # Compute the complex transmittance.
+        self.T_hat_vals = np.sqrt(np.abs(self.p_norm_vals))*np.exp(
             1j*self.phase_rad_vals)
 
-        # Compute the Fresnel Scale (See MTR86 Equation 6)
-        cb                      = np.cos(self.B_rad_vals)
-        sb                      = np.sin(self.B_rad_vals)
-        sp                      = np.sin(self.phi_rad_vals)
-        self.F_km_vals          = np.sqrt(0.5 * self.lambda_sky_km_vals *
-            self.D_km_vals * (1 - (cb*cb) * (sp*sp)) / (sb*sb))
+        # Compute geometric qunatities for the Fresnel Scale.
+        cb = np.cos(self.B_rad_vals)
+        sb = np.sin(self.B_rad_vals)
+        sp = np.sin(self.phi_rad_vals)
+
+        # Compute the Fresnel Scale (km).
+        self.F_km_vals = np.sqrt(0.5 * self.lambda_sky_km_vals *
+                                 self.D_km_vals * (1 - cb*cb*sp*sp)/(sb*sb))
         
         # Compute the Normalized Equaivalent Width (See MTR86 Equation 20)
         self.norm_eq            = self.__func_dict[wtype]["normeq"]
@@ -449,53 +606,67 @@ class DiffractionCorrection(object):
 
     # Function dictionary with normalized equivalent widths.
     __func_dict = {
-        "rect"    : {"func" : __rect,     "normeq" : 1.00000000},
-        "coss"    : {"func" : __coss,     "normeq" : 1.50000000},
-        "kb20"    : {"func" : __kb20,     "normeq" : 1.49634231},
-        "kb25"    : {"func" : __kb25,     "normeq" : 1.65191895},
-        "kb35"    : {"func" : __kb35,     "normeq" : 1.92844639},
-        "kbmd20"  : {"func" : __kbmd20,   "normeq" : 1.52048174},
-        "kbmd25"  : {"func" : __kbmd25,   "normeq" : 1.65994218}
+        "rect":   {"func": __rect,     "normeq": 1.00000000},
+        "coss":   {"func": __coss,     "normeq": 1.50000000},
+        "kb20":   {"func": __kb20,     "normeq": 1.49634231},
+        "kb25":   {"func": __kb25,     "normeq": 1.65191895},
+        "kb35":   {"func": __kb35,     "normeq": 1.92844639},
+        "kbmd20": {"func": __kbmd20,   "normeq": 1.52048174},
+        "kbmd25": {"func": __kbmd25,   "normeq": 1.65994218}
         }
 
-    def __trim_attributes(self,fwd):
+    def __trim_attributes(self, fwd):
         # Get rid of uncomputed values and keep only what was processed.
-        start  = self.start                 # Starting Point.
-        n_used = self.n_used                # Number of point used.
-        crange = np.arange(n_used)+start    # Processed range.
+        start = self.start
+        n_used = self.n_used
+        crange = np.arange(n_used)+start
 
-        self.rho_km_vals                = self.rho_km_vals[crange]
-        self.p_norm_vals                = self.p_norm_vals[crange]
-        self.phase_rad_vals             = self.phase_rad_vals[crange]
-        self.B_rad_vals                 = self.B_rad_vals[crange]
-        self.D_km_vals                  = self.D_km_vals[crange]
-        self.f_sky_hz_vals              = self.f_sky_hz_vals[crange]
-        self.phi_rad_vals               = self.phi_rad_vals[crange]
-        self.rho_dot_kms_vals           = self.rho_dot_kms_vals[crange]
-        self.T_hat_vals                 = self.T_hat_vals[crange]
-        self.F_km_vals                  = self.F_km_vals[crange]
-        self.w_km_vals                  = self.w_km_vals[crange]
-        self.mu_vals                    = self.mu_vals[crange]
-        self.lambda_sky_km_vals         = self.lambda_sky_km_vals[crange]
-        self.T_vals                     = self.T_vals[crange]
-        self.power_vals                 = self.power_vals[crange]
-        self.tau_vals                   = self.tau_vals[crange]
-        self.phase_vals                 = self.phase_vals[crange]
-        self.t_oet_spm_vals             = self.t_oet_spm_vals[crange]
-        self.t_ret_spm_vals             = self.t_ret_spm_vals[crange]
-        self.t_set_spm_vals             = self.t_set_spm_vals[crange]
-        self.rho_corr_pole_km_vals      = self.rho_corr_pole_km_vals[crange]
-        self.rho_corr_timing_km_vals    = self.rho_corr_timing_km_vals[crange]
-        self.phi_rl_rad_vals            = self.phi_rl_rad_vals[crange]
-        self.raw_tau_threshold_vals     = self.raw_tau_threshold_vals[crange]
+        # Ring radius, azimuth angle, diffracted power, and phase.
+        self.rho_km_vals = self.rho_km_vals[crange]
+        self.p_norm_vals = self.p_norm_vals[crange]
+        self.phi_rad_vals = self.phi_rad_vals[crange]
+        self.phase_rad_vals = self.phase_rad_vals[crange]
 
-        #If the forward model was run, trim those attributes as well.
+        # Ring opening angle, normalized power, phase, and transmittance.
+        self.B_rad_vals = self.B_rad_vals[crange]
+        self.power_vals = self.power_vals[crange]
+        self.phase_vals = self.phase_vals[crange]
+        self.T_hat_vals = self.T_hat_vals[crange]
+        self.T_vals = self.T_vals[crange]
+
+        # Fresnel scale, window width, and RIP-Spacecraft distance.
+        self.F_km_vals = self.F_km_vals[crange]
+        self.w_km_vals = self.w_km_vals[crange]
+        self.D_km_vals = self.D_km_vals[crange]
+
+        # Ring radius corrections.
+        self.rho_corr_pole_km_vals = self.rho_corr_pole_km_vals[crange]
+        self.rho_corr_timing_km_vals = self.rho_corr_timing_km_vals[crange]
+
+        # Various time attributes.
+        self.t_oet_spm_vals = self.t_oet_spm_vals[crange]
+        self.t_ret_spm_vals = self.t_ret_spm_vals[crange]
+        self.t_set_spm_vals = self.t_set_spm_vals[crange]
+
+        # All other attributes.
+        self.mu_vals = self.mu_vals[crange]
+        self.tau_vals = self.tau_vals[crange]
+        self.f_sky_hz_vals = self.f_sky_hz_vals[crange]
+        self.phi_rl_rad_vals = self.phi_rl_rad_vals[crange]
+        self.rho_dot_kms_vals = self.rho_dot_kms_vals[crange]
+        self.lambda_sky_km_vals = self.lambda_sky_km_vals[crange]
+        self.raw_tau_threshold_vals = self.raw_tau_threshold_vals[crange]
+
+        # If the forward model was run, trim those attributes as well.
         if fwd:
+            # Forward power
             self.p_norm_fwd_vals = self.p_norm_fwd_vals[crange]
-            self.T_hat_fwd_vals  = self.T_hat_fwd_vals[crange]
-            self.phase_fwd_vals  = self.phase_fwd_vals[crange]
-    
-    def __fresinv(self,T_hat,ker,dx,f_scale):
+
+            # Forward Transmittance and phase.
+            self.T_hat_fwd_vals = self.T_hat_fwd_vals[crange]
+            self.phase_fwd_vals = self.phase_fwd_vals[crange]
+
+    def __fresinv(self, T_hat, ker, dx, f_scale):
         """
             Approximation Fresnel Inverse (MTR86 Equation 15)
         """
@@ -687,6 +858,7 @@ class DiffractionCorrection(object):
         # Factor used for first Newton-Raphson iteration
         dphi_fac = (cosb2*cosphi0*sinphi0/(1.0-cosb2*sinphi0*sinphi0))
         if (psitype == 'fresnel'):
+            loop = 0
             for i in np.arange(n_used):
                 # Current point being computed.
                 center = start+i
@@ -785,6 +957,9 @@ class DiffractionCorrection(object):
                     cp = np.cos(phi_s_rad)
                     sp = np.sin(phi_s_rad)
 
+                    # Compute r*cos(B)*D for efficiency
+                    rcbd = r * cbd
+
                 # If the window width has not changed, perform Newton-Raphson.
                 else:
                     # Adjust computed range by dx_km.
@@ -792,6 +967,9 @@ class DiffractionCorrection(object):
 
                     # Ajdust ring radius by dx_km.
                     r = rho_km_vals[crange]
+
+                    # Compute r*cos(B)*D for efficiency
+                    rcbd = r * cbd
 
                     # Compute square of ring radius.
                     r2 = rsq[crange]
@@ -802,19 +980,25 @@ class DiffractionCorrection(object):
                     # Compute Eta variable (MTR86 Equation 4c).
                     eta = (r02 + r2 - 2.0*r*r0*(sp*sp0 + cp*cp0)) / d2
 
+                    # Compute Xi variable (MTR86 Equation 4b).
+                    xi = cbd * (r0 * cp0 - r * cp)
+
+                    # Compute Eta variable (MTR86 Equation 4c).
+                    eta = (r02 + r2 - 2.0*r*r0*(sp*sp0 + cp*cp0)) / d2
+
                     # Compute intermediate variables for partial derivatives.
-                    v1 = r * cbd * sp
+                    v1 = rcbd * sp
                     v2 = 2.0 * r * r0 * (sp*cp0 - sp0*cp) / d2
-                    v4 = np.sqrt(1.0 + 2.0*xi + eta)
-                    v5 = cbd * r * cp
-                    v6 = 2.0 * r * r0 * (sp*sp0 + cp*cp0) / d2
+                    v3 = np.sqrt(1.0 + 2.0*xi + eta)
+                    v4 = rcbd * cp
+                    v5 = 2.0 * r * r0 * (sp*sp0 + cp*cp0) / d2
 
                     # Compute variables used for second partial derivative.
-                    dphia = (2.0*v5 + v6)/(2.0 * v4)
-                    dphib = v5 + (2.0*v1 + v2)*(2.0*v1 + v2)/(4.0*(v4*v4*v4))
+                    dphia = (2.0*v4 + v5)/(2.0 * v3)
+                    dphib = v4 + (2.0*v1 + v2)*(2.0*v1 + v2)/(4.0*(v3*v3*v3))
 
                     # Compute First and Second Partial Derivatives of psi
-                    psi_d1 = (2.0*v1 + v2) / (2.0 * v4) - v1
+                    psi_d1 = (2.0*v1 + v2) / (2.0 * v3) - v1
                     psi_d2 = dphia - dphib
 
                     # Compute Newton-Raphson perturbation
@@ -835,18 +1019,18 @@ class DiffractionCorrection(object):
                     eta = (r02 + r2 - 2.0*r*r0*(sp*sp0 + cp*cp0)) / d2
 
                     # Compute intermediate variables for partial derivatives.
-                    v1 = r * cbd * sp
+                    v1 = rcbd * sp
                     v2 = 2.0 * r * r0 * (sp*cp0 - sp0*cp) / d2
-                    v4 = np.sqrt(1.0 + 2.0*xi + eta)
-                    v5 = cbd * r * cp
-                    v6 = 2.0 * r * r0 * (sp*sp0 + cp*cp0) / d2
+                    v3 = np.sqrt(1.0 + 2.0*xi + eta)
+                    v4 = rcbd * cp
+                    v5 = 2.0 * r * r0 * (sp*sp0 + cp*cp0) / d2
 
                     # Compute variables used for second partial derivative.
-                    dphia = (2.0*v5 + v6)/(2.0 * v4)
-                    dphib = v5 + (2.0*v1 + v2)*(2.0*v1 + v2)/(4.0*(v4*v4*v4))
+                    dphia = (2.0*v4 + v5)/(2.0 * v3)
+                    dphib = v4 + (2.0*v1 + v2)*(2.0*v1 + v2)/(4.0*(v3*v3*v3))
 
                     # Compute First and Second Partial Derivatives of psi
-                    psi_d1 = (2.0*v1 + v2) / (2.0 * v4) - v1
+                    psi_d1 = (2.0*v1 + v2) / (2.0 * v3) - v1
                     psi_d2 = dphia - dphib
 
                     # Compute Newton-Raphson perturbation

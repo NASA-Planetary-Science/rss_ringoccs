@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from scipy import interpolate
 from .write_history_dict import write_history_dict
+import pdb
 
 def shell_execute(script):
     """
@@ -389,7 +390,8 @@ def get_cal(caldata,verbose=True):
 def get_dlp(dlpdata,verbose=True):
     if verbose:
         print("\tExtracting DLP Data...")
-    dfd = pd.read_csv(dlpdata, delimiter=',',
+    dfd = pd.read_csv(
+        dlpdata, delimiter=',',
         names=[
             "rho_km_vals",
             "rho_corr_pole_km_vals",
@@ -431,6 +433,7 @@ def get_tau(taudata,verbose=True):
     if verbose:
         print("\tTau Data Complete")
     return dft
+
 
 class ExtractCSVData(object):
     """
@@ -883,7 +886,155 @@ class ExtractCSVData(object):
         del self.phi_ora_deg_vals,self.raw_tau_vals
         del self.phase_deg_vals,self.raw_mu,self.B_deg_vals
         del self.geo_rho,self.geo_D,self.geo_drho,self.crange
-    
+
+
+class GetUranusData(object):
+    def __init__(self,geodata,dlpdata,dx=0.25,occ=None,verbose=False):
+        if (not isinstance(geodata,str)):
+            raise TypeError("geodata must be a string: '/path/to/geodata'")
+        if (not isinstance(dlpdata,str)):
+            raise TypeError("dlpdata must be a string: '/path/to/dlpdata'")
+        if (not isinstance(dx,float)):
+            raise TypeError("dx must be a floating point number")
+        if (dx <= 0.0):
+            raise ValueEorr("dx must be a positive number")
+        if occ:
+            if (not isinstance(occ,str)):
+                raise TypeError("occ must be a string")
+            else:
+                occ = occ.replace(" ", "").lower()
+                if (occ != 'ingress') and (occ != 'egress'):
+                    raise ValueError("occ must be 'egress' of 'ingress'")
+                else:
+                    pass
+
+        geo_dat = get_geo(geodata,verbose=verbose)
+        dlp_dat = pd.read_csv(
+            dlpdata, delimiter=',',
+            names=[
+                "t_oet_spm_vals",
+                "p_norm_vals",
+                "phase_rad_vals",
+                "f_sky_hz_vals"
+            ]
+        )
+
+        dlp_spm = np.array(dlp_dat.t_oet_spm_vals)
+        dlp_pow = np.array(dlp_dat.p_norm_vals)
+        dlp_phs = np.array(dlp_dat.phase_rad_vals)
+        dlp_frq = np.array(dlp_dat.f_sky_hz_vals)
+        geo_spm = np.array(geo_dat.t_oet_spm_vals)
+
+        geo_rho = geo_dat.rho_km_vals
+        n_rho = np.size(geo_rho)
+        drho = np.zeros(n_rho-1)
+        geo_D = geo_dat.D_km_vals
+        geo_B = geo_dat.B_deg_vals
+        geo_drho = geo_dat.rho_dot_kms_vals
+        geo_phi = geo_dat.phi_ora_deg_vals
+        t_dlp1 = np.min(dlp_spm)
+        t_dlp2 = np.max(dlp_spm)
+        t_geo1 = np.min(geo_spm)
+        t_geo2 = np.max(geo_spm)
+
+        t1 = np.max([t_dlp1,t_geo1])
+        t2 = np.min([t_dlp2,t_geo2])
+        if (t1 > t2):
+            raise ValueError(
+                "Geo and DLP data never overlap. No data available."
+            )
+
+        start = np.min((geo_spm >= t1).nonzero())
+        finish = np.max((geo_spm <= t2).nonzero())
+        tstart = np.min((dlp_spm >= t1).nonzero())
+        tfinish = np.max((dlp_spm <= t2).nonzero())
+        t_dlp = dlp_spm[tstart:tfinish+1]
+        
+        for i in range(n_rho-1):
+            drho[i] = geo_rho[i+1]-geo_rho[i]
+        if not occ:
+            if (np.min(drho) < 0.0) and (np.max(drho) > 0.0):
+                raise ValueError(
+                    "\n\tdrho is positive and negative.\n\
+                     \tSet occ to ingress or egress"
+                )
+            elif (drho > 0).all():
+                crange = np.arange(start,finish+1)
+            elif (drho < 0).all():
+                crange = np.arange(start,finish+1)
+                crange = crange[::-1]
+            elif (drho == 0).all():
+                raise ValueError("drho/dt = 0 for all points.")
+            else:
+                raise ValueError("drho/dt has invalid values.")
+        elif (occ == 'ingress'):
+            crange = (drho < 0.0).nonzero()
+            if (np.size(crange) == 0):
+                raise TypeError("drho is never negative. Use occ = 'egress'")
+        elif (occ == 'egress'):
+            crange = (drho > 0.0).nonzero()
+            if (np.size(crange) == 0):
+                raise TypeError("drho is never positive. Use occ = 'ingress'")
+        else:
+            raise ValueError("Invalid occ keyword: %s" % occ)
+
+        dlp_rho_interp = interpolate.interp1d(geo_spm,geo_rho,kind="linear")
+        dlp_rho = dlp_rho_interp(t_dlp)
+
+        rho_min = np.min(dlp_rho)
+        rho_max = np.max(dlp_rho)
+        self.rho_km_vals = np.arange(rho_min,rho_max,dx)
+
+        drho_interp = interpolate.interp1d(geo_rho,geo_drho,kind="linear")
+        self.rho_dot_kms_vals = drho_interp(self.rho_km_vals)
+        
+        geo_D_interp = interpolate.interp1d(geo_rho,geo_D,kind="linear")
+        self.D_km_vals = geo_D_interp(self.rho_km_vals)
+
+        geo_B_interp = interpolate.interp1d(geo_rho,geo_B,kind="linear")
+        self.B_rad_vals = np.deg2rad(geo_B_interp(self.rho_km_vals))
+
+        geo_phi_interp = interpolate.interp1d(geo_rho,geo_phi,kind="linear")
+        self.phi_rad_vals = np.deg2rad(geo_phi_interp(self.rho_km_vals))
+
+        power_interp = interpolate.interp1d(dlp_rho,dlp_pow,kind="linear")
+        self.p_norm_vals = power_interp(self.rho_km_vals)
+
+        phase_interp = interpolate.interp1d(dlp_rho,dlp_phs[tstart:tfinish+1],kind="linear")
+        self.phase_rad_vals = phase_interp(self.rho_km_vals)
+
+        freq_interp = interpolate.interp1d(dlp_rho,dlp_frq[tstart:tfinish+1],kind="linear")
+        self.f_sky_hz_vals = freq_interp(self.rho_km_vals)
+
+        n = np.size(self.rho_km_vals)
+
+        self.t_oet_spm_vals = np.zeros(n)
+        self.t_ret_spm_vals = np.zeros(n)
+        self.t_set_spm_vals = np.zeros(n)
+        self.rho_corr_pole_km_vals = np.zeros(n)
+        self.rho_corr_timing_km_vals = np.zeros(n)
+        self.phi_rl_rad_vals = np.zeros(n)
+        self.raw_tau_threshold_vals = np.zeros(n)
+
+        if verbose:
+            print("\tData Extraction Complete.")
+        if verbose:
+            print("\tWriting History...")
+
+        input_vars = {
+            "GEO Data": geodata,
+            "DLP Data": dlpdata
+            }
+        input_kwds = {
+            "occ":             occ,
+            "Use of Verbose":  verbose
+            }
+        self.history = write_history_dict(input_vars, input_kwds, __file__)
+        if verbose:
+            print("\tHistory Complete.")
+        if verbose:
+            print("\tExtract CSV Data Complete.")
+
 class pure_csv_reader(object):
     def __init__(self,dat):
         if (not isinstance(dat, str)):

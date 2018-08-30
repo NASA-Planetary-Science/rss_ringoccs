@@ -53,6 +53,7 @@ kernels_list_file = '../tables/rev007_list_of_kernels.txt'
 kernels_dir = '../kernels/'
 kernels = '../tables/Rev007_meta_kernel.ker'
 rev_number = '007'
+occultation_direction = 'Egress'
 
 print("Downloading RSR files...")
 os.system('./get_rsr_file.sh %s %s %s ; echo "RSR Complete"' %
@@ -193,10 +194,10 @@ tau_inst = rss.diffcorr.DiffractionCorrection(
     dlp_inst, res_km, rng=inversion_range, verbose=verbose
 )
 
-write_geo_series(rev_info, geo_inst, geo_file, output_directory, 'Egress')
-write_cal_series(rev_info, cal_inst, cal_file, output_directory, 'Egress')
-write_dlp_series(rev_info, dlp_inst, dlp_file, output_directory, 'Egress')
-write_tau_series(rev_info, tau_inst, tau_file, output_directory, 'Egress')
+write_geo_series(rev_info, geo_inst, geo_file, output_directory, occultation_direction)
+write_cal_series(rev_info, cal_inst, cal_file, output_directory, occultation_direction)
+write_dlp_series(rev_info, dlp_inst, dlp_file, output_directory, occultation_direction)
+write_tau_series(rev_info, tau_inst, tau_file, output_directory, occultation_direction)
 
 fig1 = plt.figure(1, figsize=(11, 8.5))
 plt.plot(tau_inst.rho_km_vals, tau_inst.power_vals)

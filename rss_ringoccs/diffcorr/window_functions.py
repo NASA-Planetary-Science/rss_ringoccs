@@ -41,11 +41,16 @@ def rect(w_in, dx, error_check=True):
             Lowercase variables: RJM - 2018/05/16 1:29 P.M.
     """
     if error_check:
-        tw  = check_pos_real(w_in)
-        tdx = check_pos_real(dx)
-        if (not tdx) or (not tw):
-            raise ValueError("Input must be two positive real numbers")
-    else: pass
+        if not isinstance(w_in,float):
+            try:
+                w_in = float(w_in)
+            except TypeError:
+                raise TypeError("w_in must be a positive floating point number.")
+        if not isinstance(dx,float):
+            try:
+                dx = float(dx)
+            except TypeError:
+                raise TypeError("w_in must be a positive floating point number.")
     nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
     w_func = np.zeros(nw_pts) + 1.0
     return w_func
@@ -88,11 +93,16 @@ def coss(w_in, dx, error_check=True):
             Lowercase variables: RJM - 2018/05/16 1:34 P.M.
     """
     if error_check:
-        tw  = check_pos_real(w_in)
-        tdx = check_pos_real(dx)
-        if (not tdx) or (not tw):
-            sys.exit("Input must be two positive real numbers")
-    else: pass
+        if not isinstance(w_in,float):
+            try:
+                w_in = float(w_in)
+            except TypeError:
+                raise TypeError("w_in must be a positive floating point number.")
+        if not isinstance(dx,float):
+            try:
+                dx = float(dx)
+            except TypeError:
+                raise TypeError("w_in must be a positive floating point number.")
     nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
     x      = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx
     w_func = np.cos(np.pi * x / w_in)**2
@@ -100,11 +110,16 @@ def coss(w_in, dx, error_check=True):
 
 def kb20(w_in, dx, error_check=True):
     if error_check:
-        tw  = check_pos_real(w_in)
-        tdx = check_pos_real(dx)
-        if (not tdx) or (not tw):
-            sys.exit("Input must be two positive real numbers")
-    else: pass
+        if not isinstance(w_in,float):
+            try:
+                w_in = float(w_in)
+            except TypeError:
+                raise TypeError("w_in must be a positive floating point number.")
+        if not isinstance(dx,float):
+            try:
+                dx = float(dx)
+            except TypeError:
+                raise TypeError("w_in must be a positive floating point number.")
     nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
     x      = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx
     alpha  = 2.0*np.pi
@@ -223,11 +238,16 @@ def kb35(w_in, dx, error_check=True):
             Lowercase variables: RJM - 2018/06/16 3:26 P.M.
     """
     if error_check:
-        tw  = check_pos_real(w_in)
-        tdx = check_pos_real(dx)
-        if (not tdx) or (not tw):
-            sys.exit("Input must be two positive real numbers")
-    else: pass
+        if not isinstance(w_in,float):
+            try:
+                w_in = float(w_in)
+            except TypeError:
+                raise TypeError("w_in must be a positive floating point number.")
+        if not isinstance(dx,float):
+            try:
+                dx = float(dx)
+            except TypeError:
+                raise TypeError("w_in must be a positive floating point number.")
     nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
     x      = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx
     alpha  = 3.5 * np.pi
@@ -281,11 +301,16 @@ def kbmd20(w_in, dx, error_check=True):
             Lowercase variables: RJM - 2018/05/16 3:34 P.M.
     """
     if error_check:
-        tw  = check_pos_real(w_in)
-        tdx = check_pos_real(dx)
-        if (not tdx) or (not tw):
-            sys.exit("Input must be two positive real numbers")
-    else: pass
+        if not isinstance(w_in,float):
+            try:
+                w_in = float(w_in)
+            except TypeError:
+                raise TypeError("w_in must be a positive floating point number.")
+        if not isinstance(dx,float):
+            try:
+                dx = float(dx)
+            except TypeError:
+                raise TypeError("w_in must be a positive floating point number.")
     nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
     x      = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx
     alpha  = 2.0*np.pi
@@ -339,11 +364,16 @@ def kbmd25(w_in, dx, error_check=True):
             Lowercase variables: RJM - 2018/05/16 3:34 P.M.
     """
     if error_check:
-        tw  = check_pos_real(w_in)
-        tdx = check_pos_real(dx)
-        if (not tdx) or (not tw):
-            sys.exit("Input must be two positive real numbers")
-    else: pass
+        if not isinstance(w_in,float):
+            try:
+                w_in = float(w_in)
+            except TypeError:
+                raise TypeError("w_in must be a positive floating point number.")
+        if not isinstance(dx,float):
+            try:
+                dx = float(dx)
+            except TypeError:
+                raise TypeError("w_in must be a positive floating point number.")
     nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
     x      = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx
     alpha  = 2.5 * np.pi
@@ -396,15 +426,74 @@ def kbal(w_in, dx, al):
                 https://doi.org/10.1186/s13660-016-0988-1
         History:
             Created: RJM - 2018/05/16 3:50 P.M.
-    """
+
     tw  = check_pos_real(w_in)
     tdx = check_pos_real(dx)
     if (not tdx) or (not tw):
         sys.exit("Input must be two positive real numbers")
+    """
     nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
     x      = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx
     alpha  =  al * np.pi
     w_func = iv(0.0,alpha * np.sqrt((1.0 - (2.0 * x / w_in)**2)))/iv(0.0,alpha)
+    return w_func
+
+def kbmdal(w_in, dx, al):
+    """
+        Function:
+            kb35
+        Purpose:
+            Create Kaiser-Bessel 3.5 window.
+        Variables:
+            W:      Window width.
+            dx:     Width of one point.
+            al:     The alpha parameter.
+        Outputs:
+            w_func: The Kaiser-Bessel alpha window of width w_in and
+                    spacing dx between points.
+        Dependencies:
+            [1] diffcorr
+            [2] sys
+            [3] numpy
+        Notes:
+            [1] The Kaiser-Bessel window is computed using the 
+                modified Bessel Function of the First Kind. It's
+                value is y = I_0(alpha*sqrt(1-4x^2/w^2))/I_0(alpha),
+                where w is the window width.
+            [2] We automatically multiply the alpha parameter by pi,
+                so the kbal window function has an alpha value of
+                alpha = al * pi
+            [3] The endpoints of the Kaiser-Bessel function tend to
+                zero faster than (1+2 * alpha)) / exp(alpha)
+        Warnings:
+            [1] None of the Kaiser-Bessel windows evaluate to zero at
+                their endpoints. The endpoints are 1/I_0(alpha). For
+                small values of alpha this can create Gibb's like
+                effects in reconstruction do to the large
+                discontinuity in the window. For alpha values beyond
+                2.5 * pi this effect is negligible.
+        References:
+            [1] Essam A. Marouf, G. Leonard Tyler, Paul A. Rosen,
+                Profiling Saturn's rings by radio occultation,
+                Icarus, Volume 68, Issue 1, 1986, Pages 120-166,
+                https://doi.org/10.1016/0019-1035(86)90078-3
+            [2] https://en.wikipedia.org/wiki/Window_function
+            [3] On approximating the Modified Bessel Function of the
+                First Kind and Toader-Qi Mean, Yang, ZH. & Chu, YM.
+                J Inequal Appl (2016): 40., Springer,
+                https://doi.org/10.1186/s13660-016-0988-1
+        History:
+            Created: RJM - 2018/05/16 3:50 P.M.
+
+    tw  = check_pos_real(w_in)
+    tdx = check_pos_real(dx)
+    if (not tdx) or (not tw):
+        sys.exit("Input must be two positive real numbers")
+    """
+    nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
+    x      = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx
+    alpha  =  al * np.pi
+    w_func = (iv(0.0,alpha * np.sqrt((1.0 - (2.0 * x / w_in)**2)))-1)/(iv(0.0,alpha)-1)
     return w_func
 
 def window_width(res,normeq,fsky,fres,rho_dot,sigma=False,bfac=True):

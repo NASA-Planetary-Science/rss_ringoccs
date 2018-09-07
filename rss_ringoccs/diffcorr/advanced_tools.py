@@ -3,13 +3,13 @@ import numpy as np
 from scipy import interpolate
 from .diffraction_correction import DiffractionCorrection
 from .physics_functions import fresnel_forward, freq_wav
-from rss_ringoccs.tools import get_geo, extract_csv_data
+from rss_ringoccs.tools.misc_tools import get_geo, ExtractCSVData
 
 class compare_tau(object):
     def __init__(self,geo,cal,dlp,tau,res,rng='all',
         wtype="kb25",bfac=True,fft=False,verbose=True,norm=True):
 
-        data        = extract_csv_data(
+        data        = ExtractCSVData(
             geo,cal,dlp,taudata=tau,verbose=verbose
         )
         tr          = data.tau_rho

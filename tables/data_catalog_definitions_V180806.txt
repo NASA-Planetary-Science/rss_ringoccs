@@ -1,0 +1,145 @@
+data_catalog_definitions_V180806.txt
+
+--------------------------------------------------------------------------------
+COLUMN HEADER        			    DEFINITION
+--------------------------------------------------------------------------------
+'CIMS_REQUEST_ID'                   : Official CIMS (Cassini Information 
+        						      Management Systems) event name
+        						      (e.g., RSS_007RI_OCC003_PRIME)
+'REV'        					    : Spacecraft orbit number around the Saturn
+        						      system (e.g., 007)
+'YEAR'                              : Year of when event event occured
+        						      (e.g., 2005)
+'DOY'                               : Day of year of when event occured
+        						      (e.g., 123)
+'UTC_START'                         : Start of event date and time in UTC,
+        			 			      with format YYYY MMM DD hh:mm:ss
+        						      (e.g., 2005 MAY 03 02:30:00) 
+'UTC_END'                           : End of event date and time in UTC,
+        			 			      with format YYYY MMM DD hh:mm:ss
+        						      (e.g., 2005 MAY 03 06:42:31)
+'UPLINK_DSN_COMPLEX_INITAL'         : Initial of DSN complex where the uplink 
+        						      station is located.
+        						      (e.g., G for Goldstone complex)
+'UPLINK_DSN_ANTENNA_ID'             : Identification name of the uplink DSN 
+        							  antenna (e.g., DSS-14)
+'UPLINK_DSN_APERTURE_M'             : Aperture of uplink DSN antenna, in meters
+        						      (e.g., 70)
+'UPLINK_BAND'                       : Band name for the frequency range of the
+        						      radio signal sent from Earth to the 
+        							  spacecraft (e.g., X, S, or Ka)
+'DOWNLINK_DSN_COMPLEX_INITAL'       : Initial of DSN complex where the downlink
+        						      station is located
+        						      (e.g., C for Canberra)
+'DOWNLINK_DSN_ANTENNA_ID'           : Identification name of the downlink DSN
+        						      antenna (e.g., DSS-34)
+'DOWNLINK_DSN_APERTURE_M'           : Aperture of downlink DSN antenna, 
+        							  in meters (e.g., 34)
+'DOWNLINK_BAND'                     : Band name for the frequency range of the
+        						      radio signal sent by the spacecraft to 
+        							  Earth (e.g., X, S, or Ka)
+'RSR_FILENAME'                      : Name of RSR (Radio Science Receiver) file,
+        						      including directory path to file on PDS
+        						      (e.g., cors_0106/sroc1_123/rsr/
+        						    		 s10sroi2005123_0230nnnk25rd.1b2)
+'POLARIZATION'                      : Orientation of radio wave sent by the 
+        							  spacecraft
+        						      (e.g., R for right circular polarization)
+'USO_HZ'                            : Frequency, in Hz, of the radio signal 
+        						      transmitted from the USO, or Ultra Stable
+        						      Oscillator, a 4.788194-Mhz crystal 
+        							  oscillator designed to send accurate 
+        							  frequency and phase stability for
+        						      radio science experiments.
+        						      (e.g., 8427222034.3405 for X-band,
+        						             32023443730.4938 for Ka-band,
+        						    		 2298333282.09286 for S-band)
+'SAMPLING_RATE_KHZ'                 : Data sampling frequency recorded within
+        							  the associated RSR file, in kHz.
+        						      (e.g., 1, or 16)
+'OCCULTATION_TYPE'                  : Orientation and direction of spacecraft
+        			 			      relative to ring system during event
+        							  recorded in the associated RSR file.
+        						      (e.g., ingress, egress, chord: ingress, or
+        						    		 chord: egress)
+'SPM_START'                         : Event start time, recorded in seconds past
+        						      midnight of event DOY.
+        						      (e.g., 8884 for UTC_start =
+        									 2005 MAY 03 02:30:00)
+'SPM_END'                           : Event end time, recorded in seconds past
+        				 		      midnight of event DOY.
+        						      (e.g., 24151.45 for UTC_end =
+        									 2005 MAY 03 06:42:31)
+'RHO_START_KM'                      : Radial distance of the Saturn ring
+        			 			      plane intersection by the spacecraft-
+        			 			      to-observing-station light ray, at
+        			 			      the start of the event
+        						      (e.g., 202982.685)
+'RHO_END_KM'                        : Radial distance of the Saturn ring
+        	     				      plane intersection by the spacecraft-
+        		   				      to-observing-station light ray, at
+        						      the end of the event
+        						      (e.g., 29467.33006)
+'RHO_MIN_KM'                        : Minimum radial distance of the Saturn ring
+        	 					      plane intersection by the spacecraft-to- 
+        						      observing-station light ray 
+        						      (e.g., 29467.3300615)
+'RHO_MAX_KM'                        : Maximum radial distance of the Saturn ring
+        	    				      plane intersection by the spacecraft-to-
+        					 	      observing-station light ray
+        						      (e.g., 202982.684993)
+'RHO_MAX_ELEV_KM'                   : Radial distance of the Saturn ring
+        	  					      plane intersecion by spacecraft-to-
+        						      observing-station light ray, at the
+        						      moment the spacecraft is highest
+        			 			      in the sky relative to the observing 
+        							  station
+        						      (e.g., 202982.684993)
+'ELEV_MIN_RHO_DEG'                  : Elevation of spacecraft in the sky
+        						      relative to observing station, at
+        						      the moment of minimum ring plane
+        						      intersection by spacecraft-to-observer
+        						      light ray. (e.g., 11.42497899)
+'ELEV_MAX_DEG'                      : Maximum elevation of spacecraft in
+        			      the sky relative to observing station
+        						      (e.g., 11.42497899)
+'ELEV_MAX_RHO_DEG'                  : Elevation of spacecraft in the sky
+        						      relative to observing station, at
+        						      the moment of maximum ring plane
+        						      intersection by spacecraft-to- 
+        						      observer light ray.
+        						      (e.g., 62.52023511)
+'B_DEG'                             : The angle in degrees measured at the ring
+        						      intercept point, starting from the
+        						      ring plane and ending in the direction
+        						      of the photon heading toward the
+        			 			      observer. This angle is positive on
+        			 			      the north side of Saturn's rings and
+        			 			      negative on the south side.
+        						      (e.g., -23.57613848)
+'ATMOSPHERE_DETECTION_SPM_START'    : The earliest time during the event at 
+        							  which the Saturn atmosphere was detected
+        							  by the spacecraft-to-observer light ray,
+        							  measured in seconds past midnight of 
+        							  event DOY.
+        						      (e.g., 21430)
+'ATMOSPHERE_DETECTION_SPM_END'      : The latest time during the event at which
+        							  the Saturn atmosphere was detected by the
+        					          spacecraft-to-observer light ray, 
+        							  measured in seconds past midnight of
+        							  event DOY.
+        						      (e.g., 24151)
+'ATMOSPHERE_DETECTION_RHO_KM_START' : The ring radius intercept at the time of
+        							  'ATMOSPHERE_DETECTION_SPM_START'
+        							  (e.g., 62133.43466)
+'ATMOSPHERE_DETECTION_RHO_KM_END'   : The ring radius intercept at the time of
+        							  'ATMOSPHERE_DETECTION_SPM_END'
+        							  (e.g., 29467.33006)
+'KERNELS'                           : List of SPICE kernels used to
+        		   					  compute spacecraft trajectory
+        							  (e.g., ['cpck09Jun2005.tpc';
+        									  '050606R_SCPSE_05114_05132.bsp';
+        									  'naif0012.tls';
+        								 	  'de421.bsp';
+            								  'earthstns_itrf93_050714.bsp';
+            								  'earth_000101_180919_180629.bpc'])

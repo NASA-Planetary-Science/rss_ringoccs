@@ -6,6 +6,8 @@ Purpose: Write GEO data and label files in PDS3 format.
 
 Revisions:
     2018 Jul 23 - jfong - copied from jwf_pds3_geo_series_v3.py
+    2018 Sep 10 - jfong - add underscore to record type and product type
+
 '''
 import pdb
 import time
@@ -120,7 +122,7 @@ def get_geo_series_info(rev_info, geo_inst, series_name, prof_dir):
 
 
     PDS_VERSION_ID = 'PDS3'
-    RECORD_TYPE = 'FIXED LENGTH'
+    RECORD_TYPE = 'FIXED_LENGTH'
     RECORD_BYTES = pds3.get_record_bytes(ncol, nchar, ndelim, nspecial)
     FILE_RECORDS = str(len(sampling_parameter_arr))
     SERIES_NAME = series_name
@@ -128,7 +130,7 @@ def get_geo_series_info(rev_info, geo_inst, series_name, prof_dir):
     DATA_SET_ID = '"CO-SR-RSS-?/?-OCC-V0.1"'
     RING_OBSERVATION_ID = pds3.get_ring_obs_id(year, doy, band, dsn)
     PRODUCT_ID = series_name
-    PRODUCT_TYPE = 'OCCULTATION GEOMETRY'
+    PRODUCT_TYPE = 'OCCULTATION_GEOMETRY'
     PRODUCT_CREATION_TIME = current_time_ISOD
     PRODUCER_ID = '"TC2017"'
 

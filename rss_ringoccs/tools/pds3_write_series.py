@@ -287,7 +287,8 @@ def write_history_text(f, hist_list_keys, hist_dict, hist_dict_keys):
 
                     else: # if not a dictionary
                         if varkey == 'kernels':
-                            this_input = ['"' + x.split('/')[-1] + '"'
+                            pdb.set_trace()
+                            this_input = [x.split('/')[-1]
                                     for x in this_input]
                         if varkey == 'rsr_file':
                             rsr_dir = this_input.rsplit('/', 1)[0] + '/'
@@ -325,7 +326,7 @@ def write_history_text(f, hist_list_keys, hist_dict, hist_dict_keys):
                                 f.write(h_indent + ''.ljust(hpad+3)
                                         + str(varkey) + ': '
                                         + str(this_input) + ',' + cr)
-                    n_input = n_input+1
+                        n_input = n_input+1
             else:
                 f.write(h_indent + this_kwd.ljust(hpad) + eq + this_val + cr)
         hists_written.append(str(this_inst))
@@ -400,7 +401,7 @@ def get_ring_profile_direction(rho_vals):
 
         
 def get_record_bytes(ncol, nchar, ndelim, nspecial):
-    nchar = ncol * (nchar + ndelim) + nspecial
+    nchar = ncol * (nchar + ndelim) + nspecial - 1
     return str(nchar)
 
         

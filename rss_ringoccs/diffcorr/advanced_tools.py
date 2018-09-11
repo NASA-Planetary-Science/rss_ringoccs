@@ -3,9 +3,10 @@ import numpy as np
 from scipy import interpolate
 from .diffraction_correction import DiffractionCorrection
 from .physics_functions import fresnel_forward, freq_wav
-from rss_ringoccs.tools.misc_tools import get_geo, ExtractCSVData
+from rss_ringoccs.tools.CSV_tools import get_geo, ExtractCSVData
 
-class compare_tau(object):
+
+class CompareTau(object):
     def __init__(self,geo,cal,dlp,tau,res,rng='all',
         wtype="kb25",bfac=True,fft=False,verbose=True,norm=True):
 
@@ -35,7 +36,8 @@ class compare_tau(object):
         self.wtype       = wtype
         self.res         = res
 
-class find_optimal_resolution(object):
+
+class FindOptimalResolution(object):
     def __init__(self,geo,cal,dlp,tau,sres,dres,nres,
         rng='all',wlst=['kb25'],verbose=True):
         self.linfint = None
@@ -96,7 +98,8 @@ class find_optimal_resolution(object):
         self.resint  = resint
         self.resfft  = resfft
 
-class delta_impulse_diffraction(object):
+
+class DeltaImpulseDiffraction(object):
     def __init__(self,geo,lambda_km,res,rho,dx_km_desired=0.25,
         occ=False,wtype='kb25',fwd=False,norm=True,bfac=True,
         verbose=True,fft=False,psitype='full',usefres=False):
@@ -308,7 +311,8 @@ class delta_impulse_diffraction(object):
         del geo_rho,geo_drho,geo_D,geo_phi,geo_B,D_km_interp,rho_dot_interp
         del phi_deg_vals,phi_deg_interp,B_deg_interp,B_deg_vals
 
-class double_slit_diffraction(object):
+
+class DoubleSlitDiffraction(object):
     def __init__(
         self,geo,lambda_km,res,rho_s,rho_e,rho1,rho2,rho3,rho4,dx_km_desired=0.25,
         occ=False,wtype='kb25',fwd=False,norm=True,bfac=True,

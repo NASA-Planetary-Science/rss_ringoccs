@@ -3,10 +3,18 @@ import time
 import numpy as np
 from scipy.special import lambertw, iv
 from rss_ringoccs.tools.write_history_dict import write_history_dict
+
+# Declare constant for the speed of light (km/s)
 SPEED_OF_LIGHT_KM = 299792.4580
+
+# Declare constants for multiples of pi.
 TWO_PI = 6.283185307179586476925287
 ONE_PI = 3.141592653589793238462643
-RECIPROCAL_E = 0.3678794411714423215955238
+
+# Declare constant for the reciprocal of e.
+RCPR_E = 0.3678794411714423215955238
+
+# Declare constants for various Bessel function inputs (I_0(x)).
 IV0_20 = 87.10850209627940
 IV0_25 = 373.02058499037486
 IV0_35 = 7257.7994923041760
@@ -24,7 +32,7 @@ region_dict = {
     'titanringlet':    [77870.0, 77930.0],
     'huygens':         [117650.0, 117950.0],
     'huygensringlet':  [117650.0, 117950.0]
-    }
+}
 
 
 class DiffractionCorrection(object):
@@ -811,7 +819,7 @@ class DiffractionCorrection(object):
 
             P1 = P/(1-P)
             P2 = P1*np.exp(P1)
-            if ((RECIPROCAL_E + np.min(P2)) < 1.0e-16):
+            if ((RCPR_E + np.min(P2)) < 1.0e-16):
                 raise ValueError(
                     "\n\tOne of the parameters used for calculating\n"
                     "\tthe window width is close to an illegal value.\n"

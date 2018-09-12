@@ -534,7 +534,7 @@ def normalize(dx,ker,f_scale,error_check=True):
     norm_fact = np.sqrt(2.0) * f_scale / T1         # Normalization Factor
     return norm_fact
 
-def get_range_actual(rho,rng,w_vals):
+def get_range_actual(rho, rng, w_vals):
     """
         Function:
             get_range_actual

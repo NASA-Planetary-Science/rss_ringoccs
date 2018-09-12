@@ -1,4 +1,3 @@
-import sys
 import numpy as np
 from scipy import interpolate
 from .diffraction_correction import DiffractionCorrection
@@ -7,34 +6,32 @@ from rss_ringoccs.tools.CSV_tools import get_geo, ExtractCSVData
 
 
 class CompareTau(object):
-    def __init__(self,geo,cal,dlp,tau,res,rng='all',
-        wtype="kb25",bfac=True,fft=False,verbose=True,norm=True):
+    def __init__(self, geo, cal, dlp, tau, res,
+                 rng='all', wtype="kb25", bfac=True,
+                 fft=False, verbose=True, norm=True):
 
-        data        = ExtractCSVData(
-            geo,cal,dlp,taudata=tau,verbose=verbose
-        )
-        tr          = data.tau_rho
-        tau_power   = data.power_vals
-        tau_phase   = data.phase_vals
-        tau_tau     = data.tau_vals
-        rec         = DiffractionCorrection(
-            data,res,rng=rng,bfac=bfac,wtype=wtype,fft=fft,
-            verbose=verbose,norm=norm
-        )
+        data = ExtractCSVData(geo, cal, dlp, taudata=tau, verbose=verbose)
+        rec = DiffractionCorrection(data, res, rng=rng, bfac=bfac, wtype=wtype,
+                                    fft=fft, verbose=verbose, norm=norm)
         rho_km_vals = rec.rho_km_vals
-        rmin,rmax = np.min(rho_km_vals),np.max(rho_km_vals)
-        tau_rstart  = int(np.min((tr-rmin>=0).nonzero()))
-        tau_rfin    = int(np.max((rmax-tr>=0).nonzero()))
+        tau_power = data.power_vals
+        tau_phase = data.phase_vals
+        tau_tau = data.tau_vals
+        tr = data.tau_rho
+        rmin = np.min(rho_km_vals)
+        rmax = np.max(rho_km_vals)
+        tau_rstart = int(np.min((tr-rmin>=0).nonzero()))
+        tau_rfin = int(np.max((rmax-tr>=0).nonzero()))
 
         self.rho_km_vals = rec.rho_km_vals
-        self.power_vals  = rec.power_vals
-        self.tau_vals    = rec.tau_vals
-        self.phase_vals  = rec.phase_vals
-        self.tau_power   = tau_power[tau_rstart:tau_rfin+1]
-        self.tau_tau     = tau_tau[tau_rstart:tau_rfin+1]
-        self.tau_phase   = tau_phase[tau_rstart:tau_rfin+1]
-        self.wtype       = wtype
-        self.res         = res
+        self.power_vals = rec.power_vals
+        self.phase_vals = rec.phase_vals
+        self.tau_power = tau_power[tau_rstart:tau_rfin+1]
+        self.tau_phase = tau_phase[tau_rstart:tau_rfin+1]
+        self.tau_vals = rec.tau_vals
+        self.tau_tau = tau_tau[tau_rstart:tau_rfin+1]
+        self.wtype = wtype
+        self.res = res
 
 
 class FindOptimalResolution(object):
@@ -46,10 +43,10 @@ class FindOptimalResolution(object):
         self.l2fft   = None
 
         nwins   = np.size(wlst)
-        linfint = np.zeros((nwins,nres))
-        l2int   = np.zeros((nwins,nres))
-        linffft = np.zeros((nwins,nres))
-        l2fft   = np.zeros((nwins,nres))
+        linfint = np.zeros((nwins, nres))
+        l2int   = np.zeros((nwins, nres))
+        linffft = np.zeros((nwins, nres))
+        l2fft   = np.zeros((nwins, nres))
         resint  = np.zeros((nwins))
         resfft  = np.zeros((nwins))
         eres    = sres + (nres-1)*dres
@@ -66,11 +63,10 @@ class FindOptimalResolution(object):
         rstart      = int(np.min((tr-rmin>=0).nonzero()))
         rfin        = int(np.max((rmax-tr>=0).nonzero()))
         tau_power   = tau_power[rstart:rfin+1]
-        sys.stdout.write("\033[K")
         for i in np.arange(nres):
             for j in range(nwins):
-                wtype        = wlst[j]       
-                recint       = DiffractionCorrection(data,res,rng=rng,wtype=wtype,fft=False)
+                wtype = wlst[j]
+                recint = DiffractionCorrection(data,res,rng=rng,wtype=wtype,fft=False)
                 p_int        = recint.power_vals
                 linf         = np.max(np.abs(p_int - tau_power))
                 l2           = np.sqrt(np.sum(np.abs(p_int-tau_power)**2)*recint.dx_km)
@@ -83,11 +79,11 @@ class FindOptimalResolution(object):
                 l2           = np.sqrt(np.sum(np.abs(p_fft-tau_power)**2)*recint.dx_km)
                 linffft[j,i] = linf
                 l2fft[j,i]   = l2
-                sys.stdout.write("\033[K")
                 if verbose:
                     printmes = ('Res:',res,'Max:',eres,"WTYPE:",wtype)
                     print("%s %f %s %f %s %s" % printmes)
             res += dres
+
         for j in range(nwins):
             resint[j] = sres+dres*np.min((linfint[j,...] == np.min(linfint[j,...])).nonzero())
             resfft[j] = sres+dres*np.min((linffft[j,...] == np.min(linffft[j,...])).nonzero())
@@ -127,7 +123,7 @@ class DeltaImpulseDiffraction(object):
             raise TypeError("psitype must be a string. Ex: 'full'")
         if not isinstance(verbose, bool):
             raise TypeError("usefres must be Boolean: True/False")
-    
+
         data = get_geo(geo,verbose=verbose)
         self.__retrieve_variables(data,verbose)
         self.__compute_variables(dx_km_desired,occ,verbose)
@@ -341,7 +337,7 @@ class DoubleSlitDiffraction(object):
             raise TypeError("psitype must be a string. Ex: 'full'")
         if not isinstance(verbose, bool):
             raise TypeError("usefres must be Boolean: True/False")
-    
+
         data = get_geo(geo,verbose=verbose)
         self.__retrieve_variables(data,verbose)
         self.__compute_variables(dx_km_desired,occ,verbose)

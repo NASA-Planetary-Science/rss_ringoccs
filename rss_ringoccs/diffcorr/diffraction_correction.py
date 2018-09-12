@@ -1,10 +1,12 @@
 # Import dependencies for the diffcorr module
 import time
-import sys
 import numpy as np
 from scipy.special import lambertw, iv
 from rss_ringoccs.tools.write_history_dict import write_history_dict
 SPEED_OF_LIGHT_KM = 299792.4580
+TWO_PI = 6.283185307179586476925287
+ONE_PI = 3.141592653589793238462643
+RECIPROCAL_E = 0.3678794411714423215955238
 
 # Dictionary containing regions of interest within the Saturnian Rings.
 region_dict = {
@@ -120,6 +122,7 @@ class DiffractionCorrection(object):
                     'MTR2'      Second Order Series from MTR86.
                     'MTR3'      Third Order Series from MTR86.
                     'MTR4'      Fourth Order Series from MTR86.
+                    'Fresnel'   Standard Fresnel approximation.
                 The variable is neither case nor space sensitive.
                 Default is set to 'full'.
             verbose:
@@ -175,83 +178,294 @@ class DiffractionCorrection(object):
         History:
             Created: RJM - 2018/05/16 5:40 P.M.
     """
-    def __init__(self, NormDiff, res, rng="all", wtype="kb25", fwd=False,
-                 norm=True, verbose=False, bfac=True, sigma=2.e-13,
-                 fft=False, psitype="full"):
+    def __init__(self, NormDiff, res, rng="all", wtype="kb25",
+                 fwd=False, norm=True, verbose=False, bfac=True,
+                 sigma=2.e-13, fft=False, psitype="full"):
+
+        # Set a variable for the starting time of the computation.
         t1 = time.time()
+
+        # Make sure that verbose is a boolean.
+        if not isinstance(verbose, bool):
+            raise TypeError(
+                "\n\tverbose must be Boolean: True/False\n"
+                "\tYour input has type: %s\n"
+                "\tInput should have type: bool\n"
+                "\tSet verbose=True or verbose=False\n"
+                % (type(verbose).__name__)
+            )
+        else:
+            pass
 
         if verbose:
             print("Processing Diffraction Correction:")
             print("\tRunning Error Check on Input Arguments...")
-        if (not isinstance(res, float)) or (not isinstance(res, int)):
+
+        # Check that the input resolution is a positive floating point number.
+        if (not isinstance(res, float)):
             try:
                 res = float(res)
-            except TypeError:
-                raise TypeError("res must be a positive floating point number")
-        if (res <= 0.0):
-            raise ValueError("res must be a positive floating point number")
+            except (TypeError, ValueError):
+                raise TypeError(
+                    "\n\tres must be a positive floating point number\n"
+                    "\tYour input has type: %s\n"
+                    "\tInput should have type: float\n"
+                    % (type(res).__name__)
+                )
+        elif (res <= 0.0):
+            raise ValueError(
+                "\n\tres must be a positive floating point number\n"
+                "\tYour requested resolution (km): %f\n"
+                % (res)
+            )
+        else:
+            pass
+        
+        # Check that the requested window type is a legal input.
         if not isinstance(wtype, str):
-            raise TypeError("wtype must be a string. Ex: 'coss'")
-        elif not (wtype in self.__func_dict):
             erm = ""
             for key in self.__func_dict:
-                erm = "%s%s\n" % (erm, key)
-            raise ValueError("\nIllegal string used for wtype.\n"
-                             "\rAllowed Strings:\n%s" % erm)
+                erm = "%s\t\t'%s'\n" % (erm, key)
+            raise TypeError(
+                "\n\twtype must be a string.\n"
+                "\tYour input has type: %s\n"
+                "\tInput should have type: str\n"
+                "\tAllowed string are:\n%s"
+                % (type(wtype).__name__,erm)
+            )
+        else:
+            # Remove spaces, quotes, and apostrophe's from the wtype variable.
+            wtype = wtype.replace(" ", "").replace("'", "").replace('"', "")
+
+            # Set wtype string to lower-case.
+            wtype = wtype.lower()
+            if not (wtype in self.__func_dict):
+                erm = ""
+                for key in self.__func_dict:
+                    erm = "%s\t\t'%s'\n" % (erm, key)
+                raise ValueError(
+                    "\n\tIllegal string used for wtype.\n"
+                    "\tYour string: '%s'\n"
+                    "\tAllowed Strings:\n%s"
+                    % (wtype,erm)
+                )
+            else:
+                pass
+
+        # Check that the forward boolean is valid.
         if not isinstance(fwd, bool):
-            raise TypeError("fwd must be Boolean: True/False")
+            raise TypeError(
+                "\n\tfwd must be Boolean: True/False\n"
+                "\tYour input has type: %s\n"
+                "\tInput should have type: bool\n"
+                "\tSet fwd=True or fwd=False\n"
+                % (type(fwd).__name__)
+            )
+        else:
+            pass
+
+        # Ensure that the normalize boolean has a legal value.
         if not isinstance(norm, bool):
-            raise TypeError("norm must be Boolean: True/False")
+            raise TypeError(
+                "\n\tnorm must be Boolean: True/False\n"
+                "\tYour input has type: %s\n"
+                "\tInput should have type: bool\n"
+                "\tSet norm=True or norm=False\n"
+                % (type(norm).__name__)
+            )
+        else:
+            pass
+
+        # Make sure that bfac is a boolean.
         if not isinstance(bfac, bool):
-            raise TypeError("bfac must be Boolean: True/False")
+            raise TypeError(
+                "\n\tbfac must be Boolean: True/False\n"
+                "\tYour input has type: %s\n"
+                "\tInput should have type: bool\n"
+                "\tSet bfac=True or bfac=False\n"
+                % (type(bfac).__name__)
+            )
+        else:
+            pass
+
+        # Check that the fft boolean is valid.
         if not isinstance(fft, bool):
-            raise TypeError("fft must be Boolean: True/False")
-        if not isinstance(verbose, bool):
-            raise TypeError("verbose must be Boolean: True/False")
+            raise TypeError(
+                "\n\tfft must be Boolean: True/False\n"
+                "\tYour input has type: %s\n"
+                "\tInput should have type: bool\n"
+                "\tSet fft=True or fft=False\n"
+                % (type(fft).__name__)
+            )
+        else:
+            pass
+
+        # Cbeck that psitype is a valid string.
         if not isinstance(psitype, str):
-            raise TypeError("psitype must be a string. Ex: 'full'")
+            erm = ""
+            for key in self.__psi_types:
+                erm = "%s\t\t'%s'\n" % (erm, key)
+            raise TypeError(
+                "\n\tpsitype must be a string.\n"
+                "\tYour input has type: %s\n"
+                "\tInput should have type: str\n"
+                "\tAllowed strings are:\n%s"
+                % (type(psitype).__name__, erm)
+            )
+        else:
+            # Remove spaces, quotes, and apostrophe's from the psitype.
+            psitype = psitype.replace(" ", "").replace("'", "").replace('"', "")
+            psitype = psitype.lower()
+
+            # Perform error check, print legal inputs if needed.
+            if not (psitype in self.__psi_types):
+                erm = ""
+                for key in self.__psi_types:
+                    erm = "%s\t\t'%s'\n" % (erm, key)
+                raise TypeError(
+                    "\n\tInvalid string for psitype.\n"
+                    "\tYour string: '%s'\n"
+                    "\tAllowed strings are:\n%s"
+                    % (psitype, erm)
+                )
+            else:
+                pass
+
+        # Check that the requested range is a legal input.
         if (not isinstance(rng, str)) and (not isinstance(rng, list)):
             try:
-                rng = [np.min(rng), np.max(rng)]
-                if (np.min(rng) < 0):
+                if (np.size(rng) < 2):
+                    erm = ""
+                    for key in region_dict:
+                        erm = "%s\t\t'%s'\n" % (erm, key)
+                    raise TypeError(
+                        "\n\trng must be a list a valid string.\n"
+                        "\tYour input has type: %s\n"
+                        "\tSet range=[a,b], where a is the STARTING point\n"
+                        "\tand b is the ENDING point of reconstruction, or\n"
+                        "\tuse one of the following valid strings:\n%s"
+                        % (type(rng).__name__,erm)
+                    )
+                elif (np.min(rng) < 0):
                     raise ValueError(
-                        "Minimum requested range must be positive"
-                        )
+                        "\n\tMinimum requested range must be positive\n"
+                        "\tYour minimum requested range: %f\n"
+                        % (np.min(rng))
+                    )
+                else:
+                    rng = [np.min(rng), np.max(rng)]
             except TypeError:
-                raise TypeError("rng must be a list [a,b] or a valid string")
+                erm = ""
+                for key in region_dict:
+                    erm = "%s\t\t'%s'\n" % (erm, key)
+                raise TypeError(
+                    "\n\trng must be a list of floating\n"
+                    "\tpoint numbers or a valid string.\n"
+                    "\tYour input has type: %s\n"
+                    "\tSet range=[a,b], where a is the STARTING point\n"
+                    "\tand b is the ENDING point of reconstruction, or\n"
+                    "\tuse one of the following valid strings:\n%s"
+                    % (type(rng).__name__,erm)
+                )
         elif isinstance(rng, list):
+            # Try converting all elements to floating point numbers.
             if (not all(isinstance(x, float) for x in rng)):
                 try:
-                    for i in range(np.size(rng)):
+                    for i in np.arange(np.size(rng)):
                         rng[i] = float(rng[i])
-                except TypeError:
+                except (TypeError, ValueError):
+                    erm = ""
+                    for key in region_dict:
+                        erm = "%s\t\t'%s'\n" % (erm, key)
                     raise TypeError(
-                        "rng must be a list of floating point numbers"
-                        )
-            elif (np.size(rng) > 2):
-                raise TypeError("rng must contain two numbers: rng = [a,b]")
-            elif (np.min(rng) < 0.0):
-                raise ValueError("Minimum requested range must be positive")
+                        "\n\trng must be a list of floating\n"
+                        "\tpoint numbers or a valid string.\n"
+                        "\tYour input has type: %s\n"
+                        "\tSet range=[a,b], where a is the STARTING point\n"
+                        "\tand b is the ENDING point of reconstruction, or\n"
+                        "\tuse one of the following valid strings:\n%s"
+                        % (type(rng).__name__,erm)
+                    )
+            else:
+                pass
+
+            # Check that there are at least two numbers.
+            if (np.size(rng) < 2):
+                erm = ""
+                for key in region_dict:
+                    erm = "%s\t\t'%s'\n" % (erm, key)
+                raise TypeError(
+                    "\n\trng must contain two numbers: rng=[a,b]\n"
+                    "\tYou provided less than 2 numbers.\n"
+                    "\tSet range=[a,b], where a is the STARTING point\n"
+                    "\tand b is the ENDING point of reconstruction, or\n"
+                    "\tuse one of the following valid strings:\n%s"
+                    % (erm)
+                )
+            else:
+                pass
+
+            # Check that the smallest number is positive.
+            if (np.min(rng) < 0.0):
+                raise ValueError(
+                    "\n\tMinimum requested range must be positive\n"
+                    "\tYour minimum requested range: %f\n"
+                    % (np.min(rng))
+                )
+            else:
+                pass
         elif isinstance(rng, str):
-            rng = rng.replace(" ", "").lower()
+            rng = rng.replace(" ", "").replace("'", "").replace('"', "")
+            rng = rng.lower()
             if not (rng in region_dict):
                 erm = ""
                 for key in region_dict:
-                    erm = "%s%s\n" % (erm, key)
-                raise ValueError("\nIllegal string used for rng.\n"
-                                 "\rAllowed Strings:\n%s" % erm)
+                    erm = "%s\t\t'%s'\n" % (erm, key)
+                raise ValueError(
+                    "\n\tIllegal string used for rng.\n"
+                    "\tYour string: '%s'\n"
+                    "\tAllowed Strings:\n%s"
+                    % (rng, erm)
+                )
+        else:
+            erm = ""
+            for key in region_dict:
+                erm = "%s\t\t'%s'\n" % (erm, key)
+            raise TypeError(
+                "\n\trng must be a list of floating\n"
+                "\tpoint numbers or a valid string.\n"
+                "\tYour input has type: %s\n"
+                "\tSet range=[a,b], where a is the STARTING point\n"
+                "\tand b is the ENDING point of reconstruction, or\n"
+                "\tuse one of the following valid strings:\n%s"
+                % (type(rng).__name__,erm)
+            )
+
+        # Check that the Allen Deviation is a legal value.
         if (not isinstance(sigma,float)):
             try:
                 sigma = float(sigma)
-            except TypeError:
+            except (TypeError, ValueError):
                 raise TypeError(
-                    "sigma must be a positive floating point number."
-                    )
-        if (np.min(sigma) < 0.0):
-            raise TypeError("sigma must be a positive floating point number.")
+                    "\n\tsigma must be a positive floating point number.\n"
+                    "\tYour input has type: %s\n"
+                    % (type(sigma).__name__)
+                )
+        else:
+            pass
+
+        if (np.min(sigma) <= 0.0):
+                raise ValueError(
+                    "\n\tsigma must be a positive floating point number.\n"
+                    "\tYour input: %f\n"
+                    % (sigma)
+                )
+        else:
+            pass
 
         if verbose:
             print("\tAssigning Inputs as Attributes...")
+
         # Set forward power variable to None in case it isn't defined later.
         self.p_norm_fwd_vals = None
 
@@ -265,7 +479,7 @@ class DiffractionCorrection(object):
         self.fft = fft
 
         # Assing window type and Allen deviation variables as attributes.
-        self.wtype = wtype.replace(" ", "").lower()
+        self.wtype = wtype
         self.sigma = sigma
 
         # Assign normalization and b-factor variables as attributes.
@@ -277,17 +491,23 @@ class DiffractionCorrection(object):
 
         # Assign verbose and psi approximation variables as attributes.
         self.verbose = verbose
-        self.psitype = psitype.replace(" ", "").lower()
+        self.psitype = psitype
 
         # Retrieve variables from the NormDiff class, setting as attributes.
         if verbose:
             print("\tRetrieving Variables from NormDiff Instance...")
+
         try:
-            # Ring radius and normalized power.
+            # Ring radius
             self.rho_km_vals = NormDiff.rho_km_vals
+
+            # Compute sampling distance (km)
+            self.dx_km = self.rho_km_vals[1] - self.rho_km_vals[0]
+
+            # Retrieve normalized power.
             self.p_norm_vals = NormDiff.p_norm_vals
-            
-            # Phase of signal, negating do to mathematical conventions.
+
+            # Phase of signal, negating due to mathematical conventions.
             self.phase_rad_vals = -NormDiff.phase_rad_vals
 
             # Ring opening angle.
@@ -306,11 +526,11 @@ class DiffractionCorrection(object):
             self.rho_dot_kms_vals = NormDiff.rho_dot_kms_vals
 
             # Retrieve time variables (Earth, Ring, and Spacecraft ET).
-            self.t_oet_spm_vals = NormDiff.t_oet_spm_vals  
-            self.t_ret_spm_vals = NormDiff.t_ret_spm_vals         
-            self.t_set_spm_vals = NormDiff.t_set_spm_vals  
+            self.t_oet_spm_vals = NormDiff.t_oet_spm_vals
+            self.t_ret_spm_vals = NormDiff.t_ret_spm_vals
+            self.t_set_spm_vals = NormDiff.t_set_spm_vals
 
-            # Pole corrections in ring radius.       
+            # Pole corrections in ring radius.
             self.rho_corr_pole_km_vals = NormDiff.rho_corr_pole_km_vals
 
             # Timing corrections in ring radius.
@@ -324,59 +544,238 @@ class DiffractionCorrection(object):
 
             # History from the NormDiff instance.
             self.dathist = NormDiff.history
-        except AttributeError as errmes:
-            raise AttributeError("NormDiff missing an attribute. %s" % errmes)
+        except AttributeError:
+            try:
+                # Retrieve normalized power.
+                self.p_norm_vals = NormDiff.p_norm_vals
+
+                # Phase of signal, negating due to mathematical conventions.
+                self.phase_rad_vals = -NormDiff.phase_rad_vals
+
+                # Ring opening angle.
+                self.B_rad_vals = NormDiff.B_rad_vals
+
+                # Spacecraft-to-Ring Intercept Point (RIP) distance.
+                self.D_km_vals = NormDiff.D_km_vals
+
+                # Ring azimuth angle.
+                self.phi_rad_vals = NormDiff.phi_rad_vals
+
+                # Frequency from the recieved signal.
+                self.f_sky_hz_vals = NormDiff.f_sky_hz_vals
+
+                # RIP velocity.
+                self.rho_dot_kms_vals = NormDiff.rho_dot_kms_vals
+
+                n_elements = np.size(self.rho_km_vals)
+
+                # Retrieve time variables (Earth, Ring, and Spacecraft ET).
+                self.t_oet_spm_vals = np.zeros(n_elements)
+                self.t_ret_spm_vals = self.t_oet_spm_vals
+                self.t_set_spm_vals = self.t_oet_spm_vals
+
+                # Pole corrections in ring radius.
+                self.rho_corr_pole_km_vals = self.t_oet_spm_vals
+
+                # Timing corrections in ring radius.
+                self.rho_corr_timing_km_vals = self.t_oet_spm_vals
+
+                # Ring longitude angle.
+                self.phi_rl_rad_vals = self.t_oet_spm_vals
+
+                # Optical depth of diffraction profile.
+                self.raw_tau_threshold_vals = self.t_oet_spm_vals
+
+                # History from the NormDiff instance.
+                self.dathist = NormDiff.history
+
+                del n_elements
+
+            except AttributeError as errmes:
+                raise AttributeError(
+                    "\n\tNormDiff missing an attribute. %s\n" % (errmes)
+                )
+
+        # Check that the data is well sampled for the requested resolution.
+        if self.res < 2.0*self.dx_km:
+            raise ValueError(
+                "\n\tRequested resolution is less than twice the\n"
+                "\tsample spacing of the input data. This\n"
+                "\tviolates the sampling theorem and will result\n"
+                "\tin an inaccurate reconstruction.\n\n"
+                "\tRequested Resolution (km): %f\n"
+                "\tSample Spacing (km): %f\n\n"
+                "\tTO CORRECT THIS:"
+                "\t\tChoose a resolution GREATER than %f km\n" %
+                (self.res,self.dx_km,2.0*self.dx_km)
+            )
+        else:
+            pass
 
         # Compute mu: Sin(|B|)
         self.mu_vals = np.sin(np.abs(self.B_rad_vals))
 
         if verbose:
             print("\tCheck Variables for Errors...")
+
         # Check that rho_km_vals is increasing and the rev isn't a chord occ.
         drho = [np.min(self.rho_dot_kms_vals),np.max(self.rho_dot_kms_vals)]
-        dx   = self.rho_km_vals[1]-self.rho_km_vals[0]
+
         if (drho[0] < 0) and (drho[1] > 0):
-            raise ValueError("drho/dt had positive and negative values.")
-        if (dx > 0) and (drho[1] < 0):
+            raise ValueError(
+                "\n\tdrho/dt has positive and negative values.\n"
+                "\tYour input file is probably a chord occultation.\n"
+                "\tDiffraction Correction can only be perform for\n"
+                "\tone event at a time. That is, either an ingress\n"
+                "\tor an egress event.\n\n"
+                "\tTO CORRECT THIS:\n"
+                "\t\tSplit the input into two parts: An egress\n"
+                "\t\tportion and an ingress portion, and then run\n"
+                "\t\tdiffraction correction on the individual pieces.\n"
+            )
+        elif (self.dx_km > 0) and (drho[1] < 0):
             self.rho_dot_kms_vals=np.abs(self.rho_dot_kms_vals)
-        if (dx < 0):
-            self.rho_km_vals      = self.rho_km_vals[::-1]
-            self.phase_rad_vals   = self.phase_rad_vals[::-1]
-            self.p_norm_vals      = self.p_norm_vals[::-1]
-            self.phi_rad_vals     = self.phi_rad_vals[::-1]
-            self.B_rad_vals       = self.B_rad_vals[::-1]
-            self.f_sky_hz_vals    = self.f_sky_hz_vals[::-1]
-            self.D_km_vals        = self.D_km_vals[::-1]
+        elif (self.dx_km < 0):
+            self.rho_km_vals = self.rho_km_vals[::-1]
+            self.phase_rad_vals = self.phase_rad_vals[::-1]
+            self.p_norm_vals = self.p_norm_vals[::-1]
+            self.phi_rad_vals = self.phi_rad_vals[::-1]
+            self.B_rad_vals = self.B_rad_vals[::-1]
+            self.f_sky_hz_vals = self.f_sky_hz_vals[::-1]
+            self.D_km_vals  = self.D_km_vals[::-1]
             self.rho_dot_kms_vals = np.abs(self.rho_dot_kms_vals[::-1])
+        else:
+            del drho
 
         # Check that all variables from NormDiff are the same size.
         n_rho = np.size(self.rho_km_vals)
         if (np.size(self.phase_rad_vals) != n_rho):
-            raise ValueError("Bad NormDiff: len(phase) != len(rho)")
-        if (np.size(self.p_norm_vals) != n_rho):
-            raise ValueError("Bad NormDiff: len(power) != len(rho)")
-        if (np.size(self.phi_rad_vals) != n_rho):
-            raise ValueError("Bad NormDiff: len(phi) != len(rho)")
-        if (np.size(self.B_rad_vals) != n_rho):
-            raise ValueError("Bad NormDiff: len(B) != (rho)")
-        if (np.size(self.f_sky_hz_vals) != n_rho):
-            raise ValueError("Bad NormDiff: len(frequency) != len(rho)")
-        if (np.size(self.D_km_vals) != n_rho):
-            raise ValueError("Bad NormDiff: len(D) != len(rho)")
-        if (np.size(self.rho_dot_kms_vals) != n_rho):
-            raise ValueError("Bad NormDiff: len(rho_dot) != len(rho)")
+            raise IndexError(
+                "\tBad NormDiff: len(phase) != len(rho)\n"
+                "\tThe number of data points in phase is\n"
+                "\tnot equal to the number of data points\n"
+                "\tin radius. Check the input NormDiff\n"
+                "\tinstance for any errors.\n"
+            )
+        elif (np.size(self.p_norm_vals) != n_rho):
+            raise IndexError(
+                "\tBad NormDiff: len(power) != len(rho)\n"
+                "\tThe number of data points in power is\n"
+                "\tnot equal to the number of data points\n"
+                "\tin radius. Check the input NormDiff\n"
+                "\tinstance for any errors.\n"
+            )
+        elif (np.size(self.phi_rad_vals) != n_rho):
+            raise IndexError(
+                "\tBad NormDiff: len(phi) != len(rho)\n"
+                "\tThe number of data points in angle is\n"
+                "\tnot equal to the number of data points\n"
+                "\tin radius. Check the input NormDiff\n"
+                "\tinstance for any errors.\n"
+            )
+        elif (np.size(self.B_rad_vals) != n_rho):
+            raise IndexError(
+                "\tBad NormDiff: len(B) != len(rho)\n"
+                "\tThe number of data points in B is\n"
+                "\tnot equal to the number of data points\n"
+                "\tin radius. Check the input NormDiff\n"
+                "\tinstance for any errors.\n"
+            )
+        elif (np.size(self.f_sky_hz_vals) != n_rho):
+            raise IndexError(
+                "\tBad NormDiff: len(frequency) != len(rho)\n"
+                "\tThe number of data points in frequency is\n"
+                "\tnot equal to the number of data points\n"
+                "\tin radius. Check the input NormDiff\n"
+                "\tinstance for any errors.\n"
+            )
+        elif (np.size(self.D_km_vals) != n_rho):
+            raise IndexError(
+                "\tBad NormDiff: len(D) != len(rho)\n"
+                "\tThe number of data points in D is\n"
+                "\tnot equal to the number of data points\n"
+                "\tin radius. Check the input NormDiff\n"
+                "\tinstance for any errors.\n"
+            )
+        elif (np.size(self.rho_dot_kms_vals) != n_rho):
+            raise IndexError(
+                "\tBad NormDiff: len(rho_dot) != len(rho)\n"
+                "\tThe number of data points in velocity is\n"
+                "\tnot equal to the number of data points\n"
+                "\tin radius. Check the input NormDiff\n"
+                "\tinstance for any errors.\n"
+            )
+        else:
+            del n_rho
+
+        # Perform error checks on the NormDiff variables.
+        if (np.min(self.p_norm_vals) < 0.0):
+            raise ValueError(
+                "\n\tThere are negative values in the normalized\n"
+                "\tdiffracted power. Check the NormDiff instance\n"
+                "\tfor errors.\n"
+            )
+        elif (np.min(np.abs(self.phase_rad_vals)) > TWO_PI):
+            raise ValueError(
+                "\n\tThere are values of phase (in radians)\n"
+                "\tthat are greater than 2pi. Check the NormDiff\n"
+                "\tinstance for errors. Also check to make sure\n"
+                "\tthe values in the NormDiff intance are in\n"
+                "\tradians, and NOT degrees."
+            )
+        elif (np.min(np.abs(self.B_rad_vals)) > TWO_PI):
+            raise ValueError(
+                "\n\tThere are values of B (in radians)\n"
+                "\tthat are greater than 2pi. Check the NormDiff\n"
+                "\tinstance for errors. Also check to make sure\n"
+                "\tthe values in the NormDiff intance are in\n"
+                "\tradians, and NOT degrees."
+            )
+        elif (np.min(self.D_km_vals) < 0.0):
+            raise ValueError(
+                "\n\tThere are negative values for the spacecraft\n"
+                "\tto Ring-Intercept-Point distance, D. Check the\n"
+                "\tNormDiff instance for errors.\n"
+            )
+        elif (np.min(self.D_km_vals == 0.0)):
+            raise ValueError(
+                "\n\tThere are zero-valued elements for the\n"
+                "\tSpacecraft to Ring-Intercept-Point distance,\n"
+                "D. Check the NormDiff instance for errors."
+            )
+        elif (np.min(np.abs(self.phi_rad_vals)) > TWO_PI):
+            raise ValueError(
+                "\n\tThere are values of phi (in radians)\n"
+                "\tthat are greater than 2pi. Check the NormDiff\n"
+                "\tinstance for errors. Also check to make sure\n"
+                "\tthe values in the NormDiff intance are in\n"
+                "\tradians, and NOT degrees."
+            )
+        elif (np.min(self.f_sky_hz_vals < 0.0)):
+            raise ValueError(
+                "\n\tThere are negative values of the frequency.\n"
+                "\tCheck the NormDiff instance for errors.\n"
+            )
+        elif (np.min(self.f_sky_hz_vals == 0.0)):
+            raise ValueError(
+                "\n\tThere are zero-valued elements for the\n"
+                "\tfrequency. Check the NormDiff instance\n"
+                "\tfor errors.\n"
+            )
+        else:
+            pass
 
         if verbose:
             print("\tComputing Necessary Variables...")
+
         # Compute wavelength (km).
         self.lambda_sky_km_vals = SPEED_OF_LIGHT_KM / self.f_sky_hz_vals
 
-        # Compute sampling distance (km)
-        self.dx_km = self.rho_km_vals[1] - self.rho_km_vals[0]
-
         # Compute the complex transmittance.
-        self.T_hat_vals = np.sqrt(np.abs(self.p_norm_vals))*np.exp(
-            1j*self.phase_rad_vals)
+        theta = 1j*self.phase_rad_vals
+        abs_T = np.sqrt(self.p_norm_vals)
+        self.T_hat_vals = abs_T*np.exp(theta)
+        del theta, abs_T
 
         # Compute geometric qunatities for the Fresnel Scale.
         cb = np.cos(self.B_rad_vals)
@@ -386,57 +785,194 @@ class DiffractionCorrection(object):
         # Compute the Fresnel Scale (km).
         self.F_km_vals = np.sqrt(0.5 * self.lambda_sky_km_vals *
                                  self.D_km_vals * (1 - cb*cb*sp*sp)/(sb*sb))
+        del cb, sb, sp
         
         # Compute the Normalized Equaivalent Width (See MTR86 Equation 20)
-        self.norm_eq            = self.__func_dict[wtype]["normeq"]
+        self.norm_eq = self.__func_dict[wtype]["normeq"]
 
         # Compute the window width. (See MTR86 Equations 19, 32, and 33).
         if bfac:
-            omega = 2.0 * np.pi * self.f_sky_hz_vals
-            alpha = (omega*omega) * (sigma*sigma)/(2.0 * self.rho_dot_kms_vals)
-            P     = res / (alpha * (self.F_km_vals*self.F_km_vals))
+            omega = TWO_PI * self.f_sky_hz_vals
+            alpha = (omega*omega) * (sigma*sigma) / (2.0 * self.rho_dot_kms_vals)
+            P = res / (alpha * (self.F_km_vals*self.F_km_vals))
             # The inverse exists only if P>1.
             if (np.min(P) <= 1.0):
                 raise ValueError(
-                    "\nWarning: Bad Points!\n\
-                    \rEither rho_dot_kms_vals, F_km_vals, or res_km is\n\
-                    \rtoo small, or sigma is too large. Request coarser\n\
-                    \rresolution or set bfac=False as a keyword."
+                    "\n\tWarning: Bad Points!\n"
+                    "\tEither rho_dot_kms_vals, F_km_vals, or res_km is\n"
+                    "\ttoo small, or sigma is too large. Request coarser\n"
+                    "\tresolution or set bfac=False as a keyword."
                 )
-            self.w_km_vals = self.norm_eq*np.abs(((P-1)*lambertw(
-                np.exp(P/(1-P))*P/(1-P))+P)/(P-1)/alpha)
+            else:
+                pass
+
+            P1 = P/(1-P)
+            P2 = P1*np.exp(P1)
+            if ((RECIPROCAL_E + np.min(P2)) < 1.0e-16):
+                raise ValueError(
+                    "\n\tOne of the parameters used for calculating\n"
+                    "\tthe window width is close to an illegal value.\n"
+                    "\tThe Lambert W function is called and the\n"
+                    "\tmethod for calculating this fails when the\n"
+                    "\targument is close to -1/e. However, the\n"
+                    "\tfunction behaves perfectly well at this value\n"
+                    "\tand evaluates to 1. What causes this behavior\n"
+                    "\tis a low Allen deviation, low frequency, or a\n"
+                    "\thigh spacecraft velocity. In these scenarios\n"
+                    "\tthe 'b-factor' is nearly zero, and it's best\n"
+                    "\tto ingore this altogether\n\n"
+                    "\tTO CORRECT THIS:\n"
+                    "\tActivate the bfac paramter and set:\n"
+                    "\t\tbfac=False\n\n"
+                    "\tReconstruction should proceed as normal.\n"
+                )
+            else:
+                pass
+
+            self.w_km_vals = self.norm_eq*np.abs(lambertw(P2)-P1)/alpha
+            del omega, alpha, P, P1, P2
         else:
             self.w_km_vals = 2.0*self.norm_eq*self.F_km_vals*self.F_km_vals/res
 
         # From the requested range, extract array of the form [a,b]
-        if (type(rng) == type('Hello')):
-            rng = rng.replace(" ","").lower()
-            if (rng in region_dict): self.rng = np.array(region_dict[rng])
-            else:
-                erm = ""
-                for key in region_dict: erm = "%s%s\n" % (erm,key)
-                raise ValueError("Illegal Range. Allowed Strings:\n%s"%erm)
-        elif (np.size(rng) < 2):
-            raise TypeError("Only one value given for range. Use rng = [a,b]")
+        if (isinstance(rng, str)):
+            self.rng = np.array(region_dict[rng])
         else:
             self.rng = np.array([np.min(rng),np.max(rng)])
 
         # Compute the starting point and the number of points used.
-        rho         = self.rho_km_vals          # Ring radius.
-        w_max       = np.max(self.w_km_vals)    # Largest window used.
+        rho = self.rho_km_vals
+        w_max = np.max(self.w_km_vals)
 
         # Compute the smallest and largest allowed radii for reconstruction.
         rho_min_lim = np.min(rho)+np.ceil(w_max/2.0)
         rho_max_lim = np.max(rho)-np.ceil(w_max/2.0)
 
+        # Check that there is enough data for reconstruction.
+        if rho_min_lim > np.max(rho):
+            raise ValueError(
+                "\n\tThe window size needed for reconstruction is\n"
+                "\tis larger than the available range of data.\n\n"
+                "\tMinimum Available Radius in Data: %f\n"
+                "\tMaximum Available Radius in Data: %f\n"
+                "\tMinimum Reconstructed Radius: %f\n\n"
+                "\tThe minimum reconstructed radius is the minimum\n"
+                "\tavailable radius in data plus half of a window. This is\n"
+                "\tgreater than the maximum available data point, meaning\n"
+                "\tthere is insufficient data for the reconstruction.\n\n"
+                "\tTO CORRECT THIS:\n"
+                "\t\tRequest a coarser resolution or\n"
+                "\t\tselect a different window function.\n"
+                % (np.min(rho),np.max(rho),rho_min_lim)
+            )
+        elif rho_max_lim < np.min(rho):
+            raise ValueError(
+                "\n\tThe window size needed for reconstruction is\n"
+                "\tis larger than the available range of data.\n\n"
+                "\tMinimum Available Radius in Data: %f\n"
+                "\tMaximum Available Radius in Data: %f\n"
+                "\tMaximum Reconstructed Radius: %f\n\n"
+                "\tThe maximum reconstructed radius is the maximum\n"
+                "\tavailable radius in data minus half of a window.\n"
+                "\tThis is less than the minimum available data\n"
+                "\tpoint, meaning there is insufficient data for\n"
+                "\tthe reconstruction.\n\n"
+                "\tTO CORRECT THIS:\n"
+                "\t\tRequest a coarser resolution or\n"
+                "\t\tselect a different window function.\n"
+                % (np.min(rho), np.max(rho), rho_max_lim)
+            )
+        elif (np.max(rho) < np.min(self.rng)):
+            raise ValueError(
+                "\n\tMinimum requested range is greater\n"
+                "\tthan the maximum available data point.\n\n"
+                "\tYour Requested Minimum (km): %f\n"
+                "\tYour Requested Maximum (km): %f\n"
+                "\tMaximum Available Data (km): %f\n\n"
+                "\tSelect a smaller range for reconstruction\n"
+                % (np.min(rng), np.max(rng), np.max(rho))
+            )
+        elif (np.min(rho) > np.max(self.rng)):
+            raise ValueError(
+                "\n\tMaximum requested range is less\n"
+                "\tthan the maximum available data point.\n\n"
+                "\tYour Requested Minimum (km): %f\n"
+                "\tYour Requested Maximum (km): %f\n"
+                "\tMinimum Available Data (km): %f\n\n"
+                "\tTO CORRECT THIS:\n"
+                "\t\tSelect a larger range for reconstruction\n"
+                % (np.min(rng), np.max(rng), np.min(rho))
+            )
+        else:
+            pass
+
         # Compute the smallest and largest values within requested range.
-        rho_start   = rho[np.min((rho >= np.min(self.rng)).nonzero())]
-        rho_end     = rho[np.max((rho <= np.max(self.rng)).nonzero())]
+        rho_start = rho[np.min((rho >= np.min(self.rng)).nonzero())]
+        rho_end = rho[np.max((rho <= np.max(self.rng)).nonzero())]
 
         # Compute the start and end point for reconstruction.
-        rho_min     = np.max([rho_min_lim,rho_start])
-        rho_max     = np.min([rho_max_lim,rho_end])
-        self.start  = int(np.min((rho >= rho_min).nonzero()))
+        rho_min = np.max([rho_min_lim,rho_start])
+        rho_max = np.min([rho_max_lim,rho_end])
+
+        if (rho_min > rho_max):
+            if (rho_min_lim > rho_end) and (rho_max_lim > rho_min):
+                raise ValueError(
+                    "\n\tThe minimum possible radius is greater\n"
+                    "\tthan the maximum available data point\n"
+                    "\twithin your requested range.\n\n"
+                    "\tMaximum Available Data Point: %f\n"
+                    "\tMinimum Radius Needed: %f\n\n"
+                    "\tThis is because your requested\n"
+                    "\trange is outside of the scope of the\n"
+                    "\tavailable data (Or near the edge of it).\n\n"
+                    "\tTO CORRECT THIS:\n"
+                    "\t\tRequest a larger range that includes\n"
+                    "\t\tthis minimum data point.\n"
+                    % (rho_max, rho_min_lim)
+                )
+            elif ((rho_max_lim < rho_min) and (rho_min_lim < rho_end)):
+                raise ValueError(
+                    "\n\tThe maximum possible radius is less\n"
+                    "\tthan the minimum available data point\n"
+                    "\twithin your requested range.\n\n"
+                    "\tMinimum Available Data Point: %f\n"
+                    "\tMaximum Radius Needed: %f\n\n"
+                    "\tThis is because your requested\n"
+                    "\trange is outside of the scope of the\n"
+                    "\tavailable data (Or near the edge of it).\n\n"
+                    "\tTO CORRECT THIS:\n"
+                    "\t\tRequest a larger range that includes\n"
+                    "\t\tthis maximum data point.\n"
+                    % (rho_min, rho_max_lim)
+                )
+            elif ((rho_min_lim > rho_end) and (rho_max_lim < rho_min)):
+                raise ValueError(
+                    "\n\tThe minimum possible radius is less\n"
+                    "\tthan the maximum possible radius.\n\n"
+                    "\tMinimum Radius Needed: %f\n"
+                    "\tMaximum Radius Needed: %f\n\n"
+                    "\tThis is because the windows needed for\n"
+                    "\treconstruction are greater than the range\n"
+                    "\tthat is available in the data.\n\n"
+                    "\tTO CORRECT THIS:\n"
+                    "\t\tRequest a coarser resolution or choose\n"
+                    "\t\ta different window function.\n"
+                    % (rho_min_lim, rho_max_lim)
+                )
+            else:
+                raise ValueError(
+                    "\n\tThe required window widths for your\n"
+                    "\trequested resolution is greater than\n"
+                    "\tthe data that is available. No\n"
+                    "\tpoints can be processed as a result\n\n"
+                    "\tTO CORRECT THIS:\n"
+                    "\t\tChose a coarser resolution or choose\n"
+                    "\t\ta different window function."
+                )
+        else:
+            pass
+
+        self.start = int(np.min((rho >= rho_min).nonzero()))
         self.finish = int(np.max((rho <= rho_max).nonzero()))
         self.n_used = 1 + (self.finish - self.start)
 
@@ -447,13 +983,15 @@ class DiffractionCorrection(object):
         # self.__trim_inputs()
         if self.verbose:
             print("\tRunning Fresnel Inversion...")
+
         self.T_vals = self.__ftrans(fwd=False)
         if self.verbose:
-            sys.stdout.write("\x1b[2K")
             print("\tInversion Complete.")
+
         if self.fwd:
             if self.verbose:
                 print("\tComputing Forward Transform...")
+
             self.T_hat_fwd_vals  = self.__ftrans(fwd=True)
             self.p_norm_fwd_vals = np.abs(
                 self.T_hat_fwd_vals*self.T_hat_fwd_vals
@@ -461,8 +999,7 @@ class DiffractionCorrection(object):
             self.phase_fwd_vals = -np.arctan2(np.imag(self.T_hat_fwd_vals),
                                               np.real(self.T_hat_fwd_vals))
             if self.verbose:
-                sys.stdout.write("\x1b[2K")
-                print("Forward Transform Complete.")
+                print("\tForward Transform Complete.")
         if self.verbose:
             print("\tComputing Power and Phase...")
 
@@ -510,7 +1047,7 @@ class DiffractionCorrection(object):
         t2 = time.time()
         if self.verbose:
             print("\tDiffraction Correction Complete.")
-        print("Computation Time: ",t2-t1,end="\r")
+        print("Computation Time: %f" % (t2-t1), end="\r")
 
     def __rect(w_in, dx):
         """
@@ -531,7 +1068,7 @@ class DiffractionCorrection(object):
         # Compute argument of window function.
         x      = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx
         # Compute window function.
-        w_func = np.cos(np.pi * x / w_in)**2
+        w_func = np.cos(ONE_PI * x / w_in)**2
         return w_func
 
     def __kb20(w_in, dx):
@@ -543,7 +1080,7 @@ class DiffractionCorrection(object):
         # Compute argument of window function.
         x      = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx
         # Alpha value for kb20 is 2.0
-        alpha  = 2.0 * np.pi
+        alpha  = TWO_PI
         # Compute window function.
         w_func = iv(0.0,alpha * np.sqrt((1.0 - (2.0 * x / w_in)**2)))/iv(0.0,alpha)
         return w_func
@@ -557,7 +1094,7 @@ class DiffractionCorrection(object):
         # Compute argument of window function.
         x      = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx
         # Alpha value for kb25 is 2.5.
-        alpha  = 2.5 * np.pi
+        alpha  = 2.5 * ONE_PI
         # Compute window function.
         w_func = iv(0.0,alpha * np.sqrt((1.0 - (2.0 * x / w_in)**2)))/iv(0.0,alpha)
         return w_func
@@ -571,7 +1108,7 @@ class DiffractionCorrection(object):
         # Compute argument of window function.
         x      = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx
         # Alpha value for kb35 is 3.5.
-        alpha  = 3.5 * np.pi
+        alpha  = 3.5 * ONE_PI
         # Compute window function.
         w_func = iv(0.0,alpha * np.sqrt((1.0 - (2.0 * x / w_in)**2)))/iv(0.0,alpha)
         return w_func
@@ -585,7 +1122,7 @@ class DiffractionCorrection(object):
         # Compute argument of window function.
         x      = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx
         # Alpha value for kbmd20 is 2.0.
-        alpha  = 2.0*np.pi
+        alpha  = 2.0 * ONE_PI
         # Compute window function.
         w_func = (iv(0.0,alpha*np.sqrt((1.0-(2.0*x/w_in)**2)))-1)/(iv(0.0,alpha)-1)
         return w_func
@@ -599,7 +1136,7 @@ class DiffractionCorrection(object):
         # Compute argument of window function.
         x      = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx
         # Alpha value for kbmd25 is 2.5.
-        alpha  = 2.5*np.pi
+        alpha  = 2.5 * ONE_PI
         # Compute window function.
         w_func = (iv(0.0,alpha*np.sqrt((1.0-(2.0*x/w_in)**2)))-1)/(iv(0.0,alpha)-1)
         return w_func
@@ -614,6 +1151,8 @@ class DiffractionCorrection(object):
         "kbmd20": {"func": __kbmd20,   "normeq": 1.52048174},
         "kbmd25": {"func": __kbmd25,   "normeq": 1.65994218}
         }
+    
+    __psi_types = ["fresnel", "full", "mtr2", "mtr3", "mtr4"]
 
     def __trim_attributes(self, fwd):
         # Get rid of uncomputed values and keep only what was processed.
@@ -785,7 +1324,7 @@ class DiffractionCorrection(object):
         n_used = self.n_used
 
         # Compute product of wavenumber and RIP distance.
-        kD_vals = 2.0 * np.pi * d_km_vals / lambda_km_vals
+        kD_vals = 2.0 * ONE_PI * d_km_vals / lambda_km_vals
 
         # Compute Cosine of opening angle.
         cosb = np.cos(B_rad_vals)
@@ -807,7 +1346,7 @@ class DiffractionCorrection(object):
 
         # Define normalization function and verbose message.
         nrm = self.__normalize
-        mes = "Pt: %d  Tot: %d  Width: %d  Psi Iters: %d"
+        mes = "\t\tPt: %d  Tot: %d  Width: %d  Psi Iters: %d"
 
         # Set inverse function to FFT or Integration.
         if fft:
@@ -884,7 +1423,7 @@ class DiffractionCorrection(object):
                 F = F_km_vals[center]
 
                 # Compute psi for with stationary phase value
-                psi_vals = (np.pi/2.0)*((r-r0)/F)*((r-r0)/F)
+                psi_vals = (ONE_PI / 2.0) * ((r-r0)/F) * ((r-r0)/F)
 
                 # Compute kernel function for Fresnel inverse
                 if fwd:
@@ -1065,5 +1604,7 @@ class DiffractionCorrection(object):
                 if norm:
                     T_out[center] *= nrm(dx_km, ker, F)
                 if verbose:
-                    print(mes % (i, n_used, nw, loop), end="\r")
+                    print(mes % (i, n_used-1, nw, loop), end="\r")
+            if verbose:
+                print("\n", end="\r")
         return T_out

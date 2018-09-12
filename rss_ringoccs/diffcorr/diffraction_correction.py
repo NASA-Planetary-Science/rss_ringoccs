@@ -7,6 +7,9 @@ SPEED_OF_LIGHT_KM = 299792.4580
 TWO_PI = 6.283185307179586476925287
 ONE_PI = 3.141592653589793238462643
 RECIPROCAL_E = 0.3678794411714423215955238
+IV0_20 = 87.10850209627940
+IV0_25 = 373.02058499037486
+IV0_35 = 7257.7994923041760
 
 # Dictionary containing regions of interest within the Saturnian Rings.
 region_dict = {
@@ -33,7 +36,7 @@ class DiffractionCorrection(object):
             on a data set that is a near radially symmetric function
             of the ring radius, or ring intercept point (RIP).
         Arguments:
-            dat:    
+            dat:
                 The data set, usually an instance of the NormDiff
                 class from the rss_ringoccs Calibration subpackage.
                 This instance MUST contain the following attributes
@@ -47,12 +50,12 @@ class DiffractionCorrection(object):
                     f_sky_hz_vals:    Sky Frequency (Hertz)
                     rho_dot_kms_vals: RIP-velocity (km/s)
                     history:          History dictionary
-            res:    
+            res:
                 The requested resolution for processing (km). This
                 must be a positive real number, that is, a positive
                 floating point number or integer.
         Keywords:
-            rng:    
+            rng:
                 The request range for diffraction correction.
                 Preferred input is rng = [a,b]. Arrays are
                 allowed and the range will be set as:
@@ -65,7 +68,7 @@ class DiffractionCorrection(object):
                 For other planets use rng = [a,b]. Default value
                 is set to 'all' which processing [65,000,140,000]
                 Values MUST be set in kilometers.
-            wtype:  
+            wtype:
                 The requested tapering function for diffraction
                 correction. A string with several allowed inputs:
                     'rect'      Rectangular Window.
@@ -77,7 +80,7 @@ class DiffractionCorrection(object):
                     'kbmd25'    Modified kb25 Window.
                 The variable is neither case nor space sensitive.
                 Default window is set to 'kb25'
-            fwd:    
+            fwd:
                 A Boolean for determining whether or not
                 forward modelling will be computed. This is good
                 starting point for deciding if the diffraction
@@ -103,7 +106,7 @@ class DiffractionCorrection(object):
                 Deviation is set to 2e-13. If set to a positive
                 real number, the Allen Deviation will be assumed
                 to be that real number. Default is True.
-            fft:    
+            fft:
                 A Boolean for determining whether or not FFT's will
                 be used for computing the complex transmittance. The
                 use of FFT's assumes that the geometry of the system
@@ -140,9 +143,9 @@ class DiffractionCorrection(object):
                 The sine of the elevation angle.
             lambda_sky_km_vals:
                 Wavelength of the recieved signal (km).
-            dx_km:  
+            dx_km:
                 Radial spacing between points (km).
-            norm_eq:        
+            norm_eq:
                 Normalized equivalent width of the window function.
             n_used:
                 Number of points that were processed (integer).
@@ -168,9 +171,9 @@ class DiffractionCorrection(object):
             [1] numpy
             [2] scipy
             [3] diffcorr
-            [4] 
+            [4]
         Notes:
-            [1] 
+            [1]
         References:
 
         Examples:
@@ -220,7 +223,7 @@ class DiffractionCorrection(object):
             )
         else:
             pass
-        
+
         # Check that the requested window type is a legal input.
         if not isinstance(wtype, str):
             erm = ""
@@ -231,7 +234,7 @@ class DiffractionCorrection(object):
                 "\tYour input has type: %s\n"
                 "\tInput should have type: str\n"
                 "\tAllowed string are:\n%s"
-                % (type(wtype).__name__,erm)
+                % (type(wtype).__name__, erm)
             )
         else:
             # Remove spaces, quotes, and apostrophe's from the wtype variable.
@@ -247,7 +250,7 @@ class DiffractionCorrection(object):
                     "\n\tIllegal string used for wtype.\n"
                     "\tYour string: '%s'\n"
                     "\tAllowed Strings:\n%s"
-                    % (wtype,erm)
+                    % (wtype, erm)
                 )
             else:
                 pass
@@ -314,8 +317,8 @@ class DiffractionCorrection(object):
             )
         else:
             # Remove spaces, quotes, and apostrophe's from the psitype.
-            psitype = psitype.replace(" ", "").replace("'", "").replace('"', "")
-            psitype = psitype.lower()
+            psitype = psitype.replace(" ", "").replace("'", "")
+            psitype = psitype.replace('"', "").lower()
 
             # Perform error check, print legal inputs if needed.
             if not (psitype in self.__psi_types):
@@ -344,7 +347,7 @@ class DiffractionCorrection(object):
                         "\tSet range=[a,b], where a is the STARTING point\n"
                         "\tand b is the ENDING point of reconstruction, or\n"
                         "\tuse one of the following valid strings:\n%s"
-                        % (type(rng).__name__,erm)
+                        % (type(rng).__name__, erm)
                     )
                 elif (np.min(rng) < 0):
                     raise ValueError(
@@ -365,7 +368,7 @@ class DiffractionCorrection(object):
                     "\tSet range=[a,b], where a is the STARTING point\n"
                     "\tand b is the ENDING point of reconstruction, or\n"
                     "\tuse one of the following valid strings:\n%s"
-                    % (type(rng).__name__,erm)
+                    % (type(rng).__name__, erm)
                 )
         elif isinstance(rng, list):
             # Try converting all elements to floating point numbers.
@@ -384,7 +387,7 @@ class DiffractionCorrection(object):
                         "\tSet range=[a,b], where a is the STARTING point\n"
                         "\tand b is the ENDING point of reconstruction, or\n"
                         "\tuse one of the following valid strings:\n%s"
-                        % (type(rng).__name__,erm)
+                        % (type(rng).__name__, erm)
                     )
             else:
                 pass
@@ -438,11 +441,11 @@ class DiffractionCorrection(object):
                 "\tSet range=[a,b], where a is the STARTING point\n"
                 "\tand b is the ENDING point of reconstruction, or\n"
                 "\tuse one of the following valid strings:\n%s"
-                % (type(rng).__name__,erm)
+                % (type(rng).__name__, erm)
             )
 
         # Check that the Allen Deviation is a legal value.
-        if (not isinstance(sigma,float)):
+        if (not isinstance(sigma, float)):
             try:
                 sigma = float(sigma)
             except (TypeError, ValueError):
@@ -607,7 +610,7 @@ class DiffractionCorrection(object):
                 "\tSample Spacing (km): %f\n\n"
                 "\tTO CORRECT THIS:"
                 "\t\tChoose a resolution GREATER than %f km\n" %
-                (self.res,self.dx_km,2.0*self.dx_km)
+                (self.res, self.dx_km, 2.0*self.dx_km)
             )
         else:
             pass
@@ -619,7 +622,7 @@ class DiffractionCorrection(object):
             print("\tCheck Variables for Errors...")
 
         # Check that rho_km_vals is increasing and the rev isn't a chord occ.
-        drho = [np.min(self.rho_dot_kms_vals),np.max(self.rho_dot_kms_vals)]
+        drho = [np.min(self.rho_dot_kms_vals), np.max(self.rho_dot_kms_vals)]
 
         if (drho[0] < 0) and (drho[1] > 0):
             raise ValueError(
@@ -634,7 +637,7 @@ class DiffractionCorrection(object):
                 "\t\tdiffraction correction on the individual pieces.\n"
             )
         elif (self.dx_km > 0) and (drho[1] < 0):
-            self.rho_dot_kms_vals=np.abs(self.rho_dot_kms_vals)
+            self.rho_dot_kms_vals = np.abs(self.rho_dot_kms_vals)
         elif (self.dx_km < 0):
             self.rho_km_vals = self.rho_km_vals[::-1]
             self.phase_rad_vals = self.phase_rad_vals[::-1]
@@ -642,7 +645,7 @@ class DiffractionCorrection(object):
             self.phi_rad_vals = self.phi_rad_vals[::-1]
             self.B_rad_vals = self.B_rad_vals[::-1]
             self.f_sky_hz_vals = self.f_sky_hz_vals[::-1]
-            self.D_km_vals  = self.D_km_vals[::-1]
+            self.D_km_vals = self.D_km_vals[::-1]
             self.rho_dot_kms_vals = np.abs(self.rho_dot_kms_vals[::-1])
         else:
             del drho
@@ -786,14 +789,14 @@ class DiffractionCorrection(object):
         self.F_km_vals = np.sqrt(0.5 * self.lambda_sky_km_vals *
                                  self.D_km_vals * (1 - cb*cb*sp*sp)/(sb*sb))
         del cb, sb, sp
-        
+
         # Compute the Normalized Equaivalent Width (See MTR86 Equation 20)
         self.norm_eq = self.__func_dict[wtype]["normeq"]
 
         # Compute the window width. (See MTR86 Equations 19, 32, and 33).
         if bfac:
             omega = TWO_PI * self.f_sky_hz_vals
-            alpha = (omega*omega) * (sigma*sigma) / (2.0 * self.rho_dot_kms_vals)
+            alpha = omega*omega * sigma*sigma / (2.0 * self.rho_dot_kms_vals)
             P = res / (alpha * (self.F_km_vals*self.F_km_vals))
             # The inverse exists only if P>1.
             if (np.min(P) <= 1.0):
@@ -838,7 +841,7 @@ class DiffractionCorrection(object):
         if (isinstance(rng, str)):
             self.rng = np.array(region_dict[rng])
         else:
-            self.rng = np.array([np.min(rng),np.max(rng)])
+            self.rng = np.array([np.min(rng), np.max(rng)])
 
         # Compute the starting point and the number of points used.
         rho = self.rho_km_vals
@@ -863,7 +866,7 @@ class DiffractionCorrection(object):
                 "\tTO CORRECT THIS:\n"
                 "\t\tRequest a coarser resolution or\n"
                 "\t\tselect a different window function.\n"
-                % (np.min(rho),np.max(rho),rho_min_lim)
+                % (np.min(rho), np.max(rho), rho_min_lim)
             )
         elif rho_max_lim < np.min(rho):
             raise ValueError(
@@ -911,8 +914,8 @@ class DiffractionCorrection(object):
         rho_end = rho[np.max((rho <= np.max(self.rng)).nonzero())]
 
         # Compute the start and end point for reconstruction.
-        rho_min = np.max([rho_min_lim,rho_start])
-        rho_max = np.min([rho_max_lim,rho_end])
+        rho_min = np.max([rho_min_lim, rho_start])
+        rho_max = np.min([rho_max_lim, rho_end])
 
         if (rho_min > rho_max):
             if (rho_min_lim > rho_end) and (rho_max_lim > rho_min):
@@ -977,8 +980,8 @@ class DiffractionCorrection(object):
         self.n_used = 1 + (self.finish - self.start)
 
         # Delete unnecessary variables for clarity and memory.
-        del rho,w_max,rho_min_lim,rho_max_lim,rho_start,rho_end
-        del rho_min,rho_max,rng,norm,fwd,fft,bfac,psitype,verbose
+        del rho, w_max, rho_min_lim, rho_max_lim, rho_start, rho_end
+        del rho_min, rho_max, rng, norm, fwd, fft, bfac, psitype, verbose
 
         # self.__trim_inputs()
         if self.verbose:
@@ -992,7 +995,7 @@ class DiffractionCorrection(object):
             if self.verbose:
                 print("\tComputing Forward Transform...")
 
-            self.T_hat_fwd_vals  = self.__ftrans(fwd=True)
+            self.T_hat_fwd_vals = self.__ftrans(fwd=True)
             self.p_norm_fwd_vals = np.abs(
                 self.T_hat_fwd_vals*self.T_hat_fwd_vals
             )
@@ -1005,10 +1008,11 @@ class DiffractionCorrection(object):
 
         # Compute power and phase.
         self.power_vals = np.abs(self.T_vals*self.T_vals)
-        self.phase_vals = -np.arctan2(np.imag(self.T_vals),np.real(self.T_vals))
+        self.phase_vals = -np.arctan2(np.imag(self.T_vals),
+                                      np.real(self.T_vals))
 
         # Compute regions of non-zero power.
-        crange = (self.power_vals>0).nonzero()
+        crange = (self.power_vals > 0.0).nonzero()
 
         # Create empty array for normalized optical depth.
         tau = np.zeros(np.size(self.power_vals))
@@ -1066,7 +1070,7 @@ class DiffractionCorrection(object):
         # Window functions have an odd number of points.
         nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
         # Compute argument of window function.
-        x      = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx
+        x = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx
         # Compute window function.
         w_func = np.cos(ONE_PI * x / w_in)**2
         return w_func
@@ -1077,12 +1081,12 @@ class DiffractionCorrection(object):
         """
         # Window functions have an odd number of points.
         nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
+
         # Compute argument of window function.
-        x      = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx
-        # Alpha value for kb20 is 2.0
-        alpha  = TWO_PI
+        x = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx / w_in
+
         # Compute window function.
-        w_func = iv(0.0,alpha * np.sqrt((1.0 - (2.0 * x / w_in)**2)))/iv(0.0,alpha)
+        w_func = iv(0.0, TWO_PI * np.sqrt((1.0 - 4.0*x*x))) / IV0_20
         return w_func
 
     def __kb25(w_in, dx):
@@ -1091,12 +1095,15 @@ class DiffractionCorrection(object):
         """
         # Window functions have an odd number of points.
         nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
+
         # Compute argument of window function.
-        x      = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx
+        x = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx / w_in
+
         # Alpha value for kb25 is 2.5.
-        alpha  = 2.5 * ONE_PI
+        alpha = 2.5 * ONE_PI
+
         # Compute window function.
-        w_func = iv(0.0,alpha * np.sqrt((1.0 - (2.0 * x / w_in)**2)))/iv(0.0,alpha)
+        w_func = iv(0.0, alpha * np.sqrt((1.0 - 4.0*x*x))) / IV0_25
         return w_func
 
     def __kb35(w_in, dx):
@@ -1106,11 +1113,11 @@ class DiffractionCorrection(object):
         # Window functions have an odd number of points.
         nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
         # Compute argument of window function.
-        x      = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx
+        x = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx / w_in
         # Alpha value for kb35 is 3.5.
-        alpha  = 3.5 * ONE_PI
+        alpha = 3.5 * ONE_PI
         # Compute window function.
-        w_func = iv(0.0,alpha * np.sqrt((1.0 - (2.0 * x / w_in)**2)))/iv(0.0,alpha)
+        w_func = iv(0.0, alpha * np.sqrt((1.0 - 4.0*x*x))) / IV0_35
         return w_func
 
     def __kbmd20(w_in, dx):
@@ -1120,11 +1127,9 @@ class DiffractionCorrection(object):
         # Window functions have an odd number of points.
         nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
         # Compute argument of window function.
-        x      = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx
-        # Alpha value for kbmd20 is 2.0.
-        alpha  = 2.0 * ONE_PI
+        x = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx / w_in
         # Compute window function.
-        w_func = (iv(0.0,alpha*np.sqrt((1.0-(2.0*x/w_in)**2)))-1)/(iv(0.0,alpha)-1)
+        w_func = iv(0.0, TWO_PI*np.sqrt(1.0 - 4.0*x*x) - 1.0) / (IV0_20 - 1.0)
         return w_func
 
     def __kbmd25(w_in, dx):
@@ -1134,11 +1139,11 @@ class DiffractionCorrection(object):
         # Window functions have an odd number of points.
         nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
         # Compute argument of window function.
-        x      = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx
+        x = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx / w_in
         # Alpha value for kbmd25 is 2.5.
-        alpha  = 2.5 * ONE_PI
+        alpha = 2.5 * ONE_PI
         # Compute window function.
-        w_func = (iv(0.0,alpha*np.sqrt((1.0-(2.0*x/w_in)**2)))-1)/(iv(0.0,alpha)-1)
+        w_func = iv(0.0, alpha*np.sqrt(1.0 - 4.0*x*x) - 1.0) / (IV0_25 - 1.0)
         return w_func
 
     # Function dictionary with normalized equivalent widths.
@@ -1151,7 +1156,7 @@ class DiffractionCorrection(object):
         "kbmd20": {"func": __kbmd20,   "normeq": 1.52048174},
         "kbmd25": {"func": __kbmd25,   "normeq": 1.65994218}
         }
-    
+
     __psi_types = ["fresnel", "full", "mtr2", "mtr3", "mtr4"]
 
     def __trim_attributes(self, fwd):

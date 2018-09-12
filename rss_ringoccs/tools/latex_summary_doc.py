@@ -1,9 +1,9 @@
-def latex_summary_doc(pdfdir,pdffil,resolution,outfilename):
+def latex_summary_doc(pdfdir, pdffil, resolution, outfilename):
 
     var = 'Rev133E_RSS_2010_170_X43_E_Summary'
 
 
-    LaTeXFile       = r'''
+    LaTeXFile = r'''
 \documentclass{article}
 %---------------------------Packages----------------------------%
 \usepackage{geometry}
@@ -257,7 +257,12 @@ def latex_summary_doc(pdfdir,pdffil,resolution,outfilename):
                 width=\textwidth,
             ]{Bob}
         }
-        \caption[Normal Optical Depth Profiles 70000-85000km]{Rev7-E normal optical depth profiles reconstructed to remove diffraction effects at 1 km resolution contained in the file RSS\_2005\_123\_X43\_E\_TAU\_01KM.tab. The 1 km resolution profile is plotted in green.}
+        \caption[Normal Optical Depth Profiles 70000-85000km]{%
+            Rev7-E normal optical depth profiles reconstructed to
+            remove diffraction effects at 1 km resolution contained
+            in the file RSS\_2005\_123\_X43\_E\_TAU\_01KM.tab.
+            The 1 km resolution profile is plotted in green.
+        }
     \end{figure}
     \newpage
     \begin{figure}[H]

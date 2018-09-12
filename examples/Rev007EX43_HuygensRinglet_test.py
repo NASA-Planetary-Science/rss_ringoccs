@@ -29,23 +29,16 @@ import rss_ringoccs as rss
 sys.path.remove('../')
 
 # ***** Begin user input *****
-#rsr_file = '../data/co-s-rss-1-sroc1-v10/cors_0108/sroc1_123/rsr/s10sroi2005123_0230nnnx43rd.2a2'
-#rsr_file = '../../../../data/cors_0105/sroc1_123/rsr/s10sroe2005123_0740nnnx43rd.2a2'
-rsr_file = '../../../../data/s10-rev07-rsr-data/S10EAOE2005_123_0740NNNX43D.2A1'
+rsr_file = '../data/co-s-rss-1-sroc1-v10/cors_0105/sroc1_123/rsr/s10sroe2005123_0740nnnx43rd.2a2'
 kernels_list_file = '../tables/Rev007_list_of_kernels.txt'
 kernels = '../tables/Rev007_meta_kernel.ker'
 kernels_dir = '../kernels/'
 
 output_directory = '../output/rev7E_X43_e2e_output/'
-#output_directory = '../../../../../jfong/rss_ringoccs/output/RSS_loop_v2_output/Rev007/E/Rev007E_RSS_2005_123_X43_E/'
 freq_offset_file = output_directory + 'freq_offset_file.txt'
 f_resid_fit_parameters_file = output_directory + 'f_resid_fit_parameters.p'
 power_norm_fit_parameters_file = (output_directory
     + 'power_norm_fit_parameters.p')
-
-outfig = '../../../../../jfong/rss_ringoccs/output/figs/users_guide_Huygens_20180822.ps'
-
-
 
 f_USO = 8427222034.34050
 dr_km_desired = 0.25
@@ -56,7 +49,6 @@ planet = 'Saturn'
 spacecraft = 'Cassini'
 
 Huygens_xrange = [117800., 117860.] 
-
 # ***** End user input *****
 
 start_time = time.time()
@@ -169,7 +161,6 @@ axes[1,2].set_xlabel(xtitle)
 end_time = time.time()
 plt.tight_layout()
 plt.subplots_adjust(top=0.93)
-plt.savefig(outfig)
 
 print('Total run time: ', end_time-start_time)
 plt.show()

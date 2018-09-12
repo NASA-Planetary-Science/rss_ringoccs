@@ -2,96 +2,208 @@ import numpy as np
 import pandas as pd
 from scipy import interpolate
 from .write_history_dict import write_history_dict
+RADS_PER_DEGS = 0.0174532925199432957692369
 
-def get_geo(geodata,verbose=True):
+def get_geo(geo, verbose=True):
+    if (not isinstance(geo, str)):
+        raise TypeError(
+            "\n\tgeo must be a string: '/path/to/geo'\n"
+            "\tYour input has type: %s\n"
+            "\tInput should have type: str\n"
+            % (type(geo).__name__)
+        )
+    elif not isinstance(verbose, bool):
+        raise TypeError(
+            "\n\tverbose must be Boolean: True/False\n"
+            "\tYour input has type: %s\n"
+            "\tInput should have type: bool\n"
+            "\tSet verbose=True or verbose=False\n"
+            % (type(verbose).__name__)
+        )
+    else:
+        pass
+
     if verbose:
         print("\tExtracting Geo Data...")
-    dfg = pd.read_csv(geodata, delimiter=',',
-        names=[
-            "t_oet_spm_vals",
-        	"t_ret_spm_vals",
-        	"t_set_spm_vals",
-        	"rho_km_vals",
-        	"phi_rl_deg_vals",
-        	"phi_ora_deg_vals",
-        	"B_deg_vals",
-        	"D_km_vals",
-        	"rho_dot_kms_vals",
-        	"phi_rl_dot_kms_vals",
-        	"F_km_vals",
-        	"R_imp_km_vals",
-        	"rx_km_vals",
-            "ry_km_vals",
-        	"rz_km_vals",
-        	"vx_kms_vals",
-        	"vy_kms_vals",
-			"vz_kms_vals"
-            ]
+    
+    try:
+        dfg = pd.read_csv(geo, delimiter=',',
+            names=[
+                "t_oet_spm_vals",
+                "t_ret_spm_vals",
+                "t_set_spm_vals",
+                "rho_km_vals",
+                "phi_rl_deg_vals",
+                "phi_ora_deg_vals",
+                "B_deg_vals",
+                "D_km_vals",
+                "rho_dot_kms_vals",
+                "phi_rl_dot_kms_vals",
+                "F_km_vals",
+                "R_imp_km_vals",
+                "rx_km_vals",
+                "ry_km_vals",
+                "rz_km_vals",
+                "vx_kms_vals",
+                "vy_kms_vals",
+                "vz_kms_vals"
+                ]
+            )
+    except FileNotFoundError:
+        raise FileNotFoundError(
+            "\n\tYour input geo file does not exists.\n"
+            "\tYour file: '%s'\n"
+            % (geo)
         )
+
     if verbose:
         print("\tGeo Data Complete.")
+
     return dfg
 
-def get_cal(caldata,verbose=True):
+def get_cal(cal, verbose=True):
+    if (not isinstance(cal, str)):
+        raise TypeError(
+            "\n\tcal must be a string: '/path/to/cal'\n"
+            "\tYour input has type: %s\n"
+            "\tInput should have type: str\n"
+            % (type(cal).__name__)
+        )
+    elif not isinstance(verbose, bool):
+        raise TypeError(
+            "\n\tverbose must be Boolean: True/False\n"
+            "\tYour input has type: %s\n"
+            "\tInput should have type: bool\n"
+            "\tSet verbose=True or verbose=False\n"
+            % (type(verbose).__name__)
+        )
+    else:
+        pass
+
     if verbose:
         print("\tExtracting Cal Data...")
-    dfc = pd.read_csv(caldata, delimiter=',',
-        names=[
-            "spm_vals",
-            "f_sky_pred_vals",
-            "f_sky_resid_fit_vals",
-            "p_free_vals"
-            ]
+
+    try:
+        dfc = pd.read_csv(cal, delimiter=',',
+            names=[
+                "spm_vals",
+                "f_sky_pred_vals",
+                "f_sky_resid_fit_vals",
+                "p_free_vals"
+                ]
+            )
+    except FileNotFoundError:
+        raise FileNotFoundError(
+            "\n\tYour input cal file does not exists.\n"
+            "\tYour file: '%s'\n"
+            % (cal)
         )
+
     if verbose:
         print("\tCal Data Complete.")
+
     return dfc
 
-def get_dlp(dlpdata,verbose=True):
+def get_dlp(dlp, verbose=True):
+    if (not isinstance(dlp, str)):
+        raise TypeError(
+            "\n\tdlp must be a string: '/path/to/dlp'\n"
+            "\tYour input has type: %s\n"
+            "\tInput should have type: str\n"
+            % (type(dlp).__name__)
+        )
+    elif not isinstance(verbose, bool):
+        raise TypeError(
+            "\n\tverbose must be Boolean: True/False\n"
+            "\tYour input has type: %s\n"
+            "\tInput should have type: bool\n"
+            "\tSet verbose=True or verbose=False\n"
+            % (type(verbose).__name__)
+        )
+    else:
+        pass
+
     if verbose:
         print("\tExtracting DLP Data...")
-    dfd = pd.read_csv(
-        dlpdata, delimiter=',',
-        names=[
-            "rho_km_vals",
-            "rho_corr_pole_km_vals",
-            "rho_corr_timing_km_vals",
-            "phi_rl_deg_vals",
-            "phi_ora_deg_vals",
-            "raw_tau_vals",
-            "phase_deg_vals",
-            "raw_tau_threshold_vals",
-            "t_oet_spm_vals",
-            "t_ret_spm_vals",
-            "t_set_spm_vals",
-            "B_deg_vals"
-        ]
-    )
+
+    try:
+        dfd = pd.read_csv(
+            dlp, delimiter=',',
+            names=[
+                "rho_km_vals",
+                "rho_corr_pole_km_vals",
+                "rho_corr_timing_km_vals",
+                "phi_rl_deg_vals",
+                "phi_ora_deg_vals",
+                "raw_tau_vals",
+                "phase_deg_vals",
+                "raw_tau_threshold_vals",
+                "t_oet_spm_vals",
+                "t_ret_spm_vals",
+                "t_set_spm_vals",
+                "B_deg_vals"
+            ]
+        )
+    except FileNotFoundError:
+        raise FileNotFoundError(
+            "\n\tYour input dlp file does not exists.\n"
+            "\tYour file: '%s'\n"
+            % (dlp)
+        )
+
     if verbose:
         print("\tDLP Data Complete")
     return dfd
 
-def get_tau(taudata,verbose=True):
+def get_tau(tau, verbose=True):
+    if (not isinstance(tau, str)):
+        raise TypeError(
+            "\n\ttau must be a string: '/path/to/tau'\n"
+            "\tYour input has type: %s\n"
+            "\tInput should have type: str\n"
+            % (type(tau).__name__)
+        )
+    elif not isinstance(verbose, bool):
+        raise TypeError(
+            "\n\tverbose must be Boolean: True/False\n"
+            "\tYour input has type: %s\n"
+            "\tInput should have type: bool\n"
+            "\tSet verbose=True or verbose=False\n"
+            % (type(verbose).__name__)
+        )
+    else:
+        pass
+
     if verbose:
         print("\tExtracting Tau Data...")
-    dft = pd.read_csv(taudata, delimiter=',',
-        names=[
-            "rho_km_vals",
-            "rho_km_pole_corr_vals",
-            "rho_km_offsett_vals",
-            "phi_rl_deg_vals",
-            "phi_ora_deg_vals",
-            "raw_tau_vals",
-            "phase_deg_vals",
-            "raw_tau_threshold_vals",
-            "spm_vals",
-            "t_ret_spm_vals",
-            "t_set_spm_vals",
-            "B_deg_vals"
-        ]
-    )
+
+    try:
+        dft = pd.read_csv(tau, delimiter=',',
+            names=[
+                "rho_km_vals",
+                "rho_km_pole_corr_vals",
+                "rho_km_offsett_vals",
+                "phi_rl_deg_vals",
+                "phi_ora_deg_vals",
+                "raw_tau_vals",
+                "phase_deg_vals",
+                "raw_tau_threshold_vals",
+                "spm_vals",
+                "t_ret_spm_vals",
+                "t_set_spm_vals",
+                "B_deg_vals"
+            ]
+        )
+    except FileNotFoundError:
+        raise FileNotFoundError(
+            "\n\tYour input tau file does not exists.\n"
+            "\tYour file: '%s'\n"
+            % (tau)
+        )
+
     if verbose:
         print("\tTau Data Complete")
+
     return dft
 
 
@@ -125,97 +237,64 @@ class ExtractCSVData(object):
                                 radius, in kilometers per second.
     """
 
-    def __init__(self,geodata,caldata,dlpdata,taudata=None,verbose=True):
+    def __init__(self, geo, cal, dlp, tau=None, verbose=True):
 
-        if (not isinstance(geodata,str)):
-            raise TypeError("geodata must be a string: '/path/to/geodata'")
-        if (not isinstance(caldata,str)):
-            raise TypeError("caldata must be a string: '/path/to/caldata'")
-        if (not isinstance(dlpdata,str)):
-            raise TypeError("dlpdata must be a string: '/path/to/dlpdata'")
-        if (not isinstance(verbose,bool)):
-            raise TypeError("verbose must be a boolean: True/False")
-
-        # Save inputs as attributes.
-        self.geodata = geodata
-        self.caldata = caldata
-        self.dlpdata = dlpdata
-        self.taudata = taudata
+        if (not isinstance(geo, str)):
+            raise TypeError(
+                "geo must be a string: '/path/to/geo'"
+                "\tYour input has type: %s\n"
+                "\tInput should have type: str\n"
+                % (type(geo).__name__)
+            )
+        elif (not isinstance(cal, str)):
+            raise TypeError(
+                "cal must be a string: '/path/to/cal'"
+                "\tYour input has type: %s\n"
+                "\tInput should have type: str\n"
+                % (type(cal).__name__)
+            )
+        elif (not isinstance(dlp, str)):
+            raise TypeError(
+                "dlp must be a string: '/path/to/dlp'"
+                "\tYour input has type: %s\n"
+                "\tInput should have type: str\n"
+                % (type(dlp).__name__)
+            )
+        elif not isinstance(verbose, bool):
+            raise TypeError(
+                "\n\tverbose must be Boolean: True/False\n"
+                "\tYour input has type: %s\n"
+                "\tInput should have type: bool\n"
+                "\tSet verbose=True or verbose=False\n"
+                % (type(verbose).__name__)
+            )
+        else:
+            pass
 
         if verbose:
             print("Extracting Data from CSV Files:")
 
+        # Save inputs as attributes.
+        self.geo = geo
+        self.cal = cal
+        self.dlp = dlp
+        self.tau = tau
+
         # Extract GEO, CAL, and DLP data.
-        geo_dat = get_geo(geodata,verbose=verbose)
-        cal_dat = get_cal(caldata,verbose=verbose)
-        dlp_dat = get_dlp(dlpdata,verbose=verbose)
+        geo_dat = get_geo(self.geo, verbose=verbose)
+        cal_dat = get_cal(self.cal, verbose=verbose)
+        dlp_dat = get_dlp(self.dlp, verbose=verbose)
 
-        self.__retrieve_variables(geo_dat,cal_dat,dlp_dat,verbose)
-        self.__compute_variables(verbose)
-        self.__interpolate_variables(verbose)
-        self.__del_attributes()
-
-        if (not isinstance(taudata,type(None))):
-            if (not isinstance(taudata,str)):
-                raise TypeError("taudata must be a string: '/path/to/taudata'")
-            else:
-                tau_dat         = get_tau(taudata,verbose=verbose)
-                rho_km_vals     = self.rho_km_vals
-                tr              = tau_dat.rho_km_vals
-                tt              = tau_dat.raw_tau_vals
-                tpdeg           = tau_dat.phase_deg_vals
-                tbdeg           = tau_dat.B_deg_vals
-                rmin            = np.min(tr)
-                rmax            = np.max(tr)
-                rstart          = int(np.min((rho_km_vals-rmin>=0).nonzero()))
-                rfin            = int(np.max((rmax-rho_km_vals>=0).nonzero()))
-                tau_rho         = rho_km_vals[rstart:rfin+1]
-                tbrad           = np.deg2rad(tbdeg)
-                tprad           = np.deg2rad(tpdeg)
-                tm              = np.sin(np.abs(tbrad))
-                tt_interp       = interpolate.interp1d(tr,tt,kind='linear')
-                tphase_interp   = interpolate.interp1d(tr,tprad,kind='linear')
-                phase_vals      = tphase_interp(tau_rho)
-                tau_vals        = tt_interp(tau_rho)
-                tm_interp       = interpolate.interp1d(tr,tm,kind='linear')
-                tmu             = tm_interp(tau_rho)
-                power_vals      = np.exp(-tau_vals/tmu)
-                self.power_vals = power_vals
-                self.tau_vals   = tau_vals
-                self.phase_vals = phase_vals
-                self.tau_rho    = tau_rho
-
-        if verbose:
-            print("\tData Extraction Complete.")
-        if verbose:
-            print("\tWriting History...")
-
-        input_vars = {
-            "GEO Data":self.geodata,
-            "CAL Data":self.caldata,
-            "DLP Data":self.dlpdata
-            }
-        input_kwds = {
-            "TAU Data": self.taudata,
-            "Use of Verbose": verbose
-            }
-        self.history = write_history_dict(input_vars, input_kwds, __file__)
-        if verbose:
-            print("\tHistory Complete.")
-        if verbose:
-            print("\tExtract CSV Data Complete.")
-
-    def __retrieve_variables(self,geo_dat,cal_dat,dlp_dat,verbose):
         if verbose:
             print("\tRetrieving Variables...")
 
         # Run an error check on rho_km_vals
-        rho_km_vals = np.array(dlp_dat.rho_km_vals)
-        if not isinstance(rho_km_vals, np.ndarray):
+        self.rho_km_vals = np.array(dlp_dat.rho_km_vals)
+        if not isinstance(self.rho_km_vals, np.ndarray):
             raise TypeError("Bad DLP: rho_km_vals must be a numpy array")
-        elif (not np.isreal(rho_km_vals).all()):
+        elif (not np.isreal(self.rho_km_vals).all()):
             raise ValueError("Bad DLP: rho_km_vals must be real valued")
-        elif (np.min(rho_km_vals) < 0.0):
+        elif (np.min(self.rho_km_vals) < 0.0):
             raise ValueError("Bad DLP: rho_km_vals has negative values")
         else:
             pass
@@ -242,7 +321,7 @@ class ExtractCSVData(object):
 
         # Run an error check on phase_deg_vals
         phase_deg_vals = np.array(dlp_dat.phase_deg_vals)
-        if (not isinstance(phase_deg_vals,np.ndarray)):
+        if (not isinstance(phase_deg_vals, np.ndarray)):
             raise TypeError("Bad DLP: phase_deg_vals must be a numpy array")
         elif (not np.isreal(phase_deg_vals).all()):
             raise ValueError("Bad DLP: phase_deg_vals must be real valued")
@@ -253,55 +332,55 @@ class ExtractCSVData(object):
     
         # Run an error check on B_deg_vals
         B_deg_vals = np.array(dlp_dat.B_deg_vals)
-        if (not isinstance(B_deg_vals,np.ndarray)):
+        if (not isinstance(B_deg_vals, np.ndarray)):
             raise TypeError("Bad DLP: B_deg_vals must be a numpy array")
         elif (not np.isreal(B_deg_vals).all()):
             raise ValueError("Bad DLP: B_deg_vals must be real valued")
-        elif (np.max(np.abs(phi_ora_deg_vals)) > 360.0):
+        elif (np.max(np.abs(B_deg_vals)) > 360.0):
             raise ValueError("Bad DLP: max{|B_deg_vals|} > 360")
         else:
             pass
 
         # Run an error check on t_ret_spm_vals
-        t_ret_spm_vals = np.array(dlp_dat.t_ret_spm_vals)
-        if (not isinstance(t_ret_spm_vals,np.ndarray)):
+        self.t_ret_spm_vals = np.array(dlp_dat.t_ret_spm_vals)
+        if (not isinstance(self.t_ret_spm_vals, np.ndarray)):
             raise TypeError("Bad DLP: t_ret_spm_vals must be a numpy array")
-        elif (not np.isreal(t_ret_spm_vals).all()):
+        elif (not np.isreal(self.t_ret_spm_vals).all()):
             raise ValueError("Bad DLP: t_ret_spm_vals must be real valued")
-        elif (np.min(t_ret_spm_vals) < 0.0):
+        elif (np.min(self.t_ret_spm_vals) < 0.0):
             raise ValueError("Bad DLP: t_ret_spm_vals has negative values.")
         else:
             pass
 
         # Run an error check on t_set_spm_vals
-        t_set_spm_vals = np.array(dlp_dat.t_set_spm_vals)
-        if (not isinstance(t_set_spm_vals,np.ndarray)):
+        self.t_set_spm_vals = np.array(dlp_dat.t_set_spm_vals)
+        if (not isinstance(self.t_set_spm_vals, np.ndarray)):
             raise TypeError("Bad DLP: t_set_spm_vals must be a numpy array")
-        elif (not np.isreal(t_set_spm_vals).all()):
+        elif (not np.isreal(self.t_set_spm_vals).all()):
             raise ValueError("Bad DLP: t_set_spm_vals must be real valued")
-        elif (np.min(t_ret_spm_vals) < 0.0):
+        elif (np.min(self.t_set_spm_vals) < 0.0):
             raise ValueError("Bad DLP: t_set_spm_vals has negative values.")
         else:
             pass
 
         # Run an error check on t_oet_spm_vals
-        t_oet_spm_vals = np.array(dlp_dat.t_oet_spm_vals)
-        if (not isinstance(t_oet_spm_vals, np.ndarray)):
+        self.t_oet_spm_vals = np.array(dlp_dat.t_oet_spm_vals)
+        if (not isinstance(self.t_oet_spm_vals, np.ndarray)):
             raise TypeError("Bad DLP: t_oet_spm_vals must be a numpy array")
-        elif (not np.isreal(t_oet_spm_vals).all()):
+        elif (not np.isreal(self.t_oet_spm_vals).all()):
             raise ValueError("Bad DLP: t_oet_spm_vals must be real valued")
-        elif (np.min(t_ret_spm_vals) < 0.0):
+        elif (np.min(self.t_oet_spm_vals) < 0.0):
             raise ValueError("Bad DLP: t_oet_spm_vals has negative values")
         else:
             pass
 
         # Run an error check on rho_corr_pole_km_vals
-        rho_corr_pole_km_vals = np.array(dlp_dat.rho_corr_pole_km_vals)
-        if (not isinstance(rho_corr_pole_km_vals, np.ndarray)):
+        self.rho_corr_pole_km_vals = np.array(dlp_dat.rho_corr_pole_km_vals)
+        if (not isinstance(self.rho_corr_pole_km_vals, np.ndarray)):
             raise TypeError(
                 "Bad DLP: rho_corr_pole_km_vals must be a numpy array"
             )
-        elif (not np.isreal(rho_corr_pole_km_vals).all()):
+        elif (not np.isreal(self.rho_corr_pole_km_vals).all()):
             raise ValueError(
                 "Bad DLP: rho_corr_pole_km_vals must be real valued"
             )
@@ -309,12 +388,12 @@ class ExtractCSVData(object):
             pass
 
         # Run an error check on rho_corr_timing_km_vals
-        rho_corr_timing_km_vals = np.array(dlp_dat.rho_corr_timing_km_vals)
-        if (not isinstance(rho_corr_timing_km_vals, np.ndarray)):
+        self.rho_corr_timing_km_vals = np.array(dlp_dat.rho_corr_timing_km_vals)
+        if (not isinstance(self.rho_corr_timing_km_vals, np.ndarray)):
             raise TypeError(
                 "Bad DLP: rho_corr_timing_km_vals must be a numpy array"
             )
-        elif (not np.isreal(rho_corr_timing_km_vals).all()):
+        elif (not np.isreal(self.rho_corr_timing_km_vals).all()):
             raise ValueError(
                 "Bad DLP: rho_corr_timing_km_vals must be real valued"
             )
@@ -322,21 +401,21 @@ class ExtractCSVData(object):
             pass
 
         # Run an error check on phi_rl_deg_vals
-        phi_rl_deg_vals = np.array(dlp_dat.phi_rl_deg_vals)
-        if (not isinstance(phi_rl_deg_vals, np.ndarray)):
+        self.phi_rl_deg_vals = np.array(dlp_dat.phi_rl_deg_vals)
+        if (not isinstance(self.phi_rl_deg_vals, np.ndarray)):
             raise TypeError("Bad DLP: phi_rl_deg_vals must be a numpy array")
-        elif (not np.isreal(phi_rl_deg_vals).all()):
+        elif (not np.isreal(self.phi_rl_deg_vals).all()):
             raise ValueError("Bad DLP: phi_rl_deg_vals must be real valued")
         else:
             pass
 
         # Run an error check on raw_tau_threshold_vals
-        raw_tau_threshold_vals = np.array(dlp_dat.raw_tau_threshold_vals)
-        if (not isinstance(raw_tau_threshold_vals, np.ndarray)):
+        self.raw_tau_threshold_vals = np.array(dlp_dat.raw_tau_threshold_vals)
+        if (not isinstance(self.raw_tau_threshold_vals, np.ndarray)):
             raise TypeError(
                 "Bad DLP: raw_tau_threshold_vals must be a numpy array"
             )
-        elif (not np.isreal(raw_tau_threshold_vals).all()):
+        elif (not np.isreal(self.raw_tau_threshold_vals).all()):
             raise ValueError(
                 "Bad DLP: raw_tau_threshold_vals must be real valued"
             )
@@ -355,7 +434,7 @@ class ExtractCSVData(object):
             pass
 
         # Run an error check on geo_D
-        geo_D   = np.array(geo_dat.D_km_vals)
+        geo_D = np.array(geo_dat.D_km_vals)
         if (not isinstance(geo_D, np.ndarray)):
             raise TypeError("Bad GEO: D_km_vals must be a numpy array")
         elif (not np.isreal(geo_D).all()):
@@ -366,7 +445,7 @@ class ExtractCSVData(object):
             pass
 
         # Run an error check on geo_drho
-        geo_drho    = np.array(geo_dat.rho_dot_kms_vals)
+        geo_drho = np.array(geo_dat.rho_dot_kms_vals)
         if (not isinstance(geo_drho, np.ndarray)):
             raise TypeError("Bad GEO: rho_dot_kms_vals must be a numpy array")
         elif (not np.isreal(geo_drho).all()):
@@ -387,49 +466,25 @@ class ExtractCSVData(object):
         else:
             pass
 
-        self.rho_km_vals             = rho_km_vals
-        self.phi_ora_deg_vals        = phi_ora_deg_vals
-        self.raw_tau_vals            = raw_tau_vals
-        self.phase_deg_vals          = phase_deg_vals
-        self.B_deg_vals              = B_deg_vals
-        self.geo_rho                 = geo_rho
-        self.geo_D                   = geo_D
-        self.geo_drho                = geo_drho
-
-        # Set time and frequency attributes.
-        self.f_sky_raw_vals = f_sky_raw_vals
-        self.t_oet_spm_vals = t_oet_spm_vals
-        self.t_ret_spm_vals = t_ret_spm_vals
-        self.t_set_spm_vals = t_set_spm_vals
-        self.rho_corr_pole_km_vals   = rho_corr_pole_km_vals
-        self.rho_corr_timing_km_vals = rho_corr_timing_km_vals
-        self.phi_rl_deg_vals         = phi_rl_deg_vals
-        self.raw_tau_threshold_vals  = raw_tau_threshold_vals
-
-    def __compute_variables(self,verbose):
         if verbose:
             print("\tComputing Variables...")
-        phi_rad_vals    = np.deg2rad(self.phi_ora_deg_vals)
-        phi_rl_rad_vals = np.deg2rad(self.phi_rl_deg_vals)
-        phase_rad_vals  = np.deg2rad(self.phase_deg_vals)
-        B_rad_vals      = np.deg2rad(self.B_deg_vals)
-        raw_mu          = np.sin(np.abs(B_rad_vals))
-        raw_tau_vals    = self.raw_tau_vals
-        geo_drho        = self.geo_drho
-        p_norm_vals     = np.exp(-raw_tau_vals/raw_mu)
 
-        rho_km_vals = self.rho_km_vals
-        t_oet_spm_vals = self.t_oet_spm_vals
+        self.phi_rad_vals = phi_ora_deg_vals*RADS_PER_DEGS
+        self.phi_rl_rad_vals = self.phi_rl_deg_vals*RADS_PER_DEGS
+        self.phase_rad_vals = phase_deg_vals*RADS_PER_DEGS
+        self.B_rad_vals = B_deg_vals*RADS_PER_DEGS
+        raw_mu = np.sin(np.abs(self.B_rad_vals))
+        self.p_norm_vals = np.exp(-raw_tau_vals/raw_mu)
 
-        if (np.size(rho_km_vals) != np.size(t_oet_spm_vals)):
+        if (np.size(self.rho_km_vals) != np.size(self.t_oet_spm_vals)):
             raise ValueError("len(rho_km_vals) != len(t_oet_spm_vals")
 
-        dr = np.zeros(np.size(rho_km_vals) - 1)
-        dt = np.zeros(np.size(t_oet_spm_vals)-1)
+        dr = np.zeros(np.size(self.rho_km_vals) - 1)
+        dt = np.zeros(np.size(self.t_oet_spm_vals)-1)
 
-        for i in range(np.size(rho_km_vals) - 1):
-            dr[i] = rho_km_vals[i+1] - rho_km_vals[i]
-            dt[i] = t_oet_spm_vals[i+1] - t_oet_spm_vals[i]
+        for i in range(np.size(self.rho_km_vals) - 1):
+            dr[i] = self.rho_km_vals[i+1] - self.rho_km_vals[i]
+            dt[i] = self.t_oet_spm_vals[i+1] - self.t_oet_spm_vals[i]
         
         drdt = dr/dt
 
@@ -446,8 +501,10 @@ class ExtractCSVData(object):
         else:
             raise ValueError("Bad DLP: drho/dt has incompatible elements")
 
-        if (occ == 'ingress'):  crange = (geo_drho < 0.0).nonzero()
-        elif (occ == 'egress'): crange = (geo_drho > 0.0).nonzero()
+        if (occ == 'ingress'):
+            crange = (geo_drho < 0.0).nonzero()
+        elif (occ == 'egress'):
+            crange = (geo_drho > 0.0).nonzero()
         else:
             crange_e = (geo_drho > 0.0).nonzero()
             crange_i = (geo_drho < 0.0).nonzero()
@@ -455,10 +512,11 @@ class ExtractCSVData(object):
             n_i      = np.size(crange_i)
             if (n_e != 0) and (n_i !=0):
                 raise ValueError(
-                    "rho_dot_kms_vals has positive and negative values.\
-                    This is likely a chord occultation. Set occ='ingress'\
-                    to examine the ingress portion, and occ='egress'\
-                    for the egress porition.")
+                    "\n\trho_dot_kms_vals has positive and negative values.\n"
+                    "\tThis is likely a chord occultation. Set occ='ingress'\n"
+                    "\tto examine the ingress portion, and occ='egress'\n"
+                    "\tfor the egress porition."
+                )
             elif (n_e == 0) and (n_i == 0):
                 raise ValueError("rho_dot_kms_vals is either empty or zero.")
             elif (n_e != 0) and (n_i == 0):
@@ -477,77 +535,93 @@ class ExtractCSVData(object):
                 mes = "rho_dot_kms_vals is never positive."
             else: raise ValueError("Bad occ input: Set 'egress' or 'ingress'")
             raise ValueError("Bad occ Input: '%s': %s" % (occ,mes))
-        
-        self.occ             = occ
-        self.crange          = crange
-        self.p_norm_vals     = p_norm_vals
-        self.B_rad_vals      = B_rad_vals
-        self.phase_rad_vals  = phase_rad_vals
-        self.phi_rad_vals    = phi_rad_vals
-        self.phi_rl_rad_vals = phi_rl_rad_vals
-        self.raw_mu          = raw_mu
 
-    def __interpolate_variables(self,verbose):
         if verbose: print("\tInterpolating Data...")
-        crange                  = self.crange
-        rho_km_vals             = self.rho_km_vals
-        t_set_spm_vals          = self.t_set_spm_vals
-        t_ret_spm_vals          = self.t_ret_spm_vals
-        t_oet_spm_vals          = self.t_oet_spm_vals
-        rho_corr_pole_km_vals      = self.rho_corr_pole_km_vals
-        rho_corr_timing_km_vals = self.rho_corr_timing_km_vals
 
-        f_sky_raw_vals   = self.f_sky_raw_vals
-        geo_rho          = self.geo_rho[crange]
-        geo_drho         = self.geo_drho[crange]
-        geo_D            = self.geo_D[crange]
-        rmin             = np.min(geo_rho)
-        rmax             = np.max(geo_rho)
-        rstart           = int(np.min((rho_km_vals-rmin>=0.0).nonzero()))
-        rfin             = int(np.max((rmax-rho_km_vals>=0.0).nonzero()))
-        rho_km_vals      = rho_km_vals[rstart:rfin+1]
-        phi_rad_vals     = self.phi_rad_vals[rstart:rfin+1]
-        phase_rad_vals   = self.phase_rad_vals[rstart:rfin+1]
-        B_rad_vals       = self.B_rad_vals[rstart:rfin+1]
-        p_norm_vals      = self.p_norm_vals[rstart:rfin+1]
-        d_km_interp      = interpolate.interp1d(geo_rho,geo_D,kind='linear')
-        D_km_vals        = d_km_interp(rho_km_vals)
-        rho_dot_interp   = interpolate.interp1d(geo_rho,geo_drho,kind='linear')
-        rho_dot_kms_vals = rho_dot_interp(rho_km_vals)
-        n_rho_vals       = np.size(rho_km_vals)
-        n_f_vals         = np.size(f_sky_raw_vals)
-        frange           = np.arange(n_f_vals)
-        xrange           = np.arange(n_rho_vals)*(n_f_vals-1.0)/(n_rho_vals-1.0)
-        fsky_interp      = interpolate.interp1d(frange,f_sky_raw_vals,kind='linear')
-        f_sky_hz_vals    = fsky_interp(xrange)
+        geo_drho = geo_drho[crange]
+        geo_rho = geo_rho[crange]
+        geo_D = geo_D[crange]
+        rmin = np.min(geo_rho)
+        rmax = np.max(geo_rho)
+        rfin = int(np.max((rmax-self.rho_km_vals>=0.0).nonzero()))
+        rstart = int(np.min((self.rho_km_vals-rmin>=0.0).nonzero()))
+        self.phase_rad_vals = self.phase_rad_vals[rstart:rfin+1]
+        self.phi_rad_vals = self.phi_rad_vals[rstart:rfin+1]
+        self.rho_km_vals = self.rho_km_vals[rstart:rfin+1]
+        self.p_norm_vals = self.p_norm_vals[rstart:rfin+1]
+        self.B_rad_vals = self.B_rad_vals[rstart:rfin+1]
+        d_km_interp = interpolate.interp1d(geo_rho, geo_D, kind='linear')
+        self.D_km_vals = d_km_interp(self.rho_km_vals)
+        rho_dot_interp = interpolate.interp1d(geo_rho, geo_drho, kind='linear')
+        self.rho_dot_kms_vals = rho_dot_interp(self.rho_km_vals)
+        n_rho_vals = np.size(self.rho_km_vals)
+        n_f_vals = np.size(f_sky_raw_vals)
+        frange = np.arange(n_f_vals)
+        xrange = np.arange(n_rho_vals)*(n_f_vals-1.0)/(n_rho_vals-1.0)
+        f_interp = interpolate.interp1d(frange, f_sky_raw_vals, kind='linear')
+        self.f_sky_hz_vals = f_interp(xrange)
+        self.t_ret_spm_vals = self.t_ret_spm_vals[rstart:rfin+1]
+        self.t_set_spm_vals = self.t_set_spm_vals[rstart:rfin+1]
+        self.t_oet_spm_vals = self.t_oet_spm_vals[rstart:rfin+1]
+        self.rho_corr_pole_km_vals = self.rho_corr_pole_km_vals[rstart:rfin+1]
+        self.rho_corr_timing_km_vals = self.rho_corr_timing_km_vals[rstart:rfin+1]
 
-        t_ret_spm_vals          = t_ret_spm_vals[rstart:rfin+1]
-        t_set_spm_vals          = t_set_spm_vals[rstart:rfin+1]
-        t_oet_spm_vals          = t_oet_spm_vals[rstart:rfin+1]
-        rho_corr_pole_km_vals      = rho_corr_pole_km_vals[rstart:rfin+1]
-        rho_corr_timing_km_vals = rho_corr_timing_km_vals[rstart:rfin+1]
+        del f_sky_raw_vals, rmin, rmax, rstart, rfin, n_rho_vals, n_f_vals
+        del rho_dot_interp, frange, xrange, f_interp, phi_ora_deg_vals
+        del raw_tau_vals, phase_deg_vals, raw_mu, B_deg_vals, geo_rho, geo_D
+        del geo_drho, crange, geo_dat, cal_dat, dlp_dat
 
-        del f_sky_raw_vals,geo_rho,geo_drho,geo_D,rmin,rmax,rstart,rfin
-        del rho_dot_interp,n_rho_vals,n_f_vals,frange,xrange,fsky_interp
-        
-        self.rho_km_vals        = rho_km_vals
-        self.phi_rad_vals       = phi_rad_vals
-        self.p_norm_vals        = p_norm_vals
-        self.phase_rad_vals     = phase_rad_vals
-        self.B_rad_vals         = B_rad_vals
-        self.D_km_vals          = D_km_vals
-        self.f_sky_hz_vals      = f_sky_hz_vals
-        self.rho_dot_kms_vals   = rho_dot_kms_vals
-        t_set_spm_vals          = t_set_spm_vals
-        t_ret_spm_vals          = t_ret_spm_vals
-        t_oet_spm_vals          = t_oet_spm_vals
-        rho_corr_pole_km_vals   = rho_corr_pole_km_vals
-        rho_corr_timing_km_vals = rho_corr_timing_km_vals
+        if (not isinstance(tau, type(None))):
+            if (not isinstance(tau, str)):
+                raise TypeError("taudata must be a string: '/path/to/taudata'")
+            else:
+                tau_dat = get_tau(self.tau, verbose=verbose)
+                tp = tau_dat.phase_deg_vals*RADS_PER_DEGS
+                tm = tau_dat.B_deg_vals*RADS_PER_DEGS
+                tm = np.sin(np.abs(tm))
+                tr = tau_dat.rho_km_vals
+                tt = tau_dat.raw_tau_vals
+                rmin = np.min(tr)
+                rmax = np.max(tr)
+                rfin = int(np.max((rmax-self.rho_km_vals>=0).nonzero()))
+                rstart = int(np.min((self.rho_km_vals-rmin>=0).nonzero()))
+                self.tau_rho = self.rho_km_vals[rstart:rfin+1]
+                tt_interp = interpolate.interp1d(tr,tt,kind='linear')
+                tp_interp = interpolate.interp1d(tr,tp,kind='linear')
+                tm_interp = interpolate.interp1d(tr,tm,kind='linear')
+                self.phase_vals = tp_interp(self.tau_rho)
+                self.tau_vals = tt_interp(self.tau_rho)
+                tm = tm_interp(self.tau_rho)
+                self.power_vals = np.exp(-self.tau_vals/tm)
+                del tau_dat, tp, tm, tr, tt, rmin, rmax, rfin, rstart
+                del tt_interp, tp_interp, tm_interp
+        else:
+            pass
 
-    def __del_attributes(self):
-        del self.phi_ora_deg_vals,self.raw_tau_vals
-        del self.phase_deg_vals,self.raw_mu,self.B_deg_vals
-        del self.geo_rho,self.geo_D,self.geo_drho,self.crange
+        if verbose:
+            print("\tData Extraction Complete.")
+
+        if verbose:
+            print("\tWriting History...")
+
+        input_vars = {
+            "GEO Data": self.geo,
+            "CAL Data": self.cal,
+            "DLP Data": self.dlp
+            }
+
+        input_kwds = {
+            "TAU Data": self.tau,
+            "Use of Verbose": verbose
+            }
+
+        self.history = write_history_dict(input_vars, input_kwds, __file__)
+
+        if verbose:
+            print("\tHistory Complete.")
+
+        if verbose:
+            print("\tExtract CSV Data Complete.")
 
 
 class GetUranusData(object):

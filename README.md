@@ -3,7 +3,7 @@ rss_ringoccs is a suite of Python-based analysis tools for Cassini Radio Science
 
 THIS IS A PRE-RELEASE VERSION. 
 
-The official release of Version 1.0 (and release notes) will be on September 28, 2018.
+The official release of Version 1.0 (and release notes) will be available on September 28, 2018.
 
 ## Introduction
 The Cassini Radio Science Subsystem (RSS) was used during the Cassini orbital tour of Saturn to observe a superb series of ring occultations that resulted in high-resolution, high-SNR radial profiles of Saturn's rings at three radio wavelengths: 13 cm (S band), 3.6 cm (X band), and 0.9 cm (Ka band). Radial optical depth profiles of the rings at 1- and 10-km resolution produced by the Cassini RSS team, using state of the art signal processing techniques to remove diffraction effects, are available on NASA's Planetary Data System (PDS). These archived products are likely to be quite adequate for many ring scientists, but for those who wish to generate their own diffraction-corrected ring profiles from Cassini RSS observations, we offer rss_ringoccs: a suite of Python-based  analysis tools for Cassini Radio Science (RSS) ring occultations.

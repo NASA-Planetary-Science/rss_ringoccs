@@ -608,12 +608,12 @@ class ExtractCSVData(object):
             "GEO Data": self.geo,
             "CAL Data": self.cal,
             "DLP Data": self.dlp
-            }
+        }
 
         input_kwds = {
             "TAU Data": self.tau,
             "Use of Verbose": verbose
-            }
+        }
 
         self.history = write_history_dict(input_vars, input_kwds, __file__)
 

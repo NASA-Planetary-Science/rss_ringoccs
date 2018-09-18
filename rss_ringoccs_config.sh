@@ -38,9 +38,6 @@ else
 
 	# Remove the shell script from your home directory.
 	rm -f "$fil"
-
-	# Update bash_profile.
-	source .bash_profile
 fi
 
 # Update conda
@@ -48,3 +45,8 @@ conda update conda
 
 # Install Spiceypy
 conda install -c https://conda.anaconda.org/andrewannex spiceypy
+
+# Source .bash_profile to update you path.
+echo "Sourcing .bash_profile"
+echo "Make sure you are using Bash when running rss_ringoccs"
+source .bash_profile

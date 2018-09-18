@@ -992,7 +992,6 @@ class DiffractionCorrection(object):
         del rho, w_max, rho_min_lim, rho_max_lim, rho_start, rho_end
         del rho_min, rho_max, rng, norm, fwd, fft, bfac, psitype, verbose
 
-        # self.__trim_inputs()
         if self.verbose:
             print("\tRunning Fresnel Inversion...")
 

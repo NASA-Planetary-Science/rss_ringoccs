@@ -35,6 +35,4 @@ Workaround: Use Linux operating system, and post an Issue on the Github page for
 
 8. Implement speed improvements using multiprocessing, Cython, and/or C versions of time-consuming routines.
 
-9. Workarounds that remove GUI components to optimize and streamline the pipeline.
-
-10. Incorporating different fit options into the free space fitting in the power normalization routines.
+9. Workarounds that remove or significantly reduce the need for GUI components to optimize and streamline the pipeline.

@@ -608,7 +608,8 @@ class DiffractionCorrection(object):
                 )
 
         # Check that the data is well sampled for the requested resolution.
-        if self.res < 2.0*self.dx_km:
+        # Create a 1e-6 buffer to account for floating point round-off error.
+        if self.res < 1.999999*self.dx_km:
             raise ValueError(
                 "\n\tRequested resolution is less than twice the\n"
                 "\tsample spacing of the input data. This\n"
@@ -616,7 +617,7 @@ class DiffractionCorrection(object):
                 "\tin an inaccurate reconstruction.\n\n"
                 "\tRequested Resolution (km): %f\n"
                 "\tSample Spacing (km): %f\n\n"
-                "\tTO CORRECT THIS:"
+                "\tTO CORRECT THIS:\n"
                 "\t\tChoose a resolution GREATER than %f km\n" %
                 (self.res, self.dx_km, 2.0*self.dx_km)
             )

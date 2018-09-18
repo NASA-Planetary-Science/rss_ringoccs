@@ -5,9 +5,9 @@ if [ ! "$BASH_VERSION" ] ; then
 fi
 osstring=`uname`
 
-if [ osstring = "Darwin" ]; then
+if [ "$osstring" = "Darwin" ]; then
 	fil="Anaconda3-5.1.0-MacOSX-x86_64.sh"
-elif [ osstring = "Linux" ];
+elif [ "$osstring" = "Linux" ]; then
 	fil="Anaconda3-5.1.0-Linux-x86_64.sh"
 else
 	echo "Operating System not recognized"
@@ -19,29 +19,32 @@ fi
 web="https://repo.continuum.io/archive/"
 webfil="$web$fil"
 
-if [ ! -e "~/anaconda3" ]; then
+# Go to your home directory
+cd ~
+
+# Check to see if anaconda3 exists on your computer.
+
+if [ -d anaconda3 ]; then
+	echo "You already have Anaconda on your computer."
+	echo "Running updates..."
+else
 	echo "Anaconda3 does not currently exist on your computer."
 	echo "Running setup scripts now..."
-	# Go to your home directory
-	cd ~
 
 	# Use cURL to download Anaconda 5.1.0.
 	curl -Ok "$webfil"
 
 	# Run the Anaconda installer.
-	bash "filename" -b -p ~/anaconda3
+	bash "$fil" -b -p ~/anaconda3
 
 	# Remove the shell script from your home directory.
-	rm Anaconda3-5.1.0-MacOSX-x86_64.sh
+	rm -f "$fil"
 
 	# Add Anaconda to your path.
 	echo 'export PATH="~/anaconda3/bin:$PATH"' >> ~/.bash_profile
 
 	# Update bash_profile.
 	source .bash_profile
-else
-	echo "You already have Anaconda on your computer."
-	echo "Running updates..."
 fi
 
 # Update conda

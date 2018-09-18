@@ -3,6 +3,7 @@ NASA-Planetary-Science/rss_ringoccs/AAREADME.txt
 Revisions:
   2018 Mar 22 - rfrench - original version
   2018 Aug 21 - jfong - revised directory structure
+  2018 Sep 14 - 
   
 Overview of NASA-Planetary-Science/rss_ringoccs GitHub repository
 
@@ -19,6 +20,7 @@ Developers:
     Jolene Fong, Research Assistant, Wellesley College
     Ryan Maguire, Research Assistant, Wellesley College
     Glenn Steranka, Research Assistant, Wellesley College
+    Sophia Flury, Research Assistant, Wellesley College
 
 System requirements:
   This software and installation have been tested on the following operating systems:
@@ -38,14 +40,17 @@ The rss_ringoccs package has a strict directory structure that we recommend that
   rss_ringoccs_master/
     AAREADME.txt [this file]
     data/         <--- Raw Cassini RSS data ONLY, downloaded from NASA PDS Atmospheres Node 
-    docs/         <--- documentation
+    docs/         <--- documentation including AAREADME.txt and User's Guide
     examples/     <--- detailed rss_ringoccs tutorials and figures
     kernels/      <--- NASA/JPL/NAIF/SPICE "kernel" files ONLY (spacecraft trajectory files, planetary ephemerides, etc.)
                        downloaded from https://naif.jpl.nasa.gov/pub/naif/
     output/       <--- output files produced by rss_ringoccs software
-    pipeline/     <--- source files (Python and shell scripts)
-	rss_ringoccs/ <--- package
-	tables/       <--- accompanying text files 
+    output/RevXXX/ev/RevXXX_YYYY_DOY_B##_D/         <--- output directory for each revolution (XXXX), event (ev),
+                                                         year (YYYY), day of year (DOY), bandpass (B), DSN station (##), 
+							 and direction (D)
+    pipeline/     <--- script files (Python and shell scripts)
+    rss_ringoccs/ <--- software package
+    tables/       <--- accompanying text files 
 
 Quick installation guide:
 
@@ -66,7 +71,7 @@ Quick installation guide:
     + This step will create a subdirectory called rss_ringoccs_master/
     
 3) Download and install spiceypy from https://github.com/AndrewAnnex/SpiceyPy, following installation instructions 
-    in https://github.com/AndrewAnnex/SpiceyPy/blob/master/README.rst
+    in https://github.com/AndrewAnnex/SpiceyPy/blob/master/README.rst or the pip install directions in the User's Guide
     Test your installation by firing up Python, using this example:
         In[1]: import spiceypy
         In[2]: spiceypy.pi()
@@ -75,9 +80,9 @@ Quick installation guide:
         
 Documentation:
 
-rss_ringoccs_master/docs/ contains extensive documentation of the rss_ringocss package, and a QuickStartGuide.txt
+rss_ringoccs_master/docs/ contains extensive documentation of the rss_ringocss package, and a rss_ringoccs_User_Guide.pdf
 
-Follow the step-by-step instructions in QuickStartGuide.txt to:
+Follow the step-by-step instructions in the rss_ringoccs_User_Guide.pdf to:
   + download selected raw Cassini RSS data required for the demo programs (takes some time)
   + download selected kernel files required for analysis of Cassini RSS data (takes some time)
   + run the non-interactive sample end-to-end processing of a single RSS ring occultation event
@@ -85,9 +90,12 @@ Follow the step-by-step instructions in QuickStartGuide.txt to:
   
 Next steps:
 
-  +Read the more extensive documentation End2EndGuide.txt to learn about the sequence of processing steps go from a raw RSS data file        radial optical depth profile of Saturn's rings.
-  +Download additional RSS data files and the required kernel files to have a full distribution of all available data (takes considerable    download time and substantial disk space)
-  +While you are waiting for the downloads to complete, read the "RSS_Data_Users_Guide.pdf" for additional background on the Cassini RSS      ring occultation experiments.
+  +Read the more extensive documentation rss_ringoccs_User_Guide.pdf to learn about the sequence of processing steps 
+   go from a raw RSS data file radial optical depth profile of Saturn's rings.
+  +Download additional RSS data files and the required kernel files to have a full distribution of all available 
+   data (takes considerable    download time and substantial disk space)
+  +While you are waiting for the downloads to complete, read the "RSS_Data_Users_Guide.pdf" for additional background
+   on the Cassini RSS ring occultation experiments.
   
 Getting Help:
 

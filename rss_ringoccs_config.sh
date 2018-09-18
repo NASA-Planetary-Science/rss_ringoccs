@@ -22,7 +22,7 @@ web="https://repo.continuum.io/archive/"
 webfil="$web$fil"
 
 # Go to your home directory
-MY_DIRECTORY = $(pwd)
+MY_DIRECTORY=$(pwd)
 cd ~
 
 # Check to see if anaconda3 exists on your computer.

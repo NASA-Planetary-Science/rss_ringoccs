@@ -23,7 +23,6 @@ webfil="$web$fil"
 cd ~
 
 # Check to see if anaconda3 exists on your computer.
-
 if [ -d anaconda3 ]; then
 	echo "You already have Anaconda on your computer."
 	echo "Running updates..."
@@ -39,9 +38,6 @@ else
 
 	# Remove the shell script from your home directory.
 	rm -f "$fil"
-
-	# Add Anaconda to your path.
-	echo 'export PATH="~/anaconda3/bin:$PATH"' >> ~/.bash_profile
 
 	# Update bash_profile.
 	source .bash_profile

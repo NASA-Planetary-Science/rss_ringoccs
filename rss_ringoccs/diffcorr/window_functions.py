@@ -496,7 +496,7 @@ def kbmdal(w_in, dx, al):
     w_func = (iv(0.0,alpha * np.sqrt((1.0 - (2.0 * x / w_in)**2)))-1)/(iv(0.0,alpha)-1)
     return w_func
 
-def window_width(res,normeq,fsky,fres,rho_dot,sigma=False,bfac=True):
+def window_width(res, normeq, fsky, fres, rho_dot, sigma = 2.e-13, bfac=True):
     """
         Function: window_width
         Purpose:  Compute the window width as a function of ring radius.
@@ -512,11 +512,9 @@ def window_width(res,normeq,fsky,fres,rho_dot,sigma=False,bfac=True):
             Translated from IDL: RJM - 2018/05/15 8:38 P.M.
     """
     if bfac:
-        if (not sigma):
-            sigma = 2.e-13
         omega = 2.0 * np.pi * fsky
-        alpha = (omega**2) * (sigma**2) / (2.0 * rho_dot)
-        P     = res / (alpha * (fres**2))
+        alpha = (omega*omega) * (sigma*sigma) / (2.0 * rho_dot)
+        P     = res / (alpha * (fres*fres))
         # The inverse exists only if P>1.
         if (np.min(P) < 1.0001):
             print("ERROR: Bad Points!")
@@ -580,11 +578,11 @@ def get_range_actual(rho, rng, w_vals):
     return start, n_used
 
 func_dict = {
-        "rect" :    {"func" : rect,     "normeq" : 1.00000000},
-        "coss" :    {"func" : coss,     "normeq" : 1.50000000},
-        "kb20" :    {"func" : kb20,     "normeq" : 1.49634231},
-        "kb25" :    {"func" : kb25,     "normeq" : 1.65191895},
-        "kb35" :    {"func" : kb35,     "normeq" : 1.92844639},
-        "kbmd20" :  {"func" : kbmd20,   "normeq" : 1.52048174},
-        "kbmd25" :  {"func" : kbmd25,   "normeq" : 1.65994218}
-        }
+    "rect":   {"func": rect,   "normeq": 1.00000000},
+    "coss":   {"func": coss,   "normeq": 1.50000000},
+    "kb20":   {"func": kb20,   "normeq": 1.49634231},
+    "kb25":   {"func": kb25,   "normeq": 1.65191895},
+    "kb35":   {"func": kb35,   "normeq": 1.92844639},
+    "kbmd20": {"func": kbmd20, "normeq": 1.52048174},
+    "kbmd25": {"func": kbmd25, "normeq": 1.65994218}
+}

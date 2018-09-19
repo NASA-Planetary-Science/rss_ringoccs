@@ -1,52 +1,5 @@
 import numpy as np
 from . import window_functions as wf
-SPEED_OF_LIGHT_KM = 299792.4580
-
-def power_func(T_in):
-    """
-        Function:
-            power
-        Purpose:
-            Compute power from complex transmittance.
-        Variables:
-            T_in:   The complex transmittance.
-        Output:
-            power:  The power.
-        Dependencies:
-            [1] numpy
-            [2] sys
-        Notes:
-            [1] The power is simply the square of the absolute value
-                of the complex transmittance. This equation works for
-                both a diffracted and a reconstructed transmittance.
-        References:
-            [1] Essam A. Marouf, G. Leonard Tyler, Paul A. Rosen,
-                Profiling Saturn's rings by radio occultation,
-                Icarus, Volume 68, Issue 1, 1986, Pages 120-166,
-                https://doi.org/10.1016/0019-1035(86)90078-3
-            [2] S. W. Asmar, R. G. French, E. A. Marouf, P. Schinder,
-                J. W. Armstrong, P. Tortora, L. Iess, A. Anabtawi,
-                A. J. Kliore, M. Parisi, M. Zannoni, and D. Kahan,
-                Cassini Radio Science User's Guide, September, 2014,
-                https://pds-rings.seti.org/cassini/rss/
-        Examples:
-            Compute the power of a diffraction pattern through a
-            square well.
-                In [1]: import diffcorr as dc
-                In [2]: import numpy as np
-                In [3]: import matplotlib.pyplot as plt
-                In [4]: x = np.array(range(0,10001))*0.01-50.0
-                In [5]: T = dc.sq_well_solve(x,-5,5,1)
-                In [6]: p = dc.power_func(T)
-                In [7]: plt.show(plt.plot(x,p))
-        History:
-            Created: RJM - 2018/05/16 5:19 A.M.
-    """
-    if (not check_real(T_in)) and (not check_complex(T_in)):
-        raise TypeError("Complex transmittance must be real or complex valued.")
-    else:
-        power = (np.abs(T_in))**2
-    return power
 
 def phase_func(T_in):
     """
@@ -161,49 +114,9 @@ def tau_func(T_in,mu):
         tau[crange] = -mu[crange] * np.log(np.abs(p[crange]))
     return tau
 
-def wker(w,psi):
-    """
-        Function:
-            wker
-        Purpose:
-            Compute the weighted kernel function.
-        Variables:
-            psi:  The independent variable.
-            w:    The weight function.
-        Output:
-            kernel: The weighted kernel function.
-        History:
-            Translated from IDL: RJM - 2018/05/16 5:10 A.M.
-    """
-    kernel = w * np.exp(1j * psi)
-    return kernel
-
-def freq_wav(freqwav):
-    """
-        Function:
-            freq_wav
-        Purpose:
-            Converts frequency to wavelength, and vice versa.
-        Variables:
-            FREQWAV: Frequency (wavelength) of the input in Hz (km).
-        Outputs:
-            WAVFREQ: Wavelength (frequency) of the input in Km (Hz).
-        NOTE:
-            Frequency MUST be Hertz, wavelength MUST be Kilometers.
-        History:
-            Translated from IDL: RJM - 2018/05/14 11:41 A.M.
-    """
-    if not check_real(freqwav):
-        sys.exit("Input must be real valued")
-    elif (np.min(freqwav) <= 0):
-        sys.exit("Input must be positive")
-    else:
-        wavfreq = SPEED_OF_LIGHT_KM / freqwav
-    return wavfreq
-
 def fresnel_forward(rho_km_vals,F_km_vals,phi_rad_vals,B_rad_vals,D_km_vals,
-    T_vals,lambda_km_vals,w_km_vals,dx_km,wtype,start,n_used,norm=True,fft=False,
-    verbose=True,psitype='full'):
+                    T_vals,lambda_km_vals,w_km_vals,dx_km,wtype,start,n_used,
+                    norm=True,fft=False,verbose=True,psitype='full'):
     """
         Procedure: fresnel_forward
         Purpose:   Computes the forward model of diffraction from a set of
@@ -501,9 +414,10 @@ def fresnel_forward(rho_km_vals,F_km_vals,phi_rad_vals,B_rad_vals,D_km_vals,
                       % (i, n_fwd, nw, loop), end="\r")
     return T_hat_fwd_vals
 
-def fresnel_inversion(rho_vals,F_vals,phi_rad_vals,B_vals,D_vals,
-    T_hat_vals,lambda_vals,w_vals,dx,wtype,start,n_used,norm=True,fft=False,
-    verbose=True,psitype='full'):
+def fresnel_inversion(rho_vals, F_vals, phi_rad_vals, B_vals, D_vals,
+                      T_hat_vals, lambda_vals, w_vals, dx, wtype, start,
+                      n_used, norm=True, fft=False, verbose=True,
+                      psitype='full'):
     """
         Function:  fresnel_inversion
         Purpose:   Computes the fresnel inversion from a set of diffracted data

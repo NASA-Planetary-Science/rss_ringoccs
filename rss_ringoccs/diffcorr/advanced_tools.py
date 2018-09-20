@@ -1,7 +1,7 @@
 import numpy as np
 from scipy import interpolate
-from .diffraction_correction import DiffractionCorrection
-from .physics_functions import fresnel_forward, freq_wav
+from .diffraction_correction import DiffractionCorrection, SPEED_OF_LIGHT_KM
+from .physics_functions import fresnel_forward
 from rss_ringoccs.tools.CSV_tools import get_geo, ExtractCSVData
 
 
@@ -10,7 +10,7 @@ class CompareTau(object):
                  rng='all', wtype="kb25", bfac=True,
                  fft=False, verbose=True, norm=True):
 
-        data = ExtractCSVData(geo, cal, dlp, taudata=tau, verbose=verbose)
+        data = ExtractCSVData(geo, cal, dlp, tau=tau, verbose=verbose)
         rec = DiffractionCorrection(data, res, rng=rng, bfac=bfac, wtype=wtype,
                                     fft=fft, verbose=verbose, norm=norm)
         rho_km_vals = rec.rho_km_vals
@@ -167,7 +167,7 @@ class DeltaImpulseDiffraction(object):
         lambda_vals         = np.zeros(np.size(self.rho_km_vals))+lambda_km
         self.p_norm_vals    = p_norm_vals
         self.phase_rad_vals = phase_rad_vals
-        self.f_sky_hz_vals  = freq_wav(lambda_vals)
+        self.f_sky_hz_vals  = SPEED_OF_LIGHT_KM/lambda_vals
         self.nstar          = nstar
         self.history        = "Bob"
 

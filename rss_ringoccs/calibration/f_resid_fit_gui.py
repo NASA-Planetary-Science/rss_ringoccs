@@ -24,6 +24,13 @@ Revisions:
       f_resid_fit_gui.py
    2018 May 08 - gsteranka - copied from prev version
    2018 May 30 - gsteranka - Make decent initial guess at fit
+   2018 Sep 11 - sflury - Added attributes ymd (median frequency residual),
+      ystd (root-median-square frequency residual, proxy for standard deviation
+      of the mean), and sigmaclip (an array of Booleans which select only those
+      frequency offset residuals which fall within one rms of the median).
+      Changed plotting to center on residuals within one rms of the median
+      frequency offset residual.
+ 
 """
 
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg,
@@ -248,9 +255,26 @@ class FResidFitGui(Frame):
         initUI()
         """
 
+        ## Plot residual frequency and fit
+        #self.ax.plot(self.x, self.y, color='g')
+        #self.ax.plot(self.x, self.yfit, color='r')
+        #self.ax.set_xlabel('SPM')
+        #self.ax.set_ylabel('Hz')
+
+        # compute median frequency offset residual
+        self.ymd = np.median(self.y)
+        # compute root-median square frequency offset residual
+        self.ystd = 5.*np.sqrt(np.median(np.square(self.y-self.ymd)))
+        # create Boolean array which excludes any data with a frequency offset
+        #  residual which falls more than three standard deviations from the
+        #  median frequency offset residual
+        self.sigmaclip = [(self.y>self.ymd-self.ystd)&(self.y<self.ymd+
+            self.ystd)]
+
         # Plot residual frequency and fit
-        self.ax.plot(self.x, self.y, color='g')
-        self.ax.plot(self.x, self.yfit, color='r')
+        self.ax.plot(self.x, self.y, color='0.75')
+        self.ax.plot(self.x[self.sigmaclip], self.y[self.sigmaclip], color='0.0')
+        self.ax.plot(self.x, self.yfit, color='r', lw = 2)
         self.ax.set_xlabel('SPM')
         self.ax.set_ylabel('Hz')
 
@@ -275,6 +299,7 @@ class FResidFitGui(Frame):
                 xlim_rho = self.ax_rho.get_xlim()
                 self.ax_rho.set_xlim([xlim_rho[1], xlim_rho[0]])
         self.ax_rho.set_xlabel('Rho (km)')
+        self.ax.set_ylim(self.ymd-1.5*self.ystd,self.ymd+1.5*self.ystd)
 
         # Show the canvas
         self.canvas = FigureCanvasTkAgg(self.f, master=self.parent)
@@ -299,11 +324,18 @@ class FResidFitGui(Frame):
         ind = self.ind
         not_ind = self.not_ind
 
+        ## Plot the residual frequency within the freespace regions and its fit
+        #self.ax.cla()
+        #self.ax.plot(self.x[ind], self.y[ind], color='g')
+        #self.ax.plot(self.x, self.yfit, color='r')
+        #self.ax.set_ylim([min(self.y[ind]) - 1.0, max(self.y[ind]) + 1.0])
+
         # Plot the residual frequency within the freespace regions and its fit
         self.ax.cla()
-        self.ax.plot(self.x[ind], self.y[ind], color='g')
-        self.ax.plot(self.x, self.yfit, color='r')
-        self.ax.set_ylim([min(self.y[ind]) - 1.0, max(self.y[ind]) + 1.0])
+        self.ax.plot(self.x, self.y, color='0.75')
+        self.ax.plot(self.x[self.sigmaclip], self.y[self.sigmaclip], color='0.0')
+        self.ax.plot(self.x, self.yfit, color='r', lw = 2)
+        self.ax.set_ylim(self.ymd-1.5*self.ystd,self.ymd+1.5*self.ystd)
 
         # Plot the radius scale on the upper x-axis
         if self.is_chord:

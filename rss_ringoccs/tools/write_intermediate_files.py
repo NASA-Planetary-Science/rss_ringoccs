@@ -74,14 +74,18 @@ def write_intermediate_files(year, doy, band, dsn, profdir, filtyp,
 
             # Check for most recent file and order them by date
             dirfiles = os.listdir(dirsrch)
-            sfn = [x.split('_') for x in dirfiles]
-            sqn0 = [(x[-2]+x[-1][0:4]) for x in sfn if (x[-3]==filtyp)]
-            sqn1 = [int(x) for x in sqn0]
-
-            if len(sqn1) == 0:
+            
+            if len(dirfiles) == 0:
                 seq_num = '0001'
             else:
-                seq_num = (str(sqn1[-1] + 1))[-4:]
+                sfn = [x.split('_') for x in dirfiles]
+                sqn0 = [(x[-2]+x[-1][0:4]) for x in sfn if (x[-3]==filtyp)]
+                if len(sqn0) == 0:
+                    seq_num = '0001'
+                else:
+                    sqn1 = [int(x) for x in sqn0]
+
+                    seq_num = (str(sqn1[-1] + 1))[-4:]
 
             out2 = out1 + '_' + seq_num
 

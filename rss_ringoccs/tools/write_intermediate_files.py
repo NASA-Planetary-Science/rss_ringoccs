@@ -14,6 +14,7 @@ Purpose: This function writes output intermediate data files (such as
 Revisions:
     2018 Sep 18 - jfong - original
     2018 Sep 19 - jfong - add 4-digit sequence number after date to outfile str
+    2018 Sep 20 - jfong - search if file type exists for seq_num='0001'
 """
 
 import os
@@ -77,7 +78,10 @@ def write_intermediate_files(year, doy, band, dsn, profdir, filtyp,
             sqn0 = [(x[-2]+x[-1][0:4]) for x in sfn if (x[-3]==filtyp)]
             sqn1 = [int(x) for x in sqn0]
 
-            seq_num = (str(sqn1[-1] + 1))[-4:]
+            if len(sqn1) == 0:
+                seq_num = '0001'
+            else:
+                seq_num = (str(sqn1[-1] + 1))[-4:]
 
             out2 = out1 + '_' + seq_num
 

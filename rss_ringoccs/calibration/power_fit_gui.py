@@ -22,6 +22,9 @@ Revisions:
     2018 May 09 - gsteranka - Original version
         power_fit_gui.py
     2018 May 10 - gsteranka - Copied to use in GitHub code
+    2018 Sep 19 - sflury - Updated GUI to have predicted free space regions
+       highlighted using matplotlib.pyplot.fill_between. Changed plot colors
+       to higher contrast and color-blind accessible.
 """
 
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg,
@@ -277,11 +280,23 @@ class PowerFitGui(Frame):
         initUI()
         """
 
+        # Shading of predicted free-space regions and normalization of power to
+        #    max power
+        self.rho_to_spm_func = interp1d(self.x_rho,self.x)
+        self.rho_free = [[69100.0, 73500], [87350.0, 87450.0],
+            [117690.0, 117780.0], [119850.0, 120020.0],
+            [133500.0, 133650.0], [137000.0, 194400.0]]
+        self.spm_free = [[self.rho_to_spm_func(xl[0]),self.rho_to_spm_func(xl[1])] for xl in self.rho_free]
+        for xl in self.spm_free:
+            self.ax.fill_between(xl,-1,2,color='0.75',zorder=0)
+        
+        self.ynorm = self.y/np.max(self.y)
+        
         # Plot power and its default fit
-        self.ax.plot(self.x, self.y, color='b')
-        self.ax.plot(self.xfit, self.yfit, color='r')
+        self.ax.plot(self.x, self.ynorm, color='0.0',zorder=1)
+        self.ax.plot(self.xfit, self.yfit/np.max(self.y), color='r',lw=2,zorder=2)
         self.ax.set_xlabel('SPM')
-
+        
         # Plot radius scale on upper x-axis
         self.ax_rho = self.ax.twiny()
         rho_diff = np.diff(self.x_rho)
@@ -297,12 +312,16 @@ class PowerFitGui(Frame):
             self.ax_rho.set_xlabel('Rho (km)')
         else:
             self.is_chord = False
-            self.ax_rho.plot(self.x_rho, self.y, alpha=0)
+            self.ax_rho.plot(self.x_rho, self.ynorm, alpha=0)
             # Reverse x axis if ingress
             if np.all(rho_diff < 0):
                 xlim_rho = self.ax_rho.get_xlim()
                 self.ax_rho.set_xlim([xlim_rho[1], xlim_rho[0]])
         self.ax_rho.set_xlabel('Rho (km)')
+        
+        # set x and y limits
+        self.ax.set_xlim(self.rho_to_spm_func(6e4),self.rho_to_spm_func(1.5e5))
+        self.ax.set_ylim(-0.2,1.2)
 
         # Show the canvas
         self.canvas = FigureCanvasTkAgg(self.f, master=self.parent)
@@ -330,12 +349,21 @@ class PowerFitGui(Frame):
 
         # plot power within freespace range and its fit
         self.ax.cla()
-        self.ax.plot(self.x[ind], self.y[ind], color='b')
-        self.ax.plot(self.xfit, self.yfit, color='r')
-        if not_ind is not None:
-            self.ax.plot(self.x[not_ind], self.y[not_ind], color='b',
-                alpha=0.1)
 
+        # Shading of predicted free-space regions
+        for xl in self.spm_free:
+            self.ax.fill_between(xl,-1,2,color='0.75',zorder=0)
+        # set x and y limits
+        self.ax.set_xlim(self.rho_to_spm_func(6e4),self.rho_to_spm_func(1.5e5))
+        self.ax.set_ylim(-0.2,1.2)
+        # Plot power and its default fit
+        self.ax.plot(self.x, self.ynorm, color='0.0',zorder=1)
+        self.ax.plot(self.xfit, self.yfit/np.max(self.y), color='r',lw=2,zorder=2)
+        
+        if not_ind is not None:
+            self.ax.plot(self.x[not_ind], self.y[not_ind]/np.max(self.y), color='k',
+                alpha=0.1)
+        
         # Plot radius scale on upper x-axis
         if self.is_chord:
             ax_rho_ticks = (self.ax.get_xticks())[
@@ -346,9 +374,9 @@ class PowerFitGui(Frame):
             self.ax_rho.set_xticklabels(self._get_rho_tick_labels(
                 ax_rho_ticks))
         else:
-            self.ax_rho.plot(self.x_rho, self.y, alpha=0)
-        self.ax_rho.set_xlabel('Rho (km)')
+            self.ax_rho.plot(self.x_rho, self.ynorm, alpha=0)
 
+        self.ax_rho.set_xlabel('Rho (km)')
         self.ax.set_xlabel('SPM')
         self.canvas.show()
 

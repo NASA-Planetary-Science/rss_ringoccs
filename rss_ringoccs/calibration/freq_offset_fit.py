@@ -246,6 +246,9 @@ class FreqOffsetFit(object):
             f_uso = f_uso_x*(3.0/11.0)
         elif band == 'K':
             f_uso = f_uso_x*3.8
+        else:
+            print('WARNING (freq_offset_fit.py): Invalid frequency band!')
+            sys.exit()
 
         self.__f_uso = f_uso
         profdir = geo_inst.get_profile_dir()

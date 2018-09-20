@@ -182,7 +182,7 @@ class NormDiff(object):
             Recorded information about the run
     """
 
-    def __init__(self, rsr_inst, dr_km, geo_inst, cal_inst,
+    def __init__(self, rsr_inst, geo_inst, cal_inst, dr_km,
             dr_km_tol=0.01, is_chord=False, verbose=False):
         """
         Purpose:
@@ -245,7 +245,7 @@ class NormDiff(object):
         if not isinstance(geo_inst, rss.occgeo.Geometry):
             sys.exit('ERROR (NormDiff): geo_inst input must be an '
                 + 'instance of the Geometry class')
-
+        
         if ((not isinstance(cal_inst, rss.calibration.Calibration))
                 & (not isinstance(cal_inst, rss.tools.CreateCalInst))):
             sys.exit('ERROR (NormDiff): cal_inst input must be an instance of '
@@ -328,7 +328,8 @@ class NormDiff(object):
         p_free_cal = cal_inst.p_free_vals
 
         if verbose:
-            print('Calculating predicted sky frequency from input rsr_inst')
+            print('\tCalculating predicted sky frequency...')
+            #from input rsr_inst')
         dummy_spm, f_sky_pred_file = rsr_inst.get_f_sky_pred(f_spm=spm_cal)
         f_offset_fit_cal = f_sky_pred_cal - f_sky_pred_file
         rho_km_cal = rho_interp_func(spm_cal)
@@ -351,8 +352,8 @@ class NormDiff(object):
         # Inteprolate frequency offset to finer spacing in preparation
         #     for integration
         if verbose:
-            print('Interpolating and integrating frequency offset, and '
-                + 'applying to IQ_m')
+            print('\tInterpolating and integrating frequency offset...')# and '
+               # + 'applying to IQ_m')
         dt = 0.1
         n_pts = round((spm_cal[-1] - spm_cal[0]) / dt)
         spm_cal_interp = spm_cal[0] + dt * np.arange(n_pts)
@@ -367,11 +368,13 @@ class NormDiff(object):
             fill_value='extrapolate')
         f_detrend_rad = f_detrend_rad_func(spm_vals)
 
+        if verbose:
+            print('\tDetrending measured I''s and Q''s...')
         # Detrend raw measured I and Q
         IQ_c = IQ_m * np.exp(-1j * f_detrend_rad)
 
         if verbose:
-            print('Interpolating and setting attributes')
+            print('\tInterpolating and setting attributes...')
 
         if not is_chord:
             rho_km_desired, IQ_c_desired = resample_IQ(rho_km_vals, IQ_c,

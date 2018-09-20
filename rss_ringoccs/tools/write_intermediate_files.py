@@ -73,7 +73,9 @@ def write_intermediate_files(year, doy, band, dsn, profdir, filtyp,
         if os.path.exists(dirsrch):
 
             # Check for most recent file and order them by date
-            dirfiles = [x in os.listdir(dirsrch) if not x.startswith('.')]
+            dirfiles = [x for x in os.listdir(dirsrch) if
+                    x.startswith('.')==False]
+
             
             if len(dirfiles) == 0:
                 seq_num = '0001'

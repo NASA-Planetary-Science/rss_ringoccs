@@ -1,0 +1,6 @@
+naif/CASSINI/kernels/spk/050606R_SCPSE_05114_05132.bsp
+naif/CASSINI/kernels/pck/cpck26Feb2009.tpc
+naif/CASSINI/kernels/lsk/naif0012.tls
+naif/generic_kernels/spk/planets/de430.bsp
+naif/generic_kernels/spk/stations/earthstns_itrf93_050714.bsp
+naif/CASSINI/kernels/pck/earth_000101_180919_180629.bpc

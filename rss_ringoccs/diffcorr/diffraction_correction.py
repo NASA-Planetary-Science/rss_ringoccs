@@ -1918,26 +1918,25 @@ class DiffractionCorrection(object):
 
                 # Window width and Frensel scale for current point.
                 w = w_km_vals[center]
-                F = F_km_vals[center]
 
                 if (np.abs(w_init - w) >= 2.0 * dx_km):
-                    r0 = rho_km_vals[center]
-
-                    # Window function for current point.
+                    # Reset w_init and recompute window function.
+                    w_init = w
                     w_func = fw(w, dx_km)
 
-                    # Number of points in current window.
+                    # Reset number of window points
                     nw = np.size(w_func)
 
-                    # Computed range of points.
+                    # Computed range for current point
                     crange = np.arange(int(center-(nw-1)/2),
-                                    int(1+center+(nw-1)/2))-1
+                                       int(1+center+(nw-1)/2))
 
-                    # Computed ring radius range and Fresnel scale.
+                    # Ajdust ring radius by dx_km.
                     r = rho_km_vals[crange]
+                    r0 = rho_km_vals[center]
 
                     # Compute psi for with stationary phase value
-                    x = (r-r0)/F
+                    x = r-r0
                     psi_vals = (ONE_PI / 2.0) * x * x / F2[center]
                 else:
                     crange += 1

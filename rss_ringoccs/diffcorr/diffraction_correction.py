@@ -3,6 +3,7 @@ import time
 import numpy as np
 from scipy.special import lambertw, iv
 from rss_ringoccs.tools.write_history_dict import write_history_dict
+from rss_ringoccs.tools.write_output_files import write_output_files
 
 # Declare constant for the speed of light (km/s)
 SPEED_OF_LIGHT_KM = 299792.4580
@@ -155,9 +156,6 @@ class DiffractionCorrection(object):
                 geometrical 'psi' function is used. Several strings
                 are allowed:
                     'full'      No Approximation is applied.
-                    'taylor2'   Second order Taylor Series.
-                    'taylor3'   Third order Taylor Series.
-                    'taylor4'   Fourth order Taylor Series.
                     'MTR2'      Second Order Series from MTR86.
                     'MTR3'      Third Order Series from MTR86.
                     'MTR4'      Fourth Order Series from MTR86.
@@ -294,9 +292,9 @@ class DiffractionCorrection(object):
         History:
             Created: RJM - 2018/05/16 5:40 P.M.
     """
-    def __init__(self, NormDiff, res, rng="all", wtype="kb25",
-                 fwd=False, norm=True, verbose=False, bfac=True,
-                 sigma=2.e-13, fft=False, psitype="full"):
+    def __init__(self, NormDiff, res, rng="all", wtype="kb25", fwd=False,
+                 norm=True, verbose=False, bfac=True, sigma=2.e-13,
+                 fft=False, psitype="full", write_file=False):
 
         # Set a variable for the starting time of the computation.
         t1 = time.time()
@@ -415,6 +413,18 @@ class DiffractionCorrection(object):
                 "\tInput should have type: bool\n"
                 "\tSet fft=True or fft=False\n"
                 % (type(fft).__name__)
+            )
+        else:
+            pass
+
+        # Check that the fft boolean is valid.
+        if not isinstance(write_file, bool):
+            raise TypeError(
+                "\n\twrite_file must be Boolean: True/False\n"
+                "\tYour input has type: %s\n"
+                "\tInput should have type: bool\n"
+                "\tSet write_file=True or write_file=False\n"
+                % (type(write_file).__name__)
             )
         else:
             pass
@@ -1258,6 +1268,13 @@ class DiffractionCorrection(object):
         }
 
         self.history = write_history_dict(input_vars, input_kwds, __file__)
+
+
+        # Set rev_info attribute from NormDiff instance.
+        self.rev_info = NormDiff.rev_info
+        if write_file:
+            write_output_files(self)
+
         t2 = time.time()
         if self.verbose:
             print("\tDiffraction Correction Complete.")
@@ -1676,7 +1693,7 @@ class DiffractionCorrection(object):
         inv_t_hat *= dx*(1.0+1.0j)/(2.0*f_scale)
 
         # Return midpoint value.
-        T = inv_t_hat[int((nw-1)/2)+1]
+        T = inv_t_hat[int((nw-1)/2)]
         return T
 
     def __normalize(self, dx, ker, f_scale):
@@ -1889,34 +1906,42 @@ class DiffractionCorrection(object):
         # Factor used for first Newton-Raphson iteration
         dphi_fac = (cosb2*cosphi0*sinphi0/(1.0-cosb2*sinphi0*sinphi0))
         if (psitype == 'fresnel'):
+            r0 = rho_km_vals[center]
+            r = rho_km_vals[crange]
+            F2 = F_km_vals*F_km_vals
+            x = (r-r0)
+            psi_vals = (ONE_PI / 2.0) * x * x
             loop = 0
             for i in np.arange(n_used):
                 # Current point being computed.
                 center = start+i
 
-                # Ring radius of current point.
-                r0 = rho_km_vals[center]
-
-                # Window width for current point.
+                # Window width and Frensel scale for current point.
                 w = w_km_vals[center]
-
-                # Window function for current point.
-                w_func = fw(w, dx_km)
-
-                # Number of points in current window.
-                nw = np.size(w_func)
-
-                # Computed range of points.
-                crange = np.arange(int(center-(nw-1)/2),
-                                   int(1+center+(nw-1)/2))-1
-
-                # Computed ring radius range and Fresnel scale.
-                r = rho_km_vals[crange]
                 F = F_km_vals[center]
 
-                # Compute psi for with stationary phase value
-                x = (r-r0)/F
-                psi_vals = (ONE_PI / 2.0) * x * x
+                if (np.abs(w_init - w) >= 2.0 * dx_km):
+                    r0 = rho_km_vals[center]
+
+                    # Window function for current point.
+                    w_func = fw(w, dx_km)
+
+                    # Number of points in current window.
+                    nw = np.size(w_func)
+
+                    # Computed range of points.
+                    crange = np.arange(int(center-(nw-1)/2),
+                                    int(1+center+(nw-1)/2))-1
+
+                    # Computed ring radius range and Fresnel scale.
+                    r = rho_km_vals[crange]
+
+                    # Compute psi for with stationary phase value
+                    x = (r-r0)/F
+                    psi_vals = (ONE_PI / 2.0) * x * x / F2[center]
+                else:
+                    crange += 1
+                    psi_vals = (ONE_PI / 2.0) * x * x / F2[center]
 
                 # Compute kernel function for Fresnel inverse
                 if fwd:
@@ -1935,6 +1960,8 @@ class DiffractionCorrection(object):
                     T_out[center] *= nrm(dx_km, ker, F)
                 if verbose:
                     print(mes % (i, n_used, nw, loop), end="\r")
+            if verbose:
+                print("\n", end="\r")
         else:
             for i in np.arange(n_used):
                 # Current point being computed.
@@ -2100,4 +2127,5 @@ class DiffractionCorrection(object):
                     print(mes % (i, n_used-1, nw, loop), end="\r")
             if verbose:
                 print("\n", end="\r")
+
         return T_out

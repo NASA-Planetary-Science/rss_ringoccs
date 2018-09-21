@@ -15,6 +15,8 @@ Workaroud: In order to produce the best match to the RSS diffraction-corrected r
 
 *** Terminating app due to uncaught exception 'NSInvalidArgumentException', reason: '-[NSApplication _setup:]: unrecognized selector sent to instance'
 
+Workaround: Use Linux operating system, and post an Issue on the Github page for rss_ringoccs
+
 3. Power and frequency calibration GUIs may sometimes not close when users click the "OK" button or the red "X" button.
 
 Workaround: Use Linux operating system, and post an Issue on the Github page for rss_ringoccs

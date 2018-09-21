@@ -37,6 +37,7 @@ The rss_ringoccs package was develped and tested on several unix-based operating
 rss_ringoccs is written in Python 3. We have tested the code under the following Python distributions:
 
 Enthought Deployment Manager -- https://www.enthought.com -- Python 3.5.2
+
 Anaconda --https://anaconda.org/anaconda/python -- Python 3.7.0
 
 ## Acknowledgements

@@ -26,8 +26,7 @@ import rss_ringoccs as rss
 sys.path.remove('../')
 
 # ***** Begin user input *****
-#rsr_file = '../data/co-s-rss-1-sroc1-v10/cors_0105/sroc1_123/rsr/s10sroe2005123_0740nnnx43rd.2a2'
-rsr_file = '/Volumes/jfong001/Research/TC2017/data/s10-rev07-rsr-data/S10EAOE2005_123_0740NNNX43D.2A1'
+rsr_file = '../data/co-s-rss-1-sroc1-v10/cors_0105/sroc1_123/rsr/s10sroe2005123_0740nnnx43rd.2a2'
 kernels_list_file = 'Rev007_list_of_kernels.txt'
 kernels = 'Rev007_meta_kernel.ker'
 kernels_dir = '../kernels/'

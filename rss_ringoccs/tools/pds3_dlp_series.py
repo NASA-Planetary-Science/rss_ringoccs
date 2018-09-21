@@ -624,10 +624,9 @@ def write_dlp_series(rev_info, dlp_inst, title, outdir, prof_dir):
             respectively, where * is "title".
     """
 
-    current_time = time.strftime("_%Y%m%d")
 
-    outfile_tab = outdir + title.upper() + current_time + '.TAB'
-    outfile_lbl = outdir + title.upper() + current_time + '.LBL'
+    outfile_tab = outdir + title.upper() + '.TAB'
+    outfile_lbl = outdir + title.upper() + '.LBL'
 
     series_name = '"' + outfile_tab.split('/')[-1] + '"'
 

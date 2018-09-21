@@ -23,11 +23,16 @@ Revisions:
                           rsr_inst attributes
                         - remove rsr_file and sample_rate_khz attribute 
                           extraction from rsr_inst
+    2018 Sep 20 - jfong - add write_file kwarg
+                        - set rev_info from rsr_inst as an attribute
+                        - add prof_dir to rev_info dict attribute
+
 """
 from ..tools.spm_to_et import spm_to_et
 from ..tools.et_to_spm import et_to_spm
-from ..tools.date_to_rev import date_to_rev
 from ..tools.write_history_dict import write_history_dict
+
+#from ..tools.pds3_geo_series import write_geo_series
 from .calc_elevation_deg import calc_elevation_deg
 from .get_pole import get_pole
 from .calc_rho_vec_km import calc_rho_vec_km
@@ -44,9 +49,15 @@ from .get_planet_occ_times import get_planet_occ_times
 from .calc_beta import calc_beta
 from .calc_beta import calc_B_eff_deg
 
+
+
 import spiceypy as spice
 import numpy as np
 import sys
+
+sys.path.append('../rss_ringoccs/tools/')
+from write_output_files import write_output_files
+sys.path.remove('../rss_ringoccs/tools/')
 
 
 class Geometry(object):
@@ -56,7 +67,7 @@ class Geometry(object):
     diffraction reconstruction as well as other relevant geometry parameters.
     """
     def __init__(self, rsr_inst, planet, spacecraft, kernels, pt_per_sec=1.,
-            verbose=False):
+            verbose=False, write_file=True):
         """This calculates occultation geometry as attributes.
 
         Args:
@@ -158,7 +169,7 @@ class Geometry(object):
             print('Calculating occultation geometry...')
 
         if verbose:
-            print('\t Checking for valid inputs...')
+            print('\tChecking for valid inputs...')
 
         if type(planet) != str:
             sys.exit('WARNING (Geometry): Input planet is NOT a string!')
@@ -171,7 +182,7 @@ class Geometry(object):
                     + 'float!')
 
         if verbose:
-            print('\t Extracting information from rsr file...')
+            print('\tExtracting information from rsr file...')
 
         # Extract information from rsr instance
         try:
@@ -183,6 +194,13 @@ class Geometry(object):
             spm_end = rsr_inst.spm_vals[-1]
             rsr_hist = rsr_inst.history
             (f_spm, f_sky) = rsr_inst.get_f_sky_pred()
+
+            if verbose:
+                print('\tSetting rev info attribute...')
+
+            # Setting rev info attribute
+            self.rev_info = rsr_inst.rev_info
+
 
         except AttributeError:
             sys.exit('WARNING (Geometry): Input RSR instance does '
@@ -198,7 +216,7 @@ class Geometry(object):
 
         # Calculate Saturn center to ring intercept vector
         if verbose:
-            print('\t Calculating ring intercept event time and vector...')
+            print('\tCalculating ring intercept event time and vector...')
         rho_vec_vals, t_ret_et_vals = calc_rho_vec_km(t_oet_et_vals, planet,
                 spacecraft, dsn, kernels=kernels)
 
@@ -206,35 +224,35 @@ class Geometry(object):
 
         # Calculate spacecraft event time
         if verbose:
-            print('\t Calculating spacecraft event time...')
+            print('\tCalculating spacecraft event time...')
         t_set_et_vals = calc_set_et(t_oet_et_vals, spacecraft, dsn)
 
         # Retrieve Saturn pole unit vector
         if verbose:
-            print('\t Retrieving Saturn pole unit vector...')
+            print('\tRetrieving Saturn pole unit vector...')
         nhat_p = get_pole(t_set_et_vals[0], planet)
 
         if verbose:
-            print('\t Calculating ring longitude and ring azimuth...')
+            print('\tCalculating ring longitude and ring azimuth...')
 
         # Calculated ring longitude and observed ring azimuth
         phi_rl_deg_vals, phi_ora_deg_vals = calc_phi_deg(t_oet_et_vals,
                 rho_vec_vals, spacecraft, dsn, nhat_p)
 
         if verbose:
-            print('\t Calculating distance from spacecraft to ring intercept '
+            print('\tCalculating distance from spacecraft to ring intercept '
                 + 'point...')
         # Calculate distance from spacecraft to ring intercept point
         D_km_vals = calc_D_km(t_ret_et_vals, t_set_et_vals)
 
         if verbose:
-            print('\t Calculating ring opening angle...')
+            print('\tCalculating ring opening angle...')
 
         # Calculate ring opening angle
         B_deg_vals = calc_B_deg(t_oet_et_vals, spacecraft, dsn, nhat_p)
 
         if verbose:
-            print('\t Calculating Fresnel scale...')
+            print('\tCalculating Fresnel scale...')
 
         # Calculate Fresnel scale
         F_km_vals = calc_F_km(D_km_vals, f_sky_hz_vals, B_deg_vals,
@@ -244,32 +262,32 @@ class Geometry(object):
         t_set_spm_vals = et_to_spm(t_set_et_vals)
 
         if verbose:
-            print('\t Calculating ring intercept velocities...')
+            print('\tCalculating ring intercept velocities...')
         # Calculate ring intercept velocities
         rho_dot_kms_vals, phi_rl_dot_kms_vals = calc_rip_velocity(rho_km_vals,
                 phi_rl_deg_vals, step)
 
         if verbose:
-            print('\t Calculating spacecraft state vector...')
+            print('\tCalculating spacecraft state vector...')
         # Calculate spacecraft state vector
         R_sc_km_vals, R_sc_dot_kms_vals = calc_sc_state(t_set_et_vals,
                 spacecraft, planet, dsn, nhat_p)
 
         if verbose:
-            print('\t Calculating impact radius...')
+            print('\tCalculating impact radius...')
         # Calculate impact radius
         R_imp_km_vals = calc_impact_radius_km(R_sc_km_vals, t_set_et_vals,
                 spacecraft, dsn, nhat_p)
 
         if verbose:
-            print('\t Calculating elevation angle...')
+            print('\tCalculating elevation angle...')
 
         # Calculate target angle above the horizon
         elev_deg_vals = calc_elevation_deg(t_oet_et_vals, spacecraft, dsn)
 
         # Calculate beta
         if verbose:
-            print('\t Calculating beta...')
+            print('\tCalculating beta...')
         beta_vals = calc_beta(B_deg_vals, phi_ora_deg_vals)
         B_eff_deg_vals = calc_B_eff_deg(B_deg_vals, phi_ora_deg_vals)
 
@@ -302,7 +320,7 @@ class Geometry(object):
 
         # Write processing history dictionary attribute
         if verbose:
-            print('\t Writing history dictionary...')
+            print('\tWriting history dictionary...')
 
         input_vars = {
                 "rsr_inst": rsr_hist,
@@ -314,6 +332,13 @@ class Geometry(object):
                 "pt_per_sec": pt_per_sec
                 }
         self.history = write_history_dict(input_vars, input_kwds, __file__)
+
+        # Add prof_dir entry to rev_info dict
+        self.rev_info['prof_dir'] = self.get_profile_dir()
+
+        # Write output data and label file if set
+        if write_file:
+            write_output_files(self)
 
     def __get_naif_version(self):
         """
@@ -337,5 +362,6 @@ class Geometry(object):
         else:
             prof_dir = '"BOTH"'
         return prof_dir
+
     
 

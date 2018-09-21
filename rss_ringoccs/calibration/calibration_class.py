@@ -22,6 +22,9 @@ Revisions:
     2018 Sep 16 - jfong - remove fit_inst, norm_inst inputs (create them here)
     2018 Sep 17 - jfong - add file_search kwd
     2018 Sep 18 - jfong - update verbose print statements
+    2018 Sep 20 - jfong - add write_file kwarg
+                        - set rev_info from geo_inst as attribute
+                            - this will inherit the same prof_dir
 """
 
 
@@ -35,8 +38,10 @@ sys.path.append('../..')
 import rss_ringoccs as rss
 from rss_ringoccs.tools.search_for_file import search_for_file
 from rss_ringoccs.tools.write_intermediate_files import write_intermediate_files
+from rss_ringoccs.tools.write_output_files import write_output_files
 
 sys.path.remove('../..')
+
 
 from .freq_offset_fit import FreqOffsetFit
 class Calibration(object):
@@ -79,7 +84,7 @@ class Calibration(object):
     """
 
     def __init__(self, rsr_inst, geo_inst, dt_cal=1.0, file_search=True,
-            verbose=False, USE_GUI=False):
+            verbose=False, USE_GUI=False, write_file=True):
         """
         Args:
             fit_inst:
@@ -130,6 +135,9 @@ class Calibration(object):
 
         if verbose:
             print('\nCalibrating frequency and power...')
+
+        # Extract rev_info from geo_inst -- this will inherit its prof_dir
+        self.rev_info = geo_inst.rev_info
 
         # Calculate frequency offset fit
         ## Use default residual frequency fit
@@ -186,34 +194,35 @@ class Calibration(object):
 
         # Normalize observed power by the freespace signal
         norm_inst = rss.calibration.Normalization(spm_vals, IQ_c,
-            geo_inst, rsr_inst, verbose=verbose)
+            geo_inst, rsr_inst, verbose=verbose, file_search=file_search)
 
         profdir = geo_inst.get_profile_dir()
         # If set, search for power normalization fit pickle (PNFP) file
-        if file_search:
-            pnfp_file = search_for_file(rsr_inst.year,
-                    rsr_inst.doy, rsr_inst.band, 
-                    (rsr_inst.dsn).split('-')[-1], profdir, 'PNFP')
+        #if file_search:
+        #    pnfp_file = search_for_file(rsr_inst.year,
+        #            rsr_inst.doy, rsr_inst.band, 
+        #            (rsr_inst.dsn).split('-')[-1], profdir, 'PNFP')
 
-            print('\tExtracting power normalization fit from:\n\t\t'
-                    + '/'.join(pnfp_file.split('/')[0:5]) + '/\n\t\t\t'
-                    + pnfp_file.split('/')[-1])
-            file_object = open(pnfp_file, 'rb')
-            fit_param_dict = pickle.load(file_object)
-            k_power_norm = fit_param_dict['k']
-            freespace_spm = fit_param_dict['freespace_spm']
-            knots_spm = fit_param_dict['knots_spm']
-            
-            spm_power_fit, power_spline_fit = norm_inst.get_spline_fit(
-                freespace_spm=freespace_spm, knots_spm=knots_spm,
-                spline_order=k_power_norm, USE_GUI=False, verbose=verbose)
+        #    print('\tExtracting power normalization fit from:\n\t\t'
+        #            + '/'.join(pnfp_file.split('/')[0:5]) + '/\n\t\t\t'
+        #            + pnfp_file.split('/')[-1])
+        #    file_object = open(pnfp_file, 'rb')
+        #    fit_param_dict = pickle.load(file_object)
+        #    k_power_norm = fit_param_dict['k']
+        #    freespace_spm = fit_param_dict['freespace_spm']
+        #    knots_spm = fit_param_dict['knots_spm']
+        #    
+        #    spm_power_fit, power_spline_fit = norm_inst.get_spline_fit(
+        #        freespace_spm=freespace_spm, knots_spm=knots_spm,
+        #        spline_order=k_power_norm, USE_GUI=False, verbose=verbose)
             
 
             
 
         # Evaluate spline fit at spm_cal. Assumes you already made a
         #     satisfactory spline fit
-        dummy_spm, _p_free = norm_inst.get_spline_fit(USE_GUI=USE_GUI)
+        dummy_spm, _p_free = norm_inst.get_spline_fit(USE_GUI=USE_GUI,
+                file_search=file_search)
         p_free_cal_func = interp1d(dummy_spm, _p_free)
         p_free_cal = p_free_cal_func(spm_cal)
 
@@ -223,12 +232,15 @@ class Calibration(object):
         self.p_free_vals = p_free_cal
         self.__set_history(fit_inst, norm_inst, geo_inst, dt_cal)
 
-        if not file_search:
-            pnfp = {'k': norm_inst._spline_order,
-                    'freespace_spm': norm_inst._freespace_spm,
-                    'knots_spm': norm_inst._knots_spm}
-            write_intermediate_files(rsr_inst.year, rsr_inst.doy,
-                    rsr_inst.band, rsr_inst.dsn, profdir, 'PNFP', pnfp)
+        #if not file_search:
+        #    pnfp = {'k': norm_inst._spline_order,
+        #            'freespace_spm': norm_inst._freespace_spm,
+        #            'knots_spm': norm_inst._knots_spm}
+        #    write_intermediate_files(rsr_inst.year, rsr_inst.doy,
+        #            rsr_inst.band, rsr_inst.dsn, profdir, 'PNFP', pnfp)
+
+        if write_file:
+            write_output_files(self)
 
     def __set_history(self, fit_inst, norm_inst, geo_inst, dt_cal):
         """

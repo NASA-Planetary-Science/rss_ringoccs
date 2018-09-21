@@ -616,6 +616,7 @@ class ExtractCSVData(object):
         }
 
         self.history = write_history_dict(input_vars, input_kwds, __file__)
+        self.rev_info = None
 
         if verbose:
             print("\tHistory Complete.")

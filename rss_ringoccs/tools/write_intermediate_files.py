@@ -22,7 +22,7 @@ import os
 from time import strftime
 import pdb
 import pickle
-from date_to_rev import date_to_rev
+from .date_to_rev import date_to_rev
 import numpy as np
 
 

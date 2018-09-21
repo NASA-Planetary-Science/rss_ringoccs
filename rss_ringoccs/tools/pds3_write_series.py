@@ -11,6 +11,7 @@ Revisions:
     2018 Jul 27 - jfong - get rid of comma for kernels if only one listed
                         - debug history loop (extra instance)
                         - add error range for constant sampling interval check
+    2018 Sep 20 - jfong - remove kernels str split when varkey=='kernels'
 '''
 import numpy as np
 import pdb
@@ -56,7 +57,7 @@ def pds3_write_series_lbl(str_lbl, out_lbl_file):
     # Write kernels SPICE file names
     #   Add braces to first and last kernel
     kernel_kwd = naif_key_order[1]
-    kernel_val_list = naif_all_kwd[kernel_kwd]
+    kernel_val_list = [naif_all_kwd[kernel_kwd]]
 
     if kernel_val_list != '':
         kernel_val_list[0] = '{' + kernel_val_list[0]
@@ -251,7 +252,6 @@ def write_history_text(f, hist_list_keys, hist_dict, hist_dict_keys):
     for ehist in range(n_histories):
         f.write(blank_line)
         this_inst = hist_list_keys[ehist]
-        print(this_inst)
         if ehist == 0:
             f.write(str(this_inst) + ':' + cr)
             this_hist = hist_dict
@@ -287,9 +287,9 @@ def write_history_text(f, hist_list_keys, hist_dict, hist_dict_keys):
 
                     else: # if not a dictionary
                         if varkey == 'kernels':
-                            pdb.set_trace()
+                            ex1 = [this_input]
                             this_input = [x.split('/')[-1]
-                                    for x in this_input]
+                                    for x in ex1]
                         if varkey == 'rsr_file':
                             rsr_dir = this_input.rsplit('/', 1)[0] + '/'
                             rsr_filename = this_input.split('/')[-1]

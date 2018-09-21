@@ -93,6 +93,11 @@ Revisions:
    2018 Jun 27 - gsteranka - Adjust CAL file use so sky frequency column has
                              frequency offset fit added to it
    2018 Jun 28 - gsteranka - Change spm_vals attribute to t_oet_spm_vals
+   2018 Sep 20 - jfong - add write_file kwarg
+                       - set rev_info as attribute from geo_inst
+                            - this will inherit its prof_dir, WHICH WILL BE
+                              INCORRECT FOR CHORD OCCULTATIONS! TODO!!
+                       - add dr_km as attribute
 """
 
 import copy
@@ -107,6 +112,10 @@ from .resample_IQ import resample_IQ
 sys.path.append('../..')
 import rss_ringoccs as rss
 sys.path.remove('../..')
+
+sys.path.append('../../rss_ringoccs/tools/')
+from write_output_files import write_output_files
+sys.path.remove('../../rss_ringoccs/tools/')
 
 
 class NormDiff(object):
@@ -183,7 +192,8 @@ class NormDiff(object):
     """
 
     def __init__(self, rsr_inst, geo_inst, cal_inst, dr_km,
-            dr_km_tol=0.01, is_chord=False, verbose=False):
+            dr_km_tol=0.01, is_chord=False, verbose=False,
+            write_file=True):
         """
         Purpose:
         Instantiation defines all attributes of instance.
@@ -442,6 +452,14 @@ class NormDiff(object):
             spm_cal, f_sky_pred_cal, rsr_inst,
             end_of_chord_ing=end_of_chord_ing)
 
+        # set dr_km input as an attribute
+        self.dr_km = dr_km
+        # set rev info -- need to update for chord
+        self.rev_info = geo_inst.rev_info
+        if write_file:
+            write_output_files(self)
+
+
     def __set_attributes(self, rho_km_desired, spm_desired, p_norm_vals,
             phase_rad_vals,
             spm_geo, rho_dot_kms_geo, geo_inst,
@@ -557,6 +575,7 @@ class NormDiff(object):
         hist_dict = rss.tools.write_history_dict(
             input_var_dict, input_kw_dict, __file__)
         self.history = hist_dict
+
 
     def chord_split(self):
         """

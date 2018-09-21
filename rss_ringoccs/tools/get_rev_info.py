@@ -7,6 +7,7 @@ Purpose: Create dictionary of rev information needed for LBL files.
 Revisions:
     2018 Jul 18 - jfong - original
                         - move rev_to_occ_info.py here
+    2018 Sep 20 - jfong - remove rev input, have that calculated here
 
 
 """
@@ -14,8 +15,9 @@ Revisions:
 import pandas as pd
 import sys
 import pdb
+from .date_to_rev import date_to_rev
 
-def get_rev_info(rsr_inst, rev):
+def get_rev_info(rsr_inst):
     """
     This returns a dictionary with information related to the ring occultation.
 
@@ -33,11 +35,13 @@ def get_rev_info(rsr_inst, rev):
 
     """
 
+    rev = date_to_rev(rsr_inst.year, rsr_inst.doy)
+
     occ_dir, planetary_occ_flag = rev_to_occ_info(rev)
 
     rev_info = {
             "rsr_file":   rsr_inst.rsr_file.split('/')[-1]
-            , "band":     '"'+str(rsr_inst.band).split("'")[1]+'"'
+            , "band":     '"'+str(rsr_inst.band)+'"'
             , "year":     str(rsr_inst.year)
             , "doy":      str(rsr_inst.doy)
             , "dsn":      str(rsr_inst.dsn)

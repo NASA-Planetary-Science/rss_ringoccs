@@ -624,10 +624,9 @@ def write_tau_series(rev_info, tau_inst, title, outdir, prof_dir):
             directory, with filenames, *YYYYMMDD.TAB and *YYYYMMDD.LBL,
             respectively, where * is "title".
     """
-    current_time = time.strftime("_%Y%m%d")
 
-    outfile_tab = outdir + title.upper() + current_time + '.TAB'
-    outfile_lbl = outdir + title.upper() + current_time + '.LBL'
+    outfile_tab = outdir + title.upper() + '.TAB'
+    outfile_lbl = outdir + title.upper() + '.LBL'
 
     series_name = '"' + outfile_tab.split('/')[-1] + '"'
 

@@ -41,6 +41,11 @@ Revisions:
                              frequency correctly
    2018 Jul 06 - gsteranka - Switch default decimate_16khz_to_1khz value to
                              True
+   2018 Aug 24 - jfong - int() n_sfdu to work for rev8E X63 (truncated file)
+   2018 Sep 11 - jfong - print error message if n_sfdu!=int(n_sfdu)
+   2018 Sep 18 - jfong - updated verbose print statements to be consistent
+                         with those in Geometry and DiffractionCorrection
+                       - rewrite band to be a str instead of a byte char
 
 *************************VARIABLES*************************
 NAME - TYPE - scalar/array - PURPOSE
@@ -253,8 +258,8 @@ class RSRReader(object):
         self.__set_history()
 
         if verbose:
-            print('Reading RSR header information')
-
+            print('\nExtracting information from RSR file...')
+            print('\tReading header information...')
         # Length of SFDU header, and a function to read the header in the
         # proper format
         struct_hdr_fmt = (self.__endian + self.__sfdu_format + self.__ha_format
@@ -281,7 +286,11 @@ class RSRReader(object):
         # Find number of SFDU in file, and number of points per SFDU
         rsr_size = os.path.getsize(self.rsr_file)
         bytes_per_sfdu = sfdu_hdr_dict['sfdu_length'] + 20
-        n_sfdu = rsr_size / bytes_per_sfdu
+        n_sfdu = int(rsr_size / bytes_per_sfdu)
+        if rsr_size % bytes_per_sfdu != 0:
+            print('WARNING (RSRReader): file size not the same as expected!\n' 
+                    + '\t Using n_sfdu=' + str(n_sfdu) 
+                    + ' instead of n_sfdu=' + str(rsr_size/bytes_per_sfdu))
         sh_bits_per_sample = sfdu_hdr_dict['sh_bits_per_sample']
         bytes_per_sample = sh_bits_per_sample / 8
         data_length_per_sfdu = sfdu_hdr_dict['Data_length']
@@ -300,7 +309,7 @@ class RSRReader(object):
         self.doy = sfdu_hdr_dict['sh_doy']
         self.year = sfdu_hdr_dict['sh_year']
         self.dsn = 'DSS-' + str(sfdu_hdr_dict['sh_dss_id'])
-        self.band = sfdu_hdr_dict['sh_dl_band']
+        self.band = chr(sfdu_hdr_dict['sh_dl_band'][0])
         self.sample_rate_khz = sfdu_hdr_dict['sh_sample_rate']
 
         # DSS-74 files have the regular year and DOY set to 0
@@ -314,15 +323,22 @@ class RSRReader(object):
         self.__n_sfdu = n_sfdu
 
         if verbose:
-            print('First 10 raw SPM:')
-            print(self.spm_vals[0:10])
-            print('Year, DOY, DSN, band, sample_rate:')
-            print(str(self.year) + ', ' + str(self.doy) + ', '
-                + str(self.dsn) + ', ' + str(self.band) + ', '
-                + str(self.sample_rate_khz))
+            print('\t\tSPM range:\t\t' + str(self.spm_vals[0]) + ', '
+                    + str(self.spm_vals[-1]))
+            #print('First 10 raw SPM:')
+            #print(self.spm_vals[0:10])
+            print('\t\tYear:\t\t\t' + str(self.year))
+            print('\t\tDOY:\t\t\t' + str(self.doy))
+            print('\t\tDSN:\t\t\t' + str(self.dsn))
+            print('\t\tBand:\t\t\t' + str(self.band))
+            print('\t\tSampling rate in kHz:\t' + str(self.sample_rate_khz))
+            #print('Year, DOY, DSN, band, sample_rate:')
+            #print(str(self.year) + ', ' + str(self.doy) + ', '
+            #+ str(self.dsn) + ', ' + str(self.band) + ', '
+            #    + str(self.sample_rate_khz))
 
         if verbose:
-            print('Reading RSR data and setting the IQ_m attribute')
+            print('\tSetting the IQ_m attribute...')
         self.__set_IQ(verbose=verbose)
 
     def __set_sfdu_unpack(self, spm_range):
@@ -453,7 +469,7 @@ class RSRReader(object):
             sys.exit()
 
         if verbose:
-            print('Assembling arrays of frequency polynomials from RSR file')
+            print('\tAssembling arrays of frequency polynomials from RSR file...')
 
         # Arrays to contain sets of frequency polynomials
         rfif_lo_array = np.zeros(self.__end_sfdu - self.__start_sfdu + 1)
@@ -488,7 +504,7 @@ class RSRReader(object):
             n_iter += 1
 
         if verbose:
-            print('Evaluating sky frequency at desired SPM')
+            print('\tEvaluating sky frequency at desired SPM...')
 
         # Calculate sky frequency for the input time array
         f_sky_pred = np.zeros(len(f_spm))
@@ -578,13 +594,13 @@ class RSRReader(object):
         for j in jobs:
             j.join()
         IQ_m = np.hstack(results)
-        print('\n')
+        #print('\n')
 
         # Decimate 16kHz file to 1kHz spacing if specified
         if decimate_16khz_to_1khz & (self.sample_rate_khz == 16):
 
             if verbose:
-                print('Decimating to 1kHz sampling')
+                print('\tDecimating to 1kHz sampling...')
 
             IQ_m = decimate(IQ_m, 4, zero_phase=True)
             IQ_m = decimate(IQ_m, 4, zero_phase=True)
@@ -593,14 +609,14 @@ class RSRReader(object):
             dt = 1.0 / float(1000)
             spm_vals = spm_vals[0] + dt * np.arange(n_pts)
         elif decimate_16khz_to_1khz & (self.sample_rate_khz == 1):
-            print('WARNING (RSRReader.get_IQ): Cannot decimate a 1 kHz file '
-                + 'any further. Skipping extra decimation')
+            print('\nWARNING (RSRReader.get_IQ): Cannot decimate a 1 kHz file '
+                + 'any further. Skipping extra decimation\n')
 
-        if verbose:
-            print('First 10 SPM, I, and Q:')
-            for i in range(10):
-                print('%24.16f %15i %15i' %
-                    (spm_vals[i], np.real(IQ_m[i]), np.imag(IQ_m[i])))
+        #if verbose:
+        #    print('First 10 SPM, I, and Q:')
+        #    for i in range(10):
+        #        print('%24.16f %15i %15i' %
+        #            (spm_vals[i], np.real(IQ_m[i]), np.imag(IQ_m[i])))
 
         # Set spm_vals attribute corresponding to speified spm_range and the
         #     raw measured I and Q

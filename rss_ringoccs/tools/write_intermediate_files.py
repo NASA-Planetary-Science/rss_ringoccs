@@ -15,13 +15,14 @@ Revisions:
     2018 Sep 18 - jfong - original
     2018 Sep 19 - jfong - add 4-digit sequence number after date to outfile str
     2018 Sep 20 - jfong - search if file type exists for seq_num='0001'
+    2018 Sep 21 - jfong - update seqnum for new dates
 """
 
 import os
 from time import strftime
 import pdb
 import pickle
-from .date_to_rev import date_to_rev
+from date_to_rev import date_to_rev
 import numpy as np
 
 
@@ -66,8 +67,9 @@ def write_intermediate_files(year, doy, band, dsn, profdir, filtyp,
         relpath = '../' * int(len(cwds)-ind-1)
 
         # Create output file name without file extension
+        curday = strftime('%Y%m%d')
         dirsrch = relpath + dirstr
-        out1 = dirsrch + filestr + '_' + filtyp.upper() + strftime('_%Y%m%d')
+        out1 = dirsrch + filestr + '_' + filtyp.upper() + '_' + curday
 
         # Check if directory exists, if not, create it
         if os.path.exists(dirsrch):
@@ -81,7 +83,8 @@ def write_intermediate_files(year, doy, band, dsn, profdir, filtyp,
                 seq_num = '0001'
             else:
                 sfn = [x.split('_') for x in dirfiles]
-                sqn0 = [(x[-2]+x[-1][0:4]) for x in sfn if (x[-3]==filtyp)]
+                sqn0 = [(x[-2]+x[-1][0:4]) for x in sfn if (x[-3]==filtyp)
+                        and (x[-2]==curday)]
                 if len(sqn0) == 0:
                     seq_num = '0001'
                 else:

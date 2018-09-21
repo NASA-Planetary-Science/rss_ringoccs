@@ -83,9 +83,10 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
     y = np.concatenate((firstvals, y, lastvals))
     return np.convolve( m[::-1], y, mode='valid')
 
-def fresnel_forward(rho_km_vals,F_km_vals,phi_rad_vals,B_rad_vals,D_km_vals,
-                    T_vals,lambda_km_vals,w_km_vals,dx_km,wtype,start,n_used,
-                    norm=True,fft=False,verbose=True,psitype='full'):
+def fresnel_transform(rho_km_vals, F_km_vals, phi_rad_vals, B_rad_vals,
+                    D_km_vals, T_vals, lambda_km_vals, w_km_vals,
+                    dx_km, wtype, start, n_used, norm=True, fft=False,
+                    verbose=True, psitype='full'):
     """
         Procedure: fresnel_forward
         Purpose:   Computes the forward model of diffraction from a set of
@@ -572,7 +573,7 @@ def psi_d2_phi(r,r0,d,b,phi,phi0,error_check=True):
     psi_d2_phi_vals = dphia - dphib
     return psi_d2_phi_vals
 
-def fresnel_transform(T,ker,DX,f_scale):
+def fresnel_inverse(T,ker,DX,f_scale):
     """
         Function: fresnel_transform
         Purpose:  Compute the approximate inverse of a Fresnel transform.
@@ -798,7 +799,7 @@ def fresnel_cos(x):
             raise TypeError(
                 "\n\tError Encountered:\n"
                 "\trss_ringoccs: Diffcorr Subpackage\n"
-                "\tspecial_function.fresnel_cos:\n"
+                "\tspecial_functions.fresnel_cos:\n"
                 "\t\tInput must be a real or complex valued numpy array.\n"
                 "\t\tThe elements of your array have type: %s"
                 % (x.dtype)

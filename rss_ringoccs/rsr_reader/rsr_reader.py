@@ -46,6 +46,8 @@ Revisions:
    2018 Sep 18 - jfong - updated verbose print statements to be consistent
                          with those in Geometry and DiffractionCorrection
                        - rewrite band to be a str instead of a byte char
+   2018 Sep 20 - jfong - add rev_info dictionary attribute and
+                         __set_rev_info() method
 
 *************************VARIABLES*************************
 NAME - TYPE - scalar/array - PURPOSE
@@ -69,6 +71,10 @@ from scipy.signal import decimate
 import struct
 import sys
 import time
+
+sys.path.append('../')
+from rss_ringoccs.tools.get_rev_info import get_rev_info
+sys.path.remove('../')
 
 
 class RSRReader(object):
@@ -340,6 +346,12 @@ class RSRReader(object):
         if verbose:
             print('\tSetting the IQ_m attribute...')
         self.__set_IQ(verbose=verbose)
+
+        # Set rev info for file creation
+        if verbose:
+            print('\tSetting rev info...')
+        self.__set_rev_info()
+
 
     def __set_sfdu_unpack(self, spm_range):
         """
@@ -685,3 +697,6 @@ class RSRReader(object):
             'Input Variables': input_var_dict,
             'Input Keywords': input_kw_dict}
         self.history = history_dict
+
+    def __set_rev_info(self):
+        self.rev_info = get_rev_info(self)

@@ -1076,7 +1076,7 @@ def double_slit_diffraction_solve(x, z, a, d):
     f = f1*f2/f3
     return f
 
-def sq_well_solve(x,a,b,F,invert=False):
+def sq_well_solve(x, a, b, F, invert=False):
     """
         Function:
             sq_well_solve

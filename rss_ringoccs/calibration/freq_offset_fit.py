@@ -44,17 +44,30 @@ Revisions:
    2018 Jun 05 - gsteranka - Added sc_name keyword. Default is Cassini
    2018 Jun 21 - gsteranka - Switch "k" input to "poly_order", and "_k"
                              attribute to "_poly_order"
+    2018 Sep 16 - jfong - remove f_spm and f_offset inputs, calculate here
+    2018 Sep 17 - jfong - add search for freq offset file
+                        - added f_uso_x kwd with default = 8427222034.34050
+    2018 Sep 18 - jfong - write FOF and FRFP if file_search=False
+    2018 Sep 19 - sflury - Added function which creates a mask array to exclude
+                           rings, planetary occultation, and data more than
+                           5-sigma beyond the median residual signal
+
 """
 
 import numpy as np
 from numpy.polynomial import polynomial as poly
 from scipy.interpolate import interp1d
 import sys
+import pdb
+import pickle
 
 from tkinter import Tk
 
 from .calc_f_sky_recon import calc_f_sky_recon
+from .calc_freq_offset import calc_freq_offset
 from ..tools.cassini_blocked import cassini_blocked
+from ..tools.search_for_file import search_for_file
+from ..tools.write_intermediate_files import write_intermediate_files
 from .f_resid_fit_gui import FResidFitGui
 
 sys.path.append('../..')
@@ -118,9 +131,9 @@ class FreqOffsetFit(object):
             Recorded information about the run
         """
 
-    def __init__(self, rsr_inst, geo_inst, f_spm, f_offset,
-            f_uso, poly_order=9, spm_include=None, sc_name='Cassini',
-            USE_GUI=True, verbose=False):
+    def __init__(self, rsr_inst, geo_inst, poly_order=9, 
+            spm_include=None, sc_name='Cassini', f_uso_x=8427222034.34050,
+            file_search=True, USE_GUI=True, verbose=False):
         """
         Purpose:
         Define all attributes associated with data set, and make a fit to
@@ -186,11 +199,11 @@ class FreqOffsetFit(object):
             sys.exit('ERROR (FreqOffsetFIt): geo_inst input must be an '
                 + 'instance of the Geometry class')
 
-        if (not isinstance(f_uso, float)) & (not isinstance(f_uso, int)):
-            print('WARNING (FreqOffsetFit): f_uso input must be either an int '
-                + 'or float. Ignoring current input and setting to '
-                + str(8427222034.34050))
-            f_uso = 8427222034.34050
+#        if (not isinstance(f_uso, float)) & (not isinstance(f_uso, int)):
+#            print('WARNING (FreqOffsetFit): f_uso input must be either an int '
+#                + 'or float. Ignoring current input and setting to '
+#                + str(8427222034.34050))
+#            f_uso = 8427222034.34050
 
         if not isinstance(poly_order, int):
             print('WARNING (FreqOffsetFit): poly_order input must be an int. '
@@ -223,14 +236,70 @@ class FreqOffsetFit(object):
         self.__rsr_inst = rsr_inst
         self.__kernels = geo_inst.kernels
         self.__geo_inst = geo_inst
+        
+
+        # Adjust USO frequency by wavelength
+        band = rsr_inst.band
+        if band == 'X':
+            f_uso = f_uso_x
+        elif band == 'S':
+            f_uso = f_uso_x*(3.0/11.0)
+        elif band == 'K':
+            f_uso = f_uso_x*3.8
+        else:
+            print('WARNING (freq_offset_fit.py): Invalid frequency band!')
+            sys.exit()
+
         self.__f_uso = f_uso
+        profdir = geo_inst.get_profile_dir()
+
+        # Search for frequency offset fit (FOF) text file
+        if file_search:
+            fof_file = search_for_file(rsr_inst.year, rsr_inst.doy,
+                    band, rsr_inst.dsn, profdir, 'FOF')
+
+            if (fof_file == 'N/A'):
+                # if no file found, calculate f_offset
+                f_spm, f_offset, f_offset_history = calc_freq_offset(
+                        self.__rsr_inst)
+            # Read in parameters from offset file
+            print('\tExtracting frequency offset from:\n\t\t' 
+                    + '/'.join(fof_file.split('/')[0:5]) + '/\n\t\t\t'
+                    + fof_file.split('/')[-1])
+            freq_offset_file_vals = np.loadtxt(fof_file)
+            f_spm = freq_offset_file_vals[:, 0]
+            f_offset = freq_offset_file_vals[:, 1]
+
+            # Search for frequency residual fit pickle (FRFP) file
+            frfp_file = search_for_file(rsr_inst.year,
+                    rsr_inst.doy, band, rsr_inst.dsn, profdir,
+                    'FRFP')
+            print('\tExtracting residual frequency fit from:\n\t\t'
+                    + '/'.join(frfp_file.split('/')[0:5]) + '/\n\t\t\t'
+                    + frfp_file.split('/')[-1])
+            file_object = open(frfp_file, 'rb')
+            fit_param_dict = pickle.load(file_object)
+            poly_order = fit_param_dict['k']
+            spm_include = fit_param_dict['spm_include']
+        else:
+            # Compute frequency offset
+            f_spm, f_offset, f_offset_history = calc_freq_offset(
+                    self.__rsr_inst)
+
+            # Save frequency offset to a text file
+
+            write_intermediate_files(rsr_inst.year,
+                    rsr_inst.doy, rsr_inst.band, rsr_inst.dsn, profdir,
+                    'FOF', {'f_spm':f_spm, 'f_offset':f_offset})
+        
 
         # Attributes for components of frequency offset, except for residual
         # frequency and its fit
         if verbose:
-            print('Calculating predicted sky frequency from input rsr_inst and'
-                + 'reconstructed sky frequency from kernelsin in input '
-                + 'geo_inst')
+            #print('Calculating predicted sky frequency from input rsr_inst and'
+            #    + 'reconstructed sky frequency from kernelsin in input '
+            #    + 'geo_inst')
+            print('\tCalculating predicted sky frequency...')
         self.__f_spm = np.asarray(f_spm)
         self.__f_offset = np.asarray(f_offset)
         f_spm, self.__f_sky_pred = rsr_inst.get_f_sky_pred(f_spm=self.__f_spm)
@@ -251,14 +320,80 @@ class FreqOffsetFit(object):
         self._rho_exclude = [[0, 70000], [91900, 94000], [98000, 118000],
             [194400, np.inf]]
 
+        # Masking of frequency fit residuals
+        self.__fsr_mask = self.__get_mask()
+
         # Set attributes for residual frequency fit, and the
         #     new frequency offset fit
         self.set_f_sky_resid_fit(poly_order=poly_order,
             spm_include=spm_include, USE_GUI=USE_GUI, verbose=verbose)
 
+
+
         # Get I and Q from RSR object
         self.__spm_vals = rsr_inst.spm_vals
         self.__IQ_m = rsr_inst.IQ_m
+
+        # Write frequency residual fit parameter pickle file
+        if not file_search:
+            frfp = {'k': self._poly_order, 'spm_include': self._spm_include}
+            write_intermediate_files(rsr_inst.year, rsr_inst.doy,
+                        rsr_inst.band, rsr_inst.dsn, profdir, 'FRFP', frfp)
+
+    def __get_mask(self):
+        '''
+        Sophia's sigma-clipping and mask creation
+        '''
+    
+        # get residual and intercept radius attributes
+        f_sky_resid = self.__f_offset - (self.__f_sky_recon - self.__f_sky_pred)
+        f_rho = self.__f_rho
+    
+        ## create mask array that includes everything
+        fsr_mask = np.array([True for i in range(len(f_sky_resid))],dtype=bool)
+    
+        # By default, exclude radii inside of Saturn, the B ring, and far
+        #     outside of rings where sometimes the signal drops off. Only these
+        #     regions are overly noisy at the default 8.192 second spacing in
+        #     the frequency offset from FreqOffset class. This is the initial
+        #     guess for regions to fit over. User adjusts using spm_include
+        #     keyword
+    
+        for i in range(len(f_rho)):
+            for rl in self._rho_exclude:
+                if f_rho[i] > rl[0] and f_rho[i] < rl[1]:
+                    fsr_mask[i] = False
+    
+        ## Compute median, standard deviation, and implememt sigma-clipping
+        #       for data which fall in acceptable regions
+        fsr_median = np.median(f_sky_resid[fsr_mask])
+        fsr_stdev = 5. * np.sqrt(np.median(np.square(f_sky_resid[fsr_mask] - fsr_median)))
+        for i in range(len(f_sky_resid)):
+            if f_sky_resid[i] < fsr_median - fsr_stdev or f_sky_resid[i] > fsr_median + fsr_stdev:
+                fsr_mask[i] = False
+    
+        ## iteratively check adjacent values for false positives -- i.e.,
+        #       all four adjacent mask array values are False
+        #       first forwards
+        for i in range(2,len(fsr_mask)-2):
+            if fsr_mask[i]:
+                if not fsr_mask[i-2]:
+                    if not fsr_mask[i-1]:
+                        if not fsr_mask[i+1]:
+                            if not fsr_mask[1+2]:
+                                fsr_mask[i] = False
+        #       then backwards
+        for i in range(len(fsr_mask)-2,2,-1):
+            if fsr_mask[i]:
+                if not fsr_mask[i-2]:
+                    if not fsr_mask[i-1]:
+                        if not fsr_mask[i+1]:
+                            if not fsr_mask[1+2]:
+                                fsr_mask[i] = False
+    
+        ## return frequency sky residual mask array
+        return fsr_mask
+
 
     def set_f_sky_resid_fit(self, poly_order=9, spm_include=None, USE_GUI=True,
             verbose=False):
@@ -360,44 +495,49 @@ class FreqOffsetFit(object):
                 (np.invert(is_blocked_ion))))
         ind = np.reshape(np.concatenate(ind), -1)
 
-        # If user specified spm_include argument that overrides the rho_exclude
-        #     argument
-        if spm_include:
-            if verbose:
-                print('Using specified fit parameters')
-            self._spm_include = spm_include
-            ind = []
-            for i in range(len(spm_include)):
-                ind.append(np.argwhere((f_spm >= spm_include[i][0]) &
-                    (f_spm <= spm_include[i][1]) &
-                    (np.invert(is_blocked_ion))))
-            ind = np.reshape(np.concatenate(ind), -1)
-        else:
-            if verbose:
-                print('Using default fit parameters')
-            spm_include = []
-            for i in range(len(rho_exclude) - 1):
-                _ind = np.argwhere((f_rho > rho_exclude[i][1])
-                    & (f_rho < rho_exclude[i + 1][0]))
-                spm_include.append([float(min(f_spm[_ind])),
-                    float(max(f_spm[_ind]))])
-            self._spm_include = spm_include
+        ## If user specified spm_include argument that overrides the rho_exclude
+        ##     argument
+        #if spm_include:
+        #    if verbose:
+        #        print('\tComputing frequency residual fit using '
+        #            + 'SPECIFIED fit parameters...')
+        #    self._spm_include = spm_include
+        #    ind = []
+        #    for i in range(len(spm_include)):
+        #        ind.append(np.argwhere((f_spm >= spm_include[i][0]) &
+        #            (f_spm <= spm_include[i][1]) &
+        #            (np.invert(is_blocked_ion))))
+        #    ind = np.reshape(np.concatenate(ind), -1)
+        #else:
+        #    if verbose:
+        #        print('\tComputing frequency residual fit using '
+        #            + 'DEFAULT fit parameters...')
+        #    spm_include = []
+        #    for i in range(len(rho_exclude) - 1):
+        #        _ind = np.argwhere((f_rho > rho_exclude[i][1])
+        #            & (f_rho < rho_exclude[i + 1][0]))
+        #        spm_include.append([float(min(f_spm[_ind])),
+        #            float(max(f_spm[_ind]))])
+        #    self._spm_include = spm_include
 
-        if len(ind) == 0:
-            print('ERROR (FreqOffsetFit.set_f_sky_resid_fit): All \n'
-                + 'points fall outside of specified spm_include regions')
-            sys.exit()
+        #if len(ind) == 0:
+        #    print('ERROR (FreqOffsetFit.set_f_sky_resid_fit): All \n'
+        #        + 'points fall outside of specified spm_include regions')
+        #    sys.exit()
 
+
+        # Coefficients for least squares fit, and evaluation of coefficients
+        if verbose:
+            print('\tEvaluating polynomial fit...')
         # When fitting, use x values adjusted to range over [-1, 1]
         npts = len(f_spm)
         spm_temp = ((f_spm - f_spm[int(npts / 2)])
             / max(f_spm - f_spm[int(npts / 2)]))
 
-        # Coefficients for least squares fit, and evaluation of coefficients
-        if verbose:
-            print('Evaluating polynomial fit')
-        coef = poly.polyfit(spm_temp[ind], f_sky_resid[ind], poly_order)
-        f_sky_resid_fit = poly.polyval(spm_temp, coef)
+        ## fit using polynomial of user-selected order
+        coef = poly.polyfit(spm_temp[self.__fsr_mask], f_sky_resid[self.__fsr_mask], poly_order)
+       ## evaluate polynomial using coefficients from polynomial fit
+        f_sky_resid_fit = poly.polyval(spm_temp,coef)
 
         self.__f_sky_resid_fit = f_sky_resid_fit
 
@@ -408,7 +548,7 @@ class FreqOffsetFit(object):
 
         if USE_GUI:
             if verbose:
-                print('Using GUI to make a polynomial fit')
+                print('\tUsing GUI to make a polynomial fit...')
             root = Tk()
             f_resid_fit_gui_inst = FResidFitGui(root, self, f_spm, f_rho,
                 f_sky_resid)

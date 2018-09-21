@@ -17,6 +17,10 @@ Workaroud: In order to produce the best match to the RSS diffraction-corrected r
 
 Workaround: Use Linux operating system, and post an Issue on the Github page for rss_ringoccs
 
+3. Power and frequency calibration GUIs may sometimes not close when users click the "OK" button or the red "X" button.
+
+Workaround: Use Linux operating system, and post an Issue on the Github page for rss_ringoccs
+
 ## Planned Augmentations ##
 
 1. Include calculation of threshold optical depth

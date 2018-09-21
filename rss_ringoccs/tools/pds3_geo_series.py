@@ -7,6 +7,8 @@ Purpose: Write GEO data and label files in PDS3 format.
 Revisions:
     2018 Jul 23 - jfong - copied from jwf_pds3_geo_series_v3.py
     2018 Sep 10 - jfong - add underscore to record type and product type
+    2018 Sep 20 - jfong - split geo_kernels only if it is a list
+
 
 '''
 import pdb
@@ -118,7 +120,11 @@ def get_geo_series_info(rev_info, geo_inst, series_name, prof_dir):
     t_oet_spm_end = geo_inst.t_oet_spm_vals[-1]
     geo_kernels = geo_inst.kernels
     # Remove directory path from kernel list
-    geo_kernels = ['"'+x.split('/')[-1]+'"' for x in geo_kernels]
+    if isinstance(geo_kernels, list):
+        geo_kernels = ['"'+x.split('/')[-1]+'"' for x in geo_kernels]
+    else:
+        geo_kernels = '"' + geo_kernels + '"'
+
 
 
     PDS_VERSION_ID = 'PDS3'
@@ -545,9 +551,9 @@ def write_geo_series(rev_info, geo_inst, title, outdir, prof_dir):
             directory, with filenames, *YYYYMMDD.TAB and *YYYYMMDD.LBL,
             respectively, where * is "title".
     """
-    current_time = time.strftime("_%Y%m%d") #-%H%M%S")
-    outfile_tab = outdir + title.upper() + current_time + '.TAB'
-    outfile_lbl = outdir + title.upper() + current_time + '.LBL'
+#    current_time = time.strftime("_%Y%m%d") #-%H%M%S")
+    outfile_tab = outdir + title.upper() + '.TAB'
+    outfile_lbl = outdir + title.upper() + '.LBL'
     series_name = '"' + outfile_tab.split('/')[-1] + '"'
 
     fmt = '%32.16F' # format for float entry
@@ -563,5 +569,3 @@ def write_geo_series(rev_info, geo_inst, title, outdir, prof_dir):
     pds3.pds3_write_series_lbl(str_lbl, outfile_lbl)
 
     return None
-
-

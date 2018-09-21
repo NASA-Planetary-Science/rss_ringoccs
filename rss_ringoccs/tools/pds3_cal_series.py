@@ -8,6 +8,7 @@ Purpose: From a cal instance, produce inputs to pds3_write_series_lbl()
 Revisions:
     2018 Jul 23 - jfong - copied from jwf_pds3_cal_series_v2.py
     2018 Sep 10 - jfong - add underscore to record type and product type
+    2018 Sep 20 - jfong - only split kernels if list
 """
 
 import pds3_write_series as pds3
@@ -105,7 +106,10 @@ def get_cal_series_info(rev_info, cal_inst, series_name, prof_dir):
     geo_kernels = cal_inst.history['Input Variables']['geo_inst'][
             'Input Variables']['kernels']
     # Remove directory path from kernel list
-    geo_kernels = ['"'+x.split('/')[-1]+'"' for x in geo_kernels]
+    if isinstance(geo_kernels, list):
+        geo_kernels = ['"'+x.split('/')[-1]+'"' for x in geo_kernels]
+    else:
+        geo_kernels = '"' + geo_kernels + '"'
 
 
     PDS_VERSION_ID = 'PDS3'
@@ -468,9 +472,8 @@ def write_cal_series(rev_info, cal_inst, title, outdir, prof_dir):
             directory, with filenames, *YYYYMMDD.TAB and *YYYYMMDD.LBL,
             respectively, where * is "title".
     """
-    current_time = time.strftime("_%Y%m%d") 
-    outfile_tab = outdir + title.upper() + current_time + '.TAB'
-    outfile_lbl = outdir + title.upper() + current_time + '.LBL'
+    outfile_tab = outdir + title.upper() + '.TAB'
+    outfile_lbl = outdir + title.upper() + '.LBL'
 
     series_name = '"' + outfile_tab.split('/')[-1] + '"' 
 

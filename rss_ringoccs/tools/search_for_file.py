@@ -9,6 +9,7 @@ Purpose: This function searches for an existing frequency offset text file,
 
 Revisions:
     2018 Sep 17 - jfong - original
+    2018 Sep 24 - jfong - hardcode relative path (../ouput/*)
 """
 
 import glob
@@ -36,16 +37,17 @@ def search_for_file(year, doy, band, dsn, profdir, filtyp):
 #    pdb.set_trace()
     filestr = ('RSS_' + str(year) + '_' + str(doy) + '_' + str(band) +
             str(dsn) + '_' + pd1)
-    dirstr = ('output/Rev' + rev + '/' + pd1 + '/' + 'Rev' + rev + pd1 +
+    dirstr = ('../output/Rev' + rev + '/' + pd1 + '/' + 'Rev' + rev + pd1 +
             '_' + filestr + '/')
     
 #    fsearch = dirstr + filestr + '*' + filtyp.upper() + '*' + '.*'
-    cwds = (os.getcwd()).split('/')
+    #cwds = (os.getcwd()).split('/')
     # index of first appearance of rss_ringoccs
-    ind = cwds.index('rss_ringoccs')
-    relpath = '../' * int(len(cwds)-ind-1)
+    #ind = cwds.index('rss_ringoccs')
+    #relpath = '../' * int(len(cwds)-ind-1)
     
-    fsrch = relpath + dirstr +  '*' + filtyp.upper() + '*' + '.*'
+    #fsrch = relpath + dirstr +  '*' + filtyp.upper() + '*' + '.*'
+    fsrch = dirstr +  '*' + filtyp.upper() + '*' + '.*'
 
     all_files = []
     for filename in glob.glob(fsrch, recursive=True):

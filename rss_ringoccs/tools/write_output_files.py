@@ -81,10 +81,10 @@ def construct_output_filename(rev_info, inst, filtyp):
         # Create output file name without file extension
         out1 = dirstr + filestr + '_' + filtyp.upper() + strftime('_%Y%m%d')
 
-        if os.path.exists(dirsrch):
+        if os.path.exists(dirstr):
 
             # Check for most recent file and order them by date
-            dirfiles = [x for x in os.listdir(dirsrch) if
+            dirfiles = [x for x in os.listdir(dirstr) if
                     x.startswith('.')==False]
 
 
@@ -105,8 +105,8 @@ def construct_output_filename(rev_info, inst, filtyp):
 
 
         else:
-            print('\tCreating directory:\n\t\t' + dirsrch)
-            os.system('[ ! -d ' + dirsrch + ' ] && mkdir -p ' + dirsrch)
+            print('\tCreating directory:\n\t\t' + dirstr)
+            os.system('[ ! -d ' + dirstr + ' ] && mkdir -p ' + dirstr)
 
             seq_num = '0001'
             out2 = out1 + '_' + seq_num

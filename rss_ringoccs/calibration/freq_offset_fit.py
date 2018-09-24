@@ -265,6 +265,9 @@ class FreqOffsetFit(object):
                 # if no file found, calculate f_offset
                 f_spm, f_offset, f_offset_history = calc_freq_offset(
                         self.__rsr_inst)
+                write_intermediate_files(rsr_inst.year,
+                        rsr_inst.doy, rsr_inst.band, rsr_inst.dsn, profdir,
+                        'FOF', {'f_spm':f_spm, 'f_offset':f_offset})
             # Read in parameters from offset file
             print('\tExtracting frequency offset from:\n\t\t' 
                     + '/'.join(fof_file.split('/')[0:5]) + '/\n\t\t\t'
@@ -493,28 +496,41 @@ class FreqOffsetFit(object):
             frfp_file = search_for_file(self.__rsr_inst.year,
                     self.__rsr_inst.doy, self.__rsr_inst.band, 
                     self.__rsr_inst.dsn, self.profdir, 'FRFP')
-            print('\tExtracting residual frequency fit from:\n\t\t'
-                    + '/'.join(frfp_file.split('/')[0:5]) + '/\n\t\t\t'
-                    + frfp_file.split('/')[-1])
-            file_object = open(frfp_file, 'rb')
-            fit_param_dict = pickle.load(file_object)
-            coef = fit_param_dict['coef']
+            if frfp_file == 'N/A':
+                print('WARNING (get_spline_fit()): FRFP file not found!')
+                if verbose:
+                    print('\tEvaluating polynomial fit...')
+                # When fitting, use x values adjusted to range over [-1, 1]
+
+                ## fit using polynomial of user-selected order
+                coef = poly.polyfit(spm_temp[self.__fsr_mask], f_sky_resid[self.__fsr_mask], poly_order)
+                frfp = {'coef': coef}
+                write_intermediate_files(self.__rsr_inst.year, self.__rsr_inst.doy,
+                        self.__rsr_inst.band, self.__rsr_inst.dsn, 
+                        self.profdir, 'FRFP', frfp)
+            else:
+                print('\tExtracting residual frequency fit from:\n\t\t'
+                        + '/'.join(frfp_file.split('/')[0:5]) + '/\n\t\t\t'
+                        + frfp_file.split('/')[-1])
+                file_object = open(frfp_file, 'rb')
+                fit_param_dict = pickle.load(file_object)
+                coef = fit_param_dict['coef']
         else:
 
 
             # Determine if Cassini blocked by Saturn's ionosophere. Important for
             #     chord occultations
-            is_blocked_atm, is_blocked_ion = cassini_blocked(f_spm,
-                self.__rsr_inst, self.__kernels)
+            #is_blocked_atm, is_blocked_ion = cassini_blocked(f_spm,
+            #    self.__rsr_inst, self.__kernels)
 
-            # Array of indices to include by default. Overridden by spm_include
-            #     keyword
-            ind = []
-            for i in range(len(rho_exclude) - 1):
-                ind.append(np.argwhere((f_rho > rho_exclude[i][1]) &
-                    (f_rho < rho_exclude[i + 1][0]) &
-                    (np.invert(is_blocked_ion))))
-            ind = np.reshape(np.concatenate(ind), -1)
+            ## Array of indices to include by default. Overridden by spm_include
+            ##     keyword
+            #ind = []
+            #for i in range(len(rho_exclude) - 1):
+            #    ind.append(np.argwhere((f_rho > rho_exclude[i][1]) &
+            #        (f_rho < rho_exclude[i + 1][0]) &
+            #        (np.invert(is_blocked_ion))))
+            #ind = np.reshape(np.concatenate(ind), -1)
 
             ## If user specified spm_include argument that overrides the rho_exclude
             ##     argument

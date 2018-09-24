@@ -54,22 +54,22 @@ def write_intermediate_files(year, doy, band, dsn, profdir, filtyp,
         filestr = ('RSS_' + str(year) + '_' + str(doy) + '_' + str(band) +
             str(dsn) + '_' + dd)
     
-        dirstr = ('output/Rev' + rev + '/' + dd + '/' + 'Rev' + rev + 
+        dirstr = ('../output/Rev' + rev + '/' + dd + '/' + 'Rev' + rev + 
                 pd2 + dd + '_' + filestr + '/')
 
 #    os.system('[ ! -d ' + output_directory + ' ] && mkdir -p '
 #            + output_directory)
 #    fsearch = dirstr + filestr + '*' + filtyp.upper() + '*' + '.*'
 
-        cwds = (os.getcwd()).split('/')
+        #cwds = (os.getcwd()).split('/')
         # index of first appearance of rss_ringoccs
-        ind = cwds.index('rss_ringoccs')
-        relpath = '../' * int(len(cwds)-ind-1)
+        #ind = cwds.index('rss_ringoccs')
+        #relpath = '../' * int(len(cwds)-ind-1)
 
         # Create output file name without file extension
         curday = strftime('%Y%m%d')
-        dirsrch = relpath + dirstr
-        out1 = dirsrch + filestr + '_' + filtyp.upper() + '_' + curday
+        #dirsrch = relpath + dirstr
+        out1 = dirstr + filestr + '_' + filtyp.upper() + '_' + curday
 
         # Check if directory exists, if not, create it
         if os.path.exists(dirsrch):

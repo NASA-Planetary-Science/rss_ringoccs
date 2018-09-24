@@ -6,6 +6,7 @@ Purpose: Write output *.TAB data and corresponding *.LBL label file.
 
 Revisions:
     2018 Sep 19 - jfong - original
+    2018 Sep 24 - jfong - hardcode relative path (../output/*)
 """
 import sys
 from pds3_geo_series import write_geo_series
@@ -39,7 +40,7 @@ def write_output_files(inst):
         filtyp = 'DLP_' + str(int(inst.dr_km * 1000 * 2)).zfill(4) + 'M'
 
     elif isinstance(inst, rss.diffcorr.DiffractionCorrection):
-        filtyp = 'TAU_' + str(int(inst.res_km * 1000)).zfill(5) + 'M'
+        filtyp = 'TAU_' + str(int(inst.res * 1000)).zfill(5) + 'M'
     else:
         print('invalid instance!')
 
@@ -65,21 +66,20 @@ def construct_output_filename(rev_info, inst, filtyp):
         filestr = ('RSS_' + str(year) + '_' + str(doy) + '_' + str(band) +
             str(dsn) + '_' + dd)
 
-        dirstr = ('output/Rev' + rev + '/' + dd + '/' + 'Rev' + rev +
+        dirstr = ('../output/Rev' + rev + '/' + dd + '/' + 'Rev' + rev +
                 pd2 + dd + '_' + filestr + '/')
 
 #    os.system('[ ! -d ' + output_directory + ' ] && mkdir -p '
 #            + output_directory)
 #    fsearch = dirstr + filestr + '*' + filtyp.upper() + '*' + '.*'
 
-        cwds = (os.getcwd()).split('/')
+        #cwds = (os.getcwd()).split('/')
         # index of first appearance of rss_ringoccs
-        ind = cwds.index('rss_ringoccs')
-        relpath = '../' * int(len(cwds)-ind-1)
+        #ind = cwds.index('rss_ringoccs')
+        #relpath = '../' * int(len(cwds)-ind-1)
 
         # Create output file name without file extension
-        dirsrch = relpath + dirstr
-        out1 = dirsrch + filestr + '_' + filtyp.upper() + strftime('_%Y%m%d')
+        out1 = dirstr + filestr + '_' + filtyp.upper() + strftime('_%Y%m%d')
 
         if os.path.exists(dirsrch):
 

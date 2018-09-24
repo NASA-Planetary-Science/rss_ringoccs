@@ -17,7 +17,7 @@ import time
 
 # ***** Begin user input *****
 rsr_file = '../data/co-s-rss-1-sroc1-v10/cors_0105/sroc1_123/rsr/s10sroe2005123_0740nnnx43rd.2a2'
-kernels = '../tables/Sa-TC17-V001.ker'
+kernels = 'Rev007_meta_kernel.ker'
 planet = 'Saturn'
 spacecraft = 'Cassini'
 dr_km_desired = 0.05

@@ -1,6 +1,19 @@
 import numpy as np
 from scipy.special import lambertw, iv
 
+# Declare constants for multiples of pi.
+TWO_PI = 6.283185307179586476925287
+ONE_PI = 3.141592653589793238462643
+
+# Declare constants for the reciprocal of e and the square root of 2.
+RCPR_E = 0.3678794411714423215955238
+SQRT_2 = 1.414213562373095048801689
+
+# Declare constants for various Bessel function inputs (I_0(x)).
+IV0_20 = 87.10850209627940
+IV0_25 = 373.02058499037486
+IV0_35 = 7257.7994923041760
+
 def rect(w_in, dx, error_check=True):
     """
         Function:
@@ -41,16 +54,60 @@ def rect(w_in, dx, error_check=True):
             Lowercase variables: RJM - 2018/05/16 1:29 P.M.
     """
     if error_check:
-        if not isinstance(w_in,float):
+        if not isinstance(w_in, float):
             try:
                 w_in = float(w_in)
-            except TypeError:
-                raise TypeError("w_in must be a positive floating point number.")
-        if not isinstance(dx,float):
+            except (TypeError, ValueError):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\twindow_functions.rect:\n"
+                    "\t\tFirst input must be a floating point number.\n"
+                    "\t\tYour input has type: %s\n"
+                    % (type(w_in).__name__)
+                )
+        else:
+            pass
+    
+        if (w_in <= 0.0):
+            raise ValueError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\twindow_functions.rect:\n"
+                "\t\tFirst input must positive.\n"
+                "\t\tYour input: %f\n"
+                % (w_in)
+            )
+        else:
+            pass
+
+        if not isinstance(dx, float):
             try:
                 dx = float(dx)
-            except TypeError:
-                raise TypeError("w_in must be a positive floating point number.")
+            except (TypeError, ValueError):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\twindow_functions.rect:\n"
+                    "\t\tSecond input must be a floating point number.\n"
+                    "\t\tYour input has type: %s\n"
+                    % (type(dx).__name__)
+                )
+        else:
+            pass
+
+        if (dx <= 0.0):
+            raise ValueError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\twindow_functions.rect:\n"
+                "\t\tSecond input must positive.\n"
+                "\t\tYour input: %f\n"
+                % (dx)
+            )
+        else:
+            pass
+
     nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
     w_func = np.zeros(nw_pts) + 1.0
     return w_func
@@ -93,37 +150,133 @@ def coss(w_in, dx, error_check=True):
             Lowercase variables: RJM - 2018/05/16 1:34 P.M.
     """
     if error_check:
-        if not isinstance(w_in,float):
+        if not isinstance(w_in, float):
             try:
                 w_in = float(w_in)
-            except TypeError:
-                raise TypeError("w_in must be a positive floating point number.")
-        if not isinstance(dx,float):
+            except (TypeError, ValueError):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\twindow_functions.coss:\n"
+                    "\t\tFirst input must be a floating point number.\n"
+                    "\t\tYour input has type: %s\n"
+                    % (type(w_in).__name__)
+                )
+        else:
+            pass
+    
+        if (w_in <= 0.0):
+            raise ValueError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\twindow_functions.coss:\n"
+                "\t\tFirst input must positive.\n"
+                "\t\tYour input: %f\n"
+                % (w_in)
+            )
+        else:
+            pass
+
+        if not isinstance(dx, float):
             try:
                 dx = float(dx)
-            except TypeError:
-                raise TypeError("w_in must be a positive floating point number.")
+            except (TypeError, ValueError):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\twindow_functions.coss:\n"
+                    "\t\tSecond input must be a floating point number.\n"
+                    "\t\tYour input has type: %s\n"
+                    % (type(dx).__name__)
+                )
+        else:
+            pass
+
+        if (dx <= 0.0):
+            raise ValueError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\twindow_functions.coss:\n"
+                "\t\tSecond input must positive.\n"
+                "\t\tYour input: %f\n"
+                % (dx)
+            )
+        else:
+            pass
+
+    # The number of points in a window must be odd.
     nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
-    x      = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx
-    w_func = np.cos(np.pi * x / w_in)**2
+
+    # Set the independent variable for the window.
+    x  = ONE_PI * (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx / w_in
+
+    w_func = np.cos(x)*np.cos(x)
     return w_func
 
 def kb20(w_in, dx, error_check=True):
     if error_check:
-        if not isinstance(w_in,float):
+        if not isinstance(w_in, float):
             try:
                 w_in = float(w_in)
-            except TypeError:
-                raise TypeError("w_in must be a positive floating point number.")
-        if not isinstance(dx,float):
+            except (TypeError, ValueError):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\twindow_functions.kb20:\n"
+                    "\t\tFirst input must be a floating point number.\n"
+                    "\t\tYour input has type: %s\n"
+                    % (type(w_in).__name__)
+                )
+        else:
+            pass
+    
+        if (w_in <= 0.0):
+            raise ValueError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\twindow_functions.kb20:\n"
+                "\t\tFirst input must positive.\n"
+                "\t\tYour input: %f\n"
+                % (w_in)
+            )
+        else:
+            pass
+
+        if not isinstance(dx, float):
             try:
                 dx = float(dx)
-            except TypeError:
-                raise TypeError("w_in must be a positive floating point number.")
+            except (TypeError, ValueError):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\twindow_functions.kb20:\n"
+                    "\t\tSecond input must be a floating point number.\n"
+                    "\t\tYour input has type: %s\n"
+                    % (type(dx).__name__)
+                )
+        else:
+            pass
+
+        if (dx <= 0.0):
+            raise ValueError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\twindow_functions.kb20:\n"
+                "\t\tSecond input must positive.\n"
+                "\t\tYour input: %f\n"
+                % (dx)
+            )
+        else:
+            pass
+
+    # Window functions have an odd number of points.
     nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
-    x      = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx
-    alpha  = 2.0*np.pi
-    w_func = iv(0.0,alpha * np.sqrt((1.0 - (2.0 * x / w_in)**2)))/iv(0.0,alpha)
+
+    # Compute argument of window function.
+    x = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx / w_in
+
+    # Compute window function.
+    w_func = iv(0.0, TWO_PI * np.sqrt((1.0 - 4.0*x*x))) / IV0_20
     return w_func
 
 def kb25(w_in, dx, error_check=True):
@@ -174,20 +327,71 @@ def kb25(w_in, dx, error_check=True):
             Lowercase variables: RJM - 2018/05/16 3:23 P.M.
     """
     if error_check:
-        if not isinstance(w_in,float):
+        if not isinstance(w_in, float):
             try:
                 w_in = float(w_in)
-            except TypeError:
-                raise TypeError("w_in must be a positive floating point number.")
-        if not isinstance(dx,float):
+            except (TypeError, ValueError):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\twindow_functions.kb25:\n"
+                    "\t\tFirst input must be a floating point number.\n"
+                    "\t\tYour input has type: %s\n"
+                    % (type(w_in).__name__)
+                )
+        else:
+            pass
+    
+        if (w_in <= 0.0):
+            raise ValueError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\twindow_functions.kb25:\n"
+                "\t\tFirst input must positive.\n"
+                "\t\tYour input: %f\n"
+                % (w_in)
+            )
+        else:
+            pass
+
+        if not isinstance(dx, float):
             try:
                 dx = float(dx)
-            except TypeError:
-                raise TypeError("w_in must be a positive floating point number.")
+            except (TypeError, ValueError):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\twindow_functions.kb25:\n"
+                    "\t\tSecond input must be a floating point number.\n"
+                    "\t\tYour input has type: %s\n"
+                    % (type(dx).__name__)
+                )
+        else:
+            pass
+
+        if (dx <= 0.0):
+            raise ValueError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\twindow_functions.kb25:\n"
+                "\t\tSecond input must positive.\n"
+                "\t\tYour input: %f\n"
+                % (dx)
+            )
+        else:
+            pass
+
+    # Window functions have an odd number of points.
     nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
-    x      = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx
-    alpha  = 2.5*np.pi
-    w_func = iv(0.0,alpha * np.sqrt((1.0 - (2.0 * x / w_in)**2)))/iv(0.0,alpha)
+
+    # Compute argument of window function.
+    x = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx / w_in
+
+    # Alpha value for kb25 is 2.5.
+    alpha = 2.5 * ONE_PI
+
+    # Compute window function.
+    w_func = iv(0.0, alpha * np.sqrt((1.0 - 4.0*x*x))) / IV0_25
     return w_func
 
 def kb35(w_in, dx, error_check=True):
@@ -238,20 +442,71 @@ def kb35(w_in, dx, error_check=True):
             Lowercase variables: RJM - 2018/06/16 3:26 P.M.
     """
     if error_check:
-        if not isinstance(w_in,float):
+        if not isinstance(w_in, float):
             try:
                 w_in = float(w_in)
-            except TypeError:
-                raise TypeError("w_in must be a positive floating point number.")
-        if not isinstance(dx,float):
+            except (TypeError, ValueError):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\twindow_functions.kb35:\n"
+                    "\t\tFirst input must be a floating point number.\n"
+                    "\t\tYour input has type: %s\n"
+                    % (type(w_in).__name__)
+                )
+        else:
+            pass
+    
+        if (w_in <= 0.0):
+            raise ValueError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\twindow_functions.kb35:\n"
+                "\t\tFirst input must positive.\n"
+                "\t\tYour input: %f\n"
+                % (w_in)
+            )
+        else:
+            pass
+
+        if not isinstance(dx, float):
             try:
                 dx = float(dx)
-            except TypeError:
-                raise TypeError("w_in must be a positive floating point number.")
+            except (TypeError, ValueError):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\twindow_functions.kb35:\n"
+                    "\t\tSecond input must be a floating point number.\n"
+                    "\t\tYour input has type: %s\n"
+                    % (type(dx).__name__)
+                )
+        else:
+            pass
+
+        if (dx <= 0.0):
+            raise ValueError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\twindow_functions.kb35:\n"
+                "\t\tSecond input must positive.\n"
+                "\t\tYour input: %f\n"
+                % (dx)
+            )
+        else:
+            pass
+
+    # Window functions have an odd number of points.
     nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
-    x      = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx
-    alpha  = 3.5 * np.pi
-    w_func = iv(0.0,alpha * np.sqrt((1.0 - (2.0 * x / w_in)**2)))/iv(0.0,alpha)
+
+    # Compute argument of window function.
+    x = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx / w_in
+
+    # Alpha value for kb35 is 3.5.
+    alpha = 3.5 * ONE_PI
+
+    # Compute window function.
+    w_func = iv(0.0, alpha * np.sqrt((1.0 - 4.0*x*x))) / IV0_35
     return w_func
 
 def kbmd20(w_in, dx, error_check=True):
@@ -301,20 +556,68 @@ def kbmd20(w_in, dx, error_check=True):
             Lowercase variables: RJM - 2018/05/16 3:34 P.M.
     """
     if error_check:
-        if not isinstance(w_in,float):
+        if not isinstance(w_in, float):
             try:
                 w_in = float(w_in)
-            except TypeError:
-                raise TypeError("w_in must be a positive floating point number.")
-        if not isinstance(dx,float):
+            except (TypeError, ValueError):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\twindow_functions.kb20:\n"
+                    "\t\tFirst input must be a floating point number.\n"
+                    "\t\tYour input has type: %s\n"
+                    % (type(w_in).__name__)
+                )
+        else:
+            pass
+    
+        if (w_in <= 0.0):
+            raise ValueError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\twindow_functions.kb20:\n"
+                "\t\tFirst input must positive.\n"
+                "\t\tYour input: %f\n"
+                % (w_in)
+            )
+        else:
+            pass
+
+        if not isinstance(dx, float):
             try:
                 dx = float(dx)
-            except TypeError:
-                raise TypeError("w_in must be a positive floating point number.")
+            except (TypeError, ValueError):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\twindow_functions.kb20:\n"
+                    "\t\tSecond input must be a floating point number.\n"
+                    "\t\tYour input has type: %s\n"
+                    % (type(dx).__name__)
+                )
+        else:
+            pass
+
+        if (dx <= 0.0):
+            raise ValueError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\twindow_functions.kb20:\n"
+                "\t\tSecond input must positive.\n"
+                "\t\tYour input: %f\n"
+                % (dx)
+            )
+        else:
+            pass
+
+    # Window functions have an odd number of points.
     nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
-    x      = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx
-    alpha  = 2.0*np.pi
-    w_func = (iv(0.0,alpha*np.sqrt((1.0-(2.0*x/w_in)**2)))-1)/(iv(0.0,alpha)-1)
+
+    # Compute argument of window function.
+    x = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx / w_in
+
+    # Compute window function.
+    w_func = (iv(0.0, TWO_PI * np.sqrt((1.0 - 4.0*x*x))) - 1.0)/(IV0_20 - 1.0)
     return w_func
 
 def kbmd25(w_in, dx, error_check=True):
@@ -364,23 +667,74 @@ def kbmd25(w_in, dx, error_check=True):
             Lowercase variables: RJM - 2018/05/16 3:34 P.M.
     """
     if error_check:
-        if not isinstance(w_in,float):
+        if not isinstance(w_in, float):
             try:
                 w_in = float(w_in)
-            except TypeError:
-                raise TypeError("w_in must be a positive floating point number.")
-        if not isinstance(dx,float):
+            except (TypeError, ValueError):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\twindow_functions.kb25:\n"
+                    "\t\tFirst input must be a floating point number.\n"
+                    "\t\tYour input has type: %s\n"
+                    % (type(w_in).__name__)
+                )
+        else:
+            pass
+    
+        if (w_in <= 0.0):
+            raise ValueError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\twindow_functions.kb25:\n"
+                "\t\tFirst input must positive.\n"
+                "\t\tYour input: %f\n"
+                % (w_in)
+            )
+        else:
+            pass
+
+        if not isinstance(dx, float):
             try:
                 dx = float(dx)
-            except TypeError:
-                raise TypeError("w_in must be a positive floating point number.")
+            except (TypeError, ValueError):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\twindow_functions.kb25:\n"
+                    "\t\tSecond input must be a floating point number.\n"
+                    "\t\tYour input has type: %s\n"
+                    % (type(dx).__name__)
+                )
+        else:
+            pass
+
+        if (dx <= 0.0):
+            raise ValueError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\twindow_functions.kb25:\n"
+                "\t\tSecond input must positive.\n"
+                "\t\tYour input: %f\n"
+                % (dx)
+            )
+        else:
+            pass
+
+    # Window functions have an odd number of points.
     nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
-    x      = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx
-    alpha  = 2.5 * np.pi
-    w_func = (iv(0.0,alpha*np.sqrt((1.0-(2.0*x/w_in)**2)))-1)/(iv(0.0,alpha)-1)
+
+    # Compute argument of window function.
+    x = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx / w_in
+
+    # Alpha value for kb25 is 2.5.
+    alpha = 2.5 * ONE_PI
+
+    # Compute window function.
+    w_func = (iv(0.0, alpha * np.sqrt((1.0 - 4.0*x*x))) - 1.0)/(IV0_25-1.0)
     return w_func
 
-def kbal(w_in, dx, al):
+def kbal(w_in, dx, al, error_check=True):
     """
         Function:
             kb35
@@ -432,13 +786,98 @@ def kbal(w_in, dx, al):
     if (not tdx) or (not tw):
         sys.exit("Input must be two positive real numbers")
     """
+    if error_check:
+        if not isinstance(w_in, float):
+            try:
+                w_in = float(w_in)
+            except (TypeError, ValueError):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\twindow_functions.kb25:\n"
+                    "\t\tFirst input must be a floating point number.\n"
+                    "\t\tYour input has type: %s\n"
+                    % (type(w_in).__name__)
+                )
+        else:
+            pass
+    
+        if (w_in <= 0.0):
+            raise ValueError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\twindow_functions.kb25:\n"
+                "\t\tFirst input must positive.\n"
+                "\t\tYour input: %f\n"
+                % (w_in)
+            )
+        else:
+            pass
+
+        if not isinstance(dx, float):
+            try:
+                dx = float(dx)
+            except (TypeError, ValueError):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\twindow_functions.kb25:\n"
+                    "\t\tSecond input must be a floating point number.\n"
+                    "\t\tYour input has type: %s\n"
+                    % (type(dx).__name__)
+                )
+        else:
+            pass
+
+        if (dx <= 0.0):
+            raise ValueError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\twindow_functions.kb25:\n"
+                "\t\tSecond input must positive.\n"
+                "\t\tYour input: %f\n"
+                % (dx)
+            )
+        else:
+            pass
+
+        if not isinstance(al, float):
+            try:
+                al = float(al)
+            except (TypeError, ValueError):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\twindow_functions.kbal:\n"
+                    "\t\tThird input must be a floating point number.\n"
+                    "\t\tYour input has type: %s\n"
+                    % (type(al).__name__)
+                )
+        else:
+            pass
+
+        if (al < 0.0):
+            raise ValueError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\twindow_functions.kb25:\n"
+                "\t\tSecond input must non-negative.\n"
+                "\t\tYour input: %f\n"
+                % (al)
+            )
+        else:
+            pass
+
+    # Window functions have an odd number of points.
     nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
-    x      = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx
-    alpha  =  al * np.pi
-    w_func = iv(0.0,alpha * np.sqrt((1.0 - (2.0 * x / w_in)**2)))/iv(0.0,alpha)
+
+    # Compute argument of window function.
+    x = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx / w_in
+    alpha  =  al * ONE_PI
+    w_func = iv(0.0, alpha * np.sqrt((1.0 - 4.0*x*x)))/iv(0.0, alpha)
     return w_func
 
-def kbmdal(w_in, dx, al):
+def kbmdal(w_in, dx, al, error_check=True):
     """
         Function:
             kb35
@@ -490,46 +929,325 @@ def kbmdal(w_in, dx, al):
     if (not tdx) or (not tw):
         sys.exit("Input must be two positive real numbers")
     """
+    if error_check:
+        if not isinstance(w_in, float):
+            try:
+                w_in = float(w_in)
+            except (TypeError, ValueError):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\twindow_functions.kb25:\n"
+                    "\t\tFirst input must be a floating point number.\n"
+                    "\t\tYour input has type: %s\n"
+                    % (type(w_in).__name__)
+                )
+        else:
+            pass
+    
+        if (w_in <= 0.0):
+            raise ValueError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\twindow_functions.kb25:\n"
+                "\t\tFirst input must positive.\n"
+                "\t\tYour input: %f\n"
+                % (w_in)
+            )
+        else:
+            pass
+
+        if not isinstance(dx, float):
+            try:
+                dx = float(dx)
+            except (TypeError, ValueError):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\twindow_functions.kb25:\n"
+                    "\t\tSecond input must be a floating point number.\n"
+                    "\t\tYour input has type: %s\n"
+                    % (type(dx).__name__)
+                )
+        else:
+            pass
+
+        if (dx <= 0.0):
+            raise ValueError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\twindow_functions.kb25:\n"
+                "\t\tSecond input must positive.\n"
+                "\t\tYour input: %f\n"
+                % (dx)
+            )
+        else:
+            pass
+
+        if not isinstance(al, float):
+            try:
+                al = float(al)
+            except (TypeError, ValueError):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\twindow_functions.kbal:\n"
+                    "\t\tThird input must be a floating point number.\n"
+                    "\t\tYour input has type: %s\n"
+                    % (type(al).__name__)
+                )
+        else:
+            pass
+
+        if (al < 0.0):
+            raise ValueError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\twindow_functions.kb25:\n"
+                "\t\tSecond input must non-negative.\n"
+                "\t\tYour input: %f\n"
+                % (al)
+            )
+        else:
+            pass
+
+    # Window functions have an odd number of points.
     nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
-    x      = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx
-    alpha  =  al * np.pi
-    w_func = (iv(0.0,alpha * np.sqrt((1.0 - (2.0 * x / w_in)**2)))-1)/(iv(0.0,alpha)-1)
+
+    # Compute argument of window function.
+    x = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx / w_in
+    alpha  =  al * ONE_PI
+    w_func = (iv(0.0, alpha*np.sqrt((1.0-4.0*x*x)))-1.0)/(iv(0.0, alpha)-1.0)
     return w_func
 
-def window_width(res, normeq, fsky, fres, rho_dot, sigma = 2.e-13, bfac=True):
+def window_width(res, normeq, fsky, fres, rdot,
+                 sigma = 2.e-13, bfac=True, error_check=True):
     """
-        Function: window_width
-        Purpose:  Compute the window width as a function of ring radius.
+        Function:
+            window_width
+        Purpose:
+            Compute the window width as a function of ring radius.
+            This is given from MTR86 Equations 19, 32, and 33.
         Variables:
-            res:     The requested resolution.
-            normeq:  The normalized equivalent width. Unitless.
-            fsky:    The sky frequency.
-            fres:    The Fresnel scale.
-            rho_dot: The time derivative of the ring radius.
+            res:
+                The requested resolution.
+            normeq:
+                The normalized equivalent width. Unitless.
+            fsky:
+                The sky frequency.
+            fres:
+                The Fresnel scale.
+            rdot:
+                The time derivative of the ring radius.
         Output:
             w_vals:  The window width as a function of ring radius.
         History:
             Translated from IDL: RJM - 2018/05/15 8:38 P.M.
     """
+    if error_check:
+        if (not isinstance(res, float)):
+            try:
+                res = float(res)
+            except (TypeError, ValueError):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\twindow_functions.window_width:\n"
+                    "\t\tFirst input must be a floating point number.\n"
+                    "\t\tYour input has type: %s\n"
+                    % (type(res).__name__)
+                )
+        else:
+            pass
+        
+        if (res <= 0):
+            raise ValueError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\twindow_functions.window_width:\n"
+                    "\t\tFirst input must be positive.\n"
+                    "\t\tYour input : %f\n"
+                    % (res)
+            )
+        else:
+            pass
+
+        if (not isinstance(normeq, float)):
+            try:
+                res = float(ref)
+            except (TypeError, ValueError):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\twindow_functions.window_width:\n"
+                    "\t\tSecond input must be a floating point number.\n"
+                    "\t\tYour input has type: %s\n"
+                    % (type(normeq).__name__)
+                )
+        else:
+            pass
+        
+        if (normeq <= 0):
+            raise ValueError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\twindow_functions.window_width:\n"
+                    "\t\tSecond input must be positive.\n"
+                    "\t\tYour input : %f\n"
+                    % (normeq)
+            )
+        else:
+            pass
+        
+        try:
+            fsky = np.array(fsky)
+            if not (np.all(np.isreal(fsky))):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\twindow_functions.window_width:\n"
+                    "\t\tfsky must be a positive float or\n"
+                    "\t\ta numpy array of positive floats.\n"
+                )
+            elif (np.min(fsky) < 0.0):
+                raise ValueError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\twindow_functions.window_width:\n"
+                    "\t\tfsky must be a positive float or\n"
+                    "\t\ta numpy array of positive floats.\n"
+                )
+            else:
+                pass
+
+            fres = np.array(fres)
+            if not (np.all(np.isreal(fres))):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\twindow_functions.window_width:\n"
+                    "\t\tfres must be a positive float or\n"
+                    "\t\ta numpy array of positive floats.\n"
+                )
+            elif (np.min(fres) < 0.0):
+                raise ValueError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\twindow_functions.window_width:\n"
+                    "\t\tfres must be a positive float or\n"
+                    "\t\ta numpy array of positive floats.\n"
+                )
+            else:
+                pass
+
+            rdot = np.array(rdot)
+            if not (np.all(np.isreal(rdot))):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\twindow_functions.window_width:\n"
+                    "\t\trdot must be a float or a numpy\n"
+                    "\t\tarray of floats.\n"
+                )
+            else:
+                pass
+
+        except (ValueError, TypeError) as errmes:
+            raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\twindow_functions.window_width:\n"
+                    "\t\tOne of your inputs was unable to\n"
+                    "\t\tbe converted into a numpy array.\n"
+                    "\tOrginal Error Message: %s\n"
+                    % (errmes)
+            )
+        
+        if (not isinstance(sigma, float)):
+            try:
+                sigma = float(sigma)
+            except (TypeError, ValueError):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\twindow_functions.window_width:\n"
+                    "\t\tKeyword sigma must be a floating point number.\n"
+                    "\t\tYour input has type: %s\n"
+                    % (type(sigma).__name__)
+                )
+        else:
+            pass
+
+        if (sigma <= 0.0):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\twindow_functions.window_width:\n"
+                "\t\tKeyword sigma must be positive.\n"
+                "\t\tYour input: %f\n"
+                % (sigma)
+            )
+        else:
+            pass
+
+        if (not isinstance(bfac, bool)):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\twindow_functions.window_width:\n"
+                "\t\tbfac keyword must be a boolean.\n"
+                "\t\tSet bfac=True or bfac=False.\n"
+            )
+        else:
+            pass
+
+    f2 = fres*fres
     if bfac:
-        omega = 2.0 * np.pi * fsky
-        alpha = (omega*omega) * (sigma*sigma) / (2.0 * rho_dot)
-        P     = res / (alpha * (fres*fres))
+        omega = TWO_PI * fsky
+        alpha = omega*omega * sigma*sigma / (2.0 * rdot)
+        P = res / (alpha * f2)
         # The inverse exists only if P>1.
-        if (np.min(P) < 1.0001):
-            print("ERROR: Bad Points!")
-            print((P < 1.0001).nonzero())
-            print("Either rho_dot_kms_vals, F_km_vals, or res_km is to small.")
-            print("Exclude points or request coarser resolution.")
-            sys.exit("Illegal parameter values. Read error message.")
-        w_vals = normeq*np.abs(resolution_inverse(P) / alpha)
+        if (np.min(P) <= 1.0):
+            raise ValueError(
+                "\n\tWarning: Bad Points!\n"
+                "\tEither rho_dot_kms_vals, F_km_vals, or res_km is\n"
+                "\ttoo small, or sigma is too large. It is also\n"
+                "\tpossible that the frequency is too large.\n"
+                "\tRequest coarser resolution, check your input\n"
+                "\tdata, or set bfac=False as a keyword.\n"
+            )
+        else:
+            pass
+
+        P1 = P/(1-P)
+        P2 = P1*np.exp(P1)
+        crange1 = ((RCPR_E + P2) < 1.0e-16).nonzero()
+        crange2 = ((RCPR_E + P2) >= 1.0e-16).nonzero()
+        w_vals = np.zeros(np.size(fres))
+        if (np.size(crange1) > 0):
+            w_vals[crange1] = 2.0*f2/res
+        else:
+            pass
+
+        if (np.size(crange2) > 0):
+            w_vals[crange2] = np.abs(lambertw(P2)-P1)/alpha
+        else:
+            pass
+
+        del omega, alpha, P, P1, P2, crange1, crange2
     else:
-        w_vals = 2.0*normeq*fres*fres/res
+        w_vals = 2.0*f2/res
+
+    w_vals *= normeq
+
     return w_vals
 
-def normalize(dx,ker,f_scale,error_check=True):
-    T1        = np.abs(np.sum(ker) * dx)   # Freespace Integral
-    norm_fact = np.sqrt(2.0) * f_scale / T1         # Normalization Factor
+def normalize(dx, ker, f_scale, error_check=True):
+    # Freespace Integral
+    T1 = np.abs(np.sum(ker) * dx)
+
+    # Normalization Factor
+    norm_fact = SQRT_2 * f_scale / T1
     return norm_fact
 
 def get_range_actual(rho, rng, w_vals):

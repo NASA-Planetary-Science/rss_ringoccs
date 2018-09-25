@@ -113,9 +113,7 @@ sys.path.append('../..')
 import rss_ringoccs as rss
 sys.path.remove('../..')
 
-sys.path.append('../../rss_ringoccs/tools/')
-from write_output_files import write_output_files
-sys.path.remove('../../rss_ringoccs/tools/')
+from ..tools.write_output_files import write_output_files
 
 
 class NormDiff(object):

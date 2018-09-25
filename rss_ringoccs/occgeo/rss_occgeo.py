@@ -32,6 +32,7 @@ from ..tools.spm_to_et import spm_to_et
 from ..tools.et_to_spm import et_to_spm
 from ..tools.write_output_files import write_output_files
 from ..tools.write_history_dict import write_history_dict
+from ..tools.write_output_files import write_output_files
 
 #from ..tools.pds3_geo_series import write_geo_series
 from .calc_elevation_deg import calc_elevation_deg

@@ -108,13 +108,11 @@ import sys
 
 from ..rsr_reader.rsr_reader import RSRReader
 from .resample_IQ import resample_IQ
+from ..tools.write_output_files import write_output_files
 
 sys.path.append('../..')
 import rss_ringoccs as rss
 sys.path.remove('../..')
-
-from ..tools.write_output_files import write_output_files
-
 
 class NormDiff(object):
     """

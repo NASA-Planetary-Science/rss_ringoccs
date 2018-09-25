@@ -11,7 +11,7 @@ Revisions:
 import numpy as np
 import pdb
 import time
-import pds3_write_series as pds3
+from . import pds3_write_series as pds3
 
 def write_dlp_series_data(dlp_inst, fmt, out_file):
     """

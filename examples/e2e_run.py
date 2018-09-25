@@ -50,10 +50,8 @@ dlp_inst = rss.calibration.NormDiff(rsr_inst, geo_inst,
         cal_inst, dr_km_desired, verbose=verbose, write_file=write_file)
 
 # Invert profile for full occultation
-tau_inst = rss.diffcorr.DiffractionCorrection(dlp_inst, res_km,
+tau_inst = rss.diffrec.DiffractionCorrection(dlp_inst, res_km,
         rng=inversion_range, verbose=verbose, write_file=write_file)
 end_time = time.time()
 print('Computation time: ' + str(end_time-start_time))
 pdb.set_trace()
-
-         

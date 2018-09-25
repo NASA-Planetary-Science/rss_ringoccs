@@ -12,6 +12,7 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
         better than other types of filtering approaches, such as
         moving averages techniques.
         Parameters
+        
         ----------
         y : array_like, shape (N,)
             the values of the time history of the signal.

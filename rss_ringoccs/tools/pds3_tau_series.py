@@ -12,7 +12,7 @@ import numpy as np
 import pdb
 import time
 import sys
-import pds3_write_series as pds3
+from . import pds3_write_series as pds3
 
 def write_tau_series_data(tau_inst, fmt, out_file):
     """

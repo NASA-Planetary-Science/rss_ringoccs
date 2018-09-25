@@ -30,6 +30,7 @@ Revisions:
 """
 from ..tools.spm_to_et import spm_to_et
 from ..tools.et_to_spm import et_to_spm
+from ..tools.write_output_files import write_output_files
 from ..tools.write_history_dict import write_history_dict
 
 #from ..tools.pds3_geo_series import write_geo_series
@@ -54,10 +55,6 @@ from .calc_beta import calc_B_eff_deg
 import spiceypy as spice
 import numpy as np
 import sys
-
-sys.path.append('../rss_ringoccs/tools/')
-from write_output_files import write_output_files
-sys.path.remove('../rss_ringoccs/tools/')
 
 
 class Geometry(object):

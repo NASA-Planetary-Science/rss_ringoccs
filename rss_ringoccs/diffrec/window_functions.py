@@ -27,9 +27,7 @@ def rect(w_in, dx, error_check=True):
             w_func: The rectungular window function of width w_in
                     and spacing dx between points.
         Dependencies:
-            [1] diffcorr
-            [2] sys
-            [3] numpy
+            [1] numpy
         Notes:
             The rectangular window function is the unit function.
             That is, it is equal to one across it's entire domain. It
@@ -47,8 +45,8 @@ def rect(w_in, dx, error_check=True):
         Examples:
             Create a rectangular window function of width 10,
             with 0.01 spacing spacing between points.
-                In [1]: import diffcorr as dc
-                In [2]: dc.rect(10,0.1)
+                In [1]: from rss_ringoccs import diffrec
+                In [2]: diffrec.rect(10,0.1)
         History:
             Translated from IDL: RJM - 2018/05/15 9:03 A.M.
             Lowercase variables: RJM - 2018/05/16 1:29 P.M.
@@ -60,7 +58,7 @@ def rect(w_in, dx, error_check=True):
             except (TypeError, ValueError):
                 raise TypeError(
                     "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\trss_ringoccs: diffrec Subpackage\n"
                     "\twindow_functions.rect:\n"
                     "\t\tFirst input must be a floating point number.\n"
                     "\t\tYour input has type: %s\n"
@@ -72,7 +70,7 @@ def rect(w_in, dx, error_check=True):
         if (w_in <= 0.0):
             raise ValueError(
                 "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\trss_ringoccs: diffrec Subpackage\n"
                 "\twindow_functions.rect:\n"
                 "\t\tFirst input must positive.\n"
                 "\t\tYour input: %f\n"
@@ -87,7 +85,7 @@ def rect(w_in, dx, error_check=True):
             except (TypeError, ValueError):
                 raise TypeError(
                     "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\trss_ringoccs: diffrec Subpackage\n"
                     "\twindow_functions.rect:\n"
                     "\t\tSecond input must be a floating point number.\n"
                     "\t\tYour input has type: %s\n"
@@ -99,7 +97,7 @@ def rect(w_in, dx, error_check=True):
         if (dx <= 0.0):
             raise ValueError(
                 "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\trss_ringoccs: diffrec Subpackage\n"
                 "\twindow_functions.rect:\n"
                 "\t\tSecond input must positive.\n"
                 "\t\tYour input: %f\n"
@@ -125,9 +123,7 @@ def coss(w_in, dx, error_check=True):
             w_func: The squared cosine window function of width w_in
                     and spacing dx between points.
         Dependencies:
-            [1] diffcorr
-            [2] sys
-            [3] numpy
+            [1] numpy
         Notes:
             [1] This window function is defined as
                 y = cos^2(x * pi/w), where w is the window width.
@@ -156,7 +152,7 @@ def coss(w_in, dx, error_check=True):
             except (TypeError, ValueError):
                 raise TypeError(
                     "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\trss_ringoccs: diffrec Subpackage\n"
                     "\twindow_functions.coss:\n"
                     "\t\tFirst input must be a floating point number.\n"
                     "\t\tYour input has type: %s\n"
@@ -168,7 +164,7 @@ def coss(w_in, dx, error_check=True):
         if (w_in <= 0.0):
             raise ValueError(
                 "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\trss_ringoccs: diffrec Subpackage\n"
                 "\twindow_functions.coss:\n"
                 "\t\tFirst input must positive.\n"
                 "\t\tYour input: %f\n"
@@ -183,7 +179,7 @@ def coss(w_in, dx, error_check=True):
             except (TypeError, ValueError):
                 raise TypeError(
                     "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\trss_ringoccs: diffrec Subpackage\n"
                     "\twindow_functions.coss:\n"
                     "\t\tSecond input must be a floating point number.\n"
                     "\t\tYour input has type: %s\n"
@@ -195,7 +191,7 @@ def coss(w_in, dx, error_check=True):
         if (dx <= 0.0):
             raise ValueError(
                 "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\trss_ringoccs: diffrec Subpackage\n"
                 "\twindow_functions.coss:\n"
                 "\t\tSecond input must positive.\n"
                 "\t\tYour input: %f\n"
@@ -221,7 +217,7 @@ def kb20(w_in, dx, error_check=True):
             except (TypeError, ValueError):
                 raise TypeError(
                     "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\trss_ringoccs: diffrec Subpackage\n"
                     "\twindow_functions.kb20:\n"
                     "\t\tFirst input must be a floating point number.\n"
                     "\t\tYour input has type: %s\n"
@@ -233,7 +229,7 @@ def kb20(w_in, dx, error_check=True):
         if (w_in <= 0.0):
             raise ValueError(
                 "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\trss_ringoccs: diffrec Subpackage\n"
                 "\twindow_functions.kb20:\n"
                 "\t\tFirst input must positive.\n"
                 "\t\tYour input: %f\n"
@@ -248,7 +244,7 @@ def kb20(w_in, dx, error_check=True):
             except (TypeError, ValueError):
                 raise TypeError(
                     "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\trss_ringoccs: diffrec Subpackage\n"
                     "\twindow_functions.kb20:\n"
                     "\t\tSecond input must be a floating point number.\n"
                     "\t\tYour input has type: %s\n"
@@ -260,7 +256,7 @@ def kb20(w_in, dx, error_check=True):
         if (dx <= 0.0):
             raise ValueError(
                 "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\trss_ringoccs: diffrec Subpackage\n"
                 "\twindow_functions.kb20:\n"
                 "\t\tSecond input must positive.\n"
                 "\t\tYour input: %f\n"
@@ -292,9 +288,7 @@ def kb25(w_in, dx, error_check=True):
             w_func: The Kaiser-Bessel 2.5 window of width w_in and
                     spacing dx between points.
         Dependencies:
-            [1] diffcorr
-            [2] sys
-            [3] numpy
+            [1] numpy
         Notes:
             [1] The Kaiser-Bessel window is computed using the 
                 modified Bessel Function of the First Kind. It's
@@ -333,7 +327,7 @@ def kb25(w_in, dx, error_check=True):
             except (TypeError, ValueError):
                 raise TypeError(
                     "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\trss_ringoccs: diffrec Subpackage\n"
                     "\twindow_functions.kb25:\n"
                     "\t\tFirst input must be a floating point number.\n"
                     "\t\tYour input has type: %s\n"
@@ -345,7 +339,7 @@ def kb25(w_in, dx, error_check=True):
         if (w_in <= 0.0):
             raise ValueError(
                 "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\trss_ringoccs: diffrec Subpackage\n"
                 "\twindow_functions.kb25:\n"
                 "\t\tFirst input must positive.\n"
                 "\t\tYour input: %f\n"
@@ -360,7 +354,7 @@ def kb25(w_in, dx, error_check=True):
             except (TypeError, ValueError):
                 raise TypeError(
                     "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\trss_ringoccs: diffrec Subpackage\n"
                     "\twindow_functions.kb25:\n"
                     "\t\tSecond input must be a floating point number.\n"
                     "\t\tYour input has type: %s\n"
@@ -372,7 +366,7 @@ def kb25(w_in, dx, error_check=True):
         if (dx <= 0.0):
             raise ValueError(
                 "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\trss_ringoccs: diffrec Subpackage\n"
                 "\twindow_functions.kb25:\n"
                 "\t\tSecond input must positive.\n"
                 "\t\tYour input: %f\n"
@@ -407,9 +401,7 @@ def kb35(w_in, dx, error_check=True):
             w_func: The Kaiser-Bessel 3.5 window of width w_in and
                     spacing dx between points.
         Dependencies:
-            [1] diffcorr
-            [2] sys
-            [3] numpy
+            [1] numpy
         Notes:
             [1] The Kaiser-Bessel window is computed using the 
                 modified Bessel Function of the First Kind. It's
@@ -448,7 +440,7 @@ def kb35(w_in, dx, error_check=True):
             except (TypeError, ValueError):
                 raise TypeError(
                     "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\trss_ringoccs: diffrec Subpackage\n"
                     "\twindow_functions.kb35:\n"
                     "\t\tFirst input must be a floating point number.\n"
                     "\t\tYour input has type: %s\n"
@@ -460,7 +452,7 @@ def kb35(w_in, dx, error_check=True):
         if (w_in <= 0.0):
             raise ValueError(
                 "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\trss_ringoccs: diffrec Subpackage\n"
                 "\twindow_functions.kb35:\n"
                 "\t\tFirst input must positive.\n"
                 "\t\tYour input: %f\n"
@@ -475,7 +467,7 @@ def kb35(w_in, dx, error_check=True):
             except (TypeError, ValueError):
                 raise TypeError(
                     "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\trss_ringoccs: diffrec Subpackage\n"
                     "\twindow_functions.kb35:\n"
                     "\t\tSecond input must be a floating point number.\n"
                     "\t\tYour input has type: %s\n"
@@ -487,7 +479,7 @@ def kb35(w_in, dx, error_check=True):
         if (dx <= 0.0):
             raise ValueError(
                 "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\trss_ringoccs: diffrec Subpackage\n"
                 "\twindow_functions.kb35:\n"
                 "\t\tSecond input must positive.\n"
                 "\t\tYour input: %f\n"
@@ -522,9 +514,7 @@ def kbmd20(w_in, dx, error_check=True):
             w_func: The Modified Kaiser-Bessel 2.5 window of width
                     w_in and spacing dx between points.
         Dependencies:
-            [1] diffcorr
-            [2] sys
-            [3] numpy
+            [1] numpy
         Notes:
             [1] The Modified Kaiser-Bessel window is computed using
                 the modified Bessel Function of the First Kind. It's
@@ -562,8 +552,8 @@ def kbmd20(w_in, dx, error_check=True):
             except (TypeError, ValueError):
                 raise TypeError(
                     "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffcorr Subpackage\n"
-                    "\twindow_functions.kb20:\n"
+                    "\trss_ringoccs: diffrec Subpackage\n"
+                    "\twindow_functions.kbmd20:\n"
                     "\t\tFirst input must be a floating point number.\n"
                     "\t\tYour input has type: %s\n"
                     % (type(w_in).__name__)
@@ -574,8 +564,8 @@ def kbmd20(w_in, dx, error_check=True):
         if (w_in <= 0.0):
             raise ValueError(
                 "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
-                "\twindow_functions.kb20:\n"
+                "\trss_ringoccs: diffrec Subpackage\n"
+                "\twindow_functions.kbmd20:\n"
                 "\t\tFirst input must positive.\n"
                 "\t\tYour input: %f\n"
                 % (w_in)
@@ -589,8 +579,8 @@ def kbmd20(w_in, dx, error_check=True):
             except (TypeError, ValueError):
                 raise TypeError(
                     "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffcorr Subpackage\n"
-                    "\twindow_functions.kb20:\n"
+                    "\trss_ringoccs: diffrec Subpackage\n"
+                    "\twindow_functions.kbmd20:\n"
                     "\t\tSecond input must be a floating point number.\n"
                     "\t\tYour input has type: %s\n"
                     % (type(dx).__name__)
@@ -601,8 +591,8 @@ def kbmd20(w_in, dx, error_check=True):
         if (dx <= 0.0):
             raise ValueError(
                 "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
-                "\twindow_functions.kb20:\n"
+                "\trss_ringoccs: diffrec Subpackage\n"
+                "\twindow_functions.kbmd20:\n"
                 "\t\tSecond input must positive.\n"
                 "\t\tYour input: %f\n"
                 % (dx)
@@ -633,9 +623,7 @@ def kbmd25(w_in, dx, error_check=True):
             w_func: The Modified Kaiser-Bessel 2.5 window of width
                     w_in and spacing dx between points.
         Dependencies:
-            [1] diffcorr
-            [2] sys
-            [3] numpy
+            [1] numpy
         Notes:
             [1] The Modified Kaiser-Bessel window is computed using
                 the modified Bessel Function of the First Kind. It's
@@ -673,8 +661,8 @@ def kbmd25(w_in, dx, error_check=True):
             except (TypeError, ValueError):
                 raise TypeError(
                     "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffcorr Subpackage\n"
-                    "\twindow_functions.kb25:\n"
+                    "\trss_ringoccs: diffrec Subpackage\n"
+                    "\twindow_functions.kbmd25:\n"
                     "\t\tFirst input must be a floating point number.\n"
                     "\t\tYour input has type: %s\n"
                     % (type(w_in).__name__)
@@ -685,8 +673,8 @@ def kbmd25(w_in, dx, error_check=True):
         if (w_in <= 0.0):
             raise ValueError(
                 "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
-                "\twindow_functions.kb25:\n"
+                "\trss_ringoccs: diffrec Subpackage\n"
+                "\twindow_functions.kbmd25:\n"
                 "\t\tFirst input must positive.\n"
                 "\t\tYour input: %f\n"
                 % (w_in)
@@ -700,8 +688,8 @@ def kbmd25(w_in, dx, error_check=True):
             except (TypeError, ValueError):
                 raise TypeError(
                     "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffcorr Subpackage\n"
-                    "\twindow_functions.kb25:\n"
+                    "\trss_ringoccs: diffrec Subpackage\n"
+                    "\twindow_functions.kbmd25:\n"
                     "\t\tSecond input must be a floating point number.\n"
                     "\t\tYour input has type: %s\n"
                     % (type(dx).__name__)
@@ -712,8 +700,8 @@ def kbmd25(w_in, dx, error_check=True):
         if (dx <= 0.0):
             raise ValueError(
                 "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
-                "\twindow_functions.kb25:\n"
+                "\trss_ringoccs: diffrec Subpackage\n"
+                "\twindow_functions.kbmd25:\n"
                 "\t\tSecond input must positive.\n"
                 "\t\tYour input: %f\n"
                 % (dx)
@@ -748,9 +736,7 @@ def kbal(w_in, dx, al, error_check=True):
             w_func: The Kaiser-Bessel alpha window of width w_in and
                     spacing dx between points.
         Dependencies:
-            [1] diffcorr
-            [2] sys
-            [3] numpy
+            [1] numpy
         Notes:
             [1] The Kaiser-Bessel window is computed using the 
                 modified Bessel Function of the First Kind. It's
@@ -780,11 +766,6 @@ def kbal(w_in, dx, al, error_check=True):
                 https://doi.org/10.1186/s13660-016-0988-1
         History:
             Created: RJM - 2018/05/16 3:50 P.M.
-
-    tw  = check_pos_real(w_in)
-    tdx = check_pos_real(dx)
-    if (not tdx) or (not tw):
-        sys.exit("Input must be two positive real numbers")
     """
     if error_check:
         if not isinstance(w_in, float):
@@ -793,8 +774,8 @@ def kbal(w_in, dx, al, error_check=True):
             except (TypeError, ValueError):
                 raise TypeError(
                     "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffcorr Subpackage\n"
-                    "\twindow_functions.kb25:\n"
+                    "\trss_ringoccs: diffrec Subpackage\n"
+                    "\twindow_functions.kbal:\n"
                     "\t\tFirst input must be a floating point number.\n"
                     "\t\tYour input has type: %s\n"
                     % (type(w_in).__name__)
@@ -805,8 +786,8 @@ def kbal(w_in, dx, al, error_check=True):
         if (w_in <= 0.0):
             raise ValueError(
                 "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
-                "\twindow_functions.kb25:\n"
+                "\trss_ringoccs: diffrec Subpackage\n"
+                "\twindow_functions.kbal:\n"
                 "\t\tFirst input must positive.\n"
                 "\t\tYour input: %f\n"
                 % (w_in)
@@ -820,8 +801,8 @@ def kbal(w_in, dx, al, error_check=True):
             except (TypeError, ValueError):
                 raise TypeError(
                     "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffcorr Subpackage\n"
-                    "\twindow_functions.kb25:\n"
+                    "\trss_ringoccs: diffrec Subpackage\n"
+                    "\twindow_functions.kbal:\n"
                     "\t\tSecond input must be a floating point number.\n"
                     "\t\tYour input has type: %s\n"
                     % (type(dx).__name__)
@@ -832,8 +813,8 @@ def kbal(w_in, dx, al, error_check=True):
         if (dx <= 0.0):
             raise ValueError(
                 "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
-                "\twindow_functions.kb25:\n"
+                "\trss_ringoccs: diffrec Subpackage\n"
+                "\twindow_functions.kbal:\n"
                 "\t\tSecond input must positive.\n"
                 "\t\tYour input: %f\n"
                 % (dx)
@@ -847,7 +828,7 @@ def kbal(w_in, dx, al, error_check=True):
             except (TypeError, ValueError):
                 raise TypeError(
                     "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\trss_ringoccs: diffrec Subpackage\n"
                     "\twindow_functions.kbal:\n"
                     "\t\tThird input must be a floating point number.\n"
                     "\t\tYour input has type: %s\n"
@@ -859,8 +840,8 @@ def kbal(w_in, dx, al, error_check=True):
         if (al < 0.0):
             raise ValueError(
                 "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
-                "\twindow_functions.kb25:\n"
+                "\trss_ringoccs: diffrec Subpackage\n"
+                "\twindow_functions.kbal:\n"
                 "\t\tSecond input must non-negative.\n"
                 "\t\tYour input: %f\n"
                 % (al)
@@ -891,9 +872,7 @@ def kbmdal(w_in, dx, al, error_check=True):
             w_func: The Kaiser-Bessel alpha window of width w_in and
                     spacing dx between points.
         Dependencies:
-            [1] diffcorr
-            [2] sys
-            [3] numpy
+            [1] numpy
         Notes:
             [1] The Kaiser-Bessel window is computed using the 
                 modified Bessel Function of the First Kind. It's
@@ -936,8 +915,8 @@ def kbmdal(w_in, dx, al, error_check=True):
             except (TypeError, ValueError):
                 raise TypeError(
                     "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffcorr Subpackage\n"
-                    "\twindow_functions.kb25:\n"
+                    "\trss_ringoccs: diffrec Subpackage\n"
+                    "\twindow_functions.kbmdal:\n"
                     "\t\tFirst input must be a floating point number.\n"
                     "\t\tYour input has type: %s\n"
                     % (type(w_in).__name__)
@@ -948,8 +927,8 @@ def kbmdal(w_in, dx, al, error_check=True):
         if (w_in <= 0.0):
             raise ValueError(
                 "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
-                "\twindow_functions.kb25:\n"
+                "\trss_ringoccs: diffrec Subpackage\n"
+                "\twindow_functions.kbmdal:\n"
                 "\t\tFirst input must positive.\n"
                 "\t\tYour input: %f\n"
                 % (w_in)
@@ -963,8 +942,8 @@ def kbmdal(w_in, dx, al, error_check=True):
             except (TypeError, ValueError):
                 raise TypeError(
                     "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffcorr Subpackage\n"
-                    "\twindow_functions.kb25:\n"
+                    "\trss_ringoccs: diffrec Subpackage\n"
+                    "\twindow_functions.kbmdal:\n"
                     "\t\tSecond input must be a floating point number.\n"
                     "\t\tYour input has type: %s\n"
                     % (type(dx).__name__)
@@ -975,8 +954,8 @@ def kbmdal(w_in, dx, al, error_check=True):
         if (dx <= 0.0):
             raise ValueError(
                 "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
-                "\twindow_functions.kb25:\n"
+                "\trss_ringoccs: diffrec Subpackage\n"
+                "\twindow_functions.kbmdal:\n"
                 "\t\tSecond input must positive.\n"
                 "\t\tYour input: %f\n"
                 % (dx)
@@ -990,8 +969,8 @@ def kbmdal(w_in, dx, al, error_check=True):
             except (TypeError, ValueError):
                 raise TypeError(
                     "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffcorr Subpackage\n"
-                    "\twindow_functions.kbal:\n"
+                    "\trss_ringoccs: diffrec Subpackage\n"
+                    "\twindow_functions.kbmdal:\n"
                     "\t\tThird input must be a floating point number.\n"
                     "\t\tYour input has type: %s\n"
                     % (type(al).__name__)
@@ -1002,8 +981,8 @@ def kbmdal(w_in, dx, al, error_check=True):
         if (al < 0.0):
             raise ValueError(
                 "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
-                "\twindow_functions.kb25:\n"
+                "\trss_ringoccs: diffrec Subpackage\n"
+                "\twindow_functions.kbmdal:\n"
                 "\t\tSecond input must non-negative.\n"
                 "\t\tYour input: %f\n"
                 % (al)
@@ -1051,7 +1030,7 @@ def window_width(res, normeq, fsky, fres, rdot,
             except (TypeError, ValueError):
                 raise TypeError(
                     "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\trss_ringoccs: diffrec Subpackage\n"
                     "\twindow_functions.window_width:\n"
                     "\t\tFirst input must be a floating point number.\n"
                     "\t\tYour input has type: %s\n"
@@ -1063,7 +1042,7 @@ def window_width(res, normeq, fsky, fres, rdot,
         if (res <= 0):
             raise ValueError(
                     "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\trss_ringoccs: diffrec Subpackage\n"
                     "\twindow_functions.window_width:\n"
                     "\t\tFirst input must be positive.\n"
                     "\t\tYour input : %f\n"
@@ -1078,7 +1057,7 @@ def window_width(res, normeq, fsky, fres, rdot,
             except (TypeError, ValueError):
                 raise TypeError(
                     "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\trss_ringoccs: diffrec Subpackage\n"
                     "\twindow_functions.window_width:\n"
                     "\t\tSecond input must be a floating point number.\n"
                     "\t\tYour input has type: %s\n"
@@ -1090,7 +1069,7 @@ def window_width(res, normeq, fsky, fres, rdot,
         if (normeq <= 0):
             raise ValueError(
                     "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\trss_ringoccs: diffrec Subpackage\n"
                     "\twindow_functions.window_width:\n"
                     "\t\tSecond input must be positive.\n"
                     "\t\tYour input : %f\n"
@@ -1104,7 +1083,7 @@ def window_width(res, normeq, fsky, fres, rdot,
             if not (np.all(np.isreal(fsky))):
                 raise TypeError(
                     "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\trss_ringoccs: diffrec Subpackage\n"
                     "\twindow_functions.window_width:\n"
                     "\t\tfsky must be a positive float or\n"
                     "\t\ta numpy array of positive floats.\n"
@@ -1112,7 +1091,7 @@ def window_width(res, normeq, fsky, fres, rdot,
             elif (np.min(fsky) < 0.0):
                 raise ValueError(
                     "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\trss_ringoccs: diffrec Subpackage\n"
                     "\twindow_functions.window_width:\n"
                     "\t\tfsky must be a positive float or\n"
                     "\t\ta numpy array of positive floats.\n"
@@ -1124,7 +1103,7 @@ def window_width(res, normeq, fsky, fres, rdot,
             if not (np.all(np.isreal(fres))):
                 raise TypeError(
                     "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\trss_ringoccs: diffrec Subpackage\n"
                     "\twindow_functions.window_width:\n"
                     "\t\tfres must be a positive float or\n"
                     "\t\ta numpy array of positive floats.\n"
@@ -1132,7 +1111,7 @@ def window_width(res, normeq, fsky, fres, rdot,
             elif (np.min(fres) < 0.0):
                 raise ValueError(
                     "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\trss_ringoccs: diffrec Subpackage\n"
                     "\twindow_functions.window_width:\n"
                     "\t\tfres must be a positive float or\n"
                     "\t\ta numpy array of positive floats.\n"
@@ -1144,7 +1123,7 @@ def window_width(res, normeq, fsky, fres, rdot,
             if not (np.all(np.isreal(rdot))):
                 raise TypeError(
                     "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\trss_ringoccs: diffrec Subpackage\n"
                     "\twindow_functions.window_width:\n"
                     "\t\trdot must be a float or a numpy\n"
                     "\t\tarray of floats.\n"
@@ -1155,7 +1134,7 @@ def window_width(res, normeq, fsky, fres, rdot,
         except (ValueError, TypeError) as errmes:
             raise TypeError(
                     "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\trss_ringoccs: diffrec Subpackage\n"
                     "\twindow_functions.window_width:\n"
                     "\t\tOne of your inputs was unable to\n"
                     "\t\tbe converted into a numpy array.\n"
@@ -1169,7 +1148,7 @@ def window_width(res, normeq, fsky, fres, rdot,
             except (TypeError, ValueError):
                 raise TypeError(
                     "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\trss_ringoccs: diffrec Subpackage\n"
                     "\twindow_functions.window_width:\n"
                     "\t\tKeyword sigma must be a floating point number.\n"
                     "\t\tYour input has type: %s\n"
@@ -1181,7 +1160,7 @@ def window_width(res, normeq, fsky, fres, rdot,
         if (sigma <= 0.0):
             raise TypeError(
                 "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\trss_ringoccs: diffrec Subpackage\n"
                 "\twindow_functions.window_width:\n"
                 "\t\tKeyword sigma must be positive.\n"
                 "\t\tYour input: %f\n"
@@ -1193,7 +1172,7 @@ def window_width(res, normeq, fsky, fres, rdot,
         if (not isinstance(bfac, bool)):
             raise TypeError(
                 "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\trss_ringoccs: diffrec Subpackage\n"
                 "\twindow_functions.window_width:\n"
                 "\t\tbfac keyword must be a boolean.\n"
                 "\t\tSet bfac=True or bfac=False.\n"
@@ -1250,7 +1229,7 @@ def normalize(dx, ker, f_scale, error_check=True):
             except (TypeError, ValueError):
                 raise TypeError(
                     "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\trss_ringoccs: diffrec Subpackage\n"
                     "\twindow_functions.normalize:\n"
                     "\t\tFirst input must be a floating point number.\n"
                     "\t\tYour input has type: %s\n"
@@ -1262,7 +1241,7 @@ def normalize(dx, ker, f_scale, error_check=True):
         if (dx <= 0.0):
             raise ValueError(
                     "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\trss_ringoccs: diffrec Subpackage\n"
                     "\twindow_functions.normalize:\n"
                     "\t\tFirst input must be positive.\n"
                     "\t\tYour input: %f\n"
@@ -1276,7 +1255,7 @@ def normalize(dx, ker, f_scale, error_check=True):
         except (ValueError, TypeError):
             raise TypeError(
                 "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\trss_ringoccs: diffrec Subpackage\n"
                 "\twindow_functions.normalize:\n"
                 "\t\tSecond argument could not be converted\n"
                 "\t\tinto a numpy array.\n"
@@ -1287,7 +1266,7 @@ def normalize(dx, ker, f_scale, error_check=True):
         except (ValueError, TypeError):
             raise TypeError(
                 "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\trss_ringoccs: diffrec Subpackage\n"
                 "\twindow_functions.normalize:\n"
                 "\t\tThird argument could not be converted\n"
                 "\t\tinto a numpy array.\n"
@@ -1296,14 +1275,14 @@ def normalize(dx, ker, f_scale, error_check=True):
         if (not np.all(np.isreal(f_scale))):
             raise ValueError(
                 "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\trss_ringoccs: diffrec Subpackage\n"
                 "\twindow_functions.normalize:\n"
                 "\t\tThird argument must be real valued.\n"
             )
         elif (np.min(f_scale) <= 0.0):
             raise ValueError(
                 "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\trss_ringoccs: diffrec Subpackage\n"
                 "\twindow_functions.normalize:\n"
                 "\t\tThird argument must be positive.\n"
             )
@@ -1351,7 +1330,7 @@ def get_range_actual(rho, rng, w_vals, error_check=True):
         except (ValueError, TypeError):
             raise TypeError(
                 "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\trss_ringoccs: diffrec Subpackage\n"
                 "\twindow_functions.get_range_actual:\n"
                 "\t\tFirst argument could not be converted\n"
                 "\t\tinto a numpy array.\n"
@@ -1360,14 +1339,14 @@ def get_range_actual(rho, rng, w_vals, error_check=True):
         if (not np.all(np.isreal(rho))):
             raise ValueError(
                 "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\trss_ringoccs: diffrec Subpackage\n"
                 "\twindow_functions.get_range_actual:\n"
                 "\t\tFirst argument must be real valued.\n"
             )
         elif (np.min(rho) <= 0.0):
             raise ValueError(
                 "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\trss_ringoccs: diffrec Subpackage\n"
                 "\twindow_functions.get_range_actual:\n"
                 "\t\tFirst argument must be positive.\n"
             )
@@ -1379,7 +1358,7 @@ def get_range_actual(rho, rng, w_vals, error_check=True):
         except (ValueError, TypeError):
             raise TypeError(
                 "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\trss_ringoccs: diffrec Subpackage\n"
                 "\twindow_functions.get_range_actual:\n"
                 "\t\tThird argument could not be converted\n"
                 "\t\tinto a numpy array.\n"
@@ -1388,14 +1367,14 @@ def get_range_actual(rho, rng, w_vals, error_check=True):
         if (not np.all(np.isreal(w_vals))):
             raise ValueError(
                 "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\trss_ringoccs: diffrec Subpackage\n"
                 "\twindow_functions.get_range_actual:\n"
                 "\t\tThird argument must be real valued.\n"
             )
         elif (np.min(w_vals) <= 0.0):
             raise ValueError(
                 "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\trss_ringoccs: diffrec Subpackage\n"
                 "\twindow_functions.get_range_actual:\n"
                 "\t\tThird argument must be positive.\n"
             )
@@ -1405,14 +1384,14 @@ def get_range_actual(rho, rng, w_vals, error_check=True):
         if (not isinstance(rng, list)):
             raise TypeError(
                 "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\trss_ringoccs: diffrec Subpackage\n"
                 "\twindow_functions.get_range_actual:\n"
                 "\t\tSecond argument must be a list.\n"
             )
         elif (np.size(rng) != 2):
             raise IndexError(
                 "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\trss_ringoccs: diffrec Subpackage\n"
                 "\twindow_functions.get_range_actual:\n"
                 "\t\tSecond argument must be a list\n"
                 "\t\tcontaining two positive numbers.\n"
@@ -1426,7 +1405,7 @@ def get_range_actual(rho, rng, w_vals, error_check=True):
         except (ValueError, TypeError):
             raise TypeError(
                 "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\trss_ringoccs: diffrec Subpackage\n"
                 "\twindow_functions.get_range_actual:\n"
                 "\t\tSecond argument must be a list\n"
                 "\t\tcontaining two positive floats.\n"
@@ -1435,7 +1414,7 @@ def get_range_actual(rho, rng, w_vals, error_check=True):
         if (np.min(rng) <= 0.0):
             raise ValueError(
                 "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\trss_ringoccs: diffrec Subpackage\n"
                 "\twindow_functions.get_range_actual:\n"
                 "\t\tSecond argument must be a list\n"
                 "\t\tcontaining two positive numbers.\n"

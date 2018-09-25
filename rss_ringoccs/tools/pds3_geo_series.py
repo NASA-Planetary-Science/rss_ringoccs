@@ -13,7 +13,7 @@ Revisions:
 '''
 import pdb
 import time
-import pds3_write_series as pds3
+from . import pds3_write_series as pds3
 import numpy as np
 
 

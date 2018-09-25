@@ -114,7 +114,6 @@ sys.path.append('../..')
 import rss_ringoccs as rss
 sys.path.remove('../..')
 
-
 class NormDiff(object):
     """
     Purpose:

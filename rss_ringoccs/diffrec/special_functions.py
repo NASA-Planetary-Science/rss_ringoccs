@@ -1,18 +1,19 @@
 import numpy as np
 from scipy.special import erf, lambertw
 from . import window_functions as wf
+import pdb
 SQRT_PI_2 = 0.886226925452758013649084
 
 def savitzky_golay(y, window_size, order, deriv=0, rate=1):
     """
-        Smooth (and optionally differentiate) data with a
-        Savitzky-Golay filter. The Savitzky-Golay filter removes
-        high frequency noise from data. It has the advantage of
-        preserving the original shape and features of the signal
-        better than other types of filtering approaches, such as
-        moving averages techniques.
+        Function:
+            savitsky_golay
+        Purpose:
+            To smooth data with a Savitzky-Golay filter.
+            This removes high frequency noise while
+            maintaining many of the original features of
+            the input data.
         Parameters
-        
         ----------
         y : array_like, shape (N,)
             the values of the time history of the signal.
@@ -68,21 +69,34 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
     else:
         pass
 
-    order_range = range(order+1)
     half_window = (window_size -1) // 2
 
     # precompute coefficients
-    b = np.mat([[k**i for i in order_range] for k in range(-half_window, half_window+1)])
+    b = np.zeros((window_size, order+1))
+    b[..., 0] = 1
+    for k in range((window_size - 1) // 2):
+        n0 = ((window_size-1) // 2) - k
+        m = n0
+        n = -n0
+        for j in range(1,order+1):
+            b[k, j] = n
+            b[window_size-1-k, j] = m
+            n *= -n0
+            m *= n0
+
+    b = np.mat(b)
+
     m = 1
     for i in range(deriv):
         m *= rate*(deriv-i)
+
     m *= np.linalg.pinv(b).A[deriv]
     # pad the signal at the extremes with
     # values taken from the signal itself
-    firstvals = y[0] - np.abs( y[1:half_window+1][::-1] - y[0] )
+    firstvals = y[0] - np.abs(y[1:half_window+1][::-1] - y[0])
     lastvals = y[-1] + np.abs(y[-half_window-1:-1][::-1] - y[-1])
     y = np.concatenate((firstvals, y, lastvals))
-    return np.convolve( m[::-1], y, mode='valid')
+    return np.convolve(m[::-1], y, mode='valid')
 
 def fresnel_transform(rho_km_vals, F_km_vals, phi_rad_vals, B_rad_vals,
                     D_km_vals, T_vals, lambda_km_vals, w_km_vals,

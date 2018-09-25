@@ -11,7 +11,7 @@ Revisions:
     2018 Sep 20 - jfong - only split kernels if list
 """
 
-import pds3_write_series as pds3
+from . import pds3_write_series as pds3
 import numpy as np
 import pdb
 import time

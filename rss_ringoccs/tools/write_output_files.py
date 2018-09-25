@@ -9,10 +9,10 @@ Revisions:
     2018 Sep 24 - jfong - hardcode relative path (../output/*)
 """
 import sys
-from pds3_geo_series import write_geo_series
-from pds3_cal_series import write_cal_series
-from pds3_dlp_series import write_dlp_series
-from pds3_tau_series import write_tau_series
+from .pds3_geo_series import write_geo_series
+from .pds3_cal_series import write_cal_series
+from .pds3_dlp_series import write_dlp_series
+from .pds3_tau_series import write_tau_series
 from time import strftime
 
 sys.path.append('../../')

@@ -30,6 +30,8 @@ Revisions:
       frequency offset residuals which fall within one rms of the median).
       Changed plotting to center on residuals within one rms of the median
       frequency offset residual.
+    2018 Sep 25 - sflury - Mask for plotting data used in fit now take from
+                           fit_inst
  
 """
 
@@ -181,13 +183,13 @@ class FResidFitGui(Frame):
         # Box to select fit order
         combo = Combobox(fit_order_frame, textvariable=self.cvar)
         combo.bind('<<ComboboxSelected>>', self.adjust_deg)
-        combo['values'] = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-        combo.current(2)
+        combo['values'] = [i for i in range(10)]
+        combo.current(int(self.fit_deg))
         combo.grid(row=0, column=0)
-
+        
         # Variable outside of box that says current fit order
         self.lvar = IntVar()
-        self.lvar.set('3')
+        self.lvar.set(str(self.fit_deg))
         lbl = Label(fit_order_frame, textvariable=self.lvar)
         lbl.grid(row=0, column=1)
 
@@ -233,7 +235,7 @@ class FResidFitGui(Frame):
         """
 
         self.fit_inst.set_f_sky_resid_fit(poly_order=self.fit_deg,
-            spm_include=self.xlim, USE_GUI=False)
+            spm_include=self.xlim, USE_GUI=False, file_search=False)
         _x, f_sky_resid_fit = self.fit_inst.get_f_sky_resid_fit()
         return f_sky_resid_fit
 
@@ -268,8 +270,7 @@ class FResidFitGui(Frame):
         # create Boolean array which excludes any data with a frequency offset
         #  residual which falls more than three standard deviations from the
         #  median frequency offset residual
-        self.sigmaclip = [(self.y>self.ymd-self.ystd)&(self.y<self.ymd+
-            self.ystd)]
+        self.sigmaclip = self.fit_inst._FreqOffsetFit__fsr_mask
 
         # Plot residual frequency and fit
         self.ax.plot(self.x, self.y, color='0.75')

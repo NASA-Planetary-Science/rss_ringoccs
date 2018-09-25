@@ -1,8 +1,11 @@
 import numpy as np
 from scipy.special import erf, lambertw
 from . import window_functions
-import pdb
-SQRT_PI_2 = 0.886226925452758013649084
+
+# Declare constants for multiples of pi.
+TWO_PI = 6.283185307179586476925287
+ONE_PI = 3.141592653589793238462643
+RADS_PER_DEGS = 0.0174532925199432957692369
 
 def savitzky_golay(y, window_size, order, deriv=0, rate=1):
     """
@@ -111,342 +114,386 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
 
 def fresnel_transform(rho_km_vals, phi_rad_vals, F_km_vals, B_rad_vals,
                       d_km_vals, T_in, lambda_km_vals, w_km_vals, dx_km,
-                      wtype, norm=True, fft=False, fwd=False, verbose=True,
-                      psitype='full'):
+                      wtype="kb25", norm=True, fft=False, fwd=False,
+                      verbose=True, psitype='full'):
     """
-        Procedure: fresnel_forward
-        Purpose:   Computes the forward model of diffraction from a set of
-            reconstructed data.
-        Variables:
-            rho_vals:        Ring radius, in kilometers.
-            F_vals:          Fresnel scale, in kilometers.
-            phi_rad_vals:    Ring azimuth angle, in radians.
-            B_rad_vals:      Ring opening angle, in radians.
-            lambda_sky_vals: Wavelength of recieved signal, in kilometers.
-            D_vals:          Spacecraft-RIP distance, in kilometers.
-            dx:              Sampling spacing, in kilometers.
-            T_vals:          Reconstructed complex transmittance.
-            w_vals:          Window width, in kilometers.
-            wtype:           Window used in reconstruction, string.
-            start:           Starting point of reconstructed data.
-            n_used:          Number of reconstructed points.
+        Procedure:
+            fresnel_transform
+        Purpose:
+            Computes the Fresnel Transform (Forward or Inverse)
+            of a given data set.
+        Arguments:
+            rho_km_vals:
+                Real Numpy Array
+                Ring radius, in kilometers.
+            phi_rad_vals:
+                Real Numpy Array
+                Ring azimuth angle, in radians.
+            F_km_vals:
+                Real Numpy Array
+                Fresnel scale, in kilometers.
+            B_rad_vals:
+                Real Numpy Array
+                Ring opening angle, in radians.
+            lambda_sky_km_vals:
+                Real Numpy Array
+                Wavelength of recieved signal, in kilometers.
+            D_km_vals:
+                Real Numpy Array
+                Spacecraft-RIP distance, in kilometers.
+            dx_km:
+                Float
+                Sample spacing, in kilometers.
+            T_in:
+                Complex Numpy Array
+                Complex data set.
+            w_vals:
+                Real Numpy Array
+                Window width, in kilometers.
         Keywords:
-            Normalize: Parameter for normalizing the complex transmittance by
-                the window function that is used. Default is True. Set to False
-                to skip this feature.
+            wtype:
+                String
+                Window used in reconstruction.
+            norm:
+                Boolean
+                Boolean for determining if the transform
+                will be normalized by the window width.
+            fft:
+                Boolean
+                Whether or not to use FFT's.
+            fwd:
+                Boolean
+                Used for determining if the Forward or
+                Inverse Fresnel Transform will be computed.
+                By default, the inverse transform is computed.
+            verbose:
+                Boolean
+                Determines if progress reports print out.
+            psitype:
+                String
+                Chosen approximation for the psi variable.
+                Allowed strings are:
+                    'full'      No Approximation is applied.
+                    'MTR2'      Second Order Series from MTR86.
+                    'MTR3'      Third Order Series from MTR86.
+                    'MTR4'      Fourth Order Series from MTR86.
+                    'Fresnel'   Standard Fresnel approximation.
         Output:
-            phase_fwd_vals  - Phase of the forward model, in radians.
-            T_hat_fwd_vals  - Complex transmittance of forward model.
-            p_norm_fwd_vals - Normalized power of forward model, unitless.
+            T_out:
+                The Fresnel transform of T_in. Forward transform
+                if fwd=True was set, inverse transform otherwise.
         History:
             Translated from IDL: RJM - 2018/05/14 5:06 P.M.
+            Updated: RJM - 2018/09/25 10:27 P.M.
     """
-        # Retrieve requested window type, starting point, and sample spacing.
-        start, n_used = window_functions.get_range_actual(rho_km_vals,
-                                                          [0.1,9999999.0],
-                                                          w_km_vals)
+    # Retrieve requested window type, starting point, and sample spacing.
+    start, n_used = window_functions.get_range_actual(rho_km_vals,
+                                                      [0.1,9999999.0],
+                                                      w_km_vals)
 
-        # Compute product of wavenumber and RIP distance.
-        kD_vals = TWO_PI * d_km_vals / lambda_km_vals
+    # Compute product of wavenumber and RIP distance.
+    kD_vals = TWO_PI * d_km_vals / lambda_km_vals
 
-        # Compute Cosine of opening angle.
-        cosb = np.cos(B_rad_vals)
+    # Compute Cosine of opening angle.
+    cosb = np.cos(B_rad_vals)
 
-        # Precompute variables for speed.
-        cosbD = cosb/d_km_vals
-        cosb2 = cosb*cosb
+    # Precompute variables for speed.
+    cosbD = cosb/d_km_vals
+    cosb2 = cosb*cosb
 
-        # Compute cosine and sine of ring azimuth angle.
-        cosphi0 = np.cos(phi_rad_vals)
-        sinphi0 = np.sin(phi_rad_vals)
+    # Compute cosine and sine of ring azimuth angle.
+    cosphi0 = np.cos(phi_rad_vals)
+    sinphi0 = np.sin(phi_rad_vals)
 
-        # Precompute squares of variables for speed.
-        dsq = d_km_vals*d_km_vals
-        rsq = rho_km_vals*rho_km_vals
+    # Precompute squares of variables for speed.
+    dsq = d_km_vals*d_km_vals
+    rsq = rho_km_vals*rho_km_vals
 
-        # Define window function.
-        fw = window_functions.func_dict[wtype]["func"]
+    # Define window function.
+    fw = window_functions.func_dict[wtype]["func"]
 
-        # Define normalization function and verbose message.
-        nrm = window_functions.normalize
-        mes = "\t\tPt: %d  Tot: %d  Width: %d  Psi Iters: %d"
+    # Define normalization function and verbose message.
+    nrm = window_functions.normalize
+    mes = "\t\tPt: %d  Tot: %d  Width: %d  Psi Iters: %d"
 
-        # Set inverse function to FFT or Integration.
-        if fft:
-            finv = fresinvfft
-        else:
-            finv = fresinv
+    # Set inverse function to FFT or Integration.
+    if fft:
+        finv = fresnel_inverse_fft
+    else:
+        finv = fresnel_inverse
+    # Set psi approximation.
+    if (psitype == 'full'):
+        psif = psi_func_fast
+    elif (psitype == 'mtr2'):
+        psif = psi_quadratic_fast
+    elif (psitype == 'mtr3'):
+        psif = psi_cubic_fast
+    elif (psitype == 'mtr4'):
+        psif = psi_quartic_fast
+    else:
+        psif = psi_func_fast
 
-        # Set psi approximation.
-        if (psitype == 'full'):
-            psif = psi_func
-        elif (psitype == 'mtr4'):
-            psif = psi_quartic
-        else:
-            psif = psi_func
+    # If forward transform, adjust starting point by half a window.
+    if fwd:
+        w_max = np.max(w_km_vals[start:start + n_used])
+        nw_fwd = int(np.ceil(w_max / (2.0 * dx_km)))
+        start_fwd = int(start + nw_fwd)
+        n_fwd = int(n_used - 2 * nw_fwd)
+        start = start_fwd
+        n_used = n_fwd
+    else:
+        pass
+    
+    # Create empty array for reconstruction / forward transform.
+    T_out = T_in * 0.0
 
-        # If forward transform, adjust starting point by half a window.
-        if fwd:
-            w_max = np.max(w_km_vals[start:start + n_used])
-            nw_fwd = int(np.ceil(w_max / (2.0 * dx_km)))
-            start_fwd = int(start + nw_fwd)
-            n_fwd = int(n_used - 2 * nw_fwd)
-            start = start_fwd
-            n_used = n_fwd
-        else:
-            pass
-        
-        # Create empty array for reconstruction / forward transform.
-        T_out = T_in * 0.0
+    # Set the first computed point to the 'start' variable.
+    center = start
 
-        # Set the first computed point to the 'start' variable.
-        center = start
+    # Compute first window width and window function.
+    w_init = w_km_vals[center]
+    w_func = fw(w_init, dx_km)
 
-        # Compute first window width and window function.
-        w_init = w_km_vals[center]
-        w_func = fw(w_init, dx_km)
+    # Compute number of points in window function
+    nw = np.size(w_func)
 
-        # Compute number of points in window function
-        nw = np.size(w_func)
+    # Computed range about the first point
+    crange = np.arange(int(center-(nw-1)/2), int(1+center+(nw-1)/2))-1
 
-        # Computed range about the first point
-        crange = np.arange(int(center-(nw-1)/2), int(1+center+(nw-1)/2))-1
+    # Compute first approximation for stationary phase.
+    phi_s_rad = phi_rad_vals[center]
 
-        # Compute first approximation for stationary phase.
-        phi_s_rad = phi_rad_vals[center]
+    # Compute Cosines and Sines of first approximation.
+    cp = np.cos(phi_s_rad)
+    sp = np.sin(phi_s_rad)
 
-        # Compute Cosines and Sines of first approximation.
-        cp = np.cos(phi_s_rad)
-        sp = np.sin(phi_s_rad)
+    # Factor used for first Newton-Raphson iteration
+    dphi_fac = (cosb2*cosphi0*sinphi0/(1.0-cosb2*sinphi0*sinphi0))
+    if (psitype == 'fresnel'):
+        r0 = rho_km_vals[center]
+        r = rho_km_vals[crange]
+        F2 = F_km_vals*F_km_vals
+        x = (r-r0)
+        psi_vals = (ONE_PI / 2.0) * x * x
+        loop = 0
+        for i in np.arange(n_used):
+            # Current point being computed.
+            center = start+i
 
-        # Factor used for first Newton-Raphson iteration
-        dphi_fac = (cosb2*cosphi0*sinphi0/(1.0-cosb2*sinphi0*sinphi0))
-        if (psitype == 'fresnel'):
-            r0 = rho_km_vals[center]
-            r = rho_km_vals[crange]
-            F2 = F_km_vals*F_km_vals
-            x = (r-r0)
-            psi_vals = (ONE_PI / 2.0) * x * x
-            loop = 0
-            for i in np.arange(n_used):
-                # Current point being computed.
-                center = start+i
+            # Window width and Frensel scale for current point.
+            w = w_km_vals[center]
+            F = F_km_vals[center]
 
-                # Window width and Frensel scale for current point.
-                w = w_km_vals[center]
+            if (np.abs(w_init - w) >= 2.0 * dx_km):
+                # Reset w_init and recompute window function.
+                w_init = w
+                w_func = fw(w, dx_km)
 
-                if (np.abs(w_init - w) >= 2.0 * dx_km):
-                    # Reset w_init and recompute window function.
-                    w_init = w
-                    w_func = fw(w, dx_km)
+                # Reset number of window points
+                nw = np.size(w_func)
 
-                    # Reset number of window points
-                    nw = np.size(w_func)
+                # Computed range for current point
+                crange = np.arange(int(center-(nw-1)/2),
+                                   int(1+center+(nw-1)/2))
 
-                    # Computed range for current point
-                    crange = np.arange(int(center-(nw-1)/2),
-                                       int(1+center+(nw-1)/2))
-
-                    # Ajdust ring radius by dx_km.
-                    r = rho_km_vals[crange]
-                    r0 = rho_km_vals[center]
-
-                    # Compute psi for with stationary phase value
-                    x = r-r0
-                    psi_vals = (ONE_PI / 2.0) * x * x / F2[center]
-                else:
-                    crange += 1
-                    psi_vals = (ONE_PI / 2.0) * x * x / F2[center]
-
-                # Compute kernel function for Fresnel inverse
-                if fwd:
-                    ker = w_func*np.exp(1j*psi_vals)
-                else:
-                    ker = w_func*np.exp(-1j*psi_vals)
-
-                # Range of diffracted data that falls inside the window
-                T = T_in[crange]
-
-                # Compute 'approximate' Fresnel Inversion for current point
-                T_out[center] = finv(T, ker, dx_km, F)
-
-                # If normalization has been set, normalize the reconstruction
-                if norm:
-                    T_out[center] *= nrm(dx_km, ker, F)
-                if verbose:
-                    print(mes % (i, n_used, nw, loop), end="\r")
-            if verbose:
-                print("\n", end="\r")
-        else:
-            for i in np.arange(n_used):
-                # Current point being computed.
-                center = start+i
-
-                # Compute current radius and RIP distance.
+                # Ajdust ring radius by dx_km.
+                r = rho_km_vals[crange]
                 r0 = rho_km_vals[center]
-                d2 = dsq[center]
-
-                # Compute square of ring radius.
-                r02 = rsq[center]
-
-                # Precomputed variables for speed.
-                cbd = cosbD[center]
-                cb2 = cosb2[center]
-                cp0 = cosphi0[center]
-                sp0 = sinphi0[center]
-
-                # Compute product of wavenumber and RIP Distance.
-                kD = kD_vals[center]
-
-                # Current window width and Fresnel scale.
-                w = w_km_vals[center]
-                F = F_km_vals[center]
-
-                # If the window width has changed, recompute variables.
-                if (np.abs(w_init - w) >= 2.0 * dx_km):
-                    # Reset w_init and recompute window function.
-                    w_init = w
-                    w_func = fw(w, dx_km)
-
-                    # Reset number of window points
-                    nw = np.size(w_func)
-
-                    # Computed range for current point
-                    crange = np.arange(int(center-(nw-1)/2),
-                                       int(1+center+(nw-1)/2))
-
-                    # Ajdust ring radius by dx_km.
-                    r = rho_km_vals[crange]
-
-                    # Compute square of ring radius.
-                    r2 = rsq[crange]
-
-                    # First iteration of Newton-Raphson.
-                    dphi_s_rad = dphi_fac[center] * (r - r0) / r0
-
-                    # Compute new angle.
-                    phi_s_rad = phi_rad_vals[center] - dphi_s_rad
-
-                    # Compute Sines and Cosines of new angle.
-                    cp = np.cos(phi_s_rad)
-                    sp = np.sin(phi_s_rad)
-
-                    # Compute r*cos(B)*D for efficiency
-                    rcbd = r * cbd
-
-                # If the window width has not changed, perform Newton-Raphson.
-                else:
-                    # Adjust computed range by dx_km.
-                    crange += 1
-
-                    # Ajdust ring radius by dx_km.
-                    r = rho_km_vals[crange]
-
-                    # Compute r*cos(B)*D for efficiency
-                    rcbd = r * cbd
-
-                    # Compute square of ring radius.
-                    r2 = rsq[crange]
-
-                    # Compute Xi variable (MTR86 Equation 4b).
-                    xi = cbd * (r0 * cp0 - r * cp)
-
-                    # Compute Eta variable (MTR86 Equation 4c).
-                    eta = (r02 + r2 - 2.0*r*r0*(sp*sp0 + cp*cp0)) / d2
-
-                    # Compute Xi variable (MTR86 Equation 4b).
-                    xi = cbd * (r0 * cp0 - r * cp)
-
-                    # Compute Eta variable (MTR86 Equation 4c).
-                    eta = (r02 + r2 - 2.0*r*r0*(sp*sp0 + cp*cp0)) / d2
-
-                    # Compute intermediate variables for partial derivatives.
-                    v1 = rcbd * sp
-                    v2 = 2.0 * r * r0 * (sp*cp0 - sp0*cp) / d2
-                    v3 = np.sqrt(1.0 + 2.0*xi + eta)
-                    v4 = rcbd * cp
-                    v5 = 2.0 * r * r0 * (sp*sp0 + cp*cp0) / d2
-
-                    # Compute variables used for second partial derivative.
-                    dphia = (2.0*v4 + v5)/(2.0 * v3)
-                    dphib = v4 + (2.0*v1 + v2)*(2.0*v1 + v2)/(4.0*(v3*v3*v3))
-
-                    # Compute First and Second Partial Derivatives of psi
-                    psi_d1 = (2.0*v1 + v2) / (2.0 * v3) - v1
-                    psi_d2 = dphia - dphib
-
-                    # Compute Newton-Raphson perturbation
-                    dphi_s_rad = -psi_d1 / psi_d2
-                    phi_s_rad += dphi_s_rad
-
-                    # Compute Cosines and Sines new angle
-                    cp = np.cos(phi_s_rad)
-                    sp = np.sin(phi_s_rad)
-
-                loop = 0
-                # Perform Newton-Raphson on phi.
-                while (np.max(np.abs(dphi_s_rad)) > 1.e-10):
-                    # Compute Xi variable (MTR86 Equation 4b).
-                    xi = cbd * (r0 * cp0 - r * cp)
-
-                    # Compute Eta variable (MTR86 Equation 4c).
-                    eta = (r02 + r2 - 2.0*r*r0*(sp*sp0 + cp*cp0)) / d2
-
-                    # Compute intermediate variables for partial derivatives.
-                    v1 = rcbd * sp
-                    v2 = 2.0 * r * r0 * (sp*cp0 - sp0*cp) / d2
-                    v3 = np.sqrt(1.0 + 2.0*xi + eta)
-                    v4 = rcbd * cp
-                    v5 = 2.0 * r * r0 * (sp*sp0 + cp*cp0) / d2
-
-                    # Compute variables used for second partial derivative.
-                    dphia = (2.0*v4 + v5)/(2.0 * v3)
-                    dphib = v4 + (2.0*v1 + v2)*(2.0*v1 + v2)/(4.0*(v3*v3*v3))
-
-                    # Compute First and Second Partial Derivatives of psi
-                    psi_d1 = (2.0*v1 + v2) / (2.0 * v3) - v1
-                    psi_d2 = dphia - dphib
-
-                    # Compute Newton-Raphson perturbation
-                    dphi_s_rad = -psi_d1 / psi_d2
-                    phi_s_rad += dphi_s_rad
-
-                    # Compute Cosines and Sines new angle
-                    cp = np.cos(phi_s_rad)
-                    sp = np.sin(phi_s_rad)
-
-                    # Add one to loop variable for each iteration
-                    loop += 1
-                    if loop > 5:
-                        break
 
                 # Compute psi for with stationary phase value
-                psi_vals = psif(kD, r, r0, cbd, d2, cp0, sp0, cp, sp, w, nw)
+                x = r-r0
+                psi_vals = (ONE_PI / 2.0) * x * x / F2[center]
+            else:
+                crange += 1
+                psi_vals = (ONE_PI / 2.0) * x * x / F2[center]
 
-                # Compute kernel function for Fresnel inverse
-                if fwd:
-                    ker = w_func*np.exp(1j*psi_vals)
-                else:
-                    ker = w_func*np.exp(-1j*psi_vals)
+            # Compute kernel function for Fresnel inverse
+            if fwd:
+                ker = w_func*np.exp(1j*psi_vals)
+            else:
+                ker = w_func*np.exp(-1j*psi_vals)
 
-                # Range of diffracted data that falls inside the window
-                T = T_in[crange]
+            # Range of diffracted data that falls inside the window
+            T = T_in[crange]
 
-                # Compute 'approximate' Fresnel Inversion for current point
-                T_out[center] = finv(T, ker, dx_km, F)
+            # Compute 'approximate' Fresnel Inversion for current point
+            T_out[center] = finv(T, ker, dx_km, F)
 
-                # If normalization has been set, normalize the reconstruction
-                if norm:
-                    T_out[center] *= nrm(dx_km, ker, F)
-                if verbose:
-                    print(mes % (i, n_used-1, nw, loop), end="\r")
+            # If normalization has been set, normalize the reconstruction
+            if norm:
+                T_out[center] *= nrm(dx_km, ker, F)
             if verbose:
-                print("\n", end="\r")
+                print(mes % (i, n_used, nw, loop), end="\r")
+        if verbose:
+            print("\n", end="\r")
+    else:
+        for i in np.arange(n_used):
+            # Current point being computed.
+            center = start+i
 
-        return T_out
+            # Compute current radius and RIP distance.
+            r0 = rho_km_vals[center]
+            d2 = dsq[center]
 
+            # Compute square of ring radius.
+            r02 = rsq[center]
 
-def compute_norm_eq(w_func):
+            # Precomputed variables for speed.
+            cbd = cosbD[center]
+            cb2 = cosb2[center]
+            cp0 = cosphi0[center]
+            sp0 = sinphi0[center]
+
+            # Compute product of wavenumber and RIP Distance.
+            kD = kD_vals[center]
+
+            # Current window width and Fresnel scale.
+            w = w_km_vals[center]
+            F = F_km_vals[center]
+
+            # If the window width has changed, recompute variables.
+            if (np.abs(w_init - w) >= 2.0 * dx_km):
+                # Reset w_init and recompute window function.
+                w_init = w
+                w_func = fw(w, dx_km)
+
+                # Reset number of window points
+                nw = np.size(w_func)
+
+                # Computed range for current point
+                crange = np.arange(int(center-(nw-1)/2),
+                                   int(1+center+(nw-1)/2))
+
+                # Ajdust ring radius by dx_km.
+                r = rho_km_vals[crange]
+
+                # Compute square of ring radius.
+                r2 = rsq[crange]
+
+                # First iteration of Newton-Raphson.
+                dphi_s_rad = dphi_fac[center] * (r - r0) / r0
+
+                # Compute new angle.
+                phi_s_rad = phi_rad_vals[center] - dphi_s_rad
+
+                # Compute Sines and Cosines of new angle.
+                cp = np.cos(phi_s_rad)
+                sp = np.sin(phi_s_rad)
+
+                # Compute r*cos(B)*D for efficiency
+                rcbd = r * cbd
+
+            # If the window width has not changed, perform Newton-Raphson.
+            else:
+                # Adjust computed range by dx_km.
+                crange += 1
+
+                # Ajdust ring radius by dx_km.
+                r = rho_km_vals[crange]
+
+                # Compute r*cos(B)*D for efficiency
+                rcbd = r * cbd
+
+                # Compute square of ring radius.
+                r2 = rsq[crange]
+
+                # Compute Xi variable (MTR86 Equation 4b).
+                xi = cbd * (r0 * cp0 - r * cp)
+
+                # Compute Eta variable (MTR86 Equation 4c).
+                eta = (r02 + r2 - 2.0*r*r0*(sp*sp0 + cp*cp0)) / d2
+
+                # Compute Xi variable (MTR86 Equation 4b).
+                xi = cbd * (r0 * cp0 - r * cp)
+
+                # Compute Eta variable (MTR86 Equation 4c).
+                eta = (r02 + r2 - 2.0*r*r0*(sp*sp0 + cp*cp0)) / d2
+
+                # Compute intermediate variables for partial derivatives.
+                v1 = rcbd * sp
+                v2 = 2.0 * r * r0 * (sp*cp0 - sp0*cp) / d2
+                v3 = np.sqrt(1.0 + 2.0*xi + eta)
+                v4 = rcbd * cp
+                v5 = 2.0 * r * r0 * (sp*sp0 + cp*cp0) / d2
+
+                # Compute variables used for second partial derivative.
+                dphia = (2.0*v4 + v5)/(2.0 * v3)
+                dphib = v4 + (2.0*v1 + v2)*(2.0*v1 + v2)/(4.0*(v3*v3*v3))
+
+                # Compute First and Second Partial Derivatives of psi
+                psi_d1 = (2.0*v1 + v2) / (2.0 * v3) - v1
+                psi_d2 = dphia - dphib
+
+                # Compute Newton-Raphson perturbation
+                dphi_s_rad = -psi_d1 / psi_d2
+                phi_s_rad += dphi_s_rad
+
+                # Compute Cosines and Sines new angle
+                cp = np.cos(phi_s_rad)
+                sp = np.sin(phi_s_rad)
+            loop = 0
+
+            # Perform Newton-Raphson on phi.
+            while (np.max(np.abs(dphi_s_rad)) > 1.e-10):
+                # Compute Xi variable (MTR86 Equation 4b).
+                xi = cbd * (r0 * cp0 - r * cp)
+
+                # Compute Eta variable (MTR86 Equation 4c).
+                eta = (r02 + r2 - 2.0*r*r0*(sp*sp0 + cp*cp0)) / d2
+
+                # Compute intermediate variables for partial derivatives.
+                v1 = rcbd * sp
+                v2 = 2.0 * r * r0 * (sp*cp0 - sp0*cp) / d2
+                v3 = np.sqrt(1.0 + 2.0*xi + eta)
+                v4 = rcbd * cp
+                v5 = 2.0 * r * r0 * (sp*sp0 + cp*cp0) / d2
+
+                # Compute variables used for second partial derivative.
+                dphia = (2.0*v4 + v5)/(2.0 * v3)
+                dphib = v4 + (2.0*v1 + v2)*(2.0*v1 + v2)/(4.0*(v3*v3*v3))
+
+                # Compute First and Second Partial Derivatives of psi
+                psi_d1 = (2.0*v1 + v2) / (2.0 * v3) - v1
+                psi_d2 = dphia - dphib
+
+                # Compute Newton-Raphson perturbation
+                dphi_s_rad = -psi_d1 / psi_d2
+                phi_s_rad += dphi_s_rad
+
+                # Compute Cosines and Sines new angle
+                cp = np.cos(phi_s_rad)
+                sp = np.sin(phi_s_rad)
+
+                # Add one to loop variable for each iteration
+                loop += 1
+                if loop > 5:
+                    break
+
+            # Compute psi for with stationary phase value
+            psi_vals = psif(kD, r, r0, cbd, d2, cp0, sp0, cp, sp, w, nw)
+
+            # Compute kernel function for Fresnel inverse
+            if fwd:
+                ker = w_func*np.exp(1j*psi_vals)
+            else:
+                ker = w_func*np.exp(-1j*psi_vals)
+
+            # Range of diffracted data that falls inside the window
+            T = T_in[crange]
+
+            # Compute 'approximate' Fresnel Inversion for current point
+            T_out[center] = finv(T, ker, dx_km, F)
+
+            # If normalization has been set, normalize the reconstruction
+            if norm:
+                T_out[center] *= nrm(dx_km, ker, F)
+            if verbose:
+                print(mes % (i, n_used-1, nw, loop), end="\r")
+        if verbose:
+            print("\n", end="\r")
+    return T_out
+
+def compute_norm_eq(w_func, error_check=True):
     """
         Function:
             compute_norm_eq
@@ -500,125 +547,856 @@ def compute_norm_eq(w_func):
         History:
             Created: RJM - 2018/05/16 3:54 P.M.
     """
-    if not check_real(w_func):
-        raise TypeError("Input must be real valued")
-    nw      = np.size(w_func)
-    normeq  = nw*(np.sum(w_func**2)) / (np.sum(w_func)**2)
+    if error_check:
+        try:
+            w_func = np.array(w_func)
+        except (ValueError, TypeError):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.compute_norm_eq:\n"
+                "\t\tFirst input could not be converted\n"
+                "\t\tinto a numpy array.\n"
+            )
+
+        if (not np.all(np.isreal(w_func))):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.compute_norm_eq:\n"
+                "\t\tFirst input must be an array\n"
+                "\t\tof floating point numbers.\n"
+            )
+        elif (np.min(w_func) < 0.0):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.compute_norm_eq:\n"
+                "\t\tFirst input must be an array\n"
+                "\t\tof positive numbers.\n"
+            )
+        else:
+            pass
+    nw = np.size(w_func)
+    tot = np.sum(w_func)
+    normeq = nw*(np.sum(w_func*w_func)) / (tot*tot)
     return normeq
 
-def fresnel_scale(Lambda,d,phi,b,DEG=False):
+def fresnel_scale(Lambda, d, phi, b, deg=False, error_check=True):
     """
     Function:
         fresnel_scale
     Purpose:
         Compute the Fresnel Scale from lambda, D, Phi, and B.
     Variables:
-        Lambda: Wavelength of the incoming signal.
-        d:      RIP-Spacecraft Distance.
-        phi:    Ring Azimuth Angle.
-        b:      Ring Opening Angle.
+        Lambda:
+            Numpy Array or Float
+            Wavelength of the incoming signal.
+        d:
+            Numpy Array or Float
+            RIP-Spacecraft Distance.
+        phi:
+            Numpy Array or Float
+            Ring azimuth angle.
+        b:
+            Numpy Array or Float
+            Ring opening angle.
     Keywords:
-        DEG:    Set True if phi/b are in degrees. Default is radians.
+        DEG:
+            Boolean
+            Set True if phi/b are in degrees.
+            Default is radians.
     Output:
         FRES:   The Fresnel scale.
-    NOTE:
-        Lambda and d must be in the same units. The output (Fresnel
-        scale) will have the same units as lambda and d. In addition,
-        b and phi must also have the same units. If b and phi are in
-        degrees, make sure to set DEG = True. Default is radians.
+    Note:
+        Lambda and d must be in the same units.
+        The output (Fresnel scale) will have the same units
+        as lambda and d. In addition, b and phi must also
+        have the same units. If b and phi are in degrees,
+        make sure to set DEG=True. Default is radians.
     History:
         Translated from IDL: RJM - 2018/04/15 12:36 P.M.
     """
-    if (not check_real(Lambda)):
-        sys.exit("Lambda must be real")
-    if (not check_real(d)):
-        sys.exit("D must be real")
-    if (not check_real(phi)):
-        sys.exit("Phi must be real")
-    if (not check_real(b)): 
-        sys.exit("B must be real")
-    if DEG:
-        cb = np.cos(b * np.pi / 180)
-        sb = np.sin(b * np.pi / 180)
-        sp = np.sin(phi * np.pi / 180)
+    if error_check:
+        try:
+            Lambda = np.array(Lambda)
+        except (ValueError, TypeError):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.fresnel_scale:\n"
+                "\t\tFirst input could not be converted\n"
+                "\t\tinto a numpy array.\n"
+            )
+
+        if (not np.all(np.isreal(Lambda))):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.fresnel_scale:\n"
+                "\t\tFirst input must be an array\n"
+                "\t\tof floating point numbers.\n"
+            )
+        elif (np.min(Lambda) < 0.0):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.fresnel_scale:\n"
+                "\t\tFirst input must be an array\n"
+                "\t\tof positive numbers.\n"
+            )
+        else:
+            pass
+
+        try:
+            d = np.array(d)
+        except (ValueError, TypeError):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.fresnel_scale:\n"
+                "\t\tSecond input could not be converted\n"
+                "\t\tinto a numpy array.\n"
+            )
+
+        if (not np.all(np.isreal(d))):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.fresnel_scale:\n"
+                "\t\tSecond input must be an array\n"
+                "\t\tof floating point numbers.\n"
+            )
+        elif (np.min(d) < 0.0):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.fresnel_scale:\n"
+                "\t\tSecond input must be an array\n"
+                "\t\tof positive numbers.\n"
+            )
+        else:
+            pass
+
+        try:
+            phi = np.array(phi)
+        except (ValueError, TypeError):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.fresnel_scale:\n"
+                "\t\tThird input could not be converted\n"
+                "\t\tinto a numpy array.\n"
+            )
+
+        if (not np.all(np.isreal(phi))):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.fresnel_scale:\n"
+                "\t\tThird input must be an array\n"
+                "\t\tof floating point numbers.\n"
+            )
+        else:
+            pass
+
+        try:
+            b = np.array(b)
+        except (ValueError, TypeError):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.fresnel_scale:\n"
+                "\t\tSecond input could not be converted\n"
+                "\t\tinto a numpy array.\n"
+            )
+
+        if (not np.all(np.isreal(b))):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.fresnel_scale:\n"
+                "\t\tSecond input must be an array\n"
+                "\t\tof floating point number.\n"
+            )
+        else:
+            pass
+    else:
+        pass
+
+    if deg:
+        cb = np.cos(b * RADS_PER_DEGS)
+        sb = np.sin(b * RADS_PER_DEGS)
+        sp = np.sin(phi * RADS_PER_DEGS)
     else:
         cb = np.cos(b)
         sb = np.sin(b)
         sp = np.sin(phi)
-    fres = np.sqrt(0.5 * Lambda * d * (1 - (cb**2) * (sp**2)) / (sb**2))
+    fres = np.sqrt(0.5 * Lambda * d * (1 - (cb*cb) * (sp*sp)) / (sb*sb))
     return fres
 
-def psi_d1_phi(r,r0,d,b,phi,phi0,error_check=True):
+def psi_func_fast(kD, r, r0, cbd, d2, cp0, sp0, cp, sp, w, nw):
     """
-        Function: psi_d1_phi
-        Purpose:  Calculate dpsi/dphi from geometry variables.
+        Function:
+            psi_func_fast
+        Purpose:
+            Compute psi (MTR Equation 4) with
+            no error checks using precomputed
+            sines and cosines of various
+            parameters.
+        Arguments:
+            kD:
+                Float
+                Wavenumber
+            r:
+                Numpy Array
+                Ring radius, in kilometers.
+            r0:
+                Float:
+                Ring radius of the center of the window, kilometers.
+            cbd:
+                Float
+                Cosine(B) * D
+            d2:
+                Float
+                The square of D.
+            cp0:
+                Float
+                Cosine(phi0)
+            sp0:
+                Float
+                Sine(phi0)
+            cp:
+                Numpy Array
+                Cosine(phi)
+            sp:
+                Numpy Array
+                Sine(phi)
+            w:
+                Numpy Array
+                Window width as a function of
+                ring radius. While this value is
+                not needed for the "Full" psi function,
+                it is needed in various MTR approximations.
+                To ease the flow of the fresnel_transform
+                function, all psi functions have the same
+                parameters.
+            nw:
+                Float
+                Number of points in w. Same comment as w.
+        Outputs:
+            psi:
+                Real Numpy Array
+                Geometric Function from Fresnel Kernel.
+        Dependencies:
+            [1] numpy
+    """
+    # Compute Xi variable (MTR86 Equation 4b).
+    xi = cbd * (r0 * cp0 - r * cp)
+
+    # Compute Eta variable (MTR86 Equation 4c).
+    eta = (r0*r0 + r*r - 2.0*r*r0*(sp*sp0 + cp*cp0)) / d2
+    psi_vals = kD * (np.sqrt(1.0 + 2.0 * xi + eta) - (1.0 + xi))
+    return psi_vals
+
+def psi_quadratic_fast(kD, r, r0, cbd, d2, cp0, sp0, cp, sp, w, nw):
+    """
+        Function:
+            psi_quadratic_fast
+        Purpose:
+            Compute psi (MTR Equation 4) with
+            no error checks using precomputed
+            sines and cosines of various
+            parameters using the MTR quadratic
+            polynomial approximation.
+        Arguments:
+            kD:
+                Float
+                Wavenumber
+            r:
+                Numpy Array
+                Ring radius, in kilometers.
+            r0:
+                Float:
+                Ring radius of the center of the window, kilometers.
+            cbd:
+                Float
+                Cosine(B) * D
+            d2:
+                Float
+                The square of D.
+            cp0:
+                Float
+                Cosine(phi0)
+            sp0:
+                Float
+                Sine(phi0)
+            cp:
+                Numpy Array
+                Cosine(phi)
+            sp:
+                Numpy Array
+                Sine(phi)
+            w:
+                Numpy Array
+                Window width as a function of
+                ring radius.
+            nw:
+                Float
+                Number of points in w.
+        Outputs:
+            psi:
+                Real Numpy Array
+                Geometric Function from Fresnel Kernel.
+        Dependencies:
+            [1] numpy
+    """
+    # Compute psi.
+    psi_full = self.__psi_func(kD, r, r0, cbd, d2, cp0, sp0, cp, sp, w, nw)
+
+    # Compute shifted ring radius and window width.
+    x = (r-r0)
+    w = np.max(x)-np.min(x)
+
+    # Compute midpoints and endpoints.
+    n1 = 0
+    n2 = np.min((r0 - w/4 <= r).nonzero())
+    n3 = np.max((r0 + w/4 >= r).nonzero())
+    n4 = nw-1
+
+    # Compute variables for psi polynomials.
+    d_psi_half = psi_full[n3]-psi_full[n2]
+    d_psi_full = psi_full[n4] - psi_full[n1]
+    a_psi_half = (psi_full[n3]+psi_full[n2])/2
+    a_psi_full = (psi_full[n1]+psi_full[n4])/2
+
+    # Compute coefficients for the polynomial expansion.
+    c1 = (8.0*d_psi_half-d_psi_full)/(3.0*w)
+    c2 = 4.0*(16.0*a_psi_half-a_psi_full)/(3.0*w*w)
+
+    # Compute quartic psi approximation.
+    psi_vals = (c1 + c2*x)*x
+    return psi_vals
+
+def psi_cubic_fast(kD, r, r0, cbd, d2, cp0, sp0, cp, sp, w, nw):
+    """
+        Function:
+            psi_cubic_fast
+        Purpose:
+            Compute psi (MTR Equation 4) with
+            no error checks using precomputed
+            sines and cosines of various
+            parameters using the MTR cubic
+            polynomial approximation.
+        Arguments:
+            kD:
+                Float
+                Wavenumber
+            r:
+                Numpy Array
+                Ring radius, in kilometers.
+            r0:
+                Float:
+                Ring radius of the center of the window, kilometers.
+            cbd:
+                Float
+                Cosine(B) * D
+            d2:
+                Float
+                The square of D.
+            cp0:
+                Float
+                Cosine(phi0)
+            sp0:
+                Float
+                Sine(phi0)
+            cp:
+                Numpy Array
+                Cosine(phi)
+            sp:
+                Numpy Array
+                Sine(phi)
+            w:
+                Numpy Array
+                Window width as a function of
+                ring radius.
+            nw:
+                Float
+                Number of points in w.
+        Outputs:
+            psi:
+                Real Numpy Array
+                Geometric Function from Fresnel Kernel.
+        Dependencies:
+            [1] numpy
+    """
+    # Compute psi.
+    psi_full = self.__psi_func(kD, r, r0, cbd, d2, cp0, sp0, cp, sp, w, nw)
+
+    # Compute shifted ring radius and window width.
+    x = (r-r0)
+    w = np.max(x)-np.min(x)
+
+    # Compute midpoints and endpoints.
+    n1 = 0
+    n2 = np.min((r0 - w/4 <= r).nonzero())
+    n3 = np.max((r0 + w/4 >= r).nonzero())
+    n4 = nw-1
+
+    # Compute variables for psi polynomials.
+    d_psi_half = psi_full[n3]-psi_full[n2]
+    d_psi_full = psi_full[n4] - psi_full[n1]
+    a_psi_half = (psi_full[n3]+psi_full[n2])/2
+    a_psi_full = (psi_full[n1]+psi_full[n4])/2
+
+    # Compute coefficients for the polynomial expansion.
+    c1 = (8.0*d_psi_half-d_psi_full)/(3.0*w)
+    c2 = 4.0*(16.0*a_psi_half-a_psi_full)/(3.0*w*w)
+    c3 = 16.0*(d_psi_full-2.0*d_psi_half)/(3.0*w*w*w)
+
+    # Compute quartic psi approximation.
+    psi_vals = x*(c1 + x*(c2+x*c3))
+    return psi_vals
+
+def psi_quartic_fast(kD, r, r0, cbd, d2, cp0, sp0, cp, sp, w, nw):
+    """
+        Function:
+            psi_quartic_fast
+        Purpose:
+            Compute psi (MTR Equation 4) with
+            no error checks using precomputed
+            sines and cosines of various
+            parameters using the MTR quartic
+            polynomial approximation.
+        Arguments:
+            kD:
+                Float
+                Wavenumber
+            r:
+                Numpy Array
+                Ring radius, in kilometers.
+            r0:
+                Float:
+                Ring radius of the center of the window, kilometers.
+            cbd:
+                Float
+                Cosine(B) * D
+            d2:
+                Float
+                The square of D.
+            cp0:
+                Float
+                Cosine(phi0)
+            sp0:
+                Float
+                Sine(phi0)
+            cp:
+                Numpy Array
+                Cosine(phi)
+            sp:
+                Numpy Array
+                Sine(phi)
+            w:
+                Numpy Array
+                Window width as a function of
+                ring radius.
+            nw:
+                Float
+                Number of points in w.
+        Outputs:
+            psi:
+                Real Numpy Array
+                Geometric Function from Fresnel Kernel.
+        Dependencies:
+            [1] numpy
+    """
+    # Compute psi.
+    psi_full = self.__psi_func(kD, r, r0, cbd, d2, cp0, sp0, cp, sp, w, nw)
+
+    # Compute shifted ring radius and window width.
+    x = (r-r0)
+    w = np.max(x)-np.min(x)
+
+    # Compute midpoints and endpoints.
+    n1 = 0
+    n2 = np.min((r0 - w/4 <= r).nonzero())
+    n3 = np.max((r0 + w/4 >= r).nonzero())
+    n4 = nw-1
+
+    # Compute variables for psi polynomials.
+    d_psi_half = psi_full[n3]-psi_full[n2]
+    d_psi_full = psi_full[n4] - psi_full[n1]
+    a_psi_half = (psi_full[n3]+psi_full[n2])/2
+    a_psi_full = (psi_full[n1]+psi_full[n4])/2
+
+    # Compute coefficients for the polynomial expansion.
+    c1 = (8.0*d_psi_half-d_psi_full)/(3.0*w)
+    c2 = 4.0*(16.0*a_psi_half-a_psi_full)/(3.0*w*w)
+    c3 = 16.0*(d_psi_full-2.0*d_psi_half)/(3.0*w*w*w)
+    c4 = 64.0*(a_psi_full-4.0*a_psi_half)/(3.0*w*w*w*w)
+
+    # Compute quartic psi approximation.
+    psi_vals = x*(c1 + x*(c2+x*(c3+x*c4)))
+    return psi_vals
+
+def psi_d1_phi(r, r0, d, b, phi, phi0, error_check=True):
+    """
+        Function:
+            psi_d1_phi
+        Purpose:
+            Calculate dpsi/dphi from geometric variables.
         Variables:
-            r:    Ring radius variable (Integrated over). km.
-            r0:   Ring intercept point. km.
-            d:    RIP-Spacecraft distance. km.
-            b:    The ring opening angle.
-            phi:  The ring azimuth angle (variable).
-            phi0: The ring azimuth angle (value).
+            r:
+                Numpy Array
+                Ring radius variable, in kilometers.
+            r0:
+                Float
+                Ring intercept point, in kilometers.
+            d:
+                Numpy Array
+                RIP-Spacecraft distance in kilometers.
+            b:
+                Numpy Array
+                The ring opening angle, in radians.
+            phi:
+                Numpy Array
+                The ring azimuth angle or r, in radians.
+            phi0:
+                Float or Numpy Array
+                The ring azimuth angle for r0, in radians.
         History:
             Translated from IDL: RJM - 2018/05/15 7:06 P.M.
     """
     if error_check:
-        if (not check_real(r)):
-            sys.exit("r must be real valued")
-        if (not check_real(r0)):
-            sys.exit("r0 must be real valued")
-        if (not check_real(d)):
-            sys.exit("d must be real valued")
-        if (not check_real(b)):
-            sys.exit("b must be real valued")
-        if (not check_real(phi)):
-            sys.exit("phi must be real valued")
-        if (not check_real(phi0)):
-            sys.exit("phi0 must be real valued")
-    else: pass
-    cb   = np.cos(b)
-    sp   = np.sin(phi)
-    cp   = np.cos(phi)
-    sp0  = np.sin(phi0)
-    cp0  = np.cos(phi0)
-    xi   = (cb / d) * (r0*cp0 - r*cp)
-    eta  = (r0**2 + r**2 - 2.0*r*r0*(sp*sp0 + cp*cp0)) / (d**2)
-    v1   = r * cb * sp / d
-    v2   = 2.0 * r * r0 * (sp*cp0 - sp0*cp) / (d**2)
+        try:
+            r = np.array(r)
+        except (ValueError, TypeError):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.psi_d1_phi:\n"
+                "\t\tFirst input could not be converted\n"
+                "\t\tinto a numpy array.\n"
+            )
+
+        if (not np.all(np.isreal(r))):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.psi_d1_phi:\n"
+                "\t\tFirst input must be an array\n"
+                "\t\tof floating point number.\n"
+            )
+        elif (np.min(r) < 0.0):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.psi_d1_phi:\n"
+                "\t\tFirst input must be an array\n"
+                "\t\tof positive numbers.\n"
+            )
+        else:
+            pass
+        
+        if (not isinstance(r0, float)):
+            try:
+                r0 = float(r0)
+            except (TypeError, ValueError):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffrec Subpackage\n"
+                    "\tspecial_functions.psi_d1_phi:\n"
+                    "\t\tSecond input must be a positive\n"
+                    "\t\tfloating point number.\n"
+                )
+        else:
+            pass
+        
+        if (np.min(r0) < 0.0):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.psi_d1_phi:\n"
+                "\t\tSecond input must be a positive\n"
+                "\t\tfloating point number.\n"
+            )
+        else:
+            pass
+
+        try:
+            d = np.array(d)
+        except (ValueError, TypeError):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.psi_d1_phi:\n"
+                "\t\tThird input could not be converted\n"
+                "\t\tinto a numpy array.\n"
+            )
+
+        if (not np.all(np.isreal(d))):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.psi_d1_phi:\n"
+                "\t\tThird input must be an array\n"
+                "\t\tof floating point number.\n"
+            )
+        elif (np.min(d) < 0.0):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.psi_d1_phi:\n"
+                "\t\tThird input must be an array\n"
+                "\t\tof positive numbers.\n"
+            )
+        else:
+            pass
+
+        try:
+            b = np.array(b)
+        except (ValueError, TypeError):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.psi_d1_phi:\n"
+                "\t\tFourth input could not be converted\n"
+                "\t\tinto a numpy array.\n"
+            )
+
+        if (not np.all(np.isreal(b))):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.psi_d1_phi:\n"
+                "\t\tFourth input must be an array\n"
+                "\t\tof floating point number.\n"
+            )
+        else:
+            pass
+
+        try:
+            phi = np.array(phi)
+        except (ValueError, TypeError):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.psi_d1_phi:\n"
+                "\t\tFifth input could not be converted\n"
+                "\t\tinto a numpy array.\n"
+            )
+
+        if (not np.all(np.isreal(phi))):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.psi_d1_phi:\n"
+                "\t\tFifth input must be an array\n"
+                "\t\tof floating point number.\n"
+            )
+        else:
+            pass
+
+        if (not isinstance(phi0, float)):
+            try:
+                phi0 = float(phi0)
+            except (TypeError, ValueError):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffrec Subpackage\n"
+                    "\tspecial_functions.psi_d1_phi:\n"
+                    "\t\tSecond input must be a positive\n"
+                    "\t\tfloating point number.\n"
+                )
+        else:
+            pass
+    else:
+        pass
+
+    cb = np.cos(b)
+    sp = np.sin(phi)
+    cp = np.cos(phi)
+    sp0 = np.sin(phi0)
+    cp0 = np.cos(phi0)
+    xi = (cb / d) * (r0*cp0 - r*cp)
+    eta = (r0*r0 + r*r - 2.0*r*r0*(sp*sp0 + cp*cp0)) / (d*d)
+    v1 = r * cb * sp / d
+    v2 = 2.0 * r * r0 * (sp*cp0 - sp0*cp) / (d*d)
     psi_d1_phi_vals = (2.0*v1 + v2) / (2.0 * np.sqrt(1.0 + 2.0*xi + eta)) - v1
+    print("Bob")
     return psi_d1_phi_vals
 
-def psi_d2_phi(r,r0,d,b,phi,phi0,error_check=True):
+def psi_d2_phi(r, r0, d, b, phi, phi0, error_check=True):
     """
-        Function: psi_d2_phi_fast
-        Purpose:  Calculate second derivative of psi with respect to phi from
-        geometry variables using previously computed sines and cosines.
+        Function:
+            psi_d2_phi
+        Purpose:
+            Calculate dpsi/dphi from geometric variables.
         Variables:
-            r:    Ring radius variable (Integrated over). km.
-            r0:   Ring intercept point. km.
-            d:    RIP-Spacecraft distance. km.
-            cb:   The cosine of the ring opening angle.
-            cp:   The cosine of the ring azimuth angle (variable).
-            sp:   The sine of the ring azimuth angle (variable).
-            cp0:  The cosine of the ring azimuth angle (value).
-            sp0:  The sine of the ring azimuth angle (value).
-        History:
-            Translated from IDL: RJM - 2018/05/15 5:36 P.M.
+            r:
+                Numpy Array
+                Ring radius variable, in kilometers.
+            r0:
+                Float
+                Ring intercept point, in kilometers.
+            d:
+                Numpy Array
+                RIP-Spacecraft distance in kilometers.
+            b:
+                Numpy Array
+                The ring opening angle, in radians.
+            phi:
+                Numpy Array
+                The ring azimuth angle or r, in radians.
+            phi0:
+                Float or Numpy Array
+                The ring azimuth angle for r0, in radians.
     """
     if error_check:
-        if (not check_real(r)):
-            sys.exit("r must be real valued")
-        if (not check_real(r0)):
-            sys.exit("r0 must be real valued")
-        if (not check_real(d)):
-            sys.exit("d must be real valued")
-        if (not check_real(b)):
-            sys.exit("b must be real valued")
-        if (not check_real(phi)):
-            sys.exit("phi must be real valued")
-        if (not check_real(phi0)):
-            sys.exit("phi0 must be real valued")
-    else: pass
+        try:
+            r = np.array(r)
+        except (ValueError, TypeError):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.psi_d2_phi:\n"
+                "\t\tFirst input could not be converted\n"
+                "\t\tinto a numpy array.\n"
+            )
+
+        if (not np.all(np.isreal(r))):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.psi_d2_phi:\n"
+                "\t\tFirst input must be an array\n"
+                "\t\tof floating point number.\n"
+            )
+        elif (np.min(r) < 0.0):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.psi_d2_phi:\n"
+                "\t\tFirst input must be an array\n"
+                "\t\tof positive numbers.\n"
+            )
+        else:
+            pass
+        
+        if (not isinstance(r0, float)):
+            try:
+                r0 = float(r0)
+            except (TypeError, ValueError):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffrec Subpackage\n"
+                    "\tspecial_functions.psi_d2_phi:\n"
+                    "\t\tSecond input must be a positive\n"
+                    "\t\tfloating point number.\n"
+                )
+        else:
+            pass
+        
+        if (np.min(r0) < 0.0):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.psi_d2_phi:\n"
+                "\t\tSecond input must be a positive\n"
+                "\t\tfloating point number.\n"
+            )
+        else:
+            pass
+
+        try:
+            r = np.array(d)
+        except (ValueError, TypeError):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.psi_d2_phi:\n"
+                "\t\tThird input could not be converted\n"
+                "\t\tinto a numpy array.\n"
+            )
+
+        if (not np.all(np.isreal(d))):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.psi_d2_phi:\n"
+                "\t\tThird input must be an array\n"
+                "\t\tof floating point number.\n"
+            )
+        elif (np.min(d) < 0.0):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.psi_d2_phi:\n"
+                "\t\tThird input must be an array\n"
+                "\t\tof positive numbers.\n"
+            )
+        else:
+            pass
+
+        try:
+            r = np.array(b)
+        except (ValueError, TypeError):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.psi_d2_phi:\n"
+                "\t\tFourth input could not be converted\n"
+                "\t\tinto a numpy array.\n"
+            )
+
+        if (not np.all(np.isreal(b))):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.psi_d2_phi:\n"
+                "\t\tFourth input must be an array\n"
+                "\t\tof floating point number.\n"
+            )
+        else:
+            pass
+
+        try:
+            r = np.array(phi)
+        except (ValueError, TypeError):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.psi_d2_phi:\n"
+                "\t\tFifth input could not be converted\n"
+                "\t\tinto a numpy array.\n"
+            )
+
+        if (not np.all(np.isreal(phi))):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.psi_d2_phi:\n"
+                "\t\tFifth input must be an array\n"
+                "\t\tof floating point number.\n"
+            )
+        else:
+            pass
+
+        if (not isinstance(phi0, float)):
+            try:
+                phi0 = float(phi0)
+            except (TypeError, ValueError):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffrec Subpackage\n"
+                    "\tspecial_functions.psi_d2_phi:\n"
+                    "\t\tSecond input must be a positive\n"
+                    "\t\tfloating point number.\n"
+                )
+        else:
+            pass
+    else:
+        pass
     cb   = np.cos(b)
     sp   = np.sin(phi)
     cp   = np.cos(phi)
@@ -635,82 +1413,266 @@ def psi_d2_phi(r,r0,d,b,phi,phi0,error_check=True):
     psi_d2_phi_vals = dphia - dphib
     return psi_d2_phi_vals
 
-def fresnel_inverse(T,ker,DX,f_scale):
+def fresnel_inverse(T_hat, ker, dx, f_scale):
     """
-        Function: fresnel_transform
-        Purpose:  Compute the approximate inverse of a Fresnel transform.
-            Variables:
-                T:   The input function (Diffraction data).
-                KER: The Fresnel kernel.
-                dx:  The size of a bin (r[1]-r[0]).
-                f_scale: The Frensel scale. If not set, a default of 1 is used.
-        Output:
-            T_HAT:   The forward model for the diffraction pattern.
-        History:
-            Translated from IDL: RJM - 2018/04/15 12:23 P.M.
+        Method:
+            __fresinv
+        Purpose:
+            Compute the approximation Fresnel
+            Inverse (MTR86 Equation 15)
+        Arguments:
+            T_hat:
+                Complex Numpy Array
+                The complex transmittance of the
+                normalized diffraction data.
+            ker:
+                Complex Numpy Array
+                The Fresnel Kernel.
+            dx:
+                Positive Float
+                The spacing between points in the window.
+                This is equivalent to the sample spacing.
+                This value is in kilometers.
+            f_scale
+                Real Numpy Array
+                The Fresnel Scale as a function of
+                ring radius (km).
+        Outputs:
+            T:
+                Complex Number
+                The fresnel inversion about the center
+                of the Fresnel Kernel.
+        Dependencies:
+            [1] numpy
     """
-    if (not check_real(T)) and (not check_complex(T)):
-        sys.exit('T must be real or complex')
-    if (not check_real(ker)) and (not check_complex(ker)):
-        sys.exit('Ker must be real or complex')
-    if (np.size(T) != np.size(ker)):
-        sys.exit('T and ker have a different number of elements')
-    if (not check_pos_real(DX)):
-        sys.exit('DX must be a positive number')
-    if (not check_pos_real(f_scale)):
-        sys.exit('f_scale must be positive')
-    T_hat = np.sum(ker * T) * DX * (1.0-1.0j) / (2. * f_scale)
-    return T_hat
-
-def fresnel_inverse_fft(T_hat,ker,dx,f_scale,error_check=True):
-    if error_check:
-        if (not check_real(T_hat)) and (not check_complex(T_hat)):
-            sys.exit('T_hat must be real or complex')
-        if (not check_real(ker)) and (not check_complex(ker)):
-            sys.exit('Ker must be real or complex')
-        if (np.size(T_hat) != np.size(ker)):
-            sys.exit('T_hat and ker have a different number of elements')
-        if (not check_pos_real(dx)):
-            sys.exit('DX must be a positive number')
-        if (not check_pos_real(f_scale)):
-            sys.exit('F_SCALE must be positive')
-    else: pass
-    nw = np.size(T_hat)
-    fft_t_hat       = np.fft.fft(T_hat)
-    fft_conv        = np.fft.fft(ker)
-    inv_t_hat       = np.fft.ifftshift(np.fft.ifft(fft_t_hat*fft_conv))
-    inv_t_hat      *= dx*(np.complex(1.0,1.0))/(2.0*f_scale)
-    T               = inv_t_hat[int((nw-1)/2)]
+    T = np.sum(ker * T_hat) * dx * (1.0+1.0j) / (2.0 * f_scale)
     return T
 
-def psi_func(r,r0,d,b,phi,phi0,error_check=True):
+def fresnel_inverse_fft(T_hat, ker, dx, f_scale):
     """
-        Function: psi_fast
-        Purpose:  Calculate psi from geometry variables.
+        Method:
+            __fresinvfft
+        Purpose:
+            Compute the approximation Fresnel Inverse
+            (MTR86 Equation 15) using FFTs.
+        Arguments:
+            T_hat:
+                Complex Numpy Array
+                The complex transmittance of the
+                normalized diffraction data.
+            ker:
+                Complex Numpy Array
+                The Fresnel Kernel.
+            dx:
+                Positive Float
+                The spacing between points in the window.
+                This is equivalent to the sample spacing.
+                This value is in kilometers.
+            f_scale
+                Real Numpy Array
+                The Fresnel Scale as a function of
+                ring radius (km).
+        Outputs:
+            T:
+                Complex Number
+                The fresnel inversion about the center
+                of the Fresnel Kernel.
+        Dependencies:
+            [1] numpy
+    """
+    # Number of points in window.
+    nw = np.size(T_hat)
+
+    # FFT of data.
+    fft_t_hat = np.fft.fft(T_hat)
+
+    # FFT of weight Fresnel Kernel.
+    fft_conv = np.fft.fft(ker)
+
+    # Inverse FFT, assuming the convolution theorem is valid.
+    inv_t_hat = np.fft.ifftshift(np.fft.ifft(fft_t_hat*fft_conv))
+
+    # Scale factor outside of integral.
+    inv_t_hat *= dx*(1.0+1.0j)/(2.0*f_scale)
+
+    # Return midpoint value.
+    T = inv_t_hat[int((nw-1)/2)]
+    return T
+
+def psi_func(r, r0, d, b, phi, phi0, error_check=True):
+    """
+        Function:
+            psi_func
+        Purpose:
+            Calculate psi from geometry variables.
         Variables:
-            r:    Ring radius variable.
-            r0:   Ring intercept point.
-            D:    RIP-Spacecraft distance.
-            b:    Ring opening angle.
-            phi:  Ring azimuth angle (variable).
-            phi0: Ring azimuth angle (variable).
+            r:
+                Numpy Array
+                Ring radius variable, in kilometers.
+            r0:
+                Float
+                Ring intercept point, in kilometers.
+            d:
+                Numpy Array
+                RIP-Spacecraft distance in kilometers.
+            b:
+                Numpy Array
+                The ring opening angle, in radians.
+            phi:
+                Numpy Array
+                The ring azimuth angle or r, in radians.
+            phi0:
+                Float or Numpy Array
+                The ring azimuth angle for r0, in radians.
         History:
             Translated from IDL: RJM - 2018/05/15 7:48 P.M.
     """
     if error_check:
-        if (not check_real(r)):
-            sys.exit("r must be real valued")
-        if (not check_real(r0)):
-            sys.exit("r0 must be real valued")
-        if (not check_real(d)):
-            sys.exit("d must be real valued")
-        if (not check_real(b)):
-            sys.exit("b must be real valued")
-        if (not check_real(phi)):
-            sys.exit("phi must be real valued")
-        if (not check_real(phi0)):
-            sys.exit("phi0 must be real valued")
-    else: pass
+        try:
+            r = np.array(r)
+        except (ValueError, TypeError):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.psi_d1_phi:\n"
+                "\t\tFirst input could not be converted\n"
+                "\t\tinto a numpy array.\n"
+            )
+
+        if (not np.all(np.isreal(r))):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.psi_d1_phi:\n"
+                "\t\tFirst input must be an array\n"
+                "\t\tof floating point number.\n"
+            )
+        elif (np.min(r) < 0.0):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.psi_d1_phi:\n"
+                "\t\tFirst input must be an array\n"
+                "\t\tof positive numbers.\n"
+            )
+        else:
+            pass
+        
+        if (not isinstance(r0, float)):
+            try:
+                r0 = float(r0)
+            except (TypeError, ValueError):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffrec Subpackage\n"
+                    "\tspecial_functions.psi_d1_phi:\n"
+                    "\t\tSecond input must be a positive\n"
+                    "\t\tfloating point number.\n"
+                )
+        else:
+            pass
+        
+        if (np.min(r0) < 0.0):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.psi_d1_phi:\n"
+                "\t\tSecond input must be a positive\n"
+                "\t\tfloating point number.\n"
+            )
+        else:
+            pass
+
+        try:
+            d = np.array(d)
+        except (ValueError, TypeError):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.psi_d1_phi:\n"
+                "\t\tThird input could not be converted\n"
+                "\t\tinto a numpy array.\n"
+            )
+
+        if (not np.all(np.isreal(d))):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.psi_d1_phi:\n"
+                "\t\tThird input must be an array\n"
+                "\t\tof floating point number.\n"
+            )
+        elif (np.min(d) < 0.0):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.psi_d1_phi:\n"
+                "\t\tThird input must be an array\n"
+                "\t\tof positive numbers.\n"
+            )
+        else:
+            pass
+
+        try:
+            b = np.array(b)
+        except (ValueError, TypeError):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.psi_d1_phi:\n"
+                "\t\tFourth input could not be converted\n"
+                "\t\tinto a numpy array.\n"
+            )
+
+        if (not np.all(np.isreal(b))):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.psi_d1_phi:\n"
+                "\t\tFourth input must be an array\n"
+                "\t\tof floating point number.\n"
+            )
+        else:
+            pass
+
+        try:
+            phi = np.array(phi)
+        except (ValueError, TypeError):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.psi_d1_phi:\n"
+                "\t\tFifth input could not be converted\n"
+                "\t\tinto a numpy array.\n"
+            )
+
+        if (not np.all(np.isreal(phi))):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.psi_d1_phi:\n"
+                "\t\tFifth input must be an array\n"
+                "\t\tof floating point number.\n"
+            )
+        else:
+            pass
+
+        if (not isinstance(phi0, float)):
+            try:
+                phi0 = float(phi0)
+            except (TypeError, ValueError):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffrec Subpackage\n"
+                    "\tspecial_functions.psi_d1_phi:\n"
+                    "\t\tSecond input must be a positive\n"
+                    "\t\tfloating point number.\n"
+                )
+        else:
+            pass
+    else:
+        pass
+
     cb   = np.cos(b)
     sp   = np.sin(phi)
     cp   = np.cos(phi)
@@ -721,7 +1683,7 @@ def psi_func(r,r0,d,b,phi,phi0,error_check=True):
     psi_vals   = np.sqrt(1.0 + 2.0 * xi + eta) - (1.0 + xi)
     return psi_vals
 
-def resolution_inverse(x):
+def resolution_inverse(x, error_check):
     """
         Function:
             resolution_inverse
@@ -762,51 +1724,54 @@ def resolution_inverse(x):
             Translated from IDL: RJM - 2018/05/15 1:49 P.M.
             Added error checks: RJM - 2018/09/19 6:57 P.M.
     """
-    y = x
-    try:
-        x = np.array(x)
-        if (not np.all(np.isreal(x))) and (not np.all(np.iscomplex(x))):
+    if error_check:
+        y = x
+        try:
+            x = np.array(x)
+            if (not np.all(np.isreal(x))) and (not np.all(np.iscomplex(x))):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\tspecial_function.resolution_inverse:\n"
+                    "\t\tInput must be a real or complex valued numpy array.\n"
+                    "\t\tThe elements of your array have type: %s"
+                    % (x.dtype)
+                )
+            else:
+                del y
+        except (TypeError, ValueError) as errmes:
             raise TypeError(
                 "\n\tError Encountered:\n"
                 "\trss_ringoccs: Diffcorr Subpackage\n"
                 "\tspecial_function.resolution_inverse:\n"
                 "\t\tInput must be a real or complex valued numpy array.\n"
-                "\t\tThe elements of your array have type: %s"
-                % (x.dtype)
+                "\t\tYour input has type: %s\n"
+                "\tOriginal Error Mesage: %s\n"
+                % (type(y).__name__, errmes)
+            )
+        if (np.min(np.real(x)) <= 1.0):
+            raise ValueError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\tspecial_function.resolution_inverse:\n"
+                "\t\tThis function is only defined for inputs\n"
+                "\t\twhose real part is greater than 1.\n"
+                "\t\tYour input has real minimum: %f\n"
+                % (np.min(np.real(x)))
             )
         else:
-            del y
-    except (TypeError, ValueError) as errmes:
-        raise TypeError(
-            "\n\tError Encountered:\n"
-            "\trss_ringoccs: Diffcorr Subpackage\n"
-            "\tspecial_function.resolution_inverse:\n"
-            "\t\tInput must be a real or complex valued numpy array.\n"
-            "\t\tYour input has type: %s\n"
-            "\tOriginal Error Mesage: %s\n"
-            % (type(y).__name__, errmes)
-        )
-    if (np.min(np.real(x)) <= 1.0):
-        raise ValueError(
-            "\n\tError Encountered:\n"
-            "\trss_ringoccs: Diffcorr Subpackage\n"
-            "\tspecial_function.resolution_inverse:\n"
-            "\t\tThis function is only defined for inputs\n"
-            "\t\twhose real part is greater than 1.\n"
-            "\t\tYour input has real minimum: %f\n"
-            % (np.min(np.real(x)))
-        )
-    else:
-        P1 = x/(1.0-x)
-        P2 = P1*np.exp(P1)
-        f = lambertw(P2)-P1
+            pass
+
+    P1 = x/(1.0-x)
+    P2 = P1*np.exp(P1)
+    f = lambertw(P2)-P1
 
     if np.all(np.isreal(x)):
         f = np.real(f)
 
     return f
 
-def fresnel_cos(x):
+def fresnel_cos(x, error_check=True):
     """
         Function:
             fresnel_cos
@@ -854,37 +1819,42 @@ def fresnel_cos(x):
             Allow complex arguments: RJM - 2018/05/16 1:25 P.M.
             Updated and added error check: RJM - 2018/09/19 7:00 P.M.
     """
-    y = x
-    try:
-        x = np.array(x)
-        if (not np.all(np.isreal(x))) and (not np.all(np.iscomplex(x))):
+    if error_check:
+        y = x
+        try:
+            x = np.array(x)
+            if (not np.all(np.isreal(x))) and (not np.all(np.iscomplex(x))):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\tspecial_functions.fresnel_cos:\n"
+                    "\t\tInput must be a real or complex valued numpy array.\n"
+                    "\t\tThe elements of your array have type: %s"
+                    % (x.dtype)
+                )
+            else:
+                del y
+        except (TypeError, ValueError) as errmes:
             raise TypeError(
                 "\n\tError Encountered:\n"
                 "\trss_ringoccs: Diffcorr Subpackage\n"
-                "\tspecial_functions.fresnel_cos:\n"
+                "\tspecial_function.fresnel_cos:\n"
                 "\t\tInput must be a real or complex valued numpy array.\n"
-                "\t\tThe elements of your array have type: %s"
-                % (x.dtype)
+                "\t\tYour input has type: %s\n"
+                "\tOriginal Error Mesage: %s\n"
+                % (type(y).__name__, errmes)
             )
-        else:
-            del y
-    except (TypeError, ValueError) as errmes:
-        raise TypeError(
-            "\n\tError Encountered:\n"
-            "\trss_ringoccs: Diffcorr Subpackage\n"
-            "\tspecial_function.fresnel_cos:\n"
-            "\t\tInput must be a real or complex valued numpy array.\n"
-            "\t\tYour input has type: %s\n"
-            "\tOriginal Error Mesage: %s\n"
-            % (type(y).__name__, errmes)
-        )
+    else:
+        pass
+
     f_cos = ((0.25-0.25j)*erf((1.0+1.0j)*x*SQRT_PI_2)+
-            (0.25+0.25j)*erf((1.0-1.0j)*x*SQRT_PI_2))
+             (0.25+0.25j)*erf((1.0-1.0j)*x*SQRT_PI_2))
+
     if (np.isreal(x).all()):
         f_cos = np.real(f_cos)
     return f_cos
 
-def fresnel_sin(x):
+def fresnel_sin(x, error_check=True):
     """
         Function:
             fresnel_sin
@@ -932,32 +1902,37 @@ def fresnel_sin(x):
             Allow complex arguments: RJM - 2018/05/16 1:26 P.M.
             Updated and added error check: RJM - 2018/09/19 7:01 P.M.
     """
-    y = x
-    try:
-        x = np.array(x)
-        if (not np.all(np.isreal(x))) and (not np.all(np.iscomplex(x))):
+    if error_check:
+        y = x
+        try:
+            x = np.array(x)
+            if (not np.all(np.isreal(x))) and (not np.all(np.iscomplex(x))):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\tspecial_function.fresnel_cos:\n"
+                    "\t\tInput must be a real or complex valued numpy array.\n"
+                    "\t\tThe elements of your array have type: %s"
+                    % (x.dtype)
+                )
+            else:
+                del y
+        except (TypeError, ValueError) as errmes:
             raise TypeError(
                 "\n\tError Encountered:\n"
                 "\trss_ringoccs: Diffcorr Subpackage\n"
                 "\tspecial_function.fresnel_cos:\n"
                 "\t\tInput must be a real or complex valued numpy array.\n"
-                "\t\tThe elements of your array have type: %s"
-                % (x.dtype)
+                "\t\tYour input has type: %s\n"
+                "\tOriginal Error Mesage: %s\n"
+                % (type(y).__name__, errmes)
             )
-        else:
-            del y
-    except (TypeError, ValueError) as errmes:
-        raise TypeError(
-            "\n\tError Encountered:\n"
-            "\trss_ringoccs: Diffcorr Subpackage\n"
-            "\tspecial_function.fresnel_cos:\n"
-            "\t\tInput must be a real or complex valued numpy array.\n"
-            "\t\tYour input has type: %s\n"
-            "\tOriginal Error Mesage: %s\n"
-            % (type(y).__name__, errmes)
-        )
+    else:
+        pass
+
     f_sin = ((0.25+0.25j)*erf((1.0+1.0j)*x*SQRT_PI_2)+
-            (0.25-0.25j)*erf((1.0-1.0j)*x*SQRT_PI_2))
+             (0.25-0.25j)*erf((1.0-1.0j)*x*SQRT_PI_2))
+
     if (np.isreal(x).all()):
         f_sin = np.real(f_sin)
     return f_sin
@@ -1133,8 +2108,8 @@ def double_slit_diffraction_solve(x, z, a, d):
             % (type(a).__name__)
             )
     f1 = np.sinc(a*x/z)*np.sinc(a*x/z)
-    f2 = np.sin(2.0*np.pi*d*x/z)*np.sin(2.0*np.pi*d*x/z)
-    f3 = 4.0*np.sin(np.pi*d*x/z)*np.sin(np.pi*d*x/z)
+    f2 = np.sin(TWO_PI*d*x/z)*np.sin(TWO_PI*d*x/z)
+    f3 = 4.0*np.sin(ONE_PI*d*x/z)*np.sin(ONE_PI*d*x/z)
     f = f1*f2/f3
     return f
 

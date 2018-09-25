@@ -167,43 +167,14 @@ class DeltaImpulseDiffraction(object):
         self.phase_rad_vals = phase_rad_vals
         self.f_sky_hz_vals  = SPEED_OF_LIGHT_KM/lambda_vals
         self.nstar          = nstar
-        self.history        = "Bob"
+        self.history        = "Delta Impulse DIffraction Model"
 
-        recdata = diffraction_correction(self,res,rng=rng,
-            wtype=wtype,fwd=fwd,norm=norm,verbose=verbose,
-            bfac=bfac,fft=fft,psitype=psitype)
+        recdata = diffraction_correction(self, res, rng=rng, wtype=wtype,
+                                         fwd=fwd, norm=norm, verbose=verbose,
+                                         bfac=bfac, fft=fft, psitype=psitype)
 
-        self.rho_star           = rho
-        self.rho_km_vals        = recdata.rho_km_vals
-        self.p_norm_vals        = recdata.p_norm_vals
-        self.phase_rad_vals     = recdata.phase_rad_vals
-        self.B_rad_vals         = recdata.B_rad_vals
-        self.D_km_vals          = recdata.D_km_vals
-        self.f_sky_hz_vals      = recdata.f_sky_hz_vals
-        self.phi_rad_vals       = recdata.phi_rad_vals
-        self.rho_dot_kms_vals   = recdata.rho_dot_kms_vals
-        self.T_hat_vals         = recdata.T_hat_vals
-        self.res                = recdata.res
-        self.wtype              = recdata.wtype
-        self.rng                = recdata.rng
-        self.F_km_vals          = recdata.F_km_vals
-        self.w_km_vals          = recdata.w_km_vals
-        self.mu_vals            = recdata.mu_vals
-        self.lambda_sky_km_vals = recdata.lambda_sky_km_vals
-        self.dx_km              = recdata.dx_km
-        self.norm_eq            = recdata.norm_eq
-        self.n_used             = recdata.n_used
-        self.start              = recdata.start
-        self.T_vals             = recdata.T_vals
-        self.power_vals         = recdata.power_vals
-        self.tau_vals           = recdata.tau_vals
-        self.phase_vals         = recdata.phase_vals
-        self.p_norm_fwd_vals    = recdata.p_norm_fwd_vals
-        self.T_hat_fwd_vals     = recdata.T_hat_fwd_vals
-        self.phase_fwd_vals     = recdata.phase_fwd_vals
-        self.norm               = recdata.norm
-        self.fwd                = recdata.fwd
-        self.fft                = recdata.fft
+        self = recdata
+        self.rho_star = rho
 
     def __retrieve_variables(self,geo_dat,verbose):
         if verbose: print("Retrieving Variables...")

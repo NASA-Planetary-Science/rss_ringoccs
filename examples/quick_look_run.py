@@ -39,7 +39,7 @@ for n in range(nres):
     res = res_list[n]
     label = str(res*1000.) + 'm'
     print('Reconstructing at ', label, '...')
-    tau_inst = rss.diffcorr.DiffractionCorrection(dlp_inst, res,
+    tau_inst = rss.diffrec.DiffractionCorrection(dlp_inst, res,
             rng=Maxwell_xrange, verbose=verbose)
     rho = tau_inst.rho_km_vals - 87515.
     tau = tau_inst.tau_vals
@@ -54,4 +54,3 @@ axes[-1].set_xlabel('$\\rho$ - 87515 (km)')
 axes[-1].set_xlim([-45.,45.])
 
 pdb.set_trace()
-

@@ -62,7 +62,7 @@ dlp_inst = rss.calibration.NormDiff(rsr_inst, geo_inst, cal_inst,
         dr_km_desired, verbose=verbose)
 
 # Invert profile for full occultation
-tau_inst = rss.diffcorr.DiffractionCorrection(dlp_inst, res_km,
+tau_inst = rss.diffrec.DiffractionCorrection(dlp_inst, res_km,
         rng=inversion_range, verbose=verbose)
 
 # Plot Huygens ringlet
@@ -112,5 +112,3 @@ plt.tight_layout()
 plt.subplots_adjust(top=0.93)
 
 print('Total run time: ', end_time-start_time)
-
-

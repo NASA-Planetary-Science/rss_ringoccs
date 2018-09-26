@@ -55,7 +55,6 @@ Revisions:
                         - removed try/except for faulty spline orders, add
                           the spline order check when extracting order from 
                           kwarg
-                        - add spline_rep output to get_spline_fit()
 """
 
 import numpy as np
@@ -553,12 +552,11 @@ class Normalization(object):
         except ValueError:
             pass
 
-        self.__pnfp_splrep = spline_rep
-        self.placeholder = spline_rep
+        self.pnfp_splrep = spline_rep
 
         if USE_GUI:
             print('Using GUI')
-            splrep_ori = spline_rep
+            pnfp_coef_ori = spline_rep[1]
             root = Tk()
             power_fit_gui_inst = PowerFitGui(root, self, spm_vals_down,
                 rho_km_vals_down, p_obs_down, spm_fit)
@@ -570,20 +568,32 @@ class Normalization(object):
                 except UnicodeDecodeError:
                     pass
             spline_fit = power_fit_gui_inst.yfit
-            spline_rep_new = power_fit_gui_inst._get_fit()[1]
-            if splrep_ori != spline_rep_new:
-                print('\tPower normalization fit changed within GUI!\n'
-                        + '\tWriting new file...')
-                pnfp = {'knots_spm': spline_rep_new[0],
-                        'spline_coef': spline_rep_new[1],
-                        'spline_order': spline_rep_new[2]}
-                write_intermediate_files(self.__rsr_inst.year,
-                        self.__rsr_inst.doy, self.__rsr_inst.band,
-                        self.__rsr_inst.dsn, self.profdir, 'PNFP', pnfp)
+
+            # If fit was changed during GUI, write new file
+            if len(pnfp_coef_ori) == len(self.pnfp_splrep[1]):
+                if all(pnfp_coef_ori == self.pnfp_splrep[1]) == False:
+                    print('\tPower normalization fit changed within GUI!\n'
+                            + '\tWriting new file...')
+                    pnfp = {'knots_spm': self.pnfp_splrep[0],
+                            'spline_coef': self.pnfp_splrep[1],
+                            'spline_order': self.pnfp_splrep[2]}
+                    write_intermediate_files(self.__rsr_inst.year,
+                            self.__rsr_inst.doy, self.__rsr_inst.band,
+                            self.__rsr_inst.dsn, self.profdir, 'PNFP', pnfp)
+            else:
+                if (pnfp_coef_ori == self.pnfp_splrep[1]) == False:
+                    print('\tPower normalization fit changed within GUI!\n'
+                            + '\tWriting new file...')
+                    pnfp = {'knots_spm': self.pnfp_splrep[0],
+                            'spline_coef': self.pnfp_splrep[1],
+                            'spline_order': self.pnfp_splrep[2]}
+                    write_intermediate_files(self.__rsr_inst.year,
+                            self.__rsr_inst.doy, self.__rsr_inst.band,
+                            self.__rsr_inst.dsn, self.profdir, 'PNFP', pnfp)
 
 
         self.__set_history()
-        return spm_fit, spline_fit, spline_rep
+        return spm_fit, spline_fit#, spline_rep
 
     def __get_default_freespace_ind(self, rho_km_vals_down, freespace_km,
             is_blocked_atm):

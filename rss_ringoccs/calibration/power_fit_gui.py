@@ -257,8 +257,8 @@ class PowerFitGui(Frame):
 
         spm_fit, spline_fit = self.norm_inst.get_spline_fit(
             spline_order=self.fit_deg, knots_spm=self.knots_spm,
-            freespace_spm=self.xlim, USE_GUI=False)
-        return spline_fit
+            freespace_spm=self.xlim, USE_GUI=False, file_search=False)
+        return spline_fit#, spline_rep
 
     def _get_rho_tick_labels(self, spm_tick_labels):
         """

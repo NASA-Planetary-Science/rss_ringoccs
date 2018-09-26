@@ -48,6 +48,13 @@ Revisions:
                             and for selected knots
     2018 Sep 20 - jfong - add file_search kwarg, search file for splrep outputs
                         - add profdir attribute
+    2018 Sep 25 - jfong - remove file_search kwarg from __init__ because
+                          get_spline_fit() is never called within __init__ but
+                          always outside of the function (which needs to be 
+                          addressed later)
+                        - removed try/except for faulty spline orders, add
+                          the spline order check when extracting order from 
+                          kwarg
 """
 
 import numpy as np
@@ -126,8 +133,7 @@ class Normalization(object):
             Recorded information about the run
     """
 
-    def __init__(self, spm_raw, IQ_c_raw, geo_inst, rsr_inst, verbose=False,
-            file_search=True):
+    def __init__(self, spm_raw, IQ_c_raw, geo_inst, rsr_inst, verbose=False):
         """
         Purpose:
         Instantiation defines raw resolution SPM, frequency corrected I
@@ -274,7 +280,7 @@ class Normalization(object):
 
     def get_spline_fit(self, spline_order=None, dt_down=None,
             freespace_spm=None, knots_spm=None, USE_GUI=True, verbose=False,
-            file_search=True):
+            file_search=False):
         """
         Purpose:
         Make spline fit to observed downsampled power at specified set
@@ -345,7 +351,12 @@ class Normalization(object):
 
         # Update defaults if any keyword arguments were specified
         if spline_order is not None:
-            self._spline_order = spline_order
+            if spline_order<1 or spline_order>5:
+                print('WARNING (Normalization.get_spline_fit): Given degree of '
+                        + 'the spline (k) is not supported (1<=k<=5). '
+                        + 'Reverting to degree 2')
+            else:
+                self._spline_order = spline_order
         if dt_down is not None:
             dt_down = abs(dt_down)
             self._dt_down = dt_down
@@ -491,80 +502,37 @@ class Normalization(object):
         #     in case it's ingress, since indices were gotten from rho values,
         #     which are not in order for ingress
         if verbose:
-            print('\tEvaluating spline fiti...')
+            print('\tEvaluating spline fit...')
         ind_sort = np.argsort(spm_vals_free)
         ind_knot_sort = np.argsort(knots_spm_data)
-        try:
-            if file_search:
-                pnfp_file = search_for_file(self.__rsr_inst.year,
+        if file_search:
+            # Search for power normalization fit pickle (PNFP) file
+            pnfp_file = search_for_file(self.__rsr_inst.year,
                     self.__rsr_inst.doy, self.__rsr_inst.band,
                     self.__rsr_inst.dsn, self.profdir, 'PNFP')
-                print('\tExtracting power normalization fit from:\n\t\t'
-                        + '/'.join(pnfp_file.split('/')[0:5]) + '/\n\t\t\t'
-                        + pnfp_file.split('/')[-1])
-                if pnfp_file == 'N/A':
-                    print('WARNING (get_spline_fit()): PNFP file not found!')
-                    spline_rep = splrep(spm_vals_free[ind_sort], 
-                             p_obs_free[ind_sort], k=spline_order, 
-                             t=knots_spm_data[ind_knot_sort])
-                    pnfp = {'spline_order': spline_rep[2],
-                            'spline_coef': spline_rep[1],
-                            'knots_spm': spline_rep[0]}
-                    write_intermediate_files(self.__rsr_inst.year,
-                            self.__rsr_inst.doy, self.__rsr_inst.band,
-                            self.__rsr_inst.dsn, self.profdir, 'PNFP', pnfp)
-                else:
-                    file_object = open(pnfp_file, 'rb')
-                    fit_param_dict = pickle.load(file_object)
-                    k_power_norm = fit_param_dict['spline_order']
-                    spline_coef = fit_param_dict['spline_coef']
-                    knots_spm = fit_param_dict['knots_spm']
-                    spline_rep = (knots_spm, spline_coef, k_power_norm)
+            if pnfp_file == 'N/A':
+                print('WARNING (get_spline_fit()): PNFP file not found!')
+                print('Evaluating spline fit...')
+                spline_rep = splrep(spm_vals_free[ind_sort], 
+                        p_obs_free[ind_sort],
+                        k=spline_order, t=knots_spm_data[ind_knot_sort])
             else:
-                 spline_rep = splrep(spm_vals_free[ind_sort], 
-                         p_obs_free[ind_sort], k=spline_order, 
-                         t=knots_spm_data[ind_knot_sort])
-                 pnfp = {'spline_order': spline_rep[2],
-                         'spline_coef': spline_rep[1],
-                         'knots_spm': spline_rep[0]}
-                 write_intermediate_files(self.__rsr_inst.year,
-                         self.__rsr_inst.doy, self.__rsr_inst.band, 
-                         self.__rsr_inst.dsn, self.profdir, 'PNFP', pnfp)
-
-            spline_fit = splev(spm_fit, spline_rep, ext=1)
-        except TypeError:
-            print('WARNING (Normalization.get_spline_fit): Given degree of '
-                + 'the spline (k) is not supported (1<=k<=5). Reverting to '
-                + 'degree 2')
-            if file_search:
-                pnfp_file = search_for_file(self.__rsr_inst.year,
-                    self.__rsr_inst.doy, self.__rsr_inst.band,
-                    self.__rsr_inst.dsn, self.profdir, 'PNFP')
-                print('\tExtracting power normalization fit from:\n\t\t'
-                        + '/'.join(pnfp_file.split('/')[0:5]) + '/\n\t\t\t'
-                        + pnfp_file.split('/')[-1])
+                print('\tExtracting power normalization spline fit parameters '
+                        + 'from:\n\t\t' + '/'.join(pnfp_file.split('/')[0:5])
+                        + '/\n\t\t\t' + pnfp_file.split('/')[-1])
                 file_object = open(pnfp_file, 'rb')
                 fit_param_dict = pickle.load(file_object)
                 k_power_norm = fit_param_dict['spline_order']
                 spline_coef = fit_param_dict['spline_coef']
                 knots_spm = fit_param_dict['knots_spm']
                 spline_rep = (knots_spm, spline_coef, k_power_norm)
-            else:
-                 spline_rep = splrep(spm_vals_free[ind_sort], 
-                         p_obs_free[ind_sort], k=spline_order, 
-                         t=knots_spm_data[ind_knot_sort])
-                 pnfp = {'spline_order': spline_rep[2],
-                         'spline_coef': spline_rep[1],
-                         'knots_spm': spline_rep[0]}
-                 write_intermediate_files(self.__rsr_inst.year,
-                         self.__rsr_inst.doy, self.__rsr_inst.band, 
-                         self.__rsr_inst.dsn, self.profdir, 'PNFP', pnfp)
+        else:
+            print('\tEvaluating spline fit...')
+            spline_rep = splrep(spm_vals_free[ind_sort], 
+                    p_obs_free[ind_sort],
+                    k=spline_order, t=knots_spm_data[ind_knot_sort])
 
-            self._spline_order = 2
-            spline_order = 2
-            #spline_rep = splrep(spm_vals_free[ind_sort], p_obs_free[ind_sort],
-            #    k=spline_order, t=knots_spm_data[ind_knot_sort])
-            spline_fit = splev(spm_fit, spline_rep, ext=1)
+        spline_fit = splev(spm_fit, spline_rep, ext=1)
 
         # Set values outside of SPM values in splrep to the exterior-most
         #     spline values
@@ -584,8 +552,11 @@ class Normalization(object):
         except ValueError:
             pass
 
+        self.pnfp_splrep = spline_rep
+
         if USE_GUI:
             print('Using GUI')
+            pnfp_coef_ori = spline_rep[1]
             root = Tk()
             power_fit_gui_inst = PowerFitGui(root, self, spm_vals_down,
                 rho_km_vals_down, p_obs_down, spm_fit)
@@ -598,8 +569,31 @@ class Normalization(object):
                     pass
             spline_fit = power_fit_gui_inst.yfit
 
+            # If fit was changed during GUI, write new file
+            if len(pnfp_coef_ori) == len(self.pnfp_splrep[1]):
+                if all(pnfp_coef_ori == self.pnfp_splrep[1]) == False:
+                    print('\tPower normalization fit changed within GUI!\n'
+                            + '\tWriting new file...')
+                    pnfp = {'knots_spm': self.pnfp_splrep[0],
+                            'spline_coef': self.pnfp_splrep[1],
+                            'spline_order': self.pnfp_splrep[2]}
+                    write_intermediate_files(self.__rsr_inst.year,
+                            self.__rsr_inst.doy, self.__rsr_inst.band,
+                            self.__rsr_inst.dsn, self.profdir, 'PNFP', pnfp)
+            else:
+                if (pnfp_coef_ori == self.pnfp_splrep[1]) == False:
+                    print('\tPower normalization fit changed within GUI!\n'
+                            + '\tWriting new file...')
+                    pnfp = {'knots_spm': self.pnfp_splrep[0],
+                            'spline_coef': self.pnfp_splrep[1],
+                            'spline_order': self.pnfp_splrep[2]}
+                    write_intermediate_files(self.__rsr_inst.year,
+                            self.__rsr_inst.doy, self.__rsr_inst.band,
+                            self.__rsr_inst.dsn, self.profdir, 'PNFP', pnfp)
+
+
         self.__set_history()
-        return spm_fit, spline_fit
+        return spm_fit, spline_fit#, spline_rep
 
     def __get_default_freespace_ind(self, rho_km_vals_down, freespace_km,
             is_blocked_atm):

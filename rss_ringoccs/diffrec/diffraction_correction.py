@@ -1765,6 +1765,63 @@ class DiffractionCorrection(object):
         psi_vals = kD * (np.sqrt(1.0 + 2.0 * xi + eta) - (1.0 + xi))
         return psi_vals
 
+    def __psi_quadratic(self, kD, r, r0, cbd, d2, cp0, sp0, cp, sp, w, nw):
+        # Compute psi.
+        psi_full = self.__psi_func(kD, r, r0, cbd, d2, cp0, sp0, cp, sp, w, nw)
+
+        # Compute shifted ring radius and window width.
+        x = (r-r0)
+        w = np.max(x)-np.min(x)
+
+        # Compute midpoints and endpoints.
+        n1 = 0
+        n2 = np.min((r0 - w/4 <= r).nonzero())
+        n3 = np.max((r0 + w/4 >= r).nonzero())
+        n4 = nw-1
+
+        # Compute variables for psi polynomials.
+        d_psi_half = psi_full[n3]-psi_full[n2]
+        d_psi_full = psi_full[n4] - psi_full[n1]
+        a_psi_half = (psi_full[n3]+psi_full[n2])/2
+        a_psi_full = (psi_full[n1]+psi_full[n4])/2
+
+        # Compute coefficients for the polynomial expansion.
+        c1 = (8.0*d_psi_half-d_psi_full)/(3.0*w)
+        c2 = 4.0*(16.0*a_psi_half-a_psi_full)/(3.0*w*w)
+
+        # Compute quartic psi approximation.
+        psi_vals = (c1 + c2*x)*x
+        return psi_vals
+
+    def __psi_cubic(self, kD, r, r0, cbd, d2, cp0, sp0, cp, sp, w, nw):
+        # Compute psi.
+        psi_full = self.__psi_func(kD, r, r0, cbd, d2, cp0, sp0, cp, sp, w, nw)
+
+        # Compute shifted ring radius and window width.
+        x = (r-r0)
+        w = np.max(x)-np.min(x)
+
+        # Compute midpoints and endpoints.
+        n1 = 0
+        n2 = np.min((r0 - w/4 <= r).nonzero())
+        n3 = np.max((r0 + w/4 >= r).nonzero())
+        n4 = nw-1
+
+        # Compute variables for psi polynomials.
+        d_psi_half = psi_full[n3]-psi_full[n2]
+        d_psi_full = psi_full[n4] - psi_full[n1]
+        a_psi_half = (psi_full[n3]+psi_full[n2])/2
+        a_psi_full = (psi_full[n1]+psi_full[n4])/2
+
+        # Compute coefficients for the polynomial expansion.
+        c1 = (8.0*d_psi_half-d_psi_full)/(3.0*w)
+        c2 = 4.0*(16.0*a_psi_half-a_psi_full)/(3.0*w*w)
+        c3 = 16.0*(d_psi_full-2.0*d_psi_half)/(3.0*w*w*w)
+
+        # Compute quartic psi approximation.
+        psi_vals = x*(c1 + x*(c2+x*c3))
+        return psi_vals
+
     def __psi_quartic(self, kD, r, r0, cbd, d2, cp0, sp0, cp, sp, w, nw):
         # Compute psi.
         psi_full = self.__psi_func(kD, r, r0, cbd, d2, cp0, sp0, cp, sp, w, nw)
@@ -1792,7 +1849,7 @@ class DiffractionCorrection(object):
         c4 = 64.0*(a_psi_full-4.0*a_psi_half)/(3.0*w*w*w*w)
 
         # Compute quartic psi approximation.
-        psi_vals = (c1 + c2*x)*x + (c3+c4*x)*x*x*x
+        psi_vals = x*(c1 + x*(c2+x*(c3+x*c4)))
         return psi_vals
 
     def __ftrans(self, fwd):
@@ -1864,6 +1921,10 @@ class DiffractionCorrection(object):
         # Set psi approximation.
         if (psitype == 'full'):
             psif = self.__psi_func
+        elif (psitype == 'mtr2'):
+            psif = self.__psi_quadratic
+        elif (psitype == 'mtr3'):
+            psif = self.__psi_cubic
         elif (psitype == 'mtr4'):
             psif = self.__psi_quartic
         else:
@@ -1907,10 +1968,10 @@ class DiffractionCorrection(object):
         dphi_fac = (cosb2*cosphi0*sinphi0/(1.0-cosb2*sinphi0*sinphi0))
         if (psitype == 'fresnel'):
             r0 = rho_km_vals[center]
-            r = rho_km_vals[crange]
+            r = rho_km_vals[crange+1]
             F2 = F_km_vals*F_km_vals
-            x = (r-r0)
-            psi_vals = (ONE_PI / 2.0) * x * x
+            x = r-r0
+            x2 = (ONE_PI / 2.0) * x * x
             loop = 0
             for i in np.arange(n_used):
                 # Current point being computed.
@@ -1918,6 +1979,7 @@ class DiffractionCorrection(object):
 
                 # Window width and Frensel scale for current point.
                 w = w_km_vals[center]
+                F = F_km_vals[center]
 
                 if (np.abs(w_init - w) >= 2.0 * dx_km):
                     # Reset w_init and recompute window function.
@@ -1937,10 +1999,11 @@ class DiffractionCorrection(object):
 
                     # Compute psi for with stationary phase value
                     x = r-r0
-                    psi_vals = (ONE_PI / 2.0) * x * x / F2[center]
+                    x2 = (ONE_PI / 2.0) * x * x
                 else:
                     crange += 1
-                    psi_vals = (ONE_PI / 2.0) * x * x / F2[center]
+                
+                psi_vals = x2 / F2[center]
 
                 # Compute kernel function for Fresnel inverse
                 if fwd:

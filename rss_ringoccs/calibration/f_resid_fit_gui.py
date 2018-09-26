@@ -32,6 +32,7 @@ Revisions:
       frequency offset residual.
     2018 Sep 25 - sflury - Mask for plotting data used in fit now take from
                            fit_inst
+    2018 Sep 25 - jfong - update displayed fit order to reflect actual fit order
  
 """
 
@@ -159,7 +160,7 @@ class FResidFitGui(Frame):
         self.pack(fill=tkinter.BOTH, expand=1)
 
         # Default fit
-        self.fit_deg = 3
+        self.fit_deg = len(self.fit_inst.frfp_coef)-1
         self.xlim = self.fit_inst._spm_include
         dummy, self.yfit = self.fit_inst.get_f_sky_resid_fit()
 

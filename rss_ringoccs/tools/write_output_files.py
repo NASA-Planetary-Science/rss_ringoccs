@@ -28,7 +28,7 @@ func_typ = {'GEO': write_geo_series,
 
 def write_output_files(inst):
     rev_info = inst.rev_info
-    
+
     # Check for instance type and write that specific file
     if isinstance(inst, rss.occgeo.Geometry):
         filtyp = 'GEO'
@@ -39,7 +39,7 @@ def write_output_files(inst):
     elif isinstance(inst, rss.calibration.NormDiff):
         filtyp = 'DLP_' + str(int(inst.dr_km * 1000 * 2)).zfill(4) + 'M'
 
-    elif isinstance(inst, rss.diffcorr.DiffractionCorrection):
+    elif isinstance(inst, rss.diffrec.DiffractionCorrection):
         filtyp = 'TAU_' + str(int(inst.res * 1000)).zfill(5) + 'M'
     else:
         print('invalid instance!')
@@ -114,8 +114,8 @@ def construct_output_filename(rev_info, inst, filtyp):
         title = out2.split('/')[-1]
         outdir = '/'.join(out2.split('/')[0:-1]) + '/'
 
-        func_typ[filtyp[0:3]](rev_info, inst, title, outdir, 
+        func_typ[filtyp[0:3]](rev_info, inst, title, outdir,
                 rev_info['prof_dir'])
 
-        
+
     return None

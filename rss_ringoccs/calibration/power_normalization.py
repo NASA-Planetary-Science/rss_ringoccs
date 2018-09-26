@@ -55,6 +55,7 @@ Revisions:
                         - removed try/except for faulty spline orders, add
                           the spline order check when extracting order from 
                           kwarg
+    2018 Sep 26 - jfong - write PNFP file if file not found
 """
 
 import numpy as np
@@ -516,6 +517,12 @@ class Normalization(object):
                 spline_rep = splrep(spm_vals_free[ind_sort], 
                         p_obs_free[ind_sort],
                         k=spline_order, t=knots_spm_data[ind_knot_sort])
+                pnfp = {'knots_spm': spline_rep[0],
+                        'spline_coef': spline_rep[1],
+                        'spline_order': spline_rep[2]}
+                write_intermediate_files(self.__rsr_inst.year,
+                        self.__rsr_inst.doy, self.__rsr_inst.band,
+                        self.__rsr_inst.dsn, self.profdir, 'PNFP', pnfp)
             else:
                 print('\tExtracting power normalization spline fit parameters '
                         + 'from:\n\t\t' + '/'.join(pnfp_file.split('/')[0:5])

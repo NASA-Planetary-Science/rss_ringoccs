@@ -62,6 +62,8 @@ Revisions:
                         - file_search can be given a string of the desired FOF
                           file and that file, instead of the most recent FOF,
                           will be read.
+    2018 Sep 26 - jfong - add print statement for when FOF not found
+                        - write FRFP file if file not found
 """
 
 import numpy as np
@@ -270,6 +272,8 @@ class FreqOffsetFit(object):
 
         # If no file found, calculate frequency offset and save FOF file
         if (fof_file == 'N/A'):
+            print('\tNo frequency offset file found...\n'
+                    + '\tCalculating frequency offset...')
             f_spm, f_offset, f_offset_history = calc_freq_offset(
                     self.__rsr_inst)
             write_intermediate_files(rsr_inst.year,
@@ -488,6 +492,11 @@ class FreqOffsetFit(object):
 
                 ## fit using polynomial of user-selected order
                 coef = poly.polyfit(spm_temp[self.__fsr_mask], f_sky_resid[self.__fsr_mask], poly_order)
+                frfp = {'coef': coef}
+                write_intermediate_files(self.__rsr_inst.year, 
+                        self.__rsr_inst.doy,
+                        self.__rsr_inst.band, self.__rsr_inst.dsn, 
+                        self.profdir, 'FRFP', frfp)
             else:
                 print('\tExtracting residual frequency fit from:\n\t\t'
                         + '/'.join(frfp_file.split('/')[0:5]) + '/\n\t\t\t'

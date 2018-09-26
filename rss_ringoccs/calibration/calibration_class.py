@@ -30,7 +30,6 @@ Revisions:
                         - if only one file path given, search for the most
                           recent file for the other file
                         - file_search=False default in __init__ kwarg
-                        - add spline_rep output to get_spline_fit
 """
 
 
@@ -232,7 +231,7 @@ class Calibration(object):
 
         # Evaluate spline fit at spm_cal. Assumes you already made a
         #     satisfactory spline fit
-        dummy_spm, _p_free, dummy_splrep = norm_inst.get_spline_fit(
+        dummy_spm, _p_free = norm_inst.get_spline_fit(
                 USE_GUI=USE_GUI, file_search=file_search_pnfp)
         p_free_cal_func = interp1d(dummy_spm, _p_free)
         p_free_cal = p_free_cal_func(spm_cal)

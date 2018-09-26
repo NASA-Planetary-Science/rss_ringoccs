@@ -53,7 +53,15 @@ Revisions:
                            5-sigma beyond the median residual signal
     2018 Sep 20 - jfong - move file search for FRFP to set_f_sky_resid_fit
                         - edit FRFP to only include coef
-
+    2018 Sep 25 - jfong - automatically search for FOF file, but if
+                          nonexistent then calculate FOF
+                        - if file_search=True and USE_GUI=True, the GUI will
+                          automatically show the fits from newest FRFP file.
+                          If any changes were made to the GUI fit, a new FRFP
+                          file will be written.
+                        - file_search can be given a string of the desired FOF
+                          file and that file, instead of the most recent FOF,
+                          will be read.
 """
 
 import numpy as np
@@ -135,7 +143,7 @@ class FreqOffsetFit(object):
 
     def __init__(self, rsr_inst, geo_inst, poly_order=9, 
             spm_include=None, sc_name='Cassini', f_uso_x=8427222034.34050,
-            file_search=True, USE_GUI=True, verbose=False):
+            file_search=False, USE_GUI=True, verbose=False):
         """
         Purpose:
         Define all attributes associated with data set, and make a fit to
@@ -257,17 +265,17 @@ class FreqOffsetFit(object):
         self.profdir = profdir
 
         # Search for frequency offset fit (FOF) text file
-        if file_search:
-            fof_file = search_for_file(rsr_inst.year, rsr_inst.doy,
-                    band, rsr_inst.dsn, profdir, 'FOF')
+        fof_file = search_for_file(rsr_inst.year, rsr_inst.doy,
+                band, rsr_inst.dsn, profdir, 'FOF')
 
-            if (fof_file == 'N/A'):
-                # if no file found, calculate f_offset
-                f_spm, f_offset, f_offset_history = calc_freq_offset(
-                        self.__rsr_inst)
-                write_intermediate_files(rsr_inst.year,
-                        rsr_inst.doy, rsr_inst.band, rsr_inst.dsn, profdir,
-                        'FOF', {'f_spm':f_spm, 'f_offset':f_offset})
+        # If no file found, calculate frequency offset and save FOF file
+        if (fof_file == 'N/A'):
+            f_spm, f_offset, f_offset_history = calc_freq_offset(
+                    self.__rsr_inst)
+            write_intermediate_files(rsr_inst.year,
+                    rsr_inst.doy, rsr_inst.band, rsr_inst.dsn, profdir,
+                    'FOF', {'f_spm':f_spm, 'f_offset':f_offset})
+        else:
             # Read in parameters from offset file
             print('\tExtracting frequency offset from:\n\t\t' 
                     + '/'.join(fof_file.split('/')[0:5]) + '/\n\t\t\t'
@@ -275,29 +283,6 @@ class FreqOffsetFit(object):
             freq_offset_file_vals = np.loadtxt(fof_file)
             f_spm = freq_offset_file_vals[:, 0]
             f_offset = freq_offset_file_vals[:, 1]
-
-            ## Search for frequency residual fit pickle (FRFP) file
-            #frfp_file = search_for_file(rsr_inst.year,
-            #        rsr_inst.doy, band, rsr_inst.dsn, profdir,
-            #        'FRFP')
-            #print('\tExtracting residual frequency fit from:\n\t\t'
-            #        + '/'.join(frfp_file.split('/')[0:5]) + '/\n\t\t\t'
-            #        + frfp_file.split('/')[-1])
-            #file_object = open(frfp_file, 'rb')
-            #fit_param_dict = pickle.load(file_object)
-            #poly_order = fit_param_dict['k']
-            #spm_include = fit_param_dict['spm_include']
-        else:
-            # Compute frequency offset
-            f_spm, f_offset, f_offset_history = calc_freq_offset(
-                    self.__rsr_inst)
-
-            # Save frequency offset to a text file
-
-            write_intermediate_files(rsr_inst.year,
-                    rsr_inst.doy, rsr_inst.band, rsr_inst.dsn, profdir,
-                    'FOF', {'f_spm':f_spm, 'f_offset':f_offset})
-        
 
         # Attributes for components of frequency offset, except for residual
         # frequency and its fit
@@ -318,7 +303,6 @@ class FreqOffsetFit(object):
         rho_geo = np.asarray(geo_inst.rho_km_vals)
         rho_interp_func = interp1d(spm_geo, rho_geo, fill_value='extrapolate')
         self.__f_rho = rho_interp_func(self.__f_spm)
-
         # Attribute keeping track of fit parameter
         self._spm_include = spm_include
 
@@ -341,7 +325,7 @@ class FreqOffsetFit(object):
         self.__spm_vals = rsr_inst.spm_vals
         self.__IQ_m = rsr_inst.IQ_m
 
-        ## Write frequency residual fit parameter pickle file
+        ### Write frequency residual fit parameter pickle file
         #if not file_search:
         #    frfp = {'k': self._poly_order, 'spm_include': self._spm_include}
         #    write_intermediate_files(rsr_inst.year, rsr_inst.doy,
@@ -403,7 +387,7 @@ class FreqOffsetFit(object):
 
 
     def set_f_sky_resid_fit(self, poly_order=9, spm_include=None, USE_GUI=True,
-            verbose=False, file_search=True):
+            verbose=False, file_search=False):
         """
         Purpose:
         Calculate fit to residual sky frequency. Sets attributes
@@ -490,6 +474,7 @@ class FreqOffsetFit(object):
         npts = len(f_spm)
         spm_temp = ((f_spm - f_spm[int(npts / 2)])
             / max(f_spm - f_spm[int(npts / 2)]))
+        
 
         if file_search:
             ## Search for frequency residual fit pickle (FRFP) file
@@ -497,17 +482,12 @@ class FreqOffsetFit(object):
                     self.__rsr_inst.doy, self.__rsr_inst.band, 
                     self.__rsr_inst.dsn, self.profdir, 'FRFP')
             if frfp_file == 'N/A':
-                print('WARNING (get_spline_fit()): FRFP file not found!')
-                if verbose:
-                    print('\tEvaluating polynomial fit...')
+                print('WARNING (set_f_sky_resid_fit()): FRFP file not found!')
+                print('\tEvaluating polynomial fit...')
                 # When fitting, use x values adjusted to range over [-1, 1]
 
                 ## fit using polynomial of user-selected order
                 coef = poly.polyfit(spm_temp[self.__fsr_mask], f_sky_resid[self.__fsr_mask], poly_order)
-                frfp = {'coef': coef}
-                write_intermediate_files(self.__rsr_inst.year, self.__rsr_inst.doy,
-                        self.__rsr_inst.band, self.__rsr_inst.dsn, 
-                        self.profdir, 'FRFP', frfp)
             else:
                 print('\tExtracting residual frequency fit from:\n\t\t'
                         + '/'.join(frfp_file.split('/')[0:5]) + '/\n\t\t\t'
@@ -518,51 +498,6 @@ class FreqOffsetFit(object):
         else:
 
 
-            # Determine if Cassini blocked by Saturn's ionosophere. Important for
-            #     chord occultations
-            #is_blocked_atm, is_blocked_ion = cassini_blocked(f_spm,
-            #    self.__rsr_inst, self.__kernels)
-
-            ## Array of indices to include by default. Overridden by spm_include
-            ##     keyword
-            #ind = []
-            #for i in range(len(rho_exclude) - 1):
-            #    ind.append(np.argwhere((f_rho > rho_exclude[i][1]) &
-            #        (f_rho < rho_exclude[i + 1][0]) &
-            #        (np.invert(is_blocked_ion))))
-            #ind = np.reshape(np.concatenate(ind), -1)
-
-            ## If user specified spm_include argument that overrides the rho_exclude
-            ##     argument
-            #if spm_include:
-            #    if verbose:
-            #        print('\tComputing frequency residual fit using '
-            #            + 'SPECIFIED fit parameters...')
-            #    self._spm_include = spm_include
-            #    ind = []
-            #    for i in range(len(spm_include)):
-            #        ind.append(np.argwhere((f_spm >= spm_include[i][0]) &
-            #            (f_spm <= spm_include[i][1]) &
-            #            (np.invert(is_blocked_ion))))
-            #    ind = np.reshape(np.concatenate(ind), -1)
-            #else:
-            #    if verbose:
-            #        print('\tComputing frequency residual fit using '
-            #            + 'DEFAULT fit parameters...')
-            #    spm_include = []
-            #    for i in range(len(rho_exclude) - 1):
-            #        _ind = np.argwhere((f_rho > rho_exclude[i][1])
-            #            & (f_rho < rho_exclude[i + 1][0]))
-            #        spm_include.append([float(min(f_spm[_ind])),
-            #            float(max(f_spm[_ind]))])
-            #    self._spm_include = spm_include
-
-            #if len(ind) == 0:
-            #    print('ERROR (FreqOffsetFit.set_f_sky_resid_fit): All \n'
-            #        + 'points fall outside of specified spm_include regions')
-            #    sys.exit()
-
-
             # Coefficients for least squares fit, and evaluation of coefficients
             if verbose:
                 print('\tEvaluating polynomial fit...')
@@ -571,22 +506,21 @@ class FreqOffsetFit(object):
             ## fit using polynomial of user-selected order
             coef = poly.polyfit(spm_temp[self.__fsr_mask], f_sky_resid[self.__fsr_mask], poly_order)
             frfp = {'coef': coef}
-            write_intermediate_files(self.__rsr_inst.year, self.__rsr_inst.doy,
-                        self.__rsr_inst.band, self.__rsr_inst.dsn, 
-                        self.profdir, 'FRFP', frfp)
-       ## evaluate polynomial using coefficients from polynomial fit
+
         f_sky_resid_fit = poly.polyval(spm_temp,coef)
 
         self.__f_sky_resid_fit = f_sky_resid_fit
+        self.frfp_coef = coef
 
         # Update frequency offset fit attribute for new residual sky
         # frequency fit
         self.__f_offset_fit = self.__f_sky_resid_fit + (self.__f_sky_recon -
             self.__f_sky_pred)
-
+        
         if USE_GUI:
             if verbose:
                 print('\tUsing GUI to make a polynomial fit...')
+            coef_ori = coef
             root = Tk()
             f_resid_fit_gui_inst = FResidFitGui(root, self, f_spm, f_rho,
                 f_sky_resid)
@@ -597,6 +531,26 @@ class FreqOffsetFit(object):
                     break
                 except UnicodeDecodeError:
                     pass
+
+            # If fit was changed during GUI, write new file
+            if len(coef_ori) == len(self.frfp_coef):
+                if all(coef_ori == self.frfp_coef) == False:
+                    frfp = {'coef': self.frfp_coef}
+                    print('\tFrequency residual fit changed within GUI!\n'
+                            + '\tWriting new file...')
+                    write_intermediate_files(self.__rsr_inst.year, 
+                            self.__rsr_inst.doy,
+                            self.__rsr_inst.band, self.__rsr_inst.dsn, 
+                            self.profdir, 'FRFP', frfp)
+            else:
+                if (coef_ori == self.frfp_coef) == False:
+                    frfp = {'coef': self.frfp_coef}
+                    print('\tFrequency residual fit changed within GUI!\n'
+                            + '\tWriting new file...')
+                    write_intermediate_files(self.__rsr_inst.year, 
+                            self.__rsr_inst.doy,
+                            self.__rsr_inst.band, self.__rsr_inst.dsn, 
+                            self.profdir, 'FRFP', frfp)
 
         # Set history attribute
         self.__set_history()

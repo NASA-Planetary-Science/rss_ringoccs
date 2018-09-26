@@ -25,6 +25,7 @@ Revisions:
     2018 Sep 19 - sflury - Updated GUI to have predicted free space regions
        highlighted using matplotlib.pyplot.fill_between. Changed plot colors
        to higher contrast and color-blind accessible.
+    2018 Sep 25 - jfong - add spline_rep to _get_fit() output
 """
 
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg,
@@ -168,7 +169,7 @@ class PowerFitGui(Frame):
         self.fit_deg = norm_inst._spline_order
         self.xlim = norm_inst._freespace_spm
         self.knots_spm = norm_inst._knots_spm
-        self.yfit = self._get_fit()
+        self.yfit = self._get_fit()[0]
 
         self.ind = np.arange(len(self.x))
         self.not_ind = None
@@ -255,10 +256,10 @@ class PowerFitGui(Frame):
         adjust_range_and_knots(), and revert_range()
         """
 
-        spm_fit, spline_fit = self.norm_inst.get_spline_fit(
+        spm_fit, spline_fit, spline_rep = self.norm_inst.get_spline_fit(
             spline_order=self.fit_deg, knots_spm=self.knots_spm,
-            freespace_spm=self.xlim, USE_GUI=False)
-        return spline_fit
+            freespace_spm=self.xlim, USE_GUI=False, file_search=False)
+        return spline_fit, spline_rep
 
     def _get_rho_tick_labels(self, spm_tick_labels):
         """
@@ -393,7 +394,7 @@ class PowerFitGui(Frame):
         self.fit_deg = int(new_deg.get())
 
         # Get new fit and plot it
-        self.yfit = self._get_fit()
+        self.yfit = self._get_fit()[0]
         self.update_plot()
 
     def adjust_range_and_knots(self):
@@ -457,7 +458,7 @@ class PowerFitGui(Frame):
             return
 
         # Update fit and plot it
-        new_yfit = self._get_fit()
+        new_yfit = self._get_fit()[0]
         self.yfit = new_yfit
         self.update_plot()
 
@@ -484,7 +485,7 @@ class PowerFitGui(Frame):
         self.not_ind = None
 
         # Update fit and plot it
-        new_yfit = self._get_fit()
+        new_yfit = self._get_fit()[0]
         self.yfit = new_yfit
         self.update_plot()
 

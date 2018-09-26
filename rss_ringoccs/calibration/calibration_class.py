@@ -25,6 +25,12 @@ Revisions:
     2018 Sep 20 - jfong - add write_file kwarg
                         - set rev_info from geo_inst as attribute
                             - this will inherit the same prof_dir
+    2018 Sep 25 - jfong - allow file_search to be a boolean or a string
+                        - if string, parse for FRFP or PNFP file paths,
+                        - if only one file path given, search for the most
+                          recent file for the other file
+                        - file_search=False default in __init__ kwarg
+                        - add spline_rep output to get_spline_fit
 """
 
 
@@ -83,7 +89,7 @@ class Calibration(object):
             Dictionary with information of the run
     """
 
-    def __init__(self, rsr_inst, geo_inst, dt_cal=1.0, file_search=True,
+    def __init__(self, rsr_inst, geo_inst, dt_cal=1.0, file_search=False,
             verbose=False, USE_GUI=False, write_file=True):
         """
         Args:
@@ -139,10 +145,37 @@ class Calibration(object):
         # Extract rev_info from geo_inst -- this will inherit its prof_dir
         self.rev_info = geo_inst.rev_info
 
+        # Extract strings from file_search if available
+        if file_search:
+            if isinstance(file_search, bool):
+                file_search_frfp = file_search
+                file_search_pnfp = file_search
+            elif isinstance(file_search, str):
+                # if string, decipher which type of intermediate file
+                if 'PNFP' in file_search:
+                    file_search_pnfp = file_search
+                    file_search_frfp = True
+                if 'FRFP' in file_search:
+                    file_search_pnfp = True
+                    file_search_frfp = file_search
+            elif isinstance(file_search, list):
+                if len(file_search)>2:
+                    print('WARNING (calibration_class.py): incorrect number '
+                            + 'of filepaths given in file_search kwarg!')
+                    sys.exit()
+                file_search_pnfp = [x for x in file_search if 'PNFP' in x][0]
+                file_search_frfp = [x for x in file_search if 'FRFP' in x][0]
+            else:
+                print('WARNING (calibration_class.py): incorrect file_search '
+                        + 'kwarg given!')
+        else:
+            file_search_frfp = False
+            file_search_pnfp = False
+
         # Calculate frequency offset fit
         ## Use default residual frequency fit
         fit_inst = rss.calibration.FreqOffsetFit(rsr_inst, geo_inst,
-                file_search=file_search, USE_GUI=USE_GUI, verbose=verbose)
+                file_search=file_search_frfp, USE_GUI=USE_GUI, verbose=verbose)
 
 
         # Get corrected I's and Q's
@@ -194,35 +227,13 @@ class Calibration(object):
 
         # Normalize observed power by the freespace signal
         norm_inst = rss.calibration.Normalization(spm_vals, IQ_c,
-            geo_inst, rsr_inst, verbose=verbose, file_search=file_search)
+            geo_inst, rsr_inst, verbose=verbose)
 
-        profdir = geo_inst.get_profile_dir()
-        # If set, search for power normalization fit pickle (PNFP) file
-        #if file_search:
-        #    pnfp_file = search_for_file(rsr_inst.year,
-        #            rsr_inst.doy, rsr_inst.band, 
-        #            (rsr_inst.dsn).split('-')[-1], profdir, 'PNFP')
-
-        #    print('\tExtracting power normalization fit from:\n\t\t'
-        #            + '/'.join(pnfp_file.split('/')[0:5]) + '/\n\t\t\t'
-        #            + pnfp_file.split('/')[-1])
-        #    file_object = open(pnfp_file, 'rb')
-        #    fit_param_dict = pickle.load(file_object)
-        #    k_power_norm = fit_param_dict['k']
-        #    freespace_spm = fit_param_dict['freespace_spm']
-        #    knots_spm = fit_param_dict['knots_spm']
-        #    
-        #    spm_power_fit, power_spline_fit = norm_inst.get_spline_fit(
-        #        freespace_spm=freespace_spm, knots_spm=knots_spm,
-        #        spline_order=k_power_norm, USE_GUI=False, verbose=verbose)
-            
-
-            
 
         # Evaluate spline fit at spm_cal. Assumes you already made a
         #     satisfactory spline fit
-        dummy_spm, _p_free = norm_inst.get_spline_fit(USE_GUI=USE_GUI,
-                file_search=file_search)
+        dummy_spm, _p_free, dummy_splrep = norm_inst.get_spline_fit(
+                USE_GUI=USE_GUI, file_search=file_search_pnfp)
         p_free_cal_func = interp1d(dummy_spm, _p_free)
         p_free_cal = p_free_cal_func(spm_cal)
 

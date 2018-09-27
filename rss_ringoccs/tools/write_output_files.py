@@ -7,6 +7,7 @@ Purpose: Write output *.TAB data and corresponding *.LBL label file.
 Revisions:
     2018 Sep 19 - jfong - original
     2018 Sep 24 - jfong - hardcode relative path (../output/*)
+    2018 Sep 26 - jfong - reset seqnum counter for new days
 """
 import sys
 from .pds3_geo_series import write_geo_series
@@ -21,12 +22,22 @@ sys.path.remove('../../')
 
 import pdb
 import os
+
 func_typ = {'GEO': write_geo_series,
         'CAL': write_cal_series,
         'DLP': write_dlp_series,
         'TAU': write_tau_series}
 
 def write_output_files(inst):
+    """
+    Write output (geo, cal, dlp, tau) *.TAB and *.LBL files, depending on 
+    instance given.
+
+    Args:
+        inst (instance):
+            Instance of either Geometry, Calibration, NormDiff, or
+            DiffractionCorrection classes.
+    """
     rev_info = inst.rev_info
 
     # Check for instance type and write that specific file
@@ -69,17 +80,9 @@ def construct_output_filename(rev_info, inst, filtyp):
         dirstr = ('../output/Rev' + rev + '/' + dd + '/' + 'Rev' + rev +
                 pd2 + dd + '_' + filestr + '/')
 
-#    os.system('[ ! -d ' + output_directory + ' ] && mkdir -p '
-#            + output_directory)
-#    fsearch = dirstr + filestr + '*' + filtyp.upper() + '*' + '.*'
-
-        #cwds = (os.getcwd()).split('/')
-        # index of first appearance of rss_ringoccs
-        #ind = cwds.index('rss_ringoccs')
-        #relpath = '../' * int(len(cwds)-ind-1)
-
         # Create output file name without file extension
-        out1 = dirstr + filestr + '_' + filtyp.upper() + strftime('_%Y%m%d')
+        curday = strftime('%Y%m%d')
+        out1 = dirstr + filestr + '_' + filtyp.upper() + '_' + curday
 
         if os.path.exists(dirstr):
 
@@ -92,7 +95,8 @@ def construct_output_filename(rev_info, inst, filtyp):
                 seq_num = '0001'
             else:
                 sfn = [x.split('_') for x in dirfiles]
-                sqn0 = [(x[-2]+x[-1][0:4]) for x in sfn if (x[-3]==filtyp)]
+                sqn0 = [(x[-2]+x[-1][0:4]) for x in sfn if (x[-3]==filtyp)
+                        and (x[-2]==curday)]
                 if len(sqn0) == 0:
                     seq_num = '0001'
                 else:
@@ -117,5 +121,5 @@ def construct_output_filename(rev_info, inst, filtyp):
         func_typ[filtyp[0:3]](rev_info, inst, title, outdir,
                 rev_info['prof_dir'])
 
-
     return None
+

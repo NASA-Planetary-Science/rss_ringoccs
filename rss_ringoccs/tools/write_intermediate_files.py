@@ -16,6 +16,7 @@ Revisions:
     2018 Sep 19 - jfong - add 4-digit sequence number after date to outfile str
     2018 Sep 20 - jfong - search if file type exists for seq_num='0001'
     2018 Sep 21 - jfong - update seqnum for new dates
+    2018 Sep 26 - jfong - update print statement
 """
 
 import os
@@ -25,9 +26,40 @@ import pickle
 from .date_to_rev import date_to_rev
 import numpy as np
 
-
 def write_intermediate_files(year, doy, band, dsn, profdir, filtyp,
         contents):
+    """
+    Write intermediate files (frequency offset file, residual fit parameters
+        file, power normalization fit parameters file) to directory
+        ../output/RevXXX/P/RevXXXP_RSS_YEAR_DOY_BDD_P/
+                RSS_YEAR_DOY_BDD_filtype_DATE_#.ext
+        where XXX is the 3-digit rev number, P is the profile direction
+        (I for ingress, E for egress), YEAR is the 4-digit year,
+        DOY is the 3-digit day-of-year, B is the 1-letter band, DD is the
+        2-digit dsn station number, filtyp is the abbreviation for the output
+        file type, DATE is the current date in YYYYMMDD format, # is the
+        number of file types written so far in current date, ext is the
+        extension associated with filtyp.
+
+    Args:
+        year (str):
+            year of event
+        doy (str):
+            day-of-year of event
+        band (str):
+            Name of the wavelength of transmission (S, X, or K)
+        dsn (str):
+            Deep Space Network ID of the station that observed the spacecraft
+            for this event
+        profdir (str):
+            Profile direction of event.
+        filtyp (str):
+            Type of intermediate file to search for. 'FOF' for frequency
+            offset file, 'FRFP' for frequency residual fit parameters,
+            and 'PNFP' for power normalization fit parameters.
+        contents (dict):
+            Dictionary containing contents to be written to intermediate file.
+    """
     # Remove 'DSS-' from dsn name
     dsn = dsn.split('-')[-1]
 
@@ -57,18 +89,9 @@ def write_intermediate_files(year, doy, band, dsn, profdir, filtyp,
         dirstr = ('../output/Rev' + rev + '/' + dd + '/' + 'Rev' + rev + 
                 pd2 + dd + '_' + filestr + '/')
 
-#    os.system('[ ! -d ' + output_directory + ' ] && mkdir -p '
-#            + output_directory)
-#    fsearch = dirstr + filestr + '*' + filtyp.upper() + '*' + '.*'
-
-        #cwds = (os.getcwd()).split('/')
-        # index of first appearance of rss_ringoccs
-        #ind = cwds.index('rss_ringoccs')
-        #relpath = '../' * int(len(cwds)-ind-1)
-
         # Create output file name without file extension
         curday = strftime('%Y%m%d')
-        #dirsrch = relpath + dirstr
+
         out1 = dirstr + filestr + '_' + filtyp.upper() + '_' + curday
 
         # Check if directory exists, if not, create it
@@ -98,6 +121,7 @@ def write_intermediate_files(year, doy, band, dsn, profdir, filtyp,
             
         
         else:
+            # Create new directory and write first file of filtyp
             print('\tCreating directory:\n\t\t' + dirstr)
             os.system('[ ! -d ' + dirstr + ' ] && mkdir -p ' + dirstr)
 
@@ -109,15 +133,15 @@ def write_intermediate_files(year, doy, band, dsn, profdir, filtyp,
             f_spm = contents['f_spm']
             f_offset = contents['f_offset']
             print('\tSaving frequency offset calculations to:\n\t\t'
-                    + outfile)
+                    + '/'.join(outfile.split('/')[0:5]) + '/\n\t\t\t'
+                        + outfile.split('/')[-1])
             np.savetxt(outfile, np.c_[f_spm, f_offset], fmt='%32.16F'*2)
-            
-            # check data contents for f_spm and f_offset
 
         elif filtyp == 'FRFP':
             outfile = out2 + '.P'
             print('\tSaving frequency residual fit parameters to:\n\t\t'
-                    + outfile)
+                    + '/'.join(outfile.split('/')[0:5]) + '/\n\t\t\t'
+                        + outfile.split('/')[-1])
             file_object = open(outfile, 'wb')
             pickle.dump(contents, file_object)
             file_object.close()
@@ -125,12 +149,10 @@ def write_intermediate_files(year, doy, band, dsn, profdir, filtyp,
         elif filtyp == 'PNFP':
             outfile = out2 + '.P'
             print('\tSaving power normalization fit parameters to:\n\t\t'
-                    + outfile)
+                    + '/'.join(outfile.split('/')[0:5]) + '/\n\t\t\t'
+                        + outfile.split('/')[-1])
             file_object = open(outfile, 'wb')
             pickle.dump(contents, file_object)
             file_object.close()
-
-
-
 
     return None

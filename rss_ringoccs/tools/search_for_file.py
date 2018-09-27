@@ -10,6 +10,7 @@ Purpose: This function searches for an existing frequency offset text file,
 Revisions:
     2018 Sep 17 - jfong - original
     2018 Sep 24 - jfong - hardcode relative path (../ouput/*)
+    2018 Sep 26 - jfong - remove file not found print statement
 """
 
 import glob
@@ -19,11 +20,41 @@ import sys
 from .date_to_rev import date_to_rev
 
 def search_for_file(year, doy, band, dsn, profdir, filtyp):
+    """
+    Search for intermediate files (frequency offset file, frequency
+        residual fit parameters file, power normalization fit parameters file)
+        within the ../output/ directory.
+
+    Args:
+        year (str):
+            year of event
+        doy (str):
+            day-of-year of event
+        band (str):
+            Name of the wavelength of transmission (S, X, or K)
+        dsn (str):
+            Deep Space Network ID of the station that observed the spacecraft
+            for this event
+        profdir (str):
+            Profile direction of event.
+        filtyp (str):
+            Type of intermediate file to search for. 'FOF' for frequency
+            offset file, 'FRFP' for frequency residual fit parameters,
+            and 'PNFP' for power normalization fit parameters.
+
+    Returns:
+        rfile (str):
+            Relative path to desired file. Most recent file of filtyp if more
+            than one exists. If no file found, returns 'N/A'.
+    """
+
     # Remove 'DSS-' from dsn name
     dsn = dsn.split('-')[-1]
 
     # Rename profdir to be I for ingress, E for egress, CI/CE for chord
     pd1 = (profdir.split('"')[1])[0]
+
+    # For chord occultation, use asterisk for both CI/CE
     if pd1 == 'B':
         pd1 = '*'
 
@@ -32,21 +63,13 @@ def search_for_file(year, doy, band, dsn, profdir, filtyp):
     
     # Construct directory structure nomenclature
     #   RevXXX/P/RevXXXP_RSS_YEAR_DOY_BDD_P/RSS_YEAR_DOY_BDD_filtype_DATE_#
-    # sample chord: Rev054/E/Rev054CE_RSS_2007_353_K55_E/
-    # Rev054/E/Rev054CE_RSS_2007_353_K55_E
-#    pdb.set_trace()
+    #   sample chord: Rev054/E/Rev054CE_RSS_2007_353_K55_E/
+    #     Rev054/E/Rev054CE_RSS_2007_353_K55_E
     filestr = ('RSS_' + str(year) + '_' + str(doy) + '_' + str(band) +
             str(dsn) + '_' + pd1)
     dirstr = ('../output/Rev' + rev + '/' + pd1 + '/' + 'Rev' + rev + pd1 +
             '_' + filestr + '/')
     
-#    fsearch = dirstr + filestr + '*' + filtyp.upper() + '*' + '.*'
-    #cwds = (os.getcwd()).split('/')
-    # index of first appearance of rss_ringoccs
-    #ind = cwds.index('rss_ringoccs')
-    #relpath = '../' * int(len(cwds)-ind-1)
-    
-    #fsrch = relpath + dirstr +  '*' + filtyp.upper() + '*' + '.*'
     fsrch = dirstr +  '*' + filtyp.upper() + '*' + '.*'
 
     all_files = []
@@ -60,11 +83,8 @@ def search_for_file(year, doy, band, dsn, profdir, filtyp):
         all_files_sorted = [x for y, x in sorted(zip(datestr,all_files))]
         rfile = all_files_sorted[-1]
     elif len(all_files) == 0:
-        print('WARNING (search_for_file.py): '+ filtyp + ' not found!')
         rfile = 'N/A'
     else:
         rfile = all_files[0]
 
-
-#    search_dir = 'Rev' + rev + '/' +
     return rfile

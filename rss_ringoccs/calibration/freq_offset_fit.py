@@ -63,7 +63,9 @@ Revisions:
                           file and that file, instead of the most recent FOF,
                           will be read.
     2018 Sep 26 - jfong - add print statement for when FOF not found
-                        - write FRFP file if file not found
+                        - write FRFP file if file not found,
+                          read FRFP file if specified in file_search
+
 """
 
 import numpy as np
@@ -178,6 +180,11 @@ class FreqOffsetFit(object):
             USE_GUI (bool):
                 Use the interactive GUI to make a residual
                 frequency fit. This is highly recommended
+            file_search (bool, str):
+                Search ../output/ directory for frequency residual fit
+                parameter (FRFP) file if set. If string given, read fit from
+                that particular file. If not set, fit a polynomial to
+                frequency residual and save to FRFP file.
             verbose (bool):
                 Optional test plot
 
@@ -210,12 +217,6 @@ class FreqOffsetFit(object):
         if not isinstance(geo_inst, rss.occgeo.Geometry):
             sys.exit('ERROR (FreqOffsetFIt): geo_inst input must be an '
                 + 'instance of the Geometry class')
-
-#        if (not isinstance(f_uso, float)) & (not isinstance(f_uso, int)):
-#            print('WARNING (FreqOffsetFit): f_uso input must be either an int '
-#                + 'or float. Ignoring current input and setting to '
-#                + str(8427222034.34050))
-#            f_uso = 8427222034.34050
 
         if not isinstance(poly_order, int):
             print('WARNING (FreqOffsetFit): poly_order input must be an int. '
@@ -291,9 +292,6 @@ class FreqOffsetFit(object):
         # Attributes for components of frequency offset, except for residual
         # frequency and its fit
         if verbose:
-            #print('Calculating predicted sky frequency from input rsr_inst and'
-            #    + 'reconstructed sky frequency from kernelsin in input '
-            #    + 'geo_inst')
             print('\tCalculating predicted sky frequency...')
         self.__f_spm = np.asarray(f_spm)
         self.__f_offset = np.asarray(f_offset)
@@ -307,6 +305,7 @@ class FreqOffsetFit(object):
         rho_geo = np.asarray(geo_inst.rho_km_vals)
         rho_interp_func = interp1d(spm_geo, rho_geo, fill_value='extrapolate')
         self.__f_rho = rho_interp_func(self.__f_spm)
+
         # Attribute keeping track of fit parameter
         self._spm_include = spm_include
 
@@ -329,11 +328,11 @@ class FreqOffsetFit(object):
         self.__spm_vals = rsr_inst.spm_vals
         self.__IQ_m = rsr_inst.IQ_m
 
-        ### Write frequency residual fit parameter pickle file
-        #if not file_search:
-        #    frfp = {'k': self._poly_order, 'spm_include': self._spm_include}
-        #    write_intermediate_files(rsr_inst.year, rsr_inst.doy,
-        #                rsr_inst.band, rsr_inst.dsn, profdir, 'FRFP', frfp)
+        # Write frequency residual fit parameter pickle file
+        if file_search==False:
+            frfp = {'coef': self.frfp_coef}
+            write_intermediate_files(rsr_inst.year, rsr_inst.doy,
+                        rsr_inst.band, rsr_inst.dsn, profdir, 'FRFP', frfp)
 
     def __get_mask(self):
         '''
@@ -413,6 +412,11 @@ class FreqOffsetFit(object):
                 frequency fit. This is highly recommended
             verbose (bool):
                 Optional test plot
+            file_search (bool, str):
+                Search ../output/ directory for frequency residual fit
+                parameter (FRFP) file if set. If string given, read fit from
+                that particular file. If not set, fit a polynomial to
+                frequency residual and save to FRFP file.
 
         Dependencies:
             [1] RSRReader
@@ -482,28 +486,36 @@ class FreqOffsetFit(object):
 
         if file_search:
             ## Search for frequency residual fit pickle (FRFP) file
-            frfp_file = search_for_file(self.__rsr_inst.year,
-                    self.__rsr_inst.doy, self.__rsr_inst.band, 
-                    self.__rsr_inst.dsn, self.profdir, 'FRFP')
-            if frfp_file == 'N/A':
-                print('WARNING (set_f_sky_resid_fit()): FRFP file not found!')
-                print('\tEvaluating polynomial fit...')
-                # When fitting, use x values adjusted to range over [-1, 1]
-
-                ## fit using polynomial of user-selected order
-                coef = poly.polyfit(spm_temp[self.__fsr_mask], f_sky_resid[self.__fsr_mask], poly_order)
-                frfp = {'coef': coef}
-                write_intermediate_files(self.__rsr_inst.year, 
-                        self.__rsr_inst.doy,
-                        self.__rsr_inst.band, self.__rsr_inst.dsn, 
-                        self.profdir, 'FRFP', frfp)
-            else:
+            if isinstance(file_search, str):
                 print('\tExtracting residual frequency fit from:\n\t\t'
-                        + '/'.join(frfp_file.split('/')[0:5]) + '/\n\t\t\t'
-                        + frfp_file.split('/')[-1])
-                file_object = open(frfp_file, 'rb')
+                        + '/'.join(file_search.split('/')[0:5]) + '/\n\t\t\t'
+                        + file_search.split('/')[-1])
+                file_object = open(file_search, 'rb')
                 fit_param_dict = pickle.load(file_object)
                 coef = fit_param_dict['coef']
+            else:
+                frfp_file = search_for_file(self.__rsr_inst.year,
+                        self.__rsr_inst.doy, self.__rsr_inst.band, 
+                        self.__rsr_inst.dsn, self.profdir, 'FRFP')
+                if frfp_file == 'N/A':
+                    print('WARNING (set_f_sky_resid_fit()): FRFP file not found!')
+                    print('\tEvaluating polynomial fit...')
+                    # When fitting, use x values adjusted to range over [-1, 1]
+    
+                    ## fit using polynomial of user-selected order
+                    coef = poly.polyfit(spm_temp[self.__fsr_mask], f_sky_resid[self.__fsr_mask], poly_order)
+                    frfp = {'coef': coef}
+                    write_intermediate_files(self.__rsr_inst.year, 
+                            self.__rsr_inst.doy,
+                            self.__rsr_inst.band, self.__rsr_inst.dsn, 
+                            self.profdir, 'FRFP', frfp)
+                else:
+                    print('\tExtracting residual frequency fit from:\n\t\t'
+                            + '/'.join(frfp_file.split('/')[0:5]) + '/\n\t\t\t'
+                            + frfp_file.split('/')[-1])
+                    file_object = open(frfp_file, 'rb')
+                    fit_param_dict = pickle.load(file_object)
+                    coef = fit_param_dict['coef']
         else:
 
 

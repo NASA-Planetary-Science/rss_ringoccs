@@ -50,10 +50,10 @@ Revisions:
                         - add profdir attribute
     2018 Sep 25 - jfong - remove file_search kwarg from __init__ because
                           get_spline_fit() is never called within __init__ but
-                          always outside of the function (which needs to be 
+                          always outside of the function (which needs to be
                           addressed later)
                         - removed try/except for faulty spline orders, add
-                          the spline order check when extracting order from 
+                          the spline order check when extracting order from
                           kwarg
     2018 Sep 26 - jfong - write PNFP file if file not found,
                           read PNFP file if specified in file_search
@@ -512,7 +512,7 @@ class Normalization(object):
                 if pnfp_file == 'N/A':
                     print('WARNING (get_spline_fit()): PNFP file not found!')
                     print('Evaluating spline fit...')
-                    spline_rep = splrep(spm_vals_free[ind_sort], 
+                    spline_rep = splrep(spm_vals_free[ind_sort],
                             p_obs_free[ind_sort],
                             k=spline_order, t=knots_spm_data[ind_knot_sort])
                     pnfp = {'knots_spm': spline_rep[0],
@@ -533,7 +533,7 @@ class Normalization(object):
                     spline_rep = (knots_spm, spline_coef, k_power_norm)
         else:
             print('\tEvaluating spline fit...')
-            spline_rep = splrep(spm_vals_free[ind_sort], 
+            spline_rep = splrep(spm_vals_free[ind_sort],
                     p_obs_free[ind_sort],
                     k=spline_order, t=knots_spm_data[ind_knot_sort])
 

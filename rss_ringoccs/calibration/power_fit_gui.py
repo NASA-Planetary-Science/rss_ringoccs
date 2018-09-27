@@ -201,7 +201,7 @@ class PowerFitGui(Frame):
         combo['values'] = [i for i in range(1,6)]
         combo.current(int(self.fit_deg))
         combo.grid(row=0, column=0)
-        
+
         # Variable outside of box that says current fit order
         self.lvar = IntVar()
         self.lvar.set(str(self.fit_deg))
@@ -270,7 +270,8 @@ class PowerFitGui(Frame):
             spm_tick_labels (list):
                 SPM tick labels to get corresponding radius values
         """
-        spm_to_rho_func = interp1d(self.x, self.x_rho)
+        spm_to_rho_func = interp1d(self.x, self.x_rho,
+                                bounds_error=False,fill_value='extrapolate')
         rho_tick_labels = spm_to_rho_func(spm_tick_labels)
         return ['%.1f' % rho_tick_label for rho_tick_label in rho_tick_labels]
 
@@ -283,21 +284,22 @@ class PowerFitGui(Frame):
 
         # Shading of predicted free-space regions and normalization of power to
         #    max power
-        self.rho_to_spm_func = interp1d(self.x_rho,self.x)
+        self.rho_to_spm_func = interp1d(self.x_rho,self.x,
+                                bounds_error=False,fill_value='extrapolate')
         self.rho_free = [[69100.0, 73500], [87350.0, 87450.0],
             [117690.0, 117780.0], [119850.0, 120020.0],
             [133500.0, 133650.0], [137000.0, 194400.0]]
         self.spm_free = [[self.rho_to_spm_func(xl[0]),self.rho_to_spm_func(xl[1])] for xl in self.rho_free]
         for xl in self.spm_free:
             self.ax.fill_between(xl,-1,2,color='0.75',zorder=0)
-        
+
         self.ynorm = self.y/np.max(self.y)
-        
+
         # Plot power and its default fit
         self.ax.plot(self.x, self.ynorm, color='0.0',zorder=1)
         self.ax.plot(self.xfit, self.yfit/np.max(self.y), color='r',lw=2,zorder=2)
         self.ax.set_xlabel('SPM')
-        
+
         # Plot radius scale on upper x-axis
         self.ax_rho = self.ax.twiny()
         rho_diff = np.diff(self.x_rho)
@@ -319,7 +321,7 @@ class PowerFitGui(Frame):
                 xlim_rho = self.ax_rho.get_xlim()
                 self.ax_rho.set_xlim([xlim_rho[1], xlim_rho[0]])
         self.ax_rho.set_xlabel('Rho (km)')
-        
+
         # set x and y limits
         self.ax.set_xlim(self.rho_to_spm_func(6e4),self.rho_to_spm_func(1.5e5))
         self.ax.set_ylim(-0.2,1.2)
@@ -360,11 +362,11 @@ class PowerFitGui(Frame):
         # Plot power and its default fit
         self.ax.plot(self.x, self.ynorm, color='0.0',zorder=1)
         self.ax.plot(self.xfit, self.yfit/np.max(self.y), color='r',lw=2,zorder=2)
-        
+
         if not_ind is not None:
             self.ax.plot(self.x[not_ind], self.y[not_ind]/np.max(self.y), color='k',
                 alpha=0.1)
-        
+
         # Plot radius scale on upper x-axis
         if self.is_chord:
             ax_rho_ticks = (self.ax.get_xticks())[

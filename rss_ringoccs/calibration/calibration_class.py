@@ -26,9 +26,9 @@ Revisions:
                         - set rev_info from geo_inst as attribute
                             - this will inherit the same prof_dir
     2018 Sep 25 - jfong - allow file_search to be a boolean or a string
-                        - if string, parse for FRFP or PNFP file paths,
-                        - if only one file path given, search for the most
-                          recent file for the other file
+                            - if string, parse for FRFP or PNFP file paths,
+                            - if only one file path given, search for the most
+                              recent file for the other file
                         - file_search=False default in __init__ kwarg
 """
 
@@ -92,12 +92,8 @@ class Calibration(object):
             verbose=False, USE_GUI=False, write_file=True):
         """
         Args:
-            fit_inst:
-                Instance of the FreqOffsetFit class. Used for the
-                frequency offset fit and the residual frequency fit
-            norm_inst:
-                Instance of the Normalization class. Used for the power
-                normalizing spline fit
+            rsr_inst:
+                Instance of the RSRReader class
             geo_inst:
                 Instance of the Geometry class. Used for various
                 geometry parameters
@@ -105,6 +101,11 @@ class Calibration(object):
                 Desired time Spacing between points
             verbose (bool):
                 Print intermediate steps and results
+            USE_GUI (bool):
+                Use the interactive GUI to make a residual frequency polynomial
+                fit and a freespace power spline fit.
+            write_file (bool):
+                Write output *CAL.TAB and *CAL.LBL files
 
         Dependencies:
             [1] FreqOffsetFit
@@ -113,14 +114,6 @@ class Calibration(object):
             [4] scipy
             [5] numpy
         """
-
-     #   if not isinstance(fit_inst, rss.calibration.FreqOffsetFit):
-     #       sys.exit('ERROR (Calibration): fit_inst input needs to be an '
-     #           + 'instance of the FreqOffsetFit class')
-
-     #   if not isinstance(norm_inst, rss.calibration.Normalization):
-     #       sys.exit('ERROR (Calibration): norm_inst input needs to be an '
-     #           + 'instance of the Normalization class')
 
         if not isinstance(geo_inst, rss.occgeo.Geometry):
             sys.exit('ERROR (Calibration): geo_inst input needs to be an '
@@ -184,15 +177,10 @@ class Calibration(object):
 
         spm_geo = np.asarray(geo_inst.t_oet_spm_vals)
         rho_km_geo = np.asarray(geo_inst.rho_km_vals)
-        #phi_rad_vals = np.radians(np.asarray(geo_inst.phi_ora_deg_vals))
-        #B_rad_vals = np.radians(np.asarray(geo_inst.B_deg_vals))
-        #D_km_vals = np.asarray(geo_inst.D_km_vals)
-        #rho_dot_kms_vals = np.asarray(geo_inst.rho_dot_kms_vals)
-        #F_km_vals = np.asarray(geo_inst.F_km_vals)
 
         if verbose:
             print('\tRetrieving predicted sky frequency, residual '
-                + 'frequency fit, and frequency offset fit...')
+                + 'frequency fit, \n\t\tand frequency offset fit...')
         f_spm, f_sky_pred = fit_inst.get_f_sky_pred()
         f_spm, f_sky_resid_fit = fit_inst.get_f_sky_resid_fit()
         f_spm, f_offset_fit = fit_inst.get_f_offset_fit()
@@ -206,9 +194,6 @@ class Calibration(object):
 
         if verbose:
             print('\tInterpolating values to calibration SPM...')
-                #predicted sky frequency, residual sky '
-                #+ 'frequency fit, and frequency offset fit to calibration '
-                #+ 'SPM. Evaluating spline fit at calibration SPM')
 
         # Evaluate f_sky_pred at spm_cal
         f_sky_pred_func = interp1d(f_spm, f_sky_pred, fill_value='extrapolate')
@@ -241,13 +226,6 @@ class Calibration(object):
         self.f_sky_resid_fit_vals = f_sky_resid_fit_cal
         self.p_free_vals = p_free_cal
         self.__set_history(fit_inst, norm_inst, geo_inst, dt_cal)
-
-        #if not file_search:
-        #    pnfp = {'k': norm_inst._spline_order,
-        #            'freespace_spm': norm_inst._freespace_spm,
-        #            'knots_spm': norm_inst._knots_spm}
-        #    write_intermediate_files(rsr_inst.year, rsr_inst.doy,
-        #            rsr_inst.band, rsr_inst.dsn, profdir, 'PNFP', pnfp)
 
         if write_file:
             write_output_files(self)

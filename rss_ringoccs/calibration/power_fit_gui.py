@@ -25,6 +25,8 @@ Revisions:
     2018 Sep 19 - sflury - Updated GUI to have predicted free space regions
        highlighted using matplotlib.pyplot.fill_between. Changed plot colors
        to higher contrast and color-blind accessible.
+    2018 Sep 26 - jfong - update to display fit read from file
+    2018 Sep 26 - sflury - update to display correct fit order when GUI pops up
 """
 
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg,
@@ -165,7 +167,7 @@ class PowerFitGui(Frame):
         self.y = p_obs_down
         self.xfit = spm_fit
 
-        self.fit_deg = norm_inst._spline_order
+        self.fit_deg = norm_inst.pnfp_splrep[2]
         self.xlim = norm_inst._freespace_spm
         self.knots_spm = norm_inst._knots_spm
         self.yfit = self._get_fit()
@@ -193,17 +195,16 @@ class PowerFitGui(Frame):
 
         # Frame to put fit order box in
         fit_order_frame = LabelFrame(self, text='Fit Order')
-
         # Box to select fit order
         combo = Combobox(fit_order_frame, textvariable=self.cvar)
         combo.bind('<<ComboboxSelected>>', self.adjust_deg)
-        combo['values'] = [1, 2, 3, 4, 5]
-        combo.current(1)
+        combo['values'] = [i for i in range(1,6)]
+        combo.current(int(self.fit_deg))
         combo.grid(row=0, column=0)
-
+        
         # Variable outside of box that says current fit order
         self.lvar = IntVar()
-        self.lvar.set('2')
+        self.lvar.set(str(self.fit_deg))
         lbl = Label(fit_order_frame, textvariable=self.lvar)
         lbl.grid(row=0, column=1)
 

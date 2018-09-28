@@ -199,7 +199,7 @@ class PowerFitGui(Frame):
         combo = Combobox(fit_order_frame, textvariable=self.cvar)
         combo.bind('<<ComboboxSelected>>', self.adjust_deg)
         combo['values'] = [i for i in range(1,6)]
-        combo.current(int(self.fit_deg))
+        combo.current(int(self.fit_deg-1))
         combo.grid(row=0, column=0)
 
         # Variable outside of box that says current fit order

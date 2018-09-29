@@ -2,10 +2,14 @@
 
 ## rss_ringoccs Version 1.0 ##
 
-Release date: 2018 September 28
+Release date: 2018 September 30
 
 ## Known Issues and Limitations ##
-1. rss_ringoccs implements effective radial resolution as defined in Marouf, Tyler, and Rosen 1986 (GIVE REF) eq. xx, using a Kaiser-Bessel alpha=2.5 window function. In order to match the 1-km resolution diffraction-corrected profiles produced by Essam Marouf on the PDS Ring-Moon Systems Node, we must specify an effective resolution of about 0.75 km. The source of this discrepancy appears to be a difference in definitions of effective resolution, but is at this time unresolved.
+1. rss_ringoccs implements effective radial resolution as defined in Marouf, Tyler, and Rosen 1986 (MTR86, Icarus 68, 120-166) eq. 19, using a Kaiser-Bessel alpha=2.5 window function. In contrast, Marouf et al.'s diffraction-reconstructed profiles on the PDS Ring-Moon Systems Node adopt the shortest resolvable wavelength as the
+resolution metric. Its inverse is the
+highest spatial frequency preserved in the data. The latter is 1 cycle/km for the 1 km
+resolution of Marouf's reconstructed profiles. The value corresponds to ~750 m
+processing resolution as defined in MTR86. The bandwidth of the lowpass filter in the final stage of the data processing chain determines such frequency and is selected to achieve the desired resolution.
 
 Workaroud: In order to produce the best match to the RSS diffraction-corrected ring profiles on the PDS, specify in rss_ringoccs a desired resolution 0.75 times that given in the PDS files.
 
@@ -40,3 +44,5 @@ Workaround: Use Linux operating system, and post an Issue on the Github page for
 8. Implement speed improvements using multiprocessing, Cython, and/or C versions of time-consuming routines.
 
 9. Workarounds that remove or significantly reduce the need for GUI components to optimize and streamline the pipeline.
+
+10. Implement low-pass filter as final step of diffraction reconstruction, tuned to give best match to Marouf et al.'s definition of the effective resolution, rather than the MTR86 eq. 19 definition, so that our results will more more directly comparable to Marouf's.

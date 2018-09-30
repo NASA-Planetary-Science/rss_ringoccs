@@ -11,7 +11,7 @@ highest spatial frequency preserved in the data. The latter is 1 cycle/km for th
 resolution of Marouf's reconstructed profiles. The value corresponds to ~750 m
 processing resolution as defined in MTR86. The bandwidth of the lowpass filter in the final stage of the data processing chain determines such frequency and is selected to achieve the desired resolution.
 
-Workaroud: In order to produce the best match to the RSS diffraction-corrected ring profiles on the PDS, specify in rss_ringoccs a desired resolution 0.75 times that given in the PDS files.
+Workaroud: In order to produce the best match to the RSS diffraction-reconstructed ring profiles on the PDS, specify in rss_ringoccs a desired resolution 0.75 times that given in the PDS files.
 
 2. Power and frequency calibration GUIs give the following error message under some versions of Python on MacOS systems:
 

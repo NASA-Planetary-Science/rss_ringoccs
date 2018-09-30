@@ -1,5 +1,5 @@
 # rss_ringoccs
-rss_ringoccs is a suite of Python-based analysis tools for Cassini Radio Science (RSS) ring occultations. It was developed at Wellesley College under the direction of Richard French (Cassini RSS Team Leader) by Research Assistants Sophia Flury, Jolene Fong, Ryan Maguire, and Glenn Steranka, with funding provided by the NASA/JPL Cassini project.
+rss_ringoccs is a suite of Python-based analysis tools for Cassini Radio Science (RSS) ring occultations. It was developed at Wellesley College by members of Team Cassini under the direction of Richard French (Cassini RSS Team Leader) by Research Assistants Sophia Flury, Jolene Fong, Ryan Maguire, and Glenn Steranka, with funding provided by the NASA/JPL Cassini project.
 
 This is Version 1.0, offically released on September 30, 2018.
 

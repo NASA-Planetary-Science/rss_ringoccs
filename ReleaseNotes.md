@@ -1,10 +1,17 @@
 # Release Notes #
 
+## rss_ringoccs Version 1.1 ##
+
+Release date: TBD
+### Changes from Version 1.0 ###
+
+### Known Issues and Limitations ###
+
 ## rss_ringoccs Version 1.0 ##
 
 Release date: 2018 September 30
 
-## Known Issues and Limitations ##
+### Known Issues and Limitations ###
 1. rss_ringoccs implements effective radial resolution as defined in Marouf, Tyler, and Rosen 1986 (MTR86, Icarus 68, 120-166) eq. 19, using a Kaiser-Bessel alpha=2.5 window function. In contrast, Marouf et al.'s diffraction-reconstructed profiles on the PDS Ring-Moon Systems Node adopt the shortest resolvable wavelength as the
 resolution metric. Its inverse is the
 highest spatial frequency preserved in the data. The latter is 1 cycle/km for the 1 km
@@ -25,7 +32,7 @@ Workaround: Use Linux operating system, and post an Issue on the Github page for
 
 Workaround: Use Linux operating system, and post an Issue on the Github page for rss_ringoccs
 
-## Planned Augmentations ##
+### Planned Augmentations ###
 
 1. Include calculation of threshold optical depth
 

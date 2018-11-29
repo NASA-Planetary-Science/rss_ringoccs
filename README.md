@@ -24,5 +24,5 @@ citing rss_ringoccs using the DOI:10.5281/zenodo.1226748
 ## Acknowledgements
 This work was supported by the NASA/JPL Cassini mission. We are especially grateful 
 to Linda Spilker and Kathryn Weld for their encouragement and support, and to 
-RSS Team Member Essam Marouf for developing the diffraction correction technique
+RSS Team Member Essam Marouf for developing the diffraction reconstruction technique
 that underlies this work.

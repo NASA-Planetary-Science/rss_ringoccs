@@ -72,6 +72,6 @@ V1.0-2: Power and frequency calibration GUIs give the following error message un
 
 Workaround: Use Linux operating system, and post an Issue on the Github page for rss_ringoccs
 
-3. Power and frequency calibration GUIs may sometimes not close when users click the "OK" button or the red "X" button.
+V1.0-3. Power and frequency calibration GUIs may sometimes not close when users click the "OK" button or the red "X" button.
 
 Workaround: Use Linux operating system, and post an Issue on the Github page for rss_ringoccs

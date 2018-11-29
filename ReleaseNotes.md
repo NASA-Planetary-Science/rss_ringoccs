@@ -15,7 +15,7 @@ Release date: TBD
 
 5. All output files now include full history of commands used to produce them.
 
-6. Readthedocs documentation produces for all rss_ringoccs routines.
+6. Readthedocs documentation produced for all rss_ringoccs routines.
 
 7. Describe validation tests in User Guide (do we want to include source code to produce these as well? I like that idea...)
 

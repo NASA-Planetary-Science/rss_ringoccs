@@ -9,7 +9,11 @@ The Cassini Radio Science Subsystem (RSS) was used during the Cassini orbital to
 The purpose of rss_ringoccs is to enable scientists to produce "on demand" radial optical depth profiles of Saturn's rings from the raw RSS data, without requiring a deep familiarity with the complex processing steps involved in calibrating the data and correcting for the effects of diffraction. The code and algorithms are extensively documented, providing a starting point for users who wish to test, refine, or optimize the straightforward methods we have employed. Our emphasis has been on clarity, sometimes at the expense of programming efficiency and execution time. rss_ringoccs does an excellent job of reproducing existing RSS processed ring occultation data already present on NASA's PDS Ring-Moons Node, but we make no claim to having achieved the state-of-the-art in every respect. We encourage users to augment our algorithms and to report on those improvements, so that they can be  incorporated in future editions of rss_ringoccs. 
 
 ## Installation and Documentation
-Detailed installation instructions and full documentation are contained in https://github.com/NASA-Planetary-Science/rss_ringoccs/tree/master/docs/rss_ringoccs__User_Guide.pdf. Release notes are contained in https://github.com/NASA-Planetary-Science/rss_ringoccs/blob/master/ReleaseNotes.md
+Detailed installation instructions and full documentation are contained in https://github.com/NASA-Planetary-Science/rss_ringoccs/tree/master/docs/rss_ringoccs__User_Guide.pdf. 
+
+Release notes are contained in https://github.com/NASA-Planetary-Science/rss_ringoccs/blob/master/ReleaseNotes.md
+
+Source code documentation is found at READ THE DOCS......
 
 ## How to (Get) Help
 If you have trouble with installation or execution of the rss_ringoccs package, we encourage you to post a issue to https://github.com/NASA-Planetary-Science/rss_ringoccs/issues. We will attempt to respond promptly, and ther users will benefit. Alternatively, you can write email directly to Richard French: rfrench_at_wellesley.edu.

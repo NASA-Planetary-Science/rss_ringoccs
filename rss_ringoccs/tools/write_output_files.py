@@ -47,7 +47,7 @@ def write_output_files(inst):
     elif isinstance(inst, rss.calibration.Calibration):
         filtyp = 'CAL'
 
-    elif isinstance(inst, rss.calibration.NormDiff):
+    elif isinstance(inst, rss.calibration.DiffractionLimitedProfile):
         filtyp = 'DLP_' + str(int(inst.dr_km * 1000 * 2)).zfill(4) + 'M'
 
     elif isinstance(inst, rss.diffrec.DiffractionCorrection):
@@ -58,7 +58,10 @@ def write_output_files(inst):
     construct_output_filename(rev_info, inst, filtyp)
     return None
 
-def construct_output_filename(rev_info, inst, filtyp):
+def construct_filepath(rev_info, filtyp):
+    title_out = []
+    outdir_out = []
+
     pd1 = (rev_info['prof_dir'].split('"')[1])[0]
     if pd1 == 'B':
         pd1 = ['I','E']
@@ -77,8 +80,8 @@ def construct_output_filename(rev_info, inst, filtyp):
         filestr = ('RSS_' + str(year) + '_' + str(doy) + '_' + str(band) +
             str(dsn) + '_' + dd)
 
-        dirstr = ('../output/Rev' + rev + '/' + dd + '/' + 'Rev' + rev +
-                pd2 + dd + '_' + filestr + '/')
+        dirstr = ('../output/Rev' + rev + '/Rev' + rev + dd + '/' + 'Rev' +
+                rev + pd2 + dd + '_' + filestr + '/')
 
         # Create output file name without file extension
         curday = strftime('%Y%m%d')
@@ -117,7 +120,18 @@ def construct_output_filename(rev_info, inst, filtyp):
 
         title = out2.split('/')[-1]
         outdir = '/'.join(out2.split('/')[0:-1]) + '/'
+        title_out.append(title)
+        outdir_out.append(outdir)
+    return title_out, outdir_out
+        
 
+def construct_output_filename(rev_info, inst, filtyp):
+
+    titles, outdirs = construct_filepath(rev_info, filtyp)
+    ndirs = len(titles)
+    for n in range(ndirs):
+        title = titles[n]
+        outdir = outdirs[n]
         func_typ[filtyp[0:3]](rev_info, inst, title, outdir,
                 rev_info['prof_dir'])
 

@@ -8,11 +8,11 @@ from rss_ringoccs.tools.CSV_tools import get_geo, ExtractCSVData
 class CompareTau(object):
     def __init__(self, geo, cal, dlp, tau, res,
                  rng='all', wtype="kb25", bfac=True,
-                 fft=False, verbose=True, norm=True):
+                 verbose=True, norm=True, psitype='full'):
 
         data = ExtractCSVData(geo, cal, dlp, tau=tau, verbose=verbose)
         rec = DiffractionCorrection(data, res, rng=rng, bfac=bfac, wtype=wtype,
-                                    fft=fft, verbose=verbose, norm=norm)
+                                    psitype=psitype, verbose=verbose, norm=norm)
         rho_km_vals = rec.rho_km_vals
         tau_power = data.power_vals
         tau_phase = data.phase_vals
@@ -41,10 +41,7 @@ class FindOptimalResolution(object):
         nwins   = np.size(wlst)
         linfint = np.zeros((nwins, nres))
         l2int   = np.zeros((nwins, nres))
-        linffft = np.zeros((nwins, nres))
-        l2fft   = np.zeros((nwins, nres))
         resint  = np.zeros((nwins))
-        resfft  = np.zeros((nwins))
         eres    = sres + (nres-1)*dres
 
         res = sres
@@ -64,19 +61,12 @@ class FindOptimalResolution(object):
             for j in range(nwins):
                 wtype = wlst[j]
                 recint = DiffractionCorrection(data, res, rng=rng,
-                                               wtype=wtype, fft=False)
+                                               wtype=wtype)
                 p_int = recint.power_vals
                 linf = np.max(np.abs(p_int - tau_power))
                 l2 = np.sqrt(np.sum(np.abs(p_int-tau_power)**2)*recint.dx_km)
                 linfint[j,i] = linf
                 l2int[j,i] = l2
-                recfft = DiffractionCorrection(data, res, rng=rng,
-                                               wtype=wtype, fft=True)
-                p_fft = recfft.power_vals
-                linf = np.max(np.abs(p_fft - tau_power))
-                l2 = np.sqrt(np.sum(np.abs(p_fft-tau_power)**2)*recint.dx_km)
-                linffft[j,i] = linf
-                l2fft[j,i] = l2
                 if verbose:
                     printmes = ('Res:',res,'Max:',eres,"WTYPE:",wtype)
                     print("%s %f %s %f %s %s" % printmes)
@@ -84,19 +74,15 @@ class FindOptimalResolution(object):
 
         for j in range(nwins):
             resint[j] = sres+dres*np.min((linfint[j,...] == np.min(linfint[j,...])).nonzero())
-            resfft[j] = sres+dres*np.min((linffft[j,...] == np.min(linffft[j,...])).nonzero())
         self.linfint = linfint
         self.l2int   = l2int
-        self.linffft = linffft
-        self.l2fft   = l2fft
         self.resint  = resint
-        self.resfft  = resfft
 
 
 class DeltaImpulseDiffraction(object):
     def __init__(self,geo,lambda_km,res,rho,dx_km_desired=0.25,
         occ=False,wtype='kb25',fwd=False,norm=True,bfac=True,
-        verbose=True,fft=False,psitype='full',usefres=False):
+        verbose=True,psitype='full',usefres=False):
 
         if (not isinstance(res, float)) or (not isinstance(res, int)):
             try:
@@ -113,8 +99,6 @@ class DeltaImpulseDiffraction(object):
             raise TypeError("norm must be Boolean: True/False")
         if not isinstance(bfac, bool):
             raise TypeError("bfac must be Boolean: True/False")
-        if not isinstance(fft, bool):
-            raise TypeError("fft must be Boolean: True/False")
         if not isinstance(verbose, bool):
             raise TypeError("verbose must be Boolean: True/False")
         if not isinstance(psitype, str):
@@ -171,7 +155,7 @@ class DeltaImpulseDiffraction(object):
 
         recdata = diffraction_correction(self, res, rng=rng, wtype=wtype,
                                          fwd=fwd, norm=norm, verbose=verbose,
-                                         bfac=bfac, fft=fft, psitype=psitype)
+                                         bfac=bfac, psitype=psitype)
 
         self = recdata
         self.rho_star = rho

@@ -40,14 +40,12 @@ region_dict = {
 
 class DiffractionCorrection(object):
     """
-        Class:
-            DiffractionCorrection
         Purpose:
             Perform diffraction correction for a ring occultation
             on a data set that is a near radially symmetric function
             of the ring radius, or ring intercept point (RIP).
         Arguments:
-            NormDiff:
+            :NormDiff:
                 The data set, usually an instance of the NormDiff
                 class from the rss_ringoccs Calibration subpackage.
                 This instance MUST contain the following attributes
@@ -61,13 +59,11 @@ class DiffractionCorrection(object):
                     f_sky_hz_vals:    Sky Frequency (Hertz)
                     rho_dot_kms_vals: RIP-velocity (km/s)
                     history:          History dictionary
-            res:
-                Positive Float or Integer
+            :res (*float* or *int*):
                 The requested resolution for processing (km). This
                 must be a positive real number.
         Keywords:
-            rng:
-                List or String
+            :rng (*list* or *str*):
                 The requested range for diffraction correction.
                 Preferred input is rng = [a,b]. Arrays are
                 allowed and the range will be set as:
@@ -90,8 +86,7 @@ class DiffractionCorrection(object):
                 For other planets use rng = [a,b]. Default value
                 is set to 'all' which processes [1, 400000]
                 Values MUST be set in kilometers.
-            wtype:
-                String
+            :wtype (*str):
                 The requested tapering function for diffraction
                 correction. A string with several allowed inputs:
                     'rect'      Rectangular Window.
@@ -104,8 +99,7 @@ class DiffractionCorrection(object):
                 The variable is neither case nor space sensitive.
                 Default window is set to 'kb25'. See window_functions
                 submodule for further documentation.
-            fwd:
-                Boolean
+            :fwd (*bool*):
                 A Boolean for determining whether or not
                 forward modelling will be computed. This is good
                 starting point for deciding if the diffraction
@@ -113,8 +107,7 @@ class DiffractionCorrection(object):
                 the reconstruction is good, the forward model
                 should reproduce the p_norm_vals attribute from
                 the input NormDiff instance. Default is set to False.
-            norm:
-                Boolean
+            :norm (*bool*):
                 A Boolean for determining whether or not the
                 reconstructed complex transmittance is normalize
                 by the window width. This normalization is the
@@ -122,8 +115,7 @@ class DiffractionCorrection(object):
                 free space divided by the complex transmittance
                 that is computed using free space weighted by the
                 selected tapering function. Default is True.
-            bfac:
-                Boolean
+            :bfac (*bool*):
                 A Boolean for determining whether or not the
                 'b' factor in the window width computation is
                 used. This is equivalent to setting the Allen
@@ -133,8 +125,7 @@ class DiffractionCorrection(object):
                 Deviation is set to 2e-13, or whichever number you
                 wish to specify in the sigma keyword (See below).
                 Default is True.
-            sigma:
-                Positive Float
+            :sigma (*float*):
                 The Allen deviation for the spacecraft. If the bfac
                 keyword (See above) is set to False, this is ignored.
                 If bfac is set to True, and sigma is NOT specified,
@@ -142,8 +133,7 @@ class DiffractionCorrection(object):
                 deviation for Cassini with 1 second integration time.
                 For spacecraft other than Cassini, you should provide
                 the Allen deviation yourself. Default is sigma=2e-13
-            psitype:
-                String
+            :psitype (*str*):
                 A string for determining what approximation to the
                 geometrical 'psi' function is used. Several strings
                 are allowed:
@@ -154,133 +144,124 @@ class DiffractionCorrection(object):
                     'Fresnel'   Standard Fresnel approximation.
                 The variable is neither case nor space sensitive.
                 Default is set to 'full'.
-            verbose:
-                Boolean
+            :verbose (*bool*):
                 A Boolean for determining if various pieces of
                 information are printed to the screen or not.
                 Default is False.
         Attributes:
-            bfac:
+            :bfac:
                 Boolean for bfac (See keywords).
-            dathist:
+            :dathist:
                 History from NormDiff instance.
-            dx_km:
+            :dx_km:
                 Radial spacing for the data points (km).
-            f_sky_hz_vals:
+            :f_sky_hz_vals:
                 Recieved frequency from the spacecraft (Hz).
-            finish:
+            :finish:
                 Final point that was reconstructed.
-            fwd:
+            :fwd:
                 Boolean for fwd (See keywords).
-            history:
+            :history:
                 History for the DiffractionCorrection class.
                 This contains system info and user info, including
                 what operating system was used, username, hostname,
                 computer name, and the inputs provided.
-            lambda_sky_km_vals:
+            :lambda_sky_km_vals:
                 Wavelength of recieved signal from spacecraft (km).
-            mu_vals:
+            :mu_vals:
                 The sine of the ring opening angle (Unitless).
-            n_used:
+            :n_used:
                 Number of points that were reconstructed.
-            norm:
+            :norm:
                 Boolean for norm (See keywords).
-            norm_eq:
+            :norm_eq:
                 Normalized equivalent width computed from window
                 that was used during reconstruction. See the
                 window_functions submodule for more information.
-            p_norm_fwd_vals:
+            :p_norm_fwd_vals:
                 Normalized power computer from the forward modelling
                 of the reconstructed data. This will be a None type
                 variable unless fwd=True is set. If the
                 reconstruction went well, this should mimic the raw
                 data, p_norm_vals.
-            p_norm_vals:
+            :p_norm_vals:
                 Normalized power from the diffracted signal. This is
                 the square of the absolute value of the recieved
                 complex transmittance.
-            phase_fwd_vals:
+            :phase_fwd_vals:
                 Phase computed from the forward model of the
                 reconstructed data. This will be a None type
                 variable unless fwd=True is set. If the
                 reconstruction went well, this should mimic
                 phase_rad_vals. This variable is in radians.
-            phase_rad_vals:
+            :phase_rad_vals:
                 Phase from the diffracted signal (Radians).
-            phase_vals:
+            :phase_vals:
                 Reconstructed phase (Radians).
-            phi_rad_vals:
+            :phi_rad_vals:
                 Ring azimuth angle of the ring intercept (Radians).
-            phi_rl_rad_vals:
+            :phi_rl_rad_vals:
                 Ring longitude angle. This will be a None type unless
                 it was provided in the NormDiff class. Otherwise,
                 this variable is in radians.
-            power_vals:
+            :power_vals:
                 Normalized reconstructed power.
-            psitype:
+            :psitype:
                 String for psitype (See keywords).
-            raw_tau_threshold_vals:
+            :raw_tau_threshold_vals:
                 Threshold optical depth for the diffracted data.
                 This will be a None type unless provided for in the
                 NormDiff class.
-            res:
+            :res:
                 Requested resolution (See arguments). In kilometers.
-            rho_corr_pole_km_vals:
+            :rho_corr_pole_km_vals:
                 Radial corrections from the Planet's pole. This will
                 be a None type variable unless provided in the
                 NormDiff class. Otherwise, this is in kilometers.
-            rho_corr_timing_km_vals:
+            :rho_corr_timing_km_vals:
                 Radial corrections from timing offsets. This will be
                 a None type variable unless provided in the NormDiff
                 class. Otherwise, this is in kilometers.
-            rho_dot_kms_vals:
+            :rho_dot_kms_vals:
                 Time derivative of the ring intercept point (km/s).
-            rho_km_vals:
+            :rho_km_vals:
                 Ring-intercept-point (RIP) in kilometers.
-            rng:
+            :rng:
                 Range that was used for reconstruction, taking into
                 the range that was requested by the user. The actual
                 range takes into account limits in the available data
                 and limits in the required window sizes.
-            rngreq:
+            :rngreq:
                 Requested range (See keywords).
-            sigma:
+            :sigma:
                 Requested Allen deviation (See keywords).
-            start:
+            :start:
                 First point that was reconstructed.
-            t_oet_spm_vals:
+            :t_oet_spm_vals:
                 Time the signal is measured on Earth. This is a
                 None type unless provided for in the NormDiff class.
-            t_ret_spm_vals:
+            :t_ret_spm_vals:
                 Time the signal passes through the diffracting
                 medium. This is a None type unless provided for in
                 the NormDiff class.
-            t_set_spm_vals:
+            :t_set_spm_vals:
                 Time the signal is emitted from the spacecraft. This
                 is a None type unless provided in the NormDiff class.
-            tau_threshold_vals:
+            :tau_threshold_vals:
                 Threshold optical depth of the reconstructed data.
-            tau_vals:
+            :tau_vals:
                 Optical depth of the reconstructed data.
-            verbose:
+            :verbose:
                 Boolean for Verbose (See keywords).
-            w_km_vals:
+            :w_km_vals:
                 Window width as a function of radius (km).
-            wtype:
+            :wtype:
                 String for wtype (See keywords).
         Dependencies:
-            [1] numpy
-            [2] scipy
-            [3] rss_ringoccs
-            [4] time
-        Notes:
-            [1]
-        References:
-
-        Examples:
-
-        History:
-            Created: RJM - 2018/05/16 5:40 P.M.
+            #. numpy
+            #. scipy
+            #. rss_ringoccs
+            #. time
     """
     def __init__(self, NormDiff, res, rng="all", wtype="kb25", fwd=False,
                  norm=True, verbose=False, bfac=True, sigma=2.e-13,
@@ -2319,3 +2300,8 @@ class DiffractionCorrection(object):
                 print("\n", end="\r")
 
         return T_out
+
+    """
+        History:
+        Created: RJM - 2018/05/16 5:40 P.M.
+    """

@@ -87,88 +87,82 @@ def make_executable(path):
     os.chmod(path, mode)
 
 def latex_summary_doc(pdfdir, pdffil, resolution, outfilename):
+
+    """
     var = 'Rev133E_RSS_2010_170_X43_E_Summary'
+    rev = var[:]
+    doy = var[:]
+    res = var[:]
+    occ = var[:]
+    geo = var[:]
+    cal = var[:]
+    tau = var[:]
+    year = var[:]
+    band = var[:]
+    """
+    var = 'Bob'
+    rev = var[:]
+    doy = var[:]
+    res = var[:]
+    occ = var[:]
+    geo = var[:]
+    cal = var[:]
+    tau = var[:]
+    year = var[:]
+    band = var[:]
+
     LaTeXFile = r"""
         \documentclass{article}
-        %---------------------------Packages----------------------------%
+        %---------------------------Preamble----------------------------%
         \usepackage{geometry}
         \geometry{a4paper, margin = 1.0in}
-        \usepackage{graphicx, float}            % Graphics/Images.
-        \usepackage[english]{babel}             % Language typesetting.
-        \usepackage[dvipsnames]{xcolor}         % Color names.
-        \usepackage{listings, lstlinebgrd}      % Verbatim-Like Tools.
-        \usepackage{mathtools, esint, mathrsfs} % amsmath and integrals.
-        \usepackage{amsthm, amsfonts}           % Fonts and theorems.
-        \usepackage{wrapfig}                    % Wrap text around figs.
-        \usepackage{hyperref}                   % Allows for hyperlinks.
-        \hypersetup{
-            colorlinks=true,
-            linkcolor=blue,
-            filecolor=magenta,
-            urlcolor=Cerulean,
-            citecolor=SkyBlue
-        }                                       % Colors for hyperref.
-        \usepackage[
-            font={normalsize},
-            hypcap=true,
-            labelsep=colon
-        ]{caption}                              % Figure captions.
-        \usepackage[%
-            font=normalsize,
-            labelformat=simple,
-            labelsep=colon%
-        ]{subcaption}                           % Subfigure captions.
-        \usepackage[
-            toc,
-            acronym,
-            nogroupskip
-        ]{glossaries}                           %Glossaries and acronyms.
-        %------------------------New Commands---------------------------%
-        \renewcommand\labelitemii{$\circ$}
-        \renewcommand\thesubfigure{%
-            \arabic{section}.\arabic{figure}.\arabic{subfigure}%
-        }
+        \usepackage{graphicx, float}
+        \usepackage[english]{babel}
+        \usepackage[dvipsnames]{xcolor}
+        \usepackage[font={normalsize}, labelsep=colon]{caption}
         \addto\captionsenglish{\renewcommand{\figurename}{Fig.}}
-        %--------------------------LENGTHS------------------------------%
-        % Indent and paragraph spacing.
+        \newcommand{\thePDF}{%s}
+        \newcommand{\theREV}{%s}
+        \newcommand{\theDOY}{%s}
+        \newcommand{\theRES}{%s}
+        \newcommand{\theOCC}{%s}
+        \newcommand{\theGEO}{%s}
+        \newcommand{\theCAL}{%s}
+        \newcommand{\theTAU}{%s}
+        \newcommand{\theYEAR}{%s}
+        \newcommand{\theBAND}{%s}
         \setlength{\parindent}{0em}
         \setlength{\parskip}{0em}
-
-        % CARL IS RSS\_2005\_123\_X43\_E
-        % BOB IS THE PDF FILE (Or /path/to/bob.pdf)
-        % Ex: Bob = /path/to/Rev133E_RSS_2010_170_X43_E_Summary.pdf
-
+        %-----------------------Main Document---------------------------%
         \begin{document}
             \pagenumbering{gobble}
             \begin{center}
-                \LARGE{%
-                    \texttt{%
-                        {RSS}\textunderscore{YEAR}%
-                        \textunderscore{DOY}\textunderscore{BAND}%
-                        \textunderscore{OCC}
-                    }\\[2.0ex]
-                    REVNUMBER Cassini Radio Science Ring
-                    Occultation:\\[1.0ex]
-                    Geometry, Data Calibration,
-                    and Reconstructed\\[1.0ex]
-                    Optical Depth and
-                    Phase Shift Profiles\\[1.0ex]
-                    at RESOLUTION\\[2.5ex]
-                }
+                        \LARGE{\texttt{
+                               RSS\textunderscore\theYEAR%
+                               \textunderscore\theDOY\textunderscore\theBAND%
+                               \textunderscore\theOCC}\\[2.0ex]
+                            Rev\theREV\
+                            Cassini Radio Science Ring Occultation:\\[1.0ex]
+                            Geometry, Data Calibration,
+                            and Reconstructed\\[1.0ex]
+                            Optical Depth and
+                            Phase Shift Profiles\\[1.0ex]
+                            at \theRES\
+                            Resolution\\[2.5ex]}
                 \large{\today}
             \end{center}
             \vspace{2ex}
             \begin{figure}[H]
                 \centering
-                \resizebox{\textwidth}{!}{%
-                    \includegraphics[%
+                \resizebox{\textwidth}{!}{
+                    \includegraphics[
                         page=1,
                         trim={0.0cm 0.0cm 0.0cm 0.9cm},
                         clip,
                         width=\textwidth
-                    ]{Bob}
+                    ]{\thePDF}
                 }
-                \caption*{%
+                \caption*{
                     The radio occultation track as seen
                     looking down on the ring plane.
                     The solid
@@ -187,31 +181,31 @@ def latex_summary_doc(pdfdir, pdffil, resolution, outfilename):
                 \centering
                 \begin{tabular}{l l}
                     \hline
-                    Symbol      & Parameter Name\\
+                    Symbol&Parameter Name\\
                     \hline
-                    $t_{OET}$ & OBSERVED EVENT TIME\\
-                    $t_{RET}$ & RING EVENT TIME\\
-                    $t_{SET}$ & SPACECRAFT EVENT TIME\\
-                    $\rho$ & RING RADIUS\\
-                    $\phi_{RL}$ & RING LONGITUDE\\
-                    $\phi_{ORA}$ & OBSERVED RING AZIMUTH\\
-                    $B$ & OBSERVED RING ELEVATION\\
-                    $D$ & SPACECRAFT TO RING INTERCEPT DISTANCE\\
-                    $\partial\rho/\partial t$
-                    & RING INTERCEPT RADIAL VELOCITY\\
-                    $\partial\theta/\partial t$
-                    & RING INTERCEPT AZIMUTHAL VELOCITY\\
-                    $F$ & FRESNEL SCALE\\
-                    $R_{impact}$ & IMPACT RADIUS\\
-                    $r_x$ & SPACECRAFT POSITION X\\
-                    $r_y$ & SPACECRAFT POSITION Y\\
-                    $r_z$ & SPACECRAFT POSITION Z\\
-                    $v_x$ & SPACECRAFT VELOCITY X\\
-                    $v_y$ & SPACECRAFT VELOCITY Y\\
-                    $v_z$ & SPACECRAFT VELOCITY Z\\
+                    $t_{OET}$&OBSERVED EVENT TIME\\
+                    $t_{RET}$&RING EVENT TIME\\
+                    $t_{SET}$&SPACECRAFT EVENT TIME\\
+                    $\rho$&RING RADIUS\\
+                    $\phi_{RL}$&RING LONGITUDE\\
+                    $\phi_{ORA}$&OBSERVED RING AZIMUTH\\
+                    $B$&OBSERVED RING ELEVATION\\
+                    $D$&SPACECRAFT TO RING INTERCEPT DISTANCE\\
+                    $\partial\rho/\partial{t}$&
+                    RING INTERCEPT RADIAL VELOCITY\\
+                    $\partial\theta/\partial t$&
+                    RING INTERCEPT AZIMUTHAL VELOCITY\\
+                    $F$&FRESNEL SCALE\\
+                    $R_{impact}$&IMPACT RADIUS\\
+                    $r_x$&SPACECRAFT POSITION X\\
+                    $r_y$&SPACECRAFT POSITION Y\\
+                    $r_z$&SPACECRAFT POSITION Z\\
+                    $v_x$&SPACECRAFT VELOCITY X\\
+                    $v_y$&SPACECRAFT VELOCITY Y\\
+                    $v_z$&SPACECRAFT VELOCITY Z\\
                     \hline
                 \end{tabular}
-                \caption[Glossary of Parameters from the Geo File]{%
+                \caption[Glossary of Parameters from the Geo File]{
                     Glossary of parameters in file CARL\_GEO.TAB.
                     See companion label (.LBL) file for description
                     of parameters.
@@ -222,15 +216,15 @@ def latex_summary_doc(pdfdir, pdffil, resolution, outfilename):
                 \centering
                 \begin{tabular}{l l}
                     \hline
-                    Symbol & Parameter Name\\
+                    Symbol&Parameter Name\\
                     \hline
-                    $t_{OET}$ & OBSERVED EVENT TIME\\
-                    $f_{sky}$ & SKY FREQUENCY\\
-                    $f_{resid}$ & RESIDUAL FREQUENCY\\
-                    $P_{free}$ & FREESPACE POWER\\
+                    $t_{OET}$&OBSERVED EVENT TIME\\
+                    $f_{sky}$&SKY FREQUENCY\\
+                    $f_{resid}$&RESIDUAL FREQUENCY\\
+                    $P_{free}$&FREESPACE POWER\\
                     \hline
                 \end{tabular}
-                \caption[Glossary of Data from the Cal File]{%
+                \caption[Glossary of Data from the Cal File]{
                     Glossary of calibration data in file
                     CARL\_CAL.TAB. See companion label (.LBL)
                     file for description of the data.
@@ -241,22 +235,22 @@ def latex_summary_doc(pdfdir, pdffil, resolution, outfilename):
                 \centering
                 \begin{tabular}{l l}
                     \hline
-                    Symbol & Parameter Name\\
+                    Symbol&Parameter Name\\
                     \hline
-                    $\rho$ & RING RADIUS\\
-                    $\Delta\rho$ & RADIUS CORRECTION\\
-                    $\phi_{RL}$ & RING LONGITUDE\\
-                    $\phi_{ORA}$ & OBSERVED RING AZIMUTH\\
-                    $\tau$ & NORMAL OPTICAL DEPTH\\
-                    $\phi$ & PHASE SHIFT\\
-                    $\tau_{TH}$ & NORMAL OPTICAL DEPTH THRESHOLD\\
-                    $t_{OET}$ & OBSERVED EVENT TIME\\
-                    $t_{RET}$ & RING EVENT TIME\\
-                    $t_{SET}$ & SPACECRAFT EVENT TIME\\
-                    $B$ & OBSERVED RING ELEVATION\\
+                    $\rho$&RING RADIUS\\
+                    $\Delta\rho$&RADIUS CORRECTION\\
+                    $\phi_{RL}$&RING LONGITUDE\\
+                    $\phi_{ORA}$&OBSERVED RING AZIMUTH\\
+                    $\tau$&NORMAL OPTICAL DEPTH\\
+                    $\phi$&PHASE SHIFT\\
+                    $\tau_{TH}$&NORMAL OPTICAL DEPTH THRESHOLD\\
+                    $t_{OET}$&OBSERVED EVENT TIME\\
+                    $t_{RET}$&RING EVENT TIME\\
+                    $t_{SET}$&SPACECRAFT EVENT TIME\\
+                    $B$&OBSERVED RING ELEVATION\\
                     \hline
                 \end{tabular}
-                \caption[Glossary of Parameters in Tau File]{%
+                \caption[Glossary of Parameters in Tau File]{
                     Glossary of optical depth, phase shift,
                     and selected geometry parameters
                     contained in files CARL\_TAU\_01KM.TAB
@@ -270,38 +264,33 @@ def latex_summary_doc(pdfdir, pdffil, resolution, outfilename):
             \begin{figure}[H]
                 \centering
                 \large{\textbf{View from Earth}}\par
-                \includegraphics[%
+                \includegraphics[
                     page=2,
                     trim={0.5in 1.5in 0.3in 1.5in},
                     clip,
                     width=\textwidth
-                ]{Bob}
-                \caption{%
-                    Earth view of the occultation geometry
-                    parameters in file CARL\_E\_GEO.tab
-                }
+                ]{\thePDF}
+                \caption{Earth view of the occultation geometry
+                         parameters in \theGEO.}
             \end{figure}
             \vspace{32ex}
             \begin{figure}[H]
                 \centering
                 \large{\textbf{View from North Pole}}\par
-                \includegraphics[%
+                \includegraphics[
                     page=3,
                     trim={0.5in 0.8in 0.3in 0.8in},
                     clip,
                     width=\textwidth
-                ]{Bob}
-                \caption{See caption of Figure 1a.}
+                ]{\thePDF}
+                \caption{See caption of Figure 1a. $\oplus$}
             \end{figure}
             \newpage
             \begin{figure}[H]
                 \centering
-                \includegraphics[%
-                    page=4,
-                    width=\textwidth
-                ]{Bob}
-                \caption[Calibration Data from Cal File]{%
-                    Calibration data in file Rev007\_E\_X43\_CAL.TAB.
+                \includegraphics[page=4, width=\textwidth]{\thePDF}
+                \caption[Calibration Data from Cal File]{
+                    Calibration data in file \theCAL.
                     The frequency residuals data
                     (the smooth curve, in the second panel)
                     is used to steer the carrier signal to the middle
@@ -319,127 +308,96 @@ def latex_summary_doc(pdfdir, pdffil, resolution, outfilename):
             \newpage
             \begin{figure}[H]
                 \centering
-                \includegraphics[%
-                    page=5,
-                    width=\textwidth
-                ]{Bob}
-                \caption[%
-                    Ring Radius Correction from
-                    Selected Occultation Geometry
-                ]{%
+                \includegraphics[page=5, width=\textwidth]{\thePDF}
+                \caption[Ring Radius Correction from
+                         Selected Occultation Geometry]{
                     Ring radius correction and
                     selected occultation geometry parameters
-                    contained in the file CARL\_TAU\_RESOLUTION.TAB
+                    contained in the file \theTAU\
                     (solid green).
                 }
             \end{figure}
             \newpage
             \begin{figure}[H]
                 \centering
-                \resizebox{\textwidth}{!}{%
-                    \includegraphics[%
-                        page=6,
-                        width=\textwidth,
-                    ]{Bob}
+                \resizebox{\textwidth}{!}{
+                    \includegraphics[page=6, width=\textwidth]{\thePDF}
                 }
-                \caption[Normal Optical Depth Profiles 70000-85000km]{%
-                    Rev7-E normal optical depth profiles reconstructed to
-                    remove diffraction effects at 1 km resolution contained
-                    in the file RSS\_2005\_123\_X43\_E\_TAU\_01KM.tab.
-                    The 1 km resolution profile is plotted in green.
-                }
+                \caption[Normal Optical Depth Profiles 70000-85000km]{
+                    Rev7-E normal optical depth profiles reconstructed
+                    to remove diffraction effects at 1 km resolution
+                    contained in the file
+                    \theTAU
+                    The 1 km resolution profile is plotted in green.}
             \end{figure}
             \newpage
             \begin{figure}[H]
                 \centering
-                \resizebox{\textwidth}{!}{%
-                    \includegraphics[%
-                        page=7,
-                        width=\textwidth
-                    ]{Bob}
+                \resizebox{\textwidth}{!}{
+                    \includegraphics[page=7, width=\textwidth]{\thePDF}
                 }
-                \caption[%
-                    Normal Optical Depth Profiles 85000-100000km%
-                ]{%
+                \caption[Normal Optical Depth Profiles 85000-100000km]{
                     Rev7-E normal optical depth profiles
                     reconstructed to remove diffraction effects
                     at 1 km resolution contained in the file
-                    RSS\_2005\_123\_X43\_E\_TAU\_01KM.tab.
+                    \theTAU.
                     The 1 km resolution profile is plotted in green.
                 }
             \end{figure}
             \newpage
             \begin{figure}[H]
                 \centering
-                \resizebox{\textwidth}{!}{%
-                    \includegraphics[%
-                        page=8,
-                        width=\textwidth
-                    ]{Bob}
+                \resizebox{\textwidth}{!}{
+                    \includegraphics[page=8, width=\textwidth]{\thePDF}
                 }
-                \caption[%
-                    Normal Optical Depth Profiles 100000-115000km
-                ]{%
+                \caption[Normal Optical Depth Profiles 100000-115000km]{
                     Rev7-E normal optical depth profiles
                     reconstructed to remove diffraction effects
                     at 1 km resolution contained in the file
-                    RSS\_2005\_123\_X43\_E\_TAU\_01KM.tab.
+                    \theTAU.
                     The 1 km resolution profile is plotted in green.
                 }
             \end{figure}
             \newpage
             \begin{figure}[H]
                 \centering
-                \resizebox{\textwidth}{!}{%
-                    \includegraphics[%
-                        page=9,
-                        width=\textwidth
-                    ]{Bob}
+                \resizebox{\textwidth}{!}{
+                    \includegraphics[page=9, width=\textwidth]{\thePDF}
                 }
-                \caption[%
-                    Normal Optical Depth Profiles 115000-130000km
-                ]{%
+                \caption[Normal Optical Depth Profiles 115000-130000km]{
                     Rev7-E normal optical depth profiles
                     reconstructed to remove diffraction effects
                     at 1 km resolution
-                    (file RSS\_2005\_123\_X43\_E\_TAU\_01KM.tab).
+                    (file \theTAU).
                     The 1 km resolution profile is plotted in green.
                 }
             \end{figure}
             \newpage
             \begin{figure}[H]
                 \centering
-                \resizebox{\textwidth}{!}{%
-                    \includegraphics[%
-                        page=10,
-                        width=\textwidth
-                    ]{Bob}
+                \resizebox{\textwidth}{!}{
+                    \includegraphics[page=10, width=\textwidth]{\thePDF}
                 }
-                \caption[%
-                    Normal Optical Depth Profiles 130000-145000km
-                ]{%
+                \caption[Normal Optical Depth Profiles 130000-145000km]{
                     Rev7-E normal optical depth profiles
                     reconstructed to remove diffraction
                     effects at 1 km resolution contained
                     in the file
-                    RSS\_2005\_123\_X43\_E\_TAU\_01KM.tab.
+                    \theTAU.
                     The 1 km resolution profile is plotted in green.
                 }
             \end{figure}
             \newpage
             \begin{figure}[H]
                 \centering
-                \resizebox{\textwidth}{!}{%
-                    \includegraphics[%
-                        page=11,
-                        width=\textwidth
-                    ]{Bob}
+                \resizebox{\textwidth}{!}{
+                    \includegraphics[page=11, width=\textwidth]{\thePDF}
                 }
-                \caption[Phase Shift Profile]{%
+                \caption[Phase Shift Profile]{
                     Rev7-E Phase shift profile reconstructed
                     to remove diffraction effects at 1 km
                     resolution contained in the file
-                    RSS\_2005\_123\_X43\_E\_TAU\_01KM.TAB.
+                    \theTAU.
                     The 1 km resolution profile is plotted
                     in solid green.
                 }
@@ -447,17 +405,14 @@ def latex_summary_doc(pdfdir, pdffil, resolution, outfilename):
             \newpage
             \begin{figure}[H]
                 \centering
-                \resizebox{\textwidth}{!}{%
-                    \includegraphics[%
-                        page=12,
-                        width=\textwidth
-                    ]{Bob}
+                \resizebox{\textwidth}{!}{
+                    \includegraphics[page=12, width=\textwidth]{\thePDF}
                 }
-                \caption[Phase Shift Profile]{%
+                \caption[Phase Shift Profile]{
                     Rev7-E Phase shift profile reconstructed
                     to remove diffraction effects at 1 km
                     resolution contained in the file
-                    RSS\_2005\_123\_X43\_E\_TAU\_01KM.TAB.
+                    \theTAU.
                     The 1 km resolution profile is plotted
                     in solid green.
                 }
@@ -465,17 +420,14 @@ def latex_summary_doc(pdfdir, pdffil, resolution, outfilename):
             \newpage
             \begin{figure}[H]
                 \centering
-                \resizebox{\textwidth}{!}{%
-                    \includegraphics[%
-                        page=13,
-                        width=\textwidth
-                    ]{Bob}
+                \resizebox{\textwidth}{!}{
+                    \includegraphics[page=13, width=\textwidth]{\thePDF}
                 }
-                \caption[Phase Shift Profile]{%
+                \caption[Phase Shift Profile]{
                     Rev7-E Phase shift profile reconstructed
                     to remove diffraction effects at 1 km
                     resolution contained in the file
-                    RSS\_2005\_123\_X43\_E\_TAU\_01KM.TAB.
+                    \theTAU.
                     The 1 km resolution profile is plotted
                     in solid green.
                 }
@@ -483,17 +435,14 @@ def latex_summary_doc(pdfdir, pdffil, resolution, outfilename):
             \newpage
             \begin{figure}[H]
                 \centering
-                \resizebox{\textwidth}{!}{%
-                    \includegraphics[%
-                        page=14,
-                        width=\textwidth
-                    ]{Bob}
+                \resizebox{\textwidth}{!}{
+                    \includegraphics[page=14, width=\textwidth]{\thePDF}
                 }
-                \caption[Phase Shift Profile]{%
+                \caption[Phase Shift Profile]{
                     Rev7-E Phase shift profile reconstructed
                     to remove diffraction effects at 1 km
                     resolution contained in the file
-                    RSS\_2005\_123\_X43\_E\_TAU\_01KM.TAB.
+                    \theTAU.
                     The 1 km resolution profile is plotted
                     in solid green.
                 }
@@ -501,25 +450,20 @@ def latex_summary_doc(pdfdir, pdffil, resolution, outfilename):
             \newpage
             \begin{figure}[H]
                 \centering
-                \resizebox{\textwidth}{!}{%
-                    \includegraphics[%
-                        page=15,
-                        width=\textwidth
-                    ]{Bob}
+                \resizebox{\textwidth}{!}{
+                    \includegraphics[page=15, width=\textwidth]{\thePDF}
                 }
-                \caption[Phase Shift Profile]{%
+                \caption[Phase Shift Profile]{
                     Rev7-E Phase shift profile reconstructed
                     to remove diffraction effects at 1 km
                     resolution contained in the file
-                    RSS\_2005\_123\_X43\_E\_TAU\_01KM.TAB.
+                    \theTAU.
                     The 1 km resolution profile is plotted
                     in solid green.
                 }
             \end{figure}
         \end{document}
-    """ % (pdfdir, pdffil, pdffil, pdffil, pdffil,
-           pdffil, pdffil, pdffil, pdffil, pdffil,
-           pdffil, pdffil)
+    """% (var, rev, doy, res, occ, geo, cal, tau, year, band)
     TexName = outfilename
     TexFileName = '%s.tex' % TexName
     TexFile = open(TexFileName,'w')
@@ -530,13 +474,13 @@ def latex_summary_doc(pdfdir, pdffil, resolution, outfilename):
         #!/bin/bash
         pdflatex %s.tex
         pdflatex %s.tex
-        rm -f %s.log
-        rm -f %s.aux
-        rm -f %s.tex
-        rm -f %s.sh
+        rm %s.log
+        rm %s.aux
+        rm %s.tex
+        rm %s.sh
     """ % (TexName,TexName,TexName,TexName,TexName,TexName)
 
-    TexSh   = open("%s.sh" % TexName,'w')
+    TexSh = open("%s.sh" % TexName,'w')
     TexSh.write(TexScript)
     TexSh.close()
 

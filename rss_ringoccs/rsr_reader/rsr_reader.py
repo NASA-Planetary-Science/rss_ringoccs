@@ -66,15 +66,13 @@ from multiprocessing import Queue
 import numpy as np
 import os
 import pdb
-import platform
 from scipy.signal import decimate
 import struct
 import sys
 import time
 
-sys.path.append('../')
-from rss_ringoccs.tools.get_rev_info import get_rev_info
-sys.path.remove('../')
+from ..tools.get_rev_info import get_rev_info
+from ..tools.write_history_dict import write_history_dict
 
 
 class RSRReader(object):
@@ -687,16 +685,9 @@ class RSRReader(object):
         input_var_dict = {'rsr_file': self.rsr_file}
         input_kw_dict = {
             'decimate_16khz_to_1khz': self.__decimate_16khz_to_1khz}
-        history_dict = {'User Name': os.getlogin(),
-            'Host Name': os.uname().nodename,
-            'Run Date': time.ctime() + ' ' + time.tzname[0],
-            'Python Version': platform.python_version(),
-            'Operating System': os.uname().sysname,
-            'Source File': __file__.split('/')[-1],
-            'Source Directory': __file__.rsplit('/', 1)[0] + '/',
-            'Input Variables': input_var_dict,
-            'Input Keywords': input_kw_dict}
-        self.history = history_dict
+
+        self.history = write_history_dict(input_var_dict, input_kw_dict,
+                __file__)
 
     def __set_rev_info(self):
         self.rev_info = get_rev_info(self)

@@ -7,6 +7,7 @@ import numpy as np
         the continuous FFT power spectrum
 
     Nov 01 2018 - sflury        -- original, used components of v1.0 script
+    Nov 15 2018 - sflury        -- updated default window size and window spacing
 '''
 class calc_freq_offset(object):
     '''
@@ -17,21 +18,17 @@ class calc_freq_offset(object):
                 rsr_inst
 
             Optional
-                dt_freq         -- half the width of the FFT window
+                dt_freq         -- half the width of the FFT window, default is 128 sec
                 delta_t_cent    -- incremental change in SPM window center
                                    Note: this will determine the speed of the
                                    frequency offset calculations. Window spacing
-                                   less than 200 seconds will take time:
-                                        100 sec spacing      4 sec
-                                         50 sec spacing      8 sec
-                                         25 sec spacing     16 sec
-                                         10 sec spacing     46 sec
-                                    Default is 20 sec spacing.
+                                   less than 200 seconds will take time.
+                                   Default is 10 sec spacing.
 
 
             Calls functions to set up and run continuous FFTs and get peak freqs
     '''
-    def __init__(self,rsr_inst,dt_freq=131.072,n_FFTs=5e2):
+    def __init__(self,rsr_inst,spm_min,spm_max,dt_freq=128.):
 
         # Get raw SPM and raw I & Q from RSR instance
         self.spm_vals = rsr_inst.spm_vals
@@ -41,12 +38,9 @@ class calc_freq_offset(object):
 
         # set frequency sampling as attribute
         self.dt_freq = dt_freq
-        # set number of samples
-        self.n_FFTs = n_FFTs
-        # finds and sets ranges/limits for FFTs
-        ### ~~ WARNING ~~ ###
-        # This will clip the SPM and IQ data attributes
-        #self.__set_fft_ranges()
+        # set lower and upper limits to sampling
+        self.spm_min = spm_min
+        self.spm_max = spm_max
 
         # finds offset frequencies
         self.__find_offset_freqs()
@@ -66,14 +60,14 @@ class calc_freq_offset(object):
     '''
     def __find_offset_freqs(self):
 
-        #
-        delta_t_cent = (np.max(self.spm_vals)-np.min(self.spm_vals))/float(self.n_FFTs)
+        # hard-set the spacing to 10 spm between each window center
+        delta_t_cent = 10.
 
         # storage lists -- later converted to arrays and stored as attributes
         spms = []
         freqs = []
         # iteratively compute peak frequency
-        for spm_mid in np.arange(np.min(self.spm_vals),np.max(self.spm_vals)+delta_t_cent,delta_t_cent):
+        for spm_mid in np.arange(self.spm_min,self.spm_max+delta_t_cent,delta_t_cent):
             # set indices using boolean mask over a range of SPM
             ind = [(self.spm_vals>=spm_mid)&(self.spm_vals<spm_mid+self.dt_freq)]
             # make sure data are included in range
@@ -91,7 +85,6 @@ class calc_freq_offset(object):
         __find_peak_freq
 
             Takes
-                spm         -- spm_vals within the current window
                 IQ          -- IQ_m vals within the current window
 
             Computes continuous FFT, finds frequency at max power
@@ -108,8 +101,8 @@ class calc_freq_offset(object):
 
         # Get FFT frequencies
         f = np.fft.fftfreq(IQ.size)/self.dt
-        # Compute FFT with extra exp( -j * 2pi * f * dt ) factor for continuous
-        IQ_fft = np.fft.fft(np.exp(-1j*2*np.pi*f*self.dt)*IQ)
+        # Compute FFT
+        IQ_fft = np.fft.fft(IQ)
         # Compute power
         power = (np.absolute(IQ_fft) ** 2) / (float(len(IQ)) ** 2)
 

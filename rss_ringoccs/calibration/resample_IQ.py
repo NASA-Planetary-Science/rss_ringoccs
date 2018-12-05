@@ -6,28 +6,6 @@ resample_IQ.py
 Purpose: Resample I and Q from uniformly spaced time to uniformly spaced
          radius. Normally, you resample from raw resolution data.
 
-Revisions:
-      gjs_resample_IQ.py
-   2018 Feb 27 - gsteranka - Original version
-   2018 Mar 01 - gsteranka - Took pre_resample function outside of resample_IQ
-                             function, since I found out it doesn't need to be
-                             inside to be recognized in a call to resample_IQ
-                             from another file
-   2018 Mar 07 - gsteranka - Input is a complex number IQ_c, instead of
-                             separate real and imaginary parts
-   2018 Mar 08 - gsteranka - Change input arrays so rho starts within dr_km_tol
-                             of an integer number of dr_km. Makes it so after
-                             resampling, everything is at a more even number
-      resample_IQ.py
-   2018 Mar 20 - gsteranka - Copy to official version and remove debug steps
-   2018 Apr 09 - gsteranka - Edited pre_resample function to handle ingerss
-                             files as well as egress
-   2018 May 07 - gsteranka - Add warning, intended for chord occultations, if
-                             the input radii are not either monotonically
-                             increasing or decreasing. Also now switching
-                             ingress occultations to be increasing, which lets
-                             the final radii be at integer numbers of requested
-                             final spacing
 """
 
 import numpy as np
@@ -74,7 +52,7 @@ def resample_IQ(rho_km, IQ_c, dr_desired, dr_km_tol=0.01, verbose=False):
         >>> (rho_km_desired, IQ_c_resampled) = resample_IQ(rho_km_raw, \
                 IQ_c_raw, dr_desired, dr_km_tol=dr_km_tol, verbose=verbose)
 
-    Args:
+    Arguments:
         rho_km (np.ndarray):
             Set of ring intercept point values at initial
             resolution before resampling
@@ -139,3 +117,28 @@ def resample_IQ(rho_km, IQ_c, dr_desired, dr_km_tol=0.01, verbose=False):
                 (rho_km_desired[i], I_c_desired[i], Q_c_desired[i]))
 
     return rho_km_desired, I_c_desired + 1j * Q_c_desired
+
+"""
+Revisions:
+      gjs_resample_IQ.py
+   2018 Feb 27 - gsteranka - Original version
+   2018 Mar 01 - gsteranka - Took pre_resample function outside of resample_IQ
+                             function, since I found out it doesn't need to be
+                             inside to be recognized in a call to resample_IQ
+                             from another file
+   2018 Mar 07 - gsteranka - Input is a complex number IQ_c, instead of
+                             separate real and imaginary parts
+   2018 Mar 08 - gsteranka - Change input arrays so rho starts within dr_km_tol
+                             of an integer number of dr_km. Makes it so after
+                             resampling, everything is at a more even number
+      resample_IQ.py
+   2018 Mar 20 - gsteranka - Copy to official version and remove debug steps
+   2018 Apr 09 - gsteranka - Edited pre_resample function to handle ingerss
+                             files as well as egress
+   2018 May 07 - gsteranka - Add warning, intended for chord occultations, if
+                             the input radii are not either monotonically
+                             increasing or decreasing. Also now switching
+                             ingress occultations to be increasing, which lets
+                             the final radii be at integer numbers of requested
+                             final spacing
+"""

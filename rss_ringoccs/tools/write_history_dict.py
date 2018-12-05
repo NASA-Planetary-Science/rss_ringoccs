@@ -53,8 +53,10 @@ def write_history_dict(input_vars, input_kwds, source_file):
     operating_system = os.uname()[0]
     src_dir = source_file.rsplit('/',1)[0] +'/'
     src_file = source_file.split('/')[-1]
+    rssocc_version = '1.1'
 
     history = {
+            "rss_ringoccs Version": rssocc_version,
             "User Name": user_name,
             "Host Name": host_name,
             "Run Date": run_date,
@@ -62,8 +64,8 @@ def write_history_dict(input_vars, input_kwds, source_file):
             "Operating System": operating_system,
             "Source Directory": src_dir,
             "Source File": src_file,
-            "Input Variables": input_vars,
-            "Input Keywords": input_kwds
+            "Positional Args": input_vars,
+            "Keyword Args": input_kwds
             }
     return history
 

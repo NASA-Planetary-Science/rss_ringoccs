@@ -6,6 +6,7 @@ Purpose: Read legal PDS3 label files.
 
 Revisions:
     2018 Jul 23 - jfong - copied from jwf_pds3_reader.py
+    2018 Nov 05 - jfong - record all PDS keywords
 """
 import pdb
 import numpy as np

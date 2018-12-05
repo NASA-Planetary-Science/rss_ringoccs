@@ -46,7 +46,8 @@ def get_geo(geo, verbose=True):
                 "rz_km_vals",
                 "vx_kms_vals",
                 "vy_kms_vals",
-                "vz_kms_vals"
+                "vz_kms_vals",
+                "Bob"
                 ]
             )
     except FileNotFoundError:
@@ -135,6 +136,7 @@ def get_dlp(dlp, verbose=True):
                 "rho_corr_timing_km_vals",
                 "phi_rl_deg_vals",
                 "phi_ora_deg_vals",
+                "p_norm_vals",
                 "raw_tau_vals",
                 "phase_deg_vals",
                 "raw_tau_threshold_vals",
@@ -185,6 +187,7 @@ def get_tau(tau, verbose=True):
                 "rho_km_offsett_vals",
                 "phi_rl_deg_vals",
                 "phi_ora_deg_vals",
+                "p_norm_vals",
                 "raw_tau_vals",
                 "phase_deg_vals",
                 "raw_tau_threshold_vals",
@@ -300,7 +303,7 @@ class ExtractCSVData(object):
             pass
         
         # Run an error check on phi_ora_deg_vals
-        phi_ora_deg_vals = np.array(dlp_dat.phi_ora_deg_vals)
+        phi_ora_deg_vals = np.array(geo_dat.phi_ora_deg_vals)
         if not isinstance(phi_ora_deg_vals, np.ndarray):
             raise TypeError("Bad DLP: phi_ora_deg_vals must be a numpy array")
         elif (not np.isreal(phi_ora_deg_vals).all()):
@@ -326,12 +329,13 @@ class ExtractCSVData(object):
         elif (not np.isreal(phase_deg_vals).all()):
             raise ValueError("Bad DLP: phase_deg_vals must be real valued")
         elif (np.max(np.abs(phase_deg_vals)) > 360.0):
-            raise ValueError("Bad DLP: max{|phase_deg_vals|} > 360")
+            # raise ValueError("Bad DLP: max{|phase_deg_vals|} > 360")
+            print("Bad DLP: max{|phase_deg_vals|} > 360")
         else:
             pass
     
         # Run an error check on B_deg_vals
-        B_deg_vals = np.array(dlp_dat.B_deg_vals)
+        B_deg_vals = np.array(geo_dat.B_deg_vals)
         if (not isinstance(B_deg_vals, np.ndarray)):
             raise TypeError("Bad DLP: B_deg_vals must be a numpy array")
         elif (not np.isreal(B_deg_vals).all()):
@@ -347,8 +351,6 @@ class ExtractCSVData(object):
             raise TypeError("Bad DLP: t_ret_spm_vals must be a numpy array")
         elif (not np.isreal(self.t_ret_spm_vals).all()):
             raise ValueError("Bad DLP: t_ret_spm_vals must be real valued")
-        elif (np.min(self.t_ret_spm_vals) < 0.0):
-            raise ValueError("Bad DLP: t_ret_spm_vals has negative values.")
         else:
             pass
 
@@ -358,8 +360,6 @@ class ExtractCSVData(object):
             raise TypeError("Bad DLP: t_set_spm_vals must be a numpy array")
         elif (not np.isreal(self.t_set_spm_vals).all()):
             raise ValueError("Bad DLP: t_set_spm_vals must be real valued")
-        elif (np.min(self.t_set_spm_vals) < 0.0):
-            raise ValueError("Bad DLP: t_set_spm_vals has negative values.")
         else:
             pass
 
@@ -369,8 +369,6 @@ class ExtractCSVData(object):
             raise TypeError("Bad DLP: t_oet_spm_vals must be a numpy array")
         elif (not np.isreal(self.t_oet_spm_vals).all()):
             raise ValueError("Bad DLP: t_oet_spm_vals must be real valued")
-        elif (np.min(self.t_oet_spm_vals) < 0.0):
-            raise ValueError("Bad DLP: t_oet_spm_vals has negative values")
         else:
             pass
 
@@ -454,7 +452,9 @@ class ExtractCSVData(object):
             pass
 
         # Run an error check on f_sky_raw_vals
-        f_sky_raw_vals = np.array(cal_dat.f_sky_pred_vals)
+        f_sky_pred = np.array(cal_dat.f_sky_pred_vals)
+        f_sky_resid = np.array(cal_dat.f_sky_resid_fit_vals)
+        f_sky_raw_vals = f_sky_pred - f_sky_resid
         if (not isinstance(f_sky_raw_vals, np.ndarray)):
             raise TypeError("Bad CAL: f_sky_raw_vals must be a numpy array")
         elif (not np.isreal(f_sky_raw_vals).all()):
@@ -469,18 +469,14 @@ class ExtractCSVData(object):
         if verbose:
             print("\tComputing Variables...")
 
-        self.phi_rad_vals = phi_ora_deg_vals*RADS_PER_DEGS
         self.phi_rl_rad_vals = self.phi_rl_deg_vals*RADS_PER_DEGS
         self.phase_rad_vals = phase_deg_vals*RADS_PER_DEGS
-        self.B_rad_vals = B_deg_vals*RADS_PER_DEGS
-        raw_mu = np.sin(np.abs(self.B_rad_vals))
-        self.p_norm_vals = np.exp(-raw_tau_vals/raw_mu)
 
         if (np.size(self.rho_km_vals) != np.size(self.t_oet_spm_vals)):
             raise ValueError("len(rho_km_vals) != len(t_oet_spm_vals")
 
         dr = np.zeros(np.size(self.rho_km_vals) - 1)
-        dt = np.zeros(np.size(self.t_oet_spm_vals)-1)
+        dt = np.zeros(np.size(self.t_oet_spm_vals) - 1)
 
         for i in range(np.size(self.rho_km_vals) - 1):
             dr[i] = self.rho_km_vals[i+1] - self.rho_km_vals[i]
@@ -545,24 +541,29 @@ class ExtractCSVData(object):
         rmax = np.max(geo_rho)
         rfin = int(np.max((rmax-self.rho_km_vals>=0.0).nonzero()))
         rstart = int(np.min((self.rho_km_vals-rmin>=0.0).nonzero()))
-        self.phase_rad_vals = self.phase_rad_vals[rstart:rfin+1]
-        self.phi_rad_vals = self.phi_rad_vals[rstart:rfin+1]
-        self.rho_km_vals = self.rho_km_vals[rstart:rfin+1]
-        self.p_norm_vals = self.p_norm_vals[rstart:rfin+1]
-        self.B_rad_vals = self.B_rad_vals[rstart:rfin+1]
-        d_km_interp = interpolate.interp1d(geo_rho, geo_D, kind='linear')
-        self.D_km_vals = d_km_interp(self.rho_km_vals)
-        rho_dot_interp = interpolate.interp1d(geo_rho, geo_drho, kind='linear')
-        self.rho_dot_kms_vals = rho_dot_interp(self.rho_km_vals)
         n_rho_vals = np.size(self.rho_km_vals)
         n_f_vals = np.size(f_sky_raw_vals)
         frange = np.arange(n_f_vals)
         xrange = np.arange(n_rho_vals)*(n_f_vals-1.0)/(n_rho_vals-1.0)
-        f_interp = interpolate.interp1d(frange, f_sky_raw_vals, kind='linear')
+        d_km_interp = interpolate.interp1d(geo_rho, geo_D, kind='cubic')
+        rho_dot_interp = interpolate.interp1d(geo_rho, geo_drho, kind='cubic')
+        phi_interp = interpolate.interp1d(geo_rho, phi_ora_deg_vals, kind="cubic")
+        B_interp = interpolate.interp1d(geo_rho, B_deg_vals, kind="cubic")
+        f_interp = interpolate.interp1d(frange, f_sky_raw_vals, kind='cubic')
+        self.D_km_vals = d_km_interp(self.rho_km_vals)
+        self.rho_dot_kms_vals = rho_dot_interp(self.rho_km_vals)
+        self.phi_rad_vals = phi_interp(self.rho_km_vals)*RADS_PER_DEGS
+        self.B_rad_vals = B_interp(self.rho_km_vals)*RADS_PER_DEGS
         self.f_sky_hz_vals = f_interp(xrange)
+        raw_mu = np.sin(np.abs(self.B_rad_vals))
+        self.p_norm_vals = np.exp(-raw_tau_vals/raw_mu)
         self.t_ret_spm_vals = self.t_ret_spm_vals[rstart:rfin+1]
         self.t_set_spm_vals = self.t_set_spm_vals[rstart:rfin+1]
         self.t_oet_spm_vals = self.t_oet_spm_vals[rstart:rfin+1]
+        self.phase_rad_vals = self.phase_rad_vals[rstart:rfin+1]
+        self.phase_rad_vals = dlp_dat.phase_deg_vals[rstart:rfin+1]*RADS_PER_DEGS
+        self.rho_km_vals = self.rho_km_vals[rstart:rfin+1]
+        self.p_norm_vals = self.p_norm_vals[rstart:rfin+1]
         self.rho_corr_pole_km_vals = self.rho_corr_pole_km_vals[rstart:rfin+1]
         self.rho_corr_timing_km_vals = self.rho_corr_timing_km_vals[rstart:rfin+1]
 
@@ -610,13 +611,20 @@ class ExtractCSVData(object):
             "DLP Data": self.dlp
         }
 
-        input_kwds = {
-            "TAU Data": self.tau,
-            "Use of Verbose": verbose
-        }
+        input_kwds = {"TAU Data": self.tau}
 
         self.history = write_history_dict(input_vars, input_kwds, __file__)
-        self.rev_info = None
+        self.rev_info = {
+            "rsr_file": "N/A",
+            "band": '"X"',
+            "year": '2005',
+            "doy": '123',
+            "dsn": 'DSS-43',
+            "occ_dir": '"E"',
+            "planetary_occ_flag": '"E"',
+            "rev_num": '133',
+            "prof_dir": '"EGRESS"'
+        }
 
         if verbose:
             print("\tHistory Complete.")

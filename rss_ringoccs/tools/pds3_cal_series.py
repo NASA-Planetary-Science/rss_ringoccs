@@ -11,12 +11,12 @@ Revisions:
     2018 Sep 20 - jfong - only split kernels if list
 """
 
-from . import pds3_write_series as pds3
+from . import pds3_write_series_v2 as pds3
 import numpy as np
 import pdb
 import time
 
-def write_cal_series_data(cal_inst, fmt, out_file):
+def write_cal_series_data(cal_inst, out_file):
     """
     This writes a CAL data file.
 
@@ -25,8 +25,7 @@ def write_cal_series_data(cal_inst, fmt, out_file):
         fmt (str): Format string
         out_file (str): Output file name, including path.
     """
-    fmt_comma = fmt+','
-    format_str = fmt_comma*3 + fmt + '%s'
+    format_str = ('%14.6F,' + '%20.6F,' + '%10.6F,' + '%14.6F' + '%s')
     npts = len(cal_inst.t_oet_spm_vals)
 
     print('\nWriting CAL data to: ', out_file, '\n')
@@ -75,21 +74,14 @@ def get_cal_series_info(rev_info, cal_inst, series_name, prof_dir):
     # Values for number of columns, number of bytes per column,
     #   number of bytes per column delimiter, number of bytes allocated to
     #   special characters per column
-    ncol = 4        
-    nchar = 32      
-    ndelim = 1      
-    nspecial = 2    
+    formats = ['"F14.6"', '"F20.6"', '"F10.6"', '"F14.6"']
+    ncol = len(formats)
 
     # Values for aligning equal signs
     alignment_column        = 32
     series_alignment_column = 28
-    bytes_list = [nchar] * ncol
 
-    # Calculate start bytes for each column
-    new_bytes_list = [(nchar+ndelim)] * ncol
-    new_bytes_list.insert(0,1)
-    start_bytes_list = np.cumsum(new_bytes_list)
-    start_bytes_list = start_bytes_list[:-1]
+    record_bytes, bytes_list, start_bytes_list = pds3.get_record_bytes(formats)
 
     col_num = list(range(1, ncol+1))
 
@@ -103,8 +95,8 @@ def get_cal_series_info(rev_info, cal_inst, series_name, prof_dir):
     sampling_parameter_arr = cal_inst.t_oet_spm_vals
     t_oet_spm_start = cal_inst.t_oet_spm_vals[0]
     t_oet_spm_end = cal_inst.t_oet_spm_vals[-1]
-    geo_kernels = cal_inst.history['Input Variables']['geo_inst'][
-            'Input Variables']['kernels']
+    geo_kernels = cal_inst.history['Positional Args']['geo_inst'][
+            'Positional Args']['kernels']
     # Remove directory path from kernel list
     if isinstance(geo_kernels, list):
         geo_kernels = ['"'+x.split('/')[-1]+'"' for x in geo_kernels]
@@ -114,7 +106,7 @@ def get_cal_series_info(rev_info, cal_inst, series_name, prof_dir):
 
     PDS_VERSION_ID = 'PDS3'
     RECORD_TYPE = 'FIXED_LENGTH'
-    RECORD_BYTES = pds3.get_record_bytes(ncol, nchar, ndelim, nspecial) 
+    RECORD_BYTES = record_bytes
     FILE_RECORDS = str(len(sampling_parameter_arr))
     SERIES_NAME = series_name
 
@@ -144,7 +136,7 @@ def get_cal_series_info(rev_info, cal_inst, series_name, prof_dir):
     FREQUENCY_BAND = band
 
     # '' indicates that this keyword is not present in LBL file
-    NAIF_TOOLKIT_VERSION = ''
+    NAIF_TOOLKIT_VERSION = cal_inst.naif_toolkit_version
 
     SPICE_FILE_NAME = geo_kernels
 
@@ -221,42 +213,76 @@ def get_cal_series_info(rev_info, cal_inst, series_name, prof_dir):
 
     sd = '|'
     FILE_DESCRIPTION = ('"This file contains estimates of' + sd
-            + 'signal attributes needed to calibrate the raw ring data '
-            + 'before' + sd + 'reliable optical depth profiles are '
-            + 'computed. The attributes are the' + sd + 'signal sky-frequency, '
-            + 'the fit to residual frequency, and the free-space' + sd
-            + 'signal power. The attributes are listed versus ' 
-            + 'OBSERVED EVENT TIME' + sd + '(Earth received time) ' 
-            + 'over equal time increments (1 s).' + sd
-            + ' ' + sd
-            + 'The sky frequency estimates are included for completeness ' 
-            + 'and to facilitate' + sd + ' independent checks of frequency '
-            + 'calculations. The radio science receiver' + sd + 'at the DSN '
-            + 'ground receiving station (the RSR) steers the frequency of the'
-            + sd + 'received sinusoid so that the measured spectral '
-            + 'line falls at the center of' + sd + 'the recording '
-            + 'bandwidth. Spectral estimates of the measured I/Q samples can '
-            + sd + 'be used to calculate any offsets of the spectral line '
-            + 'from the center of' + sd + 'the bandwidth. The measured offsets '
-            + 'together with other frequency' + sd + 'steering information '
-            + 'encoded in the RSR recording are used to calculate the' + sd
-            + 'listed sky-frequency based on procedures documented '
-            + 'in JPLD-16765.' + sd
+            + 'signal attributes needed to calibrate the raw ring data before'
+            + sd + 'reliable optical depth profiles are computed. The '
+            + 'attributes are the' + sd + 'signal sky-frequency, the '
+            + 'frequency residual, and the free-space' + sd
+            + 'signal power. The attributes are listed versus ''OBSERVED '
+            + 'EVENT TIME''' + sd + '(Earth received time) over equal '
+            + 'time increments (1 s).' + sd
             + ' ' + sd
             + 'The frequency residual estimates are required to steer the '
-            + 'frequency of the' + sd + 'downlink sinusoid to a constant '
-            + 'value (here the center of the recording' + sd
-            + 'bandwidth) before the sinusoid amplitude and phase can '
-            + 'be estimated. This is' + sd + 'done in the FreqOffsetFit class '
-            + '(inputs to this class are under "fit_inst"' + sd
-            + 'history below.' + sd
+            + 'frequency' + sd + 'of the downlink sinusoid to a constant '
+            + 'value (near the center of the' + sd 
+            + 'recording bandwidth) before the sinusoid amplitude and '
+            + 'phase can be' + sd + 'estimated. The free-space signal '
+            + 'power estimates are required to' + sd + 'normalize the '
+            + 'power of the steered sinusoid to value of about unity' + sd
+            + '(optical depth of about zero) outside Ring A, inside Ring C, '
+            + 'and within' + sd + 'large ring gaps. The sky-frequency '
+            + 'estimates are included for completeness' + sd
+            + 'and to facilitate independent checks of frequency '
+            + 'calculations.' + sd
             + ' ' + sd
-            + 'The free-space signal power estimates are required to '
-            + 'normalize the' + sd + 'power of the steered sinusoid to a '
-            + 'value of about unity (optical depth' + sd + 'of about zero) '
-            + 'outside Ring A, inside Ring C, and within large ring' + sd
-            + 'gaps. This is done in the Normalization class (inputs are '
-            + 'under "norm_inst"' + sd + 'history below).' + sd
+            + 'The radio science receiver at the DSN ground receiving station '
+            + 'the (RSR)' + sd + 'steers the frequency of the received '
+            + 'sinusoid so that the measured' +  sd + 'spectral line falls '
+            + 'at the center of the recording bandwidth. Spectral' + sd
+            + 'estimates of the measured I/Q samples can be used to '
+            + 'calculate any' + sd + 'offsets of the spectral line from '
+            + 'the center of the bandwidth. The' + sd
+            + 'measured offsets together with other frequency steering '
+            + 'information' + sd + 'encoded in the RSR recording are used '
+            + 'to calculate the listed sky-' + sd
+            + 'frequency based on procedures documented in the JPLD-16765. '
+            + 'Part' + sd + 'of the measured frequency offset is caused '
+            + 'by the use of a predicted' + sd
+            + 'spacecraft trajectory to estimate '
+            + 'the received Doppler-shifted signal' + sd
+            + 'frequency needed to steer the RSR. This part can be removed '
+            + 'by using' + sd +'the more accurate trajectory reconstructed '
+            + 'by the Cassini Navigation' + sd + 'Team instead. '
+            + 'The listed frequency residuals are the remaining' + sd
+            + 'frequency offsets spline-fitted in a least-squares sense '
+            + 'over the' + sd + 'global extent of the rings. The free-space '
+            + 'signal power estimates are' + sd + 'also calculated using '
+            + 'global polynomial fits to power estimates outside' + sd
+            + 'Ring A and, when possible, inside Ring C, as well as within '
+            + 'major' + sd + 'ring gaps.' + sd
+            + ' ' + sd
+            + 'Relevant geometry calculations are based on the use of the '
+            + 'Cassini' + sd + 'Navigation Team Naif Toolkit kernel files '
+            + 'available at the time of' + sd + 'archiving and are listed '
+            + 'above. We note that the adopted Planetary' + sd 
+            + 'Constants Kernel (PCK) file is not necessarily the one '
+            + 'Cassini NAV' + sd + 'associates with the listed '
+            + 'reconstructed trajectory file. The' + sd 
+            + 'difference this causes to estimate ring radius is well '
+            + 'below 1 km' + sd + 'and has negligble impact on the '
+            + 'archived products.' + sd
+            + ' ' + sd
+            + 'All calculations assume fixed UltraStable Oscillator (USO) '
+            + 'reference' + sd + 'frequency of 8,427,222,034.34050 Hz '
+            + 'at X-band, its value near the' + sd + 'beginning of the '
+            + 'Cassini orbital tour. The frequency is coherently' + sd
+            + 'scaled by 3/11 for S-band and by 209/55 for Ka-band. The exact '
+            + 'USO' + sd + 'frequency changed slightly (at the Hz level) '
+            + 'during the USO lifetime.' + sd + 'The change negligibly '
+            + 'impacts the archived products. The same holds' + sd
+            + 'true for the Allan deviation characterizing the stability of '
+            + 'the USO.' + sd + 'Typical values of the Allan deviation '
+            + 'is 2E-13 over 1 s and 1E-13' + sd + 'over 10-100 s. '
+            + 'The value changed little over the USO lifetime.' + sd
             + ' ' + sd
             + 'This file was produced using the rss_ringoccs open-source '
             + 'processing suite' + sd + 'developed at Wellesley College with '
@@ -265,11 +291,61 @@ def get_cal_series_info(rev_info, cal_inst, series_name, prof_dir):
             + 'rss_ringoccs.' + sd
             + ' ' + sd
             + 'Please address any inquiries to:' + sd
-            + 'Richard G. French' + sd
-            + 'Astronomy Department, Wellesley College' + sd
-            + 'Wellesley, MA 02481-8203' + sd
-            + '(781) 283-3747' + sd
-            + 'rfrench@wellesley.edu"')
+            + 'Richard G. French,' + sd
+            + 'Astronomy Department, Wellesley College;' + sd
+            + 'Wellesley, MA 02481-8203;' + sd
+            + '(781) 283-3747;' + sd
+            + 'rfrench@wellesley.edu."')
+#    FILE_DESCRIPTION = ('"This file contains estimates of' + sd
+#            + 'signal attributes needed to calibrate the raw ring data '
+#            + 'before' + sd + 'reliable optical depth profiles are '
+#            + 'computed. The attributes are the' + sd + 'signal sky-frequency, '
+#            + 'the fit to residual frequency, and the free-space' + sd
+#            + 'signal power. The attributes are listed versus ' 
+#            + 'OBSERVED EVENT TIME' + sd + '(Earth received time) ' 
+#            + 'over equal time increments (1 s).' + sd
+#            + ' ' + sd
+#            + 'The sky frequency estimates are included for completeness ' 
+#            + 'and to facilitate' + sd + ' independent checks of frequency '
+#            + 'calculations. The radio science receiver' + sd + 'at the DSN '
+#            + 'ground receiving station (the RSR) steers the frequency of the'
+#            + sd + 'received sinusoid so that the measured spectral '
+#            + 'line falls at the center of' + sd + 'the recording '
+#            + 'bandwidth. Spectral estimates of the measured I/Q samples can '
+#            + sd + 'be used to calculate any offsets of the spectral line '
+#            + 'from the center of' + sd + 'the bandwidth. The measured offsets '
+#            + 'together with other frequency' + sd + 'steering information '
+#            + 'encoded in the RSR recording are used to calculate the' + sd
+#            + 'listed sky-frequency based on procedures documented '
+#            + 'in JPLD-16765.' + sd
+#            + ' ' + sd
+#            + 'The frequency residual estimates are required to steer the '
+#            + 'frequency of the' + sd + 'downlink sinusoid to a constant '
+#            + 'value (here the center of the recording' + sd
+#            + 'bandwidth) before the sinusoid amplitude and phase can '
+#            + 'be estimated. This is' + sd + 'done in the FreqOffsetFit class '
+#            + '(inputs to this class are under "fit_inst"' + sd
+#            + 'history below.' + sd
+#            + ' ' + sd
+#            + 'The free-space signal power estimates are required to '
+#            + 'normalize the' + sd + 'power of the steered sinusoid to a '
+#            + 'value of about unity (optical depth' + sd + 'of about zero) '
+#            + 'outside Ring A, inside Ring C, and within large ring' + sd
+#            + 'gaps. This is done in the Normalization class (inputs are '
+#            + 'under "norm_inst"' + sd + 'history below).' + sd
+#            + ' ' + sd
+#            + 'This file was produced using the rss_ringoccs open-source '
+#            + 'processing suite' + sd + 'developed at Wellesley College with '
+#            + 'the support of the Cassini project and' + sd + 'hosted '
+#            + 'on GithHub at https://github.com/NASA-Planetary-Science/'
+#            + 'rss_ringoccs.' + sd
+#            + ' ' + sd
+#            + 'Please address any inquiries to:' + sd
+#            + 'Richard G. French' + sd
+#            + 'Astronomy Department, Wellesley College' + sd
+#            + 'Wellesley, MA 02481-8203' + sd
+#            + '(781) 283-3747' + sd
+#            + 'rfrench@wellesley.edu"')
 
 
 
@@ -280,26 +356,28 @@ def get_cal_series_info(rev_info, cal_inst, series_name, prof_dir):
     HIST_OPERATING_SYSTEM = cal_inst.history['Operating System']
     HIST_SOURCE_DIR = cal_inst.history['Source Directory']
     HIST_SOURCE_FILE = cal_inst.history['Source File']
-    HIST_INPUT_VARIABLES = cal_inst.history['Input Variables']
-    HIST_INPUT_KEYWORDS = cal_inst.history['Input Keywords']
-    HIST_description = ('This is a detailed record of the' + sd
-                    + 'processing steps used to generate this file.')
+    HIST_INPUT_VARIABLES = cal_inst.history['Positional Args']
+    HIST_INPUT_KEYWORDS = cal_inst.history['Keyword Args']
+    HIST_RSSOCC_VERSION = cal_inst.history['rss_ringoccs Version']
+    HIST_description = ('This is a record of the processing steps'
+                        + sd + 'and inputs used to generate this file.')
 
     HISTORY_dict = {
-            'key_order': ['User Name', 'Host Name', 'Run Date',
-                        'Python Version', 'Operating System', 
-                        'Source Directory','Source File', 
-                        'Input Variables', 'Input Keywords']
+            'key_order0': ['User Name', 'Host Name', 'Operating System',
+                        'Python Version', 'rss_ringoccs Version']
+            ,'key_order1': ['Source Directory','Source File',
+                        'Positional Args', 'Keyword Args']
             , 'hist name': 'Calibration history'
             , 'User Name': HIST_USER_NAME
             , 'Host Name': HIST_HOST_NAME
             , 'Run Date': HIST_RUN_DATE
             , 'Python Version': HIST_PYTHON_VERSION
+            , 'rss_ringoccs Version': HIST_RSSOCC_VERSION
             , 'Operating System': HIST_OPERATING_SYSTEM
             , 'Source Directory': HIST_SOURCE_DIR
             , 'Source File': HIST_SOURCE_FILE
-            , 'Input Variables': HIST_INPUT_VARIABLES
-            , 'Input Keywords': HIST_INPUT_KEYWORDS
+            , 'Positional Args': HIST_INPUT_VARIABLES
+            , 'Keyword Args': HIST_INPUT_KEYWORDS
             , 'description': HIST_description
             }
 
@@ -381,7 +459,6 @@ def get_cal_series_info(rev_info, cal_inst, series_name, prof_dir):
 
     n_objects = len(object_names)
     data_types = ['ASCII_REAL'] * n_objects
-    formats = ['"F32.16"'] * n_objects
     units = ['"SECOND"', '"HERTZ"', '"HERTZ"', '"N/A"']
     
     es = ''
@@ -477,11 +554,9 @@ def write_cal_series(rev_info, cal_inst, title, outdir, prof_dir):
 
     series_name = '"' + outfile_tab.split('/')[-1] + '"' 
 
-    fmt = '%32.16F' 
-
     
     # Write data file
-    write_cal_series_data(cal_inst, fmt, outfile_tab)
+    write_cal_series_data(cal_inst, outfile_tab)
 
     # Get label file information
     str_lbl = get_cal_series_info(rev_info, cal_inst, series_name, prof_dir)

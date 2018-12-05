@@ -8,16 +8,17 @@ Revisions:
     2018 Jul 23 - jfong - copied from jwf_pds3_geo_series_v3.py
     2018 Sep 10 - jfong - add underscore to record type and product type
     2018 Sep 20 - jfong - split geo_kernels only if it is a list
+    2018 Nov 16 - jfong - update formats to match CORS_8001 v2
 
 
 '''
 import pdb
 import time
-from . import pds3_write_series as pds3
+from . import pds3_write_series_v2 as pds3
 import numpy as np
 
 
-def write_geo_series_data(geo_inst, fmt, out_file):
+def write_geo_series_data(geo_inst, out_file):
     """
     This writes a GEO data file.
 
@@ -26,8 +27,12 @@ def write_geo_series_data(geo_inst, fmt, out_file):
         fmt (str): Format string
         out_file (str): Output file name, including path.
     """
-    fmt_comma = fmt+','
-    format_str = fmt_comma * 17 + fmt + '%s'
+    #fmt_comma = fmt+','
+    
+    format_str = ('%14.6F,'*4 + '%12.6F,'*3 + '%16.6F' + '%14.6F,'*4
+                  + '%16.6F,'*3 + '%14.6F,'*3 + '%12.6F' + '%s')
+
+    #format_str = fmt_comma * 18 + fmt + '%s'
     npts = len(geo_inst.t_oet_spm_vals)
 
     print('\nWriting GEO data to: ', out_file, '\n')
@@ -53,6 +58,7 @@ def write_geo_series_data(geo_inst, fmt, out_file):
             geo_inst.vx_kms_vals[n],
             geo_inst.vy_kms_vals[n],
             geo_inst.vz_kms_vals[n],
+            geo_inst.elev_deg_vals[n],
             '\r\n'))
     f.close()
     return None
@@ -89,21 +95,20 @@ def get_geo_series_info(rev_info, geo_inst, series_name, prof_dir):
     # Values for number of columns, number of bytes per column,
     #   number of bytes per column delimiter, number of bytes allocated to
     #   special characters per column
-    ncol = 18     
-    nchar = 32    
-    ndelim = 1    
-    nspecial = 2  
+    formats = ['"F14.6"', '"F14.6"','"F14.6"', '"F14.6"',
+            '"F12.6"', '"F12.6"', '"F12.6"',
+            '"F16.6"',
+            '"F14.6"', '"F14.6"', '"F14.6"', '"F14.6"',
+            '"F16.6"', '"F16.6"', '"F16.6"',
+            '"F14.6"', '"F14.6"', '"F14.6"',
+            '"F12.6"']
+    ncol = len(formats)
 
     # Values for aligning equal signs
     alignment_column        = 32
     series_alignment_column = 28
-    bytes_list = [nchar] * ncol
 
-    # Calculate start bytes for each column
-    new_bytes_list = [(nchar+ndelim)] * ncol
-    new_bytes_list.insert(0,1)
-    start_bytes_list = np.cumsum(new_bytes_list)
-    start_bytes_list = start_bytes_list[:-1]
+    record_bytes, bytes_list, start_bytes_list = pds3.get_record_bytes(formats)
 
     col_num = list(range(1, ncol+1))
 
@@ -129,7 +134,7 @@ def get_geo_series_info(rev_info, geo_inst, series_name, prof_dir):
 
     PDS_VERSION_ID = 'PDS3'
     RECORD_TYPE = 'FIXED_LENGTH'
-    RECORD_BYTES = pds3.get_record_bytes(ncol, nchar, ndelim, nspecial)
+    RECORD_BYTES = record_bytes
     FILE_RECORDS = str(len(sampling_parameter_arr))
     SERIES_NAME = series_name
 
@@ -225,20 +230,51 @@ def get_geo_series_info(rev_info, geo_inst, series_name, prof_dir):
 
     # Description of file, with sd marking end of lines
     FILE_DESCRIPTION = ('"This file contains parameters' + sd
-            + 'pertinent to the ring occultation observation'
-            + 'geometry needed for' + sd + 'reconstruction of'
-            + 'diffraction effects and for other data analysis'
-            + sd + 'purposes. Light-time effects have been'
-            + 'accounted for in computing' + sd + 'these parameters. '
-            + 'For more details, see MAROUFETAL1986 and Appendix' + sd 
-            + 'B of ROSEN1989.' + sd 
+            + 'pertinent to the ring occultation observation '
+            + 'geometry needed for' + sd + 'reconstruction of '
+            + 'the diffraction limited profiles and for other' + sd
+            + 'data analysis purposes. Light-time effects have been '
+            + 'accounted for' + sd + 'in computing these parameters. '
+            + 'For more details, see MAROUFETAL1986' + sd
+            + 'and Appendix B of ROSEN1989.' + sd 
+            + ' ' + sd
+            + 'The geometry calculations are based on the use of the official'
+            + ' Cassini' + sd + 'Navigation Team NAIF Toolkit kernel '
+            + 'files available at the time of' + sd
+            + 'archiving and are listed above. We note that the adopted '
+            + 'Planetary' + sd + 'Constants Kernel (PCK) file is not '
+            + 'necessarily the one Cassini NAV' + sd
+            + 'associates with the listed reconstructed trajectory file. The'
+            + sd + 'difference this causes to estimated ring radius is well '
+            + 'below 1 km and' + sd + 'has negligible impact on the archived '
+            + 'products.' + sd
+            + ' ' + sd
+            + 'All calculations assumed fixed UltraStable Oscillator (USO) '
+            + 'reference' + sd + 'frequency of 8,427,222,034.34050 Hz at '
+            + 'X-band, its value near the' + sd
+            + 'beginning of the Cassini orbital tour. The frequency is '
+            + 'coherently' + sd + 'scaled by 3/11 for S-band and 209/55 '
+            + 'for Ka-band. The exact USO' + sd 
+            + 'requency changed slightly (at the Hz level) during the USO '
+            + 'lifetime.' + sd + 'The change negligibly impacts the '
+            + 'archived products. The same holds' + sd
+            + 'true for the Allan deviation characterizing the stability '
+            + 'of the USO.' + sd + 'Typical values of the Allan deviation is '
+            + '2E-13 over 1 s and 1E-13 over' + sd + '10-100 s. '
+            + 'The values changed little over the lifetime of the USO.' + sd
+            + ' ' + sd
+            + 'This file was produced using the rss_ringoccs open-source '
+            + 'processing suite' + sd + 'developed at Wellesley College with '
+            + 'the support of the Cassini project and' + sd + 'hosted '
+            + 'on GithHub at https://github.com/NASA-Planetary-Science/'
+            + 'rss_ringoccs.' + sd
             + ' ' + sd
             + 'Please address any inquiries to:' + sd
-            + 'Richard G. French' + sd
-            + 'Astronomy Department, Wellesley College' + sd
-            + 'Wellesley, MA 02481-8203' + sd
-            + '(781) 283-3747' + sd
-            + 'rfrench@wellesley.edu"')
+            + 'Richard G. French,' + sd
+            + 'Astronomy Department, Wellesley College;' + sd
+            + 'Wellesley, MA 02481-8203;' + sd
+            + '(781) 283-3747;' + sd
+            + 'rfrench@wellesley.edu."')
 
     # Extract history information
     HIST_USER_NAME = geo_inst.history['User Name']
@@ -248,26 +284,32 @@ def get_geo_series_info(rev_info, geo_inst, series_name, prof_dir):
     HIST_OPERATING_SYSTEM = geo_inst.history['Operating System']
     HIST_SOURCE_DIR = geo_inst.history['Source Directory']
     HIST_SOURCE_FILE = geo_inst.history['Source File']
-    HIST_INPUT_VARIABLES = geo_inst.history['Input Variables']
-    HIST_INPUT_KEYWORDS = geo_inst.history['Input Keywords']
-    HIST_description = ('This is a detailed record of the' + sd
-                    + 'processing steps used to generate this file.')
+    HIST_INPUT_VARIABLES = geo_inst.history['Positional Args']
+    HIST_INPUT_KEYWORDS = geo_inst.history['Keyword Args']
+    HIST_RSSOCC_VERSION = geo_inst.history['rss_ringoccs Version']
+    HIST_description = ('This is a record of the processing steps'
+                        + sd + 'and inputs used to generate this file.')
 
     HISTORY_dict = {
-            'key_order': ['User Name', 'Host Name', 'Run Date',
-                        'Python Version', 'Operating System',
-                        'Source Directory','Source File',
-                        'Input Variables', 'Input Keywords']
+            'key_order0': ['User Name', 'Host Name', 'Operating System',
+                        'Python Version', 'rss_ringoccs Version']
+            ,'key_order1': ['Source Directory','Source File',
+                        'Positional Args', 'Keyword Args']
+            #'key_order': ['User Name', 'Host Name', 'Run Date',
+            #            'Python Version', 'Operating System',
+            #            'Source Directory','Source File',
+            #            'Input Variables', 'Input Keywords']
             , 'hist name': 'Geometry history'
             , 'User Name': HIST_USER_NAME
             , 'Host Name': HIST_HOST_NAME
-            , 'Run Date': HIST_RUN_DATE
+            #, 'Run Date': HIST_RUN_DATE
             , 'Python Version': HIST_PYTHON_VERSION
+            , 'rss_ringoccs Version': HIST_RSSOCC_VERSION
             , 'Operating System': HIST_OPERATING_SYSTEM
             , 'Source Directory': HIST_SOURCE_DIR
             , 'Source File': HIST_SOURCE_FILE
-            , 'Input Variables': HIST_INPUT_VARIABLES
-            , 'Input Keywords': HIST_INPUT_KEYWORDS
+            , 'Positional Args': HIST_INPUT_VARIABLES
+            , 'Keyword Args': HIST_INPUT_KEYWORDS
             , 'description': HIST_description
             }
 
@@ -287,7 +329,7 @@ def get_geo_series_info(rev_info, geo_inst, series_name, prof_dir):
     SERIES = 'SERIES'
     SERIES_NAME = '"OCCULTATION GEOMETRY"'
     SERIES_INTERCHANGE_FORMAT = 'ASCII'
-    SERIES_COLUMNS = '18'
+    SERIES_COLUMNS = '19'
     SERIES_ROWS = FILE_RECORDS
     SERIES_ROW_BYTES = RECORD_BYTES
     SERIES_SAMPLING_PARAMETER_NAME = '"OBSERVED EVENT TIME"'
@@ -360,17 +402,20 @@ def get_geo_series_info(rev_info, geo_inst, series_name, prof_dir):
             , '"SPACECRAFT VELOCITY X"'
             , '"SPACECRAFT VELOCITY Y"'
             , '"SPACECRAFT VELOCITY Z"'
+            , '"OBSERVED SPACECRAFT LATITUDE"'
             ]
 
     n_objects = len(object_names)
     data_types = ['ASCII_REAL'] * n_objects
     # NOTE: this is hardcoded in!! and a bad way to make a list of reps
-    formats = ['"F32.16"'] * 18
+    #formats = ['"F32.16"'] * 18
+
     units = ['"SECOND"', '"SECOND"', '"SECOND"',
             '"KILOMETER"', '"DEGREE"', '"DEGREE"', '"DEGREE"',
             '"KILOMETER"', '"KM/SEC"', '"KM/SEC"',
             '"KILOMETER"', '"KILOMETER"', '"KILOMETER"', '"KILOMETER"',
-            '"KILOMETER"', '"KM/SEC"', '"KM/SEC"', '"KM/SEC"']
+            '"KILOMETER"', '"KM/SEC"', '"KM/SEC"', '"KM/SEC"',
+            '"DEGREE"']
     
     # only variables with TIME in name have reference times
     # a null string indicates that this keyword is absent for this object
@@ -378,13 +423,14 @@ def get_geo_series_info(rev_info, geo_inst, series_name, prof_dir):
     es = ''
     reference_times = [OBJECT_REFERENCE_TIME, OBJECT_REFERENCE_TIME,
             OBJECT_REFERENCE_TIME, es, es, es, es, es, es, es, es, es, 
-            es, es, es, es, es, es]
+            es, es, es, es, es, es, es]
     
     object_descriptions = [
             ('"The instant at which photons were' + sd
             + 'received at the DSN receiving station, given in '
             + 'elapsed seconds' + sd + 'after the moment specified '
-            + 'by REFERENCE_TIME."')
+            + 'by REFERENCE_TIME. Also referred to' + sd
+            + 'as Earth receiving time or ERT."')
             ,
             ('"The time at which photons left the' + sd + 'ring plane. '
             + 'This time is earlier than the associated' + sd
@@ -395,33 +441,39 @@ def get_geo_series_info(rev_info, geo_inst, series_name, prof_dir):
             ,
             ('"The time at which photons left the' + sd
             + 'spacecraft, given in elapsed seconds after '
-            + 'the moment specified by' + sd + 'REFERENCE_TIME."')
+            + 'the moment specified by' + sd + 'REFERENCE_TIME. '
+            + 'Also referred to as SCET."')
             ,
             ('"Radial distance from the center of' + sd
             + 'Saturn to the ring-plane intercept point at '
             + 'the RING EVENT TIME."')
             ,
-            ('"Inertial longitude on the ring plane' + sd
+            ('"Inertial (J2000) longitude in the ring' + sd + 'plane '
             + 'of the ring-plane intercept point at the RING EVENT TIME."')
             ,
             ('"Measured at the ring-plane intercept' + sd 
             + 'point, starting from the direction of a photon heading to '
-            + 'the' + sd + 'observer, and ending at the direction '
-            + 'of a local radial vector.' + sd + 'This angle is '
-            + 'projected into the ring plane and measured in the' + sd
-            + 'prograde direction. As seen from the observer, it equals 90 '
-            + sd + 'degrees along the right ansa and 270 degrees '
-            + 'along the left ansa.' + sd + 'Values range from 0 '
-            + 'to 360 degrees. This convention for observed' + sd
-            + 'ring azimuth differs from that adopted in '
-            + 'MAROUFETAL1986 by 180' + sd + 'degrees."')
+            + 'the' + sd + 'observer (Earth receiving station), '
+            + 'and ending at the direction of' + sd
+            + 'a local radial vector. This angle is '
+            + 'projected into the ring plane' + sd + 'and measured in the '
+            + 'prograde direction. As seen from the observer, ' + sd
+            + 'it equals 90 degrees along the right ansa and 270 degrees '
+            + 'along the' + sd + 'left ansa. Values range from 0 '
+            + 'to 360 degrees. This convention for' + sd
+            + 'observed ring azimuth differs from that adopted in '
+            + 'MAROUFETAL1986 by' + sd + '180 degrees."')
             ,
             ('"The angle measured at the ring' + sd
             + 'intercept point, starting from the ring plane '
             + 'and ending in the' + sd + 'direction of the '
             + 'photon heading toward the observer. This angle is' + sd
             + 'positive on the north side of Saturn''s rings and '
-            + 'negative on the' + sd + 'south side."')
+            + 'negative on the' + sd + 'south side. Its value is '
+            + 'nearly constant over the duration of a' + sd
+            + 'ring occultation experiment and is nearly equal to the '
+            + 'ring opening' + sd + 'angle (Earth elevation angle above '
+            + 'the ring plane)."')
             ,
             ('"The distance between the spacecraft (at' + sd
             + 'the SPACECRAFT EVENT TIME) and the ring-plane '
@@ -442,7 +494,7 @@ def get_geo_series_info(rev_info, geo_inst, series_name, prof_dir):
             ,
             ('"Fresnel scale of diffraction implied by' + sd
             + 'the occultation geometry at X-band. See Eq. (6) of '
-            + 'MAROUFETAL1986.' + sd + 'The Fresnel scale at S-band is'
+            + 'MAROUFETAL1986.' + sd + 'The Fresnel scale at S-band is '
             + 'sqrt(11/3) times FRESNEL SCALE.' + sd + 'The Fresnel '
             + 'scale at Ka-band is sqrt(55/209) times FRESNEL SCALE."')
             ,
@@ -500,6 +552,12 @@ def get_geo_series_info(rev_info, geo_inst, series_name, prof_dir):
             + 'See description of planetocentric reference' + sd 
             + 'frame (ux, uy, uz) in the description of column '
             + 'SPACECRAFT POSITION X."')
+            ,
+            ('"The latitude of the position vector from' + sd
+            + 'the observing DSN station to the spacecraft computed at the '
+            + 'OBSERVED' + sd + 'EVENT TIME. The position vector is '
+            + 'computed in the topographic reference' + sd
+            + 'frame of the DSN station based on the frame kernel."')
             ]
 
 
@@ -556,11 +614,9 @@ def write_geo_series(rev_info, geo_inst, title, outdir, prof_dir):
     outfile_lbl = outdir + title.upper() + '.LBL'
     series_name = '"' + outfile_tab.split('/')[-1] + '"'
 
-    fmt = '%32.16F' # format for float entry
-
 
     # Write data file
-    write_geo_series_data(geo_inst, fmt, outfile_tab)
+    write_geo_series_data(geo_inst, outfile_tab)
 
     # Get label file information
     str_lbl = get_geo_series_info(rev_info, geo_inst, series_name, prof_dir)

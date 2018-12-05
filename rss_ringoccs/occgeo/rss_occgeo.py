@@ -26,13 +26,21 @@ Revisions:
     2018 Sep 20 - jfong - add write_file kwarg
                         - set rev_info from rsr_inst as an attribute
                         - add prof_dir to rev_info dict attribute
+    2018 Oct 15 - jfong - add freespace_km attribute using find_gaps()
+    2018 Oct 17 - jfong - add ionos_occ_spm_vals, atmos_occ_spm_vals attr
+    2018 Oct 23 - jfong - update freespace_km attr to freespace_spm
+                        - add ingress_spm, egress_spm attributes
+    2018 Nov 05 - jfong - use SET for atmosphere calculation
+    2018 Nov 19 - jfong - add chord verification
+                        - replace splrep, splev for interp1d for rho interp
 
 """
 from ..tools.spm_to_et import spm_to_et
 from ..tools.et_to_spm import et_to_spm
 from ..tools.write_output_files import write_output_files
 from ..tools.write_history_dict import write_history_dict
-from ..tools.write_output_files import write_output_files
+#from ..tools.write_output_files import write_output_files
+#from ..tools.write_history_dict_v2 import write_history_dict_v2
 
 #from ..tools.pds3_geo_series import write_geo_series
 from .calc_elevation_deg import calc_elevation_deg
@@ -50,13 +58,16 @@ from .calc_impact_radius_km import calc_impact_radius_km
 from .get_planet_occ_times import get_planet_occ_times
 from .calc_beta import calc_beta
 from .calc_beta import calc_B_eff_deg
-
+from .get_freespace import get_freespace
+from scipy.interpolate import splrep
+from scipy.interpolate import splev
 
 
 import spiceypy as spice
 import numpy as np
 import sys
-
+import pdb
+import inspect
 
 class Geometry(object):
 
@@ -162,6 +173,11 @@ class Geometry(object):
         Warnings:
             [1] This code has only been tested for planet='Saturn'.
         """
+        #pdb.set_trace()
+        #ex=inspect.getargvalues(inspect.currentframe())[3]
+
+        #pdb.set_trace()
+        # write input history
 
         if verbose:
             print('Calculating occultation geometry...')
@@ -188,6 +204,8 @@ class Geometry(object):
             doy = rsr_inst.doy
             dsn = rsr_inst.dsn
             band = rsr_inst.band
+            self.__spm_full = rsr_inst.spm_vals
+            #self.__et_vals = spm_to_et(self.__spm_full, doy, year, kernels=kernels)
             spm_start = rsr_inst.spm_vals[0]
             spm_end = rsr_inst.spm_vals[-1]
             rsr_hist = rsr_inst.history
@@ -208,6 +226,8 @@ class Geometry(object):
         step = 1./pt_per_sec
         t_oet_spm_vals = np.arange(spm_start, spm_end, step)
         t_oet_et_vals = spm_to_et(t_oet_spm_vals, doy, year, kernels=kernels)
+        #self.__et_vals = np.arange(t_oet_et_vals[0], t_oet_et_vals[-1],
+        #        0.1)
 
         # Interpolate to get sky frequency
         f_sky_hz_vals = np.interp(t_oet_spm_vals, f_spm, f_sky)
@@ -316,6 +336,16 @@ class Geometry(object):
         self.beta_vals = np.asarray(beta_vals)
         self.B_eff_deg_vals = np.asarray(B_eff_deg_vals)
 
+
+
+        # Calculate when signal passes atmosphere + ionosphere
+        ionos_occ_et_vals = get_planet_occ_times(t_oet_et_vals, dsn,
+                planet, spacecraft, height_above=5000.)
+        self.ionos_occ_spm_vals = et_to_spm(ionos_occ_et_vals)
+
+        atmos_occ_et_vals = get_planet_occ_times(t_oet_et_vals, dsn,
+                planet, spacecraft, height_above=500.)
+        self.atmos_occ_spm_vals = et_to_spm(atmos_occ_et_vals)
         # Write processing history dictionary attribute
         if verbose:
             print('\tWriting history dictionary...')
@@ -333,6 +363,16 @@ class Geometry(object):
 
         # Add prof_dir entry to rev_info dict
         self.rev_info['prof_dir'] = self.get_profile_dir()
+
+        if self.rev_info['prof_dir'] == '"BOTH"':
+            self.split_ind = self.get_chord_ind()
+        else:
+            self.split_ind = None
+
+        self.freespace_km, self.freespace_spm = get_freespace(
+                t_ret_spm_vals, year, doy, rho_km_vals,
+                phi_rl_deg_vals, t_oet_spm_vals, self.atmos_occ_spm_vals,
+                split_ind=self.split_ind, kernels=kernels)
 
         # Write output data and label file if set
         if write_file:
@@ -358,8 +398,47 @@ class Geometry(object):
         elif (dr_start > 0) and (dr_end > 0):
             prof_dir = '"EGRESS"'
         else:
-            prof_dir = '"BOTH"'
+            # check if actually a chord occultation
+            prof_dir = self.verify_chord()
         return prof_dir
 
+    def verify_chord(self):
+        split_ind = self.get_chord_ind()
+
+        t_oet_ing = self.t_oet_spm_vals[:split_ind]
+        t_oet_egr = self.t_oet_spm_vals[split_ind:]
+
+        n_ing = len(t_oet_ing)
+        n_egr = len(t_oet_egr)
+
+
+        atmos_blocked_spm = list(self.atmos_occ_spm_vals)
+        
+        ing_blocked = [x for x in t_oet_ing if x in atmos_blocked_spm]
+        egr_blocked = [x for x in t_oet_egr if x in atmos_blocked_spm]
+
+        if len(ing_blocked) == n_ing:
+            prof_dir = '"EGRESS"'
+        elif len(egr_blocked) == n_egr:
+            prof_dir = '"INGRESS"'
+        else:
+            prof_dir = '"BOTH"'
     
+        return prof_dir
+
+    def get_chord_ind(self):
+
+
+        # add 2 for the index of the first element after the sign change
+        ind = np.argwhere(np.diff(np.sign(self.rho_dot_kms_vals)))
+
+        if len(ind) > 1:
+            print('WARNING! ring radius changes direction twice!')
+            pdb.set_trace()
+        elif len(ind) == 0:
+            ind = None
+        else:
+            ind = int(ind[0]) + 2
+
+        return ind
 

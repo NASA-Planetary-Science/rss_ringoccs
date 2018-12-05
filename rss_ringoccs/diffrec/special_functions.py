@@ -735,310 +735,6 @@ def fresnel_scale(Lambda, d, phi, b, deg=False, error_check=True):
     fres = np.sqrt(0.5 * Lambda * d * (1 - (cb*cb) * (sp*sp)) / (sb*sb))
     return fres
 
-def psi_func_fast(kD, r, r0, cbd, d2, cp0, sp0, cp, sp, w, nw):
-    """
-        Function:
-            psi_func_fast
-        Purpose:
-            Compute psi (MTR Equation 4) with
-            no error checks using precomputed
-            sines and cosines of various
-            parameters.
-        Arguments:
-            kD:
-                Float
-                Wavenumber
-            r:
-                Numpy Array
-                Ring radius, in kilometers.
-            r0:
-                Float:
-                Ring radius of the center of the window, kilometers.
-            cbd:
-                Float
-                Cosine(B) * D
-            d2:
-                Float
-                The square of D.
-            cp0:
-                Float
-                Cosine(phi0)
-            sp0:
-                Float
-                Sine(phi0)
-            cp:
-                Numpy Array
-                Cosine(phi)
-            sp:
-                Numpy Array
-                Sine(phi)
-            w:
-                Numpy Array
-                Window width as a function of
-                ring radius. While this value is
-                not needed for the "Full" psi function,
-                it is needed in various MTR approximations.
-                To ease the flow of the fresnel_transform
-                function, all psi functions have the same
-                parameters.
-            nw:
-                Float
-                Number of points in w. Same comment as w.
-        Outputs:
-            psi:
-                Real Numpy Array
-                Geometric Function from Fresnel Kernel.
-        Dependencies:
-            [1] numpy
-    """
-    # Compute Xi variable (MTR86 Equation 4b).
-    xi = cbd * (r0 * cp0 - r * cp)
-
-    # Compute Eta variable (MTR86 Equation 4c).
-    eta = (r0*r0 + r*r - 2.0*r*r0*(sp*sp0 + cp*cp0)) / d2
-    psi_vals = kD * (np.sqrt(1.0 + 2.0 * xi + eta) - (1.0 + xi))
-    return psi_vals
-
-def psi_quadratic_fast(kD, r, r0, cbd, d2, cp0, sp0, cp, sp, w, nw):
-    """
-        Function:
-            psi_quadratic_fast
-        Purpose:
-            Compute psi (MTR Equation 4) with
-            no error checks using precomputed
-            sines and cosines of various
-            parameters using the MTR quadratic
-            polynomial approximation.
-        Arguments:
-            kD:
-                Float
-                Wavenumber
-            r:
-                Numpy Array
-                Ring radius, in kilometers.
-            r0:
-                Float:
-                Ring radius of the center of the window, kilometers.
-            cbd:
-                Float
-                Cosine(B) * D
-            d2:
-                Float
-                The square of D.
-            cp0:
-                Float
-                Cosine(phi0)
-            sp0:
-                Float
-                Sine(phi0)
-            cp:
-                Numpy Array
-                Cosine(phi)
-            sp:
-                Numpy Array
-                Sine(phi)
-            w:
-                Numpy Array
-                Window width as a function of
-                ring radius.
-            nw:
-                Float
-                Number of points in w.
-        Outputs:
-            psi:
-                Real Numpy Array
-                Geometric Function from Fresnel Kernel.
-        Dependencies:
-            [1] numpy
-    """
-    # Compute psi.
-    psi_full = self.__psi_func(kD, r, r0, cbd, d2, cp0, sp0, cp, sp, w, nw)
-
-    # Compute shifted ring radius and window width.
-    x = (r-r0)
-    w = np.max(x)-np.min(x)
-
-    # Compute midpoints and endpoints.
-    n1 = 0
-    n2 = np.min((r0 - w/4 <= r).nonzero())
-    n3 = np.max((r0 + w/4 >= r).nonzero())
-    n4 = nw-1
-
-    # Compute variables for psi polynomials.
-    d_psi_half = psi_full[n3]-psi_full[n2]
-    d_psi_full = psi_full[n4] - psi_full[n1]
-    a_psi_half = (psi_full[n3]+psi_full[n2])/2
-    a_psi_full = (psi_full[n1]+psi_full[n4])/2
-
-    # Compute coefficients for the polynomial expansion.
-    c1 = (8.0*d_psi_half-d_psi_full)/(3.0*w)
-    c2 = 4.0*(16.0*a_psi_half-a_psi_full)/(3.0*w*w)
-
-    # Compute quartic psi approximation.
-    psi_vals = (c1 + c2*x)*x
-    return psi_vals
-
-def psi_cubic_fast(kD, r, r0, cbd, d2, cp0, sp0, cp, sp, w, nw):
-    """
-        Function:
-            psi_cubic_fast
-        Purpose:
-            Compute psi (MTR Equation 4) with
-            no error checks using precomputed
-            sines and cosines of various
-            parameters using the MTR cubic
-            polynomial approximation.
-        Arguments:
-            kD:
-                Float
-                Wavenumber
-            r:
-                Numpy Array
-                Ring radius, in kilometers.
-            r0:
-                Float:
-                Ring radius of the center of the window, kilometers.
-            cbd:
-                Float
-                Cosine(B) * D
-            d2:
-                Float
-                The square of D.
-            cp0:
-                Float
-                Cosine(phi0)
-            sp0:
-                Float
-                Sine(phi0)
-            cp:
-                Numpy Array
-                Cosine(phi)
-            sp:
-                Numpy Array
-                Sine(phi)
-            w:
-                Numpy Array
-                Window width as a function of
-                ring radius.
-            nw:
-                Float
-                Number of points in w.
-        Outputs:
-            psi:
-                Real Numpy Array
-                Geometric Function from Fresnel Kernel.
-        Dependencies:
-            [1] numpy
-    """
-    # Compute psi.
-    psi_full = self.__psi_func(kD, r, r0, cbd, d2, cp0, sp0, cp, sp, w, nw)
-
-    # Compute shifted ring radius and window width.
-    x = (r-r0)
-    w = np.max(x)-np.min(x)
-
-    # Compute midpoints and endpoints.
-    n1 = 0
-    n2 = np.min((r0 - w/4 <= r).nonzero())
-    n3 = np.max((r0 + w/4 >= r).nonzero())
-    n4 = nw-1
-
-    # Compute variables for psi polynomials.
-    d_psi_half = psi_full[n3]-psi_full[n2]
-    d_psi_full = psi_full[n4] - psi_full[n1]
-    a_psi_half = (psi_full[n3]+psi_full[n2])/2
-    a_psi_full = (psi_full[n1]+psi_full[n4])/2
-
-    # Compute coefficients for the polynomial expansion.
-    c1 = (8.0*d_psi_half-d_psi_full)/(3.0*w)
-    c2 = 4.0*(16.0*a_psi_half-a_psi_full)/(3.0*w*w)
-    c3 = 16.0*(d_psi_full-2.0*d_psi_half)/(3.0*w*w*w)
-
-    # Compute quartic psi approximation.
-    psi_vals = x*(c1 + x*(c2+x*c3))
-    return psi_vals
-
-def psi_quartic_fast(kD, r, r0, cbd, d2, cp0, sp0, cp, sp, w, nw):
-    """
-        Function:
-            psi_quartic_fast
-        Purpose:
-            Compute psi (MTR Equation 4) with
-            no error checks using precomputed
-            sines and cosines of various
-            parameters using the MTR quartic
-            polynomial approximation.
-        Arguments:
-            kD:
-                Float
-                Wavenumber
-            r:
-                Numpy Array
-                Ring radius, in kilometers.
-            r0:
-                Float:
-                Ring radius of the center of the window, kilometers.
-            cbd:
-                Float
-                Cosine(B) * D
-            d2:
-                Float
-                The square of D.
-            cp0:
-                Float
-                Cosine(phi0)
-            sp0:
-                Float
-                Sine(phi0)
-            cp:
-                Numpy Array
-                Cosine(phi)
-            sp:
-                Numpy Array
-                Sine(phi)
-            w:
-                Numpy Array
-                Window width as a function of
-                ring radius.
-            nw:
-                Float
-                Number of points in w.
-        Outputs:
-            psi:
-                Real Numpy Array
-                Geometric Function from Fresnel Kernel.
-        Dependencies:
-            [1] numpy
-    """
-    # Compute psi.
-    psi_full = self.__psi_func(kD, r, r0, cbd, d2, cp0, sp0, cp, sp, w, nw)
-
-    # Compute shifted ring radius and window width.
-    x = (r-r0)
-    w = np.max(x)-np.min(x)
-
-    # Compute midpoints and endpoints.
-    n1 = 0
-    n2 = np.min((r0 - w/4 <= r).nonzero())
-    n3 = np.max((r0 + w/4 >= r).nonzero())
-    n4 = nw-1
-
-    # Compute variables for psi polynomials.
-    d_psi_half = psi_full[n3]-psi_full[n2]
-    d_psi_full = psi_full[n4] - psi_full[n1]
-    a_psi_half = (psi_full[n3]+psi_full[n2])/2
-    a_psi_full = (psi_full[n1]+psi_full[n4])/2
-
-    # Compute coefficients for the polynomial expansion.
-    c1 = (8.0*d_psi_half-d_psi_full)/(3.0*w)
-    c2 = 4.0*(16.0*a_psi_half-a_psi_full)/(3.0*w*w)
-    c3 = 16.0*(d_psi_full-2.0*d_psi_half)/(3.0*w*w*w)
-    c4 = 64.0*(a_psi_full-4.0*a_psi_half)/(3.0*w*w*w*w)
-
-    # Compute quartic psi approximation.
-    psi_vals = x*(c1 + x*(c2+x*(c3+x*c4)))
-    return psi_vals
-
 def psi_d1_phi(r, r0, d, b, phi, phi0, error_check=True):
     """
         Function:
@@ -1448,58 +1144,7 @@ def fresnel_inverse(T_hat, ker, dx, f_scale):
     T = np.sum(ker * T_hat) * dx * (1.0+1.0j) / (2.0 * f_scale)
     return T
 
-def fresnel_inverse_fft(T_hat, ker, dx, f_scale):
-    """
-        Method:
-            __fresinvfft
-        Purpose:
-            Compute the approximation Fresnel Inverse
-            (MTR86 Equation 15) using FFTs.
-        Arguments:
-            T_hat:
-                Complex Numpy Array
-                The complex transmittance of the
-                normalized diffraction data.
-            ker:
-                Complex Numpy Array
-                The Fresnel Kernel.
-            dx:
-                Positive Float
-                The spacing between points in the window.
-                This is equivalent to the sample spacing.
-                This value is in kilometers.
-            f_scale
-                Real Numpy Array
-                The Fresnel Scale as a function of
-                ring radius (km).
-        Outputs:
-            T:
-                Complex Number
-                The fresnel inversion about the center
-                of the Fresnel Kernel.
-        Dependencies:
-            [1] numpy
-    """
-    # Number of points in window.
-    nw = np.size(T_hat)
-
-    # FFT of data.
-    fft_t_hat = np.fft.fft(T_hat)
-
-    # FFT of weight Fresnel Kernel.
-    fft_conv = np.fft.fft(ker)
-
-    # Inverse FFT, assuming the convolution theorem is valid.
-    inv_t_hat = np.fft.ifftshift(np.fft.ifft(fft_t_hat*fft_conv))
-
-    # Scale factor outside of integral.
-    inv_t_hat *= dx*(1.0+1.0j)/(2.0*f_scale)
-
-    # Return midpoint value.
-    T = inv_t_hat[int((nw-1)/2)]
-    return T
-
-def psi_func(r, r0, d, b, phi, phi0, error_check=True):
+def psi_func(kD, r, r0, phi, phi0, B, D, error_check=True):
     """
         Function:
             psi_func
@@ -1558,33 +1203,38 @@ def psi_func(r, r0, d, b, phi, phi0, error_check=True):
         else:
             pass
         
-        if (not isinstance(r0, float)):
-            try:
-                r0 = float(r0)
-            except (TypeError, ValueError):
-                raise TypeError(
-                    "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffrec Subpackage\n"
-                    "\tspecial_functions.psi_d1_phi:\n"
-                    "\t\tSecond input must be a positive\n"
-                    "\t\tfloating point number.\n"
-                )
-        else:
-            pass
-        
-        if (np.min(r0) < 0.0):
+        try:
+            r0 = np.array(r0)
+        except (ValueError, TypeError):
             raise TypeError(
                 "\n\tError Encountered:\n"
                 "\trss_ringoccs: Diffrec Subpackage\n"
                 "\tspecial_functions.psi_d1_phi:\n"
-                "\t\tSecond input must be a positive\n"
-                "\t\tfloating point number.\n"
+                "\t\tSecond input could not be converted\n"
+                "\t\tinto a numpy array.\n"
+            )
+
+        if (not np.all(np.isreal(r0))):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.psi_d1_phi:\n"
+                "\t\tFirst input must be an array\n"
+                "\t\tof floating point number.\n"
+            )
+        elif (np.min(r0) < 0.0):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffrec Subpackage\n"
+                "\tspecial_functions.psi_d1_phi:\n"
+                "\t\tFirst input must be an array\n"
+                "\t\tof positive numbers.\n"
             )
         else:
             pass
-
+        
         try:
-            d = np.array(d)
+            D = np.array(D)
         except (ValueError, TypeError):
             raise TypeError(
                 "\n\tError Encountered:\n"
@@ -1594,7 +1244,7 @@ def psi_func(r, r0, d, b, phi, phi0, error_check=True):
                 "\t\tinto a numpy array.\n"
             )
 
-        if (not np.all(np.isreal(d))):
+        if (not np.all(np.isreal(D))):
             raise TypeError(
                 "\n\tError Encountered:\n"
                 "\trss_ringoccs: Diffrec Subpackage\n"
@@ -1602,7 +1252,7 @@ def psi_func(r, r0, d, b, phi, phi0, error_check=True):
                 "\t\tThird input must be an array\n"
                 "\t\tof floating point number.\n"
             )
-        elif (np.min(d) < 0.0):
+        elif (np.min(D) < 0.0):
             raise TypeError(
                 "\n\tError Encountered:\n"
                 "\trss_ringoccs: Diffrec Subpackage\n"
@@ -1614,7 +1264,7 @@ def psi_func(r, r0, d, b, phi, phi0, error_check=True):
             pass
 
         try:
-            b = np.array(b)
+            B = np.array(B)
         except (ValueError, TypeError):
             raise TypeError(
                 "\n\tError Encountered:\n"
@@ -1624,7 +1274,7 @@ def psi_func(r, r0, d, b, phi, phi0, error_check=True):
                 "\t\tinto a numpy array.\n"
             )
 
-        if (not np.all(np.isreal(b))):
+        if (not np.all(np.isreal(B))):
             raise TypeError(
                 "\n\tError Encountered:\n"
                 "\trss_ringoccs: Diffrec Subpackage\n"
@@ -1673,14 +1323,12 @@ def psi_func(r, r0, d, b, phi, phi0, error_check=True):
     else:
         pass
 
-    cb   = np.cos(b)
-    sp   = np.sin(phi)
-    cp   = np.cos(phi)
-    sp0  = np.sin(phi0)
-    cp0  = np.cos(phi0)
-    xi   = (cb / d) * (r0*cp0 - r*cp)
-    eta  = ((r0*r0) + (r*r) - 2.0 * r * r0 * (sp*sp0 + cp*cp0)) / (d*d)
-    psi_vals   = np.sqrt(1.0 + 2.0 * xi + eta) - (1.0 + xi)
+    # Compute Xi variable (MTR86 Equation 4b).
+    xi = (np.cos(B)/D) * (r * np.cos(phi) - r0 * np.cos(phi0))
+
+    # Compute Eta variable (MTR86 Equation 4c).
+    eta = (r0*r0 + r*r - 2.0*r*r0*np.cos(phi-phi0)) / (D*D)
+    psi_vals = kD * (np.sqrt(1.0+eta-2.0*xi) - (1.0-xi))
     return psi_vals
 
 def resolution_inverse(x, error_check):

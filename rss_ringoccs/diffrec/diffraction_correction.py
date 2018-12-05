@@ -51,15 +51,15 @@ class DiffractionCorrection(object):
                 This instance MUST contain the following attributes
                 and MUST have the same names.
 
-                    -rho_km_vals:      Ring Radius (km)
-                    -phi_rad_vals:     Ring Azimuth Angle (Radians)
-                    -p_norm_vals:      Normalized Power
-                    -phase_rad_vals:   Phase (Radians)
-                    -B_rad_vals:       Elevation Angle (Radians)
-                    -D_km_vals:        RIP-Distance (km)
-                    -f_sky_hz_vals:    Sky Frequency (Hertz)
-                    -rho_dot_kms_vals: RIP-velocity (km/s)
-                    -history:          History dictionary
+                |   rho_km_vals:      Ring Radius (km)
+                |   phi_rad_vals:     Ring Azimuth Angle (Radians)
+                |   p_norm_vals:      Normalized Power
+                |   phase_rad_vals:   Phase (Radians)
+                |   B_rad_vals:       Elevation Angle (Radians)
+                |   D_km_vals:        RIP-Distance (km)
+                |   f_sky_hz_vals:    Sky Frequency (Hertz)
+                |   rho_dot_kms_vals: RIP-velocity (km/s)
+                |   history:          History dictionary
             :res (*float* or *int*):
                 The requested resolution for processing (km). This
                 must be a positive real number.
@@ -1221,6 +1221,7 @@ class DiffractionCorrection(object):
         self.tau_vals = tau
 
         self.tau_threshold_vals = np.zeros(np.size(self.rho_km_vals))
+        # self.tau_threshold_vals = NormDiff.raw_tau_threshold_vals
 
         self.__trim_attributes(self.fwd)
 

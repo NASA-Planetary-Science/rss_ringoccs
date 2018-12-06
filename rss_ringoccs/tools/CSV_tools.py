@@ -733,22 +733,24 @@ class GetUranusData(object):
         drho_interp = interpolate.interp1d(geo_rho,geo_drho,kind="linear")
         self.rho_dot_kms_vals = drho_interp(self.rho_km_vals)
         
-        geo_D_interp = interpolate.interp1d(geo_rho,geo_D,kind="linear")
+        geo_D_interp = interpolate.interp1d(geo_rho,geo_D, kind="linear")
         self.D_km_vals = geo_D_interp(self.rho_km_vals)
 
-        geo_B_interp = interpolate.interp1d(geo_rho,geo_B,kind="linear")
+        geo_B_interp = interpolate.interp1d(geo_rho, geo_B, kind="linear")
         self.B_rad_vals = np.deg2rad(geo_B_interp(self.rho_km_vals))
 
-        geo_phi_interp = interpolate.interp1d(geo_rho,geo_phi,kind="linear")
+        geo_phi_interp = interpolate.interp1d(geo_rho, geo_phi, kind="linear")
         self.phi_rad_vals = np.deg2rad(geo_phi_interp(self.rho_km_vals))
 
-        power_interp = interpolate.interp1d(dlp_rho,dlp_pow,kind="linear")
+        power_interp = interpolate.interp1d(dlp_rho, dlp_pow, kind="linear")
         self.p_norm_vals = power_interp(self.rho_km_vals)
 
-        phase_interp = interpolate.interp1d(dlp_rho,dlp_phs[tstart:tfinish+1],kind="linear")
+        phase_interp = interpolate.interp1d(dlp_rho, dlp_phs[tstart:tfinish+1],
+                                            kind="linear")
         self.phase_rad_vals = phase_interp(self.rho_km_vals)
 
-        freq_interp = interpolate.interp1d(dlp_rho,dlp_frq[tstart:tfinish+1],kind="linear")
+        freq_interp = interpolate.interp1d(dlp_rho, dlp_frq[tstart:tfinish+1],
+                                           kind="linear")
         self.f_sky_hz_vals = freq_interp(self.rho_km_vals)
 
         n = np.size(self.rho_km_vals)

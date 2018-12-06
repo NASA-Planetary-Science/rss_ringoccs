@@ -303,12 +303,12 @@ def write_history_text(f, hist_list_keys, hist_dict, hist_dict_keys):
                         #    ex1 = [this_input]
                         #    this_input = [x.split('/')[-1]
                         #            for x in ex1]
-                        if varkey == 'rsr_file':
-                            ind0 = this_input.index('v10')+4
-                            rsr_dir0 = this_input[:ind0]
-                            rsr_dir1 = this_input[ind0:].rsplit('/',1)[0]+'/'
-                            rsr_filename = this_input.split('/')[-1]
-                            this_input = [rsr_dir0, rsr_dir1, rsr_filename]
+                        #if varkey == 'rsr_file':
+                        #    ind0 = this_input.index('v10')+4
+                        #    rsr_dir0 = this_input[:ind0]
+                        #    rsr_dir1 = this_input[ind0:].rsplit('/',1)[0]+'/'
+                        #    rsr_filename = this_input.split('/')[-1]
+                        #    this_input = [rsr_dir0, rsr_dir1, rsr_filename]
                         # check if input is longer than rest of line
                         space_avail = 40
 

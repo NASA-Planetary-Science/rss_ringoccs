@@ -79,7 +79,7 @@ class Normalization(object):
         rimp_down = splev(spm_down, spm_to_rimp)
 
         # Create mask array based on freespace region predictions
-        self.create_mask(spm_down, rho_down, freespace_spm,p_obs_down)
+        self.create_mask(spm_down, freespace_spm,p_obs_down)
 
         # Compute fit
         self.fit_freespace_power(spm_down, p_obs_down, order=order,fittype=fittype)
@@ -197,7 +197,7 @@ class Normalization(object):
 
         return gaps
 
-    def create_mask(self, spm, rho, gaps_spm, pc):
+    def create_mask(self, spm,gaps_spm, pc):
         """
         Arguments:
             :spm (*np.ndarray*): SPM in seconds of the downsampled signal

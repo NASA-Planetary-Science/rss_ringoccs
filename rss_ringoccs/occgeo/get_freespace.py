@@ -57,7 +57,16 @@ def get_freespace(t_ret_spm_vals, year, doy, rho_km_vals,
 
         rho_to_spm = interp1d(rho_out, t_oet_out, fill_value='extrapolate')
 
+
+
         gaps_spm = rho_to_spm(gaps_km)
+
+        # reverse list for ingress occ so that gaps_spm in increasing order
+        if (rho_out[1]-rho_out[0]) < 0:
+            # reverse each list in gaps_spm
+            gaps_spm_1 = [[x[1],x[0]] for x in gaps_spm]
+            gaps_spm = gaps_spm_1[::-1]
+
 
     return gaps_km, gaps_spm
 

@@ -17,7 +17,6 @@ from ..rsr_reader.rsr_reader import RSRReader
 from .resample_IQ import resample_IQ
 from ..tools.write_history_dict import write_history_dict
 from ..tools.write_output_files import write_output_files
-from .namegen import CSVname
 
 sys.path.append('../..')
 import rss_ringoccs as rss
@@ -126,6 +125,7 @@ class DiffractionLimitedProfile(object):
 
         # if set, write output data and label file
         self.rev_info = geo_inst.rev_info
+        self.dr_km = dr_km
         if write_file:
             write_output_files(self)
 

@@ -18,9 +18,9 @@ import pickle
 from .calc_f_sky_recon import calc_f_sky_recon
 #from .calc_freq_offset import calc_freq_offset
 from .calc_freq_offset import calc_freq_offset
-from .namegen import plotname
 #from ..tools.cassini_blocked import cassini_blocked
 from ..tools.search_for_file import search_for_file
+from ..tools.write_output_files import construct_filepath
 
 import sys
 sys.path.append('../../')
@@ -183,6 +183,7 @@ class FreqOffsetFit(object):
             if (f_sky_resid[i] < fsr_median - fsr_stdev) or (f_sky_resid[i] > fsr_median + fsr_stdev):
                 fsr_mask[i] = False
 
+        ## Polynomial fit clipping
         # try a 9th order polynomial fit
         pinit = np.polyfit(f_spm[fsr_mask], f_sky_resid[fsr_mask], 9)#np.polyfit(f_spm[fsr_mask], f_sky_resid[fsr_mask], 9)
         # Compute standard deviation from fit and implememt sigma-clipping
@@ -196,6 +197,8 @@ class FreqOffsetFit(object):
             for i in range(len(f_sky_resid)):
                 if (f_sky_resid[i] < np.polyval(pinit,f_spm[i]) - fit_stdev) or (f_sky_resid[i] > np.polyval(pinit,f_spm[i]) + fit_stdev):
                     fsr_mask[i] = False
+        else:
+            fit_stdev = 0.1
 
         ## iteratively check adjacent values for false positives -- i.e.,
         #       all four adjacent mask array values are False
@@ -276,15 +279,17 @@ class FreqOffsetFit(object):
             :poly_order (*float*): order of polynomial fit to the residual sky frequency
         """
         #generate plot file name
-        filename = plotname(self.rev_info,'FORFIT')
+        filename,outdir = construct_filepath(self.rev_info,'FORFIT')
         # residuals used for fit
         plt.plot(spm[mask],resid[mask],'.k')
         # all residuals
         plt.plot(spm,resid,'-',color='0.5',lw=1)
         # indicate limits for ring system
-        linds = [(self.raw_rho>=7.4e4)&(self.raw_rho<=1.4e5)]
-        plt.axvline(np.nanmin(self.raw_spm_vals[linds]),dashes=[12,4],color='0.2')
-        plt.axvline(np.nanmax(self.raw_spm_vals[linds]),dashes=[12,4],color='0.2')
+        linds = [(self.raw_rho>=7e4)&(self.raw_rho<=1.4e5)]
+        imin = np.argmin(self.raw_rho>=7.4e4)
+        imax = np.argmax(self.raw_rho<=1.4e5)
+        plt.axvline(self.raw_spm_vals[imin],dashes=[12,4],color='0.2')
+        plt.axvline(self.raw_spm_vals[imax],dashes=[12,4],color='0.2')
         # fit to residuals
         plt.plot(spm,fit,'-r')
         # limits to plot
@@ -295,7 +300,7 @@ class FreqOffsetFit(object):
         plt.ylabel(r'$f_{predict}-f_{observe}$')
         plt.title('Frequency Offset Residual Fit for PolyOrder '+str(poly_order))
         # output
-        plt.savefig(filename,dpi=128)
+        plt.savefig(filename+'.PDF')
         plt.close()
 """
 Revisions:

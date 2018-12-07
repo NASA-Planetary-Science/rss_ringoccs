@@ -15,7 +15,7 @@ import rss_ringoccs as rss
 sys.path.remove('../..')
 
 from ..tools.cassini_blocked import cassini_blocked
-from .namegen import plotname
+from ..tools.write_output_files import construct_filepath
 import pdb
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
@@ -79,7 +79,7 @@ class Normalization(object):
         rimp_down = splev(spm_down, spm_to_rimp)
 
         # Create mask array based on freespace region predictions
-        self.create_mask(spm_down, freespace_spm,p_obs_down)
+        self.create_mask(spm_down, rho_down, freespace_spm,p_obs_down)
 
         # Compute fit
         self.fit_freespace_power(spm_down, p_obs_down, order=order,fittype=fittype)
@@ -197,22 +197,20 @@ class Normalization(object):
 
         return gaps
 
-    def create_mask(self, spm_full, gaps_spm, pc):
+    def create_mask(self, spm, rho, gaps_spm, pc):
         """
         Arguments:
-            :geo_inst (*object*):
-                           Instance of the Geometry class, used to estimate
-                           the freespace regions within and surrounding the
-                           ring system, accounting for Saturn occultation
-                           and the Keplerian geometry of the rings
-            :rho_km_vals (*np.ndarray*): radial intercept poin of occultation in km
-
+            :spm (*np.ndarray*): SPM in seconds of the downsampled signal
+            :rho (*np.ndarray*): occultation intercept radius of the downsampled signal
+            :gaps_spm (*list*): location of freespace regions as predicted by the gap-finding
+                                routines ``get_freespace.py`` using tabulated orbital parameters.
+            :pc (*np.ndarray*): phase-corrected downsampled power where :math:`P_c=|I_c^2+iQ_c^2|`
         Sets attributes
-            :__mask (*np.ndarray*):
+            :mask (*np.ndarray*):
                            array of booleans wherein True designates data
                            corresponding to freespace power and False
                            data corresponding to occultation events
-            :__gaps (*list*):
+            :gaps (*list*):
                            an Nx2 list of lower and upper radial limits in
                            km for each of N gaps designated
         """
@@ -237,7 +235,7 @@ class Normalization(object):
 
         for spm_limits in gaps_spm_copy:
             # Boolean mask including only spm values within gap
-            ind = [(spm_full>=spm_limits[0])&(spm_full<=spm_limits[1])]
+            ind = [(spm>=spm_limits[0])&(spm<=spm_limits[1])]
             # find median corrected power within space
             #if pc_median < np.median(pc_median)*1.3 and pc_median > np.median(pc_median)*1.3:
             pcm = np.nanmedian(pc_norm[ind])
@@ -249,15 +247,15 @@ class Normalization(object):
             #    gaps_spm.remove(spm_limits)
 
         # create mask array that includes only freespace power
-        fsp_mask = np.array([False for i in range(len(spm_full))])
+        fsp_mask = np.array([False for i in range(len(spm))])
 
         # iterate over all radii
-        for i in range(len(spm_full)):
+        for i in range(len(spm)):
             # check to see if intercept radius falls within a gap
             #for rho_limits in gaps:
             for spm_limits,p_c_m in zip(gaps_spm,pc_median):
                 # looks at specific gap and compares radius to gap boundaries
-                if spm_full[i] >= spm_limits[0] and spm_full[i] <= spm_limits[1]:
+                if spm[i] >= spm_limits[0] and spm[i] <= spm_limits[1]:
                     #fsp_mask[i] = True
                     # compares the corrected, normalized IQ to the median free-
                     # space power within the gap, TRUE if within 10%
@@ -281,6 +279,7 @@ class Normalization(object):
             :order (*float*): order of the fit, whole number between 1 and 5.
                                 Default order is 3.
             :type (*str*): type of fit to use, default is 'poly'. Options are
+
                             - 'poly' a single polynomial
                             - 'spline' an unsmoothed spline fit
 
@@ -422,8 +421,8 @@ class Normalization(object):
         fig.text(0.45,0.01,r'SPM - '+str(int(spm_off))+' ($10^3$ sec)')
         fig.text(0.01,0.5,r'Power (arb.)',rotation=90)
         if save:
-            filename = plotname(self.rev_info,'FSPFIT')
-            plt.savefig(filename,dpi=128)
+            filename,outdir = construct_filepath(self.rev_info,'FORFIT')
+            plt.savefig(filename+'.PDF')
             plt.close('all')
         else:
             plt.show(block=False)

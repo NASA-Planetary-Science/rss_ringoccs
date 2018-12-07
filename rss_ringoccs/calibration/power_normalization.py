@@ -421,11 +421,11 @@ class Normalization(object):
         fig.text(0.45,0.01,r'SPM - '+str(int(spm_off))+' ($10^3$ sec)')
         fig.text(0.01,0.5,r'Power (arb.)',rotation=90)
         if save:
-            # generate file name(s)
-            filenames,outdir = construct_filepath(self.rev_info,'FORFIT')
+            #generate plot file names
+            filenames,outdirs = construct_filepath(self.rev_info,'FORFIT')
             # output
-            for file in filenames:
-                plt.savefig(file+'.PDF')
+            for file,dir in zip(filenames,outdirs):
+                plt.savefig(dir+file+'.PDF')
             plt.close('all')
         else:
             plt.show(block=False)

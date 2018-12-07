@@ -298,10 +298,10 @@ class FreqOffsetFit(object):
         plt.ylabel(r'$f_{predict}-f_{observe}$')
         plt.title('Frequency Offset Residual Fit for PolyOrder '+str(poly_order))
         #generate plot file names
-        filenames,outdir = construct_filepath(self.rev_info,'FORFIT')
+        filenames,outdirs = construct_filepath(self.rev_info,'FORFIT')
         # output
-        for file in filenames:
-            plt.savefig(file+'.PDF')
+        for file,dir in zip(filenames,outdirs):
+            plt.savefig(dir+file+'.PDF')
         plt.close()
 """
 Revisions:

@@ -126,9 +126,6 @@ class DiffractionLimitedProfile(object):
         # if set, write output data and label file
         self.rev_info = geo_inst.rev_info
         self.dr_km = dr_km
-        if write_file:
-            write_output_files(self)
-
 
 
         input_vars = {
@@ -142,6 +139,9 @@ class DiffractionLimitedProfile(object):
                 'profile_range': profile_range}
 
         self.history = write_history_dict(input_vars, input_kwds, __file__)
+        if write_file:
+            write_output_files(self)
+
 
 
     def interp_and_set_attr(self, rho_km_desired, spm_desired,

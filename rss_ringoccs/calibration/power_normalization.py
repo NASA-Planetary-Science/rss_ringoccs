@@ -216,7 +216,7 @@ class Normalization(object):
         """
 
         # normalize corrected power to max corrected power inside the occultation
-        pc_max = np.nanmax(pc[(spm_full>=gaps_spm[1][1])&(spm_full<=gaps_spm[-2][0])])
+        pc_max = np.nanmax(pc[(spm>=gaps_spm[1][1])&(spm<=gaps_spm[-2][0])])
         pc_norm = pc/pc_max
 
         # get lower, upper radial limits to planet/atmosphere occultation
@@ -421,8 +421,11 @@ class Normalization(object):
         fig.text(0.45,0.01,r'SPM - '+str(int(spm_off))+' ($10^3$ sec)')
         fig.text(0.01,0.5,r'Power (arb.)',rotation=90)
         if save:
-            filename,outdir = construct_filepath(self.rev_info,'FORFIT')
-            plt.savefig(filename+'.PDF')
+            # generate file name(s)
+            filenames,outdir = construct_filepath(self.rev_info,'FORFIT')
+            # output
+            for file in filenames:
+                plt.savefig(file+'.PDF')
             plt.close('all')
         else:
             plt.show(block=False)

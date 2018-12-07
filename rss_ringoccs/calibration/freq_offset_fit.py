@@ -278,8 +278,6 @@ class FreqOffsetFit(object):
             :spm_max (*float*): end of occultation in SPM
             :poly_order (*float*): order of polynomial fit to the residual sky frequency
         """
-        #generate plot file name
-        filename,outdir = construct_filepath(self.rev_info,'FORFIT')
         # residuals used for fit
         plt.plot(spm[mask],resid[mask],'.k')
         # all residuals
@@ -299,8 +297,11 @@ class FreqOffsetFit(object):
         plt.xlabel('SPM (sec)')
         plt.ylabel(r'$f_{predict}-f_{observe}$')
         plt.title('Frequency Offset Residual Fit for PolyOrder '+str(poly_order))
+        #generate plot file names
+        filenames,outdir = construct_filepath(self.rev_info,'FORFIT')
         # output
-        plt.savefig(filename+'.PDF')
+        for file in filenames:
+            plt.savefig(file+'.PDF')
         plt.close()
 """
 Revisions:

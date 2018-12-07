@@ -126,8 +126,8 @@ class DiffractionLimitedProfile(object):
 
         # if set, write output data and label file
         self.rev_info = geo_inst.rev_info
-        '''if write_file:
-            write_output_files(self)'''
+        if write_file:
+            write_output_files(self)
 
 
 
@@ -332,27 +332,6 @@ class DiffractionLimitedProfile(object):
                     profile_range=profile_range)
         else:
             print('WARNING (create_dlps()): Invalid profile direction given!')
-
-
-        if True:
-            if dlp_ing != None :
-                filename = CSVname(dlp_ing.rev_info,'DLPING')
-                outfile = open(filename,'w')
-                header = ['SPM (sec)','RHO (km)','Power','Optical Depth']
-                outfile.write(','.join(h for h in header)+'\n')
-                for i in range(len(dlp_ing.t_oet_spm_vals)):
-                    row = [dlp_ing.t_oet_spm_vals[i],dlp_ing.rho_km_vals[i],dlp_ing.p_norm_vals[i],dlp_ing.tau_vals[i]]
-                    outfile.write(','.join(str(round(item,8)) for item in row)+'\n')
-                outfile.close()
-            if dlp_egr != None :
-                filename = CSVname(dlp_egr.rev_info,'DLPEGR')
-                outfile = open(filename,'w')
-                header = ['SPM (sec)','Sky Freq (Hz)','Resid Fit (Hz)','Freespace Power (arb)']
-                outfile.write(','.join(h for h in header)+'\n')
-                for i in range(len(dlp_egr.t_oet_spm_vals)):
-                    row = [dlp_egr.t_oet_spm_vals[i],dlp_egr.rho_km_vals[i],dlp_egr.p_norm_vals[i],dlp_egr.tau_vals[i]]
-                    outfile.write(','.join(str(round(item,8)) for item in row)+'\n')
-                outfile.close()
 
         return dlp_ing, dlp_egr
 

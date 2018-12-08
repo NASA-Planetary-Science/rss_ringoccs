@@ -1,34 +1,24 @@
 import numpy as np
 
-'''
+"""
     calc_freq_offset
 
         Class for computing the frequency corresponding to the maximum power in
         the continuous FFT power spectrum
-
-    Nov 01 2018 - sflury        -- original, used components of v1.0 script
-    Nov 15 2018 - sflury        -- updated default window size and window spacing
-'''
+"""
 class calc_freq_offset(object):
-    '''
-        __init__
+    """
+        Purpose:
+            Calls functions to sample raw signal at regular intervals using a window
+            of width ``dt_freq``
 
-            Takes
-                self
-                rsr_inst
+        Arguments:
+            :rsr_inst (*object*): Object instance of the RSRReader class
 
-            Optional
-                dt_freq         -- half the width of the FFT window, default is 128 sec
-                delta_t_cent    -- incremental change in SPM window center
-                                   Note: this will determine the speed of the
-                                   frequency offset calculations. Window spacing
-                                   less than 200 seconds will take time.
-                                   Default is 10 sec spacing.
-
-
-            Calls functions to set up and run continuous FFTs and get peak freqs
-    '''
-    def __init__(self,rsr_inst,spm_min,spm_max,dt_freq=128.):
+        Keyword Arguments:
+            :dt_freq (*float*): half the width of the FFT window, default is 128 sec
+    """
+    def __init__(self,rsr_inst,spm_min,spm_max,dt_freq=64.):
 
         # Get raw SPM and raw I & Q from RSR instance
         self.spm_vals = rsr_inst.spm_vals
@@ -47,17 +37,17 @@ class calc_freq_offset(object):
 
 
 
-    '''
-        __find_freqs
+    """
+    Purpose:
+        Iteratively calls __find_peak_freq for slices of SPM and IQself.
 
-            Takes
-                self
-
-            Iteratively calls __find_peak_freq for slices of SPM and IQself.
-
-            Sets
-                f_spm           -- frequency offset files sampled wrt SPM
-    '''
+    Attributes:
+        :f_spm (*np.ndarray*): signal window centers in SPM for which the offset
+                                frequencies were computed
+        :f_offset (*np.ndarray*): offset frequencies computed over the occultation
+                                sampled once every 10 seconds with signal window
+                                of width ``dt_freq``
+    """
     def __find_offset_freqs(self):
 
         # hard-set the spacing to 10 spm between each window center
@@ -69,11 +59,11 @@ class calc_freq_offset(object):
         # iteratively compute peak frequency
         for spm_mid in np.arange(self.spm_min,self.spm_max+delta_t_cent,delta_t_cent):
             # set indices using boolean mask over a range of SPM
-            ind = [(self.spm_vals>=spm_mid)&(self.spm_vals<spm_mid+self.dt_freq)]
+            ind = [(self.spm_vals>=spm_mid-self.dt_freq)&(self.spm_vals<spm_mid+self.dt_freq)]
             # make sure data are included in range
             if len(self.spm_vals[ind]) > 2 :
                 # get average SPM in window
-                spms += [np.nanmean(self.spm_vals[ind])]
+                spms += [spm_mid]#np.nanmean(self.spm_vals[ind])]
                 # get frequency of peak in power spectrum
                 freqs += [self.__find_peak_freq(self.IQ_m[ind])]
         # convert to arrays and store as attributes
@@ -81,17 +71,16 @@ class calc_freq_offset(object):
         self.f_offset = np.array(freqs)+0.01
         # pay no attention to the extra 0.01 correction needed but inexplicable
 
-    '''
-        __find_peak_freq
+    """
+    Purpose:
+        Computes continuous FFT, finds frequency at max power
 
-            Takes
-                IQ          -- IQ_m vals within the current window
+    Arguments:
+        :IQ (*np.ndarray*): IQ_m vals within the current window
 
-            Computes continuous FFT, finds frequency at max power
-
-            Returns
-                f_max       -- frequency at max power
-    '''
+    Returns:
+        :f_max (*float*): frequency at max power
+    """
     def __find_peak_freq(self,IQ):
 
         # Compute and apply Hamming window
@@ -110,3 +99,8 @@ class calc_freq_offset(object):
         f_max = f[np.argwhere(power==np.nanmax(power))][0][0]
 
         return f_max
+"""
+History
+    Nov 01 2018 - sflury        -- original, used components of v1.0 script
+    Nov 15 2018 - sflury        -- updated default window size and window spacing
+"""

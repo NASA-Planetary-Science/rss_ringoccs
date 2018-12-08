@@ -35,7 +35,7 @@ class FreqOffsetFit(object):
     """
 
     def __init__(self, rsr_inst, geo_inst, poly_order=7,
-            f_uso_x=8427222034.34050, file_search=False, verbose=False):
+            f_uso_x=8427222034.34050, verbose=False):
         """
         Make a fit to sigma-clipped frequency offset.
 

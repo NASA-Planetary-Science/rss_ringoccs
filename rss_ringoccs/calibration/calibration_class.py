@@ -150,9 +150,8 @@ class Calibration(object):
         self.p_free_vals = p_free_cal
         gaps_used = norm_inst.gaps
 
-        res_km = 1.0#np.nanmedian([rsr_inst.spm_vals[i]-rsr_inst.spm_vals[i-1] for i in range(1,len(rsr_inst.spm_vals))])
-        tau_thresh_inst = calc_tau_thresh(rsr_inst,geo_inst,norm_inst.gaps,self.IQ_c,
-                                        p_free_raw,res_km=res_km,Calpha=1.205,raw=False)
+        tau_thresh_inst = calc_tau_thresh(rsr_inst,geo_inst,norm_inst.gaps,p_free_raw,res_km=1)
+        self.snr = tau_thresh_inst.snr
         self.tau_thresh = tau_thresh_inst.tau_thresh
         self.spm_thresh = tau_thresh_inst.spm_vals
         self.rho_thresh = tau_thresh_inst.rho_vals

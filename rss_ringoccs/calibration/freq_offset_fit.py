@@ -140,7 +140,8 @@ class FreqOffsetFit(object):
 
         # Draw and save reference plot
         self.plotFORFit(f_spm,f_sky_resid,f_sky_resid_fit,self.__fsr_mask,
-                        spm_min,spm_max,poly_order)
+                        spm_min,spm_max,geo_inst.freespace_spm[0][0],
+                        geo_inst.freespace_spm[-1][1],poly_order)
 
         # Calculate frequency offset fit
         self.f_offset_fit = f_sky_resid_fit + (f_sky_recon - f_sky_pred)
@@ -261,7 +262,7 @@ class FreqOffsetFit(object):
         return f_sky_resid_fit
 
     # Create and save a plot of the offset residual fit
-    def plotFORFit(self,spm,resid,fit,mask,spm_min,spm_max,poly_order):
+    def plotFORFit(self,spm,resid,fit,mask,spm_min,spm_max,occ_min,occ_max,poly_order):
         """
         Purpose:
             Plot results of the automated frequency offset residual fit and save
@@ -283,11 +284,8 @@ class FreqOffsetFit(object):
         # all residuals
         plt.plot(spm,resid,'-',color='0.5',lw=1)
         # indicate limits for ring system
-        linds = [(self.raw_rho>=7e4)&(self.raw_rho<=1.4e5)]
-        imin = np.argmin(self.raw_rho>=7.4e4)
-        imax = np.argmax(self.raw_rho<=1.4e5)
-        plt.axvline(self.raw_spm_vals[imin],dashes=[12,4],color='0.2')
-        plt.axvline(self.raw_spm_vals[imax],dashes=[12,4],color='0.2')
+        plt.axvline(occ_min,dashes=[12,4],color='0.2')
+        plt.axvline(occ_max,dashes=[12,4],color='0.2')
         # fit to residuals
         plt.plot(spm,fit,'-r')
         # limits to plot

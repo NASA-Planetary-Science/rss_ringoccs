@@ -31,7 +31,6 @@ import rss_ringoccs as rss
 from rss_ringoccs.tools.search_for_file import search_for_file
 from rss_ringoccs.tools.write_output_files import write_output_files
 from rss_ringoccs.tools.write_history_dict import write_history_dict
-from .namegen import CSVname
 from .calc_tau_thresh import calc_tau_thresh
 sys.path.remove('../..')
 
@@ -87,7 +86,7 @@ class Calibration(object):
     """
 
     def __init__(self, rsr_inst, geo_inst, fof_order=9, pnf_order=3, dt_cal=1.0,
-                 verbose=False, file_search=False, write_file=True, interact=False, pnf_fittype='poly'):
+                 verbose=False, write_file=True, interact=False, pnf_fittype='poly'):
 
         if not isinstance(geo_inst, rss.occgeo.Geometry):
             sys.exit('ERROR (Calibration): geo_inst input needs to be an '
@@ -111,38 +110,11 @@ class Calibration(object):
         # Extract rev_info from geo_inst -- this will inherit its prof_dir
         self.rev_info = geo_inst.rev_info
 
-        # Extract strings from file_search if available
-        if file_search:
-            if isinstance(file_search, bool):
-                file_search_frfp = file_search
-                file_search_pnfp = file_search
-            elif isinstance(file_search, str):
-                # if string, decipher which type of intermediate file
-                if 'PNFP' in file_search:
-                    file_search_pnfp = file_search
-                    file_search_frfp = True
-                if 'FRFP' in file_search:
-                    file_search_pnfp = True
-                    file_search_frfp = file_search
-            elif isinstance(file_search, list):
-                if len(file_search)>2:
-                    print('WARNING (calibration_class.py): incorrect number '
-                            + 'of filepaths given in file_search kwarg!')
-                    sys.exit()
-                file_search_pnfp = [x for x in file_search if 'PNFP' in x][0]
-                file_search_frfp = [x for x in file_search if 'FRFP' in x][0]
-            else:
-                print('WARNING (calibration_class.py): incorrect file_search '
-                        + 'kwarg given!')
-        else:
-            file_search_frfp = False
-            file_search_pnfp = False
 
         # Calculate frequency offset fit
         ## Use default residual frequency fit
         fit_inst = rss.calibration.FreqOffsetFit(rsr_inst, geo_inst,
-                file_search=file_search_frfp, verbose=verbose,
-                poly_order=fof_order)
+                verbose=verbose, poly_order=fof_order)
 
         # Get corrected I's and Q's
         self.IQ_c = self.correct_IQ(rsr_inst.spm_vals,rsr_inst.IQ_m,

@@ -28,15 +28,16 @@ def get_freespace(t_ret_spm_vals, year, doy, rho_km_vals,
                 phi_rl_ing)
 
         
-        rho_to_spm_ing = interp1d(rho_ing, t_oet_ing, fill_value='extrapolate')
-        rho_to_spm_egr = interp1d(rho_egr, t_oet_egr, fill_value='extrapolate')
-        
         
 
         t_ret_egr, t_oet_egr, phi_rl_egr, rho_egr = split_chord_arr(
                 t_ret_spm_vals, t_oet_spm_vals, atmos_occ_spm_vals,
                 phi_rl_deg_vals, rho_km_vals,
                 split_ind, '"EGRESS"')
+
+        rho_to_spm_ing = interp1d(rho_ing, t_oet_ing, fill_value='extrapolate')
+        rho_to_spm_egr = interp1d(rho_egr, t_oet_egr, fill_value='extrapolate')
+        
 
         gaps_km_egr = get_freespace_km(t_ret_egr, year, doy, rho_egr, 
                 phi_rl_egr)
@@ -45,7 +46,7 @@ def get_freespace(t_ret_spm_vals, year, doy, rho_km_vals,
 
         gaps_km = {'INGRESS': gaps_km_ing,
                 'EGRESS': gaps_km_egr}
-        gaps_spm = gaps_spm_ing + gaps_spm_egr
+        gaps_spm = gaps_spm_ing.tolist() + gaps_spm_egr.tolist()
 
     else:
         t_ret_out, t_oet_out, phi_rl_out, rho_out = remove_blocked(
@@ -59,14 +60,13 @@ def get_freespace(t_ret_spm_vals, year, doy, rho_km_vals,
 
 
 
-        gaps_spm = rho_to_spm(gaps_km)
+        gaps_spm = rho_to_spm(gaps_km).tolist()
 
         # reverse list for ingress occ so that gaps_spm in increasing order
         if (rho_out[1]-rho_out[0]) < 0:
             # reverse each list in gaps_spm
             gaps_spm_1 = [[x[1],x[0]] for x in gaps_spm]
             gaps_spm = gaps_spm_1[::-1]
-
 
     return gaps_km, gaps_spm
 

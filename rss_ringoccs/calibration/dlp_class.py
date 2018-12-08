@@ -308,7 +308,6 @@ class DiffractionLimitedProfile(object):
             geo_ing.D_km_vals = geo_inst.D_km_vals[:ind]
             geo_ing.F_km_vals = geo_inst.F_km_vals[:ind]
             geo_ing.rev_info['prof_dir'] = '"INGRESS"'
-            pdb.set_trace()
 
             dlp_ing = cls(rsr_ing, geo_ing, cal_ing, dr_km,
                     dr_km_tol=dr_km_tol, verbose=verbose,

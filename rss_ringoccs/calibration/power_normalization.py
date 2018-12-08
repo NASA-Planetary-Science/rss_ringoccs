@@ -240,7 +240,9 @@ class Normalization(object):
             #if pc_median < np.median(pc_median)*1.3 and pc_median > np.median(pc_median)*1.3:
             pcm = np.nanmedian(pc_norm[ind])
             if pcm < 0.5 or pcm > 1.25 :
+                #gaps_spm = np.delete(gaps_spm_copy, spm_limits)
                 gaps_spm.remove(spm_limits)
+                #gaps_spm = (gaps_spm_copy.tolist()).remove(spm_limits)
             else:
                 pc_median += [pcm]#[np.nanmedian(pc_norm[ind])]
             #else:
@@ -422,7 +424,7 @@ class Normalization(object):
         fig.text(0.01,0.5,r'Power (arb.)',rotation=90)
         if save:
             #generate plot file names
-            filenames,outdirs = construct_filepath(self.rev_info,'FORFIT')
+            filenames,outdirs = construct_filepath(self.rev_info,'FSPFIT')
             # output
             for file,dir in zip(filenames,outdirs):
                 plt.savefig(dir+file+'.PDF')

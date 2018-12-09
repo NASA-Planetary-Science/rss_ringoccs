@@ -1,7 +1,18 @@
 """
 Purpose:
     Compute :math:`\\tau_{thresh}` for use as a proxy for maximum reliable value
-    of optical depth within the diffraction-limited profile.
+    of optical depth within the diffraction-limited or diffraction-reconstructed
+    profile. This follows [MTR1986]_ Equations 24 and 26, which define,
+    respectively, the power of the thermal noise
+
+        .. math::
+            \\hat{P}_N = \\frac{\\dot{\\rho}_0}{\\mathrm{SNR}_0 \\Delta\\rho_0}
+
+    and the threshold optical depth
+
+        .. math::
+            \\tau_{thresh} = -\\sin(B)\\ln\\left(\\frac{1}{2}C_{\\alpha}\\hat{P}_N\\right)
+
 """
 import numpy as np
 import matplotlib.pyplot as plt
@@ -12,87 +23,82 @@ import pdb
 class calc_tau_thresh(object):
     """
     Purpose:
-        Compute threshold optical depth following 
+        Compute threshold optical depth following
 
     Arguments:
         :rsr_inst (*object*): object instance of the RSRReader class
         :geo_inst (*object*): object instance of the Geometry class
         :freespace_spm (*np.ndarray*): locations of freespace where intrinsic
                                 spacecraft signal is observed
-        :IQ_c (*np.ndarray*): phase-corrected complex spacecraft signal
         :pnorm_fit (*np.ndarray*): polynomial fit to the freespace power,
                                 resampled to raw SPM
 
     Keyword Arguments:
-        :res_km (*float*): maximum threshold for noise power relative
-                                to spacecraft signal power. Default is 10%.
+        :res_km (*float*):
         :Calpha (*float*): constant for scaling Bandwidth/SNR ratio. Default is
-                                2.41 for 70% confidence
+                                2.41 for 70% confidence (see [MTR1986]_)
 
     Attributes:
-        :pn_med (*float*): Median receiver "noise" power
-        :pn_rms (*float*): RMS receiver "noise" power as proxy for uncertainty in
-                                noise.
-        :snr (*np.ndarray*): Signal-to-Noise Ratio over the entire occultation.
+        :snr (*np.ndarray*): Signal-to-noise ratio SNR0 over the entire occultation.
                                 This changes over the occultation because the signal
                                 power fluctuates.
-        :tau_thresh (*np.ndarray*): threshold optical depth computed by
-
-        .. math::
-
-            \\tau_{thresh} = -\\sin(B)\\ln\\left(\\frac{C_{\\alpha} \\dot{\\rho}}{\\text{SNR}\\Delta R}\\right)
+        :tau_thresh (*np.ndarray*): threshold optical depth computed using [MTR1986]_
 
     """
-    def __init__(self,rsr_inst,geo_inst,freespace_spm,IQ_c,pnorm_fit,
-                res_km=1.0,Calpha=1.205,constant=False,raw=True):
+    def __init__(self,rsr_inst,geo_inst,freespace_spm,pnorm_fit,
+                res_km=1.0,Calpha=2.41,constant=False):
 
         # get atmosphere location in observation
         atmo = geo_inst.atmos_occ_spm_vals
 
         ###
-        ### ~~ RESAMPLE TO RAW SPM ~~
+        ### ~~ COMPUTE SPECTROGRAM ~~
         ###
+        # Points per FFT for spectrogram
+        fs = rsr_inst.sample_rate_khz*1000
+        nperseg = int(fs*1.024)
 
-        # Compute spline coefficients relating SPM to rho and find rho
-        rho_geo_spl_coef = splrep(geo_inst.t_oet_spm_vals, geo_inst.rho_km_vals)
-        rho_vals = splev(rsr_inst.spm_vals, rho_geo_spl_coef)
+        # computing the spectrogram
+        f_spec, t_spec, spec = spectrogram(rsr_inst.IQ_m,fs,
+            nperseg=int(fs*1.024), return_onesided=False)
 
-        self.spm_vals = rsr_inst.spm_vals
-        self.rho_vals = rho_vals
-
-        # get bandwidth from spacecraft velocity relative to occultation event radius
-        # and the data resolution, first resampling rho dot to raw
-        rho_dot_geo_spl_coef = splrep(geo_inst.t_oet_spm_vals, geo_inst.rho_dot_kms_vals)
-        rho_dot_vals = splev(rsr_inst.spm_vals,rho_dot_geo_spl_coef)
-        bandwidth = abs(rho_dot_vals/res_km)
-
-        # resample and convert ring elevation to radiians
-        B_deg_geo_spl_coef = splrep(geo_inst.t_oet_spm_vals, geo_inst.B_deg_vals)
-        B_deg_vals = splev(rsr_inst.spm_vals,B_deg_geo_spl_coef)
-        B_rad = np.deg2rad(B_deg_vals)
-
-        #self.spm_vals = rsr_inst.spm_vals
-        #self.rho_vals = rho_vals
+        ###
+        ### ~~ RESAMPLE TO SPECTROGRAM SPM ~~
+        ###
+        # SPM and various geometry/calibration parameters for spectra
+        spm_spec = rsr_inst.spm_vals[0] + t_spec
+        self.spm_vals = spm_spec
+        rho_km_spec = np.interp(spm_spec, geo_inst.t_oet_spm_vals, geo_inst.rho_km_vals)
+        self.rho_vals = rho_km_spec
+        rho_dot_kms_spec = np.interp(spm_spec, geo_inst.t_oet_spm_vals, geo_inst.rho_dot_kms_vals)
+        B_deg_spec = np.interp(spm_spec, geo_inst.t_oet_spm_vals, geo_inst.B_deg_vals)
+        B_rad = np.deg2rad(B_deg_spec)
+        pnorm_spec = np.interp(spm_spec, rsr_inst.spm_vals, pnorm_fit)
 
         ###
         ### ~~ FIND SIGNAL AND NOISE POWER ~~
         ###
         # noise
-        noise = self.find_noise(rsr_inst.spm_vals,rsr_inst.IQ_m,pnorm_fit,freespace_spm)
-
+        noise = self.find_noise_spec(f_spec,spm_spec,spec,pnorm_spec,freespace_spm)
         # signal
         # If constant SNR desired, use power from freespace regions
         if constant:
             signal = self.find_signal(spm_spec,spec,freespace_spm)
         # If SNR varies, use fit to freespace signal
         else:
-            signal = pnorm_fit
+            signal = np.interp(spm_spec, rsr_inst.spm_vals, pnorm_fit)
+        #
+        bandwidth = abs( rho_dot_kms_spec / res_km )
+        snr_spec = signal/noise
+        tau_spec = np.sin(B_rad)*np.log(0.5*Calpha*bandwidth/snr_spec)
 
-        bandwidth = abs( rho_dot_vals / res_km )
-        snr_raw = signal / noise
-        tau_raw = np.sin(B_rad)*np.log(Calpha*bandwidth/snr_raw)
-        self.snr = snr_raw
-        self.tau_thresh = tau_raw
+        # compute SNR and set attribute
+        self.snr = snr_spec
+
+        ###
+        ### ~~ COMPUTE THRESHOLD OPTICAL DEPTH ~~
+        ###
+        self.tau_thresh = tau_spec
 
     def find_noise(self,spm,IQ,pnorm,freespace_spm):
 
@@ -123,8 +129,8 @@ class calc_tau_thresh(object):
 
         # Where noise is located in each spectrum
         noise_ind_hz = (((f_spec >= -400) &
-            (f_spec <= -200)) |
-            ((f_spec >= 200) &
+            (f_spec <= -100)) |
+            ((f_spec >= 100) &
              (f_spec <= 400)))
 
         # Noise and spectrum signal for each spectrum

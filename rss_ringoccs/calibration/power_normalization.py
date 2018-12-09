@@ -187,7 +187,7 @@ class Normalization(object):
             else:
                 s1 = ind[i]+1
                 s2 = ind[i+1]-3
-                str1 = gaps_str[s1:s2]#ind[0]+1:ind[1]-3]
+                str1 = gaps_str[s1:s2]
             f1 = float(str1.split(',')[0])
             f2 = float(str1.split(',')[1])
             print([f1,f2])
@@ -394,15 +394,12 @@ class Normalization(object):
             if i < len(gaps):
                 # x range and limits
                 dx = gaps[i][1]-gaps[i][0]
-                xmin = gaps[i][0]-5#0.5*dx
-                xmax = gaps[i][1]+5#0.5*dx
+                xmin = gaps[i][0]-5
+                xmax = gaps[i][1]+5
                 # label on profile
                 lims = np.array(gaps[i])/1e3-spm_off
                 c=np.random.rand(3)
-                #ax_prof.text(np.mean(lims),1.0,str(i+1),zorder=4)
-                #ax_prof.fill_between(lims,-1,2,color=c,zorder=0)
                 # plotting
-                #ax[i].fill_between(lims,-1,2,color=c,zorder=0)
                 ax[i].plot(spm[self.mask]/1e3-spm_off, pow[self.mask]/pmax,'.k',ms=6)
                 ax[i].plot(spm/1e3-spm_off, pow/pmax, color='blue')
                 ax[i].plot(spm/1e3-spm_off, self.pnorm_fit/pmax, color='red')
@@ -418,15 +415,17 @@ class Normalization(object):
                 ax[i].axis('off')
 
         # subplot margin setting
-        plt.subplots_adjust(wspace=None, hspace=0.3,left=0.1,right=0.975,top=0.975,bottom=0.075)
+        plt.subplots_adjust(wspace=None, hspace=0.3,left=0.1,right=0.975,top=0.95,bottom=0.075)
         # axis labels
         fig.text(0.45,0.01,r'SPM - '+str(int(spm_off))+' ($10^3$ sec)')
         fig.text(0.01,0.5,r'Power (arb.)',rotation=90)
+        fig.text(0.3,0.925,'PolyOrder: '+str(order))
         if save:
             #generate plot file names
             filenames,outdirs = construct_filepath(self.rev_info,'FSPFIT')
             # output
             for file,dir in zip(filenames,outdirs):
+                fig.text(0.125,0.96,file,fontsize=15)
                 plt.savefig(dir+file+'.PDF')
             plt.close('all')
         else:
@@ -470,9 +469,8 @@ class Normalization(object):
         # New SPM, rho, and p_obs, at the downsampled resolution
         spm_vals_down = np.linspace(spm_raw[0], spm_raw[-1],
             num=len(p_obs_down))
-        #rho_km_vals_down = self.__rho_interp_func(spm_vals_down)
 
-        return spm_vals_down, p_obs_down#,rho_km_vals_down, p_obs_down
+        return spm_vals_down, p_obs_down
 """
 Revisions:
       power_normalization.py

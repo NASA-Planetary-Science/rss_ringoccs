@@ -3,14 +3,14 @@
 
 calc_f_sky_recon.py
 
-Purpose: Calculate sky frequency from the reconstructed event kernels.
-         copied from Nicole Rappaport's "predicts" program in Fortran.
+Purpose:
+    Calculate sky frequency from the reconstructed event kernels.
+    copied from Nicole Rappaport's ``predicts`` program in Fortran.
 
 References:
-
-    This comes from <http://casrss2.fltops.jpl.nasa.gov:~njr/programs/predicts>_
-    It contains a version of Nicole Rappaport's PREDICTS program, which calculates
-    predicted sky frequencies.
+    This is a pythonized version of Nicole Rappaport's PREDICTS program, which
+    predicts sky frequencies by computing the Doppler shift due to motion of the
+    spacecraft relative to the observer (i.e., the receiving station).
 """
 
 import numpy as np

@@ -181,6 +181,10 @@ class FreqOffsetFit(object):
 
         # iteratively check to see if each residual value is within 3 sigma
         for i in range(len(f_sky_resid)):
+            # exclude nans
+            if np.isnan(f_sky_resid[i]):
+                fsr_mask[i] = False
+            # exclude data outside 3-sigma of median
             if (f_sky_resid[i] < fsr_median - fsr_stdev) or (f_sky_resid[i] > fsr_median + fsr_stdev):
                 fsr_mask[i] = False
 

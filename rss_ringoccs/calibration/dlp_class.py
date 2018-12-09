@@ -15,6 +15,7 @@ import sys
 
 from ..rsr_reader.rsr_reader import RSRReader
 from .resample_IQ import resample_IQ
+from .calc_tau_thresh import calc_tau_thresh
 from ..tools.write_history_dict import write_history_dict
 from ..tools.write_output_files import write_output_files
 
@@ -115,7 +116,11 @@ class DiffractionLimitedProfile(object):
         phase_rad_vals = np.arctan2(np.imag(IQ_c_desired),
                 np.real(IQ_c_desired))
 
-
+        tau_thresh_inst = calc_tau_thresh(rsr_inst,geo_inst,cal_inst,res_km=1)
+        self.snr = tau_thresh_inst.snr
+        self.tau_thresh = tau_thresh_inst.tau_thresh
+        self.spm_thresh = tau_thresh_inst.spm_vals
+        self.rho_thresh = tau_thresh_inst.rho_vals
 
         self.interp_and_set_attr(rho_km_desired, spm_desired, p_norm_vals,
                 spm_cal, phase_rad_vals, spm_geo, rho_dot_kms_geo,

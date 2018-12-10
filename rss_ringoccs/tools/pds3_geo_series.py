@@ -29,7 +29,7 @@ def write_geo_series_data(geo_inst, out_file):
     """
     #fmt_comma = fmt+','
     
-    format_str = ('%14.6F,'*4 + '%12.6F,'*3 + '%16.6F' + '%14.6F,'*4
+    format_str = ('%14.6F,'*4 + '%12.6F,'*3 + '%16.6F,' + '%14.6F,'*4
                   + '%16.6F,'*3 + '%14.6F,'*3 + '%12.6F' + '%s')
 
     #format_str = fmt_comma * 18 + fmt + '%s'

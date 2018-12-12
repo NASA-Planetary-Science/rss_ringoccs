@@ -2277,10 +2277,6 @@ class DiffractionCorrection(object):
                 # Compute Eta variable (MTR86 Equation 4c).
                 psi_vals = psif(kD, r, r0, phi, phi0, b, d)
 
-                a = 0.3*kD
-                x = (r-r0)/d
-                psi_vals += a*x*x*x
-
                 # Compute kernel function for Fresnel inverse
                 if fwd:
                     ker = w_func*np.exp(1j*psi_vals)

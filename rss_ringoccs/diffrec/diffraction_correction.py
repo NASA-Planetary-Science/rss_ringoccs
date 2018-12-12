@@ -1193,7 +1193,7 @@ class DiffractionCorrection(object):
         if self.verbose:
             print("\tComputing Power and Phase...")
         self.power_vals = np.abs(self.T_vals*self.T_vals)
-        self.phase_vals = -np.arctan2(np.imag(self.T_vals),
+        self.phase_vals = np.arctan2(np.imag(self.T_vals),
                                       np.real(self.T_vals))
 
         if self.verbose:
@@ -1204,7 +1204,7 @@ class DiffractionCorrection(object):
             self.T_hat_fwd_vals = self.__ftrans(fwd=True)
             self.p_norm_fwd_vals = np.abs(self.T_hat_fwd_vals*
                                           self.T_hat_fwd_vals)
-            self.phase_fwd_vals = -np.arctan2(np.imag(self.T_hat_fwd_vals),
+            self.phase_fwd_vals = np.arctan2(np.imag(self.T_hat_fwd_vals),
                                               np.real(self.T_hat_fwd_vals))
             if self.verbose:
                 print("\tForward Transform Complete.")
@@ -1494,7 +1494,8 @@ class DiffractionCorrection(object):
         "kbmd25": {"func": __kbmd25,   "normeq": 1.65994218}
         }
 
-    __psi_types = ["fresnel", "fresnel3", "fresnel4", "fresnel6", "fresnel8", "full"]
+    __psi_types = ["fresnel", "fresnel3", "fresnel4",
+                   "fresnel6", "fresnel8", "full"]
 
     def __trim_attributes(self, fwd):
         """

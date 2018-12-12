@@ -25,7 +25,7 @@ def get_geo(geo, verbose=True):
 
     if verbose:
         print("\tExtracting Geo Data...")
-    
+
     try:
         dfg = pd.read_csv(geo, delimiter=',',
             names=[
@@ -47,7 +47,7 @@ def get_geo(geo, verbose=True):
                 "vx_kms_vals",
                 "vy_kms_vals",
                 "vz_kms_vals",
-                "Bob"
+                "obs_spacecract_lat_deg_vals"
                 ]
             )
     except FileNotFoundError:
@@ -329,7 +329,6 @@ class ExtractCSVData(object):
         elif (not np.isreal(phase_deg_vals).all()):
             raise ValueError("Bad DLP: phase_deg_vals must be real valued")
         elif (np.max(np.abs(phase_deg_vals)) > 360.0):
-            # raise ValueError("Bad DLP: max{|phase_deg_vals|} > 360")
             print("Bad DLP: max{|phase_deg_vals|} > 360")
         else:
             pass

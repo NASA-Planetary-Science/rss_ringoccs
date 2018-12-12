@@ -586,9 +586,9 @@ class ExtractCSVData(object):
                 rfin = int(np.max((rmax-self.rho_km_vals>=0).nonzero()))
                 rstart = int(np.min((self.rho_km_vals-rmin>=0).nonzero()))
                 self.tau_rho = self.rho_km_vals[rstart:rfin+1]
-                tt_interp = interpolate.interp1d(tr,tt,kind='linear')
-                tp_interp = interpolate.interp1d(tr,tp,kind='linear')
-                tm_interp = interpolate.interp1d(tr,tm,kind='linear')
+                tt_interp = interpolate.interp1d(tr, tt, kind='cubic')
+                tp_interp = interpolate.interp1d(tr, tp, kind='cubic')
+                tm_interp = interpolate.interp1d(tr, tm, kind='cubic')
                 self.phase_vals = tp_interp(self.tau_rho)
                 self.tau_vals = tt_interp(self.tau_rho)
                 tm = tm_interp(self.tau_rho)

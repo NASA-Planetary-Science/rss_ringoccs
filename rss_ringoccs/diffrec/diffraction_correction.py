@@ -1193,7 +1193,7 @@ class DiffractionCorrection(object):
         if self.verbose:
             print("\tComputing Power and Phase...")
         self.power_vals = np.abs(self.T_vals*self.T_vals)
-        self.phase_vals = np.arctan2(np.imag(self.T_vals),
+        self.phase_vals = -np.arctan2(np.imag(self.T_vals),
                                       np.real(self.T_vals))
 
         if self.verbose:

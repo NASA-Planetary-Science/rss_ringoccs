@@ -1,14 +1,13 @@
 """
-
-freq_offset_fit_jol.py
-
-Purpose: Makes a fit to the frequency offset made from freq_offset.py, using
-         the frequency offset, predicted sky frequency, reconstructed sky
-         frequency, and a fit to residual frequency.
+Purpose:
+        Compute a fit to the frequency offset residual using
+        the frequency offset, predicted sky frequency, and reconstructed sky
+        frequency.
 """
 
 import numpy as np
-#from numpy.polynomial import polynomial as poly
+### suppress any annoying warning messages
+np.seterr(all='ignore')
 import matplotlib.pyplot as plt
 from scipy.interpolate import splrep, splev
 import sys
@@ -29,20 +28,35 @@ sys.path.remove('../../')
 
 
 class FreqOffsetFit(object):
-    """Class to make a fit to extracted frequency offset. Uses predicted
-    sky frequency, reconstructed sky frequency, and a fit to residual sky
-    frequency to do so.
+    """
+    Obtains :math:`f(t)_{offset}` from ``calc_freq_offset``, :math:`f(t)_{dr}`
+    from ``calc_f_sky_recon``, and :math:`f(t)_{dp}` from ``get_f_sky_pred``.
+    Computes a polynomial fit :math:`\hat{f}(t)_{resid}` of order specified by
+    ``poly_order`` to sigma-clipped residual difference :math:`f(t)_{resid}`
+    between observed and predicted frequency offset where the residual is given
+    by
+
+    .. math::
+        f(t)_{resid} = (f(t)_{dr}-f(t)_{dp}) - f(t)_{offset}
+
+
+
+    Arguments:
+        :rsr_inst (*object*): object instance of the RSRReader class
+        :geo_inst (*object*): object instance of the Geometry class
+
+    Keyword Arguments:
+        :poly_order (*float*): whole number specifying the order of the polynomial
+                                fit to the residual frequency offset
+        :f_uso_x (*float*): frequency in Hz of the X-band ultra-stable oscilator
+                                onboard the Cassini spacecraft. Default is
+                                8427222034.3405 Hz.
+        :verbose (*bool*): when True, enables verbose output mode
     """
 
     def __init__(self, rsr_inst, geo_inst, poly_order=7,
             f_uso_x=8427222034.34050, verbose=False):
-        """
-        Make a fit to sigma-clipped frequency offset.
 
-        Args:
-            rsr_inst
-            geo_inst
-        """
 
         # Check inputs for validity
         if not isinstance(rsr_inst, rss.rsr_reader.RSRReader):
@@ -263,7 +277,7 @@ class FreqOffsetFit(object):
             print('\tPolynomial sum squared residuals:',stats[0])'''
 
         f_sky_resid_fit = np.polyval( coef, spm_temp )
-        chi2 = np.sum(np.square(f_sky_resid_fit[self._fsr_mask]-f_sky_resid[self.__fsr_mask]))
+        chi2 = np.sum(np.square(f_sky_resid_fit[self.__fsr_mask]-f_sky_resid[self.__fsr_mask]))
 
         return f_sky_resid_fit,chi2
 
@@ -304,7 +318,7 @@ class FreqOffsetFit(object):
         # labels
         plt.xlabel('SPM (sec)')
         plt.ylabel(r'$f_{predict}-f_{observe}$')
-        plt.text(0.4,0.8,'PolyOrder: '+str(poly_order),transform = ax.transAxes)
+        plt.text(0.4,0.95,'PolyOrder: '+str(poly_order),transform = ax.transAxes)
         # output
         for file,dir in zip(filenames,outdirs):
             plt.title(file)

@@ -263,7 +263,7 @@ class FreqOffsetFit(object):
             print('\tPolynomial sum squared residuals:',stats[0])'''
 
         f_sky_resid_fit = np.polyval( coef, spm_temp )
-        chi2 = np.sum(np.square(np.polyval(coef,spm[self.mask])-power[self.mask]))
+        chi2 = np.sum(np.square(f_sky_resid_fit[self._fsr_mask]-f_sky_resid[self.__fsr_mask]))
 
         return f_sky_resid_fit,chi2
 

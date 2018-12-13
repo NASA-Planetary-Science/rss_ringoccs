@@ -25,7 +25,7 @@ def get_geo(geo, verbose=True):
 
     if verbose:
         print("\tExtracting Geo Data...")
-    
+
     try:
         dfg = pd.read_csv(geo, delimiter=',',
             names=[
@@ -47,7 +47,7 @@ def get_geo(geo, verbose=True):
                 "vx_kms_vals",
                 "vy_kms_vals",
                 "vz_kms_vals",
-                "Bob"
+                "obs_spacecract_lat_deg_vals"
                 ]
             )
     except FileNotFoundError:
@@ -329,7 +329,6 @@ class ExtractCSVData(object):
         elif (not np.isreal(phase_deg_vals).all()):
             raise ValueError("Bad DLP: phase_deg_vals must be real valued")
         elif (np.max(np.abs(phase_deg_vals)) > 360.0):
-            # raise ValueError("Bad DLP: max{|phase_deg_vals|} > 360")
             print("Bad DLP: max{|phase_deg_vals|} > 360")
         else:
             pass
@@ -587,9 +586,9 @@ class ExtractCSVData(object):
                 rfin = int(np.max((rmax-self.rho_km_vals>=0).nonzero()))
                 rstart = int(np.min((self.rho_km_vals-rmin>=0).nonzero()))
                 self.tau_rho = self.rho_km_vals[rstart:rfin+1]
-                tt_interp = interpolate.interp1d(tr,tt,kind='linear')
-                tp_interp = interpolate.interp1d(tr,tp,kind='linear')
-                tm_interp = interpolate.interp1d(tr,tm,kind='linear')
+                tt_interp = interpolate.interp1d(tr, tt, kind='cubic')
+                tp_interp = interpolate.interp1d(tr, tp, kind='cubic')
+                tm_interp = interpolate.interp1d(tr, tm, kind='cubic')
                 self.phase_vals = tp_interp(self.tau_rho)
                 self.tau_vals = tt_interp(self.tau_rho)
                 tm = tm_interp(self.tau_rho)

@@ -135,7 +135,7 @@ class FreqOffsetFit(object):
         # Fit frequency offset residual
         if verbose:
             print('\tCalculating fit to frequency offset residuals...')
-        f_sky_resid_fit = self.fit_f_sky_resid(f_spm, f_rho, f_sky_resid,
+        f_sky_resid_fit,chi2 = self.fit_f_sky_resid(f_spm, f_rho, f_sky_resid,
                 poly_order=poly_order)
 
         # Draw and save reference plot
@@ -148,6 +148,7 @@ class FreqOffsetFit(object):
         self.f_spm = f_spm
         self.f_sky_pred  = f_sky_pred
         self.f_sky_resid_fit = f_sky_resid_fit
+        self.chi_squared = chi2
 
     def create_mask(self, f_spm, f_rho, f_sky_resid):
         """
@@ -262,8 +263,9 @@ class FreqOffsetFit(object):
             print('\tPolynomial sum squared residuals:',stats[0])'''
 
         f_sky_resid_fit = np.polyval( coef, spm_temp )
+        chi2 = np.sum(np.square(np.polyval(coef,spm[self.mask])-power[self.mask]))
 
-        return f_sky_resid_fit
+        return f_sky_resid_fit,chi2
 
     # Create and save a plot of the offset residual fit
     def plotFORFit(self,spm,resid,fit,mask,spm_min,spm_max,occ_min,occ_max,poly_order):

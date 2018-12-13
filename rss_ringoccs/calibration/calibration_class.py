@@ -45,11 +45,11 @@ class Calibration(object):
         .. If the calibration files for the desired input parameters already exsit,
         .. use the ``MakeCalInst`` class in the ``cal_inst_from_file.py``.
 
-    Arguments
+    Arguments:
         :rsr_inst (*object*): Instance of the RSRReader class
         :geo_inst (*object*): Instance of the Geometry class
 
-    Keyword Arguments
+    Keyword Arguments:
         :fof_order (*float*): Whole number specifying the polynomial order to use
                                 when fitting the frequency offset residual.
                                 Default is 9.
@@ -64,7 +64,7 @@ class Calibration(object):
         :interact (*bool*): If True, enables the interactive mode in the terminal
                                 for fitting the freespace power. Default is False.
 
-    Attributes
+    Attributes:
         :rev_info (*list*): list of strings identifying the specific occultation:
                                 year, day of year, direction and type of occultation,
                                 spacecraft revolution number, and observation band
@@ -78,7 +78,7 @@ class Calibration(object):
         :history (*dict*): information about the parameters, results, and
                             computation of the calibration procedures
 
-    Returns
+    Returns:
         Object instance with attributes associated with the process of calibrating the
         measured signal :math:`I_{m}+iQ_{m}` as well as the method for
         phase-correcting :math:`I_{m}+iQ_{m}`.

@@ -300,6 +300,10 @@ class RSRReader(object):
         data_length_per_sfdu = sfdu_hdr_dict['Data_length']
         n_pts_per_sfdu = np.int(data_length_per_sfdu / (2 * bytes_per_sample))
 
+        # Set fgain for threshold optical depth calculation
+        self.fxgain_px_no = sfdu_hdr_dict['sh_fgain_px_no']
+        self.fgain_if_bandwidth = sfdu_hdr_dict['sh_fgain_if_bandwidth']
+
         # Get array of SPM values for whole file
         sh_sample_rate_hz = sfdu_hdr_dict['sh_sample_rate'] * 1000.0
         sh_sfdu_seconds = sfdu_hdr_dict['sh_sfdu_seconds']

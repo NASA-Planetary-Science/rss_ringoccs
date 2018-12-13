@@ -51,6 +51,13 @@ class DiffractionLimitedProfile(object):
         :write_file (*bool*): When True, writes processing results to file. Default is True.
         :profile_range (*list*): 1x2 list specifying the radial limits in km of on the
                     occultation. Default is [65000,150000].
+
+    Attributes:
+        :snr (*np.ndarray*): Signal-to-noise ratio
+        :tau_thresh (*np.ndarray*): threshold optical depth
+        :spm_thresh (*np.ndarray*): SPM at which threshold optical depth is computed
+        :rho_thresh (*np.ndarray*): radius at which threshold optical depth is computed
+        :dr_km (*float*): raw DLP sampling rate
     """
     def __init__(self, rsr_inst, geo_inst, cal_inst, dr_km,
             dr_km_tol=0.01, verbose=False, write_file=True,
@@ -116,7 +123,8 @@ class DiffractionLimitedProfile(object):
         phase_rad_vals = np.arctan2(np.imag(IQ_c_desired),
                 np.real(IQ_c_desired))
 
-        tau_thresh_inst = calc_tau_thresh(rsr_inst,geo_inst,cal_inst,res_km=1)
+        # compute threshold optical depth
+        tau_thresh_inst = calc_tau_thresh(rsr_inst,geo_inst,cal_inst,res_km=0.5)
         self.snr = tau_thresh_inst.snr
         self.tau_thresh = tau_thresh_inst.tau_thresh
         self.spm_thresh = tau_thresh_inst.spm_vals
@@ -220,8 +228,8 @@ class DiffractionLimitedProfile(object):
         self.rho_corr_pole_km_vals = rho_corr_pole_km_vals
         self.rho_corr_timing_km_vals = rho_corr_timing_km_vals
         self.tau_vals = -np.sin(B_rad_vals_interp)*np.log(p_norm_vals)
-        self.raw_tau_threshold_vals = raw_tau_threshold_vals
-        self.tau_threshold_vals = tau_threshold_vals
+        self.raw_tau_threshold_vals = np.interp(spm_desired,self.spm_thresh,self.tau_thresh)
+        self.tau_threshold_vals = np.interp(spm_desired,self.spm_thresh,self.tau_thresh)
 
 
 

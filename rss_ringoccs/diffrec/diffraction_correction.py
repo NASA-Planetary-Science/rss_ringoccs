@@ -60,6 +60,7 @@ class DiffractionCorrection(object):
                 |   f_sky_hz_vals:    Sky Frequency (Hertz)
                 |   rho_dot_kms_vals: RIP-velocity (km/s)
                 |   history:          History dictionary
+
             :res (*float* or *int*):
                 The requested resolution for processing (km). This
                 must be a positive real number.
@@ -68,21 +69,25 @@ class DiffractionCorrection(object):
                 The requested range for diffraction correction.
                 Preferred input is rng = [a,b]. Arrays are
                 allowed and the range will be set as:
-                    rng = [MIN(array), MAX(array)]
+
+                |    rng = [MIN(array), MAX(array)]
+
                 Finally, certain strings containing a few of the
                 regions of interests within the rings of Saturn
                 are allowed. Permissable strings are:
-                    'all'             [1.0, 400000.0]
-                    'cringripples'    [77690.0, 77760.0]
-                    'encke'           [132900.0, 134200.0]
-                    'enckegap'        [132900.0, 134200.0]
-                    'janusepimetheus' [96200.0, 96800.0]
-                    'maxwell'         [87410.0, 87610.0]
-                    'maxwellringlet'  [87410.0, 87610.0]
-                    'titan'           [77870.0, 77930.0]
-                    'titanringlet'    [77870.0, 77930.0]
-                    'huygens'         [117650.0, 117950.0]
-                    'huygensringlet'  [117650.0, 117950.0]
+
+                |    'all'             [1.0, 400000.0]
+                |    'cringripples'    [77690.0, 77760.0]
+                |    'encke'           [132900.0, 134200.0]
+                |    'enckegap'        [132900.0, 134200.0]
+                |    'janusepimetheus' [96200.0, 96800.0]
+                |    'maxwell'         [87410.0, 87610.0]
+                |    'maxwellringlet'  [87410.0, 87610.0]
+                |    'titan'           [77870.0, 77930.0]
+                |    'titanringlet'    [77870.0, 77930.0]
+                |    'huygens'         [117650.0, 117950.0]
+                |    'huygensringlet'  [117650.0, 117950.0]
+
                 Strings are neither case nor space sensitive.
                 For other planets use rng = [a,b]. Default value
                 is set to 'all' which processes [1, 400000]
@@ -90,13 +95,15 @@ class DiffractionCorrection(object):
             :wtype (*str):
                 The requested tapering function for diffraction
                 correction. A string with several allowed inputs:
-                    'rect'      Rectangular Window.
-                    'coss'      Squared Cosine Window.
-                    'kb20'      Kaiser-Bessel 2.0 Window.
-                    'kb25'      Kaiser-Bessel 2.5 Window.
-                    'kb35'      Kaiser-Bessel 3.5 Window.
-                    'kbmd20'    Modified kb20 Window.
-                    'kbmd25'    Modified kb25 Window.
+
+                |    'rect'      Rectangular Window.
+                |    'coss'      Squared Cosine Window.
+                |    'kb20'      Kaiser-Bessel 2.0 Window.
+                |    'kb25'      Kaiser-Bessel 2.5 Window.
+                |    'kb35'      Kaiser-Bessel 3.5 Window.
+                |    'kbmd20'    Modified kb20 Window.
+                |    'kbmd25'    Modified kb25 Window.
+
                 The variable is neither case nor space sensitive.
                 Default window is set to 'kb25'. See window_functions
                 submodule for further documentation.
@@ -138,11 +145,13 @@ class DiffractionCorrection(object):
                 A string for determining what approximation to the
                 geometrical 'psi' function is used. Several strings
                 are allowed:
-                    'full'      No Approximation is applied.
-                    'MTR2'      Second Order Series from MTR86.
-                    'MTR3'      Third Order Series from MTR86.
-                    'MTR4'      Fourth Order Series from MTR86.
-                    'Fresnel'   Standard Fresnel approximation.
+
+                |    'full'      No Approximation is applied.
+                |    'MTR2'      Second Order Series from MTR86.
+                |    'MTR3'      Third Order Series from MTR86.
+                |    'MTR4'      Fourth Order Series from MTR86.
+                |    'Fresnel'   Standard Fresnel approximation.
+
                 The variable is neither case nor space sensitive.
                 Default is set to 'full'.
             :verbose (*bool*):
@@ -903,11 +912,9 @@ class DiffractionCorrection(object):
 
         # Perform error checks on the NormDiff variables.
         if (np.min(self.p_norm_vals) < 0.0):
-            raise ValueError(
-                "\n\tThere are negative values in the normalized\n"
-                "\tdiffracted power. Check the NormDiff instance\n"
-                "\tfor errors.\n"
-            )
+            raise ValueError("\n\tThere are negative values in the normalized\n"
+                             "\tdiffracted power. Check the NormDiff instance\n"
+                             "\tfor errors.\n")
         elif (np.max(np.abs(self.phase_rad_vals)) > TWO_PI+1e-8):
             # raise ValueError(
                 print(
@@ -926,11 +933,9 @@ class DiffractionCorrection(object):
                 "\tradians, and NOT degrees.\n"
             )
         elif (np.min(self.D_km_vals) < 0.0):
-            raise ValueError(
-                "\n\tThere are negative values for the spacecraft\n"
-                "\tto Ring-Intercept-Point distance, D. Check the\n"
-                "\tNormDiff instance for errors.\n"
-            )
+            raise ValueError("\n\tThere are negative values for the\n"
+                             "\tspacecraft to RIP distance, D.\n"
+                             "\tCheck the NormDiff instance for errors.\n")
         elif (np.min(self.D_km_vals == 0.0)):
             raise ValueError(
                 "\n\tThere are zero-valued elements for the\n"
@@ -946,10 +951,8 @@ class DiffractionCorrection(object):
                 "\tradians, and NOT degrees.\n"
             )
         elif (np.min(self.f_sky_hz_vals < 0.0)):
-            raise ValueError(
-                "\n\tThere are negative values of the frequency.\n"
-                "\tCheck the NormDiff instance for errors.\n"
-            )
+            raise ValueError("\n\tThere are negative values of the frequency.\n"
+                             "\tCheck the NormDiff instance for errors.\n")
         elif (np.min(self.f_sky_hz_vals == 0.0)):
             raise ValueError(
                 "\n\tThere are zero-valued elements for the\n"
@@ -1193,8 +1196,11 @@ class DiffractionCorrection(object):
         if self.verbose:
             print("\tComputing Power and Phase...")
         self.power_vals = np.abs(self.T_vals*self.T_vals)
+
+        # Return phase to original sign.
         self.phase_vals = -np.arctan2(np.imag(self.T_vals),
                                       np.real(self.T_vals))
+        self.phase_rad_vals *= -1
 
         if self.verbose:
             print("\tInversion Complete.")
@@ -1494,7 +1500,8 @@ class DiffractionCorrection(object):
         "kbmd25": {"func": __kbmd25,   "normeq": 1.65994218}
         }
 
-    __psi_types = ["fresnel", "fresnel3", "fresnel4", "fresnel6", "fresnel8", "full"]
+    __psi_types = ["fresnel", "fresnel3", "fresnel4",
+                   "fresnel6", "fresnel8", "full"]
 
     def __trim_attributes(self, fwd):
         """
@@ -1786,6 +1793,7 @@ class DiffractionCorrection(object):
         r0 = rho_km_vals[crange]
 
         if (psitype == 'fresnel'):
+            crange -= 1
             F2 = F_km_vals*F_km_vals
             x = r-r0
             x2 = (ONE_PI / 2.0) * x * x
@@ -1820,7 +1828,7 @@ class DiffractionCorrection(object):
                 else:
                     crange += 1
                 
-                psi_vals = x2 / F2[crange]
+                psi_vals = x2 / F2[center]
 
                 # Compute kernel function for Fresnel inverse
                 if fwd:
@@ -1842,15 +1850,11 @@ class DiffractionCorrection(object):
             if verbose:
                 print("\n", end="\r")
         elif (psitype == 'fresnel3'):
+            crange -= 1
             cosb = np.cos(B_rad_vals)
             cosp = np.cos(phi_rad_vals)
             sinp = np.sin(phi_rad_vals)
             A_2 = 0.5*cosb*cosb*sinp*sinp/(1-cosb*cosb*sinp*sinp)
-
-            d = d_km_vals
-            d2 = d*d
-            d3 = d*d2
-            d4 = d*d3
 
             # Legendre polynomials
             P_1 = cosb*cosp
@@ -1863,7 +1867,7 @@ class DiffractionCorrection(object):
             b_1 = (P_1-P_1*P_2)/3.0
             b_2 = (P_2-P_1*P_3)*0.25
 
-            x = (r-r0)
+            x = (r-r0)/d_km_vals[center]
             x2 = x*x
             x3 = x2*x
 
@@ -1891,20 +1895,16 @@ class DiffractionCorrection(object):
                     # Ajdust ring radius by dx_km.
                     r = rho_km_vals[center]
                     r0 = rho_km_vals[crange]
-                    x = r-r0
+                    x = (r-r0)/d_km_vals[center]
                     x2 = x*x
                     x3 = x2*x
-                    x4 = x3*x
                 else:
                     crange += 1
 
-                psi_0 = (b_0[center]*x2/d2[center]+
-                         b_1[center]*x3/d3[center])
+                psi_0 = b_0[center]*x2+b_1[center]*x3
 
-
-                psi_1 = -A_2[center]*(
-                        P_1[center]*P_1[center]*x2/d2[center]+
-                        P_1[center]*P_2[center]*x3/d3[center])
+                psi_1 = -A_2[center]*(P_1[center]*P_1[center]*x2+
+                                      P_1[center]*P_2[center]*x3)
 
                 psi_vals = kD_vals[center]*(psi_0 + psi_1)
 
@@ -1928,15 +1928,11 @@ class DiffractionCorrection(object):
             if verbose:
                 print("\n", end="\r")
         elif (psitype == 'fresnel4'):
+            crange -= 1
             cosb = np.cos(B_rad_vals)
             cosp = np.cos(phi_rad_vals)
             sinp = np.sin(phi_rad_vals)
-            A_2 = 0.5*cosb*cosb*sinp*sinp/(1-cosb*cosb*sinp*sinp)
-
-            d = d_km_vals
-            d2 = d*d
-            d3 = d*d2
-            d4 = d*d3
+            A_2 = 0.5*cosb*cosb*sinp*sinp/(1.0-cosb*cosb*sinp*sinp)
 
             # Legendre polynomials
             P_1 = cosb*cosp
@@ -1949,7 +1945,7 @@ class DiffractionCorrection(object):
             b_1 = (P_1-P_1*P_2)/3.0
             b_2 = (P_2-P_1*P_3)*0.25
 
-            x = (r-r0)
+            x = (r-r0)/d_km_vals[center]
             x2 = x*x
             x3 = x2*x
             x4 = x3*x
@@ -1978,22 +1974,17 @@ class DiffractionCorrection(object):
                     # Ajdust ring radius by dx_km.
                     r = rho_km_vals[center]
                     r0 = rho_km_vals[crange]
-                    x = r-r0
+                    x = (r-r0)/d_km_vals[center]
                     x2 = x*x
                     x3 = x2*x
                     x4 = x3*x
                 else:
                     crange += 1
 
-                psi_0 = (b_0[center]*x2/d2[center]+
-                         b_1[center]*x3/d3[center]+
-                         b_2[center]*x4/d4[center])
+                psi_0 = b_0[center]*x2+b_1[center]*x3+b_2[center]*x4
 
-
-                psi_1 = -A_2[center]*(P_1[center]*x/d[center]+
-                              P_2[center]*x2/d2[center])*(
-                              P_1[center]*x/d[center]+
-                              P_2[center]*x2/d2[center])
+                psi_1 = -A_2[center]*(P_1[center]*x+P_2[center]*x2)*(
+                                      P_1[center]*x+P_2[center]*x2)
 
                 psi_vals = kD_vals[center]*(psi_0 + psi_1)
 
@@ -2017,10 +2008,11 @@ class DiffractionCorrection(object):
             if verbose:
                 print("\n", end="\r")
         elif (psitype == 'fresnel6'):
+            crange -= 1
             cosb = np.cos(B_rad_vals)
             cosp = np.cos(phi_rad_vals)
             sinp = np.sin(phi_rad_vals)
-            A_2 = 0.5*cosb*cosb*sinp*sinp/(1-cosb*cosb*sinp*sinp)
+            A_2 = 0.5*cosb*cosb*sinp*sinp/(1.0-cosb*cosb*sinp*sinp)
 
             # Legendre polynomials
             P_1 = cosb*cosp
@@ -2037,8 +2029,6 @@ class DiffractionCorrection(object):
             b_3 = (P_3-P_1*P_4)*0.2
             b_4 = (P_4-P_1*P_5)/6.0
 
-            r = rho_km_vals[center]
-            r0 = rho_km_vals[crange+1]
             x = (r-r0)/d_km_vals[center]
             x2 = x*x
             x3 = x2*x
@@ -2079,19 +2069,19 @@ class DiffractionCorrection(object):
                 else:
                     crange += 1
 
-                psi_0 = (b_0[crange]*x2+
-                         b_1[crange]*x3+
-                         b_2[crange]*x4+
-                         b_3[crange]*x5+
-                         b_4[crange]*x6)
+                psi_0 = (b_0[center]*x2+
+                         b_1[center]*x3+
+                         b_2[center]*x4+
+                         b_3[center]*x5+
+                         b_4[center]*x6)
 
 
-                psi_1 = -A_2[crange]*(P_1[crange]*x+
-                                      P_2[crange]*x2+
-                                      P_3[crange]*x3)*(
-                                      P_1[crange]*x+
-                                      P_2[crange]*x2+
-                                      P_3[crange]*x3)
+                psi_1 = -A_2[crange]*(P_1[center]*x+
+                                      P_2[center]*x2+
+                                      P_3[center]*x3)*(
+                                      P_1[center]*x+
+                                      P_2[center]*x2+
+                                      P_3[center]*x3)
 
                 psi_vals = kD_vals[center]*(psi_0 + psi_1)
 
@@ -2115,10 +2105,11 @@ class DiffractionCorrection(object):
             if verbose:
                 print("\n", end="\r")
         elif (psitype == 'fresnel8'):
+            crange -= 1
             cosb = np.cos(B_rad_vals)
             cosp = np.cos(phi_rad_vals)
             sinp = np.sin(phi_rad_vals)
-            A_2 = 0.5*cosb*cosb*sinp*sinp/(1-cosb*cosb*sinp*sinp)
+            A_2 = 0.5*cosb*cosb*sinp*sinp/(1.0-cosb*cosb*sinp*sinp)
 
             # Legendre polynomials
             P_1 = cosb*cosp
@@ -2128,7 +2119,7 @@ class DiffractionCorrection(object):
             P_4 = (35.0*P12*P12-30.0*P12+3.0)/8.0
             P_5 = P_1*(63.0*P12*P12-70.0*P12+15.0)/8.0
             P_6 = (231.0*P12*P12*P12-315.0*P12*P12+105.0*P12-5.0)/16.0
-            P_7 = P_1*(429.0*P12*P12*P12-693.0*P12*P12+315.0*P12-35.0)/16.0
+            # P_7 = P_1*(429.0*P12*P12*P12-693.0*P12*P12+315.0*P12-35.0)/16.0
 
             # Second set of polynomials.
             b_0 = (1.0-P12)/2.0
@@ -2139,8 +2130,6 @@ class DiffractionCorrection(object):
             b_5 = (P_5-P_1*P_4)/7.0
             b_6 = (P_6-P_1*P_5)/8.0
 
-            r = rho_km_vals[center]
-            r0 = rho_km_vals[crange+1]
             x = (r-r0)/d_km_vals[center]
             x2 = x*x
             x3 = x2*x
@@ -2180,26 +2169,28 @@ class DiffractionCorrection(object):
                     x4 = x3*x
                     x5 = x4*x
                     x6 = x5*x
+                    x7 = x6*x
+                    x8 = x7*x
                 else:
                     crange += 1
 
-                psi_0 = (b_0[crange]*x2+
-                         b_1[crange]*x3+
-                         b_2[crange]*x4+
-                         b_3[crange]*x5+
-                         b_4[crange]*x6+
-                         b_5[crange]*x7+
-                         b_6[crange]*x8)
+                psi_0 = (b_0[center]*x2+
+                         b_1[center]*x3+
+                         b_2[center]*x4+
+                         b_3[center]*x5+
+                         b_4[center]*x6+
+                         b_5[center]*x7+
+                         b_6[center]*x8)
 
 
-                psi_1 = -A_2[crange]*(P_1[crange]*x+
-                                      P_2[crange]*x2+
-                                      P_3[crange]*x3+
-                                      P_4[crange]*x4)*(
-                                      P_1[crange]*x+
-                                      P_2[crange]*x2+
-                                      P_3[crange]*x3+
-                                      P_4[crange]*x4)
+                psi_1 = -A_2[center]*(P_1[center]*x+
+                                      P_2[center]*x2+
+                                      P_3[center]*x3+
+                                      P_4[center]*x4)*(
+                                      P_1[center]*x+
+                                      P_2[center]*x2+
+                                      P_3[center]*x3+
+                                      P_4[center]*x4)
 
                 psi_vals = kD_vals[center]*(psi_0 + psi_1)
 
@@ -2232,8 +2223,6 @@ class DiffractionCorrection(object):
                 F = F_km_vals[center]
 
                 w_init = w
-                r0 = rho_km_vals[crange]
-
                 w_func = fw(w, dx_km)
 
                 # Reset number of window points
@@ -2276,10 +2265,6 @@ class DiffractionCorrection(object):
 
                 # Compute Eta variable (MTR86 Equation 4c).
                 psi_vals = psif(kD, r, r0, phi, phi0, b, d)
-
-                a = 0.3*kD
-                x = (r-r0)/d
-                psi_vals += a*x*x*x
 
                 # Compute kernel function for Fresnel inverse
                 if fwd:

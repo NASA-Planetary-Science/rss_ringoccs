@@ -54,7 +54,7 @@ class calc_tau_thresh(object):
         # convert IQ to power at the spm_cal sampling
         power = np.interp(cal_inst.t_oet_spm_vals,rsr_inst.spm_vals,abs(rsr_inst.IQ_m**2))
 
-        '''###
+        ###
         ### ~~ COMPUTE SPECTROGRAM ~~
         ###
         # Points per FFT for spectrogram
@@ -71,35 +71,23 @@ class calc_tau_thresh(object):
         # SPM and various geometry/calibration parameters for spectra
         spm_spec = rsr_inst.spm_vals[0] + t_spec
         self.spm_vals = spm_spec
-        rho_km_spec = np.interp(spm_spec, geo_inst.t_oet_spm_vals, geo_inst.rho_km_vals)
-        self.rho_vals = rho_km_spec
-        rho_dot_kms_spec = np.interp(spm_spec, geo_inst.t_oet_spm_vals, geo_inst.rho_dot_kms_vals)
-        B_deg_spec = np.interp(spm_spec, geo_inst.t_oet_spm_vals, geo_inst.B_deg_vals)
-        B_rad = np.deg2rad(B_deg_spec)
-        pnorm_spec = np.interp(spm_spec, rsr_inst.spm_vals, cal_inst.p_free_vals)'''
-
-        self.spm_vals = cal_inst.t_oet_spm_vals
-        rho_km = np.interp(cal_inst.t_oet_spm_vals, geo_inst.t_oet_spm_vals, geo_inst.rho_km_vals)
+        rho_km= np.interp(spm_spec, geo_inst.t_oet_spm_vals, geo_inst.rho_km_vals)
         self.rho_vals = rho_km
-        rho_dot_kms = np.interp(cal_inst.t_oet_spm_vals, geo_inst.t_oet_spm_vals, geo_inst.rho_dot_kms_vals)
-        B_deg = np.interp(cal_inst.t_oet_spm_vals, geo_inst.t_oet_spm_vals, geo_inst.B_deg_vals)
+        rho_dot_kms = np.interp(spm_spec, geo_inst.t_oet_spm_vals, geo_inst.rho_dot_kms_vals)
+        B_deg = np.interp(spm_spec, geo_inst.t_oet_spm_vals, geo_inst.B_deg_vals)
         B_rad = np.deg2rad(B_deg)
+        pnorm = np.interp(spm_spec, cal_inst.t_oet_spm_vals, cal_inst.p_free_vals)
 
 
         ###
         ### ~~ FIND SIGNAL AND NOISE POWER ~~
         ###
         # noise
-        #noise = self.find_noise_spec(f_spec,spm_spec,spec,pnorm_spec,geo_inst.freespace_spm)
-        noise = self.find_noise(cal_inst.t_oet_spm_vals,power,cal_inst.p_free_vals,cal_inst.gaps)
+        noise = self.find_noise_spec(f_spec,spm_spec,spec,pnorm,geo_inst.freespace_spm)
+        #noise = self.find_noise(cal_inst.t_oet_spm_vals,power,cal_inst.p_free_vals,cal_inst.gaps)
         # signal
-        '''# If constant SNR desired, use power from freespace regions
-        if constant:
-            signal = self.find_signal(spm_spec,spec,cal_inst.p_free_vals)
-        # If SNR varies, use fit to freespace signal
-        else:'''
-        #signal = np.interp(spm_spec, cal_inst.t_oet_spm_vals, cal_inst.p_free_vals)
-        signal = cal_inst.p_free_vals
+        signal = np.interp(spm_spec, cal_inst.t_oet_spm_vals, cal_inst.p_free_vals)
+        #signal = cal_inst.p_free_vals
         #
         bandwidth = abs( rho_dot_kms / res_km )
         snr = signal/noise
@@ -112,25 +100,6 @@ class calc_tau_thresh(object):
         ### ~~ COMPUTE THRESHOLD OPTICAL DEPTH ~~
         ###
         self.tau_thresh = tau
-
-    def find_noise(self,spm,power,pnorm,gaps):
-
-        # boundaries of occultation
-        tmin = gaps[0][0]
-        tmax = gaps[-1][1]
-
-        # set maximum threshold for noise power relative to spacecraft signal
-        p_sc_min = np.nanmin(pnorm[(spm>tmin)&(spm<tmax)])
-        pnoise_thresh = 0.1 * p_sc_min
-        #
-        noise = []
-        for i in range(len(spm)):#spm,P in zip(spm_vals,power):
-            if spm[i] < tmin or spm[i] > tmax :
-                if i > 1 and i < len(spm)-2 :
-                    if power[i] < pnoise_thresh and power[i-1] < pnoise_thresh:
-                        noise += [power[i]]#[IQ[i]]#
-
-        return np.nanmedian(noise)
 
     def find_noise_spec(self,f_spec,spm_spec,spec,pnorm_spec,freespace_spm):
 
@@ -156,20 +125,6 @@ class calc_tau_thresh(object):
         # clip based on power
         pclip = np.argwhere(noise_vals[noise_ind]<0.1*pmin)
         return np.nanmedian(noise_vals[noise_ind][pclip])
-
-
-
-    def find_signal(self,spm_spec,spec,freespace_spm):
-
-        # Indices to estimate signal using freespace regions
-        signal_ind = []
-        for i in range(len(freespace_spm)):
-            signal_ind.append(np.argwhere(
-                (spm_spec >= freespace_spm[i][0]) &
-                (spm_spec <= freespace_spm[i][1])))
-        signal_ind = np.reshape(np.concatenate(signal_ind), -1)
-
-        return np.nanmedian(spec[signal_ind])
 
 """
 Revision history

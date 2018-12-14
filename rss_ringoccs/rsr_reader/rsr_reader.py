@@ -15,8 +15,8 @@ import struct
 import sys
 import time
 
-from ..tools.get_rev_info import get_rev_info
-from ..tools.write_history_dict import write_history_dict
+from ..tools.history import get_rev_info
+from ..tools.history import write_history_dict
 
 
 class RSRReader(object):

@@ -16,7 +16,7 @@ import sys
 from ..rsr_reader.rsr_reader import RSRReader
 from .resample_IQ import resample_IQ
 from .calc_tau_thresh import calc_tau_thresh
-from ..tools.write_history_dict import write_history_dict
+from ..tools.history import write_history_dict
 from ..tools.write_output_files import write_output_files
 
 sys.path.append('../..')

@@ -8,6 +8,7 @@ Dependencies:
     #. time
     #. os
     #. platform
+    #. pandas
     #. numpy
 """
 import sys
@@ -15,6 +16,7 @@ import time
 import platform
 import os
 import numpy as np
+import pandas as pd
 
 def date_to_rev(year, doy, 
         rss_file='../tables/RSSActivities_before_USOfailure_rings_only.txt'):
@@ -160,5 +162,7 @@ def write_history_dict(input_vars, input_kwds, source_file, add_info=None):
 
     if add_info:
         history["Additional Info"] = add_info
+    else:
+        history["Additional Info"] = ''
     return history
 

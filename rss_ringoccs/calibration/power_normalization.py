@@ -290,7 +290,7 @@ class Normalization(object):
         """
         self.fittype=fittype
         self.order=order
-
+        v = float(len(f_sky_resid[self.mask])) - (order+1)
         # polynomial fit
         if fittype == 'poly' :
 
@@ -299,7 +299,7 @@ class Normalization(object):
             coef = np.polyfit(spm[self.mask],power[self.mask],order)
             # evaluate the polynomial at all spm
             fit = np.polyval(coef, spm)
-            chi2 = np.sum(np.square(np.polyval(coef,spm[self.mask])-power[self.mask]))
+            chi2 = np.sum(np.square(np.polyval(coef,spm[self.mask])-power[self.mask]))/v
 
             #fit = np.polyval(coef, spm_full)
 
@@ -323,7 +323,7 @@ class Normalization(object):
 
             # evaluate spline at all spm
             fit = splev(spm,coef)
-            chi2 = np.sum(np.square(splev(spm[self.mask],coef)-power[self.mask]))
+            chi2 = np.sum(np.square(splev(spm[self.mask],coef)-power[self.mask]))/v
 
         else:
             # if keyword type not recognized, state for user and fit with poly
@@ -334,7 +334,7 @@ class Normalization(object):
             coef = np.polyfit(spm[self.mask],power[self.mask],order)
             # evaluate the polynomial at all spm
             fit = np.polyval(coef, spm)
-            chi2 = np.sum(np.square(np.polyval(coef,spm[self.mask])-power[self.mask]))
+            chi2 = np.sum(np.square(np.polyval(coef,spm[self.mask])-power[self.mask]))/v
 
 
         self.pnorm_fit = fit

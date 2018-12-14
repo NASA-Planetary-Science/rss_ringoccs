@@ -275,8 +275,10 @@ def write_history_text(f, hist_list_keys, hist_dict, hist_dict_keys):
         for hkey in hist_dict_keys:
             this_kwd = hkey
             this_val = this_hist[this_kwd]
+            if this_val == '':
+                continue
             n_thisval = len(this_val)
-            if (this_kwd == 'Positional Args') or (this_kwd == 'Keyword Args'):
+            if (this_kwd == 'Positional Args') or (this_kwd == 'Keyword Args') or (this_kwd == 'Additional Info'):
                 n_input = 0
                 # Loop over input var/kwd dictionary keys
                 for varkey in this_val:
@@ -360,6 +362,7 @@ def history_loop_over_long_inputs(f, this_input, this_kwd, varkey, num):
     varlen = len(str(varkey)) + 2
 
     if varkey == 'freespace_spm':
+        pdb.set_trace()
         kline[0] = kline[0].replace('\n', ',\r\n'+' '*(hpad+varlen+7))
         #kline = (str(this_input)).replace('\n', '\n'+' '*hpad)
 

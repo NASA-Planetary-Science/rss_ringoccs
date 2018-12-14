@@ -2,7 +2,7 @@
 import time
 import numpy as np
 from scipy.special import lambertw, iv
-from rss_ringoccs.tools.write_history_dict import write_history_dict
+from rss_ringoccs.tools.history import write_history_dict
 from rss_ringoccs.tools.write_output_files import write_output_files
 import pdb
 

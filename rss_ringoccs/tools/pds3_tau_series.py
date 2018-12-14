@@ -340,7 +340,8 @@ def get_tau_series_info(rev_info, tau_inst, series_name, prof_dir):
             + 'processing chain. The' + sd + 'archived 1 km resolution '
             + 'profile is identical to one reconstructed directly' + sd
             + 'from the archived 0.5 km resolution diffraction-limited '
-            + 'data processed to achieve 0.75 km ''processing resolution'', '
+            + 'data processed to' + sd
+            + 'achieve 0.75 km ''processing resolution'', '
             + 'where the latter is defined by' + sd
             + 'Eq. 19 of MAROUFETAL1986.' + sd
             + ' ' + sd
@@ -356,7 +357,7 @@ def get_tau_series_info(rev_info, tau_inst, series_name, prof_dir):
             + 'down to the meters range.' + sd
             + ' ' + sd
             + 'All archived data products were generated assuming '
-            + 'fixed UltraStable Oscillator (USO) '
+            + 'fixed USO '
             + 'reference' + sd + 'frequency of 8,427,222,034.34050 Hz '
             + 'at X-band, its value near the' + sd + 'beginning of the '
             + 'Cassini orbital tour. The frequency is coherently' + sd
@@ -441,6 +442,7 @@ def get_tau_series_info(rev_info, tau_inst, series_name, prof_dir):
     HIST_SOURCE_FILE = tau_inst.history['Source File']
     HIST_INPUT_VARIABLES = tau_inst.history['Positional Args']
     HIST_INPUT_KEYWORDS = tau_inst.history['Keyword Args']
+    HIST_ADD_INFO = tau_inst.history['Additional Info']
     HIST_RSSOCC_VERSION = tau_inst.history['rss_ringoccs Version']
     HIST_description = ('This is a record of the processing steps'
                         + sd + 'and inputs used to generate this file.')
@@ -449,7 +451,7 @@ def get_tau_series_info(rev_info, tau_inst, series_name, prof_dir):
             'key_order0': ['User Name', 'Host Name', 'Operating System',
                         'Python Version', 'rss_ringoccs Version']
             ,'key_order1': ['Source Directory','Source File',
-                        'Positional Args', 'Keyword Args']
+                        'Positional Args', 'Keyword Args', 'Additional Info']
             , 'hist name': 'DiffractionReconstruction history'
             , 'User Name': HIST_USER_NAME
             , 'Host Name': HIST_HOST_NAME
@@ -461,6 +463,7 @@ def get_tau_series_info(rev_info, tau_inst, series_name, prof_dir):
             , 'Source File': HIST_SOURCE_FILE
             , 'Positional Args': HIST_INPUT_VARIABLES
             , 'Keyword Args': HIST_INPUT_KEYWORDS
+            , 'Additional Info': HIST_ADD_INFO
             , 'description': HIST_description
             }
 

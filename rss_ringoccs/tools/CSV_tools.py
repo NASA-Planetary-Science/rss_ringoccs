@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from scipy import interpolate
-from .write_history_dict import write_history_dict
+from .history import write_history_dict
 RADS_PER_DEGS = 0.0174532925199432957692369
 
 def get_geo(geo, verbose=True):

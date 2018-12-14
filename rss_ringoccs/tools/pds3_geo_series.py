@@ -4,13 +4,14 @@ pds3_geo_series.py
 
 Purpose: Write GEO data and label files in PDS3 format.
 
-Revisions:
-    2018 Jul 23 - jfong - copied from jwf_pds3_geo_series_v3.py
-    2018 Sep 10 - jfong - add underscore to record type and product type
-    2018 Sep 20 - jfong - split geo_kernels only if it is a list
-    2018 Nov 16 - jfong - update formats to match CORS_8001 v2
+Dependencies:
+    #. numpy
+    #. time
+    #. rss_ringoccs.tools.pds3_write_series_v2
 
-
+Notes:
+    [1] Contents of output GEO data and label files are meant to mimic
+        GEO files from CORSS_8001 v2.
 '''
 import pdb
 import time
@@ -20,19 +21,22 @@ import numpy as np
 
 def write_geo_series_data(geo_inst, out_file):
     """
-    This writes a GEO data file.
+    This writes a GEO data file with columns: observed event time, ring
+    event time, spacecraft event time, ring radius, ring longitude,
+    observed ring azimuth, ring opening angle, distance from spacecraft to
+    ring intercept point, radial velocity, azimuthal velocity, Fresnel scale,
+    impact radius, x-component of spacecraft position, y-component of
+    spacecraft position, z-component of spacecraft position, x-component
+    of spacecraft velocity, y-component of spacecraft velocity, z-component
+    of spacecraft velocity, observed spacecraft latitude.
 
-    Args:
-        geo_inst (class): Instance of Geometry class
-        fmt (str): Format string
-        out_file (str): Output file name, including path.
+    Arguments:
+        :geo_inst (*class*): Instance of Geometry class
+        :out_file (*str*): Path to output file
     """
-    #fmt_comma = fmt+','
-    
     format_str = ('%14.6F,'*4 + '%12.6F,'*3 + '%16.6F,' + '%14.6F,'*4
                   + '%16.6F,'*3 + '%14.6F,'*3 + '%12.6F' + '%s')
 
-    #format_str = fmt_comma * 18 + fmt + '%s'
     npts = len(geo_inst.t_oet_spm_vals)
 
     print('\nWriting GEO data to: ', out_file, '\n')
@@ -68,26 +72,21 @@ def get_geo_series_info(rev_info, geo_inst, series_name, prof_dir):
     """
     This returns the information needed to write a GEO label file.
 
-    Args:
-        rev_info (dict): Dictionary with keys: rsr_file, band, year, doy, dsn
-                         occ_dir, planetary_occ_flag, rev_num
-        geo_inst (class): Instance of Geometry class
-        series_name (str): Name of the output .TAB and .LBL file, not including
-                           extensions. Date in YYYYMMDD format will be added
-                           onto series_name
-        prof_dir (str): Direction of ring occultation for this geo_inst
+    Arguments
+        :rev_info (*dict*): Dictionary with keys: rsr_file, band, year, doy,
+                        dsn, occ_dir, planetary_occ_flag, rev_num
+        :geo_inst (*class*): Instance of Geometry class
+        :series_name (*str*): Name of the output .TAB and .LBL file,
+                            not including extensions. '_YYYYMMDD_XXXX' will
+                            be added to the end of series_name
+        :prof_dir (*str*): Direction of ring occultation for this cal_inst
 
-    Outputs:
-        str_lbl (dict): Dictionary with keys: string_delimiter,
+    Returns
+        :str_lbl (*dict*): Dictionary with keys: string_delimiter,
                         alignment_column, series_alignment_column,
                         keywords_value, keywords_NAIF_TOOLKIT_VERSION,
                         description, keywords_series, object_keys,
                         object_values, history
-
-    Notes:
-        [1] This is a reproduction of GEO label files within
-            Cassini_RSS_Ring_Profiles_2018_Archive, with minor edits.
-        [2] The format of each data entry is hardcoded within "nchar".
     """
     # Get current time in ISOD format
     current_time_ISOD = time.strftime("%Y-%j") + 'T' + time.strftime("%H:%M:%S")
@@ -286,6 +285,7 @@ def get_geo_series_info(rev_info, geo_inst, series_name, prof_dir):
     HIST_SOURCE_FILE = geo_inst.history['Source File']
     HIST_INPUT_VARIABLES = geo_inst.history['Positional Args']
     HIST_INPUT_KEYWORDS = geo_inst.history['Keyword Args']
+    HIST_ADD_INFO = geo_inst.history['Additional Info']
     HIST_RSSOCC_VERSION = geo_inst.history['rss_ringoccs Version']
     HIST_description = ('This is a record of the processing steps'
                         + sd + 'and inputs used to generate this file.')
@@ -294,11 +294,7 @@ def get_geo_series_info(rev_info, geo_inst, series_name, prof_dir):
             'key_order0': ['User Name', 'Host Name', 'Operating System',
                         'Python Version', 'rss_ringoccs Version']
             ,'key_order1': ['Source Directory','Source File',
-                        'Positional Args', 'Keyword Args']
-            #'key_order': ['User Name', 'Host Name', 'Run Date',
-            #            'Python Version', 'Operating System',
-            #            'Source Directory','Source File',
-            #            'Input Variables', 'Input Keywords']
+                        'Positional Args', 'Keyword Args', 'Additional Info']
             , 'hist name': 'Geometry history'
             , 'User Name': HIST_USER_NAME
             , 'Host Name': HIST_HOST_NAME
@@ -310,6 +306,7 @@ def get_geo_series_info(rev_info, geo_inst, series_name, prof_dir):
             , 'Source File': HIST_SOURCE_FILE
             , 'Positional Args': HIST_INPUT_VARIABLES
             , 'Keyword Args': HIST_INPUT_KEYWORDS
+            , 'Additional Info': HIST_ADD_INFO
             , 'description': HIST_description
             }
 
@@ -407,9 +404,6 @@ def get_geo_series_info(rev_info, geo_inst, series_name, prof_dir):
 
     n_objects = len(object_names)
     data_types = ['ASCII_REAL'] * n_objects
-    # NOTE: this is hardcoded in!! and a bad way to make a list of reps
-    #formats = ['"F32.16"'] * 18
-
     units = ['"SECOND"', '"SECOND"', '"SECOND"',
             '"KILOMETER"', '"DEGREE"', '"DEGREE"', '"DEGREE"',
             '"KILOMETER"', '"KM/SEC"', '"KM/SEC"',
@@ -417,9 +411,6 @@ def get_geo_series_info(rev_info, geo_inst, series_name, prof_dir):
             '"KILOMETER"', '"KM/SEC"', '"KM/SEC"', '"KM/SEC"',
             '"DEGREE"']
     
-    # only variables with TIME in name have reference times
-    # a null string indicates that this keyword is absent for this object
-    # NOTE: this is a horrible way of creating a list! (same as units)
     es = ''
     reference_times = [OBJECT_REFERENCE_TIME, OBJECT_REFERENCE_TIME,
             OBJECT_REFERENCE_TIME, es, es, es, es, es, es, es, es, es, 
@@ -593,23 +584,17 @@ def write_geo_series(rev_info, geo_inst, title, outdir, prof_dir):
     """
     This function writes a GEO series, which includes a data and label file.
 
-    Args:
-        rev_info (dict): Dictionary with keys: rsr_file, band, year, doy, dsn
+    Arguments
+        :rev_info (*dict*): Dictionary with keys: rsr_file, band, year, doy, dsn
                          occ_dir, planetary_occ_flag, rev_num
-        geo_inst (class): Instance of NormDiff class
-        title (str): Name of the output .TAB and .LBL file, not including
-                           extensions. Date in YYYYMMDD format will be added
-                           onto series_name
-        outdir (str): Path to output directory
-        prof_dir (str): Direction of ring occultation for this geo_inst
-
-    Notes:
-        [1] Data entry format of %32.16F is hardcoded.
-        [2] A data and label file will be output into the input "outdir"
-            directory, with filenames, *YYYYMMDD.TAB and *YYYYMMDD.LBL,
-            respectively, where * is "title".
+        :geo_inst (*class*): Instance of Geometry class
+        :title (*str*): Name of the output .TAB and .LBL file, not including
+                           extensions. Date in YYYYMMDD format and sequence
+                           number in XXXX format will be added at the end
+                           of series_name
+        :outdir (*str*): Path to output directory
+        :prof_dir (*str*): Direction of ring occultation for this geo_inst
     """
-#    current_time = time.strftime("_%Y%m%d") #-%H%M%S")
     outfile_tab = outdir + title.upper() + '.TAB'
     outfile_lbl = outdir + title.upper() + '.LBL'
     series_name = '"' + outfile_tab.split('/')[-1] + '"'

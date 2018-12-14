@@ -290,7 +290,7 @@ class Normalization(object):
         """
         self.fittype=fittype
         self.order=order
-        v = float(len(f_sky_resid[self.mask])) - (order+1)
+        v = float(len(power[self.mask])) - (order+1)
         # polynomial fit
         if fittype == 'poly' :
 

@@ -28,7 +28,7 @@ from .et_to_spm import et_to_spm
 from .cassini_blocked import cassini_blocked
 from .cal_inst_from_file import CreateCalInst
 from .pds3_reader import PDS3Reader
-from .date_to_rev import date_to_rev
-from .get_rev_info import get_rev_info
-from .write_history_dict import write_history_dict
 from .CSV_tools import ExtractCSVData
+from .history import write_history_dict
+from .history import date_to_rev
+from .history import get_rev_info

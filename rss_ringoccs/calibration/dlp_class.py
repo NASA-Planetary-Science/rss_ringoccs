@@ -16,7 +16,7 @@ import sys
 from ..rsr_reader.rsr_reader import RSRReader
 from .resample_IQ import resample_IQ
 from .calc_tau_thresh import calc_tau_thresh
-from ..tools.write_history_dict import write_history_dict
+from ..tools.history import write_history_dict
 from ..tools.write_output_files import write_output_files
 
 sys.path.append('../..')
@@ -101,19 +101,21 @@ class DiffractionLimitedProfile(object):
         rho_km_desired, IQ_c_desired = resample_IQ(rho_full, IQ_c,
                 dr_km, dr_km_tol=dr_km_tol)
 
-        # resample IQ_c, to exact rho boundaries
-        #rho_km_desired_interp, IQc_desired_interp = self.interp_IQ(
-        #        rho_full, IQ_c, dr_km, profile_range)
+        # Slice rho_km_desired to profile_range values
+        ind1 = list(rho_km_desired).index(min(list(rho_km_desired),
+                    key=lambda x:abs(x-profile_range[0])))
+
+        ind2 = list(rho_km_desired).index(min(list(rho_km_desired),
+                    key=lambda x:abs(x-profile_range[1])))
+
+        rho_km_desired = rho_km_desired[ind1:ind2+1]
+        IQ_c_desired = IQ_c_desired[ind1:ind2+1]
 
         # interpolate coef to convert rho to SPm
-        #rho_to_spm = splrep(rho_km_geo, spm_geo)
-        #spm_desired = splev(rho_km_desired, rho_to_spm)
         spm_desired_func = interp1d(rho_km_geo, spm_geo,
                 fill_value='extrapolate')
         spm_desired = spm_desired_func(rho_km_desired)
 
-        #rho_to_pfree = splrep(rho_km_cal, p_free_cal)
-        #p_free = splev(rho_km_desired, rho_to_pfree)
         p_free_interp_func = interp1d(rho_km_cal, p_free_cal,
                 fill_value='extrapolate')
         p_free = p_free_interp_func(rho_km_desired)
@@ -205,10 +207,6 @@ class DiffractionLimitedProfile(object):
         # FILLERS FOR RADIUS CORRECTION
         rho_corr_pole_km_vals = np.zeros(len(spm_desired))
         rho_corr_timing_km_vals = np.zeros(len(spm_desired))
-
-        # FILLERS FOR THRESHOLD OPTICAL DEPTH
-        raw_tau_threshold_vals = np.zeros(len(spm_desired))
-        tau_threshold_vals = np.zeros(len(spm_desired))
 
         # Set attributes
         self.rho_km_vals = rho_km_desired
@@ -349,6 +347,4 @@ class DiffractionLimitedProfile(object):
 
 """
 Revisions:
-    2018 Oct 29 - jfong - based on v1.0 norm_diff_class.py
-    2018 Nov 09 - jfong - add create_dlps() class method
 """

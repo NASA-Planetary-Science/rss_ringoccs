@@ -137,14 +137,10 @@ class FreqOffsetFit(object):
         if len(self.raw_spm_vals[inds]) > 2 :
             spm_min = np.min(self.raw_spm_vals[inds])
             spm_max = np.max(self.raw_spm_vals[inds])
-            spm_occ_min = np.min(self.raw_spm_vals[occ_inds])
-            spm_occ_max = np.max(self.raw_spm_vals[occ_inds])
         else:
             print('Error in estimating SPM range for frequency offset!')
             spm_min = self.raw_spm_vals[0]
             spm_max = self.raw_spm_vals[-1]
-            spm_occ_min = np.nan
-            spm_occ_max = np.nan
 
         # Calculate offset frequency within given SPM limits
         if verbose:
@@ -175,7 +171,8 @@ class FreqOffsetFit(object):
 
         # Draw and save reference plot
         self.plotFORFit(f_spm,f_sky_resid,f_sky_resid_fit,self.__fsr_mask,
-                        spm_min,spm_max,spm_occ_min,spm_occ_max,poly_order)
+                        spm_min,spm_max,geo_inst.freespace_spm[0][0],
+                        geo_inst.freespace_spm[-1][1],poly_order)
 
         # Calculate frequency offset fit
         self.f_offset_fit = f_sky_resid_fit + (f_sky_recon - f_sky_pred)

@@ -39,7 +39,12 @@ class FreqOffsetFit(object):
     .. math::
         f(t)_{resid} = (f(t)_{dr}-f(t)_{dp}) - f(t)_{offset}
 
+    Final frequency offset :math:`\hat{f}(t)_{offset}` is found using the
+    polynomial fit :math:`\hat{f}(t)_{resid}` to the frequency offset residuals
+    such that
 
+    .. math::
+        \hat{f}(t)_{offset} = \hat{f}(t)_{resid} + (f(t)_{dr} - f(t)_{dp})
 
     Arguments:
         :rsr_inst (*object*): object instance of the RSRReader class
@@ -52,6 +57,16 @@ class FreqOffsetFit(object):
                                 onboard the Cassini spacecraft. Default is
                                 8427222034.3405 Hz.
         :verbose (*bool*): when True, enables verbose output mode
+
+    Attributes:
+        :f_offset_fit: final frequency offset evaluated using fit to offset residuals
+                        :math:`\hat{f}(t)_{offset} = \hat{f}(t)_{resid} + (f(t)_{dr} - f(t)_{dp})`
+        :f_spm: SPM at which the offset frequency was sampled
+        :f_sky_pred: predicted sky frequency :math:`f(t)_{dp}`
+        :f_sky_resid_fit: fit to the residual frequency offset :math:`\hat{f}(t)_{resid}`
+                        evaluated at ``f_spm``
+        :chi_squared: sum of the squared residual frequency offset fit such that
+                        :math:`\chi^2 = \sum (\hat{f}(t)_{resid}-f(t)_{resid})^2`
     """
 
     def __init__(self, rsr_inst, geo_inst, poly_order=7,
@@ -117,14 +132,19 @@ class FreqOffsetFit(object):
         #    False is outside the occultation range -- this is generalized
         #    to work for diametric and chord occultations
         inds = [(self.raw_rho>6.25e4)&(self.raw_rho<3e5)]
+        occ_inds = [(self.raw_rho>7e4)&(self.raw_rho<1.4e5)]
         # Find the max and min SPM values with True boolean indices
         if len(self.raw_spm_vals[inds]) > 2 :
             spm_min = np.min(self.raw_spm_vals[inds])
             spm_max = np.max(self.raw_spm_vals[inds])
+            spm_occ_min = np.min(self.raw_spm_vals[occ_inds])
+            spm_occ_max = np.max(self.raw_spm_vals[occ_inds])
         else:
             print('Error in estimating SPM range for frequency offset!')
             spm_min = self.raw_spm_vals[0]
             spm_max = self.raw_spm_vals[-1]
+            spm_occ_min = np.nan
+            spm_occ_max = np.nan
 
         # Calculate offset frequency within given SPM limits
         if verbose:
@@ -142,6 +162,7 @@ class FreqOffsetFit(object):
 
         # Compute residual sky frequency
         f_sky_resid = f_offset - (f_sky_recon - f_sky_pred)
+
         if verbose:
             print('\tCreating sigma clipping mask array...')
         self.__fsr_mask = self.create_mask(f_spm, f_rho, f_sky_resid)
@@ -154,8 +175,7 @@ class FreqOffsetFit(object):
 
         # Draw and save reference plot
         self.plotFORFit(f_spm,f_sky_resid,f_sky_resid_fit,self.__fsr_mask,
-                        spm_min,spm_max,geo_inst.freespace_spm[0][0],
-                        geo_inst.freespace_spm[-1][1],poly_order)
+                        spm_min,spm_max,spm_occ_min,spm_occ_max,poly_order)
 
         # Calculate frequency offset fit
         self.f_offset_fit = f_sky_resid_fit + (f_sky_recon - f_sky_pred)
@@ -191,7 +211,7 @@ class FreqOffsetFit(object):
         #   for data which fall in acceptable regions
         fsr_median = np.nanmedian(f_sky_resid[fsr_mask])
         fsr_stdev = 3.*np.sqrt(np.nanmedian(np.square(f_sky_resid-fsr_median)))
-        if fsr_stdev < 1 or fsr_stdev > 20 :
+        if fsr_stdev < 1 or fsr_stdev > 5 :
             fsr_stdev = 1
 
         # iteratively check to see if each residual value is within 3 sigma
@@ -202,6 +222,14 @@ class FreqOffsetFit(object):
             # exclude data outside 3-sigma of median
             if (f_sky_resid[i] < fsr_median - fsr_stdev) or (f_sky_resid[i] > fsr_median + fsr_stdev):
                 fsr_mask[i] = False
+
+        # if there are no True values in mask array, then reset and hope for the best
+        if not np.any(fsr_mask):
+            fsr_mask = np.array([True for i in range(len(f_sky_resid))],dtype=bool)
+            for i in range(len(f_sky_resid)):
+                # exclude nans
+                if np.isnan(f_sky_resid[i]):
+                    fsr_mask[i] = False
 
         ## Polynomial fit clipping
         # try a 9th order polynomial fit
@@ -277,7 +305,8 @@ class FreqOffsetFit(object):
             print('\tPolynomial sum squared residuals:',stats[0])'''
 
         f_sky_resid_fit = np.polyval( coef, spm_temp )
-        chi2 = np.sum(np.square(f_sky_resid_fit[self.__fsr_mask]-f_sky_resid[self.__fsr_mask]))
+        v = float(len(f_sky_resid[self.__fsr_mask])) - (poly_order+1)
+        chi2 = np.sum(np.square(f_sky_resid_fit[self.__fsr_mask]-f_sky_resid[self.__fsr_mask])) / v
 
         return f_sky_resid_fit,chi2
 

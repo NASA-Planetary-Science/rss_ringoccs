@@ -2,13 +2,17 @@
 """
 pds3_cal_series.py
 
-Purpose: From a cal instance, produce inputs to pds3_write_series_lbl()
-         for *CAL.LBL
+Purpose: Write CAL data and label files in PDS3 format.
 
-Revisions:
-    2018 Jul 23 - jfong - copied from jwf_pds3_cal_series_v2.py
-    2018 Sep 10 - jfong - add underscore to record type and product type
-    2018 Sep 20 - jfong - only split kernels if list
+Dependencies:
+    #. numpy
+    #. time
+    #. rss_ringoccs.tools.pds3_write_series_v2
+
+Notes:
+    [1] Contents of output CAL data and label files are meant to mimic
+        CAL files from CORSS_8001 v2.
+    
 """
 
 from . import pds3_write_series_v2 as pds3
@@ -18,12 +22,12 @@ import time
 
 def write_cal_series_data(cal_inst, out_file):
     """
-    This writes a CAL data file.
+    This writes a CAL data file with columns: observed event time,
+    sky frequency, residual frequency, and fit to free-space power.
 
-    Args:
-        cal_inst (class): Instance of Calibration class
-        fmt (str): Format string
-        out_file (str): Output file name, including path.
+    Arguments
+        :cal_inst (*class*): Instance of Calibration class
+        :out_file (*str*): Path to output file
     """
     format_str = ('%14.6F,' + '%20.6F,' + '%10.6F,' + '%14.6F' + '%s')
     npts = len(cal_inst.t_oet_spm_vals)
@@ -47,26 +51,21 @@ def get_cal_series_info(rev_info, cal_inst, series_name, prof_dir):
     """
     This returns the information needed to write a CAL label file.
 
-    Args:
-        rev_info (dict): Dictionary with keys: rsr_file, band, year, doy, dsn
-                         occ_dir, planetary_occ_flag, rev_num
-        cal_inst (class): Instance of Calibration class
-        series_name (str): Name of the output .TAB and .LBL file, not including
-                           extensions. Date in YYYYMMDD format will be added
-                           onto series_name
-        prof_dir (str): Direction of ring occultation for this cal_inst
+    Arguments
+        :rev_info (*dict*): Dictionary with keys: rsr_file, band, year, doy, 
+                        dsn, occ_dir, planetary_occ_flag, rev_num
+        :cal_inst (*class*): Instance of Calibration class
+        :series_name (*str*): Name of the output .TAB and .LBL file, 
+                            not including extensions. '_YYYYMMDD_XXXX' will
+                            be added to the end of series_name 
+        :prof_dir (*str*): Direction of ring occultation for this cal_inst
 
-    Outputs:
-        str_lbl (dict): Dictionary with keys: string_delimiter,
+    Returns
+        :str_lbl (*dict*): Dictionary with keys: string_delimiter,
                         alignment_column, series_alignment_column,
                         keywords_value, keywords_NAIF_TOOLKIT_VERSION,
                         description, keywords_series, object_keys,
                         object_values, history
-
-    Notes:
-        [1] This is a reproduction of CAL label files within
-            Cassini_RSS_Ring_Profiles_2018_Archive, with minor edits.
-        [2] The format of each data entry is hardcoded within "nchar".
     """
     # Get current time in _YYYYMMDD-hhmmss format
     current_time_ISOD = time.strftime("%Y-%j") + 'T' + time.strftime("%H:%M:%S")
@@ -296,58 +295,6 @@ def get_cal_series_info(rev_info, cal_inst, series_name, prof_dir):
             + 'Wellesley, MA 02481-8203;' + sd
             + '(781) 283-3747;' + sd
             + 'rfrench@wellesley.edu."')
-#    FILE_DESCRIPTION = ('"This file contains estimates of' + sd
-#            + 'signal attributes needed to calibrate the raw ring data '
-#            + 'before' + sd + 'reliable optical depth profiles are '
-#            + 'computed. The attributes are the' + sd + 'signal sky-frequency, '
-#            + 'the fit to residual frequency, and the free-space' + sd
-#            + 'signal power. The attributes are listed versus ' 
-#            + 'OBSERVED EVENT TIME' + sd + '(Earth received time) ' 
-#            + 'over equal time increments (1 s).' + sd
-#            + ' ' + sd
-#            + 'The sky frequency estimates are included for completeness ' 
-#            + 'and to facilitate' + sd + ' independent checks of frequency '
-#            + 'calculations. The radio science receiver' + sd + 'at the DSN '
-#            + 'ground receiving station (the RSR) steers the frequency of the'
-#            + sd + 'received sinusoid so that the measured spectral '
-#            + 'line falls at the center of' + sd + 'the recording '
-#            + 'bandwidth. Spectral estimates of the measured I/Q samples can '
-#            + sd + 'be used to calculate any offsets of the spectral line '
-#            + 'from the center of' + sd + 'the bandwidth. The measured offsets '
-#            + 'together with other frequency' + sd + 'steering information '
-#            + 'encoded in the RSR recording are used to calculate the' + sd
-#            + 'listed sky-frequency based on procedures documented '
-#            + 'in JPLD-16765.' + sd
-#            + ' ' + sd
-#            + 'The frequency residual estimates are required to steer the '
-#            + 'frequency of the' + sd + 'downlink sinusoid to a constant '
-#            + 'value (here the center of the recording' + sd
-#            + 'bandwidth) before the sinusoid amplitude and phase can '
-#            + 'be estimated. This is' + sd + 'done in the FreqOffsetFit class '
-#            + '(inputs to this class are under "fit_inst"' + sd
-#            + 'history below.' + sd
-#            + ' ' + sd
-#            + 'The free-space signal power estimates are required to '
-#            + 'normalize the' + sd + 'power of the steered sinusoid to a '
-#            + 'value of about unity (optical depth' + sd + 'of about zero) '
-#            + 'outside Ring A, inside Ring C, and within large ring' + sd
-#            + 'gaps. This is done in the Normalization class (inputs are '
-#            + 'under "norm_inst"' + sd + 'history below).' + sd
-#            + ' ' + sd
-#            + 'This file was produced using the rss_ringoccs open-source '
-#            + 'processing suite' + sd + 'developed at Wellesley College with '
-#            + 'the support of the Cassini project and' + sd + 'hosted '
-#            + 'on GithHub at https://github.com/NASA-Planetary-Science/'
-#            + 'rss_ringoccs.' + sd
-#            + ' ' + sd
-#            + 'Please address any inquiries to:' + sd
-#            + 'Richard G. French' + sd
-#            + 'Astronomy Department, Wellesley College' + sd
-#            + 'Wellesley, MA 02481-8203' + sd
-#            + '(781) 283-3747' + sd
-#            + 'rfrench@wellesley.edu"')
-
-
 
     HIST_USER_NAME = cal_inst.history['User Name']
     HIST_HOST_NAME = cal_inst.history['Host Name']
@@ -358,6 +305,7 @@ def get_cal_series_info(rev_info, cal_inst, series_name, prof_dir):
     HIST_SOURCE_FILE = cal_inst.history['Source File']
     HIST_INPUT_VARIABLES = cal_inst.history['Positional Args']
     HIST_INPUT_KEYWORDS = cal_inst.history['Keyword Args']
+    HIST_ADD_INFO = cal_inst.history['Additional Info']
     HIST_RSSOCC_VERSION = cal_inst.history['rss_ringoccs Version']
     HIST_description = ('This is a record of the processing steps'
                         + sd + 'and inputs used to generate this file.')
@@ -366,7 +314,7 @@ def get_cal_series_info(rev_info, cal_inst, series_name, prof_dir):
             'key_order0': ['User Name', 'Host Name', 'Operating System',
                         'Python Version', 'rss_ringoccs Version']
             ,'key_order1': ['Source Directory','Source File',
-                        'Positional Args', 'Keyword Args']
+                        'Positional Args', 'Keyword Args', 'Additional Info']
             , 'hist name': 'Calibration history'
             , 'User Name': HIST_USER_NAME
             , 'Host Name': HIST_HOST_NAME
@@ -378,6 +326,7 @@ def get_cal_series_info(rev_info, cal_inst, series_name, prof_dir):
             , 'Source File': HIST_SOURCE_FILE
             , 'Positional Args': HIST_INPUT_VARIABLES
             , 'Keyword Args': HIST_INPUT_KEYWORDS
+            , 'Additional Info': HIST_ADD_INFO
             , 'description': HIST_description
             }
 
@@ -533,21 +482,17 @@ def write_cal_series(rev_info, cal_inst, title, outdir, prof_dir):
     """
     This function writes a CAL series, which includes a data and label file.
 
-    Args:
-        rev_info (dict): Dictionary with keys: rsr_file, band, year, doy, dsn
+    Arguments
+        :rev_info (*dict*): Dictionary with keys: rsr_file, band, year, doy, dsn
                          occ_dir, planetary_occ_flag, rev_num
-        cal_inst (class): Instance of Calibration class
-        title (str): Name of the output .TAB and .LBL file, not including
-                           extensions. Date in YYYYMMDD format will be added
-                           onto series_name
-        outdir (str): Path to output directory
-        prof_dir (str): Direction of ring occultation for this cal_inst
+        :cal_inst (*class*): Instance of Calibration class
+        :title (*str*): Name of the output .TAB and .LBL file, not including
+                           extensions. Date in YYYYMMDD format and sequence
+                           number in XXXX format will be added at the end
+                           of series_name
+        :outdir (*str*): Path to output directory
+        :prof_dir (*str*): Direction of ring occultation for this cal_inst
 
-    Notes:
-        [1] Data entry format of %32.16F is hardcoded.
-        [2] A data and label file will be output into the input "outdir"
-            directory, with filenames, *YYYYMMDD.TAB and *YYYYMMDD.LBL,
-            respectively, where * is "title".
     """
     outfile_tab = outdir + title.upper() + '.TAB'
     outfile_lbl = outdir + title.upper() + '.LBL'

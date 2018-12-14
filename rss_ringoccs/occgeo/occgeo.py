@@ -27,23 +27,25 @@ occgeo.py
 from ..tools.spm_to_et import spm_to_et
 from ..tools.et_to_spm import et_to_spm
 from ..tools.write_output_files import write_output_files
-from ..tools.write_history_dict import write_history_dict
-from .calc_elevation_deg import calc_elevation_deg
-from .get_pole import get_pole
-from .calc_rho_vec_km import calc_rho_vec_km
-from .calc_set_et import calc_set_et
-from .calc_phi_deg import calc_phi_deg
-from .calc_D_km import calc_D_km
-from .calc_B_deg import calc_B_deg
-from .calc_F_km import calc_F_km
-from .xform_j2k_to_pcf import xform_j2k_to_pcf
-from .calc_sc_state import calc_sc_state
-from .calc_rip_velocity import calc_rip_velocity
-from .calc_impact_radius_km import calc_impact_radius_km
-from .get_planet_occ_times import get_planet_occ_times
-from .calc_beta import calc_beta
-from .calc_beta import calc_B_eff_deg
-from .get_freespace import get_freespace
+from ..tools.history import write_history_dict
+
+from .calc_occ_geometry import calc_elevation_deg
+from .calc_occ_geometry import get_pole
+from .calc_occ_geometry import calc_rho_vec_km
+from .calc_occ_geometry import calc_set_et
+from .calc_occ_geometry import calc_phi_deg
+from .calc_occ_geometry import calc_D_km
+from .calc_occ_geometry import calc_B_deg
+from .calc_occ_geometry import calc_F_km
+from .calc_occ_geometry import xform_j2k_to_pcf
+from .calc_occ_geometry import calc_sc_state
+from .calc_occ_geometry import calc_rip_velocity
+from .calc_occ_geometry import calc_impact_radius_km
+from .calc_occ_geometry import get_planet_occ_times
+from .calc_occ_geometry import calc_beta
+from .calc_occ_geometry import calc_B_eff_deg
+from .calc_occ_geometry import get_freespace
+
 from scipy.interpolate import splrep
 from scipy.interpolate import splev
 
@@ -166,8 +168,8 @@ class Geometry(object):
         if verbose:
             print('\tSetting rev info attribute...')
 
-            # Setting rev info attribute
-            self.rev_info = rsr_inst.rev_info
+        # Setting rev info attribute
+        self.rev_info = rsr_inst.rev_info
 
         # Create new spm array with defined points per second
         step = 1./pt_per_sec
@@ -314,6 +316,11 @@ class Geometry(object):
             self.split_ind = self.get_chord_ind()
         else:
             self.split_ind = None
+
+        if len(self.atmos_occ_spm_vals) == 0:
+            self.rev_info['planetary_occ_flag'] = '"N"'
+        else:
+            self.rev_info['planetary_occ_flag'] = '"Y"'
 
         self.freespace_km, self.freespace_spm = get_freespace(
                 t_ret_spm_vals, year, doy, rho_km_vals,

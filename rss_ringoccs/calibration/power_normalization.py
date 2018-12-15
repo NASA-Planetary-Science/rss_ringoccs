@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 """
 Purpose:
-    Normalize frequency-corrected power using a polynomial fit of specified order.
+    Normalize frequency-corrected power using a polynomial fit of specified 
+    order.
 
 """
 
@@ -32,7 +33,8 @@ class Normalization(object):
 
     Arguments:
         :spm_raw (*np.ndarray*): SPM as sampled in the raw data
-        :IQ_c (*np.ndarray*): frequency-corrected signal corresponding to spm_raw
+        :IQ_c (*np.ndarray*): frequency-corrected signal corresponding to 
+            spm_raw
         :geo_inst (*np.ndarray*):
                        instance of the Geometry class, used to estimate
                        the freespace regions within and surrounding the
@@ -53,18 +55,16 @@ class Normalization(object):
                         to the freespace power. Default is False.
     """
 
-    def __init__(self, spm_raw, IQ_c, geo_inst, rsr_inst, order=3, fittype='poly',
-                                                interact=False, verbose=False):
+    def __init__(self, spm_raw, IQ_c, geo_inst, rsr_inst, order=3, 
+            fittype='poly', interact=False, verbose=False):
 
         # store rev info
         self.rev_info = geo_inst.rev_info
+        self.order = order
 
         # Resample geometry values to raw sampling rate
         rho_km_vals = geo_inst.rho_km_vals
-        #spm_to_rho = splrep(geo_inst.t_oet_spm_vals, geo_inst.rho_km_vals)
-        #rho_km_full = splev(rsr_inst.spm_vals, spm_to_rho)
 
-        #self.rho_to_spm = splrep(geo_inst.rho_km_vals, geo_inst.t_oet_spm_vals)
         freespace_spm = geo_inst.freespace_spm
 
         # downsample IQ so that diffraction fringes do not affect fit
@@ -82,15 +82,18 @@ class Normalization(object):
         self.create_mask(spm_down, freespace_spm,p_obs_down)
 
         # Compute fit
-        self.fit_freespace_power(spm_down, p_obs_down, order=order,fittype=fittype)
+        self.fit_freespace_power(spm_down, p_obs_down, order=self.order,
+                    fittype=fittype)
         # get User input to see if everything looks okay or needs tweaking
         #    will return modified freespace regions
         if interact :
-            new_gaps = self.fit_check(spm_down,p_obs_down,freespace_spm,order)
+            new_gaps = self.fit_check(spm_down,p_obs_down,freespace_spm,
+                                        self.order)
         else:
             new_gaps = freespace_spm
         # plot final fit for user reference
-        self.plot_power_profile(spm_down,p_obs_down,new_gaps,order,save=True)
+        self.plot_power_profile(spm_down,p_obs_down,new_gaps,self.order,
+                save=True)
 
 
     def fit_check(self,spm_down,p_obs_down,freespace_spm,order):
@@ -100,10 +103,12 @@ class Normalization(object):
             freespace power fitting step. This is done by prompting the user for
             input in the command line and displaying the results of their input
             for the polynomial fit to the freespace power.
-            Only called if the Normalization keyword ``interact`` is set to True.
+            Only called if the Normalization keyword ``interact`` is set to 
+            True.
 
         Arguments:
-            :gaps_str (*str*): string containing the user input freespace regions.
+            :gaps_str (*str*): string containing the user input freespace 
+                regions.
 
         Returns:
             :gaps (*list*): an Nx2 list of floats indicating the lower and upper
@@ -118,7 +123,8 @@ class Normalization(object):
         new_gaps = freespace_spm
         while 'n' in cont or 'N' in cont:
             # Prompt if freespace regions to change
-            change_freespace = input('\nDo you want to change the freespace regions? ')
+            change_freespace = input('\nDo you want to change the freespace '
+                                    + 'regions? ')
             if 'y' in change_freespace or 'Y' in change_freespace:
                 # print most recent freespace regions used
                 print('\n')
@@ -126,26 +132,30 @@ class Normalization(object):
                 print('['+',\n'.join(str(g) for g in new_gaps)+']')
                 print('\n')
                 # Prompt for reversion to default (in case of oopses)
-                revert_gaps = input('Do you want to revert to the default freespace gaps? ')
+                revert_gaps = input('Do you want to revert to the default '
+                                    + 'freespace gaps? ')
                 # if reverting, then revert
                 if 'y' in revert_gaps or 'Y' in revert_gaps:
                     new_gaps = freespace_spm
                 # if not reverting, prompt for new freespace regions
                 else:
-                    new_gaps_str = input('Please input new freespace gaps in SPM and '
-                        + 'press enter twice: ')
+                    new_gaps_str = input('Please input new freespace gaps in '
+                                        + 'SPM and press enter twice: ')
                     print('\n')
-                    # if the string doesn't start with double brackets (not an NxM list)
-                    #    then keep current gaps
+                    # if the string doesn't start with double brackets 
+                    #   (not an NxM list) then keep current gaps
                     if '[[' not in new_gaps_str and ']]' not in new_gaps_str :
-                        print('Invalid entry for freespace gaps.\nMust be Nx2 list.')
+                        print('Invalid entry for freespace gaps.\nMust be Nx2 '
+                                + 'list.')
                         print('Reverting to previous freespace regions.')
                         new_gaps = self.gaps
                     # otherwise, extract new freespace regions
                     else:
-                        new_gaps = self.extract_list_from_str(new_gaps_str[1:-1])
+                        new_gaps = self.extract_list_from_str(
+                                            new_gaps_str[1:-1])
                 # create new mask based on changes to freespace regions
-                self.create_mask(spm_down, new_gaps, p_obs_down/np.nanmax(p_obs_down))
+                self.create_mask(spm_down, new_gaps, 
+                            p_obs_down/np.nanmax(p_obs_down))
 
             # Prompt for fit type
             print('\n')
@@ -157,10 +167,12 @@ class Normalization(object):
             print('\n')
 
             # update fit
-            self.fit_freespace_power(spm_down, p_obs_down, order=order,fittype=fittype)
+            self.fit_freespace_power(spm_down, p_obs_down, 
+                        order=order,fittype=fittype)
             # update plot for user
             self.plot_power_profile(spm_down,p_obs_down,new_gaps,order)
             cont = input('Do you want to continue with this fit? (y/n): ')
+        self.order = order
 
         return new_gaps
 
@@ -270,6 +282,9 @@ class Normalization(object):
         self.mask = fsp_mask
         self.gaps = gaps_spm
 
+        if len(gaps_spm) <= 5:
+            self.order = 1
+
 
     def fit_freespace_power(self,spm,power,order=3,fittype='poly'):
         """
@@ -377,10 +392,12 @@ class Normalization(object):
         gs = GridSpec(6,ncols)
         ### total profile - takes two rows ###
         ax_prof = fig.add_subplot(gs[0:2,:])
-        ax_prof.plot(spm[self.mask]/1e3-spm_off, pow[self.mask]/pmax, '.k',ms=6,zorder=1)
+        ax_prof.plot(spm[self.mask]/1e3-spm_off, pow[self.mask]/pmax, '.k'
+                    ,ms=6,zorder=1)
         ax_prof.plot(spm/1e3-spm_off, pow/pmax, color='blue',zorder=2)
         ax_prof.plot(spm/1e3-spm_off, self.pnorm_fit/pmax, color='red',zorder=3)
-        ax_prof.set_xlim((gaps[0][0]-100)/1e3-spm_off,(gaps[-1][1]+100)/1e3-spm_off)
+        ax_prof.set_xlim((gaps[0][0]-100)/1e3-spm_off,
+                        (gaps[-1][1]+100)/1e3-spm_off)
         ax_prof.set_ylim(0,1.1)
         ### individual freespace regions ###
         # add subplots
@@ -400,7 +417,8 @@ class Normalization(object):
                 lims = np.array(gaps[i])/1e3-spm_off
                 c=np.random.rand(3)
                 # plotting
-                ax[i].plot(spm[self.mask]/1e3-spm_off, pow[self.mask]/pmax,'.k',ms=6)
+                ax[i].plot(spm[self.mask]/1e3-spm_off, pow[self.mask]/pmax,
+                            '.k',ms=6)
                 ax[i].plot(spm/1e3-spm_off, pow/pmax, color='blue')
                 ax[i].plot(spm/1e3-spm_off, self.pnorm_fit/pmax, color='red')
 
@@ -425,8 +443,10 @@ class Normalization(object):
             filenames,outdirs = construct_filepath(self.rev_info,'FSPFIT')
             # output
             for file,dir in zip(filenames,outdirs):
+                outfile = dir + file + '.PDF'
+                #print('Saving power normalization plot to: '+outfile)
                 fig.text(0.125,0.96,file,fontsize=15)
-                plt.savefig(dir+file+'.PDF')
+                plt.savefig(outfile)
             plt.close('all')
         else:
             plt.show(block=False)

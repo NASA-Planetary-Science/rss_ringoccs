@@ -84,11 +84,23 @@ class DiffractionLimitedProfile(object):
         phi_rl_deg_geo = geo_inst.phi_rl_deg_vals
         D_km_geo = geo_inst.D_km_vals
 
+        #if max(spm_geo) is not max(spm_full) and min(spm_geo) is not min(spm_full):
+
         spm_cal = cal_inst.t_oet_spm_vals
         f_sky_pred_cal = cal_inst.f_sky_hz_vals
         p_free_cal = cal_inst.p_free_vals
         IQ_c = cal_inst.IQ_c
 
+        # Check if spm_geo and spm_full start/end at same time,
+        #   if not, reduce spm_full to spm_geo boundaries
+        if (min(spm_geo) != np.floor(min(spm_full))) or (
+                max(spm_geo) != np.floor(max(spm_full))):
+            ind1 = np.where(spm_full == spm_geo[0])[0][0]
+            ind2 = np.where(spm_full == spm_geo[-1])[0][0] + 1000
+
+            spm_full = spm_full[ind1:ind2]
+            IQ_m = IQ_m[ind1:ind2]
+            IQ_c = IQ_c[ind1:ind2]
 
 
 

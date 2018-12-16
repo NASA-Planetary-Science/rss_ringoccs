@@ -376,7 +376,7 @@ class DiffractionLimitedProfile(object):
             geo_egr.phi_rl_deg_vals = geo_inst.phi_rl_deg_vals[ind:]
             geo_egr.D_km_vals = geo_inst.D_km_vals[ind:]
             geo_egr.F_km_vals = geo_inst.F_km_vals[ind:]
-            geo_ing.rev_info['prof_dir'] = '"EGRESS"'
+            geo_egr.rev_info['prof_dir'] = '"EGRESS"'
 
             dlp_egr = cls(rsr_egr, geo_egr, cal_egr, dr_km,
                     dr_km_tol=dr_km_tol, verbose=verbose, write_file=write_file,

@@ -8,9 +8,10 @@ Purpose:
     copied from Nicole Rappaport's ``predicts`` program in Fortran.
 
 References:
-    This is a pythonized version of Nicole Rappaport's PREDICTS program, which
-    predicts sky frequencies by computing the Doppler shift due to motion of the
-    spacecraft relative to the observer (i.e., the receiving station).
+    This is a pythonized version of Nicole Rappaport's PREDICTS
+    program, which predicts sky frequencies by computing the Doppler
+    shift due to motion of the spacecraft relative to the observer
+    (i.e., the receiving station).
 """
 
 import numpy as np
@@ -64,7 +65,8 @@ def calc_f_sky_recon(f_spm, rsr_inst, sc_name, f_uso, kernels):
             String list of full path name to set of kernels
 
     Returns:
-        :RF (*np.ndarray*): Reconstructed sky frequency computed from spacecraft telemetry and oscillator frequency
+        :RF (*np.ndarray*): Reconstructed sky frequency computed from
+        spacecraft telemetry and oscillator frequency
     """
 
     spice.kclear()
@@ -101,8 +103,9 @@ def derlt(sc_code, etsc, rs_code, et):
     """
     Arguments:
         :sc_code (*int*): Spacecraft NAIF ID
-        :etsc (*float*): Epoch (in ephemeris seconds past J2000 TDB) at
-                                which the signal arrives at the receiver station
+        :etsc (*float*): Epoch (in ephemeris seconds past J2000 TDB)
+                        at which the signal arrives at the receiver
+                        station
         :rs_code (*int*): Receiving station NAIF ID
         :et (*float*): Ephemeris time
 
@@ -189,13 +192,5 @@ def derpt(et, code):
 
 """
 Revisions:
-      gjs_calc_f_sky_recon.py
-   2018 Feb 22 - gsteranka - Original version
-      gjs_calc_f_sky_recon_v2.py
-   2018 Mar 06 - gsteranka - Edited to be a set of functions instead of a
-                             class, and to take SPM directly, instead of
-                             ephemeris time
-      calc_f_sky_recon.py
-   2018 Mar 20 - gsteranka - Copy to official version and remove debug steps
-   2018 Dec 04 - sflury - Documentation
+
 """

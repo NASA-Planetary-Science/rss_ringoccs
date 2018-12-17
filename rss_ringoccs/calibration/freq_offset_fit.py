@@ -66,7 +66,9 @@ class FreqOffsetFit(object):
         :f_sky_resid_fit: fit to the residual frequency offset :math:`\hat{f}(t)_{resid}`
                         evaluated at ``f_spm``
         :chi_squared: sum of the squared residual frequency offset fit such that
-                        :math:`\chi^2 = \sum (\hat{f}(t)_{resid}-f(t)_{resid})^2`
+                        :math:`\chi^2 = \\frac{1}{N-m}\sum(\hat{f}(t)_{resid}-f(t)_{resid})^2`
+                        for :math:`N` data and :math:`m` free parameters (i.e., the
+                        polynomial order plus one).
     """
 
     def __init__(self, rsr_inst, geo_inst, poly_order=7,

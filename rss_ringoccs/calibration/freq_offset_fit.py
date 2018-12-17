@@ -19,7 +19,6 @@ from .calc_f_sky_recon import calc_f_sky_recon
 #from .calc_freq_offset import calc_freq_offset
 from .calc_freq_offset import calc_freq_offset
 #from ..tools.cassini_blocked import cassini_blocked
-from ..tools.search_for_file import search_for_file
 from ..tools.write_output_files import construct_filepath
 
 import sys

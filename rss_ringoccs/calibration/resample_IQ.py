@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 """
-
-resample_IQ.py
-
-Purpose: Resample I and Q from uniformly spaced time to uniformly spaced
-         radius. Normally, you resample from raw resolution data.
+Purpose:
+    Resample I and Q from uniformly spaced time to uniformly spaced
+    radius. This is set up to downsample from the raw resolution data.
 
 """
 
@@ -15,9 +13,17 @@ from scipy.interpolate import interp1d
 
 def pre_resample(rho_km, vec, freq):
     """
-    Sub-function inside of resample_IQ to put vectors to uniform spaced
-    radius at a similar spacing as raw resolution.  For ingress occultations,
-    this step implicitly reverses the radius scale when interpolating
+    Purpose:
+        Set vector sampling to be uniform with respect to radius at
+        a spacing comparable to that of raw resolution.  For ingress
+        occultations, this step implicitly reverses the radius scale
+        when interpolating.
+
+    Arguments:
+        :rho_km (*np.ndarray*): radius in kilometers
+        :vec (*np.ndarray*): a single vector component I or Q of the
+                complex signal
+        :freq (*float*): radial sampling frequency
     """
 
     # Average radius spacing over region
@@ -42,33 +48,37 @@ def pre_resample(rho_km, vec, freq):
 
 def resample_IQ(rho_km, IQ_c, dr_desired, dr_km_tol=0.01, verbose=False):
     """
-    Function to resample I and Q to uniformly spaced radius. Based off of
-    Matlab's resample function
+    Purpose:
+        Resample I and Q to uniformly spaced radius. Based off of
+        Matlab's ``resample`` function
 
     Example:
-        >>> fit_inst = FreqOffsetFit(RSR_inst, geo_inst, f_spm, f_offset, \
-                f_USO, kernels, k=k, rho_exclude=rho_exclude)
+        >>> fit_inst = FreqOffsetFit(RSR_inst, geo_inst, f_spm,
+                        f_offset, f_USO, kernels, k=k,
+                        rho_exclude=rho_exclude)
         >>> (spm_raw, IQ_c_raw) = fit_inst.get_IQ_c()
-        >>> (rho_km_desired, IQ_c_resampled) = resample_IQ(rho_km_raw, \
-                IQ_c_raw, dr_desired, dr_km_tol=dr_km_tol, verbose=verbose)
+        >>> (rho_km_desired, IQ_c_resampled) = resample_IQ(rho_km_raw,
+                        IQ_c_raw, dr_desired, dr_km_tol=dr_km_tol,
+                        verbose=verbose)
 
     Arguments:
-        rho_km (np.ndarray):
+        :rho_km (*np.ndarray*):
             Set of ring intercept point values at initial
             resolution before resampling
-        IQ_c (np.ndarray):
-            Frequency corrected complex signal at initial
+        :IQ_c (*np.ndarray*):
+            Frequency-corrected complex signal at initial
             resolution before resampling
-        dr_desired (float):
-            Desired final radial spacing to resample to
-        dr_km_tol (float):
-            Maximum distance from an integer number of
-            dr_desired that the first rho value will be at. Makes the final
-            set of rho values more regular-looking. For example, if you say
-            dr_km_tol=0.01 with a dr_desired of 0.25, your final set of rho
-            values might look something like [70000.26, 70000.51, ...]
+        :dr_desired (*float*):
+            Desired final radial sample spacing
+        :dr_km_tol (*float*):
+            Maximum tolerance for difference between a multiple of
+            ``dr_desired`` and the starting value for radius. For
+            example, if ``dr_km_tol=0.01`` and ``dr_desired=0.25``,
+            the final set of rho values might look something like
+            [70000.26, 70000.51, ...]
         verbose (bool):
-            Testing variable to print out the first few resampled results
+            Testing variable to print out the first few resampled
+            results
     """
 
     rho_km_diff = np.diff(rho_km)
@@ -120,25 +130,4 @@ def resample_IQ(rho_km, IQ_c, dr_desired, dr_km_tol=0.01, verbose=False):
 
 """
 Revisions:
-      gjs_resample_IQ.py
-   2018 Feb 27 - gsteranka - Original version
-   2018 Mar 01 - gsteranka - Took pre_resample function outside of resample_IQ
-                             function, since I found out it doesn't need to be
-                             inside to be recognized in a call to resample_IQ
-                             from another file
-   2018 Mar 07 - gsteranka - Input is a complex number IQ_c, instead of
-                             separate real and imaginary parts
-   2018 Mar 08 - gsteranka - Change input arrays so rho starts within dr_km_tol
-                             of an integer number of dr_km. Makes it so after
-                             resampling, everything is at a more even number
-      resample_IQ.py
-   2018 Mar 20 - gsteranka - Copy to official version and remove debug steps
-   2018 Apr 09 - gsteranka - Edited pre_resample function to handle ingerss
-                             files as well as egress
-   2018 May 07 - gsteranka - Add warning, intended for chord occultations, if
-                             the input radii are not either monotonically
-                             increasing or decreasing. Also now switching
-                             ingress occultations to be increasing, which lets
-                             the final radii be at integer numbers of requested
-                             final spacing
 """

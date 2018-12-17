@@ -1,7 +1,8 @@
 """
 Purpose:
         Compute a fit to the frequency offset residual using
-        the frequency offset, predicted sky frequency, and reconstructed sky
+        the frequency offset, predicted sky frequency, and
+        reconstructed sky
         frequency.
 """
 
@@ -29,46 +30,53 @@ sys.path.remove('../../')
 
 class FreqOffsetFit(object):
     """
-    Obtains :math:`f(t)_{offset}` from ``calc_freq_offset``, :math:`f(t)_{dr}`
-    from ``calc_f_sky_recon``, and :math:`f(t)_{dp}` from ``get_f_sky_pred``.
-    Computes a polynomial fit :math:`\hat{f}(t)_{resid}` of order specified by
-    ``poly_order`` to sigma-clipped residual difference :math:`f(t)_{resid}`
-    between observed and predicted frequency offset where the residual is given
-    by
+    Obtains :math:`f(t)_{offset}` from ``calc_freq_offset``,
+    :math:`f(t)_{dr}` from ``calc_f_sky_recon``, and :math:`f(t)_{dp}`
+    from ``get_f_sky_pred``. Computes a polynomial fit
+    :math:`\hat{f}(t)_{resid}` of order specified by ``poly_order`` to
+    sigma-clipped residual difference :math:`f(t)_{resid}` between
+    observed and predicted frequency offset where the residual is
+    given by
 
     .. math::
         f(t)_{resid} = (f(t)_{dr}-f(t)_{dp}) - f(t)_{offset}
 
-    Final frequency offset :math:`\hat{f}(t)_{offset}` is found using the
-    polynomial fit :math:`\hat{f}(t)_{resid}` to the frequency offset residuals
-    such that
+    Final frequency offset :math:`\hat{f}(t)_{offset}` is found using
+    the polynomial fit :math:`\hat{f}(t)_{resid}` to the frequency
+    offset residuals such that
 
     .. math::
-        \hat{f}(t)_{offset} = \hat{f}(t)_{resid} + (f(t)_{dr} - f(t)_{dp})
+        \hat{f}(t)_{offset} = \hat{f}(t)_{resid} +
+        (f(t)_{dr} - f(t)_{dp})
 
     Arguments:
         :rsr_inst (*object*): object instance of the RSRReader class
         :geo_inst (*object*): object instance of the Geometry class
 
     Keyword Arguments:
-        :poly_order (*float*): whole number specifying the order of the polynomial
-                                fit to the residual frequency offset
-        :f_uso_x (*float*): frequency in Hz of the X-band ultra-stable oscilator
-                                onboard the Cassini spacecraft. Default is
-                                8427222034.3405 Hz.
+        :poly_order (*float*): whole number specifying the order of
+                        the polynomial fit to the residual frequency
+                        offset
+        :f_uso_x (*float*): frequency in Hz of the X-band ultra-stable
+                        oscilator onboard the Cassini spacecraft.
+                        Default is 8427222034.3405 Hz.
         :verbose (*bool*): when True, enables verbose output mode
 
     Attributes:
-        :f_offset_fit: final frequency offset evaluated using fit to offset residuals
-                        :math:`\hat{f}(t)_{offset} = \hat{f}(t)_{resid} + (f(t)_{dr} - f(t)_{dp})`
+        :f_offset_fit: final frequency offset evaluated using fit to
+                        offset residuals :math:`\hat{f}(t)_{offset} =
+                        \hat{f}(t)_{resid} + (f(t)_{dr} - f(t)_{dp})`
         :f_spm: SPM at which the offset frequency was sampled
         :f_sky_pred: predicted sky frequency :math:`f(t)_{dp}`
-        :f_sky_resid_fit: fit to the residual frequency offset :math:`\hat{f}(t)_{resid}`
-                        evaluated at ``f_spm``
-        :chi_squared: sum of the squared residual frequency offset fit such that
-                        :math:`\chi^2 = \\frac{1}{N-m}\sum(\hat{f}(t)_{resid}-f(t)_{resid})^2`
-                        for :math:`N` data and :math:`m` free parameters (i.e., the
-                        polynomial order plus one).
+        :f_sky_resid_fit: fit to the residual frequency offset
+                        math:`\hat{f}(t)_{resid}` evaluated at
+                        ``f_spm``
+        :chi_squared: sum of the squared residual frequency offset fit
+                        such that :math:`\chi^2 = \\frac{1}{N-m}
+                        \sum(\hat{f}(t)_{resid}-f(t)_{resid})^2`
+                        for :math:`N` data and :math:`m` free
+                        parameters (i.e., the polynomial order plus
+                        one).
     """
 
     def __init__(self, rsr_inst, geo_inst, poly_order=7,
@@ -186,20 +194,22 @@ class FreqOffsetFit(object):
     def create_mask(self, f_spm, f_rho, f_sky_resid):
         """
         Purpose:
-            Creates a Boolean mask array which excludes data based on the
-            following critera:
-                #. ring or planetary occultation in region prevents accurate
-                   estimation of the offset frequency
-                #. offset frequencies fall more than 5-sigma beyond the median
-                   offset frequency
-                #. adjacent data all excluded by previous requirements (excludes
-                   noise which by happenstance satisfies the above criteria)
+            Creates a Boolean mask array which excludes data based on
+            the following critera:
+                #. ring or planetary occultation in region prevents
+                accurate estimation of the offset frequency
+                #. offset frequencies fall more than 5-sigma beyond
+                the median offset frequency
+                #. adjacent data all excluded by previous requirements
+                (excludes noise which by happenstance satisfies the
+                above criteria)
 
         Arguments:
-            :f_spm (*np.ndarray*): SPM sampled by ``calc_freq_offset`` when calculating
-                                    the offset frequencies for the occultation
-            :f_rho (*np.ndarray*): ring intercept radius of the spacecraft signal
-                                    resampled to match f_spm
+            :f_spm (*np.ndarray*): SPM sampled by ``calc_freq_offset``
+                        when calculating the offset frequencies for
+                        the occultation
+            :f_rho (*np.ndarray*): ring intercept radius of the
+                        spacecraft signal resampled to match f_spm
             :f_sky_resid (*np.ndarray*): residual sky frequency
         """
 
@@ -275,14 +285,16 @@ class FreqOffsetFit(object):
         Fit a polynomial to residual frequency.
 
         Arguments:
-            :f_spm (*np.ndarray*): SPM sampled by ``calc_freq_offset`` when calculating
-                                    the offset frequencies for the occultation
-            :f_rho (*np.ndarray*): ring intercept radius of the spacecraft signal
-                                    resampled to match f_spm
+            :f_spm (*np.ndarray*): SPM sampled by ``calc_freq_offset``
+                        when calculating the offset frequencies for
+                        the occultation
+            :f_rho (*np.ndarray*): ring intercept radius of the
+                        spacecraft signal resampled to match f_spm
             :f_sky_resid (*np.ndarray*): residual sky frequency
 
         Keyword Arguments:
-            :poly_order (*float*): Order of polynomial fit to residual frequency
+            :poly_order (*float*): Order of polynomial fit to residual
+                        frequency
             :verbose (*bool*): If True, print processing steps
         """
 
@@ -313,19 +325,23 @@ class FreqOffsetFit(object):
     def plotFORFit(self,spm,resid,fit,mask,spm_min,spm_max,occ_min,occ_max,poly_order):
         """
         Purpose:
-            Plot results of the automated frequency offset residual fit and save
-            plot to a file. File name will match the *.LBL and *.TAB nomenclature.
+            Plot results of the automated frequency offset residual
+            fit and save plot to a file. File name will match the
+            .LBL and .TAB nomenclature.
 
         Arguments:
-            :spm (*np.ndarray*): SPM sampled by ``calc_freq_offset`` when calculating
-                                    the offset frequencies for the occultation
+            :spm (*np.ndarray*): SPM sampled by ``calc_freq_offset``
+                        when calculating the offset frequencies for
+                        the occultation
             :resid (*np.ndarray*): residual sky frequency
-            :fit (*np.ndarray*): polynomial fit to the residual sky frequency
-            :mask (*np.ndarray*): boolean array used to mask residual sky frequency
-                                    for the polynomial fitting
+            :fit (*np.ndarray*): polynomial fit to the residual sky
+                        frequency
+            :mask (*np.ndarray*): boolean array used to mask residual
+                        sky frequency for the polynomial fitting
             :spm_min (*float*): start of occultation in SPM
             :spm_max (*float*): end of occultation in SPM
-            :poly_order (*float*): order of polynomial fit to the residual sky frequency
+            :poly_order (*float*): order of polynomial fit to the
+                        residual sky frequency
         """
         #generate plot file names
         filenames,outdirs = construct_filepath(self.rev_info,'FORFIT')
@@ -354,10 +370,4 @@ class FreqOffsetFit(object):
         plt.close()
 """
 Revisions:
-    2018 Oct 11 - jfong - copied from v1.0 freq_offset_fit.py
-    2018 Nov 15 - sflury - changed sigma clipping so that minimum standard dev
-                           is 1 Hz to prevent exclusion of actual trend
-                         - added sigma clipping based on initial polynomial fit
-                           in creat_mask to improve data selection
-                         - tweaked plotting output for better visualization
 """

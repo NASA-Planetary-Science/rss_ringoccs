@@ -362,7 +362,6 @@ def history_loop_over_long_inputs(f, this_input, this_kwd, varkey, num):
     varlen = len(str(varkey)) + 2
 
     if varkey == 'freespace_spm':
-        pdb.set_trace()
         kline[0] = kline[0].replace('\n', ',\r\n'+' '*(hpad+varlen+7))
         #kline = (str(this_input)).replace('\n', '\n'+' '*hpad)
 

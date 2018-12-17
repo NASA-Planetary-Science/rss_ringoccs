@@ -400,7 +400,7 @@ class Geometry(object):
             # Remove falsechord portions
             if self.verbose:
                 print('\tRemoving portion blocked by atmosphere...')
-            self.__remove_false_chord()
+            self.__remove_atmos_values()
         else:
             prof_dir = '"BOTH"'
 

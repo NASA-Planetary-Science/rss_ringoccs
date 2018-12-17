@@ -1,22 +1,23 @@
 import numpy as np
 
 """
-    calc_freq_offset
-
-        Class for computing the frequency corresponding to the maximum power in
-        the continuous FFT power spectrum
+Purpose:
+    Class for computing the frequency corresponding to the maximum
+    power in the FFT power spectrum
 """
 class calc_freq_offset(object):
     """
         Purpose:
-            Calls functions to sample raw signal at regular intervals using a window
-            of width ``dt_freq``
+            Calls functions to sample raw signal at regular intervals
+            using a window of width ``dt_freq``
 
         Arguments:
-            :rsr_inst (*object*): Object instance of the RSRReader class
+            :rsr_inst (*object*): Object instance of the RSRReader
+                        class
 
         Keyword Arguments:
-            :dt_freq (*float*): half the width of the FFT window, default is 128 sec
+            :dt_freq (*float*): half the width of the FFT window,
+                        default is 64 sec
     """
     def __init__(self,rsr_inst,spm_min,spm_max,dt_freq=64.):
 
@@ -39,14 +40,14 @@ class calc_freq_offset(object):
 
     """
     Purpose:
-        Iteratively calls __find_peak_freq for slices of SPM and IQself.
+        Iteratively calls __find_peak_freq for slices of SPM and IQ.
 
     Attributes:
-        :f_spm (*np.ndarray*): signal window centers in SPM for which the offset
-                                frequencies were computed
-        :f_offset (*np.ndarray*): offset frequencies computed over the occultation
-                                sampled once every 10 seconds with signal window
-                                of width ``dt_freq``
+        :f_spm (*np.ndarray*): signal window centers in SPM for which
+                        the offset frequencies were computed
+        :f_offset (*np.ndarray*): offset frequencies computed over the
+                        occultation sampled once every 10 seconds with
+                        signal window of width ``dt_freq``
     """
     def __find_offset_freqs(self):
 
@@ -100,7 +101,5 @@ class calc_freq_offset(object):
 
         return f_max
 """
-History
-    Nov 01 2018 - sflury        -- original, used components of v1.0 script
-    Nov 15 2018 - sflury        -- updated default window size and window spacing
+Revisions
 """

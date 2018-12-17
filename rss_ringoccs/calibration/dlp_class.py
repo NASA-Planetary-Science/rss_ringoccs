@@ -1,9 +1,9 @@
 """
 
 Purpose:
-         Create a class whose attributes have all the necessary inputs for
-         performing a Fresnel inversion usng DiffractionCorrection, given
-         instances of the classes RSRReader, Geometry, and Calibration.
+     Create a class whose attributes have all the necessary inputs for
+     performing a Fresnel inversion usng DiffractionCorrection, given
+     instances of the classes RSRReader, Geometry, and Calibration.
 
 """
 
@@ -20,44 +20,48 @@ from ..tools.write_output_files import write_output_files
 
 class DiffractionLimitedProfile(object):
     """
-    Framework for an object class containing the diffraction-limited optical 
-    depth profile (DLP) and related attributes.
+    Framework for an object class containing the diffraction-limited
+    optical depth profile (DLP) and related attributes.
 
     Arguments:
         :rsr_inst (*object*): Instance of RSRReader class
         :geo_inst (*object*): Instance of Geometry class
         :cal_inst (*object*): Instance of Calibration class
-        :dr_km (*float*): radial sampling rate :math:`\\Delta\\rho` for 
-                            the DLP in kilometers. DLP radial *resolution* 
-                            is the Nyquist radial sampling, i.e., twice 
-                            the input value of `dr_km`, meaning that this 
-                            will affect the minimum resolution of the 
-                            diffraction-reconstructed profile. Value for
-                            `dr_km` can range from 0.05 km to 0.75 km for the
-                            reconstruction resolutions supported by 
-                            `rss_ringoccs`. PDS sampling rate is 0.25 km, 
-                            which gives a DLP resolution of 0.5 km.
+        :dr_km (*float*): radial sampling rate :math:`\\Delta\\rho`
+                        for the DLP in kilometers. DLP radial
+                        *resolution* is the Nyquist radial sampling,
+                        i.e., twice the input value of `dr_km`,
+                        meaning that this will affect the minimum
+                        resolution of the diffraction-reconstructed
+                        profile. Value for `dr_km` can range from
+                        0.05 km to 0.75 km for the reconstruction
+                        resolutions supported by `rss_ringoccs`.
+                        PDS sampling rate is 0.25 km, which gives a
+                        DLP resolution of 0.5 km.
 
     Keyword Arguments:
-        :dr_km_tol (*float*): Maximum distance from an integer number of
-                    dr_desired that the first rho value will be at. Makes 
-                    the final set of rho values more regular-looking. 
-                    For example, if you say dr_km_tol=0.01 with a dr_desired 
-                    of 0.25, your final set of rho values might look something 
-                    like [70000.26, 70000.51, ...]
-        :verbose (*bool*): When True, turns on verbose output. Default is False.
-        :write_file (*bool*): When True, writes processing results to 
-                    file. Default is True.
-        :profile_range (*list*): 1x2 list specifying the radial limits 
-                    in km of on the occultation. Default is [65000,150000].
+        :dr_km_tol (*float*): Maximum distance from an integer number
+                        of dr_desired that the first rho value will be
+                        at. Makes the final set of rho values more
+                        regular-looking. For example, if you say
+                        dr_km_tol=0.01 with a dr_desired of 0.25, your
+                        final set of rho values might look something
+                        like [70000.26, 70000.51, ...]
+        :verbose (*bool*): When True, turns on verbose output. Default
+                        is False.
+        :write_file (*bool*): When True, writes processing results to
+                        file. Default is True.
+        :profile_range (*list*): 1x2 list specifying the radial limits
+                        in km of on the occultation. Default is
+                        [65000,150000].
 
     Attributes:
         :snr (*np.ndarray*): Signal-to-noise ratio
         :tau_thresh (*np.ndarray*): threshold optical depth
-        :spm_thresh (*np.ndarray*): SPM at which threshold optical 
+        :spm_thresh (*np.ndarray*): SPM at which threshold optical
                 depth is computed
-        :rho_thresh (*np.ndarray*): radius at which threshold optical depth 
-                is computed
+        :rho_thresh (*np.ndarray*): radius at which threshold optical
+                depth is computed
         :dr_km (*float*): raw DLP sampling rate
     """
     def __init__(self, rsr_inst, geo_inst, cal_inst, dr_km,
@@ -143,13 +147,14 @@ class DiffractionLimitedProfile(object):
             else:
                 raise ValueError('dlp_class.py: Negative normalized power '
                             + 'within ring system!')
-            
+
 
         phase_rad_vals = np.arctan2(np.imag(IQ_c_desired),
                 np.real(IQ_c_desired))
 
-        # compute threshold optical depth
-        tau_thresh_inst = calc_tau_thresh(rsr_inst,geo_inst,cal_inst,res_km=0.5)
+        # compute threshold optical depth at Nyquist sampling rate
+        # (i.e., twice the "raw" DLP sampling rate)
+        tau_thresh_inst = calc_tau_thresh(rsr_inst,geo_inst,cal_inst,res_km=2.*dr_km)
         self.snr = tau_thresh_inst.snr
         self.tau_thresh = tau_thresh_inst.tau_thresh
         self.spm_thresh = tau_thresh_inst.spm_vals

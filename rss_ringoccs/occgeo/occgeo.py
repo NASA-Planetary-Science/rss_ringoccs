@@ -134,6 +134,8 @@ class Geometry(object):
     """
     def __init__(self, rsr_inst, planet, spacecraft, kernels, pt_per_sec=1.,
             verbose=False, write_file=True):
+    
+        self.verbose = verbose
 
         if verbose:
             print('Calculating occultation geometry...')
@@ -165,21 +167,12 @@ class Geometry(object):
         rsr_hist = rsr_inst.history
         (f_spm, f_sky) = rsr_inst.get_f_sky_pred()
 
-        if verbose:
-            print('\tSetting rev info attribute...')
-
-        # Setting rev info attribute
         self.rev_info = rsr_inst.rev_info
 
         # Create new spm array with defined points per second
         step = 1./pt_per_sec
         t_oet_spm_vals = np.arange(spm_start, spm_end, step)
         t_oet_et_vals = spm_to_et(t_oet_spm_vals, doy, year, kernels=kernels)
-        #self.__et_vals = np.arange(t_oet_et_vals[0], t_oet_et_vals[-1],
-        #        0.1)
-
-        # Interpolate to get sky frequency
-        f_sky_hz_vals = np.interp(t_oet_spm_vals, f_spm, f_sky)
 
         # Calculate Saturn center to ring intercept vector
         if verbose:
@@ -188,6 +181,12 @@ class Geometry(object):
                 spacecraft, dsn, kernels=kernels)
 
         rho_km_vals = [spice.vnorm(vec) for vec in rho_vec_vals]
+
+
+
+        # Interpolate to get sky frequency
+        f_sky_hz_vals = np.interp(t_oet_spm_vals, f_spm, f_sky)
+
 
         # Calculate spacecraft event time
         if verbose:
@@ -258,6 +257,16 @@ class Geometry(object):
         beta_vals = calc_beta(B_deg_vals, phi_ora_deg_vals)
         B_eff_deg_vals = calc_B_eff_deg(B_deg_vals, phi_ora_deg_vals)
 
+        # Calculate when signal passes atmosphere + ionosphere
+        ionos_occ_et_vals = get_planet_occ_times(t_oet_et_vals, dsn,
+                planet, spacecraft, height_above=5000.)
+        self.ionos_occ_spm_vals = et_to_spm(ionos_occ_et_vals)
+
+        atmos_occ_et_vals = get_planet_occ_times(t_oet_et_vals, dsn,
+                planet, spacecraft, height_above=500.)
+        self.atmos_occ_spm_vals = et_to_spm(atmos_occ_et_vals)
+
+
         # Set attributes, first block contains the inputs to *GEO.TAB
         self.t_oet_spm_vals = np.asarray(t_oet_spm_vals)
         self.t_ret_spm_vals = np.asarray(t_ret_spm_vals)
@@ -284,16 +293,21 @@ class Geometry(object):
         self.beta_vals = np.asarray(beta_vals)
         self.B_eff_deg_vals = np.asarray(B_eff_deg_vals)
 
+        # Add prof_dir entry to rev_info dict
+        self.rev_info['prof_dir'] = self.get_profile_dir()
+
+        if self.rev_info['prof_dir'] == '"BOTH"':
+            self.split_ind = self.get_chord_ind()
+        else:
+            self.split_ind = None
+
+        if len(self.atmos_occ_spm_vals) == 0:
+            self.rev_info['planetary_occ_flag'] = '"N"'
+        else:
+            self.rev_info['planetary_occ_flag'] = '"Y"'
 
 
-        # Calculate when signal passes atmosphere + ionosphere
-        ionos_occ_et_vals = get_planet_occ_times(t_oet_et_vals, dsn,
-                planet, spacecraft, height_above=5000.)
-        self.ionos_occ_spm_vals = et_to_spm(ionos_occ_et_vals)
 
-        atmos_occ_et_vals = get_planet_occ_times(t_oet_et_vals, dsn,
-                planet, spacecraft, height_above=500.)
-        self.atmos_occ_spm_vals = et_to_spm(atmos_occ_et_vals)
         # Write processing history dictionary attribute
         if verbose:
             print('\tWriting history dictionary...')
@@ -309,18 +323,6 @@ class Geometry(object):
                 }
         self.history = write_history_dict(input_vars, input_kwds, __file__)
 
-        # Add prof_dir entry to rev_info dict
-        self.rev_info['prof_dir'] = self.get_profile_dir()
-
-        if self.rev_info['prof_dir'] == '"BOTH"':
-            self.split_ind = self.get_chord_ind()
-        else:
-            self.split_ind = None
-
-        if len(self.atmos_occ_spm_vals) == 0:
-            self.rev_info['planetary_occ_flag'] = '"N"'
-        else:
-            self.rev_info['planetary_occ_flag'] = '"Y"'
 
         self.freespace_km, self.freespace_spm = get_freespace(
                 t_ret_spm_vals, year, doy, rho_km_vals,
@@ -386,12 +388,50 @@ class Geometry(object):
 
         if len(ing_blocked) == n_ing:
             prof_dir = '"EGRESS"'
+
+            # Remove false chord portions
+            if self.verbose:
+                print('\tRemoving portion blocked by atmosphere...')
+            self.__remove_atmos_values()
+
         elif len(egr_blocked) == n_egr:
             prof_dir = '"INGRESS"'
+
+            # Remove falsechord portions
+            if self.verbose:
+                print('\tRemoving portion blocked by atmosphere...')
+            self.__remove_false_chord()
         else:
             prof_dir = '"BOTH"'
-    
+
         return prof_dir
+
+    def __remove_atmos_values(self):
+        npts = len(self.t_oet_spm_vals)
+
+        # Index array of where atmosphere is blocking signal
+        ind1 = np.argwhere(
+                self.t_oet_spm_vals == min(self.atmos_occ_spm_vals))[0][0]
+        ind2 = np.argwhere(
+                self.t_oet_spm_vals == max(self.atmos_occ_spm_vals))[0][0]
+
+        rind = np.arange(ind1, ind2+1, step=1)
+        
+        # Make sure ind2 > ind1
+        if ind1 > ind2:
+            ind1t = ind1
+            ind2t = ind2t
+
+            ind1 = ind2t
+            ind2 = ind1t
+
+
+        for attr, value in self.__dict__.items():
+            if type(value) is not bool and len(value) == npts:
+                setattr(self, attr, np.delete(value, rind))
+            else:
+                continue
+
 
     def get_chord_ind(self):
         """

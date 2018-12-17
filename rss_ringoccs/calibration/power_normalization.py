@@ -91,6 +91,7 @@ class Normalization(object):
                                         self.order)
         else:
             new_gaps = freespace_spm
+
         # plot final fit for user reference
         self.plot_power_profile(spm_down,p_obs_down,new_gaps,self.order,
                 save=True)
@@ -183,7 +184,8 @@ class Normalization(object):
             Extract an Nx2 list from the string of user input freespace regions.
 
         Arguments:
-            :gaps_str (*str*): string containing the user input freespace regions.
+            :gaps_str (*str*): string containing the user input freespace 
+                regions.
 
         Returns:
             :gaps (*list*): an Nx2 list of floats indicating the lower and upper
@@ -213,11 +215,13 @@ class Normalization(object):
         """
         Arguments:
             :spm (*np.ndarray*): SPM in seconds of the downsampled signal
-            :rho (*np.ndarray*): occultation intercept radius of the downsampled signal
-            :gaps_spm (*list*): location of freespace regions as predicted by the gap-finding
-                                routines ``get_freespace.py`` using tabulated orbital parameters.
-            :pc (*np.ndarray*): phase-corrected downsampled power where :math:`P_c=|I_c^2+iQ_c^2|`
-        Sets attributes
+            :rho (*np.ndarray*): occultation intercept radius of the 
+                downsampled signal
+            :gaps_spm (*list*): location of freespace regions as predicted 
+                by the gap-finding routines ``get_freespace.py`` using
+                tabulated orbital parameters.
+            :pc (*np.ndarray*): phase-corrected downsampled power where 
+                :math:`P_c=|I_c^2+iQ_c^2|`. Sets attributes
             :mask (*np.ndarray*):
                            array of booleans wherein True designates data
                            corresponding to freespace power and False
@@ -227,7 +231,7 @@ class Normalization(object):
                            km for each of N gaps designated
         """
 
-        # normalize corrected power to max corrected power inside the occultation
+        # normalize corrected power to max corrected power inside occultation
         pc_max = np.nanmax(pc[(spm>=gaps_spm[1][1])&(spm<=gaps_spm[-2][0])])
         pc_norm = pc/pc_max
 
@@ -237,28 +241,19 @@ class Normalization(object):
 
         # storage
         pc_median = []
-        ### compute median power in each freespace region
-        #for rho_limits in gaps:
-        #    # Boolean mask including only rho values within gap
-        #    ind = [(rho_km_full>rho_limits[0])&(rho_km_full<rho_limits[1])]
-        #    # find median corrected power within space
-        #    pc_median += [np.nanmedian(pc_norm[ind])]
+
+        # compute median power in each freespace region
         gaps_spm_copy = gaps_spm.copy()
 
         for spm_limits in gaps_spm_copy:
             # Boolean mask including only spm values within gap
             ind = [(spm>=spm_limits[0])&(spm<=spm_limits[1])]
             # find median corrected power within space
-            #if pc_median < np.median(pc_median)*1.3 and pc_median > np.median(pc_median)*1.3:
             pcm = np.nanmedian(pc_norm[ind])
             if pcm < 0.5 or pcm > 1.25 :
-                #gaps_spm = np.delete(gaps_spm_copy, spm_limits)
                 gaps_spm.remove(spm_limits)
-                #gaps_spm = (gaps_spm_copy.tolist()).remove(spm_limits)
             else:
-                pc_median += [pcm]#[np.nanmedian(pc_norm[ind])]
-            #else:
-            #    gaps_spm.remove(spm_limits)
+                pc_median += [pcm]
 
         # create mask array that includes only freespace power
         fsp_mask = np.array([False for i in range(len(spm))])
@@ -266,11 +261,9 @@ class Normalization(object):
         # iterate over all radii
         for i in range(len(spm)):
             # check to see if intercept radius falls within a gap
-            #for rho_limits in gaps:
             for spm_limits,p_c_m in zip(gaps_spm,pc_median):
                 # looks at specific gap and compares radius to gap boundaries
                 if spm[i] >= spm_limits[0] and spm[i] <= spm_limits[1]:
-                    #fsp_mask[i] = True
                     # compares the corrected, normalized IQ to the median free-
                     # space power within the gap, TRUE if within 10%
                     if pc_norm[i] > p_c_m-0.1 and pc_norm[i] < p_c_m+0.1 :
@@ -290,7 +283,8 @@ class Normalization(object):
         """
         Arguments:
             :spm (*np.ndarray*): downsampled SPM
-            :power (*np.ndarray*): absolute square of downsapmled phase-corrected signal
+            :power (*np.ndarray*): absolute square of downsampled
+                phase-corrected signal
 
         Keyword Arguments:
             :order (*float*): order of the fit, whole number between 1 and 5.
@@ -314,9 +308,9 @@ class Normalization(object):
             coef = np.polyfit(spm[self.mask],power[self.mask],order)
             # evaluate the polynomial at all spm
             fit = np.polyval(coef, spm)
-            chi2 = np.sum(np.square(np.polyval(coef,spm[self.mask])-power[self.mask]))/v
+            chi2 = np.sum(np.square(np.polyval(coef,spm[self.mask])-
+                                                power[self.mask]))/v
 
-            #fit = np.polyval(coef, spm_full)
 
         # spline fit
         elif fittype == 'spline' :
@@ -334,11 +328,13 @@ class Normalization(object):
             smooth = (ml-np.sqrt(2*ml),ml+np.sqrt(2*ml))
 
             # use knots and given order to compute B-spline coefficients
-            coef = splrep(spm[self.mask],power[self.mask],k=order,t=knots_spm, s=smooth)
+            coef = splrep(spm[self.mask],power[self.mask],k=order,
+                            t=knots_spm, s=smooth)
 
             # evaluate spline at all spm
             fit = splev(spm,coef)
-            chi2 = np.sum(np.square(splev(spm[self.mask],coef)-power[self.mask]))/v
+            chi2 = np.sum(np.square(splev(spm[self.mask],coef)
+                                            -power[self.mask]))/v
 
         else:
             # if keyword type not recognized, state for user and fit with poly
@@ -349,7 +345,8 @@ class Normalization(object):
             coef = np.polyfit(spm[self.mask],power[self.mask],order)
             # evaluate the polynomial at all spm
             fit = np.polyval(coef, spm)
-            chi2 = np.sum(np.square(np.polyval(coef,spm[self.mask])-power[self.mask]))/v
+            chi2 = np.sum(np.square(np.polyval(coef,spm[self.mask])-
+                                                power[self.mask]))/v
 
 
         self.pnorm_fit = fit
@@ -359,20 +356,23 @@ class Normalization(object):
     def plot_power_profile(self,spm,pow,gaps,order,save=False):
         """
         Purpose:
-            Plot results of the freespace power for total profile and each individual
-            freespace region and either show plot in a GUI or save it to a file.
+            Plot results of the freespace power for total profile and 
+            each individual freespace region and either show plot in a 
+            GUI or save it to a file.
             File name will match the *.LBL and *.TAB nomenclature.
 
         Arguments:
-            :spm (*np.ndarray*): SPM sampled by ``calc_freq_offset`` when calculating
-                                    the offset frequencies for the occultation
+            :spm (*np.ndarray*): SPM sampled by 
+                ``calc_freq_offset`` when calculating the offset frequencies 
+                for the occultation
             :pow (*np.ndarray*): residual sky frequency
             :gaps (*np.ndarray*): gap edges used to select freespace power
-            :order (*float*): order of polynomial fit to the residual sky frequency
+            :order (*float*): order of polynomial fit to the residual sky 
+                frequency
 
         Keyword Arguments:
-            :save (*bool*): If True, saves plots to file. Otherwise, plot is shown in GUI.
-                            Default is False.
+            :save (*bool*): If True, saves plots to file. Otherwise, plot 
+                is shown in GUI. Default is False.
         """
         # max power inside the occultation
         pmax = np.nanmax(pow[(spm>=gaps[0][0])&(spm<=gaps[-1][1])])
@@ -433,7 +433,8 @@ class Normalization(object):
                 ax[i].axis('off')
 
         # subplot margin setting
-        plt.subplots_adjust(wspace=None, hspace=0.3,left=0.1,right=0.975,top=0.95,bottom=0.075)
+        plt.subplots_adjust(wspace=None, hspace=0.3,left=0.1,right=0.975,
+                             top=0.95,bottom=0.075)
         # axis labels
         fig.text(0.45,0.01,r'SPM - '+str(int(spm_off))+' ($10^3$ sec)')
         fig.text(0.01,0.5,r'Power (arb.)',rotation=90)
@@ -459,7 +460,8 @@ class Normalization(object):
 
         Arguments:
             :spm_raw (*np.ndarray*): raw SPM values
-            :IQ_c_raw (*np.nparray*): :math:`I_c+iQ_c` sampled at the raw SPM rate
+            :IQ_c_raw (*np.nparray*): :math:`I_c+iQ_c` sampled at the 
+                raw SPM rate
 
         Keyword Arguments:
             :dt_down (*float*):
@@ -493,17 +495,4 @@ class Normalization(object):
         return spm_vals_down, p_obs_down
 """
 Revisions:
-      power_normalization.py
-      2018 Oct 17 - jfong - edit inputs to create_mask
-                            - remove rho_km_vals because already in geo_inst
-                            - remove spm_vals -- never used?
-                          - use atmos_occ_spm_vals in place of cassini_blocked
-                          - index ind not m for IQ_c_median
-                          - IQ_c_median is at raw spm values, not same dim
-      2018 Nov 12 - sflury - changed median freespace power criterion from 1e-3
-                             to 0.5 in the create_mask function
-                           - moved power normalization plot to own function
-                           - moved iterative user interaction to own function
-      2018 Nov 15 - sflury - added clipping of freespace power that is too high,
-                             made interactive mode optional with kwarg "interact"
 """

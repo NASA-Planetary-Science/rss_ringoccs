@@ -173,8 +173,8 @@ class FreqOffsetFit(object):
 
         # Draw and save reference plot
         self.plotFORFit(f_spm,f_sky_resid,f_sky_resid_fit,self.__fsr_mask,
-                        spm_min,spm_max,geo_inst.freespace_spm[0][0],
-                        geo_inst.freespace_spm[-1][1],poly_order)
+                        spm_min,spm_max,geo_inst.t_oet_spm_vals[0],
+                        geo_inst.t_oet_spm_vals[-1],poly_order)
 
         # Calculate frequency offset fit
         self.f_offset_fit = f_sky_resid_fit + (f_sky_recon - f_sky_pred)

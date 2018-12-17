@@ -84,33 +84,15 @@ class DiffractionLimitedProfile(object):
         phi_rl_deg_geo = geo_inst.phi_rl_deg_vals
         D_km_geo = geo_inst.D_km_vals
 
-        #if max(spm_geo) is not max(spm_full) and min(spm_geo) is not min(spm_full):
-
         spm_cal = cal_inst.t_oet_spm_vals
         f_sky_pred_cal = cal_inst.f_sky_hz_vals
         p_free_cal = cal_inst.p_free_vals
         IQ_c = cal_inst.IQ_c
 
-        # Check if spm_geo and spm_full start/end at same time,
-        #   if not, reduce spm_full to spm_geo boundaries
-        if (min(spm_geo) != np.floor(min(spm_full))) or (
-                max(spm_geo) != np.floor(max(spm_full))):
-            ind1 = np.where(spm_full == spm_geo[0])[0][0]
-            ind2 = np.where(spm_full == spm_geo[-1])[0][0] + 1000
-
-            spm_full = spm_full[ind1:ind2]
-            IQ_m = IQ_m[ind1:ind2]
-            IQ_c = IQ_c[ind1:ind2]
-
-
-
         # interpolate coef to convert SPM to rho
         spm_to_rho = splrep(spm_geo, rho_km_geo)
         rho_full = splev(spm_full, spm_to_rho)
 
-        # get predicted sky frequency for cal SPM
-        dummy_spm, f_sky_pred_file = rsr_inst.get_f_sky_pred(f_spm=spm_cal)
-        f_offset_fit_cal = f_sky_pred_cal - f_sky_pred_file
         rho_km_cal = splev(spm_cal, spm_to_rho)
 
         # resample IQ_c, but not to exact rho boundaries
@@ -267,8 +249,10 @@ class DiffractionLimitedProfile(object):
         self.rho_corr_pole_km_vals = rho_corr_pole_km_vals
         self.rho_corr_timing_km_vals = rho_corr_timing_km_vals
         self.tau_vals = -np.sin(B_rad_vals_interp)*np.log(p_norm_vals)
-        self.raw_tau_threshold_vals = np.interp(spm_desired,self.spm_thresh,self.tau_thresh)
-        self.tau_threshold_vals = np.interp(spm_desired,self.spm_thresh,self.tau_thresh)
+        self.raw_tau_threshold_vals = np.interp(
+                spm_desired, self.spm_thresh,self.tau_thresh)
+        self.tau_threshold_vals = np.interp(
+                spm_desired,self.spm_thresh,self.tau_thresh)
 
 
 
@@ -299,6 +283,24 @@ class DiffractionLimitedProfile(object):
         # check for ingress, egress, or chord
         prof_dir = geo_inst.rev_info['prof_dir']
 
+        spm_full = rsr_inst.spm_vals
+        spm_geo = geo_inst.t_oet_spm_vals
+
+        # Check if spm_geo and spm_full start/end at same time,
+        #   if not, reduce spm_full to spm_geo boundaries
+        if (min(spm_geo) != np.floor(min(spm_full))) or (
+                max(spm_geo) != np.floor(max(spm_full))):
+            ind1 = np.where(spm_full == spm_geo[0])[0][0]
+            ind2 = np.where(spm_full == spm_geo[-1])[0][0]
+
+            IQ_m = rsr_inst.IQ_m
+            IQ_c = rsr_inst.IQ_c
+
+            rsr_inst.spm_vals = spm_full[ind1:ind2]
+            rsr_inst.IQ_m = IQ_m[ind1:ind2]
+            cal_inst.IQ_c = IQ_c[ind1:ind2]
+
+
         if prof_dir == '"INGRESS"':
             dlp_egr = None
             dlp_ing = cls(rsr_inst, geo_inst, cal_inst, dr_km,
@@ -315,7 +317,10 @@ class DiffractionLimitedProfile(object):
             # split ingress and egress
             geo_ing = copy.deepcopy(geo_inst)
             geo_egr = copy.deepcopy(geo_inst)
-            ind = geo_inst.split_ind
+
+            # Get index of first value after rho_dot switches value
+            ind = np.argwhere(
+                    np.diff(np.sign(geo_inst.rho_dot_kms_vals)))[0][0]+1
             ind_spm1 = geo_inst.t_oet_spm_vals[ind]
 
             rsr_ing = copy.deepcopy(rsr_inst)
@@ -324,29 +329,41 @@ class DiffractionLimitedProfile(object):
             cal_ing = copy.deepcopy(cal_inst)
             cal_egr = copy.deepcopy(cal_inst)
 
-            ind_spm2 = np.argwhere(rsr_inst.spm_vals == ind_spm1)[0][0]
-            ind_spm3 = np.argwhere(cal_inst.t_oet_spm_vals == ind_spm1)[0][0]
+            # For ingress occ, remove 1s from the end
+            ind_rsr_ing = np.argwhere(
+                            rsr_inst.spm_vals == (ind_spm1-1.))[0][0]
+            ind_cal_ing = np.argwhere(
+                            cal_inst.t_oet_spm_vals == (ind_spm1-1.))[0][0]
 
+            # For egress occ, remove 1s from the beginning
+            ind_rsr_egr = np.argwhere(
+                            rsr_inst.spm_vals == (ind_spm1+1.))[0][0]
+            ind_cal_egr = np.argwhere(
+                            cal_inst.t_oet_spm_vals == (ind_spm1+1.))[0][0]
 
             # split raw spm and IQ attributes
-            rsr_ing.spm_vals = rsr_inst.spm_vals[:ind_spm2]
-            rsr_ing.IQ_m = rsr_inst.IQ_m[:ind_spm2]
+            rsr_ing.spm_vals = rsr_inst.spm_vals[:ind_rsr_ing]
+            rsr_ing.IQ_m = rsr_inst.IQ_m[:ind_rsr_ing]
 
-            rsr_egr.spm_vals = rsr_inst.spm_vals[ind_spm2:]
-            rsr_egr.IQ_m = rsr_inst.IQ_m[ind_spm2:]
+            rsr_egr.spm_vals = rsr_inst.spm_vals[ind_rsr_egr:]
+            rsr_egr.IQ_m = rsr_inst.IQ_m[ind_rsr_egr:]
+
 
             # split calibration attributes
-            cal_ing.IQ_c = cal_inst.IQ_c[:ind_spm2]
-            cal_ing.p_free_vals = cal_inst.p_free_vals[:ind_spm3]
-            cal_ing.f_sky_hz_vals = cal_inst.f_sky_hz_vals[:ind_spm3]
-            cal_ing.t_oet_spm_vals = cal_inst.t_oet_spm_vals[:ind_spm3]
-            cal_ing.f_sky_resid_fit_vals = cal_inst.f_sky_resid_fit_vals[:ind_spm3]
+            cal_ing.IQ_c = cal_inst.IQ_c[:ind_rsr_ing]
 
-            cal_egr.IQ_c = cal_inst.IQ_c[ind_spm2:]
-            cal_egr.p_free_vals = cal_inst.p_free_vals[ind_spm3:]
-            cal_egr.f_sky_hz_vals = cal_inst.f_sky_hz_vals[ind_spm3:]
-            cal_egr.t_oet_spm_vals = cal_inst.t_oet_spm_vals[ind_spm3:]
-            cal_egr.f_sky_resid_fit_vals = cal_inst.f_sky_resid_fit_vals[ind_spm3:]
+            cal_ing.p_free_vals = cal_inst.p_free_vals[:ind_cal_ing]
+            cal_ing.f_sky_hz_vals = cal_inst.f_sky_hz_vals[:ind_cal_ing]
+            cal_ing.t_oet_spm_vals = cal_inst.t_oet_spm_vals[:ind_cal_ing]
+            cal_ing.f_sky_resid_fit_vals = (
+                        cal_inst.f_sky_resid_fit_vals[:ind_cal_ing])
+
+            cal_egr.IQ_c = cal_inst.IQ_c[ind_rsr_egr:]
+            cal_egr.p_free_vals = cal_inst.p_free_vals[ind_cal_egr:]
+            cal_egr.f_sky_hz_vals = cal_inst.f_sky_hz_vals[ind_cal_egr:]
+            cal_egr.t_oet_spm_vals = cal_inst.t_oet_spm_vals[ind_cal_egr:]
+            cal_egr.f_sky_resid_fit_vals = (
+                        cal_inst.f_sky_resid_fit_vals[ind_cal_egr:])
 
             # split geometry attributes
             geo_ing.rho_km_vals = geo_inst.rho_km_vals[:ind]

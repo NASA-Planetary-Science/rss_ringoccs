@@ -1,17 +1,17 @@
 """
-:Purpose:
+Purpose:
 
-    Class framework for performing the necessary calibration steps for the RSR
-    data. This includes phase correction based on frequency offset of the
-    spacecraft and normalization of received power with respect to the
-    intrinsic spacecraft power.
+    Class framework for performing the necessary calibration steps for
+    the RSR data. This includes phase correction based on frequency
+    offset of the spacecraft and normalization of received power with
+    respect to the intrinsic spacecraft power.
 
-:Notes:
+Notes:
 
-    Can be computationally cumbersome, especially for chord occultations. May
-    require up to 30 mins for 16 kHz RSR data files.
+    Can be computationally cumbersome, especially for chord
+    occultations. May require up to 30 mins for 16 kHz RSR data files.
 
-:Dependencies:
+Dependencies:
 
     #. numpy
     #. pdb
@@ -35,64 +35,67 @@ from ..occgeo import Geometry
 class Calibration(object):
     """
     Purpose:
-        Define a class which, when instantiated, calls the submodules for
-        performing each step of the calibration process by instantiating the
-        classes ``FreqOffsetFit`` in the ``freq_offset_fit.py`` script and
-        ``Normalization`` in the ``power_normalization.py`` script.
-        .. If the calibration files for the desired input parameters already
-        .. exist, use the ``MakeCalInst`` class in the ``cal_inst_from_file.py``
+        Define a class which, when instantiated, calls the submodules
+        for performing each step of the calibration process by
+        instantiating the classes ``FreqOffsetFit`` in the
+        ``freq_offset_fit.py`` script and ``Normalization`` in the
+        ``power_normalization.py`` script.
 
     Arguments:
         :rsr_inst (*object*): Instance of the RSRReader class
         :geo_inst (*object*): Instance of the Geometry class
 
     Keyword Arguments:
-        :fof_order (*float*): Whole number specifying the polynomial order to
-                                use when fitting the frequency offset residual.
-                                Default is 9.
-        :pnf_order (*float*): whole number specifying the polynomial order to
-                                use when fitting the freespace power. Default
-                                is 3.
-        :dt_cal (*float*): Desired final spacing in SPM between data points.
-                                Default is 1 sec.
-        :verbose (*bool*): If True, print intermediate steps and results.
-                                Default is False.
-        :write_file (*bool*): If True, write output *CAL.TAB and *CAL.LBL files.
-                                Default is True.
-        :interact (*bool*): If True, enables the interactive mode in the
-                                terminal for fitting the freespace power.
-                                Default is False.
+        :fof_order (*float*): Whole number specifying the polynomial
+                        order to use when fitting the frequency offset
+                        residual. Default is 9.
+        :pnf_order (*float*): whole number specifying the polynomial
+                        order to use when fitting the freespace power.
+                        Default is 3.
+        :dt_cal (*float*): Desired final spacing in SPM between data
+                        points. Default is 1 sec.
+        :verbose (*bool*): If True, print intermediate steps and
+                        results. Default is False.
+        :write_file (*bool*): If True, write output CAL .TAB and
+                        CAL .LBL files. Default is True.
+        :interact (*bool*): If True, enables the interactive mode in
+                        the terminal for fitting the freespace power.
+                        Default is False.
 
     Attributes:
-        :rev_info (*dict*): dict identifying the specific occultation: rsrfile,
-                                year, day of year, direction and type of
-                                occultation, spacecraft revolution number,
-                                and observation band
-        :t_oet_spm_vals (*np.ndarray*): SPM values for observed event time
-                                :math:`t`
+        :rev_info (*dict*): *dict* of information identifying the
+                        specific occultation: rsrfile, year, day of
+                        year, direction and type of occultation,
+                        spacecraft revolution number, and observation
+                        band
+        :t_oet_spm_vals (*np.ndarray*): SPM values for observed event
+                        time :math:`t`
         :f_sky_hz_vals (*np.ndarray*):
-                            sum of the predicted sky frequency values
-                            and the fit to frequency offset
-                            :math:`\\hat{f}(t)_{offset}=(f_{dr}(t)-f_{dp}(t))+\\hat{f}(t)_{resid}`
-                            following Equation 19 in [CRSUG2018]_.
-        :f_sky_resid_fit_vals (*np.ndarray*): fit to residual sky frequency
-            :math:`\\hat{f}(t)_{resid}`
+                        sum of the predicted sky frequency values
+                        and the fit to frequency offset
+                        :math:`\\hat{f}(t)_{offset}=(f_{dr}(t)
+                        -f_{dp}(t))+\\hat{f}(t)_{resid}`
+                        following Equation 19 in [CRSUG2018]_.
+        :f_sky_resid_fit_vals (*np.ndarray*): fit to residual sky
+                        frequency :math:`\\hat{f}(t)_{resid}`
         :p_free_vals (*np.ndarray*): fit to freespace power
-            :math:`\\hat{P}_0(t)`
+                        :math:`\\hat{P}_0(t)`
         :IQ_c (*np.ndarray*): phase-corrected spacecraft signal
-            :math:`I_{c}+iQ_{c}`
-        :history (*dict*): information about the parameters, results, and
-                            computation of the calibration procedures
-        :FORFIT_chi_squared (*float*): sum of the squared residual frequency
-                            offset fit such that
-            :math:`\chi^2 = \\frac{1}{N-m}\sum (\hat{f}(t)_{resid}-f(t)_{resid})^2`
+                        :math:`I_{c}+iQ_{c}`
+        :history (*dict*): information about the parameters, results,
+                        and computation of the calibration procedures
+        :FORFIT_chi_squared (*float*): sum of the squared residual
+                        frequency offset fit such that
+                        :math:`\chi^2 = \\frac{1}{N-m}\sum
+                        (\hat{f}(t)_{resid}-f(t)_{resid})^2`
         :FSPFIT_chi_squared (*float*):
-            :math:`\chi^2 = \\frac{1}{N-m}\sum (\hat{P}_0(t)-P_0(t))^2`
+                        :math:`\chi^2 = \\frac{1}{N-m}\sum
+                        (\hat{P}_0(t)-P_0(t))^2`
 
     Returns:
         Object instance with attributes associated with the process of
-        calibrating the measured signal :math:`I_{m}+iQ_{m}` as well as
-        the method for phase-correcting :math:`I_{m}+iQ_{m}`.
+        calibrating the measured signal :math:`I_{m}+iQ_{m}` as well
+        as the method for phase-correcting :math:`I_{m}+iQ_{m}`.
     """
 
     def __init__(self, rsr_inst, geo_inst, fof_order=9, pnf_order=3, dt_cal=1.0,
@@ -194,30 +197,39 @@ class Calibration(object):
         """
         Purpose:
 
-        Apply frequency offset fit to raw measured signal using the signal
-        frequencies calculated by ``FreqOffsetFit``. First resamples the
-        frequency offset fit to a 0.1 sec separation. Then, computes detrending
-        function by integrating frequency offset fit to get phase detrending
-        function :math:`\\psi`. Finally, applies phase detrending correction
-        to signal to raw signal such that
+            Apply frequency offset fit to raw measured signal using
+            the signal frequencies calculated by ``FreqOffsetFit``.
+            First resamples the frequency offset fit to a 0.1 sec
+            separation. Then, computes detrending function by
+            integrating frequency offset fit to get phase detrending
+            function :math:`\\psi` using Equation 18 from
+            [CRSUG2018]_ where
 
-        .. math::
-            I_{c}+iQ_{c} = [I_{m}+iQ_{m}] \\exp(-i\\psi)
+            .. math::
+                \\psi = \int^{t}\hat{f}(\\tau)_{offset}
+                \mathrm{d}\\tau+\\psi(t_0)
 
-        as discussed in [CRSUG2018]_ (see their Equations 17 and 18).
+            Finally, applies phase detrending correction to signal to
+            raw signal such that
+
+            .. math::
+                I_{c}+iQ_{c} = [I_{m}+iQ_{m}] \\exp(-i\\psi)
+
+            as discussed in [CRSUG2018]_ (see their Equation 17).
+
         Arguments:
             :spm_vals (*np.ndarray*): raw SPM values
             :IQ_m (*np.ndarray*): raw complex signal measured by DSN
-            :f_spm (*np.ndarray*): SPM sampled for frequency offset calculation
-                                in the ``calc_freq_offset`` class in the
-                                ``calc_freq_offset.py`` script.
-            :f_offset_fit (*np.ndarray*): frequency of the spacecraft signal
-                                corresponding to ``f_spm``
+            :f_spm (*np.ndarray*): SPM sampled for frequency offset
+                        calculation in the ``calc_freq_offset`` class
+                        in the ``calc_freq_offset.py`` script.
+            :f_offset_fit (*np.ndarray*): frequency of the spacecraft
+                        signal corresponding to ``f_spm``
 
         Returns:
-            :IQ_c (*np.ndarray*):
-                Frequency-corrected complex signal :math:`I_{c}+iQ_{c}`
-                corresponding to ``spm_vals``
+            :IQ_c (*np.ndarray*): Frequency-corrected complex signal
+                        :math:`I_{c}+iQ_{c}` corresponding to
+                        ``spm_vals``
         """
 
         # Interpolate frequeny offset fit to 0.1 second spacing, since
@@ -241,30 +253,5 @@ class Calibration(object):
         return IQ_c
 """
 Revisions:
-        calibration_class.py
-    2018 Jun 11 - gsteranka - Original version
-    2018 Jun 27 - gsteranka - Adjust so sky frequency as frequency offset fit
-                              added on top of predicted sky frequency from
-                              RSR file
-    2018 Sep 16 - jfong - remove fit_inst, norm_inst inputs (create them here)
-    2018 Sep 17 - jfong - add file_search kwd
-    2018 Sep 18 - jfong - update verbose print statements
-    2018 Sep 20 - jfong - add write_file kwarg
-                        - set rev_info from geo_inst as attribute
-                            - this will inherit the same prof_dir
-    2018 Sep 25 - jfong - allow file_search to be a boolean or a string
-                            - if string, parse for FRFP or PNFP file paths,
-                            - if only one file path given, search for the most
-                              recent file for the other file
-                        - file_search=False default in __init__ kwarg
-    2018 Oct 11 - sflury - update to use only splrep,splev for interpolating
-                           and updated to match inner workings of fit_inst
-                           and norm_inst -- lots of simplying, Thoreau would be
-                           happy
-    2018 Nov 15 - sflury - removed "order" kwarg and added "fof_order", "pnf_order",
-                           and "interact" kwargs for customizing fits when creating
-                           instance of Calibration class with optional interactive
-                           mode
-    2018 Nov 26 - sflury - reformatted doc strings to match new, standardized format
-    2018 Nov 29 - sflury - added call to threshold optical depth class
+
 """

@@ -29,6 +29,6 @@ from .cassini_blocked import cassini_blocked
 from .cal_inst_from_file import CreateCalInst
 from .pds3_reader import PDS3Reader
 from .CSV_tools import ExtractCSVData
-from .history import write_history_dict
-from .history import date_to_rev
-from .history import get_rev_info
+from .history import write_history_dict as write_history_dict
+from .history import date_to_rev as date_to_rev
+from .history import get_rev_info as get_rev_info

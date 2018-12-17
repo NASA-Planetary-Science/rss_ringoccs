@@ -5,23 +5,29 @@ et_to_spm.py
 
 Purpose: Convert ephemeris time to seconds past midnight (SPM).
 
-Revisions:
-    2018 Mar 13 - jfong - original
-    2018 Jun 26 - jfong - add load_kernels if kernels present
-                        - debug for occs longer than a day
-    2018 Jun 28 - jfong - add ref_doy keyword; if set, calculate spm relative
-                          to ref_doy
-    2018 Jun 29 - jfong - found bug in calculating ibrk that caused wrapping
-    2018 Jul 30 - jfong - allow et_vals to be a float
+Dependencies:
+    #. numpy
+    #. spiceypy
 """
 
 import numpy as np
 import spiceypy as spice
-import pdb
 
 def et_to_spm(et_vals, kernels=None, ref_doy=None):
-    """Function to convert ephemeris time to SPM"""
+    """
+    Convert ephemeris time to seconds past midnight.
 
+    Arguments:
+        :et_vals (*float* or *np.ndarray*): ET seconds past J2000
+    
+    Keyword Arguments:
+        :kernels (*str* or *list*): Path to NAIF kernels
+        :ref_doy (*int*): Reference day of year, typically used for
+            occultations that occur over multiple days
+
+    Returns:
+        :spm_vals (*float* or *np.ndarray*): Seconds past midnight
+    """
     if kernels:
         spice.kclear()
         spice.furnsh(kernels)
@@ -73,5 +79,3 @@ def et_to_spm(et_vals, kernels=None, ref_doy=None):
         
 
     return np.array(spm_vals)
-
-

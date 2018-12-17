@@ -11,7 +11,6 @@ import copy
 import numpy as np
 import pdb
 from scipy.interpolate import splrep, splev, interp1d
-import sys
 
 from ..rsr_reader.rsr_reader import RSRReader
 from .resample_IQ import resample_IQ
@@ -19,50 +18,55 @@ from .calc_tau_thresh import calc_tau_thresh
 from ..tools.history import write_history_dict
 from ..tools.write_output_files import write_output_files
 
-sys.path.append('../..')
-import rss_ringoccs as rss
-sys.path.remove('../..')
-
 class DiffractionLimitedProfile(object):
     """
-    Framework for an object class containing the diffraction-limited optical depth
-    profile (DLP) and related attributes.
+    Framework for an object class containing the diffraction-limited optical 
+    depth profile (DLP) and related attributes.
 
     Arguments:
         :rsr_inst (*object*): Instance of RSRReader class
         :geo_inst (*object*): Instance of Geometry class
         :cal_inst (*object*): Instance of Calibration class
-        :dr_km (*float*): radial sampling rate :math:`\\Delta\\rho` for the DLP
-                            in kilometers. DLP radial *resolution* is the Nyquist
-                            radial sampling, i.e., twice the input value of `dr_km`,
-                            meaning that this will affect the minimum resolution
-                            of the diffraction-reconstructed profile. Value for
+        :dr_km (*float*): radial sampling rate :math:`\\Delta\\rho` for 
+                            the DLP in kilometers. DLP radial *resolution* 
+                            is the Nyquist radial sampling, i.e., twice 
+                            the input value of `dr_km`, meaning that this 
+                            will affect the minimum resolution of the 
+                            diffraction-reconstructed profile. Value for
                             `dr_km` can range from 0.05 km to 0.75 km for the
-                            reconstruction resolutions supported by `rss_ringoccs`.
-                            PDS sampling rate is 0.25 km, which gives a DLP resolution of 0.5 km.
+                            reconstruction resolutions supported by 
+                            `rss_ringoccs`. PDS sampling rate is 0.25 km, 
+                            which gives a DLP resolution of 0.5 km.
 
     Keyword Arguments:
         :dr_km_tol (*float*): Maximum distance from an integer number of
-                    dr_desired that the first rho value will be at. Makes the final
-                    set of rho values more regular-looking. For example, if you say
-                    dr_km_tol=0.01 with a dr_desired of 0.25, your final set of rho
-                    values might look something like [70000.26, 70000.51, ...]
+                    dr_desired that the first rho value will be at. Makes 
+                    the final set of rho values more regular-looking. 
+                    For example, if you say dr_km_tol=0.01 with a dr_desired 
+                    of 0.25, your final set of rho values might look something 
+                    like [70000.26, 70000.51, ...]
         :verbose (*bool*): When True, turns on verbose output. Default is False.
-        :write_file (*bool*): When True, writes processing results to file. Default is True.
-        :profile_range (*list*): 1x2 list specifying the radial limits in km of on the
-                    occultation. Default is [65000,150000].
+        :write_file (*bool*): When True, writes processing results to 
+                    file. Default is True.
+        :profile_range (*list*): 1x2 list specifying the radial limits 
+                    in km of on the occultation. Default is [65000,150000].
 
     Attributes:
         :snr (*np.ndarray*): Signal-to-noise ratio
         :tau_thresh (*np.ndarray*): threshold optical depth
-        :spm_thresh (*np.ndarray*): SPM at which threshold optical depth is computed
-        :rho_thresh (*np.ndarray*): radius at which threshold optical depth is computed
+        :spm_thresh (*np.ndarray*): SPM at which threshold optical 
+                depth is computed
+        :rho_thresh (*np.ndarray*): radius at which threshold optical depth 
+                is computed
         :dr_km (*float*): raw DLP sampling rate
     """
     def __init__(self, rsr_inst, geo_inst, cal_inst, dr_km,
             dr_km_tol=0.01, verbose=False, write_file=True,
             profile_range=[65000., 150000.]):
 
+
+        if verbose:
+            print('Preparing diffraction-limited profile...')
 
         # Extract necessary information from instance inputs
         spm_full = rsr_inst.spm_vals
@@ -80,11 +84,23 @@ class DiffractionLimitedProfile(object):
         phi_rl_deg_geo = geo_inst.phi_rl_deg_vals
         D_km_geo = geo_inst.D_km_vals
 
+        #if max(spm_geo) is not max(spm_full) and min(spm_geo) is not min(spm_full):
+
         spm_cal = cal_inst.t_oet_spm_vals
         f_sky_pred_cal = cal_inst.f_sky_hz_vals
         p_free_cal = cal_inst.p_free_vals
         IQ_c = cal_inst.IQ_c
 
+        # Check if spm_geo and spm_full start/end at same time,
+        #   if not, reduce spm_full to spm_geo boundaries
+        if (min(spm_geo) != np.floor(min(spm_full))) or (
+                max(spm_geo) != np.floor(max(spm_full))):
+            ind1 = np.where(spm_full == spm_geo[0])[0][0]
+            ind2 = np.where(spm_full == spm_geo[-1])[0][0] + 1000
+
+            spm_full = spm_full[ind1:ind2]
+            IQ_m = IQ_m[ind1:ind2]
+            IQ_c = IQ_c[ind1:ind2]
 
 
 
@@ -121,6 +137,31 @@ class DiffractionLimitedProfile(object):
         p_free = p_free_interp_func(rho_km_desired)
 
         p_norm_vals = (abs(IQ_c_desired)**2)/p_free
+
+        # Check for negative power
+        if min(p_norm_vals) < 0.:
+            if verbose:
+                print('\tFound negative normalized power...')
+            neg_ind = [x for x,y in enumerate(p_norm_vals) if y<0.]
+            # check if neg_ind is a continuous chunk
+            if (np.diff(neg_ind)).all() == 1.:
+                if 0 in neg_ind or len(p_norm_vals)-1 in neg_ind:
+                    print('\tRemoving negative values...')
+                    p_norm_vals = p_norm_vals[~np.array(neg_ind)]
+                    rho_km_desired = rho_km_desired[~np.array(neg_ind)]
+                    IQ_c_desired = IQ_c_desired[~np.array(neg_ind)]
+                    spm_desired = spm_desired[~np.array(neg_ind)]
+                else:
+                    raise ValueError('dlp_class.py: Negative normalized power '
+                            + 'within ring system!')
+
+
+
+
+            else:
+                raise ValueError('dlp_class.py: Negative normalized power '
+                            + 'within ring system!')
+            
 
         phase_rad_vals = np.arctan2(np.imag(IQ_c_desired),
                 np.real(IQ_c_desired))
@@ -335,7 +376,7 @@ class DiffractionLimitedProfile(object):
             geo_egr.phi_rl_deg_vals = geo_inst.phi_rl_deg_vals[ind:]
             geo_egr.D_km_vals = geo_inst.D_km_vals[ind:]
             geo_egr.F_km_vals = geo_inst.F_km_vals[ind:]
-            geo_ing.rev_info['prof_dir'] = '"EGRESS"'
+            geo_egr.rev_info['prof_dir'] = '"EGRESS"'
 
             dlp_egr = cls(rsr_egr, geo_egr, cal_egr, dr_km,
                     dr_km_tol=dr_km_tol, verbose=verbose, write_file=write_file,

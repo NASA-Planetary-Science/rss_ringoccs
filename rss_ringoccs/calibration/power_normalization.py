@@ -15,7 +15,6 @@ sys.path.append('../..')
 import rss_ringoccs as rss
 sys.path.remove('../..')
 
-from ..tools.cassini_blocked import cassini_blocked
 from ..tools.write_output_files import construct_filepath
 import pdb
 import matplotlib.pyplot as plt

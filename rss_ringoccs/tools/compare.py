@@ -27,8 +27,10 @@ def compare(NormDiff, geo, cal, dlp, tau, outfile, res=0.75, rng="Maxwell",
         plt.rc('font', size=10)
         plt.figure(figsize=(8.5, 11))
         plt.suptitle("TAU Parameters", size=14)
-        gs = gridspec.GridSpec(3, 1, wspace=0.0, hspace=0.0)
-        plt.subplot(gs[0,0])
+        gs = gridspec.GridSpec(3, 2, wspace=0.0, hspace=0.0)
+
+        # Plot Normalized Power
+        plt.subplot(gs[0, 0])
         plt.xlim(rmin, rmax)
         plt.tick_params(axis='y', which='both', left=True,
                         right=True, labelleft=True)
@@ -38,6 +40,20 @@ def compare(NormDiff, geo, cal, dlp, tau, outfile, res=0.75, rng="Maxwell",
         plt.plot(rec.rho_km_vals, rec.power_vals, label="rss_ringoccs")
         plt.plot(data.tau_rho, data.power_vals, label="PDS")
         plt.legend()
+
+        # Plot Difference in Normalized Power
+        plt.subplot(gs[0, 1])
+        plt.xlim(rmin, rmax)
+        interp = interpolate.interp1d(data.tau_rho, data.power_vals)
+        power = interp(rec.rho_km_vals)
+        plt.tick_params(axis='y', which='both', left=True,
+                        right=True, labelleft=True)
+        plt.tick_params(axis='x', which='both', bottom=False,
+                        top=True, labelbottom=False)
+        plt.ylabel('Difference in Power')
+        plt.plot(rec.rho_km_vals, rec.power_vals-power)
+        plt.legend()
+
         plt.subplot(gs[1,0])
         plt.xlim(rmin, rmax)
         plt.tick_params(axis='y', which='both', left=True, right=True,

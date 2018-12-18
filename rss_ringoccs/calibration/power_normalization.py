@@ -65,6 +65,10 @@ class Normalization(object):
         rho_km_vals = geo_inst.rho_km_vals
 
         freespace_spm = geo_inst.freespace_spm
+        if len(freespace_spm) == 0:
+            no_gaps = True
+        else:
+            no_gaps = False
 
         # downsample IQ so that diffraction fringes do not affect fit
         spm_down, p_obs_down = self.downsample_IQ(spm_raw, IQ_c,dt_down=0.2)
@@ -77,23 +81,48 @@ class Normalization(object):
         spm_to_rimp = splrep(geo_inst.t_oet_spm_vals, geo_inst.R_imp_km_vals)
         rimp_down = splev(spm_down, spm_to_rimp)
 
-        # Create mask array based on freespace region predictions
-        self.create_mask(spm_down, freespace_spm,p_obs_down)
+        if no_gaps:
+            interact = True
+            self.gaps = [[spm_down[1], spm_down[-2]]]
+            self.hfit_med(p_obs_down)
+            self.mask = np.array([True for x in range(len(p_obs_down))])
+        else:
+            # Create mask array based on freespace region predictions
+            self.create_mask(spm_down, freespace_spm,p_obs_down)
+            if (self.mask == False).all():
+                interact = True
+                self.gaps = [[spm_down[1], spm_down[-2]]]
+                self.hfit_med(p_obs_down)
+                self.mask = np.array([True for x in range(len(p_obs_down))])
+            else:
+                # Compute fit
+                self.fit_freespace_power(spm_down, p_obs_down, order=self.order,
+                            fittype=fittype)
 
-        # Compute fit
-        self.fit_freespace_power(spm_down, p_obs_down, order=self.order,
-                    fittype=fittype)
         # get User input to see if everything looks okay or needs tweaking
         #    will return modified freespace regions
-        if interact :
-            new_gaps = self.fit_check(spm_down,p_obs_down,freespace_spm,
-                                        self.order)
+        if interact:
+            #new_gaps = self.fit_check(spm_down,p_obs_down,freespace_spm,
+            #                            self.order)
+            new_gaps = self.fit_check(spm_down, p_obs_down, self.gaps,
+                    self.order)
         else:
             new_gaps = freespace_spm
 
         # plot final fit for user reference
         self.plot_power_profile(spm_down,p_obs_down,new_gaps,self.order,
                 save=True)
+
+    def hfit_med(self, p_obs_down):
+
+        self.order = 1
+        self.fittype = 'poly'
+
+        p_median0 = np.nanmedian(p_obs_down)
+        self.pnorm_fit = np.zeros(len(p_obs_down)) + p_median0
+
+        v = float(len(p_obs_down)) - (self.order+1)
+        self.chi_squared = np.sum(np.square(self.pnorm_fit - p_obs_down))/v
 
 
     def fit_check(self,spm_down,p_obs_down,freespace_spm,order):
@@ -118,7 +147,8 @@ class Normalization(object):
         self.plot_power_profile(spm_down,p_obs_down,freespace_spm,order)
 
         # Prompt if fit looks okay
-        cont = 'y'#input('\nDo you want to continue with this fit? (y/n): ')
+        #cont = 'y'
+        cont = input('\nDo you want to continue with this fit? (y/n): ')
 
         new_gaps = freespace_spm
         while 'n' in cont or 'N' in cont:

@@ -129,16 +129,19 @@ class DiffractionLimitedProfile(object):
             if verbose:
                 print('\tFound negative normalized power...')
             neg_ind = [x for x,y in enumerate(p_norm_vals) if y<0.]
+            pos_ind = [x for x,y in enumerate(p_norm_vals) if y>0.]
+            if len(pos_ind) == 0:
+                raise ValueError('(dlp_class.py) No positive power!')
             # check if neg_ind is a continuous chunk
             if (np.diff(neg_ind)).all() == 1.:
                 if 0 in neg_ind or len(p_norm_vals)-1 in neg_ind:
                     print('\tRemoving negative values...')
-                    p_norm_vals = p_norm_vals[~np.array(neg_ind)]
-                    rho_km_desired = rho_km_desired[~np.array(neg_ind)]
-                    IQ_c_desired = IQ_c_desired[~np.array(neg_ind)]
-                    spm_desired = spm_desired[~np.array(neg_ind)]
+                    p_norm_vals = p_norm_vals[pos_ind]
+                    rho_km_desired = rho_km_desired[pos_ind]
+                    IQ_c_desired = IQ_c_desired[pos_ind]
+                    spm_desired = spm_desired[pos_ind]
                 else:
-                    raise ValueError('dlp_class.py: Negative normalized power '
+                    raise ValueError('(dlp_class.py) Negative normalized power '
                             + 'within ring system!')
 
 

@@ -299,7 +299,7 @@ class DiffractionLimitedProfile(object):
             ind2 = np.where(spm_full == spm_geo[-1])[0][0]
 
             IQ_m = rsr_inst.IQ_m
-            IQ_c = rsr_inst.IQ_c
+            IQ_c = cal_inst.IQ_c
 
             rsr_inst.spm_vals = spm_full[ind1:ind2]
             rsr_inst.IQ_m = IQ_m[ind1:ind2]

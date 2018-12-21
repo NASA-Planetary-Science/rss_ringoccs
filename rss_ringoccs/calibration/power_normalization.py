@@ -337,8 +337,15 @@ class Normalization(object):
             coef = np.polyfit(spm[self.mask],power[self.mask],order)
             # evaluate the polynomial at all spm
             fit = np.polyval(coef, spm)
+            # change order to 1 if fit drops below zero
+            if min(fit)<0.:
+                self.order = 1
+                coef = np.polyfit(spm[self.mask], power[self.mask], self.order)
+                fit = np.polyval(coef, spm)
+
             chi2 = np.sum(np.square(np.polyval(coef,spm[self.mask])-
                                                 power[self.mask]))/v
+
 
 
         # spline fit

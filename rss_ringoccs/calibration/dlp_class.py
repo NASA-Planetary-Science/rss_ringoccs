@@ -157,7 +157,7 @@ class DiffractionLimitedProfile(object):
 
         # compute threshold optical depth at Nyquist sampling rate
         # (i.e., twice the "raw" DLP sampling rate)
-        tau_thresh_inst = calc_tau_thresh(rsr_inst,geo_inst,cal_inst,res_km=2.*dr_km)
+        tau_thresh_inst = calc_tau_thresh(rsr_inst,geo_inst,cal_inst,res_km=dr_km)
         self.snr = tau_thresh_inst.snr
         self.tau_thresh = tau_thresh_inst.tau_thresh
         self.spm_thresh = tau_thresh_inst.spm_vals

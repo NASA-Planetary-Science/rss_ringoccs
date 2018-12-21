@@ -20,7 +20,7 @@ Purpose:
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import splrep,splev
-from scipy.signal import spectrogram,resample_poly
+from scipy.signal import spectrogram
 import pdb
 
 class calc_tau_thresh(object):
@@ -54,9 +54,10 @@ class calc_tau_thresh(object):
     def __init__(self,rsr_inst,geo_inst,cal_inst,
                 res_km=1.0,Calpha=2.41,constant=False):
 
-        # convert measured IQ to power at the spm_cal sampling
-        p_m = np.interp(cal_inst.t_oet_spm_vals,rsr_inst.spm_vals,abs(rsr_inst.IQ_m**2))
-        dt = cal_inst.t_oet_spm_vals[1]-cal_inst.t_oet_spm_vals[0]
+        # find time-series sampling frequency and rate
+        dt = np.nanmedian([rsr_inst.spm_vals[i+1]-rsr_inst.spm_vals[i] for i in range(len(rsr_inst.spm_vals)-1)])
+        #cal_inst.t_oet_spm_vals[1]-cal_inst.t_oet_spm_vals[0]
+        df = rsr_inst.sample_rate_khz * 1e3
 
         # resample rho and rho dot
         rho_km = np.interp(cal_inst.t_oet_spm_vals,geo_inst.t_oet_spm_vals,geo_inst.rho_km_vals)
@@ -72,7 +73,7 @@ class calc_tau_thresh(object):
         ###
         # noise
         #noise = self.find_noise_spec(f_spec,spm_spec,spec,pnorm,geo_inst.freespace_spm)
-        noise = self.find_noise(rho_km,p_m,cal_inst.p_free_vals,dt)
+        noise = self.find_noise(rsr_inst.spm_vals,rsr_inst.IQ_m,dt,df)
         # signal
         #signal = np.interp(spm_spec, cal_inst.t_oet_spm_vals, cal_inst.p_free_vals)
         signal = cal_inst.p_free_vals
@@ -80,7 +81,7 @@ class calc_tau_thresh(object):
         bandwidth = abs( rho_dot_kms / res_km )
         snr = signal/noise
 
-        tau = -np.sin(B_rad)*np.log(0.5*Calpha*bandwidth*snr)
+        tau = -np.sin(abs(B_rad))*np.log(0.5*Calpha*bandwidth/snr)
 
         # compute SNR and set attribute
         self.snr = snr
@@ -90,47 +91,37 @@ class calc_tau_thresh(object):
         ###
         self.tau_thresh = tau
 
-    def find_noise(self,rho,p_m,p_fit,dt):
+    def find_noise(self,spm,IQ,dt,df):
         """
         Purpose:
-            Locate the additive receiver noise within the data set
-            based on initial estimate that SNR > 10 and the
-            assumption that the receiver noise will not appear within
-            the radius range of the ring system in the occultation.
+            Locate the additive receiver noise within the data set.
+            This is done by computing a spectrogram of the raw
+            complex signal, filtering out the spacecraft signal, and
+            averaging over the frequency and time domains.
 
         Arguments:
-            :rho (*np.ndarray*): Radius sampled at the calibration
-                        SPM sampling rate (``dt_cal`` in the
-                        calibration object class)
-            :p_m (*np.ndarray*): complex measured signal power
-            :p_fit (*np.ndarray*): polynomial fit to the freespace
-                        power; representative of the expected
-                        intrinsic spacecraft power
-            :dt (*float*): sampling rate of the SPM (``dt_cal``) for
+            :spm (*np.ndarray*): raw SPM in seconds
+            :IQ (*np.ndarray*): measured complex signal
+            :dt (*float*): sampling spacing in sec of the raw SPM for
                         use in determining the indices of the first
                         and last 1,000 seconds of the occultation in
                         order to determine the location of receiver
                         noise within the data set
+            :df (*float*): sampling frequency in Hz of the IQ
         """
-        # snr threshold
-        thresh = 0.1 * np.nanmin(p_fit[(rho>7e4)&(rho<1.4e5)])
-        # storage list
-        p_noise = []
-        # for power values in first 1,000 secs of data set
-        for i in range(1,int(1e3/dt)):
-            # if in the right SNR ballpark
-            if p_m[i-1] < thresh and p_m[i] < thresh and p_m[i+1] < thresh :
-                # store for statistics
-                p_noise += [p_m[i]]
-        # for power values in last 1,000 secs of data set
-        for i in range(len(p_m)-int(1e3/dt),len(p_m)-1):
-            # if in the right SNR ballpark
-            if p_m[i-1] < thresh and p_m[i] < thresh and p_m[i+1] < thresh :
-                # store for statistics
-                p_noise += [p_m[i]]
-        # return median of the noise power
-        return np.nanmedian(p_noise)
+        # Spectrogram to filter out spacecraft signal
+        n = int(1.024 * df) # number of elements based on frequency sampling
+        freq,time,Sxx = spectrogram(IQ,df,nperseg=n,return_onesided=False)
+        time += spm[0]
+        # frequency filtering to include only the thermal receiver power, averaged over time
+        Sxx_freq_filt = np.nanmean(Sxx[((freq>-450)&(freq<-200))|((freq>200)&(freq<450)),:],0)
+        # time filtering to include only the signal outside the occultation
+        # by looking at just the first and last 1,000 seconds
+        tmin = spm[int(1e3/dt)]
+        tmax = spm[-int(1e3/dt)]
+        p_noise = np.nanmean(Sxx_freq_filt[(time<tmin)|(time>tmax)])
 
+        return p_noise
 """
 Revision history
     Nov 29 2018 - sflury -- original

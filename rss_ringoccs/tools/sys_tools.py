@@ -86,34 +86,26 @@ def make_executable(path):
     mode |= (mode & 0o444) >> 2    # copy R bits to X
     os.chmod(path, mode)
 
-def latex_summary_doc(pdfdir, pdffil, resolution, outfilename):
+def latex_summary_doc(pdffil, resolution, outfilename):
+    """
+        var = 'Rev133E_RSS_2010_170_X43_E_Summary'
+    """
+    var = pdffil.split("/")
+    var = var[-1]
+    var = var.split("_")
+    rev = var[0][3:6]
+    doy = var[3]
+    res = str(resolution)
+    occ = var[5]
+    year = var[2]
+    band = var[4][0:3]
 
-    """
-    var = 'Rev133E_RSS_2010_170_X43_E_Summary'
-    rev = var[:]
-    doy = var[:]
-    res = var[:]
-    occ = var[:]
-    geo = var[:]
-    cal = var[:]
-    tau = var[:]
-    year = var[:]
-    band = var[:]
-    """
-    var = 'Bob'
-    rev = var[:]
-    doy = var[:]
-    res = var[:]
-    occ = var[:]
-    geo = var[:]
-    cal = var[:]
-    tau = var[:]
-    year = var[:]
-    band = var[:]
+    geo = "RSS\_%s\_%s\_%s\_%s\_GEO.TAB" % (year, doy, band, occ)
+    cal = "RSS\_%s\_%s\_%s\_%s\_CAL.TAB" % (year, doy, band, occ)
+    tau = "RSS\_%s\_%s\_%s\_%s\_TAU\_%sKM.TAB" % (year, doy, band, occ, res)
 
     LaTeXFile = r"""
         \documentclass{article}
-        %---------------------------Preamble----------------------------%
         \usepackage{geometry}
         \geometry{a4paper, margin = 1.0in}
         \usepackage{graphicx, float}
@@ -133,14 +125,12 @@ def latex_summary_doc(pdfdir, pdffil, resolution, outfilename):
         \newcommand{\theBAND}{%s}
         \setlength{\parindent}{0em}
         \setlength{\parskip}{0em}
-        %-----------------------Main Document---------------------------%
         \begin{document}
             \pagenumbering{gobble}
             \begin{center}
-                        \LARGE{\texttt{
-                               RSS\textunderscore\theYEAR%
-                               \textunderscore\theDOY\textunderscore\theBAND%
-                               \textunderscore\theOCC}\\[2.0ex]
+                        \LARGE{\texttt{RSS\textunderscore\theYEAR%%
+                               \textunderscore\theDOY\textunderscore%%
+                               \theBAND\textunderscore\theOCC}\\[2.0ex]
                             Rev\theREV\
                             Cassini Radio Science Ring Occultation:\\[1.0ex]
                             Geometry, Data Calibration,
@@ -206,7 +196,7 @@ def latex_summary_doc(pdfdir, pdffil, resolution, outfilename):
                     \hline
                 \end{tabular}
                 \caption[Glossary of Parameters from the Geo File]{
-                    Glossary of parameters in file CARL\_GEO.TAB.
+                    Glossary of parameters in file \theGEO.
                     See companion label (.LBL) file for description
                     of parameters.
                 }
@@ -226,7 +216,7 @@ def latex_summary_doc(pdfdir, pdffil, resolution, outfilename):
                 \end{tabular}
                 \caption[Glossary of Data from the Cal File]{
                     Glossary of calibration data in file
-                    CARL\_CAL.TAB. See companion label (.LBL)
+                    \theCAL. See companion label (.LBL)
                     file for description of the data.
                 }
                 \label{tab:easydata_glossary_from_cal_file}
@@ -253,8 +243,7 @@ def latex_summary_doc(pdfdir, pdffil, resolution, outfilename):
                 \caption[Glossary of Parameters in Tau File]{
                     Glossary of optical depth, phase shift,
                     and selected geometry parameters
-                    contained in files CARL\_TAU\_01KM.TAB
-                    and RSS\_2005\_123\_X43\_E\_TAU\_10KM.TAB.
+                    contained in files \theTAU.
                     See companion label
                     (.LBL) files for description of the data.
                 }
@@ -463,7 +452,7 @@ def latex_summary_doc(pdfdir, pdffil, resolution, outfilename):
                 }
             \end{figure}
         \end{document}
-    """% (var, rev, doy, res, occ, geo, cal, tau, year, band)
+    """% (pdffil, rev, doy, res, occ, geo, cal, tau, year, band)
     TexName = outfilename
     TexFileName = '%s.tex' % TexName
     TexFile = open(TexFileName,'w')

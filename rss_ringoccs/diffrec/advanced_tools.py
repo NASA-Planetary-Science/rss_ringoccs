@@ -73,10 +73,11 @@ class FindOptimalResolution(object):
             res += dres
 
         for j in range(nwins):
-            resint[j] = sres+dres*np.min((linfint[j,...] == np.min(linfint[j,...])).nonzero())
+            resint[j] = sres+dres*np.min(
+                (linfint[j,...] == np.min(linfint[j,...])).nonzero())
         self.linfint = linfint
-        self.l2int   = l2int
-        self.resint  = resint
+        self.resint = resint
+        self.l2int = l2int
 
 
 class DeltaImpulseDiffraction(object):

@@ -31,11 +31,17 @@ Release date: TBD
 
 13. Provide additional details of steps in processing pipeline in User Guide.
 
-10. Resolve V1.0-1 issue: redefine our effective resolution to match Marouf's PDS results by scaling our nominal resolution by a factor of 1/0.75. This gives an excellent match to the PDS results, and makes our results consistent with his for any given user-requested resolution.
+**Resolved V1.0-1**
 
-11. Resolve V1.0-2 issue: eliminated GUI that produced this error.
+10. Redefine our effective resolution to match Marouf's PDS results by scaling our nominal resolution by a factor of 1/0.75. This gives an excellent match to the PDS results, and makes our results consistent with his for any given user-requested resolution.
 
-12. Resolve V1.0-3 issue: eliminated GUI that produced this error.
+**Resolved V1.0-2**
+
+11. Eliminated GUI that produced this error.
+
+**Resolved V1.0-3**
+
+12. Eliminated GUI that produced this error.
 
 ### Known Issues and Limitations of V1.1 ###
 

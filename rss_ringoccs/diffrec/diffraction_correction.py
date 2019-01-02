@@ -846,6 +846,7 @@ class DiffractionCorrection(object):
             self.f_sky_hz_vals = self.f_sky_hz_vals[::-1]
             self.D_km_vals = self.D_km_vals[::-1]
             self.rho_dot_kms_vals = np.abs(self.rho_dot_kms_vals[::-1])
+            self.dx_km *= -1.0
         else:
             del drho
 
@@ -2285,6 +2286,15 @@ class DiffractionCorrection(object):
                     print(mes % (i, n_used-1, nw, loop), end="\r")
             if verbose:
                 print("\n", end="\r")
+        
+        try:
+            self.ker = ker
+            self.psi = psi
+            self.dx_km = dx_km
+            self.F = F
+            self.T = T
+        except:
+            pass
 
         return T_out
 

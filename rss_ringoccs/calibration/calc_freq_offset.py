@@ -37,20 +37,18 @@ class calc_freq_offset(object):
         self.__find_offset_freqs()
 
 
-
-    """
-    Purpose:
-        Iteratively calls __find_peak_freq for slices of SPM and IQ.
-
-    Attributes:
-        :f_spm (*np.ndarray*): signal window centers in SPM for which
-                        the offset frequencies were computed
-        :f_offset (*np.ndarray*): offset frequencies computed over the
-                        occultation sampled once every 10 seconds with
-                        signal window of width ``dt_freq``
-    """
     def __find_offset_freqs(self):
+        """
+        Purpose:
+            Iteratively calls __find_peak_freq for slices of SPM and IQ.
 
+        Attributes:
+            :f_spm (*np.ndarray*): signal window centers in SPM for which
+                            the offset frequencies were computed
+            :f_offset (*np.ndarray*): offset frequencies computed over the
+                            occultation sampled once every 10 seconds with
+                            signal window of width ``dt_freq``
+        """
         # hard-set the spacing to 10 spm between each window center
         delta_t_cent = 10.
 
@@ -72,18 +70,17 @@ class calc_freq_offset(object):
         self.f_offset = np.array(freqs)+0.01
         # pay no attention to the extra 0.01 correction needed but inexplicable
 
-    """
-    Purpose:
-        Computes continuous FFT, finds frequency at max power
-
-    Arguments:
-        :IQ (*np.ndarray*): IQ_m vals within the current window
-
-    Returns:
-        :f_max (*float*): frequency at max power
-    """
     def __find_peak_freq(self,IQ):
+        """
+        Purpose:
+            Computes continuous FFT, finds frequency at max power
 
+        Arguments:
+            :IQ (*np.ndarray*): IQ_m vals within the current window
+
+        Returns:
+            :f_max (*float*): frequency at max power
+        """
         # Compute and apply Hamming window
         weight = 0.5 * (1.0 - np.cos(2.0 * np.pi * np.arange(float(len(IQ))) /
             (float(len(IQ)) - 1)))

@@ -70,7 +70,7 @@ def get_rev_info(rsr_inst):
             "rsr_file":   rsr_inst.rsr_file.split('/')[-1]
             , "band":     '"'+str(rsr_inst.band)+'"'
             , "year":     str(rsr_inst.year)
-            , "doy":      str(rsr_inst.doy)
+            , "doy":      str(rsr_inst.doy).zfill(3)
             , "dsn":      str(rsr_inst.dsn)
             , "occ_dir":  occ_dir
             , "planetary_occ_flag": planetary_occ_flag

@@ -23,6 +23,9 @@ sys.path.remove('../../')
 import pdb
 import os
 
+chord_revnums = ['053', '054', '056', '057', '058', '060', '063', '064',
+                    '067', '079', '081', '082', '084', '089']
+
 func_typ = {'GEO': write_geo_series,
         'CAL': write_cal_series,
         'DLP': write_dlp_series,
@@ -70,18 +73,23 @@ def construct_filepath(rev_info, filtyp):
         pd1 = [pd1]
         pd2 = ''
 
+
     doy = rev_info['doy']
     band = rev_info['band'].split('"')[1]
     year = rev_info['year']
     dsn = rev_info['dsn'].split('-')[-1]
     rev = rev_info['rev_num']
 
+    if rev in chord_revnums:
+        if 'DLP' in filtyp or 'TAU' in filtyp:
+            pd2 = 'C'
+
     for dd in pd1:
         filestr = ('RSS_' + str(year) + '_' + str(doy) + '_' + str(band) +
             str(dsn) + '_' + dd)
 
-        dirstr = ('../output/Rev' + rev + '/Rev' + rev + dd + '/' + 'Rev' +
-                rev + pd2 + dd + '_' + filestr + '/')
+        dirstr = ('../output/Rev' + rev + '/Rev' + rev + pd2 + dd 
+                + '/' + 'Rev' + rev + pd2 + dd + '_' + filestr + '/')
 
         # Create output file name without file extension
         curday = strftime('%Y%m%d')

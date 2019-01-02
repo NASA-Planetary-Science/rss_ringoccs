@@ -126,35 +126,15 @@ class DiffractionLimitedProfile(object):
 
         # Check for negative power
         if min(p_norm_vals) < 0.:
-            if verbose:
-                print('\tFound negative normalized power...')
-            neg_ind = [x for x,y in enumerate(p_norm_vals) if y<0.]
-            # check if neg_ind is a continuous chunk
-            if (np.diff(neg_ind)).all() == 1.:
-                if 0 in neg_ind or len(p_norm_vals)-1 in neg_ind:
-                    print('\tRemoving negative values...')
-                    p_norm_vals = p_norm_vals[~np.array(neg_ind)]
-                    rho_km_desired = rho_km_desired[~np.array(neg_ind)]
-                    IQ_c_desired = IQ_c_desired[~np.array(neg_ind)]
-                    spm_desired = spm_desired[~np.array(neg_ind)]
-                else:
-                    raise ValueError('dlp_class.py: Negative normalized power '
-                            + 'within ring system!')
-
-
-
-
-            else:
-                raise ValueError('dlp_class.py: Negative normalized power '
-                            + 'within ring system!')
-
+            raise ValueError('(dlp_class.py): Negative power values found '
+                    + 'within ring system!')
 
         phase_rad_vals = np.arctan2(np.imag(IQ_c_desired),
                 np.real(IQ_c_desired))
 
         # compute threshold optical depth at Nyquist sampling rate
         # (i.e., twice the "raw" DLP sampling rate)
-        tau_thresh_inst = calc_tau_thresh(rsr_inst,geo_inst,cal_inst,res_km=2.*dr_km)
+        tau_thresh_inst = calc_tau_thresh(rsr_inst,geo_inst,cal_inst,res_km=dr_km)
         self.snr = tau_thresh_inst.snr
         self.tau_thresh = tau_thresh_inst.tau_thresh
         self.spm_thresh = tau_thresh_inst.spm_vals

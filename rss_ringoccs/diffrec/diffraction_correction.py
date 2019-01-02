@@ -846,6 +846,7 @@ class DiffractionCorrection(object):
             self.f_sky_hz_vals = self.f_sky_hz_vals[::-1]
             self.D_km_vals = self.D_km_vals[::-1]
             self.rho_dot_kms_vals = np.abs(self.rho_dot_kms_vals[::-1])
+            self.dx_km *= -1.0
         else:
             del drho
 
@@ -1170,19 +1171,19 @@ class DiffractionCorrection(object):
 
         # Create input variable and keyword dictionaries for history.
         input_vars = {
-                'dlp_inst': NormDiff.history,
-                'res': res
-                }
+            'dlp_inst': NormDiff.history,
+            'res': res
+        }
 
         input_kwds = {
-                'rng': rng,
-                'wtype': wtype,
-                'fwd': fwd,
-                'norm': norm,
-                'bfac': bfac,
-                'sigma': sigma,
-                'psitype': psitype
-                }
+            'rng': rng,
+            'wtype': wtype,
+            'fwd': fwd,
+            'norm': norm,
+            'bfac': bfac,
+            'sigma': sigma,
+            'psitype': psitype
+        }
 
         # Delete unnecessary variables for clarity.
         del rho, w_max, rho_min_lim, rho_max_lim, rho_start, rho_end
@@ -1862,14 +1863,21 @@ class DiffractionCorrection(object):
             P_2 = (3.0*P12-1.0)*0.5
             P_3 = (5.0*P12-3.0)*0.5*P_1
 
+            P_1_1 = P_1*P_1
+            P_1_2 = 2.0*P_1*P_2
+
             # Second set of polynomials.
             b_0 = (1.0-P12)*0.5
             b_1 = (P_1-P_1*P_2)/3.0
             b_2 = (P_2-P_1*P_3)*0.25
 
-            x = (r-r0)/d_km_vals[center]
+            # Initial radial parameter
+            x = (r-r0)
             x2 = x*x
-            x3 = x2*x
+
+            # D_km_vals and the square of it.
+            d = d_km_vals
+            d2 = d*d
 
             loop = 0
             for i in np.arange(n_used):
@@ -1895,18 +1903,18 @@ class DiffractionCorrection(object):
                     # Ajdust ring radius by dx_km.
                     r = rho_km_vals[center]
                     r0 = rho_km_vals[crange]
-                    x = (r-r0)/d_km_vals[center]
+                    x = r-r0
                     x2 = x*x
-                    x3 = x2*x
                 else:
                     crange += 1
+                
+                z = x/d[center]
+                z2 = x2/d2[center]
 
-                psi_0 = b_0[center]*x2+b_1[center]*x3
+                psi_vals = z2*(b_0[center]-A_2[center]*P_1_1[center]+
+                            (b_1[center]-A_2[center]*P_1_2[center])*z)
 
-                psi_1 = -A_2[center]*(P_1[center]*P_1[center]*x2+
-                                      P_1[center]*P_2[center]*x3)
-
-                psi_vals = kD_vals[center]*(psi_0 + psi_1)
+                psi_vals *= kD_vals[center]
 
                 # Compute kernel function for Fresnel inverse
                 if fwd:
@@ -1940,15 +1948,23 @@ class DiffractionCorrection(object):
             P_2 = (3.0*P12-1.0)*0.5
             P_3 = (5.0*P12-3.0)*0.5*P_1
 
+            # Products of Legendre Polynomials used in Expansion
+            C_0 = P_1*P_1
+            C_1 = 2.0*P_1*P_2
+            C_2 = P_2*P_2
+
             # Second set of polynomials.
             b_0 = (1.0-P12)*0.5
             b_1 = (P_1-P_1*P_2)/3.0
             b_2 = (P_2-P_1*P_3)*0.25
 
-            x = (r-r0)/d_km_vals[center]
+            # Initial radial parameter
+            x = (r-r0)
             x2 = x*x
-            x3 = x2*x
-            x4 = x3*x
+
+            # D_km_vals and the square of it.
+            d = d_km_vals
+            d2 = d*d
 
             loop = 0
             for i in np.arange(n_used):
@@ -1974,19 +1990,18 @@ class DiffractionCorrection(object):
                     # Ajdust ring radius by dx_km.
                     r = rho_km_vals[center]
                     r0 = rho_km_vals[crange]
-                    x = (r-r0)/d_km_vals[center]
+                    x = r-r0
                     x2 = x*x
-                    x3 = x2*x
-                    x4 = x3*x
                 else:
                     crange += 1
 
-                psi_0 = b_0[center]*x2+b_1[center]*x3+b_2[center]*x4
+                z = x/d[center]
+                z2 = x2/d2[center]
 
-                psi_1 = -A_2[center]*(P_1[center]*x+P_2[center]*x2)*(
-                                      P_1[center]*x+P_2[center]*x2)
-
-                psi_vals = kD_vals[center]*(psi_0 + psi_1)
+                psi_vals = b_0[center]-A_2[center]*C_0[center]
+                psi_vals += z*(b_1[center]-A_2[center]*C_1[center])
+                psi_vals += z2*(b_2[center]-A_2[center]*C_2[center])
+                psi_vals *= kD_vals[center]*z2
 
                 # Compute kernel function for Fresnel inverse
                 if fwd:
@@ -2033,8 +2048,19 @@ class DiffractionCorrection(object):
             x2 = x*x
             x3 = x2*x
             x4 = x3*x
-            x5 = x4*x
-            x6 = x5*x
+
+            # Products of Legendre Polynomials used in Expansion
+            C_0 = P_1*P_1
+            C_1 = 2.0*P_1*P_2
+            C_2 = P_2*P_2+2.0*P_1*P_3
+            C_3 = 2.0*P_2*P_3
+            C_4 = P_3*P_3
+
+            # D_km_vals and various powers.
+            d = d_km_vals
+            d2 = d*d
+            d3 = d*d2
+            d4 = d*d3
 
             loop = 0
             for i in np.arange(n_used):
@@ -2060,30 +2086,25 @@ class DiffractionCorrection(object):
                     # Ajdust ring radius by dx_km.
                     r = rho_km_vals[center]
                     r0 = rho_km_vals[crange]
-                    x = (r-r0)/d_km_vals[center]
+                    x = r-r0
                     x2 = x*x
                     x3 = x2*x
                     x4 = x3*x
-                    x5 = x4*x
-                    x6 = x5*x
                 else:
                     crange += 1
 
-                psi_0 = (b_0[center]*x2+
-                         b_1[center]*x3+
-                         b_2[center]*x4+
-                         b_3[center]*x5+
-                         b_4[center]*x6)
+                z = x/d[center]
+                z2 = x2/d2[center]
+                z3 = x3/d3[center]
+                z4 = x4/d4[center]
 
+                psi_vals = b_0[center]-A_2[crange]*C_0[center]
+                psi_vals += z*(b_1[center]-A_2[crange]*C_1[center])
+                psi_vals += z2*(b_2[center]-A_2[crange]*C_2[center])
+                psi_vals += z3*(b_3[center]-A_2[crange]*C_3[center])
+                psi_vals += z4*(b_4[center]-A_2[crange]*C_4[center])
 
-                psi_1 = -A_2[crange]*(P_1[center]*x+
-                                      P_2[center]*x2+
-                                      P_3[center]*x3)*(
-                                      P_1[center]*x+
-                                      P_2[center]*x2+
-                                      P_3[center]*x3)
-
-                psi_vals = kD_vals[center]*(psi_0 + psi_1)
+                psi_vals *= z2*kD_vals[center]
 
                 # Compute kernel function for Fresnel inverse
                 if fwd:
@@ -2285,6 +2306,15 @@ class DiffractionCorrection(object):
                     print(mes % (i, n_used-1, nw, loop), end="\r")
             if verbose:
                 print("\n", end="\r")
+        
+        try:
+            self.ker = ker
+            self.psi = psi
+            self.dx_km = dx_km
+            self.F = F
+            self.T = T
+        except:
+            pass
 
         return T_out
 

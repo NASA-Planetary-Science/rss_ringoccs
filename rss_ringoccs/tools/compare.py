@@ -7,7 +7,13 @@ from matplotlib import gridspec
 from scipy import interpolate
 from .write_output_files import construct_filepath
 
-def cringplots(TauInst, outfile="outfile.pdf"):
+# title_out, outdir_out = construct_filepath(rev_info, filetyp)
+
+def cringplots(rev, geo, cal, dlp, res, outfile="outfile.pdf",
+               wtype="kbmd20", psitype="Fresnel4"):
+    data = ExtractCSVData(geo, cal, dlp, verbose=False)
+    TauInst = diffrec.DiffractionCorrection(data, res, wtype=wtype,
+                                            rng=[74630, 90300], psitype=psitype)
     RegDict = [
         ["B1 U1", 74665],
         ["Mimas 4:1", 74900],
@@ -56,7 +62,8 @@ def cringplots(TauInst, outfile="outfile.pdf"):
             plt.rc('font', family='serif')
             plt.rc('font', size=10)
             plt.figure(figsize=(8.5, 11))
-            plt.suptitle("C-Ring Reconstructions: %s Resolution" % res, size=14)
+            plt.suptitle("%s C-Ring Reconstructions: %s Resolution"
+                         % (rev, res), size=14)
             gs = gridspec.GridSpec(4, 2, wspace=0.5, hspace=0.5)
 
             # Plot Normalized Power
@@ -89,7 +96,8 @@ def cringplots(TauInst, outfile="outfile.pdf"):
             plt.rc('font', family='serif')
             plt.rc('font', size=10)
             plt.figure(figsize=(8.5, 11))
-            plt.suptitle("C-Ring Reconstructions: %s Resolution" % res, size=14)
+            plt.suptitle("%s C-Ring Reconstructions: %s Resolution"
+                         % (rev, res), size=14)
             gs = gridspec.GridSpec(4, 2, wspace=0.5, hspace=0.5)
             for i_plot in range(int(N_Plots % 8)):
                 plt.subplot(gs[int(i_plot/2), int(i_plot % 2)])
@@ -115,9 +123,8 @@ def cringplots(TauInst, outfile="outfile.pdf"):
 
             pdf.savefig(bbox_inches="tight", pad_inches=1)
             plt.close()
-# title_out, outdir_out = construct_filepath(rev_info, filetyp)
 
-def compare(NormDiff, geo, cal, dlp, tau, outfile, res=0.75, rng="Maxwell",
+def compare(NormDiff, geo, cal, dlp, tau, outfile, res=0.75, rng="all",
             wtype="kbmd20", norm=True, bfac=True, sigma=2.e-13, verbose=True,
             psitype="Fresnel8"):
     data = ExtractCSVData(geo, cal, dlp, tau=tau, verbose=verbose)
@@ -127,8 +134,8 @@ def compare(NormDiff, geo, cal, dlp, tau, outfile, res=0.75, rng="Maxwell",
                                         psitype=psitype, write_file=False)
     rmin = np.min(rec.rho_km_vals)
     rmax = np.max(rec.rho_km_vals)
-    nstart = np.max((rec.rho_km_vals == rmax).nonzero())
-    nend = np.min((rec.rho_km_vals == rmin).nonzero())
+    nmin = np.min((rec.rho_km_vals >= rmin).nonzero())
+    nmax = np.min((rec.rho_km_vals <= rmax).nonzero())
 
     with PdfPages(outfile) as pdf:
         plt.rc('font', family='serif')
@@ -147,9 +154,12 @@ def compare(NormDiff, geo, cal, dlp, tau, outfile, res=0.75, rng="Maxwell",
         plt.ylabel('Normalized Power')
         plt.plot(rec.rho_km_vals, rec.power_vals, 'b')
         plt.plot(data.tau_rho, data.power_vals, 'g')
+        p1 = rec.power_vals
+        p2 = data.power_vals
+        ymin = np.min([np.min(p1), np.min(p2)])*0.98
+        ymax = np.max([np.max(p1), np.max(p2)])*1.02
         plt.xlim(rmin, rmax)
-        plt.ylim(-0.1, np.max([np.max(rec.power_vals),
-                              np.max(data.power_vals)])*1.1)
+        plt.ylim(ymin, ymax)
 
         # Plot Difference in Normalized Power
         plt.subplot(gs[0, 1])
@@ -173,9 +183,12 @@ def compare(NormDiff, geo, cal, dlp, tau, outfile, res=0.75, rng="Maxwell",
         plt.ylabel('Normal Optical Depth')
         plt.plot(rec.rho_km_vals, rec.tau_vals, 'b')
         plt.plot(data.tau_rho, data.tau_vals, 'g')
+        p1 = rec.tau_vals
+        p2 = data.tau_vals
+        ymin = np.min([np.min(p1), np.min(p2)])*0.98
+        ymax = np.max([np.max(p1), np.max(p2)])*1.02
         plt.xlim(rmin, rmax)
-        plt.ylim(-0.1, np.max([np.max(rec.tau_vals),
-                              np.max(data.tau_vals)])+0.2)
+        plt.ylim(ymin, ymax)
 
         # Plot Difference in Normal Optical Depth
         plt.subplot(gs[1, 1])
@@ -202,6 +215,10 @@ def compare(NormDiff, geo, cal, dlp, tau, outfile, res=0.75, rng="Maxwell",
         plt.plot(rec.rho_km_vals, rec.phase_vals, 'b', label="rss_ringoccs")
         plt.plot(data.tau_rho, data.phase_vals, 'g', label="PDS")
         plt.legend(loc='upper right', bbox_to_anchor=(1.9, 3.4))
+        p1 = rec.phase_vals
+        p2 = data.phase_vals
+        ymin = np.min([np.min(p1), np.min(p2)])*0.98
+        ymax = np.max([np.max(p1), np.max(p2)])*1.02
         plt.xlim(rmin, rmax)
         plt.ylim(ymin, ymax)
 
@@ -216,6 +233,106 @@ def compare(NormDiff, geo, cal, dlp, tau, outfile, res=0.75, rng="Maxwell",
                         top=False, labelbottom=True)
         plt.xlabel("Ring Radius (km)")
         plt.plot(rec.rho_km_vals, diff, 'r')
+        plt.ylim(np.min(diff), np.max(diff))
 
         pdf.savefig(bbox_inches="tight", pad_inches=1)
         plt.close()
+
+def galleryplots(rev, geo, cal, dlp, tau=None, res=[1.0], rng="all",
+                wtype="kbmd20", psitype="Fresnel4", outfile="galleryplot.pdf",
+                ymin=-0.2, ymax=1.4):
+
+    data = ExtractCSVData(geo, cal, dlp, tau=tau, verbose=False)
+    N_Plots = len(res)
+    N_Pages = int(N_Plots/4.0)
+
+    with PdfPages(outfile) as pdf:
+        for i_page in range(N_Pages):
+            plt.rc('font', family='serif')
+            plt.rc('font', size=10)
+            plt.figure(figsize=(8.5, 11))
+            plt.suptitle("Resolution Comparison: %s" % (rev), size=14)
+            gs = gridspec.GridSpec(4, 1, hspace=0.0)
+
+            # Perform Reconstructions
+            for i in range(4):
+                i_res = int(4*i_page+i)
+                sres = str(res[i_res])+"km Reconstruction"
+                rec = diffrec.DiffractionCorrection(data, res[i_res],
+                                                    wtype=wtype, rng=rng,
+                                                    psitype=psitype)
+                plt.subplot(gs[i, 0])
+                plt.tick_params(axis='y', which='both', left=True,
+                                right=True, labelleft=True)
+                plt.locator_params(axis='y', nbins=4)
+                if (i == 0):
+                    start = str(np.min(rec.rho_km_vals))
+                    end = str(np.max(rec.rho_km_vals))
+                    plt.title("Comparison Plots: %skm to %skm" % (start, end))
+                    plt.tick_params(axis='x', which='both', bottom=False,
+                                    top=True, labelbottom=False)
+                    plt.locator_params(axis='x', nbins=8)
+                elif (i == 3):
+                    plt.xlabel("Ring Radius (km)")
+                    plt.tick_params(axis='x', which='both', bottom=True,
+                                    top=False, labelbottom=True)
+                    plt.locator_params(axis='x', nbins=8)
+                else:
+                    plt.tick_params(axis='x', which='both', bottom=False,
+                                    top=False, labelbottom=False)
+                plt.ylabel("Normalized Power")
+                plt.plot(rec.rho_km_vals, rec.power_vals, 'b', label=sres)
+                plt.plot(data.tau_rho, data.power_vals, 'r', label="PDS")
+                rmin = np.min(rec.rho_km_vals)
+                rmax = np.max(rec.rho_km_vals)
+                plt.xlim(rmin, rmax)
+                plt.ylim(ymin, ymax)
+                plt.legend()
+
+            pdf.savefig(bbox_inches="tight", pad_inches=1)
+            plt.close()
+
+        if ((N_Plots % 4) != 0):
+            plt.rc('font', family='serif')
+            plt.rc('font', size=10)
+            plt.figure(figsize=(8.5, 11))
+            plt.suptitle("Resolution Comparison: %s" % (rev), size=14)
+            gs = gridspec.GridSpec(4, 1, hspace=0.0)
+
+            for i in range(int(N_Plots % 4)):
+                i_res = int(4*N_Pages+i)
+                sres = str(res[i_res])+"km Reconstruction"
+                rec = diffrec.DiffractionCorrection(data, res[i_res],
+                                                    wtype=wtype, rng=rng,
+                                                    psitype=psitype)
+                plt.subplot(gs[i, 0])
+                plt.tick_params(axis='y', which='both', left=True,
+                                right=True, labelleft=True)
+                plt.locator_params(axis='y', nbins=4)
+                if (i == 0):
+                    start = str(np.min(rec.rho_km_vals))
+                    end = str(np.max(rec.rho_km_vals))
+                    plt.title("Comparison Plots: %skm to %skm" % (start, end))
+                    plt.tick_params(axis='x', which='both', bottom=False,
+                                    top=True, labelbottom=False)
+                    plt.locator_params(axis='x', nbins=8)
+                elif (i == (N_Plots % 4) - 1):
+                    plt.xlabel("Ring Radius (km)")
+                    plt.tick_params(axis='x', which='both', bottom=True,
+                                    top=False, labelbottom=True)
+                    plt.locator_params(axis='x', nbins=8)
+                else:
+                    plt.tick_params(axis='x', which='both', bottom=False,
+                                    top=False, labelbottom=False)
+                plt.ylabel("Normalized Power")
+                plt.plot(rec.rho_km_vals, rec.power_vals, 'b', label=sres)
+                plt.plot(data.tau_rho, data.power_vals, 'r', label="PDS")
+                rmin = np.min(rec.rho_km_vals)
+                rmax = np.max(rec.rho_km_vals)
+                plt.xlim(rmin, rmax)
+                plt.ylim(ymin, ymax)
+                plt.legend()
+            pdf.savefig(bbox_inches="tight", pad_inches=1)
+            plt.close()
+        else:
+            pass

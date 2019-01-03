@@ -75,8 +75,16 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 pygments_style = 'sphinx'
 
 # -- Dependencies ------------------------------------------------------------
-autodoc_mock_imports = ['numpy','scipy','spiceypy','matplotlib','time','sys',
+from unittest.mock import MagicMock
+
+class Mock(MagicMock):
+    @classmethod
+    def __getattr__(cls, name):
+        return MagicMock()
+
+MOCK_MODULES = ['numpy','scipy','spiceypy','matplotlib','time','sys',
                         'subprocess','pdb','mayavi','os','platform']
+sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 # -- Options for HTML output -------------------------------------------------
 

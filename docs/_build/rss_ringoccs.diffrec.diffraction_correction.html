@@ -1,0 +1,525 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>rss_ringoccs.diffrec.diffraction_correction module &mdash; rss_ringoccs v1.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="rss_ringoccs.diffrec.special_functions module" href="rss_ringoccs.diffrec.special_functions.html" />
+    <link rel="prev" title="rss_ringoccs.diffrec.advanced_tools module" href="rss_ringoccs.diffrec.advanced_tools.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> rss_ringoccs
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v1.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="rss_ringoccs.html">rss_ringoccs package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="rss_ringoccs.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="rss_ringoccs.calibration.html">rss_ringoccs.calibration package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="rss_ringoccs.diffrec.html">rss_ringoccs.diffrec package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="rss_ringoccs.diffrec.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="rss_ringoccs.occgeo.html">rss_ringoccs.occgeo package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rss_ringoccs.rsr_reader.html">rss_ringoccs.rsr_reader package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rss_ringoccs.tools.html">rss_ringoccs.tools package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">rss_ringoccs</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="rss_ringoccs.html">rss_ringoccs package</a> &raquo;</li>
+        
+          <li><a href="rss_ringoccs.diffrec.html">rss_ringoccs.diffrec package</a> &raquo;</li>
+        
+      <li>rss_ringoccs.diffrec.diffraction_correction module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/rss_ringoccs.diffrec.diffraction_correction.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-rss_ringoccs.diffrec.diffraction_correction">
+<span id="rss-ringoccs-diffrec-diffraction-correction-module"></span><h1>rss_ringoccs.diffrec.diffraction_correction module<a class="headerlink" href="#module-rss_ringoccs.diffrec.diffraction_correction" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="rss_ringoccs.diffrec.diffraction_correction.DiffractionCorrection">
+<em class="property">class </em><code class="descclassname">rss_ringoccs.diffrec.diffraction_correction.</code><code class="descname">DiffractionCorrection</code><span class="sig-paren">(</span><em>NormDiff</em>, <em>res</em>, <em>rng='all'</em>, <em>wtype='kb25'</em>, <em>fwd=False</em>, <em>norm=True</em>, <em>verbose=False</em>, <em>bfac=True</em>, <em>sigma=2e-13</em>, <em>psitype='full'</em>, <em>write_file=False</em><span class="sig-paren">)</span><a class="headerlink" href="#rss_ringoccs.diffrec.diffraction_correction.DiffractionCorrection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="docutils">
+<dt>Purpose:</dt>
+<dd>Perform diffraction correction for a ring occultation
+on a data set that is a near radially symmetric function
+of the ring radius, or ring intercept point (RIP).</dd>
+<dt>Arguments:</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">NormDiff:</th><td class="field-body"><p class="first">The data set, usually an instance of the NormDiff
+class from the rss_ringoccs Calibration subpackage.
+This instance MUST contain the following attributes
+and MUST have the same names.</p>
+<div class="line-block">
+<div class="line">rho_km_vals:      Ring Radius (km)</div>
+<div class="line">phi_rad_vals:     Ring Azimuth Angle (Radians)</div>
+<div class="line">p_norm_vals:      Normalized Power</div>
+<div class="line">phase_rad_vals:   Phase (Radians)</div>
+<div class="line">B_rad_vals:       Elevation Angle (Radians)</div>
+<div class="line">D_km_vals:        RIP-Distance (km)</div>
+<div class="line">f_sky_hz_vals:    Sky Frequency (Hertz)</div>
+<div class="line">rho_dot_kms_vals: RIP-velocity (km/s)</div>
+<div class="line">history:          History dictionary</div>
+</div>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">res (<em>float</em> or <em>int</em>):</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">The requested resolution for processing (km). This
+must be a positive real number.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt>Keywords:</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">rng (<em>list</em> or <em>str</em>):</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><p class="first">The requested range for diffraction correction.
+Preferred input is rng = [a,b]. Arrays are
+allowed and the range will be set as:</p>
+<div class="line-block">
+<div class="line">rng = [MIN(array), MAX(array)]</div>
+</div>
+<p>Finally, certain strings containing a few of the
+regions of interests within the rings of Saturn
+are allowed. Permissable strings are:</p>
+<div class="line-block">
+<div class="line">‘all’             [1.0, 400000.0]</div>
+<div class="line">‘cringripples’    [77690.0, 77760.0]</div>
+<div class="line">‘encke’           [132900.0, 134200.0]</div>
+<div class="line">‘enckegap’        [132900.0, 134200.0]</div>
+<div class="line">‘janusepimetheus’ [96200.0, 96800.0]</div>
+<div class="line">‘maxwell’         [87410.0, 87610.0]</div>
+<div class="line">‘maxwellringlet’  [87410.0, 87610.0]</div>
+<div class="line">‘titan’           [77870.0, 77930.0]</div>
+<div class="line">‘titanringlet’    [77870.0, 77930.0]</div>
+<div class="line">‘huygens’         [117650.0, 117950.0]</div>
+<div class="line">‘huygensringlet’  [117650.0, 117950.0]</div>
+</div>
+<p>Strings are neither case nor space sensitive.
+For other planets use rng = [a,b]. Default value
+is set to ‘all’ which processes [1, 400000]
+Values MUST be set in kilometers.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">wtype (<a href="#id1"><span class="problematic" id="id2">*</span></a>str):</th><td class="field-body"><p class="first">The requested tapering function for diffraction
+correction. A string with several allowed inputs:</p>
+<div class="line-block">
+<div class="line">‘rect’      Rectangular Window.</div>
+<div class="line">‘coss’      Squared Cosine Window.</div>
+<div class="line">‘kb20’      Kaiser-Bessel 2.0 Window.</div>
+<div class="line">‘kb25’      Kaiser-Bessel 2.5 Window.</div>
+<div class="line">‘kb35’      Kaiser-Bessel 3.5 Window.</div>
+<div class="line">‘kbmd20’    Modified kb20 Window.</div>
+<div class="line">‘kbmd25’    Modified kb25 Window.</div>
+</div>
+<p>The variable is neither case nor space sensitive.
+Default window is set to ‘kb25’. See window_functions
+submodule for further documentation.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">fwd (<em>bool</em>):</th><td class="field-body"><p class="first">A Boolean for determining whether or not
+forward modelling will be computed. This is good
+starting point for deciding if the diffraction
+correction is physically significant or valid. If
+the reconstruction is good, the forward model
+should reproduce the p_norm_vals attribute from
+the input NormDiff instance. Default is set to False.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">norm (<em>bool</em>):</th><td class="field-body"><p class="first">A Boolean for determining whether or not the
+reconstructed complex transmittance is normalize
+by the window width. This normalization is the
+complex transmittance that is computed by using
+free space divided by the complex transmittance
+that is computed using free space weighted by the
+selected tapering function. Default is True.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">bfac (<em>bool</em>):</th><td class="field-body"><p class="first">A Boolean for determining whether or not the
+‘b’ factor in the window width computation is
+used. This is equivalent to setting the Allen
+Deviation for the spacecraft to a positive value
+or to zero. If set to False, the Allen Deviation
+is assumed to be zero. If set to True the Allen
+Deviation is set to 2e-13, or whichever number you
+wish to specify in the sigma keyword (See below).
+Default is True.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">sigma (<em>float</em>):</th><td class="field-body"><p class="first">The Allen deviation for the spacecraft. If the bfac
+keyword (See above) is set to False, this is ignored.
+If bfac is set to True, and sigma is NOT specified,
+then sigma=2e-13 will be used, which is the Allen
+deviation for Cassini with 1 second integration time.
+For spacecraft other than Cassini, you should provide
+the Allen deviation yourself. Default is sigma=2e-13</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">psitype (<em>str</em>):</th><td class="field-body"><p class="first">A string for determining what approximation to the
+geometrical ‘psi’ function is used. Several strings
+are allowed:</p>
+<div class="line-block">
+<div class="line">‘full’      No Approximation is applied.</div>
+<div class="line">‘MTR2’      Second Order Series from MTR86.</div>
+<div class="line">‘MTR3’      Third Order Series from MTR86.</div>
+<div class="line">‘MTR4’      Fourth Order Series from MTR86.</div>
+<div class="line">‘Fresnel’   Standard Fresnel approximation.</div>
+</div>
+<p>The variable is neither case nor space sensitive.
+Default is set to ‘full’.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">verbose (<em>bool</em>):</th><td class="field-body"><p class="first last">A Boolean for determining if various pieces of
+information are printed to the screen or not.
+Default is False.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt>Attributes:</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">bfac:</th><td class="field-body">Boolean for bfac (See keywords).</td>
+</tr>
+<tr class="field-even field"><th class="field-name">dathist:</th><td class="field-body">History from NormDiff instance.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">dx_km:</th><td class="field-body">Radial spacing for the data points (km).</td>
+</tr>
+<tr class="field-even field"><th class="field-name">f_sky_hz_vals:</th><td class="field-body">Recieved frequency from the spacecraft (Hz).</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">finish:</th><td class="field-body">Final point that was reconstructed.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">fwd:</th><td class="field-body">Boolean for fwd (See keywords).</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">history:</th><td class="field-body">History for the DiffractionCorrection class.
+This contains system info and user info, including
+what operating system was used, username, hostname,
+computer name, and the inputs provided.</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">lambda_sky_km_vals:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">Wavelength of recieved signal from spacecraft (km).</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">mu_vals:</th><td class="field-body">The sine of the ring opening angle (Unitless).</td>
+</tr>
+<tr class="field-even field"><th class="field-name">n_used:</th><td class="field-body">Number of points that were reconstructed.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">norm:</th><td class="field-body">Boolean for norm (See keywords).</td>
+</tr>
+<tr class="field-even field"><th class="field-name">norm_eq:</th><td class="field-body">Normalized equivalent width computed from window
+that was used during reconstruction. See the
+window_functions submodule for more information.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">p_norm_fwd_vals:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">Normalized power computer from the forward modelling
+of the reconstructed data. This will be a None type
+variable unless fwd=True is set. If the
+reconstruction went well, this should mimic the raw
+data, p_norm_vals.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">p_norm_vals:</th><td class="field-body">Normalized power from the diffracted signal. This is
+the square of the absolute value of the recieved
+complex transmittance.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">phase_fwd_vals:</th><td class="field-body">Phase computed from the forward model of the
+reconstructed data. This will be a None type
+variable unless fwd=True is set. If the
+reconstruction went well, this should mimic
+phase_rad_vals. This variable is in radians.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">phase_rad_vals:</th><td class="field-body">Phase from the diffracted signal (Radians).</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">phase_vals:</th><td class="field-body">Reconstructed phase (Radians).</td>
+</tr>
+<tr class="field-even field"><th class="field-name">phi_rad_vals:</th><td class="field-body">Ring azimuth angle of the ring intercept (Radians).</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">phi_rl_rad_vals:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">Ring longitude angle. This will be a None type unless
+it was provided in the NormDiff class. Otherwise,
+this variable is in radians.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">power_vals:</th><td class="field-body">Normalized reconstructed power.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">psitype:</th><td class="field-body">String for psitype (See keywords).</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">raw_tau_threshold_vals:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">Threshold optical depth for the diffracted data.
+This will be a None type unless provided for in the
+NormDiff class.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">res:</th><td class="field-body">Requested resolution (See arguments). In kilometers.</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">rho_corr_pole_km_vals:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">Radial corrections from the Planet’s pole. This will
+be a None type variable unless provided in the
+NormDiff class. Otherwise, this is in kilometers.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">rho_corr_timing_km_vals:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">Radial corrections from timing offsets. This will be
+a None type variable unless provided in the NormDiff
+class. Otherwise, this is in kilometers.</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">rho_dot_kms_vals:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">Time derivative of the ring intercept point (km/s).</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">rho_km_vals:</th><td class="field-body">Ring-intercept-point (RIP) in kilometers.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">rng:</th><td class="field-body">Range that was used for reconstruction, taking into
+the range that was requested by the user. The actual
+range takes into account limits in the available data
+and limits in the required window sizes.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">rngreq:</th><td class="field-body">Requested range (See keywords).</td>
+</tr>
+<tr class="field-even field"><th class="field-name">sigma:</th><td class="field-body">Requested Allen deviation (See keywords).</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">start:</th><td class="field-body">First point that was reconstructed.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">t_oet_spm_vals:</th><td class="field-body">Time the signal is measured on Earth. This is a
+None type unless provided for in the NormDiff class.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">t_ret_spm_vals:</th><td class="field-body">Time the signal passes through the diffracting
+medium. This is a None type unless provided for in
+the NormDiff class.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">t_set_spm_vals:</th><td class="field-body">Time the signal is emitted from the spacecraft. This
+is a None type unless provided in the NormDiff class.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">tau_threshold_vals:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">Threshold optical depth of the reconstructed data.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">tau_vals:</th><td class="field-body">Optical depth of the reconstructed data.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">verbose:</th><td class="field-body">Boolean for Verbose (See keywords).</td>
+</tr>
+<tr class="field-even field"><th class="field-name">w_km_vals:</th><td class="field-body">Window width as a function of radius (km).</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">wtype:</th><td class="field-body">String for wtype (See keywords).</td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt>Dependencies:</dt>
+<dd><ol class="first last arabic simple">
+<li>numpy</li>
+<li>scipy</li>
+<li>rss_ringoccs</li>
+<li>time</li>
+</ol>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="rss_ringoccs.diffrec.special_functions.html" class="btn btn-neutral float-right" title="rss_ringoccs.diffrec.special_functions module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="rss_ringoccs.diffrec.advanced_tools.html" class="btn btn-neutral" title="rss_ringoccs.diffrec.advanced_tools module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Team Cassini at Wellesley College
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'v1.1',
+              LANGUAGE:'en',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

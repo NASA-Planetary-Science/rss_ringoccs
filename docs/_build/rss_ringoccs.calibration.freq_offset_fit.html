@@ -1,0 +1,459 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>rss_ringoccs.calibration.freq_offset_fit module &mdash; rss_ringoccs v1.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="rss_ringoccs.calibration.power_normalization module" href="rss_ringoccs.calibration.power_normalization.html" />
+    <link rel="prev" title="rss_ringoccs.calibration.dlp_class module" href="rss_ringoccs.calibration.dlp_class.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> rss_ringoccs
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v1.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="rss_ringoccs.html">rss_ringoccs package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="rss_ringoccs.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="rss_ringoccs.calibration.html">rss_ringoccs.calibration package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="rss_ringoccs.calibration.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="rss_ringoccs.diffrec.html">rss_ringoccs.diffrec package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rss_ringoccs.occgeo.html">rss_ringoccs.occgeo package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rss_ringoccs.rsr_reader.html">rss_ringoccs.rsr_reader package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rss_ringoccs.tools.html">rss_ringoccs.tools package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">rss_ringoccs</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="rss_ringoccs.html">rss_ringoccs package</a> &raquo;</li>
+        
+          <li><a href="rss_ringoccs.calibration.html">rss_ringoccs.calibration package</a> &raquo;</li>
+        
+      <li>rss_ringoccs.calibration.freq_offset_fit module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/rss_ringoccs.calibration.freq_offset_fit.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-rss_ringoccs.calibration.freq_offset_fit">
+<span id="rss-ringoccs-calibration-freq-offset-fit-module"></span><h1>rss_ringoccs.calibration.freq_offset_fit module<a class="headerlink" href="#module-rss_ringoccs.calibration.freq_offset_fit" title="Permalink to this headline">¶</a></h1>
+<dl class="docutils">
+<dt>Purpose:</dt>
+<dd>Compute a fit to the frequency offset residual using
+the frequency offset, predicted sky frequency, and
+reconstructed sky
+frequency.</dd>
+</dl>
+<dl class="class">
+<dt id="rss_ringoccs.calibration.freq_offset_fit.FreqOffsetFit">
+<em class="property">class </em><code class="descclassname">rss_ringoccs.calibration.freq_offset_fit.</code><code class="descname">FreqOffsetFit</code><span class="sig-paren">(</span><em>rsr_inst</em>, <em>geo_inst</em>, <em>poly_order=7</em>, <em>f_uso_x=8427222034.3405</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#rss_ringoccs.calibration.freq_offset_fit.FreqOffsetFit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Obtains <img class="math" src="_images/math/26dd492f82133fbacbe2427404fac52665374d7a.png" alt="f(t)_{offset}"/> from <code class="docutils literal notranslate"><span class="pre">calc_freq_offset</span></code>,
+<img class="math" src="_images/math/654c21973e0c1cbcc1ae934b90a12138653315f8.png" alt="f(t)_{dr}"/> from <code class="docutils literal notranslate"><span class="pre">calc_f_sky_recon</span></code>, and <img class="math" src="_images/math/32cb5a42a3c0457161affc00cd49ca6eefaf6e57.png" alt="f(t)_{dp}"/>
+from <code class="docutils literal notranslate"><span class="pre">get_f_sky_pred</span></code>. Computes a polynomial fit
+<img class="math" src="_images/math/15953e1c438d4cf11ef1bd2311d7002e87c93045.png" alt="\hat{f}(t)_{resid}"/> of order specified by <code class="docutils literal notranslate"><span class="pre">poly_order</span></code> to
+sigma-clipped residual difference <img class="math" src="_images/math/25825a670fc0209ab36dbe0deec7aa291193275f.png" alt="f(t)_{resid}"/> between
+observed and predicted frequency offset where the residual is
+given by</p>
+<div class="math">
+<p><img src="_images/math/cfabb0199e5ac1081f5f5b2c67f000174ac802d2.png" alt="f(t)_{resid} = (f(t)_{dr}-f(t)_{dp}) - f(t)_{offset}"/></p>
+</div><p>Final frequency offset <img class="math" src="_images/math/320fd9c1511bb07e8bcebd43619f7664692b5343.png" alt="\hat{f}(t)_{offset}"/> is found using
+the polynomial fit <img class="math" src="_images/math/15953e1c438d4cf11ef1bd2311d7002e87c93045.png" alt="\hat{f}(t)_{resid}"/> to the frequency
+offset residuals such that</p>
+<div class="math">
+<p><img src="_images/math/d045beaa9f8124c8d0cff744b40b180a5575b677.png" alt="\hat{f}(t)_{offset} = \hat{f}(t)_{resid} +
+(f(t)_{dr} - f(t)_{dp})"/></p>
+</div><dl class="docutils">
+<dt>Arguments:</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">rsr_inst (<em>object</em>):</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">object instance of the RSRReader class</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">geo_inst (<em>object</em>):</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">object instance of the Geometry class</td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt>Keyword Arguments:</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">poly_order (<em>float</em>):</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">whole number specifying the order of
+the polynomial fit to the residual frequency
+offset</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">f_uso_x (<em>float</em>):</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">frequency in Hz of the X-band ultra-stable
+oscilator onboard the Cassini spacecraft.
+Default is 8427222034.3405 Hz.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">verbose (<em>bool</em>):</th><td class="field-body">when True, enables verbose output mode</td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt>Attributes:</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">f_offset_fit:</th><td class="field-body">final frequency offset evaluated using fit to
+offset residuals <img class="math" src="_images/math/1dccfc191cdae97d824ae4fd3ff46367c9ca8795.png" alt="\hat{f}(t)_{offset} =
+\hat{f}(t)_{resid} + (f(t)_{dr} - f(t)_{dp})"/></td>
+</tr>
+<tr class="field-even field"><th class="field-name">f_spm:</th><td class="field-body">SPM at which the offset frequency was sampled</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">f_sky_pred:</th><td class="field-body">predicted sky frequency <img class="math" src="_images/math/32cb5a42a3c0457161affc00cd49ca6eefaf6e57.png" alt="f(t)_{dp}"/></td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">f_sky_resid_fit:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">fit to the residual frequency offset
+math:<cite>hat{f}(t)_{resid}</cite> evaluated at
+<code class="docutils literal notranslate"><span class="pre">f_spm</span></code></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">chi_squared:</th><td class="field-body">sum of the squared residual frequency offset fit
+such that <img class="math" src="_images/math/e37485aafa9d0d5e850c791e7c5e3e62617a8e7b.png" alt="\chi^2 = \frac{1}{N-m}
+\sum(\hat{f}(t)_{resid}-f(t)_{resid})^2"/>
+for <img class="math" src="_images/math/f4170ed8938b79490d8923857962695514a8e4cb.png" alt="N"/> data and <img class="math" src="_images/math/edba97b4c0d864d26e92ea7ea73767fa38eef3f7.png" alt="m"/> free
+parameters (i.e., the polynomial order plus
+one).</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+<dl class="method">
+<dt id="rss_ringoccs.calibration.freq_offset_fit.FreqOffsetFit.create_mask">
+<code class="descname">create_mask</code><span class="sig-paren">(</span><em>f_spm</em>, <em>f_rho</em>, <em>f_sky_resid</em><span class="sig-paren">)</span><a class="headerlink" href="#rss_ringoccs.calibration.freq_offset_fit.FreqOffsetFit.create_mask" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Purpose:</dt>
+<dd><p class="first">Creates a Boolean mask array which excludes data based on
+the following critera:</p>
+<blockquote class="last">
+<div>#. ring or planetary occultation in region prevents
+accurate estimation of the offset frequency
+#. offset frequencies fall more than 5-sigma beyond
+the median offset frequency
+#. adjacent data all excluded by previous requirements
+(excludes noise which by happenstance satisfies the
+above criteria)</div></blockquote>
+</dd>
+<dt>Arguments:</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">f_spm (<em>np.ndarray</em>):</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">SPM sampled by <code class="docutils literal notranslate"><span class="pre">calc_freq_offset</span></code>
+when calculating the offset frequencies for
+the occultation</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">f_rho (<em>np.ndarray</em>):</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">ring intercept radius of the
+spacecraft signal resampled to match f_spm</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">f_sky_resid (<em>np.ndarray</em>):</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">residual sky frequency</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rss_ringoccs.calibration.freq_offset_fit.FreqOffsetFit.fit_f_sky_resid">
+<code class="descname">fit_f_sky_resid</code><span class="sig-paren">(</span><em>f_spm</em>, <em>f_rho</em>, <em>f_sky_resid</em>, <em>poly_order=None</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#rss_ringoccs.calibration.freq_offset_fit.FreqOffsetFit.fit_f_sky_resid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit a polynomial to residual frequency.</p>
+<dl class="docutils">
+<dt>Arguments:</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">f_spm (<em>np.ndarray</em>):</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">SPM sampled by <code class="docutils literal notranslate"><span class="pre">calc_freq_offset</span></code>
+when calculating the offset frequencies for
+the occultation</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">f_rho (<em>np.ndarray</em>):</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">ring intercept radius of the
+spacecraft signal resampled to match f_spm</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">f_sky_resid (<em>np.ndarray</em>):</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">residual sky frequency</td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt>Keyword Arguments:</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">poly_order (<em>float</em>):</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">Order of polynomial fit to residual
+frequency</td>
+</tr>
+<tr class="field-even field"><th class="field-name">verbose (<em>bool</em>):</th><td class="field-body">If True, print processing steps</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="rss_ringoccs.calibration.freq_offset_fit.FreqOffsetFit.plotFORFit">
+<code class="descname">plotFORFit</code><span class="sig-paren">(</span><em>spm</em>, <em>resid</em>, <em>fit</em>, <em>mask</em>, <em>spm_min</em>, <em>spm_max</em>, <em>occ_min</em>, <em>occ_max</em>, <em>poly_order</em><span class="sig-paren">)</span><a class="headerlink" href="#rss_ringoccs.calibration.freq_offset_fit.FreqOffsetFit.plotFORFit" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Purpose:</dt>
+<dd>Plot results of the automated frequency offset residual
+fit and save plot to a file. File name will match the
+.LBL and .TAB nomenclature.</dd>
+<dt>Arguments:</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">spm (<em>np.ndarray</em>):</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">SPM sampled by <code class="docutils literal notranslate"><span class="pre">calc_freq_offset</span></code>
+when calculating the offset frequencies for
+the occultation</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">resid (<em>np.ndarray</em>):</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">residual sky frequency</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">fit (<em>np.ndarray</em>):</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">polynomial fit to the residual sky
+frequency</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">mask (<em>np.ndarray</em>):</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">boolean array used to mask residual
+sky frequency for the polynomial fitting</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">spm_min (<em>float</em>):</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">start of occultation in SPM</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">spm_max (<em>float</em>):</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">end of occultation in SPM</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">poly_order (<em>float</em>):</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">order of polynomial fit to the
+residual sky frequency</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="rss_ringoccs.calibration.power_normalization.html" class="btn btn-neutral float-right" title="rss_ringoccs.calibration.power_normalization module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="rss_ringoccs.calibration.dlp_class.html" class="btn btn-neutral" title="rss_ringoccs.calibration.dlp_class module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Team Cassini at Wellesley College
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'v1.1',
+              LANGUAGE:'en',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

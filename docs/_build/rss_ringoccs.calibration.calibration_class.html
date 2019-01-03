@@ -1,0 +1,437 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>rss_ringoccs.calibration.calibration_class module &mdash; rss_ringoccs v1.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="rss_ringoccs.calibration.dlp_class module" href="rss_ringoccs.calibration.dlp_class.html" />
+    <link rel="prev" title="rss_ringoccs.calibration.calc_tau_thresh module" href="rss_ringoccs.calibration.calc_tau_thresh.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> rss_ringoccs
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v1.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="rss_ringoccs.html">rss_ringoccs package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="rss_ringoccs.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="rss_ringoccs.calibration.html">rss_ringoccs.calibration package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="rss_ringoccs.calibration.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="rss_ringoccs.diffrec.html">rss_ringoccs.diffrec package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rss_ringoccs.occgeo.html">rss_ringoccs.occgeo package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rss_ringoccs.rsr_reader.html">rss_ringoccs.rsr_reader package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rss_ringoccs.tools.html">rss_ringoccs.tools package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">rss_ringoccs</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="rss_ringoccs.html">rss_ringoccs package</a> &raquo;</li>
+        
+          <li><a href="rss_ringoccs.calibration.html">rss_ringoccs.calibration package</a> &raquo;</li>
+        
+      <li>rss_ringoccs.calibration.calibration_class module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/rss_ringoccs.calibration.calibration_class.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-rss_ringoccs.calibration.calibration_class">
+<span id="rss-ringoccs-calibration-calibration-class-module"></span><h1>rss_ringoccs.calibration.calibration_class module<a class="headerlink" href="#module-rss_ringoccs.calibration.calibration_class" title="Permalink to this headline">¶</a></h1>
+<p>Purpose:</p>
+<blockquote>
+<div>Class framework for performing the necessary calibration steps for
+the RSR data. This includes phase correction based on frequency
+offset of the spacecraft and normalization of received power with
+respect to the intrinsic spacecraft power.</div></blockquote>
+<p>Notes:</p>
+<blockquote>
+<div>Can be computationally cumbersome, especially for chord
+occultations. May require up to 30 mins for 16 kHz RSR data files.</div></blockquote>
+<p>Dependencies:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>numpy</li>
+<li>pdb</li>
+<li>scipy</li>
+<li>sys</li>
+</ol>
+</div></blockquote>
+<dl class="class">
+<dt id="rss_ringoccs.calibration.calibration_class.Calibration">
+<em class="property">class </em><code class="descclassname">rss_ringoccs.calibration.calibration_class.</code><code class="descname">Calibration</code><span class="sig-paren">(</span><em>rsr_inst</em>, <em>geo_inst</em>, <em>fof_order=9</em>, <em>pnf_order=3</em>, <em>dt_cal=1.0</em>, <em>verbose=False</em>, <em>write_file=True</em>, <em>interact=False</em>, <em>pnf_fittype='poly'</em><span class="sig-paren">)</span><a class="headerlink" href="#rss_ringoccs.calibration.calibration_class.Calibration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="docutils">
+<dt>Purpose:</dt>
+<dd>Define a class which, when instantiated, calls the submodules
+for performing each step of the calibration process by
+instantiating the classes <code class="docutils literal notranslate"><span class="pre">FreqOffsetFit</span></code> in the
+<code class="docutils literal notranslate"><span class="pre">freq_offset_fit.py</span></code> script and <code class="docutils literal notranslate"><span class="pre">Normalization</span></code> in the
+<code class="docutils literal notranslate"><span class="pre">power_normalization.py</span></code> script.</dd>
+<dt>Arguments:</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">rsr_inst (<em>object</em>):</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">Instance of the RSRReader class</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">geo_inst (<em>object</em>):</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">Instance of the Geometry class</td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt>Keyword Arguments:</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">fof_order (<em>float</em>):</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">Whole number specifying the polynomial
+order to use when fitting the frequency offset
+residual. Default is 9.</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">pnf_order (<em>float</em>):</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">whole number specifying the polynomial
+order to use when fitting the freespace power.
+Default is 3.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">dt_cal (<em>float</em>):</th><td class="field-body">Desired final spacing in SPM between data
+points. Default is 1 sec.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">verbose (<em>bool</em>):</th><td class="field-body">If True, print intermediate steps and
+results. Default is False.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">write_file (<em>bool</em>):</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">If True, write output CAL .TAB and
+CAL .LBL files. Default is True.</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">interact (<em>bool</em>):</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">If True, enables the interactive mode in
+the terminal for fitting the freespace power.
+Default is False.</td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt>Attributes:</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">rev_info (<em>dict</em>):</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><em>dict</em> of information identifying the
+specific occultation: rsrfile, year, day of
+year, direction and type of occultation,
+spacecraft revolution number, and observation
+band</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">t_oet_spm_vals (<em>np.ndarray</em>):</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">SPM values for observed event
+time <img class="math" src="_images/math/5ec053cf70dc1c98cc297322250569eda193e7a4.png" alt="t"/></td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">f_sky_hz_vals (<em>np.ndarray</em>):</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">sum of the predicted sky frequency values
+and the fit to frequency offset
+<img class="math" src="_images/math/bfe1a30acd3c5a7e2289fec4fa6c56cadfbfa5e0.png" alt="\hat{f}(t)_{offset}=(f_{dr}(t)
+-f_{dp}(t))+\hat{f}(t)_{resid}"/>
+following Equation 19 in <a class="reference internal" href="rss_ringoccs.html#crsug2018" id="id1">[CRSUG2018]</a>.</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">f_sky_resid_fit_vals (<em>np.ndarray</em>):</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">fit to residual sky
+frequency <img class="math" src="_images/math/15953e1c438d4cf11ef1bd2311d7002e87c93045.png" alt="\hat{f}(t)_{resid}"/></td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">p_free_vals (<em>np.ndarray</em>):</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">fit to freespace power
+<img class="math" src="_images/math/a08c4a4b5a97a74b6fd95bb98a5cfb7d739f6e33.png" alt="\hat{P}_0(t)"/></td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">IQ_c (<em>np.ndarray</em>):</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">phase-corrected spacecraft signal
+<img class="math" src="_images/math/e3264dac37bfcbb732b4e17ce2cf16c442658153.png" alt="I_{c}+iQ_{c}"/></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">history (<em>dict</em>):</th><td class="field-body">information about the parameters, results,
+and computation of the calibration procedures</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">FORFIT_chi_squared (<em>float</em>):</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">sum of the squared residual
+frequency offset fit such that
+<img class="math" src="_images/math/c69c0f165e6561a79cde2c4d4a0618267ff0517e.png" alt="\chi^2 = \frac{1}{N-m}\sum
+(\hat{f}(t)_{resid}-f(t)_{resid})^2"/></td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">FSPFIT_chi_squared (<em>float</em>):</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><img class="math" src="_images/math/a9b413b6e526f757342340c443fd93b4b7fcd99e.png" alt="\chi^2 = \frac{1}{N-m}\sum
+(\hat{P}_0(t)-P_0(t))^2"/></td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt>Returns:</dt>
+<dd>Object instance with attributes associated with the process of
+calibrating the measured signal <img class="math" src="_images/math/76fa991813744be0a4bb21ce612d67ab6141aaa3.png" alt="I_{m}+iQ_{m}"/> as well
+as the method for phase-correcting <img class="math" src="_images/math/76fa991813744be0a4bb21ce612d67ab6141aaa3.png" alt="I_{m}+iQ_{m}"/>.</dd>
+</dl>
+<dl class="method">
+<dt id="rss_ringoccs.calibration.calibration_class.Calibration.correct_IQ">
+<code class="descname">correct_IQ</code><span class="sig-paren">(</span><em>spm_vals</em>, <em>IQ_m</em>, <em>f_spm</em>, <em>f_offset_fit</em><span class="sig-paren">)</span><a class="headerlink" href="#rss_ringoccs.calibration.calibration_class.Calibration.correct_IQ" title="Permalink to this definition">¶</a></dt>
+<dd><p>Purpose:</p>
+<blockquote>
+<div><p>Apply frequency offset fit to raw measured signal using
+the signal frequencies calculated by <code class="docutils literal notranslate"><span class="pre">FreqOffsetFit</span></code>.
+First resamples the frequency offset fit to a 0.1 sec
+separation. Then, computes detrending function by
+integrating frequency offset fit to get phase detrending
+function <img class="math" src="_images/math/499a2ee48b33448e80b97af9df9550828bdbfb59.png" alt="\psi"/> using Equation 18 from
+<a class="reference internal" href="rss_ringoccs.html#crsug2018" id="id2">[CRSUG2018]</a> where</p>
+<div class="math">
+<p><img src="_images/math/a95977eba2be3fe847aed9326df98fd60995c617.png" alt="\psi = \int^{t}\hat{f}(\tau)_{offset}
+\mathrm{d}\tau+\psi(t_0)"/></p>
+</div><p>Finally, applies phase detrending correction to signal to
+raw signal such that</p>
+<div class="math">
+<p><img src="_images/math/294e681221779224ef235de901ff796e8c92c872.png" alt="I_{c}+iQ_{c} = [I_{m}+iQ_{m}] \exp(-i\psi)"/></p>
+</div><p>as discussed in <a class="reference internal" href="rss_ringoccs.html#crsug2018" id="id3">[CRSUG2018]</a> (see their Equation 17).</p>
+</div></blockquote>
+<dl class="docutils">
+<dt>Arguments:</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">spm_vals (<em>np.ndarray</em>):</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">raw SPM values</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">IQ_m (<em>np.ndarray</em>):</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">raw complex signal measured by DSN</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">f_spm (<em>np.ndarray</em>):</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">SPM sampled for frequency offset
+calculation in the <code class="docutils literal notranslate"><span class="pre">calc_freq_offset</span></code> class
+in the <code class="docutils literal notranslate"><span class="pre">calc_freq_offset.py</span></code> script.</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">f_offset_fit (<em>np.ndarray</em>):</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">frequency of the spacecraft
+signal corresponding to <code class="docutils literal notranslate"><span class="pre">f_spm</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt>Returns:</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">IQ_c (<em>np.ndarray</em>):</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">Frequency-corrected complex signal
+<img class="math" src="_images/math/e3264dac37bfcbb732b4e17ce2cf16c442658153.png" alt="I_{c}+iQ_{c}"/> corresponding to
+<code class="docutils literal notranslate"><span class="pre">spm_vals</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="rss_ringoccs.calibration.dlp_class.html" class="btn btn-neutral float-right" title="rss_ringoccs.calibration.dlp_class module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="rss_ringoccs.calibration.calc_tau_thresh.html" class="btn btn-neutral" title="rss_ringoccs.calibration.calc_tau_thresh module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Team Cassini at Wellesley College
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'v1.1',
+              LANGUAGE:'en',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

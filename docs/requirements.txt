@@ -3,6 +3,5 @@ scipy
 spiceypy
 matplotlib
 mayavi
-sys
 time
 platform

@@ -34,8 +34,8 @@ def pre_resample(rho_km, vec, freq):
 
     # Uniform radius grid at near-raw resolution to which to interpolate.
     #     For ingress, this implicitly reverses radius scale!
-    n_pts = round(abs(rho_km[-1] - rho_km[0]) / dr_grid)
-    rho_grid = min(rho_km) + dr_grid * np.arange(n_pts)
+    n_pts = round(abs(rho_km[-1] - (rho_km[0]+0.4)) / dr_grid)
+    rho_grid = round(min(rho_km)+0.4) + dr_grid * np.arange(n_pts)
 
     # Interpolate to near-raw resolution. For ingress, this implicitly
     #     reverses radius scale!

@@ -1,0 +1,401 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>rss_ringoccs.rsr_reader.rsr_reader module &mdash; rss_ringoccs v1.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="rss_ringoccs.tools package" href="rss_ringoccs.tools.html" />
+    <link rel="prev" title="rss_ringoccs.rsr_reader.rsr_header module" href="rss_ringoccs.rsr_reader.rsr_header.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> rss_ringoccs
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v1.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="rss_ringoccs.html">rss_ringoccs package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="rss_ringoccs.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="rss_ringoccs.calibration.html">rss_ringoccs.calibration package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rss_ringoccs.diffrec.html">rss_ringoccs.diffrec package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rss_ringoccs.occgeo.html">rss_ringoccs.occgeo package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="rss_ringoccs.rsr_reader.html">rss_ringoccs.rsr_reader package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="rss_ringoccs.rsr_reader.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="rss_ringoccs.tools.html">rss_ringoccs.tools package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">rss_ringoccs</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="rss_ringoccs.html">rss_ringoccs package</a> &raquo;</li>
+        
+          <li><a href="rss_ringoccs.rsr_reader.html">rss_ringoccs.rsr_reader package</a> &raquo;</li>
+        
+      <li>rss_ringoccs.rsr_reader.rsr_reader module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/rss_ringoccs.rsr_reader.rsr_reader.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-rss_ringoccs.rsr_reader.rsr_reader">
+<span id="rss-ringoccs-rsr-reader-rsr-reader-module"></span><h1>rss_ringoccs.rsr_reader.rsr_reader module<a class="headerlink" href="#module-rss_ringoccs.rsr_reader.rsr_reader" title="Permalink to this headline">¶</a></h1>
+<dl class="docutils">
+<dt>Purpose:</dt>
+<dd>Class to create an instance linked to an RSR file</dd>
+</dl>
+<dl class="class">
+<dt id="rss_ringoccs.rsr_reader.rsr_reader.RSRReader">
+<em class="property">class </em><code class="descclassname">rss_ringoccs.rsr_reader.rsr_reader.</code><code class="descname">RSRReader</code><span class="sig-paren">(</span><em>rsr_file</em>, <em>decimate_16khz_to_1khz=True</em>, <em>cpu_count=8</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#rss_ringoccs.rsr_reader.rsr_reader.RSRReader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Purpose:
+Reads the header of a raw RSR file when you first create an instance.
+Then reads the full RSR file to read in the raw measured complex signal <img class="math" src="_images/math/b969cab43bfd321ea4ab29672bfdefed790888be.png" alt="I+iQ"/></p>
+<dl class="docutils">
+<dt>Arguments:</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">rsr_file (<em>str</em>):</th><td class="field-body">Full path name of a raw RSR file to read. RSR files
+can be downloaded using the shell script in the data”
+directory of the GitHub clone</td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt>Keyword Arguments:</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">decimate_16khz_to_1khz (<em>bool</em>):</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">Optional Boolean argument which, if
+set to True, decimates 16kHz files down to 1kHz sampling rate.
+Note that this is a sticky keyword - if you set it to True, it
+will be True for any subsequent calls from the instance until
+you explicitly set it to False. This keyword is linked to the
+private attribute __decimate_16khz_to_1khz</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">cpu_count (<em>int</em>):</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">Number of cores to use when reading data in from
+file. Default is number of cores on your computer</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">verbose (<em>bool</em>):</th><td class="field-body">Optional boolean variable which, when set to True,
+prints the header attributes that were set</td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt>Attributes:</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">rsr_file (<em>str</em>):</th><td class="field-body">Full path name of a raw RSR file to read</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">spm_vals (<em>np.ndarray</em>):</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">Seconds Past Midnight array of times over
+entire rsr file</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">doy (<em>int</em>):</th><td class="field-body">Day of year of event</td>
+</tr>
+<tr class="field-even field"><th class="field-name">year (<em>int</em>):</th><td class="field-body">Year of event</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">dsn (<em>str</em>):</th><td class="field-body">Deep Space Network ID of the station that observed the
+spacecraft for this event</td>
+</tr>
+<tr class="field-even field"><th class="field-name">band (<em>bytes</em>):</th><td class="field-body">Name of the wavelength of transmission (S, X, or Ka)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">sample_rate_khz (<em>int</em>):</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">Sample rate, in kHz, of transmission (1 or 16)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">history (<em>dict</em>):</th><td class="field-body">Dictionary recording parameters of the run</td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt>Example:</dt>
+<dd><div class="first last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Import rss_ringoccs</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">rss_ringoccs</span> <span class="k">as</span> <span class="nn">rss</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Define instance and set header attributes, and read in raw data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rsr_inst</span> <span class="o">=</span> <span class="n">rss</span><span class="o">.</span><span class="n">rsr_reader</span><span class="o">.</span><span class="n">RSRReader</span><span class="p">(</span><span class="n">rsr_file</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span> <span class="c1"># Get predicted sky frequency at chosen SPM values f_spm</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f_spm_returned</span><span class="p">,</span> <span class="n">f_sky_pred</span> <span class="o">=</span> <span class="n">rsr_inst</span><span class="o">.</span><span class="n">get_f_sky_pred</span><span class="p">(</span><span class="n">f_spm</span><span class="o">=</span><span class="n">f_spm</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+<dt>Dependencies:</dt>
+<dd><ol class="first last arabic simple">
+<li>RSRReader</li>
+<li>numpy</li>
+<li>os</li>
+<li>platform</li>
+<li>scipy.signal.decimate</li>
+<li>struct</li>
+<li>sys</li>
+<li>time</li>
+</ol>
+</dd>
+<dt>Notes:</dt>
+<dd><ol class="first last arabic simple">
+<li>Setting <code class="docutils literal notranslate"><span class="pre">decimate_16khz_to_1khz=True</span></code> for a 1kHz file will be ignored</li>
+<li>16kHz files will take a few minutes to read and decimate</li>
+</ol>
+</dd>
+</dl>
+<dl class="method">
+<dt id="rss_ringoccs.rsr_reader.rsr_reader.RSRReader.get_f_sky_pred">
+<code class="descname">get_f_sky_pred</code><span class="sig-paren">(</span><em>f_spm=None</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#rss_ringoccs.rsr_reader.rsr_reader.RSRReader.get_f_sky_pred" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Purpose:</dt>
+<dd>Calculate predicted sky frequency at user-defined times using
+polynomial coefficients in each SFDU.</dd>
+<dt>Arguments:</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">f_spm (<em>np.ndarray</em>):</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">Array of SPM values to evaluate predicted
+sky frequency at. Default is at 1 second spacing over entire
+data set.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">verbose (<em>bool</em>):</th><td class="field-body">Print the first few predicted sky frequency values
+if set to True</td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt>Returns:</dt>
+<dd><table class="first last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">f_spm (<em>np.ndarray</em>):</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">Array of SPM values that predicted sky
+frequency was evaluated at.</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">f_sky_pred (<em>np.ndarray</em>):</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">Predicted sky frequency, calculated from
+the polynomial coefficients in the RSR file</td>
+</tr>
+</tbody>
+</table>
+</dd>
+<dt>Dependencies:</dt>
+<dd><ol class="first last arabic simple">
+<li>numpy</li>
+<li>struct</li>
+<li>sys</li>
+</ol>
+</dd>
+<dt>Notes:</dt>
+<dd><ul class="first last simple">
+<li>Will take a few minutes to run for 16kHz files</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="rss_ringoccs.tools.html" class="btn btn-neutral float-right" title="rss_ringoccs.tools package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="rss_ringoccs.rsr_reader.rsr_header.html" class="btn btn-neutral" title="rss_ringoccs.rsr_reader.rsr_header module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Team Cassini at Wellesley College
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'v1.1',
+              LANGUAGE:'en',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

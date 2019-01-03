@@ -2,12 +2,18 @@
 
 write_output_files.py
 
-Purpose: Write output *.TAB data and corresponding *.LBL label file.
+:Purpose: 
+    Functions relating to writing an output file.
 
-Revisions:
-    2018 Sep 19 - jfong - original
-    2018 Sep 24 - jfong - hardcode relative path (../output/*)
-    2018 Sep 26 - jfong - reset seqnum counter for new days
+:Dependencies:
+    #. sys
+    #. pds3_geo_series
+    #. pds3_cal_series
+    #. pds3_dlp_series
+    #. pds3_tau_series
+    #. time
+    #. os
+
 """
 import sys
 from .pds3_geo_series import write_geo_series
@@ -23,6 +29,7 @@ sys.path.remove('../../')
 import pdb
 import os
 
+#
 chord_revnums = ['053', '054', '056', '057', '058', '060', '063', '064',
                     '067', '079', '081', '082', '084', '089']
 
@@ -105,9 +112,8 @@ def construct_filepath(rev_info, filtyp):
             if len(dirfiles) == 0:
                 seq_num = '0001'
             else:
-                sfn = [x.split('_') for x in dirfiles]
-                sqn0 = [(x[-2]+x[-1][0:4]) for x in sfn if (x[-3]==filtyp)
-                        and (x[-2]==curday)]
+                sqn0 = [x.split('_')[-2]+x.split('_')[-1][0:4] for x in dirfiles
+                        if (filtyp in x) and (x.split('_')[-2]==curday)]
                 if len(sqn0) == 0:
                     seq_num = '0001'
                 else:
@@ -145,3 +151,6 @@ def construct_output_filename(rev_info, inst, filtyp):
 
     return None
 
+"""
+Revisions:
+"""

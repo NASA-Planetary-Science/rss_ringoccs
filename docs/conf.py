@@ -74,6 +74,9 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
 
+# -- Dependencies ------------------------------------------------------------
+autodoc_mock_imports = ['numpy','scipy','spiceypy','matplotlib','time','sys',
+                        'subprocess','pdb','mayavi','os','platform']
 
 # -- Options for HTML output -------------------------------------------------
 

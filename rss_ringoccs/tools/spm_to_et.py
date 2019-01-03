@@ -3,7 +3,6 @@ Purpose:
     Calculate ephemeris time given a set of SPM values and appropriate
     kernels. Called by ``calc_f_sky_recon.py``.
 """
-
 import numpy as np
 import spiceypy as spice
 import sys

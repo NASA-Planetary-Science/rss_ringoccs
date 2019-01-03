@@ -44,10 +44,23 @@ def shell_execute(script):
         History:
             Created: RJM - 2018/05/16 5:49 P.M.
     """
+    if not isinstance(script, list):
+        raise TypeError(
+            "Error: rss_ringoccs.tools.sys_tools: shell_execute\n"
+            "\n\tscript must be a list of strings\n"
+            "\tYour input has type: %s\n"
+            % (type(script).__name__)
+        )
+
     string = ""
     for x in script:
         if (not isinstance(x, str)):
-            raise TypeError("Input must be a list of strings")
+            raise TypeError(
+                "Error: rss_ringoccs.tools.sys_tools: shell_execute\n"
+                "\n\tscript must be a list of strings\n"
+                "\tOne of your inputs has type: %s\n"
+                % (type(x).__name__)
+            )
         else:
             string = "%s %s" % (string,x)
     Process=subprocess.Popen([string],shell=True)
@@ -82,20 +95,50 @@ def date_string():
     return date
 
 def make_executable(path):
+    if not isinstance(path, str):
+        raise TypeError(
+            "Error: rss_ringoccs.tools.sys_tools: make_executable\n"
+            "\n\tpath must be a string\n"
+            "\tYour input has type: %s\n"
+            "\tInput should have type: str\n"
+            % (type(path).__name__)
+        )
+    else:
+        pass
+
     mode = os.stat(path).st_mode
     mode |= (mode & 0o444) >> 2    # copy R bits to X
     os.chmod(path, mode)
 
 def latex_summary_doc(pdffil, resolution, outfilename):
-    """
-        var = 'Rev133E_RSS_2010_170_X43_E_Summary'
-    """
+    if not isinstance(pdffil, str):
+        raise TypeError(
+            "Error: rss_ringoccs.tools.sys_tools: latex_summary_doc\n"
+            "\n\tpdffil must be a string\n"
+            "\tYour input has type: %s\n"
+            % (type(pdffil).__name__)
+        )
+    elif not isinstance(outfilename, str):
+        raise TypeError(
+            "Error: rss_ringoccs.tools.sys_tools: latex_summary_doc\n"
+            "\n\toutfilename must be a string\n"
+            "\tYour input has type: %s\n"
+            % (type(outfilename).__name__)
+        )
+    try:
+        res = str(resolution)
+    except:
+        raise TypeError(
+            "Error: rss_ringoccs.tools.sys_tools: latex_summary_doc\n"
+            "\n\tresolution must be a floating point number\n"
+            "\tYour input has type: %s\n"
+            % (type(resolution).__name__)
+        )
     var = pdffil.split("/")
     var = var[-1]
     var = var.split("_")
     rev = var[0][3:6]
     doy = var[3]
-    res = str(resolution)
     occ = var[5]
     year = var[2]
     band = var[4][0:3]

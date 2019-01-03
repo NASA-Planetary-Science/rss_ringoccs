@@ -25,17 +25,20 @@ def pre_resample(rho_km, vec, freq):
                 complex signal
         :freq (*float*): radial sampling frequency
     """
+    # initial radius and radial range
+    r0 = round(rho_km[0]+0.4)
+    dr = abs(rho_km[-1] - r0)
 
     # Average radius spacing over region
-    ts_avg = abs(rho_km[-1] - rho_km[0]) / float(len(rho_km) - 1)
+    ts_avg = dr / float(len(rho_km) - 1)
     p = 1
     q = int(round(1.0 / (ts_avg * freq)))
     dr_grid = float(p) / (q * freq)
 
     # Uniform radius grid at near-raw resolution to which to interpolate.
     #     For ingress, this implicitly reverses radius scale!
-    n_pts = round(abs(rho_km[-1] - rho_km[0]) / dr_grid)
-    rho_grid = min(rho_km) + dr_grid * np.arange(n_pts)
+    n_pts = round(dr) / dr_grid)
+    rho_grid = r0 + dr_grid * np.arange(n_pts)
 
     # Interpolate to near-raw resolution. For ingress, this implicitly
     #     reverses radius scale!

@@ -995,9 +995,17 @@ def get_freespace_km(ret_spm, year, doy, rho_km, phi_rl_deg):
     if add_fsp3[0][0] < min(rho_km) or add_fsp3[0][1] > max(rho_km):
         add_fsp3 = []
 
+    # check for fsp between atmosphere and c-ring
+    fsp0_km = 72000.
+    if min(rho_km) < fsp0_km and max(rho_km) > fsp0_km:
+        add_fsp0 = [[min(rho_km), fsp0_km]]
+    else:
+        add_fsp0 = []
+
+
 
     # Add free-space beyond ring system to free-space gaps in rings
-    freespace_km = (find_gaps(ret_spm, year, doy, rho_km, phi_rl_deg)
+    freespace_km = (add_fsp0 + find_gaps(ret_spm, year, doy, rho_km, phi_rl_deg)
             + add_fsp1 + add_fsp2 + add_fsp3) 
 
     return freespace_km

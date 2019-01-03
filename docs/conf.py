@@ -13,7 +13,6 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
-import numpy as np
 import sys
 sys.path.append('../')
 import rss_ringoccs

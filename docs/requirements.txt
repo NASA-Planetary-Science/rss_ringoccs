@@ -1,0 +1,11 @@
+numpy
+scipy
+spiceypy
+matplotlib
+mayavi
+subprocesses
+pdb
+os
+sys
+time
+platform

@@ -3,7 +3,6 @@ scipy
 spiceypy
 matplotlib
 mayavi
-subprocess
 pdb
 os
 sys

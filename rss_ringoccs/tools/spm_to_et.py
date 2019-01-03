@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 Purpose:
     Calculate ephemeris time given a set of SPM values and appropriate

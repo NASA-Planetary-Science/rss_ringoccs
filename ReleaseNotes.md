@@ -2,7 +2,7 @@
 
 ## rss_ringoccs V1.1 ##
 
-Release date: TBD
+Release date: Target date: 2019 Jan 18
 
 ### Changes from V1.0 ###
 1. Output file formats for GEO, CAL, DLP, and TAU files modified to be consistent with December 2018 PDS RSS archive submission.
@@ -47,15 +47,19 @@ Release date: TBD
 
 V1.1-1: For extreme geometry of Rev133E at X-band, rss_ringoccs gives slightly different results from PDS, traceable to a difference of about 10% in the cubic term of psi. Origin of this discrepancy unknown, but it is not important for any other occultation data sets we have reduced so far.
 
-### Requests for V1.2 ###
+### Lien list for V1.2 ###
 
 1. Runnable scripts to perform push-button diffraction correction, starting either from raw RSS files or from Essam Marouf's (or our) PDS-style geometry, calibration, and diffraction-limited profiles, at any desired resolution (consistent with the sampling theorem and justified by the SNR), for the full set of RSS occultations at S, X, and Ka-band up to the point of USO failure.
 
-2. Detailed tutorials to demonstrate the use of the software.
+2. More extensive documentation to demonstrate the use of the software.
 
 3. Data catalog query - we will work with the PDS to ensure that our recently-submitted RSS ring occultation observation data catalog is compliant with current PDS search capabilities.
 
 4. Improve speed of slowest routines by using tested multiprocessor code.
+
+5. Explore possibility of processing post-USO failure RSR files.
+
+6. Explore feasibility, level of effort, and value of archiving scattered signal data -- perhaps as a PDART proposal.
 
 ## rss_ringoccs V1.0 ##
 

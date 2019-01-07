@@ -2286,6 +2286,7 @@ class DiffractionCorrection(object):
                     if (loop > 5):
                         break
 
+
                 # Compute Eta variable (MTR86 Equation 4c).
                 psi_vals = psif(kD, r, r0, phi, phi0, b, d)
 

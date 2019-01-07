@@ -40,13 +40,6 @@ class DiffractionLimitedProfile(object):
                         DLP resolution of 0.5 km.
 
     Keyword Arguments:
-        :dr_km_tol (*float*): Maximum distance from an integer number
-                        of dr_desired that the first rho value will be
-                        at. Makes the final set of rho values more
-                        regular-looking. For example, if you say
-                        dr_km_tol=0.01 with a dr_desired of 0.25, your
-                        final set of rho values might look something
-                        like [70000.26, 70000.51, ...]
         :verbose (*bool*): When True, turns on verbose output. Default
                         is False.
         :write_file (*bool*): When True, writes processing results to
@@ -56,17 +49,42 @@ class DiffractionLimitedProfile(object):
                         [65000,150000].
 
     Attributes:
-        :snr (*np.ndarray*): Signal-to-noise ratio
-        :tau_thresh (*np.ndarray*): threshold optical depth
-        :spm_thresh (*np.ndarray*): SPM at which threshold optical
-                depth is computed
-        :rho_thresh (*np.ndarray*): radius at which threshold optical
-                depth is computed
         :dr_km (*float*): raw DLP sampling rate
+        :tau_threshold_vals (*np.ndarray*): threshold optical depth
+
+        :rho_km_vals (*np.ndarray*): Ring-intercept points in km
+        :t_oet_spm_vals (*np.ndarray*): Observed event times in seconds past
+                                        midnight
+        :p_norm_vals (*np.ndarray*): Normalized diffraction-limited power
+        :phase_rad_vals (*np.ndarray*): Phase of diffraction-limited signal,
+                                        in radians
+        :B_rad_vals (*np.ndarray*): Ring opening angle in radians
+        :D_km_vals (*np.ndarray*): Ring intercept point to spacecraft distance
+                                   in km
+        :F_km_vals (*np.ndarray*): Fresnel scale in km
+        :f_sky_hz_vals (*np.ndarray*): Sky frequency in Hz
+        :phi_rad_vals (*np.ndarray*): Observed ring azimuth
+        :t_ret_spm_vals (*np.ndarray*): Ring event time in seconds past midnight
+        :t_set_spm_vals (*np.ndarray*): Spacecraft event time in seconds past
+                                        midnight
+        :phi_rl_rad_vals (*np.ndarray*): Ring longitude in radians
+        :rho_dot_kms_vals (*np.ndarray*): Ring intercept radial velocity in km/s
+        :rho_corr_pole_km_vals (*np.ndarray*): Radius correction due to 
+                                               improved pole. This is populated
+                                               with a placeholder of zeros
+        :rho_corr_timing_km_vals (*np.ndarray*): Radius correction due to 
+                                                 timing offset. This is
+                                                 populated with a placeholder 
+                                                 of zeros
+        :tau_vals (*np.ndarray*): Diffraction-limited optical depth
+        :history (*dict*): Processing history with all inputs necessary to
+                           rerun pipeline to obtain identical output
+
+    Note:
+        #. All *np.ndarray* attributes are sampled at dr_km radial spacing.
     """
-    def __init__(self, rsr_inst, geo_inst, cal_inst, dr_km,
-            dr_km_tol=0.01, verbose=False, write_file=True,
-            profile_range=[65000., 150000.]):
+    def __init__(self, rsr_inst, geo_inst, cal_inst, dr_km, verbose=False, 
+            write_file=True, profile_range=[65000., 150000.]):
 
 
         if verbose:
@@ -101,7 +119,7 @@ class DiffractionLimitedProfile(object):
 
         # resample IQ_c, but not to exact rho boundaries
         rho_km_desired, IQ_c_desired = resample_IQ(rho_full, IQ_c,
-                dr_km, dr_km_tol=dr_km_tol)
+                dr_km)
 
         # Slice rho_km_desired to profile_range values
         ind1 = list(rho_km_desired).index(min(list(rho_km_desired),
@@ -135,15 +153,14 @@ class DiffractionLimitedProfile(object):
         # compute threshold optical depth at Nyquist sampling rate
         # (i.e., twice the "raw" DLP sampling rate)
         tau_thresh_inst = calc_tau_thresh(rsr_inst,geo_inst,cal_inst,res_km=dr_km)
-        self.snr = tau_thresh_inst.snr
-        self.tau_thresh = tau_thresh_inst.tau_thresh
-        self.spm_thresh = tau_thresh_inst.spm_vals
-        self.rho_thresh = tau_thresh_inst.rho_vals
+        tau_thresh = tau_thresh_inst.tau_thresh
+        spm_thresh = tau_thresh_inst.spm_vals
 
-        self.interp_and_set_attr(rho_km_desired, spm_desired, p_norm_vals,
+        self.__interp_and_set_attr(rho_km_desired, spm_desired, p_norm_vals,
                 spm_cal, phase_rad_vals, spm_geo, rho_dot_kms_geo,
                 B_deg_geo, F_km_geo, t_ret_spm_geo, t_set_spm_geo,
-                D_km_geo, phi_ora_deg_geo, phi_rl_deg_geo, f_sky_pred_cal)
+                D_km_geo, phi_ora_deg_geo, phi_rl_deg_geo, f_sky_pred_cal,
+                tau_thresh, spm_thresh)
 
 
         # if set, write output data and label file
@@ -158,7 +175,6 @@ class DiffractionLimitedProfile(object):
                 'dr_km': dr_km}
 
         input_kwds = {
-                'dr_km_tol': dr_km_tol,
                 'profile_range': profile_range}
 
         self.history = write_history_dict(input_vars, input_kwds, __file__)
@@ -167,10 +183,11 @@ class DiffractionLimitedProfile(object):
 
 
 
-    def interp_and_set_attr(self, rho_km_desired, spm_desired,
+    def __interp_and_set_attr(self, rho_km_desired, spm_desired,
             p_norm_vals, spm_cal, phase_rad_vals, spm_geo, rho_dot_kms_geo,
             B_deg_vals, F_km_geo, t_ret_geo, t_set_geo,
-            D_km_geo, phi_ora_deg_vals, phi_rl_deg_vals, f_sky_pred_cal):
+            D_km_geo, phi_ora_deg_vals, phi_rl_deg_vals, f_sky_pred_cal,
+            tau_thresh, spm_thresh):
 
         B_rad_geo = np.radians(B_deg_vals)
         phi_ora_rad_geo = np.radians(phi_ora_deg_vals)
@@ -234,37 +251,42 @@ class DiffractionLimitedProfile(object):
         self.rho_corr_pole_km_vals = rho_corr_pole_km_vals
         self.rho_corr_timing_km_vals = rho_corr_timing_km_vals
         self.tau_vals = -np.sin(B_rad_vals_interp)*np.log(p_norm_vals)
-        self.raw_tau_threshold_vals = np.interp(
-                spm_desired, self.spm_thresh,self.tau_thresh)
         self.tau_threshold_vals = np.interp(
-                spm_desired,self.spm_thresh,self.tau_thresh)
+                spm_desired, spm_thresh, tau_thresh)
 
-
-
-
-
-
-    def interp_IQ(self, rho_km_vals, IQ_c_vals, dr_km, profile_range):
-        rho_km_desired = np.arange(profile_range[0], profile_range[1],
-            step = dr_km)
-
-        Ic = np.real(IQ_c_vals)
-        Qc = np.imag(IQ_c_vals)
-
-        rho_to_Ic = splrep(rho_km_vals, Ic)
-        Ic_desired = splev(rho_km_desired, rho_to_Ic)
-
-
-        rho_to_Qc = splrep(rho_km_vals, Qc)
-        Qc_desired = splev(rho_km_desired, rho_to_Qc)
-
-        IQc_desired = Ic_desired + 1j * Qc_desired
-
-        return rho_km_desired, IQc_desired
 
     @classmethod
-    def create_dlps(cls, rsr_inst, geo_inst, cal_inst, dr_km, dr_km_tol=0.01,
+    def create_dlps(cls, rsr_inst, geo_inst, cal_inst, dr_km, 
         verbose=False, write_file=False, profile_range=[65000., 150000.]):
+        """
+        Purpose:
+            Create ingress and egress instances of DiffractionLimitedProfile.
+
+        Arguments:
+            :rsr_inst (*object*): Instance of RSRReader class
+            :geo_inst (*object*): Instance of Geometry class
+            :cal_inst (*object*): Instance of Calibration class
+            :dr_km (*float*): radial sampling rate :math:`\\Delta\\rho`
+                            for the DLP in kilometers. DLP radial
+                            *resolution* is the Nyquist radial sampling,
+                            i.e., twice the input value of `dr_km`,
+                            meaning that this will affect the minimum
+                            resolution of the diffraction-reconstructed
+                            profile. Value for `dr_km` can range from
+                            0.05 km to 0.75 km for the reconstruction
+                            resolutions supported by `rss_ringoccs`.
+                            PDS sampling rate is 0.25 km, which gives a
+                            DLP resolution of 0.5 km.
+
+        Keyword Arguments:
+            :verbose (*bool*): When True, turns on verbose output. Default
+                            is False.
+            :write_file (*bool*): When True, writes processing results to
+                            file. Default is True.
+            :profile_range (*list*): 1x2 list specifying the radial limits
+                            in km of on the occultation. Default is
+                            [65000,150000].
+        """
         # check for ingress, egress, or chord
         prof_dir = geo_inst.rev_info['prof_dir']
 
@@ -288,14 +310,12 @@ class DiffractionLimitedProfile(object):
 
         if prof_dir == '"INGRESS"':
             dlp_egr = None
-            dlp_ing = cls(rsr_inst, geo_inst, cal_inst, dr_km,
-                    dr_km_tol=dr_km_tol, verbose=verbose,
+            dlp_ing = cls(rsr_inst, geo_inst, cal_inst, dr_km, verbose=verbose,
                     write_file=write_file, profile_range=profile_range)
 
         elif prof_dir == '"EGRESS"':
             dlp_ing = None
-            dlp_egr = cls(rsr_inst, geo_inst, cal_inst, dr_km,
-                    dr_km_tol=dr_km_tol, verbose=verbose,
+            dlp_egr = cls(rsr_inst, geo_inst, cal_inst, dr_km, verbose=verbose,
                     write_file=write_file, profile_range=profile_range)
 
         elif prof_dir == '"BOTH"':
@@ -363,8 +383,7 @@ class DiffractionLimitedProfile(object):
             geo_ing.F_km_vals = geo_inst.F_km_vals[:ind]
             geo_ing.rev_info['prof_dir'] = '"INGRESS"'
 
-            dlp_ing = cls(rsr_ing, geo_ing, cal_ing, dr_km,
-                    dr_km_tol=dr_km_tol, verbose=verbose,
+            dlp_ing = cls(rsr_ing, geo_ing, cal_ing, dr_km, verbose=verbose,
                     write_file=write_file, profile_range=profile_range)
 
 
@@ -380,9 +399,8 @@ class DiffractionLimitedProfile(object):
             geo_egr.F_km_vals = geo_inst.F_km_vals[ind:]
             geo_egr.rev_info['prof_dir'] = '"EGRESS"'
 
-            dlp_egr = cls(rsr_egr, geo_egr, cal_egr, dr_km,
-                    dr_km_tol=dr_km_tol, verbose=verbose, write_file=write_file,
-                    profile_range=profile_range)
+            dlp_egr = cls(rsr_egr, geo_egr, cal_egr, dr_km, verbose=verbose, 
+                    write_file=write_file, profile_range=profile_range)
         else:
             print('WARNING (create_dlps()): Invalid profile direction given!')
 

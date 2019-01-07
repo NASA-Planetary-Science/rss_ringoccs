@@ -4,7 +4,6 @@ import numpy as np
 from scipy.special import lambertw, iv
 from rss_ringoccs.tools.history import write_history_dict
 from rss_ringoccs.tools.write_output_files import write_output_files
-import pdb
 
 # Declare constant for the speed of light (km/s)
 SPEED_OF_LIGHT_KM = 299792.4580
@@ -2044,7 +2043,7 @@ class DiffractionCorrection(object):
             b_3 = (P_3-P_1*P_4)*0.2
             b_4 = (P_4-P_1*P_5)/6.0
 
-            x = (r-r0)/d_km_vals[center]
+            x = r-r0
             x2 = x*x
             x3 = x2*x
             x4 = x3*x
@@ -2136,11 +2135,19 @@ class DiffractionCorrection(object):
             P_1 = cosb*cosp
             P12 = P_1*P_1
             P_2 = (3.0*P12-1.0)*0.5
-            P_3 = (5.0*P12-3.0)*0.5*P_1
+            P_3 = P_1*(5.0*P12-3.0)*0.5
             P_4 = (35.0*P12*P12-30.0*P12+3.0)/8.0
             P_5 = P_1*(63.0*P12*P12-70.0*P12+15.0)/8.0
             P_6 = (231.0*P12*P12*P12-315.0*P12*P12+105.0*P12-5.0)/16.0
-            # P_7 = P_1*(429.0*P12*P12*P12-693.0*P12*P12+315.0*P12-35.0)/16.0
+
+            # Products of Legendre Polynomials used in Expansion
+            C_0 = P_1*P_1
+            C_1 = 2.0*P_1*P_2
+            C_2 = 2.0*P_1*P_3+P_2*P_2
+            C_3 = 2.0*P_1*P_4+2.0*P_2*P_3
+            C_4 = 2.0*P_2*P_4+P_3*P_3
+            C_5 = 2.0*P_3*P_4
+            C_6 = P_4*P_4
 
             # Second set of polynomials.
             b_0 = (1.0-P12)/2.0
@@ -2151,14 +2158,20 @@ class DiffractionCorrection(object):
             b_5 = (P_5-P_1*P_4)/7.0
             b_6 = (P_6-P_1*P_5)/8.0
 
-            x = (r-r0)/d_km_vals[center]
+            x = (r-r0)
             x2 = x*x
             x3 = x2*x
             x4 = x3*x
             x5 = x4*x
             x6 = x5*x
-            x7 = x6*x
-            x8 = x7*x
+
+            # D_km_vals and various powers.
+            d = d_km_vals
+            d2 = d*d
+            d3 = d*d2
+            d4 = d*d3
+            d5 = d*d4
+            d6 = d*d5
 
             loop = 0
             for i in np.arange(n_used):
@@ -2184,36 +2197,31 @@ class DiffractionCorrection(object):
                     # Ajdust ring radius by dx_km.
                     r = rho_km_vals[center]
                     r0 = rho_km_vals[crange]
-                    x = (r-r0)/d_km_vals[center]
+                    x = r-r0
                     x2 = x*x
                     x3 = x2*x
                     x4 = x3*x
                     x5 = x4*x
                     x6 = x5*x
-                    x7 = x6*x
-                    x8 = x7*x
                 else:
                     crange += 1
 
-                psi_0 = (b_0[center]*x2+
-                         b_1[center]*x3+
-                         b_2[center]*x4+
-                         b_3[center]*x5+
-                         b_4[center]*x6+
-                         b_5[center]*x7+
-                         b_6[center]*x8)
+                z = x/d[center]
+                z2 = x2/d2[center]
+                z3 = x3/d3[center]
+                z4 = x4/d4[center]
+                z5 = x5/d5[center]
+                z6 = x6/d6[center]
 
+                psi_vals = b_0[center]-A_2[crange]*C_0[center]
+                psi_vals += z*(b_1[center]-A_2[crange]*C_1[center])
+                psi_vals += z2*(b_2[center]-A_2[crange]*C_2[center])
+                psi_vals += z3*(b_3[center]-A_2[crange]*C_3[center])
+                psi_vals += z4*(b_4[center]-A_2[crange]*C_4[center])
+                psi_vals += z5*(b_5[center]-A_2[crange]*C_5[center])
+                psi_vals += z6*(b_6[center]-A_2[crange]*C_6[center])
 
-                psi_1 = -A_2[center]*(P_1[center]*x+
-                                      P_2[center]*x2+
-                                      P_3[center]*x3+
-                                      P_4[center]*x4)*(
-                                      P_1[center]*x+
-                                      P_2[center]*x2+
-                                      P_3[center]*x3+
-                                      P_4[center]*x4)
-
-                psi_vals = kD_vals[center]*(psi_0 + psi_1)
+                psi_vals *= z2*kD_vals[center]
 
                 # Compute kernel function for Fresnel inverse
                 if fwd:
@@ -2266,22 +2274,16 @@ class DiffractionCorrection(object):
                 psi_d1 = dpsi(kD, r, r0, phi, phi0, b, d)
 
                 loop = 0
-                while (np.max(np.abs(psi_d1)) > 1.0e-8):
+                while (np.max(np.abs(psi_d1)) > 1.0e-4):
                     psi_d1 = dpsi(kD, r, r0, phi, phi0, b, d)
                     psi_d2 = d2psi(kD, r, r0, phi, phi0, b, d)
-                    psi_d3 = d3psi(kD, r, r0, phi, phi0, b, d)
                     
                     # Newton-Raphson
-                    dphi = (-psi_d1 / psi_d2)
-
-                    # Halley
-                    dphi = -2*psi_d1*psi_d2/(2.0*psi_d2*psi_d2-psi_d1*psi_d3)
-
-                    phi = phi + dphi
+                    phi += -(psi_d1 / psi_d2)
 
                     # Add one to loop variable for each iteration
                     loop += 1
-                    if (loop > 2):
+                    if (loop > 5):
                         break
 
                 # Compute Eta variable (MTR86 Equation 4c).

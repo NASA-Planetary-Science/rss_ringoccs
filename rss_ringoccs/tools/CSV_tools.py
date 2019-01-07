@@ -503,8 +503,8 @@ class ExtractCSVData(object):
         else:
             crange_e = (geo_drho > 0.0).nonzero()
             crange_i = (geo_drho < 0.0).nonzero()
-            n_e      = np.size(crange_e)
-            n_i      = np.size(crange_i)
+            n_e = np.size(crange_e)
+            n_i = np.size(crange_i)
             if (n_e != 0) and (n_i !=0):
                 raise ValueError(
                     "\n\trho_dot_kms_vals has positive and negative values.\n"
@@ -536,6 +536,8 @@ class ExtractCSVData(object):
         geo_drho = geo_drho[crange]
         geo_rho = geo_rho[crange]
         geo_D = geo_D[crange]
+        phi_ora_deg_vals = phi_ora_deg_vals[crange]
+        B_deg_vals = B_deg_vals[crange]
         rmin = np.min(geo_rho)
         rmax = np.max(geo_rho)
         rfin = int(np.max((rmax-self.rho_km_vals>=0.0).nonzero()))

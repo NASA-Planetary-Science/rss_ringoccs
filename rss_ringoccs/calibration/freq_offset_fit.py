@@ -38,7 +38,7 @@ class FreqOffsetFit(object):
     given by
 
     .. math::
-        f(t)_{resid} = (f(t)_{dr}-f(t)_{dp}) - f(t)_{offset}
+        f(t)_{resid} = f(t)_{offset} - (f(t)_{dr}-f(t)_{dp})
 
     Final frequency offset :math:`\hat{f}(t)_{offset}` is found using
     the polynomial fit :math:`\hat{f}(t)_{resid}` to the frequency
@@ -316,7 +316,8 @@ class FreqOffsetFit(object):
 
         f_sky_resid_fit = np.polyval( coef, spm_temp )
         v = float(len(f_sky_resid[self.__fsr_mask])) - (poly_order+1)
-        chi2 = np.sum(np.square(f_sky_resid_fit[self.__fsr_mask]-f_sky_resid[self.__fsr_mask])) / v
+        chi2 = np.sum(np.square(f_sky_resid_fit[self.__fsr_mask]-
+            f_sky_resid[self.__fsr_mask]) / f_sky_resid_fit[self.__fsr_mask])
 
         return f_sky_resid_fit,chi2
 

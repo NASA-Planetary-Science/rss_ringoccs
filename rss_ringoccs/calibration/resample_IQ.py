@@ -25,17 +25,20 @@ def pre_resample(rho_km, vec, freq):
                 complex signal
         :freq (*float*): radial sampling frequency
     """
+    # initial radius and radial range
+    r0 = round(rho_km[0]+0.4)
+    dr = abs(rho_km[-1] - r0)
 
     # Average radius spacing over region
-    ts_avg = abs(rho_km[-1] - rho_km[0]) / float(len(rho_km) - 1)
+    ts_avg = dr / float(len(rho_km) - 1)
     p = 1
     q = int(round(1.0 / (ts_avg * freq)))
     dr_grid = float(p) / (q * freq)
 
     # Uniform radius grid at near-raw resolution to which to interpolate.
     #     For ingress, this implicitly reverses radius scale!
-    n_pts = round(abs(rho_km[-1] - rho_km[0]) / dr_grid)
-    rho_grid = min(rho_km) + dr_grid * np.arange(n_pts)
+    n_pts = round(dr / dr_grid)
+    rho_grid = r0 + dr_grid * np.arange(n_pts)
 
     # Interpolate to near-raw resolution. For ingress, this implicitly
     #     reverses radius scale!
@@ -46,7 +49,7 @@ def pre_resample(rho_km, vec, freq):
     return rho_grid, vec_grid, p, q
 
 
-def resample_IQ(rho_km, IQ_c, dr_desired, dr_km_tol=0.01, verbose=False):
+def resample_IQ(rho_km, IQ_c, dr_desired, verbose=False):
     """
     Purpose:
         Resample I and Q to uniformly spaced radius. Based off of
@@ -58,8 +61,7 @@ def resample_IQ(rho_km, IQ_c, dr_desired, dr_km_tol=0.01, verbose=False):
                         rho_exclude=rho_exclude)
         >>> (spm_raw, IQ_c_raw) = fit_inst.get_IQ_c()
         >>> (rho_km_desired, IQ_c_resampled) = resample_IQ(rho_km_raw,
-                        IQ_c_raw, dr_desired, dr_km_tol=dr_km_tol,
-                        verbose=verbose)
+                        IQ_c_raw, dr_desired, verbose=verbose)
 
     Arguments:
         :rho_km (*np.ndarray*):
@@ -70,13 +72,7 @@ def resample_IQ(rho_km, IQ_c, dr_desired, dr_km_tol=0.01, verbose=False):
             resolution before resampling
         :dr_desired (*float*):
             Desired final radial sample spacing
-        :dr_km_tol (*float*):
-            Maximum tolerance for difference between a multiple of
-            ``dr_desired`` and the starting value for radius. For
-            example, if ``dr_km_tol=0.01`` and ``dr_desired=0.25``,
-            the final set of rho values might look something like
-            [70000.26, 70000.51, ...]
-        verbose (bool):
+        :verbose (*bool*):
             Testing variable to print out the first few resampled
             results
     """
@@ -97,12 +93,6 @@ def resample_IQ(rho_km, IQ_c, dr_desired, dr_km_tol=0.01, verbose=False):
         print('DETECTED INGRESS (resample_IQ.py): reversing arrays')
         rho_km = rho_km[::-1]
         IQ_c = IQ_c[::-1]
-
-    # Begin raw resolution rho within dr_km_tol of integer number of dr_desired
-    rho_km_remainder = rho_km % dr_desired
-    rho_km_start_ind = int((np.argwhere(rho_km_remainder < dr_km_tol))[0])
-    rho_km = rho_km[rho_km_start_ind:-1]
-    IQ_c = IQ_c[rho_km_start_ind:-1]
 
     I_c = np.real(IQ_c)
     Q_c = np.imag(IQ_c)

@@ -162,6 +162,8 @@ class Calibration(object):
         self.t_oet_spm_vals = spm_cal
         self.f_sky_hz_vals = f_sky_pred_cal + f_offset_fit_cal
         self.f_sky_resid_fit_vals = f_sky_resid_fit_cal
+        self.f_sky_reid = fit_inst.f_sky_resid
+        self.f_spm = fit_inst.f_spm
         self.p_free_vals = p_free_cal
         gaps_used = norm_inst.gaps
         self.gaps = norm_inst.gaps

@@ -246,6 +246,8 @@ class Calibration(object):
         f_detrend_interp_rad = f_detrend_interp * (2.0 * np.pi)
         f_detrend_rad_splcoef = splrep(f_spm_interp, f_detrend_interp_rad)
         f_detrend_rad = splev(spm_vals, f_detrend_rad_splcoef)
+        # store phase as an attribute
+        self.phase = f_detrend_rad
 
         # Apply detrending function
         IQ_c = IQ_m * np.exp(-1j * f_detrend_rad)

@@ -496,7 +496,25 @@ def latex_summary_doc(pdffil, resolution, outfilename):
             \end{figure}
         \end{document}
     """% (pdffil, rev, doy, res, occ, geo, cal, tau, year, band)
+    if (len(outfilename) >= 4):
+        ext = outfilename[-4:]
+        ext = ext.lower()
+        if (ext == ".pdf"):
+            outfilename = outfilename[:-4]
+        else:
+            pass
+    else:
+        pass
+
     TexName = outfilename
+    texvar = outfilename.split("/")
+    if (len(texvar) > 1):
+        out = "%s/" % (texvar[0])
+        for i in range(1, len(texvar)-1):
+            out = "%s/%s/" % (out, texvar[i])
+    else:
+        out = "$PWD"
+
     TexFileName = '%s.tex' % TexName
     TexFile = open(TexFileName,'w')
     TexFile.write(LaTeXFile)
@@ -504,13 +522,14 @@ def latex_summary_doc(pdffil, resolution, outfilename):
 
     TexScript = """
         #!/bin/bash
+        cd %s
         pdflatex %s.tex
         pdflatex %s.tex
         rm %s.log
         rm %s.aux
         rm %s.tex
         rm %s.sh
-    """ % (TexName,TexName,TexName,TexName,TexName,TexName)
+    """ % (out, TexName, TexName, TexName, TexName, TexName, TexName)
 
     TexSh = open("%s.sh" % TexName,'w')
     TexSh.write(TexScript)

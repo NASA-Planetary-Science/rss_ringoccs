@@ -162,6 +162,8 @@ class Calibration(object):
         self.t_oet_spm_vals = spm_cal
         self.f_sky_hz_vals = f_sky_pred_cal + f_offset_fit_cal
         self.f_sky_resid_fit_vals = f_sky_resid_fit_cal
+        self.f_sky_resid = fit_inst.f_sky_resid
+        self.f_spm = fit_inst.f_spm
         self.p_free_vals = p_free_cal
         gaps_used = norm_inst.gaps
         self.gaps = norm_inst.gaps
@@ -246,6 +248,8 @@ class Calibration(object):
         f_detrend_interp_rad = f_detrend_interp * (2.0 * np.pi)
         f_detrend_rad_splcoef = splrep(f_spm_interp, f_detrend_interp_rad)
         f_detrend_rad = splev(spm_vals, f_detrend_rad_splcoef)
+        # store phase as an attribute
+        self.phase = f_detrend_rad
 
         # Apply detrending function
         IQ_c = IQ_m * np.exp(-1j * f_detrend_rad)

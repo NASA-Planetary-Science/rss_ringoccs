@@ -7,8 +7,8 @@ Purpose:
 """
 
 import numpy as np
-### suppress any annoying warning messages
-np.seterr(all='ignore')
+import warnings
+warnings.simplefilter('ignore', np.RankWarning)
 import matplotlib.pyplot as plt
 from scipy.interpolate import splrep, splev
 import sys
@@ -38,7 +38,7 @@ class FreqOffsetFit(object):
     given by
 
     .. math::
-        f(t)_{resid} = (f(t)_{dr}-f(t)_{dp}) - f(t)_{offset}
+        f(t)_{resid} = f(t)_{offset} - (f(t)_{dr}-f(t)_{dp})
 
     Final frequency offset :math:`\hat{f}(t)_{offset}` is found using
     the polynomial fit :math:`\hat{f}(t)_{resid}` to the frequency
@@ -189,6 +189,7 @@ class FreqOffsetFit(object):
         self.f_sky_pred  = f_sky_pred
         self.f_sky_resid_fit = f_sky_resid_fit
         self.chi_squared = chi2
+        self.f_sky_resid = f_sky_resid
 
     def create_mask(self, f_spm, f_rho, f_sky_resid):
         """
@@ -241,7 +242,7 @@ class FreqOffsetFit(object):
 
         ## Polynomial fit clipping
         # try a 9th order polynomial fit
-        pinit = np.polyfit(f_spm[fsr_mask], f_sky_resid[fsr_mask], 9)#np.polyfit(f_spm[fsr_mask], f_sky_resid[fsr_mask], 9)
+        pinit = np.polyfit(f_spm[fsr_mask], f_sky_resid[fsr_mask], 9)
         # Compute standard deviation from fit and implememt sigma-clipping
         #   for data which fall in acceptable regions
         fit_stdev = 3.*np.sqrt(np.nanmedian(np.square(f_sky_resid-np.polyval(pinit,f_spm))))
@@ -316,7 +317,8 @@ class FreqOffsetFit(object):
 
         f_sky_resid_fit = np.polyval( coef, spm_temp )
         v = float(len(f_sky_resid[self.__fsr_mask])) - (poly_order+1)
-        chi2 = np.sum(np.square(f_sky_resid_fit[self.__fsr_mask]-f_sky_resid[self.__fsr_mask])) / v
+        chi2 = np.sum(np.square(f_sky_resid_fit[self.__fsr_mask]-
+            f_sky_resid[self.__fsr_mask]) / f_sky_resid_fit[self.__fsr_mask])
 
         return f_sky_resid_fit,chi2
 

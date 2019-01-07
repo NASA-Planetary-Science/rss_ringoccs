@@ -382,7 +382,7 @@ class Normalization(object):
             # evaluate the polynomial at all spm
             fit = np.polyval(coef, spm)
             chi2 = np.sum(np.square(np.polyval(coef,spm[self.mask])-
-                                                power[self.mask]))/v
+                power[self.mask]) / np.polyval(coef,spm[self.mask]) )
 
 
         self.pnorm_fit = fit

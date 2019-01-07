@@ -568,7 +568,6 @@ class ExtractCSVData(object):
         self.rho_corr_pole_km_vals = self.rho_corr_pole_km_vals[rstart:rfin+1]
         self.rho_corr_timing_km_vals = self.rho_corr_timing_km_vals[rstart:rfin+1]
 
-
         del f_sky_raw_vals, rmin, rmax, rstart, rfin, n_rho_vals, n_f_vals
         del rho_dot_interp, frange, xrange, f_interp, phi_ora_deg_vals
         del raw_tau_vals, phase_deg_vals, raw_mu, B_deg_vals, geo_rho, geo_D

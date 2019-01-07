@@ -7,8 +7,8 @@ Purpose:
 """
 
 import numpy as np
-### suppress any annoying warning messages
-np.seterr(all='ignore')
+import warnings
+warnings.simplefilter('ignore', np.RankWarning)
 import matplotlib.pyplot as plt
 from scipy.interpolate import splrep, splev
 import sys
@@ -241,7 +241,7 @@ class FreqOffsetFit(object):
 
         ## Polynomial fit clipping
         # try a 9th order polynomial fit
-        pinit = np.polyfit(f_spm[fsr_mask], f_sky_resid[fsr_mask], 9)#np.polyfit(f_spm[fsr_mask], f_sky_resid[fsr_mask], 9)
+        pinit = np.polyfit(f_spm[fsr_mask], f_sky_resid[fsr_mask], 9)
         # Compute standard deviation from fit and implememt sigma-clipping
         #   for data which fall in acceptable regions
         fit_stdev = 3.*np.sqrt(np.nanmedian(np.square(f_sky_resid-np.polyval(pinit,f_spm))))

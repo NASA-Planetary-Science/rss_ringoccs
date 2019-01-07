@@ -189,6 +189,7 @@ class FreqOffsetFit(object):
         self.f_sky_pred  = f_sky_pred
         self.f_sky_resid_fit = f_sky_resid_fit
         self.chi_squared = chi2
+        self.f_sky_resid = f_sky_resid
 
     def create_mask(self, f_spm, f_rho, f_sky_resid):
         """

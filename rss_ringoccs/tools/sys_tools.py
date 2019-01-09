@@ -522,8 +522,9 @@ def latex_summary_doc(pdffil, resolution, outfilename):
 
     TexScript = """
         #!/bin/bash
-        pdflatex %s.tex
-        pdflatex %s.tex
+        pdflatex %s.tex > tex.out
+        pdflatex %s.tex > tex.out
+        rm tex.out
         mv %s.pdf %s
         rm %s.log
         rm %s.aux

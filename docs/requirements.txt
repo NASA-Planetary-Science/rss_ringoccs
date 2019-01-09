@@ -3,3 +3,4 @@ scipy
 spiceypy
 matplotlib
 mayavi
+pandas

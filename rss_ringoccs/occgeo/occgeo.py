@@ -224,8 +224,8 @@ class Geometry(object):
         F_km_vals = calc_F_km(D_km_vals, f_sky_hz_vals, B_deg_vals,
                 phi_ora_deg_vals)
 
-        t_ret_spm_vals = et_to_spm(t_ret_et_vals)
-        t_set_spm_vals = et_to_spm(t_set_et_vals)
+        t_ret_spm_vals = et_to_spm(t_ret_et_vals, ref_doy=doy)
+        t_set_spm_vals = et_to_spm(t_set_et_vals, ref_doy=doy)
 
         if verbose:
             print('\tCalculating ring intercept velocities...')
@@ -260,17 +260,22 @@ class Geometry(object):
         # Calculate when signal passes atmosphere + ionosphere
         ionos_occ_et_vals = get_planet_occ_times(t_oet_et_vals, dsn,
                 planet, spacecraft, height_above=5000.)
-        self.ionos_occ_spm_vals = et_to_spm(ionos_occ_et_vals)
+        self.ionos_occ_spm_vals = et_to_spm(ionos_occ_et_vals, ref_doy=doy)
+        self.ionos_occ_et_vals = ionos_occ_et_vals
 
         atmos_occ_et_vals = get_planet_occ_times(t_oet_et_vals, dsn,
                 planet, spacecraft, height_above=500.)
-        self.atmos_occ_spm_vals = et_to_spm(atmos_occ_et_vals)
+        self.atmos_occ_spm_vals = et_to_spm(atmos_occ_et_vals, ref_doy=doy)
 
 
         # Set attributes, first block contains the inputs to *GEO.TAB
         self.t_oet_spm_vals = np.asarray(t_oet_spm_vals)
         self.t_ret_spm_vals = np.asarray(t_ret_spm_vals)
         self.t_set_spm_vals = np.asarray(t_set_spm_vals)
+
+        self.t_set_et_vals = np.asarray(t_set_et_vals)
+        self.t_oet_et_vals = np.asarray(t_oet_et_vals)
+
         self.rho_km_vals = np.asarray(rho_km_vals)
         self.phi_rl_deg_vals = np.asarray(phi_rl_deg_vals)
         self.phi_ora_deg_vals = np.asarray(phi_ora_deg_vals)
@@ -458,33 +463,4 @@ class Geometry(object):
 
 """
 Revisions:
-    2018 Jul 10 - jfong - original
-    2018 Jul 11 - jfong - remove write_hist method and use
-                          write_history_dict() from tools/
-    2018 Jul 12 - jfong - add planetary_occultation_flag and
-                          ring_occultation_direction and
-                          ring_profile_direction and
-                          revolution_number attributes and methods
-    2018 Jul 16 - jfong - add beta_vals attribute
-    2018 Jul 26 - jfong - remove write_history_dict() import
-                        - add __write_history_dict method
-    2018 Jul 27 - jfong - remove __write_history_dict method and use 
-                          write_history_dict() again, which now requires
-                          source file as an additional input
-    2018 Aug 02 - jfong - remove methods pertaining to data catalog entries
-                        - remove planet_occ_flag, rev_num, ring_occ_dir,
-                          rsr_inst attributes
-                        - remove rsr_file and sample_rate_khz attribute 
-                          extraction from rsr_inst
-    2018 Sep 20 - jfong - add write_file kwarg
-                        - set rev_info from rsr_inst as an attribute
-                        - add prof_dir to rev_info dict attribute
-    2018 Oct 15 - jfong - add freespace_km attribute using find_gaps()
-    2018 Oct 17 - jfong - add ionos_occ_spm_vals, atmos_occ_spm_vals attr
-    2018 Oct 23 - jfong - update freespace_km attr to freespace_spm
-                        - add ingress_spm, egress_spm attributes
-    2018 Nov 05 - jfong - use SET for atmosphere calculation
-    2018 Nov 19 - jfong - add chord verification
-                        - replace splrep, splev for interp1d for rho interp
-
 """

@@ -499,14 +499,13 @@ def latex_summary_doc(pdffil, resolution, outfilename):
     if (len(outfilename) >= 4):
         ext = outfilename[-4:]
         ext = ext.lower()
-        if (ext == ".pdf"):
+        if ((ext == ".pdf") or (ext == ".tex")):
             outfilename = outfilename[:-4]
         else:
             pass
     else:
         pass
 
-    TexName = outfilename
     texvar = outfilename.split("/")
     if (len(texvar) > 1):
         out = "%s/" % (texvar[0])
@@ -515,21 +514,22 @@ def latex_summary_doc(pdffil, resolution, outfilename):
     else:
         out = "$PWD"
 
+    TexName = texvar[-1]
     TexFileName = '%s.tex' % TexName
     TexFile = open(TexFileName,'w')
     TexFile.write(LaTeXFile)
-    TexFile.close()    
+    TexFile.close()
 
     TexScript = """
         #!/bin/bash
-        cd %s
         pdflatex %s.tex
         pdflatex %s.tex
+        mv %s.pdf %s
         rm %s.log
         rm %s.aux
         rm %s.tex
         rm %s.sh
-    """ % (out, TexName, TexName, TexName, TexName, TexName, TexName)
+    """ % (TexName, TexName, TexName, out, TexName, TexName, TexName, TexName)
 
     TexSh = open("%s.sh" % TexName,'w')
     TexSh.write(TexScript)

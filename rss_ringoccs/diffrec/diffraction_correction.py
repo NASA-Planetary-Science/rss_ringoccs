@@ -681,24 +681,16 @@ class DiffractionCorrection(object):
 
                 n_elements = np.size(self.rho_km_vals)
 
-                # Retrieve time variables (Earth, Ring, and Spacecraft ET).
+                # If the following variables could not be found, set to zero.
                 self.t_oet_spm_vals = np.zeros(n_elements)
-                self.t_ret_spm_vals = self.t_oet_spm_vals
-                self.t_set_spm_vals = self.t_oet_spm_vals
+                self.t_ret_spm_vals = np.zeros(n_elements)
+                self.t_set_spm_vals = np.zeros(n_elements)
+                self.rho_corr_pole_km_vals = np.zeros(n_elements)
+                self.rho_corr_timing_km_vals = np.zeros(n_elements)
+                self.phi_rl_rad_vals = np.zeros(n_elements)
+                self.raw_tau_threshold_vals = np.zeros(n_elements)
 
-                # Pole corrections in ring radius.
-                self.rho_corr_pole_km_vals = self.t_oet_spm_vals
-
-                # Timing corrections in ring radius.
-                self.rho_corr_timing_km_vals = self.t_oet_spm_vals
-
-                # Ring longitude angle.
-                self.phi_rl_rad_vals = self.t_oet_spm_vals
-
-                # Optical depth of diffraction profile.
-                self.raw_tau_threshold_vals = self.t_oet_spm_vals
-
-                # History from the NormDiff instance.
+                # Set history.
                 self.dathist = NormDiff.history
 
                 del n_elements
@@ -1237,8 +1229,6 @@ class DiffractionCorrection(object):
         self.tau_vals = tau
 
         self.tau_threshold_vals = np.zeros(np.size(self.rho_km_vals))
-        # self.tau_threshold_vals = NormDiff.raw_tau_threshold_vals
-
         self.__trim_attributes(self.fwd)
 
         self.history = write_history_dict(input_vars, input_kwds, __file__)
@@ -1251,6 +1241,7 @@ class DiffractionCorrection(object):
         t2 = time.time()
         if self.verbose:
             print("\tDiffraction Correction Complete.")
+
         print("Computation Time: %f" % (t2-t1), end="\r")
 
     def __rect(w_in, dx):

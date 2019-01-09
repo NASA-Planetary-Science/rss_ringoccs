@@ -495,7 +495,7 @@ def latex_summary_doc(pdffil, resolution, outfilename):
                 }
             \end{figure}
         \end{document}
-    """% (pdffil, rev, doy, res, occ, geo, cal, tau, year, band)
+    """ % (pdffil, rev, doy, res, occ, geo, cal, tau, year, band)
     if (len(outfilename) >= 4):
         ext = outfilename[-4:]
         ext = ext.lower()

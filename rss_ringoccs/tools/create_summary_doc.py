@@ -416,7 +416,7 @@ def plot_geo_overview(pdf, geo_inst, dlp_inst):
     radii = [74.490, 91.983, 117.516, 122.052, 133.424, 136.774, 140.461]
     for row in range(nrow):
         for col in range(ncol):
-            axes[row, col].legend(loc = "upper right")
+            #axes[row, col].legend(loc = "upper right")
             axes[row, col].set_xlim(70., 150.)
             axes[row, col].set_xlabel('Ring Radius (1000 km)')
             for radius in radii:
@@ -627,7 +627,7 @@ def plot_summary_doc_v2(geo_inst, cal_inst, dlp_inst, tau_inst):
         pdf = plot_tau_overview(pdf, geo_inst, dlp_inst, tau_inst)
         pdf = plot_tau(pdf, tau_inst)
         pdf = plot_phase(pdf, tau_inst)
-    #latex_summary_doc(outfig, tau_inst.res, outfig[:-4])
+    latex_summary_doc(outfig, tau_inst.res, outfig[:-4])
 
 
     return None

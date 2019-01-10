@@ -28,3 +28,5 @@ Rev,Occultation_direction,planetary_occultation_flag
 125,"BOTH","Y"
 133,"BOTH","Y"
 137,"BOTH","Y"
+167,"INGRESS","Y"
+253,"BOTH","Y"

@@ -171,17 +171,18 @@ def latex_summary_doc(pdffil, resolution, outfilename):
         \begin{document}
             \pagenumbering{gobble}
             \begin{center}
-                        \LARGE{\texttt{RSS\textunderscore\theYEAR%%
-                               \textunderscore\theDOY\textunderscore%%
-                               \theBAND\textunderscore\theOCC}\\[2.0ex]
-                            Rev\theREV\
-                            Cassini Radio Science Ring Occultation:\\[1.0ex]
-                            Geometry, Data Calibration,
-                            and Reconstructed\\[1.0ex]
-                            Optical Depth and
-                            Phase Shift Profiles\\[1.0ex]
-                            at \theRES\
-                            Resolution\\[2.5ex]}
+                \LARGE{\texttt{
+                    RSS\textunderscore\theYEAR%%
+                    \textunderscore\theDOY\textunderscore\theBAND%%
+                    \textunderscore\theOCC}\\[2.0ex]
+                    Rev\theREV\
+                    Cassini Radio Science Ring Occultation:\\[1.0ex]
+                    Geometry, Data Calibration,
+                    and Reconstructed\\[1.0ex]
+                    Optical Depth and
+                    Phase Shift Profiles\\[1.0ex]
+                    at \theRES\
+                    Resolution\\[2.5ex]}
                 \large{\today}
             \end{center}
             \vspace{2ex}
@@ -239,7 +240,7 @@ def latex_summary_doc(pdffil, resolution, outfilename):
                     \hline
                 \end{tabular}
                 \caption[Glossary of Parameters from the Geo File]{
-                    Glossary of parameters in file \theGEO.
+                    Glossary of parameters in file CARL\_GEO.TAB.
                     See companion label (.LBL) file for description
                     of parameters.
                 }
@@ -259,7 +260,7 @@ def latex_summary_doc(pdffil, resolution, outfilename):
                 \end{tabular}
                 \caption[Glossary of Data from the Cal File]{
                     Glossary of calibration data in file
-                    \theCAL. See companion label (.LBL)
+                    CARL\_CAL.TAB. See companion label (.LBL)
                     file for description of the data.
                 }
                 \label{tab:easydata_glossary_from_cal_file}
@@ -286,7 +287,8 @@ def latex_summary_doc(pdffil, resolution, outfilename):
                 \caption[Glossary of Parameters in Tau File]{
                     Glossary of optical depth, phase shift,
                     and selected geometry parameters
-                    contained in files \theTAU.
+                    contained in files CARL\_TAU\_01KM.TAB
+                    and RSS\_2005\_123\_X43\_E\_TAU\_10KM.TAB.
                     See companion label
                     (.LBL) files for description of the data.
                 }
@@ -341,13 +343,9 @@ def latex_summary_doc(pdffil, resolution, outfilename):
             \begin{figure}[H]
                 \centering
                 \includegraphics[page=5, width=\textwidth]{\thePDF}
-                \caption[Ring Radius Correction from
-                         Selected Occultation Geometry]{
-                    Ring radius correction and
-                    selected occultation geometry parameters
-                    contained in the file \theTAU\
-                    (solid green).
-                }
+                \caption{Ring radius correction and selected
+                         occultation geometry parameters contained
+                         in the file \theTAU\ (solid green).}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -355,12 +353,10 @@ def latex_summary_doc(pdffil, resolution, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=6, width=\textwidth]{\thePDF}
                 }
-                \caption[Normal Optical Depth Profiles 70000-85000km]{
-                    Rev7-E normal optical depth profiles reconstructed
-                    to remove diffraction effects at 1 km resolution
-                    contained in the file
-                    \theTAU
-                    The 1 km resolution profile is plotted in green.}
+                \caption{Rev7-E normal optical depth profiles
+                         reconstructed to remove diffraction effects
+                         at 1 km resolution contained in the file \theTAU.
+                         The 1 km resolution profile is plotted in green.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -368,13 +364,11 @@ def latex_summary_doc(pdffil, resolution, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=7, width=\textwidth]{\thePDF}
                 }
-                \caption[Normal Optical Depth Profiles 85000-100000km]{
-                    Rev7-E normal optical depth profiles
-                    reconstructed to remove diffraction effects
-                    at 1 km resolution contained in the file
-                    \theTAU.
-                    The 1 km resolution profile is plotted in green.
-                }
+                \caption{Rev7-E normal optical depth profiles
+                         reconstructed to remove diffraction
+                         effects at 1 km resolution contained in the
+                         file \theTAU. The 1 km resolution profile
+                         is plotted in green.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -382,13 +376,11 @@ def latex_summary_doc(pdffil, resolution, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=8, width=\textwidth]{\thePDF}
                 }
-                \caption[Normal Optical Depth Profiles 100000-115000km]{
-                    Rev7-E normal optical depth profiles
-                    reconstructed to remove diffraction effects
-                    at 1 km resolution contained in the file
-                    \theTAU.
-                    The 1 km resolution profile is plotted in green.
-                }
+                \caption{Rev7-E normal optical depth profiles
+                         reconstructed to remove diffraction
+                         effects at 1 km resolution contained in
+                         the file \theTAU. The 1 km resolution
+                         profile is plotted in green.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -396,13 +388,11 @@ def latex_summary_doc(pdffil, resolution, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=9, width=\textwidth]{\thePDF}
                 }
-                \caption[Normal Optical Depth Profiles 115000-130000km]{
-                    Rev7-E normal optical depth profiles
-                    reconstructed to remove diffraction effects
-                    at 1 km resolution
-                    (file \theTAU).
-                    The 1 km resolution profile is plotted in green.
-                }
+                \caption{Rev7-E normal optical depth profiles
+                         reconstructed to remove diffraction
+                         effects at 1 km resolution (file \theTAU).
+                         The 1 km resolution profile
+                         is plotted in green.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -410,14 +400,12 @@ def latex_summary_doc(pdffil, resolution, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=10, width=\textwidth]{\thePDF}
                 }
-                \caption[Normal Optical Depth Profiles 130000-145000km]{
-                    Rev7-E normal optical depth profiles
-                    reconstructed to remove diffraction
-                    effects at 1 km resolution contained
-                    in the file
-                    \theTAU.
-                    The 1 km resolution profile is plotted in green.
-                }
+                \caption{Rev7-E normal optical depth
+                         profiles reconstructed to remove
+                         diffraction effects at 1 km resolution
+                         contained in the file \theTAU.
+                         The 1 km resolution profile
+                         is plotted in green.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -425,14 +413,11 @@ def latex_summary_doc(pdffil, resolution, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=11, width=\textwidth]{\thePDF}
                 }
-                \caption[Phase Shift Profile]{
-                    Rev7-E Phase shift profile reconstructed
-                    to remove diffraction effects at 1 km
-                    resolution contained in the file
-                    \theTAU.
-                    The 1 km resolution profile is plotted
-                    in solid green.
-                }
+                \caption{Rev7-E normal optical depth
+                         profiles reconstructed to remove diffraction
+                         effects at 1 km resolution contained in
+                         the file \theTAU. The 1 km resolution
+                         profile is plotted in green.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -440,14 +425,11 @@ def latex_summary_doc(pdffil, resolution, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=12, width=\textwidth]{\thePDF}
                 }
-                \caption[Phase Shift Profile]{
-                    Rev7-E Phase shift profile reconstructed
-                    to remove diffraction effects at 1 km
-                    resolution contained in the file
-                    \theTAU.
-                    The 1 km resolution profile is plotted
-                    in solid green.
-                }
+                \caption{Rev7-E normal optical depth
+                         profiles reconstructed to remove diffraction
+                         effects at 1 km resolution contained in
+                         the file \theTAU. The 1 km resolution
+                         profile is plotted in green.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -455,14 +437,11 @@ def latex_summary_doc(pdffil, resolution, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=13, width=\textwidth]{\thePDF}
                 }
-                \caption[Phase Shift Profile]{
-                    Rev7-E Phase shift profile reconstructed
-                    to remove diffraction effects at 1 km
-                    resolution contained in the file
-                    \theTAU.
-                    The 1 km resolution profile is plotted
-                    in solid green.
-                }
+                \caption{Rev7-E normal optical depth
+                         profiles reconstructed to remove diffraction
+                         effects at 1 km resolution contained in
+                         the file \theTAU. The 1 km resolution
+                         profile is plotted in green.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -470,14 +449,11 @@ def latex_summary_doc(pdffil, resolution, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=14, width=\textwidth]{\thePDF}
                 }
-                \caption[Phase Shift Profile]{
-                    Rev7-E Phase shift profile reconstructed
-                    to remove diffraction effects at 1 km
-                    resolution contained in the file
-                    \theTAU.
-                    The 1 km resolution profile is plotted
-                    in solid green.
-                }
+                \caption{Rev7-E normal optical depth
+                         profiles reconstructed to remove diffraction
+                         effects at 1 km resolution contained in
+                         the file \theTAU. The 1 km resolution
+                         profile is plotted in green.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -485,14 +461,119 @@ def latex_summary_doc(pdffil, resolution, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=15, width=\textwidth]{\thePDF}
                 }
-                \caption[Phase Shift Profile]{
-                    Rev7-E Phase shift profile reconstructed
-                    to remove diffraction effects at 1 km
-                    resolution contained in the file
-                    \theTAU.
-                    The 1 km resolution profile is plotted
-                    in solid green.
+                \caption{Rev7-E normal optical depth
+                         profiles reconstructed to remove diffraction
+                         effects at 1 km resolution contained in
+                         the file \theTAU. The 1 km resolution
+                         profile is plotted in green.}
+            \end{figure}
+            \newpage
+            \begin{figure}[H]
+                \centering
+                \resizebox{\textwidth}{!}{
+                    \includegraphics[page=16, width=\textwidth]{\thePDF}
                 }
+                \caption{Rev7-E normal optical depth
+                         profiles reconstructed to remove diffraction
+                         effects at 1 km resolution contained in
+                         the file \theTAU. The 1 km resolution
+                         profile is plotted in green.}
+            \end{figure}
+            \newpage
+            \begin{figure}[H]
+                \centering
+                \resizebox{\textwidth}{!}{
+                    \includegraphics[page=17, width=\textwidth]{\thePDF}
+                }
+                \caption{Rev7-E normal optical depth
+                         profiles reconstructed to remove diffraction
+                         effects at 1 km resolution contained in
+                         the file \theTAU. The 1 km resolution
+                         profile is plotted in green.}
+            \end{figure}
+            \newpage
+            \begin{figure}[H]
+                \centering
+                \resizebox{\textwidth}{!}{
+                    \includegraphics[page=18, width=\textwidth]{\thePDF}
+                }
+                \caption{Rev7-E normal optical depth
+                         profiles reconstructed to remove diffraction
+                         effects at 1 km resolution contained in
+                         the file \theTAU. The 1 km resolution
+                         profile is plotted in green.}
+            \end{figure}
+            \newpage
+            \begin{figure}[H]
+                \centering
+                \resizebox{\textwidth}{!}{
+                    \includegraphics[page=19, width=\textwidth]{\thePDF}
+                }
+                \caption{Rev7-E normal optical depth
+                         profiles reconstructed to remove diffraction
+                         effects at 1 km resolution contained in
+                         the file \theTAU. The 1 km resolution
+                         profile is plotted in green.}
+            \end{figure}
+            \newpage
+            \begin{figure}[H]
+                \centering
+                \resizebox{\textwidth}{!}{
+                    \includegraphics[page=20, width=\textwidth]{\thePDF}
+                }
+                \caption{Rev7-E normal optical depth
+                         profiles reconstructed to remove diffraction
+                         effects at 1 km resolution contained in
+                         the file \theTAU. The 1 km resolution
+                         profile is plotted in green.}
+            \end{figure}
+            \newpage
+            \begin{figure}[H]
+                \centering
+                \resizebox{\textwidth}{!}{
+                    \includegraphics[page=21, width=\textwidth]{\thePDF}
+                }
+                \caption{Rev7-E normal optical depth
+                         profiles reconstructed to remove diffraction
+                         effects at 1 km resolution contained in
+                         the file \theTAU. The 1 km resolution
+                         profile is plotted in green.}
+            \end{figure}
+            \newpage
+            \begin{figure}[H]
+                \centering
+                \resizebox{\textwidth}{!}{
+                    \includegraphics[page=22, width=\textwidth]{\thePDF}
+                }
+                \caption{Rev7-E normal optical depth
+                         profiles reconstructed to remove diffraction
+                         effects at 1 km resolution contained in
+                         the file \theTAU. The 1 km resolution
+                         profile is plotted in green.}
+            \end{figure}
+            \newpage
+            \begin{figure}[H]
+                \centering
+                \resizebox{\textwidth}{!}{
+                    \includegraphics[page=23, width=\textwidth]{\thePDF}
+                }
+                \caption{Rev7-E normal optical depth
+                         profiles reconstructed to remove diffraction
+                         effects at 1 km resolution contained in
+                         the file \theTAU. The 1 km resolution
+                         profile is plotted in green.}
+            \end{figure}
+            \newpage
+            \begin{figure}[H]
+                \centering
+                \resizebox{\textwidth}{!}{
+                    \includegraphics[page=24, width=\textwidth]{\thePDF}
+                }
+                \caption{Rev7-E Phase shift profile reconstructed
+                         to remove diffraction effects at 1 km
+                         resolution contained in the file \theTAU.
+                         The 1 km resolution profile is plotted
+                         in solid green.}
             \end{figure}
         \end{document}
     """ % (pdffil, rev, doy, res, occ, geo, cal, tau, year, band)

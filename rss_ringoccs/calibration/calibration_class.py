@@ -128,7 +128,7 @@ class Calibration(object):
         # Calculate frequency offset fit
         ## Use default residual frequency fit
         fit_inst = FreqOffsetFit(rsr_inst, geo_inst, verbose=verbose,
-                poly_order=fof_order)
+                poly_order=fof_order, write_file=write_file)
 
         # Get corrected I's and Q's
         self.IQ_c = self.correct_IQ(rsr_inst.spm_vals,rsr_inst.IQ_m,
@@ -136,7 +136,8 @@ class Calibration(object):
 
         # Normalize observed power by the freespace signal
         norm_inst = Normalization(rsr_inst.spm_vals, self.IQ_c, geo_inst,
-                rsr_inst, order=pnf_order,verbose=verbose,interact=interact)
+                rsr_inst, order=pnf_order,verbose=verbose,interact=interact,
+                write_file=write_file)
 
         '''
             Resample calibration results to spm_cal
@@ -248,8 +249,6 @@ class Calibration(object):
         f_detrend_interp_rad = f_detrend_interp * (2.0 * np.pi)
         f_detrend_rad_splcoef = splrep(f_spm_interp, f_detrend_interp_rad)
         f_detrend_rad = splev(spm_vals, f_detrend_rad_splcoef)
-        # store phase as an attribute
-        self.phase = f_detrend_rad
 
         # Apply detrending function
         IQ_c = IQ_m * np.exp(-1j * f_detrend_rad)

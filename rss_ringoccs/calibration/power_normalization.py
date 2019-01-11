@@ -55,7 +55,8 @@ class Normalization(object):
     """
 
     def __init__(self, spm_raw, IQ_c, geo_inst, rsr_inst, order=3,
-            fittype='poly', interact=False, verbose=False):
+            fittype='poly', interact=False, verbose=False,
+            write_file=False):
 
         # store rev info
         self.rev_info = geo_inst.rev_info
@@ -110,8 +111,9 @@ class Normalization(object):
             new_gaps = freespace_spm
 
         # plot final fit for user reference
-        self.plot_power_profile(spm_down,p_obs_down,new_gaps,self.order,
-                save=True)
+        if write_file:
+            self.plot_power_profile(spm_down,p_obs_down,new_gaps,
+                                    self.order,save=True)
 
     def hfit_med(self, p_obs_down):
 

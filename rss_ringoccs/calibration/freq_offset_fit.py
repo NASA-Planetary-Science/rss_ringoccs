@@ -79,7 +79,7 @@ class FreqOffsetFit(object):
     """
 
     def __init__(self, rsr_inst, geo_inst, poly_order=7,
-            f_uso_x=8427222034.34050, verbose=False):
+            f_uso_x=8427222034.34050, verbose=False, write_file=False):
 
 
         # Check inputs for validity
@@ -179,9 +179,10 @@ class FreqOffsetFit(object):
                 poly_order=poly_order)
 
         # Draw and save reference plot
-        self.plotFORFit(f_spm,f_sky_resid,f_sky_resid_fit,self.__fsr_mask,
-                        spm_min,spm_max,geo_inst.t_oet_spm_vals[0],
-                        geo_inst.t_oet_spm_vals[-1],poly_order)
+        if write_file:
+            self.plotFORFit(f_spm,f_sky_resid,f_sky_resid_fit,self.__fsr_mask,
+                            spm_min,spm_max,geo_inst.t_oet_spm_vals[0],
+                            geo_inst.t_oet_spm_vals[-1],poly_order)
 
         # Calculate frequency offset fit
         self.f_offset_fit = f_sky_resid_fit + (f_sky_recon - f_sky_pred)

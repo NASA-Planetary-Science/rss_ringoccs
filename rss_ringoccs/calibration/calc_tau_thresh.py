@@ -52,11 +52,9 @@ class calc_tau_thresh(object):
 
     """
     def __init__(self,rsr_inst,geo_inst,cal_inst,
-                res_km=1.0,Calpha=2.41,constant=False):
+                res_km=1.0,Calpha=2.41):
 
         # find time-series sampling frequency and rate
-        dt = np.nanmedian([rsr_inst.spm_vals[i+1]-rsr_inst.spm_vals[i] for i in range(len(rsr_inst.spm_vals)-1)])
-        #cal_inst.t_oet_spm_vals[1]-cal_inst.t_oet_spm_vals[0]
         df = rsr_inst.sample_rate_khz * 1e3
 
         # resample rho and rho dot
@@ -72,8 +70,7 @@ class calc_tau_thresh(object):
         ### ~~ FIND SIGNAL AND NOISE POWER ~~
         ###
         # noise
-        #noise = self.find_noise_spec(f_spec,spm_spec,spec,pnorm,geo_inst.freespace_spm)
-        noise = self.find_noise(rsr_inst.spm_vals,rsr_inst.IQ_m,dt,df)
+        noise = self.find_noise(rsr_inst.spm_vals,rsr_inst.IQ_m,df)
         # signal
         #signal = np.interp(spm_spec, cal_inst.t_oet_spm_vals, cal_inst.p_free_vals)
         signal = cal_inst.p_free_vals
@@ -91,7 +88,7 @@ class calc_tau_thresh(object):
         ###
         self.tau_thresh = tau
 
-    def find_noise(self,spm,IQ,dt,df):
+    def find_noise(self,spm,IQ,df):
         """
         Purpose:
             Locate the additive receiver noise within the data set.
@@ -102,11 +99,6 @@ class calc_tau_thresh(object):
         Arguments:
             :spm (*np.ndarray*): raw SPM in seconds
             :IQ (*np.ndarray*): measured complex signal
-            :dt (*float*): sampling spacing in sec of the raw SPM for
-                        use in determining the indices of the first
-                        and last 1,000 seconds of the occultation in
-                        order to determine the location of receiver
-                        noise within the data set
             :df (*float*): sampling frequency in Hz of the IQ
         """
         # Spectrogram to filter out spacecraft signal
@@ -117,12 +109,17 @@ class calc_tau_thresh(object):
         Sxx_freq_filt = np.nanmean(Sxx[((freq>-450)&(freq<-200))|((freq>200)&(freq<450)),:],0)
         # time filtering to include only the signal outside the occultation
         # by looking at just the first and last 1,000 seconds
-        tmin = spm[int(1e3/dt)]
-        tmax = spm[-int(1e3/dt)]
+        tmin = spm[0]+1e3
+        tmax = spm[-1]-1e3
         p_noise = np.nanmean(Sxx_freq_filt[(time<tmin)|(time>tmax)])
 
         return p_noise
 """
 Revision history
     Nov 29 2018 - sflury -- original
+    Dec 14 2018 - sflury -- spectrogram method with filtering of space-
+                            craft signal from FFT to get noise values
+    Jan 11 2018 - sflury -- updated doc strings and method for
+                            selecting the first and last thousand secs
+                            of the occultation data set
 """

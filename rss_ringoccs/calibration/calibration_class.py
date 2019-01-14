@@ -86,11 +86,12 @@ class Calibration(object):
                         and computation of the calibration procedures
         :FORFIT_chi_squared (*float*): sum of the squared residual
                         frequency offset fit such that
-                        :math:`\chi^2 = \\frac{1}{N-m}\sum
-                        (\hat{f}(t)_{resid}-f(t)_{resid})^2`
+                        :math:`\chi^2 = \\frac{1}{N-m}
+                        \sum((\hat{f}(t)_{resid}-f(t)_{resid})
+                        /\hat{f}(t)_{resid})^2`
         :FSPFIT_chi_squared (*float*):
                         :math:`\chi^2 = \\frac{1}{N-m}\sum
-                        (\hat{P}_0(t)-P_0(t))^2`
+                        ((\hat{P}_0(t)-P_0(t))/\hat{P}_0(t))^2`
 
     Returns:
         Object instance with attributes associated with the process of

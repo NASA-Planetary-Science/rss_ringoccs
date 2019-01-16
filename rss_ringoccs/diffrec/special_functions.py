@@ -9,28 +9,22 @@ RADS_PER_DEGS = 0.0174532925199432957692369
 
 def savitzky_golay(y, window_size, order, deriv=0, rate=1):
     """
-        Function:
-            savitsky_golay
         Purpose:
             To smooth data with a Savitzky-Golay filter.
             This removes high frequency noise while
             maintaining many of the original features of
             the input data.
         Arguments:
-            y:
-                Numpy Array
+            :y:
                 The input "Noisy" data.
-            window_size:
-                Int
+            :window_size (*int*):
                 The length of the window.
                 Must be an odd number.
-            order:
-                Int
+            :order (*int*):
                 The order of the polynomial used for filtering.
                 Must be less then window_size - 1.
         Keywords:
             deriv:
-                Int
                 The order of the derivative what will be computed.
         Output:
             ys:
@@ -68,7 +62,7 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
     try:
         window_size = np.abs(np.int(window_size))
         order = np.abs(np.int(order))
-    except ValueError:
+    except (ValueError, TypeError):
         raise ValueError(
             "\n\tError Encountered:\n"
             "\trss_ringoccs: Diffrec Subpackage\n"
@@ -76,14 +70,14 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
             "\t\twindow_size must be an odd integer.\n"
         )
 
-    if window_size % 2 != 1 or window_size < 1:
+    if (window_size % 2 != 1) or (window_size < 1):
         raise ValueError(
             "\n\tError Encountered:\n"
             "\trss_ringoccs: Diffrec Subpackage\n"
             "\tspecial_functions.savitzky_golar:\n"
             "\t\twindow_size must be an odd integer.\n"
         )
-    elif window_size < order + 2:
+    elif (window_size < order + 2):
         raise ValueError(
             "\n\tError Encountered:\n"
             "\trss_ringoccs: Diffrec Subpackage\n"
@@ -94,16 +88,16 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
     else:
         pass
 
-    half_window = (window_size -1) // 2
+    half_window = (window_size - 1) // 2
 
     # precompute coefficients
     b = np.zeros((window_size, order+1))
     b[..., 0] = 1
-    for k in range((window_size - 1) // 2):
-        n0 = ((window_size-1) // 2) - k
+    for k in range(half_window):
+        n0 = (half_window) - k
         m = n0
         n = -n0
-        for j in range(1,order+1):
+        for j in range(1, order+1):
             b[k, j] = n
             b[window_size-1-k, j] = m
             n *= -n0
@@ -116,11 +110,12 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
         m *= rate*(deriv-i)
 
     m *= np.linalg.pinv(b).A[deriv]
-    # pad the signal at the extremes with
-    # values taken from the signal itself
+
+    # Pad the endpoints with values from the signal.
     firstvals = y[0] - np.abs(y[1:half_window+1][::-1] - y[0])
     lastvals = y[-1] + np.abs(y[-half_window-1:-1][::-1] - y[-1])
     y = np.concatenate((firstvals, y, lastvals))
+
     return np.convolve(m[::-1], y, mode='valid')
 
 def fresnel_transform(rho_km_vals, phi_rad_vals, F_km_vals, B_rad_vals,

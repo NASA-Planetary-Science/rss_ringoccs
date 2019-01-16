@@ -19,7 +19,7 @@ from . import pds3_write_series_v2 as pds3
 import numpy as np
 
 
-def write_geo_series_data(geo_inst, out_file):
+def write_geo_series_data(geo_inst, out_file, verbose=False):
     """
     This writes a GEO data file with columns: observed event time, ring
     event time, spacecraft event time, ring radius, ring longitude,
@@ -39,7 +39,8 @@ def write_geo_series_data(geo_inst, out_file):
 
     npts = len(geo_inst.t_oet_spm_vals)
 
-    print('\nWriting GEO data to: ', out_file, '\n')
+    if verbose:
+        print('\nWriting GEO data to: ', out_file, '\n')
     f = open(out_file, 'w')
 
     for n in range(npts):

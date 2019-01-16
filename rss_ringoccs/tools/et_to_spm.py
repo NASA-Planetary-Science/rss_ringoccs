@@ -31,12 +31,14 @@ def et_to_spm(et_vals, kernels=None, ref_doy=None):
     if kernels:
         spice.kclear()
         spice.furnsh(kernels)
+    if isinstance(et_vals, float):
+        npts = 1
+    else:
+        npts = len(et_vals)
+    if npts == 0:
+        return []
+        
 
-    try:
-        npts = len(et_vals)
-    except TypeError:
-        et_vals = [et_vals]
-        npts = len(et_vals)
 
     spm_vals = []
 

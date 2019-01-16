@@ -1,6 +1,6 @@
 """
 :Purpose:
-    
+
     Functions for calculating occultation geometry parameters listed in
     *GEO.LBL file from Archived_Cassini_RSS_RingOccs_2018/ and other
     useful geometry information, such as free-space regions and planetary
@@ -20,11 +20,11 @@ from scipy.interpolate import interp1d
 def calc_B_deg(et_vals, spacecraft, dsn, nhat_p, kernels=None):
     """
     This calculates ring opening angle, or the observed ring elevation,
-    as the complement to the angle made by the Saturn pole vector and 
+    as the complement to the angle made by the Saturn pole vector and
     the Cassini to DSN vector
 
     Arguments:
-        :et_vals (*np.ndarray*): Array of earth-received times in 
+        :et_vals (*np.ndarray*): Array of earth-received times in
             ephemeris seconds.
         :dsn (*str*): DSN observing station ID -- must be compatible with NAIF.
         :nhat_p (*np.ndarray*): 1x3 array unit vector in planet pole direction.
@@ -87,12 +87,12 @@ def calc_F_km(D_km_vals, f_sky_hz_vals, B_deg_vals, phi_ora_deg_vals):
     This calculates the Fresnel scale using Eq. 6 of MTR1986.
 
     Arguments:
-        :D_km_vals (*np.ndarray*): Array of spacecraft to ring intercept 
+        :D_km_vals (*np.ndarray*): Array of spacecraft to ring intercept
             point distances in km.
-        :f_sky_hz_vals (*np.ndarray*): Array of downlink sinusoidal signal 
+        :f_sky_hz_vals (*np.ndarray*): Array of downlink sinusoidal signal
             frequency at the front-end  of observing dsn station, in Hz.
         :B_deg_vals (*np.ndarray*): Array of ring opening angle in degrees.
-        :phi_ora_deg_vals (*np.ndarray*): Array of observed ring azimuth 
+        :phi_ora_deg_vals (*np.ndarray*): Array of observed ring azimuth
             in degrees.
 
     Returns:
@@ -100,10 +100,7 @@ def calc_F_km(D_km_vals, f_sky_hz_vals, B_deg_vals, phi_ora_deg_vals):
 
     Notes:
         #. diffcorr uses an independently-calculated Fresnel scale
-        #. Reference: Essam A. Marouf, G. Leonard Tyler, Paul A. Rosen,
-            Profiling Saturn's rings by radio occultation,
-            Icarus, Volume 68, Issue 1, 1986, Pages 120-166,
-            https://doi.org/10.1016/0019-1035(86)90078-3
+        #. Reference: _[MTR1986]
 
     """
 
@@ -124,16 +121,14 @@ def calc_B_eff_deg(B_deg, phi_ora_deg):
 
     Arguments:
         :B_deg (*float* or *np.ndarray*): Ring opening angle in degrees.
-        :phi_ora_deg (*float* or *np.ndarray*): Observed ring azimuth in 
+        :phi_ora_deg (*float* or *np.ndarray*): Observed ring azimuth in
             degrees.
     Returns:
-        :B_eff_deg (*float* or *np.ndarray*): Effective ring opening angle 
+        :B_eff_deg (*float* or *np.ndarray*): Effective ring opening angle
             in degrees.
 
     Notes:
-        #. Reference: Gresh et al. (1986) Icarus 68, 481-502 Eq. 16 
-            "An analysis of bending waves in Saturn's rings using Voyager 
-            radio occultation data"
+        #. Reference: _[GRESH86] Eq. 16
     """
     B_rad = np.radians(B_deg)
     phi_ora_rad = np.radians(phi_ora_deg)
@@ -146,7 +141,7 @@ def calc_beta(B_deg, phi_ora_deg):
 
     Arguments:
         :B_deg (*float* or *np.ndarray*): Ring opening angle in degrees.
-        :phi_ora_deg (*float* or *np.ndarray*): Observed ring azimuth in 
+        :phi_ora_deg (*float* or *np.ndarray*): Observed ring azimuth in
             degrees.
 
     Returns:
@@ -163,10 +158,10 @@ def calc_elevation_deg(et_vals, target, obs, kernels=None):
 
     Arguments:
         :et_vals (*np.ndarray*): Array of observed event times in ET sec.
-        :target (*str*): Target name -- must be compatible with NAIF. This 
+        :target (*str*): Target name -- must be compatible with NAIF. This
             will typically be spacecraft or planet name.
-        :obs (*str*): Observer name -- must be compatible with NAIF. This 
-            will typically be observing dsn station name. Observer is assumed 
+        :obs (*str*): Observer name -- must be compatible with NAIF. This
+            will typically be observing dsn station name. Observer is assumed
             to be on Earth.
         :kernels (*str* or *list*): List of NAIF kernels, including path.
 
@@ -206,15 +201,15 @@ def calc_elevation_deg(et_vals, target, obs, kernels=None):
 def calc_impact_radius_km(R_sc_km_vals, et_vals, spacecraft, dsn, nhat_p,
         kernels=None):
     """
-    This calculates the closest approach of the spacecraft signal to the 
+    This calculates the closest approach of the spacecraft signal to the
     planet defined as a sphere.
 
     Arguments:
-        :R_sc_km_vals (*list*): List of 3-element arrays of spacecraft 
+        :R_sc_km_vals (*list*): List of 3-element arrays of spacecraft
             position vector in planetocentric frame at input et_vals.
         :et_vals (*np.ndarray*): Array of Earth-received times in ephemeris
             seconds.
-        :spacecraft (*str*): Spacecraft name 
+        :spacecraft (*str*): Spacecraft name
         :dsn (*str*): DSN observing station ID
         :nhat_p (*np.ndarray*): 1x3 array unit vector in planet pole direction.
 
@@ -264,10 +259,10 @@ def calc_phi_deg(et_vals, rho_vec_km_vals, spacecraft, dsn, nhat_p,
 
     Arguments:
         :et_vals (*np.ndarray*): Array of earth-received time in ET seconds.
-        :rho_vec_km_vals (*np.ndarray*): Nx3 array of ring intercept position 
+        :rho_vec_km_vals (*np.ndarray*): Nx3 array of ring intercept position
             vectors in km.
         :spacecraft (*str*): Name of spacecraft
-        :dsn (*str*): DSN observing station ID 
+        :dsn (*str*): DSN observing station ID
         :nhat_p (*np.ndarray*): 1x3 array unit vector in planet pole direction.
 
     Keyword Arguments:
@@ -275,7 +270,7 @@ def calc_phi_deg(et_vals, rho_vec_km_vals, spacecraft, dsn, nhat_p,
 
     Returns:
         :phi_rl_deg_vals (*np.ndarray*): Array of inertial longitude in degrees.
-        :phi_ora_deg_vals (*np.ndarray*): Array of observed ring azimuth 
+        :phi_ora_deg_vals (*np.ndarray*): Array of observed ring azimuth
             in degrees.
 
     Notes:
@@ -340,7 +335,7 @@ def calc_rho_km(et_vals, planet, spacecraft, dsn, kernels=None):
         :et_vals (*np.ndarray*): Array of observed event times in ET sec.
         :planet (*str*): Planet name
         :spacecraft (*str*): Spacecraft name
-        :dsn (*str*): DSN observing station ID 
+        :dsn (*str*): DSN observing station ID
 
     Keyword Arguments:
         :kernels (*str* or *list*): List of NAIF kernels, including path.
@@ -369,14 +364,14 @@ def calc_rho_vec_km(et_vals, planet, spacecraft, dsn, kernels=None,
         :et_vals (*np.ndarray*): Array of earth-received times in ET sec
         :planet (*str*): Name of planet
         :spacecraft (*str*): Name of spacecraft
-        :dsn (*str*): DSN observing station ID 
+        :dsn (*str*): DSN observing station ID
 
     Keyword Arguments:
         :kernels (*str* or *list*): Path to NAIF kernels
         :verbose (*bool*): Option for printing processing steps
 
     Output:
-        :rho_vec_km_vals (*list*): List of 3xN np.ndarrays of the planet 
+        :rho_vec_km_vals (*list*): List of 3xN np.ndarrays of the planet
             center to ring intercept point position vector in J2000 frame
         :t_ret_et_vals (*np.ndarray*): Array of ring event times in ET seconds.
 
@@ -466,7 +461,7 @@ def calc_rip_velocity(rho_km_vals, phi_rl_deg_vals, dt):
         :dt (*float*): Constant time spacing between points.
 
     Returns:
-        :rho_dot_kms_vals (*np.ndarray*): Array of ring intercept radial 
+        :rho_dot_kms_vals (*np.ndarray*): Array of ring intercept radial
             velocities in km/s.
         :phi_rl_dot_kms_vals (*np.ndarray*): Array of ring intercept azimuthal
             velocties in km/s.
@@ -495,8 +490,8 @@ def calc_sc_state(et_vals, spacecraft, planet, dsn, nhat_p, kernels=None):
     Arguments:
         :et_vals (*np.ndarray*): Array of spacecraft event times in ET seconds.
         :spacecraft (*str*): Spacecraft name
-        :planet (*str*): Planet name 
-        :dsn (*str*): Deep Space Network observing station ID 
+        :planet (*str*): Planet name
+        :dsn (*str*): Deep Space Network observing station ID
         :nhat_p (*np.ndarray*): 1x3 array unit vector in planet pole direction.
 
 
@@ -504,9 +499,9 @@ def calc_sc_state(et_vals, spacecraft, planet, dsn, nhat_p, kernels=None):
         :kernels (*str* or *list*): Path to NAIF kernel(s)
 
     Returns:
-        :R_sc_km_vals (*list*): List of Nx3 np.ndarrays of spacecraft position 
+        :R_sc_km_vals (*list*): List of Nx3 np.ndarrays of spacecraft position
             vector in km in planetocentric frame
-        :R_sc_dot_kms_vals (*list*): List of Nx3 np.ndarrays of spacecraft 
+        :R_sc_dot_kms_vals (*list*): List of Nx3 np.ndarrays of spacecraft
             velocity vector in km/s.
 
     Notes:
@@ -553,14 +548,14 @@ def calc_set_et(et_vals, spacecraft, dsn, kernels=None):
 
     Arguments:
         :et_vals (*np.ndarray*): Array of earth-received times in ET seconds.
-        :spacecraft (*str*): 
-        :dsn (*str*): Deep Space Network observing station ID 
+        :spacecraft (*str*):
+        :dsn (*str*): Deep Space Network observing station ID
 
     Keyword Arguments:
         :kernels (*str* or *list): Path to NAIF kernels
 
     Returns:
-        :t_set_et_vals (*np.ndarray*): Array of spacecraft event times 
+        :t_set_et_vals (*np.ndarray*): Array of spacecraft event times
             in ET sec.
     """
 
@@ -598,9 +593,9 @@ def get_start_jd(year, doy):
     start_jd = float(jd[3:])
     return start_jd
 
-def find_gaps(t_ret_spm_vals, year, doy, rho_km_vals, phi_rl_deg_vals, 
-        niter=int(100), tolerance=0.001, t0=2454467.000000, 
-        gaps_file='../tables/gap_orbital_elements.txt', kernels=None): 
+def find_gaps(t_ret_spm_vals, year, doy, rho_km_vals, phi_rl_deg_vals,
+        niter=int(100), tolerance=0.001, t0=2454467.000000,
+        gaps_file='../tables/gap_orbital_elements.txt', kernels=None):
     """
     Purpose:
         Find regions of free-space power (gaps) in the ring system.
@@ -611,7 +606,7 @@ def find_gaps(t_ret_spm_vals, year, doy, rho_km_vals, phi_rl_deg_vals,
         :doy (*str*): Reference day of year for seconds past midnight
         :rho_km_vals (*np.ndarray*): Ring intercept points in km
         :phi_rl_deg_vals (*np.ndarray*): Inertial ring longitude in deg.
-    
+
     Keyword Arguments:
         :niter (*int*): Maximum number of iterations
         :tolerance (*float*): Minimum difference between new and old guess for
@@ -626,7 +621,7 @@ def find_gaps(t_ret_spm_vals, year, doy, rho_km_vals, phi_rl_deg_vals,
         :gap_bounds (*list*): List of 1x2 lists of gap boundaries in km
 
     Notes:
-        [1] Reference: Philip D. Nicholson, Richard G. French, Colleen A. McGhee-French, Matthew M. Hedman, Essam A. Marouf, Joshua E. Colwell, Katherine Lonergan, Talia Sepersky, Noncircular features in Saturn’s rings II: The C ring, Icarus, Volume 241, 2014, Pages 373-396, ISSN 0019-1035, https://doi.org/10.1016/j.icarus.2014.06.024. (http://www.sciencedirect.com/science/article/pii/S0019103514003443)
+        [1] Reference: _[NICH14]
         [2] Given the default "gaps_file" keyword argument, this script must be run in a directory one level below the top-level rss_ringoccs directory.
 
 
@@ -697,7 +692,7 @@ def rad_converge(t_ret_spm_vals, rho_km_vals, phi_rl_deg_vals, semimajor,
         :eccentricity (*float*): Eccentricity of ring feature.
         *curlypi_0 (*float*): Longitude of periapse in degrees.
         *curlypi_dot (*float*): Apsidal precession rate in degrees/day.
-    
+
     Keyword Arguments:
         :niter (*int*): Maximum number of iterations
         :tolerance (*float*): Minimum difference between new and old guess for
@@ -707,7 +702,7 @@ def rad_converge(t_ret_spm_vals, rho_km_vals, phi_rl_deg_vals, semimajor,
         :radius_new (*float*): Estimated radius of ring feature in km
 
     Notes:
-        [1] Reference: Philip D. Nicholson, Richard G. French, Colleen A. McGhee-French, Matthew M. Hedman, Essam A. Marouf, Joshua E. Colwell, Katherine Lonergan, Talia Sepersky, Noncircular features in Saturn’s rings II: The C ring, Icarus, Volume 241, 2014, Pages 373-396, ISSN 0019-1035, https://doi.org/10.1016/j.icarus.2014.06.024. (http://www.sciencedirect.com/science/article/pii/S0019103514003443)
+        [1] Reference: _[NICH14]
     """
     # set initial guess at feature radius
     radius_old = semimajor*(1.+eccentricity)
@@ -788,7 +783,7 @@ def get_freespace(t_ret_spm_vals, year, doy, rho_km_vals,
         :t_oet_spm_vals (*np.ndarray*): Observed event times in SPM
         :atmos_occ_spm_vals (*np.ndarray*): SPM times of when spacecraft signal
             is blocked by planet atmosphere
-    
+
     Keyword Arguments:
         :kernels (*str* or *list*): Path to NAIF kernels
         :split_ind (*int*): Index of when a chord event switches from ingress
@@ -887,7 +882,7 @@ def split_chord_arr(t_ret_spm_vals, t_oet_spm_vals,
         :phi_rl_deg_vals (*np.ndarray*): Inertial ring longitude in deg.
         :rho_km_vals (*np.ndarray*): Ring intercept points in km
         :ind (*int*): Index of where ingress switches to egress
-        :profdir (*str*): Profile direction to return ('"INGRESS"' or 
+        :profdir (*str*): Profile direction to return ('"INGRESS"' or
             '"EGRESS"')
 
     Returns:
@@ -1006,7 +1001,7 @@ def get_freespace_km(ret_spm, year, doy, rho_km, phi_rl_deg):
 
     # Add free-space beyond ring system to free-space gaps in rings
     freespace_km = (add_fsp0 + find_gaps(ret_spm, year, doy, rho_km, phi_rl_deg)
-            + add_fsp1 + add_fsp2 + add_fsp3) 
+            + add_fsp1 + add_fsp2 + add_fsp3)
 
     return freespace_km
 
@@ -1023,7 +1018,7 @@ def get_planet_occ_times(et_vals, obs, planet, spacecraft, height_above=500.,
         :spacecraft (*str*): Spacecraft name
 
     Keyword Arguments:
-        :height_above (*float*): Height in km to be added to planet radius to 
+        :height_above (*float*): Height in km to be added to planet radius to
             account for the atmosphere
         :kernels (*str* or *list*): Path to NAIF kernels
 
@@ -1075,7 +1070,7 @@ def get_pole(et, planet, kernels=None):
 
     Arguments:
         :et (*float*): Ephemeris seconds past J2000
-        :planet (*str*): Planet name 
+        :planet (*str*): Planet name
 
     Keyword Arguments:
         :kernels (*str* or *list*): Path to NAIF kernels

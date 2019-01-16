@@ -240,7 +240,7 @@ def latex_summary_doc(pdffil, resolution, outfilename):
                     \hline
                 \end{tabular}
                 \caption[Glossary of Parameters from the Geo File]{
-                    Glossary of parameters in file CARL\_GEO.TAB.
+                    Glossary of parameters in file \theGEO.TAB.
                     See companion label (.LBL) file for description
                     of parameters.
                 }
@@ -260,7 +260,7 @@ def latex_summary_doc(pdffil, resolution, outfilename):
                 \end{tabular}
                 \caption[Glossary of Data from the Cal File]{
                     Glossary of calibration data in file
-                    CARL\_CAL.TAB. See companion label (.LBL)
+                    \theCAL.TAB. See companion label (.LBL)
                     file for description of the data.
                 }
                 \label{tab:easydata_glossary_from_cal_file}
@@ -287,8 +287,7 @@ def latex_summary_doc(pdffil, resolution, outfilename):
                 \caption[Glossary of Parameters in Tau File]{
                     Glossary of optical depth, phase shift,
                     and selected geometry parameters
-                    contained in files CARL\_TAU\_01KM.TAB
-                    and RSS\_2005\_123\_X43\_E\_TAU\_10KM.TAB.
+                    contained in files \theTAU.
                     See companion label
                     (.LBL) files for description of the data.
                 }

@@ -55,13 +55,24 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
                 Press ISBN-13: 9780521880688
     """
     try:
+        y = np.array(y)
+    except:
+        raise TypeError(
+            "\n\tError Encountered:\n"
+            "\trss_ringoccs: Diffrec Subpackage\n"
+            "\tspecial_functions.savitzky_golay\n"
+            "\tinput variable should be a numpy array."
+            "\tSyntax:\n"
+            "\t\tysmooth = savitzky_golay(y, Window_Size, Poly_Order)"
+        )
+    try:
         window_size = np.abs(np.int(window_size))
         order = np.abs(np.int(order))
     except ValueError:
         raise ValueError(
             "\n\tError Encountered:\n"
             "\trss_ringoccs: Diffrec Subpackage\n"
-            "\tspecial_functions.savitzky_golar:\n"
+            "\tspecial_functions.savitzky_golay:\n"
             "\t\twindow_size must be an odd integer.\n"
         )
 

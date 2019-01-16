@@ -284,7 +284,7 @@ class DiffractionCorrection(object):
     """
     def __init__(self, NormDiff, res, rng="all", wtype="kb25", fwd=False,
                  norm=True, verbose=False, bfac=True, sigma=2.e-13,
-                 psitype="full", write_file=False):
+                 psitype="full", write_file=False, res_factor=0.75):
 
         # Set a variable for the starting time of the computation.
         t1 = time.time()
@@ -404,6 +404,28 @@ class DiffractionCorrection(object):
                 "\tSet write_file=True or write_file=False\n"
                 % (type(write_file).__name__)
             )
+        else:
+            pass
+        
+        # Check that res_factor is a floating point number.
+        if (not isinstance(res_factor, float)):
+            try:
+                res_factor = float(res_factor)
+            except (TypeError, ValueError):
+                raise TypeError(
+                    "\n\tres_factor must be a positive floating point number.\n"
+                    "\tYour input has type: %s\n"
+                    % (type(res_factor).__name__)
+                )
+        else:
+            pass
+
+        if (res_factor <= 0.0):
+                raise ValueError(
+                    "\n\tres_factor must be a positive floating point number.\n"
+                    "\tYour input: %f\n"
+                    % (res_factor)
+                )
         else:
             pass
 
@@ -581,7 +603,9 @@ class DiffractionCorrection(object):
         self.phase_fwd_vals = None
 
         # Assign resolution and forward variables as attributes.
-        self.res = res
+        if verbose:
+            print("\tMultiplying requested resolution by res_factor...")
+        self.res = res*res_factor
         self.fwd = fwd
 
         # Assing window type and Allen deviation variables as attributes.
@@ -809,8 +833,15 @@ class DiffractionCorrection(object):
                 "\tRequested Resolution (km): %f\n"
                 "\tSample Spacing (km): %f\n\n"
                 "\tTO CORRECT THIS:\n"
-                "\t\tChoose a resolution GREATER than %f km\n" %
-                (self.res, self.dx_km, 2.0*self.dx_km)
+                "\t\tChoose a resolution GREATER than %f km\n"
+                "\n\tPLEASE NOTE:\n"
+                "\t\tTo be consistent with PDS results, a scale factor\n"
+                "\t\tof 0.75 is applied to your requested resolution.\n"
+                "\t\tto ignore this scale factor, please set the\n"
+                "\t\tkeyword 'res_factor=1.0' when calling the\n"
+                "\t\tDiffractionCorrection class.\n"
+                "\t\tres_factor is currently set to: %f"%
+                (self.res, self.dx_km, 2.0*self.dx_km/res_factor, res_factor)
             )
         else:
             pass

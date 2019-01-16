@@ -19,7 +19,7 @@ import numpy as np
 import pdb
 import time
 
-def pds3_write_series_lbl(str_lbl, out_lbl_file):
+def pds3_write_series_lbl(str_lbl, out_lbl_file, verbose=False):
 
     all_kwd = str_lbl['keywords_values']
 
@@ -32,7 +32,8 @@ def pds3_write_series_lbl(str_lbl, out_lbl_file):
 
     npad0 = str_lbl['alignment_column']
     npad1 = str_lbl['series_alignment_column']
-    print('\nWriting label to: ', out_lbl_file, '\n')
+    if verbose:
+        print('\nWriting label to: ', out_lbl_file, '\n')
     f = open(out_lbl_file, 'w')
 
     # Write keywords and values

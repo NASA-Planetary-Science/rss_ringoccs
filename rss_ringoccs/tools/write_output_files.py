@@ -31,7 +31,7 @@ import os
 
 #
 chord_revnums = ['053', '054', '056', '057', '058', '060', '063', '064',
-                    '067', '079', '081', '082', '084', '089']
+                    '067', '079', '081', '082', '084', '089', '253']
 
 func_typ = {'GEO': write_geo_series,
         'CAL': write_cal_series,
@@ -88,7 +88,7 @@ def construct_filepath(rev_info, filtyp):
     rev = rev_info['rev_num']
 
     if rev in chord_revnums:
-        if 'DLP' in filtyp or 'TAU' in filtyp:
+        if 'DLP' in filtyp or 'TAU' in filtyp or 'Summary' in filtyp:
             pd2 = 'C'
 
     for dd in pd1:
@@ -113,7 +113,7 @@ def construct_filepath(rev_info, filtyp):
                 seq_num = '0001'
             else:
                 sqn0 = [x.split('_')[-2]+x.split('_')[-1][0:4] for x in dirfiles
-                        if (filtyp in x) and (x.split('_')[-2]==curday)]
+                        if (filtyp.upper() in x) and (x.split('_')[-2]==curday)]
                 if len(sqn0) == 0:
                     seq_num = '0001'
                 else:

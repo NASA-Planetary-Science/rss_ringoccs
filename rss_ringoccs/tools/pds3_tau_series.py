@@ -14,7 +14,7 @@ import time
 import sys
 from . import pds3_write_series_v2 as pds3
 
-def write_tau_series_data(tau_inst, out_file):
+def write_tau_series_data(tau_inst, out_file, verbose=False):
     """
     This writes a TAU data file.
 
@@ -28,8 +28,8 @@ def write_tau_series_data(tau_inst, out_file):
             + '%14.6F,' + '%14.6F,' + '%12.6F' + '%s')
     npts = len(tau_inst.t_oet_spm_vals)
 
-
-    print('\nWriting TAU data to: ', out_file, '\n')
+    if verbose:
+        print('\nWriting TAU data to: ', out_file, '\n')
 
     f = open(out_file, 'w')
     for n in range(npts):
@@ -380,58 +380,6 @@ def get_tau_series_info(rev_info, tau_inst, series_name, prof_dir):
             + 'rfrench@wellesley.edu."')
 
 
-#    FILE_DESCRIPTION = ('"This file (identified by ''TAU'' in' + sd
-#            + 'the file name) contains calibrated optical depth and '
-#            + 'phase shift profiles ' + sd 
-#            + 'of Saturn''s rings reconstructed to remove diffraction '
-#            + 'effects. The' + sd + 'frequency/phase reference of the '
-#            + 'original measurements is the Cassini' + sd
-#            + 'UltraStable Oscillator, or USO. The tabulated data '
-#            + 'are sampled over a ' + sd + 'uniform ring radius grid. '
-#            + 'The sampling interval is half the period of the' + sd
-#            + 'highest spatial frequency of the profile. The latter is '
-#            + 'defined as the' + sd + 'DLP resolution. Data filtering '
-#            + 'during the reconstruction process degrades' + sd
-#            + 'achievable reconstructed profile resolution (TAU resolution) '
-#            + 'to about 1.5 to 2' + sd + 'times the DLP resolution, '
-#            + 'hence to about 3 to 4 times the data sampling' + sd
-#            + 'interval, depending on the specific filtering applied.'
-#            + 'We use the equivalent' + sd + 'width of the filter window '
-#            + 'to define the reconstruction resolution, following' + sd 
-#            + 'Eq. (19) in Marouf, Tyler, and Rosen (1986) ' 
-#            + 'Icarus 68, pp. 120-166.' + sd + 'Reconstruction resolution is '
-#            + 'explicitly identified in the name of the' + sd
-#            + 'corresponding TAU file.' + sd
-#            + ' ' + sd
-#            + 'There are several additional companion products all of '
-#            + 'which share the' + sd + 'same RING_OBSERVATION_ID (listed '
-#            + 'in the header of the LBL file) as this' + sd
-#            + 'product. These include one or more reconstructed (TAU) profiles '
-#            + 'for the' + sd + 'same occultation but at different '
-#            + 'reconstruction resolutions, and two' + sd
-#            + 'which provide geometry and calibration data. The latter two '
-#            + 'have file' + sd + 'names constructed from the same '
-#            + 'root as this file with the field for radial' + sd
-#            + 'resolution removed and the ''TAU'' replaced by '
-#            + 'either ''GEO'' (geometry) or' + sd + "'CAL' (carrier frequency "
-#            + 'and power calibration). For some reconstruction' + sd
-#            + 'resolutions, diffraction-limited profiles (DLP) are '
-#            + 'also included. In such' + sd + 'cases, the DLP file name '
-#            + 'lists the DLP resolution and ''TAU'' is replaced' + sd
-#            + 'by ''DLP''.' + sd
-#            + ' ' + sd
-#            + 'This file was produced using the rss_ringoccs open-source '
-#            + 'processing suite' + sd + 'developed at Wellesley College with '
-#            + 'the support of the Cassini project and' + sd + 'hosted '
-#            + 'on GithHub at https://github.com/NASA-Planetary-Science/'
-#            + 'rss_ringoccs.' + sd
-#            + ' ' + sd
-#            + 'Please address any inquiries to:' + sd
-#            + 'Richard G. French' + sd
-#            + 'Astronomy Department, Wellesley College' + sd
-#            + 'Wellesley, MA 02481-8203' + sd
-#            + '(781) 283-3747' + sd 
-#            + 'rfrench@wellesley.edu"')
             
     HIST_USER_NAME = tau_inst.history['User Name']
     HIST_HOST_NAME = tau_inst.history['Host Name']
@@ -554,7 +502,8 @@ def get_tau_series_info(rev_info, tau_inst, series_name, prof_dir):
             , '"RADIUS CORRECTION DUE TO IMPROVED POLE"'
             , '"RADIUS CORRECTION DUE TO TIMING OFFSET"'
             , '"RING LONGITUDE"'
-            , '"OBSERVED_RING_AZIMUTH"'
+            , '"OBSERVED RING AZIMUTH"'
+            , '"NORMALIZED SIGNAL POWER"'
             , '"NORMAL OPTICAL DEPTH"'
             , '"PHASE SHIFT"'
             , '"NORMAL OPTICAL DEPTH THRESHOLD"'
@@ -567,12 +516,12 @@ def get_tau_series_info(rev_info, tau_inst, series_name, prof_dir):
     data_types = ['ASCII_REAL'] * n_objects
     formats = ['"F32.16"'] * n_objects
     units = ['"KILOMETER"', '"N/A"', '"N/A"', '"DEGREE"',
-            '"DEGREE"', '"N/A"', '"DEGREE"', '"N/A"', '"SECOND"',
+            '"DEGREE"', '"N/A"', '"N/A"', '"DEGREE"', '"N/A"', '"SECOND"',
             '"SECOND"', '"SECOND"', '"DEGREE"']
 
     es = ''
 
-    reference_times = [es, es, es, es, es, es, es, es, 
+    reference_times = [es, es, es, es, es, es, es, es, es,
             OBJECT_REFERENCE_TIME, OBJECT_REFERENCE_TIME,
             OBJECT_REFERENCE_TIME,es]
 
@@ -605,6 +554,14 @@ def get_tau_series_info(rev_info, tau_inst, series_name, prof_dir):
             + 'degrees. This convention for' + sd + 'observed ring '
             + 'azimuth differs from that adopted in MAROUFETAL1986 by' + sd
             + '180 degrees."')
+            ,
+            ('"Power (amplitude square) of the' + sd + 'ring-attenuated '
+                + 'reconstructed radio signal, normalized by its value in' + sd
+                + 'the absence of the rings (normalized to unity in '
+                + 'free-space). The' + sd + 'value may be used to compute '
+                + 'the reconstructed oblique optical depth' + sd
+                + 'as the negative natural logarithm of the NORMALIZED '
+                + 'SIGNAL POWER."')
             ,
             ('"The normal optical depth obtained from its' + sd
             + 'measured oblique value scaled by the sine of the absolute '

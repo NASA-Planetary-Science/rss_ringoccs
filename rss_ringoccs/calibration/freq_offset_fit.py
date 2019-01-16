@@ -71,8 +71,11 @@ class FreqOffsetFit(object):
                         math:`\hat{f}(t)_{resid}` evaluated at
                         ``f_spm``
         :chi_squared: sum of the squared residual frequency offset fit
-                        such that :math:`\chi^2 = \\frac{1}{N-m}
-                        \sum(\hat{f}(t)_{resid}-f(t)_{resid})^2`
+                        normalized by the fit value (Pearson's
+                        :math:`\chi^2`) such that
+                        :math:`\chi^2 = \\frac{1}{N-m}
+                        \sum((\hat{f}(t)_{resid}-f(t)_{resid})
+                        /\hat{f}(t)_{resid})^2`
                         for :math:`N` data and :math:`m` free
                         parameters (i.e., the polynomial order plus
                         one).

@@ -4,25 +4,23 @@ import time
 
 def shell_execute(script):
     """
-        Function:
-            shell_execute
         Purpose:
             Execute a shell script from within Python.
         Variables:
-            script:     A list containing the path to the shell
-                        script and variables. For example:
-                            script = ['path/to/script','v1',...,'vn']
-                        Elements must be strings.
+            :script (*str*):
+                A list containing the path to the shell
+                script and variables. For example:
+                    script = ['path/to/script','v1',...,'vn']
+                Elements must be strings.
         Outputs:
-            Process:    An instance of the Popen class from the
-                        subprocess module. This contains attributes
-                        such as the arguments passed to it, and other
-                        system details.
-        Dependencies:
-            [1] subprocess
+            :Process:
+                An instance of the Popen class from the
+                subprocess module. This contains attributes
+                such as the arguments passed to it, and other
+                system details.
         Notes:
-            This routine has only been tested using scripts written
-            in Bash, and on standard Unix commands.
+            This routine has only been tested using scripts
+            written in Bash, and on standard Unix commands.
         References:
             [1] https://docs.python.org/3/library/subprocess.html
             [2] https://stackoverflow.com/questions/
@@ -32,8 +30,8 @@ def shell_execute(script):
                 #!/bin/bash
                 printf "Hello, World! My name is %s!" "$1"
             Run this shell script inside of Python:
-                In [1]: import diffcorr as dc
-                In [2]: dc.shell_execute(['./test.sh','Bob'])
+                In [1]: from rss_ringoccs.tools import sys_tools
+                In [2]: sys_tools.shell_execute(['./test.sh','Bob'])
                         Hello World! My name is Bob!
             We can also execute simple Unix commands.
                 In [1]: import diffcorr as dc
@@ -108,32 +106,46 @@ def make_executable(path):
     mode |= (mode & 0o444) >> 2    # copy R bits to X
     os.chmod(path, mode)
 
-def latex_summary_doc(pdffil, resolution, outfilename):
+def latex_summary_doc(pdffil, res, outfilename):
     if not isinstance(pdffil, str):
         raise TypeError(
-            "Error: rss_ringoccs.tools.sys_tools: latex_summary_doc\n"
+            "\n\tError Encountered:\n
+            "\t\trss_ringoccs.tools.sys_tools: latex_summary_doc\n"
             "\n\tpdffil must be a string\n"
             "\tYour input has type: %s\n"
             % (type(pdffil).__name__)
         )
     elif not isinstance(outfilename, str):
         raise TypeError(
-            "Error: rss_ringoccs.tools.sys_tools: latex_summary_doc\n"
+            "\n\tError Encountered:\n
+            "\t\trss_ringoccs.tools.sys_tools: latex_summary_doc\n"
             "\n\toutfilename must be a string\n"
             "\tYour input has type: %s\n"
             % (type(outfilename).__name__)
         )
-    try:
-        res = str(resolution)
-    except:
-        raise TypeError(
-            "Error: rss_ringoccs.tools.sys_tools: latex_summary_doc\n"
-            "\n\tresolution must be a floating point number\n"
-            "\tYour input has type: %s\n"
-            % (type(resolution).__name__)
+    else:
+        pass
+
+    if not (isinstance(res, float)):
+        try:
+            res = float(res)
+        except (TypeError, ValueError):
+            raise TypeError(
+                "\n\tError Encountered:\n
+                "\t\trss_ringoccs.tools.sys_tools: latex_summary_doc\n"
+                "\n\tpdffil must be a floating point number.\n"
+                "\tYour input has type: %s\n"
+                % (type(res).__name__)
         )
-    var = pdffil.split("/")
-    var = var[-1]
+    else:
+        pass
+
+    if (res < 1.0):
+        res = "%fm" % (100.0*res)
+    else:
+        res = "%fkm" % (res)
+
+    var = pdffil.split("/")[-1]
     var = var.split("_")
     rev = var[0][3:6]
     doy = var[3]
@@ -150,6 +162,7 @@ def latex_summary_doc(pdffil, resolution, outfilename):
         \usepackage{geometry}
         \geometry{a4paper, margin = 1.0in}
         \usepackage{graphicx, float}
+        \usepackage{lscape}
         \usepackage[english]{babel}
         \usepackage[dvipsnames]{xcolor}
         \usepackage[font={normalsize}, labelsep=colon]{caption}
@@ -170,8 +183,8 @@ def latex_summary_doc(pdffil, resolution, outfilename):
             \pagenumbering{gobble}
             \begin{center}
                 \LARGE{\texttt{
-                    RSS\textunderscore\theYEAR%%
-                    \textunderscore\theDOY\textunderscore\theBAND%%
+                    RSS\textunderscore\theYEAR%
+                    \textunderscore\theDOY\textunderscore\theBAND%
                     \textunderscore\theOCC}\\[2.0ex]
                     Rev\theREV\
                     Cassini Radio Science Ring Occultation:\\[1.0ex]
@@ -211,34 +224,42 @@ def latex_summary_doc(pdffil, resolution, outfilename):
             \pagenumbering{arabic}
             \begin{table}[H]
                 \centering
-                \begin{tabular}{l l}
+                \begin{tabular}{ll}
                     \hline
                     Symbol&Parameter Name\\
                     \hline
-                    $t_{OET}$&OBSERVED EVENT TIME\\
-                    $t_{RET}$&RING EVENT TIME\\
-                    $t_{SET}$&SPACECRAFT EVENT TIME\\
+                    $t_{\scriptsize{\textrm{ERT}}}$&
+                    OBSERVED EVENT TIME (Earth Receiving Time)\\
+                    $t_{\scriptsize{\textrm{RET}}}$&
+                    RING EVENT TIME\\
+                    $t_{\scriptsize{\textrm{SCET}}}$&
+                    SPACECRAFT EVENT TIME\\
                     $\rho$&RING RADIUS\\
-                    $\phi_{RL}$&RING LONGITUDE\\
-                    $\phi_{ORA}$&OBSERVED RING AZIMUTH\\
+                    $\phi_{\scriptsize{\textrm{E}}}$&
+                    RING LONGITUDE\\
+                    $\phi_{\scriptsize{\textrm{J2K}}}$&
+                    OBSERVED RING AZIMUTH\\
                     $B$&OBSERVED RING ELEVATION\\
                     $D$&SPACECRAFT TO RING INTERCEPT DISTANCE\\
-                    $\partial\rho/\partial{t}$&
+                    $V_{\scriptsize{\textrm{rad}}}$&
                     RING INTERCEPT RADIAL VELOCITY\\
-                    $\partial\theta/\partial t$&
+                    $V_{\scriptsize{\textrm{az}}}$&
                     RING INTERCEPT AZIMUTHAL VELOCITY\\
                     $F$&FRESNEL SCALE\\
-                    $R_{impact}$&IMPACT RADIUS\\
-                    $r_x$&SPACECRAFT POSITION X\\
-                    $r_y$&SPACECRAFT POSITION Y\\
-                    $r_z$&SPACECRAFT POSITION Z\\
-                    $v_x$&SPACECRAFT VELOCITY X\\
-                    $v_y$&SPACECRAFT VELOCITY Y\\
-                    $v_z$&SPACECRAFT VELOCITY Z\\
+                    $R_{\scriptsize{\textrm{imp}}}$&
+                    IMPACT RADIUS\\
+                    $r_{X}$&SPACECRAFT POSITION X\\
+                    $r_{y}$&SPACECRAFT POSITION Y\\
+                    $r_{z}$&SPACECRAFT POSITION Z\\
+                    $v_{x}$&SPACECRAFT VELOCITY X\\
+                    $v_{y}$&SPACECRAFT VELOCITY Y\\
+                    $v_{z}$&SPACECRAFT VELOCITY Z\\
+                    $\theta_{\scriptsize{\textrm{EL}}}$&
+                    OBSERVED SPACECRAFT ELEVATION\\
                     \hline
                 \end{tabular}
                 \caption[Glossary of Parameters from the Geo File]{
-                    Glossary of parameters in file \theGEO.TAB.
+                    Glossary of parameters in file \theGEO.
                     See companion label (.LBL) file for description
                     of parameters.
                 }
@@ -250,15 +271,19 @@ def latex_summary_doc(pdffil, resolution, outfilename):
                     \hline
                     Symbol&Parameter Name\\
                     \hline
-                    $t_{OET}$&OBSERVED EVENT TIME\\
-                    $f_{sky}$&SKY FREQUENCY\\
-                    $f_{resid}$&RESIDUAL FREQUENCY\\
-                    $P_{free}$&FREESPACE POWER\\
+                    $t_{\scriptsize{\textrm{ERT}}}$&
+                    OBSERVED EVENT TIME\\
+                    $f_{\scriptsize{\textrm{sky}}}$&
+                    SKY FREQUENCY\\
+                    $f_{\scriptsize{\textrm{resid}}}$&
+                    RESIDUAL FREQUENCY\\
+                    $P_{\scriptsize{\textrm{free}}}$&
+                    FREESPACE POWER\\
                     \hline
                 \end{tabular}
                 \caption[Glossary of Data from the Cal File]{
                     Glossary of calibration data in file
-                    \theCAL.TAB. See companion label (.LBL)
+                    \theCAL. See companion label (.LBL)
                     file for description of the data.
                 }
                 \label{tab:easydata_glossary_from_cal_file}
@@ -270,22 +295,33 @@ def latex_summary_doc(pdffil, resolution, outfilename):
                     Symbol&Parameter Name\\
                     \hline
                     $\rho$&RING RADIUS\\
-                    $\Delta\rho$&RADIUS CORRECTION\\
-                    $\phi_{RL}$&RING LONGITUDE\\
-                    $\phi_{ORA}$&OBSERVED RING AZIMUTH\\
+                    $\Delta\rho_{\scriptsize{\textrm{IP}}}$
+                    &RADIUS CORRECTION DUE TO IMPROVED POLE\\
+                    $\Delta\rho_{\scriptsize{\textrm{TO}}}$&
+                    RADIUS CORRECTION DUE TO TIMING OFFSET\\
+                    $\phi_{\scriptsize{\textrm{RL}}}$&
+                    RING LONGITUDE\\
+                    $\phi_{\scriptsize{\textrm{ORA}}}$&
+                    OBSERVED RING AZIMUTH\\
+                    $P$&NORMALIZED SIGNAL POWER\\
                     $\tau$&NORMAL OPTICAL DEPTH\\
                     $\phi$&PHASE SHIFT\\
-                    $\tau_{TH}$&NORMAL OPTICAL DEPTH THRESHOLD\\
-                    $t_{OET}$&OBSERVED EVENT TIME\\
-                    $t_{RET}$&RING EVENT TIME\\
-                    $t_{SET}$&SPACECRAFT EVENT TIME\\
+                    $\tau_{\scriptsize{\textrm{TH}}}$
+                    &NORMAL OPTICAL DEPTH THRESHOLD\\
+                    $t_{\scriptsize{\textrm{ERT}}}$&
+                    OBSERVED EVENT TIME
+                    (Earth Recieving Time)\\
+                    $t_{\footnotesize{\textrm{RET}}}$&
+                    RING EVENT TIME\\
+                    $t_{\footnotesize{\textrm{SCET}}}$&
+                    SPACECRAFT EVENT TIME\\
                     $B$&OBSERVED RING ELEVATION\\
                     \hline
                 \end{tabular}
                 \caption[Glossary of Parameters in Tau File]{
                     Glossary of optical depth, phase shift,
                     and selected geometry parameters
-                    contained in files \theTAU.
+                    contained in \theTAU.
                     See companion label
                     (.LBL) files for description of the data.
                 }
@@ -304,7 +340,7 @@ def latex_summary_doc(pdffil, resolution, outfilename):
                 \caption{Earth view of the occultation geometry
                          parameters in \theGEO.}
             \end{figure}
-            \vspace{32ex}
+            \vspace{30ex}
             \begin{figure}[H]
                 \centering
                 \large{\textbf{View from North Pole}}\par
@@ -320,52 +356,55 @@ def latex_summary_doc(pdffil, resolution, outfilename):
             \begin{figure}[H]
                 \centering
                 \includegraphics[page=4, width=\textwidth]{\thePDF}
-                \caption[Calibration Data from Cal File]{
-                    Calibration data in file \theCAL.
-                    The frequency residuals data
-                    (the smooth curve, in the second panel)
-                    is used to steer the carrier signal to the middle
-                    of the recording bandwidth. The free-space power
-                    data (the smooth curve in the third panel) is
-                    used to normalize signal power measurements so that
-                    the corresponding optical depth has nearly zero
-                    value in the absence of rings. Least-square fitting
-                    techniques to frequency and power estimates of
-                    the direct signal (the green curves in the second
-                    and third panels, respectively) are used to
-                    compute the calibration data.
-                }
+                \caption{Selected occultation parameters.}
             \end{figure}
             \newpage
             \begin{figure}[H]
                 \centering
                 \includegraphics[page=5, width=\textwidth]{\thePDF}
-                \caption{Ring radius correction and selected
-                         occultation geometry parameters contained
-                         in the file \theTAU\ (solid green).}
+                \caption{Calibration data in file \theCAL.
+                         The frequency residuals data
+                         (the smooth curve, in the second panel)
+                         is used to steer the carrier signal to the
+                         middle of the recording bandwidth. The
+                         free-space power data (the smooth curve in
+                         the third panel) is used to normalize signal
+                         power measurements so that the corresponding
+                         optical depth has nearly zero value in the
+                         absence of rings. Least-square fitting techniques
+                         to frequency and power estimates of the direct
+                         signal (the green curves in the second
+                         and third panels, respectively) are used to
+                         compute the calibration data.}
             \end{figure}
             \newpage
-            \begin{figure}[H]
-                \centering
-                \resizebox{\textwidth}{!}{
-                    \includegraphics[page=6, width=\textwidth]{\thePDF}
-                }
-                \caption{Rev7-E normal optical depth profiles
-                         reconstructed to remove diffraction effects
-                         at 1 km resolution contained in the file \theTAU.
-                         The 1 km resolution profile is plotted in green.}
-            \end{figure}
+            \begin{landscape}
+                \begin{figure}[H]
+                    \centering
+                    \resizebox{9.5in}{5in}{
+                        \includegraphics[page=6]{\thePDF}
+                    }
+                    \caption{Normal optical depth profile
+                             reconstructed to remove diffraction
+                             effects at \theRES\ resolution contained in
+                             the file \theTAU.
+                             \textcolor{blue}{Blue}: Reconstructed normal
+                             optical depth. \textcolor{cyan}{Cyan}:
+                             Free-space baseline. \textcolor{red}{Red}:
+                             Threshold optical depth.
+                             \textcolor{magenta}{Magenta:} Elevation angle.}
+                \end{figure}
+            \end{landscape}
             \newpage
             \begin{figure}[H]
                 \centering
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=7, width=\textwidth]{\thePDF}
                 }
-                \caption{Rev7-E normal optical depth profiles
+                \caption{Rev\theREV\ normal optical depth profiles
                          reconstructed to remove diffraction
-                         effects at 1 km resolution contained in the
-                         file \theTAU. The 1 km resolution profile
-                         is plotted in green.}
+                         effects at \theRES\ resolution contained in the
+                         file \theTAU.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -373,11 +412,10 @@ def latex_summary_doc(pdffil, resolution, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=8, width=\textwidth]{\thePDF}
                 }
-                \caption{Rev7-E normal optical depth profiles
+                \caption{Rev\theREV\ normal optical depth profiles
                          reconstructed to remove diffraction
-                         effects at 1 km resolution contained in
-                         the file \theTAU. The 1 km resolution
-                         profile is plotted in green.}
+                         effects at \theRES\ resolution contained in
+                         the file \theTAU.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -385,11 +423,10 @@ def latex_summary_doc(pdffil, resolution, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=9, width=\textwidth]{\thePDF}
                 }
-                \caption{Rev7-E normal optical depth profiles
+                \caption{Rev\theREV\ normal optical depth profiles
                          reconstructed to remove diffraction
-                         effects at 1 km resolution (file \theTAU).
-                         The 1 km resolution profile
-                         is plotted in green.}
+                         effects at \theRES\ resolution contained in
+                         the file \theTAU.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -397,12 +434,10 @@ def latex_summary_doc(pdffil, resolution, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=10, width=\textwidth]{\thePDF}
                 }
-                \caption{Rev7-E normal optical depth
-                         profiles reconstructed to remove
-                         diffraction effects at 1 km resolution
-                         contained in the file \theTAU.
-                         The 1 km resolution profile
-                         is plotted in green.}
+                \caption{Rev\theREV\ normal optical depth profiles
+                         reconstructed to remove diffraction
+                         effects at \theRES\ resolution contained in
+                         the file \theTAU.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -410,11 +445,10 @@ def latex_summary_doc(pdffil, resolution, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=11, width=\textwidth]{\thePDF}
                 }
-                \caption{Rev7-E normal optical depth
-                         profiles reconstructed to remove diffraction
-                         effects at 1 km resolution contained in
-                         the file \theTAU. The 1 km resolution
-                         profile is plotted in green.}
+                \caption{Rev\theREV\ normal optical depth profiles
+                         reconstructed to remove diffraction
+                         effects at \theRES\ resolution contained in
+                         the file \theTAU.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -422,11 +456,10 @@ def latex_summary_doc(pdffil, resolution, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=12, width=\textwidth]{\thePDF}
                 }
-                \caption{Rev7-E normal optical depth
-                         profiles reconstructed to remove diffraction
-                         effects at 1 km resolution contained in
-                         the file \theTAU. The 1 km resolution
-                         profile is plotted in green.}
+                \caption{Rev\theREV\ normal optical depth profiles
+                         reconstructed to remove diffraction
+                         effects at \theRES\ resolution contained in
+                         the file \theTAU.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -434,11 +467,10 @@ def latex_summary_doc(pdffil, resolution, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=13, width=\textwidth]{\thePDF}
                 }
-                \caption{Rev7-E normal optical depth
-                         profiles reconstructed to remove diffraction
-                         effects at 1 km resolution contained in
-                         the file \theTAU. The 1 km resolution
-                         profile is plotted in green.}
+                \caption{Rev\theREV\ normal optical depth profiles
+                         reconstructed to remove diffraction
+                         effects at \theRES\ resolution contained in
+                         the file \theTAU.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -446,11 +478,10 @@ def latex_summary_doc(pdffil, resolution, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=14, width=\textwidth]{\thePDF}
                 }
-                \caption{Rev7-E normal optical depth
-                         profiles reconstructed to remove diffraction
-                         effects at 1 km resolution contained in
-                         the file \theTAU. The 1 km resolution
-                         profile is plotted in green.}
+                \caption{Rev\theREV\ normal optical depth profiles
+                         reconstructed to remove diffraction
+                         effects at \theRES\ resolution contained in
+                         the file \theTAU.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -458,11 +489,10 @@ def latex_summary_doc(pdffil, resolution, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=15, width=\textwidth]{\thePDF}
                 }
-                \caption{Rev7-E normal optical depth
-                         profiles reconstructed to remove diffraction
-                         effects at 1 km resolution contained in
-                         the file \theTAU. The 1 km resolution
-                         profile is plotted in green.}
+                \caption{Rev\theREV\ normal optical depth profiles
+                         reconstructed to remove diffraction
+                         effects at \theRES\ resolution contained in
+                         the file \theTAU.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -470,11 +500,10 @@ def latex_summary_doc(pdffil, resolution, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=16, width=\textwidth]{\thePDF}
                 }
-                \caption{Rev7-E normal optical depth
-                         profiles reconstructed to remove diffraction
-                         effects at 1 km resolution contained in
-                         the file \theTAU. The 1 km resolution
-                         profile is plotted in green.}
+                \caption{Rev\theREV\ normal optical depth profiles
+                         reconstructed to remove diffraction
+                         effects at \theRES\ resolution contained in
+                         the file \theTAU.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -482,11 +511,10 @@ def latex_summary_doc(pdffil, resolution, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=17, width=\textwidth]{\thePDF}
                 }
-                \caption{Rev7-E normal optical depth
-                         profiles reconstructed to remove diffraction
-                         effects at 1 km resolution contained in
-                         the file \theTAU. The 1 km resolution
-                         profile is plotted in green.}
+                \caption{Rev\theREV\ normal optical depth profiles
+                         reconstructed to remove diffraction
+                         effects at \theRES\ resolution contained in
+                         the file \theTAU.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -494,11 +522,10 @@ def latex_summary_doc(pdffil, resolution, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=18, width=\textwidth]{\thePDF}
                 }
-                \caption{Rev7-E normal optical depth
-                         profiles reconstructed to remove diffraction
-                         effects at 1 km resolution contained in
-                         the file \theTAU. The 1 km resolution
-                         profile is plotted in green.}
+                \caption{Rev\theREV\ normal optical depth profiles
+                         reconstructed to remove diffraction
+                         effects at \theRES\ resolution contained in
+                         the file \theTAU.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -506,11 +533,10 @@ def latex_summary_doc(pdffil, resolution, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=19, width=\textwidth]{\thePDF}
                 }
-                \caption{Rev7-E normal optical depth
-                         profiles reconstructed to remove diffraction
-                         effects at 1 km resolution contained in
-                         the file \theTAU. The 1 km resolution
-                         profile is plotted in green.}
+                \caption{Rev\theREV\ normal optical depth profiles
+                         reconstructed to remove diffraction
+                         effects at \theRES\ resolution contained in
+                         the file \theTAU.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -518,11 +544,10 @@ def latex_summary_doc(pdffil, resolution, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=20, width=\textwidth]{\thePDF}
                 }
-                \caption{Rev7-E normal optical depth
-                         profiles reconstructed to remove diffraction
-                         effects at 1 km resolution contained in
-                         the file \theTAU. The 1 km resolution
-                         profile is plotted in green.}
+                \caption{Rev\theREV\ normal optical depth profiles
+                         reconstructed to remove diffraction
+                         effects at \theRES\ resolution contained in
+                         the file \theTAU.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -530,11 +555,10 @@ def latex_summary_doc(pdffil, resolution, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=21, width=\textwidth]{\thePDF}
                 }
-                \caption{Rev7-E normal optical depth
-                         profiles reconstructed to remove diffraction
-                         effects at 1 km resolution contained in
-                         the file \theTAU. The 1 km resolution
-                         profile is plotted in green.}
+                \caption{Rev\theREV\ normal optical depth profiles
+                         reconstructed to remove diffraction
+                         effects at \theRES\ resolution contained in
+                         the file \theTAU.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -542,11 +566,10 @@ def latex_summary_doc(pdffil, resolution, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=22, width=\textwidth]{\thePDF}
                 }
-                \caption{Rev7-E normal optical depth
-                         profiles reconstructed to remove diffraction
-                         effects at 1 km resolution contained in
-                         the file \theTAU. The 1 km resolution
-                         profile is plotted in green.}
+                \caption{Rev\theREV\ normal optical depth profiles
+                         reconstructed to remove diffraction
+                         effects at \theRES\ resolution contained in
+                         the file \theTAU.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -554,11 +577,10 @@ def latex_summary_doc(pdffil, resolution, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=23, width=\textwidth]{\thePDF}
                 }
-                \caption{Rev7-E normal optical depth
-                         profiles reconstructed to remove diffraction
-                         effects at 1 km resolution contained in
-                         the file \theTAU. The 1 km resolution
-                         profile is plotted in green.}
+                \caption{Rev\theREV\ normal optical depth profiles
+                         reconstructed to remove diffraction
+                         effects at \theRES\ resolution contained in
+                         the file \theTAU.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -566,11 +588,9 @@ def latex_summary_doc(pdffil, resolution, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=24, width=\textwidth]{\thePDF}
                 }
-                \caption{Rev7-E Phase shift profile reconstructed
-                         to remove diffraction effects at 1 km
-                         resolution contained in the file \theTAU.
-                         The 1 km resolution profile is plotted
-                         in solid green.}
+                \caption{Rev\theREV\ Phase shift profile reconstructed
+                         to remove diffraction effects at \theRES\
+                         resolution contained in the file \theTAU.}
             \end{figure}
         \end{document}
     """ % (pdffil, rev, doy, res, occ, geo, cal, tau, year, band)

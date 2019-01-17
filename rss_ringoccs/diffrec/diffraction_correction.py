@@ -1590,6 +1590,7 @@ class DiffractionCorrection(object):
         self.rho_dot_kms_vals = self.rho_dot_kms_vals[crange]
         self.lambda_sky_km_vals = self.lambda_sky_km_vals[crange]
         self.raw_tau_threshold_vals = self.raw_tau_threshold_vals[crange]
+        self.tau_threshold_vals = self.tau_threshold_vals[crange]
 
         # If the forward model was run, trim those attributes as well.
         if fwd:

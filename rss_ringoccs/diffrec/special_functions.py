@@ -5,6 +5,7 @@ from . import window_functions
 # Declare constants for multiples of pi.
 TWO_PI = 6.283185307179586476925287
 ONE_PI = 3.141592653589793238462643
+SQRT_PI_2 = 1.253314137315500251207883
 RADS_PER_DEGS = 0.0174532925199432957692369
 
 def savitzky_golay(y, window_size, order, deriv=0, rate=1):
@@ -570,6 +571,7 @@ def compute_norm_eq(w_func, error_check=True):
     nw = np.size(w_func)
     tot = np.sum(w_func)
     normeq = nw*(np.sum(w_func*w_func)) / (tot*tot)
+
     return normeq
 
 def fresnel_scale(Lambda, d, phi, b, deg=False, error_check=True):
@@ -1538,7 +1540,7 @@ def fresnel_sin(x, error_check=True):
 
     return f_sin
 
-def single_slit_diffraction_solve(x, z, a):
+def single_slit_diffraction(x, z, a):
     """
         Purpose:
             Compute diffraction through a single slit for the
@@ -1613,7 +1615,7 @@ def single_slit_diffraction_solve(x, z, a):
     f = np.sinc(a*x/z)*np.sinc(a*x/z)
     return f
 
-def double_slit_diffraction_solve(x, z, a, d):
+def double_slit_diffraction(x, z, a, d):
     """
         Purpose:
             Compute diffraction through a double slit for the
@@ -1729,41 +1731,71 @@ def sq_well_solve(x, a, b, F, invert=False):
             Translated from IDL: RJM - 2018/05/15 8:03 P.M.
             Updated and added error checks: RJM - 2018/09/19 7:19 P.M.
     """
-    if (np.size(a) != 1):
-        raise TypeError("Endpoints must be floating point numbers")
-    elif (not isinstance(a,float)):
+    if (not isinstance(x, np.ndarray)):
+        raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: diffrec subpackage\n"
+                "\tspecial_functions: sq_well_solve\n"
+                "\tFirst variable should be a numpy array.\n"
+        )
+    elif (not np.isreal(x).all()):
+        raise ValueError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: diffrec subpackage\n"
+                "\tspecial_functions: sq_well_solve\n"
+                "\tFirst variable should be real valued.\n"
+        )
+    else:
+        pass
+
+    if (not isinstance(a,float)):
         try:
             a = float(a)
         except TypeError:
-            raise TypeError("Endpoints must be floating point numbers")
-    elif (not np.isreal(a)):
-        raise ValueError("Endpoints must be real valued")
-    if (np.size(b) != 1):
-        raise TypeError("Endpoints must be floating point numbers")
-    elif (not isinstance(b,float)):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: diffrec subpackage\n"
+                "\tspecial_functions: sq_well_solve\n"
+                "\tSecond variable should be a floating point number.\n"
+                "\tYour input has type: %s"
+                % (type(a).__name__)
+            )
+    else:
+        pass
+
+    if (not isinstance(b,float)):
         try:
             b = float(b)
         except TypeError:
-            raise TypeError("Endpoints must be floating point numbers")
-    elif (not np.isreal(b)):
-        raise ValueError("Endpoints must be real valued")
-    if (np.size(F) != 1):
-        raise TypeError("Endpoints must be floating point numbers")
-    elif (not isinstance(F,float)):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: diffrec subpackage\n"
+                "\tspecial_functions: sq_well_solve\n"
+                "\tThird variable should be a floating point number.\n"
+                "\tYour input has type: %s"
+                % (type(b).__name__)
+            )
+    else:
+        pass
+
+    if (not isinstance(F,float)):
         try:
             F = float(F)
         except TypeError:
-            raise TypeError("Endpoints must be floating point numbers")
-    elif (not np.isreal(F)):
-        raise ValueError("Endpoints must be real valued")
-    if (not isinstance(x, np.ndarray)):
-        raise TypeError("Independant variable must be a numpy array")
-    elif (not np.isreal(x).all()):
-        raise ValueError("Independent variable must be real valued")
-    H = (0.5 - 0.5j) * (
-        fresnel_cos((b - x) / F) - fresnel_cos((a - x) / F)
-        + 1j*(fresnel_sin((b - x) / F) - fresnel_sin((a - x) / F))
-    )
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: diffrec subpackage\n"
+                "\tspecial_functions: sq_well_solve\n"
+                "\tFourth variable should be a floating point number.\n"
+                "\tYour input has type: %s"
+                % (type(b).__name__)
+            )
+    else:
+        pass
+
+    H = (0.5 - 0.5j) * (fresnel_cos((b-x)/F)-fresnel_cos((a-x)/F)+
+                        1j*(fresnel_sin((b-x) / F)-fresnel_sin((a-x)/F)))
+
     if not invert:
         H = 1-H
 

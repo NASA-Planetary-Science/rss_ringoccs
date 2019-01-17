@@ -41,8 +41,6 @@ def shell_execute(script):
                         Bob
                 In [3]: a.args
                 Out[3]: [' echo Bob']
-        History:
-            Created: RJM - 2018/05/16 5:49 P.M.
     """
     if not isinstance(script, list):
         raise TypeError(

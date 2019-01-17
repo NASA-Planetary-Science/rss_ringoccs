@@ -1,7 +1,7 @@
 import numpy as np
 from scipy import interpolate
 from .diffraction_correction import DiffractionCorrection, SPEED_OF_LIGHT_KM
-from .special_functions import fresnel_transform
+from .special_functions import fresnel_scale
 from rss_ringoccs.tools.CSV_tools import get_geo, ExtractCSVData
 
 
@@ -81,9 +81,9 @@ class FindOptimalResolution(object):
 
 
 class DeltaImpulseDiffraction(object):
-    def __init__(self,geo,lambda_km,res,rho,dx_km_desired=0.25,
-        occ=False,wtype='kb25',fwd=False,norm=True,bfac=True,
-        verbose=True,psitype='full',usefres=False):
+    def __init__(self, geo, lambda_km, res, rho, dx_km_desired=0.25,
+                 occ=False, wtype='kb25', fwd=False, norm=True, bfac=True,
+                 verbose=True, psitype='full', usefres=False):
 
         if (not isinstance(res, float)) or (not isinstance(res, int)):
             try:

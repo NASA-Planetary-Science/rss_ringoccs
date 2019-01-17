@@ -1,3 +1,15 @@
+"""
+    Submodule:
+        diffraction_correction
+    Purpose:
+        Provide tools for executing bash scripts
+        from within python, and creating summary
+        documents using LaTeX.
+    Dependencies:
+        #. subprocess
+        #. os
+        #. time
+"""
 import subprocess
 import os
 import time
@@ -13,7 +25,7 @@ def shell_execute(script):
                     script = ['path/to/script','v1',...,'vn']
                 Elements must be strings.
         Outputs:
-            :Process:
+            :Process (*object*):
                 An instance of the Popen class from the
                 subprocess module. This contains attributes
                 such as the arguments passed to it, and other
@@ -21,10 +33,6 @@ def shell_execute(script):
         Notes:
             This routine has only been tested using scripts
             written in Bash, and on standard Unix commands.
-        References:
-            [1] https://docs.python.org/3/library/subprocess.html
-            [2] https://stackoverflow.com/questions/
-                3777301/how-to-call-a-shell-script-from-python-code
         Examples:
             Suppose we have the following shell script test.sh:
                 #!/bin/bash
@@ -64,24 +72,11 @@ def shell_execute(script):
 
 def date_string():
     """
-        Function:
-            date_string
         Purpose:
             Create string of the form "yyyy_mm_dd_HH_MM_SS_"
-        Variables:  There are no variables to this function.
         Outputs:
-            date:   Current date "year/month/day/hour/minute/second"
-        Dependencies:
-            [1] time
-        Notes:
-            The end of the string has an underscore "_"
-        Examples:
-            Get the current date.
-                In [1]: import diffcorr as dc
-                In [2]: dc.date_string()
-                Out[2]: '2018_05_27_11_28_22_'
-        History:
-            Created: RJM - 2018/05/27 11:27 A.M.
+            :date (*str*):
+                Current date "year/month/day/hour/minute/second"
     """
     strings = time.strftime("%Y,%m,%d,%H,%M,%S")
     t = strings.split(',')
@@ -183,8 +178,8 @@ def latex_summary_doc(pdffil, res, outfilename):
             \pagenumbering{gobble}
             \begin{center}
                 \LARGE{\texttt{
-                    RSS\textunderscore\theYEAR%
-                    \textunderscore\theDOY\textunderscore\theBAND%
+                    RSS\textunderscore\theYEAR%%
+                    \textunderscore\theDOY\textunderscore\theBAND%%
                     \textunderscore\theOCC}\\[2.0ex]
                     Rev\theREV\
                     Cassini Radio Science Ring Occultation:\\[1.0ex]

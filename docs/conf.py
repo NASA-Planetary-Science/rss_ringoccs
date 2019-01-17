@@ -23,8 +23,8 @@ sys.path.insert(0, '/Volumes/sflury001/Research/TC2017/sflury/rss_ringoccs/rss_r
 # -- Project information -----------------------------------------------------
 
 project = 'rss_ringoccs'
-copyright = '2018, Team Cassini at Wellesley College'
-author = 'Dick French, Sophia Flury, Jolene Fong, Ryan Maquire, Glenn Steranka'
+copyright = '2019, Team Cassini at Wellesley College'
+author = 'Richard French (PI), Sophia Flury, Jolene Fong,\n Ryan Maquire, and Glenn Steranka'
 
 # The short X.Y version
 version = 'v1.1'
@@ -73,7 +73,6 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
-
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -135,7 +134,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'rss_ringoccs.tex', 'rss\\_ringoccs Documentation',
-     'Dick French, Sophia Flury, Jolene Fong, Ryan Maquire, Glenn Steranka', 'manual'),
+     'Dick French, Sophia Flury, Jolene Fong,\n Ryan Maquire, Glenn Steranka', 'manual'),
 ]
 
 

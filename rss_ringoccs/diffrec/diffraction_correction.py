@@ -1277,22 +1277,17 @@ class DiffractionCorrection(object):
             Purpose:
                 Compute the rectangular window function.
             Arguments:
-                w_in:
-                    Positive Float
+                :w_in (*float*):
                     The width of the window function to be computed.
                     This value is in kilometers.
-                dx:
-                    Positive Float
+                :dx (*float*):
                     The spacing between points in the window.
                     This is equivalent to the sample spacing.
                     This value is in kilometers.
             Outputs:
-                w_func:
-                    Numpy Array
-                    The rectangular window function of width
+                :w_func (*array*):
+                    Window function of width
                     w_in and with sample spacing dx.
-            Dependencies:
-                [1] numpy
         """
         # Window functions have an odd number of points.
         nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
@@ -1303,27 +1298,20 @@ class DiffractionCorrection(object):
 
     def __coss(w_in, dx):
         """
-            Method:
-                __coss
             Purpose:
                 Compute the squared cosine window function.
             Arguments:
-                w_in:
-                    Positive Float
+                :w_in (*float*):
                     The width of the window function to be computed.
                     This value is in kilometers.
-                dx:
-                    Positive Float
+                :dx (*float*):
                     The spacing between points in the window.
                     This is equivalent to the sample spacing.
                     This value is in kilometers.
             Outputs:
-                w_func:
-                    Numpy Array
-                    The squared cosine window function of width
+                :w_func (*array*):
+                    Window function of width
                     w_in and with sample spacing dx.
-            Dependencies:
-                [1] numpy
         """
         # Window functions have an odd number of points.
         nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
@@ -1337,27 +1325,20 @@ class DiffractionCorrection(object):
 
     def __kb20(w_in, dx):
         """
-            Method:
-                __kb20
             Purpose:
                 Compute the Kaiser-Bessel 2.0 window function.
             Arguments:
-                w_in:
-                    Positive Float
+                :w_in (*float*):
                     The width of the window function to be computed.
                     This value is in kilometers.
-                dx:
-                    Positive Float
+                :dx (*float*):
                     The spacing between points in the window.
                     This is equivalent to the sample spacing.
                     This value is in kilometers.
             Outputs:
-                w_func:
-                    Numpy Array
-                    The Kaiser-Bessel 2.0 window function of width
+                :w_func (*array*):
+                    Window function of width
                     w_in and with sample spacing dx.
-            Dependencies:
-                [1] numpy
         """
         # Window functions have an odd number of points.
         nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
@@ -1371,27 +1352,20 @@ class DiffractionCorrection(object):
 
     def __kb25(w_in, dx):
         """
-            Method:
-                __kb25
             Purpose:
                 Compute the Kaiser-Bessel 2.5 window function.
             Arguments:
-                w_in:
-                    Positive Float
+                :w_in (*float*):
                     The width of the window function to be computed.
                     This value is in kilometers.
-                dx:
-                    Positive Float
+                :dx (*float*):
                     The spacing between points in the window.
                     This is equivalent to the sample spacing.
                     This value is in kilometers.
             Outputs:
-                w_func:
-                    Numpy Array
-                    The Kaiser-Bessel 2.5 window function of width
+                :w_func (*array*):
+                    Window function of width
                     w_in and with sample spacing dx.
-            Dependencies:
-                [1] numpy
         """
         # Window functions have an odd number of points.
         nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
@@ -1408,27 +1382,20 @@ class DiffractionCorrection(object):
 
     def __kb35(w_in, dx):
         """
-            Method:
-                __kb35
             Purpose:
                 Compute the Kaiser-Bessel 3.5 window function.
             Arguments:
-                w_in:
-                    Positive Float
+                :w_in (*float*):
                     The width of the window function to be computed.
                     This value is in kilometers.
-                dx:
-                    Positive Float
+                :dx (*float*):
                     The spacing between points in the window.
                     This is equivalent to the sample spacing.
                     This value is in kilometers.
             Outputs:
-                w_func:
-                    Numpy Array
-                    The Kaiser-Bessel 3.5 window function of width
+                :w_func (*array*):
+                    Window function of width
                     w_in and with sample spacing dx.
-            Dependencies:
-                [1] numpy
         """
         # Window functions have an odd number of points.
         nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
@@ -1445,28 +1412,21 @@ class DiffractionCorrection(object):
 
     def __kbmd20(w_in, dx):
         """
-            Method:
-                __kbmd20
             Purpose:
                 Compute the Modifed Kaiser-Bessel 2.0
                 window function.
             Arguments:
-                w_in:
-                    Positive Float
+                :w_in (*float*):
                     The width of the window function to be computed.
                     This value is in kilometers.
-                dx:
-                    Positive Float
+                :dx (*float*):
                     The spacing between points in the window.
                     This is equivalent to the sample spacing.
                     This value is in kilometers.
             Outputs:
-                w_func:
-                    Numpy Array
-                    The Modified Kaiser-Bessel 2.0 window function
-                    of width w_in and with sample spacing dx.
-            Dependencies:
-                [1] numpy
+                :w_func (*array*):
+                    Window function of width
+                    w_in and with sample spacing dx.
         """
         # Window functions have an odd number of points.
         nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
@@ -1480,28 +1440,21 @@ class DiffractionCorrection(object):
 
     def __kbmd25(w_in, dx):
         """
-            Method:
-                __kbmd25
             Purpose:
                 Compute the Modifed Kaiser-Bessel 2.5
                 window function.
             Arguments:
-                w_in:
-                    Positive Float
+                :w_in (*float*):
                     The width of the window function to be computed.
                     This value is in kilometers.
-                dx:
-                    Positive Float
+                :dx (*float*):
                     The spacing between points in the window.
                     This is equivalent to the sample spacing.
                     This value is in kilometers.
             Outputs:
-                w_func:
-                    Numpy Array
-                    The Modified Kaiser-Bessel 2.5 window function
-                    of width w_in and with sample spacing dx.
-            Dependencies:
-                [1] numpy
+                :w_func (*array*):
+                    Window function of width
+                    w_in and with sample spacing dx.
         """
         # Window functions have an odd number of points.
         nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
@@ -1532,23 +1485,16 @@ class DiffractionCorrection(object):
 
     def __trim_attributes(self, fwd):
         """
-            Method:
-                __trim_attributes
             Purpose:
                 Trim the attributes in the DiffractionCorrection
                 class so that only reconstructed points will be
                 returned to the user. All other unused points are
                 discarded.
-            Arguments:
-                self:
-                    DiffractionCorrection instance.
-                fwd:
-                    Boolean
+            Keywords:
+                :fwd (*bool*):
                     Boolean for the forward calculation.
                     If set to True, the forward variables
                     will also be trimmed.
-            Dependencies:
-                [1] numpy
         """
         # Get rid of uncomputed values and keep only what was processed.
         start = self.start
@@ -1603,30 +1549,21 @@ class DiffractionCorrection(object):
 
     def __normalize(self, dx, ker, f_scale):
         """
-            Method:
-                __normalize
             Purpose:
                 Compute the window normalization
             Arguments:
-                ker:
-                    Complex Numpy Array
+                :ker (*array*):
                     The Fresnel Kernel.
-                dx:
-                    Positive Float
+                :dx (*float*):
                     The spacing between points in the window.
                     This is equivalent to the sample spacing.
                     This value is in kilometers.
-                f_scale
-                    Real Numpy Array
-                    The Fresnel Scale as a function of
-                    ring radius (km).
+                :f_scale (*array*):
+                    The Fresnel Scale in kilometers.
             Outputs:
-                norm_fact:
-                    Floating Point Number
+                :norm_fact (*float*):
                     The normalization of the input
                     Fresnel Kernel.
-            Dependencies:
-                [1] numpy
         """
         # Freespace Integral
         T1 = np.abs(np.sum(ker) * dx)
@@ -1637,29 +1574,26 @@ class DiffractionCorrection(object):
 
     def __psi_func(self, kD, r, r0, phi, phi0, B, D):
         """
-            Method:
-                __psi_func
             Purpose:
                 Compute psi (MTR Equation 4)
             Arguments:
-                kD:
-                    Float
-                    Wavenumber
-                dx:
-                    Positive Float
-                    The spacing between points in the window.
-                    This is equivalent to the sample spacing.
-                    This value is in kilometers.
-                f_scale
-                    Real Numpy Array
-                    The Fresnel Scale as a function of
-                    ring radius (km).
+                :kD (*float*):
+                    Wavenumber, unitless.
+                :r (*float*):
+                    Radius of reconstructed point, in kilometers.
+                :r0 (*array*):
+                    Radius of region within window, in kilometers.
+                :phi (*array*):
+                    Root values of dpsi/dphi, radians.
+                :phi0 (*array*):
+                    Ring azimuth angle corresponding to r0, radians.
+                :B (*float*):
+                    Ring opening angle, in radians.
+                :D (*float*):
+                    Spacecraft-RIP distance, in kilometers.
             Outputs:
-                psi:
-                    Real Numpy Array
+                :psi (*array*):
                     Geometric Function from Fresnel Kernel.
-            Dependencies:
-                [1] numpy
         """
         # Compute Xi variable (MTR86 Equation 4b). Signs of xi are swapped.
         xi = (np.cos(B)/D) * (r * np.cos(phi) - r0 * np.cos(phi0))
@@ -1672,6 +1606,29 @@ class DiffractionCorrection(object):
         return psi_vals
 
     def __dpsi(self, kD, r, r0, phi, phi0, B, D):
+        """
+            Purpose:
+                Compute dpsi/dphi
+            Arguments:
+                :kD (*float*):
+                    Wavenumber, unitless.
+                :r (*float*):
+                    Radius of reconstructed point, in kilometers.
+                :r0 (*array*):
+                    Radius of region within window, in kilometers.
+                :phi (*array*):
+                    Root values of dpsi/dphi, radians.
+                :phi0 (*array*):
+                    Ring azimuth angle corresponding to r0, radians.
+                :B (*float*):
+                    Ring opening angle, in radians.
+                :D (*float*):
+                    Spacecraft-RIP distance, in kilometers.
+            Outputs:
+                :dpsi (*array*):
+                    Partial derivative of psi with
+                    respect to phi.
+        """
         # Compute Xi variable (MTR86 Equation 4b).
         xi = (np.cos(B)/D) * (r * np.cos(phi) - r0 * np.cos(phi0))
 
@@ -1691,6 +1648,29 @@ class DiffractionCorrection(object):
         return psi_d1
 
     def __d2psi(self, kD, r, r0, phi, phi0, B, D):
+        """
+            Purpose:
+                Compute d^2psi/dphi^2
+            Arguments:
+                :kD (*float*):
+                    Wavenumber, unitless.
+                :r (*float*):
+                    Radius of reconstructed point, in kilometers.
+                :r0 (*array*):
+                    Radius of region within window, in kilometers.
+                :phi (*array*):
+                    Root values of dpsi/dphi, radians.
+                :phi0 (*array*):
+                    Ring azimuth angle corresponding to r0, radians.
+                :B (*float*):
+                    Ring opening angle, in radians.
+                :D (*float*):
+                    Spacecraft-RIP distance, in kilometers.
+            Outputs:
+                :dpsi (*array*):
+                    Second partial derivative of psi
+                    with respect to phi.
+        """
         # Compute Xi variable (MTR86 Equation 4b).
         xi = (np.cos(B)/D) * (r * np.cos(phi) - r0 * np.cos(phi0))
 
@@ -1714,6 +1694,29 @@ class DiffractionCorrection(object):
         return psi_d2
 
     def __d3psi(self, kD, r, r0, phi, phi0, B, D):
+        """
+            Purpose:
+                Compute d^3psi/dphi^3
+            Arguments:
+                :kD (*float*):
+                    Wavenumber, unitless.
+                :r (*float*):
+                    Radius of reconstructed point, in kilometers.
+                :r0 (*array*):
+                    Radius of region within window, in kilometers.
+                :phi (*array*):
+                    Root values of dpsi/dphi, radians.
+                :phi0 (*array*):
+                    Ring azimuth angle corresponding to r0, radians.
+                :B (*float*):
+                    Ring opening angle, in radians.
+                :D (*float*):
+                    Spacecraft-RIP distance, in kilometers.
+            Outputs:
+                :dpsi (*array*):
+                    Third partial derivative of psi
+                    with respect to phi.
+        """
         # Compute Xi variable (MTR86 Equation 4b).
         xi = (np.cos(B)/D) * (r * np.cos(phi) - r0 * np.cos(phi0))
 
@@ -1743,6 +1746,20 @@ class DiffractionCorrection(object):
         return psi_d3
 
     def __ftrans(self, fwd):
+        """
+            Purpose:
+                Compute the Fresnel Inversion.
+            Arguments:
+                :self:
+                    Instance of DiffractionCorrection class.
+            Keywords:
+                :fwd (*bool*):
+                    Boolean for whether or not the forward
+                    calculation is being performed.
+            Outputs:
+                :T_out (*array*):
+                    Complex transmittance.
+        """
         # Retrieve Ring Radius.
         rho_km_vals = self.rho_km_vals
 
@@ -2347,8 +2364,3 @@ class DiffractionCorrection(object):
             pass
 
         return T_out
-
-    """
-        History:
-        Created: RJM - 2018/05/16 5:40 P.M.
-    """

@@ -224,8 +224,8 @@ class Geometry(object):
         F_km_vals = calc_F_km(D_km_vals, f_sky_hz_vals, B_deg_vals,
                 phi_ora_deg_vals)
 
-        t_ret_spm_vals = et_to_spm(t_ret_et_vals, ref_doy=doy)
-        t_set_spm_vals = et_to_spm(t_set_et_vals, ref_doy=doy)
+        t_ret_spm_vals = et_to_spm(t_ret_et_vals)
+        t_set_spm_vals = et_to_spm(t_set_et_vals)
 
         if verbose:
             print('\tCalculating ring intercept velocities...')
@@ -260,12 +260,12 @@ class Geometry(object):
         # Calculate when signal passes atmosphere + ionosphere
         ionos_occ_et_vals = get_planet_occ_times(t_oet_et_vals, dsn,
                 planet, spacecraft, height_above=5000.)
-        self.ionos_occ_spm_vals = et_to_spm(ionos_occ_et_vals, ref_doy=doy)
+        self.ionos_occ_spm_vals = et_to_spm(ionos_occ_et_vals)
         self.ionos_occ_et_vals = ionos_occ_et_vals
 
         atmos_occ_et_vals = get_planet_occ_times(t_oet_et_vals, dsn,
                 planet, spacecraft, height_above=500.)
-        self.atmos_occ_spm_vals = et_to_spm(atmos_occ_et_vals, ref_doy=doy)
+        self.atmos_occ_spm_vals = et_to_spm(atmos_occ_et_vals)
 
 
         # Set attributes, first block contains the inputs to *GEO.TAB

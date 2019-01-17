@@ -67,7 +67,7 @@ class calc_freq_offset(object):
                 freqs += [self.__find_peak_freq(self.IQ_m[ind])]
         # convert to arrays and store as attributes
         self.f_spm = np.array(spms)
-        self.f_offset = np.array(freqs)+0.01
+        self.f_offset = np.array(freqs)#+0.01
         # pay no attention to the extra 0.01 correction needed but inexplicable
 
     def __find_peak_freq(self,IQ):

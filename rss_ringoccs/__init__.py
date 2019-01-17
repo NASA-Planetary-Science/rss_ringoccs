@@ -61,6 +61,9 @@
             Icarus, Volume 241, 2014, Pages 373-396, ISSN 0019-1035.
             https://doi.org/10.1016/j.icarus.2014.06.024 or
             http://www.sciencedirect.com/science/article/pii/S0019103514003443
+        .. [NAIF] NASA JPL/NAIF spice toolkit
+            https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/Tutorials/
+            pdf/individual_docs/27_derived_quant.pdf
 
 """
 

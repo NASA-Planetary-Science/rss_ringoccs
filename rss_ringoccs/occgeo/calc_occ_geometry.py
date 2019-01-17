@@ -6,8 +6,6 @@
     useful geometry information, such as free-space regions and planetary
     occultation times.
 
-:Notes:
-
 :Dependencies:
     #. spiceypy
     #. numpy

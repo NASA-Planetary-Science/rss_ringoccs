@@ -78,7 +78,6 @@ class Normalization(object):
         rimp_down = splev(spm_down, spm_to_rimp)
 
         if no_gaps:
-            interact = True
             self.gaps = [[spm_down[1], spm_down[-2]]]
             self.hfit_med(p_obs_down)
             self.mask = np.array([True for x in range(len(p_obs_down))])
@@ -86,7 +85,6 @@ class Normalization(object):
             # Create mask array based on freespace region predictions
             self.create_mask(spm_down, freespace_spm,p_obs_down)
             if (self.mask == False).all():
-                interact = True
                 self.gaps = [[spm_down[1], spm_down[-2]]]
                 self.hfit_med(p_obs_down)
                 self.mask = np.array([True for x in range(len(p_obs_down))])

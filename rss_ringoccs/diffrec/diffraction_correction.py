@@ -54,7 +54,7 @@ class DiffractionCorrection(object):
             on a data set that is a near radially symmetric function
             of the ring radius, or ring intercept point (RIP).
         Arguments:
-            :NormDiff:
+            :NormDiff (*object*):
                 The data set, usually an instance of the NormDiff
                 class from the rss_ringoccs Calibration subpackage.
                 This instance MUST contain the following attributes
@@ -168,46 +168,46 @@ class DiffractionCorrection(object):
                 information are printed to the screen or not.
                 Default is False.
         Attributes:
-            :bfac:
+            :bfac (*bool*):
                 Boolean for bfac (See keywords).
-            :dathist:
+            :dathist (*dict*):
                 History from NormDiff instance.
-            :dx_km:
+            :dx_km (*float*):
                 Radial spacing for the data points (km).
-            :f_sky_hz_vals:
+            :f_sky_hz_vals (*np.ndarray*):
                 Recieved frequency from the spacecraft (Hz).
-            :finish:
+            :finish (*int*):
                 Final point that was reconstructed.
-            :fwd:
+            :fwd (*bool*):
                 Boolean for fwd (See keywords).
-            :history:
+            :history (*dict*):
                 History for the DiffractionCorrection class.
                 This contains system info and user info, including
                 what operating system was used, username, hostname,
                 computer name, and the inputs provided.
-            :lambda_sky_km_vals:
+            :lambda_sky_km_vals (*np.ndarray*):
                 Wavelength of recieved signal from spacecraft (km).
-            :mu_vals:
+            :mu_vals (*np.ndarray*):
                 The sine of the ring opening angle (Unitless).
-            :n_used:
+            :n_used (*int*):
                 Number of points that were reconstructed.
-            :norm:
+            :norm (*bool*):
                 Boolean for norm (See keywords).
-            :norm_eq:
+            :norm_eq (*float*):
                 Normalized equivalent width computed from window
                 that was used during reconstruction. See the
                 window_functions submodule for more information.
-            :p_norm_fwd_vals:
+            :p_norm_fwd_vals (*np.ndarray*):
                 Normalized power computer from the forward modelling
                 of the reconstructed data. This will be a None type
                 variable unless fwd=True is set. If the
                 reconstruction went well, this should mimic the raw
                 data, p_norm_vals.
-            :p_norm_vals:
+            :p_norm_vals (*np.ndarray*):
                 Normalized power from the diffracted signal. This is
                 the square of the absolute value of the recieved
                 complex transmittance.
-            :phase_fwd_vals:
+            :phase_fwd_vals (*np.ndarray*):
                 Phase computed from the forward model of the
                 reconstructed data. This will be a None type
                 variable unless fwd=True is set. If the
@@ -627,87 +627,54 @@ class DiffractionCorrection(object):
         if verbose:
             print("\tRetrieving Variables from NormDiff Instance...")
 
-        try:
-            # Create variable for an error message.
-            errmess = "rho_km_vals"
+        # Ring radius
+        self.rho_km_vals = np.array(NormDiff.rho_km_vals)
 
-            # Ring radius
-            self.rho_km_vals = np.array(NormDiff.rho_km_vals)
+        # Retrieve normalized power.
+        self.p_norm_vals = np.array(NormDiff.p_norm_vals)
 
-            # Retrieve normalized power.
-            errmess = "p_norm_vals"
-            self.p_norm_vals = np.array(NormDiff.p_norm_vals)
+        # Phase of signal.
+        self.phase_rad_vals = np.array(NormDiff.phase_rad_vals)
 
-            # Phase of signal.
-            errmess = "phase_rad_vals"
-            self.phase_rad_vals = np.array(NormDiff.phase_rad_vals)
+        # Ring opening angle.
+        self.B_rad_vals = np.array(NormDiff.B_rad_vals)
 
-            # Ring opening angle.
-            errmes = "B_rad_vals"
-            self.B_rad_vals = np.array(NormDiff.B_rad_vals)
+        # Spacecraft-to-Ring Intercept Point (RIP) distance.
+        self.D_km_vals = np.array(NormDiff.D_km_vals)
 
-            # Spacecraft-to-Ring Intercept Point (RIP) distance.
-            errmess = "D_km_vals"
-            self.D_km_vals = np.array(NormDiff.D_km_vals)
+        # Ring azimuth angle.
+        self.phi_rad_vals = np.array(NormDiff.phi_rad_vals)
 
-            # Ring azimuth angle.
-            errmess = "phi_rad_vals"
-            self.phi_rad_vals = np.array(NormDiff.phi_rad_vals)
+        # Frequency from the recieved signal.
+        self.f_sky_hz_vals = np.array(NormDiff.f_sky_hz_vals)
 
-            # Frequency from the recieved signal.
-            errmess = "f_sky_hz_vals"
-            self.f_sky_hz_vals = np.array(NormDiff.f_sky_hz_vals)
+        # RIP velocity.
+        self.rho_dot_kms_vals = np.array(NormDiff.rho_dot_kms_vals)
 
-            # RIP velocity.
-            errmess = "rho_dot_kms_vals"
-            self.rho_dot_kms_vals = np.array(NormDiff.rho_dot_kms_vals)
+        # Retrieve time variables (Earth, Ring, and Spacecraft ET).
+        self.t_oet_spm_vals = np.array(NormDiff.t_oet_spm_vals)
+        self.t_ret_spm_vals = np.array(NormDiff.t_ret_spm_vals)
+        self.t_set_spm_vals = np.array(NormDiff.t_set_spm_vals)
 
-            # Retrieve time variables (Earth, Ring, and Spacecraft ET).
-            errmes = "t_oet_spm_vals"
-            self.t_oet_spm_vals = np.array(NormDiff.t_oet_spm_vals)
-            errmes = "t_ret_spm_vals"
-            self.t_ret_spm_vals = np.array(NormDiff.t_ret_spm_vals)
-            errmes = "t_set_spm_vals"
-            self.t_set_spm_vals = np.array(NormDiff.t_set_spm_vals)
+        # Pole corrections in ring radius.
+        self.rho_corr_pole_km_vals = np.array(NormDiff.rho_corr_pole_km_vals)
 
-            # Pole corrections in ring radius.
-            errmess = "rho_corr_pole_km_vals"
-            self.rho_corr_pole_km_vals = np.array(
-                NormDiff.rho_corr_pole_km_vals
-            )
-
-            # Timing corrections in ring radius.
-            errmess = "rho_corr_timing_km_vals"
-            self.rho_corr_timing_km_vals = np.array(
+        # Timing corrections in ring radius.
+        self.rho_corr_timing_km_vals = np.array(
                 NormDiff.rho_corr_timing_km_vals
             )
 
-            # Ring longitude angle.
-            errmess = "phi_rl_rad_vals"
-            self.phi_rl_rad_vals = np.array(NormDiff.phi_rl_rad_vals)
+        # Ring longitude angle.
+        self.phi_rl_rad_vals = np.array(NormDiff.phi_rl_rad_vals)
 
-            # Optical depth of diffraction profile.
-            errmess = "raw_tau_threshold_vals"
-            self.raw_tau_threshold_vals = np.array(
-                NormDiff.raw_tau_threshold_vals
-            )
+        # Optical depth of diffraction profile.
+        self.raw_tau_threshold_vals = np.array(NormDiff.raw_tau_threshold_vals)
 
-            # History from the NormDiff instance.
-            errmes = "history"
-            self.dathist = NormDiff.history
-        except (AttributeError, TypeError, NameError, ValueError) as err:
-            raise AttributeError(
-                "\n\tError Encountered:\n"
-                "\t\tFailure to import %s from NormDiff\n"
-                "\n\tEither your instance of Normdiff is missing\n"
-                "\tan attribute, or one of its attributes was\n"
-                "\tunable to be converted into a numpy array.\n"
-                "\tPlease check your input data.\n"
-                "\tOriginal Error Message:\n\t\t %s\n"
-                % (errmess, err)
-            )
+        # History from the NormDiff instance.
+        self.dathist = NormDiff.history
 
         n_rho = np.size(self.rho_km_vals)
+
         # Run various error checks on all variables.
         if not (np.all(np.isreal(self.rho_km_vals))):
             raise ValueError(

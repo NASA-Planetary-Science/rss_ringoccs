@@ -10,13 +10,8 @@ import numpy as np
 from scipy import signal
 from scipy.interpolate import splrep
 from scipy.interpolate import splev
-import sys
-sys.path.append('../..')
-import rss_ringoccs as rss
-sys.path.remove('../..')
 
 from ..tools.write_output_files import construct_filepath
-import pdb
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 
@@ -42,7 +37,7 @@ class Normalization(object):
         :rho_km_vals (*np.ndarray*):
                        radial intercept poin of occultation in km
 
-    Keyword Arguments
+    Keyword Arguments:
         :verbose (*bool*): when True, outputs information to
                        command line about the freespace power fitting
                        progress and results. All results will be output
@@ -103,8 +98,6 @@ class Normalization(object):
         # get User input to see if everything looks okay or needs tweaking
         #    will return modified freespace regions
         if interact:
-            #new_gaps = self.fit_check(spm_down,p_obs_down,freespace_spm,
-            #                            self.order)
             new_gaps = self.fit_check(spm_down, p_obs_down, self.gaps,
                     self.order)
         else:
@@ -149,7 +142,6 @@ class Normalization(object):
         self.plot_power_profile(spm_down,p_obs_down,freespace_spm,order)
 
         # Prompt if fit looks okay
-        #cont = 'y'
         cont = input('\nDo you want to continue with this fit? (y/n): ')
 
         new_gaps = freespace_spm
@@ -244,6 +236,9 @@ class Normalization(object):
 
     def create_mask(self, spm,gaps_spm, pc):
         """
+        Purpose:
+            Set mask and gaps attribute.
+
         Arguments:
             :spm (*np.ndarray*): SPM in seconds of the downsampled signal
             :rho (*np.ndarray*): occultation intercept radius of the
@@ -305,7 +300,8 @@ class Normalization(object):
 
         self.mask = fsp_mask
         self.gaps = gaps_spm
-
+        
+        # Use order 1 if less than 5 gaps
         if len(gaps_spm) <= 5:
             self.order = 1
 

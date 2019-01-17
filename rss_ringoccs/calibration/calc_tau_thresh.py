@@ -21,7 +21,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import splrep,splev
 from scipy.signal import spectrogram
-import pdb
 
 class calc_tau_thresh(object):
     """
@@ -58,23 +57,23 @@ class calc_tau_thresh(object):
         df = rsr_inst.sample_rate_khz * 1e3
 
         # resample rho and rho dot
-        rho_km = np.interp(cal_inst.t_oet_spm_vals,geo_inst.t_oet_spm_vals,geo_inst.rho_km_vals)
-        rho_dot_kms = np.interp(cal_inst.t_oet_spm_vals,geo_inst.t_oet_spm_vals,geo_inst.rho_dot_kms_vals)
-        B_rad = np.deg2rad(np.interp(cal_inst.t_oet_spm_vals,geo_inst.t_oet_spm_vals,geo_inst.B_deg_vals))
+        rho_km = np.interp(cal_inst.t_oet_spm_vals,geo_inst.t_oet_spm_vals,
+                geo_inst.rho_km_vals)
+        rho_dot_kms = np.interp(cal_inst.t_oet_spm_vals,geo_inst.t_oet_spm_vals,
+                geo_inst.rho_dot_kms_vals)
+        B_rad = np.deg2rad(np.interp(cal_inst.t_oet_spm_vals,
+            geo_inst.t_oet_spm_vals,geo_inst.B_deg_vals))
 
         # set attributes
         self.spm_vals = cal_inst.t_oet_spm_vals
         self.rho_vals = rho_km
 
-        ###
-        ### ~~ FIND SIGNAL AND NOISE POWER ~~
-        ###
-        # noise
+        # find noise power
         noise = self.find_noise(rsr_inst.spm_vals,rsr_inst.IQ_m,df)
-        # signal
-        #signal = np.interp(spm_spec, cal_inst.t_oet_spm_vals, cal_inst.p_free_vals)
+
+        # find signal power
         signal = cal_inst.p_free_vals
-        #
+
         bandwidth = abs( rho_dot_kms / res_km )
         snr = signal/noise
 
@@ -83,9 +82,7 @@ class calc_tau_thresh(object):
         # compute SNR and set attribute
         self.snr = snr
 
-        ###
-        ### ~~ COMPUTE THRESHOLD OPTICAL DEPTH ~~
-        ###
+        # compute threshold optical depth
         self.tau_thresh = tau
 
     def find_noise(self,spm,IQ,df):
@@ -100,13 +97,18 @@ class calc_tau_thresh(object):
             :spm (*np.ndarray*): raw SPM in seconds
             :IQ (*np.ndarray*): measured complex signal
             :df (*float*): sampling frequency in Hz of the IQ
+
+        Returns:
+            :p_noise (*np.ndarray*): noise power
         """
         # Spectrogram to filter out spacecraft signal
         n = int(1.024 * df) # number of elements based on frequency sampling
         freq,time,Sxx = spectrogram(IQ,df,nperseg=n,return_onesided=False)
         time += spm[0]
-        # frequency filtering to include only the thermal receiver power, averaged over time
-        Sxx_freq_filt = np.nanmean(Sxx[((freq>-450)&(freq<-200))|((freq>200)&(freq<450)),:],0)
+        # frequency filtering to include only the thermal receiver power, 
+        #   averaged over time
+        Sxx_freq_filt = np.nanmean(Sxx[((freq>-450)&(freq<-200))|
+            ((freq>200)&(freq<450)),:],0)
         # time filtering to include only the signal outside the occultation
         # by looking at just the first and last 1,000 seconds
         tmin = spm[0]+1e3

@@ -1,3 +1,18 @@
+"""
+    Submodule:
+        diffraction_correction
+    Purpose:
+        Provide the DiffractionCorrection class for
+        performing the necessary mathematics to correct
+        for the diffraction effects that are obtained
+        during occultation observations of planetary
+        rings using radio waves.
+    Dependencies:
+        #. numpy
+        #. scipy
+        #. rss_ringoccs
+        #. time
+"""
 # Import dependencies for the diffcorr module
 import time
 import numpy as np
@@ -213,74 +228,69 @@ class DiffractionCorrection(object):
                 variable unless fwd=True is set. If the
                 reconstruction went well, this should mimic
                 phase_rad_vals. This variable is in radians.
-            :phase_rad_vals:
+            :phase_rad_vals (*np.ndarray*):
                 Phase from the diffracted signal (Radians).
-            :phase_vals:
+            :phase_vals (*np.ndarray*):
                 Reconstructed phase (Radians).
-            :phi_rad_vals:
+            :phi_rad_vals (*np.ndarray*):
                 Ring azimuth angle of the ring intercept (Radians).
-            :phi_rl_rad_vals:
+            :phi_rl_rad_vals (*np.ndarray*):
                 Ring longitude angle. This will be a None type unless
                 it was provided in the NormDiff class. Otherwise,
                 this variable is in radians.
-            :power_vals:
+            :power_vals (*np.ndarray*):
                 Normalized reconstructed power.
-            :psitype:
+            :psitype (*str*):
                 String for psitype (See keywords).
-            :raw_tau_threshold_vals:
+            :raw_tau_threshold_vals (*np.ndarray*):
                 Threshold optical depth for the diffracted data.
                 This will be a None type unless provided for in the
                 NormDiff class.
-            :res:
+            :res (*float*):
                 Requested resolution (See arguments). In kilometers.
-            :rho_corr_pole_km_vals:
+            :rho_corr_pole_km_vals (*np.ndarray*):
                 Radial corrections from the Planet's pole. This will
                 be a None type variable unless provided in the
                 NormDiff class. Otherwise, this is in kilometers.
-            :rho_corr_timing_km_vals:
+            :rho_corr_timing_km_vals (*np.ndarray*):
                 Radial corrections from timing offsets. This will be
                 a None type variable unless provided in the NormDiff
                 class. Otherwise, this is in kilometers.
-            :rho_dot_kms_vals:
+            :rho_dot_kms_vals (*np.ndarray*):
                 Time derivative of the ring intercept point (km/s).
-            :rho_km_vals:
+            :rho_km_vals (*np.ndarray*):
                 Ring-intercept-point (RIP) in kilometers.
-            :rng:
+            :rng (*str*):
                 Range that was used for reconstruction, taking into
                 the range that was requested by the user. The actual
                 range takes into account limits in the available data
                 and limits in the required window sizes.
-            :rngreq:
+            :rngreq (*str* or *list*):
                 Requested range (See keywords).
-            :sigma:
+            :sigma (*float*):
                 Requested Allen deviation (See keywords).
-            :start:
+            :start (*int*):
                 First point that was reconstructed.
-            :t_oet_spm_vals:
+            :t_oet_spm_vals (*np.ndarray*):
                 Time the signal is measured on Earth. This is a
                 None type unless provided for in the NormDiff class.
-            :t_ret_spm_vals:
+            :t_ret_spm_vals (*np.ndarray*):
                 Time the signal passes through the diffracting
                 medium. This is a None type unless provided for in
                 the NormDiff class.
-            :t_set_spm_vals:
+            :t_set_spm_vals (*np.ndarray*):
                 Time the signal is emitted from the spacecraft. This
                 is a None type unless provided in the NormDiff class.
-            :tau_threshold_vals:
+            :tau_threshold_vals (*np.ndarray*):
                 Threshold optical depth of the reconstructed data.
-            :tau_vals:
+            :tau_vals (*np.ndarray*):
                 Optical depth of the reconstructed data.
-            :verbose:
+            :verbose (*bool*):
                 Boolean for Verbose (See keywords).
-            :w_km_vals:
+            :w_km_vals (*np.ndarray*):
                 Window width as a function of radius (km).
-            :wtype:
+            :wtype (*str*):
                 String for wtype (See keywords).
-        Dependencies:
-            #. numpy
-            #. scipy
-            #. rss_ringoccs
-            #. time
     """
     def __init__(self, NormDiff, res, rng="all", wtype="kbmd20", fwd=False,
                  norm=True, verbose=False, bfac=True, sigma=2.e-13,
@@ -930,12 +940,7 @@ class DiffractionCorrection(object):
                 "\t\tIgnore the region where drho/dt is close to zero."
             )
         elif (self.dx_km > 0) and (drho[1] < 0):
-            raise ValueError(
-                "\n\tError Encountered:\n"
-                "\t\trho_km_vals is increasing, yet\n"
-                "\t\trho_dot_kms_vals is negative.\n"
-                "\t\tPlease check your NormDiff class for errors."
-            )
+            self.rho_dot_kms_vals = np.abs(self.rho_dot_kms_vals)
         elif (self.dx_km < 0) and (drho[0] > 0):
             raise ValueError(
                 "\n\tError Encountered:\n"
@@ -1252,7 +1257,7 @@ class DiffractionCorrection(object):
                     This is equivalent to the sample spacing.
                     This value is in kilometers.
             Outputs:
-                :w_func (*array*):
+                :w_func (*np.ndarray*):
                     Window function of width
                     w_in and with sample spacing dx.
         """
@@ -1276,7 +1281,7 @@ class DiffractionCorrection(object):
                     This is equivalent to the sample spacing.
                     This value is in kilometers.
             Outputs:
-                :w_func (*array*):
+                :w_func (*np.ndarray*):
                     Window function of width
                     w_in and with sample spacing dx.
         """
@@ -1303,7 +1308,7 @@ class DiffractionCorrection(object):
                     This is equivalent to the sample spacing.
                     This value is in kilometers.
             Outputs:
-                :w_func (*array*):
+                :w_func (*np.ndarray*):
                     Window function of width
                     w_in and with sample spacing dx.
         """
@@ -1330,7 +1335,7 @@ class DiffractionCorrection(object):
                     This is equivalent to the sample spacing.
                     This value is in kilometers.
             Outputs:
-                :w_func (*array*):
+                :w_func (*np.ndarray*):
                     Window function of width
                     w_in and with sample spacing dx.
         """
@@ -1360,7 +1365,7 @@ class DiffractionCorrection(object):
                     This is equivalent to the sample spacing.
                     This value is in kilometers.
             Outputs:
-                :w_func (*array*):
+                :w_func (*np.ndarray*):
                     Window function of width
                     w_in and with sample spacing dx.
         """
@@ -1391,7 +1396,7 @@ class DiffractionCorrection(object):
                     This is equivalent to the sample spacing.
                     This value is in kilometers.
             Outputs:
-                :w_func (*array*):
+                :w_func (*np.ndarray*):
                     Window function of width
                     w_in and with sample spacing dx.
         """
@@ -1419,7 +1424,7 @@ class DiffractionCorrection(object):
                     This is equivalent to the sample spacing.
                     This value is in kilometers.
             Outputs:
-                :w_func (*array*):
+                :w_func (*np.ndarray*):
                     Window function of width
                     w_in and with sample spacing dx.
         """
@@ -1519,13 +1524,13 @@ class DiffractionCorrection(object):
             Purpose:
                 Compute the window normalization
             Arguments:
-                :ker (*array*):
+                :ker (*np.ndarray*):
                     The Fresnel Kernel.
                 :dx (*float*):
                     The spacing between points in the window.
                     This is equivalent to the sample spacing.
                     This value is in kilometers.
-                :f_scale (*array*):
+                :f_scale (*np.ndarray*):
                     The Fresnel Scale in kilometers.
             Outputs:
                 :norm_fact (*float*):
@@ -1548,18 +1553,18 @@ class DiffractionCorrection(object):
                     Wavenumber, unitless.
                 :r (*float*):
                     Radius of reconstructed point, in kilometers.
-                :r0 (*array*):
+                :r0 (*np.ndarray*):
                     Radius of region within window, in kilometers.
-                :phi (*array*):
+                :phi (*np.ndarray*):
                     Root values of dpsi/dphi, radians.
-                :phi0 (*array*):
+                :phi0 (*np.ndarray*):
                     Ring azimuth angle corresponding to r0, radians.
                 :B (*float*):
                     Ring opening angle, in radians.
                 :D (*float*):
                     Spacecraft-RIP distance, in kilometers.
             Outputs:
-                :psi (*array*):
+                :psi (*np.ndarray*):
                     Geometric Function from Fresnel Kernel.
         """
         # Compute Xi variable (MTR86 Equation 4b). Signs of xi are swapped.
@@ -1581,11 +1586,11 @@ class DiffractionCorrection(object):
                     Wavenumber, unitless.
                 :r (*float*):
                     Radius of reconstructed point, in kilometers.
-                :r0 (*array*):
+                :r0 (*np.ndarray*):
                     Radius of region within window, in kilometers.
-                :phi (*array*):
+                :phi (*np.ndarray*):
                     Root values of dpsi/dphi, radians.
-                :phi0 (*array*):
+                :phi0 (*np.ndarray*):
                     Ring azimuth angle corresponding to r0, radians.
                 :B (*float*):
                     Ring opening angle, in radians.
@@ -1623,18 +1628,18 @@ class DiffractionCorrection(object):
                     Wavenumber, unitless.
                 :r (*float*):
                     Radius of reconstructed point, in kilometers.
-                :r0 (*array*):
+                :r0 (*np.ndarray*):
                     Radius of region within window, in kilometers.
-                :phi (*array*):
+                :phi (*np.ndarray*):
                     Root values of dpsi/dphi, radians.
-                :phi0 (*array*):
+                :phi0 (*np.ndarray*):
                     Ring azimuth angle corresponding to r0, radians.
                 :B (*float*):
                     Ring opening angle, in radians.
                 :D (*float*):
                     Spacecraft-RIP distance, in kilometers.
             Outputs:
-                :dpsi (*array*):
+                :dpsi (*np.ndarray*):
                     Second partial derivative of psi
                     with respect to phi.
         """
@@ -1669,18 +1674,18 @@ class DiffractionCorrection(object):
                     Wavenumber, unitless.
                 :r (*float*):
                     Radius of reconstructed point, in kilometers.
-                :r0 (*array*):
+                :r0 (*np.ndarray*):
                     Radius of region within window, in kilometers.
-                :phi (*array*):
+                :phi (*np.ndarray*):
                     Root values of dpsi/dphi, radians.
-                :phi0 (*array*):
+                :phi0 (*np.ndarray*):
                     Ring azimuth angle corresponding to r0, radians.
                 :B (*float*):
                     Ring opening angle, in radians.
                 :D (*float*):
                     Spacecraft-RIP distance, in kilometers.
             Outputs:
-                :dpsi (*array*):
+                :dpsi (*np.ndarray*):
                     Third partial derivative of psi
                     with respect to phi.
         """
@@ -1724,7 +1729,7 @@ class DiffractionCorrection(object):
                     Boolean for whether or not the forward
                     calculation is being performed.
             Outputs:
-                :T_out (*array*):
+                :T_out (*np.ndarray*):
                     Complex transmittance.
         """
         # Retrieve Ring Radius.

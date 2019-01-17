@@ -9,7 +9,6 @@ Purpose:
 
 import copy
 import numpy as np
-import pdb
 from scipy.interpolate import splrep, splev, interp1d
 
 from ..rsr_reader.rsr_reader import RSRReader
@@ -152,7 +151,8 @@ class DiffractionLimitedProfile(object):
 
         # compute threshold optical depth at Nyquist sampling rate
         # (i.e., twice the "raw" DLP sampling rate)
-        tau_thresh_inst = calc_tau_thresh(rsr_inst,geo_inst,cal_inst,res_km=dr_km)
+        tau_thresh_inst = calc_tau_thresh(rsr_inst,geo_inst,cal_inst,
+                res_km=dr_km)
         tau_thresh = tau_thresh_inst.tau_thresh
         spm_thresh = tau_thresh_inst.spm_vals
 
@@ -415,7 +415,8 @@ class DiffractionLimitedProfile(object):
             dlp_egr = cls(rsr_egr, geo_egr, cal_egr, dr_km, verbose=verbose, 
                     write_file=write_file, profile_range=profile_range)
         else:
-            print('WARNING (create_dlps()): Invalid profile direction given!')
+            raise ValueError('ERROR (create_dlps()): Invalid profile '
+                + 'direction given!')
 
         return dlp_ing, dlp_egr
 

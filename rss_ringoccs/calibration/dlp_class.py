@@ -105,6 +105,7 @@ class DiffractionLimitedProfile(object):
         phi_ora_deg_geo = geo_inst.phi_ora_deg_vals
         phi_rl_deg_geo = geo_inst.phi_rl_deg_vals
         D_km_geo = geo_inst.D_km_vals
+        prof_dir = geo_inst.rev_info['prof_dir']
 
         spm_cal = cal_inst.t_oet_spm_vals
         f_sky_pred_cal = cal_inst.f_sky_hz_vals
@@ -127,7 +128,6 @@ class DiffractionLimitedProfile(object):
 
         ind2 = list(rho_km_desired).index(min(list(rho_km_desired),
                     key=lambda x:abs(x-profile_range[1])))
-
         rho_km_desired = rho_km_desired[ind1:ind2+1]
         IQ_c_desired = IQ_c_desired[ind1:ind2+1]
 
@@ -160,7 +160,7 @@ class DiffractionLimitedProfile(object):
                 spm_cal, phase_rad_vals, spm_geo, rho_dot_kms_geo,
                 B_deg_geo, F_km_geo, t_ret_spm_geo, t_set_spm_geo,
                 D_km_geo, phi_ora_deg_geo, phi_rl_deg_geo, f_sky_pred_cal,
-                tau_thresh, spm_thresh)
+                tau_thresh, spm_thresh, prof_dir)
 
 
         # if set, write output data and label file
@@ -187,11 +187,28 @@ class DiffractionLimitedProfile(object):
             p_norm_vals, spm_cal, phase_rad_vals, spm_geo, rho_dot_kms_geo,
             B_deg_vals, F_km_geo, t_ret_geo, t_set_geo,
             D_km_geo, phi_ora_deg_vals, phi_rl_deg_vals, f_sky_pred_cal,
-            tau_thresh, spm_thresh):
+            tau_thresh, spm_thresh, prof_dir):
 
         B_rad_geo = np.radians(B_deg_vals)
         phi_ora_rad_geo = np.radians(phi_ora_deg_vals)
         phi_rl_rad_geo = np.radians(phi_rl_deg_vals)
+
+        # ring longitude at final spacing
+        spm_to_rhodot = splrep(spm_geo, rho_dot_kms_geo)
+        rho_dot_kms_vals_interp = splev(spm_desired, spm_to_rhodot)
+
+        # check if rho_dot is both positive and negative,
+        #   if so, remove unwanted values
+        if min(rho_dot_kms_vals_interp)<0 and max(rho_dot_kms_vals_interp)>0:
+            if prof_dir == '"INGRESS"':
+                ind = np.argwhere(rho_dot_kms_vals_interp > 0)
+            if prof_dir == '"EGRESS"':
+                ind = np.argwhere(rho_dot_kms_vals_interp < 0)
+            spm_desired = np.delete(spm_desired, ind)
+            rho_km_desired = np.delete(rho_km_desired, ind)
+            p_norm_vals = np.delete(p_norm_vals, ind)
+            phase_rad_vals = np.delete(phase_rad_vals, ind)
+            rho_dot_kms_vals_interp = splev(spm_desired, spm_to_rhodot)
 
         # ring opening angle at final spacing
         spm_to_B = splrep(spm_geo, B_rad_geo)
@@ -225,9 +242,6 @@ class DiffractionLimitedProfile(object):
         spm_to_set = splrep(spm_geo, t_set_geo)
         t_set_spm_vals_interp = splev(spm_desired, spm_to_set)
 
-        # ring longitude at final spacing
-        spm_to_rhodot = splrep(spm_geo, rho_dot_kms_geo)
-        rho_dot_kms_vals_interp = splev(spm_desired, spm_to_rhodot)
 
         # FILLERS FOR RADIUS CORRECTION
         rho_corr_pole_km_vals = np.zeros(len(spm_desired))
@@ -398,7 +412,6 @@ class DiffractionLimitedProfile(object):
             geo_egr.D_km_vals = geo_inst.D_km_vals[ind:]
             geo_egr.F_km_vals = geo_inst.F_km_vals[ind:]
             geo_egr.rev_info['prof_dir'] = '"EGRESS"'
-
             dlp_egr = cls(rsr_egr, geo_egr, cal_egr, dr_km, verbose=verbose, 
                     write_file=write_file, profile_range=profile_range)
         else:

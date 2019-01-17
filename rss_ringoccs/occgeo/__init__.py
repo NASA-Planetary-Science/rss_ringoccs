@@ -6,4 +6,4 @@
 """
 
 from .occgeo import Geometry
-import .calc_occ_geometry
+import calc_occ_geometry

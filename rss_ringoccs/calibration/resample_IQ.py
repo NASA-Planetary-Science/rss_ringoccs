@@ -24,6 +24,19 @@ def pre_resample(rho_km, vec, freq):
         :vec (*np.ndarray*): a single vector component I or Q of the
                 complex signal
         :freq (*float*): radial sampling frequency
+
+    Returns:
+        :rho_grid (*np.ndarray*): Radii at uniform spacing at which the 
+                 signal component is resampled
+        :vec_grid (*np.ndarray*): Signal resampled with respect to radius
+                 with a uniform spacing
+        :p (*float*): upsampling rate to be used by scipy.signal.resample_poly.
+                 This will always be unity because no upsampling is done.
+        :q (*float*): downsampling rate to be used by 
+                  scipy.signal.resample_poly. This depends on the uniform
+                  radial sampling rate at which `rho_grid` and `vec_grid` are 
+                  sampled.
+
     """
     # initial radius and radial range
     r0 = round(rho_km[0])
@@ -55,14 +68,6 @@ def resample_IQ(rho_km, IQ_c, dr_desired, verbose=False):
         Resample I and Q to uniformly spaced radius. Based off of
         Matlab's ``resample`` function
 
-    Example:
-        >>> fit_inst = FreqOffsetFit(RSR_inst, geo_inst, f_spm,
-                        f_offset, f_USO, kernels, k=k,
-                        rho_exclude=rho_exclude)
-        >>> (spm_raw, IQ_c_raw) = fit_inst.get_IQ_c()
-        >>> (rho_km_desired, IQ_c_resampled) = resample_IQ(rho_km_raw,
-                        IQ_c_raw, dr_desired, verbose=verbose)
-
     Arguments:
         :rho_km (*np.ndarray*):
             Set of ring intercept point values at initial
@@ -75,6 +80,10 @@ def resample_IQ(rho_km, IQ_c, dr_desired, verbose=False):
         :verbose (*bool*):
             Testing variable to print out the first few resampled
             results
+    Returns:
+        :rho_km_desired (*np.ndarray*): array of ring radius at final desired
+                spacing
+        :IQ_c_desired (*np.ndarray*):
     """
 
     rho_km_diff = np.diff(rho_km)
@@ -116,7 +125,8 @@ def resample_IQ(rho_km, IQ_c, dr_desired, verbose=False):
             print('%24.16f %24.16f %24.16f' %
                 (rho_km_desired[i], I_c_desired[i], Q_c_desired[i]))
 
-    return rho_km_desired, I_c_desired + 1j * Q_c_desired
+    IQ_c_desired = I_c_desired + 1j * Q_c_desired
+    return rho_km_desired, IQ_c_desired
 
 """
 Revisions:

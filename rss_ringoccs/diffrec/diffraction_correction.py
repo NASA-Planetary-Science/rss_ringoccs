@@ -940,12 +940,7 @@ class DiffractionCorrection(object):
                 "\t\tIgnore the region where drho/dt is close to zero."
             )
         elif (self.dx_km > 0) and (drho[1] < 0):
-            raise ValueError(
-                "\n\tError Encountered:\n"
-                "\t\trho_km_vals is increasing, yet\n"
-                "\t\trho_dot_kms_vals is negative.\n"
-                "\t\tPlease check your NormDiff class for errors."
-            )
+            self.rho_dot_kms_vals = np.abs(self.rho_dot_kms_vals)
         elif (self.dx_km < 0) and (drho[0] > 0):
             raise ValueError(
                 "\n\tError Encountered:\n"

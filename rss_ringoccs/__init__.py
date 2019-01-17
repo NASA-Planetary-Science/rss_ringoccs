@@ -44,17 +44,17 @@
         #. platform
 
     References:
-        .. [MTR1986] Essam A. Marouf, G. Leonard Tyler, Paul A. Rosen,
+        ..  [MTR1986] Essam A. Marouf, G. Leonard Tyler, Paul A. Rosen,
             "Profiling Saturn's rings by radio occultation".
             Icarus, Volume 68, Issue 1, 1986, Pages 120-166,
             https://doi.org/10.1016/0019-1035(86)90078-3
-        .. [CRSUG2018] `Cassini Radio Science User's Guide
+        ..  [CRSUG2018] `Cassini Radio Science User's Guide
             <https://pds-rings.seti.org/cassini/rss/Cassini%20Radio
             %20Science%20Users%20Guide%20-%2030%20Sep%202018.pdf>`_.
-        .. [GRESH86] Gresh et al. (1986) "An analysis of bending waves
+        ..  [GRESH86] Gresh et al. (1986) "An analysis of bending waves
             in Saturn's rings using Voyager radio occultation data".
             Icarus 68, 481-502.
-        .. [NICH14] Philip D. Nicholson, Richard G. French, Colleen A.
+        ..  [NICH14] Philip D. Nicholson, Richard G. French, Colleen A.
             McGhee-French, Matthew M. Hedman, Essam A. Marouf, Joshua
             E. Colwell, Katherine Lonergan, Talia Sepersky.
             "Noncircular features in Saturn’s rings II: The C ring".
@@ -64,7 +64,29 @@
         .. [NAIF] NASA JPL/NAIF spice toolkit
             https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/Tutorials/
             pdf/individual_docs/27_derived_quant.pdf
-
+        ..  https://en.wikipedia.org/wiki/Window_function
+        ..  https://en.wikipedia.org/wiki/Window_function
+        ..  On approximating the Modified Bessel Function of the
+            First Kind and Toader-Qi Mean, Yang, ZH. & Chu, YM.
+            J Inequal Appl (2016): 40., Springer,
+            https://doi.org/10.1186/s13660-016-0988-1
+        ..  https://docs.python.org/3/library/subprocess.html
+            https://stackoverflow.com/questions/
+            3777301/how-to-call-a-shell-script-from-python-code
+        ..  A. Savitzky, M. J. E. Golay, Smoothing and
+            Differentiation of Data by Simplified Least Squares
+            Procedures. Analytical Chemistry, 1964, 36 (8),
+            pp 1627-1639.
+        ..  Numerical Recipes 3rd Edition: The Art of
+            Scientific Computing W.H. Press, S.A. Teukolsky,
+            W.T. Vetterling, B.P. Flannery Cambridge University
+            Press ISBN-13: 9780521880688
+        ..  http://mathworld.wolfram.com/LambertW-Function.html
+        ..  https://en.wikipedia.org/wiki/Lambert_W_function
+        ..  https://en.wikipedia.org/wiki/Fresnel_integral
+        ..  https://en.wikipedia.org/wiki/Error_function
+        ..  http://mathworld.wolfram.com/FresnelIntegrals.html
+        ..  http://mathworld.wolfram.com/Erf.html
 """
 
 from . import tools

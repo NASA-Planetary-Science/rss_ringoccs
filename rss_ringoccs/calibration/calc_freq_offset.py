@@ -14,6 +14,11 @@ class calc_freq_offset(object):
         Arguments:
             :rsr_inst (*object*): Object instance of the RSRReader
                         class
+            :f_spm (*np.ndarray*): signal window centers in SPM for which
+                            the offset frequencies were computed
+            :f_offset (*np.ndarray*): offset frequencies computed over the
+                            occultation sampled once every 10 seconds with
+                            signal window of width ``dt_freq``
 
         Keyword Arguments:
             :dt_freq (*float*): half the width of the FFT window,
@@ -25,7 +30,8 @@ class calc_freq_offset(object):
         self.spm_vals = rsr_inst.spm_vals
         self.IQ_m = rsr_inst.IQ_m
         # raw SPM sampling rate in seconds
-        self.dt = np.nanmedian([self.spm_vals[i+1] - self.spm_vals[i] for i in range(len(self.spm_vals)-1)])
+        self.dt = np.nanmedian([self.spm_vals[i+1] - self.spm_vals[i] 
+            for i in range(len(self.spm_vals)-1)])
 
         # set frequency sampling as attribute
         self.dt_freq = dt_freq
@@ -40,14 +46,8 @@ class calc_freq_offset(object):
     def __find_offset_freqs(self):
         """
         Purpose:
-            Iteratively calls __find_peak_freq for slices of SPM and IQ.
-
-        Attributes:
-            :f_spm (*np.ndarray*): signal window centers in SPM for which
-                            the offset frequencies were computed
-            :f_offset (*np.ndarray*): offset frequencies computed over the
-                            occultation sampled once every 10 seconds with
-                            signal window of width ``dt_freq``
+            Iteratively calls __find_peak_freq for slices of SPM and IQ
+            and sets f_spm and f_offset attributes.
         """
         # hard-set the spacing to 10 spm between each window center
         delta_t_cent = 10.
@@ -56,19 +56,20 @@ class calc_freq_offset(object):
         spms = []
         freqs = []
         # iteratively compute peak frequency
-        for spm_mid in np.arange(self.spm_min,self.spm_max+delta_t_cent,delta_t_cent):
+        for spm_mid in np.arange(self.spm_min,self.spm_max+delta_t_cent,
+                delta_t_cent):
             # set indices using boolean mask over a range of SPM
-            ind = [(self.spm_vals>=spm_mid-self.dt_freq)&(self.spm_vals<spm_mid+self.dt_freq)]
+            ind = [(self.spm_vals>=spm_mid-self.dt_freq)&
+                    (self.spm_vals<spm_mid+self.dt_freq)]
             # make sure data are included in range
             if len(self.spm_vals[ind]) > 2 :
                 # get average SPM in window
-                spms += [spm_mid]#np.nanmean(self.spm_vals[ind])]
+                spms += [spm_mid]
                 # get frequency of peak in power spectrum
                 freqs += [self.__find_peak_freq(self.IQ_m[ind])]
         # convert to arrays and store as attributes
         self.f_spm = np.array(spms)
-        self.f_offset = np.array(freqs)#+0.01
-        # pay no attention to the extra 0.01 correction needed but inexplicable
+        self.f_offset = np.array(freqs)
 
     def __find_peak_freq(self,IQ):
         """

@@ -282,7 +282,7 @@ class DiffractionCorrection(object):
             #. rss_ringoccs
             #. time
     """
-    def __init__(self, NormDiff, res, rng="all", wtype="kb25", fwd=False,
+    def __init__(self, NormDiff, res, rng="all", wtype="kbmd20", fwd=False,
                  norm=True, verbose=False, bfac=True, sigma=2.e-13,
                  psitype="fresnel4", write_file=False, res_factor=0.75):
 

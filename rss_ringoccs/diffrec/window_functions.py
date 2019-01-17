@@ -1,3 +1,13 @@
+"""
+    Purpose:
+        Provide a suite of window functions and
+        functions related to the normalized equivalent
+        width of a given array.
+    Dependencies:
+        #. numpy
+        #. spicy
+"""
+
 import numpy as np
 from scipy.special import lambertw, iv
 
@@ -24,11 +34,9 @@ def rect(w_in, dx, error_check=True):
             :dx (*float*):
                 Width of one point (Or one bin).
         Outputs:
-            :w_func:
+            :w_func (*np.ndarray*):
                 The rectungular window function of width w_in
                 and spacing dx between points. Numpy array.
-        Dependencies:
-            [1] numpy
         Notes:
             The rectangular window function is the unit function.
             That is, it is equal to one across it's entire domain. It
@@ -36,13 +44,6 @@ def rect(w_in, dx, error_check=True):
             process to act as a 'hat' function, zeroing out a
             function outside of the domain of rect's definition, and
             having no effect within that domain.
-        References:
-            [1] https://en.wikipedia.org/wiki/Window_function
-            [2] https://en.wikipedia.org/wiki/Rectangular_function
-            [3] Essam A. Marouf, G. Leonard Tyler, Paul A. Rosen,
-                Profiling Saturn's rings by radio occultation,
-                Icarus, Volume 68, Issue 1, 1986, Pages 120-166,
-                https://doi.org/10.1016/0019-1035(86)90078-3
         Examples:
             Create a rectangular window function of width 10,
             with 0.01 spacing spacing between points.
@@ -110,18 +111,17 @@ def rect(w_in, dx, error_check=True):
 
 def coss(w_in, dx, error_check=True):
     """
-        Function:
-            coss
         Purpose:
             Create cosine squared window.
         Variables:
-            W:      Window width.
-            dx:     Width of one point.
+            :W (*float*):
+                Window width.
+            :dx (*float*):
+                Width of one point.
         Outputs:
-            w_func: The squared cosine window function of width w_in
-                    and spacing dx between points.
-        Dependencies:
-            [1] numpy
+            :w_func (*np.ndarray*):
+                The squared cosine window function of width w_in
+                and spacing dx between points.
         Notes:
             [1] This window function is defined as
                 y = cos^2(x * pi/w), where w is the window width.
@@ -133,12 +133,6 @@ def coss(w_in, dx, error_check=True):
             [3] The squared cosine window is wider than the all of
                 the Kaiser-Bessel windows for alpha > 2.5*pi. Alpha
                 is a paramter in the Kaiser-Bessel window.
-        References:
-            [1] Essam A. Marouf, G. Leonard Tyler, Paul A. Rosen,
-                Profiling Saturn's rings by radio occultation,
-                Icarus, Volume 68, Issue 1, 1986, Pages 120-166,
-                https://doi.org/10.1016/0019-1035(86)90078-3
-            [2] https://en.wikipedia.org/wiki/Window_function
     """
     if error_check:
         if not isinstance(w_in, float):
@@ -205,6 +199,30 @@ def coss(w_in, dx, error_check=True):
     return w_func
 
 def kb20(w_in, dx, error_check=True):
+    """
+        Purpose:
+            Create Kaiser-Bessel 2.0 window.
+        Variables:
+            :W (*float*):
+                Window width.
+            :dx (*float*):
+                Width of one point.
+        Outputs:
+            :w_func (*np.ndarray*):
+                The squared cosine window function of width w_in
+                and spacing dx between points.
+        Notes:
+            [1] This window function is defined as
+                y = cos^2(x * pi/w), where w is the window width.
+            [2] The squared cosine window has the advantage of
+                evaluating to zero at the endpoints of the window,
+                meaning Gibb's effects from discontinuities do not
+                arise like in the rectangular window and, to a much
+                lesser degree, the Kaiser-Bessel windows.
+            [3] The squared cosine window is wider than the all of
+                the Kaiser-Bessel windows for alpha > 2.5*pi. Alpha
+                is a paramter in the Kaiser-Bessel window.
+    """
     if error_check:
         if not isinstance(w_in, float):
             try:
@@ -272,18 +290,17 @@ def kb20(w_in, dx, error_check=True):
 
 def kb25(w_in, dx, error_check=True):
     """
-        Function:
-            kb25
         Purpose:
             Create Kaiser-Bessel 2.5 window.
         Variables:
-            W:      Window width.
-            dx:     Width of one point.
+            :W (*float*):
+                Window width.
+            :dx (*float*):
+                Width of one point.
         Outputs:
-            w_func: The Kaiser-Bessel 2.5 window of width w_in and
-                    spacing dx between points.
-        Dependencies:
-            [1] numpy
+            :w_func (*np.ndarray*):
+                The Kaiser-Bessel 2.5 window of width w_in
+                and spacing dx between points.
         Notes:
             [1] The Kaiser-Bessel window is computed using the 
                 modified Bessel Function of the First Kind. It's
@@ -301,16 +318,6 @@ def kb25(w_in, dx, error_check=True):
                 effects in reconstruction do to the large
                 discontinuity in the window. For alpha = 2.5 * pi,
                 the endpoint is 0.00268082, which is close to zero.
-        References:
-            [1] Essam A. Marouf, G. Leonard Tyler, Paul A. Rosen,
-                Profiling Saturn's rings by radio occultation,
-                Icarus, Volume 68, Issue 1, 1986, Pages 120-166,
-                https://doi.org/10.1016/0019-1035(86)90078-3
-            [2] https://en.wikipedia.org/wiki/Window_function
-            [3] On approximating the Modified Bessel Function of the
-                First Kind and Toader-Qi Mean, Yang, ZH. & Chu, YM.
-                J Inequal Appl (2016): 40., Springer,
-                https://doi.org/10.1186/s13660-016-0988-1
     """
     if error_check:
         if not isinstance(w_in, float):
@@ -382,18 +389,17 @@ def kb25(w_in, dx, error_check=True):
 
 def kb35(w_in, dx, error_check=True):
     """
-        Function:
-            kb35
         Purpose:
             Create Kaiser-Bessel 3.5 window.
         Variables:
-            W:      Window width.
-            dx:     Width of one point.
+            :W (*float*):
+                Window width.
+            :dx (*float*):
+                Width of one point.
         Outputs:
-            w_func: The Kaiser-Bessel 3.5 window of width w_in and
-                    spacing dx between points.
-        Dependencies:
-            [1] numpy
+            :w_func (*np.ndarray*):
+                The Kaiser-Bessel 3.5 window of width w_in
+                and spacing dx between points.
         Notes:
             [1] The Kaiser-Bessel window is computed using the 
                 modified Bessel Function of the First Kind. It's
@@ -411,16 +417,6 @@ def kb35(w_in, dx, error_check=True):
                 effects in reconstruction do to the large
                 discontinuity in the window. For alpha = 3.5 * pi,
                 the endpoint is 0.000137783, which is close to zero.
-        References:
-            [1] Essam A. Marouf, G. Leonard Tyler, Paul A. Rosen,
-                Profiling Saturn's rings by radio occultation,
-                Icarus, Volume 68, Issue 1, 1986, Pages 120-166,
-                https://doi.org/10.1016/0019-1035(86)90078-3
-            [2] https://en.wikipedia.org/wiki/Window_function
-            [3] On approximating the Modified Bessel Function of the
-                First Kind and Toader-Qi Mean, Yang, ZH. & Chu, YM.
-                J Inequal Appl (2016): 40., Springer,
-                https://doi.org/10.1186/s13660-016-0988-1
     """
     if error_check:
         if not isinstance(w_in, float):
@@ -492,18 +488,17 @@ def kb35(w_in, dx, error_check=True):
 
 def kbmd20(w_in, dx, error_check=True):
     """
-        Function:
-            kbmd
         Purpose:
             Create the Modified Kaiser-Bessel 2.5 window.
         Variables:
-            W:      Window width.
-            dx:     Width of one point.
+            :W (*float*):
+                Window width.
+            :dx (*float*):
+                Width of one point.
         Outputs:
-            w_func: The Modified Kaiser-Bessel 2.5 window of width
-                    w_in and spacing dx between points.
-        Dependencies:
-            [1] numpy
+            w_func (*np.ndarray*):
+                The Modified Kaiser-Bessel 2.5 window of
+                width w_in and spacing dx between points.
         Notes:
             [1] The Modified Kaiser-Bessel window is computed using
                 the modified Bessel Function of the First Kind. It's
@@ -528,8 +523,6 @@ def kbmd20(w_in, dx, error_check=True):
                 dramatically. For example, alpha = 0 gives a constant
                 curve for the Kaiser-Bessel, but a bell-shaped curve
                 for the modified version.
-        References:
-            [1] https://en.wikipedia.org/wiki/Window_function
     """
     if error_check:
         if not isinstance(w_in, float):
@@ -598,18 +591,17 @@ def kbmd20(w_in, dx, error_check=True):
 
 def kbmd25(w_in, dx, error_check=True):
     """
-        Function:
-            kbmd
         Purpose:
             Create the Modified Kaiser-Bessel 2.5 window.
         Variables:
-            W:      Window width.
-            dx:     Width of one point.
+            :W (*float*):
+                Window width.
+            :dx (*float*):
+                Width of one point.
         Outputs:
-            w_func: The Modified Kaiser-Bessel 2.5 window of width
-                    w_in and spacing dx between points.
-        Dependencies:
-            [1] numpy
+            w_func (*np.ndarray*):
+                The Modified Kaiser-Bessel 2.5 window of
+                width w_in and spacing dx between points.
         Notes:
             [1] The Modified Kaiser-Bessel window is computed using
                 the modified Bessel Function of the First Kind. It's
@@ -634,8 +626,6 @@ def kbmd25(w_in, dx, error_check=True):
                 dramatically. For example, alpha = 0 gives a constant
                 curve for the Kaiser-Bessel, but a bell-shaped curve
                 for the modified version.
-        References:
-            [1] https://en.wikipedia.org/wiki/Window_function
     """
     if error_check:
         if not isinstance(w_in, float):
@@ -708,16 +698,19 @@ def kbmd25(w_in, dx, error_check=True):
 def kbal(w_in, dx, al, error_check=True):
     """
         Purpose:
-            Create Kaiser-Bessel 3.5 window.
+            Create a Kaiser-Bessel window with a user
+            specified alpha parameter.
         Variables:
-            W:      Window width.
-            dx:     Width of one point.
-            al:     The alpha parameter.
+            :W (*float*):
+                Window width.
+            :dx (*float*):
+                Width of one point.
+            :al (*float*):
+                The alpha parameter.
         Outputs:
-            w_func: The Kaiser-Bessel alpha window of width w_in and
-                    spacing dx between points.
-        Dependencies:
-            [1] numpy
+            :w_func (*np.ndarray*):
+                The Kaiser-Bessel alpha window of width
+                w_in and spacing dx between points.
         Notes:
             [1] The Kaiser-Bessel window is computed using the 
                 modified Bessel Function of the First Kind. It's
@@ -735,16 +728,6 @@ def kbal(w_in, dx, al, error_check=True):
                 effects in reconstruction do to the large
                 discontinuity in the window. For alpha values beyond
                 2.5 * pi this effect is negligible.
-        References:
-            [1] Essam A. Marouf, G. Leonard Tyler, Paul A. Rosen,
-                Profiling Saturn's rings by radio occultation,
-                Icarus, Volume 68, Issue 1, 1986, Pages 120-166,
-                https://doi.org/10.1016/0019-1035(86)90078-3
-            [2] https://en.wikipedia.org/wiki/Window_function
-            [3] On approximating the Modified Bessel Function of the
-                First Kind and Toader-Qi Mean, Yang, ZH. & Chu, YM.
-                J Inequal Appl (2016): 40., Springer,
-                https://doi.org/10.1186/s13660-016-0988-1
     """
     if error_check:
         if not isinstance(w_in, float):
@@ -839,19 +822,20 @@ def kbal(w_in, dx, al, error_check=True):
 
 def kbmdal(w_in, dx, al, error_check=True):
     """
-        Function:
-            kb35
         Purpose:
-            Create Kaiser-Bessel 3.5 window.
+            Create a modifed Kaiser-Bessel window
+            with a user specified alpha parameter.
         Variables:
-            W:      Window width.
-            dx:     Width of one point.
-            al:     The alpha parameter.
+            :W (*float*):
+                Window width.
+            :dx (*float*):
+                Width of one point.
+            :al (*float*):
+                The alpha parameter.
         Outputs:
-            w_func: The Kaiser-Bessel alpha window of width w_in and
-                    spacing dx between points.
-        Dependencies:
-            [1] numpy
+            :w_func (*np.ndarray*):
+                The Kaiser-Bessel alpha window of width
+                and w_in spacing dx between points.
         Notes:
             [1] The Kaiser-Bessel window is computed using the 
                 modified Bessel Function of the First Kind. It's
@@ -869,21 +853,6 @@ def kbmdal(w_in, dx, al, error_check=True):
                 effects in reconstruction do to the large
                 discontinuity in the window. For alpha values beyond
                 2.5 * pi this effect is negligible.
-        References:
-            [1] Essam A. Marouf, G. Leonard Tyler, Paul A. Rosen,
-                Profiling Saturn's rings by radio occultation,
-                Icarus, Volume 68, Issue 1, 1986, Pages 120-166,
-                https://doi.org/10.1016/0019-1035(86)90078-3
-            [2] https://en.wikipedia.org/wiki/Window_function
-            [3] On approximating the Modified Bessel Function of the
-                First Kind and Toader-Qi Mean, Yang, ZH. & Chu, YM.
-                J Inequal Appl (2016): 40., Springer,
-                https://doi.org/10.1186/s13660-016-0988-1
-
-    tw  = check_pos_real(w_in)
-    tdx = check_pos_real(dx)
-    if (not tdx) or (not tw):
-        sys.exit("Input must be two positive real numbers")
     """
     if error_check:
         if not isinstance(w_in, float):
@@ -979,24 +948,23 @@ def kbmdal(w_in, dx, al, error_check=True):
 def window_width(res, normeq, fsky, fres, rdot,
                  sigma = 2.e-13, bfac=True, error_check=True):
     """
-        Function:
-            window_width
         Purpose:
             Compute the window width as a function of ring radius.
             This is given from MTR86 Equations 19, 32, and 33.
         Variables:
-            res:
+            :res (*float*):
                 The requested resolution.
-            normeq:
+            :normeq (*float*):
                 The normalized equivalent width. Unitless.
-            fsky:
+            :fsky (*float* or *np.ndarray*):
                 The sky frequency.
-            fres:
+            :fres (*float* or *np.ndarray*):
                 The Fresnel scale.
-            rdot:
+            :rdot (*float*) or (*np.ndarray*):
                 The time derivative of the ring radius.
         Output:
-            w_vals:  The window width as a function of ring radius.
+            :w_vals (*np.ndarray*):
+                The window width as a function of ring radius.
     """
     if error_check:
         if (not isinstance(res, float)):
@@ -1028,7 +996,7 @@ def window_width(res, normeq, fsky, fres, rdot,
 
         if (not isinstance(normeq, float)):
             try:
-                res = float(ref)
+                res = float(res)
             except (TypeError, ValueError):
                 raise TypeError(
                     "\n\tError Encountered:\n"
@@ -1281,18 +1249,17 @@ def get_range_actual(rho, rng, w_vals, error_check=True):
             the requested region, and the size of the
             windows needed (w_vals).
         Variables:
-            :rho:
-                Numpy Array
+            :rho (*np.ndarray*):
                 Radial range of the data.
-            :rng:
-                List
+            :rng (*list* or *str*):
                 Requested start/end points for processing.
-            :w_vals:
-                Numpy Array
+            :w_vals (*np.ndarray*):
                 Window width as a function of radius.
         Output:
-            start:  The allowed starting point for processing.
-            n_used: The number of points allowed for processing.
+            start (*int*):
+                The allowed starting point for processing.
+            n_used (*int*):
+                The number of points allowed for processing.
     """
     if error_check:
         try:

@@ -109,7 +109,7 @@ def make_executable(path):
 def latex_summary_doc(pdffil, res, outfilename):
     if not isinstance(pdffil, str):
         raise TypeError(
-            "\n\tError Encountered:\n
+            "\n\tError Encountered:\n"
             "\t\trss_ringoccs.tools.sys_tools: latex_summary_doc\n"
             "\n\tpdffil must be a string\n"
             "\tYour input has type: %s\n"
@@ -117,7 +117,7 @@ def latex_summary_doc(pdffil, res, outfilename):
         )
     elif not isinstance(outfilename, str):
         raise TypeError(
-            "\n\tError Encountered:\n
+            "\n\tError Encountered:\n"
             "\t\trss_ringoccs.tools.sys_tools: latex_summary_doc\n"
             "\n\toutfilename must be a string\n"
             "\tYour input has type: %s\n"
@@ -131,7 +131,7 @@ def latex_summary_doc(pdffil, res, outfilename):
             res = float(res)
         except (TypeError, ValueError):
             raise TypeError(
-                "\n\tError Encountered:\n
+                "\n\tError Encountered:\n"
                 "\t\trss_ringoccs.tools.sys_tools: latex_summary_doc\n"
                 "\n\tpdffil must be a floating point number.\n"
                 "\tYour input has type: %s\n"

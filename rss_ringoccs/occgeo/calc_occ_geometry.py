@@ -84,7 +84,7 @@ def calc_D_km(t1, t2):
 
 def calc_F_km(D_km_vals, f_sky_hz_vals, B_deg_vals, phi_ora_deg_vals):
     """
-    This calculates the Fresnel scale using Eq. 6 of MTR1986.
+    This calculates the Fresnel scale using Eq. 6 of [MTR1986]_.
 
     Arguments:
         :D_km_vals (*np.ndarray*): Array of spacecraft to ring intercept
@@ -100,7 +100,7 @@ def calc_F_km(D_km_vals, f_sky_hz_vals, B_deg_vals, phi_ora_deg_vals):
 
     Notes:
         #. diffcorr uses an independently-calculated Fresnel scale
-        #. Reference: _[MTR1986]
+        #. Reference: [MTR1986]_ Equation 6
 
     """
 
@@ -128,7 +128,7 @@ def calc_B_eff_deg(B_deg, phi_ora_deg):
             in degrees.
 
     Notes:
-        #. Reference: _[GRESH86] Eq. 16
+        #. Reference: [GRESH86]_ Eq. 16
     """
     B_rad = np.radians(B_deg)
     phi_ora_rad = np.radians(phi_ora_deg)
@@ -274,7 +274,7 @@ def calc_phi_deg(et_vals, rho_vec_km_vals, spacecraft, dsn, nhat_p,
             in degrees.
 
     Notes:
-        #. phi_ora_deg differs from the MTR1986 definition by 180 degrees.
+        #. phi_ora_deg differs from the [MTR1986]_ definition by 180 degrees.
     """
     if kernels:
         spice.kclear()
@@ -348,7 +348,6 @@ def calc_rho_km(et_vals, planet, spacecraft, dsn, kernels=None):
     rho_vec_km, t_ret_et = calc_rho_vec_km(et_vals, planet, spacecraft, dsn,
             kernels=kernels)
 
-
     # Compute magnitude of each vector
     rho_km_vals = [spice.vnorm(vec) for vec in rho_vec_km]
 
@@ -376,8 +375,9 @@ def calc_rho_vec_km(et_vals, planet, spacecraft, dsn, kernels=None,
         :t_ret_et_vals (*np.ndarray*): Array of ring event times in ET seconds.
 
     References:
-        [1] Ring intercept point calculation using a dynamical frame:
-            page 19 of https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/Tutorials/pdf/individual_docs/27_derived_quant.pdf
+        #. Ring intercept point calculation using a dynamical frame.
+            See [NAIF]_ page 19.
+
     """
 
     if kernels:
@@ -467,13 +467,13 @@ def calc_rip_velocity(rho_km_vals, phi_rl_deg_vals, dt):
             velocties in km/s.
 
     Note:
-        [1] np.gradient assumes constant time spacing. From np.gradient
+        #. np.gradient assumes constant time spacing. From np.gradient
             documentation: The gradient is computed using second order
             accurate central differences in the interior points and either
             first or second order accurate one-sides (forward or backwards)
             differences at the boundaries. The returned gradient hence has
             the same shape as the input array.
-            (https://docs.scipy.org/doc/numpy/reference/generated/numpy.gradient.html)
+            .. (https://docs.scipy.org/doc/numpy/reference/generated/numpy.gradient.html)
     """
 
     # Compute central differences using numpy gradient
@@ -505,7 +505,7 @@ def calc_sc_state(et_vals, spacecraft, planet, dsn, nhat_p, kernels=None):
             velocity vector in km/s.
 
     Notes:
-        [1] Saturn planetocentric frame is defined by x-axis parallel to
+        #.  Saturn planetocentric frame is defined by x-axis parallel to
             projection of spacecraft-to-Earth line-of-sight, z-axis in
             direction of Saturn's pole.
     """
@@ -621,8 +621,8 @@ def find_gaps(t_ret_spm_vals, year, doy, rho_km_vals, phi_rl_deg_vals,
         :gap_bounds (*list*): List of 1x2 lists of gap boundaries in km
 
     Notes:
-        [1] Reference: _[NICH14]
-        [2] Given the default "gaps_file" keyword argument, this script must be run in a directory one level below the top-level rss_ringoccs directory.
+        #. Reference: [NICH14]_
+        #. Given the default "gaps_file" keyword argument, this script must be run in a directory one level below the top-level rss_ringoccs directory.
 
 
     """
@@ -702,7 +702,7 @@ def rad_converge(t_ret_spm_vals, rho_km_vals, phi_rl_deg_vals, semimajor,
         :radius_new (*float*): Estimated radius of ring feature in km
 
     Notes:
-        [1] Reference: _[NICH14]
+        #. Reference: [NICH14]_
     """
     # set initial guess at feature radius
     radius_old = semimajor*(1.+eccentricity)
@@ -1026,7 +1026,7 @@ def get_planet_occ_times(et_vals, obs, planet, spacecraft, height_above=500.,
         :et_blocked_vals (*np.ndarray*): Array of observed event times in ET
 
     Note:
-        [1] This was made to be generalizable to different planets, but has
+        #. This was made to be generalizable to different planets, but has
             been only tested with planet='Saturn'.
 
     """
@@ -1079,7 +1079,7 @@ def get_pole(et, planet, kernels=None):
         :nhat_p (*np.ndarray*): 1x3 unit vector in pole direction.
 
     Note:
-        [1] Quadratic terms for pole direction are typically zero but
+        #. Quadratic terms for pole direction are typically zero but
             are retained here for consistency with PCK file format definitions.
     """
 

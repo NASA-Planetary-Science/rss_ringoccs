@@ -1,8 +1,8 @@
 """
 occgeo.py
 
-:Purpose: 
-    
+:Purpose:
+
     Calculate occultation geometry for RSS ring events.
 
 :Notes:
@@ -27,7 +27,7 @@ from ..tools.et_to_spm import et_to_spm
 from ..tools.write_output_files import write_output_files
 from ..tools.history import write_history_dict
 
-import .calc_occ_geometry as cog
+import calc_occ_geometry as cog
 
 from scipy.interpolate import splrep
 from scipy.interpolate import splev
@@ -41,7 +41,7 @@ class Geometry(object):
     """
     :Purpose:
         This is an object that calculates occultation geometry needed for
-        diffraction reconstruction as well as other relevant geometry 
+        diffraction reconstruction as well as other relevant geometry
         parameters.
 
     Arguments:
@@ -58,43 +58,43 @@ class Geometry(object):
             *GEO.LBL files will be created.
 
     Attributes:
-        :t_oet_spm_vals (*np.ndarray*): Observed event time in seconds 
+        :t_oet_spm_vals (*np.ndarray*): Observed event time in seconds
             past midnight.
-        :t_ret_spm_vals (*np.ndarray*): Ring event time in seconds past 
+        :t_ret_spm_vals (*np.ndarray*): Ring event time in seconds past
             midnight.
-        :t_set_spm_vals (*np.ndarray*): Spacecraft event time in seconds 
+        :t_set_spm_vals (*np.ndarray*): Spacecraft event time in seconds
             past midnight.
-        :rho_km_vals (*np.ndarray*): Distance in km from the center of 
+        :rho_km_vals (*np.ndarray*): Distance in km from the center of
             Saturn to ring intercept point.
-        :phi_rl_deg_vals (*np.ndarray*): Ring longitude (inertial longitude) 
+        :phi_rl_deg_vals (*np.ndarray*): Ring longitude (inertial longitude)
             in degrees.
         :phi_ora_deg_vals (*np.ndarray*): Observed ring azimuth in degrees.
-        :D_km_vals (*np.ndarray*): Spacecraft to ring intercept point 
+        :D_km_vals (*np.ndarray*): Spacecraft to ring intercept point
             distance in km.
         :B_deg_vals (*np.ndarray*): Ring opening angle in degrees.
-        :rho_dot_kms_vals (*np.ndarray*): Ring intercept radial velocity 
+        :rho_dot_kms_vals (*np.ndarray*): Ring intercept radial velocity
             in km/s.
-        :phi_rl_dot_kms_vals (*np.ndarray*): Ring intercept azimuthal velocity 
+        :phi_rl_dot_kms_vals (*np.ndarray*): Ring intercept azimuthal velocity
             in km/s.
         :F_km_vals (*np.ndarray*): Fresnel scale in km.
         :R_imp_km_vals (*np.ndarray*): Impact radius in km.
-        :rx_km_vals (*np.ndarray*): x-component of spacecraft position in 
+        :rx_km_vals (*np.ndarray*): x-component of spacecraft position in
             a planetocentric frame, in km.
-        :ry_km_vals (*np.ndarray*): y-component of spacecraft position in 
+        :ry_km_vals (*np.ndarray*): y-component of spacecraft position in
             a planetocentric frame, in km.
-        :rz_km_vals (*np.ndarray*): z-component of spacecraft position in 
+        :rz_km_vals (*np.ndarray*): z-component of spacecraft position in
             a planetocentric frame, in km.
-        :vx_kms_vals (*np.ndarray*): x-component of spacecraft velocity in 
+        :vx_kms_vals (*np.ndarray*): x-component of spacecraft velocity in
             a planetocentric frame, in km/s.
-        :vy_kms_vals (*np.ndarray*): y-component of spacecraft velocity in 
+        :vy_kms_vals (*np.ndarray*): y-component of spacecraft velocity in
             a planetocentric frame, in km/s
-        :vz_kms_vals (*np.ndarray*): z-component of spacecraft velocity in 
+        :vz_kms_vals (*np.ndarray*): z-component of spacecraft velocity in
             a planetocentric frame, in km/s
         :elev_deg_vals (*np.ndarray*): Elevation angle in degrees.
         :kernels (*str* or *list*): List of NAIF kernels, including path.
         :rev_info (*dict*): RSR file specific info
         :history (*dict*): Dictionary of processing history.
-        :naif_toolkit_version (*str*): NAIF toolkit version used 
+        :naif_toolkit_version (*str*): NAIF toolkit version used
             (e.g., "V.N0066").
         :B_eff_deg_vals (*np.ndarray*): Effective ring opening angle in deg.
         :beta_vals (*np.ndarray*): Optical depth enhancement factor.
@@ -105,7 +105,7 @@ class Geometry(object):
             when the signal is occulted by the planet atmosphere, defined as
             500km above an ellipsoid with radii from cpck file.
         :freespace_spm (*list*): List of 2x1 lists of seconds past midnight
-            values that define the inner and outer edge of a free-space 
+            values that define the inner and outer edge of a free-space
             gap in the ring system
         :freespace_km (*np.ndarray*): An array of 2x1 lists of km values
             that define the inner and outer edge of a free-space gap
@@ -115,7 +115,7 @@ class Geometry(object):
     """
     def __init__(self, rsr_inst, planet, spacecraft, kernels, pt_per_sec=1.,
             verbose=False, write_file=True):
-    
+
         self.verbose = verbose
 
         if verbose:
@@ -326,7 +326,7 @@ class Geometry(object):
 
         Returns:
             :naif_str (*str*): NAIF toolkit version in format '"V.N0066"'.
-            
+
         """
         naif_ver = spice.tkvrsn('TOOLKIT')
         naif_str = ('"V.' + naif_ver.split('_')[-1] + '"')
@@ -338,7 +338,7 @@ class Geometry(object):
             Return observed profile direction.
 
         Returns:
-            :prof_dir (*str*): Profile direction as '"INGRESS"', 
+            :prof_dir (*str*): Profile direction as '"INGRESS"',
                                  '"EGRESS"', or '"BOTH"'.
         """
         rho = self.rho_km_vals
@@ -361,7 +361,7 @@ class Geometry(object):
             radial velocity is actually a chord occultation.
 
         Returns:
-            :prof_dir (*str*): Profile direction as 
+            :prof_dir (*str*): Profile direction as
                                 '"INGRESS"', '"EGRESS"', or '"BOTH"'.
         """
         split_ind = self.get_chord_ind()
@@ -374,7 +374,7 @@ class Geometry(object):
 
 
         atmos_blocked_spm = list(self.atmos_occ_spm_vals)
-        
+
         ing_blocked = [x for x in t_oet_ing if x in atmos_blocked_spm]
         egr_blocked = [x for x in t_oet_egr if x in atmos_blocked_spm]
 
@@ -408,7 +408,7 @@ class Geometry(object):
                 self.t_oet_spm_vals == max(self.atmos_occ_spm_vals))[0][0]
 
         rind = np.arange(ind1, ind2+1, step=1)
-        
+
         # Make sure ind2 > ind1
         if ind1 > ind2:
             ind1t = ind1

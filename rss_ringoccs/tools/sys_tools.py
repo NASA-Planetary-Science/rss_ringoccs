@@ -136,9 +136,11 @@ def latex_summary_doc(pdffil, res, outfilename):
         pass
 
     if (res < 1.0):
-        res = "%fm" % (100.0*res)
+        res = str(res*1000.0))
+        res = "%sM" % (res)
     else:
-        res = "%fkm" % (res)
+        res = str(res)
+        res = "%sKM" % (res)
 
     var = pdffil.split("/")[-1]
     var = var.split("_")
@@ -150,7 +152,7 @@ def latex_summary_doc(pdffil, res, outfilename):
 
     geo = "RSS\_%s\_%s\_%s\_%s\_GEO.TAB" % (year, doy, band, occ)
     cal = "RSS\_%s\_%s\_%s\_%s\_CAL.TAB" % (year, doy, band, occ)
-    tau = "RSS\_%s\_%s\_%s\_%s\_TAU\_%sKM.TAB" % (year, doy, band, occ, res)
+    tau = "RSS\_%s\_%s\_%s\_%s\_TAU\_%s.TAB" % (year, doy, band, occ, res)
 
     LaTeXFile = r"""
         \documentclass{article}

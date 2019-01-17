@@ -13,15 +13,13 @@ occgeo.py
         4) planet and lunar ephemeris kernel
         5) earth stations kernel
         6) earth rotation and constants kernel
-    #. This code has only been tested thoroughly for planet='Saturn'.
+        7) topocentric frame kernel
 
 :Dependencies:
     #. scipy.interpolate
     #. numpy
     #. spiceypy
     #. sys
-    #. rss_ringoccs.occgeo.calc_occ_geometry
-    #. rss_ringoccs.tools
 
 """
 from ..tools.spm_to_et import spm_to_et
@@ -29,31 +27,14 @@ from ..tools.et_to_spm import et_to_spm
 from ..tools.write_output_files import write_output_files
 from ..tools.history import write_history_dict
 
-from .calc_occ_geometry import calc_elevation_deg
-from .calc_occ_geometry import get_pole
-from .calc_occ_geometry import calc_rho_vec_km
-from .calc_occ_geometry import calc_set_et
-from .calc_occ_geometry import calc_phi_deg
-from .calc_occ_geometry import calc_D_km
-from .calc_occ_geometry import calc_B_deg
-from .calc_occ_geometry import calc_F_km
-from .calc_occ_geometry import xform_j2k_to_pcf
-from .calc_occ_geometry import calc_sc_state
-from .calc_occ_geometry import calc_rip_velocity
-from .calc_occ_geometry import calc_impact_radius_km
-from .calc_occ_geometry import get_planet_occ_times
-from .calc_occ_geometry import calc_beta
-from .calc_occ_geometry import calc_B_eff_deg
-from .calc_occ_geometry import get_freespace
+import .calc_occ_geometry as cog
 
 from scipy.interpolate import splrep
 from scipy.interpolate import splev
 
-
 import spiceypy as spice
 import numpy as np
 import sys
-import pdb
 
 class Geometry(object):
 
@@ -144,14 +125,15 @@ class Geometry(object):
             print('\tChecking for valid inputs...')
 
         if type(planet) != str:
-            sys.exit('WARNING (Geometry): Input planet is NOT a string!')
+            raise ValueError('ERROR (Geometry): Input planet is NOT a string!')
 
         if type(spacecraft) != str:
-            sys.exit('WARNING (Geometry): Input spacecraft is NOT a string!')
+            raise ValueError('ERROR (Geometry): Input spacecraft is NOT '
+                            + 'a string!')
 
         if not isinstance(pt_per_sec, (int, float)):
-            sys.exit('WARNING (Geometry): Input pt_per_sec is NOT an int or '
-                    + 'float!')
+            raise ValueError('ERROR (Geometry): Input pt_per_sec is NOT an int '
+                                + 'or float!')
 
         if verbose:
             print('\tExtracting information from rsr file...')
@@ -177,7 +159,7 @@ class Geometry(object):
         # Calculate Saturn center to ring intercept vector
         if verbose:
             print('\tCalculating ring intercept event time and vector...')
-        rho_vec_vals, t_ret_et_vals = calc_rho_vec_km(t_oet_et_vals, planet,
+        rho_vec_vals, t_ret_et_vals = cog.calc_rho_vec_km(t_oet_et_vals, planet,
                 spacecraft, dsn, kernels=kernels)
 
         rho_km_vals = [spice.vnorm(vec) for vec in rho_vec_vals]
@@ -191,37 +173,37 @@ class Geometry(object):
         # Calculate spacecraft event time
         if verbose:
             print('\tCalculating spacecraft event time...')
-        t_set_et_vals = calc_set_et(t_oet_et_vals, spacecraft, dsn)
+        t_set_et_vals = cog.calc_set_et(t_oet_et_vals, spacecraft, dsn)
 
         # Retrieve Saturn pole unit vector
         if verbose:
             print('\tRetrieving Saturn pole unit vector...')
-        nhat_p = get_pole(t_set_et_vals[0], planet)
+        nhat_p = cog.get_pole(t_set_et_vals[0], planet)
 
         if verbose:
             print('\tCalculating ring longitude and ring azimuth...')
 
         # Calculated ring longitude and observed ring azimuth
-        phi_rl_deg_vals, phi_ora_deg_vals = calc_phi_deg(t_oet_et_vals,
+        phi_rl_deg_vals, phi_ora_deg_vals = cog.calc_phi_deg(t_oet_et_vals,
                 rho_vec_vals, spacecraft, dsn, nhat_p)
 
         if verbose:
             print('\tCalculating distance from spacecraft to ring intercept '
                 + 'point...')
         # Calculate distance from spacecraft to ring intercept point
-        D_km_vals = calc_D_km(t_ret_et_vals, t_set_et_vals)
+        D_km_vals = cog.calc_D_km(t_ret_et_vals, t_set_et_vals)
 
         if verbose:
             print('\tCalculating ring opening angle...')
 
         # Calculate ring opening angle
-        B_deg_vals = calc_B_deg(t_oet_et_vals, spacecraft, dsn, nhat_p)
+        B_deg_vals = cog.calc_B_deg(t_oet_et_vals, spacecraft, dsn, nhat_p)
 
         if verbose:
             print('\tCalculating Fresnel scale...')
 
         # Calculate Fresnel scale
-        F_km_vals = calc_F_km(D_km_vals, f_sky_hz_vals, B_deg_vals,
+        F_km_vals = cog.calc_F_km(D_km_vals, f_sky_hz_vals, B_deg_vals,
                 phi_ora_deg_vals)
 
         t_ret_spm_vals = et_to_spm(t_ret_et_vals)
@@ -230,40 +212,40 @@ class Geometry(object):
         if verbose:
             print('\tCalculating ring intercept velocities...')
         # Calculate ring intercept velocities
-        rho_dot_kms_vals, phi_rl_dot_kms_vals = calc_rip_velocity(rho_km_vals,
-                phi_rl_deg_vals, step)
+        rho_dot_kms_vals, phi_rl_dot_kms_vals = cog.calc_rip_velocity(
+                rho_km_vals, phi_rl_deg_vals, step)
 
         if verbose:
             print('\tCalculating spacecraft state vector...')
         # Calculate spacecraft state vector
-        R_sc_km_vals, R_sc_dot_kms_vals = calc_sc_state(t_set_et_vals,
+        R_sc_km_vals, R_sc_dot_kms_vals = cog.calc_sc_state(t_set_et_vals,
                 spacecraft, planet, dsn, nhat_p)
 
         if verbose:
             print('\tCalculating impact radius...')
         # Calculate impact radius
-        R_imp_km_vals = calc_impact_radius_km(R_sc_km_vals, t_set_et_vals,
+        R_imp_km_vals = cog.calc_impact_radius_km(R_sc_km_vals, t_set_et_vals,
                 spacecraft, dsn, nhat_p)
 
         if verbose:
             print('\tCalculating elevation angle...')
 
         # Calculate target angle above the horizon
-        elev_deg_vals = calc_elevation_deg(t_oet_et_vals, spacecraft, dsn)
+        elev_deg_vals = cog.calc_elevation_deg(t_oet_et_vals, spacecraft, dsn)
 
         # Calculate beta
         if verbose:
             print('\tCalculating beta...')
-        beta_vals = calc_beta(B_deg_vals, phi_ora_deg_vals)
-        B_eff_deg_vals = calc_B_eff_deg(B_deg_vals, phi_ora_deg_vals)
+        beta_vals = cog.calc_beta(B_deg_vals, phi_ora_deg_vals)
+        B_eff_deg_vals = cog.calc_B_eff_deg(B_deg_vals, phi_ora_deg_vals)
 
         # Calculate when signal passes atmosphere + ionosphere
-        ionos_occ_et_vals = get_planet_occ_times(t_oet_et_vals, dsn,
+        ionos_occ_et_vals = cog.get_planet_occ_times(t_oet_et_vals, dsn,
                 planet, spacecraft, height_above=5000.)
         self.ionos_occ_spm_vals = et_to_spm(ionos_occ_et_vals)
         self.ionos_occ_et_vals = ionos_occ_et_vals
 
-        atmos_occ_et_vals = get_planet_occ_times(t_oet_et_vals, dsn,
+        atmos_occ_et_vals = cog.get_planet_occ_times(t_oet_et_vals, dsn,
                 planet, spacecraft, height_above=500.)
         self.atmos_occ_spm_vals = et_to_spm(atmos_occ_et_vals)
 
@@ -329,7 +311,7 @@ class Geometry(object):
         self.history = write_history_dict(input_vars, input_kwds, __file__)
 
 
-        self.freespace_km, self.freespace_spm = get_freespace(
+        self.freespace_km, self.freespace_spm = cog.get_freespace(
                 t_ret_spm_vals, year, doy, rho_km_vals,
                 phi_rl_deg_vals, t_oet_spm_vals, self.atmos_occ_spm_vals,
                 split_ind=self.split_ind, kernels=kernels)
@@ -343,18 +325,21 @@ class Geometry(object):
         Return NAIF toolkit version used.
 
         Returns:
-            (*str*): NAIF toolkit version in format '"V.N0066"'.
+            :naif_str (*str*): NAIF toolkit version in format '"V.N0066"'.
             
         """
         naif_ver = spice.tkvrsn('TOOLKIT')
-        return ('"V.' + naif_ver.split('_')[-1] + '"')
+        naif_str = ('"V.' + naif_ver.split('_')[-1] + '"')
+        return naif_str
 
     def get_profile_dir(self):
         """
-        Return observed profile direction.
+        Purpose:
+            Return observed profile direction.
 
         Returns:
-            (*str*): Profile direction as '"INGRESS"', '"EGRESS"', or '"BOTH"'.
+            :prof_dir (*str*): Profile direction as '"INGRESS"', 
+                                 '"EGRESS"', or '"BOTH"'.
         """
         rho = self.rho_km_vals
         dr_start = rho[1] - rho[0]
@@ -371,11 +356,13 @@ class Geometry(object):
 
     def verify_chord(self):
         """
-        Verify that an occultation with an increasing and decreasing
-        radial velocity is actually a chord occultation.
+        Purpose:
+            Verify that an occultation with an increasing and decreasing
+            radial velocity is actually a chord occultation.
 
         Returns:
-            (*str*): Profile direction as '"INGRESS"', '"EGRESS"', or '"BOTH"'.
+            :prof_dir (*str*): Profile direction as 
+                                '"INGRESS"', '"EGRESS"', or '"BOTH"'.
         """
         split_ind = self.get_chord_ind()
 
@@ -440,11 +427,12 @@ class Geometry(object):
 
     def get_chord_ind(self):
         """
-        Return index of where radial velocity sign change occurs in a chord
-        occultation.
+        Purpose:
+            Return index of where radial velocity sign change occurs in a chord
+            occultation.
 
         Returns:
-            (*int*): Index of where chord occultation goes from '"INGRESS"'
+            :ind (*int*): Index of where chord occultation goes from '"INGRESS"'
                 to '"EGRESS"' or vice versa.
         """
 

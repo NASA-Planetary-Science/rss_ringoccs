@@ -16,7 +16,7 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
             maintaining many of the original features of
             the input data.
         Arguments:
-            :y:
+            :y (*np.ndarray*):
                 The input "Noisy" data.
             :window_size (*int*):
                 The length of the window.
@@ -28,7 +28,7 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
             :deriv (*int*):
                 The order of the derivative what will be computed.
         Output:
-            :y_smooth:
+            :y_smooth (*np.ndarray*):
                 The data smoothed by the Savitzky-Golay filter.
                 This returns the nth derivative if the deriv
                 keyword has been set.
@@ -38,17 +38,6 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
             The main idea behind this approach is to make for
             each point a least-square fit with a polynomial of
             high order over a odd-sized window centered at the point.
-        References:
-            #. A. Savitzky, M. J. E. Golay, Smoothing and
-               Differentiation of Data by Simplified Least Squares
-               Procedures. Analytical Chemistry, 1964, 36 (8),
-               pp 1627-1639.
-            #. Numerical Recipes 3rd Edition: The Art of
-               Scientific Computing W.H. Press, S.A. Teukolsky,
-               W.T. Vetterling, B.P. Flannery Cambridge University
-               Press ISBN-13: 9780521880688
-        Dependencies:
-            #. Numpy
     """
     try:
         y = np.array(y)
@@ -122,61 +111,44 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
 
 def fresnel_transform(rho_km_vals, phi_rad_vals, F_km_vals, B_rad_vals,
                       d_km_vals, T_in, lambda_km_vals, w_km_vals, dx_km,
-                      wtype="kb25", norm=True, fft=False, fwd=False,
+                      wtype="kb25", norm=True, fwd=False,
                       verbose=True, psitype='full'):
     """
         Purpose:
             Computes the Fresnel Transform (Forward or Inverse)
             of a given data set.
         Arguments:
-            rho_km_vals:
-                Real Numpy Array
+            :rho_km_vals (*np.ndarray*):
                 Ring radius, in kilometers.
-            phi_rad_vals:
-                Real Numpy Array
+            :phi_rad_vals (*np.ndarray*):
                 Ring azimuth angle, in radians.
-            F_km_vals:
-                Real Numpy Array
+            :F_km_vals (*np.ndarray*):
                 Fresnel scale, in kilometers.
-            B_rad_vals:
-                Real Numpy Array
+            :B_rad_vals (*np.ndarray*):
                 Ring opening angle, in radians.
-            lambda_sky_km_vals:
-                Real Numpy Array
+            :lambda_sky_km_vals (*np.ndarray*):
                 Wavelength of recieved signal, in kilometers.
-            D_km_vals:
-                Real Numpy Array
+            :D_km_vals (*np.ndarray*):
                 Spacecraft-RIP distance, in kilometers.
-            dx_km:
-                Float
+            :dx_km (*float*):
                 Sample spacing, in kilometers.
-            T_in:
-                Complex Numpy Array
+            :T_in (*np.ndarray*):
                 Complex data set.
-            w_vals:
-                Real Numpy Array
+            :w_vals (*np.ndarray*):
                 Window width, in kilometers.
         Keywords:
-            wtype:
-                String
+            :wtype (*str*):
                 Window used in reconstruction.
-            norm:
-                Boolean
+            :norm (*bool*):
                 Boolean for determining if the transform
                 will be normalized by the window width.
-            fft:
-                Boolean
-                Whether or not to use FFT's.
-            fwd:
-                Boolean
+            :fwd (*bool*):
                 Used for determining if the Forward or
                 Inverse Fresnel Transform will be computed.
                 By default, the inverse transform is computed.
-            verbose:
-                Boolean
+            :verbose (*bool*):
                 Determines if progress reports print out.
-            psitype:
-                String
+            :psitype (*str*):
                 Chosen approximation for the psi variable.
                 Allowed strings are:
                     'full'      No Approximation is applied.
@@ -185,12 +157,9 @@ def fresnel_transform(rho_km_vals, phi_rad_vals, F_km_vals, B_rad_vals,
                     'MTR4'      Fourth Order Series from MTR86.
                     'Fresnel'   Standard Fresnel approximation.
         Output:
-            T_out:
+            :T_out (*np.ndarray*):
                 The Fresnel transform of T_in. Forward transform
                 if fwd=True was set, inverse transform otherwise.
-        History:
-            Translated from IDL: RJM - 2018/05/14 5:06 P.M.
-            Updated: RJM - 2018/09/25 10:27 P.M.
     """
     # Retrieve requested window type, starting point, and sample spacing.
     start, n_used = window_functions.get_range_actual(rho_km_vals, [0.1, 1.e6],
@@ -488,26 +457,19 @@ def compute_norm_eq(w_func, error_check=True):
     """
         Purpose:
             Compute normalized equivalenth width of a given function.
-        Variables:
-            :w_func:
-                A numpy array. Function with which to compute
-                the normalized equivalent width.
+        Arguments:
+            :w_func (*np.ndarray*):
+                Function with which to compute
+                the normalized equivalent width of.
         Outputs:
-            :normeq:
+            :normeq (*float*):
                 The normalized equivalent width of w_func.
-        Dependencies:
-            #. numpy
         Notes:
             The normalized equivalent width is effectively computed
             using Riemann sums to approximate integrals. Therefore
             large dx values (Spacing between points in w_func)
             will result in an inaccurate normeq. One should keep
             this in mind during calculations.
-        References:
-            #. Essam A. Marouf, G. Leonard Tyler, Paul A. Rosen,
-               Profiling Saturn's rings by radio occultation,
-               Icarus, Volume 68, Issue 1, 1986, Pages 120-166,
-               https://doi.org/10.1016/0019-1035(86)90078-3
         Examples:
             Compute the Kaiser-Bessel 2.5 window of width 30
             and spacing 0.1, and then use compute_norm_eq
@@ -535,8 +497,6 @@ def compute_norm_eq(w_func, error_check=True):
                 In [3]: normeq = dc.special_functions.compute_norm_eq(w)
                 In [4]: print(normeq)
                 1.50015
-        History:
-            Created: RJM - 2018/05/16 3:54 P.M.
     """
     if error_check:
         try:
@@ -578,21 +538,21 @@ def fresnel_scale(Lambda, d, phi, b, deg=False, error_check=True):
     """
         Purpose:
             Compute the Fresnel Scale from lambda, D, Phi, and B.
-        Variables:
-            :Lambda (*array* or *float*):
+        Arguments:
+            :Lambda (*np.ndarray* or *float*):
                 Wavelength of the incoming signal.
-            :d (*array* or *float*):
+            :d (*np.ndarray* or *float*):
                 RIP-Spacecraft Distance.
-            :phi (*array* or *float*):
+            :phi (*np.ndarray* or *float*):
                 Ring azimuth angle.
-            :b (*array* or *float*):
+            :b (*np.ndarray* or *float*):
                 Ring opening angle.
         Keywords:
             :deg (*bool*):
                 Set True if phi/b are in degrees.
                 Default is radians.
         Output:
-            :FRES:
+            :fres (*np.ndarray* or *float*):
                 The Fresnel scale.
         Note:
             Lambda and d must be in the same units.
@@ -600,8 +560,6 @@ def fresnel_scale(Lambda, d, phi, b, deg=False, error_check=True):
             as lambda and d. In addition, b and phi must also
             have the same units. If b and phi are in degrees,
             make sure to set deg=True. Default is radians.
-        History:
-            Translated from IDL: RJM - 2018/04/15 12:36 P.M.
     """
     if error_check:
         try:
@@ -726,22 +684,23 @@ def psi_d1_phi(r, r0, d, b, phi, phi0, error_check=True):
     """
         Purpose:
             Calculate dpsi/dphi from geometric variables.
-        Variables:
-            :r:
-                Numpy Array. Ring radius variable, in kilometers.
-            :r0:
-                Float. Ring intercept point, in kilometers.
-            :d:
-                Numpy Array. RIP-Spacecraft distance in kilometers.
-            :b:
-                Numpy Array. The ring opening angle, in radians.
-            :phi:
-                Numpy Array. The ring azimuth angle or r, in radians.
-            :phi0:
-                Float or Numpy Array. The ring azimuth angle
-                for r0, in radians.
-        History:
-            Translated from IDL: RJM - 2018/05/15 7:06 P.M.
+        Arguments:
+            :r (*np.ndarray*):
+                Ring radius variable, in kilometers.
+            :r0 (*float*):
+                Ring intercept point, in kilometers.
+            :d (*float*):
+                RIP-Spacecraft distance in kilometers.
+            :b (*float*):
+                The ring opening angle, in radians.
+            :phi (*np.ndarray*):
+                The ring azimuth angle or r, in radians.
+            :phi0 (*np.ndarray*):
+                The ring azimuth angle for r0, in radians.
+        Output:
+            :psi_d1_phi_vals (*np.ndarray*):
+                The partial derivative of psi
+                with respect to phi.
     """
     if error_check:
         try:
@@ -906,20 +865,23 @@ def psi_d2_phi(r, r0, d, b, phi, phi0, error_check=True):
     """
         Purpose:
             Calculate dpsi/dphi from geometric variables.
-        Variables:
-            :r:
-                Numpy Array. Ring radius variable, in kilometers.
-            :r0:
-                Float. Ring intercept point, in kilometers.
-            :d:
-                Numpy Array. RIP-Spacecraft distance in kilometers.
-            :b:
-                Numpy Array. The ring opening angle, in radians.
-            :phi:
-                Numpy Array. The ring azimuth angle or r, in radians.
-            :phi0:
-                Float or Numpy Array. The ring azimuth
-                angle for r0, in radians.
+        Arguments:
+            :r (*np.ndarray*):
+                Ring radius variable, in kilometers.
+            :r0 (*float*):
+                Ring intercept point, in kilometers.
+            :d (*float*):
+                RIP-Spacecraft distance in kilometers.
+            :b (*float*):
+                The ring opening angle, in radians.
+            :phi (*np.ndarray*):
+                The ring azimuth angle or r, in radians.
+            :phi0 (*np.ndarray*):
+                The ring azimuth angle for r0, in radians.
+        Output:
+            :psi_d2_phi_vals (*np.ndarray*):
+                The second partial derivative of psi
+                with respect to phi.
     """
     if error_check:
         try:
@@ -1090,26 +1052,21 @@ def fresnel_inverse(T_hat, ker, dx, f_scale):
             Compute the approximation Fresnel
             Inverse (MTR86 Equation 15)
         Arguments:
-            :T_hat:
-                Complex Numpy Array.
+            :T_hat (*np.ndarray*):
                 The complex transmittance of the
                 normalized diffraction data.
-            :ker:
-                Complex Numpy Array. The Fresnel Kernel.
+            :ker (*np.ndarray*):
+                he Fresnel Kernel.
             :dx (*float*):
                 The spacing between points in the window.
                 This is equivalent to the sample spacing.
                 This value is in kilometers.
-            :f_scale:
-                Real Numpy Array.
-                The Fresnel Scale as a function of
-                ring radius (km).
+            :f_scale (*np.ndarray*):
+                The Fresnel Scale, in kilometers.
         Outputs:
             :T (*complex*):
                 The fresnel inversion about the center
                 of the Fresnel Kernel.
-        Dependencies:
-            #. numpy
     """
     T = np.sum(ker * T_hat) * dx * (1.0+1.0j) / (2.0 * f_scale)
     return T
@@ -1119,24 +1076,25 @@ def psi_func(kD, r, r0, phi, phi0, B, D, error_check=True):
         Purpose:
             Calculate psi from geometry variables.
         Arguments:
-            :r:
-                Numpy Array. Ring radius variable, in kilometers.
+            :r (*np.ndarray*):
+                Ring radius variable, in kilometers.
             :r0 (*float*):
                 Ring intercept point, in kilometers.
-            :d:
-                Numpy Array. RIP-Spacecraft distance in kilometers.
-            :b:
-                Numpy Array. The ring opening angle, in radians.
-            :phi:
-                Numpy Array.
+            :d (*float*):
+                RIP-Spacecraft distance in kilometers.
+            :b (*float*):
+                The ring opening angle, in radians.
+            :phi (*np.ndarray*):
                 The ring azimuth angle or r, in radians.
-            :phi0:
-                Float or Numpy Array.
+            :phi0 (*np.ndarray*):
                 The ring azimuth angle for r0, in radians.
         Keywords:
             :verbose (*bool*):
                 Boolean for printing out information to
                 the command line.
+        Outputs:
+            :psi (*np.ndarray*):
+                Geometric quantity found in the Fresnel kernel.
     """
     if error_check:
         try:
@@ -1301,11 +1259,11 @@ def resolution_inverse(x, error_check=True):
     """
         Purpose:
             Compute the inverse of y = x/(exp(-x)+x-1)
-        Variables:
-            :x:
-                A real or complex number, or numpy array.
+        Arguments:
+            :x (*np.ndarray* or *float*):
+                Independent variable
         Outputs:
-            :f:
+            :f (*np.ndarray* or *float*):
                 The inverse of x/(exp(-x)+x-1)
         Dependencies:
             #. numpy
@@ -1320,9 +1278,6 @@ def resolution_inverse(x, error_check=True):
             #. The scipy.special lambertw function is slightly
                inaccurate when it's argument is near -1/e. This
                argument is z = exp(x/(1-x)) * x/(1-x)
-        References:
-            [1] http://mathworld.wolfram.com/LambertW-Function.html
-            [2] https://en.wikipedia.org/wiki/Lambert_W_function
         Examples:
             Plot the function on the interval (1,2)
                 In [1]: import rss_ringoccs.diffcorr.special_functions as sf
@@ -1384,15 +1339,12 @@ def fresnel_cos(x, error_check=True):
     """
         Purpose:
             Compute the Fresnel cosine function.
-        Variables:
-            :x:
+        Arguments:
+            :x (*np.ndarray* or *float*):
                 A real or complex number, or numpy array.
         Outputs:
-            :f_cos:
+            :f_cos (*np.ndarray* or *float*):
                 The fresnel cosine integral of x.
-        Dependences:
-            #. numpy
-            #. scipy
         Notes:
             [1] The Fresnel Cosine integral is the solution to the
                 equation dy/dx = cos(pi/2 * x^2), y(0) = 0. In other
@@ -1408,11 +1360,6 @@ def fresnel_cos(x, error_check=True):
                 of diffraction through a square well. Because of this
                 it is useful for forward modeling problems in 
                 radiative transfer and diffraction.
-        References:
-            [1] https://en.wikipedia.org/wiki/Fresnel_integral
-            [2] https://en.wikipedia.org/wiki/Error_function
-            [3] http://mathworld.wolfram.com/FresnelIntegrals.html
-            [4] http://mathworld.wolfram.com/Erf.html
         Examples:
             Compute and plot the Fresnel Cosine integral.
                 In [1]: import rss_ringoccs.diffcorr.special_functions as sf
@@ -1421,10 +1368,6 @@ def fresnel_cos(x, error_check=True):
                 In [4]: x = np.array(range(0,10001))*0.01 - 50.0
                 In [5]: y = sf.fresnel_cos(x)
                 In [6]: plt.show(plt.plot(x,y))
-        History:
-            Translated from IDL:     RJM - 2018/05/14 2:13 P.M.
-            Allow complex arguments: RJM - 2018/05/16 1:25 P.M.
-            Updated and added error check: RJM - 2018/09/19 7:00 P.M.
     """
     if error_check:
         y = x
@@ -1467,14 +1410,11 @@ def fresnel_sin(x, error_check=True):
         Purpose:
             Compute the Fresnel sine function.
         Variables:
-            :x:
-                A real or complex argument, or numpy array.
+            :x (*np.ndarray* or *float*):
+                The independent variable.
         Outputs:
-            :f_sin:
+            :f_sin (*np.ndarray* or *float*):
                 The fresnel sine integral of x.
-        Dependences:
-            #. numpy
-            #. scipy
         Notes:
             [1] The Fresnel sine integral is the solution to the
                 equation dy/dx = sin(pi/2 * x^2), y(0) = 0. In other
@@ -1490,11 +1430,6 @@ def fresnel_sin(x, error_check=True):
                 of diffraction through a square well. Because of this
                 is is useful for forward modeling problems in 
                 radiative transfer and diffraction.
-        References:
-            [1] https://en.wikipedia.org/wiki/Fresnel_integral
-            [2] https://en.wikipedia.org/wiki/Error_function
-            [3] http://mathworld.wolfram.com/FresnelIntegrals.html
-            [4] http://mathworld.wolfram.com/Erf.html
         Examples:
             Compute and plot the Fresnel Sine integral.
                 In [1]: import rss_ringoccs.diffcorr.special_functions as sf

@@ -14,7 +14,6 @@ Notes:
 Dependencies:
 
     #. numpy
-    #. pdb
     #. scipy
     #. sys
 
@@ -24,7 +23,6 @@ Dependencies:
 import numpy as np
 from scipy.interpolate import splrep,splev
 import sys
-import pdb
 
 from ..tools.history import write_history_dict
 from ..tools.write_output_files import write_output_files
@@ -92,11 +90,6 @@ class Calibration(object):
         :FSPFIT_chi_squared (*float*):
                         :math:`\chi^2 = \\frac{1}{N-m}\sum
                         ((\hat{P}_0(t)-P_0(t))/\hat{P}_0(t))^2`
-
-    Returns:
-        Object instance with attributes associated with the process of
-        calibrating the measured signal :math:`I_{m}+iQ_{m}` as well
-        as the method for phase-correcting :math:`I_{m}+iQ_{m}`.
     """
 
     def __init__(self, rsr_inst, geo_inst, fof_order=9, pnf_order=3, dt_cal=1.0,
@@ -127,7 +120,7 @@ class Calibration(object):
 
 
         # Calculate frequency offset fit
-        ## Use default residual frequency fit
+        # Use default residual frequency fit
         fit_inst = FreqOffsetFit(rsr_inst, geo_inst, verbose=verbose,
                 poly_order=fof_order, write_file=write_file)
 
@@ -140,21 +133,22 @@ class Calibration(object):
                 rsr_inst, order=pnf_order,verbose=verbose,interact=interact,
                 write_file=write_file)
 
-        '''
-            Resample calibration results to spm_cal
-        '''
         spm_cal = np.arange(geo_inst.t_oet_spm_vals[0],
                 geo_inst.t_oet_spm_vals[-1],dt_cal)
+
         # Evaluate f_sky_pred at spm_cal
         f_sky_pred_splcoef = splrep(fit_inst.f_spm, fit_inst.f_sky_pred)
         f_sky_pred_cal = splev(spm_cal,f_sky_pred_splcoef)
+
         # Evaluate f_sky_resid_fit at spm_cal
         f_sky_resid_fit_splcoef = splrep(fit_inst.f_spm,
                 fit_inst.f_sky_resid_fit)
         f_sky_resid_fit_cal = splev(spm_cal,f_sky_resid_fit_splcoef)
+
         # Evaluate f_offset_fit at spm_cal
         f_offset_fit_splcoef = splrep(fit_inst.f_spm,fit_inst.f_offset_fit)
         f_offset_fit_cal = splev(spm_cal,f_offset_fit_splcoef)
+
         # Evaluate spline fit at spm_cal
         p_free_cal_splcoef = splrep(norm_inst.spm_down, norm_inst.pnorm_fit)
         p_free_cal = splev(spm_cal,p_free_cal_splcoef)

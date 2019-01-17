@@ -605,6 +605,7 @@ class DiffractionCorrection(object):
         # Assign resolution and forward variables as attributes.
         if verbose:
             print("\tMultiplying requested resolution by res_factor...")
+
         self.res = res*res_factor
         self.fwd = fwd
 
@@ -677,56 +678,15 @@ class DiffractionCorrection(object):
 
             # History from the NormDiff instance.
             self.dathist = NormDiff.history
-        except (AttributeError, TypeError):
-            try:
-                # Ring radius
-                self.rho_km_vals = np.array(NormDiff.rho_km_vals)
-
-                # Retrieve normalized power.
-                self.p_norm_vals = np.array(NormDiff.p_norm_vals)
-
-                # Phase of signal.
-                self.phase_rad_vals = np.array(NormDiff.phase_rad_vals)
-
-                # Ring opening angle.
-                self.B_rad_vals = np.array(NormDiff.B_rad_vals)
-
-                # Spacecraft-to-Ring Intercept Point (RIP) distance.
-                self.D_km_vals = np.array(NormDiff.D_km_vals)
-
-                # Ring azimuth angle.
-                self.phi_rad_vals = np.array(NormDiff.phi_rad_vals)
-
-                # Frequency from the recieved signal.
-                self.f_sky_hz_vals = np.array(NormDiff.f_sky_hz_vals)
-
-                # RIP velocity.
-                self.rho_dot_kms_vals = np.array(NormDiff.rho_dot_kms_vals)
-
-                n_elements = np.size(self.rho_km_vals)
-
-                # If the following variables could not be found, set to zero.
-                self.t_oet_spm_vals = np.zeros(n_elements)
-                self.t_ret_spm_vals = np.zeros(n_elements)
-                self.t_set_spm_vals = np.zeros(n_elements)
-                self.rho_corr_pole_km_vals = np.zeros(n_elements)
-                self.rho_corr_timing_km_vals = np.zeros(n_elements)
-                self.phi_rl_rad_vals = np.zeros(n_elements)
-                self.raw_tau_threshold_vals = np.zeros(n_elements)
-
-                # Set history.
-                self.dathist = NormDiff.history
-
-                del n_elements
-            except (AttributeError, TypeError) as errmes:
-                raise AttributeError(
-                    "\n\tEither your instance of Normdiff is missing\n"
-                    "\tan attribute, or one of its attributes was\n"
-                    "\tunable to be converted into a numpy array.\n"
-                    "\tPlease check your input data.\n"
-                    "\tOriginal Error Message:\n\t\t %s\n"
-                    % (errmes)
-                )
+        except (AttributeError, TypeError, NameError) as errmes:
+            raise AttributeError(
+                "\n\tEither your instance of Normdiff is missing\n"
+                "\tan attribute, or one of its attributes was\n"
+                "\tunable to be converted into a numpy array.\n"
+                "\tPlease check your input data.\n"
+                "\tOriginal Error Message:\n\t\t %s\n"
+                % (errmes)
+            )
 
         try:
             # Make sure input data are arrays of floating point numbers.

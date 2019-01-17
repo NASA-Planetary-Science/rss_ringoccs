@@ -284,7 +284,7 @@ class DiffractionCorrection(object):
     """
     def __init__(self, NormDiff, res, rng="all", wtype="kb25", fwd=False,
                  norm=True, verbose=False, bfac=True, sigma=2.e-13,
-                 psitype="full", write_file=False, res_factor=0.75):
+                 psitype="fresnel4", write_file=False, res_factor=0.75):
 
         # Set a variable for the starting time of the computation.
         t1 = time.time()

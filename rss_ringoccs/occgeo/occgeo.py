@@ -27,7 +27,7 @@ from ..tools.et_to_spm import et_to_spm
 from ..tools.write_output_files import write_output_files
 from ..tools.history import write_history_dict
 
-import calc_occ_geometry as cog
+from . import calc_occ_geometry as cog
 
 from scipy.interpolate import splrep
 from scipy.interpolate import splev

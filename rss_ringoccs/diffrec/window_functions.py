@@ -47,10 +47,7 @@ def rect(w_in, dx, error_check=True):
             Create a rectangular window function of width 10,
             with 0.01 spacing spacing between points.
                 In [1]: from rss_ringoccs import diffrec
-                In [2]: diffrec.rect(10,0.1)
-        History:
-            Translated from IDL: RJM - 2018/05/15 9:03 A.M.
-            Lowercase variables: RJM - 2018/05/16 1:29 P.M.
+                In [2]: diffrec.rect(10, 0.1)
     """
     if error_check:
         if not isinstance(w_in, float):
@@ -142,9 +139,6 @@ def coss(w_in, dx, error_check=True):
                 Icarus, Volume 68, Issue 1, 1986, Pages 120-166,
                 https://doi.org/10.1016/0019-1035(86)90078-3
             [2] https://en.wikipedia.org/wiki/Window_function
-        History:
-            Translated from IDL: RJM - 2018/05/15 9:41 A.M.
-            Lowercase variables: RJM - 2018/05/16 1:34 P.M.
     """
     if error_check:
         if not isinstance(w_in, float):
@@ -317,9 +311,6 @@ def kb25(w_in, dx, error_check=True):
                 First Kind and Toader-Qi Mean, Yang, ZH. & Chu, YM.
                 J Inequal Appl (2016): 40., Springer,
                 https://doi.org/10.1186/s13660-016-0988-1
-        History:
-            Translated from IDL: RJM - 2018/05/15 9:43 A.M.
-            Lowercase variables: RJM - 2018/05/16 3:23 P.M.
     """
     if error_check:
         if not isinstance(w_in, float):
@@ -430,9 +421,6 @@ def kb35(w_in, dx, error_check=True):
                 First Kind and Toader-Qi Mean, Yang, ZH. & Chu, YM.
                 J Inequal Appl (2016): 40., Springer,
                 https://doi.org/10.1186/s13660-016-0988-1
-        History:
-            Translated from IDL: RJM - 2018/05/15 9:43 A.M.
-            Lowercase variables: RJM - 2018/06/16 3:26 P.M.
     """
     if error_check:
         if not isinstance(w_in, float):
@@ -542,9 +530,6 @@ def kbmd20(w_in, dx, error_check=True):
                 for the modified version.
         References:
             [1] https://en.wikipedia.org/wiki/Window_function
-        History:
-            Translated from IDL: RJM - 2018/05/15 9:44 A.M.
-            Lowercase variables: RJM - 2018/05/16 3:34 P.M.
     """
     if error_check:
         if not isinstance(w_in, float):
@@ -651,9 +636,6 @@ def kbmd25(w_in, dx, error_check=True):
                 for the modified version.
         References:
             [1] https://en.wikipedia.org/wiki/Window_function
-        History:
-            Translated from IDL: RJM - 2018/05/15 9:44 A.M.
-            Lowercase variables: RJM - 2018/05/16 3:34 P.M.
     """
     if error_check:
         if not isinstance(w_in, float):
@@ -763,8 +745,6 @@ def kbal(w_in, dx, al, error_check=True):
                 First Kind and Toader-Qi Mean, Yang, ZH. & Chu, YM.
                 J Inequal Appl (2016): 40., Springer,
                 https://doi.org/10.1186/s13660-016-0988-1
-        History:
-            Created: RJM - 2018/05/16 3:50 P.M.
     """
     if error_check:
         if not isinstance(w_in, float):
@@ -899,8 +879,6 @@ def kbmdal(w_in, dx, al, error_check=True):
                 First Kind and Toader-Qi Mean, Yang, ZH. & Chu, YM.
                 J Inequal Appl (2016): 40., Springer,
                 https://doi.org/10.1186/s13660-016-0988-1
-        History:
-            Created: RJM - 2018/05/16 3:50 P.M.
 
     tw  = check_pos_real(w_in)
     tdx = check_pos_real(dx)
@@ -1019,8 +997,6 @@ def window_width(res, normeq, fsky, fres, rdot,
                 The time derivative of the ring radius.
         Output:
             w_vals:  The window width as a function of ring radius.
-        History:
-            Translated from IDL: RJM - 2018/05/15 8:38 P.M.
     """
     if error_check:
         if (not isinstance(res, float)):
@@ -1317,9 +1293,6 @@ def get_range_actual(rho, rng, w_vals, error_check=True):
         Output:
             start:  The allowed starting point for processing.
             n_used: The number of points allowed for processing.
-        History:
-            Translated from IDL: RJM - 2018/05/15 3:19 P.M.
-            Added error checks: RJM - 2018/09/25 8:46 A.M.
     """
     if error_check:
         try:

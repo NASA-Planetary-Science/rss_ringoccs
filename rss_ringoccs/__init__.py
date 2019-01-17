@@ -44,26 +44,25 @@
         #. platform
 
     References:
-        .. [MTR1986] Essam A. Marouf, G. Leonard Tyler, Paul A. Rosen,
+        .. [MTR1986]    Essam A. Marouf, G. Leonard Tyler, Paul A. Rosen,
             "Profiling Saturn's rings by radio occultation".
             Icarus, Volume 68, Issue 1, 1986, Pages 120-166,
             https://doi.org/10.1016/0019-1035(86)90078-3
-        .. [CRSUG2018] `Cassini Radio Science User's Guide
+        .. [CRSUG2018]  `Cassini Radio Science User's Guide
             <https://pds-rings.seti.org/cassini/rss/Cassini%20Radio
             %20Science%20Users%20Guide%20-%2030%20Sep%202018.pdf>`_.
-        .. [GRESH86] Gresh et al. (1986) "An analysis of bending waves
+        .. [GRESH86]    Gresh et al. (1986) "An analysis of bending waves
             in Saturn's rings using Voyager radio occultation data".
             Icarus 68, 481-502.
-        .. [NICH14] Philip D. Nicholson, Richard G. French, Colleen A.
+        .. [NICH14]     Philip D. Nicholson, Richard G. French, Colleen A.
             McGhee-French, Matthew M. Hedman, Essam A. Marouf, Joshua
             E. Colwell, Katherine Lonergan, Talia Sepersky.
             "Noncircular features in Saturn’s rings II: The C ring".
             Icarus, Volume 241, 2014, Pages 373-396, ISSN 0019-1035.
             https://doi.org/10.1016/j.icarus.2014.06.024 or
             http://www.sciencedirect.com/science/article/pii/S0019103514003443
-        .. [NAIF] NASA JPL/NAIF spice toolkit
-            https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/Tutorials/
-            pdf/individual_docs/27_derived_quant.pdf
+        .. [NAIF]       NASA JPL/NAIF spice toolkit
+            https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/Tutorials/pdf/individual_docs/27_derived_quant.pdf
 
 """
 

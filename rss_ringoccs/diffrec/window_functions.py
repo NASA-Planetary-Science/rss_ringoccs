@@ -16,16 +16,17 @@ IV0_35 = 7257.7994923041760
 
 def rect(w_in, dx, error_check=True):
     """
-        Function:
-            rect
         Purpose:
             Create the rectangular window function
         Variables:
-            W:      Window width.
-            dx:     Width of one point (Or one bin).
+            :W (*float*):
+                Window width.
+            :dx (*float*):
+                Width of one point (Or one bin).
         Outputs:
-            w_func: The rectungular window function of width w_in
-                    and spacing dx between points.
+            :w_func:
+                The rectungular window function of width w_in
+                and spacing dx between points. Numpy array.
         Dependencies:
             [1] numpy
         Notes:
@@ -724,8 +725,6 @@ def kbmd25(w_in, dx, error_check=True):
 
 def kbal(w_in, dx, al, error_check=True):
     """
-        Function:
-            kb35
         Purpose:
             Create Kaiser-Bessel 3.5 window.
         Variables:
@@ -1300,21 +1299,19 @@ def normalize(dx, ker, f_scale, error_check=True):
 
 def get_range_actual(rho, rng, w_vals, error_check=True):
     """
-        Function:
-            get_range_actual
         Purpose:
             Compute the possible allowed range for processing,
             taking into consideration available data (rho),
             the requested region, and the size of the
             windows needed (w_vals).
         Variables:
-            rho:
+            :rho:
                 Numpy Array
                 Radial range of the data.
-            rng:
+            :rng:
                 List
                 Requested start/end points for processing.
-            w_vals:
+            :w_vals:
                 Numpy Array
                 Window width as a function of radius.
         Output:

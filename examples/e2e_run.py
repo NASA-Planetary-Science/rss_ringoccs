@@ -2,7 +2,7 @@
 
 e2e_run.py
 
-Purpose: 
+Purpose:
     Example rss_ringoccs package script to produce a 500-m resolution
     profile of the Huygens ringlet for Rev007 E X43.
 
@@ -24,11 +24,11 @@ sys.path.remove('../')
 
 # ***** Begin user input *****
 rsr_file = '../data/co-s-rss-1-sroc1-v10/cors_0727/SROC1_123/RSR/S10SROE2005123_0740NNNX43RD.2A1'
-kernels_list_file = 'Rev007_list_of_kernels.txt'
-kernels = 'Rev007_meta_kernel.ker'
+
+kernels = '../tables/e2e_kernels.ker'
 
 dr_km_desired = 0.25
-res_km = 0.5
+res_km = 1.0
 
 planet = 'Saturn'
 spacecraft = 'Cassini'
@@ -38,7 +38,7 @@ pnf_order = 3
 psitype = 'Fresnel4'
 
 verbose = True
-write_file = True
+write_file = False
 interact = False
 
 feature_km = 117830.
@@ -69,6 +69,15 @@ dlp_inst_ing, dlp_inst_egr = (
         rss.calibration.DiffractionLimitedProfile.create_dlps(
             rsr_inst, geo_inst, cal_inst, dr_km_desired, write_file=write_file,
             verbose=verbose))
+
+omega = 2. * np.pi * cal_inst.f_sky_hz_vals[100]
+sigma = 2.e-13
+alpha = ( omega**2. * sigma**2. ) / ( 2. * geo_inst.rho_dot_kms_vals[100])
+x = np.arange(0,10,0.01)
+P = x / (alpha*geo_inst.F_km_vals[100])
+
+plt.plot(x,P)
+plt.show()
 
 # Invert profile for full occultation
 if dlp_inst_ing is not None:

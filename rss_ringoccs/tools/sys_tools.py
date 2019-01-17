@@ -136,7 +136,7 @@ def latex_summary_doc(pdffil, res, outfilename):
         pass
 
     if (res < 1.0):
-        res = str(res*1000.0))
+        res = str(res*1000.0)
         res = "%sM" % (res)
     else:
         res = str(res)

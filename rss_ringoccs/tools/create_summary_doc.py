@@ -11,7 +11,6 @@ Revisions:
 
 import numpy as np
 import matplotlib
-#from pds3_reader import PDS3Reader
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from scipy.signal import savgol_filter
@@ -20,7 +19,6 @@ from .write_output_files import construct_filepath
 import pdb
 import time
 import spiceypy as spice
-#from plot_rss_occ import plot_rss_occ
 
 sat_radius =  60268.
 rings_km = [74490., 91983., 117516., 122052., 136774., 139826.]
@@ -44,13 +42,19 @@ def plot_bullseye(pdf, geo_inst):
     band = geo_inst.rev_info['band']
     t_oet_spm = geo_inst.t_oet_spm_vals
 
+    mask = np.array([True for x in range(len(t_oet_spm))])
+    for ind in range(len(t_oet_spm)):
+        if t_oet_spm[ind] in geo_inst.ionos_occ_spm_vals or (
+                rho_km[ind] > 150000.):
+            mask[ind] = False
+
     # Radio track relative to Earth direction
-    occ_ed_x = rho_km * np.cos(phi_ora_rad)
-    occ_ed_y = rho_km * np.sin(phi_ora_rad)
+    occ_ed_x = rho_km[mask] * np.cos(phi_ora_rad[mask])
+    occ_ed_y = rho_km[mask] * np.sin(phi_ora_rad[mask])
    
     # Radio track relative to inertial referenc
-    occ_an_x = rho_km * np.cos(phi_rl_rad)
-    occ_an_y = rho_km * np.sin(phi_rl_rad)
+    occ_an_x = rho_km[mask] * np.cos(phi_rl_rad[mask])
+    occ_an_y = rho_km[mask] * np.sin(phi_rl_rad[mask])
     
     theta = np.linspace(0., 2.*np.pi, 361)
     plt.figure()
@@ -266,8 +270,13 @@ def plot_occ_earth_view(pdf, geo_inst):
 
 
     # add occultation track
-    occx1 = rho_km * np.cos(np.radians(phi_rl_deg-90.)) * np.cos(Brad)
-    occy1 = rho_km * np.sin(np.radians(phi_rl_deg-90.)) * np.sin(Brad)
+    rho_mask = np.array([True for x in range(len(rho_km))])
+
+    for ind in range(len(rho_km)):
+        if rho_km[ind] > 150000.:
+            rho_mask[ind] = False
+    occx1 = rho_km[rho_mask] * np.cos(np.radians(phi_rl_deg[rho_mask]-90.)) * np.cos(Brad)
+    occy1 = rho_km[rho_mask]* np.sin(np.radians(phi_rl_deg[rho_mask]-90.)) * np.sin(Brad)
     blocked_mask = np.array([False for x in range(len(occx1))])
     for i in range(len(occx1)):
         if geo_inst.t_oet_et_vals[i] in geo_inst.ionos_occ_et_vals:
@@ -337,9 +346,15 @@ def plot_occ_pole_view(pdf, geo_inst):
         ry = Re * np.sin(nlong)
         plt.plot([0.,rx], [0.,ry], color='black', linewidth=lw1)
 
+    rho_mask = np.array([True for x in range(len(rho_km))])
+
+    for ind in range(len(rho_km)):
+        if rho_km[ind] > 150000.:
+            rho_mask[ind] = False
+
     # add occultation track
-    occx = rho_km * np.cos(np.radians(phi_ora_deg-90.))
-    occy = rho_km * np.sin(np.radians(phi_ora_deg-90.))
+    occx = rho_km[rho_mask] * np.cos(np.radians(phi_ora_deg[rho_mask]-90.))
+    occy = rho_km[rho_mask]* np.sin(np.radians(phi_ora_deg[rho_mask]-90.))
 
     occr = np.sqrt(occx**2 + occy**2)
     plt.plot(occx[occr < Re], occy[occr<Re], linestyle='--', color='blue',
@@ -361,7 +376,7 @@ def plot_occ_pole_view(pdf, geo_inst):
     pdf.savefig()
     return pdf
 
-def plot_geo_overview(pdf, geo_inst, dlp_inst):
+def plot_geo_overview(pdf, geo_inst, tau_inst):
     t_oet_hrs = geo_inst.t_oet_spm_vals/60./60.
     t_set_hrs = geo_inst.t_set_spm_vals/60./60.
     rho_km = geo_inst.rho_km_vals
@@ -372,9 +387,17 @@ def plot_geo_overview(pdf, geo_inst, dlp_inst):
     F_km = geo_inst.F_km_vals
     band = geo_inst.rev_info['band']
     phi_rl_dot_kms = geo_inst.phi_rl_dot_kms_vals
+    mask_rad = np.array([True for x in range(len(rho_km))])
+    mask_az= np.array([True for x in range(len(rho_km))])
+    for val in range(len(rho_km)):
+        if rho_dot_kms[val] < -150 or rho_dot_kms[val] > 150:
+            mask_rad[val] = False
+        if phi_rl_dot_kms[val] < -150 or phi_rl_dot_kms[val] > 150:
+            mask_az[val] = False
 
-    tau_threshold_vals = dlp_inst.tau_threshold_vals
-    rho_km_dlp = dlp_inst.rho_km_vals
+
+    tau_threshold_vals = tau_inst.tau_threshold_vals
+    rho_km_tau = tau_inst.rho_km_vals
 
     nrow = 3
     ncol = 2
@@ -389,9 +412,11 @@ def plot_geo_overview(pdf, geo_inst, dlp_inst):
     # gridspec_kw = {'width_ratios':[3, 1]}
     
     
-    ax1.set_title('Time (HPM 2005-123)', fontweight='bold', fontsize=10)
+    ax1.set_title('Time (HPM ' + geo_inst.rev_info['year'] + '-'
+                + geo_inst.rev_info['doy'] +')', fontweight='bold', fontsize=10)
     ax1.plot(rho_km/1000., t_oet_hrs, 'b', label = 'ERT')
     ax1.plot(rho_km/1000., t_set_hrs, 'r', label='SCET')
+    ax1.legend(loc='upper right')
     
     ax2.set_title('S/C Distance D/RS', fontweight='bold', fontsize=10)
     ax2.plot(rho_km/1000., D_km/sat_radius, 'k')
@@ -399,19 +424,23 @@ def plot_geo_overview(pdf, geo_inst, dlp_inst):
     ax3.set_title('Longitude, Azimuth (deg)',fontweight='bold', fontsize=10)
     ax3.plot(rho_km/1000., phi_rl_deg, 'b', label = '$\phi_E$')
     ax3.plot(rho_km/1000., phi_ora_deg, 'r', label = '$\phi_{J2K}$')
+    ax3.legend(loc='upper right')
     
     
     ax4.set_title('Occ Track Velocity (km/s)', fontweight='bold', 
              fontsize=10)
-    ax4.plot(rho_km/1000., rho_dot_kms, 'r', label = '$V_{rad}$')
-    ax4.plot(rho_km/1000., phi_rl_dot_kms, 'b', label = '$V_{az}$')
+    ax4.plot(rho_km[mask_rad]/1000., rho_dot_kms[mask_rad], 'r', label = '$V_{rad}$')
+    ax4.plot(rho_km[mask_az]/1000., phi_rl_dot_kms[mask_az], 'b', label = '$V_{az}$')
+    ax4.legend(loc='upper right')
     
     ax5.set_title('Fresnel Scale (km)', fontweight='bold', fontsize=10)
     ax5.plot(rho_km/1000., F_km, 'r', label = str(band))
+    ax5.legend(loc='upper right')
     
-    ax6.set_title('Optical Depth Threshold', fontweight='bold',
+    ax6.set_title('Threshold Optical Depth', fontweight='bold',
             fontsize=10)
-    ax6.plot(rho_km_dlp/1000., tau_threshold_vals, label=str(band))
+    ax6.plot(rho_km_tau/1000., tau_threshold_vals, label=str(band))
+    ax6.legend(loc='upper right')
     
     radii = [74.490, 91.983, 117.516, 122.052, 133.424, 136.774, 140.461]
     for row in range(nrow):
@@ -432,7 +461,7 @@ def plot_geo_overview(pdf, geo_inst, dlp_inst):
 
 def plot_cal_overview(pdf, cal_inst, dlp_inst):
     t_oet_spm  = cal_inst.t_oet_spm_vals
-    F_sky_resid_fit= cal_inst.f_sky_resid_fit_vals
+    F_sky_resid_fit= np.interp(dlp_inst.t_oet_spm_vals, t_oet_spm, cal_inst.f_sky_resid_fit_vals)
     F_sky_resid = np.interp(t_oet_spm, cal_inst.f_spm, cal_inst.f_sky_resid)
     F_sky_hz = cal_inst.f_sky_hz_vals
     P_free = cal_inst.p_free_vals
@@ -442,12 +471,11 @@ def plot_cal_overview(pdf, cal_inst, dlp_inst):
     P_free_dlp = np.interp(t_oet_spm_dlp, t_oet_spm, P_free)
     P_obs_dlp = savgol_filter(dlp_inst.p_norm_vals * P_free_dlp, 61, 3)
 
+    floor_fsky = int(np.nanmax(F_sky_hz/1.e6))
 
-
-
-    ytitle1 = '$f_{sky}$ - 8426 (MHz)'
+    ytitle1 = '$f_{sky}$ - ' + str(floor_fsky) + ' (MHz)'
     ytitle2 = '$f_{resid}$ (Hz)'
-    ytitle3 = '$P_{free}$'
+    ytitle3 = '$P_{free}$ (2x10$^{9}$)'
     xtitle = 'Observed Event Time, $t_{ERT}$ (1000 s)'
     xlim = [min(dlp_inst.t_oet_spm_vals)/1000., max(dlp_inst.t_oet_spm_vals)/1000.]
 
@@ -455,26 +483,26 @@ def plot_cal_overview(pdf, cal_inst, dlp_inst):
     ncol = 1
     fig3, axes3 = plt.subplots(nrow, ncol, figsize=(8.5, 11), sharex=True)
     fig3.subplots_adjust(hspace=0)
-    axes3[0].plot(t_oet_spm/1000., (F_sky_hz-8426.e6)*1.e-6, color='b')
+    axes3[0].plot(t_oet_spm/1000., (F_sky_hz-(floor_fsky*1.e6))*1.e-6, color='b')
     axes3[0].set_ylabel(ytitle1)
     axes3[0].set_xlim(xlim)
     
-    axes3[1].plot(t_oet_spm/1000., F_sky_resid, color='g')
-    axes3[1].plot(t_oet_spm/1000., F_sky_resid_fit, color='r')
+    axes3[1].plot(t_oet_spm/1000., F_sky_resid, color='b')
+    axes3[1].plot(dlp_inst.t_oet_spm_vals/1000., F_sky_resid_fit, color='r')
     axes3[1].set_ylabel(ytitle2)
     axes3[1].set_xlim(xlim)
     axes3[1].set_ylim([np.nanmin(F_sky_resid_fit)-0.1, 
                         np.nanmax(F_sky_resid_fit)+0.1])
 
-    axes3[2].plot(t_oet_spm_dlp/1000., P_obs_dlp, color='g')
-    axes3[2].plot(t_oet_spm_dlp/1000., P_free_dlp, color='r')
+    axes3[2].plot(t_oet_spm_dlp/1000., P_obs_dlp*2.e-9, color='b')
+    axes3[2].plot(t_oet_spm_dlp/1000., P_free_dlp*2.e-9, color='r')
     axes3[2].set_ylabel(ytitle3)
     axes3[2].set_xlabel(xtitle)
     axes3[2].set_xlim(xlim)
     pdf.savefig()
     plt.close()
     return pdf
-def plot_tau_overview(pdf, geo_inst, dlp_inst, tau_inst):
+def plot_tau_overview(pdf, geo_inst, tau_inst):
     tau = tau_inst.tau_vals
     tau_thresh = tau_inst.tau_threshold_vals
     rho_tau = tau_inst.rho_km_vals
@@ -484,20 +512,30 @@ def plot_tau_overview(pdf, geo_inst, dlp_inst, tau_inst):
 
     tau = tau_inst.tau_vals
     tau1 = savgol_filter(tau, 61, 3)
-    tau_thresh = dlp_inst.tau_threshold_vals
-    rho_dlp = dlp_inst.rho_km_vals
     rho_tau = tau_inst.rho_km_vals
-    elev_deg = geo_inst.elev_deg_vals
+    elev_deg = np.interp(tau_inst.t_oet_spm_vals, geo_inst.t_oet_spm_vals,
+            geo_inst.elev_deg_vals)
     rho_geo = geo_inst.rho_km_vals
+
+
 
     dsn = geo_inst.rev_info['dsn']
 
-    ylim1= [max(tau), -0.19]
+    #ylim1= [5.5, -0.19]
+    max_thresh = np.nanmax(tau_thresh)
+    if max(tau1) > 5.5:
+        ylim1 = [5.5, -0.2]
+    else:
+        ylim1 = [max(tau1), -0.2]
     xlim1 = [70., 145.]
 
-    ylim2 = [20., 60.]
+    ylim2 = [0., 90.]
 
     fig, ax1 = plt.subplots(figsize=(11,7))
+    plt.title('Cassini RSS: Rev' + tau_inst.rev_info['rev_num'] + '-'
+            + tau_inst.rev_info['prof_dir'][1:-1] + ', '
+            + tau_inst.rev_info['band'][1:-1]
+            + '-Band, ' + tau_inst.rev_info['dsn'])
     ax2 = ax1.twinx()
     ax1.tick_params(axis='y', colors='blue')
     ax2.tick_params(axis='y', colors='magenta')
@@ -506,7 +544,7 @@ def plot_tau_overview(pdf, geo_inst, dlp_inst, tau_inst):
     ax2.yaxis.label.set_color('magenta')
 
     ax1.plot(rho_tau/1000., tau, color='blue', linewidth=1.0)
-    ax1.plot(rho_dlp/1000., tau_thresh, linestyle='--', color='red', linewidth=1.0)
+    ax1.plot(rho_tau/1000., tau_thresh, linestyle='--', color='red', linewidth=1.0)
     ax1.set_ylabel('Normal Optical Depth')
     ax1.set_xlabel('Ring Radius, $\\rho$ (1000 km)')
     ax1.spines['left'].set_color('blue')
@@ -514,7 +552,7 @@ def plot_tau_overview(pdf, geo_inst, dlp_inst, tau_inst):
     ax1.set_ylim(ylim1)
     ax1.grid(b=True)
 
-    ax2.plot(rho_geo/1000., elev_deg, color='magenta')
+    ax2.plot(rho_tau/1000., elev_deg, color='magenta')
     ax2.set_xlim(xlim1)
     ax2.set_ylabel(dsn + ' Elevation Angle (deg)')
     ax2.spines['right'].set_color('magenta')
@@ -559,8 +597,8 @@ def plot_tau(pdf, tau_inst):
          #plt.locator_params(axis='y', nbins=6)
         for n in range(nrow):
             ax[n].axhline(y=0, color='c')
-             #ax[n].plot(rho_km/1000., tau_thresh, color='r')
-            ax[n].plot(rho_km/1000., tau, color='b', linewidth=lw1)
+            ax[n].plot(rho_km/1000., tau_thresh, color='r', linestyle='--')
+            ax[n].plot(rho_km/1000., tau, color='b', linewidth=0.8)
             r2 = rho_min + 1.
             ax[n].set_xlim(rho_min, r2)
             ax[n].set_ylim(ylim)
@@ -620,11 +658,12 @@ def plot_summary_doc_v2(geo_inst, cal_inst, dlp_inst, tau_inst):
     outfig = outdir[0] + 'Rev' + revstr + pd1 + '_' + outtitle[0] + '.pdf'
     with PdfPages(outfig) as pdf:
         pdf = plot_bullseye(pdf, geo_inst)
+
         pdf = plot_occ_earth_view(pdf, geo_inst)
         pdf = plot_occ_pole_view(pdf, geo_inst)
-        pdf = plot_geo_overview(pdf, geo_inst, dlp_inst)
+        pdf = plot_geo_overview(pdf, geo_inst, tau_inst)
         pdf = plot_cal_overview(pdf, cal_inst, dlp_inst)
-        pdf = plot_tau_overview(pdf, geo_inst, dlp_inst, tau_inst)
+        pdf = plot_tau_overview(pdf, geo_inst, tau_inst)
         pdf = plot_tau(pdf, tau_inst)
         pdf = plot_phase(pdf, tau_inst)
     latex_summary_doc(outfig, tau_inst.res, outfig[:-4])

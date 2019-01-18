@@ -49,7 +49,7 @@ class DiffractionLimitedProfile(object):
 
     Attributes:
         :dr_km (*float*): raw DLP sampling rate
-        :tau_threshold_vals (*np.ndarray*): threshold optical depth
+        :raw_tau_threshold_vals (*np.ndarray*): threshold optical depth
 
         :rho_km_vals (*np.ndarray*): Ring-intercept points in km
         :t_oet_spm_vals (*np.ndarray*): Observed event times in seconds past
@@ -265,7 +265,7 @@ class DiffractionLimitedProfile(object):
         self.rho_corr_pole_km_vals = rho_corr_pole_km_vals
         self.rho_corr_timing_km_vals = rho_corr_timing_km_vals
         self.tau_vals = -np.sin(B_rad_vals_interp)*np.log(p_norm_vals)
-        self.tau_threshold_vals = np.interp(
+        self.raw_tau_threshold_vals = np.interp(
                 spm_desired, spm_thresh, tau_thresh)
 
 

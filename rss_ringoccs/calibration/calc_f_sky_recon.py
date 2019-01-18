@@ -3,26 +3,15 @@
 
 calc_f_sky_recon.py
 
-Purpose: Calculate sky frequency from the reconstructed event kernels.
-         copied from Nicole Rappaport's "predicts" program in Fortran.
-
-NOTE: Since this was copied directly with little idea of what is actually
-      happening, the style looks horrible. Sorry about that
+Purpose:
+    Calculate sky frequency from the reconstructed event kernels.
+    copied from Nicole Rappaport's ``predicts`` program in Fortran.
 
 References:
-    This comes from casrss2.fltops.jpl.nasa.gov:~njr/programs/predicts
-    It contains a version of Nicole's PREDICTS program, which calculates
-    predicted sky frequencies
-
-Revisions:
-      gjs_calc_f_sky_recon.py
-   2018 Feb 22 - gsteranka - Original version
-      gjs_calc_f_sky_recon_v2.py
-   2018 Mar 06 - gsteranka - Edited to be a set of functions instead of a
-                             class, and to take SPM directly, instead of
-                             ephemeris time
-      calc_f_sky_recon.py
-   2018 Mar 20 - gsteranka - Copy to official version and remove debug steps
+    This is a pythonized version of Nicole Rappaport's PREDICTS
+    program, which predicts sky frequencies by computing the Doppler
+    shift due to motion of the spacecraft relative to the observer
+    (i.e., the receiving station).
 """
 
 import numpy as np
@@ -58,24 +47,27 @@ GM_SSB = [
     8.9781370309840E+03]  # 606 (Titan) from cpck30Mar2016.tpc
 
 
-def calc_f_sky_recon(f_spm, rsr_inst, sc_name, f_uso, kernels, TEST=False):
-    """Primary function to calculate sky frequency at the requested times f_spm
+def calc_f_sky_recon(f_spm, rsr_inst, sc_name, f_uso, kernels):
+    """
+    Calculates sky frequency at given times.
 
-    Args:
-        f_spm (np.ndarray):
+    Arguments:
+        :f_spm (*np.ndarray*):
             SPM values to evaluate sky frequency at
-        rsr_inst:
+        :rsr_inst:
             Instance of RSRReader class
-        sc_name (str):
+        :sc_name (*str*):
             Name of spacecraft to get sky frequency for. In our case,
             this should always be 'Cassini'
-        f_uso (float):
+        :f_uso (*float*):
             USO sky frequency for the event and the right band
-        kernels (list):
+        :kernels (*list*):
             String list of full path name to set of kernels
-        TEST (bool):
-            Print intermediate values if set to True
-        """
+
+    Returns:
+        :RF (*np.ndarray*): Reconstructed sky frequency computed from
+        spacecraft telemetry and oscillator frequency
+    """
 
     spice.kclear()
     spice.furnsh(kernels)
@@ -104,14 +96,22 @@ def calc_f_sky_recon(f_spm, rsr_inst, sc_name, f_uso, kernels, TEST=False):
         y *= f_uso
         RF[i] = f_uso - y
 
-    if TEST:
-        for i in range(10):
-            print('%30.16f' % RF[i])
     return RF
 
 
 def derlt(sc_code, etsc, rs_code, et):
-    """???"""
+    """
+    Arguments:
+        :sc_code (*int*): Spacecraft NAIF ID
+        :etsc (*float*): Epoch (in ephemeris seconds past J2000 TDB)
+                        at which the signal arrives at the receiver
+                        station
+        :rs_code (*int*): Receiving station NAIF ID
+        :et (*float*): Ephemeris time
+
+    Returns:
+        :DLTDT2 (*float*):
+    """
 
     ref = 'ECLIPJ2000'
     # Index for Solar System Barycenter
@@ -156,7 +156,14 @@ def derlt(sc_code, etsc, rs_code, et):
 
 
 def derpt(et, code):
-    """???"""
+    """
+    Arguments:
+        :et (*float*): Ephemeris time
+        :code (*int*): NAIF ID
+
+    Returns:
+        :B (*float*):
+    """
 
     ref = 'ECLIPJ2000'
     # Index for Solar System Barycenter
@@ -170,9 +177,11 @@ def derpt(et, code):
 
     for i in range(len(ID_SSB)):
         body = ID_SSB[i]
+        # ith body's ephemerides with respect to barycenter
         [SJ, _lt] = spice.spkez(body, et, ref, abcorr, SSB)
         SIJ = spice.vsubg(SJ, SI, 6)
         RIJ = spice.vnorm(SIJ[0:3])
+        # potential of Barycenter
         PHII += GM_SSB[i]/RIJ
 
     # From PRDCT_PARAM.PCK
@@ -180,3 +189,8 @@ def derpt(et, code):
     B = (PHII + 0.5*SIDOT2)/(spice.clight()**2) - LSEC
 
     return B
+
+"""
+Revisions:
+
+"""

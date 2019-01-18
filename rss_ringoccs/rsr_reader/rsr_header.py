@@ -1,13 +1,13 @@
 """
+Purpose:
+    Similar to RSRReader class in ``rsr_reader.py``. This only reads the
+    header of an RSR file and does not create an object instance.
 
-rsr_header.py
-
-Purpose: Similar to RSRReader class in rsr_reader.py, but this only reads the
-         header of an RSR file.
-
-Revisions:
-        rsr_header.py
-    2018 Jun 11 - gsteranka - Original version
+Arguments:
+    :rsr_file (*str*):
+        Full path name of a raw RSR file to read. RSR files
+        can be downloaded using the shell script in the data"
+        directory of the GitHub clone
 """
 
 import numpy as np
@@ -157,3 +157,8 @@ def rsr_header(rsr_file):
         out_dict['doy'] = sfdu_hdr_dict['sh_sfdu_doy']
 
     return out_dict
+"""
+Revisions:
+        rsr_header.py
+    2018 Jun 11 - gsteranka - Original version
+"""

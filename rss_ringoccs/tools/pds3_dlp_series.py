@@ -1,37 +1,45 @@
 
 """
-pds3_dlp_series.py
-
 Purpose: Write DLP data and label files in PDS3 format.
 
-Revisions:
-    2018 Jul 23 - jfong - copied from jwf_pds3_dlp_series.py
-    2018 Sep 10 - jfong - add underscore to record type and product type
+Dependencies:
+    #. numpy
+    #. time
+
+Notes:
+    #. Contents of output DLP data and label files are meant to mimic DLP
+        files from CORSS_8001 v2.
 """
 import numpy as np
 import pdb
 import time
-from . import pds3_write_series as pds3
+from . import pds3_write_series_v2 as pds3
 
-def write_dlp_series_data(dlp_inst, fmt, out_file):
+def write_dlp_series_data(dlp_inst, out_file, verbose=False):
     """
-    This writes a DLP data file.
+    This writes a CAL data file with columns: ring radius, radius correction
+    due to improved pole, radius correction due to timing offset, ring 
+    longitude, observed ring azimuth, power, optical depth, phase,
+    threshold optical depth, observed event time, ring event time,
+    spacecraft event time, ring opening angle.
 
-    Args:
-        dlp_inst (class): Instance of NormDiff class
-        fmt (str): Format string
-        out_file (str): Output file name, including path.
+    Arguments:
+        :dlp_inst (*class*): Instance of DiffractionLimitedProfile class
+        :out_file (*str*): Path to output file
     """
-    fmt_comma = fmt+','
-    format_str = fmt_comma*11 + fmt + '%s'
+    format_str = ('%14.6F,' + '%10.6F,' + '%10.6F,' + '%12.6F,' + '%12.6F,'
+            + '%14.6E,' + '%14.6E,' + '%12.6F,' + '%14.6E,' + '%14.6F,'
+            + '%14.6F,' + '%14.6F,' + '%12.6F' + '%s')
+
+
     npts = len(dlp_inst.t_oet_spm_vals)
 
     # Compute normalized optical depth -- NOTE: this should be added to dlp_inst
     #   as an attribute
     tau_norm_vals = -np.sin(abs(dlp_inst.B_rad_vals)) * np.log(
             dlp_inst.p_norm_vals)
-
-    print('\nWriting DLP data to: ', out_file, '\n')
+    if verbose:
+        print('\nWriting DLP data to: ', out_file, '\n')
 
     f = open(out_file, 'w')
     for n in range(npts):
@@ -41,9 +49,10 @@ def write_dlp_series_data(dlp_inst, fmt, out_file):
             dlp_inst.rho_corr_timing_km_vals[n],
             np.degrees(dlp_inst.phi_rl_rad_vals[n]),
             np.degrees(dlp_inst.phi_rad_vals[n]),
+            dlp_inst.p_norm_vals[n],
             tau_norm_vals[n],
             np.degrees(dlp_inst.phase_rad_vals[n]),
-            dlp_inst.tau_threshold_vals[n],
+            dlp_inst.raw_tau_threshold_vals[n],
             dlp_inst.t_oet_spm_vals[n],
             dlp_inst.t_ret_spm_vals[n],
             dlp_inst.t_set_spm_vals[n],
@@ -59,47 +68,38 @@ def get_dlp_series_info(rev_info, dlp_inst, series_name, prof_dir):
     """
     This returns the information needed to write a DLP label file.
 
-    Args:
-        rev_info (dict): Dictionary with keys: rsr_file, band, year, doy, dsn
+    Arguments:
+        :rev_info (*dict*): Dictionary with keys: rsr_file, band, year, doy, dsn
                          occ_dir, planetary_occ_flag, rev_num
-        dlp_inst (class): Instance of NormDiff class
-        series_name (str): Name of the output .TAB and .LBL file, not including
-                           extensions. Date in YYYYMMDD format will be added
-                           onto series_name
-        prof_dir (str): Direction of ring occultation for this dlp_inst
+        :dlp_inst (*class*): Instance of DiffractionLimitedProfile
+        :series_name (*str*): Name of the output .TAB and .LBL file, 
+                            not including extensions. Date in YYYYMMDD format
+                            and sequence number in XXXX format will be 
+                            added onto series_name
+        :prof_dir (*str*): Direction of ring occultation for this dlp_inst
 
-    Outputs:
-        str_lbl (dict): Dictionary with keys: string_delimiter,
+    Returns:
+        :str_lbl (*dict*): Dictionary with keys: string_delimiter,
                         alignment_column, series_alignment_column,
                         keywords_value, keywords_NAIF_TOOLKIT_VERSION,
                         description, keywords_series, object_keys,
                         object_values, history
-
-    Notes:
-        [1] This is a reproduction of DLP label files within
-            Cassini_RSS_Ring_Profiles_2018_Archive, with minor edits.
-        [2] The format of each data entry is hardcoded within "nchar".
     """
     current_time_ISOD = time.strftime("%Y-%j") + 'T' + time.strftime("%H:%M:%S")
 
     # Values for number of columns, number of bytes per column,
     #   number of bytes per column delimiter, number of bytes allocated to
     #   special characters per column
-    ncol = 12       
-    nchar = 32      
-    ndelim = 1      
-    nspecial = 2    
+    formats = ['"F14.6"', '"F10.6"', '"F10.6"', '"F12.6"', '"F12.6"'
+            , '"E14.6"' , '"E14.6"' , '"F12.6"' , '"E14.6"' , '"F14.6"'
+            , '"F14.6"' , '"F14.6"' , '"F12.6"']
+    ncol = len(formats)
 
     # Values for aligning equal signs
     alignment_column        = 37
     series_alignment_column = 28
-    bytes_list = [nchar] * ncol
 
-    # Calculate start bytes for each column
-    new_bytes_list = [(nchar+ndelim)] * ncol
-    new_bytes_list.insert(0,1)
-    start_bytes_list = np.cumsum(new_bytes_list)
-    start_bytes_list = start_bytes_list[:-1]
+    record_bytes, bytes_list, start_bytes_list = pds3.get_record_bytes(formats)
 
     col_num = list(range(1, ncol+1))
 
@@ -123,7 +123,7 @@ def get_dlp_series_info(rev_info, dlp_inst, series_name, prof_dir):
 
     PDS_VERSION_ID = 'PDS3'
     RECORD_TYPE = 'FIXED_LENGTH'
-    RECORD_BYTES = pds3.get_record_bytes(ncol, nchar, ndelim, nspecial)
+    RECORD_BYTES = record_bytes
     FILE_RECORDS = str(len(sampling_parameter_arr))
     SERIES_NAME = series_name
 
@@ -168,21 +168,28 @@ def get_dlp_series_info(rev_info, dlp_inst, series_name, prof_dir):
             }
 
     WAVELENGTH = wavelength_dict[band]
-
     RADIAL_RESOLUTION = str(float(pds3.get_sampling_interval(
         sampling_parameter_arr))*2.) + '   <km>'
     RADIAL_SAMPLING_INTERVAL = pds3.get_sampling_interval(
             sampling_parameter_arr) + '   <km>'
-    MINIMUM_RING_RADIUS = str(min(dlp_inst.rho_km_vals))
-    MAXIMUM_RING_RADIUS = str(max(dlp_inst.rho_km_vals))
-    MINIMUM_RING_LONGITUDE = str(min(np.degrees(dlp_inst.phi_rl_rad_vals)))
-    MAXIMUM_RING_LONGITUDE = str(max(np.degrees(dlp_inst.phi_rl_rad_vals)))
-    MINIMUM_OBSERVED_RING_AZIMUTH = str(min(np.degrees(dlp_inst.phi_rad_vals)))
-    MAXIMUM_OBSERVED_RING_AZIMUTH = str(max(np.degrees(dlp_inst.phi_rad_vals)))
-    MINIMUM_OBSERVED_RING_ELEVATION = str(min(np.degrees(dlp_inst.B_rad_vals)))
-    MAXIMUM_OBSERVED_RING_ELEVATION = str(max(np.degrees(dlp_inst.B_rad_vals)))
-    LOWEST_DETECTABLE_OPACITY = str(min(dlp_inst.tau_threshold_vals))
-    HIGHEST_DETECTABLE_OPACITY = str(max(dlp_inst.tau_threshold_vals))
+    MINIMUM_RING_RADIUS = str(
+            round(min(dlp_inst.rho_km_vals), 4)) + '   <km>'
+    MAXIMUM_RING_RADIUS = str(
+            round(max(dlp_inst.rho_km_vals),4)) + '   <km>'
+    MINIMUM_RING_LONGITUDE = str(
+            round(min(np.degrees(dlp_inst.phi_rl_rad_vals)), 4)) + '   <deg>'
+    MAXIMUM_RING_LONGITUDE = str(
+            round(max(np.degrees(dlp_inst.phi_rl_rad_vals)), 4)) + '   <deg>'
+    MINIMUM_OBSERVED_RING_AZIMUTH = str(
+            round(min(np.degrees(dlp_inst.phi_rad_vals)), 4)) + '   <deg>'
+    MAXIMUM_OBSERVED_RING_AZIMUTH = str(
+            round(max(np.degrees(dlp_inst.phi_rad_vals)), 4)) + '   <deg>'
+    MINIMUM_OBSERVED_RING_ELEVATION = str(
+            round(min(np.degrees(dlp_inst.B_rad_vals)), 4)) + '   <deg>'
+    MAXIMUM_OBSERVED_RING_ELEVATION = str(
+            round(max(np.degrees(dlp_inst.B_rad_vals)), 4)) + '   <deg>'
+    LOWEST_DETECTABLE_OPACITY = str(min(dlp_inst.raw_tau_threshold_vals))
+    HIGHEST_DETECTABLE_OPACITY = str(max(dlp_inst.raw_tau_threshold_vals))
 
 
     NAIF_TOOLKIT_VERSION = ''
@@ -299,61 +306,74 @@ def get_dlp_series_info(rev_info, dlp_inst, series_name, prof_dir):
     qq = "'"
 
     sd = '|'
-    FILE_DESCRIPTION = ('"This file (identified by ''DLP'' in' + sd
-            + 'the file name) contains calibrated but diffraction-'
-            + 'limited optical depth and' + sd + 'phase shift profiles (DLP) '
-            + 'of Saturn''s rings, that is, calibrated' + sd
-            + 'profiles before reconstruction to remove diffraction '
-            + 'effects. The' + sd + 'frequency/phase reference of the '
-            + 'original measurements is the Cassini' + sd
-            + 'UltraStable Oscillator, or USO. The tabulated data '
-            + 'are sampled over a ' + sd + 'uniform ring radius grid. '
-            + 'The sampling interval is half the period of the' + sd
-            + 'highest spatial frequency of the profile. The latter is '
-            + 'defined as the' + sd + "'DLP resolution'. " 
-            + 'The DLP resolution is explicitly identified in the name '
-            + sd + 'of the DLP file.' + sd
+    FILE_DESCRIPTION = ('"The ''DLP'' file contains' + sd
+            + 'calibrated but diffraction-limited optical depth and phase '
+            + 'shift profiles' + sd + 'of Saturn''s rings, that is, '
+            + 'calibrated profiles before reconstruction' + sd
+            + 'to remove diffraction effects. The frequency/phase '
+            + 'measurements' + sd + 'reference is the Cassini UltraStable '
+            + 'Oscillator (USO). The diffraction' + sd + 'reconstruction '
+            + 'is carried out using algorithms described at length in' + sd
+            + 'MAROUFETAL1986. Practical implementation steps are provided '
+            + 'in an' + sd + 'included documentation file.' + sd
             + ' ' + sd
-            + 'There are several additional companion products all of '
-            + 'which share the' + sd + 'same RING_OBSERVATION_ID (listed '
-            + 'in the header of the LBL file) as this' + sd
-            + 'product. One of the products is the corresponding optical '
-            + 'depth and' + sd + 'phase shift profiles reconstructed '
-            + 'to remove diffraction effects (''TAU''' + sd
-            + 'replaces ''DLP'' in the name of the file). Data filtering '
-            + 'during the' + sd + 'reconstruction process degrades the '
-            + 'achievable reconstructed profile resolution' + sd
-            + '(TAU resolution) to about 1.5 to 2 times the DLP '
-            + 'resolution, or 3 to 4' + sd + 'times the data sampling '
-            + 'interval, depending on the specific filtering' + sd 
-            + 'applied. We use the equivalent width of the filter window '
-            + 'to define the' + sd +'reconstruction resolution, following '
-            + 'Eq. (19) in Marouf, Tyler, and Rosen (1986)' + sd
-            + 'Icarus 68, pp. 120-166.'' Reconstruction resolution is '
-            + 'explicitly identified in' + sd
-            + 'the name of the corresponding TAU file.' + sd
+            + 'Several additional companion products share the same '
+            + 'RING_OBSERVATION_ID' + sd + '(listed in the header of the LBL '
+            + 'file) as this product. These include' + sd + 'one or more '
+            + 'reconstructed (TAU) files for the same occultation but' + sd
+            + 'at different resolutions, and two which provide geometry and '
+            + 'calibration' + sd + 'data. The latter two have file names '
+            + 'constructed from the same root as' + sd
+            + 'this file with the field for radial resolution removed '
+            + 'and the ''DLP''' + sd + 'replaced by either ''GEO'' '
+            + '(geometry) or ''CAL'' (carrier frequency and' + sd
+            + 'power calibration).' + sd
             + ' ' + sd
-            + 'The products may also include additional TAU profiles '
-            + 'reconstructed at ' + sd + 'different resolutions. In addition, '
-            + 'two products provide geometry and' + sd + 'calibration '
-            + 'data. Their file names are constructed from the same root '
-            + 'as' + sd + 'the DLP product with the field for radial '
-            + 'resolution removed and ''DLP''' + sd + 'replaced by either '
-            + "'GEO' (geometry) or 'CAL' (carrier frequency and power" 
-            + sd + 'calibration).' + sd
+            + 'We define spatial resolution as the shortest resolvable '
+            + 'wavelength in the' + sd + 'DLP profiles. It''s the inverse '
+            + 'of the highest spatial frequency preserved' + sd
+            + 'in the data, which is determined by the bandwidth of '
+            + 'the lowpass filter' + sd + 'used to decimate the calibrated '
+            + 'data. The archived DLP files have a shortest' + sd
+            + 'resolvable wavelength of 0.5 km (the ''500M'' descriptor '
+            + 'in the file name),' + sd + 'and are sampled every 0.25 km '
+            + '(sampled at the Nyquist rate). They are' + sd
+            + 'provided for the benefit of users wanting to experiment with '
+            + 'their own' + sd + 'diffraction reconstruction implementation. '
+            + 'Recovered profiles should look' + sd + 'identical to the '
+            + 'archived 1 km resolution reconstructed profiles provided' + sd
+            + 'that the reconstruction is implemented to achieve'
+            + ' ''processing resolution'' of' + sd + '0.75 km, where '
+            + 'the latter is defined by Eq. 19 of MAROUFETAL1986.' + sd
+            + ' ' + sd
+            + 'All archived data products were generated assuming '
+            + 'fixed USO '
+            + 'reference' + sd + 'frequency of 8,427,222,034.34050 Hz '
+            + 'at X-band, its value near the beginning' + sd + 'of the '
+            + 'Cassini orbital tour. The frequency is coherently '
+            + 'scaled by 3/11' + sd + 'for S-band and by 209/55 for Ka-band. '
+            + 'The exact USO frequency changed' + sd
+            + 'slightly (at the Hz level) during the USO lifetime. '
+            + 'The change negligibly ' + sd
+            + 'impacts the archived products. The same holds '
+            + 'true for the Allan deviation' + sd + 'characterizing the '
+            + 'stability of the USO. Typical values of the Cassini USO' + sd
+            + 'Allan deviation is 2E-13 over 1 s and 1E-13 over 10-100 s. '
+            + 'The USO Allan' + sd + 'deviation changed little over the '
+            + 'USO lifetime.' + sd
             + ' ' + sd
             + 'This file was produced using the rss_ringoccs open-source '
             + 'processing suite' + sd + 'developed at Wellesley College with '
             + 'the support of the Cassini project and' + sd + 'hosted '
             + 'on GithHub at https://github.com/NASA-Planetary-Science/'
             + 'rss_ringoccs.' + sd
-            + 'Please address any inquiries to:' + sd
             + ' ' + sd
-            + 'Richard G. French' + sd
-            + 'Astronomy Department, Wellesley College' + sd
-            + 'Wellesley, MA 02481-8203' + sd
-            + '(781) 283-3747' + sd
-            + 'rfrench@wellesley.edu"')
+            + 'Please address any inquiries to:' + sd
+            + 'Richard G. French,' + sd
+            + 'Astronomy Department, Wellesley College;' + sd
+            + 'Wellesley, MA 02481-8203;' + sd
+            + '(781) 283-3747;' + sd
+            + 'rfrench@wellesley.edu."')
             
     HIST_USER_NAME = dlp_inst.history['User Name']
     HIST_HOST_NAME = dlp_inst.history['Host Name']
@@ -362,26 +382,30 @@ def get_dlp_series_info(rev_info, dlp_inst, series_name, prof_dir):
     HIST_OPERATING_SYSTEM = dlp_inst.history['Operating System']
     HIST_SOURCE_DIR = dlp_inst.history['Source Directory']
     HIST_SOURCE_FILE = dlp_inst.history['Source File']
-    HIST_INPUT_VARIABLES = dlp_inst.history['Input Variables']
-    HIST_INPUT_KEYWORDS = dlp_inst.history['Input Keywords']
-    HIST_description = ('This is a detailed record of the' + sd
-                    + 'processing steps used to generate this file.')
+    HIST_INPUT_VARIABLES = dlp_inst.history['Positional Args']
+    HIST_INPUT_KEYWORDS = dlp_inst.history['Keyword Args']
+    HIST_ADD_INFO = dlp_inst.history['Additional Info']
+    HIST_RSSOCC_VERSION = dlp_inst.history['rss_ringoccs Version']
+    HIST_description = ('This is a record of the processing steps'
+                        + sd + 'and inputs used to generate this file.')
 
     HISTORY_dict = {
-            'key_order': ['User Name', 'Host Name', 'Run Date',
-                        'Python Version', 'Operating System',
-                        'Source Directory','Source File',
-                        'Input Variables', 'Input Keywords']
-            , 'hist name': 'Diffraction-limited profile history'
+            'key_order0': ['User Name', 'Host Name', 'Operating System',
+                        'Python Version', 'rss_ringoccs Version']
+            ,'key_order1': ['Source Directory','Source File',
+                        'Positional Args', 'Keyword Args', 'Additional Info']
+            , 'hist name': 'DiffractionLimitedProfile history'
             , 'User Name': HIST_USER_NAME
             , 'Host Name': HIST_HOST_NAME
             , 'Run Date': HIST_RUN_DATE
             , 'Python Version': HIST_PYTHON_VERSION
+            , 'rss_ringoccs Version': HIST_RSSOCC_VERSION
             , 'Operating System': HIST_OPERATING_SYSTEM
             , 'Source Directory': HIST_SOURCE_DIR
             , 'Source File': HIST_SOURCE_FILE
-            , 'Input Variables': HIST_INPUT_VARIABLES
-            , 'Input Keywords': HIST_INPUT_KEYWORDS
+            , 'Positional Args': HIST_INPUT_VARIABLES
+            , 'Keyword Args': HIST_INPUT_KEYWORDS
+            , 'Additional Info': HIST_ADD_INFO
             , 'description': HIST_description
             }
 
@@ -414,8 +438,7 @@ def get_dlp_series_info(rev_info, dlp_inst, series_name, prof_dir):
             sampling_parameter_arr)
     SERIES_DESCRIPTION = ('"This series contains variations of the' + sd
             + 'optical depth and phase shift profiles as a function of '
-            + 'RING RADIUS. Also' + sd + 'included are'# additive radius '
-            #+ 'correction terms, optical depth threshold,' + sd
+            + 'RING RADIUS. Also' + sd + 'included are'
             + ' some pertinent event times, and geometry parameters."')
 
     
@@ -465,6 +488,7 @@ def get_dlp_series_info(rev_info, dlp_inst, series_name, prof_dir):
             , '"RADIUS CORRECTION DUE TO TIMING OFFSET"'
             , '"RING LONGITUDE"'
             , '"OBSERVED_RING_AZIMUTH"'
+            , '"NORMALIZED SIGNAL POWER"'
             , '"NORMAL OPTICAL DEPTH"'
             , '"PHASE SHIFT"'
             , '"NORMAL OPTICAL DEPTH THRESHOLD"'
@@ -477,12 +501,12 @@ def get_dlp_series_info(rev_info, dlp_inst, series_name, prof_dir):
     data_types = ['ASCII_REAL'] * n_objects
     formats = ['"F32.16"'] * n_objects
     units = ['"KILOMETER"', '"N/A"', '"N/A"', '"DEGREE"',
-            '"DEGREE"', '"N/A"', '"DEGREE"', '"N/A"', '"SECOND"',
+            '"DEGREE"', '"N/A"', '"N/A"', '"DEGREE"', '"N/A"', '"SECOND"',
             '"SECOND"', '"SECOND"', '"DEGREE"']
 
     es = ''
 
-    reference_times = [es, es, es, es, es, es, es, es, 
+    reference_times = [es, es, es, es, es, es, es, es, es,
             OBJECT_REFERENCE_TIME, OBJECT_REFERENCE_TIME,
             OBJECT_REFERENCE_TIME,es]
 
@@ -516,13 +540,18 @@ def get_dlp_series_info(rev_info, dlp_inst, series_name, prof_dir):
             + 'azimuth differs from that adopted in MAROUFETAL1986 by' + sd
             + '180 degrees."')
             ,
-            ('"The diffraction-limited normal optical depth' + sd
-            + 'obtained from its '
-            + 'measured oblique value scaled by the sine of the absolute'
-            + sd + 'value of ring opening angle (OBSERVED RING ELEVATION). '
-            + 'The oblique value is' + sd + 'computed from the measured or '
-            + 'reconstructed complex ring transmittance;' + sd
-            + 'see Eq. (21) of MAROUFETAL1986."')
+            ('"Power (amplitude square) of the measured' + sd
+                + 'ring-attenuated diffraction-limited radio signal, '
+                + 'normalized by its' + sd + 'value in the absence of the '
+                + 'rings (normalized to unity in free-space).' + sd
+                + 'The value may be used to compute the measured '
+                + 'diffraction-limited' + sd + 'oblique optical depth '
+                + 'as the negative natural logarithm of the NORMALIZED' + sd
+                + 'SIGNAL POWER."')
+            ,
+            ('"The normal optical depth obtained' + sd + 'from its measured '
+                + 'oblique value csaled by the sine of the absolute' + sd
+                + 'value of ring opening angle (OBSERVED RING ELEVATION)')
             ,
             ('"The difference between the phase of' + sd + 'the coherent '
             + 'sinusoid passing directly through the rings (the direct'
@@ -607,21 +636,16 @@ def write_dlp_series(rev_info, dlp_inst, title, outdir, prof_dir):
     """
     This function writes a DLP series, which includes a data and label file.
 
-    Args:
-        rev_info (dict): Dictionary with keys: rsr_file, band, year, doy, dsn
+    Arguments:
+        :rev_info (*dict*): Dictionary with keys: rsr_file, band, year, doy, dsn
                          occ_dir, planetary_occ_flag, rev_num
-        dlp_inst (class): Instance of NormDiff class
-        title (str): Name of the output .TAB and .LBL file, not including
-                           extensions. Date in YYYYMMDD format will be added
-                           onto series_name
-        outdir (str): Path to output directory
-        prof_dir (str): Direction of ring occultation for this dlp_inst
+        :dlp_inst (*class*): Instance of DiffractionLimitedProfile class
+        :title (*str*): Name of the output .TAB and .LBL file, not including
+                           extensions. Date in YYYYMMDD format and sequence
+                           number in XXXX format will be added to series_name
+        :outdir (*str*): Path to output directory
+        :prof_dir (*str*): Direction of ring occultation for this dlp_inst
 
-    Notes:
-        [1] Data entry format of %32.16F is hardcoded.
-        [2] A data and label file will be output into the input "outdir"
-            directory, with filenames, *YYYYMMDD.TAB and *YYYYMMDD.LBL,
-            respectively, where * is "title".
     """
 
 
@@ -630,11 +654,8 @@ def write_dlp_series(rev_info, dlp_inst, title, outdir, prof_dir):
 
     series_name = '"' + outfile_tab.split('/')[-1] + '"'
 
-    fmt = '%32.16F' 
-
-
     # Write data file
-    write_dlp_series_data(dlp_inst, fmt, outfile_tab)
+    write_dlp_series_data(dlp_inst, outfile_tab)
 
     # Get label file information
     str_lbl = get_dlp_series_info(rev_info, dlp_inst, series_name, prof_dir)

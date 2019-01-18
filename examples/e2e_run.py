@@ -2,32 +2,51 @@
 
 e2e_run.py
 
-Purpose: Sample 'End-to-End' script; refer to pXX of User's Guide.
+Purpose:
+    Example rss_ringoccs package script to produce a 500-m resolution
+    profile of the Huygens ringlet for Rev007 E X43.
 
-Revisions:
-    2018 Sep 17 - jfong - original
+Notes:
+    #. This program assumes that all relevant files (rsr_file and
+        kernels) have already been downloaded. See p6-7 of
+        rss_ringoccs: User's Guide for details.
 """
 
+import matplotlib.pyplot as plt
+import numpy as np
+import pickle
 import sys
+import time
+
 sys.path.append('../')
 import rss_ringoccs as rss
 sys.path.remove('../')
-import pdb
-import time
 
 # ***** Begin user input *****
-rsr_file = '../data/co-s-rss-1-sroc1-v10/cors_0105/sroc1_123/rsr/s10sroe2005123_0740nnnx43rd.2a2'
-kernels = 'Rev007_meta_kernel.ker'
+rsr_file = '../data/co-s-rss-1-sroc1-v10/cors_0727/SROC1_123/RSR/S10SROE2005123_0740NNNX43RD.2A1'
+
+kernels = '../tables/e2e_kernels.ker'
+
+dr_km_desired = 0.25
+res_km = 1.0
+
 planet = 'Saturn'
 spacecraft = 'Cassini'
-dr_km_desired = 0.05
-res_km = 0.10
-inversion_range = 'all'
 
-USE_GUI = True
-file_search = False
-write_file = True
+fof_order = 9
+pnf_order = 3
+psitype = 'Fresnel4'
+
 verbose = True
+write_file = False
+interact = False
+
+feature_km = 117830.
+feature_name = 'Huygens Ringlet'
+
+inversion_range = [feature_km-40., feature_km+40.]
+
+
 # ***** End user input *****
 
 start_time = time.time()
@@ -40,18 +59,87 @@ geo_inst = rss.occgeo.Geometry(rsr_inst, planet, spacecraft, kernels,
         verbose=verbose, write_file=write_file)
 
 # Create instance with calibrated data
-cal_inst = rss.calibration.Calibration(rsr_inst, geo_inst,
-        file_search=file_search, USE_GUI=USE_GUI, verbose=verbose,
-        write_file=write_file)
+cal_inst = rss.calibration.Calibration(rsr_inst, geo_inst, verbose=verbose,
+        write_file=write_file, fof_order=fof_order, pnf_order=pnf_order,
+        interact=interact)
 
 # Create instance with diffraction-limited profile and other
 #   inputs needed for diffraction correction
-dlp_inst = rss.calibration.NormDiff(rsr_inst, geo_inst,
-        cal_inst, dr_km_desired, verbose=verbose, write_file=write_file)
+dlp_inst_ing, dlp_inst_egr = (
+        rss.calibration.DiffractionLimitedProfile.create_dlps(
+            rsr_inst, geo_inst, cal_inst, dr_km_desired, write_file=write_file,
+            verbose=verbose))
+
+omega = 2. * np.pi * cal_inst.f_sky_hz_vals[100]
+sigma = 2.e-13
+alpha = ( omega**2. * sigma**2. ) / ( 2. * geo_inst.rho_dot_kms_vals[100])
+x = np.arange(0,10,0.01)
+P = x / (alpha*geo_inst.F_km_vals[100])
+
+plt.plot(x,P)
+plt.show()
 
 # Invert profile for full occultation
-tau_inst = rss.diffrec.DiffractionCorrection(dlp_inst, res_km,
-        rng=inversion_range, verbose=verbose, write_file=write_file)
+if dlp_inst_ing is not None:
+    tau_inst = rss.diffrec.DiffractionCorrection(dlp_inst_ing, res_km,
+            rng=inversion_range, write_file=write_file, verbose=verbose,
+            psitype=psitype)
+if dlp_inst_egr is not None:
+    tau_inst = rss.diffrec.DiffractionCorrection(dlp_inst_egr, res_km,
+            rng=inversion_range, write_file=write_file, verbose=verbose,
+            psitype=psitype)
+
+
+# Plot Huygens ringlet
+#   first row of three: uncorrected optical depth, power, and phase
+#   second row of three: corrected optical depth, power, and phase
+fig, axes = plt.subplots(2,3, figsize=(8,5))
+
+rho_km = tau_inst.rho_km_vals - feature_km
+recon_power = tau_inst.power_vals
+raw_power = tau_inst.p_norm_vals
+
+raw_tau = -tau_inst.mu_vals * np.log(tau_inst.p_norm_vals)
+recon_tau = tau_inst.tau_vals
+
+raw_phase = tau_inst.phase_rad_vals
+recon_phase = tau_inst.phase_vals
+xtitle = '$\\rho$ - ' + str(feature_km) + ' (km)'
+
+fig.suptitle('Rev007E X43 ' + feature_name + ' at ' + str(res_km) + ' km resolution', fontsize=14)
+
+axes[0,0].plot(rho_km, raw_power)
+axes[0,0].set_ylabel('Raw Power')
+axes[0,0].set_xlabel(xtitle)
+
+axes[0,1].plot(rho_km, raw_tau)
+axes[0,1].set_ylabel('Raw Optical Depth')
+axes[0,1].set_xlabel(xtitle)
+
+axes[0,2].plot(rho_km, raw_phase)
+axes[0,2].set_ylabel('Raw Phase')
+axes[0,2].set_xlabel(xtitle)
+
+axes[1,0].plot(rho_km, recon_power)
+axes[1,0].set_ylabel('Reconstructed Power')
+axes[1,0].set_xlabel(xtitle)
+
+axes[1,1].plot(rho_km, recon_tau)
+axes[1,1].set_ylabel('Reconstructed Optical Depth')
+axes[1,1].set_xlabel(xtitle)
+
+axes[1,2].plot(rho_km, recon_phase)
+axes[1,2].set_ylabel('Reconstructed Phase')
+axes[1,2].set_xlabel(xtitle)
+
 end_time = time.time()
-print('Computation time: ' + str(end_time-start_time))
-pdb.set_trace()
+plt.tight_layout()
+plt.subplots_adjust(top=0.93)
+
+print('Total run time: ', end_time-start_time)
+
+plt.show()
+
+"""
+Revisions:
+"""

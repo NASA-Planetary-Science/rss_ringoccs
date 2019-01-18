@@ -135,12 +135,9 @@ def latex_summary_doc(pdffil, res, outfilename):
     else:
         pass
 
-    if (res < 1.0):
-        res = str(res*1000.0)
-        res = "%sM" % (res)
-    else:
-        res = str(res)
-        res = "%sKM" % (res)
+
+    res = str(res*1000.0)
+    res = "%sM" % (res)
 
     var = pdffil.split("/")[-1]
     var = var.split("_")

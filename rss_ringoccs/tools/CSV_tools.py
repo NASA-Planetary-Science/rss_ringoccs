@@ -1,3 +1,15 @@
+"""
+    Purpose:
+        Provide tools for reading in .TAB and
+        .CSV files and converting the data into
+        a usable instance of the NormDiff class.
+    Dependencies:
+        #. pandas
+        #. numpy
+        #. scipy
+        #. rss_ringoccs
+"""
+
 import numpy as np
 import pandas as pd
 from scipy import interpolate
@@ -417,11 +429,6 @@ class ExtractCSVData(object):
                 The normalized optical depth contained
                 in the tau file. If tau is not set, this
                 will be a NoneType variable.
-        Dependencies:
-            #. pandas
-            #. numpy
-            #. scipy
-            #. rss_ringoccs
     """
     def __init__(self, geo, cal, dlp, tau=None, verbose=True):
         if (not isinstance(geo, str)):
@@ -1172,3 +1179,40 @@ class PureCSVReader(object):
         self.f_sky_hz_vals    = np.array(df.f_sky_hz_vals)
         self.D_km_vals        = np.array(df.D_km_vals)
         self.rho_dot_kms_vals = np.array(df.rho_dot_kms_vals)
+
+        n_rho = np.size(self.rho_km_vals)
+        
+        zeros = np.zeros(n_rho)
+
+        # Set fake variables so DiffractionCorrection won't crash.
+        self.t_oet_spm_vals = zeros
+        self.t_ret_spm_vals = zeros
+        self.t_set_spm_vals = zeros
+        self.rho_corr_pole_km_vals = zeros
+        self.rho_corr_timing_km_vals = zeros
+        self.phi_rl_rad_vals = zeros
+        self.raw_tau_threshold_vals = zeros
+        self.tau_rho = zeros
+        self.tau_vals = zeros
+        self.phase_vals = zeros
+        self.power_vals = zeros
+
+        # Create a history.
+        input_vars = {
+            "CSV File": dat,
+        }
+
+        input_kwds = {}
+
+        self.history = write_history_dict(input_vars, input_kwds, __file__)
+        self.rev_info = {
+            "rsr_file": "Unknown",
+            "band": "Unknown",
+            "year": "Unknown",
+            "doy": "Unknown",
+            "dsn": "Unknown",
+            "occ_dir": "Unknown",
+            "planetary_occ_flag": "Unknown",
+            "rev_num": "Unknown",
+            "prof_dir": "Unknown"
+        }

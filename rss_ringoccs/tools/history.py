@@ -1,7 +1,8 @@
 """
 history.py
 
-Purpose: Functions related to recording processing history.
+Purpose: 
+    Functions related to recording processing history.
 
 Dependencies:
     #. sys
@@ -35,7 +36,7 @@ def date_to_rev(year, doy,
         :rev_number (*str*): 3-digit rev number (e.g. '007')
 
     Note:
-        [1] Given default 'rss_file' location, this script must be run
+        #. Given default 'rss_file' location, this script must be run
             one directory from the top-level rss_ringoccs directory
     """
 
@@ -97,7 +98,7 @@ def rev_to_occ_info(rev,
         :planetary_occ_flag (*str*): Flag for whether planet (Saturn) was
                                   occulted during event.
     Note:
-        [1] Given default 'sroc_info_file' location, this script must be run
+        #. Given default 'sroc_info_file' location, this script must be run
             one directory from the top-level rss_ringoccs directory
     """
 

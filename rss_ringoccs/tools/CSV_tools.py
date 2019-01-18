@@ -1198,4 +1198,21 @@ class PureCSVReader(object):
         self.power_vals = zeros
 
         # Create a history.
-        self.dathist = NormDiff.history
+        input_vars = {
+            "CSV File": dat,
+        }
+
+        input_kwds = {}
+
+        self.history = write_history_dict(input_vars, input_kwds, __file__)
+        self.rev_info = {
+            "rsr_file": "Unknown",
+            "band": "Unknown",
+            "year": "Unknown",
+            "doy": "Unknown",
+            "dsn": "Unknown",
+            "occ_dir": "Unknown",
+            "planetary_occ_flag": "Unknown",
+            "rev_num": "Unknown",
+            "prof_dir": "Unknown"
+        }

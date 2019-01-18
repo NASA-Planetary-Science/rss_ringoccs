@@ -1179,4 +1179,23 @@ class PureCSVReader(object):
         self.f_sky_hz_vals    = np.array(df.f_sky_hz_vals)
         self.D_km_vals        = np.array(df.D_km_vals)
         self.rho_dot_kms_vals = np.array(df.rho_dot_kms_vals)
+
+        n_rho = np.size(self.rho_km_vals)
         
+        zeros = np.zeros(n_rho)
+
+        # Set fake variables so DiffractionCorrection won't crash.
+        self.t_oet_spm_vals = zeros
+        self.t_ret_spm_vals = zeros
+        self.t_set_spm_vals = zeros
+        self.rho_corr_pole_km_vals = zeros
+        self.rho_corr_timing_km_vals = zeros
+        self.phi_rl_rad_vals = zeros
+        self.raw_tau_threshold_vals = zeros
+        self.tau_rho = zeros
+        self.tau_vals = zeros
+        self.phase_vals = zeros
+        self.power_vals = zeros
+
+        # Create a history.
+        self.dathist = NormDiff.history

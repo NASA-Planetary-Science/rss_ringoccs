@@ -2,35 +2,64 @@ import sys
 sys.path.append('../')
 import rss_ringoccs as rss
 sys.path.remove('../')
-
 import traceback
-
 import time
-
-# ***** Begin user input *****
-
+###
+### ***** BEGIN USER INPUT *****
+###
+# specify the directory of the RSR data files
 mpath = '../data/'
-
+# specify the meta-kernel files
 kernels = '../tables/e2e_kernels.ker'
+# specify the planet
 planet = 'Saturn'
+# specify the spacecraft
 spacecraft = 'Cassini'
+# specify whether to process 16 kHz files
+# WARNING: THESE REQUIRE A MINIMUM OF
+# 2.9 GHZ CPU, 16 GB RAM TO PROCESS
+with16 = False
+# specify the DLP radial sampling rate in km
 dr_km_desired = 0.25
+# specify the TAU processing resolution in km
 res_km = 1.0
+# specify the radial range over which to
+# reconstruct the optical depth profile
 inversion_range = [6e4,1.5e5]
+# specify the frequency offset fit order
 fof_order = 9
+# specify the power normalization order
 pnf_order = 3
-
+# specify the method of phase approximation
+psitype='Fresnel4'
+# specify whether to output results files
 write_file = True
+# specify whether to output progress to terminal
 verbose = False
-# ***** End user input *****
+###
+### ***** END USER INPUT *****
+###
 
-files = [mpath+line.strip('\n') for line in open('../tables/list_of_rsr_files_before_USO_failure_to_dl_v2.txt','r').readlines()]
+# import files
+files = [mpath+line.strip('\n') for line in open('../tables/'+
+    'list_of_rsr_files_before_USO_failure_to_dl.txt','r').readlines()]
+# remove duplicates
+files = list(set(files))
+# files with bad headers (to exclude)
+skips = [mpath+'co-s-rss-1-sroc8-v10/cors_0745/SROC8_239/RSR/S43SROI2008239_1410NNNX63RD.1A1',
+mpath+'co-s-rss-1-sroc8-v10/cors_0745/SROC8_239/RSR/S43SROI2008239_1410NNNS63RD.1B1']
+
 init_time = time.time()
 
 for rsr_file in files:
 
-    if rsr_file[-1] == '2':
+    # exclude 16 kHz files
+    if rsr_file[-1] == '2' and not with16:
         print('SKIPPING 16 KHZ FILE: ' + rsr_file)
+        continue
+    # exclude files with bad headers
+    if rsr_file in skips:
+        print('SKIPPING FILE WITH BAD HEADER: '+rsr_file)
         continue
 
     st = time.time()
@@ -40,7 +69,7 @@ for rsr_file in files:
 
     # Create instance with rsr file contents
     rsr_inst = rss.rsr_reader.RSRReader(rsr_file, verbose=verbose,
-            decimate_16khz_to_1khz=False)
+            decimate_16khz_to_1khz=with16)
 
     # Create instance with geometry parameters
     geo_inst = rss.occgeo.Geometry(rsr_inst, planet, spacecraft, kernels,

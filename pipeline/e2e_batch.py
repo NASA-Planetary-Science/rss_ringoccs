@@ -42,9 +42,8 @@ verbose = False
 
 # import files
 files = [mpath+line.strip('\n') for line in open('../tables/'+
-    'list_of_rsr_files_before_USO_failure_to_dl.txt','r').readlines()]
-# remove duplicates
-files = list(set(files))
+    'list_of_rsr_files_before_USO_failure_to_dl_v2.txt','r').readlines()]
+
 # files with bad headers (to exclude)
 skips = [mpath+'co-s-rss-1-sroc8-v10/cors_0745/SROC8_239/RSR/S43SROI2008239_1410NNNX63RD.1A1',
 mpath+'co-s-rss-1-sroc8-v10/cors_0745/SROC8_239/RSR/S43SROI2008239_1410NNNS63RD.1B1']

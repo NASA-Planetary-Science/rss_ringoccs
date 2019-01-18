@@ -1,14 +1,11 @@
 """
 
-create_summary_doc.py
-
 Purpose: Create the plots in the second version of Essam's EASYDATA summary PDF.
 
-Revisions:
-    2018 Jul 23 - jfong - copied from create_summary_doc_v2.py
 """
 
-
+import warnings
+warnings.filterwarnings("ignore")
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt

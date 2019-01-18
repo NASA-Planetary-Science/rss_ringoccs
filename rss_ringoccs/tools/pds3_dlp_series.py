@@ -1,16 +1,13 @@
 
 """
-pds3_dlp_series.py
-
 Purpose: Write DLP data and label files in PDS3 format.
 
 Dependencies:
     #. numpy
     #. time
-    #. rss_ringoccs.tools.pds3_write_series_v2
 
 Notes:
-    [1] Contents of output DLP data and label files are meant to mimic DLP
+    #. Contents of output DLP data and label files are meant to mimic DLP
         files from CORSS_8001 v2.
 """
 import numpy as np
@@ -55,7 +52,7 @@ def write_dlp_series_data(dlp_inst, out_file, verbose=False):
             dlp_inst.p_norm_vals[n],
             tau_norm_vals[n],
             np.degrees(dlp_inst.phase_rad_vals[n]),
-            dlp_inst.tau_threshold_vals[n],
+            dlp_inst.raw_tau_threshold_vals[n],
             dlp_inst.t_oet_spm_vals[n],
             dlp_inst.t_ret_spm_vals[n],
             dlp_inst.t_set_spm_vals[n],
@@ -191,8 +188,8 @@ def get_dlp_series_info(rev_info, dlp_inst, series_name, prof_dir):
             round(min(np.degrees(dlp_inst.B_rad_vals)), 4)) + '   <deg>'
     MAXIMUM_OBSERVED_RING_ELEVATION = str(
             round(max(np.degrees(dlp_inst.B_rad_vals)), 4)) + '   <deg>'
-    LOWEST_DETECTABLE_OPACITY = str(min(dlp_inst.tau_threshold_vals))
-    HIGHEST_DETECTABLE_OPACITY = str(max(dlp_inst.tau_threshold_vals))
+    LOWEST_DETECTABLE_OPACITY = str(min(dlp_inst.raw_tau_threshold_vals))
+    HIGHEST_DETECTABLE_OPACITY = str(max(dlp_inst.raw_tau_threshold_vals))
 
 
     NAIF_TOOLKIT_VERSION = ''

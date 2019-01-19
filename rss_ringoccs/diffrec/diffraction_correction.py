@@ -978,6 +978,7 @@ class DiffractionCorrection(object):
         sp = np.sin(self.phi_rad_vals)
         self.F_km_vals = np.sqrt(0.5 * self.lambda_sky_km_vals *
                                  self.D_km_vals * (1 - cb*cb*sp*sp)/(sb*sb))
+        
         del cb, sb, sp
 
         # Compute the Normalized Equaivalent Width (See MTR86 Equation 20)
@@ -987,7 +988,7 @@ class DiffractionCorrection(object):
         if bfac:
             omega = TWO_PI * self.f_sky_hz_vals
             alpha = omega*omega * sigma*sigma / (2.0 * self.rho_dot_kms_vals)
-            P = res / (alpha * (self.F_km_vals*self.F_km_vals))
+            P = self.res / (alpha * (self.F_km_vals*self.F_km_vals))
 
             # The inverse exists only if P>1.
             if (np.min(P) <= 1.0):
@@ -1007,7 +1008,8 @@ class DiffractionCorrection(object):
                 self.w_km_vals = np.zeros(np.size(self.rho_km_vals))
 
             if (np.size(crange1) > 0):
-                self.w_km_vals[crange1] = 2.0*self.F_km_vals*self.F_km_vals/res
+                self.w_km_vals[crange1] = 2.0*self.F_km_vals*self.F_km_vals
+                self.w_km_vals[crange1] /= self.res
             else:
                 pass
 
@@ -1177,7 +1179,8 @@ class DiffractionCorrection(object):
             'norm': norm,
             'bfac': bfac,
             'sigma': sigma,
-            'psitype': psitype
+            'psitype': psitype,
+            'res_factor': res_factor
         }
 
         # Delete unnecessary variables for clarity.
@@ -2325,14 +2328,5 @@ class DiffractionCorrection(object):
                     print(mes % (i, n_used-1, nw, loop), end="\r")
             if verbose:
                 print("\n", end="\r")
-        
-        try:
-            self.ker = ker
-            self.psi = psi
-            self.dx_km = dx_km
-            self.F = F
-            self.T = T
-        except:
-            pass
 
         return T_out

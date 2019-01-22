@@ -1,5 +1,4 @@
 """
-
 e2e_run.py
 
 Purpose:
@@ -14,7 +13,6 @@ Notes:
 
 import matplotlib.pyplot as plt
 import numpy as np
-import pickle
 import sys
 import time
 
@@ -127,7 +125,7 @@ end_time = time.time()
 plt.tight_layout()
 plt.subplots_adjust(top=0.93)
 
-print('Total run time: ', end_time-start_time)
+print('Total run time (min): ', str((end_time-start_time)/60.))
 
 plt.show()
 

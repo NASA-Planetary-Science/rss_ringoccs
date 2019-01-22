@@ -25,7 +25,7 @@ rsr_file = '../data/co-s-rss-1-sroc1-v10/cors_0727/SROC1_123/RSR/S10SROE2005123_
 
 kernels = '../tables/e2e_kernels.ker'
 
-dr_km_desired = 0.25
+dr_km_desired = 0.05
 res_km = 1.0
 
 planet = 'Saturn'

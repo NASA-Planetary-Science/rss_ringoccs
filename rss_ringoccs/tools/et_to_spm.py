@@ -33,6 +33,7 @@ def et_to_spm(et_vals, kernels=None, ref_doy=None):
         spice.furnsh(kernels)
     if isinstance(et_vals, float):
         npts = 1
+        et_vals = [et_vals]
     else:
         npts = len(et_vals)
     if npts == 0:

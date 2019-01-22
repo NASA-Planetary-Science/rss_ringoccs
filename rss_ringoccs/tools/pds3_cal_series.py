@@ -20,7 +20,7 @@ import numpy as np
 import pdb
 import time
 
-def write_cal_series_data(cal_inst, out_file, verbose=False):
+def write_cal_series_data(cal_inst, out_file):
     """
     This writes a CAL data file with columns: observed event time,
     sky frequency, residual frequency, and fit to free-space power.
@@ -31,8 +31,7 @@ def write_cal_series_data(cal_inst, out_file, verbose=False):
     """
     format_str = ('%14.6F,' + '%20.6F,' + '%10.6F,' + '%14.6F' + '%s')
     npts = len(cal_inst.t_oet_spm_vals)
-    if verbose:
-        print('\nWriting CAL data to: ', out_file, '\n')
+    print('\nWriting CAL data to: ', out_file, '\n')
     f = open(out_file, 'w')
     for n in range(npts):
         f.write(format_str % (

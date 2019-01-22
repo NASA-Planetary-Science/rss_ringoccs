@@ -3,7 +3,7 @@
 e2e_run.py
 
 Purpose:
-    Example rss_ringoccs package script to produce a 500-m resolution
+    Example rss_ringoccs package script to produce a 1-km resolution
     profile of the Huygens ringlet for Rev007 E X43.
 
 Notes:
@@ -38,7 +38,7 @@ pnf_order = 3
 psitype = 'Fresnel4'
 
 verbose = True
-write_file = False
+write_file = True
 interact = False
 
 feature_km = 117830.
@@ -69,15 +69,6 @@ dlp_inst_ing, dlp_inst_egr = (
         rss.calibration.DiffractionLimitedProfile.create_dlps(
             rsr_inst, geo_inst, cal_inst, dr_km_desired, write_file=write_file,
             verbose=verbose))
-
-omega = 2. * np.pi * cal_inst.f_sky_hz_vals[100]
-sigma = 2.e-13
-alpha = ( omega**2. * sigma**2. ) / ( 2. * geo_inst.rho_dot_kms_vals[100])
-x = np.arange(0,10,0.01)
-P = x / (alpha*geo_inst.F_km_vals[100])
-
-plt.plot(x,P)
-plt.show()
 
 # Invert profile for full occultation
 if dlp_inst_ing is not None:

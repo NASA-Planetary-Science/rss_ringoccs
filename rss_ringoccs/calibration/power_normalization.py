@@ -479,7 +479,7 @@ class Normalization(object):
             # output
             for file,dir in zip(filenames,outdirs):
                 outfile = dir + file + '.PDF'
-                #print('Saving power normalization plot to: '+outfile)
+                print('\nSaving power normalization plot to: '+outfile+'\n')
                 fig.text(0.125,0.96,file,fontsize=15)
                 plt.savefig(outfile)
             plt.close('all')

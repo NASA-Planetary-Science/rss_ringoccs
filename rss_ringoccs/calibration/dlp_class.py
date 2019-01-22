@@ -119,7 +119,7 @@ class DiffractionLimitedProfile(object):
 
         # resample IQ_c, but not to exact rho boundaries
         rho_km_desired, IQ_c_desired = resample_IQ(rho_full, IQ_c,
-                dr_km)
+                dr_km, verbose=verbose)
 
         # Slice rho_km_desired to profile_range values
         ind1 = list(rho_km_desired).index(min(list(rho_km_desired),

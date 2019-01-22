@@ -14,7 +14,7 @@ import time
 import sys
 from . import pds3_write_series_v2 as pds3
 
-def write_tau_series_data(tau_inst, out_file, verbose=False):
+def write_tau_series_data(tau_inst, out_file):
     """
     This writes a TAU data file.
 
@@ -28,8 +28,7 @@ def write_tau_series_data(tau_inst, out_file, verbose=False):
             + '%14.6F,' + '%14.6F,' + '%12.6F' + '%s')
     npts = len(tau_inst.t_oet_spm_vals)
 
-    if verbose:
-        print('\nWriting TAU data to: ', out_file, '\n')
+    print('\nWriting TAU data to: ', out_file, '\n')
 
     f = open(out_file, 'w')
     for n in range(npts):

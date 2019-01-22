@@ -15,7 +15,7 @@ import pdb
 import time
 from . import pds3_write_series_v2 as pds3
 
-def write_dlp_series_data(dlp_inst, out_file, verbose=False):
+def write_dlp_series_data(dlp_inst, out_file):
     """
     This writes a CAL data file with columns: ring radius, radius correction
     due to improved pole, radius correction due to timing offset, ring 
@@ -38,8 +38,7 @@ def write_dlp_series_data(dlp_inst, out_file, verbose=False):
     #   as an attribute
     tau_norm_vals = -np.sin(abs(dlp_inst.B_rad_vals)) * np.log(
             dlp_inst.p_norm_vals)
-    if verbose:
-        print('\nWriting DLP data to: ', out_file, '\n')
+    print('\nWriting DLP data to: ', out_file, '\n')
 
     f = open(out_file, 'w')
     for n in range(npts):

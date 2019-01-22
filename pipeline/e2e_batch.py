@@ -37,8 +37,8 @@ write_file = True
 # specify whether to output progress to terminal
 verbose = False
 
-fail_file = open('../output/' + sys.argv[1], 'w')
-
+err_file = sys.argv[0].split('.')[0] + '.err'
+fail_file = open('../output/' + err_file, 'w')
 #
 ###
 ### ***** END USER INPUT *****

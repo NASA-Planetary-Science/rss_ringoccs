@@ -52,9 +52,12 @@ files = [mpath+line.strip('\n') for line in open('../tables/'+
 skips = [mpath+'co-s-rss-1-sroc8-v10/cors_0745/SROC8_239/RSR/S43SROI2008239_1410NNNX63RD.1A1',
 mpath+'co-s-rss-1-sroc8-v10/cors_0745/SROC8_239/RSR/S43SROI2008239_1410NNNS63RD.1B1']
 
+nfiles = len(files)
 init_time = time.time()
 
-for rsr_file in files:
+for ind in range(nfiles):
+    
+    rsr_file = files[ind]
 
     # exclude 16 kHz files
     if rsr_file[-1] == '2' and not with16:

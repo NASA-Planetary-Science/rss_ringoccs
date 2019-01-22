@@ -20,7 +20,7 @@ dlp_file = data_dir + ''
 verbose = True
 res_km = 1.0
 inversion_range = [87400., 87600.]  # Maxwell range
-res_list = [1.5, 1.2, 0.75, 0.50]
+res_list = [2.0, 1.5, 1.0, 0.50, 0.25]
 
 plot_center_km = 87515. # radius to center plot at
 

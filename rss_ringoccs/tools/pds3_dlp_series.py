@@ -427,7 +427,7 @@ def get_dlp_series_info(rev_info, dlp_inst, series_name, prof_dir):
     SERIES = 'SERIES'
     SERIES_NAME = '"OCCULTATION PROFILE"'
     SERIES_INTERCHANGE_FORMAT = 'ASCII'
-    SERIES_COLUMNS = '12'
+    SERIES_COLUMNS = str(ncol)
     SERIES_ROWS = FILE_RECORDS
     SERIES_ROW_BYTES = RECORD_BYTES
     SERIES_SAMPLING_PARAMETER_NAME = '"RING RADIUS"'

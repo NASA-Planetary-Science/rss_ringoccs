@@ -237,7 +237,7 @@ class RSRReader(object):
         rsr_size = os.path.getsize(self.rsr_file)
         bytes_per_sfdu = sfdu_hdr_dict['sfdu_length'] + 20
         n_sfdu = int(rsr_size / bytes_per_sfdu)
-        if rsr_size % bytes_per_sfdu != 0:
+        if rsr_size % bytes_per_sfdu != 0 and verbose is True:
             print('WARNING (RSRReader): file size not the same as expected!\n'
                     + '\t Using n_sfdu=' + str(n_sfdu)
                     + ' instead of n_sfdu=' + str(rsr_size/bytes_per_sfdu))

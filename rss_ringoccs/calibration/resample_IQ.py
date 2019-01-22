@@ -99,7 +99,8 @@ def resample_IQ(rho_km, IQ_c, dr_desired, verbose=False):
     #     be selected so that the final radii are at integer numbers of
     #     requested spacing
     if rho_km_diff[0] < 0:
-        print('DETECTED INGRESS (resample_IQ.py): reversing arrays')
+        if verbose:
+            print('DETECTED INGRESS (resample_IQ.py): reversing arrays')
         rho_km = rho_km[::-1]
         IQ_c = IQ_c[::-1]
 
@@ -118,12 +119,6 @@ def resample_IQ(rho_km, IQ_c, dr_desired, verbose=False):
 
     rho_km_desired = (rho_km_uniform[0]
         + dr_desired * np.arange(len(I_c_desired)))
-
-    if verbose:
-        print('First 10 rho, I_c, Q_c:')
-        for i in range(10):
-            print('%24.16f %24.16f %24.16f' %
-                (rho_km_desired[i], I_c_desired[i], Q_c_desired[i]))
 
     IQ_c_desired = I_c_desired + 1j * Q_c_desired
     return rho_km_desired, IQ_c_desired

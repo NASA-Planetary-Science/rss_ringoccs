@@ -994,8 +994,8 @@ class DiffractionCorrection(object):
 
             self.P = P
 
-            if np.min(P <= 1.0):
-                print("\trho_dot_km_vals is too small in some regions\n."
+            if (np.min(P) <= 1.0):
+                print("\trho_dot_km_vals is too small in some regions.\n"
                       "\tTrimming data so reconstruction may proceed.\n")
                 
                 crange = (P > 1.0).nonzero()
@@ -1013,6 +1013,7 @@ class DiffractionCorrection(object):
 
                 # Trim data to allow for finite window sizes.
                 P = P[crange]
+                alpha = alpha[crange]
                 self.rho_km_vals = self.rho_km_vals[crange]
                 self.p_norm_vals = self.p_norm_vals[crange]
                 self.phi_rad_vals = self.phi_rad_vals[crange]

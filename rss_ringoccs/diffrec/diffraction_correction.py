@@ -19,6 +19,7 @@ import numpy as np
 from scipy.special import lambertw, iv
 from rss_ringoccs.tools.history import write_history_dict
 from rss_ringoccs.tools.write_output_files import write_output_files
+import pdb
 
 # Declare constant for the speed of light (km/s)
 SPEED_OF_LIGHT_KM = 299792.4580
@@ -991,13 +992,27 @@ class DiffractionCorrection(object):
             alpha = omega*omega * sigma*sigma / (2.0 * self.rho_dot_kms_vals)
             P = self.res / (alpha * (self.F_km_vals*self.F_km_vals))
 
+            self.P = P
+
             if np.min(P <= 1.0):
                 print("\trho_dot_km_vals is too small in some regions\n."
                       "\tTrimming data so reconstruction may proceed.\n")
                 
                 crange = (P > 1.0).nonzero()
 
+                if (np.size(crange) == 0):
+                    raise IndexError(
+                        "\n\tError Encountered:\n"
+                        "\t\tEither rho_dot_km_vals is too small, or\n"
+                        "\t\tF_km_vals is too large for the entirety of\n"
+                        "\t\tthe available data. Request a coarser\n"
+                        "\t\tresolution, or check your data for errors."
+                    )
+                else:
+                    pass
+
                 # Trim data to allow for finite window sizes.
+                P = P[crange]
                 self.rho_km_vals = self.rho_km_vals[crange]
                 self.p_norm_vals = self.p_norm_vals[crange]
                 self.phi_rad_vals = self.phi_rad_vals[crange]
@@ -1018,13 +1033,15 @@ class DiffractionCorrection(object):
                 self.lambda_sky_km_vals = self.lambda_sky_km_vals[crange]
                 self.raw_tau_threshold_vals = self.raw_tau_threshold_vals[crange]
 
-                P = P[crange]
+                del crange
+            else:
+                pass
 
-                P1 = P/(1-P)
-                P2 = P1*np.exp(P1)
-                crange1 = ((RCPR_E + P2) < 1.0e-16).nonzero()
-                crange2 = ((RCPR_E + P2) >= 1.0e-16).nonzero()
-                self.w_km_vals = np.zeros(np.size(self.rho_km_vals))
+            P1 = P/(1-P)
+            P2 = P1*np.exp(P1)
+            crange1 = ((RCPR_E + P2) < 1.0e-16).nonzero()
+            crange2 = ((RCPR_E + P2) >= 1.0e-16).nonzero()
+            self.w_km_vals = np.zeros(np.size(self.rho_km_vals))
 
             if (np.size(crange1) > 0):
                 self.w_km_vals[crange1] = 2.0*self.F_km_vals*self.F_km_vals
@@ -1037,7 +1054,7 @@ class DiffractionCorrection(object):
             else:
                 pass
 
-            del omega, alpha, P, P1, P2, crange, crange1, crange2
+            del omega, alpha, P, P1, P2, crange1, crange2
         else:
             self.w_km_vals = 2.0*self.F_km_vals*self.F_km_vals/res
         

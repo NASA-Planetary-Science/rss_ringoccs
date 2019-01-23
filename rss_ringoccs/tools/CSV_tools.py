@@ -2,7 +2,7 @@
     Purpose:
         Provide tools for reading in .TAB and
         .CSV files and converting the data into
-        a usable instance of the NormDiff class.
+        a usable instance of the DLP class.
     Dependencies:
         #. pandas
         #. numpy
@@ -13,7 +13,7 @@
 import numpy as np
 import pandas as pd
 from scipy import interpolate
-from .history import write_history_dict
+from .history import write_history_dict, date_to_rev, rev_to_occ_info
 RADS_PER_DEGS = 0.0174532925199432957692369
 
 def get_geo(geo, verbose=True):
@@ -976,18 +976,17 @@ class ExtractCSVData(object):
 
         self.history = write_history_dict(input_vars, input_kwds, __file__)
         var = geo.split("/")[-1]
+
+
         try:
             var = var.split("_")
-            band = var[3][0]
+            band = '"%s"' % var[3][0]
             year = var[1]
             doy = var[2]
             dsn = "DSS-%s" % (var[3][1:])
-            occ_dir = var[4]
-            rev_num = "Unknown"
-            if (occ_dir == "E"):
-                prof_dir = "EGRESS"
-            else:
-                occ_dir = "INGRESS"
+            rev_num = date_to_rev(int(year), int(doy))
+            occ_dir = rev_to_occ_info(rev_num)
+            prof_dir = '"%s%"' % var[4]
         except:
             var = "Unknown"
             band = "Unknown"
@@ -997,6 +996,7 @@ class ExtractCSVData(object):
             occ_dir = "Unknown"
             rev_num = "Unknown"
             prof_dir = "Unknown"
+
 
         self.rev_info = {
             "rsr_file": "Unknown",
@@ -1161,6 +1161,7 @@ class GetUranusData(object):
             "Use of Verbose":  verbose
             }
         self.history = write_history_dict(input_vars, input_kwds, __file__)
+
         if verbose:
             print("\tHistory Complete.")
         if verbose:

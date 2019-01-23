@@ -69,11 +69,11 @@ class DiffractionCorrection(object):
             on a data set that is a near radially symmetric function
             of the ring radius, or ring intercept point (RIP).
         Arguments:
-            :NormDiff (*object*):
-                The data set, usually an instance of the NormDiff
-                class from the rss_ringoccs Calibration subpackage.
-                This instance MUST contain the following attributes
-                and MUST have the same names.
+            :DLP (*object*):
+                The data set, usually an instance of the
+                DiffractionLimitedProfile class from the rss_ringoccs
+                Calibration subpackage. This instance MUST contain
+                the following attributes and have the same names.
 
                 |   rho_km_vals:      Ring Radius (km)
                 |   phi_rad_vals:     Ring Azimuth Angle (Radians)
@@ -138,7 +138,7 @@ class DiffractionCorrection(object):
                 correction is physically significant or valid. If
                 the reconstruction is good, the forward model
                 should reproduce the p_norm_vals attribute from
-                the input NormDiff instance. Default is set to False.
+                the input DLP instance. Default is set to False.
             :norm (*bool*):
                 A Boolean for determining whether or not the
                 reconstructed complex transmittance is normalize
@@ -186,7 +186,7 @@ class DiffractionCorrection(object):
             :bfac (*bool*):
                 Boolean for bfac (See keywords).
             :dathist (*dict*):
-                History from NormDiff instance.
+                History from DLP instance.
             :dx_km (*float*):
                 Radial spacing for the data points (km).
             :f_sky_hz_vals (*np.ndarray*):
@@ -236,7 +236,7 @@ class DiffractionCorrection(object):
                 Ring azimuth angle of the ring intercept (Radians).
             :phi_rl_rad_vals (*np.ndarray*):
                 Ring longitude angle. This will be a None type unless
-                it was provided in the NormDiff class. Otherwise,
+                it was provided in the DLP class. Otherwise,
                 this variable is in radians.
             :power_vals (*np.ndarray*):
                 Normalized reconstructed power.
@@ -245,16 +245,16 @@ class DiffractionCorrection(object):
             :raw_tau_threshold_vals (*np.ndarray*):
                 Threshold optical depth for the diffracted data.
                 This will be a None type unless provided for in the
-                NormDiff class.
+                DLP class.
             :res (*float*):
                 Requested resolution (See arguments). In kilometers.
             :rho_corr_pole_km_vals (*np.ndarray*):
                 Radial corrections from the Planet's pole. This will
                 be a None type variable unless provided in the
-                NormDiff class. Otherwise, this is in kilometers.
+                DLP class. Otherwise, this is in kilometers.
             :rho_corr_timing_km_vals (*np.ndarray*):
                 Radial corrections from timing offsets. This will be
-                a None type variable unless provided in the NormDiff
+                a None type variable unless provided in the DLP
                 class. Otherwise, this is in kilometers.
             :rho_dot_kms_vals (*np.ndarray*):
                 Time derivative of the ring intercept point (km/s).
@@ -273,14 +273,14 @@ class DiffractionCorrection(object):
                 First point that was reconstructed.
             :t_oet_spm_vals (*np.ndarray*):
                 Time the signal is measured on Earth. This is a
-                None type unless provided for in the NormDiff class.
+                None type unless provided for in the DLP class.
             :t_ret_spm_vals (*np.ndarray*):
                 Time the signal passes through the diffracting
                 medium. This is a None type unless provided for in
-                the NormDiff class.
+                the DLP class.
             :t_set_spm_vals (*np.ndarray*):
                 Time the signal is emitted from the spacecraft. This
-                is a None type unless provided in the NormDiff class.
+                is a None type unless provided in the DLP class.
             :tau_threshold_vals (*np.ndarray*):
                 Threshold optical depth of the reconstructed data.
             :tau_vals (*np.ndarray*):
@@ -292,7 +292,7 @@ class DiffractionCorrection(object):
             :wtype (*str*):
                 String for wtype (See keywords).
     """
-    def __init__(self, NormDiff, res, rng="all", wtype="kbmd20", fwd=False,
+    def __init__(self, DLP, res, rng="all", wtype="kbmd20", fwd=False,
                  norm=True, verbose=False, bfac=True, sigma=2.e-13,
                  psitype="fresnel4", write_file=False, res_factor=0.75):
 
@@ -602,7 +602,7 @@ class DiffractionCorrection(object):
             pass
 
         if verbose:
-            print("\tAssigning Inputs as Attributes...")
+            print("\tAssigning inputs as attributes...")
 
         # Set forward power variable to None in case it isn't defined later.
         self.p_norm_fwd_vals = None
@@ -634,55 +634,53 @@ class DiffractionCorrection(object):
         self.verbose = verbose
         self.psitype = psitype
 
-        # Retrieve variables from the NormDiff class, setting as attributes.
+        # Retrieve variables from the DLP class, setting as attributes.
         if verbose:
-            print("\tRetrieving Variables from NormDiff Instance...")
+            print("\tRetrieving variables from DLP instance...")
 
         # Ring radius
-        self.rho_km_vals = np.array(NormDiff.rho_km_vals)
+        self.rho_km_vals = np.array(DLP.rho_km_vals)
 
         # Retrieve normalized power.
-        self.p_norm_vals = np.array(NormDiff.p_norm_vals)
+        self.p_norm_vals = np.array(DLP.p_norm_vals)
 
         # Phase of signal.
-        self.phase_rad_vals = np.array(NormDiff.phase_rad_vals)
+        self.phase_rad_vals = np.array(DLP.phase_rad_vals)
 
         # Ring opening angle.
-        self.B_rad_vals = np.array(NormDiff.B_rad_vals)
+        self.B_rad_vals = np.array(DLP.B_rad_vals)
 
         # Spacecraft-to-Ring Intercept Point (RIP) distance.
-        self.D_km_vals = np.array(NormDiff.D_km_vals)
+        self.D_km_vals = np.array(DLP.D_km_vals)
 
         # Ring azimuth angle.
-        self.phi_rad_vals = np.array(NormDiff.phi_rad_vals)
+        self.phi_rad_vals = np.array(DLP.phi_rad_vals)
 
         # Frequency from the recieved signal.
-        self.f_sky_hz_vals = np.array(NormDiff.f_sky_hz_vals)
+        self.f_sky_hz_vals = np.array(DLP.f_sky_hz_vals)
 
         # RIP velocity.
-        self.rho_dot_kms_vals = np.array(NormDiff.rho_dot_kms_vals)
+        self.rho_dot_kms_vals = np.array(DLP.rho_dot_kms_vals)
 
         # Retrieve time variables (Earth, Ring, and Spacecraft ET).
-        self.t_oet_spm_vals = np.array(NormDiff.t_oet_spm_vals)
-        self.t_ret_spm_vals = np.array(NormDiff.t_ret_spm_vals)
-        self.t_set_spm_vals = np.array(NormDiff.t_set_spm_vals)
+        self.t_oet_spm_vals = np.array(DLP.t_oet_spm_vals)
+        self.t_ret_spm_vals = np.array(DLP.t_ret_spm_vals)
+        self.t_set_spm_vals = np.array(DLP.t_set_spm_vals)
 
         # Pole corrections in ring radius.
-        self.rho_corr_pole_km_vals = np.array(NormDiff.rho_corr_pole_km_vals)
+        self.rho_corr_pole_km_vals = np.array(DLP.rho_corr_pole_km_vals)
 
         # Timing corrections in ring radius.
-        self.rho_corr_timing_km_vals = np.array(
-                NormDiff.rho_corr_timing_km_vals
-            )
+        self.rho_corr_timing_km_vals = np.array(DLP.rho_corr_timing_km_vals)
 
         # Ring longitude angle.
-        self.phi_rl_rad_vals = np.array(NormDiff.phi_rl_rad_vals)
+        self.phi_rl_rad_vals = np.array(DLP.phi_rl_rad_vals)
 
         # Optical depth of diffraction profile.
-        self.raw_tau_threshold_vals = np.array(NormDiff.raw_tau_threshold_vals)
+        self.raw_tau_threshold_vals = np.array(DLP.raw_tau_threshold_vals)
 
-        # History from the NormDiff instance.
-        self.dathist = NormDiff.history
+        # History from the DLP instance.
+        self.dathist = DLP.history
 
         n_rho = np.size(self.rho_km_vals)
 
@@ -691,7 +689,7 @@ class DiffractionCorrection(object):
             raise ValueError(
                 "\n\t\trho_km_vals is not an array of real\n"
                 "\t\tvalued floating point numbers. Please\n"
-                "\t\tcheck your NormDiff class for errors.\n"
+                "\t\tcheck your DLP class for errors.\n"
             )
         elif (np.size(self.rho_km_vals) < 2):
             raise IndexError(
@@ -702,7 +700,7 @@ class DiffractionCorrection(object):
         elif (np.min(self.rho_km_vals < 0)):
                 raise ValueError(
                     "\n\t\trho_km_vals has negative values.\n"
-                    "\t\tPlease check your NormDiff class for\n"
+                    "\t\tPlease check your DLP class for\n"
                     "\t\terrors."
                 )
         else:
@@ -710,45 +708,45 @@ class DiffractionCorrection(object):
 
         if (np.size(self.p_norm_vals) != n_rho):
             raise IndexError(
-                "\n\tBad NormDiff: len(power) != len(rho)\n"
+                "\n\tBad DLP: len(power) != len(rho)\n"
                 "\tThe number of data points in power is\n"
                 "\tnot equal to the number of data points\n"
-                "\tin radius. Check the input NormDiff\n"
+                "\tin radius. Check the input DLP\n"
                 "\tinstance for any errors.\n"
             )
         elif (np.min(self.p_norm_vals) < 0.0):
             raise ValueError("\n\tThere are negative values in the\n"
                              "\tnormalized diffracted power. Check\n"
-                             "\tthe NormDiff instance for errors.")
+                             "\tthe DLP instance for errors.")
         elif not (np.all(np.isreal(self.p_norm_vals))):
             raise ValueError(
                 "\n\t\tp_norm_vals is not an array of real\n"
                 "\t\tvalued floating point numbers. Please\n"
-                "\t\tcheck your NormDiff class for errors.\n"
+                "\t\tcheck your DLP class for errors.\n"
             )
         else:
             self.p_norm_vals = self.p_norm_vals.astype(float)
 
         if (np.size(self.phase_rad_vals) != n_rho):
             raise IndexError(
-                "\n\tBad NormDiff: len(phase) != len(rho)\n"
+                "\n\tBad DLP: len(phase) != len(rho)\n"
                 "\tThe number of data points in phase is\n"
                 "\tnot equal to the number of data points\n"
-                "\tin radius. Check the input NormDiff\n"
+                "\tin radius. Check the input DLP\n"
                 "\tinstance for any errors.\n"
             )
         elif not (np.all(np.isreal(self.phase_rad_vals))):
             raise ValueError(
                 "\n\t\tphase_rad_vals is not an array of real\n"
                 "\t\tvalued floating point numbers. Please\n"
-                "\t\tcheck your NormDiff class for errors.\n"
+                "\t\tcheck your DLP class for errors.\n"
             )
         elif (np.max(np.abs(self.phase_rad_vals)) > TWO_PI+1e-8):
             raise ValueError(
                 "\n\tThere are values of phase (in radians)\n"
-                "\tthat are greater than 2pi. Check the NormDiff\n"
+                "\tthat are greater than 2pi. Check the DLP\n"
                 "\tinstance for errors. Also check to make sure\n"
-                "\tthe values in the NormDiff intance are in\n"
+                "\tthe values in the DLP intance are in\n"
                 "\tradians, and NOT degrees.\n"
             )
         else:
@@ -757,76 +755,76 @@ class DiffractionCorrection(object):
 
         if (np.size(self.B_rad_vals) != n_rho):
             raise IndexError(
-                "\n\tBad NormDiff: len(B) != len(rho)\n"
+                "\n\tBad DLP: len(B) != len(rho)\n"
                 "\tThe number of data points in B is\n"
                 "\tnot equal to the number of data points\n"
-                "\tin radius. Check the input NormDiff\n"
+                "\tin radius. Check the input DLP\n"
                 "\tinstance for any errors.\n"
             )
         elif (np.max(np.abs(self.B_rad_vals)) > TWO_PI+1e-8):
             raise ValueError(
                 "\n\tThere are values of B (in radians)\n"
-                "\tthat are greater than 2pi. Check the NormDiff\n"
+                "\tthat are greater than 2pi. Check the DLP\n"
                 "\tinstance for errors. Also check to make sure\n"
-                "\tthe values in the NormDiff intance are in\n"
+                "\tthe values in the DLP intance are in\n"
                 "\tradians, and NOT degrees.\n"
             )
         elif not (np.all(np.isreal(self.B_rad_vals))):
             raise ValueError(
                 "\n\t\tB_rad_vals is not an array of real\n"
                 "\t\tvalued floating point numbers. Please\n"
-                "\t\tcheck your NormDiff class for errors.\n"
+                "\t\tcheck your DLP class for errors.\n"
             )
         else:
             self.B_rad_vals = self.B_rad_vals.astype(float)
 
         if (np.size(self.D_km_vals) != n_rho):
             raise IndexError(
-                "\n\tBad NormDiff: len(D) != len(rho)\n"
+                "\n\tBad DLP: len(D) != len(rho)\n"
                 "\tThe number of data points in D is\n"
                 "\tnot equal to the number of data points\n"
-                "\tin radius. Check the input NormDiff\n"
+                "\tin radius. Check the input DLP\n"
                 "\tinstance for any errors.\n"
             )
         elif not (np.all(np.isreal(self.D_km_vals))):
             raise ValueError(
                 "\n\t\tD_km_vals is not an array of real\n"
                 "\t\tvalued floating point numbers. Please\n"
-                "\t\tcheck your NormDiff class for errors.\n"
+                "\t\tcheck your DLP class for errors.\n"
             )
         elif (np.min(self.D_km_vals) < 0.0):
             raise ValueError("\n\tThere are negative values for the\n"
                              "\tspacecraft to RIP distance, D.\n"
-                             "\tCheck the NormDiff instance for errors.\n")
+                             "\tCheck the DLP instance for errors.\n")
         elif (np.min(self.D_km_vals == 0.0)):
             raise ValueError(
                 "\n\tThere are zero-valued elements for the\n"
                 "\tSpacecraft to Ring-Intercept-Point distance,\n"
-                "\tD. Check the NormDiff instance for errors.\n"
+                "\tD. Check the DLP instance for errors.\n"
             )
         else:
             self.D_km_vals = self.D_km_vals.astype(float)
 
         if (np.size(self.phi_rad_vals) != n_rho):
             raise IndexError(
-                "\n\tBad NormDiff: len(phi) != len(rho)\n"
+                "\n\tBad DLP: len(phi) != len(rho)\n"
                 "\tThe number of data points in angle is\n"
                 "\tnot equal to the number of data points\n"
-                "\tin radius. Check the input NormDiff\n"
+                "\tin radius. Check the input DLP\n"
                 "\tinstance for any errors.\n"
             )
         elif not (np.all(np.isreal(self.phi_rad_vals))):
             raise ValueError(
                 "\n\t\tphi_rad_vals is not an array of real\n"
                 "\t\tvalued floating point numbers. Please\n"
-                "\t\tcheck your NormDiff class for errors.\n"
+                "\t\tcheck your DLP class for errors.\n"
             )
         elif (np.max(np.abs(self.phi_rad_vals)) > TWO_PI+1e-6):
             raise ValueError(
                 "\n\tThere are values of phi (in radians)\n"
-                "\tthat are greater than 2pi. Check the NormDiff\n"
+                "\tthat are greater than 2pi. Check the DLP\n"
                 "\tinstance for errors. Also check to make sure\n"
-                "\tthe values in the NormDiff intance are in\n"
+                "\tthe values in the DLP intance are in\n"
                 "\tradians, and NOT degrees.\n"
             )
         else:
@@ -834,25 +832,27 @@ class DiffractionCorrection(object):
 
         if (np.size(self.f_sky_hz_vals) != n_rho):
             raise IndexError(
-                "\n\tBad NormDiff: len(frequency) != len(rho)\n"
+                "\n\tBad DLP: len(frequency) != len(rho)\n"
                 "\tThe number of data points in frequency is\n"
                 "\tnot equal to the number of data points\n"
-                "\tin radius. Check the input NormDiff\n"
+                "\tin radius. Check the input DLP\n"
                 "\tinstance for any errors.\n"
             )
         elif not (np.all(np.isreal(self.f_sky_hz_vals))):
             raise ValueError(
                 "\n\t\tf_sky_hz_vals is not an array of real\n"
                 "\t\tvalued floating point numbers. Please\n"
-                "\t\tcheck your NormDiff class for errors.\n"
+                "\t\tcheck your DLP class for errors.\n"
             )
         elif (np.min(self.f_sky_hz_vals < 0.0)):
-            raise ValueError("\n\tThere are negative values of the frequency.\n"
-                             "\tCheck the NormDiff instance for errors.\n")
+            raise ValueError(
+                "\n\tThere are negative values of the frequency.\n"
+                "\tCheck the DLP instance for errors.\n"
+            )
         elif (np.min(self.f_sky_hz_vals == 0.0)):
             raise ValueError(
                 "\n\tThere are zero-valued elements for the\n"
-                "\tfrequency. Check the NormDiff instance\n"
+                "\tfrequency. Check the DLP instance\n"
                 "\tfor errors.\n"
             )
         else:
@@ -860,17 +860,17 @@ class DiffractionCorrection(object):
 
         if (np.size(self.rho_dot_kms_vals) != n_rho):
             raise IndexError(
-                "\n\tBad NormDiff: len(rho_dot) != len(rho)\n"
+                "\n\tBad DLP: len(rho_dot) != len(rho)\n"
                 "\tThe number of data points in velocity is\n"
                 "\tnot equal to the number of data points\n"
-                "\tin radius. Check the input NormDiff\n"
+                "\tin radius. Check the input DLP\n"
                 "\tinstance for any errors.\n"
             )
         elif not (np.all(np.isreal(self.rho_dot_kms_vals))):
             raise ValueError(
                 "\n\t\trho_dot_kms_vals is not an array of real\n"
                 "\t\tvalued floating point numbers. Please\n"
-                "\t\tcheck your NormDiff class for errors.\n"
+                "\t\tcheck your DLP class for errors.\n"
             )
         else:
             self.rho_dot_kms_vals = self.rho_dot_kms_vals.astype(float)
@@ -947,7 +947,7 @@ class DiffractionCorrection(object):
                 "\n\tError Encountered:\n"
                 "\t\trho_km_vals is decreasing, yet\n"
                 "\t\trho_dot_kms_vals is positive..\n"
-                "\t\tPlease check your NormDiff class for errors."
+                "\t\tPlease check your DLP class for errors."
             )
         elif (self.dx_km < 0):
             self.rho_km_vals = self.rho_km_vals[::-1]
@@ -991,17 +991,35 @@ class DiffractionCorrection(object):
             alpha = omega*omega * sigma*sigma / (2.0 * self.rho_dot_kms_vals)
             P = self.res / (alpha * (self.F_km_vals*self.F_km_vals))
 
-            # The inverse exists only if P>1.
-            if (np.min(P) <= 1.0):
-                raise ValueError(
-                    "\n\tWarning: Bad Points!\n"
-                    "\tEither rho_dot_kms_vals, F_km_vals, or res_km is\n"
-                    "\ttoo small, or sigma is too large. It is also\n"
-                    "\tpossible that the frequency is too large.\n"
-                    "\tRequest coarser resolution, check your input\n"
-                    "\tdata, or set bfac=False as a keyword.\n"
-                )
-            else:
+            if np.min(P <= 1.0):
+                print("\trho_dot_km_vals is too small in some regions\n."
+                      "\tTrimming data so reconstruction may proceed.\n")
+                
+                crange = (P > 1.0).nonzero()
+
+                # Trim data to allow for finite window sizes.
+                self.rho_km_vals = self.rho_km_vals[crange]
+                self.p_norm_vals = self.p_norm_vals[crange]
+                self.phi_rad_vals = self.phi_rad_vals[crange]
+                self.phase_rad_vals = self.phase_rad_vals[crange]
+                self.B_rad_vals = self.B_rad_vals[crange]
+                self.T_hat_vals = self.T_hat_vals[crange]
+                self.F_km_vals = self.F_km_vals[crange]
+                self.D_km_vals = self.D_km_vals[crange]
+                self.rho_corr_pole_km_vals = self.rho_corr_pole_km_vals[crange]
+                self.rho_corr_timing_km_vals = self.rho_corr_timing_km_vals[crange]
+                self.t_oet_spm_vals = self.t_oet_spm_vals[crange]
+                self.t_ret_spm_vals = self.t_ret_spm_vals[crange]
+                self.t_set_spm_vals = self.t_set_spm_vals[crange]
+                self.mu_vals = self.mu_vals[crange]
+                self.f_sky_hz_vals = self.f_sky_hz_vals[crange]
+                self.phi_rl_rad_vals = self.phi_rl_rad_vals[crange]
+                self.rho_dot_kms_vals = self.rho_dot_kms_vals[crange]
+                self.lambda_sky_km_vals = self.lambda_sky_km_vals[crange]
+                self.raw_tau_threshold_vals = self.raw_tau_threshold_vals[crange]
+
+                P = P[crange]
+
                 P1 = P/(1-P)
                 P2 = P1*np.exp(P1)
                 crange1 = ((RCPR_E + P2) < 1.0e-16).nonzero()
@@ -1019,7 +1037,7 @@ class DiffractionCorrection(object):
             else:
                 pass
 
-            del omega, alpha, P, P1, P2, crange1, crange2
+            del omega, alpha, P, P1, P2, crange, crange1, crange2
         else:
             self.w_km_vals = 2.0*self.F_km_vals*self.F_km_vals/res
         
@@ -1169,7 +1187,7 @@ class DiffractionCorrection(object):
 
         # Create input variable and keyword dictionaries for history.
         input_vars = {
-            'dlp_inst': NormDiff.history,
+            'dlp_inst': DLP.history,
             'res': res
         }
 
@@ -1237,8 +1255,8 @@ class DiffractionCorrection(object):
 
         self.history = write_history_dict(input_vars, input_kwds, __file__)
 
-        # Set rev_info attribute from NormDiff instance.
-        self.rev_info = NormDiff.rev_info
+        # Set rev_info attribute from DLP instance.
+        self.rev_info = DLP.rev_info
         if write_file:
             write_output_files(self)
 

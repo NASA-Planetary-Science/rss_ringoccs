@@ -615,6 +615,7 @@ class DiffractionCorrection(object):
         if verbose:
             print("\tMultiplying requested resolution by res_factor...")
 
+        self.input_res = res
         self.res = res*res_factor
         self.fwd = fwd
 

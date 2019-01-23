@@ -992,8 +992,6 @@ class DiffractionCorrection(object):
             alpha = omega*omega * sigma*sigma / (2.0 * self.rho_dot_kms_vals)
             P = self.res / (alpha * (self.F_km_vals*self.F_km_vals))
 
-            self.P = P
-
             if (np.min(P) <= 1.0):
                 print("\trho_dot_km_vals is too small in some regions.\n"
                       "\tTrimming data so reconstruction may proceed.\n")
@@ -1199,6 +1197,7 @@ class DiffractionCorrection(object):
         else:
             pass
 
+        pdb.set_trace()
         self.start = int(np.min((rho >= rho_min).nonzero()))
         self.finish = int(np.max((rho <= rho_max).nonzero()))
         self.n_used = 1 + (self.finish - self.start)

@@ -37,7 +37,7 @@ else
 	curl -Ok "$webfil"
 
 	# Run the Anaconda installer.
-	bash "$fil" -b -p ~/anaconda3
+	yes | bash "$fil" -b -p ~/anaconda3
 
 	# Remove the shell script from your home directory.
 	rm -f "$fil"
@@ -58,10 +58,10 @@ echo -e ' \t ' "Make sure you are using Bash when running rss_ringoccs"
 source .bash_profile
 
 # Update conda
-conda update conda
+yes | conda update conda
 
 # Install Spiceypy
-conda install -c https://conda.anaconda.org/andrewannex spiceypy
+yes | conda install -c https://conda.anaconda.org/andrewannex spiceypy
 
 # Source the .bash_profile again after conda updates.
 source .bash_profile

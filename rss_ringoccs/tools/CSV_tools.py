@@ -647,23 +647,23 @@ class ExtractCSVData(object):
 
             # Ring longitude angle.
             errmess = "phi_rl_deg_vals"
-            self.phi_rl_deg_vals = np.array(geo_dat.phi_rl_deg_vals)
-            if not (np.all(np.isreal(self.phi_rl_deg_vals))):
+            phi_rl_deg_vals = np.array(geo_dat.phi_rl_deg_vals)
+            if not (np.all(np.isreal(phi_rl_deg_vals))):
                 raise ValueError(
                     "\n\t\tphi_rl_deg_vals is not an array of real\n"
                     "\t\tvalued floating point numbers. Please\n"
                     "\t\tcheck your geo CSV for errors.\n"
                 )
             else:
-                self.phi_rl_deg_vals = self.phi_rl_deg_vals.astype(float)
+                phi_rl_deg_vals = phi_rl_deg_vals.astype(float)
 
-            if (np.max(np.abs(self.phi_rl_deg_vals)) >= 360+1.e-4):
+            if (np.max(np.abs(phi_rl_deg_vals)) >= 360+1.e-4):
                 raise ValueError(
                     "\n\t\tphi_rl_deg_vals has values beyond\n"
                     "\t\t360 degrees. Please check your geo\n"
                     "\t\tCSV for errors.\n"
                     "\t\t\tMaximum of |phi|: %f"
-                    % (np.max(np.abs(self.phi_rl_deg_vals)))
+                    % (np.max(np.abs(phi_rl_deg_vals)))
                 )
             else:
                 pass
@@ -893,6 +893,7 @@ class ExtractCSVData(object):
         geo_rho = geo_rho[crange]
         geo_D = geo_D[crange]
         phi_ora_deg_vals = phi_ora_deg_vals[crange]
+        phi_rl_deg_vals = phi_rl_deg_vals[crange]
         B_deg_vals = B_deg_vals[crange]
         rmin = np.min(geo_rho)
         rmax = np.max(geo_rho)
@@ -910,7 +911,7 @@ class ExtractCSVData(object):
         self.phi_rad_vals = interp(self.rho_km_vals)*RADS_PER_DEGS
         interp = interpolate.interp1d(geo_rho, B_deg_vals, kind="cubic")
         self.B_rad_vals = interp(self.rho_km_vals)*RADS_PER_DEGS
-        interp = interpolate.interp1d(geo_rho, phi_ora_deg_vals, kind="cubic")
+        interp = interpolate.interp1d(geo_rho, phi_rl_deg_vals, kind="cubic")
         self.phi_rl_rad_vals = interp(self.rho_km_vals)*RADS_PER_DEGS
         interp = interpolate.interp1d(frange, f_sky_raw_vals, kind='cubic')
         self.f_sky_hz_vals = interp(xrange)

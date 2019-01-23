@@ -6,7 +6,7 @@ PATH_VALUES		= ( '../kernels/naif/CASSINI/kernels/spk'
 					'../kernels/naif/generic_kernels/spk/stations'
 					'../kernels/naif/generic_kernels/pck'
 					'../kernels/naif/CASSINI/kernels/pck'
-					'../kernels/local')
+					'../kernels/naif/CASSINI/kernels/fk')
 
 PATH_SYMBOLS 	= ('A', 'B', 'C', 'D', 'E', 'F', 'G')
 
@@ -16,7 +16,8 @@ KERNELS_TO_LOAD = (		'$A/050606R_SCPSE_05114_05132.bsp'
 						'$C/de430.bsp'
 						'$F/cpck26Feb2009.tpc'
                         '$D/earthstns_itrf93_050714.bsp'
-						'$F/earth_000101_180919_180629.bpc')
+						'$F/earth_000101_180919_180629.bpc'
+						'$G/earth_topo_050714.tf')
 
 
 

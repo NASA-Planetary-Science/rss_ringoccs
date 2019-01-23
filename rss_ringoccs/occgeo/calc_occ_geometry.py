@@ -179,7 +179,7 @@ def calc_elevation_deg(et_vals, target, obs, kernels=None):
 
         # Compute observer to target position vector in J2000
         #   with light-correction
-        ref = 'J2000'
+        ref = obs + '_TOPO'
         abcorr = 'CN'
         ptarg1, ltime1 = spice.spkpos(target, et, ref, abcorr, obs)
 

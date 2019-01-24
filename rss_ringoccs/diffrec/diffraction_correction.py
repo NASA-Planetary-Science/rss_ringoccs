@@ -1038,6 +1038,7 @@ class DiffractionCorrection(object):
 
             P1 = P/(1-P)
             P2 = P1*np.exp(P1)
+            P2 = np.around(P2, decimals=16)
             crange1 = ((RCPR_E + P2) < 1.0e-16).nonzero()
             crange2 = ((RCPR_E + P2) >= 1.0e-16).nonzero()
             self.w_km_vals = np.zeros(np.size(self.rho_km_vals))
@@ -1052,6 +1053,8 @@ class DiffractionCorrection(object):
                 self.w_km_vals[crange2] = np.abs(lambertw(P2)-P1)/alpha
             else:
                 pass
+            
+            pdb.set_trace()
 
             del omega, alpha, P, P1, P2, crange1, crange2
         else:

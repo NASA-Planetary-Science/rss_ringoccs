@@ -32,7 +32,7 @@ def pds3_write_series_lbl(str_lbl, out_lbl_file):
 
     npad0 = str_lbl['alignment_column']
     npad1 = str_lbl['series_alignment_column']
-    print('\nWriting label to: ', out_lbl_file, '\n')
+    print('\tWriting label to: \n\t\t' + '/'.join(out_lbl_file.split('/')[0:5]) + '/\n\t\t\t' + '/'.join(out_lbl_file.split('/')[5:]))
     f = open(out_lbl_file, 'w')
 
     # Write keywords and values

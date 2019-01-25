@@ -31,7 +31,7 @@ def write_cal_series_data(cal_inst, out_file):
     """
     format_str = ('%14.6F,' + '%20.6F,' + '%10.6F,' + '%14.6F' + '%s')
     npts = len(cal_inst.t_oet_spm_vals)
-    print('\nWriting CAL data to: ', out_file, '\n')
+    print('\tWriting CAL data to: \n\t\t' + '/'.join(out_file.split('/')[0:5]) + '/\n\t\t\t' + '/'.join(out_file.split('/')[5:]))
     f = open(out_file, 'w')
     for n in range(npts):
         f.write(format_str % (

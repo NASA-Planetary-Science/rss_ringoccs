@@ -61,7 +61,7 @@ def write_output_files(inst):
         filtyp = 'DLP_' + str(int(inst.dr_km * 1000 * 2)).zfill(4) + 'M'
 
     elif isinstance(inst, rss.diffrec.DiffractionCorrection):
-        filtyp = 'TAU_' + str(int(inst.res * 1000)).zfill(5) + 'M'
+        filtyp = 'TAU_' + str(int(inst.input_res * 1000)).zfill(5) + 'M'
     else:
         print('invalid instance!')
 

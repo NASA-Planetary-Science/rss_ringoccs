@@ -28,7 +28,7 @@ def write_tau_series_data(tau_inst, out_file):
             + '%14.6F,' + '%14.6F,' + '%12.6F' + '%s')
     npts = len(tau_inst.t_oet_spm_vals)
 
-    print('\nWriting TAU data to: ', out_file, '\n')
+    print('\tWriting TAU data to: \n\t\t' + '/'.join(out_file.split('/')[0:5]) + '/\n\t\t\t' + '/'.join(out_file.split('/')[5:]))
 
     f = open(out_file, 'w')
     for n in range(npts):

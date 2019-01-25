@@ -165,8 +165,7 @@ class RSRReader(object):
     __field_names = (__sfdu_field_names + __ha_field_names + __ph_field_names
         + __sh_field_names + __data_field_names)
 
-    def __init__(self, rsr_file, decimate_16khz_to_1khz=True,
-            cpu_count=multiprocessing.cpu_count(), verbose=False):
+    def __init__(self, rsr_file, decimate_16khz_to_1khz=True, verbose=False):
         """
         Purpose:
             Sets full path name of RSR file as an attribute to the instance, and
@@ -176,21 +175,12 @@ class RSRReader(object):
 
         """
 
-        # Ensure verbose is Boolean
-        #if type(verbose) != bool:
         if not isinstance(verbose, bool):
             print('WARNING (RSRReader): verbose input should be Boolean. '
                 + 'Assuming False. If you\'re trying to use 1 or 0, then you '
                 +'should use the built-in Python booleans instead')
             verbose = False
 
-        #if type(cpu_count) != int:
-        if not isinstance(cpu_count, int):
-            print('WARNING (RSRReader): cpu_count keyword should be an '
-                + 'integer. Setting to number of cores on your computer.')
-            cpu_count = multiprocessing.cpu_count()
-
-        #if type(self.__decimate_16khz_to_1khz) != bool:
         if not isinstance(decimate_16khz_to_1khz, bool):
             print('WARNING (RSRReader.get_IQ): Expected Boolean input for '
                 + 'decimate_16khz_to_1khz keyword. Ignoring input. If you\'re '
@@ -202,7 +192,7 @@ class RSRReader(object):
 
         # Default argment for __set_IQ and cpu_count
         self.__decimate_16khz_to_1khz = decimate_16khz_to_1khz
-        self.__cpu_count = cpu_count
+        self.__cpu_count = multiprocessing.cpu_count()
 
         # Record information about the run
         self.__set_history()
@@ -571,7 +561,8 @@ class RSRReader(object):
             n_pts = len(IQ_m)
             dt = 1.0 / float(1000)
             spm_vals = spm_vals[0] + dt * np.arange(n_pts)
-        elif decimate_16khz_to_1khz & (self.sample_rate_khz == 1):
+        elif decimate_16khz_to_1khz & (self.sample_rate_khz == 1) and (
+                verbose is True):
             print('\nWARNING (RSRReader.get_IQ): Cannot decimate a 1 kHz file '
                 + 'any further. Skipping extra decimation\n')
 

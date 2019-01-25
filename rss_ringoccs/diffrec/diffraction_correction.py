@@ -303,7 +303,9 @@ class DiffractionCorrection(object):
         # Make sure that verbose is a boolean.
         if not isinstance(verbose, bool):
             raise TypeError(
-                "\n\tverbose must be Boolean: True/False\n"
+                "\n\tError Encountered:\n"
+                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
+                "\tverbose must be Boolean: True/False\n"
                 "\tYour input has type: %s\n"
                 "\tInput should have type: bool\n"
                 "\tSet verbose=True or verbose=False\n"
@@ -321,19 +323,21 @@ class DiffractionCorrection(object):
                 res = float(res)
             except (TypeError, ValueError):
                 raise TypeError(
-                    "\n\tres must be a positive floating point number\n"
+                    "\n\tError Encountered:\n"
+                    "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
+                    "\tres must be a positive floating point number\n"
                     "\tYour input has type: %s\n"
-                    "\tInput should have type: float\n"
-                    % (type(res).__name__)
+                    "\tInput should have type: float\n" % (type(res).__name__)
                 )
         else:
             pass
 
         if (res <= 0.0):
             raise ValueError(
-                "\n\tres must be a positive floating point number\n"
-                "\tYour requested resolution (km): %f\n"
-                % (res)
+                "\n\tError Encountered:\n"
+                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
+                "\tres must be a positive floating point number\n"
+                "\tYour requested resolution (km): %f\n" % (res)
             )
         else:
             pass
@@ -344,11 +348,12 @@ class DiffractionCorrection(object):
             for key in self.__func_dict:
                 erm = "%s\t\t'%s'\n" % (erm, key)
             raise TypeError(
-                "\n\twtype must be a string.\n"
+                "\n\tError Encountered:\n"
+                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
+                "\twtype must be a string.\n"
                 "\tYour input has type: %s\n"
                 "\tInput should have type: str\n"
-                "\tAllowed string are:\n%s"
-                % (type(wtype).__name__, erm)
+                "\tAllowed string are:\n%s" % (type(wtype).__name__, erm)
             )
         else:
             # Remove spaces and spaces from the wtype variable.
@@ -361,10 +366,11 @@ class DiffractionCorrection(object):
                 for key in self.__func_dict:
                     erm = "%s\t\t'%s'\n" % (erm, key)
                 raise ValueError(
-                    "\n\tIllegal string used for wtype.\n"
+                    "\n\tError Encountered:\n"
+                    "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
+                    "\tIllegal string used for wtype.\n"
                     "\tYour string: '%s'\n"
-                    "\tAllowed Strings:\n%s"
-                    % (wtype, erm)
+                    "\tAllowed Strings:\n%s" % (wtype, erm)
                 )
             else:
                 pass
@@ -1058,8 +1064,8 @@ class DiffractionCorrection(object):
         rho_min = rho-w/2.0
         rho_max = rho+w/2.0
 
-        wrange = Prange[np.where((rho_min[Prange] >= np.min(rho)) &
-                                 (rho_max[Prange] <= np.max(rho)))]
+        wrange = Prange[np.where((rho_min >= np.min(rho)) &
+                                 (rho_max <= np.max(rho)))]
         self.wrange = wrange
 
         # Check that there is enough data for reconstruction.

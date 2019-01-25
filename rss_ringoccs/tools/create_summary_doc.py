@@ -419,8 +419,8 @@ def plot_geo_overview(pdf, geo_inst, tau_inst):
     ax2.plot(rho_km/1000., D_km/sat_radius, 'k')
     
     ax3.set_title('Longitude, Azimuth (deg)',fontweight='bold', fontsize=10)
-    ax3.plot(rho_km/1000., phi_rl_deg, 'b', label = '$\phi_E$')
-    ax3.plot(rho_km/1000., phi_ora_deg, 'r', label = '$\phi_{J2K}$')
+    ax3.plot(rho_km/1000., phi_rl_deg, 'b', label = '$\phi_{J2K}$')
+    ax3.plot(rho_km/1000., phi_ora_deg, 'r', label = '$\phi_{E}$')
     ax3.legend(loc='upper right')
     
     
@@ -663,7 +663,7 @@ def plot_summary_doc_v2(geo_inst, cal_inst, dlp_inst, tau_inst):
         pdf = plot_tau_overview(pdf, geo_inst, tau_inst)
         pdf = plot_tau(pdf, tau_inst)
         pdf = plot_phase(pdf, tau_inst)
-    latex_summary_doc(outfig, tau_inst.res, outfig[:-4])
+    latex_summary_doc(outfig, tau_inst.input_res, outfig[:-4])
 
 
     return None

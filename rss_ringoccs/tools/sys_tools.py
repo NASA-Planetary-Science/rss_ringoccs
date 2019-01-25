@@ -236,9 +236,9 @@ def latex_summary_doc(pdffil, res_km, outfilename):
                     $t_{\scriptsize{\textrm{SCET}}}$&
                     SPACECRAFT EVENT TIME\\
                     $\rho$&RING RADIUS\\
-                    $\phi_{\scriptsize{\textrm{E}}}$&
-                    RING LONGITUDE\\
                     $\phi_{\scriptsize{\textrm{J2K}}}$&
+                    RING LONGITUDE\\
+                    $\phi_{\scriptsize{\textrm{E}}}$&
                     OBSERVED RING AZIMUTH\\
                     $B$&OBSERVED RING ELEVATION\\
                     $D$&SPACECRAFT TO RING INTERCEPT DISTANCE\\

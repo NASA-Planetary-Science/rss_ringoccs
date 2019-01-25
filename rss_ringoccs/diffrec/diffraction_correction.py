@@ -991,73 +991,56 @@ class DiffractionCorrection(object):
             omega = TWO_PI * self.f_sky_hz_vals
             alpha = omega*omega * sigma*sigma / (2.0 * self.rho_dot_kms_vals)
             P = self.res / (alpha * (self.F_km_vals*self.F_km_vals))
+            self.P = P
 
-            if (np.min(P) <= 1.0):
-                print("\trho_dot_km_vals is too small in some regions.\n"
-                      "\tTrimming data so reconstruction may proceed.\n")
-                
-                crange = (P > 1.0).nonzero()
+            # Create a variable specifying where P>1 occurs.
+            Prange = (P > 1.0).nonzero()[0]
 
-                if (np.size(crange) == 0):
-                    raise IndexError(
-                        "\n\tError Encountered:\n"
-                        "\t\tEither rho_dot_km_vals is too small, or\n"
-                        "\t\tF_km_vals is too large for the entirety of\n"
-                        "\t\tthe available data. Request a coarser\n"
-                        "\t\tresolution, or check your data for errors."
-                    )
-                else:
-                    pass
-
-                # Trim data to allow for finite window sizes.
-                P = P[crange]
-                alpha = alpha[crange]
-                self.rho_km_vals = self.rho_km_vals[crange]
-                self.p_norm_vals = self.p_norm_vals[crange]
-                self.phi_rad_vals = self.phi_rad_vals[crange]
-                self.phase_rad_vals = self.phase_rad_vals[crange]
-                self.B_rad_vals = self.B_rad_vals[crange]
-                self.T_hat_vals = self.T_hat_vals[crange]
-                self.F_km_vals = self.F_km_vals[crange]
-                self.D_km_vals = self.D_km_vals[crange]
-                self.rho_corr_pole_km_vals = self.rho_corr_pole_km_vals[crange]
-                self.rho_corr_timing_km_vals = self.rho_corr_timing_km_vals[crange]
-                self.t_oet_spm_vals = self.t_oet_spm_vals[crange]
-                self.t_ret_spm_vals = self.t_ret_spm_vals[crange]
-                self.t_set_spm_vals = self.t_set_spm_vals[crange]
-                self.mu_vals = self.mu_vals[crange]
-                self.f_sky_hz_vals = self.f_sky_hz_vals[crange]
-                self.phi_rl_rad_vals = self.phi_rl_rad_vals[crange]
-                self.rho_dot_kms_vals = self.rho_dot_kms_vals[crange]
-                self.lambda_sky_km_vals = self.lambda_sky_km_vals[crange]
-                self.raw_tau_threshold_vals = self.raw_tau_threshold_vals[crange]
-
-                del crange
+            if (np.size(Prange) == 0):
+                raise IndexError(
+                    "\n\tError Encountered:\n"
+                    "\t\tThe P parameter in window width computation\n"
+                    "\t\tis less than one for the entirety of the\n"
+                    "\t\tdata set. Either rho_dot_km_vals is too small,\n"
+                    "\t\tor F_km_vals is too large. Request a coarser\n"
+                    "\t\tresolution, or check your data for errors.\n"
+                    "\n\t\tAlternatively, you may set bfac=False as\n"
+                    "\t\ta keyword to skip the use of the P parameter.\n"
+                    "\t\tThis may result in inaccurate window widths."
+                )
             else:
                 pass
 
+
+            P = P[Prange]
+            alpha = alpha[Prange]
             P1 = P/(1-P)
             P2 = P1*np.exp(P1)
+
+            # LambertW returns nans far values close to zero, so round this.
             P2 = np.around(P2, decimals=16)
-            crange1 = ((RCPR_E + P2) < 1.0e-16).nonzero()
-            crange2 = ((RCPR_E + P2) >= 1.0e-16).nonzero()
+
+            # For values near -1/e, LambertW(x) is roughly -1. 
+            crange1 = ((RCPR_E + P2) < 1.0e-16).nonzero()[0]
+            crange2 = ((RCPR_E + P2) >= 1.0e-16).nonzero()[0]
             self.w_km_vals = np.zeros(np.size(self.rho_km_vals))
 
             if (np.size(crange1) > 0):
-                self.w_km_vals[crange1] = 2.0*self.F_km_vals*self.F_km_vals
-                self.w_km_vals[crange1] /= self.res
+                self.w_km_vals[Prange[crange1]] = (
+                    2.0*self.F_km_vals[Prange[crange1]]*
+                    self.F_km_vals[Prange[crange1]]/self.res
+                )
             else:
                 pass
 
             if (np.size(crange2) > 0):
-                self.w_km_vals[crange2] = np.abs(lambertw(P2)-P1)/alpha
+                self.w_km_vals[Prange[crange2]] = np.abs(lambertw(P2)-P1)/alpha
             else:
                 pass
-            
-            pdb.set_trace()
 
             del omega, alpha, P, P1, P2, crange1, crange2
         else:
+            Prange = np.arange(np.size(self.rho_km_vals))
             self.w_km_vals = 2.0*self.F_km_vals*self.F_km_vals/res
         
         self.w_km_vals *= self.norm_eq
@@ -1068,47 +1051,28 @@ class DiffractionCorrection(object):
         else:
             self.rng = np.array([np.min(rng), np.max(rng)])
 
-        # Compute the starting point and the number of points used.
-        rho = self.rho_km_vals
-        w_max = np.max(self.w_km_vals)
+        rho = self.rho_km_vals[Prange]
+        w = self.w_km_vals[Prange]
 
         # Compute the smallest and largest allowed radii for reconstruction.
-        rho_min_lim = np.min(rho)+np.ceil(w_max/2.0)
-        rho_max_lim = np.max(rho)-np.ceil(w_max/2.0)
+        rho_min = rho-w/2.0
+        rho_max = rho+w/2.0
+
+        wrange = Prange[np.where((rho_min[Prange] >= np.min(rho)) &
+                                 (rho_max[Prange] <= np.max(rho)))]
+        self.wrange = wrange
 
         # Check that there is enough data for reconstruction.
-        if rho_min_lim > np.max(rho):
+        if (np.size(wrange) == 0):
             raise ValueError(
-                "\n\tThe window size needed for reconstruction is\n"
-                "\tis larger than the available range of data.\n\n"
-                "\tMinimum Available Radius in Data: %f\n"
-                "\tMaximum Available Radius in Data: %f\n"
-                "\tMinimum Reconstructed Radius: %f\n\n"
-                "\tThe minimum reconstructed radius is the minimum\n"
-                "\tavailable radius in data plus half of a window. This is\n"
-                "\tgreater than the maximum available data point, meaning\n"
-                "\tthere is insufficient data for the reconstruction.\n\n"
-                "\tTO CORRECT THIS:\n"
-                "\t\tRequest a coarser resolution or\n"
-                "\t\tselect a different window function.\n"
-                % (np.min(rho), np.max(rho), rho_min_lim)
-            )
-        elif rho_max_lim < np.min(rho):
-            raise ValueError(
-                "\n\tThe window size needed for reconstruction is\n"
-                "\tis larger than the available range of data.\n\n"
-                "\tMinimum Available Radius in Data: %f\n"
-                "\tMaximum Available Radius in Data: %f\n"
-                "\tMaximum Reconstructed Radius: %f\n\n"
-                "\tThe maximum reconstructed radius is the maximum\n"
-                "\tavailable radius in data minus half of a window.\n"
-                "\tThis is less than the minimum available data\n"
-                "\tpoint, meaning there is insufficient data for\n"
-                "\tthe reconstruction.\n\n"
-                "\tTO CORRECT THIS:\n"
-                "\t\tRequest a coarser resolution or\n"
-                "\t\tselect a different window function.\n"
-                % (np.min(rho), np.max(rho), rho_max_lim)
+                "\n\tThe window width is too large to reconstruct any\n"
+                "\tpoints. Please choose a coarser resolution or\n"
+                "\tinspect your input data.\n"
+                "\t\tMinimum Available Radius: %f\n"
+                "\t\tMaximum Available Radius: %f\n"
+                "\t\tMinimum Required Window Width: %f\n"
+                "\t\tMaximum Required Window Width: %f\n"
+                % (np.min(rho), np.max(rho), np.min(w), np.max(w))
             )
         elif (np.max(rho) < np.min(self.rng)):
             raise ValueError(
@@ -1118,7 +1082,7 @@ class DiffractionCorrection(object):
                 "\tYour Requested Maximum (km): %f\n"
                 "\tMaximum Available Data (km): %f\n\n"
                 "\tSelect a smaller range for reconstruction\n"
-                % (np.min(rng), np.max(rng), np.max(rho))
+                % (np.min(self.rng), np.max(self.rng), np.max(rho))
             )
         elif (np.min(rho) > np.max(self.rng)):
             raise ValueError(
@@ -1129,80 +1093,33 @@ class DiffractionCorrection(object):
                 "\tMinimum Available Data (km): %f\n\n"
                 "\tTO CORRECT THIS:\n"
                 "\t\tSelect a larger range for reconstruction\n"
-                % (np.min(rng), np.max(rng), np.min(rho))
+                % (np.min(self.rng), np.max(self.rng), np.min(rho))
             )
         else:
             pass
 
-        # Compute the smallest and largest values within requested range.
-        rho_start = rho[np.min((rho >= np.min(self.rng)).nonzero())]
-        rho_end = rho[np.max((rho <= np.max(self.rng)).nonzero())]
+        rho_min = np.min(rho[wrange])
+        rho_max = np.max(rho[wrange])
 
-        # Compute the start and end point for reconstruction.
-        rho_min = np.max([rho_min_lim, rho_start])
-        rho_max = np.min([rho_max_lim, rho_end])
+        wrange = wrange[np.where((rho[wrange] >= np.min(self.rng)) &
+                                 (rho[wrange] <= np.max(self.rng)))]
 
-        if (rho_min > rho_max):
-            if (rho_min_lim > rho_end) and (rho_max_lim > rho_min):
-                raise ValueError(
-                    "\n\tThe minimum possible radius is greater\n"
-                    "\tthan the maximum available data point\n"
-                    "\twithin your requested range.\n\n"
-                    "\tMaximum Available Data Point: %f\n"
-                    "\tMinimum Radius Needed: %f\n\n"
-                    "\tThis is because your requested\n"
-                    "\trange is outside of the scope of the\n"
-                    "\tavailable data (Or near the edge of it).\n\n"
-                    "\tTO CORRECT THIS:\n"
-                    "\t\tRequest a larger range that includes\n"
-                    "\t\tthis minimum data point.\n"
-                    % (rho_max, rho_min_lim)
-                )
-            elif ((rho_max_lim < rho_min) and (rho_min_lim < rho_end)):
-                raise ValueError(
-                    "\n\tThe maximum possible radius is less\n"
-                    "\tthan the minimum available data point\n"
-                    "\twithin your requested range.\n\n"
-                    "\tMinimum Available Data Point: %f\n"
-                    "\tMaximum Radius Needed: %f\n\n"
-                    "\tThis is because your requested\n"
-                    "\trange is outside of the scope of the\n"
-                    "\tavailable data (Or near the edge of it).\n\n"
-                    "\tTO CORRECT THIS:\n"
-                    "\t\tRequest a larger range that includes\n"
-                    "\t\tthis maximum data point.\n"
-                    % (rho_min, rho_max_lim)
-                )
-            elif ((rho_min_lim > rho_end) and (rho_max_lim < rho_min)):
-                raise ValueError(
-                    "\n\tThe minimum possible radius is less\n"
-                    "\tthan the maximum possible radius.\n\n"
-                    "\tMinimum Radius Needed: %f\n"
-                    "\tMaximum Radius Needed: %f\n\n"
-                    "\tThis is because the windows needed for\n"
-                    "\treconstruction are greater than the range\n"
-                    "\tthat is available in the data.\n\n"
-                    "\tTO CORRECT THIS:\n"
-                    "\t\tRequest a coarser resolution or choose\n"
-                    "\t\a different window function.\n"
-                    % (rho_min_lim, rho_max_lim)
-                )
-            else:
-                raise ValueError(
-                    "\n\tThe required window widths for your\n"
-                    "\trequested resolution is greater than\n"
-                    "\tthe data that is available. No\n"
-                    "\tpoints can be processed as a result\n\n"
-                    "\tTO CORRECT THIS:\n"
-                    "\t\tChose a coarser resolution or choose\n"
-                    "\t\ta different window function."
-                )
+        if (np.size(wrange) <= 1):
+            raise IndexError(
+                "\n\tRequested range does not include any of the\n"
+                "\tavailable points for processing. Please choose\n"
+                "\tA different range for processing.\n"
+                "\t\tMinimum Possible Radius: %f\n"
+                "\t\tMaximum Possible Radius: %f\n"
+                "\t\tRequested Range Minimum: %f\n"
+                "\t\tRequested Range Maximum: %f"
+                % (rho_min, rho_max, np.min(self.rng), np.max(self.rng))
+            )
         else:
             pass
 
-        pdb.set_trace()
-        self.start = int(np.min((rho >= rho_min).nonzero()))
-        self.finish = int(np.max((rho <= rho_max).nonzero()))
+        self.start = wrange[0]
+        self.finish = wrange[-1]
         self.n_used = 1 + (self.finish - self.start)
 
         # Create input variable and keyword dictionaries for history.
@@ -1223,8 +1140,7 @@ class DiffractionCorrection(object):
         }
 
         # Delete unnecessary variables for clarity.
-        del rho, w_max, rho_min_lim, rho_max_lim, rho_start, rho_end
-        del rho_min, rho_max, rng, norm, fwd, bfac, psitype, verbose
+        del rho, rho_min, rho_max, rng, norm, fwd, bfac, psitype, verbose
 
         if self.verbose:
             print("\tRunning Fresnel Inversion...")

@@ -356,7 +356,7 @@ def latex_summary_doc(pdffil, res_km, outfilename):
             \begin{figure}[H]
                 \centering
                 \includegraphics[page=4, width=\textwidth]{\thePDF}
-                \caption{Rev \theREV \thePROFDIR; selected occultation parameters.}
+                \caption{Rev \theREV\ - \thePROFDIR; selected occultation parameters.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -381,9 +381,8 @@ def latex_summary_doc(pdffil, res_km, outfilename):
             \begin{landscape}
                 \begin{figure}[H]
                     \centering
-                    \resizebox{9.5in}{5in}{
                         \includegraphics[page=6]{\thePDF}
-                    }
+                    
                     \caption{
                     Observing DSN station (DSS-\theDSN) elevation angle (in \textcolor{magenta}{magenta}) superimposed on ring profile at \theRES M resolution from data file \theTAU. \textcolor{blue}{Blue}: Reconstructed normal optical depth; \textcolor{cyan}{Cyan}: Free-space baseline; \textcolor{red}{Red}:Threshold optical depth (measurement SNR $\simeq$ 1). Optical depth is plotted increasing downward, the same direction as increasing direct signal extinction.}
                 \end{figure}

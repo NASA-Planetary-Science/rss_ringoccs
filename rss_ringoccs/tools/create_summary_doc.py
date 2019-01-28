@@ -75,6 +75,7 @@ def plot_bullseye(pdf, geo_inst):
     plt.xlabel('$x$ (1000 km)')
     plt.ylabel('$y$ (1000 km)')
     plt.title('Mean Observed Ring Elevation $B$ = '+str(B_mean)+'$^\circ$')
+    plt.tick_params(axis='both', direction='in', top=True, bottom=True, right=True, left=True)
 
     # Plot rings
     for ring in rings_km:
@@ -411,9 +412,20 @@ def plot_geo_overview(pdf, geo_inst, tau_inst):
     
     ax1.set_title('Time (HPM ' + geo_inst.rev_info['year'] + '-'
                 + geo_inst.rev_info['doy'] +')', fontweight='bold', fontsize=10)
+    ytpos = 0.08
     ax1.plot(rho_km/1000., t_oet_hrs, 'b', label = 'ERT')
     ax1.plot(rho_km/1000., t_set_hrs, 'r', label='SCET')
+    ax1.text(0.17, ytpos, 'C', horizontalalignment='center',
+            verticalalignment='center', transform=ax1.transAxes)
+
+    ax1.text(0.43, ytpos, 'B', horizontalalignment='center',
+            verticalalignment='center', transform=ax1.transAxes)
+    ax1.text(0.75, ytpos, 'A', horizontalalignment='center',
+            verticalalignment='center', transform=ax1.transAxes)
+    ax1.text(0.94, ytpos, 'F', horizontalalignment='center',
+            verticalalignment='center', transform=ax1.transAxes)
     ax1.legend(loc='upper right')
+
     
     ax2.set_title('S/C Distance D/RS', fontweight='bold', fontsize=10)
     ax2.plot(rho_km/1000., D_km/sat_radius, 'k')
@@ -439,12 +451,14 @@ def plot_geo_overview(pdf, geo_inst, tau_inst):
     ax6.plot(rho_km_tau/1000., tau_threshold_vals, label=str(band))
     ax6.legend(loc='upper right')
     
-    radii = [74.490, 91.983, 117.516, 122.052, 133.424, 136.774, 140.461]
+    #radii = [74.490, 91.983, 117.516, 122.052, 133.424, 136.774, 140.461]
+    radii = [74.490, 91.983, 117.516, 122.052, 136.774, 140.461]
     for row in range(nrow):
         for col in range(ncol):
             #axes[row, col].legend(loc = "upper right")
             axes[row, col].set_xlim(70., 150.)
             axes[row, col].set_xlabel('Ring Radius (1000 km)')
+            axes[row, col].tick_params(axis='both', direction='in', top=True, bottom=True, left=True, right=True)
             for radius in radii:
                 axes[row, col].axvline(x=radius, color='k', linestyle=':',
                                 linewidth=0.5)
@@ -483,16 +497,25 @@ def plot_cal_overview(pdf, cal_inst, dlp_inst):
     axes3[0].plot(t_oet_spm/1000., (F_sky_hz-(floor_fsky*1.e6))*1.e-6, color='b')
     axes3[0].set_ylabel(ytitle1)
     axes3[0].set_xlim(xlim)
+    axes3[0].tick_params(axis='both', direction='in', top=True, bottom=True,
+            left=True, right=True)
     
-    axes3[1].plot(t_oet_spm/1000., F_sky_resid, color='b')
-    axes3[1].plot(dlp_inst.t_oet_spm_vals/1000., F_sky_resid_fit, color='r')
+    axes3[1].plot(t_oet_spm/1000., F_sky_resid, color='b', linewidth=0.6)
+    axes3[1].plot(dlp_inst.t_oet_spm_vals/1000., F_sky_resid_fit, color='r',
+            linewidth=0.6)
     axes3[1].set_ylabel(ytitle2)
     axes3[1].set_xlim(xlim)
     axes3[1].set_ylim([np.nanmin(F_sky_resid_fit)-0.1, 
                         np.nanmax(F_sky_resid_fit)+0.1])
+    axes3[1].yaxis.tick_right()
+    axes3[1].yaxis.set_label_position("right")
+    axes3[1].tick_params(axis='both', direction='in', top=True, bottom=True,
+            left=True, right=True)
 
-    axes3[2].plot(t_oet_spm_dlp/1000., P_obs_dlp*2.e-9, color='b')
-    axes3[2].plot(t_oet_spm_dlp/1000., P_free_dlp*2.e-9, color='r')
+    axes3[2].plot(t_oet_spm_dlp/1000., P_obs_dlp*2.e-9, color='b', linewidth=0.6)
+    axes3[2].plot(t_oet_spm_dlp/1000., P_free_dlp*2.e-9, color='r', linewidth=0.6)
+    axes3[2].tick_params(axis='both', direction='in', top=True, bottom=True,
+            left=True, right=True)
     axes3[2].set_ylabel(ytitle3)
     axes3[2].set_xlabel(xtitle)
     axes3[2].set_xlim(xlim)
@@ -534,14 +557,15 @@ def plot_tau_overview(pdf, geo_inst, tau_inst):
             + tau_inst.rev_info['band'][1:-1]
             + '-Band, ' + tau_inst.rev_info['dsn'])
     ax2 = ax1.twinx()
-    ax1.tick_params(axis='y', colors='blue')
-    ax2.tick_params(axis='y', colors='magenta')
+    ax1.tick_params(axis='x', direction='in', top=True, bottom=True)
+    ax1.tick_params(axis='y', colors='blue', direction='in', right=True, left=True)
+    ax2.tick_params(axis='y', colors='magenta', direction='in')
 
     ax1.yaxis.label.set_color('blue')
     ax2.yaxis.label.set_color('magenta')
 
-    ax1.plot(rho_tau/1000., tau, color='blue', linewidth=1.0)
-    ax1.plot(rho_tau/1000., tau_thresh, linestyle='--', color='red', linewidth=1.0)
+    ax1.plot(rho_tau/1000., tau, color='blue', linewidth=0.6)
+    ax1.plot(rho_tau/1000., tau_thresh, linestyle='--', color='red', linewidth=0.8)
     ax1.set_ylabel('Normal Optical Depth')
     ax1.set_xlabel('Ring Radius, $\\rho$ (1000 km)')
     ax1.spines['left'].set_color('blue')
@@ -596,6 +620,7 @@ def plot_tau(pdf, tau_inst):
             ax[n].axhline(y=0, color='c')
             ax[n].plot(rho_km/1000., tau_thresh, color='r', linestyle='--')
             ax[n].plot(rho_km/1000., tau, color='b', linewidth=0.8)
+            ax[n].tick_params(axis='both', direction='in', top=True, bottom=True, left=True, right=True)
             r2 = rho_min + 1.
             ax[n].set_xlim(rho_min, r2)
             ax[n].set_ylim(ylim)
@@ -631,19 +656,23 @@ def plot_phase(pdf, tau_inst):
     axes5[0].plot(rho_km/1000., phi_deg, color='b', linewidth=lw1)
     axes5[0].set_xlim([72., 90.])
     axes5[0].set_ylabel(ytitle)
+    axes5[0].tick_params(axis='both', direction='in', top=True, bottom=True, left=True, right=True)
 
     axes5[1].plot(rho_km/1000., phi_deg, color='b', linewidth=lw1)
     axes5[1].set_xlim([90., 108.])
     axes5[1].set_ylabel(ytitle)
+    axes5[1].tick_params(axis='both', direction='in', top=True, bottom=True, left=True, right=True)
 
     axes5[2].plot(rho_km/1000., phi_deg, color='b', linewidth=lw1)
     axes5[2].set_xlim([108., 126.])
     axes5[2].set_ylabel(ytitle)
+    axes5[2].tick_params(axis='both', direction='in', top=True, bottom=True, left=True, right=True)
 
     axes5[3].plot(rho_km/1000., phi_deg, color='b', linewidth=lw1)
     axes5[3].set_xlim([126., 144.])
     axes5[3].set_ylabel(ytitle)
     axes5[3].set_xlabel(xtitle)
+    axes5[3].tick_params(axis='both', direction='in', top=True, bottom=True, left=True, right=True)
     pdf.savefig()
     plt.close()
     return pdf

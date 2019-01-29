@@ -242,12 +242,12 @@ class Geometry(object):
         # Calculate when signal passes atmosphere + ionosphere
         ionos_occ_et_vals = cog.get_planet_occ_times(t_oet_et_vals, dsn,
                 planet, spacecraft, height_above=5000.)
-        self.ionos_occ_spm_vals = et_to_spm(ionos_occ_et_vals)
+        self.ionos_occ_spm_vals = et_to_spm(ionos_occ_et_vals, ref_doy=doy)
         self.ionos_occ_et_vals = ionos_occ_et_vals
 
         atmos_occ_et_vals = cog.get_planet_occ_times(t_oet_et_vals, dsn,
                 planet, spacecraft, height_above=500.)
-        self.atmos_occ_spm_vals = et_to_spm(atmos_occ_et_vals)
+        self.atmos_occ_spm_vals = et_to_spm(atmos_occ_et_vals, ref_doy=doy)
 
 
         # Set attributes, first block contains the inputs to *GEO.TAB

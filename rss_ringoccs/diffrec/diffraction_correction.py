@@ -11,15 +11,12 @@
         #. numpy
         #. scipy
         #. rss_ringoccs
-        #. time
 """
 # Import dependencies for the diffcorr module
-import time
 import numpy as np
 from scipy.special import lambertw, iv
 from rss_ringoccs.tools.history import write_history_dict
 from rss_ringoccs.tools.write_output_files import write_output_files
-import pdb
 
 # Declare constant for the speed of light (km/s)
 SPEED_OF_LIGHT_KM = 299792.4580
@@ -296,9 +293,6 @@ class DiffractionCorrection(object):
     def __init__(self, DLP, res, rng="all", wtype="kbmd20", fwd=False,
                  norm=True, verbose=False, bfac=True, sigma=2.e-13,
                  psitype="fresnel4", write_file=False, res_factor=0.75):
-
-        # Set a variable for the starting time of the computation.
-        t1 = time.time()
 
         # Make sure that verbose is a boolean.
         if not isinstance(verbose, bool):
@@ -1202,11 +1196,8 @@ class DiffractionCorrection(object):
         if write_file:
             write_output_files(self)
 
-        t2 = time.time()
         if self.verbose:
             print("\tDiffraction Correction Complete.")
-
-        print("Computation Time: %f" % (t2-t1), end="\r")
 
     def __rect(w_in, dx):
         """

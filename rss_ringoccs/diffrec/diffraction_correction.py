@@ -629,83 +629,65 @@ class DiffractionCorrection(object):
         if verbose:
             print("\tAssigning inputs as attributes...")
 
-        # Set forward power variable to None in case it isn't defined later.
+        # Assign variables as attributes.
         self.p_norm_fwd_vals = None
-
-        # Set forward phase and power to None as well.
         self.T_hat_fwd_vals = None
         self.phase_fwd_vals = None
-
-        # Assign resolution and forward variables as attributes.
-        if verbose:
-            print("\tMultiplying requested resolution by res_factor...")
-
         self.input_res = res
-        self.res = res*res_factor
-        self.fwd = fwd
-
-        # Assing window type and Allen deviation variables as attributes.
-        self.wtype = wtype
-        self.sigma = sigma
-
-        # Assign normalization and b-factor variables as attributes.
-        self.norm = norm
-        self.bfac = bfac
-
-        # Assign requested range variable as an attribute.
-        self.rngreq = rng
-
-        # Assign verbose and psi approximation variables as attributes.
         self.verbose = verbose
         self.psitype = psitype
+        self.rngreq = rng
+        self.wtype = wtype
+        self.sigma = sigma
+        self.norm = norm
+        self.bfac = bfac
+        self.res = res*res_factor
+        self.fwd = fwd
 
         # Retrieve variables from the DLP class, setting as attributes.
         if verbose:
             print("\tRetrieving variables from DLP instance...")
 
-        # Ring radius
-        self.rho_km_vals = np.array(DLP.rho_km_vals)
-
-        # Retrieve normalized power.
-        self.p_norm_vals = np.array(DLP.p_norm_vals)
-
-        # Phase of signal.
-        self.phase_rad_vals = np.array(DLP.phase_rad_vals)
-
-        # Ring opening angle.
-        self.B_rad_vals = np.array(DLP.B_rad_vals)
-
-        # Spacecraft-to-Ring Intercept Point (RIP) distance.
-        self.D_km_vals = np.array(DLP.D_km_vals)
-
-        # Ring azimuth angle.
-        self.phi_rad_vals = np.array(DLP.phi_rad_vals)
-
-        # Frequency from the recieved signal.
-        self.f_sky_hz_vals = np.array(DLP.f_sky_hz_vals)
-
-        # RIP velocity.
-        self.rho_dot_kms_vals = np.array(DLP.rho_dot_kms_vals)
-
-        # Retrieve time variables (Earth, Ring, and Spacecraft ET).
-        self.t_oet_spm_vals = np.array(DLP.t_oet_spm_vals)
-        self.t_ret_spm_vals = np.array(DLP.t_ret_spm_vals)
-        self.t_set_spm_vals = np.array(DLP.t_set_spm_vals)
-
-        # Pole corrections in ring radius.
-        self.rho_corr_pole_km_vals = np.array(DLP.rho_corr_pole_km_vals)
-
-        # Timing corrections in ring radius.
-        self.rho_corr_timing_km_vals = np.array(DLP.rho_corr_timing_km_vals)
-
-        # Ring longitude angle.
-        self.phi_rl_rad_vals = np.array(DLP.phi_rl_rad_vals)
-
-        # Optical depth of diffraction profile.
-        self.raw_tau_threshold_vals = np.array(DLP.raw_tau_threshold_vals)
-
-        # History from the DLP instance.
-        self.dathist = DLP.history
+        try:
+            erm = "rho_km_vals"
+            self.rho_km_vals = np.array(DLP.rho_km_vals)
+            erm = "p_norm_vals"
+            self.p_norm_vals = np.array(DLP.p_norm_vals)
+            erm = "phase_rad_vals"
+            self.phase_rad_vals = np.array(DLP.phase_rad_vals)
+            erm = "B_rad_vals"
+            self.B_rad_vals = np.array(DLP.B_rad_vals)
+            erm = "D_km_vals"
+            self.D_km_vals = np.array(DLP.D_km_vals)
+            erm = "phi_rad_vals"
+            self.phi_rad_vals = np.array(DLP.phi_rad_vals)
+            erm = "f_sky_hz_vals"
+            self.f_sky_hz_vals = np.array(DLP.f_sky_hz_vals)
+            erm = "rho_dot_kms_vals"
+            self.rho_dot_kms_vals = np.array(DLP.rho_dot_kms_vals)
+            erm = "t_oet_spm_vals"
+            self.t_oet_spm_vals = np.array(DLP.t_oet_spm_vals)
+            erm = "t_ret_spm_vals"
+            self.t_ret_spm_vals = np.array(DLP.t_ret_spm_vals)
+            erm = "t_set_spm_vals"
+            self.t_set_spm_vals = np.array(DLP.t_set_spm_vals)
+            erm = "rho_corr_pole_km_vals"
+            self.rho_corr_pole_km_vals = np.array(DLP.rho_corr_pole_km_vals)
+            erm = "rho_corr_timing_km_vals"
+            self.rho_corr_timing_km_vals = np.array(DLP.rho_corr_timing_km_vals)
+            erm = "phi_rl_rad_vals"
+            self.phi_rl_rad_vals = np.array(DLP.phi_rl_rad_vals)
+            erm = "raw_tau_threshold_vals"
+            self.raw_tau_threshold_vals = np.array(DLP.raw_tau_threshold_vals)
+            erm = "history"
+            self.dathist = DLP.history
+        except (TypeError, ValueError, NameError, AttributeError):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
+                "\t%s could not be converted into a numpy array.\n"
+                "\tCheck your DLP class for errors." % erm
+            )
 
         n_rho = np.size(self.rho_km_vals)
 
@@ -950,7 +932,7 @@ class DiffractionCorrection(object):
             )
         else:
             self.rho_dot_kms_vals = self.rho_dot_kms_vals.astype(float)
-            del n_rho
+            del n_rho, erm
 
         # Compute sampling distance (km)
         self.dx_km = self.rho_km_vals[1] - self.rho_km_vals[0]
@@ -1711,58 +1693,6 @@ class DiffractionCorrection(object):
 
         return psi_d2
 
-    def __d3psi(self, kD, r, r0, phi, phi0, B, D):
-        """
-            Purpose:
-                Compute d^3psi/dphi^3
-            Arguments:
-                :kD (*float*):
-                    Wavenumber, unitless.
-                :r (*float*):
-                    Radius of reconstructed point, in kilometers.
-                :r0 (*np.ndarray*):
-                    Radius of region within window, in kilometers.
-                :phi (*np.ndarray*):
-                    Root values of dpsi/dphi, radians.
-                :phi0 (*np.ndarray*):
-                    Ring azimuth angle corresponding to r0, radians.
-                :B (*float*):
-                    Ring opening angle, in radians.
-                :D (*float*):
-                    Spacecraft-RIP distance, in kilometers.
-            Outputs:
-                :dpsi (*np.ndarray*):
-                    Third partial derivative of psi
-                    with respect to phi.
-        """
-        # Compute Xi variable (MTR86 Equation 4b).
-        xi = (np.cos(B)/D) * (r * np.cos(phi) - r0 * np.cos(phi0))
-
-        # Compute Eta variable (MTR86 Equation 4c).
-        eta = (r0*r0 + r*r - 2.0*r*r0*np.cos(phi-phi0)) / (D*D)
-
-        psi0 = np.sqrt(1.0+eta-2.0*xi)
-        psi3 = psi0*psi0*psi0
-        psi5 = psi3*psi0*psi0
-
-        # Compute derivatives.
-        dxi = -r*np.cos(B)*np.sin(phi)/D
-        dxi2 = -r*np.cos(B)*np.cos(phi)/D
-        dxi3 = r*np.cos(B)*np.sin(phi)/D
-
-        deta = 2.0*r*r0*np.sin(phi-phi0)/(D*D)
-        deta2 = 2.0*r*r0*np.cos(phi-phi0)/(D*D)
-        deta3 = -2.0*r*r0*np.sin(phi-phi0)/(D*D)
-
-        psi_d3 = (0.5/psi0)*(deta3-2.0*dxi3)
-        psi_d3 += (0.375/psi5)*((deta-2.0*dxi)**3)
-        psi_d3 += (-0.75/psi3)*(deta-2.0*dxi)*(deta2-2.0*dxi2)
-        psi_d3 += dxi3
-
-        psi_d3 *= kD
-
-        return psi_d3
-
     def __ftrans(self, fwd):
         """
             Purpose:
@@ -2272,11 +2202,15 @@ class DiffractionCorrection(object):
                 w = self.w_km_vals[center]
                 F = self.F_km_vals[center]
 
-                w_init = w
-                w_func = fw(w, self.dx_km)
+                if (np.abs(w_init - w) >= 2.0 * self.dx_km):
+                    # Reset w_init and recompute window function.
+                    w_init = w
+                    w_func = fw(w, self.dx_km)
 
-                # Reset number of window points
-                nw = np.size(w_func)
+                    # Reset number of window points
+                    nw = np.size(w_func)
+                else:
+                    pass
 
                 # Computed range for current point
                 crange = np.arange(int(center-(nw-1)/2),
@@ -2292,9 +2226,9 @@ class DiffractionCorrection(object):
                 kD = kD_vals[crange]
 
                 # Compute Newton-Raphson perturbation
-                psi_d1 = dpsi(kD, r, r0, phi, phi0, b, d)
-
+                psi_d1 = self.__dpsi(kD, r, r0, phi, phi0, b, d)
                 loop = 0
+
                 while (np.max(np.abs(psi_d1)) > 1.0e-4):
                     psi_d1 = self.__dpsi(kD, r, r0, phi, phi0, b, d)
                     psi_d2 = self.__d2psi(kD, r, r0, phi, phi0, b, d)

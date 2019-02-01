@@ -25,7 +25,7 @@ yes | python e2e_batch.py | tee ../output/e2e_batch.py.out
 If you have trouble with installation or execution of the rss_ringoccs package, we encourage you to post a issue to https://github.com/NASA-Planetary-Science/rss_ringoccs/issues. We will attempt to respond promptly, and ther users will benefit. Alternatively, you can write email directly to Richard French: rfrench_at_wellesley.edu.
 ## Citing rss_ringoccs
 If you use rss_ringoccs as the basis of a publication, please consider 
-citing rss_ringoccs using the DOI:10.5281/zenodo.1226748
+citing rss_ringoccs using the DOI:10.5281/zenodo.2548947
 
 ## Acknowledgements
 This work was supported by the NASA/JPL Cassini mission. We are especially grateful 

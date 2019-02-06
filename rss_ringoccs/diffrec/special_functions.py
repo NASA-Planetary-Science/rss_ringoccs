@@ -5,8 +5,9 @@ from . import window_functions
 # Declare constants for multiples of pi.
 TWO_PI = 6.283185307179586476925287
 ONE_PI = 3.141592653589793238462643
-SQRT_PI_2 = 1.253314137315500251207883
 RADS_PER_DEGS = 0.0174532925199432957692369
+RCP_SQRT_2 = 0.7071067811865476
+SQRT_PI_2 = 1.253314137315500251207883
 
 def savitzky_golay(y, window_size, order, deriv=0, rate=1):
     """
@@ -687,13 +688,14 @@ def fresnel_cos(x, error_check=True):
     else:
         pass
 
-    f_cos = ((0.25-0.25j)*erf((1.0+1.0j)*x*SQRT_PI_2)+
-             (0.25+0.25j)*erf((1.0-1.0j)*x*SQRT_PI_2))
+    x *= RCP_SQRT_2
+    f_cos = ((0.25-0.25j)*erf((1.0+1.0j)*x)+
+             (0.25+0.25j)*erf((1.0-1.0j)*x))
 
     if (np.isreal(x).all()):
         f_cos = np.real(f_cos)
 
-    return f_cos
+    return f_cos*SQRT_PI_2
 
 def fresnel_sin(x, error_check=True):
     """
@@ -757,13 +759,14 @@ def fresnel_sin(x, error_check=True):
     else:
         pass
 
-    f_sin = ((0.25+0.25j)*erf((1.0+1.0j)*x*SQRT_PI_2)+
-             (0.25-0.25j)*erf((1.0-1.0j)*x*SQRT_PI_2))
+    x *= RCP_SQRT_2
+    f_sin = ((0.25+0.25j)*erf((1.0+1.0j)*x)+
+             (0.25-0.25j)*erf((1.0-1.0j)*x))
 
     if (np.isreal(x).all()):
         f_sin = np.real(f_sin)
 
-    return f_sin
+    return f_sin*SQRT_PI_2
 
 def single_slit_diffraction(x, z, a):
     """

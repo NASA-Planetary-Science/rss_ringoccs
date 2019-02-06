@@ -1,6 +1,9 @@
 .DS_Store*
 *.pyc
 *.icloud
+*.rst
+*.bat
+Makefile
 kernels/
 output/
 data/

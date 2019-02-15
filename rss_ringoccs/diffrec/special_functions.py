@@ -840,7 +840,9 @@ def single_slit_diffraction(x, z, a):
             % (type(a).__name__)
             )
 
-    f = np.sinc(a*x/z)*np.sinc(a*x/z)
+    f = np.sinc(a*x/z)
+    f *= f
+    
     return f
 
 def double_slit_diffraction(x, z, a, d):

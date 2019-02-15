@@ -1,83 +1,667 @@
 import numpy as np
 from scipy import interpolate
 from .diffraction_correction import DiffractionCorrection, SPEED_OF_LIGHT_KM
+from .diffraction_correction import region_dict
 from .special_functions import fresnel_scale
+from .window_functions import func_dict
 from rss_ringoccs.tools.CSV_tools import get_geo, ExtractCSVData
 
+# List of allowed psitypes.
+psi_types = ["fresnel", "fresnel3", "fresnel4", "fresnel6", "fresnel8", "full"]
 
 class CompareTau(object):
-    def __init__(self, geo, cal, dlp, tau, res,
-                 rng='all', wtype="kb25", bfac=True,
-                 verbose=True, norm=True, psitype='full'):
+    def __init__(self, geo, cal, dlp, tau, res, rng='all', wtype="kbmd20",
+                 fwd=False, bfac=True, sigma=2.e-13, verbose=False, norm=True,
+                 psitype='fresnel4', res_factor=0.75):
+
+        # Make sure that input files are strings.
+        if not isinstance(geo, str):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\t\trss_ringoccs.diffrec.CompareTau\n\n"
+                "\tgeo must be a string: '/path/to/geo.TAB'\n"
+                "\tYour input has type: %s\n"
+                "\tInput should have type: str\n" % (type(geo).__name__)
+            )
+        elif not isinstance(cal, str):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\t\trss_ringoccs.diffrec.CompareTau\n\n"
+                "\tcal must be a string: '/path/to/cal.TAB'\n"
+                "\tYour input has type: %s\n"
+                "\tInput should have type: str\n" % (type(cal).__name__)
+            )
+        elif not isinstance(dlp, str):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\t\trss_ringoccs.diffrec.CompareTau\n\n"
+                "\tdlp must be a string: '/path/to/dlp.TAB'\n"
+                "\tYour input has type: %s\n"
+                "\tInput should have type: str\n" % (type(dlp).__name__)
+            )
+        elif not isinstance(tau, str):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\t\trss_ringoccs.diffrec.CompareTau\n\n"
+                "\ttau must be a string: '/path/to/tau.TAB'\n"
+                "\tYour input has type: %s\n"
+                "\tInput should have type: str\n" % (type(tau).__name__)
+            )
+        else:
+            pass
+
+        # Make sure that verbose is a boolean.
+        if not isinstance(verbose, bool):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\t\trss_ringoccs.diffrec.CompareTau\n\n"
+                "\tverbose must be Boolean: True/False\n"
+                "\tYour input has type: %s\n"
+                "\tInput should have type: bool\n"
+                "\tSet verbose=True or verbose=False\n"
+                % (type(verbose).__name__)
+            )
+        else:
+            pass
+
+        # Check that the input resolution is a positive floating point number.
+        if (not isinstance(res, float)):
+            try:
+                res = float(res)
+            except (TypeError, ValueError):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\t\trss_ringoccs.diffrec.CompareTau\n\n"
+                    "\tres must be a positive floating point number\n"
+                    "\tYour input has type: %s\n"
+                    "\tInput should have type: float\n" % (type(res).__name__)
+                )
+        else:
+            pass
+
+        if (res <= 0.0):
+            raise ValueError(
+                "\n\tError Encountered:\n"
+                "\t\trss_ringoccs.diffrec.CompareTau\n\n"
+                "\tres must be a positive floating point number\n"
+                "\tYour requested resolution (km): %f\n" % (res)
+            )
+        else:
+            pass
+
+        # Check that the requested window type is a legal input.
+        if not isinstance(wtype, str):
+            erm = ""
+            for key in func_dict:
+                erm = "%s\t\t'%s'\n" % (erm, key)
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\t\trss_ringoccs.diffrec.CompareTau\n\n"
+                "\twtype must be a string.\n"
+                "\tYour input has type: %s\n"
+                "\tInput should have type: str\n"
+                "\tAllowed string are:\n%s" % (type(wtype).__name__, erm)
+            )
+        else:
+            # Remove spaces and quotes from the wtype variable.
+            wtype = wtype.replace(" ", "").replace("'", "").replace('"', "")
+
+            # Set wtype string to lower-case.
+            wtype = wtype.lower()
+            if not (wtype in func_dict):
+                erm = ""
+                for key in func_dict:
+                    erm = "%s\t\t'%s'\n" % (erm, key)
+                raise ValueError(
+                    "\n\tError Encountered:\n"
+                    "\t\trss_ringoccs.diffrec.CompareTau\n\n"
+                    "\tIllegal string used for wtype.\n"
+                    "\tYour string: '%s'\n"
+                    "\tAllowed Strings:\n%s" % (wtype, erm)
+                )
+            else:
+                pass
+
+        # Check that the forward boolean is valid.
+        if not isinstance(fwd, bool):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\t\trss_ringoccs.diffrec.CompareTau\n\n"
+                "\tfwd must be Boolean: True/False\n"
+                "\tYour input has type: %s\n"
+                "\tInput should have type: bool\n"
+                "\tSet fwd=True or fwd=False\n" % (type(fwd).__name__)
+            )
+        else:
+            pass
+
+        # Ensure that the normalize boolean has a legal value.
+        if not isinstance(norm, bool):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\t\trss_ringoccs.diffrec.CompareTau\n\n"
+                "\tnorm must be Boolean: True/False\n"
+                "\tYour input has type: %s\n"
+                "\tInput should have type: bool\n"
+                "\tSet norm=True or norm=False\n" % (type(norm).__name__)
+            )
+        else:
+            pass
+
+        # Make sure that bfac is a boolean.
+        if not isinstance(bfac, bool):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\t\trss_ringoccs.diffrec.CompareTau\n\n"
+                "\tbfac must be Boolean: True/False\n"
+                "\tYour input has type: %s\n"
+                "\tInput should have type: bool\n"
+                "\tSet bfac=True or bfac=False\n" % (type(bfac).__name__)
+            )
+        else:
+            pass
+        
+        # Check that res_factor is a floating point number.
+        if (not isinstance(res_factor, float)):
+            try:
+                res_factor = float(res_factor)
+            except (TypeError, ValueError):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\t\trss_ringoccs.diffrec.CompareTau\n\n"
+                    "\tres_factor must be a positive floating point number.\n"
+                    "\tYour input has type: %s\n" % (type(res_factor).__name__)
+                )
+        else:
+            pass
+
+        if (res_factor <= 0.0):
+            raise ValueError(
+                "\n\tError Encountered:\n"
+                "\t\trss_ringoccs.diffrec.CompareTau\n\n"
+                "\tres_factor must be a positive floating point number.\n"
+                "\tYour input: %f\n"
+                % (res_factor)
+            )
+        else:
+            pass
+
+        # Cbeck that psitype is a valid string.
+        if not isinstance(psitype, str):
+            erm = ""
+            for key in psi_types:
+                erm = "%s\t\t'%s'\n" % (erm, key)
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\t\trss_ringoccs.diffrec.CompareTau\n\n"
+                "\tpsitype must be a string.\n"
+                "\tYour input has type: %s\n"
+                "\tInput should have type: str\n"
+                "\tAllowed strings are:\n%s" % (type(psitype).__name__, erm)
+            )
+        else:
+            # Remove spaces, quotes, and apostrophe's from the psitype.
+            psitype = psitype.replace(" ", "").replace("'", "")
+            psitype = psitype.replace('"', "").lower()
+
+            # Perform error check, print legal inputs if needed.
+            if not (psitype in psi_types):
+                erm = ""
+                for key in psi_types:
+                    erm = "%s\t\t'%s'\n" % (erm, key)
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\t\trss_ringoccs.diffrec.CompareTau\n\n"
+                    "\tInvalid string for psitype.\n"
+                    "\tYour string: '%s'\n"
+                    "\tAllowed strings are:\n%s"
+                    % (psitype, erm)
+                )
+            else:
+                pass
+
+        # Check that the requested range is a legal input.
+        if (not isinstance(rng, str)) and (not isinstance(rng, list)):
+            try:
+                if (np.size(rng) < 2):
+                    erm = ""
+                    for key in region_dict:
+                        erm = "%s\t\t'%s'\n" % (erm, key)
+                    raise TypeError(
+                        "\n\tError Encountered:\n"
+                        "\t\trss_ringoccs.diffrec.CompareTau\n\n"
+                        "\trng must be a list or a valid string.\n"
+                        "\tYour input has type: %s\n"
+                        "\tSet range=[a,b], where a is the STARTING point\n"
+                        "\tand b is the ENDING point of reconstruction, or\n"
+                        "\tuse one of the following valid strings:\n%s"
+                        % (type(rng).__name__, erm)
+                    )
+                elif (np.min(rng) < 0):
+                    raise ValueError(
+                        "\n\tError Encountered:\n"
+                        "\t\trss_ringoccs.diffrec.CompareTau\n\n"
+                        "\tMinimum requested range must be positive\n"
+                        "\tYour minimum requested range: %f\n" % (np.min(rng))
+                    )
+                else:
+                    rng = [np.min(rng), np.max(rng)]
+            except TypeError:
+                erm = ""
+                for key in region_dict:
+                    erm = "%s\t\t'%s'\n" % (erm, key)
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\t\trss_ringoccs.diffrec.CompareTau\n\n"
+                    "\trng must be a list of floating\n"
+                    "\tpoint numbers or a valid string.\n"
+                    "\tYour input has type: %s\n"
+                    "\tSet range=[a,b], where a is the STARTING point\n"
+                    "\tand b is the ENDING point of reconstruction, or\n"
+                    "\tuse one of the following valid strings:\n%s"
+                    % (type(rng).__name__, erm)
+                )
+        elif isinstance(rng, list):
+            # Try converting all elements to floating point numbers.
+            if (not all(isinstance(x, float) for x in rng)):
+                try:
+                    for i in np.arange(np.size(rng)):
+                        rng[i] = float(rng[i])
+                except (TypeError, ValueError):
+                    erm = ""
+                    for key in region_dict:
+                        erm = "%s\t\t'%s'\n" % (erm, key)
+                    raise TypeError(
+                        "\n\tError Encountered:\n"
+                        "\t\trss_ringoccs.diffrec.CompareTau\n\n"
+                        "\trng must be a list of floating\n"
+                        "\tpoint numbers or a valid string.\n"
+                        "\tYour input has type: %s\n"
+                        "\tSet range=[a,b], where a is the STARTING point\n"
+                        "\tand b is the ENDING point of reconstruction, or\n"
+                        "\tuse one of the following valid strings:\n%s"
+                        % (type(rng).__name__, erm)
+                    )
+            else:
+                pass
+
+            # Check that there are at least two numbers.
+            if (np.size(rng) < 2):
+                erm = ""
+                for key in region_dict:
+                    erm = "%s\t\t'%s'\n" % (erm, key)
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\t\trss_ringoccs.diffrec.CompareTau\n\n"
+                    "\trng must contain two numbers: rng=[a,b]\n"
+                    "\tYou provided less than 2 numbers.\n"
+                    "\tSet range=[a,b], where a is the STARTING point\n"
+                    "\tand b is the ENDING point of reconstruction, or\n"
+                    "\tuse one of the following valid strings:\n%s" % (erm)
+                )
+            else:
+                pass
+
+            # Check that the smallest number is positive.
+            if (np.min(rng) < 0.0):
+                raise ValueError(
+                    "\n\tError Encountered:\n"
+                    "\t\trss_ringoccs.diffrec.CompareTau\n\n"
+                    "\tMinimum requested range must be positive\n"
+                    "\tYour minimum requested range: %f\n" % (np.min(rng))
+                )
+            else:
+                pass
+        elif isinstance(rng, str):
+            rng = rng.replace(" ", "").replace("'", "").replace('"', "")
+            rng = rng.lower()
+            if not (rng in region_dict):
+                erm = ""
+                for key in region_dict:
+                    erm = "%s\t\t'%s'\n" % (erm, key)
+                raise ValueError(
+                    "\n\tError Encountered:\n"
+                    "\t\trss_ringoccs.diffrec.CompareTau\n\n"
+                    "\tIllegal string used for rng.\n"
+                    "\tYour string: '%s'\n"
+                    "\tAllowed Strings:\n%s" % (rng, erm)
+                )
+        else:
+            erm = ""
+            for key in region_dict:
+                erm = "%s\t\t'%s'\n" % (erm, key)
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\t\trss_ringoccs.diffrec.CompareTau\n\n"
+                "\trng must be a list of floating\n"
+                "\tpoint numbers or a valid string.\n"
+                "\tYour input has type: %s\n"
+                "\tSet range=[a,b], where a is the STARTING point\n"
+                "\tand b is the ENDING point of reconstruction, or\n"
+                "\tuse one of the following valid strings:\n%s"
+                % (type(rng).__name__, erm)
+            )
+
+        # Check that the Allen Deviation is a legal value.
+        if (not isinstance(sigma, float)):
+            try:
+                sigma = float(sigma)
+            except (TypeError, ValueError):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\t\trss_ringoccs.diffrec.CompareTau\n\n"
+                    "\tsigma must be a positive floating point number.\n"
+                    "\tYour input has type: %s\n" % (type(sigma).__name__)
+                )
+        else:
+            pass
+
+        if (np.min(sigma) <= 0.0):
+                raise ValueError(
+                    "\n\tError Encountered:\n"
+                    "\t\trss_ringoccs.diffrec.CompareTau\n\n"
+                    "\n\tsigma must be a positive floating point number.\n"
+                    "\tYour input: %f\n" % (sigma)
+                )
+        else:
+            pass
 
         data = ExtractCSVData(geo, cal, dlp, tau=tau, verbose=verbose)
-        rec = DiffractionCorrection(data, res, rng=rng, bfac=bfac, wtype=wtype,
-                                    psitype=psitype, verbose=verbose, norm=norm)
-        rho_km_vals = rec.rho_km_vals
-        tau_power = data.power_vals
-        tau_phase = data.phase_vals
-        tau_tau = data.tau_vals
+        rec = DiffractionCorrection(data, res, rng=rng, wtype=wtype, fwd=fwd,
+                                    norm=norm, verbose=verbose, bfac=bfac,
+                                    sigma=sigma, psitype=psitype,
+                                    res_factor=res_factor)
+
+        self.rho_km_vals = rec.rho_km_vals
         tr = data.tau_rho
-        rmin = np.min(rho_km_vals)
-        rmax = np.max(rho_km_vals)
+        rmin = np.min(self.rho_km_vals)
+        rmax = np.max(self.rho_km_vals)
         tau_rstart = int(np.min((tr-rmin>=0).nonzero()))
         tau_rfin = int(np.max((rmax-tr>=0).nonzero()))
 
         self.rho_km_vals = rec.rho_km_vals
         self.power_vals = rec.power_vals
         self.phase_vals = rec.phase_vals
-        self.tau_power = tau_power[tau_rstart:tau_rfin+1]
-        self.tau_phase = tau_phase[tau_rstart:tau_rfin+1]
         self.tau_vals = rec.tau_vals
-        self.tau_tau = tau_tau[tau_rstart:tau_rfin+1]
+        self.tau_power = data.power_vals[tau_rstart:tau_rfin+1]
+        self.tau_phase = data.phase_vals[tau_rstart:tau_rfin+1]
+        self.tau_tau = data.tau_vals[tau_rstart:tau_rfin+1]
         self.wtype = wtype
         self.res = res
 
 
 class FindOptimalResolution(object):
     def __init__(self, geo, cal, dlp, tau, sres, dres,
-                 nres, rng='all', wlst=['kb25'], verbose=True):
+                 nres, rng='all', wlst=['kbmd20'], verbose=True):
 
-        nwins   = np.size(wlst)
-        linfint = np.zeros((nwins, nres))
-        l2int   = np.zeros((nwins, nres))
-        resint  = np.zeros((nwins))
-        eres    = sres + (nres-1)*dres
+        # Make sure that verbose is a boolean.
+        if not isinstance(verbose, bool):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\t\trss_ringoccs.diffrec.FindOptimalResolution\n\n"
+                "\tverbose must be Boolean: True/False\n"
+                "\tYour input has type: %s\n"
+                "\tInput should have type: bool\n"
+                "\tSet verbose=True or verbose=False\n"
+                % (type(verbose).__name__)
+            )
+        else:
+            pass
 
+        # Make sure that input files are strings.
+        if not isinstance(geo, str):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\t\trss_ringoccs.diffrec.FindOptimalResolution\n\n"
+                "\tgeo must be a string: '/path/to/geo.TAB'\n"
+                "\tYour input has type: %s\n"
+                "\tInput should have type: str\n" % (type(geo).__name__)
+            )
+        elif not isinstance(cal, str):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\t\trss_ringoccs.diffrec.FindOptimalResolution\n\n"
+                "\tcal must be a string: '/path/to/cal.TAB'\n"
+                "\tYour input has type: %s\n"
+                "\tInput should have type: str\n" % (type(cal).__name__)
+            )
+        elif not isinstance(dlp, str):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\t\trss_ringoccs.diffrec.FindOptimalResolution\n\n"
+                "\tdlp must be a string: '/path/to/dlp.TAB'\n"
+                "\tYour input has type: %s\n"
+                "\tInput should have type: str\n" % (type(dlp).__name__)
+            )
+        elif not isinstance(tau, str):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\t\trss_ringoccs.diffrec.FindOptimalResolution\n\n"
+                "\ttau must be a string: '/path/to/tau.TAB'\n"
+                "\tYour input has type: %s\n"
+                "\tInput should have type: str\n" % (type(tau).__name__)
+            )
+        else:
+            pass
+
+        # Check resolution inputs.
+        if (not isinstance(sres, float)):
+            try:
+                sres = float(sres)
+            except (TypeError, ValueError):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\t\trss_ringoccs.diffrec.FindOptimalResolution\n\n"
+                    "\tsres must be a positive floating point number\n"
+                    "\tYour input has type: %s\n"
+                    "\tInput should have type: float\n" % (type(sres).__name__)
+                )
+        elif (not isinstance(dres, float)):
+            try:
+                dres = float(dres)
+            except (TypeError, ValueError):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\t\trss_ringoccs.diffrec.FindOptimalResolution\n\n"
+                    "\tdres must be a positive floating point number\n"
+                    "\tYour input has type: %s\n"
+                    "\tInput should have type: float\n" % (type(dres).__name__)
+                )
+        elif (not isinstance(nres, int)):
+            try:
+                nres = int(nres)
+            except (TypeError, ValueError):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\t\trss_ringoccs.diffrec.FindOptimalResolution\n\n"
+                    "\tnres must be a positive integer.\n"
+                    "\tYour input has type: %s\n"
+                    "\tInput should have type: int\n" % (type(nres).__name__)
+                )
+        else:
+            pass
+
+        # Check that the requested range is a legal input.
+        if (not isinstance(rng, str)) and (not isinstance(rng, list)):
+            try:
+                if (np.size(rng) < 2):
+                    erm = ""
+                    for key in region_dict:
+                        erm = "%s\t\t'%s'\n" % (erm, key)
+                    raise TypeError(
+                        "\n\tError Encountered:\n"
+                        "\t\trss_ringoccs.diffrec.FindOptimalResolution\n\n"
+                        "\trng must be a list or a valid string.\n"
+                        "\tYour input has type: %s\n"
+                        "\tSet range=[a,b], where a is the STARTING point\n"
+                        "\tand b is the ENDING point of reconstruction, or\n"
+                        "\tuse one of the following valid strings:\n%s"
+                        % (type(rng).__name__, erm)
+                    )
+                elif (np.min(rng) < 0):
+                    raise ValueError(
+                        "\n\tError Encountered:\n"
+                        "\t\trss_ringoccs.diffrec.FindOptimalResolution\n\n"
+                        "\tMinimum requested range must be positive\n"
+                        "\tYour minimum requested range: %f\n" % (np.min(rng))
+                    )
+                else:
+                    rng = [np.min(rng), np.max(rng)]
+            except TypeError:
+                erm = ""
+                for key in region_dict:
+                    erm = "%s\t\t'%s'\n" % (erm, key)
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\t\trss_ringoccs.diffrec.FindOptimalResolution\n\n"
+                    "\trng must be a list of floating\n"
+                    "\tpoint numbers or a valid string.\n"
+                    "\tYour input has type: %s\n"
+                    "\tSet range=[a,b], where a is the STARTING point\n"
+                    "\tand b is the ENDING point of reconstruction, or\n"
+                    "\tuse one of the following valid strings:\n%s"
+                    % (type(rng).__name__, erm)
+                )
+        elif isinstance(rng, list):
+            # Try converting all elements to floating point numbers.
+            if (not all(isinstance(x, float) for x in rng)):
+                try:
+                    for i in np.arange(np.size(rng)):
+                        rng[i] = float(rng[i])
+                except (TypeError, ValueError):
+                    erm = ""
+                    for key in region_dict:
+                        erm = "%s\t\t'%s'\n" % (erm, key)
+                    raise TypeError(
+                        "\n\tError Encountered:\n"
+                        "\t\trss_ringoccs.diffrec.FindOptimalResolution\n\n"
+                        "\trng must be a list of floating\n"
+                        "\tpoint numbers or a valid string.\n"
+                        "\tYour input has type: %s\n"
+                        "\tSet range=[a,b], where a is the STARTING point\n"
+                        "\tand b is the ENDING point of reconstruction, or\n"
+                        "\tuse one of the following valid strings:\n%s"
+                        % (type(rng).__name__, erm)
+                    )
+            else:
+                pass
+
+            # Check that there are at least two numbers.
+            if (np.size(rng) < 2):
+                erm = ""
+                for key in region_dict:
+                    erm = "%s\t\t'%s'\n" % (erm, key)
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\t\trss_ringoccs.diffrec.FindOptimalResolution\n\n"
+                    "\trng must contain two numbers: rng=[a,b]\n"
+                    "\tYou provided less than 2 numbers.\n"
+                    "\tSet range=[a,b], where a is the STARTING point\n"
+                    "\tand b is the ENDING point of reconstruction, or\n"
+                    "\tuse one of the following valid strings:\n%s" % (erm)
+                )
+            else:
+                pass
+
+            # Check that the smallest number is positive.
+            if (np.min(rng) < 0.0):
+                raise ValueError(
+                    "\n\tError Encountered:\n"
+                    "\t\trss_ringoccs.diffrec.FindOptimalResolution\n\n"
+                    "\tMinimum requested range must be positive\n"
+                    "\tYour minimum requested range: %f\n" % (np.min(rng))
+                )
+            else:
+                pass
+        elif isinstance(rng, str):
+            rng = rng.replace(" ", "").replace("'", "").replace('"', "")
+            rng = rng.lower()
+            if not (rng in region_dict):
+                erm = ""
+                for key in region_dict:
+                    erm = "%s\t\t'%s'\n" % (erm, key)
+                raise ValueError(
+                    "\n\tError Encountered:\n"
+                    "\t\trss_ringoccs.diffrec.FindOptimalResolution\n\n"
+                    "\tIllegal string used for rng.\n"
+                    "\tYour string: '%s'\n"
+                    "\tAllowed Strings:\n%s" % (rng, erm)
+                )
+        else:
+            erm = ""
+            for key in region_dict:
+                erm = "%s\t\t'%s'\n" % (erm, key)
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\t\trss_ringoccs.diffrec.FindOptimalResolution\n\n"
+                "\trng must be a list of floating\n"
+                "\tpoint numbers or a valid string.\n"
+                "\tYour input has type: %s\n"
+                "\tSet range=[a,b], where a is the STARTING point\n"
+                "\tand b is the ENDING point of reconstruction, or\n"
+                "\tuse one of the following valid strings:\n%s"
+                % (type(rng).__name__, erm)
+            )
+
+        if (not isinstance(wlst, list)):
+            raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\t\trss_ringoccs.diffrec.FindOptimalResolution\n\n"
+                    "\twlst must be a list of strings.\n"
+                    "\tYour input has type: %s\n"
+                    "\tInput should have type: list\n" % (type(sres).__name__)
+            )
+        elif (not all(isinstance(x, str) for x in wlst)):
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\t\trss_ringoccs.diffrec.FindOptimalResolution\n\n"
+                "\twlst must be a list of strings.\n"
+            )
+        else:
+            for i in range(len(wlst)):
+                wlst[i] = wlst[i].replace(" ", "").replace("'", "")
+                wlst[i] = wlst[i].replace('"', "").lower()
+
+            if not all((wtype in func_dict) for wtype in wlst):
+                erm = ""
+                for key in func_dict:
+                    erm = "%s\t\t'%s'\n" % (erm, key)
+                raise ValueError(
+                    "\n\tError Encountered:\n"
+                    "\t\trss_ringoccs.diffrec.FindOptimalResolution\n\n"
+                    "\tIllegal string used for wtype.\n"
+                    "\tYour strings: '%s'\n"
+                    "\tAllowed Strings:\n%s" % (wtype, erm)
+                )
+            else:
+                pass
+
+        nwins = np.size(wlst)
+        self.linf = np.zeros((nres, nwins))
+        self.l2 = np.zeros((nres, nwins))
+        self.ideal_res = np.zeros((nwins))
+        eres = sres + (nres-1)*dres
         res = sres
         data = ExtractCSVData(geo, cal, dlp, tau=tau, verbose=verbose)
-        tr = data.tau_rho
-        tau_power = data.power_vals
         rec = DiffractionCorrection(data, res, rng=rng,
                                     wtype="kb35", verbose=False)
-        rho_km_vals = rec.rho_km_vals
-        power_vals  = rec.power_vals
-        rmin        = np.min(rho_km_vals)
-        rmax        = np.max(rho_km_vals)
-        rstart      = int(np.min((tr-rmin>=0).nonzero()))
-        rfin        = int(np.max((rmax-tr>=0).nonzero()))
-        tau_power   = tau_power[rstart:rfin+1]
+        start = int(np.min((data.tau_rho-np.min(rec.rho_km_vals)>=0).nonzero()))
+        fin = int(np.max((np.max(rec.rho_km_vals)-data.tau_rho>=0).nonzero()))
+        tau_power = data.power_vals[start:fin+1]
         for i in np.arange(nres):
             for j in range(nwins):
                 wtype = wlst[j]
-                recint = DiffractionCorrection(data, res, rng=rng,
-                                               wtype=wtype)
-                p_int = recint.power_vals
-                linf = np.max(np.abs(p_int - tau_power))
-                l2 = np.sqrt(np.sum(np.abs(p_int-tau_power)**2)*recint.dx_km)
-                linfint[j,i] = linf
-                l2int[j,i] = l2
-                if verbose:
-                    printmes = ('Res:',res,'Max:',eres,"WTYPE:",wtype)
-                    print("%s %f %s %f %s %s" % printmes)
-            res += dres
+                recint = DiffractionCorrection(data, res, rng=rng, wtype=wtype)
+                p_int = np.abs(recint.power_vals - tau_power)
+                self.linf[i,j] = np.max(p_int)
+                self.l2[i,j] = np.sqrt(np.sum(p_int*p_int)*recint.dx_km)
 
-        for j in range(nwins):
-            resint[j] = sres+dres*np.min(
-                (linfint[j,...] == np.min(linfint[j,...])).nonzero())
-        self.linfint = linfint
-        self.resint = resint
-        self.l2int = l2int
+                if verbose:
+                    print("%s %f %s %f %s %s"
+                          % ('Res:',res,'Max:',eres,"WTYPE:",wtype))
+
+            res += dres
+        self.ideal_res = sres+dres*np.argmin(self.linf, axis=0)
 
 
 class DeltaImpulseDiffraction(object):

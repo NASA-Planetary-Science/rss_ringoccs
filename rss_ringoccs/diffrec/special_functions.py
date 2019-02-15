@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.special import erf, lambertw
 from . import window_functions
+from rss_ringoccs._ufuncs import _special_functions
 
 # Declare constants for multiples of pi.
 TWO_PI = 6.283185307179586476925287
@@ -546,7 +547,7 @@ def psi_func(kD, r, r0, phi, phi0, B, D, error_check=True):
     psi_vals = kD * (np.sqrt(1.0+eta-2.0*xi) - (1.0-xi))
     return psi_vals
 
-def resolution_inverse(x, error_check=True):
+def resolution_inverse(x):
     """
         Purpose:
             Compute the inverse of y = x/(exp(-x)+x-1)
@@ -626,7 +627,113 @@ def resolution_inverse(x, error_check=True):
 
     return f
 
-def fresnel_cos(x, error_check=True):
+def fresnel_cos(x):
+    """
+        Purpose:
+            Compute the Fresnel cosine function.
+        Arguments:
+            :x (*np.ndarray* or *float*):
+                A real or complex number, or numpy array.
+        Outputs:
+            :f_cos (*np.ndarray* or *float*):
+                The fresnel cosine integral of x.
+        Notes:
+            [1] The Fresnel Cosine integral is the solution to the
+                equation dy/dx = cos(pi/2 * x^2), y(0) = 0. In other
+                words, y = integral (t=0 to x) cos(pi/2 * t^2) dt
+            [2] The Fresnel Cosine and Sine integrals are computed by
+                using the scipy.special Error Function. The Error
+                Function, usually denoted Erf(x), is the solution to
+                dy/dx = (2/sqrt(pi)) * exp(-x^2), y(0) = 0. That is:
+                y = 2/sqrt(pi) * integral (t=0 to x) exp(-t^2)dt.
+                Using Euler's Formula for exponentials allows one
+                to use this to solve for the Fresnel Cosine integral.
+            [3] The Fresnel Cosine integral is used for the solution
+                of diffraction through a square well. Because of this
+                it is useful for forward modeling problems in 
+                radiative transfer and diffraction.
+        Examples:
+            Compute and plot the Fresnel Cosine integral.
+                In [1]: import rss_ringoccs.diffcorr.special_functions as sf
+                In [2]: import numpy as np
+                In [3]: import matplotlib.pyplot as plt
+                In [4]: x = np.array(range(0,10001))*0.01 - 50.0
+                In [5]: y = sf.fresnel_cos(x)
+                In [6]: plt.show(plt.plot(x,y))
+    """
+    try:
+        return _special_functions.fresnel_cos(x)
+    except (TypeError, ValueError):
+        raise TypeError(
+            "\n\tError Encountered:\n"
+            "\trss_ringoccs: Diffcorr Subpackage\n"
+            "\tspecial_function.fresnel_cos:\n"
+            "\t\tInput must be an array of floating point numbers.\n"
+        )
+
+def fresnel_sin(x):
+    """
+        Purpose:
+            Compute the Fresnel sine function.
+        Variables:
+            :x (*np.ndarray* or *float*):
+                The independent variable.
+        Outputs:
+            :f_sin (*np.ndarray* or *float*):
+                The fresnel sine integral of x.
+        Notes:
+            [1] The Fresnel sine integral is the solution to the
+                equation dy/dx = sin(pi/2 * x^2), y(0) = 0. In other
+                words, y = integral (t=0 to x) sin(pi/2 * t^2) dt
+            [2] The Fresnel Cossine and Sine integrals are computed
+                by using the scipy.special Error Function. The Error
+                Function, usually denoted Erf(x), is the solution to
+                dy/dx = (2/sqrt(pi)) * exp(-x^2), y(0) = 0. That is:
+                y = 2/sqrt(pi) * integral (t=0 to x) exp(-t^2)dt.
+                Using Euler's Formula for exponentials allows one
+                to use this to solve for the Fresnel Sine integral.
+            [3] The Fresnel sine integral is used for the solution
+                of diffraction through a square well. Because of this
+                is is useful for forward modeling problems in 
+                radiative transfer and diffraction.
+        Examples:
+            Compute and plot the Fresnel Sine integral.
+                In [1]: import rss_ringoccs.diffcorr.special_functions as sf
+                In [2]: import numpy as np
+                In [3]: import matplotlib.pyplot as plt
+                In [4]: x = np.array(range(0,10001))*0.01 - 50.0
+                In [5]: y = sf.fresnel_sin(x)
+                In [6]: plt.show(plt.plot(x,y))
+    """
+    try:
+        return _special_functions.fresnel_sin(x)
+    except (TypeError, ValueError):
+        raise TypeError(
+            "\n\tError Encountered:\n"
+            "\trss_ringoccs: Diffcorr Subpackage\n"
+            "\tspecial_function.fresnel_sin:\n"
+            "\t\tInput must be an array of floating point numbers.\n"
+        )
+
+def square_well_diffraction(x, a, b, F, invert=False):
+    try:
+        if invert:
+            return 1.0-_special_functions.square_well_diffraction(x, a, b, F)
+        else:
+            return _special_functions.square_well_diffraction(x, a, b, F)
+    except(TypeError, ValueError):
+        raise TypeError(
+            "\n\tError Encountered:\n"
+            "\trss_ringoccs: diffrec Subpackage\n"
+            "\tspecial_functions.square_well_diffraction:\n"
+            "\t\tInvalid input. Input should be:\n"
+            "\t\t\tx:\t Numpy array of floating point numbers.\n"
+            "\t\t\ta:\t Floating point number.\n"
+            "\t\t\tb:\t Floating point number.\n"
+            "\t\t\tF:\t Floating point number.\n"
+        )
+
+def old_fresnel_cos(x, error_check=True):
     """
         Purpose:
             Compute the Fresnel cosine function.
@@ -697,7 +804,7 @@ def fresnel_cos(x, error_check=True):
 
     return f_cos*SQRT_PI_2
 
-def fresnel_sin(x, error_check=True):
+def old_fresnel_sin(x, error_check=True):
     """
         Purpose:
             Compute the Fresnel sine function.
@@ -937,7 +1044,7 @@ def double_slit_diffraction(x, z, a, d):
 
     return f
 
-def sq_well_solve(x, a, b, F, invert=False):
+def old_square_well_diffraction(x, a, b, F, invert=False):
     """
         Function:
             sq_well_solve
@@ -1023,8 +1130,8 @@ def sq_well_solve(x, a, b, F, invert=False):
     else:
         pass
 
-    H = (0.5 - 0.5j) * (fresnel_cos((b-x)/F)-fresnel_cos((a-x)/F)+
-                        1j*(fresnel_sin((b-x) / F)-fresnel_sin((a-x)/F)))
+    H = (0.5 - 0.5j) * (old_fresnel_cos((b-x)/F)-old_fresnel_cos((a-x)/F)+
+                        1j*(old_fresnel_sin((b-x) / F)-old_fresnel_sin((a-x)/F)))
 
     if not invert:
         H = 1-H

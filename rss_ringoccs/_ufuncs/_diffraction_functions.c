@@ -62,7 +62,7 @@ static void Fresnel_Transform_Func(char **args, npy_intp *dimensions,
 {
     char *n_pts = 0;
     double w_init, x, F, F2;
-    static void (*fw)(char *, double, double, npy_intp, char *);
+    void (*fw)(char*, double, double, npy_intp, char*);
     npy_intp i, j, k, n_total;
 
     char *T_in              = args[0];
@@ -83,26 +83,26 @@ static void Fresnel_Transform_Func(char **args, npy_intp *dimensions,
     npy_intp w_steps        = steps[3];
     npy_intp w_f_steps      = steps[4];
     npy_intp x_arr_steps    = steps[5];
-    npy_intp T_out_steps    = steps[9];
+    npy_intp T_out_steps    = steps[10];
 
     n_total = *(int *)n_used * rho_steps;
 
-    if (strncmp(*(char *)wtype, "rect", 4) == 0){
+    if (*(int *)wtype == 0){
         fw = &__rect;
     }
-    else if (strncmp(*(char *)wtype, "coss", 4) == 0){
+    else if (*(int *)wtype == 1){
         fw = &__coss;
     }
-    else if (strncmp(*(char *)wtype, "kb20", 4) == 0){
+    else if (*(int *)wtype == 2){
         fw = &__coss;
     }
-    else if (strncmp(*(char *)wtype, "kb25", 4) == 0){
+    else if (*(int *)wtype == 3){
         fw = &__coss;
     }
-    else if (strncmp(*(char *)wtype, "kb35", 4) == 0){
+    else if (*(int *)wtype == 4){
         fw = &__coss;
     }
-    else if (strncmp(*(char *)wtype, "kbmd20", 4) == 0){
+    else if (*(int *)wtype == 5){
         fw = &__coss;
     }
     else {
@@ -117,8 +117,8 @@ static void Fresnel_Transform_Func(char **args, npy_intp *dimensions,
     T_out       += *(int *)start*T_out_steps;
     w_init       = *(double *)w_km_vals;
 
-    fw(&w_func, w_init, *(double *)dx_km, w_f_steps, &n_pts);
-    get_arr(&x_arr, &rho_km_vals, &n_pts, rho_steps);
+    fw(w_func, w_init, *(double *)dx_km, w_f_steps, n_pts);
+    get_arr(x_arr, rho_km_vals, n_pts, rho_steps);
 
     for (i=0; i<=n_total; ++i){
         /* Rho, Window width, Frensel scale for current point. */
@@ -128,7 +128,7 @@ static void Fresnel_Transform_Func(char **args, npy_intp *dimensions,
         if (fabs(w_init - *(double *)w_km_vals) >= 2.0 * *(double *)dx_km) {
             /* Reset w_init and recompute window function. */
             w_init = *(double *)w_km_vals;
-            fw(*w_func, w_init, *(double *)dx_km, w_f_steps, *n_pts);
+            fw(w_func, w_init, *(double *)dx_km, w_f_steps, n_pts);
 
             /* Compute psi for with stationary phase value */
             get_arr(x_arr, rho_km_vals, n_pts, rho_steps);
@@ -158,7 +158,7 @@ static void Fresnel_Transform_Func(char **args, npy_intp *dimensions,
 PyUFuncGenericFunction fresnel_transform_funcs[1] = {&Fresnel_Transform_Func};
 
 /* Input and return types for double input and out.. */
-static char data_types[10] = {
+static char data_types[11] = {
     NPY_COMPLEX128,
     NPY_DOUBLE,
     NPY_DOUBLE,
@@ -168,6 +168,7 @@ static char data_types[10] = {
     NPY_LONG,
     NPY_LONG,
     NPY_DOUBLE,
+    NPY_LONG,
     NPY_COMPLEX128
 };
 
@@ -201,7 +202,7 @@ PyMODINIT_FUNC PyInit__diffraction_functions(void)
 
     fresnel_transform = PyUFunc_FromFuncAndData(fresnel_transform_funcs, 
                                                 PyuFunc_data, data_types,
-                                                1, 9, 1, PyUFunc_None,
+                                                1, 10, 1, PyUFunc_None,
                                                 "fresnel_transform",
                                                 "fresnel_transform_docstring",
                                                 0);

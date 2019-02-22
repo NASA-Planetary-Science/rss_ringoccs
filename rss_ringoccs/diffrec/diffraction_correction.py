@@ -419,8 +419,6 @@ class DiffractionCorrection(object):
                 "\tCheck your DLP class for errors." % erm
             )
 
-        n_rho = np.size(self.rho_km_vals)
-
         # Run various error checks on all variables.
         error_check.check_is_real(self.D_km_vals, "D_km_vals", fname)
         error_check.check_is_real(self.B_rad_vals, "B_rad_vals", fname)
@@ -446,105 +444,30 @@ class DiffractionCorrection(object):
 
         if (np.size(self.rho_km_vals) < 2):
             raise IndexError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                "\trho_km_vals has less than 2 points.\n"
-                "\tIt is impossible to do reconstruction.\n"
-                "\tPlease check your input data.\n"
+                """
+                    \r\tError Encountered:
+                    \r\t\trss_ringoccs.diffrec.DiffractionCorrection\n
+                    \r\trho_km_vals has less than 2 points.
+                    \r\tIt is impossible to do reconstruction.
+                """
             )
         else:
             self.rho_km_vals = self.rho_km_vals.astype(float)
 
-        if (np.size(self.p_norm_vals) != n_rho):
-            raise IndexError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                "\tBad DLP: len(power) != len(rho)\n"
-                "\tThe number of data points in power is not\n"
-                "\tequal to the number of data points in radius.\n"
-            )
-        else:
-            self.p_norm_vals = self.p_norm_vals.astype(float)
-
-        if (np.size(self.phase_rad_vals) != n_rho):
-            raise IndexError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                "\tBad DLP: len(phase) != len(rho)\n"
-                "\tThe number of data points in phase is\n"
-                "\tnot equal to the number of data points\n"
-                "\tin radius. Check the input DLP\n"
-                "\tinstance for any errors.\n"
-            )
-        else:
-            # Negating phase from mathematical conventions.
-            self.phase_rad_vals = -self.phase_rad_vals.astype(float)
-
-        if (np.size(self.B_rad_vals) != n_rho):
-            raise IndexError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                "\tBad DLP: len(B) != len(rho)\n"
-                "\tThe number of data points in B is\n"
-                "\tnot equal to the number of data points\n"
-                "\tin radius. Check the input DLP\n"
-                "\tinstance for any errors.\n"
-            )
-        else:
-            self.B_rad_vals = self.B_rad_vals.astype(float)
-
-        if (np.size(self.D_km_vals) != n_rho):
-            raise IndexError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                "\tBad DLP: len(D) != len(rho)\n"
-                "\tThe number of data points in D is\n"
-                "\tnot equal to the number of data points\n"
-                "\tin radius. Check the input DLP\n"
-                "\tinstance for any errors.\n"
-            )
-        else:
-            self.D_km_vals = self.D_km_vals.astype(float)
-
-        if (np.size(self.phi_rad_vals) != n_rho):
-            raise IndexError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                "\tBad DLP: len(phi) != len(rho)\n"
-                "\tThe number of data points in angle is\n"
-                "\tnot equal to the number of data points\n"
-                "\tin radius. Check the input DLP\n"
-                "\tinstance for any errors.\n"
-            )
-        else:
-            self.phi_rad_vals = self.phi_rad_vals.astype(float)
-
-        if (np.size(self.f_sky_hz_vals) != n_rho):
-            raise IndexError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                "\tBad DLP: len(frequency) != len(rho)\n"
-                "\tThe number of data points in frequency is\n"
-                "\tnot equal to the number of data points\n"
-                "\tin radius. Check the input DLP\n"
-                "\tinstance for any errors.\n"
-            )
-        else:
-            self.f_sky_hz_vals = self.f_sky_hz_vals.astype(float)
-
-        if (np.size(self.rho_dot_kms_vals) != n_rho):
-            raise IndexError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                "\tBad DLP: len(rho_dot) != len(rho)\n"
-                "\tThe number of data points in velocity is\n"
-                "\tnot equal to the number of data points\n"
-                "\tin radius. Check the input DLP\n"
-                "\tinstance for any errors.\n"
-            )
-        else:
-            self.rho_dot_kms_vals = self.rho_dot_kms_vals.astype(float)
-            del n_rho, erm
+        error_check.check_lengths(self.rho_dot_kms_vals, self.rho_km_vals, 
+                                  "rho_dot_kms_vals", "rho_km_vals", fname)
+        error_check.check_lengths(self.phase_rad_vals, self.rho_km_vals,
+                                  "phase_rad_vals", "rho_km_vals", fname)
+        error_check.check_lengths(self.f_sky_hz_vals, self.rho_km_vals,
+                                  "f_sky_hz_vals", "rho_km_vals", fname)
+        error_check.check_lengths(self.phi_rad_vals, self.rho_km_vals,
+                                  "phi_rad_vals", "rho_km_vals", fname)
+        error_check.check_lengths(self.p_norm_vals, self.rho_km_vals,
+                                  "p_norm_vals", "rho_km_vals", fname)
+        error_check.check_lengths(self.B_rad_vals, self.rho_km_vals,
+                                  "B_rad_vals", "rho_km_vals", fname)
+        error_check.check_lengths(self.D_km_vals, self.rho_km_vals,
+                                  "D_km_vals", "rho_km_vals", fname)
 
         # Compute sampling distance (km)
         self.dx_km = self.rho_km_vals[1] - self.rho_km_vals[0]

@@ -201,6 +201,20 @@ def check_psitype(psitype, fname):
 
     return psitype
 
+def check_lengths(input_var_1, input_var_2, 
+                  input_var_name_1, input_var_name_2, function_name):
+    if (np.size(input_var_1) != np.size(input_var_2)):
+        raise IndexError(
+            """
+                \r\tError Encountered:
+                \r\t\t%s\n
+                \r\tThe number of points in %s is not
+                \r\tequal to the number of points in %s.
+            """ (function_name, input_var_name_1, input_var_name_2)
+        )
+    else:
+        return
+
 def check_is_real(input_var, input_var_name, fname):
     if not (np.all(np.isreal(input_var))):
         raise TypeError(

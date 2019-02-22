@@ -15,6 +15,7 @@ import numpy as np
 from scipy.special import lambertw, iv
 from rss_ringoccs.tools.history import write_history_dict
 from rss_ringoccs.tools.write_output_files import write_output_files
+from rss_ringoccs.tools import error_check
 
 # Declare constant for the speed of light (km/s)
 SPEED_OF_LIGHT_KM = 299792.4580
@@ -293,47 +294,29 @@ class DiffractionCorrection(object):
                  norm=True, verbose=False, bfac=True, sigma=2.e-13,
                  psitype="fresnel4", write_file=False, res_factor=0.75):
 
-        # Make sure that verbose is a boolean.
-        if not isinstance(verbose, bool):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                "\tverbose must be Boolean: True/False\n"
-                "\tYour input has type: %s\n"
-                "\tInput should have type: bool\n"
-                "\tSet verbose=True or verbose=False\n"
-                % (type(verbose).__name__)
-            )
-        elif verbose:
+        fname = "diffrec.diffraction_correction.DiffractionCorrection"
+        error_check.check_type(verbose, bool, "verbose", fname)
+
+        if verbose:
             print("Processing Diffraction Correction:")
             print("\tRunning Error Check on Input Arguments...")
         else:
             pass
 
-        # Check that the input resolution is a positive floating point number.
-        if (not isinstance(res, float)):
-            try:
-                res = float(res)
-            except (TypeError, ValueError):
-                raise TypeError(
-                    "\n\tError Encountered:\n"
-                    "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                    "\tres must be a positive floating point number\n"
-                    "\tYour input has type: %s\n"
-                    "\tInput should have type: float\n" % (type(res).__name__)
-                )
-        else:
-            pass
+        error_check.check_type(fwd, bool, "fwd", fname)
+        error_check.check_type(bfac, bool, "bfac", fname)
+        error_check.check_type(norm, bool, "norm", fname)
+        error_check.check_type(write_file, bool, "write_file", fname)
 
-        if (res <= 0.0):
-            raise ValueError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                "\tres must be a positive floating point number\n"
-                "\tYour requested resolution (km): %f\n" % (res)
-            )
-        else:
-            pass
+        res = error_check.check_type_and_convert(res, float, "res", fname)
+        sigma = error_check.check_type_and_convert(sigma, float, "sigma", fname)
+        res_factor = error_check.check_type_and_convert(res_factor, float,
+                                                        "res_factor", fname)
+
+        # Check that these variables are positive.
+        error_check.check_positive(res, "res", fname)
+        error_check.check_positive(sigma, "sigma", fname)
+        error_check.check_positive(res_factor, "res_factor", fname)
 
         # Check that the requested window type is a legal input.
         if not isinstance(wtype, str):
@@ -341,8 +324,8 @@ class DiffractionCorrection(object):
             for key in self.__func_dict:
                 erm = "%s\t\t'%s'\n" % (erm, key)
             raise TypeError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
+                "\n\tError Encountered: rss_ringoccs\n"
+                "\t\tdiffrec.diffraction_correction.DiffractionCorrection\n\n"
                 "\twtype must be a string.\n"
                 "\tYour input has type: %s\n"
                 "\tInput should have type: str\n"
@@ -359,272 +342,18 @@ class DiffractionCorrection(object):
                 for key in self.__func_dict:
                     erm = "%s\t\t'%s'\n" % (erm, key)
                 raise ValueError(
-                    "\n\tError Encountered:\n"
-                    "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                    "\tIllegal string used for wtype.\n"
+                    "\n\tError Encountered: rss_ringoccs\n"
+                    "\t\tdiffrec.diffraction_correction.DiffractionCorrection"
+                    "\n\n\tIllegal string used for wtype.\n"
                     "\tYour string: '%s'\n"
                     "\tAllowed Strings:\n%s" % (wtype, erm)
                 )
             else:
                 pass
 
-        # Check that the forward boolean is valid.
-        if not isinstance(fwd, bool):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                "\tfwd must be Boolean: True/False\n"
-                "\tYour input has type: %s\n"
-                "\tInput should have type: bool\n"
-                "\tSet fwd=True or fwd=False\n" % (type(fwd).__name__)
-            )
-        else:
-            pass
-
-        # Ensure that the normalize boolean has a legal value.
-        if not isinstance(norm, bool):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                "\tnorm must be Boolean: True/False\n"
-                "\tYour input has type: %s\n"
-                "\tInput should have type: bool\n"
-                "\tSet norm=True or norm=False\n" % (type(norm).__name__)
-            )
-        else:
-            pass
-
-        # Make sure that bfac is a boolean.
-        if not isinstance(bfac, bool):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                "\tbfac must be Boolean: True/False\n"
-                "\tYour input has type: %s\n"
-                "\tInput should have type: bool\n"
-                "\tSet bfac=True or bfac=False\n" % (type(bfac).__name__)
-            )
-        else:
-            pass
-
-        # Check that write_file boolean is valid.
-        if not isinstance(write_file, bool):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                "\twrite_file must be Boolean: True/False\n"
-                "\tYour input has type: %s\n"
-                "\tInput should have type: bool\n"
-                "\tSet write_file=True or write_file=False\n"
-                % (type(write_file).__name__)
-            )
-        else:
-            pass
-        
-        # Check that res_factor is a floating point number.
-        if (not isinstance(res_factor, float)):
-            try:
-                res_factor = float(res_factor)
-            except (TypeError, ValueError):
-                raise TypeError(
-                    "\n\tError Encountered:\n"
-                    "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                    "\tres_factor must be a positive floating point number.\n"
-                    "\tYour input has type: %s\n" % (type(res_factor).__name__)
-                )
-        else:
-            pass
-
-        if (res_factor <= 0.0):
-                raise ValueError(
-                    "\n\tError Encountered:\n"
-                    "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                    "\tres_factor must be a positive floating point number.\n"
-                    "\tYour input: %f\n"
-                    % (res_factor)
-                )
-        else:
-            pass
-
-        # Cbeck that psitype is a valid string.
-        if not isinstance(psitype, str):
-            erm = ""
-            for key in self.__psi_types:
-                erm = "%s\t\t'%s'\n" % (erm, key)
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                "\tpsitype must be a string.\n"
-                "\tYour input has type: %s\n"
-                "\tInput should have type: str\n"
-                "\tAllowed strings are:\n%s" % (type(psitype).__name__, erm)
-            )
-        else:
-            # Remove spaces, quotes, and apostrophe's from the psitype.
-            psitype = psitype.replace(" ", "").replace("'", "")
-            psitype = psitype.replace('"', "").lower()
-
-            # Perform error check, print legal inputs if needed.
-            if not (psitype in self.__psi_types):
-                erm = ""
-                for key in self.__psi_types:
-                    erm = "%s\t\t'%s'\n" % (erm, key)
-                raise TypeError(
-                    "\n\tError Encountered:\n"
-                    "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                    "\tInvalid string for psitype.\n"
-                    "\tYour string: '%s'\n"
-                    "\tAllowed strings are:\n%s"
-                    % (psitype, erm)
-                )
-            else:
-                pass
-
-        # Check that the requested range is a legal input.
-        if (not isinstance(rng, str)) and (not isinstance(rng, list)):
-            try:
-                if (np.size(rng) < 2):
-                    erm = ""
-                    for key in region_dict:
-                        erm = "%s\t\t'%s'\n" % (erm, key)
-                    raise TypeError(
-                        "\n\tError Encountered:\n"
-                        "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                        "\trng must be a list or a valid string.\n"
-                        "\tYour input has type: %s\n"
-                        "\tSet range=[a,b], where a is the STARTING point\n"
-                        "\tand b is the ENDING point of reconstruction, or\n"
-                        "\tuse one of the following valid strings:\n%s"
-                        % (type(rng).__name__, erm)
-                    )
-                elif (np.min(rng) < 0):
-                    raise ValueError(
-                        "\n\tError Encountered:\n"
-                        "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                        "\tMinimum requested range must be positive\n"
-                        "\tYour minimum requested range: %f\n" % (np.min(rng))
-                    )
-                else:
-                    rng = [np.min(rng), np.max(rng)]
-            except TypeError:
-                erm = ""
-                for key in region_dict:
-                    erm = "%s\t\t'%s'\n" % (erm, key)
-                raise TypeError(
-                    "\n\tError Encountered:\n"
-                    "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                    "\trng must be a list of floating\n"
-                    "\tpoint numbers or a valid string.\n"
-                    "\tYour input has type: %s\n"
-                    "\tSet range=[a,b], where a is the STARTING point\n"
-                    "\tand b is the ENDING point of reconstruction, or\n"
-                    "\tuse one of the following valid strings:\n%s"
-                    % (type(rng).__name__, erm)
-                )
-        elif isinstance(rng, list):
-            # Try converting all elements to floating point numbers.
-            if (not all(isinstance(x, float) for x in rng)):
-                try:
-                    for i in np.arange(np.size(rng)):
-                        rng[i] = float(rng[i])
-                except (TypeError, ValueError):
-                    erm = ""
-                    for key in region_dict:
-                        erm = "%s\t\t'%s'\n" % (erm, key)
-                    raise TypeError(
-                        "\n\tError Encountered:\n"
-                        "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                        "\trng must be a list of floating\n"
-                        "\tpoint numbers or a valid string.\n"
-                        "\tYour input has type: %s\n"
-                        "\tSet range=[a,b], where a is the STARTING point\n"
-                        "\tand b is the ENDING point of reconstruction, or\n"
-                        "\tuse one of the following valid strings:\n%s"
-                        % (type(rng).__name__, erm)
-                    )
-            else:
-                pass
-
-            # Check that there are at least two numbers.
-            if (np.size(rng) < 2):
-                erm = ""
-                for key in region_dict:
-                    erm = "%s\t\t'%s'\n" % (erm, key)
-                raise TypeError(
-                    "\n\tError Encountered:\n"
-                    "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                    "\trng must contain two numbers: rng=[a,b]\n"
-                    "\tYou provided less than 2 numbers.\n"
-                    "\tSet range=[a,b], where a is the STARTING point\n"
-                    "\tand b is the ENDING point of reconstruction, or\n"
-                    "\tuse one of the following valid strings:\n%s" % (erm)
-                )
-            else:
-                pass
-
-            # Check that the smallest number is positive.
-            if (np.min(rng) < 0.0):
-                raise ValueError(
-                    "\n\tError Encountered:\n"
-                    "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                    "\tMinimum requested range must be positive\n"
-                    "\tYour minimum requested range: %f\n" % (np.min(rng))
-                )
-            else:
-                pass
-        elif isinstance(rng, str):
-            rng = rng.replace(" ", "").replace("'", "").replace('"', "")
-            rng = rng.lower()
-            if not (rng in region_dict):
-                erm = ""
-                for key in region_dict:
-                    erm = "%s\t\t'%s'\n" % (erm, key)
-                raise ValueError(
-                    "\n\tError Encountered:\n"
-                    "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                    "\tIllegal string used for rng.\n"
-                    "\tYour string: '%s'\n"
-                    "\tAllowed Strings:\n%s" % (rng, erm)
-                )
-        else:
-            erm = ""
-            for key in region_dict:
-                erm = "%s\t\t'%s'\n" % (erm, key)
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                "\trng must be a list of floating\n"
-                "\tpoint numbers or a valid string.\n"
-                "\tYour input has type: %s\n"
-                "\tSet range=[a,b], where a is the STARTING point\n"
-                "\tand b is the ENDING point of reconstruction, or\n"
-                "\tuse one of the following valid strings:\n%s"
-                % (type(rng).__name__, erm)
-            )
-
-        # Check that the Allen Deviation is a legal value.
-        if (not isinstance(sigma, float)):
-            try:
-                sigma = float(sigma)
-            except (TypeError, ValueError):
-                raise TypeError(
-                    "\n\tError Encountered:\n"
-                    "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                    "\tsigma must be a positive floating point number.\n"
-                    "\tYour input has type: %s\n" % (type(sigma).__name__)
-                )
-        else:
-            pass
-
-        if (np.min(sigma) <= 0.0):
-                raise ValueError(
-                    "\n\tError Encountered:\n"
-                    "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                    "\n\tsigma must be a positive floating point number.\n"
-                    "\tYour input: %f\n" % (sigma)
-                )
-        else:
-            pass
+        # Check that range and psitype are legal inputs.
+        rng = error_check.check_range_input(rng, fname)
+        psitype = error_check.check_psitype(psitype, fname)
 
         if verbose:
             print("\tAssigning inputs as attributes...")
@@ -692,15 +421,29 @@ class DiffractionCorrection(object):
         n_rho = np.size(self.rho_km_vals)
 
         # Run various error checks on all variables.
-        if not (np.all(np.isreal(self.rho_km_vals))):
-            raise ValueError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                "\trho_km_vals is not an array of real\n"
-                "\tvalued floating point numbers. Please\n"
-                "\tcheck your DLP class for errors.\n"
-            )
-        elif (np.size(self.rho_km_vals) < 2):
+        error_check.check_is_real(self.D_km_vals, "D_km_vals", fname)
+        error_check.check_is_real(self.B_rad_vals, "B_rad_vals", fname)
+        error_check.check_is_real(self.rho_km_vals, "rho_km_vals", fname)
+        error_check.check_is_real(self.p_norm_vals, "p_norm_vals", fname)
+        error_check.check_is_real(self.phi_rad_vals, "phi_rad_vals", fname)
+        error_check.check_is_real(self.f_sky_hz_vals, "f_sky_hz_vals", fname)
+        error_check.check_is_real(self.phase_rad_vals, "phase_rad_vals", fname)
+        error_check.check_is_real(self.rho_dot_kms_vals, 
+                                  "rho_dot_kms_vals", fname)
+
+        error_check.check_positive(self.D_km_vals, "D_km_vals", fname)
+        error_check.check_positive(self.rho_km_vals, "rho_km_vals", fname)
+        error_check.check_positive(self.p_norm_vals, "p_norm_vals", fname)
+        error_check.check_positive(self.f_sky_hz_vals, "f_sky_hz_vals", fname)
+
+        error_check.check_two_pi(self.B_rad_vals, "B_rad_vals",
+                                 fname, deg=False)
+        error_check.check_two_pi(self.phi_rad_vals, "phi_rad_vals",
+                                 fname, deg=False)
+        error_check.check_two_pi(self.phase_rad_vals, "phase_rad_vals",
+                                 fname, deg=False)
+
+        if (np.size(self.rho_km_vals) < 2):
             raise IndexError(
                 "\n\tError Encountered:\n"
                 "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
@@ -708,13 +451,6 @@ class DiffractionCorrection(object):
                 "\tIt is impossible to do reconstruction.\n"
                 "\tPlease check your input data.\n"
             )
-        elif (np.min(self.rho_km_vals < 0)):
-                raise ValueError(
-                    "\n\tError Encountered:\n"
-                    "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                    "\trho_km_vals has negative values.\n"
-                    "\tPlease check your DLP class for errors."
-                )
         else:
             self.rho_km_vals = self.rho_km_vals.astype(float)
 
@@ -723,25 +459,8 @@ class DiffractionCorrection(object):
                 "\n\tError Encountered:\n"
                 "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
                 "\tBad DLP: len(power) != len(rho)\n"
-                "\tThe number of data points in power is\n"
-                "\tnot equal to the number of data points\n"
-                "\tin radius. Check the input DLP\n"
-                "\tinstance for any errors.\n"
-            )
-        elif (np.min(self.p_norm_vals) < 0.0):
-            raise ValueError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                "\tThere are negative values in the\n"
-                "\tnormalized diffracted power. Check\n"
-                "\tthe DLP instance for errors.")
-        elif not (np.all(np.isreal(self.p_norm_vals))):
-            raise ValueError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                "\tp_norm_vals is not an array of real\n"
-                "\tvalued floating point numbers. Please\n"
-                "\tcheck your DLP class for errors.\n"
+                "\tThe number of data points in power is not\n"
+                "\tequal to the number of data points in radius.\n"
             )
         else:
             self.p_norm_vals = self.p_norm_vals.astype(float)
@@ -755,24 +474,6 @@ class DiffractionCorrection(object):
                 "\tnot equal to the number of data points\n"
                 "\tin radius. Check the input DLP\n"
                 "\tinstance for any errors.\n"
-            )
-        elif not (np.all(np.isreal(self.phase_rad_vals))):
-            raise ValueError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                "\tphase_rad_vals is not an array of real\n"
-                "\tvalued floating point numbers. Please\n"
-                "\tcheck your DLP class for errors.\n"
-            )
-        elif (np.max(np.abs(self.phase_rad_vals)) > TWO_PI+1e-8):
-            raise ValueError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                "\tThere are values of phase (radians)\n"
-                "\tthat are greater than 2pi. Check the DLP\n"
-                "\tinstance for errors. Also check to make sure\n"
-                "\tthe values in the DLP intance are in\n"
-                "\tradians, and NOT degrees.\n"
             )
         else:
             # Negating phase from mathematical conventions.
@@ -788,24 +489,6 @@ class DiffractionCorrection(object):
                 "\tin radius. Check the input DLP\n"
                 "\tinstance for any errors.\n"
             )
-        elif (np.max(np.abs(self.B_rad_vals)) > TWO_PI+1e-8):
-            raise ValueError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                "\tThere are values of B (radians)\n"
-                "\tthat are greater than 2pi. Check the DLP\n"
-                "\tinstance for errors. Also check to make sure\n"
-                "\tthe values in the DLP intance are in\n"
-                "\tradians, and NOT degrees.\n"
-            )
-        elif not (np.all(np.isreal(self.B_rad_vals))):
-            raise ValueError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                "\tB_rad_vals is not an array of real\n"
-                "\tvalued floating point numbers. Please\n"
-                "\tcheck your DLP class for errors.\n"
-            )
         else:
             self.B_rad_vals = self.B_rad_vals.astype(float)
 
@@ -818,30 +501,6 @@ class DiffractionCorrection(object):
                 "\tnot equal to the number of data points\n"
                 "\tin radius. Check the input DLP\n"
                 "\tinstance for any errors.\n"
-            )
-        elif not (np.all(np.isreal(self.D_km_vals))):
-            raise ValueError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                "\tD_km_vals is not an array of real\n"
-                "\tvalued floating point numbers. Please\n"
-                "\tcheck your DLP class for errors.\n"
-            )
-        elif (np.min(self.D_km_vals) < 0.0):
-            raise ValueError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                "\tThere are negative values for the\n"
-                "\tspacecraft to RIP distance, D.\n"
-                "\tCheck the DLP instance for errors.\n"
-            )
-        elif (np.min(self.D_km_vals == 0.0)):
-            raise ValueError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                "\tThere are zero-valued elements for the\n"
-                "\tSpacecraft to Ring-Intercept-Point distance, D.\n"
-                "\Check the DLP instance for errors.\n"
             )
         else:
             self.D_km_vals = self.D_km_vals.astype(float)
@@ -856,24 +515,6 @@ class DiffractionCorrection(object):
                 "\tin radius. Check the input DLP\n"
                 "\tinstance for any errors.\n"
             )
-        elif not (np.all(np.isreal(self.phi_rad_vals))):
-            raise ValueError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                "\tphi_rad_vals is not an array of real\n"
-                "\tvalued floating point numbers. Please\n"
-                "\tcheck your DLP class for errors.\n"
-            )
-        elif (np.max(np.abs(self.phi_rad_vals)) > TWO_PI+1e-6):
-            raise ValueError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                "\tThere are values of phi (in radians)\n"
-                "\tthat are greater than 2pi. Check the DLP\n"
-                "\tinstance for errors. Also check to make sure\n"
-                "\tthe values in the DLP intance are in\n"
-                "\tradians, and NOT degrees.\n"
-            )
         else:
             self.phi_rad_vals = self.phi_rad_vals.astype(float)
 
@@ -887,28 +528,6 @@ class DiffractionCorrection(object):
                 "\tin radius. Check the input DLP\n"
                 "\tinstance for any errors.\n"
             )
-        elif not (np.all(np.isreal(self.f_sky_hz_vals))):
-            raise ValueError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                "\tf_sky_hz_vals is not an array of real\n"
-                "\tvalued floating point numbers. Please\n"
-                "\tcheck your DLP class for errors.\n"
-            )
-        elif (np.min(self.f_sky_hz_vals < 0.0)):
-            raise ValueError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                "\tThere are negative values of the frequency.\n"
-                "\tCheck the DLP instance for errors.\n"
-            )
-        elif (np.min(self.f_sky_hz_vals == 0.0)):
-            raise ValueError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                "\tThere are zero-valued elements for the\n"
-                "\tfrequency. Check the DLP instance for errors."
-            )
         else:
             self.f_sky_hz_vals = self.f_sky_hz_vals.astype(float)
 
@@ -921,14 +540,6 @@ class DiffractionCorrection(object):
                 "\tnot equal to the number of data points\n"
                 "\tin radius. Check the input DLP\n"
                 "\tinstance for any errors.\n"
-            )
-        elif not (np.all(np.isreal(self.rho_dot_kms_vals))):
-            raise ValueError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                "\trho_dot_kms_vals is not an array of real\n"
-                "\tvalued floating point numbers. Please\n"
-                "\tcheck your DLP class for errors.\n"
             )
         else:
             self.rho_dot_kms_vals = self.rho_dot_kms_vals.astype(float)
@@ -1744,7 +1355,7 @@ class DiffractionCorrection(object):
         r = self.rho_km_vals[start]
         r0 = self.rho_km_vals[crange]
 
-        if (self.psitype == 'fresnel'):
+        if (self.psitype == "fresnel"):
             crange -= 1
             F2 = (self.F_km_vals*self.F_km_vals).tolist()
             x = r-r0
@@ -1802,7 +1413,7 @@ class DiffractionCorrection(object):
                     print(mes % (i, n_used, nw, loop), end="\r")
             if self.verbose:
                 print("\n")
-        elif (self.psitype == 'fresnel3'):
+        elif (self.psitype == "fresnel3"):
             crange -= 1
             cosb = np.cos(self.B_rad_vals)
             cosp = np.cos(self.phi_rad_vals)
@@ -1885,7 +1496,7 @@ class DiffractionCorrection(object):
                     print(mes % (i, n_used, nw, loop), end="\r")
             if self.verbose:
                 print("\n", end="\r")
-        elif (self.psitype == 'fresnel4'):
+        elif (self.psitype == "fresnel4"):
             crange -= 1
             cosb = np.cos(self.B_rad_vals)
             cosp = np.cos(self.phi_rad_vals)
@@ -1972,7 +1583,7 @@ class DiffractionCorrection(object):
                     print(mes % (i, n_used, nw, loop), end="\r")
             if self.verbose:
                 print("\n", end="\r")
-        elif (self.psitype == 'fresnel6'):
+        elif (self.psitype == "fresnel6"):
             crange -= 1
             cosb = np.cos(self.B_rad_vals)
             cosp = np.cos(self.phi_rad_vals)
@@ -2075,7 +1686,7 @@ class DiffractionCorrection(object):
                     print(mes % (i, n_used, nw, loop), end="\r")
             if self.verbose:
                 print("\n", end="\r")
-        elif (self.psitype == 'fresnel8'):
+        elif (self.psitype == "fresnel8"):
             crange -= 1
             cosb = np.cos(self.B_rad_vals)
             cosp = np.cos(self.phi_rad_vals)
@@ -2191,6 +1802,76 @@ class DiffractionCorrection(object):
                     T_out[center] *= self.__normalize(self.dx_km, ker, F)
                 if self.verbose:
                     print(mes % (i, n_used, nw, loop), end="\r")
+            if self.verbose:
+                print("\n", end="\r")
+        elif (self.psitype == "elliptical"):
+            for i in np.arange(n_used):
+                # Current point being computed.
+                center = start+i
+
+                # Current window width and Fresnel scale.
+                w = self.w_km_vals[center]
+                F = self.F_km_vals[center]
+
+                if (np.abs(w_init - w) >= 2.0 * self.dx_km):
+                    # Reset w_init and recompute window function.
+                    w_init = w
+                    w_func = fw(w, self.dx_km)
+
+                    # Reset number of window points
+                    nw = np.size(w_func)
+                else:
+                    pass
+
+                # Computed range for current point
+                crange = np.arange(int(center-(nw-1)/2),
+                                   int(1+center+(nw-1)/2))
+                
+                # Ajdust ring radius by dx_km.
+                r = self.rho_km_vals[center]
+                r0 = self.rho_km_vals[crange]
+                d = self.D_km_vals[center]
+                b = self.B_rad_vals[center]
+                phi0 = self.phi_rad_vals[center]
+                phi = self.phi_rad_vals[center] + np.zeros(nw)
+                kD = kD_vals[crange]
+
+                # Compute Newton-Raphson perturbation
+                psi_d1 = self.__dpsi(kD, r, r0, phi, phi0, b, d)
+                loop = 0
+
+                while (np.max(np.abs(psi_d1)) > 1.0e-4):
+                    psi_d1 = self.__dpsi(kD, r, r0, phi, phi0, b, d)
+                    psi_d2 = self.__d2psi(kD, r, r0, phi, phi0, b, d)
+                    
+                    # Newton-Raphson
+                    phi += -(psi_d1 / psi_d2)
+
+                    # Add one to loop variable for each iteration
+                    loop += 1
+                    if (loop > 5):
+                        break
+
+                # Compute Eta variable (MTR86 Equation 4c).
+                psi_vals = self.__psi_func(kD, r, r0, phi, phi0, b, d)
+
+                # Compute kernel function for Fresnel inverse
+                if fwd:
+                    ker = w_func*np.exp(1j*psi_vals)
+                else:
+                    ker = w_func*np.exp(-1j*psi_vals)
+
+                # Range of diffracted data that falls inside the window
+                T = T_in[crange]
+
+                # Compute 'approximate' Fresnel Inversion for current point
+                T_out[center] = np.sum(ker*T)*self.dx_km*(1.0+1.0j)/(2.0*F)
+
+                # If normalization has been set, normalize the reconstruction
+                if self.norm:
+                    T_out[center] *= self.__normalize(self.dx_km, ker, F)
+                if self.verbose:
+                    print(mes % (i, n_used-1, nw, loop), end="\r")
             if self.verbose:
                 print("\n", end="\r")
         else:

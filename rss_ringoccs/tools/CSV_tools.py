@@ -772,17 +772,6 @@ class ExtractCSVData(object):
             else:
                 f_sky_resid = f_sky_resid.astype(float)
 
-            if (np.min(f_sky_resid) <= 0.0):
-                raise ValueError(
-                    "\n\t\tf_sky_resid has values that are\n"
-                    "\t\tnot positive. Please check your input\n"
-                    "\t\tcal CSV for errors.\n"
-                    "\t\t\tMinimum frequency value: %f"
-                    % np.min(f_sky_resid)
-                )
-            else:
-                pass
-
             errmess = "f_sky_resid"
             f_sky_raw_vals = f_sky_pred - f_sky_resid
             if (np.min(f_sky_raw_vals) <= 0.0):

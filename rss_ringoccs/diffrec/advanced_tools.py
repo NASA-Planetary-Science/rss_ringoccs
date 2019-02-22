@@ -1,93 +1,37 @@
 import numpy as np
 from scipy import interpolate
-from .diffraction_correction import DiffractionCorrection, SPEED_OF_LIGHT_KM
-from .diffraction_correction import region_dict
-from .special_functions import fresnel_scale
-from .window_functions import func_dict
-from rss_ringoccs.tools.CSV_tools import get_geo, ExtractCSVData
+from . import diffraction_correction, special_functions, window_functions
+from rss_ringoccs.tools import CSV_tools, error_check
 
-# List of allowed psitypes.
-psi_types = ["fresnel", "fresnel3", "fresnel4", "fresnel6", "fresnel8", "full"]
 
 class CompareTau(object):
     def __init__(self, geo, cal, dlp, tau, res, rng='all', wtype="kbmd20",
                  fwd=False, bfac=True, sigma=2.e-13, verbose=False, norm=True,
                  psitype='fresnel4', res_factor=0.75):
 
-        # Make sure that input files are strings.
-        if not isinstance(geo, str):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.CompareTau\n\n"
-                "\tgeo must be a string: '/path/to/geo.TAB'\n"
-                "\tYour input has type: %s\n"
-                "\tInput should have type: str\n" % (type(geo).__name__)
-            )
-        elif not isinstance(cal, str):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.CompareTau\n\n"
-                "\tcal must be a string: '/path/to/cal.TAB'\n"
-                "\tYour input has type: %s\n"
-                "\tInput should have type: str\n" % (type(cal).__name__)
-            )
-        elif not isinstance(dlp, str):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.CompareTau\n\n"
-                "\tdlp must be a string: '/path/to/dlp.TAB'\n"
-                "\tYour input has type: %s\n"
-                "\tInput should have type: str\n" % (type(dlp).__name__)
-            )
-        elif not isinstance(tau, str):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.CompareTau\n\n"
-                "\ttau must be a string: '/path/to/tau.TAB'\n"
-                "\tYour input has type: %s\n"
-                "\tInput should have type: str\n" % (type(tau).__name__)
-            )
-        else:
-            pass
+        # Check all input variables for errors.
+        fname = "diffrec.advanced_tools.CompareTau"
+        error_check.check_type(verbose, bool, "verbose", fname)
+        error_check.check_type(geo, str, "geo", fname)
+        error_check.check_type(cal, str, "cal", fname)
+        error_check.check_type(dlp, str, "dlp", fname)
+        error_check.check_type(tau, str, "tau", fname)
+        error_check.check_type(fwd, bool, "fwd", fname)
+        error_check.check_type(norm, bool, "norm", fname)
+        error_check.check_type(bfac, bool, "bfac", fname)
+        error_check.check_type(wtype, str, "wtype", fname)
+        error_check.check_type(psitype, str, "psitype", fname)
 
-        # Make sure that verbose is a boolean.
-        if not isinstance(verbose, bool):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.CompareTau\n\n"
-                "\tverbose must be Boolean: True/False\n"
-                "\tYour input has type: %s\n"
-                "\tInput should have type: bool\n"
-                "\tSet verbose=True or verbose=False\n"
-                % (type(verbose).__name__)
-            )
-        else:
-            pass
+        # Try converting certain inputs into floating point numbers.
+        res = error_check.check_type_and_convert(res, float, "res", fname)
+        sigma = error_check.check_type_and_convert(sigma, float, "sigma", fname)
+        res_factor = error_check.check_type_and_convert(res_factor, float,
+                                                        "res_factor", fname)
 
-        # Check that the input resolution is a positive floating point number.
-        if (not isinstance(res, float)):
-            try:
-                res = float(res)
-            except (TypeError, ValueError):
-                raise TypeError(
-                    "\n\tError Encountered:\n"
-                    "\t\trss_ringoccs.diffrec.CompareTau\n\n"
-                    "\tres must be a positive floating point number\n"
-                    "\tYour input has type: %s\n"
-                    "\tInput should have type: float\n" % (type(res).__name__)
-                )
-        else:
-            pass
-
-        if (res <= 0.0):
-            raise ValueError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.CompareTau\n\n"
-                "\tres must be a positive floating point number\n"
-                "\tYour requested resolution (km): %f\n" % (res)
-            )
-        else:
-            pass
+        # Check that these variables are positive.
+        error_check.check_positive(res, "res", fname)
+        error_check.check_positive(sigma, "sigma", fname)
+        error_check.check_positive(res_factor, "res_factor", fname)
 
         # Check that the requested window type is a legal input.
         if not isinstance(wtype, str):
@@ -108,9 +52,9 @@ class CompareTau(object):
 
             # Set wtype string to lower-case.
             wtype = wtype.lower()
-            if not (wtype in func_dict):
+            if not (wtype in window_functions.func_dict):
                 erm = ""
-                for key in func_dict:
+                for key in window_functions.func_dict:
                     erm = "%s\t\t'%s'\n" % (erm, key)
                 raise ValueError(
                     "\n\tError Encountered:\n"
@@ -122,255 +66,17 @@ class CompareTau(object):
             else:
                 pass
 
-        # Check that the forward boolean is valid.
-        if not isinstance(fwd, bool):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.CompareTau\n\n"
-                "\tfwd must be Boolean: True/False\n"
-                "\tYour input has type: %s\n"
-                "\tInput should have type: bool\n"
-                "\tSet fwd=True or fwd=False\n" % (type(fwd).__name__)
-            )
-        else:
-            pass
+        # Check that range and psitype are legal inputs.
+        rng = error_check.check_range_input(rng, fname)
+        psitype = error_check.check_psitype(psitype, fname)
 
-        # Ensure that the normalize boolean has a legal value.
-        if not isinstance(norm, bool):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.CompareTau\n\n"
-                "\tnorm must be Boolean: True/False\n"
-                "\tYour input has type: %s\n"
-                "\tInput should have type: bool\n"
-                "\tSet norm=True or norm=False\n" % (type(norm).__name__)
-            )
-        else:
-            pass
-
-        # Make sure that bfac is a boolean.
-        if not isinstance(bfac, bool):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.CompareTau\n\n"
-                "\tbfac must be Boolean: True/False\n"
-                "\tYour input has type: %s\n"
-                "\tInput should have type: bool\n"
-                "\tSet bfac=True or bfac=False\n" % (type(bfac).__name__)
-            )
-        else:
-            pass
-        
-        # Check that res_factor is a floating point number.
-        if (not isinstance(res_factor, float)):
-            try:
-                res_factor = float(res_factor)
-            except (TypeError, ValueError):
-                raise TypeError(
-                    "\n\tError Encountered:\n"
-                    "\t\trss_ringoccs.diffrec.CompareTau\n\n"
-                    "\tres_factor must be a positive floating point number.\n"
-                    "\tYour input has type: %s\n" % (type(res_factor).__name__)
-                )
-        else:
-            pass
-
-        if (res_factor <= 0.0):
-            raise ValueError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.CompareTau\n\n"
-                "\tres_factor must be a positive floating point number.\n"
-                "\tYour input: %f\n"
-                % (res_factor)
-            )
-        else:
-            pass
-
-        # Cbeck that psitype is a valid string.
-        if not isinstance(psitype, str):
-            erm = ""
-            for key in psi_types:
-                erm = "%s\t\t'%s'\n" % (erm, key)
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.CompareTau\n\n"
-                "\tpsitype must be a string.\n"
-                "\tYour input has type: %s\n"
-                "\tInput should have type: str\n"
-                "\tAllowed strings are:\n%s" % (type(psitype).__name__, erm)
-            )
-        else:
-            # Remove spaces, quotes, and apostrophe's from the psitype.
-            psitype = psitype.replace(" ", "").replace("'", "")
-            psitype = psitype.replace('"', "").lower()
-
-            # Perform error check, print legal inputs if needed.
-            if not (psitype in psi_types):
-                erm = ""
-                for key in psi_types:
-                    erm = "%s\t\t'%s'\n" % (erm, key)
-                raise TypeError(
-                    "\n\tError Encountered:\n"
-                    "\t\trss_ringoccs.diffrec.CompareTau\n\n"
-                    "\tInvalid string for psitype.\n"
-                    "\tYour string: '%s'\n"
-                    "\tAllowed strings are:\n%s"
-                    % (psitype, erm)
-                )
-            else:
-                pass
-
-        # Check that the requested range is a legal input.
-        if (not isinstance(rng, str)) and (not isinstance(rng, list)):
-            try:
-                if (np.size(rng) < 2):
-                    erm = ""
-                    for key in region_dict:
-                        erm = "%s\t\t'%s'\n" % (erm, key)
-                    raise TypeError(
-                        "\n\tError Encountered:\n"
-                        "\t\trss_ringoccs.diffrec.CompareTau\n\n"
-                        "\trng must be a list or a valid string.\n"
-                        "\tYour input has type: %s\n"
-                        "\tSet range=[a,b], where a is the STARTING point\n"
-                        "\tand b is the ENDING point of reconstruction, or\n"
-                        "\tuse one of the following valid strings:\n%s"
-                        % (type(rng).__name__, erm)
-                    )
-                elif (np.min(rng) < 0):
-                    raise ValueError(
-                        "\n\tError Encountered:\n"
-                        "\t\trss_ringoccs.diffrec.CompareTau\n\n"
-                        "\tMinimum requested range must be positive\n"
-                        "\tYour minimum requested range: %f\n" % (np.min(rng))
-                    )
-                else:
-                    rng = [np.min(rng), np.max(rng)]
-            except TypeError:
-                erm = ""
-                for key in region_dict:
-                    erm = "%s\t\t'%s'\n" % (erm, key)
-                raise TypeError(
-                    "\n\tError Encountered:\n"
-                    "\t\trss_ringoccs.diffrec.CompareTau\n\n"
-                    "\trng must be a list of floating\n"
-                    "\tpoint numbers or a valid string.\n"
-                    "\tYour input has type: %s\n"
-                    "\tSet range=[a,b], where a is the STARTING point\n"
-                    "\tand b is the ENDING point of reconstruction, or\n"
-                    "\tuse one of the following valid strings:\n%s"
-                    % (type(rng).__name__, erm)
-                )
-        elif isinstance(rng, list):
-            # Try converting all elements to floating point numbers.
-            if (not all(isinstance(x, float) for x in rng)):
-                try:
-                    for i in np.arange(np.size(rng)):
-                        rng[i] = float(rng[i])
-                except (TypeError, ValueError):
-                    erm = ""
-                    for key in region_dict:
-                        erm = "%s\t\t'%s'\n" % (erm, key)
-                    raise TypeError(
-                        "\n\tError Encountered:\n"
-                        "\t\trss_ringoccs.diffrec.CompareTau\n\n"
-                        "\trng must be a list of floating\n"
-                        "\tpoint numbers or a valid string.\n"
-                        "\tYour input has type: %s\n"
-                        "\tSet range=[a,b], where a is the STARTING point\n"
-                        "\tand b is the ENDING point of reconstruction, or\n"
-                        "\tuse one of the following valid strings:\n%s"
-                        % (type(rng).__name__, erm)
-                    )
-            else:
-                pass
-
-            # Check that there are at least two numbers.
-            if (np.size(rng) < 2):
-                erm = ""
-                for key in region_dict:
-                    erm = "%s\t\t'%s'\n" % (erm, key)
-                raise TypeError(
-                    "\n\tError Encountered:\n"
-                    "\t\trss_ringoccs.diffrec.CompareTau\n\n"
-                    "\trng must contain two numbers: rng=[a,b]\n"
-                    "\tYou provided less than 2 numbers.\n"
-                    "\tSet range=[a,b], where a is the STARTING point\n"
-                    "\tand b is the ENDING point of reconstruction, or\n"
-                    "\tuse one of the following valid strings:\n%s" % (erm)
-                )
-            else:
-                pass
-
-            # Check that the smallest number is positive.
-            if (np.min(rng) < 0.0):
-                raise ValueError(
-                    "\n\tError Encountered:\n"
-                    "\t\trss_ringoccs.diffrec.CompareTau\n\n"
-                    "\tMinimum requested range must be positive\n"
-                    "\tYour minimum requested range: %f\n" % (np.min(rng))
-                )
-            else:
-                pass
-        elif isinstance(rng, str):
-            rng = rng.replace(" ", "").replace("'", "").replace('"', "")
-            rng = rng.lower()
-            if not (rng in region_dict):
-                erm = ""
-                for key in region_dict:
-                    erm = "%s\t\t'%s'\n" % (erm, key)
-                raise ValueError(
-                    "\n\tError Encountered:\n"
-                    "\t\trss_ringoccs.diffrec.CompareTau\n\n"
-                    "\tIllegal string used for rng.\n"
-                    "\tYour string: '%s'\n"
-                    "\tAllowed Strings:\n%s" % (rng, erm)
-                )
-        else:
-            erm = ""
-            for key in region_dict:
-                erm = "%s\t\t'%s'\n" % (erm, key)
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.CompareTau\n\n"
-                "\trng must be a list of floating\n"
-                "\tpoint numbers or a valid string.\n"
-                "\tYour input has type: %s\n"
-                "\tSet range=[a,b], where a is the STARTING point\n"
-                "\tand b is the ENDING point of reconstruction, or\n"
-                "\tuse one of the following valid strings:\n%s"
-                % (type(rng).__name__, erm)
-            )
-
-        # Check that the Allen Deviation is a legal value.
-        if (not isinstance(sigma, float)):
-            try:
-                sigma = float(sigma)
-            except (TypeError, ValueError):
-                raise TypeError(
-                    "\n\tError Encountered:\n"
-                    "\t\trss_ringoccs.diffrec.CompareTau\n\n"
-                    "\tsigma must be a positive floating point number.\n"
-                    "\tYour input has type: %s\n" % (type(sigma).__name__)
-                )
-        else:
-            pass
-
-        if (np.min(sigma) <= 0.0):
-                raise ValueError(
-                    "\n\tError Encountered:\n"
-                    "\t\trss_ringoccs.diffrec.CompareTau\n\n"
-                    "\n\tsigma must be a positive floating point number.\n"
-                    "\tYour input: %f\n" % (sigma)
-                )
-        else:
-            pass
-
-        data = ExtractCSVData(geo, cal, dlp, tau=tau, verbose=verbose)
-        rec = DiffractionCorrection(data, res, rng=rng, wtype=wtype, fwd=fwd,
-                                    norm=norm, verbose=verbose, bfac=bfac,
-                                    sigma=sigma, psitype=psitype,
-                                    res_factor=res_factor)
+        data = CSV_tools.ExtractCSVData(geo, cal, dlp, tau=tau, verbose=verbose)
+        rec = diffraction_correction.DiffractionCorrection(
+            data, res, rng=rng, wtype=wtype,
+            fwd=fwd, norm=norm, bfac=bfac,
+            sigma=sigma, psitype=psitype,
+            res_factor=res_factor, verbose=verbose
+        )
 
         self.rho_km_vals = rec.rho_km_vals
         tr = data.tau_rho
@@ -391,227 +97,38 @@ class CompareTau(object):
 
 
 class FindOptimalResolution(object):
-    def __init__(self, geo, cal, dlp, tau, sres, dres,
-                 nres, rng='all', wlst=['kbmd20'], verbose=True):
+    def __init__(self, geo, cal, dlp, tau, sres, dres, nres, fwd=False,
+                 norm=True, bfac=True, sigma=2.e-13, psitype="fresnel4",
+                 rng='all', wlst=['kbmd20'], res_factor=0.75, verbose=True):
 
-        # Make sure that verbose is a boolean.
-        if not isinstance(verbose, bool):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.FindOptimalResolution\n\n"
-                "\tverbose must be Boolean: True/False\n"
-                "\tYour input has type: %s\n"
-                "\tInput should have type: bool\n"
-                "\tSet verbose=True or verbose=False\n"
-                % (type(verbose).__name__)
-            )
-        else:
-            pass
+        # Check all input variables for errors.
+        fname = "diffrec.advanced_tools.FindOptimalResolution"
+        error_check.check_type(verbose, bool, "verbose", fname)
+        error_check.check_type(geo, str, "geo", fname)
+        error_check.check_type(cal, str, "cal", fname)
+        error_check.check_type(dlp, str, "dlp", fname)
+        error_check.check_type(tau, str, "tau", fname)
+        error_check.check_type(fwd, bool, "fwd", fname)
+        error_check.check_type(norm, bool, "norm", fname)
+        error_check.check_type(bfac, bool, "bfac", fname)
+        error_check.check_type(wlst, list, "wlst", fname)
+        error_check.check_type(psitype, str, "psitype", fname)
+        sres = error_check.check_type_and_convert(sres, float, "sres", fname)
+        dres = error_check.check_type_and_convert(dres, float, "dres", fname)
+        nres = error_check.check_type_and_convert(nres, int, "nres", fname)
+        sigma = error_check.check_type_and_convert(sigma, float, "sigma", fname)
+        res_factor = error_check.check_type_and_convert(res_factor, float, 
+                                                        "res_factor", fname)
 
-        # Make sure that input files are strings.
-        if not isinstance(geo, str):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.FindOptimalResolution\n\n"
-                "\tgeo must be a string: '/path/to/geo.TAB'\n"
-                "\tYour input has type: %s\n"
-                "\tInput should have type: str\n" % (type(geo).__name__)
-            )
-        elif not isinstance(cal, str):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.FindOptimalResolution\n\n"
-                "\tcal must be a string: '/path/to/cal.TAB'\n"
-                "\tYour input has type: %s\n"
-                "\tInput should have type: str\n" % (type(cal).__name__)
-            )
-        elif not isinstance(dlp, str):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.FindOptimalResolution\n\n"
-                "\tdlp must be a string: '/path/to/dlp.TAB'\n"
-                "\tYour input has type: %s\n"
-                "\tInput should have type: str\n" % (type(dlp).__name__)
-            )
-        elif not isinstance(tau, str):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.FindOptimalResolution\n\n"
-                "\ttau must be a string: '/path/to/tau.TAB'\n"
-                "\tYour input has type: %s\n"
-                "\tInput should have type: str\n" % (type(tau).__name__)
-            )
-        else:
-            pass
-
-        # Check resolution inputs.
-        if (not isinstance(sres, float)):
-            try:
-                sres = float(sres)
-            except (TypeError, ValueError):
-                raise TypeError(
-                    "\n\tError Encountered:\n"
-                    "\t\trss_ringoccs.diffrec.FindOptimalResolution\n\n"
-                    "\tsres must be a positive floating point number\n"
-                    "\tYour input has type: %s\n"
-                    "\tInput should have type: float\n" % (type(sres).__name__)
-                )
-        elif (not isinstance(dres, float)):
-            try:
-                dres = float(dres)
-            except (TypeError, ValueError):
-                raise TypeError(
-                    "\n\tError Encountered:\n"
-                    "\t\trss_ringoccs.diffrec.FindOptimalResolution\n\n"
-                    "\tdres must be a positive floating point number\n"
-                    "\tYour input has type: %s\n"
-                    "\tInput should have type: float\n" % (type(dres).__name__)
-                )
-        elif (not isinstance(nres, int)):
-            try:
-                nres = int(nres)
-            except (TypeError, ValueError):
-                raise TypeError(
-                    "\n\tError Encountered:\n"
-                    "\t\trss_ringoccs.diffrec.FindOptimalResolution\n\n"
-                    "\tnres must be a positive integer.\n"
-                    "\tYour input has type: %s\n"
-                    "\tInput should have type: int\n" % (type(nres).__name__)
-                )
-        else:
-            pass
+        error_check.check_positive(sres, "sres", fname)
+        error_check.check_positive(dres, "dres", fname)
+        error_check.check_positive(nres, "nres", fname)
+        error_check.check_positive(sigma, "sigma", fname)
 
         # Check that the requested range is a legal input.
-        if (not isinstance(rng, str)) and (not isinstance(rng, list)):
-            try:
-                if (np.size(rng) < 2):
-                    erm = ""
-                    for key in region_dict:
-                        erm = "%s\t\t'%s'\n" % (erm, key)
-                    raise TypeError(
-                        "\n\tError Encountered:\n"
-                        "\t\trss_ringoccs.diffrec.FindOptimalResolution\n\n"
-                        "\trng must be a list or a valid string.\n"
-                        "\tYour input has type: %s\n"
-                        "\tSet range=[a,b], where a is the STARTING point\n"
-                        "\tand b is the ENDING point of reconstruction, or\n"
-                        "\tuse one of the following valid strings:\n%s"
-                        % (type(rng).__name__, erm)
-                    )
-                elif (np.min(rng) < 0):
-                    raise ValueError(
-                        "\n\tError Encountered:\n"
-                        "\t\trss_ringoccs.diffrec.FindOptimalResolution\n\n"
-                        "\tMinimum requested range must be positive\n"
-                        "\tYour minimum requested range: %f\n" % (np.min(rng))
-                    )
-                else:
-                    rng = [np.min(rng), np.max(rng)]
-            except TypeError:
-                erm = ""
-                for key in region_dict:
-                    erm = "%s\t\t'%s'\n" % (erm, key)
-                raise TypeError(
-                    "\n\tError Encountered:\n"
-                    "\t\trss_ringoccs.diffrec.FindOptimalResolution\n\n"
-                    "\trng must be a list of floating\n"
-                    "\tpoint numbers or a valid string.\n"
-                    "\tYour input has type: %s\n"
-                    "\tSet range=[a,b], where a is the STARTING point\n"
-                    "\tand b is the ENDING point of reconstruction, or\n"
-                    "\tuse one of the following valid strings:\n%s"
-                    % (type(rng).__name__, erm)
-                )
-        elif isinstance(rng, list):
-            # Try converting all elements to floating point numbers.
-            if (not all(isinstance(x, float) for x in rng)):
-                try:
-                    for i in np.arange(np.size(rng)):
-                        rng[i] = float(rng[i])
-                except (TypeError, ValueError):
-                    erm = ""
-                    for key in region_dict:
-                        erm = "%s\t\t'%s'\n" % (erm, key)
-                    raise TypeError(
-                        "\n\tError Encountered:\n"
-                        "\t\trss_ringoccs.diffrec.FindOptimalResolution\n\n"
-                        "\trng must be a list of floating\n"
-                        "\tpoint numbers or a valid string.\n"
-                        "\tYour input has type: %s\n"
-                        "\tSet range=[a,b], where a is the STARTING point\n"
-                        "\tand b is the ENDING point of reconstruction, or\n"
-                        "\tuse one of the following valid strings:\n%s"
-                        % (type(rng).__name__, erm)
-                    )
-            else:
-                pass
+        rng = check_range_input(rng, fname)
 
-            # Check that there are at least two numbers.
-            if (np.size(rng) < 2):
-                erm = ""
-                for key in region_dict:
-                    erm = "%s\t\t'%s'\n" % (erm, key)
-                raise TypeError(
-                    "\n\tError Encountered:\n"
-                    "\t\trss_ringoccs.diffrec.FindOptimalResolution\n\n"
-                    "\trng must contain two numbers: rng=[a,b]\n"
-                    "\tYou provided less than 2 numbers.\n"
-                    "\tSet range=[a,b], where a is the STARTING point\n"
-                    "\tand b is the ENDING point of reconstruction, or\n"
-                    "\tuse one of the following valid strings:\n%s" % (erm)
-                )
-            else:
-                pass
-
-            # Check that the smallest number is positive.
-            if (np.min(rng) < 0.0):
-                raise ValueError(
-                    "\n\tError Encountered:\n"
-                    "\t\trss_ringoccs.diffrec.FindOptimalResolution\n\n"
-                    "\tMinimum requested range must be positive\n"
-                    "\tYour minimum requested range: %f\n" % (np.min(rng))
-                )
-            else:
-                pass
-        elif isinstance(rng, str):
-            rng = rng.replace(" ", "").replace("'", "").replace('"', "")
-            rng = rng.lower()
-            if not (rng in region_dict):
-                erm = ""
-                for key in region_dict:
-                    erm = "%s\t\t'%s'\n" % (erm, key)
-                raise ValueError(
-                    "\n\tError Encountered:\n"
-                    "\t\trss_ringoccs.diffrec.FindOptimalResolution\n\n"
-                    "\tIllegal string used for rng.\n"
-                    "\tYour string: '%s'\n"
-                    "\tAllowed Strings:\n%s" % (rng, erm)
-                )
-        else:
-            erm = ""
-            for key in region_dict:
-                erm = "%s\t\t'%s'\n" % (erm, key)
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.FindOptimalResolution\n\n"
-                "\trng must be a list of floating\n"
-                "\tpoint numbers or a valid string.\n"
-                "\tYour input has type: %s\n"
-                "\tSet range=[a,b], where a is the STARTING point\n"
-                "\tand b is the ENDING point of reconstruction, or\n"
-                "\tuse one of the following valid strings:\n%s"
-                % (type(rng).__name__, erm)
-            )
-
-        if (not isinstance(wlst, list)):
-            raise TypeError(
-                    "\n\tError Encountered:\n"
-                    "\t\trss_ringoccs.diffrec.FindOptimalResolution\n\n"
-                    "\twlst must be a list of strings.\n"
-                    "\tYour input has type: %s\n"
-                    "\tInput should have type: list\n" % (type(sres).__name__)
-            )
-        elif (not all(isinstance(x, str) for x in wlst)):
+        if (not all(isinstance(x, str) for x in wlst)):
             raise TypeError(
                 "\n\tError Encountered:\n"
                 "\t\trss_ringoccs.diffrec.FindOptimalResolution\n\n"
@@ -643,7 +160,7 @@ class FindOptimalResolution(object):
         eres = sres + (nres-1)*dres
         res = sres
         data = ExtractCSVData(geo, cal, dlp, tau=tau, verbose=verbose)
-        rec = DiffractionCorrection(data, res, rng=rng,
+        rec = diffraction_correction(data, res, rng=rng,
                                     wtype="kb35", verbose=False)
         start = int(np.min((data.tau_rho-np.min(rec.rho_km_vals)>=0).nonzero()))
         fin = int(np.max((np.max(rec.rho_km_vals)-data.tau_rho>=0).nonzero()))
@@ -651,7 +168,7 @@ class FindOptimalResolution(object):
         for i in np.arange(nres):
             for j in range(nwins):
                 wtype = wlst[j]
-                recint = DiffractionCorrection(data, res, rng=rng, wtype=wtype)
+                recint = diffraction_correction(data, res, rng=rng, wtype=wtype)
                 p_int = np.abs(recint.power_vals - tau_power)
                 self.linf[i,j] = np.max(p_int)
                 self.l2[i,j] = np.sqrt(np.sum(p_int*p_int)*recint.dx_km)
@@ -664,34 +181,193 @@ class FindOptimalResolution(object):
         self.ideal_res = sres+dres*np.argmin(self.linf, axis=0)
 
 
+class SquareWellFromGEO(object):
+    def __init__(self, geo, lambda_km, res, rho, dx_km_desired=0.25,
+                 occ=False, wtype='kb25', fwd=False, norm=True, bfac=True,
+                 verbose=True, psitype='full', usefres=False):
+
+        # Check all input variables for errors.
+        fname = "diffrec.advanced_tools.SquareWellFromGEO"
+        error_check.check_type(verbose, bool, "verbose", fname)
+        error_check.check_type(norm, bool, "norm", fname)
+        error_check.check_type(bfac, bool, "bfac", fname)
+        error_check.check_type(occ, str, "occ", fname)
+        error_check.check_type(fwd, bool, "fwd", fname)
+        error_check.check_type(geo, str, "geo", fname)
+        error_check.check_type(wtype, str, "wtype", fname)
+        error_check.check_type(psitype, str, "psitype", fname)
+        res = error_check.check_type_and_convert(res, float, "res", fname)
+        lambda_km = error_check.check_type_and_convert(lambda_km, float,
+                                                       "lambda_km", fname)
+        dx_km_desirederror_check.check_type_and_convert(dx_km_desired, float,
+                                                        "dx_km_desired", fname)
+
+        error_check.check_positive(res, "res", fname)
+        error_check.check_positive(dx_km_desired, "dx_km_desired", fname)
+        error_check.check_positive(lambda_km, "lambda_km", fname)
+
+        data = get_geo(geo, verbose=verbose)
+
+        if verbose:
+            print("Retrieving Variables...")
+
+        # Retrieve rho and phi from geo data.
+        self.rho_km_vals = np.array(geo_dat.rho_km_vals)
+        self.phi_rad_vals = np.rad2deg(np.array(geo_dat.phi_ora_deg_vals))
+
+        # Retrieve B and D from geo data.
+        self.D_km_vals = np.array(data.D_km_vals)
+        self.B_rad_vals = np.rad2deg(np.array(data.B_deg_vals))
+
+        # Retrieve drho/dt.
+        self.rho_dot_kms_vals = np.array(data.rho_dot_kms_vals)
+
+        # Run error check on variables from GEO file.
+        error_check.check_is_real(self.D_km_vals, "D_km_vals", fname)
+        error_check.check_is_real(self.B_rad_vals, "B_rad_vals", fname)
+        error_check.check_is_real(self.rho_km_vals, "rho_km_vals", fname)
+        error_check.check_is_real(self.phi_rad_vals, "phi_rad_vals", fname)
+        error_check.check_is_real(self.rho_dot_kms_vals,
+                                  "rho_dot_km_vals", fname)
+
+        error_check.check_positive(self.D_km_vals, "D_km_vals", fname)
+        error_check.check_positive(self.rho_km_vals, "rho_km_vals", fname)
+        error_check.check_two_pi(B_rad_vals, "B_rad_vals", fname, deg=False)
+        error_check.check_two_pi(phi_rad_vals, "phi_rad_vals", fname, deg=False)
+
+        if verbose:
+            print("Computing Variables...")
+
+        if (occ == 'ingress'): 
+            crange = (self.geo_drho < 0.0).nonzero()
+        elif (occ == 'egress'):
+            crange = (self.geo_drho > 0.0).nonzero()
+        else:
+            crange_e = (self.geo_drho > 0.0).nonzero()
+            crange_i = (self.geo_drho < 0.0).nonzero()
+            n_e      = np.size(crange_e)
+            n_i      = np.size(crange_i)
+            if (n_e != 0) and (n_i !=0):
+                raise ValueError(
+                    "rho_dot_kms_vals has positive and negative values.\
+                    This is likely a chord occultation. Set occ='ingress'\
+                    to examine the ingress portion, and occ='egress'\
+                    for the egress portion.")
+            elif (n_e == 0) and (n_i == 0):
+                raise ValueError("rho_dot_kms_vals is either empty or zero.")
+            elif (n_e != 0) and (n_i == 0):
+                crange = crange_e
+                occ    = 'egress'
+            elif (n_e == 0) and (n_i != 0):
+                crange = crange_i
+                occ    = 'ingress'
+            else: raise TypeError("Bad Input: GEO DATA")
+        del n_e,n_i,crange_e,crange_i
+        if (np.size(crange) == 0):
+            if (occ == 'ingress'):
+                mes = "rho_dot_kms_vals is never negative."
+            elif (occ == 'egress'):
+                mes = "rho_dot_kms_vals is never positive."
+            else:
+                raise ValueError("Bad occ input: Set 'egress' or 'ingress'")
+            raise ValueError("Bad occ Input: '%s': %s" % (occ, mes))
+        geo_rho = geo_rho[crange]
+        self.D_km_vals = self.D_km_vals[crange]
+        self.rho_dot_kms_vals = self.rho_dot_kms_vals[crange]
+        self.phi_rad_vals = self.phi_rad_vals[crange]
+        self.B_rad_vals = self.B_rad_vals[crange]
+        self.rho_km_vals = np.arange(np.min(geo_rho),
+                                     np.max(geo_rho), dx_km_desired)
+
+        if verbose:
+            print("Interpolating Data...")
+
+        interp = interpolate.interp1d(geo_rho, self.D_km_vals)
+        self.D_km_vals = interp(self.rho_km_vals)
+        interp = interpolate.interp1d(geo_rho, self.rho_dot_kms_vals)
+        self.rho_dot_kms_vals = interp(self.rho_km_vals)
+        interp = interpolate.interp1d(geo_rho, self.phi_rad_vals)
+        self.phi_rad_vals = interp(self.rho_km_vals)
+        interp = interpolate.interp1d(geo_rho, self.B_rad_vals)
+        self.B_rad_vals = B_deg_interp(self.rho_km_vals)
+        del geo_rho, interp
+
+        r0       = self.rho_km_vals
+        b        = self.B_rad_vals
+        d        = self.D_km_vals
+        phi      = self.phi_rad_vals
+        rng      = [rho-10.0*res,rho+10.0*res]
+        nstar    = np.min((r0-rho>=0).nonzero())
+        r        = r0[nstar]
+        phistar  = phi[nstar]
+        F        = fresnel_scale(lambda_km,d,phi,b)
+
+        if usefres:
+            x = (r-r0)/F
+            psi_vals = (diffraction_correction.HALF_PI)*x*x
+        else:
+            kD          = 2.0 * np.pi * d[nstar] / lambda_km
+            dphi_s  = psi_factor(r0,r,b,phi)
+            phi_s       = phi - dphi_s
+            loop        = 0
+
+            # Perform Newton-Raphson on phi.
+            while (np.max(np.abs(dphi_s)) > 1.e-8):
+                psi_d1  = psi_d1_phi(r,r0,d,b,phi_s,phi0,error_check=False)
+                psi_d2  = psi_d2_phi(r,r0,d,b,phi_s,phi0,error_check=False)
+                dphi_s  = -psi_d1 / psi_d2
+                phi_s  += dphi_s
+                loop   += 1
+                if loop > 20:
+                    break
+                if verbose: print("Psi Iter: %d" % loop,end="\r")
+            if verbose: print("Psi Iter: %d  dphi: %" % (loop,np.max(dphi_s)))
+            psi_vals = kD * psi(r,r0,d,b,phi_s,phi0)
+
+        T_hat_vals     = (1.0-1.0j)*np.exp(1j*psi_vals)/(2.0*F)
+        p_norm_vals    = np.abs(T_hat_vals)*np.abs(T_hat_vals)
+        phase_rad_vals = -np.arctan2(np.imag(T_hat_vals),np.real(T_hat_vals))
+
+        lambda_vals         = np.zeros(np.size(self.rho_km_vals))+lambda_km
+        self.p_norm_vals    = p_norm_vals
+        self.phase_rad_vals = phase_rad_vals
+        self.f_sky_hz_vals = diffraction_correction.SPEED_OF_LIGHT_KM/lambda_vals
+        self.nstar          = nstar
+        self.history        = "Delta Impulse DIffraction Model"
+
+        recdata = diffraction_correction(self, res, rng=rng, wtype=wtype,
+                                         fwd=fwd, norm=norm, verbose=verbose,
+                                         bfac=bfac, psitype=psitype)
+
+        self = recdata
+        self.rho_star = rho
+
+
 class DeltaImpulseDiffraction(object):
     def __init__(self, geo, lambda_km, res, rho, dx_km_desired=0.25,
                  occ=False, wtype='kb25', fwd=False, norm=True, bfac=True,
                  verbose=True, psitype='full', usefres=False):
 
-        if (not isinstance(res, float)) or (not isinstance(res, int)):
-            try:
-                res = float(res)
-            except TypeError:
-                raise TypeError("res must be a positive floating point number")
-        if (res <= 0.0):
-            raise ValueError("res must be a positive floating point number")
-        if not isinstance(wtype, str):
-            raise TypeError("wtype must be a string. Ex: 'coss'")
-        if not isinstance(fwd, bool):
-            raise TypeError("fwd must be Boolean: True/False")
-        if not isinstance(norm, bool):
-            raise TypeError("norm must be Boolean: True/False")
-        if not isinstance(bfac, bool):
-            raise TypeError("bfac must be Boolean: True/False")
-        if not isinstance(verbose, bool):
-            raise TypeError("verbose must be Boolean: True/False")
-        if not isinstance(psitype, str):
-            raise TypeError("psitype must be a string. Ex: 'full'")
-        if not isinstance(verbose, bool):
-            raise TypeError("usefres must be Boolean: True/False")
+        # Check all input variables for errors.
+        fname = "diffrec.advanced_tools.SquareWellFromGEO"
+        check_type(verbose, bool, "verbose", fname)
+        check_type(norm, bool, "norm", fname)
+        check_type(bfac, bool, "bfac", fname)
+        check_type(occ, str, "occ", fname)
+        check_type(fwd, bool, "fwd", fname)
+        check_type(geo, str, "geo", fname)
+        check_type(wtype, str, "wtype", fname)
+        check_type(psitype, str, "psitype", fname)
+        check_type_and_convert(lambda_km, float, "lambda_km", fname)
+        check_type_and_convert(res, float, "res", fname)
+        check_type_and_convert(dx_km_desired, float, "dx_km_desired", fname)
 
-        data = get_geo(geo,verbose=verbose)
+        check_positive(res, "res", fname)
+        check_positive(dx_km_desired, "dx_km_desired", fname)
+        check_positive(lambda_km, "lambda_km", fname)
+
+        data = get_geo(geo, verbose=verbose)
+
         self.__retrieve_variables(data,verbose)
         self.__compute_variables(dx_km_desired,occ,verbose)
         self.__interpolate_variables(verbose)
@@ -844,3 +520,4 @@ class DeltaImpulseDiffraction(object):
         self.B_rad_vals       = np.deg2rad(B_deg_vals)
         del geo_rho,geo_drho,geo_D,geo_phi,geo_B,D_km_interp,rho_dot_interp
         del phi_deg_vals,phi_deg_interp,B_deg_interp,B_deg_vals
+      

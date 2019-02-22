@@ -5,15 +5,13 @@
 #include "../../include/ndarraytypes.h"
 #include "../../include/ufuncobject.h"
 
-static PyMethodDef _special_functions_methods[] = {{NULL, NULL, 0, NULL}};
 double SQRT_PI_BY_8 = 0.626657068657750125603941;
-
+static PyMethodDef _special_functions_methods[] = {{NULL, NULL, 0, NULL}};
 /*-----------------------------DEFINE C FUNCTIONS-----------------------------*
  * These are functions written in pure C without the use of the Numpy-C API.  *
  * The are used to define various special functions. They will be wrapped in  *
  * a form that is useable with the Python interpreter later on.               *
  *----------------------------------------------------------------------------*/
-
 double Fresnel_Sine_Func(double x)
 {
     /* Variables for S(x) and powers of x, respectively. */
@@ -221,10 +219,9 @@ static void complex_sqwellsol(char **args, npy_intp *dimensions,
 
     for (i = 0; i < n; i++) {
         /*BEGIN main ufunc computation*/
-        *((double complex*)out) = Square_Well_Diffraction_Solution(*(double *)x,
-                                                                   *(double *)a,
-                                                                   *(double *)b,
-                                                                   *(double *)F);
+        *((double complex*)out) = Square_Well_Diffraction_Solution(
+            *(double *)x, *(double *)a, *(double *)b, *(double *)F
+        );
         /*END main ufunc computation*/
 
         x += in_step;

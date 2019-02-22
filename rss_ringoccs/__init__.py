@@ -57,7 +57,7 @@
         ..  [NICH14] Philip D. Nicholson, Richard G. French, Colleen A.
             McGhee-French, Matthew M. Hedman, Essam A. Marouf, Joshua
             E. Colwell, Katherine Lonergan, Talia Sepersky.
-            "Noncircular features in Saturn’s rings II: The C ring".
+            "Noncircular features in Saturn's rings II: The C ring".
             Icarus, Volume 241, 2014, Pages 373-396, ISSN 0019-1035.
             https://doi.org/10.1016/j.icarus.2014.06.024 or
             http://www.sciencedirect.com/science/article/pii/S0019103514003443

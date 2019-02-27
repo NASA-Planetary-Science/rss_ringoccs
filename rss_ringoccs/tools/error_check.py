@@ -60,8 +60,8 @@ def check_two_pi(input_var, input_var_name, f_name, deg=True):
     if (np.max(np.abs(input_var)) > max_value):
         raise TypeError(
             """
-                \n\r\tError Encountered: rss_ringoccs\n
-                \r\t\t%s\n\n
+                \n\r\tError Encountered: rss_ringoccs
+                \r\t\t%s\n
                 \r\t%s must be be less than 2 pi (Radians).
             """ % (f_name, input_var_name)
         )

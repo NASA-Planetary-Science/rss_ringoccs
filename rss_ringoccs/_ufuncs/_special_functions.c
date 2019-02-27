@@ -5,7 +5,53 @@
 #include "../../include/ndarraytypes.h"
 #include "../../include/ufuncobject.h"
 
-double SQRT_PI_BY_8 = 0.626657068657750125603941;
+/* Define Coefficients for the Fresnel Sine Taylor Expansion. */
+#define FRESNEL_SINE_TAYLOR_00 0.3333333333333333
+#define FRESNEL_SINE_TAYLOR_01 -0.023809523809523808
+#define FRESNEL_SINE_TAYLOR_02 0.0007575757575757576
+#define FRESNEL_SINE_TAYLOR_03 -1.3227513227513228e-05
+#define FRESNEL_SINE_TAYLOR_04 1.4503852223150468e-07
+#define FRESNEL_SINE_TAYLOR_05 -1.0892221037148573e-09
+#define FRESNEL_SINE_TAYLOR_06 5.9477940136376354e-12
+#define FRESNEL_SINE_TAYLOR_07 -2.466827010264457e-14
+#define FRESNEL_SINE_TAYLOR_08 8.032735012415773e-17
+#define FRESNEL_SINE_TAYLOR_09 -2.107855191442136e-19
+#define FRESNEL_SINE_TAYLOR_10 4.5518467589282e-22
+#define FRESNEL_SINE_TAYLOR_11 -8.230149299214221e-25
+#define FRESNEL_SINE_TAYLOR_12 1.2641078988989164e-27
+#define FRESNEL_SINE_TAYLOR_13 -1.669761793417372e-30
+
+/* Define Coefficients for the Fresnel Sine Asymptotic Expansion. */
+#define FRESNEL_SINE_ASYM_00 -0.5
+#define FRESNEL_SINE_ASYM_01 -0.25
+#define FRESNEL_SINE_ASYM_02 0.375
+#define FRESNEL_SINE_ASYM_03 0.9375
+
+/* Define Coefficients for the Fresnel Cosine Taylor Expansion. */
+#define FRESNEL_COSINE_TAYLOR_00 1.0
+#define FRESNEL_COSINE_TAYLOR_01 -0.1
+#define FRESNEL_COSINE_TAYLOR_02 0.004629629629629629
+#define FRESNEL_COSINE_TAYLOR_03 -0.00010683760683760684
+#define FRESNEL_COSINE_TAYLOR_04 1.4589169000933706e-06
+#define FRESNEL_COSINE_TAYLOR_05 -1.3122532963802806e-08
+#define FRESNEL_COSINE_TAYLOR_06 8.35070279514724e-11
+#define FRESNEL_COSINE_TAYLOR_07 -3.9554295164585257e-13
+#define FRESNEL_COSINE_TAYLOR_08 1.4483264643598138e-15
+#define FRESNEL_COSINE_TAYLOR_09 -4.221407288807088e-18
+#define FRESNEL_COSINE_TAYLOR_10 1.0025164934907719e-20f
+#define FRESNEL_COSINE_TAYLOR_11 -1.977064753877905e-23
+#define FRESNEL_COSINE_TAYLOR_12 3.289260349175752e-26
+#define FRESNEL_COSINE_TAYLOR_13 -4.6784835155184856e-29
+
+/* Define Coefficients for the Fresnel Coine Asymptotic Expansion. */
+#define FRESNEL_COSINE_ASYM_00 0.5
+#define FRESNEL_COSINE_ASYM_01 -0.25
+#define FRESNEL_COSINE_ASYM_02 -0.375
+#define FRESNEL_COSINE_ASYM_03 0.9375
+
+/* Define Miscellaneous Constants. */
+#define SQRT_PI_BY_8 0.626657068657750125603941
+
 static PyMethodDef _special_functions_methods[] = {{NULL, NULL, 0, NULL}};
 /*-----------------------------DEFINE C FUNCTIONS-----------------------------*
  * These are functions written in pure C without the use of the Numpy-C API.  *
@@ -15,8 +61,8 @@ static PyMethodDef _special_functions_methods[] = {{NULL, NULL, 0, NULL}};
 double Fresnel_Sine_Func(double x)
 {
     /* Variables for S(x) and powers of x, respectively. */
-    double sx, arg;
-    arg = x*x;
+    double sx;
+    double arg = x*x;
 
     /* For small x use the Taylor expansion to compute C(x). For larger x,  *
      * use the asymptotic expansion. For values near 3.076, accuracy of 5   *
@@ -24,48 +70,51 @@ double Fresnel_Sine_Func(double x)
     if (arg < 9.0){
         double arg_sq = arg*arg;
         if (arg < 1.0){
-            sx = arg_sq * -1.3227513227513228e-05 + 0.0007575757575757576;
-            sx = sx*arg_sq - 0.023809523809523808;
-            sx = sx*arg_sq + 0.3333333333333333;
+            sx = arg_sq * FRESNEL_SINE_TAYLOR_03 + FRESNEL_SINE_TAYLOR_02;
+            sx = arg_sq * sx + FRESNEL_SINE_TAYLOR_01;
+            sx = arg_sq * sx + FRESNEL_SINE_TAYLOR_00;
             sx *= arg;
             return sx*x;
         }
         else if (arg < 4.0){
-            sx = arg_sq * -2.466827010264457e-14 + 5.9477940136376354e-12;
-            sx = arg_sq * sx - 1.0892221037148573e-09;
-            sx = arg_sq * sx + 1.4503852223150468e-07;
-            sx = arg_sq * sx - 1.3227513227513228e-05;
-            sx = arg_sq * sx + 0.0007575757575757576;
-            sx = arg_sq * sx - 0.023809523809523808;
-            sx = arg_sq * sx + 0.3333333333333333;
+            sx = arg_sq * FRESNEL_SINE_TAYLOR_07 + FRESNEL_SINE_TAYLOR_06;
+            sx = arg_sq * sx + FRESNEL_SINE_TAYLOR_05;
+            sx = arg_sq * sx + FRESNEL_SINE_TAYLOR_04;
+            sx = arg_sq * sx + FRESNEL_SINE_TAYLOR_03;
+            sx = arg_sq * sx + FRESNEL_SINE_TAYLOR_02;
+            sx = arg_sq * sx + FRESNEL_SINE_TAYLOR_01;
+            sx = arg_sq * sx + FRESNEL_SINE_TAYLOR_00;
             sx *= arg;
             return sx*x;
         }
         else{
-            sx = arg_sq * -1.669761793417372e-30 + 1.2641078988989164e-27;
-            sx = arg_sq * sx - 8.230149299214221e-25;
-            sx = arg_sq * sx + 4.5518467589282e-22;
-            sx = arg_sq * sx - 2.107855191442136e-19;
-            sx = arg_sq * sx + 8.032735012415773e-17;
-            sx = arg_sq * sx - 2.466827010264457e-14;
-            sx = arg_sq * sx + 5.9477940136376354e-12;
-            sx = arg_sq * sx - 1.0892221037148573e-09;
-            sx = arg_sq * sx + 1.4503852223150468e-07;
-            sx = arg_sq * sx - 1.3227513227513228e-05;
-            sx = arg_sq * sx + 0.0007575757575757576;
-            sx = arg_sq * sx - 0.023809523809523808;
-            sx = arg_sq * sx + 0.3333333333333333;
+            sx = arg_sq * FRESNEL_SINE_TAYLOR_13 + FRESNEL_SINE_TAYLOR_12;
+            sx = arg_sq * sx + FRESNEL_SINE_TAYLOR_11;
+            sx = arg_sq * sx + FRESNEL_SINE_TAYLOR_10;
+            sx = arg_sq * sx + FRESNEL_SINE_TAYLOR_09;
+            sx = arg_sq * sx + FRESNEL_SINE_TAYLOR_08;
+            sx = arg_sq * sx + FRESNEL_SINE_TAYLOR_07;
+            sx = arg_sq * sx + FRESNEL_SINE_TAYLOR_06;
+            sx = arg_sq * sx + FRESNEL_SINE_TAYLOR_05;
+            sx = arg_sq * sx + FRESNEL_SINE_TAYLOR_04;
+            sx = arg_sq * sx + FRESNEL_SINE_TAYLOR_03;
+            sx = arg_sq * sx + FRESNEL_SINE_TAYLOR_02;
+            sx = arg_sq * sx + FRESNEL_SINE_TAYLOR_01;
+            sx = arg_sq * sx + FRESNEL_SINE_TAYLOR_00;
             sx *= arg;
             return sx*x;
         }
     }
-    else {
+    else if (arg < 1.0e150) {
         double sinarg, cosarg;
         cosarg = cos(arg);
         sinarg = sin(arg);
         arg = 1.0/arg;
-        cosarg *= arg*(0.375*arg*arg - 0.5);
-        sinarg *= arg*arg*(0.9375*arg*arg - 0.25);
+        cosarg *= arg;
+        arg *= arg;
+        sinarg *= arg;
+        cosarg *= FRESNEL_SINE_ASYM_02*arg + FRESNEL_SINE_ASYM_00;
+        sinarg *= FRESNEL_SINE_ASYM_03*arg + FRESNEL_SINE_ASYM_01;
 
         sx = cosarg + sinarg;
         sx *= x;
@@ -75,6 +124,9 @@ double Fresnel_Sine_Func(double x)
         else {
             return sx-SQRT_PI_BY_8;
         }
+    }
+    else {
+        return ((x > 0) - (x < 0))*SQRT_PI_BY_8;
     }
 }
 
@@ -90,35 +142,35 @@ double Fresnel_Cosine_Func(double x)
     if (arg < 9.0){
         double arg_sq = arg*arg;
         if (arg < 1.0){
-            sx = arg_sq * -0.00010683760683760684 + 0.004629629629629629;
-            sx = sx*arg_sq - 0.1;
-            sx = sx*arg_sq + 1.0;
+            sx = arg_sq * FRESNEL_COSINE_TAYLOR_03 + FRESNEL_COSINE_TAYLOR_02;
+            sx = arg_sq * sx + FRESNEL_COSINE_TAYLOR_01;
+            sx = arg_sq * sx + FRESNEL_COSINE_TAYLOR_00;
             return sx*x;
         }
         else if (arg < 4.0){
-            sx = arg_sq * -3.9554295164585257e-13 + 8.35070279514724e-11;
-            sx = arg_sq * sx - 1.3122532963802806e-08;
-            sx = arg_sq * sx + 1.4589169000933706e-06;
-            sx = arg_sq * sx - 0.00010683760683760684;
-            sx = arg_sq * sx + 0.004629629629629629;
-            sx = arg_sq * sx - 0.1;
-            sx = arg_sq * sx + 1.0;
+            sx = arg_sq * FRESNEL_COSINE_TAYLOR_07 + FRESNEL_COSINE_TAYLOR_06;
+            sx = arg_sq * sx + FRESNEL_COSINE_TAYLOR_05;
+            sx = arg_sq * sx + FRESNEL_COSINE_TAYLOR_04;
+            sx = arg_sq * sx + FRESNEL_COSINE_TAYLOR_03;
+            sx = arg_sq * sx + FRESNEL_COSINE_TAYLOR_02;
+            sx = arg_sq * sx + FRESNEL_COSINE_TAYLOR_01;
+            sx = arg_sq * sx + FRESNEL_COSINE_TAYLOR_00;
             return sx*x;
         }
         else{
-            sx = arg_sq * -4.6784835155184856e-29 + 3.289260349175752e-26;
-            sx = arg_sq * sx - 1.977064753877905e-23;
-            sx = arg_sq * sx + 1.0025164934907719e-20;
-            sx = arg_sq * sx - 4.221407288807088e-18;
-            sx = arg_sq * sx + 1.4483264643598138e-15;
-            sx = arg_sq * sx - 3.9554295164585257e-13;
-            sx = arg_sq * sx + 8.35070279514724e-11;
-            sx = arg_sq * sx - 1.3122532963802806e-08;
-            sx = arg_sq * sx + 1.4589169000933706e-06;
-            sx = arg_sq * sx - 0.00010683760683760684;
-            sx = arg_sq * sx + 0.004629629629629629;
-            sx = arg_sq * sx - 0.1;
-            sx = arg_sq * sx + 1.0;
+            sx = arg_sq * FRESNEL_COSINE_TAYLOR_13 + FRESNEL_COSINE_TAYLOR_12;
+            sx = arg_sq * sx + FRESNEL_COSINE_TAYLOR_11;
+            sx = arg_sq * sx + FRESNEL_COSINE_TAYLOR_10;
+            sx = arg_sq * sx + FRESNEL_COSINE_TAYLOR_09;
+            sx = arg_sq * sx + FRESNEL_COSINE_TAYLOR_08;
+            sx = arg_sq * sx + FRESNEL_COSINE_TAYLOR_07;
+            sx = arg_sq * sx + FRESNEL_COSINE_TAYLOR_06;
+            sx = arg_sq * sx + FRESNEL_COSINE_TAYLOR_05;
+            sx = arg_sq * sx + FRESNEL_COSINE_TAYLOR_04;
+            sx = arg_sq * sx + FRESNEL_COSINE_TAYLOR_03;
+            sx = arg_sq * sx + FRESNEL_COSINE_TAYLOR_02;
+            sx = arg_sq * sx + FRESNEL_COSINE_TAYLOR_01;
+            sx = arg_sq * sx + FRESNEL_COSINE_TAYLOR_00;
             return sx*x;
         }
     }
@@ -127,8 +179,11 @@ double Fresnel_Cosine_Func(double x)
         cosarg = cos(arg);
         sinarg = sin(arg);
         arg = 1.0/arg;
-        cosarg *= arg*arg*(0.9375*arg*arg - 0.25);
-        sinarg *= arg*(-0.375*arg*arg + 0.5);
+        sinarg *= arg;
+        arg *= arg;
+        cosarg *= arg;
+        cosarg *= FRESNEL_COSINE_ASYM_03*arg + FRESNEL_COSINE_ASYM_01;
+        sinarg *= FRESNEL_COSINE_ASYM_02*arg + FRESNEL_COSINE_ASYM_00;
 
         sx = cosarg + sinarg;
         sx *= x;
@@ -144,17 +199,13 @@ double Fresnel_Cosine_Func(double x)
 double complex Square_Well_Diffraction_Solution(double x, double a,
                                                 double b, double F)
 {
-    double arg1, arg2, real_part, imag_part;
-    double complex result;
-    arg1 = (b-x)/F;
-    arg2 = (a-x)/F;
+    double arg1 = (b-x)/F;
+    double arg2 = (a-x)/F;
+    double real_part = Fresnel_Cosine_Func(arg1) - Fresnel_Cosine_Func(arg2);
+    double imag_part = Fresnel_Sine_Func(arg1) - Fresnel_Sine_Func(arg2);
+    double complex result = real_part + imag_part*_Complex_I;
 
-    real_part = Fresnel_Cosine_Func(arg1) - Fresnel_Cosine_Func(arg2);
-    imag_part = Fresnel_Sine_Func(arg1) - Fresnel_Sine_Func(arg2);
-
-    result = real_part + imag_part*_Complex_I;
-    result = 1.0 - (0.5 - 0.5*_Complex_I)*result;
-    return result;
+    return 1.0 - (0.5 - 0.5*_Complex_I)*result;
 }
 
 /*---------------------------DEFINE PYTHON FUNCTIONS--------------------------*

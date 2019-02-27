@@ -182,9 +182,9 @@ class FindOptimalResolution(object):
 
 
 class SquareWellFromGEO(object):
-    def __init__(self, geo, lambda_km, res, rho, dx_km_desired=0.25,
-                 occ=False, wtype='kb25', fwd=False, norm=True, bfac=True,
-                 verbose=True, psitype='full', usefres=False):
+    def __init__(self, geo, lambda_km, res, rho, width, dx_km_desired=0.25,
+                 occ="other", wtype='kb25', fwd=False, norm=True, bfac=True,
+                 verbose=True, psitype='full'):
 
         # Check all input variables for errors.
         fname = "diffrec.advanced_tools.SquareWellFromGEO"
@@ -197,27 +197,31 @@ class SquareWellFromGEO(object):
         error_check.check_type(wtype, str, "wtype", fname)
         error_check.check_type(psitype, str, "psitype", fname)
         res = error_check.check_type_and_convert(res, float, "res", fname)
+        width = error_check.check_type_and_convert(width, float, "width", fname)
         lambda_km = error_check.check_type_and_convert(lambda_km, float,
                                                        "lambda_km", fname)
-        dx_km_desirederror_check.check_type_and_convert(dx_km_desired, float,
-                                                        "dx_km_desired", fname)
+        dx_km_desired = error_check.check_type_and_convert(dx_km_desired, float,
+                                                           "dx_km_desired", fname)
 
         error_check.check_positive(res, "res", fname)
+        error_check.check_positive(width, "width", fname)
         error_check.check_positive(dx_km_desired, "dx_km_desired", fname)
         error_check.check_positive(lambda_km, "lambda_km", fname)
 
-        data = get_geo(geo, verbose=verbose)
+        data = CSV_tools.get_geo(geo, verbose=verbose)
+        occ = occ.replace(" ", "").replace("'", "").replace('"', "")
+        occ = occ.lower()
 
         if verbose:
             print("Retrieving Variables...")
 
         # Retrieve rho and phi from geo data.
-        self.rho_km_vals = np.array(geo_dat.rho_km_vals)
-        self.phi_rad_vals = np.rad2deg(np.array(geo_dat.phi_ora_deg_vals))
+        self.rho_km_vals = np.array(data.rho_km_vals)
+        self.phi_rad_vals = np.deg2rad(np.array(data.phi_ora_deg_vals))
 
         # Retrieve B and D from geo data.
         self.D_km_vals = np.array(data.D_km_vals)
-        self.B_rad_vals = np.rad2deg(np.array(data.B_deg_vals))
+        self.B_rad_vals = np.deg2rad(np.array(data.B_deg_vals))
 
         # Retrieve drho/dt.
         self.rho_dot_kms_vals = np.array(data.rho_dot_kms_vals)
@@ -232,46 +236,88 @@ class SquareWellFromGEO(object):
 
         error_check.check_positive(self.D_km_vals, "D_km_vals", fname)
         error_check.check_positive(self.rho_km_vals, "rho_km_vals", fname)
-        error_check.check_two_pi(B_rad_vals, "B_rad_vals", fname, deg=False)
-        error_check.check_two_pi(phi_rad_vals, "phi_rad_vals", fname, deg=False)
+        error_check.check_two_pi(self.B_rad_vals, "B_rad_vals",
+                                 fname, deg=False)
+        error_check.check_two_pi(self.phi_rad_vals, "phi_rad_vals",
+                                 fname, deg=False)
 
         if verbose:
             print("Computing Variables...")
 
-        if (occ == 'ingress'): 
-            crange = (self.geo_drho < 0.0).nonzero()
+        if (occ == 'ingress'):
+            crange = (self.rho_dot_kms_vals < 0.0).nonzero()
         elif (occ == 'egress'):
-            crange = (self.geo_drho > 0.0).nonzero()
+            crange = (self.rho_dot_kms_vals > 0.0).nonzero()
         else:
-            crange_e = (self.geo_drho > 0.0).nonzero()
-            crange_i = (self.geo_drho < 0.0).nonzero()
+            crange_e = (self.rho_dot_kms_vals > 0.0).nonzero()
+            crange_i = (self.rho_dot_kms_vals < 0.0).nonzero()
             n_e      = np.size(crange_e)
             n_i      = np.size(crange_i)
             if (n_e != 0) and (n_i !=0):
                 raise ValueError(
-                    "rho_dot_kms_vals has positive and negative values.\
-                    This is likely a chord occultation. Set occ='ingress'\
-                    to examine the ingress portion, and occ='egress'\
-                    for the egress portion.")
+                    """
+                        \r\tError Encountered: rss_ringoccs
+                        \r\t\t%s\n
+                        \r\trho_dot_kms_vals has positive and negative values.
+                        \r\tThis is likely a chord occultation.
+                        \r\tSet occ='ingress' or occ='egress'.
+                    """ % fname
+                )
             elif (n_e == 0) and (n_i == 0):
-                raise ValueError("rho_dot_kms_vals is either empty or zero.")
+                raise ValueError(
+                    """
+                        \r\tError Encountered: rss_ringoccs
+                        \r\t\t%s\n
+                        \r\trho_dot_kms_vals is either zero or empty.
+                    """ % fname
+                )
             elif (n_e != 0) and (n_i == 0):
                 crange = crange_e
                 occ    = 'egress'
             elif (n_e == 0) and (n_i != 0):
                 crange = crange_i
                 occ    = 'ingress'
-            else: raise TypeError("Bad Input: GEO DATA")
-        del n_e,n_i,crange_e,crange_i
+            else:
+                raise TypeError(
+                    """
+                        \r\tError Encountered: rss_ringoccs
+                        \r\t\t%s\n
+                        \r\tCould not determine occultation type.
+                        \r\tCheck your input GEO file.
+                    """ % fname
+                )
+        del n_e, n_i, crange_e, crange_i
+
         if (np.size(crange) == 0):
             if (occ == 'ingress'):
-                mes = "rho_dot_kms_vals is never negative."
+                raise TypeError(
+                    """
+                        \r\tError Encountered: rss_ringoccs
+                        \r\t\t%s\n
+                        \r\trho_dot_kms_vals is never negative.
+                    """ % fname
+                )
             elif (occ == 'egress'):
-                mes = "rho_dot_kms_vals is never positive."
+                raise TypeError(
+                    """
+                        \r\tError Encountered: rss_ringoccs
+                        \r\t\t%s\n
+                        \r\trho_dot_kms_vals is never negative.
+                    """ % fname
+                )
             else:
-                raise ValueError("Bad occ input: Set 'egress' or 'ingress'")
-            raise ValueError("Bad occ Input: '%s': %s" % (occ, mes))
-        geo_rho = geo_rho[crange]
+                raise TypeError(
+                    """
+                        \r\tError Encountered: rss_ringoccs
+                        \r\t\t%s\n
+                        \r\tCould not determine occultation type.
+                        \r\tCheck your input GEO file.
+                    """ % fname
+                )
+        else:
+            pass
+
+        geo_rho = self.rho_km_vals[crange]
         self.D_km_vals = self.D_km_vals[crange]
         self.rho_dot_kms_vals = self.rho_dot_kms_vals[crange]
         self.phi_rad_vals = self.phi_rad_vals[crange]
@@ -289,8 +335,21 @@ class SquareWellFromGEO(object):
         interp = interpolate.interp1d(geo_rho, self.phi_rad_vals)
         self.phi_rad_vals = interp(self.rho_km_vals)
         interp = interpolate.interp1d(geo_rho, self.B_rad_vals)
-        self.B_rad_vals = B_deg_interp(self.rho_km_vals)
+        self.B_rad_vals = interp(self.rho_km_vals)
         del geo_rho, interp
+
+ 'history'
+ 'p_norm_vals'
+ 'phase_rad_vals'
+ 'phi_rl_rad_vals'
+ 'power_vals'
+ 'raw_tau_threshold_vals'
+ 'rev_info'
+ 'rho_corr_pole_km_vals'
+ 'rho_corr_timing_km_vals'
+ 't_oet_spm_vals'
+ 't_ret_spm_vals'
+ 't_set_spm_vals'
 
         r0       = self.rho_km_vals
         b        = self.B_rad_vals
@@ -300,44 +359,23 @@ class SquareWellFromGEO(object):
         nstar    = np.min((r0-rho>=0).nonzero())
         r        = r0[nstar]
         phistar  = phi[nstar]
-        F        = fresnel_scale(lambda_km,d,phi,b)
+        F = special_functions.fresnel_scale(lambda_km, self.D_km_vals,
+                                            self.phi_rad_vals, self.B_rad_vals)
 
-        if usefres:
-            x = (r-r0)/F
-            psi_vals = (diffraction_correction.HALF_PI)*x*x
-        else:
-            kD          = 2.0 * np.pi * d[nstar] / lambda_km
-            dphi_s  = psi_factor(r0,r,b,phi)
-            phi_s       = phi - dphi_s
-            loop        = 0
-
-            # Perform Newton-Raphson on phi.
-            while (np.max(np.abs(dphi_s)) > 1.e-8):
-                psi_d1  = psi_d1_phi(r,r0,d,b,phi_s,phi0,error_check=False)
-                psi_d2  = psi_d2_phi(r,r0,d,b,phi_s,phi0,error_check=False)
-                dphi_s  = -psi_d1 / psi_d2
-                phi_s  += dphi_s
-                loop   += 1
-                if loop > 20:
-                    break
-                if verbose: print("Psi Iter: %d" % loop,end="\r")
-            if verbose: print("Psi Iter: %d  dphi: %" % (loop,np.max(dphi_s)))
-            psi_vals = kD * psi(r,r0,d,b,phi_s,phi0)
-
-        T_hat_vals     = (1.0-1.0j)*np.exp(1j*psi_vals)/(2.0*F)
-        p_norm_vals    = np.abs(T_hat_vals)*np.abs(T_hat_vals)
+        T_hat_vals = (1.0-1.0j)*np.exp(1j*psi_vals)/(2.0*F)
+        p_norm_vals = np.abs(T_hat_vals)*np.abs(T_hat_vals)
         phase_rad_vals = -np.arctan2(np.imag(T_hat_vals),np.real(T_hat_vals))
 
-        lambda_vals         = np.zeros(np.size(self.rho_km_vals))+lambda_km
-        self.p_norm_vals    = p_norm_vals
+        lambda_vals = np.zeros(np.size(self.rho_km_vals))+lambda_km
+        self.p_norm_vals = p_norm_vals
         self.phase_rad_vals = phase_rad_vals
         self.f_sky_hz_vals = diffraction_correction.SPEED_OF_LIGHT_KM/lambda_vals
-        self.nstar          = nstar
+        self.nstar = nstar
         self.history        = "Delta Impulse DIffraction Model"
 
-        recdata = diffraction_correction(self, res, rng=rng, wtype=wtype,
-                                         fwd=fwd, norm=norm, verbose=verbose,
-                                         bfac=bfac, psitype=psitype)
+        recdata = DiffractionCorrection(self, res, rng=rng, wtype=wtype,
+                                        fwd=fwd, norm=norm, verbose=verbose,
+                                        bfac=bfac, psitype=psitype)
 
         self = recdata
         self.rho_star = rho
@@ -366,7 +404,7 @@ class DeltaImpulseDiffraction(object):
         check_positive(dx_km_desired, "dx_km_desired", fname)
         check_positive(lambda_km, "lambda_km", fname)
 
-        data = get_geo(geo, verbose=verbose)
+        data = CSV_tools.get_geo(geo, verbose=verbose)
 
         self.__retrieve_variables(data,verbose)
         self.__compute_variables(dx_km_desired,occ,verbose)

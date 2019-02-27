@@ -16,7 +16,6 @@ from scipy.special import lambertw, iv
 from rss_ringoccs.tools.history import write_history_dict
 from rss_ringoccs.tools.write_output_files import write_output_files
 from rss_ringoccs.tools import error_check
-from rss_ringoccs._ufuncs import _diffraction_functions
 
 # Declare constant for the speed of light (km/s)
 SPEED_OF_LIGHT_KM = 299792.4580
@@ -468,6 +467,14 @@ class DiffractionCorrection(object):
                                   "B_rad_vals", "rho_km_vals", fname)
         error_check.check_lengths(self.D_km_vals, self.rho_km_vals,
                                   "D_km_vals", "rho_km_vals", fname)
+        
+        self.rho_dot_kms_vals = self.rho_dot_kms_vals.astype(float)
+        self.phase_rad_vals = -self.phase_rad_vals.astype(float)
+        self.f_sky_hz_vals = self.f_sky_hz_vals.astype(float)
+        self.phi_rad_vals = self.phi_rad_vals.astype(float)
+        self.p_norm_vals = self.p_norm_vals.astype(float)
+        self.B_rad_vals = self.B_rad_vals.astype(float)
+        self.D_km_vals = self.D_km_vals.astype(float)
 
         # Compute sampling distance (km)
         self.dx_km = self.rho_km_vals[1] - self.rho_km_vals[0]
@@ -475,32 +482,32 @@ class DiffractionCorrection(object):
         # Check that the data is well sampled for the requested resolution.
         if (self.dx_km == 0.0):
             raise ValueError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                "\trho_km_vals[1]-rho_km_vals[0]=0.0\n"
-                "\tThe sample spacing is zero. Please\n"
-                "\tcheck the input data for errors."
+                """
+                    \r\tError Encountered: rss_ringoccs
+                    \r\t\t%s\n
+                    \r\trho_km_vals[1]-rho_km_vals[0]=0.0
+                    \r\tThe sample spacing is zero.
+                """ % (fname)
             )
         elif self.res < 1.999999*self.dx_km:
             raise ValueError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                "\tRequested resolution is less than twice the\n"
-                "\tsample spacing of the input data. This\n"
-                "\tviolates the sampling theorem and will result\n"
-                "\tin an inaccurate reconstruction.\n\n"
-                "\tRequested Resolution (km): %f\n"
-                "\tSample Spacing (km): %f\n\n"
-                "\tTO CORRECT THIS:\n"
-                "\t\tChoose a resolution GREATER than %f km\n"
-                "\n\tPLEASE NOTE:\n"
-                "\t\tTo be consistent with PDS results, a scale factor\n"
-                "\t\tof 0.75 is applied to your requested resolution.\n"
-                "\t\tto ignore this scale factor, please set the\n"
-                "\t\tkeyword 'res_factor=1.0' when calling the\n"
-                "\t\tDiffractionCorrection class.\n"
-                "\t\tres_factor is currently set to: %f"%
-                (self.res, self.dx_km, 2.0*self.dx_km/res_factor, res_factor)
+                """
+                    \r\tError Encountered: rss_ringoccs
+                    \r\t\t%s\n
+                    \r\tRequested resolution is less than twice the sample
+                    \r\tspacing. This will produce an inaccurate results.\n
+                    \r\tRequested Resolution (km): %f
+                    \r\tSample Spacing (km): %f\n
+                    \r\tTO CORRECT THIS:
+                    \r\t\tChoose a resolution GREATER than %f km\n
+                    \r\tPLEASE NOTE:\n
+                    \r\t\tTo be consistent with PDS results, a scale factor
+                    \r\t\tof 0.75 is applied to your requested resolution.
+                    \r\t\tto ignore this, set 'res_factor=1.0' when calling
+                    \r\t\tthe DiffractionCorrection class.\n
+                    \r\t\tres_factor is currently set to: %f
+                """ % (fname, self.res, self.dx_km,
+                       2.0*self.dx_km/res_factor, res_factor)
             )
         else:
             pass
@@ -513,17 +520,18 @@ class DiffractionCorrection(object):
 
         if (drho[0] < 0) and (drho[1] > 0):
             raise ValueError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                "\tdrho/dt has positive and negative values.\n"
-                "\tYour input file is probably a chord occultation.\n"
-                "\tDiffraction Correction can only be performed for\n"
-                "\tone event at a time. That is, either an ingress\n"
-                "\tor an egress event.\n\n"
-                "\tTO CORRECT THIS:\n"
-                "\t\tSplit the input into two parts: An egress\n"
-                "\t\tportion and an ingress portion, and then run\n"
-                "\t\tdiffraction correction on the individual pieces.\n"
+                """
+                    \r\tError Encountered: rss_ringoccs
+                    \r\t\t%s\n
+                    \r\tdrho/dt has positive and negative values.
+                    \r\tYour input file is probably a chord occultation.
+                    \r\tDiffraction Correction can only be performed for
+                    \r\tone event at a time. That is, ingress or egress.
+                    \r\tTO CORRECT THIS:
+                    \r\t\tSplit the input into two parts: An egress
+                    \r\t\tportion and an ingress portion, and then run
+                    \r\t\tdiffraction correction on the individual pieces.
+                """ % (fname)
             )
         elif ((drho[0] == 0.0) or (drho[1] == 0.0)):
             raise ValueError(
@@ -569,10 +577,8 @@ class DiffractionCorrection(object):
         # Compute various variables.
         self.lambda_sky_km_vals = SPEED_OF_LIGHT_KM / self.f_sky_hz_vals
         self.mu_vals = np.sin(np.abs(self.B_rad_vals))
-        theta = 1j*self.phase_rad_vals
-        abs_T = np.sqrt(self.p_norm_vals)
-        self.T_hat_vals = abs_T*np.exp(theta)
-        del theta, abs_T
+        self.T_hat_vals = np.exp(1j*self.phase_rad_vals)
+        self.T_hat_vals *= np.sqrt(self.p_norm_vals)
 
         # Compute geometric qunatities and the Fresnel Scale.
         cb = np.cos(self.B_rad_vals)
@@ -733,18 +739,18 @@ class DiffractionCorrection(object):
         # Create input variable and keyword dictionaries for history.
         input_vars = {
             'dlp_inst': DLP.history,
-            'res': res
+            'res':      res
         }
 
         input_kwds = {
-            'rng': rng,
-            'wtype': wtype,
-            'fwd': fwd,
-            'norm': norm,
-            'bfac': bfac,
-            'sigma': sigma,
-            'psitype': psitype,
-            'res_factor': res_factor
+            'rng':          rng,
+            'wtype':        wtype,
+            'fwd':          fwd,
+            'norm':         norm,
+            'bfac':         bfac,
+            'sigma':        sigma,
+            'psitype':      psitype,
+            'res_factor':   res_factor
         }
 
         # Delete unnecessary variables for clarity.
@@ -1015,9 +1021,6 @@ class DiffractionCorrection(object):
         "kbmd25": {"func": __kbmd25,   "normeq": 1.65994218}
         }
 
-    __psi_types = ["fresnel", "fresnel3", "fresnel4",
-                   "fresnel6", "fresnel8", "full"]
-
     def __trim_attributes(self, fwd):
         """
             Purpose:
@@ -1279,6 +1282,23 @@ class DiffractionCorrection(object):
         r = self.rho_km_vals[start]
         r0 = self.rho_km_vals[crange]
 
+        """
+        if (self.psitype == "c"):
+            w_func = fw(np.max(self.w_km_vals), self.dx_km)
+            x_arr = np.zeros(np.size(w_func)) + 0.0
+            T_out = _diffraction_functions.fresnel_transform(
+                T_in,
+                self.rho_km_vals,
+                self.F_km_vals,
+                self.w_km_vals,
+                self.w_km_vals,
+                self.w_km_vals,
+                self.start,
+                self.n_used,
+                self.dx_km,
+                1
+            )
+        """
         if (self.psitype == "fresnel"):
             crange -= 1
             F2 = (self.F_km_vals*self.F_km_vals).tolist()

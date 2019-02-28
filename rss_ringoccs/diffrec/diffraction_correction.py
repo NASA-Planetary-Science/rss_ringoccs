@@ -16,6 +16,7 @@ from scipy.special import lambertw, iv
 from rss_ringoccs.tools.history import write_history_dict
 from rss_ringoccs.tools.write_output_files import write_output_files
 from rss_ringoccs.tools import error_check
+# from rss_ringoccs._ufuncs import _diffraction_functions
 
 # Declare constant for the speed of light (km/s)
 SPEED_OF_LIGHT_KM = 299792.4580
@@ -408,8 +409,6 @@ class DiffractionCorrection(object):
             self.phi_rl_rad_vals = np.array(DLP.phi_rl_rad_vals)
             erm = "raw_tau_threshold_vals"
             self.raw_tau_threshold_vals = np.array(DLP.raw_tau_threshold_vals)
-            erm = "history"
-            self.dathist = DLP.history
         except (TypeError, ValueError, NameError, AttributeError):
             raise TypeError(
                 "\n\tError Encountered:\n"
@@ -417,6 +416,8 @@ class DiffractionCorrection(object):
                 "\t%s could not be converted into a numpy array.\n"
                 "\tCheck your DLP class for errors." % erm
             )
+        
+        self.dathist = DLP.history
 
         # Run various error checks on all variables.
         error_check.check_is_real(self.D_km_vals, "D_km_vals", fname)
@@ -431,7 +432,7 @@ class DiffractionCorrection(object):
 
         error_check.check_positive(self.D_km_vals, "D_km_vals", fname)
         error_check.check_positive(self.rho_km_vals, "rho_km_vals", fname)
-        error_check.check_positive(self.p_norm_vals, "p_norm_vals", fname)
+        error_check.check_positive(self.p_norm_vals+1.0e-308, "p_norm_vals", fname)
         error_check.check_positive(self.f_sky_hz_vals, "f_sky_hz_vals", fname)
 
         error_check.check_two_pi(self.B_rad_vals, "B_rad_vals",
@@ -1281,9 +1282,8 @@ class DiffractionCorrection(object):
         # Compute current radius and RIP distance.
         r = self.rho_km_vals[start]
         r0 = self.rho_km_vals[crange]
-
         """
-        if (self.psitype == "c"):
+        if (self.psitype == "fresnel"):
             w_func = fw(np.max(self.w_km_vals), self.dx_km)
             x_arr = np.zeros(np.size(w_func)) + 0.0
             T_out = _diffraction_functions.fresnel_transform(

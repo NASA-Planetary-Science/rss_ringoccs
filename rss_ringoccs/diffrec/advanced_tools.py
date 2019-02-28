@@ -2,6 +2,7 @@ import numpy as np
 from scipy import interpolate
 from . import diffraction_correction, special_functions, window_functions
 from rss_ringoccs.tools import CSV_tools, error_check
+from rss_ringoccs.tools.history import write_history_dict, date_to_rev, rev_to_occ_info
 
 
 class CompareTau(object):
@@ -184,11 +185,12 @@ class FindOptimalResolution(object):
 class SquareWellFromGEO(object):
     def __init__(self, geo, lambda_km, res, rho, width, dx_km_desired=0.25,
                  occ="other", wtype='kb25', fwd=False, norm=True, bfac=True,
-                 verbose=True, psitype='full'):
+                 verbose=True, psitype='fresnel', use_fresnel=False):
 
         # Check all input variables for errors.
         fname = "diffrec.advanced_tools.SquareWellFromGEO"
         error_check.check_type(verbose, bool, "verbose", fname)
+        error_check.check_type(use_fresnel, bool, "use_fresnel", fname)
         error_check.check_type(norm, bool, "norm", fname)
         error_check.check_type(bfac, bool, "bfac", fname)
         error_check.check_type(occ, str, "occ", fname)
@@ -213,36 +215,70 @@ class SquareWellFromGEO(object):
         occ = occ.lower()
 
         if verbose:
-            print("Retrieving Variables...")
+            print("\tRetrieving Variables...")
 
-        # Retrieve rho and phi from geo data.
-        self.rho_km_vals = np.array(data.rho_km_vals)
-        self.phi_rad_vals = np.deg2rad(np.array(data.phi_ora_deg_vals))
+        try:
+            # Create dummy variable in case an error occurs.
+            errmess = "rho_km_vals"
+            self.rho_km_vals = np.array(data.rho_km_vals)
+            errmess = "phi_ora_rad_vals"
+            self.phi_rad_vals = np.array(data.phi_ora_deg_vals)
+            self.phi_rad_vals = np.deg2rad(self.phi_rad_vals)
+            errmess = "B_rad_vals"
+            self.B_rad_vals = np.array(data.B_deg_vals)
+            self.B_rad_vals = np.deg2rad(self.B_rad_vals)
+            errmess = "t_oet_spm_vals"
+            self.t_oet_spm_vals = np.array(data.t_oet_spm_vals)
+            errmess = "t_ret_spm_vals"
+            self.t_ret_spm_vals = np.array(data.t_ret_spm_vals)
+            errmess = "t_set_spm_vals"
+            self.t_set_spm_vals = np.array(data.t_set_spm_vals)
+            errmess = "phi_rl_rad_vals"
+            self.phi_rl_rad_vals = np.array(data.phi_rl_deg_vals)
+            self.phi_rl_rad_vals = np.deg2rad(self.phi_rl_rad_vals)
+            errmess = "D_km_vals"
+            self.D_km_vals = np.array(data.D_km_vals)
+            errmess = "rho_dot_kms_vals"
+            self.rho_dot_kms_vals = np.array(data.rho_dot_kms_vals)
+        except (ValueError, TypeError, NameError, AttributeError):
+            raise TypeError(
+                """
+                    \r\tError Encountered: rss_ringoccs
+                    \r\t\t%s\n
+                    \r\tCould not convert %s into a numpy array.
+                    \r\tCheck input GEO file.
+                """ % (fname, errmess)
+            )
 
-        # Retrieve B and D from geo data.
-        self.D_km_vals = np.array(data.D_km_vals)
-        self.B_rad_vals = np.deg2rad(np.array(data.B_deg_vals))
-
-        # Retrieve drho/dt.
-        self.rho_dot_kms_vals = np.array(data.rho_dot_kms_vals)
 
         # Run error check on variables from GEO file.
         error_check.check_is_real(self.D_km_vals, "D_km_vals", fname)
         error_check.check_is_real(self.B_rad_vals, "B_rad_vals", fname)
         error_check.check_is_real(self.rho_km_vals, "rho_km_vals", fname)
         error_check.check_is_real(self.phi_rad_vals, "phi_rad_vals", fname)
+        error_check.check_is_real(self.t_oet_spm_vals, "t_oet_spm_vals", fname)
+        error_check.check_is_real(self.t_ret_spm_vals, "t_ret_spm_vals", fname)
+        error_check.check_is_real(self.t_set_spm_vals, "t_set_spm_vals", fname)
+        error_check.check_is_real(self.phi_rl_rad_vals,
+                                  "phi_rl_rad_vals", fname)
         error_check.check_is_real(self.rho_dot_kms_vals,
                                   "rho_dot_km_vals", fname)
 
         error_check.check_positive(self.D_km_vals, "D_km_vals", fname)
         error_check.check_positive(self.rho_km_vals, "rho_km_vals", fname)
+        error_check.check_positive(self.t_oet_spm_vals, "t_oet_spm_vals", fname)
+        error_check.check_positive(self.t_ret_spm_vals, "t_ret_spm_vals", fname)
+        error_check.check_positive(self.t_set_spm_vals, "t_set_spm_vals", fname)
+
         error_check.check_two_pi(self.B_rad_vals, "B_rad_vals",
                                  fname, deg=False)
         error_check.check_two_pi(self.phi_rad_vals, "phi_rad_vals",
                                  fname, deg=False)
+        error_check.check_two_pi(self.phi_rl_rad_vals, "phi_rl_rad_vals",
+                                 fname, deg=False)
 
         if verbose:
-            print("Computing Variables...")
+            print("\tComputing Variables...")
 
         if (occ == 'ingress'):
             crange = (self.rho_dot_kms_vals < 0.0).nonzero()
@@ -326,7 +362,7 @@ class SquareWellFromGEO(object):
                                      np.max(geo_rho), dx_km_desired)
 
         if verbose:
-            print("Interpolating Data...")
+            print("\tInterpolating Data...")
 
         interp = interpolate.interp1d(geo_rho, self.D_km_vals)
         self.D_km_vals = interp(self.rho_km_vals)
@@ -334,228 +370,407 @@ class SquareWellFromGEO(object):
         self.rho_dot_kms_vals = interp(self.rho_km_vals)
         interp = interpolate.interp1d(geo_rho, self.phi_rad_vals)
         self.phi_rad_vals = interp(self.rho_km_vals)
+        interp = interpolate.interp1d(geo_rho, self.phi_rl_rad_vals)
+        self.phi_rl_rad_vals = interp(self.rho_km_vals)
         interp = interpolate.interp1d(geo_rho, self.B_rad_vals)
         self.B_rad_vals = interp(self.rho_km_vals)
+        interp = interpolate.interp1d(geo_rho, self.t_oet_spm_vals)
+        self.t_oet_spm_vals = interp(self.rho_km_vals)
+        interp = interpolate.interp1d(geo_rho, self.t_ret_spm_vals)
+        self.t_ret_spm_vals = interp(self.rho_km_vals)
+        interp = interpolate.interp1d(geo_rho, self.t_set_spm_vals)
+        self.t_set_spm_vals = interp(self.rho_km_vals)
         del geo_rho, interp
 
- 'history'
- 'p_norm_vals'
- 'phase_rad_vals'
- 'phi_rl_rad_vals'
- 'power_vals'
- 'raw_tau_threshold_vals'
- 'rev_info'
- 'rho_corr_pole_km_vals'
- 'rho_corr_timing_km_vals'
- 't_oet_spm_vals'
- 't_ret_spm_vals'
- 't_set_spm_vals'
+        # Add 'fake' variables necessary for DiffractionCorrection class.
+        self.raw_tau_threshold_vals = np.zeros(np.size(self.rho_km_vals))
+        self.rho_corr_pole_km_vals = np.zeros(np.size(self.rho_km_vals))
+        self.rho_corr_timing_km_vals = np.zeros(np.size(self.rho_km_vals))
+        self.f_sky_hz_vals = np.zeros(np.size(self.rho_km_vals))
+        self.f_sky_hz_vals += diffraction_correction.SPEED_OF_LIGHT_KM/lambda_km
 
-        r0       = self.rho_km_vals
-        b        = self.B_rad_vals
-        d        = self.D_km_vals
-        phi      = self.phi_rad_vals
-        rng      = [rho-10.0*res,rho+10.0*res]
-        nstar    = np.min((r0-rho>=0).nonzero())
-        r        = r0[nstar]
-        phistar  = phi[nstar]
-        F = special_functions.fresnel_scale(lambda_km, self.D_km_vals,
-                                            self.phi_rad_vals, self.B_rad_vals)
+        if verbose:
+            print("\tWriting History...")
 
-        T_hat_vals = (1.0-1.0j)*np.exp(1j*psi_vals)/(2.0*F)
-        p_norm_vals = np.abs(T_hat_vals)*np.abs(T_hat_vals)
-        phase_rad_vals = -np.arctan2(np.imag(T_hat_vals),np.real(T_hat_vals))
+        input_vars = {
+            "GEO Data":     geo,
+            "Wavelength":   lambda_km,
+            "Resolution":   res,
+            "Radius":       rho,
+            "Width":        width
+        }
 
-        lambda_vals = np.zeros(np.size(self.rho_km_vals))+lambda_km
-        self.p_norm_vals = p_norm_vals
-        self.phase_rad_vals = phase_rad_vals
-        self.f_sky_hz_vals = diffraction_correction.SPEED_OF_LIGHT_KM/lambda_vals
-        self.nstar = nstar
-        self.history        = "Delta Impulse DIffraction Model"
+        input_kwds = {
+            "Sample Spacing":   dx_km_desired,
+            "Occultation Type": occ,
+            "Window Type":      wtype,
+            "Forward Model":    fwd,
+            "Normalization":    norm,
+            "b-factor":         bfac,
+            "verbose":          verbose,
+            "Psi Type":         psitype,
+            "Fresnel Model":    use_fresnel
+        }
 
-        recdata = DiffractionCorrection(self, res, rng=rng, wtype=wtype,
-                                        fwd=fwd, norm=norm, verbose=verbose,
-                                        bfac=bfac, psitype=psitype)
+        self.history = write_history_dict(input_vars, input_kwds, __file__)
+        var = geo.split("/")[-1]
 
-        self = recdata
-        self.rho_star = rho
+        try:
+            var = var.split("_")
+            band = '"%s"' % var[3][0]
+            year = var[1]
+            doy = var[2]
+            dsn = "DSS-%s" % (var[3][1:])
+            rev_num = date_to_rev(int(year), int(doy))
+            occ_dir = rev_to_occ_info(rev_num)
+            prof_dir = '"%s%"' % var[4]
+        except:
+            var = "Unknown"
+            band = "Unknown"
+            year = "Unknown"
+            doy = "Unknown"
+            dsn = "Unknown"
+            occ_dir = "Unknown"
+            rev_num = "Unknown"
+            prof_dir = "Unknown"
+
+
+        self.rev_info = {
+            "rsr_file": "Unknown",
+            "band": band,
+            "year": year,
+            "doy": doy,
+            "dsn": dsn,
+            "occ_dir": occ_dir,
+            "planetary_occ_flag": occ_dir,
+            "rev_num": rev_num,
+            "prof_dir": prof_dir
+        }
+
+        if use_fresnel:
+            center = np.min((self.rho_km_vals >= rho).nonzero())
+            cb2 = np.cos(self.B_rad_vals[center])
+            cb2 *= cb2
+            sb2 = np.sin(self.B_rad_vals[center])
+            sb2 *= sb2
+            sp2 = np.sin(self.phi_rad_vals[center])
+            sp2 *= sp2
+            F = np.sqrt(0.5*lambda_km*self.D_km_vals[center]*(1-cb2*sp2)/(sb2))
+            T_hat = special_functions.square_well_diffraction(self.rho_km_vals,
+                                                              rho-width/2.0,
+                                                              rho+width/2.0, F)
+            self.p_norm_vals = np.abs(T_hat)
+            self.phase_rad_vals = np.arctan2(np.imag(T_hat), np.real(T_hat))
+        else:
+            self.p_norm_vals = np.zeros(np.size(self.rho_km_vals))+1.0
+            rstart = np.min((self.rho_km_vals>=rho-width/2.0).nonzero())
+            rfinsh = np.max((self.rho_km_vals<=rho+width/2.0).nonzero())
+            self.p_norm_vals[rstart:rfinsh+1] = 0.0
+            self.phase_rad_vals = np.zeros(np.size(self.rho_km_vals))
+            rec = diffraction_correction.DiffractionCorrection(
+                self, res, psitype=psitype, verbose=verbose, wtype=wtype,
+                bfac=bfac
+            )
+
+            self.p_norm_vals = rec.power_vals
+            self.phase_rad_vals = -rec.phase_vals
+
+            crange = np.arange(rec.start, rec.start+rec.n_used, 1)
+            self.B_rad_vals = self.B_rad_vals[crange]
+            self.D_km_vals = self.D_km_vals[crange]
+            self.f_sky_hz_vals = self.f_sky_hz_vals[crange]
+            self.phi_rad_vals = self.phi_rad_vals[crange]
+            self.phi_rl_rad_vals = self.phi_rl_rad_vals[crange]
+            self.raw_tau_threshold_vals = self.raw_tau_threshold_vals[crange]
+            self.rho_corr_pole_km_vals = self.rho_corr_pole_km_vals[crange]
+            self.rho_corr_timing_km_vals = self.rho_corr_timing_km_vals[crange]
+            self.rho_dot_kms_vals = self.rho_dot_kms_vals[crange]
+            self.rho_km_vals = self.rho_km_vals[crange]
+            self.t_oet_spm_vals = self.t_oet_spm_vals[crange]
+            self.t_ret_spm_vals = self.t_ret_spm_vals[crange]
+            self.t_set_spm_vals = self.t_set_spm_vals[crange]
+
+        if verbose:
+            print("\tData Extraction Complete.")
 
 
 class DeltaImpulseDiffraction(object):
-    def __init__(self, geo, lambda_km, res, rho, dx_km_desired=0.25,
-                 occ=False, wtype='kb25', fwd=False, norm=True, bfac=True,
-                 verbose=True, psitype='full', usefres=False):
+    def __init__(self, geo, lambda_km, res, rho, width, dx_km_desired=0.25,
+                 occ="other", wtype='kb25', fwd=False, norm=True, bfac=True,
+                 verbose=True, psitype='fresnel'):
 
         # Check all input variables for errors.
         fname = "diffrec.advanced_tools.SquareWellFromGEO"
-        check_type(verbose, bool, "verbose", fname)
-        check_type(norm, bool, "norm", fname)
-        check_type(bfac, bool, "bfac", fname)
-        check_type(occ, str, "occ", fname)
-        check_type(fwd, bool, "fwd", fname)
-        check_type(geo, str, "geo", fname)
-        check_type(wtype, str, "wtype", fname)
-        check_type(psitype, str, "psitype", fname)
-        check_type_and_convert(lambda_km, float, "lambda_km", fname)
-        check_type_and_convert(res, float, "res", fname)
-        check_type_and_convert(dx_km_desired, float, "dx_km_desired", fname)
+        error_check.check_type(verbose, bool, "verbose", fname)
+        error_check.check_type(norm, bool, "norm", fname)
+        error_check.check_type(bfac, bool, "bfac", fname)
+        error_check.check_type(occ, str, "occ", fname)
+        error_check.check_type(fwd, bool, "fwd", fname)
+        error_check.check_type(geo, str, "geo", fname)
+        error_check.check_type(wtype, str, "wtype", fname)
+        error_check.check_type(psitype, str, "psitype", fname)
+        res = error_check.check_type_and_convert(res, float, "res", fname)
+        width = error_check.check_type_and_convert(width, float, "width", fname)
+        lambda_km = error_check.check_type_and_convert(lambda_km, float,
+                                                       "lambda_km", fname)
+        dx_km_desired = error_check.check_type_and_convert(dx_km_desired, float,
+                                                           "dx_km_desired",
+                                                           fname)
 
-        check_positive(res, "res", fname)
-        check_positive(dx_km_desired, "dx_km_desired", fname)
-        check_positive(lambda_km, "lambda_km", fname)
+        error_check.check_positive(res, "res", fname)
+        error_check.check_positive(width, "width", fname)
+        error_check.check_positive(dx_km_desired, "dx_km_desired", fname)
+        error_check.check_positive(lambda_km, "lambda_km", fname)
 
         data = CSV_tools.get_geo(geo, verbose=verbose)
+        occ = occ.replace(" ", "").replace("'", "").replace('"', "")
+        occ = occ.lower()
 
-        self.__retrieve_variables(data,verbose)
-        self.__compute_variables(dx_km_desired,occ,verbose)
-        self.__interpolate_variables(verbose)
+        if verbose:
+            print("\tRetrieving Variables...")
 
-        r0       = self.rho_km_vals
-        b        = self.B_rad_vals
-        d        = self.D_km_vals
-        phi      = self.phi_rad_vals
-        rng      = [rho-10.0*res,rho+10.0*res]
-        nstar    = np.min((r0-rho>=0).nonzero())
-        r        = r0[nstar]
-        phistar  = phi[nstar]
-        F        = fresnel_scale(lambda_km,d,phi,b)
+        try:
+            # Create dummy variable in case an error occurs.
+            errmess = "rho_km_vals"
+            self.rho_km_vals = np.array(data.rho_km_vals)
+            errmess = "phi_ora_rad_vals"
+            self.phi_rad_vals = np.array(data.phi_ora_deg_vals)
+            self.phi_rad_vals = np.deg2rad(self.phi_rad_vals)
+            errmess = "B_rad_vals"
+            self.B_rad_vals = np.array(data.B_deg_vals)
+            self.B_rad_vals = np.deg2rad(self.B_rad_vals)
+            errmess = "t_oet_spm_vals"
+            self.t_oet_spm_vals = np.array(data.t_oet_spm_vals)
+            errmess = "t_ret_spm_vals"
+            self.t_ret_spm_vals = np.array(data.t_ret_spm_vals)
+            errmess = "t_set_spm_vals"
+            self.t_set_spm_vals = np.array(data.t_set_spm_vals)
+            errmess = "phi_rl_rad_vals"
+            self.phi_rl_rad_vals = np.array(data.phi_rl_deg_vals)
+            self.phi_rl_rad_vals = np.deg2rad(self.phi_rl_rad_vals)
+            errmess = "D_km_vals"
+            self.D_km_vals = np.array(data.D_km_vals)
+            errmess = "rho_dot_kms_vals"
+            self.rho_dot_kms_vals = np.array(data.rho_dot_kms_vals)
+        except (ValueError, TypeError, NameError, AttributeError):
+            raise TypeError(
+                """
+                    \r\tError Encountered: rss_ringoccs
+                    \r\t\t%s\n
+                    \r\tCould not convert %s into a numpy array.
+                    \r\tCheck input GEO file.
+                """ % (fname, errmess)
+            )
 
-        if (usefres == True):
-            psi_vals = (np.pi/2.0)*((r0-r)/F)*((r0-r)/F)
+        # Run error check on variables from GEO file.
+        error_check.check_is_real(self.D_km_vals, "D_km_vals", fname)
+        error_check.check_is_real(self.B_rad_vals, "B_rad_vals", fname)
+        error_check.check_is_real(self.rho_km_vals, "rho_km_vals", fname)
+        error_check.check_is_real(self.phi_rad_vals, "phi_rad_vals", fname)
+        error_check.check_is_real(self.t_oet_spm_vals, "t_oet_spm_vals", fname)
+        error_check.check_is_real(self.t_ret_spm_vals, "t_ret_spm_vals", fname)
+        error_check.check_is_real(self.t_set_spm_vals, "t_set_spm_vals", fname)
+        error_check.check_is_real(self.phi_rl_rad_vals,
+                                  "phi_rl_rad_vals", fname)
+        error_check.check_is_real(self.rho_dot_kms_vals,
+                                  "rho_dot_km_vals", fname)
+
+        error_check.check_positive(self.D_km_vals, "D_km_vals", fname)
+        error_check.check_positive(self.rho_km_vals, "rho_km_vals", fname)
+        error_check.check_positive(self.t_oet_spm_vals, "t_oet_spm_vals", fname)
+        error_check.check_positive(self.t_ret_spm_vals, "t_ret_spm_vals", fname)
+        error_check.check_positive(self.t_set_spm_vals, "t_set_spm_vals", fname)
+
+        error_check.check_two_pi(self.B_rad_vals, "B_rad_vals",
+                                 fname, deg=False)
+        error_check.check_two_pi(self.phi_rad_vals, "phi_rad_vals",
+                                 fname, deg=False)
+        error_check.check_two_pi(self.phi_rl_rad_vals, "phi_rl_rad_vals",
+                                 fname, deg=False)
+
+        if verbose:
+            print("\tComputing Variables...")
+
+        if (occ == 'ingress'):
+            crange = (self.rho_dot_kms_vals < 0.0).nonzero()
+        elif (occ == 'egress'):
+            crange = (self.rho_dot_kms_vals > 0.0).nonzero()
         else:
-            kD          = 2.0 * np.pi * d[nstar] / lambda_km
-            dphi_s  = psi_factor(r0,r,b,phi)
-            phi_s       = phi - dphi_s
-            loop        = 0
-
-            # Perform Newton-Raphson on phi.
-            while (np.max(np.abs(dphi_s)) > 1.e-8):
-                psi_d1  = psi_d1_phi(r,r0,d,b,phi_s,phi0,error_check=False)
-                psi_d2  = psi_d2_phi(r,r0,d,b,phi_s,phi0,error_check=False)
-                dphi_s  = -psi_d1 / psi_d2
-                phi_s  += dphi_s
-                loop   += 1
-                if loop > 20:
-                    break
-                if verbose: print("Psi Iter: %d" % loop,end="\r")
-            if verbose: print("Psi Iter: %d  dphi: %" % (loop,np.max(dphi_s)))
-            psi_vals = kD * psi(r,r0,d,b,phi_s,phi0)
-
-        T_hat_vals     = (1.0-1.0j)*np.exp(1j*psi_vals)/(2.0*F)
-        p_norm_vals    = np.abs(T_hat_vals)*np.abs(T_hat_vals)
-        phase_rad_vals = -np.arctan2(np.imag(T_hat_vals),np.real(T_hat_vals))
-
-        lambda_vals         = np.zeros(np.size(self.rho_km_vals))+lambda_km
-        self.p_norm_vals    = p_norm_vals
-        self.phase_rad_vals = phase_rad_vals
-        self.f_sky_hz_vals  = SPEED_OF_LIGHT_KM/lambda_vals
-        self.nstar          = nstar
-        self.history        = "Delta Impulse DIffraction Model"
-
-        recdata = diffraction_correction(self, res, rng=rng, wtype=wtype,
-                                         fwd=fwd, norm=norm, verbose=verbose,
-                                         bfac=bfac, psitype=psitype)
-
-        self = recdata
-        self.rho_star = rho
-
-    def __retrieve_variables(self,geo_dat,verbose):
-        if verbose: print("Retrieving Variables...")
-        geo_rho          = np.array(geo_dat.rho_km_vals)
-        geo_D            = np.array(geo_dat.D_km_vals)
-        geo_drho         = np.array(geo_dat.rho_dot_kms_vals)
-        geo_phi          = np.array(geo_dat.phi_ora_deg_vals)
-        geo_B            = np.array(geo_dat.B_deg_vals)
-        rhotype,drhotype = check_real(geo_rho),check_real(geo_drho)
-        phitype,Btype    = check_real(geo_phi),check_real(geo_B)
-        Dtype            = check_real(geo_D)
-        if not rhotype:
-            raise TypeError("Bad GEO: rho_km_vals not real valued.")
-        elif (np.min(geo_rho) < 0.0):
-            raise ValueError("Bad GEO: rho_km_vals has negative values.")
-        else: self.geo_rho  = geo_rho
-        if not Dtype:
-            raise TypeError("Bad GEO: D_km_vals not real valued.")
-        elif (np.min(geo_D) < 0.0):
-            raise ValueError("Bad GEO: D_km_vals has negative values.")
-        else: self.geo_D    = geo_D
-        if not drhotype:
-            raise TypeError("Bad GEO: rho_dot_kms_vals not real valued.")
-        else: self.geo_drho = geo_drho
-        if not phitype:
-            raise TypeError("Bad GEO: phi_deg_ora_vals not real valued.")
-        elif (np.max(np.abs(geo_phi)) > 360.0):
-            raise ValueError("Bad GEO: phi_deg_ora_vals > 360")
-        else: self.geo_phi  = geo_phi
-        if not Btype:
-            raise TypeError("Bad GEO: B_deg_vals not real valued.")
-        elif (np.max(np.abs(geo_B)) > 360.0):
-            raise ValueError("Bad GEO: B_de2g_vals > 360")
-        else: self.geo_B    = geo_B
-        del rhotype,Dtype,drhotype,phitype,Btype
-
-    def __compute_variables(self,dx_km_desired,occ,verbose):
-        if verbose: print("Computing Variables...")
-        geo_drho        = self.geo_drho
-
-        if (occ == 'ingress'):  crange = (geo_drho < 0.0).nonzero()
-        elif (occ == 'egress'): crange = (geo_drho > 0.0).nonzero()
-        else:
-            crange_e = (geo_drho > 0.0).nonzero()
-            crange_i = (geo_drho < 0.0).nonzero()
+            crange_e = (self.rho_dot_kms_vals > 0.0).nonzero()
+            crange_i = (self.rho_dot_kms_vals < 0.0).nonzero()
             n_e      = np.size(crange_e)
             n_i      = np.size(crange_i)
             if (n_e != 0) and (n_i !=0):
                 raise ValueError(
-                    "rho_dot_kms_vals has positive and negative values.\
-                    This is likely a chord occultation. Set occ='ingress'\
-                    to examine the ingress portion, and occ='egress'\
-                    for the egress portion.")
+                    """
+                        \r\tError Encountered: rss_ringoccs
+                        \r\t\t%s\n
+                        \r\trho_dot_kms_vals has positive and negative values.
+                        \r\tThis is likely a chord occultation.
+                        \r\tSet occ='ingress' or occ='egress'.
+                    """ % fname
+                )
             elif (n_e == 0) and (n_i == 0):
-                raise ValueError("rho_dot_kms_vals is either empty or zero.")
+                raise ValueError(
+                    """
+                        \r\tError Encountered: rss_ringoccs
+                        \r\t\t%s\n
+                        \r\trho_dot_kms_vals is either zero or empty.
+                    """ % fname
+                )
             elif (n_e != 0) and (n_i == 0):
                 crange = crange_e
                 occ    = 'egress'
             elif (n_e == 0) and (n_i != 0):
                 crange = crange_i
                 occ    = 'ingress'
-            else: raise TypeError("Bad Input: GEO DATA")
-        del n_e,n_i,crange_e,crange_i
+            else:
+                raise TypeError(
+                    """
+                        \r\tError Encountered: rss_ringoccs
+                        \r\t\t%s\n
+                        \r\tCould not determine occultation type.
+                        \r\tCheck your input GEO file.
+                    """ % fname
+                )
+        del n_e, n_i, crange_e, crange_i
+
         if (np.size(crange) == 0):
             if (occ == 'ingress'):
-                mes = "rho_dot_kms_vals is never negative."
+                raise TypeError(
+                    """
+                        \r\tError Encountered: rss_ringoccs
+                        \r\t\t%s\n
+                        \r\trho_dot_kms_vals is never negative.
+                    """ % fname
+                )
             elif (occ == 'egress'):
-                mes = "rho_dot_kms_vals is never positive."
-            else: raise ValueError("Bad occ input: Set 'egress' or 'ingress'")
-            raise ValueError("Bad occ Input: '%s': %s" % (occ,mes))
-        self.geo_rho        = self.geo_rho[crange]
-        self.geo_D          = self.geo_D[crange]
-        self.geo_drho       = self.geo_drho[crange]
-        self.geo_phi        = self.geo_phi[crange]
-        self.geo_B          = self.geo_B[crange]
-        rmin                = np.min(geo_rho)
-        rmax                = np.max(geo_rho)
-        self.rho_km_vals    = np.arange(rmin,rmax,dx_km_desired)
-        del rmin,rmax,geo_rho,geo_D,geo_drho,geo_phi,geo_B,rho_km_vals
+                raise TypeError(
+                    """
+                        \r\tError Encountered: rss_ringoccs
+                        \r\t\t%s\n
+                        \r\trho_dot_kms_vals is never negative.
+                    """ % fname
+                )
+            else:
+                raise TypeError(
+                    """
+                        \r\tError Encountered: rss_ringoccs
+                        \r\t\t%s\n
+                        \r\tCould not determine occultation type.
+                        \r\tCheck your input GEO file.
+                    """ % fname
+                )
+        else:
+            pass
 
-    def __interpolate_variables(self,verbose):
-        if verbose: print("Interpolating Data...")
-        rho_km_vals           = self.rho_km_vals
-        geo_rho               = self.geo_rho
-        geo_drho              = self.geo_drho
-        geo_D                 = self.geo_D
-        geo_phi               = self.geo_phi
-        geo_B                 = self.geo_B
-        D_km_interp           = interpolate.interp1d(geo_rho,geo_D)
-        self.D_km_vals        = D_km_interp(rho_km_vals)
-        rho_dot_interp        = interpolate.interp1d(geo_rho,geo_drho)
-        self.rho_dot_kms_vals = rho_dot_interp(rho_km_vals)
-        phi_deg_interp        = interpolate.interp1d(geo_rho,geo_phi)
-        phi_deg_vals          = phi_deg_interp(rho_km_vals)
-        B_deg_interp          = interpolate.interp1d(geo_rho,geo_B)
-        B_deg_vals            = B_deg_interp(rho_km_vals)
-        self.phi_rad_vals     = np.deg2rad(phi_deg_vals)
-        self.B_rad_vals       = np.deg2rad(B_deg_vals)
-        del geo_rho,geo_drho,geo_D,geo_phi,geo_B,D_km_interp,rho_dot_interp
-        del phi_deg_vals,phi_deg_interp,B_deg_interp,B_deg_vals
-      
+        geo_rho = self.rho_km_vals[crange]
+        self.D_km_vals = self.D_km_vals[crange]
+        self.rho_dot_kms_vals = self.rho_dot_kms_vals[crange]
+        self.phi_rad_vals = self.phi_rad_vals[crange]
+        self.B_rad_vals = self.B_rad_vals[crange]
+        self.rho_km_vals = np.arange(np.min(geo_rho),
+                                     np.max(geo_rho), dx_km_desired)
+
+        if verbose:
+            print("\tInterpolating Data...")
+
+        interp = interpolate.interp1d(geo_rho, self.D_km_vals)
+        self.D_km_vals = interp(self.rho_km_vals)
+        interp = interpolate.interp1d(geo_rho, self.rho_dot_kms_vals)
+        self.rho_dot_kms_vals = interp(self.rho_km_vals)
+        interp = interpolate.interp1d(geo_rho, self.phi_rad_vals)
+        self.phi_rad_vals = interp(self.rho_km_vals)
+        interp = interpolate.interp1d(geo_rho, self.phi_rl_rad_vals)
+        self.phi_rl_rad_vals = interp(self.rho_km_vals)
+        interp = interpolate.interp1d(geo_rho, self.B_rad_vals)
+        self.B_rad_vals = interp(self.rho_km_vals)
+        interp = interpolate.interp1d(geo_rho, self.t_oet_spm_vals)
+        self.t_oet_spm_vals = interp(self.rho_km_vals)
+        interp = interpolate.interp1d(geo_rho, self.t_ret_spm_vals)
+        self.t_ret_spm_vals = interp(self.rho_km_vals)
+        interp = interpolate.interp1d(geo_rho, self.t_set_spm_vals)
+        self.t_set_spm_vals = interp(self.rho_km_vals)
+        del geo_rho, interp
+
+        # Add 'fake' variables necessary for DiffractionCorrection class.
+        self.raw_tau_threshold_vals = np.zeros(np.size(self.rho_km_vals))
+        self.rho_corr_pole_km_vals = np.zeros(np.size(self.rho_km_vals))
+        self.rho_corr_timing_km_vals = np.zeros(np.size(self.rho_km_vals))
+        self.f_sky_hz_vals = np.zeros(np.size(self.rho_km_vals))
+        self.f_sky_hz_vals += diffraction_correction.SPEED_OF_LIGHT_KM/lambda_km
+
+        if verbose:
+            print("\tWriting History...")
+
+        input_vars = {
+            "GEO Data":     geo,
+            "Wavelength":   lambda_km,
+            "Resolution":   res,
+            "Radius":       rho,
+            "Width":        width
+        }
+
+        input_kwds = {
+            "Sample Spacing":   dx_km_desired,
+            "Occultation Type": occ,
+            "Window Type":      wtype,
+            "Forward Model":    fwd,
+            "Normalization":    norm,
+            "b-factor":         bfac,
+            "verbose":          verbose,
+            "Psi Type":         psitype
+        }
+
+        self.history = write_history_dict(input_vars, input_kwds, __file__)
+        var = geo.split("/")[-1]
+
+        try:
+            var = var.split("_")
+            band = '"%s"' % var[3][0]
+            year = var[1]
+            doy = var[2]
+            dsn = "DSS-%s" % (var[3][1:])
+            rev_num = date_to_rev(int(year), int(doy))
+            occ_dir = rev_to_occ_info(rev_num)
+            prof_dir = '"%s%"' % var[4]
+        except:
+            var = "Unknown"
+            band = "Unknown"
+            year = "Unknown"
+            doy = "Unknown"
+            dsn = "Unknown"
+            occ_dir = "Unknown"
+            rev_num = "Unknown"
+            prof_dir = "Unknown"
+
+
+        self.rev_info = {
+            "rsr_file": "Unknown",
+            "band": band,
+            "year": year,
+            "doy": doy,
+            "dsn": dsn,
+            "occ_dir": occ_dir,
+            "planetary_occ_flag": occ_dir,
+            "rev_num": rev_num,
+            "prof_dir": prof_dir
+        }
+
+        center = np.min((self.rho_km_vals >= rho).nonzero())
+        cb2 = np.cos(self.B_rad_vals[center])
+        cb2 *= cb2
+        sb2 = np.sin(self.B_rad_vals[center])
+        sb2 *= sb2
+        sp2 = np.sin(self.phi_rad_vals[center])
+        sp2 *= sp2
+        F = np.sqrt(0.5*lambda_km*self.D_km_vals[center]*(1-cb2*sp2)/(sb2))
+        T_hat = special_functions.square_well_diffraction(self.rho_km_vals,
+                                                          rho-width/2.0,
+                                                          rho+width/2.0, F)
+        self.p_norm_vals = np.abs(T_hat)
+        self.phase_rad_vals = np.arctan2(np.imag(T_hat), np.real(T_hat))
+
+        if verbose:
+            print("\tData Extraction Complete.")
+   

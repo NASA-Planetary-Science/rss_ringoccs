@@ -51,6 +51,8 @@
 
 /* Define Miscellaneous Constants. */
 #define SQRT_PI_BY_8 0.626657068657750125603941
+#define SQRT_PI_BY_2 1.2533141373155001
+#define SQRT_2_BY_PI 0.7978845608028654
 
 static PyMethodDef _special_functions_methods[] = {{NULL, NULL, 0, NULL}};
 /*-----------------------------DEFINE C FUNCTIONS-----------------------------*
@@ -66,7 +68,8 @@ double Fresnel_Sine_Func(double x)
 
     /* For small x use the Taylor expansion to compute C(x). For larger x,  *
      * use the asymptotic expansion. For values near 3.076, accuracy of 5   *
-     * decimals is guaranteed. Higher precicion outside this region.        */
+     * decimals is guaranteed. Higher precicion outside this region. When   *
+     * |x| > 1.e8, S(x) returns +/- sqrt(pi/8) to 8 decimals.               */
     if (arg < 9.0){
         double arg_sq = arg*arg;
         if (arg < 1.0){
@@ -105,7 +108,7 @@ double Fresnel_Sine_Func(double x)
             return sx*x;
         }
     }
-    else if (arg < 1.0e150) {
+    else if (arg < 1.0e16) {
         double sinarg, cosarg;
         cosarg = cos(arg);
         sinarg = sin(arg);
@@ -118,14 +121,13 @@ double Fresnel_Sine_Func(double x)
 
         sx = cosarg + sinarg;
         sx *= x;
-        if (x > 0){
-            return sx+SQRT_PI_BY_8;
-        }
-        else {
-            return sx-SQRT_PI_BY_8;
-        }
+        /*  (x > 0) - (x < 0) is a quick way to return sign(x) and avoids an  *
+         *  expensive if-then statement. Output for the asymptotic expansion  *
+         *  is f(|x|) + sign(x) * sqrt(pi/8). Error goes like 1/x^15.         */
+        return sx + ((x > 0) - (x < 0))*SQRT_PI_BY_8;
     }
     else {
+        /* For large values, return the limit of S(x) as x -> +/- infinity. */
         return ((x > 0) - (x < 0))*SQRT_PI_BY_8;
     }
 }
@@ -199,13 +201,14 @@ double Fresnel_Cosine_Func(double x)
 double complex Square_Well_Diffraction_Solution(double x, double a,
                                                 double b, double F)
 {
-    double arg1 = (b-x)/F;
-    double arg2 = (a-x)/F;
+    double arg1 = SQRT_2_BY_PI*(x-a)/F;
+    double arg2 = SQRT_2_BY_PI*(x-b)/F;
     double real_part = Fresnel_Cosine_Func(arg1) - Fresnel_Cosine_Func(arg2);
     double imag_part = Fresnel_Sine_Func(arg1) - Fresnel_Sine_Func(arg2);
     double complex result = real_part + imag_part*_Complex_I;
+    result *= SQRT_PI_BY_2;
 
-    return 1.0 - (0.5 - 0.5*_Complex_I)*result;
+    return F*(1.0+1.0*_Complex_I + (0.5 - 0.5*_Complex_I)*result);
 }
 
 /*---------------------------DEFINE PYTHON FUNCTIONS--------------------------*

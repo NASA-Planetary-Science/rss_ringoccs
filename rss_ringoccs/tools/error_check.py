@@ -51,6 +51,21 @@ def check_positive(input_var, input_var_name, f_name):
     
     return
 
+def check_non_negative(input_var, input_var_name, f_name):
+    if (np.min(input_var) < 0.0):
+        raise TypeError(
+            """
+                \r\tError Encountered: rss_ringoccs
+                \r\t\t%s\n
+                \r\t%s must be be non-negative.
+            """ % (f_name, input_var_name)
+        )
+    else:
+        pass
+    
+    return
+
+
 def check_two_pi(input_var, input_var_name, f_name, deg=True):
     if deg:
         max_value = 360.0001

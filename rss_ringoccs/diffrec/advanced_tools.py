@@ -1,8 +1,7 @@
 import numpy as np
 from scipy import interpolate
 from . import diffraction_correction, special_functions, window_functions
-from rss_ringoccs.tools import CSV_tools, error_check
-from rss_ringoccs.tools.history import write_history_dict, date_to_rev, rev_to_occ_info
+from rss_ringoccs.tools import CSV_tools, error_check, history
 
 
 class CompareTau(object):
@@ -73,10 +72,8 @@ class CompareTau(object):
 
         data = CSV_tools.ExtractCSVData(geo, cal, dlp, tau=tau, verbose=verbose)
         rec = diffraction_correction.DiffractionCorrection(
-            data, res, rng=rng, wtype=wtype,
-            fwd=fwd, norm=norm, bfac=bfac,
-            sigma=sigma, psitype=psitype,
-            res_factor=res_factor, verbose=verbose
+            data, res, rng=rng, wtype=wtype, fwd=fwd, norm=norm, bfac=bfac,
+            sigma=sigma, psitype=psitype, res_factor=res_factor, verbose=verbose
         )
 
         self.rho_km_vals = rec.rho_km_vals
@@ -412,7 +409,8 @@ class SquareWellFromGEO(object):
             "Fresnel Model":    use_fresnel
         }
 
-        self.history = write_history_dict(input_vars, input_kwds, __file__)
+        self.history = history.write_history_dict(input_vars,
+                                                  input_kwds, __file__)
         var = geo.split("/")[-1]
 
         try:
@@ -421,8 +419,8 @@ class SquareWellFromGEO(object):
             year = var[1]
             doy = var[2]
             dsn = "DSS-%s" % (var[3][1:])
-            rev_num = date_to_rev(int(year), int(doy))
-            occ_dir = rev_to_occ_info(rev_num)
+            rev_num = history.date_to_rev(int(year), int(doy))
+            occ_dir = history.rev_to_occ_info(rev_num)
             prof_dir = '"%s%"' % var[4]
         except:
             var = "Unknown"
@@ -455,8 +453,8 @@ class SquareWellFromGEO(object):
             T_hat = special_functions.square_well_diffraction(self.rho_km_vals,
                                                               rho-width/2.0,
                                                               rho+width/2.0, F)
-            self.p_norm_vals = np.abs(T_hat)
-            self.phase_rad_vals = np.arctan2(np.imag(T_hat), np.real(T_hat))
+            self.p_norm_vals = np.abs(T_hat)*np.abs(T_hat)
+            self.phase_rad_vals = -np.arctan2(np.imag(T_hat), np.real(T_hat))
         else:
             self.p_norm_vals = np.zeros(np.size(self.rho_km_vals))+1.0
             rstart = np.min((self.rho_km_vals>=rho-width/2.0).nonzero())
@@ -491,7 +489,7 @@ class SquareWellFromGEO(object):
 
 
 class DeltaImpulseDiffraction(object):
-    def __init__(self, geo, lambda_km, res, rho, width, dx_km_desired=0.25,
+    def __init__(self, geo, lambda_km, rho, width, dx_km_desired=0.25,
                  occ="other", wtype='kb25', fwd=False, norm=True, bfac=True,
                  verbose=True, psitype='fresnel', use_fresnel=False):
 
@@ -506,14 +504,13 @@ class DeltaImpulseDiffraction(object):
         error_check.check_type(geo, str, "geo", fname)
         error_check.check_type(wtype, str, "wtype", fname)
         error_check.check_type(psitype, str, "psitype", fname)
-        res = error_check.check_type_and_convert(res, float, "res", fname)
         width = error_check.check_type_and_convert(width, float, "width", fname)
         lambda_km = error_check.check_type_and_convert(lambda_km, float,
                                                        "lambda_km", fname)
         dx_km_desired = error_check.check_type_and_convert(dx_km_desired, float,
-                                                           "dx_km_desired", fname)
+                                                           "dx_km_desired",
+                                                           fname)
 
-        error_check.check_positive(res, "res", fname)
         error_check.check_positive(width, "width", fname)
         error_check.check_positive(dx_km_desired, "dx_km_desired", fname)
         error_check.check_positive(lambda_km, "lambda_km", fname)
@@ -702,7 +699,6 @@ class DeltaImpulseDiffraction(object):
         input_vars = {
             "GEO Data":     geo,
             "Wavelength":   lambda_km,
-            "Resolution":   res,
             "Radius":       rho,
             "Width":        width
         }
@@ -719,7 +715,8 @@ class DeltaImpulseDiffraction(object):
             "Fresnel Model":    use_fresnel
         }
 
-        self.history = write_history_dict(input_vars, input_kwds, __file__)
+        self.history = history.write_history_dict(input_vars,
+                                                  input_kwds, __file__)
         var = geo.split("/")[-1]
 
         try:
@@ -728,8 +725,8 @@ class DeltaImpulseDiffraction(object):
             year = var[1]
             doy = var[2]
             dsn = "DSS-%s" % (var[3][1:])
-            rev_num = date_to_rev(int(year), int(doy))
-            occ_dir = rev_to_occ_info(rev_num)
+            rev_num = history.date_to_rev(int(year), int(doy))
+            occ_dir = history.rev_to_occ_info(rev_num)
             prof_dir = '"%s%"' % var[4]
         except:
             var = "Unknown"
@@ -759,7 +756,7 @@ class DeltaImpulseDiffraction(object):
                                             self.phi_rad_vals[center],
                                             self.B_rad_vals[center])
         kD = diffraction_correction.TWO_PI*self.D_km_vals[center]/lambda_km
-        psi = special_functions.psi_func(KD, self.rho_km_vals[center],
+        psi = special_functions.psi_func(kD, self.rho_km_vals[center],
                                          self.rho_km_vals,
                                          self.phi_rad_vals[center],
                                          self.phi_rad_vals,
@@ -768,8 +765,7 @@ class DeltaImpulseDiffraction(object):
         
         T_hat = np.exp(1.0j*psi)*(1.0-1.0j)/F
         self.p_norm_vals = np.abs(T_hat)
-        self.phase_rad_vals = np.arctan2(np.imag(T_hat), np.real(T_hat))
+        self.phase_rad_vals = -np.arctan2(np.imag(T_hat), np.real(T_hat))
 
         if verbose:
             print("\tData Extraction Complete.")
-   

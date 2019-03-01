@@ -192,7 +192,7 @@ def compute_norm_eq(w_func, error_check=True):
 
     return normeq
 
-def fresnel_scale(Lambda, d, phi, b, deg=False, error_check=True):
+def fresnel_scale(Lambda, d, phi, b, deg=False):
     """
         Purpose:
             Compute the Fresnel Scale from lambda, D, Phi, and B.
@@ -219,124 +219,31 @@ def fresnel_scale(Lambda, d, phi, b, deg=False, error_check=True):
             have the same units. If b and phi are in degrees,
             make sure to set deg=True. Default is radians.
     """
-    if error_check:
-        try:
-            Lambda = np.array(Lambda)
-        except (ValueError, TypeError):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffrec Subpackage\n"
-                "\tspecial_functions.fresnel_scale:\n"
-                "\t\tFirst input could not be converted\n"
-                "\t\tinto a numpy array.\n"
-            )
+    try:
+        Lambda = np.array(Lambda)
+        phi = np.array(phi)
+        d = np.array(d)
+        b = np.array(b)
 
-        if (not np.all(np.isreal(Lambda))):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffrec Subpackage\n"
-                "\tspecial_functions.fresnel_scale:\n"
-                "\t\tFirst input must be an array\n"
-                "\t\tof floating point numbers.\n"
-            )
-        elif (np.min(Lambda) < 0.0):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffrec Subpackage\n"
-                "\tspecial_functions.fresnel_scale:\n"
-                "\t\tFirst input must be an array\n"
-                "\t\tof positive numbers.\n"
-            )
+        if deg:
+            cb = np.cos(b * RADS_PER_DEGS)
+            sb = np.sin(b * RADS_PER_DEGS)
+            sp = np.sin(phi * RADS_PER_DEGS)
         else:
-            pass
+            cb = np.cos(b)
+            sb = np.sin(b)
+            sp = np.sin(phi)
 
-        try:
-            d = np.array(d)
-        except (ValueError, TypeError):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffrec Subpackage\n"
-                "\tspecial_functions.fresnel_scale:\n"
-                "\t\tSecond input could not be converted\n"
-                "\t\tinto a numpy array.\n"
-            )
-
-        if (not np.all(np.isreal(d))):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffrec Subpackage\n"
-                "\tspecial_functions.fresnel_scale:\n"
-                "\t\tSecond input must be an array\n"
-                "\t\tof floating point numbers.\n"
-            )
-        elif (np.min(d) < 0.0):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffrec Subpackage\n"
-                "\tspecial_functions.fresnel_scale:\n"
-                "\t\tSecond input must be an array\n"
-                "\t\tof positive numbers.\n"
-            )
-        else:
-            pass
-
-        try:
-            phi = np.array(phi)
-        except (ValueError, TypeError):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffrec Subpackage\n"
-                "\tspecial_functions.fresnel_scale:\n"
-                "\t\tThird input could not be converted\n"
-                "\t\tinto a numpy array.\n"
-            )
-
-        if (not np.all(np.isreal(phi))):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffrec Subpackage\n"
-                "\tspecial_functions.fresnel_scale:\n"
-                "\t\tThird input must be an array\n"
-                "\t\tof floating point numbers.\n"
-            )
-        else:
-            pass
-
-        try:
-            b = np.array(b)
-        except (ValueError, TypeError):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffrec Subpackage\n"
-                "\tspecial_functions.fresnel_scale:\n"
-                "\t\tSecond input could not be converted\n"
-                "\t\tinto a numpy array.\n"
-            )
-
-        if (not np.all(np.isreal(b))):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffrec Subpackage\n"
-                "\tspecial_functions.fresnel_scale:\n"
-                "\t\tSecond input must be an array\n"
-                "\t\tof floating point number.\n"
-            )
-        else:
-            pass
-    else:
-        pass
-
-    if deg:
-        cb = np.cos(b * RADS_PER_DEGS)
-        sb = np.sin(b * RADS_PER_DEGS)
-        sp = np.sin(phi * RADS_PER_DEGS)
-    else:
-        cb = np.cos(b)
-        sb = np.sin(b)
-        sp = np.sin(phi)
-
-    fres = np.sqrt(0.5 * Lambda * d * (1 - (cb*cb) * (sp*sp)) / (sb*sb))
-    return fres
+        return np.sqrt(0.5 * Lambda * d * (1 - (cb*cb) * (sp*sp)) / (sb*sb))
+    except (TypeError, ValueError):
+        raise TypeError(
+            """
+                \r\tError Encountered: rss_ringoccs
+                \r\t\tdiffrec.special_functions.fresnel_scale\n
+                \r\tInputs should be four numpy arrays or
+                \r\tfloating point numbers.
+            """
+        )
 
 def fresnel_inverse(T_hat, ker, dx, f_scale):
     """
@@ -363,7 +270,7 @@ def fresnel_inverse(T_hat, ker, dx, f_scale):
     T = np.sum(ker * T_hat) * dx * (1.0+1.0j) / (2.0 * f_scale)
     return T
 
-def psi_func(kD, r, r0, phi, phi0, B, D, error_check=True):
+def psi_func(kD, r, r0, phi, phi0, B, D):
     """
         Purpose:
             Calculate psi from geometry variables.
@@ -388,164 +295,30 @@ def psi_func(kD, r, r0, phi, phi0, B, D, error_check=True):
             :psi (*np.ndarray*):
                 Geometric quantity found in the Fresnel kernel.
     """
-    if error_check:
-        try:
-            r = np.array(r)
-        except (ValueError, TypeError):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffrec Subpackage\n"
-                "\tspecial_functions.psi_d1_phi:\n"
-                "\t\tFirst input could not be converted\n"
-                "\t\tinto a numpy array.\n"
-            )
+    try:
+        phi0 = np.array(phi0)
+        phi = np.array(phi)
+        r0 = np.array(r0)
+        r = np.array(r)
+        D = np.array(D)
+        B = np.array(B)
 
-        if (not np.all(np.isreal(r))):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffrec Subpackage\n"
-                "\tspecial_functions.psi_d1_phi:\n"
-                "\t\tFirst input must be an array\n"
-                "\t\tof floating point number.\n"
-            )
-        elif (np.min(r) < 0.0):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffrec Subpackage\n"
-                "\tspecial_functions.psi_d1_phi:\n"
-                "\t\tFirst input must be an array\n"
-                "\t\tof positive numbers.\n"
-            )
-        else:
-            pass
-        
-        try:
-            r0 = np.array(r0)
-        except (ValueError, TypeError):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffrec Subpackage\n"
-                "\tspecial_functions.psi_d1_phi:\n"
-                "\t\tSecond input could not be converted\n"
-                "\t\tinto a numpy array.\n"
-            )
+        # Compute Xi variable (MTR86 Equation 4b).
+        xi = (np.cos(B)/D) * (r * np.cos(phi) - r0 * np.cos(phi0))
 
-        if (not np.all(np.isreal(r0))):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffrec Subpackage\n"
-                "\tspecial_functions.psi_d1_phi:\n"
-                "\t\tFirst input must be an array\n"
-                "\t\tof floating point number.\n"
-            )
-        elif (np.min(r0) < 0.0):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffrec Subpackage\n"
-                "\tspecial_functions.psi_d1_phi:\n"
-                "\t\tFirst input must be an array\n"
-                "\t\tof positive numbers.\n"
-            )
-        else:
-            pass
-        
-        try:
-            D = np.array(D)
-        except (ValueError, TypeError):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffrec Subpackage\n"
-                "\tspecial_functions.psi_d1_phi:\n"
-                "\t\tThird input could not be converted\n"
-                "\t\tinto a numpy array.\n"
-            )
-
-        if (not np.all(np.isreal(D))):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffrec Subpackage\n"
-                "\tspecial_functions.psi_d1_phi:\n"
-                "\t\tThird input must be an array\n"
-                "\t\tof floating point number.\n"
-            )
-        elif (np.min(D) < 0.0):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffrec Subpackage\n"
-                "\tspecial_functions.psi_d1_phi:\n"
-                "\t\tThird input must be an array\n"
-                "\t\tof positive numbers.\n"
-            )
-        else:
-            pass
-
-        try:
-            B = np.array(B)
-        except (ValueError, TypeError):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffrec Subpackage\n"
-                "\tspecial_functions.psi_d1_phi:\n"
-                "\t\tFourth input could not be converted\n"
-                "\t\tinto a numpy array.\n"
-            )
-
-        if (not np.all(np.isreal(B))):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffrec Subpackage\n"
-                "\tspecial_functions.psi_d1_phi:\n"
-                "\t\tFourth input must be an array\n"
-                "\t\tof floating point number.\n"
-            )
-        else:
-            pass
-
-        try:
-            phi = np.array(phi)
-        except (ValueError, TypeError):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffrec Subpackage\n"
-                "\tspecial_functions.psi_d1_phi:\n"
-                "\t\tFifth input could not be converted\n"
-                "\t\tinto a numpy array.\n"
-            )
-
-        if (not np.all(np.isreal(phi))):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffrec Subpackage\n"
-                "\tspecial_functions.psi_d1_phi:\n"
-                "\t\tFifth input must be an array\n"
-                "\t\tof floating point number.\n"
-            )
-        else:
-            pass
-
-        if (not isinstance(phi0, float)):
-            try:
-                phi0 = float(phi0)
-            except (TypeError, ValueError):
-                raise TypeError(
-                    "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffrec Subpackage\n"
-                    "\tspecial_functions.psi_d1_phi:\n"
-                    "\t\tSecond input must be a positive\n"
-                    "\t\tfloating point number.\n"
-                )
-        else:
-            pass
-    else:
-        pass
-
-    # Compute Xi variable (MTR86 Equation 4b).
-    xi = (np.cos(B)/D) * (r * np.cos(phi) - r0 * np.cos(phi0))
-
-    # Compute Eta variable (MTR86 Equation 4c).
-    eta = (r0*r0 + r*r - 2.0*r*r0*np.cos(phi-phi0)) / (D*D)
-    psi_vals = kD * (np.sqrt(1.0+eta-2.0*xi) - (1.0-xi))
-    return psi_vals
+        # Compute Eta variable (MTR86 Equation 4c).
+        eta = (r0*r0 + r*r - 2.0*r*r0*np.cos(phi-phi0)) / (D*D)
+        psi_vals = kD * (np.sqrt(1.0+eta-2.0*xi) - (1.0-xi))
+        return psi_vals
+    except (TypeError, ValueError):
+        raise TypeError(
+            """
+                \r\tError Encountered: rss_ringoccs
+                \r\t\tdiffrec.special_functions.psi_func\n
+                \r\tInputs should be six numpy arrays or
+                \r\tfloating point numbers.
+            """
+        )
 
 def resolution_inverse(x):
     """

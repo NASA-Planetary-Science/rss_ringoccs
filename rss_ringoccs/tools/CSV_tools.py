@@ -16,7 +16,7 @@ from scipy import interpolate
 from .history import write_history_dict, date_to_rev, rev_to_occ_info
 from . import error_check
 
-def get_geo(geo, verbose=True):
+def get_geo(geo, verbose=True, use_deprecate=False):
     """
         Purpose:
             To extract a pandas DataFrame from a given
@@ -60,29 +60,47 @@ def get_geo(geo, verbose=True):
         print("\tExtracting Geo Data...")
 
     try:
-        dfg = pd.read_csv(geo, delimiter=',',
-            names=[
-                "t_oet_spm_vals",
-                "t_ret_spm_vals",
-                "t_set_spm_vals",
-                "rho_km_vals",
-                "phi_rl_deg_vals",
-                "phi_ora_deg_vals",
-                "B_deg_vals",
-                "D_km_vals",
-                "rho_dot_kms_vals",
-                "phi_rl_dot_kms_vals",
-                "F_km_vals",
-                "R_imp_km_vals",
-                "rx_km_vals",
-                "ry_km_vals",
-                "rz_km_vals",
-                "vx_kms_vals",
-                "vy_kms_vals",
-                "vz_kms_vals",
-                "obs_spacecract_lat_deg_vals"
-            ]
-        )
+        if use_deprecate:
+            dfg = pd.read_csv(geo, delimiter=',',
+                              names=["t_oet_spm_vals",
+                                     "t_ret_spm_vals",
+                                     "t_set_spm_vals",
+                                     "rho_km_vals",
+                                     "phi_rl_deg_vals",
+                                     "phi_ora_deg_vals",
+                                     "B_deg_vals",
+                                     "D_km_vals",
+                                     "rho_dot_kms_vals",
+                                     "phi_rl_dot_kms_vals",
+                                     "F_km_vals",
+                                     "R_imp_km_vals",
+                                     "rx_km_vals",
+                                     "ry_km_vals",
+                                     "rz_km_vals",
+                                     "vx_kms_vals",
+                                     "vy_kms_vals",
+                                     "vz_kms_vals"])
+        else:
+            dfg = pd.read_csv(geo, delimiter=',',
+                              names=["t_oet_spm_vals",
+                                     "t_ret_spm_vals",
+                                     "t_set_spm_vals",
+                                     "rho_km_vals",
+                                     "phi_rl_deg_vals",
+                                     "phi_ora_deg_vals",
+                                     "B_deg_vals",
+                                     "D_km_vals",
+                                     "rho_dot_kms_vals",
+                                     "phi_rl_dot_kms_vals",
+                                     "F_km_vals",
+                                     "R_imp_km_vals",
+                                     "rx_km_vals",
+                                     "ry_km_vals",
+                                     "rz_km_vals",
+                                     "vx_kms_vals",
+                                     "vy_kms_vals",
+                                     "vz_kms_vals",
+                                     "obs_spacecract_lat_deg_vals"])
     except FileNotFoundError:
         raise FileNotFoundError(
             """
@@ -128,13 +146,10 @@ def get_cal(cal, verbose=True):
 
     try:
         dfc = pd.read_csv(cal, delimiter=',',
-            names=[
-                "spm_vals",
-                "f_sky_pred_vals",
-                "f_sky_resid_fit_vals",
-                "p_free_vals"
-                ]
-            )
+                          names=["spm_vals",
+                                 "f_sky_pred_vals",
+                                 "f_sky_resid_fit_vals",
+                                 "p_free_vals"])
     except FileNotFoundError:
         raise FileNotFoundError(
             """
@@ -150,7 +165,7 @@ def get_cal(cal, verbose=True):
 
     return dfc
 
-def get_dlp(dlp, verbose=True):
+def get_dlp(dlp, verbose=True, use_deprecate=False):
     """
         Purpose:
             To extract a pandas DataFrame from a given
@@ -188,24 +203,35 @@ def get_dlp(dlp, verbose=True):
         print("\tExtracting DLP Data...")
 
     try:
-        dfd = pd.read_csv(
-            dlp, delimiter=',',
-            names=[
-                "rho_km_vals",
-                "rho_corr_pole_km_vals",
-                "rho_corr_timing_km_vals",
-                "phi_rl_deg_vals",
-                "phi_ora_deg_vals",
-                "p_norm_vals",
-                "raw_tau_vals",
-                "phase_deg_vals",
-                "raw_tau_threshold_vals",
-                "t_oet_spm_vals",
-                "t_ret_spm_vals",
-                "t_set_spm_vals",
-                "B_deg_vals"
-            ]
-        )
+        if use_deprecate:
+            dfd = pd.read_csv(dlp, delimiter=',',
+                              names=["rho_km_vals",
+                                     "rho_corr_pole_km_vals",
+                                     "rho_corr_timing_km_vals",
+                                     "phi_rl_deg_vals",
+                                     "phi_ora_deg_vals",
+                                     "raw_tau_vals",
+                                     "phase_deg_vals",
+                                     "raw_tau_threshold_vals",
+                                     "t_oet_spm_vals",
+                                     "t_ret_spm_vals",
+                                     "t_set_spm_vals",
+                                     "B_deg_vals"])
+        else:
+            dfd = pd.read_csv(dlp, delimiter=',',
+                              names=["rho_km_vals",
+                                     "rho_corr_pole_km_vals",
+                                     "rho_corr_timing_km_vals",
+                                     "phi_rl_deg_vals",
+                                     "phi_ora_deg_vals",
+                                     "p_norm_vals",
+                                     "raw_tau_vals",
+                                     "phase_deg_vals",
+                                     "raw_tau_threshold_vals",
+                                     "t_oet_spm_vals",
+                                     "t_ret_spm_vals",
+                                     "t_set_spm_vals",
+                                     "B_deg_vals"])
     except FileNotFoundError:
         raise FileNotFoundError(
             """
@@ -220,7 +246,7 @@ def get_dlp(dlp, verbose=True):
         print("\tDLP Data Complete")
     return dfd
 
-def get_tau(tau, verbose=True):
+def get_tau(tau, verbose=True, use_deprecate=False):
     """
         Purpose:
             To extract a pandas DataFrame from a given
@@ -258,23 +284,35 @@ def get_tau(tau, verbose=True):
         print("\tExtracting Tau Data...")
 
     try:
-        dft = pd.read_csv(tau, delimiter=',',
-            names=[
-                "rho_km_vals",
-                "rho_km_pole_corr_vals",
-                "rho_km_offsett_vals",
-                "phi_rl_deg_vals",
-                "phi_ora_deg_vals",
-                "p_norm_vals",
-                "raw_tau_vals",
-                "phase_deg_vals",
-                "raw_tau_threshold_vals",
-                "spm_vals",
-                "t_ret_spm_vals",
-                "t_set_spm_vals",
-                "B_deg_vals"
-            ]
-        )
+        if use_deprecate:
+            dft = pd.read_csv(tau, delimiter=',',
+                              names=["rho_km_vals",
+                                     "rho_km_pole_corr_vals",
+                                     "rho_km_offsett_vals",
+                                     "phi_rl_deg_vals",
+                                     "phi_ora_deg_vals",
+                                     "raw_tau_vals",
+                                     "phase_deg_vals",
+                                     "raw_tau_threshold_vals",
+                                     "spm_vals",
+                                     "t_ret_spm_vals",
+                                     "t_set_spm_vals",
+                                     "B_deg_vals"])
+        else:
+            dft = pd.read_csv(tau, delimiter=',',
+                              names=["rho_km_vals",
+                              "rho_km_pole_corr_vals",
+                              "rho_km_offsett_vals",
+                              "phi_rl_deg_vals",
+                              "phi_ora_deg_vals",
+                              "p_norm_vals",
+                              "raw_tau_vals",
+                              "phase_deg_vals",
+                              "raw_tau_threshold_vals",
+                              "spm_vals",
+                              "t_ret_spm_vals",
+                              "t_set_spm_vals",
+                              "B_deg_vals"])
     except FileNotFoundError:
         raise FileNotFoundError(
             """

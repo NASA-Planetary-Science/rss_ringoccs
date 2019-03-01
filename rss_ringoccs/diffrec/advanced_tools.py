@@ -449,13 +449,9 @@ class SquareWellFromGEO(object):
 
         if use_fresnel:
             center = np.min((self.rho_km_vals >= rho).nonzero())
-            cb2 = np.cos(self.B_rad_vals[center])
-            cb2 *= cb2
-            sb2 = np.sin(self.B_rad_vals[center])
-            sb2 *= sb2
-            sp2 = np.sin(self.phi_rad_vals[center])
-            sp2 *= sp2
-            F = np.sqrt(0.5*lambda_km*self.D_km_vals[center]*(1-cb2*sp2)/(sb2))
+            F = special_functions.fresnel_scale(lambda_km, self.D_km_vals[center],
+                                                self.phi_rad_vals[center],
+                                                self.B_rad_vals[center])
             T_hat = special_functions.square_well_diffraction(self.rho_km_vals,
                                                               rho-width/2.0,
                                                               rho+width/2.0, F)
@@ -497,11 +493,12 @@ class SquareWellFromGEO(object):
 class DeltaImpulseDiffraction(object):
     def __init__(self, geo, lambda_km, res, rho, width, dx_km_desired=0.25,
                  occ="other", wtype='kb25', fwd=False, norm=True, bfac=True,
-                 verbose=True, psitype='fresnel'):
+                 verbose=True, psitype='fresnel', use_fresnel=False):
 
         # Check all input variables for errors.
         fname = "diffrec.advanced_tools.SquareWellFromGEO"
         error_check.check_type(verbose, bool, "verbose", fname)
+        error_check.check_type(use_fresnel, bool, "use_fresnel", fname)
         error_check.check_type(norm, bool, "norm", fname)
         error_check.check_type(bfac, bool, "bfac", fname)
         error_check.check_type(occ, str, "occ", fname)
@@ -514,8 +511,7 @@ class DeltaImpulseDiffraction(object):
         lambda_km = error_check.check_type_and_convert(lambda_km, float,
                                                        "lambda_km", fname)
         dx_km_desired = error_check.check_type_and_convert(dx_km_desired, float,
-                                                           "dx_km_desired",
-                                                           fname)
+                                                           "dx_km_desired", fname)
 
         error_check.check_positive(res, "res", fname)
         error_check.check_positive(width, "width", fname)
@@ -719,7 +715,8 @@ class DeltaImpulseDiffraction(object):
             "Normalization":    norm,
             "b-factor":         bfac,
             "verbose":          verbose,
-            "Psi Type":         psitype
+            "Psi Type":         psitype,
+            "Fresnel Model":    use_fresnel
         }
 
         self.history = write_history_dict(input_vars, input_kwds, __file__)
@@ -758,16 +755,18 @@ class DeltaImpulseDiffraction(object):
         }
 
         center = np.min((self.rho_km_vals >= rho).nonzero())
-        cb2 = np.cos(self.B_rad_vals[center])
-        cb2 *= cb2
-        sb2 = np.sin(self.B_rad_vals[center])
-        sb2 *= sb2
-        sp2 = np.sin(self.phi_rad_vals[center])
-        sp2 *= sp2
-        F = np.sqrt(0.5*lambda_km*self.D_km_vals[center]*(1-cb2*sp2)/(sb2))
-        T_hat = special_functions.square_well_diffraction(self.rho_km_vals,
-                                                          rho-width/2.0,
-                                                          rho+width/2.0, F)
+        F = special_functions.fresnel_scale(lambda_km, self.D_km_vals[center],
+                                            self.phi_rad_vals[center],
+                                            self.B_rad_vals[center])
+        kD = diffraction_correction.TWO_PI*self.D_km_vals[center]/lambda_km
+        psi = special_functions.psi_func(KD, self.rho_km_vals[center],
+                                         self.rho_km_vals,
+                                         self.phi_rad_vals[center],
+                                         self.phi_rad_vals,
+                                         self.B_rad_vals[center],
+                                         self.D_km_vals[center])
+        
+        T_hat = np.exp(1.0j*psi)*(1.0-1.0j)/F
         self.p_norm_vals = np.abs(T_hat)
         self.phase_rad_vals = np.arctan2(np.imag(T_hat), np.real(T_hat))
 

@@ -32,7 +32,7 @@ do
 	webdirfil=$web$dirfil
 	if [ ! -e $localdirfil ]
 	then
-    		echo Current File $localdirfil does not locally exist. Fetching.
+    	echo Current File $localdirfil does not locally exist. Fetching.
 		if curl --output /dev/null --silent --head --fail "$webdirfil"; then
  			echo "URL exists: $webdirfil"
 			curl --create-dirs -o $localdirfil $webdirfil

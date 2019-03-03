@@ -13,68 +13,90 @@
 
 static PyMethodDef _diffraction_functions_methods[] = {{NULL, NULL, 0, NULL}};
 
-static void __coss(char **wfunc, double w_width, double dx,
-                   npy_intp w_steps, char** nw_pts)
+static void __rect(double* wfunc, double w_width, double dx, long nw_pts)
 {
-        int i;
-        double x;
+        long i;
 
-        /* Window functions have an odd number of points. */
-        *((int *)nw_pts) = (2 * (int)(w_width / (2.0 * dx))) + 1;
-
-        for (i=0; i<*(int *)nw_pts; i++){
-            x = i - (*(int *)nw_pts - 1) / 2.0;
-            x *= ONE_PI * dx / w_width;
-            x = cos(x);
-            *((double *)(wfunc+i*w_steps)) = x*x;
+        for (i=0; i<nw_pts; i++){
+            wfunc[i] = 1.0;
         }
 }
 
-static void get_arr(char** x_arr, char** rho,
-                    char** nw_pts, npy_intp rho_steps)
+static void __coss(double* wfunc, double w_width, double dx, long nw_pts)
 {
-    int i, j;
+        long i;
+        double x;
+
+        for (i=0; i<nw_pts; i++){
+            x = i - (nw_pts - 1) / 2.0;
+            x *= ONE_PI * dx / w_width;
+            x = cos(x);
+            x *= x;
+            wfunc[i] = x;
+        }
+}
+
+complex double _fresnel_transform(double* x_arr, char* T_in, double* w_func,
+                                   double F, double dx, long n_pts,
+                                   npy_intp T_in_steps)
+{
+    long i, j;
+    double x, F2;
+    complex double T_out = 0.0;
+
+    j = -(n_pts - 1)/2;
+    F = 1.0/F;
+    F2 = F*F;
+
+    for (i=0; i<n_pts; ++i){
+        x = x_arr[i]*F2;
+        T_out += w_func[i] * (cos(x) - sin(x) * _Complex_I) *
+                 *(complex double *)(T_in + j*T_in_steps);
+        j += 1;
+    }
+        T_out *= (0.5+0.5*_Complex_I)*dx*F;
+    return T_out;
+}
+
+static void get_arr(double* x_arr, double dx, long nw_pts)
+{
+    long i, j;
     double x;
-    i = -(*(int *)nw_pts-1)/2 * rho_steps;
-    for (j=0; j<*(int *)nw_pts; j++){
-        x = *(double *)(rho) - *(double *)(rho - i);
+
+    j = -(nw_pts-1)/2;
+
+
+    for (i=0; i<nw_pts; ++i){
+        x = - j*dx;
         x *= HALF_PI*x;
-        *((double *)(x_arr+j*rho_steps)) = x;
-        i += rho_steps;
+        x_arr[i] = x;
+        j += 1;
     }
 }
 
 static void Fresnel_Transform_Func(char **args, npy_intp *dimensions,
                                    npy_intp* steps, void* data)
 {
-    char* n_pts;
-    double w_init, x, F, F2;
-    void (*fw)(char**, double, double, npy_intp, char**);
-    npy_intp i, j, k, n_total;
+    long i, nw_pts;
+    double w_init, dx, two_dx;
+    void (*fw)(double*, double, double, long);
 
     char *T_in              = args[0];
     char *rho_km_vals       = args[1];
     char *F_km_vals         = args[2];
     char *w_km_vals         = args[3];
-    char *w_func            = args[4];
-    char *x_arr             = args[5];
-    char *start             = args[6];
-    char *n_used            = args[7];
-    char *dx_km             = args[8];
-    char *wtype             = args[9];
-    char *T_out             = args[10];
+    char *start             = args[4];
+    char *n_used            = args[5];
+    char *wtype             = args[6];
+    char *T_out             = args[7];
 
     npy_intp T_in_steps     = steps[0];
     npy_intp rho_steps      = steps[1];
     npy_intp F_steps        = steps[2];
     npy_intp w_steps        = steps[3];
-    npy_intp w_f_steps      = steps[4];
-    npy_intp x_arr_steps    = steps[5];
-    npy_intp T_out_steps    = steps[10];
+    npy_intp T_out_steps    = steps[7];
 
-    n_total = *(int *)n_used * rho_steps;
-
-    if (*(int *)wtype == 0){fw = &__coss;}
+    if (*(int *)wtype == 0){fw = &__rect;}
     else if (*(int *)wtype == 1){fw = &__coss;}
     else if (*(int *)wtype == 2){fw = &__coss;}
     else if (*(int *)wtype == 3){fw = &__coss;}
@@ -83,51 +105,45 @@ static void Fresnel_Transform_Func(char **args, npy_intp *dimensions,
     else {fw = &__coss;}
 
     /* Compute first window width and window function. */
-    w_km_vals   += *(int *)start*w_steps;
-    rho_km_vals += *(int *)start*rho_steps;
-    F_km_vals   += *(int *)start*F_steps;
-    T_in        += *(int *)start*T_in_steps;
-    T_out       += *(int *)start*T_out_steps;
+    w_km_vals   += *(long *)start*w_steps;
+    rho_km_vals += *(long *)start*rho_steps;
+    F_km_vals   += *(long *)start*F_steps;
+    T_in        += *(long *)start*T_in_steps;
+    T_out       += *(long *)start*T_out_steps;
     w_init       = *(double *)w_km_vals;
 
-    fw(&w_func, w_init, *(double *)dx_km, w_f_steps, &n_pts);
-    get_arr(&x_arr, &rho_km_vals, &n_pts, rho_steps);
 
-    for (i=0; i<=n_total; ++i){
-        /* Rho, Window width, Frensel scale for current point. */
-        F = *(double *)F_km_vals;
-        F2 = F * F;
+    dx = *(double *)(rho_km_vals+rho_steps) - *(double *)(rho_km_vals);
+    two_dx = 2.0*dx;
+    nw_pts = (2 * (int)(w_init / (2.0 * dx))) + 1;
 
-        if (fabs(w_init - *(double *)w_km_vals) >= 2.0 * *(double *)dx_km) {
-            /* Reset w_init and recompute window function. */
+    double* x_arr = (double *)malloc(sizeof(double)*nw_pts);
+    double* w_func = (double *)malloc(sizeof(double)*nw_pts);
+
+    
+    fw(w_func, w_init, dx, nw_pts);
+    get_arr(x_arr, dx, nw_pts);
+
+    for (i=0; i<=*(long *)n_used; ++i){
+        if (fabs(w_init - *(double *)w_km_vals) >= two_dx) {
+            // Reset w_init and recompute window function.
             w_init = *(double *)w_km_vals;
-            fw(&w_func, w_init, *(double *)dx_km, w_f_steps, &n_pts);
-            get_arr(&x_arr, &rho_km_vals, &n_pts, rho_steps);
+            nw_pts = (2 * (int)(w_init / (2.0 * dx))) + 1;
+            w_func = (double *)realloc(w_func, sizeof(double)*nw_pts);
+            x_arr = (double *)realloc(x_arr, sizeof(double)*nw_pts);
+            fw(w_func, w_init, dx, nw_pts);
+            get_arr(x_arr, dx, nw_pts);
         }
 
-        *((complex double *)T_out) = 0.0;
-        k = - (*(int *)&n_pts - 1) / 2;
+        *((complex double *)T_out) = _fresnel_transform(x_arr, T_in, w_func,
+                                                        *(double *)F_km_vals,
+                                                        dx,  nw_pts,
+                                                        T_in_steps);
 
-        printf("%d\n", *(int *)&n_pts);
-        printf("%ld\n", k);
-
-        for (j=0; j<*(int *)&n_pts; ++j){
-            x = *(double *)(x_arr + j*x_arr_steps)/F2;
-            *((complex double *)T_out) += *(double *)(w_func +j*w_f_steps) * (
-                cos(x) - sin(x) * _Complex_I
-            )* *(complex double *)(T_in + k*T_in_steps);
-            k += 1;
-        }
-
-        printf("%ld", i);
-
-        *((complex double *)T_out) *= *(double *)dx_km*(0.5+0.5*_Complex_I)/F;
-
-        rho_km_vals += rho_steps;
         w_km_vals   += w_steps;
         F_km_vals   += F_steps;
         T_in        += T_in_steps;
-        T_out       += T_out_steps; 
+        T_out       += T_out_steps;
     }
 }
 
@@ -140,11 +156,8 @@ static char data_types[11] = {
     NPY_DOUBLE,
     NPY_DOUBLE,
     NPY_DOUBLE,
-    NPY_DOUBLE,
-    NPY_DOUBLE,
     NPY_LONG,
     NPY_LONG,
-    NPY_DOUBLE,
     NPY_LONG,
     NPY_COMPLEX128
 };
@@ -179,7 +192,7 @@ PyMODINIT_FUNC PyInit__diffraction_functions(void)
 
     fresnel_transform = PyUFunc_FromFuncAndData(fresnel_transform_funcs, 
                                                 PyuFunc_data, data_types,
-                                                1, 10, 1, PyUFunc_None,
+                                                1, 7, 1, PyUFunc_None,
                                                 "fresnel_transform",
                                                 "fresnel_transform_docstring",
                                                 0);

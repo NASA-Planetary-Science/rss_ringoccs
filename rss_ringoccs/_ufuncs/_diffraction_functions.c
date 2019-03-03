@@ -37,6 +37,21 @@
 
 static PyMethodDef _diffraction_functions_methods[] = {{NULL, NULL, 0, NULL}};
 
+static void get_arr(double* x_arr, double dx, long nw_pts)
+{
+    long i, j;
+    double x;
+
+    j = -(nw_pts-1)/2;
+
+    for (i=0; i<nw_pts; ++i){
+        x = - j*dx;
+        x *= HALF_PI*x;
+        x_arr[i] = x;
+        j += 1;
+    }
+}
+
 static void __rect(double* wfunc, double w_width, double dx, long nw_pts)
 {
         long i;
@@ -48,30 +63,32 @@ static void __rect(double* wfunc, double w_width, double dx, long nw_pts)
 
 static void __coss(double* wfunc, double w_width, double dx, long nw_pts)
 {
-        long i;
+        long i, j;
         double x;
+        dx = ONE_PI * dx / w_width;
 
+        j = -(nw_pts - 1) / 2.0;
         for (i=0; i<nw_pts; i++){
-            x = i - (nw_pts - 1) / 2.0;
-            x *= ONE_PI * dx / w_width;
+            x = j * dx;
             x = cos(x);
             x *= x;
             wfunc[i] = x;
+            j += 1;
         }
 }
 
 static void __kbmd25(double* wfunc, double w_width, double dx, long nw_pts)
 {
-        long i;
+        long i, j;
         double x;
         double bessel_x;
-        dx = dx / w_width;
+        dx = 2.0 * dx / w_width;
 
+        j = -(nw_pts - 1) / 2.0;
         for (i=0; i<nw_pts; i++){
-            x = i - (nw_pts - 1) / 2.0;
-            x *= dx;
+            x = j * dx;
             x *= x;
-            x = 1.0 - 4.0*x;
+            x = 1.0 - x;
             bessel_x = MODIFIED_KAISER_BESSEL_2_5_A08*x;
             bessel_x = x*bessel_x + MODIFIED_KAISER_BESSEL_2_5_A07;
             bessel_x = x*bessel_x + MODIFIED_KAISER_BESSEL_2_5_A06;
@@ -82,6 +99,7 @@ static void __kbmd25(double* wfunc, double w_width, double dx, long nw_pts)
             bessel_x = x*bessel_x + MODIFIED_KAISER_BESSEL_2_5_A01;
 
             wfunc[i] = x*bessel_x;
+            j += 1;
         }
 }
 
@@ -106,21 +124,6 @@ complex double _fresnel_transform(double* x_arr, char* T_in, double* w_func,
 
         T_out *= (0.5+0.5*_Complex_I)*dx*F;
     return T_out;
-}
-
-static void get_arr(double* x_arr, double dx, long nw_pts)
-{
-    long i, j;
-    double x;
-
-    j = -(nw_pts-1)/2;
-
-    for (i=0; i<nw_pts; ++i){
-        x = - j*dx;
-        x *= HALF_PI*x;
-        x_arr[i] = x;
-        j += 1;
-    }
 }
 
 static void Fresnel_Transform_Func(char **args, npy_intp *dimensions,

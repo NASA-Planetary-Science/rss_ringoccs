@@ -34,8 +34,7 @@
  *******************************************************************************
  *                              DEFINED FUNCTIONS                              *
  *******************************************************************************
- *  Fresnel_Sine_Taylor_to_Asymptotic:                                         *
- *  Fresnel_Cosine_Taylor_to_Asymptotic:                                       *
+ *  Fresnel_Sine_Taylor_to_Asymptotic / Fresnel_Cosine_Taylor_to_Asymptotic:   *
  *      This uses the standard Taylor expansion for small inputs (|x|<=3), and *
  *      asymptotic expansions for large input (|x|>3). The Taylor Series are:  *
  *                                                                             * 
@@ -77,24 +76,22 @@
  *      The error in the asympotic series goes like |a_N(x)|+|b_N(x)|.         *
  *      For large x, and appropriate N, this can be made incredibly small.     *
  *******************************************************************************
- *  Fresnel_Sine_While_to_Asymptotic:                                          *
- *  Fresnel_Cosine_While_to_Asymptotic:                                        *
+ *  Fresnel_Sine_While_to_Asymptotic / Fresnel_Cosine_While_to_Asymptotic:     *
  *      Similar to Fresnel_Sine_Taylor_to_Asymptotic, but a while loop is used *
  *      during the Taylor approximation, stopping once the error is 1.0e-8.    *
  *******************************************************************************
- *  Fresnel_Sine_Heald_Rational_EPS_Minus_Three:                               *
- *  Fresnel_Cosine_Heald_Rational_EPS_Minus_Three:                             *
- *      Mark A. Heald's approximation using rational functions, with error of  *
- *      less than 2.0e-3.                                                      *
- *  Fresnel_Sine_Heald_Rational_EPS_Minus_Four                                 *
- *      Mark A. Heald's approximation using rational functions, with error of  *
- *      less than 1.0e-4.                                                      *
- *  Fresnel_Sine_Heald_Rational_EPS_Minus_Six                                  *
- *      Mark A. Heald's approximation using rational functions, with error of  *
- *      less than 9.0e-6.                                                      *
- *  Fresnel_Sine_Heald_Rational_EPS_Minus_Eight                                *
- *      Mark A. Heald's approximation using rational functions, with error of  *
- *      less than 4.0e-8.                                                      *
+ *  Fresnel_Sine_Heald_Rational_EPS_Minus_Three,                               *
+ *  Fresnel_Cosine_Heald_Rational_EPS_Minus_Three,                             *
+ *  Fresnel_Sine_Heald_Rational_EPS_Minus_Four,                                *
+ *  Fresnel_Cosine_Heald_Rational_EPS_Minus_Three,                             *
+ *  Fresnel_Sine_Heald_Rational_EPS_Minus_Six,                                 *
+ *  Fresnel_Cosine_Heald_Rational_EPS_Minus_Six,                               *
+ *  Fresnel_Sine_Heald_Rational_EPS_Minus_Eight,                               *
+ *  Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight:                             *
+ *      Computes fresnel integrals to specified precision using a rational     *
+ *      approximation as computed by Mark A. Heald.                            *
+ *      See Rational Approximations for the Fresnel Integrals, Mark A. Heald,  *
+ *      Mathematics of Computation, Vol. 44, No. 170 (Apr., 1985), pp. 459-461 *
  *******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                                *
  *  Date:       Febuary 26, 2019                                               *
@@ -256,7 +253,7 @@
 #define FRESNEL_HEALD_RATIONAL_EPS_6_D04 0.60353
 
 /* Coefficients for up to 8 significant digits. */
-#define FRESNEL_HEALD_RATIONAL_EPS_8_A09 1.0000000
+#define FRESNEL_HEALD_RATIONAL_EPS_8_A00 1.0000000
 #define FRESNEL_HEALD_RATIONAL_EPS_8_A01 0.1945161
 #define FRESNEL_HEALD_RATIONAL_EPS_8_A02 0.2363641
 #define FRESNEL_HEALD_RATIONAL_EPS_8_A03 0.0683240
@@ -468,8 +465,9 @@ double Fresnel_Sine_Heald_Rational_EPS_Minus_Three(double x)
 
 double Fresnel_Sine_Heald_Rational_EPS_Minus_Four(double x)
 {
-    double A, R, a, b, c, d;
-    x *= SQRT_2_BY_PI;
+    double A, R, a, b, c, d, sgn_x;
+    sgn_x = (x>0)-(x<0);
+    x *= SQRT_2_BY_PI*sgn_x;
 
     /* Compute the Numerator of the A_jk Function.      */
     a = FRESNEL_HEALD_RATIONAL_EPS_4_A01*x + FRESNEL_HEALD_RATIONAL_EPS_4_A00;
@@ -493,13 +491,14 @@ double Fresnel_Sine_Heald_Rational_EPS_Minus_Four(double x)
     R = c/d;
     R *= SQRT_PI_BY_2;
 
-    return SQRT_PI_BY_8 - R*cos(A);
+    return sgn_x*(SQRT_PI_BY_8 - R*cos(A));
 }
 
 double Fresnel_Sine_Heald_Rational_EPS_Minus_Six(double x)
 {
-    double A, R, a, b, c, d;
-    x *= SQRT_2_BY_PI;
+    double A, R, a, b, c, d, sgn_x;
+    sgn_x = (x>0)-(x<0);
+    x *= SQRT_2_BY_PI*sgn_x;
 
     /* Compute the Numerator of the A_jk Function.      */
     a = FRESNEL_HEALD_RATIONAL_EPS_6_A02*x + FRESNEL_HEALD_RATIONAL_EPS_6_A01;
@@ -527,7 +526,50 @@ double Fresnel_Sine_Heald_Rational_EPS_Minus_Six(double x)
     R = c/d;
     R *= SQRT_PI_BY_2;
 
-    return SQRT_PI_BY_8 - R*cos(A);
+    return sgn_x*(SQRT_PI_BY_8 - R*cos(A));
+}
+
+double Fresnel_Sine_Heald_Rational_EPS_Minus_Eight(double x)
+{
+    double A, R, a, b, c, d, sgn_x;
+    sgn_x = (x>0)-(x<0);
+    x *= SQRT_2_BY_PI*sgn_x;
+
+    /* Compute the Numerator of the A_jk Function.      */
+    a = FRESNEL_HEALD_RATIONAL_EPS_8_A04*x + FRESNEL_HEALD_RATIONAL_EPS_8_A03;
+    a = a*x + FRESNEL_HEALD_RATIONAL_EPS_8_A02;
+    a = a*x + FRESNEL_HEALD_RATIONAL_EPS_8_A01;
+    a = a*x + FRESNEL_HEALD_RATIONAL_EPS_8_A00;
+
+    /* Compute the Denominator of the A_jk Function.    */
+    b = FRESNEL_HEALD_RATIONAL_EPS_8_B06*x + FRESNEL_HEALD_RATIONAL_EPS_8_B05;
+    b = x*b + FRESNEL_HEALD_RATIONAL_EPS_8_B04;
+    b = x*b + FRESNEL_HEALD_RATIONAL_EPS_8_B03;
+    b = x*b + FRESNEL_HEALD_RATIONAL_EPS_8_B02;
+    b = x*b + FRESNEL_HEALD_RATIONAL_EPS_8_B01;
+    b = x*b + FRESNEL_HEALD_RATIONAL_EPS_8_B00;
+
+    /* Compute the Numerator of the R_lm Function.      */
+    c = FRESNEL_HEALD_RATIONAL_EPS_8_C05*x + FRESNEL_HEALD_RATIONAL_EPS_8_C04;
+    c = x*c + FRESNEL_HEALD_RATIONAL_EPS_8_C03;
+    c = x*c + FRESNEL_HEALD_RATIONAL_EPS_8_C02;
+    c = x*c + FRESNEL_HEALD_RATIONAL_EPS_8_C01;
+    c = x*c + FRESNEL_HEALD_RATIONAL_EPS_8_C00;
+
+    /* Compute the Denominator of the R_lm Function.    */
+    d = FRESNEL_HEALD_RATIONAL_EPS_8_D06*x + FRESNEL_HEALD_RATIONAL_EPS_8_D05;
+    d = x*d + FRESNEL_HEALD_RATIONAL_EPS_8_D04;
+    d = x*d + FRESNEL_HEALD_RATIONAL_EPS_8_D03;
+    d = x*d + FRESNEL_HEALD_RATIONAL_EPS_8_D02;
+    d = x*d + FRESNEL_HEALD_RATIONAL_EPS_8_D01;
+    d = x*d + FRESNEL_HEALD_RATIONAL_EPS_8_D00;
+
+    A = a/b-x*x;
+    A *= PI_BY_TWO;
+    R = c/d;
+    R *= SQRT_PI_BY_2;
+
+    return sgn_x*(SQRT_PI_BY_8 - R*cos(A));
 }
 
 /*---------------------------DEFINE PYTHON FUNCTIONS--------------------------*
@@ -647,12 +689,35 @@ static void double_fresnel_heald_eps_6(char **args, npy_intp *dimensions,
     }
 }
 
+static void double_fresnel_heald_eps_8(char **args, npy_intp *dimensions,
+                                       npy_intp* steps, void* data)
+{
+    npy_intp i;
+    npy_intp n = dimensions[0];
+    char *in1 = args[0];
+    char *out1 = args[1];
+    npy_intp in1_step = steps[0];
+    npy_intp out1_step = steps[1];
+
+    for (i = 0; i < n; i++) {
+        /*BEGIN main ufunc computation*/
+        *((double *)out1) = Fresnel_Sine_Heald_Rational_EPS_Minus_Eight(
+            *(double *)in1
+        );
+        /*END main ufunc computation*/
+
+        in1 += in1_step;
+        out1 += out1_step;
+    }
+}
+
 /* Define pointers to the C functions. */
 PyUFuncGenericFunction fresnel_sin_1[1] = {&double_fresnelsin_taylor_to_asymp};
 PyUFuncGenericFunction fresnel_sin_2[1] = {&double_fresnelsin_while_to_asymp};
 PyUFuncGenericFunction fresnel_sin_3[1] = {&double_fresnel_heald_eps_3};
 PyUFuncGenericFunction fresnel_sin_4[1] = {&double_fresnel_heald_eps_4};
 PyUFuncGenericFunction fresnel_sin_5[1] = {&double_fresnel_heald_eps_6};
+PyUFuncGenericFunction fresnel_sin_6[1] = {&double_fresnel_heald_eps_8};
 
 /* Input and return types for double input and out. */
 static char double_double_types[2] = {NPY_DOUBLE, NPY_DOUBLE};
@@ -678,6 +743,7 @@ PyMODINIT_FUNC PyInit__fresnel_integrals(void)
     PyObject *fresnel_sin_heald_eps_three;
     PyObject *fresnel_sin_heald_eps_four;
     PyObject *fresnel_sin_heald_eps_six;
+    PyObject *fresnel_sin_heald_eps_eight;
 
     PyObject *m, *d;
     m = PyModule_Create(&moduledef);
@@ -722,6 +788,14 @@ PyMODINIT_FUNC PyInit__fresnel_integrals(void)
         "fresnel_sin_heald_eps_six_docstring", 0
     );
 
+    fresnel_sin_heald_eps_eight = PyUFunc_FromFuncAndData(
+        fresnel_sin_6, PyuFunc_data, double_double_types,
+        1, 1, 1, PyUFunc_None, 
+        "fresnel_sin_heald_eps_eight",
+        "fresnel_sin_heald_eps_eight_docstring", 0
+    );
+
+
     d = PyModule_GetDict(m);
 
     PyDict_SetItemString(d, "fresnel_sin_taylor_to_asymptotic",
@@ -734,11 +808,14 @@ PyMODINIT_FUNC PyInit__fresnel_integrals(void)
                          fresnel_sin_heald_eps_four);
     PyDict_SetItemString(d, "fresnel_sin_heald_eps_six",
                          fresnel_sin_heald_eps_six);
+    PyDict_SetItemString(d, "fresnel_sin_heald_eps_eight",
+                         fresnel_sin_heald_eps_eight);
     Py_DECREF(fresnel_sin_taylor_to_asymptotic);
     Py_DECREF(fresnel_sin_while_to_asymptotic);
     Py_DECREF(fresnel_sin_heald_eps_three);
     Py_DECREF(fresnel_sin_heald_eps_four);
     Py_DECREF(fresnel_sin_heald_eps_six);
+    Py_DECREF(fresnel_sin_heald_eps_eight);
     return m;
 }
 #else
@@ -749,6 +826,7 @@ PyMODINIT_FUNC init__funcs(void)
     PyObject *fresnel_sin_heald_eps_three;
     PyObject *fresnel_sin_heald_eps_four;
     PyObject *fresnel_sin_heald_eps_six;
+    PyObject *fresnel_sin_heald_eps_eight;
 
     PyObject *m, *d;
 
@@ -793,6 +871,12 @@ PyMODINIT_FUNC init__funcs(void)
         "fresnel_sin_heald_eps_six",
         "fresnel_sin_heald_eps_six_docstring", 0
     );
+    fresnel_sin_heald_eps_eight = PyUFunc_FromFuncAndData(
+        fresnel_sin_6, PyuFunc_data, double_double_types,
+        1, 1, 1, PyUFunc_None, 
+        "fresnel_sin_heald_eps_eight",
+        "fresnel_sin_heald_eps_eight_docstring", 0
+    );
 
     d = PyModule_GetDict(m);
 
@@ -806,10 +890,13 @@ PyMODINIT_FUNC init__funcs(void)
                          fresnel_sin_heald_eps_four);
     PyDict_SetItemString(d, "fresnel_sin_heald_eps_six",
                          fresnel_sin_heald_eps_six);
+    PyDict_SetItemString(d, "fresnel_sin_heald_eps_eight",
+                         fresnel_sin_heald_eps_eight);
     Py_DECREF(fresnel_sin_taylor_to_asymptotic);
     Py_DECREF(fresnel_sin_while_to_asymptotic);
     Py_DECREF(fresnel_sin_heald_eps_three);
     Py_DECREF(fresnel_sin_heald_eps_four);
     Py_DECREF(fresnel_sin_heald_eps_six);
+    Py_DECREF(fresnel_sin_heald_eps_eight);
 }
 #endif

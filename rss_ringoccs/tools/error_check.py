@@ -176,7 +176,7 @@ def check_range_input(rng, f_name):
 
 def check_psitype(psitype, fname):
     psi_types = ["fresnel", "fresnel3", "fresnel4",
-                 "fresnel6", "fresnel8", "full"]
+                 "fresnel6", "fresnel8", "full", "c"]
 
     # Cbeck that psitype is a valid string.
     if not isinstance(psitype, str):

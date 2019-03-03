@@ -11,6 +11,30 @@
 #define HALF_PI 1.5707963267948966
 #define ONE_PI 3.141592653589793
 
+/*
+#define KAISER_BESSEL_2_5_A00 1.0
+#define KAISER_BESSEL_2_5_A01 -14.71036758931379
+#define KAISER_BESSEL_2_5_A02 94.28094137560409
+#define KAISER_BESSEL_2_5_A03 -353.52377591977927
+#define KAISER_BESSEL_2_5_A04 878.0028262813076
+#define KAISER_BESSEL_2_5_A05 -1551.8157242842929
+#define KAISER_BESSEL_2_5_A06 2048.5647177480982
+*/
+
+#define MODIFIED_KAISER_BESSEL_2_5_A00 0.0026880229613119944
+#define MODIFIED_KAISER_BESSEL_2_5_A01 0.0414526925768658
+#define MODIFIED_KAISER_BESSEL_2_5_A02 0.15981315511470268
+#define MODIFIED_KAISER_BESSEL_2_5_A03 0.27383552414445234
+#define MODIFIED_KAISER_BESSEL_2_5_A04 0.26393049748737285
+#define MODIFIED_KAISER_BESSEL_2_5_A05 0.16280559997394245
+#define MODIFIED_KAISER_BESSEL_2_5_A06 0.06974074939343818
+#define MODIFIED_KAISER_BESSEL_2_5_A07 0.021948775738161588
+#define MODIFIED_KAISER_BESSEL_2_5_A08 0.005288714199801829
+#define MODIFIED_KAISER_BESSEL_2_5_A09 0.0010068965459581003
+#define MODIFIED_KAISER_BESSEL_2_5_A10 0.00015527610283483967
+#define MODIFIED_KAISER_BESSEL_2_5_A11 1.978969147627502e-05
+
+
 static PyMethodDef _diffraction_functions_methods[] = {{NULL, NULL, 0, NULL}};
 
 static void __rect(double* wfunc, double w_width, double dx, long nw_pts)
@@ -36,9 +60,34 @@ static void __coss(double* wfunc, double w_width, double dx, long nw_pts)
         }
 }
 
+static void __kbmd25(double* wfunc, double w_width, double dx, long nw_pts)
+{
+        long i;
+        double x;
+        double bessel_x;
+        dx = dx / w_width;
+
+        for (i=0; i<nw_pts; i++){
+            x = i - (nw_pts - 1) / 2.0;
+            x *= dx;
+            x *= x;
+            x = 1.0 - 4.0*x;
+            bessel_x = MODIFIED_KAISER_BESSEL_2_5_A08*x;
+            bessel_x = x*bessel_x + MODIFIED_KAISER_BESSEL_2_5_A07;
+            bessel_x = x*bessel_x + MODIFIED_KAISER_BESSEL_2_5_A06;
+            bessel_x = x*bessel_x + MODIFIED_KAISER_BESSEL_2_5_A05;
+            bessel_x = x*bessel_x + MODIFIED_KAISER_BESSEL_2_5_A04;
+            bessel_x = x*bessel_x + MODIFIED_KAISER_BESSEL_2_5_A03;
+            bessel_x = x*bessel_x + MODIFIED_KAISER_BESSEL_2_5_A02;
+            bessel_x = x*bessel_x + MODIFIED_KAISER_BESSEL_2_5_A01;
+
+            wfunc[i] = x*bessel_x;
+        }
+}
+
 complex double _fresnel_transform(double* x_arr, char* T_in, double* w_func,
-                                   double F, double dx, long n_pts,
-                                   npy_intp T_in_steps)
+                                  double F, double dx, long n_pts,
+                                  npy_intp T_in_steps)
 {
     long i, j;
     double x, F2;
@@ -54,6 +103,7 @@ complex double _fresnel_transform(double* x_arr, char* T_in, double* w_func,
                  *(complex double *)(T_in + j*T_in_steps);
         j += 1;
     }
+
         T_out *= (0.5+0.5*_Complex_I)*dx*F;
     return T_out;
 }
@@ -64,7 +114,6 @@ static void get_arr(double* x_arr, double dx, long nw_pts)
     double x;
 
     j = -(nw_pts-1)/2;
-
 
     for (i=0; i<nw_pts; ++i){
         x = - j*dx;
@@ -102,7 +151,7 @@ static void Fresnel_Transform_Func(char **args, npy_intp *dimensions,
     else if (*(int *)wtype == 3){fw = &__coss;}
     else if (*(int *)wtype == 4){fw = &__coss;}
     else if (*(int *)wtype == 5){fw = &__coss;}
-    else {fw = &__coss;}
+    else {fw = &__kbmd25;}
 
     /* Compute first window width and window function. */
     w_km_vals   += *(long *)start*w_steps;
@@ -151,7 +200,7 @@ static void Fresnel_Transform_Func(char **args, npy_intp *dimensions,
 PyUFuncGenericFunction fresnel_transform_funcs[1] = {&Fresnel_Transform_Func};
 
 /* Input and return types for double input and out.. */
-static char data_types[11] = {
+static char data_types[8] = {
     NPY_COMPLEX128,
     NPY_DOUBLE,
     NPY_DOUBLE,

@@ -1288,16 +1288,17 @@ class DiffractionCorrection(object):
                 wnum = 0
             elif (self.wtype == "coss"):
                 wnum = 1
-            elif (self.wtype == "kb25"):
+            elif (self.wtype == "kb20"):
                 wnum = 2
+            elif (self.wtype == "kb25"):
+                wnum = 3
             elif (self.wtype == "kb35"):
                 wnum = 4
             elif (self.wtype == "kbmd20"):
                 wnum = 5
             else:
                 wnum = 6
-            w_func = fw(np.max(self.w_km_vals), self.dx_km)
-            x_arr = np.zeros(np.size(w_func)) + 0.0
+
             T_out = _diffraction_functions.fresnel_transform(
                 T_in, self.rho_km_vals, self.F_km_vals,
                 self.w_km_vals, self.start, self.n_used, wnum

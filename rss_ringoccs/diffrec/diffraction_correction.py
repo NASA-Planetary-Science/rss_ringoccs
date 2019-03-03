@@ -16,6 +16,7 @@ from scipy.special import lambertw, iv
 from rss_ringoccs.tools.history import write_history_dict
 from rss_ringoccs.tools.write_output_files import write_output_files
 from rss_ringoccs.tools import error_check
+from rss_ringoccs._ufuncs import _diffraction_functions
 
 # Declare constant for the speed of light (km/s)
 SPEED_OF_LIGHT_KM = 299792.4580
@@ -431,8 +432,8 @@ class DiffractionCorrection(object):
 
         error_check.check_positive(self.D_km_vals, "D_km_vals", fname)
         error_check.check_positive(self.rho_km_vals, "rho_km_vals", fname)
-        error_check.check_positive(self.p_norm_vals+1.0e-308, "p_norm_vals", fname)
         error_check.check_positive(self.f_sky_hz_vals, "f_sky_hz_vals", fname)
+        error_check.check_non_negative(self.p_norm_vals, "p_norm_vals", fname)
 
         error_check.check_two_pi(self.B_rad_vals, "B_rad_vals",
                                  fname, deg=False)
@@ -1281,24 +1282,27 @@ class DiffractionCorrection(object):
         # Compute current radius and RIP distance.
         r = self.rho_km_vals[start]
         r0 = self.rho_km_vals[crange]
-        """
-        if (self.psitype == "fresnel"):
+
+        if (self.psitype == "c"):
+            if (self.wtype == "rect"):
+                wnum = 0
+            elif (self.wtype == "coss"):
+                wnum = 1
+            elif (self.wtype == "kb25"):
+                wnum = 2
+            elif (self.wtype == "kb35"):
+                wnum = 4
+            elif (self.wtype == "kbmd20"):
+                wnum = 5
+            else:
+                wnum = 6
             w_func = fw(np.max(self.w_km_vals), self.dx_km)
             x_arr = np.zeros(np.size(w_func)) + 0.0
             T_out = _diffraction_functions.fresnel_transform(
-                T_in,
-                self.rho_km_vals,
-                self.F_km_vals,
-                self.w_km_vals,
-                self.w_km_vals,
-                self.w_km_vals,
-                self.start,
-                self.n_used,
-                self.dx_km,
-                1
+                T_in, self.rho_km_vals, self.F_km_vals,
+                self.w_km_vals, self.start, self.n_used, wnum
             )
-        """
-        if (self.psitype == "fresnel"):
+        elif (self.psitype == "fresnel"):
             crange -= 1
             F2 = (self.F_km_vals*self.F_km_vals).tolist()
             x = r-r0

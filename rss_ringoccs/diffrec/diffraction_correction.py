@@ -1283,7 +1283,12 @@ class DiffractionCorrection(object):
         r = self.rho_km_vals[start]
         r0 = self.rho_km_vals[crange]
 
-        if (self.psitype == "c"):
+        if (self.psitype == "cfresnel"):
+            """
+                To avoid string parsing and checking within the C routine,
+                an integer between 0 and 6 is assigned to each of the legal
+                wtype inputs. 
+            """
             if (self.wtype == "rect"):
                 wnum = 0
             elif (self.wtype == "coss"):
@@ -1299,9 +1304,35 @@ class DiffractionCorrection(object):
             else:
                 wnum = 6
 
-            T_out = _diffraction_functions.fresnel_transform(
+            T_out = _diffraction_functions.fresnel_transform_quadratic(
                 T_in, self.rho_km_vals, self.F_km_vals,
                 self.w_km_vals, self.start, self.n_used, wnum
+            )
+        elif (self.psitype == "cfresnel4"):
+            """
+                To avoid string parsing and checking within the C routine,
+                an integer between 0 and 6 is assigned to each of the legal
+                wtype inputs. 
+            """
+            if (self.wtype == "rect"):
+                wnum = 0
+            elif (self.wtype == "coss"):
+                wnum = 1
+            elif (self.wtype == "kb20"):
+                wnum = 2
+            elif (self.wtype == "kb25"):
+                wnum = 3
+            elif (self.wtype == "kb35"):
+                wnum = 4
+            elif (self.wtype == "kbmd20"):
+                wnum = 5
+            else:
+                wnum = 6
+
+            T_out = _diffraction_functions.fresnel_transform_quartic(
+                T_in, self.dx_km, self.F_km_vals, self.phi_rad_vals, kD_vals,
+                self.B_rad_vals, self.D_km_vals, self.w_km_vals, self.start,
+                self.n_used, wnum
             )
         elif (self.psitype == "fresnel"):
             crange -= 1
@@ -1531,6 +1562,7 @@ class DiffractionCorrection(object):
                     print(mes % (i, n_used, nw, loop), end="\r")
             if self.verbose:
                 print("\n", end="\r")
+
         elif (self.psitype == "fresnel6"):
             crange -= 1
             cosb = np.cos(self.B_rad_vals)

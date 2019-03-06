@@ -54,6 +54,19 @@
 #define SQRT_PI_BY_2 1.2533141373155001
 #define SQRT_2_BY_PI 0.7978845608028654
 
+/* Define Coefficients of Taylor Expansion of sin(pi/2 x) and cos(pi/2 x). */
+#define SIN_PI_BY_2_X_A01 1.5707963267948966
+#define SIN_PI_BY_2_X_A03 -0.6459640975062462
+#define SIN_PI_BY_2_X_A05 0.07969262624616703
+#define SIN_PI_BY_2_X_A07 -0.004681754135318687
+
+#define COS_PI_BY_2_X_A00 1.0
+#define COS_PI_BY_2_X_A02 -1.2337005501361697
+#define COS_PI_BY_2_X_A04 0.253669507901048
+#define COS_PI_BY_2_X_A06 -0.020863480763352957
+#define COS_PI_BY_2_X_A08 0.0009192602748394263
+
+
 static PyMethodDef _special_functions_methods[] = {{NULL, NULL, 0, NULL}};
 /*-----------------------------DEFINE C FUNCTIONS-----------------------------*
  * These are functions written in pure C without the use of the Numpy-C API.  *
@@ -210,6 +223,11 @@ double complex Square_Well_Diffraction_Solution(double x, double a,
 
     return F*(1.0+1.0*_Complex_I + (0.5 - 0.5*_Complex_I)*result);
 }
+/*
+double Fast_Sine(double x){
+
+}
+*/
 
 /*---------------------------DEFINE PYTHON FUNCTIONS--------------------------*
  * This contains the Numpy-C and Python-C API parts that allow for the above  *

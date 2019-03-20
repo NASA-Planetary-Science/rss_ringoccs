@@ -65,7 +65,6 @@ def check_non_negative(input_var, input_var_name, f_name):
     
     return
 
-
 def check_two_pi(input_var, input_var_name, f_name, deg=True):
     if deg:
         max_value = 360.0001

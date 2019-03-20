@@ -1,5 +1,5 @@
 /*******************************************************************************
- *                             Fresnel Integrals                               *
+ *                               Fresnel Sine                                  *
  *******************************************************************************
  * This C program contains several algorithms for the computation of the       *
  * Fresnel Sine and Cosine integrals. This is meant to test the accuracy and   *
@@ -17,14 +17,6 @@
  *        | |                                                                  *
  *         -                                                                   *
  *         0                                                                   *
- *                                                                             *
- *           x                                                                 *
- *           -                                                                 *
- *          | |                                                                *
- * C(x) =   |   cos(t^2) dt                                                    *
- *        | |                                                                  *
- *         -                                                                   *
- *         0                                                                   *
  *******************************************************************************
  * It is very common for a pi/2 to be placed inside the sine and cosine terms, *
  * and thus in translating one would need to scale x by sqrt(2/pi) and scale   *
@@ -37,16 +29,10 @@
  *  Fresnel_Sine_Taylor_to_Asymptotic / Fresnel_Cosine_Taylor_to_Asymptotic:   *
  *      This uses the standard Taylor expansion for small inputs (|x|<=3), and *
  *      asymptotic expansions for large input (|x|>3). The Taylor Series are:  *
- *                                                                             * 
+ *                                                                             *
  *                  _____                                                      *
  *                  \      (-1)^n x^(4n+3)/                                    *
  *        S(x)=     /____                /  (4n+3)(2n+1)!                      *
- *                  n = 0                                                      *
- *                                                                             *
- *                                                                             * 
- *                  _____                                                      *
- *                  \      (-1)^n x^(4n+1)/                                    *
- *        C(x)=     /____                /  (4n+1)(2n)!                        *
  *                  n = 0                                                      *
  *                                                                             *
  *      This can be obtained by substituting the Taylor expansions for         *
@@ -62,15 +48,10 @@
  *                                                                             *
  *          a_n(x) = (4n+2)! / (2^(4n+3) (2n+1)! x^(4n+3))                     *
  *          b_n(x) = (4n)! / (2^(4n+1) (2n)! x^(4n+1))                         *
- *                                                                             * 
- *                             _____                                           *
- *                             \                                               *
- *        S(x) = sqrt(pi/i) -  /____  (-1)^n (a_n(x)sin(x^2) + b_n(x)cos(x^2)) *
- *                             n = 0                                           *
  *                                                                             *
  *                             _____                                           *
  *                             \                                               *
- *        S(x) = sqrt(pi/i) +  /____  (-1)^n (b_n(x)sin(x^2) - a_n(x)cos(x^2)) *
+ *        S(x) = sqrt(pi/i) -  /____  (-1)^n (a_n(x)sin(x^2) + b_n(x)cos(x^2)) *
  *                             n = 0                                           *
  *                                                                             *
  *      The error in the asympotic series goes like |a_N(x)|+|b_N(x)|.         *
@@ -81,13 +62,9 @@
  *      during the Taylor approximation, stopping once the error is 1.0e-8.    *
  *******************************************************************************
  *  Fresnel_Sine_Heald_Rational_EPS_Minus_Three,                               *
- *  Fresnel_Cosine_Heald_Rational_EPS_Minus_Three,                             *
  *  Fresnel_Sine_Heald_Rational_EPS_Minus_Four,                                *
- *  Fresnel_Cosine_Heald_Rational_EPS_Minus_Three,                             *
  *  Fresnel_Sine_Heald_Rational_EPS_Minus_Six,                                 *
- *  Fresnel_Cosine_Heald_Rational_EPS_Minus_Six,                               *
  *  Fresnel_Sine_Heald_Rational_EPS_Minus_Eight,                               *
- *  Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight:                             *
  *      Computes fresnel integrals to specified precision using a rational     *
  *      approximation as computed by Mark A. Heald.                            *
  *      See Rational Approximations for the Fresnel Integrals, Mark A. Heald,  *
@@ -97,12 +74,8 @@
  *  Date:       Febuary 26, 2019                                               *
  ******************************************************************************/
 
-#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <math.h>
 #include <complex.h>
-#include "../../include/Python.h"
-#include "../../include/ndarraytypes.h"
-#include "../../include/ufuncobject.h"
 
 /* Define Miscellaneous Constants. */
 #define SQRT_PI_BY_8 0.6266570686577501
@@ -110,10 +83,6 @@
 #define SQRT_2_BY_PI 0.7978845608028654
 #define PI_BY_TWO 1.5707963267948966
 #define SQRT_2 1.4142135623730951
-
-/*
- *  DEFINE COEFFICIENTS FOR FRESNEL SINE INTEGRAL.
- */
 
 /* Define Coefficients for the Fresnel Sine Taylor Expansion. */
 #define FRESNEL_SINE_TAYLOR_00 0.3333333333333333
@@ -153,36 +122,6 @@
 #define FRESNEL_SINE_ASYM_05 -14.765625
 #define FRESNEL_SINE_ASYM_06 81.210938
 #define FRESNEL_SINE_ASYM_07 527.87109375
-
-/*
- *  DEFINE COEFFICIENTS FOR FRESNEL COSINE INTEGRAL.
- */
-
-/* Define Coefficients for the Fresnel Cosine Taylor Expansion. */
-#define FRESNEL_COSINE_TAYLOR_00 1.0
-#define FRESNEL_COSINE_TAYLOR_01 -0.1
-#define FRESNEL_COSINE_TAYLOR_02 0.004629629629629629
-#define FRESNEL_COSINE_TAYLOR_03 -0.00010683760683760684
-#define FRESNEL_COSINE_TAYLOR_04 1.4589169000933706e-06
-#define FRESNEL_COSINE_TAYLOR_05 -1.3122532963802806e-08
-#define FRESNEL_COSINE_TAYLOR_06 8.35070279514724e-11
-#define FRESNEL_COSINE_TAYLOR_07 -3.9554295164585257e-13
-#define FRESNEL_COSINE_TAYLOR_08 1.4483264643598138e-15
-#define FRESNEL_COSINE_TAYLOR_09 -4.221407288807088e-18
-#define FRESNEL_COSINE_TAYLOR_10 1.0025164934907719e-20f
-#define FRESNEL_COSINE_TAYLOR_11 -1.977064753877905e-23
-#define FRESNEL_COSINE_TAYLOR_12 3.289260349175752e-26
-#define FRESNEL_COSINE_TAYLOR_13 -4.6784835155184856e-29
-
-/* Define Coefficients for the Fresnel Coine Asymptotic Expansion. */
-#define FRESNEL_COSINE_ASYM_00 0.5
-#define FRESNEL_COSINE_ASYM_01 -0.25
-#define FRESNEL_COSINE_ASYM_02 -0.375
-#define FRESNEL_COSINE_ASYM_03 0.9375
-#define FRESNEL_COSINE_ASYM_04 3.281250
-#define FRESNEL_COSINE_ASYM_05 -14.765625
-#define FRESNEL_COSINE_ASYM_06 -81.210938
-#define FRESNEL_COSINE_ASYM_07 527.87109375
 
 /*******************************************************************************
  * Define Coefficients Used for the Rational Approximation of the              *
@@ -282,7 +221,6 @@
 #define FRESNEL_HEALD_RATIONAL_EPS_8_D05 0.4205217
 #define FRESNEL_HEALD_RATIONAL_EPS_8_D06 0.13634704
 
-static PyMethodDef _fresnel_integrals_methods[] = {{NULL, NULL, 0, NULL}};
 /*******************************************************************************
  *------------------------------DEFINE C FUNCTIONS-----------------------------*
  *******************************************************************************
@@ -298,44 +236,27 @@ double Fresnel_Sine_Taylor_to_Asymptotic_Func(double x)
 
     /* For small x use the Taylor expansion to compute C(x). For larger x,  *
      * use the asymptotic expansion. For values near 3.076, accuracy of 5   *
-     * decimals is guaranteed. Higher precicion outside this region.        */
+     * decimals is guaranteed. Higher precicion outside this region. When   *
+     * |x| > 1.e8, S(x) returns +/- sqrt(pi/8) to 8 decimals.               */
     if (arg < 9.0){
-        double arg_sq = arg*arg;
-        if (arg < 1.0){
-            sx = arg_sq * FRESNEL_SINE_TAYLOR_03 + FRESNEL_SINE_TAYLOR_02;
-            sx = arg_sq * sx + FRESNEL_SINE_TAYLOR_01;
-            sx = arg_sq * sx + FRESNEL_SINE_TAYLOR_00;
-            sx *= arg;
-            return sx*x;
-        }
-        else if (arg < 4.0){
-            sx = arg_sq * FRESNEL_SINE_TAYLOR_07 + FRESNEL_SINE_TAYLOR_06;
-            sx = arg_sq * sx + FRESNEL_SINE_TAYLOR_05;
-            sx = arg_sq * sx + FRESNEL_SINE_TAYLOR_04;
-            sx = arg_sq * sx + FRESNEL_SINE_TAYLOR_03;
-            sx = arg_sq * sx + FRESNEL_SINE_TAYLOR_02;
-            sx = arg_sq * sx + FRESNEL_SINE_TAYLOR_01;
-            sx = arg_sq * sx + FRESNEL_SINE_TAYLOR_00;
-            sx *= arg;
-            return sx*x;
-        }
-        else{
-            sx = arg_sq * FRESNEL_SINE_TAYLOR_13 + FRESNEL_SINE_TAYLOR_12;
-            sx = arg_sq * sx + FRESNEL_SINE_TAYLOR_11;
-            sx = arg_sq * sx + FRESNEL_SINE_TAYLOR_10;
-            sx = arg_sq * sx + FRESNEL_SINE_TAYLOR_09;
-            sx = arg_sq * sx + FRESNEL_SINE_TAYLOR_08;
-            sx = arg_sq * sx + FRESNEL_SINE_TAYLOR_07;
-            sx = arg_sq * sx + FRESNEL_SINE_TAYLOR_06;
-            sx = arg_sq * sx + FRESNEL_SINE_TAYLOR_05;
-            sx = arg_sq * sx + FRESNEL_SINE_TAYLOR_04;
-            sx = arg_sq * sx + FRESNEL_SINE_TAYLOR_03;
-            sx = arg_sq * sx + FRESNEL_SINE_TAYLOR_02;
-            sx = arg_sq * sx + FRESNEL_SINE_TAYLOR_01;
-            sx = arg_sq * sx + FRESNEL_SINE_TAYLOR_00;
-            sx *= arg;
-            return sx*x;
-        }
+        x *= arg;
+        arg *= arg;
+        sx = arg * FRESNEL_SINE_TAYLOR_15 + FRESNEL_SINE_TAYLOR_14;
+        sx = arg * sx + FRESNEL_SINE_TAYLOR_13;
+        sx = arg * sx + FRESNEL_SINE_TAYLOR_12;
+        sx = arg * sx + FRESNEL_SINE_TAYLOR_11;
+        sx = arg * sx + FRESNEL_SINE_TAYLOR_10;
+        sx = arg * sx + FRESNEL_SINE_TAYLOR_09;
+        sx = arg * sx + FRESNEL_SINE_TAYLOR_08;
+        sx = arg * sx + FRESNEL_SINE_TAYLOR_07;
+        sx = arg * sx + FRESNEL_SINE_TAYLOR_06;
+        sx = arg * sx + FRESNEL_SINE_TAYLOR_05;
+        sx = arg * sx + FRESNEL_SINE_TAYLOR_04;
+        sx = arg * sx + FRESNEL_SINE_TAYLOR_03;
+        sx = arg * sx + FRESNEL_SINE_TAYLOR_02;
+        sx = arg * sx + FRESNEL_SINE_TAYLOR_01;
+        sx = arg * sx + FRESNEL_SINE_TAYLOR_00;
+        return sx*x;
     }
     else if (arg < 1.0e16) {
         double sinarg, cosarg;
@@ -381,7 +302,7 @@ double Fresnel_Sine_While_to_Asymptotic_Func(double x)
         FRESNEL_SINE_TAYLOR_15, FRESNEL_SINE_TAYLOR_16, FRESNEL_SINE_TAYLOR_17,
         FRESNEL_SINE_TAYLOR_18, FRESNEL_SINE_TAYLOR_19, FRESNEL_SINE_TAYLOR_20,
         FRESNEL_SINE_TAYLOR_21, FRESNEL_SINE_TAYLOR_22, FRESNEL_SINE_TAYLOR_23,
-        FRESNEL_SINE_TAYLOR_24, FRESNEL_SINE_TAYLOR_25, FRESNEL_SINE_TAYLOR_26,
+        FRESNEL_SINE_TAYLOR_24, FRESNEL_SINE_TAYLOR_25, FRESNEL_SINE_TAYLOR_26
     };
 
     /* Variables for S(x) and powers of x, respectively. */
@@ -413,7 +334,7 @@ double Fresnel_Sine_While_to_Asymptotic_Func(double x)
         }
         return x*sx;
     }
-    else {
+    else if (arg < 1.0e16) {
         double sinarg, cosarg;
         cosarg = cos(arg);
         sinarg = sin(arg);
@@ -421,17 +342,28 @@ double Fresnel_Sine_While_to_Asymptotic_Func(double x)
         cosarg *= arg;
         arg *= arg;
         sinarg *= arg;
-        cosarg *= FRESNEL_SINE_ASYM_02*arg + FRESNEL_SINE_ASYM_00;
-        sinarg *= FRESNEL_SINE_ASYM_03*arg + FRESNEL_SINE_ASYM_01;
+
+        cosarg *= FRESNEL_SINE_ASYM_00 + arg*(
+                    FRESNEL_SINE_ASYM_02 + arg*(
+                        FRESNEL_SINE_ASYM_04 + FRESNEL_SINE_ASYM_06*arg
+                    )
+                );
+        sinarg *= FRESNEL_SINE_ASYM_01 + arg*(
+                    FRESNEL_SINE_ASYM_03 + arg*(
+                        FRESNEL_SINE_ASYM_05 + FRESNEL_SINE_ASYM_07*arg
+                    )
+                );
 
         sx = cosarg + sinarg;
         sx *= x;
-        if (x > 0){
-            return sx+SQRT_PI_BY_8;
-        }
-        else {
-            return sx-SQRT_PI_BY_8;
-        }
+        /*  (x > 0) - (x < 0) is a quick way to return sign(x) and avoids an  *
+         *  expensive if-then statement. Output for the asymptotic expansion  *
+         *  is f(|x|) + sign(x) * sqrt(pi/8). Error goes like 1/x^15.         */
+        return sx + ((x > 0) - (x < 0))*SQRT_PI_BY_8;
+    }
+    else {
+        /* For large values, return the limit of S(x) as x -> +/- infinity. */
+        return ((x > 0) - (x < 0))*SQRT_PI_BY_8;
     }
 }
 
@@ -571,332 +503,3 @@ double Fresnel_Sine_Heald_Rational_EPS_Minus_Eight(double x)
 
     return sgn_x*(SQRT_PI_BY_8 - R*cos(A));
 }
-
-/*---------------------------DEFINE PYTHON FUNCTIONS--------------------------*
- * This contains the Numpy-C and Python-C API parts that allow for the above  *
- * functions to be called in Python. Numpy arrays, as well as floating point  *
- * and integer valued arguments may then be passed into these functions for   *
- * improvement in performance, as opposed to the routines written purely in   *
- * Python. Successful compiling requires the Numpy and Python header files.   *
- *----------------------------------------------------------------------------*/
-static void double_fresnelsin_taylor_to_asymp(char **args, npy_intp *dimensions,
-                                              npy_intp* steps, void* data)
-{
-    npy_intp i;
-    npy_intp n = dimensions[0];
-    char *in1 = args[0];
-    char *out1 = args[1];
-    npy_intp in1_step = steps[0];
-    npy_intp out1_step = steps[1];
-
-    for (i = 0; i < n; i++) {
-        /* BEGIN main ufunc computation.    */
-        *((double *)out1) = Fresnel_Sine_Taylor_to_Asymptotic_Func(
-            *(double *)in1
-        );
-        /* END main ufunc computation.      */
-
-        in1 += in1_step;
-        out1 += out1_step;
-    }
-}
-
-static void double_fresnelsin_while_to_asymp(char **args, npy_intp *dimensions,
-                                             npy_intp* steps, void* data)
-{
-    npy_intp i;
-    npy_intp n = dimensions[0];
-    char *in1 = args[0];
-    char *out1 = args[1];
-    npy_intp in1_step = steps[0];
-    npy_intp out1_step = steps[1];
-
-    for (i = 0; i < n; i++) {
-        /*BEGIN main ufunc computation*/
-        *((double *)out1) = Fresnel_Sine_While_to_Asymptotic_Func(
-            *(double *)in1
-        );
-        /*END main ufunc computation*/
-
-        in1 += in1_step;
-        out1 += out1_step;
-    }
-}
-
-static void double_fresnel_heald_eps_3(char **args, npy_intp *dimensions,
-                                       npy_intp* steps, void* data)
-{
-    npy_intp i;
-    npy_intp n = dimensions[0];
-    char *in1 = args[0];
-    char *out1 = args[1];
-    npy_intp in1_step = steps[0];
-    npy_intp out1_step = steps[1];
-
-    for (i = 0; i < n; i++) {
-        /*BEGIN main ufunc computation*/
-        *((double *)out1) = Fresnel_Sine_Heald_Rational_EPS_Minus_Three(
-            *(double *)in1
-        );
-        /*END main ufunc computation*/
-
-        in1 += in1_step;
-        out1 += out1_step;
-    }
-}
-
-static void double_fresnel_heald_eps_4(char **args, npy_intp *dimensions,
-                                       npy_intp* steps, void* data)
-{
-    npy_intp i;
-    npy_intp n = dimensions[0];
-    char *in1 = args[0];
-    char *out1 = args[1];
-    npy_intp in1_step = steps[0];
-    npy_intp out1_step = steps[1];
-
-    for (i = 0; i < n; i++) {
-        /*BEGIN main ufunc computation*/
-        *((double *)out1) = Fresnel_Sine_Heald_Rational_EPS_Minus_Four(
-            *(double *)in1
-        );
-        /*END main ufunc computation*/
-
-        in1 += in1_step;
-        out1 += out1_step;
-    }
-}
-
-static void double_fresnel_heald_eps_6(char **args, npy_intp *dimensions,
-                                       npy_intp* steps, void* data)
-{
-    npy_intp i;
-    npy_intp n = dimensions[0];
-    char *in1 = args[0];
-    char *out1 = args[1];
-    npy_intp in1_step = steps[0];
-    npy_intp out1_step = steps[1];
-
-    for (i = 0; i < n; i++) {
-        /*BEGIN main ufunc computation*/
-        *((double *)out1) = Fresnel_Sine_Heald_Rational_EPS_Minus_Six(
-            *(double *)in1
-        );
-        /*END main ufunc computation*/
-
-        in1 += in1_step;
-        out1 += out1_step;
-    }
-}
-
-static void double_fresnel_heald_eps_8(char **args, npy_intp *dimensions,
-                                       npy_intp* steps, void* data)
-{
-    npy_intp i;
-    npy_intp n = dimensions[0];
-    char *in1 = args[0];
-    char *out1 = args[1];
-    npy_intp in1_step = steps[0];
-    npy_intp out1_step = steps[1];
-
-    for (i = 0; i < n; i++) {
-        /*BEGIN main ufunc computation*/
-        *((double *)out1) = Fresnel_Sine_Heald_Rational_EPS_Minus_Eight(
-            *(double *)in1
-        );
-        /*END main ufunc computation*/
-
-        in1 += in1_step;
-        out1 += out1_step;
-    }
-}
-
-/* Define pointers to the C functions. */
-PyUFuncGenericFunction fresnel_sin_1[1] = {&double_fresnelsin_taylor_to_asymp};
-PyUFuncGenericFunction fresnel_sin_2[1] = {&double_fresnelsin_while_to_asymp};
-PyUFuncGenericFunction fresnel_sin_3[1] = {&double_fresnel_heald_eps_3};
-PyUFuncGenericFunction fresnel_sin_4[1] = {&double_fresnel_heald_eps_4};
-PyUFuncGenericFunction fresnel_sin_5[1] = {&double_fresnel_heald_eps_6};
-PyUFuncGenericFunction fresnel_sin_6[1] = {&double_fresnel_heald_eps_8};
-
-/* Input and return types for double input and out. */
-static char double_double_types[2] = {NPY_DOUBLE, NPY_DOUBLE};
-static void *PyuFunc_data[1] = {NULL};
-
-#if PY_VERSION_HEX >= 0x03000000
-static struct PyModuleDef moduledef = {
-    PyModuleDef_HEAD_INIT,
-    "_fresnel_integrals",
-    NULL,
-    -1,
-    _fresnel_integrals_methods,
-    NULL,
-    NULL,
-    NULL,
-    NULL
-};
-
-PyMODINIT_FUNC PyInit__fresnel_integrals(void)
-{
-    PyObject *fresnel_sin_taylor_to_asymptotic;
-    PyObject *fresnel_sin_while_to_asymptotic;
-    PyObject *fresnel_sin_heald_eps_three;
-    PyObject *fresnel_sin_heald_eps_four;
-    PyObject *fresnel_sin_heald_eps_six;
-    PyObject *fresnel_sin_heald_eps_eight;
-
-    PyObject *m, *d;
-    m = PyModule_Create(&moduledef);
-    if (!m) {
-        return NULL;
-    }
-
-    import_array();
-    import_umath();
-
-    fresnel_sin_taylor_to_asymptotic = PyUFunc_FromFuncAndData(
-        fresnel_sin_1, PyuFunc_data, double_double_types,
-        1, 1, 1, PyUFunc_None,
-        "fresnel_sin_taylor_to_asymptotic",
-        "fresnel_sin_1_docstring", 0
-    );
-
-    fresnel_sin_while_to_asymptotic = PyUFunc_FromFuncAndData(
-        fresnel_sin_2, PyuFunc_data, double_double_types,
-        1, 1, 1, PyUFunc_None, 
-        "fresnel_sin_while_to_asymptotic",
-        "fresnel_sin_while_to_asymptotic_docstring", 0
-    );
-
-    fresnel_sin_heald_eps_three = PyUFunc_FromFuncAndData(
-        fresnel_sin_3, PyuFunc_data, double_double_types,
-        1, 1, 1, PyUFunc_None, 
-        "fresnel_sin_heald_eps_three",
-        "fresnel_sin_heald_eps_three_docstring", 0
-    );
-    fresnel_sin_heald_eps_four = PyUFunc_FromFuncAndData(
-        fresnel_sin_4, PyuFunc_data, double_double_types,
-        1, 1, 1, PyUFunc_None, 
-        "fresnel_sin_heald_eps_four",
-        "fresnel_sin_heald_eps_four_docstring", 0
-    );
-
-    fresnel_sin_heald_eps_six = PyUFunc_FromFuncAndData(
-        fresnel_sin_5, PyuFunc_data, double_double_types,
-        1, 1, 1, PyUFunc_None, 
-        "fresnel_sin_heald_eps_six",
-        "fresnel_sin_heald_eps_six_docstring", 0
-    );
-
-    fresnel_sin_heald_eps_eight = PyUFunc_FromFuncAndData(
-        fresnel_sin_6, PyuFunc_data, double_double_types,
-        1, 1, 1, PyUFunc_None, 
-        "fresnel_sin_heald_eps_eight",
-        "fresnel_sin_heald_eps_eight_docstring", 0
-    );
-
-
-    d = PyModule_GetDict(m);
-
-    PyDict_SetItemString(d, "fresnel_sin_taylor_to_asymptotic",
-                         fresnel_sin_taylor_to_asymptotic);
-    PyDict_SetItemString(d, "fresnel_sin_while_to_asymptotic",
-                         fresnel_sin_while_to_asymptotic);
-    PyDict_SetItemString(d, "fresnel_sin_heald_eps_three",
-                         fresnel_sin_heald_eps_three);
-    PyDict_SetItemString(d, "fresnel_sin_heald_eps_four",
-                         fresnel_sin_heald_eps_four);
-    PyDict_SetItemString(d, "fresnel_sin_heald_eps_six",
-                         fresnel_sin_heald_eps_six);
-    PyDict_SetItemString(d, "fresnel_sin_heald_eps_eight",
-                         fresnel_sin_heald_eps_eight);
-    Py_DECREF(fresnel_sin_taylor_to_asymptotic);
-    Py_DECREF(fresnel_sin_while_to_asymptotic);
-    Py_DECREF(fresnel_sin_heald_eps_three);
-    Py_DECREF(fresnel_sin_heald_eps_four);
-    Py_DECREF(fresnel_sin_heald_eps_six);
-    Py_DECREF(fresnel_sin_heald_eps_eight);
-    return m;
-}
-#else
-PyMODINIT_FUNC init__funcs(void)
-{
-    PyObject *fresnel_sin_taylor_to_asymptotic;
-    PyObject *fresnel_sin_while_to_asymptotic;
-    PyObject *fresnel_sin_heald_eps_three;
-    PyObject *fresnel_sin_heald_eps_four;
-    PyObject *fresnel_sin_heald_eps_six;
-    PyObject *fresnel_sin_heald_eps_eight;
-
-    PyObject *m, *d;
-
-    m = Py_InitModule("__funcs", _fresnel_integrals_methods);
-    if (m == NULL) {
-        return;
-    }
-
-    import_array();
-    import_umath();
-
-    fresnel_sin_taylor_to_asymptotic = PyUFunc_FromFuncAndData(
-        fresnel_sin_1, PyuFunc_data, double_double_types,
-        1, 1, 1, PyUFunc_None,
-        "fresnel_sin_taylor_to_asymptotic",
-        "fresnel_sin_1_docstring", 0
-    );
-
-    fresnel_sin_while_to_asymptotic = PyUFunc_FromFuncAndData(
-        fresnel_sin_2, PyuFunc_data, double_double_types,
-        1, 1, 1, PyUFunc_None, 
-        "fresnel_sin_while_to_asymptotic",
-        "fresnel_sin_while_to_asymptotic_docstring", 0
-    );
-
-    fresnel_sin_heald_eps_three = PyUFunc_FromFuncAndData(
-        fresnel_sin_3, PyuFunc_data, double_double_types,
-        1, 1, 1, PyUFunc_None, 
-        "fresnel_sin_heald_eps_three",
-        "fresnel_sin_heald_eps_three_docstring", 0
-    );
-    fresnel_sin_heald_eps_four = PyUFunc_FromFuncAndData(
-        fresnel_sin_4, PyuFunc_data, double_double_types,
-        1, 1, 1, PyUFunc_None, 
-        "fresnel_sin_heald_eps_four",
-        "fresnel_sin_heald_eps_four_docstring", 0
-    );
-
-    fresnel_sin_heald_eps_six = PyUFunc_FromFuncAndData(
-        fresnel_sin_5, PyuFunc_data, double_double_types,
-        1, 1, 1, PyUFunc_None, 
-        "fresnel_sin_heald_eps_six",
-        "fresnel_sin_heald_eps_six_docstring", 0
-    );
-    fresnel_sin_heald_eps_eight = PyUFunc_FromFuncAndData(
-        fresnel_sin_6, PyuFunc_data, double_double_types,
-        1, 1, 1, PyUFunc_None, 
-        "fresnel_sin_heald_eps_eight",
-        "fresnel_sin_heald_eps_eight_docstring", 0
-    );
-
-    d = PyModule_GetDict(m);
-
-    PyDict_SetItemString(d, "fresnel_sin_taylor_to_asymptotic",
-                         fresnel_sin_taylor_to_asymptotic);
-    PyDict_SetItemString(d, "fresnel_sin_while_to_asymptotic",
-                         fresnel_sin_while_to_asymptotic);
-    PyDict_SetItemString(d, "fresnel_sin_heald_eps_three",
-                         fresnel_sin_heald_eps_three);
-    PyDict_SetItemString(d, "fresnel_sin_heald_eps_four",
-                         fresnel_sin_heald_eps_four);
-    PyDict_SetItemString(d, "fresnel_sin_heald_eps_six",
-                         fresnel_sin_heald_eps_six);
-    PyDict_SetItemString(d, "fresnel_sin_heald_eps_eight",
-                         fresnel_sin_heald_eps_eight);
-    Py_DECREF(fresnel_sin_taylor_to_asymptotic);
-    Py_DECREF(fresnel_sin_while_to_asymptotic);
-    Py_DECREF(fresnel_sin_heald_eps_three);
-    Py_DECREF(fresnel_sin_heald_eps_four);
-    Py_DECREF(fresnel_sin_heald_eps_six);
-    Py_DECREF(fresnel_sin_heald_eps_eight);
-}
-#endif

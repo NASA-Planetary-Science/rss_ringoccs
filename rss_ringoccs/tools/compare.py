@@ -1,5 +1,5 @@
 from rss_ringoccs import diffrec
-from .CSV_tools import ExtractCSVData
+from . import CSV_tools, error_check
 import numpy as np
 from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
@@ -7,10 +7,27 @@ from matplotlib import gridspec
 from scipy import interpolate
 
 def cringplots(rev, geo, cal, dlp, res, outfile="outfile.pdf",
-               wtype="kbmd20", psitype="Fresnel4"):
-    data = ExtractCSVData(geo, cal, dlp, verbose=False)
+               wtype="kbmd20", psitype="cfresnel4"):
+    fname = "tools.compare.cringplots"
+
+    # Run error checks on the input variables.
+    error_check.check_type(rev, str, "rev", fname)
+    error_check.check_type(geo, str, "geo", fname)
+    error_check.check_type(cal, str, "cal", fname)
+    error_check.check_type(dlp, str, "dlp", fname)
+    error_check.check_type(wtype, str, "wtype", fname)
+    error_check.check_type(outfile, str, "outfile", fname)
+    res = error_check.check_type_and_convert(res, float, "res", fname)
+    psitype = error_check.check_psitype(psitype, fname)
+
+    # Get the data from the input GEO, CAL, and DLP CSV Files.
+    data = CSV_tools.ExtractCSVData(geo, cal, dlp, verbose=False)
+
+    # Run diffraction correction on the input data.
     TauInst = diffrec.DiffractionCorrection(data, res, wtype=wtype,
                                             rng=[74630, 90300], psitype=psitype)
+
+    # List of regions to plot within the C Ring.
     RegDict = [
         ["B1 U1", 74665],
         ["Mimas 4:1", 74900],
@@ -50,124 +67,196 @@ def cringplots(rev, geo, cal, dlp, res, outfile="outfile.pdf",
         ["B40", 90280],
     ]
 
-    res = str(TauInst.res)+" km"
+    # Convert to a string for plots.
+    res = "%s km" % str(TauInst.res)
+
+    # Total number of plots, and total number of pages.
     N_Plots = len(RegDict)
     N_Pages = int(N_Plots/8.0)
-    
+
     with PdfPages(outfile) as pdf:
         for i_page in range(N_Pages):
+            # Font and configuration for plots.
             plt.rc('font', family='serif')
             plt.rc('font', size=10)
             plt.figure(figsize=(8.5, 11))
             plt.suptitle("%s C-Ring Reconstructions: %s Resolution"
                          % (rev, res), size=14)
+            
+            # Use gridspec to create 4-by-2 plots.
             gs = gridspec.GridSpec(4, 2, wspace=0.5, hspace=0.5)
 
             # Plot Normalized Power
             for i_plot in range(8):
                 plt.subplot(gs[int(i_plot/2), int(i_plot % 2)])
+
+                # Setup parameters for x and y axes.
                 plt.tick_params(axis='y', which='both', left=True,
                                 right=True, labelleft=True)
                 plt.tick_params(axis='x', which='both', bottom=True,
                                 top=True, labelbottom=True)
+
+                # Number of ticks on the x and y axes.
                 plt.locator_params(axis='y', nbins=3)
                 plt.locator_params(axis='x', nbins=4)
+
+                # Set the title, and labels for both axes.
                 plt.title(RegDict[int(8*i_page+i_plot)][0])
-                plt.ylabel("Normalized Power")
+                plt.ylabel("Normalized Optical Depth")
                 plt.xlabel("Ring Radius (km)")
-                plt.plot(TauInst.rho_km_vals, TauInst.power_vals, 'b')
+
+                # Plot the plots.
+                plt.plot(TauInst.rho_km_vals, TauInst.tau_vals, 'b')
+
+                # Compute the range for the x-axis.
                 rmin = RegDict[int(8*i_page+i_plot)][1] - 15.0
                 rmax = RegDict[int(8*i_page+i_plot)][1] + 15.0
+
+                # Get the indices that are being plotted.
                 nmin = np.min((TauInst.rho_km_vals >= rmin).nonzero())
                 nmax = np.max((TauInst.rho_km_vals <= rmax).nonzero())
-                p = TauInst.power_vals[nmin: nmax+1]
+
+                # Add a buffer in the y-axis.
+                p = TauInst.tau_vals[nmin: nmax+1]
                 ymin = np.min(p)*0.98
                 ymax = np.max(p)*1.02
+
+                # Set the range for the x and y axes.
                 plt.xlim(rmin, rmax)
                 plt.ylim(ymin, ymax)
 
+            # Add the plot to the output PDF and move on to the next one.
             pdf.savefig(bbox_inches="tight", pad_inches=1)
             plt.close()
-        
+
+        # Special case for if the number of plots is not divisble by eight.
         if ((N_Plots % 8) != 0):
+            # Configuration for the plots.
             plt.rc('font', family='serif')
             plt.rc('font', size=10)
             plt.figure(figsize=(8.5, 11))
             plt.suptitle("%s C-Ring Reconstructions: %s Resolution"
                          % (rev, res), size=14)
+
+            # Use gridspec to create 4-by-2 plots.
             gs = gridspec.GridSpec(4, 2, wspace=0.5, hspace=0.5)
+
             for i_plot in range(int(N_Plots % 8)):
                 plt.subplot(gs[int(i_plot/2), int(i_plot % 2)])
+
+                # Tick parameters for x and y axes.
                 plt.tick_params(axis='y', which='both', left=True,
                                 right=True, labelleft=True)
                 plt.tick_params(axis='x', which='both', bottom=True,
                                 top=True, labelbottom=True)
+                
+                # Number of ticks for the x and y axes.
                 plt.locator_params(axis='y', nbins=3)
                 plt.locator_params(axis='x', nbins=4)
+
+                # Title and labels for axes.
                 plt.title(RegDict[int(8*(N_Pages-1)+i_plot)][0])
                 plt.ylabel("Normalized Power")
                 plt.xlabel("Ring Radius (km)")
-                plt.plot(TauInst.rho_km_vals, TauInst.power_vals, 'b')
+
+                # Plot the plots.
+                plt.plot(TauInst.rho_km_vals, TauInst.tau_vals, 'b')
+
+                # Compute the range of the x and y axes.
                 rmin = RegDict[int(8*(N_Pages-1)+i_plot)][1] - 15.0
                 rmax = RegDict[int(8*(N_Pages-1)+i_plot)][1] + 15.0
+
+                # Get the indices that are being plotted.
                 nmin = np.min((TauInst.rho_km_vals >= rmin).nonzero())
                 nmax = np.max((TauInst.rho_km_vals <= rmax).nonzero())
-                p = TauInst.power_vals[nmin: nmax+1]
+
+                # Add a buffer to the y-axis.
+                p = TauInst.tau_vals[nmin: nmax+1]
                 ymin = np.min(p)*0.98
                 ymax = np.max(p)*1.02
+
+                # Set the range for the x and y axes.
                 plt.xlim(rmin, rmax)
                 plt.ylim(ymin, ymax)
 
+            # Add the final page to the output PDF and close.
             pdf.savefig(bbox_inches="tight", pad_inches=1)
             plt.close()
 
 def compare(NormDiff, geo, cal, dlp, tau, outfile, res=0.75, rng="all",
             wtype="kbmd20", norm=True, bfac=True, sigma=2.e-13, verbose=True,
             psitype="Fresnel8"):
-    data = ExtractCSVData(geo, cal, dlp, tau=tau, verbose=verbose)
+
+    # Retrieve the data from the input CSV files.
+    data = CSV_tools.ExtractCSVData(geo, cal, dlp, tau=tau, verbose=verbose)
+
+    # Perform diffraction reconstruction on the raw data.
     rec = diffrec.DiffractionCorrection(NormDiff, res, rng=rng, wtype=wtype,
                                         fwd=True, norm=norm, bfac=bfac,
                                         sigma=sigma, verbose=verbose,
                                         psitype=psitype, write_file=False)
+
+    # Compute the range for the x-axis.
     rmin = np.min(rec.rho_km_vals)
     rmax = np.max(rec.rho_km_vals)
+
+    # Compute the indices corresponding to the range of the x-axis.
     nmin = np.min((rec.rho_km_vals >= rmin).nonzero())
     nmax = np.min((rec.rho_km_vals <= rmax).nonzero())
 
     with PdfPages(outfile) as pdf:
+        # Configuration for the plots.
         plt.rc('font', family='serif')
         plt.rc('font', size=10)
         plt.figure(figsize=(8.5, 11))
+
+        # Title for the page.
         plt.suptitle("TAU Parameters", size=14)
+
+        # Use gridspec to create a 3-by-2 group of plots.
         gs = gridspec.GridSpec(3, 2, wspace=0.0, hspace=0.0)
 
-        # Plot Normalized Power
+        # Subplot for Normalized Power.
         plt.subplot(gs[0, 0])
+
+        # Set tick parameters for the x and y axes.
         plt.tick_params(axis='y', which='both', left=True,
                         right=False, labelleft=True)
         plt.tick_params(axis='x', which='both', bottom=False,
                         top=True, labelbottom=False)
+
+        # Add the title for the plots and labels.
         plt.title("Comparison Plots")
         plt.ylabel('Normalized Power')
+
+        # Plot reconstructed power and the power being compared against.
         plt.plot(rec.rho_km_vals, rec.power_vals, 'b')
         plt.plot(data.tau_rho, data.power_vals, 'g')
         p1 = rec.power_vals
         p2 = data.power_vals
+
+        # Compute the range of the y-axis.
         ymin = np.min([np.min(p1), np.min(p2)])*0.98
         ymax = np.max([np.max(p1), np.max(p2)])*1.02
         plt.xlim(rmin, rmax)
         plt.ylim(ymin, ymax)
 
-        # Plot Difference in Normalized Power
+        # Plot Difference in Normalized Power.
         plt.subplot(gs[0, 1])
         interp = interpolate.interp1d(data.tau_rho, data.power_vals)
         diff = rec.power_vals - interp(rec.rho_km_vals)
+
+        # Set tick parameters for the difference plot.
         plt.tick_params(axis='y', which='both', left=False,
                         right=True, labelleft=False, labelright=True)
         plt.tick_params(axis='x', which='both', bottom=False,
                         top=True, labelbottom=False)
+
+        # Add a title, and make the plots.
         plt.title("Difference Plots")
         plt.plot(rec.rho_km_vals, diff, 'r')
+
+        # Set the range for the x and y axes.
         plt.xlim(rmin, rmax)
         plt.ylim(np.min(diff), np.max(diff))
 
@@ -371,190 +460,66 @@ def galleryplots(rev, geo, cal, dlp, tau=None, res=[1.0], rng="all",
                 The maximum y value to be plotted.
                 Ex: ymax = 1.5
     """
-    # Make sure rev, geo, cal, and dlp are strings.
-    if (not isinstance(rev, str)):
-        raise TypeError(
-            "rev must be a string: 'Rev###'\n"
-            "\tYour input has type: %s\n"
-            "\tInput should have type: str\n"
-            % (type(rev).__name__)
-        )
-    elif (not isinstance(geo, str)):
-        raise TypeError(
-            "geo must be a string: '/path/to/geo'\n"
-            "\tYour input has type: %s\n"
-            "\tInput should have type: str\n"
-            % (type(geo).__name__)
-        )
-    elif (not isinstance(cal, str)):
-        raise TypeError(
-            "cal must be a string: '/path/to/cal'\n"
-            "\tYour input has type: %s\n"
-            "\tInput should have type: str\n"
-            % (type(cal).__name__)
-        )
-    elif (not isinstance(dlp, str)):
-        raise TypeError(
-            "dlp must be a string: '/path/to/dlp'\n"
-            "\tYour input has type: %s\n"
-            "\tInput should have type: str\n"
-            % (type(dlp).__name__)
-        )
-    elif (not isinstance(outfile, str)):
-        raise TypeError(
-            "outfile must be a string: '/path/to/outfile'\n"
-            "\tYour input has type: %s\n"
-            "\tInput should have type: str\n"
-            % (type(outfile).__name__)
-        )
-    elif (not isinstance(ymin, float)):
-        try:
-            ymin = float(ymin)
-        except:
-            raise TypeError(
-                "ymin must be a floating point number.\n"
-                "\tYour input has type: %s\n"
-                "\tInput should have type: float\n"
-                % (type(ymin).__name__)
-            )
-    else:
-        pass
+    # Check that the input variables contain legal values.
+    fname = "tools.compare.galleryplots"
+    error_check.check_type(rev, str, "rev", fname)
+    error_check.check_type(geo, str, "geo", fname)
+    error_check.check_type(cal, str, "cal", fname)
+    error_check.check_type(dlp, str, "dlp", fname)
+    error_check.check_type(norm, bool, "norm", fname)
+    error_check.check_type(bfac, bool, "bfac", fname)
+    error_check.check_type(outfile, str, "outfile", fname)
+    error_check.check_type(verbose, bool, "verbose", fname)
+    ymin = error_check.check_type_and_convert(ymin, float, "ymin", fname)
+    ymax = error_check.check_type_and_convert(ymax, float, "ymax", fname)
+    sigma = error_check.check_type_and_convert(sigma, float, "sigma", fname)
+    res_factor = error_check.check_type_and_convert(res_factor, float,
+                                                    "res_factor", fname)
+    
+    error_check.check_positive(sigma, "sigma", fname)
+    error_check.check_positive(res_factor, "res_factor", fname)
 
-    if tau:
-        if (not isinstance(tau, str)):
-            raise TypeError(
-                "tau must be a string: '/path/to/tau'\n"
-                "\tYour input has type: %s\n"
-                "\tInput should have type: str\n"
-                % (type(tau).__name__)
-            )
-        else:
-            pass
-    else:
-        pass
-
-    # Make sure that verbose is a boolean.
-    if not isinstance(verbose, bool):
-        raise TypeError(
-            "\n\tverbose must be Boolean: True/False\n"
-            "\tYour input has type: %s\n"
-            "\tInput should have type: bool\n"
-            "\tSet verbose=True or verbose=False\n"
-            % (type(verbose).__name__)
-        )
-    else:
-        pass
+    psitype = error_check.check_psitype(psitype, fname)
 
     # Check that the input resolution is a positive floating point number.
     if (not isinstance(res, list)):
-        try:
-            res = float(res)
-            res = [res]
-        except (TypeError, ValueError):
-            raise TypeError(
-                "\n\tres must be a list of positive floating point numbers\n"
-                "\tYour input has type: %s\n"
-                "\tInput should have type: float\n"
-                % (type(res).__name__)
-            )
+        res = error_check.check_type_and_convert(res, float, "res", fname)
+        res = [res]
     else:
         pass
 
     for x in res:
-        if (x <= 0.0):
-            raise ValueError(
-                "\n\tres must be a list of positive floating point numbers\n"
-                "\tYour requested resolutions (km): %f\n"
-                % (res)
-            )
-        else:
-            pass
+        error_check.check_positive(x, "res", fname)
+    
+    if tau:
+        error_check.check_type(tau, str, "tau", fname)
 
-    # Ensure that the normalize boolean has a legal value.
-    if not isinstance(norm, bool):
-        raise TypeError(
-            "\n\tnorm must be Boolean: True/False\n"
-            "\tYour input has type: %s\n"
-            "\tInput should have type: bool\n"
-            "\tSet norm=True or norm=False\n"
-            % (type(norm).__name__)
-        )
-    else:
-        pass
+    # Extract the data from the given CSV files.
+    data = CSV_tools.ExtractCSVData(geo, cal, dlp, tau=tau, verbose=verbose)
 
-    # Make sure that bfac is a boolean.
-    if not isinstance(bfac, bool):
-        raise TypeError(
-            "\n\tbfac must be Boolean: True/False\n"
-            "\tYour input has type: %s\n"
-            "\tInput should have type: bool\n"
-            "\tSet bfac=True or bfac=False\n"
-            % (type(bfac).__name__)
-        )
-    else:
-        pass
-        
-    # Check that res_factor is a floating point number.
-    if (not isinstance(res_factor, float)):
-        try:
-            res_factor = float(res_factor)
-        except (TypeError, ValueError):
-            raise TypeError(
-                "\n\tres_factor must be a positive floating point number.\n"
-                "\tYour input has type: %s\n"
-                % (type(res_factor).__name__)
-            )
-    else:
-        pass
-
-    if (res_factor <= 0.0):
-            raise ValueError(
-                "\n\tres_factor must be a positive floating point number.\n"
-                "\tYour input: %f\n"
-                % (res_factor)
-            )
-    else:
-        pass
-
-    # Check that the Allen Deviation is a legal value.
-    if (not isinstance(sigma, float)):
-        try:
-            sigma = float(sigma)
-        except (TypeError, ValueError):
-            raise TypeError(
-                "\n\tsigma must be a positive floating point number.\n"
-                "\tYour input has type: %s\n"
-                % (type(sigma).__name__)
-            )
-    else:
-            pass
-
-    if (np.min(sigma) <= 0.0):
-            raise ValueError(
-                "\n\tsigma must be a positive floating point number.\n"
-                "\tYour input: %f\n"
-                % (sigma)
-            )
-    else:
-        pass
-
-
-    data = ExtractCSVData(geo, cal, dlp, tau=tau, verbose=False)
+    # Total number of plots, and total number of pages.
     N_Plots = len(res)
     N_Pages = int(N_Plots/4.0)
 
     with PdfPages(outfile) as pdf:
         for i_page in range(N_Pages):
+            # Configurations for the plots.
             plt.rc('font', family='serif')
             plt.rc('font', size=10)
             plt.figure(figsize=(8.5, 11))
+
+            # Title for the page.
             plt.suptitle("Resolution Comparison: %s" % (rev), size=14)
+
+            # Use gridspec to create a 4-by-1 group of plots.
             gs = gridspec.GridSpec(4, 1, hspace=0.0)
 
             # Perform Reconstructions
             for i in range(4):
                 i_res = int(4*i_page+i)
                 sres = str(res[i_res])+"km Reconstruction"
+
+                # Use the DiffractionCorrection class to get the output data.
                 rec = diffrec.DiffractionCorrection(data, res[i_res],
                                                     wtype=wtype, rng=rng,
                                                     psitype=psitype, norm=norm,
@@ -562,9 +527,13 @@ def galleryplots(rev, geo, cal, dlp, tau=None, res=[1.0], rng="all",
                                                     res_factor=res_factor,
                                                     verbose=verbose)
                 plt.subplot(gs[i, 0])
+
+                # Set up the tick parameters for the y axis.
                 plt.tick_params(axis='y', which='both', left=True,
                                 right=True, labelleft=True)
                 plt.locator_params(axis='y', nbins=4)
+
+                # x-axis ticks depend on if this is the top, middle, or bottom.
                 if (i == 0):
                     start = str(np.min(rec.rho_km_vals))
                     end = str(np.max(rec.rho_km_vals))
@@ -580,28 +549,45 @@ def galleryplots(rev, geo, cal, dlp, tau=None, res=[1.0], rng="all",
                 else:
                     plt.tick_params(axis='x', which='both', bottom=False,
                                     top=False, labelbottom=False)
+
+                # Set the label for the y-axis.
                 plt.ylabel("Normalized Power")
+
+                # Plot the reconstructed power.
                 plt.plot(rec.rho_km_vals, rec.power_vals, 'b', label=sres)
-                plt.plot(data.tau_rho, data.power_vals, 'r', label="PDS")
+
+                # If a tau file is provided, plot the results it contains.
+                if tau:
+                    plt.plot(data.tau_rho, data.power_vals, 'r', label="PDS")
+
+                # Set the x and y range for the plots.
                 rmin = np.min(rec.rho_km_vals)
                 rmax = np.max(rec.rho_km_vals)
                 plt.xlim(rmin, rmax)
                 plt.ylim(ymin, ymax)
                 plt.legend()
 
+            # Append the plots to the pdf, close, and move on to the next one.
             pdf.savefig(bbox_inches="tight", pad_inches=1)
             plt.close()
 
         if ((N_Plots % 4) != 0):
+            # Configurations for the plots.
             plt.rc('font', family='serif')
             plt.rc('font', size=10)
             plt.figure(figsize=(8.5, 11))
+
+            # Title for the page.
             plt.suptitle("Resolution Comparison: %s" % (rev), size=14)
+
+            # Use gridspec to create a 4-by-1 group of plots.
             gs = gridspec.GridSpec(4, 1, hspace=0.0)
 
             for i in range(int(N_Plots % 4)):
                 i_res = int(4*N_Pages+i)
                 sres = str(res[i_res])+"km Reconstruction"
+
+                # Perform diffraction correction on the last sets.
                 rec = diffrec.DiffractionCorrection(data, res[i_res],
                                                     wtype=wtype, rng=rng,
                                                     psitype=psitype, norm=norm,
@@ -609,9 +595,13 @@ def galleryplots(rev, geo, cal, dlp, tau=None, res=[1.0], rng="all",
                                                     res_factor=res_factor,
                                                     verbose=verbose)
                 plt.subplot(gs[i, 0])
+
+                # Set tick parameters for the y axis.
                 plt.tick_params(axis='y', which='both', left=True,
                                 right=True, labelleft=True)
                 plt.locator_params(axis='y', nbins=4)
+
+                # Set tick parameters for the x-axis.
                 if (i == 0):
                     start = str(np.min(rec.rho_km_vals))
                     end = str(np.max(rec.rho_km_vals))
@@ -627,14 +617,25 @@ def galleryplots(rev, geo, cal, dlp, tau=None, res=[1.0], rng="all",
                 else:
                     plt.tick_params(axis='x', which='both', bottom=False,
                                     top=False, labelbottom=False)
+                
+                # Add labels to the y-axis.
                 plt.ylabel("Normalized Power")
+
+                # Plot the results.
                 plt.plot(rec.rho_km_vals, rec.power_vals, 'b', label=sres)
-                plt.plot(data.tau_rho, data.power_vals, 'r', label="PDS")
+
+                # If a tau file is provided, plot the results it contains.
+                if tau:
+                    plt.plot(data.tau_rho, data.power_vals, 'r', label="PDS")
+                
+                # Set the range for the x and y axes.
                 rmin = np.min(rec.rho_km_vals)
                 rmax = np.max(rec.rho_km_vals)
                 plt.xlim(rmin, rmax)
                 plt.ylim(ymin, ymax)
                 plt.legend()
+            
+            # Save the plots and close the PDF.
             pdf.savefig(bbox_inches="tight", pad_inches=1)
             plt.close()
         else:

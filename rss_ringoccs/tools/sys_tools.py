@@ -14,6 +14,8 @@ import subprocess
 import os
 import time
 
+from . import error_check
+
 def shell_execute(script):
     """
         Purpose:
@@ -48,27 +50,15 @@ def shell_execute(script):
                 In [3]: a.args
                 Out[3]: [' echo Bob']
     """
-    if not isinstance(script, list):
-        raise TypeError(
-            "Error: rss_ringoccs.tools.sys_tools: shell_execute\n"
-            "\n\tscript must be a list of strings\n"
-            "\tYour input has type: %s\n"
-            % (type(script).__name__)
-        )
+    fname = "tools.sys_tools.shell_execute"
+    error_check.check_type(script, list, "script", fname)
 
     string = ""
     for x in script:
-        if (not isinstance(x, str)):
-            raise TypeError(
-                "Error: rss_ringoccs.tools.sys_tools: shell_execute\n"
-                "\n\tscript must be a list of strings\n"
-                "\tOne of your inputs has type: %s\n"
-                % (type(x).__name__)
-            )
-        else:
-            string = "%s %s" % (string,x)
-    Process=subprocess.Popen([string],shell=True)
-    return Process
+        error_check.check_type(x, str, "script[i]", fname)
+        string = "%s %s" % (string, x)
+
+    return subprocess.Popen([string],shell=True)
 
 def date_string():
     """
@@ -86,58 +76,21 @@ def date_string():
     return date
 
 def make_executable(path):
-    if not isinstance(path, str):
-        raise TypeError(
-            "Error: rss_ringoccs.tools.sys_tools: make_executable\n"
-            "\n\tpath must be a string\n"
-            "\tYour input has type: %s\n"
-            "\tInput should have type: str\n"
-            % (type(path).__name__)
-        )
-    else:
-        pass
+    error_check.check_type(path, str, "path", "tools.sys_tools.make_executable")
 
     mode = os.stat(path).st_mode
-    mode |= (mode & 0o444) >> 2    # copy R bits to X
+
+    # Copy R bits to X.
+    mode |= (mode & 0o444) >> 2
     os.chmod(path, mode)
 
 def latex_summary_doc(pdffil, res_km, outfilename):
-    if not isinstance(pdffil, str):
-        raise TypeError(
-            "\n\tError Encountered:\n"
-            "\t\trss_ringoccs.tools.sys_tools: latex_summary_doc\n"
-            "\n\tpdffil must be a string\n"
-            "\tYour input has type: %s\n"
-            % (type(pdffil).__name__)
-        )
-    elif not isinstance(outfilename, str):
-        raise TypeError(
-            "\n\tError Encountered:\n"
-            "\t\trss_ringoccs.tools.sys_tools: latex_summary_doc\n"
-            "\n\toutfilename must be a string\n"
-            "\tYour input has type: %s\n"
-            % (type(outfilename).__name__)
-        )
-    else:
-        pass
+    fname = "tools.sys_tools.latex_summary_doc"
+    error_check.check_type(pdffil, str, "pdffil", fname)
+    error_check.check_type(outfilename, str, "outfilename", fname)
+    res = error_check.check_type_and_convert(res, float, "res", fname)
 
-    if not (isinstance(res_km, float)):
-        try:
-            res_km = float(res_km)
-        except (TypeError, ValueError):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.tools.sys_tools: latex_summary_doc\n"
-                "\n\tpdffil must be a floating point number.\n"
-                "\tYour input has type: %s\n"
-                % (type(res_km).__name__)
-        )
-    else:
-        pass
-
-
-    res = str(int(res_km*1000.0)) + 'M'
-    #res = "%sM" % (res)
+    res = "%sM" % str(int(res_km*1000.0))
 
     var = pdffil.split("/")[-1]
     var = var.split("_")
@@ -338,7 +291,11 @@ def latex_summary_doc(pdffil, res_km, outfilename):
                     clip,
                     width=0.75\textwidth
                 ]{\thePDF}
-                \caption{View of RSS ring occultation from Earth, with occultation track plotted in blue (dashed when blocked by planet). 30-min markers are plotted as solid blue dots. Black solid line represents direction to Earth.}
+                \caption{View of RSS ring occultation from Earth,
+                         with occultation track plotted in blue
+                         (dashed when blocked by planet). 30-min markers are
+                         plotted as solid blue dots. Black solid line
+                         represents direction to Earth.}
             \end{figure}
             \vspace{30ex}
             \begin{figure}[H]
@@ -350,13 +307,18 @@ def latex_summary_doc(pdffil, res_km, outfilename):
                     clip,
                     width=\textwidth
                 ]{\thePDF}
-                \caption{View of RSS ring occultation from north pole of planet, with occultation track plotted in blue (dashed when blocked by planet). 30-min markers are plotted as solid blue dots. Black solid line represents direction to Earth.}
+                \caption{View of RSS ring occultation from north pole of planet,
+                         with occultation track plotted in blue
+                         (dashed when blocked by planet). 30-min markers are
+                         plotted as solid blue dots. Black solid line
+                         represents direction to Earth.}
             \end{figure}
             \newpage
             \begin{figure}[H]
                 \centering
                 \includegraphics[page=4, width=\textwidth]{\thePDF}
-                \caption{Rev \theREV\ - \thePROFDIR; selected occultation parameters.}
+                \caption{Rev \theREV\ - \thePROFDIR;
+                         selected occultation parameters.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -381,10 +343,18 @@ def latex_summary_doc(pdffil, res_km, outfilename):
             \begin{landscape}
                 \begin{figure}[H]
                     \centering
-                        \includegraphics[page=6]{\thePDF}
-                    
-                    \caption{
-                    Observing DSN station (DSS-\theDSN) elevation angle (in \textcolor{magenta}{magenta}) superimposed on ring profile at \theRES M resolution from data file \theTAU. \textcolor{blue}{Blue}: Reconstructed normal optical depth; \textcolor{cyan}{Cyan}: Free-space baseline; \textcolor{red}{Red}:Threshold optical depth (measurement SNR $\simeq$ 1). Optical depth is plotted increasing downward, the same direction as increasing direct signal extinction.}
+                    \includegraphics[page=6]{\thePDF}
+                    \caption{Observing DSN station (DSS-\theDSN) elevation
+                             angle (in \textcolor{magenta}{magenta})
+                             superimposed on ring profile at \theRES M
+                             resolution from data file \theTAU.
+                             \textcolor{blue}{Blue}: Reconstructed normal
+                             optical depth; \textcolor{cyan}{Cyan}:
+                             Free-space baseline;
+                             \textcolor{red}{Red}:Threshold optical depth
+                             (measurement SNR $\simeq$ 1). Optical depth is
+                             plotted increasing downward, the same direction
+                             as increasing direct signal extinction.}
                 \end{figure}
             \end{landscape}
             \newpage
@@ -393,8 +363,15 @@ def latex_summary_doc(pdffil, res_km, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=7, width=\textwidth]{\thePDF}
                 }
-                \caption{
-                    Observing DSN station (DSS-\theDSN) elevation angle (in \textcolor{magenta}{magenta}) superimposed on ring profile at \theRES M resolution from data file \theTAU. \textcolor{blue}{Blue}: Reconstructed normal optical depth; \textcolor{cyan}{Cyan}: Free-space baseline; \textcolor{red}{Red}:Threshold optical depth (measurement SNR $\simeq$ 1). Optical depth is plotted increasing downward, the same direction as increasing direct signal extinction.}
+                \caption{Observing DSN station (DSS-\theDSN) elevation angle
+                         (in \textcolor{magenta}{magenta}) superimposed on ring
+                         profile at \theRES M resolution from data file \theTAU.
+                         \textcolor{blue}{Blue}: Reconstructed normal optical
+                         depth; \textcolor{cyan}{Cyan}: Free-space baseline;
+                         \textcolor{red}{Red}:Threshold optical depth
+                         (measurement SNR $\simeq$ 1). Optical depth is plotted
+                         increasing downward, the same direction as increasing
+                         direct signal extinction.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -402,7 +379,13 @@ def latex_summary_doc(pdffil, res_km, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=8, width=\textwidth]{\thePDF}
                 }
-                \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file \theTAU. \textcolor{blue}{Blue}: Reconstructed normal optical depth; \textcolor{cyan}{Cyan}: Free-space baseline; \textcolor{red}{Red}: Threshold optical depth (measurement SNR $\simeq$ 1). Optical depth is plotted downword, the same direction as increasing direct signal extinction.}
+                \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file
+                         \theTAU. \textcolor{blue}{Blue}: Reconstructed normal
+                         optical depth; \textcolor{cyan}{Cyan}: Free-space
+                         baseline; \textcolor{red}{Red}: Threshold optical depth
+                         (measurement SNR $\simeq$ 1). Optical depth is plotted
+                         downword, the same direction as increasing direct
+                         signal extinction.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -410,7 +393,13 @@ def latex_summary_doc(pdffil, res_km, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=9, width=\textwidth]{\thePDF}
                 }
-                \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file \theTAU. \textcolor{blue}{Blue}: Reconstructed normal optical depth; \textcolor{cyan}{Cyan}: Free-space baseline; \textcolor{red}{Red}: Threshold optical depth (measurement SNR $\simeq$ 1). Optical depth is plotted downword, the same direction as increasing direct signal extinction.}
+                \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file
+                         \theTAU. \textcolor{blue}{Blue}: Reconstructed normal
+                         optical depth; \textcolor{cyan}{Cyan}: Free-space
+                         baseline; \textcolor{red}{Red}: Threshold optical
+                         depth (measurement SNR $\simeq$ 1). Optical depth is
+                         plotted downword, the same direction as increasing
+                         direct signal extinction.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -418,7 +407,13 @@ def latex_summary_doc(pdffil, res_km, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=10, width=\textwidth]{\thePDF}
                 }
-                \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file \theTAU. \textcolor{blue}{Blue}: Reconstructed normal optical depth; \textcolor{cyan}{Cyan}: Free-space baseline; \textcolor{red}{Red}: Threshold optical depth (measurement SNR $\simeq$ 1). Optical depth is plotted downword, the same direction as increasing direct signal extinction.}
+                \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file
+                         \theTAU. \textcolor{blue}{Blue}: Reconstructed normal
+                         optical depth; \textcolor{cyan}{Cyan}: Free-space
+                         baseline; \textcolor{red}{Red}: Threshold optical
+                         depth (measurement SNR $\simeq$ 1). Optical depth is
+                         plotted downword, the same direction as increasing
+                         direct signal extinction.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -426,7 +421,13 @@ def latex_summary_doc(pdffil, res_km, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=11, width=\textwidth]{\thePDF}
                 }
-                \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file \theTAU. \textcolor{blue}{Blue}: Reconstructed normal optical depth; \textcolor{cyan}{Cyan}: Free-space baseline; \textcolor{red}{Red}: Threshold optical depth (measurement SNR $\simeq$ 1). Optical depth is plotted downword, the same direction as increasing direct signal extinction.}
+                \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file
+                         \theTAU. \textcolor{blue}{Blue}: Reconstructed normal
+                         optical depth; \textcolor{cyan}{Cyan}: Free-space
+                         baseline; \textcolor{red}{Red}: Threshold optical
+                         depth (measurement SNR $\simeq$ 1). Optical depth is
+                         plotted downword, the same direction as increasing
+                         direct signal extinction.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -434,7 +435,13 @@ def latex_summary_doc(pdffil, res_km, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=12, width=\textwidth]{\thePDF}
                 }
-                \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file \theTAU. \textcolor{blue}{Blue}: Reconstructed normal optical depth; \textcolor{cyan}{Cyan}: Free-space baseline; \textcolor{red}{Red}: Threshold optical depth (measurement SNR $\simeq$ 1). Optical depth is plotted downword, the same direction as increasing direct signal extinction.}
+                \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file
+                         \theTAU. \textcolor{blue}{Blue}: Reconstructed normal
+                         optical depth; \textcolor{cyan}{Cyan}: Free-space
+                         baseline; \textcolor{red}{Red}: Threshold optical
+                         depth (measurement SNR $\simeq$ 1). Optical depth is
+                         plotted downword, the same direction as increasing
+                         direct signal extinction.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -442,7 +449,13 @@ def latex_summary_doc(pdffil, res_km, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=13, width=\textwidth]{\thePDF}
                 }
-                \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file \theTAU. \textcolor{blue}{Blue}: Reconstructed normal optical depth; \textcolor{cyan}{Cyan}: Free-space baseline; \textcolor{red}{Red}: Threshold optical depth (measurement SNR $\simeq$ 1). Optical depth is plotted downword, the same direction as increasing direct signal extinction.}
+                \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file
+                         \theTAU. \textcolor{blue}{Blue}: Reconstructed normal
+                         optical depth; \textcolor{cyan}{Cyan}: Free-space
+                         baseline; \textcolor{red}{Red}: Threshold optical depth
+                         (measurement SNR $\simeq$ 1). Optical depth is plotted
+                         downword, the same direction as increasing direct
+                         signal extinction.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -450,7 +463,13 @@ def latex_summary_doc(pdffil, res_km, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=14, width=\textwidth]{\thePDF}
                 }
-                \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file \theTAU. \textcolor{blue}{Blue}: Reconstructed normal optical depth; \textcolor{cyan}{Cyan}: Free-space baseline; \textcolor{red}{Red}: Threshold optical depth (measurement SNR $\simeq$ 1). Optical depth is plotted downword, the same direction as increasing direct signal extinction.}
+                \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file
+                         \theTAU. \textcolor{blue}{Blue}: Reconstructed normal
+                         optical depth; \textcolor{cyan}{Cyan}: Free-space
+                         baseline; \textcolor{red}{Red}: Threshold optical depth
+                         (measurement SNR $\simeq$ 1). Optical depth is plotted
+                         downword, the same direction as increasing direct
+                         signal extinction.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -458,7 +477,13 @@ def latex_summary_doc(pdffil, res_km, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=15, width=\textwidth]{\thePDF}
                 }
-                \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file \theTAU. \textcolor{blue}{Blue}: Reconstructed normal optical depth; \textcolor{cyan}{Cyan}: Free-space baseline; \textcolor{red}{Red}: Threshold optical depth (measurement SNR $\simeq$ 1). Optical depth is plotted downword, the same direction as increasing direct signal extinction.}
+                \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file
+                         \theTAU. \textcolor{blue}{Blue}: Reconstructed normal
+                         optical depth; \textcolor{cyan}{Cyan}: Free-space
+                         baseline; \textcolor{red}{Red}: Threshold optical depth
+                         (measurement SNR $\simeq$ 1). Optical depth is plotted
+                         downword, the same direction as increasing direct
+                         signal extinction.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -466,7 +491,13 @@ def latex_summary_doc(pdffil, res_km, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=16, width=\textwidth]{\thePDF}
                 }
-                \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file \theTAU. \textcolor{blue}{Blue}: Reconstructed normal optical depth; \textcolor{cyan}{Cyan}: Free-space baseline; \textcolor{red}{Red}: Threshold optical depth (measurement SNR $\simeq$ 1). Optical depth is plotted downword, the same direction as increasing direct signal extinction.}
+                \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file
+                         \theTAU. \textcolor{blue}{Blue}: Reconstructed normal
+                         optical depth; \textcolor{cyan}{Cyan}: Free-space
+                         baseline; \textcolor{red}{Red}: Threshold optical
+                         depth (measurement SNR $\simeq$ 1). Optical depth is
+                         plotted downword, the same direction as increasing
+                         direct signal extinction.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -474,7 +505,13 @@ def latex_summary_doc(pdffil, res_km, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=17, width=\textwidth]{\thePDF}
                 }
-                \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file \theTAU. \textcolor{blue}{Blue}: Reconstructed normal optical depth; \textcolor{cyan}{Cyan}: Free-space baseline; \textcolor{red}{Red}: Threshold optical depth (measurement SNR $\simeq$ 1). Optical depth is plotted downword, the same direction as increasing direct signal extinction.}
+                \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file
+                         \theTAU. \textcolor{blue}{Blue}: Reconstructed normal
+                         optical depth; \textcolor{cyan}{Cyan}: Free-space
+                         baseline; \textcolor{red}{Red}: Threshold optical
+                         depth (measurement SNR $\simeq$ 1). Optical depth is
+                         plotted downword, the same direction as increasing
+                         direct signal extinction.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -482,7 +519,13 @@ def latex_summary_doc(pdffil, res_km, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=18, width=\textwidth]{\thePDF}
                 }
-                \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file \theTAU. \textcolor{blue}{Blue}: Reconstructed normal optical depth; \textcolor{cyan}{Cyan}: Free-space baseline; \textcolor{red}{Red}: Threshold optical depth (measurement SNR $\simeq$ 1). Optical depth is plotted downword, the same direction as increasing direct signal extinction.}
+                \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file
+                         \theTAU. \textcolor{blue}{Blue}: Reconstructed normal
+                         optical depth; \textcolor{cyan}{Cyan}: Free-space
+                         baseline; \textcolor{red}{Red}: Threshold optical
+                         depth (measurement SNR $\simeq$ 1). Optical depth is
+                         plotted downword, the same direction as increasing
+                         direct signal extinction.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -490,7 +533,13 @@ def latex_summary_doc(pdffil, res_km, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=19, width=\textwidth]{\thePDF}
                 }
-                \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file \theTAU. \textcolor{blue}{Blue}: Reconstructed normal optical depth; \textcolor{cyan}{Cyan}: Free-space baseline; \textcolor{red}{Red}: Threshold optical depth (measurement SNR $\simeq$ 1). Optical depth is plotted downword, the same direction as increasing direct signal extinction.}
+                \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file
+                         \theTAU. \textcolor{blue}{Blue}: Reconstructed normal
+                         optical depth; \textcolor{cyan}{Cyan}: Free-space
+                         baseline; \textcolor{red}{Red}: Threshold optical
+                         depth (measurement SNR $\simeq$ 1). Optical depth is
+                         plotted downword, the same direction as increasing
+                         direct signal extinction.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -498,7 +547,13 @@ def latex_summary_doc(pdffil, res_km, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=20, width=\textwidth]{\thePDF}
                 }
-                \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file \theTAU. \textcolor{blue}{Blue}: Reconstructed normal optical depth; \textcolor{cyan}{Cyan}: Free-space baseline; \textcolor{red}{Red}: Threshold optical depth (measurement SNR $\simeq$ 1). Optical depth is plotted downword, the same direction as increasing direct signal extinction.}
+                \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file
+                         \theTAU. \textcolor{blue}{Blue}: Reconstructed normal
+                         optical depth; \textcolor{cyan}{Cyan}: Free-space
+                         baseline; \textcolor{red}{Red}: Threshold optical
+                         depth (measurement SNR $\simeq$ 1). Optical depth is
+                         plotted downword, the same direction as increasing
+                         direct signal extinction.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -506,7 +561,13 @@ def latex_summary_doc(pdffil, res_km, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=21, width=\textwidth]{\thePDF}
                 }
-                \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file \theTAU. \textcolor{blue}{Blue}: Reconstructed normal optical depth; \textcolor{cyan}{Cyan}: Free-space baseline; \textcolor{red}{Red}: Threshold optical depth (measurement SNR $\simeq$ 1). Optical depth is plotted downword, the same direction as increasing direct signal extinction.}
+                \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file
+                         \theTAU. \textcolor{blue}{Blue}: Reconstructed normal
+                         optical depth; \textcolor{cyan}{Cyan}: Free-space
+                         baseline; \textcolor{red}{Red}: Threshold optical
+                         depth (measurement SNR $\simeq$ 1). Optical depth is
+                         plotted downword, the same direction as increasing
+                         direct signal extinction.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -514,7 +575,13 @@ def latex_summary_doc(pdffil, res_km, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=22, width=\textwidth]{\thePDF}
                 }
-                \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file \theTAU. \textcolor{blue}{Blue}: Reconstructed normal optical depth; \textcolor{cyan}{Cyan}: Free-space baseline; \textcolor{red}{Red}: Threshold optical depth (measurement SNR $\simeq$ 1). Optical depth is plotted downword, the same direction as increasing direct signal extinction.}
+                \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file
+                         \theTAU. \textcolor{blue}{Blue}: Reconstructed normal
+                         optical depth; \textcolor{cyan}{Cyan}: Free-space
+                         baseline; \textcolor{red}{Red}: Threshold optical
+                         depth (measurement SNR $\simeq$ 1). Optical depth is
+                         plotted downword, the same direction as increasing
+                         direct signal extinction.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -522,7 +589,13 @@ def latex_summary_doc(pdffil, res_km, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=23, width=\textwidth]{\thePDF}
                 }
-                \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file \theTAU. \textcolor{blue}{Blue}: Reconstructed normal optical depth; \textcolor{cyan}{Cyan}: Free-space baseline; \textcolor{red}{Red}: Threshold optical depth (measurement SNR $\simeq$ 1). Optical depth is plotted downword, the same direction as increasing direct signal extinction.}
+                \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file
+                         \theTAU. \textcolor{blue}{Blue}: Reconstructed normal
+                         optical depth; \textcolor{cyan}{Cyan}: Free-space
+                         baseline; \textcolor{red}{Red}: Threshold optical
+                         depth (measurement SNR $\simeq$ 1). Optical depth is
+                         plotted downword, the same direction as increasing
+                         direct signal extinction.}
             \end{figure}
             \newpage
             \begin{figure}[H]
@@ -530,7 +603,9 @@ def latex_summary_doc(pdffil, res_km, outfilename):
                 \resizebox{\textwidth}{!}{
                     \includegraphics[page=24, width=\textwidth]{\thePDF}
                 }
-                \caption{Rev\theREV\-\theOCC\ DSS-\theDSN\ $\phi$-profile from data file \theTAU. Phase wrapping occurs at the $\pm$180$^{\circ}$ boundaries.}
+                \caption{Rev\theREV\-\theOCC\ DSS-\theDSN\ $\phi$-profile
+                         from data file \theTAU. Phase wrapping occurs at
+                         the $\pm$180$^{\circ}$ boundaries.}
             \end{figure}
         \end{document}
     """ % (pdffil, rev, doy, res, occ, geo, cal, tau, year, band, profdir, dsn)

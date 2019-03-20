@@ -1562,6 +1562,7 @@ class DiffractionCorrection(object):
                     print(mes % (i, n_used, nw, loop), end="\r")
             if self.verbose:
                 print("\n", end="\r")
+            self.psi = psi_vals
 
         elif (self.psitype == "fresnel6"):
             crange -= 1

@@ -11,7 +11,9 @@
 #define HALF_PI 1.5707963267948966
 #define ONE_PI 3.141592653589793
 
-/* Taylor Expansion of the Modified Bessel Function of the First Kind. */
+/* Taylor Expansion of Modified Kaiser-Bessel Function, alpha = 2.0 Pi */
+
+/* Taylor Expansion of Modified Kaiser-Bessel Function, alpha = 2.5 Pi */
 #define MODIFIED_KAISER_BESSEL_2_5_A00 0.0
 #define MODIFIED_KAISER_BESSEL_2_5_A01 0.04145269257683473
 #define MODIFIED_KAISER_BESSEL_2_5_A02 0.1598131551145829
@@ -33,9 +35,8 @@
 #define MODIFIED_KAISER_BESSEL_2_5_A18 1.595536776390232e-13
 #define MODIFIED_KAISER_BESSEL_2_5_A19 6.815840023528809e-15
 
-static PyMethodDef _diffraction_functions_methods[] = {{NULL, NULL, 0, NULL}};
 
-static void get_arr(double* x_arr, double dx, long nw_pts)
+static void get_pi_arr(double* x_arr, double dx, long nw_pts)
 {
     /***************************************************************************
      *  Function:                                                              *
@@ -59,12 +60,11 @@ static void get_arr(double* x_arr, double dx, long nw_pts)
     }
 }
 
-static void get_arr_quartic(double* x_arr, double* x_arr_2,
-                            double dx, long nw_pts)
+static void get_arr(double* x_arr, double dx, long nw_pts)
 {
     /***************************************************************************
      *  Function:                                                              *
-     *      get_arr_quartic                                                    *
+     *      get_arr                                                            *
      *  Purpose:                                                               *
      *      This computes the array pi/2 x^2, where x range from rho-w/2 to    *
      *      rho+w/2. Do the the symmetry involved in the computation of the    *
@@ -78,7 +78,6 @@ static void get_arr_quartic(double* x_arr, double* x_arr_2,
 
     for (i=0; i<nw_pts; ++i){
         x_arr[i]    = (i-nw_pts)*dx;
-        x_arr_2[i]  = x_arr[i]*x_arr[i];
     }
 }
 
@@ -93,17 +92,15 @@ static void __rect(double* wfunc, double w_width, double dx, long nw_pts)
 
 static void __coss(double* wfunc, double w_width, double dx, long nw_pts)
 {
-        long i, j;
+        long i;
         double x;
         dx = ONE_PI * dx / w_width;
 
-        j = -(nw_pts - 1) / 2.0;
         for (i=0; i<nw_pts; i++){
-            x = j * dx;
+            x = (i-nw_pts) * dx;
             x = cos(x);
             x *= x;
             wfunc[i] = x;
-            j += 1;
         }
 }
 
@@ -163,35 +160,54 @@ complex double _fresnel_transform(double* x_arr, char* T_in, double* w_func,
     return T_out;
 }
 
-complex double _fresnel_quartic(double* x_arr, double* x_arr_2, char* T_in,
-                                double* w_func, double rcpr_D, double rcpr_D2,
-                                double A_0, double A_1, double A_2, double dx,
-                                double rcpr_F, double kd, long n_pts,
-                                npy_intp T_in_steps)
+complex double _fresnel_quartic(double* x_arr, char* T_in, double* w_func,
+                                double rcpr_D, double A_0, double A_1,
+                                double A_2, double dx, double rcpr_F, double kd,
+                                long n_pts, npy_intp T_in_steps)
 {
+    /***************************************************************************
+     *  Compute the Fresnel Transform:                                         *
+     *                                                                         *
+     *              W/2                                                        *
+     *               -                                                         *
+     *              | |                                                        *
+     *   T(rho) =   |   T_hat(rho_0)w(rho-rho_0)exp(-i psi) drho_0             *
+     *            | |                                                          *
+     *             -                                                           *
+     *            -W/2                                                         *
+     *                                                                         *
+     *  Where W is the window width, psi is the Fresnel Kernel, T_hat is the   *
+     *  diffrected complex transmittance, and w is the window function.        *
+     **************************************************************************/
     long i, j;
-    double x, x2, psi;
-    complex double T_out, exp_negative_psi;
+    double x, x2, psi, psi_even, psi_odd;
+    complex double T_out, exp_negative_psi, exp_positive_psi;
 
+    /*  Initialize T_out to zero.  */
     T_out = 0.0;
     j = -n_pts;
 
     for (i = 0; i<n_pts; ++i){
         x   = x_arr[i]*rcpr_D;
-        x2  = x_arr_2[i]*rcpr_D2;
+        x2  = x*x;
 
-        /* Use Horner's Method to compute Psi. */
-        psi = A_2*x+A_1;
-        psi = psi*x+A_0;
-        psi *= x2*kd;
+        psi_even = kd*x2*(A_0+x2*A_2);
+        psi_odd = kd*x2*x*A_1;
 
-        exp_negative_psi = (cos(psi) - _Complex_I*sin(psi)) * w_func[i];
-        T_out += exp_negative_psi * (*(complex double *)(T_in + j*T_in_steps) +
-                                     *(complex double *)(T_in - j*T_in_steps));
+        /*  Compute exp(-ipsi) using Euler's Formula.  */
+        psi = psi_even - psi_odd;
+        exp_negative_psi = (cos(psi) - _Complex_I*sin(psi))*w_func[i];
+
+        psi = psi_even + psi_odd;
+        exp_positive_psi = (cos(psi) - _Complex_I*sin(psi))*w_func[i];
+
+        /*  Approximate the integral with a Riemann Sum.  */
+        T_out += exp_negative_psi * *(complex double *)(T_in + j*T_in_steps);
+        T_out += exp_positive_psi * *(complex double *)(T_in - j*T_in_steps);
         j += 1;
     }
         T_out += *(complex double *)T_in;
-        T_out *= (0.5+0.5*_Complex_I)*dx*rcpr_F;
+        T_out *= (0.5 + 0.5*_Complex_I) * dx * rcpr_F;
     return T_out;
 }
 
@@ -233,7 +249,6 @@ static void Fresnel_Transform_Quadratic_Func(char **args, npy_intp *dimensions,
     T_out       += *(long *)start*T_out_steps;
     w_init       = *(double *)w_km_vals;
 
-
     dx = *(double *)(rho_km_vals+rho_steps) - *(double *)(rho_km_vals);
     two_dx = 2.0*dx;
     nw_pts = (int)(w_init / (2.0 * dx));
@@ -243,7 +258,7 @@ static void Fresnel_Transform_Quadratic_Func(char **args, npy_intp *dimensions,
 
     
     fw(w_func, w_init, dx, nw_pts);
-    get_arr(x_arr, dx, nw_pts);
+    get_pi_arr(x_arr, dx, nw_pts);
 
     for (i=0; i<=*(long *)n_used; ++i){
         if (fabs(w_init - *(double *)w_km_vals) >= two_dx) {
@@ -253,7 +268,7 @@ static void Fresnel_Transform_Quadratic_Func(char **args, npy_intp *dimensions,
             w_func = (double *)realloc(w_func, sizeof(double)*nw_pts);
             x_arr = (double *)realloc(x_arr, sizeof(double)*nw_pts);
             fw(w_func, w_init, dx, nw_pts);
-            get_arr(x_arr, dx, nw_pts);
+            get_pi_arr(x_arr, dx, nw_pts);
         }
 
         *((complex double *)T_out) = _fresnel_transform(x_arr, T_in, w_func,
@@ -274,7 +289,7 @@ static void Fresnel_Transform_Quartic_Func(char **args, npy_intp *dimensions,
     long i, nw_pts;
     double w_init, dx, two_dx, cosb, sinp, cosp;
     double Legendre_Coeff, P_1, P12, P_2, P_3, b_0, b_1, b_2;
-    double A_0, A_1, A_2, rcpr_D, rcpr_D2, rcpr_F;
+    double A_0, A_1, A_2, rcpr_D, rcpr_F;
     void (*fw)(double*, double, double, long);
 
     char *T_in              = args[0];
@@ -322,54 +337,57 @@ static void Fresnel_Transform_Quartic_Func(char **args, npy_intp *dimensions,
     nw_pts  = (int)(w_init / (2.0 * dx));
 
     double* x_arr   = (double *)malloc(sizeof(double) * nw_pts);
-    double* x_arr_2 = (double *)malloc(sizeof(double) * nw_pts);
     double* w_func  = (double *)malloc(sizeof(double) * nw_pts);
 
     fw(w_func, w_init, dx, nw_pts);
-    get_arr_quartic(x_arr, x_arr_2, dx, nw_pts);
+    get_arr(x_arr, dx, nw_pts);
 
     for (i=0; i<=*(long *)n_used; ++i){
         rcpr_F          = 1.0 / *(double *)F_km_vals;
         rcpr_D          = 1.0 / *(double *)D_km_vals;
-        rcpr_D2         = rcpr_D*rcpr_D;
         cosb            = cos(*(double *)B_rad_vals);
         cosp            = cos(*(double *)phi_rad_vals);
         sinp            = sin(*(double *)phi_rad_vals);
         Legendre_Coeff  = cosb*cosb*sinp*sinp;
         Legendre_Coeff  = 0.5*Legendre_Coeff/(1.0-Legendre_Coeff);
 
-        /* Compute Legendre Polynomials. */
+        /* Compute Legendre Polynomials. Rather than computing in the         *
+         * standard form, i.e. (3 x^2 - 1) / 2, pre-compute the coefficients  *
+         * of the various divisions, i.e. 1.5 x^2 - 0.5.                      */
         P_1 = cosb*cosp;
         P12 = P_1*P_1;
-        P_2 = (3.0*P12-1.0)*0.5;
-        P_3 = (5.0*P12-3.0)*0.5*P_1;
+        P_2 = 1.5*P12-0.5;
+        P_3 = (2.5*P12-1.5)*P_1;
 
         /* Second set of polynomials, (P_{n} - P_1 * P_{n+1}) / (n+2) */
         b_0 = 0.5 - 0.5*P12;
-        b_1 = (P_1-P_1*P_2)*0.333333333333;
+        b_1 = 0.333333333333 - 0.333333333333*P_2;
         b_2 = (P_2-P_1*P_3)*0.25;
 
         /* Compute coefficients for Fresnel-Legendre Expansion. */
         A_0 = b_0 - Legendre_Coeff*P12;
-        A_1 = b_1 - Legendre_Coeff*2.0*P_1*P_2;
+        A_1 = P_1*(b_1 - Legendre_Coeff*2.0*P_2);
         A_2 = b_2 - Legendre_Coeff*P_2*P_2;
 
+        /*  If the window width changes significantly, recompute w_func.  */
         if (fabs(w_init - *(double *)w_km_vals) >= two_dx) {
             // Reset w_init and recompute window function.
             w_init  = *(double *)w_km_vals;
             nw_pts  = (int)(w_init / (2.0 * dx));
             w_func  = (double *)realloc(w_func, sizeof(double)*nw_pts);
             x_arr   = (double *)realloc(x_arr, sizeof(double)*nw_pts);
-            x_arr_2 = (double *)realloc(x_arr_2, sizeof(double)*nw_pts);
             fw(w_func, w_init, dx, nw_pts);
-            get_arr_quartic(x_arr, x_arr_2, dx, nw_pts);
+            get_arr(x_arr, dx, nw_pts);
         }
 
-        *((complex double *)T_out) = _fresnel_quartic(x_arr, x_arr_2, T_in,
-                                                      w_func, rcpr_D, rcpr_D2,
-                                                      A_0, A_1, A_2, dx, rcpr_F,
-                                                      *(double *)kd_vals,
+        /*  Compute the fresnel tranform about the current point.   */
+        *((complex double *)T_out) = _fresnel_quartic(x_arr, T_in, w_func,
+                                                      rcpr_D, A_0, A_1, A_2, dx,
+                                                      rcpr_F, *(double *)kd_vals,
                                                       nw_pts, T_in_steps);
+        
+        /*  Increment pointers using pointer arithmetic, equivalent to        *
+         *  changing var[n] to var[n+1].                                      */
         phi_rad_vals    += phi_steps;
         kd_vals         += kd_steps;
         B_rad_vals      += B_steps;
@@ -380,6 +398,9 @@ static void Fresnel_Transform_Quartic_Func(char **args, npy_intp *dimensions,
         T_out           += T_out_steps;
     }
 }
+
+/*                            C-Python API Stuff                              */
+static PyMethodDef _diffraction_functions_methods[] = {{NULL, NULL, 0, NULL}};
 
 /* Define pointers to the C functions. */
 PyUFuncGenericFunction f_quad_funcs[1] = {&Fresnel_Transform_Quadratic_Func};
@@ -397,6 +418,7 @@ static char quad_data_types[8] = {
     NPY_COMPLEX128
 };
 
+/* Input and return types for Quartic Fresnel Transform */
 static char qurt_data_types[12] = {
     NPY_COMPLEX128,
     NPY_DOUBLE,

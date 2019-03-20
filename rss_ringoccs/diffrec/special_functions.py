@@ -438,10 +438,13 @@ def fresnel_cos(x):
         return _special_functions.fresnel_cos(x)
     except (TypeError, ValueError):
         raise TypeError(
-            "\n\tError Encountered:\n"
-            "\trss_ringoccs: Diffcorr Subpackage\n"
-            "\tspecial_function.fresnel_cos:\n"
-            "\t\tInput must be an array of floating point numbers.\n"
+            """
+                \r\tError Encountered: rss_ringoccs
+                \r\t\tdiffrec.special_functions.fresnel_sin
+                \r
+                \r\tInvalid input. Input must be a numpy array or
+                \r\ta floating point number.
+            """
         )
 
 def fresnel_sin(x):
@@ -482,28 +485,47 @@ def fresnel_sin(x):
         return _special_functions.fresnel_sin(x)
     except (TypeError, ValueError):
         raise TypeError(
-            "\n\tError Encountered:\n"
-            "\trss_ringoccs: Diffcorr Subpackage\n"
-            "\tspecial_function.fresnel_sin:\n"
-            "\t\tInput must be an array of floating point numbers.\n"
+            """
+                \r\tError Encountered: rss_ringoccs
+                \r\t\tdiffrec.special_functions.fresnel_sin
+                \r
+                \r\tInvalid input. Input must be a numpy array or
+                \r\ta floating point number.
+            """
         )
 
-def square_well_diffraction(x, a, b, F, invert=False):
+def square_well_diffraction(x, a, b, F):
     try:
-        if invert:
-            return 1.0-_special_functions.square_well_diffraction(x, a, b, F)
-        else:
-            return _special_functions.square_well_diffraction(x, a, b, F)
+        return _special_functions.square_well_diffraction(x, a, b, F)
     except(TypeError, ValueError):
         raise TypeError(
-            "\n\tError Encountered:\n"
-            "\trss_ringoccs: diffrec Subpackage\n"
-            "\tspecial_functions.square_well_diffraction:\n"
-            "\t\tInvalid input. Input should be:\n"
-            "\t\t\tx:\t Numpy array of floating point numbers.\n"
-            "\t\t\ta:\t Floating point number.\n"
-            "\t\t\tb:\t Floating point number.\n"
-            "\t\t\tF:\t Floating point number.\n"
+            """
+                \r\tError Encountered: rss_ringoccs
+                \r\t\tdiffrec.special_functions.square_well_diffraction
+                \r
+                \r\tInvalid input. Input should be:
+                \r\t\tx:\t Numpy array of floating point numbers.
+                \r\t\ta:\t Floating point number
+                \r\t\tb:\t Floating point number
+                \r\t\tF:\t Floating point number
+            """
+        )
+
+def inverse_square_well_diffraction(x, a, b, F):
+    try:
+        return _special_functions.inverse_square_well_diffraction(x, a, b, F)
+    except(TypeError, ValueError):
+        raise TypeError(
+            """
+                \r\tError Encountered: rss_ringoccs
+                \r\t\tdiffrec.special_functions.inverse_square_well_diffraction
+                \r
+                \r\tInvalid input. Input should be:
+                \r\t\tx:\t Numpy array of floating point numbers.
+                \r\t\ta:\t Floating point number
+                \r\t\tb:\t Floating point number
+                \r\t\tF:\t Floating point number
+            """
         )
 
 def old_fresnel_cos(x, error_check=True):
@@ -817,7 +839,7 @@ def double_slit_diffraction(x, z, a, d):
 
     return f
 
-def old_square_well_diffraction(x, a, b, F, invert=False):
+def old_square_well_diffraction(x, a, b, F):
     """
         Function:
             sq_well_solve
@@ -841,72 +863,70 @@ def old_square_well_diffraction(x, a, b, F, invert=False):
             Translated from IDL: RJM - 2018/05/15 8:03 P.M.
             Updated and added error checks: RJM - 2018/09/19 7:19 P.M.
     """
-    if (not isinstance(x, np.ndarray)):
+    try:
+        arg_1 = np.sqrt(np.pi/2.0)*((a-x)/F)
+        arg_2 = np.sqrt(np.pi/2.0)*((b-x)/F)
+        
+        return 1.0 - np.sqrt(2.0/np.pi)*(0.5 - 0.5j) * (
+            old_fresnel_cos(arg_2)-old_fresnel_cos(arg_1)+
+            1j*(old_fresnel_sin(arg_2)-old_fresnel_sin(arg_1))
+        )
+    except(TypeError, ValueError):
         raise TypeError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: diffrec subpackage\n"
-                "\tspecial_functions: sq_well_solve\n"
-                "\tFirst variable should be a numpy array.\n"
+            """
+                \r\tError Encountered: rss_ringoccs
+                \r\t\tdiffrec.special_functions.old_square_well_diffraction
+                \r
+                \r\tInvalid input. Input should be:
+                \r\t\tx:\t Numpy array of floating point numbers.
+                \r\t\ta:\t Floating point number
+                \r\t\tb:\t Floating point number
+                \r\t\tF:\t Floating point number
+            """
         )
-    elif (not np.isreal(x).all()):
-        raise ValueError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: diffrec subpackage\n"
-                "\tspecial_functions: sq_well_solve\n"
-                "\tFirst variable should be real valued.\n"
+
+def old_inverse_square_well_diffraction(x, a, b, F):
+    """
+        Function:
+            sq_well_solve
+        Purpose:
+            Computes the solution of diffraction through a square well.
+        Variables:
+            :x:
+                Real numpy array. The independent variable.
+            :a (*float*):
+                The LEFTMOST endpoint of the square well.
+            :b (*float*):
+                The RIGHTMOST endpoint of the square well.
+            :F (*float*):
+                The Fresnel scale.
+        Output:
+            :H:
+                Complex numpy array.
+                Diffraction pattern of a square well on
+                the interal [a,b].
+        History:
+            Translated from IDL: RJM - 2018/05/15 8:03 P.M.
+            Updated and added error checks: RJM - 2018/09/19 7:19 P.M.
+    """
+    try:
+        arg_1 = np.sqrt(np.pi/2.0)*((a-x)/F)
+        arg_2 = np.sqrt(np.pi/2.0)*((b-x)/F)
+        
+        return np.sqrt(2.0/np.pi)*(0.5 - 0.5j) * (
+            old_fresnel_cos(arg_2)-old_fresnel_cos(arg_1)+
+            1j*(old_fresnel_sin(arg_2)-old_fresnel_sin(arg_1))
         )
-    else:
-        pass
-
-    if (not isinstance(a,float)):
-        try:
-            a = float(a)
-        except TypeError:
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: diffrec subpackage\n"
-                "\tspecial_functions: sq_well_solve\n"
-                "\tSecond variable should be a floating point number.\n"
-                "\tYour input has type: %s"
-                % (type(a).__name__)
-            )
-    else:
-        pass
-
-    if (not isinstance(b,float)):
-        try:
-            b = float(b)
-        except TypeError:
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: diffrec subpackage\n"
-                "\tspecial_functions: sq_well_solve\n"
-                "\tThird variable should be a floating point number.\n"
-                "\tYour input has type: %s"
-                % (type(b).__name__)
-            )
-    else:
-        pass
-
-    if (not isinstance(F,float)):
-        try:
-            F = float(F)
-        except TypeError:
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: diffrec subpackage\n"
-                "\tspecial_functions: sq_well_solve\n"
-                "\tFourth variable should be a floating point number.\n"
-                "\tYour input has type: %s"
-                % (type(b).__name__)
-            )
-    else:
-        pass
-
-    H = (0.5 - 0.5j) * (old_fresnel_cos((b-x)/F)-old_fresnel_cos((a-x)/F)+
-                        1j*(old_fresnel_sin((b-x) / F)-old_fresnel_sin((a-x)/F)))
-
-    if not invert:
-        H = 1-H
-
-    return H
+    except(TypeError, ValueError):
+        raise TypeError(
+            """
+                \r\tError Encountered: rss_ringoccs
+                \r\t\tdiffrec.special_functions.old_inverse_square_well_diffraction
+                \r
+                \r\tInvalid input. Input should be:
+                \r\t\tx:\t Numpy array of floating point numbers.
+                \r\t\ta:\t Floating point number
+                \r\t\tb:\t Floating point number
+                \r\t\tF:\t Floating point number
+            """
+        )

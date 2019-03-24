@@ -7,6 +7,7 @@ def configuration(parent_package=None, top_path=None):
                            parent_name=parent_package,
                            top_path=top_path)
     config.add_extension('_special_functions', ['_special_functions.c'])
+    config.add_extension('_fresnel_integrals', ['_fresnel_integrals.c'])
     config.add_extension('_diffraction_functions', ['_diffraction_functions.c'])
 
     return config

@@ -8,8 +8,7 @@
 #include <complex.h>
 
 /* Include the special functions defined in various header files.   */
-#include "./_fresnel_sine.h"
-#include "./_fresnel_cosine.h"
+#include "__fresnel_integrals.h"
 
 /*  Various header files required for the C-Python API to work.     */
 #include "../../include/Python.h"
@@ -17,42 +16,6 @@
 #include "../../include/ufuncobject.h"
 
 static PyMethodDef _special_functions_methods[] = {{NULL, NULL, 0, NULL}};
-/*-----------------------------DEFINE C FUNCTIONS-----------------------------*
- * These are functions written in pure C without the use of the Numpy-C API.  *
- * The are used to define various special functions. They will be wrapped in  *
- * a form that is useable with the Python interpreter later on.               *
- *----------------------------------------------------------------------------*/
-
-double complex Square_Well_Diffraction_Solution(double x, double a,
-                                                double b, double F)
-{
-    double arg1 = SQRT_PI_BY_2*(a-x)/F;
-    double arg2 = SQRT_PI_BY_2*(b-x)/F;
-    double real_part = Fresnel_Cosine_Taylor_to_Asymptotic_Func(arg2)
-                     - Fresnel_Cosine_Taylor_to_Asymptotic_Func(arg1);
-    double imag_part = Fresnel_Sine_Taylor_to_Asymptotic_Func(arg2)
-                     - Fresnel_Sine_Taylor_to_Asymptotic_Func(arg1);
-    double complex result = real_part + imag_part*_Complex_I;
-    result *= SQRT_2_BY_PI;
-
-    return 1.0 - (0.5 - 0.5*_Complex_I)*result;
-}
-
-double complex Inverted_Square_Well_Diffraction_Solution(double x, double a,
-                                                         double b, double F)
-{
-    double arg1 = SQRT_PI_BY_2*(a-x)/F;
-    double arg2 = SQRT_PI_BY_2*(b-x)/F;
-    double real_part =   Fresnel_Cosine_Taylor_to_Asymptotic_Func(arg2)
-                       - Fresnel_Cosine_Taylor_to_Asymptotic_Func(arg1);
-    double imag_part =   Fresnel_Sine_Taylor_to_Asymptotic_Func(arg2)
-                       - Fresnel_Sine_Taylor_to_Asymptotic_Func(arg1);
-    double complex result = real_part + imag_part*_Complex_I;
-    result *= SQRT_2_BY_PI;
-
-    return (0.5 - 0.5*_Complex_I)*result;
-}
-
 /*---------------------------DEFINE PYTHON FUNCTIONS--------------------------*
  * This contains the Numpy-C and Python-C API parts that allow for the above  *
  * functions to be called in Python. Numpy arrays, as well as floating point  *
@@ -65,8 +28,8 @@ static void double_fresnelsin(char **args, npy_intp *dimensions,
 {
     npy_intp i;
     npy_intp n = dimensions[0];
-    char *in1 = args[0];
-    char *out1 = args[1];
+    char *in = args[0];
+    char *out = args[1];
 
     npy_intp in1_step = steps[0];
     npy_intp out1_step = steps[1];
@@ -74,11 +37,13 @@ static void double_fresnelsin(char **args, npy_intp *dimensions,
     for (i = 0; i < n; i++) {
         /*  The function Fresnel_Sine_Taylor_to_Asymptotic_Func is defined in *
          *  _fresnel_sin.h. Make sure this is in the current directory!       */
-        *((double *)out1) = Fresnel_Sine_Taylor_to_Asymptotic_Func(*(double *)in1);
+        *((double *)out) = Fresnel_Sine_Taylor_to_Asymptotic_Func(
+            *(double *)in
+        );
 
         /* Push the pointers forward by the appropriate increment.            */
-        in1 += in1_step;
-        out1 += out1_step;
+        in  += in1_step;
+        out += out1_step;
     }
 }
 
@@ -87,8 +52,8 @@ static void double_fresnelcos(char **args, npy_intp *dimensions,
 {
     npy_intp i;
     npy_intp n = dimensions[0];
-    char *in1 = args[0];
-    char *out1 = args[1];
+    char *in = args[0];
+    char *out = args[1];
 
     npy_intp in1_step = steps[0];
     npy_intp out1_step = steps[1];
@@ -96,11 +61,13 @@ static void double_fresnelcos(char **args, npy_intp *dimensions,
     for (i = 0; i < n; i++) {
         /*  The function Fresnel_Cosine_Taylor_to_Asymptotic_Func is defined  *
          *  in _fresnel_cosine.h. Make sure this is in the current directory! */
-        *((double *)out1) = Fresnel_Cosine_Taylor_to_Asymptotic_Func(*(double *)in1);
+        *((double *)out) = Fresnel_Cosine_Taylor_to_Asymptotic_Func(
+            *(double *)in
+        );
 
         /* Push the pointers forward by the appropriate increment.            */
-        in1 += in1_step;
-        out1 += out1_step;
+        in  += in1_step;
+        out += out1_step;
     }
 }
 
@@ -153,7 +120,6 @@ static void complex_invsqwellsol(char **args, npy_intp *dimensions,
         out += out_step;
     }
 }
-
 
 /* Define pointers to the C functions. */
 PyUFuncGenericFunction fresnel_sin_funcs[1]     = {&double_fresnelsin};

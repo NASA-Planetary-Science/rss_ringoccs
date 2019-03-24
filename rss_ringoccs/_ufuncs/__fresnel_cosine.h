@@ -71,55 +71,18 @@
  *  Author:     Ryan Maguire, Wellesley College                                *
  *  Date:       Febuary 26, 2019                                               *
  ******************************************************************************/
-
 #include <math.h>
 #include <complex.h>
 
-/* Define Miscellaneous Constants. */
-#define SQRT_PI_BY_8 0.6266570686577501
-#define SQRT_PI_BY_2 1.2533141373155001
-#define SQRT_2_BY_PI 0.7978845608028654
-#define PI_BY_TWO 1.5707963267948966
-#define SQRT_2 1.4142135623730951
+/*  Various coefficients and constants defined here.    */
+#include "__math_constants.h"
 
-/* Define Coefficients for the Fresnel Cosine Taylor Expansion. */
-#define FRESNEL_COSINE_TAYLOR_00 1.0
-#define FRESNEL_COSINE_TAYLOR_01 -0.1
-#define FRESNEL_COSINE_TAYLOR_02 0.004629629629629629
-#define FRESNEL_COSINE_TAYLOR_03 -0.00010683760683760684
-#define FRESNEL_COSINE_TAYLOR_04 1.4589169000933706e-06
-#define FRESNEL_COSINE_TAYLOR_05 -1.3122532963802806e-08
-#define FRESNEL_COSINE_TAYLOR_06 8.35070279514724e-11
-#define FRESNEL_COSINE_TAYLOR_07 -3.9554295164585257e-13
-#define FRESNEL_COSINE_TAYLOR_08 1.4483264643598138e-15
-#define FRESNEL_COSINE_TAYLOR_09 -4.221407288807088e-18
-#define FRESNEL_COSINE_TAYLOR_10 1.0025164934907719e-20
-#define FRESNEL_COSINE_TAYLOR_11 -1.977064753877905e-23
-#define FRESNEL_COSINE_TAYLOR_12 3.289260349175752e-26
-#define FRESNEL_COSINE_TAYLOR_13 -4.678483515518486e-29
-#define FRESNEL_COSINE_TAYLOR_14 5.754191643982172e-32
-#define FRESNEL_COSINE_TAYLOR_15 -6.180307588222796e-35
-#define FRESNEL_COSINE_TAYLOR_16 5.846755007468836e-38
-#define FRESNEL_COSINE_TAYLOR_17 -4.908923964523423e-41
-#define FRESNEL_COSINE_TAYLOR_18 3.6824935154611457e-44
-#define FRESNEL_COSINE_TAYLOR_19 -2.483069097454912e-47
-#define FRESNEL_COSINE_TAYLOR_20 1.513107949541217e-50
-#define FRESNEL_COSINE_TAYLOR_21 -8.373419683872281e-54
-#define FRESNEL_COSINE_TAYLOR_22 4.2267897541935526e-57
-#define FRESNEL_COSINE_TAYLOR_23 -1.954102582324171e-60
-#define FRESNEL_COSINE_TAYLOR_24 8.30461450592911e-64
-#define FRESNEL_COSINE_TAYLOR_25 -3.255395462013028e-67
-#define FRESNEL_COSINE_TAYLOR_26 1.1807618389115701e-70
-
-/* Define Coefficients for the Fresnel Coine Asymptotic Expansion. */
-#define FRESNEL_COSINE_ASYM_00 0.5
-#define FRESNEL_COSINE_ASYM_01 -0.25
-#define FRESNEL_COSINE_ASYM_02 -0.375
-#define FRESNEL_COSINE_ASYM_03 0.9375
-#define FRESNEL_COSINE_ASYM_04 3.281250
-#define FRESNEL_COSINE_ASYM_05 -14.765625
-#define FRESNEL_COSINE_ASYM_06 -81.210938
-#define FRESNEL_COSINE_ASYM_07 527.87109375
+/*******************************************************************************
+ *------------------------------DEFINE C FUNCTIONS-----------------------------*
+ * These are functions written in pure C without the use of the Numpy-C API.   *
+ * They are used to define various special functions. They will be wrapped in  *
+ * a form that is useable with the Python interpreter later on.                *
+ ******************************************************************************/
 
 double Fresnel_Cosine_Taylor_to_Asymptotic_Func(double x)
 {
@@ -277,4 +240,142 @@ double Fresnel_Cosine_While_to_Asymptotic_Func(double x)
         /* For large values, return the limit of S(x) as x -> +/- infinity. */
         return ((x > 0) - (x < 0))*SQRT_PI_BY_8;
     }
+}
+
+double Fresnel_Cosine_Heald_Rational_EPS_Minus_Three(double x)
+{
+    double A, R, a, b, c, d, sgn_x;
+    sgn_x = (x>0)-(x<0);
+    x *= SQRT_2_BY_PI*sgn_x;
+
+    /* Compute the Numerator of the A_jk Function.      */
+    a = FRESNEL_HEALD_RATIONAL_EPS_3_A00;
+
+    /* Compute the Denominator of the A_jk Function.    */
+    b = FRESNEL_HEALD_RATIONAL_EPS_3_B03*x + FRESNEL_HEALD_RATIONAL_EPS_3_B02;
+    b = x*b + FRESNEL_HEALD_RATIONAL_EPS_3_B01;
+    b = x*b + FRESNEL_HEALD_RATIONAL_EPS_3_B00;
+
+    /* Compute the Numerator of the R_lm Function.      */
+    c = FRESNEL_HEALD_RATIONAL_EPS_3_C01*x + FRESNEL_HEALD_RATIONAL_EPS_3_C00;
+
+    /* Compute the Denominator of the R_lm Function.    */
+    d = FRESNEL_HEALD_RATIONAL_EPS_3_D02*x + FRESNEL_HEALD_RATIONAL_EPS_3_D01;
+    d = x*d + FRESNEL_HEALD_RATIONAL_EPS_3_D00;
+
+    A = a/b-x*x;
+    A *= PI_BY_TWO;
+    R = c/d;
+    R *= SQRT_PI_BY_2;
+
+    return sgn_x*(SQRT_PI_BY_8 - R*sin(A));
+}
+
+double Fresnel_Cosine_Heald_Rational_EPS_Minus_Four(double x)
+{
+    double A, R, a, b, c, d, sgn_x;
+    sgn_x = (x>0)-(x<0);
+    x *= SQRT_2_BY_PI*sgn_x;
+
+    /* Compute the Numerator of the A_jk Function.      */
+    a = FRESNEL_HEALD_RATIONAL_EPS_4_A01*x + FRESNEL_HEALD_RATIONAL_EPS_4_A00;
+
+    /* Compute the Denominator of the A_jk Function.    */
+    b = FRESNEL_HEALD_RATIONAL_EPS_4_B03*x + FRESNEL_HEALD_RATIONAL_EPS_4_B02;
+    b = x*b + FRESNEL_HEALD_RATIONAL_EPS_4_B01;
+    b = x*b + FRESNEL_HEALD_RATIONAL_EPS_4_B00;
+
+    /* Compute the Numerator of the R_lm Function.      */
+    c = FRESNEL_HEALD_RATIONAL_EPS_4_C02*x + FRESNEL_HEALD_RATIONAL_EPS_4_C01;
+    c = x*c + FRESNEL_HEALD_RATIONAL_EPS_4_C00;
+
+    /* Compute the Denominator of the R_lm Function.    */
+    d = FRESNEL_HEALD_RATIONAL_EPS_4_D03*x + FRESNEL_HEALD_RATIONAL_EPS_4_D02;
+    d = x*d + FRESNEL_HEALD_RATIONAL_EPS_4_D01;
+    d = x*d + FRESNEL_HEALD_RATIONAL_EPS_4_D00;
+
+    A = a/b-x*x;
+    A *= PI_BY_TWO;
+    R = c/d;
+    R *= SQRT_PI_BY_2;
+
+    return sgn_x*(SQRT_PI_BY_8 - R*sin(A));
+}
+
+double Fresnel_Cosine_Heald_Rational_EPS_Minus_Six(double x)
+{
+    double A, R, a, b, c, d, sgn_x;
+    sgn_x = (x>0)-(x<0);
+    x *= SQRT_2_BY_PI*sgn_x;
+
+    /* Compute the Numerator of the A_jk Function.      */
+    a = FRESNEL_HEALD_RATIONAL_EPS_6_A02*x + FRESNEL_HEALD_RATIONAL_EPS_6_A01;
+    a = a*x + FRESNEL_HEALD_RATIONAL_EPS_6_A00;
+
+    /* Compute the Denominator of the A_jk Function.    */
+    b = FRESNEL_HEALD_RATIONAL_EPS_6_B04*x + FRESNEL_HEALD_RATIONAL_EPS_6_B03;
+    b = x*b + FRESNEL_HEALD_RATIONAL_EPS_6_B02;
+    b = x*b + FRESNEL_HEALD_RATIONAL_EPS_6_B01;
+    b = x*b + FRESNEL_HEALD_RATIONAL_EPS_6_B00;
+
+    /* Compute the Numerator of the R_lm Function.      */
+    c = FRESNEL_HEALD_RATIONAL_EPS_6_C03*x + FRESNEL_HEALD_RATIONAL_EPS_6_C02;
+    c = x*c + FRESNEL_HEALD_RATIONAL_EPS_6_C01;
+    c = x*c + FRESNEL_HEALD_RATIONAL_EPS_6_C00;
+
+    /* Compute the Denominator of the R_lm Function.    */
+    d = FRESNEL_HEALD_RATIONAL_EPS_6_D04*x + FRESNEL_HEALD_RATIONAL_EPS_6_D03;
+    d = x*d + FRESNEL_HEALD_RATIONAL_EPS_6_D02;
+    d = x*d + FRESNEL_HEALD_RATIONAL_EPS_6_D01;
+    d = x*d + FRESNEL_HEALD_RATIONAL_EPS_6_D00;
+
+    A = a/b-x*x;
+    A *= PI_BY_TWO;
+    R = c/d;
+    R *= SQRT_PI_BY_2;
+
+    return sgn_x*(SQRT_PI_BY_8 - R*sin(A));
+}
+
+double Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight(double x)
+{
+    double A, R, a, b, c, d, sgn_x;
+    sgn_x = (x>0)-(x<0);
+    x *= SQRT_2_BY_PI*sgn_x;
+
+    /* Compute the Numerator of the A_jk Function.      */
+    a = FRESNEL_HEALD_RATIONAL_EPS_8_A04*x + FRESNEL_HEALD_RATIONAL_EPS_8_A03;
+    a = a*x + FRESNEL_HEALD_RATIONAL_EPS_8_A02;
+    a = a*x + FRESNEL_HEALD_RATIONAL_EPS_8_A01;
+    a = a*x + FRESNEL_HEALD_RATIONAL_EPS_8_A00;
+
+    /* Compute the Denominator of the A_jk Function.    */
+    b = FRESNEL_HEALD_RATIONAL_EPS_8_B06*x + FRESNEL_HEALD_RATIONAL_EPS_8_B05;
+    b = x*b + FRESNEL_HEALD_RATIONAL_EPS_8_B04;
+    b = x*b + FRESNEL_HEALD_RATIONAL_EPS_8_B03;
+    b = x*b + FRESNEL_HEALD_RATIONAL_EPS_8_B02;
+    b = x*b + FRESNEL_HEALD_RATIONAL_EPS_8_B01;
+    b = x*b + FRESNEL_HEALD_RATIONAL_EPS_8_B00;
+
+    /* Compute the Numerator of the R_lm Function.      */
+    c = FRESNEL_HEALD_RATIONAL_EPS_8_C05*x + FRESNEL_HEALD_RATIONAL_EPS_8_C04;
+    c = x*c + FRESNEL_HEALD_RATIONAL_EPS_8_C03;
+    c = x*c + FRESNEL_HEALD_RATIONAL_EPS_8_C02;
+    c = x*c + FRESNEL_HEALD_RATIONAL_EPS_8_C01;
+    c = x*c + FRESNEL_HEALD_RATIONAL_EPS_8_C00;
+
+    /* Compute the Denominator of the R_lm Function.    */
+    d = FRESNEL_HEALD_RATIONAL_EPS_8_D06*x + FRESNEL_HEALD_RATIONAL_EPS_8_D05;
+    d = x*d + FRESNEL_HEALD_RATIONAL_EPS_8_D04;
+    d = x*d + FRESNEL_HEALD_RATIONAL_EPS_8_D03;
+    d = x*d + FRESNEL_HEALD_RATIONAL_EPS_8_D02;
+    d = x*d + FRESNEL_HEALD_RATIONAL_EPS_8_D01;
+    d = x*d + FRESNEL_HEALD_RATIONAL_EPS_8_D00;
+
+    A = a/b-x*x;
+    A *= PI_BY_TWO;
+    R = c/d;
+    R *= SQRT_PI_BY_2;
+
+    return sgn_x*(SQRT_PI_BY_8 - R*sin(A));
 }

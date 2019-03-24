@@ -1,40 +1,12 @@
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <math.h>
 #include <complex.h>
-#include <stdio.h>
 #include "../../include/Python.h"
 #include "../../include/ndarraytypes.h"
 #include "../../include/ufuncobject.h"
 
-/* Various constants used for diffraction correction. */
-#define SQRT_PI_BY_8 0.626657068657750125603941
-#define HALF_PI 1.5707963267948966
-#define ONE_PI 3.141592653589793
-
-/* Taylor Expansion of Modified Kaiser-Bessel Function, alpha = 2.0 Pi */
-
-/* Taylor Expansion of Modified Kaiser-Bessel Function, alpha = 2.5 Pi */
-#define MODIFIED_KAISER_BESSEL_2_5_A00 0.0
-#define MODIFIED_KAISER_BESSEL_2_5_A01 0.04145269257683473
-#define MODIFIED_KAISER_BESSEL_2_5_A02 0.1598131551145829
-#define MODIFIED_KAISER_BESSEL_2_5_A03 0.27383552414424717
-#define MODIFIED_KAISER_BESSEL_2_5_A04 0.26393049748717506
-#define MODIFIED_KAISER_BESSEL_2_5_A05 0.16280559997382046
-#define MODIFIED_KAISER_BESSEL_2_5_A06 0.06974074939338591
-#define MODIFIED_KAISER_BESSEL_2_5_A07 0.02194877573814514
-#define MODIFIED_KAISER_BESSEL_2_5_A08 0.005288714199797866
-#define MODIFIED_KAISER_BESSEL_2_5_A09 0.0010068965459573457
-#define MODIFIED_KAISER_BESSEL_2_5_A10 0.00015527610283472333
-#define MODIFIED_KAISER_BESSEL_2_5_A11 1.978969147626019e-05
-#define MODIFIED_KAISER_BESSEL_2_5_A12 2.1193188594867417e-06
-#define MODIFIED_KAISER_BESSEL_2_5_A13 1.9338793216440484e-07
-#define MODIFIED_KAISER_BESSEL_2_5_A14 1.521573968755883e-08
-#define MODIFIED_KAISER_BESSEL_2_5_A15 1.0428703568483377e-09
-#define MODIFIED_KAISER_BESSEL_2_5_A16 6.282176430490713e-11
-#define MODIFIED_KAISER_BESSEL_2_5_A17 3.352216487175118e-12
-#define MODIFIED_KAISER_BESSEL_2_5_A18 1.595536776390232e-13
-#define MODIFIED_KAISER_BESSEL_2_5_A19 6.815840023528809e-15
-
+/*  Various coefficients and constants defined here.    */
+#include "__math_constants.h"
 
 static void get_pi_arr(double* x_arr, double dx, long nw_pts)
 {
@@ -55,7 +27,7 @@ static void get_pi_arr(double* x_arr, double dx, long nw_pts)
 
     for (i=0; i<nw_pts; ++i){
         x = (i-nw_pts)*dx;
-        x *= HALF_PI*x;
+        x *= PI_BY_TWO*x;
         x_arr[i] = x;
     }
 }

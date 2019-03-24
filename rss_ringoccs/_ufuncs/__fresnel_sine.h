@@ -73,159 +73,16 @@
  *  Author:     Ryan Maguire, Wellesley College                                *
  *  Date:       Febuary 26, 2019                                               *
  ******************************************************************************/
-
 #include <math.h>
 #include <complex.h>
 
-/* Define Miscellaneous Constants. */
-#define SQRT_PI_BY_8 0.6266570686577501
-#define SQRT_PI_BY_2 1.2533141373155001
-#define SQRT_2_BY_PI 0.7978845608028654
-#define PI_BY_TWO 1.5707963267948966
-#define SQRT_2 1.4142135623730951
-
-/* Define Coefficients for the Fresnel Sine Taylor Expansion. */
-#define FRESNEL_SINE_TAYLOR_00 0.3333333333333333
-#define FRESNEL_SINE_TAYLOR_01 -0.023809523809523808
-#define FRESNEL_SINE_TAYLOR_02 0.0007575757575757576
-#define FRESNEL_SINE_TAYLOR_03 -1.3227513227513228e-05
-#define FRESNEL_SINE_TAYLOR_04 1.4503852223150468e-07
-#define FRESNEL_SINE_TAYLOR_05 -1.0892221037148573e-09
-#define FRESNEL_SINE_TAYLOR_06 5.9477940136376354e-12
-#define FRESNEL_SINE_TAYLOR_07 -2.466827010264457e-14
-#define FRESNEL_SINE_TAYLOR_08 8.032735012415773e-17
-#define FRESNEL_SINE_TAYLOR_09 -2.107855191442136e-19
-#define FRESNEL_SINE_TAYLOR_10 4.5518467589282e-22
-#define FRESNEL_SINE_TAYLOR_11 -8.230149299214221e-25
-#define FRESNEL_SINE_TAYLOR_12 1.2641078988989164e-27
-#define FRESNEL_SINE_TAYLOR_13 -1.669761793417372e-30
-#define FRESNEL_SINE_TAYLOR_14 1.9169428621097826e-33
-#define FRESNEL_SINE_TAYLOR_15 -1.9303572088151077e-36
-#define FRESNEL_SINE_TAYLOR_16 1.7188560628017835e-39
-#define FRESNEL_SINE_TAYLOR_17 -1.3630412617791397e-42
-#define FRESNEL_SINE_TAYLOR_18 9.687280238870763e-46
-#define FRESNEL_SINE_TAYLOR_19 -6.205657919637396e-49
-#define FRESNEL_SINE_TAYLOR_20 3.601579309810126e-52
-#define FRESNEL_SINE_TAYLOR_21 -1.9025412272898796e-55
-#define FRESNEL_SINE_TAYLOR_22 9.186429502398686e-59
-#define FRESNEL_SINE_TAYLOR_23 -4.070135277853256e-62
-#define FRESNEL_SINE_TAYLOR_24 1.66058051345109e-65
-#define FRESNEL_SINE_TAYLOR_25 6.259184116948712e-69
-#define FRESNEL_SINE_TAYLOR_26 2.1862104229538858e-72
-
-/* Define Coefficients for the Fresnel Sine Asymptotic Expansion. */
-#define FRESNEL_SINE_ASYM_00 -0.5
-#define FRESNEL_SINE_ASYM_01 -0.25
-#define FRESNEL_SINE_ASYM_02 0.375
-#define FRESNEL_SINE_ASYM_03 0.9375
-#define FRESNEL_SINE_ASYM_04 -3.281250
-#define FRESNEL_SINE_ASYM_05 -14.765625
-#define FRESNEL_SINE_ASYM_06 81.210938
-#define FRESNEL_SINE_ASYM_07 527.87109375
-
-/*******************************************************************************
- * Define Coefficients Used for the Rational Approximation of the              *
- * Fresnel Integrals using approximations from Mark. A. Heald.                 *
- * See Rational Approximations for the Fresnel Integrals,                      *
- * Mathematics of Computation, Vol. 44, No. 170 (Apr., 1985), pp. 459-461      *
- *                                                                             *
- * Heald defines the Fresnel Integrals as the integral of                      *
- * sin(pi/2 x^2) and cos(pi/2 x^2), whereas we adopt the definition of         *
- * the integral of sin(x^2) and cos(x^2). As such, a scale factor of           *
- * sqrt(2/pi) is multiplied to our coefficients, and a scale factor of         *
- * sqrt(pi/2) is multiplied to the final output.                               *
- ******************************************************************************/
-
-/* Coefficients for up to 3 significant digits. */
-#define FRESNEL_HEALD_RATIONAL_EPS_3_A00 1.00000
-
-#define FRESNEL_HEALD_RATIONAL_EPS_3_B00 2.000000
-#define FRESNEL_HEALD_RATIONAL_EPS_3_B01 2.524
-#define FRESNEL_HEALD_RATIONAL_EPS_3_B02 1.886
-#define FRESNEL_HEALD_RATIONAL_EPS_3_B03 0.803
-
-#define FRESNEL_HEALD_RATIONAL_EPS_3_C00 1.00000
-#define FRESNEL_HEALD_RATIONAL_EPS_3_C01 0.506
-
-#define FRESNEL_HEALD_RATIONAL_EPS_3_D00 1.4142135623730951
-#define FRESNEL_HEALD_RATIONAL_EPS_3_D01 2.054
-#define FRESNEL_HEALD_RATIONAL_EPS_3_D02 1.79
-
-/* Coefficients for up to 4 significant digits. */
-#define FRESNEL_HEALD_RATIONAL_EPS_4_A00 1.00000
-#define FRESNEL_HEALD_RATIONAL_EPS_4_A01 0.1765
-
-#define FRESNEL_HEALD_RATIONAL_EPS_4_B00 2.0000
-#define FRESNEL_HEALD_RATIONAL_EPS_4_B01 2.915
-#define FRESNEL_HEALD_RATIONAL_EPS_4_B02 2.079
-#define FRESNEL_HEALD_RATIONAL_EPS_4_B03 1.519
-
-#define FRESNEL_HEALD_RATIONAL_EPS_4_C00 1.00000
-#define FRESNEL_HEALD_RATIONAL_EPS_4_C01 0.5083
-#define FRESNEL_HEALD_RATIONAL_EPS_4_C02 0.3569
-
-#define FRESNEL_HEALD_RATIONAL_EPS_4_D00 1.4142135623730951
-#define FRESNEL_HEALD_RATIONAL_EPS_4_D01 2.1416
-#define FRESNEL_HEALD_RATIONAL_EPS_4_D02 1.8515
-#define FRESNEL_HEALD_RATIONAL_EPS_4_D03 1.1021
-
-/* Coefficients for up to 6 significant digits. */
-#define FRESNEL_HEALD_RATIONAL_EPS_6_A00 1.00000
-#define FRESNEL_HEALD_RATIONAL_EPS_6_A01 0.08218
-#define FRESNEL_HEALD_RATIONAL_EPS_6_A02 0.15108
-
-#define FRESNEL_HEALD_RATIONAL_EPS_6_B00 2.0000
-#define FRESNEL_HEALD_RATIONAL_EPS_6_B01 2.7097
-#define FRESNEL_HEALD_RATIONAL_EPS_6_B02 2.3185
-#define FRESNEL_HEALD_RATIONAL_EPS_6_B03 1.2389
-#define FRESNEL_HEALD_RATIONAL_EPS_6_B04 0.6561
-
-#define FRESNEL_HEALD_RATIONAL_EPS_6_C00 1.00000
-#define FRESNEL_HEALD_RATIONAL_EPS_6_C01 0.60427
-#define FRESNEL_HEALD_RATIONAL_EPS_6_C02 0.41159
-#define FRESNEL_HEALD_RATIONAL_EPS_6_C03 0.19170
-
-#define FRESNEL_HEALD_RATIONAL_EPS_6_D00 1.4142135623730951
-#define FRESNEL_HEALD_RATIONAL_EPS_6_D01 2.26794
-#define FRESNEL_HEALD_RATIONAL_EPS_6_D02 2.15594
-#define FRESNEL_HEALD_RATIONAL_EPS_6_D03 1.26057
-#define FRESNEL_HEALD_RATIONAL_EPS_6_D04 0.60353
-
-/* Coefficients for up to 8 significant digits. */
-#define FRESNEL_HEALD_RATIONAL_EPS_8_A00 1.0000000
-#define FRESNEL_HEALD_RATIONAL_EPS_8_A01 0.1945161
-#define FRESNEL_HEALD_RATIONAL_EPS_8_A02 0.2363641
-#define FRESNEL_HEALD_RATIONAL_EPS_8_A03 0.0683240
-#define FRESNEL_HEALD_RATIONAL_EPS_8_A04 0.0241212
-
-#define FRESNEL_HEALD_RATIONAL_EPS_8_B00 2.0000000
-#define FRESNEL_HEALD_RATIONAL_EPS_8_B01 2.9355041
-#define FRESNEL_HEALD_RATIONAL_EPS_8_B02 2.7570460
-#define FRESNEL_HEALD_RATIONAL_EPS_8_B03 1.8757210
-#define FRESNEL_HEALD_RATIONAL_EPS_8_B04 0.9781130
-#define FRESNEL_HEALD_RATIONAL_EPS_8_B05 0.3566810
-#define FRESNEL_HEALD_RATIONAL_EPS_8_B06 0.1182470
-
-#define FRESNEL_HEALD_RATIONAL_EPS_8_C00 1.0000000
-#define FRESNEL_HEALD_RATIONAL_EPS_8_C01 0.7769507
-#define FRESNEL_HEALD_RATIONAL_EPS_8_C02 0.6460117
-#define FRESNEL_HEALD_RATIONAL_EPS_8_C03 0.3460509
-#define FRESNEL_HEALD_RATIONAL_EPS_8_C04 0.1339259
-#define FRESNEL_HEALD_RATIONAL_EPS_8_C05 0.0433995
-
-#define FRESNEL_HEALD_RATIONAL_EPS_8_D00 1.4142135623730951
-#define FRESNEL_HEALD_RATIONAL_EPS_8_D01 2.5129806
-#define FRESNEL_HEALD_RATIONAL_EPS_8_D02 2.7196741
-#define FRESNEL_HEALD_RATIONAL_EPS_8_D03 1.9840524
-#define FRESNEL_HEALD_RATIONAL_EPS_8_D04 1.0917325
-#define FRESNEL_HEALD_RATIONAL_EPS_8_D05 0.4205217
-#define FRESNEL_HEALD_RATIONAL_EPS_8_D06 0.13634704
+/*  Various coefficients and constants defined here.    */
+#include "__math_constants.h"
 
 /*******************************************************************************
  *------------------------------DEFINE C FUNCTIONS-----------------------------*
- *******************************************************************************
  * These are functions written in pure C without the use of the Numpy-C API.   *
- * The are used to define various special functions. They will be wrapped in   *
+ * They are used to define various special functions. They will be wrapped in  *
  * a form that is useable with the Python interpreter later on.                *
  ******************************************************************************/
 double Fresnel_Sine_Taylor_to_Asymptotic_Func(double x)
@@ -369,8 +226,9 @@ double Fresnel_Sine_While_to_Asymptotic_Func(double x)
 
 double Fresnel_Sine_Heald_Rational_EPS_Minus_Three(double x)
 {
-    double A, R, a, b, c, d;
-    x *= SQRT_2_BY_PI;
+    double A, R, a, b, c, d, sgn_x;
+    sgn_x = (x>0)-(x<0);
+    x *= SQRT_2_BY_PI*sgn_x;
 
     /* Compute the Numerator of the A_jk Function.      */
     a = FRESNEL_HEALD_RATIONAL_EPS_3_A00;
@@ -392,7 +250,7 @@ double Fresnel_Sine_Heald_Rational_EPS_Minus_Three(double x)
     R = c/d;
     R *= SQRT_PI_BY_2;
 
-    return SQRT_PI_BY_8 - R*cos(A);
+    return sgn_x*(SQRT_PI_BY_8 - R*cos(A));
 }
 
 double Fresnel_Sine_Heald_Rational_EPS_Minus_Four(double x)

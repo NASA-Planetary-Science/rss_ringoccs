@@ -1879,7 +1879,7 @@ class DiffractionCorrection(object):
                 psi_d1 = self.__dpsi(kD, r, r0, phi, phi0, b, d)
                 loop = 0
 
-                while (np.max(np.abs(psi_d1)) > 1.0e-4):
+                while (np.max(np.abs(psi_drec 1)) > 1.0e-4):
                     psi_d1 = self.__dpsi_ellipse(kD, r, r0, phi, phi0, b, d, ecc, peri)
                     psi_d2 = self.__d2psi(kD, r, r0, phi, phi0, b, d)
                     

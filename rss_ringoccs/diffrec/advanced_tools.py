@@ -182,7 +182,8 @@ class FindOptimalResolution(object):
 class SquareWellFromGEO(object):
     def __init__(self, geo, lambda_km, res, rho, width, dx_km_desired=0.25,
                  occ="other", wtype='kb25', fwd=False, norm=True, bfac=True,
-                 verbose=True, psitype='fresnel', use_fresnel=False):
+                 verbose=True, psitype='fresnel', use_fresnel=False,
+                 eccentricty=0.0, periapse=0.0):
 
         # Check all input variables for errors.
         fname = "diffrec.advanced_tools.SquareWellFromGEO"

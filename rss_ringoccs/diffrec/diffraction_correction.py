@@ -293,7 +293,8 @@ class DiffractionCorrection(object):
     """
     def __init__(self, DLP, res, rng="all", wtype="kbmd20", fwd=False,
                  norm=True, verbose=False, bfac=True, sigma=2.e-13,
-                 psitype="fresnel4", write_file=False, res_factor=0.75):
+                 psitype="fresnel4", write_file=False, res_factor=0.75,
+                 eccentricity=0.0, periapse=0.0):
 
         fname = "diffrec.diffraction_correction.DiffractionCorrection"
         error_check.check_type(verbose, bool, "verbose", fname)
@@ -318,6 +319,10 @@ class DiffractionCorrection(object):
         error_check.check_positive(res, "res", fname)
         error_check.check_positive(sigma, "sigma", fname)
         error_check.check_positive(res_factor, "res_factor", fname)
+        error_check.check_non_negative(eccentricity, "eccentricity", fname)
+        
+        # Check that the periapse is within [0, 2pi)
+        error_check.check_two_pi(periapse, "periapse", fname)
 
         # Check that the requested window type is a legal input.
         if not isinstance(wtype, str):
@@ -363,6 +368,8 @@ class DiffractionCorrection(object):
         self.p_norm_fwd_vals = None
         self.T_hat_fwd_vals = None
         self.phase_fwd_vals = None
+        self.eccentricity = eccentricity
+        self.periapse = periapse
         self.input_res = res
         self.verbose = verbose
         self.psitype = psitype
@@ -751,7 +758,9 @@ class DiffractionCorrection(object):
             'bfac':         bfac,
             'sigma':        sigma,
             'psitype':      psitype,
-            'res_factor':   res_factor
+            'res_factor':   res_factor,
+            'periapse':     periapse,
+            'eccentricity':  eccentricity
         }
 
         # Delete unnecessary variables for clarity.
@@ -1186,6 +1195,54 @@ class DiffractionCorrection(object):
 
         return psi_d1
 
+    def __dpsi_ellipse(self, kD, r, r0, phi, phi0, B, D, ecc, peri):
+        """
+            Purpose:
+                Compute dpsi/dphi
+            Arguments:
+                :kD (*float*):
+                    Wavenumber, unitless.
+                :r (*float*):
+                    Radius of reconstructed point, in kilometers.
+                :r0 (*np.ndarray*):
+                    Radius of region within window, in kilometers.
+                :phi (*np.ndarray*):
+                    Root values of dpsi/dphi, radians.
+                :phi0 (*np.ndarray*):
+                    Ring azimuth angle corresponding to r0, radians.
+                :B (*float*):
+                    Ring opening angle, in radians.
+                :D (*float*):
+                    Spacecraft-RIP distance, in kilometers.
+            Outputs:
+                :dpsi (*array*):
+                    Partial derivative of psi with
+                    respect to phi.
+        """
+        # Compute Xi variable (MTR86 Equation 4b).
+        xi = (np.cos(B)/D) * (r * np.cos(phi) - r0 * np.cos(phi0))
+
+        # Compute Eta variable (MTR86 Equation 4c).
+        eta = (r0*r0 + r*r - 2.0*r*r0*np.cos(phi-phi0)) / (D*D)
+
+        psi0 = np.sqrt(1.0+eta-2.0*xi)
+
+        # Compute derivatives.
+        dxi_phi = -(np.cos(B)/D) * (r*np.sin(phi))
+        deta_phi = 2.0*r*r0*np.sin(phi-phi0)/(D*D)
+
+        dxi_rho = (np.cos(B)/D)*np.cos(phi)
+        deta_rho = 2.0*(r-r0*np.cos(phi-phi0)) / (D*D)
+
+        # Compute the partial derivative.
+        psi_d1 = (deta_rho-2.0*dxi_rho)*(0.5/psi0) + dxi_rho
+        psi_d1 *= r*ecc*np.sin(phi-peri)/(1+ecc*np.cos(phi-peri))
+        psi_d1 += (deta_phi-2.0*dxi_phi)*(0.5/psi0) + dxi_phi
+
+        psi_d1 *= kD
+
+        return psi_d1
+
     def __d2psi(self, kD, r, r0, phi, phi0, B, D):
         """
             Purpose:
@@ -1563,7 +1620,6 @@ class DiffractionCorrection(object):
             if self.verbose:
                 print("\n", end="\r")
             self.psi = psi_vals
-
         elif (self.psitype == "fresnel6"):
             crange -= 1
             cosb = np.cos(self.B_rad_vals)
@@ -1785,7 +1841,9 @@ class DiffractionCorrection(object):
                     print(mes % (i, n_used, nw, loop), end="\r")
             if self.verbose:
                 print("\n", end="\r")
-        elif (self.psitype == "elliptical"):
+        elif (self.psitype == "ellipse"):
+            peri = self.periapse
+            ecc = self.eccentricity
             for i in np.arange(n_used):
                 # Current point being computed.
                 center = start+i
@@ -1822,7 +1880,7 @@ class DiffractionCorrection(object):
                 loop = 0
 
                 while (np.max(np.abs(psi_d1)) > 1.0e-4):
-                    psi_d1 = self.__dpsi(kD, r, r0, phi, phi0, b, d)
+                    psi_d1 = self.__dpsi_ellipse(kD, r, r0, phi, phi0, b, d, ecc, peri)
                     psi_d2 = self.__d2psi(kD, r, r0, phi, phi0, b, d)
                     
                     # Newton-Raphson

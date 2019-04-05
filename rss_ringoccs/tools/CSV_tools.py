@@ -424,7 +424,7 @@ class ExtractCSVData(object):
                 in the tau file. If tau is not set, this
                 will be a NoneType variable.
     """
-    def __init__(self, geo, cal, dlp, tau=None, verbose=True):
+    def __init__(self, geo, cal, dlp, tau=None, verbose=True, use_deprecate=False):
         fname = "tools.CSV_tools.ExtractCSVData"
         error_check.check_type(geo, str, "geo", fname)
         error_check.check_type(cal, str, "cal", fname)
@@ -446,9 +446,9 @@ class ExtractCSVData(object):
         self.tau = tau
 
         # Extract GEO, CAL, and DLP data.
-        geo_dat = get_geo(self.geo, verbose=verbose)
+        geo_dat = get_geo(self.geo, verbose=verbose, use_deprecate=use_deprecate)
         cal_dat = get_cal(self.cal, verbose=verbose)
-        dlp_dat = get_dlp(self.dlp, verbose=verbose)
+        dlp_dat = get_dlp(self.dlp, verbose=verbose, use_deprecate=use_deprecate)
 
         if verbose:
             print("\tRetrieving Variables...")
@@ -717,7 +717,7 @@ class ExtractCSVData(object):
         del rstart, rfin, raw_mu
 
         if (not isinstance(tau, type(None))):
-            tau_dat = get_tau(self.tau, verbose=verbose)
+            tau_dat = get_tau(self.tau, verbose=verbose, use_deprecate=use_deprecate)
             tm = np.sin(np.abs(np.deg2rad(tau_dat.B_deg_vals)))
             rmin = np.min(tau_dat.rho_km_vals)
             rmax = np.max(tau_dat.rho_km_vals)

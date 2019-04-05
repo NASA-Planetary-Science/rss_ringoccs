@@ -183,7 +183,8 @@ class SquareWellFromGEO(object):
     def __init__(self, geo, lambda_km, res, rho, width, dx_km_desired=0.25,
                  occ="other", wtype='kb25', fwd=False, norm=True, bfac=True,
                  verbose=True, psitype='fresnel', use_fresnel=False,
-                 eccentricity=0.0, periapse=0.0):
+                 eccentricity=0.0, periapse=0.0, use_deprecate=False,
+                 res_factor=0.75):
 
         # Check all input variables for errors.
         fname = "diffrec.advanced_tools.SquareWellFromGEO"
@@ -208,7 +209,7 @@ class SquareWellFromGEO(object):
         error_check.check_positive(dx_km_desired, "dx_km_desired", fname)
         error_check.check_positive(lambda_km, "lambda_km", fname)
 
-        data = CSV_tools.get_geo(geo, verbose=verbose)
+        data = CSV_tools.get_geo(geo, verbose=verbose, use_deprecate=use_deprecate)
         occ = occ.replace(" ", "").replace("'", "").replace('"', "")
         occ = occ.lower()
 
@@ -320,7 +321,8 @@ class SquareWellFromGEO(object):
                         \r\tCheck your input GEO file.
                     """ % fname
                 )
-        del n_e, n_i, crange_e, crange_i
+
+            del n_e, n_i, crange_e, crange_i
 
         if (np.size(crange) == 0):
             if (occ == 'ingress'):
@@ -468,7 +470,8 @@ class SquareWellFromGEO(object):
             self.phase_rad_vals = np.zeros(np.size(self.rho_km_vals))
             rec = diffraction_correction.DiffractionCorrection(
                 self, res, psitype=psitype, verbose=verbose, wtype=wtype,
-                bfac=bfac, eccentricity=eccentricity, periapse=periapse
+                bfac=bfac, eccentricity=eccentricity, periapse=periapse,
+                res_factor=res_factor
             )
 
             self.p_norm_actual_vals = self.p_norm_vals

@@ -184,7 +184,7 @@ class SquareWellFromGEO(object):
                  occ="other", wtype='kb25', fwd=False, norm=True, bfac=True,
                  verbose=True, psitype='fresnel', use_fresnel=False,
                  eccentricity=0.0, periapse=0.0, use_deprecate=False,
-                 res_factor=0.75):
+                 res_factor=0.75, rng="all"):
 
         # Check all input variables for errors.
         fname = "diffrec.advanced_tools.SquareWellFromGEO"
@@ -471,7 +471,7 @@ class SquareWellFromGEO(object):
             rec = diffraction_correction.DiffractionCorrection(
                 self, res, psitype=psitype, verbose=verbose, wtype=wtype,
                 bfac=bfac, eccentricity=eccentricity, periapse=periapse,
-                res_factor=res_factor
+                res_factor=res_factor, rng=rng
             )
 
             self.p_norm_actual_vals = self.p_norm_vals

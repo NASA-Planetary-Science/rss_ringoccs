@@ -1,3 +1,6 @@
+#ifndef FRESNEL_INTEGRAL_H
+#define FRESNEL_INTEGRAL_H
+
 #include <math.h>
 #include <complex.h>
 
@@ -368,3 +371,5 @@ double complex Inverted_Square_Well_Diffraction_Solution(double x, double a,
 
     return (0.5 - 0.5*_Complex_I)*result;
 }
+
+#endif

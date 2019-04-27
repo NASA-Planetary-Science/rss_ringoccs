@@ -71,6 +71,9 @@
  *  Author:     Ryan Maguire, Wellesley College                                *
  *  Date:       Febuary 26, 2019                                               *
  ******************************************************************************/
+#ifndef FRESNEL_COSINE_H
+#define FRESNEL_COSINE_H
+
 #include <math.h>
 #include <complex.h>
 
@@ -379,3 +382,5 @@ double Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight(double x)
 
     return sgn_x*(SQRT_PI_BY_8 - R*sin(A));
 }
+
+#endif

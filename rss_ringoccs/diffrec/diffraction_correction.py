@@ -1447,6 +1447,7 @@ class DiffractionCorrection(object):
 
                 if self.verbose:
                     print(mes % (i, n_used, nw, loop), end="\r")
+            self.psi_vals = psi_vals
             if self.verbose:
                 print("\n")
         elif (self.psitype == "fresnel3"):
@@ -1873,7 +1874,7 @@ class DiffractionCorrection(object):
                 b = self.B_rad_vals[center]
                 phi0 = self.phi_rad_vals[center]
                 phi = self.phi_rad_vals[center] + np.zeros(nw)
-                kD = kD_vals[crange]
+                kD = kD_vals[center]
 
                 # Compute Newton-Raphson perturbation
                 psi_d1 = self.__dpsi(kD, r, r0, phi, phi0, b, d)
@@ -1888,7 +1889,7 @@ class DiffractionCorrection(object):
 
                     # Add one to loop variable for each iteration
                     loop += 1
-                    if (loop > 5):
+                    if (loop > 3):
                         break
 
                 # Compute Eta variable (MTR86 Equation 4c).
@@ -1943,7 +1944,7 @@ class DiffractionCorrection(object):
                 b = self.B_rad_vals[center]
                 phi0 = self.phi_rad_vals[center]
                 phi = self.phi_rad_vals[center] + np.zeros(nw)
-                kD = kD_vals[crange]
+                kD = kD_vals[center]
 
                 # Compute Newton-Raphson perturbation
                 psi_d1 = self.__dpsi(kD, r, r0, phi, phi0, b, d)
@@ -1958,7 +1959,7 @@ class DiffractionCorrection(object):
 
                     # Add one to loop variable for each iteration
                     loop += 1
-                    if (loop > 5):
+                    if (loop > 1):
                         break
 
                 # Compute Eta variable (MTR86 Equation 4c).
@@ -1983,5 +1984,7 @@ class DiffractionCorrection(object):
                     print(mes % (i, n_used-1, nw, loop), end="\r")
             if self.verbose:
                 print("\n", end="\r")
+            
+            self.psi_vals = psi_vals
 
         return T_out

@@ -71,8 +71,8 @@
  *  Author:     Ryan Maguire, Wellesley College                                *
  *  Date:       Febuary 26, 2019                                               *
  ******************************************************************************/
-#ifndef FRESNEL_COSINE_H
-#define FRESNEL_COSINE_H
+#ifndef RSS_RINGOCCS_FRESNEL_COSINE_H
+#define RSS_RINGOCCS_FRESNEL_COSINE_H
 
 #include <math.h>
 #include <complex.h>

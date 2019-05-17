@@ -528,148 +528,6 @@ def inverse_square_well_diffraction(x, a, b, F):
             """
         )
 
-def old_fresnel_cos(x, error_check=True):
-    """
-        Purpose:
-            Compute the Fresnel cosine function.
-        Arguments:
-            :x (*np.ndarray* or *float*):
-                A real or complex number, or numpy array.
-        Outputs:
-            :f_cos (*np.ndarray* or *float*):
-                The fresnel cosine integral of x.
-        Notes:
-            [1] The Fresnel Cosine integral is the solution to the
-                equation dy/dx = cos(pi/2 * x^2), y(0) = 0. In other
-                words, y = integral (t=0 to x) cos(pi/2 * t^2) dt
-            [2] The Fresnel Cosine and Sine integrals are computed by
-                using the scipy.special Error Function. The Error
-                Function, usually denoted Erf(x), is the solution to
-                dy/dx = (2/sqrt(pi)) * exp(-x^2), y(0) = 0. That is:
-                y = 2/sqrt(pi) * integral (t=0 to x) exp(-t^2)dt.
-                Using Euler's Formula for exponentials allows one
-                to use this to solve for the Fresnel Cosine integral.
-            [3] The Fresnel Cosine integral is used for the solution
-                of diffraction through a square well. Because of this
-                it is useful for forward modeling problems in 
-                radiative transfer and diffraction.
-        Examples:
-            Compute and plot the Fresnel Cosine integral.
-                In [1]: import rss_ringoccs.diffcorr.special_functions as sf
-                In [2]: import numpy as np
-                In [3]: import matplotlib.pyplot as plt
-                In [4]: x = np.array(range(0,10001))*0.01 - 50.0
-                In [5]: y = sf.fresnel_cos(x)
-                In [6]: plt.show(plt.plot(x,y))
-    """
-    if error_check:
-        y = x
-        try:
-            x = np.array(x)
-            if (not np.all(np.isreal(x))) and (not np.all(np.iscomplex(x))):
-                raise TypeError(
-                    "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffcorr Subpackage\n"
-                    "\tspecial_functions.fresnel_cos:\n"
-                    "\t\tInput must be a real or complex valued numpy array.\n"
-                    "\t\tThe elements of your array have type: %s"
-                    % (x.dtype)
-                )
-            else:
-                del y
-        except (TypeError, ValueError) as errmes:
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
-                "\tspecial_function.fresnel_cos:\n"
-                "\t\tInput must be a real or complex valued numpy array.\n"
-                "\t\tYour input has type: %s\n"
-                "\tOriginal Error Mesage: %s\n"
-                % (type(y).__name__, errmes)
-            )
-    else:
-        pass
-
-    x *= RCP_SQRT_2
-    f_cos = ((0.25-0.25j)*erf((1.0+1.0j)*x)+
-             (0.25+0.25j)*erf((1.0-1.0j)*x))
-
-    if (np.isreal(x).all()):
-        f_cos = np.real(f_cos)
-
-    return f_cos*SQRT_PI_2
-
-def old_fresnel_sin(x, error_check=True):
-    """
-        Purpose:
-            Compute the Fresnel sine function.
-        Variables:
-            :x (*np.ndarray* or *float*):
-                The independent variable.
-        Outputs:
-            :f_sin (*np.ndarray* or *float*):
-                The fresnel sine integral of x.
-        Notes:
-            [1] The Fresnel sine integral is the solution to the
-                equation dy/dx = sin(pi/2 * x^2), y(0) = 0. In other
-                words, y = integral (t=0 to x) sin(pi/2 * t^2) dt
-            [2] The Fresnel Cossine and Sine integrals are computed
-                by using the scipy.special Error Function. The Error
-                Function, usually denoted Erf(x), is the solution to
-                dy/dx = (2/sqrt(pi)) * exp(-x^2), y(0) = 0. That is:
-                y = 2/sqrt(pi) * integral (t=0 to x) exp(-t^2)dt.
-                Using Euler's Formula for exponentials allows one
-                to use this to solve for the Fresnel Sine integral.
-            [3] The Fresnel sine integral is used for the solution
-                of diffraction through a square well. Because of this
-                is is useful for forward modeling problems in 
-                radiative transfer and diffraction.
-        Examples:
-            Compute and plot the Fresnel Sine integral.
-                In [1]: import rss_ringoccs.diffcorr.special_functions as sf
-                In [2]: import numpy as np
-                In [3]: import matplotlib.pyplot as plt
-                In [4]: x = np.array(range(0,10001))*0.01 - 50.0
-                In [5]: y = sf.fresnel_sin(x)
-                In [6]: plt.show(plt.plot(x,y))
-    """
-    if error_check:
-        y = x
-        try:
-            x = np.array(x)
-            if (not np.all(np.isreal(x))) and (not np.all(np.iscomplex(x))):
-                raise TypeError(
-                    "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffcorr Subpackage\n"
-                    "\tspecial_function.fresnel_cos:\n"
-                    "\t\tInput must be a real or complex valued numpy array.\n"
-                    "\t\tThe elements of your array have type: %s"
-                    % (x.dtype)
-                )
-            else:
-                del y
-        except (TypeError, ValueError) as errmes:
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
-                "\tspecial_function.fresnel_cos:\n"
-                "\t\tInput must be a real or complex valued numpy array.\n"
-                "\t\tYour input has type: %s\n"
-                "\tOriginal Error Mesage: %s\n"
-                % (type(y).__name__, errmes)
-            )
-    else:
-        pass
-
-    x *= RCP_SQRT_2
-    f_sin = ((0.25+0.25j)*erf((1.0+1.0j)*x)+
-             (0.25-0.25j)*erf((1.0-1.0j)*x))
-
-    if (np.isreal(x).all()):
-        f_sin = np.real(f_sin)
-
-    return f_sin*SQRT_PI_2
-
 def single_slit_diffraction(x, z, a):
     """
         Purpose:
@@ -838,6 +696,148 @@ def double_slit_diffraction(x, z, a, d):
     f = f1*f2/f3
 
     return f
+
+def old_fresnel_cos(x, error_check=True):
+    """
+        Purpose:
+            Compute the Fresnel cosine function.
+        Arguments:
+            :x (*np.ndarray* or *float*):
+                A real or complex number, or numpy array.
+        Outputs:
+            :f_cos (*np.ndarray* or *float*):
+                The fresnel cosine integral of x.
+        Notes:
+            [1] The Fresnel Cosine integral is the solution to the
+                equation dy/dx = cos(pi/2 * x^2), y(0) = 0. In other
+                words, y = integral (t=0 to x) cos(pi/2 * t^2) dt
+            [2] The Fresnel Cosine and Sine integrals are computed by
+                using the scipy.special Error Function. The Error
+                Function, usually denoted Erf(x), is the solution to
+                dy/dx = (2/sqrt(pi)) * exp(-x^2), y(0) = 0. That is:
+                y = 2/sqrt(pi) * integral (t=0 to x) exp(-t^2)dt.
+                Using Euler's Formula for exponentials allows one
+                to use this to solve for the Fresnel Cosine integral.
+            [3] The Fresnel Cosine integral is used for the solution
+                of diffraction through a square well. Because of this
+                it is useful for forward modeling problems in 
+                radiative transfer and diffraction.
+        Examples:
+            Compute and plot the Fresnel Cosine integral.
+                In [1]: import rss_ringoccs.diffcorr.special_functions as sf
+                In [2]: import numpy as np
+                In [3]: import matplotlib.pyplot as plt
+                In [4]: x = np.array(range(0,10001))*0.01 - 50.0
+                In [5]: y = sf.fresnel_cos(x)
+                In [6]: plt.show(plt.plot(x,y))
+    """
+    if error_check:
+        y = x
+        try:
+            x = np.array(x)
+            if (not np.all(np.isreal(x))) and (not np.all(np.iscomplex(x))):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\tspecial_functions.fresnel_cos:\n"
+                    "\t\tInput must be a real or complex valued numpy array.\n"
+                    "\t\tThe elements of your array have type: %s"
+                    % (x.dtype)
+                )
+            else:
+                del y
+        except (TypeError, ValueError) as errmes:
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\tspecial_function.fresnel_cos:\n"
+                "\t\tInput must be a real or complex valued numpy array.\n"
+                "\t\tYour input has type: %s\n"
+                "\tOriginal Error Mesage: %s\n"
+                % (type(y).__name__, errmes)
+            )
+    else:
+        pass
+
+    x *= RCP_SQRT_2
+    f_cos = ((0.25-0.25j)*erf((1.0+1.0j)*x)+
+             (0.25+0.25j)*erf((1.0-1.0j)*x))
+
+    if (np.isreal(x).all()):
+        f_cos = np.real(f_cos)
+
+    return f_cos*SQRT_PI_2
+
+def old_fresnel_sin(x, error_check=True):
+    """
+        Purpose:
+            Compute the Fresnel sine function.
+        Variables:
+            :x (*np.ndarray* or *float*):
+                The independent variable.
+        Outputs:
+            :f_sin (*np.ndarray* or *float*):
+                The fresnel sine integral of x.
+        Notes:
+            [1] The Fresnel sine integral is the solution to the
+                equation dy/dx = sin(pi/2 * x^2), y(0) = 0. In other
+                words, y = integral (t=0 to x) sin(pi/2 * t^2) dt
+            [2] The Fresnel Cossine and Sine integrals are computed
+                by using the scipy.special Error Function. The Error
+                Function, usually denoted Erf(x), is the solution to
+                dy/dx = (2/sqrt(pi)) * exp(-x^2), y(0) = 0. That is:
+                y = 2/sqrt(pi) * integral (t=0 to x) exp(-t^2)dt.
+                Using Euler's Formula for exponentials allows one
+                to use this to solve for the Fresnel Sine integral.
+            [3] The Fresnel sine integral is used for the solution
+                of diffraction through a square well. Because of this
+                is is useful for forward modeling problems in 
+                radiative transfer and diffraction.
+        Examples:
+            Compute and plot the Fresnel Sine integral.
+                In [1]: import rss_ringoccs.diffcorr.special_functions as sf
+                In [2]: import numpy as np
+                In [3]: import matplotlib.pyplot as plt
+                In [4]: x = np.array(range(0,10001))*0.01 - 50.0
+                In [5]: y = sf.fresnel_sin(x)
+                In [6]: plt.show(plt.plot(x,y))
+    """
+    if error_check:
+        y = x
+        try:
+            x = np.array(x)
+            if (not np.all(np.isreal(x))) and (not np.all(np.iscomplex(x))):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\tspecial_function.fresnel_cos:\n"
+                    "\t\tInput must be a real or complex valued numpy array.\n"
+                    "\t\tThe elements of your array have type: %s"
+                    % (x.dtype)
+                )
+            else:
+                del y
+        except (TypeError, ValueError) as errmes:
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\tspecial_function.fresnel_cos:\n"
+                "\t\tInput must be a real or complex valued numpy array.\n"
+                "\t\tYour input has type: %s\n"
+                "\tOriginal Error Mesage: %s\n"
+                % (type(y).__name__, errmes)
+            )
+    else:
+        pass
+
+    x *= RCP_SQRT_2
+    f_sin = ((0.25+0.25j)*erf((1.0+1.0j)*x)+
+             (0.25-0.25j)*erf((1.0-1.0j)*x))
+
+    if (np.isreal(x).all()):
+        f_sin = np.real(f_sin)
+
+    return f_sin*SQRT_PI_2
 
 def old_square_well_diffraction(x, a, b, F):
     """

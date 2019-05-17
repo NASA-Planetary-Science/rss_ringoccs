@@ -73,8 +73,8 @@
  *  Author:     Ryan Maguire, Wellesley College                                *
  *  Date:       Febuary 26, 2019                                               *
  ******************************************************************************/
-#ifndef FRESNEL_SINE_H
-#define FRESNEL_SINE_H
+#ifndef RSS_RINGOCCS_FRESNEL_SINE_H
+#define RSS_RINGOCCS_FRESNEL_SINE_H
 
 #include <math.h>
 #include <complex.h>

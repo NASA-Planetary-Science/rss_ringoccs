@@ -503,7 +503,7 @@ class StraightEdgeFromGEO(object):
                  occ="other", wtype='kb25', fwd=False, norm=True, bfac=True,
                  verbose=True, psitype='fresnel', use_fresnel=False,
                  eccentricity=0.0, periapse=0.0, use_deprecate=False,
-                 res_factor=0.75, rng="all"):
+                 res_factor=0.75, rng="all", side="right"):
 
         # Check all input variables for errors.
         fname = "diffrec.advanced_tools.SquareWellFromGEO"
@@ -514,6 +514,7 @@ class StraightEdgeFromGEO(object):
         error_check.check_type(occ, str, "occ", fname)
         error_check.check_type(fwd, bool, "fwd", fname)
         error_check.check_type(geo, str, "geo", fname)
+        error_check.check_type(side, str, "side", fname)
         error_check.check_type(wtype, str, "wtype", fname)
         error_check.check_type(psitype, str, "psitype", fname)
         res = error_check.check_type_and_convert(res, float, "res", fname)
@@ -531,6 +532,8 @@ class StraightEdgeFromGEO(object):
         data = CSV_tools.get_geo(geo, verbose=verbose, use_deprecate=use_deprecate)
         occ = occ.replace(" ", "").replace("'", "").replace('"', "")
         occ = occ.lower()
+        side = side.replace(" ", "").replace("'", "").replace('"', "")
+        side = side.lower()
 
         if verbose:
             print("\tRetrieving Variables...")

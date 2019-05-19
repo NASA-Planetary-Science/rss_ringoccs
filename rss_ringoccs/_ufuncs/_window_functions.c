@@ -73,6 +73,31 @@ static void double_kb25(char **args, npy_intp *dimensions,
     }
 }
 
+static void double_kb35(char **args, npy_intp *dimensions,
+                        npy_intp* steps, void* data)
+{
+    npy_intp i;
+    npy_intp n = dimensions[0];
+    char *x = args[0];
+    char *W = args[1];
+    char *out = args[2];
+
+    npy_intp x_step = steps[0];
+    npy_intp W_step = steps[1];
+    npy_intp out_step = steps[2];
+
+    for (i = 0; i < n; i++) {
+        /*  The function Fresnel_Sine_Taylor_to_Asymptotic_Func is defined in *
+         *  _fresnel_sin.h. Make sure this is in the current directory!       */
+        *((double *)out) = Kaiser_Bessel_Window_3_5(*(double *)x, *(double *)W);
+
+        /* Push the pointers forward by the appropriate increment.            */
+        x   += x_step;
+        W   += W_step;
+        out += out_step;
+    }
+}
+
 static void double_kbmd20(char **args, npy_intp *dimensions,
                           npy_intp* steps, void* data)
 {
@@ -127,11 +152,40 @@ static void double_kbmd25(char **args, npy_intp *dimensions,
     }
 }
 
+static void double_kbmd35(char **args, npy_intp *dimensions,
+                          npy_intp* steps, void* data)
+{
+    npy_intp i;
+    npy_intp n = dimensions[0];
+    char *x = args[0];
+    char *W = args[1];
+    char *out = args[2];
+
+    npy_intp x_step = steps[0];
+    npy_intp W_step = steps[1];
+    npy_intp out_step = steps[2];
+
+    for (i = 0; i < n; i++) {
+        /*  The function Fresnel_Sine_Taylor_to_Asymptotic_Func is defined in *
+         *  _fresnel_sin.h. Make sure this is in the current directory!       */
+        *((double *)out) = Modified_Kaiser_Bessel_Window_3_5(
+            *(double *)x, *(double *)W
+        );
+
+        /* Push the pointers forward by the appropriate increment.            */
+        x   += x_step;
+        W   += W_step;
+        out += out_step;
+    }
+}
+
 /* Define pointers to the C functions. */
-PyUFuncGenericFunction kb25_funcs[1] = {&double_kb25};
 PyUFuncGenericFunction kb20_funcs[1] = {&double_kb20};
-PyUFuncGenericFunction kbmd25_funcs[1] = {&double_kbmd25};
+PyUFuncGenericFunction kb25_funcs[1] = {&double_kb25};
+PyUFuncGenericFunction kb35_funcs[1] = {&double_kb35};
 PyUFuncGenericFunction kbmd20_funcs[1] = {&double_kbmd20};
+PyUFuncGenericFunction kbmd25_funcs[1] = {&double_kbmd25};
+PyUFuncGenericFunction kbmd35_funcs[1] = {&double_kbmd35};
 
 /* Input and return types for double input and out.. */
 static char ddd_types[3]     = {NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE};
@@ -153,8 +207,8 @@ static struct PyModuleDef moduledef = {
 
 PyMODINIT_FUNC PyInit__window_functions(void)
 {
-    PyObject *kb25, *kb20;
-    PyObject *kbmd25, *kbmd20;
+    PyObject *kb25, *kb20, *kb35;
+    PyObject *kbmd25, *kbmd20, *kbmd35;
     PyObject *m, *d;
     m = PyModule_Create(&moduledef);
     if (!m) {
@@ -164,32 +218,40 @@ PyMODINIT_FUNC PyInit__window_functions(void)
     import_array();
     import_umath();
 
-    kb25 = PyUFunc_FromFuncAndData(kb25_funcs, PyuFunc_data, ddd_types,
-                                   1, 2, 1, PyUFunc_None, "kb25",
-                                   "kb25_docstring", 0);
+    kb25 = PyUFunc_FromFuncAndData(kb25_funcs, PyuFunc_data, ddd_types, 1, 2, 1,
+                                   PyUFunc_None, "kb25", "kb25_docstring", 0);
 
-    kb20 = PyUFunc_FromFuncAndData(kb20_funcs, PyuFunc_data, ddd_types,
-                                   1, 2, 1, PyUFunc_None, "kb20",
-                                   "kb20_docstring", 0);
+    kb20 = PyUFunc_FromFuncAndData(kb20_funcs, PyuFunc_data, ddd_types, 1, 2, 1,
+                                   PyUFunc_None, "kb20", "kb20_docstring", 0);
 
-    kbmd25 = PyUFunc_FromFuncAndData(kbmd25_funcs, PyuFunc_data, ddd_types,
-                                     1, 2, 1, PyUFunc_None, "kbmd25",
-                                     "kbmd25_docstring", 0);
+    kb35 = PyUFunc_FromFuncAndData(kb35_funcs, PyuFunc_data, ddd_types, 1, 2, 1,
+                                   PyUFunc_None, "kb35", "kb35_docstring", 0);
+
     kbmd20 = PyUFunc_FromFuncAndData(kbmd20_funcs, PyuFunc_data, ddd_types,
                                      1, 2, 1, PyUFunc_None, "kbmd20",
                                      "kbmd20_docstring", 0);
 
+    kbmd25 = PyUFunc_FromFuncAndData(kbmd25_funcs, PyuFunc_data, ddd_types,
+                                     1, 2, 1, PyUFunc_None, "kbmd25",
+                                     "kbmd25_docstring", 0);
+
+    kbmd35 = PyUFunc_FromFuncAndData(kbmd35_funcs, PyuFunc_data, ddd_types,
+                                     1, 2, 1, PyUFunc_None, "kbmd35",
+                                     "kbmd35_docstring", 0);
 
     d = PyModule_GetDict(m);
-
-    PyDict_SetItemString(d, "kbmd25", kbmd25);
     PyDict_SetItemString(d, "kbmd20", kbmd20);
-    PyDict_SetItemString(d, "kb25", kb25);
+    PyDict_SetItemString(d, "kbmd25", kbmd25);
+    PyDict_SetItemString(d, "kbmd35", kbmd20);
     PyDict_SetItemString(d, "kb20", kb20);
+    PyDict_SetItemString(d, "kb25", kb25);
+    PyDict_SetItemString(d, "kb35", kb20);
     Py_DECREF(kbmd20);
     Py_DECREF(kbmd25);
+    Py_DECREF(kbmd35);
     Py_DECREF(kb20);
     Py_DECREF(kb25);
+    Py_DECREF(kb35);
 
     return m;
 }
@@ -207,19 +269,39 @@ PyMODINIT_FUNC init__funcs(void)
     import_array();
     import_umath();
 
-    kbmd25 = PyUFunc_FromFuncAndData(kbmd25_funcs, PyuFunc_data, ddd_types,
-                                     1, 2, 1, PyUFunc_None, "kbmd25",
-                                     "kbmd25_docstring", 0);
+    kb25 = PyUFunc_FromFuncAndData(kb25_funcs, PyuFunc_data, ddd_types, 1, 2, 1,
+                                   PyUFunc_None, "kb25", "kb25_docstring", 0);
+
+    kb20 = PyUFunc_FromFuncAndData(kb20_funcs, PyuFunc_data, ddd_types, 1, 2, 1,
+                                   PyUFunc_None, "kb20", "kb20_docstring", 0);
+
+    kb35 = PyUFunc_FromFuncAndData(kb35_funcs, PyuFunc_data, ddd_types, 1, 2, 1,
+                                   PyUFunc_None, "kb35", "kb35_docstring", 0);
+
     kbmd20 = PyUFunc_FromFuncAndData(kbmd20_funcs, PyuFunc_data, ddd_types,
                                      1, 2, 1, PyUFunc_None, "kbmd20",
                                      "kbmd20_docstring", 0);
 
+    kbmd25 = PyUFunc_FromFuncAndData(kbmd25_funcs, PyuFunc_data, ddd_types,
+                                     1, 2, 1, PyUFunc_None, "kbmd25",
+                                     "kbmd25_docstring", 0);
+
+    kbmd35 = PyUFunc_FromFuncAndData(kbmd35_funcs, PyuFunc_data, ddd_types,
+                                     1, 2, 1, PyUFunc_None, "kbmd35",
+                                     "kbmd35_docstring", 0);
 
     d = PyModule_GetDict(m);
-
-    PyDict_SetItemString(d, "kbmd25", kbmd25);
     PyDict_SetItemString(d, "kbmd20", kbmd20);
+    PyDict_SetItemString(d, "kbmd25", kbmd25);
+    PyDict_SetItemString(d, "kbmd35", kbmd20);
+    PyDict_SetItemString(d, "kb20", kb20);
+    PyDict_SetItemString(d, "kb25", kb25);
+    PyDict_SetItemString(d, "kb35", kb20);
     Py_DECREF(kbmd20);
     Py_DECREF(kbmd25);
+    Py_DECREF(kbmd35);
+    Py_DECREF(kb20);
+    Py_DECREF(kb25);
+    Py_DECREF(kb35);
 }
 #endif

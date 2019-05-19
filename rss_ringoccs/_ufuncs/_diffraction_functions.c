@@ -8,6 +8,9 @@
 /*  Various coefficients and constants defined here.    */
 #include "__math_constants.h"
 
+/*  Window functions defined here.                      */
+#include "__window_functions.h"
+
 static void get_pi_arr(double* x_arr, double dx, long nw_pts)
 {
     /***************************************************************************
@@ -51,56 +54,6 @@ static void get_arr(double* x_arr, double dx, long nw_pts)
     for (i=0; i<nw_pts; ++i){
         x_arr[i]    = (i-nw_pts)*dx;
     }
-}
-
-static void __rect(double* wfunc, double w_width, double dx, long nw_pts)
-{
-        long i;
-
-        for (i=0; i<nw_pts; i++){
-            wfunc[i] = 1.0;
-        }
-}
-
-static void __coss(double* wfunc, double w_width, double dx, long nw_pts)
-{
-        long i;
-        double x;
-        dx = ONE_PI * dx / w_width;
-
-        for (i=0; i<nw_pts; i++){
-            x = (i-nw_pts) * dx;
-            x = cos(x);
-            x *= x;
-            wfunc[i] = x;
-        }
-}
-
-static void __kbmd25(double* wfunc, double w_width, double dx, long nw_pts)
-{
-        long i;
-        double x;
-        double bessel_x;
-        dx = 2.0 * dx / w_width;
-
-        for (i=0; i<nw_pts; i++){
-            x = (i-nw_pts) * dx;
-            x = 1.0 - x*x;
-            bessel_x = MODIFIED_KAISER_BESSEL_2_5_A12;
-            bessel_x = x*bessel_x + MODIFIED_KAISER_BESSEL_2_5_A11;
-            bessel_x = x*bessel_x + MODIFIED_KAISER_BESSEL_2_5_A10;
-            bessel_x = x*bessel_x + MODIFIED_KAISER_BESSEL_2_5_A09;
-            bessel_x = x*bessel_x + MODIFIED_KAISER_BESSEL_2_5_A08;
-            bessel_x = x*bessel_x + MODIFIED_KAISER_BESSEL_2_5_A07;
-            bessel_x = x*bessel_x + MODIFIED_KAISER_BESSEL_2_5_A06;
-            bessel_x = x*bessel_x + MODIFIED_KAISER_BESSEL_2_5_A05;
-            bessel_x = x*bessel_x + MODIFIED_KAISER_BESSEL_2_5_A04;
-            bessel_x = x*bessel_x + MODIFIED_KAISER_BESSEL_2_5_A03;
-            bessel_x = x*bessel_x + MODIFIED_KAISER_BESSEL_2_5_A02;
-            bessel_x = x*bessel_x + MODIFIED_KAISER_BESSEL_2_5_A01;
-
-            wfunc[i] = x*bessel_x;
-        }
 }
 
 complex double _fresnel_transform(double* x_arr, char* T_in, double* w_func,
@@ -207,10 +160,10 @@ static void Fresnel_Transform_Quadratic_Func(char **args, npy_intp *dimensions,
 
     if (*(int *)wtype == 0){fw = &__rect;}
     else if (*(int *)wtype == 1){fw = &__coss;}
-    else if (*(int *)wtype == 2){fw = &__coss;}
-    else if (*(int *)wtype == 3){fw = &__coss;}
-    else if (*(int *)wtype == 4){fw = &__coss;}
-    else if (*(int *)wtype == 5){fw = &__coss;}
+    else if (*(int *)wtype == 2){fw = &__kb20;}
+    else if (*(int *)wtype == 3){fw = &__kb25;}
+    else if (*(int *)wtype == 4){fw = &__kb35;}
+    else if (*(int *)wtype == 5){fw = &__kbmd20;}
     else {fw = &__kbmd25;}
 
     /* Compute first window width and window function. */
@@ -228,7 +181,6 @@ static void Fresnel_Transform_Quadratic_Func(char **args, npy_intp *dimensions,
     double* x_arr = (double *)malloc(sizeof(double)*nw_pts);
     double* w_func = (double *)malloc(sizeof(double)*nw_pts);
 
-    
     fw(w_func, w_init, dx, nw_pts);
     get_pi_arr(x_arr, dx, nw_pts);
 
@@ -287,10 +239,10 @@ static void Fresnel_Transform_Quartic_Func(char **args, npy_intp *dimensions,
 
     if (*(int *)wtype == 0){fw = &__rect;}
     else if (*(int *)wtype == 1){fw = &__coss;}
-    else if (*(int *)wtype == 2){fw = &__coss;}
-    else if (*(int *)wtype == 3){fw = &__coss;}
-    else if (*(int *)wtype == 4){fw = &__coss;}
-    else if (*(int *)wtype == 5){fw = &__coss;}
+    else if (*(int *)wtype == 2){fw = &__kb20;}
+    else if (*(int *)wtype == 3){fw = &__kb25;}
+    else if (*(int *)wtype == 4){fw = &__kb35;}
+    else if (*(int *)wtype == 5){fw = &__kbmd20;}
     else {fw = &__kbmd25;}
 
     /* Compute first window width and window function. */

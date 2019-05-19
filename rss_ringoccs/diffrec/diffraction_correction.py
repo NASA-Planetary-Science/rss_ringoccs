@@ -293,7 +293,7 @@ class DiffractionCorrection(object):
     """
     def __init__(self, DLP, res, rng="all", wtype="kbmd20", fwd=False,
                  norm=True, verbose=False, bfac=True, sigma=2.e-13,
-                 psitype="fresnel4", write_file=False, res_factor=0.75,
+                 psitype="cfresnel4", write_file=False, res_factor=0.75,
                  eccentricity=0.0, periapse=0.0):
 
         fname = "diffrec.diffraction_correction.DiffractionCorrection"

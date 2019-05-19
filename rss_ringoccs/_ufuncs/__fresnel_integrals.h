@@ -1,5 +1,5 @@
-#ifndef FRESNEL_INTEGRAL_H
-#define FRESNEL_INTEGRAL_H
+#ifndef RSS_RINGOCCS_FRESNEL_INTEGRAL_H
+#define RSS_RINGOCCS_FRESNEL_INTEGRAL_H
 
 #include <math.h>
 #include <complex.h>

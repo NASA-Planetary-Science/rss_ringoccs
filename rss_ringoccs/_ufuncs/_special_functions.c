@@ -7,7 +7,7 @@
 /*  complex data types, as well as _Complex_I, are defined here.    */
 #include <complex.h>
 
-/* Include the special functions defined in various header files.   */
+/* Include fresnel integrals header. This includes frensel_sin/cos. */
 #include "__fresnel_integrals.h"
 
 /*  Various header files required for the C-Python API to work.     */

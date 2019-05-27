@@ -1,14 +1,19 @@
 import numpy as np
 from scipy.special import erf, lambertw
 from . import window_functions
-from rss_ringoccs._ufuncs import _special_functions
-
-# Declare constants for multiples of pi.
-TWO_PI = 6.283185307179586476925287
-ONE_PI = 3.141592653589793238462643
-RADS_PER_DEGS = 0.0174532925199432957692369
-RCP_SQRT_2 = 0.7071067811865476
-SQRT_PI_2 = 1.253314137315500251207883
+try:
+    from rss_ringoccs._ufuncs import _special_functions
+except (ImportError, ModuleNotFoundError):
+    print(
+        """
+            Error: rss_ringoccs.diffrec.special_functions
+            \tCould Not Import C Code. Stricly Using Python Code.
+            \tThis is signicantly slower. There was most likely an error
+            \tin your installation of rss_ringoccs. To use the C Code,
+            \tdownload a C Compiler (GCC) and see the User's Guide for
+            \tinstallation instructions.
+        """
+    )
 
 def savitzky_golay(y, window_size, order, deriv=0, rate=1):
     """
@@ -226,9 +231,11 @@ def fresnel_scale(Lambda, d, phi, b, deg=False):
         b = np.array(b)
 
         if deg:
-            cb = np.cos(b * RADS_PER_DEGS)
-            sb = np.sin(b * RADS_PER_DEGS)
-            sp = np.sin(phi * RADS_PER_DEGS)
+            b = np.deg2rad(b)
+            phi = np.deg2rad(phi)
+            cb = np.cos(b)
+            sb = np.sin(b)
+            sp = np.sin(phi)
         else:
             cb = np.cos(b)
             sb = np.sin(b)
@@ -436,16 +443,40 @@ def fresnel_cos(x):
     """
     try:
         return _special_functions.fresnel_cos(x)
-    except (TypeError, ValueError):
-        raise TypeError(
-            """
-                \r\tError Encountered: rss_ringoccs
-                \r\t\tdiffrec.special_functions.fresnel_sin
-                \r
-                \r\tInvalid input. Input must be a numpy array or
-                \r\ta floating point number.
-            """
-        )
+    except (TypeError, ValueError, NameError):
+        y = x
+        try:
+            x = np.array(x)
+            if (not np.all(np.isreal(x))) and (not np.all(np.iscomplex(x))):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\tspecial_functions.fresnel_cos:\n"
+                    "\t\tInput must be a real or complex valued numpy array.\n"
+                    "\t\tThe elements of your array have type: %s"
+                    % (x.dtype)
+                )
+            else:
+                del y
+        except (TypeError, ValueError) as errmes:
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\tspecial_function.fresnel_cos:\n"
+                "\t\tInput must be a real or complex valued numpy array.\n"
+                "\t\tYour input has type: %s\n"
+                "\tOriginal Error Mesage: %s\n"
+                % (type(y).__name__, errmes)
+            )
+
+        x *= window_functions.RCP_SQRT_2
+        f_cos = ((0.25-0.25j)*erf((1.0+1.0j)*x)+
+                (0.25+0.25j)*erf((1.0-1.0j)*x))
+
+        if (np.isreal(x).all()):
+            f_cos = np.real(f_cos)
+
+        return f_cos*window_functions.SQRT_PI_2
 
 def fresnel_sin(x):
     """
@@ -483,50 +514,92 @@ def fresnel_sin(x):
     """
     try:
         return _special_functions.fresnel_sin(x)
-    except (TypeError, ValueError):
-        raise TypeError(
-            """
-                \r\tError Encountered: rss_ringoccs
-                \r\t\tdiffrec.special_functions.fresnel_sin
-                \r
-                \r\tInvalid input. Input must be a numpy array or
-                \r\ta floating point number.
-            """
-        )
+    except (TypeError, ValueError, NameError):
+        y = x
+        try:
+            x = np.array(x)
+            if (not np.all(np.isreal(x))):
+                raise TypeError(
+                    "\n\tError Encountered:\n"
+                    "\trss_ringoccs: Diffcorr Subpackage\n"
+                    "\tspecial_function.fresnel_cos:\n"
+                    "\t\tInput must be a real valued numpy array.\n"
+                    "\t\tThe elements of your array have type: %s"
+                    % (x.dtype)
+                )
+            else:
+                del y
+        except (TypeError, ValueError) as errmes:
+            raise TypeError(
+                "\n\tError Encountered:\n"
+                "\trss_ringoccs: Diffcorr Subpackage\n"
+                "\tspecial_function.fresnel_cos:\n"
+                "\t\tInput must be a real valued numpy array.\n"
+                "\t\tYour input has type: %s\n"
+                "\tOriginal Error Mesage: %s\n"
+                % (type(y).__name__, errmes)
+            )
+
+        x *= window_functions.RCP_SQRT_2
+        f_sin = ((0.25+0.25j)*erf((1.0+1.0j)*x)+
+                (0.25-0.25j)*erf((1.0-1.0j)*x))
+
+        if (np.isreal(x).all()):
+            f_sin = np.real(f_sin)
+
+        return f_sin*window_functions.SQRT_PI_2
 
 def square_well_diffraction(x, a, b, F):
     try:
         return _special_functions.square_well_diffraction(x, a, b, F)
-    except(TypeError, ValueError):
-        raise TypeError(
-            """
-                \r\tError Encountered: rss_ringoccs
-                \r\t\tdiffrec.special_functions.square_well_diffraction
-                \r
-                \r\tInvalid input. Input should be:
-                \r\t\tx:\t Numpy array of floating point numbers.
-                \r\t\ta:\t Floating point number
-                \r\t\tb:\t Floating point number
-                \r\t\tF:\t Floating point number
-            """
-        )
+    except(TypeError, ValueError, NameError):
+        try:
+            arg_1 = np.sqrt(np.pi/2.0)*((a-x)/F)
+            arg_2 = np.sqrt(np.pi/2.0)*((b-x)/F)
+            
+            return 1.0 - np.sqrt(2.0/np.pi)*(0.5 - 0.5j) * (
+                fresnel_cos(arg_2)-fresnel_cos(arg_1)+
+                1j*(fresnel_sin(arg_2)-fresnel_sin(arg_1))
+            )
+        except(TypeError, ValueError):
+            raise TypeError(
+                """
+                    \r\tError Encountered: rss_ringoccs
+                    \r\t\tdiffrec.special_functions.square_well_diffraction
+                    \r
+                    \r\tInvalid input. Input should be:
+                    \r\t\tx:\t Numpy array of floating point numbers.
+                    \r\t\ta:\t Floating point number
+                    \r\t\tb:\t Floating point number
+                    \r\t\tF:\t Floating point number
+                """
+            )
 
 def inverse_square_well_diffraction(x, a, b, F):
     try:
         return _special_functions.inverse_square_well_diffraction(x, a, b, F)
-    except(TypeError, ValueError):
-        raise TypeError(
-            """
-                \r\tError Encountered: rss_ringoccs
-                \r\t\tdiffrec.special_functions.inverse_square_well_diffraction
-                \r
-                \r\tInvalid input. Input should be:
-                \r\t\tx:\t Numpy array of floating point numbers.
-                \r\t\ta:\t Floating point number
-                \r\t\tb:\t Floating point number
-                \r\t\tF:\t Floating point number
-            """
-        )
+    except(TypeError, ValueError, NameError):
+        try:
+            arg_1 = np.sqrt(np.pi/2.0)*((a-x)/F)
+            arg_2 = np.sqrt(np.pi/2.0)*((b-x)/F)
+            
+            return np.sqrt(2.0/np.pi)*(0.5 - 0.5j) * (
+                fresnel_cos(arg_2)-fresnel_cos(arg_1)+
+                1j*(fresnel_sin(arg_2)-fresnel_sin(arg_1))
+            )
+        except(TypeError, ValueError):
+            raise TypeError(
+                """
+                    \r\tError Encountered: rss_ringoccs
+                    \r\t\tdiffrec.special_functions.inverse_square_well_diffraction
+                    \r
+                    \r\tInvalid input. Input should be:
+                    \r\t\tx:\t Numpy array of floating point numbers.
+                    \r\t\ta:\t Floating point number
+                    \r\t\tb:\t Floating point number
+                    \r\t\tF:\t Floating point number
+                """
+            )
 
 def single_slit_diffraction(x, z, a):
     """
@@ -691,242 +764,8 @@ def double_slit_diffraction(x, z, a, d):
             % (type(a).__name__)
             )
     f1 = np.sinc(a*x/z)*np.sinc(a*x/z)
-    f2 = np.sin(TWO_PI*d*x/z)*np.sin(TWO_PI*d*x/z)
-    f3 = 4.0*np.sin(ONE_PI*d*x/z)*np.sin(ONE_PI*d*x/z)
+    f2 = np.square(np.sin(window_functions.TWO_PI*d*x/z))
+    f3 = 4.0*np.square(np.sin(np.pi*d*x/z))
     f = f1*f2/f3
 
     return f
-
-def old_fresnel_cos(x, error_check=True):
-    """
-        Purpose:
-            Compute the Fresnel cosine function.
-        Arguments:
-            :x (*np.ndarray* or *float*):
-                A real or complex number, or numpy array.
-        Outputs:
-            :f_cos (*np.ndarray* or *float*):
-                The fresnel cosine integral of x.
-        Notes:
-            [1] The Fresnel Cosine integral is the solution to the
-                equation dy/dx = cos(pi/2 * x^2), y(0) = 0. In other
-                words, y = integral (t=0 to x) cos(pi/2 * t^2) dt
-            [2] The Fresnel Cosine and Sine integrals are computed by
-                using the scipy.special Error Function. The Error
-                Function, usually denoted Erf(x), is the solution to
-                dy/dx = (2/sqrt(pi)) * exp(-x^2), y(0) = 0. That is:
-                y = 2/sqrt(pi) * integral (t=0 to x) exp(-t^2)dt.
-                Using Euler's Formula for exponentials allows one
-                to use this to solve for the Fresnel Cosine integral.
-            [3] The Fresnel Cosine integral is used for the solution
-                of diffraction through a square well. Because of this
-                it is useful for forward modeling problems in 
-                radiative transfer and diffraction.
-        Examples:
-            Compute and plot the Fresnel Cosine integral.
-                In [1]: import rss_ringoccs.diffcorr.special_functions as sf
-                In [2]: import numpy as np
-                In [3]: import matplotlib.pyplot as plt
-                In [4]: x = np.array(range(0,10001))*0.01 - 50.0
-                In [5]: y = sf.fresnel_cos(x)
-                In [6]: plt.show(plt.plot(x,y))
-    """
-    if error_check:
-        y = x
-        try:
-            x = np.array(x)
-            if (not np.all(np.isreal(x))) and (not np.all(np.iscomplex(x))):
-                raise TypeError(
-                    "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffcorr Subpackage\n"
-                    "\tspecial_functions.fresnel_cos:\n"
-                    "\t\tInput must be a real or complex valued numpy array.\n"
-                    "\t\tThe elements of your array have type: %s"
-                    % (x.dtype)
-                )
-            else:
-                del y
-        except (TypeError, ValueError) as errmes:
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
-                "\tspecial_function.fresnel_cos:\n"
-                "\t\tInput must be a real or complex valued numpy array.\n"
-                "\t\tYour input has type: %s\n"
-                "\tOriginal Error Mesage: %s\n"
-                % (type(y).__name__, errmes)
-            )
-    else:
-        pass
-
-    x *= RCP_SQRT_2
-    f_cos = ((0.25-0.25j)*erf((1.0+1.0j)*x)+
-             (0.25+0.25j)*erf((1.0-1.0j)*x))
-
-    if (np.isreal(x).all()):
-        f_cos = np.real(f_cos)
-
-    return f_cos*SQRT_PI_2
-
-def old_fresnel_sin(x, error_check=True):
-    """
-        Purpose:
-            Compute the Fresnel sine function.
-        Variables:
-            :x (*np.ndarray* or *float*):
-                The independent variable.
-        Outputs:
-            :f_sin (*np.ndarray* or *float*):
-                The fresnel sine integral of x.
-        Notes:
-            [1] The Fresnel sine integral is the solution to the
-                equation dy/dx = sin(pi/2 * x^2), y(0) = 0. In other
-                words, y = integral (t=0 to x) sin(pi/2 * t^2) dt
-            [2] The Fresnel Cossine and Sine integrals are computed
-                by using the scipy.special Error Function. The Error
-                Function, usually denoted Erf(x), is the solution to
-                dy/dx = (2/sqrt(pi)) * exp(-x^2), y(0) = 0. That is:
-                y = 2/sqrt(pi) * integral (t=0 to x) exp(-t^2)dt.
-                Using Euler's Formula for exponentials allows one
-                to use this to solve for the Fresnel Sine integral.
-            [3] The Fresnel sine integral is used for the solution
-                of diffraction through a square well. Because of this
-                is is useful for forward modeling problems in 
-                radiative transfer and diffraction.
-        Examples:
-            Compute and plot the Fresnel Sine integral.
-                In [1]: import rss_ringoccs.diffcorr.special_functions as sf
-                In [2]: import numpy as np
-                In [3]: import matplotlib.pyplot as plt
-                In [4]: x = np.array(range(0,10001))*0.01 - 50.0
-                In [5]: y = sf.fresnel_sin(x)
-                In [6]: plt.show(plt.plot(x,y))
-    """
-    if error_check:
-        y = x
-        try:
-            x = np.array(x)
-            if (not np.all(np.isreal(x))) and (not np.all(np.iscomplex(x))):
-                raise TypeError(
-                    "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffcorr Subpackage\n"
-                    "\tspecial_function.fresnel_cos:\n"
-                    "\t\tInput must be a real or complex valued numpy array.\n"
-                    "\t\tThe elements of your array have type: %s"
-                    % (x.dtype)
-                )
-            else:
-                del y
-        except (TypeError, ValueError) as errmes:
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
-                "\tspecial_function.fresnel_cos:\n"
-                "\t\tInput must be a real or complex valued numpy array.\n"
-                "\t\tYour input has type: %s\n"
-                "\tOriginal Error Mesage: %s\n"
-                % (type(y).__name__, errmes)
-            )
-    else:
-        pass
-
-    x *= RCP_SQRT_2
-    f_sin = ((0.25+0.25j)*erf((1.0+1.0j)*x)+
-             (0.25-0.25j)*erf((1.0-1.0j)*x))
-
-    if (np.isreal(x).all()):
-        f_sin = np.real(f_sin)
-
-    return f_sin*SQRT_PI_2
-
-def old_square_well_diffraction(x, a, b, F):
-    """
-        Function:
-            sq_well_solve
-        Purpose:
-            Computes the solution of diffraction through a square well.
-        Variables:
-            :x:
-                Real numpy array. The independent variable.
-            :a (*float*):
-                The LEFTMOST endpoint of the square well.
-            :b (*float*):
-                The RIGHTMOST endpoint of the square well.
-            :F (*float*):
-                The Fresnel scale.
-        Output:
-            :H:
-                Complex numpy array.
-                Diffraction pattern of a square well on
-                the interal [a,b].
-        History:
-            Translated from IDL: RJM - 2018/05/15 8:03 P.M.
-            Updated and added error checks: RJM - 2018/09/19 7:19 P.M.
-    """
-    try:
-        arg_1 = np.sqrt(np.pi/2.0)*((a-x)/F)
-        arg_2 = np.sqrt(np.pi/2.0)*((b-x)/F)
-        
-        return 1.0 - np.sqrt(2.0/np.pi)*(0.5 - 0.5j) * (
-            old_fresnel_cos(arg_2)-old_fresnel_cos(arg_1)+
-            1j*(old_fresnel_sin(arg_2)-old_fresnel_sin(arg_1))
-        )
-    except(TypeError, ValueError):
-        raise TypeError(
-            """
-                \r\tError Encountered: rss_ringoccs
-                \r\t\tdiffrec.special_functions.old_square_well_diffraction
-                \r
-                \r\tInvalid input. Input should be:
-                \r\t\tx:\t Numpy array of floating point numbers.
-                \r\t\ta:\t Floating point number
-                \r\t\tb:\t Floating point number
-                \r\t\tF:\t Floating point number
-            """
-        )
-
-def old_inverse_square_well_diffraction(x, a, b, F):
-    """
-        Function:
-            sq_well_solve
-        Purpose:
-            Computes the solution of diffraction through a square well.
-        Variables:
-            :x:
-                Real numpy array. The independent variable.
-            :a (*float*):
-                The LEFTMOST endpoint of the square well.
-            :b (*float*):
-                The RIGHTMOST endpoint of the square well.
-            :F (*float*):
-                The Fresnel scale.
-        Output:
-            :H:
-                Complex numpy array.
-                Diffraction pattern of a square well on
-                the interal [a,b].
-        History:
-            Translated from IDL: RJM - 2018/05/15 8:03 P.M.
-            Updated and added error checks: RJM - 2018/09/19 7:19 P.M.
-    """
-    try:
-        arg_1 = np.sqrt(np.pi/2.0)*((a-x)/F)
-        arg_2 = np.sqrt(np.pi/2.0)*((b-x)/F)
-        
-        return np.sqrt(2.0/np.pi)*(0.5 - 0.5j) * (
-            old_fresnel_cos(arg_2)-old_fresnel_cos(arg_1)+
-            1j*(old_fresnel_sin(arg_2)-old_fresnel_sin(arg_1))
-        )
-    except(TypeError, ValueError):
-        raise TypeError(
-            """
-                \r\tError Encountered: rss_ringoccs
-                \r\t\tdiffrec.special_functions.old_inverse_square_well_diffraction
-                \r
-                \r\tInvalid input. Input should be:
-                \r\t\tx:\t Numpy array of floating point numbers.
-                \r\t\ta:\t Floating point number
-                \r\t\tb:\t Floating point number
-                \r\t\tF:\t Floating point number
-            """
-        )

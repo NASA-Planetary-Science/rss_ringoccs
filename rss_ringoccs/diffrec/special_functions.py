@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.special import erf, lambertw
 from . import window_functions
+from rss_ringoccs.tools import error_check
 try:
     from rss_ringoccs._ufuncs import _special_functions
 except (ImportError, ModuleNotFoundError):
@@ -241,7 +242,7 @@ def fresnel_scale(Lambda, d, phi, b, deg=False):
             sb = np.sin(b)
             sp = np.sin(phi)
 
-        return np.sqrt(0.5 * Lambda * d * (1 - (cb*cb) * (sp*sp)) / (sb*sb))
+        return np.sqrt(0.5 * Lambda * d * (1-np.square(cb*sp)) / np.square(sb))
     except (TypeError, ValueError):
         raise TypeError(
             """
@@ -252,80 +253,174 @@ def fresnel_scale(Lambda, d, phi, b, deg=False):
             """
         )
 
-def fresnel_inverse(T_hat, ker, dx, f_scale):
+def psi(kD, r, r0, phi, phi0, B, D):
     """
         Purpose:
-            Compute the approximation Fresnel
-            Inverse (MTR86 Equation 15)
+            Compute psi (MTR Equation 4)
         Arguments:
-            :T_hat (*np.ndarray*):
-                The complex transmittance of the
-                normalized diffraction data.
-            :ker (*np.ndarray*):
-                he Fresnel Kernel.
-            :dx (*float*):
-                The spacing between points in the window.
-                This is equivalent to the sample spacing.
-                This value is in kilometers.
-            :f_scale (*np.ndarray*):
-                The Fresnel Scale, in kilometers.
-        Outputs:
-            :T (*complex*):
-                The fresnel inversion about the center
-                of the Fresnel Kernel.
-    """
-    T = np.sum(ker * T_hat) * dx * (1.0+1.0j) / (2.0 * f_scale)
-    return T
-
-def psi_func(kD, r, r0, phi, phi0, B, D):
-    """
-        Purpose:
-            Calculate psi from geometry variables.
-        Arguments:
-            :r (*np.ndarray*):
-                Ring radius variable, in kilometers.
-            :r0 (*float*):
-                Ring intercept point, in kilometers.
-            :d (*float*):
-                RIP-Spacecraft distance in kilometers.
-            :b (*float*):
-                The ring opening angle, in radians.
+            :kD (*float*):
+                Wavenumber, unitless.
+            :r (*float*):
+                Radius of reconstructed point, in kilometers.
+            :r0 (*np.ndarray*):
+                Radius of region within window, in kilometers.
             :phi (*np.ndarray*):
-                The ring azimuth angle or r, in radians.
+                Root values of dpsi/dphi, radians.
             :phi0 (*np.ndarray*):
-                The ring azimuth angle for r0, in radians.
-        Keywords:
-            :verbose (*bool*):
-                Boolean for printing out information to
-                the command line.
+                Ring azimuth angle corresponding to r0, radians.
+            :B (*float*):
+                Ring opening angle, in radians.
+            :D (*float*):
+                Spacecraft-RIP distance, in kilometers.
         Outputs:
             :psi (*np.ndarray*):
-                Geometric quantity found in the Fresnel kernel.
+                Geometric Function from Fresnel Kernel.
     """
-    try:
-        phi0 = np.array(phi0)
-        phi = np.array(phi)
-        r0 = np.array(r0)
-        r = np.array(r)
-        D = np.array(D)
-        B = np.array(B)
+    # Compute Xi variable (MTR86 Equation 4b). Signs of xi are swapped.
+    xi = (np.cos(B)/D) * (r * np.cos(phi) - r0 * np.cos(phi0))
 
-        # Compute Xi variable (MTR86 Equation 4b).
-        xi = (np.cos(B)/D) * (r * np.cos(phi) - r0 * np.cos(phi0))
+    # Compute Eta variable (MTR86 Equation 4c).
+    eta = (r0*r0 + r*r - 2.0*r*r0*np.cos(phi-phi0)) / (D*D)
 
-        # Compute Eta variable (MTR86 Equation 4c).
-        eta = (r0*r0 + r*r - 2.0*r*r0*np.cos(phi-phi0)) / (D*D)
-        psi_vals = kD * (np.sqrt(1.0+eta-2.0*xi) - (1.0-xi))
-        return psi_vals
-    except (TypeError, ValueError):
-        raise TypeError(
-            """
-                \r\tError Encountered: rss_ringoccs
-                \r\t\tdiffrec.special_functions.psi_func\n
-                \r\tInputs should be six numpy arrays or
-                \r\tfloating point numbers.
-            """
-        )
+    # Sign of xi swapped from MTR86.
+    psi_vals = kD * (np.sqrt(1.0+eta-2.0*xi) + xi - 1.0)
+    return psi_vals
+
+def dpsi(kD, r, r0, phi, phi0, B, D):
+    """
+        Purpose:
+            Compute dpsi/dphi
+        Arguments:
+            :kD (*float*):
+                Wavenumber, unitless.
+            :r (*float*):
+                Radius of reconstructed point, in kilometers.
+            :r0 (*np.ndarray*):
+                Radius of region within window, in kilometers.
+            :phi (*np.ndarray*):
+                Root values of dpsi/dphi, radians.
+            :phi0 (*np.ndarray*):
+                Ring azimuth angle corresponding to r0, radians.
+            :B (*float*):
+                Ring opening angle, in radians.
+            :D (*float*):
+                Spacecraft-RIP distance, in kilometers.
+        Outputs:
+            :dpsi (*array*):
+                Partial derivative of psi with
+                respect to phi.
+    """
+    # Compute Xi variable (MTR86 Equation 4b).
+    xi = (np.cos(B)/D) * (r * np.cos(phi) - r0 * np.cos(phi0))
+
+    # Compute Eta variable (MTR86 Equation 4c).
+    eta = (r0*r0 + r*r - 2.0*r*r0*np.cos(phi-phi0)) / (D*D)
+
+    psi0 = np.sqrt(1.0+eta-2.0*xi)
+
+    # Compute derivatives.
+    dxi = -(np.cos(B)/D) * (r*np.sin(phi))
+    deta = 2.0*r*r0*np.sin(phi-phi0)/(D*D)
+
+    # Compute the partial derivative.
+    psi_d1 = (0.5/psi0)*(deta-2.0*dxi) + dxi
+    psi_d1 *= kD
+
+    return psi_d1
+
+def dpsi_ellipse(kD, r, r0, phi, phi0, B, D, ecc, peri):
+    """
+        Purpose:
+            Compute dpsi/dphi
+        Arguments:
+            :kD (*float*):
+                Wavenumber, unitless.
+            :r (*float*):
+                Radius of reconstructed point, in kilometers.
+            :r0 (*np.ndarray*):
+                Radius of region within window, in kilometers.
+            :phi (*np.ndarray*):
+                Root values of dpsi/dphi, radians.
+            :phi0 (*np.ndarray*):
+                Ring azimuth angle corresponding to r0, radians.
+            :B (*float*):
+                Ring opening angle, in radians.
+            :D (*float*):
+                Spacecraft-RIP distance, in kilometers.
+        Outputs:
+            :dpsi (*array*):
+                Partial derivative of psi with
+                respect to phi.
+    """
+    # Compute Xi variable (MTR86 Equation 4b).
+    xi = (np.cos(B)/D) * (r * np.cos(phi) - r0 * np.cos(phi0))
+
+    # Compute Eta variable (MTR86 Equation 4c).
+    eta = (r0*r0 + r*r - 2.0*r*r0*np.cos(phi-phi0)) / (D*D)
+
+    psi0 = np.sqrt(1.0+eta-2.0*xi)
+
+    # Compute derivatives.
+    dxi_phi = -(np.cos(B)/D) * (r*np.sin(phi))
+    deta_phi = 2.0*r*r0*np.sin(phi-phi0)/(D*D)
+
+    dxi_rho = (np.cos(B)/D)*np.cos(phi)
+    deta_rho = 2.0*(r-r0*np.cos(phi-phi0)) / (D*D)
+
+    # Compute the partial derivative.
+    psi_d1 = (deta_rho-2.0*dxi_rho)*(0.5/psi0) + dxi_rho
+    psi_d1 *= r*ecc*np.sin(phi-peri)/(1+ecc*np.cos(phi-peri))
+    psi_d1 += (deta_phi-2.0*dxi_phi)*(0.5/psi0) + dxi_phi
+
+    psi_d1 *= kD
+
+    return psi_d1
+
+def d2psi(kD, r, r0, phi, phi0, B, D):
+    """
+        Purpose:
+            Compute d^2psi/dphi^2
+        Arguments:
+            :kD (*float*):
+                Wavenumber, unitless.
+            :r (*float*):
+                Radius of reconstructed point, in kilometers.
+            :r0 (*np.ndarray*):
+                Radius of region within window, in kilometers.
+            :phi (*np.ndarray*):
+                Root values of dpsi/dphi, radians.
+            :phi0 (*np.ndarray*):
+                Ring azimuth angle corresponding to r0, radians.
+            :B (*float*):
+                Ring opening angle, in radians.
+            :D (*float*):
+                Spacecraft-RIP distance, in kilometers.
+        Outputs:
+            :dpsi (*np.ndarray*):
+                Second partial derivative of psi
+                with respect to phi.
+    """
+    # Compute Xi variable (MTR86 Equation 4b).
+    xi = (np.cos(B)/D) * (r * np.cos(phi) - r0 * np.cos(phi0))
+
+    # Compute Eta variable (MTR86 Equation 4c).
+    eta = (r0*r0 + r*r - 2.0*r*r0*np.cos(phi-phi0)) / (D*D)
+
+    psi0 = np.sqrt(1.0+eta-2.0*xi)
+
+    # Compute derivatives.
+    dxi = -(np.cos(B)/D) * (r*np.sin(phi))
+    dxi2 = -(np.cos(B)/D) * (r*np.cos(phi))
+
+    deta = 2.0*r*r0*np.sin(phi-phi0)/(D*D)
+    deta2 = 2.0*r*r0*np.cos(phi-phi0)/(D*D)
+
+    # Compute the second partial derivative.
+    psi_d2 = (-0.25/(psi0*psi0*psi0))*(deta-2.0*dxi)*(deta-2.0*dxi)
+    psi_d2 += (0.5/psi0)*(deta2-2.0*dxi2)+dxi2
+    psi_d2 *= kD
+
+    return psi_d2
 
 def resolution_inverse(x):
     """
@@ -360,43 +455,9 @@ def resolution_inverse(x):
                 In [6]: plt.show(plt.plot(x,y))
                 (Beautiful plots appear here)
     """
-    if error_check:
-        y = x
-        try:
-            x = np.array(x)
-            if (not np.all(np.isreal(x))) and (not np.all(np.iscomplex(x))):
-                raise TypeError(
-                    "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffcorr Subpackage\n"
-                    "\tspecial_function.resolution_inverse:\n"
-                    "\t\tInput must be a real or complex valued numpy array.\n"
-                    "\t\tThe elements of your array have type: %s"
-                    % (x.dtype)
-                )
-            else:
-                del y
-        except (TypeError, ValueError) as errmes:
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
-                "\tspecial_function.resolution_inverse:\n"
-                "\t\tInput must be a real or complex valued numpy array.\n"
-                "\t\tYour input has type: %s\n"
-                "\tOriginal Error Mesage: %s\n"
-                % (type(y).__name__, errmes)
-            )
-        if (np.min(np.real(x)) <= 1.0):
-            raise ValueError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
-                "\tspecial_function.resolution_inverse:\n"
-                "\t\tThis function is only defined for inputs\n"
-                "\t\twhose real part is greater than 1.\n"
-                "\t\tYour input has real minimum: %f\n"
-                % (np.min(np.real(x)))
-            )
-        else:
-            pass
+    fname = "diffrec.special_functions.resolution_inverse"
+    error_check.check_is_real(x, "x", fname)
+    error_check.check_positive(np.min(np.real(x))-1.0, "x-1", fname)
 
     P1 = x/(1.0-x)
     P2 = P1*np.exp(P1)
@@ -444,34 +505,11 @@ def fresnel_cos(x):
     try:
         return _special_functions.fresnel_cos(x)
     except (TypeError, ValueError, NameError):
-        y = x
-        try:
-            x = np.array(x)
-            if (not np.all(np.isreal(x))) and (not np.all(np.iscomplex(x))):
-                raise TypeError(
-                    "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffcorr Subpackage\n"
-                    "\tspecial_functions.fresnel_cos:\n"
-                    "\t\tInput must be a real or complex valued numpy array.\n"
-                    "\t\tThe elements of your array have type: %s"
-                    % (x.dtype)
-                )
-            else:
-                del y
-        except (TypeError, ValueError) as errmes:
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
-                "\tspecial_function.fresnel_cos:\n"
-                "\t\tInput must be a real or complex valued numpy array.\n"
-                "\t\tYour input has type: %s\n"
-                "\tOriginal Error Mesage: %s\n"
-                % (type(y).__name__, errmes)
-            )
+        fname = "diffrec.special_functions.fresnel_cos"
+        error_check.check_is_real(x, "x", fname)
 
         x *= window_functions.RCP_SQRT_2
-        f_cos = ((0.25-0.25j)*erf((1.0+1.0j)*x)+
-                (0.25+0.25j)*erf((1.0-1.0j)*x))
+        f_cos = ((0.25-0.25j)*erf((1.0+1.0j)*x)+(0.25+0.25j)*erf((1.0-1.0j)*x))
 
         if (np.isreal(x).all()):
             f_cos = np.real(f_cos)
@@ -515,34 +553,11 @@ def fresnel_sin(x):
     try:
         return _special_functions.fresnel_sin(x)
     except (TypeError, ValueError, NameError):
-        y = x
-        try:
-            x = np.array(x)
-            if (not np.all(np.isreal(x))):
-                raise TypeError(
-                    "\n\tError Encountered:\n"
-                    "\trss_ringoccs: Diffcorr Subpackage\n"
-                    "\tspecial_function.fresnel_cos:\n"
-                    "\t\tInput must be a real valued numpy array.\n"
-                    "\t\tThe elements of your array have type: %s"
-                    % (x.dtype)
-                )
-            else:
-                del y
-        except (TypeError, ValueError) as errmes:
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
-                "\tspecial_function.fresnel_cos:\n"
-                "\t\tInput must be a real valued numpy array.\n"
-                "\t\tYour input has type: %s\n"
-                "\tOriginal Error Mesage: %s\n"
-                % (type(y).__name__, errmes)
-            )
+        fname = "diffrec.special_functions.fresnel_sin"
+        error_check.check_is_real(x, "x", fname)
 
         x *= window_functions.RCP_SQRT_2
-        f_sin = ((0.25+0.25j)*erf((1.0+1.0j)*x)+
-                (0.25-0.25j)*erf((1.0-1.0j)*x))
+        f_sin = ((0.25+0.25j)*erf((1.0+1.0j)*x)+(0.25-0.25j)*erf((1.0-1.0j)*x))
 
         if (np.isreal(x).all()):
             f_sin = np.real(f_sin)
@@ -611,7 +626,6 @@ def single_slit_diffraction(x, z, a):
             :x:
                 A real or complex argument, or numpy array.
             :z (*float*):
-                Float
                 The perpendicular distance from the slit plane to
                 the observer.
             :a (*float*):
@@ -621,62 +635,13 @@ def single_slit_diffraction(x, z, a):
         Outputs:
             :f:
                 Single slit diffraction pattern.
-        Dependences:
-            [1] numpy
     """
-    y = x
-    try:
-        x = np.array(x)
-        if (not np.all(np.isreal(x))) and (not np.all(np.iscomplex(x))):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
-                "\tspecial_function.single_slit_diffraction_solve:\n"
-                "\t\tInput must be a real or complex valued numpy array.\n"
-                "\t\tThe elements of your array have type: %s"
-                % (x.dtype)
-            )
-        else:
-            del y
-    except (TypeError, ValueError) as errmes:
-        raise TypeError(
-            "\n\tError Encountered:\n"
-            "\trss_ringoccs: Diffcorr Subpackage\n"
-            "\tspecial_function.single_slit_diffraction_solve:\n"
-            "\t\tFirst input must be a real or complex valued numpy array.\n"
-            "\t\tYour input has type: %s\n"
-            "\tOriginal Error Mesage: %s\n"
-            % (type(y).__name__, errmes)
-        )
-    if not (isinstance(z, float)):
-        try:
-            z = float(z)
-        except ValueError:
-            raise ValueError(
-            "\n\tError Encountered:\n"
-            "\trss_ringoccs: Diffcorr Subpackage\n"
-            "\tspecial_function.single_slit_diffraction_solve:\n"
-            "\t\tSecond input must be a floating point number.\n"
-            "\t\tYour input has type: %s\n"
-            % (type(z).__name__)
-            )
-    if not (isinstance(a, float)):
-        try:
-            a = float(a)
-        except ValueError:
-            raise ValueError(
-            "\n\tError Encountered:\n"
-            "\trss_ringoccs: Diffcorr Subpackage\n"
-            "\tspecial_function.single_slit_diffraction_solve:\n"
-            "\t\tThird input must be a floating point number.\n"
-            "\t\tYour input has type: %s\n"
-            % (type(a).__name__)
-            )
+    fname = "diffrec.special_functions.single_slit_diffraction"
+    error_check.check_is_real(x, "x", fname)
+    z = error_check.check_type_and_convert(z, float, "z", fname)
+    a = error_check.check_type_and_convert(a, float, "a", fname)
 
-    f = np.sinc(a*x/z)
-    f *= f
-    
-    return f
+    return np.square(np.sinc(a*x/z))
 
 def double_slit_diffraction(x, z, a, d):
     """
@@ -703,69 +668,12 @@ def double_slit_diffraction(x, z, a, d):
         Dependences:
             [1] numpy
     """
-    y = x
-    try:
-        x = np.array(x)
-        if (not np.all(np.isreal(x))) and (not np.all(np.iscomplex(x))):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffcorr Subpackage\n"
-                "\tspecial_function.double_slit_diffraction_solve:\n"
-                "\t\tInput must be a real or complex valued numpy array.\n"
-                "\t\tThe elements of your array have type: %s"
-                % (x.dtype)
-            )
-        else:
-            del y
-    except (TypeError, ValueError) as errmes:
-        raise TypeError(
-            "\n\tError Encountered:\n"
-            "\trss_ringoccs: Diffcorr Subpackage\n"
-            "\tspecial_function.double_slit_diffraction_solve:\n"
-            "\t\tFirst input must be a real or complex valued numpy array.\n"
-            "\t\tYour input has type: %s\n"
-            "\tOriginal Error Mesage: %s\n"
-            % (type(y).__name__, errmes)
-        )
-    if not (isinstance(z, float)):
-        try:
-            z = float(z)
-        except ValueError:
-            raise ValueError(
-            "\n\tError Encountered:\n"
-            "\trss_ringoccs: Diffcorr Subpackage\n"
-            "\tspecial_function.double_slit_diffraction_solve:\n"
-            "\t\tSecond input must be a floating point number.\n"
-            "\t\tYour input has type: %s\n"
-            % (type(z).__name__)
-            )
-    if not (isinstance(a, float)):
-        try:
-            a = float(a)
-        except ValueError:
-            raise ValueError(
-            "\n\tError Encountered:\n"
-            "\trss_ringoccs: Diffcorr Subpackage\n"
-            "\tspecial_function.double_slit_diffraction_solve:\n"
-            "\t\tThird input must be a floating point number.\n"
-            "\t\tYour input has type: %s\n"
-            % (type(a).__name__)
-            )
-    if not (isinstance(d, float)):
-        try:
-            d = float(d)
-        except ValueError:
-            raise ValueError(
-            "\n\tError Encountered:\n"
-            "\trss_ringoccs: Diffcorr Subpackage\n"
-            "\tspecial_function.double_slit_diffraction_solve:\n"
-            "\t\tFourth input must be a floating point number.\n"
-            "\t\tYour input has type: %s\n"
-            % (type(a).__name__)
-            )
-    f1 = np.sinc(a*x/z)*np.sinc(a*x/z)
+    fname = "diffrec.special_functions.double_slit_diffraction"
+    error_check.check_is_real(x, "x", fname)
+    z = error_check.check_type_and_convert(z, float, "z", fname)
+    a = error_check.check_type_and_convert(a, float, "a", fname)
+    f1 = np.square(np.sinc(a*x/z))
     f2 = np.square(np.sin(window_functions.TWO_PI*d*x/z))
     f3 = 4.0*np.square(np.sin(np.pi*d*x/z))
-    f = f1*f2/f3
 
-    return f
+    return f1*f2/f3

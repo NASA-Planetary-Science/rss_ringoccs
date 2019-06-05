@@ -1,8 +1,7 @@
 """
     Purpose:
-        Provide a suite of window functions and
-        functions related to the normalized equivalent
-        width of a given array.
+        Provide a suite of window functions and functions related
+        to the normalized equivalent width of a given array.
     Dependencies:
         #. numpy
         #. spicy
@@ -10,6 +9,7 @@
 
 import numpy as np
 from scipy.special import lambertw, iv
+from rss_ringoccs.tools import error_check
 try:
     from rss_ringoccs._ufuncs import _window_functions
 except (ImportError, ModuleNotFoundError):
@@ -43,21 +43,22 @@ def rect(x, W):
         Purpose:
             Compute the rectangular window function.
         Arguments:
+            :x (*np.ndarray*):
+                Real valued array used for the independent
+                variable, or x-axis.
             :w_in (*float*):
-                The width of the window function to be computed.
-                This value is in kilometers.
-            :dx (*float*):
-                The spacing between points in the window.
-                This is equivalent to the sample spacing.
-                This value is in kilometers.
+                Width of the window. Positive float.
         Outputs:
             :w_func (*np.ndarray*):
-                Window function of width
-                w_in and with sample spacing dx.
+                Window function of width w_in evaluated along x.
     """
     try:
         return _window_functions.rect(x, W)
     except (TypeError, ValueError, NameError):
+        fname = "diffrec.window_functions.rect"
+        error_check.check_is_real(x, "x", fname)
+        error_check.check_positive(W, "W", fname)
+
         w_func = np.zeros(np.size(x)) + 1.0
         w_func[(np.abs(x) >= W/2.0).nonzero()] = 0.0
         return w_func
@@ -65,23 +66,23 @@ def rect(x, W):
 def coss(x, W):
     """
         Purpose:
-            Compute the squared cosine window function.
+            Compute the Cosine Squared Window Function.
         Arguments:
+            :x (*np.ndarray*):
+                Real valued array used for the independent
+                variable, or x-axis.
             :w_in (*float*):
-                The width of the window function to be computed.
-                This value is in kilometers.
-            :dx (*float*):
-                The spacing between points in the window.
-                This is equivalent to the sample spacing.
-                This value is in kilometers.
+                Width of the window. Positive float.
         Outputs:
             :w_func (*np.ndarray*):
-                Window function of width
-                w_in and with sample spacing dx.
+                Window function of width w_in evaluated along x.
     """
     try:
         return _window_functions.coss(x, W)
     except (TypeError, ValueError, NameError):
+        fname = "diffrec.window_functions.coss"
+        error_check.check_is_real(x, "x", fname)
+        error_check.check_positive(W, "W", fname)
         x *= np.pi/W
 
         w_func = np.square(np.cos(x))
@@ -91,23 +92,23 @@ def coss(x, W):
 def kb20(x, W):
     """
         Purpose:
-            Compute the Kaiser-Bessel 2.0 window function.
+            Compute the Kaiser-Bessel 2.0 Window Function.
         Arguments:
+            :x (*np.ndarray*):
+                Real valued array used for the independent
+                variable, or x-axis.
             :w_in (*float*):
-                The width of the window function to be computed.
-                This value is in kilometers.
-            :dx (*float*):
-                The spacing between points in the window.
-                This is equivalent to the sample spacing.
-                This value is in kilometers.
+                Width of the window. Positive float.
         Outputs:
             :w_func (*np.ndarray*):
-                Window function of width
-                w_in and with sample spacing dx.
+                Window function of width w_in evaluated along x.
     """
     try:
         return _window_functions.kb20(x, W)
     except (TypeError, ValueError, NameError):
+        fname = "diffrec.window_functions.kb20"
+        error_check.check_is_real(x, "x", fname)
+        error_check.check_positive(W, "W", fname)
         x = 1.0 - np.square(2.0*x/W)
 
         # Compute window function.
@@ -118,23 +119,23 @@ def kb20(x, W):
 def kb25(x, W):
     """
         Purpose:
-            Compute the Kaiser-Bessel 2.5 window function.
+            Compute the Kaiser-Bessel 2.5 Window Function.
         Arguments:
+            :x (*np.ndarray*):
+                Real valued array used for the independent
+                variable, or x-axis.
             :w_in (*float*):
-                The width of the window function to be computed.
-                This value is in kilometers.
-            :dx (*float*):
-                The spacing between points in the window.
-                This is equivalent to the sample spacing.
-                This value is in kilometers.
+                Width of the window. Positive float.
         Outputs:
             :w_func (*np.ndarray*):
-                Window function of width
-                w_in and with sample spacing dx.
+                Window function of width w_in evaluated along x.
     """
     try:
         return _window_functions.kb25(x, W)
     except (TypeError, ValueError, NameError):
+        fname = "diffrec.window_functions.kb25"
+        error_check.check_is_real(x, "x", fname)
+        error_check.check_positive(W, "W", fname)
         x = 1.0 - np.square(2.0*x/W)
 
         # Alpha value for kb25 is 2.5.
@@ -148,23 +149,23 @@ def kb25(x, W):
 def kb35(x, W):
     """
         Purpose:
-            Compute the Kaiser-Bessel 3.5 window function.
+            Compute the Kaiser-Bessel 3.5 Window Function.
         Arguments:
+            :x (*np.ndarray*):
+                Real valued array used for the independent
+                variable, or x-axis.
             :w_in (*float*):
-                The width of the window function to be computed.
-                This value is in kilometers.
-            :dx (*float*):
-                The spacing between points in the window.
-                This is equivalent to the sample spacing.
-                This value is in kilometers.
+                Width of the window. Positive float.
         Outputs:
             :w_func (*np.ndarray*):
-                Window function of width
-                w_in and with sample spacing dx.
+                Window function of width w_in evaluated along x.
     """
     try:
         return _window_functions.kb35(x, W)
     except (TypeError, ValueError, NameError):
+        fname = "diffrec.window_functions.kb35"
+        error_check.check_is_real(x, "x", fname)
+        error_check.check_positive(W, "W", fname)
         x = 1.0 - np.square(2.0*x/W)
 
         # Alpha value for kb35 is 3.5.
@@ -178,24 +179,23 @@ def kb35(x, W):
 def kbmd20(x, W):
     """
         Purpose:
-            Compute the Modifed Kaiser-Bessel 2.0
-            window function.
+            Compute the Modified Kaiser-Bessel 2.0 Window Function.
         Arguments:
+            :x (*np.ndarray*):
+                Real valued array used for the independent
+                variable, or x-axis.
             :w_in (*float*):
-                The width of the window function to be computed.
-                This value is in kilometers.
-            :dx (*float*):
-                The spacing between points in the window.
-                This is equivalent to the sample spacing.
-                This value is in kilometers.
+                Width of the window. Positive float.
         Outputs:
             :w_func (*np.ndarray*):
-                Window function of width
-                w_in and with sample spacing dx.
+                Window function of width w_in evaluated along x.
     """
     try:
         return _window_functions.kbmd20(x, W)
     except (TypeError, ValueError, NameError):
+        fname = "diffrec.window_functions.kbmd20"
+        error_check.check_is_real(x, "x", fname)
+        error_check.check_positive(W, "W", fname)
         x = 1.0 - np.square(2.0*x/W)
 
         # Compute window function.
@@ -206,24 +206,23 @@ def kbmd20(x, W):
 def kbmd25(x, W):
     """
         Purpose:
-            Compute the Modifed Kaiser-Bessel 2.5
-            window function.
+            Compute the Modified Kaiser-Bessel 2.5 Window Function.
         Arguments:
+            :x (*np.ndarray*):
+                Real valued array used for the independent
+                variable, or x-axis.
             :w_in (*float*):
-                The width of the window function to be computed.
-                This value is in kilometers.
-            :dx (*float*):
-                The spacing between points in the window.
-                This is equivalent to the sample spacing.
-                This value is in kilometers.
+                Width of the window. Positive float.
         Outputs:
             :w_func (*np.ndarray*):
-                Window function of width
-                w_in and with sample spacing dx.
+                Window function of width w_in evaluated along x.
     """
     try:
         return _window_functions.kbmd25(x, W)
     except (TypeError, ValueError, NameError):
+        fname = "diffrec.window_functions.kbmd25"
+        error_check.check_is_real(x, "x", fname)
+        error_check.check_positive(W, "W", fname)
         x = 1.0 - np.square(2.0*x/W)
 
         # Alpha value for kbmd25 is 2.5.
@@ -237,24 +236,23 @@ def kbmd25(x, W):
 def kbmd35(x, W):
     """
         Purpose:
-            Compute the Modifed Kaiser-Bessel 3.5
-            window function.
+            Compute the Modified Kaiser-Bessel 3.5 Window Function.
         Arguments:
+            :x (*np.ndarray*):
+                Real valued array used for the independent
+                variable, or x-axis.
             :w_in (*float*):
-                The width of the window function to be computed.
-                This value is in kilometers.
-            :dx (*float*):
-                The spacing between points in the window.
-                This is equivalent to the sample spacing.
-                This value is in kilometers.
+                Width of the window. Positive float.
         Outputs:
             :w_func (*np.ndarray*):
-                Window function of width
-                w_in and with sample spacing dx.
+                Window function of width w_in evaluated along x.
     """
     try:
         return _window_functions.kbmd35(x, W)
     except (TypeError, ValueError, NameError):
+        fname = "diffrec.window_functions.kbmd35"
+        error_check.check_is_real(x, "x", fname)
+        error_check.check_positive(W, "W", fname)
         x = 1.0 - np.square(2.0*x/W)
 
         # Alpha value for kbmd35 is 3.5.
@@ -265,7 +263,7 @@ def kbmd35(x, W):
         w_func[(x <= 0).nonzero()] = 0.0
         return w_func
 
-def kbal(w_in, dx, al, error_check=True):
+def kbal(x, W, alpha):
     """
         Purpose:
             Create a Kaiser-Bessel window with a user
@@ -299,98 +297,20 @@ def kbal(w_in, dx, al, error_check=True):
                 discontinuity in the window. For alpha values beyond
                 2.5 * pi this effect is negligible.
     """
-    if error_check:
-        if not isinstance(w_in, float):
-            try:
-                w_in = float(w_in)
-            except (TypeError, ValueError):
-                raise TypeError(
-                    "\n\tError Encountered:\n"
-                    "\trss_ringoccs: diffrec Subpackage\n"
-                    "\twindow_functions.kbal:\n"
-                    "\t\tFirst input must be a floating point number.\n"
-                    "\t\tYour input has type: %s\n"
-                    % (type(w_in).__name__)
-                )
-        else:
-            pass
-    
-        if (w_in <= 0.0):
-            raise ValueError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: diffrec Subpackage\n"
-                "\twindow_functions.kbal:\n"
-                "\t\tFirst input must positive.\n"
-                "\t\tYour input: %f\n"
-                % (w_in)
-            )
-        else:
-            pass
-
-        if not isinstance(dx, float):
-            try:
-                dx = float(dx)
-            except (TypeError, ValueError):
-                raise TypeError(
-                    "\n\tError Encountered:\n"
-                    "\trss_ringoccs: diffrec Subpackage\n"
-                    "\twindow_functions.kbal:\n"
-                    "\t\tSecond input must be a floating point number.\n"
-                    "\t\tYour input has type: %s\n"
-                    % (type(dx).__name__)
-                )
-        else:
-            pass
-
-        if (dx <= 0.0):
-            raise ValueError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: diffrec Subpackage\n"
-                "\twindow_functions.kbal:\n"
-                "\t\tSecond input must positive.\n"
-                "\t\tYour input: %f\n"
-                % (dx)
-            )
-        else:
-            pass
-
-        if not isinstance(al, float):
-            try:
-                al = float(al)
-            except (TypeError, ValueError):
-                raise TypeError(
-                    "\n\tError Encountered:\n"
-                    "\trss_ringoccs: diffrec Subpackage\n"
-                    "\twindow_functions.kbal:\n"
-                    "\t\tThird input must be a floating point number.\n"
-                    "\t\tYour input has type: %s\n"
-                    % (type(al).__name__)
-                )
-        else:
-            pass
-
-        if (al < 0.0):
-            raise ValueError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: diffrec Subpackage\n"
-                "\twindow_functions.kbal:\n"
-                "\t\tSecond input must non-negative.\n"
-                "\t\tYour input: %f\n"
-                % (al)
-            )
-        else:
-            pass
+    fname = "diffrec.window_functions.kbal"
+    error_check.check_is_real(x, "x", fname)
+    error_check.check_positive(W, "W", fname)
 
     # Window functions have an odd number of points.
-    nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
+    x = 1.0 - np.square(2.0*x/W)
 
-    # Compute argument of window function.
+    # Compute window function.
     x = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx / w_in
-    alpha  =  al * np.pi
-    w_func = iv(0.0, alpha * np.sqrt((1.0 - 4.0*x*x)))/iv(0.0, alpha)
+    alpha *= np.pi
+    w_func = iv(0.0, alpha * np.sqrt(x))/iv(0.0, alpha)
     return w_func
 
-def kbmdal(w_in, dx, al, error_check=True):
+def kbmdal(x, W, al):
     """
         Purpose:
             Create a modifed Kaiser-Bessel window
@@ -424,95 +344,17 @@ def kbmdal(w_in, dx, al, error_check=True):
                 discontinuity in the window. For alpha values beyond
                 2.5 * pi this effect is negligible.
     """
-    if error_check:
-        if not isinstance(w_in, float):
-            try:
-                w_in = float(w_in)
-            except (TypeError, ValueError):
-                raise TypeError(
-                    "\n\tError Encountered:\n"
-                    "\trss_ringoccs: diffrec Subpackage\n"
-                    "\twindow_functions.kbmdal:\n"
-                    "\t\tFirst input must be a floating point number.\n"
-                    "\t\tYour input has type: %s\n"
-                    % (type(w_in).__name__)
-                )
-        else:
-            pass
-    
-        if (w_in <= 0.0):
-            raise ValueError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: diffrec Subpackage\n"
-                "\twindow_functions.kbmdal:\n"
-                "\t\tFirst input must positive.\n"
-                "\t\tYour input: %f\n"
-                % (w_in)
-            )
-        else:
-            pass
-
-        if not isinstance(dx, float):
-            try:
-                dx = float(dx)
-            except (TypeError, ValueError):
-                raise TypeError(
-                    "\n\tError Encountered:\n"
-                    "\trss_ringoccs: diffrec Subpackage\n"
-                    "\twindow_functions.kbmdal:\n"
-                    "\t\tSecond input must be a floating point number.\n"
-                    "\t\tYour input has type: %s\n"
-                    % (type(dx).__name__)
-                )
-        else:
-            pass
-
-        if (dx <= 0.0):
-            raise ValueError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: diffrec Subpackage\n"
-                "\twindow_functions.kbmdal:\n"
-                "\t\tSecond input must positive.\n"
-                "\t\tYour input: %f\n"
-                % (dx)
-            )
-        else:
-            pass
-
-        if not isinstance(al, float):
-            try:
-                al = float(al)
-            except (TypeError, ValueError):
-                raise TypeError(
-                    "\n\tError Encountered:\n"
-                    "\trss_ringoccs: diffrec Subpackage\n"
-                    "\twindow_functions.kbmdal:\n"
-                    "\t\tThird input must be a floating point number.\n"
-                    "\t\tYour input has type: %s\n"
-                    % (type(al).__name__)
-                )
-        else:
-            pass
-
-        if (al < 0.0):
-            raise ValueError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: diffrec Subpackage\n"
-                "\twindow_functions.kbmdal:\n"
-                "\t\tSecond input must non-negative.\n"
-                "\t\tYour input: %f\n"
-                % (al)
-            )
-        else:
-            pass
+    fname = "diffrec.window_functions.kbal"
+    error_check.check_is_real(x, "x", fname)
+    error_check.check_positive(W, "W", fname)
 
     # Window functions have an odd number of points.
-    nw_pts = int(2 * np.floor(w_in / (2.0 * dx)) + 1)
+    x = 1.0 - np.square(2.0*x/W)
 
-    # Compute argument of window function.
+    # Compute window function.
     x = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx / w_in
-    alpha  =  al * np.pi
-    w_func = (iv(0.0, alpha*np.sqrt((1.0-4.0*x*x)))-1.0)/(iv(0.0, alpha)-1.0)
+    alpha *= np.pi
+    w_func = (iv(0.0, alpha * np.sqrt(x))-1.0)/(iv(0.0, alpha)-1.0)
     return w_func
 
 def window_width(res, normeq, fsky, fres, rho_dot,
@@ -584,6 +426,7 @@ def window_width(res, normeq, fsky, fres, rho_dot,
             pass
     else:
         w_vals = 2.0*np.square(fres)/res
+        Prange = (fres > 0.0).nonzero()[0]
 
     w_vals *= normeq
 

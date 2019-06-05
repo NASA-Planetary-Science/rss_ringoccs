@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 
-calc_f_sky_recon.py
+jwf_calc_f_sky_recon.py
 
 Purpose:
     Calculate sky frequency from the reconstructed event kernels.
@@ -16,9 +16,10 @@ References:
 
 import numpy as np
 from spiceypy import spiceypy as spice
-import sys
-
 from ..tools.spm_to_et import spm_to_et
+import sys
+import pdb
+
 
 # Product of the gravitational constant by the Sun mass
 MUS = 1.3271244002331E+11
@@ -31,22 +32,28 @@ LTfac = 9.8509818970128E-06
 
 # see derpt.f for assignment of IDs
 ID_SSB = [1, 2, 399, 4, 5, 6, 7, 8, 9, 10, 301, 606]
-
+# G*M for key solary system barycenters, numbered by NAIF ID
 GM_SSB = [
-    2.2032080000000E+04,  # 1
+    2.2032080000000E+04,  # 1 (MERCURY)
     3.2485859900000E+05,  #
-    3.9860043600000E+05,  # 399
-    4.2828314000000E+04,  # 4
-    1.2671276786300E+08,  # 5
-    3.7940626063000E+07,  # 6
-    5.7945490070000E+06,  # 7
-    6.8365340640000E+06,  # 8
-    9.8160100000000E+02,  # 9
-    1.3271244002331E+11,  # 10
-    4.9027990000000E+03,  # 301
+    3.9860043600000E+05,  # 399 (EARTH)
+    4.2828314000000E+04,  # 4 (MARS)
+    1.2671276786300E+08,  # 5 (JUPITER)
+    3.7940626063000E+07,  # 6 (SATURN)
+    5.7945490070000E+06,  # 7 (URANUS)
+    6.8365340640000E+06,  # 8 (NEPTUNE)
+    9.8160100000000E+02,  # 9 (PLUTO) why?
+    1.3271244002331E+11,  # 10 (SUN)
+    4.9027990000000E+03,  # 301 (EARTH'S MOON)
     8.9781370309840E+03]  # 606 (Titan) from cpck30Mar2016.tpc
 
+# Turnaround ratios for spacecraft conversion of uplink frequency
+# (first listed band) to the downlink frequency (second listed band)
+TURNR = {'S-S':240./221.,'S-X':880./221.,'S-Ka':0./221.,
+          'X-S':240./749.,'X-X':880./749.,'X-Ka':3344./749.,
+          'Ka-S':0./3599.,'Ka-X':0./3599.,'Ka-Ka':3360./3600.}
 
+# Predicts code
 def calc_f_sky_recon(f_spm, rsr_inst, sc_name, f_uso, kernels):
     """
     Calculates sky frequency at given times.
@@ -85,16 +92,37 @@ def calc_f_sky_recon(f_spm, rsr_inst, sc_name, f_uso, kernels):
     # Reconstructed sky frequency array
     RF = np.zeros(n_times)
 
-    for i in range(n_times):
-        et = et_vals[i]
-        [etsc, _lt] = spice.ltime(et, rs_code, '<-', sc_code)
-        A23 = derlt(sc_code, etsc, rs_code, et)
-        B3 = derpt(et, rs_code)
-        B2 = derpt(etsc, sc_code)
-        temp = (B2 - B3)/(1.0 - B3)
-        y = -A23*temp + A23 + temp
-        y *= f_uso
-        RF[i] = f_uso - y
+    # if tracking mode is one-way, use the downlink method
+    if rsr_inst.track_mode == 1:
+        for i in range(n_times):
+            et = et_vals[i]
+            [etsc, _lt] = spice.ltime(et, rs_code, '<-', sc_code)
+            A23 = derlt(sc_code, etsc, rs_code, et)
+            B3 = derpt(et, rs_code)
+            B2 = derpt(etsc, sc_code)
+            temp = (B2 - B3)/(1.0 - B3)
+            y = -A23*temp + A23 + temp
+            y *= f_uso
+            RF[i] = f_uso - y
+
+    # if tracking mode is multi-way, use the uplink-downlink method
+    else:
+        # Transmission Station code
+        ts_code = spice.bodn2c(rsr_inst.ul_dsn)
+
+        for n in range(n_times):
+            et = et_vals[n]
+            etsc, lt1 = spice.ltime(et, rs_code, '<-', sc_code)
+            A23 = derlt(sc_code, etsc, rs_code, et)
+            etts, lt2 = spice.ltime(etsc, sc_code, '<-', ts_code)
+            A12 = derlt(ts_code, etts, sc_code, etsc)
+            B3 = derpt(et, rs_code)
+            B1 = derpt(etts, ts_code)
+            temp = (B1 - B3) / (1.0 - B3)
+            z = A12 * A23 * temp - A12 * A23 - ( A12 + A23 ) * temp + temp + A12 + A23
+            temp = f_uso * TURNR[rsr_inst.ul_band+'-'+rsr_inst.band]
+            z = z * temp
+            RF[n] = temp - z
 
     return RF
 
@@ -189,8 +217,3 @@ def derpt(et, code):
     B = (PHII + 0.5*SIDOT2)/(spice.clight()**2) - LSEC
 
     return B
-
-"""
-Revisions:
-
-"""

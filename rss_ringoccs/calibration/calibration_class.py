@@ -22,6 +22,7 @@ Dependencies:
 
 import numpy as np
 from scipy.interpolate import splrep,splev
+from scipy.integrate import simps
 import sys
 
 from ..tools.history import write_history_dict
@@ -44,9 +45,6 @@ class Calibration(object):
         :geo_inst (*object*): Instance of the Geometry class
 
     Keyword Arguments:
-        :fof_order (*float*): Whole number specifying the polynomial
-                        order to use when fitting the frequency offset
-                        residual. Default is 9.
         :pnf_order (*float*): whole number specifying the polynomial
                         order to use when fitting the freespace power.
                         Default is 3.
@@ -92,9 +90,9 @@ class Calibration(object):
                         ((\hat{P}_0(t)-P_0(t))/\hat{P}_0(t))^2`
     """
 
-    def __init__(self, rsr_inst, geo_inst, fof_order=9, pnf_order=3, dt_cal=1.0,
+    def __init__(self, rsr_inst, geo_inst, pnf_order=3, dt_cal=1.0,
                  verbose=False, write_file=True, interact=False,
-                 pnf_fittype='poly'):
+                 fit_resid=False):
 
         if not isinstance(geo_inst, Geometry):
             sys.exit('ERROR (Calibration): geo_inst input needs to be an '
@@ -112,6 +110,28 @@ class Calibration(object):
                 + 'False')
             verbose = False
 
+        '''
+        # Find the max and min SPM values with True boolean indices
+        if len(self.raw_spm_vals[inds]) > 2 :
+            # if user-defined lower spm is more constraining than geometry
+            if np.min(self.raw_spm_vals[inds]) < np.min(spm_limits) :
+                spm_min = np.min(spm_limits)
+            # otherwise, use limits implied by geometry
+            else:
+                spm_min = np.min(self.raw_spm_vals[inds])
+            # if user-defined upper spm is more constraining than geometry
+            if np.max(self.raw_spm_vals[inds]) > np.max(spm_limits) :
+                spm_max = np.max(spm_limits)
+            # otherwise, use limits implied by geometry
+            else:
+                spm_max = np.max(self.raw_spm_vals[inds])
+        # if geometry is too restricting, use max and min SPM
+        else:
+            print('Error in estimating SPM range for frequency offset!')
+            spm_min = self.raw_spm_vals[0]
+            spm_max = self.raw_spm_vals[-1]
+        '''
+
         if verbose:
             print('\nCalibrating frequency and power...')
 
@@ -122,7 +142,7 @@ class Calibration(object):
         # Calculate frequency offset fit
         # Use default residual frequency fit
         fit_inst = FreqOffsetFit(rsr_inst, geo_inst, verbose=verbose,
-                poly_order=fof_order, write_file=write_file)
+                write_file=write_file, fit_resid=fit_resid)
 
         # Get corrected I's and Q's
         self.IQ_c = self.correct_IQ(rsr_inst.spm_vals,rsr_inst.IQ_m,
@@ -130,7 +150,7 @@ class Calibration(object):
 
         # Normalize observed power by the freespace signal
         norm_inst = Normalization(rsr_inst.spm_vals, self.IQ_c, geo_inst,
-                rsr_inst, order=pnf_order,verbose=verbose,interact=interact,
+                order=pnf_order,verbose=verbose,interact=interact,
                 write_file=write_file)
 
         spm_cal = np.arange(geo_inst.t_oet_spm_vals[0],
@@ -139,11 +159,6 @@ class Calibration(object):
         # Evaluate f_sky_pred at spm_cal
         f_sky_pred_splcoef = splrep(fit_inst.f_spm, fit_inst.f_sky_pred)
         f_sky_pred_cal = splev(spm_cal,f_sky_pred_splcoef)
-
-        # Evaluate f_sky_resid_fit at spm_cal
-        f_sky_resid_fit_splcoef = splrep(fit_inst.f_spm,
-                fit_inst.f_sky_resid_fit)
-        f_sky_resid_fit_cal = splev(spm_cal,f_sky_resid_fit_splcoef)
 
         # Evaluate f_offset_fit at spm_cal
         f_offset_fit_splcoef = splrep(fit_inst.f_spm,fit_inst.f_offset_fit)
@@ -157,8 +172,10 @@ class Calibration(object):
         # attributes for writing to file
         self.t_oet_spm_vals = spm_cal
         self.f_sky_hz_vals = f_sky_pred_cal + f_offset_fit_cal
-        self.f_sky_resid_fit_vals = f_sky_resid_fit_cal
-        self.f_sky_resid = fit_inst.f_sky_resid
+        self.f_offset_fit_vals = f_offset_fit_cal
+        self.f_offset = fit_inst.f_offset
+        self.f_sky_resid_fit_vals = f_offset_fit_cal
+        self.f_sky_resid = fit_inst.f_offset
         self.f_spm = fit_inst.f_spm
         self.p_free_vals = p_free_cal
         gaps_used = norm_inst.gaps
@@ -171,10 +188,10 @@ class Calibration(object):
                 "rsr_inst": rsr_inst.history,
                 "geo_inst": geo_inst.history}
         input_kwds = {
-                "fof_order": fof_order,
+                "fof_order": fit_inst.poly_order,
                 "pnf_order": pnf_order,
                 "dt_cal": dt_cal,
-                "pnf_fittype": pnf_fittype,
+                "pnf_fittype": 'poly',
                 "freespace_spm": gaps_used,
                 "interact": interact}
 
@@ -232,17 +249,20 @@ class Calibration(object):
 
         # Interpolate frequeny offset fit to 0.1 second spacing, since
         # this makes the integration later more accurate
-        dt = 0.1
+        dt = 0.01
         npts = round((f_spm[-1] - f_spm[0]) / dt)
-        f_spm_interp = f_spm[0] + dt * np.arange(npts)
-        f_offset_fit_splcoef = splrep(f_spm, f_offset_fit)
-        f_offset_fit_interp = splev(f_spm_interp,f_offset_fit_splcoef)
+        f_spm_ip = f_spm[0] + dt * np.arange(npts)
+        f_off_splcoef = splrep(f_spm, f_offset_fit)
+        f_off_ip = splev(f_spm_ip,f_off_splcoef)
 
         # Integration of frequency offset fit to get phase detrending function.
-        # Then interpolated to same SPM as I and Q
-        f_detrend_interp = np.cumsum(f_offset_fit_interp) * dt
-        f_detrend_interp_rad = f_detrend_interp * (2.0 * np.pi)
-        f_detrend_rad_splcoef = splrep(f_spm_interp, f_detrend_interp_rad)
+        f_detrend_ip = np.cumsum(f_off_ip)*dt
+        #f_detrend_ip = np.zeros(len(f_off_ip))
+        #for i in range(len(f_off_ip)):
+        #    f_detrend_ip[i] = simps(f_off_ip[:i+1],x=f_spm_ip[:i+1])
+        f_detrend_ip_rad = f_detrend_ip * (2.0 * np.pi)
+        # Then interpolate to same SPM as I and Q
+        f_detrend_rad_splcoef = splrep(f_spm_ip, f_detrend_ip_rad)
         f_detrend_rad = splev(spm_vals, f_detrend_rad_splcoef)
 
         # Apply detrending function

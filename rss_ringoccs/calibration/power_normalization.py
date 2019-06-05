@@ -49,7 +49,7 @@ class Normalization(object):
                         to the freespace power. Default is False.
     """
 
-    def __init__(self, spm_raw, IQ_c, geo_inst, rsr_inst, order=3,
+    def __init__(self, spm_raw, IQ_c, geo_inst, order=3,
             fittype='poly', interact=False, verbose=False,
             write_file=False):
 
@@ -258,7 +258,12 @@ class Normalization(object):
         """
 
         # normalize corrected power to max corrected power inside occultation
-        pc_max = np.nanmax(pc[(spm>=gaps_spm[1][1])&(spm<=gaps_spm[-2][0])])
+        if len(gaps_spm)==2 or len(gaps_spm)==3:
+            pc_max = np.nanmax(pc[(spm>=gaps_spm[0][1])&(spm<=gaps_spm[-1][0])])
+        elif len(gaps_spm)==1:
+            pc_max = np.nanmax(pc[(spm>gaps_spm[0][0])&(spm<=gaps_spm[0][1])])
+        else:
+            pc_max = np.nanmax(pc[(spm>=gaps_spm[1][1])&(spm<=gaps_spm[-2][0])])
         pc_norm = pc/pc_max
 
         # get lower, upper radial limits to planet/atmosphere occultation
@@ -300,7 +305,7 @@ class Normalization(object):
 
         self.mask = fsp_mask
         self.gaps = gaps_spm
-        
+
         # Use order 1 if less than 5 gaps
         if len(gaps_spm) <= 5:
             self.order = 1
@@ -482,6 +487,7 @@ class Normalization(object):
                 print('\tSaving power normalization plot to: \n\t\t' + '/'.join(outfile.split('/')[0:5]) + '/\n\t\t\t' + '/'.join(outfile.split('/')[5:]))
                 fig.text(0.125,0.96,file,fontsize=15)
                 plt.savefig(outfile)
+                fig.texts[-1].set_visible(False)
             plt.close('all')
         else:
             plt.show(block=False)

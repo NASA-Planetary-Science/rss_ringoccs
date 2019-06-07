@@ -28,7 +28,7 @@ static void double_fresnelsin(char **args, npy_intp *dimensions,
 {
     npy_intp i;
     npy_intp n = dimensions[0];
-    char *in = args[0];
+    char *in  = args[0];
     char *out = args[1];
 
     npy_intp in1_step = steps[0];

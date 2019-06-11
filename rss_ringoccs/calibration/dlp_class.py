@@ -16,6 +16,7 @@ from .resample_IQ import resample_IQ
 from .calc_tau_thresh import calc_tau_thresh
 from ..tools.history import write_history_dict
 from ..tools.write_output_files import write_output_files
+import pdb
 
 class DiffractionLimitedProfile(object):
     """
@@ -68,12 +69,12 @@ class DiffractionLimitedProfile(object):
                                         midnight
         :phi_rl_rad_vals (*np.ndarray*): Ring longitude in radians
         :rho_dot_kms_vals (*np.ndarray*): Ring intercept radial velocity in km/s
-        :rho_corr_pole_km_vals (*np.ndarray*): Radius correction due to 
+        :rho_corr_pole_km_vals (*np.ndarray*): Radius correction due to
                                                improved pole. This is populated
                                                with a placeholder of zeros
-        :rho_corr_timing_km_vals (*np.ndarray*): Radius correction due to 
+        :rho_corr_timing_km_vals (*np.ndarray*): Radius correction due to
                                                  timing offset. This is
-                                                 populated with a placeholder 
+                                                 populated with a placeholder
                                                  of zeros
         :tau_vals (*np.ndarray*): Diffraction-limited optical depth
         :history (*dict*): Processing history with all inputs necessary to
@@ -82,7 +83,7 @@ class DiffractionLimitedProfile(object):
     Note:
         #. All *np.ndarray* attributes are sampled at dr_km radial spacing.
     """
-    def __init__(self, rsr_inst, geo_inst, cal_inst, dr_km, verbose=False, 
+    def __init__(self, rsr_inst, geo_inst, cal_inst, dr_km, verbose=False,
             write_file=True, profile_range=[65000., 150000.]):
 
 
@@ -120,6 +121,18 @@ class DiffractionLimitedProfile(object):
         # resample IQ_c, but not to exact rho boundaries
         rho_km_desired, IQ_c_desired = resample_IQ(rho_full, IQ_c,
                 dr_km, verbose=verbose)
+        dr_km = round(abs(rho_km_desired[1]-rho_km_desired[0]),3)
+
+        # Check if rho_km_desired covers profile_range values
+        if np.logical_and(rho_km_desired>profile_range[0],
+                rho_km_desired<profile_range[1]).any() == False:
+            minmax = [min(rho_km_desired), max(rho_km_desired)]
+            raise ValueError('(dlp_class.py): Data does not cover desired '
+                    + 'profile range! Desired profile range:'
+                    + str(profile_range) + '. Data range: '
+                    + str(minmax) + '.')
+
+
 
         # Slice rho_km_desired to profile_range values
         ind1 = list(rho_km_desired).index(min(list(rho_km_desired),
@@ -194,8 +207,9 @@ class DiffractionLimitedProfile(object):
         phi_rl_rad_geo = np.radians(phi_rl_deg_vals)
 
         # ring longitude at final spacing
-        spm_to_rhodot = splrep(spm_geo, rho_dot_kms_geo)
-        rho_dot_kms_vals_interp = splev(spm_desired, spm_to_rhodot)
+        #spm_to_rhodot = splrep(spm_geo, rho_dot_kms_geo, k=1)
+        #rho_dot_kms_vals_interp = splev(spm_desired, spm_to_rhodot)
+        rho_dot_kms_vals_interp = np.interp(spm_desired, spm_geo, rho_dot_kms_geo)
 
         # check if rho_dot is both positive and negative,
         #   if so, remove unwanted values
@@ -208,39 +222,50 @@ class DiffractionLimitedProfile(object):
             rho_km_desired = np.delete(rho_km_desired, ind)
             p_norm_vals = np.delete(p_norm_vals, ind)
             phase_rad_vals = np.delete(phase_rad_vals, ind)
-            rho_dot_kms_vals_interp = splev(spm_desired, spm_to_rhodot)
+            #rho_dot_kms_vals_interp = splev(spm_desired, spm_to_rhodot)
+            rho_dot_kms_vals_interp = np.interp(spm_desired, spm_geo,
+                    rho_dot_kms_geo)
 
         # ring opening angle at final spacing
-        spm_to_B = splrep(spm_geo, B_rad_geo)
-        B_rad_vals_interp = splev(spm_desired, spm_to_B)
+        #spm_to_B = splrep(spm_geo, B_rad_geo)
+        #B_rad_vals_interp = splev(spm_desired, spm_to_B)
+        B_rad_vals_interp = np.interp(spm_desired, spm_geo, B_rad_geo)
 
         # spacecraft - rip distance at final spacing
-        spm_to_D = splrep(spm_geo, D_km_geo)
-        D_km_vals_interp = splev(spm_desired, spm_to_D)
+        #spm_to_D = splrep(spm_geo, D_km_geo, k=1)
+        #D_km_vals_interp = splev(spm_desired, spm_to_D)
+        D_km_vals_interp = np.interp(spm_desired, spm_geo, D_km_geo)
 
         # Fresnel scale at final spacing
-        spm_to_F = splrep(spm_geo, F_km_geo)
-        F_km_vals_interp = splev(spm_desired, spm_to_F)
+        #spm_to_F = splrep(spm_geo, F_km_geo)
+        #F_km_vals_interp = splev(spm_desired, spm_to_F)
+        F_km_vals_interp = np.interp(spm_desired, spm_geo, F_km_geo)
 
         # sky frequency at final spacing
-        spm_to_fsky = splrep(spm_cal, f_sky_pred_cal)
-        f_sky_hz_vals_interp = splev(spm_desired, spm_to_fsky)
+        #spm_to_fsky = splrep(spm_cal, f_sky_pred_cal)
+        #f_sky_hz_vals_interp = splev(spm_desired, spm_to_fsky)
+        f_sky_hz_vals_interp = np.interp(spm_desired, spm_cal, f_sky_pred_cal)
 
         # obvserved ring azimuth at final spacing
-        spm_to_phi_ora = splrep(spm_geo, phi_ora_rad_geo)
-        phi_ora_rad_vals_interp = splev(spm_desired, spm_to_phi_ora)
+        #spm_to_phi_ora = splrep(spm_geo, phi_ora_rad_geo, k=1)
+        #phi_ora_rad_vals_interp = splev(spm_desired, spm_to_phi_ora)
+        phi_ora_rad_vals_interp = np.interp(spm_desired, spm_geo,
+                phi_ora_rad_geo)
 
         # obvserved ring azimuth at final spacing
-        spm_to_phi_rl = splrep(spm_geo, phi_rl_rad_geo)
-        phi_rl_rad_vals_interp = splev(spm_desired, spm_to_phi_rl)
-
+        #spm_to_phi_rl = splrep(spm_geo, phi_rl_rad_geo, k=1)
+        #phi_rl_rad_vals_interp = splev(spm_desired, spm_to_phi_rl)
+        phi_rl_rad_vals_interp = np.interp(spm_desired, spm_geo,
+                phi_rl_rad_geo)
         # ring event time at final spacing
-        spm_to_ret = splrep(spm_geo, t_ret_geo)
-        t_ret_spm_vals_interp = splev(spm_desired, spm_to_ret)
+        #spm_to_ret = splrep(spm_geo, t_ret_geo)
+        #t_ret_spm_vals_interp = splev(spm_desired, spm_to_ret)
+        t_ret_spm_vals_interp = np.interp(spm_desired, spm_geo, t_ret_geo)
 
         # spacecraft event time at final spacing
-        spm_to_set = splrep(spm_geo, t_set_geo)
-        t_set_spm_vals_interp = splev(spm_desired, spm_to_set)
+        #spm_to_set = splrep(spm_geo, t_set_geo)
+        #t_set_spm_vals_interp = splev(spm_desired, spm_to_set)
+        t_set_spm_vals_interp = np.interp(spm_desired, spm_geo, t_set_geo)
 
 
         # FILLERS FOR RADIUS CORRECTION
@@ -270,7 +295,7 @@ class DiffractionLimitedProfile(object):
 
 
     @classmethod
-    def create_dlps(cls, rsr_inst, geo_inst, cal_inst, dr_km, 
+    def create_dlps(cls, rsr_inst, geo_inst, cal_inst, dr_km,
         verbose=False, write_file=False, profile_range=[65000., 150000.]):
         """
         Purpose:
@@ -396,6 +421,7 @@ class DiffractionLimitedProfile(object):
             geo_ing.D_km_vals = geo_inst.D_km_vals[:ind]
             geo_ing.F_km_vals = geo_inst.F_km_vals[:ind]
             geo_ing.rev_info['prof_dir'] = '"INGRESS"'
+            geo_ing.rev_info['DIR'] = 'CHORD'
 
             dlp_ing = cls(rsr_ing, geo_ing, cal_ing, dr_km, verbose=verbose,
                     write_file=write_file, profile_range=profile_range)
@@ -412,7 +438,8 @@ class DiffractionLimitedProfile(object):
             geo_egr.D_km_vals = geo_inst.D_km_vals[ind:]
             geo_egr.F_km_vals = geo_inst.F_km_vals[ind:]
             geo_egr.rev_info['prof_dir'] = '"EGRESS"'
-            dlp_egr = cls(rsr_egr, geo_egr, cal_egr, dr_km, verbose=verbose, 
+            geo_egr.rev_info['DIR'] = 'CHORD'
+            dlp_egr = cls(rsr_egr, geo_egr, cal_egr, dr_km, verbose=verbose,
                     write_file=write_file, profile_range=profile_range)
         else:
             raise ValueError('ERROR (create_dlps()): Invalid profile '

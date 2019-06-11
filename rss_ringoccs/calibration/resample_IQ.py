@@ -26,15 +26,15 @@ def pre_resample(rho_km, vec, freq):
         :freq (*float*): radial sampling frequency
 
     Returns:
-        :rho_grid (*np.ndarray*): Radii at uniform spacing at which the 
+        :rho_grid (*np.ndarray*): Radii at uniform spacing at which the
                  signal component is resampled
         :vec_grid (*np.ndarray*): Signal resampled with respect to radius
                  with a uniform spacing
         :p (*float*): upsampling rate to be used by scipy.signal.resample_poly.
                  This will always be unity because no upsampling is done.
-        :q (*float*): downsampling rate to be used by 
+        :q (*float*): downsampling rate to be used by
                   scipy.signal.resample_poly. This depends on the uniform
-                  radial sampling rate at which `rho_grid` and `vec_grid` are 
+                  radial sampling rate at which `rho_grid` and `vec_grid` are
                   sampled.
 
     """
@@ -44,9 +44,37 @@ def pre_resample(rho_km, vec, freq):
 
     # Average radius spacing over region
     ts_avg = dr / float(len(rho_km) - 1)
+    # check to make sure desired resolution is allowed
+    # if average radial sampling is larger than desired
+    # radial resolution, then the desired resolution
+    # is not achievable with this data set
+    if ts_avg > 1./freq :
+        # round up to nearest 0.025
+        res = round(40*ts_avg)/40
+        if res < ts_avg:
+            res += 0.025
+        # print warning + advisory for 16 kHz files
+        print('\tWARNING:')
+        warn_str = ('Desired DLP resolution not achievable.\n\t\t'
+              +'Average raw radial sampling of '+str(round(ts_avg,3))
+              +' km\n\t\tis larger than the '+str(1./freq)+' km value '
+              +'assigned \n\t\tto the variable dr_km. Setting DLP '
+              +'\n\t\tresolution to lowest achievable raw\n\t\tsampling of '
+              +str(res)+' km.\n\t\t')
+        advc_str = ('To achieve the desired '+str(1./freq)+' km resolution,\n\t\t'
+              +'consider using the 16 khz data file for this\n\t\t'
+              +'occultation.')
+        print('\t\t'+warn_str+advc_str)
+        # update spatial frequency
+        freq = 1./res
+    else:
+        res = round(1./freq,3)
+    # upsampling factor -- default is 1
     p = 1
+    # downsampling factor
     q = int(round(1.0 / (ts_avg * freq)))
-    dr_grid = float(p) / (q * freq)
+    #print(freq,1/freq,dr,ts_avg,p,q)
+    dr_grid = float(p) / (float(q) * freq)
 
     # Uniform radius grid at near-raw resolution to which to interpolate.
     #     For ingress, this implicitly reverses radius scale!
@@ -59,7 +87,7 @@ def pre_resample(rho_km, vec, freq):
         fill_value='extrapolate')
     vec_grid = vec_grid_interp(rho_grid)
 
-    return rho_grid, vec_grid, p, q
+    return rho_grid, vec_grid, p, q, res
 
 
 def resample_IQ(rho_km, IQ_c, dr_desired, verbose=False):
@@ -108,9 +136,9 @@ def resample_IQ(rho_km, IQ_c, dr_desired, verbose=False):
     Q_c = np.imag(IQ_c)
 
     # Pre-resampling steps. Interpolates to uniform radius at near-raw spacing
-    rho_km_uniform, I_c_uniform, p, q = pre_resample(rho_km, I_c,
+    rho_km_uniform, I_c_uniform, p, q, dr = pre_resample(rho_km, I_c,
         1.0 / dr_desired)
-    rho_km_uniform, Q_c_uniform, p, q = pre_resample(rho_km, Q_c,
+    rho_km_uniform, Q_c_uniform, p, q, dr = pre_resample(rho_km, Q_c,
         1.0 / dr_desired)
 
     # Downsample by factor q to desired final spacing
@@ -118,7 +146,7 @@ def resample_IQ(rho_km, IQ_c, dr_desired, verbose=False):
     Q_c_desired = signal.resample_poly(Q_c_uniform, p, q)
 
     rho_km_desired = (rho_km_uniform[0]
-        + dr_desired * np.arange(len(I_c_desired)))
+        + dr * np.arange(len(I_c_desired)))
 
     IQ_c_desired = I_c_desired + 1j * Q_c_desired
     return rho_km_desired, IQ_c_desired

@@ -5,9 +5,6 @@
 #include "../../include/ndarraytypes.h"
 #include "../../include/ufuncobject.h"
 
-/*  For parallel processing.                              */
-#include <omp.h>
-
 /*  Various coefficients and constants defined here.      */
 #include "__math_constants.h"
 
@@ -33,13 +30,14 @@ static void Fresnel_Transform_Quadratic_Func(char **args, npy_intp *dimensions,
     char *n_used            = args[5];
     char *wtype             = args[6];
     char *use_norm          = args[7];
-    char *T_out             = args[8];
+    char *use_fwd           = args[8];
+    char *T_out             = args[9];
 
     npy_intp T_in_steps     = steps[0];
     npy_intp rho_steps      = steps[1];
     npy_intp F_steps        = steps[2];
     npy_intp w_steps        = steps[3];
-    npy_intp T_out_steps    = steps[8];
+    npy_intp T_out_steps    = steps[9];
 
     if (*(int *)wtype == 0){fw = &__rect;}
     else if (*(int *)wtype == 1){fw = &__coss;}
@@ -73,9 +71,9 @@ static void Fresnel_Transform_Quadratic_Func(char **args, npy_intp *dimensions,
     for(j=0; j<nw_pts; ++j){
         w_func[j] = fw(x_arr[j], w_init);
         x_arr[j] *= PI_BY_TWO*x_arr[j];
+        x_arr[j] *= (*(int *)use_fwd == 0) - (*(int *)use_fwd == 1);
     }
 
-    #pragma omp parallel for
     for (i=0; i<=*(long *)n_used; ++i){
         if (fabs(w_init - *(double *)w_km_vals) >= two_dx) {
             /* Reset w_init and recompute window function.    */
@@ -87,6 +85,7 @@ static void Fresnel_Transform_Quadratic_Func(char **args, npy_intp *dimensions,
             for(j=0; j<nw_pts; ++j){
                 w_func[j] = fw(x_arr[j], w_init);
                 x_arr[j] *= PI_BY_TWO*x_arr[j];
+                x_arr[j] *= (*(int *)use_fwd == 0) - (*(int *)use_fwd == 1);
             }
         }
 
@@ -109,6 +108,8 @@ static void Fresnel_Transform_Quartic_Func(char **args, npy_intp *dimensions,
     double Legendre_Coeff, P_1, P12, P_2, P_3, b_0, b_1, b_2;
     double A_0, A_1, A_2, rcpr_D, rcpr_F;
     double (*fw)(double, double);
+    complex double (*FresT)(double*, char*, double*, double, double, double,
+                            double, double, double, double, long, npy_intp);
 
     char *T_in              = args[0];
     char *F_km_vals         = args[2];
@@ -120,7 +121,9 @@ static void Fresnel_Transform_Quartic_Func(char **args, npy_intp *dimensions,
     char *start             = args[8];
     char *n_used            = args[9];
     char *wtype             = args[10];
-    char *T_out             = args[11];
+    char *use_norm          = args[11];
+    char *use_fwd           = args[12];
+    char *T_out             = args[13];
 
     npy_intp T_in_steps     = steps[0];
     npy_intp F_steps        = steps[2];
@@ -129,7 +132,7 @@ static void Fresnel_Transform_Quartic_Func(char **args, npy_intp *dimensions,
     npy_intp B_steps        = steps[5];
     npy_intp D_steps        = steps[6];
     npy_intp w_steps        = steps[7];
-    npy_intp T_out_steps    = steps[11];
+    npy_intp T_out_steps    = steps[13];
 
     if (*(int *)wtype == 0){fw = &__rect;}
     else if (*(int *)wtype == 1){fw = &__coss;}
@@ -138,6 +141,9 @@ static void Fresnel_Transform_Quartic_Func(char **args, npy_intp *dimensions,
     else if (*(int *)wtype == 4){fw = &Kaiser_Bessel_Window_3_5;}
     else if (*(int *)wtype == 5){fw = &Modified_Kaiser_Bessel_Window_2_0;}
     else {fw = &Modified_Kaiser_Bessel_Window_2_5;}
+
+    if (*(int *)use_norm == 0){FresT = &_fresnel_quartic;}
+    else {FresT = &_fresnel_quartic_norm;}
 
     /* Compute first window width and window function. */
     phi_rad_vals    += *(long *)start * phi_steps;
@@ -148,6 +154,12 @@ static void Fresnel_Transform_Quartic_Func(char **args, npy_intp *dimensions,
     w_km_vals       += *(long *)start * w_steps;
     T_in            += *(long *)start * T_in_steps;
     T_out           += *(long *)start * T_out_steps;
+
+    if (*(int *)use_fwd == 1){
+        for (i=0; i<=*(long *)n_used; ++i){
+            *(double *)(kd_vals+i*kd_steps) *= -1.0;
+        }
+    }
 
     w_init  = *(double *)w_km_vals;
     dx      = *(double *)args[1];
@@ -162,7 +174,6 @@ static void Fresnel_Transform_Quartic_Func(char **args, npy_intp *dimensions,
         w_func[j] = fw(x_arr[j], w_init);
     }
 
-    #pragma omp parallel for
     for (i=0; i<=*(long *)n_used; ++i){
         rcpr_F          = 1.0 / *(double *)F_km_vals;
         rcpr_D          = 1.0 / *(double *)D_km_vals;
@@ -205,10 +216,10 @@ static void Fresnel_Transform_Quartic_Func(char **args, npy_intp *dimensions,
         }
 
         /*  Compute the fresnel tranform about the current point.   */
-        *((complex double *)T_out) = _fresnel_quartic(x_arr, T_in, w_func,
-                                                      rcpr_D, A_0, A_1, A_2, dx,
-                                                      rcpr_F, *(double *)kd_vals,
-                                                      nw_pts, T_in_steps);
+        *((complex double *)T_out) = FresT(x_arr, T_in, w_func, rcpr_D,
+                                           A_0, A_1, A_2, dx, rcpr_F,
+                                           *(double *)kd_vals,
+                                           nw_pts, T_in_steps);
         
         /*  Increment pointers using pointer arithmetic, equivalent to        *
          *  changing var[n] to var[n+1].                                      */
@@ -231,11 +242,12 @@ PyUFuncGenericFunction f_quad_funcs[1] = {&Fresnel_Transform_Quadratic_Func};
 PyUFuncGenericFunction f_qurt_funcs[1] = {&Fresnel_Transform_Quartic_Func};
 
 /* Input and return types for Quadratic Fresnel Transform */
-static char quad_data_types[9] = {
+static char quad_data_types[10] = {
     NPY_COMPLEX128,
     NPY_DOUBLE,
     NPY_DOUBLE,
     NPY_DOUBLE,
+    NPY_LONG,
     NPY_LONG,
     NPY_LONG,
     NPY_LONG,
@@ -244,7 +256,7 @@ static char quad_data_types[9] = {
 };
 
 /* Input and return types for Quartic Fresnel Transform */
-static char qurt_data_types[12] = {
+static char qurt_data_types[14] = {
     NPY_COMPLEX128,
     NPY_DOUBLE,
     NPY_DOUBLE,
@@ -253,6 +265,8 @@ static char qurt_data_types[12] = {
     NPY_DOUBLE,
     NPY_DOUBLE,
     NPY_DOUBLE,
+    NPY_LONG,
+    NPY_LONG,
     NPY_LONG,
     NPY_LONG,
     NPY_LONG,
@@ -285,13 +299,13 @@ PyMODINIT_FUNC PyInit__diffraction_functions(void)
 
     fresnel_transform_quadratic = PyUFunc_FromFuncAndData(
         f_quad_funcs, PyuFunc_data, quad_data_types,
-        1, 8, 1, PyUFunc_None, "fresnel_transform_quadratic",
+        1, 9, 1, PyUFunc_None, "fresnel_transform_quadratic",
         "fresnel_transform_quadratic_docstring", 0
     );
 
     fresnel_transform_quartic = PyUFunc_FromFuncAndData(
         f_qurt_funcs, PyuFunc_data, qurt_data_types,
-        1, 11, 1, PyUFunc_None, "fresnel_transform_quartic",
+        1, 13, 1, PyUFunc_None, "fresnel_transform_quartic",
         "fresnel_transform_quartic_docstring", 0
     );
 
@@ -321,13 +335,13 @@ PyMODINIT_FUNC init__funcs(void)
 
     fresnel_transform_quadratic = PyUFunc_FromFuncAndData(
         f_quad_funcs, PyuFunc_data, quad_data_types,
-        1, 8, 1, PyUFunc_None, "fresnel_transform_quadratic",
+        1, 9, 1, PyUFunc_None, "fresnel_transform_quadratic",
         "fresnel_transform_quadratic_docstring", 0
     );
 
     fresnel_transform_quartic = PyUFunc_FromFuncAndData(
         f_qurt_funcs, PyuFunc_data, qurt_data_types,
-        1, 9, 1, PyUFunc_None, "fresnel_transform_quartic",
+        1, 12, 1, PyUFunc_None, "fresnel_transform_quartic",
         "fresnel_transform_quartic_docstring", 0
     );
 

@@ -64,6 +64,7 @@ if args.plot_feature:
     #   first row of three: uncorrected optical depth, power, and phase
     #   second row of three: corrected optical depth, power, and phase
     fig, axes = plt.subplots(2,3, figsize=(8,5))
+    axes = axes.reshape(-1)
     
     rho_km = tau_inst.rho_km_vals - args.feature_km
     recon_power = tau_inst.power_vals
@@ -78,29 +79,27 @@ if args.plot_feature:
     
     fig.suptitle('Rev007E X43 ' + args.feature_name + ' at ' + str(args.res_km) + ' km resolution', fontsize=14)
     
-    axes[0,0].plot(rho_km, raw_power)
-    axes[0,0].set_ylabel('Raw Power')
-    axes[0,0].set_xlabel(xtitle)
+    axes[0].plot(rho_km, raw_power)
+    axes[0].set_ylabel('Raw Power')
     
-    axes[0,1].plot(rho_km, raw_tau)
-    axes[0,1].set_ylabel('Raw Optical Depth')
-    axes[0,1].set_xlabel(xtitle)
+    axes[1].plot(rho_km, raw_tau)
+    axes[1].set_ylabel('Raw Optical Depth')
     
-    axes[0,2].plot(rho_km, raw_phase)
-    axes[0,2].set_ylabel('Raw Phase (rad)')
-    axes[0,2].set_xlabel(xtitle)
+    axes[2].plot(rho_km, raw_phase)
+    axes[2].set_ylabel('Raw Phase (rad)')
     
-    axes[1,0].plot(rho_km, recon_power)
-    axes[1,0].set_ylabel('Reconstructed Power')
-    axes[1,0].set_xlabel(xtitle)
+    axes[3].plot(rho_km, recon_power)
+    axes[3].set_ylabel('Reconstructed Power')
     
-    axes[1,1].plot(rho_km, recon_tau)
-    axes[1,1].set_ylabel('Reconstructed Optical Depth')
-    axes[1,1].set_xlabel(xtitle)
+    axes[4].plot(rho_km, recon_tau)
+    axes[4].set_ylabel('Reconstructed Optical Depth')
     
-    axes[1,2].plot(rho_km, recon_phase)
-    axes[1,2].set_ylabel('Reconstructed Phase (rad)')
-    axes[1,2].set_xlabel(xtitle)
+    axes[5].plot(rho_km, recon_phase)
+    axes[5].set_ylabel('Reconstructed Phase (rad)')
+
+    for ax in axes:
+        ax.set_xlabel(xtitle)
+        ax.set_xlim([-30., 30.])
     
     plt.tight_layout()
     plt.subplots_adjust(top=0.93)

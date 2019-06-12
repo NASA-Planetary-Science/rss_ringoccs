@@ -1,7 +1,7 @@
 """
 history.py
 
-Purpose: 
+Purpose:
     Functions related to recording processing history.
 
 Dependencies:
@@ -19,8 +19,8 @@ import os
 import numpy as np
 import pandas as pd
 
-def date_to_rev(year, doy, 
-        rss_file='../tables/RSSActivities_before_USOfailure_rings_only.txt'):
+def date_to_rev(year, doy,
+        rss_file='../tables/RSSActivities_all_rings_only.txt'):
     """
     Purpose:
         Pull rev number from a table given the year and doy from a RSS
@@ -46,6 +46,10 @@ def date_to_rev(year, doy,
     doy_vals = np.asarray(date_to_rev_table[3])
     year_where = (year_vals == year)
     doy_where = (doy_vals == doy)
+    if (doy_where == False).all():
+        possible_doy = list(doy_vals[year_where])
+        ind = possible_doy.index(min(possible_doy, key=lambda x:abs(x-doy)))
+        doy_where = (doy_vals == possible_doy[ind])
     year_and_doy_where = year_where & doy_where
     rev_number = rev_number_vals[year_and_doy_where][0][4:7]
 
@@ -65,7 +69,7 @@ def get_rev_info(rsr_inst):
 
     rev = date_to_rev(rsr_inst.year, rsr_inst.doy)
 
-    occ_dir, planetary_occ_flag = rev_to_occ_info(rev)
+    occ_dir = rev_to_occ_info(rev)
 
     rev_info = {
             "rsr_file":   rsr_inst.rsr_file.split('/')[-1]
@@ -74,14 +78,14 @@ def get_rev_info(rsr_inst):
             , "doy":      str(rsr_inst.doy).zfill(3)
             , "dsn":      str(rsr_inst.dsn)
             , "occ_dir":  occ_dir
-            , "planetary_occ_flag": planetary_occ_flag
             , "rev_num": rev
             }
+           # , "planetary_occ_flag": planetary_occ_flag
 
     return rev_info
 
-def rev_to_occ_info(rev, 
-        sroc_info_file='../tables/list_of_sroc_dir_before_USOfailure.txt'):
+def rev_to_occ_info(rev,
+        sroc_info_file='../tables/list_of_sroc_dir_all_events.txt'):
     """
     Pull occultation direction from a text file given rev.
 
@@ -102,28 +106,27 @@ def rev_to_occ_info(rev,
             one directory from the top-level rss_ringoccs directory
     """
 
-    occ_dir_table = pd.read_csv(sroc_info_file, header=None, skiprows=1, 
+    occ_dir_table = pd.read_csv(sroc_info_file, header=None, skiprows=1,
             dtype=str)
     rev_str_list = list(occ_dir_table[0])
     occ_dir_list = list(occ_dir_table[1])
-    planet_flag_list = list(occ_dir_table[2])
 
     try:
         ind = rev_str_list.index(rev)
     except ValueError:
         print('(rev_to_occ_info()): Rev not found in sroc_info_file!')
+        return '"BOTH"'#,'"Y"'
 
     occ_dir = '"' + occ_dir_list[ind] + '"'
-    planetary_occ_flag = '"' + planet_flag_list[ind] + '"'
 
-    return occ_dir, planetary_occ_flag
+    return occ_dir
 
 def write_history_dict(input_vars, input_kwds, source_file, add_info=None):
     """
     This creates a dictionary of processing history for an instance.
 
     Arguments:
-        :input_vars (*dict*): Dictionary of all input variables to the 
+        :input_vars (*dict*): Dictionary of all input variables to the
                                 instance.
         :input_kwds (*dict*): Dictionary of all input keywords to the instance.
         :source_file (*str*):  Full path to the script used to run the instance.
@@ -134,7 +137,7 @@ def write_history_dict(input_vars, input_kwds, source_file, add_info=None):
     Returns:
         :history (*dict*): Dictionary with keys: "User Name", "Host Name",
                             "Run Date", "Python Version", "Operating System",
-                            "Source File", "Positional Args", 
+                            "Source File", "Positional Args",
                             "Keyword Args"
 
     """
@@ -166,4 +169,3 @@ def write_history_dict(input_vars, input_kwds, source_file, add_info=None):
     else:
         history["Additional Info"] = ''
     return history
-

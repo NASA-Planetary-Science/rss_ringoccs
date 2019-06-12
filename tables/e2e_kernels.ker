@@ -6,9 +6,10 @@ PATH_VALUES		= ( '../kernels/naif/CASSINI/kernels/spk'
 					'../kernels/naif/generic_kernels/spk/stations'
 					'../kernels/naif/generic_kernels/pck'
 					'../kernels/naif/CASSINI/kernels/pck'
-					'../kernels/naif/CASSINI/kernels/fk')
+					'../kernels/naif/CASSINI/kernels/fk'
+					'../kernels/naif/generic_kernels/fk/stations')
 
-PATH_SYMBOLS 	= ('A', 'B', 'C', 'D', 'E', 'F', 'G')
+PATH_SYMBOLS 	= ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H')
 
 
 KERNELS_TO_LOAD = (		'$A/050606R_SCPSE_05114_05132.bsp' 
@@ -177,6 +178,7 @@ KERNELS_TO_LOAD = (		'$A/050606R_SCPSE_05114_05132.bsp'
 						'$B/naif0012.tls'
 						'$C/de430.bsp'
 						'$D/dss_17_prelim_itrf93_161110.bsp'
+						'$H/dss_35_36_prelim_itrf93_140620.tf'
 						'$D/dss_35_36_prelim_itrf93_140620.bsp'
 						'$F/cpck26Feb2009.tpc'
                         '$D/earthstns_itrf93_050714.bsp'

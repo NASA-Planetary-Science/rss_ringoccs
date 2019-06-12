@@ -1,5 +1,5 @@
 """
-occgeo.py
+occgeo_proximal.py
 
 :Purpose:
 
@@ -114,15 +114,16 @@ class Geometry(object):
 
     """
     def __init__(self, rsr_inst, planet, spacecraft, kernels, pt_per_sec=1.,
-            verbose=False, write_file=True):
+            ref='J2000', ring_frame=None, nhat_p=None, verbose=False,
+            write_file=True):
+
 
         self.verbose = verbose
+        self.add_info = []
 
         if verbose:
             print('Calculating occultation geometry...')
 
-        if verbose:
-            print('\tChecking for valid inputs...')
 
         if type(planet) != str:
             raise ValueError('ERROR (Geometry): Input planet is NOT a string!')
@@ -135,10 +136,7 @@ class Geometry(object):
             raise ValueError('ERROR (Geometry): Input pt_per_sec is NOT an int '
                                 + 'or float!')
 
-        if verbose:
-            print('\tExtracting information from rsr file...')
-
-        # Extract information from rsr instance
+        ## Extract information from rsr instance
         year = rsr_inst.year
         doy = rsr_inst.doy
         dsn = rsr_inst.dsn
@@ -149,58 +147,123 @@ class Geometry(object):
         rsr_hist = rsr_inst.history
         (f_spm, f_sky) = rsr_inst.get_f_sky_pred()
 
+        ul_dsn = rsr_inst.ul_dsn
+
         self.rev_info = rsr_inst.rev_info
 
         # Create new spm array with defined points per second
         step = 1./pt_per_sec
-        t_oet_spm_vals = np.arange(spm_start, spm_end, step)
+        t_oet_spm_vals = np.arange(spm_full[0], spm_full[-1], step)
         t_oet_et_vals = spm_to_et(t_oet_spm_vals, doy, year, kernels=kernels)
 
+
+        # Calculate spacecraft event time
+        t_set_et_vals = cog.calc_set_et(t_oet_et_vals, spacecraft, dsn)
+
+        # Retrieve Saturn pole unit vector
+
+        if nhat_p is None:
+            nhat_p = cog.get_pole(t_set_et_vals[0], planet)
+
+        # Calculate spacecraft state vector
+        R_sc_km_vals, R_sc_dot_kms_vals = cog.calc_sc_state(t_set_et_vals,
+                spacecraft, planet, dsn, nhat_p, ref=ref)
+
+        rx_km_vals = np.stack(R_sc_km_vals)[:, 0]
+        ry_km_vals = np.stack(R_sc_km_vals)[:, 1]
+        rz_km_vals = np.stack(R_sc_km_vals)[:, 2]
+        vx_kms_vals = np.stack(R_sc_dot_kms_vals)[:, 0]
+        vy_kms_vals = np.stack(R_sc_dot_kms_vals)[:, 1]
+        vz_kms_vals = np.stack(R_sc_dot_kms_vals)[:, 2]
+
+        # Verify valid ring intercept points -- there should only be
+        #   a ring intercept point when Cassini and Earth are on the opposite
+        #   side of the ring plane
+        if year >= 2016:
+            #self.rz_km_vals = np.stack(R_sc_km_vals)[:, 2]
+            R_earth_km_vals, R_earth_dot_kms_vals = cog.calc_sc_state(
+                    t_oet_et_vals, 'Earth', planet, dsn, nhat_p)
+            rz1 = rz_km_vals
+            rz2 = np.stack(R_earth_km_vals)[:,2]
+
+            check_posz = np.logical_and(rz1>0, rz2>0)
+            check_negz = np.logical_and(rz1<0, rz2<0)
+            mask = ~(np.logical_or(check_posz, check_negz))
+            t1 = t_oet_spm_vals[~mask][0]
+            t2 = t_oet_spm_vals[~mask][-1]
+            
+            if (np.logical_or(check_posz, check_negz)).any(): # is True:
+                mask = ~(np.logical_or(check_posz, check_negz))
+                t_oet_spm_vals = t_oet_spm_vals[mask]
+                t_oet_et_vals = t_oet_et_vals[mask]
+                inds = np.argwhere(mask==False)
+                if verbose:
+                    print('\t\tRemoving false intercepts, inds=',inds)
+                #rho_vec_vals = rho_vec_vals[mask]
+                #t_ret_et_vals = t_ret_et_vals[mask]
+                t_set_et_vals = t_set_et_vals[mask]
+                rx_km_vals = rx_km_vals[mask]
+                ry_km_vals = ry_km_vals[mask]
+                rz_km_vals = rz_km_vals[mask]
+                vx_kms_vals = vx_kms_vals[mask]
+                vy_kms_vals = vy_kms_vals[mask]
+                vz_kms_vals = vz_kms_vals[mask]
+                self.rev_info['PER'] = ''
+                self.add_info.append('Found false intercept points; removed '
+                        + 'indices ' + str(inds[0]) + ' to ' + str(inds[-1])
+                        + ' , or OET from' + str(t1) + ' to ' + str(t2))
+
         # Calculate Saturn center to ring intercept vector
-        if verbose:
-            print('\tCalculating ring intercept event time and vector...')
         rho_vec_vals, t_ret_et_vals = cog.calc_rho_vec_km(t_oet_et_vals, planet,
-                spacecraft, dsn, kernels=kernels)
+                spacecraft, dsn, kernels=kernels, ref=ref,ring_frame=ring_frame)
 
         rho_km_vals = [spice.vnorm(vec) for vec in rho_vec_vals]
-
-
 
         # Interpolate to get sky frequency
         f_sky_hz_vals = np.interp(t_oet_spm_vals, f_spm, f_sky)
 
-
-        # Calculate spacecraft event time
-        if verbose:
-            print('\tCalculating spacecraft event time...')
-        t_set_et_vals = cog.calc_set_et(t_oet_et_vals, spacecraft, dsn)
-
-        # Retrieve Saturn pole unit vector
-        if verbose:
-            print('\tRetrieving Saturn pole unit vector...')
-        nhat_p = cog.get_pole(t_set_et_vals[0], planet)
-
-        if verbose:
-            print('\tCalculating ring longitude and ring azimuth...')
-
         # Calculated ring longitude and observed ring azimuth
         phi_rl_deg_vals, phi_ora_deg_vals = cog.calc_phi_deg(t_oet_et_vals,
-                rho_vec_vals, spacecraft, dsn, nhat_p)
+                rho_vec_vals, spacecraft, dsn, nhat_p, ref=ref)
 
-        if verbose:
-            print('\tCalculating distance from spacecraft to ring intercept '
-                + 'point...')
+        # Calculate uplink ring intercept point for post-USO events
+        if year >= 2011:
+            sc_code = spice.bodn2c(spacecraft)
+            try:
+                ul_dsn_code = spice.bodn2c(ul_dsn)
+            except:
+                if verbose:
+                    print('\tUplink DSN station not found -- using Earth...')
+
+                ul_dsn_code = spice.bodn2c('Earth')
+                ul_dsn = 'Earth'
+            t_ul_et_vals_list = []
+            for set_et in t_set_et_vals:
+                ul_et_vals, ltime = spice.ltime(set_et, sc_code, "<-", 
+                        ul_dsn_code)
+                t_ul_et_vals_list.append(ul_et_vals)
+            t_ul_et_vals = np.array(t_ul_et_vals_list)
+            ul_rho_vec_km, ul_ret_et = cog.calc_rho_vec_km(
+                    t_set_et_vals, planet, ul_dsn, spacecraft)
+            ul_rho_vec_km, ul_ret_et = cog.calc_rho_vec_km(t_set_et_vals, planet, 'Earth', spacecraft, ring_frame=None)
+            ul_rho_km_vals = [spice.vnorm(vec) for vec in ul_rho_vec_km]
+
+            ul_phi_rl_deg_vals, ul_phi_ora_deg_vals = (
+                    cog.calc_phi_deg(t_set_et_vals, ul_rho_vec_km, spacecraft,
+                        ul_dsn, nhat_p, ref=ref))
+            self.ul_rho_km_vals = np.array(ul_rho_km_vals)
+            self.ul_phi_rl_deg_vals = np.array(ul_phi_rl_deg_vals)
+            self.ul_phi_ora_deg_vals = np.array(ul_phi_ora_deg_vals)
+
+
+
         # Calculate distance from spacecraft to ring intercept point
         D_km_vals = cog.calc_D_km(t_ret_et_vals, t_set_et_vals)
 
-        if verbose:
-            print('\tCalculating ring opening angle...')
 
         # Calculate ring opening angle
-        B_deg_vals = cog.calc_B_deg(t_oet_et_vals, spacecraft, dsn, nhat_p)
-
-        if verbose:
-            print('\tCalculating Fresnel scale...')
+        B_deg_vals = cog.calc_B_deg(t_oet_et_vals, spacecraft, dsn, nhat_p,
+                ref=ref)
 
         # Calculate Fresnel scale
         F_km_vals = cog.calc_F_km(D_km_vals, f_sky_hz_vals, B_deg_vals,
@@ -209,33 +272,19 @@ class Geometry(object):
         t_ret_spm_vals = et_to_spm(t_ret_et_vals)
         t_set_spm_vals = et_to_spm(t_set_et_vals)
 
-        if verbose:
-            print('\tCalculating ring intercept velocities...')
         # Calculate ring intercept velocities
         rho_dot_kms_vals, phi_rl_dot_kms_vals = cog.calc_rip_velocity(
                 rho_km_vals, phi_rl_deg_vals, step)
 
-        if verbose:
-            print('\tCalculating spacecraft state vector...')
-        # Calculate spacecraft state vector
-        R_sc_km_vals, R_sc_dot_kms_vals = cog.calc_sc_state(t_set_et_vals,
-                spacecraft, planet, dsn, nhat_p)
 
-        if verbose:
-            print('\tCalculating impact radius...')
         # Calculate impact radius
         R_imp_km_vals = cog.calc_impact_radius_km(R_sc_km_vals, t_set_et_vals,
-                spacecraft, dsn, nhat_p)
-
-        if verbose:
-            print('\tCalculating elevation angle...')
+                spacecraft, dsn, nhat_p, ref=ref)
 
         # Calculate target angle above the horizon
         elev_deg_vals = cog.calc_elevation_deg(t_oet_et_vals, spacecraft, dsn)
 
         # Calculate beta
-        if verbose:
-            print('\tCalculating beta...')
         beta_vals = cog.calc_beta(B_deg_vals, phi_ora_deg_vals)
         B_eff_deg_vals = cog.calc_B_eff_deg(B_deg_vals, phi_ora_deg_vals)
 
@@ -267,12 +316,12 @@ class Geometry(object):
         self.phi_rl_dot_kms_vals = np.asarray(phi_rl_dot_kms_vals)
         self.F_km_vals = np.asarray(F_km_vals)
         self.R_imp_km_vals = np.asarray(R_imp_km_vals)
-        self.rx_km_vals = np.stack(R_sc_km_vals)[:, 0]
-        self.ry_km_vals = np.stack(R_sc_km_vals)[:, 1]
-        self.rz_km_vals = np.stack(R_sc_km_vals)[:, 2]
-        self.vx_kms_vals = np.stack(R_sc_dot_kms_vals)[:, 0]
-        self.vy_kms_vals = np.stack(R_sc_dot_kms_vals)[:, 1]
-        self.vz_kms_vals = np.stack(R_sc_dot_kms_vals)[:, 2]
+        self.rx_km_vals = np.array(rx_km_vals)
+        self.ry_km_vals = np.array(ry_km_vals)
+        self.rz_km_vals = np.array(rz_km_vals)
+        self.vx_kms_vals = np.array(vx_kms_vals)
+        self.vy_kms_vals = np.array(vy_kms_vals)
+        self.vz_kms_vals = np.array(vz_kms_vals)
 
         self.kernels = kernels
         self.elev_deg_vals = np.asarray(elev_deg_vals)
@@ -293,12 +342,7 @@ class Geometry(object):
         else:
             self.rev_info['planetary_occ_flag'] = '"Y"'
 
-
-
         # Write processing history dictionary attribute
-        if verbose:
-            print('\tWriting history dictionary...')
-
         input_vars = {
                 "rsr_inst": rsr_hist,
                 "kernels": kernels,
@@ -306,9 +350,16 @@ class Geometry(object):
                 "spacecraft": spacecraft
                 }
         input_kwds = {
-                "pt_per_sec": pt_per_sec
+                "pt_per_sec": pt_per_sec,
+                "ref": ref,
+                "ring_frame": ring_frame,
+                "nhat_p": nhat_p,
                 }
-        self.history = write_history_dict(input_vars, input_kwds, __file__)
+        if self.add_info == []:
+            self.add_info = None
+
+        self.history = write_history_dict(input_vars, input_kwds, __file__,
+                add_info=self.add_info)
 
 
         self.freespace_km, self.freespace_spm = cog.get_freespace(
@@ -365,7 +416,27 @@ class Geometry(object):
                                 '"INGRESS"', '"EGRESS"', or '"BOTH"'.
         """
         split_ind = self.get_chord_ind()
+        # first, check if chord split is beyond ring system
+        rho_split = self.rho_km_vals[split_ind]
+        if rho_split > 170000.:
+            rho1 = self.rho_km_vals[:split_ind]
+            rho2 = self.rho_km_vals[split_ind:]
+            if (rho2>170000.).all():
+                self.__remove_values_beyond_rings()
+                dr = rho1[1] - rho1[0]
+                if dr<0:
+                    return '"INGRESS"'
+                if dr>0:
+                    return '"EGRESS"'
+            elif (rho1>170000.).all():
+                self.__remove_values_beyond_rings()
+                dr = rho2[1] - rho2[0]
+                if dr<0:
+                    return '"INGRESS"'
+                if dr>0:
+                    return '"EGRESS"'
 
+        # second, check if chord split happens during atmos occ
         t_oet_ing = self.t_oet_spm_vals[:split_ind]
         t_oet_egr = self.t_oet_spm_vals[split_ind:]
 
@@ -384,6 +455,8 @@ class Geometry(object):
             # Remove false chord portions
             if self.verbose:
                 print('\tRemoving portion blocked by atmosphere...')
+                self.add_info.append('Portion of event blocked by atmosphere; '
+                        + 'removed indices ')
             self.__remove_atmos_values()
 
         elif len(egr_blocked) == n_egr:
@@ -397,6 +470,18 @@ class Geometry(object):
             prof_dir = '"BOTH"'
 
         return prof_dir
+    def __remove_values_beyond_rings(self):
+        npts = len(self.rho_km_vals)
+        ind1 = np.argwhere(self.rho_km_vals > 170000.)[0][0]
+
+        rind = np.arange(ind1, npts+1, step=1)
+        for attr, value in self.__dict__.items():
+            if type(value) is not bool and len(value) == npts:
+                setattr(self, attr, np.delete(value, rind))
+            else:
+                continue
+
+        return None
 
     def __remove_atmos_values(self):
         npts = len(self.t_oet_spm_vals)

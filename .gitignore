@@ -3,7 +3,6 @@
 *.icloud
 *.rst
 *.bat
-*.so
 Makefile
 kernels/
 output/

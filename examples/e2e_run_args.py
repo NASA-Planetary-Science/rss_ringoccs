@@ -8,7 +8,7 @@ write_file = True                   # Write output data and label files
 
 ### RSRReader
 rsr_file = '../data/co-s-rss-1-sroc1-v10/cors_0727/SROC1_123/RSR/S10SROE2005123_0740NNNX43RD.2A1'
-decimate_16khz_to_1khz = True       # Decimate 16 kHz rsr file to 1 kHz
+decimate_16khz_to_1khz = False      # Decimate 16 kHz rsr file to 1 kHz
 
 ### Geometry
 kernels = 'Rev007_meta_kernel.ker'  # Path to meta-kernel or list of paths to
@@ -20,9 +20,6 @@ pt_per_sec = 1.0                    # Number of points per second calculated
 
 ### Calibration
 dt_cal = 1.0                        # Time spacing in seconds between points
-fof_order = 9                       # Frequency offset polynomial fit order
-pnf_fittype = 'poly'                # Power normalization fit type (e.g.,
-                                    #       'poly', 'spline')
 pnf_order = 3                       # Power normalization fit order
 interact = False                    # Manually update power normalization fit
 
@@ -45,4 +42,4 @@ sigma = 2.e-13                      # Allen deviation
 fwd = False                         # Compute forward model
 norm = True                         # Normalize reconstructed complex
                                     #       transmittance by window width
-bfac = True                         # Use input sigma in window calculation
+bfac = False                        # Use input sigma in window calculation

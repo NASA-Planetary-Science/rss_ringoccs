@@ -29,7 +29,8 @@ def spm_to_et(spm, doy, year, kernels=None):
     if year == 0:
         sys.exit('WARNING (spm_to_et): input year is 0!')
 
-
+    year = int(year)
+    doy = int(doy)
 
 
     # Leap seconds kernel
@@ -39,18 +40,22 @@ def spm_to_et(spm, doy, year, kernels=None):
     spice.kclear()
     spice.furnsh(kernels)
 
-    hours = (spm / 3600.0).astype(int)
-    remainder_spm = (spm - hours*3600.0).astype(int)
-    minutes = (remainder_spm / 60.0).astype(int)
-    seconds = spm - hours*3600.0 - minutes*60.0
-
-    try:
-        n_pts = len(spm)
-    except TypeError:
-        n_pts = len([spm])
+    if isinstance(spm, float):
+        hours = int(spm/3600.)
+        remainder_spm = int(spm - hours*3600.0)
+        minutes = int(remainder_spm/60.)
+        seconds = spm - hours*3600.0 - minutes*60.0
+        n_pts = 1
         hours = [hours]
         minutes = [minutes]
         seconds = [seconds]
+    else:
+        hours = (spm / 3600.0).astype(int)
+        remainder_spm = (spm - hours*3600.0).astype(int)
+        minutes = (remainder_spm / 60.0).astype(int)
+        seconds = spm - hours*3600.0 - minutes*60.0
+        n_pts = len(spm)
+
 
     et_sec_vals = np.zeros(n_pts)
 
@@ -66,9 +71,14 @@ def spm_to_et(spm, doy, year, kernels=None):
         doy_adjusted = doy + hours[i]/24
 
         # Adjust if day goes on to next year
-        this_year = (year +
+        if n_pts == 1:
+            this_year = int(year +
+                np.floor((doy_adjusted - 1)/days_per_year))
+            this_doy = int(1 + (doy_adjusted-1) % days_per_year)
+        else:
+            this_year = (year +
                 np.floor((doy_adjusted - 1)/days_per_year)).astype(int)
-        this_doy = (1 + (doy_adjusted-1) % days_per_year).astype(int)
+            this_doy = (1 + (doy_adjusted-1) % days_per_year).astype(int)
 
         utc_str = (str(this_year) + '-' + str(this_doy).zfill(3) + 'T'
             + str(hours[i] % 24).zfill(2) + ':'

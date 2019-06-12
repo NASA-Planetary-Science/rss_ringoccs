@@ -758,28 +758,17 @@ class ExtractCSVData(object):
         self.history = write_history_dict(input_vars, input_kwds, __file__)
         var = geo.split("/")[-1]
 
-        try:
-            var = var.split("_")
-            band = '"%s"' % var[3][0]
-            year = var[1]
-            doy = var[2]
-            dsn = "DSS-%s" % (var[3][1:])
-            rev_num = date_to_rev(int(year), int(doy))
-            occ_dir = rev_to_occ_info(rev_num)
-            prof_dir = '"%s%"' % var[4]
-        except:
-            var = "Unknown"
-            band = "Unknown"
-            year = "Unknown"
-            doy = "Unknown"
-            dsn = "Unknown"
-            occ_dir = "Unknown"
-            rev_num = "Unknown"
-            prof_dir = "Unknown"
-
+        var = var.split("_")
+        band = '"%s"' % var[3][0]
+        year = var[1]
+        doy = var[2]
+        dsn = "DSS-%s" % (var[3][1:])
+        rev_num = date_to_rev(int(year), int(doy))
+        occ_dir = rev_to_occ_info(rev_num)
+        prof_dir = '"%s"' % var[4]
 
         self.rev_info = {
-            "rsr_file": "Unknown",
+            "rsr_file": "UNK",
             "band": band,
             "year": year,
             "doy": doy,

@@ -1,3 +1,131 @@
+/*******************************************************************************
+ *                          Difraction Functions                               *
+ *******************************************************************************
+ *  Purpose:                                                                   *
+ *      This file contains functions used for computing the Fresnel Inverse    *
+ *      Transform on a set of diffraction limited data. There are several      *
+ *      Methods of performing this:                                            *
+ *          Fresnel Quadratic Approximations:                                  *
+ *              Classic quadratic approximation that is used in Fourier Optics.*
+ *          Legendre Cubic Expansion:                                          *
+ *              Approximation of the Fresnel kernel by a quartic polynomial    *
+ *              using the Legendre Polynomials.                                *
+ *          Legendre Quartic Expansion:                                        *
+ *              Approximation of the Fresnel kernel by a quartic polynomial    *
+ *              using the Legendre Polynomials.                                *
+ *          Legendre Sextic Expansion:                                         *
+ *              Approximation of the Fresnel kernel by a sextic polynomial     *
+ *              using the Legendre Polynomials.                                *
+ *          Legendre Octic Expansion:                                          *
+ *              Approximation of the Fresnel kernel by a octic polynomial      *
+ *              using the Legendre Polynomials.                                *
+ *******************************************************************************
+ *  Variables:                                                                 *
+ *     A_0         (Double):                                                   *
+ *         The coefficient of the x^2 term in the expansion for psi.           *
+ *     A_1         (Double):                                                   *
+ *         The coefficient of the x^3 term in the expansion for psi.           *
+ *     A_2         (Double):                                                   *
+ *         The coefficient of the x^4 term in the expansion for psi.           *
+ *     A_3         (Double):                                                   *
+ *         The coefficient of the x^5 term in the expansion for psi.           *
+ *     A_4         (Double):                                                   *
+ *         The coefficient of the x^6 term in the expansion for psi.           *
+ *     dx          (Double):                                                   *
+ *         Spacing between two consecutive ring intercept points, km.          *
+ *     kd          (Double):                                                   *
+ *         The wavenumber, k, weighted by the spacecraft-ring distance, D.     *
+ *     n_pts       (Long):                                                     *
+ *         Half the number of points in the window, rounded down.              *
+ *     rcpr_D      (Double):                                                   *
+ *         1/D, where D is the distant from the spacecraft to the ring         *
+ *         intercept point, in kilometers.                                     *
+ *     rcpr_F      (Double):                                                   *
+ *         The reciprocal of the Fresnel scale in kilometers.                  *
+ *     T_in        (Pointer to Char):                                          *
+ *         The raw diffraction-limited data that is to be corrected.           *
+ *     T_in_steps  (npy_intp (Equivalent to Long)):                            *
+ *         The number of steps in memory to get from the nth data point        *
+ *         to the (n+1)th data point in the T_in variable (See above).         *
+ *     T_out       (Complex Double):                                           *
+ *         The diffraction corrected profile.                                  *
+ *     w_func      (Pointer to Double):                                        *
+ *         Pre-computed window function. Should have the same number of        *
+ *         points as the x_arr pointer.                                        *
+ *     x_arr       (Pointer to Double):                                        *
+ *         The ring radii within the given window.                             *
+ *******************************************************************************
+ *  The Inverse Fresnel Transform:                                             *
+ *                                                                             *
+ *                W/2                                                          *
+ *                 -                                                           *
+ *                | |                                                          *
+ *     T(rho) =   |   T_hat(r_0)w(r-r_0)exp(-i psi(r,r_0)) dr_0                *
+ *              | |                                                            *
+ *               -                                                             *
+ *              -W/2                                                           *
+ *                                                                             *
+ *  Where T_hat is the diffracted data, w is the window function, r is         *
+ *  the ring intercept point, and r_0 is a dummy variable of integration.      *
+ *  psi is the Fresnel Kernel, and exp is simply the exponential function.     *
+ *******************************************************************************
+ *  The Normalization Scheme:                                                  *
+ *      As the resolution get's too high, say 10 km or greater, then window    *
+ *      width quickly shrinks to zero. Thus the integral will be approximately *
+ *      zero. To account for this, the option to normalize the integral by the *
+ *      window width is offered. The normalization is defined as follows:      *
+ *                                                                             *
+ *                    |     _ +infinity           |                            *
+ *                    |    | |                    |                            *
+ *                    |    |    exp(-i psi(x)) dx |                            *
+ *                    |  | |                      |                            *
+ *                    |   -  -infinity            |                            *
+ *          Norm =  __________________________________                         *
+ *                  |    -  +W/2                    |                          *
+ *                  |   | |                         |                          *
+ *                  |   |    w(x) exp(-i psi(x)) dx |                          *
+ *                  | | |                           |                          *
+ *                  |  -   -W/2                     |                          *
+ *                                                                             *
+ *      This has the effect of making the free-space regions, or regions which *
+ *      were not affected by diffraction, evaluate to approximately one,       *
+ *      regardless of what resolution was chosen.                              *
+ *******************************************************************************
+ *                              DEFINED FUNCTIONS                              *
+ *******************************************************************************
+ *  get_arr:                                                                   *
+ *      Void function that takes in a pointer to a double array and creates    *
+ *      an array of values for the ring radius within half a window width of   *
+ *      the ring intercept point. Do to symmetry, only the values to the left  *
+ *      of the ring intercept point are computed.                              *
+ *******************************************************************************
+ *  _fresnel_transform:                                                        *
+ *      Computes the Fresnel Inverse Transform using the classic Fresnel       *
+ *      quadratic approximation. No normalization is applied.                  *
+ *******************************************************************************
+ *  _fresnel_transform_norm:                                                   *
+ *      Same as _fresnel_transform, but the normalization is applied.          *
+ *******************************************************************************
+ *  _fresnel_cubic,                                                            *
+ *  _fresnel_quartic,                                                          *
+ *  _fresnel_sextic,                                                           *
+ *  _fresnel_octic:                                                            *
+ *      Computes the Fresnel Inverse Transform using Legendre Polynomials to   *
+ *      approximate the Fresnel kernel to various powers (3, 4, 6, or 8).      *
+ *******************************************************************************
+ *  _fresnel_cubic_norm,                                                       *
+ *  _fresnel_quartic_norm,                                                     *
+ *  _fresnel_sextic_norm,                                                      *
+ *  _fresnel_octic_norm:                                                       *
+ *      Same as previous functions, but with the normalization scheme.         *
+ *******************************************************************************
+ *                             A FRIENDY WARNING                               *
+ *******************************************************************************
+ *  This code uses complex numbers throughout, and is compatible with the C99  *
+ *  standard. To use this code, make sure your compiler supports C99 or more   *
+ *  recent standards of the C Programming Language.                            *
+ ******************************************************************************/
+
 /*  Include guard to avoid importing this file twice.                         */
 #ifndef RSS_RINGOCCS_DIFFRACTION_FUNCTIONS_H
 #define RSS_RINGOCCS_DIFFRACTION_FUNCTIONS_H
@@ -9,6 +137,14 @@
 /*  Various coefficients and constants defined here.                          */
 #include "__math_constants.h"
 
+/*******************************************************************************
+ *------------------------------DEFINE C FUNCTIONS-----------------------------*
+ *  These are functions written in pure C without the use of the Numpy-C API.  *
+ *  They are used to define various special functions. They will be wrapped in *
+ *  a form that is useable with the Python interpreter later on within         *
+ *  the _diffraction_functions.c file.                                         *
+ ******************************************************************************/
+
 /*  This void function takes a pointer as an input. The pointers values       *
  *  are changed within the code, and there is no need to "return" anything.   *
  *  Hence, this function has no "return" statement.                           */
@@ -17,16 +153,6 @@ static void get_arr(double* x_arr, double dx, long nw_pts)
     /***************************************************************************
      *  Function:                                                              *
      *      get_arr                                                            *
-     *  Inputs:                                                                *
-     *      x_arr   (Pointer to Double):                                       *
-     *          The array that stores the ring radius points, in kilometers.   *
-     *      dx      (Double):                                                  *
-     *          The spacing between two ring intercept points, in kilometers.  *
-     *      nw_pts  (Long):                                                    *
-     *          Half of the number of points in a given window, rounded down.  *
-     *          For example, for a window with 31 points, nw_pts should be 15. *
-     *  Outputs:                                                               *
-     *      None. The x_arr pointer is altered within the code.                *
      *  Purpose:                                                               *
      *      This computes an array of length nw_pts, with values ranging from  *
      *      -nw_pts*dx to zero. Due to symmetry in the reconstruction, only    *
@@ -48,41 +174,14 @@ complex double _fresnel_transform(double* x_arr, char* T_in, double* w_func,
     /***************************************************************************
      *  Function:                                                              *
      *      _fresnel_transform                                                 *
-     *  Inputs:                                                                *
-     *      x_arr       (Pointer to Double):                                   *
-     *          The ring radii within the given window.                        *
-     *      T_in        (Pointer to Char):                                     *
-     *          The raw diffraction-limited data that is to be corrected.      *
-     *      w_func      (Pointer to Double):                                   *
-     *          Pre-computed window function. Should have the same number of   *
-     *          points as the x_arr pointer.                                   *
-     *      F           (Double):                                              *
-     *          The Fresnel Scale for the center of the window, in kilometers. *
-     *      dx          (Double):                                              *
-     *          Spacing between two consecutive ring intercept points, km.     *
-     *      n_pts       (Long):                                                *
-     *          Half the number of points in the window, rounded down.         *
-     *      T_in_steps  (npy_intp (Equivalent to Long)):                       *
-     *          The number of steps in memory to get from the nth data point   *
-     *          to the (n+1)th data point in the T_in variable (See above).    *
      *  Outputs:                                                               *
      *      T_out       (Complex Double):                                      *
      *          The diffraction corrected profile.                             *
      *  Purpose:                                                               *
      *      This function uses the classic Fresnel quadratic aproximation to   *
      *      the Fresnel Kernel to perform diffraction correction for the given *
-     *      input data. The C99 standard (Or higher) is required, as Complex   *
-     *      Variables are used. The transform is defined as:                   *
-     *                 W/2                                                     *
-     *                  -                                                      *
-     *                 | |                                                     *
-     *      T(rho) =   |   T_hat(r_0)w(r-r_0)exp(-i pi/2 (r-r_0)^2/F^2) dx_0   *
-     *               | |                                                       *
-     *                -                                                        *
-     *               -W/2                                                      *
-     *                                                                         *
-     *  Where T_hat is the diffracted data, w is the window function, r is     *
-     *  the ring intercept point, and r_0 is a dummy variable of integration.  *
+     *      input data. Mathematical definitions are given in the comment      *
+     *      at the start of this file.                                         *
      **************************************************************************/
     /*  Declare all necessary variables.   */
     long i, j;
@@ -128,57 +227,15 @@ complex double _fresnel_transform_norm(double* x_arr, char* T_in,
     /***************************************************************************
      *  Function:                                                              *
      *      _fresnel_transform_norm                                            *
-     *  Inputs:                                                                *
-     *      x_arr       (Pointer to Double):                                   *
-     *          The ring radii within the given window.                        *
-     *      T_in        (Pointer to Char):                                     *
-     *          The raw diffraction-limited data that is to be corrected.      *
-     *      w_func      (Pointer to Double):                                   *
-     *          Pre-computed window function. Should have the same number of   *
-     *          points as the x_arr pointer.                                   *
-     *      F           (Double):                                              *
-     *          The Fresnel Scale for the center of the window, in kilometers. *
-     *      dx          (Double):                                              *
-     *          Spacing between two consecutive ring intercept points, km.     *
-     *      n_pts       (Long):                                                *
-     *          Half the number of points in the window, rounded down.         *
-     *      T_in_steps  (npy_intp (Equivalent to Long)):                       *
-     *          The number of steps in memory to get from the nth data point   *
-     *          to the (n+1)th data point in the T_in variable (See above).    *
      *  Outputs:                                                               *
      *      T_out       (Complex Double):                                      *
      *          The diffraction corrected profile.                             *
      *  Purpose:                                                               *
      *      This function uses the classic Fresnel quadratic aproximation to   *
      *      the Fresnel Kernel to perform diffraction correction for the given *
-     *      input data. The output is the then normalized by the window width. *
-     *      The normalization is given as follows:                             *
-     *                                                                         *
-     *                |     _ +infinity           |                            *
-     *                |    | |                    |                            *
-     *                |    |    exp(-i psi(x)) dx |                            *
-     *                |  | |                      |                            *
-     *                |   -  -infinity            |                            *
-     *      Norm =  __________________________________                         *
-     *              |    -  +W/2                    |                          *
-     *              |   | |                         |                          *
-     *              |   |    w(x) exp(-i psi(x)) dx |                          *
-     *              | | |                           |                          *
-     *              |  -   -W/2                     |                          *
-     *                                                                         *
-     *      Where psi is the Fresnel Kernel, w is the window function,         *
-     *      and W is the window width. |f| denotes the absolute value of f.    *
-     *      Variables are used. The transform is defined as:                   *
-     *                 W/2                                                     *
-     *                  -                                                      *
-     *                 | |                                                     *
-     *      T(rho) =   |   T_hat(r_0)w(r-r_0)exp(-i pi/2 (r-r_0)^2/F^2) dx_0   *
-     *               | |                                                       *
-     *                -                                                        *
-     *               -W/2                                                      *
-     *                                                                         *
-     *  Where T_hat is the diffracted data, r is the ring intercept point, and *
-     *  r_0 is a dummy variable of integration.                                *
+     *      input data, and applies the normalization scheme to the output.    *
+     *      Mathematical definitions are given in the comment at the start of  *
+     *      this file.                                                         *
      **************************************************************************/
     /*  Declare all necessary variables.   */
     long i, j;
@@ -233,49 +290,14 @@ complex double _fresnel_cubic(double* x_arr, char* T_in, double* w_func,
     /***************************************************************************
      *  Function:                                                              *
      *      _fresnel_transform_cubic                                           *
-     *  Inputs:                                                                *
-     *      x_arr       (Pointer to Double):                                   *
-     *          The ring radii within the given window.                        *
-     *      T_in        (Pointer to Char):                                     *
-     *          The raw diffraction-limited data that is to be corrected.      *
-     *      w_func      (Pointer to Double):                                   *
-     *          Pre-computed window function. Should have the same number of   *
-     *          points as the x_arr pointer.                                   *
-     *      rcpr_D      (Double):                                              *
-     *          1/D, where D is the distant from the spacecraft to the ring    *
-     *          intercept point, in kilometers.                                *
-     *      A_0         (Double):                                              *
-     *          The coefficient of the x^2 term in the expansion for psi.      *
-     *      A_1         (Double):                                              *
-     *          The coefficient of the x^3 term in the expansion for psi.      *
-     *      dx          (Double):                                              *
-     *          Spacing between two consecutive ring intercept points, km.     *
-     *      rcpr_F      (Double):                                              *
-     *          The reciprocal of the Fresnel scale in kilometers.             *
-     *      kd          (Double):                                              *
-     *          The wavenumber, k, weighted by the spacecraft-ring distance, D.*
-     *      n_pts       (Long):                                                *
-     *          Half the number of points in the window, rounded down.         *
-     *      T_in_steps  (npy_intp (Equivalent to Long)):                       *
-     *          The number of steps in memory to get from the nth data point   *
-     *          to the (n+1)th data point in the T_in variable (See above).    *
      *  Outputs:                                                               *
      *      T_out       (Complex Double):                                      *
      *          The diffraction corrected profile.                             *
      *  Purpose:                                                               *
      *      This function uses Legendre polynomials to approximate the Fresnel *
      *      kernel up to a cubic expansion, and then performs diffraction      *
-     *      correction on diffracted data using this. The transform is:        *
-     *                 W/2                                                     *
-     *                  -                                                      *
-     *                 | |                                                     *
-     *      T(rho) =   |   T_hat(r_0)w(r-r_0)exp(-i psi(x,x_0)) dx_0           *
-     *               | |                                                       *
-     *                -                                                        *
-     *               -W/2                                                      *
-     *                                                                         *
-     *  Where T_hat is the diffracted data, w is the window function, r is     *
-     *  the ring intercept point, and r_0 is a dummy variable of integration.  *
+     *      correction on diffracted data using this. Mathematics definitions  *
+     *      are given in the comment at the start of this file.                *
      **************************************************************************/
     /*  Declare all necessary variables.   */
     long i, j;
@@ -326,69 +348,16 @@ complex double _fresnel_cubic_norm(double* x_arr, char* T_in, double* w_func,
 {
     /***************************************************************************
      *  Function:                                                              *
-     *      _fresnel_transform_quartic_norm                                    *
-     *  Inputs:                                                                *
-     *      x_arr       (Pointer to Double):                                   *
-     *          The ring radii within the given window.                        *
-     *      T_in        (Pointer to Char):                                     *
-     *          The raw diffraction-limited data that is to be corrected.      *
-     *      w_func      (Pointer to Double):                                   *
-     *          Pre-computed window function. Should have the same number of   *
-     *          points as the x_arr pointer.                                   *
-     *      rcpr_D      (Double):                                              *
-     *          1/D, where D is the distant from the spacecraft to the ring    *
-     *          intercept point, in kilometers.                                *
-     *      A_0         (Double):                                              *
-     *          The coefficient of the x^2 term in the expansion for psi.      *
-     *      A_1         (Double):                                              *
-     *          The coefficient of the x^3 term in the expansion for psi.      *
-     *      A_2         (Double):                                              *
-     *          The coefficient of the x^4 term in the expansion for psi.      *
-     *      dx          (Double):                                              *
-     *          Spacing between two consecutive ring intercept points, km.     *
-     *      rcpr_F      (Double):                                              *
-     *          The reciprocal of the Fresnel scale in kilometers.             *
-     *      kd          (Double):                                              *
-     *          The wavenumber, k, weighted by the spacecraft-ring distance, D.*
-     *      n_pts       (Long):                                                *
-     *          Half the number of points in the window, rounded down.         *
-     *      T_in_steps  (npy_intp (Equivalent to Long)):                       *
-     *          The number of steps in memory to get from the nth data point   *
-     *          to the (n+1)th data point in the T_in variable (See above).    *
+     *      _fresnel_transform_cubic_norm                                      *
      *  Outputs:                                                               *
      *      T_out       (Complex Double):                                      *
      *          The diffraction corrected profile.                             *
      *  Purpose:                                                               *
      *      This function uses Legendre polynomials to approximate the Fresnel *
-     *      kernel up to a quartic expansion, and then performs diffraction    *
-     *      correction on diffracted data using this.The output is the then    *
-     *      normalized by the window width. The normalization is given by:     *
-     *                                                                         *
-     *                |     _ +infinity           |                            *
-     *                |    | |                    |                            *
-     *                |    |    exp(-i psi(x)) dx |                            *
-     *                |  | |                      |                            *
-     *                |   -  -infinity            |                            *
-     *      Norm =  __________________________________                         *
-     *              |    -  +W/2                    |                          *
-     *              |   | |                         |                          *
-     *              |   |    w(x) exp(-i psi(x)) dx |                          *
-     *              | | |                           |                          *
-     *              |  -   -W/2                     |                          *
-     *                                                                         *
-     *      Where psi is the Fresnel Kernel, w is the window function,         *
-     *      and W is the window width. |f| denotes the absolute value of f.    *
-     *      Variables are used. The transform is defined as:                   *
-     *                                                                         *
-     *                  -  +W/2                                                *
-     *                 | |                                                     *
-     *      T(rho) =   |   T_hat(r_0)w(r-r_0)exp(-i psi(x)) dx_0               *
-     *               | |                                                       *
-     *                -   -W/2                                                 *
-     *                                                                         *
-     *                                                                         *
-     *  Where T_hat is the diffracted data, r is the ring intercept point, and *
-     *  r_0 is a dummy variable of integration.                                *
+     *      kernel up to a cubic expansion, and then performs diffraction      *
+     *      correction on diffracted data using this. The normalization scheme *
+     *      is applied to the output. Mathematical definitions are given in    *
+     *      the comment at the start of this file.                             *
      **************************************************************************/
     /*  Declare all necessary variables.   */
     long i, j;
@@ -450,51 +419,14 @@ complex double _fresnel_quartic(double* x_arr, char* T_in, double* w_func,
     /***************************************************************************
      *  Function:                                                              *
      *      _fresnel_transform_quartic                                         *
-     *  Inputs:                                                                *
-     *      x_arr       (Pointer to Double):                                   *
-     *          The ring radii within the given window.                        *
-     *      T_in        (Pointer to Char):                                     *
-     *          The raw diffraction-limited data that is to be corrected.      *
-     *      w_func      (Pointer to Double):                                   *
-     *          Pre-computed window function. Should have the same number of   *
-     *          points as the x_arr pointer.                                   *
-     *      rcpr_D      (Double):                                              *
-     *          1/D, where D is the distant from the spacecraft to the ring    *
-     *          intercept point, in kilometers.                                *
-     *      A_0         (Double):                                              *
-     *          The coefficient of the x^2 term in the expansion for psi.      *
-     *      A_1         (Double):                                              *
-     *          The coefficient of the x^3 term in the expansion for psi.      *
-     *      A_2         (Double):                                              *
-     *          The coefficient of the x^4 term in the expansion for psi.      *
-     *      dx          (Double):                                              *
-     *          Spacing between two consecutive ring intercept points, km.     *
-     *      rcpr_F      (Double):                                              *
-     *          The reciprocal of the Fresnel scale in kilometers.             *
-     *      kd          (Double):                                              *
-     *          The wavenumber, k, weighted by the spacecraft-ring distance, D.*
-     *      n_pts       (Long):                                                *
-     *          Half the number of points in the window, rounded down.         *
-     *      T_in_steps  (npy_intp (Equivalent to Long)):                       *
-     *          The number of steps in memory to get from the nth data point   *
-     *          to the (n+1)th data point in the T_in variable (See above).    *
      *  Outputs:                                                               *
      *      T_out       (Complex Double):                                      *
      *          The diffraction corrected profile.                             *
      *  Purpose:                                                               *
      *      This function uses Legendre polynomials to approximate the Fresnel *
      *      kernel up to a quartic expansion, and then performs diffraction    *
-     *      correction on diffracted data using this. The transform is:        *
-     *                 W/2                                                     *
-     *                  -                                                      *
-     *                 | |                                                     *
-     *      T(rho) =   |   T_hat(r_0)w(r-r_0)exp(-i psi(x,x_0)) dx_0           *
-     *               | |                                                       *
-     *                -                                                        *
-     *               -W/2                                                      *
-     *                                                                         *
-     *  Where T_hat is the diffracted data, w is the window function, r is     *
-     *  the ring intercept point, and r_0 is a dummy variable of integration.  *
+     *      correction on diffracted data using this. Mathematics definitions  *
+     *      are given in the comment at the start of this file.                *
      **************************************************************************/
     /*  Declare all necessary variables.   */
     long i, j;
@@ -545,69 +477,16 @@ complex double _fresnel_quartic_norm(double* x_arr, char* T_in, double* w_func,
 {
     /***************************************************************************
      *  Function:                                                              *
-     *      _fresnel_transform_quartic_norm                                    *
-     *  Inputs:                                                                *
-     *      x_arr       (Pointer to Double):                                   *
-     *          The ring radii within the given window.                        *
-     *      T_in        (Pointer to Char):                                     *
-     *          The raw diffraction-limited data that is to be corrected.      *
-     *      w_func      (Pointer to Double):                                   *
-     *          Pre-computed window function. Should have the same number of   *
-     *          points as the x_arr pointer.                                   *
-     *      rcpr_D      (Double):                                              *
-     *          1/D, where D is the distant from the spacecraft to the ring    *
-     *          intercept point, in kilometers.                                *
-     *      A_0         (Double):                                              *
-     *          The coefficient of the x^2 term in the expansion for psi.      *
-     *      A_1         (Double):                                              *
-     *          The coefficient of the x^3 term in the expansion for psi.      *
-     *      A_2         (Double):                                              *
-     *          The coefficient of the x^4 term in the expansion for psi.      *
-     *      dx          (Double):                                              *
-     *          Spacing between two consecutive ring intercept points, km.     *
-     *      rcpr_F      (Double):                                              *
-     *          The reciprocal of the Fresnel scale in kilometers.             *
-     *      kd          (Double):                                              *
-     *          The wavenumber, k, weighted by the spacecraft-ring distance, D.*
-     *      n_pts       (Long):                                                *
-     *          Half the number of points in the window, rounded down.         *
-     *      T_in_steps  (npy_intp (Equivalent to Long)):                       *
-     *          The number of steps in memory to get from the nth data point   *
-     *          to the (n+1)th data point in the T_in variable (See above).    *
+     *      _fresnel_transform_quartic                                         *
      *  Outputs:                                                               *
      *      T_out       (Complex Double):                                      *
      *          The diffraction corrected profile.                             *
      *  Purpose:                                                               *
      *      This function uses Legendre polynomials to approximate the Fresnel *
      *      kernel up to a quartic expansion, and then performs diffraction    *
-     *      correction on diffracted data using this.The output is the then    *
-     *      normalized by the window width. The normalization is given by:     *
-     *                                                                         *
-     *                |     _ +infinity           |                            *
-     *                |    | |                    |                            *
-     *                |    |    exp(-i psi(x)) dx |                            *
-     *                |  | |                      |                            *
-     *                |   -  -infinity            |                            *
-     *      Norm =  __________________________________                         *
-     *              |    -  +W/2                    |                          *
-     *              |   | |                         |                          *
-     *              |   |    w(x) exp(-i psi(x)) dx |                          *
-     *              | | |                           |                          *
-     *              |  -   -W/2                     |                          *
-     *                                                                         *
-     *      Where psi is the Fresnel Kernel, w is the window function,         *
-     *      and W is the window width. |f| denotes the absolute value of f.    *
-     *      Variables are used. The transform is defined as:                   *
-     *                                                                         *
-     *                  -  +W/2                                                *
-     *                 | |                                                     *
-     *      T(rho) =   |   T_hat(r_0)w(r-r_0)exp(-i psi(x)) dx_0               *
-     *               | |                                                       *
-     *                -   -W/2                                                 *
-     *                                                                         *
-     *                                                                         *
-     *  Where T_hat is the diffracted data, r is the ring intercept point, and *
-     *  r_0 is a dummy variable of integration.                                *
+     *      correction on diffracted data using this. The normalization scheme *
+     *      is then applied to the output. Mathematical definitions can be     *
+     *      found in the comment at the start of this file.                    *
      **************************************************************************/
     /*  Declare all necessary variables.   */
     long i, j;
@@ -670,55 +549,14 @@ complex double _fresnel_sextic(double* x_arr, char* T_in, double* w_func,
     /***************************************************************************
      *  Function:                                                              *
      *      _fresnel_transform_sextic                                          *
-     *  Inputs:                                                                *
-     *      x_arr       (Pointer to Double):                                   *
-     *          The ring radii within the given window.                        *
-     *      T_in        (Pointer to Char):                                     *
-     *          The raw diffraction-limited data that is to be corrected.      *
-     *      w_func      (Pointer to Double):                                   *
-     *          Pre-computed window function. Should have the same number of   *
-     *          points as the x_arr pointer.                                   *
-     *      rcpr_D      (Double):                                              *
-     *          1/D, where D is the distant from the spacecraft to the ring    *
-     *          intercept point, in kilometers.                                *
-     *      A_0         (Double):                                              *
-     *          The coefficient of the x^2 term in the expansion for psi.      *
-     *      A_1         (Double):                                              *
-     *          The coefficient of the x^3 term in the expansion for psi.      *
-     *      A_2         (Double):                                              *
-     *          The coefficient of the x^4 term in the expansion for psi.      *
-     *      A_3         (Double):                                              *
-     *          The coefficient of the x^5 term in the expansion for psi.      *
-     *      A_4         (Double):                                              *
-     *          The coefficient of the x^6 term in the expansion for psi.      *
-     *      dx          (Double):                                              *
-     *          Spacing between two consecutive ring intercept points, km.     *
-     *      rcpr_F      (Double):                                              *
-     *          The reciprocal of the Fresnel scale in kilometers.             *
-     *      kd          (Double):                                              *
-     *          The wavenumber, k, weighted by the spacecraft-ring distance, D.*
-     *      n_pts       (Long):                                                *
-     *          Half the number of points in the window, rounded down.         *
-     *      T_in_steps  (npy_intp (Equivalent to Long)):                       *
-     *          The number of steps in memory to get from the nth data point   *
-     *          to the (n+1)th data point in the T_in variable (See above).    *
      *  Outputs:                                                               *
      *      T_out       (Complex Double):                                      *
      *          The diffraction corrected profile.                             *
      *  Purpose:                                                               *
      *      This function uses Legendre polynomials to approximate the Fresnel *
-     *      kernel up to a quartic expansion, and then performs diffraction    *
-     *      correction on diffracted data using this. The transform is:        *
-     *                 W/2                                                     *
-     *                  -                                                      *
-     *                 | |                                                     *
-     *      T(rho) =   |   T_hat(r_0)w(r-r_0)exp(-i psi(x,x_0)) dx_0           *
-     *               | |                                                       *
-     *                -                                                        *
-     *               -W/2                                                      *
-     *                                                                         *
-     *  Where T_hat is the diffracted data, w is the window function, r is     *
-     *  the ring intercept point, and r_0 is a dummy variable of integration.  *
+     *      kernel up to a sextic expansion, and then performs diffraction     *
+     *      correction on diffracted data using this. Mathematics definitions  *
+     *      are given in the comment at the start of this file.                *
      **************************************************************************/
     /*  Declare all necessary variables.   */
     long i, j;
@@ -770,69 +608,16 @@ complex double _fresnel_sextic_norm(double* x_arr, char* T_in, double* w_func,
 {
     /***************************************************************************
      *  Function:                                                              *
-     *      _fresnel_transform_quartic_norm                                    *
-     *  Inputs:                                                                *
-     *      x_arr       (Pointer to Double):                                   *
-     *          The ring radii within the given window.                        *
-     *      T_in        (Pointer to Char):                                     *
-     *          The raw diffraction-limited data that is to be corrected.      *
-     *      w_func      (Pointer to Double):                                   *
-     *          Pre-computed window function. Should have the same number of   *
-     *          points as the x_arr pointer.                                   *
-     *      rcpr_D      (Double):                                              *
-     *          1/D, where D is the distant from the spacecraft to the ring    *
-     *          intercept point, in kilometers.                                *
-     *      A_0         (Double):                                              *
-     *          The coefficient of the x^2 term in the expansion for psi.      *
-     *      A_1         (Double):                                              *
-     *          The coefficient of the x^3 term in the expansion for psi.      *
-     *      A_2         (Double):                                              *
-     *          The coefficient of the x^4 term in the expansion for psi.      *
-     *      dx          (Double):                                              *
-     *          Spacing between two consecutive ring intercept points, km.     *
-     *      rcpr_F      (Double):                                              *
-     *          The reciprocal of the Fresnel scale in kilometers.             *
-     *      kd          (Double):                                              *
-     *          The wavenumber, k, weighted by the spacecraft-ring distance, D.*
-     *      n_pts       (Long):                                                *
-     *          Half the number of points in the window, rounded down.         *
-     *      T_in_steps  (npy_intp (Equivalent to Long)):                       *
-     *          The number of steps in memory to get from the nth data point   *
-     *          to the (n+1)th data point in the T_in variable (See above).    *
+     *      _fresnel_transform_sextic                                          *
      *  Outputs:                                                               *
      *      T_out       (Complex Double):                                      *
      *          The diffraction corrected profile.                             *
      *  Purpose:                                                               *
      *      This function uses Legendre polynomials to approximate the Fresnel *
-     *      kernel up to a quartic expansion, and then performs diffraction    *
-     *      correction on diffracted data using this.The output is the then    *
-     *      normalized by the window width. The normalization is given by:     *
-     *                                                                         *
-     *                |     _ +infinity           |                            *
-     *                |    | |                    |                            *
-     *                |    |    exp(-i psi(x)) dx |                            *
-     *                |  | |                      |                            *
-     *                |   -  -infinity            |                            *
-     *      Norm =  __________________________________                         *
-     *              |    -  +W/2                    |                          *
-     *              |   | |                         |                          *
-     *              |   |    w(x) exp(-i psi(x)) dx |                          *
-     *              | | |                           |                          *
-     *              |  -   -W/2                     |                          *
-     *                                                                         *
-     *      Where psi is the Fresnel Kernel, w is the window function,         *
-     *      and W is the window width. |f| denotes the absolute value of f.    *
-     *      Variables are used. The transform is defined as:                   *
-     *                                                                         *
-     *                  -  +W/2                                                *
-     *                 | |                                                     *
-     *      T(rho) =   |   T_hat(r_0)w(r-r_0)exp(-i psi(x)) dx_0               *
-     *               | |                                                       *
-     *                -   -W/2                                                 *
-     *                                                                         *
-     *                                                                         *
-     *  Where T_hat is the diffracted data, r is the ring intercept point, and *
-     *  r_0 is a dummy variable of integration.                                *
+     *      kernel up to a sextic expansion, and then performs diffraction     *
+     *      correction on diffracted data using this. The normalization scheme *
+     *      is then applied to the output. Mathematical definitions can be     *
+     *      found in the comment at the start of this file.                    *
      **************************************************************************/
     /*  Declare all necessary variables.   */
     long i, j;
@@ -853,6 +638,138 @@ complex double _fresnel_sextic_norm(double* x_arr, char* T_in, double* w_func,
         /*  Compute psi use Horner's Method for Polynomial Computation.       */
         psi_even = kd*x2*(A_0+x2*(A_2+x2*A_4));
         psi_odd  = kd*x2*x*(A_1+x2*A_3);
+
+        /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
+        psi = psi_even - psi_odd;
+        exp_negative_psi = (cos(psi) - _Complex_I*sin(psi))*w_func[i];
+
+        /*  Compute the right side of exp(-ipsi) using Euler's Formula.       */
+        psi = psi_even + psi_odd;
+        exp_positive_psi = (cos(psi) - _Complex_I*sin(psi))*w_func[i];
+
+        /*  Compute denominator portion of norm using a Riemann Sum.          */
+        norm  += exp_negative_psi+exp_positive_psi;
+
+        /*  Approximate the integral with a Riemann Sum.  */
+        T_out += exp_negative_psi * *(complex double *)(T_in + j*T_in_steps);
+        T_out += exp_positive_psi * *(complex double *)(T_in - j*T_in_steps);
+        j += 1;
+    }
+
+        /*  Add the central point in the Riemann sum. This is center of the   *
+         *  window function, that is where w_func = 1.                        */
+        T_out += *(complex double *)T_in;
+        norm  += 1.0;
+
+        /*  The integral in the numerator of norm evaluates to F sqrt(2). Use *
+         *  this in the calculation of the normalization. The cabs function   *
+         *  computes the absolute value of complex number.                    */
+        norm = SQRT_2 / cabs(norm);
+
+        /*  Multiply result by the coefficient found in the Fresnel inverse.  */
+        T_out *= (0.5 + 0.5*_Complex_I) * norm;
+    return T_out;
+}
+
+complex double _fresnel_octic(double* x_arr, char* T_in, double* w_func,
+                              double rcpr_D, double A_0, double A_1,
+                              double A_2, double A_3, double A_4, double A_5,
+                              double A_6, double dx, double rcpr_F, double kd,
+                              long n_pts, npy_intp T_in_steps)
+{
+    /***************************************************************************
+     *  Function:                                                              *
+     *      _fresnel_transform_sextic                                          *
+     *  Outputs:                                                               *
+     *      T_out       (Complex Double):                                      *
+     *          The diffraction corrected profile.                             *
+     *  Purpose:                                                               *
+     *      This function uses Legendre polynomials to approximate the Fresnel *
+     *      kernel up to a sextic expansion, and then performs diffraction     *
+     *      correction on diffracted data using this. Mathematics definitions  *
+     *      are given in the comment at the start of this file.                *
+     **************************************************************************/
+    /*  Declare all necessary variables.   */
+    long i, j;
+    double x, x2, psi, psi_even, psi_odd;
+    complex double T_out, exp_negative_psi, exp_positive_psi;
+
+    /*  Initialize T_out to zero so we can loop over later.                   */
+    T_out = 0.0;
+
+    j = -n_pts;
+
+    /*  Use a Riemann Sum to approximation the Fresnel Inverse Integral.      */
+    for (i = 0; i<n_pts; ++i){
+        x   = x_arr[i]*rcpr_D;
+        x2  = x*x;
+
+        /*  Compute psi use Horner's Method for Polynomial Computation.       */
+        psi_even = kd*x2*(A_0+x2*(A_2+x2*(A_4+x2*A_6)));
+        psi_odd  = kd*x2*x*(A_1+x2*(A_3+x2*A_5));
+
+        /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
+        psi = psi_even - psi_odd;
+        exp_negative_psi = (cos(psi) - _Complex_I*sin(psi))*w_func[i];
+
+        /*  Compute the right side of exp(-ipsi) using Euler's Formula.       */
+        psi = psi_even + psi_odd;
+        exp_positive_psi = (cos(psi) - _Complex_I*sin(psi))*w_func[i];
+
+        /*  Approximate the integral with a Riemann Sum.  */
+        T_out += exp_negative_psi * *(complex double *)(T_in + j*T_in_steps);
+        T_out += exp_positive_psi * *(complex double *)(T_in - j*T_in_steps);
+        j += 1;
+    }
+
+        /*  Add the central point in the Riemann sum. This is center of the   *
+         *  window function, that is where w_func = 1.                        */
+        T_out += *(complex double *)T_in;
+
+        /*  Multiply result by the coefficient found in the Fresnel inverse.  */
+        T_out *= (0.5 + 0.5*_Complex_I) * dx * rcpr_F;
+    return T_out;
+}
+
+complex double _fresnel_octic_norm(double* x_arr, char* T_in, double* w_func,
+                                   double rcpr_D, double A_0, double A_1,
+                                   double A_2, double A_3, double A_4,
+                                   double A_5, double A_6, double dx,
+                                   double rcpr_F, double kd,
+                                   long n_pts, npy_intp T_in_steps)
+{
+    /***************************************************************************
+     *  Function:                                                              *
+     *      _fresnel_transform_sextic                                          *
+     *  Outputs:                                                               *
+     *      T_out       (Complex Double):                                      *
+     *          The diffraction corrected profile.                             *
+     *  Purpose:                                                               *
+     *      This function uses Legendre polynomials to approximate the Fresnel *
+     *      kernel up to a sextic expansion, and then performs diffraction     *
+     *      correction on diffracted data using this. The normalization scheme *
+     *      is then applied to the output. Mathematical definitions can be     *
+     *      found in the comment at the start of this file.                    *
+     **************************************************************************/
+    /*  Declare all necessary variables.   */
+    long i, j;
+    double x, x2, psi, psi_even, psi_odd;
+    complex double T_out, exp_negative_psi, exp_positive_psi, norm;
+
+    /*  Initialize T_out and norm to zero so we can loop over later.          */
+    T_out = 0.0;
+    norm  = 0.0;
+
+    j = -n_pts;
+
+    /*  Use a Riemann Sum to approximation the Fresnel Inverse Integral.      */
+    for (i = 0; i<n_pts; ++i){
+        x   = x_arr[i]*rcpr_D;
+        x2  = x*x;
+
+        /*  Compute psi use Horner's Method for Polynomial Computation.       */
+        psi_even = kd*x2*(A_0+x2*(A_2+x2*(A_4+x2*A_6)));
+        psi_odd  = kd*x2*x*(A_1+x2*(A_3+x2*A_5));
 
         /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
         psi = psi_even - psi_odd;

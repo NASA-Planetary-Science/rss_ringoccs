@@ -4,7 +4,7 @@ from . import window_functions
 from rss_ringoccs.tools import error_check
 try:
     from rss_ringoccs._ufuncs import _special_functions
-except (ImportError, ModuleNotFoundError):
+except:
     print(
         """
             Error: rss_ringoccs.diffrec.special_functions

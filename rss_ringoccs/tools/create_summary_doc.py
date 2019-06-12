@@ -288,6 +288,7 @@ def plot_occ_earth_view(pdf, geo_inst):
     plt.scatter(occx1[::dpts], occy1[::dpts], s=10, color='blue')
         
     pdf.savefig()
+    plt.close()
 
     return pdf
 
@@ -372,6 +373,7 @@ def plot_occ_pole_view(pdf, geo_inst):
     plt.plot([0.,0.], [-68000., -180000.], 'k-', linewidth=2.3)
     plt.text(2000., -180000., '$\oplus$', fontsize=15)
     pdf.savefig()
+    plt.close()
     return pdf
 
 def plot_geo_overview(pdf, geo_inst, tau_inst):
@@ -599,9 +601,11 @@ def plot_tau(pdf, tau_inst):
     rho_km = tau_inst.rho_km_vals
     tau = tau_inst.tau_vals
     tau_thresh = tau_inst.tau_threshold_vals
+    res_km = str(round(tau_inst.input_res,3))
 
     
-    title = 'Cassini RSS: Reconstructed X-band Normal Optical Depth Profile (1 km Resolution)'
+    title = ('Cassini RSS: Reconstructed X-band Normal Optical Depth Profile'
+            + ' (' + res_km + ' km Resolution)')
     ncol = 1
     nrow = 4
 

@@ -91,8 +91,7 @@ class Calibration(object):
     """
 
     def __init__(self, rsr_inst, geo_inst, pnf_order=3, dt_cal=1.0,
-                 verbose=False, write_file=True, interact=False,
-                 fit_resid=False):
+                 verbose=False, write_file=True, interact=False):
 
         if not isinstance(geo_inst, Geometry):
             sys.exit('ERROR (Calibration): geo_inst input needs to be an '
@@ -142,7 +141,7 @@ class Calibration(object):
         # Calculate frequency offset fit
         # Use default residual frequency fit
         fit_inst = FreqOffsetFit(rsr_inst, geo_inst, verbose=verbose,
-                write_file=write_file, fit_resid=fit_resid)
+                write_file=write_file)
 
         # Get corrected I's and Q's
         self.IQ_c = self.correct_IQ(rsr_inst.spm_vals,rsr_inst.IQ_m,

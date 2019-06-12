@@ -187,16 +187,17 @@ class Calibration(object):
                 "rsr_inst": rsr_inst.history,
                 "geo_inst": geo_inst.history}
         input_kwds = {
-                "fof_order": fit_inst.poly_order,
                 "pnf_order": pnf_order,
                 "dt_cal": dt_cal,
-                "pnf_fittype": 'poly',
-                "freespace_spm": gaps_used,
                 "interact": interact}
 
         additional_info = {
                 "FORFIT_chi_squared": self.FORFIT_chi_squared,
-                "FSPFIT_chi_squared": self.FSPFIT_chi_squared}
+                "FSPFIT_chi_squared": self.FSPFIT_chi_squared,
+                "pnf_fittype": 'poly',
+                "fof_order": fit_inst.poly_order,
+                "freespace_spm": gaps_used}
+
 
         self.history = write_history_dict(input_vars, input_kwds, __file__,
                 add_info=additional_info)

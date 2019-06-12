@@ -20,6 +20,8 @@ from .pds3_geo_series import write_geo_series
 from .pds3_cal_series import write_cal_series
 from .pds3_dlp_series import write_dlp_series
 from .pds3_tau_series import write_tau_series
+#from .pds3_spectro_image import write_spectro_image
+import time
 from time import strftime
 
 sys.path.append('../../')
@@ -29,16 +31,14 @@ sys.path.remove('../../')
 import pdb
 import os
 
-#
-chord_revnums = ['053', '054', '056', '057', '058', '060', '063', '064',
-                    '067', '079', '081', '082', '084', '089', '253']
 
 func_typ = {'GEO': write_geo_series,
         'CAL': write_cal_series,
         'DLP': write_dlp_series,
         'TAU': write_tau_series}
+        #'SPECTRO': write_spectro_image}
 
-def write_output_files(inst):
+def write_output_files(inst, add_text=None):
     """
     Write output (geo, cal, dlp, tau) *.TAB and *.LBL files, depending on 
     instance given.
@@ -48,20 +48,26 @@ def write_output_files(inst):
             Instance of either Geometry, Calibration, NormDiff, or
             DiffractionCorrection classes.
     """
+    if add_text is not None:
+        add = add_text
+    else:
+        add = ''
     rev_info = inst.rev_info
 
     # Check for instance type and write that specific file
     if isinstance(inst, rss.occgeo.Geometry):
-        filtyp = 'GEO'
+        filtyp = 'GEO' + add
 
     elif isinstance(inst, rss.calibration.Calibration):
-        filtyp = 'CAL'
+        filtyp = 'CAL' + add
 
     elif isinstance(inst, rss.calibration.DiffractionLimitedProfile):
-        filtyp = 'DLP_' + str(int(inst.dr_km * 1000 * 2)).zfill(4) + 'M'
+        filtyp = 'DLP_' + str(int(inst.dr_km * 1000 * 2)).zfill(4) + 'M' + add
 
     elif isinstance(inst, rss.diffrec.DiffractionCorrection):
-        filtyp = 'TAU_' + str(int(inst.input_res * 1000)).zfill(5) + 'M'
+        filtyp = 'TAU_' + str(int(inst.input_res * 1000)).zfill(5) + 'M' + add
+    #elif isinstance(inst, rss.scatter.Scatter):
+    #    filtyp = 'SCATTER_' + inst.band + (inst.dsn).split('-')[1] + add
     else:
         print('invalid instance!')
 
@@ -87,9 +93,13 @@ def construct_filepath(rev_info, filtyp):
     dsn = rev_info['dsn'].split('-')[-1]
     rev = rev_info['rev_num']
 
-    if rev in chord_revnums:
+
+    if 'DIR' in rev_info:
         if 'DLP' in filtyp or 'TAU' in filtyp or 'Summary' in filtyp:
             pd2 = 'C'
+
+    if 'PER' in rev_info:
+        pd2 = 'P' + pd2
 
     for dd in pd1:
         filestr = ('RSS_' + str(year) + '_' + str(doy) + '_' + str(band) +
@@ -153,4 +163,5 @@ def construct_output_filename(rev_info, inst, filtyp):
 
 """
 Revisions:
+    2019 Apr 09 - jfong - add Scatter outfile
 """

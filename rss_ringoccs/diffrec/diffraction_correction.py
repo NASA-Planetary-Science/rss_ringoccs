@@ -19,7 +19,7 @@ from rss_ringoccs.tools import error_check
 from . import special_functions, window_functions
 try:
     from rss_ringoccs._ufuncs import _diffraction_functions
-except (ImportError, ModuleNotFoundError):
+except:
     print(
         """
             Error: rss_ringoccs.diffrec.diffraction_correction
@@ -1068,7 +1068,7 @@ class DiffractionCorrection(object):
             if (self.psitype == "fresnel"):
                 try:
                     if self.verbose:
-                        print("\t\tUsing C Code for Diffraction Correction...")
+                        print("\t\tTrying C Code for Diffraction Correction...")
 
                     return _diffraction_functions.fresnel_transform_quadratic(
                         T_in, self.rho_km_vals, self.F_km_vals,
@@ -1132,17 +1132,54 @@ class DiffractionCorrection(object):
                             print(mes % (i, n_used, nw, loop), end="\r")
                     print(mes % (i, n_used, nw, loop))
                     return T_out
+            elif (self.psitype == "fresnel3"):
+                try:
+                    if self.verbose:
+                        print("\t\tTrying C Code for Diffraction Correction...")
+                    return _diffraction_functions.fresnel_transform_cubic(
+                        T_in, self.dx_km, self.F_km_vals, self.phi_rad_vals,
+                        kD_vals, self.B_rad_vals, self.D_km_vals,
+                        self.w_km_vals, start, n_used, wnum, use_norm, use_fwd
+                    )
+                except (TypeError, ValueError, NameError):
+                    if self.verbose:
+                        print("\t\tCould not import C code. Using Python Code.")
             elif (self.psitype == "fresnel4"):
                 try:
                     if self.verbose:
-                        print("\t\tUsing C Code for Diffraction Correction...")
+                        print("\t\tTrying C Code for Diffraction Correction...")
 
                     return _diffraction_functions.fresnel_transform_quartic(
                         T_in, self.dx_km, self.F_km_vals, self.phi_rad_vals,
                         kD_vals, self.B_rad_vals, self.D_km_vals,
                         self.w_km_vals, start, n_used, wnum, use_norm, use_fwd
                     )
+                except (TypeError, ValueError, NameError):
+                    if self.verbose:
+                        print("\t\tCould not import C code. Using Python Code.")
+            elif (self.psitype == "fresnel6"):
+                try:
+                    if self.verbose:
+                        print("\t\tTrying C Code for Diffraction Correction...")
 
+                    return _diffraction_functions.fresnel_transform_sextic(
+                        T_in, self.dx_km, self.F_km_vals, self.phi_rad_vals,
+                        kD_vals, self.B_rad_vals, self.D_km_vals,
+                        self.w_km_vals, start, n_used, wnum, use_norm, use_fwd
+                    )
+                except (TypeError, ValueError, NameError):
+                    if self.verbose:
+                        print("\t\tCould not import C code. Using Python Code.")
+            else:
+                try:
+                    if self.verbose:
+                        print("\t\tTrying C Code for Diffraction Correction...")
+
+                    return _diffraction_functions.fresnel_transform_octic(
+                        T_in, self.dx_km, self.F_km_vals, self.phi_rad_vals,
+                        kD_vals, self.B_rad_vals, self.D_km_vals,
+                        self.w_km_vals, start, n_used, wnum, use_norm, use_fwd
+                    )
                 except (TypeError, ValueError, NameError):
                     if self.verbose:
                         print("\t\tCould not import C code. Using Python Code.")
@@ -1211,7 +1248,7 @@ class DiffractionCorrection(object):
                         w_init = self.w_km_vals[center]
                         nw = int(2 * np.floor(w_init / (2.0 * self.dx_km)) + 1)        
                         crange = np.arange(int(center-(nw-1)/2),
-                                        int(1+center+(nw-1)/2))
+                                           int(1+center+(nw-1)/2))
 
                         # Ajdust ring radius by dx_km.
                         r0 = self.rho_km_vals[crange]
@@ -1244,7 +1281,7 @@ class DiffractionCorrection(object):
                     # Compute 'approximate' Fresnel Inversion for current point
                     T_out[center] = np.sum(ker*T)*self.dx_km*(1.0+1.0j)/(2.0*F)
 
-                    # If normalization has been set, normalize the reconstruction
+                    # If normalization has been set, normalize correction.
                     if self.norm:
                         T_out[center] *= __norm(self.dx_km, ker, F)
                     if self.verbose:
@@ -1364,7 +1401,7 @@ class DiffractionCorrection(object):
                         T_out[center] *= __norm(self.dx_km, ker, F)
                     if self.verbose:
                         print(mes % (i, n_used, nw, loop), end="\r")
-            elif (self.psitype == "fresnel8"):
+            else:
                 for i in np.arange(n_used):
                     # Current point being computed.
                     center = start+i
@@ -1431,14 +1468,6 @@ class DiffractionCorrection(object):
                         T_out[center] *= __norm(self.dx_km, ker, F)
                     if self.verbose:
                         print(mes % (i, n_used, nw, loop), end="\r")
-            else:
-                raise ValueError(
-                    """
-                        \rError Encountered: rss_ringoccs
-                        \r\tdiffrec.DiffractionCorrection\n
-                        \rIllegal wtype selected.\n
-                    """
-                )
         if self.verbose:
             print("\n", end="\r")
         return T_out

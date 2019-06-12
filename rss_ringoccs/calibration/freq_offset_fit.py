@@ -76,7 +76,7 @@ class FreqOffsetFit(object):
     """
 
     def __init__(self, rsr_inst, geo_inst, f_uso_x=8427222034.34050,
-            verbose=False, write_file=False, fit_resid=False):
+            verbose=False, write_file=False):
 
 
         # Check inputs for validity

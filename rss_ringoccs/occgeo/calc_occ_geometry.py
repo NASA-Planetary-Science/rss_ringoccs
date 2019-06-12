@@ -15,11 +15,12 @@ import spiceypy as spice
 import numpy as np
 from scipy.interpolate import interp1d
 
-def calc_B_deg(et_vals, spacecraft, dsn, nhat_p, kernels=None):
+def calc_B_deg(et_vals, spacecraft, dsn, nhat_p, kernels=None,
+        ref='J2000'):
     """
     This calculates ring opening angle, or the observed ring elevation,
-    as the complement to the angle made by the Saturn pole vector and
-    the Cassini to DSN vector
+    as the complement to the angle made by the planet pole vector and
+    the spacecraft to DSN vector
 
     Arguments:
         :et_vals (*np.ndarray*): Array of earth-received times in
@@ -37,27 +38,29 @@ def calc_B_deg(et_vals, spacecraft, dsn, nhat_p, kernels=None):
     if kernels:
         spice.kclear()
         spice.furnsh(kernels)
-    try:
+
+    if isinstance(et_vals, float):
+        npts = 1
+        et_vals = [et_vals]
+    else:
         npts = len(et_vals)
-    except TypeError:
-        et = et_vals
-        et_vals = []
-        et_vals.append(et)
-        npts = len(et_vals)
+
+    if npts == 0:
+        return []
 
     B_deg_vals = np.zeros(npts)
 
     for n in range(npts):
-        # Compute Cassini to dsn position vector
+        # Compute spacecraft to dsn position vector
         targ = dsn
         et = et_vals[n]
-        ref = 'J2000'
+        #ref = 'J2000'
         abcorr = 'CN'
         obs = spacecraft
         starg, ltime = spice.spkpos(targ, et, ref, abcorr, obs)
 
         # Calculate B as the complement to the angle made by the
-        #   Saturn pole vector and the Cassini to DSN vector
+        #   planet pole vector and the spacecraft to DSN vector
         v1 = starg
         v2 = nhat_p
         B_rad = (np.pi/2.) - spice.vsep(v1, v2)
@@ -197,7 +200,7 @@ def calc_elevation_deg(et_vals, target, obs, kernels=None):
     return elev_deg_vals
 
 def calc_impact_radius_km(R_sc_km_vals, et_vals, spacecraft, dsn, nhat_p,
-        kernels=None):
+        ref='J2000', kernels=None):
     """
     This calculates the closest approach of the spacecraft signal to the
     planet defined as a sphere.
@@ -232,7 +235,7 @@ def calc_impact_radius_km(R_sc_km_vals, et_vals, spacecraft, dsn, nhat_p,
         # Compute spacecraft to dsn position vector in J2000 frame,
         #   at et+ltime
         targ = dsn
-        ref = 'J2000'
+        #ref = 'J2000'
         abcorr = 'XCN'
         obs = spacecraft
         starg1, ltime1 = spice.spkpos(targ, et, ref, abcorr, obs)
@@ -250,7 +253,7 @@ def calc_impact_radius_km(R_sc_km_vals, et_vals, spacecraft, dsn, nhat_p,
         R_imp_km_vals[n] = distance
     return R_imp_km_vals
 
-def calc_phi_deg(et_vals, rho_vec_km_vals, spacecraft, dsn, nhat_p,
+def calc_phi_deg(et_vals, rho_vec_km_vals, spacecraft, dsn, nhat_p, ref='J2000',
         kernels=None):
     """
     This calculates observed ring azimuth and ring longitude.
@@ -289,7 +292,7 @@ def calc_phi_deg(et_vals, rho_vec_km_vals, spacecraft, dsn, nhat_p,
 
         # Compute DSN to spacecraft position vector with light correction
         targ = dsn
-        ref = 'J2000'
+        #ref = 'J2000'
         abcorr = 'CN'
         obs = spacecraft
         starg, ltime = spice.spkpos(targ, et, ref, abcorr, obs)
@@ -325,7 +328,8 @@ def calc_phi_deg(et_vals, rho_vec_km_vals, spacecraft, dsn, nhat_p,
 
     return phi_rl_deg_vals, phi_ora_deg_vals
 
-def calc_rho_km(et_vals, planet, spacecraft, dsn, kernels=None):
+def calc_rho_km(et_vals, planet, spacecraft, dsn, kernels=None, 
+        ring_frame=None):
     """
     Calculate the distance between Saturn center to ring intercept point.
 
@@ -344,15 +348,15 @@ def calc_rho_km(et_vals, planet, spacecraft, dsn, kernels=None):
 
     # Calculate rho vector
     rho_vec_km, t_ret_et = calc_rho_vec_km(et_vals, planet, spacecraft, dsn,
-            kernels=kernels)
+            kernels=kernels, ring_frame=ring_frame)
 
     # Compute magnitude of each vector
     rho_km_vals = [spice.vnorm(vec) for vec in rho_vec_km]
 
     return np.asarray(rho_km_vals)
 
-def calc_rho_vec_km(et_vals, planet, spacecraft, dsn, kernels=None,
-        verbose=False):
+def calc_rho_vec_km(et_vals, planet, spacecraft, dsn, ref='J2000', kernels=None,
+        verbose=False, ring_frame=None):
     """
     This calculates the position vector of the ring intercept point from the
     planet center in J2000 frame.
@@ -403,13 +407,19 @@ def calc_rho_vec_km(et_vals, planet, spacecraft, dsn, kernels=None,
     name = planet_naif_radii
     dvals = new_radii
     spice.pdpool(name, dvals)
+    if ring_frame is None:
+        iau_planet = 'IAU_'+planet.upper()
+        frame = iau_planet
+    else:
+        frame = ring_frame
+
 
     for n in range(npts):
         et = et_vals[n]
 
         # Compute spacecraft position relative to dsn
         targ = spacecraft
-        ref = 'J2000'
+        #ref = 'J2000'
         abcorr = 'CN'
         obs = dsn
         starg, ltime, = spice.spkpos(targ, et, ref, abcorr, obs)
@@ -418,17 +428,17 @@ def calc_rho_vec_km(et_vals, planet, spacecraft, dsn, kernels=None,
 
         # Compute intersection of vector with ring plane and time epoch
         #   of intersection in ET secs (ring event time)
-        iau_planet = 'IAU_'+planet.upper()
 
         method = 'Ellipsoid'
         target = planet
-        fixref = iau_planet
+        #fixref = iau_planet
+        fixref = frame
         abcorr = 'CN'
         obsrvr = dsn
-        dref = 'J2000'
+        #dref = 'J2000'
+        dref = ref
         dvec = nhat_sc2dsn
-        spoint, trgepc, srfvec = spice.sincpt(method, target, et,
-                fixref, abcorr, obsrvr, dref, dvec)
+        spoint, trgepc, srfvec = spice.sincpt(method, target, et, fixref, abcorr, obsrvr, dref, dvec)
 
         t_ret_et_vals[n] = trgepc
 
@@ -481,7 +491,8 @@ def calc_rip_velocity(rho_km_vals, phi_rl_deg_vals, dt):
     phi_rl_dot_kms_vals = rho_km_vals * np.gradient(phi_rl_rad_vals, dt)
     return rho_dot_kms_vals, phi_rl_dot_kms_vals
 
-def calc_sc_state(et_vals, spacecraft, planet, dsn, nhat_p, kernels=None):
+def calc_sc_state(et_vals, spacecraft, planet, dsn, nhat_p, ref='J2000',
+        kernels=None):
     """
     This calculates spacecraft state vector in a planetocentric frame.
 
@@ -522,7 +533,7 @@ def calc_sc_state(et_vals, spacecraft, planet, dsn, nhat_p, kernels=None):
         # Compute planet to spacecraft state vector in J2000 frame,
         #   with no light-time correction
         targ = spacecraft
-        ref = 'J2000'
+        #ref = 'J2000'
         abcorr = 'NONE'
         obs = planet
         starg0, ltime0 = spice.spkezr(targ, et, ref, abcorr, obs)
@@ -630,8 +641,7 @@ def find_gaps(t_ret_spm_vals, year, doy, rho_km_vals, phi_rl_deg_vals,
         spice.furnsh(kernels)
 
     # import tabulated info on gap geometry/orbits
-    gaps = np.loadtxt('../tables/gap_orbital_elements.txt',
-            skiprows=1, delimiter=',',usecols=(1,2,3,4))
+    gaps = np.loadtxt(gaps_file, skiprows=1, delimiter=',',usecols=(1,2,3,4))
 
     # places to store results
     gap_bounds = []
@@ -1112,7 +1122,8 @@ def get_pole(et, planet, kernels=None):
 
     return nhat_p
 
-def xform_j2k_to_pcf(vec, et, spacecraft, dsn, nhat_p, kernels=None):
+def xform_j2k_to_pcf(vec, et, spacecraft, dsn, nhat_p, ref='J2000', 
+        kernels=None):
     """
     Purpose
         Transform vector in J2000 frame to planet ring plane frame.
@@ -1136,7 +1147,7 @@ def xform_j2k_to_pcf(vec, et, spacecraft, dsn, nhat_p, kernels=None):
 
     # Compute Cassini (at et) to dsn position vector (at et+ltime)
     targ = dsn
-    ref = 'J2000'
+    #ref = 'J2000'
     abcorr = 'XCN'
     obs = spacecraft
     starg1, ltime1 = spice.spkpos(targ, et, ref, abcorr, obs)

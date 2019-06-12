@@ -49,22 +49,16 @@ if dlp_inst_ing is not None:
             psitype=args.psitype, wtype=args.wtype, fwd=args.fwd,
             norm=args.norm, bfac=args.bfac, write_file=args.write_file,
             verbose=args.verbose)
-    sum1 = time.time()
     rss.tools.plot_summary_doc_v2(geo_inst, cal_inst, dlp_inst_ing,
                     tau_inst)
-    sum2 = time.time()
-    print('ing summary time: ', str(sum2-sum1))
 if dlp_inst_egr is not None:
     tau_inst = rss.diffrec.DiffractionCorrection(dlp_inst_egr, args.res_km,
             rng=args.inversion_range, res_factor=args.res_factor,
             psitype=args.psitype, wtype=args.wtype, fwd=args.fwd,
             norm=args.norm, bfac=args.bfac, write_file=args.write_file,
             verbose=args.verbose)
-    sum1 = time.time()
     rss.tools.plot_summary_doc_v2(geo_inst, cal_inst, dlp_inst_egr,
                     tau_inst)
-    sum2 = time.time()
-    print('egr summary time: ', str(sum2-sum1))
 if args.plot_feature:
     # Plot Huygens ringlet
     #   first row of three: uncorrected optical depth, power, and phase

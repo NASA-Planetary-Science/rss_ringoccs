@@ -12,7 +12,7 @@ from scipy.special import lambertw, iv
 from rss_ringoccs.tools import error_check
 try:
     from rss_ringoccs._ufuncs import _window_functions
-except (ImportError, ModuleNotFoundError):
+except:
     print(
         """
             Error: rss_ringoccs.diffrec.window_functions

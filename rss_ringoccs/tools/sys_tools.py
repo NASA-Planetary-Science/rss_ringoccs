@@ -88,7 +88,7 @@ def latex_summary_doc(pdffil, res_km, outfilename):
     fname = "tools.sys_tools.latex_summary_doc"
     error_check.check_type(pdffil, str, "pdffil", fname)
     error_check.check_type(outfilename, str, "outfilename", fname)
-    res = error_check.check_type_and_convert(res, float, "res", fname)
+    res = error_check.check_type_and_convert(res_km, float, "res_km", fname)
 
     res = "%sM" % str(int(res_km*1000.0))
 

@@ -7,7 +7,6 @@ Purpose: Functions for getting PDS3 label file information and writing PDS3
 
 '''
 import numpy as np
-import pdb
 import time
 
 def pds3_write_series_lbl(str_lbl, out_lbl_file):
@@ -428,7 +427,7 @@ def get_sampling_interval(sampling_param):
     if dr_start > dr_end_bounds[0] and dr_start < dr_end_bounds[1]:
         dr = dr_start
     else:
-        raise ValueError('WARNING: sampling interval is not constant!\n\tdr_start, dr_end = ', dr_start, dr_end)
+        print('WARNING (pds3_write_series_v2): Sampling interval is not constant!\n\tdr_start, dr_end = ', dr_start, dr_end, ' Using dr_start.')
 
     return str(dr)
 

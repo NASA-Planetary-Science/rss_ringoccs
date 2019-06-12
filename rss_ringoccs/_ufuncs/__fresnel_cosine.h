@@ -10,13 +10,13 @@
  * experiment with the various known algorithms.                               *
  *******************************************************************************
  * We define the Fresnel Cosine Integrals as follows:                          *
- *           x                                                                 *
- *           -                                                                 *
- *          | |                                                                *
- * C(x) =   |   cos(t^2) dt                                                    *
- *        | |                                                                  *
- *         -                                                                   *
- *         0                                                                   *
+ *                x                                                            *
+ *                -                                                            *
+ *               | |                                                           *
+ *      C(x) =   |   cos(t^2) dt                                               *
+ *             | |                                                             *
+ *              -                                                              *
+ *              0                                                              *
  *******************************************************************************
  * It is very common for a pi/2 to be placed inside the cosine term,           *
  * and thus in translating one would need to scale x by sqrt(2/pi) and scale   *

@@ -8,12 +8,12 @@ import warnings
 warnings.filterwarnings("ignore")
 import numpy as np
 import matplotlib
+matplotlib.rcParams['agg.path.chunksize'] = 10000
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from scipy.signal import savgol_filter
 from .sys_tools import latex_summary_doc
 from .write_output_files import construct_filepath
-import pdb
 import time
 import spiceypy as spice
 

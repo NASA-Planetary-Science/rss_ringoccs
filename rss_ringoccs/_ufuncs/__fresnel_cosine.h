@@ -1,28 +1,28 @@
 /*******************************************************************************
  *                             Fresnel Cosine                                  *
  *******************************************************************************
- * This C program contains several algorithms for the computation of the       *
- * Fresnel Cosine integral. This is meant to test the accuracy and efficiency  *
- * of the various algorithms. This file is not included in the setup.py file,  *
- * and thus will not be compiled. The fresnel sine and cosine functions that   *
- * are used in the _special_functions.c file are the functions that had the    *
- * best combination of speed and accuracy. This file is kept so that users may *
- * experiment with the various known algorithms.                               *
+ *  This C program contains several algorithms for the computation of the      *
+ *  Fresnel Cosine integral. This is meant to test the accuracy and efficiency *
+ *  of the various algorithms. This file is not included in the setup.py file, *
+ *  and thus will not be compiled. The fresnel sine and cosine functions that  *
+ *  are used in the _special_functions.c file are the functions that had the   *
+ *  best combination of speed and accuracy. This file is kept so that users    *
+ *  may experiment with the various known algorithms.                          *
  *******************************************************************************
- * We define the Fresnel Cosine Integrals as follows:                          *
- *                x                                                            *
- *                -                                                            *
- *               | |                                                           *
- *      C(x) =   |   cos(t^2) dt                                               *
- *             | |                                                             *
- *              -                                                              *
- *              0                                                              *
+ *  We define the Fresnel Cosine Integrals as follows:                         *
+ *                 x                                                           *
+ *                 -                                                           *
+ *                | |                                                          *
+ *       C(x) =   |   cos(t^2) dt                                              *
+ *              | |                                                            *
+ *               -                                                             *
+ *               0                                                             *
  *******************************************************************************
- * It is very common for a pi/2 to be placed inside the cosine term,           *
- * and thus in translating one would need to scale x by sqrt(2/pi) and scale   *
- * the results by sqrt(pi/2). Several of the algorithms implemented compute    *
- * the latter definition. We have taken this into account in our functions     *
- * and return the values corresponding to the equations above.                 *
+ *  It is very common for a pi/2 to be placed inside the cosine term,          *
+ *  and thus in translating one would need to scale x by sqrt(2/pi) and scale  *
+ *  the results by sqrt(pi/2). Several of the algorithms implemented compute   *
+ *  the latter definition. We have taken this into account in our functions    *
+ *  and return the values corresponding to the equations above.                *
  *******************************************************************************
  *                              DEFINED FUNCTIONS                              *
  *******************************************************************************

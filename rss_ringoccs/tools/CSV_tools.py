@@ -682,20 +682,10 @@ class ExtractCSVData(object):
 
         del crange, geo_dat, cal_dat, dlp_dat
 
-        rfin = int(np.max((np.max(geo_rho)-self.rho_km_vals>=0.0).nonzero()))
-        rstart = int(np.min((self.rho_km_vals-np.min(geo_rho)>=0.0).nonzero()))
 
 
         raw_mu = np.sin(np.abs(self.B_rad_vals))
         self.p_norm_vals = np.exp(-self.raw_tau_vals/raw_mu)
-        self.rho_corr_timing_km_vals = self.rho_corr_timing_km_vals[rstart:rfin+1]
-        self.rho_corr_pole_km_vals = self.rho_corr_pole_km_vals[rstart:rfin+1]
-        self.t_ret_spm_vals = self.t_ret_spm_vals[rstart:rfin+1]
-        self.t_set_spm_vals = self.t_set_spm_vals[rstart:rfin+1]
-        self.t_oet_spm_vals = self.t_oet_spm_vals[rstart:rfin+1]
-        self.phase_rad_vals = self.phase_rad_vals[rstart:rfin+1]
-        self.rho_km_vals = self.rho_km_vals[rstart:rfin+1]
-        self.p_norm_vals = self.p_norm_vals[rstart:rfin+1]
         
         self.f_sky_hz_vals = np.interp(self.t_oet_spm_vals, cal_spm,
                 self.f_sky_hz_vals)
@@ -703,7 +693,7 @@ class ExtractCSVData(object):
         self.rho_dot_kms_vals = np.interp(self.rho_km_vals, geo_rho,
                 self.rho_dot_kms_vals)
 
-        del rstart, rfin, raw_mu, geo_rho
+        del raw_mu, geo_rho
 
         if (not isinstance(tau, type(None))):
             tau_dat = get_tau(self.tau, verbose=verbose, use_deprecate=use_deprecate)

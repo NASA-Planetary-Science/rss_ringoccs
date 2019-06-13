@@ -685,11 +685,6 @@ class ExtractCSVData(object):
         rfin = int(np.max((np.max(geo_rho)-self.rho_km_vals>=0.0).nonzero()))
         rstart = int(np.min((self.rho_km_vals-np.min(geo_rho)>=0.0).nonzero()))
 
-        self.D_km_vals = np.interp(self.rho_km_vals, geo_rho, self.D_km_vals)
-        self.rho_dot_kms_vals = np.interp(self.rho_km_vals, geo_rho,
-                self.rho_dot_kms_vals)
-
-        del geo_rho
 
         raw_mu = np.sin(np.abs(self.B_rad_vals))
         self.p_norm_vals = np.exp(-self.raw_tau_vals/raw_mu)
@@ -704,8 +699,11 @@ class ExtractCSVData(object):
         
         self.f_sky_hz_vals = np.interp(self.t_oet_spm_vals, cal_spm,
                 self.f_sky_hz_vals)
+        self.D_km_vals = np.interp(self.rho_km_vals, geo_rho, self.D_km_vals)
+        self.rho_dot_kms_vals = np.interp(self.rho_km_vals, geo_rho,
+                self.rho_dot_kms_vals)
 
-        del rstart, rfin, raw_mu
+        del rstart, rfin, raw_mu, geo_rho
 
         if (not isinstance(tau, type(None))):
             tau_dat = get_tau(self.tau, verbose=verbose, use_deprecate=use_deprecate)

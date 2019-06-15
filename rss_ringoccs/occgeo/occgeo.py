@@ -119,7 +119,7 @@ class Geometry(object):
 
 
         self.verbose = verbose
-        self.add_info = []
+        self.add_info = {}
 
         if verbose:
             print('Calculating occultation geometry...')
@@ -189,18 +189,20 @@ class Geometry(object):
             check_posz = np.logical_and(rz1>0, rz2>0)
             check_negz = np.logical_and(rz1<0, rz2<0)
             mask = ~(np.logical_or(check_posz, check_negz))
+            if (mask==False).all():
+                raise ValueError('No ring intercepts found!')
+
             t1 = t_oet_spm_vals[~mask][0]
             t2 = t_oet_spm_vals[~mask][-1]
             
             if (np.logical_or(check_posz, check_negz)).any(): # is True:
-                mask = ~(np.logical_or(check_posz, check_negz))
                 t_oet_spm_vals = t_oet_spm_vals[mask]
                 t_oet_et_vals = t_oet_et_vals[mask]
                 inds = np.argwhere(mask==False)
                 if verbose:
-                    print('\t\tRemoving false intercepts, inds=',inds)
-                #rho_vec_vals = rho_vec_vals[mask]
-                #t_ret_et_vals = t_ret_et_vals[mask]
+                    print('\tRemoving false intercept points: '
+                        + 'Indices ' + str(inds[0]) + ' to ' + str(inds[-1])
+                        + ',\n\t\tor OET from ' + str(t1) + ' to ' + str(t2))
                 t_set_et_vals = t_set_et_vals[mask]
                 rx_km_vals = rx_km_vals[mask]
                 ry_km_vals = ry_km_vals[mask]
@@ -209,9 +211,10 @@ class Geometry(object):
                 vy_kms_vals = vy_kms_vals[mask]
                 vz_kms_vals = vz_kms_vals[mask]
                 self.rev_info['PER'] = ''
-                self.add_info.append('Found false intercept points; removed '
-                        + 'indices ' + str(inds[0]) + ' to ' + str(inds[-1])
-                        + ' , or OET from' + str(t1) + ' to ' + str(t2))
+                self.add_info['False intercept points'] = (
+                        'Removed indices ' + str(inds[0]) + ' to ' 
+                        + str(inds[-1]) + ', or OET from ' + str(t1) 
+                        + ' to ' + str(t2) + ' SPM')
 
         # Calculate Saturn center to ring intercept vector
         rho_vec_vals, t_ret_et_vals = cog.calc_rho_vec_km(t_oet_et_vals, planet,
@@ -355,7 +358,8 @@ class Geometry(object):
                 "ring_frame": ring_frame,
                 "nhat_p": nhat_p,
                 }
-        if self.add_info == []:
+
+        if self.add_info == {}:
             self.add_info = None
 
         self.history = write_history_dict(input_vars, input_kwds, __file__,
@@ -448,23 +452,20 @@ class Geometry(object):
 
         ing_blocked = [x for x in t_oet_ing if x in atmos_blocked_spm]
         egr_blocked = [x for x in t_oet_egr if x in atmos_blocked_spm]
+                #self.add_info['False intercept points'] = (
+                #        'indices ' + str(inds[0]) + ' to ' + str(inds[-1])
+                #        + ', or OET from ' + str(t1) + ' to ' + str(t2))
 
         if len(ing_blocked) == n_ing:
             prof_dir = '"EGRESS"'
 
             # Remove false chord portions
-            if self.verbose:
-                print('\tRemoving portion blocked by atmosphere...')
-                self.add_info.append('Portion of event blocked by atmosphere; '
-                        + 'removed indices ')
             self.__remove_atmos_values()
 
         elif len(egr_blocked) == n_egr:
             prof_dir = '"INGRESS"'
 
             # Remove falsechord portions
-            if self.verbose:
-                print('\tRemoving portion blocked by atmosphere...')
             self.__remove_atmos_values()
         else:
             prof_dir = '"BOTH"'
@@ -492,7 +493,6 @@ class Geometry(object):
         ind2 = np.argwhere(
                 self.t_oet_spm_vals == max(self.atmos_occ_spm_vals))[0][0]
 
-        rind = np.arange(ind1, ind2+1, step=1)
 
         # Make sure ind2 > ind1
         if ind1 > ind2:
@@ -501,6 +501,15 @@ class Geometry(object):
 
             ind1 = ind2t
             ind2 = ind1t
+
+        rind = np.arange(ind1, ind2+1, step=1)
+
+        if self.verbose:
+            print('\tRemoving portion blocked by atmosphere...')
+        self.add_info['Blocked by atmosphere'] = (
+                'Removed indices ' + str(ind1) + ' to ' + str(ind2)
+                + ', or OET from ' + str(self.t_oet_spm_vals[ind1])
+                + ' to ' + str(self.t_oet_spm_vals[ind2]) + ' SPM')
 
 
         for attr, value in self.__dict__.items():
@@ -526,7 +535,6 @@ class Geometry(object):
 
         if len(ind) > 1:
             print('WARNING! ring radius changes direction twice!')
-            pdb.set_trace()
         elif len(ind) == 0:
             ind = None
         else:

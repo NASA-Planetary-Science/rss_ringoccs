@@ -474,8 +474,8 @@ def plot_geo_overview(pdf, geo_inst, tau_inst):
 
 def plot_cal_overview(pdf, cal_inst, dlp_inst):
     t_oet_spm  = cal_inst.t_oet_spm_vals
-    F_sky_resid_fit= np.interp(dlp_inst.t_oet_spm_vals, t_oet_spm, cal_inst.f_sky_resid_fit_vals)
-    F_sky_resid = np.interp(t_oet_spm, cal_inst.f_spm, cal_inst.f_sky_resid)
+    F_sky_resid_fit= np.interp(dlp_inst.t_oet_spm_vals, t_oet_spm, cal_inst.f_offset_fit_vals)
+    F_sky_resid = np.interp(t_oet_spm, cal_inst.f_spm, cal_inst.f_offset)
     F_sky_hz = cal_inst.f_sky_hz_vals
     P_free = cal_inst.p_free_vals
 

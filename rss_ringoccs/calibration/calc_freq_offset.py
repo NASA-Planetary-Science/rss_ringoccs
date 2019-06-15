@@ -1,29 +1,38 @@
+"""
+
+:Purpose:
+    Class for computing the frequency corresponding to the maximum
+    power in the FFT power spectrum
+
+"""
+
 import numpy as np
 import sys
 
-"""
-Purpose:
-    Class for computing the frequency corresponding to the maximum
-    power in the FFT power spectrum
-"""
 class calc_freq_offset(object):
     """
-        Purpose:
-            Calls functions to sample raw signal at regular intervals
-            using a window of width ``dt_freq``
+    :Purpose:
+        Calls functions to sample raw signal at regular intervals
+        using a window of width ``dt_freq``
 
-        Arguments:
-            :rsr_inst (*object*): Object instance of the RSRReader
-                        class
-            :f_spm (*np.ndarray*): signal window centers in SPM for which
-                            the offset frequencies were computed
-            :f_offset (*np.ndarray*): offset frequencies computed over the
-                            occultation sampled once every 10 seconds with
-                            signal window of width ``dt_freq``
+    Arguments
+        :rsr_inst (*object*): Object instance of the RSRReader class
+        :spm_min (*float*): Minimum observed event time for sampling
+        :spm_max (*float): Maximum observed event time for sampling
 
-        Keyword Arguments:
-            :dt_freq (*float*): half the width of the FFT window,
-                        default is 64 sec
+    Keyword Arguments
+        :dt_freq (*float*): half the width of the FFT window
+
+    Attributes
+        :spm_vals (*np.ndarray*): Observed event time at full sampling
+        :IQ_m (*np.ndarray*): Uncorrected real and imaginary components of signal
+        :dt (*float*): Raw time sampling from spm_vals
+        :dt_freq (*float*): half the width of the FFT window
+        :spm_min (*float*): Minimum time for sampling
+        :spm_max (*float*): Maximum time for sampling
+        :f_spm (*np.ndarray*): Observed event time for frequency offset
+        :f_offset (*np.ndarray*): Frequency offset, or frequency at max power
+
     """
     def __init__(self,rsr_inst,spm_min,spm_max,dt_freq=2.):
 
@@ -74,13 +83,12 @@ class calc_freq_offset(object):
 
     def __find_peak_freq(self,time,IQ,df=0.001,hwid=0.2):
         """
-        Purpose:
-            Computes continuous FFT, finds frequency at max power
+        Computes continuous FFT, finds frequency at max power
 
-        Arguments:
+        Arguments
             :IQ (*np.ndarray*): IQ_m vals within the current window
 
-        Returns:
+        Returns
             :f_max (*float*): frequency at max power
         """
         # Compute and apply Hamming window

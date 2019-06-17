@@ -1,24 +1,27 @@
 /*******************************************************************************
- *                          Difraction Functions                               *
+ *                          Diffraction Functions                              *
  *******************************************************************************
  *  Purpose:                                                                   *
  *      This file contains functions used for computing the Fresnel Inverse    *
  *      Transform on a set of diffraction limited data. There are several      *
- *      Methods of performing this:                                            *
+ *      Methods for performing this:                                           *
  *          Fresnel Quadratic Approximations:                                  *
  *              Classic quadratic approximation that is used in Fourier Optics.*
  *          Legendre Cubic Expansion:                                          *
- *              Approximation of the Fresnel kernel by a quartic polynomial    *
- *              using the Legendre Polynomials.                                *
+ *              Approximates Fresnel kernel by a cubic using                   *
+ *              Legendre Polynomials.                                          *
  *          Legendre Quartic Expansion:                                        *
- *              Approximation of the Fresnel kernel by a quartic polynomial    *
- *              using the Legendre Polynomials.                                *
+ *              Approximates Fresnel kernel by a quartic using                 *
+ *              Legendre Polynomials.                                          *
  *          Legendre Sextic Expansion:                                         *
- *              Approximation of the Fresnel kernel by a sextic polynomial     *
- *              using the Legendre Polynomials.                                *
+ *              Approximates Fresnel kernel by a sextic using                  *
+ *              Legendre Polynomials.                                          *
  *          Legendre Octic Expansion:                                          *
- *              Approximation of the Fresnel kernel by a octic polynomial      *
- *              using the Legendre Polynomials.                                *
+ *              Approximates Fresnel kernel by an octic using                  *
+ *              Legendre Polynomials.                                          *
+ *          Newton-Raphson Method:                                             *
+ *              Computes the stationary value of the Fresnel kernel            *
+ *              by iteratively applying the Newton-Raphson method.             *
  *******************************************************************************
  *  Variables:                                                                 *
  *     A_0         (Double):                                                   *
@@ -31,12 +34,16 @@
  *         The coefficient of the x^5 term in the expansion for psi.           *
  *     A_4         (Double):                                                   *
  *         The coefficient of the x^6 term in the expansion for psi.           *
+ *     A_5         (Double):                                                   *
+ *         The coefficient of the x^7 term in the expansion for psi.           *
+ *     A_6         (Double):                                                   *
+ *         The coefficient of the x^8 term in the expansion for psi.           *
  *     dx          (Double):                                                   *
  *         Spacing between two consecutive ring intercept points, km.          *
  *     kd          (Double):                                                   *
  *         The wavenumber, k, weighted by the spacecraft-ring distance, D.     *
  *     n_pts       (Long):                                                     *
- *         Half the number of points in the window, rounded down.              *
+ *         Number of points in a window functions.                             *
  *     rcpr_D      (Double):                                                   *
  *         1/D, where D is the distant from the spacecraft to the ring         *
  *         intercept point, in kilometers.                                     *
@@ -70,7 +77,7 @@
  *  psi is the Fresnel Kernel, and exp is simply the exponential function.     *
  *******************************************************************************
  *  The Normalization Scheme:                                                  *
- *      As the resolution get's too high, say 10 km or greater, then window    *
+ *      As the resolution gets too high, say 10 km or greater, then window     *
  *      width quickly shrinks to zero. Thus the integral will be approximately *
  *      zero. To account for this, the option to normalize the integral by the *
  *      window width is offered. The normalization is defined as follows:      *
@@ -137,6 +144,9 @@
 /*  Various coefficients and constants defined here.                          */
 #include "__math_constants.h"
 
+/*  Functions for computing the Fresnel Kernel and Newton's Method. */
+#include "__fresnel_kernel.h"
+
 /*******************************************************************************
  *------------------------------DEFINE C FUNCTIONS-----------------------------*
  *  These are functions written in pure C without the use of the Numpy-C API.  *
@@ -174,6 +184,9 @@ complex double _fresnel_transform(double* x_arr, char* T_in, double* w_func,
     /***************************************************************************
      *  Function:                                                              *
      *      _fresnel_transform                                                 *
+     *  Inputs:                                                                *
+     *      x_arr   (Pointer to Double):                                       *
+     *          The square of the ring radii (In kilometers squared).          *
      *  Outputs:                                                               *
      *      T_out       (Complex Double):                                      *
      *          The diffraction corrected profile.                             *
@@ -188,9 +201,10 @@ complex double _fresnel_transform(double* x_arr, char* T_in, double* w_func,
     double x, rcpr_F, rcpr_F2;
     complex double T_out, exp_negative_ix;
 
-    /*  Initialize the T_out variable to zero, so we can loop over later. */
+    /*  Initialize the T_out variable to zero, so we can loop over later.     */
     T_out = 0.0;
 
+    /*  j is used to index the elements of T_in over the window.              */
     j = -n_pts;
 
     /*  Division is more expensive than multiplication, so store the          *
@@ -198,7 +212,7 @@ complex double _fresnel_transform(double* x_arr, char* T_in, double* w_func,
     rcpr_F  = 1.0/F;
     rcpr_F2 = rcpr_F*rcpr_F;
 
-    /*  Use a Riemann Sum to approximation the Fresnel Inverse Integral.  */
+    /*  Use a Riemann Sum to approximate the Fresnel Inverse Integral.        */
     for (i = 0; i<n_pts; ++i){
         x = x_arr[i]*rcpr_F2;
 
@@ -206,17 +220,18 @@ complex double _fresnel_transform(double* x_arr, char* T_in, double* w_func,
         exp_negative_ix = (cos(x) - _Complex_I*sin(x)) * w_func[i];
 
         /*  Take advantage of the symmetry of the quadratic approximation.    *
-         *  This cuts the number of computation roughly in half.              */  
+         *  This cuts the number of computations roughly in half.             */  
         T_out += exp_negative_ix * (*(complex double *)(T_in + j*T_in_steps) +
                                     *(complex double *)(T_in - j*T_in_steps));
         j += 1;
     }
-        /*  Add the central point in the Riemann sum. This is center of the   *
-         *  window function, that is where w_func = 1.                        */
-        T_out += *(complex double *)T_in;
 
-        /*  Multiply result by the coefficient found in the Fresnel inverse.  */
-        T_out *= (0.5+0.5*_Complex_I)*dx*rcpr_F;
+    /*  Add the central point in the Riemann sum. This is center of the       *
+     *  window function, that is where w_func = 1.                            */
+    T_out += *(complex double *)T_in;
+
+    /*  Multiply result by the coefficient found in the Fresnel inverse.      */
+    T_out *= (0.5+0.5*_Complex_I)*dx*rcpr_F;
     return T_out;
 }
 
@@ -242,10 +257,11 @@ complex double _fresnel_transform_norm(double* x_arr, char* T_in,
     double x, rcpr_F, rcpr_F2;
     complex double T_out, exp_negative_ix, norm;
 
-    /*  Initialize T_out and norm to zero, so we can loop over later. */
+    /*  Initialize T_out and norm to zero, so we can loop over later.         */
     T_out  = 0.0;
     norm   = 0.0;
 
+    /*  j is used to index the elements of T_in over the window.              */
     j = -n_pts;
 
     /*  Division is more expensive than multiplication, so store the          *
@@ -253,7 +269,7 @@ complex double _fresnel_transform_norm(double* x_arr, char* T_in,
     rcpr_F  = 1.0/F;
     rcpr_F2 = rcpr_F*rcpr_F;
 
-    /*  Use a Riemann Sum to approximation the Fresnel Inverse Integral.      */
+    /*  Use a Riemann Sum to approximate the Fresnel Inverse Integral.        */
     for (i = 0; i<n_pts; ++i){
         x = x_arr[i]*rcpr_F2;
 
@@ -262,23 +278,26 @@ complex double _fresnel_transform_norm(double* x_arr, char* T_in,
 
         /*  Compute denominator portion of norm using a Riemann Sum.          */
         norm  += 2.0*exp_negative_ix;
+
+        /*  Compute actual Fresnel Inverse (As a part of the Riemann Sum).    */
         T_out += exp_negative_ix * (*(complex double *)(T_in + j*T_in_steps) +
                                     *(complex double *)(T_in - j*T_in_steps));
         j += 1;
     }
-        /*  Add the central point in the Riemann sum. This is center of the   *
-         *  window function, that is where w_func = 1.                        */
-        T_out += *(complex double *)T_in;
-        norm  += 1.0;
 
-        /*  The integral in the numerator of norm evaluates to F sqrt(2). Use *
-         *  this in the calculation of the normalization. The cabs function   *
-         *  computes the absolute value of complex number.                    */
-        norm = SQRT_2 / cabs(norm);
+    /*  Add the central point in the Riemann sum. This is center of the       *
+     *  window function, that is where w_func = 1.                            */
+    T_out += *(complex double *)T_in;
+    norm  += 1.0;
 
-        /*  Multiply result by the coefficient found in the Fresnel inverse.  *
-         *  The 1/F term is omitted, since the F in the norm cancels this.    */
-        T_out *= (0.5+0.5*_Complex_I)*norm;
+    /*  The integral in the numerator of norm evaluates to F sqrt(2). Use     *
+     *  this in the calculation of the normalization. The cabs function       *
+     *  computes the absolute value of complex number.                        */
+    norm = SQRT_2 / cabs(norm);
+
+    /*  Multiply result by the coefficient found in the Fresnel inverse.      *
+     *  The 1/F term is omitted, since the F in the norm cancels this.        */
+    T_out *= (0.5+0.5*_Complex_I)*norm;
     return T_out;
 }
 
@@ -296,7 +315,7 @@ complex double _fresnel_cubic(double* x_arr, char* T_in, double* w_func,
      *  Purpose:                                                               *
      *      This function uses Legendre polynomials to approximate the Fresnel *
      *      kernel up to a cubic expansion, and then performs diffraction      *
-     *      correction on diffracted data using this. Mathematics definitions  *
+     *      correction on diffracted data using this. Mathematical definitions *
      *      are given in the comment at the start of this file.                *
      **************************************************************************/
     /*  Declare all necessary variables.   */
@@ -307,9 +326,10 @@ complex double _fresnel_cubic(double* x_arr, char* T_in, double* w_func,
     /*  Initialize T_out to zero so we can loop over later.                   */
     T_out = 0.0;
 
+    /*  j is used to index the elements of T_in over the window.              */
     j = -n_pts;
 
-    /*  Use a Riemann Sum to approximation the Fresnel Inverse Integral.      */
+    /*  Use a Riemann Sum to approximate the Fresnel Inverse Integral.        */
     for (i = 0; i<n_pts; ++i){
         x   = x_arr[i]*rcpr_D;
         x2  = x*x;
@@ -332,12 +352,12 @@ complex double _fresnel_cubic(double* x_arr, char* T_in, double* w_func,
         j += 1;
     }
 
-        /*  Add the central point in the Riemann sum. This is center of the   *
-         *  window function, that is where w_func = 1.                        */
-        T_out += *(complex double *)T_in;
+    /*  Add the central point in the Riemann sum. This is center of the       *
+     *  window function, that is where w_func = 1.                            */
+    T_out += *(complex double *)T_in;
 
-        /*  Multiply result by the coefficient found in the Fresnel inverse.  */
-        T_out *= (0.5 + 0.5*_Complex_I) * dx * rcpr_F;
+    /*  Multiply result by the coefficient found in the Fresnel inverse.      */
+    T_out *= (0.5 + 0.5*_Complex_I) * dx * rcpr_F;
     return T_out;
 }
 
@@ -368,9 +388,10 @@ complex double _fresnel_cubic_norm(double* x_arr, char* T_in, double* w_func,
     T_out = 0.0;
     norm  = 0.0;
 
+    /*  j is used to index the elements of T_in over the window.              */
     j = -n_pts;
 
-    /*  Use a Riemann Sum to approximation the Fresnel Inverse Integral.      */
+    /*  Use a Riemann Sum to approximate the Fresnel Inverse Integral.        */
     for (i = 0; i<n_pts; ++i){
         x   = x_arr[i]*rcpr_D;
         x2  = x*x;
@@ -396,18 +417,18 @@ complex double _fresnel_cubic_norm(double* x_arr, char* T_in, double* w_func,
         j += 1;
     }
 
-        /*  Add the central point in the Riemann sum. This is center of the   *
-         *  window function, that is where w_func = 1.                        */
-        T_out += *(complex double *)T_in;
-        norm  += 1.0;
+    /*  Add the central point in the Riemann sum. This is center of the       *
+     *  window function, that is where w_func = 1.                            */
+    T_out += *(complex double *)T_in;
+    norm  += 1.0;
 
-        /*  The integral in the numerator of norm evaluates to F sqrt(2). Use *
-         *  this in the calculation of the normalization. The cabs function   *
-         *  computes the absolute value of complex number.                    */
-        norm = SQRT_2 / cabs(norm);
+    /*  The integral in the numerator of norm evaluates to F sqrt(2). Use     *
+     *  this in the calculation of the normalization. The cabs function       *
+     *  computes the absolute value of complex number.                        */
+    norm = SQRT_2 / cabs(norm);
 
-        /*  Multiply result by the coefficient found in the Fresnel inverse.  */
-        T_out *= (0.5 + 0.5*_Complex_I) * norm;
+    /*  Multiply result by the coefficient found in the Fresnel inverse.      */
+    T_out *= (0.5 + 0.5*_Complex_I) * norm;
     return T_out;
 }
 
@@ -425,7 +446,7 @@ complex double _fresnel_quartic(double* x_arr, char* T_in, double* w_func,
      *  Purpose:                                                               *
      *      This function uses Legendre polynomials to approximate the Fresnel *
      *      kernel up to a quartic expansion, and then performs diffraction    *
-     *      correction on diffracted data using this. Mathematics definitions  *
+     *      correction on diffracted data using this. Mathematical definitions *
      *      are given in the comment at the start of this file.                *
      **************************************************************************/
     /*  Declare all necessary variables.   */
@@ -436,9 +457,10 @@ complex double _fresnel_quartic(double* x_arr, char* T_in, double* w_func,
     /*  Initialize T_out to zero so we can loop over later.                   */
     T_out = 0.0;
 
+    /*  j is used to index the elements of T_in over the window.              */
     j = -n_pts;
 
-    /*  Use a Riemann Sum to approximation the Fresnel Inverse Integral.      */
+    /*  Use a Riemann Sum to approximate the Fresnel Inverse Integral.        */
     for (i = 0; i<n_pts; ++i){
         x   = x_arr[i]*rcpr_D;
         x2  = x*x;
@@ -461,12 +483,12 @@ complex double _fresnel_quartic(double* x_arr, char* T_in, double* w_func,
         j += 1;
     }
 
-        /*  Add the central point in the Riemann sum. This is center of the   *
-         *  window function, that is where w_func = 1.                        */
-        T_out += *(complex double *)T_in;
+    /*  Add the central point in the Riemann sum. This is center of the       *
+     *  window function, that is where w_func = 1.                            */
+    T_out += *(complex double *)T_in;
 
-        /*  Multiply result by the coefficient found in the Fresnel inverse.  */
-        T_out *= (0.5 + 0.5*_Complex_I) * dx * rcpr_F;
+    /*  Multiply result by the coefficient found in the Fresnel inverse.      */
+    T_out *= (0.5 + 0.5*_Complex_I) * dx * rcpr_F;
     return T_out;
 }
 
@@ -497,9 +519,10 @@ complex double _fresnel_quartic_norm(double* x_arr, char* T_in, double* w_func,
     T_out = 0.0;
     norm  = 0.0;
 
+    /*  j is used to index the elements of T_in over the window.              */
     j = -n_pts;
 
-    /*  Use a Riemann Sum to approximation the Fresnel Inverse Integral.      */
+    /*  Use a Riemann Sum to approximate the Fresnel Inverse Integral.        */
     for (i = 0; i<n_pts; ++i){
         x   = x_arr[i]*rcpr_D;
         x2  = x*x;
@@ -525,18 +548,18 @@ complex double _fresnel_quartic_norm(double* x_arr, char* T_in, double* w_func,
         j += 1;
     }
 
-        /*  Add the central point in the Riemann sum. This is center of the   *
-         *  window function, that is where w_func = 1.                        */
-        T_out += *(complex double *)T_in;
-        norm  += 1.0;
+    /*  Add the central point in the Riemann sum. This is center of the       *
+     *  window function, that is where w_func = 1.                            */
+    T_out += *(complex double *)T_in;
+    norm  += 1.0;
 
-        /*  The integral in the numerator of norm evaluates to F sqrt(2). Use *
-         *  this in the calculation of the normalization. The cabs function   *
-         *  computes the absolute value of complex number.                    */
-        norm = SQRT_2 / cabs(norm);
+    /*  The integral in the numerator of norm evaluates to F sqrt(2). Use     *
+     *  this in the calculation of the normalization. The cabs function       *
+     *  computes the absolute value of complex number.                        */
+    norm = SQRT_2 / cabs(norm);
 
-        /*  Multiply result by the coefficient found in the Fresnel inverse.  */
-        T_out *= (0.5 + 0.5*_Complex_I) * norm;
+    /*  Multiply result by the coefficient found in the Fresnel inverse.      */
+    T_out *= (0.5 + 0.5*_Complex_I) * norm;
     return T_out;
 }
 
@@ -555,7 +578,7 @@ complex double _fresnel_sextic(double* x_arr, char* T_in, double* w_func,
      *  Purpose:                                                               *
      *      This function uses Legendre polynomials to approximate the Fresnel *
      *      kernel up to a sextic expansion, and then performs diffraction     *
-     *      correction on diffracted data using this. Mathematics definitions  *
+     *      correction on diffracted data using this. Mathematical definitions *
      *      are given in the comment at the start of this file.                *
      **************************************************************************/
     /*  Declare all necessary variables.   */
@@ -566,9 +589,10 @@ complex double _fresnel_sextic(double* x_arr, char* T_in, double* w_func,
     /*  Initialize T_out to zero so we can loop over later.                   */
     T_out = 0.0;
 
+    /*  j is used to index the elements of T_in over the window.              */
     j = -n_pts;
 
-    /*  Use a Riemann Sum to approximation the Fresnel Inverse Integral.      */
+    /*  Use a Riemann Sum to approximate the Fresnel Inverse Integral.        */
     for (i = 0; i<n_pts; ++i){
         x   = x_arr[i]*rcpr_D;
         x2  = x*x;
@@ -591,12 +615,12 @@ complex double _fresnel_sextic(double* x_arr, char* T_in, double* w_func,
         j += 1;
     }
 
-        /*  Add the central point in the Riemann sum. This is center of the   *
-         *  window function, that is where w_func = 1.                        */
-        T_out += *(complex double *)T_in;
+    /*  Add the central point in the Riemann sum. This is center of the       *
+     *  window function, that is where w_func = 1.                            */
+    T_out += *(complex double *)T_in;
 
-        /*  Multiply result by the coefficient found in the Fresnel inverse.  */
-        T_out *= (0.5 + 0.5*_Complex_I) * dx * rcpr_F;
+    /*  Multiply result by the coefficient found in the Fresnel inverse.      */
+    T_out *= (0.5 + 0.5*_Complex_I) * dx * rcpr_F;
     return T_out;
 }
 
@@ -628,9 +652,10 @@ complex double _fresnel_sextic_norm(double* x_arr, char* T_in, double* w_func,
     T_out = 0.0;
     norm  = 0.0;
 
+    /*  j is used to index the elements of T_in over the window.              */
     j = -n_pts;
 
-    /*  Use a Riemann Sum to approximation the Fresnel Inverse Integral.      */
+    /*  Use a Riemann Sum to approximate the Fresnel Inverse Integral.        */
     for (i = 0; i<n_pts; ++i){
         x   = x_arr[i]*rcpr_D;
         x2  = x*x;
@@ -656,18 +681,18 @@ complex double _fresnel_sextic_norm(double* x_arr, char* T_in, double* w_func,
         j += 1;
     }
 
-        /*  Add the central point in the Riemann sum. This is center of the   *
-         *  window function, that is where w_func = 1.                        */
-        T_out += *(complex double *)T_in;
-        norm  += 1.0;
+    /*  Add the central point in the Riemann sum. This is center of the       *
+     *  window function, that is where w_func = 1.                            */
+    T_out += *(complex double *)T_in;
+    norm  += 1.0;
 
-        /*  The integral in the numerator of norm evaluates to F sqrt(2). Use *
-         *  this in the calculation of the normalization. The cabs function   *
-         *  computes the absolute value of complex number.                    */
-        norm = SQRT_2 / cabs(norm);
+    /*  The integral in the numerator of norm evaluates to F sqrt(2). Use     *
+     *  this in the calculation of the normalization. The cabs function       *
+     *  computes the absolute value of complex number.                        */
+    norm = SQRT_2 / cabs(norm);
 
-        /*  Multiply result by the coefficient found in the Fresnel inverse.  */
-        T_out *= (0.5 + 0.5*_Complex_I) * norm;
+    /*  Multiply result by the coefficient found in the Fresnel inverse.      */
+    T_out *= (0.5 + 0.5*_Complex_I) * norm;
     return T_out;
 }
 
@@ -686,7 +711,7 @@ complex double _fresnel_octic(double* x_arr, char* T_in, double* w_func,
      *  Purpose:                                                               *
      *      This function uses Legendre polynomials to approximate the Fresnel *
      *      kernel up to a sextic expansion, and then performs diffraction     *
-     *      correction on diffracted data using this. Mathematics definitions  *
+     *      correction on diffracted data using this. Mathematical definitions *
      *      are given in the comment at the start of this file.                *
      **************************************************************************/
     /*  Declare all necessary variables.   */
@@ -697,9 +722,10 @@ complex double _fresnel_octic(double* x_arr, char* T_in, double* w_func,
     /*  Initialize T_out to zero so we can loop over later.                   */
     T_out = 0.0;
 
+    /*  j is used to index the elements of T_in over the window.              */
     j = -n_pts;
 
-    /*  Use a Riemann Sum to approximation the Fresnel Inverse Integral.      */
+    /*  Use a Riemann Sum to approximate the Fresnel Inverse Integral.        */
     for (i = 0; i<n_pts; ++i){
         x   = x_arr[i]*rcpr_D;
         x2  = x*x;
@@ -722,12 +748,12 @@ complex double _fresnel_octic(double* x_arr, char* T_in, double* w_func,
         j += 1;
     }
 
-        /*  Add the central point in the Riemann sum. This is center of the   *
-         *  window function, that is where w_func = 1.                        */
-        T_out += *(complex double *)T_in;
+    /*  Add the central point in the Riemann sum. This is center of the       *
+     *  window function, that is where w_func = 1.                            */
+    T_out += *(complex double *)T_in;
 
-        /*  Multiply result by the coefficient found in the Fresnel inverse.  */
-        T_out *= (0.5 + 0.5*_Complex_I) * dx * rcpr_F;
+    /*  Multiply result by the coefficient found in the Fresnel inverse.      */
+    T_out *= (0.5 + 0.5*_Complex_I) * dx * rcpr_F;
     return T_out;
 }
 
@@ -760,9 +786,10 @@ complex double _fresnel_octic_norm(double* x_arr, char* T_in, double* w_func,
     T_out = 0.0;
     norm  = 0.0;
 
+    /*  j is used to index the elements of T_in over the window.              */
     j = -n_pts;
 
-    /*  Use a Riemann Sum to approximation the Fresnel Inverse Integral.      */
+    /*  Use a Riemann Sum to approximate the Fresnel Inverse Integral.        */
     for (i = 0; i<n_pts; ++i){
         x   = x_arr[i]*rcpr_D;
         x2  = x*x;
@@ -788,18 +815,101 @@ complex double _fresnel_octic_norm(double* x_arr, char* T_in, double* w_func,
         j += 1;
     }
 
-        /*  Add the central point in the Riemann sum. This is center of the   *
-         *  window function, that is where w_func = 1.                        */
-        T_out += *(complex double *)T_in;
-        norm  += 1.0;
+    /*  Add the central point in the Riemann sum. This is center of the       *
+     *  window function, that is where w_func = 1.                            */
+    T_out += *(complex double *)T_in;
+    norm  += 1.0;
 
-        /*  The integral in the numerator of norm evaluates to F sqrt(2). Use *
-         *  this in the calculation of the normalization. The cabs function   *
-         *  computes the absolute value of complex number.                    */
-        norm = SQRT_2 / cabs(norm);
+    /*  The integral in the numerator of norm evaluates to F sqrt(2). Use     *
+     *  this in the calculation of the normalization. The cabs function       *
+     *  computes the absolute value of complex number.                        */
+    norm = SQRT_2 / cabs(norm);
 
-        /*  Multiply result by the coefficient found in the Fresnel inverse.  */
-        T_out *= (0.5 + 0.5*_Complex_I) * norm;
+    /*  Multiply result by the coefficient found in the Fresnel inverse.      */
+    T_out *= (0.5 + 0.5*_Complex_I) * norm;
+    return T_out;
+}
+
+complex double _fresnel_transform_newton(double* x_arr, double* phi_arr,
+                                         char* T_in, double* w_func, double kD,
+                                         double r, double B, double D,
+                                         double EPS, long toler, double dx,
+                                         double rcpr_F, long n_pts,
+                                         npy_intp T_in_steps)
+{
+    /*  Declare all necessary variables.   */
+    long i, j;
+    double psi, phi;
+    complex double T_out, exp_psi;
+
+    /*  Initialize T_out and norm to zero so we can loop over later.          */
+    T_out = 0.0;
+
+    /*  j is used to index the elements of T_in over the window.              */
+    j = -(int)((n_pts-1)/2);
+
+    /*  Use a Riemann Sum to approximate the Fresnel Inverse Integral.        */
+    for (i = 0; i<n_pts; ++i){
+
+        /*  Use Newton-Raphson to compute stationary point for psi.           */
+        phi = Newton_Raphson_fresnel_psi(kD, r, x_arr[i], phi_arr[i],
+                                         phi_arr[i], B, D, EPS, toler);
+
+        /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
+        psi     = fresnel_psi(kD, r, x_arr[i], phi, phi_arr[i], B, D);
+        exp_psi = (cos(psi) - _Complex_I*sin(psi))*w_func[i];
+
+        /*  Approximate the integral with a Riemann Sum.  */
+        T_out += exp_psi * *(complex double *)(T_in + j*T_in_steps);
+        j     += 1;
+    }
+
+    /*  Multiply result by the coefficient found in the Fresnel inverse.      */
+    T_out *= (0.5 + 0.5*_Complex_I) * dx * rcpr_F;
+    return T_out;
+}
+
+complex double _fresnel_transform_newton_norm(double* x_arr, double* phi_arr,
+                                              char* T_in, double* w_func,
+                                              double kD, double r, double B,
+                                              double D, double EPS, long toler,
+                                              double dx, double rcpr_F,
+                                              long n_pts, npy_intp T_in_steps)
+{
+    /*  Declare all necessary variables.   */
+    long i, j;
+    double psi, phi;
+    complex double T_out, exp_psi, norm;
+
+    /*  Initialize T_out and norm to zero so we can loop over later.          */
+    T_out = 0.0;
+    norm  = 0.0;
+
+    /*  j is used to index the elements of T_in over the window.              */
+    j = -(int)((n_pts-1)/2);
+
+    /*  Use a Riemann Sum to approximate the Fresnel Inverse Integral.        */
+    for (i = 0; i<n_pts; ++i){
+        phi = Newton_Raphson_fresnel_psi(kD, r, x_arr[i], phi_arr[i],
+                                         phi_arr[i], B, D, EPS, toler);
+
+        /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
+        psi     = fresnel_psi(kD, r, x_arr[i], phi, phi_arr[i], B, D);
+        exp_psi = (cos(psi) - _Complex_I*sin(psi))*w_func[i];
+        norm   += exp_psi;
+
+        /*  Approximate the integral with a Riemann Sum.  */
+        T_out += exp_psi * *(complex double *)(T_in + j*T_in_steps);
+        j     += 1;
+    }
+
+    /*  The integral in the numerator of norm evaluates to F sqrt(2). Use     *
+     *  this in the calculation of the normalization. The cabs function       *
+     *  computes the absolute value of complex number.                        */
+    norm = SQRT_2 / cabs(norm);
+
+    /*  Multiply result by the coefficient found in the Fresnel inverse.      */
+    T_out *= (0.5 + 0.5*_Complex_I) * norm;
     return T_out;
 }
 

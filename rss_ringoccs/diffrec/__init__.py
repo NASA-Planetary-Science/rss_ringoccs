@@ -70,3 +70,4 @@
 
 # Import the main classes used in diffraction reconstruction.
 from .diffraction_correction import DiffractionCorrection
+from . import advanced_tools

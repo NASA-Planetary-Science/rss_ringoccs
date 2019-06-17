@@ -1,5 +1,6 @@
 """
-Purpose:
+
+:Purpose:
     Compute :math:`\\tau_{thresh}` for use as a proxy for maximum
     reliable value of optical depth within the diffraction-limited or
     diffraction-reconstructed profile. This follows [MTR1986]_
@@ -16,7 +17,13 @@ Purpose:
         \\tau_{thresh} = -\\sin(B)
         \\ln\\left(\\frac{1}{2}C_{\\alpha}\\hat{P}_N\\right)
 
+:Dependencies:
+    #. numpy
+    #. matplotlib
+    #. scipy
+
 """
+
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import splrep,splev
@@ -24,30 +31,30 @@ from scipy.signal import spectrogram
 
 class calc_tau_thresh(object):
     """
-    Purpose:
+    :Purpose:
         Compute threshold optical depth following
 
-    Arguments:
+    Arguments
         :rsr_inst (*object*): object instance of the RSRReader class
         :geo_inst (*object*): object instance of the Geometry class
-        :freespace_spm (*np.ndarray*): locations of freespace where
-                        intrinsic spacecraft signal is observed
-        :pnorm_fit (*np.ndarray*): polynomial fit to the freespace
-                        power, resampled to raw SPM
+        :cal_inst (*object*): object instance of the Calibration class
 
-    Keyword Arguments:
-        :res_km (*float*):
-        :Calpha (*float*): constant for scaling Bandwidth/SNR ratio.
+    Keyword Arguments
+        :res_km (*float*): Reconstruction resolution in km
+        :Calpha (*float*): Constant for scaling Bandwidth/SNR ratio.
                         Default is 2.41 for 70% confidence
                         (see [MTR1986]_)
 
-    Attributes:
+    Attributes
         :snr (*np.ndarray*): Signal-to-noise ratio SNR0 over the
                         entire occultation. This changes over the
                         occultation because the signal power
                         fluctuates.
         :tau_thresh (*np.ndarray*): threshold optical depth computed
                         using [MTR1986]_
+        :spm_vals (*np.ndarray*): Observed event time array from cal_inst
+        :rho_vals (*np.ndarray*): Ring intercept point array interpolated to
+                                  spm_vals
 
     """
     def __init__(self,rsr_inst,geo_inst,cal_inst,
@@ -87,18 +94,17 @@ class calc_tau_thresh(object):
 
     def find_noise(self,spm,IQ,df):
         """
-        Purpose:
-            Locate the additive receiver noise within the data set.
-            This is done by computing a spectrogram of the raw
-            complex signal, filtering out the spacecraft signal, and
-            averaging over the frequency and time domains.
+        Locate the additive receiver noise within the data set.
+        This is done by computing a spectrogram of the raw
+        complex signal, filtering out the spacecraft signal, and
+        averaging over the frequency and time domains.
 
-        Arguments:
+        Arguments
             :spm (*np.ndarray*): raw SPM in seconds
             :IQ (*np.ndarray*): measured complex signal
             :df (*float*): sampling frequency in Hz of the IQ
 
-        Returns:
+        Returns
             :p_noise (*np.ndarray*): noise power
         """
         # Spectrogram to filter out spacecraft signal

@@ -1,24 +1,24 @@
 #!/usr/bin/env python
 """
 
-jwf_calc_f_sky_recon.py
-
-Purpose:
+:Purpose:
     Calculate sky frequency from the reconstructed event kernels.
     copied from Nicole Rappaport's ``predicts`` program in Fortran.
 
-References:
+:References:
     This is a pythonized version of Nicole Rappaport's PREDICTS
     program, which predicts sky frequencies by computing the Doppler
     shift due to motion of the spacecraft relative to the observer
     (i.e., the receiving station).
+
+:Dependencies:
+    #. numpy
+    #. spiceypy
 """
 
 import numpy as np
 from spiceypy import spiceypy as spice
 from ..tools.spm_to_et import spm_to_et
-import sys
-import pdb
 
 
 # Product of the gravitational constant by the Sun mass
@@ -42,7 +42,7 @@ GM_SSB = [
     3.7940626063000E+07,  # 6 (SATURN)
     5.7945490070000E+06,  # 7 (URANUS)
     6.8365340640000E+06,  # 8 (NEPTUNE)
-    9.8160100000000E+02,  # 9 (PLUTO) why?
+    9.8160100000000E+02,  # 9 (PLUTO) 
     1.3271244002331E+11,  # 10 (SUN)
     4.9027990000000E+03,  # 301 (EARTH'S MOON)
     8.9781370309840E+03]  # 606 (Titan) from cpck30Mar2016.tpc
@@ -58,22 +58,17 @@ def calc_f_sky_recon(f_spm, rsr_inst, sc_name, f_uso, kernels):
     """
     Calculates sky frequency at given times.
 
-    Arguments:
-        :f_spm (*np.ndarray*):
-            SPM values to evaluate sky frequency at
-        :rsr_inst:
-            Instance of RSRReader class
-        :sc_name (*str*):
-            Name of spacecraft to get sky frequency for. In our case,
-            this should always be 'Cassini'
-        :f_uso (*float*):
-            USO sky frequency for the event and the right band
-        :kernels (*list*):
-            String list of full path name to set of kernels
+    Arguments
+        :f_spm (*np.ndarray*): SPM values to evaluate sky frequency at
+        :rsr_inst (*object*): Instance of RSRReader class
+        :sc_name (*str*): Name of spacecraft to get sky frequency for. 
+                          In our case, this should always be 'Cassini'
+        :f_uso (*float*): USO sky frequency for the event and the right band
+        :kernels (*list*): String list of full path name to set of kernels
 
-    Returns:
+    Returns
         :RF (*np.ndarray*): Reconstructed sky frequency computed from
-        spacecraft telemetry and oscillator frequency
+                            spacecraft telemetry and oscillator frequency
     """
 
     spice.kclear()
@@ -129,7 +124,7 @@ def calc_f_sky_recon(f_spm, rsr_inst, sc_name, f_uso, kernels):
 
 def derlt(sc_code, etsc, rs_code, et):
     """
-    Arguments:
+    Arguments
         :sc_code (*int*): Spacecraft NAIF ID
         :etsc (*float*): Epoch (in ephemeris seconds past J2000 TDB)
                         at which the signal arrives at the receiver
@@ -137,7 +132,7 @@ def derlt(sc_code, etsc, rs_code, et):
         :rs_code (*int*): Receiving station NAIF ID
         :et (*float*): Ephemeris time
 
-    Returns:
+    Returns
         :DLTDT2 (*float*):
     """
 
@@ -185,11 +180,11 @@ def derlt(sc_code, etsc, rs_code, et):
 
 def derpt(et, code):
     """
-    Arguments:
+    Arguments
         :et (*float*): Ephemeris time
         :code (*int*): NAIF ID
 
-    Returns:
+    Returns
         :B (*float*):
     """
 

@@ -1,29 +1,33 @@
 """
 
-Purpose:
+:Purpose:
      Create a class whose attributes have all the necessary inputs for
      performing a Fresnel inversion usng DiffractionCorrection, given
      instances of the classes RSRReader, Geometry, and Calibration.
+
+:Dependencies:
+    #. numpy
+    #. copy
+    #. scipy
 
 """
 
 import copy
 import numpy as np
 from scipy.interpolate import splrep, splev, interp1d
-
 from ..rsr_reader.rsr_reader import RSRReader
 from .resample_IQ import resample_IQ
 from .calc_tau_thresh import calc_tau_thresh
 from ..tools.history import write_history_dict
 from ..tools.write_output_files import write_output_files
-import pdb
 
 class DiffractionLimitedProfile(object):
     """
-    Framework for an object class containing the diffraction-limited
-    optical depth profile (DLP) and related attributes.
+    :Purpose:
+        Framework for an object class containing the diffraction-limited
+        optical depth profile (DLP) and related attributes.
 
-    Arguments:
+    Arguments
         :rsr_inst (*object*): Instance of RSRReader class
         :geo_inst (*object*): Instance of Geometry class
         :cal_inst (*object*): Instance of Calibration class
@@ -39,7 +43,7 @@ class DiffractionLimitedProfile(object):
                         PDS sampling rate is 0.25 km, which gives a
                         DLP resolution of 0.5 km.
 
-    Keyword Arguments:
+    Keyword Arguments
         :verbose (*bool*): When True, turns on verbose output. Default
                         is False.
         :write_file (*bool*): When True, writes processing results to
@@ -48,7 +52,7 @@ class DiffractionLimitedProfile(object):
                         in km of on the occultation. Default is
                         [65000,150000].
 
-    Attributes:
+    Attributes
         :dr_km (*float*): raw DLP sampling rate
         :raw_tau_threshold_vals (*np.ndarray*): threshold optical depth
 
@@ -79,6 +83,7 @@ class DiffractionLimitedProfile(object):
         :tau_vals (*np.ndarray*): Diffraction-limited optical depth
         :history (*dict*): Processing history with all inputs necessary to
                            rerun pipeline to obtain identical output
+        :rev_info (*dict*): *dict* containing rev- and rsr-specific info
 
     Note:
         #. All *np.ndarray* attributes are sampled at dr_km radial spacing.
@@ -298,10 +303,9 @@ class DiffractionLimitedProfile(object):
     def create_dlps(cls, rsr_inst, geo_inst, cal_inst, dr_km,
         verbose=False, write_file=False, profile_range=[65000., 150000.]):
         """
-        Purpose:
-            Create ingress and egress instances of DiffractionLimitedProfile.
+        Create ingress and egress instances of DiffractionLimitedProfile.
 
-        Arguments:
+        Arguments
             :rsr_inst (*object*): Instance of RSRReader class
             :geo_inst (*object*): Instance of Geometry class
             :cal_inst (*object*): Instance of Calibration class
@@ -317,7 +321,7 @@ class DiffractionLimitedProfile(object):
                             PDS sampling rate is 0.25 km, which gives a
                             DLP resolution of 0.5 km.
 
-        Keyword Arguments:
+        Keyword Arguments
             :verbose (*bool*): When True, turns on verbose output. Default
                             is False.
             :write_file (*bool*): When True, writes processing results to

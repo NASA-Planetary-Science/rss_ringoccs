@@ -278,29 +278,20 @@ class RSRReader(object):
         self.__n_pts_per_sfdu = n_pts_per_sfdu
         self.__n_sfdu = n_sfdu
 
-        if verbose:
-            print('\t\tSPM range:\t\t' + str(self.spm_vals[0]) + ', '
-                    + str(self.spm_vals[-1]))
-            #print('First 10 raw SPM:')
-            #print(self.spm_vals[0:10])
-            print('\t\tYear:\t\t\t' + str(self.year))
-            print('\t\tDOY:\t\t\t' + str(self.doy))
-            print('\t\tDSN:\t\t\t' + str(self.dsn))
-            print('\t\tBand:\t\t\t' + str(self.band))
-            print('\t\tSampling rate in kHz:\t' + str(self.sample_rate_khz))
-            #print('Year, DOY, DSN, band, sample_rate:')
-            #print(str(self.year) + ', ' + str(self.doy) + ', '
-            #+ str(self.dsn) + ', ' + str(self.band) + ', '
-            #    + str(self.sample_rate_khz))
 
-        if verbose:
-            print('\tSetting the IQ_m attribute...')
         self.__set_IQ(verbose=verbose)
 
         # Set rev info for file creation
-        if verbose:
-            print('\tSetting rev info...')
         self.__set_rev_info()
+        if verbose:
+            print('\t\tRev:\t\t\t' + self.rev_info['rev_num'])
+            print('\t\tYear:\t\t\t' + str(self.year))
+            print('\t\tDOY:\t\t\t' + str(self.doy))
+            print('\t\tSPM range:\t\t' + str(self.spm_vals[0]) + ', '
+                    + str(self.spm_vals[-1]))
+            print('\t\tDSN:\t\t\t' + str(self.dsn))
+            print('\t\tBand:\t\t\t' + str(self.band))
+            print('\t\tSampling rate in kHz:\t' + str(self.sample_rate_khz))
 
 
     def __set_sfdu_unpack(self, spm_range):

@@ -455,19 +455,17 @@ class ExtractCSVData(object):
 
         try:
             # Create dummy variable in case an error occurs.
+            # Grab info from DLP if possible
             errmess = "rho_km_vals"
             self.rho_km_vals = np.array(dlp_dat.rho_km_vals)
             errmess = "raw_tau_vals"
             self.raw_tau_vals = np.array(dlp_dat.raw_tau_vals)
             errmess = "phase_rad_vals"
-            self.phase_rad_vals = np.array(dlp_dat.phase_deg_vals)
-            self.phase_rad_vals = np.deg2rad(self.phase_rad_vals)
+            self.phase_rad_vals = np.radians(np.array(dlp_dat.phase_deg_vals))
             errmess = "phi_ora_rad_vals"
-            self.phi_rad_vals = np.array(geo_dat.phi_ora_deg_vals)
-            self.phi_rad_vals = np.deg2rad(self.phi_rad_vals)
+            self.phi_rad_vals = np.radians(np.array(dlp_dat.phi_ora_deg_vals))
             errmess = "B_rad_vals"
-            self.B_rad_vals = np.array(geo_dat.B_deg_vals)
-            self.B_rad_vals = np.deg2rad(self.B_rad_vals)
+            self.B_rad_vals = np.radians(np.array(dlp_dat.B_deg_vals))
             errmess = "t_oet_spm_vals"
             self.t_oet_spm_vals = np.array(dlp_dat.t_oet_spm_vals)
             errmess = "t_ret_spm_vals"
@@ -479,22 +477,27 @@ class ExtractCSVData(object):
             errmess = "rho_corr_pole_km_vals"
             self.rho_corr_timing_km_vals = np.array(dlp_dat.rho_corr_timing_km_vals)
             errmess = "phi_rl_rad_vals"
-            self.phi_rl_rad_vals = np.array(geo_dat.phi_rl_deg_vals)
-            self.phi_rl_rad_vals = np.deg2rad(self.phi_rl_rad_vals)
+            self.phi_rl_rad_vals = np.radians(np.array(dlp_dat.phi_rl_deg_vals))
             errmess = "raw_tau_threshold_vals"
             self.raw_tau_threshold_vals = np.array(dlp_dat.raw_tau_threshold_vals)
-            errmess = "geo_rho"
-            geo_rho = np.array(geo_dat.rho_km_vals)
-            errmess = "D_km_vals"
-            self.D_km_vals = np.array(geo_dat.D_km_vals)
-            errmess = "rho_dot_kms_vals"
-            self.rho_dot_kms_vals = np.array(geo_dat.rho_dot_kms_vals)
+            # Grab info from CAL
             errmess = "f_sky_pred"
             f_sky_pred = np.array(cal_dat.f_sky_pred_vals)
             errmess = "f_sky_resid"
             f_sky_resid = np.array(cal_dat.f_sky_resid_fit_vals)
             errmess = "f_sky_resid"
             self.f_sky_hz_vals = f_sky_pred - f_sky_resid
+
+            # Grab remaining necessary info from GEO
+            errmess = "geo_rho"
+            geo_rho = np.array(geo_dat.rho_km_vals)
+            errmess = "D_km_vals"
+            self.D_km_vals = np.array(geo_dat.D_km_vals)
+            errmess = "rho_dot_kms_vals"
+            self.rho_dot_kms_vals = np.array(geo_dat.rho_dot_kms_vals)
+            
+            errmess = "cal_spm"
+            cal_spm = np.array(cal_dat.spm_vals)
         except (ValueError, TypeError, NameError, AttributeError):
             raise TypeError(
                 """
@@ -675,46 +678,22 @@ class ExtractCSVData(object):
 
         geo_rho = geo_rho[crange]
         self.D_km_vals = self.D_km_vals[crange]
-        self.B_rad_vals = self.B_rad_vals[crange]
-        self.phi_rad_vals = self.phi_rad_vals[crange]
-        self.phi_rl_rad_vals = self.phi_rl_rad_vals[crange]
         self.rho_dot_kms_vals = self.rho_dot_kms_vals[crange]
 
         del crange, geo_dat, cal_dat, dlp_dat
 
-        rfin = int(np.max((np.max(geo_rho)-self.rho_km_vals>=0.0).nonzero()))
-        rstart = int(np.min((self.rho_km_vals-np.min(geo_rho)>=0.0).nonzero()))
-        n_rho_vals = np.size(self.rho_km_vals)
-        n_f_vals = np.size(self.f_sky_hz_vals)
-        frange = np.arange(n_f_vals)
-        xrange = np.arange(n_rho_vals)*(n_f_vals-1.0)/(n_rho_vals-1.0)
-        interp = interpolate.interp1d(geo_rho, self.D_km_vals)
-        self.D_km_vals = interp(self.rho_km_vals)
-        interp = interpolate.interp1d(geo_rho, self.rho_dot_kms_vals)
-        self.rho_dot_kms_vals = interp(self.rho_km_vals)
-        interp = interpolate.interp1d(geo_rho, self.phi_rad_vals)
-        self.phi_rad_vals = interp(self.rho_km_vals)
-        interp = interpolate.interp1d(geo_rho, self.B_rad_vals)
-        self.B_rad_vals = interp(self.rho_km_vals)
-        interp = interpolate.interp1d(geo_rho, self.phi_rl_rad_vals)
-        self.phi_rl_rad_vals = interp(self.rho_km_vals)
-        interp = interpolate.interp1d(frange, self.f_sky_hz_vals)
-        self.f_sky_hz_vals = interp(xrange)
 
-        del n_rho_vals, n_f_vals, interp, frange, xrange, geo_rho
 
         raw_mu = np.sin(np.abs(self.B_rad_vals))
         self.p_norm_vals = np.exp(-self.raw_tau_vals/raw_mu)
-        self.rho_corr_timing_km_vals = self.rho_corr_timing_km_vals[rstart:rfin+1]
-        self.rho_corr_pole_km_vals = self.rho_corr_pole_km_vals[rstart:rfin+1]
-        self.t_ret_spm_vals = self.t_ret_spm_vals[rstart:rfin+1]
-        self.t_set_spm_vals = self.t_set_spm_vals[rstart:rfin+1]
-        self.t_oet_spm_vals = self.t_oet_spm_vals[rstart:rfin+1]
-        self.phase_rad_vals = self.phase_rad_vals[rstart:rfin+1]
-        self.rho_km_vals = self.rho_km_vals[rstart:rfin+1]
-        self.p_norm_vals = self.p_norm_vals[rstart:rfin+1]
+        
+        self.f_sky_hz_vals = np.interp(self.t_oet_spm_vals, cal_spm,
+                self.f_sky_hz_vals)
+        self.D_km_vals = np.interp(self.rho_km_vals, geo_rho, self.D_km_vals)
+        self.rho_dot_kms_vals = np.interp(self.rho_km_vals, geo_rho,
+                self.rho_dot_kms_vals)
 
-        del rstart, rfin, raw_mu
+        del raw_mu, geo_rho
 
         if (not isinstance(tau, type(None))):
             tau_dat = get_tau(self.tau, verbose=verbose, use_deprecate=use_deprecate)
@@ -936,54 +915,3 @@ class GetUranusData(object):
         if verbose:
             print("\tExtract CSV Data Complete.")
 
-
-class PureCSVReader(object):
-    def __init__(self, dat):
-        if (not isinstance(dat, str)):
-            raise TypeError("Text file must be a string.")
-        df = pd.read_csv(dat)
-        self.rho_km_vals      = np.array(df.rho_km_vals)
-        self.phase_rad_vals   = np.array(df.phase_rad_vals)
-        self.p_norm_vals      = np.array(df.p_norm_vals)
-        self.phi_rad_vals     = np.array(df.phi_rad_vals)
-        self.B_rad_vals       = np.array(df.B_rad_vals)
-        self.f_sky_hz_vals    = np.array(df.f_sky_hz_vals)
-        self.D_km_vals        = np.array(df.D_km_vals)
-        self.rho_dot_kms_vals = np.array(df.rho_dot_kms_vals)
-
-        n_rho = np.size(self.rho_km_vals)
-        
-        zeros = np.zeros(n_rho)
-
-        # Set fake variables so DiffractionCorrection won't crash.
-        self.t_oet_spm_vals = zeros
-        self.t_ret_spm_vals = zeros
-        self.t_set_spm_vals = zeros
-        self.rho_corr_pole_km_vals = zeros
-        self.rho_corr_timing_km_vals = zeros
-        self.phi_rl_rad_vals = zeros
-        self.raw_tau_threshold_vals = zeros
-        self.tau_rho = zeros
-        self.tau_vals = zeros
-        self.phase_vals = zeros
-        self.power_vals = zeros
-
-        # Create a history.
-        input_vars = {
-            "CSV File": dat,
-        }
-
-        input_kwds = {}
-
-        self.history = write_history_dict(input_vars, input_kwds, __file__)
-        self.rev_info = {
-            "rsr_file": "Unknown",
-            "band": "Unknown",
-            "year": "Unknown",
-            "doy": "Unknown",
-            "dsn": "Unknown",
-            "occ_dir": "Unknown",
-            "planetary_occ_flag": "Unknown",
-            "rev_num": "Unknown",
-            "prof_dir": "Unknown"
-        }

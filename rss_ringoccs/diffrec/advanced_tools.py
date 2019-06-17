@@ -87,6 +87,7 @@ class CompareTau(object):
         self.power_vals = rec.power_vals
         self.phase_vals = rec.phase_vals
         self.tau_vals = rec.tau_vals
+        self.tau_rho = data.tau_rho[tau_rstart:tau_rfin+1]
         self.tau_power = data.power_vals[tau_rstart:tau_rfin+1]
         self.tau_phase = data.phase_vals[tau_rstart:tau_rfin+1]
         self.tau_tau = data.tau_vals[tau_rstart:tau_rfin+1]

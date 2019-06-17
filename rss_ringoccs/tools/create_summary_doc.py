@@ -8,12 +8,12 @@ import warnings
 warnings.filterwarnings("ignore")
 import numpy as np
 import matplotlib
+matplotlib.rcParams['agg.path.chunksize'] = 10000
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from scipy.signal import savgol_filter
 from .sys_tools import latex_summary_doc
 from .write_output_files import construct_filepath
-import pdb
 import time
 import spiceypy as spice
 
@@ -288,6 +288,7 @@ def plot_occ_earth_view(pdf, geo_inst):
     plt.scatter(occx1[::dpts], occy1[::dpts], s=10, color='blue')
         
     pdf.savefig()
+    plt.close()
 
     return pdf
 
@@ -372,6 +373,7 @@ def plot_occ_pole_view(pdf, geo_inst):
     plt.plot([0.,0.], [-68000., -180000.], 'k-', linewidth=2.3)
     plt.text(2000., -180000., '$\oplus$', fontsize=15)
     pdf.savefig()
+    plt.close()
     return pdf
 
 def plot_geo_overview(pdf, geo_inst, tau_inst):
@@ -472,8 +474,8 @@ def plot_geo_overview(pdf, geo_inst, tau_inst):
 
 def plot_cal_overview(pdf, cal_inst, dlp_inst):
     t_oet_spm  = cal_inst.t_oet_spm_vals
-    F_sky_resid_fit= np.interp(dlp_inst.t_oet_spm_vals, t_oet_spm, cal_inst.f_sky_resid_fit_vals)
-    F_sky_resid = np.interp(t_oet_spm, cal_inst.f_spm, cal_inst.f_sky_resid)
+    F_sky_resid_fit= np.interp(dlp_inst.t_oet_spm_vals, t_oet_spm, cal_inst.f_offset_fit_vals)
+    F_sky_resid = np.interp(t_oet_spm, cal_inst.f_spm, cal_inst.f_offset)
     F_sky_hz = cal_inst.f_sky_hz_vals
     P_free = cal_inst.p_free_vals
 
@@ -599,9 +601,11 @@ def plot_tau(pdf, tau_inst):
     rho_km = tau_inst.rho_km_vals
     tau = tau_inst.tau_vals
     tau_thresh = tau_inst.tau_threshold_vals
+    res_km = str(round(tau_inst.input_res,3))
 
     
-    title = 'Cassini RSS: Reconstructed X-band Normal Optical Depth Profile (1 km Resolution)'
+    title = ('Cassini RSS: Reconstructed X-band Normal Optical Depth Profile'
+            + ' (' + res_km + ' km Resolution)')
     ncol = 1
     nrow = 4
 

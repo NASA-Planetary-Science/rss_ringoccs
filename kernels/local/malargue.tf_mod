@@ -1,0 +1,170 @@
+KPL/FK
+ 
+   FILE: malargue.tf
+ 
+   This file was created by PINPOINT.
+ 
+   PINPOINT Version 3.0.0 --- March 26, 2009
+   PINPOINT RUN DATE/TIME:    2013-01-02T22:21:43
+   PINPOINT DEFINITIONS FILE: malargue.in
+   PINPOINT PCK FILE:         malargue.in
+   PINPOINT SPK FILE:         malargue.bsp
+ 
+   The input definitions file is appended to this
+   file as a comment block.
+ 
+ 
+   Body-name mapping follows:
+ 
+\begindata
+ 
+   NAIF_BODY_NAME                      += 'MALARGUE'
+   NAIF_BODY_CODE                      += 398958
+
+   NAIF_BODY_NAME                      += 'DSS-84'
+   NAIF_BODY_CODE                      += 398958
+
+\begintext
+ 
+ 
+   Reference frame specifications follow:
+ 
+ 
+   Topocentric frame MALARGUE_TOPO
+ 
+      The Z axis of this frame points toward the zenith.
+      The X axis of this frame points North.
+ 
+      Topocentric frame MALARGUE_TOPO is centered at the site MALARGUE
+      which at the epoch
+ 
+          2003 JAN 01 00:00:00.000 TDB
+ 
+       has Cartesian coordinates
+ 
+         X (km):                  0.1823343363400E+04
+         Y (km):                 -0.4850457990300E+04
+         Z (km):                 -0.3708971815400E+04
+ 
+      and planetodetic coordinates
+ 
+         Longitude (deg):       -69.3981777208571
+         Latitude  (deg):       -35.7759705203630
+         Altitude   (km):         0.1572505010896E+01
+ 
+      These planetodetic coordinates are expressed relative to
+      a reference spheroid having the dimensions
+ 
+         Equatorial radius (km):  6.3781363000000E+03
+         Polar radius      (km):  6.3567516010000E+03
+ 
+      All of the above coordinates are relative to the frame ITRF93.
+ 
+ 
+\begindata
+ 
+   FRAME_DSS-84_TOPO                 =  1398958
+   FRAME_1398958_NAME                  =  'DSS-84_TOPO'
+   FRAME_1398958_CLASS                 =  4
+   FRAME_1398958_CLASS_ID              =  1398958
+   FRAME_1398958_CENTER                =  398958
+
+   OBJECT_398958_FRAME                 =  'DSS-84_TOPO'
+
+   TKFRAME_DSS-84_RELATIVE            =  'ITRF93'
+   TKFRAME_DSS-84_SPEC                =  'ANGLES'
+   TKFRAME_DSS-84_UNITS               =  'DEGREES'
+   TKFRAME_DSS-84_AXES                =  ( 3, 2, 3 )
+   TKFRAME_DSS-84_ANGLES              =  ( -290.6018222791429,
+                                            -125.7759705203630,
+                                             180.0000000000000 )
+
+   FRAME_MALARGUE_TOPO                 =  1398958
+   FRAME_1398958_NAME                  =  'MALARGUE_TOPO'
+   FRAME_1398958_CLASS                 =  4
+   FRAME_1398958_CLASS_ID              =  1398958
+   FRAME_1398958_CENTER                =  398958
+ 
+   OBJECT_398958_FRAME                 =  'MALARGUE_TOPO'
+ 
+   TKFRAME_1398958_RELATIVE            =  'ITRF93'
+   TKFRAME_1398958_SPEC                =  'ANGLES'
+   TKFRAME_1398958_UNITS               =  'DEGREES'
+   TKFRAME_1398958_AXES                =  ( 3, 2, 3 )
+   TKFRAME_1398958_ANGLES              =  ( -290.6018222791429,
+                                            -125.7759705203630,
+                                             180.0000000000000 )
+ 
+\begintext
+ 
+ 
+Definitions file malargue.in
+--------------------------------------------------------------------------------
+ 
+ 
+  Original file name:              malargue.in
+  File creation date:              02-JAN-2013
+  Author:                          N. Bachman (JPL/NAIF)
+ 
+  Description
+  -----------
+ 
+  This PINPOINT input file contains geocentric position and velocity
+  data for the ESA 35m station at Malargue.
+ 
+  Station position and velocity data were provided by Dr. William Folkner
+  (via email dated 02-JAN-2013).
+ 
+  The SPICE integer code for this station is 398958.
+ 
+  Earth radii used to define the zenith direction for the
+  topocentric reference frame associated with this station
+  are those used for the FK
+ 
+     earth_topo_050714.tf
+ 
+ 
+   Reference Spheroid
+   ------------------
+ 
+   The reference bi-axial spheroid is defined by an equatorial and a
+   polar radius.  Calling these Re and Rp respectively, the flattening
+   factor f is defined as
+ 
+      f = ( Re - Rp ) / Re
+ 
+   For the reference spheroid used by this file, the equatorial radius
+   Re and inverse flattening factor 1/f are
+ 
+      Re  = 6378136.3 m
+      1/f = 298.257
+ 
+ 
+  begindata
+ 
+     BODY399_RADII        = ( 6378.1363  6378.1363  6356.751601 )
+ 
+     NAIF_BODY_NAME       += ( 'MALARGUE' )
+     NAIF_BODY_CODE       += ( 398958   )
+ 
+     SITES                =  ( 'MALARGUE' )
+ 
+     MALARGUE_CENTER      =  399
+     MALARGUE_FRAME       =  'ITRF93'
+     MALARGUE_IDCODE      =  398958
+     MALARGUE_XYZ         =  ( 1823.3433634  -4850.4579903  -3708.9718154  )
+     MALARGUE_DXYZ        =  (       -0.0262        -0.0177         0.0122 )
+     MALARGUE_EPOCH       =  @2003-JAN-1
+     MALARGUE_TOPO_EPOCH  =  @2003-JAN-1
+     MALARGUE_UP          =  'Z'
+     MALARGUE_NORTH       =  'X'
+     MALARGUE_BOUNDS      =  ( @1950-JAN-1, @2050-JAN-1 )
+ 
+  begintext
+ 
+ 
+ 
+begintext
+ 
+[End of definitions file]
+ 

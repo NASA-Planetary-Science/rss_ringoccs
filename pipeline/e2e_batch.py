@@ -6,7 +6,8 @@ sys.path.remove('../')
 import traceback
 import time
 
-err_file = sys.argv[0].split('.')[0] + '.err'
+# Create new error file
+err_file = sys.argv[0].split('.')[0] + time.strftime("_%Y%m%d-%H%M%S") + '.err'
 fail_file = open('../output/' + err_file, 'w')
 files = [args.mpath+line.strip('\n') for line in open(
                 args.rsr_file_list,'r').readlines()]
@@ -47,8 +48,7 @@ for ind in range(nfiles):
         # Create instance with calibrated data
         cal_inst = rss.calibration.Calibration(rsr_inst, geo_inst, 
                 verbose=args.verbose, write_file=args.write_file, 
-                fof_order=args.fof_order, pnf_order=args.pnf_order, 
-                pnf_fittype=args.pnf_fittype, interact=args.interact)
+                pnf_order=args.pnf_order, interact=args.interact)
         
         # Create instance with diffraction-limited profile and other
         #   inputs needed for diffraction correction
@@ -77,10 +77,11 @@ for ind in range(nfiles):
             rss.tools.plot_summary_doc_v2(geo_inst, cal_inst, dlp_inst_egr,
                     tau_inst)
         
-        # if verbose, let user know this file processed successfuly
         et = time.time()
         run_time = str((et-st)/60.)
         print('File processing time (min): ' + str(run_time))
+    except KeyboardInterrupt:
+        sys.exit()
     except:
         tb = traceback.format_exc()
         fail_file.write('-'*48+'\n')

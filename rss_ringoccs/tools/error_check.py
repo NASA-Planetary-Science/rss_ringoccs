@@ -224,7 +224,7 @@ def check_lengths(input_var_1, input_var_2,
                 \r\t\t%s\n
                 \r\tThe number of points in %s is not
                 \r\tequal to the number of points in %s.
-            """ (function_name, input_var_name_1, input_var_name_2)
+            """ % (function_name, input_var_name_1, input_var_name_2)
         )
     else:
         return

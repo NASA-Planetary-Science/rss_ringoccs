@@ -121,17 +121,19 @@ static void complex_invsqwellsol(char **args, npy_intp *dimensions,
     }
 }
 
-/* Define pointers to the C functions. */
+
+
+/*  Define pointers to the C functions.                     */
 PyUFuncGenericFunction fresnel_sin_funcs[1]     = {&double_fresnelsin};
 PyUFuncGenericFunction fresnel_cos_funcs[1]     = {&double_fresnelcos};
 PyUFuncGenericFunction sqwellsol_funcs[1]       = {&complex_sqwellsol};
 PyUFuncGenericFunction invsqwellsol_funcs[1]    = {&complex_invsqwellsol};
 
-/* Input and return types for double input and out.. */
+/*  Input and return types for double input and out.        */
 static char double_double_types[2] = {NPY_DOUBLE, NPY_DOUBLE};
 static void *PyuFunc_data[1] = {NULL};
 
-/* Input and return types for square_well_diffraction. */
+/*  Input and return types for square_well_diffraction.     */
 static char sqwellsol_types[5] = {NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE,
                                   NPY_DOUBLE, NPY_COMPLEX128};
 

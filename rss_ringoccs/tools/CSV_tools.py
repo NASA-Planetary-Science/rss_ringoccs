@@ -787,7 +787,7 @@ class ExtractCSVData(object):
 
 
 class GetUranusData(object):
-    def __init__(self,geodata,dlpdata,dx=0.25,occ=None,verbose=False):
+    def __init__(self, geodata, dlpdata, dx=0.25, occ=None, verbose=False):
         if (not isinstance(geodata,str)):
             raise TypeError("geodata must be a string: '/path/to/geodata'")
         if (not isinstance(dlpdata,str)):

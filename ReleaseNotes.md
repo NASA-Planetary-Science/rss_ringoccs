@@ -1,47 +1,53 @@
 # Release Notes #
 
+## rss_ringoccs V1.2 ##
+
+Release date: 2019 Jun 28
+
+### Changes from V1.1 ###
+
+1. Improved sigma-clipping and frequency offset fitting for speed, accuracy, and usability.
+
+2. Adapted code to process Voyager 2 radio occultation data for Uranus' rings.
+
+**Resolved V1.1-1**
+
+1. Introduced push-button scripts starting from either raw RSS files (the `e2e_batch.py` script) or from Essam Marouf's (or our) PDS-style geometry, calibration, and diffraction-limited profiles (the `quick_look.py` script), at any desired resolution (consistent with the sampling theorem and justified by the SNR), for the full set of RSS occultations at S, X, and Ka-band up to the point of USO failure.
+
+**Resolved V1.1-2**
+
+2. Software is now more extensively documented online, in the User's Guide, and within the push-button scripts.
+
+**Resolved V1.1-4**
+
+3. Improved speed of slowest routines in diffraction reconstruction by re-writing in C, wrapping in python, and utilizing multi-core processing.
+
+**Resolved V1.1-5**
+
+4. Added support for processing many of the post-USO failure RSR files.
+
+**Resolved V1.1-6**
+
+5. Added support for processing the incoherent, or scattered, signal.
+
+### Known Issues and Limitations of V1.2 ###
+
+#### V1.1-1 ####
+For the extreme nearly edge-on viewing geometry of Rev133E at X-band, rss_ringoccs gives slightly different results from PDS, traceable to a difference of about 10% in the cubic term of the varaiable psi. The origin of this discrepancy is unknown, but it is not important for any other occultation data sets we have reduced so far, and is relatively minor even for Rev133E at X band.
+Some post-USO files contain discontinuous frequency offsets. While this has largely been documented, v1.2 does not support the appropriate processing of these files.
+
+### Lien list for V1.3 ###
+
+1. Complete post-USO support. This includes addressing the discontinuous frequency offsets and the phase echo introduced by diffraction of the uplink signal by the ring system..
+
+2. Data catalog query - we will work with the PDS to ensure that our recently-submitted RSS ring occultation observation data catalog is compliant with current PDS search capabilities.
+
+3. Improve processing and documenting of the scattered signal. This should include appropriate Doppler footprint contours and correcting the observed frequency drift to account for wavelength-dependents and motion of the spacecraft.
+
+
 ## rss_ringoccs V1.1 ##
 
 Release date: 2019 Feb 1
-
-### Changes from V1.0 ###
-1. Output file formats for GEO, CAL, DLP, and TAU files modified to be consistent with December 2018 PDS RSS archive submission.
-
-2. Use 1 kHz RSR files by default, since they are now available on the PDS.
-
-3. Modify power normalization and frequency offset components of calibration steps to reduce/eliminate need for GUIs.
-
-4. Major speed-ups of many routines.
-
-5. Include calculation of threshold optical depth.
-
-6. Ability to produce summary plots of elevation vs time of the Cassini spacecraft from each DSN, for each occultation.
-
-7. Ability to produce Earth views of each occultation.
-
-8. Ability to produce summary PDF files for each occultation, in same format as PDF versions.
-
-9. All output files now include full history of commands used to produce them.
-
-10. Readthedocs documentation produced for all rss_ringoccs routines.
-
-11. Describe validation tests in User Guide. 
-
-12. Provide sample scripts for end-to-end runs of representative occultations.
-
-13. Provide additional details of steps in processing pipeline in User Guide.
-
-**Resolved V1.0-1**
-
-10. Redefine our effective resolution to match RSS Science Team Member Essam Marouf's PDS results by scaling our nominal resolution by a factor of 1/0.75. This gives an excellent match to the PDS results, and makes our results consistent with his for any given user-requested resolution.
-
-**Resolved V1.0-2**
-
-11. Eliminated GUI that produced this error.
-
-**Resolved V1.0-3**
-
-12. Eliminated GUI that produced this error.
 
 ### Known Issues and Limitations of V1.1 ###
 
@@ -61,6 +67,7 @@ For the extreme nearly edge-on viewing geometry of Rev133E at X-band, rss_ringoc
 5. Explore possibility of processing post-USO failure RSR files.
 
 6. Explore feasibility, level of effort, and value of archiving scattered signal data -- perhaps as a PDART proposal.
+
 
 ## rss_ringoccs V1.0 ##
 

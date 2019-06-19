@@ -67,13 +67,13 @@ class Calibration(object):
         :t_oet_spm_vals (*np.ndarray*): SPM values for observed event
                         time :math:`t`
         :f_sky_hz_vals (*np.ndarray*):
-                        sum of the predicted sky frequency values
+                        sum of the reconstructed sky frequency values
                         and the fit to frequency offset
                         :math:`\\hat{f}(t)_{offset}=(f_{dr}(t)
-                        -f_{dp}(t))+\\hat{f}(t)_{resid}`
+                        -f_{dp}(t))+\\hat{f}(t)_{offset}`
                         following Equation 19 in [CRSUG2018]_.
-        :f_sky_resid_fit_vals (*np.ndarray*): fit to residual sky
-                        frequency :math:`\\hat{f}(t)_{resid}`
+        :f_offset_fit_vals (*np.ndarray*): fit to
+                        frequency offset :math:`\\hat{f}(t)_{offset}`
         :p_free_vals (*np.ndarray*): fit to freespace power
                         :math:`\\hat{P}_0(t)`
         :IQ_c (*np.ndarray*): phase-corrected spacecraft signal
@@ -83,8 +83,8 @@ class Calibration(object):
         :FORFIT_chi_squared (*float*): sum of the squared residual
                         frequency offset fit such that
                         :math:`\chi^2 = \\frac{1}{N-m}
-                        \sum((\hat{f}(t)_{resid}-f(t)_{resid})
-                        /\hat{f}(t)_{resid})^2`
+                        \sum((\hat{f}(t)_{offset}-f(t)_{offset})
+                        /\hat{f}(t)_{offset})^2`
         :FSPFIT_chi_squared (*float*):
                         :math:`\chi^2 = \\frac{1}{N-m}\sum
                         ((\hat{P}_0(t)-P_0(t))/\hat{P}_0(t))^2`
@@ -139,7 +139,7 @@ class Calibration(object):
 
 
         # Calculate frequency offset fit
-        # Use default residual frequency fit
+        # Use default offset frequency fit
         fit_inst = FreqOffsetFit(rsr_inst, geo_inst, verbose=verbose,
                 write_file=write_file)
 
@@ -155,9 +155,9 @@ class Calibration(object):
         spm_cal = np.arange(geo_inst.t_oet_spm_vals[0],
                 geo_inst.t_oet_spm_vals[-1],dt_cal)
 
-        # Evaluate f_sky_pred at spm_cal
-        f_sky_pred_splcoef = splrep(fit_inst.f_spm, fit_inst.f_sky_pred)
-        f_sky_pred_cal = splev(spm_cal,f_sky_pred_splcoef)
+        # Evaluate f_sky_recon at spm_cal
+        f_sky_recon_splcoef = splrep(fit_inst.f_spm, fit_inst.f_sky_recon)
+        f_sky_recon_cal = splev(spm_cal,f_sky_recon_splcoef)
 
         # Evaluate f_offset_fit at spm_cal
         f_offset_fit_splcoef = splrep(fit_inst.f_spm,fit_inst.f_offset_fit)
@@ -170,11 +170,9 @@ class Calibration(object):
 
         # attributes for writing to file
         self.t_oet_spm_vals = spm_cal
-        self.f_sky_hz_vals = f_sky_pred_cal + f_offset_fit_cal
+        self.f_sky_hz_vals = f_sky_recon_cal + f_offset_fit_cal
         self.f_offset_fit_vals = f_offset_fit_cal
         self.f_offset = fit_inst.f_offset
-        self.f_sky_resid_fit_vals = f_offset_fit_cal
-        self.f_sky_resid = fit_inst.f_offset
         self.f_spm = fit_inst.f_spm
         self.p_free_vals = p_free_cal
         gaps_used = norm_inst.gaps

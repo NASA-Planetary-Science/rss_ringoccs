@@ -1,9 +1,9 @@
 """
 Purpose:
-        Compute a fit to the frequency offset residual using
-        the frequency offset, predicted sky frequency, and
-        reconstructed sky
-        frequency.
+        Compute a fit to the frequency offset using offset frequencies
+        calculated from raw data, sigma-clipping frequencies
+        contaminated by rings, and fitting with a polynomial of order
+        determined by an iterative F-test.
 """
 
 import numpy as np
@@ -26,23 +26,12 @@ sys.path.remove('../../')
 class FreqOffsetFit(object):
     """
     Obtains :math:`f(t)_{offset}` from ``calc_freq_offset``,
-    :math:`f(t)_{dr}` from ``calc_f_sky_recon``, and :math:`f(t)_{dp}`
-    from ``get_f_sky_pred``. Computes a polynomial fit
-    :math:`\hat{f}(t)_{resid}` of F-test specified fof_order to
-    sigma-clipped residual difference :math:`f(t)_{resid}` between
-    observed and predicted frequency offset where the residual is
-    given by
-
-    .. math::
-        f(t)_{resid} = f(t)_{offset} - (f(t)_{dr}-f(t)_{dp})
-
-    Final frequency offset :math:`\hat{f}(t)_{offset}` is found using
-    the polynomial fit :math:`\hat{f}(t)_{resid}` to the frequency
-    offset residuals such that
-
-    .. math::
-        \hat{f}(t)_{offset} = \hat{f}(t)_{resid} +
-        (f(t)_{dr} - f(t)_{dp})
+    :math:`f(t)_{dr}` from ``calc_f_sky_recon``. Computes a polynomial
+    fit :math:`\hat{f}(t)_{offset}` of F-test specified order to
+    sigma-clipped frequency offset. Final sky frequency
+    :math:`\hat{f}(t)_{sky}` is calculated by summing the polynomial
+    fit :math:`\hat{f}(t)_{offset}` with the reconstructed sky
+    frequency :math:`f(t)_{dr}`.
 
     Arguments:
         :rsr_inst (*object*): object instance of the RSRReader class
@@ -55,21 +44,18 @@ class FreqOffsetFit(object):
         :verbose (*bool*): when True, enables verbose output mode
 
     Attributes:
-        :f_offset_fit (*np.ndarray*): final frequency offset evaluated using
-                        fit to offset residuals
-                        :math:`\hat{f}(t)_{offset} =
-                        \hat{f}(t)_{resid} + (f(t)_{dr} - f(t)_{dp})`
+        :f_offset_fit (*np.ndarray*): fit to frequency offset :math:`\hat{f}(t)_{offset}
         :f_spm (*np.ndarray*): SPM at which the offset frequency was sampled
-        :f_sky_pred (*np.ndarray*): predicted sky frequency :math:`f(t)_{dp}`
-        :f_offset_fit (*np.ndarray*): fit to the residual frequency offset
-                        math:`\hat{f}(t)_{resid}` evaluated at
-                        ``f_spm``
-        :chi_squared (*float*): sum of the squared residual frequency offset fit
+        :f_sky_recon (*np.ndarray*): reconstructed sky frequency :math:`f(t)_{dr}`
+        :f_offset_fit (*np.ndarray*): fit to the frequency offset
+                        math:`\hat{f}(t)_{offset}` evaluated at ``f_spm``
+        :chi_squared (*float*): sum of the squared residual difference between
+                        the frequency offset and the frequency offset fit
                         normalized by the fit value (Pearson's
                         :math:`\chi^2`) such that
                         :math:`\chi^2 = \\frac{1}{N-m}
-                        \sum((\hat{f}(t)_{resid}-f(t)_{resid})
-                        /\hat{f}(t)_{resid})^2`
+                        \sum((\hat{f}(t)_{offset}-f(t)_{offset})
+                        /\hat{f}(t)_{offset})^2`
                         for :math:`N` data and :math:`m` free
                         parameters (i.e., the polynomial order plus
                         one).
@@ -94,7 +80,6 @@ class FreqOffsetFit(object):
             verbose = False
 
         # Extract necessary information from input instances
-        #   NOTE: predicted sky frequency extracted from rsr_inst later
         self.band = rsr_inst.band
         self.year = rsr_inst.year
         self.doy = rsr_inst.doy
@@ -155,12 +140,11 @@ class FreqOffsetFit(object):
         # Interpolate rho to frequency time values
         f_rho = splev(f_spm, rho_geo_spl_coef)
 
-        # Compute predicted sky frequency
+        # Compute reconstructed sky frequency
         if verbose:
-            print('\tCalculating predicted frequency offset...')
-        #spm0, f_sky_pred = rsr_inst.get_f_sky_pred(f_spm=f_spm)
+            print('\tCalculating reconstructed frequency offset...')
 
-        f_sky_pred = calc_f_sky_recon(f_spm, rsr_inst, sc_name, f_uso,
+        f_sky_recon = calc_f_sky_recon(f_spm, rsr_inst, sc_name, f_uso,
                 kernels)
 
         # simply fit the offset frequency
@@ -199,7 +183,7 @@ class FreqOffsetFit(object):
         self.f_offset_fit = f_offset_fit
         self.f_spm = foff_inst.f_spm
         self.f_offset = foff_inst.f_offset
-        self.f_sky_pred  = f_sky_pred
+        self.f_sky_recon  = f_sky_recon
         self.chi_squared = chi2
 
     def create_mask(self, f_spm, f_rho, f_offset):
@@ -211,6 +195,8 @@ class FreqOffsetFit(object):
                 accurate estimation of the offset frequency
                 #. offset frequencies fall more than 5-sigma beyond
                 the median offset frequency
+                #. offset frequencies vary by more than  0.25 Hz relative
+                to neighboring  offset frequencies
                 #. adjacent data all excluded by previous requirements
                 (excludes noise which by happenstance satisfies the
                 above criteria)
@@ -221,11 +207,11 @@ class FreqOffsetFit(object):
                         the occultation
             :f_rho (*np.ndarray*): ring intercept radius of the
                         spacecraft signal resampled to match f_spm
-            :f_offset (*np.ndarray*): residual sky frequency
+            :f_offset (*np.ndarray*): frequency offset
 
         Returns:
             :fsr_mask (*np.ndarray*): Array of booleons, with True for
-                                      reliable residual frequency offset.
+                                      reliable frequency offset.
         """
         dt_spm = round((self.raw_spm_vals[-1]-self.raw_spm_vals[0])
                     /float(len(self.raw_spm_vals)),8)
@@ -239,7 +225,7 @@ class FreqOffsetFit(object):
         fsr_median = np.nanmedian(f_offset[fsr_mask])
         fsr_stdev = 5.*np.sqrt(np.nanmedian(np.square(f_offset-fsr_median)))
 
-        # iteratively check to see if each residual value is within 3 sigma
+        # iteratively check to see if each freq offset value is within 3 sigma
         for i in range(len(f_offset)):
             # exclude nans
             if np.isnan(f_offset[i]):
@@ -333,7 +319,7 @@ class FreqOffsetFit(object):
                 # Create new mask array that includes everything
                 fsr_mask = np.array([True for i in range(len(f_offset))],
                         dtype=bool)
-                # iteratively check to see if each residual value is
+                # iteratively check to see if each freq offset value is
                 # within 5 sigma of fit
                 for i in range(len(f_offset)):
                     # exclude values 5-sigma outside of polynomial approximation
@@ -402,7 +388,7 @@ class FreqOffsetFit(object):
                     if not fsr_mask[i-1] and not fsr_mask[i+1]:
                         fsr_mask[i] = False
 
-        ## return frequency sky residual mask array
+        ## return frequency offset mask array
         return fsr_mask
 
     def calc_poly_order(self, f_spm_cl, f_offset_cl, verbose=False):
@@ -462,7 +448,7 @@ class FreqOffsetFit(object):
 
     def fit_freq_offset(self, f_spm, f_rho, f_offset,verbose=False):
         """
-        Fit a polynomial to residual frequency.
+        Fit a polynomial to frequency offset.
 
         Arguments:
             :f_spm (*np.ndarray*): SPM sampled by ``calc_freq_offset``
@@ -477,15 +463,16 @@ class FreqOffsetFit(object):
             :verbose (*bool*): If True, print processing steps
 
         Returns:
-            :f_offset_fit (*np.ndarray*): fit to the residual frequency
-                            offset math:`\hat{f}(t)_{resid}` evaluated at
+            :f_offset_fit (*np.ndarray*): fit to the frequency
+                            offset math:`\hat{f}(t)_{offset}` evaluated at
                             ``f_spm``
-            :chi2 (*float*): sum of the squared residual frequency offset fit
+            :chi2 (*float*): sum of the squared residual difference between
+                            frequency offset and frequency offset fit
                             normalized by the fit value (Pearson's
                             :math:`\chi^2`) such that
                             :math:`\chi^2 = \\frac{1}{N-m}
-                            \sum((\hat{f}(t)_{resid}-f(t)_{resid})
-                            /\hat{f}(t)_{resid})^2`
+                            \sum((\hat{f}(t)_{offset}-f(t)_{offset})
+                            /\hat{f}(t)_{offset})^2`
                             for :math:`N` data and :math:`m` free
                             parameters (i.e., the polynomial order plus
                             one).
@@ -499,9 +486,6 @@ class FreqOffsetFit(object):
         coef = np.polyfit(spm_temp[self.__fsr_mask],f_offset[self.__fsr_mask],
                                 self.poly_order)
 
-        '''if verbose:
-            print('\tPolynomial sum squared residuals:',stats[0])'''
-
         f_offset_fit = np.polyval( coef, spm_temp )
         v = float(len(f_offset[self.__fsr_mask])) - (self.poly_order+1)
         chi2 = np.sum(np.square(f_offset_fit[self.__fsr_mask]-
@@ -509,11 +493,11 @@ class FreqOffsetFit(object):
 
         return f_offset_fit,chi2
 
-    # Create and save a plot of the offset residual fit
-    def plotFORFit(self,spm,resid,fit,mask,spm_min,spm_max,occ_min,occ_max):
+    # Create and save a plot of the freq offset fit
+    def plotFORFit(self,spm,f_offset,fit,mask,spm_min,spm_max,occ_min,occ_max):
         """
         Purpose:
-            Plot results of the automated frequency offset residual
+            Plot results of the automated frequency offset
             fit and save plot to a file. File name will match the
             .LBL and .TAB nomenclature.
 
@@ -521,11 +505,10 @@ class FreqOffsetFit(object):
             :spm (*np.ndarray*): SPM sampled by ``calc_freq_offset``
                         when calculating the offset frequencies for
                         the occultation
-            :resid (*np.ndarray*): residual sky frequency
-            :fit (*np.ndarray*): polynomial fit to the residual sky
-                        frequency
-            :mask (*np.ndarray*): boolean array used to mask residual
-                        sky frequency for the polynomial fitting
+            :f_offset (*np.ndarray*): frequency offset
+            :fit (*np.ndarray*): polynomial fit to the frequency offset
+            :mask (*np.ndarray*): boolean array used to mask frequency
+                        offset for the polynomial fitting
             :spm_min (*float*): start of occultation in SPM
             :spm_max (*float*): end of occultation in SPM
         """
@@ -533,21 +516,18 @@ class FreqOffsetFit(object):
         filenames,outdirs = construct_filepath(self.rev_info,'FORFIT')
         # set up subplot
         ax = plt.figure().add_subplot(111)
-        # residuals used for fit
-        plt.plot(spm[mask],resid[mask],'.k')
-        # all residuals
-        plt.plot(spm,resid,'-',color='0.5',lw=1)
-        # indicate limits for ring system
-        #plt.axvline(occ_min,dashes=[12,4],color='0.2')
-        #plt.axvline(occ_max,dashes=[12,4],color='0.2')
-        # fit to residuals
+        # frequency offsets used for fit
+        plt.plot(spm[mask],f_offset[mask],'.k')
+        # all frequency offsets
+        plt.plot(spm,f_offset,'-',color='0.5',lw=1)
+        # fit to frequency offset
         plt.plot(spm,fit,'-r')
         # limits to plot
         plt.xlim(spm_min-100,spm_max+100)
-        plt.ylim(np.nanmin(resid[mask])-0.1,np.nanmax(resid[mask])+0.1)
+        plt.ylim(np.nanmin(f_offset[mask])-0.1,np.nanmax(f_offset[mask])+0.1)
         # labels
         plt.xlabel('SPM (sec)')
-        plt.ylabel(r'$f_{predict}-f_{observe}$')
+        plt.ylabel(r'Frequency Offset (Hz)')
         plt.text(0.4,0.95,'PolyOrder: '+str(self.poly_order),transform =
                 ax.transAxes)
         # output

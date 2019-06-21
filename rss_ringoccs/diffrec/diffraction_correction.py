@@ -12,7 +12,7 @@
 """
 # Import dependencies for the diffcorr module
 import numpy as np
-from scipy.special import lambertw, iv
+import sys
 from rss_ringoccs.tools.history import write_history_dict
 from rss_ringoccs.tools.write_output_files import write_output_files
 from rss_ringoccs.tools import error_check
@@ -37,16 +37,6 @@ SPEED_OF_LIGHT_KM = 299792.4580
 # Declare constants for multiples of pi.
 HALF_PI = 1.570796326794896619231322
 TWO_PI = 6.283185307179586476925287
-ONE_PI = 3.141592653589793238462643
-
-# Declare constants for the reciprocal of e and the square root of 2.
-RCPR_E = 0.3678794411714423215955238
-SQRT_2 = 1.414213562373095048801689
-
-# Declare constants for various Bessel function inputs (I_0(x)).
-IV0_20 = 87.10850209627940
-IV0_25 = 373.02058499037486
-IV0_35 = 7257.7994923041760
 
 # Dictionary containing regions of interest within the Saturnian Rings.
 region_dict = {
@@ -1081,10 +1071,12 @@ class DiffractionCorrection(object):
                         print("\t\tTrying C Code for Diffraction Correction...")
 
                     return _diffraction_functions.fresnel_transform_quadratic(
-                        T_in, self.rho_km_vals, self.F_km_vals, self.w_km_vals,
+                        T_in, self.dx_km, self.F_km_vals, self.w_km_vals,
                         start, n_used, wnum, use_norm, use_fwd
                     )
-                except (TypeError, ValueError, NameError):
+                except KeyboardInterrupt:
+                    sys.exit("KeyboardInterrupt")
+                except:
                     if self.verbose:
                         print("\t\tCould not import C code. Using Python Code.")
 

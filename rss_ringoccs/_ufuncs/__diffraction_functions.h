@@ -8,17 +8,17 @@
  *          Fresnel Quadratic Approximations:                                  *
  *              Classic quadratic approximation that is used in Fourier Optics.*
  *          Legendre Cubic Expansion:                                          *
- *              Cubic approimation of Fresnel Kernel by Legenedre polynomials. *
+ *              Cubic approimation of Fresnel Kernel by Legenedre Polynomials. *
  *          Legendre Quartic Expansion:                                        *
  *              Quartic approximation of Fresnel Kernel                        *
  *              by Legendre polynomials.                                       *
  *          Legendre Sextic Expansion:                                         *
- *              Sextic approximation of Fresnel Kernel by Legendre polynomials.*
+ *              Sextic approximation of Fresnel Kernel by Legendre Polynomials.*
  *          Legendre Octic Expansion:                                          *
- *              Octic approximation of Fresnel Kernel by Legendre polynomials. *
+ *              Octic approximation of Fresnel Kernel by Legendre Polynomials. *
  *          Newton-Raphson Method:                                             *
- *              Computes the Fresnel inverse transform by computing the        *
- *              stationary value of the Fresnel kernel using the               *
+ *              Computes the Fresnel Inverse Transform by computing the        *
+ *              stationary value of the Fresnel Kernel using the               *
  *              Newton-Raphson method of root-finding.                         *
  *******************************************************************************
  *  Variables:                                                                 *
@@ -62,13 +62,13 @@
  *******************************************************************************
  *  The Inverse Fresnel Transform:                                             *
  *                                                                             *
- *                    W/2                                                      *
+ *                infinity                                                     *
  *                     -                                                       *
  *                    | |                                                      *
  *         T(rho) =   |   T_hat(r_0)w(r-r_0)exp(-i psi(r,r_0)) dr_0            *
  *                  | |                                                        *
  *                   -                                                         *
- *                  -W/2                                                       *
+ *               -infinity                                                     *
  *                                                                             *
  *      Where T_hat is the diffracted data, w is the window function, r is     *
  *      the ring intercept point, and r_0 is a dummy variable of integration.  *
@@ -131,11 +131,14 @@
  *  fresnel_transform_newton_norm:                                             *
  *      Same as previous function, but with the normalization scheme.          *
  *******************************************************************************
- *                             A FRIENDY WARNING                               *
+ *                            A FRIENDLY WARNING                               *
  *******************************************************************************
  *  This code uses complex numbers throughout, and is compatible with the C99  *
  *  standard. To use this code, make sure your compiler supports C99 or more   *
  *  recent standards of the C Programming Language.                            *
+ *******************************************************************************
+ *  Author:     Ryan Maguire, Wellesley College                                *
+ *  Date:       June 21, 2019                                                  *
  ******************************************************************************/
 
 /*  Include guard to avoid importing this file twice.                         */
@@ -172,11 +175,13 @@ static void get_arr(double* x_arr, double dx, long nw_pts)
      *      This computes an array of length nw_pts, with values ranging from  *
      *      -nw_pts*dx to zero. Due to symmetry in the reconstruction, only    *
      *      the left half of a given window is needed, and hence this returns  *
-     *      only half of the array. The values 0 to nw_pts*dx are omitted.     *
+     *      only half of the array. The values zero to nw_pts*dx are omitted.  *
      **************************************************************************/
+
+    /*  Declare variable for indexing over.                                   */
     long i;
 
-    /*  Loop over the input array, and assign the correct ring radius (km)  */
+    /*  Loop over the input array, and assign the correct ring radius (km)    */
     for (i=0; i<nw_pts; ++i){
         x_arr[i] = (i-nw_pts)*dx;
     }
@@ -203,7 +208,7 @@ complex double _fresnel_transform(double* x_arr, char* T_in, double* w_func,
     long i, j;
 
     /*  rcpr_F and rcpr_F2 are the reciprocal of the Fresnel scale, and the   *
-     *  square of this. x is used for argument of the Fresnel kernel.         */
+     *  square of this. x is used as the argument of the Fresnel kernel.      */
     double x, rcpr_F, rcpr_F2;
 
     /*  exp_negative_ix is used for the Fresnel kernel.                       */
@@ -233,8 +238,8 @@ complex double _fresnel_transform(double* x_arr, char* T_in, double* w_func,
         j += 1;
     }
 
-    /*  Add the central point in the Riemann sum. This is center of the       *
-     *  window function, that is where w_func = 1.                            */
+    /*  Add the central point in the Riemann sum. This is the center of the   *
+     *  window function. That is, where w_func = 1.                           */
     T_out += *(complex double *)T_in;
 
     /*  Multiply result by the coefficient found in the Fresnel inverse.      */
@@ -264,7 +269,7 @@ complex double _fresnel_transform_norm(double* x_arr, char* T_in,
     long i, j;
 
     /*  rcpr_F and rcpr_F2 are the reciprocal of the Fresnel scale, and the   *
-     *  square of this. x is used for argument of the Fresnel kernel.         */
+     *  square of this. x is used as the argument of the Fresnel kernel.      */
     double x, rcpr_F, rcpr_F2;
 
     /*  exp_negative_ix is the Fresnel kernel, norm is the normalization.     */

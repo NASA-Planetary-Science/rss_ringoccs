@@ -688,10 +688,10 @@ class ExtractCSVData(object):
         self.p_norm_vals = np.exp(-self.raw_tau_vals/raw_mu)
         
         self.f_sky_hz_vals = np.interp(self.t_oet_spm_vals, cal_spm,
-                self.f_sky_hz_vals)
+                                       self.f_sky_hz_vals)
         self.D_km_vals = np.interp(self.rho_km_vals, geo_rho, self.D_km_vals)
         self.rho_dot_kms_vals = np.interp(self.rho_km_vals, geo_rho,
-                self.rho_dot_kms_vals)
+                                          self.rho_dot_kms_vals)
 
         del raw_mu, geo_rho
 
@@ -703,17 +703,11 @@ class ExtractCSVData(object):
             rfin = int(np.max((rmax-self.rho_km_vals>=0).nonzero()))
             rstart = int(np.min((self.rho_km_vals-rmin>=0).nonzero()))
             self.tau_rho = self.rho_km_vals[rstart:rfin+1]
-            interp = interpolate.interp1d(tau_dat.rho_km_vals,
-                                          tau_dat.raw_tau_vals, kind='cubic')
-            self.tau_vals = interp(self.tau_rho)
-            interp = interpolate.interp1d(tau_dat.rho_km_vals,
-                                          np.deg2rad(tau_dat.phase_deg_vals),
-                                          kind='cubic')
-            self.phase_vals = interp(self.tau_rho)
-            interp = interpolate.interp1d(tau_dat.rho_km_vals, tm, kind='cubic')
-            tm = interp(self.tau_rho)
+            self.tau_vals = np.interp(self.tau_rho, tau_dat.rho_km_vals, tau_dat.raw_tau_vals)
+            self.phase_vals = np.interp(self.tau_rho, tau_dat.rho_km_vals, np.deg2rad(tau_dat.phase_deg_vals))
+            tm = np.interp(self.tau_rho, tau_dat.rho_km_vals, tm)
             self.power_vals = np.exp(-self.tau_vals/tm)
-            del tau_dat, tm, rmin, rmax, rfin, rstart, interp
+            del tau_dat, tm, rmin, rmax, rfin, rstart
         else:
             self.tau_rho = None
             self.tau_vals = None
@@ -737,26 +731,41 @@ class ExtractCSVData(object):
         self.history = write_history_dict(input_vars, input_kwds, __file__)
         var = geo.split("/")[-1]
 
-        var = var.split("_")
-        band = '"%s"' % var[3][0]
-        year = var[1]
-        doy = var[2]
-        dsn = "DSS-%s" % (var[3][1:])
-        rev_num = date_to_rev(int(year), int(doy))
-        occ_dir = rev_to_occ_info(rev_num)
-        prof_dir = '"%s"' % var[4]
+        try:
+            var = var.split("_")
+            band = '"%s"' % var[3][0]
+            year = var[1]
+            doy = var[2]
+            dsn = "DSS-%s" % (var[3][1:])
+            rev_num = date_to_rev(int(year), int(doy))
+            occ_dir = rev_to_occ_info(rev_num)
+            prof_dir = '"%s"' % var[4]
 
-        self.rev_info = {
-            "rsr_file": "UNK",
-            "band": band,
-            "year": year,
-            "doy": doy,
-            "dsn": dsn,
-            "occ_dir": occ_dir,
-            "planetary_occ_flag": occ_dir,
-            "rev_num": rev_num,
-            "prof_dir": prof_dir
-        }
+            self.rev_info = {
+                "rsr_file": "UNK",
+                "band": band,
+                "year": year,
+                "doy": doy,
+                "dsn": dsn,
+                "occ_dir": occ_dir,
+                "planetary_occ_flag": occ_dir,
+                "rev_num": rev_num,
+                "prof_dir": prof_dir
+            }
+        except:
+            print(
+                """
+                    \r\tError: rss_ringoccs
+                    \r\t\ttools.CSV_tools.ExtractCSVData\n
+                    \r\tCould not set rev_info. Returning data without this.
+                    \r\twrite_file option will not work with this instance of
+                    \r\tthe ExtractCSVData class. This can still be used with
+                    \r\tDiffractionCorrection if write_file=False is set.\n
+                    \r\tTo correct, re-run within pipeline directory.
+                """
+            )
+
+            self.rev_info = None
 
         if verbose:
             print("\tHistory Complete.")
@@ -766,15 +775,13 @@ class ExtractCSVData(object):
 
 
 class GetUranusData(object):
-    def __init__(self, geodata, dlpdata, dx=0.25, occ=None, verbose=False):
-        if (not isinstance(geodata,str)):
-            raise TypeError("geodata must be a string: '/path/to/geodata'")
-        if (not isinstance(dlpdata,str)):
-            raise TypeError("dlpdata must be a string: '/path/to/dlpdata'")
-        if (not isinstance(dx,float)):
-            raise TypeError("dx must be a floating point number")
-        if (dx <= 0.0):
-            raise ValueEorr("dx must be a positive number")
+    def __init__(self, geo, dlp, dx=0.25, occ=None, verbose=False):
+        fname = "tools.CSV_tools.GetUranusData"
+        error_check.check_type(geo, str, "geo", fname)
+        error_check.check_type(dlp, str, "cal", fname)
+        error_check.check_type(dx, float, "dx", fname)
+        error_check.check_non_negative(dx, "dx", fname)
+
         if occ:
             if (not isinstance(occ,str)):
                 raise TypeError("occ must be a string")
@@ -785,16 +792,10 @@ class GetUranusData(object):
                 else:
                     pass
 
-        geo_dat = get_geo(geodata,verbose=verbose)
-        dlp_dat = pd.read_csv(
-            dlpdata, delimiter=',',
-            names=[
-                "t_oet_spm_vals",
-                "p_norm_vals",
-                "phase_rad_vals",
-                "f_sky_hz_vals"
-            ]
-        )
+        geo_dat = get_geo(geo, verbose=verbose)
+        dlp_dat = pd.read_csv(dlp, delimiter=',',
+                              names=["t_oet_spm_vals", "p_norm_vals",
+                                     "phase_rad_vals", "f_sky_hz_vals"])
 
         dlp_spm = np.array(dlp_dat.t_oet_spm_vals)
         dlp_pow = np.array(dlp_dat.p_norm_vals)
@@ -814,11 +815,16 @@ class GetUranusData(object):
         t_geo1 = np.min(geo_spm)
         t_geo2 = np.max(geo_spm)
 
-        t1 = np.max([t_dlp1,t_geo1])
-        t2 = np.min([t_dlp2,t_geo2])
+        t1 = np.max([t_dlp1, t_geo1])
+        t2 = np.min([t_dlp2, t_geo2])
         if (t1 > t2):
             raise ValueError(
-                "Geo and DLP data never overlap. No data available."
+                """
+                    \r\tError Encountered: rss_ringoccs
+                    \r\t\t%s\n
+                    \r\tGeo and DLP fules never overlap.
+                    \r\tNo data available to process.
+                """ % fname
             )
 
         start = np.min((geo_spm >= t1).nonzero())
@@ -855,35 +861,19 @@ class GetUranusData(object):
         else:
             raise ValueError("Invalid occ keyword: %s" % occ)
 
-        dlp_rho_interp = interpolate.interp1d(geo_spm,geo_rho,kind="linear")
-        dlp_rho = dlp_rho_interp(t_dlp)
+        dlp_rho = np.interp(geo_spm, geo_rho, t_dlp)
 
         rho_min = np.min(dlp_rho)
         rho_max = np.max(dlp_rho)
         self.rho_km_vals = np.arange(rho_min,rho_max,dx)
 
-        drho_interp = interpolate.interp1d(geo_rho,geo_drho,kind="linear")
-        self.rho_dot_kms_vals = drho_interp(self.rho_km_vals)
-        
-        geo_D_interp = interpolate.interp1d(geo_rho,geo_D, kind="linear")
-        self.D_km_vals = geo_D_interp(self.rho_km_vals)
-
-        geo_B_interp = interpolate.interp1d(geo_rho, geo_B, kind="linear")
-        self.B_rad_vals = np.deg2rad(geo_B_interp(self.rho_km_vals))
-
-        geo_phi_interp = interpolate.interp1d(geo_rho, geo_phi, kind="linear")
-        self.phi_rad_vals = np.deg2rad(geo_phi_interp(self.rho_km_vals))
-
-        power_interp = interpolate.interp1d(dlp_rho, dlp_pow, kind="linear")
-        self.p_norm_vals = power_interp(self.rho_km_vals)
-
-        phase_interp = interpolate.interp1d(dlp_rho, dlp_phs[tstart:tfinish+1],
-                                            kind="linear")
-        self.phase_rad_vals = phase_interp(self.rho_km_vals)
-
-        freq_interp = interpolate.interp1d(dlp_rho, dlp_frq[tstart:tfinish+1],
-                                           kind="linear")
-        self.f_sky_hz_vals = freq_interp(self.rho_km_vals)
+        self.rho_dot_kms_vals = np.interp(self.rho_km_vals, geo_rho, geo_drho)
+        self.D_km_vals = np.interp(self.rho_km_vals, geo_rho, geo_D)
+        self.B_rad_vals = np.deg2rad(np.interp(self.rho_km_vals, geo_rho, geo_B))
+        self.phi_rad_vals = np.deg2rad(np.interp(self.rho_km_vals, geo_rho, geo_phi))
+        self.p_norm_vals = np.interp(self.rho_km_vals, dlp_rho, dlp_pow)
+        self.phase_rad_vals = np.interp(self.rho_km_vals, dlp_rho, dlp_phs[tstart:tfinish+1])
+        self.f_sky_hz_vals = np.interp(self.rho_km_vals, dlp_rho, dlp_frq[tstart:tfinish+1])
 
         n = np.size(self.rho_km_vals)
 
@@ -901,8 +891,8 @@ class GetUranusData(object):
             print("\tWriting History...")
 
         input_vars = {
-            "GEO Data": geodata,
-            "DLP Data": dlpdata
+            "GEO Data": geo,
+            "DLP Data": dlp
             }
         input_kwds = {
             "occ":             occ,

@@ -77,20 +77,26 @@ class CompareTau(object):
         )
 
         self.rho_km_vals = rec.rho_km_vals
-        tr = data.tau_rho
         rmin = np.min(self.rho_km_vals)
         rmax = np.max(self.rho_km_vals)
-        tau_rstart = int(np.min((tr-rmin>=0).nonzero()))
-        tau_rfin = int(np.max((rmax-tr>=0).nonzero()))
+        rstart = int(np.min((data.tau_rho-rmin>=0).nonzero()))
+        rfin = int(np.max((rmax-data.tau_rho>=0).nonzero()))
 
-        self.rho_km_vals = rec.rho_km_vals
-        self.power_vals = rec.power_vals
-        self.phase_vals = rec.phase_vals
-        self.tau_vals = rec.tau_vals
-        self.tau_rho = data.tau_rho[tau_rstart:tau_rfin+1]
-        self.tau_power = data.power_vals[tau_rstart:tau_rfin+1]
-        self.tau_phase = data.phase_vals[tau_rstart:tau_rfin+1]
-        self.tau_tau = data.tau_vals[tau_rstart:tau_rfin+1]
+        self.tau_rho = data.tau_rho[rstart:rfin+1]
+        self.tau_power = data.power_vals[rstart:rfin+1]
+        self.tau_phase = data.phase_vals[rstart:rfin+1]
+        self.tau_tau = data.tau_vals[rstart:rfin+1]
+
+        rmin = np.min(data.tau_rho)
+        rmax = np.max(data.tau_rho)
+        rstart = int(np.min((self.rho_km_vals-rmin>=0).nonzero()))
+        rfin = int(np.max((rmax-self.rho_km_vals>=0).nonzero()))
+
+        self.rho_km_vals = rec.rho_km_vals[rstart:rfin+1]
+        self.power_vals = rec.power_vals[rstart:rfin+1]
+        self.phase_vals = rec.phase_vals[rstart:rfin+1]
+        self.tau_vals = rec.tau_vals[rstart:rfin+1]
+
         self.wtype = wtype
         self.res = res
 
@@ -355,33 +361,24 @@ class ModelFromGEO(object):
             pass
 
         geo_rho = self.rho_km_vals[crange]
-        self.D_km_vals = self.D_km_vals[crange]
         self.rho_dot_kms_vals = self.rho_dot_kms_vals[crange]
         self.phi_rad_vals = self.phi_rad_vals[crange]
+        self.rho_km_vals = np.arange(np.min(geo_rho), np.max(geo_rho), dx_km_desired)
         self.B_rad_vals = self.B_rad_vals[crange]
-        self.rho_km_vals = np.arange(np.min(geo_rho),
-                                     np.max(geo_rho), dx_km_desired)
+        self.D_km_vals = self.D_km_vals[crange]
 
         if verbose:
             print("\tInterpolating Data...")
 
-        interp = interpolate.interp1d(geo_rho, self.D_km_vals)
-        self.D_km_vals = interp(self.rho_km_vals)
-        interp = interpolate.interp1d(geo_rho, self.rho_dot_kms_vals)
-        self.rho_dot_kms_vals = interp(self.rho_km_vals)
-        interp = interpolate.interp1d(geo_rho, self.phi_rad_vals)
-        self.phi_rad_vals = interp(self.rho_km_vals)
-        interp = interpolate.interp1d(geo_rho, self.phi_rl_rad_vals)
-        self.phi_rl_rad_vals = interp(self.rho_km_vals)
-        interp = interpolate.interp1d(geo_rho, self.B_rad_vals)
-        self.B_rad_vals = interp(self.rho_km_vals)
-        interp = interpolate.interp1d(geo_rho, self.t_oet_spm_vals)
-        self.t_oet_spm_vals = interp(self.rho_km_vals)
-        interp = interpolate.interp1d(geo_rho, self.t_ret_spm_vals)
-        self.t_ret_spm_vals = interp(self.rho_km_vals)
-        interp = interpolate.interp1d(geo_rho, self.t_set_spm_vals)
-        self.t_set_spm_vals = interp(self.rho_km_vals)
-        del geo_rho, interp
+        self.rho_dot_kms_vals = np.interp(self.rho_km_vals, geo_rho, self.rho_dot_kms_vals)
+        self.phi_rl_rad_vals = np.interp(self.rho_km_vals, geo_rho, self.phi_rl_rad_vals)
+        self.t_ret_spm_vals = np.interp(self.rho_km_vals, geo_rho, self.t_ret_spm_vals)
+        self.t_oet_spm_vals = np.interp(self.rho_km_vals, geo_rho, self.t_oet_spm_vals)
+        self.t_set_spm_vals = np.interp(self.rho_km_vals, geo_rho, self.t_set_spm_vals)
+        self.phi_rad_vals = np.interp(self.rho_km_vals, geo_rho, self.phi_rad_vals)
+        self.B_rad_vals = np.interp(self.rho_km_vals, geo_rho, self.B_rad_vals)
+        self.D_km_vals = np.interp(self.rho_km_vals, geo_rho, self.D_km_vals)
+        del geo_rho
 
         # Add 'fake' variables necessary for DiffractionCorrection class.
         self.raw_tau_threshold_vals = np.zeros(np.size(self.rho_km_vals))
@@ -517,10 +514,8 @@ class PhaseEchoSquareWellFromGEO(object):
         error_check.check_type(psitype, str, "psitype", fname)
         res = error_check.check_type_and_convert(res, float, "res", fname)
         width = error_check.check_type_and_convert(width, float, "width", fname)
-        lambda_km = error_check.check_type_and_convert(lambda_km, float,
-                                                       "lambda_km", fname)
-        dx_km_desired = error_check.check_type_and_convert(dx_km_desired, float,
-                                                           "dx_km_desired", fname)
+        lambda_km = error_check.check_type_and_convert(lambda_km, float, "lambda_km", fname)
+        dx_km_desired = error_check.check_type_and_convert(dx_km_desired, float, "dx_km_desired", fname)
 
         error_check.check_positive(res, "res", fname)
         error_check.check_positive(width, "width", fname)
@@ -539,11 +534,9 @@ class PhaseEchoSquareWellFromGEO(object):
             errmess = "rho_km_vals"
             self.rho_km_vals = np.array(data.rho_km_vals)
             errmess = "phi_ora_rad_vals"
-            self.phi_rad_vals = np.array(data.phi_ora_deg_vals)
-            self.phi_rad_vals = np.deg2rad(self.phi_rad_vals)
+            self.phi_rad_vals = np.deg2rad(np.array(data.phi_ora_deg_vals))
             errmess = "B_rad_vals"
-            self.B_rad_vals = np.array(data.B_deg_vals)
-            self.B_rad_vals = np.deg2rad(self.B_rad_vals)
+            self.B_rad_vals = np.deg2rad(np.array(data.B_deg_vals))
             errmess = "t_oet_spm_vals"
             self.t_oet_spm_vals = np.array(data.t_oet_spm_vals)
             errmess = "t_ret_spm_vals"
@@ -551,8 +544,7 @@ class PhaseEchoSquareWellFromGEO(object):
             errmess = "t_set_spm_vals"
             self.t_set_spm_vals = np.array(data.t_set_spm_vals)
             errmess = "phi_rl_rad_vals"
-            self.phi_rl_rad_vals = np.array(data.phi_rl_deg_vals)
-            self.phi_rl_rad_vals = np.deg2rad(self.phi_rl_rad_vals)
+            self.phi_rl_rad_vals = np.deg2rad(np.array(data.phi_rl_deg_vals))
             errmess = "D_km_vals"
             self.D_km_vals = np.array(data.D_km_vals)
             errmess = "rho_dot_kms_vals"
@@ -575,10 +567,8 @@ class PhaseEchoSquareWellFromGEO(object):
         error_check.check_is_real(self.t_oet_spm_vals, "t_oet_spm_vals", fname)
         error_check.check_is_real(self.t_ret_spm_vals, "t_ret_spm_vals", fname)
         error_check.check_is_real(self.t_set_spm_vals, "t_set_spm_vals", fname)
-        error_check.check_is_real(self.phi_rl_rad_vals,
-                                  "phi_rl_rad_vals", fname)
-        error_check.check_is_real(self.rho_dot_kms_vals,
-                                  "rho_dot_km_vals", fname)
+        error_check.check_is_real(self.phi_rl_rad_vals, "phi_rl_rad_vals", fname)
+        error_check.check_is_real(self.rho_dot_kms_vals, "rho_dot_km_vals", fname)
 
         error_check.check_positive(self.D_km_vals, "D_km_vals", fname)
         error_check.check_positive(self.rho_km_vals, "rho_km_vals", fname)
@@ -586,12 +576,9 @@ class PhaseEchoSquareWellFromGEO(object):
         error_check.check_positive(self.t_ret_spm_vals, "t_ret_spm_vals", fname)
         error_check.check_positive(self.t_set_spm_vals, "t_set_spm_vals", fname)
 
-        error_check.check_two_pi(self.B_rad_vals, "B_rad_vals",
-                                 fname, deg=False)
-        error_check.check_two_pi(self.phi_rad_vals, "phi_rad_vals",
-                                 fname, deg=False)
-        error_check.check_two_pi(self.phi_rl_rad_vals, "phi_rl_rad_vals",
-                                 fname, deg=False)
+        error_check.check_two_pi(self.B_rad_vals, "B_rad_vals", fname, deg=False)
+        error_check.check_two_pi(self.phi_rad_vals, "phi_rad_vals", fname, deg=False)
+        error_check.check_two_pi(self.phi_rl_rad_vals, "phi_rl_rad_vals", fname, deg=False)
 
         if verbose:
             print("\tComputing Variables...")
@@ -670,38 +657,29 @@ class PhaseEchoSquareWellFromGEO(object):
             pass
 
         geo_rho = self.rho_km_vals[crange]
-        self.D_km_vals = self.D_km_vals[crange]
         self.rho_dot_kms_vals = self.rho_dot_kms_vals[crange]
         self.phi_rad_vals = self.phi_rad_vals[crange]
+        self.rho_km_vals = np.arange(np.min(geo_rho), np.max(geo_rho), dx_km_desired)
         self.B_rad_vals = self.B_rad_vals[crange]
-        self.rho_km_vals = np.arange(np.min(geo_rho),
-                                     np.max(geo_rho), dx_km_desired)
+        self.D_km_vals = self.D_km_vals[crange]
 
         if verbose:
             print("\tInterpolating Data...")
 
-        interp = interpolate.interp1d(geo_rho, self.D_km_vals)
-        self.D_km_vals = interp(self.rho_km_vals)
-        interp = interpolate.interp1d(geo_rho, self.rho_dot_kms_vals)
-        self.rho_dot_kms_vals = interp(self.rho_km_vals)
-        interp = interpolate.interp1d(geo_rho, self.phi_rad_vals)
-        self.phi_rad_vals = interp(self.rho_km_vals)
-        interp = interpolate.interp1d(geo_rho, self.phi_rl_rad_vals)
-        self.phi_rl_rad_vals = interp(self.rho_km_vals)
-        interp = interpolate.interp1d(geo_rho, self.B_rad_vals)
-        self.B_rad_vals = interp(self.rho_km_vals)
-        interp = interpolate.interp1d(geo_rho, self.t_oet_spm_vals)
-        self.t_oet_spm_vals = interp(self.rho_km_vals)
-        interp = interpolate.interp1d(geo_rho, self.t_ret_spm_vals)
-        self.t_ret_spm_vals = interp(self.rho_km_vals)
-        interp = interpolate.interp1d(geo_rho, self.t_set_spm_vals)
-        self.t_set_spm_vals = interp(self.rho_km_vals)
-        del geo_rho, interp
+        self.rho_dot_kms_vals = np.interp(self.rho_km_vals, geo_rho, self.rho_dot_kms_vals)
+        self.phi_rl_rad_vals = np.interp(self.rho_km_vals, geo_rho, self.phi_rl_rad_vals)
+        self.t_ret_spm_vals = np.interp(self.rho_km_vals, geo_rho, self.t_ret_spm_vals)
+        self.t_oet_spm_vals = np.interp(self.rho_km_vals, geo_rho, self.t_oet_spm_vals)
+        self.t_set_spm_vals = np.interp(self.rho_km_vals, geo_rho, self.t_set_spm_vals)
+        self.phi_rad_vals = np.interp(self.rho_km_vals, geo_rho, self.phi_rad_vals)
+        self.B_rad_vals = np.interp(self.rho_km_vals, geo_rho, self.B_rad_vals)
+        self.D_km_vals = np.interp(self.rho_km_vals, geo_rho, self.D_km_vals)
+        del geo_rho
 
         # Add 'fake' variables necessary for DiffractionCorrection class.
+        self.rho_corr_timing_km_vals = np.zeros(np.size(self.rho_km_vals))
         self.raw_tau_threshold_vals = np.zeros(np.size(self.rho_km_vals))
         self.rho_corr_pole_km_vals = np.zeros(np.size(self.rho_km_vals))
-        self.rho_corr_timing_km_vals = np.zeros(np.size(self.rho_km_vals))
         self.f_sky_hz_vals = np.zeros(np.size(self.rho_km_vals))
         self.f_sky_hz_vals += diffraction_correction.SPEED_OF_LIGHT_KM/lambda_km
 
@@ -738,30 +716,35 @@ class PhaseEchoSquareWellFromGEO(object):
             year = var[1]
             doy = var[2]
             dsn = "DSS-%s" % (var[3][1:])
-            rev_num = history.date_to_rev(int(year), int(doy))
-            occ_dir = history.rev_to_occ_info(rev_num)
-            prof_dir = '"%s%"' % var[4]
-        except:
-            var = "Unknown"
-            band = "Unknown"
-            year = "Unknown"
-            doy = "Unknown"
-            dsn = "Unknown"
-            occ_dir = "Unknown"
-            rev_num = "Unknown"
-            prof_dir = "Unknown"
+            rev_num = date_to_rev(int(year), int(doy))
+            occ_dir = rev_to_occ_info(rev_num)
+            prof_dir = '"%s"' % var[4]
 
-        self.rev_info = {
-            "rsr_file": "Unknown",
-            "band": band,
-            "year": year,
-            "doy": doy,
-            "dsn": dsn,
-            "occ_dir": occ_dir,
-            "planetary_occ_flag": occ_dir,
-            "rev_num": rev_num,
-            "prof_dir": prof_dir
-        }
+            self.rev_info = {
+                "rsr_file": "UNK",
+                "band": band,
+                "year": year,
+                "doy": doy,
+                "dsn": dsn,
+                "occ_dir": occ_dir,
+                "planetary_occ_flag": occ_dir,
+                "rev_num": rev_num,
+                "prof_dir": prof_dir
+            }
+        except:
+            print(
+                """
+                    \r\tError: rss_ringoccs
+                    \r\t\t%s\n
+                    \r\tCould not set rev_info. Returning data without this.
+                    \r\twrite_file option will not work with this instance of
+                    \r\tthe ExtractCSVData class. This can still be used with
+                    \r\tDiffractionCorrection if write_file=False is set.\n
+                    \r\tTo correct, re-run within pipeline directory.
+                """ % fname
+            )
+
+            self.rev_info = None
 
         if use_fresnel:
             center = np.min((self.rho_km_vals >= rho).nonzero())

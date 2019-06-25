@@ -1,4 +1,4 @@
-rss_ringoccs/examples/AA_examples.txt
+rss_ringoccs/examples/AAREADME_examples.txt
 
 Revisions:
   2019 Jun 25 - rfrench - original version

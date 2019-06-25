@@ -12,8 +12,7 @@ fail_file = open('../output/' + err_file, 'w')
 files = [args.mpath+line.strip('\n') for line in open(
                 args.rsr_file_list,'r').readlines()]
 
-# files with bad headers (to exclude)
-skips = [args.mpath for x in args.skips]
+
 
 nfiles = len(files)
 init_time = time.time()
@@ -28,10 +27,6 @@ for ind in range(nfiles):
         print('SKIPPING 16 KHZ FILE: ' + rsr_file)
         continue
 
-    # exclude files with bad headers
-    if rsr_file in args.skips:
-        print('SKIPPING FILE WITH BAD HEADER: '+rsr_file)
-        continue
     try:
         st = time.time()
     

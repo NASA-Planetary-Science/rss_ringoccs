@@ -2,6 +2,7 @@ rss_ringoccs/output/AAREADME_output.txt
 
 Revisions:
   2018 May 08 - rfrench - original version
+  2019 Jun 25 - rfrench - update version of User Guide to V1.2
   
 The rss_ringoccs/output directory contains output files produced by the 
 rss_ringoccs software. It contains subdirectories organized by 
@@ -22,4 +23,4 @@ Rev007/Rev007E/Rev007E_RSS_2005_123_X43_E/
   Direction:        E (egress)
 
 Additional information about output data formats can be found in 
-rss_ringoccs/docs/rss_ringoccs_users_guide.pdf
+rss_ringoccs/docs/rss_ringoccs_User_Guide_V1.2.pdf

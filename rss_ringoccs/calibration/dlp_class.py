@@ -403,15 +403,15 @@ class DiffractionLimitedProfile(object):
             cal_ing.p_free_vals = cal_inst.p_free_vals[:ind_cal_ing]
             cal_ing.f_sky_hz_vals = cal_inst.f_sky_hz_vals[:ind_cal_ing]
             cal_ing.t_oet_spm_vals = cal_inst.t_oet_spm_vals[:ind_cal_ing]
-            cal_ing.f_sky_resid_fit_vals = (
-                        cal_inst.f_sky_resid_fit_vals[:ind_cal_ing])
+            cal_ing.f_offset_fit_vals = (
+                        cal_inst.f_offset_fit_vals[:ind_cal_ing])
 
             cal_egr.IQ_c = cal_inst.IQ_c[ind_rsr_egr:]
             cal_egr.p_free_vals = cal_inst.p_free_vals[ind_cal_egr:]
             cal_egr.f_sky_hz_vals = cal_inst.f_sky_hz_vals[ind_cal_egr:]
             cal_egr.t_oet_spm_vals = cal_inst.t_oet_spm_vals[ind_cal_egr:]
-            cal_egr.f_sky_resid_fit_vals = (
-                        cal_inst.f_sky_resid_fit_vals[ind_cal_egr:])
+            cal_egr.f_offset_fit_vals = (
+                        cal_inst.f_offset_fit_vals[ind_cal_egr:])
 
             # split geometry attributes
             geo_ing.rho_km_vals = geo_inst.rho_km_vals[:ind]

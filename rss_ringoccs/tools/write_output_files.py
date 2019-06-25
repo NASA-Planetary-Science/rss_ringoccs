@@ -136,7 +136,6 @@ def construct_filepath(rev_info, filtyp):
 
 
         else:
-            print('\tCreating directory:\n\t\t' + dirstr)
             os.system('[ ! -d ' + dirstr + ' ] && mkdir -p ' + dirstr)
 
             seq_num = '0001'

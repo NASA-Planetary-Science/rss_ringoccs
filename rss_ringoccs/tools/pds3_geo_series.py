@@ -39,7 +39,7 @@ def write_geo_series_data(geo_inst, out_file):
 
     npts = len(geo_inst.t_oet_spm_vals)
 
-    print('\tWriting GEO data to: \n\t\t' + '/'.join(out_file.split('/')[0:5]) + '/\n\t\t\t' + '/'.join(out_file.split('/')[5:]))
+    print('\tWriting GEO data to: \n\t\t' + out_file)
     f = open(out_file, 'w')
 
     for n in range(npts):

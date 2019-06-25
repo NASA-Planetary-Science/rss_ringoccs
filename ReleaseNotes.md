@@ -32,13 +32,15 @@ Release date: 2019 Jun 28
 
 ### Known Issues and Limitations of V1.2 ###
 
-#### V1.1-1 ####
+#### V1.2-1 ####
 For the extreme nearly edge-on viewing geometry of Rev133E at X-band, rss_ringoccs gives slightly different results from PDS, traceable to a difference of about 10% in the cubic term of the varaiable psi. The origin of this discrepancy is unknown, but it is not important for any other occultation data sets we have reduced so far, and is relatively minor even for Rev133E at X band.
+
+#### V1.2-2 ####
 Some post-USO files contain discontinuous frequency offsets. While this has largely been documented, v1.2 does not support the appropriate processing of these files.
 
 ### Lien list for V1.3 ###
 
-1. Complete post-USO support. This includes addressing the discontinuous frequency offsets and the phase echo introduced by diffraction of the uplink signal by the ring system..
+1. Complete post-USO support. This includes addressing the discontinuous frequency offsets and the phase echo introduced by diffraction of the uplink signal by the ring system.
 
 2. Data catalog query - we will work with the PDS to ensure that our recently-submitted RSS ring occultation observation data catalog is compliant with current PDS search capabilities.
 

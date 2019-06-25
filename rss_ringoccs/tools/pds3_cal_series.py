@@ -23,7 +23,7 @@ import time
 def write_cal_series_data(cal_inst, out_file):
     """
     This writes a CAL data file with columns: observed event time,
-    sky frequency, residual frequency, and fit to free-space power.
+    sky frequency, offset frequency, and fit to free-space power.
 
     Arguments
         :cal_inst (*class*): Instance of Calibration class
@@ -37,7 +37,7 @@ def write_cal_series_data(cal_inst, out_file):
         f.write(format_str % (
             cal_inst.t_oet_spm_vals[n],
             cal_inst.f_sky_hz_vals[n],
-            cal_inst.f_sky_resid_fit_vals[n],
+            cal_inst.f_offset_fit_vals[n],
             cal_inst.p_free_vals[n],
             '\r\n'))
 
@@ -214,12 +214,12 @@ def get_cal_series_info(rev_info, cal_inst, series_name, prof_dir):
             + 'signal attributes needed to calibrate the raw ring data before'
             + sd + 'reliable optical depth profiles are computed. The '
             + 'attributes are the' + sd + 'signal sky-frequency, the '
-            + 'frequency residual, and the free-space' + sd
+            + 'frequency offset, and the free-space' + sd
             + 'signal power. The attributes are listed versus ''OBSERVED '
             + 'EVENT TIME''' + sd + '(Earth received time) over equal '
             + 'time increments (1 s).' + sd
             + ' ' + sd
-            + 'The frequency residual estimates are required to steer the '
+            + 'The frequency offset estimates are required to steer the '
             + 'frequency' + sd + 'of the downlink sinusoid to a constant '
             + 'value (near the center of the' + sd 
             + 'recording bandwidth) before the sinusoid amplitude and '
@@ -250,8 +250,7 @@ def get_cal_series_info(rev_info, cal_inst, series_name, prof_dir):
             + 'frequency needed to steer the RSR. This part can be removed '
             + 'by using' + sd +'the more accurate trajectory reconstructed '
             + 'by the Cassini Navigation' + sd + 'Team instead. '
-            + 'The listed frequency residuals are the remaining' + sd
-            + 'frequency offsets spline-fitted in a least-squares sense '
+            + 'The listed frequency offset is the polynomial fit '
             + 'over the' + sd + 'global extent of the rings. The free-space '
             + 'signal power estimates are' + sd + 'also calculated using '
             + 'global polynomial fits to power estimates outside' + sd

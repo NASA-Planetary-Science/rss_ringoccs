@@ -697,6 +697,7 @@ def plot_summary_doc_v2(geo_inst, cal_inst, dlp_inst, tau_inst):
         pdf = plot_tau(pdf, tau_inst)
         pdf = plot_phase(pdf, tau_inst)
     latex_summary_doc(outfig, tau_inst.input_res, outfig[:-4])
+    print('\tSaving summary PDF to:\n\t\t' + outfig)
 
 
     return None

@@ -49,9 +49,9 @@ GM_SSB = [
 
 # Turnaround ratios for spacecraft conversion of uplink frequency
 # (first listed band) to the downlink frequency (second listed band)
-TURNR = {'S-S':240./221.,'S-X':880./221.,'S-Ka':0./221.,
-          'X-S':240./749.,'X-X':880./749.,'X-Ka':3344./749.,
-          'Ka-S':0./3599.,'Ka-X':0./3599.,'Ka-Ka':3360./3600.}
+TURNR = {'S-S':240./221.,'S-X':880./221.,'S-K':0./221.,
+          'X-S':240./749.,'X-X':880./749.,'X-K':3344./749.,
+          'K-S':0./3599.,'K-X':0./3599.,'K-K':3360./3600.}
 
 # Predicts code
 def calc_f_sky_recon(f_spm, rsr_inst, sc_name, f_uso, kernels):

@@ -152,7 +152,7 @@
 /*  Various coefficients and constants defined here.                          */
 #include "__math_constants.h"
 
-/*  Functions for computing the Fresnel Kernel and Newton's Method. */
+/*  Functions for computing the Fresnel Kernel and Newton's Method.           */
 #include "__fresnel_kernel.h"
 
 /*******************************************************************************

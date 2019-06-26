@@ -84,37 +84,35 @@ def make_executable(path):
     mode |= (mode & 0o444) >> 2
     os.chmod(path, mode)
 
-def latex_summary_doc(pdffil, res_km, outfilename):
+def latex_summary_doc(pdffil, res_km, geo, cal, tau):
     fname = "tools.sys_tools.latex_summary_doc"
     error_check.check_type(pdffil, str, "pdffil", fname)
-    error_check.check_type(outfilename, str, "outfilename", fname)
-    res = error_check.check_type_and_convert(res_km, float, "res_km", fname)
+    error_check.check_type(geo, str, "geo", fname)
+    error_check.check_type(cal, str, "cal", fname)
+    error_check.check_type(tau, str, "tau", fname)
 
+    res = error_check.check_type_and_convert(res_km, float, "res_km", fname)
     res = "%sM" % str(int(res_km*1000.0))
 
     var = pdffil.split("/")[-1]
     var = var.split("_")
     rev = var[0][3:6]
+    occ = var[0][6:]
     doy = var[3]
-    occ = var[5]
-    if occ == 'I':
-        profdir = 'Ingress'
-    if occ == 'E':
-        profdir = 'Egress'
+    dsn = var[4][1:]
     year = var[2]
     band = var[4][0:3]
-    dsn = var[4][1:]
 
-    geo = "RSS\_%s\_%s\_%s\_%s\_GEO.TAB" % (year, doy, band, occ)
-    cal = "RSS\_%s\_%s\_%s\_%s\_CAL.TAB" % (year, doy, band, occ)
-    tau = "RSS\_%s\_%s\_%s\_%s\_TAU\_%s.TAB" % (year, doy, band, occ, res)
+    geo = geo.replace("_", "\_")
+    cal = cal.replace("_", "\_")
+    tau = tau.replace("_", "\_")
 
     LaTeXFile = r"""
         \documentclass{article}
         \usepackage{geometry}
         \geometry{a4paper, margin = 1.0in}
         \usepackage{graphicx, float}
-        \usepackage{lscape}
+        \usepackage{pdflscape}
         \usepackage[english]{babel}
         \usepackage[dvipsnames]{xcolor}
         \usepackage[font={normalsize}, labelsep=colon]{caption}
@@ -129,7 +127,6 @@ def latex_summary_doc(pdffil, res_km, outfilename):
         \newcommand{\theTAU}{%s}
         \newcommand{\theYEAR}{%s}
         \newcommand{\theBAND}{%s}
-        \newcommand{\thePROFDIR}{%s}
         \newcommand{\theDSN}{%s}
         \setlength{\parindent}{0em}
         \setlength{\parskip}{0em}
@@ -140,7 +137,7 @@ def latex_summary_doc(pdffil, res_km, outfilename):
                     RSS\textunderscore\theYEAR%%
                     \textunderscore\theDOY\textunderscore\theBAND%%
                     \textunderscore\theOCC}\\[2.0ex]
-                    Rev\theREV\
+                    Rev\theREV\theOCC\
                     Cassini Radio Science Ring Occultation:\\[1.0ex]
                     Geometry, Data Calibration,
                     and Reconstructed\\[1.0ex]
@@ -229,7 +226,7 @@ def latex_summary_doc(pdffil, res_km, outfilename):
                     OBSERVED EVENT TIME\\
                     $f_{\scriptsize{\textrm{sky}}}$&
                     SKY FREQUENCY\\
-                    $f_{\scriptsize{\textrm{resid}}}$&
+                    $f_{\scriptsize{\textrm{offset}}}$&
                     RESIDUAL FREQUENCY\\
                     $P_{\scriptsize{\textrm{free}}}$&
                     FREESPACE POWER\\
@@ -317,13 +314,18 @@ def latex_summary_doc(pdffil, res_km, outfilename):
             \begin{figure}[H]
                 \centering
                 \includegraphics[page=4, width=\textwidth]{\thePDF}
-                \caption{Rev \theREV\ - \thePROFDIR;
+                \caption{Rev\theREV\theOCC;
                          selected occultation parameters.}
             \end{figure}
             \newpage
             \begin{figure}[H]
                 \centering
-                \includegraphics[page=5, width=\textwidth]{\thePDF}
+                \includegraphics[
+                    page=5,
+                    width=\textwidth,
+                    trim = {1cm 2cm 0.5cm 2cm},
+                    clip
+                ]{\thePDF}
                 \caption{Calibration data in file \theCAL.
                          The frequency residuals data
                          (the smooth curve, in the second panel)
@@ -339,11 +341,16 @@ def latex_summary_doc(pdffil, res_km, outfilename):
                          and third panels, respectively) are used to
                          compute the calibration data.}
             \end{figure}
-            \newpage
             \begin{landscape}
                 \begin{figure}[H]
                     \centering
-                    \includegraphics[page=6]{\thePDF}
+                    \resizebox{9.5in}{5.5in}{
+                        \includegraphics[
+                            page=6,
+                            trim={2.0cm 1.0cm 1.5cm 1.5cm},
+                            clip
+                        ]{\thePDF}
+                    }
                     \caption{Observing DSN station (DSS-\theDSN) elevation
                              angle (in \textcolor{magenta}{magenta})
                              superimposed on ring profile at \theRES M
@@ -357,11 +364,15 @@ def latex_summary_doc(pdffil, res_km, outfilename):
                              as increasing direct signal extinction.}
                 \end{figure}
             \end{landscape}
-            \newpage
             \begin{figure}[H]
                 \centering
                 \resizebox{\textwidth}{!}{
-                    \includegraphics[page=7, width=\textwidth]{\thePDF}
+                    \includegraphics[
+                        page=7,
+                        width=\textwidth,
+                        trim = {0.4cm 0cm 0.5cm 0cm},
+                        clip
+                    ]{\thePDF}
                 }
                 \caption{Observing DSN station (DSS-\theDSN) elevation angle
                          (in \textcolor{magenta}{magenta}) superimposed on ring
@@ -377,7 +388,12 @@ def latex_summary_doc(pdffil, res_km, outfilename):
             \begin{figure}[H]
                 \centering
                 \resizebox{\textwidth}{!}{
-                    \includegraphics[page=8, width=\textwidth]{\thePDF}
+                    \includegraphics[
+                        page=8,
+                        width=\textwidth,
+                        trim = {0.4cm 0cm 0.5cm 0cm},
+                        clip
+                    ]{\thePDF}
                 }
                 \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file
                          \theTAU. \textcolor{blue}{Blue}: Reconstructed normal
@@ -391,7 +407,12 @@ def latex_summary_doc(pdffil, res_km, outfilename):
             \begin{figure}[H]
                 \centering
                 \resizebox{\textwidth}{!}{
-                    \includegraphics[page=9, width=\textwidth]{\thePDF}
+                    \includegraphics[
+                        page=9,
+                        width=\textwidth,
+                        trim = {0.4cm 0cm 0.5cm 0cm},
+                        clip
+                    ]{\thePDF}
                 }
                 \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file
                          \theTAU. \textcolor{blue}{Blue}: Reconstructed normal
@@ -405,7 +426,12 @@ def latex_summary_doc(pdffil, res_km, outfilename):
             \begin{figure}[H]
                 \centering
                 \resizebox{\textwidth}{!}{
-                    \includegraphics[page=10, width=\textwidth]{\thePDF}
+                    \includegraphics[
+                        page=10,
+                        width=\textwidth,
+                        trim = {0.4cm 0cm 0.5cm 0cm},
+                        clip
+                    ]{\thePDF}
                 }
                 \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file
                          \theTAU. \textcolor{blue}{Blue}: Reconstructed normal
@@ -419,7 +445,12 @@ def latex_summary_doc(pdffil, res_km, outfilename):
             \begin{figure}[H]
                 \centering
                 \resizebox{\textwidth}{!}{
-                    \includegraphics[page=11, width=\textwidth]{\thePDF}
+                    \includegraphics[
+                        page=11,
+                        width=\textwidth,
+                        trim = {0.4cm 0cm 0.5cm 0cm},
+                        clip
+                    ]{\thePDF}
                 }
                 \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file
                          \theTAU. \textcolor{blue}{Blue}: Reconstructed normal
@@ -433,7 +464,12 @@ def latex_summary_doc(pdffil, res_km, outfilename):
             \begin{figure}[H]
                 \centering
                 \resizebox{\textwidth}{!}{
-                    \includegraphics[page=12, width=\textwidth]{\thePDF}
+                    \includegraphics[
+                        page=12,
+                        width=\textwidth,
+                        trim = {0.4cm 0cm 0.5cm 0cm},
+                        clip
+                    ]{\thePDF}
                 }
                 \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file
                          \theTAU. \textcolor{blue}{Blue}: Reconstructed normal
@@ -447,7 +483,11 @@ def latex_summary_doc(pdffil, res_km, outfilename):
             \begin{figure}[H]
                 \centering
                 \resizebox{\textwidth}{!}{
-                    \includegraphics[page=13, width=\textwidth]{\thePDF}
+                    \includegraphics[page=13,
+                        width=\textwidth,
+                        trim = {0.4cm 0cm 0.5cm 0cm},
+                        clip
+                    ]{\thePDF}
                 }
                 \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file
                          \theTAU. \textcolor{blue}{Blue}: Reconstructed normal
@@ -461,7 +501,12 @@ def latex_summary_doc(pdffil, res_km, outfilename):
             \begin{figure}[H]
                 \centering
                 \resizebox{\textwidth}{!}{
-                    \includegraphics[page=14, width=\textwidth]{\thePDF}
+                    \includegraphics[
+                        page=14,
+                        width=\textwidth,
+                        trim = {0.4cm 0cm 0.5cm 0cm},
+                        clip
+                    ]{\thePDF}
                 }
                 \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file
                          \theTAU. \textcolor{blue}{Blue}: Reconstructed normal
@@ -475,7 +520,12 @@ def latex_summary_doc(pdffil, res_km, outfilename):
             \begin{figure}[H]
                 \centering
                 \resizebox{\textwidth}{!}{
-                    \includegraphics[page=15, width=\textwidth]{\thePDF}
+                    \includegraphics[
+                        page=15,
+                        width=\textwidth,
+                        trim = {0.4cm 0cm 0.5cm 0cm},
+                        clip
+                    ]{\thePDF}
                 }
                 \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file
                          \theTAU. \textcolor{blue}{Blue}: Reconstructed normal
@@ -489,7 +539,12 @@ def latex_summary_doc(pdffil, res_km, outfilename):
             \begin{figure}[H]
                 \centering
                 \resizebox{\textwidth}{!}{
-                    \includegraphics[page=16, width=\textwidth]{\thePDF}
+                    \includegraphics[
+                        page=16,
+                        width=\textwidth,
+                        trim = {0.4cm 0cm 0.5cm 0cm},
+                        clip
+                    ]{\thePDF}
                 }
                 \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file
                          \theTAU. \textcolor{blue}{Blue}: Reconstructed normal
@@ -503,7 +558,12 @@ def latex_summary_doc(pdffil, res_km, outfilename):
             \begin{figure}[H]
                 \centering
                 \resizebox{\textwidth}{!}{
-                    \includegraphics[page=17, width=\textwidth]{\thePDF}
+                    \includegraphics[
+                        page=17,
+                        width=\textwidth,
+                        trim = {0.4cm 0cm 0.5cm 0cm},
+                        clip
+                    ]{\thePDF}
                 }
                 \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file
                          \theTAU. \textcolor{blue}{Blue}: Reconstructed normal
@@ -517,7 +577,12 @@ def latex_summary_doc(pdffil, res_km, outfilename):
             \begin{figure}[H]
                 \centering
                 \resizebox{\textwidth}{!}{
-                    \includegraphics[page=18, width=\textwidth]{\thePDF}
+                    \includegraphics[
+                        page=18,
+                        width=\textwidth,
+                        trim = {0.4cm 0cm 0.5cm 0cm},
+                        clip
+                    ]{\thePDF}
                 }
                 \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file
                          \theTAU. \textcolor{blue}{Blue}: Reconstructed normal
@@ -531,7 +596,12 @@ def latex_summary_doc(pdffil, res_km, outfilename):
             \begin{figure}[H]
                 \centering
                 \resizebox{\textwidth}{!}{
-                    \includegraphics[page=19, width=\textwidth]{\thePDF}
+                    \includegraphics[
+                        page=19,
+                        width=\textwidth,
+                        trim = {0.4cm 0cm 0.5cm 0cm},
+                        clip
+                    ]{\thePDF}
                 }
                 \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file
                          \theTAU. \textcolor{blue}{Blue}: Reconstructed normal
@@ -545,7 +615,12 @@ def latex_summary_doc(pdffil, res_km, outfilename):
             \begin{figure}[H]
                 \centering
                 \resizebox{\textwidth}{!}{
-                    \includegraphics[page=20, width=\textwidth]{\thePDF}
+                    \includegraphics[
+                        page=20,
+                        width=\textwidth,
+                        trim = {0.4cm 0cm 0.5cm 0cm},
+                        clip
+                    ]{\thePDF}
                 }
                 \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file
                          \theTAU. \textcolor{blue}{Blue}: Reconstructed normal
@@ -559,7 +634,12 @@ def latex_summary_doc(pdffil, res_km, outfilename):
             \begin{figure}[H]
                 \centering
                 \resizebox{\textwidth}{!}{
-                    \includegraphics[page=21, width=\textwidth]{\thePDF}
+                    \includegraphics[
+                        page=21,
+                        width=\textwidth,
+                        trim = {0.4cm 0cm 0.5cm 0cm},
+                        clip
+                    ]{\thePDF}
                 }
                 \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file
                          \theTAU. \textcolor{blue}{Blue}: Reconstructed normal
@@ -573,7 +653,12 @@ def latex_summary_doc(pdffil, res_km, outfilename):
             \begin{figure}[H]
                 \centering
                 \resizebox{\textwidth}{!}{
-                    \includegraphics[page=22, width=\textwidth]{\thePDF}
+                    \includegraphics[
+                        page=22,
+                        width=\textwidth,
+                        trim = {0.4cm 0cm 0.5cm 0cm},
+                        clip
+                    ]{\thePDF}
                 }
                 \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file
                          \theTAU. \textcolor{blue}{Blue}: Reconstructed normal
@@ -587,7 +672,12 @@ def latex_summary_doc(pdffil, res_km, outfilename):
             \begin{figure}[H]
                 \centering
                 \resizebox{\textwidth}{!}{
-                    \includegraphics[page=23, width=\textwidth]{\thePDF}
+                    \includegraphics[
+                        page=23,
+                        width=\textwidth,
+                        trim = {0.4cm 0cm 0.5cm 0cm},
+                        clip
+                    ]{\thePDF}
                 }
                 \caption{Rev\theREV\-\theOCC\ $\tau$-profile from data file
                          \theTAU. \textcolor{blue}{Blue}: Reconstructed normal
@@ -601,33 +691,31 @@ def latex_summary_doc(pdffil, res_km, outfilename):
             \begin{figure}[H]
                 \centering
                 \resizebox{\textwidth}{!}{
-                    \includegraphics[page=24, width=\textwidth]{\thePDF}
+                    \includegraphics[
+                        page=24,
+                        width=\textwidth,
+                        trim = {1.0cm 1cm 1.4cm 1cm},
+                        clip
+                    ]{\thePDF}
                 }
                 \caption{Rev\theREV\-\theOCC\ DSS-\theDSN\ $\phi$-profile
                          from data file \theTAU. Phase wrapping occurs at
                          the $\pm$180$^{\circ}$ boundaries.}
             \end{figure}
         \end{document}
-    """ % (pdffil, rev, doy, res, occ, geo, cal, tau, year, band, profdir, dsn)
-    if (len(outfilename) >= 4):
-        ext = outfilename[-4:]
-        ext = ext.lower()
-        if ((ext == ".pdf") or (ext == ".tex")):
-            outfilename = outfilename[:-4]
-        else:
-            pass
-    else:
-        pass
+    """ % (pdffil, rev, doy, res, occ, geo, cal, tau, year, band, dsn)
 
-    texvar = outfilename.split("/")
+    texvar = pdffil.split("/")
+
     if (len(texvar) > 1):
         out = "%s/" % (texvar[0])
         for i in range(1, len(texvar)-1):
-            out = "%s/%s/" % (out, texvar[i])
+            out = "%s%s/" % (out, texvar[i])
     else:
         out = "$PWD"
 
     TexName = texvar[-1]
+    TexName = TexName.split(".")[0]
     TexFileName = '%s.tex' % TexName
     TexFile = open(TexFileName,'w')
     TexFile.write(LaTeXFile)

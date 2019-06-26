@@ -10,7 +10,7 @@ import time
 verbose = False
 write_file = True
 ### RSRReader
-rsr_file_list = '../tables/rsr_files_before_USO_failure.txt'
+rsr_file_list = '../tables/rsr_1kHz_files_before_USO_failure.txt'
 decimate_16khz_to_1khz = False       # Decimate 16 kHz rsr file to 1 kHz
 with16 = False
 
@@ -59,7 +59,7 @@ nfiles = len(files)
 init_time = time.time()
 
 for ind in range(nfiles):
-    
+
     print('\nn='+str(ind))
     rsr_file = files[ind]
 
@@ -70,22 +70,22 @@ for ind in range(nfiles):
 
     try:
         st = time.time()
-    
+
         # print RSR file
         print(rsr_file)
         # Create instance with rsr file contents
         rsr_inst = rss.rsr_reader.RSRReader(rsr_file, verbose=verbose,
                 decimate_16khz_to_1khz=decimate_16khz_to_1khz)
-            
+
         # Create instance with geometry parameters
         geo_inst = rss.occgeo.Geometry(rsr_inst, planet, spacecraft,
                 kernels, verbose=verbose, write_file=write_file)
-            
+
         # Create instance with calibrated data
-        cal_inst = rss.calibration.Calibration(rsr_inst, geo_inst, 
-                verbose=verbose, write_file=write_file, 
+        cal_inst = rss.calibration.Calibration(rsr_inst, geo_inst,
+                verbose=verbose, write_file=write_file,
                 pnf_order=pnf_order, interact=interact)
-        
+
         # Create instance with diffraction-limited profile and other
         #   inputs needed for diffraction correction
         dlp_inst_ing, dlp_inst_egr = (
@@ -112,7 +112,7 @@ for ind in range(nfiles):
                     verbose=verbose))
             rss.tools.plot_summary_doc_v2(geo_inst, cal_inst, dlp_inst_egr,
                     tau_inst)
-        
+
         et = time.time()
         run_time = str((et-st)/60.)
         print('File processing time (min): ' + str(run_time))

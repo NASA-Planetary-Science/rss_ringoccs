@@ -10,7 +10,7 @@ import time
 verbose = False
 write_file = True
 ### RSRReader
-rsr_file_list = '../tables/rsr_1kHz_files_before_USO_failure.txt'
+rsr_file_list = '../tables/rsr_1kHz_files_after_USO_failure_withuplink.txt'
 decimate_16khz_to_1khz = False       # Decimate 16 kHz rsr file to 1 kHz
 with16 = False
 

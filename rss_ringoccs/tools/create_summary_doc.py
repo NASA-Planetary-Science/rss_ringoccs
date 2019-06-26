@@ -653,7 +653,7 @@ def plot_tau(pdf, tau_inst):
     rho_min = 74.
     rho_max = 155.
 
-    ylim_max = round((max(tau_thresh) + 1.5)*2.0) / 2.0
+    ylim_max = round((max(tau_thresh) * 1.5)*2.0) / 2.0
     ylim = [ylim_max, -0.5]
     yticks_max = int(np.floor(ylim_max))
     yticks=range(0, yticks_max)

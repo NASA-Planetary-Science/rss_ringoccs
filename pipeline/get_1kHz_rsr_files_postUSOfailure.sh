@@ -5,7 +5,7 @@ if [ ! "$BASH_VERSION" ] ; then
 fi
 web="https://atmos.nmsu.edu/pdsd/archive/data/"
 # post-USO failure 1 kHz RSR files with uplink station documentation
-input=../tables/rsr_files_after_USO_failure_withuplink.txt
+input=../tables/rsr_1kHz_files_after_USO_failure_withuplink.txt
 while IFS= read -r dirfil
 do
 localdirfil="../data/$dirfil"

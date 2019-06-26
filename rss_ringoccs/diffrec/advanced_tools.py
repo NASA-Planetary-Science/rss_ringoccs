@@ -187,7 +187,7 @@ class FindOptimalResolution(object):
 
 
 class ModelFromGEO(object):
-    def __init__(self, geo, lambda_km, res, rho, width, dx_km_desired=0.25,
+    def __init__(self, geo, lambda_km, res, rho, width=100, dx_km_desired=0.25,
                  occ="other", wtype='kb25', fwd=False, norm=True, bfac=True,
                  verbose=True, psitype='fresnel', use_fresnel=False,
                  eccentricity=0.0, periapse=0.0, use_deprecate=False,
@@ -202,6 +202,7 @@ class ModelFromGEO(object):
         error_check.check_type(occ, str, "occ", fname)
         error_check.check_type(fwd, bool, "fwd", fname)
         error_check.check_type(geo, str, "geo", fname)
+        error_check.check_type(model, str, "model", fname)
         error_check.check_type(wtype, str, "wtype", fname)
         error_check.check_type(psitype, str, "psitype", fname)
         res = error_check.check_type_and_convert(res, float, "res", fname)
@@ -210,6 +211,30 @@ class ModelFromGEO(object):
                                                        "lambda_km", fname)
         dx_km_desired = error_check.check_type_and_convert(dx_km_desired, float,
                                                            "dx_km_desired", fname)
+
+        model = model.replace(" ", "").replace("'", "").replace('"', "")
+        model = model.lower()
+
+        model_list = [
+            "rightstraightedge",
+            "leftstraightedge",
+            "squarewell",
+            "deltafunction"
+        ]
+
+        if not (model in model_list):
+            erm = ""
+            for key in model_list:
+                erm = "%s\t\t'%s'\n" % (erm, key)
+            raise TypeError(
+                """
+                    \r\n\tError Encountered:\n
+                    \r\t\t%s\n\n
+                    \r\tIllegal model requested.
+                    \r\tYour input: %s
+                    \r\tAllowed options are:\n%s
+                """ % (fname, model, erm)
+            )
 
         error_check.check_positive(res, "res", fname)
         error_check.check_positive(width, "width", fname)
@@ -255,7 +280,6 @@ class ModelFromGEO(object):
                     \r\tCheck input GEO file.
                 """ % (fname, errmess)
             )
-
 
         # Run error check on variables from GEO file.
         error_check.check_is_real(self.D_km_vals, "D_km_vals", fname)
@@ -446,51 +470,146 @@ class ModelFromGEO(object):
             "prof_dir": prof_dir
         }
 
-        if use_fresnel:
-            center = np.min((self.rho_km_vals >= rho).nonzero())
-            F = special_functions.fresnel_scale(lambda_km, self.D_km_vals[center],
-                                                self.phi_rad_vals[center],
-                                                self.B_rad_vals[center])
-            T_hat = special_functions.square_well_diffraction(self.rho_km_vals,
-                                                              rho-width/2.0,
-                                                              rho+width/2.0, F)
-            self.p_norm_actual_vals =  np.zeros(np.size(self.rho_km_vals))+1.0
-            rstart = np.min((self.rho_km_vals>=rho-width/2.0).nonzero())
-            rfinsh = np.max((self.rho_km_vals<=rho+width/2.0).nonzero())
-            self.p_norm_actual_vals[rstart:rfinsh+1] = 0.0
-            self.p_norm_vals = np.abs(T_hat)*np.abs(T_hat)
-            self.phase_rad_vals = -np.arctan2(np.imag(T_hat), np.real(T_hat))
-        else:
-            self.p_norm_vals = np.zeros(np.size(self.rho_km_vals))+1.0
-            rstart = np.min((self.rho_km_vals>=rho-width/2.0).nonzero())
-            rfinsh = np.max((self.rho_km_vals<=rho+width/2.0).nonzero())
-            self.p_norm_vals[rstart:rfinsh+1] = 0.0
-            self.phase_rad_vals = np.zeros(np.size(self.rho_km_vals))
-            rec = diffraction_correction.DiffractionCorrection(
-                self, res, psitype=psitype, verbose=verbose, wtype=wtype,
-                bfac=bfac, eccentricity=eccentricity, periapse=periapse,
-                res_factor=res_factor, rng=rng
-            )
+        if (model == "squarewell"):
+            if use_fresnel:
+                center = np.min((self.rho_km_vals >= rho).nonzero())
+                F = special_functions.fresnel_scale(lambda_km, self.D_km_vals[center],
+                                                    self.phi_rad_vals[center],
+                                                    self.B_rad_vals[center])
+                T_hat = special_functions.square_well_diffraction(
+                    self.rho_km_vals, rho-width/2.0, rho+width/2.0, F
+                )
+                self.p_norm_actual_vals = np.zeros(np.size(self.rho_km_vals))+1.0
+                rstart = np.min((self.rho_km_vals>=rho-width/2.0).nonzero())
+                rfinsh = np.max((self.rho_km_vals<=rho+width/2.0).nonzero())
+                self.p_norm_actual_vals[rstart:rfinsh+1] = 0.0
+                self.p_norm_vals = np.abs(T_hat)*np.abs(T_hat)
+                self.phase_rad_vals = -np.arctan2(np.imag(T_hat), np.real(T_hat))
+            else:
+                self.p_norm_vals = np.zeros(np.size(self.rho_km_vals))+1.0
+                rstart = np.min((self.rho_km_vals>=rho-width/2.0).nonzero())
+                rfinsh = np.max((self.rho_km_vals<=rho+width/2.0).nonzero())
+                self.p_norm_vals[rstart:rfinsh+1] = 0.0
+                self.phase_rad_vals = np.zeros(np.size(self.rho_km_vals))
+                rec = diffraction_correction.DiffractionCorrection(
+                    self, res, psitype=psitype, verbose=verbose, wtype=wtype,
+                    bfac=bfac, eccentricity=eccentricity, periapse=periapse,
+                    res_factor=res_factor, rng=rng
+                )
 
-            self.p_norm_actual_vals = self.p_norm_vals
-            self.p_norm_vals = rec.power_vals
-            self.phase_rad_vals = -rec.phase_vals
-            self.F_km_vals = rec.F_km_vals
+                self.p_norm_actual_vals = self.p_norm_vals
+                self.p_norm_vals = rec.power_vals
+                self.phase_rad_vals = -rec.phase_vals
+                self.F_km_vals = rec.F_km_vals
 
-            crange = np.arange(rec.start, rec.start+rec.n_used, 1)
-            self.B_rad_vals = self.B_rad_vals[crange]
-            self.D_km_vals = self.D_km_vals[crange]
-            self.f_sky_hz_vals = self.f_sky_hz_vals[crange]
-            self.phi_rad_vals = self.phi_rad_vals[crange]
-            self.phi_rl_rad_vals = self.phi_rl_rad_vals[crange]
-            self.raw_tau_threshold_vals = self.raw_tau_threshold_vals[crange]
-            self.rho_corr_pole_km_vals = self.rho_corr_pole_km_vals[crange]
-            self.rho_corr_timing_km_vals = self.rho_corr_timing_km_vals[crange]
-            self.rho_dot_kms_vals = self.rho_dot_kms_vals[crange]
-            self.rho_km_vals = self.rho_km_vals[crange]
-            self.t_oet_spm_vals = self.t_oet_spm_vals[crange]
-            self.t_ret_spm_vals = self.t_ret_spm_vals[crange]
-            self.t_set_spm_vals = self.t_set_spm_vals[crange]
+                crange = np.arange(rec.start, rec.start+rec.n_used, 1)
+                self.B_rad_vals = self.B_rad_vals[crange]
+                self.D_km_vals = self.D_km_vals[crange]
+                self.f_sky_hz_vals = self.f_sky_hz_vals[crange]
+                self.phi_rad_vals = self.phi_rad_vals[crange]
+                self.phi_rl_rad_vals = self.phi_rl_rad_vals[crange]
+                self.raw_tau_threshold_vals = self.raw_tau_threshold_vals[crange]
+                self.rho_corr_pole_km_vals = self.rho_corr_pole_km_vals[crange]
+                self.rho_corr_timing_km_vals = self.rho_corr_timing_km_vals[crange]
+                self.rho_dot_kms_vals = self.rho_dot_kms_vals[crange]
+                self.rho_km_vals = self.rho_km_vals[crange]
+                self.t_oet_spm_vals = self.t_oet_spm_vals[crange]
+                self.t_ret_spm_vals = self.t_ret_spm_vals[crange]
+                self.t_set_spm_vals = self.t_set_spm_vals[crange]
+        elif (model == "rightstraightedge"):
+            if use_fresnel:
+                center = np.min((self.rho_km_vals >= rho).nonzero())
+                F = special_functions.fresnel_scale(lambda_km, self.D_km_vals[center],
+                                                    self.phi_rad_vals[center],
+                                                    self.B_rad_vals[center])
+                
+                x = window_functions.SQRT_PI_2*(rho-self.rho_km_vals)/F
+
+                T_hat = special_functions.fresnel_cos(x)+1j*special_functions.fresnel_sin(x)
+                T_hat = (0.5+0.5j-T_hat/window_functions.SQRT_PI_2)*(0.5-0.5j)
+
+                self.p_norm_actual_vals = np.zeros(np.size(self.rho_km_vals))
+                rstart = np.min((self.rho_km_vals>=rho).nonzero())
+                self.p_norm_actual_vals[rstart:-1] = 1.0
+                self.p_norm_vals = np.abs(T_hat)*np.abs(T_hat)
+                self.phase_rad_vals = -np.arctan2(np.imag(T_hat), np.real(T_hat))
+            else:
+                self.p_norm_vals = np.zeros(np.size(self.rho_km_vals))
+                rstart = np.min((self.rho_km_vals>=rho).nonzero())
+                self.p_norm_vals[rstart:-1] = 1.0
+                self.phase_rad_vals = np.zeros(np.size(self.rho_km_vals))
+                rec = diffraction_correction.DiffractionCorrection(
+                    self, res, psitype=psitype, verbose=verbose, wtype=wtype,
+                    bfac=bfac, eccentricity=eccentricity, periapse=periapse,
+                    res_factor=res_factor, rng=rng
+                )
+
+                self.p_norm_actual_vals = self.p_norm_vals
+                self.p_norm_vals = rec.power_vals
+                self.phase_rad_vals = -rec.phase_vals
+                self.F_km_vals = rec.F_km_vals
+
+                crange = np.arange(rec.start, rec.start+rec.n_used, 1)
+                self.B_rad_vals = self.B_rad_vals[crange]
+                self.D_km_vals = self.D_km_vals[crange]
+                self.f_sky_hz_vals = self.f_sky_hz_vals[crange]
+                self.phi_rad_vals = self.phi_rad_vals[crange]
+                self.phi_rl_rad_vals = self.phi_rl_rad_vals[crange]
+                self.raw_tau_threshold_vals = self.raw_tau_threshold_vals[crange]
+                self.rho_corr_pole_km_vals = self.rho_corr_pole_km_vals[crange]
+                self.rho_corr_timing_km_vals = self.rho_corr_timing_km_vals[crange]
+                self.rho_dot_kms_vals = self.rho_dot_kms_vals[crange]
+                self.rho_km_vals = self.rho_km_vals[crange]
+                self.t_oet_spm_vals = self.t_oet_spm_vals[crange]
+                self.t_ret_spm_vals = self.t_ret_spm_vals[crange]
+                self.t_set_spm_vals = self.t_set_spm_vals[crange]
+        elif (model == "leftstraightedge"):
+            if use_fresnel:
+                center = np.min((self.rho_km_vals >= rho).nonzero())
+                F = special_functions.fresnel_scale(lambda_km, self.D_km_vals[center],
+                                                    self.phi_rad_vals[center],
+                                                    self.B_rad_vals[center])
+                
+                x = window_functions.SQRT_PI_2*(rho-self.rho_km_vals)/F
+
+                T_hat = special_functions.fresnel_cos(x)+1j*special_functions.fresnel_sin(x)
+                T_hat = (T_hat/window_functions.SQRT_PI_2+0.5+0.5j)*(0.5-0.5j)
+
+                self.p_norm_actual_vals = np.zeros(np.size(self.rho_km_vals))
+                rstart = np.min((self.rho_km_vals>=rho).nonzero())
+                self.p_norm_actual_vals[rstart:-1] = 1.0
+                self.p_norm_vals = np.abs(T_hat)*np.abs(T_hat)
+                self.phase_rad_vals = -np.arctan2(np.imag(T_hat), np.real(T_hat))
+            else:
+                self.p_norm_vals = np.zeros(np.size(self.rho_km_vals))
+                rfinsh = np.max((self.rho_km_vals<=rho).nonzero())
+                self.p_norm_vals[0:rfinsh] = 1.0
+                self.phase_rad_vals = np.zeros(np.size(self.rho_km_vals))
+                rec = diffraction_correction.DiffractionCorrection(
+                    self, res, psitype=psitype, verbose=verbose, wtype=wtype,
+                    bfac=bfac, eccentricity=eccentricity, periapse=periapse,
+                    res_factor=res_factor, rng=rng
+                )
+
+                self.p_norm_actual_vals = self.p_norm_vals
+                self.p_norm_vals = rec.power_vals
+                self.phase_rad_vals = -rec.phase_vals
+                self.F_km_vals = rec.F_km_vals
+
+                crange = np.arange(rec.start, rec.start+rec.n_used, 1)
+                self.B_rad_vals = self.B_rad_vals[crange]
+                self.D_km_vals = self.D_km_vals[crange]
+                self.f_sky_hz_vals = self.f_sky_hz_vals[crange]
+                self.phi_rad_vals = self.phi_rad_vals[crange]
+                self.phi_rl_rad_vals = self.phi_rl_rad_vals[crange]
+                self.raw_tau_threshold_vals = self.raw_tau_threshold_vals[crange]
+                self.rho_corr_pole_km_vals = self.rho_corr_pole_km_vals[crange]
+                self.rho_corr_timing_km_vals = self.rho_corr_timing_km_vals[crange]
+                self.rho_dot_kms_vals = self.rho_dot_kms_vals[crange]
+                self.rho_km_vals = self.rho_km_vals[crange]
+                self.t_oet_spm_vals = self.t_oet_spm_vals[crange]
+                self.t_ret_spm_vals = self.t_ret_spm_vals[crange]
+                self.t_set_spm_vals = self.t_set_spm_vals[crange]
 
         if verbose:
             print("\tData Extraction Complete.")

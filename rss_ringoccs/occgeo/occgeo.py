@@ -120,6 +120,7 @@ class Geometry(object):
 
         self.verbose = verbose
         self.add_info = {}
+        nhat_p_input = nhat_p
 
         if verbose:
             print('Calculating occultation geometry...')
@@ -363,7 +364,7 @@ class Geometry(object):
                 "pt_per_sec": pt_per_sec,
                 "ref": ref,
                 "ring_frame": ring_frame,
-                "nhat_p": nhat_p,
+                "nhat_p": nhat_p_input,
                 }
 
         if self.add_info == {}:

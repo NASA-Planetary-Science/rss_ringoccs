@@ -253,7 +253,8 @@ class RSRReader(object):
         self.doy = sfdu_hdr_dict['sh_doy']
         self.year = sfdu_hdr_dict['sh_year']
         self.dsn = 'DSS-' + str(sfdu_hdr_dict['sh_dss_id'])
-        self.ul_dsn = 'DSS-'+str(sfdu_hdr_dict['sh_ul_dss_id'])
+        #self.ul_dsn = 'DSS-'+str(sfdu_hdr_dict['sh_ul_dss_id'])
+        self.ul_dsn = 'DSS-'+rsr_file.split('/')[-1].split('_')[1][5:7]
         self.band = chr(sfdu_hdr_dict['sh_dl_band'][0])
         self.ul_band = chr(sfdu_hdr_dict['sh_ulband'][0])
         #self.track_mode = sfdu_hdr_dict['sh_trk_mode']

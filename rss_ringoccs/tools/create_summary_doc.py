@@ -557,7 +557,7 @@ def plot_cal_overview(pdf, cal_inst, dlp_inst):
     axes3[2].set_ylabel(ytitle3)
     axes3[2].set_xlabel(xtitle)
     axes3[2].set_xlim(xlim)
-    axes3[2].set_ylim([0.,max(P_free_dlp*2.e-9)+0.2])
+    axes3[2].set_ylim([0.,max(P_free_dlp*2.e-9)*1.3])
     pdf.savefig()
     plt.close()
     return pdf

@@ -171,6 +171,9 @@ def calc_elevation_deg(et_vals, target, obs, kernels=None):
     """
     npts = len(et_vals)
     elev_deg_vals = np.zeros(npts)
+    if obs == '398958':
+        obs = 'MALARGUE'
+    ref = (obs + '_TOPO').replace(' ','_')
 
     # Load kernels
     if kernels:
@@ -182,7 +185,7 @@ def calc_elevation_deg(et_vals, target, obs, kernels=None):
 
         # Compute observer to target position vector in J2000
         #   with light-correction
-        ref = obs + '_TOPO'
+        
         abcorr = 'CN'
         ptarg1, ltime1 = spice.spkpos(target, et, ref, abcorr, obs)
 

@@ -28,7 +28,6 @@ sys.path.append('../../')
 import rss_ringoccs as rss
 sys.path.remove('../../')
 
-import pdb
 import os
 
 
@@ -71,8 +70,8 @@ def write_output_files(inst, add_text=None):
     else:
         print('invalid instance!')
 
-    construct_output_filename(rev_info, inst, filtyp)
-    return None
+    outfiles = construct_output_filename(rev_info, inst, filtyp)
+    return outfiles
 
 def construct_filepath(rev_info, filtyp):
     title_out = []
@@ -152,13 +151,15 @@ def construct_output_filename(rev_info, inst, filtyp):
 
     titles, outdirs = construct_filepath(rev_info, filtyp)
     ndirs = len(titles)
+    outfiles = []
     for n in range(ndirs):
         title = titles[n]
         outdir = outdirs[n]
+        outfiles.append(outdir + title)
         func_typ[filtyp[0:3]](rev_info, inst, title, outdir,
                 rev_info['prof_dir'])
 
-    return None
+    return outfiles
 
 """
 Revisions:

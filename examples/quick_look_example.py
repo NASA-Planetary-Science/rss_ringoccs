@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import time
 
 # ***** Begin user input *****
-data_dir = '../output/Rev007/Rev007E/Rev007E_RSS_2005_123_K34_E/'
+data_dir = '../output/Rev007/Rev007E/Rev007E_RSS_2005_123_X43_E/'
 geo_file = data_dir + 'RSS_2005_123_X43_E_GEO_YYYYMMDD_0001.TAB'
 cal_file = data_dir + 'RSS_2005_123_X43_E_CAL_YYYYMMDD_0001.TAB'
 dlp_file = data_dir + 'RSS_2005_123_X43_E_DLP_0100M_YYYYMMDD_0001.TAB'

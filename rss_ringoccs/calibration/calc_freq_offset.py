@@ -59,7 +59,7 @@ class calc_freq_offset(object):
             and sets f_spm and f_offset attributes.
         """
         # hard-set the spacing to 10 spm between each window center
-        delta_t_cent = 20.
+        delta_t_cent = 10.
 
         # storage lists -- later converted to arrays and stored as attributes
         spms = []

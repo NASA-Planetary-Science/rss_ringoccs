@@ -203,7 +203,7 @@ class Calibration(object):
 
 
         if write_file:
-            write_output_files(self)
+            self.outfiles = write_output_files(self)
 
 
     def correct_IQ(self,spm_vals,IQ_m,f_spm,f_offset_fit):

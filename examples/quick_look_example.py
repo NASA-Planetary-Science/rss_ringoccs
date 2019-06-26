@@ -51,6 +51,7 @@ for n in range(nres):
     ax.set_ylabel('$\\tau$')
     ax.grid(True)
     ax.legend()
+    ax.set_ylim([-0.5,4.0])
 
 axes[0].set_title('Rev007E X43 Maxwell Ringlet Optical Depth \nReconstruction Resolution Comparison', fontsize=13)
 axes[-1].set_xlabel('$\\rho$ - ' + str(plot_center_km) + ' (km)')

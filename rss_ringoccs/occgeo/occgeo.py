@@ -189,13 +189,20 @@ class Geometry(object):
             check_posz = np.logical_and(rz1>0, rz2>0)
             check_negz = np.logical_and(rz1<0, rz2<0)
             mask = ~(np.logical_or(check_posz, check_negz))
-            if (mask==False).all():
+            if (mask==False).all() is True:
                 raise ValueError('No ring intercepts found!')
+            if (mask==True).all() is False:
 
-            t1 = t_oet_spm_vals[~mask][0]
-            t2 = t_oet_spm_vals[~mask][-1]
-            
-            if (np.logical_or(check_posz, check_negz)).any(): # is True:
+
+
+
+
+
+
+                t1 = t_oet_spm_vals[~mask][0]
+                t2 = t_oet_spm_vals[~mask][-1]
+                
+                #if (np.logical_or(check_posz, check_negz)).any(): # is True:
                 t_oet_spm_vals = t_oet_spm_vals[mask]
                 t_oet_et_vals = t_oet_et_vals[mask]
                 inds = np.argwhere(mask==False)
@@ -236,7 +243,7 @@ class Geometry(object):
                 ul_dsn_code = spice.bodn2c(ul_dsn)
             except:
                 if verbose:
-                    print('\tUplink DSN station not found -- using Earth...')
+                    print('\tUplink DSN station not found -- using Earth as observer')
 
                 ul_dsn_code = spice.bodn2c('Earth')
                 ul_dsn = 'Earth'

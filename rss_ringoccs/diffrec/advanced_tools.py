@@ -487,8 +487,6 @@ class ModelFromGEO(object):
                 rstart = np.min((self.rho_km_vals>=rho-width/2.0).nonzero())
                 rfinsh = np.max((self.rho_km_vals<=rho+width/2.0).nonzero())
                 self.p_norm_actual_vals[rstart:rfinsh+1] = 0.0
-                self.p_norm_vals = np.abs(T_hat)*np.abs(T_hat)
-                self.phase_rad_vals = -np.arctan2(np.imag(T_hat), np.real(T_hat))
             else:
                 self.p_norm_vals = np.zeros(np.size(self.rho_km_vals))+1.0
                 rstart = np.min((self.rho_km_vals>=rho-width/2.0).nonzero())
@@ -500,26 +498,6 @@ class ModelFromGEO(object):
                     bfac=bfac, eccentricity=eccentricity, periapse=periapse,
                     res_factor=res_factor, rng=rng
                 )
-
-                self.p_norm_actual_vals = self.p_norm_vals
-                self.p_norm_vals = rec.power_vals
-                self.phase_rad_vals = -rec.phase_vals
-                self.F_km_vals = rec.F_km_vals
-
-                crange = np.arange(rec.start, rec.start+rec.n_used, 1)
-                self.B_rad_vals = self.B_rad_vals[crange]
-                self.D_km_vals = self.D_km_vals[crange]
-                self.f_sky_hz_vals = self.f_sky_hz_vals[crange]
-                self.phi_rad_vals = self.phi_rad_vals[crange]
-                self.phi_rl_rad_vals = self.phi_rl_rad_vals[crange]
-                self.raw_tau_threshold_vals = self.raw_tau_threshold_vals[crange]
-                self.rho_corr_pole_km_vals = self.rho_corr_pole_km_vals[crange]
-                self.rho_corr_timing_km_vals = self.rho_corr_timing_km_vals[crange]
-                self.rho_dot_kms_vals = self.rho_dot_kms_vals[crange]
-                self.rho_km_vals = self.rho_km_vals[crange]
-                self.t_oet_spm_vals = self.t_oet_spm_vals[crange]
-                self.t_ret_spm_vals = self.t_ret_spm_vals[crange]
-                self.t_set_spm_vals = self.t_set_spm_vals[crange]
         elif (model == "rightstraightedge"):
             if use_fresnel:
                 center = np.min((self.rho_km_vals >= rho).nonzero())
@@ -535,8 +513,6 @@ class ModelFromGEO(object):
                 self.p_norm_actual_vals = np.zeros(np.size(self.rho_km_vals))
                 rstart = np.min((self.rho_km_vals>=rho).nonzero())
                 self.p_norm_actual_vals[rstart:-1] = 1.0
-                self.p_norm_vals = np.abs(T_hat)*np.abs(T_hat)
-                self.phase_rad_vals = -np.arctan2(np.imag(T_hat), np.real(T_hat))
             else:
                 self.p_norm_vals = np.zeros(np.size(self.rho_km_vals))
                 rstart = np.min((self.rho_km_vals>=rho).nonzero())
@@ -547,26 +523,6 @@ class ModelFromGEO(object):
                     bfac=bfac, eccentricity=eccentricity, periapse=periapse,
                     res_factor=res_factor, rng=rng
                 )
-
-                self.p_norm_actual_vals = self.p_norm_vals
-                self.p_norm_vals = rec.power_vals
-                self.phase_rad_vals = -rec.phase_vals
-                self.F_km_vals = rec.F_km_vals
-
-                crange = np.arange(rec.start, rec.start+rec.n_used, 1)
-                self.B_rad_vals = self.B_rad_vals[crange]
-                self.D_km_vals = self.D_km_vals[crange]
-                self.f_sky_hz_vals = self.f_sky_hz_vals[crange]
-                self.phi_rad_vals = self.phi_rad_vals[crange]
-                self.phi_rl_rad_vals = self.phi_rl_rad_vals[crange]
-                self.raw_tau_threshold_vals = self.raw_tau_threshold_vals[crange]
-                self.rho_corr_pole_km_vals = self.rho_corr_pole_km_vals[crange]
-                self.rho_corr_timing_km_vals = self.rho_corr_timing_km_vals[crange]
-                self.rho_dot_kms_vals = self.rho_dot_kms_vals[crange]
-                self.rho_km_vals = self.rho_km_vals[crange]
-                self.t_oet_spm_vals = self.t_oet_spm_vals[crange]
-                self.t_ret_spm_vals = self.t_ret_spm_vals[crange]
-                self.t_set_spm_vals = self.t_set_spm_vals[crange]
         elif (model == "leftstraightedge"):
             if use_fresnel:
                 center = np.min((self.rho_km_vals >= rho).nonzero())
@@ -582,8 +538,6 @@ class ModelFromGEO(object):
                 self.p_norm_actual_vals = np.zeros(np.size(self.rho_km_vals))
                 rstart = np.min((self.rho_km_vals>=rho).nonzero())
                 self.p_norm_actual_vals[rstart:-1] = 1.0
-                self.p_norm_vals = np.abs(T_hat)*np.abs(T_hat)
-                self.phase_rad_vals = -np.arctan2(np.imag(T_hat), np.real(T_hat))
             else:
                 self.p_norm_vals = np.zeros(np.size(self.rho_km_vals))
                 rfinsh = np.max((self.rho_km_vals<=rho).nonzero())
@@ -595,25 +549,29 @@ class ModelFromGEO(object):
                     res_factor=res_factor, rng=rng
                 )
 
-                self.p_norm_actual_vals = self.p_norm_vals
-                self.p_norm_vals = rec.power_vals
-                self.phase_rad_vals = -rec.phase_vals
-                self.F_km_vals = rec.F_km_vals
+        if use_fresnel:
+            self.p_norm_vals = np.abs(T_hat)*np.abs(T_hat)
+            self.phase_rad_vals = -np.arctan2(np.imag(T_hat), np.real(T_hat))
+        else:
+            self.p_norm_vals = rec.power_vals
+            self.phase_rad_vals = -rec.phase_vals
+            self.F_km_vals = rec.F_km_vals
+            self.p_norm_actual_vals = self.p_norm_vals
 
-                crange = np.arange(rec.start, rec.start+rec.n_used, 1)
-                self.B_rad_vals = self.B_rad_vals[crange]
-                self.D_km_vals = self.D_km_vals[crange]
-                self.f_sky_hz_vals = self.f_sky_hz_vals[crange]
-                self.phi_rad_vals = self.phi_rad_vals[crange]
-                self.phi_rl_rad_vals = self.phi_rl_rad_vals[crange]
-                self.raw_tau_threshold_vals = self.raw_tau_threshold_vals[crange]
-                self.rho_corr_pole_km_vals = self.rho_corr_pole_km_vals[crange]
-                self.rho_corr_timing_km_vals = self.rho_corr_timing_km_vals[crange]
-                self.rho_dot_kms_vals = self.rho_dot_kms_vals[crange]
-                self.rho_km_vals = self.rho_km_vals[crange]
-                self.t_oet_spm_vals = self.t_oet_spm_vals[crange]
-                self.t_ret_spm_vals = self.t_ret_spm_vals[crange]
-                self.t_set_spm_vals = self.t_set_spm_vals[crange]
+        crange = np.arange(rec.start, rec.start+rec.n_used, 1)
+        self.B_rad_vals = self.B_rad_vals[crange]
+        self.D_km_vals = self.D_km_vals[crange]
+        self.f_sky_hz_vals = self.f_sky_hz_vals[crange]
+        self.phi_rad_vals = self.phi_rad_vals[crange]
+        self.phi_rl_rad_vals = self.phi_rl_rad_vals[crange]
+        self.raw_tau_threshold_vals = self.raw_tau_threshold_vals[crange]
+        self.rho_corr_pole_km_vals = self.rho_corr_pole_km_vals[crange]
+        self.rho_corr_timing_km_vals = self.rho_corr_timing_km_vals[crange]
+        self.rho_dot_kms_vals = self.rho_dot_kms_vals[crange]
+        self.rho_km_vals = self.rho_km_vals[crange]
+        self.t_oet_spm_vals = self.t_oet_spm_vals[crange]
+        self.t_ret_spm_vals = self.t_ret_spm_vals[crange]
+        self.t_set_spm_vals = self.t_set_spm_vals[crange]
 
         if echo:
             n_shift = int(rho_shift/dx_km_desired)

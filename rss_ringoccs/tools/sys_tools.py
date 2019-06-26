@@ -227,7 +227,7 @@ def latex_summary_doc(pdffil, res_km, geo, cal, tau):
                     $f_{\scriptsize{\textrm{sky}}}$&
                     SKY FREQUENCY\\
                     $f_{\scriptsize{\textrm{offset}}}$&
-                    RESIDUAL FREQUENCY\\
+                    OFFSET FREQUENCY\\
                     $P_{\scriptsize{\textrm{free}}}$&
                     FREESPACE POWER\\
                     \hline
@@ -327,7 +327,7 @@ def latex_summary_doc(pdffil, res_km, geo, cal, tau):
                     clip
                 ]{\thePDF}
                 \caption{Calibration data in file \theCAL.
-                         The frequency residuals data
+                         The frequency offset data
                          (the smooth curve, in the second panel)
                          is used to steer the carrier signal to the
                          middle of the recording bandwidth. The

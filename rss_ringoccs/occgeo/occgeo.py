@@ -381,7 +381,7 @@ class Geometry(object):
 
         # Write output data and label file if set
         if write_file:
-            write_output_files(self)
+            self.outfiles = write_output_files(self)
 
     def __get_naif_version(self):
         """

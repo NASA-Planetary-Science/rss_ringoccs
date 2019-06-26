@@ -197,7 +197,7 @@ class DiffractionLimitedProfile(object):
 
         self.history = write_history_dict(input_vars, input_kwds, __file__)
         if write_file:
-            write_output_files(self)
+            self.outfiles = write_output_files(self)
 
 
 

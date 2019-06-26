@@ -653,10 +653,10 @@ def plot_tau(pdf, tau_inst):
     rho_min = 74.
     rho_max = 155.
 
-    ylim_max = round((max(tau_thresh) * 1.5)*2.0) / 2.0
-    ylim = [ylim_max, -0.5]
+    ylim_max = round((max(tau_thresh) * 1.5))
+    ylim = [ylim_max+0.5, -0.5]
     yticks_max = int(np.floor(ylim_max))
-    yticks=range(0, yticks_max)
+    yticks=range(0, yticks_max+1)
 
     
     for page in range(17):
@@ -671,7 +671,7 @@ def plot_tau(pdf, tau_inst):
             r2 = rho_min + 1.
             ax[n].set_xlim(rho_min, r2)
             ax[n].set_ylim(ylim)
-            ax[n].grid(True, which='both')
+            ax[n].grid(True)
             ax[n].set_ylabel('$\\tau$')
             if n==0:
                 ax[n].set_title(title)
@@ -750,7 +750,10 @@ def plot_summary_doc_v2(geo_inst, cal_inst, dlp_inst, tau_inst):
         pdf = plot_tau_overview(pdf, geo_inst, tau_inst)
         pdf = plot_tau(pdf, tau_inst)
         pdf = plot_phase(pdf, tau_inst)
-    latex_summary_doc(outfig, tau_inst.input_res, outfig[:-4])
+    geofile = geo_inst.outfiles[0].split('/')[-1]
+    calfile = cal_inst.outfiles[0].split('/')[-1]
+    taufile = tau_inst.outfiles[0].split('/')[-1]
+    latex_summary_doc(outfig, tau_inst.input_res, geofile, calfile, taufile)
     print('\tSaving summary PDF to:\n\t\t' + outfig)
 
 

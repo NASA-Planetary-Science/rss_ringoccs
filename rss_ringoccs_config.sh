@@ -55,7 +55,7 @@ fi
 # Source .bash_profile to update you path.
 echo -e ' \t ' "Sourcing .bash_profile"
 echo -e ' \t ' "Make sure you are using Bash when running rss_ringoccs"
-source .bash_profile
+source ~/.bash_profile
 
 # Update conda
 yes | conda update conda

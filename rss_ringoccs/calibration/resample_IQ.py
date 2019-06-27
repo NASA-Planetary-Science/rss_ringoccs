@@ -110,7 +110,8 @@ def resample_IQ(rho_km, IQ_c, dr_desired, verbose=False):
     Returns
         :rho_km_desired (*np.ndarray*): array of ring radius at final desired
                 spacing
-        :IQ_c_desired (*np.ndarray*):
+        :IQ_c_desired (*np.ndarray*): Frequency-corrected complex signal at 
+                final desired spacing
     """
 
     rho_km_diff = np.diff(rho_km)

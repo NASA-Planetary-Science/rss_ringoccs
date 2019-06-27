@@ -5,7 +5,7 @@ sys.path.remove('../')
 import traceback
 import time
 
-# ***** Pipeling inputs *****
+# ***** Pipeline inputs *****
 ### Global inputs
 verbose = False
 write_file = True

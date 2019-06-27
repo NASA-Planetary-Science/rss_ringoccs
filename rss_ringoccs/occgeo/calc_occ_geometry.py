@@ -188,7 +188,7 @@ def calc_elevation_deg(et_vals, target, obs, kernels=None):
 
         # Compute observer to target position vector in J2000
         #   with light-correction
-        
+
         abcorr = 'CN'
         ptarg1, ltime1 = spice.spkpos(target, et, ref, abcorr, obs)
 
@@ -338,7 +338,7 @@ def calc_phi_deg(et_vals, rho_vec_km_vals, spacecraft, dsn, nhat_p, ref='J2000',
 
     return phi_rl_deg_vals, phi_ora_deg_vals
 
-def calc_rho_km(et_vals, planet, spacecraft, dsn, kernels=None, 
+def calc_rho_km(et_vals, planet, spacecraft, dsn, kernels=None,
         ring_frame=None):
     """
     Calculate the distance between Saturn center to ring intercept point.
@@ -394,7 +394,7 @@ def calc_rho_vec_km(et_vals, planet, spacecraft, dsn, ref='J2000', kernels=None,
 
     References
         #. Ring intercept point calculation using a dynamical frame.
-            See [NAIF]_ page 19.
+           See [NAIF]_ page 19.
     """
 
     if kernels:
@@ -1034,7 +1034,7 @@ def get_planet_occ_times(et_vals, obs, planet, spacecraft, height_above=500.,
 
     Note:
         #. This was made to be generalizable to different planets, but has
-            been only tested with planet='Saturn'.
+           been only tested with planet='Saturn'.
     """
 
     if kernels:
@@ -1085,7 +1085,7 @@ def get_pole(et, planet, kernels=None):
 
     Note:
         #. Quadratic terms for pole direction are typically zero but
-            are retained here for consistency with PCK file format definitions.
+           are retained here for consistency with PCK file format definitions.
     """
 
     # Load kernels
@@ -1119,7 +1119,7 @@ def get_pole(et, planet, kernels=None):
 
     return nhat_p
 
-def xform_j2k_to_pcf(vec, et, spacecraft, dsn, nhat_p, ref='J2000', 
+def xform_j2k_to_pcf(vec, et, spacecraft, dsn, nhat_p, ref='J2000',
         kernels=None):
     """
     Transform vector in J2000 frame to planet ring plane frame.

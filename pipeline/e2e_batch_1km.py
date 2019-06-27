@@ -5,7 +5,7 @@ sys.path.remove('../')
 import traceback
 import time
 
-# ***** Pipeling inputs *****
+# ***** Pipeline inputs *****
 ### Global inputs
 verbose = False
 write_file = True
@@ -21,7 +21,6 @@ planet = 'Saturn'                      # Name of target planet
 spacecraft = 'Cassini'                 # Name of target spacecraft
 pt_per_sec = 1.0                       # Number of points per second calculated
                                        #       for each parameter
-
 ### Calibration
 dt_cal = 1.0                        # Time spacing in seconds between points
 pnf_order = 3                       # Power normalization fit order

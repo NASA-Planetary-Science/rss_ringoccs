@@ -4,10 +4,11 @@
     Class for computing the frequency corresponding to the maximum
     power in the FFT power spectrum
 
+:Dependencies:
+    #. numpy
 """
 
 import numpy as np
-import sys
 
 class calc_freq_offset(object):
     """
@@ -54,9 +55,8 @@ class calc_freq_offset(object):
 
     def __find_offset_freqs(self):
         """
-        Purpose:
-            Iteratively calls __find_peak_freq for slices of SPM and IQ
-            and sets f_spm and f_offset attributes.
+        Iteratively calls __find_peak_freq for slices of SPM and IQ
+        and sets f_spm and f_offset attributes.
         """
         # hard-set the spacing to 10 spm between each window center
         delta_t_cent = 10.

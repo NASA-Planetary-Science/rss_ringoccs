@@ -1,21 +1,27 @@
 """
-Purpose:
-    Calculate ephemeris time given a set of SPM values and appropriate
-    kernels. Called by ``calc_f_sky_recon.py``.
+
+:Purpose:
+    Calculate ephemeris time given a set of SPM values and appropriate kernels.
+
+:Dependencies:
+    #. numpy
+    #. spiceypy
+    #. sys
 """
 import numpy as np
 import spiceypy as spice
 import sys
-import pdb
 
 def spm_to_et(spm, doy, year, kernels=None):
     """
-    Arguments:
+    Convert seconds past midnight to ephemeris seconds past J2000.
+
+    Arguments
         :spm (*np.ndarray*): SPM values
         :doy (*int*): Day of year of observation
         :year (*int*): Year of observation
 
-    Keyword Arguments:
+    Keyword Arguments
         :kernels (*str*): String specifying the appropriate ephemeris
                 kernel file. If ``None``, sets the kernel file
                 to
@@ -91,11 +97,4 @@ def spm_to_et(spm, doy, year, kernels=None):
 
 """
 Revisions:
-      gjs_spm_to_et.py
-   2018 Feb 22 - gsteranka - Original version
-      spm_to_et.py
-   2018 Mar 20 - gsteranka - Copy to official version and remove
-                             debug steps
-    2018 Jul 23 - jfong - add input error checks (doy and year can't be 0)
-    2018 Jul 30 - jfong - allow float inputs for spm (in addition to array)
 """

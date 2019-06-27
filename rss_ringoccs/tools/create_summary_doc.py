@@ -1,7 +1,15 @@
 """
 
-Purpose: Create the plots in the second version of Essam's EASYDATA summary PDF.
+:Purpose:
+    Create a summary PDF of the same format as those in CORSS_8001.
 
+:Dependencies:
+    #. warnings
+    #. numpy
+    #. matplotlib
+    #. scipy
+    #. time
+    #. spiceypy
 """
 
 import warnings
@@ -31,6 +39,16 @@ Rvals=[74490., 91983.,117516., 122052.,136774.]
 lw1 = 1.0
 
 def plot_bullseye(pdf, dlp_inst):
+    """
+    Add page to pdf with a birds-eye view of the ring plane, with
+    occultation tracks (relative to Earth and J2000).
+
+    Arguments
+        :pdf (*obj*): pdf to save plot to
+        :dlp_inst (*obj*): Instance of DiffractionLimitedProfile
+    Returns
+        :pdf (*obj*): Input pdf with an additional page for plot.
+    """
     # Grab geometry information
     plt.close()
     rho_km = dlp_inst.rho_km_vals
@@ -98,6 +116,16 @@ def calc_bp(rap,decp,ra,dec):
 
 # note: p2 is a legend page with no plots
 def plot_occ_earth_view(pdf, geo_inst):
+    """
+    Add page to pdf with an Earth-view of the Saturn ring system and the
+    occultation track.
+
+    Arguments
+        :pdf (*obj*): pdf to save plot to
+        :geo_inst (*obj*): Instance of Geometry
+    Returns
+        :pdf (*obj*): Input pdf with an additional page for plot.
+    """
 
     # initialize plot
     plt.close()
@@ -289,6 +317,16 @@ def plot_occ_earth_view(pdf, geo_inst):
     return pdf
 
 def plot_occ_pole_view(pdf, geo_inst):
+    """
+    Add page to pdf with a north pole view of the Saturn ring system and the
+    occultation track.
+
+    Arguments
+        :pdf (*obj*): pdf to save plot to
+        :geo_inst (*obj*): Instance of Geometry
+    Returns
+        :pdf (*obj*): Input pdf with an additional page for plot.
+    """
     plt.close()
     plt.axis('off')
     plt.axes().set_aspect('equal')
@@ -373,6 +411,19 @@ def plot_occ_pole_view(pdf, geo_inst):
     return pdf
 
 def plot_geo_overview(pdf, geo_inst, tau_inst):
+    """
+    Add page to pdf with plots of event times, spacecraft to ring intercept
+    distance, ring intercept longitudes, ring intercept velocities, 
+    fresnel scale, and threshold optical depth.
+    occultation track.
+
+    Arguments
+        :pdf (*obj*): pdf to save plot to
+        :geo_inst (*obj*): Instance of Geometry
+        :tau_inst (*obj*): Instance of DiffractionCorrection
+    Returns
+        :pdf (*obj*): Input pdf with an additional page for plot.
+    """
     t_oet_1kspm = geo_inst.t_oet_spm_vals/1000.
     t_set_1kspm = geo_inst.t_set_spm_vals/1000.
     rho_km = geo_inst.rho_km_vals
@@ -509,6 +560,18 @@ def plot_geo_overview(pdf, geo_inst, tau_inst):
     return pdf
 
 def plot_cal_overview(pdf, cal_inst, dlp_inst):
+    """
+    Add page to pdf with plot of sky frequency, frequency offset, and
+    freespace power normalization fit.
+
+    Arguments
+        :pdf (*obj*): pdf to save plot to
+        :cal_inst (*obj*): Instance of Calibration
+        :dlp_inst (*obj*): Instance of DiffractionLimitedProfile
+
+    Returns
+        :pdf (*obj*): Input pdf with an additional page for plot.
+    """
     t_oet_spm  = cal_inst.t_oet_spm_vals
     F_offset_fit= np.interp(dlp_inst.t_oet_spm_vals, t_oet_spm, cal_inst.f_offset_fit_vals)
     F_offset = np.interp(t_oet_spm, cal_inst.f_spm, cal_inst.f_offset)
@@ -562,6 +625,18 @@ def plot_cal_overview(pdf, cal_inst, dlp_inst):
     plt.close()
     return pdf
 def plot_tau_overview(pdf, geo_inst, tau_inst):
+    """
+    Add page to pdf with one plot of the entire reconstructed optical
+    depth profile, with threshold optical depth and elevation angle overplotted.
+
+    Arguments
+        :pdf (*obj*): pdf to save plot to
+        :geo_inst (*obj*): Instance of Geometry
+        :tau_inst (*obj*): Instance of DiffractionCorrection
+
+    Returns
+        :pdf (*obj*): Input pdf with an additional page for plot.
+    """
     tau = tau_inst.tau_vals
     tau_thresh = tau_inst.tau_threshold_vals
     rho_tau = tau_inst.rho_km_vals
@@ -634,6 +709,17 @@ def plot_tau_overview(pdf, geo_inst, tau_inst):
     return pdf
 
 def plot_tau(pdf, tau_inst):
+    """
+    Add 17 pages to pdf, with each page containing 4km of the reconstructed
+    optical depth profile and threshold optical depth overplotted.
+
+    Arguments
+        :pdf (*obj*): pdf to save plot to
+        :tau_inst (*obj*): Instance of DiffractionCorrection
+
+    Returns
+        :pdf (*obj*): Input pdf with an additional page for plot.
+    """
     # Plot page 5-9 -- optical depth as a funct of ring radius
     rho_km = tau_inst.rho_km_vals
     tau = tau_inst.tau_vals
@@ -686,6 +772,17 @@ def plot_tau(pdf, tau_inst):
     return pdf
 
 def plot_phase(pdf, tau_inst):
+    """
+    Add a page to pdf with reconstructed phase, in degrees, for the entire
+    profile.
+
+    Arguments
+        :pdf (*obj*): pdf to save plot to
+        :tau_inst (*obj*): Instance of DiffractionCorrection
+
+    Returns
+        :pdf (*obj*): Input pdf with an additional page for plot.
+    """
     res_km = str(round(tau_inst.input_res,3))
     band = str(tau_inst.rev_info['band'].split('"')[1])
     if band=='K':
@@ -732,6 +829,17 @@ def plot_phase(pdf, tau_inst):
     return pdf
 
 def plot_summary_doc_v2(geo_inst, cal_inst, dlp_inst, tau_inst):
+    """
+    Create LaTeX-ed PDF with plots detailing the ring occultation event and
+    important processing steps.
+
+    Arguments
+        :geo_inst (*obj*): Instance of Geometry
+        :cal_inst (*obj*): Instance of Calibration
+        :dlp_inst (*obj*): Instance of DiffractionLimitedProfile
+        :tau_inst (*obj*): Instance of DiffractionCorrection
+
+    """
     pd1 = (tau_inst.rev_info['prof_dir'].split('"')[1])[0]
     if 'DIR' in tau_inst.rev_info.keys():
         pd1 = 'C' + pd1

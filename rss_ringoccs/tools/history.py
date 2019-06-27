@@ -1,10 +1,9 @@
 """
-history.py
 
-Purpose:
+:Purpose:
     Functions related to recording processing history.
 
-Dependencies:
+:Dependencies:
     #. sys
     #. time
     #. os
@@ -22,17 +21,16 @@ import pandas as pd
 def date_to_rev(year, doy,
         rss_file='../tables/RSSActivities_all_rings_only.txt'):
     """
-    Purpose:
-        Pull rev number from a table given the year and doy from a RSS
-        activities file with columns for CIMS request, sequence number,
-        year, doy, start earth-received time in HH:MM, end earth-received time
-        in HH:MM
+    Pull rev number from a table given the year and doy from a RSS
+    activities file with columns for CIMS request, sequence number,
+    year, doy, start earth-received time in HH:MM, end earth-received time
+    in HH:MM
 
-    Arguments:
+    Arguments
         :year (*int*): Year of occultation
         :doy (*int*): Day of year of occultation
 
-    Returns:
+    Returns
         :rev_number (*str*): 3-digit rev number (e.g. '007')
 
     Note:
@@ -99,8 +97,7 @@ def rev_to_occ_info(rev,
     Returns
         :occ_dir (*str*): Occultation direction (over entire, I&E, occultation)
                        This is not to be confused with profile direction.
-        :planetary_occ_flag (*str*): Flag for whether planet (Saturn) was
-                                  occulted during event.
+
     Note:
         #. Given default 'sroc_info_file' location, this script must be run
             one directory from the top-level rss_ringoccs directory

@@ -1,7 +1,5 @@
+
 """
-
-write_output_files.py
-
 :Purpose: 
     Functions relating to writing an output file.
 
@@ -42,10 +40,14 @@ def write_output_files(inst, add_text=None):
     Write output (geo, cal, dlp, tau) *.TAB and *.LBL files, depending on 
     instance given.
 
-    Args:
-        inst (instance):
-            Instance of either Geometry, Calibration, NormDiff, or
-            DiffractionCorrection classes.
+    Arguments
+        :inst (*object*): Instance of either Geometry, Calibration, 
+                         DiffractionLimitedProfile, or
+                         DiffractionCorrection
+
+    Keyword Arguments
+        :add_text (*str*): Additional string to be added to filename.
+        
     """
     if add_text is not None:
         add = add_text
@@ -74,6 +76,18 @@ def write_output_files(inst, add_text=None):
     return outfiles
 
 def construct_filepath(rev_info, filtyp):
+    """
+    Construct output filepath 
+
+    Arguments
+        :rev_info (*dict*): Dictionary with information related to ring
+                            occultation.
+        :filtyp (*str*): Type of file (e.g., 'GEO', 'CAL, 'DLP', 'TAU')
+
+    Returns
+        :title_out (*list*): List of strings of output file names
+        :outdir_out (*list*): List of strings of output directory path
+    """
     title_out = []
     outdir_out = []
 
@@ -148,6 +162,20 @@ def construct_filepath(rev_info, filtyp):
         
 
 def construct_output_filename(rev_info, inst, filtyp):
+    """
+    Construct output filepath 
+
+    Arguments
+        :rev_info (*dict*): Dictionary with information related to ring
+                            occultation.
+        :inst (*object*): Instance of either Geometry, Calibration, 
+                         DiffractionLimitedProfile, or
+                         DiffractionCorrection
+        :filtyp (*str*): Type of file (e.g., 'GEO', 'CAL, 'DLP', 'TAU')
+
+    Returns
+        :outfiles (*list*): List of output filepaths
+    """
 
     titles, outdirs = construct_filepath(rev_info, filtyp)
     ndirs = len(titles)
@@ -163,5 +191,4 @@ def construct_output_filename(rev_info, inst, filtyp):
 
 """
 Revisions:
-    2019 Apr 09 - jfong - add Scatter outfile
 """

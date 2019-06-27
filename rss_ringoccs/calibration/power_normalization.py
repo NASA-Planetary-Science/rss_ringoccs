@@ -1,9 +1,14 @@
 #!/usr/bin/env python
 """
-Purpose:
+
+:Purpose:
     Normalize frequency-corrected power using a polynomial fit of specified
     order.
 
+:Dependencies:
+    #. numpy
+    #. scipy
+    #. matplotlib
 """
 
 import numpy as np
@@ -18,14 +23,14 @@ from matplotlib.gridspec import GridSpec
 
 class Normalization(object):
     """
-    Purpose:
+    :Purpose:
         Finds freespace power based on ring geometry, locations of gaps
         computed by the Geometry class, and signal power relative to median
         power within the gaps. Fits the freespace power with a polynomial.
         If desired, this fitting process can be interactive. A plot will be
         saved following rss_ringoccs nomenclature to visualize the fit results.
 
-    Arguments:
+    Arguments
         :spm_raw (*np.ndarray*): SPM as sampled in the raw data
         :IQ_c (*np.ndarray*): frequency-corrected signal corresponding to
             spm_raw
@@ -37,7 +42,7 @@ class Normalization(object):
         :rho_km_vals (*np.ndarray*):
                        radial intercept poin of occultation in km
 
-    Keyword Arguments:
+    Keyword Arguments
         :verbose (*bool*): when True, outputs information to
                        command line about the freespace power fitting
                        progress and results. All results will be output
@@ -47,11 +52,14 @@ class Normalization(object):
                         fit to the freespace power. Default is 3.
         :interact (*bool*): If True, allows user to interactively adjust fit
                         to the freespace power. Default is False.
+        :fittype (*str*): Type of fit to freespace regions. Default is
+                        a polynomial fit.
     """
 
     def __init__(self, spm_raw, IQ_c, geo_inst, order=3,
             fittype='poly', interact=False, verbose=False,
             write_file=False):
+
 
         # store rev info
         self.rev_info = geo_inst.rev_info

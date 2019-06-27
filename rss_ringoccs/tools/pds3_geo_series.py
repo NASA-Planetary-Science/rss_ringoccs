@@ -1,10 +1,9 @@
+"""
 
-'''
-pds3_geo_series.py
+:Purpose: 
+    Write GEO data and label files in PDS3 format.
 
-Purpose: Write GEO data and label files in PDS3 format.
-
-Dependencies:
+:Dependencies:
     #. numpy
     #. time
     #. rss_ringoccs.tools.pds3_write_series_v2
@@ -12,8 +11,7 @@ Dependencies:
 Notes:
     [1] Contents of output GEO data and label files are meant to mimic
         GEO files from CORSS_8001 v2.
-'''
-import pdb
+"""
 import time
 from . import pds3_write_series_v2 as pds3
 import numpy as np

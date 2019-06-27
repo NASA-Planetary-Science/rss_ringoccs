@@ -25,19 +25,20 @@ sys.path.remove('../../')
 
 class FreqOffsetFit(object):
     """
-    Obtains :math:`f(t)_{offset}` from ``calc_freq_offset``,
-    :math:`f(t)_{dr}` from ``calc_f_sky_recon``. Computes a polynomial
-    fit :math:`\hat{f}(t)_{offset}` of F-test specified order to
-    sigma-clipped frequency offset. Final sky frequency
-    :math:`\hat{f}(t)_{sky}` is calculated by summing the polynomial
-    fit :math:`\hat{f}(t)_{offset}` with the reconstructed sky
-    frequency :math:`f(t)_{dr}`.
+    :Purpose:
+        Obtains :math:`f(t)_{offset}` from ``calc_freq_offset``,
+        :math:`f(t)_{dr}` from ``calc_f_sky_recon``. Computes a polynomial
+        fit :math:`\hat{f}(t)_{offset}` of F-test specified order to
+        sigma-clipped frequency offset. Final sky frequency
+        :math:`\hat{f}(t)_{sky}` is calculated by summing the polynomial
+        fit :math:`\hat{f}(t)_{offset}` with the reconstructed sky
+        frequency :math:`f(t)_{dr}`.
 
-    Arguments:
+    Arguments
         :rsr_inst (*object*): object instance of the RSRReader class
         :geo_inst (*object*): object instance of the Geometry class
 
-    Keyword Arguments:
+    Keyword Arguments
         :f_uso_x (*float*): frequency in Hz of the X-band ultra-stable
                         oscilator onboard the Cassini spacecraft.
                         Default is 8427222034.3405 Hz.
@@ -188,20 +189,19 @@ class FreqOffsetFit(object):
 
     def create_mask(self, f_spm, f_rho, f_offset):
         """
-        Purpose:
-            Creates a Boolean mask array which excludes data based on
-            the following critera:
-                #. ring or planetary occultation in region prevents
+        Creates a Boolean mask array which excludes data based on
+        the following critera:
+            #. ring or planetary occultation in region prevents
                 accurate estimation of the offset frequency
-                #. offset frequencies fall more than 5-sigma beyond
+            #. offset frequencies fall more than 5-sigma beyond
                 the median offset frequency
-                #. offset frequencies vary by more than  0.25 Hz relative
+            #. offset frequencies vary by more than  0.25 Hz relative
                 to neighboring  offset frequencies
-                #. adjacent data all excluded by previous requirements
+            #. adjacent data all excluded by previous requirements
                 (excludes noise which by happenstance satisfies the
                 above criteria)
 
-        Arguments:
+        Arguments
             :f_spm (*np.ndarray*): SPM sampled by ``calc_freq_offset``
                         when calculating the offset frequencies for
                         the occultation
@@ -209,7 +209,7 @@ class FreqOffsetFit(object):
                         spacecraft signal resampled to match f_spm
             :f_offset (*np.ndarray*): frequency offset
 
-        Returns:
+        Returns
             :fsr_mask (*np.ndarray*): Array of booleons, with True for
                                       reliable frequency offset.
         """
@@ -393,11 +393,10 @@ class FreqOffsetFit(object):
 
     def calc_poly_order(self, f_spm_cl, f_offset_cl, verbose=False):
         """
-        Purpose:
-            Use a variant of the F-test to determine the best order
-            polynomial to use to fit the frequency offset.
+        Use a variant of the F-test to determine the best order
+        polynomial to use to fit the frequency offset.
 
-        Arguments:
+        Arguments
             :f_spm_cl (*np.ndarray*): SPM sampled by ``calc_freq_offset``
                         and clipped by the initial boolean mask.
             :f_offset_cl (*np.ndarray*): carrier frequency offset from
@@ -450,7 +449,7 @@ class FreqOffsetFit(object):
         """
         Fit a polynomial to frequency offset.
 
-        Arguments:
+        Arguments
             :f_spm (*np.ndarray*): SPM sampled by ``calc_freq_offset``
                         when calculating the offset frequencies for
                         the occultation
@@ -459,10 +458,10 @@ class FreqOffsetFit(object):
             :f_offset (*np.ndarray*): carrier frequency offset from
                         center of band
 
-        Keyword Arguments:
+        Keyword Arguments
             :verbose (*bool*): If True, print processing steps
 
-        Returns:
+        Returns
             :f_offset_fit (*np.ndarray*): fit to the frequency
                             offset math:`\hat{f}(t)_{offset}` evaluated at
                             ``f_spm``
@@ -496,12 +495,11 @@ class FreqOffsetFit(object):
     # Create and save a plot of the freq offset fit
     def plotFORFit(self,spm,f_offset,fit,mask,spm_min,spm_max,occ_min,occ_max):
         """
-        Purpose:
-            Plot results of the automated frequency offset
-            fit and save plot to a file. File name will match the
-            .LBL and .TAB nomenclature.
+        Plot results of the automated frequency offset
+        fit and save plot to a file. File name will match the
+        .LBL and .TAB nomenclature.
 
-        Arguments:
+        Arguments
             :spm (*np.ndarray*): SPM sampled by ``calc_freq_offset``
                         when calculating the offset frequencies for
                         the occultation

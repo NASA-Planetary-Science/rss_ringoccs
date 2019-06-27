@@ -1,25 +1,27 @@
 
 """
-pds3_tau_series.py
+:Purpose: 
+    Write TAU data and label files in PDS3 format.
 
-Purpose: From a tau instance, produce inputs to pds3_write_series_lbl().
-
-Revisions:
-    2018 Jul 23 - jfong - cpied from jwf_pds3_tau_series_v2.py
-    2018 Sep 10 - jfong - add underscore to record type and product type
+:Dependencies:
+    #. numpy
+    #. time
 """
+
 import numpy as np
-import pdb
 import time
-import sys
 from . import pds3_write_series_v2 as pds3
 
 def write_tau_series_data(tau_inst, out_file):
     """
-    This writes a TAU data file.
+    This writes a TAU data file with columns: ring radius, radius correction
+    due to improved pole, radius correction due to timing offset, ring 
+    longitude, observed ring azimuth, power, optical depth, phase,
+    threshold optical depth, observed event time, ring event time,
+    spacecraft event time, ring opening angle.
 
     Args:
-        tau_inst (class): Instance of diffraction_correction class
+        tau_inst (class): Instance of DiffractionCorrection class
         fmt (str): Format string
         out_file (str): Output file name, including path.
     """
@@ -662,11 +664,6 @@ def write_tau_series(rev_info, tau_inst, title, outdir, prof_dir):
         outdir (str): Path to output directory
         prof_dir (str): Direction of ring occultation for this tau_inst
 
-    Notes:
-        [1] Data entry format of %32.16F is hardcoded.
-        [2] A data and label file will be output into the input "outdir"
-            directory, with filenames, *YYYYMMDD.TAB and *YYYYMMDD.LBL,
-            respectively, where * is "title".
     """
 
     outfile_tab = outdir + title.upper() + '.TAB'

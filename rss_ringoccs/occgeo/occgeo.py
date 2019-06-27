@@ -1,8 +1,6 @@
 """
-occgeo_proximal.py
 
 :Purpose:
-
     Calculate occultation geometry for RSS ring events.
 
 :Notes:
@@ -16,10 +14,9 @@ occgeo_proximal.py
         7) topocentric frame kernel
 
 :Dependencies:
-    #. scipy.interpolate
+    #. scipy
     #. numpy
     #. spiceypy
-    #. sys
 
 """
 from ..tools.spm_to_et import spm_to_et
@@ -34,7 +31,6 @@ from scipy.interpolate import splev
 
 import spiceypy as spice
 import numpy as np
-import sys
 
 class Geometry(object):
 
@@ -44,20 +40,27 @@ class Geometry(object):
         diffraction reconstruction as well as other relevant geometry
         parameters.
 
-    Arguments:
+    Arguments
         :rsr_inst (*class*): Instance of RSRReader class.
         :kernels (*str* or *list*): List of NAIF kernels, including path.
         :planet (*str*): Planet name
         :spacecraft (*str*): Spacecraft name
 
-    Keyword Arguments:
+    Keyword Arguments
         :pt_per_sec (*float*): Number of points calculated per second
             for all geometry calculations.
         :verbose (*bool*): Boolean for whether processing steps are printed.
         :write_file (*bool*): Boolean for whether output *GEO.TAB and
             *GEO.LBL files will be created.
+        :ref (*str*): Reference frame to be used in spiceypy calls. Default
+                      is 'J2000'
+        :ring_frame (*str*): Ring plane frame. Default is the equatorial
+                             frame, (e.g. 'IAU_SATURN')
+        :nhat_p (*list*): Unit vector in pole direction, in rectangular
+                          coordinates. If None, it will be calculated
+                          using contents of the planetary constants kernel.
 
-    Attributes:
+    Attributes
         :t_oet_spm_vals (*np.ndarray*): Observed event time in seconds
             past midnight.
         :t_ret_spm_vals (*np.ndarray*): Ring event time in seconds past
@@ -107,9 +110,21 @@ class Geometry(object):
         :freespace_spm (*list*): List of 2x1 lists of seconds past midnight
             values that define the inner and outer edge of a free-space
             gap in the ring system
-        :freespace_km (*np.ndarray*): An array of 2x1 lists of km values
+        :freespace_km (*np.ndarray*): Array of 2x1 lists of km values
             that define the inner and outer edge of a free-space gap
             in the ring system
+        :ul_rho_km_vals (*np.ndarray*): Uplink ring intercept points.
+            This is only calculated for events after USO failure (after year
+            2010)
+        :ul_phi_rl_deg_vals (*np.ndarray*): Ring longitude of the uplink
+            ring intercept point. This is only calculated for events
+            after USO failure (after year 2010)
+        :ul_phi_ora_deg_vals (*np.ndarray*): Observed ring azimuth of the
+            uplink ring intercept point. This is only calculated for events
+            after USO failure (after year 2010)
+        :add_info (*dict*): Additional information about changes to the
+            data (e.g., removing points blocked by atmosphere,
+            removing false ring intercept points from proximal orbits, etc.)
 
 
     """
@@ -397,10 +412,9 @@ class Geometry(object):
 
     def get_profile_dir(self):
         """
-        Purpose:
-            Return observed profile direction.
+        Return observed profile direction.
 
-        Returns:
+        Returns
             :prof_dir (*str*): Profile direction as '"INGRESS"',
                                  '"EGRESS"', or '"BOTH"'.
         """
@@ -419,11 +433,10 @@ class Geometry(object):
 
     def verify_chord(self):
         """
-        Purpose:
-            Verify that an occultation with an increasing and decreasing
-            radial velocity is actually a chord occultation.
+        Verify that an occultation with an increasing and decreasing
+        radial velocity is actually a chord occultation.
 
-        Returns:
+        Returns
             :prof_dir (*str*): Profile direction as
                                 '"INGRESS"', '"EGRESS"', or '"BOTH"'.
         """
@@ -479,6 +492,7 @@ class Geometry(object):
             prof_dir = '"BOTH"'
 
         return prof_dir
+
     def __remove_values_beyond_rings(self):
         npts = len(self.rho_km_vals)
         ind1 = np.argwhere(self.rho_km_vals > 170000.)[0][0]
@@ -529,11 +543,10 @@ class Geometry(object):
 
     def get_chord_ind(self):
         """
-        Purpose:
-            Return index of where radial velocity sign change occurs in a chord
-            occultation.
+        Return index of where radial velocity sign change occurs in a chord
+        occultation.
 
-        Returns:
+        Returns
             :ind (*int*): Index of where chord occultation goes from '"INGRESS"'
                 to '"EGRESS"' or vice versa.
         """

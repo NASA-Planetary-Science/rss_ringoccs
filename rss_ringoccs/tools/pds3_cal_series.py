@@ -352,7 +352,7 @@ def get_cal_series_info(rev_info, cal_inst, series_name, prof_dir):
     SERIES_SAMPLING_PARAMETER_INTERVAL = pds3.get_sampling_interval(
             sampling_parameter_arr)
     SERIES_DESCRIPTION = ('"This series contains variations of the' + sd
-            + 'signal sky-frequency, residual frequency, and free-space '
+            + 'signal sky-frequency, offset frequency, and free-space '
             + 'power as a' + sd + 'function of OBSERVED EVENT TIME '
             + '(Earth receiving time)."')
     
@@ -400,7 +400,7 @@ def get_cal_series_info(rev_info, cal_inst, series_name, prof_dir):
     object_names = [
             '"OBSERVED EVENT TIME"'
             , '"SKY FREQUENCY"'
-            , '"RESIDUAL FREQUENCY"'
+            , '"OFFSET FREQUENCY"'
             , '"FREESPACE POWER"'
             ]
 
@@ -428,15 +428,9 @@ def get_cal_series_info(rev_info, cal_inst, series_name, prof_dir):
             + 'measured I/Q samples. See formula' + sd
             + 'given in Section 2.6 of JPLD-16765."')
             ,
-            ('"The residual frequency is the' + sd + 'difference between '
-            + 'the sky_frequency and the Doppler-shifted' + sd
-            + 'frequency of the received sinusoid computed based on the'
-            + sd + 'reconstructed spacecraft trajectory and smoothed '
-            + 'using weighted' + sd + 'least-square spline fit across '
-            + 'the extent of the ring system. Time' + sd + 'history of '
-            + 'the estimate is used to steer the frequency of the' + sd
-            + 'received sinusoid to the center of the recording '
-            + 'bandwidth."')
+            ('"The offset frequency is the' + sd + 'frequency of the '
+            + 'carrier signal relative to the' + sd
+            + 'center of the receiver bandwidth."')
             ,
             ('"Estimate of the power of the received' + sd + 'sinusoid '
             + 'in the absence of the rings. It is calculated using' + sd

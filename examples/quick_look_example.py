@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import time
 
 # ***** Begin user input *****
-data_dir = '../output/Rev007/Rev007E/Rev007E_RSS_2005_123_K34_E/'
+data_dir = '../output/Rev007/Rev007E/Rev007E_RSS_2005_123_X43_E/'
 geo_file = data_dir + 'RSS_2005_123_X43_E_GEO_YYYYMMDD_0001.TAB'
 cal_file = data_dir + 'RSS_2005_123_X43_E_CAL_YYYYMMDD_0001.TAB'
 dlp_file = data_dir + 'RSS_2005_123_X43_E_DLP_0100M_YYYYMMDD_0001.TAB'
@@ -51,6 +51,7 @@ for n in range(nres):
     ax.set_ylabel('$\\tau$')
     ax.grid(True)
     ax.legend()
+    ax.set_ylim([-0.5,4.0])
 
 axes[0].set_title('Rev007E X43 Maxwell Ringlet Optical Depth \nReconstruction Resolution Comparison', fontsize=13)
 axes[-1].set_xlabel('$\\rho$ - ' + str(plot_center_km) + ' (km)')

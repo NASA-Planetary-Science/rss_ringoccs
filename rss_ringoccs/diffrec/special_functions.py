@@ -138,28 +138,28 @@ def compute_norm_eq(w_func, error_check=True):
             Compute the Kaiser-Bessel 2.5 window of width 30
             and spacing 0.1, and then use compute_norm_eq
             to compute the normalized equivalent width:
-                In [1]: from rss_ringoccs import diffrec as dc
-                In [2]: w = dc.window_functions.kb25(30, 0.1)
-                In [3]: normeq = dc.special_functions.compute_norm_eq(w)
-                In [4]: print(normeq)
+                >>> from rss_ringoccs import diffrec as dc
+                >>> w = dc.window_functions.kb25(30, 0.1)
+                >>> normeq = dc.special_functions.compute_norm_eq(w)
+                >>> print(normeq)
                 1.6573619266424229
             In contrast, the actual value is 1.6519208.
             Compute the normalized equivalent width for the squared
             cosine window of width 10 and spacing 0.25.
-                In [1]: from rss_ringoccs import diffrec as dc
-                In [2]: w = dc.window_functions.coss(10, 0.25)
-                In [3]: normeq = dc.special_functions.compute_norm_eq(w)
-                In [4]: print(normeq)
+                >>> from rss_ringoccs import diffrec as dc
+                >>> w = dc.window_functions.coss(10, 0.25)
+                >>> normeq = dc.special_functions.compute_norm_eq(w)
+                >>> print(normeq)
                 1.5375000000000003
             The normalized equivalent width of the squared cosine
             function can be computed exactly using standard methods
             from a calculus course. It's value is exactly 1.5
             If we use a smaller dx when computing w, we get a better
             approximation. Use width 10 and spacing 0.001.
-                In [1]: from rss_ringoccs import diffrec as dc
-                In [2]: w = dc.window_functions.coss(10, 0.001)
-                In [3]: normeq = dc.special_functions.compute_norm_eq(w)
-                In [4]: print(normeq)
+                >>> from rss_ringoccs import diffrec as dc
+                >>> w = dc.window_functions.coss(10, 0.001)
+                >>> normeq = dc.special_functions.compute_norm_eq(w)
+                >>> print(normeq)
                 1.50015
     """
     if error_check:
@@ -447,13 +447,13 @@ def resolution_inverse(x):
                argument is z = exp(x/(1-x)) * x/(1-x)
         Examples:
             Plot the function on the interval (1,2)
-                In [1]: import rss_ringoccs.diffcorr.special_functions as sf
-                In [2]: import numpy as np
-                In [3]: x = np.array(range(0,1001))*0.001+1.01
-                In [4]: y = sf.resolution_inverse(x)
-                In [5]: import matplotlib.pyplot as plt
-                In [6]: plt.show(plt.plot(x,y))
-                (Beautiful plots appear here)
+
+            >>> import rss_ringoccs.diffcorr.special_functions as sf
+            >>> import numpy as np
+            >>> x = np.array(range(0,1001))*0.001+1.01
+            >>> y = sf.resolution_inverse(x)
+            >>> import matplotlib.pyplot as plt
+            >>> plt.show(plt.plot(x,y))
     """
     fname = "diffrec.special_functions.resolution_inverse"
     error_check.check_is_real(x, "x", fname)
@@ -479,28 +479,29 @@ def fresnel_cos(x):
             :f_cos (*np.ndarray* or *float*):
                 The fresnel cosine integral of x.
         Notes:
-            [1] The Fresnel Cosine integral is the solution to the
+            #.  The Fresnel Cosine integral is the solution to the
                 equation dy/dx = cos(pi/2 * x^2), y(0) = 0. In other
                 words, y = integral (t=0 to x) cos(pi/2 * t^2) dt
-            [2] The Fresnel Cosine and Sine integrals are computed by
+            #.  The Fresnel Cosine and Sine integrals are computed by
                 using the scipy.special Error Function. The Error
                 Function, usually denoted Erf(x), is the solution to
                 dy/dx = (2/sqrt(pi)) * exp(-x^2), y(0) = 0. That is:
                 y = 2/sqrt(pi) * integral (t=0 to x) exp(-t^2)dt.
                 Using Euler's Formula for exponentials allows one
                 to use this to solve for the Fresnel Cosine integral.
-            [3] The Fresnel Cosine integral is used for the solution
+            #.  The Fresnel Cosine integral is used for the solution
                 of diffraction through a square well. Because of this
-                it is useful for forward modeling problems in 
+                it is useful for forward modeling problems in
                 radiative transfer and diffraction.
         Examples:
             Compute and plot the Fresnel Cosine integral.
-                In [1]: import rss_ringoccs.diffcorr.special_functions as sf
-                In [2]: import numpy as np
-                In [3]: import matplotlib.pyplot as plt
-                In [4]: x = np.array(range(0,10001))*0.01 - 50.0
-                In [5]: y = sf.fresnel_cos(x)
-                In [6]: plt.show(plt.plot(x,y))
+            
+            >>> import rss_ringoccs.diffcorr.special_functions as sf
+            >>> import numpy as np
+            >>> import matplotlib.pyplot as plt
+            >>> x = np.array(range(0,10001))*0.01 - 50.0
+            >>> y = sf.fresnel_cos(x)
+            >>> plt.show(plt.plot(x,y))
     """
     try:
         return _special_functions.fresnel_cos(x)
@@ -527,28 +528,28 @@ def fresnel_sin(x):
             :f_sin (*np.ndarray* or *float*):
                 The fresnel sine integral of x.
         Notes:
-            [1] The Fresnel sine integral is the solution to the
+            #.  The Fresnel sine integral is the solution to the
                 equation dy/dx = sin(pi/2 * x^2), y(0) = 0. In other
                 words, y = integral (t=0 to x) sin(pi/2 * t^2) dt
-            [2] The Fresnel Cossine and Sine integrals are computed
+            #.  The Fresnel Cossine and Sine integrals are computed
                 by using the scipy.special Error Function. The Error
                 Function, usually denoted Erf(x), is the solution to
                 dy/dx = (2/sqrt(pi)) * exp(-x^2), y(0) = 0. That is:
                 y = 2/sqrt(pi) * integral (t=0 to x) exp(-t^2)dt.
                 Using Euler's Formula for exponentials allows one
                 to use this to solve for the Fresnel Sine integral.
-            [3] The Fresnel sine integral is used for the solution
+            #.  The Fresnel sine integral is used for the solution
                 of diffraction through a square well. Because of this
-                is is useful for forward modeling problems in 
+                is is useful for forward modeling problems in
                 radiative transfer and diffraction.
         Examples:
             Compute and plot the Fresnel Sine integral.
-                In [1]: import rss_ringoccs.diffcorr.special_functions as sf
-                In [2]: import numpy as np
-                In [3]: import matplotlib.pyplot as plt
-                In [4]: x = np.array(range(0,10001))*0.01 - 50.0
-                In [5]: y = sf.fresnel_sin(x)
-                In [6]: plt.show(plt.plot(x,y))
+            >>> import rss_ringoccs.diffcorr.special_functions as sf
+            >>> import numpy as np
+            >>> import matplotlib.pyplot as plt
+            >>> x = np.array(range(0,10001))*0.01 - 50.0
+            >>> y = sf.fresnel_sin(x)
+            >>> plt.show(plt.plot(x,y))
     """
     try:
         return _special_functions.fresnel_sin(x)
@@ -571,7 +572,7 @@ def square_well_diffraction(x, a, b, F):
         try:
             arg_1 = np.sqrt(np.pi/2.0)*((a-x)/F)
             arg_2 = np.sqrt(np.pi/2.0)*((b-x)/F)
-            
+
             return 1.0 - np.sqrt(2.0/np.pi)*(0.5 - 0.5j) * (
                 fresnel_cos(arg_2)-fresnel_cos(arg_1)+
                 1j*(fresnel_sin(arg_2)-fresnel_sin(arg_1))
@@ -597,7 +598,7 @@ def inverse_square_well_diffraction(x, a, b, F):
         try:
             arg_1 = np.sqrt(np.pi/2.0)*((a-x)/F)
             arg_2 = np.sqrt(np.pi/2.0)*((b-x)/F)
-            
+
             return np.sqrt(2.0/np.pi)*(0.5 - 0.5j) * (
                 fresnel_cos(arg_2)-fresnel_cos(arg_1)+
                 1j*(fresnel_sin(arg_2)-fresnel_sin(arg_1))
@@ -666,7 +667,7 @@ def double_slit_diffraction(x, z, a, d):
             :f:
                 Single slit diffraction pattern.
         Dependences:
-            [1] numpy
+            #. numpy
     """
     fname = "diffrec.special_functions.double_slit_diffraction"
     error_check.check_is_real(x, "x", fname)

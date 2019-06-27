@@ -335,11 +335,7 @@ def latex_summary_doc(pdffil, res_km, geo, cal, tau):
                          the third panel) is used to normalize signal
                          power measurements so that the corresponding
                          optical depth has nearly zero value in the
-                         absence of rings. Least-square fitting techniques
-                         to frequency and power estimates of the direct
-                         signal (the green curves in the second
-                         and third panels, respectively) are used to
-                         compute the calibration data.}
+                         absence of rings.}
             \end{figure}
             \begin{landscape}
                 \begin{figure}[H]
@@ -353,12 +349,12 @@ def latex_summary_doc(pdffil, res_km, geo, cal, tau):
                     }
                     \caption{Observing DSN station (DSS-\theDSN) elevation
                              angle (in \textcolor{magenta}{magenta})
-                             superimposed on ring profile at \theRES M
-                             resolution from data file \theTAU.
+                             superimposed on ring profile at \theRES  
+                             ~resolution from data file \theTAU.
                              \textcolor{blue}{Blue}: Reconstructed normal
                              optical depth; \textcolor{cyan}{Cyan}:
                              Free-space baseline;
-                             \textcolor{red}{Red}:Threshold optical depth
+                             \textcolor{red}{Red}: Threshold optical depth
                              (measurement SNR $\simeq$ 1). Optical depth is
                              plotted increasing downward, the same direction
                              as increasing direct signal extinction.}

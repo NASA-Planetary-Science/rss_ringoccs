@@ -274,28 +274,28 @@ def kbal(x, W, alpha):
             :dx (*float*):
                 Width of one point.
             :al (*float*):
-                The alpha parameter.
+                The alpha parameter :math:`\\alpha_0`.
         Outputs:
             :w_func (*np.ndarray*):
                 The Kaiser-Bessel alpha window of width
                 w_in and spacing dx between points.
         Notes:
-            [1] The Kaiser-Bessel window is computed using the 
+            #.  The Kaiser-Bessel window is computed using the
                 modified Bessel Function of the First Kind. It's
-                value is y = I_0(alpha*sqrt(1-4x^2/w^2))/I_0(alpha),
+                value is :math:`y = I_0(\\alpha\\sqrt{1-4x^2/w^2})/I_0(\\alpha)`,
                 where w is the window width.
-            [2] We automatically multiply the alpha parameter by pi,
+            #.  We automatically multiply the alpha parameter by pi,
                 so the kbal window function has an alpha value of
-                alpha = al * pi
-            [3] The endpoints of the Kaiser-Bessel function tend to
-                zero faster than (1+2 * alpha)) / exp(alpha)
+                :math:`\\alpha = \\alpha_0 \\pi`
+            #.  The endpoints of the Kaiser-Bessel function tend to
+                zero faster than :math:`(1+2\\alpha) / \\exp(\\alpha)`
         Warnings:
-            [1] None of the Kaiser-Bessel windows evaluate to zero at
-                their endpoints. The endpoints are 1/I_0(alpha). For
-                small values of alpha this can create Gibb's like
+            #.  None of the Kaiser-Bessel windows evaluate to zero at
+                their endpoints. The endpoints are :math:`1/I_0(\\alpha)`.
+                For small values of alpha this can create Gibb's like
                 effects in reconstruction do to the large
                 discontinuity in the window. For alpha values beyond
-                2.5 * pi this effect is negligible.
+                :math:`2.5\\pi` this effect is negligible.
     """
     fname = "diffrec.window_functions.kbal"
     error_check.check_is_real(x, "x", fname)
@@ -321,28 +321,28 @@ def kbmdal(x, W, al):
             :dx (*float*):
                 Width of one point.
             :al (*float*):
-                The alpha parameter.
+                The alpha parameter :math:`\\alpha_0`.
         Outputs:
             :w_func (*np.ndarray*):
                 The Kaiser-Bessel alpha window of width
                 and w_in spacing dx between points.
         Notes:
-            [1] The Kaiser-Bessel window is computed using the 
+            #.  The Kaiser-Bessel window is computed using the
                 modified Bessel Function of the First Kind. It's
-                value is y = I_0(alpha*sqrt(1-4x^2/w^2))/I_0(alpha),
+                value is :math:`y = I_0(\\alpha\\sqrt{1-4x^2/w^2})/I_0(\\alpha)`,
                 where w is the window width.
-            [2] We automatically multiply the alpha parameter by pi,
+            #.  We automatically multiply the alpha parameter by pi,
                 so the kbal window function has an alpha value of
-                alpha = al * pi
-            [3] The endpoints of the Kaiser-Bessel function tend to
-                zero faster than (1+2 * alpha)) / exp(alpha)
+                :math:`\\alpha = \\alpha_0\\pi`
+            #.  The endpoints of the Kaiser-Bessel function tend to
+                zero faster than :math:`(1+2\\alpha)) / \\exp(\\alpha)`
         Warnings:
-            [1] None of the Kaiser-Bessel windows evaluate to zero at
-                their endpoints. The endpoints are 1/I_0(alpha). For
-                small values of alpha this can create Gibb's like
-                effects in reconstruction do to the large
+            #.  None of the Kaiser-Bessel windows evaluate to zero at
+                their endpoints. The endpoints are :math:`1/I_0(\\alpha)`.
+                For small values of alpha this can create Gibb's like
+                effects in reconstruction due to the large
                 discontinuity in the window. For alpha values beyond
-                2.5 * pi this effect is negligible.
+                :math:`2.5\\pi` this effect is negligible.
     """
     fname = "diffrec.window_functions.kbal"
     error_check.check_is_real(x, "x", fname)
@@ -410,7 +410,7 @@ def window_width(res, normeq, fsky, fres, rho_dot,
         # LambertW returns nans far values close to zero, so round this.
         P2 = np.around(P2, decimals=16)
 
-        # For values near -1/e, LambertW(x) is roughly -1. 
+        # For values near -1/e, LambertW(x) is roughly -1.
         crange1 = ((RCPR_E + P2) < 1.0e-16).nonzero()[0]
         crange2 = ((RCPR_E + P2) >= 1.0e-16).nonzero()[0]
         w_vals = np.zeros(np.size(rho_dot))

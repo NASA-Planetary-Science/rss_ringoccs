@@ -192,14 +192,14 @@ class FreqOffsetFit(object):
         Creates a Boolean mask array which excludes data based on
         the following critera:
             #. ring or planetary occultation in region prevents
-                accurate estimation of the offset frequency
+               accurate estimation of the offset frequency
             #. offset frequencies fall more than 5-sigma beyond
-                the median offset frequency
+               the median offset frequency
             #. offset frequencies vary by more than  0.25 Hz relative
-                to neighboring  offset frequencies
+               to neighboring  offset frequencies
             #. adjacent data all excluded by previous requirements
-                (excludes noise which by happenstance satisfies the
-                above criteria)
+               (excludes noise which by happenstance satisfies the
+               above criteria)
 
         Arguments
             :f_spm (*np.ndarray*): SPM sampled by ``calc_freq_offset``

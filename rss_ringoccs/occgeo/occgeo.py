@@ -4,7 +4,8 @@
     Calculate occultation geometry for RSS ring events.
 
 :Notes:
-    #. kernels list must include:
+    #.  kernels list must include:
+
         1) spacecraft ephemeris kernel
         2) planetary constants kernel
         3) leapseconds kernel
@@ -217,7 +218,7 @@ class Geometry(object):
 
                 t1 = t_oet_spm_vals[~mask][0]
                 t2 = t_oet_spm_vals[~mask][-1]
-                
+
                 #if (np.logical_or(check_posz, check_negz)).any(): # is True:
                 t_oet_spm_vals = t_oet_spm_vals[mask]
                 t_oet_et_vals = t_oet_et_vals[mask]
@@ -235,8 +236,8 @@ class Geometry(object):
                 vz_kms_vals = vz_kms_vals[mask]
                 self.rev_info['PER'] = ''
                 self.add_info['False intercept points'] = (
-                        'Removed indices ' + str(inds[0]) + ' to ' 
-                        + str(inds[-1]) + ', or OET from ' + str(t1) 
+                        'Removed indices ' + str(inds[0]) + ' to '
+                        + str(inds[-1]) + ', or OET from ' + str(t1)
                         + ' to ' + str(t2) + ' SPM')
 
         # Calculate Saturn center to ring intercept vector
@@ -265,7 +266,7 @@ class Geometry(object):
                 ul_dsn = 'Earth'
             t_ul_et_vals_list = []
             for set_et in t_set_et_vals:
-                ul_et_vals, ltime = spice.ltime(set_et, sc_code, "<-", 
+                ul_et_vals, ltime = spice.ltime(set_et, sc_code, "<-",
                         ul_dsn_code)
                 t_ul_et_vals_list.append(ul_et_vals)
             t_ul_et_vals = np.array(t_ul_et_vals_list)

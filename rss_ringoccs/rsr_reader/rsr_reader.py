@@ -1,7 +1,17 @@
 #!/usr/bin/env python
 """
-Purpose:
+
+:Purpose:
     Class to create an instance linked to an RSR file
+
+:Dependencies:
+    #. multiprocessing
+    #. numpy
+    #. os
+    #. scipy
+    #. struct
+    #. sys
+    #. time
 """
 
 import multiprocessing
@@ -21,17 +31,17 @@ from ..tools.history import write_history_dict
 
 class RSRReader(object):
     """
-    Purpose:
+    :Purpose:
     Reads the header of a raw RSR file when you first create an instance.
     Then reads the full RSR file to read in the raw measured complex signal :math:`I+iQ`
 
-    Arguments:
+    Arguments
         :rsr_file (*str*):
             Full path name of a raw RSR file to read. RSR files
             can be downloaded using the shell script in the data"
             directory of the GitHub clone
 
-    Keyword Arguments:
+    Keyword Arguments
         :decimate_16khz_to_1khz (*bool*):
             Optional Boolean argument which, if
             set to True, decimates 16kHz files down to 1kHz sampling rate.
@@ -46,35 +56,27 @@ class RSRReader(object):
             Optional boolean variable which, when set to True,
             prints the header attributes that were set
 
-    Attributes:
+    Attributes
         :rsr_file (*str*): Full path name of a raw RSR file to read
         :spm_vals (*np.ndarray*): Seconds Past Midnight array of times over
             entire rsr file
         :doy (*int*): Day of year of event
         :year (*int*): Year of event
-        :dsn (*str*): Deep Space Network ID of the station that observed the
-            spacecraft for this event
-        :band (*bytes*): Name of the wavelength of transmission (S, X, or Ka)
+        :dsn (*str*): Deep Space Network ID of the downlink station
+        :band (*str*): Name of the wavelength of downlink transmission
+                        (S, X, or Ka)
+        :ul_band (*str*): Name of the wavelength of uplink transmission
+        :ul_dsn (*str*): Deep Space Network ID of uplink station
         :sample_rate_khz (*int*): Sample rate, in kHz, of transmission (1 or 16)
         :history (*dict*): Dictionary recording parameters of the run
 
-    Example:
+    Example
         >>> # Import rss_ringoccs
         >>> import rss_ringoccs as rss
         >>> # Define instance and set header attributes, and read in raw data
         >>> rsr_inst = rss.rsr_reader.RSRReader(rsr_file)
         >>>  # Get predicted sky frequency at chosen SPM values f_spm
         >>> f_spm_returned, f_sky_pred = rsr_inst.get_f_sky_pred(f_spm=f_spm)
-
-    Dependencies:
-        #. RSRReader
-        #. numpy
-        #. os
-        #. platform
-        #. scipy.signal.decimate
-        #. struct
-        #. sys
-        #. time
 
     Notes:
         #. Setting ``decimate_16khz_to_1khz=True`` for a 1kHz file will be ignored
@@ -166,14 +168,6 @@ class RSRReader(object):
         + __sh_field_names + __data_field_names)
 
     def __init__(self, rsr_file, decimate_16khz_to_1khz=True, verbose=False):
-        """
-        Purpose:
-            Sets full path name of RSR file as an attribute to the instance, and
-            reads the header of the RSR file, which sets the RSR header attributes
-            spm_vals, doy, year, dsn, band, sample_rate_khz. Also sets private
-            attributes for reading the RSR file later in the "get" methods.
-
-        """
 
         if not isinstance(verbose, bool):
             print('WARNING (RSRReader): verbose input should be Boolean. '
@@ -253,11 +247,11 @@ class RSRReader(object):
         self.doy = sfdu_hdr_dict['sh_doy']
         self.year = sfdu_hdr_dict['sh_year']
         self.dsn = 'DSS-' + str(sfdu_hdr_dict['sh_dss_id'])
-        #self.ul_dsn = 'DSS-'+str(sfdu_hdr_dict['sh_ul_dss_id'])
         self.ul_dsn = 'DSS-'+rsr_file.split('/')[-1].split('_')[1][5:7]
+        if self.ul_dsn == 'DSS-MM':
+            self.ul_dsn = 'DSS-'+str(sfdu_hdr_dict['sh_ul_dss_id'])
         self.band = chr(sfdu_hdr_dict['sh_dl_band'][0])
         self.ul_band = chr(sfdu_hdr_dict['sh_ulband'][0])
-        #self.track_mode = sfdu_hdr_dict['sh_trk_mode']
         # correct header info if not accurate
         if self.year > 2011 :
             self.track_mode = 2
@@ -297,13 +291,12 @@ class RSRReader(object):
 
     def __set_sfdu_unpack(self, spm_range):
         """
-        Purpose:
-            Set private attribute ``__sfdu_unpack``, which is used to unpack the
-            RSR file one SFDU at a time. Also sets attributes for the start and
-            end SFDU to read. Not included in ``__init__`` because it's not necessary
-            for reading the header information
+        Set private attribute ``__sfdu_unpack``, which is used to unpack the
+        RSR file one SFDU at a time. Also sets attributes for the start and
+        end SFDU to read. Not included in ``__init__`` because it's 
+        not necessary for reading the header information
 
-        Arguments:
+        Arguments
             :spm_range (*list*):
                 2-element array of range of SPM values to read
                 over. Passed from either ``set_f_sky_pred`` or ``set_IQ``
@@ -345,11 +338,10 @@ class RSRReader(object):
 
     def get_f_sky_pred(self, f_spm=None, verbose=False):
         """
-        Purpose:
-            Calculate predicted sky frequency at user-defined times using
-            polynomial coefficients in each SFDU.
+        Calculate predicted sky frequency at user-defined times using
+        polynomial coefficients in each SFDU.
 
-        Arguments:
+        Arguments
             :f_spm (*np.ndarray*):
                 Array of SPM values to evaluate predicted
                 sky frequency at. Default is at 1 second spacing over entire
@@ -358,27 +350,15 @@ class RSRReader(object):
                 Print the first few predicted sky frequency values
                 if set to True
 
-        Returns:
+        Returns
             :f_spm (*np.ndarray*):
                 Array of SPM values that predicted sky
                 frequency was evaluated at.
             :f_sky_pred (*np.ndarray*):
                 Predicted sky frequency, calculated from
                 the polynomial coefficients in the RSR file
-
-        Dependencies:
-            #. numpy
-            #. struct
-            #. sys
-
-        Notes:
-            - Will take a few minutes to run for 16kHz files
-            .. #. If you try hard enough, you'll probably be able to get an
-            ..    error message from the f_spm input
         """
 
-        # Ensure verbose is Boolean
-        #if type(verbose) != bool:
         if not isinstance(verbose, bool):
             print('WARNING (RSRReader): verbose input should be Boolean. '
                 + 'Assuming False. If you\'re trying to use 1 or 0, then you '
@@ -489,16 +469,15 @@ class RSRReader(object):
 
     def __set_IQ(self, verbose=False):
         """
-        Purpose:
-            Read full RSR file to find the raw measured I and Q over the
-            specified spm_range of the file. Adds attributes for raw SPM values
-            over the specified time range and the raw measured I and Q values.
+        Read full RSR file to find the raw measured I and Q over the
+        specified spm_range of the file. Adds attributes for raw SPM values
+        over the specified time range and the raw measured I and Q values.
 
-        Arguments:
+        Arguments
             :verbose (*bool*):
                 If True, print steps and intermediate results
 
-        Adds attributes:
+        Attributes
             :spm_vals (*np.ndarray*):
                 Raw resolution SPM values over specified
                 ``spm_range``
@@ -507,11 +486,6 @@ class RSRReader(object):
                 ``spm_range``
         """
 
-        # Ensure verbose is Boolean
-#         if type(verbose) != bool:
-#             print('WARNING (RSRReader): verbose input should be Boolean. '
-#                 + 'Assuming False')
-#             verbose = False
 
         spm_vals = self.spm_vals
 
@@ -519,11 +493,6 @@ class RSRReader(object):
         if self.sample_rate_khz == 16:
             self.__spm_16khz = spm_vals
 
-        # Ensure that input is a Boolean
-#         if type(self.__decimate_16khz_to_1khz) != bool:
-#             print('WARNING (RSRReader.get_IQ): Expected Boolean input for ' +
-#                 'decimate_16khz_to_1khz keyword. Ignoring input')
-#             self.__decimate_16khz_to_1khz = False
 
         decimate_16khz_to_1khz = self.__decimate_16khz_to_1khz
 
@@ -551,7 +520,6 @@ class RSRReader(object):
         for j in jobs:
             j.join()
         IQ_m = np.hstack(results)
-        #print('\n')
 
         # Decimate 16kHz file to 1kHz spacing if specified
         if decimate_16khz_to_1khz & (self.sample_rate_khz == 16):
@@ -570,14 +538,6 @@ class RSRReader(object):
             print('\nWARNING (RSRReader.get_IQ): Cannot decimate a 1 kHz file '
                 + 'any further. Skipping extra decimation\n')
 
-        #if verbose:
-        #    print('First 10 SPM, I, and Q:')
-        #    for i in range(10):
-        #        print('%24.16f %15i %15i' %
-        #            (spm_vals[i], np.real(IQ_m[i]), np.imag(IQ_m[i])))
-
-        # Set spm_vals attribute corresponding to speified spm_range and the
-        #     raw measured I and Q
         self.spm_vals = spm_vals
         self.IQ_m = IQ_m
 
@@ -640,57 +600,5 @@ class RSRReader(object):
     def __set_rev_info(self):
         self.rev_info = get_rev_info(self)
 """
-WHERE TO GET NECESSARY INPUT:
-    rsr_file: Use the shell script in the "data" directory in
-        your GitHub clone directory to download RSR files. Use the full path
-        name of one of these RSR files for this input
-
 Revisions:
-      gjs_rsr_reader_v2.py
-   2018 Feb 14 - gsteranka - Original version
-   2018 Feb 20 - gsteranka - Made edits JWF suggested in her copy of the code.
-                             Reading RSR header in __init__, since you always
-                             have to do that anyway. Class name changed
-                             from ReadRSR to RSRReader. "read_hdr" method now
-                             private, since user doesn't need to use
-   2018 Feb 20 - gsteranka - DSN output has "DSS-" in front of the number
-      gjs_rsr_reader_v3.py
-   2018 Feb 28 - gsteranka - Copied from v2. Edited names of methods and
-                             edited docstrings. Also changed SPM_vals
-                             definition so there's no rounding error
-   2018 Mar 02 - gsteranka - Edited so predicted sky frequency and I/Q info
-                             are not set as attributes to the objects, but
-                             rather returned into variables. Changed so now you
-                             can't make two different objects with different
-                             attributes set. Also eliminated separate header
-                             reading routine and am just doing it in __init__
-   2018 Mar 07 - gsteranka - Fixed bug where length of SPM_vals outputted by
-                             get_IQ doesn't match length of IQ_m
-      rsr_reader.py
-   2018 Mar 20 - gsteranka - Copy to official version and remove debug steps
-   2018 Mar 21 - gsteranka - Added keyword argument in get_IQ method to
-                             decimate 16kHz files to 1kHz sampling if True
-   2018 May 08 - gsteranla - Added input checks
-   2018 May 30 - gsteranka - Added history attribute
-   2018 Jun 25 - gsteranka - Fixed bug with 16kHz file not getting sky
-                             frequency correctly
-   2018 Jul 06 - gsteranka - Switch default decimate_16khz_to_1khz value to
-                             True
-   2018 Aug 24 - jfong - int() n_sfdu to work for rev8E X63 (truncated file)
-   2018 Sep 11 - jfong - print error message if n_sfdu!=int(n_sfdu)
-   2018 Sep 18 - jfong - updated verbose print statements to be consistent
-                         with those in Geometry and DiffractionCorrection
-                       - rewrite band to be a str instead of a byte char
-   2018 Sep 20 - jfong - add rev_info dictionary attribute and
-                         __set_rev_info() method
-
-*************************VARIABLES*************************
-NAME - TYPE - scalar/array - PURPOSE
-endian - str - scalar - Endian format to use in reading rsr_file
-f_spm - float - array - Frequency SPM to evaluate sky frequency over
-f_sky_pred - float - array - Sky frequency read in from polynomials in RSR file
-rsr_file - str - scalar - Full path name to an RSR file
-sh_sample_rate_hz - int - scalar - Sample rate of RSR file in Hz
-spm_range - float - array - Range of SPM to read data from RSR file
-spm_vals - float - array - Seconds past midnight of data measurements
 """

@@ -766,7 +766,7 @@ class DiffractionCorrection(object):
         # Set rev_info attribute from DLP instance.
         self.rev_info = DLP.rev_info
         if write_file:
-            write_output_files(self)
+            self.outfiles = write_output_files(self)
 
         if self.verbose:
             print("\tDiffraction Correction Complete.")

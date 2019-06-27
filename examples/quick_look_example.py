@@ -12,11 +12,13 @@ sys.path.remove('../')
 import matplotlib.pyplot as plt
 import time
 
+date = 'YYYYMMDD'
+
 # ***** Begin user input *****
 data_dir = '../output/Rev007/Rev007E/Rev007E_RSS_2005_123_X43_E/'
-geo_file = data_dir + 'RSS_2005_123_X43_E_GEO_YYYYMMDD_0001.TAB'
-cal_file = data_dir + 'RSS_2005_123_X43_E_CAL_YYYYMMDD_0001.TAB'
-dlp_file = data_dir + 'RSS_2005_123_X43_E_DLP_0100M_YYYYMMDD_0001.TAB'
+geo_file = data_dir + 'RSS_2005_123_X43_E_GEO_' + date + '_0001.TAB'
+cal_file = data_dir + 'RSS_2005_123_X43_E_CAL_' + date + '_0001.TAB'
+dlp_file = data_dir + 'RSS_2005_123_X43_E_DLP_0100M_' + date + '_0001.TAB'
 
 verbose = True
 res_km = 1.0

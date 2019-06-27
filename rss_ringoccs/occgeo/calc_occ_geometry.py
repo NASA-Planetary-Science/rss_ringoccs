@@ -105,7 +105,6 @@ def calc_F_km(D_km_vals, f_sky_hz_vals, B_deg_vals, phi_ora_deg_vals):
     Notes
         #. diffcorr uses an independently-calculated Fresnel scale
         #. Reference: [MTR1986]_ Equation 6
-
     """
 
     lambda_sky = spice.clight() / f_sky_hz_vals
@@ -396,7 +395,6 @@ def calc_rho_vec_km(et_vals, planet, spacecraft, dsn, ref='J2000', kernels=None,
     References
         #. Ring intercept point calculation using a dynamical frame.
             See [NAIF]_ page 19.
-
     """
 
     if kernels:
@@ -490,7 +488,6 @@ def calc_rip_velocity(rho_km_vals, phi_rl_deg_vals, dt):
             velocities in km/s.
         :phi_rl_dot_kms_vals (*np.ndarray*): Array of ring intercept azimuthal
             velocties in km/s.
-
     """
 
     # Compute central differences using numpy gradient
@@ -1038,7 +1035,6 @@ def get_planet_occ_times(et_vals, obs, planet, spacecraft, height_above=500.,
     Note:
         #. This was made to be generalizable to different planets, but has
             been only tested with planet='Saturn'.
-
     """
 
     if kernels:

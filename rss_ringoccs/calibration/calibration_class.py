@@ -66,8 +66,8 @@ class Calibration(object):
         :f_sky_hz_vals (*np.ndarray*):
                         sum of the reconstructed sky frequency values
                         and the fit to frequency offset
-                        :math:`\\hat{f}(t)_{offset}=(f_{dr}(t)
-                        -f_{dp}(t))+\\hat{f}(t)_{offset}`
+                        :math:`\\hat{f}(t)_{sky}=f_{dr}(t)
+                        +\\hat{f}(t)_{offset}`
                         following Equation 19 in [CRSUG2018]_.
         :f_offset_fit_vals (*np.ndarray*): fit to
                         frequency offset :math:`\\hat{f}(t)_{offset}`

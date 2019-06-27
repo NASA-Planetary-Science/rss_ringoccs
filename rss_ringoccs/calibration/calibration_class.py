@@ -1,24 +1,21 @@
 """
-Purpose:
 
+:Purpose:
     Class framework for performing the necessary calibration steps for
     the RSR data. This includes phase correction based on frequency
     offset of the spacecraft and normalization of received power with
     respect to the intrinsic spacecraft power.
 
-Notes:
-
+:Notes:
     Can be computationally cumbersome, especially for chord
     occultations. May require up to 30 mins for 16 kHz RSR data files.
 
 Dependencies:
-
     #. numpy
     #. scipy
     #. sys
 
 """
-
 
 import numpy as np
 from scipy.interpolate import splrep,splev
@@ -33,18 +30,18 @@ from ..occgeo import Geometry
 
 class Calibration(object):
     """
-    Purpose:
+    :Purpose:
         Define a class which, when instantiated, calls the submodules
         for performing each step of the calibration process by
         instantiating the classes ``FreqOffsetFit`` in the
         ``freq_offset_fit.py`` script and ``Normalization`` in the
         ``power_normalization.py`` script.
 
-    Arguments:
+    Arguments
         :rsr_inst (*object*): Instance of the RSRReader class
         :geo_inst (*object*): Instance of the Geometry class
 
-    Keyword Arguments:
+    Keyword Arguments
         :pnf_order (*float*): whole number specifying the polynomial
                         order to use when fitting the freespace power.
                         Default is 3.
@@ -58,7 +55,7 @@ class Calibration(object):
                         the terminal for fitting the freespace power.
                         Default is False.
 
-    Attributes:
+    Attributes
         :rev_info (*dict*): *dict* of information identifying the
                         specific occultation: rsrfile, year, day of
                         year, direction and type of occultation,

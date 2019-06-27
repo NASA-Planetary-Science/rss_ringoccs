@@ -1,23 +1,23 @@
 
 """
-pds3_cal_series.py
+:Purpose: 
+    Write CAL data and label files in PDS3 format.
 
-Purpose: Write CAL data and label files in PDS3 format.
-
-Dependencies:
+:Dependencies:
     #. numpy
     #. time
-    #. rss_ringoccs.tools.pds3_write_series_v2
 
 Notes:
     [1] Contents of output CAL data and label files are meant to mimic
-        CAL files from CORSS_8001 v2.
+        CAL files from CORSS_8001 v2 with the exception of swapping
+        residual frequency with offset frequency.
+    [2] For output filename and directory structure, refer to the
+        rss_ringoccs V1.2 User's Guide.
     
 """
 
 from . import pds3_write_series_v2 as pds3
 import numpy as np
-import pdb
 import time
 
 def write_cal_series_data(cal_inst, out_file):

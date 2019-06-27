@@ -1,8 +1,9 @@
 
 """
-Purpose: Write DLP data and label files in PDS3 format.
+:Purpose: 
+    Write DLP data and label files in PDS3 format.
 
-Dependencies:
+:Dependencies:
     #. numpy
     #. time
 
@@ -11,13 +12,12 @@ Notes:
         files from CORSS_8001 v2.
 """
 import numpy as np
-import pdb
 import time
 from . import pds3_write_series_v2 as pds3
 
 def write_dlp_series_data(dlp_inst, out_file):
     """
-    This writes a CAL data file with columns: ring radius, radius correction
+    This writes a DLP data file with columns: ring radius, radius correction
     due to improved pole, radius correction due to timing offset, ring 
     longitude, observed ring azimuth, power, optical depth, phase,
     threshold optical depth, observed event time, ring event time,

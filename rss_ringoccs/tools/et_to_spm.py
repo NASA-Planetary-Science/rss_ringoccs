@@ -1,11 +1,9 @@
-
 """
 
-et_to_spm.py
+:Purpose: 
+    Convert ephemeris time to seconds past midnight (SPM).
 
-Purpose: Convert ephemeris time to seconds past midnight (SPM).
-
-Dependencies:
+:Dependencies:
     #. numpy
     #. spiceypy
 """
@@ -17,15 +15,15 @@ def et_to_spm(et_vals, kernels=None, ref_doy=None):
     """
     Convert ephemeris time to seconds past midnight.
 
-    Arguments:
+    Arguments
         :et_vals (*float* or *np.ndarray*): ET seconds past J2000
     
-    Keyword Arguments:
+    Keyword Arguments
         :kernels (*str* or *list*): Path to NAIF kernels
         :ref_doy (*int*): Reference day of year, typically used for
             occultations that occur over multiple days
 
-    Returns:
+    Returns
         :spm_vals (*float* or *np.ndarray*): Seconds past midnight
     """
     if kernels:

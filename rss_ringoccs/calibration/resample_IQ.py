@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 """
-Purpose:
+
+:Purpose:
     Resample I and Q from uniformly spaced time to uniformly spaced
     radius. This is set up to downsample from the raw resolution data.
-
 """
 
 import numpy as np
@@ -13,19 +13,18 @@ from scipy.interpolate import interp1d
 
 def pre_resample(rho_km, vec, freq):
     """
-    Purpose:
-        Set vector sampling to be uniform with respect to radius at
-        a spacing comparable to that of raw resolution.  For ingress
-        occultations, this step implicitly reverses the radius scale
-        when interpolating.
+    Set vector sampling to be uniform with respect to radius at
+    a spacing comparable to that of raw resolution.  For ingress
+    occultations, this step implicitly reverses the radius scale
+    when interpolating.
 
-    Arguments:
+    Arguments
         :rho_km (*np.ndarray*): radius in kilometers
         :vec (*np.ndarray*): a single vector component I or Q of the
                 complex signal
         :freq (*float*): radial sampling frequency
 
-    Returns:
+    Returns
         :rho_grid (*np.ndarray*): Radii at uniform spacing at which the
                  signal component is resampled
         :vec_grid (*np.ndarray*): Signal resampled with respect to radius
@@ -92,11 +91,10 @@ def pre_resample(rho_km, vec, freq):
 
 def resample_IQ(rho_km, IQ_c, dr_desired, verbose=False):
     """
-    Purpose:
-        Resample I and Q to uniformly spaced radius. Based off of
-        Matlab's ``resample`` function
+    Resample I and Q to uniformly spaced radius. Based off of
+    Matlab's ``resample`` function
 
-    Arguments:
+    Arguments
         :rho_km (*np.ndarray*):
             Set of ring intercept point values at initial
             resolution before resampling
@@ -108,7 +106,8 @@ def resample_IQ(rho_km, IQ_c, dr_desired, verbose=False):
         :verbose (*bool*):
             Testing variable to print out the first few resampled
             results
-    Returns:
+
+    Returns
         :rho_km_desired (*np.ndarray*): array of ring radius at final desired
                 spacing
         :IQ_c_desired (*np.ndarray*):

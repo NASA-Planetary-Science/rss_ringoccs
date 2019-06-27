@@ -1,13 +1,12 @@
 """
-    Purpose:
-        Provide tools for reading in .TAB and
-        .CSV files and converting the data into
-        a usable instance of the DLP class.
-    Dependencies:
-        #. pandas
-        #. numpy
-        #. scipy
-        #. rss_ringoccs
+:Purpose:
+        Provide tools for reading in .TAB and .CSV files and converting 
+        the data into a usable instance of the DLP class.
+
+:Dependencies:
+    #. pandas
+    #. numpy
+    #. scipy
 """
 
 import numpy as np
@@ -18,39 +17,39 @@ from . import error_check
 
 def get_geo(geo, verbose=True, use_deprecate=False):
     """
-        Purpose:
-            To extract a pandas DataFrame from a given
-            GEO.TAB or GEO.CSV file.
-        Arguments:
-            :geo (*str*):
-                A string containing the location of
-                the requested geo file.
-                Ex: geo = "/path/to/geo.CSV"
-                File must contain the following columns,
-                in the following order:
-                |   t_oet_spm_vals
-                |   t_ret_spm_vals
-                |   t_set_spm_vals
-                |   rho_km_vals
-                |   phi_rl_deg_vals
-                |   phi_ora_deg_vals
-                |   B_deg_vals
-                |   D_km_vals
-                |   rho_dot_kms_vals
-                |   phi_rl_dot_kms_vals
-                |   F_km_vals
-                |   R_imp_km_vals
-                |   rx_km_vals
-                |   ry_km_vals
-                |   rz_km_vals
-                |   vx_kms_vals
-                |   vy_kms_vals
-                |   vz_kms_vals
-                |   obs_spacecract_lat_deg_vals
-        Keywords:
-            :verbose (*bool*):
-                A Boolean for printing out auxiliary
-                information to the command line.
+    To extract a pandas DataFrame from a given GEO.TAB or GEO.CSV file.
+
+    Arguments
+        :geo (*str*):
+            A string containing the location of
+            the requested geo file.
+            Ex: geo = "/path/to/geo.CSV"
+            File must contain the following columns,
+            in the following order:
+            |   t_oet_spm_vals
+            |   t_ret_spm_vals
+            |   t_set_spm_vals
+            |   rho_km_vals
+            |   phi_rl_deg_vals
+            |   phi_ora_deg_vals
+            |   B_deg_vals
+            |   D_km_vals
+            |   rho_dot_kms_vals
+            |   phi_rl_dot_kms_vals
+            |   F_km_vals
+            |   R_imp_km_vals
+            |   rx_km_vals
+            |   ry_km_vals
+            |   rz_km_vals
+            |   vx_kms_vals
+            |   vy_kms_vals
+            |   vz_kms_vals
+            |   obs_spacecract_lat_deg_vals
+
+    Keywords
+        :verbose (*bool*):
+            A Boolean for printing out auxiliary
+            information to the command line.
     """
     fname = "tools.CSV_tools.get_geo"
     error_check.check_type(geo, str, "geo", fname)
@@ -770,138 +769,6 @@ class ExtractCSVData(object):
         if verbose:
             print("\tHistory Complete.")
 
-        if verbose:
-            print("\tExtract CSV Data Complete.")
-
-
-class GetUranusData(object):
-    def __init__(self, geo, dlp, dx=0.25, occ=None, verbose=False):
-        fname = "tools.CSV_tools.GetUranusData"
-        error_check.check_type(geo, str, "geo", fname)
-        error_check.check_type(dlp, str, "cal", fname)
-        error_check.check_type(dx, float, "dx", fname)
-        error_check.check_non_negative(dx, "dx", fname)
-
-        if occ:
-            if (not isinstance(occ,str)):
-                raise TypeError("occ must be a string")
-            else:
-                occ = occ.replace(" ", "").lower()
-                if (occ != 'ingress') and (occ != 'egress'):
-                    raise ValueError("occ must be 'egress' of 'ingress'")
-                else:
-                    pass
-
-        geo_dat = get_geo(geo, verbose=verbose)
-        dlp_dat = pd.read_csv(dlp, delimiter=',',
-                              names=["t_oet_spm_vals", "p_norm_vals",
-                                     "phase_rad_vals", "f_sky_hz_vals"])
-
-        dlp_spm = np.array(dlp_dat.t_oet_spm_vals)
-        dlp_pow = np.array(dlp_dat.p_norm_vals)
-        dlp_phs = np.array(dlp_dat.phase_rad_vals)
-        dlp_frq = np.array(dlp_dat.f_sky_hz_vals)
-        geo_spm = np.array(geo_dat.t_oet_spm_vals)
-
-        geo_rho = geo_dat.rho_km_vals
-        n_rho = np.size(geo_rho)
-        drho = np.zeros(n_rho-1)
-        geo_D = geo_dat.D_km_vals
-        geo_B = geo_dat.B_deg_vals
-        geo_drho = geo_dat.rho_dot_kms_vals
-        geo_phi = geo_dat.phi_ora_deg_vals
-        t_dlp1 = np.min(dlp_spm)
-        t_dlp2 = np.max(dlp_spm)
-        t_geo1 = np.min(geo_spm)
-        t_geo2 = np.max(geo_spm)
-
-        t1 = np.max([t_dlp1, t_geo1])
-        t2 = np.min([t_dlp2, t_geo2])
-        if (t1 > t2):
-            raise ValueError(
-                """
-                    \r\tError Encountered: rss_ringoccs
-                    \r\t\t%s\n
-                    \r\tGeo and DLP fules never overlap.
-                    \r\tNo data available to process.
-                """ % fname
-            )
-
-        start = np.min((geo_spm >= t1).nonzero())
-        finish = np.max((geo_spm <= t2).nonzero())
-        tstart = np.min((dlp_spm >= t1).nonzero())
-        tfinish = np.max((dlp_spm <= t2).nonzero())
-        t_dlp = dlp_spm[tstart:tfinish+1]
-        
-        for i in range(n_rho-1):
-            drho[i] = geo_rho[i+1]-geo_rho[i]
-        if not occ:
-            if (np.min(drho) < 0.0) and (np.max(drho) > 0.0):
-                raise ValueError(
-                    "\n\tdrho is positive and negative.\n\
-                     \tSet occ to ingress or egress"
-                )
-            elif (drho > 0).all():
-                crange = np.arange(start,finish+1)
-            elif (drho < 0).all():
-                crange = np.arange(start,finish+1)
-                crange = crange[::-1]
-            elif (drho == 0).all():
-                raise ValueError("drho/dt = 0 for all points.")
-            else:
-                raise ValueError("drho/dt has invalid values.")
-        elif (occ == 'ingress'):
-            crange = (drho < 0.0).nonzero()
-            if (np.size(crange) == 0):
-                raise TypeError("drho is never negative. Use occ = 'egress'")
-        elif (occ == 'egress'):
-            crange = (drho > 0.0).nonzero()
-            if (np.size(crange) == 0):
-                raise TypeError("drho is never positive. Use occ = 'ingress'")
-        else:
-            raise ValueError("Invalid occ keyword: %s" % occ)
-
-        dlp_rho = np.interp(geo_spm, geo_rho, t_dlp)
-
-        rho_min = np.min(dlp_rho)
-        rho_max = np.max(dlp_rho)
-        self.rho_km_vals = np.arange(rho_min,rho_max,dx)
-
-        self.rho_dot_kms_vals = np.interp(self.rho_km_vals, geo_rho, geo_drho)
-        self.D_km_vals = np.interp(self.rho_km_vals, geo_rho, geo_D)
-        self.B_rad_vals = np.deg2rad(np.interp(self.rho_km_vals, geo_rho, geo_B))
-        self.phi_rad_vals = np.deg2rad(np.interp(self.rho_km_vals, geo_rho, geo_phi))
-        self.p_norm_vals = np.interp(self.rho_km_vals, dlp_rho, dlp_pow)
-        self.phase_rad_vals = np.interp(self.rho_km_vals, dlp_rho, dlp_phs[tstart:tfinish+1])
-        self.f_sky_hz_vals = np.interp(self.rho_km_vals, dlp_rho, dlp_frq[tstart:tfinish+1])
-
-        n = np.size(self.rho_km_vals)
-
-        self.t_oet_spm_vals = np.zeros(n)
-        self.t_ret_spm_vals = np.zeros(n)
-        self.t_set_spm_vals = np.zeros(n)
-        self.rho_corr_pole_km_vals = np.zeros(n)
-        self.rho_corr_timing_km_vals = np.zeros(n)
-        self.phi_rl_rad_vals = np.zeros(n)
-        self.raw_tau_threshold_vals = np.zeros(n)
-
-        if verbose:
-            print("\tData Extraction Complete.")
-        if verbose:
-            print("\tWriting History...")
-
-        input_vars = {
-            "GEO Data": geo,
-            "DLP Data": dlp
-            }
-        input_kwds = {
-            "occ":             occ,
-            "Use of Verbose":  verbose
-            }
-        self.history = write_history_dict(input_vars, input_kwds, __file__)
-
-        if verbose:
-            print("\tHistory Complete.")
         if verbose:
             print("\tExtract CSV Data Complete.")
 

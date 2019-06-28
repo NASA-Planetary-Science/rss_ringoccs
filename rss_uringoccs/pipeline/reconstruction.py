@@ -2,6 +2,7 @@ import os
 import sys
 sys.path.append('../')
 from rss_uringoccs.tools.history import write_history_dict
+from rss_uringoccs.tools.write_output_files import write_output_files
 sys.path.remove('../')
 sys.path.append('../../')
 import rss_ringoccs.diffrec.diffraction_correction as DiffCorr
@@ -91,7 +92,10 @@ for dir in ['I','E']:
         # do reconstruction
         tau_inst = DiffCorr.DiffractionCorrection(dlp_inst,pipe.res,rng=[rho_min,rho_max],
                     res_factor=1, psitype=pipe.psitype, wtype=pipe.window,
-                    fwd=False, norm=False, bfac=True, write_file=True,
+                    fwd=False, norm=False, bfac=True, write_file=False,
                     verbose=pipe.verbose, sigma=2e-12)
 
+        # write out to file
+        if pipe.write_file :
+            write_output_files(tau_inst)
         print('\n')

@@ -48,9 +48,11 @@ def stack_spec(time,Sxx,N=int(16)):
     '''
     Purpose:
         Stack spectrogram slices to improve SNR of the incoherent signal.
+
     Arguments:
-        :time (*np.ndarray): Jx1 array of times at which the spectrogram was computed
-        :Sxx (*np.ndarray): IxJ array of spectrogram power values
+        :time (*np.ndarray*): Jx1 array of times at which the spectrogram was computed
+        :Sxx (*np.ndarray*): IxJ array of spectrogram power values
+
     Keyword Arguments:
         :N (*int*): number of FFT segments to include in each bin,
                   must be less than J, default is 16
@@ -85,7 +87,7 @@ def spectro(time,signal,stack=True,nstack=int(16),hires=False,numpts=None,nsegs=
                         Fourier transform to circumvent Gabor uncertainty
                         when computing the STFT.
         :numpts (*int*): number of points to use in each STFT segment.
-                        Only relevant if ``hires`` is true, default 1000.
+                        Only used if ``hires`` is true, default 1000.
         :nsegs (*int*): number of segments to use in total STFT. Only used
                         if ``hires`` is True, default is length of ``time`` / ``nperseg``
     Notes:

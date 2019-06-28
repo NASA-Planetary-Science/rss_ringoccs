@@ -201,7 +201,8 @@ def compute_norm_eq(w_func, error_check=True):
 def fresnel_scale(Lambda, d, phi, b, deg=False):
     """
         Purpose:
-            Compute the Fresnel Scale from lambda, D, Phi, and B.
+            Compute the Fresnel Scale from :math:`\\lambda`, :math:`D`,
+            :math:`\\phi`, and :math:`B`.
         Arguments:
             :Lambda (*np.ndarray* or *float*):
                 Wavelength of the incoming signal.
@@ -213,16 +214,16 @@ def fresnel_scale(Lambda, d, phi, b, deg=False):
                 Ring opening angle.
         Keywords:
             :deg (*bool*):
-                Set True if phi/b are in degrees.
+                Set True if :math:`\\phi` or :math:`B` are in degrees.
                 Default is radians.
         Output:
             :fres (*np.ndarray* or *float*):
                 The Fresnel scale.
         Note:
-            Lambda and d must be in the same units.
+            :math:`\\lambda` and :math:`D` must be in the same units.
             The output (Fresnel scale) will have the same units
-            as lambda and d. In addition, b and phi must also
-            have the same units. If b and phi are in degrees,
+            as :math:`\\lambda` and d. In addition, :math:`B` and :math:`\\phi` must also
+            have the same units. If :math:`B` and :math:`\\phi` are in degrees,
             make sure to set deg=True. Default is radians.
     """
     try:
@@ -256,7 +257,7 @@ def fresnel_scale(Lambda, d, phi, b, deg=False):
 def psi(kD, r, r0, phi, phi0, B, D):
     """
         Purpose:
-            Compute psi (MTR Equation 4)
+            Compute :math:`\\psi` (MTR Equation 4)
         Arguments:
             :kD (*float*):
                 Wavenumber, unitless.
@@ -265,7 +266,7 @@ def psi(kD, r, r0, phi, phi0, B, D):
             :r0 (*np.ndarray*):
                 Radius of region within window, in kilometers.
             :phi (*np.ndarray*):
-                Root values of dpsi/dphi, radians.
+                Root values of :math:`\\mathrm{d}\\psi/\\mathrm{d}\\phi`, radians.
             :phi0 (*np.ndarray*):
                 Ring azimuth angle corresponding to r0, radians.
             :B (*float*):
@@ -289,7 +290,7 @@ def psi(kD, r, r0, phi, phi0, B, D):
 def dpsi(kD, r, r0, phi, phi0, B, D):
     """
         Purpose:
-            Compute dpsi/dphi
+            Compute :math:`\\mathrm{d}\\psi/\\mathrm{d}\\phi`
         Arguments:
             :kD (*float*):
                 Wavenumber, unitless.
@@ -298,7 +299,7 @@ def dpsi(kD, r, r0, phi, phi0, B, D):
             :r0 (*np.ndarray*):
                 Radius of region within window, in kilometers.
             :phi (*np.ndarray*):
-                Root values of dpsi/dphi, radians.
+                Root values of :math:`\\mathrm{d}\\psi/\\mathrm{d}\\phi`, radians.
             :phi0 (*np.ndarray*):
                 Ring azimuth angle corresponding to r0, radians.
             :B (*float*):
@@ -307,8 +308,8 @@ def dpsi(kD, r, r0, phi, phi0, B, D):
                 Spacecraft-RIP distance, in kilometers.
         Outputs:
             :dpsi (*array*):
-                Partial derivative of psi with
-                respect to phi.
+                Partial derivative of :math:`\\psi` with
+                respect to :math:`\\phi`.
     """
     # Compute Xi variable (MTR86 Equation 4b).
     xi = (np.cos(B)/D) * (r * np.cos(phi) - r0 * np.cos(phi0))
@@ -331,7 +332,7 @@ def dpsi(kD, r, r0, phi, phi0, B, D):
 def dpsi_ellipse(kD, r, r0, phi, phi0, B, D, ecc, peri):
     """
         Purpose:
-            Compute dpsi/dphi
+            Compute :math:`\\mathrm{d}\\psi/\\mathrm{d}\\phi`
         Arguments:
             :kD (*float*):
                 Wavenumber, unitless.
@@ -340,7 +341,7 @@ def dpsi_ellipse(kD, r, r0, phi, phi0, B, D, ecc, peri):
             :r0 (*np.ndarray*):
                 Radius of region within window, in kilometers.
             :phi (*np.ndarray*):
-                Root values of dpsi/dphi, radians.
+                Root values of :math:`\\mathrm{d}\\psi/\\mathrm{d}\\phi`, radians.
             :phi0 (*np.ndarray*):
                 Ring azimuth angle corresponding to r0, radians.
             :B (*float*):
@@ -349,8 +350,8 @@ def dpsi_ellipse(kD, r, r0, phi, phi0, B, D, ecc, peri):
                 Spacecraft-RIP distance, in kilometers.
         Outputs:
             :dpsi (*array*):
-                Partial derivative of psi with
-                respect to phi.
+                Partial derivative of :math:`\\psi` with
+                respect to :math:`\\phi`.
     """
     # Compute Xi variable (MTR86 Equation 4b).
     xi = (np.cos(B)/D) * (r * np.cos(phi) - r0 * np.cos(phi0))
@@ -379,7 +380,7 @@ def dpsi_ellipse(kD, r, r0, phi, phi0, B, D, ecc, peri):
 def d2psi(kD, r, r0, phi, phi0, B, D):
     """
         Purpose:
-            Compute d^2psi/dphi^2
+            Compute :math:`\\mathrm{d}^2\\psi/\\mathrm{d}\\phi^2`
         Arguments:
             :kD (*float*):
                 Wavenumber, unitless.
@@ -388,7 +389,8 @@ def d2psi(kD, r, r0, phi, phi0, B, D):
             :r0 (*np.ndarray*):
                 Radius of region within window, in kilometers.
             :phi (*np.ndarray*):
-                Root values of dpsi/dphi, radians.
+                Root values of :math:`\\mathrm{d}\\psi/\\mathrm{d}\\phi`,
+                radians.
             :phi0 (*np.ndarray*):
                 Ring azimuth angle corresponding to r0, radians.
             :B (*float*):
@@ -397,8 +399,8 @@ def d2psi(kD, r, r0, phi, phi0, B, D):
                 Spacecraft-RIP distance, in kilometers.
         Outputs:
             :dpsi (*np.ndarray*):
-                Second partial derivative of psi
-                with respect to phi.
+                Second partial derivative of :math:`\\psi`
+                with respect to :math:`\\phi`.
     """
     # Compute Xi variable (MTR86 Equation 4b).
     xi = (np.cos(B)/D) * (r * np.cos(phi) - r0 * np.cos(phi0))
@@ -425,26 +427,26 @@ def d2psi(kD, r, r0, phi, phi0, B, D):
 def resolution_inverse(x):
     """
         Purpose:
-            Compute the inverse of y = x/(exp(-x)+x-1)
+            Compute the inverse of :math:`y = x/(\\exp(-x)+x-1)`
         Arguments:
             :x (*np.ndarray* or *float*):
                 Independent variable
         Outputs:
             :f (*np.ndarray* or *float*):
-                The inverse of x/(exp(-x)+x-1)
+                The inverse of :math:`x/(\\exp(-x)+x-1)`
         Dependencies:
             #. numpy
             #. scipy.special
         Method:
-            The inverse of x/(exp(-x)+x-1) is computed using the
+            The inverse of :math:`x/(\\exp(-x)+x-1)` is computed using the
             LambertW function. This function is the inverse of
-            y = x * exp(x). This is computed using the scipy.special
+            :math:`y = x\\exp(x)`. This is computed using the scipy.special
             subpackage using their lambertw function.
         Warnings:
             #. The real part of the argument must be greater than 1.
             #. The scipy.special lambertw function is slightly
-               inaccurate when it's argument is near -1/e. This
-               argument is z = exp(x/(1-x)) * x/(1-x)
+               inaccurate when it's argument is near :math:`-1/e`. This
+               argument is :math:`z = \\exp(x/(1-x)) * x/(1-x)`
         Examples:
             Plot the function on the interval (1,2)
 
@@ -480,13 +482,13 @@ def fresnel_cos(x):
                 The fresnel cosine integral of x.
         Notes:
             #.  The Fresnel Cosine integral is the solution to the
-                equation dy/dx = cos(pi/2 * x^2), y(0) = 0. In other
-                words, y = integral (t=0 to x) cos(pi/2 * t^2) dt
+                equation :math:`\\mathrm{d}y/\\mathrm{d}x = \\cos(\\frac\\pi 2 x^2)`, :math:`y(0) = 0`. In other
+                words, :math:`y = \\int_{t=0}^{x}\\cos(\\frac\\pi 2 t^2)\\mathrm{d}t`
             #.  The Fresnel Cosine and Sine integrals are computed by
                 using the scipy.special Error Function. The Error
                 Function, usually denoted Erf(x), is the solution to
-                dy/dx = (2/sqrt(pi)) * exp(-x^2), y(0) = 0. That is:
-                y = 2/sqrt(pi) * integral (t=0 to x) exp(-t^2)dt.
+                :math:`\\mathrm{d}y/\\mathrm{d}x = \\frac{2}{\\sqrt{\\pi}}\\exp(-x^2)`, :math:`y(0) = 0`. That is:
+                :math:`y = \\frac{2}{\\sqrt{\\pi}}\\int_{t=0}^{x}\\exp(-t^2)\\mathrm{d}t`.
                 Using Euler's Formula for exponentials allows one
                 to use this to solve for the Fresnel Cosine integral.
             #.  The Fresnel Cosine integral is used for the solution
@@ -495,7 +497,7 @@ def fresnel_cos(x):
                 radiative transfer and diffraction.
         Examples:
             Compute and plot the Fresnel Cosine integral.
-            
+
             >>> import rss_ringoccs.diffcorr.special_functions as sf
             >>> import numpy as np
             >>> import matplotlib.pyplot as plt
@@ -529,13 +531,13 @@ def fresnel_sin(x):
                 The fresnel sine integral of x.
         Notes:
             #.  The Fresnel sine integral is the solution to the
-                equation dy/dx = sin(pi/2 * x^2), y(0) = 0. In other
-                words, y = integral (t=0 to x) sin(pi/2 * t^2) dt
+                equation :math:`\\mathrm{d}y/\\mathrm{d}x = \\sin(\\frac\\pi 2 x^2)`, :math:`y(0) = 0`. In other
+                words, :math:`y = \\int_{t=0}^{x}\\sin(\\frac\\pi 2 t^2) dt`
             #.  The Fresnel Cossine and Sine integrals are computed
                 by using the scipy.special Error Function. The Error
                 Function, usually denoted Erf(x), is the solution to
-                dy/dx = (2/sqrt(pi)) * exp(-x^2), y(0) = 0. That is:
-                y = 2/sqrt(pi) * integral (t=0 to x) exp(-t^2)dt.
+                :math:`\\mathrm{d}y/\\mathrm{d}x = \\frac{2}{\\sqrt{\\pi}} \\exp(-x^2)`, :math:`y(0) = 0`. That is:
+                :math:`y = \\frac{2}{\\sqrt{\\pi}}\\int_{t=0}^{x}\\exp(-t^2)dt`.
                 Using Euler's Formula for exponentials allows one
                 to use this to solve for the Fresnel Sine integral.
             #.  The Fresnel sine integral is used for the solution
@@ -544,6 +546,7 @@ def fresnel_sin(x):
                 radiative transfer and diffraction.
         Examples:
             Compute and plot the Fresnel Sine integral.
+
             >>> import rss_ringoccs.diffcorr.special_functions as sf
             >>> import numpy as np
             >>> import matplotlib.pyplot as plt
@@ -666,8 +669,6 @@ def double_slit_diffraction(x, z, a, d):
         Outputs:
             :f:
                 Single slit diffraction pattern.
-        Dependences:
-            #. numpy
     """
     fname = "diffrec.special_functions.double_slit_diffraction"
     error_check.check_is_real(x, "x", fname)

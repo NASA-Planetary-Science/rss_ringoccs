@@ -1,0 +1,15 @@
+\begindata
+
+
+PATH_VALUES     = ( '../kernels', '../kernels/local/' )
+
+PATH_SYMBOLS    = ( 'A', 'B')
+KERNELS_TO_LOAD = (     '$A/ura111.bsp'
+						            '$A/vgr2.ura111.bsp'
+                        '$A/earthstns_itrf93_040916.bsp'
+                        '$A/earth_720101_031229.bpc'
+                        '$A/cpck21May2009.tpc'
+						            '$A/de430.bsp'
+						            '$A/earth_topo_050714.tf'
+                        '$A/naif0012.tls'
+                        '$B/uranus_ringframes_French_et_al_1988.tf')

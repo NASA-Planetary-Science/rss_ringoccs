@@ -32,7 +32,7 @@ Release date: 2019 Jun 28
 
 ### Known Issues and Limitations of V1.2 ###
 
-#### V1.2-1 ####
+#### V1.2-1 (carried over from V1.1-1) ####
 For the extreme nearly edge-on viewing geometry of Rev133E at X-band, rss_ringoccs gives slightly different results from PDS, traceable to a difference of about 10% in the cubic term of the varaiable psi. The origin of this discrepancy is unknown, but it is not important for any other occultation data sets we have reduced so far, and is relatively minor even for Rev133E at X band.
 
 #### V1.2-2 ####
@@ -54,7 +54,7 @@ Release date: 2019 Feb 1
 ### Known Issues and Limitations of V1.1 ###
 
 #### V1.1-1 ####
-For the extreme nearly edge-on viewing geometry of Rev133E at X-band, rss_ringoccs gives slightly different results from PDS, traceable to a difference of about 10% in the cubic term of the varaiable psi. The origin of this discrepancy is unknown, but it is not important for any other occultation data sets we have reduced so far, and is relatively minor even for Rev133E at X band.
+For the extreme nearly edge-on viewing geometry of Rev133E at X-band, rss_ringoccs gives slightly different results from PDS, traceable to a difference of about 10% in the cubic term of the variable psi. The origin of this discrepancy is unknown, but it is not important for any other occultation data sets we have reduced so far, and is relatively minor even for Rev133E at X band.
 
 ### Lien list for V1.2 ###
 

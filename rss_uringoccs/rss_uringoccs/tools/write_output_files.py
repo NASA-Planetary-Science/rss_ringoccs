@@ -21,7 +21,7 @@ from .pds3_tau_series import write_tau_series
 from time import strftime
 
 sys.path.append('../../')
-import rss_uringoccs as rss
+import rss_ringoccs as rss
 sys.path.remove('../../')
 
 import pdb

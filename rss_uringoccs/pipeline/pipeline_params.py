@@ -1,8 +1,10 @@
 ### BEGIN USER INPUT
 # raw data filepath
-rawpath = '/Volumes/sflury001/Research/TC2017/data/VoyagerUranus/data/raw/'#'../data/'
+rawpath = '../data/'
 # global setting of verbose mode
 verbose = True              # optional verbose mode
+# write file out?
+write_file = True
 # global kernel file
 kernels = '../tables/VG2_URING_kernel.ker' # kernel file
 # reference files for DLP processing
@@ -14,12 +16,12 @@ cal_sn = '0001'              # CAL file serial number
 dr_km_desired = 0.005       # DLP sampling resolution
 # reference files for Reconstruction
 dlp_res = '005'             # DLP resolution in meters
-dlp_date = '20190522'       # DLP file date
-dlp_sn = '0002'             # DLP file serial number
+dlp_date = '20190628'       # DLP file date
+dlp_sn = '0001'             # DLP file serial number
 # settings for Reconstruction processing
 window = 'kb25'             # reconstruction window for Fresnel transform
 res = 0.02                  # desired reconstruction resolution
-psitype = 'cfresnel4'       # method for approximating psi
+psitype = 'fresnel4'       # method for approximating psi
 ### END USER INPUT
 #
 ### ANCILARY INFORMATION

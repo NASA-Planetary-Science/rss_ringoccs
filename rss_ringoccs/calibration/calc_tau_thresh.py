@@ -88,6 +88,8 @@ class calc_tau_thresh(object):
 
         # compute SNR and set attribute
         self.snr = snr
+        self.bandwidth = bandwidth
+        self.mu = -np.sin(abs(B_rad))
 
         # compute threshold optical depth
         self.tau_thresh = tau
@@ -111,7 +113,7 @@ class calc_tau_thresh(object):
         n = int(1.024 * df) # number of elements based on frequency sampling
         freq,time,Sxx = spectrogram(IQ,df,nperseg=n,return_onesided=False)
         time += spm[0]
-        # frequency filtering to include only the thermal receiver power, 
+        # frequency filtering to include only the thermal receiver power,
         #   averaged over time
         Sxx_freq_filt = np.nanmean(Sxx[((freq>-450)&(freq<-200))|
             ((freq>200)&(freq<450)),:],0)

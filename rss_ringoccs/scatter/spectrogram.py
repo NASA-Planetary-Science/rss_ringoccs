@@ -129,17 +129,17 @@ def Scatter(rsr_inst,geo_inst,cal_inst,rho_limits=[6.5e4,1.4e5],
     Purpose:
         Run spectrogram code and output results to file
     Arguments:
-        rsr_inst (*obj*): instance of RSR reader
-        geo_inst (*obj*): instance of Geometry
-        cal_inst (*obj*): instance of Calibration
+        :rsr_inst (*obj*): instance of RSR reader
+        :geo_inst (*obj*): instance of Geometry
+        :cal_inst (*obj*): instance of Calibration
     Keyword Arguments:
-        rho_limits (*list*): 2x1 list of radii boundaries in km over which to
+        :rho_limits (*list*): 2x1 list of radii boundaries in km over which to
                         compute the spectrogram, default is [65,000,140,000].
-        stack (*bool*): specifies whether to stack the resulting spectrogram
+        :stack (*bool*): specifies whether to stack the resulting spectrogram
                         to improve scattered signal SNR. Default is True.
-        nstack (*int*): number of spectrogram slices to stack in each bin,
+        :nstack (*int*): number of spectrogram slices to stack in each bin,
                         only used if ``stack`` is set to True.
-        hires (*bool*): specifying whether to compute spectrogram "manually"
+        :hires (*bool*): specifying whether to compute spectrogram "manually"
                         in a hi-res time sampling mode, default is False. Note:
                         this will take a substantial amount of time to compute
                         and is not recommended.

@@ -1,12 +1,12 @@
 ### BEGIN USER INPUT
 # raw data filepath
-rawpath = '../data/'
+rawpath = '../uring_files/data/'
 # global setting of verbose mode
 verbose = True              # optional verbose mode
 # write file out?
 write_file = True
 # global kernel file
-kernels = '../tables/VG2_URING_kernel.ker' # kernel file
+kernels = '../uring_files/kernels/VG2_URING_kernel.ker' # kernel file
 # reference files for DLP processing
 geo_date = '20190628'        # GEO file date
 geo_sn = '0001'              # GEO file serial number

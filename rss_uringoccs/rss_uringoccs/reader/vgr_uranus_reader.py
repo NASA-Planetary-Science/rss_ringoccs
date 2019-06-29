@@ -6,13 +6,14 @@ NOTE: 1 second gaps between egress UC0482 and UC0483 tapes
 """
 import pdb
 import numpy as np
-from scipy.fftpack import fft, ifft
+from scipy.fftpack import hilbert
 import os
 import sys
 
 class VGRUranusReader(object):
     def __init__(self,data_dir,prof_dir):
         # check if data directory exists
+        print('Reading data files...')
         if not os.path.isdir(data_dir) :
             print('Directory '+data_dir+' not found.')
             sys.exit()
@@ -75,7 +76,7 @@ class VGRUranusReader(object):
 
         # get I and Q
         I = np.array([x-128 for x in data_out])
-        Q = np.array(self.hilbert(I))
+        Q = np.array(hilbert(I))
 
         # generate SPM array
         Npts_per_file   = nrecords * rec_data_bytes/nchan
@@ -144,23 +145,3 @@ class VGRUranusReader(object):
             data = np.reshape(data_out, (int(nrecords*rec_data_bytes/nchan),nchan))[:,channel]
             return data
 
-    def hilbert(self,xarr):
-        """
-        translated from hilbert.pro because scipy.signal.hilbert() and
-        scipy.fftpack.hilbert() do not reproduce values from IDL's hilbert funct.
-        """
-        N1 = len(xarr)
-        N2 = int(N1/2) - 1
-        N3 = N1 - N2
-        # foward fft into freq  domain
-        fftarr = fft(xarr) / N1
-        t1 = fftarr[0]
-        # angle shift by 90, -90
-        t2 = fftarr[1:N2+1] * 1j
-        t3 = fftarr[N3:N1] / 1j
-        t4 = fftarr[-1]
-        ht = [t1, *t2, *t3, t4]
-
-        # inverse fft into time domain
-        ifftarr = ifft(ht) * N1
-        return np.real(ifftarr)

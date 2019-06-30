@@ -1,6 +1,6 @@
 """
     License and Copyright:
-        Copyright (C) 2018 Team Cassini
+        Copyright (C) 2019 Team Cassini
 
         This program is free software: you  can redistribute it and/or modify it
         under the  terms of the GNU  General Public License as  published by the

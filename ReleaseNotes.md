@@ -2,7 +2,7 @@
 
 ## rss_ringoccs V1.2 ##
 
-Release date: 2019 Jun 28
+Release date: 2019 Jun 30
 
 ### Changes from V1.1 ###
 

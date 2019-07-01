@@ -146,7 +146,7 @@ def write_history_dict(input_vars, input_kwds, source_file, add_info=None):
     operating_system = os.uname()[0]
     src_dir = source_file.rsplit('/',1)[0] +'/'
     src_file = source_file.split('/')[-1]
-    rssocc_version = '1.1'
+    rssocc_version = '1.2'
 
     history = {
             "rss_ringoccs Version": rssocc_version,

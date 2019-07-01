@@ -22,7 +22,7 @@ To simplify and expedite the use of rss_ringoccs, we provide a Python script tha
 ```cd rss_ringoccs_master/pipeline
 yes | python e2e_batch.py 
 ```
-The `rss_ringoccs User Guide`  
+The `rss_ringoccs User Guide` includes several additional examples of end-to-end processing scripts, as well as instructions to enable users to construct their own batch end-to-end scripts. 
 
 ## How to (Get) Help
 If you have trouble with installation or execution of the rss_ringoccs package, we encourage you to post a issue to https://github.com/NASA-Planetary-Science/rss_ringoccs/issues. We will attempt to respond promptly, and ther users will benefit. Alternatively, you can write email directly to Richard French: rfrench_at_wellesley.edu.

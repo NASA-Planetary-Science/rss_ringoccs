@@ -12,7 +12,7 @@ from matplotlib.colors import LogNorm
 rho_limits = [6.5e4,1.4e5]
 
 ### Read in file names and Maxwell values
-files = open('../tables/list_of_rsr_files_before_USO_failure_to_dl_v2.txt','r').readlines()
+files = open('../tables/rsr_1kHz_files_before_USO_failure.txt','r').readlines()
 
 # do for all files
 for file in files:
@@ -26,10 +26,6 @@ for file in files:
         print('SKIPPING 16 KHZ FILE: ' + rsr_file)
         continue
 
-    # exclude files with bad headers
-    if rsr_file in args.skips:
-        print('SKIPPING FILE WITH BAD HEADER: '+rsr_file)
-        continue
     try:
         # Create instance with rsr file contents
         rsr_inst = rss.rsr_reader.RSRReader(rsr_file, verbose=args.verbose,
@@ -42,8 +38,7 @@ for file in files:
         # Create instance with calibrated data
         cal_inst = rss.calibration.Calibration(rsr_inst, geo_inst,
                 verbose=args.verbose, write_file=args.write_file,
-                fof_order=args.fof_order, pnf_order=args.pnf_order,
-                pnf_fittype=args.pnf_fittype, interact=args.interact)
+                pnf_order=args.pnf_order, interact=args.interact)
 
         # Create instance with diffraction-limited profile and other
         #   inputs needed for diffraction correction
@@ -74,6 +69,8 @@ for file in files:
 
         # Create spectrogram of scattered signal
         rss.scatter.Scatter(rsr_inst,geo_inst,cal_inst,stack=True,nstack=int(9))
+    except KeyboardInterrupt:
+        sys.exit()
     except:
         tb = traceback.format_exc()
         print(tb)

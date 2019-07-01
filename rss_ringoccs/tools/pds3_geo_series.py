@@ -37,7 +37,6 @@ def write_geo_series_data(geo_inst, out_file):
 
     npts = len(geo_inst.t_oet_spm_vals)
 
-    print('\tWriting GEO data to: \n\t\t' + out_file)
     f = open(out_file, 'w')
 
     for n in range(npts):
@@ -63,6 +62,8 @@ def write_geo_series_data(geo_inst, out_file):
             geo_inst.elev_deg_vals[n],
             '\r\n'))
     f.close()
+
+    print('\tGEO data written to: ' + out_file)
     return None
 
 

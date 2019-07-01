@@ -30,7 +30,6 @@ def write_tau_series_data(tau_inst, out_file):
             + '%14.6F,' + '%14.6F,' + '%12.6F' + '%s')
     npts = len(tau_inst.t_oet_spm_vals)
 
-    print('\tWriting TAU data to: \n\t\t' + out_file)
 
     f = open(out_file, 'w')
     for n in range(npts):
@@ -51,6 +50,8 @@ def write_tau_series_data(tau_inst, out_file):
             '\r\n'))
             
     f.close()
+
+    print('\tTAU data written to: ' + out_file)
 
 
     return None

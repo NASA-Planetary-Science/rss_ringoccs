@@ -38,7 +38,6 @@ def write_dlp_series_data(dlp_inst, out_file):
     #   as an attribute
     tau_norm_vals = -np.sin(abs(dlp_inst.B_rad_vals)) * np.log(
             dlp_inst.p_norm_vals)
-    print('\tWriting DLP data to: \n\t\t' + out_file)
 
     f = open(out_file, 'w')
     for n in range(npts):
@@ -59,6 +58,7 @@ def write_dlp_series_data(dlp_inst, out_file):
             '\r\n'))
             
     f.close()
+    print('\tDLP data written to: ' + out_file)
 
 
     return None

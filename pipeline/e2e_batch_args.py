@@ -5,7 +5,7 @@ Purpose: Provide all inputs to batch run, to be imported by e2e_batch.py
 ### Batch inputs
 with16 = False                      # Process 16 kHz files (use False to skip)
 mpath = '../data/'                  # Path to location of data files
-rsr_file_list = '../tables/rsr_files_before_USO_failure.txt'
+rsr_file_list = '../tables/rsr_1kHz_files_before_USO_failure.txt'
 
 ### Global inputs
 verbose    = False                  # Print processing steps to terminal

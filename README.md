@@ -18,7 +18,7 @@ Release notes are contained in https://github.com/NASA-Planetary-Science/rss_rin
 Source code documentation is found at https://rss-ringoccs.readthedocs.io/en/master/
 
 ## Batch Data Processing
-To simplify and expedite the use of rss_ringoccs, we provide a Python script that performs the end-to-end pipeline for a list of files contained in a reference ASCII text file. The default list is the 1 kHz Cassini RSR files prior to the USO failure, which can be found in the ./tables/ directory. This batch script implementation of the pipeline is located in the ./pipeline/ directory. We suggest running the batch script using the `yes` command as shown here:
+Once `rss_ringoccs` has been installed and the necessary data and ephemeris/geometry files have been downloaded to local storage, as describd in the `rss_ringoccs User Guide`, users should first test `rss_ringoccs` using the documented example scripts. Once all is well, users will be able to process a set of Cassini RSS ring observations in batch mode. To simplify and expedite the use of `rss_ringoccs`, we provide a Python script that performs the end-to-end pipeline for a list of files contained in a reference ASCII text file. The default list is the 1 kHz Cassini RSR files prior to the USO failure, which can be found in the  `./tables/` directory. This batch script implementation of the pipeline is located in the `./pipeline/` directory. We suggest running the batch script using the `yes` command as shown here:
 ```cd rss_ringoccs_master/pipeline
 yes | python e2e_batch.py 
 ```

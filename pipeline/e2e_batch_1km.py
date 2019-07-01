@@ -39,7 +39,7 @@ res_factor = 0.75                   # Factor to be multiplied to resolution
 inversion_range = profile_range     # Lower and upper radial bounds to inversion
 psitype = 'Fresnel4'                # Psi type
 wtype = 'kbmd20'                    # Window type
-sigma = 2.e-13                      # Allen deviation
+sigma = 2.e-13                      # Allan deviation
 fwd = False                         # Compute forward model
 norm = True                         # Normalize reconstructed complex
                                     #       transmittance by window width

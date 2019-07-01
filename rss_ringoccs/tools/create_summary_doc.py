@@ -862,7 +862,7 @@ def plot_summary_doc_v2(geo_inst, cal_inst, dlp_inst, tau_inst):
     calfile = cal_inst.outfiles[0].split('/')[-1] + '.TAB'
     taufile = tau_inst.outfiles[0].split('/')[-1] + '.TAB'
     latex_summary_doc(outfig, tau_inst.input_res, geofile, calfile, taufile)
-    print('\tSaving summary PDF to:\n\t\t' + outfig)
+    print('\tSummary PDF saved to: ' + outfig)
 
 
     return None

@@ -532,8 +532,8 @@ class FreqOffsetFit(object):
         for file,dir in zip(filenames,outdirs):
             plt.title(file)
             outfile = dir + file + '.PDF'
-            print('\tSaving frequency offset fit plot to: \n\t\t' + outfile)
             plt.savefig(outfile)
+            print('\tFrequency offset fit plot saved to: ' + outfile)
         plt.close()
 """
 Revisions:

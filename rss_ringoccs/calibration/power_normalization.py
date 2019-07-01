@@ -492,10 +492,10 @@ class Normalization(object):
             # output
             for file,dir in zip(filenames,outdirs):
                 outfile = dir + file + '.PDF'
-                print('\tSaving power normalization plot to: \n\t\t' + outfile)
                 fig.text(0.125,0.96,file,fontsize=15)
                 plt.savefig(outfile)
                 fig.texts[-1].set_visible(False)
+                print('\tPower normalization plot saved to: ' + outfile)
             plt.close('all')
         else:
             plt.show(block=False)

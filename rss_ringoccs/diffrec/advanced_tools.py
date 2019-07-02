@@ -222,8 +222,7 @@ class ModelFromGEO(object):
         model_list = [
             "rightstraightedge",
             "leftstraightedge",
-            "squarewell",
-            "deltafunction"
+            "squarewell"
         ]
 
         if not (model in model_list):
@@ -550,6 +549,8 @@ class ModelFromGEO(object):
                 )
 
         if use_fresnel:
+            start = 0
+            n_used = np.size(self.rho_km_vals)
             self.p_norm_vals = np.abs(T_hat)*np.abs(T_hat)
             self.phase_rad_vals = -np.arctan2(np.imag(T_hat), np.real(T_hat))
         else:
@@ -557,8 +558,10 @@ class ModelFromGEO(object):
             self.phase_rad_vals = -rec.phase_vals
             self.F_km_vals = rec.F_km_vals
             self.p_norm_actual_vals = self.p_norm_vals
+            start = rec.start
+            n_used = rec.n_used
 
-        crange = np.arange(rec.start, rec.start+rec.n_used, 1)
+        crange = np.arange(start, start+n_used, 1)
         self.B_rad_vals = self.B_rad_vals[crange]
         self.D_km_vals = self.D_km_vals[crange]
         self.f_sky_hz_vals = self.f_sky_hz_vals[crange]

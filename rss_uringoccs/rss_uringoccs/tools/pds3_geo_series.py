@@ -1,9 +1,10 @@
-"""
 
-:Purpose: 
-    Write GEO data and label files in PDS3 format.
+'''
+pds3_geo_series.py
 
-:Dependencies:
+Purpose: Write GEO data and label files in PDS3 format.
+
+Dependencies:
     #. numpy
     #. time
     #. rss_ringoccs.tools.pds3_write_series_v2
@@ -11,7 +12,8 @@
 Notes:
     [1] Contents of output GEO data and label files are meant to mimic
         GEO files from CORSS_8001 v2.
-"""
+'''
+import pdb
 import time
 from . import pds3_write_series_v2 as pds3
 import numpy as np
@@ -37,6 +39,7 @@ def write_geo_series_data(geo_inst, out_file):
 
     npts = len(geo_inst.t_oet_spm_vals)
 
+    print('\tWriting GEO data to: \n\t\t' + '/'.join(out_file.split('/')[0:5]) + '/\n\t\t\t' + '/'.join(out_file.split('/')[5:]))
     f = open(out_file, 'w')
 
     for n in range(npts):
@@ -62,8 +65,6 @@ def write_geo_series_data(geo_inst, out_file):
             geo_inst.elev_deg_vals[n],
             '\r\n'))
     f.close()
-
-    print('\tGEO data written to: ' + out_file)
     return None
 
 
@@ -111,7 +112,6 @@ def get_geo_series_info(rev_info, geo_inst, series_name, prof_dir):
     col_num = list(range(1, ncol+1))
 
 
-    rsr_file = rev_info['rsr_file']
     band = rev_info['band']
     year = rev_info['year']
     doy = rev_info['doy']
@@ -136,22 +136,21 @@ def get_geo_series_info(rev_info, geo_inst, series_name, prof_dir):
     FILE_RECORDS = str(len(sampling_parameter_arr))
     SERIES_NAME = series_name
 
-    DATA_SET_ID = '"CO-SR-RSS-?/?-OCC-V0.1"'
+    DATA_SET_ID = '"VG2-UR-RSS-?/?-OCC-V0.1"'
     RING_OBSERVATION_ID = pds3.get_ring_obs_id(year, doy, band, dsn)
     PRODUCT_ID = series_name
     PRODUCT_TYPE = 'OCCULTATION_GEOMETRY'
     PRODUCT_CREATION_TIME = current_time_ISOD
-    PRODUCER_ID = '"TC2017"'
+    PRODUCER_ID = '"TC2019"'
 
-    INSTRUMENT_HOST_NAME = '"CASSINI ORBITER"'
-    INSTRUMENT_HOST_ID = 'CO'
+    INSTRUMENT_HOST_NAME = '"VOYAGER 2"'
+    INSTRUMENT_HOST_ID = 'VG2'
     INSTRUMENT_NAME = '"RADIO SCIENCE SUBSYSTEM"'
-    INSTRUMENT_ID = 'RSS'
-    MISSION_PHASE_NAME = '"TOUR"'
-    TARGET_NAME = '"S RINGS"'
+    INSTRUMENT_ID = 'RSS-VG2U'
+    #MISSION_PHASE_NAME = '"TOUR"'
+    TARGET_NAME = '"U RINGS"'
     START_TIME = pds3.get_ISOD_str(t_oet_spm_start, year, doy)
     STOP_TIME = pds3.get_ISOD_str(t_oet_spm_end, year, doy)
-    REVOLUTION_NUMBER = rev_info['rev_num']
     DSN_STATION_NUMBER = dsn.split('-')[-1]
     OCCULTATION_TYPE = 'RADIO'
     PLANETARY_OCCULTATION_FLAG = rev_info['planetary_occ_flag']
@@ -188,11 +187,10 @@ def get_geo_series_info(rev_info, geo_inst, series_name, prof_dir):
                          , 'INSTRUMENT_HOST_ID'
                          , 'INSTRUMENT_NAME'
                          , 'INSTRUMENT_ID'
-                         , 'MISSION_PHASE_NAME'
+                         #, 'MISSION_PHASE_NAME'
                          , 'TARGET_NAME'
                          , 'START_TIME'
                          , 'STOP_TIME'
-                         , 'REVOLUTION_NUMBER'
                          , 'DSN_STATION_NUMBER'
                          , 'OCCULTATION_TYPE'
                          , 'PLANETARY_OCCULTATION_FLAG'
@@ -203,11 +201,10 @@ def get_geo_series_info(rev_info, geo_inst, series_name, prof_dir):
             , 'INSTRUMENT_HOST_ID': INSTRUMENT_HOST_ID
             , 'INSTRUMENT_NAME' : INSTRUMENT_NAME
             , 'INSTRUMENT_ID': INSTRUMENT_ID
-            , 'MISSION_PHASE_NAME': MISSION_PHASE_NAME
+            #, 'MISSION_PHASE_NAME': MISSION_PHASE_NAME
             , 'TARGET_NAME': TARGET_NAME
             , 'START_TIME' : START_TIME
             , 'STOP_TIME' : STOP_TIME
-            , 'REVOLUTION_NUMBER': REVOLUTION_NUMBER
             , 'DSN_STATION_NUMBER': DSN_STATION_NUMBER
             , 'OCCULTATION_TYPE' : OCCULTATION_TYPE
             , 'PLANETARY_OCCULTATION_FLAG': PLANETARY_OCCULTATION_FLAG
@@ -236,31 +233,31 @@ def get_geo_series_info(rev_info, geo_inst, series_name, prof_dir):
             + 'For more details, see MAROUFETAL1986' + sd
             + 'and Appendix B of ROSEN1989.' + sd 
             + ' ' + sd
-            + 'The geometry calculations are based on the use of the official'
-            + ' Cassini' + sd + 'Navigation Team NAIF Toolkit kernel '
-            + 'files available at the time of' + sd
-            + 'archiving and are listed above. We note that the adopted '
-            + 'Planetary' + sd + 'Constants Kernel (PCK) file is not '
-            + 'necessarily the one Cassini NAV' + sd
-            + 'associates with the listed reconstructed trajectory file. The'
-            + sd + 'difference this causes to estimated ring radius is well '
-            + 'below 1 km and' + sd + 'has negligible impact on the archived '
-            + 'products.' + sd
-            + ' ' + sd
-            + 'All calculations assumed fixed UltraStable Oscillator (USO) '
-            + 'reference' + sd + 'frequency of 8,427,222,034.34050 Hz at '
-            + 'X-band, its value near the' + sd
-            + 'beginning of the Cassini orbital tour. The frequency is '
-            + 'coherently' + sd + 'scaled by 3/11 for S-band and 209/55 '
-            + 'for Ka-band. The exact USO' + sd 
-            + 'requency changed slightly (at the Hz level) during the USO '
-            + 'lifetime.' + sd + 'The change negligibly impacts the '
-            + 'archived products. The same holds' + sd
-            + 'true for the Allan deviation characterizing the stability '
-            + 'of the USO.' + sd + 'Typical values of the Allan deviation is '
-            + '2E-13 over 1 s and 1E-13 over' + sd + '10-100 s. '
-            + 'The values changed little over the lifetime of the USO.' + sd
-            + ' ' + sd
+            #+ 'The geometry calculations are based on the use of the official'
+            #+ ' Cassini' + sd + 'Navigation Team NAIF Toolkit kernel '
+            #+ 'files available at the time of' + sd
+            #+ 'archiving and are listed above. We note that the adopted '
+            #+ 'Planetary' + sd + 'Constants Kernel (PCK) file is not '
+            #+ 'necessarily the one Cassini NAV' + sd
+            #+ 'associates with the listed reconstructed trajectory file. The'
+            #+ sd + 'difference this causes to estimated ring radius is well '
+            #+ 'below 1 km and' + sd + 'has negligible impact on the archived '
+            #+ 'products.' + sd
+            #+ ' ' + sd
+            #+ 'All calculations assumed fixed UltraStable Oscillator (USO) '
+            #+ 'reference' + sd + 'frequency of 8,427,222,034.34050 Hz at '
+            #+ 'X-band, its value near the' + sd
+            #+ 'beginning of the Cassini orbital tour. The frequency is '
+            #+ 'coherently' + sd + 'scaled by 3/11 for S-band and 209/55 '
+            #+ 'for Ka-band. The exact USO' + sd 
+            #+ 'requency changed slightly (at the Hz level) during the USO '
+            #+ 'lifetime.' + sd + 'The change negligibly impacts the '
+            #+ 'archived products. The same holds' + sd
+            #+ 'true for the Allan deviation characterizing the stability '
+            #+ 'of the USO.' + sd + 'Typical values of the Allan deviation is '
+            #+ '2E-13 over 1 s and 1E-13 over' + sd + '10-100 s. '
+            #+ 'The values changed little over the lifetime of the USO.' + sd
+            #+ ' ' + sd
             + 'This file was produced using the rss_ringoccs open-source '
             + 'processing suite' + sd + 'developed at Wellesley College with '
             + 'the support of the Cassini project and' + sd + 'hosted '
@@ -435,7 +432,7 @@ def get_geo_series_info(rev_info, geo_inst, series_name, prof_dir):
             + 'Also referred to as SCET."')
             ,
             ('"Radial distance from the center of' + sd
-            + 'Saturn to the ring-plane intercept point at '
+            + 'Uranus to the ring-plane intercept point at '
             + 'the RING EVENT TIME."')
             ,
             ('"Inertial (J2000) longitude in the ring' + sd + 'plane '
@@ -458,7 +455,7 @@ def get_geo_series_info(rev_info, geo_inst, series_name, prof_dir):
             + 'intercept point, starting from the ring plane '
             + 'and ending in the' + sd + 'direction of the '
             + 'photon heading toward the observer. This angle is' + sd
-            + 'positive on the north side of Saturn''s rings and '
+            + 'positive on the north side of Uranus'' rings and '
             + 'negative on the' + sd + 'south side. Its value is '
             + 'nearly constant over the duration of a' + sd
             + 'ring occultation experiment and is nearly equal to the '
@@ -479,7 +476,7 @@ def get_geo_series_info(rev_info, geo_inst, series_name, prof_dir):
             + 'direction of motion' + sd + 'at the intercept point '
             + '(at the RING EVENT TIME). The orbital direction' + sd
             + 'is defined by the cross-product of a vector along '
-            + 'Saturn''s pole and' + sd + 'the radial velocity at '
+            + 'Uranus'' pole and' + sd + 'the radial velocity at '
             + 'the intercept point, in that order."')
             ,
             ('"Fresnel scale of diffraction implied by' + sd
@@ -489,7 +486,7 @@ def get_geo_series_info(rev_info, geo_inst, series_name, prof_dir):
             + 'scale at Ka-band is sqrt(55/209) times FRESNEL SCALE."')
             ,
             ('"The radius of a sphere centered at' + sd
-            + 'Saturn and is tangent to the line-of-sight from '
+            + 'Uranus and is tangent to the line-of-sight from '
             + 'the spacecraft (at' + sd + 'the SPACECRAFT EVENT TIME) '
             + 'to Earth (at the OBSERVED EVENT TIME). It' + sd
             + 'identified the minimum radius of hypothetical '
@@ -505,7 +502,7 @@ def get_geo_series_info(rev_info, geo_inst, series_name, prof_dir):
             + '(at the' + sd + 'SPACECRAFT EVENT TIME) to Earth '
             + '(at the OBSERVED EVENT TIME)' + sd + 'on the ring plane. '
             + 'The basis vector uz is in the' + sd
-            + 'direction of Saturn''s pole. The basis vector uy '
+            + 'direction of Uranus'' pole. The basis vector uy '
             + 'is defined by the' + sd + 'right-hand rule."')
             ,
             ('"Y component of the spacecraft position' + sd

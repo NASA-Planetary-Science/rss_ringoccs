@@ -5,7 +5,7 @@ Purpose: Provide all inputs to batch run, to be imported by e2e_batch.py
 ### Batch inputs
 with16 = False                      # Process 16 kHz files (use False to skip)
 mpath = '../data/'                  # Path to location of data files
-rsr_file_list = '../tables/rsr_files_before_USO_failure.txt'
+rsr_file_list = '../tables/rsr_1kHz_files_before_USO_failure.txt'
 
 ### Global inputs
 verbose    = False                  # Print processing steps to terminal
@@ -40,7 +40,7 @@ res_factor = 0.75                   # Factor to be multiplied to resolution
 inversion_range = profile_range     # Lower and upper radial bounds to inversion
 psitype = 'Fresnel4'                # Psi type
 wtype = 'kbmd20'                    # Window type
-sigma = 2.e-13                      # Allen deviation
+sigma = 2.e-13                      # Allan deviation
 fwd = False                         # Compute forward model
 norm = True                         # Normalize reconstructed complex
                                     #       transmittance by window width

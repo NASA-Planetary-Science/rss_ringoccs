@@ -1,27 +1,19 @@
 """
 
-:Purpose:
-    Create a summary PDF of the same format as those in CORSS_8001.
+Purpose: Create the plots in the second version of Essam's EASYDATA summary PDF.
 
-:Dependencies:
-    #. warnings
-    #. numpy
-    #. matplotlib
-    #. scipy
-    #. time
-    #. spiceypy
 """
 
 import warnings
 warnings.filterwarnings("ignore")
 import numpy as np
 import matplotlib
-matplotlib.rcParams['agg.path.chunksize'] = 10000
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from scipy.signal import savgol_filter
 from .sys_tools import latex_summary_doc
 from .write_output_files import construct_filepath
+import pdb
 import time
 import spiceypy as spice
 
@@ -38,34 +30,28 @@ planet = Saturn
 Rvals=[74490., 91983.,117516., 122052.,136774.]
 lw1 = 1.0
 
-def plot_bullseye(pdf, dlp_inst):
-    """
-    Add page to pdf with a birds-eye view of the ring plane, with
-    occultation tracks (relative to Earth and J2000).
-
-    Arguments
-        :pdf (*obj*): pdf to save plot to
-        :dlp_inst (*obj*): Instance of DiffractionLimitedProfile
-    Returns
-        :pdf (*obj*): Input pdf with an additional page for plot.
-    """
+def plot_bullseye(pdf, geo_inst):
     # Grab geometry information
-    plt.close()
-    rho_km = dlp_inst.rho_km_vals
-    phi_rl_rad = dlp_inst.phi_rl_rad_vals
-    phi_ora_rad = dlp_inst.phi_rad_vals
-    B_mean = round(np.mean(np.degrees(dlp_inst.B_rad_vals)), 4)
-    band = dlp_inst.rev_info['band']
-    t_oet_spm = dlp_inst.t_oet_spm_vals
+    rho_km = geo_inst.rho_km_vals
+    phi_rl_rad = np.radians(geo_inst.phi_rl_deg_vals)
+    phi_ora_rad = np.radians(geo_inst.phi_ora_deg_vals)
+    B_mean = round(np.mean(geo_inst.B_deg_vals), 4)
+    band = geo_inst.rev_info['band']
+    t_oet_spm = geo_inst.t_oet_spm_vals
 
+    mask = np.array([True for x in range(len(t_oet_spm))])
+    for ind in range(len(t_oet_spm)):
+        if t_oet_spm[ind] in geo_inst.ionos_occ_spm_vals or (
+                rho_km[ind] > 150000.):
+            mask[ind] = False
 
     # Radio track relative to Earth direction
-    occ_ed_x = rho_km * np.cos(phi_ora_rad)
-    occ_ed_y = rho_km * np.sin(phi_ora_rad)
-  
+    occ_ed_x = rho_km[mask] * np.cos(phi_ora_rad[mask])
+    occ_ed_y = rho_km[mask] * np.sin(phi_ora_rad[mask])
+   
     # Radio track relative to inertial referenc
-    occ_an_x = rho_km * np.cos(phi_rl_rad)
-    occ_an_y = rho_km * np.sin(phi_rl_rad)
+    occ_an_x = rho_km[mask] * np.cos(phi_rl_rad[mask])
+    occ_an_y = rho_km[mask] * np.sin(phi_rl_rad[mask])
     
     theta = np.linspace(0., 2.*np.pi, 361)
     plt.figure()
@@ -84,6 +70,8 @@ def plot_bullseye(pdf, dlp_inst):
     plt.plot(occ_an_x/1000., occ_an_y/1000., 'b-', linewidth=1.5)
     plt.plot(occ_ed_x/1000., occ_ed_y/1000., 'r-', linewidth=1.5)
     plt.axis('equal')
+    plt.xlim([-150., 150.])
+    plt.ylim([-150., 150.])
     plt.xlabel('$x$ (1000 km)')
     plt.ylabel('$y$ (1000 km)')
     plt.title('Mean Observed Ring Elevation $B$ = '+str(B_mean)+'$^\circ$')
@@ -95,8 +83,6 @@ def plot_bullseye(pdf, dlp_inst):
     plt.text(80, -3, 'C')
     plt.text(101, -3, 'B')
     plt.text(125, -3, 'A')
-    plt.xlim([-150., 150.])
-    plt.ylim([-150., 150.])
 
     pdf.savefig()
     plt.close()
@@ -116,16 +102,6 @@ def calc_bp(rap,decp,ra,dec):
 
 # note: p2 is a legend page with no plots
 def plot_occ_earth_view(pdf, geo_inst):
-    """
-    Add page to pdf with an Earth-view of the Saturn ring system and the
-    occultation track.
-
-    Arguments
-        :pdf (*obj*): pdf to save plot to
-        :geo_inst (*obj*): Instance of Geometry
-    Returns
-        :pdf (*obj*): Input pdf with an additional page for plot.
-    """
 
     # initialize plot
     plt.close()
@@ -312,21 +288,10 @@ def plot_occ_earth_view(pdf, geo_inst):
     plt.scatter(occx1[::dpts], occy1[::dpts], s=10, color='blue')
         
     pdf.savefig()
-    plt.close()
 
     return pdf
 
 def plot_occ_pole_view(pdf, geo_inst):
-    """
-    Add page to pdf with a north pole view of the Saturn ring system and the
-    occultation track.
-
-    Arguments
-        :pdf (*obj*): pdf to save plot to
-        :geo_inst (*obj*): Instance of Geometry
-    Returns
-        :pdf (*obj*): Input pdf with an additional page for plot.
-    """
     plt.close()
     plt.axis('off')
     plt.axes().set_aspect('equal')
@@ -407,25 +372,11 @@ def plot_occ_pole_view(pdf, geo_inst):
     plt.plot([0.,0.], [-68000., -180000.], 'k-', linewidth=2.3)
     plt.text(2000., -180000., '$\oplus$', fontsize=15)
     pdf.savefig()
-    plt.close()
     return pdf
 
 def plot_geo_overview(pdf, geo_inst, tau_inst):
-    """
-    Add page to pdf with plots of event times, spacecraft to ring intercept
-    distance, ring intercept longitudes, ring intercept velocities, 
-    fresnel scale, and threshold optical depth.
-    occultation track.
-
-    Arguments
-        :pdf (*obj*): pdf to save plot to
-        :geo_inst (*obj*): Instance of Geometry
-        :tau_inst (*obj*): Instance of DiffractionCorrection
-    Returns
-        :pdf (*obj*): Input pdf with an additional page for plot.
-    """
-    t_oet_1kspm = geo_inst.t_oet_spm_vals/1000.
-    t_set_1kspm = geo_inst.t_set_spm_vals/1000.
+    t_oet_hrs = geo_inst.t_oet_spm_vals/60./60.
+    t_set_hrs = geo_inst.t_set_spm_vals/60./60.
     rho_km = geo_inst.rho_km_vals
     phi_rl_deg = geo_inst.phi_rl_deg_vals
     phi_ora_deg = geo_inst.phi_ora_deg_vals
@@ -441,7 +392,6 @@ def plot_geo_overview(pdf, geo_inst, tau_inst):
             mask_rad[val] = False
         if phi_rl_dot_kms[val] < -150 or phi_rl_dot_kms[val] > 150:
             mask_az[val] = False
-
 
 
     tau_threshold_vals = tau_inst.tau_threshold_vals
@@ -460,11 +410,11 @@ def plot_geo_overview(pdf, geo_inst, tau_inst):
     # gridspec_kw = {'width_ratios':[3, 1]}
     
     
-    ax1.set_title('Time (1000 SPM ' + geo_inst.rev_info['year'] + '-'
+    ax1.set_title('Time (HPM ' + geo_inst.rev_info['year'] + '-'
                 + geo_inst.rev_info['doy'] +')', fontweight='bold', fontsize=10)
     ytpos = 0.08
-    ax1.plot(rho_km/1000., t_oet_1kspm, 'b', label = 'ERT')
-    ax1.plot(rho_km/1000., t_set_1kspm, 'r', label='SCET')
+    ax1.plot(rho_km/1000., t_oet_hrs, 'b', label = 'ERT')
+    ax1.plot(rho_km/1000., t_set_hrs, 'r', label='SCET')
     ax1.text(0.17, ytpos, 'C', horizontalalignment='center',
             verticalalignment='center', transform=ax1.transAxes)
 
@@ -493,53 +443,14 @@ def plot_geo_overview(pdf, geo_inst, tau_inst):
     ax4.legend(loc='upper right')
     
     ax5.set_title('Fresnel Scale (km)', fontweight='bold', fontsize=10)
-    ax5.plot(rho_km/1000., F_km, 'r', label = band.split('"')[1])
+    ax5.plot(rho_km/1000., F_km, 'r', label = str(band))
     ax5.legend(loc='upper right')
     
     ax6.set_title('Threshold Optical Depth', fontweight='bold',
             fontsize=10)
-    ax6.plot(rho_km_tau/1000., tau_threshold_vals, label=band.split('"')[1])
+    ax6.plot(rho_km_tau/1000., tau_threshold_vals, label=str(band))
     ax6.legend(loc='upper right')
-
-    if 'DIR' in tau_inst.rev_info:
-        # for chords, check direction order
-        d0 = rho_km[1] - rho_km[0]
-        d1 = rho_km[-1] - rho_km[-2]
-
-        if d0 < 0:
-            # ingress first, ind0 will be first index of occ within ring bounds
-            ind0 = np.argwhere(rho_km < 150000.)[0][0]
-            ind1 = np.argwhere(rho_km>150000.)[-1][0]
-        else:
-            ind0_1 = ind1
-            ind1_1 = ind0
-            ind0 = ind0_1
-            ind1 = ind1_1
-
-        ax1.scatter(rho_km[ind0]/1000., t_oet_1kspm[ind0], s=50,
-                edgecolor='b', facecolor='none')
-        ax1.scatter(rho_km[ind0]/1000., t_set_1kspm[ind0], s=50,
-                edgecolor='r', facecolor='none')
     
-        ax3.scatter(rho_km[ind0]/1000., phi_rl_deg[ind0], s=50,
-                edgecolor='b', facecolor='none')
-        ax3.scatter(rho_km[ind0]/1000., phi_ora_deg[ind0], s=50,
-                edgecolor='r', facecolor='none')
-
-        ax3.scatter(rho_km[ind0]/1000., phi_rl_deg[ind0], s=50,
-                edgecolor='b', facecolor='none')
-        ax3.scatter(rho_km[ind0]/1000., phi_rl_deg[ind0], s=50,
-                edgecolor='b', facecolor='none')
-
-
-        ax4.scatter(rho_km[ind0]/1000., phi_rl_dot_kms[ind0], s=50,
-                edgecolor='b', facecolor='none')
-        ax4.scatter(rho_km[ind0]/1000., rho_dot_kms[ind0], s=50,
-                edgecolor='r', facecolor='none')
-
-        ax5.scatter(rho_km[ind0]/1000., F_km[ind0], s=50,
-                edgecolor='r', facecolor='none')
-
     #radii = [74.490, 91.983, 117.516, 122.052, 133.424, 136.774, 140.461]
     radii = [74.490, 91.983, 117.516, 122.052, 136.774, 140.461]
     for row in range(nrow):
@@ -560,21 +471,9 @@ def plot_geo_overview(pdf, geo_inst, tau_inst):
     return pdf
 
 def plot_cal_overview(pdf, cal_inst, dlp_inst):
-    """
-    Add page to pdf with plot of sky frequency, frequency offset, and
-    freespace power normalization fit.
-
-    Arguments
-        :pdf (*obj*): pdf to save plot to
-        :cal_inst (*obj*): Instance of Calibration
-        :dlp_inst (*obj*): Instance of DiffractionLimitedProfile
-
-    Returns
-        :pdf (*obj*): Input pdf with an additional page for plot.
-    """
     t_oet_spm  = cal_inst.t_oet_spm_vals
-    F_offset_fit= np.interp(dlp_inst.t_oet_spm_vals, t_oet_spm, cal_inst.f_offset_fit_vals)
-    F_offset = np.interp(t_oet_spm, cal_inst.f_spm, cal_inst.f_offset)
+    F_sky_resid_fit= np.interp(dlp_inst.t_oet_spm_vals, t_oet_spm, cal_inst.f_sky_resid_fit_vals)
+    F_sky_resid = np.interp(t_oet_spm, cal_inst.f_spm, cal_inst.f_sky_resid)
     F_sky_hz = cal_inst.f_sky_hz_vals
     P_free = cal_inst.p_free_vals
 
@@ -586,7 +485,7 @@ def plot_cal_overview(pdf, cal_inst, dlp_inst):
     floor_fsky = int(np.nanmax(F_sky_hz/1.e6))
 
     ytitle1 = '$f_{sky}$ - ' + str(floor_fsky) + ' (MHz)'
-    ytitle2 = '$f_{offset}$ (Hz)'
+    ytitle2 = '$f_{resid}$ (Hz)'
     ytitle3 = '$P_{free}$ (2x10$^{9}$)'
     xtitle = 'Observed Event Time, $t_{ERT}$ (1000 s)'
     xlim = [min(dlp_inst.t_oet_spm_vals)/1000., max(dlp_inst.t_oet_spm_vals)/1000.]
@@ -601,13 +500,13 @@ def plot_cal_overview(pdf, cal_inst, dlp_inst):
     axes3[0].tick_params(axis='both', direction='in', top=True, bottom=True,
             left=True, right=True)
     
-    axes3[1].plot(t_oet_spm/1000., F_offset, color='b', linewidth=0.6)
-    axes3[1].plot(dlp_inst.t_oet_spm_vals/1000., F_offset_fit, color='r',
+    axes3[1].plot(t_oet_spm/1000., F_sky_resid, color='b', linewidth=0.6)
+    axes3[1].plot(dlp_inst.t_oet_spm_vals/1000., F_sky_resid_fit, color='r',
             linewidth=0.6)
     axes3[1].set_ylabel(ytitle2)
     axes3[1].set_xlim(xlim)
-    axes3[1].set_ylim([np.nanmin(F_offset_fit)-0.1, 
-                        np.nanmax(F_offset_fit)+0.1])
+    axes3[1].set_ylim([np.nanmin(F_sky_resid_fit)-0.1, 
+                        np.nanmax(F_sky_resid_fit)+0.1])
     axes3[1].yaxis.tick_right()
     axes3[1].yaxis.set_label_position("right")
     axes3[1].tick_params(axis='both', direction='in', top=True, bottom=True,
@@ -620,23 +519,10 @@ def plot_cal_overview(pdf, cal_inst, dlp_inst):
     axes3[2].set_ylabel(ytitle3)
     axes3[2].set_xlabel(xtitle)
     axes3[2].set_xlim(xlim)
-    axes3[2].set_ylim([0.,max(P_free_dlp*2.e-9)*1.3])
     pdf.savefig()
     plt.close()
     return pdf
 def plot_tau_overview(pdf, geo_inst, tau_inst):
-    """
-    Add page to pdf with one plot of the entire reconstructed optical
-    depth profile, with threshold optical depth and elevation angle overplotted.
-
-    Arguments
-        :pdf (*obj*): pdf to save plot to
-        :geo_inst (*obj*): Instance of Geometry
-        :tau_inst (*obj*): Instance of DiffractionCorrection
-
-    Returns
-        :pdf (*obj*): Input pdf with an additional page for plot.
-    """
     tau = tau_inst.tau_vals
     tau_thresh = tau_inst.tau_threshold_vals
     rho_tau = tau_inst.rho_km_vals
@@ -645,7 +531,7 @@ def plot_tau_overview(pdf, geo_inst, tau_inst):
 
 
     tau = tau_inst.tau_vals
-    tau1 = savgol_filter(tau, 123, 3)
+    tau1 = savgol_filter(tau, 61, 3)
     rho_tau = tau_inst.rho_km_vals
     elev_deg = np.interp(tau_inst.t_oet_spm_vals, geo_inst.t_oet_spm_vals,
             geo_inst.elev_deg_vals)
@@ -678,7 +564,7 @@ def plot_tau_overview(pdf, geo_inst, tau_inst):
     ax1.yaxis.label.set_color('blue')
     ax2.yaxis.label.set_color('magenta')
 
-    ax1.plot(rho_tau/1000., tau, color='blue', linewidth=0.3)
+    ax1.plot(rho_tau/1000., tau, color='blue', linewidth=0.6)
     ax1.plot(rho_tau/1000., tau_thresh, linestyle='--', color='red', linewidth=0.8)
     ax1.set_ylabel('Normal Optical Depth')
     ax1.set_xlabel('Ring Radius, $\\rho$ (1000 km)')
@@ -687,7 +573,7 @@ def plot_tau_overview(pdf, geo_inst, tau_inst):
     ax1.set_ylim(ylim1)
     ax1.grid(b=True)
 
-    ax2.plot(rho_tau/1000., elev_deg, color='magenta', linewidth=0.8)
+    ax2.plot(rho_tau/1000., elev_deg, color='magenta')
     ax2.set_xlim(xlim1)
     ax2.set_ylabel(dsn + ' Elevation Angle (deg)')
     ax2.spines['right'].set_color('magenta')
@@ -709,29 +595,13 @@ def plot_tau_overview(pdf, geo_inst, tau_inst):
     return pdf
 
 def plot_tau(pdf, tau_inst):
-    """
-    Add 17 pages to pdf, with each page containing 4km of the reconstructed
-    optical depth profile and threshold optical depth overplotted.
-
-    Arguments
-        :pdf (*obj*): pdf to save plot to
-        :tau_inst (*obj*): Instance of DiffractionCorrection
-
-    Returns
-        :pdf (*obj*): Input pdf with an additional page for plot.
-    """
     # Plot page 5-9 -- optical depth as a funct of ring radius
     rho_km = tau_inst.rho_km_vals
     tau = tau_inst.tau_vals
     tau_thresh = tau_inst.tau_threshold_vals
-    res_km = str(round(tau_inst.input_res,3))
-    band = str(tau_inst.rev_info['band'].split('"')[1])
-    if band=='K':
-        band='Ka'
 
     
-    title = ('Cassini RSS: Reconstructed X-band Normal Optical Depth Profile'
-            + ' (' + res_km + ' km Resolution)')
+    title = 'Cassini RSS: Reconstructed X-band Normal Optical Depth Profile (1 km Resolution)'
     ncol = 1
     nrow = 4
 
@@ -739,15 +609,12 @@ def plot_tau(pdf, tau_inst):
     rho_min = 74.
     rho_max = 155.
 
-    ylim_max = round((max(tau_thresh) * 1.25))
-    ylim = [ylim_max+0.5, -0.5]
-    yticks_max = int(np.floor(ylim_max))
-    yticks=range(0, yticks_max+1)
+    ylim = [5.5, -0.5]
 
     
     for page in range(17):
         fig, ax = plt.subplots(nrow, ncol, figsize=(8.5,11))
-        plt.setp(ax, yticks=yticks)#yticks=[0,1,2,3,4,5])
+        plt.setp(ax, yticks=[0,1,2,3,4,5])
          #plt.locator_params(axis='y', nbins=6)
         for n in range(nrow):
             ax[n].axhline(y=0, color='c')
@@ -772,31 +639,13 @@ def plot_tau(pdf, tau_inst):
     return pdf
 
 def plot_phase(pdf, tau_inst):
-    """
-    Add a page to pdf with reconstructed phase, in degrees, for the entire
-    profile.
-
-    Arguments
-        :pdf (*obj*): pdf to save plot to
-        :tau_inst (*obj*): Instance of DiffractionCorrection
-
-    Returns
-        :pdf (*obj*): Input pdf with an additional page for plot.
-    """
-    res_km = str(round(tau_inst.input_res,3))
-    band = str(tau_inst.rev_info['band'].split('"')[1])
-    if band=='K':
-        band='Ka'
-
 
     # Plot page 10 -- phase shift as a funct of ring radius
     rho_km = tau_inst.rho_km_vals
     phi_deg = np.degrees(tau_inst.phase_vals)
 
 
-
-    title = ('Cassini RSS: Reconstructed ' + band + '-band Phase Shift Profile '
-                +'(' + res_km + ' km Resolution)')
+    title = 'Cassini RSS: Reconstructed X-band Phase Shift Profile (1 km Resolution)'
     ytitle = '$\phi$ (deg.)'
     xtitle = 'Ring Radius, $\\rho$ (1000 km)'
     ncol = 1
@@ -829,27 +678,12 @@ def plot_phase(pdf, tau_inst):
     return pdf
 
 def plot_summary_doc_v2(geo_inst, cal_inst, dlp_inst, tau_inst):
-    """
-    Create LaTeX-ed PDF with plots detailing the ring occultation event and
-    important processing steps.
-
-    Arguments
-        :geo_inst (*obj*): Instance of Geometry
-        :cal_inst (*obj*): Instance of Calibration
-        :dlp_inst (*obj*): Instance of DiffractionLimitedProfile
-        :tau_inst (*obj*): Instance of DiffractionCorrection
-
-    """
     pd1 = (tau_inst.rev_info['prof_dir'].split('"')[1])[0]
-    if 'DIR' in tau_inst.rev_info.keys():
-        pd1 = 'C' + pd1
-    if 'PER' in tau_inst.rev_info.keys():
-        pd1 = 'P' + pd1
     revstr = tau_inst.rev_info['rev_num'].zfill(3)
     outtitle, outdir = construct_filepath(tau_inst.rev_info, 'Summary')
     outfig = outdir[0] + 'Rev' + revstr + pd1 + '_' + outtitle[0] + '.pdf'
     with PdfPages(outfig) as pdf:
-        pdf = plot_bullseye(pdf, dlp_inst)
+        pdf = plot_bullseye(pdf, geo_inst)
 
         pdf = plot_occ_earth_view(pdf, geo_inst)
         pdf = plot_occ_pole_view(pdf, geo_inst)
@@ -858,11 +692,7 @@ def plot_summary_doc_v2(geo_inst, cal_inst, dlp_inst, tau_inst):
         pdf = plot_tau_overview(pdf, geo_inst, tau_inst)
         pdf = plot_tau(pdf, tau_inst)
         pdf = plot_phase(pdf, tau_inst)
-    geofile = geo_inst.outfiles[0].split('/')[-1] + '.TAB'
-    calfile = cal_inst.outfiles[0].split('/')[-1] + '.TAB'
-    taufile = tau_inst.outfiles[0].split('/')[-1] + '.TAB'
-    latex_summary_doc(outfig, tau_inst.input_res, geofile, calfile, taufile)
-    print('\tSummary PDF saved to: ' + outfig)
+    latex_summary_doc(outfig, tau_inst.input_res, outfig[:-4])
 
 
     return None

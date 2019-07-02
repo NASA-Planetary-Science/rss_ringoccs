@@ -2,7 +2,7 @@
 
 ## rss_ringoccs V1.2 ##
 
-Release date: 2019 Jun 28
+Release date: 2019 Jun 30
 
 ### Changes from V1.1 ###
 
@@ -20,7 +20,7 @@ Release date: 2019 Jun 28
 
 **Resolved V1.1-4**
 
-3. Improved speed of slowest routines in diffraction reconstruction by re-writing in C, wrapping in python, and utilizing multi-core processing.
+3. Improved speed of slowest routines in diffraction reconstruction by re-writing in C, wrapping in Python, and utilizing multi-core processing.
 
 **Resolved V1.1-5**
 
@@ -32,11 +32,11 @@ Release date: 2019 Jun 28
 
 ### Known Issues and Limitations of V1.2 ###
 
-#### V1.2-1 ####
+#### V1.2-1 (carried over from V1.1-1) ####
 For the extreme nearly edge-on viewing geometry of Rev133E at X-band, rss_ringoccs gives slightly different results from PDS, traceable to a difference of about 10% in the cubic term of the varaiable psi. The origin of this discrepancy is unknown, but it is not important for any other occultation data sets we have reduced so far, and is relatively minor even for Rev133E at X band.
 
 #### V1.2-2 ####
-Some post-USO files contain discontinuous frequency offsets. While this has largely been documented, v1.2 does not support the appropriate processing of these files.
+Some post-USO files contain discontinuous frequency offsets. rss_rings v1.2 does not support the processing of these files.
 
 ### Lien list for V1.3 ###
 
@@ -54,7 +54,7 @@ Release date: 2019 Feb 1
 ### Known Issues and Limitations of V1.1 ###
 
 #### V1.1-1 ####
-For the extreme nearly edge-on viewing geometry of Rev133E at X-band, rss_ringoccs gives slightly different results from PDS, traceable to a difference of about 10% in the cubic term of the varaiable psi. The origin of this discrepancy is unknown, but it is not important for any other occultation data sets we have reduced so far, and is relatively minor even for Rev133E at X band.
+For the extreme nearly edge-on viewing geometry of Rev133E at X-band, rss_ringoccs gives slightly different results from PDS, traceable to a difference of about 10% in the cubic term of the variable psi. The origin of this discrepancy is unknown, but it is not important for any other occultation data sets we have reduced so far, and is relatively minor even for Rev133E at X band.
 
 ### Lien list for V1.2 ###
 

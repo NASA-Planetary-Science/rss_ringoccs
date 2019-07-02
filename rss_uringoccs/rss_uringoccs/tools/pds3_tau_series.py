@@ -1,88 +1,82 @@
 
 """
-:Purpose: 
-    Write DLP data and label files in PDS3 format.
+pds3_tau_series.py
 
-:Dependencies:
-    #. numpy
-    #. time
+Purpose: From a tau instance, produce inputs to pds3_write_series_lbl().
 
-Notes:
-    #. Contents of output DLP data and label files are meant to mimic DLP
-        files from CORSS_8001 v2.
+Revisions:
+    2018 Jul 23 - jfong - cpied from jwf_pds3_tau_series_v2.py
+    2018 Sep 10 - jfong - add underscore to record type and product type
 """
 import numpy as np
+import pdb
 import time
+import sys
 from . import pds3_write_series_v2 as pds3
 
-def write_dlp_series_data(dlp_inst, out_file):
+def write_tau_series_data(tau_inst, out_file):
     """
-    This writes a DLP data file with columns: ring radius, radius correction
-    due to improved pole, radius correction due to timing offset, ring 
-    longitude, observed ring azimuth, power, optical depth, phase,
-    threshold optical depth, observed event time, ring event time,
-    spacecraft event time, ring opening angle.
+    This writes a TAU data file.
 
-    Arguments:
-        :dlp_inst (*class*): Instance of DiffractionLimitedProfile class
-        :out_file (*str*): Path to output file
+    Args:
+        tau_inst (class): Instance of diffraction_correction class
+        fmt (str): Format string
+        out_file (str): Output file name, including path.
     """
     format_str = ('%14.6F,' + '%10.6F,' + '%10.6F,' + '%12.6F,' + '%12.6F,'
             + '%14.6E,' + '%14.6E,' + '%12.6F,' + '%14.6E,' + '%14.6F,'
             + '%14.6F,' + '%14.6F,' + '%12.6F' + '%s')
+    npts = len(tau_inst.t_oet_spm_vals)
 
-
-    npts = len(dlp_inst.t_oet_spm_vals)
-
-    # Compute normalized optical depth -- NOTE: this should be added to dlp_inst
-    #   as an attribute
-    tau_norm_vals = -np.sin(abs(dlp_inst.B_rad_vals)) * np.log(
-            dlp_inst.p_norm_vals)
+    print('\tWriting TAU data to: \n\t\t' + '/'.join(out_file.split('/')[0:5]) + '/\n\t\t\t' + '/'.join(out_file.split('/')[5:]))
 
     f = open(out_file, 'w')
     for n in range(npts):
         f.write(format_str % (
-            dlp_inst.rho_km_vals[n],
-            dlp_inst.rho_corr_pole_km_vals[n],
-            dlp_inst.rho_corr_timing_km_vals[n],
-            np.degrees(dlp_inst.phi_rl_rad_vals[n]),
-            np.degrees(dlp_inst.phi_rad_vals[n]),
-            dlp_inst.p_norm_vals[n],
-            tau_norm_vals[n],
-            np.degrees(dlp_inst.phase_rad_vals[n]),
-            dlp_inst.raw_tau_threshold_vals[n],
-            dlp_inst.t_oet_spm_vals[n],
-            dlp_inst.t_ret_spm_vals[n],
-            dlp_inst.t_set_spm_vals[n],
-            np.degrees(dlp_inst.B_rad_vals[n]),
+            tau_inst.rho_km_vals[n],
+            tau_inst.rho_corr_pole_km_vals[n],
+            tau_inst.rho_corr_timing_km_vals[n],
+            np.degrees(tau_inst.phi_rl_rad_vals[n]),
+            np.degrees(tau_inst.phi_rad_vals[n]),
+            tau_inst.power_vals[n],
+            tau_inst.tau_vals[n],
+            np.degrees(tau_inst.phase_vals[n]),
+            tau_inst.tau_threshold_vals[n],
+            tau_inst.t_oet_spm_vals[n],
+            tau_inst.t_ret_spm_vals[n],
+            tau_inst.t_set_spm_vals[n],
+            np.degrees(tau_inst.B_rad_vals[n]),
             '\r\n'))
-            
+
     f.close()
-    print('\tDLP data written to: ' + out_file)
 
 
     return None
 
-def get_dlp_series_info(rev_info, dlp_inst, series_name, prof_dir):
+def get_tau_series_info(rev_info, tau_inst, series_name, prof_dir):
     """
-    This returns the information needed to write a DLP label file.
+    This returns the information needed to write a TAU label file.
 
-    Arguments:
-        :rev_info (*dict*): Dictionary with keys: rsr_file, band, year, doy, dsn
+    Args:
+        rev_info (dict): Dictionary with keys: rsr_file, band, year, doy, dsn
                          occ_dir, planetary_occ_flag, rev_num
-        :dlp_inst (*class*): Instance of DiffractionLimitedProfile
-        :series_name (*str*): Name of the output .TAB and .LBL file, 
-                            not including extensions. Date in YYYYMMDD format
-                            and sequence number in XXXX format will be 
-                            added onto series_name
-        :prof_dir (*str*): Direction of ring occultation for this dlp_inst
+        tau_inst (class): Instance of diffraction_correction class
+        series_name (str): Name of the output .TAB and .LBL file, not including
+                           extensions. Date in YYYYMMDD format will be added
+                           onto series_name
+        prof_dir (str): Direction of ring occultation for this tau_inst
 
-    Returns:
-        :str_lbl (*dict*): Dictionary with keys: string_delimiter,
+    Outputs:
+        str_lbl (dict): Dictionary with keys: string_delimiter,
                         alignment_column, series_alignment_column,
                         keywords_value, keywords_NAIF_TOOLKIT_VERSION,
                         description, keywords_series, object_keys,
                         object_values, history
+
+    Notes:
+        [1] This is a reproduction of TAU label files within
+            Cassini_RSS_Ring_Profiles_2018_Archive, with minor edits.
+        [2] The format of each data entry is hardcoded within "nchar".
     """
     current_time_ISOD = time.strftime("%Y-%j") + 'T' + time.strftime("%H:%M:%S")
 
@@ -102,22 +96,21 @@ def get_dlp_series_info(rev_info, dlp_inst, series_name, prof_dir):
 
     col_num = list(range(1, ncol+1))
 
-    rsr_file = rev_info['rsr_file']
     band = rev_info['band']
     year = rev_info['year']
     doy = rev_info['doy']
     dsn = rev_info['dsn']
 
-    # Extract relevant information from dlp instance
-    sampling_parameter_arr = dlp_inst.rho_km_vals
-    t_oet_spm_start = dlp_inst.t_oet_spm_vals[0]
-    t_oet_spm_end = dlp_inst.t_oet_spm_vals[-1]
+    # Extract relevant information from tau instance
+    sampling_parameter_arr = tau_inst.rho_km_vals
+    t_oet_spm_start = tau_inst.t_oet_spm_vals[0]
+    t_oet_spm_end = tau_inst.t_oet_spm_vals[-1]
 
-    t_ret_spm_start = dlp_inst.t_ret_spm_vals[0]
-    t_ret_spm_end = dlp_inst.t_ret_spm_vals[-1]
+    t_ret_spm_start = tau_inst.t_ret_spm_vals[0]
+    t_ret_spm_end = tau_inst.t_ret_spm_vals[-1]
 
-    t_set_spm_start = dlp_inst.t_set_spm_vals[0]
-    t_set_spm_end = dlp_inst.t_set_spm_vals[-1]
+    t_set_spm_start = tau_inst.t_set_spm_vals[0]
+    t_set_spm_end = tau_inst.t_set_spm_vals[-1]
 
 
     PDS_VERSION_ID = 'PDS3'
@@ -126,30 +119,29 @@ def get_dlp_series_info(rev_info, dlp_inst, series_name, prof_dir):
     FILE_RECORDS = str(len(sampling_parameter_arr))
     SERIES_NAME = series_name
 
-    DATA_SET_ID = '"CO-SR-RSS-?/?-OCC-V0.1"'
+    DATA_SET_ID = '"VG2-UR-RSS-?/?-OCC-V0.1"'
     RING_OBSERVATION_ID = pds3.get_ring_obs_id(year, doy, band, dsn)
     PRODUCT_ID = series_name
     PRODUCT_TYPE = 'RING_PROFILE'
     PRODUCT_CREATION_TIME = current_time_ISOD
-    PRODUCER_ID = '"TC2017"'
-    SOURCE_PRODUCT_ID = '"' + rsr_file.upper() + '"'
+    PRODUCER_ID = '"TC2019"'
+    if rev_info['prof_dir'] == 'I':
+        SOURCE_PRODUCT_ID = '["SCRA_1066/UC0461/F00001.DAT", "SCRA_1066/UC0462/F00001.DAT", "SCRA_1067/UC0463/F00001.DAT"]'
+    elif rev_info['prof_dir'] == 'E':
+        SOURCE_PRODUCT_ID = '["SCRA_1070/UC0482/F00001.DAT", "SCRA_1070/UC0483/F00001.DAT", "SCRA_1070/UC0484/F00001.DAT", "SCRA_1070/UC0485/F00001.DAT"]'
 
 
-    INSTRUMENT_HOST_NAME = '"CASSINI ORBITER"'
-    INSTRUMENT_HOST_ID = 'CO'
+    INSTRUMENT_HOST_NAME = '"VOYAGER 2"'
+    INSTRUMENT_HOST_ID = 'VGR2'
     INSTRUMENT_NAME = '"RADIO SCIENCE SUBSYSTEM"'
-    INSTRUMENT_ID = 'RSS'
-    MISSION_PHASE_NAME = '"TOUR"'
-    TARGET_NAME = '"S RINGS"'
+    INSTRUMENT_ID = 'RSS-VG2'
+    TARGET_NAME = '"U RINGS"'
     START_TIME = pds3.get_ISOD_str(t_oet_spm_start, year, doy)
     STOP_TIME = pds3.get_ISOD_str(t_oet_spm_end, year, doy)
     RING_EVENT_START_TIME = pds3.get_ISOD_str(t_ret_spm_start, year, doy)
     RING_EVENT_STOP_TIME = pds3.get_ISOD_str(t_ret_spm_end, year, doy)
     SPACECRAFT_EVENT_START_TIME = pds3.get_ISOD_str(t_set_spm_start, year, doy)
     SPACECRAFT_EVENT_STOP_TIME = pds3.get_ISOD_str(t_set_spm_end, year, doy)
-    SPACECRAFT_CLOCK_START_COUNT = '"UNK"'
-    SPACECRAFT_CLOCK_STOP_COUNT = '"UNK"'
-    REVOLUTION_NUMBER = rev_info['rev_num']
     DSN_STATION_NUMBER = dsn.split('-')[-1]
 
     OBSERVATION_TYPE = '"OCCULTATION PROFILE"'
@@ -161,34 +153,33 @@ def get_dlp_series_info(rev_info, dlp_inst, series_name, prof_dir):
     FREQUENCY_BAND = band
 
     wavelength_dict = {
-              '"X"': "3.5574   <cm>"
-            , '"K"': "0.93617   <cm>"
-            , '"S"': "13.044   <cm>"
+              'X': "3.5574   <cm>"
+            , 'K': "0.93617   <cm>"
+            , 'S': "13.044   <cm>"
             }
 
     WAVELENGTH = wavelength_dict[band]
+
     RADIAL_RESOLUTION = str(float(pds3.get_sampling_interval(
         sampling_parameter_arr))*2.) + '   <km>'
     RADIAL_SAMPLING_INTERVAL = pds3.get_sampling_interval(
             sampling_parameter_arr) + '   <km>'
-    MINIMUM_RING_RADIUS = str(
-            round(min(dlp_inst.rho_km_vals), 4)) + '   <km>'
-    MAXIMUM_RING_RADIUS = str(
-            round(max(dlp_inst.rho_km_vals),4)) + '   <km>'
-    MINIMUM_RING_LONGITUDE = str(
-            round(min(np.degrees(dlp_inst.phi_rl_rad_vals)), 4)) + '   <deg>'
-    MAXIMUM_RING_LONGITUDE = str(
-            round(max(np.degrees(dlp_inst.phi_rl_rad_vals)), 4)) + '   <deg>'
+    MINIMUM_RING_RADIUS = str(round(min(tau_inst.rho_km_vals),4)) + '   <km>'
+    MAXIMUM_RING_RADIUS = str(round(max(tau_inst.rho_km_vals),4)) + '   <km>'
+    MINIMUM_RING_LONGITUDE = str(round(min(np.degrees(tau_inst.phi_rl_rad_vals))
+                                , 4)) + '   <deg>'
+    MAXIMUM_RING_LONGITUDE = str(round(max(np.degrees(tau_inst.phi_rl_rad_vals))
+                                , 4)) + '   <deg>'
     MINIMUM_OBSERVED_RING_AZIMUTH = str(
-            round(min(np.degrees(dlp_inst.phi_rad_vals)), 4)) + '   <deg>'
+            round(min(np.degrees(tau_inst.phi_rad_vals)),4)) + '   <deg>'
     MAXIMUM_OBSERVED_RING_AZIMUTH = str(
-            round(max(np.degrees(dlp_inst.phi_rad_vals)), 4)) + '   <deg>'
+            round(max(np.degrees(tau_inst.phi_rad_vals)),4)) + '   <deg>'
     MINIMUM_OBSERVED_RING_ELEVATION = str(
-            round(min(np.degrees(dlp_inst.B_rad_vals)), 4)) + '   <deg>'
+            round(min(np.degrees(tau_inst.B_rad_vals)), 4)) + '   <deg>'
     MAXIMUM_OBSERVED_RING_ELEVATION = str(
-            round(max(np.degrees(dlp_inst.B_rad_vals)), 4)) + '   <deg>'
-    LOWEST_DETECTABLE_OPACITY = str(min(dlp_inst.raw_tau_threshold_vals))
-    HIGHEST_DETECTABLE_OPACITY = str(max(dlp_inst.raw_tau_threshold_vals))
+            round(max(np.degrees(tau_inst.B_rad_vals)), 4)) + '   <deg>'
+    LOWEST_DETECTABLE_OPACITY = str(min(tau_inst.tau_threshold_vals))
+    HIGHEST_DETECTABLE_OPACITY = str(max(tau_inst.tau_threshold_vals))
 
 
     NAIF_TOOLKIT_VERSION = ''
@@ -224,7 +215,6 @@ def get_dlp_series_info(rev_info, dlp_inst, series_name, prof_dir):
                          , 'INSTRUMENT_HOST_ID'
                          , 'INSTRUMENT_NAME'
                          , 'INSTRUMENT_ID'
-                         , 'MISSION_PHASE_NAME'
                          , 'TARGET_NAME'
                          , 'START_TIME'
                          , 'STOP_TIME'
@@ -232,15 +222,11 @@ def get_dlp_series_info(rev_info, dlp_inst, series_name, prof_dir):
                          , 'RING_EVENT_STOP_TIME'
                          , 'SPACECRAFT_EVENT_START_TIME'
                          , 'SPACECRAFT_EVENT_STOP_TIME'
-                         , 'SPACECRAFT_CLOCK_START_COUNT'
-                         , 'SPACECRAFT_CLOCK_STOP_COUNT'
-                         , 'REVOLUTION_NUMBER'
                          , 'DSN_STATION_NUMBER']
             , 'INSTRUMENT_HOST_NAME': INSTRUMENT_HOST_NAME
             , 'INSTRUMENT_HOST_ID': INSTRUMENT_HOST_ID
             , 'INSTRUMENT_NAME' : INSTRUMENT_NAME
             , 'INSTRUMENT_ID': INSTRUMENT_ID
-            , 'MISSION_PHASE_NAME': MISSION_PHASE_NAME
             , 'TARGET_NAME': TARGET_NAME
             , 'START_TIME' : START_TIME
             , 'STOP_TIME' : STOP_TIME
@@ -248,9 +234,6 @@ def get_dlp_series_info(rev_info, dlp_inst, series_name, prof_dir):
             , 'RING_EVENT_STOP_TIME': RING_EVENT_STOP_TIME
             , 'SPACECRAFT_EVENT_START_TIME': SPACECRAFT_EVENT_START_TIME
             , 'SPACECRAFT_EVENT_STOP_TIME': SPACECRAFT_EVENT_STOP_TIME
-            , 'SPACECRAFT_CLOCK_START_COUNT': SPACECRAFT_CLOCK_START_COUNT
-            , 'SPACECRAFT_CLOCK_STOP_COUNT': SPACECRAFT_CLOCK_STOP_COUNT
-            , 'REVOLUTION_NUMBER': REVOLUTION_NUMBER
             , 'DSN_STATION_NUMBER': DSN_STATION_NUMBER
             }
 
@@ -293,9 +276,9 @@ def get_dlp_series_info(rev_info, dlp_inst, series_name, prof_dir):
              , 'MAXIMUM_RING_LONGITUDE': MAXIMUM_RING_LONGITUDE
              , 'MINIMUM_OBSERVED_RING_AZIMUTH': MINIMUM_OBSERVED_RING_AZIMUTH
              , 'MAXIMUM_OBSERVED_RING_AZIMUTH': MAXIMUM_OBSERVED_RING_AZIMUTH
-             , 'MINIMUM_OBSERVED_RING_ELEVATION': 
+             , 'MINIMUM_OBSERVED_RING_ELEVATION':
                         MINIMUM_OBSERVED_RING_ELEVATION
-             , 'MAXIMUM_OBSERVED_RING_ELEVATION': 
+             , 'MAXIMUM_OBSERVED_RING_ELEVATION':
                         MAXIMUM_OBSERVED_RING_ELEVATION
              , 'LOWEST_DETECTABLE_OPACITY': LOWEST_DETECTABLE_OPACITY
              , 'HIGHEST_DETECTABLE_OPACITY': HIGHEST_DETECTABLE_OPACITY
@@ -305,61 +288,54 @@ def get_dlp_series_info(rev_info, dlp_inst, series_name, prof_dir):
     qq = "'"
 
     sd = '|'
-    FILE_DESCRIPTION = ('"The ''DLP'' file contains' + sd
-            + 'calibrated but diffraction-limited optical depth and phase '
-            + 'shift profiles' + sd + 'of Saturn''s rings, that is, '
-            + 'calibrated profiles before reconstruction' + sd
-            + 'to remove diffraction effects. The frequency/phase '
-            + 'measurements' + sd + 'reference is the Cassini UltraStable '
-            + 'Oscillator (USO). The diffraction' + sd + 'reconstruction '
-            + 'is carried out using algorithms described at length in' + sd
-            + 'MAROUFETAL1986. Practical implementation steps are provided '
-            + 'in an' + sd + 'included documentation file.' + sd
+    FILE_DESCRIPTION = ('"The ''TAU'' file contains calibrated' + sd
+            + 'optical depth and phase shift profiles of Uranus'' rings '
+            + 'reconstructed from' + sd + 'the diffraction-limited '
+            + 'measurements.The reconstruction' + sd + 'is carried out using algorithms '
+            + 'described at length in MAROUFETAL1986.' + sd
+            + 'Practical implementation steps are provided in an included '
+            + 'documentation' + sd + 'file.' + sd
             + ' ' + sd
             + 'Several additional companion products share the same '
-            + 'RING_OBSERVATION_ID' + sd + '(listed in the header of the LBL '
-            + 'file) as this product. These include' + sd + 'one or more '
-            + 'reconstructed (TAU) files for the same occultation but' + sd
-            + 'at different resolutions, and two which provide geometry and '
-            + 'calibration' + sd + 'data. The latter two have file names '
-            + 'constructed from the same root as' + sd
-            + 'this file with the field for radial resolution removed '
-            + 'and the ''DLP''' + sd + 'replaced by either ''GEO'' '
-            + '(geometry) or ''CAL'' (carrier frequency and' + sd
-            + 'power calibration).' + sd
+            + 'RING_OBSERVATION_ID' + sd + '(listed in the header of the '
+            + 'LBL file) as this product. These include' + sd
+            + 'one or more reconstructed profiles (TAU) files for the same '
+            + 'occultation but' + sd + 'at different resolutions, and two '
+            + 'which provide geometry and calibration' + sd
+            + 'data. The latter two have file names constructed from the same '
+            + 'root as' + sd + 'this file with the field for radial '
+            + 'resolution removed and the ''TAU''' + sd + 'replaced by either'
+            + ' ''GEO'' (geometry) or ''CAL'' (carrier frequency and' + sd
+            + 'power calibration). For some resolutions, diffraction-limited '
+            + 'profiles' + sd + '(DLP) files are also included. In such '
+            + 'cases, the DLP file name lists the' + sd
+            + 'DLP resolution and ''TAU'' is replaced by ''DLP''.' + sd
             + ' ' + sd
             + 'We define spatial resolution as the shortest resolvable '
-            + 'wavelength in the' + sd + 'DLP profiles. It''s the inverse '
-            + 'of the highest spatial frequency preserved' + sd
-            + 'in the data, which is determined by the bandwidth of '
-            + 'the lowpass filter' + sd + 'used to decimate the calibrated '
-            + 'data. The archived DLP files have a shortest' + sd
-            + 'resolvable wavelength of 0.5 km (the ''500M'' descriptor '
-            + 'in the file name),' + sd + 'and are sampled every 0.25 km '
-            + '(sampled at the Nyquist rate). They are' + sd
-            + 'provided for the benefit of users wanting to experiment with '
-            + 'their own' + sd + 'diffraction reconstruction implementation. '
-            + 'Recovered profiles should look' + sd + 'identical to the '
-            + 'archived 1 km resolution reconstructed profiles provided' + sd
-            + 'that the reconstruction is implemented to achieve'
-            + ' ''processing resolution'' of' + sd + '0.75 km, where '
-            + 'the latter is defined by Eq. 19 of MAROUFETAL1986.' + sd
+            + 'wavelength in a' + sd + 'reconstructed profile. The definition '
+            + 'is convenient for characterization' + sd
+            + 'of multiple resolution profiles generated from a '
+            + 'reference reconstructed' + sd + 'profile of resolution '
+            + 'much finer than 1 km (when experimental conditions' + sd
+            + 'allow). The shortest resolvable wavelength is the inverse '
+            + 'of the highest' + sd + 'spatial frequency preserved in the '
+            + 'data and is determined by the bandwidth' + sd
+            + 'of the lowpass filter applied at the end of the data '
+            + 'processing chain. The' + sd + 'archived 50 m resolution '
+            + 'profile is comparable to one reconstructed directly' + sd
+            + 'from the 5 m resolution diffraction-limited '
+            + 'data processed to' + sd
+            + 'achieve 50 m ''processing resolution'', '
+            + 'where the latter is defined by' + sd
+            + 'Eq. 19 of MAROUFETAL1986.' + sd
             + ' ' + sd
-            + 'All archived data products were generated assuming '
-            + 'fixed USO '
-            + 'reference' + sd + 'frequency of 8,427,222,034.34050 Hz '
-            + 'at X-band, its value near the beginning' + sd + 'of the '
-            + 'Cassini orbital tour. The frequency is coherently '
-            + 'scaled by 3/11' + sd + 'for S-band and by 209/55 for Ka-band. '
-            + 'The exact USO frequency changed' + sd
-            + 'slightly (at the Hz level) during the USO lifetime. '
-            + 'The change negligibly ' + sd
-            + 'impacts the archived products. The same holds '
-            + 'true for the Allan deviation' + sd + 'characterizing the '
-            + 'stability of the USO. Typical values of the Cassini USO' + sd
-            + 'Allan deviation is 2E-13 over 1 s and 1E-13 over 10-100 s. '
-            + 'The USO Allan' + sd + 'deviation changed little over the '
-            + 'USO lifetime.' + sd
+            + 'As discussed in MAROUFETAL1986, actual reconstructed profile '
+            + 'resolution can' + sd + 'be impacted by several factors '
+            + 'including stability of the reference' + sd
+            + 'oscillator. The latter is usually charactereized by the Allan'
+            + sd + 'deviation/variance. Typical values of the Voyager oscillator '
+            + 'Allan deviation are' + sd + '2E-12 over 1s and 1E-12 over '
+            + '10-100s.' + sd
             + ' ' + sd
             + 'This file was produced using the rss_ringoccs open-source '
             + 'processing suite' + sd + 'developed at Wellesley College with '
@@ -373,18 +349,20 @@ def get_dlp_series_info(rev_info, dlp_inst, series_name, prof_dir):
             + 'Wellesley, MA 02481-8203;' + sd
             + '(781) 283-3747;' + sd
             + 'rfrench@wellesley.edu."')
-            
-    HIST_USER_NAME = dlp_inst.history['User Name']
-    HIST_HOST_NAME = dlp_inst.history['Host Name']
-    HIST_RUN_DATE = dlp_inst.history['Run Date']
-    HIST_PYTHON_VERSION = dlp_inst.history['Python Version']
-    HIST_OPERATING_SYSTEM = dlp_inst.history['Operating System']
-    HIST_SOURCE_DIR = dlp_inst.history['Source Directory']
-    HIST_SOURCE_FILE = dlp_inst.history['Source File']
-    HIST_INPUT_VARIABLES = dlp_inst.history['Positional Args']
-    HIST_INPUT_KEYWORDS = dlp_inst.history['Keyword Args']
-    HIST_ADD_INFO = dlp_inst.history['Additional Info']
-    HIST_RSSOCC_VERSION = dlp_inst.history['rss_ringoccs Version']
+
+
+
+    HIST_USER_NAME = tau_inst.history['User Name']
+    HIST_HOST_NAME = tau_inst.history['Host Name']
+    HIST_RUN_DATE = tau_inst.history['Run Date']
+    HIST_PYTHON_VERSION = tau_inst.history['Python Version']
+    HIST_OPERATING_SYSTEM = tau_inst.history['Operating System']
+    HIST_SOURCE_DIR = tau_inst.history['Source Directory']
+    HIST_SOURCE_FILE = tau_inst.history['Source File']
+    HIST_INPUT_VARIABLES = tau_inst.history['Positional Args']
+    HIST_INPUT_KEYWORDS = tau_inst.history['Keyword Args']
+    HIST_ADD_INFO = tau_inst.history['Additional Info']
+    HIST_RSSOCC_VERSION = tau_inst.history['rss_ringoccs Version']
     HIST_description = ('This is a record of the processing steps'
                         + sd + 'and inputs used to generate this file.')
 
@@ -393,7 +371,7 @@ def get_dlp_series_info(rev_info, dlp_inst, series_name, prof_dir):
                         'Python Version', 'rss_ringoccs Version']
             ,'key_order1': ['Source Directory','Source File',
                         'Positional Args', 'Keyword Args', 'Additional Info']
-            , 'hist name': 'DiffractionLimitedProfile history'
+            , 'hist name': 'DiffractionReconstruction history'
             , 'User Name': HIST_USER_NAME
             , 'Host Name': HIST_HOST_NAME
             , 'Run Date': HIST_RUN_DATE
@@ -433,14 +411,22 @@ def get_dlp_series_info(rev_info, dlp_inst, series_name, prof_dir):
     SERIES_SAMPLING_PARAMETER_UNIT = '"KILOMETER"'
     SERIES_MINIMUM_SAMPLING_PARAMETER = str(min(sampling_parameter_arr))
     SERIES_MAXIMUM_SAMPLING_PARAMETER = str(max(sampling_parameter_arr))
-    SERIES_SAMPLING_PARAMETER_INTERVAL = pds3.get_sampling_interval(
-            sampling_parameter_arr)
+    SERIES_SAMPLING_PARAMETER_INTERVAL = pds3.get_sampling_interval(sampling_parameter_arr)
     SERIES_DESCRIPTION = ('"This series contains variations of the' + sd
             + 'optical depth and phase shift profiles as a function of '
-            + 'RING RADIUS. Also' + sd + 'included are'
+            + 'RING RADIUS. Also' + sd + 'included are'# additive radius '
+            #+ 'correction terms, optical depth threshold,' + sd
             + ' some pertinent event times, and geometry parameters."')
+    #SERIES_USAGE_NOTE = ('"This product was made as a cross-check to'
+    #        + sd + 'Cassini_RSS_Ring_Profiles_2018_Archive using an '
+    #        + 'independent processing' + sd + 'software. There are two columns '
+    #        + "('RADIUS CORRECTION DUE TO IMPROVED POLE'" + sd + "and 'RADIUS "
+    #        + "CORRECTION DUE TO TIMING OFFSET') that include only zeros "
+    #        + 'and' + sd + 'are meant only as placeholders to match the '
+    #        + 'file contents of' + sd
+    #        + 'Cassini_RSS_Ring_Profiles_2018_Archive."')
 
-    
+
     OBJECT_REFERENCE_TIME = pds3.get_spm_ref_time(year, doy)
 
     SERIES_dict = {
@@ -467,6 +453,7 @@ def get_dlp_series_info(rev_info, dlp_inst, series_name, prof_dir):
             , 'SAMPLING_PARAMETER_INTERVAL':
                 SERIES_SAMPLING_PARAMETER_INTERVAL
             , 'DESCRIPTION': SERIES_DESCRIPTION
+            #, 'USAGE_NOTE': SERIES_USAGE_NOTE
             }
 
     object_keys = [
@@ -486,7 +473,7 @@ def get_dlp_series_info(rev_info, dlp_inst, series_name, prof_dir):
             , '"RADIUS CORRECTION DUE TO IMPROVED POLE"'
             , '"RADIUS CORRECTION DUE TO TIMING OFFSET"'
             , '"RING LONGITUDE"'
-            , '"OBSERVED_RING_AZIMUTH"'
+            , '"OBSERVED RING AZIMUTH"'
             , '"NORMALIZED SIGNAL POWER"'
             , '"NORMAL OPTICAL DEPTH"'
             , '"PHASE SHIFT"'
@@ -510,7 +497,7 @@ def get_dlp_series_info(rev_info, dlp_inst, series_name, prof_dir):
             OBJECT_REFERENCE_TIME,es]
 
     object_descriptions = [
-            ('"Radial distance from the center of' + sd + 'Saturn '
+            ('"Radial distance from the center of' + sd + 'Uranus '
             + 'to the ring-plane intercept point at the RING EVENT TIME."')
             ,
             ('"This is a placeholder column to match' + sd
@@ -523,7 +510,7 @@ def get_dlp_series_info(rev_info, dlp_inst, series_name, prof_dir):
             + 'Profiles_2018_Archive.' + sd + 'There is no information '
             + 'in this column -- it is populated with zeros."')
             ,
-            ('"Inertial (J2000) longitude in the ring' + sd 
+            ('"Inertial (J2000) longitude in the ring' + sd
             + 'plane of the ring-plane intercept point at the '
             + 'RING EVENT TIME."')
             ,
@@ -539,30 +526,32 @@ def get_dlp_series_info(rev_info, dlp_inst, series_name, prof_dir):
             + 'azimuth differs from that adopted in MAROUFETAL1986 by' + sd
             + '180 degrees."')
             ,
-            ('"Power (amplitude square) of the measured' + sd
-                + 'ring-attenuated diffraction-limited radio signal, '
-                + 'normalized by its' + sd + 'value in the absence of the '
-                + 'rings (normalized to unity in free-space).' + sd
-                + 'The value may be used to compute the measured '
-                + 'diffraction-limited' + sd + 'oblique optical depth '
-                + 'as the negative natural logarithm of the NORMALIZED' + sd
+            ('"Power (amplitude square) of the' + sd + 'ring-attenuated '
+                + 'reconstructed radio signal, normalized by its value in' + sd
+                + 'the absence of the rings (normalized to unity in '
+                + 'free-space). The' + sd + 'value may be used to compute '
+                + 'the reconstructed oblique optical depth' + sd
+                + 'as the negative natural logarithm of the NORMALIZED '
                 + 'SIGNAL POWER."')
             ,
-            ('"The normal optical depth obtained' + sd + 'from its measured '
-                + 'oblique value csaled by the sine of the absolute' + sd
-                + 'value of ring opening angle (OBSERVED RING ELEVATION)')
+            ('"The normal optical depth obtained from its' + sd
+            + 'measured oblique value scaled by the sine of the absolute '
+            + 'value of ring' + sd + 'opening angle (OBSERVED RING ELEVATION). '
+            + 'The oblique value is computed' + sd + 'from reconstructed '
+            + 'complex ring transmittance; see Eq. (21) of' + sd
+            + 'MAROUFETAL1986."')
             ,
             ('"The difference between the phase of' + sd + 'the coherent '
             + 'sinusoid passing directly through the rings (the direct'
             + sd + 'signal) and its value had the rings been absent. The '
-            + 'phase shift is' + sd + 'computed from the measured '
+            + 'phase shift is' + sd + 'computed from the reconstructed '
             + 'complex ring transmittance;' + sd
-            + 'see Eq. (22) of MAROUFETAL1986. The phase reference '
-            + 'of the original' + sd + 'measurements is the Cassini '
-            + 'UltraStable Oscillator, or USO."')
+            + 'see Eq. (22) of MAROUFETAL1986."')# The phase reference '
+            #+ 'of the original' + sd + 'measurements is the Cassini '
+            #+ 'UltraStable Oscillator, or USO."')
             ,
             ('"The value of the normal optical depth' + sd + 'for which '
-            + 'the magnitude of the measured complex ring transmittance'
+            + 'the magnitude of the reconstructed complex ring transmittance'
             + sd + 'is equal in numerical value to the 70% confidence '
             + 'interval of the' + sd + 'noisy measurement (signal-to-'
             + 'noise ratio, or SNR, of about unity).' + sd
@@ -590,14 +579,14 @@ def get_dlp_series_info(rev_info, dlp_inst, series_name, prof_dir):
             + 'after the moment' + sd + 'specified by REFERENCE_TIME."')
             ,
             ('"The time at which photons left the' + sd + 'spacecraft, '
-            + 'given in elapsed seconds after the moment specified by' 
+            + 'given in elapsed seconds after the moment specified by'
             + sd + 'REFERENCE_TIME. Also referred to as SCET."')
             ,
             ('"The angle measured at the ring' + sd + 'intercept point, '
             + 'starting from the ring plane and ending in the' + sd
             + 'direction of the photon heading toward the observer. '
             + 'This angle is' + sd + 'positive on the north side of '
-            + 'Saturn''s rings and negative on the' + sd + 'south side. '
+            + 'Uranus'' rings and negative on the' + sd + 'south side. '
             + 'Its value is nearly constant over the duration of a ' + sd
             + 'ring occultation experiment and is nearly equal to the '
             + 'ring opening' + sd + 'angle (Earth elevation angle '
@@ -631,34 +620,40 @@ def get_dlp_series_info(rev_info, dlp_inst, series_name, prof_dir):
     return str_lbl
 
 
-def write_dlp_series(rev_info, dlp_inst, title, outdir, prof_dir):
+def write_tau_series(rev_info, tau_inst, title, outdir, prof_dir):
     """
     This function writes a DLP series, which includes a data and label file.
 
-    Arguments:
-        :rev_info (*dict*): Dictionary with keys: rsr_file, band, year, doy, dsn
+    Args:
+        rev_info (dict): Dictionary with keys: rsr_file, band, year, doy, dsn
                          occ_dir, planetary_occ_flag, rev_num
-        :dlp_inst (*class*): Instance of DiffractionLimitedProfile class
-        :title (*str*): Name of the output .TAB and .LBL file, not including
-                           extensions. Date in YYYYMMDD format and sequence
-                           number in XXXX format will be added to series_name
-        :outdir (*str*): Path to output directory
-        :prof_dir (*str*): Direction of ring occultation for this dlp_inst
+        tau_inst (class): Instance of diffraction_correction class
+        title (str): Name of the output .TAB and .LBL file, not including
+                           extensions. Date in YYYYMMDD format will be added
+                           onto series_name
+        outdir (str): Path to output directory
+        prof_dir (str): Direction of ring occultation for this tau_inst
 
+    Notes:
+        [1] Data entry format of %32.16F is hardcoded.
+        [2] A data and label file will be output into the input "outdir"
+            directory, with filenames, *YYYYMMDD.TAB and *YYYYMMDD.LBL,
+            respectively, where * is "title".
     """
-
 
     outfile_tab = outdir + title.upper() + '.TAB'
     outfile_lbl = outdir + title.upper() + '.LBL'
 
     series_name = '"' + outfile_tab.split('/')[-1] + '"'
 
+
     # Write data file
-    write_dlp_series_data(dlp_inst, outfile_tab)
+    write_tau_series_data(tau_inst, outfile_tab)
 
     # Get label file information
-    str_lbl = get_dlp_series_info(rev_info, dlp_inst, series_name, prof_dir)
+    str_lbl = get_tau_series_info(rev_info, tau_inst, series_name, prof_dir)
 
     # Write label file
     pds3.pds3_write_series_lbl(str_lbl, outfile_lbl)
+
     return None

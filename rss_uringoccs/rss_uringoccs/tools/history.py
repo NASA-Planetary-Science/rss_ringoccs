@@ -1,9 +1,10 @@
 """
+history.py
 
-:Purpose:
+Purpose:
     Functions related to recording processing history.
 
-:Dependencies:
+Dependencies:
     #. sys
     #. time
     #. os
@@ -21,16 +22,17 @@ import pandas as pd
 def date_to_rev(year, doy,
         rss_file='../tables/RSSActivities_all_rings_only.txt'):
     """
-    Pull rev number from a table given the year and doy from a RSS
-    activities file with columns for CIMS request, sequence number,
-    year, doy, start earth-received time in HH:MM, end earth-received time
-    in HH:MM
+    Purpose:
+        Pull rev number from a table given the year and doy from a RSS
+        activities file with columns for CIMS request, sequence number,
+        year, doy, start earth-received time in HH:MM, end earth-received time
+        in HH:MM
 
-    Arguments
+    Arguments:
         :year (*int*): Year of occultation
         :doy (*int*): Day of year of occultation
 
-    Returns
+    Returns:
         :rev_number (*str*): 3-digit rev number (e.g. '007')
 
     Note:
@@ -67,7 +69,7 @@ def get_rev_info(rsr_inst):
 
     rev = date_to_rev(rsr_inst.year, rsr_inst.doy)
 
-    occ_dir = rev_to_occ_info(rev)
+    occ_dir, planetary_occ_flag = rev_to_occ_info(rev)
 
     rev_info = {
             "rsr_file":   rsr_inst.rsr_file.split('/')[-1]
@@ -76,14 +78,14 @@ def get_rev_info(rsr_inst):
             , "doy":      str(rsr_inst.doy).zfill(3)
             , "dsn":      str(rsr_inst.dsn)
             , "occ_dir":  occ_dir
+            , "planetary_occ_flag": planetary_occ_flag
             , "rev_num": rev
             }
-           # , "planetary_occ_flag": planetary_occ_flag
 
     return rev_info
 
 def rev_to_occ_info(rev,
-        sroc_info_file='../tables/list_of_sroc_dir_all_events.txt'):
+        sroc_info_file='../tables/list_of_sroc_dir_before_USOfailure.txt'):
     """
     Pull occultation direction from a text file given rev.
 
@@ -97,7 +99,8 @@ def rev_to_occ_info(rev,
     Returns
         :occ_dir (*str*): Occultation direction (over entire, I&E, occultation)
                        This is not to be confused with profile direction.
-
+        :planetary_occ_flag (*str*): Flag for whether planet (Saturn) was
+                                  occulted during event.
     Note:
         #. Given default 'sroc_info_file' location, this script must be run
             one directory from the top-level rss_ringoccs directory
@@ -107,16 +110,18 @@ def rev_to_occ_info(rev,
             dtype=str)
     rev_str_list = list(occ_dir_table[0])
     occ_dir_list = list(occ_dir_table[1])
+    planet_flag_list = list(occ_dir_table[2])
 
     try:
         ind = rev_str_list.index(rev)
     except ValueError:
         print('(rev_to_occ_info()): Rev not found in sroc_info_file!')
-        return '"BOTH"'#,'"Y"'
+        return '"BOTH"','"Y"'
 
     occ_dir = '"' + occ_dir_list[ind] + '"'
+    planetary_occ_flag = '"' + planet_flag_list[ind] + '"'
 
-    return occ_dir
+    return occ_dir, planetary_occ_flag
 
 def write_history_dict(input_vars, input_kwds, source_file, add_info=None):
     """
@@ -146,7 +151,7 @@ def write_history_dict(input_vars, input_kwds, source_file, add_info=None):
     operating_system = os.uname()[0]
     src_dir = source_file.rsplit('/',1)[0] +'/'
     src_file = source_file.split('/')[-1]
-    rssocc_version = '1.2'
+    rssocc_version = '1.1'
 
     history = {
             "rss_ringoccs Version": rssocc_version,

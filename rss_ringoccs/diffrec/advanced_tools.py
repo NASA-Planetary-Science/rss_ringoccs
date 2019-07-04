@@ -102,7 +102,7 @@ class CompareTau(object):
 
 
 class FindOptimalResolution(object):
-    def __init__(self, geo, cal, dlp, tau, sres, dres, nres, fwd=False,
+    def __init__(self, geo, cal, dlp, tau, sres, dres, nres,
                  norm=True, bfac=True, sigma=2.e-13, psitype="fresnel4",
                  rng='all', wlst=['kbmd20'], res_factor=0.75, verbose=True):
 
@@ -113,7 +113,6 @@ class FindOptimalResolution(object):
         error_check.check_type(cal, str, "cal", fname)
         error_check.check_type(dlp, str, "dlp", fname)
         error_check.check_type(tau, str, "tau", fname)
-        error_check.check_type(fwd, bool, "fwd", fname)
         error_check.check_type(norm, bool, "norm", fname)
         error_check.check_type(bfac, bool, "bfac", fname)
         error_check.check_type(wlst, list, "wlst", fname)
@@ -188,7 +187,7 @@ class FindOptimalResolution(object):
 
 class ModelFromGEO(object):
     def __init__(self, geo, lambda_km, res, rho, width=100, dx_km_desired=0.25,
-                 occ="other", wtype='kb25', fwd=False, norm=True, bfac=True,
+                 occ="other", wtype='kb25', norm=True, bfac=True,
                  verbose=True, psitype='fresnel', use_fresnel=False,
                  eccentricity=0.0, periapse=0.0, use_deprecate=False,
                  res_factor=0.75, rng="all", model="squarewell", echo=False,
@@ -201,7 +200,6 @@ class ModelFromGEO(object):
         error_check.check_type(norm, bool, "norm", fname)
         error_check.check_type(bfac, bool, "bfac", fname)
         error_check.check_type(occ, str, "occ", fname)
-        error_check.check_type(fwd, bool, "fwd", fname)
         error_check.check_type(geo, str, "geo", fname)
         error_check.check_type(echo, bool, "echo", fname)
         error_check.check_type(model, str, "model", fname)
@@ -429,7 +427,6 @@ class ModelFromGEO(object):
             "Sample Spacing":   dx_km_desired,
             "Occultation Type": occ,
             "Window Type":      wtype,
-            "Forward Model":    fwd,
             "Normalization":    norm,
             "b-factor":         bfac,
             "verbose":          verbose,
@@ -510,8 +507,8 @@ class ModelFromGEO(object):
                 T_hat = (0.5+0.5j-T_hat/window_functions.SQRT_PI_2)*(0.5-0.5j)
 
                 self.p_norm_actual_vals = np.zeros(np.size(self.rho_km_vals))
-                rstart = np.min((self.rho_km_vals>=rho).nonzero())
-                self.p_norm_actual_vals[rstart:-1] = 1.0
+                rfinsh = np.max((self.rho_km_vals<=rho).nonzero())
+                self.p_norm_actual_vals[0:rfinsh] = 1.0
             else:
                 self.p_norm_vals = np.zeros(np.size(self.rho_km_vals))
                 rstart = np.min((self.rho_km_vals>=rho).nonzero())
@@ -557,34 +554,47 @@ class ModelFromGEO(object):
             self.p_norm_vals = rec.power_vals
             self.phase_rad_vals = -rec.phase_vals
             self.F_km_vals = rec.F_km_vals
-            self.p_norm_actual_vals = self.p_norm_vals
-            start = rec.start
-            n_used = rec.n_used
-
-        crange = np.arange(start, start+n_used, 1)
-        self.B_rad_vals = self.B_rad_vals[crange]
-        self.D_km_vals = self.D_km_vals[crange]
-        self.f_sky_hz_vals = self.f_sky_hz_vals[crange]
-        self.phi_rad_vals = self.phi_rad_vals[crange]
-        self.phi_rl_rad_vals = self.phi_rl_rad_vals[crange]
-        self.raw_tau_threshold_vals = self.raw_tau_threshold_vals[crange]
-        self.rho_corr_pole_km_vals = self.rho_corr_pole_km_vals[crange]
-        self.rho_corr_timing_km_vals = self.rho_corr_timing_km_vals[crange]
-        self.rho_dot_kms_vals = self.rho_dot_kms_vals[crange]
-        self.rho_km_vals = self.rho_km_vals[crange]
-        self.t_oet_spm_vals = self.t_oet_spm_vals[crange]
-        self.t_ret_spm_vals = self.t_ret_spm_vals[crange]
-        self.t_set_spm_vals = self.t_set_spm_vals[crange]
+            self.B_rad_vals = rec.B_rad_vals
+            self.D_km_vals = rec.D_km_vals
+            self.f_sky_hz_vals = rec.f_sky_hz_vals
+            self.phi_rad_vals = rec.phi_rad_vals
+            self.phi_rl_rad_vals = rec.phi_rl_rad_vals
+            self.raw_tau_threshold_vals = rec.raw_tau_threshold_vals
+            self.rho_corr_pole_km_vals = rec.rho_corr_pole_km_vals
+            self.rho_corr_timing_km_vals = rec.rho_corr_timing_km_vals
+            self.rho_dot_kms_vals = rec.rho_dot_kms_vals
+            self.rho_km_vals = rec.rho_km_vals
+            self.t_oet_spm_vals = rec.t_oet_spm_vals
+            self.t_ret_spm_vals = rec.t_ret_spm_vals
+            self.t_set_spm_vals = rec.t_set_spm_vals
+            self.p_norm_actual_vals = rec.p_norm_vals
 
         if echo:
             n_shift = int(rho_shift/dx_km_desired)
-            self.phase_rad_vals = np.roll(self.phase_rad_vals, n_shift)
-            self.p_norm_vals = self.p_norm_actual_vals[crange]
+            self.p_norm_vals = self.p_norm_actual_vals
+            self.phase_rad_vals = -np.roll(self.phase_rad_vals, n_shift)
             rec = diffraction_correction.DiffractionCorrection(
                 self, res, psitype=psitype, verbose=verbose, wtype=wtype,
                 bfac=bfac, eccentricity=eccentricity, periapse=periapse,
                 res_factor=res_factor, rng=rng
             )
+            self.p_norm_vals = rec.power_vals
+            self.phase_rad_vals = -rec.phase_vals
+            self.F_km_vals = rec.F_km_vals
+            self.B_rad_vals = rec.B_rad_vals
+            self.D_km_vals = rec.D_km_vals
+            self.f_sky_hz_vals = rec.f_sky_hz_vals
+            self.phi_rad_vals = rec.phi_rad_vals
+            self.phi_rl_rad_vals = rec.phi_rl_rad_vals
+            self.raw_tau_threshold_vals = rec.raw_tau_threshold_vals
+            self.rho_corr_pole_km_vals = rec.rho_corr_pole_km_vals
+            self.rho_corr_timing_km_vals = rec.rho_corr_timing_km_vals
+            self.rho_dot_kms_vals = rec.rho_dot_kms_vals
+            self.rho_km_vals = rec.rho_km_vals
+            self.t_oet_spm_vals = rec.t_oet_spm_vals
+            self.t_ret_spm_vals = rec.t_ret_spm_vals
+            self.t_set_spm_vals = rec.t_set_spm_vals
+            self.p_norm_actual_vals = self.p_norm_actual_vals[rec.start:rec.start+rec.n_used]
 
         if verbose:
             print("\tData Extraction Complete.")

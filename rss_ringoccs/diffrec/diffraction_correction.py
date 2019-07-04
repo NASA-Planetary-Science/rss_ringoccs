@@ -506,7 +506,7 @@ class DiffractionCorrection(object):
                     \r\tError Encountered: rss_ringoccs
                     \r\t\t%s\n
                     \r\tRequested resolution is less than twice the sample
-                    \r\tspacing. This will produce an inaccurate results.\n
+                    \r\tspacing. This will produce inaccurate results.\n
                     \r\tRequested Resolution (km): %f
                     \r\tSample Spacing (km): %f\n
                     \r\tTO CORRECT THIS:

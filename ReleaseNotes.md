@@ -1,8 +1,22 @@
 # Release Notes #
 
+
+## rss_ringoccs V1.2.1 ##
+
+Release date: TBD
+This is the current development version. It should not be considered stable until 
+it is formally released.
+
+### Changes from V1.2 ###
+
+1. Fix minor typographical errors in user Guide.
+
+2. Clearer explanation of differences between end-to-end batch processing scripts.
+
+
 ## rss_ringoccs V1.2 ##
 
-Release date: 2019 Jun 30
+Release date: 2019 July 1
 
 ### Changes from V1.1 ###
 

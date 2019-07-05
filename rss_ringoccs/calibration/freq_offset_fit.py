@@ -216,7 +216,10 @@ class FreqOffsetFit(object):
         dt_spm = round((self.raw_spm_vals[-1]-self.raw_spm_vals[0])
                     /float(len(self.raw_spm_vals)),8)
         dt_fof = round((f_spm[-1]-f_spm[0])/float(len(f_spm)),6)
-        df = 12.5*dt_spm*dt_fof
+        if dt_spm < 1e-3 :
+            df = 12.5*dt_fof*1e-3
+        else:
+            df = 12.5*dt_spm*dt_fof
 
         # Create mask array that includes everything
         fsr_mask = np.array([True for i in range(len(f_offset))],dtype=bool)

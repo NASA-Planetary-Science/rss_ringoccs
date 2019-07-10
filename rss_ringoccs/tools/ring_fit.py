@@ -1,8 +1,8 @@
 '''
     Purpose:
         To determine the locations of a ring feature from normal optical
-        depth profiles of planetary rings. This uses a Levenberg-Marquardt
-        method to fit the observed :math:`1-\\exp(-\\tau)` with a function
+        depth profiles of planetary rings. This uses a Trust Region Reflective
+        algorithm to fit the observed :math:`1-\\exp(-\\tau)` with a function
         to determine the exact location of a ring edge.
 
     Dependencies:
@@ -31,11 +31,17 @@ class ring_fit(object):
             :start_oet_utc (*str*): 26 character string indicating the UTC
                             time at which the observation of the ring
                             profile began
+            :rho (*np.ndarray*): masked ring intercept radii used in fit
+            :pow (*np.ndarray*): masked "power" (:math:`$1-\\exp(-\\tau)$`)
+                            used in  fit
             :edge_oet_utc (*str*): 26 character string indicating the UTC
                             time at which the observation of the center of
                             the ring feature occurred
             :edge_oet_spm (*float*):
-            :edge_oet_spm (*float*):
+            :edge_ret_spm (*float*):
+            :edge_km (*float*):
+            :edge_km_err (*float*):
+            :edge_ret_spm (*float*):
 
         Note:
             The software assumes the files are named and stored following
@@ -98,13 +104,6 @@ class ring_fit(object):
         # observation ID
         self.obsid = 'RSS_'+rev+profdir[-1]+'_'+band+dsn.replace('DSS-','')+'_'+src+'_'+res.strip()+'m'
 
-        # initial parameters and parameter boundaries
-        if func == 'logistic':
-            p0 = [edge_guess,1.,-3.,0.0]
-            bounds = ([edge_lims[0],0,-10,-0.1],[edge_lims[1],1,-2,0.1])
-        else:
-            p0 = [1.,1.,1.,1.]
-            bounds = ()
 
         # load in data
         rho,lamb,tau,oet,ret = np.loadtxt(file,delimiter=',',usecols=(0,3,6,9,10)).T
@@ -114,19 +113,38 @@ class ring_fit(object):
         self.start_oet_utc = self.revinfo2utc(year,doy,0.0)#np.min(oet))
 
         # mask to ring edge limits
-        mask = [(rho>edge_lims[0]-10)&(rho<edge_lims[1]+10)]
+        mask = [(rho>edge_lims[0])&(rho<edge_lims[1])]
+
+        # store masked data as attributes
+        self.rho = rho[mask]
+        self.pow = pow[mask]
 
         # check mask to make sure sufficient data are present in desired radius range
-        if len(pow[mask]) > 5 :
+        if len(self.pow) > 5 :
 
             # force "normalize" if freespace is offset from zero
             # to keep profile values consistent with parameter bounds
-            if np.nanmin(pow[mask]) > 0.0 :
-                pow -= np.nanmin(pow[mask])
+            if np.nanmin(self.pow) > 0.0 :
+                self.pow -= np.nanmin(self.pow)
 
-            # fit with logistic function using Levenberg-Marquardt from scipy
-            par,cov = curve_fit(funcs[func],rho[mask],pow[mask],p0=p0,bounds=bounds,maxfev=100000)
+            # initial parameters and parameter boundaries
+            if func == 'logistic' :
+                p0 = [edge_guess,1.,-3.,0.0]
+                bounds = ([edge_lims[0],0,-10,-0.1],[edge_lims[1],1,-2,0.1])
 
+            elif func == 'gauss' or func == 'lorentz' :
+                p0  = [edge_guess,1.,1.,0.0]
+                bounds = ([edge_lims[0],-np.inf,-np.inf,-0.1],[edge_lims[1],np.inf,np.inf,0.1])
+
+            elif func == 'voigt' :
+                p0  = [edge_guess,1.,1.,0.0]
+                bounds = ([edge_lims[0],-np.inf,-np.inf,-np.inf,-0.1],[edge_lims[1],np.inf,np.inf,np.inf,0.1])
+
+            # fit using Trust Region Reflective algorithm
+            par,cov = curve_fit(funcs[func],self.rho,self.pow,p0=p0,bounds=bounds,maxfev=100000)
+
+            # store fit as attribute
+            self.fit = funcs[func](self.rho,*par)
             # store results as attributes
             self.fit_parameters = par
             self.fit_covariance = cov

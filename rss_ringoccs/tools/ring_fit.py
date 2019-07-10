@@ -15,7 +15,7 @@ import numpy as np
 import os, sys
 from scipy.optimize import curve_fit
 from scipy.special import wofz
-from astropy.time import Time
+from spiceypy import furnsh, utc2et, et2utc
 
 class ring_fit(object):
     '''
@@ -205,12 +205,13 @@ class ring_fit(object):
         s = str(round((spm%3600)%60,8))
         if len(s.split('.')[0]) == 1 :
             s = '0'+s
-        # join strings in yday format for astropy
-        time = ":".join(i for i in [y,d,h,m,s])
-        # create time object with astropy
-        t = Time(time,format='yday',scale='utc',precision=6)
-        # return UTC
-        return t.isot
+
+        # utc format in calender format: eg "1986 APR 12 16:31:09.814"
+        furnsh('../kernels/naif/CASSINI/kernels/lsk/naif0012.tls')
+        utc0 = year+'-'+d+'T'+h+':'+m+':'+s
+        et = utc2et(utc0)
+        utc1 = et2utc(et,'C', 6)
+        return utc1
 
     # logistic function
     def logistic(self,x,x0,L,k,c):

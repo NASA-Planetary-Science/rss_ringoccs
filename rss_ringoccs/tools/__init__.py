@@ -18,4 +18,5 @@ from .history import write_history_dict as write_history_dict
 from .history import date_to_rev as date_to_rev
 from .history import get_rev_info as get_rev_info
 from .create_summary_doc import plot_summary_doc_v2
+from .dtau_partsize import *
 from .ring_fit import ring_fit

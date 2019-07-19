@@ -8,7 +8,7 @@
     Dependencies:
         #. numpy
         #. scipy
-        #. astropy
+        #. spiceypy
 '''
 # import libraries
 import numpy as np
@@ -41,28 +41,29 @@ class ring_fit(object):
                             properly formatted, the script defaults to
                             a list of `[cent_guess-50,cent_guess+50]`
             :func (*str*): a string specifying the function to fit to the
-                            desired feature. Options: 'logistic' for the
-                            logistic function (used for fitting ring, gap,
-                            and other sharp edges), 'gauss' for Gaussian
-                            (used for ringlets with a narrow base),
-                            'lorentz' for Lorentzian (used for ringlets
-                            with a broad base and narrow, sharp peak),
-                            or 'voigt' for Voigt (a compromise between
-                            Gaussian and Lorentzian profiles). Default is
-                            'logistic'.
+                            desired feature. Options:
+                                ===========   ==============
+                                Input         Function
+                                ===========   ==============
+                                'logistic'    logistic function (used for fitting ring, gap, and other sharp edges)
+                                'gauss'       Gaussian (used for ringlets with a narrow base)
+                                'lorentz'     Lorentzian (used for ringlets with a broad base and narrow, sharp peak),
+                                'voigt'       Voigt (a compromise between Gaussian and Lorentzian profiles)
+                                ===========   ==============
+                            Default is 'logistic'.
 
         Attributes:
             :obsid (*str*): 22 character string indicating the year, date,
                             direction, band, station, processing software,
                             and reconstruction resolution in meters
-            :start_oet_utc (*str*): 26 character string indicating the UTC
+            :start_oet_utc (*str*): 28 character string indicating the UTC
                             time at which the observation of the ring
                             profile began
             :rho (*np.ndarray*): masked ring intercept radii used in fit
             :pow (*np.ndarray*): masked "power" (:math:`$1-\\exp(-\\tau)$`)
                             used in  fit
             :fit (*np.ndarray*): best fit to masked profile
-            :cent_oet_utc (*str*): 26 character string indicating the UTC
+            :cent_oet_utc (*str*): 28 character string indicating the UTC
                             time at which the observation of the center of
                             the ring feature occurred
             :cent_oet_spm (*float*): observed event time of the ring feature
@@ -76,6 +77,16 @@ class ring_fit(object):
             :rho_dot_kms (*float*): ring intercept radial velocity at the
                             ring feature in kilometers per second
             :ilong_deg (*float*): inertial longitude of the ring feature in degrees
+            :flag (*int*): flag indicating fit quality according to the following
+                            criteria:
+                                ====    ==========================================================
+                                Flag    Meaning
+                                ====    ==========================================================
+                                0       fit is acceptable
+                                1       no data available for fit
+                                2       feature not detected ( ABS(A-N) < STDV(DATA-FIT) )
+                                3       feature location not well-constrained ( uncertainty > 1 km )
+                                ====    ==========================================================
 
         Notes:
             #.  The software assumes the files are named and stored following
@@ -93,8 +104,8 @@ class ring_fit(object):
     def __init__(self,file,cent_guess,data_lims=None,func='logistic'):
 
         # function options
-        funcs = {'logistic':self.logistic,'gauss':self.gauss,
-                 'lorentz':self.lorentz,'voigt':self.voigt}
+        funcs = {'logistic':self.__logistic,'gauss':self.__gauss,
+                 'lorentz':self.__lorentz,'voigt':self.__voigt}
 
         # check to make sure input file exists
         if not os.path.exists(file) :
@@ -131,6 +142,22 @@ class ring_fit(object):
             # resort to defaults
             data_lims = [cent_guess-50,cent_guess+50]
 
+        # initial parameters and parameter boundaries based on function
+        # logistic
+        if func == 'logistic' :
+            p0 = [cent_guess,1.,-3.,0.0]
+            #bounds = ([data_lims[0],0,-10,-0.1],[data_lims[1],2,-2,0.1])
+            bounds = ([data_lims[0],-np.inf,-np.inf,-0.1],[data_lims[1],np.inf,np.inf,0.1])
+        # gauss and lorentz
+        elif func == 'gauss' or func == 'lorentz' :
+            p0  = [cent_guess,1.,1.,0.0]
+            bounds = ([data_lims[0],0,-np.inf,-0.1],[data_lims[1],np.inf,np.inf,0.1])
+        # voigt
+        elif func == 'voigt' :
+            p0  = [cent_guess,1.,1.,1.,0.0]
+            bounds = ([data_lims[0],0,-np.inf,-np.inf,-0.1],[data_lims[1],np.inf,np.inf,np.inf,0.1])
+
+
         # get occultation info from filepath, assuming PDS and rss_ringoccs heirarchy and naming
         rev_info = file.split('/')[-2].split('_')
         rev = rev_info[0][3:6]
@@ -156,7 +183,6 @@ class ring_fit(object):
 
         # load in data
         rho,lamb,tau,oet,ret = np.loadtxt(file,delimiter=',',usecols=(0,3,6,9,10)).T
-        pow = 1. - np.exp(-tau)
 
         # acquire UTC of the day of the observation
         self.start_oet_utc = self.revinfo2utc(year,doy,0.0)#np.min(oet))
@@ -166,7 +192,10 @@ class ring_fit(object):
 
         # store masked data as attributes
         self.rho = rho[mask]
-        self.pow = pow[mask]
+        self.pow = 1. - np.exp(-tau[mask])
+
+        # fit flag -- default as well-fit
+        self.flag = int(0)
 
         # check mask to make sure sufficient data are present in desired radius range
         if len(self.pow) > 5 :
@@ -176,23 +205,8 @@ class ring_fit(object):
             if np.nanmin(self.pow) > 0.0 :
                 self.pow -= np.nanmin(self.pow)
 
-            # initial parameters and parameter boundaries
-            if func == 'logistic' :
-                p0 = [cent_guess,1.,-3.,0.0]
-                bounds = ([data_lims[0],0,-10,-0.1],[data_lims[1],1,-2,0.1])
-
-            elif func == 'gauss' or func == 'lorentz' :
-                p0  = [cent_guess,1.,1.,0.0]
-                bounds = ([data_lims[0],-np.inf,-np.inf,-0.1],[data_lims[1],np.inf,np.inf,0.1])
-
-            elif func == 'voigt' :
-                p0  = [cent_guess,1.,1.,1.,0.0]
-                bounds = ([data_lims[0],-np.inf,-np.inf,-np.inf,-0.1],[data_lims[1],np.inf,np.inf,np.inf,0.1])
-
             # fit using Trust Region Reflective algorithm
             par,cov = curve_fit(funcs[func],self.rho,self.pow,p0=p0,bounds=bounds,maxfev=100000)
-
-
 
             # store fit as attribute
             self.fit = funcs[func](self.rho,*par)
@@ -211,6 +225,24 @@ class ring_fit(object):
             self.sumsq_resid = np.sum(np.square(self.pow
                                     -funcs[func](self.rho,*par))) # summed squared residuals
             self.rms_resid = np.std(self.pow-funcs[func](self.rho,*par)) # rms residuals
+            self.aon = abs(self.fit_parameters[1] - self.fit_parameters[-1])
+            ### CHECK FIT RESULTS AND FLAG BAD FITS
+            # flag if feature is not detected
+            if self.aon < self.rms_resid and self.rms_resid < 1.0 :# or self.fit_parameters[1] < 0.2:
+                sys.stdout.write("\r")
+                sys.stdout.write('\n     Ring feature not well detected for '+self.obsid
+                                +'\n     Do not trust fit results.\n\n')
+                sys.stdout.flush()
+                # flag as not detected
+                self.flag = int(2)
+            # flag if fit is poorly constrained
+            elif self.cent_km_err > 1. or self.rms_resid > 1.0 :
+                sys.stdout.write("\r")
+                sys.stdout.write('\n     Ring feature location not well constrained for '+self.obsid
+                                +'\n     Do not trust fit results.\n\n')
+                sys.stdout.flush()
+                # flag as poorly constrained
+                self.flag = int(3)
 
             # SPM of the observed event time of the ring edge
             oet_spm = np.interp(par[0],rho[mask],oet[mask])
@@ -234,10 +266,12 @@ class ring_fit(object):
             sys.stdout.write('     Insufficient data to fit edge at '+
                              '%d km for file\n     %s\n\n' % (cent_guess,file))
             sys.stdout.flush()
+            # flag as lacking data
+            self.flag = int(1)
             # set attributes to zero when fit is not possible
-            self.fit = 0.0
-            self.fit_parameters = 0.0
-            self.fit_covariance = 0.0
+            self.fit = np.zeros(len(self.pow))
+            self.fit_parameters = p0
+            self.fit_covariance = np.zeros((len(p0),len(p0)))
             self.sumsq_resid = 0.0
             self.rms_resid = 0.0
             self.cent_km = 0.0
@@ -253,6 +287,22 @@ class ring_fit(object):
     # and seconds past midnight to UTC using
     # the astropy.time module
     def revinfo2utc(self,year,doy,spm):
+        '''
+        Purpose:
+            Convert the observation time contained in the file name
+            in year and day-of-year and time-of-day (in spm) in the
+            input file to UTC1 format. Converts from decimal spm to
+            sexigecimal to build UTC0 time string. Uses `spiceypy`
+            to convert from UTC0 to UTC1.
+
+        Arguments:
+            :year (*int*, *float*, or *str*): year
+            :doy (*int* or *float*): day of year
+            :spm (*float*): time in seconds past midnight
+
+        Returns:
+            UTC1 time at 6 decimal precision
+        '''
         # get UTC from year, doy, and spm
         # start with year:day:hour:min:sec.sec format
         y = str(int(year))
@@ -288,22 +338,22 @@ class ring_fit(object):
         return utc1
 
     # logistic function
-    def logistic(self,x,x0,L,k,c):
+    def __logistic(self,x,x0,L,k,c):
         return L/(1.+np.exp(-k*(x-x0)))+c
 
     # gaussian function
-    def gauss(self,x,x0,L,k,c):
+    def __gauss(self,x,x0,L,k,c):
         norm = L*np.sqrt(k/np.pi)
         return norm*np.exp(-k*(x-x0)**2)+c
 
     # lorentzian function
-    def lorentz(self,x,x0,L,k,c):
+    def __lorentz(self,x,x0,L,k,c):
         norm = L*np.sqrt(k)
         return norm/(np.pi*(x-x0)**2+k)+c
 
     # voigt function
-    def voigt(self,x,x0,L,k1,k2,c):
+    def __voigt(self,x,x0,L,k1,k2,c):
         z = ((x-x0)+1j*k1)/k2
-        w = wofz
+        w = wofz(z)
         norm = 1./(k2*np.sqrt(np.pi))
         return norm*np.real(w)+c

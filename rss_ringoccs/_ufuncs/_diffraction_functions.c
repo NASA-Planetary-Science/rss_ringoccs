@@ -627,7 +627,7 @@ static void Fresnel_Transform_Sextic_Func(char **args, npy_intp *dimensions,
         P12 = P_1*P_1;
         P_2 = 1.5*P12-0.5;
         P_3 = (2.5*P12-1.5)*P_1;
-        P_4 = (4.375*P12-7.5)*P12+0.376;
+        P_4 = (4.375*P12-7.5)*P12+0.375;
         P_5 = ((7.875*P12-8.75)*P12+1.875)*P_1;
 
         /* Second set of polynomials, (P_{n} - P_1 * P_{n+1}) / (n+2) */
@@ -771,7 +771,7 @@ static void Fresnel_Transform_Octic_Func(char **args, npy_intp *dimensions,
         P12 = P_1*P_1;
         P_2 = 1.5*P12-0.5;
         P_3 = (2.5*P12-1.5)*P_1;
-        P_4 = (4.375*P12-7.5)*P12+0.376;
+        P_4 = (4.375*P12-7.5)*P12+0.375;
         P_5 = ((7.875*P12-8.75)*P12+1.875)*P_1;
         P_6 = (((14.4375*P12-19.6875)*P12+6.5625)*P12)-0.3125;
         P_7 = (((P12*26.8125-43.3125)*P12+19.6875)*P12-2.1875)*P_1;

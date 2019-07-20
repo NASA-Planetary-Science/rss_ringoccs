@@ -151,12 +151,12 @@ class FreqOffsetFit(object):
         # simply fit the offset frequency
         if verbose:
             print('\tCreating sigma clipping mask array...')
-        self.__fsr_mask = self.create_mask(f_spm, f_rho, f_offset)
+        self.__mask = self.create_mask(f_spm, f_rho, f_offset)
 
         # if the freq offset covers only a small range (i.e., less than
         # 68% of the data set), then use a low polynomial order to
         # prevent over-fitting of the offset frequency
-        if ((f_spm[self.__fsr_mask][-1]-f_spm[self.__fsr_mask][0]) /
+        if ((f_spm[self.__mask][-1]-f_spm[self.__mask][0]) /
             (f_spm[-1]-f_spm[0])) < 0.68 :
             if verbose:
                 print('\tInsufficient coverage of occultation. Setting'+
@@ -166,8 +166,8 @@ class FreqOffsetFit(object):
         else:
             if verbose:
                 print('\tEstimating the best polynomial order...')
-            self.poly_order = self.calc_poly_order(f_spm[self.__fsr_mask],
-                        f_offset[self.__fsr_mask], verbose=False)
+            self.poly_order = self.calc_poly_order(f_spm[self.__mask],
+                        f_offset[self.__mask], verbose=False)
 
         # Fit frequency offset
         if verbose:
@@ -176,7 +176,7 @@ class FreqOffsetFit(object):
 
         # Draw and save reference plot
         if write_file:
-            self.plotFORFit(f_spm,f_offset,f_offset_fit,self.__fsr_mask,
+            self.plotFORFit(f_spm,f_offset,f_offset_fit,self.__mask,
                             spm_min,spm_max,geo_inst.t_oet_spm_vals[0],
                             geo_inst.t_oet_spm_vals[-1])
 
@@ -210,7 +210,7 @@ class FreqOffsetFit(object):
             :f_offset (*np.ndarray*): frequency offset
 
         Returns
-            :fsr_mask (*np.ndarray*): Array of booleons, with True for
+            :mask (*np.ndarray*): Array of booleons, with True for
                                       reliable frequency offset.
         """
         dt_spm = round((self.raw_spm_vals[-1]-self.raw_spm_vals[0])
@@ -221,93 +221,38 @@ class FreqOffsetFit(object):
         else:
             df = 12.5*dt_spm*dt_fof
 
-        # Create mask array that includes everything
-        fsr_mask = np.array([True for i in range(len(f_offset))],dtype=bool)
         # Compute median, standard deviation, and implememt sigma-clipping
         #   for data which fall in acceptable regions
-        fsr_median = np.nanmedian(f_offset[fsr_mask])
-        fsr_stdev = 5.*np.sqrt(np.nanmedian(np.square(f_offset-fsr_median)))
+        f_median = np.nanmedian(f_offset)
+        f_stdev = 5.*np.sqrt(np.nanmedian(np.square(f_offset-f_median)))
+        # difference between offset frequency and its median
+        median_diff = abs(f_offset-f_median)
 
-        # iteratively check to see if each freq offset value is within 3 sigma
-        for i in range(len(f_offset)):
-            # exclude nans
-            if np.isnan(f_offset[i]):
-                fsr_mask[i] = False
-            # exclude values well outside of the possible range
-            elif f_offset[i] < -150 or f_offset[i] > 150 :
-                fsr_mask[i] = False
-            # exclude data outside 3-sigma of median
-            elif (f_offset[i] < fsr_median - fsr_stdev) or (
-                    f_offset[i] > fsr_median + fsr_stdev):
-                fsr_mask[i] = False
-            # exclude data with discontinuous jumps
-            elif i > 1 and i < len(f_offset)-2:
-                chk1 = (abs(f_offset[i]-f_offset[i-1]) > df)
-                chk2 = (abs(f_offset[i]-f_offset[i+1]) > df)
-                if chk1 or chk2 :
-                    fsr_mask[i] = False
-                # if this offset freq passes sigma and local variability checks
-                # proceed to check variability within the masked data
-                if fsr_mask[i] :
-                    # look for next reliable offset freq
-                    j = int(1)
-                    while j < len(f_offset)-(i+j) and not fsr_mask[i+j]:
-                        j += 1
-                    # look for next reliable offset freq
-                    k = int(1)
-                    while k < len(f_offset)-(i+j+k) and not fsr_mask[i+j+k]:
-                        k += 1
-                    # compare difference
-                    chk3 = (abs(f_offset[i]-f_offset[i+j]) > df)
-                    # compare difference
-                    chk4 = (abs(f_offset[i+j]-f_offset[i+j+k]) > df)
-                    # and have been defined
-                    if (i+j) < (i+j+k) and (i+j) < len(f_offset) and (i+j+k) < len(f_offset) :
-                        # if both checks pass
-                        if chk3 and chk4 :
-                            # data is an outlier, so exclude
-                            fsr_mask[i+j] = False
-            else:
-                fsr_mask[i] = False
+        # iteratively check to see if each freq offset value is within
+        # specified sigma (here, 5 standard deviations)
+        mask = self.__sigma_clip(f_offset,median_diff,f_stdev,df=df)
+        # check for false positives
+        mask = self.__neighbor_check(mask)
 
-        # iteratively check adjacent values for false positives
-        #   i.e., all four adjacent mask array values are False
-        #   first forwards
-        for i in range(2,len(fsr_mask)-2):
-            if fsr_mask[i]:
-                if not fsr_mask[i-2] and not fsr_mask[i-1]:
-                    if not fsr_mask[i+1] and not fsr_mask[i+2]:
-                        fsr_mask[i] = False
-
-        # now check backwards, just in case false positives were supporting
-        # each other and preventing removal
-        for i in range(len(fsr_mask)-3,2,-1):
-            if fsr_mask[i]:
-                if not fsr_mask[i-2] and not fsr_mask[i-1]:
-                    if not fsr_mask[i+1] and not fsr_mask[i+2]:
-                        fsr_mask[i] = False
-                if not fsr_mask[i-1] and not fsr_mask[i+1]:
-                    fsr_mask[i] = False
-
-        # if there are no True values in mask array, then reset
-        #   and hope for the best
-        if not np.any(fsr_mask):
-            fsr_mask = np.array([True for i in range(len(f_offset))],
-                    dtype=bool)
+        # if there are no True values in mask array, then exclude nans
+        # and hope for the best
+        if not np.any(mask):
+            mask = np.array([True]*len(f_offset),dtype=bool)
             for i in range(len(f_offset)):
                 # exclude nans
                 if np.isnan(f_offset[i]):
-                    fsr_mask[i] = False
+                    mask[i] = False
                 # exclude values well outside of the possible range
                 elif f_offset[i] < -150 or f_offset[i] > 150 :
-                    fsr_mask[i] = False
+                    mask[i] = False
 
         # iteratively do polynomial clipping
         for ipol in range(3):
+
             # compute best polynomial order
-            self.poly_order = self.calc_poly_order(f_spm[fsr_mask], f_offset[fsr_mask])
-            # Polynomial fit clipping
-            pinit = np.polyfit(f_spm[fsr_mask], f_offset[fsr_mask], self.poly_order)
+            self.poly_order = self.calc_poly_order(f_spm[mask], f_offset[mask])
+            # polynomial fit
+            pinit = np.polyfit(f_spm[mask], f_offset[mask], self.poly_order)
 
             # Compute standard deviation from fit and implememt sigma-clipping
             #   for data which fall in acceptable regions
@@ -318,83 +263,84 @@ class FreqOffsetFit(object):
             #   help sigma clip
             if fit_stdev < 1 :
                 # store old mask
-                old_mask = fsr_mask
-                # Create new mask array that includes everything
-                fsr_mask = np.array([True for i in range(len(f_offset))],
-                        dtype=bool)
+                old_mask = mask
+                # get absolute difference between polynomial and data
+                poly_diff = abs( f_offset - np.polyval(pinit,f_spm) )
                 # iteratively check to see if each freq offset value is
                 # within 5 sigma of fit
-                for i in range(len(f_offset)):
-                    # exclude values 5-sigma outside of polynomial approximation
-                    if (f_offset[i] > np.polyval(pinit,f_spm[i]) -
-                            fit_stdev) and (f_offset[i] < np.polyval(
-                                pinit,f_spm[i]) + fit_stdev):
-                        # exclude nans
-                        if np.isnan(f_offset[i]):
-                            fsr_mask[i] = False
-                        # exclude values well outside of the possible range
-                        elif f_offset[i] < -150 or f_offset[i] > 150 :
-                            fsr_mask[i] = False
-                        # exclude data outside 3-sigma of median
-                        elif (f_offset[i] < np.polyval(pinit,f_spm[i]) -
-                                fit_stdev) or (f_offset[i] > np.polyval(
-                                    pinit,f_spm[i]) + fit_stdev):
-                            fsr_mask[i] = False
-                        # exclude data with discontinuous jumps
-                        elif i > 1 and i < len(f_offset)-2:
-                            chk1 = (abs(f_offset[i]-f_offset[i-1]) > df)
-                            chk2 = (abs(f_offset[i]-f_offset[i+1]) > df)
-                            if chk1 or chk2 :
-                                fsr_mask[i] = False
-                            # if this offset freq passes sigma and local variability checks
-                            # proceed to check variability within the masked data
-                            if fsr_mask[i] :
-                                # look for next reliable offset freq
-                                j = int(1)
-                                while j < len(f_offset)-(i+j) and not fsr_mask[i+j]:
-                                    j += 1
-                                # look for next reliable offset freq
-                                k = int(1)
-                                while k < len(f_offset)-(i+j+k) and not fsr_mask[i+j+k]:
-                                    k += 1
-                                # compare difference
-                                chk3 = (abs(f_offset[i]-f_offset[i+j]) > df)
-                                # compare difference
-                                chk4 = (abs(f_offset[i+j]-f_offset[i+j+k]) > df)
-                                # and have been defined
-                                if (i+j) < (i+j+k) and (i+j) < len(f_offset) and (i+j+k) < len(f_offset) :
-                                    # if both checks pass
-                                    if chk3 and chk4 :
-                                        # data is an outlier, so exclude
-                                        fsr_mask[i+j] = False
-                        else:
-                            fsr_mask[i] = False
-                    else:
-                        fsr_mask[i] = False
+                new_mask = self.__sigma_clip(f_offset,poly_diff,fit_stdev,df=df)
 
-            # iteratively check adjacent values for false positives
-            #   i.e., all four adjacent mask array values are False
-            #   first forwards
-            for i in range(2,len(fsr_mask)-2):
-                if fsr_mask[i]:
-                    if not fsr_mask[i-2] and not fsr_mask[i-1]:
-                        if not fsr_mask[i+1] and not fsr_mask[i+2]:
-                            fsr_mask[i] = False
-
-            # now check backwards, just in case false positives were supporting
-            # each other and preventing removal
-            for i in range(len(fsr_mask)-3,2,-1):
-                if fsr_mask[i]:
-                    if not fsr_mask[i-2] and not fsr_mask[i-1]:
-                        if not fsr_mask[i+1] and not fsr_mask[i+2]:
-                            fsr_mask[i] = False
-                    if not fsr_mask[i-1] and not fsr_mask[i+1]:
-                        fsr_mask[i] = False
+                # check for false positives
+                mask = self.__neighbor_check(new_mask)
 
         ## return frequency offset mask array
-        return fsr_mask
+        return mask
 
-    def calc_poly_order(self, f_spm_cl, f_offset_cl, verbose=False):
+    def __sigma_clip(self, f_offset, diff, stdev, df=0.25 ):
+        # starting mask that is all-inclusive
+        mask = np.array([True]*len(f_offset),dtype=bool)
+        # iteratively check to see if each freq offset value is
+        # within appropriate distance of fit
+        for i in range(len(f_offset)):
+            # exclude nans
+            if np.isnan(f_offset[i]):
+                mask[i] = False
+            # exclude values well outside of the possible frequency range
+            elif f_offset[i] < -150 or f_offset[i] > 150 :
+                mask[i] = False
+            # exclude data more than 5 sigma outside projected trend
+            elif diff[i] > stdev :
+                mask[i] = False
+            # exclude data with discontinuous jumps
+            elif i > 1 and i < len(f_offset)-2:
+                chk1 = (abs(f_offset[i]-f_offset[i-1]) > df)
+                chk2 = (abs(f_offset[i]-f_offset[i+1]) > df)
+                if chk1 or chk2 :
+                    mask[i] = False
+                # if this offset freq passes sigma and local variability checks
+                # proceed to check variability within the masked data
+                if mask[i] :
+                    # look for next reliable offset freq
+                    j = int(1)
+                    while j < len(f_offset)-(i+j) and not mask[i+j]:
+                        j += 1
+                    # look for next reliable offset freq
+                    k = int(1)
+                    while k < len(f_offset)-(i+j+k) and not mask[i+j+k]:
+                        k += 1
+                    # compare difference
+                    chk3 = (abs(f_offset[i]-f_offset[i+j]) > df)
+                    # compare difference
+                    chk4 = (abs(f_offset[i+j]-f_offset[i+j+k]) > df)
+                    # and have been defined
+                    if (i+j) < (i+j+k) and (i+j) < len(f_offset) and (i+j+k) < len(f_offset) :
+                        # if both checks pass
+                        if chk3 and chk4 :
+                            # data is an outlier, so exclude
+                            mask[i+j] = False
+        return mask
+
+    def __neighbor_check(self, mask):
+        # iteratively check adjacent values for false positives
+        #   i.e., all four adjacent mask array values are False
+        #   first forwards
+        for i in range(2,len(mask)-2):
+            if mask[i]:
+                if not mask[i-2] and not mask[i-1]:
+                    if not mask[i+1] and not mask[i+2]:
+                        mask[i] = False
+        # now check backwards, just in case false positives were supporting
+        # each other and preventing removal
+        for i in range(len(mask)-3,2,-1):
+            if mask[i]:
+                if not mask[i-2] and not mask[i-1]:
+                    if not mask[i+1] and not mask[i+2]:
+                        mask[i] = False
+                if not mask[i-1] and not mask[i+1]:
+                    mask[i] = False
+        return mask
+
+    def calc_poly_order(self, f_spm_cl, f_offset_cl, verbose=False, max_order=10):
         """
         Use a variant of the F-test to determine the best order
         polynomial to use to fit the frequency offset.
@@ -419,7 +365,7 @@ class FreqOffsetFit(object):
             print('-'*72)
         # while F test finds new terms to be significant and the order
         # is at most a ninth order polynomial
-        while F > 1. and polyord2 < 11 :
+        while F > 1. and polyord2 < max_order+1 :
             # if new term is significant update and continue
             polyord1 = polyord2
             polyord2 += 1
@@ -485,13 +431,13 @@ class FreqOffsetFit(object):
             / max(f_spm - f_spm[int(npts / 2)]))
 
         ## fit using polynomial of user-selected order
-        coef = np.polyfit(spm_temp[self.__fsr_mask],f_offset[self.__fsr_mask],
+        coef = np.polyfit(spm_temp[self.__mask],f_offset[self.__mask],
                                 self.poly_order)
 
         f_offset_fit = np.polyval( coef, spm_temp )
-        v = float(len(f_offset[self.__fsr_mask])) - (self.poly_order+1)
-        chi2 = np.sum(np.square(f_offset_fit[self.__fsr_mask]-
-            f_offset[self.__fsr_mask]) / f_offset_fit[self.__fsr_mask])
+        v = float(len(f_offset[self.__mask])) - (self.poly_order+1)
+        chi2 = np.sum(np.square(f_offset_fit[self.__mask]-
+            f_offset[self.__mask]) / f_offset_fit[self.__mask])
 
         return f_offset_fit,chi2
 

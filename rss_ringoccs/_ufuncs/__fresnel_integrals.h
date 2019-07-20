@@ -367,7 +367,6 @@ double complex Inverted_Square_Well_Diffraction_Solution(double x, double a,
     double complex result =   Fresnel_Heald_Rational_EPS_Minus_Eight(arg2)
                             - Fresnel_Heald_Rational_EPS_Minus_Eight(arg1);
     result *= SQRT_2_BY_PI;
-    result *= SQRT_2_BY_PI;
 
     return (0.5 - 0.5*_Complex_I)*result;
 }

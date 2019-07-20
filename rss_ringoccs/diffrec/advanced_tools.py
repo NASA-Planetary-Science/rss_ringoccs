@@ -1,5 +1,4 @@
 import numpy as np
-from scipy import interpolate
 from . import diffraction_correction, special_functions, window_functions
 from rss_ringoccs.tools import CSV_tools, error_check, history
 
@@ -191,7 +190,7 @@ class ModelFromGEO(object):
                  verbose=True, psitype='fresnel', use_fresnel=False,
                  eccentricity=0.0, periapse=0.0, use_deprecate=False,
                  res_factor=0.75, rng="all", model="squarewell", echo=False,
-                 rho_shift=0.0):
+                 rho_shift=0.0, data_rho=None, data_pow=None, data_phase=None):
 
         # Check all input variables for errors.
         fname = "diffrec.advanced_tools.ModelFromGEO"
@@ -218,9 +217,11 @@ class ModelFromGEO(object):
         model = model.lower()
 
         model_list = [
+            "deltaimpulse",
             "rightstraightedge",
             "leftstraightedge",
-            "squarewell"
+            "squarewell",
+            "fromdata"
         ]
 
         if not (model in model_list):
@@ -245,6 +246,43 @@ class ModelFromGEO(object):
         data = CSV_tools.get_geo(geo, verbose=verbose, use_deprecate=use_deprecate)
         occ = occ.replace(" ", "").replace("'", "").replace('"', "")
         occ = occ.lower()
+
+        if ((type(data_pow) == type(None)) and
+            (not (type(data_rho) == type(None)))):
+            raise TypeError(
+                """
+                    \n\r\tError Encountered: rss_ringoccs\n
+                    \r\t\t%s\n\n
+                    \r\tYou gave input for data_rho but not data_pow.\n
+                    \r\tPlease provide an input array for power.\n
+                """ % (fname)
+            )
+        elif ((type(data_rho) == type(None)) and
+              (not (type(data_pow) == type(None)))):
+            raise TypeError(
+                """
+                    \n\r\tError Encountered: rss_ringoccs\n
+                    \r\t\t%s\n\n
+                    \r\tYou gave input for data_pow but not data_rho.\n
+                    \r\tPlease provide an input array for rho.\n
+                """ % (fname)
+            )
+        elif not ((type(data_rho) == type(None)) and 
+                  (type(data_pow) == type(None))):
+            error_check.check_is_real(data_rho, "data_rho", fname)
+            error_check.check_is_real(data_pow, "data_pow", fname)
+            error_check.check_non_negative(data_rho, "data_rho", fname)
+            error_check.check_non_negative(data_pow, "data_pow", fname)
+            error_check.check_lengths(data_rho, data_pow, "data_rho",
+                                      "data_pow", fname)
+            if not (type(data_phase) == type(None)):
+                error_check.check_is_real(data_phase, "data_phase", fname)
+                error_check.check_lengths(data_rho, data_phase, "data_rho",
+                                          "data_phase", fname)
+            else:
+                data_phase = np.zeros(np.size(data_rho))
+        else:
+            pass
 
         if verbose:
             print("\tRetrieving Variables...")
@@ -412,6 +450,18 @@ class ModelFromGEO(object):
         self.f_sky_hz_vals = np.zeros(np.size(self.rho_km_vals))
         self.f_sky_hz_vals += diffraction_correction.SPEED_OF_LIGHT_KM/lambda_km
 
+        # Interpolate modeled data, if necessary.
+        if not (type(data_rho) == type(None)):
+            rstart = np.min((data_rho >= np.min(self.rho_km_vals)).nonzero())
+            rfinsh = np.max((data_rho <= np.max(self.rho_km_vals)).nonzero())
+            data_rho = data_rho[rstart:rfinsh]
+            data_pow = data_pow[rstart:rfinsh]
+            data_phase = data_phase[rstart:rfinsh]
+
+            self.data_pow = np.interp(self.rho_km_vals, data_rho, data_pow)
+        else:
+            pass
+
         if verbose:
             print("\tWriting History...")
 
@@ -473,13 +523,15 @@ class ModelFromGEO(object):
         if (model == "squarewell"):
             if use_fresnel:
                 center = np.min((self.rho_km_vals >= rho).nonzero())
-                F = special_functions.fresnel_scale(lambda_km, self.D_km_vals[center],
+                F = special_functions.fresnel_scale(lambda_km,
+                                                    self.D_km_vals[center],
                                                     self.phi_rad_vals[center],
                                                     self.B_rad_vals[center])
                 T_hat = special_functions.square_well_diffraction(
                     self.rho_km_vals, rho-width/2.0, rho+width/2.0, F
                 )
-                self.p_norm_actual_vals = np.zeros(np.size(self.rho_km_vals))+1.0
+                self.p_norm_actual_vals = np.zeros(np.size(self.rho_km_vals))
+                self.p_norm_actual_vals += 1.0
                 rstart = np.min((self.rho_km_vals>=rho-width/2.0).nonzero())
                 rfinsh = np.max((self.rho_km_vals<=rho+width/2.0).nonzero())
                 self.p_norm_actual_vals[rstart:rfinsh+1] = 0.0
@@ -497,13 +549,15 @@ class ModelFromGEO(object):
         elif (model == "rightstraightedge"):
             if use_fresnel:
                 center = np.min((self.rho_km_vals >= rho).nonzero())
-                F = special_functions.fresnel_scale(lambda_km, self.D_km_vals[center],
+                F = special_functions.fresnel_scale(lambda_km,
+                                                    self.D_km_vals[center],
                                                     self.phi_rad_vals[center],
                                                     self.B_rad_vals[center])
                 
                 x = window_functions.SQRT_PI_2*(rho-self.rho_km_vals)/F
 
-                T_hat = special_functions.fresnel_cos(x)+1j*special_functions.fresnel_sin(x)
+                T_hat = (special_functions.fresnel_cos(x)+
+                         special_functions.fresnel_sin(x)*1j)
                 T_hat = (0.5+0.5j-T_hat/window_functions.SQRT_PI_2)*(0.5-0.5j)
 
                 self.p_norm_actual_vals = np.zeros(np.size(self.rho_km_vals))
@@ -522,13 +576,15 @@ class ModelFromGEO(object):
         elif (model == "leftstraightedge"):
             if use_fresnel:
                 center = np.min((self.rho_km_vals >= rho).nonzero())
-                F = special_functions.fresnel_scale(lambda_km, self.D_km_vals[center],
+                F = special_functions.fresnel_scale(lambda_km,
+                                                    self.D_km_vals[center],
                                                     self.phi_rad_vals[center],
                                                     self.B_rad_vals[center])
                 
                 x = window_functions.SQRT_PI_2*(rho-self.rho_km_vals)/F
 
-                T_hat = special_functions.fresnel_cos(x)+1j*special_functions.fresnel_sin(x)
+                T_hat = (special_functions.fresnel_cos(x)+
+                         special_functions.fresnel_sin(x)*1j)
                 T_hat = (T_hat/window_functions.SQRT_PI_2+0.5+0.5j)*(0.5-0.5j)
 
                 self.p_norm_actual_vals = np.zeros(np.size(self.rho_km_vals))
@@ -544,10 +600,42 @@ class ModelFromGEO(object):
                     bfac=bfac, eccentricity=eccentricity, periapse=periapse,
                     res_factor=res_factor, rng=rng
                 )
+        elif (model == "deltaimpulse"):
+            center = np.min((self.rho_km_vals >= rho).nonzero())
+            F = special_functions.fresnel_scale(lambda_km,
+                                                self.D_km_vals[center],
+                                                self.phi_rad_vals[center],
+                                                self.B_rad_vals[center])
+
+            self.p_norm_actual_vals = np.zeros(np.size(self.rho_km_vals))
+            self.p_norm_actual_vals[center] = 1.0/dx_km_desired
+            kD = diffraction_correction.TWO_PI * self.D_km_vals / lambda_km
+            kD = kD[center]
+            r = self.rho_km_vals[center]
+            r0 = self.rho_km_vals
+            phi = self.phi_rad_vals[center]
+            phi0 = self.phi_rad_vals
+            B = self.B_rad_vals
+            D = self.D_km_vals
+            if use_fresnel:
+                psi = (np.pi/2.0)*np.square((r0-r)/F)
+            else:
+                psi = special_functions.psi(kD, r, r0, phi, phi0, B, D)
+
+            T_hat = np.exp(1j*psi)
+            T_hat *= (0.5-0.5*1j)/F
+        else:
+            use_fresnel = False
+            self.p_norm_vals = self.data_pow
+            self.phase_rad_vals = np.zeros(np.size(self.rho_km_vals))
+            rec = diffraction_correction.DiffractionCorrection(
+                self, res, psitype=psitype, verbose=verbose, wtype=wtype,
+                bfac=bfac, eccentricity=eccentricity, periapse=periapse,
+                res_factor=res_factor, rng=rng
+            )
+            self.test = rec
 
         if use_fresnel:
-            start = 0
-            n_used = np.size(self.rho_km_vals)
             self.p_norm_vals = np.abs(T_hat)*np.abs(T_hat)
             self.phase_rad_vals = -np.arctan2(np.imag(T_hat), np.real(T_hat))
         else:
@@ -573,6 +661,9 @@ class ModelFromGEO(object):
             n_shift = int(rho_shift/dx_km_desired)
             self.p_norm_vals = self.p_norm_actual_vals
             self.phase_rad_vals = -np.roll(self.phase_rad_vals, n_shift)
+            if not (type(data_phase) == type(None)):
+                self.data_phase = np.interp(self.rho_km_vals, data_rho, data_phase)
+                self.phase_rad_vals -= self.data_phase
             rec = diffraction_correction.DiffractionCorrection(
                 self, res, psitype=psitype, verbose=verbose, wtype=wtype,
                 bfac=bfac, eccentricity=eccentricity, periapse=periapse,
@@ -594,7 +685,9 @@ class ModelFromGEO(object):
             self.t_oet_spm_vals = rec.t_oet_spm_vals
             self.t_ret_spm_vals = rec.t_ret_spm_vals
             self.t_set_spm_vals = rec.t_set_spm_vals
-            self.p_norm_actual_vals = self.p_norm_actual_vals[rec.start:rec.start+rec.n_used]
+            self.p_norm_actual_vals = self.p_norm_actual_vals[
+                rec.start:rec.start+rec.n_used
+            ]
 
         if verbose:
             print("\tData Extraction Complete.")

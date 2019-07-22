@@ -1,6 +1,6 @@
 """
 :Purpose:
-        Provide tools for reading in .TAB and .CSV files and converting 
+        Provide tools for reading in .TAB and .CSV files and converting
         the data into a usable instance of the DLP class.
 
 :Dependencies:
@@ -432,8 +432,6 @@ class ExtractCSVData(object):
 
         if (not isinstance(tau, type(None))):
             error_check.check_type(tau, str, "tau", fname)
-        else:
-            pass
 
         if verbose:
             print("Extracting Data from CSV Files:")
@@ -453,8 +451,7 @@ class ExtractCSVData(object):
             print("\tRetrieving Variables...")
 
         try:
-            # Create dummy variable in case an error occurs.
-            # Grab info from DLP if possible
+            # Read in DLP. Create dummy variable in case an error occurs.
             errmess = "rho_km_vals"
             self.rho_km_vals = np.array(dlp_dat.rho_km_vals)
             errmess = "raw_tau_vals"
@@ -479,6 +476,7 @@ class ExtractCSVData(object):
             self.phi_rl_rad_vals = np.radians(np.array(dlp_dat.phi_rl_deg_vals))
             errmess = "raw_tau_threshold_vals"
             self.raw_tau_threshold_vals = np.array(dlp_dat.raw_tau_threshold_vals)
+
             # Grab info from CAL
             errmess = "f_sky_pred"
             f_sky_pred = np.array(cal_dat.f_sky_pred_vals)
@@ -494,7 +492,7 @@ class ExtractCSVData(object):
             self.D_km_vals = np.array(geo_dat.D_km_vals)
             errmess = "rho_dot_kms_vals"
             self.rho_dot_kms_vals = np.array(geo_dat.rho_dot_kms_vals)
-            
+
             errmess = "cal_spm"
             cal_spm = np.array(cal_dat.spm_vals)
         except (ValueError, TypeError, NameError, AttributeError):
@@ -546,19 +544,31 @@ class ExtractCSVData(object):
         error_check.check_two_pi(self.B_rad_vals, "B_rad_vals",
                                  fname, deg=False)
 
+        error_check.check_lengths(self.t_set_spm_vals, self.rho_km_vals,
+                                  "t_set_spm_vals", "rho_km_vals", fname)
+        error_check.check_lengths(self.t_ret_spm_vals, self.rho_km_vals,
+                                  "t_ret_spm_vals", "rho_km_vals", fname)
+        error_check.check_lengths(self.t_oet_spm_vals, self.rho_km_vals,
+                                  "t_oet_spm_vals", "rho_km_vals", fname)
+        error_check.check_lengths(self.phase_rad_vals, self.rho_km_vals,
+                                  "phase_rad_vals", "rho_km_vals", fname)
+        error_check.check_lengths(self.phi_rad_vals, self.rho_km_vals,
+                                  "phi_rad_vals", "rho_km_vals", fname)
+        error_check.check_lengths(self.raw_tau_vals, self.rho_km_vals,
+                                  "raw_tau_vals", "rho_km_vals", fname)
+        error_check.check_lengths(self.B_rad_vals, self.rho_km_vals,
+                                  "B_rad_vals", "rho_km_vals", fname)
+        error_check.check_lengths(self.D_km_vals, geo_rho,
+                                  "D_km_vals", "rho_km_vals", fname)
+        error_check.check_lengths(self.rho_dot_kms_vals, geo_rho,
+                                  "D_km_vals", "rho_km_vals", fname)
+
         if verbose:
             print("\tComputing Variables...")
 
-        if (np.size(self.rho_km_vals) != np.size(self.t_oet_spm_vals)):
-            raise ValueError("len(rho_km_vals) != len(t_oet_spm_vals")
+        dr = np.diff(self.rho_km_vals)
+        dt = np.diff(self.t_set_spm_vals)
 
-        dr = np.zeros(np.size(self.rho_km_vals) - 1)
-        dt = np.zeros(np.size(self.t_oet_spm_vals) - 1)
-
-        for i in range(np.size(self.rho_km_vals) - 1):
-            dr[i] = self.rho_km_vals[i+1] - self.rho_km_vals[i]
-            dt[i] = self.t_oet_spm_vals[i+1] - self.t_oet_spm_vals[i]
-        
         drdt = dr/dt
 
         if (np.min(drdt) < 0.0) and (np.max (drdt) > 0.0):
@@ -590,13 +600,15 @@ class ExtractCSVData(object):
                 """
                     \r\tError Encountered: rss_ringoccs
                     \r\t\t%s\n
-                    \r\tCould not determine what type of occultation
-                    \r\tthis is. Set occ='ingress' or occ='egress'.
+                    \r\tCould not determine occultation type.
                 """ % (fname)
             )
 
         if (occ == 'ingress'):
             crange = (self.rho_dot_kms_vals < 0.0).nonzero()
+            self.rho_dot_kms_vals = self.rho_dot_kms_vals[::-1]
+            self.D_km_vals = self.D_km_vals[::-1]
+            geo_rho = geo_rho[::-1]
         elif (occ == 'egress'):
             crange = (self.rho_dot_kms_vals > 0.0).nonzero()
         else:
@@ -671,7 +683,6 @@ class ExtractCSVData(object):
         else:
             pass
 
-
         if verbose:
             print("\tInterpolating Data...")
 
@@ -681,11 +692,9 @@ class ExtractCSVData(object):
 
         del crange, geo_dat, cal_dat, dlp_dat
 
-
-
         raw_mu = np.sin(np.abs(self.B_rad_vals))
         self.p_norm_vals = np.exp(-self.raw_tau_vals/raw_mu)
-        
+
         self.f_sky_hz_vals = np.interp(self.t_oet_spm_vals, cal_spm,
                                        self.f_sky_hz_vals)
         self.D_km_vals = np.interp(self.rho_km_vals, geo_rho, self.D_km_vals)
@@ -702,8 +711,10 @@ class ExtractCSVData(object):
             rfin = int(np.max((rmax-self.rho_km_vals>=0).nonzero()))
             rstart = int(np.min((self.rho_km_vals-rmin>=0).nonzero()))
             self.tau_rho = self.rho_km_vals[rstart:rfin+1]
-            self.tau_vals = np.interp(self.tau_rho, tau_dat.rho_km_vals, tau_dat.raw_tau_vals)
-            self.phase_vals = np.interp(self.tau_rho, tau_dat.rho_km_vals, np.deg2rad(tau_dat.phase_deg_vals))
+            self.tau_vals = np.interp(self.tau_rho, tau_dat.rho_km_vals,
+                                      tau_dat.raw_tau_vals)
+            self.phase_vals = np.interp(self.tau_rho, tau_dat.rho_km_vals,
+                                        np.deg2rad(tau_dat.phase_deg_vals))
             tm = np.interp(self.tau_rho, tau_dat.rho_km_vals, tm)
             self.power_vals = np.exp(-self.tau_vals/tm)
             del tau_dat, tm, rmin, rmax, rfin, rstart
@@ -771,4 +782,3 @@ class ExtractCSVData(object):
 
         if verbose:
             print("\tExtract CSV Data Complete.")
-

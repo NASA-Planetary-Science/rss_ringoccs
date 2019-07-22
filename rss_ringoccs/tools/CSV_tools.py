@@ -592,9 +592,13 @@ class ExtractCSVData(object):
                 """ % (fname, dlp)
             )
         elif (drdt < 0.0).all():
-            occ = 'ingress'
+
+            # The rev is ingress, so flip GEO variables.
+            self.rho_dot_kms_vals = self.rho_dot_kms_vals[::-1]
+            self.D_km_vals = self.D_km_vals[::-1]
+            geo_rho = geo_rho[::-1]
         elif (drdt > 0.0).all():
-            occ = 'egress'
+            pass
         else:
             raise ValueError(
                 """
@@ -604,93 +608,10 @@ class ExtractCSVData(object):
                 """ % (fname)
             )
 
-        if (occ == 'ingress'):
-            crange = (self.rho_dot_kms_vals < 0.0).nonzero()
-            self.rho_dot_kms_vals = self.rho_dot_kms_vals[::-1]
-            self.D_km_vals = self.D_km_vals[::-1]
-            geo_rho = geo_rho[::-1]
-        elif (occ == 'egress'):
-            crange = (self.rho_dot_kms_vals > 0.0).nonzero()
-        else:
-            crange_e = (self.rho_dot_kms_vals > 0.0).nonzero()
-            crange_i = (self.rho_dot_kms_vals < 0.0).nonzero()
-            n_e = np.size(crange_e)
-            n_i = np.size(crange_i)
-            if (n_e != 0) and (n_i !=0):
-                raise ValueError(
-                    """
-                        \r\tError Encountered: rss_ringoccs
-                        \r\t\t%s\n
-                        \r\trho_dot_kms_vals has positive and negative values.
-                        \r\tThis is likely a chord occultation.
-                        \r\tSet occ='ingress' or occ='egress'
-                    """ % (fname)
-                )
-            elif (n_e == 0) and (n_i == 0):
-                raise ValueError(
-                    """
-                        \r\tError Encountered: rss_ringoccs
-                        \r\t\t%s\n
-                        \r\trho_dot_kms_vals is either zero or empty.
-                        \r\tCheck input geo file for errors.
-                        \r\tYour file: %s
-                    """ % (fname, geo)
-                )
-            elif (n_e != 0) and (n_i == 0):
-                crange = crange_e
-                occ    = 'egress'
-            elif (n_e == 0) and (n_i != 0):
-                crange = crange_i
-                occ    = 'ingress'
-            else:
-                raise ValueError(
-                    """
-                        \r\tError Encountered: rss_ringoccs
-                        \r\t\t%s\n
-                        \r\tCould not determine what type of occultation
-                        \r\tthis is. Set occ='ingress' or occ='egress'.
-                    """ % (fname)
-                )
-
-            del n_e, n_i, crange_e, crange_i
-
-        if (np.size(crange) == 0):
-            if (occ == 'ingress'):
-                raise TypeError(
-                    """
-                        \r\tError Encountered: rss_ringoccs
-                        \r\t\t%s\n
-                        \r\trho_dot_kms_vals is never negative.
-                    """ % fname
-                )
-            elif (occ == 'egress'):
-                raise TypeError(
-                    """
-                        \r\tError Encountered: rss_ringoccs
-                        \r\t\t%s\n
-                        \r\trho_dot_kms_vals is never negative.
-                    """ % fname
-                )
-            else:
-                raise TypeError(
-                    """
-                        \r\tError Encountered: rss_ringoccs
-                        \r\t\t%s\n
-                        \r\tCould not determine occultation type.
-                        \r\tCheck your input GEO file.
-                    """ % fname
-                )
-        else:
-            pass
-
         if verbose:
             print("\tInterpolating Data...")
 
-        geo_rho = geo_rho[crange]
-        self.D_km_vals = self.D_km_vals[crange]
-        self.rho_dot_kms_vals = self.rho_dot_kms_vals[crange]
-
-        del crange, geo_dat, cal_dat, dlp_dat
+        del geo_dat, cal_dat, dlp_dat
 
         raw_mu = np.sin(np.abs(self.B_rad_vals))
         self.p_norm_vals = np.exp(-self.raw_tau_vals/raw_mu)
@@ -737,12 +658,10 @@ class ExtractCSVData(object):
         }
 
         input_kwds = {"TAU Data": self.tau}
-
         self.history = write_history_dict(input_vars, input_kwds, __file__)
-        var = geo.split("/")[-1]
 
         try:
-            var = var.split("_")
+            var = (geo.split("/")[-1]).split("_")
             band = '"%s"' % var[3][0]
             year = var[1]
             doy = var[2]
@@ -779,6 +698,4 @@ class ExtractCSVData(object):
 
         if verbose:
             print("\tHistory Complete.")
-
-        if verbose:
             print("\tExtract CSV Data Complete.")

@@ -308,6 +308,7 @@ class DiffractionCorrection(object):
         else:
             pass
 
+        error_check.check_type(wtype, str, "wtype", fname)
         error_check.check_type(fwd, bool, "fwd", fname)
         error_check.check_type(bfac, bool, "bfac", fname)
         error_check.check_type(norm, bool, "norm", fname)
@@ -317,48 +318,38 @@ class DiffractionCorrection(object):
         sigma = error_check.check_type_and_convert(sigma, float, "sigma", fname)
         res_factor = error_check.check_type_and_convert(res_factor, float,
                                                         "res_factor", fname)
+        eccentricity = error_check.check_type_and_convert(eccentricity, float,
+                                                          "eccentricity", fname)
+        periapse = error_check.check_type_and_convert(periapse, float,
+                                                      "periapse", fname)
 
         # Check that these variables are positive.
         error_check.check_positive(res, "res", fname)
         error_check.check_positive(sigma, "sigma", fname)
         error_check.check_positive(res_factor, "res_factor", fname)
         error_check.check_non_negative(eccentricity, "eccentricity", fname)
-        
+
         # Check that the periapse is within [0, 2pi)
         error_check.check_two_pi(periapse, "periapse", fname)
 
-        # Check that the requested window type is a legal input.
-        if not isinstance(wtype, str):
+        # Remove spaces/quotes from the wtype variable and set to lower case.
+        wtype = wtype.replace(" ", "").replace("'", "").replace('"', "")
+        wtype = wtype.lower()
+
+        # Check that wtype is in the allowed list of window types.
+        if not (wtype in window_functions.func_dict):
             erm = ""
             for key in window_functions.func_dict:
                 erm = "%s\t\t'%s'\n" % (erm, key)
-            raise TypeError(
+            raise ValueError(
                 "\n\tError Encountered: rss_ringoccs\n"
-                "\t\tdiffrec.diffraction_correction.DiffractionCorrection\n\n"
-                "\twtype must be a string.\n"
-                "\tYour input has type: %s\n"
-                "\tInput should have type: str\n"
-                "\tAllowed string are:\n%s" % (type(wtype).__name__, erm)
+                "\t\tdiffrec.diffraction_correction.DiffractionCorrection"
+                "\n\n\tIllegal string used for wtype.\n"
+                "\tYour string: '%s'\n"
+                "\tAllowed Strings:\n%s" % (wtype, erm)
             )
         else:
-            # Remove spaces and quotes from the wtype variable.
-            wtype = wtype.replace(" ", "").replace("'", "").replace('"', "")
-
-            # Set wtype string to lower-case.
-            wtype = wtype.lower()
-            if not (wtype in window_functions.func_dict):
-                erm = ""
-                for key in window_functions.func_dict:
-                    erm = "%s\t\t'%s'\n" % (erm, key)
-                raise ValueError(
-                    "\n\tError Encountered: rss_ringoccs\n"
-                    "\t\tdiffrec.diffraction_correction.DiffractionCorrection"
-                    "\n\n\tIllegal string used for wtype.\n"
-                    "\tYour string: '%s'\n"
-                    "\tAllowed Strings:\n%s" % (wtype, erm)
-                )
-            else:
-                pass
+            pass
 
         # Check that range and psitype are legal inputs.
         rng = error_check.check_range_input(rng, fname)
@@ -426,7 +417,7 @@ class DiffractionCorrection(object):
                 "\t%s could not be converted into a numpy array.\n"
                 "\tCheck your DLP class for errors." % erm
             )
-        
+
         self.dathist = DLP.history
 
         # Run various error checks on all variables.
@@ -437,7 +428,7 @@ class DiffractionCorrection(object):
         error_check.check_is_real(self.phi_rad_vals, "phi_rad_vals", fname)
         error_check.check_is_real(self.f_sky_hz_vals, "f_sky_hz_vals", fname)
         error_check.check_is_real(self.phase_rad_vals, "phase_rad_vals", fname)
-        error_check.check_is_real(self.rho_dot_kms_vals, 
+        error_check.check_is_real(self.rho_dot_kms_vals,
                                   "rho_dot_kms_vals", fname)
 
         error_check.check_positive(self.D_km_vals, "D_km_vals", fname)
@@ -464,7 +455,7 @@ class DiffractionCorrection(object):
         else:
             self.rho_km_vals = self.rho_km_vals.astype(float)
 
-        error_check.check_lengths(self.rho_dot_kms_vals, self.rho_km_vals, 
+        error_check.check_lengths(self.rho_dot_kms_vals, self.rho_km_vals,
                                   "rho_dot_kms_vals", "rho_km_vals", fname)
         error_check.check_lengths(self.phase_rad_vals, self.rho_km_vals,
                                   "phase_rad_vals", "rho_km_vals", fname)
@@ -478,7 +469,7 @@ class DiffractionCorrection(object):
                                   "B_rad_vals", "rho_km_vals", fname)
         error_check.check_lengths(self.D_km_vals, self.rho_km_vals,
                                   "D_km_vals", "rho_km_vals", fname)
-        
+
         self.rho_dot_kms_vals = self.rho_dot_kms_vals.astype(float)
         self.phase_rad_vals = -self.phase_rad_vals.astype(float)
         self.f_sky_hz_vals = self.f_sky_hz_vals.astype(float)
@@ -730,9 +721,9 @@ class DiffractionCorrection(object):
         self.power_vals = np.square(np.abs(self.T_vals))
 
         # Return phase to original sign.
+        self.phase_rad_vals *= -1
         self.phase_vals = -np.arctan2(np.imag(self.T_vals),
                                       np.real(self.T_vals))
-        self.phase_rad_vals *= -1
 
         if self.verbose:
             print("\tInversion Complete.")
@@ -767,6 +758,8 @@ class DiffractionCorrection(object):
         self.rev_info = DLP.rev_info
         if write_file:
             self.outfiles = write_output_files(self)
+        else:
+            self.outfiles = None
 
         if self.verbose:
             print("\tDiffraction Correction Complete.")
@@ -869,13 +862,13 @@ class DiffractionCorrection(object):
             start = self.start
             n_used = self.n_used
             T_in = self.T_hat_vals
-        
+
         # Create empty array for reconstruction / forward transform.
         T_out = T_in * 0.0
 
         # Compute first window width and window function.
         w_init = self.w_km_vals[start]
-        nw = int(2 * np.floor(w_init / (2.0 * self.dx_km)) + 1)        
+        nw = int(2 * np.floor(w_init / (2.0 * self.dx_km)) + 1)
         crange = np.arange(int(start-(nw-1)/2), int(1+start+(nw-1)/2))
         r0 = self.rho_km_vals[crange]
         r = self.rho_km_vals[start]
@@ -927,7 +920,7 @@ class DiffractionCorrection(object):
                     # Compute first window width and window function.
                     w_init = self.w_km_vals[center]
 
-                    nw = int(2 * np.floor(w_init / (2.0 * self.dx_km)) + 1)        
+                    nw = int(2 * np.floor(w_init / (2.0 * self.dx_km)) + 1)
                     crange = np.arange(int(center-(nw-1)/2),
                                        int(1+center+(nw-1)/2))
 
@@ -940,7 +933,7 @@ class DiffractionCorrection(object):
                 else:
                     crange += 1
                     r0 = self.rho_km_vals[crange]
-                
+
                 d = self.D_km_vals[center]
                 b = self.B_rad_vals[center]
                 kD = kD_vals[center]
@@ -957,7 +950,7 @@ class DiffractionCorrection(object):
                                                             phi, phi0, b,
                                                             d, ecc, peri)
                     psi_d2 = special_functions.d2psi(kD, r, r0, phi, phi0, b, d)
-                    
+
                     # Newton-Raphson
                     phi += -(psi_d1 / psi_d2)
 
@@ -1010,7 +1003,7 @@ class DiffractionCorrection(object):
                         # Compute first window width and window function.
                         w_init = self.w_km_vals[center]
 
-                        nw = int(2 * np.floor(w_init / (2.0 * self.dx_km)) + 1)        
+                        nw = int(2 * np.floor(w_init / (2.0 * self.dx_km)) + 1)
                         crange = np.arange(int(center-(nw-1)/2),
                                         int(1+center+(nw-1)/2))
 
@@ -1023,7 +1016,7 @@ class DiffractionCorrection(object):
                     else:
                         crange += 1
                         r0 = self.rho_km_vals[crange]
-                    
+
                     d = self.D_km_vals[center]
                     b = self.B_rad_vals[center]
                     kD = kD_vals[center]
@@ -1037,7 +1030,7 @@ class DiffractionCorrection(object):
                     while (np.max(np.abs(psi_d1)) > 1.0e-4):
                         psi_d1 = special_functions.dpsi(kD, r, r0, phi, phi0, b, d)
                         psi_d2 = special_functions.d2psi(kD, r, r0, phi, phi0, b, d)
-                        
+
                         # Newton-Raphson
                         phi += -(psi_d1 / psi_d2)
 
@@ -1097,7 +1090,7 @@ class DiffractionCorrection(object):
 
                             # Compute first window width and window function.
                             w_init = self.w_km_vals[center]
-                            nw = int(2 * np.floor(w_init / (2.0*self.dx_km))+1)        
+                            nw = int(2 * np.floor(w_init / (2.0*self.dx_km))+1)
                             crange = np.arange(int(center-(nw-1)/2),
                                             int(1+center+(nw-1)/2))
 
@@ -1112,7 +1105,7 @@ class DiffractionCorrection(object):
                             w_func = fw(x, w_init)
                         else:
                             crange += 1
-                        
+
                         psi_vals = x2 / F2[center]
 
                         # Compute kernel function for Fresnel inverse
@@ -1157,7 +1150,7 @@ class DiffractionCorrection(object):
                         kD_vals, self.B_rad_vals, self.D_km_vals,
                         self.w_km_vals, start, n_used, wnum, use_norm, use_fwd
                     )
-                except (TypeError, ValueError, NameError):   
+                except (TypeError, ValueError, NameError):
                     if self.verbose:
                         print("\t\tCould not import C code. Using Python Code.")
             elif (self.psitype == "fresnel6"):
@@ -1250,7 +1243,7 @@ class DiffractionCorrection(object):
 
                         # Compute first window width and window function.
                         w_init = self.w_km_vals[center]
-                        nw = int(2 * np.floor(w_init / (2.0 * self.dx_km)) + 1)        
+                        nw = int(2 * np.floor(w_init / (2.0 * self.dx_km)) + 1)
                         crange = np.arange(int(center-(nw-1)/2),
                                            int(1+center+(nw-1)/2))
 
@@ -1265,7 +1258,7 @@ class DiffractionCorrection(object):
                         w_func = fw(x, w_init)
                     else:
                         crange += 1
-                    
+
                     z = x/d[center]
                     z2 = x2/d2[center]
 
@@ -1303,7 +1296,7 @@ class DiffractionCorrection(object):
 
                         # Compute first window width and window function.
                         w_init = self.w_km_vals[center]
-                        nw = int(2 * np.floor(w_init / (2.0 * self.dx_km)) + 1)        
+                        nw = int(2 * np.floor(w_init / (2.0 * self.dx_km)) + 1)
                         crange = np.arange(int(center-(nw-1)/2),
                                         int(1+center+(nw-1)/2))
 
@@ -1357,7 +1350,7 @@ class DiffractionCorrection(object):
 
                         # Compute first window width and window function.
                         w_init = self.w_km_vals[center]
-                        nw = int(2 * np.floor(w_init / (2.0 * self.dx_km)) + 1)        
+                        nw = int(2 * np.floor(w_init / (2.0 * self.dx_km)) + 1)
                         crange = np.arange(int(center-(nw-1)/2),
                                         int(1+center+(nw-1)/2))
 

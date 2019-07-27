@@ -230,8 +230,6 @@ static void Fresnel_Transform_Quadratic_Func(char **args, npy_intp *dimensions,
         /*  If forward transform is selected, negate x_arr.                   */
         x_arr[j] *= (*(int *)use_fwd == 0) - (*(int *)use_fwd == 1);
     }
-    free(x_arr);
-    free(w_func);
 
     /*  Compute the Fresnel transform across the input data.                  */
     for (i=0; i<=*(long *)n_used; ++i){
@@ -266,6 +264,8 @@ static void Fresnel_Transform_Quadratic_Func(char **args, npy_intp *dimensions,
         T_in        += T_in_steps;
         T_out       += T_out_steps;
     }
+    free(x_arr);
+    free(w_func);
 }
 
 static void Fresnel_Transform_Cubic_Func(char **args, npy_intp *dimensions,

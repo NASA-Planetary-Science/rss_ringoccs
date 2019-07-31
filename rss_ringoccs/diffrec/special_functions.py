@@ -193,10 +193,9 @@ def compute_norm_eq(w_func, error_check=True):
         else:
             pass
     nw = np.size(w_func)
-    tot = np.sum(w_func)
-    normeq = nw*(np.sum(w_func*w_func)) / (tot*tot)
+    tot_sq = np.square(np.sum(w_func))
 
-    return normeq
+    return nw*(np.sum(w_func*w_func)) / tot_sq
 
 def fresnel_scale(Lambda, d, phi, b, deg=False):
     """

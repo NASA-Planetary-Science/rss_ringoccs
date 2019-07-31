@@ -120,7 +120,7 @@ class FindOptimalResolution(object):
         dres = error_check.check_type_and_convert(dres, float, "dres", fname)
         nres = error_check.check_type_and_convert(nres, int, "nres", fname)
         sigma = error_check.check_type_and_convert(sigma, float, "sigma", fname)
-        res_factor = error_check.check_type_and_convert(res_factor, float, 
+        res_factor = error_check.check_type_and_convert(res_factor, float,
                                                         "res_factor", fname)
 
         error_check.check_positive(sres, "sres", fname)
@@ -129,7 +129,7 @@ class FindOptimalResolution(object):
         error_check.check_positive(sigma, "sigma", fname)
 
         # Check that the requested range is a legal input.
-        rng = check_range_input(rng, fname)
+        rng = error_check.check_range_input(rng, fname)
 
         if (not all(isinstance(x, str) for x in wlst)):
             raise TypeError(
@@ -142,7 +142,7 @@ class FindOptimalResolution(object):
                 wlst[i] = wlst[i].replace(" ", "").replace("'", "")
                 wlst[i] = wlst[i].replace('"', "").lower()
 
-            if not all((wtype in func_dict) for wtype in wlst):
+            if not all((wtype in window_functions.func_dict) for wtype in wlst):
                 erm = ""
                 for key in func_dict:
                     erm = "%s\t\t'%s'\n" % (erm, key)
@@ -162,8 +162,8 @@ class FindOptimalResolution(object):
         self.ideal_res = np.zeros((nwins))
         eres = sres + (nres-1)*dres
         res = sres
-        data = ExtractCSVData(geo, cal, dlp, tau=tau, verbose=verbose)
-        rec = diffraction_correction(data, res, rng=rng,
+        data = CSV_tools.ExtractCSVData(geo, cal, dlp, tau=tau, verbose=verbose)
+        rec = diffraction_correction.DiffractionCorrection(data, res, rng=rng,
                                     wtype="kb35", verbose=False)
         start = int(np.min((data.tau_rho-np.min(rec.rho_km_vals)>=0).nonzero()))
         fin = int(np.max((np.max(rec.rho_km_vals)-data.tau_rho>=0).nonzero()))
@@ -171,7 +171,7 @@ class FindOptimalResolution(object):
         for i in np.arange(nres):
             for j in range(nwins):
                 wtype = wlst[j]
-                recint = diffraction_correction(data, res, rng=rng, wtype=wtype)
+                recint = diffraction_correction.DiffractionCorrection(data, res, rng=rng, wtype=wtype)
                 p_int = np.abs(recint.power_vals - tau_power)
                 self.linf[i,j] = np.max(p_int)
                 self.l2[i,j] = np.sqrt(np.sum(p_int*p_int)*recint.dx_km)
@@ -267,7 +267,7 @@ class ModelFromGEO(object):
                     \r\tPlease provide an input array for rho.\n
                 """ % (fname)
             )
-        elif not ((type(data_rho) == type(None)) and 
+        elif not ((type(data_rho) == type(None)) and
                   (type(data_pow) == type(None))):
             error_check.check_is_real(data_rho, "data_rho", fname)
             error_check.check_is_real(data_pow, "data_pow", fname)
@@ -553,7 +553,7 @@ class ModelFromGEO(object):
                                                     self.D_km_vals[center],
                                                     self.phi_rad_vals[center],
                                                     self.B_rad_vals[center])
-                
+
                 x = window_functions.SQRT_PI_2*(rho-self.rho_km_vals)/F
 
                 T_hat = (special_functions.fresnel_cos(x)+
@@ -580,7 +580,7 @@ class ModelFromGEO(object):
                                                     self.D_km_vals[center],
                                                     self.phi_rad_vals[center],
                                                     self.B_rad_vals[center])
-                
+
                 x = window_functions.SQRT_PI_2*(rho-self.rho_km_vals)/F
 
                 T_hat = (special_functions.fresnel_cos(x)+

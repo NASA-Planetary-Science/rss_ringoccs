@@ -1,9 +1,8 @@
-
 /*  Include guard to avoid importing this file twice.                         */
 #ifndef RSS_RINGOCCS_FRESNEL_KERNEL_H
 #define RSS_RINGOCCS_FRESNEL_KERNEL_H
 
-#include <stdio.h>
+/*  Various mathematical functions defined here.                              */
 #include <math.h>
 
 double Newton_Raphson(double x, double (*f)(double),
@@ -11,12 +10,18 @@ double Newton_Raphson(double x, double (*f)(double),
 {
     double dx;
     long i = 0;
+
+    /*  Evaluate the perturbation term, then compute the next iteration.      */
     dx = (*f)(x)/(*f_prime)(x);
     x -= dx;
+
+    /*  Continuing this computation until the error is below the threshold.   */
     while(fabs(dx) > EPS){
         dx = (*f)(x)/(*f_prime)(x);
         x -= dx;
         ++i;
+
+        /*  Break if too many iterations have been run.                       */
         if (i > toler){break;}
     }
     return x;
@@ -35,7 +40,7 @@ double fresnel_psi(double kD, double r, double r0, double phi,
     return kD * (sqrt(1.0+eta-2.0*xi) + xi - 1.0);
 }
 
-double fresnel_dpsi_dphi(double kD, double r, double r0, double phi, 
+double fresnel_dpsi_dphi(double kD, double r, double r0, double phi,
                          double phi0, double B, double D)
 {
     double xi, eta, psi0, dxi, deta;

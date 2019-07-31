@@ -264,6 +264,8 @@ static void Fresnel_Transform_Quadratic_Func(char **args, npy_intp *dimensions,
         T_in        += T_in_steps;
         T_out       += T_out_steps;
     }
+    free(x_arr);
+    free(w_func);
 }
 
 static void Fresnel_Transform_Cubic_Func(char **args, npy_intp *dimensions,
@@ -384,7 +386,7 @@ static void Fresnel_Transform_Cubic_Func(char **args, npy_intp *dimensions,
                                            A_0, A_1, dx, rcpr_F,
                                            *(double *)kd_vals,
                                            nw_pts, T_in_steps);
-        
+
         /*  Increment pointers using pointer arithmetic, equivalent to        *
          *  changing var[n] to var[n+1].                                      */
         phi_rad_vals    += phi_steps;
@@ -396,6 +398,8 @@ static void Fresnel_Transform_Cubic_Func(char **args, npy_intp *dimensions,
         T_in            += T_in_steps;
         T_out           += T_out_steps;
     }
+    free(x_arr);
+    free(w_func);
 }
 
 static void Fresnel_Transform_Quartic_Func(char **args, npy_intp *dimensions,
@@ -519,7 +523,7 @@ static void Fresnel_Transform_Quartic_Func(char **args, npy_intp *dimensions,
                                            A_0, A_1, A_2, dx, rcpr_F,
                                            *(double *)kd_vals,
                                            nw_pts, T_in_steps);
-        
+
         /*  Increment pointers using pointer arithmetic, equivalent to        *
          *  changing var[n] to var[n+1].                                      */
         phi_rad_vals    += phi_steps;
@@ -531,6 +535,8 @@ static void Fresnel_Transform_Quartic_Func(char **args, npy_intp *dimensions,
         T_in            += T_in_steps;
         T_out           += T_out_steps;
     }
+    free(x_arr);
+    free(w_func);
 }
 
 static void Fresnel_Transform_Sextic_Func(char **args, npy_intp *dimensions,
@@ -662,7 +668,7 @@ static void Fresnel_Transform_Sextic_Func(char **args, npy_intp *dimensions,
                                            A_0, A_1, A_2, A_3, A_4, dx, rcpr_F,
                                            *(double *)kd_vals,
                                            nw_pts, T_in_steps);
-        
+
         /*  Increment pointers using pointer arithmetic, equivalent to        *
          *  changing var[n] to var[n+1].                                      */
         phi_rad_vals    += phi_steps;
@@ -674,6 +680,8 @@ static void Fresnel_Transform_Sextic_Func(char **args, npy_intp *dimensions,
         T_in            += T_in_steps;
         T_out           += T_out_steps;
     }
+    free(x_arr);
+    free(w_func);
 }
 
 static void Fresnel_Transform_Octic_Func(char **args, npy_intp *dimensions,
@@ -813,7 +821,7 @@ static void Fresnel_Transform_Octic_Func(char **args, npy_intp *dimensions,
                                            dx, rcpr_F,
                                            *(double *)kd_vals,
                                            nw_pts, T_in_steps);
-        
+
         /*  Increment pointers using pointer arithmetic, equivalent to        *
          *  changing var[n] to var[n+1].                                      */
         phi_rad_vals    += phi_steps;
@@ -825,6 +833,8 @@ static void Fresnel_Transform_Octic_Func(char **args, npy_intp *dimensions,
         T_in            += T_in_steps;
         T_out           += T_out_steps;
     }
+    free(x_arr);
+    free(w_func);
 }
 
 static void Fresnel_Transform_Newton_Func(char **args, npy_intp *dimensions,
@@ -942,7 +952,7 @@ static void Fresnel_Transform_Newton_Func(char **args, npy_intp *dimensions,
                                            *(double *)B_rad_vals,
                                            *(double *)D_km_vals, EPS, toler,
                                            dx, rcpr_F, nw_pts, T_in_steps);
-        
+
         /*  Increment pointers using pointer arithmetic, equivalent to        *
          *  changing var[n] to var[n+1].                                      */
         phi_rad_vals    += phi_steps;
@@ -955,6 +965,8 @@ static void Fresnel_Transform_Newton_Func(char **args, npy_intp *dimensions,
         T_in            += T_in_steps;
         T_out           += T_out_steps;
     }
+    free(x_arr);
+    free(w_func);
 }
 
 /*                            C-Python API Stuff                              */

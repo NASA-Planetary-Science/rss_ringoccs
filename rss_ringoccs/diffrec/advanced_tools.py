@@ -620,7 +620,8 @@ class ModelFromGEO(object):
             if use_fresnel:
                 psi = (np.pi/2.0)*np.square((r0-r)/F)
             else:
-                psi = special_functions.psi(kD, r, r0, phi, phi0, B, D)
+                psi_vals = special_functions.fresnel_psi(kD, r, r0, phi,
+                                                         phi0, b, d)
 
             T_hat = np.exp(1j*psi)
             T_hat *= (0.5-0.5*1j)/F

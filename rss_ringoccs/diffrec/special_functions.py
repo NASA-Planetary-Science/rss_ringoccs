@@ -176,7 +176,7 @@ def compute_norm_eq(w_func):
             """
         )
 
-def fresnel_scale(Lambda, d, phi, b, deg=False):
+def fresnel_scale(Lambda, d, phi, b):
     """
         Purpose:
             Compute the Fresnel Scale from :math:`\\lambda`, :math:`D`,
@@ -190,10 +190,6 @@ def fresnel_scale(Lambda, d, phi, b, deg=False):
                 Ring azimuth angle.
             :b (*np.ndarray* or *float*):
                 Ring opening angle.
-        Keywords:
-            :deg (*bool*):
-                Set True if :math:`\\phi` or :math:`B` are in degrees.
-                Default is radians.
         Output:
             :fres (*np.ndarray* or *float*):
                 The Fresnel scale.
@@ -201,8 +197,7 @@ def fresnel_scale(Lambda, d, phi, b, deg=False):
             :math:`\\lambda` and :math:`D` must be in the same units.
             The output (Fresnel scale) will have the same units
             as :math:`\\lambda` and d. In addition, :math:`B` and :math:`\\phi`
-            must also have the same units. If :math:`B` and :math:`\\phi` are
-            in degrees, make sure to set deg=True. Default is radians.
+            must also be in radians.
     """
     try:
         Lambda = np.array(Lambda)
@@ -210,16 +205,9 @@ def fresnel_scale(Lambda, d, phi, b, deg=False):
         d = np.array(d)
         b = np.array(b)
 
-        if deg:
-            b = np.deg2rad(b)
-            phi = np.deg2rad(phi)
-            cb = np.cos(b)
-            sb = np.sin(b)
-            sp = np.sin(phi)
-        else:
-            cb = np.cos(b)
-            sb = np.sin(b)
-            sp = np.sin(phi)
+        cb = np.cos(b)
+        sb = np.sin(b)
+        sp = np.sin(phi)
 
         return np.sqrt(0.5 * Lambda * d * (1-np.square(cb*sp)) / np.square(sb))
     except (TypeError, ValueError):

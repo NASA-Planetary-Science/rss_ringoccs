@@ -117,7 +117,7 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
 
     return np.convolve(m[::-1], y, mode='valid')
 
-def compute_norm_eq(w_func, error_check=True):
+def compute_norm_eq(w_func):
     """
         Purpose:
             Compute normalized equivalenth width of a given function.
@@ -162,40 +162,19 @@ def compute_norm_eq(w_func, error_check=True):
                 >>> print(normeq)
                 1.50015
     """
-    if error_check:
-        try:
-            w_func = np.array(w_func)
-        except (ValueError, TypeError):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffrec Subpackage\n"
-                "\tspecial_functions.compute_norm_eq:\n"
-                "\t\tFirst input could not be converted\n"
-                "\t\tinto a numpy array.\n"
-            )
+    try:
+        nw = np.size(w_func)
+        tot_sq = np.square(np.sum(w_func))
 
-        if (not np.all(np.isreal(w_func))):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffrec Subpackage\n"
-                "\tspecial_functions.compute_norm_eq:\n"
-                "\t\tFirst input must be an array\n"
-                "\t\tof floating point numbers.\n"
-            )
-        elif (np.min(w_func) < 0.0):
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\trss_ringoccs: Diffrec Subpackage\n"
-                "\tspecial_functions.compute_norm_eq:\n"
-                "\t\tFirst input must be an array\n"
-                "\t\tof positive numbers.\n"
-            )
-        else:
-            pass
-    nw = np.size(w_func)
-    tot_sq = np.square(np.sum(w_func))
-
-    return nw*(np.sum(w_func*w_func)) / tot_sq
+        return nw*(np.sum(w_func*w_func)) / tot_sq
+    except (TypeError, ValueError, NameError, IndexError):
+        raise TypeError(
+            """
+                \r\tError Encountered: rss_ringoccs
+                \r\t\tdiffrec.special_functions.compute_norm_eq\n
+                \r\tInput should be a numpy array of floating point numbers.
+            """
+        )
 
 def fresnel_scale(Lambda, d, phi, b, deg=False):
     """
@@ -678,3 +657,33 @@ def double_slit_diffraction(x, z, a, d):
     f3 = 4.0*np.square(np.sin(np.pi*d*x/z))
 
     return f1*f2/f3
+
+def square_well_phase(x, a, b, F):
+    try:
+        return _special_functions.square_well_phase(x, a, b, F)
+    except(TypeError, ValueError, NameError):
+        try:
+            arg_1 = np.sqrt(np.pi/2.0)*((a-x)/F)
+            arg_2 = np.sqrt(np.pi/2.0)*((b-x)/F)
+
+            im = -(1.0/np.sqrt(2.0*np.pi))*(
+                fresnel_sin(arg_2) - fresnel_sin(arg_1) -
+                fresnel_cos(arg_2) + fresnel_cos(arg_1))
+            re = 1.0 - (1.0/np.sqrt(2.0*np.pi))*(
+                fresnel_cos(arg_2) - fresnel_cos(arg_1) +
+                fresnel_sin(arg_2) - fresnel_sin(arg_1))
+
+            return np.arctan2(im, re) 
+        except(TypeError, ValueError):
+            raise TypeError(
+                """
+                    \r\tError Encountered: rss_ringoccs
+                    \r\t\tdiffrec.special_functions.square_well_diffraction
+                    \r
+                    \r\tInvalid input. Input should be:
+                    \r\t\tx:\t Numpy array of floating point numbers.
+                    \r\t\ta:\t Floating point number
+                    \r\t\tb:\t Floating point number
+                    \r\t\tF:\t Floating point number
+                """
+            )

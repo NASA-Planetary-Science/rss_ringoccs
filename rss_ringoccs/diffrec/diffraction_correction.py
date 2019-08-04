@@ -588,7 +588,7 @@ class DiffractionCorrection(object):
         # Compute geometric qunatities and the Fresnel Scale.
         self.F_km_vals = special_functions.fresnel_scale(
             self.lambda_sky_km_vals, self.D_km_vals,
-            self.phi_rad_vals, self.B_rad_vals, deg=False
+            self.phi_rad_vals, self.B_rad_vals
         )
 
         # Compute the Normalized Equaivalent Width (See MTR86 Equation 20)

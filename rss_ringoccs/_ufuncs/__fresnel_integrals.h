@@ -371,4 +371,21 @@ double complex Inverted_Square_Well_Diffraction_Solution(double x, double a,
     return (0.5 - 0.5*_Complex_I)*result;
 }
 
+double Square_Well_Diffraction_Phase(double x, double a, double b, double F)
+{
+    a = SQRT_PI_BY_2*(a-x)/F;
+    b = SQRT_PI_BY_2*(b-x)/F;
+    double im = SQRT_ONE_BY_2_PI *
+        (Fresnel_Sine_Heald_Rational_EPS_Minus_Eight(b) -
+         Fresnel_Sine_Heald_Rational_EPS_Minus_Eight(a) - 
+         Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight(b) +
+         Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight(a));
+    double re = 1.0 - SQRT_ONE_BY_2_PI *
+        (Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight(b) -
+         Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight(a) +
+         Fresnel_Sine_Heald_Rational_EPS_Minus_Eight(b)   -
+         Fresnel_Sine_Heald_Rational_EPS_Minus_Eight(a));
+    return atan2(im, re);
+}
+
 #endif

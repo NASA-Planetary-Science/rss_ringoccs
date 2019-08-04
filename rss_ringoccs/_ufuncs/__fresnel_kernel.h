@@ -27,8 +27,8 @@ double Newton_Raphson(double x, double (*f)(double),
     return x;
 }
 
-double fresnel_psi(double kD, double r, double r0, double phi,
-                   double phi0, double B, double D)
+double Fresnel_Psi_Func(double kD, double r, double r0, double phi,
+                        double phi0, double B, double D)
 {
     double xi, eta;
 
@@ -40,8 +40,8 @@ double fresnel_psi(double kD, double r, double r0, double phi,
     return kD * (sqrt(1.0+eta-2.0*xi) + xi - 1.0);
 }
 
-double fresnel_dpsi_dphi(double kD, double r, double r0, double phi,
-                         double phi0, double B, double D)
+double Fresnel_dPsi_dPhi_Func(double kD, double r, double r0, double phi,
+                              double phi0, double B, double D)
 {
     double xi, eta, psi0, dxi, deta;
 
@@ -57,9 +57,9 @@ double fresnel_dpsi_dphi(double kD, double r, double r0, double phi,
     return kD * ((0.5/psi0)*(deta-2.0*dxi) + dxi);
 }
 
-double fresnel_dpsi_dphi_ellipse(double kD, double r, double r0,
-                                 double phi, double phi0, double B,
-                                 double D, double ecc, double peri)
+double Fresnel_dPsi_dPhi_Ellipse_Func(double kD, double r, double r0,
+                                      double phi, double phi0, double B,
+                                      double D, double ecc, double peri)
 {
     double xi, eta, psi0, psi_d1, dxi_phi, deta_phi, dxi_rho, deta_rho;
     /*  Compute xi variable (MTR86 Equation 4b) and eta (Equation 4c).        */
@@ -81,8 +81,8 @@ double fresnel_dpsi_dphi_ellipse(double kD, double r, double r0,
     return kD * psi_d1;
 }
 
-double fresnel_d2psi_dphi2(double kD, double r, double r0, double phi,
-                           double phi0, double B, double D)
+double Fresnel_d2Psi_dPhi2_Func(double kD, double r, double r0, double phi,
+                                double phi0, double B, double D)
 {
     double xi, eta, psi0, dxi, dxi2, deta, deta2, psi_d2;
     /*  Compute xi variable (MTR86 Equation 4b) and eta (Equation 4c).        */
@@ -103,35 +103,37 @@ double fresnel_d2psi_dphi2(double kD, double r, double r0, double phi,
     return kD*psi_d2;
 }
 
-double Newton_Raphson_fresnel_psi(double kD, double r, double r0,
+double Newton_Raphson_Fresnel_Psi(double kD, double r, double r0,
                                   double phi, double phi0, double B,
                                   double D, double EPS, long toler)
 {
     double dphi;
     long i = 0;
-    dphi  = fresnel_psi(kD, r, r0, phi, phi0, B, D);
+    dphi  = Fresnel_Psi_Func(kD, r, r0, phi, phi0, B, D);
     while(fabs(dphi) > EPS){
-        dphi  = fresnel_dpsi_dphi(kD, r, r0, phi, phi0, B, D);
-        phi  -= dphi/fresnel_d2psi_dphi2(kD, r, r0, phi, phi0, B, D);
+        dphi  = Fresnel_dPsi_dPhi_Func(kD, r, r0, phi, phi0, B, D);
+        phi  -= dphi/Fresnel_d2Psi_dPhi2_Func(kD, r, r0, phi, phi0, B, D);
         ++i;
         if (i > toler){break;}
     }
     return phi;
 }
 
-double Newton_Raphson_fresnel_ellipse(double kD, double r, double r0,
+double Newton_Raphson_Fresnel_Ellipse(double kD, double r, double r0,
                                       double phi, double phi0, double B,
                                       double D, double ecc, double peri,
                                       double EPS, long toler)
 {
     double dphi;
     long i = 0;
-    dphi  = fresnel_dpsi_dphi_ellipse(kD, r, r0, phi, phi0, B, D, ecc, peri);
-    dphi /= fresnel_d2psi_dphi2(kD, r, r0, phi, phi0, B, D);
+    dphi  = Fresnel_dPsi_dPhi_Ellipse_Func(kD, r, r0, phi, phi0,
+                                           B, D, ecc, peri);
+    dphi /= Fresnel_d2Psi_dPhi2_Func(kD, r, r0, phi, phi0, B, D);
     phi  -= dphi;
     while(fabs(dphi) > EPS){
-        dphi  = fresnel_dpsi_dphi_ellipse(kD, r, r0, phi, phi0, B, D, ecc, peri);
-        dphi /= fresnel_d2psi_dphi2(kD, r, r0, phi, phi0, B, D);
+        dphi  = Fresnel_dPsi_dPhi_Ellipse_Func(kD, r, r0, phi, phi0,
+                                               B, D, ecc, peri);
+        dphi /= Fresnel_d2Psi_dPhi2_Func(kD, r, r0, phi, phi0, B, D);
         phi  -= dphi;
         ++i;
         if (i > toler){break;}

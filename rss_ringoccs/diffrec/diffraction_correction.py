@@ -960,7 +960,8 @@ class DiffractionCorrection(object):
                         break
 
                 # Compute Eta variable (MTR86 Equation 4c).
-                psi_vals = special_functions.psi(kD, r, r0, phi, phi0, b, d)
+                psi_vals = special_functions.fresnel_psi(kD, r, r0, phi,
+                                                         phi0, b, d)
 
                 # Compute kernel function for Fresnel inverse
                 if fwd:
@@ -1040,7 +1041,8 @@ class DiffractionCorrection(object):
                             break
 
                     # Compute Eta variable (MTR86 Equation 4c).
-                    psi_vals = special_functions.psi(kD, r, r0, phi, phi0, b, d)
+                    psi_vals = special_functions.fresnel_psi(kD, r, r0, phi,
+                                                            phi0, b, d)
 
                     # Compute kernel function for Fresnel inverse
                     if fwd:

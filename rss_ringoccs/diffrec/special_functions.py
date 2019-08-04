@@ -200,9 +200,9 @@ def fresnel_scale(Lambda, d, phi, b, deg=False):
         Note:
             :math:`\\lambda` and :math:`D` must be in the same units.
             The output (Fresnel scale) will have the same units
-            as :math:`\\lambda` and d. In addition, :math:`B` and :math:`\\phi` must also
-            have the same units. If :math:`B` and :math:`\\phi` are in degrees,
-            make sure to set deg=True. Default is radians.
+            as :math:`\\lambda` and d. In addition, :math:`B` and :math:`\\phi`
+            must also have the same units. If :math:`B` and :math:`\\phi` are
+            in degrees, make sure to set deg=True. Default is radians.
     """
     try:
         Lambda = np.array(Lambda)
@@ -232,7 +232,7 @@ def fresnel_scale(Lambda, d, phi, b, deg=False):
             """
         )
 
-def psi(kD, r, r0, phi, phi0, B, D):
+def fresnel_psi(kD, r, r0, phi, phi0, B, D):
     """
         Purpose:
             Compute :math:`\\psi` (MTR Equation 4)
@@ -255,17 +255,20 @@ def psi(kD, r, r0, phi, phi0, B, D):
             :psi (*np.ndarray*):
                 Geometric Function from Fresnel Kernel.
     """
-    # Compute Xi variable (MTR86 Equation 4b). Signs of xi are swapped.
-    xi = (np.cos(B)/D) * (r * np.cos(phi) - r0 * np.cos(phi0))
+    try:
+        return _special_functions.fresnel_psi(kD, r, r0, phi, phi0, B, D)
+    except:
+        # Compute Xi variable (MTR86 Equation 4b). Signs of xi are swapped.
+        xi = (np.cos(B)/D) * (r * np.cos(phi) - r0 * np.cos(phi0))
 
-    # Compute Eta variable (MTR86 Equation 4c).
-    eta = (r0*r0 + r*r - 2.0*r*r0*np.cos(phi-phi0)) / (D*D)
+        # Compute Eta variable (MTR86 Equation 4c).
+        eta = (r0*r0 + r*r - 2.0*r*r0*np.cos(phi-phi0)) / (D*D)
 
-    # Sign of xi swapped from MTR86.
-    psi_vals = kD * (np.sqrt(1.0+eta-2.0*xi) + xi - 1.0)
-    return psi_vals
+        # Sign of xi swapped from MTR86.
+        psi_vals = kD * (np.sqrt(1.0+eta-2.0*xi) + xi - 1.0)
+        return psi_vals
 
-def dpsi(kD, r, r0, phi, phi0, B, D):
+def fresnel_dpsi(kD, r, r0, phi, phi0, B, D):
     """
         Purpose:
             Compute :math:`\\mathrm{d}\\psi/\\mathrm{d}\\phi`

@@ -902,11 +902,11 @@ complex double _fresnel_transform_newton(double* x_arr, double* phi_arr,
     for (i = 0; i<n_pts; ++i){
 
         /*  Calculate the stationary value of psi with respect to phi.        */
-        phi = Newton_Raphson_fresnel_psi(kD, r, x_arr[i], phi_arr[i],
+        phi = Newton_Raphson_Fresnel_Psi(kD, r, x_arr[i], phi_arr[i],
                                          phi_arr[i], B, D, EPS, toler);
 
         /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
-        psi     = fresnel_psi(kD, r, x_arr[i], phi, phi_arr[i], B, D);
+        psi     = Fresnel_Psi_Func(kD, r, x_arr[i], phi, phi_arr[i], B, D);
         exp_psi = (cos(psi) - _Complex_I*sin(psi))*w_func[i];
 
         /*  Approximate the integral with a Riemann Sum.  */
@@ -957,11 +957,11 @@ complex double _fresnel_transform_newton_norm(double* x_arr, double* phi_arr,
     /*  Use a Riemann Sum to approximate the Fresnel Inverse Integral.        */
     for (i = 0; i<n_pts; ++i){
         /*  Calculate the stationary value of psi with respect to phi.        */
-        phi = Newton_Raphson_fresnel_psi(kD, r, x_arr[i], phi_arr[i],
+        phi = Newton_Raphson_Fresnel_Psi(kD, r, x_arr[i], phi_arr[i],
                                          phi_arr[i], B, D, EPS, toler);
 
         /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
-        psi     = fresnel_psi(kD, r, x_arr[i], phi, phi_arr[i], B, D);
+        psi     = Fresnel_Psi_Func(kD, r, x_arr[i], phi, phi_arr[i], B, D);
         exp_psi = (cos(psi) - _Complex_I*sin(psi))*w_func[i];
 
         /*  Compute the norm using a Riemann sum as well.                     */

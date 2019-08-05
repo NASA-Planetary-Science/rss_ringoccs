@@ -186,14 +186,14 @@ static void Fresnel_Transform_Quadratic_Func(char **args, npy_intp *dimensions,
     npy_intp T_out_steps = steps[9];
 
     /*  Cast the selected window type to the fw pointer.                      */
-    if (*(int *)wtype == 0){fw = &__rect;}
-    else if (*(int *)wtype == 1){fw = &__coss;}
-    else if (*(int *)wtype == 2){fw = &Kaiser_Bessel_Window_2_0;}
-    else if (*(int *)wtype == 3){fw = &Kaiser_Bessel_Window_2_5;}
-    else if (*(int *)wtype == 4){fw = &Kaiser_Bessel_Window_3_5;}
-    else if (*(int *)wtype == 5){fw = &Modified_Kaiser_Bessel_Window_2_0;}
-    else if (*(int *)wtype == 6){fw = &Modified_Kaiser_Bessel_Window_2_5;}
-    else {fw = &Modified_Kaiser_Bessel_Window_3_5;}
+    if (*(int *)wtype == 0){fw = &Rect_Window_Func;}
+    else if (*(int *)wtype == 1){fw = &Coss_Window_Func;}
+    else if (*(int *)wtype == 2){fw = &Kaiser_Bessel_2_0_Window_Func;}
+    else if (*(int *)wtype == 3){fw = &Kaiser_Bessel_2_5_Window_Func;}
+    else if (*(int *)wtype == 4){fw = &Kaiser_Bessel_3_5_Window_Func;}
+    else if (*(int *)wtype == 5){fw = &Modified_Kaiser_Bessel_2_0_Window_Func;}
+    else if (*(int *)wtype == 6){fw = &Modified_Kaiser_Bessel_2_5_Window_Func;}
+    else {fw = &Modified_Kaiser_Bessel_3_5_Window_Func;}
 
     /*  Cast FresT to the appropriate function.                               */
     if (*(int *)use_norm == 0){FresT = &_fresnel_transform;}
@@ -302,14 +302,15 @@ static void Fresnel_Transform_Cubic_Func(char **args, npy_intp *dimensions,
     npy_intp w_steps        = steps[7];
     npy_intp T_out_steps    = steps[13];
 
-    if (*(int *)wtype == 0){fw = &__rect;}
-    else if (*(int *)wtype == 1){fw = &__coss;}
-    else if (*(int *)wtype == 2){fw = &Kaiser_Bessel_Window_2_0;}
-    else if (*(int *)wtype == 3){fw = &Kaiser_Bessel_Window_2_5;}
-    else if (*(int *)wtype == 4){fw = &Kaiser_Bessel_Window_3_5;}
-    else if (*(int *)wtype == 5){fw = &Modified_Kaiser_Bessel_Window_2_0;}
-    else if (*(int *)wtype == 6){fw = &Modified_Kaiser_Bessel_Window_2_5;}
-    else {fw = &Modified_Kaiser_Bessel_Window_3_5;}
+    /*  Cast the selected window type to the fw pointer.                      */
+    if (*(int *)wtype == 0){fw = &Rect_Window_Func;}
+    else if (*(int *)wtype == 1){fw = &Coss_Window_Func;}
+    else if (*(int *)wtype == 2){fw = &Kaiser_Bessel_2_0_Window_Func;}
+    else if (*(int *)wtype == 3){fw = &Kaiser_Bessel_2_5_Window_Func;}
+    else if (*(int *)wtype == 4){fw = &Kaiser_Bessel_3_5_Window_Func;}
+    else if (*(int *)wtype == 5){fw = &Modified_Kaiser_Bessel_2_0_Window_Func;}
+    else if (*(int *)wtype == 6){fw = &Modified_Kaiser_Bessel_2_5_Window_Func;}
+    else {fw = &Modified_Kaiser_Bessel_3_5_Window_Func;}
 
     if (*(int *)use_norm == 0){FresT = &_fresnel_cubic;}
     else {FresT = &_fresnel_cubic_norm;}
@@ -436,14 +437,15 @@ static void Fresnel_Transform_Quartic_Func(char **args, npy_intp *dimensions,
     npy_intp w_steps        = steps[7];
     npy_intp T_out_steps    = steps[13];
 
-    if (*(int *)wtype == 0){fw = &__rect;}
-    else if (*(int *)wtype == 1){fw = &__coss;}
-    else if (*(int *)wtype == 2){fw = &Kaiser_Bessel_Window_2_0;}
-    else if (*(int *)wtype == 3){fw = &Kaiser_Bessel_Window_2_5;}
-    else if (*(int *)wtype == 4){fw = &Kaiser_Bessel_Window_3_5;}
-    else if (*(int *)wtype == 5){fw = &Modified_Kaiser_Bessel_Window_2_0;}
-    else if (*(int *)wtype == 6){fw = &Modified_Kaiser_Bessel_Window_2_5;}
-    else {fw = &Modified_Kaiser_Bessel_Window_3_5;}
+    /*  Cast the selected window type to the fw pointer.                      */
+    if (*(int *)wtype == 0){fw = &Rect_Window_Func;}
+    else if (*(int *)wtype == 1){fw = &Coss_Window_Func;}
+    else if (*(int *)wtype == 2){fw = &Kaiser_Bessel_2_0_Window_Func;}
+    else if (*(int *)wtype == 3){fw = &Kaiser_Bessel_2_5_Window_Func;}
+    else if (*(int *)wtype == 4){fw = &Kaiser_Bessel_3_5_Window_Func;}
+    else if (*(int *)wtype == 5){fw = &Modified_Kaiser_Bessel_2_0_Window_Func;}
+    else if (*(int *)wtype == 6){fw = &Modified_Kaiser_Bessel_2_5_Window_Func;}
+    else {fw = &Modified_Kaiser_Bessel_3_5_Window_Func;}
 
     if (*(int *)use_norm == 0){FresT = &_fresnel_quartic;}
     else {FresT = &_fresnel_quartic_norm;}
@@ -575,14 +577,15 @@ static void Fresnel_Transform_Sextic_Func(char **args, npy_intp *dimensions,
     npy_intp w_steps        = steps[7];
     npy_intp T_out_steps    = steps[13];
 
-    if (*(int *)wtype == 0){fw = &__rect;}
-    else if (*(int *)wtype == 1){fw = &__coss;}
-    else if (*(int *)wtype == 2){fw = &Kaiser_Bessel_Window_2_0;}
-    else if (*(int *)wtype == 3){fw = &Kaiser_Bessel_Window_2_5;}
-    else if (*(int *)wtype == 4){fw = &Kaiser_Bessel_Window_3_5;}
-    else if (*(int *)wtype == 5){fw = &Modified_Kaiser_Bessel_Window_2_0;}
-    else if (*(int *)wtype == 6){fw = &Modified_Kaiser_Bessel_Window_2_5;}
-    else {fw = &Modified_Kaiser_Bessel_Window_3_5;}
+    /*  Cast the selected window type to the fw pointer.                      */
+    if (*(int *)wtype == 0){fw = &Rect_Window_Func;}
+    else if (*(int *)wtype == 1){fw = &Coss_Window_Func;}
+    else if (*(int *)wtype == 2){fw = &Kaiser_Bessel_2_0_Window_Func;}
+    else if (*(int *)wtype == 3){fw = &Kaiser_Bessel_2_5_Window_Func;}
+    else if (*(int *)wtype == 4){fw = &Kaiser_Bessel_3_5_Window_Func;}
+    else if (*(int *)wtype == 5){fw = &Modified_Kaiser_Bessel_2_0_Window_Func;}
+    else if (*(int *)wtype == 6){fw = &Modified_Kaiser_Bessel_2_5_Window_Func;}
+    else {fw = &Modified_Kaiser_Bessel_3_5_Window_Func;}
 
     if (*(int *)use_norm == 0){FresT = &_fresnel_sextic;}
     else {FresT = &_fresnel_sextic_norm;}
@@ -721,14 +724,15 @@ static void Fresnel_Transform_Octic_Func(char **args, npy_intp *dimensions,
     npy_intp w_steps        = steps[7];
     npy_intp T_out_steps    = steps[13];
 
-    if (*(int *)wtype == 0){fw = &__rect;}
-    else if (*(int *)wtype == 1){fw = &__coss;}
-    else if (*(int *)wtype == 2){fw = &Kaiser_Bessel_Window_2_0;}
-    else if (*(int *)wtype == 3){fw = &Kaiser_Bessel_Window_2_5;}
-    else if (*(int *)wtype == 4){fw = &Kaiser_Bessel_Window_3_5;}
-    else if (*(int *)wtype == 5){fw = &Modified_Kaiser_Bessel_Window_2_0;}
-    else if (*(int *)wtype == 6){fw = &Modified_Kaiser_Bessel_Window_2_5;}
-    else {fw = &Modified_Kaiser_Bessel_Window_3_5;}
+    /*  Cast the selected window type to the fw pointer.                      */
+    if (*(int *)wtype == 0){fw = &Rect_Window_Func;}
+    else if (*(int *)wtype == 1){fw = &Coss_Window_Func;}
+    else if (*(int *)wtype == 2){fw = &Kaiser_Bessel_2_0_Window_Func;}
+    else if (*(int *)wtype == 3){fw = &Kaiser_Bessel_2_5_Window_Func;}
+    else if (*(int *)wtype == 4){fw = &Kaiser_Bessel_3_5_Window_Func;}
+    else if (*(int *)wtype == 5){fw = &Modified_Kaiser_Bessel_2_0_Window_Func;}
+    else if (*(int *)wtype == 6){fw = &Modified_Kaiser_Bessel_2_5_Window_Func;}
+    else {fw = &Modified_Kaiser_Bessel_3_5_Window_Func;}
 
     if (*(int *)use_norm == 0){FresT = &_fresnel_octic;}
     else {FresT = &_fresnel_octic_norm;}
@@ -876,14 +880,15 @@ static void Fresnel_Transform_Newton_Func(char **args, npy_intp *dimensions,
     npy_intp w_steps        = steps[7];
     npy_intp T_out_steps    = steps[13];
 
-    if (*(int *)wtype == 0){fw = &__rect;}
-    else if (*(int *)wtype == 1){fw = &__coss;}
-    else if (*(int *)wtype == 2){fw = &Kaiser_Bessel_Window_2_0;}
-    else if (*(int *)wtype == 3){fw = &Kaiser_Bessel_Window_2_5;}
-    else if (*(int *)wtype == 4){fw = &Kaiser_Bessel_Window_3_5;}
-    else if (*(int *)wtype == 5){fw = &Modified_Kaiser_Bessel_Window_2_0;}
-    else if (*(int *)wtype == 6){fw = &Modified_Kaiser_Bessel_Window_2_5;}
-    else {fw = &Modified_Kaiser_Bessel_Window_3_5;}
+    /*  Cast the selected window type to the fw pointer.                      */
+    if (*(int *)wtype == 0){fw = &Rect_Window_Func;}
+    else if (*(int *)wtype == 1){fw = &Coss_Window_Func;}
+    else if (*(int *)wtype == 2){fw = &Kaiser_Bessel_2_0_Window_Func;}
+    else if (*(int *)wtype == 3){fw = &Kaiser_Bessel_2_5_Window_Func;}
+    else if (*(int *)wtype == 4){fw = &Kaiser_Bessel_3_5_Window_Func;}
+    else if (*(int *)wtype == 5){fw = &Modified_Kaiser_Bessel_2_0_Window_Func;}
+    else if (*(int *)wtype == 6){fw = &Modified_Kaiser_Bessel_2_5_Window_Func;}
+    else {fw = &Modified_Kaiser_Bessel_3_5_Window_Func;}
 
     if (*(int *)use_norm == 0){FresT = &_fresnel_transform_newton;}
     else {FresT = &_fresnel_transform_newton_norm;}
@@ -973,7 +978,7 @@ static void Fresnel_Transform_Newton_Func(char **args, npy_intp *dimensions,
 static PyMethodDef _diffraction_functions_methods[] = {{NULL, NULL, 0, NULL}};
 
 /* Define pointers to the C functions. */
-PyUFuncGenericFunction f_quad_funcs[1] = {&Fresnel_Transform_Quadratic_Func};
+PyUFuncGenericFunction f_quad_funcs[1]  = {&Fresnel_Transform_Quadratic_Func};
 PyUFuncGenericFunction f_cubic_funcs[1] = {&Fresnel_Transform_Cubic_Func};
 PyUFuncGenericFunction f_quart_funcs[1] = {&Fresnel_Transform_Quartic_Func};
 PyUFuncGenericFunction f_sxtic_funcs[1] = {&Fresnel_Transform_Sextic_Func};

@@ -1025,12 +1025,16 @@ class DiffractionCorrection(object):
                     phi0 = self.phi_rad_vals[center]
 
                     # Compute Newton-Raphson perturbation
-                    psi_d1 = special_functions.dpsi(kD, r, r0, phi, phi0, b, d)
+                    psi_d1 = special_functions.fresnel_dpsi_dphi(kD, r, r0, phi,
+                                                                 phi0, b, d)
                     loop = 0
 
                     while (np.max(np.abs(psi_d1)) > 1.0e-4):
-                        psi_d1 = special_functions.dpsi(kD, r, r0, phi, phi0, b, d)
-                        psi_d2 = special_functions.d2psi(kD, r, r0, phi, phi0, b, d)
+                        psi_d1 = special_functions.fresnel_dpsi_dphi(kD, r, r0,
+                                                                     phi, phi0,
+                                                                     b, d)
+                        psi_d2 = special_functions.d2psi(kD, r, r0, phi,
+                                                         phi0, b, d)
 
                         # Newton-Raphson
                         phi += -(psi_d1 / psi_d2)

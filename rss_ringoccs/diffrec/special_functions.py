@@ -256,7 +256,7 @@ def fresnel_psi(kD, r, r0, phi, phi0, B, D):
         psi_vals = kD * (np.sqrt(1.0+eta-2.0*xi) + xi - 1.0)
         return psi_vals
 
-def fresnel_dpsi(kD, r, r0, phi, phi0, B, D):
+def fresnel_dpsi_dphi(kD, r, r0, phi, phi0, B, D):
     """
         Purpose:
             Compute :math:`\\mathrm{d}\\psi/\\mathrm{d}\\phi`
@@ -280,23 +280,27 @@ def fresnel_dpsi(kD, r, r0, phi, phi0, B, D):
                 Partial derivative of :math:`\\psi` with
                 respect to :math:`\\phi`.
     """
-    # Compute Xi variable (MTR86 Equation 4b).
-    xi = (np.cos(B)/D) * (r * np.cos(phi) - r0 * np.cos(phi0))
+    try:
+        return _special_functions.fresnel_dpsi_dphi(kD, r, r0, phi, phi0, B, D)
+    except:
 
-    # Compute Eta variable (MTR86 Equation 4c).
-    eta = (r0*r0 + r*r - 2.0*r*r0*np.cos(phi-phi0)) / (D*D)
+        # Compute Xi variable (MTR86 Equation 4b).
+        xi = (np.cos(B)/D) * (r * np.cos(phi) - r0 * np.cos(phi0))
 
-    psi0 = np.sqrt(1.0+eta-2.0*xi)
+        # Compute Eta variable (MTR86 Equation 4c).
+        eta = (r0*r0 + r*r - 2.0*r*r0*np.cos(phi-phi0)) / (D*D)
 
-    # Compute derivatives.
-    dxi = -(np.cos(B)/D) * (r*np.sin(phi))
-    deta = 2.0*r*r0*np.sin(phi-phi0)/(D*D)
+        psi0 = np.sqrt(1.0+eta-2.0*xi)
 
-    # Compute the partial derivative.
-    psi_d1 = (0.5/psi0)*(deta-2.0*dxi) + dxi
-    psi_d1 *= kD
+        # Compute derivatives.
+        dxi = -(np.cos(B)/D) * (r*np.sin(phi))
+        deta = 2.0*r*r0*np.sin(phi-phi0)/(D*D)
 
-    return psi_d1
+        # Compute the partial derivative.
+        psi_d1 = (0.5/psi0)*(deta-2.0*dxi) + dxi
+        psi_d1 *= kD
+
+        return psi_d1
 
 def dpsi_ellipse(kD, r, r0, phi, phi0, B, D, ecc, peri):
     """

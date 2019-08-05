@@ -78,7 +78,7 @@ static void fresnelsin_healdepsthree(char **args, npy_intp *dimensions,
     for (i = 0; i < n; i++) {
         /*  The function Fresnel_Sine_Taylor_to_Asymptotic_Func is defined in *
          *  _fresnel_sin.h. Make sure this is in the current directory!       */
-        *((double *)out) = Fresnel_Sine_Heald_Rational_EPS_Minus_Three(
+        *((double *)out) = Fresnel_Sine_Heald_Rational_EPS_Minus_Three_Func(
             *(double *)in
         );
 
@@ -101,7 +101,7 @@ static void fresnelsin_healdepsfour(char **args, npy_intp *dimensions,
     for (i = 0; i < n; i++) {
         /*  The function Fresnel_Sine_Taylor_to_Asymptotic_Func is defined in *
          *  _fresnel_sin.h. Make sure this is in the current directory!       */
-        *((double *)out) = Fresnel_Sine_Heald_Rational_EPS_Minus_Four(
+        *((double *)out) = Fresnel_Sine_Heald_Rational_EPS_Minus_Four_Func(
             *(double *)in
         );
 
@@ -124,7 +124,7 @@ static void fresnelsin_healdepssix(char **args, npy_intp *dimensions,
     for (i = 0; i < n; i++) {
         /*  The function Fresnel_Sine_Taylor_to_Asymptotic_Func is defined in *
          *  _fresnel_sin.h. Make sure this is in the current directory!       */
-        *((double *)out) = Fresnel_Sine_Heald_Rational_EPS_Minus_Six(
+        *((double *)out) = Fresnel_Sine_Heald_Rational_EPS_Minus_Six_Func(
             *(double *)in
         );
 
@@ -147,7 +147,7 @@ static void fresnelsin_healdepseight(char **args, npy_intp *dimensions,
     for (i = 0; i < n; i++) {
         /*  The function Fresnel_Sine_Taylor_to_Asymptotic_Func is defined in *
          *  _fresnel_sin.h. Make sure this is in the current directory!       */
-        *((double *)out) = Fresnel_Sine_Heald_Rational_EPS_Minus_Eight(
+        *((double *)out) = Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Func(
             *(double *)in
         );
 
@@ -217,7 +217,7 @@ static void fresnelcos_healdepsthree(char **args, npy_intp *dimensions,
     for (i = 0; i < n; i++) {
         /*  The function Fresnel_Sine_Taylor_to_Asymptotic_Func is defined in *
          *  _fresnel_sin.h. Make sure this is in the current directory!       */
-        *((double *)out) = Fresnel_Cosine_Heald_Rational_EPS_Minus_Three(
+        *((double *)out) = Fresnel_Cosine_Heald_Rational_EPS_Minus_Three_Func(
             *(double *)in
         );
 
@@ -240,7 +240,7 @@ static void fresnelcos_healdepsfour(char **args, npy_intp *dimensions,
     for (i = 0; i < n; i++) {
         /*  The function Fresnel_Sine_Taylor_to_Asymptotic_Func is defined in *
          *  _fresnel_sin.h. Make sure this is in the current directory!       */
-        *((double *)out) = Fresnel_Cosine_Heald_Rational_EPS_Minus_Four(
+        *((double *)out) = Fresnel_Cosine_Heald_Rational_EPS_Minus_Four_Func(
             *(double *)in
         );
 
@@ -263,7 +263,7 @@ static void fresnelcos_healdepssix(char **args, npy_intp *dimensions,
     for (i = 0; i < n; i++) {
         /*  The function Fresnel_Sine_Taylor_to_Asymptotic_Func is defined in *
          *  _fresnel_sin.h. Make sure this is in the current directory!       */
-        *((double *)out) = Fresnel_Cosine_Heald_Rational_EPS_Minus_Six(
+        *((double *)out) = Fresnel_Cosine_Heald_Rational_EPS_Minus_Six_Func(
             *(double *)in
         );
 
@@ -286,7 +286,7 @@ static void fresnelcos_healdepseight(char **args, npy_intp *dimensions,
     for (i = 0; i < n; i++) {
         /*  The function Fresnel_Sine_Taylor_to_Asymptotic_Func is defined in *
          *  _fresnel_sin.h. Make sure this is in the current directory!       */
-        *((double *)out) = Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight(
+        *((double *)out) = Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight_Func(
             *(double *)in
         );
 
@@ -333,7 +333,7 @@ static void fresnel_healdepsthree(char **args, npy_intp *dimensions,
     for (i = 0; i < n; i++) {
         /*  The function Fresnel_Sine_Taylor_to_Asymptotic_Func is defined in *
          *  _fresnel_sin.h. Make sure this is in the current directory!       */
-        *((double complex *)out) = Fresnel_Heald_Rational_EPS_Minus_Three(
+        *((double complex *)out) = Fresnel_Heald_Rational_EPS_Minus_Three_Func(
             *(double *)in
         );
 
@@ -356,7 +356,7 @@ static void fresnel_healdepsfour(char **args, npy_intp *dimensions,
     for (i = 0; i < n; i++) {
         /*  The function Fresnel_Sine_Taylor_to_Asymptotic_Func is defined in *
          *  _fresnel_sin.h. Make sure this is in the current directory!       */
-        *((double complex *)out) = Fresnel_Heald_Rational_EPS_Minus_Four(
+        *((double complex *)out) = Fresnel_Heald_Rational_EPS_Minus_Four_Func(
             *(double *)in
         );
 
@@ -379,7 +379,7 @@ static void fresnel_healdepssix(char **args, npy_intp *dimensions,
     for (i = 0; i < n; i++) {
         /*  The function Fresnel_Sine_Taylor_to_Asymptotic_Func is defined in *
          *  _fresnel_sin.h. Make sure this is in the current directory!       */
-        *((double complex *)out) = Fresnel_Heald_Rational_EPS_Minus_Six(
+        *((double complex *)out) = Fresnel_Heald_Rational_EPS_Minus_Six_Func(
             *(double *)in
         );
 
@@ -402,7 +402,7 @@ static void fresnel_healdepseight(char **args, npy_intp *dimensions,
     for (i = 0; i < n; i++) {
         /*  The function Fresnel_Sine_Taylor_to_Asymptotic_Func is defined in *
          *  _fresnel_sin.h. Make sure this is in the current directory!       */
-        *((double complex *)out) = Fresnel_Heald_Rational_EPS_Minus_Eight(
+        *((double complex *)out) = Fresnel_Heald_Rational_EPS_Minus_Eight_Func(
             *(double *)in
         );
 
@@ -428,7 +428,7 @@ static void complex_sqwellsol(char **args, npy_intp *dimensions,
 
     for (i = 0; i < n; i++) {
         /*BEGIN main ufunc computation*/
-        *((double complex*)out) = Square_Well_Diffraction_Solution(
+        *((double complex*)out) = Square_Well_Diffraction_Solution_Func(
             *(double *)x, *(double *)a, *(double *)b, *(double *)F
         );
         /*END main ufunc computation*/
@@ -453,7 +453,7 @@ static void complex_invsqwellsol(char **args, npy_intp *dimensions,
 
     for (i = 0; i < n; i++) {
         /*BEGIN main ufunc computation*/
-        *((double complex*)out) = Inverted_Square_Well_Diffraction_Solution(
+        *((double complex*)out) = Inverted_Square_Well_Diffraction_Solution_Func(
             *(double *)x, *(double *)a, *(double *)b, *(double *)F
         );
         /*END main ufunc computation*/
@@ -464,37 +464,38 @@ static void complex_invsqwellsol(char **args, npy_intp *dimensions,
 }
 
 /* Define pointers to the C functions. */
-PyUFuncGenericFunction fresnel_sin_t2a[1]     = {&fresnelsin_taylor2asymp};
-PyUFuncGenericFunction fresnel_sin_while[1]   = {&fresnelsin_while};
-PyUFuncGenericFunction fresnel_sin_healde3[1] = {&fresnelsin_healdepsthree};
-PyUFuncGenericFunction fresnel_sin_healde4[1] = {&fresnelsin_healdepsfour};
-PyUFuncGenericFunction fresnel_sin_healde6[1] = {&fresnelsin_healdepssix};
-PyUFuncGenericFunction fresnel_sin_healde8[1] = {&fresnelsin_healdepseight};
+PyUFuncGenericFunction fresnel_sin_t2a_funcs[1] = {&fresnelsin_taylor2asymp};
+PyUFuncGenericFunction fresnel_sin_while_funcs[1] = {&fresnelsin_while};
+PyUFuncGenericFunction fresnel_sin_healde3_funcs[1] = {&fresnelsin_healdepsthree};
+PyUFuncGenericFunction fresnel_sin_healde4_funcs[1] = {&fresnelsin_healdepsfour};
+PyUFuncGenericFunction fresnel_sin_healde6_funcs[1] = {&fresnelsin_healdepssix};
+PyUFuncGenericFunction fresnel_sin_healde8_funcs[1] = {&fresnelsin_healdepseight};
 
-PyUFuncGenericFunction fresnel_cos_t2a[1]     = {&fresnelcos_taylor2asmyp};
-PyUFuncGenericFunction fresnel_cos_while[1]   = {&fresnelcos_while};
-PyUFuncGenericFunction fresnel_cos_healde3[1] = {&fresnelcos_healdepsthree};
-PyUFuncGenericFunction fresnel_cos_healde4[1] = {&fresnelcos_healdepsfour};
-PyUFuncGenericFunction fresnel_cos_healde6[1] = {&fresnelcos_healdepssix};
-PyUFuncGenericFunction fresnel_cos_healde8[1] = {&fresnelcos_healdepseight};
+PyUFuncGenericFunction fresnel_cos_t2a_funcs[1] = {&fresnelcos_taylor2asmyp};
+PyUFuncGenericFunction fresnel_cos_while_funcs[1] = {&fresnelcos_while};
+PyUFuncGenericFunction fresnel_cos_healde3_funcs[1] = {&fresnelcos_healdepsthree};
+PyUFuncGenericFunction fresnel_cos_healde4_funcs[1] = {&fresnelcos_healdepsfour};
+PyUFuncGenericFunction fresnel_cos_healde6_funcs[1] = {&fresnelcos_healdepssix};
+PyUFuncGenericFunction fresnel_cos_healde8_funcs[1] = {&fresnelcos_healdepseight};
 
-PyUFuncGenericFunction fresnel_t2a[1]     = {&fresnel_taylor2asmyp};
-PyUFuncGenericFunction fresnel_healde3[1] = {&fresnel_healdepsthree};
-PyUFuncGenericFunction fresnel_healde4[1] = {&fresnel_healdepsfour};
-PyUFuncGenericFunction fresnel_healde6[1] = {&fresnel_healdepssix};
-PyUFuncGenericFunction fresnel_healde8[1] = {&fresnel_healdepseight};
+PyUFuncGenericFunction fresnel_t2a_funcs[1] = {&fresnel_taylor2asmyp};
+PyUFuncGenericFunction fresnel_healde3_funcs[1] = {&fresnel_healdepsthree};
+PyUFuncGenericFunction fresnel_healde4_funcs[1] = {&fresnel_healdepsfour};
+PyUFuncGenericFunction fresnel_healde6_funcs[1] = {&fresnel_healdepssix};
+PyUFuncGenericFunction fresnel_healde8_funcs[1] = {&fresnel_healdepseight};
 
 PyUFuncGenericFunction sqwellsol_funcs[1]       = {&complex_sqwellsol};
 PyUFuncGenericFunction invsqwellsol_funcs[1]    = {&complex_invsqwellsol};
 
 /* Input and return types for double input and out.. */
-static char double_double_types[2] = {NPY_DOUBLE, NPY_DOUBLE};
+static char double_double_types[2]  = {NPY_DOUBLE, NPY_DOUBLE};
 static char double_complex_types[2] = {NPY_DOUBLE, NPY_COMPLEX128};
-static void *PyuFunc_data[1] = {NULL};
 
 /* Input and return types for square_well_diffraction. */
 static char sqwellsol_types[5] = {NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE,
                                   NPY_DOUBLE, NPY_COMPLEX128};
+
+static void *PyuFunc_data[1] = {NULL};
 
 #if PY_VERSION_HEX >= 0x03000000
 static struct PyModuleDef moduledef = {
@@ -544,7 +545,7 @@ PyMODINIT_FUNC PyInit__fresnel_integrals(void)
 
     /*  Fresnel Sine Functions.     */
     fresnel_sin_taylor_to_asymptotic = PyUFunc_FromFuncAndData(
-        fresnel_sin_t2a,
+        fresnel_sin_t2a_funcs,
         PyuFunc_data,
         double_double_types,
         1, 1, 1,
@@ -555,7 +556,7 @@ PyMODINIT_FUNC PyInit__fresnel_integrals(void)
     );
 
     fresnel_sin_while_to_asymptotic = PyUFunc_FromFuncAndData(
-        fresnel_sin_while,
+        fresnel_sin_while_funcs,
         PyuFunc_data,
         double_double_types,
         1, 1, 1,
@@ -566,7 +567,7 @@ PyMODINIT_FUNC PyInit__fresnel_integrals(void)
     );
 
     fresnel_sin_heald_eps_minus_three = PyUFunc_FromFuncAndData(
-        fresnel_sin_healde3,
+        fresnel_sin_healde3_funcs,
         PyuFunc_data,
         double_double_types,
         1, 1, 1,
@@ -577,7 +578,7 @@ PyMODINIT_FUNC PyInit__fresnel_integrals(void)
     );
 
     fresnel_sin_heald_eps_minus_four = PyUFunc_FromFuncAndData(
-        fresnel_sin_healde4,
+        fresnel_sin_healde4_funcs,
         PyuFunc_data,
         double_double_types,
         1, 1, 1,
@@ -588,7 +589,7 @@ PyMODINIT_FUNC PyInit__fresnel_integrals(void)
     );
 
     fresnel_sin_heald_eps_minus_six = PyUFunc_FromFuncAndData(
-        fresnel_sin_healde6,
+        fresnel_sin_healde6_funcs,
         PyuFunc_data,
         double_double_types,
         1, 1, 1,
@@ -599,7 +600,7 @@ PyMODINIT_FUNC PyInit__fresnel_integrals(void)
     );
 
     fresnel_sin_heald_eps_minus_eight = PyUFunc_FromFuncAndData(
-        fresnel_sin_healde8,
+        fresnel_sin_healde8_funcs,
         PyuFunc_data,
         double_double_types,
         1, 1, 1,
@@ -611,7 +612,7 @@ PyMODINIT_FUNC PyInit__fresnel_integrals(void)
 
     /*  Fresnel Cosine Functions.   */
     fresnel_cos_taylor_to_asymptotic = PyUFunc_FromFuncAndData(
-        fresnel_cos_t2a,
+        fresnel_cos_t2a_funcs,
         PyuFunc_data,
         double_double_types,
         1, 1, 1,
@@ -622,7 +623,7 @@ PyMODINIT_FUNC PyInit__fresnel_integrals(void)
     );
 
     fresnel_cos_while_to_asymptotic = PyUFunc_FromFuncAndData(
-        fresnel_cos_while,
+        fresnel_cos_while_funcs,
         PyuFunc_data,
         double_double_types,
         1, 1, 1,
@@ -633,7 +634,7 @@ PyMODINIT_FUNC PyInit__fresnel_integrals(void)
     );
 
     fresnel_cos_heald_eps_minus_three = PyUFunc_FromFuncAndData(
-        fresnel_cos_healde3,
+        fresnel_cos_healde3_funcs,
         PyuFunc_data,
         double_double_types,
         1, 1, 1,
@@ -644,7 +645,7 @@ PyMODINIT_FUNC PyInit__fresnel_integrals(void)
     );
 
     fresnel_cos_heald_eps_minus_four = PyUFunc_FromFuncAndData(
-        fresnel_cos_healde4,
+        fresnel_cos_healde4_funcs,
         PyuFunc_data,
         double_double_types,
         1, 1, 1,
@@ -655,7 +656,7 @@ PyMODINIT_FUNC PyInit__fresnel_integrals(void)
     );
 
     fresnel_cos_heald_eps_minus_six = PyUFunc_FromFuncAndData(
-        fresnel_cos_healde6,
+        fresnel_cos_healde6_funcs,
         PyuFunc_data,
         double_double_types,
         1, 1, 1,
@@ -666,7 +667,7 @@ PyMODINIT_FUNC PyInit__fresnel_integrals(void)
     );
 
     fresnel_cos_heald_eps_minus_eight = PyUFunc_FromFuncAndData(
-        fresnel_cos_healde8,
+        fresnel_cos_healde8_funcs,
         PyuFunc_data,
         double_double_types,
         1, 1, 1,
@@ -678,7 +679,7 @@ PyMODINIT_FUNC PyInit__fresnel_integrals(void)
 
     /*  Fresnel Integral Functions.     */
     fresnel_integral_taylor_to_asymptotic = PyUFunc_FromFuncAndData(
-        fresnel_t2a,
+        fresnel_t2a_funcs,
         PyuFunc_data,
         double_complex_types,
         1, 1, 1,
@@ -689,7 +690,7 @@ PyMODINIT_FUNC PyInit__fresnel_integrals(void)
     );
 
     fresnel_integral_heald_eps_minus_three = PyUFunc_FromFuncAndData(
-        fresnel_healde3,
+        fresnel_healde3_funcs,
         PyuFunc_data,
         double_complex_types,
         1, 1, 1,
@@ -700,7 +701,7 @@ PyMODINIT_FUNC PyInit__fresnel_integrals(void)
     );
 
     fresnel_integral_heald_eps_minus_four = PyUFunc_FromFuncAndData(
-        fresnel_healde4,
+        fresnel_healde4_funcs,
         PyuFunc_data,
         double_complex_types,
         1, 1, 1,
@@ -711,7 +712,7 @@ PyMODINIT_FUNC PyInit__fresnel_integrals(void)
     );
 
     fresnel_integral_heald_eps_minus_six = PyUFunc_FromFuncAndData(
-        fresnel_sin_healde6,
+        fresnel_sin_healde6_funcs,
         PyuFunc_data,
         double_complex_types,
         1, 1, 1,
@@ -722,7 +723,7 @@ PyMODINIT_FUNC PyInit__fresnel_integrals(void)
     );
 
     fresnel_integral_heald_eps_minus_eight = PyUFunc_FromFuncAndData(
-        fresnel_healde8,
+        fresnel_healde8_funcs,
         PyuFunc_data,
         double_complex_types,
         1, 1, 1,
@@ -738,6 +739,7 @@ PyMODINIT_FUNC PyInit__fresnel_integrals(void)
         1, 4, 1, PyUFunc_None, "square_well_diffraction", 
         "square_well_diffraction_docstring", 0
     );
+
     inverse_square_well_diffraction = PyUFunc_FromFuncAndData(
         invsqwellsol_funcs, PyuFunc_data, sqwellsol_types,
         1, 4, 1, PyUFunc_None, "inverse_square_well_diffraction", 

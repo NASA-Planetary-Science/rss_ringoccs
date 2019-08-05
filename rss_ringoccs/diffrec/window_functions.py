@@ -457,8 +457,7 @@ def normalize(dx, ker, f_scale):
     T1 = np.abs(np.sum(ker) * dx)
 
     # Normalization Factor
-    norm_fact = SQRT_2 * f_scale / T1
-    return norm_fact
+    return SQRT_2 * f_scale / T1
 
 func_dict = {
     "rect":   {"func": rect,   "normeq": 1.00000000},

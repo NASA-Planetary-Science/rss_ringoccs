@@ -227,7 +227,7 @@ double Fresnel_Sine_While_to_Asymptotic_Func(double x)
     }
 }
 
-double Fresnel_Sine_Heald_Rational_EPS_Minus_Three(double x)
+double Fresnel_Sine_Heald_Rational_EPS_Minus_Three_Func(double x)
 {
     double A, R, a, b, c, d, sgn_x;
     sgn_x = (x>0)-(x<0);
@@ -256,7 +256,7 @@ double Fresnel_Sine_Heald_Rational_EPS_Minus_Three(double x)
     return sgn_x*(SQRT_PI_BY_8 - R*cos(A));
 }
 
-double Fresnel_Sine_Heald_Rational_EPS_Minus_Four(double x)
+double Fresnel_Sine_Heald_Rational_EPS_Minus_Four_Func(double x)
 {
     double A, R, a, b, c, d, sgn_x;
     sgn_x = (x>0)-(x<0);
@@ -287,7 +287,7 @@ double Fresnel_Sine_Heald_Rational_EPS_Minus_Four(double x)
     return sgn_x*(SQRT_PI_BY_8 - R*cos(A));
 }
 
-double Fresnel_Sine_Heald_Rational_EPS_Minus_Six(double x)
+double Fresnel_Sine_Heald_Rational_EPS_Minus_Six_Func(double x)
 {
     double A, R, a, b, c, d, sgn_x;
     sgn_x = (x>0)-(x<0);
@@ -322,7 +322,7 @@ double Fresnel_Sine_Heald_Rational_EPS_Minus_Six(double x)
     return sgn_x*(SQRT_PI_BY_8 - R*cos(A));
 }
 
-double Fresnel_Sine_Heald_Rational_EPS_Minus_Eight(double x)
+double Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Func(double x)
 {
     double A, R, a, b, c, d, sgn_x;
     sgn_x = (x>0)-(x<0);

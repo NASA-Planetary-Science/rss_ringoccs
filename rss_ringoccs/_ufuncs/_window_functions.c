@@ -39,7 +39,7 @@ static void double_rect(char **args, npy_intp *dimensions,
     for (i = 0; i < n; i++) {
         /*  The function Fresnel_Sine_Taylor_to_Asymptotic_Func is defined in *
          *  _fresnel_sin.h. Make sure this is in the current directory!       */
-        *((double *)out) = __rect(*(double *)x, *(double *)W);
+        *((double *)out) = Rect_Window_Func(*(double *)x, *(double *)W);
 
         /* Push the pointers forward by the appropriate increment.            */
         x   += x_step;
@@ -64,7 +64,7 @@ static void double_coss(char **args, npy_intp *dimensions,
     for (i = 0; i < n; i++) {
         /*  The function Fresnel_Sine_Taylor_to_Asymptotic_Func is defined in *
          *  _fresnel_sin.h. Make sure this is in the current directory!       */
-        *((double *)out) = __coss(*(double *)x, *(double *)W);
+        *((double *)out) = Coss_Window_Func(*(double *)x, *(double *)W);
 
         /* Push the pointers forward by the appropriate increment.            */
         x   += x_step;
@@ -89,7 +89,8 @@ static void double_kb20(char **args, npy_intp *dimensions,
     for (i = 0; i < n; i++) {
         /*  The function Fresnel_Sine_Taylor_to_Asymptotic_Func is defined in *
          *  _fresnel_sin.h. Make sure this is in the current directory!       */
-        *((double *)out) = Kaiser_Bessel_Window_2_0(*(double *)x, *(double *)W);
+        *((double *)out) = Kaiser_Bessel_2_0_Window_Func(*(double *)x,
+                                                         *(double *)W);
 
         /* Push the pointers forward by the appropriate increment.            */
         x   += x_step;
@@ -114,7 +115,8 @@ static void double_kb25(char **args, npy_intp *dimensions,
     for (i = 0; i < n; i++) {
         /*  The function Fresnel_Sine_Taylor_to_Asymptotic_Func is defined in *
          *  _fresnel_sin.h. Make sure this is in the current directory!       */
-        *((double *)out) = Kaiser_Bessel_Window_2_5(*(double *)x, *(double *)W);
+        *((double *)out) = Kaiser_Bessel_2_5_Window_Func(*(double *)x,
+                                                         *(double *)W);
 
         /* Push the pointers forward by the appropriate increment.            */
         x   += x_step;
@@ -139,7 +141,8 @@ static void double_kb35(char **args, npy_intp *dimensions,
     for (i = 0; i < n; i++) {
         /*  The function Fresnel_Sine_Taylor_to_Asymptotic_Func is defined in *
          *  _fresnel_sin.h. Make sure this is in the current directory!       */
-        *((double *)out) = Kaiser_Bessel_Window_3_5(*(double *)x, *(double *)W);
+        *((double *)out) = Kaiser_Bessel_3_5_Window_Func(*(double *)x,
+                                                         *(double *)W);
 
         /* Push the pointers forward by the appropriate increment.            */
         x   += x_step;
@@ -164,9 +167,8 @@ static void double_kbmd20(char **args, npy_intp *dimensions,
     for (i = 0; i < n; i++) {
         /*  The function Fresnel_Sine_Taylor_to_Asymptotic_Func is defined in *
          *  _fresnel_sin.h. Make sure this is in the current directory!       */
-        *((double *)out) = Modified_Kaiser_Bessel_Window_2_0(
-            *(double *)x, *(double *)W
-        );
+        *((double *)out) = Modified_Kaiser_Bessel_2_0_Window_Func(*(double *)x,
+                                                                  *(double *)W);
 
         /* Push the pointers forward by the appropriate increment.            */
         x   += x_step;
@@ -191,9 +193,8 @@ static void double_kbmd25(char **args, npy_intp *dimensions,
     for (i = 0; i < n; i++) {
         /*  The function Fresnel_Sine_Taylor_to_Asymptotic_Func is defined in *
          *  _fresnel_sin.h. Make sure this is in the current directory!       */
-        *((double *)out) = Modified_Kaiser_Bessel_Window_2_5(
-            *(double *)x, *(double *)W
-        );
+        *((double *)out) = Modified_Kaiser_Bessel_2_5_Window_Func(*(double *)x,
+                                                                  *(double *)W);
 
         /* Push the pointers forward by the appropriate increment.            */
         x   += x_step;
@@ -218,9 +219,8 @@ static void double_kbmd35(char **args, npy_intp *dimensions,
     for (i = 0; i < n; i++) {
         /*  The function Fresnel_Sine_Taylor_to_Asymptotic_Func is defined in *
          *  _fresnel_sin.h. Make sure this is in the current directory!       */
-        *((double *)out) = Modified_Kaiser_Bessel_Window_3_5(
-            *(double *)x, *(double *)W
-        );
+        *((double *)out) = Modified_Kaiser_Bessel_3_5_Window_Func(*(double *)x,
+                                                                  *(double *)W);
 
         /* Push the pointers forward by the appropriate increment.            */
         x   += x_step;

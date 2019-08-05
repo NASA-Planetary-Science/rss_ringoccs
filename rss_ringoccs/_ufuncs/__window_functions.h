@@ -4,7 +4,7 @@
 /*  Various coefficients and constants defined here.    */
 #include "__math_constants.h"
 
-double __rect(double x, double W)
+double Rect_Window_Func(double x, double W)
 {
     if (fabs(x) <= W/2.0){
         return 1.0;
@@ -14,7 +14,7 @@ double __rect(double x, double W)
     }
 }
 
-double __coss(double x, double W)
+double Coss_Window_Func(double x, double W)
 {
     if (fabs(x) <= W/2.0){
         x *= ONE_PI/W;
@@ -27,7 +27,7 @@ double __coss(double x, double W)
     }
 }
 
-double Kaiser_Bessel_Window_2_0(double x, double W)
+double Kaiser_Bessel_2_0_Window_Func(double x, double W)
 {
     double bessel_x;
     x = 2.0*x/W;
@@ -53,7 +53,7 @@ double Kaiser_Bessel_Window_2_0(double x, double W)
     }
 }
 
-double Kaiser_Bessel_Window_2_5(double x, double W)
+double Kaiser_Bessel_2_5_Window_Func(double x, double W)
 {
     double bessel_x;
     x = 2.0*x/W;
@@ -79,7 +79,7 @@ double Kaiser_Bessel_Window_2_5(double x, double W)
     }
 }
 
-double Kaiser_Bessel_Window_3_5(double x, double W)
+double Kaiser_Bessel_3_5_Window_Func(double x, double W)
 {
     double bessel_x;
     x = 2.0*x/W;
@@ -115,7 +115,7 @@ double Kaiser_Bessel_Window_3_5(double x, double W)
     }
 }
 
-double Modified_Kaiser_Bessel_Window_2_0(double x, double W)
+double Modified_Kaiser_Bessel_2_0_Window_Func(double x, double W)
 {
     double bessel_x;
     x = 2.0*x/W;
@@ -140,7 +140,7 @@ double Modified_Kaiser_Bessel_Window_2_0(double x, double W)
     }
 }
 
-double Modified_Kaiser_Bessel_Window_2_5(double x, double W)
+double Modified_Kaiser_Bessel_2_5_Window_Func(double x, double W)
 {
     double bessel_x;
     x = 2.0*x/W;
@@ -165,7 +165,7 @@ double Modified_Kaiser_Bessel_Window_2_5(double x, double W)
     }
 }
 
-double Modified_Kaiser_Bessel_Window_3_5(double x, double W)
+double Modified_Kaiser_Bessel_3_5_Window_Func(double x, double W)
 {
     double bessel_x;
     x = 2.0*x/W;

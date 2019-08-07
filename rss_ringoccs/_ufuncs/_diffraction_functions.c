@@ -469,7 +469,7 @@ static void Fresnel_Transform_Quartic_Func(char **args, npy_intp *dimensions,
     w_init  = *(double *)w_km_vals;
     dx      = *(double *)args[1];
     two_dx  = 2.0*dx;
-    nw_pts  = (int)(w_init / (2.0 * dx));
+    nw_pts  = (int)(w_init / two_dx);
 
     double* x_arr   = (double *)malloc(sizeof(double) * nw_pts);
     double* w_func  = (double *)malloc(sizeof(double) * nw_pts);

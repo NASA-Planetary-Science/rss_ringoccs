@@ -460,12 +460,12 @@ def normalize(dx, ker, f_scale):
     return SQRT_2 * f_scale / T1
 
 func_dict = {
-    "rect":   {"func": rect,   "normeq": 1.00000000},
-    "coss":   {"func": coss,   "normeq": 1.50000000},
-    "kb20":   {"func": kb20,   "normeq": 1.49634231},
-    "kb25":   {"func": kb25,   "normeq": 1.65191895},
-    "kb35":   {"func": kb35,   "normeq": 1.92844639},
-    "kbmd20": {"func": kbmd20, "normeq": 1.52048382},
-    "kbmd25": {"func": kbmd25, "normeq": 1.65994438},
-    "kbmd35": {"func": kbmd35, "normeq": 1.52048382}
+    "rect":   {"func": rect,   "normeq": 1.00000000, "wnum": 0},
+    "coss":   {"func": coss,   "normeq": 1.50000000, "wnum": 1},
+    "kb20":   {"func": kb20,   "normeq": 1.49634231, "wnum": 2},
+    "kb25":   {"func": kb25,   "normeq": 1.65191895, "wnum": 3},
+    "kb35":   {"func": kb35,   "normeq": 1.92844639, "wnum": 4},
+    "kbmd20": {"func": kbmd20, "normeq": 1.52048382, "wnum": 5},
+    "kbmd25": {"func": kbmd25, "normeq": 1.65994438, "wnum": 6},
+    "kbmd35": {"func": kbmd35, "normeq": 1.52048382, "wnum": 7}
 }

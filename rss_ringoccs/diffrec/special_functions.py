@@ -682,3 +682,562 @@ def square_well_phase(x, a, b, F):
                     \r\t\tF:\t Floating point number
                 """
             )
+
+def fresnel_inversion_ellipse(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
+                              kD_vals, B_rad_vals, D_km_vals, w_km_vals, start,
+                              n_used, peri, ecc, wtype="kbmd20", norm=True,
+                              fwd=False):
+
+    dx_km = rho_km_vals[1]-rho_km_vals[0]
+
+    # Define functions.
+    fw = window_functions.func_dict[wtype]["func"]
+    wn = window_functions.func_dict[wtype]["wnum"]
+    __norm = window_functions.normalize
+
+    # Create empty array for reconstruction / forward transform.
+    T_out = T_in * 0.0
+
+    # Compute first window width and window function.
+    w_init = w_km_vals[start]
+    nw = int(2 * np.floor(w_init / (2.0 * self.dx_km)) + 1)
+    crange = np.arange(int(start-(nw-1)/2), int(1+start+(nw-1)/2))
+    r0 = rho_km_vals[crange]
+    r = rho_km_vals[start]
+    x = r-r0
+    w_func = fw(x, w_init)
+
+    for i in np.arange(n_used):
+
+        # Current point being computed.
+        center = start+i
+
+        # Current window width, Fresnel scale, and ring radius.
+        w = w_km_vals[center]
+        F = F_km_vals[center]
+        r = rho_km_vals[center]
+        if (np.abs(w_init - w) >= 2.0 * dx_km):
+
+            # Compute first window width and window function.
+            w_init = w_km_vals[center]
+            nw = int(2 * np.floor(w_init / (2.0 * self.dx_km)) + 1)
+            crange = np.arange(int(center-(nw-1)/2), int(1+center+(nw-1)/2))
+
+            # Ajdust ring radius by dx_km.
+            r0 = rho_km_vals[crange]
+
+            # Compute psi for with stationary phase value
+            x = r-r0
+            w_func = fw(x, w_init)
+        else:
+            crange += 1
+            r0 = rho_km_vals[crange]
+
+        d = D_km_vals[center]
+        b = B_rad_vals[center]
+        kD = kD_vals[center]
+        phi = phi_rad_vals[crange]
+        phi0 = phi_rad_vals[crange]
+
+        # Compute Newton-Raphson perturbation
+        psi_d1 = dpsi_ellipse(kD, r, r0, phi, phi0, b, d, ecc, peri)
+        loop = 0
+        while (np.max(np.abs(psi_d1)) > 1.0e-4):
+            psi_d1 = dpsi_ellipse(kD, r, r0, phi, phi0, b, d, ecc, peri)
+            psi_d2 = d2psi(kD, r, r0, phi, phi0, b, d)
+
+            # Newton-Raphson
+            phi += -(psi_d1 / psi_d2)
+
+            # Add one to loop variable for each iteration
+            loop += 1
+            if (loop > 4):
+                break
+
+        # Compute Eta variable (MTR86 Equation 4c).
+        psi_vals = fresnel_psi(kD, r, r0, phi, phi0, b, d)
+
+        # Compute kernel function for Fresnel inverse
+        if fwd:
+            ker = w_func*np.exp(1j*psi_vals)
+        else:
+            ker = w_func*np.exp(-1j*psi_vals)
+
+        # Compute 'approximate' Fresnel Inversion for current point
+        T = T_in[crange]
+        T_out[center] = np.sum(ker*T) * dx_km * (0.5+0.5j) / F
+
+        # If normalization has been set, normalize the reconstruction
+        if self.norm:
+            T_out[center] *= window_functions.normalize(dx_km, ker, F)
+
+def fresnel_inversion_newton(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
+                             kD_vals, B_rad_vals, D_km_vals, w_km_vals, start,
+                             n_used, wtype="kbmd20", norm=True, fwd=False):
+    try:
+        return _diffraction_functions.fresnel_transform_newton(
+            T_in, rho_km_vals, F_km_vals, phi_rad_vals, kD_vals, B_rad_vals,
+            D_km_vals, w_km_vals, start, n_used, wnum[wtype], norm, fwd
+        )
+    except KeyboardInterrupt:
+        raise
+    except:
+        dx_km = rho_km_vals[1]-rho_km_vals[0]
+
+        # Define functions.
+        fw = window_functions.func_dict[wtype]["func"]
+        wn = window_functions.func_dict[wtype]["wnum"]
+        __norm = window_functions.normalize
+
+        # Create empty array for reconstruction / forward transform.
+        T_out = T_in * 0.0
+
+        # Compute first window width and window function.
+        w_init = w_km_vals[start]
+        nw = int(2 * np.floor(w_init / (2.0 * self.dx_km)) + 1)
+        crange = np.arange(int(start-(nw-1)/2), int(1+start+(nw-1)/2))
+        r0 = rho_km_vals[crange]
+        r = rho_km_vals[start]
+        x = r-r0
+        w_func = fw(x, w_init)
+        for i in np.arange(n_used):
+
+            # Current point being computed.
+            center = start+i
+
+            # Current window width, Fresnel scale, and ring radius.
+            w = w_km_vals[center]
+            F = F_km_vals[center]
+            r = rho_km_vals[center]
+            if (np.abs(w_init - w) >= 2.0 * self.dx_km):
+
+                # Compute first window width and window function.
+                w_init = w_km_vals[center]
+                nw = int(2 * np.floor(w_init / (2.0 * dx_km)) + 1)
+                crange = np.arange(int(center-(nw-1)/2), int(1+center+(nw-1)/2))
+
+                # Ajdust ring radius by dx_km.
+                r0 = rho_km_vals[crange]
+
+                # Compute psi for with stationary phase value
+                x = r-r0
+                w_func = fw(x, w_init)
+            else:
+                crange += 1
+                r0 = rho_km_vals[crange]
+
+            d = D_km_vals[center]
+            b = B_rad_vals[center]
+            kD = kD_vals[center]
+            phi = phi_rad_vals[center]
+            phi0 = phi_rad_vals[center]
+
+            # Compute Newton-Raphson perturbation
+            psi_d1 = fresnel_dpsi_dphi(kD, r, r0, phi, phi0, b, d)
+            loop = 0
+            while (np.max(np.abs(psi_d1)) > 1.0e-4):
+                psi_d1 = fresnel_dpsi_dphi(kD, r, r0, phi, phi0, b, d)
+                psi_d2 = d2psi(kD, r, r0, phi, phi0, b, d)
+
+                # Newton-Raphson
+                phi += -(psi_d1 / psi_d2)
+
+                # Add one to loop variable for each iteration
+                loop += 1
+                if (loop > 4):
+                    break
+
+            # Compute Eta variable (MTR86 Equation 4c).
+            psi_vals = fresnel_psi(kD, r, r0, phi, phi0, b, d)
+
+            # Compute kernel function for Fresnel inverse
+            if fwd:
+                ker = w_func*np.exp(1j*psi_vals)
+            else:
+                ker = w_func*np.exp(-1j*psi_vals)
+
+            # Compute 'approximate' Fresnel Inversion for current point
+            T = T_in[crange]
+            T_out[center] = np.sum(ker*T) * dx_km * (0.5+0.5j)/F
+
+            # If normalization has been set, normalize the reconstruction
+            if self.norm:
+                T_out[center] *= window_functions.normalize(self.dx_km, ker, F)
+
+def fresnel_inversion_quadratic(T_in, dx, F_km_vals, w_km_vals, start, n_used,
+                                wnum, norm, fwd):
+    try:
+        return _diffraction_functions.fresnel_transform_quadratic(
+            T_in, self.dx_km, self.F_km_vals, self.w_km_vals,
+            start, n_used, wnum, use_norm, use_fwd
+        )
+    except KeyboardInterrupt:
+        raise
+    except:
+        dx_km = rho_km_vals[1]-rho_km_vals[0]
+
+        # Define functions.
+        fw = window_functions.func_dict[wtype]["func"]
+        wn = window_functions.func_dict[wtype]["wnum"]
+        __norm = window_functions.normalize
+
+        # Create empty array for reconstruction / forward transform.
+        T_out = T_in * 0.0
+
+        # Compute first window width and window function.
+        w_init = w_km_vals[start]
+        nw = int(2 * np.floor(w_init / (2.0 * self.dx_km)) + 1)
+        crange = np.arange(int(start-(nw-1)/2), int(1+start+(nw-1)/2))
+        r0 = rho_km_vals[crange]
+        r = rho_km_vals[start]
+        x = r-r0
+        w_func = fw(x, w_init)
+        crange -= 1
+        F2 = np.square(F_km_vals)
+        x = r-r0
+        x2 = HALF_PI * np.square(x)
+        loop = 0
+        for i in np.arange(n_used):
+
+            # Current point being computed.
+            center = start+i
+
+            # Window width and Frensel scale for current point.
+            w = w_km_vals[center]
+            F = F_km_vals[center]
+            if (np.abs(w_init - w) >= 2.0 * dx_km):
+
+                # Compute first window width and window function.
+                w_init = w_km_vals[center]
+                nw = int(2 * np.floor(w_init / (2.0 * dx_km))+1)
+                crange = np.arange(int(center-(nw-1)/2), int(1+center+(nw-1)/2))
+
+                # Ajdust ring radius by dx_km.
+                r0 = rho_km_vals[crange]
+                r = rho_km_vals[center]
+
+                # Compute psi for with stationary phase value
+                x = r-r0
+                x2 = HALF_PI * np.square(x)
+                w_func = fw(x, w_init)
+            else:
+                crange += 1
+
+            psi_vals = x2 / F2[center]
+
+            # Compute kernel function for Fresnel inverse
+            if fwd:
+                ker = w_func*np.exp(1j*psi_vals)
+            else:
+                ker = w_func*np.exp(-1j*psi_vals)
+
+            # Compute 'approximate' Fresnel Inversion.
+            T_out[center] = np.sum(ker * T_in[crange]) * dx_km * (0.5+0.5j)/F
+
+            # If norm has been set, normalize the reconstruction
+            if norm:
+                T_out[center] *= __norm(dx_km, ker, F)
+        return T_out
+
+def fresnel_inversion_cubic(T_in, dx, F_km_vals, phi_rad_vals, kD_vals,
+                            B_rad_vals, D_km_vals, w_km_vals, start,
+                            n_used, wnum, use_norm, use_fwd):
+    try:
+        return _diffraction_functions.fresnel_transform_cubic(
+            T_in, self.dx_km, self.F_km_vals, self.phi_rad_vals,
+            kD_vals, self.B_rad_vals, self.D_km_vals,
+            self.w_km_vals, start, n_used, wnum, use_norm, use_fwd
+        )
+    except KeyboardInterrupt:
+        raise
+    except:
+        crange -= 1
+        cosb = np.cos(self.B_rad_vals)
+        cosp = np.cos(self.phi_rad_vals)
+        sinp = np.sin(self.phi_rad_vals)
+        A_2 = 0.5*np.square(cosb*sinp)/(1.0-np.square(cosb*sinp))
+
+        # Legendre Polynomials.
+        P_1 = cosb*cosp;
+        P12 = P_1*P_1;
+        P_2 = 1.5*P12-0.5;
+
+        # Second set of polynomials.
+        b_0 = 0.5 - 0.5*P12
+        b_1 = (0.333333333333 - 0.333333333333*P_2)*P_1
+
+        # Products of Legendre Polynomials used in Expansion
+        C_0 = P12
+        C_1 = 2.0*P_1*P_2
+
+        x = (r-r0)
+        x2 = np.square(x)
+
+        # D_km_vals and various powers.
+        d = self.D_km_vals
+        d2 = np.square(d)
+
+        loop = 0
+        for i in np.arange(n_used):
+
+            # Current point being computed.
+            center = start+i
+
+            # Window width and Frensel scale for current point.
+            w = self.w_km_vals[center]
+            F = self.F_km_vals[center]
+            if (np.abs(w_init - w) >= 2.0 * self.dx_km):
+
+                # Compute first window width and window function.
+                w_init = self.w_km_vals[center]
+                nw = int(2 * np.floor(w_init / (2.0 * self.dx_km)) + 1)
+                crange = np.arange(int(center-(nw-1)/2), int(1+center+(nw-1)/2))
+
+                # Ajdust ring radius by dx_km.
+                r0 = self.rho_km_vals[crange]
+                r = self.rho_km_vals[center]
+
+                # Compute psi for with stationary phase value
+                x = r-r0
+                x2 = np.square(x)
+                w_func = fw(x, w_init)
+            else:
+                crange += 1
+
+            z = x/d[center]
+            z2 = x2/d2[center]
+            psi_vals = z2*(b_0[center]-A_2[center]*C_0[center]+
+                          (b_1[center]-A_2[center]*C_1[center])*z)
+            psi_vals *= kD_vals[center]
+
+            # Compute kernel function for Fresnel inverse
+            if fwd:
+                ker = w_func*np.exp(1j*psi_vals)
+            else:
+                ker = w_func*np.exp(-1j*psi_vals)
+
+            # Range of diffracted data that falls inside the window
+            T = T_in[crange]
+
+            # Compute 'approximate' Fresnel Inversion for current point
+            T_out[center] = np.sum(ker*T)*self.dx_km*(1.0+1.0j)/(2.0*F)
+
+            # If normalization has been set, normalize correction.
+            if self.norm:
+                T_out[center] *= __norm(self.dx_km, ker, F)
+        return T_out
+
+def fresnel_inversion_quartic():
+    try:
+        return _diffraction_functions.fresnel_transform_quartic(
+            T_in, self.dx_km, self.F_km_vals, self.phi_rad_vals,
+            kD_vals, self.B_rad_vals, self.D_km_vals,
+            self.w_km_vals, start, n_used, wnum, use_norm, use_fwd
+        )
+    except KeyboardInterrupt:
+        raise
+    except:
+        for i in np.arange(n_used):
+            # Current point being computed.
+            center = start+i
+            # Window width and Frensel scale for current point.
+            w = self.w_km_vals[center]
+            F = self.F_km_vals[center]
+            if (np.abs(w_init - w) >= 2.0 * self.dx_km):
+                # Compute first window width and window function.
+                w_init = self.w_km_vals[center]
+                nw = int(2 * np.floor(w_init / (2.0 * self.dx_km)) + 1)
+                crange = np.arange(int(center-(nw-1)/2),
+                                int(1+center+(nw-1)/2))
+                # Ajdust ring radius by dx_km.
+                r0 = self.rho_km_vals[crange]
+                r = self.rho_km_vals[center]
+                # Compute psi for with stationary phase value
+                x = r-r0
+                x2 = np.square(x)
+                w_func = fw(x, w_init)
+            else:
+                crange += 1
+            z = x/d[center]
+            z2 = x2/d2[center]
+            psi_vals = b_0[center]-A_2[center]*C_0[center]
+            psi_vals += z*(b_1[center]-A_2[center]*C_1[center])
+            psi_vals += z2*(b_2[center]-A_2[center]*C_2[center])
+            psi_vals *= kD_vals[center]*z2
+            # Compute kernel function for Fresnel inverse
+            if fwd:
+                ker = w_func*np.exp(1j*psi_vals)
+            else:
+                ker = w_func*np.exp(-1j*psi_vals)
+            # Range of diffracted data that falls inside the window
+            T = T_in[crange]
+            # Compute 'approximate' Fresnel Inversion for current point
+            T_out[center] = np.sum(ker*T)*self.dx_km*(1.0+1.0j)/(2.0*F)
+            # If normalization has been set, normalize the reconstruction
+            if self.norm:
+                T_out[center] *= __norm(self.dx_km, ker, F)
+        return T_out
+
+def fresnel_inversion_sextic():
+    try:
+        return _diffraction_functions.fresnel_transform_sextic(
+            T_in, self.dx_km, self.F_km_vals, self.phi_rad_vals,
+            kD_vals, self.B_rad_vals, self.D_km_vals,
+            self.w_km_vals, start, n_used, wnum, use_norm, use_fwd
+        )
+    except KeyboardInterrupt:
+        raise
+    except:
+        for i in np.arange(n_used):
+            # Current point being computed.
+            center = start+i
+            # Window width and Frensel scale for current point.
+            w = self.w_km_vals[center]
+            F = self.F_km_vals[center]
+            if (np.abs(w_init - w) >= 2.0 * self.dx_km):
+                # Compute first window width and window function.
+                w_init = self.w_km_vals[center]
+                nw = int(2 * np.floor(w_init / (2.0 * self.dx_km)) + 1)
+                crange = np.arange(int(center-(nw-1)/2),
+                                int(1+center+(nw-1)/2))
+                # Ajdust ring radius by dx_km.
+                r0 = self.rho_km_vals[crange]
+                r = self.rho_km_vals[center]
+                # Compute psi for with stationary phase value
+                x = r-r0
+                x2 = np.square(x)
+                x3 = x2*x
+                x4 = np.square(x2)
+                w_func = fw(x, w_init)
+            else:
+                crange += 1
+            z = x/d[center]
+            z2 = x2/d2[center]
+            z3 = x3/d3[center]
+            z4 = x4/d4[center]
+            psi_vals = b_0[center]-A_2[crange]*C_0[center]
+            psi_vals += z*(b_1[center]-A_2[crange]*C_1[center])
+            psi_vals += z2*(b_2[center]-A_2[crange]*C_2[center])
+            psi_vals += z3*(b_3[center]-A_2[crange]*C_3[center])
+            psi_vals += z4*(b_4[center]-A_2[crange]*C_4[center])
+            psi_vals *= z2*kD_vals[center]
+            # Compute kernel function for Fresnel inverse
+            if fwd:
+                ker = w_func*np.exp(1j*psi_vals)
+            else:
+                ker = w_func*np.exp(-1j*psi_vals)
+            # Range of diffracted data that falls inside the window
+            T = T_in[crange]
+            # Compute 'approximate' Fresnel Inversion for current point
+            T_out[center] = np.sum(ker*T)*self.dx_km*(1.0+1.0j)/(2.0*F)
+            # If normalization has been set, normalize the reconstruction
+            if self.norm:
+                T_out[center] *= __norm(self.dx_km, ker, F)
+        return T_out
+
+def fresnel_inversion_octic():
+    try:
+        return _diffraction_functions.fresnel_transform_octic(
+            T_in, self.dx_km, self.F_km_vals, self.phi_rad_vals,
+            kD_vals, self.B_rad_vals, self.D_km_vals,
+            self.w_km_vals, start, n_used, wnum, use_norm, use_fwd
+        )
+    except KeyboardInterrupt:
+        raise
+    except:
+        crange -= 1
+        cosb = np.cos(self.B_rad_vals)
+        cosp = np.cos(self.phi_rad_vals)
+        sinp = np.sin(self.phi_rad_vals)
+        A_2 = 0.5*np.square(cosb*sinp)/(1.0-np.square(cosb*sinp))
+        # Legendre Polynomials.
+        P_1 = cosb*cosp;
+        P12 = P_1*P_1;
+        P_2 = 1.5*P12-0.5;
+        P_3 = (2.5*P12-1.5)*P_1;
+        P_4 = (4.375*P12-7.5)*P12+0.376;
+        P_5 = ((7.875*P12-8.75)*P12+1.875)*P_1;
+        P_6 = (((14.4375*P12-19.6875)*P12+6.5625)*P12)-0.3125;
+        P_7 = (((P12*26.8125-43.3125)*P12+19.6875)*P12-2.1875)*P_1;
+        # Second set of polynomials.
+        b_0 = 0.5 - 0.5*P12
+        b_1 = (0.333333333333 - 0.333333333333*P_2)*P_1
+        b_2 = (P_2 - P_1*P_3)*0.25
+        b_3 = (P_3 - P_1*P_4)*0.20
+        b_4 = (P_4 - P_1*P_5)*0.16666666666666666
+        b_5 = (P_5 - P_1*P_6)*0.14285714285714285
+        b_6 = (P_6 - P_1*P_7)*0.125
+        # Products of Legendre Polynomials used in Expansion
+        C_0 = P12
+        C_1 = 2.0*P_1*P_2
+        C_2 = 2.0*P_1*P_3+np.square(P_2)
+        C_3 = 2.0*P_1*P_4+2.0*P_2*P_3
+        C_4 = 2.0*P_2*P_4+np.square(P_3)
+        C_5 = 2.0*P_3*P_4
+        C_6 = np.square(P_4)
+        x = (r-r0)
+        x2 = np.square(x)
+        x3 = x2*x
+        x4 = np.square(x2)
+        x5 = x4*x
+        x6 = np.square(x3)
+        # D_km_vals and various powers.
+        d = self.D_km_vals
+        d2 = np.square(d)
+        d3 = d2*d
+        d4 = np.square(d2)
+        d5 = d4*d
+        d6 = np.square(d3)
+        loop = 0
+        for i in np.arange(n_used):
+            # Current point being computed.
+            center = start+i
+            # Window width and Frensel scale for current point.
+            w = self.w_km_vals[center]
+            F = self.F_km_vals[center]
+            if (np.abs(w_init - w) >= 2.0 * self.dx_km):
+                # Compute first window width and window function.
+                w_init = self.w_km_vals[center]
+                nw = int(2 * np.floor(w_init / (2.0 * self.dx_km)) + 1)
+                crange = np.arange(int(center-(nw-1)/2),
+                                   int(1+center+(nw-1)/2))
+                # Ajdust ring radius by dx_km.
+                r0 = self.rho_km_vals[crange]
+                r = self.rho_km_vals[center]
+                # Compute psi for with stationary phase value
+                x = r-r0
+                x2 = np.square(x)
+                x3 = x2*x
+                x4 = np.square(x2)
+                x5 = x4*x
+                x6 = np.square(x3)
+                w_func = fw(x, w_init)
+            else:
+                crange += 1
+            z = x/d[center]
+            z2 = x2/d2[center]
+            z3 = x3/d3[center]
+            z4 = x4/d4[center]
+            z5 = x5/d5[center]
+            z6 = x6/d6[center]
+            psi_vals = b_0[center]-A_2[crange]*C_0[center]
+            psi_vals += z*(b_1[center]-A_2[crange]*C_1[center])
+            psi_vals += z2*(b_2[center]-A_2[crange]*C_2[center])
+            psi_vals += z3*(b_3[center]-A_2[crange]*C_3[center])
+            psi_vals += z4*(b_4[center]-A_2[crange]*C_4[center])
+            psi_vals += z5*(b_5[center]-A_2[crange]*C_5[center])
+            psi_vals += z6*(b_6[center]-A_2[crange]*C_6[center])
+            psi_vals *= z2*kD_vals[center]
+            # Compute kernel function for Fresnel inverse
+            if fwd:
+                ker = w_func*np.exp(1j*psi_vals)
+            else:
+                ker = w_func*np.exp(-1j*psi_vals)
+            # Range of diffracted data that falls inside the window
+            T = T_in[crange]
+            # Compute 'approximate' Fresnel Inversion for current point
+            T_out[center] = np.sum(ker*T)*self.dx_km*(1.0+1.0j)/(2.0*F)
+            # If normalization has been set, normalize the reconstruction
+            if self.norm:
+                T_out[center] *= __norm(self.dx_km, ker, F)
+        return T_out

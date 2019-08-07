@@ -634,7 +634,6 @@ class ModelFromGEO(object):
                 bfac=bfac, eccentricity=eccentricity, periapse=periapse,
                 res_factor=res_factor, rng=rng
             )
-            self.test = rec
 
         if use_fresnel:
             self.p_norm_vals = np.abs(T_hat)*np.abs(T_hat)

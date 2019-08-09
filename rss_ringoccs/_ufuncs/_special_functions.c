@@ -24,6 +24,32 @@ static PyMethodDef _special_functions_methods[] = {{NULL, NULL, 0, NULL}};
  * improvement in performance, as opposed to the routines written purely in   *
  * Python. Successful compiling requires the Numpy and Python header files.   *
  *----------------------------------------------------------------------------*/
+static void double_compute_normeq(char **args, npy_intp *dimensions,
+                                  npy_intp* steps, void* data)
+{
+    double tot_sq = 0.0;
+    double sq_tot = 0.0;
+    npy_intp i;
+    npy_intp n = dimensions[0];
+    char *w_func  = args[0];
+    char *norm_eq = args[1];
+
+
+    npy_intp w_step = steps[0];
+
+    for (i = 0; i < n; i++) {
+        /* Compute the sum and the sum of the squares.                        */
+        tot_sq += *(double *)w_func;
+        sq_tot += *(double *)w_func * *(double *)w_func;
+
+        /*  Push the pointer forward by the appropriate increment.            */
+        w_func  += w_step;
+    }
+
+    /*  Square the sum.                                                       */
+    tot_sq *= tot_sq;
+    *(double *)norm_eq = (double)n * sq_tot / tot_sq;
+}
 
 /*  Functions from __fresnel_integrals.h                                      */
 static void double_fresnelsin(char **args, npy_intp *dimensions,
@@ -231,6 +257,7 @@ static void double_dpsi_dphi(char **args, npy_intp *dimensions,
 }
 
 /*  Define pointers to the C functions.                                       */
+PyUFuncGenericFunction compute_normeq_funcs[1]  = {&double_compute_normeq};
 PyUFuncGenericFunction fresnel_sin_funcs[1]     = {&double_fresnelsin};
 PyUFuncGenericFunction fresnel_cos_funcs[1]     = {&double_fresnelcos};
 PyUFuncGenericFunction sqwellsol_funcs[1]       = {&complex_sqwellsol};
@@ -267,6 +294,7 @@ static struct PyModuleDef moduledef = {
 
 PyMODINIT_FUNC PyInit__special_functions(void)
 {
+    PyObject *compute_norm_eq;
     PyObject *fresnel_sin;
     PyObject *fresnel_cos;
     PyObject *square_well_diffraction;
@@ -284,6 +312,11 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     import_array();
     import_umath();
 
+    compute_norm_eq = PyUFunc_FromFuncAndData(
+        compute_normeq_funcs, PyuFunc_data, double_double_types, 1, 1, 1,
+        PyUFunc_None, "compute_norm_eq", "comput_norm_eq_docstring", 0
+    );
+
     fresnel_sin = PyUFunc_FromFuncAndData(fresnel_sin_funcs, PyuFunc_data,
                                           double_double_types, 1, 1, 1,
                                           PyUFunc_None, "fresnel_sin",
@@ -324,6 +357,7 @@ PyMODINIT_FUNC PyInit__special_functions(void)
 
     d = PyModule_GetDict(m);
 
+    PyDict_SetItemString(d, "compute_norm_eq", compute_norm_eq);
     PyDict_SetItemString(d, "fresnel_sin", fresnel_sin);
     PyDict_SetItemString(d, "fresnel_cos", fresnel_cos);
     PyDict_SetItemString(d, "square_well_diffraction", square_well_diffraction);
@@ -333,6 +367,7 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     PyDict_SetItemString(d, "fresnel_psi", fresnel_psi);
     PyDict_SetItemString(d, "fresnel_dpsi_dphi", fresnel_dpsi_dphi);
 
+    Py_DECREF(compute_norm_eq);
     Py_DECREF(fresnel_sin);
     Py_DECREF(fresnel_cos);
     Py_DECREF(square_well_diffraction);
@@ -346,6 +381,7 @@ PyMODINIT_FUNC PyInit__special_functions(void)
 #else
 PyMODINIT_FUNC init__funcs(void)
 {
+    PyObject *compute_norm_eq;
     PyObject *fresnel_sin;
     PyObject *fresnel_cos;
     PyObject *square_well_diffraction;
@@ -363,6 +399,11 @@ PyMODINIT_FUNC init__funcs(void)
     import_array();
     import_umath();
 
+    compute_norm_eq = PyUFunc_FromFuncAndData(
+        compute_normeq_funcs,PyuFunc_data, double_double_types, 1, 1, 1,
+        PyUFunc_None, "compute_norm_eq", "comput_norm_eq_docstring", 0
+    );
+
     fresnel_sin = PyUFunc_FromFuncAndData(fresnel_sin_funcs, PyuFunc_data,
                                           double_double_types, 1, 1, 1,
                                           PyUFunc_None, "fresnel_sin",
@@ -403,6 +444,7 @@ PyMODINIT_FUNC init__funcs(void)
 
     d = PyModule_GetDict(m);
 
+    PyDict_SetItemString(d, "compute_norm_eq", compute_norm_eq);
     PyDict_SetItemString(d, "fresnel_sin", fresnel_sin);
     PyDict_SetItemString(d, "fresnel_cos", fresnel_cos);
     PyDict_SetItemString(d, "square_well_diffraction", square_well_diffraction);
@@ -412,6 +454,7 @@ PyMODINIT_FUNC init__funcs(void)
     PyDict_SetItemString(d, "fresnel_psi", fresnel_psi);
     PyDict_SetItemString(d, "fresnel_dpsi_dphi", fresnel_dpsi_dphi);
 
+    Py_DECREF(compute_norm_eq);
     Py_DECREF(fresnel_sin);
     Py_DECREF(fresnel_cos);
     Py_DECREF(square_well_diffraction);

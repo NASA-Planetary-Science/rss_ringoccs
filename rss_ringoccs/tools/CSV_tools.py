@@ -6,7 +6,6 @@
     :Dependencies:
         #. pandas
         #. numpy
-        #. scipy
 """
 
 import numpy as np

@@ -730,7 +730,7 @@ def plot_tau(pdf, tau_inst):
         band='Ka'
 
     
-    title = ('Cassini RSS: Reconstructed X-band Normal Optical Depth Profile'
+    title = ('Cassini RSS: Reconstructed ' + band + '-band Normal Optical Depth Profile'
             + ' (' + res_km + ' km Resolution)')
     ncol = 1
     nrow = 4

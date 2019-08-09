@@ -249,17 +249,19 @@ class RSRReader(object):
         self.dsn = 'DSS-' + str(sfdu_hdr_dict['sh_dss_id'])
         self.ul_dsn = 'DSS-'+rsr_file.split('/')[-1].split('_')[1][5:7]
         if self.ul_dsn == 'DSS-MM':
-            self.ul_dsn = 'DSS-'+str(sfdu_hdr_dict['sh_ul_dss_id'])
+            if len(str(sfdu_hdr_dict['sh_ul_dss_id'])) != 2:
+                if verbose:
+                    print("\tInvalid uplink DSN... using 'Earth'")
+                self.ul_dsn = 'Earth'
+            else:
+                self.ul_dsn = 'DSS-'+str(sfdu_hdr_dict['sh_ul_dss_id'])
         self.band = chr(sfdu_hdr_dict['sh_dl_band'][0])
         self.ul_band = chr(sfdu_hdr_dict['sh_ulband'][0])
         # correct header info if not accurate
         if self.year > 2011 :
             self.track_mode = 2
-            if int(sfdu_hdr_dict['sh_ul_dss_id']) < 10 :
-                self.ul_dsn = 'DSS-'+rsr_file[-11:-9]
         else:
             self.track_mode = 1
-        #print(self.ul_dsn)
 
         self.sample_rate_khz = sfdu_hdr_dict['sh_sample_rate']
 

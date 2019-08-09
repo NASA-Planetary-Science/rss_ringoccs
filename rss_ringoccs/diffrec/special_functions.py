@@ -4,6 +4,7 @@ from . import window_functions
 from rss_ringoccs.tools import error_check
 try:
     from rss_ringoccs._ufuncs import _special_functions
+    from rss_ringoccs._ufuncs import _diffraction_functions
 except:
     print(
         """
@@ -683,7 +684,7 @@ def fresnel_inversion_ellipse(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
 
     # Compute first window width and window function.
     w_init = w_km_vals[start]
-    nw = int(2 * np.floor(w_init / (2.0 * self.dx_km)) + 1)
+    nw = int(2 * np.floor(w_init / (2.0 * dx_km)) + 1)
     crange = np.arange(int(start-(nw-1)/2), int(1+start+(nw-1)/2))
     r0 = rho_km_vals[crange]
     r = rho_km_vals[start]
@@ -703,7 +704,7 @@ def fresnel_inversion_ellipse(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
 
             # Compute first window width and window function.
             w_init = w_km_vals[center]
-            nw = int(2 * np.floor(w_init / (2.0 * self.dx_km)) + 1)
+            nw = int(2 * np.floor(w_init / (2.0 * dx_km)) + 1)
             crange = np.arange(int(center-(nw-1)/2), int(1+center+(nw-1)/2))
 
             # Ajdust ring radius by dx_km.
@@ -751,38 +752,58 @@ def fresnel_inversion_ellipse(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
         T_out[center] = np.sum(ker*T) * dx_km * (0.5+0.5j) / F
 
         # If normalization has been set, normalize the reconstruction
-        if self.norm:
+        if norm:
             T_out[center] *= window_functions.normalize(dx_km, ker, F)
 
 def fresnel_inversion_newton(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
                              kD_vals, B_rad_vals, D_km_vals, w_km_vals, start,
-                             n_used, wtype="kbmd20", norm=True, fwd=False):
+                             n_used, wtype, norm, fwd):
     try:
         return _diffraction_functions.fresnel_transform_newton(
             T_in, rho_km_vals, F_km_vals, phi_rad_vals, kD_vals, B_rad_vals,
-            D_km_vals, w_km_vals, start, n_used, wnum[wtype], norm, fwd
+            D_km_vals, w_km_vals, start, n_used,
+            window_functions.func_dict[wtype]["wnum"], int(norm), int(fwd)
         )
     except KeyboardInterrupt:
         raise
     except:
+
+        # Warn user that the C code failed and that pure Python is being used.
+        print(
+            """
+                \r\tWarning: rss_ringoccs
+                \r\t\tdiffrec.special_function.fresnel_inversion_newton\n
+                \r\tCould not use C code. Using Python. This is very slow.
+            """
+        )
+
         dx_km = rho_km_vals[1]-rho_km_vals[0]
 
         # Define functions.
         fw = window_functions.func_dict[wtype]["func"]
         wn = window_functions.func_dict[wtype]["wnum"]
-        __norm = window_functions.normalize
 
         # Create empty array for reconstruction / forward transform.
         T_out = T_in * 0.0
 
         # Compute first window width and window function.
         w_init = w_km_vals[start]
-        nw = int(2 * np.floor(w_init / (2.0 * self.dx_km)) + 1)
+
+        # Number of points in the first window (Odd integer).
+        nw = int(2 * np.floor(w_init / (2.0 * dx_km)) + 1)
+
+        # Indices for the data corresponding to current window.
         crange = np.arange(int(start-(nw-1)/2), int(1+start+(nw-1)/2))
+
+        # Various geometry variables.
         r0 = rho_km_vals[crange]
         r = rho_km_vals[start]
         x = r-r0
+
+        # Compute the first window function.
         w_func = fw(x, w_init)
+
+        # Perform the Fresnel Transform, point by point, via Riemann sums.
         for i in np.arange(n_used):
 
             # Current point being computed.
@@ -792,37 +813,52 @@ def fresnel_inversion_newton(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
             w = w_km_vals[center]
             F = F_km_vals[center]
             r = rho_km_vals[center]
-            if (np.abs(w_init - w) >= 2.0 * self.dx_km):
+
+            # If window widths changes too much, recompute the window function.
+            if (np.abs(w_init - w) >= 2.0 * dx_km):
 
                 # Compute first window width and window function.
                 w_init = w_km_vals[center]
+
+                # Number of points in window (Odd integer).
                 nw = int(2 * np.floor(w_init / (2.0 * dx_km)) + 1)
+
+                # Indices for the data corresponding to this window.
                 crange = np.arange(int(center-(nw-1)/2), int(1+center+(nw-1)/2))
 
                 # Ajdust ring radius by dx_km.
                 r0 = rho_km_vals[crange]
-
-                # Compute psi for with stationary phase value
                 x = r-r0
+
+                # Recompute the window function.
                 w_func = fw(x, w_init)
             else:
+
+                # If width hasn't changed much, increment index variable.
                 crange += 1
                 r0 = rho_km_vals[crange]
 
-            d = D_km_vals[center]
-            b = B_rad_vals[center]
-            kD = kD_vals[center]
-            phi = phi_rad_vals[center]
-            phi0 = phi_rad_vals[center]
+            # Various geometry variables for the current point.
+            d = D_km_vals[crange]
+            b = B_rad_vals[crange]
+            kD = kD_vals[crange]
+            phi = phi_rad_vals[crange]
+            phi0 = phi_rad_vals[crange]
 
-            # Compute Newton-Raphson perturbation
+            # Compute dpsi/dphi.
             psi_d1 = fresnel_dpsi_dphi(kD, r, r0, phi, phi0, b, d)
+
+            # Variable for breaking out of the inner for loop.
             loop = 0
+
+            # Perform Newton-Raphson to find the roots of dpsi/dphi.
             while (np.max(np.abs(psi_d1)) > 1.0e-4):
+
+                # Compute the first and second derivatives of psi.
                 psi_d1 = fresnel_dpsi_dphi(kD, r, r0, phi, phi0, b, d)
                 psi_d2 = d2psi(kD, r, r0, phi, phi0, b, d)
 
-                # Newton-Raphson
+                # Newton-Raphson Perturbation.
                 phi += -(psi_d1 / psi_d2)
 
                 # Add one to loop variable for each iteration
@@ -830,56 +866,81 @@ def fresnel_inversion_newton(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
                 if (loop > 4):
                     break
 
-            # Compute Eta variable (MTR86 Equation 4c).
+            # Compute Psi (From Fresnel Kernel) (MTR86 Equation 4).
             psi_vals = fresnel_psi(kD, r, r0, phi, phi0, b, d)
 
-            # Compute kernel function for Fresnel inverse
+            # Compute kernel function for Fresnel inverse or forward model.
             if fwd:
                 ker = w_func*np.exp(1j*psi_vals)
             else:
                 ker = w_func*np.exp(-1j*psi_vals)
 
-            # Compute 'approximate' Fresnel Inversion for current point
+            # Compute approximate Fresnel Inversion for current point.
             T = T_in[crange]
             T_out[center] = np.sum(ker*T) * dx_km * (0.5+0.5j)/F
 
             # If normalization has been set, normalize the reconstruction
-            if self.norm:
-                T_out[center] *= window_functions.normalize(self.dx_km, ker, F)
+            if norm:
+                T_out[center] *= window_functions.normalize(dx_km, ker, F)
+        return T_out
 
-def fresnel_inversion_quadratic(T_in, dx, F_km_vals, w_km_vals, start, n_used,
-                                wnum, norm, fwd):
+def fresnel_inversion_quadratic(T_in, dx_km, F_km_vals, w_km_vals, start, n_used,
+                                wtype, norm, fwd):
     try:
         return _diffraction_functions.fresnel_transform_quadratic(
-            T_in, self.dx_km, self.F_km_vals, self.w_km_vals,
-            start, n_used, wnum, use_norm, use_fwd
+            T_in, dx_km, F_km_vals, w_km_vals, start, n_used,
+            window_functions.func_dict[wtype]["wnum"], int(norm), int(fwd)
         )
     except KeyboardInterrupt:
         raise
     except:
-        dx_km = rho_km_vals[1]-rho_km_vals[0]
 
-        # Define functions.
+        # Warn user that the C code failed and that pure Python is being used.
+        print(
+            """
+                \r\tWarning: rss_ringoccs
+                \r\t\tdiffrec.special_function.fresnel_inversion_newton\n
+                \r\tCould not use C code. Using Python. This is very slow.
+            """
+        )
+        # Create an array for rho_km_vals that is equally spaced.
+        rho_km_vals = np.arange(start, start+n_used)*dx_km
+
+        # Extract window information from the window dictionary.
         fw = window_functions.func_dict[wtype]["func"]
         wn = window_functions.func_dict[wtype]["wnum"]
-        __norm = window_functions.normalize
 
         # Create empty array for reconstruction / forward transform.
         T_out = T_in * 0.0
 
-        # Compute first window width and window function.
+        # Extract the first window width.
         w_init = w_km_vals[start]
-        nw = int(2 * np.floor(w_init / (2.0 * self.dx_km)) + 1)
+
+        # Compute the number of points needed for window (Must be odd integer).
+        nw = int(2 * np.floor(w_init / (2.0 * dx_km)) + 1)
+
+        # Range of indices of rho_km_vals that are processed for first window.
         crange = np.arange(int(start-(nw-1)/2), int(1+start+(nw-1)/2))
+
+        # Geometry and data to reconstruct the first point.
         r0 = rho_km_vals[crange]
         r = rho_km_vals[start]
         x = r-r0
-        w_func = fw(x, w_init)
-        crange -= 1
-        F2 = np.square(F_km_vals)
-        x = r-r0
         x2 = HALF_PI * np.square(x)
+
+        # Compute the window function about the current point.
+        w_func = fw(x, w_init)
+
+        # Decrement crange by 1 since a +1 occurs in the next for loop.
+        crange -= 1
+
+        # Precompute the square of F_km_vals for speed.
+        F2 = np.square(F_km_vals)
+
+        # Variable for setting a cutoff value for the innermost for loop.
         loop = 0
+
+        # Perform Fresnel Transform, point by point, but using Riemann Sums.
         for i in np.arange(n_used):
 
             # Current point being computed.
@@ -888,38 +949,49 @@ def fresnel_inversion_quadratic(T_in, dx, F_km_vals, w_km_vals, start, n_used,
             # Window width and Frensel scale for current point.
             w = w_km_vals[center]
             F = F_km_vals[center]
+
+            # If the width has changed too much, recompute the window function.
             if (np.abs(w_init - w) >= 2.0 * dx_km):
 
                 # Compute first window width and window function.
                 w_init = w_km_vals[center]
+
+                # Number of points in window (Odd integer).
                 nw = int(2 * np.floor(w_init / (2.0 * dx_km))+1)
+
+                # Range of indices for rho_km_vals for this window.
                 crange = np.arange(int(center-(nw-1)/2), int(1+center+(nw-1)/2))
 
                 # Ajdust ring radius by dx_km.
                 r0 = rho_km_vals[crange]
                 r = rho_km_vals[center]
 
-                # Compute psi for with stationary phase value
+                # Center rho_km_vals about r0.
                 x = r-r0
                 x2 = HALF_PI * np.square(x)
+
+                # Recompute the window function.
                 w_func = fw(x, w_init)
             else:
+
+                # If width hasn't changed much, increment indexing variable.
                 crange += 1
 
+            # Fresnel approximation gives psi = pi/2 ((r-r0) / F)^2
             psi_vals = x2 / F2[center]
 
-            # Compute kernel function for Fresnel inverse
+            # Compute kernel function for Fresnel inverse or forward model.
             if fwd:
                 ker = w_func*np.exp(1j*psi_vals)
             else:
                 ker = w_func*np.exp(-1j*psi_vals)
 
-            # Compute 'approximate' Fresnel Inversion.
+            # Compute approximate Fresnel Transform using a Riemann Sum.
             T_out[center] = np.sum(ker * T_in[crange]) * dx_km * (0.5+0.5j)/F
 
             # If norm has been set, normalize the reconstruction
             if norm:
-                T_out[center] *= __norm(dx_km, ker, F)
+                T_out[center] *= window_functions.normalize(dx_km, ker, F)
         return T_out
 
 def fresnel_inversion_cubic(T_in, dx, F_km_vals, phi_rad_vals, kD_vals,
@@ -927,17 +999,16 @@ def fresnel_inversion_cubic(T_in, dx, F_km_vals, phi_rad_vals, kD_vals,
                             n_used, wnum, use_norm, use_fwd):
     try:
         return _diffraction_functions.fresnel_transform_cubic(
-            T_in, self.dx_km, self.F_km_vals, self.phi_rad_vals,
-            kD_vals, self.B_rad_vals, self.D_km_vals,
-            self.w_km_vals, start, n_used, wnum, use_norm, use_fwd
+            T_in, dx, F_km_vals, phi_rad_vals, kD_vals, B_rad_vals,
+            D_km_vals, w_km_vals, start, n_used, wnum, use_norm, use_fwd
         )
     except KeyboardInterrupt:
         raise
     except:
         crange -= 1
-        cosb = np.cos(self.B_rad_vals)
-        cosp = np.cos(self.phi_rad_vals)
-        sinp = np.sin(self.phi_rad_vals)
+        cosb = np.cos(B_rad_vals)
+        cosp = np.cos(phi_rad_vals)
+        sinp = np.sin(phi_rad_vals)
         A_2 = 0.5*np.square(cosb*sinp)/(1.0-np.square(cosb*sinp))
 
         # Legendre Polynomials.
@@ -957,7 +1028,7 @@ def fresnel_inversion_cubic(T_in, dx, F_km_vals, phi_rad_vals, kD_vals,
         x2 = np.square(x)
 
         # D_km_vals and various powers.
-        d = self.D_km_vals
+        d = D_km_vals
         d2 = np.square(d)
 
         loop = 0
@@ -967,18 +1038,18 @@ def fresnel_inversion_cubic(T_in, dx, F_km_vals, phi_rad_vals, kD_vals,
             center = start+i
 
             # Window width and Frensel scale for current point.
-            w = self.w_km_vals[center]
-            F = self.F_km_vals[center]
-            if (np.abs(w_init - w) >= 2.0 * self.dx_km):
+            w = w_km_vals[center]
+            F = F_km_vals[center]
+            if (np.abs(w_init - w) >= 2.0 * dx):
 
                 # Compute first window width and window function.
-                w_init = self.w_km_vals[center]
-                nw = int(2 * np.floor(w_init / (2.0 * self.dx_km)) + 1)
+                w_init = w_km_vals[center]
+                nw = int(2 * np.floor(w_init / (2.0 * dx)) + 1)
                 crange = np.arange(int(center-(nw-1)/2), int(1+center+(nw-1)/2))
 
                 # Ajdust ring radius by dx_km.
-                r0 = self.rho_km_vals[crange]
-                r = self.rho_km_vals[center]
+                r0 = rho_km_vals[crange]
+                r = rho_km_vals[center]
 
                 # Compute psi for with stationary phase value
                 x = r-r0
@@ -1003,19 +1074,21 @@ def fresnel_inversion_cubic(T_in, dx, F_km_vals, phi_rad_vals, kD_vals,
             T = T_in[crange]
 
             # Compute 'approximate' Fresnel Inversion for current point
-            T_out[center] = np.sum(ker*T)*self.dx_km*(1.0+1.0j)/(2.0*F)
+            T_out[center] = np.sum(ker * T) * dx * (1.0+1.0j) / (2.0*F)
 
             # If normalization has been set, normalize correction.
-            if self.norm:
-                T_out[center] *= __norm(self.dx_km, ker, F)
+            if norm:
+                T_out[center] *= __norm(dx_km, ker, F)
         return T_out
 
-def fresnel_inversion_quartic():
+def fresnel_inversion_quartic(T_in, dx_km, F_km_vals, phi_rad_vals, kD_vals,
+                              B_rad_vals, D_km_vals, w_km_vals, start, n_used,
+                              wtype, norm, fwd):
     try:
         return _diffraction_functions.fresnel_transform_quartic(
-            T_in, self.dx_km, self.F_km_vals, self.phi_rad_vals,
-            kD_vals, self.B_rad_vals, self.D_km_vals,
-            self.w_km_vals, start, n_used, wnum, use_norm, use_fwd
+            T_in, dx_km, F_km_vals, phi_rad_vals, kD_vals, B_rad_vals,
+            D_km_vals, w_km_vals, start, n_used,
+            window_functions.func_dict[wtype]["wnum"], int(norm), int(fwd)
         )
     except KeyboardInterrupt:
         raise

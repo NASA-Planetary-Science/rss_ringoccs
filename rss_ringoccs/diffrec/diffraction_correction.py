@@ -12,7 +12,6 @@
 """
 # Import dependencies for the diffcorr module
 import numpy as np
-import sys
 from rss_ringoccs.tools.history import write_history_dict
 from rss_ringoccs.tools.write_output_files import write_output_files
 from rss_ringoccs.tools import error_check
@@ -1074,7 +1073,7 @@ class DiffractionCorrection(object):
                         start, n_used, wnum, use_norm, use_fwd
                     )
                 except KeyboardInterrupt:
-                    sys.exit("KeyboardInterrupt")
+                    raise
                 except:
                     if self.verbose:
                         print("\t\tCould not import C code. Using Python Code.")

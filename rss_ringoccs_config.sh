@@ -63,6 +63,9 @@ yes | conda update conda
 # Install Spiceypy
 yes | conda install -c https://conda.anaconda.org/andrewannex spiceypy
 
+# Install PyMieScatt
+yes | conda install -c conda-forge pymiescatt
+
 # Source the .bash_profile again after conda updates.
 source .bash_profile
 

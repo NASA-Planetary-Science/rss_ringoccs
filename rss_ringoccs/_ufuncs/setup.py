@@ -9,7 +9,7 @@ def configuration(parent_package=None, top_path=None):
     config.add_extension('_special_functions', ['_special_functions.c'])
     config.add_extension('_window_functions', ['_window_functions.c'])
     config.add_extension('_diffraction_functions', ['_diffraction_functions.c'])
-    config.add_extension('testmodule', ['test.c'])
+    # config.add_extension('testmodule', ['test.c'])
 
     return config
 

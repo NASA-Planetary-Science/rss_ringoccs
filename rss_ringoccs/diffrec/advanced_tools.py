@@ -186,7 +186,7 @@ class FindOptimalResolution(object):
 
 class ModelFromGEO(object):
     def __init__(self, geo, lambda_km, res, rho, width=100, dx_km_desired=0.25,
-                 occ="other", wtype='kb25', norm=True, bfac=True,
+                 occ="other", wtype='kb25', norm=True, bfac=True, sigma=2.e-13,
                  verbose=True, psitype='fresnel', use_fresnel=False,
                  eccentricity=0.0, periapse=0.0, use_deprecate=False,
                  res_factor=0.75, rng="all", model="squarewell", echo=False,
@@ -520,6 +520,110 @@ class ModelFromGEO(object):
             "prof_dir": prof_dir
         }
 
+        center = np.min((self.rho_km_vals >= rho).nonzero())
+        F = special_functions.fresnel_scale(lambda_km,
+                                            self.D_km_vals[center],
+                                            self.phi_rad_vals[center],
+                                            self.B_rad_vals[center])
+        F = F + np.zeros(np.size(self.rho_km_vals))
+        kD_vals = 2.0*np.pi * self.D_km_vals / lambda_km
+
+        # Compute the Normalized Equaivalent Width (See MTR86 Equation 20)
+        norm_eq = window_functions.func_dict[wtype]["normeq"]
+
+        # Compute the window width. (See MTR86 Equations 19, 32, and 33).
+        self.w_km_vals, Prange = window_functions.window_width(
+            res, norm_eq, self.f_sky_hz_vals, F, self.rho_dot_kms_vals,
+            sigma, bfac=bfac, Return_P=True
+        )
+
+        # From the requested range, extract array of the form [a, b]
+        if (isinstance(rng, str)):
+            self.rng = np.array(diffraction_correction.region_dict[rng])
+        else:
+            self.rng = np.array([np.min(rng), np.max(rng)])
+
+        # Compute the smallest and largest allowed radii for reconstruction.
+        crho = self.rho_km_vals[Prange]
+        w = self.w_km_vals[Prange]
+        rho_min = self.rho_km_vals[Prange]-self.w_km_vals[Prange]/2.0
+        rho_max = self.rho_km_vals[Prange]+self.w_km_vals[Prange]/2.0
+
+        wrange = Prange[np.where((rho_min >= np.min(crho)) &
+                                 (rho_max <= np.max(crho)))]
+        self.wrange = wrange
+
+        # Check that there is enough data for reconstruction.
+        if (np.size(wrange) == 0):
+            raise ValueError(
+                """
+                    \r\tError Encountered: rss_ringoccs
+                    \r\t\t%s\n
+                    \r\tThe window width is too large to reconstruct any
+                    \r\tpoints. Please choose a coarser resolution or
+                    \r\tinspect your input data.\n
+                    \r\t\tMinimum Available Radius:         %f
+                    \r\t\tMaximum Available Radius:         %f
+                    \r\t\tMinimum Required Window Width:    %f
+                    \r\t\tMaximum Required Window Width:    %f
+                """ % (fname, np.min(crho), np.max(crho), np.min(w), np.max(w))
+            )
+        elif (np.max(crho) < np.min(self.rng)):
+            raise ValueError(
+                """
+                    \r\tError Encountered: rss_ringoccs
+                    \r\t\t%s\n
+                    \r\tMinimum requested range is greater
+                    \r\tthan the maximum available data point.
+                    \r\tSelect a smaller range for reconstruction.\n
+                    \r\tYour Requested Minimum (km):    %f
+                    \r\tYour Requested Maximum (km):    %f
+                    \r\tMaximum Available Data (km):    %f
+                """ % (fname, np.min(self.rng), np.max(self.rng), np.max(crho))
+            )
+        elif (np.min(crho) > np.max(self.rng)):
+            raise ValueError(
+                """
+                    \r\tError Encountered: rss_ringoccs
+                    \r\t\t%s\n
+                    \r\tMaximum requested range is less
+                    \r\tthan the minimum available data point.\n
+                    \r\tYour Requested Minimum (km): %f
+                    \r\tYour Requested Maximum (km): %f
+                    \r\tMinimum Available Data (km): %f\n
+                    \r\tTO CORRECT THIS:
+                    \r\t\tSelect a larger range for reconstruction
+                """ % (fname, np.min(self.rng), np.max(self.rng), np.min(crho))
+            )
+        else:
+            pass
+
+        rho_min = np.min(crho[wrange])
+        rho_max = np.max(crho[wrange])
+
+        wrange = wrange[np.where((crho[wrange] >= np.min(self.rng)) &
+                                 (crho[wrange] <= np.max(self.rng)))]
+
+        if (np.size(wrange) <= 1):
+            raise IndexError(
+                "\n\tError Encountered:\n"
+                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
+                "\tRequested range does not include any of the\n"
+                "\tavailable points for processing. Please choose\n"
+                "\tA different range for processing.\n"
+                "\t\tMinimum Possible Radius: %f\n"
+                "\t\tMaximum Possible Radius: %f\n"
+                "\t\tRequested Range Minimum: %f\n"
+                "\t\tRequested Range Maximum: %f"
+                % (rho_min, rho_max, np.min(self.rng), np.max(self.rng))
+            )
+        else:
+            pass
+
+        start = wrange[0]
+        finish = wrange[-1]
+        n_used = 1 + (finish - start)
+
         if (model == "squarewell"):
             if use_fresnel:
                 center = np.min((self.rho_km_vals >= rho).nonzero())
@@ -548,12 +652,6 @@ class ModelFromGEO(object):
                 )
         elif (model == "rightstraightedge"):
             if use_fresnel:
-                center = np.min((self.rho_km_vals >= rho).nonzero())
-                F = special_functions.fresnel_scale(lambda_km,
-                                                    self.D_km_vals[center],
-                                                    self.phi_rad_vals[center],
-                                                    self.B_rad_vals[center])
-
                 x = window_functions.SQRT_PI_2*(rho-self.rho_km_vals)/F
 
                 T_hat = (special_functions.fresnel_cos(x)+
@@ -568,10 +666,11 @@ class ModelFromGEO(object):
                 rstart = np.min((self.rho_km_vals>=rho).nonzero())
                 self.p_norm_vals[rstart:-1] = 1.0
                 self.phase_rad_vals = np.zeros(np.size(self.rho_km_vals))
-                rec = diffraction_correction.DiffractionCorrection(
-                    self, res, psitype=psitype, verbose=verbose, wtype=wtype,
-                    bfac=bfac, eccentricity=eccentricity, periapse=periapse,
-                    res_factor=res_factor, rng=rng
+                print("bob")
+                self.T_out = special_functions.fresnel_inversion_newton(
+                    self.p_norm_vals+0.0j, self.rho_km_vals, F, self.phi_rad_vals,
+                    kD_vals, self.B_rad_vals, self.D_km_vals, self.w_km_vals,
+                    start, n_used, wtype, norm, True
                 )
         elif (model == "leftstraightedge"):
             if use_fresnel:

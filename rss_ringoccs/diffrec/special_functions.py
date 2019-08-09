@@ -19,16 +19,14 @@ except:
 def savitzky_golay(y, window_size, order, deriv=0, rate=1):
     """
         Purpose:
-            To smooth data with a Savitzky-Golay filter.
-            This removes high frequency noise while
-            maintaining many of the original features of
-            the input data.
+            To smooth data with a Savitzky-Golay filter. This removes
+            high frequency noise while maintaining many of the
+            original features of the input data.
         Arguments:
             :y (*np.ndarray*):
                 The input "Noisy" data.
             :window_size (*int*):
-                The length of the window.
-                Must be an odd number.
+                The length of the window. Must be an odd number.
             :order (*int*):
                 The order of the polynomial used for filtering.
                 Must be less then window_size - 1.
@@ -37,52 +35,42 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
                 The order of the derivative what will be computed.
         Output:
             :y_smooth (*np.ndarray*):
-                The data smoothed by the Savitzky-Golay filter.
-                This returns the nth derivative if the deriv
-                keyword has been set.
-        Notes:
-            The Savitzky-Golay is a type of low-pass filter,
-            particularly suited for smoothing noisy data.
-            The main idea behind this approach is to make for
-            each point a least-square fit with a polynomial of
-            high order over a odd-sized window centered at the point.
+                The data smoothed by Savitzky-Golay filter.
     """
     try:
         y = np.array(y)
-    except:
-        raise TypeError(
-            "\n\tError Encountered:\n"
-            "\trss_ringoccs: Diffrec Subpackage\n"
-            "\tspecial_functions.savitzky_golay\n"
-            "\tinput variable should be a numpy array."
-            "\tSyntax:\n"
-            "\t\tysmooth = savitzky_golay(y, Window_Size, Poly_Order)"
-        )
-    try:
         window_size = np.abs(np.int(window_size))
         order = np.abs(np.int(order))
-    except (ValueError, TypeError):
-        raise ValueError(
-            "\n\tError Encountered:\n"
-            "\trss_ringoccs: Diffrec Subpackage\n"
-            "\tspecial_functions.savitzky_golay:\n"
-            "\t\twindow_size must be an odd integer.\n"
+    except KeyboardInterrupt:
+        raise
+    except:
+        raise TypeError(
+            """
+                \r\tError Encountered: rss_ringoccs
+                \r\t\tdiffrec.special_functions.savitzky_golay\n
+                \r\tUsage:
+                \r\t\tysmooth = savitzky_golay(y, Window_Size, Poly_Order)
+                \r\t\ty:            Numpy Array (Floating Point)
+                \r\t\tWindow_Size   Positive Odd Integer
+                \r\t\tPoly_Order    Positive Integer (Poly_Order > Window_Size)
+            """
         )
 
     if (window_size % 2 != 1) or (window_size < 1):
         raise ValueError(
-            "\n\tError Encountered:\n"
-            "\trss_ringoccs: Diffrec Subpackage\n"
-            "\tspecial_functions.savitzky_golar:\n"
-            "\t\twindow_size must be an odd integer.\n"
+            """
+                \r\tError Encountered: rss_ringoccs
+                \r\t\tdiffrec.special_functions.savitzky_golay\n
+                \r\twindow_size must be an odd integer.
+            """
         )
     elif (window_size < order + 2):
         raise ValueError(
-            "\n\tError Encountered:\n"
-            "\trss_ringoccs: Diffrec Subpackage\n"
-            "\tspecial_functions.savitzky_golar:\n"
-            "\t\twindow_size is too small for the\n"
-            "\t\trequested polynomial order.\n"
+            """
+                \r\tError Encountered: rss_ringoccs
+                \r\t\tdiffrec.special_functions.savitzky_golay\n
+                \r\twindow_size must be less than Poly_Order.
+            """
         )
     else:
         pass
@@ -123,21 +111,18 @@ def compute_norm_eq(w_func):
             Compute normalized equivalenth width of a given function.
         Arguments:
             :w_func (*np.ndarray*):
-                Function with which to compute
-                the normalized equivalent width of.
+                Function to compute the normalized equivalent width.
         Outputs:
             :normeq (*float*):
                 The normalized equivalent width of w_func.
         Notes:
-            The normalized equivalent width is effectively computed
-            using Riemann sums to approximate integrals. Therefore
-            large dx values (Spacing between points in w_func)
-            will result in an inaccurate normeq. One should keep
-            this in mind during calculations.
+            The normalized equivalent width is computed using Riemann
+            sums to approximate integrals. Therefore large dx values
+            (Spacing between points) will result in an inaccurate
+            normeq. One should keep this in mind during calculations.
         Examples:
-            Compute the Kaiser-Bessel 2.5 window of width 30
-            and spacing 0.1, and then use compute_norm_eq
-            to compute the normalized equivalent width:
+            Compute the Kaiser-Bessel 2.5 window of width 30km and
+            spacing 0.1 and compute the normalized equivalent width:
                 >>> from rss_ringoccs import diffrec as dc
                 >>> w = dc.window_functions.kb25(30, 0.1)
                 >>> normeq = dc.special_functions.compute_norm_eq(w)
@@ -163,24 +148,19 @@ def compute_norm_eq(w_func):
                 1.50015
     """
     try:
+        return _special_functions.compute_norm_eq(w_func)
+    except KeyboardInterrupt:
+        raise
+    except:
         nw = np.size(w_func)
         tot_sq = np.square(np.sum(w_func))
 
         return nw*(np.sum(w_func*w_func)) / tot_sq
-    except (TypeError, ValueError, NameError, IndexError):
-        raise TypeError(
-            """
-                \r\tError Encountered: rss_ringoccs
-                \r\t\tdiffrec.special_functions.compute_norm_eq\n
-                \r\tInput should be a numpy array of floating point numbers.
-            """
-        )
 
 def fresnel_scale(Lambda, d, phi, b):
     """
         Purpose:
-            Compute the Fresnel Scale from :math:`\\lambda`, :math:`D`,
-            :math:`\\phi`, and :math:`B`.
+            Compute the Fresnel Scale.
         Arguments:
             :Lambda (*np.ndarray* or *float*):
                 Wavelength of the incoming signal.
@@ -196,8 +176,8 @@ def fresnel_scale(Lambda, d, phi, b):
         Note:
             :math:`\\lambda` and :math:`D` must be in the same units.
             The output (Fresnel scale) will have the same units
-            as :math:`\\lambda` and d. In addition, :math:`B` and :math:`\\phi`
-            must also be in radians.
+            as :math:`\\lambda` and d. In addition, :math:`B`
+            and :math:`\\phi` must also be in radians.
     """
     try:
         Lambda = np.array(Lambda)
@@ -232,7 +212,7 @@ def fresnel_psi(kD, r, r0, phi, phi0, B, D):
             :r0 (*np.ndarray*):
                 Radius of region within window, in kilometers.
             :phi (*np.ndarray*):
-                Root values of :math:`\\mathrm{d}\\psi/\\mathrm{d}\\phi`, radians.
+                Ring azimuth angle corresponding to r, radians.
             :phi0 (*np.ndarray*):
                 Ring azimuth angle corresponding to r0, radians.
             :B (*float*):
@@ -245,6 +225,8 @@ def fresnel_psi(kD, r, r0, phi, phi0, B, D):
     """
     try:
         return _special_functions.fresnel_psi(kD, r, r0, phi, phi0, B, D)
+    except KeyboardInterrupt:
+        raise
     except:
         # Compute Xi variable (MTR86 Equation 4b). Signs of xi are swapped.
         xi = (np.cos(B)/D) * (r * np.cos(phi) - r0 * np.cos(phi0))
@@ -268,7 +250,7 @@ def fresnel_dpsi_dphi(kD, r, r0, phi, phi0, B, D):
             :r0 (*np.ndarray*):
                 Radius of region within window, in kilometers.
             :phi (*np.ndarray*):
-                Root values of :math:`\\mathrm{d}\\psi/\\mathrm{d}\\phi`, radians.
+                Ring azimuth angle corresponding to r, radians.
             :phi0 (*np.ndarray*):
                 Ring azimuth angle corresponding to r0, radians.
             :B (*float*):
@@ -282,8 +264,9 @@ def fresnel_dpsi_dphi(kD, r, r0, phi, phi0, B, D):
     """
     try:
         return _special_functions.fresnel_dpsi_dphi(kD, r, r0, phi, phi0, B, D)
+    except KeyboardInterrupt:
+        raise
     except:
-
         # Compute Xi variable (MTR86 Equation 4b).
         xi = (np.cos(B)/D) * (r * np.cos(phi) - r0 * np.cos(phi0))
 

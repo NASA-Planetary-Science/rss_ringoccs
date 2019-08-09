@@ -6,6 +6,7 @@
 static PyObject *MaxValue(PyObject *self, PyObject *args)
 {
     PyArrayObject *arr;
+    PyArrayObject *arr2;
     int i;
 
     /*  parse single numpy array argument */
@@ -15,20 +16,11 @@ static PyObject *MaxValue(PyObject *self, PyObject *args)
     }
 
     // Useful metadata about the data
-    int typenum    = PyArray_TYPE(arr);
-    if( typenum != NPY_DOUBLE ){
-        PyArrayObject* arr2 = (PyArrayObject*)PyArray_FromArray(
-            arr, PyArray_DescrFromType(NPY_DOUBLE), NPY_ARRAY_ALIGNED
-        );
-        Py_DECREF(arr);
-        arr = arr2;
-    }
-
-    // Useful metadata about the data
     npy_intp* dims = PyArray_DIMS(arr);
     npy_intp* strides = PyArray_STRIDES(arr);
     void *data0 = PyArray_DATA(arr);
-    int n = dims[0];
+    int typenum = PyArray_TYPE(arr);
+    if( typenum == NPY_DOUBLE ){
 
     double max = *(double *)data0;
 
@@ -54,8 +46,8 @@ static PyObject *MaxValue(PyObject *self, PyObject *args)
     */
 
     return Py_BuildValue("d", max);
-}                
-                
+}
+
 /*  define functions in module */
 static PyMethodDef DiffMethods[] =
 {
@@ -72,7 +64,7 @@ static PyMethodDef DiffMethods[] =
         NULL
     }
 };
-    
+
 static struct PyModuleDef cModPyDem =
 {
     PyModuleDef_HEAD_INIT,
@@ -81,7 +73,7 @@ static struct PyModuleDef cModPyDem =
     -1,
     DiffMethods
 };
-    
+
 /* module initialization */
 PyMODINIT_FUNC PyInit_testmodule(void)
 {

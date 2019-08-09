@@ -1,17 +1,16 @@
 """
-:Purpose:
-        Provide tools for reading in .TAB and .CSV files and converting
-        the data into a usable instance of the DLP class.
+    :Purpose:
+            Provide tools for reading in .TAB and .CSV files and converting
+            the data into a usable instance of the DLP class.
 
-:Dependencies:
-    #. pandas
-    #. numpy
-    #. scipy
+    :Dependencies:
+        #. pandas
+        #. numpy
+        #. scipy
 """
 
 import numpy as np
 import pandas as pd
-from scipy import interpolate
 from .history import write_history_dict, date_to_rev, rev_to_occ_info
 from . import error_check
 

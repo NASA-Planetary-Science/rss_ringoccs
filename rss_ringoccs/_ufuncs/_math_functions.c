@@ -38,8 +38,6 @@ static PyObject *max(PyObject *self, PyObject *args)
         else {
             PyErr_Format(
                 PyExc_TypeError,
-                "\rError Encountered: rss_ringoccs\n"
-                "\r\tdiffrec.special_functions.MaxValue\n\n"
                 "\rInput should be a numpy array of numbers (Floats/Ints)."
             );
             return NULL;
@@ -48,8 +46,6 @@ static PyObject *max(PyObject *self, PyObject *args)
     else{
         PyErr_Format(
             PyExc_TypeError,
-            "\rError Encountered: rss_ringoccs\n"
-            "\r\tdiffrec.special_functions.MaxValue\n\n"
             "\rInput should be a numpy array of numbers (Floats/Ints)."
         );
         return NULL;
@@ -59,24 +55,14 @@ static PyObject *max(PyObject *self, PyObject *args)
 /*  define functions in module */
 static PyMethodDef DiffMethods[] =
 {
-    {
-        "max",
-        max,
-        METH_VARARGS,
-        "Evaluate the maximum of a numpy array."
-    },
-    {
-        NULL,
-        NULL,
-        0,
-        NULL
-    }
+    {"max", max, METH_VARARGS, "Evaluate the maximum of a numpy array."},
+    {NULL, NULL, 0, NULL}
 };
 
 static struct PyModuleDef cModPyDem =
 {
     PyModuleDef_HEAD_INIT,
-    "testmodule", /* name of module */
+    "_math_functions", /* name of module */
     "",
     -1,
     DiffMethods

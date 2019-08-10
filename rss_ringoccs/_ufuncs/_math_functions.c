@@ -1,8 +1,6 @@
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include "../../include/Python.h"
 #include "../../include/arrayobject.h"
-#include <math.h>
-#include <stdio.h>
 
 static PyObject *max(PyObject *self, PyObject *args)
 {
@@ -10,12 +8,13 @@ static PyObject *max(PyObject *self, PyObject *args)
     long i, n, strides;
 
     if (PyArg_ParseTuple(args, "O!", &PyArray_Type, &arr)){
-        // Useful metadata about the data
-        n = PyArray_DIMS(arr)[0];
-        strides = PyArray_STRIDES(arr)[0];
+        /* Get some info about the data. */
+        n           = PyArray_DIMS(arr)[0];
+        strides     = PyArray_STRIDES(arr)[0];
         void *data0 = PyArray_DATA(arr);
         int typenum = PyArray_TYPE(arr);
-        if(typenum == NPY_DOUBLE){
+
+        if (typenum == NPY_DOUBLE){
             double max = *(double *)data0;
             for (i=0; i<n; ++i){
                 if (*(double *)data0 > max){

@@ -36,41 +36,30 @@ static PyObject *max(PyObject *self, PyObject *args)
         }
         else {
             PyErr_Format(
-                PyExc_TypeError,
-                "\rInput should be a numpy array of numbers (Floats/Ints)."
+                PyExc_TypeError, "Input should be a numpy array of numbers."
             );
             return NULL;
         }
     }
     else{
         PyErr_Format(
-            PyExc_TypeError,
-            "\rInput should be a numpy array of numbers (Floats/Ints)."
+            PyExc_TypeError, "Input should be a numpy array of numbers."
         );
         return NULL;
     }
 }
 
-/*  define functions in module */
 static PyMethodDef DiffMethods[] =
 {
-    {"max", max, METH_VARARGS, "Evaluate the maximum of a numpy array."},
+    {"max", max, METH_VARARGS, "Compute the maximum of a numpy array."},
     {NULL, NULL, 0, NULL}
 };
 
 static struct PyModuleDef cModPyDem =
-{
-    PyModuleDef_HEAD_INIT,
-    "_math_functions", /* name of module */
-    "",
-    -1,
-    DiffMethods
-};
+    {PyModuleDef_HEAD_INIT, "_math_functions", "", -1, DiffMethods};
 
-/* module initialization */
 PyMODINIT_FUNC PyInit__math_functions(void)
 {
-    /* IMPORTANT: this must be called */
     import_array();
     return PyModule_Create(&cModPyDem);
 }

@@ -845,11 +845,6 @@ class DiffractionCorrection(object):
         # Compute product of wavenumber and RIP distance.
         kD_vals = TWO_PI * self.D_km_vals / self.lambda_sky_km_vals
 
-        # Define functions.
-        fw = window_functions.func_dict[self.wtype]["func"]
-        mes = "\t\tPt: %d  Tot: %d  Width: %d  Psi Iters: %d\t"
-        __norm = window_functions.normalize
-
         # If forward transform, adjust starting point by half a window.
         if fwd:
             w_max = np.max(self.w_km_vals[self.start:self.start + self.n_used])
@@ -862,111 +857,12 @@ class DiffractionCorrection(object):
             n_used = self.n_used
             T_in = self.T_hat_vals
 
-        # Create empty array for reconstruction / forward transform.
-        T_out = T_in * 0.0
-
-        # Compute first window width and window function.
-        w_init = self.w_km_vals[start]
-        nw = int(2 * np.floor(w_init / (2.0 * self.dx_km)) + 1)
-        crange = np.arange(int(start-(nw-1)/2), int(1+start+(nw-1)/2))
-        r0 = self.rho_km_vals[crange]
-        r = self.rho_km_vals[start]
-        x = r-r0
-        w_func = fw(x, w_init)
-
-        # Assign integer to window functions for passing args into C code.
-        if (self.wtype == "rect"):
-            wnum = 0
-        elif (self.wtype == "coss"):
-            wnum = 1
-        elif (self.wtype == "kb20"):
-            wnum = 2
-        elif (self.wtype == "kb25"):
-            wnum = 3
-        elif (self.wtype == "kb35"):
-            wnum = 4
-        elif (self.wtype == "kbmd20"):
-            wnum = 5
-        elif (self.wtype == "kbmd25"):
-            wnum = 6
-        else:
-            wnum = 7
-
         if (self.psitype == "ellipse"):
-            peri = self.periapse
-            ecc = self.eccentricity
-            for i in np.arange(n_used):
-                # Current point being computed.
-                center = start+i
-
-                # Current window width, Fresnel scale, and ring radius.
-                w = self.w_km_vals[center]
-                F = self.F_km_vals[center]
-                r = self.rho_km_vals[center]
-
-                if (np.abs(w_init - w) >= 2.0 * self.dx_km):
-
-                    # Compute first window width and window function.
-                    w_init = self.w_km_vals[center]
-
-                    nw = int(2 * np.floor(w_init / (2.0 * self.dx_km)) + 1)
-                    crange = np.arange(int(center-(nw-1)/2),
-                                       int(1+center+(nw-1)/2))
-
-                    # Ajdust ring radius by dx_km.
-                    r0 = self.rho_km_vals[crange]
-
-                    # Compute psi for with stationary phase value
-                    x = r-r0
-                    w_func = fw(x, w_init)
-                else:
-                    crange += 1
-                    r0 = self.rho_km_vals[crange]
-
-                d = self.D_km_vals[center]
-                b = self.B_rad_vals[center]
-                kD = kD_vals[center]
-                phi = self.phi_rad_vals[crange]
-                phi0 = self.phi_rad_vals[crange]
-
-                # Compute Newton-Raphson perturbation
-                psi_d1 = special_functions.dpsi_ellipse(kD, r, r0, phi, phi0,
-                                                        b, d, ecc, peri)
-                loop = 0
-
-                while (np.max(np.abs(psi_d1)) > 1.0e-4):
-                    psi_d1 = special_functions.dpsi_ellipse(kD, r, r0,
-                                                            phi, phi0, b,
-                                                            d, ecc, peri)
-                    psi_d2 = special_functions.d2psi(kD, r, r0, phi, phi0, b, d)
-
-                    # Newton-Raphson
-                    phi += -(psi_d1 / psi_d2)
-
-                    # Add one to loop variable for each iteration
-                    loop += 1
-                    if (loop > 4):
-                        break
-
-                # Compute Eta variable (MTR86 Equation 4c).
-                psi_vals = special_functions.fresnel_psi(kD, r, r0, phi,
-                                                         phi0, b, d)
-
-                # Compute kernel function for Fresnel inverse
-                if fwd:
-                    ker = w_func*np.exp(1j*psi_vals)
-                else:
-                    ker = w_func*np.exp(-1j*psi_vals)
-
-                # Compute 'approximate' Fresnel Inversion for current point
-                T = T_in[crange]
-                T_out[center] = np.sum(ker*T)*self.dx_km*(0.5+0.5j)/F
-
-                # If normalization has been set, normalize the reconstruction
-                if self.norm:
-                    T_out[center] *= window_functions.normalize(self.dx_km, ker, F)
-                if self.verbose:
-                    print(mes % (i, n_used-1, nw, loop), end="\r")
+            return special_functions.fresnel_transform_ellipse(
+                T_in, self.rho_km_vals, self.F_km_vals, self.phi_rad_vals,
+                kD_vals, self.B_rad_vals, self.D_km_vals, self.w_km_vals, start,
+                n_used, peri, ecc, self.wtype, self.norm, fwd
+            )
         elif (self.psitype == "full"):
             return special_functions.fresnel_inversion_newton(
                 T_in, self.rho_km_vals, self.F_km_vals, self.phi_rad_vals,
@@ -974,21 +870,21 @@ class DiffractionCorrection(object):
                 start, n_used, self.wtype, self.norm, self.fwd
             )
         elif (self.psitype == "fresnel"):
-            return special_functions.fresnel_inversion_quadratic(
-                T_in, self.dx_km, self.F_km_vals, self.w_km_vals, start,
-                n_used, self.wtype, self.norm, self.fwd
+            return special_functions.fresnel_transform_quadratic(
+                T_in, self.rho_km_vals, self.F_km_vals, self.w_km_vals, start,
+                n_used, self.wtype, self.norm, fwd
             )
         elif (self.psitype == "fresnel3"):
             return _diffraction_functions.fresnel_transform_cubic(
                 T_in, self.dx_km, self.F_km_vals, self.phi_rad_vals,
                 kD_vals, self.B_rad_vals, self.D_km_vals,
-                self.w_km_vals, start, n_used, wnum, use_norm, use_fwd
+                self.w_km_vals, start, n_used, self.wtype, self.norm, fwd
             )
         elif (self.psitype == "fresnel4"):
-            return special_functions.fresnel_inversion_quartic(
+            return special_functions.fresnel_transform_quartic(
                 T_in, self.dx_km, self.F_km_vals, self.phi_rad_vals,
-                kD_vals, self.B_rad_vals, self.D_km_vals,
-                self.w_km_vals, start, n_used, self.wtype, self.norm, self.fwd
+                kD_vals, self.B_rad_vals, self.D_km_vals, self.w_km_vals,
+                start, n_used, self.wtype, self.norm, fwd
             )
         elif (self.psitype == "fresnel6"):
             return _diffraction_functions.fresnel_transform_sextic(
@@ -1288,6 +1184,3 @@ class DiffractionCorrection(object):
                         T_out[center] *= __norm(self.dx_km, ker, F)
                     if self.verbose:
                         print(mes % (i, n_used, nw, loop), end="\r")
-        if self.verbose:
-            print("\n", end="\r")
-        return T_out

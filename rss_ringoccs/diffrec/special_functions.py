@@ -667,7 +667,7 @@ def square_well_phase(x, a, b, F):
                 """
             )
 
-def fresnel_inversion_ellipse(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
+def fresnel_transform_ellipse(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
                               kD_vals, B_rad_vals, D_km_vals, w_km_vals, start,
                               n_used, peri, ecc, wtype="kbmd20", norm=True,
                               fwd=False):
@@ -677,7 +677,6 @@ def fresnel_inversion_ellipse(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
     # Define functions.
     fw = window_functions.func_dict[wtype]["func"]
     wn = window_functions.func_dict[wtype]["wnum"]
-    __norm = window_functions.normalize
 
     # Create empty array for reconstruction / forward transform.
     T_out = T_in * 0.0
@@ -755,7 +754,7 @@ def fresnel_inversion_ellipse(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
         if norm:
             T_out[center] *= window_functions.normalize(dx_km, ker, F)
 
-def fresnel_inversion_newton(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
+def fresnel_transform_newton(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
                              kD_vals, B_rad_vals, D_km_vals, w_km_vals, start,
                              n_used, wtype, norm, fwd):
     try:
@@ -884,9 +883,10 @@ def fresnel_inversion_newton(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
                 T_out[center] *= window_functions.normalize(dx_km, ker, F)
         return T_out
 
-def fresnel_inversion_quadratic(T_in, dx_km, F_km_vals, w_km_vals, start, n_used,
-                                wtype, norm, fwd):
+def fresnel_transform_quadratic(T_in, rho_km_vals, F_km_vals, w_km_vals, start,
+                                n_used, wtype, norm, fwd):
     try:
+        dx_km = rho_km_vals[1]-rho_km_vals[0]
         return _diffraction_functions.fresnel_transform_quadratic(
             T_in, dx_km, F_km_vals, w_km_vals, start, n_used,
             window_functions.func_dict[wtype]["wnum"], int(norm), int(fwd)
@@ -904,7 +904,7 @@ def fresnel_inversion_quadratic(T_in, dx_km, F_km_vals, w_km_vals, start, n_used
             """
         )
         # Create an array for rho_km_vals that is equally spaced.
-        rho_km_vals = np.arange(start, start+n_used)*dx_km
+        dx_km = rho_km_vals[1]-rho_km_vals[0]
 
         # Extract window information from the window dictionary.
         fw = window_functions.func_dict[wtype]["func"]
@@ -994,10 +994,11 @@ def fresnel_inversion_quadratic(T_in, dx_km, F_km_vals, w_km_vals, start, n_used
                 T_out[center] *= window_functions.normalize(dx_km, ker, F)
         return T_out
 
-def fresnel_inversion_cubic(T_in, dx, F_km_vals, phi_rad_vals, kD_vals,
+def fresnel_transform_cubic(T_in, rho_km_vals, F_km_vals, phi_rad_vals, kD_vals,
                             B_rad_vals, D_km_vals, w_km_vals, start,
                             n_used, wnum, use_norm, use_fwd):
     try:
+        dx_km = rho_km_vals[1]-rho_km_vals[0]
         return _diffraction_functions.fresnel_transform_cubic(
             T_in, dx, F_km_vals, phi_rad_vals, kD_vals, B_rad_vals,
             D_km_vals, w_km_vals, start, n_used, wnum, use_norm, use_fwd
@@ -1005,6 +1006,23 @@ def fresnel_inversion_cubic(T_in, dx, F_km_vals, phi_rad_vals, kD_vals,
     except KeyboardInterrupt:
         raise
     except:
+        dx_km = rho_km_vals[1]-rho_km_vals[0]
+
+        # Define functions.
+        fw = window_functions.func_dict[wtype]["func"]
+    
+        # Create empty array for reconstruction / forward transform.
+        T_out = T_in * 0.0
+    
+        # Compute first window width and window function.
+        w_init = w_km_vals[start]
+        nw = int(2 * np.floor(w_init / (2.0 * dx_km)) + 1)
+        crange = np.arange(int(start-(nw-1)/2), int(1+start+(nw-1)/2))
+        r0 = rho_km_vals[crange]
+        r = rho_km_vals[start]
+        x = r-r0
+        w_func = fw(x, w_init)
+
         crange -= 1
         cosb = np.cos(B_rad_vals)
         cosp = np.cos(phi_rad_vals)
@@ -1081,7 +1099,7 @@ def fresnel_inversion_cubic(T_in, dx, F_km_vals, phi_rad_vals, kD_vals,
                 T_out[center] *= __norm(dx_km, ker, F)
         return T_out
 
-def fresnel_inversion_quartic(T_in, dx_km, F_km_vals, phi_rad_vals, kD_vals,
+def fresnel_transform_quartic(T_in, dx_km, F_km_vals, phi_rad_vals, kD_vals,
                               B_rad_vals, D_km_vals, w_km_vals, start, n_used,
                               wtype, norm, fwd):
     try:
@@ -1134,7 +1152,9 @@ def fresnel_inversion_quartic(T_in, dx_km, F_km_vals, phi_rad_vals, kD_vals,
                 T_out[center] *= __norm(self.dx_km, ker, F)
         return T_out
 
-def fresnel_inversion_sextic():
+def fresnel_transform_sextic(T_in, dx_km, F_km_vals, phi_rad_vals, kD_vals,
+                             B_rad_vals, D_km_vals, w_km_vals, start, n_used,
+                             wtype, norm, fwd):
     try:
         return _diffraction_functions.fresnel_transform_sextic(
             T_in, self.dx_km, self.F_km_vals, self.phi_rad_vals,
@@ -1191,7 +1211,9 @@ def fresnel_inversion_sextic():
                 T_out[center] *= __norm(self.dx_km, ker, F)
         return T_out
 
-def fresnel_inversion_octic():
+def fresnel_transform_octic(T_in, dx_km, F_km_vals, phi_rad_vals, kD_vals,
+                            B_rad_vals, D_km_vals, w_km_vals, start, n_used,
+                            wtype, norm, fwd):
     try:
         return _diffraction_functions.fresnel_transform_octic(
             T_in, self.dx_km, self.F_km_vals, self.phi_rad_vals,

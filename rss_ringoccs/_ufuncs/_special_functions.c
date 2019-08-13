@@ -64,10 +64,16 @@ static PyObject *compute_norm_eq(PyObject *self, PyObject *args)
         }
 
         if (typenum == NPY_DOUBLE){
-            return PyFloat_FromDouble(Normeq_Double_Func((double *)data, dim));
+            return PyFloat_FromDouble(Normeq_Double((double *)data, dim));
+        }
+        else if (typenum == NPY_LONGDOUBLE){
+            return PyFloat_FromDouble(Normeq_Long_Double((long double *)data, dim));
+        }
+        else if (typenum == NPY_FLOAT){
+            return PyFloat_FromDouble(Normeq_Float((float *)data, dim));
         }
         else if (typenum == NPY_LONG){
-            return PyFloat_FromDouble(Normeq_Long_Func((long *)data, dim));
+            return PyFloat_FromDouble(Normeq_Long((long *)data, dim));
         }
         else {
             PyErr_Format(PyExc_TypeError, FNAME

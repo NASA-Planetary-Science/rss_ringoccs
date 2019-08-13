@@ -2,49 +2,113 @@
 #include "../../include/Python.h"
 #include "../../include/arrayobject.h"
 
+#include "__math_functions.h"
+
 static PyObject *max(PyObject *self, PyObject *args)
 {
+    #define FNAME "rss_ringoccs.diffrec.math_functions.max\n"
     PyArrayObject *arr;
-    long i, n, strides;
+    PyObject *tuple = PyTuple_GetItem(args, 0);
 
-    if (PyArg_ParseTuple(args, "O!", &PyArray_Type, &arr)){
-        /* Get some info about the data. */
-        n           = PyArray_DIMS(arr)[0];
-        strides     = PyArray_STRIDES(arr)[0];
-        void *data0 = PyArray_DATA(arr);
-        int typenum = PyArray_TYPE(arr);
+    if (PyLong_Check(tuple)){
+        long max;
+        PyArg_ParseTuple(args, "l", &max);
+        return PyLong_FromLong(max);
+    }
+    else if (PyFloat_Check(tuple)){
+        double max;
+        PyArg_ParseTuple(args, "d", &max);
+        return PyFloat_FromDouble(max);
+    }
+    else if (PyArg_ParseTuple(args, "O!", &PyArray_Type, &arr)){
+        npy_int typenum, dim;
+        void *data;
+
+        // Check to make sure input isn't zero dimensional!
+        if (PyArray_NDIM(arr) != 1){
+            PyErr_Format(PyExc_TypeError, FNAME
+                         "\rInput must be a one-dimensional array.");
+            return NULL;
+        }
+
+        // Useful information about the data.
+        typenum = PyArray_TYPE(arr);
+        dim     = PyArray_DIMS(arr)[0];
+        data    = PyArray_DATA(arr);
+
+        if (dim == 0){
+            PyErr_Format(PyExc_TypeError, FNAME "\rInput array is empty.");
+            return NULL;
+        }
 
         if (typenum == NPY_DOUBLE){
-            double max = *(double *)data0;
-            for (i=0; i<n; ++i){
-                if (*(double *)data0 > max){
-                    max = *(double *)data0;
-                }
-                data0 += strides;
-            }
-            return Py_BuildValue("d", max);
+            return PyFloat_FromDouble(max_double((double *)data, dim));
         }
         else if (typenum == NPY_LONG){
-            long max = *(long *)data0;
-            for (i=0; i<n; ++i){
-                if (*(long *)data0 > max){
-                    max = *(long *)data0;
-                }
-                data0 += strides;
-            }
-            return Py_BuildValue("l", max);
+            return PyLong_FromLong(max_long((long *)data, dim));
         }
         else {
-            PyErr_Format(
-                PyExc_TypeError, "Input should be a numpy array of numbers."
-            );
+            PyErr_Format(PyExc_TypeError, FNAME
+                         "\rInput should be a numpy array of numbers.");
             return NULL;
         }
     }
-    else{
-        PyErr_Format(
-            PyExc_TypeError, "Input should be a numpy array of numbers."
-        );
+    else {
+        PyErr_Format(PyExc_TypeError, FNAME
+                     "\rInput should be a numpy array of numbers.");
+        return NULL;
+    }
+}
+
+static PyObject *min(PyObject *self, PyObject *args)
+{
+    #define FNAME "rss_ringoccs.diffrec.math_functions.max\n"
+    PyArrayObject *arr;
+    PyObject *tuple = PyTuple_GetItem(args, 0);
+
+    if (PyLong_Check(tuple)){
+        long min;
+        PyArg_ParseTuple(args, "l", &min);
+        return PyLong_FromLong(min);
+    }
+    else if (PyFloat_Check(tuple)){
+        double min;
+        PyArg_ParseTuple(args, "d", &min);
+        return PyFloat_FromDouble(min);
+    }
+    else if (PyArg_ParseTuple(args, "O!", &PyArray_Type, &arr)){
+        npy_int typenum, dim;
+        void *data;
+
+        // Check to make sure input isn't zero dimensional!
+        if (PyArray_NDIM(arr) != 1){
+            PyErr_Format(PyExc_TypeError, FNAME
+                         "\rInput must be a one-dimensional array.");
+            return NULL;
+        }
+
+        // Useful information about the data.
+        typenum = PyArray_TYPE(arr);
+        dim     = PyArray_DIMS(arr)[0];
+        data    = PyArray_DATA(arr);
+
+        if (typenum == NPY_DOUBLE){
+            return PyFloat_FromDouble(min_double((double *)data, dim));
+        }
+        else if (typenum == NPY_LONG){
+            return PyLong_FromLong(min_long((long *)data, dim));
+        }
+        else {
+            PyErr_Format(PyExc_TypeError, FNAME
+                        "\rInput should be a numpy array of numbers,"
+                        "or a floating point/integer value.");
+            return NULL;
+        }
+    }
+    else {
+        PyErr_Format(PyExc_TypeError, FNAME
+                     "\rInput should be a numpy array of numbers,"
+                     "or a floating point/integer value.");
         return NULL;
     }
 }
@@ -52,6 +116,7 @@ static PyObject *max(PyObject *self, PyObject *args)
 static PyMethodDef DiffMethods[] =
 {
     {"max", max, METH_VARARGS, "Compute the maximum of a numpy array."},
+    {"min", min, METH_VARARGS, "Compute the minimum of a numpy array."},
     {NULL, NULL, 0, NULL}
 };
 

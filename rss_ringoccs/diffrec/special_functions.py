@@ -3,8 +3,7 @@ from scipy.special import erf, lambertw
 from . import window_functions
 from rss_ringoccs.tools import error_check
 try:
-    from rss_ringoccs._ufuncs import _special_functions
-    from rss_ringoccs._ufuncs import _diffraction_functions
+    from . import _special_functions, _diffraction_functions
 except:
     print(
         """
@@ -16,6 +15,19 @@ except:
             \tinstallation instructions.
         """
     )
+
+# Declare constant for the speed of light (km/s)
+SPEED_OF_LIGHT_KM = 299792.4580
+
+# Declare constants for multiples of pi.
+HALF_PI = 1.570796326794896619231322
+TWO_PI = 6.283185307179586476925287
+
+def wavelength_to_wavenumber(lambda_km):
+    return TWO_PI / lambda_km
+
+def frequency_to_wavelength(freq_hz):
+    return SPEED_OF_LIGHT_KM/freq_hz
 
 def savitzky_golay(y, window_size, order, deriv=0, rate=1):
     """
@@ -632,7 +644,7 @@ def double_slit_diffraction(x, z, a, d):
     z = error_check.check_type_and_convert(z, float, "z", fname)
     a = error_check.check_type_and_convert(a, float, "a", fname)
     f1 = np.square(np.sinc(a*x/z))
-    f2 = np.square(np.sin(window_functions.TWO_PI*d*x/z))
+    f2 = np.square(np.sin(TWO_PI*d*x/z))
     f3 = 4.0*np.square(np.sin(np.pi*d*x/z))
 
     return f1*f2/f3
@@ -885,30 +897,40 @@ def fresnel_transform_newton(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
 
 def fresnel_transform_quadratic(T_in, rho_km_vals, F_km_vals, w_km_vals, start,
                                 n_used, wtype, norm, fwd):
+
+    # Try using the C version of the Fresnel transform.
     try:
+
+        # Compute the distance between two points (Sample spacing).
         dx_km = rho_km_vals[1]-rho_km_vals[0]
+
+        # Compute the Fresnel transform.
         return _diffraction_functions.fresnel_transform_quadratic(
             T_in, dx_km, F_km_vals, w_km_vals, start, n_used,
             window_functions.func_dict[wtype]["wnum"], int(norm), int(fwd)
         )
+
+    # If you press CTRL-C, exit the script.
     except KeyboardInterrupt:
         raise
+
+    # If, for any other reason, the C code can't execute, use the Python code.
     except:
 
         # Warn user that the C code failed and that pure Python is being used.
         print(
             """
                 \r\tWarning: rss_ringoccs
-                \r\t\tdiffrec.special_function.fresnel_inversion_newton\n
+                \r\t\tdiffrec.special_functions.fresnel_inversion_quadratic\n
                 \r\tCould not use C code. Using Python. This is very slow.
             """
         )
-        # Create an array for rho_km_vals that is equally spaced.
+
+        # Compute the sample spacing.
         dx_km = rho_km_vals[1]-rho_km_vals[0]
 
-        # Extract window information from the window dictionary.
+        # Extract the window function from the window dictionary.
         fw = window_functions.func_dict[wtype]["func"]
-        wn = window_functions.func_dict[wtype]["wnum"]
 
         # Create empty array for reconstruction / forward transform.
         T_out = T_in * 0.0
@@ -937,10 +959,7 @@ def fresnel_transform_quadratic(T_in, rho_km_vals, F_km_vals, w_km_vals, start,
         # Precompute the square of F_km_vals for speed.
         F2 = np.square(F_km_vals)
 
-        # Variable for setting a cutoff value for the innermost for loop.
-        loop = 0
-
-        # Perform Fresnel Transform, point by point, but using Riemann Sums.
+        # Perform Fresnel Transform, point by point, using Riemann Sums.
         for i in np.arange(n_used):
 
             # Current point being computed.

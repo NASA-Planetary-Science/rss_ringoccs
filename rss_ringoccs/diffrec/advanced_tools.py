@@ -448,7 +448,9 @@ class ModelFromGEO(object):
         self.rho_corr_pole_km_vals = np.zeros(np.size(self.rho_km_vals))
         self.rho_corr_timing_km_vals = np.zeros(np.size(self.rho_km_vals))
         self.f_sky_hz_vals = np.zeros(np.size(self.rho_km_vals))
-        self.f_sky_hz_vals += diffraction_correction.SPEED_OF_LIGHT_KM/lambda_km
+        self.f_sky_hz_vals += special_functions.frequency_to_wavelength(
+            lambda_km
+        )
 
         # Interpolate modeled data, if necessary.
         if not (type(data_rho) == type(None)):
@@ -708,7 +710,9 @@ class ModelFromGEO(object):
 
             self.p_norm_actual_vals = np.zeros(np.size(self.rho_km_vals))
             self.p_norm_actual_vals[center] = 1.0/dx_km_desired
-            kD = diffraction_correction.TWO_PI * self.D_km_vals / lambda_km
+            kD = special_functions.wavelength_to_wavenumber(
+                lambda_km
+            ) * self.D_km_vals
             kD = kD[center]
             r = self.rho_km_vals[center]
             r0 = self.rho_km_vals

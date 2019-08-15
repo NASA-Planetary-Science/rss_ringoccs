@@ -1521,9 +1521,9 @@ def fresnel_transform_octic(T_in, rho_km_vals, F_km_vals, phi_rad_vals, kD_vals,
 
         # Compute the Fresnel transform.
         return _diffraction_functions.fresnel_transform_octic(
-            T_in, self.dx_km, self.F_km_vals, self.phi_rad_vals,
-            kD_vals, self.B_rad_vals, self.D_km_vals,
-            self.w_km_vals, start, n_used, wnum, use_norm, use_fwd
+            T_in, dx_km, F_km_vals, phi_rad_vals, kD_vals, B_rad_vals,
+            D_km_vals, w_km_vals, start, n_used,
+            window_functions.func_dict[wtype]["wnum"], int(norm), int(fwd)
         )
 
     # If CTRL-C is pressed, exit.

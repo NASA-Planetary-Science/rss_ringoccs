@@ -7,7 +7,6 @@
         rings using radio waves.
     Dependencies:
         #. numpy
-        #. scipy
         #. rss_ringoccs
 """
 # Import dependencies for the diffcorr module
@@ -17,25 +16,16 @@ from rss_ringoccs.tools.write_output_files import write_output_files
 from rss_ringoccs.tools import error_check
 from . import special_functions, window_functions
 try:
-    from rss_ringoccs._ufuncs import _diffraction_functions
+    from . import _diffraction_functions
 except:
     print(
         """
             Error: rss_ringoccs.diffrec.diffraction_correction
-            \tCould Not Import C Code. Stricly Using Python Code.
-            \tThis is signicantly slower. There was most likely an error
-            \tin your installation of rss_ringoccs. To use the C Code,
-            \tdownload a C Compiler (GCC) and see the User's Guide for
-            \tinstallation instructions.
+            \tCould Not Import C Code. Using Python Code. This is very slow.
+            \tThere was most likely an error while installing rss_ringoccs. To
+            \tuse the C Code, download GCC and see the User's Guide.
         """
     )
-
-# Declare constant for the speed of light (km/s)
-SPEED_OF_LIGHT_KM = 299792.4580
-
-# Declare constants for multiples of pi.
-HALF_PI = 1.570796326794896619231322
-TWO_PI = 6.283185307179586476925287
 
 # Dictionary containing regions of interest within the Saturnian Rings.
 region_dict = {
@@ -341,11 +331,13 @@ class DiffractionCorrection(object):
             for key in window_functions.func_dict:
                 erm = "%s\t\t'%s'\n" % (erm, key)
             raise ValueError(
-                "\n\tError Encountered: rss_ringoccs\n"
-                "\t\tdiffrec.diffraction_correction.DiffractionCorrection"
-                "\n\n\tIllegal string used for wtype.\n"
-                "\tYour string: '%s'\n"
-                "\tAllowed Strings:\n%s" % (wtype, erm)
+                """
+                    \r\tError Encountered: rss_ringoccs
+                    \r\t\t%s\n
+                    \tIllegal string used for wtype.
+                    \r\t\tYour string: '%s'\n
+                    \r\tAllowed Strings:\n%s
+                """ % (fname, wtype, erm)
             )
         else:
             pass
@@ -411,10 +403,12 @@ class DiffractionCorrection(object):
             self.raw_tau_threshold_vals = np.array(DLP.raw_tau_threshold_vals)
         except (TypeError, ValueError, NameError, AttributeError):
             raise TypeError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                "\t%s could not be converted into a numpy array.\n"
-                "\tCheck your DLP class for errors." % erm
+                """
+                    \r\tError Encountered: rss_ringoccs
+                    \r\t\t%s\n
+                    \r\t%s could not be converted into a numpy array.\n
+                    \r\tCheck your DLP instance for errors.
+                """ % (fname, erm)
             )
 
         self.dathist = DLP.history
@@ -445,11 +439,10 @@ class DiffractionCorrection(object):
         if (np.size(self.rho_km_vals) < 2):
             raise IndexError(
                 """
-                    \r\tError Encountered:
-                    \r\t\trss_ringoccs.diffrec.DiffractionCorrection\n
+                    \r\tError Encountered: rss_ringoccs
+                    \r\t\t%s\n
                     \r\trho_km_vals has less than 2 points.
-                    \r\tIt is impossible to do reconstruction.
-                """
+                """ % fname
             )
         else:
             self.rho_km_vals = self.rho_km_vals.astype(float)
@@ -495,17 +488,14 @@ class DiffractionCorrection(object):
                 """
                     \r\tError Encountered: rss_ringoccs
                     \r\t\t%s\n
-                    \r\tRequested resolution is less than twice the sample
-                    \r\tspacing. This will produce inaccurate results.\n
-                    \r\tRequested Resolution (km): %f
-                    \r\tSample Spacing (km): %f\n
-                    \r\tTO CORRECT THIS:
-                    \r\t\tChoose a resolution GREATER than %f km\n
-                    \r\tPLEASE NOTE:\n
-                    \r\t\tTo be consistent with PDS results, a scale factor
-                    \r\t\tof 0.75 is applied to your requested resolution.
-                    \r\t\tto ignore this, set 'res_factor=1.0' when calling
-                    \r\t\tthe DiffractionCorrection class.\n
+                    \r\tResolution is less than twice the sample spacing.
+                    \r\t\tRequested Resolution (km): %f
+                    \r\t\tSample Spacing (km): %f\n
+                    \r\tChoose a resolution GREATER than %f km\n
+                    \r\tPLEASE NOTE:
+                    \r\t\tTo be consistent with PDS results, a factor of 0.75
+                    \r\t\tis applied to the requested resolution. To ignore
+                    \r\t\tthis set the keyword 'res_factor=1.0'.
                     \r\t\tres_factor is currently set to: %f
                 """ % (fname, self.res, self.dx_km,
                        2.0*self.dx_km/res_factor, res_factor)
@@ -529,25 +519,22 @@ class DiffractionCorrection(object):
                     \r\tDiffraction Correction can only be performed for
                     \r\tone event at a time. That is, ingress or egress.\n
                     \r\tTO CORRECT THIS:
-                    \r\t\tSplit the input into two parts: An egress
-                    \r\t\tportion and an ingress portion, and then run
-                    \r\t\tdiffraction correction on the individual pieces.
+                    \r\t\tSplit the input into two parts: Ingress and Engress
+                    \r\t\tand perform diffraction correction twice.
                 """ % (fname)
             )
         elif ((drho[0] == 0.0) or (drho[1] == 0.0)):
             raise ValueError(
                 """
-                    \r\tError Encountered:
+                    \r\tError Encountered: rss_ringoccs
                     \r\t\t%s\n
-                    \r\tdrho/dt has elements with value zero.
+                    \r\tdrho/dt has zero valued elements.
                     \r\tYour input file is probably a chord occultation.
                     \r\tDiffraction Correction can only be performed for
-                    \r\tone event at a time. That is, either an ingress
-                    \r\tor an egress event.\n
+                    \r\tone event at a time. That is, ingress or egress.\n
                     \r\tTO CORRECT THIS:
-                    \r\t\tSplit the input into two parts: An egress
-                    \r\t\tportion and an ingress portion, and then run
-                    \r\t\tdiffraction correction on the individual pieces.
+                    \r\t\tSplit the input into two parts: Ingress and Engress
+                    \r\t\tand perform diffraction correction twice.
                     \r\t\tIgnore the region where drho/dt is close to zero.
                 """ % (fname)
             )
@@ -579,7 +566,9 @@ class DiffractionCorrection(object):
             print("\tComputing Necessary Variables...")
 
         # Compute various variables.
-        self.lambda_sky_km_vals = SPEED_OF_LIGHT_KM / self.f_sky_hz_vals
+        self.lambda_sky_km_vals = special_functions.frequency_to_wavelength(
+            self.f_sky_hz_vals
+        )
         self.mu_vals = np.sin(np.abs(self.B_rad_vals))
         self.T_hat_vals = np.exp(1j*self.phase_rad_vals)
         self.T_hat_vals *= np.sqrt(self.p_norm_vals)
@@ -613,7 +602,6 @@ class DiffractionCorrection(object):
 
         wrange = Prange[np.where((rho_min >= np.min(rho)) &
                                  (rho_max <= np.max(rho)))]
-        self.wrange = wrange
 
         # Check that there is enough data for reconstruction.
         if (np.size(wrange) == 0):
@@ -621,9 +609,7 @@ class DiffractionCorrection(object):
                 """
                     \r\tError Encountered: rss_ringoccs
                     \r\t\t%s\n
-                    \r\tThe window width is too large to reconstruct any
-                    \r\tpoints. Please choose a coarser resolution or
-                    \r\tinspect your input data.\n
+                    \r\tThe window width is too large to reconstruct anything.
                     \r\t\tMinimum Available Radius:         %f
                     \r\t\tMaximum Available Radius:         %f
                     \r\t\tMinimum Required Window Width:    %f
@@ -635,9 +621,7 @@ class DiffractionCorrection(object):
                 """
                     \r\tError Encountered: rss_ringoccs
                     \r\t\t%s\n
-                    \r\tMinimum requested range is greater
-                    \r\tthan the maximum available data point.
-                    \r\tSelect a smaller range for reconstruction.\n
+                    \r\tMinimum requested range is greater than available data.
                     \r\tYour Requested Minimum (km):    %f
                     \r\tYour Requested Maximum (km):    %f
                     \r\tMaximum Available Data (km):    %f
@@ -648,43 +632,34 @@ class DiffractionCorrection(object):
                 """
                     \r\tError Encountered: rss_ringoccs
                     \r\t\t%s\n
-                    \r\tMaximum requested range is less
-                    \r\tthan the minimum available data point.\n
-                    \r\tYour Requested Minimum (km): %f
-                    \r\tYour Requested Maximum (km): %f
-                    \r\tMinimum Available Data (km): %f\n
-                    \r\tTO CORRECT THIS:
-                    \r\t\tSelect a larger range for reconstruction
+                    \r\tMaximum requested range is less than available data.
+                    \r\tYour Requested Minimum (km):    %f
+                    \r\tYour Requested Maximum (km):    %f
+                    \r\tMinimum Available Data (km):    %f
                 """ % (fname, np.min(self.rng), np.max(self.rng), np.min(rho))
             )
         else:
-            pass
-
-        rho_min = np.min(rho[wrange])
-        rho_max = np.max(rho[wrange])
-
-        wrange = wrange[np.where((rho[wrange] >= np.min(self.rng)) &
-                                 (rho[wrange] <= np.max(self.rng)))]
+            rho_min = np.min(rho[wrange])
+            rho_max = np.max(rho[wrange])
+            wrange = wrange[np.where((rho[wrange] >= np.min(self.rng)) &
+                                    (rho[wrange] <= np.max(self.rng)))]
 
         if (np.size(wrange) <= 1):
             raise IndexError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                "\tRequested range does not include any of the\n"
-                "\tavailable points for processing. Please choose\n"
-                "\tA different range for processing.\n"
-                "\t\tMinimum Possible Radius: %f\n"
-                "\t\tMaximum Possible Radius: %f\n"
-                "\t\tRequested Range Minimum: %f\n"
-                "\t\tRequested Range Maximum: %f"
-                % (rho_min, rho_max, np.min(self.rng), np.max(self.rng))
+            """
+                \r\tError Encountered: rss_ringoccs
+                \r\t\t%s\n
+                \r\tRequested range is beyond available data.
+                \r\t\tMinimum Possible Radius: %f
+                \r\t\tMaximum Possible Radius: %f
+                \r\t\tMinimum Requested Range: %f
+                \r\t\tMaximum Requested Range: %f
+            """ % (fname, rho_min, rho_max, np.min(self.rng), np.max(self.rng))
             )
         else:
-            pass
-
-        self.start = wrange[0]
-        self.finish = wrange[-1]
-        self.n_used = 1 + (self.finish - self.start)
+            self.start = wrange[0]
+            self.finish = wrange[-1]
+            self.n_used = 1 + (self.finish - self.start)
 
         # Create input variable and keyword dictionaries for history.
         input_vars = {
@@ -843,7 +818,9 @@ class DiffractionCorrection(object):
                     Complex transmittance.
         """
         # Compute product of wavenumber and RIP distance.
-        kD_vals = TWO_PI * self.D_km_vals / self.lambda_sky_km_vals
+        kD_vals = special_functions.wavelength_to_wavenumber(
+            self.lambda_sky_km_vals
+        ) * self.D_km_vals
 
         # If forward transform, adjust starting point by half a window.
         if fwd:
@@ -860,327 +837,28 @@ class DiffractionCorrection(object):
         if (self.psitype == "ellipse"):
             return special_functions.fresnel_transform_ellipse(
                 T_in, self.rho_km_vals, self.F_km_vals, self.phi_rad_vals,
-                kD_vals, self.B_rad_vals, self.D_km_vals, self.w_km_vals, start,
-                n_used, peri, ecc, self.wtype, self.norm, fwd
-            )
-        elif (self.psitype == "full"):
-            return special_functions.fresnel_inversion_newton(
-                T_in, self.rho_km_vals, self.F_km_vals, self.phi_rad_vals,
                 kD_vals, self.B_rad_vals, self.D_km_vals, self.w_km_vals,
-                start, n_used, self.wtype, self.norm, self.fwd
+                start, n_used, self.periapse, self.eccentricity, self.wtype,
+                self.norm, fwd
             )
         elif (self.psitype == "fresnel"):
             return special_functions.fresnel_transform_quadratic(
                 T_in, self.rho_km_vals, self.F_km_vals, self.w_km_vals, start,
                 n_used, self.wtype, self.norm, fwd
             )
-        elif (self.psitype == "fresnel3"):
-            return _diffraction_functions.fresnel_transform_cubic(
-                T_in, self.dx_km, self.F_km_vals, self.phi_rad_vals,
-                kD_vals, self.B_rad_vals, self.D_km_vals,
-                self.w_km_vals, start, n_used, self.wtype, self.norm, fwd
-            )
-        elif (self.psitype == "fresnel4"):
-            return special_functions.fresnel_transform_quartic(
-                T_in, self.dx_km, self.F_km_vals, self.phi_rad_vals,
-                kD_vals, self.B_rad_vals, self.D_km_vals, self.w_km_vals,
-                start, n_used, self.wtype, self.norm, fwd
-            )
-        elif (self.psitype == "fresnel6"):
-            return _diffraction_functions.fresnel_transform_sextic(
-                T_in, self.dx_km, self.F_km_vals, self.phi_rad_vals,
-                kD_vals, self.B_rad_vals, self.D_km_vals,
-                self.w_km_vals, start, n_used, wnum, use_norm, use_fwd
-            )
         else:
-            return _diffraction_functions.fresnel_transform_octic(
-                T_in, self.dx_km, self.F_km_vals, self.phi_rad_vals,
-                kD_vals, self.B_rad_vals, self.D_km_vals,
-                self.w_km_vals, start, n_used, wnum, use_norm, use_fwd
-            )
-
-            crange -= 1
-            cosb = np.cos(self.B_rad_vals)
-            cosp = np.cos(self.phi_rad_vals)
-            sinp = np.sin(self.phi_rad_vals)
-            A_2 = 0.5*np.square(cosb*sinp)/(1.0-np.square(cosb*sinp))
-
-            # Legendre Polynomials.
-            P_1 = cosb*cosp;
-            P12 = P_1*P_1;
-            P_2 = 1.5*P12-0.5;
-            P_3 = (2.5*P12-1.5)*P_1;
-            P_4 = (4.375*P12-7.5)*P12+0.376;
-            P_5 = ((7.875*P12-8.75)*P12+1.875)*P_1;
-            P_6 = (((14.4375*P12-19.6875)*P12+6.5625)*P12)-0.3125;
-            P_7 = (((P12*26.8125-43.3125)*P12+19.6875)*P12-2.1875)*P_1;
-
-            # Second set of polynomials.
-            b_0 = 0.5 - 0.5*P12
-            b_1 = (0.333333333333 - 0.333333333333*P_2)*P_1
-            b_2 = (P_2 - P_1*P_3)*0.25
-            b_3 = (P_3 - P_1*P_4)*0.20
-            b_4 = (P_4 - P_1*P_5)*0.16666666666666666
-            b_5 = (P_5 - P_1*P_6)*0.14285714285714285
-            b_6 = (P_6 - P_1*P_7)*0.125
-
-            # Products of Legendre Polynomials used in Expansion
-            C_0 = P12
-            C_1 = 2.0*P_1*P_2
-            C_2 = 2.0*P_1*P_3+np.square(P_2)
-            C_3 = 2.0*P_1*P_4+2.0*P_2*P_3
-            C_4 = 2.0*P_2*P_4+np.square(P_3)
-            C_5 = 2.0*P_3*P_4
-            C_6 = np.square(P_4)
-
-            x = (r-r0)
-            x2 = np.square(x)
-            x3 = x2*x
-            x4 = np.square(x2)
-            x5 = x4*x
-            x6 = np.square(x3)
-
-            # D_km_vals and various powers.
-            d = self.D_km_vals
-            d2 = np.square(d)
-            d3 = d2*d
-            d4 = np.square(d2)
-            d5 = d4*d
-            d6 = np.square(d3)
-
-            loop = 0
-            if (self.psitype == "fresnel3"):
-                for i in np.arange(n_used):
-                    # Current point being computed.
-                    center = start+i
-
-                    # Window width and Frensel scale for current point.
-                    w = self.w_km_vals[center]
-                    F = self.F_km_vals[center]
-
-                    if (np.abs(w_init - w) >= 2.0 * self.dx_km):
-
-                        # Compute first window width and window function.
-                        w_init = self.w_km_vals[center]
-                        nw = int(2 * np.floor(w_init / (2.0 * self.dx_km)) + 1)
-                        crange = np.arange(int(center-(nw-1)/2),
-                                           int(1+center+(nw-1)/2))
-
-                        # Ajdust ring radius by dx_km.
-                        r0 = self.rho_km_vals[crange]
-                        r = self.rho_km_vals[center]
-
-                        # Compute psi for with stationary phase value
-                        x = r-r0
-                        x2 = np.square(x)
-
-                        w_func = fw(x, w_init)
-                    else:
-                        crange += 1
-
-                    z = x/d[center]
-                    z2 = x2/d2[center]
-
-                    psi_vals = z2*(b_0[center]-A_2[center]*C_0[center]+
-                                  (b_1[center]-A_2[center]*C_1[center])*z)
-                    psi_vals *= kD_vals[center]
-
-                    # Compute kernel function for Fresnel inverse
-                    if fwd:
-                        ker = w_func*np.exp(1j*psi_vals)
-                    else:
-                        ker = w_func*np.exp(-1j*psi_vals)
-
-                    # Range of diffracted data that falls inside the window
-                    T = T_in[crange]
-
-                    # Compute 'approximate' Fresnel Inversion for current point
-                    T_out[center] = np.sum(ker*T)*self.dx_km*(1.0+1.0j)/(2.0*F)
-
-                    # If normalization has been set, normalize correction.
-                    if self.norm:
-                        T_out[center] *= __norm(self.dx_km, ker, F)
-                    if self.verbose:
-                        print(mes % (i, n_used, nw, loop), end="\r")
+            if (self.psitype == "full"):
+                FresT = special_functions.fresnel_transform_newton
+            elif (self.psitype == "fresnel3"):
+                FresT = special_functions.fresnel_transform_cubic
             elif (self.psitype == "fresnel4"):
-                for i in np.arange(n_used):
-                    # Current point being computed.
-                    center = start+i
-
-                    # Window width and Frensel scale for current point.
-                    w = self.w_km_vals[center]
-                    F = self.F_km_vals[center]
-
-                    if (np.abs(w_init - w) >= 2.0 * self.dx_km):
-
-                        # Compute first window width and window function.
-                        w_init = self.w_km_vals[center]
-                        nw = int(2 * np.floor(w_init / (2.0 * self.dx_km)) + 1)
-                        crange = np.arange(int(center-(nw-1)/2),
-                                        int(1+center+(nw-1)/2))
-
-                        # Ajdust ring radius by dx_km.
-                        r0 = self.rho_km_vals[crange]
-                        r = self.rho_km_vals[center]
-
-                        # Compute psi for with stationary phase value
-                        x = r-r0
-                        x2 = np.square(x)
-
-                        w_func = fw(x, w_init)
-                    else:
-                        crange += 1
-
-                    z = x/d[center]
-                    z2 = x2/d2[center]
-
-                    psi_vals = b_0[center]-A_2[center]*C_0[center]
-                    psi_vals += z*(b_1[center]-A_2[center]*C_1[center])
-                    psi_vals += z2*(b_2[center]-A_2[center]*C_2[center])
-                    psi_vals *= kD_vals[center]*z2
-
-                    # Compute kernel function for Fresnel inverse
-                    if fwd:
-                        ker = w_func*np.exp(1j*psi_vals)
-                    else:
-                        ker = w_func*np.exp(-1j*psi_vals)
-
-                    # Range of diffracted data that falls inside the window
-                    T = T_in[crange]
-
-                    # Compute 'approximate' Fresnel Inversion for current point
-                    T_out[center] = np.sum(ker*T)*self.dx_km*(1.0+1.0j)/(2.0*F)
-
-                    # If normalization has been set, normalize the reconstruction
-                    if self.norm:
-                        T_out[center] *= __norm(self.dx_km, ker, F)
-                    if self.verbose:
-                        print(mes % (i, n_used, nw, loop), end="\r")
+                FresT = special_functions.fresnel_transform_quartic
             elif (self.psitype == "fresnel6"):
-                for i in np.arange(n_used):
-                    # Current point being computed.
-                    center = start+i
-
-                    # Window width and Frensel scale for current point.
-                    w = self.w_km_vals[center]
-                    F = self.F_km_vals[center]
-
-                    if (np.abs(w_init - w) >= 2.0 * self.dx_km):
-
-                        # Compute first window width and window function.
-                        w_init = self.w_km_vals[center]
-                        nw = int(2 * np.floor(w_init / (2.0 * self.dx_km)) + 1)
-                        crange = np.arange(int(center-(nw-1)/2),
-                                        int(1+center+(nw-1)/2))
-
-                        # Ajdust ring radius by dx_km.
-                        r0 = self.rho_km_vals[crange]
-                        r = self.rho_km_vals[center]
-
-                        # Compute psi for with stationary phase value
-                        x = r-r0
-                        x2 = np.square(x)
-                        x3 = x2*x
-                        x4 = np.square(x2)
-
-                        w_func = fw(x, w_init)
-                    else:
-                        crange += 1
-
-                    z = x/d[center]
-                    z2 = x2/d2[center]
-                    z3 = x3/d3[center]
-                    z4 = x4/d4[center]
-
-                    psi_vals = b_0[center]-A_2[crange]*C_0[center]
-                    psi_vals += z*(b_1[center]-A_2[crange]*C_1[center])
-                    psi_vals += z2*(b_2[center]-A_2[crange]*C_2[center])
-                    psi_vals += z3*(b_3[center]-A_2[crange]*C_3[center])
-                    psi_vals += z4*(b_4[center]-A_2[crange]*C_4[center])
-
-                    psi_vals *= z2*kD_vals[center]
-
-                    # Compute kernel function for Fresnel inverse
-                    if fwd:
-                        ker = w_func*np.exp(1j*psi_vals)
-                    else:
-                        ker = w_func*np.exp(-1j*psi_vals)
-
-                    # Range of diffracted data that falls inside the window
-                    T = T_in[crange]
-
-                    # Compute 'approximate' Fresnel Inversion for current point
-                    T_out[center] = np.sum(ker*T)*self.dx_km*(1.0+1.0j)/(2.0*F)
-
-                    # If normalization has been set, normalize the reconstruction
-                    if self.norm:
-                        T_out[center] *= __norm(self.dx_km, ker, F)
-                    if self.verbose:
-                        print(mes % (i, n_used, nw, loop), end="\r")
+                FresT = special_functions.fresnel_transform_sextic
             else:
-                for i in np.arange(n_used):
-                    # Current point being computed.
-                    center = start+i
-
-                    # Window width and Frensel scale for current point.
-                    w = self.w_km_vals[center]
-                    F = self.F_km_vals[center]
-
-                    if (np.abs(w_init - w) >= 2.0 * self.dx_km):
-
-                        # Compute first window width and window function.
-                        w_init = self.w_km_vals[center]
-                        nw = int(2 * np.floor(w_init / (2.0 * self.dx_km)) + 1)
-                        crange = np.arange(int(center-(nw-1)/2),
-                                           int(1+center+(nw-1)/2))
-
-                        # Ajdust ring radius by dx_km.
-                        r0 = self.rho_km_vals[crange]
-                        r = self.rho_km_vals[center]
-
-                        # Compute psi for with stationary phase value
-                        x = r-r0
-                        x2 = np.square(x)
-                        x3 = x2*x
-                        x4 = np.square(x2)
-                        x5 = x4*x
-                        x6 = np.square(x3)
-
-                        w_func = fw(x, w_init)
-                    else:
-                        crange += 1
-
-                    z = x/d[center]
-                    z2 = x2/d2[center]
-                    z3 = x3/d3[center]
-                    z4 = x4/d4[center]
-                    z5 = x5/d5[center]
-                    z6 = x6/d6[center]
-
-                    psi_vals = b_0[center]-A_2[crange]*C_0[center]
-                    psi_vals += z*(b_1[center]-A_2[crange]*C_1[center])
-                    psi_vals += z2*(b_2[center]-A_2[crange]*C_2[center])
-                    psi_vals += z3*(b_3[center]-A_2[crange]*C_3[center])
-                    psi_vals += z4*(b_4[center]-A_2[crange]*C_4[center])
-                    psi_vals += z5*(b_5[center]-A_2[crange]*C_5[center])
-                    psi_vals += z6*(b_6[center]-A_2[crange]*C_6[center])
-
-                    psi_vals *= z2*kD_vals[center]
-
-                    # Compute kernel function for Fresnel inverse
-                    if fwd:
-                        ker = w_func*np.exp(1j*psi_vals)
-                    else:
-                        ker = w_func*np.exp(-1j*psi_vals)
-
-                    # Range of diffracted data that falls inside the window
-                    T = T_in[crange]
-
-                    # Compute 'approximate' Fresnel Inversion for current point
-                    T_out[center] = np.sum(ker*T)*self.dx_km*(1.0+1.0j)/(2.0*F)
-
-                    # If normalization has been set, normalize the reconstruction
-                    if self.norm:
-                        T_out[center] *= __norm(self.dx_km, ker, F)
-                    if self.verbose:
-                        print(mes % (i, n_used, nw, loop), end="\r")
+                FresT = special_functions.fresnel_transform_octic
+            
+            return FresT(T_in, self.rho_km_vals, self.F_km_vals,
+                         self.phi_rad_vals, kD_vals, self.B_rad_vals,
+                         self.D_km_vals, self.w_km_vals, start, n_used,
+                         self.wtype, self.norm, fwd)

@@ -1,7 +1,7 @@
 #ifndef RSS_RINGOCCS_NORMALIZED_EQUIVALENT_WIDTH_H
 #define RSS_RINGOCCS_NORMALIZED_EQUIVALENT_WIDTH_H
 
-double Normeq_Float(float *w_func, long n_elements){
+float Normeq_Float(float *w_func, long n_elements){
     float tot_sq = 0.0;
     float sq_tot = 0.0;
     long i;
@@ -35,7 +35,7 @@ double Normeq_Double(double *w_func, long n_elements){
     return n_elements * sq_tot / tot_sq;
 }
 
-double Normeq_Long_Double(long double *w_func, long n_elements){
+long double Normeq_Long_Double(long double *w_func, long n_elements){
     long double tot_sq = 0.0;
     long double sq_tot = 0.0;
     long i;

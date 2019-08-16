@@ -448,7 +448,9 @@ class ModelFromGEO(object):
         self.rho_corr_pole_km_vals = np.zeros(np.size(self.rho_km_vals))
         self.rho_corr_timing_km_vals = np.zeros(np.size(self.rho_km_vals))
         self.f_sky_hz_vals = np.zeros(np.size(self.rho_km_vals))
-        self.f_sky_hz_vals += diffraction_correction.SPEED_OF_LIGHT_KM/lambda_km
+        self.f_sky_hz_vals += special_functions.frequency_to_wavelength(
+            lambda_km
+        )
 
         # Interpolate modeled data, if necessary.
         if not (type(data_rho) == type(None)):
@@ -521,12 +523,13 @@ class ModelFromGEO(object):
         }
 
         center = np.min((self.rho_km_vals >= rho).nonzero())
-        F = special_functions.fresnel_scale(lambda_km,
-                                            self.D_km_vals[center],
-                                            self.phi_rad_vals[center],
-                                            self.B_rad_vals[center])
-        F = F + np.zeros(np.size(self.rho_km_vals))
-        kD_vals = 2.0*np.pi * self.D_km_vals / lambda_km
+        F = special_functions.fresnel_scale(
+            lambda_km, self.D_km_vals[center],
+            self.phi_rad_vals[center], self.B_rad_vals[center]
+        ) + np.zeros(np.size(self.rho_km_vals))
+
+        kD_vals = special_functions.wavelength_to_wavenumber(lambda_km)
+        kD_vals *= self.D_km_vals
 
         # Compute the Normalized Equaivalent Width (See MTR86 Equation 20)
         norm_eq = window_functions.func_dict[wtype]["normeq"]
@@ -551,7 +554,6 @@ class ModelFromGEO(object):
 
         wrange = Prange[np.where((rho_min >= np.min(crho)) &
                                  (rho_max <= np.max(crho)))]
-        self.wrange = wrange
 
         # Check that there is enough data for reconstruction.
         if (np.size(wrange) == 0):
@@ -559,9 +561,7 @@ class ModelFromGEO(object):
                 """
                     \r\tError Encountered: rss_ringoccs
                     \r\t\t%s\n
-                    \r\tThe window width is too large to reconstruct any
-                    \r\tpoints. Please choose a coarser resolution or
-                    \r\tinspect your input data.\n
+                    \r\tThe window width is too large.
                     \r\t\tMinimum Available Radius:         %f
                     \r\t\tMaximum Available Radius:         %f
                     \r\t\tMinimum Required Window Width:    %f
@@ -573,9 +573,7 @@ class ModelFromGEO(object):
                 """
                     \r\tError Encountered: rss_ringoccs
                     \r\t\t%s\n
-                    \r\tMinimum requested range is greater
-                    \r\tthan the maximum available data point.
-                    \r\tSelect a smaller range for reconstruction.\n
+                    \r\tMinimum requested range is out of bounds.
                     \r\tYour Requested Minimum (km):    %f
                     \r\tYour Requested Maximum (km):    %f
                     \r\tMaximum Available Data (km):    %f
@@ -586,89 +584,69 @@ class ModelFromGEO(object):
                 """
                     \r\tError Encountered: rss_ringoccs
                     \r\t\t%s\n
-                    \r\tMaximum requested range is less
-                    \r\tthan the minimum available data point.\n
+                    \r\tMaximum requested range iss out of bounds.
                     \r\tYour Requested Minimum (km): %f
                     \r\tYour Requested Maximum (km): %f
                     \r\tMinimum Available Data (km): %f\n
-                    \r\tTO CORRECT THIS:
-                    \r\t\tSelect a larger range for reconstruction
                 """ % (fname, np.min(self.rng), np.max(self.rng), np.min(crho))
             )
         else:
-            pass
+            rho_min = np.min(crho[wrange])
+            rho_max = np.max(crho[wrange])
 
-        rho_min = np.min(crho[wrange])
-        rho_max = np.max(crho[wrange])
-
-        wrange = wrange[np.where((crho[wrange] >= np.min(self.rng)) &
-                                 (crho[wrange] <= np.max(self.rng)))]
+            wrange = wrange[np.where((crho[wrange] >= np.min(self.rng)) &
+                                    (crho[wrange] <= np.max(self.rng)))]
 
         if (np.size(wrange) <= 1):
             raise IndexError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                "\tRequested range does not include any of the\n"
-                "\tavailable points for processing. Please choose\n"
-                "\tA different range for processing.\n"
-                "\t\tMinimum Possible Radius: %f\n"
-                "\t\tMaximum Possible Radius: %f\n"
-                "\t\tRequested Range Minimum: %f\n"
-                "\t\tRequested Range Maximum: %f"
-                % (rho_min, rho_max, np.min(self.rng), np.max(self.rng))
+            """
+                \r\tError Encountered: rss_ringoccs
+                \r\t\t%s\n
+                \r\tRequested range is beyond available data.
+                \r\t\tMinimum Possible Radius: %f
+                \r\t\tMaximum Possible Radius: %f
+                \r\t\tMinimum Requested Range: %f
+                \r\t\tMaximum Requested Range: %f
+            """ % (fname, rho_min, rho_max, np.min(self.rng), np.max(self.rng))
             )
         else:
-            pass
+            start = wrange[0]
+            finish = wrange[-1]
+            n_used = 1 + (finish - start)
 
-        start = wrange[0]
-        finish = wrange[-1]
-        n_used = 1 + (finish - start)
-
+        if verbose:
+            print("\tComputing Forward Model...")
         if (model == "squarewell"):
+            self.p_norm_actual_vals = np.zeros(np.size(self.rho_km_vals))
+            self.p_norm_actual_vals += 1.0
+            rstart = np.min((self.rho_km_vals>=rho-width/2.0).nonzero())
+            rfinsh = np.max((self.rho_km_vals<=rho+width/2.0).nonzero())
+            self.p_norm_actual_vals[rstart:rfinsh+1] = 0.0
             if use_fresnel:
-                center = np.min((self.rho_km_vals >= rho).nonzero())
-                F = special_functions.fresnel_scale(lambda_km,
-                                                    self.D_km_vals[center],
-                                                    self.phi_rad_vals[center],
-                                                    self.B_rad_vals[center])
                 T_hat = special_functions.square_well_diffraction(
                     self.rho_km_vals, rho-width/2.0, rho+width/2.0, F
                 )
-                self.p_norm_actual_vals = np.zeros(np.size(self.rho_km_vals))
-                self.p_norm_actual_vals += 1.0
-                rstart = np.min((self.rho_km_vals>=rho-width/2.0).nonzero())
-                rfinsh = np.max((self.rho_km_vals<=rho+width/2.0).nonzero())
-                self.p_norm_actual_vals[rstart:rfinsh+1] = 0.0
             else:
-                self.p_norm_vals = np.zeros(np.size(self.rho_km_vals))+1.0
-                rstart = np.min((self.rho_km_vals>=rho-width/2.0).nonzero())
-                rfinsh = np.max((self.rho_km_vals<=rho+width/2.0).nonzero())
-                self.p_norm_vals[rstart:rfinsh+1] = 0.0
-                self.phase_rad_vals = np.zeros(np.size(self.rho_km_vals))
-                rec = diffraction_correction.DiffractionCorrection(
-                    self, res, psitype=psitype, verbose=verbose, wtype=wtype,
-                    bfac=bfac, eccentricity=eccentricity, periapse=periapse,
-                    res_factor=res_factor, rng=rng
+                T_in = self.p_norm_actual_vals.astype(complex)
+                T_hat = special_functions.fresnel_transform_newton(
+                    T_in, self.rho_km_vals, F, self.phi_rad_vals,
+                    kD_vals, self.B_rad_vals, self.D_km_vals, self.w_km_vals,
+                    start, n_used, wtype, norm, True
                 )
         elif (model == "rightstraightedge"):
+            self.p_norm_actual_vals = np.zeros(np.size(self.rho_km_vals))
+            rfinsh = np.max((self.rho_km_vals<=rho).nonzero())
+            self.p_norm_actual_vals[0:rfinsh] = 1.0
             if use_fresnel:
                 x = window_functions.SQRT_PI_2*(rho-self.rho_km_vals)/F
-
                 T_hat = (special_functions.fresnel_cos(x)+
-                         special_functions.fresnel_sin(x)*1j)
-                T_hat = (0.5+0.5j-T_hat/window_functions.SQRT_PI_2)*(0.5-0.5j)
-
-                self.p_norm_actual_vals = np.zeros(np.size(self.rho_km_vals))
-                rfinsh = np.max((self.rho_km_vals<=rho).nonzero())
-                self.p_norm_actual_vals[0:rfinsh] = 1.0
+                         special_functions.fresnel_sin(x)*1j) * (
+                         0.5+0.5j-T_hat/window_functions.SQRT_PI_2
+                        )*(0.5-0.5j)
             else:
-                self.p_norm_vals = np.zeros(np.size(self.rho_km_vals))
-                rstart = np.min((self.rho_km_vals>=rho).nonzero())
-                self.p_norm_vals[rstart:-1] = 1.0
-                self.phase_rad_vals = np.zeros(np.size(self.rho_km_vals))
-                print("bob")
-                self.T_out = special_functions.fresnel_inversion_newton(
-                    self.p_norm_vals+0.0j, self.rho_km_vals, F, self.phi_rad_vals,
+                T_in = self.p_norm_actual_vals.astype(complex)
+                T_hat = special_functions.fresnel_transform_newton(
+                    T_in, self.rho_km_vals, F, self.phi_rad_vals,
                     kD_vals, self.B_rad_vals, self.D_km_vals, self.w_km_vals,
                     start, n_used, wtype, norm, True
                 )
@@ -708,7 +686,9 @@ class ModelFromGEO(object):
 
             self.p_norm_actual_vals = np.zeros(np.size(self.rho_km_vals))
             self.p_norm_actual_vals[center] = 1.0/dx_km_desired
-            kD = diffraction_correction.TWO_PI * self.D_km_vals / lambda_km
+            kD = special_functions.wavelength_to_wavenumber(
+                lambda_km
+            ) * self.D_km_vals
             kD = kD[center]
             r = self.rho_km_vals[center]
             r0 = self.rho_km_vals
@@ -734,27 +714,29 @@ class ModelFromGEO(object):
                 res_factor=res_factor, rng=rng
             )
 
-        if use_fresnel:
-            self.p_norm_vals = np.abs(T_hat)*np.abs(T_hat)
-            self.phase_rad_vals = -np.arctan2(np.imag(T_hat), np.real(T_hat))
-        else:
-            self.p_norm_vals = rec.power_vals
-            self.phase_rad_vals = -rec.phase_vals
-            self.F_km_vals = rec.F_km_vals
-            self.B_rad_vals = rec.B_rad_vals
-            self.D_km_vals = rec.D_km_vals
-            self.f_sky_hz_vals = rec.f_sky_hz_vals
-            self.phi_rad_vals = rec.phi_rad_vals
-            self.phi_rl_rad_vals = rec.phi_rl_rad_vals
-            self.raw_tau_threshold_vals = rec.raw_tau_threshold_vals
-            self.rho_corr_pole_km_vals = rec.rho_corr_pole_km_vals
-            self.rho_corr_timing_km_vals = rec.rho_corr_timing_km_vals
-            self.rho_dot_kms_vals = rec.rho_dot_kms_vals
-            self.rho_km_vals = rec.rho_km_vals
-            self.t_oet_spm_vals = rec.t_oet_spm_vals
-            self.t_ret_spm_vals = rec.t_ret_spm_vals
-            self.t_set_spm_vals = rec.t_set_spm_vals
-            self.p_norm_actual_vals = rec.p_norm_vals
+        if verbose:
+            print("\tForward Model Complete.")
+        self.p_norm_vals = np.abs(T_hat)*np.abs(T_hat)
+        self.phase_rad_vals = -np.arctan2(np.imag(T_hat), np.real(T_hat))
+
+        crange = np.arange(n_used)+start
+        self.B_rad_vals = self.B_rad_vals[crange]
+        self.D_km_vals = self.D_km_vals[crange]
+        self.f_sky_hz_vals = self.f_sky_hz_vals[crange]
+        self.p_norm_actual_vals = self.p_norm_actual_vals[crange]
+        self.p_norm_vals = self.p_norm_vals[crange]
+        self.phase_rad_vals = self.phase_rad_vals[crange]
+        self.phi_rad_vals = self.phi_rad_vals[crange]
+        self.phi_rl_rad_vals = self.phi_rl_rad_vals[crange]
+        self.raw_tau_threshold_vals = self.raw_tau_threshold_vals[crange]
+        self.rho_corr_pole_km_vals = self.rho_corr_pole_km_vals[crange]
+        self.rho_corr_timing_km_vals = self.rho_corr_timing_km_vals[crange]
+        self.rho_dot_kms_vals = self.rho_dot_kms_vals[crange]
+        self.rho_km_vals = self.rho_km_vals[crange]
+        self.t_oet_spm_vals = self.t_oet_spm_vals[crange]
+        self.t_ret_spm_vals = self.t_ret_spm_vals[crange]
+        self.t_set_spm_vals = self.t_set_spm_vals[crange]
+        self.w_km_vals = self.w_km_vals[crange]
 
         if echo:
             n_shift = int(rho_shift/dx_km_desired)

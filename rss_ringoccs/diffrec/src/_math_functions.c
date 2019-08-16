@@ -1,8 +1,9 @@
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
-#include "../../include/Python.h"
-#include "../../include/arrayobject.h"
+#include "../../../include/Python.h"
+#include "../../../include/arrayobject.h"
 
-#include "__math_functions.h"
+#include "__max.h"
+#include "__min.h"
 
 static PyObject *max(PyObject *self, PyObject *args)
 {
@@ -42,10 +43,10 @@ static PyObject *max(PyObject *self, PyObject *args)
         }
 
         if (typenum == NPY_DOUBLE){
-            return PyFloat_FromDouble(max_double((double *)data, dim));
+            return PyFloat_FromDouble(Max_Double((double *)data, dim));
         }
         else if (typenum == NPY_LONG){
-            return PyLong_FromLong(max_long((long *)data, dim));
+            return PyLong_FromLong(Max_Long((long *)data, dim));
         }
         else {
             PyErr_Format(PyExc_TypeError, FNAME
@@ -93,10 +94,10 @@ static PyObject *min(PyObject *self, PyObject *args)
         data    = PyArray_DATA(arr);
 
         if (typenum == NPY_DOUBLE){
-            return PyFloat_FromDouble(min_double((double *)data, dim));
+            return PyFloat_FromDouble(Min_Double((double *)data, dim));
         }
         else if (typenum == NPY_LONG){
-            return PyLong_FromLong(min_long((long *)data, dim));
+            return PyLong_FromLong(Min_Long((long *)data, dim));
         }
         else {
             PyErr_Format(PyExc_TypeError, FNAME

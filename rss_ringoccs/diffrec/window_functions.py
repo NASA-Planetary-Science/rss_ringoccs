@@ -11,16 +11,14 @@ import numpy as np
 from scipy.special import lambertw, iv
 from rss_ringoccs.tools import error_check
 try:
-    from rss_ringoccs._ufuncs import _window_functions
+    from . import _window_functions
 except:
     print(
         """
             Error: rss_ringoccs.diffrec.window_functions
-            \tCould Not Import C Code. Stricly Using Python Code.
-            \tThis is signicantly slower. There was most likely an error
-            \tin your installation of rss_ringoccs. To use the C Code,
-            \tdownload a C Compiler (GCC) and see the User's Guide for
-            \tinstallation instructions.
+            \tCould Not Import C Code. Using Python Code. This is very slow.
+            \tThere was most likely an error while installing rss_ringoccs. To
+            \tuse the C Code, download GCC and see the User's Guide.
         """
     )
 

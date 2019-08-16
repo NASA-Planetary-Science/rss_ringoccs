@@ -529,10 +529,10 @@ def fresnel_sin(x):
         fname = "diffrec.special_functions.fresnel_sin"
         error_check.check_is_real(x, "x", fname)
 
-        x *= window_functions.RCP_SQRT_2
-        f_sin = ((0.25+0.25j)*erf((1.0+1.0j)*x)+(0.25-0.25j)*erf((1.0-1.0j)*x))
+        x0 = x*window_functions.RCP_SQRT_2
+        f_sin = ((0.25+0.25j)*erf((1.0+1.0j)*x0)+(0.25-0.25j)*erf((1.0-1.0j)*x0))
 
-        if (np.isreal(x).all()):
+        if (np.isreal(x0).all()):
             f_sin = np.real(f_sin)
 
         return f_sin*window_functions.SQRT_PI_2

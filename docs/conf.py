@@ -17,7 +17,7 @@ import sys
 sys.path.append('../')
 import rss_ringoccs
 sys.path.remove('../')
-sys.path.insert(0, '/Volumes/sflury001/Research/TC2017/sflury/rss_ringoccs/rss_ringoccs')
+sys.path.insert(0, '/Volumes/rmaguire001/Research/TC2017/rmaguire/rss_ringoccs/rss_ringoccs')
 
 
 # -- Project information -----------------------------------------------------
@@ -27,9 +27,9 @@ copyright = '2019, Team Cassini at Wellesley College'
 author = 'Richard French (PI), Sophia Flury, Jolene Fong,\n Ryan Maquire, and Glenn Steranka'
 
 # The short X.Y version
-version = 'v1.1'
+version = 'v1.2'
 # The full version, including alpha/beta/rc tags
-release = 'v1.1'
+release = 'v1.2'
 
 
 # -- General configuration ---------------------------------------------------

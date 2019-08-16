@@ -1,50 +1,40 @@
-/*  To avoid compiler warnings about deprecated numpy stuff.        */
+/*  To avoid compiler warnings about deprecated numpy stuff.                 */
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 
 /* cosine and sine are defined here. */
 #include <math.h>
 
-/*  complex data types, as well as _Complex_I, are defined here.    */
+/*  complex data types, as well as _Complex_I, are defined here.             */
 #include <complex.h>
 
-/* Include the Kaiser-Bessel functions.                             */
+/*  Window functions defined here.                                           */
 #include "__window_functions.h"
 
-/*  Various header files required for the C-Python API to work.     */
-#include "../../include/Python.h"
-#include "../../include/ndarraytypes.h"
-#include "../../include/ufuncobject.h"
+/*  Various header files required for the C-Python API to work.              */
+#include "../../../include/Python.h"
+#include "../../../include/ndarraytypes.h"
+#include "../../../include/ufuncobject.h"
 
 static PyMethodDef _window_functions_methods[] = {{NULL, NULL, 0, NULL}};
-/*---------------------------DEFINE PYTHON FUNCTIONS--------------------------*
- * This contains the Numpy-C and Python-C API parts that allow for the above  *
- * functions to be called in Python. Numpy arrays, as well as floating point  *
- * and integer valued arguments may then be passed into these functions for   *
- * improvement in performance, as opposed to the routines written purely in   *
- * Python. Successful compiling requires the Numpy and Python header files.   *
- *----------------------------------------------------------------------------*/
+/*---------------------------DEFINE PYTHON FUNCTIONS-------------------------*
+ * This contains the Numpy-C and Python-C API parts that allow for the above *
+ * functions to be called in Python. Numpy arrays, as well as floating point *
+ * and integer valued arguments may then be passed into these functions for  *
+ * improvement in performance, as opposed to the routines written purely in  *
+ * Python. Successful compiling requires the Numpy and Python header files.  *
+ *---------------------------------------------------------------------------*/
 static void double_rect(char **args, npy_intp *dimensions,
                         npy_intp* steps, void* data)
 {
     npy_intp i;
     npy_intp n = dimensions[0];
-    char *x = args[0];
-    char *W = args[1];
-    char *out = args[2];
 
-    npy_intp x_step = steps[0];
-    npy_intp W_step = steps[1];
-    npy_intp out_step = steps[2];
+    double *x   =  (double *)args[0];
+    double  W   = *(double *)args[1];
+    double *out =  (double *)args[2];
 
     for (i = 0; i < n; i++) {
-        /*  The function Fresnel_Sine_Taylor_to_Asymptotic_Func is defined in *
-         *  _fresnel_sin.h. Make sure this is in the current directory!       */
-        *((double *)out) = Rect_Window_Func(*(double *)x, *(double *)W);
-
-        /* Push the pointers forward by the appropriate increment.            */
-        x   += x_step;
-        W   += W_step;
-        out += out_step;
+        out[i] = Rect_Window_Func(x[i], W);
     }
 }
 
@@ -53,23 +43,13 @@ static void double_coss(char **args, npy_intp *dimensions,
 {
     npy_intp i;
     npy_intp n = dimensions[0];
-    char *x = args[0];
-    char *W = args[1];
-    char *out = args[2];
 
-    npy_intp x_step = steps[0];
-    npy_intp W_step = steps[1];
-    npy_intp out_step = steps[2];
+    double *x   =  (double *)args[0];
+    double  W   = *(double *)args[1];
+    double *out =  (double *)args[2];
 
     for (i = 0; i < n; i++) {
-        /*  The function Fresnel_Sine_Taylor_to_Asymptotic_Func is defined in *
-         *  _fresnel_sin.h. Make sure this is in the current directory!       */
-        *((double *)out) = Coss_Window_Func(*(double *)x, *(double *)W);
-
-        /* Push the pointers forward by the appropriate increment.            */
-        x   += x_step;
-        W   += W_step;
-        out += out_step;
+        out[i] = Coss_Window_Func(x[i], W);
     }
 }
 
@@ -78,24 +58,13 @@ static void double_kb20(char **args, npy_intp *dimensions,
 {
     npy_intp i;
     npy_intp n = dimensions[0];
-    char *x = args[0];
-    char *W = args[1];
-    char *out = args[2];
 
-    npy_intp x_step = steps[0];
-    npy_intp W_step = steps[1];
-    npy_intp out_step = steps[2];
+    double *x   =  (double *)args[0];
+    double  W   = *(double *)args[1];
+    double *out =  (double *)args[2];
 
     for (i = 0; i < n; i++) {
-        /*  The function Fresnel_Sine_Taylor_to_Asymptotic_Func is defined in *
-         *  _fresnel_sin.h. Make sure this is in the current directory!       */
-        *((double *)out) = Kaiser_Bessel_2_0_Window_Func(*(double *)x,
-                                                         *(double *)W);
-
-        /* Push the pointers forward by the appropriate increment.            */
-        x   += x_step;
-        W   += W_step;
-        out += out_step;
+        out[i] = Kaiser_Bessel_2_0_Double(x[i], W);
     }
 }
 
@@ -104,24 +73,13 @@ static void double_kb25(char **args, npy_intp *dimensions,
 {
     npy_intp i;
     npy_intp n = dimensions[0];
-    char *x = args[0];
-    char *W = args[1];
-    char *out = args[2];
 
-    npy_intp x_step = steps[0];
-    npy_intp W_step = steps[1];
-    npy_intp out_step = steps[2];
+    double *x   =  (double *)args[0];
+    double  W   = *(double *)args[1];
+    double *out =  (double *)args[2];
 
     for (i = 0; i < n; i++) {
-        /*  The function Fresnel_Sine_Taylor_to_Asymptotic_Func is defined in *
-         *  _fresnel_sin.h. Make sure this is in the current directory!       */
-        *((double *)out) = Kaiser_Bessel_2_5_Window_Func(*(double *)x,
-                                                         *(double *)W);
-
-        /* Push the pointers forward by the appropriate increment.            */
-        x   += x_step;
-        W   += W_step;
-        out += out_step;
+        out[i] = Kaiser_Bessel_2_5_Double(x[i], W);
     }
 }
 
@@ -130,24 +88,13 @@ static void double_kb35(char **args, npy_intp *dimensions,
 {
     npy_intp i;
     npy_intp n = dimensions[0];
-    char *x = args[0];
-    char *W = args[1];
-    char *out = args[2];
 
-    npy_intp x_step = steps[0];
-    npy_intp W_step = steps[1];
-    npy_intp out_step = steps[2];
+    double *x   =  (double *)args[0];
+    double  W   = *(double *)args[1];
+    double *out =  (double *)args[2];
 
     for (i = 0; i < n; i++) {
-        /*  The function Fresnel_Sine_Taylor_to_Asymptotic_Func is defined in *
-         *  _fresnel_sin.h. Make sure this is in the current directory!       */
-        *((double *)out) = Kaiser_Bessel_3_5_Window_Func(*(double *)x,
-                                                         *(double *)W);
-
-        /* Push the pointers forward by the appropriate increment.            */
-        x   += x_step;
-        W   += W_step;
-        out += out_step;
+        out[i] = Kaiser_Bessel_3_5_Double(x[i], W);
     }
 }
 
@@ -156,24 +103,13 @@ static void double_kbmd20(char **args, npy_intp *dimensions,
 {
     npy_intp i;
     npy_intp n = dimensions[0];
-    char *x = args[0];
-    char *W = args[1];
-    char *out = args[2];
 
-    npy_intp x_step = steps[0];
-    npy_intp W_step = steps[1];
-    npy_intp out_step = steps[2];
+    double *x   =  (double *)args[0];
+    double  W   = *(double *)args[1];
+    double *out =  (double *)args[2];
 
     for (i = 0; i < n; i++) {
-        /*  The function Fresnel_Sine_Taylor_to_Asymptotic_Func is defined in *
-         *  _fresnel_sin.h. Make sure this is in the current directory!       */
-        *((double *)out) = Modified_Kaiser_Bessel_2_0_Window_Func(*(double *)x,
-                                                                  *(double *)W);
-
-        /* Push the pointers forward by the appropriate increment.            */
-        x   += x_step;
-        W   += W_step;
-        out += out_step;
+        out[i] = Modified_Kaiser_Bessel_2_0_Double(x[i], W);
     }
 }
 
@@ -182,24 +118,13 @@ static void double_kbmd25(char **args, npy_intp *dimensions,
 {
     npy_intp i;
     npy_intp n = dimensions[0];
-    char *x = args[0];
-    char *W = args[1];
-    char *out = args[2];
 
-    npy_intp x_step = steps[0];
-    npy_intp W_step = steps[1];
-    npy_intp out_step = steps[2];
+    double *x   =  (double *)args[0];
+    double  W   = *(double *)args[1];
+    double *out =  (double *)args[2];
 
     for (i = 0; i < n; i++) {
-        /*  The function Fresnel_Sine_Taylor_to_Asymptotic_Func is defined in *
-         *  _fresnel_sin.h. Make sure this is in the current directory!       */
-        *((double *)out) = Modified_Kaiser_Bessel_2_5_Window_Func(*(double *)x,
-                                                                  *(double *)W);
-
-        /* Push the pointers forward by the appropriate increment.            */
-        x   += x_step;
-        W   += W_step;
-        out += out_step;
+        out[i] = Modified_Kaiser_Bessel_2_5_Double(x[i], W);
     }
 }
 
@@ -208,33 +133,22 @@ static void double_kbmd35(char **args, npy_intp *dimensions,
 {
     npy_intp i;
     npy_intp n = dimensions[0];
-    char *x = args[0];
-    char *W = args[1];
-    char *out = args[2];
 
-    npy_intp x_step = steps[0];
-    npy_intp W_step = steps[1];
-    npy_intp out_step = steps[2];
+    double *x   =  (double *)args[0];
+    double  W   = *(double *)args[1];
+    double *out =  (double *)args[2];
 
     for (i = 0; i < n; i++) {
-        /*  The function Fresnel_Sine_Taylor_to_Asymptotic_Func is defined in *
-         *  _fresnel_sin.h. Make sure this is in the current directory!       */
-        *((double *)out) = Modified_Kaiser_Bessel_3_5_Window_Func(*(double *)x,
-                                                                  *(double *)W);
-
-        /* Push the pointers forward by the appropriate increment.            */
-        x   += x_step;
-        W   += W_step;
-        out += out_step;
+        out[i] = Modified_Kaiser_Bessel_3_5_Double(x[i], W);
     }
 }
 
 /* Define pointers to the C functions. */
-PyUFuncGenericFunction rect_funcs[1] = {&double_rect};
-PyUFuncGenericFunction coss_funcs[1] = {&double_coss};
-PyUFuncGenericFunction kb20_funcs[1] = {&double_kb20};
-PyUFuncGenericFunction kb25_funcs[1] = {&double_kb25};
-PyUFuncGenericFunction kb35_funcs[1] = {&double_kb35};
+PyUFuncGenericFunction rect_funcs[1]   = {&double_rect};
+PyUFuncGenericFunction coss_funcs[1]   = {&double_coss};
+PyUFuncGenericFunction kb20_funcs[1]   = {&double_kb20};
+PyUFuncGenericFunction kb25_funcs[1]   = {&double_kb25};
+PyUFuncGenericFunction kb35_funcs[1]   = {&double_kb35};
 PyUFuncGenericFunction kbmd20_funcs[1] = {&double_kbmd20};
 PyUFuncGenericFunction kbmd25_funcs[1] = {&double_kbmd25};
 PyUFuncGenericFunction kbmd35_funcs[1] = {&double_kbmd35};

@@ -166,7 +166,7 @@
 /*  This void function takes a pointer as an input. The pointers values       *
  *  are changed within the code, and there is no need to "return" anything.   *
  *  Hence, this function has no "return" statement.                           */
-static void get_arr(double* x_arr, double dx, long nw_pts)
+static void get_arr(double *x_arr, double dx, long nw_pts)
 {
     /***************************************************************************
      *  Function:                                                              *

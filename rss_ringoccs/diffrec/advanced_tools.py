@@ -640,9 +640,8 @@ class ModelFromGEO(object):
             if use_fresnel:
                 x = window_functions.SQRT_PI_2*(rho-self.rho_km_vals)/F
                 T_hat = (special_functions.fresnel_cos(x)+
-                         special_functions.fresnel_sin(x)*1j) * (
-                         0.5+0.5j-T_hat/window_functions.SQRT_PI_2
-                        )*(0.5-0.5j)
+                         special_functions.fresnel_sin(x)*1j)
+                T_hat *= (0.5+0.5j-T_hat/window_functions.SQRT_PI_2)*(0.5-0.5j)
             else:
                 T_in = self.p_norm_actual_vals.astype(complex)
                 T_hat = special_functions.fresnel_transform_newton(

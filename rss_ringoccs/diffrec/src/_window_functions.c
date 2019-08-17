@@ -24,7 +24,7 @@ static PyMethodDef _window_functions_methods[] = {{NULL, NULL, 0, NULL}};
  * Python. Successful compiling requires the Numpy and Python header files.  *
  *---------------------------------------------------------------------------*/
 static void double_rect(char **args, npy_intp *dimensions,
-                        npy_intp* steps, void* data)
+                        npy_intp *steps, void *data)
 {
     npy_intp i;
     npy_intp n = dimensions[0];
@@ -34,12 +34,12 @@ static void double_rect(char **args, npy_intp *dimensions,
     double *out =  (double *)args[2];
 
     for (i = 0; i < n; i++) {
-        out[i] = Rect_Window_Func(x[i], W);
+        out[i] = Rect_Window_Double(x[i], W);
     }
 }
 
 static void double_coss(char **args, npy_intp *dimensions,
-                        npy_intp* steps, void* data)
+                        npy_intp *steps, void *data)
 {
     npy_intp i;
     npy_intp n = dimensions[0];
@@ -49,12 +49,12 @@ static void double_coss(char **args, npy_intp *dimensions,
     double *out =  (double *)args[2];
 
     for (i = 0; i < n; i++) {
-        out[i] = Coss_Window_Func(x[i], W);
+        out[i] = Coss_Window_Double(x[i], W);
     }
 }
 
 static void double_kb20(char **args, npy_intp *dimensions,
-                        npy_intp* steps, void* data)
+                        npy_intp *steps, void *data)
 {
     npy_intp i;
     npy_intp n = dimensions[0];
@@ -69,7 +69,7 @@ static void double_kb20(char **args, npy_intp *dimensions,
 }
 
 static void double_kb25(char **args, npy_intp *dimensions,
-                        npy_intp* steps, void* data)
+                        npy_intp *steps, void *data)
 {
     npy_intp i;
     npy_intp n = dimensions[0];
@@ -84,7 +84,7 @@ static void double_kb25(char **args, npy_intp *dimensions,
 }
 
 static void double_kb35(char **args, npy_intp *dimensions,
-                        npy_intp* steps, void* data)
+                        npy_intp *steps, void *data)
 {
     npy_intp i;
     npy_intp n = dimensions[0];

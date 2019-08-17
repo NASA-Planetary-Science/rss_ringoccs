@@ -1053,7 +1053,7 @@ def fresnel_transform_cubic(T_in, rho_km_vals, F_km_vals, phi_rad_vals, kD_vals,
         return _diffraction_functions.fresnel_transform_cubic(
             T_in, dx_km, F_km_vals, phi_rad_vals, kD_vals, B_rad_vals,
             D_km_vals, w_km_vals, start, n_used,
-            window_functions.func_dict[wtype]["wnum"], int(norm), int(fwd)
+            window_functions.func_dict[wtype]["wnum"], int(norm), int(fwd), 2
         )
 
     # If CTRL-C is pressed, exit.

@@ -95,8 +95,12 @@ The source code for the `rss_ringoccs` software is stored in the `./rss_ringoccs
     - The `e2e_run.py` script serves as an example of the pipeline from reading a raw RSR file to outputting a reconstructed profile
     - The `quick_look_run.py` script serves as an example of the diffraction correction from reading the .TAB files to outputting a reconstructed profile
 - Batches (in the `./pipeline/` directory)
-    - DLP batch (`dlp_batch.py`) which produces 30 m DLP profiles for all pre-USO, XXX m DLP profiles for post-USO
-    - DiffRec batch (diffrec_batch.py) which produces on-demand reconstructed profiles at custom resolutions down to 60 m for pre-USO, 2XXX m for post-USO, for any desired radius range, window function, approximation of ψ
+    - DLP batch (`dlp_batch.py`) which produces 30 m DLP profiles for all pre-USO and a large portion of post-USO occultations. This only need ever be run once for each file list (one for the pre-USO RSR files and one for the post-USO RSR files). This will allow reconstruction at resolutions from 100 m to 3 km without re-running the initial steps of the pipeline.
+    - DiffRec batch (`diffrec_batch.py`) which produces on-demand reconstructed profiles at custom reconstruction resolutions down to 100 m for pre-USO, 500 m for post-USO, for any desired radius range, window function, approximation of ψ.
+    - End-to-end batches of various resolutions (`e2e_batch_1km.py`, `e2e_batch_500m.py`, and `e2e_batch_postUSO_1km.py`) - these produce GEO, CAL, DLP, and TAU files corresponding to the processing of raw data contained in RSR files into reconstructed optical depth profiles
+
+## Tables
+Tables of reference information are stored in the `./tables/` directory. These include lists of kernel files to download for processing Cassini data, raw RSR files recommended for download and processing, the data catalog, and orbital elements pertaining to gaps in Saturn's rings.
 
 ## Science Tools
 
@@ -132,18 +136,20 @@ The source code for the `rss_ringoccs` software is stored in the `./rss_ringoccs
 - Customizable for particular types of features (edges, wells, hats) and certain radius ranges
 
 ## Uranus Pipeline
-- Contained in rss_uringoccs
-- Follows MTR86 and Gresh 1989
-- Parameter file allows user to customize processing
-- Goal: achieve highest resolution profiles of Uranian rings to date (only possible with a radio occultation experiment)
+- Contained in `./rss_uringoccs/`
+- **Goal:** reproduce original 1989 processing of Voyager 2 1986 Uranus ring occultation experiments and achieve highest resolution profiles of Uranian rings to date (only possible with a radio occultation experiment).
+- Pipeline processing follows MTR86 and Gresh 1989
+- Running the pipeline
+    - Run from `./rss_uringoccs/pipeline/` with a bash script
+    - Parameter file allows user to customize processing before running bash script
 - Unique data file reader &mdash; **Contact: J Fong**
-    - Reads in unique binary file of 50 kHz Voyager 2 Uranus data digitized by D Simpson. This only contains the real component — imaginary signal has been lost!
-    - Uses a Hilbert transform to recover imaginary signal
+    - Reads in unique binary file of 50 kHz Voyager 2 Uranus data digitized by D Simpson. This only contains the real component — imaginary component has been lost!
+    - Uses a Hilbert transform to recover imaginary component of the complex signal
 - Geometry is computed for each ring frame (feature added by J Fong)
 - Completely restructured calibration and DLP steps &mdash; **Contact: S Flury**
     - Raw freq offset is provided, not calculated (50 kHz over a few thousand seconds is computationally taxing)
     - Primary phase steering (as with Saturn) is done for whole data set. Phase detrending function is computed here using a composite Simpson’s rule — it is possible that disagreement with Gresh 1989 results occurs in part because they used a simple Reimann sum to compute the phase detrending function instead of Simpson’s rule. Lien: investigate whether this is in fact the case.
-    - DLP resampling occurs at 5 m
+    - DLP resampling occurs at 5 m resolution
     - Secondary phase steering is done by unwrapping phase and “fitting” with a smoothed (convolved with uniform kernel) phase which preserves the diffraction patterns. This was finicky because the phase unwrapping does not handle noise or diffraction patterns well. Lien: investigate possibility of automating this without hardwiring corrections. Perhaps this might make use of the discontinuity-finder to automate the phase unwrapping corrections.
     - Power normalization is performed. Sufficient freespace power exists adjacent to each ring that no checks for gaps is necessary.
 - DiffractionCorrection
@@ -151,7 +157,7 @@ The source code for the `rss_ringoccs` software is stored in the `./rss_ringoccs
     - A script reads in the Uranus DLP file, builds a DLP object, and calls DiffractionCorrection from rss_ringoccs to do the reconstruction
 - **Lien:** 
     - Use Doppler contours to determine location/origin of epsilon ring scattered signal
-    - investigate use of `pywavelets` to perform wavelet analysis for Uranian ring system — currently not able to reproduce the results of `wavelet.pro` Morlet wavelet transform due to a missing sine term in the pywavelets continuous Morlet wavelet transform with Morlet
+    - investigate use of `pywavelets` to perform wavelet analysis for Uranian ring system — currently not able to reproduce the results of `wavelet.pro` Morlet wavelet transform due to a missing sine term in the `pywavelets` continuous Morlet wavelet transform
 
 ## Other documentation
 

@@ -1,13 +1,13 @@
 """
-    Purpose:
-        Provide the DiffractionCorrection class for
-        performing the necessary mathematics to correct
-        for the diffraction effects that are obtained
-        during occultation observations of planetary
-        rings using radio waves.
-    Dependencies:
-        #. numpy
-        #. rss_ringoccs
+Purpose:
+    Provide the DiffractionCorrection class for
+    performing the necessary mathematics to correct
+    for the diffraction effects that are obtained
+    during occultation observations of planetary
+    rings using radio waves.
+Dependencies:
+    #. numpy
+    #. rss_ringoccs
 """
 # Import dependencies for the diffcorr module
 import numpy as np
@@ -20,10 +20,10 @@ try:
 except:
     print(
         """
-            Error: rss_ringoccs.diffrec.diffraction_correction
-            \tCould Not Import C Code. Using Python Code. This is very slow.
-            \tThere was most likely an error while installing rss_ringoccs. To
-            \tuse the C Code, download GCC and see the User's Guide.
+        \rError: rss_ringoccs.diffrec.diffraction_correction
+        \r\tCould Not Import C Code. Using Python Code. This is very slow.
+        \r\tThere was most likely an error while installing rss_ringoccs. To
+        \r\tuse the C Code, download GCC and see the User's Guide.
         """
     )
 
@@ -55,233 +55,208 @@ region_dict = {
 
 class DiffractionCorrection(object):
     """
-        Purpose:
-            Perform diffraction correction for a ring occultation
-            on a data set that is a near radially symmetric function
-            of the ring radius, or ring intercept point (RIP).
-        Arguments:
-            :DLP (*object*):
-                The data set, usually an instance of the
-                DiffractionLimitedProfile class from the rss_ringoccs
-                Calibration subpackage. This instance MUST contain
-                the following attributes and have the same names.
+    Purpose:
+        Perform diffraction correction for a ring occultation
+        on a data set that is a near radially symmetric function
+        of the ring radius, or ring intercept point (RIP).
+    Arguments:
+        :DLP (*object*):
+            The data set, usually an instance of the
+            DiffractionLimitedProfile class from the rss_ringoccs
+            Calibration subpackage. This instance MUST contain
+            the following attributes and have the same names.
 
-                |   rho_km_vals:      Ring Radius (km)
-                |   phi_rad_vals:     Ring Azimuth Angle (Radians)
-                |   p_norm_vals:      Normalized Power
-                |   phase_rad_vals:   Phase (Radians)
-                |   B_rad_vals:       Elevation Angle (Radians)
-                |   D_km_vals:        RIP-Distance (km)
-                |   f_sky_hz_vals:    Sky Frequency (Hertz)
-                |   rho_dot_kms_vals: RIP-velocity (km/s)
-                |   history:          History dictionary
+            |   rho_km_vals:      Ring Radius (km)
+            |   phi_rad_vals:     Ring Azimuth Angle (Radians)
+            |   p_norm_vals:      Normalized Power
+            |   phase_rad_vals:   Phase (Radians)
+            |   B_rad_vals:       Elevation Angle (Radians)
+            |   D_km_vals:        RIP-Distance (km)
+            |   f_sky_hz_vals:    Sky Frequency (Hertz)
+            |   rho_dot_kms_vals: RIP-velocity (km/s)
+            |   history:          History dictionary
 
-            :res (*float* or *int*):
-                The requested resolution for processing (km). This
-                must be a positive real number.
-        Keywords:
-            :rng (*list* or *str*):
-                The requested range for diffraction correction.
-                Preferred input is rng = [a,b]. Arrays are
-                allowed and the range will be set as:
+        :res (*float* or *int*):
+            The (positive) requested resolution for processing (km).
+    Keywords:
+        :rng (*list* or *str*):
+            The requested range for diffraction correction.
+            Preferred input is rng = [a,b]. Arrays are
+            allowed and the range will be set as:
 
-                |    rng = [MIN(array), MAX(array)]
+            |    rng = [MIN(array), MAX(array)]
 
-                Finally, certain strings containing a few of the
-                regions of interests within the rings of Saturn
-                are allowed. Permissable strings are:
+            Strings containing a few regions of interests within the
+            rings of Saturn are allowed. Permissable strings are:
 
-                |    'all'             [1.0, 400000.0]
-                |    'cringripples'    [77690.0, 77760.0]
-                |    'encke'           [132900.0, 134200.0]
-                |    'enckegap'        [132900.0, 134200.0]
-                |    'janusepimetheus' [96200.0, 96800.0]
-                |    'maxwell'         [87410.0, 87610.0]
-                |    'maxwellringlet'  [87410.0, 87610.0]
-                |    'titan'           [77870.0, 77930.0]
-                |    'titanringlet'    [77870.0, 77930.0]
-                |    'huygens'         [117650.0, 117950.0]
-                |    'huygensringlet'  [117650.0, 117950.0]
+            |    'all'             [1.0, 400000.0]
+            |    'cringripples'    [77690.0, 77760.0]
+            |    'encke'           [132900.0, 134200.0]
+            |    'enckegap'        [132900.0, 134200.0]
+            |    'janusepimetheus' [96200.0, 96800.0]
+            |    'maxwell'         [87410.0, 87610.0]
+            |    'maxwellringlet'  [87410.0, 87610.0]
+            |    'titan'           [77870.0, 77930.0]
+            |    'titanringlet'    [77870.0, 77930.0]
+            |    'huygens'         [117650.0, 117950.0]
+            |    'huygensringlet'  [117650.0, 117950.0]
 
-                Strings are neither case nor space sensitive.
-                For other planets use rng = [a,b]. Default value
-                is set to 'all' which processes [1, 400000]
-                Values MUST be set in kilometers.
-            :wtype (*str):
-                The requested tapering function for diffraction
-                correction. A string with several allowed inputs:
+            Strings are neither case nor space sensitive.
+            Values MUST be set in kilometers. Default is 'all'.
+        :wtype (*str):
+            The requested tapering function for diffraction
+            correction. A string with several allowed inputs:
 
-                |    'rect'      Rectangular Window.
-                |    'coss'      Squared Cosine Window.
-                |    'kb20'      Kaiser-Bessel 2.0 Window.
-                |    'kb25'      Kaiser-Bessel 2.5 Window.
-                |    'kb35'      Kaiser-Bessel 3.5 Window.
-                |    'kbmd20'    Modified kb20 Window.
-                |    'kbmd25'    Modified kb25 Window.
+            |    'rect'      Rectangular Window.
+            |    'coss'      Squared Cosine Window.
+            |    'kb20'      Kaiser-Bessel 2.0 Window.
+            |    'kb25'      Kaiser-Bessel 2.5 Window.
+            |    'kb35'      Kaiser-Bessel 3.5 Window.
+            |    'kbmd20'    Modified kb20 Window.
+            |    'kbmd25'    Modified kb25 Window.
+            |    'kbmd35'    Modified kb35 Window.
 
-                The variable is neither case nor space sensitive.
-                Default window is set to 'kb25'. See window_functions
-                submodule for further documentation.
-            :fwd (*bool*):
-                A Boolean for determining whether or not
-                forward modelling will be computed. This is good
-                starting point for deciding if the diffraction
-                correction is physically significant or valid. If
-                the reconstruction is good, the forward model
-                should reproduce the p_norm_vals attribute from
-                the input DLP instance. Default is set to False.
-            :norm (*bool*):
-                A Boolean for determining whether or not the
-                reconstructed complex transmittance is normalize
-                by the window width. This normalization is the
-                complex transmittance that is computed by using
-                free space divided by the complex transmittance
-                that is computed using free space weighted by the
-                selected tapering function. Default is True.
-            :bfac (*bool*):
-                A Boolean for determining whether or not the
-                'b' factor in the window width computation is
-                used. This is equivalent to setting the Allen
-                Deviation for the spacecraft to a positive value
-                or to zero. If set to False, the Allen Deviation
-                is assumed to be zero. If set to True the Allen
-                Deviation is set to 2e-13, or whichever number you
-                wish to specify in the sigma keyword (See below).
-                Default is True.
-            :sigma (*float*):
-                The Allen deviation for the spacecraft. If the bfac
-                keyword (See above) is set to False, this is ignored.
-                If bfac is set to True, and sigma is NOT specified,
-                then sigma=2e-13 will be used, which is the Allen
-                deviation for Cassini with 1 second integration time.
-                For spacecraft other than Cassini, you should provide
-                the Allen deviation yourself. Default is sigma=2e-13
-            :psitype (*str*):
-                A string for determining what approximation to the
-                geometrical 'psi' function is used. Several strings
-                are allowed:
+            The variable is neither case nor space sensitive.
+            Default window is set to 'kb25'. See window_functions
+            submodule for further documentation.
+        :fwd (*bool*):
+            Boolean for running forward modelling. This is good
+            test for deciding if the diffraction correction is
+            physically significant or valid. If the reconstruction is
+            good the forward model should reproduce the p_norm_vals
+            attribute from the input DLP instance. Default is False.
+        :norm (*bool*):
+            A Boolean for normalizing the reconstructed complex
+            transmittance by the window width. Default is True.
+        :bfac (*bool*):
+            A Boolean for determining whether or not the 'b' factor
+            in the window width computation is used. If False,
+            the Allen Deviation is assumed to be zero. If True,
+            the Allen Deviation is determined by the sigma keyword
+            (see below). Default is True.
+        :sigma (*float*):
+            The Allen deviation for the spacecraft. If the bfac
+            keyword (See above) is set to False, this is ignored.
+            If bfac is set to True, and sigma is NOT specified,
+            then sigma=2e-13 will be used, which is the Allen
+            deviation for Cassini with 1 second integration time.
+            For spacecraft other than Cassini, you should provide
+            the Allen deviation yourself. Default is sigma=2e-13
+        :psitype (*str*):
+            A string for determining what approximation to the
+            Fresnel kernel. is used. Several strings are allowed:
 
-                |    'full'      No Approximation is applied.
-                |    'MTR2'      Second Order Series from MTR86.
-                |    'MTR3'      Third Order Series from MTR86.
-                |    'MTR4'      Fourth Order Series from MTR86.
-                |    'Fresnel'   Standard Fresnel approximation.
+            |    'full'      No Approximation is applied.
+            |    'fresnel'   Standard Fresnel approximation.
+            |    'fresnel3'  Cubic approximation.
+            |    'fresnel4'  Quartic approximation.
+            |    'fresnel6'  Sextic approximation.
+            |    'fresnel8'  Octic approximation.
 
-                The variable is neither case nor space sensitive.
-                Default is set to 'full'.
-            :verbose (*bool*):
-                A Boolean for determining if various pieces of
-                information are printed to the screen or not.
-                Default is False.
-        Attributes:
-            :bfac (*bool*):
-                Boolean for bfac (See keywords).
-            :dathist (*dict*):
-                History from DLP instance.
-            :dx_km (*float*):
-                Radial spacing for the data points (km).
-            :f_sky_hz_vals (*np.ndarray*):
-                Recieved frequency from the spacecraft (Hz).
-            :finish (*int*):
-                Final point that was reconstructed.
-            :fwd (*bool*):
-                Boolean for fwd (See keywords).
-            :history (*dict*):
-                History for the DiffractionCorrection class.
-                This contains system info and user info, including
-                what operating system was used, username, hostname,
-                computer name, and the inputs provided.
-            :lambda_sky_km_vals (*np.ndarray*):
-                Wavelength of recieved signal from spacecraft (km).
-            :mu_vals (*np.ndarray*):
-                The sine of the ring opening angle (Unitless).
-            :n_used (*int*):
-                Number of points that were reconstructed.
-            :norm (*bool*):
-                Boolean for norm (See keywords).
-            :norm_eq (*float*):
-                Normalized equivalent width computed from window
-                that was used during reconstruction. See the
-                window_functions submodule for more information.
-            :p_norm_fwd_vals (*np.ndarray*):
-                Normalized power computer from the forward modelling
-                of the reconstructed data. This will be a None type
-                variable unless fwd=True is set. If the
-                reconstruction went well, this should mimic the raw
-                data, p_norm_vals.
-            :p_norm_vals (*np.ndarray*):
-                Normalized power from the diffracted signal. This is
-                the square of the absolute value of the recieved
-                complex transmittance.
-            :phase_fwd_vals (*np.ndarray*):
-                Phase computed from the forward model of the
-                reconstructed data. This will be a None type
-                variable unless fwd=True is set. If the
-                reconstruction went well, this should mimic
-                phase_rad_vals. This variable is in radians.
-            :phase_rad_vals (*np.ndarray*):
-                Phase from the diffracted signal (Radians).
-            :phase_vals (*np.ndarray*):
-                Reconstructed phase (Radians).
-            :phi_rad_vals (*np.ndarray*):
-                Ring azimuth angle of the ring intercept (Radians).
-            :phi_rl_rad_vals (*np.ndarray*):
-                Ring longitude angle. This will be a None type unless
-                it was provided in the DLP class. Otherwise,
-                this variable is in radians.
-            :power_vals (*np.ndarray*):
-                Normalized reconstructed power.
-            :psitype (*str*):
-                String for psitype (See keywords).
-            :raw_tau_threshold_vals (*np.ndarray*):
-                Threshold optical depth for the diffracted data.
-                This will be a None type unless provided for in the
-                DLP class.
-            :res (*float*):
-                Requested resolution (See arguments). In kilometers.
-            :rho_corr_pole_km_vals (*np.ndarray*):
-                Radial corrections from the Planet's pole. This will
-                be a None type variable unless provided in the
-                DLP class. Otherwise, this is in kilometers.
-            :rho_corr_timing_km_vals (*np.ndarray*):
-                Radial corrections from timing offsets. This will be
-                a None type variable unless provided in the DLP
-                class. Otherwise, this is in kilometers.
-            :rho_dot_kms_vals (*np.ndarray*):
-                Time derivative of the ring intercept point (km/s).
-            :rho_km_vals (*np.ndarray*):
-                Ring-intercept-point (RIP) in kilometers.
-            :rng (*list*):
-                Range that was used for reconstruction, taking into
-                the range that was requested by the user. The actual
-                range takes into account limits in the available data
-                and limits in the required window sizes.
-            :rngreq (*str* or *list*):
-                Requested range (See keywords).
-            :sigma (*float*):
-                Requested Allen deviation (See keywords).
-            :start (*int*):
-                First point that was reconstructed.
-            :t_oet_spm_vals (*np.ndarray*):
-                Time the signal is measured on Earth. This is a
-                None type unless provided for in the DLP class.
-            :t_ret_spm_vals (*np.ndarray*):
-                Time the signal passes through the diffracting
-                medium. This is a None type unless provided for in
-                the DLP class.
-            :t_set_spm_vals (*np.ndarray*):
-                Time the signal is emitted from the spacecraft. This
-                is a None type unless provided in the DLP class.
-            :tau_threshold_vals (*np.ndarray*):
-                Threshold optical depth of the reconstructed data.
-            :tau_vals (*np.ndarray*):
-                Optical depth of the reconstructed data.
-            :verbose (*bool*):
-                Boolean for Verbose (See keywords).
-            :w_km_vals (*np.ndarray*):
-                Window width as a function of radius (km).
-            :wtype (*str*):
-                String for wtype (See keywords).
+            Neither case nor space sensitive. Default is 'full'.
+        :verbose (*bool*):
+            Boolean for determining if various pieces of information
+            are printed or not. Default is False.
+    Attributes:
+        :bfac (*bool*):
+            Boolean for bfac (See keywords).
+        :dathist (*dict*):
+            History from DLP instance.
+        :dx_km (*float*):
+            Radial spacing for the data points (km).
+        :f_sky_hz_vals (*np.ndarray*):
+            Recieved frequency from the spacecraft (Hz).
+        :finish (*int*):
+            Final point that was reconstructed.
+        :fwd (*bool*):
+            Boolean for fwd (See keywords).
+        :history (*dict*):
+            History for the DiffractionCorrection class.
+            This contains system info and user info, including
+            what operating system was used, username, hostname,
+            computer name, and the inputs provided.
+        :lambda_sky_km_vals (*np.ndarray*):
+            Wavelength of recieved signal from spacecraft (km).
+        :mu_vals (*np.ndarray*):
+            The sine of the ring opening angle (Unitless).
+        :n_used (*int*):
+            Number of points that were reconstructed.
+        :norm (*bool*):
+            Boolean for norm (See keywords).
+        :norm_eq (*float*):
+            Normalized equivalent width computed from window
+            that was used during reconstruction. See the
+            window_functions submodule for more information.
+        :p_norm_fwd_vals (*np.ndarray*):
+            Normalized power computer from the forward modelling
+            of the reconstructed data. This will be a None type
+            variable unless fwd=True is set. If the
+            reconstruction went well, this should mimic the raw
+            data, p_norm_vals.
+        :p_norm_vals (*np.ndarray*):
+            Normalized power from the diffracted signal. This is
+            the square of the absolute value of the recieved
+            complex transmittance.
+        :phase_fwd_vals (*np.ndarray*):
+            Phase computed from the forward model of the
+            reconstructed data. This will be a None type
+            variable unless fwd=True is set. If the
+            reconstruction went well, this should mimic
+            phase_rad_vals. This variable is in radians.
+        :phase_rad_vals (*np.ndarray*):
+            Phase from the diffracted signal (Radians).
+        :phase_vals (*np.ndarray*):
+            Reconstructed phase (Radians).
+        :phi_rad_vals (*np.ndarray*):
+            Ring azimuth angle of the ring intercept (Radians).
+        :phi_rl_rad_vals (*np.ndarray*):
+            Ring longitude angle (Radians).
+        :power_vals (*np.ndarray*):
+            Normalized reconstructed power.
+        :psitype (*str*):
+            String for psitype (See keywords).
+        :raw_tau_threshold_vals (*np.ndarray*):
+            Threshold optical depth for the diffracted data.
+        :res (*float*):
+            Requested resolution (See arguments). In kilometers.
+        :rho_corr_pole_km_vals (*np.ndarray*):
+            Radial corrections from the Planet's pole. This will
+            be a None type variable unless provided in the
+            DLP class. Otherwise, this is in kilometers.
+        :rho_corr_timing_km_vals (*np.ndarray*):
+            Radial corrections from timing offsets. This will be
+            a None type variable unless provided in the DLP
+            class. Otherwise, this is in kilometers.
+        :rho_dot_kms_vals (*np.ndarray*):
+            Time derivative of the ring intercept point (km/s).
+        :rho_km_vals (*np.ndarray*):
+            Ring-intercept-point (RIP) in kilometers.
+        :rng (*list*):
+            Range that was used for reconstruction. The actual
+            range takes into account limits in the available data
+            and limits in the required window sizes.
+        :rngreq (*str* or *list*):
+            Requested range (See 'rng' in keywords).
+        :sigma (*float*):
+            Requested Allen deviation (See keywords).
+        :start (*int*):
+            First point that was reconstructed.
+        :t_oet_spm_vals (*np.ndarray*):
+            Time the signal is measured on Earth.
+        :t_ret_spm_vals (*np.ndarray*):
+            Time the signal passes through the diffracting medium.
+        :t_set_spm_vals (*np.ndarray*):
+            Time the signal is emitted from the spacecraft.
+        :tau_threshold_vals (*np.ndarray*):
+            Threshold optical depth of the reconstructed data.
+        :tau_vals (*np.ndarray*):
+            Optical depth of the reconstructed data.
+        :verbose (*bool*):
+            Boolean for Verbose (See keywords).
+        :w_km_vals (*np.ndarray*):
+            Window width as a function of radius (km).
+        :wtype (*str*):
+            String for wtype (See keywords).
     """
     def __init__(self, DLP, res, rng="all", wtype="kbmd20", fwd=False,
                  norm=True, verbose=False, bfac=True, sigma=2.e-13,

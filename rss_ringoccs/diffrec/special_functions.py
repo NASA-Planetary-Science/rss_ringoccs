@@ -1039,21 +1039,44 @@ def fresnel_transform_quadratic(T_in, rho_km_vals, F_km_vals, w_km_vals, start,
                 T_out[center] *= window_functions.normalize(dx_km, ker, F)
         return T_out
 
-def fresnel_transform_cubic(T_in, rho_km_vals, F_km_vals, phi_rad_vals, kD_vals,
-                            B_rad_vals, D_km_vals, w_km_vals, start,
-                            n_used, wtype, norm, fwd):
+def fresnel_legendre_transform(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
+                               kD_vals, B_rad_vals, D_km_vals, w_km_vals, start,
+                               n_used, wtype, norm, fwd, psitype, python=False):
+
+    if (psitype == "fresnel4") or (psitype == "fresnel3"):
+        ord = 3
+    elif (psitype == "fresnel6"):
+        ord = 5
+    elif (psitype == "fresnel8"):
+        ord = 7
+        # dx_km = rho_km_vals[1]-rho_km_vals[0]
+        # return _diffraction_functions.fresnel_transform_octic(
+        #     T_in, dx_km, F_km_vals, phi_rad_vals, kD_vals, B_rad_vals,
+        #     D_km_vals, w_km_vals, start, n_used,
+        #     window_functions.func_dict[wtype]["wnum"], int(norm), int(fwd)
+        # )
+
+    else:
+        raise ValueError(
+            "\r\tError Encountered: rss_ringoccs"
+            "\r\t\tdiffrec.special_functions.fresnel_legendre_transform\n"
+            "\r\tpsitype must be set to 'fresnel4', 'fresnel6', or 'fresnel8'"
+        )
 
     # Try using the C version of the Fresnel transform.
     try:
+
+        if python:
+            raise ValueError
 
         # Compute the distance between two points (Sample spacing).
         dx_km = rho_km_vals[1]-rho_km_vals[0]
 
         # Compute the Fresnel transform.
-        return _diffraction_functions.fresnel_transform_cubic(
+        return _diffraction_functions.fresnel_legendre_transform(
             T_in, dx_km, F_km_vals, phi_rad_vals, kD_vals, B_rad_vals,
             D_km_vals, w_km_vals, start, n_used,
-            window_functions.func_dict[wtype]["wnum"], int(norm), int(fwd), 2
+            window_functions.func_dict[wtype]["wnum"], int(norm), int(fwd), ord
         )
 
     # If CTRL-C is pressed, exit.
@@ -1105,26 +1128,44 @@ def fresnel_transform_cubic(T_in, rho_km_vals, F_km_vals, phi_rad_vals, kD_vals,
         cosb = np.cos(B_rad_vals)
         cosp = np.cos(phi_rad_vals)
         sinp = np.sin(phi_rad_vals)
+        Legendre_Coeff  = cosb*sinp
+        Legendre_Coeff *= Legendre_Coeff
+        Legendre_Coeff  = 0.5*Legendre_Coeff/(1.0-Legendre_Coeff)
 
         # Compute coefficient that occurs in Legendre expansion of psi.
         A_2 = 0.5*np.square(cosb*sinp)/(1.0-np.square(cosb*sinp))
 
         # Legendre Polynomials.
-        P_1 = cosb*cosp
-        P12 = P_1*P_1
-        P_2 = 1.5*P12-0.5
+        legendre_p = []
+        legendre_p.append(1.0)
+        legendre_p.append(cosb*cosp)
 
-        # Second set of polynomials.
-        b_0 = 0.5 - 0.5*P12
-        b_1 = (0.333333333333 - 0.333333333333*P_2)*P_1
+        fresnel_p = []
+        fresnel_p.append(0.5-0.5*np.square(legendre_p[1]))
 
-        # Products of Legendre Polynomials used in Expansion.
-        C_0 = P12
-        C_1 = 2.0*P_1*P_2
+        coeffs_p = []
 
-        # D_km_vals and various powers.
-        d = D_km_vals
-        d2 = np.square(d)
+        l_coeffs = []
+
+        for i in range(ord):
+            l_coeffs.append(1.0/(i+2.0))
+
+        for i in range(1, ord):
+            legendre_p.append(((2.0*i+1.0)*legendre_p[1]*legendre_p[i] -
+                              i*legendre_p[i-1])*l_coeffs[i-1])
+            fresnel_p.append((legendre_p[i]-legendre_p[1]*legendre_p[i+1])*l_coeffs[i])
+
+            coeffs_p.append(0.0)
+            for k in range(i):
+                coeffs_p[i-1] += legendre_p[k+1]*legendre_p[i-k]
+
+            coeffs_p[i-1] = fresnel_p[i-1] - Legendre_Coeff*coeffs_p[i-1]
+
+        i = int((ord+1)/2)
+        coeffs_p.append((fresnel_p[i]-Legendre_Coeff*np.square(legendre_p[i])))
+
+        rcpr_d = 1.0/D_km_vals
+        rcpr_d2 = np.square(rcpr_d)
 
         # Perform Fresnel transform, point by point, using Riemann sums.
         for i in np.arange(n_used):
@@ -1164,520 +1205,13 @@ def fresnel_transform_cubic(T_in, rho_km_vals, F_km_vals, phi_rad_vals, kD_vals,
                 crange += 1
 
             # Independent variable used in the Legendre expansion.
-            z = x/d[center]
-            z2 = x2/d2[center]
-
-            # Approximate psi using Legendre polynomials.
-            psi_vals = z2*(b_0[center]-A_2[center]*C_0[center]+
-                          (b_1[center]-A_2[center]*C_1[center])*z)
-            psi_vals *= kD_vals[center]
-
-            # Compute kernel function for Fresnel inverse or forward model.
-            if fwd:
-                ker = w_func*np.exp(1j*psi_vals)
-            else:
-                ker = w_func*np.exp(-1j*psi_vals)
-
-            # Compute approximate Fresnel transform for current point
-            T_out[center] = np.sum(ker * T_in[crange]) * dx_km * (0.5+0.5j) / F
-
-            # If normalization has been set, normalize the reconstruction.
-            if norm:
-                T_out[center] *= window_functions.normalize(dx_km, ker, F)
-        return T_out
-
-def fresnel_transform_quartic(T_in, rho_km_vals, F_km_vals, phi_rad_vals, kD_vals,
-                              B_rad_vals, D_km_vals, w_km_vals, start, n_used,
-                              wtype, norm, fwd):
-
-    # Try using the C version of the Fresnel transform.
-    try:
-
-        # Compute the distance between two points (Sample spacing).
-        dx_km = rho_km_vals[1]-rho_km_vals[0]
-
-        # Compute the Fresnel transform.
-        return _diffraction_functions.fresnel_transform_quartic(
-            T_in, dx_km, F_km_vals, phi_rad_vals, kD_vals, B_rad_vals,
-            D_km_vals, w_km_vals, start, n_used,
-            window_functions.func_dict[wtype]["wnum"], int(norm), int(fwd)
-        )
-
-    # If CTRL-C is pressed, exit.
-    except KeyboardInterrupt:
-        raise
-
-    # If, for any reason, the C code can't execute, use the Python version.
-    except:
-
-        # Warn user that the C code failed and that pure Python is being used.
-        print(
-            """
-                \r\tWarning: rss_ringoccs
-                \r\t\tdiffrec.special_functions.fresnel_transform_quartic\n
-                \r\tCould not use C code. Using Python. This is very slow.
-            """
-        )
-
-        # Compute sample spacing.
-        dx_km = rho_km_vals[1]-rho_km_vals[0]
-
-        # Define functions.
-        fw = window_functions.func_dict[wtype]["func"]
-    
-        # Create empty array for reconstruction / forward transform.
-        T_out = T_in * 0.0
-    
-        # Compute first window width.
-        w_init = w_km_vals[start]
-
-        # Compute the number of points needed for window (Must be odd integer).
-        nw = int(2 * np.floor(w_init / (2.0 * dx_km)) + 1)
-
-        # Range of indices of rho_km_vals that are processed for first window.
-        crange = np.arange(int(start-(nw-1)/2), int(1+start+(nw-1)/2))
-
-        # Geometry and data to reconstruct the first point.
-        r0 = rho_km_vals[crange]
-        r = rho_km_vals[start]
-        x = r-r0
-        x2 = np.square(x)
-
-        # Window function about first point.
-        w_func = fw(x, w_init)
-
-        # Decrement crange by 1 since a +1 occurs in the next for loop.
-        crange -= 1
-
-        # Precompute sine and cosine of variables for speed.
-        cosb = np.cos(B_rad_vals)
-        cosp = np.cos(phi_rad_vals)
-        sinp = np.sin(phi_rad_vals)
-
-        # Compute coefficient that occurs in Legendre expansion of psi.
-        A_2 = 0.5*np.square(cosb*sinp)/(1.0-np.square(cosb*sinp))
-
-        # Legendre Polynomials.
-        P_1 = cosb*cosp
-        P12 = P_1*P_1
-        P_2 = 1.5*P12-0.5
-        P_3 = (2.5*P12-1.5)*P_1
-
-        # Second set of polynomials.
-        b_0 = 0.5 - 0.5*P12
-        b_1 = (0.333333333333 - 0.333333333333*P_2)*P_1
-        b_2 = (P_2 - P_1*P_3)*0.25
-
-        # Products of Legendre Polynomials used in Expansion
-        C_0 = P12
-        C_1 = 2.0*P_1*P_2
-        C_2 = 2.0*P_1*P_3+np.square(P_2)
-
-        x = (r-r0)
-        x2 = np.square(x)
-
-        # D_km_vals and various powers.
-        d = D_km_vals
-        d2 = np.square(d)
-
-        # Perform Fresnel transform, point by point, using Riemann sums.
-        for i in np.arange(n_used):
-
-            # Current point being computed.
-            center = start+i
-
-            # Window width and Frensel scale for current point.
-            w = w_km_vals[center]
-            F = F_km_vals[center]
-
-            # If the width has changed too much, recompute the window function.
-            if (np.abs(w_init - w) >= 2.0 * dx_km):
-
-                # Compute first window width and window function.
-                w_init = w_km_vals[center]
-
-                # Number of points in window (Odd integer).
-                nw = int(2 * np.floor(w_init / (2.0 * dx_km))+1)
-
-                # Range of indices for rho_km_vals for this window.
-                crange = np.arange(int(center-(nw-1)/2), int(1+center+(nw-1)/2))
-
-                # Ajdust ring radius by dx_km.
-                r0 = rho_km_vals[crange]
-                r = rho_km_vals[center]
-
-                # Center rho_km_vals about r0.
-                x = r-r0
-                x2 = np.square(x)
-
-                # Recompute the window function.
-                w_func = fw(x, w_init)
-            else:
-
-                # If width hasn't changed much, increment indexing variable.
-                crange += 1
-
-            # Compute independent variable of Legendre expansion.
-            z = x/d[center]
-            z2 = x2/d2[center]
-
-            # Approximate psi with Legendre polynomials.
-            psi_vals = b_0[center]-A_2[center]*C_0[center]
-            psi_vals += z*(b_1[center]-A_2[center]*C_1[center])
-            psi_vals += z2*(b_2[center]-A_2[center]*C_2[center])
-            psi_vals *= kD_vals[center]*z2
-
-            # Compute kernel function for Fresnel inverse or forward model.
-            if fwd:
-                ker = w_func*np.exp(1j*psi_vals)
-            else:
-                ker = w_func*np.exp(-1j*psi_vals)
-
-            # Compute approximate Fresnel transform for current point
-            T_out[center] = np.sum(ker * T_in[crange]) * dx_km * (0.5+0.5j) / F
-
-            # If normalization has been set, normalize the reconstruction.
-            if norm:
-                T_out[center] *= window_functions.normalize(dx_km, ker, F)
-        return T_out
-
-def fresnel_transform_sextic(T_in, rho_km_vals, F_km_vals, phi_rad_vals, kD_vals,
-                             B_rad_vals, D_km_vals, w_km_vals, start, n_used,
-                             wtype, norm, fwd):
-
-    # Try using the C version of the Fresnel transform.
-    try:
-
-        # Compute the distance between two points (Sample spacing).
-        dx_km = rho_km_vals[1]-rho_km_vals[0]
-
-        # Compute the Fresnel transform.
-        return _diffraction_functions.fresnel_transform_sextic(
-            T_in, dx_km, F_km_vals, phi_rad_vals, kD_vals, B_rad_vals,
-            D_km_vals, w_km_vals, start, n_used,
-            window_functions.func_dict[wtype]["wnum"], int(norm), int(fwd)
-        )
-
-    # If CTRL-C is pressed, exit.
-    except KeyboardInterrupt:
-        raise
-
-    # If, for any other reason, the C code can't execute, use Python version.
-    except:
-
-        # Warn user that the C code failed and that pure Python is being used.
-        print(
-            """
-                \r\tWarning: rss_ringoccs
-                \r\t\tdiffrec.special_functions.fresnel_transform_sextic\n
-                \r\tCould not use C code. Using Python. This is very slow.
-            """
-        )
-
-        # Compute sample spacing.
-        dx_km = rho_km_vals[1]-rho_km_vals[0]
-
-        # Define functions.
-        fw = window_functions.func_dict[wtype]["func"]
-    
-        # Create empty array for reconstruction / forward transform.
-        T_out = T_in * 0.0
-    
-        # Compute first window width.
-        w_init = w_km_vals[start]
-
-        # Compute the number of points needed for window (Must be odd integer).
-        nw = int(2 * np.floor(w_init / (2.0 * dx_km)) + 1)
-
-        # Range of indices of rho_km_vals that are processed for first window.
-        crange = np.arange(int(start-(nw-1)/2), int(1+start+(nw-1)/2))
-
-        # Geometry and data to reconstruct the first point.
-        r0 = rho_km_vals[crange]
-        r = rho_km_vals[start]
-        x = (r-r0)
-        x2 = np.square(x)
-        x3 = x2*x
-        x4 = np.square(x2)
-
-        # Window function about first point.
-        w_func = fw(x, w_init)
-
-        # Decrement crange by 1 since a +1 occurs in the next for loop.
-        crange -= 1
-
-        # Precompute sine and cosine of variables for speed.
-        cosb = np.cos(B_rad_vals)
-        cosp = np.cos(phi_rad_vals)
-        sinp = np.sin(phi_rad_vals)
-
-        # Compute coefficient that occurs in Legendre expansion of psi.
-        A_2 = 0.5*np.square(cosb*sinp)/(1.0-np.square(cosb*sinp))
-
-        # Legendre Polynomials.
-        P_1 = cosb*cosp
-        P12 = P_1*P_1
-        P_2 = 1.5*P12-0.5
-        P_3 = (2.5*P12-1.5)*P_1
-        P_4 = (4.375*P12-7.5)*P12+0.376
-        P_5 = ((7.875*P12-8.75)*P12+1.875)*P_1
-
-        # Second set of polynomials.
-        b_0 = 0.5 - 0.5*P12
-        b_1 = (0.333333333333 - 0.333333333333*P_2)*P_1
-        b_2 = (P_2 - P_1*P_3)*0.25
-        b_3 = (P_3 - P_1*P_4)*0.20
-        b_4 = (P_4 - P_1*P_5)*0.16666666666666666
-
-        # Products of Legendre Polynomials used in Expansion
-        C_0 = P12
-        C_1 = 2.0*P_1*P_2
-        C_2 = 2.0*P_1*P_3+np.square(P_2)
-        C_3 = 2.0*P_1*P_4+2.0*P_2*P_3
-        C_4 = 2.0*P_2*P_4+np.square(P_3)
-
-        # D_km_vals and various powers.
-        d = D_km_vals
-        d2 = np.square(d)
-        d3 = d2*d
-        d4 = np.square(d2)
-
-        # Perform Fresnel transform, point by point, using Riemann sums.
-        for i in np.arange(n_used):
-
-            # Current point being computed.
-            center = start+i
-
-            # Window width and Frensel scale for current point.
-            w = w_km_vals[center]
-            F = F_km_vals[center]
-
-            # If the width has changed too much, recompute the window function.
-            if (np.abs(w_init - w) >= 2.0 * dx_km):
-
-                # Compute first window width and window function.
-                w_init = w_km_vals[center]
-
-                # Number of points in window (Odd integer).
-                nw = int(2 * np.floor(w_init / (2.0 * dx_km))+1)
-
-                # Range of indices for rho_km_vals for this window.
-                crange = np.arange(int(center-(nw-1)/2), int(1+center+(nw-1)/2))
-
-                # Ajdust ring radius by dx_km.
-                r0 = rho_km_vals[crange]
-                r = rho_km_vals[center]
-
-                # Center rho_km_vals about r0.
-                x = r-r0
-                x2 = np.square(x)
-                x3 = x2*x
-                x4 = np.square(x2)
-
-                # Recompute the window function.
-                w_func = fw(x, w_init)
-            else:
-
-                # If width hasn't changed much, increment indexing variable.
-                crange += 1
-
-            # Compute independent variable used in Legendre expansion.
-            z = x/d[center]
-            z2 = x2/d2[center]
-            z3 = x3/d3[center]
-            z4 = x4/d4[center]
-
-            # Approximate psi using Legendre polynomials
-            psi_vals = b_0[center]-A_2[crange]*C_0[center]
-            psi_vals += z*(b_1[center]-A_2[crange]*C_1[center])
-            psi_vals += z2*(b_2[center]-A_2[crange]*C_2[center])
-            psi_vals += z3*(b_3[center]-A_2[crange]*C_3[center])
-            psi_vals += z4*(b_4[center]-A_2[crange]*C_4[center])
-            psi_vals *= z2*kD_vals[center]
-
-            # Compute kernel function for Fresnel inverse or forward model.
-            if fwd:
-                ker = w_func*np.exp(1j*psi_vals)
-            else:
-                ker = w_func*np.exp(-1j*psi_vals)
-
-            # Compute approximate Fresnel transform for current point
-            T_out[center] = np.sum(ker * T_in[crange]) * dx_km * (0.5+0.5j) / F
-
-            # If normalization has been set, normalize the reconstruction.
-            if norm:
-                T_out[center] *= window_functions.normalize(dx_km, ker, F)
-        return T_out
-
-def fresnel_transform_octic(T_in, rho_km_vals, F_km_vals, phi_rad_vals, kD_vals,
-                            B_rad_vals, D_km_vals, w_km_vals, start, n_used,
-                            wtype, norm, fwd):
-
-    # Try using the C version of the Fresnel transform.
-    try:
-
-        # Compute the distance between two points (Sample spacing).
-        dx_km = rho_km_vals[1]-rho_km_vals[0]
-
-        # Compute the Fresnel transform.
-        return _diffraction_functions.fresnel_transform_octic(
-            T_in, dx_km, F_km_vals, phi_rad_vals, kD_vals, B_rad_vals,
-            D_km_vals, w_km_vals, start, n_used,
-            window_functions.func_dict[wtype]["wnum"], int(norm), int(fwd)
-        )
-
-    # If CTRL-C is pressed, exit.
-    except KeyboardInterrupt:
-        raise
-
-    # If, for any other reason, the C code can't execute, use Python version.
-    except:
-
-        # Warn user that the C code failed and that pure Python is being used.
-        print(
-            """
-                \r\tWarning: rss_ringoccs
-                \r\t\tdiffrec.special_functions.fresnel_transform_octic\n
-                \r\tCould not use C code. Using Python. This is very slow.
-            """
-        )
-
-        # Compute sample spacing.
-        dx_km = rho_km_vals[1]-rho_km_vals[0]
-
-        # Define functions.
-        fw = window_functions.func_dict[wtype]["func"]
-    
-        # Create empty array for reconstruction / forward transform.
-        T_out = T_in * 0.0
-    
-        # Compute first window width.
-        w_init = w_km_vals[start]
-
-        # Compute the number of points needed for window (Must be odd integer).
-        nw = int(2 * np.floor(w_init / (2.0 * dx_km)) + 1)
-
-        # Range of indices of rho_km_vals that are processed for first window.
-        crange = np.arange(int(start-(nw-1)/2), int(1+start+(nw-1)/2))
-
-        # Geometry and data to reconstruct the first point.
-        r0 = rho_km_vals[crange]
-        r = rho_km_vals[start]
-        x = (r-r0)
-        x2 = np.square(x)
-        x3 = x2*x
-        x4 = np.square(x2)
-        x5 = x4*x
-        x6 = np.square(x3)
-
-        # Window function about first point.
-        w_func = fw(x, w_init)
-
-        # Decrement crange by 1 since a +1 occurs in the next for loop.
-        crange -= 1
-
-        # Precompute sine and cosine of variables for speed.
-        cosb = np.cos(B_rad_vals)
-        cosp = np.cos(phi_rad_vals)
-        sinp = np.sin(phi_rad_vals)
-
-        # Compute coefficient that occurs in Legendre expansion of psi.
-        A_2 = 0.5*np.square(cosb*sinp)/(1.0-np.square(cosb*sinp))
-
-        # Legendre Polynomials.
-        P_1 = cosb*cosp
-        P12 = P_1*P_1
-        P_2 = 1.5*P12-0.5
-        P_3 = (2.5*P12-1.5)*P_1
-        P_4 = (4.375*P12-7.5)*P12+0.376
-        P_5 = ((7.875*P12-8.75)*P12+1.875)*P_1
-        P_6 = (((14.4375*P12-19.6875)*P12+6.5625)*P12)-0.3125
-        P_7 = (((P12*26.8125-43.3125)*P12+19.6875)*P12-2.1875)*P_1
-
-        # Second set of polynomials.
-        b_0 = 0.5 - 0.5*P12
-        b_1 = (0.333333333333 - 0.333333333333*P_2)*P_1
-        b_2 = (P_2 - P_1*P_3)*0.25
-        b_3 = (P_3 - P_1*P_4)*0.20
-        b_4 = (P_4 - P_1*P_5)*0.16666666666666666
-        b_5 = (P_5 - P_1*P_6)*0.14285714285714285
-        b_6 = (P_6 - P_1*P_7)*0.125
-
-        # Products of Legendre Polynomials used in Expansion
-        C_0 = P12
-        C_1 = 2.0*P_1*P_2
-        C_2 = 2.0*P_1*P_3+np.square(P_2)
-        C_3 = 2.0*P_1*P_4+2.0*P_2*P_3
-        C_4 = 2.0*P_2*P_4+np.square(P_3)
-        C_5 = 2.0*P_3*P_4
-        C_6 = np.square(P_4)
-
-        # D_km_vals and various powers.
-        d = D_km_vals
-        d2 = np.square(d)
-        d3 = d2*d
-        d4 = np.square(d2)
-        d5 = d4*d
-        d6 = np.square(d3)
-
-        # Perform Fresnel transform, point by point, using Riemann sums.
-        for i in np.arange(n_used):
-
-            # Current point being computed.
-            center = start+i
-
-            # Window width and Frensel scale for current point.
-            w = w_km_vals[center]
-            F = F_km_vals[center]
-
-            # If the width has changed too much, recompute the window function.
-            if (np.abs(w_init - w) >= 2.0 * dx_km):
-
-                # Compute first window width and window function.
-                w_init = w_km_vals[center]
-
-                # Number of points in window (Odd integer).
-                nw = int(2 * np.floor(w_init / (2.0 * dx_km))+1)
-
-                # Range of indices for rho_km_vals for this window.
-                crange = np.arange(int(center-(nw-1)/2), int(1+center+(nw-1)/2))
-
-                # Ajdust ring radius by dx_km.
-                r0 = rho_km_vals[crange]
-                r = rho_km_vals[center]
-
-                # Center rho_km_vals about r0.
-                x = r-r0
-                x2 = np.square(x)
-                x3 = x2*x
-                x4 = np.square(x2)
-                x5 = x4*x
-                x6 = np.square(x3)
-
-                # Recompute the window function.
-                w_func = fw(x, w_init)
-            else:
-
-                # If width hasn't changed much, increment indexing variable.
-                crange += 1
-
-            # Compute independent variable of Legendre expansion.
-            z = x/d[center]
-            z2 = x2/d2[center]
-            z3 = x3/d3[center]
-            z4 = x4/d4[center]
-            z5 = x5/d5[center]
-            z6 = x6/d6[center]
-
-            # Approximate psi using Legendre polynomials.
-            psi_vals = b_0[center]-A_2[crange]*C_0[center]
-            psi_vals += z*(b_1[center]-A_2[crange]*C_1[center])
-            psi_vals += z2*(b_2[center]-A_2[crange]*C_2[center])
-            psi_vals += z3*(b_3[center]-A_2[crange]*C_3[center])
-            psi_vals += z4*(b_4[center]-A_2[crange]*C_4[center])
-            psi_vals += z5*(b_5[center]-A_2[crange]*C_5[center])
-            psi_vals += z6*(b_6[center]-A_2[crange]*C_6[center])
-            psi_vals *= z2*kD_vals[center]
+            z = x*rcpr_d[center]
+            psi_vals = coeffs_p[ord-1][center]
+            for k in range(2, ord):
+                psi_vals = psi_vals*z + coeffs_p[ord-k][center]
+            
+            psi_vals = psi_vals*z + coeffs_p[0][center]
+            psi_vals *= kD_vals[center] * np.square(z)
 
             # Compute kernel function for Fresnel inverse or forward model.
             if fwd:

@@ -261,10 +261,11 @@ class DiffractionCorrection(object):
     def __init__(self, DLP, res, rng="all", wtype="kbmd20", fwd=False,
                  norm=True, verbose=False, bfac=True, sigma=2.e-13,
                  psitype="fresnel4", write_file=False, res_factor=0.75,
-                 eccentricity=0.0, periapse=0.0):
+                 eccentricity=0.0, periapse=0.0, python=False):
 
         fname = "diffrec.diffraction_correction.DiffractionCorrection"
         error_check.check_type(verbose, bool, "verbose", fname)
+        self.python = python
 
         if verbose:
             print("Processing Diffraction Correction:")
@@ -821,19 +822,16 @@ class DiffractionCorrection(object):
                 T_in, self.rho_km_vals, self.F_km_vals, self.w_km_vals, start,
                 n_used, self.wtype, self.norm, fwd
             )
+        elif (self.psitype == "full"):
+            return special_functions.fresnel_transform_newton(
+                T_in, self.rho_km_vals, self.F_km_vals, self.phi_rad_vals,
+                kD_vals, self.B_rad_vals, self.D_km_vals, self.w_km_vals, start,
+                n_used, self.wtype, self.norm, fwd
+            )
         else:
-            if (self.psitype == "full"):
-                FresT = special_functions.fresnel_transform_newton
-            elif (self.psitype == "fresnel3"):
-                FresT = special_functions.fresnel_transform_cubic
-            elif (self.psitype == "fresnel4"):
-                FresT = special_functions.fresnel_transform_quartic
-            elif (self.psitype == "fresnel6"):
-                FresT = special_functions.fresnel_transform_sextic
-            else:
-                FresT = special_functions.fresnel_transform_octic
-            
-            return FresT(T_in, self.rho_km_vals, self.F_km_vals,
-                         self.phi_rad_vals, kD_vals, self.B_rad_vals,
-                         self.D_km_vals, self.w_km_vals, start, n_used,
-                         self.wtype, self.norm, fwd)
+            return special_functions.fresnel_legendre_transform(
+                T_in, self.rho_km_vals, self.F_km_vals, self.phi_rad_vals,
+                kD_vals, self.B_rad_vals, self.D_km_vals, self.w_km_vals, start,
+                n_used, self.wtype, self.norm, fwd, self.psitype,
+                python=self.python
+            )

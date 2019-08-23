@@ -724,8 +724,8 @@ class ModelFromGEO(object):
                 self.phi_rad_vals, kD_vals, self.B_rad_vals, self.D_km_vals,
                 periapse, eccentricity, False
             )
-            self.p_norm_vals = np.abs(T_hat)*np.abs(T_hat)
-            self.phase_rad_vals = -np.arctan2(np.imag(T_hat), np.real(T_hat))
+            self.p_norm_vals = np.square(np.abs(T_hat))
+            self.phase_rad_vals = np.arctan2(np.imag(T_hat), np.real(T_hat))
 
             crange = np.arange(n_used)+start
             self.B_rad_vals = self.B_rad_vals[crange]

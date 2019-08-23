@@ -1041,7 +1041,8 @@ def fresnel_transform_quadratic(T_in, rho_km_vals, F_km_vals, w_km_vals, start,
 
 def fresnel_legendre_transform(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
                                kD_vals, B_rad_vals, D_km_vals, w_km_vals, start,
-                               n_used, wtype, norm, fwd, psitype, python=False):
+                               n_used, wtype, norm, fwd, psitype,
+                               use_python=False):
 
     if (psitype == "fresnel4") or (psitype == "fresnel3"):
         ord = 3
@@ -1066,7 +1067,7 @@ def fresnel_legendre_transform(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
     # Try using the C version of the Fresnel transform.
     try:
 
-        if python:
+        if use_python:
             raise ValueError
 
         # Compute the distance between two points (Sample spacing).
@@ -1226,3 +1227,28 @@ def fresnel_legendre_transform(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
             if norm:
                 T_out[center] *= window_functions.normalize(dx_km, ker, F)
         return T_out
+
+def fresnel_transform():
+        if (self.psitype == "ellipse"):
+            return special_functions.fresnel_transform_ellipse(
+                T_in, ho_km_vals, F_km_vals, phi_rad_vals, kD_vals, B_rad_vals,
+                D_km_vals, w_km_vals, start, n_used, periapse, eccentricity,
+                wtype, norm, fwd
+            )
+        elif (self.psitype == "fresnel"):
+            return special_functions.fresnel_transform_quadratic(
+                T_in, rho_km_vals, F_km_vals, w_km_vals, start,
+                n_used, wtype, norm, fwd 
+            )
+        elif (self.psitype == "full"):
+            return fresnel_transform_newton(
+                T_in, rho_km_vals, F_km_vals, phi_rad_vals, kD_vals, B_rad_vals,
+                D_km_vals, w_km_vals, start, n_used, wtype, norm, fwd
+            )
+        elif ((psitype == "fresnel4") or (psitype == "fresnel6")
+                                      or (psitype == "fresnel8")):
+            return fresnel_legendre_transform(
+                T_in, rho_km_vals, F_km_vals, phi_rad_vals, kD_vals, B_rad_vals,
+                D_km_vals, w_km_vals, start, n_used, wtype, norm, fwd, psitype,
+                use_python=use_python
+            )

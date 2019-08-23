@@ -344,12 +344,14 @@ static void Fresnel_Legendre_Transform_Func(char **args, npy_intp *dimensions,
         fresnel_p[0]  = 0.5-0.5*legendre_p[1]*legendre_p[1];
 
         /* Compute Legendre Polynomials,                                      */
-        for (j=1; j<=order_by_2; ++j){
+        for (j=1; j < order; ++j){
             legendre_p[j+1] = ((2.0*j+1.0)*legendre_p[1]*legendre_p[j] - j*legendre_p[j-1])*l_coeffs[j-1];
             fresnel_p[j] = (legendre_p[j]-legendre_p[1]*legendre_p[j+1]) * l_coeffs[j];
+        }
 
-            /*  Compute the coefficients using Cauchy Products. First compute *
-             *  the bottom triangle of the square in the product.             */
+        /*  Compute the coefficients using Cauchy Products. First compute     *
+         *  the bottom triangle of the square in the product.                 */
+        for (j=1; j<=order_by_2; ++j){
             coeffs_p[j-1] = 0.0;
             for (k=0; k<j; k++){
                 coeffs_p[j-1] += legendre_p[k+1]*legendre_p[j-k];
@@ -359,12 +361,9 @@ static void Fresnel_Legendre_Transform_Func(char **args, npy_intp *dimensions,
 
         /*  Compute along the upper triangle of the square.                   */
         for (j=order_by_2+1; j<order; ++j){
-            legendre_p[j+1] = ((2.0*j+1.0)*legendre_p[1]*legendre_p[j] - j*legendre_p[j-1])*l_coeffs[j-1];
-            fresnel_p[j] = (legendre_p[j]-legendre_p[1]*legendre_p[j+1]) * l_coeffs[j];
-
             coeffs_p[j-1] = 0.0;
             for (k=j-order_by_2; k<order_by_2; k++){
-                coeffs_p[j-1] += legendre_p[k+1]*legendre_p[order_by_2-k];
+                coeffs_p[j-1] += legendre_p[k+1]*legendre_p[j-k];
             }
             coeffs_p[j-1] = fresnel_p[j-1] - Legendre_Coeff*coeffs_p[j-1];
         }
@@ -403,7 +402,7 @@ static void Fresnel_Legendre_Transform_Func(char **args, npy_intp *dimensions,
 static void Fresnel_Transform_Newton_Func(char **args, npy_intp *dimensions,
                                           npy_intp* steps, void* data)
 {
-    long i, j, nw_pts, toler;
+    long i, j, nw_pts, toler, center;
     double w_init, dx, two_dx, rcpr_F, EPS;
 
     toler = 5;
@@ -414,122 +413,97 @@ static void Fresnel_Transform_Newton_Func(char **args, npy_intp *dimensions,
                             double, double, double, double, long, double,
                             double, long, npy_intp);
 
-    char *T_in              = args[0];
-    char *rho_km_vals       = args[1];
-    char *F_km_vals         = args[2];
-    char *phi_rad_vals      = args[3];
-    char *kd_vals           = args[4];
-    char *B_rad_vals        = args[5];
-    char *D_km_vals         = args[6];
-    char *w_km_vals         = args[7];
-    char *start             = args[8];
-    char *n_used            = args[9];
-    char *wtype             = args[10];
-    char *use_norm          = args[11];
-    char *use_fwd           = args[12];
-    char *T_out             = args[13];
+    char *T_in            = args[0];
+    double *rho_km_vals   = (double *)args[1];
+    double *F_km_vals     = (double *)args[2];
+    double *phi_rad_vals  = (double *)args[3];
+    double *kd_vals       = (double *)args[4];
+    double *B_rad_vals    = (double *)args[5];
+    double *D_km_vals     = (double *)args[6];
+    double *w_km_vals     = (double *)args[7];
+    long start            = *(long *)args[8];
+    long n_used           = *(long *)args[9];
+    int wtype             = *(int *)args[10];
+    int use_norm          = *(int *)args[11];
+    int use_fwd           = *(int *)args[12];
+    complex double *T_out = (complex double *)args[13];
 
     npy_intp T_in_steps     = steps[0];
-    npy_intp rho_steps      = steps[1];
-    npy_intp F_steps        = steps[2];
-    npy_intp phi_steps      = steps[3];
-    npy_intp kd_steps       = steps[4];
-    npy_intp B_steps        = steps[5];
-    npy_intp D_steps        = steps[6];
-    npy_intp w_steps        = steps[7];
-    npy_intp T_out_steps    = steps[13];
 
     /*  Cast the selected window type to the fw pointer.                      */
-    if      (*(int *)wtype == 0){fw = &Rect_Window_Double;}
-    else if (*(int *)wtype == 1){fw = &Coss_Window_Double;}
-    else if (*(int *)wtype == 2){fw = &Kaiser_Bessel_2_0_Double;}
-    else if (*(int *)wtype == 3){fw = &Kaiser_Bessel_2_5_Double;}
-    else if (*(int *)wtype == 4){fw = &Kaiser_Bessel_3_5_Double;}
-    else if (*(int *)wtype == 5){fw = &Modified_Kaiser_Bessel_2_0_Double;}
-    else if (*(int *)wtype == 6){fw = &Modified_Kaiser_Bessel_2_5_Double;}
-    else {fw = &Modified_Kaiser_Bessel_3_5_Double;}
+    if      (wtype == 0){fw = &Rect_Window_Double;}
+    else if (wtype == 1){fw = &Coss_Window_Double;}
+    else if (wtype == 2){fw = &Kaiser_Bessel_2_0_Double;}
+    else if (wtype == 3){fw = &Kaiser_Bessel_2_5_Double;}
+    else if (wtype == 4){fw = &Kaiser_Bessel_3_5_Double;}
+    else if (wtype == 5){fw = &Modified_Kaiser_Bessel_2_0_Double;}
+    else if (wtype == 6){fw = &Modified_Kaiser_Bessel_2_5_Double;}
+    else                {fw = &Modified_Kaiser_Bessel_3_5_Double;}
 
-    if (*(int *)use_norm == 0){FresT = &_fresnel_transform_newton;}
-    else {FresT = &_fresnel_transform_newton_norm;}
+    if (use_norm){FresT = &_fresnel_transform_newton_norm;}
+    else {FresT = &_fresnel_transform_newton;}
 
     /* Compute first window width and window function. */
-    phi_rad_vals    += *(long *)start * phi_steps;
-    rho_km_vals     += *(long *)start * rho_steps;
-    kd_vals         += *(long *)start * kd_steps;
-    B_rad_vals      += *(long *)start * B_steps;
-    D_km_vals       += *(long *)start * D_steps;
-    F_km_vals       += *(long *)start * F_steps;
-    w_km_vals       += *(long *)start * w_steps;
-    T_in            += *(long *)start * T_in_steps;
-    T_out           += *(long *)start * T_out_steps;
+    center = start;
+    T_in  += start * T_in_steps;
 
-    if (*(int *)use_fwd == 1){
-        for (i=0; i<=*(long *)n_used; ++i){
-            *(double *)(kd_vals+i*kd_steps) *= -1.0;
+    if (use_fwd){
+        for (i=0; i<=n_used; ++i){
+            kd_vals[center+i] *= -1.0;
         }
     }
 
-    w_init  = *(double *)w_km_vals;
-    dx      = *(double *)(rho_km_vals+rho_steps) - *(double *)(rho_km_vals);
+    w_init  = w_km_vals[center];
+    dx      = rho_km_vals[center+1] - rho_km_vals[center];
     two_dx  = 2.0*dx;
-    nw_pts  = 2*((int)(w_init / (2.0 * dx)))+1;
+    nw_pts  = 2*((long)(w_init / (2.0 * dx)))+1;
 
-    double* x_arr   = (double *)malloc(sizeof(double) * nw_pts);
-    double* phi_arr = (double *)malloc(sizeof(double) * nw_pts);
-    double* w_func  = (double *)malloc(sizeof(double) * nw_pts);
+    double *x_arr   = (double *)malloc(sizeof(double) * nw_pts);
+    double *phi_arr = (double *)malloc(sizeof(double) * nw_pts);
+    double *w_func  = (double *)malloc(sizeof(double) * nw_pts);
 
     for (j=0; j<nw_pts; ++j){
-        x_arr[j]   =  *(double *)(rho_km_vals+rho_steps*(j-(nw_pts-1)/2));
-        phi_arr[j] =  *(double *)(phi_rad_vals+phi_steps*(j-(nw_pts-1)/2));
-        w_func[j]  = fw(x_arr[j] - *(double *)rho_km_vals, w_init);
+        x_arr[j]   = rho_km_vals[center+j-(nw_pts-1)/2];
+        phi_arr[j] = phi_rad_vals[center+j-(nw_pts-1)/2];
+        w_func[j]  = fw(x_arr[j] - rho_km_vals[center], w_init);
     }
 
-    for (i=0; i<=*(long *)n_used; ++i){
-        rcpr_F = 1.0 / *(double *)F_km_vals;
+    for (i=0; i<=n_used; ++i){
+        rcpr_F = 1.0 / F_km_vals[center];
 
         /*  If the window width changes significantly, recompute w_func.  */
-        if (fabs(w_init - *(double *)w_km_vals) >= two_dx) {
+        if (fabs(w_init - w_km_vals[center]) >= two_dx) {
             // Reset w_init and recompute window function.
-            w_init  = *(double *)w_km_vals;
+            w_init  = w_km_vals[center];
             nw_pts  = 2*((int)(w_init / (2.0 * dx)))+1;
-            w_func  = (double *)realloc(w_func, sizeof(double)*nw_pts);
+            w_func  = (double *)realloc(w_func,  sizeof(double) * nw_pts);
             phi_arr = (double *)realloc(phi_arr, sizeof(double) * nw_pts);
-            x_arr   = (double *)realloc(x_arr, sizeof(double)*nw_pts);
+            x_arr   = (double *)realloc(x_arr,   sizeof(double) * nw_pts);
             for (j=0; j<nw_pts; ++j){
-                x_arr[j]  =  *(double *)(rho_km_vals+rho_steps*(j-(nw_pts-1)/2));
-                phi_arr[j] =  *(double *)(phi_rad_vals+phi_steps*(j-(nw_pts-1)/2));
-                w_func[j] = fw(x_arr[j] - *(double *)rho_km_vals, w_init);
+                x_arr[j]   = rho_km_vals[center+j-(nw_pts-1)/2];
+                phi_arr[j] = phi_rad_vals[center+j-(nw_pts-1)/2];
+                w_func[j]  = fw(x_arr[j] - rho_km_vals[center], w_init);
             }
         }
         else {
             for (j=0; j<nw_pts; ++j){
-                x_arr[j]   =  *(double *)(rho_km_vals+rho_steps*(j-(nw_pts-1)/2));
-                phi_arr[j] =  *(double *)(phi_rad_vals+phi_steps*(j-(nw_pts-1)/2));
-                w_func[j]  = fw(x_arr[j] - *(double *)rho_km_vals, w_init);
+                x_arr[j]   = rho_km_vals[center+j-(nw_pts-1)/2];
+                phi_arr[j] = phi_rad_vals[center+j-(nw_pts-1)/2];
             }
         }
 
         /*  Compute the fresnel tranform about the current point.   */
-        *((complex double *)T_out) = FresT(x_arr, phi_arr, T_in, w_func,
-                                           *(double *)kd_vals,
-                                           *(double *)rho_km_vals,
-                                           *(double *)B_rad_vals,
-                                           *(double *)D_km_vals, EPS, toler,
-                                           dx, rcpr_F, nw_pts, T_in_steps);
+        T_out[center] = FresT(x_arr, phi_arr, T_in, w_func, kd_vals[center],
+                              rho_km_vals[center], B_rad_vals[center],
+                              D_km_vals[center], EPS, toler, dx, rcpr_F,
+                              nw_pts, T_in_steps);
 
-        /*  Increment pointers using pointer arithmetic, equivalent to        *
-         *  changing var[n] to var[n+1].                                      */
-        phi_rad_vals    += phi_steps;
-        rho_km_vals     += rho_steps;
-        kd_vals         += kd_steps;
-        B_rad_vals      += B_steps;
-        D_km_vals       += D_steps;
-        F_km_vals       += F_steps;
-        w_km_vals       += w_steps;
-        T_in            += T_in_steps;
-        T_out           += T_out_steps;
+        /*  Increment pointers using pointer arithmetic.                      */
+        T_in   += T_in_steps;
+        center += 1;
     }
     free(x_arr);
+    free(phi_arr);
     free(w_func);
 }
 

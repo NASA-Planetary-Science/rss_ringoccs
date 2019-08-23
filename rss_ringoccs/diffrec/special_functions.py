@@ -1149,14 +1149,22 @@ def fresnel_legendre_transform(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
                               i*legendre_p[i-1])*l_coeffs[i-1])
             fresnel_p.append((legendre_p[i]-legendre_p[1]*legendre_p[i+1])*l_coeffs[i])
 
+        for i in range(1, int((ord+1)/2)+1):
             coeffs_p.append(0.0)
             for k in range(i):
                 coeffs_p[i-1] += legendre_p[k+1]*legendre_p[i-k]
 
             coeffs_p[i-1] = fresnel_p[i-1] - Legendre_Coeff*coeffs_p[i-1]
 
+        for i in range(int((ord+1)/2)+1, ord):
+            coeffs_p.append(0.0)
+            for k in range(i - int((ord+1)/2), int((ord+1)/2)):
+                coeffs_p[i-1] += legendre_p[k+1]*legendre_p[i-k]
+
+            coeffs_p[i-1] = fresnel_p[i-1] - Legendre_Coeff*coeffs_p[i-1]
+
         i = int((ord+1)/2)
-        coeffs_p.append((fresnel_p[i]-Legendre_Coeff*np.square(legendre_p[i])))
+        coeffs_p.append((fresnel_p[ord-1]-Legendre_Coeff*np.square(legendre_p[i])))
 
         rcpr_d = 1.0/D_km_vals
         rcpr_d2 = np.square(rcpr_d)

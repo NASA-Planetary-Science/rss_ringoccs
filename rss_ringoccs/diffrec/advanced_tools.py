@@ -212,6 +212,11 @@ class ModelFromGEO(object):
         dx_km_desired = error_check.check_type_and_convert(dx_km_desired, float,
                                                            "dx_km_desired", fname)
 
+        eccentricity = error_check.check_type_and_convert(eccentricity, float,
+                                                          "eccentricity", fname)
+        periapse = error_check.check_type_and_convert(periapse, float,
+                                                      "periapse", fname)
+
         model = model.replace(" ", "").replace("'", "").replace('"', "")
         model = model.lower()
 
@@ -644,12 +649,13 @@ class ModelFromGEO(object):
             use_fresnel = False
             self.p_norm_vals = self.data_pow
 
-        if not use_fresnel:
+        if ((not use_fresnel) and (not (model == "deltaimpulse"))):
             T_in = self.p_norm_actual_vals.astype(complex)
-            T_hat = special_functions.fresnel_transform_newton(
-                T_in, self.rho_km_vals, F, self.phi_rad_vals,
-                kD_vals, self.B_rad_vals, self.D_km_vals, self.w_km_vals,
-                start, n_used, wtype, norm, True
+            T_hat = special_functions.fresnel_transform(
+                T_in, self.rho_km_vals, F, self.w_km_vals,
+                start, n_used, wtype, norm, False, psitype,
+                self.phi_rad_vals, kD_vals, self.B_rad_vals, self.D_km_vals,
+                periapse, eccentricity, False
             )
 
         if verbose:
@@ -711,10 +717,11 @@ class ModelFromGEO(object):
                 self.data_phase = np.interp(self.rho_km_vals, data_rho, data_phase)
                 self.phase_rad_vals -= self.data_phase
 
-            T_hat = special_functions.fresnel_transform_newton(
-                T_in, self.rho_km_vals, F, self.phi_rad_vals,
-                kD_vals, self.B_rad_vals, self.D_km_vals, self.w_km_vals,
-                start, n_used, wtype, norm, True
+            T_hat = special_functions.fresnel_transform(
+                T_in, self.rho_km_vals, F, self.w_km_vals,
+                start, n_used, wtype, norm, False, psitype,
+                self.phi_rad_vals, kD_vals, self.B_rad_vals, self.D_km_vals,
+                periapse, eccentricity, False
             )
             self.p_norm_vals = np.abs(T_hat)*np.abs(T_hat)
             self.phase_rad_vals = -np.arctan2(np.imag(T_hat), np.real(T_hat))

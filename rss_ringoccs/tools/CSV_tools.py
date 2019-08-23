@@ -592,7 +592,7 @@ class ExtractCSVData(object):
         elif (drdt < 0.0).all():
 
             # The rev is ingress, so flip GEO variables.
-            self.rho_dot_kms_vals = self.rho_dot_kms_vals[::-1]
+            self.rho_dot_kms_vals = np.abs(self.rho_dot_kms_vals[::-1])
             self.D_km_vals = self.D_km_vals[::-1]
             geo_rho = geo_rho[::-1]
         elif (drdt > 0.0).all():

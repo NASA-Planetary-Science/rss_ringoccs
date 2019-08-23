@@ -1050,13 +1050,6 @@ def fresnel_legendre_transform(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
         ord = 5
     elif (psitype == "fresnel8"):
         ord = 7
-        # dx_km = rho_km_vals[1]-rho_km_vals[0]
-        # return _diffraction_functions.fresnel_transform_octic(
-        #     T_in, dx_km, F_km_vals, phi_rad_vals, kD_vals, B_rad_vals,
-        #     D_km_vals, w_km_vals, start, n_used,
-        #     window_functions.func_dict[wtype]["wnum"], int(norm), int(fwd)
-        # )
-
     else:
         raise ValueError(
             "\r\tError Encountered: rss_ringoccs"
@@ -1068,7 +1061,7 @@ def fresnel_legendre_transform(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
     try:
 
         if use_python:
-            raise ValueError
+            raise ValueError("Using Python")
 
         # Compute the distance between two points (Sample spacing).
         dx_km = rho_km_vals[1]-rho_km_vals[0]
@@ -1228,19 +1221,21 @@ def fresnel_legendre_transform(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
                 T_out[center] *= window_functions.normalize(dx_km, ker, F)
         return T_out
 
-def fresnel_transform():
-        if (self.psitype == "ellipse"):
-            return special_functions.fresnel_transform_ellipse(
-                T_in, ho_km_vals, F_km_vals, phi_rad_vals, kD_vals, B_rad_vals,
+def fresnel_transform(T_in, rho_km_vals, F_km_vals, w_km_vals, start, n_used,
+                      wtype, norm, fwd, psitype, phi_rad_vals=None,
+                      kD_vals=None, B_rad_vals=None, D_km_vals=None,
+                      periapse=None, eccentricity=None, use_python=False):
+        if (psitype == "ellipse"):
+            return fresnel_transform_ellipse(
+                T_in, rho_km_vals, F_km_vals, phi_rad_vals, kD_vals, B_rad_vals,
                 D_km_vals, w_km_vals, start, n_used, periapse, eccentricity,
                 wtype, norm, fwd
             )
-        elif (self.psitype == "fresnel"):
-            return special_functions.fresnel_transform_quadratic(
-                T_in, rho_km_vals, F_km_vals, w_km_vals, start,
-                n_used, wtype, norm, fwd 
-            )
-        elif (self.psitype == "full"):
+        elif (psitype == "fresnel"):
+            return fresnel_transform_quadratic(T_in, rho_km_vals, F_km_vals,
+                                               w_km_vals, start, n_used, wtype,
+                                               norm, fwd)
+        elif (psitype == "full"):
             return fresnel_transform_newton(
                 T_in, rho_km_vals, F_km_vals, phi_rad_vals, kD_vals, B_rad_vals,
                 D_km_vals, w_km_vals, start, n_used, wtype, norm, fwd

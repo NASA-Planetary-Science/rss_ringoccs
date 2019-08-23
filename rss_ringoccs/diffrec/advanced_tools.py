@@ -686,6 +686,7 @@ class ModelFromGEO(object):
         if echo:
             if verbose:
                 print("\tComputing Echo Model...")
+
             T_in = self.p_norm_actual_vals.astype(complex)
             F = F[crange]
             kD_vals = kD_vals[crange]

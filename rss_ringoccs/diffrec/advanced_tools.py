@@ -186,7 +186,7 @@ class FindOptimalResolution(object):
 
 class ModelFromGEO(object):
     def __init__(self, geo, lambda_km, res, rho, width=100, dx_km_desired=0.25,
-                 occ="other", wtype='kb25', norm=True, bfac=True, sigma=2.e-13,
+                 wtype='kb25', norm=True, bfac=True, sigma=2.e-13,
                  verbose=True, psitype='fresnel', use_fresnel=False,
                  eccentricity=0.0, periapse=0.0, use_deprecate=False,
                  res_factor=0.75, rng="all", model="squarewell", echo=False,
@@ -198,7 +198,6 @@ class ModelFromGEO(object):
         error_check.check_type(use_fresnel, bool, "use_fresnel", fname)
         error_check.check_type(norm, bool, "norm", fname)
         error_check.check_type(bfac, bool, "bfac", fname)
-        error_check.check_type(occ, str, "occ", fname)
         error_check.check_type(geo, str, "geo", fname)
         error_check.check_type(echo, bool, "echo", fname)
         error_check.check_type(model, str, "model", fname)
@@ -244,8 +243,6 @@ class ModelFromGEO(object):
         error_check.check_positive(lambda_km, "lambda_km", fname)
 
         data = CSV_tools.get_geo(geo, verbose=verbose, use_deprecate=use_deprecate)
-        occ = occ.replace(" ", "").replace("'", "").replace('"', "")
-        occ = occ.lower()
 
         if ((type(data_pow) == type(None)) and
             (not (type(data_rho) == type(None)))):
@@ -349,86 +346,61 @@ class ModelFromGEO(object):
         if verbose:
             print("\tComputing Variables...")
 
-        if (occ == 'ingress'):
-            crange = (self.rho_dot_kms_vals < 0.0).nonzero()
-        elif (occ == 'egress'):
-            crange = (self.rho_dot_kms_vals > 0.0).nonzero()
+        # Check that rho_km_vals is increasing and the rev isn't a chord occ.
+        drho = [np.min(self.rho_dot_kms_vals), np.max(self.rho_dot_kms_vals)]
+        dx_km = self.rho_km_vals[1] - self.rho_km_vals[0]
+
+        if (drho[0] < 0) and (drho[1] > 0):
+            raise ValueError(
+                """
+                    \r\tError Encountered: rss_ringoccs
+                    \r\t\t%s\n
+                    \r\tdrho/dt has positive and negative values.
+                    \r\tYour input file is probably a chord occultation.
+                    \r\tDiffraction Correction can only be performed for
+                    \r\tone event at a time. That is, ingress or egress.\n
+                    \r\tTO CORRECT THIS:
+                    \r\t\tSplit the input into two parts: Ingress and Engress
+                    \r\t\tand perform diffraction correction twice.
+                """ % (fname)
+            )
+        elif ((drho[0] == 0.0) or (drho[1] == 0.0)):
+            raise ValueError(
+                """
+                    \r\tError Encountered: rss_ringoccs
+                    \r\t\t%s\n
+                    \r\tdrho/dt has zero valued elements.
+                    \r\tYour input file is probably a chord occultation.
+                    \r\tDiffraction Correction can only be performed for
+                    \r\tone event at a time. That is, ingress or egress.\n
+                    \r\tTO CORRECT THIS:
+                    \r\t\tSplit the input into two parts: Ingress and Engress
+                    \r\t\tand perform diffraction correction twice.
+                    \r\t\tIgnore the region where drho/dt is close to zero.
+                """ % (fname)
+            )
+        elif (dx_km > 0) and (drho[1] < 0):
+            self.rho_dot_kms_vals = np.abs(self.rho_dot_kms_vals)
+        elif (dx_km < 0) and (drho[0] > 0):
+            raise ValueError(
+                """
+                    \r\tError Encountered:
+                    \r\t\t%s\n
+                    \r\trho_km_vals is decreasing yet rho_dot_kms_vals
+                    \r\tis positiive. Check DLP class for errors.
+                """ % (fname)
+            )
+        elif (dx_km < 0):
+            self.rho_km_vals = self.rho_km_vals[::-1]
+            self.phi_rad_vals = self.phi_rad_vals[::-1]
+            self.B_rad_vals = self.B_rad_vals[::-1]
+            self.D_km_vals = self.D_km_vals[::-1]
+            self.rho_dot_kms_vals = np.abs(self.rho_dot_kms_vals[::-1])
         else:
-            crange_e = (self.rho_dot_kms_vals > 0.0).nonzero()
-            crange_i = (self.rho_dot_kms_vals < 0.0).nonzero()
-            n_e      = np.size(crange_e)
-            n_i      = np.size(crange_i)
-            if (n_e != 0) and (n_i !=0):
-                raise ValueError(
-                    """
-                        \r\tError Encountered: rss_ringoccs
-                        \r\t\t%s\n
-                        \r\trho_dot_kms_vals has positive and negative values.
-                        \r\tThis is likely a chord occultation.
-                        \r\tSet occ='ingress' or occ='egress'.
-                    """ % fname
-                )
-            elif (n_e == 0) and (n_i == 0):
-                raise ValueError(
-                    """
-                        \r\tError Encountered: rss_ringoccs
-                        \r\t\t%s\n
-                        \r\trho_dot_kms_vals is either zero or empty.
-                    """ % fname
-                )
-            elif (n_e != 0) and (n_i == 0):
-                crange = crange_e
-                occ    = 'egress'
-            elif (n_e == 0) and (n_i != 0):
-                crange = crange_i
-                occ    = 'ingress'
-            else:
-                raise TypeError(
-                    """
-                        \r\tError Encountered: rss_ringoccs
-                        \r\t\t%s\n
-                        \r\tCould not determine occultation type.
-                        \r\tCheck your input GEO file.
-                    """ % fname
-                )
+            del drho
 
-            del n_e, n_i, crange_e, crange_i
-
-        if (np.size(crange) == 0):
-            if (occ == 'ingress'):
-                raise TypeError(
-                    """
-                        \r\tError Encountered: rss_ringoccs
-                        \r\t\t%s\n
-                        \r\trho_dot_kms_vals is never negative.
-                    """ % fname
-                )
-            elif (occ == 'egress'):
-                raise TypeError(
-                    """
-                        \r\tError Encountered: rss_ringoccs
-                        \r\t\t%s\n
-                        \r\trho_dot_kms_vals is never negative.
-                    """ % fname
-                )
-            else:
-                raise TypeError(
-                    """
-                        \r\tError Encountered: rss_ringoccs
-                        \r\t\t%s\n
-                        \r\tCould not determine occultation type.
-                        \r\tCheck your input GEO file.
-                    """ % fname
-                )
-        else:
-            pass
-
-        geo_rho = self.rho_km_vals[crange]
-        self.rho_dot_kms_vals = self.rho_dot_kms_vals[crange]
-        self.phi_rad_vals = self.phi_rad_vals[crange]
+        geo_rho = self.rho_km_vals
         self.rho_km_vals = np.arange(np.min(geo_rho), np.max(geo_rho), dx_km_desired)
-        self.B_rad_vals = self.B_rad_vals[crange]
-        self.D_km_vals = self.D_km_vals[crange]
 
         if verbose:
             print("\tInterpolating Data...")
@@ -477,7 +449,6 @@ class ModelFromGEO(object):
 
         input_kwds = {
             "Sample Spacing":   dx_km_desired,
-            "Occultation Type": occ,
             "Window Type":      wtype,
             "Normalization":    norm,
             "b-factor":         bfac,

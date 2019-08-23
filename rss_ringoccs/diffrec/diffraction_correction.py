@@ -261,11 +261,11 @@ class DiffractionCorrection(object):
     def __init__(self, DLP, res, rng="all", wtype="kbmd20", fwd=False,
                  norm=True, verbose=False, bfac=True, sigma=2.e-13,
                  psitype="fresnel4", write_file=False, res_factor=0.75,
-                 eccentricity=0.0, periapse=0.0, python=False):
+                 eccentricity=0.0, periapse=0.0, use_python=False):
 
         fname = "diffrec.diffraction_correction.DiffractionCorrection"
         error_check.check_type(verbose, bool, "verbose", fname)
-        self.python = python
+        self.use_python = use_python
 
         if verbose:
             print("Processing Diffraction Correction:")
@@ -810,28 +810,9 @@ class DiffractionCorrection(object):
             n_used = self.n_used
             T_in = self.T_hat_vals
 
-        if (self.psitype == "ellipse"):
-            return special_functions.fresnel_transform_ellipse(
-                T_in, self.rho_km_vals, self.F_km_vals, self.phi_rad_vals,
-                kD_vals, self.B_rad_vals, self.D_km_vals, self.w_km_vals,
-                start, n_used, self.periapse, self.eccentricity, self.wtype,
-                self.norm, fwd
-            )
-        elif (self.psitype == "fresnel"):
-            return special_functions.fresnel_transform_quadratic(
-                T_in, self.rho_km_vals, self.F_km_vals, self.w_km_vals, start,
-                n_used, self.wtype, self.norm, fwd
-            )
-        elif (self.psitype == "full"):
-            return special_functions.fresnel_transform_newton(
-                T_in, self.rho_km_vals, self.F_km_vals, self.phi_rad_vals,
-                kD_vals, self.B_rad_vals, self.D_km_vals, self.w_km_vals, start,
-                n_used, self.wtype, self.norm, fwd
-            )
-        else:
-            return special_functions.fresnel_legendre_transform(
-                T_in, self.rho_km_vals, self.F_km_vals, self.phi_rad_vals,
-                kD_vals, self.B_rad_vals, self.D_km_vals, self.w_km_vals, start,
-                n_used, self.wtype, self.norm, fwd, self.psitype,
-                python=self.python
-            )
+        return special_functions.fresnel_transform(
+            T_in, self.rho_km_vals, self.F_km_vals, self.w_km_vals,
+            start, n_used, self.wtype, self.norm, fwd, self.psitype,
+            self.phi_rad_vals, kD_vals, self.B_rad_vals, self.D_km_vals,
+            self.periapse, self.eccentricity, self.use_python
+        )

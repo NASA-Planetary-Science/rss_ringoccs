@@ -14,6 +14,8 @@ def configuration(parent_package=None, top_path=None):
                          ['src/_diffraction_functions.c'])
     config.add_extension('_math_functions',
                          ['src/_math_functions.c'])
+    config.add_extension('_fresnel_diffraction',
+                         ['src/_fresnel_diffraction.c'])
 
     return config
 

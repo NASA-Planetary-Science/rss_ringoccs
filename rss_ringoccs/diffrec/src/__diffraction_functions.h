@@ -403,10 +403,11 @@ complex double _fresnel_transform_norm(double *x_arr, char *T_in,
  *      T_out (complex double):                                               *
  *          The diffraction corrected profile.                                *
  ******************************************************************************/
-complex double _fresnel_legendre(double *x_arr, char *T_in, double *w_func,
-                                 double rcpr_D, double *coeffs, double dx,
-                                 double rcpr_F, double kd, long n_pts,
-                                 int order, npy_intp T_in_steps){
+complex double Fresnel_Legendre_Double(double *x_arr, char *T_in,
+                                       double *w_func, double rcpr_D,
+                                       double *coeffs, double dx,
+                                       double rcpr_F, double kd, long n_pts,
+                                       int order, npy_intp T_in_steps){
 
     /*  Declare all necessary variables. i and j are used for indexing.       */
     long i, j, k;
@@ -462,11 +463,12 @@ complex double _fresnel_legendre(double *x_arr, char *T_in, double *w_func,
     return T_out;
 }
 
-complex double _fresnel_legendre_norm(double* x_arr, char* T_in, double* w_func,
-                                      double rcpr_D, double *coeffs, double dx,
-                                      double rcpr_F, double kd, long n_pts,
-                                      int order, npy_intp T_in_steps)
-{
+complex double Fresnel_Legendre_Norm_Double(double* x_arr, char* T_in,
+                                            double* w_func, double rcpr_D,
+                                            double *coeffs, double dx,
+                                            double rcpr_F, double kd,
+                                            long n_pts, int order,
+                                            npy_intp T_in_steps){
     /***************************************************************************
      *  Function:                                                              *
      *      _fresnel_transform_cubic                                           *

@@ -4,10 +4,9 @@
 /* Include the special functions defined in various header files.   */
 #include "__fresnel_integrals.h"
 
-/*  Various header files required for the C-Python API to work.     */
-#include "../../../include/Python.h"
-#include "../../../include/ndarraytypes.h"
-#include "../../../include/ufuncobject.h"
+#include <Python.h>
+#include <numpy/ndarraytypes.h>
+#include <numpy/ufuncobject.h>
 
 static PyMethodDef _fresnel_integrals_methods[] = {{NULL, NULL, 0, NULL}};
 /*---------------------------DEFINE PYTHON FUNCTIONS--------------------------*

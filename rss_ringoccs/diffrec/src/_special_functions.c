@@ -8,8 +8,9 @@
 #include <complex.h>
 
 /* Include fresnel integrals header. This includes frensel_sin/cos.          */
-#include "__fresnel_integrals.h"
 #include "__fresnel_kernel.h"
+#include "_physics_functions_wrappers.h"
+#include "_fresnel_integrals_wrappers.h"
 
 /*  Where compute_norm_eq lives.                                             */
 #include "__normalized_equivalent_width.h"
@@ -96,35 +97,6 @@ static PyMethodDef _special_functions_methods[] =
 };
 /*-------------------------DEFINE UNIVERSAL FUNCTIONS-------------------------*/
 
-/*  Functions from __fresnel_integrals.h                                      */
-static void double_fresnelsin(char **args, npy_intp *dimensions,
-                              npy_intp* steps, void* data)
-{
-    npy_intp i;
-    npy_intp n  = dimensions[0];
-    double *in  = (double *)args[0];
-    double *out = (double *)args[1];
-
-    for (i = 0; i < n; i++) {
-        out[i] = Fresnel_Sine_Taylor_to_Asymptotic_Func(in[i]);
-    }
-}
-
-static void double_fresnelcos(char **args, npy_intp *dimensions,
-                              npy_intp* steps, void* data)
-{
-    npy_intp i;
-    npy_intp n  = dimensions[0];
-    double *in  = (double *)args[0];
-    double *out = (double *)args[1];
-
-    for (i = 0; i < n; i++) {
-        /*  The function Fresnel_Cosine_Taylor_to_Asymptotic_Func is defined  *
-         *  in _fresnel_cosine.h. Make sure this is in the current directory! */
-        out[i] = Fresnel_Cosine_Taylor_to_Asymptotic_Func(in[i]);
-    }
-}
-
 /*  Functions from __fresnel_kernel.h                                         */
 static void double_psi(char **args, npy_intp *dimensions,
                        npy_intp* steps, void* data)
@@ -207,6 +179,12 @@ static void double_dpsi_dphi(char **args, npy_intp *dimensions,
 }
 
 /*  Define pointers to the C functions.                                       */
+PyUFuncGenericFunction wavelength_to_wavenumber_funcs[3] = {
+    &float_wavelength_to_wavenumber,
+    &double_wavelength_to_wavenumber,
+    &long_double_wavelength_to_wavenumber
+};
+
 PyUFuncGenericFunction fresnel_sin_funcs[1]     = {&double_fresnelsin};
 PyUFuncGenericFunction fresnel_cos_funcs[1]     = {&double_fresnelcos};
 PyUFuncGenericFunction psi_funcs[1]             = {&double_psi};

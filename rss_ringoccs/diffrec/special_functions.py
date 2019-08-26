@@ -4,30 +4,35 @@ from . import window_functions
 from rss_ringoccs.tools import error_check
 try:
     from . import _special_functions, _diffraction_functions
+    from . import _fresnel_diffraction
 except:
-    print(
+    raise ImportError(
         """
-            Error: rss_ringoccs.diffrec.special_functions
-            \tCould Not Import C Code. Stricly Using Python Code.
-            \tThis is signicantly slower. There was most likely an error
-            \tin your installation of rss_ringoccs. To use the C Code,
-            \tdownload a C Compiler (GCC) and see the User's Guide for
-            \tinstallation instructions.
+        \r\tError: rss_ringoccs
+        \r\t\tdiffrec.special_functions
+        \r\tCould Not Import C Code. There was most likely an error
+        \r\tin your installation of rss_ringoccs. Download GCC (C Compiler)
+        \r\tand see the User's Guide for installation instructions.
         """
     )
 
-# Declare constant for the speed of light (km/s)
-SPEED_OF_LIGHT_KM = 299792.4580
-
 # Declare constants for multiples of pi.
 HALF_PI = 1.570796326794896619231322
-TWO_PI = 6.283185307179586476925287
 
 def wavelength_to_wavenumber(lambda_km):
-    return TWO_PI / lambda_km
+    try:
+        return _physics_functions.wavelength_to_wavenumber(lambda_km)
+    except KeyboardInterrupt:
+        raise
+    except:
+        raise TypeError(
+            """
+            Oops.
+            """
+        )
 
 def frequency_to_wavelength(freq_hz):
-    return SPEED_OF_LIGHT_KM/freq_hz
+    return _physics_functions.frequency_to_wavelength(freq_hz)
 
 def savitzky_golay(y, window_size, order, deriv=0, rate=1):
     """
@@ -539,7 +544,7 @@ def fresnel_sin(x):
 
 def square_well_diffraction(x, a, b, F):
     try:
-        return _special_functions.square_well_diffraction(x, a, b, F)
+        return _fresnel_diffraction.square_well_diffraction(x, a, b, F)
     except(TypeError, ValueError, NameError):
         try:
             arg_1 = np.sqrt(np.pi/2.0)*((a-x)/F)
@@ -565,7 +570,7 @@ def square_well_diffraction(x, a, b, F):
 
 def inverse_square_well_diffraction(x, a, b, F):
     try:
-        return _special_functions.inverse_square_well_diffraction(x, a, b, F)
+        return _fresnel_diffraction.inverse_square_well_diffraction(x, a, b, F)
     except(TypeError, ValueError, NameError):
         try:
             arg_1 = np.sqrt(np.pi/2.0)*((a-x)/F)
@@ -580,6 +585,36 @@ def inverse_square_well_diffraction(x, a, b, F):
                 """
                     \r\tError Encountered: rss_ringoccs
                     \r\t\tdiffrec.special_functions.inverse_square_well_diffraction
+                    \r
+                    \r\tInvalid input. Input should be:
+                    \r\t\tx:\t Numpy array of floating point numbers.
+                    \r\t\ta:\t Floating point number
+                    \r\t\tb:\t Floating point number
+                    \r\t\tF:\t Floating point number
+                """
+            )
+
+def square_well_phase(x, a, b, F):
+    try:
+        return _fresnel_diffraction.square_well_phase(x, a, b, F)
+    except(TypeError, ValueError, NameError):
+        try:
+            arg_1 = np.sqrt(np.pi/2.0)*((a-x)/F)
+            arg_2 = np.sqrt(np.pi/2.0)*((b-x)/F)
+
+            im = -(1.0/np.sqrt(2.0*np.pi))*(
+                fresnel_sin(arg_2) - fresnel_sin(arg_1) -
+                fresnel_cos(arg_2) + fresnel_cos(arg_1))
+            re = 1.0 - (1.0/np.sqrt(2.0*np.pi))*(
+                fresnel_cos(arg_2) - fresnel_cos(arg_1) +
+                fresnel_sin(arg_2) - fresnel_sin(arg_1))
+
+            return np.arctan2(im, re) 
+        except(TypeError, ValueError):
+            raise TypeError(
+                """
+                    \r\tError Encountered: rss_ringoccs
+                    \r\t\tdiffrec.special_functions.square_well_diffraction
                     \r
                     \r\tInvalid input. Input should be:
                     \r\t\tx:\t Numpy array of floating point numbers.
@@ -609,12 +644,11 @@ def single_slit_diffraction(x, z, a):
             :f:
                 Single slit diffraction pattern.
     """
-    fname = "diffrec.special_functions.single_slit_diffraction"
-    error_check.check_is_real(x, "x", fname)
-    z = error_check.check_type_and_convert(z, float, "z", fname)
-    a = error_check.check_type_and_convert(a, float, "a", fname)
-
-    return np.square(np.sinc(a*x/z))
+    try:
+        return _fraunhofer_diffraction.single_slit_fraunhofer_diffraction(x,
+                                                                          z, a)
+    except:
+        raise TypeValue("Big boo boo")
 
 def double_slit_diffraction(x, z, a, d):
     """
@@ -639,45 +673,11 @@ def double_slit_diffraction(x, z, a, d):
             :f:
                 Single slit diffraction pattern.
     """
-    fname = "diffrec.special_functions.double_slit_diffraction"
-    error_check.check_is_real(x, "x", fname)
-    z = error_check.check_type_and_convert(z, float, "z", fname)
-    a = error_check.check_type_and_convert(a, float, "a", fname)
-    f1 = np.square(np.sinc(a*x/z))
-    f2 = np.square(np.sin(TWO_PI*d*x/z))
-    f3 = 4.0*np.square(np.sin(np.pi*d*x/z))
-
-    return f1*f2/f3
-
-def square_well_phase(x, a, b, F):
     try:
-        return _special_functions.square_well_phase(x, a, b, F)
-    except(TypeError, ValueError, NameError):
-        try:
-            arg_1 = np.sqrt(np.pi/2.0)*((a-x)/F)
-            arg_2 = np.sqrt(np.pi/2.0)*((b-x)/F)
-
-            im = -(1.0/np.sqrt(2.0*np.pi))*(
-                fresnel_sin(arg_2) - fresnel_sin(arg_1) -
-                fresnel_cos(arg_2) + fresnel_cos(arg_1))
-            re = 1.0 - (1.0/np.sqrt(2.0*np.pi))*(
-                fresnel_cos(arg_2) - fresnel_cos(arg_1) +
-                fresnel_sin(arg_2) - fresnel_sin(arg_1))
-
-            return np.arctan2(im, re) 
-        except(TypeError, ValueError):
-            raise TypeError(
-                """
-                    \r\tError Encountered: rss_ringoccs
-                    \r\t\tdiffrec.special_functions.square_well_diffraction
-                    \r
-                    \r\tInvalid input. Input should be:
-                    \r\t\tx:\t Numpy array of floating point numbers.
-                    \r\t\ta:\t Floating point number
-                    \r\t\tb:\t Floating point number
-                    \r\t\tF:\t Floating point number
-                """
-            )
+        return _fraunhofer_diffraction.double_slit_fraunhofer_diffraction(x, z, 
+                                                                          a, d)
+    except:
+        raise TypeError("Oh no.")
 
 def fresnel_transform_ellipse(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
                               kD_vals, B_rad_vals, D_km_vals, w_km_vals, start,

@@ -1,6 +1,6 @@
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
-#include "../../../include/Python.h"
-#include "../../../include/arrayobject.h"
+#include <Python.h>
+#include <numpy/arrayobject.h>
 
 #include "__max.h"
 #include "__min.h"

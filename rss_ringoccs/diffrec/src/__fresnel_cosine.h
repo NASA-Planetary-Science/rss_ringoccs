@@ -87,8 +87,9 @@
  * a form that is useable with the Python interpreter later on.                *
  ******************************************************************************/
 
-double Fresnel_Cosine_Taylor_to_Asymptotic_Func(double x)
-{
+/*----------------------Double Precision Functions----------------------------*/
+
+double Fresnel_Cosine_Taylor_to_Asymptotic_Func(double x){
     /***************************************************************************
      * This is the primary function for compute the Fresnel_Cosine integral.   *
      * It offers the best combination of speed and accurary. For small         *

@@ -5,59 +5,13 @@
  *      This file contains functions used for computing the Fresnel Inverse   *
  *      Transform on a set of diffraction limited data. There are several     *
  *      Methods of performing this:                                           *
- *          Fresnel Quadratic Approximations:                                 *
+ *          Fresnel Quadratic Approximation:                                  *
  *              Classic quadratic approximation from Fourier Optics.          *
- *          Legendre Cubic Expansion:                                         *
- *              Approximation of the Fresnel kernel by a quartic polynomial   *
- *              using the Legendre Polynomials.                               *
- *          Legendre Quartic Expansion:                                       *
- *              Approximation of the Fresnel kernel by a quartic polynomial   *
- *              using the Legendre Polynomials.                               *
- *          Legendre Sextic Expansion:                                        *
- *              Approximation of the Fresnel kernel by a sextic polynomial    *
- *              using the Legendre Polynomials.                               *
- *          Legendre Octic Expansion:                                         *
- *              Approximation of the Fresnel kernel by a octic polynomial     *
- *              using the Legendre Polynomials.                               *
- ******************************************************************************
- *  Variables:                                                                *
- *     A_0         (Double):                                                  *
- *         The coefficient of the x^2 term in the expansion for psi.          *
- *     A_1         (Double):                                                  *
- *         The coefficient of the x^3 term in the expansion for psi.          *
- *     A_2         (Double):                                                  *
- *         The coefficient of the x^4 term in the expansion for psi.          *
- *     A_3         (Double):                                                  *
- *         The coefficient of the x^5 term in the expansion for psi.          *
- *     A_4         (Double):                                                  *
- *         The coefficient of the x^6 term in the expansion for psi.          *
- *     A_5         (Double):                                                  *
- *         The coefficient of the x^7 term in the expansion for psi.          *
- *     A_6         (Double):                                                  *
- *         The coefficient of the x^8 term in the expansion for psi.          *
- *     dx          (Double):                                                  *
- *         Spacing between two consecutive ring intercept points, km.         *
- *     kd          (Double):                                                  *
- *         The wavenumber, k, weighted by the spacecraft-ring distance, D.    *
- *     n_pts       (Long):                                                    *
- *         Half the number of points in the window, rounded down.             *
- *     rcpr_D      (Double):                                                  *
- *         1/D, where D is the distant from the spacecraft to the ring        *
- *         intercept point, in kilometers.                                    *
- *     rcpr_F      (Double):                                                  *
- *         The reciprocal of the Fresnel scale in kilometers.                 *
- *     T_in        (Pointer to Char):                                         *
- *         The raw diffraction-limited data that is to be corrected.          *
- *     T_in_steps  (npy_intp (Equivalent to Long)):                           *
- *         The number of steps in memory to get from the nth data point       *
- *         to the (n+1)th data point in the T_in variable (See above).        *
- *     T_out       (Complex Double):                                          *
- *         The diffraction corrected profile.                                 *
- *     w_func      (Pointer to Double):                                       *
- *         Pre-computed window function. Should have the same number of       *
- *         points as the x_arr pointer.                                       *
- *     x_arr       (Pointer to Double):                                       *
- *         The ring radii within the given window.                            *
+ *          Legendre Expansions:                                              *
+ *              Uses Legendre polynomials to approximate the Fresnel kernel.  *
+ *          Newton-Raphon Method:                                             *
+ *              Uses Newton-Raphson root finding method to compute the        *
+ *              stationary value of the Fresnel kernel.                       *
  ******************************************************************************
  *  The Inverse Fresnel Transform:                                            *
  *                                                                            *
@@ -74,9 +28,9 @@
  *  psi is the Fresnel Kernel, and exp is simply the exponential function.    *
  ******************************************************************************
  *  The Normalization Scheme:                                                 *
- *      As the resolution get's too high, say 10 km or greater, then window   *
- *      width quickly shrinks to zero. Thus the integral will be approximately*
- *      zero. To account for this, the option to normalize the integral by the*
+ *      As the resolution get's too high, say 10 km or greater, the window    *
+ *      width quickly shrinks to zero. Thus the integral will be close to     *
+ *      zero. To account for this the option to normalize the integral by the *
  *      window width is offered. The normalization is defined as follows:     *
  *                                                                            *
  *                    |     _ +infinity           |                           *
@@ -97,65 +51,60 @@
  ******************************************************************************
  *                              DEFINED FUNCTIONS                             *
  ******************************************************************************
- *  get_arr:                                                                  *
- *      Void function that takes in a pointer to a double array and creates   *
- *      an array of values for the ring radius within half a window width of  *
- *      the ring intercept point. Do to symmetry, only the values to the left *
- *      of the ring intercept point are computed.                             *
+ *  complex_double_fresnel_transform_quadratic:                               *
+ *      Computes the Fresnel Inverse Transform using Fresnel's approximation. *
+ *      This is the fastest, but can be inaccurate for certain geometries.    *
  ******************************************************************************
- *  _fresnel_transform:                                                       *
- *      Computes the Fresnel Inverse Transform using the classic Fresnel      *
- *      quadratic approximation. No normalization is applied.                 *
+ *  complex_double_fresnel_legendre_transform:                                *
+ *      Approximates the transform using Legendre polynomials. This is very   *
+ *      fast and accurate. It is the default method called from Python.       *
  ******************************************************************************
- *  _fresnel_transform_norm:                                                  *
- *      Same as _fresnel_transform, but the normalization is applied.         *
- ******************************************************************************
- *  _fresnel_cubic,                                                           *
- *  _fresnel_quartic,                                                         *
- *  _fresnel_sextic,                                                          *
- *  _fresnel_octic:                                                           *
- *      Computes the Fresnel Inverse Transform using Legendre Polynomials to  *
- *      approximate the Fresnel kernel to various powers (3, 4, 6, or 8).     *
- ******************************************************************************
- *  _fresnel_cubic_norm,                                                      *
- *  _fresnel_quartic_norm,                                                    *
- *  _fresnel_sextic_norm,                                                     *
- *  _fresnel_octic_norm:                                                      *
- *      Same as previous functions, but with the normalization scheme.        *
+ *  complex_double_fresnel_transform_newton:                                  *
+ *      Uses Newton-Raphson to compute the stationary value of the Fresnel    *
+ *      Kernel. This is the most accurate, but also the slowest.              *
  ******************************************************************************
  *                             A FRIENDY WARNING                              *
  ******************************************************************************
- *  This code uses complex numbers throughout, and is compatible with the C99 *
- *  standard. To use this code, make sure your compiler supports C99 or more  *
- *  recent standards of the C Programming Language.                           *
- *****************************************************************************/
+ *  1.) This code uses complex numbers throughout, and is compatible with the *
+ *      C99 standard. To use this code, make sure your compiler supports C99  *
+ *      or more recent standards of the C Programming Language.               *
+ * 
+ *  2.) This code acts as Python wrappers for the pure C functions found in   *
+ *      __diffraction_correction.h. As such, there is usage of the C-Numpy    *
+ *      UFuncs API, as well as the standard C-Python API. This allows numpy   *
+ *      arrays and various Python objects to be passed into these C routines. *
+ ******************************************************************************/
 
-/*  To avoid compiler warnings about deprecated numpy stuff.                 */
+/*  To avoid compiler warnings about deprecated numpy stuff.                  */
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 
-/*  Various trig functions, complex variables, and more found here.          */
+/*  Various trig functions, complex variables, and more found here.           */
 #include <math.h>
 #include <complex.h>
 
-/*  Various header files required for the C-Python API to work.              */
+/*  Various header files required for the C-Python API to work.               */
 #include "../../../include/Python.h"
 #include "../../../include/ndarraytypes.h"
 #include "../../../include/ufuncobject.h"
 
-/*  Various coefficients and constants defined here.                         */
+/*  Various coefficients and constants defined here.                          */
 #include "__math_constants.h"
 
-/*  Window functions and Fresnel Transforms defined here.                    */
+/*  Window functions and Fresnel Transforms defined here.                     */
 #include "__window_functions.h"
 #include "__diffraction_functions.h"
 
-/*  Functions for computing the Fresnel Kernel and Newton's Method.          */
+/*  Functions for computing the Fresnel Kernel and Newton's Method.           */
 #include "__fresnel_kernel.h"
+
+/*  Functions for computing Legendre polynomials found here.                  */
 #include "__legendre.h"
 
-static void Fresnel_Transform_Quadratic_Double(char **args, npy_intp *dimensions,
-                                               npy_intp* steps, void* data)
-{
+static void complex_double_fresnel_transform_quadratic(char **args,
+                                                       npy_intp *dimensions,
+                                                       npy_intp* steps,
+                                                       void* data){
+
     /*  i and j used for indexing, nw_pts is number of points in window.     */
     long i, j, nw_pts, center;
 
@@ -258,8 +207,10 @@ static void Fresnel_Transform_Quadratic_Double(char **args, npy_intp *dimensions
     free(w_func);
 }
 
-static void Fresnel_Legendre_Transform_Double(char **args, npy_intp *dimensions,
-                                              npy_intp* steps, void* data){
+static void complex_double_fresnel_legendre_transform(char **args,
+                                                      npy_intp *dimensions,
+                                                      npy_intp* steps,
+                                                      void* data){
     long i, nw_pts, center;
     double w_init, two_dx, cosb, sinp, cosp;
     double Legendre_Coeff, rcpr_D, rcpr_F;
@@ -296,8 +247,8 @@ static void Fresnel_Legendre_Transform_Double(char **args, npy_intp *dimensions,
     else if (wtype == 6){fw = &Modified_Kaiser_Bessel_2_5_Double;}
     else                {fw = &Modified_Kaiser_Bessel_3_5_Double;}
 
-    if (use_norm){FresT = &_fresnel_legendre_norm;}
-    else         {FresT = &_fresnel_legendre;}
+    if (use_norm){FresT = &Fresnel_Legendre_Norm_Double;}
+    else         {FresT = &Fresnel_Legendre_Double;}
 
     /* Compute first window width and window function. */
     T_in  += start * T_in_steps;
@@ -367,8 +318,10 @@ static void Fresnel_Legendre_Transform_Double(char **args, npy_intp *dimensions,
     free(fresnel_ker_coeffs);
 }
 
-static void Fresnel_Transform_Newton_Double(char **args, npy_intp *dimensions,
-                                            npy_intp* steps, void* data){
+static void complex_double_fresnel_transform_newton(char **args,
+                                                    npy_intp *dimensions,
+                                                    npy_intp* steps,
+                                                    void* data){
     long i, j, nw_pts, toler, center;
     double w_init, dx, two_dx, rcpr_F, EPS;
 
@@ -376,7 +329,7 @@ static void Fresnel_Transform_Newton_Double(char **args, npy_intp *dimensions,
     EPS = 1.E-4;
 
     double (*fw)(double, double);
-    complex double (*FresT)(double*, double*, char*, double*, double,
+    complex double (*FresT)(double *, double *, char *, double *, double,
                             double, double, double, double, long, double,
                             double, long, npy_intp);
 
@@ -474,17 +427,28 @@ static void Fresnel_Transform_Newton_Double(char **args, npy_intp *dimensions,
     free(w_func);
 }
 
-/*                            C-Python API Stuff                              */
+/******************************************************************************
+ *----------------------------C Python API Stuff------------------------------*
+ ******************************************************************************/
+
 static PyMethodDef _diffraction_functions_methods[] = {{NULL, NULL, 0, NULL}};
 
 /* Define pointers to the C functions. */
-PyUFuncGenericFunction f_quad_funcs[1]     = {&Fresnel_Transform_Quadratic_Double};
-PyUFuncGenericFunction f_legendre_funcs[1] = {&Fresnel_Legendre_Transform_Double};
-PyUFuncGenericFunction f_newtn_funcs[1]    = {&Fresnel_Transform_Newton_Double};
+PyUFuncGenericFunction f_quad_funcs[1] = {
+    &complex_double_fresnel_transform_quadratic
+};
+
+PyUFuncGenericFunction f_legendre_funcs[1] = {
+    &complex_double_fresnel_legendre_transform
+};
+
+PyUFuncGenericFunction f_newtn_funcs[1] = {
+    &complex_double_fresnel_transform_newton
+};
 
 /* Input and return types for Quadratic Fresnel Transform */
 static char quad_data_types[10] = {
-    NPY_COMPLEX128,
+    NPY_CDOUBLE,
     NPY_DOUBLE,
     NPY_DOUBLE,
     NPY_DOUBLE,
@@ -493,12 +457,12 @@ static char quad_data_types[10] = {
     NPY_LONG,
     NPY_LONG,
     NPY_LONG,
-    NPY_COMPLEX128
+    NPY_CDOUBLE
 };
 
 /* Input and return types for Quartic Fresnel Transform */
 static char legendre_data_types[15] = {
-    NPY_COMPLEX128,
+    NPY_CDOUBLE,
     NPY_DOUBLE,
     NPY_DOUBLE,
     NPY_DOUBLE,
@@ -512,11 +476,11 @@ static char legendre_data_types[15] = {
     NPY_LONG,
     NPY_LONG,
     NPY_LONG,
-    NPY_COMPLEX128
+    NPY_CDOUBLE
 };
 
 static char newton_data_types[14] = {
-    NPY_COMPLEX128,
+    NPY_CDOUBLE,
     NPY_DOUBLE,
     NPY_DOUBLE,
     NPY_DOUBLE,
@@ -529,7 +493,7 @@ static char newton_data_types[14] = {
     NPY_LONG,
     NPY_LONG,
     NPY_LONG,
-    NPY_COMPLEX128
+    NPY_CDOUBLE
 };
 
 static void *PyuFunc_data[1] = {NULL};
@@ -542,13 +506,13 @@ static struct PyModuleDef moduledef = {PyModuleDef_HEAD_INIT,
                                        _diffraction_functions_methods,
                                        NULL, NULL, NULL, NULL};
 
-PyMODINIT_FUNC PyInit__diffraction_functions(void)
-{
+PyMODINIT_FUNC PyInit__diffraction_functions(void){
     PyObject *fresnel_transform_quadratic;
     PyObject *fresnel_legendre_transform;
     PyObject *fresnel_transform_newton;
 
     PyObject *m, *d;
+
     m = PyModule_Create(&moduledef);
     if (!m) {
         return NULL;
@@ -587,14 +551,14 @@ PyMODINIT_FUNC PyInit__diffraction_functions(void)
     return m;
 }
 #else
-PyMODINIT_FUNC init__funcs(void)
-{
+PyMODINIT_FUNC init__diffraction_functions(void){
     PyObject *fresnel_transform_quadratic;
-    PyObject *fresnel_transform_quartic;
-    PyObject *fresnel_transform_cubic;
+    PyObject *fresnel_legendre_transform;
+    PyObject *fresnel_transform_newton;
+
     PyObject *m, *d;
 
-    m = Py_InitModule("__funcs", _diffraction_functions_methods);
+    m = Py_InitModule("_diffraction_functions", _diffraction_functions_methods);
     if (m == NULL) {
         return;
     }
@@ -608,32 +572,15 @@ PyMODINIT_FUNC init__funcs(void)
         "fresnel_transform_quadratic_docstring", 0
     );
 
-    fresnel_transform_cubic = PyUFunc_FromFuncAndData(
-        f_cubic_funcs, PyuFunc_data, legendre_data_types,
-        1, 13, 1, PyUFunc_None, "fresnel_transform_cubic",
+    fresnel_legendre_transform = PyUFunc_FromFuncAndData(
+        f_legendre_funcs, PyuFunc_data, legendre_data_types,
+        1, 14, 1, PyUFunc_None, "fresnel_transform_cubic",
         "fresnel_transform_cubic_docstring", 0
     );
 
-    fresnel_transform_quartic = PyUFunc_FromFuncAndData(
-        f_quart_funcs, PyuFunc_data, legendre_data_types,
-        1, 13, 1, PyUFunc_None, "fresnel_transform_quartic",
-        "fresnel_transform_quartic_docstring", 0
-    );
 
-    fresnel_transform_sextic = PyUFunc_FromFuncAndData(
-        f_sxtic_funcs, PyuFunc_data, legendre_data_types,
-        1, 13, 1, PyUFunc_None, "fresnel_transform_sextic",
-        "fresnel_transform_sextic_docstring", 0
-    );
-
-    fresnel_transform_octic = PyUFunc_FromFuncAndData(
-        f_octic_funcs, PyuFunc_data, legendre_data_types,
-        1, 13, 1, PyUFunc_None, "fresnel_transform_octic",
-        "fresnel_transform_octic_docstring", 0
-    );
-
-    fresnel_transform_octic = PyUFunc_FromFuncAndData(
-        f_newtn_funcs, PyuFunc_data, legendre_data_types,
+    fresnel_transform_newton = PyUFunc_FromFuncAndData(
+        f_newtn_funcs, PyuFunc_data, newton_data_types,
         1, 13, 1, PyUFunc_None, "fresnel_transform_newton",
         "fresnel_transform_newton_docstring", 0
     );
@@ -641,16 +588,10 @@ PyMODINIT_FUNC init__funcs(void)
     d = PyModule_GetDict(m);
 
     PyDict_SetItemString(d, "fresnel_transform_quadratic", fresnel_transform_quadratic);
-    PyDict_SetItemString(d, "fresnel_transform_cubic", fresnel_transform_cubic);
-    PyDict_SetItemString(d, "fresnel_transform_quartic", fresnel_transform_quartic);
-    PyDict_SetItemString(d, "fresnel_transform_sextic", fresnel_transform_sextic);
-    PyDict_SetItemString(d, "fresnel_transform_octic", fresnel_transform_octic);
+    PyDict_SetItemString(d, "fresnel_legendre_transform", fresnel_legendre_transform);
     PyDict_SetItemString(d, "fresnel_transform_newton", fresnel_transform_newton);
     Py_DECREF(fresnel_transform_quadratic);
-    Py_DECREF(fresnel_transform_cubic);
-    Py_DECREF(fresnel_transform_quartic);
-    Py_DECREF(fresnel_transform_sextic);
-    Py_DECREF(fresnel_transform_octic);
+    Py_DECREF(fresnel_legendre_transform);
     Py_DECREF(fresnel_transform_newton);
     return m;
 }

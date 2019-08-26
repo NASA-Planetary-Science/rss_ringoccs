@@ -11,9 +11,9 @@
 #include "__fresnel_diffraction.h"
 
 /*  Various header files required for the C-Python API to work.               */
-#include "../../../include/Python.h"
-#include "../../../include/ndarraytypes.h"
-#include "../../../include/ufuncobject.h"
+#include <Python.h>
+#include <numpy/ndarraytypes.h>
+#include <numpy/ufuncobject.h>
 
 static PyMethodDef _fresnel_diffraction_methods[] =
 {

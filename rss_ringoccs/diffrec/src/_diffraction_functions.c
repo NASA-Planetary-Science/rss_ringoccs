@@ -83,9 +83,9 @@
 #include <complex.h>
 
 /*  Various header files required for the C-Python API to work.               */
-#include "../../../include/Python.h"
-#include "../../../include/ndarraytypes.h"
-#include "../../../include/ufuncobject.h"
+#include <Python.h>
+#include <numpy/ndarraytypes.h>
+#include <numpy/ufuncobject.h>
 
 /*  Various coefficients and constants defined here.                          */
 #include "__math_constants.h"

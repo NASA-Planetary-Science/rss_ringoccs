@@ -347,48 +347,4 @@ double complex Fresnel_Heald_Rational_EPS_Minus_Eight_Func(double x)
     return cx + _Complex_I*sx;
 }
 
-double complex Square_Well_Diffraction_Solution_Func(double x, double a,
-                                                     double b, double F)
-{
-    double arg1 = SQRT_PI_BY_2*(a-x)/F;
-    double arg2 = SQRT_PI_BY_2*(b-x)/F;
-    double complex result =   Fresnel_Heald_Rational_EPS_Minus_Eight_Func(arg2)
-                            - Fresnel_Heald_Rational_EPS_Minus_Eight_Func(arg1);
-    result *= SQRT_2_BY_PI;
-
-    return 1.0 - (0.5 - 0.5*_Complex_I)*result;
-}
-
-double complex Inverted_Square_Well_Diffraction_Solution_Func(double x,
-                                                              double a,
-                                                              double b,
-                                                              double F)
-{
-    double arg1 = SQRT_PI_BY_2*(a-x)/F;
-    double arg2 = SQRT_PI_BY_2*(b-x)/F;
-    double complex result =   Fresnel_Heald_Rational_EPS_Minus_Eight_Func(arg2)
-                            - Fresnel_Heald_Rational_EPS_Minus_Eight_Func(arg1);
-    result *= SQRT_2_BY_PI;
-
-    return (0.5 - 0.5*_Complex_I)*result;
-}
-
-double Square_Well_Diffraction_Phase_Func(double x, double a,
-                                          double b, double F)
-{
-    a = SQRT_PI_BY_2*(a-x)/F;
-    b = SQRT_PI_BY_2*(b-x)/F;
-    double im = SQRT_ONE_BY_2_PI *
-        (Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Func(b) -
-         Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Func(a) - 
-         Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight_Func(b) +
-         Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight_Func(a));
-    double re = 1.0 - SQRT_ONE_BY_2_PI *
-        (Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight_Func(b) -
-         Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight_Func(a) +
-         Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Func(b)   -
-         Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Func(a));
-    return atan2(im, re);
-}
-
 #endif

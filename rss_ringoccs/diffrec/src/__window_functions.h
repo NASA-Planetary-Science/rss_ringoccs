@@ -8,8 +8,7 @@
 #include "__kaiser_bessel.h"
 #include "__modified_kaiser_bessel.h"
 
-float Rect_Window_Float(float x, float W)
-{
+float Rect_Window_Float(float x, float W){
     if (fabsf(x) <= W/2.0){
         return 1.0;
     }
@@ -18,8 +17,7 @@ float Rect_Window_Float(float x, float W)
     }
 }
 
-double Rect_Window_Double(double x, double W)
-{
+double Rect_Window_Double(double x, double W){
     if (fabs(x) <= W/2.0){
         return 1.0;
     }
@@ -28,8 +26,7 @@ double Rect_Window_Double(double x, double W)
     }
 }
 
-long double Rect_Window_Long_Double(long double x, long double W)
-{
+long double Rect_Window_Long_Double(long double x, long double W){
     if (fabsl(x) <= W/2.0){
         return 1.0;
     }
@@ -38,8 +35,7 @@ long double Rect_Window_Long_Double(long double x, long double W)
     }
 }
 
-float Coss_Window_Float(float x, float W)
-{
+float Coss_Window_Float(float x, float W){
     if (fabsf(x) <= W/2.0){
         x *= ONE_PI/W;
         x = cos(x);
@@ -51,8 +47,7 @@ float Coss_Window_Float(float x, float W)
     }
 }
 
-double Coss_Window_Double(double x, double W)
-{
+double Coss_Window_Double(double x, double W){
     if (fabs(x) <= W/2.0){
         x *= ONE_PI/W;
         x = cos(x);
@@ -64,8 +59,7 @@ double Coss_Window_Double(double x, double W)
     }
 }
 
-long double Coss_Window_Long_Double(long double x, long double W)
-{
+long double Coss_Window_Long_Double(long double x, long double W){
     if (fabsl(x) <= W/2.0){
         x *= ONE_PI/W;
         x = cos(x);

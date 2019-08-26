@@ -125,63 +125,6 @@ static void double_fresnelcos(char **args, npy_intp *dimensions,
     }
 }
 
-static void complex_sqwellsol(char **args, npy_intp *dimensions,
-                              npy_intp* steps, void* data)
-{
-    npy_intp i;
-    npy_intp n = dimensions[0];
-    double *x =  (double *)args[0];
-    double  a  = *(double *)args[1];
-    double  b  = *(double *)args[2];
-    double  F  = *(double *)args[3];
-    double complex *out = (double complex *)args[4];
-
-    for (i = 0; i < n; i++) {
-        out[i] = Square_Well_Diffraction_Solution_Func(x[i], a, b, F);
-    }
-}
-
-static void complex_invsqwellsol(char **args, npy_intp *dimensions,
-                                 npy_intp* steps, void* data)
-{
-    npy_intp i;
-    npy_intp n = dimensions[0];
-    double *x  =  (double *)args[0];
-    double a   = *(double *)args[1];
-    double b   = *(double *)args[2];
-    double F   = *(double *)args[3];
-    double complex *out = (double complex *)args[4];
-
-    for (i = 0; i < n; i++) {
-        out[i] = Inverted_Square_Well_Diffraction_Solution_Func(x[i], a, b, F);
-    }
-}
-
-static void double_sqwellphase(char **args, npy_intp *dimensions,
-                               npy_intp* steps, void* data)
-{
-    npy_intp i;
-    npy_intp n = dimensions[0];
-    char *x = args[0];
-    char *a = args[1];
-    char *b = args[2];
-    char *F = args[3];
-    char *out = args[4];
-    npy_intp in_step = steps[0];
-    npy_intp out_step = steps[4];
-
-    for (i = 0; i < n; i++) {
-        /*BEGIN main ufunc computation*/
-        *((double complex*)out) = Square_Well_Diffraction_Phase_Func(
-            *(double *)x, *(double *)a, *(double *)b, *(double *)F
-        );
-        /*END main ufunc computation*/
-
-        x += in_step;
-        out += out_step;
-    }
-}
-
 /*  Functions from __fresnel_kernel.h                                         */
 static void double_psi(char **args, npy_intp *dimensions,
                        npy_intp* steps, void* data)
@@ -266,19 +209,12 @@ static void double_dpsi_dphi(char **args, npy_intp *dimensions,
 /*  Define pointers to the C functions.                                       */
 PyUFuncGenericFunction fresnel_sin_funcs[1]     = {&double_fresnelsin};
 PyUFuncGenericFunction fresnel_cos_funcs[1]     = {&double_fresnelcos};
-PyUFuncGenericFunction sqwellsol_funcs[1]       = {&complex_sqwellsol};
-PyUFuncGenericFunction invsqwellsol_funcs[1]    = {&complex_invsqwellsol};
-PyUFuncGenericFunction sqwellphase_funcs[1]     = {&double_sqwellphase};
 PyUFuncGenericFunction psi_funcs[1]             = {&double_psi};
 PyUFuncGenericFunction dpsi_funcs[1]            = {&double_dpsi_dphi};
 
 /*  Input and return types for double input and out.                          */
 static char double_double_types[2] = {NPY_DOUBLE, NPY_DOUBLE};
 static void *PyuFunc_data[1] = {NULL};
-
-/*  Input and return types for square_well_diffraction.                       */
-static char sqwellsol_types[5] = {NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE,
-                                  NPY_DOUBLE, NPY_COMPLEX128};
 
 /* Input and return types for fresnel_psi.                                    */
 static char octo_double_types[8] = {NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE,
@@ -302,9 +238,6 @@ PyMODINIT_FUNC PyInit__special_functions(void)
 {
     PyObject *fresnel_sin;
     PyObject *fresnel_cos;
-    PyObject *square_well_diffraction;
-    PyObject *inverse_square_well_diffraction;
-    PyObject *square_well_phase;
     PyObject *fresnel_psi;
     PyObject *fresnel_dpsi_dphi;
     PyObject *m, *d;
@@ -327,24 +260,6 @@ PyMODINIT_FUNC PyInit__special_functions(void)
                                           PyUFunc_None, "fresnel_cos",
                                           "fresnel_cos_docstring", 0);
 
-    square_well_diffraction = PyUFunc_FromFuncAndData(
-        sqwellsol_funcs, PyuFunc_data, sqwellsol_types,
-        1, 4, 1, PyUFunc_None, "square_well_diffraction", 
-        "square_well_diffraction_docstring", 0
-    );
-
-    inverse_square_well_diffraction = PyUFunc_FromFuncAndData(
-        invsqwellsol_funcs, PyuFunc_data, sqwellsol_types,
-        1, 4, 1, PyUFunc_None, "inverse_square_well_diffraction", 
-        "inverse_square_well_diffraction_docstring", 0
-    );
-
-    square_well_phase = PyUFunc_FromFuncAndData(
-        sqwellphase_funcs, PyuFunc_data, sqwellsol_types,
-        1, 4, 1, PyUFunc_None, "square_well_phase", 
-        "square_well_phase_docstring", 0
-    );
-
     fresnel_psi = PyUFunc_FromFuncAndData(
         psi_funcs, PyuFunc_data, octo_double_types, 1, 7, 1,
         PyUFunc_None, "fresnel_psi",  "fresnel_psi_docstring", 0
@@ -359,18 +274,11 @@ PyMODINIT_FUNC PyInit__special_functions(void)
 
     PyDict_SetItemString(d, "fresnel_sin", fresnel_sin);
     PyDict_SetItemString(d, "fresnel_cos", fresnel_cos);
-    PyDict_SetItemString(d, "square_well_diffraction", square_well_diffraction);
-    PyDict_SetItemString(d, "inverse_square_well_diffraction",
-                         inverse_square_well_diffraction);
-    PyDict_SetItemString(d, "square_well_phase", square_well_phase);
     PyDict_SetItemString(d, "fresnel_psi", fresnel_psi);
     PyDict_SetItemString(d, "fresnel_dpsi_dphi", fresnel_dpsi_dphi);
 
     Py_DECREF(fresnel_sin);
     Py_DECREF(fresnel_cos);
-    Py_DECREF(square_well_diffraction);
-    Py_DECREF(inverse_square_well_diffraction);
-    Py_DECREF(square_well_phase);
     Py_DECREF(fresnel_psi);
     Py_DECREF(fresnel_dpsi_dphi);
 
@@ -381,9 +289,6 @@ PyMODINIT_FUNC init__funcs(void)
 {
     PyObject *fresnel_sin;
     PyObject *fresnel_cos;
-    PyObject *square_well_diffraction;
-    PyObject *inverse_square_well_diffraction;
-    PyObject *square_well_phase;
     PyObject *fresnel_psi;
     PyObject *fresnel_dpsi_dphi;
     PyObject *m, *d;
@@ -406,24 +311,6 @@ PyMODINIT_FUNC init__funcs(void)
                                           PyUFunc_None, "fresnel_cos",
                                           "fresnel_cos_docstring", 0);
 
-    square_well_diffraction = PyUFunc_FromFuncAndData(
-        sqwellsol_funcs, PyuFunc_data, sqwellsol_types,
-        1, 4, 1, PyUFunc_None, "square_well_diffraction", 
-        "square_well_diffraction_docstring", 0
-    );
-
-    inverse_square_well_diffraction = PyUFunc_FromFuncAndData(
-        invsqwellsol_funcs, PyuFunc_data, sqwellsol_types,
-        1, 4, 1, PyUFunc_None, "inverse_square_well_diffraction", 
-        "inverse_square_well_diffraction_docstring", 0
-    );
-
-    square_well_phase = PyUFunc_FromFuncAndData(
-        sqwellphase_funcs, PyuFunc_data, sqwellsol_types,
-        1, 4, 1, PyUFunc_None, "square_well_phase", 
-        "square_well_phase_docstring", 0
-    );
-
     fresnel_psi = PyUFunc_FromFuncAndData(
         psi_funcs, PyuFunc_data, octo_double_types, 1, 7, 1,
         PyUFunc_None, "fresnel_psi",  "fresnel_psi_docstring", 0
@@ -438,18 +325,11 @@ PyMODINIT_FUNC init__funcs(void)
 
     PyDict_SetItemString(d, "fresnel_sin", fresnel_sin);
     PyDict_SetItemString(d, "fresnel_cos", fresnel_cos);
-    PyDict_SetItemString(d, "square_well_diffraction", square_well_diffraction);
-    PyDict_SetItemString(d, "inverse_square_well_diffraction",
-                         inverse_square_well_diffraction);
-    PyDict_SetItemString(d, "square_well_phase", square_well_phase);
     PyDict_SetItemString(d, "fresnel_psi", fresnel_psi);
     PyDict_SetItemString(d, "fresnel_dpsi_dphi", fresnel_dpsi_dphi);
 
     Py_DECREF(fresnel_sin);
     Py_DECREF(fresnel_cos);
-    Py_DECREF(square_well_diffraction);
-    Py_DECREF(inverse_square_well_diffraction);
-    Py_DECREF(square_well_phase);
     Py_DECREF(fresnel_psi);
     Py_DECREF(fresnel_dpsi_dphi);
 

@@ -9,9 +9,9 @@ except:
     raise ImportError(
         """
         \r\tError: rss_ringoccs
-        \r\t\tdiffrec.special_functions
+        \r\t\tdiffrec.special_functions\n
         \r\tCould Not Import C Code. There was most likely an error
-        \r\tin your installation of rss_ringoccs. Download GCC (C Compiler)
+        \r\tin your installation of rss_ringoccs. Install GCC (C Compiler)
         \r\tand see the User's Guide for installation instructions.
         """
     )
@@ -21,39 +21,60 @@ HALF_PI = 1.570796326794896619231322
 
 def wavelength_to_wavenumber(lambda_km):
     try:
-        return _physics_functions.wavelength_to_wavenumber(lambda_km)
+        return _special_functions.wavelength_to_wavenumber(lambda_km)
     except KeyboardInterrupt:
         raise
     except:
         raise TypeError(
             """
-            Oops.
+            \r\tError: rss_ringoccs
+            \r\t\tdiffrec.special_functions.wavelength_to_wavenumber\n
+            \r\tInput should be a numpy array of non-zero real numbers
+            \r\t(Ints or floats), or a non-zero int or non-zero float.\n
+            \r\tUsage:
+            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. np.arange(0, 10)
+            \r\t\t>>> y = wavelength_to_wavenumber(x)
             """
         )
 
 def frequency_to_wavelength(freq_hz):
-    return _physics_functions.frequency_to_wavelength(freq_hz)
+    try:
+        return _special_functions.frequency_to_wavelength(freq_hz)
+    except KeyboardInterrupt:
+        raise
+    except:
+        raise TypeError(
+            """
+            \r\tError: rss_ringoccs
+            \r\t\tdiffrec.special_functions.wavelength_to_wavenumber\n
+            \r\tInput should be a numpy array of non-zero real numbers
+            \r\t(Ints or floats), or a non-zero int or non-zero float.\n
+            \r\tUsage:
+            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. np.arange(0, 10)
+            \r\t\t>>> y = frequency_to_wavelength(x)
+            """
+        )
 
 def savitzky_golay(y, window_size, order, deriv=0, rate=1):
     """
-        Purpose:
-            To smooth data with a Savitzky-Golay filter. This removes
-            high frequency noise while maintaining many of the
-            original features of the input data.
-        Arguments:
-            :y (*np.ndarray*):
-                The input "Noisy" data.
-            :window_size (*int*):
-                The length of the window. Must be an odd number.
-            :order (*int*):
-                The order of the polynomial used for filtering.
-                Must be less then window_size - 1.
-        Keywords:
-            :deriv (*int*):
-                The order of the derivative what will be computed.
-        Output:
-            :y_smooth (*np.ndarray*):
-                The data smoothed by Savitzky-Golay filter.
+    Purpose:
+        To smooth data with a Savitzky-Golay filter. This removes
+        high frequency noise while maintaining many of the
+        original features of the input data.
+    Arguments:
+        :y (*np.ndarray*):
+            The input "Noisy" data.
+        :window_size (*int*):
+            The length of the window. Must be an odd number.
+        :order (*int*):
+            The order of the polynomial used for filtering.
+            Must be less then window_size - 1.
+    Keywords:
+        :deriv (*int*):
+            The order of the derivative what will be computed.
+    Output:
+        :y_smooth (*np.ndarray*):
+            The data smoothed by Savitzky-Golay filter.
     """
     try:
         y = np.array(y)

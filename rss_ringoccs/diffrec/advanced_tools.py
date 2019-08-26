@@ -687,7 +687,6 @@ class ModelFromGEO(object):
             if verbose:
                 print("\tComputing Echo Model...")
 
-            T_in = self.p_norm_actual_vals.astype(complex)
             F = F[crange]
             kD_vals = kD_vals[crange]
             n_shift = int(rho_shift/dx_km_desired)
@@ -711,6 +710,7 @@ class ModelFromGEO(object):
             start = wrange[0]
             finish = wrange[-1]
             n_used = 1 + (finish - start)
+
             T_in = (self.p_norm_actual_vals.astype(complex) *
                     np.exp(1.0j*self.phase_rad_vals))
 

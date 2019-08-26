@@ -155,64 +155,85 @@
 /*  Functions for computing the Fresnel Kernel and Newton's Method.           */
 #include "__fresnel_kernel.h"
 
-/*******************************************************************************
- *------------------------------DEFINE C FUNCTIONS-----------------------------*
- *  These are functions written in pure C without the use of the Numpy-C API.  *
- *  They are used to define various special functions. They will be wrapped in *
- *  a form that is useable with the Python interpreter later on within         *
- *  the _diffraction_functions.c file.                                         *
+/******************************************************************************
+ *------------------------------DEFINE C FUNCTIONS----------------------------*
+ *  These are functions written in pure C without the use of the C-Python API.*
  ******************************************************************************/
 
-/*  This void function takes a pointer as an input. The pointers values       *
- *  are changed within the code, and there is no need to "return" anything.   *
- *  Hence, this function has no "return" statement.                           */
-static void get_arr(double *x_arr, double dx, long nw_pts)
-{
-    /***************************************************************************
-     *  Function:                                                              *
-     *      get_arr                                                            *
-     *  Purpose:                                                               *
-     *      This computes an array of length nw_pts, with values ranging from  *
-     *      -nw_pts*dx to zero. Due to symmetry in the reconstruction, only    *
-     *      the left half of a given window is needed, and hence this returns  *
-     *      only half of the array. The values zero to nw_pts*dx are omitted.  *
-     **************************************************************************/
-
-    /*  Declare variable for indexing over.                                   */
-    long i;
-
-    /*  Loop over the input array, and assign the correct ring radius (km)    */
-    for (i=0; i<nw_pts; ++i){
-        x_arr[i] = (i-nw_pts)*dx;
-    }
-}
-
+/******************************************************************************
+ *  Function:                                                                 *
+ *      reset_window                                                          *
+ *  Purpose:                                                                  *
+ *      Compute an array of points from -width to zero, equally spaced by dx. *
+ *      This acts as the independent variable for later use.                  *
+ *  Arguments:                                                                *
+ *      x_arr (double *):                                                     *
+ *          Defined as rho-rho0, where rho0 is the ring radius of the point   *
+ *          being reconstructed, and rho is the dummy variable of integration *
+ *          which varies from rho0-W/2 to rho+W/2, W being the window width.  *
+ *      w_func (double *):                                                    *
+ *          The window/tapering function, as a function of x_arr.             *
+ *      dx (double):                                                          *
+ *          The sample spacing, equivalent to x_arr[1] - x_arr[0].            *
+ *      width (double):                                                       *
+ *          The width of the window function.                                 *
+ *      nw_pts (long):                                                        *
+ *          Half the number of points in the window width. The symmetry of    *
+ *          the quadratic approximation allows one to perform the inversion   *
+ *          with only half of the window. This saves a lot of computation.    *
+ *      fw  (*)(double, double):                                              *
+ *          Function pointer to the window function.                          *
+ *  Notes:                                                                    *
+ *      1.) This is a void function that takes in pointers as arguments. The  *
+ *          values of the pointers are changed within this function and there *
+ *          is no need to return anything. Hence, no return statement.        *
+ ******************************************************************************/
 static void reset_window(double *x_arr, double *w_func, double dx, double width,
-                         long nw_pts, double (*fw)(double, double))
-{
+                         long nw_pts, double (*fw)(double, double)){
+    /*  Create a variable for indexing.                                       */
     long i;
+
+    /* Loop over i, computing the window function and the x_arr variable.     */
     for(i=0; i<nw_pts; ++i){
         x_arr[i] = (i-nw_pts)*dx;
         w_func[i] = fw(x_arr[i], width);
     }
 }
 
-complex double _fresnel_transform(double* x_arr, char* T_in, double* w_func,
-                                  double F, double dx, long n_pts,
-                                  npy_intp T_in_steps)
-{
-    /***************************************************************************
-     *  Function:                                                              *
-     *      _fresnel_transform                                                 *
-     *  Outputs:                                                               *
-     *      T_out       (Complex Double):                                      *
-     *          The diffraction corrected profile.                             *
-     *  Purpose:                                                               *
-     *      This function uses the classic Fresnel quadratic aproximation to   *
-     *      the Fresnel Kernel to perform diffraction correction for the given *
-     *      input data. Mathematical definitions are given in the comment      *
-     *      at the start of this file.                                         *
-     **************************************************************************/
+/******************************************************************************
+ *  Function:                                                                 *
+ *      _fresnel_transform                                                    *
+ *  Purpose:                                                                  *
+ *      Perform diffraction correction on diffraction limited data using the  *
+ *      classic Fresnel quadratic approximation to the Fresnel kernel.        *
+ *  Arguments:                                                                *
+ *      x_arr (double *):                                                     *
+ *          Defined as pi/2 (rho-rho0)^2, where rho0 is the ring radius of    *
+ *          the point being reconstructed, and rho is the dummy variable of   *
+ *          integration which varies from rho0-W/2 to rho+W/2, W being the    *
+ *          window width.                                                     *
+ *      T_in (char *):                                                        *
+ *          The diffracted data.                                              *
+ *      w_func (double *):                                                    *
+ *          The window/tapering function, as a function of x_arr.             *
+ *      F (double):                                                           *
+ *          The Fresnel scale at rho0.                                        *
+ *      dx (double):                                                          *
+ *          The sample spacing, equivalent to x_arr[1] - x_arr[0].            *
+ *      n_pts (long):                                                         *
+ *          Half the number of points in the window width. The symmetry of    *
+ *          the quadratic approximation allows one to perform the inversion   *
+ *          with only half of the window. This saves a lot of computation.    *
+ *      T_in_steps (npy_intp):                                                *
+ *          The number of steps in memory of the nth point to the (n+1)th     *
+ *          point in the T_in pointer.                                        *
+ *  Outputs:                                                                  *
+ *      T_out (complex double):                                               *
+ *          The diffraction corrected profile.                                *
+ ******************************************************************************/
+complex double _fresnel_transform(double *x_arr, char *T_in,
+                                  double *w_func, double F, double dx,
+                                  long n_pts, npy_intp T_in_steps){
 
     /*  Declare all necessary variables. i and j are used for indexing.       */
     long i, j;
@@ -227,6 +248,7 @@ complex double _fresnel_transform(double* x_arr, char* T_in, double* w_func,
     /*  Initialize the T_out variable to zero, so we can loop over later.     */
     T_out = 0.0;
 
+    /*  From symmetry we need only compute -W/2 to zero, so start at -n_pts.  */
     j = -n_pts;
 
     /*  Division is more expensive than multiplication, so store the          *
@@ -257,23 +279,40 @@ complex double _fresnel_transform(double* x_arr, char* T_in, double* w_func,
     return T_out;
 }
 
-complex double _fresnel_transform_norm(double* x_arr, char* T_in,
-                                       double* w_func, double F, double dx,
-                                       long n_pts, npy_intp T_in_steps)
-{
-    /***************************************************************************
-     *  Function:                                                              *
-     *      _fresnel_transform_norm                                            *
-     *  Outputs:                                                               *
-     *      T_out       (Complex Double):                                      *
-     *          The diffraction corrected profile.                             *
-     *  Purpose:                                                               *
-     *      This function uses the classic Fresnel quadratic aproximation to   *
-     *      the Fresnel Kernel to perform diffraction correction for the given *
-     *      input data, and applies the normalization scheme to the output.    *
-     *      Mathematical definitions are given in the comment at the start of  *
-     *      this file.                                                         *
-     **************************************************************************/
+/******************************************************************************
+ *  Function:                                                                 *
+ *      _fresnel_transform_norm                                               *
+ *  Purpose:                                                                  *
+ *      Same as _fresnel_trasnform, but the output is normalized by the       *
+ *      window width. See the comment at the top of this file for more info.  *
+ *  Arguments:                                                                *
+ *      x_arr (double *):                                                     *
+ *          Defined as pi/2 (rho-rho0)^2, where rho0 is the ring radius of    *
+ *          the point being reconstructed, and rho is the dummy variable of   *
+ *          integration which varies from rho0-W/2 to rho+W/2, W being the    *
+ *          window width.                                                     *
+ *      T_in (char *):                                                        *
+ *          The diffracted data.                                              *
+ *      w_func (double *):                                                    *
+ *          The window/tapering function, as a function of x_arr.             *
+ *      F (double):                                                           *
+ *          The Fresnel scale at rho0.                                        *
+ *      dx (double):                                                          *
+ *          The sample spacing, equivalent to x_arr[1] - x_arr[0].            *
+ *      n_pts (long):                                                         *
+ *          Half the number of points in the window width. The symmetry of    *
+ *          the quadratic approximation allows one to perform the inversion   *
+ *          with only half of the window. This saves a lot of computation.    *
+ *      T_in_steps (npy_intp):                                                *
+ *          The number of steps in memory of the nth point to the (n+1)th     *
+ *          point in the T_in pointer.                                        *
+ *  Outputs:                                                                  *
+ *      T_out (complex double):                                               *
+ *          The diffraction corrected profile.                                *
+ ******************************************************************************/
+complex double _fresnel_transform_norm(double *x_arr, char *T_in,
+                                       double *w_func, double F, double dx,
+                                       long n_pts, npy_intp T_in_steps){
 
     /*  Declare all necessary variables. i and j are used for indexing.       */
     long i, j;
@@ -285,10 +324,11 @@ complex double _fresnel_transform_norm(double* x_arr, char* T_in,
     /*  exp_negative_ix is the Fresnel kernel, norm is the normalization.     */
     complex double T_out, exp_negative_ix, norm;
 
-    /*  Initialize T_out and norm to zero, so we can loop over later. */
+    /*  Initialize T_out and norm to zero, so we can loop over later.         */
     T_out  = 0.0;
     norm   = 0.0;
 
+    /*  From symmetry we need only compute -W/2 to zero, so start at -n_pts.  */
     j = -n_pts;
 
     /*  Division is more expensive than multiplication, so store the          *
@@ -329,23 +369,44 @@ complex double _fresnel_transform_norm(double* x_arr, char* T_in,
     return T_out;
 }
 
-complex double _fresnel_legendre(double* x_arr, char* T_in, double* w_func,
+/******************************************************************************
+ *  Function:                                                                 *
+ *      _fresnel_transform                                                    *
+ *  Purpose:                                                                  *
+ *      Performs diffraction correction using Legendre polynomials to         *
+ *      approximate the Fresnel kernel. Do to the nature of Legendre          *
+ *      polynomials and the first iteration of the Newton-Raphson scheme      *
+ *      applied to the Fresnel kernel, this is often extremely accurate and   *
+ *      extremely fast.                                                       *
+ *  Arguments:                                                                *
+ *      x_arr (double *):                                                     *
+ *          Defined as pi/2 (rho-rho0)^2, where rho0 is the ring radius of    *
+ *          the point being reconstructed, and rho is the dummy variable of   *
+ *          integration which varies from rho0-W/2 to rho+W/2, W being the    *
+ *          window width.                                                     *
+ *      T_in (char *):                                                        *
+ *          The diffracted data.                                              *
+ *      w_func (double *):                                                    *
+ *          The window/tapering function, as a function of x_arr.             *
+ *      rcpr_D (double):                                                      *
+ *          The reciprocal of D, the spacecraft-to-ring-intercept distance.   *
+ *      dx (double):                                                          *
+ *          The sample spacing, equivalent to x_arr[1] - x_arr[0].            *
+ *      n_pts (long):                                                         *
+ *          Half the number of points in the window width. The symmetry of    *
+ *          the quadratic approximation allows one to perform the inversion   *
+ *          with only half of the window. This saves a lot of computation.    *
+ *      T_in_steps (npy_intp):                                                *
+ *          The number of steps in memory of the nth point to the (n+1)th     *
+ *          point in the T_in pointer.                                        *
+ *  Outputs:                                                                  *
+ *      T_out (complex double):                                               *
+ *          The diffraction corrected profile.                                *
+ ******************************************************************************/
+complex double _fresnel_legendre(double *x_arr, char *T_in, double *w_func,
                                  double rcpr_D, double *coeffs, double dx,
                                  double rcpr_F, double kd, long n_pts,
-                                 int order, npy_intp T_in_steps)
-{
-    /***************************************************************************
-     *  Function:                                                              *
-     *      _fresnel_transform_cubic                                           *
-     *  Outputs:                                                               *
-     *      T_out       (Complex Double):                                      *
-     *          The diffraction corrected profile.                             *
-     *  Purpose:                                                               *
-     *      This function uses Legendre polynomials to approximate the Fresnel *
-     *      kernel up to a cubic expansion, and then performs diffraction      *
-     *      correction on diffracted data using this. Mathematical definitions *
-     *      are given in the comment at the start of this file.                *
-     **************************************************************************/
+                                 int order, npy_intp T_in_steps){
 
     /*  Declare all necessary variables. i and j are used for indexing.       */
     long i, j, k;

@@ -2,20 +2,22 @@
 #define RSS_RINGOCCS_MATH_CONSTANTS_H
 
 /* Define Miscellaneous Constants. */
-#define SQRT_ONE_BY_2_PI    0.3989422804014326
-#define SQRT_PI_BY_8        0.6266570686577501
-#define SQRT_PI_BY_2        1.2533141373155001
-#define SQRT_2_BY_PI        0.7978845608028654
-#define PI_BY_TWO           1.5707963267948966
-#define ONE_PI              3.1415926535897930
-#define SQRT_2              1.4142135623730951
+#define SQRT_ONE_BY_2_PI    0.3989422804014326779399461
+#define SQRT_PI_BY_8        0.6266570686577501256039413
+#define SQRT_PI_BY_2        1.2533141373155002512078830
+#define SQRT_2_BY_PI        0.7978845608028653558798921
+#define PI_BY_TWO           1.5707963267948966192313220
+#define ONE_PI              3.1415926535897932384626430
+#define TWO_PI              6.2831853071795864769252870
+#define SQRT_2              1.4142135623730950488016890
+#define SPEED_OF_LIGHT_KM   299792.45800
 
 /*******************************************************************************
  *  Coefficients for Fresnel Sine and Fresnel Cosine.                          *
  ******************************************************************************/
 
 /* Define Coefficients for the Fresnel Sine Taylor Expansion. */
-#define FRESNEL_SINE_TAYLOR_00  0.3333333333333333
+#define FRESNEL_SINE_TAYLOR_00  0.333333333333333333333333
 #define FRESNEL_SINE_TAYLOR_01 -0.023809523809523808
 #define FRESNEL_SINE_TAYLOR_02  0.0007575757575757576
 #define FRESNEL_SINE_TAYLOR_03 -1.3227513227513228e-05

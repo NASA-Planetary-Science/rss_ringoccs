@@ -1,5 +1,5 @@
-/*  To avoid compiler warnings about deprecated numpy stuff.                 */
-#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+#ifndef RSS_RINGOCCS_FRESNEL_DIFFRACTION_WRAPPERS_H
+#define RSS_RINGOCCS_FRESNEL_DIFFRACTION_WRAPPERS_H
 
 /* cosine and sine are defined here. */
 #include <math.h>
@@ -11,14 +11,7 @@
 #include "__fresnel_diffraction.h"
 
 /*  Various header files required for the C-Python API to work.               */
-#include <Python.h>
 #include <numpy/ndarraytypes.h>
-#include <numpy/ufuncobject.h>
-
-static PyMethodDef _fresnel_diffraction_methods[] =
-{
-    {NULL, NULL, 0, NULL}
-};
 
 /*************Square Well Diffraction Using Fresnel Approximation**************/
 
@@ -252,145 +245,4 @@ static void long_double_square_well_phase(char **args, npy_intp *dimensions,
     }
 }
 
-PyUFuncGenericFunction sqwellsol_funcs[3] = {
-    &complex_float_square_well,
-    &complex_double_square_well,
-    &complex_long_double_square_well
-};
-
-PyUFuncGenericFunction invsqwellsol_funcs[3] = {
-    &complex_float_inv_square_well,
-    &complex_double_inv_square_well,
-    &complex_long_double_inv_square_well
-};
-
-PyUFuncGenericFunction sqwellphase_funcs[3] = {
-    &float_square_well_phase,
-    &double_square_well_phase,
-    &long_double_square_well_phase
-};
-
-static void *PyuFunc_data[3
-] = {NULL, NULL, NULL};
-
-/*  Input and return types for square_well_diffraction.                       */
-static char square_well_double_types[15] = {NPY_FLOAT,
-                                            NPY_FLOAT,
-                                            NPY_FLOAT,
-                                            NPY_FLOAT, NPY_CFLOAT,
-                                            NPY_DOUBLE,
-                                            NPY_DOUBLE,
-                                            NPY_DOUBLE,
-                                            NPY_DOUBLE, NPY_CDOUBLE,
-                                            NPY_LONGDOUBLE,
-                                            NPY_LONGDOUBLE,
-                                            NPY_LONGDOUBLE,
-                                            NPY_LONGDOUBLE, NPY_CLONGDOUBLE};
-
-#if PY_VERSION_HEX >= 0x03000000
-static struct PyModuleDef moduledef = {
-    PyModuleDef_HEAD_INIT,
-    "_fresnel_diffraction",
-    NULL,
-    -1,
-    _fresnel_diffraction_methods,
-    NULL,
-    NULL,
-    NULL,
-    NULL
-};
-
-PyMODINIT_FUNC PyInit__fresnel_diffraction(void)
-{
-    PyObject *square_well_diffraction;
-    PyObject *inverse_square_well_diffraction;
-    PyObject *square_well_phase;
-    PyObject *m, *d;
-
-    m = PyModule_Create(&moduledef);
-    if (!m) {
-        return NULL;
-    }
-
-    import_array();
-    import_umath();
-
-    square_well_diffraction = PyUFunc_FromFuncAndData(
-        sqwellsol_funcs, PyuFunc_data, square_well_double_types,
-        3, 4, 1, PyUFunc_None, "square_well_diffraction", 
-        "square_well_diffraction_docstring", 0
-    );
-
-    inverse_square_well_diffraction = PyUFunc_FromFuncAndData(
-        invsqwellsol_funcs, PyuFunc_data, square_well_double_types,
-        3, 4, 1, PyUFunc_None, "inverse_square_well_diffraction", 
-        "inverse_square_well_diffraction_docstring", 0
-    );
-
-    square_well_phase = PyUFunc_FromFuncAndData(
-        sqwellphase_funcs, PyuFunc_data, square_well_double_types,
-        3, 4, 1, PyUFunc_None, "square_well_phase", 
-        "square_well_phase_docstring", 0
-    );
-
-    d = PyModule_GetDict(m);
-
-    PyDict_SetItemString(d, "square_well_diffraction", square_well_diffraction);
-    PyDict_SetItemString(d, "inverse_square_well_diffraction",
-                         inverse_square_well_diffraction);
-    PyDict_SetItemString(d, "square_well_phase", square_well_phase);
-
-    Py_DECREF(square_well_diffraction);
-    Py_DECREF(inverse_square_well_diffraction);
-    Py_DECREF(square_well_phase);
-
-    return m;
-}
-#else
-PyMODINIT_FUNC init__funcs(void)
-{
-    PyObject *square_well_diffraction;
-    PyObject *inverse_square_well_diffraction;
-    PyObject *square_well_phase;
-    PyObject *m, *d;
-
-    m = Py_InitModule("__funcs", _fresnel_diffraction_methods);
-    if (m == NULL) {
-        return;
-    }
-
-    import_array();
-    import_umath();
-
-    square_well_diffraction = PyUFunc_FromFuncAndData(
-        sqwellsol_funcs, PyuFunc_data, sqwellsol_types,
-        1, 4, 1, PyUFunc_None, "square_well_diffraction", 
-        "square_well_diffraction_docstring", 0
-    );
-
-    inverse_square_well_diffraction = PyUFunc_FromFuncAndData(
-        invsqwellsol_funcs, PyuFunc_data, sqwellsol_types,
-        1, 4, 1, PyUFunc_None, "inverse_square_well_diffraction", 
-        "inverse_square_well_diffraction_docstring", 0
-    );
-
-    square_well_phase = PyUFunc_FromFuncAndData(
-        sqwellphase_funcs, PyuFunc_data, sqwellsol_types,
-        1, 4, 1, PyUFunc_None, "square_well_phase", 
-        "square_well_phase_docstring", 0
-    );
-
-    d = PyModule_GetDict(m);
-
-    PyDict_SetItemString(d, "square_well_diffraction", square_well_diffraction);
-    PyDict_SetItemString(d, "inverse_square_well_diffraction",
-                         inverse_square_well_diffraction);
-    PyDict_SetItemString(d, "square_well_phase", square_well_phase);
-
-    Py_DECREF(square_well_diffraction);
-    Py_DECREF(inverse_square_well_diffraction);
-    Py_DECREF(square_well_phase);
-
-    return m;
-}
 #endif

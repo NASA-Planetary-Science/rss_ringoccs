@@ -219,16 +219,16 @@ float Square_Well_Diffraction_Phase_Float(float x, float a, float b, float F){
     b = SQRT_PI_BY_2*(b-x)/F;
 
     im = SQRT_ONE_BY_2_PI *
-        (Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Func(b)   -
-         Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Func(a)   - 
-         Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight_Func(b) +
-         Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight_Func(a));
+        (Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Float(b)   -
+         Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Float(a)   - 
+         Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight_Float(b) +
+         Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight_Float(a));
 
     re = 1.0 - SQRT_ONE_BY_2_PI *
-        (Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight_Func(b) -
-         Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight_Func(a) +
-         Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Func(b)   -
-         Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Func(a));
+        (Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight_Float(b) -
+         Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight_Float(a) +
+         Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Float(b)   -
+         Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Float(a));
     return atan2(im, re);
 }
 
@@ -257,16 +257,16 @@ double Square_Well_Diffraction_Phase_Double(double x, double a,
     b = SQRT_PI_BY_2*(b-x)/F;
 
     im = SQRT_ONE_BY_2_PI *
-        (Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Func(b)   -
-         Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Func(a)   - 
-         Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight_Func(b) +
-         Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight_Func(a));
+        (Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Double(b)   -
+         Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Double(a)   - 
+         Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight_Double(b) +
+         Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight_Double(a));
 
     re = 1.0 - SQRT_ONE_BY_2_PI *
-        (Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight_Func(b) -
-         Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight_Func(a) +
-         Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Func(b)   -
-         Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Func(a));
+        (Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight_Double(b) -
+         Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight_Double(a) +
+         Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Double(b)   -
+         Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Double(a));
     return atan2(im, re);
 }
 
@@ -297,16 +297,16 @@ long double Square_Well_Diffraction_Phase_Long_Double(long double x,
     b = SQRT_PI_BY_2*(b-x)/F;
 
     im = SQRT_ONE_BY_2_PI *
-        (Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Func(b)   -
-         Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Func(a)   - 
-         Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight_Func(b) +
-         Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight_Func(a));
+        (Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Long_Double(b)   -
+         Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Long_Double(a)   - 
+         Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight_Long_Double(b) +
+         Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight_Long_Double(a));
 
     re = 1.0 - SQRT_ONE_BY_2_PI *
-        (Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight_Func(b) -
-         Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight_Func(a) +
-         Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Func(b)   -
-         Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Func(a));
+        (Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight_Long_Double(b) -
+         Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight_Long_Double(a) +
+         Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Long_Double(b)   -
+         Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Long_Double(a));
     return atan2(im, re);
 }
 

@@ -29,9 +29,9 @@ def wavelength_to_wavenumber(lambda_km):
             \r\tError: rss_ringoccs
             \r\t\tdiffrec.special_functions.wavelength_to_wavenumber\n
             \r\tInput should be a numpy array of non-zero real numbers
-            \r\t(Ints or floats), or a non-zero int or non-zero float.\n
+            \r\t(ints or floats), or a non-zero int or non-zero float.\n
             \r\tUsage:
-            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. np.arange(0, 10)
+            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. np.arange(3, 10)
             \r\t\t>>> y = wavelength_to_wavenumber(x)
             """
         )
@@ -47,9 +47,9 @@ def frequency_to_wavelength(freq_hz):
             \r\tError: rss_ringoccs
             \r\t\tdiffrec.special_functions.wavelength_to_wavenumber\n
             \r\tInput should be a numpy array of non-zero real numbers
-            \r\t(Ints or floats), or a non-zero int or non-zero float.\n
+            \r\t(ints or floats), or a non-zero int or non-zero float.\n
             \r\tUsage:
-            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. np.arange(0, 10)
+            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. np.arange(3, 10)
             \r\t\t>>> y = frequency_to_wavelength(x)
             """
         )
@@ -190,10 +190,17 @@ def compute_norm_eq(w_func):
     except KeyboardInterrupt:
         raise
     except:
-        nw = np.size(w_func)
-        tot_sq = np.square(np.sum(w_func))
-
-        return nw*(np.sum(w_func*w_func)) / tot_sq
+        raise TypeError(
+            """
+            \r\tError: rss_ringoccs
+            \r\t\tdiffrec.special_functions.wavelength_to_wavenumber\n
+            \r\tInput should be a numpy array of real numbers (ints or floats),
+            \r\tor a non-zero int or non-zero float.\n
+            \r\tUsage:
+            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. np.arange(-5, 5)
+            \r\t\t>>> y = frequency_to_wavelength(x)
+            """
+        )
 
 def fresnel_scale(Lambda, d, phi, b):
     """
@@ -420,36 +427,36 @@ def d2psi(kD, r, r0, phi, phi0, B, D):
 
 def resolution_inverse(x):
     """
-        Purpose:
-            Compute the inverse of :math:`y = x/(\\exp(-x)+x-1)`
-        Arguments:
-            :x (*np.ndarray* or *float*):
-                Independent variable
-        Outputs:
-            :f (*np.ndarray* or *float*):
-                The inverse of :math:`x/(\\exp(-x)+x-1)`
-        Dependencies:
-            #. numpy
-            #. scipy.special
-        Method:
-            The inverse of :math:`x/(\\exp(-x)+x-1)` is computed using the
-            LambertW function. This function is the inverse of
-            :math:`y = x\\exp(x)`. This is computed using the scipy.special
-            subpackage using their lambertw function.
-        Warnings:
-            #. The real part of the argument must be greater than 1.
-            #. The scipy.special lambertw function is slightly
-               inaccurate when it's argument is near :math:`-1/e`. This
-               argument is :math:`z = \\exp(x/(1-x)) * x/(1-x)`
-        Examples:
-            Plot the function on the interval (1,2)
+    Purpose:
+        Compute the inverse of :math:`y = x/(\\exp(-x)+x-1)`
+    Arguments:
+        :x (*np.ndarray* or *float*):
+            Independent variable
+    Outputs:
+        :f (*np.ndarray* or *float*):
+            The inverse of :math:`x/(\\exp(-x)+x-1)`
+    Dependencies:
+        #. numpy
+        #. scipy.special
+    Method:
+        The inverse of :math:`x/(\\exp(-x)+x-1)` is computed using the
+        LambertW function. This function is the inverse of
+        :math:`y = x\\exp(x)`. This is computed using the scipy.special
+        subpackage using their lambertw function.
+    Warnings:
+        #. The real part of the argument must be greater than 1.
+        #. The scipy.special lambertw function is slightly
+           inaccurate when it's argument is near :math:`-1/e`. This
+           argument is :math:`z = \\exp(x/(1-x)) * x/(1-x)`
+    Examples:
+        Plot the function on the interval (1,2)
 
-            >>> import rss_ringoccs.diffcorr.special_functions as sf
-            >>> import numpy as np
-            >>> x = np.array(range(0,1001))*0.001+1.01
-            >>> y = sf.resolution_inverse(x)
-            >>> import matplotlib.pyplot as plt
-            >>> plt.show(plt.plot(x,y))
+        >>> import rss_ringoccs.diffcorr.special_functions as sf
+        >>> import numpy as np
+        >>> x = np.array(range(0,1001))*0.001+1.01
+        >>> y = sf.resolution_inverse(x)
+        >>> import matplotlib.pyplot as plt
+        >>> plt.show(plt.plot(x,y))
     """
     fname = "diffrec.special_functions.resolution_inverse"
     error_check.check_is_real(x, "x", fname)
@@ -466,38 +473,31 @@ def resolution_inverse(x):
 
 def fresnel_cos(x):
     """
-        Purpose:
-            Compute the Fresnel cosine function.
-        Arguments:
-            :x (*np.ndarray* or *float*):
-                A real or complex number, or numpy array.
-        Outputs:
-            :f_cos (*np.ndarray* or *float*):
-                The fresnel cosine integral of x.
-        Notes:
-            #.  The Fresnel Cosine integral is the solution to the
-                equation :math:`\\mathrm{d}y/\\mathrm{d}x = \\cos(\\frac\\pi 2 x^2)`, :math:`y(0) = 0`. In other
-                words, :math:`y = \\int_{t=0}^{x}\\cos(\\frac\\pi 2 t^2)\\mathrm{d}t`
-            #.  The Fresnel Cosine and Sine integrals are computed by
-                using the scipy.special Error Function. The Error
-                Function, usually denoted Erf(x), is the solution to
-                :math:`\\mathrm{d}y/\\mathrm{d}x = \\frac{2}{\\sqrt{\\pi}}\\exp(-x^2)`, :math:`y(0) = 0`. That is:
-                :math:`y = \\frac{2}{\\sqrt{\\pi}}\\int_{t=0}^{x}\\exp(-t^2)\\mathrm{d}t`.
-                Using Euler's Formula for exponentials allows one
-                to use this to solve for the Fresnel Cosine integral.
-            #.  The Fresnel Cosine integral is used for the solution
-                of diffraction through a square well. Because of this
-                it is useful for forward modeling problems in
-                radiative transfer and diffraction.
-        Examples:
-            Compute and plot the Fresnel Cosine integral.
+    Purpose:
+        Compute the Fresnel cosine function.
+    Arguments:
+        :x (*np.ndarray* or *float*):
+            A real or complex number, or numpy array.
+    Outputs:
+        :f_cos (*np.ndarray* or *float*):
+            The fresnel cosine integral of x.
+    Notes:
+        #.  The Fresnel Cosine integral is the solution to the equation
+            :math:`\\mathrm{d}y/\\mathrm{d}x = \\cos(\\frac\\pi 2 x^2)`,
+            :math:`y(0) = 0`. In other words,
+            :math:`y = \\int_{t=0}^{x}\\cos(\\frac\\pi 2 t^2)\\mathrm{d}t`
+        #.  The Fresnel Cosine integral is used for the solution
+            of diffraction through a square well. Because of this
+            it is useful for forward modeling problems in
+            radiative transfer and diffraction.
+    Examples:
+        Compute and the Fresnel Cosine integral from -10 to 10, with
+            points spaced 0.01 apart.
 
-            >>> import rss_ringoccs.diffcorr.special_functions as sf
-            >>> import numpy as np
-            >>> import matplotlib.pyplot as plt
-            >>> x = np.array(range(0,10001))*0.01 - 50.0
-            >>> y = sf.fresnel_cos(x)
-            >>> plt.show(plt.plot(x,y))
+        >>> import rss_ringoccs.diffcorr.special_functions as sf
+        >>> import numpy as np
+        >>> x = np.arange(-10, 10, 0.01)
+        >>> y = sf.fresnel_cos(x)
     """
     try:
         return _special_functions.fresnel_cos(x)
@@ -524,125 +524,102 @@ def fresnel_sin(x):
             :f_sin (*np.ndarray* or *float*):
                 The fresnel sine integral of x.
         Notes:
-            #.  The Fresnel sine integral is the solution to the
-                equation :math:`\\mathrm{d}y/\\mathrm{d}x = \\sin(\\frac\\pi 2 x^2)`, :math:`y(0) = 0`. In other
-                words, :math:`y = \\int_{t=0}^{x}\\sin(\\frac\\pi 2 t^2) dt`
-            #.  The Fresnel Cossine and Sine integrals are computed
-                by using the scipy.special Error Function. The Error
-                Function, usually denoted Erf(x), is the solution to
-                :math:`\\mathrm{d}y/\\mathrm{d}x = \\frac{2}{\\sqrt{\\pi}} \\exp(-x^2)`, :math:`y(0) = 0`. That is:
-                :math:`y = \\frac{2}{\\sqrt{\\pi}}\\int_{t=0}^{x}\\exp(-t^2)dt`.
-                Using Euler's Formula for exponentials allows one
-                to use this to solve for the Fresnel Sine integral.
+            #.  The Fresnel sine integral is the solution to the equation
+                :math:`\\mathrm{d}y/\\mathrm{d}x = \\sin(\\frac\\pi 2 x^2)`,
+                :math:`y(0) = 0`. In other words,
+                :math:`y = \\int_{t=0}^{x}\\sin(\\frac\\pi 2 t^2) dt`
             #.  The Fresnel sine integral is used for the solution
                 of diffraction through a square well. Because of this
                 is is useful for forward modeling problems in
                 radiative transfer and diffraction.
         Examples:
-            Compute and plot the Fresnel Sine integral.
+            Compute the Fresnel Sine integral from -10 to 10, with
+            points spaced 0.01 apart.
 
             >>> import rss_ringoccs.diffcorr.special_functions as sf
             >>> import numpy as np
-            >>> import matplotlib.pyplot as plt
-            >>> x = np.array(range(0,10001))*0.01 - 50.0
+            >>> x = np.arange(-10, 10, 0.01)
             >>> y = sf.fresnel_sin(x)
-            >>> plt.show(plt.plot(x,y))
     """
     try:
         return _special_functions.fresnel_sin(x)
-    except (TypeError, ValueError, NameError):
-        fname = "diffrec.special_functions.fresnel_sin"
-        error_check.check_is_real(x, "x", fname)
-
-        x0 = x*window_functions.RCP_SQRT_2
-        f_sin = ((0.25+0.25j)*erf((1.0+1.0j)*x0)+(0.25-0.25j)*erf((1.0-1.0j)*x0))
-
-        if (np.isreal(x0).all()):
-            f_sin = np.real(f_sin)
-
-        return f_sin*window_functions.SQRT_PI_2
+    except KeyboardInterrupt:
+        raise
+    except:
+        raise TypeError(
+            """
+            \r\tError: rss_ringoccs
+            \r\t\tdiffrec.special_functions.fresnel_sin\n
+            \r\tInput should be a numpy array of real numbers (ints or floats),
+            \r\tor a non-zero int or non-zero float.\n
+            \r\tUsage:
+            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. np.arange(-5, 5)
+            \r\t\t>>> y = frequency_to_wavelength(x)
+            """
+        )
 
 def square_well_diffraction(x, a, b, F):
     try:
         return _special_functions.square_well_diffraction(x, a, b, F)
-    except(TypeError, ValueError, NameError):
-        try:
-            arg_1 = np.sqrt(np.pi/2.0)*((a-x)/F)
-            arg_2 = np.sqrt(np.pi/2.0)*((b-x)/F)
-
-            return 1.0 - np.sqrt(2.0/np.pi)*(0.5 - 0.5j) * (
-                fresnel_cos(arg_2)-fresnel_cos(arg_1)+
-                1j*(fresnel_sin(arg_2)-fresnel_sin(arg_1))
-            )
-        except(TypeError, ValueError):
-            raise TypeError(
-                """
-                    \r\tError Encountered: rss_ringoccs
-                    \r\t\tdiffrec.special_functions.square_well_diffraction
-                    \r
-                    \r\tInvalid input. Input should be:
-                    \r\t\tx:\t Numpy array of floating point numbers.
-                    \r\t\ta:\t Floating point number
-                    \r\t\tb:\t Floating point number
-                    \r\t\tF:\t Floating point number
-                """
-            )
+    except KeyboardInterrupt:
+        raise
+    except:
+        raise TypeError(
+            """
+            \r\tError: rss_ringoccs
+            \r\t\tdiffrec.special_functions.square_well_diffraction\n
+            \r\tInput should be a numpy array of real numbers (ints or floats),
+            \r\tand three floats/ints.\n
+            \r\tUsage:
+            \r\t\t>>> x = np.arange(-10, 10, 0.01)
+            \r\t\t>>> a = -5.0
+            \r\t\t>>> b = 5.0
+            \r\t\t>>> F = 0.05
+            \r\t\t>>> y = square_well_diffraction(x, a, b, F)
+            """
+        )
 
 def inverse_square_well_diffraction(x, a, b, F):
     try:
         return _special_functions.inverse_square_well_diffraction(x, a, b, F)
-    except(TypeError, ValueError, NameError):
-        try:
-            arg_1 = np.sqrt(np.pi/2.0)*((a-x)/F)
-            arg_2 = np.sqrt(np.pi/2.0)*((b-x)/F)
-
-            return np.sqrt(2.0/np.pi)*(0.5 - 0.5j) * (
-                fresnel_cos(arg_2)-fresnel_cos(arg_1)+
-                1j*(fresnel_sin(arg_2)-fresnel_sin(arg_1))
-            )
-        except(TypeError, ValueError):
-            raise TypeError(
-                """
-                    \r\tError Encountered: rss_ringoccs
-                    \r\t\tdiffrec.special_functions.inverse_square_well_diffraction
-                    \r
-                    \r\tInvalid input. Input should be:
-                    \r\t\tx:\t Numpy array of floating point numbers.
-                    \r\t\ta:\t Floating point number
-                    \r\t\tb:\t Floating point number
-                    \r\t\tF:\t Floating point number
-                """
-            )
+    except KeyboardInterrupt:
+        raise
+    except:
+        raise TypeError(
+            """
+            \r\tError: rss_ringoccs
+            \r\t\tdiffrec.special_functions.inverse_square_well_diffraction\n
+            \r\tInput should be a numpy array of real numbers (ints or floats),
+            \r\tand three floats/ints.\n
+            \r\tUsage:
+            \r\t\t>>> x = np.arange(-10, 10, 0.01)
+            \r\t\t>>> a = -5.0
+            \r\t\t>>> b = 5.0
+            \r\t\t>>> F = 0.05
+            \r\t\t>>> y = inverse_square_well_diffraction(x, a, b, F)
+            """
+        )
 
 def square_well_phase(x, a, b, F):
     try:
         return _special_functions.square_well_phase(x, a, b, F)
-    except(TypeError, ValueError, NameError):
-        try:
-            arg_1 = np.sqrt(np.pi/2.0)*((a-x)/F)
-            arg_2 = np.sqrt(np.pi/2.0)*((b-x)/F)
-
-            im = -(1.0/np.sqrt(2.0*np.pi))*(
-                fresnel_sin(arg_2) - fresnel_sin(arg_1) -
-                fresnel_cos(arg_2) + fresnel_cos(arg_1))
-            re = 1.0 - (1.0/np.sqrt(2.0*np.pi))*(
-                fresnel_cos(arg_2) - fresnel_cos(arg_1) +
-                fresnel_sin(arg_2) - fresnel_sin(arg_1))
-
-            return np.arctan2(im, re) 
-        except(TypeError, ValueError):
-            raise TypeError(
-                """
-                    \r\tError Encountered: rss_ringoccs
-                    \r\t\tdiffrec.special_functions.square_well_diffraction
-                    \r
-                    \r\tInvalid input. Input should be:
-                    \r\t\tx:\t Numpy array of floating point numbers.
-                    \r\t\ta:\t Floating point number
-                    \r\t\tb:\t Floating point number
-                    \r\t\tF:\t Floating point number
-                """
-            )
+    except KeyboardInterrupt:
+        raise
+    except:
+        raise TypeError(
+            """
+            \r\tError: rss_ringoccs
+            \r\t\tdiffrec.special_functions.square_well_phase\n
+            \r\tInput should be a numpy array of real numbers (ints or floats),
+            \r\tand three floats/ints.\n
+            \r\tUsage:
+            \r\t\t>>> x = np.arange(-10, 10, 0.01)
+            \r\t\t>>> a = -5.0
+            \r\t\t>>> b = 5.0
+            \r\t\t>>> F = 0.05
+            \r\t\t>>> y = square_well_phase(x, a, b, F)
+            """
+        )
 
 def single_slit_diffraction(x, z, a):
     """
@@ -665,10 +642,23 @@ def single_slit_diffraction(x, z, a):
                 Single slit diffraction pattern.
     """
     try:
-        return _fraunhofer_diffraction.single_slit_fraunhofer_diffraction(x,
-                                                                          z, a)
+        return _special_functions.single_slit_diffraction(x, z, a)
+    except KeyboardInterrupt:
+        raise
     except:
-        raise TypeValue("Big boo boo")
+        raise TypeError(
+            """
+            \r\tError: rss_ringoccs
+            \r\t\tdiffrec.special_functions.single_slit_diffraction\n
+            \r\tInput should be a numpy array of real numbers (ints or floats),
+            \r\tand three floats/ints.\n
+            \r\tUsage:
+            \r\t\t>>> x = numpy.arange(-10, 10, 0.01)
+            \r\t\t>>> z = 5.0
+            \r\t\t>>> a = 10.0
+            \r\t\t>>> y = single_slit_diffraction(x, z, a)
+            """
+        )
 
 def double_slit_diffraction(x, z, a, d):
     """
@@ -694,10 +684,24 @@ def double_slit_diffraction(x, z, a, d):
                 Single slit diffraction pattern.
     """
     try:
-        return _fraunhofer_diffraction.double_slit_fraunhofer_diffraction(x, z, 
-                                                                          a, d)
+        return _special_functions.double_slit_diffraction(x, z, a, d)
+    except KeyboardInterrupt:
+        raise
     except:
-        raise TypeError("Oh no.")
+        raise TypeError(
+            """
+            \r\tError: rss_ringoccs
+            \r\t\tdiffrec.special_functions.double_slit_diffraction\n
+            \r\tInput should be a numpy array of real numbers (ints or floats),
+            \r\tand three floats/ints.\n
+            \r\tUsage:
+            \r\t\t>>> x = np.arange(-10, 10, 0.01)
+            \r\t\t>>> z = 5.0
+            \r\t\t>>> a = 10.0
+            \r\t\t>>> d = 1.0
+            \r\t\t>>> y = double_slit_diffraction(x, z, a, d)
+            """
+        )
 
 def fresnel_transform_ellipse(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
                               kD_vals, B_rad_vals, D_km_vals, w_km_vals, start,
@@ -1064,7 +1068,7 @@ def fresnel_legendre_transform(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
                                n_used, wtype, norm, fwd, psitype,
                                use_python=False):
 
-    if (psitype == "fresnel4") or (psitype == "fresnel3"):
+    if (psitype == "fresnel4"):
         ord = 3
     elif (psitype == "fresnel6"):
         ord = 5
@@ -1253,25 +1257,50 @@ def fresnel_transform(T_in, rho_km_vals, F_km_vals, w_km_vals, start, n_used,
                       wtype, norm, fwd, psitype, phi_rad_vals=None,
                       kD_vals=None, B_rad_vals=None, D_km_vals=None,
                       periapse=None, eccentricity=None, use_python=False):
-        if (psitype == "ellipse"):
-            return fresnel_transform_ellipse(
-                T_in, rho_km_vals, F_km_vals, phi_rad_vals, kD_vals, B_rad_vals,
-                D_km_vals, w_km_vals, start, n_used, periapse, eccentricity,
-                wtype, norm, fwd
-            )
-        elif (psitype == "fresnel"):
-            return fresnel_transform_quadratic(T_in, rho_km_vals, F_km_vals,
-                                               w_km_vals, start, n_used, wtype,
-                                               norm, fwd)
-        elif (psitype == "full"):
-            return fresnel_transform_newton(
-                T_in, rho_km_vals, F_km_vals, phi_rad_vals, kD_vals, B_rad_vals,
-                D_km_vals, w_km_vals, start, n_used, wtype, norm, fwd
-            )
-        elif ((psitype == "fresnel4") or (psitype == "fresnel6")
-                                      or (psitype == "fresnel8")):
-            return fresnel_legendre_transform(
-                T_in, rho_km_vals, F_km_vals, phi_rad_vals, kD_vals, B_rad_vals,
-                D_km_vals, w_km_vals, start, n_used, wtype, norm, fwd, psitype,
-                use_python=use_python
-            )
+
+    fname = "diffrec.special_functions.fresnel_transform"
+    # Remove spaces/quotes from the wtype variable and set to lower case.
+    wtype = wtype.replace(" ", "").replace("'", "").replace('"', "")
+    wtype = wtype.lower()
+
+    # Check that wtype is in the allowed list of window types.
+    if not (wtype in window_functions.func_dict):
+        erm = ""
+        for key in window_functions.func_dict:
+            erm = "%s\t\t'%s'\n" % (erm, key)
+        raise ValueError(
+            """
+                \r\tError Encountered: rss_ringoccs
+                \r\t\t%s\n
+                \tIllegal string used for wtype.
+                \r\t\tYour string: '%s'\n
+                \r\tAllowed Strings:\n%s
+            """ % (fname, wtype, erm)
+        )
+    else:
+        pass
+
+    # Check that range and psitype are legal inputs.
+    psitype = error_check.check_psitype(psitype, fname)
+
+    if (psitype == "ellipse"):
+        return fresnel_transform_ellipse(T_in, rho_km_vals, F_km_vals,
+                                         phi_rad_vals, kD_vals, B_rad_vals,
+                                         D_km_vals, w_km_vals, start,
+                                         n_used, periapse, eccentricity,
+                                         wtype, norm, fwd)
+    elif (psitype == "fresnel"):
+        return fresnel_transform_quadratic(T_in, rho_km_vals, F_km_vals,
+                                           w_km_vals, start, n_used, wtype,
+                                           norm, fwd)
+    elif (psitype == "full"):
+        return fresnel_transform_newton(T_in, rho_km_vals, F_km_vals,
+                                        phi_rad_vals, kD_vals, B_rad_vals,
+                                        D_km_vals, w_km_vals, start, n_used,
+                                        wtype, norm, fwd)
+    else:
+        return fresnel_legendre_transform(T_in, rho_km_vals, F_km_vals,
+                                          phi_rad_vals, kD_vals, B_rad_vals,
+                                          D_km_vals, w_km_vals, start, n_used,
+                                          wtype, norm, fwd, psitype,
+                                          use_python=use_python)

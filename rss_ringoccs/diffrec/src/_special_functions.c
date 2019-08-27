@@ -354,8 +354,6 @@ PyUFuncGenericFunction wavelength_to_wavenumber_funcs[3] = {
 static void *PyuFunc_None_3[3] = {NULL, NULL, NULL};
 static void *PyuFunc_data[1]   = {NULL};
 
-static char double_double_types[2] = {NPY_DOUBLE, NPY_DOUBLE};
-
 /* Input and return types for fresnel_psi.                                    */
 static char octo_double_types[8] = {NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE,
                                     NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE,
@@ -437,7 +435,7 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     );
 
     fresnel_sin = PyUFunc_FromFuncAndData(
-        fresnel_sin_funcs, PyuFunc_data, double_double_types, 1, 1, 1,
+        fresnel_sin_funcs, PyuFunc_data, real_in_real_out, 3, 1, 1,
         PyUFunc_None, "fresnel_sin", "fresnel_sin_docstring", 0
     );
 

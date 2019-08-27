@@ -8,7 +8,7 @@
 #include "__fresnel_sine.h"
 #include "__fresnel_cosine.h"
 
-double complex Fresnel_Taylor_to_Asymptotic_Func(double x)
+complex double Fresnel_Taylor_to_Asymptotic_Double(double x)
 {
     /***************************************************************************
      * This is the primary function for compute the Fresnel_Cosine integral.   *
@@ -116,7 +116,7 @@ double complex Fresnel_Taylor_to_Asymptotic_Func(double x)
     }
 }
 
-double complex Fresnel_While_to_Asymptotic_Func(double x)
+complex double Fresnel_While_to_Asymptotic_Func(double x)
 {
     double FRESNEL_COSINE_TAYLOR_COEFFICIENTS[27] = {
         FRESNEL_COSINE_TAYLOR_00, FRESNEL_COSINE_TAYLOR_01,
@@ -197,7 +197,7 @@ double complex Fresnel_While_to_Asymptotic_Func(double x)
     }
 }
 
-double complex Fresnel_Heald_Rational_EPS_Minus_Three_Func(double x)
+complex double Fresnel_Heald_Rational_EPS_Minus_Three_Func(double x)
 {
     double A, R, a, b, c, d, sgn_x, sx, cx;
     sgn_x = (x>0)-(x<0);
@@ -229,7 +229,7 @@ double complex Fresnel_Heald_Rational_EPS_Minus_Three_Func(double x)
     return cx + _Complex_I*sx;
 }
 
-double complex Fresnel_Heald_Rational_EPS_Minus_Four_Func(double x)
+complex double Fresnel_Heald_Rational_EPS_Minus_Four_Func(double x)
 {
     double A, R, a, b, c, d, sgn_x, sx, cx;
     sgn_x = (x>0)-(x<0);
@@ -263,7 +263,7 @@ double complex Fresnel_Heald_Rational_EPS_Minus_Four_Func(double x)
     return cx + _Complex_I*sx;
 }
 
-double complex Fresnel_Heald_Rational_EPS_Minus_Six_Func(double x)
+complex double Fresnel_Heald_Rational_EPS_Minus_Six_Func(double x)
 {
     double A, R, a, b, c, d, sgn_x, cx, sx;
     sgn_x = (x>0)-(x<0);
@@ -301,7 +301,7 @@ double complex Fresnel_Heald_Rational_EPS_Minus_Six_Func(double x)
     return cx + _Complex_I*sx;
 }
 
-double complex Fresnel_Heald_Rational_EPS_Minus_Eight_Func(double x)
+complex double Fresnel_Heald_Rational_EPS_Minus_Eight_Func(double x)
 {
     double A, R, a, b, c, d, sgn_x, cx, sx;
     sgn_x = (x>0)-(x<0);

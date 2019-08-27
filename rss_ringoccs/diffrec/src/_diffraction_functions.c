@@ -91,7 +91,9 @@
 #include "__math_constants.h"
 
 /*  Window functions and Fresnel Transforms defined here.                     */
-#include "__window_functions.h"
+#include "__misc_windows.h"
+#include "__kaiser_bessel.h"
+#include "__modified_kaiser_bessel.h"
 #include "__diffraction_functions.h"
 
 /*  Functions for computing the Fresnel Kernel and Newton's Method.           */

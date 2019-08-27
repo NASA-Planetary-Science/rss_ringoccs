@@ -4,10 +4,6 @@
 /*  Various coefficients and constants defined here.    */
 #include "__math_constants.h"
 
-/*  Kaiser-Bessel Functions found here.                 */
-#include "__kaiser_bessel.h"
-#include "__modified_kaiser_bessel.h"
-
 float Rect_Window_Float(float x, float W){
     if (fabsf(x) <= W/2.0){
         return 1.0;

@@ -16,10 +16,10 @@
  *  Coefficients for Fresnel Sine and Fresnel Cosine.                          *
  ******************************************************************************/
 
-/* Define Coefficients for the Fresnel Sine Taylor Expansion. */
+/* Define Coefficients for the Fresnel Sine Taylor Expansion.                 */
 #define FRESNEL_SINE_TAYLOR_00  0.3333333333333333333333333
 #define FRESNEL_SINE_TAYLOR_01 -2.38095238095238095238095238095e-2
-#define FRESNEL_SINE_TAYLOR_02  7.57575757575757575757575757576e-3
+#define FRESNEL_SINE_TAYLOR_02  7.57575757575757575757575757576e-4
 #define FRESNEL_SINE_TAYLOR_03 -1.32275132275132275132275132275e-5
 #define FRESNEL_SINE_TAYLOR_04  1.45038522231504687645038522232e-7
 #define FRESNEL_SINE_TAYLOR_05 -1.08922210371485733804574384285e-9

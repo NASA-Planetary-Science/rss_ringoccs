@@ -12,7 +12,8 @@
 static void float_frequency_to_wavelength(char **args, npy_intp *dimensions,
                                           npy_intp *steps, void *data){
     long i;
-    long n  = dimensions[0];
+    long n = dimensions[0];
+
     float *in  = (float *)args[0];
     float *out = (float *)args[1];
 
@@ -24,7 +25,8 @@ static void float_frequency_to_wavelength(char **args, npy_intp *dimensions,
 static void double_frequency_to_wavelength(char **args, npy_intp *dimensions,
                                            npy_intp *steps, void *data){
     long i;
-    long n  = dimensions[0];
+    long n = dimensions[0];
+
     double *in  = (double *)args[0];
     double *out = (double *)args[1];
 
@@ -37,7 +39,8 @@ static void long_double_frequency_to_wavelength(char **args,
                                                 npy_intp *dimensions,
                                                 npy_intp *steps, void *data){
     long i;
-    long n  = dimensions[0];
+    long n = dimensions[0];
+
     long double *in  = (long double *)args[0];
     long double *out = (long double *)args[1];
 
@@ -51,7 +54,8 @@ static void long_double_frequency_to_wavelength(char **args,
 static void float_wavelength_to_wavenumber(char **args, npy_intp *dimensions,
                                            npy_intp *steps, void *data){
     long i;
-    long n  = dimensions[0];
+    long n = dimensions[0];
+
     float *in  = (float *)args[0];
     float *out = (float *)args[1];
 
@@ -63,7 +67,8 @@ static void float_wavelength_to_wavenumber(char **args, npy_intp *dimensions,
 static void double_wavelength_to_wavenumber(char **args, npy_intp *dimensions,
                                             npy_intp *steps, void *data){
     long i;
-    long n  = dimensions[0];
+    long n = dimensions[0];
+
     double *in  = (double *)args[0];
     double *out = (double *)args[1];
 
@@ -76,7 +81,8 @@ static void long_double_wavelength_to_wavenumber(char **args,
                                                  npy_intp *dimensions,
                                                  npy_intp *steps, void *data){
     long i;
-    long n  = dimensions[0];
+    long n = dimensions[0];
+
     long double *in  = (long double *)args[0];
     long double *out = (long double *)args[1];
 

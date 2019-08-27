@@ -408,7 +408,7 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     import_umath();
 
     inverse_square_well_diffraction = PyUFunc_FromFuncAndData(
-        invsqwellsol_funcs, PyuFunc_data, four_real_in_one_real_out,
+        invsqwellsol_funcs, PyuFunc_None_3, four_real_in_one_real_out,
         3, 4, 1, PyUFunc_None, "inverse_square_well_diffraction", 
         "inverse_square_well_diffraction_docstring", 0
     );
@@ -435,18 +435,18 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     );
 
     fresnel_sin = PyUFunc_FromFuncAndData(
-        fresnel_sin_funcs, PyuFunc_data, real_in_real_out, 3, 1, 1,
+        fresnel_sin_funcs, PyuFunc_None_3, real_in_real_out, 3, 1, 1,
         PyUFunc_None, "fresnel_sin", "fresnel_sin_docstring", 0
     );
 
     square_well_diffraction = PyUFunc_FromFuncAndData(
-        sqwellsol_funcs, PyuFunc_data, four_real_in_one_real_out,
+        sqwellsol_funcs, PyuFunc_None_3, four_real_in_one_real_out,
         3, 4, 1, PyUFunc_None, "square_well_diffraction", 
         "square_well_diffraction_docstring", 0
     );
 
     square_well_phase = PyUFunc_FromFuncAndData(
-        sqwellphase_funcs, PyuFunc_data, four_real_in_one_real_out,
+        sqwellphase_funcs, PyuFunc_None_3, four_real_in_one_real_out,
         3, 4, 1, PyUFunc_None, "square_well_phase", 
         "square_well_phase_docstring", 0
     );

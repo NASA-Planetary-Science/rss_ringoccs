@@ -4,7 +4,6 @@ from . import window_functions
 from rss_ringoccs.tools import error_check
 try:
     from . import _special_functions, _diffraction_functions
-    from . import _fresnel_diffraction
 except:
     raise ImportError(
         """
@@ -565,7 +564,7 @@ def fresnel_sin(x):
 
 def square_well_diffraction(x, a, b, F):
     try:
-        return _fresnel_diffraction.square_well_diffraction(x, a, b, F)
+        return _special_functions.square_well_diffraction(x, a, b, F)
     except(TypeError, ValueError, NameError):
         try:
             arg_1 = np.sqrt(np.pi/2.0)*((a-x)/F)
@@ -591,7 +590,7 @@ def square_well_diffraction(x, a, b, F):
 
 def inverse_square_well_diffraction(x, a, b, F):
     try:
-        return _fresnel_diffraction.inverse_square_well_diffraction(x, a, b, F)
+        return _special_functions.inverse_square_well_diffraction(x, a, b, F)
     except(TypeError, ValueError, NameError):
         try:
             arg_1 = np.sqrt(np.pi/2.0)*((a-x)/F)
@@ -617,7 +616,7 @@ def inverse_square_well_diffraction(x, a, b, F):
 
 def square_well_phase(x, a, b, F):
     try:
-        return _fresnel_diffraction.square_well_phase(x, a, b, F)
+        return _special_functions.square_well_phase(x, a, b, F)
     except(TypeError, ValueError, NameError):
         try:
             arg_1 = np.sqrt(np.pi/2.0)*((a-x)/F)

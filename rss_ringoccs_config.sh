@@ -6,8 +6,10 @@ fi
 osstring=`uname`
 
 if [ "$osstring" = "Darwin" ]; then
+	BASH_FILE=bash_profile
 	fil="Anaconda3-2019.07-MacOSX-x86_64.sh"
 elif [ "$osstring" = "Linux" ]; then
+	BASH_FILE=bashrc
 	fil="Anaconda3-2019.07-Linux-x86_64.sh"
 else
 	echo "Operating System not recognized"
@@ -43,8 +45,8 @@ else
 	rm -f $fil
 fi
 
-# Source the bashrc file.
-source .bashrc
+# Source the bashrc/bash_profile file.
+source .$BASH_FILE
 
 # Check that anaconda3 is included in your path
 echo -e ' \t ' "Checking your PATH variable..."
@@ -52,13 +54,13 @@ if [[ ":$PATH:" == *"/anaconda3/bin"* ]]; then
   echo -e ' \t ' "PATH variable is set"
 else
 	echo -e ' \t ' "Adding ~/anaconda3/bin to your PATH"
-	echo 'export PATH="~/anaconda3/bin:$PATH"' >>~/.bashrc
+	echo 'export PATH="~/anaconda3/bin:$PATH"' >>~/.$BASH_FILE
 fi
 
-# Source .bashrc to update you path.
-echo -e ' \t ' "Sourcing .bashrc"
+# Source .bashrc/.bash_profile to update you path.
+echo -e ' \t ' "Sourcing .bashrc/.bash_profile"
 echo -e ' \t ' "Make sure you are using Bash when running rss_ringoccs"
-source .bashrc
+source .$BASH_FILE
 
 # Update conda
 echo -e ' \t ' "Updating conda..."
@@ -69,10 +71,10 @@ echo -e ' \t ' "Installing spiceypy..."
 yes | conda install -c conda-forge spiceypy
 
 # Install PyMieScatt
-conda install -c conda-forge pymiescatt
+yes | conda install -c conda-forge pymiescatt
 
-# Source the .bashrc again after conda updates.
-source .bashrc
+# Source the .bashrc/.bash_profile again after conda updates.
+source .$BASH_FILE
 
 # Change back to working directory
 cd "$MY_DIRECTORY"

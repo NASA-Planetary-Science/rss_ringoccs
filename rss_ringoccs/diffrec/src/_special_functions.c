@@ -9,6 +9,7 @@
 
 /* Include fresnel integrals header. This includes frensel_sin/cos.          */
 #include "__fresnel_kernel.h"
+#include "_fraunhofer_diffraction_wrappers.h"
 #include "_fresnel_diffraction_wrappers.h"
 #include "_physics_functions_wrappers.h"
 #include "_fresnel_integrals_wrappers.h"
@@ -332,6 +333,12 @@ PyUFuncGenericFunction fresnel_sin_funcs[3] = {
 PyUFuncGenericFunction psi_funcs[1]             = {&double_psi};
 PyUFuncGenericFunction dpsi_funcs[1]            = {&double_dpsi_dphi};
 
+PyUFuncGenericFunction single_slit_funcs[3] = {
+    &float_single_slit_diffraction,
+    &double_single_slit_diffraction,
+    &long_double_single_slit_diffraction
+};
+
 PyUFuncGenericFunction sqwellsol_funcs[3] = {
     &complex_float_square_well,
     &complex_double_square_well,
@@ -359,19 +366,24 @@ static char octo_double_types[8] = {NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE,
                                     NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE,
                                     NPY_DOUBLE, NPY_DOUBLE};
 
-static char real_in_real_out[6] = {NPY_FLOAT, NPY_FLOAT,
-                                   NPY_DOUBLE, NPY_DOUBLE,
-                                   NPY_LONGDOUBLE, NPY_LONGDOUBLE};
+static char one_real_in_one_real_out[6] = {NPY_FLOAT, NPY_FLOAT,
+                                           NPY_DOUBLE, NPY_DOUBLE,
+                                           NPY_LONGDOUBLE, NPY_LONGDOUBLE};
 
-static char four_real_in_one_real_out[15] = {NPY_FLOAT, NPY_FLOAT,
-                                             NPY_FLOAT, NPY_FLOAT,
-                                             NPY_CFLOAT,
-                                             NPY_DOUBLE, NPY_DOUBLE,
-                                             NPY_DOUBLE, NPY_DOUBLE,
-                                             NPY_CDOUBLE,
-                                             NPY_LONGDOUBLE, NPY_LONGDOUBLE,
-                                             NPY_LONGDOUBLE, NPY_LONGDOUBLE,
-                                             NPY_CLONGDOUBLE};
+static char three_real_in_one_real_out[12] = {
+    NPY_FLOAT, NPY_FLOAT, NPY_FLOAT, NPY_FLOAT,
+    NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE,
+    NPY_LONGDOUBLE, NPY_LONGDOUBLE, NPY_LONGDOUBLE, NPY_LONGDOUBLE
+};
+
+static char four_real_in_one_complex_out[15] = {
+    NPY_FLOAT, NPY_FLOAT, NPY_FLOAT, NPY_FLOAT,
+    NPY_CFLOAT,
+    NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE,
+    NPY_CDOUBLE,
+    NPY_LONGDOUBLE, NPY_LONGDOUBLE, NPY_LONGDOUBLE, NPY_LONGDOUBLE,
+    NPY_CLONGDOUBLE
+};
 
 #if PY_VERSION_HEX >= 0x03000000
 static struct PyModuleDef moduledef = {
@@ -394,6 +406,7 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     PyObject *fresnel_cos;
     PyObject *fresnel_psi;
     PyObject *fresnel_dpsi_dphi;
+    PyObject *single_slit_diffraction;
     PyObject *square_well_diffraction;
     PyObject *square_well_phase;
     PyObject *wavelength_to_wavenumber;
@@ -408,13 +421,13 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     import_umath();
 
     inverse_square_well_diffraction = PyUFunc_FromFuncAndData(
-        invsqwellsol_funcs, PyuFunc_None_3, four_real_in_one_real_out,
+        invsqwellsol_funcs, PyuFunc_None_3, four_real_in_one_complex_out,
         3, 4, 1, PyUFunc_None, "inverse_square_well_diffraction", 
         "inverse_square_well_diffraction_docstring", 0
     );
 
     frequency_to_wavelength = PyUFunc_FromFuncAndData(
-        frequency_to_wavelength_funcs, PyuFunc_None_3, real_in_real_out,
+        frequency_to_wavelength_funcs, PyuFunc_None_3, one_real_in_one_real_out,
         3, 1, 1, PyUFunc_None, "frequency_to_wavelength",
         "frequency_to_wavelength_docstring", 0
     );
@@ -425,7 +438,7 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     );
 
     fresnel_cos = PyUFunc_FromFuncAndData(
-        fresnel_cos_funcs, PyuFunc_None_3, real_in_real_out, 3, 1, 1,
+        fresnel_cos_funcs, PyuFunc_None_3, one_real_in_one_real_out, 3, 1, 1,
         PyUFunc_None, "fresnel_cos", "fresnel_cos_docstring", 0
     );
 
@@ -435,26 +448,32 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     );
 
     fresnel_sin = PyUFunc_FromFuncAndData(
-        fresnel_sin_funcs, PyuFunc_None_3, real_in_real_out, 3, 1, 1,
+        fresnel_sin_funcs, PyuFunc_None_3, one_real_in_one_real_out, 3, 1, 1,
         PyUFunc_None, "fresnel_sin", "fresnel_sin_docstring", 0
     );
 
+    single_slit_diffraction = PyUFunc_FromFuncAndData(
+        single_slit_funcs, PyuFunc_None_3, three_real_in_one_real_out,
+        3, 3, 1, PyUFunc_None, "single_slit_diffraction", 
+        "single_slit_diffraction_docstring", 0
+    );
+
     square_well_diffraction = PyUFunc_FromFuncAndData(
-        sqwellsol_funcs, PyuFunc_None_3, four_real_in_one_real_out,
+        sqwellsol_funcs, PyuFunc_None_3, four_real_in_one_complex_out,
         3, 4, 1, PyUFunc_None, "square_well_diffraction", 
         "square_well_diffraction_docstring", 0
     );
 
     square_well_phase = PyUFunc_FromFuncAndData(
-        sqwellphase_funcs, PyuFunc_None_3, four_real_in_one_real_out,
+        sqwellphase_funcs, PyuFunc_None_3, four_real_in_one_complex_out,
         3, 4, 1, PyUFunc_None, "square_well_phase", 
         "square_well_phase_docstring", 0
     );
 
     wavelength_to_wavenumber = PyUFunc_FromFuncAndData(
-        wavelength_to_wavenumber_funcs, PyuFunc_None_3, real_in_real_out,
-        3, 1, 1, PyUFunc_None, "wavelength_to_wavenumber",
-        "wavelength_to_wavenumber_docstring", 0
+        wavelength_to_wavenumber_funcs, PyuFunc_None_3,
+        one_real_in_one_real_out, 3, 1, 1, PyUFunc_None,
+        "wavelength_to_wavenumber", "wavelength_to_wavenumber_docstring", 0
     );
 
     d = PyModule_GetDict(m);
@@ -466,6 +485,7 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     PyDict_SetItemString(d, "fresnel_cos", fresnel_cos);
     PyDict_SetItemString(d, "fresnel_psi", fresnel_psi);
     PyDict_SetItemString(d, "fresnel_dpsi_dphi", fresnel_dpsi_dphi);
+    PyDict_SetItemString(d, "single_slit_diffraction", single_slit_diffraction);
     PyDict_SetItemString(d, "square_well_diffraction", square_well_diffraction);
     PyDict_SetItemString(d, "square_well_phase", square_well_phase);
     PyDict_SetItemString(d, "wavelength_to_wavenumber",
@@ -477,6 +497,7 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     Py_DECREF(fresnel_cos);
     Py_DECREF(fresnel_psi);
     Py_DECREF(fresnel_dpsi_dphi);
+    Py_DECREF(single_slit_diffraction);
     Py_DECREF(square_well_diffraction);
     Py_DECREF(square_well_phase);
     Py_DECREF(wavelength_to_wavenumber);

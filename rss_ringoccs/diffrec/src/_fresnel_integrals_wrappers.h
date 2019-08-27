@@ -10,8 +10,9 @@
 
 static void float_fresnelsin(char **args, npy_intp *dimensions,
                               npy_intp* steps, void* data){
-    npy_intp i;
-    npy_intp n  = dimensions[0];
+    long i;
+    long n = dimensions[0];
+
     float *in  = (float *)args[0];
     float *out = (float *)args[1];
 
@@ -22,8 +23,9 @@ static void float_fresnelsin(char **args, npy_intp *dimensions,
 
 static void double_fresnelsin(char **args, npy_intp *dimensions,
                               npy_intp* steps, void* data){
-    npy_intp i;
-    npy_intp n  = dimensions[0];
+    long i;
+    long n = dimensions[0];
+
     double *in  = (double *)args[0];
     double *out = (double *)args[1];
 
@@ -34,8 +36,9 @@ static void double_fresnelsin(char **args, npy_intp *dimensions,
 
 static void long_double_fresnelsin(char **args, npy_intp *dimensions,
                                    npy_intp* steps, void* data){
-    npy_intp i;
-    npy_intp n  = dimensions[0];
+    long i;
+    long n = dimensions[0];
+
     long double *in  = (long double *)args[0];
     long double *out = (long double *)args[1];
 
@@ -48,8 +51,9 @@ static void long_double_fresnelsin(char **args, npy_intp *dimensions,
 
 static void float_fresnelcos(char **args, npy_intp *dimensions,
                              npy_intp *steps, void *data){
-    npy_intp i;
-    npy_intp n  = dimensions[0];
+    long i;
+    long n = dimensions[0];
+
     float *in  = (float *)args[0];
     float *out = (float *)args[1];
 
@@ -61,8 +65,9 @@ static void float_fresnelcos(char **args, npy_intp *dimensions,
 static void double_fresnelcos(char **args, npy_intp *dimensions,
                               npy_intp* steps, void* data)
 {
-    npy_intp i;
-    npy_intp n  = dimensions[0];
+    long i;
+    long n  = dimensions[0];
+
     double *in  = (double *)args[0];
     double *out = (double *)args[1];
 
@@ -74,8 +79,9 @@ static void double_fresnelcos(char **args, npy_intp *dimensions,
 static void long_double_fresnelcos(char **args, npy_intp *dimensions,
                                    npy_intp* steps, void* data)
 {
-    npy_intp i;
-    npy_intp n  = dimensions[0];
+    long i;
+    long n = dimensions[0];
+
     long double *in  = (long double *)args[0];
     long double *out = (long double *)args[1];
 

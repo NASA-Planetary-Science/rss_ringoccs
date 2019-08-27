@@ -8,7 +8,9 @@
 #include <complex.h>
 
 /*  Window functions defined here.                                           */
-#include "__window_functions.h"
+#include "__misc_windows.h"
+#include "__kaiser_bessel.h"
+#include "__modified_kaiser_bessel.h"
 
 /*  Various header files required for the C-Python API to work.              */
 #include <Python.h>

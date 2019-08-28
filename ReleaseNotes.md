@@ -59,7 +59,7 @@ Some post-USO files contain discontinuous frequency offsets. rss_rings v1.2 does
 
 ### Lien list for V1.3 ###
 
-1. Complete post-USO support. This includes addressing the discontinuous frequency offsets and the phase echo introduced by diffraction of the uplink signal by the ring system.
+1. Properly proximal egress occultations in Grand Finale orbits
 
 2. Data catalog query - we will work with the PDS to ensure that our recently-submitted RSS ring occultation observation data catalog is compliant with current PDS search capabilities.
 

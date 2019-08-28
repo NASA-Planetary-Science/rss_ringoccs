@@ -19,7 +19,6 @@ from multiprocessing import Process
 from multiprocessing import Queue
 import numpy as np
 import os
-import pdb
 from scipy.signal import decimate
 import struct
 import sys
@@ -249,12 +248,7 @@ class RSRReader(object):
         self.dsn = 'DSS-' + str(sfdu_hdr_dict['sh_dss_id'])
         self.ul_dsn = 'DSS-'+rsr_file.split('/')[-1].split('_')[1][5:7]
         if self.ul_dsn == 'DSS-MM':
-            if len(str(sfdu_hdr_dict['sh_ul_dss_id'])) != 2:
-                if verbose:
-                    print("\tInvalid uplink DSN... using 'Earth'")
-                self.ul_dsn = 'Earth'
-            else:
-                self.ul_dsn = 'DSS-'+str(sfdu_hdr_dict['sh_ul_dss_id'])
+            self.ul_dsn = 'DSS-'+str(sfdu_hdr_dict['sh_ul_dss_id'])
         self.band = chr(sfdu_hdr_dict['sh_dl_band'][0])
         self.ul_band = chr(sfdu_hdr_dict['sh_ulband'][0])
         # correct header info if not accurate

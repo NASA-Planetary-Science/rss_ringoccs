@@ -15,10 +15,10 @@ try:
 except:
     print(
         """
-            Error: rss_ringoccs.diffrec.window_functions
-            \tCould Not Import C Code. Using Python Code. This is very slow.
-            \tThere was most likely an error while installing rss_ringoccs. To
-            \tuse the C Code, download GCC and see the User's Guide.
+        \rError: rss_ringoccs.diffrec.window_functions
+        \r\tCould Not Import C Code. There was most likely an error
+        \r\tin your installation of rss_ringoccs. Install GCC (C Compiler)
+        \r\tand see the User's Guide for installation instructions.
         """
     )
 

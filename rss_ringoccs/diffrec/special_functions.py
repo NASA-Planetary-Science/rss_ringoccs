@@ -15,9 +15,6 @@ except:
         """
     )
 
-# Declare constants for multiples of pi.
-HALF_PI = 1.570796326794896619231322
-
 def wavelength_to_wavenumber(lambda_km):
     try:
         return _special_functions.wavelength_to_wavenumber(lambda_km)
@@ -246,41 +243,41 @@ def fresnel_scale(Lambda, d, phi, b):
 
 def fresnel_psi(kD, r, r0, phi, phi0, B, D):
     """
-        Purpose:
-            Compute :math:`\\psi` (MTR Equation 4)
-        Arguments:
-            :kD (*float*):
-                Wavenumber, unitless.
-            :r (*float*):
-                Radius of reconstructed point, in kilometers.
-            :r0 (*np.ndarray*):
-                Radius of region within window, in kilometers.
-            :phi (*np.ndarray*):
-                Ring azimuth angle corresponding to r, radians.
-            :phi0 (*np.ndarray*):
-                Ring azimuth angle corresponding to r0, radians.
-            :B (*float*):
-                Ring opening angle, in radians.
-            :D (*float*):
-                Spacecraft-RIP distance, in kilometers.
-        Outputs:
-            :psi (*np.ndarray*):
-                Geometric Function from Fresnel Kernel.
+    Purpose:
+        Compute :math:`\\psi` (MTR Equation 4)
+    Arguments:
+        :kD (*float*):
+            Wavenumber, unitless.
+        :r (*float*):
+            Radius of reconstructed point, in kilometers.
+        :r0 (*np.ndarray*):
+            Radius of region within window, in kilometers.
+        :phi (*np.ndarray*):
+            Ring azimuth angle corresponding to r, radians.
+        :phi0 (*np.ndarray*):
+            Ring azimuth angle corresponding to r0, radians.
+        :B (*float*):
+            Ring opening angle, in radians.
+        :D (*float*):
+            Spacecraft-RIP distance, in kilometers.
+    Outputs:
+        :psi (*np.ndarray*):
+            Geometric Function from Fresnel Kernel.
     """
     try:
         return _special_functions.fresnel_psi(kD, r, r0, phi, phi0, B, D)
     except KeyboardInterrupt:
         raise
     except:
-        # Compute Xi variable (MTR86 Equation 4b). Signs of xi are swapped.
-        xi = (np.cos(B)/D) * (r * np.cos(phi) - r0 * np.cos(phi0))
-
-        # Compute Eta variable (MTR86 Equation 4c).
-        eta = (r0*r0 + r*r - 2.0*r*r0*np.cos(phi-phi0)) / (D*D)
-
-        # Sign of xi swapped from MTR86.
-        psi_vals = kD * (np.sqrt(1.0+eta-2.0*xi) + xi - 1.0)
-        return psi_vals
+        raise TypeError(
+            """
+            \r\tError: rss_ringoccs
+            \r\t\tdiffrec.special_functions.fresnel_psi\n
+            \r\tInput should be seven numpy arrays of real numbers.\n
+            \r\tUsage:
+            \r\t\t>>> y = fresnel_psi(kD, r, r0, phi, phi0, B, D)\n
+            """
+        )
 
 def fresnel_dpsi_dphi(kD, r, r0, phi, phi0, B, D):
     """
@@ -311,23 +308,15 @@ def fresnel_dpsi_dphi(kD, r, r0, phi, phi0, B, D):
     except KeyboardInterrupt:
         raise
     except:
-        # Compute Xi variable (MTR86 Equation 4b).
-        xi = (np.cos(B)/D) * (r * np.cos(phi) - r0 * np.cos(phi0))
-
-        # Compute Eta variable (MTR86 Equation 4c).
-        eta = (r0*r0 + r*r - 2.0*r*r0*np.cos(phi-phi0)) / (D*D)
-
-        psi0 = np.sqrt(1.0+eta-2.0*xi)
-
-        # Compute derivatives.
-        dxi = -(np.cos(B)/D) * (r*np.sin(phi))
-        deta = 2.0*r*r0*np.sin(phi-phi0)/(D*D)
-
-        # Compute the partial derivative.
-        psi_d1 = (0.5/psi0)*(deta-2.0*dxi) + dxi
-        psi_d1 *= kD
-
-        return psi_d1
+        raise TypeError(
+            """
+            \r\tError: rss_ringoccs
+            \r\t\tdiffrec.special_functions.fresnel_dpsi_dphi\n
+            \r\tInput should be seven numpy arrays of real numbers.\n
+            \r\tUsage:
+            \r\t\t>>> y = fresnel_dpsi_dphi(kD, r, r0, phi, phi0, B, D)\n
+            """
+        )
 
 def dpsi_ellipse(kD, r, r0, phi, phi0, B, D, ecc, peri):
     """
@@ -838,7 +827,7 @@ def fresnel_transform_ellipse(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
 
         # If normalization has been set, normalize the reconstruction
         if norm:
-            T_out[center] *= window_functions.normalize(dx_km, ker, F)
+            T_out[center] *= window_functions.window_norm(dx_km, ker, F)
     return T_out
 
 def fresnel_transform_newton(T_in, rho_km_vals, F_km_vals, phi_rad_vals,

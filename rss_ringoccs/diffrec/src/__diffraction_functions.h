@@ -3,7 +3,7 @@
  ******************************************************************************
  *  Purpose:                                                                  *
  *      This file contains functions used for computing the Fresnel transform *
- *      For diffraction reconstruction or forward modeling.                   *
+ *      for diffraction reconstruction or forward modeling.                   *
  *          Fresnel Quadratic Approximations:                                 *
  *              Classic quadratic approximation used in Fourier optics.       *
  *          LegendreExpansion:                                                *
@@ -27,7 +27,7 @@
  *      psi is the Fresnel Kernel, and exp is simply the exponential function.*
  ******************************************************************************
  *  The Normalization Scheme:                                                 *
- *      As the resolution get's too high, say 10 km or greater, the window    *
+ *      As the resolution get's too high, say 10 km or larger, the window     *
  *      width quickly shrinks to zero and the integral will be approximately  *
  *      zero. To account for this, the option to normalize the integral by    *
  *      the window width is offered. The normalization is defined as follows: *
@@ -45,8 +45,8 @@
  *                  |  -   -W/2                     |                         *
  *                                                                            *
  *      This has the effect of making the free-space regions, which are       *
- *      region that are not affected by diffraction, evaluate to one,         *
- *      regardless of what resolution was chosen.                             *
+ *      regions that are not affected by diffraction, evaluate to one,        *
+ *      regardless of what (positive) resolution was chosen.                  *
  ******************************************************************************
  *                              DEFINED FUNCTIONS                             *
  ******************************************************************************
@@ -57,25 +57,25 @@
  *      of the ring intercept point are computed. This also computes the      *
  *      window function as a function of this array.                          *
  ******************************************************************************
- *  _fresnel_transform:                                                       *
+ *  Fresnel_Transform_Double:                                                 *
  *      Computes the Fresnel transform using a quadratic approximation to the *
  *      Fresnel kernel. No normalization is applied.                          *
  ******************************************************************************
- *  _fresnel_transform_norm:                                                  *
+ *  Fresnel_Transform_Norm_Double:                                            *
  *      Same as _fresnel_transform, but the normalization is applied.         *
  ******************************************************************************
- *  _fresnel_legendre:                                                        *
+ *  Fresnel_Legendre_Double:                                                  *
  *      Computes the Fresnel Transform using Legendre Polynomials to          *
  *      approximate the Fresnel kernel to various powers (4, 6, or 8).        *
  ******************************************************************************
- *  _fresnel_legendre_norm:                                                   *
+ *  Fresnel_Legendre_Norm_Double:                                             *
  *      Same as the previous functions, but with the normalization scheme.    *
  ******************************************************************************
- *  _fresnel_transform_newton:                                                *
+ *  Fresnel_Transform_Newton_Double:                                          *
  *      Computes the Fresnel inverse transform using Newton-Raphson to        *
  *      compute the stationary value of the Fresnel kernel.                   *
  ******************************************************************************
- *  fresnel_transform_newton_norm:                                            *
+ *  Fresnel_Transform_Newton_Norm_Double:                                     *
  *      Same as previous function, but with the normalization scheme.         *
  ******************************************************************************
  *                            A FRIENDLY WARNING                              *
@@ -128,7 +128,7 @@
  *          Half the number of points in the window width. The symmetry of    *
  *          the quadratic approximation allows one to perform the inversion   *
  *          with only half of the window. This saves a lot of computation.    *
- *      fw  (*)(double, double):                                              *
+ *      fw  double (*)(double, double):                                       *
  *          Function pointer to the window function.                          *
  *  Notes:                                                                    *
  *      1.) This is a void function that takes in pointers as arguments. The  *
@@ -150,22 +150,28 @@ static void reset_window(double *x_arr, double *w_func, double dx, double width,
 
 /******************************************************************************
  *  Function:                                                                 *
- *      _fresnel_transform                                                    *
+ *      Fresnel_Transform_Double                                              *
  *  Purpose:                                                                  *
  *      Perform diffraction correction on diffraction limited data using the  *
  *      classic Fresnel quadratic approximation to the Fresnel kernel.        *
  *  Arguments:                                                                *
  *      x_arr (double *):                                                     *
- *          Defined as pi/2 (rho-rho0)^2, where rho0 is the ring radius of    *
- *          the point being reconstructed, and rho is the dummy variable of   *
- *          integration which varies from rho0-W/2 to rho+W/2, W being the    *
- *          window width.                                                     *
+ *          Defined as pi/2 (rho-rho0)^2, where rho is the ring radius of     *
+ *          the point being reconstructed, and rho0 is the dummy variable of  *
+ *          integration which varies from rho-W/2 to zero, W being the        *
+ *          window width. This should point to n_pts number of elements.      *
  *      T_in (char *):                                                        *
- *          The diffracted data.                                              *
+ *          The diffracted data. Must contain at least n_pts (see below)      *
+ *          points to the left and right of the starting point, or a          *
+ *          segmentation fault will occur. This error check check is perform  *
+ *          when the function is called in _diffraction_functions.c, as well  *
+ *          as in the Python DiffractionCorrection class found in             *
+ *          diffraction_correction.py.                                        *
  *      w_func (double *):                                                    *
- *          The window/tapering function, as a function of x_arr.             *
+ *          The window/tapering function, as a function of x_arr. This should *
+ *          point to n_pts number of elements.                                *
  *      F (double):                                                           *
- *          The Fresnel scale at rho0.                                        *
+ *          The Fresnel scale at rho.                                         *
  *      dx (double):                                                          *
  *          The sample spacing, equivalent to x_arr[1] - x_arr[0].            *
  *      n_pts (long):                                                         *
@@ -212,7 +218,10 @@ complex double Fresnel_Transform_Double(double *x_arr, char *T_in,
         exp_negative_ix = (cos(x) - _Complex_I*sin(x)) * w_func[i];
 
         /*  Take advantage of the symmetry of the quadratic approximation.    *
-         *  This cuts the number of computations roughly in half.             */
+         *  This cuts the number of computations roughly in half. If the T_in *
+         *  pointer does not contain at least 2*n_pts+1 points, n_pts to the  *
+         *  left and n_pts to the right of the center, then this will create  *
+         *  a segmentation fault, crashing the program.                       */
         T_out += exp_negative_ix * (*(complex double *)(T_in + j*T_in_steps) +
                                     *(complex double *)(T_in - j*T_in_steps));
         j += 1;
@@ -229,29 +238,35 @@ complex double Fresnel_Transform_Double(double *x_arr, char *T_in,
 
 /******************************************************************************
  *  Function:                                                                 *
- *      _fresnel_transform_norm                                               *
+ *      Fresnel_Transform_Norm_Double                                         *
  *  Purpose:                                                                  *
  *      Same as _fresnel_trasnform, but the output is normalized by the       *
  *      window width. See the comment at the top of this file for more info.  *
  *  Arguments:                                                                *
  *      x_arr (double *):                                                     *
- *          Defined as pi/2 (rho-rho0)^2, where rho0 is the ring radius of    *
- *          the point being reconstructed, and rho is the dummy variable of   *
- *          integration which varies from rho0-W/2 to rho0, W being the       *
- *          window width.                                                     *
+ *          Defined as pi/2 (rho-rho0)^2, where rho is the ring radius of     *
+ *          the point being reconstructed, and rho0 is the dummy variable of  *
+ *          integration which varies from rho-W/2 to zero, W being the        *
+ *          window width. This should point to n_pts number of elements.      *
  *      T_in (char *):                                                        *
- *          The diffracted data.                                              *
+ *          The diffracted data. Must contain at least n_pts (see below)      *
+ *          points to the left and right of the starting point, or a          *
+ *          segmentation fault will occur. This error check check is perform  *
+ *          when the function is called in _diffraction_functions.c, as well  *
+ *          as in the Python DiffractionCorrection class found in             *
+ *          diffraction_correction.py.                                        *
  *      w_func (double *):                                                    *
- *          The window/tapering function, as a function of x_arr.             *
+ *          The window/tapering function, as a function of x_arr. This should *
+ *          point to n_pts number of elements.                                *
  *      F (double):                                                           *
- *          The Fresnel scale at rho0.                                        *
+ *          The Fresnel scale at rho.                                         *
  *      dx (double):                                                          *
  *          The sample spacing, equivalent to x_arr[1] - x_arr[0].            *
  *      n_pts (long):                                                         *
  *          Half the number of points in the window width. The symmetry of    *
  *          the quadratic approximation allows one to perform the inversion   *
  *          with only half of the window. This saves a lot of computation.    *
- *      T_in_steps (npy_intp):                                                *
+ *      T_in_steps (long):                                                    *
  *          The number of steps in memory of the nth point to the (n+1)th     *
  *          point in the T_in pointer.                                        *
  *  Outputs:                                                                  *
@@ -296,7 +311,10 @@ complex double Fresnel_Transform_Norm_Double(double *x_arr, char *T_in,
         norm  += 2.0*exp_negative_ix;
 
         /*  Take advantage of the symmetry of the quadratic approximation.    *
-         *  This cuts the number of computations roughly in half.             */
+         *  This cuts the number of computations roughly in half. If the T_in *
+         *  pointer does not contain at least 2*n_pts+1 points, n_pts to the  *
+         *  left and n_pts to the right of the center, then this will create  *
+         *  a segmentation fault, crashing the program.                       */
         T_out += exp_negative_ix * (*(complex double *)(T_in + j*T_in_steps) +
                                     *(complex double *)(T_in - j*T_in_steps));
         j += 1;
@@ -309,7 +327,7 @@ complex double Fresnel_Transform_Norm_Double(double *x_arr, char *T_in,
 
     /*  The integral in the numerator of norm evaluates to F sqrt(2). Use     *
      *  this in the calculation of the normalization. The cabs function       *
-     *  computes the absolute value of complex number (Defined in complex.h). */
+     *  computes the absolute value of complex number (defined in complex.h). */
     norm = SQRT_2 / cabs(norm);
 
     /*  Multiply result by the coefficient found in the Fresnel inverse.      *
@@ -332,14 +350,22 @@ complex double Fresnel_Transform_Norm_Double(double *x_arr, char *T_in,
  *          Defined as rho-rho0, where rho0 is the ring radius of the point   *
  *          being reconstructed and rho is the dummy variable of integration  *
  *          which varies from rho0-W/2 to rho0, W being the window width.     *
+ *          This should contain n_pts (see below) number of elements.         *
  *      T_in (char *):                                                        *
- *          The diffracted data.                                              *
+ *          The diffracted data. Must contain at least n_pts (see below)      *
+ *          points to the left and right of the starting point, or a          *
+ *          segmentation fault will occur. This error check check is perform  *
+ *          when the function is called in _diffraction_functions.c, as well  *
+ *          as in the Python DiffractionCorrection class found in             *
+ *          diffraction_correction.py.                                        *
  *      w_func (double *):                                                    *
- *          The window/tapering function, as a function of x_arr.             *
+ *          The window/tapering function, as a function of x_arr. This should *
+ *          contain n_pts (see below) number of elements.                     *
  *      D (double):                                                           *
  *          The distance from the spacecraft to the ring-intercept point.     *
  *      coeffs (double *):                                                    *
- *          The coefficients of the polynomial approximation of psi.          *
+ *          The coefficients of the polynomial approximation of psi. This     *
+ *          should conter order (see below) number of elements.               *
  *      dx (double):                                                          *
  *          The sample spacing, equivalent to x_arr[1] - x_arr[0].            *
  *      F (double):                                                           *
@@ -411,7 +437,9 @@ complex double Fresnel_Legendre_Double(double *x_arr, char *T_in,
         psi = psi_even + psi_odd;
         exp_positive_psi = (cos(psi) - _Complex_I*sin(psi))*w_func[i];
 
-        /*  Approximate the integral with a Riemann Sum.                      */
+        /*  Compute the transform with a Riemann sum. If the T_in pointer     *
+         *  does not contain at least 2*n_pts+1 points, n_pts to the left and *
+         *  right of the center, then this will create a segmentation fault.  */
         T_out += exp_negative_psi * *(complex double *)(T_in + j*T_in_steps);
         T_out += exp_positive_psi * *(complex double *)(T_in - j*T_in_steps);
         j += 1;
@@ -437,14 +465,22 @@ complex double Fresnel_Legendre_Double(double *x_arr, char *T_in,
  *          Defined as rho-rho0, where rho0 is the ring radius of the point   *
  *          being reconstructed and rho is the dummy variable of integration  *
  *          which varies from rho0-W/2 to rho0, W being the window width.     *
+ *          This should contain n_pts (see below) number of elements.         *
  *      T_in (char *):                                                        *
- *          The diffracted data.                                              *
+ *          The diffracted data. Must contain at least n_pts (see below)      *
+ *          points to the left and right of the starting point, or a          *
+ *          segmentation fault will occur. This error check check is perform  *
+ *          when the function is called in _diffraction_functions.c, as well  *
+ *          as in the Python DiffractionCorrection class found in             *
+ *          diffraction_correction.py.                                        *
  *      w_func (double *):                                                    *
- *          The window/tapering function, as a function of x_arr.             *
+ *          The window/tapering function, as a function of x_arr. This should *
+ *          contain n_pts (see below) number of elements.                     *
  *      D (double):                                                           *
  *          The distance from the spacecraft to the ring-intercept point.     *
  *      coeffs (double *):                                                    *
- *          The coefficients of the polynomial approximation of psi.          *
+ *          The coefficients of the polynomial approximation of psi. This     *
+ *          should conter order (see below) number of elements.               *
  *      dx (double):                                                          *
  *          The sample spacing, equivalent to x_arr[1] - x_arr[0].            *
  *      F (double):                                                           *
@@ -523,7 +559,9 @@ complex double Fresnel_Legendre_Norm_Double(double *x_arr, char *T_in,
         /*  Compute denominator portion of norm using a Riemann Sum.          */
         norm  += exp_negative_psi+exp_positive_psi;
 
-        /*  Approximate the integral with a Riemann Sum.                      */
+        /*  Compute the transform with a Riemann sum. If the T_in pointer     *
+         *  does not contain at least 2*n_pts+1 points, n_pts to the left and *
+         *  right of the center, then this will create a segmentation fault.  */
         T_out += exp_negative_psi * *(complex double *)(T_in + j*T_in_steps);
         T_out += exp_positive_psi * *(complex double *)(T_in - j*T_in_steps);
         j += 1;
@@ -555,12 +593,20 @@ complex double Fresnel_Legendre_Norm_Double(double *x_arr, char *T_in,
  *          Defined as rho-rho0, where rho0 is the ring radius of the point   *
  *          being reconstructed and rho is the dummy variable of integration  *
  *          which varies from rho0-W/2 to rho+W/2, W being the window width.  *
+ *          This should contain n_pts (see below) number of elements.         *
  *      phi_arr (double *):                                                   *
  *          The ring azimuth angle corresponding to rho, in radians.          *
+ *          This should contain n_pts (see below) number of elements.         *
  *      T_in (char *):                                                        *
- *          The diffracted data.                                              *
+ *          The diffracted data. Must contain at least n_pts (see below)      *
+ *          points to the left and right of the starting point, or a          *
+ *          segmentation fault will occur. This error check check is perform  *
+ *          when the function is called in _diffraction_functions.c, as well  *
+ *          as in the Python DiffractionCorrection class found in             *
+ *          diffraction_correction.py.                                        *
  *      w_func (double *):                                                    *
  *          The window/tapering function, as a function of x_arr.             *
+ *          This should contain n_pts (see below) number of elements.         *
  *      kd (double):                                                          *
  *          The wavenumber k scaled by D (See above).                         *
  *      r (double):                                                           *
@@ -620,7 +666,9 @@ complex double Fresnel_Transform_Newton_Double(
         psi     = Fresnel_Psi_Func(kD, r, x_arr[i], phi, phi_arr[i], B, D);
         exp_psi = (cos(psi) - _Complex_I*sin(psi))*w_func[i];
 
-        /*  Approximate the integral with a Riemann Sum.  */
+        /*  Compute the transform with a Riemann sum. If the T_in pointer     *
+         *  does not contain at least 2*n_pts+1 points, n_pts to the left and *
+         *  right of the center, then this will create a segmentation fault.  */
         T_out += exp_psi * *(complex double *)(T_in + j*T_in_steps);
         j     += 1;
     }
@@ -641,12 +689,20 @@ complex double Fresnel_Transform_Newton_Double(
  *          Defined as rho-rho0, where rho0 is the ring radius of the point   *
  *          being reconstructed and rho is the dummy variable of integration  *
  *          which varies from rho0-W/2 to rho+W/2, W being the window width.  *
+ *          This should contain n_pts (see below) number of elements.         *
  *      phi_arr (double *):                                                   *
  *          The ring azimuth angle corresponding to rho, in radians.          *
+ *          This should contain n_pts (see below) number of elements.         *
  *      T_in (char *):                                                        *
- *          The diffracted data.                                              *
+ *          The diffracted data. Must contain at least n_pts (see below)      *
+ *          points to the left and right of the starting point, or a          *
+ *          segmentation fault will occur. This error check check is perform  *
+ *          when the function is called in _diffraction_functions.c, as well  *
+ *          as in the Python DiffractionCorrection class found in             *
+ *          diffraction_correction.py.                                        *
  *      w_func (double *):                                                    *
  *          The window/tapering function, as a function of x_arr.             *
+ *          This should contain n_pts (see below) number of elements.         *
  *      kd (double):                                                          *
  *          The wavenumber k scaled by D (See above).                         *
  *      r (double):                                                           *
@@ -709,7 +765,9 @@ complex double Fresnel_Transform_Newton_Norm_Double(
         /*  Compute the norm using a Riemann sum as well.                     */
         norm   += exp_psi;
 
-        /*  Approximate the integral with a Riemann Sum.                      */
+        /*  Compute the transform with a Riemann sum. If the T_in pointer     *
+         *  does not contain at least 2*n_pts+1 points, n_pts to the left and *
+         *  right of the center, then this will create a segmentation fault.  */
         T_out += exp_psi * *(complex double *)(T_in + j*T_in_steps);
         j     += 1;
     }

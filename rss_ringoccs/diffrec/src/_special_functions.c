@@ -305,6 +305,12 @@ static void double_dpsi_dphi(char **args, npy_intp *dimensions,
 }
 
 /*  Define pointers to the C functions.                                       */
+PyUFuncGenericFunction double_slit_funcs[3] = {
+    &float_double_slit_diffraction,
+    &double_double_slit_diffraction,
+    &long_double_double_slit_diffraction
+};
+
 PyUFuncGenericFunction invsqwellsol_funcs[3] = {
     &complex_float_inv_square_well,
     &complex_double_inv_square_well,
@@ -322,6 +328,12 @@ PyUFuncGenericFunction fresnel_cos_funcs[3] = {
     &double_fresnelcos,
     &long_double_fresnelcos
 
+};
+
+PyUFuncGenericFunction fresnel_scale_funcs[3] = {
+    &float_fresnel_scale,
+    &double_fresnel_scale,
+    &long_double_fresnel_scale
 };
 
 PyUFuncGenericFunction fresnel_sin_funcs[3] = {
@@ -376,6 +388,15 @@ static char three_real_in_one_real_out[12] = {
     NPY_LONGDOUBLE, NPY_LONGDOUBLE, NPY_LONGDOUBLE, NPY_LONGDOUBLE
 };
 
+static char four_real_in_one_real_out[15] = {
+    NPY_FLOAT, NPY_FLOAT, NPY_FLOAT, NPY_FLOAT,
+    NPY_FLOAT,
+    NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE,
+    NPY_DOUBLE,
+    NPY_LONGDOUBLE, NPY_LONGDOUBLE, NPY_LONGDOUBLE, NPY_LONGDOUBLE,
+    NPY_LONGDOUBLE
+};
+
 static char four_real_in_one_complex_out[15] = {
     NPY_FLOAT, NPY_FLOAT, NPY_FLOAT, NPY_FLOAT,
     NPY_CFLOAT,
@@ -400,11 +421,13 @@ static struct PyModuleDef moduledef = {
 
 PyMODINIT_FUNC PyInit__special_functions(void)
 {
+    PyObject *double_slit_diffraction;
     PyObject *inverse_square_well_diffraction;
     PyObject *frequency_to_wavelength;
-    PyObject *fresnel_sin;
     PyObject *fresnel_cos;
     PyObject *fresnel_psi;
+    PyObject *fresnel_scale;
+    PyObject *fresnel_sin;
     PyObject *fresnel_dpsi_dphi;
     PyObject *single_slit_diffraction;
     PyObject *square_well_diffraction;
@@ -419,6 +442,12 @@ PyMODINIT_FUNC PyInit__special_functions(void)
 
     import_array();
     import_umath();
+
+    double_slit_diffraction = PyUFunc_FromFuncAndData(
+        double_slit_funcs, PyuFunc_None_3, four_real_in_one_real_out,
+        3, 4, 1, PyUFunc_None, "double_slit_diffraction", 
+        "double_slit_diffraction_docstring", 0
+    );
 
     inverse_square_well_diffraction = PyUFunc_FromFuncAndData(
         invsqwellsol_funcs, PyuFunc_None_3, four_real_in_one_complex_out,
@@ -445,6 +474,11 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     fresnel_psi = PyUFunc_FromFuncAndData(
         psi_funcs, PyuFunc_data, octo_double_types, 1, 7, 1,
         PyUFunc_None, "fresnel_psi",  "fresnel_psi_docstring", 0
+    );
+
+    fresnel_scale = PyUFunc_FromFuncAndData(
+        fresnel_scale_funcs, PyuFunc_None_3, four_real_in_one_real_out, 3, 4, 1,
+        PyUFunc_None, "fresnel_scale", "fresnel_scale_docstring", 0
     );
 
     fresnel_sin = PyUFunc_FromFuncAndData(
@@ -481,10 +515,11 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     PyDict_SetItemString(d, "inverse_square_well_diffraction",
                          inverse_square_well_diffraction);
     PyDict_SetItemString(d, "frequency_to_wavelength", frequency_to_wavelength);
-    PyDict_SetItemString(d, "fresnel_sin", fresnel_sin);
     PyDict_SetItemString(d, "fresnel_cos", fresnel_cos);
     PyDict_SetItemString(d, "fresnel_psi", fresnel_psi);
     PyDict_SetItemString(d, "fresnel_dpsi_dphi", fresnel_dpsi_dphi);
+    PyDict_SetItemString(d, "fresnel_scale", fresnel_scale);
+    PyDict_SetItemString(d, "fresnel_sin", fresnel_sin);
     PyDict_SetItemString(d, "single_slit_diffraction", single_slit_diffraction);
     PyDict_SetItemString(d, "square_well_diffraction", square_well_diffraction);
     PyDict_SetItemString(d, "square_well_phase", square_well_phase);
@@ -493,10 +528,11 @@ PyMODINIT_FUNC PyInit__special_functions(void)
 
     Py_DECREF(inverse_square_well_diffraction);
     Py_DECREF(frequency_to_wavelength);
-    Py_DECREF(fresnel_sin);
     Py_DECREF(fresnel_cos);
     Py_DECREF(fresnel_psi);
     Py_DECREF(fresnel_dpsi_dphi);
+    Py_DECREF(fresnel_scale);
+    Py_DECREF(fresnel_sin);
     Py_DECREF(single_slit_diffraction);
     Py_DECREF(square_well_diffraction);
     Py_DECREF(square_well_phase);

@@ -18,12 +18,12 @@ from . import special_functions, window_functions
 try:
     from . import _diffraction_functions
 except:
-    print(
+    raise ImportError(
         """
         \rError: rss_ringoccs.diffrec.diffraction_correction
-        \r\tCould Not Import C Code. Using Python Code. This is very slow.
-        \r\tThere was most likely an error while installing rss_ringoccs. To
-        \r\tuse the C Code, download GCC and see the User's Guide.
+        \r\tCould Not Import C Code. There was most likely an error
+        \r\tin your installation of rss_ringoccs. Install GCC (C Compiler)
+        \r\tand see the User's Guide for installation instructions.
         """
     )
 

@@ -1,12 +1,9 @@
 # Release Notes #
 
 
-## rss_ringoccs V1.2.1 ##
+## rss_ringoccs V1.3 ##
 
-Release date: TBD
-
-This is the current development version. It should not be considered stable until 
-it is formally released.
+Release date: 2019 August 30
 
 ### Changes from V1.2 ###
 
@@ -14,6 +11,13 @@ it is formally released.
 
 2. Clearer explanation of differences between end-to-end batch processing scripts.
 
+3. C code implemented for diffraction reconstruction and special functions.
+
+4. Support restricted to Anaconda Python for compatibility reasons.
+
+5. Enhance post-USO support. This includes addressing the discontinuous frequency offsets and modeling the phase echo introduced by diffraction of the uplink signal by the ring system.
+
+6. Runnable scripts to perform push-button diffraction correction, starting either from raw RSS files or from Essam Marouf's (or our) PDS-style geometry, calibration, and diffraction-limited profiles, at any desired resolution (consistent with the sampling theorem and justified by the SNR), for the full set of RSS occultations at S, X, and Ka-band up to the point of USO failure.
 
 ## rss_ringoccs V1.2 ##
 

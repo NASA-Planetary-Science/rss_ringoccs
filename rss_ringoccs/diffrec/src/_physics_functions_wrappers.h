@@ -7,8 +7,6 @@
 /*  Location of the C functions to be wrapped.                                */
 #include "__physics_functions.h"
 
-#include <stdio.h>
-
 /*  Wrappers for the frequency_to_wavelength function.                        */
 
 static void float_frequency_to_wavelength(char **args, npy_intp *dimensions,
@@ -159,7 +157,6 @@ static void double_fresnel_scale(char **args, npy_intp *dimensions,
         m += b_step;
     }
 }
-
 
 static void long_double_fresnel_scale(char **args, npy_intp *dimensions,
                                       npy_intp *steps, void *data){

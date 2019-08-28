@@ -39,8 +39,6 @@ class Calibration(object):
         :pnf_order (*float*): whole number specifying the polynomial
                         order to use when fitting the freespace power.
                         Default is 3.
-        :dt_cal (*float*): Desired final spacing in SPM between data
-                        points. Default is 1 sec.
         :verbose (*bool*): If True, print intermediate steps and
                         results. Default is False.
         :write_file (*bool*): If True, write output CAL .TAB and
@@ -80,18 +78,13 @@ class Calibration(object):
                         ((\hat{P}_0(t)-P_0(t))/\hat{P}_0(t))^2`
     """
 
-    def __init__(self, rsr_inst, geo_inst, pnf_order=3, dt_cal=1.0, fof_lims = None,
+    def __init__(self, rsr_inst, geo_inst, pnf_order=3, fof_lims = None,
                  verbose=False, write_file=True, interact=False):
 
         if not isinstance(geo_inst, Geometry):
             sys.exit('ERROR (Calibration): geo_inst input needs to be an '
                 + 'instance of the Geometry class')
 
-        dt_cal = abs(dt_cal)
-        if (not isinstance(dt_cal, float)) and (not isinstance(dt_cal, int)):
-            print('WARNING (Calibration): dt_cal input must be either a '
-                + 'float or an integer. Setting to default of 1.0')
-            dt_cal = 1.0
 
         if not isinstance(verbose, bool):
             print('WARNING (Calibration): verbose input must be one of '
@@ -142,8 +135,7 @@ class Calibration(object):
                 order=pnf_order,verbose=verbose,interact=interact,
                 write_file=write_file)
 
-        spm_cal = np.arange(geo_inst.t_oet_spm_vals[0],
-                geo_inst.t_oet_spm_vals[-1],dt_cal)
+        spm_cal = geo_inst.t_oet_spm_vals
 
         # Evaluate f_sky_recon at spm_cal
         f_sky_recon_splcoef = splrep(fit_inst.f_spm, fit_inst.f_sky_recon)
@@ -176,7 +168,6 @@ class Calibration(object):
                 "geo_inst": geo_inst.history}
         input_kwds = {
                 "pnf_order": pnf_order,
-                "dt_cal": dt_cal,
                 "interact": interact}
 
         additional_info = {

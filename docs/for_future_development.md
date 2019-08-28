@@ -1,4 +1,4 @@
-# A Guide to `rss_ringoccs` v1.2.1
+# Brief overview and ideas for future development of `rss_ringoccs` v1.3
 
 ## Accessibility
 

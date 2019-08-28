@@ -1,8 +1,3 @@
-import numpy as np
-
-# Declare constants for multiples of pi.
-HALF_PI = 1.570796326794896619231322
-
 def fresnel_transform_ellipse(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
                               kD_vals, B_rad_vals, D_km_vals, w_km_vals, start,
                               n_used, peri, ecc, wtype, norm, fwd):
@@ -106,7 +101,7 @@ def fresnel_transform_ellipse(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
 
         # If normalization has been set, normalize the reconstruction
         if norm:
-            T_out[center] *= window_functions.window_norm(dx_km, ker, F)
+            T_out[center] *= window_functions.normalize(dx_km, ker, F)
     return T_out
 
 def fresnel_transform_newton(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
@@ -217,7 +212,7 @@ def fresnel_transform_newton(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
 
         # If normalization has been set, normalize the reconstruction
         if norm:
-            T_out[center] *= window_functions.window_norm(dx_km, ker, F)
+            T_out[center] *= window_functions.normalize(dx_km, ker, F)
     return T_out
 
 def fresnel_transform_quadratic(T_in, rho_km_vals, F_km_vals, w_km_vals, start,
@@ -307,7 +302,7 @@ def fresnel_transform_quadratic(T_in, rho_km_vals, F_km_vals, w_km_vals, start,
 
         # If normalization has been set, normalize the reconstruction.
         if norm:
-            T_out[center] *= window_functions.window_norm(dx_km, ker, F)
+            T_out[center] *= window_functions.normalize(dx_km, ker, F)
     return T_out
 
 def fresnel_legendre_transform(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
@@ -457,5 +452,5 @@ def fresnel_legendre_transform(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
 
         # If normalization has been set, normalize the reconstruction.
         if norm:
-            T_out[center] *= window_functions.window_norm(dx_km, ker, F)
+            T_out[center] *= window_functions.normalize(dx_km, ker, F)
     return T_out

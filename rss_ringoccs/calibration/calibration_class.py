@@ -1,20 +1,16 @@
 """
-
 :Purpose:
     Class framework for performing the necessary calibration steps for
     the RSR data. This includes phase correction based on frequency
     offset of the spacecraft and normalization of received power with
     respect to the intrinsic spacecraft power.
-
 :Notes:
     Can be computationally cumbersome, especially for chord
     occultations. May require up to 30 mins for 16 kHz RSR data files.
-
 Dependencies:
     #. numpy
     #. scipy
     #. sys
-
 """
 
 import numpy as np
@@ -36,11 +32,9 @@ class Calibration(object):
         instantiating the classes ``FreqOffsetFit`` in the
         ``freq_offset_fit.py`` script and ``Normalization`` in the
         ``power_normalization.py`` script.
-
     Arguments
         :rsr_inst (*object*): Instance of the RSRReader class
         :geo_inst (*object*): Instance of the Geometry class
-
     Keyword Arguments
         :pnf_order (*float*): whole number specifying the polynomial
                         order to use when fitting the freespace power.
@@ -54,7 +48,6 @@ class Calibration(object):
         :interact (*bool*): If True, enables the interactive mode in
                         the terminal for fitting the freespace power.
                         Default is False.
-
     Attributes
         :rev_info (*dict*): *dict* of information identifying the
                         specific occultation: rsrfile, year, day of
@@ -87,7 +80,7 @@ class Calibration(object):
                         ((\hat{P}_0(t)-P_0(t))/\hat{P}_0(t))^2`
     """
 
-    def __init__(self, rsr_inst, geo_inst, pnf_order=3, dt_cal=1.0,
+    def __init__(self, rsr_inst, geo_inst, pnf_order=3, dt_cal=1.0, fof_lims = None,
                  verbose=False, write_file=True, interact=False):
 
         if not isinstance(geo_inst, Geometry):
@@ -138,7 +131,7 @@ class Calibration(object):
         # Calculate frequency offset fit
         # Use default offset frequency fit
         fit_inst = FreqOffsetFit(rsr_inst, geo_inst, verbose=verbose,
-                write_file=write_file)
+                write_file=write_file, fof_lims=fof_lims)
 
         # Get corrected I's and Q's
         self.IQ_c = self.correct_IQ(rsr_inst.spm_vals,rsr_inst.IQ_m,
@@ -206,7 +199,6 @@ class Calibration(object):
     def correct_IQ(self,spm_vals,IQ_m,f_spm,f_offset_fit):
         """
         Purpose:
-
             Apply frequency offset fit to raw measured signal using
             the signal frequencies calculated by ``FreqOffsetFit``.
             First resamples the frequency offset fit to a 0.1 sec
@@ -214,19 +206,14 @@ class Calibration(object):
             integrating frequency offset fit to get phase detrending
             function :math:`\\psi` using Equation 18 from
             [CRSUG2018]_ where
-
             .. math::
                 \\psi = \int^{t}\hat{f}(\\tau)_{offset}
                 \mathrm{d}\\tau+\\psi(t_0)
-
             Finally, applies phase detrending correction to signal to
             raw signal such that
-
             .. math::
                 I_{c}+iQ_{c} = [I_{m}+iQ_{m}] \\exp(-i\\psi)
-
             as discussed in [CRSUG2018]_ (see their Equation 17).
-
         Arguments:
             :spm_vals (*np.ndarray*): raw SPM values
             :IQ_m (*np.ndarray*): raw complex signal measured by DSN
@@ -235,7 +222,6 @@ class Calibration(object):
                         in the ``calc_freq_offset.py`` script.
             :f_offset_fit (*np.ndarray*): frequency of the spacecraft
                         signal corresponding to ``f_spm``
-
         Returns:
             :IQ_c (*np.ndarray*): Frequency-corrected complex signal
                         :math:`I_{c}+iQ_{c}` corresponding to
@@ -264,7 +250,3 @@ class Calibration(object):
         IQ_c = IQ_m * np.exp(-1j * f_detrend_rad)
 
         return IQ_c
-"""
-Revisions:
-
-"""

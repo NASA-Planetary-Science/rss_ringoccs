@@ -4,3 +4,4 @@ spiceypy
 matplotlib
 mayavi
 pandas
+PyMieScatt

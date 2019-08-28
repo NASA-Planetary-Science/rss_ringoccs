@@ -506,15 +506,22 @@ def plot_geo_overview(pdf, geo_inst, tau_inst):
         d0 = rho_km[1] - rho_km[0]
         d1 = rho_km[-1] - rho_km[-2]
 
+        # ind0 is the start of occ within ring bounds
+
         if d0 < 0:
-            # ingress first, ind0 will be first index of occ within ring bounds
-            ind0 = np.argwhere(rho_km < 150000.)[0][0]
-            ind1 = np.argwhere(rho_km>150000.)[-1][0]
+            # ingress first, ind0 will be first value < 150 e3 km
+            ind0 = np.argwhere(rho_km < 150000.)
+            if len(ind0)==0:
+                ind0 = np.argwhere(rho_km == max(rho_km))[0][0]
+            else:
+                ind0 = ind0[0][0]
         else:
-            ind0_1 = ind1
-            ind1_1 = ind0
-            ind0 = ind0_1
-            ind1 = ind1_1
+            # if egress, ind0 will be first value > 70 e3 km
+            ind0 = np.argwhere(rho_km>70000.)
+            if len(ind0)==0:
+                ind0 = np.argwhere(rho_km == min(rho_km))[0][0]
+            else:
+                ind0 = ind0[0][0]
 
         ax1.scatter(rho_km[ind0]/1000., t_oet_1kspm[ind0], s=50,
                 edgecolor='b', facecolor='none')

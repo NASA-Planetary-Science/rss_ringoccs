@@ -191,5 +191,4 @@ static void long_double_fresnel_scale(char **args, npy_intp *dimensions,
     }
 }
 
-
 #endif

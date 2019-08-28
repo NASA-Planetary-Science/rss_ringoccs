@@ -95,6 +95,8 @@ class DiffractionLimitedProfile(object):
         if verbose:
             print('Preparing diffraction-limited profile...')
 
+        self.add_info = {}
+
         # Extract necessary information from instance inputs
         spm_full = rsr_inst.spm_vals
         IQ_m = rsr_inst.IQ_m
@@ -111,6 +113,8 @@ class DiffractionLimitedProfile(object):
         phi_rl_deg_geo = geo_inst.phi_rl_deg_vals
         D_km_geo = geo_inst.D_km_vals
         prof_dir = geo_inst.rev_info['prof_dir']
+
+
 
         spm_cal = cal_inst.t_oet_spm_vals
         f_sky_pred_cal = cal_inst.f_sky_hz_vals
@@ -149,12 +153,12 @@ class DiffractionLimitedProfile(object):
         IQ_c_desired = IQ_c_desired[ind1:ind2+1]
 
         # interpolate coef to convert rho to SPm
-        spm_desired_func = interp1d(rho_km_geo, spm_geo,
-                fill_value='extrapolate')
+        spm_desired_func = interp1d(rho_km_geo, spm_geo)
+
         spm_desired = spm_desired_func(rho_km_desired)
 
-        p_free_interp_func = interp1d(rho_km_cal, p_free_cal,
-                fill_value='extrapolate')
+        p_free_interp_func = interp1d(rho_km_cal, p_free_cal)
+
         p_free = p_free_interp_func(rho_km_desired)
 
         p_norm_vals = (abs(IQ_c_desired)**2)/p_free
@@ -180,6 +184,25 @@ class DiffractionLimitedProfile(object):
                 D_km_geo, phi_ora_deg_geo, phi_rl_deg_geo, f_sky_pred_cal,
                 tau_thresh, spm_thresh, prof_dir)
 
+        if hasattr(geo_inst, 'ul_rho_km_vals'):
+
+            t_ul_spm_vals = geo_inst.t_ul_spm_vals
+            t_ul_ret_spm_vals = geo_inst.t_ul_ret_spm_vals
+            ul_rho_km_vals = geo_inst.ul_rho_km_vals
+            ul_phi_rl_deg_vals = geo_inst.ul_phi_rl_deg_vals
+            ul_phi_ora_deg_vals = geo_inst.ul_phi_ora_deg_vals
+            
+            self.t_ul_spm_vals = np.interp(self.t_oet_spm_vals, spm_geo,
+                    t_ul_spm_vals)
+            self.t_ul_ret_spm_vals = np.interp(self.t_oet_spm_vals, spm_geo,
+                    t_ul_ret_spm_vals)
+            self.ul_rho_km_vals = np.interp(self.t_oet_spm_vals, spm_geo,
+                    ul_rho_km_vals)
+            self.ul_phi_rl_deg_vals = np.interp(self.t_oet_spm_vals, spm_geo,
+                    ul_phi_rl_deg_vals)
+            self.ul_phi_ora_deg_vals = np.interp(self.t_oet_spm_vals, spm_geo,
+                    ul_phi_ora_deg_vals)
+
 
         # if set, write output data and label file
         self.rev_info = geo_inst.rev_info
@@ -195,7 +218,12 @@ class DiffractionLimitedProfile(object):
         input_kwds = {
                 'profile_range': profile_range}
 
-        self.history = write_history_dict(input_vars, input_kwds, __file__)
+        if self.add_info == {}:
+            self.add_info = None
+
+        self.history = write_history_dict(input_vars, input_kwds, __file__,
+                add_info=self.add_info)
+
         if write_file:
             self.outfiles = write_output_files(self)
 
@@ -217,12 +245,17 @@ class DiffractionLimitedProfile(object):
         rho_dot_kms_vals_interp = np.interp(spm_desired, spm_geo, rho_dot_kms_geo)
 
         # check if rho_dot is both positive and negative,
-        #   if so, remove unwanted values
+        #   if so, remove unwanted values and add note to LBL
         if min(rho_dot_kms_vals_interp)<0 and max(rho_dot_kms_vals_interp)>0:
             if prof_dir == '"INGRESS"':
                 ind = np.argwhere(rho_dot_kms_vals_interp > 0)
             if prof_dir == '"EGRESS"':
                 ind = np.argwhere(rho_dot_kms_vals_interp < 0)
+            self.add_info['Interpolating past prof_dir'] = (
+                    'Removed indices ' + str(ind[0]) + ' to '
+                    + str(ind[-1]) + ', or OET from ' 
+                    + str(spm_desired[ind[0]]) + ' to '
+                    + str(spm_desired[ind[-1]]) + ' SPM')
             spm_desired = np.delete(spm_desired, ind)
             rho_km_desired = np.delete(rho_km_desired, ind)
             p_norm_vals = np.delete(p_norm_vals, ind)
@@ -336,10 +369,16 @@ class DiffractionLimitedProfile(object):
         spm_full = rsr_inst.spm_vals
         spm_geo = geo_inst.t_oet_spm_vals
 
+#        spm_cal = cal_inst.t_oet_spm_vals
+#        f_sky_pred_cal = cal_inst.f_sky_hz_vals
+#        p_free_cal = cal_inst.p_free_vals
+#        IQ_c = cal_inst.IQ_c
         # Check if spm_geo and spm_full start/end at same time,
         #   if not, reduce spm_full to spm_geo boundaries
-        if (min(spm_geo) != np.floor(min(spm_full))) or (
-                max(spm_geo) != np.floor(max(spm_full))):
+        #if (min(spm_geo) != np.floor(min(spm_full))) or (
+        #        max(spm_geo) != np.floor(max(spm_full))):
+        if (spm_full > max(spm_geo)).any() or (
+                spm_full < min(spm_geo)).any():
             ind1 = np.where(spm_full == spm_geo[0])[0][0]
             ind2 = np.where(spm_full == spm_geo[-1])[0][0]
 
@@ -424,8 +463,26 @@ class DiffractionLimitedProfile(object):
             geo_ing.phi_rl_deg_vals = geo_inst.phi_rl_deg_vals[:ind]
             geo_ing.D_km_vals = geo_inst.D_km_vals[:ind]
             geo_ing.F_km_vals = geo_inst.F_km_vals[:ind]
-            geo_ing.rev_info['prof_dir'] = '"INGRESS"'
+            dr1 = geo_ing.rho_km_vals[1] - geo_ing.rho_km_vals[0]
+            if dr1 < 0:
+                geo_ing.rev_info['prof_dir'] = '"INGRESS"'
+            else:
+                geo_ing.rev_info['prof_dir'] = '"EGRESS"'
             geo_ing.rev_info['DIR'] = 'CHORD'
+
+            if hasattr(geo_inst, 'ul_rho_km_vals'):
+                geo_ing.t_ul_spm_vals = geo_inst.t_ul_spm_vals[:ind]
+                geo_ing.t_ul_ret_spm_vals = geo_inst.t_ul_ret_spm_vals[:ind]
+                geo_ing.ul_rho_km_vals = geo_inst.ul_rho_km_vals[:ind]
+                geo_ing.ul_phi_rl_deg_vals = geo_inst.ul_phi_rl_deg_vals[:ind]
+                geo_ing.ul_phi_ora_deg_vals = geo_inst.ul_phi_ora_deg_vals[:ind]
+
+                geo_egr.t_ul_spm_vals = geo_inst.t_ul_spm_vals[ind:]
+                geo_egr.t_ul_ret_spm_vals = geo_inst.t_ul_ret_spm_vals[ind:]
+                geo_egr.ul_rho_km_vals = geo_inst.ul_rho_km_vals[ind:]
+                geo_egr.ul_phi_rl_deg_vals = geo_inst.ul_phi_rl_deg_vals[ind:]
+                geo_egr.ul_phi_ora_deg_vals = geo_inst.ul_phi_ora_deg_vals[ind:]
+
 
             dlp_ing = cls(rsr_ing, geo_ing, cal_ing, dr_km, verbose=verbose,
                     write_file=write_file, profile_range=profile_range)
@@ -441,7 +498,11 @@ class DiffractionLimitedProfile(object):
             geo_egr.phi_rl_deg_vals = geo_inst.phi_rl_deg_vals[ind:]
             geo_egr.D_km_vals = geo_inst.D_km_vals[ind:]
             geo_egr.F_km_vals = geo_inst.F_km_vals[ind:]
-            geo_egr.rev_info['prof_dir'] = '"EGRESS"'
+            dr2 = geo_egr.rho_km_vals[1] - geo_egr.rho_km_vals[0]
+            if dr2 < 0:
+                geo_egr.rev_info['prof_dir'] = '"INGRESS"'
+            else:
+                geo_egr.rev_info['prof_dir'] = '"EGRESS"'
             geo_egr.rev_info['DIR'] = 'CHORD'
             dlp_egr = cls(rsr_egr, geo_egr, cal_egr, dr_km, verbose=verbose,
                     write_file=write_file, profile_range=profile_range)

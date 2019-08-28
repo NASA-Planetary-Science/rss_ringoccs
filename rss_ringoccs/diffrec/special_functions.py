@@ -519,10 +519,10 @@ def old_fresnel_cos(x):
     fname = "diffrec.special_functions.fresnel_cos"
     error_check.check_is_real(x, "x", fname)
 
-    x *= window_functions.RCP_SQRT_2
-    f_cos = ((0.25-0.25j)*erf((1.0+1.0j)*x)+(0.25+0.25j)*erf((1.0-1.0j)*x))
+    x0 = x*window_functions.RCP_SQRT_2
+    f_cos = ((0.25-0.25j)*erf((1.0+1.0j)*x)+(0.25+0.25j)*erf((1.0-1.0j)*x0))
 
-    if (np.isreal(x).all()):
+    if (np.isreal(x0).all()):
         f_cos = np.real(f_cos)
 
     return f_cos*window_functions.SQRT_PI_2
@@ -569,6 +569,24 @@ def fresnel_sin(x):
             \r\tUsage:
             \r\t\t>>> x = 1.0   # Or a numpy array, i.e. np.arange(-5, 5)
             \r\t\t>>> y = fresnel_sin(x)
+            """
+        )
+
+def sinc(x):
+    try:
+        return _special_functions.sinc(x)
+    except KeyboardInterrupt:
+        raise
+    except:
+        raise TypeError(
+            """
+            \r\tError: rss_ringoccs
+            \r\t\tdiffrec.special_functions.sinc\n
+            \r\tInput should be a numpy array of real numbers (ints or floats),
+            \r\tor an int or a float.\n
+            \r\tUsage:
+            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. np.arange(-5, 5)
+            \r\t\t>>> y = sinc(x)
             """
         )
 

@@ -90,7 +90,7 @@
 /*  Various coefficients and constants defined here.                          */
 #include "__math_constants.h"
 
-/*  Window functions and Fresnel Transforms defined here.                     */
+/*  Window functions and Fresnel transforms defined here.                     */
 #include "__misc_windows.h"
 #include "__kaiser_bessel.h"
 #include "__modified_kaiser_bessel.h"
@@ -104,8 +104,8 @@
 
 static void complex_double_fresnel_transform_quadratic(char **args,
                                                        npy_intp *dimensions,
-                                                       npy_intp* steps,
-                                                       void* data){
+                                                       npy_intp *steps,
+                                                       void *data){
 
     /*  i and j used for indexing, nw_pts is number of points in window.     */
     long i, j, nw_pts, center;
@@ -145,8 +145,8 @@ static void complex_double_fresnel_transform_quadratic(char **args,
     else    {fw = &Modified_Kaiser_Bessel_3_5_Double;}
 
     /*  Cast FresT to the appropriate function.                               */
-    if (use_norm == 0){FresT = &_fresnel_transform;}
-    else {FresT = &_fresnel_transform_norm;}
+    if (use_norm){FresT = &Fresnel_Transform_Norm_Double;}
+    else {FresT = &Fresnel_Transform_Double;}
 
     /* Move the pointers to the correct starting point. Compute window width.*/
     T_in   += start*T_in_steps;
@@ -211,11 +211,11 @@ static void complex_double_fresnel_transform_quadratic(char **args,
 
 static void complex_double_fresnel_legendre_transform(char **args,
                                                       npy_intp *dimensions,
-                                                      npy_intp* steps,
+                                                      npy_intp *steps,
                                                       void* data){
     long i, nw_pts, center;
     double w_init, two_dx, cosb, sinp, cosp;
-    double Legendre_Coeff, rcpr_D, rcpr_F;
+    double Legendre_Coeff;
     double (*fw)(double, double);
     complex double (*FresT)(double*, char*, double*, double, double *,
                             double, double, double, long, int, npy_intp);
@@ -237,7 +237,7 @@ static void complex_double_fresnel_legendre_transform(char **args,
 
     complex double *T_out =  (complex double *)args[14];
 
-    npy_intp T_in_steps     = steps[0];
+    npy_intp T_in_steps = steps[0];
 
     /*  Cast the selected window type to the fw pointer.                      */
     if      (wtype == 0){fw = &Rect_Window_Double;}
@@ -275,8 +275,6 @@ static void complex_double_fresnel_legendre_transform(char **args,
     reset_window(x_arr, w_func, dx, w_init, nw_pts, fw);
 
     for (i = 0; i <= n_used; ++i){
-        rcpr_F          = 1.0 / F_km_vals[center];
-        rcpr_D          = 1.0 / D_km_vals[center];
         cosb            = cos(B_rad_vals[center]);
         cosp            = cos(phi_rad_vals[center]);
         sinp            = sin(phi_rad_vals[center]);
@@ -293,9 +291,10 @@ static void complex_double_fresnel_legendre_transform(char **args,
         Fresnel_Kernel_Coefficients(fresnel_ker_coeffs, legendre_p,
                                     alt_legendre_p, Legendre_Coeff, order);
 
-        /*  If the window width changes significantly, recompute w_func.  */
+        /*  If the window width changes significantly, recompute w_func.      */
         if (fabs(w_init - w_km_vals[center]) >= two_dx) {
-            // Reset w_init and recompute window function.
+
+            /* Reset w_init and recompute window function.                    */
             w_init = w_km_vals[center];
             nw_pts = (long)(w_init / two_dx);
             w_func = (double *)realloc(w_func, sizeof(double)*nw_pts);
@@ -303,12 +302,12 @@ static void complex_double_fresnel_legendre_transform(char **args,
             reset_window(x_arr, w_func, dx, w_init, nw_pts, fw);
         }
 
-        /*  Compute the fresnel tranform about the current point.   */
-        T_out[center] = FresT(x_arr, T_in, w_func, rcpr_D, fresnel_ker_coeffs,
-                              dx, rcpr_F, kd_vals[center], nw_pts, order,
-                              T_in_steps);
+        /*  Compute the fresnel tranform about the current point.             */
+        T_out[center] = FresT(x_arr, T_in, w_func, D_km_vals[center],
+                              fresnel_ker_coeffs, dx, F_km_vals[center],
+                              kd_vals[center], nw_pts, order, T_in_steps);
 
-        /*  Increment pointers using pointer arithmetic.                     */
+        /*  Increment T_in pointer using pointer arithmetic.                  */
         T_in   += T_in_steps;
         center += 1;
     }
@@ -325,7 +324,7 @@ static void complex_double_fresnel_transform_newton(char **args,
                                                     npy_intp* steps,
                                                     void* data){
     long i, j, nw_pts, toler, center;
-    double w_init, dx, two_dx, rcpr_F, EPS;
+    double w_init, dx, two_dx, EPS;
 
     toler = 5;
     EPS = 1.E-4;
@@ -362,8 +361,8 @@ static void complex_double_fresnel_transform_newton(char **args,
     else if (wtype == 6){fw = &Modified_Kaiser_Bessel_2_5_Double;}
     else                {fw = &Modified_Kaiser_Bessel_3_5_Double;}
 
-    if (use_norm){FresT = &_fresnel_transform_newton_norm;}
-    else {FresT = &_fresnel_transform_newton;}
+    if (use_norm){FresT = &Fresnel_Transform_Newton_Norm_Double;}
+    else {FresT = &Fresnel_Transform_Newton_Double;}
 
     /* Compute first window width and window function. */
     center = start;
@@ -391,7 +390,6 @@ static void complex_double_fresnel_transform_newton(char **args,
     }
 
     for (i=0; i<=n_used; ++i){
-        rcpr_F = 1.0 / F_km_vals[center];
 
         /*  If the window width changes significantly, recompute w_func.  */
         if (fabs(w_init - w_km_vals[center]) >= two_dx) {
@@ -417,8 +415,8 @@ static void complex_double_fresnel_transform_newton(char **args,
         /*  Compute the fresnel tranform about the current point.   */
         T_out[center] = FresT(x_arr, phi_arr, T_in, w_func, kd_vals[center],
                               rho_km_vals[center], B_rad_vals[center],
-                              D_km_vals[center], EPS, toler, dx, rcpr_F,
-                              nw_pts, T_in_steps);
+                              D_km_vals[center], EPS, toler, dx,
+                              F_km_vals[center], nw_pts, T_in_steps);
 
         /*  Increment pointers using pointer arithmetic.                      */
         T_in   += T_in_steps;

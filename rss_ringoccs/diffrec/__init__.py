@@ -68,6 +68,6 @@
                                 allowed range of processing.
 """
 
-# Import the main classes used in diffraction reconstruction.
+# Import the main classes used in diffraction reconstruction and modeling.
 from .diffraction_correction import DiffractionCorrection
-from . import advanced_tools
+from .advanced_tools import ModelFromGEO, CompareTau, FindOptimalResolution

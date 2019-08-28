@@ -13,9 +13,10 @@ from rss_ringoccs.tools import error_check
 try:
     from . import _window_functions
 except:
-    print(
+    raise ImportError(
         """
-        \rError: rss_ringoccs.diffrec.window_functions
+        \r\tError: rss_ringoccs
+        \r\t\tdiffrec.window_functions\n
         \r\tCould Not Import C Code. There was most likely an error
         \r\tin your installation of rss_ringoccs. Install GCC (C Compiler)
         \r\tand see the User's Guide for installation instructions.
@@ -30,11 +31,6 @@ RCP_SQRT_2 = 0.7071067811865476
 # Declare constants for the reciprocal of e and the square root of 2.
 RCPR_E = 0.3678794411714423215955238
 SQRT_2 = 1.414213562373095048801689
-
-# Declare constants for various Bessel function inputs (I_0(x)).
-IV0_20 = 87.10850209627940
-IV0_25 = 373.02058499037486
-IV0_35 = 7257.7994923041760
 
 def rect(x, W):
     """
@@ -52,14 +48,21 @@ def rect(x, W):
     """
     try:
         return _window_functions.rect(x, W)
-    except (TypeError, ValueError, NameError):
-        fname = "diffrec.window_functions.rect"
-        error_check.check_is_real(x, "x", fname)
-        error_check.check_positive(W, "W", fname)
-
-        w_func = np.zeros(np.size(x)) + 1.0
-        w_func[(np.abs(x) >= W/2.0).nonzero()] = 0.0
-        return w_func
+    except KeyboardInterrupt:
+        raise
+    except:
+        raise TypeError(
+            """
+            \r\tError: rss_ringoccs
+            \r\t\tdiffrec.window_functions.rect\n
+            \r\tInput should be a numpy array of real numbers (ints or floats),
+            \r\tand a positive floating point number.
+            \r\tUsage:
+            \r\t\t>>> x = numpy.arange(-5, 5, 0.1)
+            \r\t\t>>> W = 5.0
+            \r\t\t>>> y = rect(x, W)
+            """
+        )
 
 def coss(x, W):
     """
@@ -77,15 +80,21 @@ def coss(x, W):
     """
     try:
         return _window_functions.coss(x, W)
-    except (TypeError, ValueError, NameError):
-        fname = "diffrec.window_functions.coss"
-        error_check.check_is_real(x, "x", fname)
-        error_check.check_positive(W, "W", fname)
-        x *= np.pi/W
-
-        w_func = np.square(np.cos(x))
-        w_func[(np.abs(x) >= W/2.0).nonzero()] = 0.0
-        return w_func
+    except KeyboardInterrupt:
+        raise
+    except:
+        raise TypeError(
+            """
+            \r\tError: rss_ringoccs
+            \r\t\tdiffrec.window_functions.coss\n
+            \r\tInput should be a numpy array of real numbers (ints or floats),
+            \r\tand a positive floating point number.
+            \r\tUsage:
+            \r\t\t>>> x = numpy.arange(-5, 5, 0.1)
+            \r\t\t>>> W = 5.0
+            \r\t\t>>> y = coss(x, W)
+            """
+        )
 
 def kb20(x, W):
     """
@@ -103,16 +112,21 @@ def kb20(x, W):
     """
     try:
         return _window_functions.kb20(x, W)
-    except (TypeError, ValueError, NameError):
-        fname = "diffrec.window_functions.kb20"
-        error_check.check_is_real(x, "x", fname)
-        error_check.check_positive(W, "W", fname)
-        x = 1.0 - np.square(2.0*x/W)
-
-        # Compute window function.
-        w_func = (iv(0.0, TWO_PI*np.sqrt(x)))/IV0_20
-        w_func[(x <= 0).nonzero()] = 0.0
-        return w_func
+    except KeyboardInterrupt:
+        raise
+    except:
+        raise TypeError(
+            """
+            \r\tError: rss_ringoccs
+            \r\t\tdiffrec.window_functions.kb20\n
+            \r\tInput should be a numpy array of real numbers (ints or floats),
+            \r\tand a positive floating point number.
+            \r\tUsage:
+            \r\t\t>>> x = numpy.arange(-5, 5, 0.1)
+            \r\t\t>>> W = 5.0
+            \r\t\t>>> y = kb20(x, W)
+            """
+        )
 
 def kb25(x, W):
     """
@@ -130,19 +144,21 @@ def kb25(x, W):
     """
     try:
         return _window_functions.kb25(x, W)
-    except (TypeError, ValueError, NameError):
-        fname = "diffrec.window_functions.kb25"
-        error_check.check_is_real(x, "x", fname)
-        error_check.check_positive(W, "W", fname)
-        x = 1.0 - np.square(2.0*x/W)
-
-        # Alpha value for kb25 is 2.5.
-        alpha = 2.5 * ONE_PI
-
-        # Compute window function.
-        w_func = (iv(0.0, alpha*np.sqrt(x)))/IV0_25
-        w_func[(x <= 0).nonzero()] = 0.0
-        return w_func
+    except KeyboardInterrupt:
+        raise
+    except:
+        raise TypeError(
+            """
+            \r\tError: rss_ringoccs
+            \r\t\tdiffrec.window_functions.kb25\n
+            \r\tInput should be a numpy array of real numbers (ints or floats),
+            \r\tand a positive floating point number.
+            \r\tUsage:
+            \r\t\t>>> x = numpy.arange(-5, 5, 0.1)
+            \r\t\t>>> W = 5.0
+            \r\t\t>>> y = kb25(x, W)
+            """
+        )
 
 def kb35(x, W):
     """
@@ -160,19 +176,21 @@ def kb35(x, W):
     """
     try:
         return _window_functions.kb35(x, W)
-    except (TypeError, ValueError, NameError):
-        fname = "diffrec.window_functions.kb35"
-        error_check.check_is_real(x, "x", fname)
-        error_check.check_positive(W, "W", fname)
-        x = 1.0 - np.square(2.0*x/W)
-
-        # Alpha value for kb35 is 3.5.
-        alpha = 3.5 * ONE_PI
-
-        # Compute window function.
-        w_func = (iv(0.0, alpha*np.sqrt(x)))/IV0_35
-        w_func[(x <= 0).nonzero()] = 0.0
-        return w_func
+    except KeyboardInterrupt:
+        raise
+    except:
+        raise TypeError(
+            """
+            \r\tError: rss_ringoccs
+            \r\t\tdiffrec.window_functions.kb35\n
+            \r\tInput should be a numpy array of real numbers (ints or floats),
+            \r\tand a positive floating point number.
+            \r\tUsage:
+            \r\t\t>>> x = numpy.arange(-5, 5, 0.1)
+            \r\t\t>>> W = 5.0
+            \r\t\t>>> y = kb35(x, W)
+            """
+        )
 
 def kbmd20(x, W):
     """
@@ -190,16 +208,21 @@ def kbmd20(x, W):
     """
     try:
         return _window_functions.kbmd20(x, W)
-    except (TypeError, ValueError, NameError):
-        fname = "diffrec.window_functions.kbmd20"
-        error_check.check_is_real(x, "x", fname)
-        error_check.check_positive(W, "W", fname)
-        x = 1.0 - np.square(2.0*x/W)
-
-        # Compute window function.
-        w_func = (iv(0.0, TWO_PI*np.sqrt(x)) - 1.0)/(IV0_20 - 1.0)
-        w_func[(x <= 0).nonzero()] = 0.0
-        return w_func
+    except KeyboardInterrupt:
+        raise
+    except:
+        raise TypeError(
+            """
+            \r\tError: rss_ringoccs
+            \r\t\tdiffrec.window_functions.kbmd20\n
+            \r\tInput should be a numpy array of real numbers (ints or floats),
+            \r\tand a positive floating point number.
+            \r\tUsage:
+            \r\t\t>>> x = numpy.arange(-5, 5, 0.1)
+            \r\t\t>>> W = 5.0
+            \r\t\t>>> y = kbmd20(x, W)
+            """
+        )
 
 def kbmd25(x, W):
     """
@@ -217,19 +240,21 @@ def kbmd25(x, W):
     """
     try:
         return _window_functions.kbmd25(x, W)
-    except (TypeError, ValueError, NameError):
-        fname = "diffrec.window_functions.kbmd25"
-        error_check.check_is_real(x, "x", fname)
-        error_check.check_positive(W, "W", fname)
-        x = 1.0 - np.square(2.0*x/W)
-
-        # Alpha value for kbmd25 is 2.5.
-        alpha = 2.5 * ONE_PI
-
-        # Compute window function.
-        w_func = (iv(0.0, alpha*np.sqrt(x)) - 1.0)/(IV0_25 - 1.0)
-        w_func[(x <= 0).nonzero()] = 0.0
-        return w_func
+    except KeyboardInterrupt:
+        raise
+    except:
+        raise TypeError(
+            """
+            \r\tError: rss_ringoccs
+            \r\t\tdiffrec.window_functions.kbmd25\n
+            \r\tInput should be a numpy array of real numbers (ints or floats),
+            \r\tand a positive floating point number.
+            \r\tUsage:
+            \r\t\t>>> x = numpy.arange(-5, 5, 0.1)
+            \r\t\t>>> W = 5.0
+            \r\t\t>>> y = kbmd25(x, W)
+            """
+        )
 
 def kbmd35(x, W):
     """
@@ -247,19 +272,21 @@ def kbmd35(x, W):
     """
     try:
         return _window_functions.kbmd35(x, W)
-    except (TypeError, ValueError, NameError):
-        fname = "diffrec.window_functions.kbmd35"
-        error_check.check_is_real(x, "x", fname)
-        error_check.check_positive(W, "W", fname)
-        x = 1.0 - np.square(2.0*x/W)
-
-        # Alpha value for kbmd35 is 3.5.
-        alpha = 3.5 * ONE_PI
-
-        # Compute window function.
-        w_func = (iv(0.0, alpha*np.sqrt(x)) - 1.0)/(IV0_35 - 1.0)
-        w_func[(x <= 0).nonzero()] = 0.0
-        return w_func
+    except KeyboardInterrupt:
+        raise
+    except:
+        raise TypeError(
+            """
+            \r\tError: rss_ringoccs
+            \r\t\tdiffrec.window_functions.kbmd35\n
+            \r\tInput should be a numpy array of real numbers (ints or floats),
+            \r\tand a positive floating point number.
+            \r\tUsage:
+            \r\t\t>>> x = numpy.arange(-5, 5, 0.1)
+            \r\t\t>>> W = 5.0
+            \r\t\t>>> y = kbmd35(x, W)
+            """
+        )
 
 def kbal(x, W, alpha):
     """
@@ -358,23 +385,23 @@ def kbmdal(x, W, al):
 def window_width(res, normeq, fsky, fres, rho_dot,
                  sigma, bfac=True, Return_P=False):
     """
-        Purpose:
-            Compute the window width as a function of ring radius.
-            This is given from MTR86 Equations 19, 32, and 33.
-        Variables:
-            :res (*float*):
-                The requested resolution.
-            :normeq (*float*):
-                The normalized equivalent width. Unitless.
-            :fsky (*float* or *np.ndarray*):
-                The sky frequency.
-            :fres (*float* or *np.ndarray*):
-                The Fresnel scale.
-            :rdot (*float*) or (*np.ndarray*):
-                The time derivative of the ring radius.
-        Output:
-            :w_vals (*np.ndarray*):
-                The window width as a function of ring radius.
+    Purpose:
+        Compute the window width as a function of ring radius.
+        This is given from MTR86 Equations 19, 32, and 33.
+    Variables:
+        :res (*float*):
+            The requested resolution.
+        :normeq (*float*):
+            The normalized equivalent width. Unitless.
+        :fsky (*float* or *np.ndarray*):
+            The sky frequency.
+        :fres (*float* or *np.ndarray*):
+            The Fresnel scale.
+        :rdot (*float*) or (*np.ndarray*):
+            The time derivative of the ring radius.
+    Output:
+        :w_vals (*np.ndarray*):
+            The window width as a function of ring radius.
     """
     if bfac:
         omega = TWO_PI * fsky
@@ -433,29 +460,42 @@ def window_width(res, normeq, fsky, fres, rho_dot,
     else:
         return w_vals
 
-def normalize(dx, ker, f_scale):
+def window_norm(ker, dx, f_scale):
     """
-        Purpose:
-            Compute the window normalization
-        Arguments:
-            :ker (*np.ndarray*):
-                The Fresnel Kernel.
-            :dx (*float*):
-                The spacing between points in the window.
-                This is equivalent to the sample spacing.
-                This value is in kilometers.
-            :f_scale (*np.ndarray*):
-                The Fresnel Scale in kilometers.
-        Outputs:
-            :norm_fact (*float*):
-                The normalization of the input
-                Fresnel Kernel.
+    Purpose:
+        Compute the window normalization
+    Arguments:
+        :ker (*np.ndarray*):
+            The Fresnel Kernel.
+        :dx (*float*):
+            The spacing between points in the window.
+            This is equivalent to the sample spacing.
+            This value is in kilometers.
+        :f_scale (*np.ndarray*):
+            The Fresnel Scale in kilometers.
+    Outputs:
+        :norm_fact (*float*):
+            The normalization of the input
+            Fresnel Kernel.
     """
-    # Freespace Integral
-    T1 = np.abs(np.sum(ker) * dx)
-
-    # Normalization Factor
-    return SQRT_2 * f_scale / T1
+    try:
+        return _window_functions.window_norm(ker, dx, f_scale)
+    except KeyboardInterrupt:
+        raise
+    except:
+        raise TypeError(
+            """
+            \r\tError: rss_ringoccs
+            \r\t\tdiffrec.window_functions.window_norm\n
+            \r\tInput should be a numpy array of real numbers (ints or floats),
+            \r\tand two positive floating point numbers.
+            \r\tUsage:
+            \r\t\t>>> x = numpy.arange(-5, 5, 0.1)
+            \r\t\t>>> dx = 0.25
+            \r\t\t>>> f_scale = 4.0
+            \r\t\t>>> y = window_norm(x, dx, f_scale)
+            """
+        )
 
 func_dict = {
     "rect":   {"func": rect,   "normeq": 1.00000000, "wnum": 0},

@@ -11,13 +11,98 @@
 #include "__misc_windows.h"
 #include "__kaiser_bessel.h"
 #include "__modified_kaiser_bessel.h"
+#include "__window_normalization.h"
 
 /*  Various header files required for the C-Python API to work.               */
 #include <Python.h>
 #include <numpy/ndarraytypes.h>
 #include <numpy/ufuncobject.h>
 
-static PyMethodDef _window_functions_methods[] = {{NULL, NULL, 0, NULL}};
+static PyObject *window_norm(PyObject *self, PyObject *args){
+    PyArrayObject *arr;
+    PyObject *tuple = PyTuple_GetItem(args, 0);
+    double dx, f_scale;
+
+    if (PyLong_Check(tuple)){
+        long ker;
+        PyArg_ParseTuple(args, "ldd", &ker, &dx, &f_scale);
+        return PyFloat_FromDouble(
+            Window_Normalization_Long(&ker, 1, dx, f_scale)
+        );
+    }
+    else if (PyFloat_Check(tuple)){
+        double ker;
+        PyArg_ParseTuple(args, "ddd", &ker, &dx, &f_scale);
+        return PyFloat_FromDouble(
+            Window_Normalization_Double(&ker, 1, dx, f_scale)
+        );
+    }
+    else if (PyArg_ParseTuple(args, "O!dd", &PyArray_Type,
+                              &arr, &dx, &f_scale)){
+        npy_int typenum, dim;
+        void *data;
+
+        // Check to make sure input isn't zero dimensional!
+        if (PyArray_NDIM(arr) != 1){
+            PyErr_Format(PyExc_TypeError,
+                         "rss_ringoccs.diffrec.math_functions.min\n"
+                         "\rInput must be a one-dimensional array.");
+            return NULL;
+        }
+
+        // Useful information about the data.
+        typenum = PyArray_TYPE(arr);
+        dim     = PyArray_DIMS(arr)[0];
+        data    = PyArray_DATA(arr);
+
+        if (typenum == NPY_FLOAT){
+            return PyFloat_FromDouble(
+                Window_Normalization_Float((float *)data, dim, dx, f_scale)
+            );
+        }
+        else if (typenum == NPY_DOUBLE){
+            return PyFloat_FromDouble(
+                Window_Normalization_Double((double *)data, dim, dx, f_scale)
+            );
+        }
+        else if (typenum == NPY_LONGDOUBLE){
+            return PyFloat_FromDouble(
+                Window_Normalization_Long_Double((long double *)data,
+                                                 dim, dx, f_scale)
+            );
+        }
+        else if (typenum == NPY_INT){
+            return PyLong_FromLong(
+                Window_Normalization_Int((int *)data, dim, dx, f_scale)
+            );
+        }
+        else if (typenum == NPY_LONG){
+            return PyLong_FromLong(
+                Window_Normalization_Long((long *)data, dim, dx, f_scale)
+            );
+        }
+        else {
+            PyErr_Format(PyExc_TypeError,
+                        "rss_ringoccs.diffrec.math_functions.min\n"
+                        "\rInput should be a numpy array of real numbers"
+                        "or a floating point/integer value.");
+            return NULL;
+        }
+    }
+    else {
+        PyErr_Format(PyExc_TypeError,
+                     "rss_ringoccs.diffrec.math_functions.min\n"
+                     "\rInput should be a numpy array of numbers,"
+                     "or a floating point/integer value.");
+        return NULL;
+    }  
+}
+
+static PyMethodDef _window_functions_methods[] = {
+    {"window_norm", window_norm, METH_VARARGS,
+     "Compute the window normalization."},
+    {NULL, NULL, 0, NULL}
+};
 /*---------------------------DEFINE PYTHON FUNCTIONS--------------------------*
  * This contains the Numpy-C and Python-C API parts that allow for the above  *
  * functions to be called in Python. Numpy arrays, as well as floating point  *

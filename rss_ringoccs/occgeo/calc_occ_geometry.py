@@ -592,6 +592,28 @@ def calc_set_et(et_vals, spacecraft, dsn, kernels=None):
 
     return np.asarray(t_set_et_vals)
 
+def calc_uplink_geo(ul_dsn, t_set_et_vals, spacecraft, planet, nhat_p,
+        ref='J2000'):
+    sc_code = spice.bodn2c(spacecraft)
+    
+    ul_dsn_code = spice.bodn2c(ul_dsn)
+
+    t_ul_et_vals_list = []
+    for set_et in t_set_et_vals:
+        ul_et_val, ltime = spice.ltime(set_et, sc_code, "<-", ul_dsn_code)
+        t_ul_et_vals_list.append(ul_et_val)
+
+    t_ul_et_vals = np.array(t_ul_et_vals_list)
+    ul_rho_vec_km, t_ul_ret_vals = calc_rho_vec_km(t_set_et_vals,
+            planet, ul_dsn, spacecraft, ring_frame=None)
+    ul_rho_km_vals = np.array([spice.vnorm(vec) for vec in ul_rho_vec_km])
+
+    ul_phi_rl_deg_vals, ul_phi_ora_deg_vals = calc_phi_deg(
+            t_set_et_vals, ul_rho_vec_km, spacecraft, ul_dsn, nhat_p, ref=ref)
+
+
+    return t_ul_et_vals, t_ul_ret_vals, ul_rho_km_vals, ul_phi_rl_deg_vals, ul_phi_ora_deg_vals
+
 def get_start_jd(year, doy):
     """
     Get the start of a day in Julian date times.
@@ -844,7 +866,10 @@ def get_freespace(t_ret_spm_vals, year, doy, rho_km_vals,
         gaps_km = {'INGRESS': gaps_km_ing,
                 'EGRESS': gaps_km_egr}
         # Add ingress and egress freespace regions together
-        gaps_spm = gaps_spm_ing.tolist() + gaps_spm_egr.tolist()
+        if gaps_spm_egr[0][0] < gaps_spm_ing[0][0]:
+            gaps_spm = gaps_spm_egr.tolist() + gaps_spm_ing.tolist()
+        else:
+            gaps_spm = gaps_spm_ing.tolist() + gaps_spm_egr.tolist()
 
     else:
         # Remove times blocked by planet atmosphere
@@ -904,20 +929,46 @@ def split_chord_arr(t_ret_spm_vals, t_oet_spm_vals,
         :rho_km_vals (*np.ndarray*): Ring intercept points in km of 'profdir'
             portion of occultation
     """
+    dr_1 = rho_km_vals[1] - rho_km_vals[0]
+    dr_2 = rho_km_vals[-1] - rho_km_vals[-2]
+
+    # verify that direction changes
+    if (dr_1 < 0 and dr_2 < 0) or (dr_1 > 0 and dr_2 > 0):
+        raise ValueError('(calc_occ_geometry.py): Chord changed directions twice')
+    
+
 
     # Split egress portion
     if profdir == '"EGRESS"':
-        t_ret_spm_split = t_ret_spm_vals[ind:]
-        t_oet_spm_split = t_oet_spm_vals[ind:]
-        phi_rl_deg_split = phi_rl_deg_vals[ind:]
-        rho_km_split = rho_km_vals[ind:]
+        # if dr_1<0, then beginning of occ is ingress.
+        if dr_1 < 0:
+            t_ret_spm_split = t_ret_spm_vals[ind:]
+            t_oet_spm_split = t_oet_spm_vals[ind:]
+            phi_rl_deg_split = phi_rl_deg_vals[ind:]
+            rho_km_split = rho_km_vals[ind:]
+        # if dr_1 > 0 then beginning of occ is egress
+        else:
+            t_ret_spm_split = t_ret_spm_vals[:ind]
+            t_oet_spm_split = t_oet_spm_vals[:ind]
+            phi_rl_deg_split = phi_rl_deg_vals[:ind]
+            rho_km_split = rho_km_vals[:ind]
+
 
     # Split ingress portion
+
     if profdir == '"INGRESS"':
-        t_ret_spm_split = t_ret_spm_vals[:ind]
-        t_oet_spm_split = t_oet_spm_vals[:ind]
-        phi_rl_deg_split = phi_rl_deg_vals[:ind]
-        rho_km_split = rho_km_vals[:ind]
+        # if dr_1 < 0, then beginning is ingress
+        if dr_1 < 0:
+            t_ret_spm_split = t_ret_spm_vals[:ind]
+            t_oet_spm_split = t_oet_spm_vals[:ind]
+            phi_rl_deg_split = phi_rl_deg_vals[:ind]
+            rho_km_split = rho_km_vals[:ind]
+        else:
+            t_ret_spm_split = t_ret_spm_vals[ind:]
+            t_oet_spm_split = t_oet_spm_vals[ind:]
+            phi_rl_deg_split = phi_rl_deg_vals[ind:]
+            rho_km_split = rho_km_vals[ind:]
+
 
     # Remove any part of the occultation that is blocked by atmosphere
     t_ret_out, t_oet_out, phi_rl_out, rho_out = remove_blocked(

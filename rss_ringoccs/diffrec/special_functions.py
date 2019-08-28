@@ -318,6 +318,7 @@ def fresnel_dpsi_dphi(kD, r, r0, phi, phi0, B, D):
             """
         )
 
+# TODO
 def dpsi_ellipse(kD, r, r0, phi, phi0, B, D, ecc, peri):
     """
         Purpose:
@@ -366,7 +367,8 @@ def dpsi_ellipse(kD, r, r0, phi, phi0, B, D, ecc, peri):
 
     return psi_d1
 
-def d2psi(kD, r, r0, phi, phi0, B, D):
+# TODO
+def fresnel_d2psi_dphi2(kD, r, r0, phi, phi0, B, D):
     """
         Purpose:
             Compute :math:`\\mathrm{d}^2\\psi/\\mathrm{d}\\phi^2`
@@ -413,6 +415,7 @@ def d2psi(kD, r, r0, phi, phi0, B, D):
 
     return psi_d2
 
+# TODO
 def resolution_inverse(x):
     """
     Purpose:
@@ -459,6 +462,7 @@ def resolution_inverse(x):
 
     return f
 
+# TODO
 def fresnel_cos(x):
     """
     Purpose:
@@ -802,7 +806,7 @@ def fresnel_transform_ellipse(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
         loop = 0
         while (np.max(np.abs(psi_d1)) > 1.0e-4):
             psi_d1 = dpsi_ellipse(kD, r, r0, phi, phi0, b, d, ecc, peri)
-            psi_d2 = d2psi(kD, r, r0, phi, phi0, b, d)
+            psi_d2 = fresnel_d2psi_dphi2(kD, r, r0, phi, phi0, b, d)
 
             # Newton-Raphson
             phi += -(psi_d1 / psi_d2)
@@ -865,7 +869,6 @@ def fresnel_transform_newton(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
             \r\t\tfwd:          Boolean.
             """
         )
-
 
 def fresnel_transform_quadratic(T_in, rho_km_vals, F_km_vals, w_km_vals, start,
                                 n_used, wtype, norm, fwd):

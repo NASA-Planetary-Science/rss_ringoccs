@@ -27,8 +27,16 @@ Some post-USO files contain discontinuous frequency offsets. rss_rings v1.3 now 
 #### V1.3-1 (carried over from V1.2-1) ####
 For the extreme nearly edge-on viewing geometry of Rev133E at X-band, rss_ringoccs gives slightly different results from PDS, traceable to a difference of about 10% in the cubic term of the varaiable psi. The origin of this discrepancy is unknown, but it is not important for any other occultation data sets we have reduced so far, and is relatively minor even for Rev133E at X band.
 
-#### V1.3-3 ####
+#### V1.3-2 ####
 Support for egress occultations at start of proximal orbits in the Grand Finale not yet implemented.
+
+### Lien list for V1.3 ###
+
+1. Properly proximal egress occultations in Grand Finale orbits
+
+2. Data catalog query - we will work with the PDS to ensure that our recently-submitted RSS ring occultation observation data catalog is compliant with current PDS search capabilities.
+
+3. Improve processing and documenting of the scattered signal. This should include appropriate Doppler footprint contours and correcting the observed frequency drift to account for wavelength-dependents and motion of the spacecraft.
 
 ## rss_ringoccs V1.2 ##
 
@@ -68,13 +76,6 @@ For the extreme nearly edge-on viewing geometry of Rev133E at X-band, rss_ringoc
 #### V1.2-2 ####
 Some post-USO files contain discontinuous frequency offsets. rss_rings v1.2 does not support the processing of these files.
 
-### Lien list for V1.3 ###
-
-1. Properly proximal egress occultations in Grand Finale orbits
-
-2. Data catalog query - we will work with the PDS to ensure that our recently-submitted RSS ring occultation observation data catalog is compliant with current PDS search capabilities.
-
-3. Improve processing and documenting of the scattered signal. This should include appropriate Doppler footprint contours and correcting the observed frequency drift to account for wavelength-dependents and motion of the spacecraft.
 
 
 ## rss_ringoccs V1.1 ##

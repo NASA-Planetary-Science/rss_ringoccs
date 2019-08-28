@@ -261,11 +261,10 @@ class DiffractionCorrection(object):
     def __init__(self, DLP, res, rng="all", wtype="kbmd20", fwd=False,
                  norm=True, verbose=False, bfac=True, sigma=2.e-13,
                  psitype="fresnel4", write_file=False, res_factor=0.75,
-                 eccentricity=0.0, periapse=0.0, use_python=False):
+                 eccentricity=0.0, periapse=0.0):
 
         fname = "diffrec.diffraction_correction.DiffractionCorrection"
         error_check.check_type(verbose, bool, "verbose", fname)
-        self.use_python = use_python
 
         if verbose:
             print("Processing Diffraction Correction:")
@@ -814,5 +813,5 @@ class DiffractionCorrection(object):
             T_in, self.rho_km_vals, self.F_km_vals, self.w_km_vals,
             start, n_used, self.wtype, self.norm, fwd, self.psitype,
             self.phi_rad_vals, kD_vals, self.B_rad_vals, self.D_km_vals,
-            self.periapse, self.eccentricity, self.use_python
+            self.periapse, self.eccentricity
         )

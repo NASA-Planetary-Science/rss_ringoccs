@@ -24,6 +24,7 @@ Submodules
    rss_ringoccs.tools.pds3_tau_series
    rss_ringoccs.tools.pds3_write_series_v2
    rss_ringoccs.tools.ring_fit
+   rss_ringoccs.tools.ring_fit_v2
    rss_ringoccs.tools.spm_to_et
    rss_ringoccs.tools.sys_tools
    rss_ringoccs.tools.write_output_files

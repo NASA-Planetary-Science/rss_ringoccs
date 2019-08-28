@@ -13,6 +13,7 @@
 #include "_fresnel_diffraction_wrappers.h"
 #include "_fresnel_integrals_wrappers.h"
 #include "_physics_functions_wrappers.h"
+#include "_sinc_wrappers.h"
 
 /*  Where compute_norm_eq lives, as well as max and min funcs.                */
 #include "__normalized_equivalent_width.h"
@@ -345,6 +346,12 @@ PyUFuncGenericFunction fresnel_sin_funcs[3] = {
 PyUFuncGenericFunction psi_funcs[1]             = {&double_psi};
 PyUFuncGenericFunction dpsi_funcs[1]            = {&double_dpsi_dphi};
 
+PyUFuncGenericFunction sinc_funcs[3] = {
+    &float_sinc,
+    &double_sinc,
+    &long_double_sinc
+};
+
 PyUFuncGenericFunction single_slit_funcs[3] = {
     &float_single_slit_diffraction,
     &double_single_slit_diffraction,
@@ -430,6 +437,7 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     PyObject *fresnel_sin;
     PyObject *fresnel_dpsi_dphi;
     PyObject *single_slit_diffraction;
+    PyObject *sinc;
     PyObject *square_well_diffraction;
     PyObject *square_well_phase;
     PyObject *wavelength_to_wavenumber;
@@ -486,6 +494,11 @@ PyMODINIT_FUNC PyInit__special_functions(void)
         PyUFunc_None, "fresnel_sin", "fresnel_sin_docstring", 0
     );
 
+    sinc = PyUFunc_FromFuncAndData(
+        sinc_funcs, PyuFunc_None_3, one_real_in_one_real_out,
+        3, 1, 1, PyUFunc_None, "sinc",  "sinc_docstring", 0
+    );
+
     single_slit_diffraction = PyUFunc_FromFuncAndData(
         single_slit_funcs, PyuFunc_None_3, three_real_in_one_real_out,
         3, 3, 1, PyUFunc_None, "single_slit_diffraction", 
@@ -520,6 +533,7 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     PyDict_SetItemString(d, "fresnel_dpsi_dphi", fresnel_dpsi_dphi);
     PyDict_SetItemString(d, "fresnel_scale", fresnel_scale);
     PyDict_SetItemString(d, "fresnel_sin", fresnel_sin);
+    PyDict_SetItemString(d, "sinc", sinc);
     PyDict_SetItemString(d, "single_slit_diffraction", single_slit_diffraction);
     PyDict_SetItemString(d, "square_well_diffraction", square_well_diffraction);
     PyDict_SetItemString(d, "square_well_phase", square_well_phase);
@@ -533,6 +547,7 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     Py_DECREF(fresnel_dpsi_dphi);
     Py_DECREF(fresnel_scale);
     Py_DECREF(fresnel_sin);
+    Py_DECREF(sinc);
     Py_DECREF(single_slit_diffraction);
     Py_DECREF(square_well_diffraction);
     Py_DECREF(square_well_phase);

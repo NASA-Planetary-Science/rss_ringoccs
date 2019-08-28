@@ -19,6 +19,17 @@ Release date: 2019 August 30
 
 6. Runnable scripts to perform push-button diffraction correction, starting either from raw RSS files or from Essam Marouf's (or our) PDS-style geometry, calibration, and diffraction-limited profiles, at any desired resolution (consistent with the sampling theorem and justified by the SNR), for the full set of RSS occultations at S, X, and Ka-band up to the point of USO failure.
 
+**Resolved V1.2-2**
+Some post-USO files contain discontinuous frequency offsets. rss_rings v1.3 now supports the processing of these files.
+
+### Known Issues and Limitations of V1.3 ###
+
+#### V1.3-1 (carried over from V1.2-1) ####
+For the extreme nearly edge-on viewing geometry of Rev133E at X-band, rss_ringoccs gives slightly different results from PDS, traceable to a difference of about 10% in the cubic term of the varaiable psi. The origin of this discrepancy is unknown, but it is not important for any other occultation data sets we have reduced so far, and is relatively minor even for Rev133E at X band.
+
+#### V1.3-3 ####
+Support for egress occultations at start of proximal orbits in the Grand Finale not yet implemented.
+
 ## rss_ringoccs V1.2 ##
 
 Release date: 2019 July 1

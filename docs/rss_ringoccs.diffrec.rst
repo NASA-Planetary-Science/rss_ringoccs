@@ -13,6 +13,8 @@ Submodules
 
    rss_ringoccs.diffrec.advanced_tools
    rss_ringoccs.diffrec.diffraction_correction
+   rss_ringoccs.diffrec.fresnel_inversion
+   rss_ringoccs.diffrec.setup
    rss_ringoccs.diffrec.special_functions
    rss_ringoccs.diffrec.window_functions
 

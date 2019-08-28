@@ -1,30 +1,30 @@
-/*  To avoid compiler warnings about deprecated numpy stuff.                 */
+/*  To avoid compiler warnings about deprecated numpy stuff.                  */
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 
 /* cosine and sine are defined here. */
 #include <math.h>
 
-/*  complex data types, as well as _Complex_I, are defined here.             */
+/*  complex data types, as well as _Complex_I, are defined here.              */
 #include <complex.h>
 
-/*  Window functions defined here.                                           */
+/*  Window functions defined here.                                            */
 #include "__misc_windows.h"
 #include "__kaiser_bessel.h"
 #include "__modified_kaiser_bessel.h"
 
-/*  Various header files required for the C-Python API to work.              */
+/*  Various header files required for the C-Python API to work.               */
 #include <Python.h>
 #include <numpy/ndarraytypes.h>
 #include <numpy/ufuncobject.h>
 
 static PyMethodDef _window_functions_methods[] = {{NULL, NULL, 0, NULL}};
-/*---------------------------DEFINE PYTHON FUNCTIONS-------------------------*
- * This contains the Numpy-C and Python-C API parts that allow for the above *
- * functions to be called in Python. Numpy arrays, as well as floating point *
- * and integer valued arguments may then be passed into these functions for  *
- * improvement in performance, as opposed to the routines written purely in  *
- * Python. Successful compiling requires the Numpy and Python header files.  *
- *---------------------------------------------------------------------------*/
+/*---------------------------DEFINE PYTHON FUNCTIONS--------------------------*
+ * This contains the Numpy-C and Python-C API parts that allow for the above  *
+ * functions to be called in Python. Numpy arrays, as well as floating point  *
+ * and integer valued arguments may then be passed into these functions for   *
+ * improvement in performance, as opposed to the routines written purely in   *
+ * Python. Successful compiling requires the Numpy and Python header files.   *
+ *----------------------------------------------------------------------------*/
 static void double_rect(char **args, npy_intp *dimensions,
                         npy_intp *steps, void *data)
 {
@@ -145,7 +145,7 @@ static void double_kbmd35(char **args, npy_intp *dimensions,
     }
 }
 
-/* Define pointers to the C functions. */
+/* Define pointers to the C functions.                                        */
 PyUFuncGenericFunction rect_funcs[1]   = {&double_rect};
 PyUFuncGenericFunction coss_funcs[1]   = {&double_coss};
 PyUFuncGenericFunction kb20_funcs[1]   = {&double_kb20};
@@ -155,7 +155,7 @@ PyUFuncGenericFunction kbmd20_funcs[1] = {&double_kbmd20};
 PyUFuncGenericFunction kbmd25_funcs[1] = {&double_kbmd25};
 PyUFuncGenericFunction kbmd35_funcs[1] = {&double_kbmd35};
 
-/* Input and return types for double input and out.. */
+/* Input and return types for double input and out.                           */
 static char ddd_types[3]     = {NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE};
 static void *PyuFunc_data[1] = {NULL};
 

@@ -411,6 +411,12 @@ PyUFuncGenericFunction res_inv_funcs[3] = {
     &long_double_resolution_inverse
 };
 
+PyUFuncGenericFunction right_straightedge_funcs[3] = {
+    &float_right_straightedge,
+    &double_right_straightedge,
+    &long_double_right_straightedge
+};
+
 PyUFuncGenericFunction sinc_funcs[3] = {
     &float_sinc,
     &double_sinc,
@@ -478,6 +484,12 @@ static char four_real_in_one_complex_out[15] = {
     NPY_CLONGDOUBLE
 };
 
+static char three_real_in_one_complex_out[12] = {
+    NPY_FLOAT, NPY_FLOAT, NPY_FLOAT, NPY_CFLOAT,
+    NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE, NPY_CDOUBLE,
+    NPY_LONGDOUBLE, NPY_LONGDOUBLE, NPY_LONGDOUBLE, NPY_CLONGDOUBLE
+};
+
 #if PY_VERSION_HEX >= 0x03000000
 static struct PyModuleDef moduledef = {
     PyModuleDef_HEAD_INIT,
@@ -503,6 +515,7 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     PyObject *fresnel_dpsi_dphi;
     PyObject *lambertw;
     PyObject *resolution_inverse;
+    PyObject *right_straightedge;
     PyObject *single_slit_diffraction;
     PyObject *sinc;
     PyObject *square_well_diffraction;
@@ -572,6 +585,12 @@ PyMODINIT_FUNC PyInit__special_functions(void)
         "resolution_inverse_docstring", 0
     );
 
+    right_straightedge = PyUFunc_FromFuncAndData(
+        right_straightedge_funcs, PyuFunc_None_3, three_real_in_one_complex_out,
+        3, 3, 1, PyUFunc_None, "right_straightedge", 
+        "right_straightedge_docstring", 0
+    );
+
     sinc = PyUFunc_FromFuncAndData(
         sinc_funcs, PyuFunc_None_3, one_real_in_one_real_out,
         3, 1, 1, PyUFunc_None, "sinc",  "sinc_docstring", 0
@@ -613,6 +632,7 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     PyDict_SetItemString(d, "fresnel_sin", fresnel_sin);
     PyDict_SetItemString(d, "lambertw", lambertw);
     PyDict_SetItemString(d, "resolution_inverse", resolution_inverse);
+    PyDict_SetItemString(d, "right_straightedge", right_straightedge);
     PyDict_SetItemString(d, "sinc", sinc);
     PyDict_SetItemString(d, "single_slit_diffraction", single_slit_diffraction);
     PyDict_SetItemString(d, "square_well_diffraction", square_well_diffraction);
@@ -629,6 +649,7 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     Py_DECREF(fresnel_sin);
     Py_DECREF(lambertw);
     Py_DECREF(resolution_inverse);
+    Py_DECREF(right_straightedge);
     Py_DECREF(sinc);
     Py_DECREF(single_slit_diffraction);
     Py_DECREF(square_well_diffraction);

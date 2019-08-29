@@ -34,6 +34,17 @@ long double Min_Long_Double(long double *arr, long n_elements){
     return min;
 }
 
+short Min_Short(short *arr, long n_elements){
+    short min = arr[0];
+    long i;
+    for (i = 1; i < n_elements; ++i){
+        if (arr[i] < min){
+            min = arr[i];
+        }
+    }
+    return min;
+}
+
 int Min_Int(int *arr, long n_elements){
     int min = arr[0];
     long i;

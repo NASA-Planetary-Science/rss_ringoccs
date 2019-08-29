@@ -13,7 +13,9 @@
 #include "_fresnel_diffraction_wrappers.h"
 #include "_fresnel_integrals_wrappers.h"
 #include "_fresnel_kernel_wrappers.h"
+#include "_lambertw_wrappers.h"
 #include "_physics_functions_wrappers.h"
+#include "_resolution_inverse_function_wrappers.h"
 #include "_sinc_wrappers.h"
 
 /*  Where compute_norm_eq lives, as well as max and min funcs.                */
@@ -394,8 +396,20 @@ PyUFuncGenericFunction fresnel_sin_funcs[3] = {
     &long_double_fresnelsin
 };
 
-PyUFuncGenericFunction psi_funcs[1]             = {&double_psi};
-PyUFuncGenericFunction dpsi_funcs[1]            = {&double_dpsi_dphi};
+PyUFuncGenericFunction lambertw_funcs[3] = {
+    &float_lambertw,
+    &double_lambertw,
+    &long_double_lambertw
+};
+
+PyUFuncGenericFunction psi_funcs[1]  = {&double_psi};
+PyUFuncGenericFunction dpsi_funcs[1] = {&double_dpsi_dphi};
+
+PyUFuncGenericFunction res_inv_funcs[3] = {
+    &float_resolution_inverse,
+    &double_resolution_inverse,
+    &long_double_resolution_inverse
+};
 
 PyUFuncGenericFunction sinc_funcs[3] = {
     &float_sinc,
@@ -487,6 +501,8 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     PyObject *fresnel_scale;
     PyObject *fresnel_sin;
     PyObject *fresnel_dpsi_dphi;
+    PyObject *lambertw;
+    PyObject *resolution_inverse;
     PyObject *single_slit_diffraction;
     PyObject *sinc;
     PyObject *square_well_diffraction;
@@ -545,6 +561,17 @@ PyMODINIT_FUNC PyInit__special_functions(void)
         PyUFunc_None, "fresnel_sin", "fresnel_sin_docstring", 0
     );
 
+    lambertw = PyUFunc_FromFuncAndData(
+        lambertw_funcs, PyuFunc_None_3, one_real_in_one_real_out, 3, 1, 1,
+        PyUFunc_None, "lambertw", "lambertw_docstring", 0
+    );
+
+    resolution_inverse = PyUFunc_FromFuncAndData(
+        res_inv_funcs, PyuFunc_None_3, one_real_in_one_real_out,
+        3, 1, 1, PyUFunc_None, "resolution_inverse", 
+        "resolution_inverse_docstring", 0
+    );
+
     sinc = PyUFunc_FromFuncAndData(
         sinc_funcs, PyuFunc_None_3, one_real_in_one_real_out,
         3, 1, 1, PyUFunc_None, "sinc",  "sinc_docstring", 0
@@ -584,6 +611,8 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     PyDict_SetItemString(d, "fresnel_dpsi_dphi", fresnel_dpsi_dphi);
     PyDict_SetItemString(d, "fresnel_scale", fresnel_scale);
     PyDict_SetItemString(d, "fresnel_sin", fresnel_sin);
+    PyDict_SetItemString(d, "lambertw", lambertw);
+    PyDict_SetItemString(d, "resolution_inverse", resolution_inverse);
     PyDict_SetItemString(d, "sinc", sinc);
     PyDict_SetItemString(d, "single_slit_diffraction", single_slit_diffraction);
     PyDict_SetItemString(d, "square_well_diffraction", square_well_diffraction);
@@ -598,6 +627,8 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     Py_DECREF(fresnel_dpsi_dphi);
     Py_DECREF(fresnel_scale);
     Py_DECREF(fresnel_sin);
+    Py_DECREF(lambertw);
+    Py_DECREF(resolution_inverse);
     Py_DECREF(sinc);
     Py_DECREF(single_slit_diffraction);
     Py_DECREF(square_well_diffraction);

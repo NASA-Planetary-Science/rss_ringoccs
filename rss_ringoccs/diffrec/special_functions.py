@@ -1,5 +1,4 @@
 import numpy as np
-from scipy.special import erf, lambertw
 from . import window_functions
 from rss_ringoccs.tools import error_check
 try:
@@ -471,53 +470,6 @@ def min(x):
             """
         ) 
 
-# TODO
-def resolution_inverse(x):
-    """
-    Purpose:
-        Compute the inverse of :math:`y = x/(\\exp(-x)+x-1)`
-    Arguments:
-        :x (*np.ndarray* or *float*):
-            Independent variable
-    Outputs:
-        :f (*np.ndarray* or *float*):
-            The inverse of :math:`x/(\\exp(-x)+x-1)`
-    Dependencies:
-        #. numpy
-        #. scipy.special
-    Method:
-        The inverse of :math:`x/(\\exp(-x)+x-1)` is computed using the
-        LambertW function. This function is the inverse of
-        :math:`y = x\\exp(x)`. This is computed using the scipy.special
-        subpackage using their lambertw function.
-    Warnings:
-        #. The real part of the argument must be greater than 1.
-        #. The scipy.special lambertw function is slightly
-           inaccurate when it's argument is near :math:`-1/e`. This
-           argument is :math:`z = \\exp(x/(1-x)) * x/(1-x)`
-    Examples:
-        Plot the function on the interval (1,2)
-
-        >>> import rss_ringoccs.diffcorr.special_functions as sf
-        >>> import numpy as np
-        >>> x = np.array(range(0,1001))*0.001+1.01
-        >>> y = sf.resolution_inverse(x)
-        >>> import matplotlib.pyplot as plt
-        >>> plt.show(plt.plot(x,y))
-    """
-    fname = "diffrec.special_functions.resolution_inverse"
-    error_check.check_is_real(x, "x", fname)
-    error_check.check_positive(np.min(np.real(x))-1.0, "x-1", fname)
-
-    P1 = x/(1.0-x)
-    P2 = P1*np.exp(P1)
-    f = lambertw(P2)-P1
-
-    if np.all(np.isreal(x)):
-        f = np.real(f)
-
-    return f
-
 def fresnel_cos(x):
     """
     Purpose:
@@ -605,6 +557,74 @@ def fresnel_sin(x):
             \r\tUsage:
             \r\t\t>>> x = 1.0   # Or a numpy array, i.e. np.arange(-5, 5)
             \r\t\t>>> y = fresnel_sin(x)
+            """
+        )
+
+def lambderw(x):
+    try:
+        return _special_functions.lambertw(x)
+    except KeyboardInterrupt:
+        raise
+    except:
+        raise TypeError(
+            """
+            \r\tError: rss_ringoccs
+            \r\t\tdiffrec.special_functions.lambertw\n
+            \r\tInput should be a numpy array of real numbers (ints or floats),
+            \r\tor an int or a float.\n
+            \r\tUsage:
+            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. np.arange(-5, 5)
+            \r\t\t>>> y = lambertw(x)
+            """
+        )
+
+def resolution_inverse(x):
+    """
+    Purpose:
+        Compute the inverse of :math:`y = x/(\\exp(-x)+x-1)`
+    Arguments:
+        :x (*np.ndarray* or *float*):
+            Independent variable
+    Outputs:
+        :f (*np.ndarray* or *float*):
+            The inverse of :math:`x/(\\exp(-x)+x-1)`
+    Dependencies:
+        #. numpy
+        #. scipy.special
+    Method:
+        The inverse of :math:`x/(\\exp(-x)+x-1)` is computed using the
+        LambertW function. This function is the inverse of
+        :math:`y = x\\exp(x)`. This is computed using the scipy.special
+        subpackage using their lambertw function.
+    Warnings:
+        #. The real part of the argument must be greater than 1.
+        #. The scipy.special lambertw function is slightly
+           inaccurate when it's argument is near :math:`-1/e`. This
+           argument is :math:`z = \\exp(x/(1-x)) * x/(1-x)`
+    Examples:
+        Plot the function on the interval (1,2)
+
+        >>> import rss_ringoccs.diffcorr.special_functions as sf
+        >>> import numpy as np
+        >>> x = np.array(range(0,1001))*0.001+1.01
+        >>> y = sf.resolution_inverse(x)
+        >>> import matplotlib.pyplot as plt
+        >>> plt.show(plt.plot(x,y))
+    """
+    try:
+        return _special_functions.resolution_inverse(x)
+    except KeyboardInterrupt:
+        raise
+    except:
+        raise TypeError(
+            """
+            \r\tError: rss_ringoccs
+            \r\t\tdiffrec.special_functions.resolution_inverse\n
+            \r\tInput should be a numpy array of real numbers (ints or floats),
+            \r\tor an int or a float.\n
+            \r\tUsage:
+            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. np.arange(-5, 5)
+            \r\t\t>>> y = resolution_inverse(x)
             """
         )
 

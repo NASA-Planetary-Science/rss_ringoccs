@@ -382,6 +382,7 @@ def kbmdal(x, W, al):
     w_func = (iv(0.0, alpha * np.sqrt(x))-1.0)/(iv(0.0, alpha)-1.0)
     return w_func
 
+# TODO
 def window_width(res, normeq, fsky, fres, rho_dot,
                  sigma, bfac=True, Return_P=False):
     """

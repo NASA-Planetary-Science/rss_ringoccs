@@ -370,28 +370,28 @@ def dpsi_ellipse(kD, r, r0, phi, phi0, B, D, ecc, peri):
 # TODO
 def fresnel_d2psi_dphi2(kD, r, r0, phi, phi0, B, D):
     """
-        Purpose:
-            Compute :math:`\\mathrm{d}^2\\psi/\\mathrm{d}\\phi^2`
-        Arguments:
-            :kD (*float*):
-                Wavenumber, unitless.
-            :r (*float*):
-                Radius of reconstructed point, in kilometers.
-            :r0 (*np.ndarray*):
-                Radius of region within window, in kilometers.
-            :phi (*np.ndarray*):
-                Root values of :math:`\\mathrm{d}\\psi/\\mathrm{d}\\phi`,
-                radians.
-            :phi0 (*np.ndarray*):
-                Ring azimuth angle corresponding to r0, radians.
-            :B (*float*):
-                Ring opening angle, in radians.
-            :D (*float*):
-                Spacecraft-RIP distance, in kilometers.
-        Outputs:
-            :dpsi (*np.ndarray*):
-                Second partial derivative of :math:`\\psi`
-                with respect to :math:`\\phi`.
+    Purpose:
+        Compute :math:`\\mathrm{d}^2\\psi/\\mathrm{d}\\phi^2`
+    Arguments:
+        :kD (*float*):
+            Wavenumber, unitless.
+        :r (*float*):
+            Radius of reconstructed point, in kilometers.
+        :r0 (*np.ndarray*):
+            Radius of region within window, in kilometers.
+        :phi (*np.ndarray*):
+            Root values of :math:`\\mathrm{d}\\psi/\\mathrm{d}\\phi`,
+            radians.
+        :phi0 (*np.ndarray*):
+            Ring azimuth angle corresponding to r0, radians.
+        :B (*float*):
+            Ring opening angle, in radians.
+        :D (*float*):
+            Spacecraft-RIP distance, in kilometers.
+    Outputs:
+        :dpsi (*np.ndarray*):
+            Second partial derivative of :math:`\\psi`
+            with respect to :math:`\\phi`.
     """
     # Compute Xi variable (MTR86 Equation 4b).
     xi = (np.cos(B)/D) * (r * np.cos(phi) - r0 * np.cos(phi0))
@@ -414,6 +414,62 @@ def fresnel_d2psi_dphi2(kD, r, r0, phi, phi0, B, D):
     psi_d2 *= kD
 
     return psi_d2
+
+def max(x):
+    """
+    Purpose:
+        Compute the maximum of a one dimensional numpy array.
+        This function was written to test use of the C-Python API.
+    Arguments:
+        :x (*numpy.ndarray*):
+            A one dimensional numpy array of real numbers.
+    Outputs:
+        :max (*float* or *int*):
+            The maximum value of x.
+    """
+    try:
+        return _special_functions.max(x)
+    except KeyboardInterrupt:
+        raise
+    except:
+        raise TypeError(
+            """
+            \r\tError: rss_ringoccs
+            \r\t\tdiffrec.special_functions.max\n
+            \r\tInput should be a numpy array of real numbers.\n
+            \r\tUsage:
+            \r\t\t>>> x = numpy.random.rand(100)
+            \r\t\t>>> y = max(x)\n
+            """
+        )
+
+def min(x):
+    """
+    Purpose:
+        Compute the maximum of a one dimensional numpy array.
+        This function was written to test use of the C-Python API.
+    Arguments:
+        :x (*numpy.ndarray*):
+            A one dimensional numpy array of real numbers.
+    Outputs:
+        :max (*float* or *int*):
+            The maximum value of x.
+    """
+    try:
+        return _special_functions.min(x)
+    except KeyboardInterrupt:
+        raise
+    except:
+        raise TypeError(
+            """
+            \r\tError: rss_ringoccs
+            \r\t\tdiffrec.special_functions.min\n
+            \r\tInput should be a numpy array of real numbers.\n
+            \r\tUsage:
+            \r\t\t>>> x = numpy.random.rand(100)
+            \r\t\t>>> y = min(x)\n
+            """
+        ) 
 
 # TODO
 def resolution_inverse(x):

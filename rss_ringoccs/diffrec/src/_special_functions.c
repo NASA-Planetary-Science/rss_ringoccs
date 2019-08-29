@@ -12,6 +12,7 @@
 #include "_fraunhofer_diffraction_wrappers.h"
 #include "_fresnel_diffraction_wrappers.h"
 #include "_fresnel_integrals_wrappers.h"
+#include "_fresnel_kernel_wrappers.h"
 #include "_physics_functions_wrappers.h"
 #include "_sinc_wrappers.h"
 
@@ -38,13 +39,29 @@ static PyObject *compute_norm_eq(PyObject *self, PyObject *args){
 
     if (PyLong_Check(tuple)){
         long normeq;
-        PyArg_ParseTuple(args, "l", &normeq);
-        return PyLong_FromLong(normeq);
+        if (PyArg_ParseTuple(args, "l", &normeq)){
+            return PyLong_FromLong(normeq);
+        }
+        else {
+            PyErr_Format(
+                PyExc_TypeError,
+                "\n\r\trss_ringoccs.diffrec.math_functions.compute_norm_eq\n"
+                "\r\t\tCould not parse int type input.");
+            return NULL;
+        }
     }
     else if (PyFloat_Check(tuple)){
         double normeq;
-        PyArg_ParseTuple(args, "d", &normeq);
-        return PyFloat_FromDouble(normeq);
+        if (PyArg_ParseTuple(args, "d", &normeq)){
+            return PyFloat_FromDouble(normeq);
+        }
+        else {
+            PyErr_Format(
+                PyExc_TypeError,
+                "\n\r\trss_ringoccs.diffrec.math_functions.compute_norm_eq\n"
+                "\r\t\tCould not parse float type input.");
+            return NULL;
+        }
     }
     else if (PyArg_ParseTuple(args, "O!", &PyArray_Type, &arr)){
         npy_int typenum, dim;
@@ -54,8 +71,8 @@ static PyObject *compute_norm_eq(PyObject *self, PyObject *args){
         if (PyArray_NDIM(arr) != 1){
             PyErr_Format(
                 PyExc_TypeError,
-                "rss_ringoccs.diffrec.special_functions.compute_norm_eq\n"
-                "\rInput must be a one-dimensional array."
+                "\n\trss_ringoccs.diffrec.special_functions.compute_norm_eq\n"
+                "\r\t\tInput must be a one-dimensional array."
             );
             return NULL;
         }
@@ -67,36 +84,61 @@ static PyObject *compute_norm_eq(PyObject *self, PyObject *args){
         if (dim == 0){
             PyErr_Format(
                 PyExc_TypeError,
-                "rss_ringoccs.diffrec.special_functions.compute_norm_eq\n"
-                "\rInput array is empty."
+                "\n\r\trss_ringoccs.diffrec.math_functions.compute_norm_eq\n"
+                "\r\t\tInput is zero dimensional."
             );
             return NULL;
         }
-
-        if (typenum == NPY_DOUBLE){
-            return PyFloat_FromDouble(Normeq_Double((double *)data, dim));
+        if (typenum == NPY_FLOAT){
+            return PyFloat_FromDouble(
+                Normeq_Float((float *)data, dim)
+            );
         }
-        else if (typenum == NPY_FLOAT){
-            return PyFloat_FromDouble(Normeq_Float((float *)data, dim));
+        else if (typenum == NPY_DOUBLE){
+            return PyFloat_FromDouble(
+                Normeq_Double((double *)data, dim)
+            );
         }
         else if (typenum == NPY_LONGDOUBLE){
-            return PyFloat_FromDouble(Normeq_Long_Double((long double *)data, dim));
+            return PyFloat_FromDouble(
+                Normeq_Long_Double((long double *)data, dim)
+            );
+        }
+        else if (typenum == NPY_SHORT){
+            return PyFloat_FromDouble(
+                Normeq_Short((short *)data, dim)
+            );
+        }
+        else if (typenum == NPY_INT){
+            return PyFloat_FromDouble(
+                Normeq_Int((int *)data, dim)
+            );
         }
         else if (typenum == NPY_LONG){
-            return PyFloat_FromDouble(Normeq_Long((long *)data, dim));
+            return PyFloat_FromDouble(
+                Normeq_Long((long *)data, dim)
+            );
+        }
+        else if (typenum == NPY_LONGLONG){
+            return PyFloat_FromDouble(
+                Normeq_Long_Long((long long *)data, dim)
+            );
         }
         else {
             PyErr_Format(
                 PyExc_TypeError,
-                "rss_ringoccs.diffrec.special_functions.compute_norm_eq\n"
-                "\rInput should be a numpy array of real numbers."
+                "\n\r\trss_ringoccs.diffrec.math_functions.compute_norm_eq\n"
+                "\r\t\tInput should be a numpy array of numbers."
             );
             return NULL;
         }
     }
     else {
-        PyErr_Format(PyExc_TypeError, 
-                     "\rInput should be a numpy array of real numbers.");
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\r\trss_ringoccs.diffrec.math_functions.compute_norm_eq\n"
+            "\r\t\tInput should be a numpy array of numbers."
+        );
         return NULL;
     }
 }
@@ -107,13 +149,27 @@ static PyObject *max(PyObject *self, PyObject *args){
 
     if (PyLong_Check(tuple)){
         long max;
-        PyArg_ParseTuple(args, "l", &max);
-        return PyLong_FromLong(max);
+        if (PyArg_ParseTuple(args, "l", &max)){
+            return PyLong_FromLong(max);
+        }
+        else {
+            PyErr_Format(PyExc_TypeError,
+                         "\n\r\trss_ringoccs.diffrec.math_functions.max\n"
+                         "\r\t\tCould not parse int type input.");
+            return NULL;
+        }
     }
     else if (PyFloat_Check(tuple)){
         double max;
-        PyArg_ParseTuple(args, "d", &max);
-        return PyFloat_FromDouble(max);
+        if(PyArg_ParseTuple(args, "d", &max)){
+            return PyFloat_FromDouble(max);
+        }
+        else {
+            PyErr_Format(PyExc_TypeError,
+                         "\n\r\trss_ringoccs.diffrec.math_functions.max\n"
+                         "\r\t\tCould not parse float type input.");
+            return NULL;
+        }
     }
     else if (PyArg_ParseTuple(args, "O!", &PyArray_Type, &arr)){
         npy_int typenum, dim;
@@ -122,8 +178,8 @@ static PyObject *max(PyObject *self, PyObject *args){
         // Check to make sure input isn't zero dimensional!
         if (PyArray_NDIM(arr) != 1){
             PyErr_Format(PyExc_TypeError,
-                         "rss_ringoccs.diffrec.math_functions.max\n"
-                         "\rInput must be a one-dimensional array.");
+                         "\n\r\trss_ringoccs.diffrec.math_functions.max\n"
+                         "\r\t\tInput must be one dimensional.");
             return NULL;
         }
 
@@ -134,28 +190,57 @@ static PyObject *max(PyObject *self, PyObject *args){
 
         if (dim == 0){
             PyErr_Format(PyExc_TypeError,
-                         "rss_ringoccs.diffrec.math_functions.max\n"
-                         "\rInput array is empty.");
+                         "\n\r\trss_ringoccs.diffrec.math_functions.max\n"
+                         "\r\t\tInput is zero dimensional.");
             return NULL;
         }
 
-        if (typenum == NPY_DOUBLE){
-            return PyFloat_FromDouble(Max_Double((double *)data, dim));
+        if (typenum == NPY_FLOAT){
+            return PyFloat_FromDouble(
+                Max_Float((float *)data, dim)
+            );
+        }
+        else if (typenum == NPY_DOUBLE){
+            return PyFloat_FromDouble(
+                Max_Double((double *)data, dim)
+            );
+        }
+        else if (typenum == NPY_LONGDOUBLE){
+            return PyFloat_FromDouble(
+                Max_Long_Double((long double *)data, dim)
+            );
+        }
+        else if (typenum == NPY_SHORT){
+            return PyLong_FromLong(
+                Max_Short((short *)data, dim)
+            );
+        }
+        else if (typenum == NPY_INT){
+            return PyLong_FromLong(
+                Max_Int((int *)data, dim)
+            );
         }
         else if (typenum == NPY_LONG){
-            return PyLong_FromLong(Max_Long((long *)data, dim));
+            return PyLong_FromLong(
+                Max_Long((long *)data, dim)
+            );
+        }
+        else if (typenum == NPY_LONGLONG){
+            return PyLong_FromLong(
+                Max_Long_Long((long long *)data, dim)
+            );
         }
         else {
             PyErr_Format(PyExc_TypeError,
-                         "rss_ringoccs.diffrec.math_functions.max\n"
-                         "\rInput should be a numpy array of numbers.");
+                         "\n\r\trss_ringoccs.diffrec.math_functions.max\n"
+                         "\r\t\tInput should be a numpy array of numbers.");
             return NULL;
         }
     }
     else {
         PyErr_Format(PyExc_TypeError,
-                     "rss_ringoccs.diffrec.math_functions.max\n"
-                     "\rInput should be a numpy array of numbers.");
+                     "\n\r\trss_ringoccs.diffrec.math_functions.max\n"
+                     "\r\t\tInput should be a numpy array of numbers.");
         return NULL;
     }
 }
@@ -166,13 +251,27 @@ static PyObject *min(PyObject *self, PyObject *args){
 
     if (PyLong_Check(tuple)){
         long min;
-        PyArg_ParseTuple(args, "l", &min);
-        return PyLong_FromLong(min);
+        if (PyArg_ParseTuple(args, "l", &min)){
+            return PyLong_FromLong(min);
+        }
+        else {
+            PyErr_Format(PyExc_TypeError,
+                         "\n\r\trss_ringoccs.diffrec.math_functions.min\n"
+                         "\r\t\tCould not parse int type input.");
+            return NULL;
+        }
     }
     else if (PyFloat_Check(tuple)){
         double min;
-        PyArg_ParseTuple(args, "d", &min);
-        return PyFloat_FromDouble(min);
+        if(PyArg_ParseTuple(args, "d", &min)){
+            return PyFloat_FromDouble(min);
+        }
+        else {
+            PyErr_Format(PyExc_TypeError,
+                         "\n\r\trss_ringoccs.diffrec.math_functions.min\n"
+                         "\r\t\tCould not parse float type input.");
+            return NULL;
+        }
     }
     else if (PyArg_ParseTuple(args, "O!", &PyArray_Type, &arr)){
         npy_int typenum, dim;
@@ -181,8 +280,8 @@ static PyObject *min(PyObject *self, PyObject *args){
         // Check to make sure input isn't zero dimensional!
         if (PyArray_NDIM(arr) != 1){
             PyErr_Format(PyExc_TypeError,
-                         "rss_ringoccs.diffrec.math_functions.min\n"
-                         "\rInput must be a one-dimensional array.");
+                         "\n\r\trss_ringoccs.diffrec.math_functions.min\n"
+                         "\r\t\tInput must be one dimensional.");
             return NULL;
         }
 
@@ -191,25 +290,60 @@ static PyObject *min(PyObject *self, PyObject *args){
         dim     = PyArray_DIMS(arr)[0];
         data    = PyArray_DATA(arr);
 
-        if (typenum == NPY_DOUBLE){
-            return PyFloat_FromDouble(Min_Double((double *)data, dim));
+        if (dim == 0){
+            PyErr_Format(PyExc_TypeError,
+                         "\n\r\trss_ringoccs.diffrec.math_functions.min\n"
+                         "\r\t\tInput is zero dimensional.");
+            return NULL;
+        }
+
+        if (typenum == NPY_FLOAT){
+            return PyFloat_FromDouble(
+                Min_Float((float *)data, dim)
+            );
+        }
+        else if (typenum == NPY_DOUBLE){
+            return PyFloat_FromDouble(
+                Min_Double((double *)data, dim)
+            );
+        }
+        else if (typenum == NPY_LONGDOUBLE){
+            return PyFloat_FromDouble(
+                Min_Long_Double((long double *)data, dim)
+            );
+        }
+        else if (typenum == NPY_SHORT){
+            return PyLong_FromLong(
+                Min_Short((short *)data, dim)
+            );
+        }
+        else if (typenum == NPY_INT){
+            return PyLong_FromLong(
+                Min_Int((int *)data, dim)
+            );
         }
         else if (typenum == NPY_LONG){
-            return PyLong_FromLong(Min_Long((long *)data, dim));
+            return PyLong_FromLong(
+                Min_Long((long *)data, dim)
+            );
+        }
+        else if (typenum == NPY_LONGLONG){
+            return PyLong_FromLong(
+                Min_Long_Long((long long *)data, dim)
+            );
         }
         else {
             PyErr_Format(PyExc_TypeError,
-                        "rss_ringoccs.diffrec.math_functions.min\n"
-                        "\rInput should be a numpy array of real numbers"
-                        "or a floating point/integer value.");
+                         "\n\r\trss_ringoccs.diffrec.math_functions.min\n"
+                         "\r\t\tInput should be a numpy array of numbers.");
             return NULL;
         }
     }
     else {
         PyErr_Format(PyExc_TypeError,
                      "rss_ringoccs.diffrec.math_functions.min\n"
-                     "\rInput should be a numpy array of numbers,"
-                     "or a floating point/integer value.");
+                     "\n\r\trss_ringoccs.diffrec.math_functions.min\n"
+                     "\r\t\tInput should be a numpy array of numbers.");
         return NULL;
     }
 }
@@ -223,89 +357,6 @@ static PyMethodDef _special_functions_methods[] =
     {NULL, NULL, 0, NULL}
 };
 /*-------------------------DEFINE UNIVERSAL FUNCTIONS-------------------------*/
-
-/*  Functions from __fresnel_kernel.h                                         */
-static void double_psi(char **args, npy_intp *dimensions,
-                       npy_intp* steps, void* data)
-{
-    npy_intp i;
-    npy_intp n = dimensions[0];
-    char *kD   = args[0];
-    char *rho  = args[1];
-    char *rho0 = args[2];
-    char *phi  = args[3];
-    char *phi0 = args[4];
-    char *B    = args[5];
-    char *D    = args[6];
-    char *out  = args[7];
-
-    npy_intp kD_steps   = steps[0];
-    npy_intp rho_steps  = steps[1];
-    npy_intp rho0_steps = steps[2];
-    npy_intp phi_steps  = steps[3];
-    npy_intp phi0_steps = steps[4];
-    npy_intp B_steps    = steps[5];
-    npy_intp D_steps    = steps[6];
-    npy_intp out_steps  = steps[7];
-
-    for (i = 0; i < n; i++) {
-        *((double *)out) = Fresnel_Psi_Func(*(double *)kD, *(double *)rho,
-                                            *(double *)rho0, *(double *)phi,
-                                            *(double *)phi0, *(double *)B,
-                                            *(double *)D);
-
-        kD   += kD_steps;
-        rho  += rho_steps;
-        rho0 += rho0_steps;
-        phi  += phi_steps;
-        phi0 += phi0_steps;
-        B    += B_steps;
-        D    += D_steps;
-        out  += out_steps;
-    }
-}
-
-static void double_dpsi_dphi(char **args, npy_intp *dimensions,
-                             npy_intp* steps, void* data)
-{
-    npy_intp i;
-    npy_intp n = dimensions[0];
-    char *kD   = args[0];
-    char *rho  = args[1];
-    char *rho0 = args[2];
-    char *phi  = args[3];
-    char *phi0 = args[4];
-    char *B    = args[5];
-    char *D    = args[6];
-    char *out  = args[7];
-
-    npy_intp kD_steps   = steps[0];
-    npy_intp rho_steps  = steps[1];
-    npy_intp rho0_steps = steps[2];
-    npy_intp phi_steps  = steps[3];
-    npy_intp phi0_steps = steps[4];
-    npy_intp B_steps    = steps[5];
-    npy_intp D_steps    = steps[6];
-    npy_intp out_steps  = steps[7];
-
-    for (i = 0; i < n; i++) {
-        *((double *)out) = Fresnel_dPsi_dPhi_Func(
-            *(double *)kD, *(double *)rho, *(double *)rho0, *(double *)phi,
-            *(double *)phi0, *(double *)B, *(double *)D
-        );
-
-        kD   += kD_steps;
-        rho  += rho_steps;
-        rho0 += rho0_steps;
-        phi  += phi_steps;
-        phi0 += phi0_steps;
-        B    += B_steps;
-        D    += D_steps;
-        out  += out_steps;
-    }
-}
-
-/*  Define pointers to the C functions.                                       */
 PyUFuncGenericFunction double_slit_funcs[3] = {
     &float_double_slit_diffraction,
     &double_double_slit_diffraction,

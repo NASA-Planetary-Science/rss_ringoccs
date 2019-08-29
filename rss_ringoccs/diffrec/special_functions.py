@@ -518,7 +518,6 @@ def resolution_inverse(x):
 
     return f
 
-# TODO
 def fresnel_cos(x):
     """
     Purpose:
@@ -563,18 +562,6 @@ def fresnel_cos(x):
             \r\t\t>>> y = fresnel_cos(x)
             """
         )
-
-def old_fresnel_cos(x):
-    fname = "diffrec.special_functions.fresnel_cos"
-    error_check.check_is_real(x, "x", fname)
-
-    x0 = x*window_functions.RCP_SQRT_2
-    f_cos = ((0.25-0.25j)*erf((1.0+1.0j)*x)+(0.25+0.25j)*erf((1.0-1.0j)*x0))
-
-    if (np.isreal(x0).all()):
-        f_cos = np.real(f_cos)
-
-    return f_cos*window_functions.SQRT_PI_2
 
 def fresnel_sin(x):
     """

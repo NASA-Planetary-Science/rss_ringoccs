@@ -100,8 +100,7 @@ float Fresnel_Cosine_Taylor_to_Asymptotic_Float(float x){
      * decimals is guaranteed. Higher precicion outside this region.        */
     if (arg < 9.0){
         arg *= arg;
-        cx = arg * FRESNEL_COSINE_TAYLOR_16 + FRESNEL_COSINE_TAYLOR_15;
-        cx = arg * cx + FRESNEL_COSINE_TAYLOR_14;
+        cx = arg * FRESNEL_COSINE_TAYLOR_15 + FRESNEL_COSINE_TAYLOR_14;
         cx = arg * cx + FRESNEL_COSINE_TAYLOR_13;
         cx = arg * cx + FRESNEL_COSINE_TAYLOR_12;
         cx = arg * cx + FRESNEL_COSINE_TAYLOR_11;

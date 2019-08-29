@@ -560,7 +560,7 @@ def fresnel_sin(x):
             """
         )
 
-def lambderw(x):
+def lambertw(x):
     try:
         return _special_functions.lambertw(x)
     except KeyboardInterrupt:

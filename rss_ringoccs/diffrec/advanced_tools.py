@@ -46,6 +46,7 @@ class CompareTau(object):
                 "\tAllowed string are:\n%s" % (type(wtype).__name__, erm)
             )
         else:
+
             # Remove spaces and quotes from the wtype variable.
             wtype = wtype.replace(" ", "").replace("'", "").replace('"', "")
 

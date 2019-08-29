@@ -100,7 +100,8 @@ float Fresnel_Cosine_Taylor_to_Asymptotic_Float(float x){
      * decimals is guaranteed. Higher precicion outside this region.        */
     if (arg < 9.0){
         arg *= arg;
-        cx = arg * FRESNEL_COSINE_TAYLOR_15 + FRESNEL_COSINE_TAYLOR_14;
+        cx = arg * FRESNEL_COSINE_TAYLOR_16 + FRESNEL_COSINE_TAYLOR_15;
+        cx = arg * cx + FRESNEL_COSINE_TAYLOR_14;
         cx = arg * cx + FRESNEL_COSINE_TAYLOR_13;
         cx = arg * cx + FRESNEL_COSINE_TAYLOR_12;
         cx = arg * cx + FRESNEL_COSINE_TAYLOR_11;
@@ -118,27 +119,30 @@ float Fresnel_Cosine_Taylor_to_Asymptotic_Float(float x){
         return cx*x;
     }
     else if (arg < 1.0e16) {
-        float sinarg, cosarg;
-        cosarg = cosf(arg);
-        sinarg = sinf(arg);
-        arg = 1.0/arg;
-        sinarg *= arg;
-        arg *= arg;
-        cosarg *= arg;
+        float sinarg, cosarg, cos_x_squared, sin_x_squared;
+        cos_x_squared = cosf(arg);
+        sin_x_squared = sinf(arg);
 
-        sinarg *= FRESNEL_COSINE_ASYM_00 + arg*(
-                    FRESNEL_COSINE_ASYM_02 + arg*(
-                        FRESNEL_COSINE_ASYM_04 + FRESNEL_COSINE_ASYM_06*arg
-                    )
-                );
-        cosarg *= FRESNEL_SINE_ASYM_01 + arg*(
-                    FRESNEL_SINE_ASYM_03 + arg*(
-                        FRESNEL_SINE_ASYM_05 + FRESNEL_SINE_ASYM_07*arg
-                    )
-                );
+        arg = 1.0/arg;
+        sin_x_squared *= arg;
+        arg *= arg;
+        cos_x_squared *= arg;
+
+        sinarg  = arg * FRESNEL_COSINE_ASYM_08 + FRESNEL_COSINE_ASYM_06;
+        sinarg  = arg * sinarg + FRESNEL_COSINE_ASYM_04;
+        sinarg  = arg * sinarg + FRESNEL_COSINE_ASYM_02;
+        sinarg  = arg * sinarg + FRESNEL_COSINE_ASYM_00;
+        sinarg *= sin_x_squared;
+
+        cosarg  = arg * FRESNEL_COSINE_ASYM_09 + FRESNEL_COSINE_ASYM_07;
+        cosarg  = arg * cosarg + FRESNEL_COSINE_ASYM_05;
+        cosarg  = arg * cosarg + FRESNEL_COSINE_ASYM_03;
+        cosarg  = arg * cosarg + FRESNEL_COSINE_ASYM_01;
+        cosarg *= cos_x_squared;
 
         cx = cosarg + sinarg;
         cx *= x;
+
         /*  (x > 0) - (x < 0) is a quick way to return sign(x) and avoids an  *
          *  expensive if-then statement. Output for the asymptotic expansion  *
          *  is f(|x|) + sign(x) * sqrt(pi/8). Error goes like 1/x^15.         */
@@ -373,9 +377,13 @@ double Fresnel_Cosine_Taylor_to_Asymptotic_Double(double x){
     /* For small x use the Taylor expansion to compute C(x). For larger x,  *
      * use the asymptotic expansion. For values near 3.076, accuracy of 5   *
      * decimals is guaranteed. Higher precicion outside this region.        */
-    if (arg < 9.0){
+    if (arg < 13.19){
         arg *= arg;
-        cx = arg * FRESNEL_COSINE_TAYLOR_18 + FRESNEL_COSINE_TAYLOR_17;
+        cx = arg * FRESNEL_COSINE_TAYLOR_22 + FRESNEL_COSINE_TAYLOR_21;
+        cx = arg * cx + FRESNEL_COSINE_TAYLOR_20;
+        cx = arg * cx + FRESNEL_COSINE_TAYLOR_19;
+        cx = arg * cx + FRESNEL_COSINE_TAYLOR_18;
+        cx = arg * cx + FRESNEL_COSINE_TAYLOR_17;
         cx = arg * cx + FRESNEL_COSINE_TAYLOR_16;
         cx = arg * cx + FRESNEL_COSINE_TAYLOR_15;
         cx = arg * cx + FRESNEL_COSINE_TAYLOR_14;
@@ -396,24 +404,26 @@ double Fresnel_Cosine_Taylor_to_Asymptotic_Double(double x){
         return cx*x;
     }
     else if (arg < 1.0e16) {
-        double sinarg, cosarg;
-        cosarg = cos(arg);
-        sinarg = sin(arg);
-        arg = 1.0/arg;
-        sinarg *= arg;
-        arg *= arg;
-        cosarg *= arg;
+        double sinarg, cosarg, cos_x_squared, sin_x_squared;
+        cos_x_squared = cos(arg);
+        sin_x_squared = sin(arg);
 
-        sinarg *= FRESNEL_COSINE_ASYM_00 + arg*(
-                    FRESNEL_COSINE_ASYM_02 + arg*(
-                        FRESNEL_COSINE_ASYM_04 + FRESNEL_COSINE_ASYM_06*arg
-                    )
-                );
-        cosarg *= FRESNEL_SINE_ASYM_01 + arg*(
-                    FRESNEL_SINE_ASYM_03 + arg*(
-                        FRESNEL_SINE_ASYM_05 + FRESNEL_SINE_ASYM_07*arg
-                    )
-                );
+        arg = 1.0/arg;
+        sin_x_squared *= arg;
+        arg *= arg;
+        cos_x_squared *= arg;
+
+        sinarg  = arg * FRESNEL_COSINE_ASYM_08 + FRESNEL_COSINE_ASYM_06;
+        sinarg  = arg * sinarg + FRESNEL_COSINE_ASYM_04;
+        sinarg  = arg * sinarg + FRESNEL_COSINE_ASYM_02;
+        sinarg  = arg * sinarg + FRESNEL_COSINE_ASYM_00;
+        sinarg *= sin_x_squared;
+
+        cosarg  = arg * FRESNEL_COSINE_ASYM_09 + FRESNEL_COSINE_ASYM_07;
+        cosarg  = arg * cosarg + FRESNEL_COSINE_ASYM_05;
+        cosarg  = arg * cosarg + FRESNEL_COSINE_ASYM_03;
+        cosarg  = arg * cosarg + FRESNEL_COSINE_ASYM_01;
+        cosarg *= cos_x_squared;
 
         cx = cosarg + sinarg;
         cx *= x;
@@ -653,9 +663,15 @@ long double Fresnel_Cosine_Taylor_to_Asymptotic_Long_Double(long double x){
     /* For small x use the Taylor expansion to compute C(x). For larger x,  *
      * use the asymptotic expansion. For values near 3.076, accuracy of 5   *
      * decimals is guaranteed. Higher precicion outside this region.        */
-    if (arg < 9.0){
+    if (arg < 16.24){
         arg *= arg;
-        cx = arg * FRESNEL_COSINE_TAYLOR_20 + FRESNEL_COSINE_TAYLOR_19;
+        cx = arg * FRESNEL_COSINE_TAYLOR_26 + FRESNEL_COSINE_TAYLOR_25;
+        cx = arg * cx + FRESNEL_COSINE_TAYLOR_24;
+        cx = arg * cx + FRESNEL_COSINE_TAYLOR_23;
+        cx = arg * cx + FRESNEL_COSINE_TAYLOR_22;
+        cx = arg * cx + FRESNEL_COSINE_TAYLOR_21;
+        cx = arg * cx + FRESNEL_COSINE_TAYLOR_20;
+        cx = arg * cx + FRESNEL_COSINE_TAYLOR_19;
         cx = arg * cx + FRESNEL_COSINE_TAYLOR_18;
         cx = arg * cx + FRESNEL_COSINE_TAYLOR_17;
         cx = arg * cx + FRESNEL_COSINE_TAYLOR_16;
@@ -678,24 +694,26 @@ long double Fresnel_Cosine_Taylor_to_Asymptotic_Long_Double(long double x){
         return cx*x;
     }
     else if (arg < 1.0e16) {
-        long double sinarg, cosarg;
-        cosarg = cosl(arg);
-        sinarg = sinl(arg);
-        arg = 1.0/arg;
-        sinarg *= arg;
-        arg *= arg;
-        cosarg *= arg;
+        long double sinarg, cosarg, cos_x_squared, sin_x_squared;
+        cos_x_squared = cosl(arg);
+        sin_x_squared = sinl(arg);
 
-        sinarg *= FRESNEL_COSINE_ASYM_00 + arg*(
-                    FRESNEL_COSINE_ASYM_02 + arg*(
-                        FRESNEL_COSINE_ASYM_04 + FRESNEL_COSINE_ASYM_06*arg
-                    )
-                );
-        cosarg *= FRESNEL_SINE_ASYM_01 + arg*(
-                    FRESNEL_SINE_ASYM_03 + arg*(
-                        FRESNEL_SINE_ASYM_05 + FRESNEL_SINE_ASYM_07*arg
-                    )
-                );
+        arg = 1.0/arg;
+        sin_x_squared *= arg;
+        arg *= arg;
+        cos_x_squared *= arg;
+
+        sinarg  = arg * FRESNEL_COSINE_ASYM_08 + FRESNEL_COSINE_ASYM_06;
+        sinarg  = arg * sinarg + FRESNEL_COSINE_ASYM_04;
+        sinarg  = arg * sinarg + FRESNEL_COSINE_ASYM_02;
+        sinarg  = arg * sinarg + FRESNEL_COSINE_ASYM_00;
+        sinarg *= sin_x_squared;
+
+        cosarg  = arg * FRESNEL_COSINE_ASYM_09 + FRESNEL_COSINE_ASYM_07;
+        cosarg  = arg * cosarg + FRESNEL_COSINE_ASYM_05;
+        cosarg  = arg * cosarg + FRESNEL_COSINE_ASYM_03;
+        cosarg  = arg * cosarg + FRESNEL_COSINE_ASYM_01;
+        cosarg *= cos_x_squared;
 
         cx = cosarg + sinarg;
         cx *= x;

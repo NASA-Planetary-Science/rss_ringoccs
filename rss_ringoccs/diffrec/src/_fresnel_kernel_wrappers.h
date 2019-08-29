@@ -2,6 +2,8 @@
 #ifndef RSS_RINGOCCS_FRESNEL_KERNEL_WRAPPER_H
 #define RSS_RINGOCCS_FRESNEL_KERNEL_WRAPPER_H
 
+/*  Where npy_intp is defined.                                                */
+#include <numpy/ndarraytypes.h>
 
 /*  Functions from __fresnel_kernel.h                                         */
 static void double_psi(char **args, npy_intp *dimensions,

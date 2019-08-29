@@ -1,4 +1,7 @@
-#include <stdio.h>
+/*  Include guard to avoid importing this file twice.                         */
+#ifndef RSS_RINGOCCS_LEGENDRE_H
+#define RSS_RINGOCCS_LEGENDRE_H
+
 
 void Legendre_Polynomials(double *legendre_p, double x, int order){
     int i;
@@ -47,3 +50,5 @@ void Fresnel_Kernel_Coefficients(double *fresnel_ker_coeffs, double *legendre_p,
     fresnel_ker_coeffs[i-1] = alt_legendre_p[order-1] -
                               Legendre_Coeff*fresnel_ker_coeffs[i-1];
 }
+
+#endif

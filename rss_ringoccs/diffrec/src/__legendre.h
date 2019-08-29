@@ -2,7 +2,6 @@
 #ifndef RSS_RINGOCCS_LEGENDRE_H
 #define RSS_RINGOCCS_LEGENDRE_H
 
-
 void Legendre_Polynomials(double *legendre_p, double x, int order){
     int i;
     legendre_p[0] = 1.0;

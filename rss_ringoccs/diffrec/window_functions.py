@@ -11,7 +11,7 @@ import numpy as np
 from scipy.special import lambertw, iv
 from rss_ringoccs.tools import error_check
 try:
-    from . import _window_functions
+    from . import _window_functions, special_functions
 except:
     raise ImportError(
         """
@@ -414,42 +414,28 @@ def window_width(res, normeq, fsky, fres, rho_dot,
 
         if (np.size(Prange) == 0):
             raise IndexError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.DiffractionCorrection\n\n"
-                "\tThe P parameter in window width computation\n"
-                "\tis less than one for the entirety of the\n"
-                "\tdata set. Either rho_dot_km_vals is too small,\n"
-                "\tor F_km_vals is too large. Request a coarser\n"
-                "\tresolution, or check your data for errors.\n\n"
-                "\tAlternatively, you may set bfac=False as\n"
-                "\ta keyword to skip the use of the P parameter.\n"
-                "\tThis may result in inaccurate window widths."
+                """
+                \r\tError Encountered:
+                \r\t\trss_ringoccs.diffrec.DiffractionCorrection\n
+                \r\tThe P parameter in window width computation
+                \r\tis less than one for the entirety of the
+                \r\tdata set. Either rho_dot_km_vals is too small,
+                \r\tor F_km_vals is too large. Request a coarser
+                \r\tresolution, or check your data for errors.\n
+                \r\tAlternatively, you may set bfac=False as
+                \r\ta keyword to skip the use of the P parameter.
+                \r\tThis may result in inaccurate window width.
+                """
             )
         else:
             pass
 
         P = P[Prange]
         alpha = alpha[Prange]
-        P1 = P/(1-P)
-        P2 = P1*np.exp(P1)
 
-        # LambertW returns nans far values close to zero, so round this.
-        P2 = np.around(P2, decimals=16)
-
-        # For values near -1/e, LambertW(x) is roughly -1.
-        crange1 = ((RCPR_E + P2) < 1.0e-16).nonzero()[0]
-        crange2 = ((RCPR_E + P2) >= 1.0e-16).nonzero()[0]
         w_vals = np.zeros(np.size(rho_dot))
+        w_vals[Prange] = special_functions.resolution_inverse(P)/alpha
 
-        if (np.size(crange1) > 0):
-            w_vals[Prange[crange1]] = 2.0*np.square(fres[Prange[crange1]])/res
-        else:
-            pass
-
-        if (np.size(crange2) > 0):
-            w_vals[Prange[crange2]] = np.abs(lambertw(P2)-P1)/alpha
-        else:
-            pass
     else:
         w_vals = 2.0*np.square(fres)/res
         Prange = (fres > 0.0).nonzero()[0]

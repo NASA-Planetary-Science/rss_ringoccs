@@ -291,4 +291,52 @@ static void long_double_right_straightedge(char **args, npy_intp *dimensions,
         out[i] = Right_Straightedge_Diffraction_Long_Double(x[i], edge, F);
     }
 }
+
+/*--------Right Straight-Edge Diffraction Using Fresnel Approximation---------*/
+
+static void float_left_straightedge(char **args, npy_intp *dimensions,
+                                    npy_intp* steps, void* data){
+    long i;
+    long n = dimensions[0];
+
+    float *x           =  (float *)args[0];
+    float edge         = *(float *)args[1];
+    float F            = *(float *)args[2];
+    complex float *out =  (complex float *)args[3];
+
+    for (i = 0; i < n; i++) {
+        out[i] = Left_Straightedge_Diffraction_Float(x[i], edge, F);
+    }
+}
+
+static void double_left_straightedge(char **args, npy_intp *dimensions,
+                                     npy_intp* steps, void* data){
+    long i;
+    long n = dimensions[0];
+
+    double *x           =  (double *)args[0];
+    double edge         = *(double *)args[1];
+    double F            = *(double *)args[2];
+    complex double *out =  (complex double *)args[3];
+
+    for (i = 0; i < n; i++) {
+        out[i] = Left_Straightedge_Diffraction_Double(x[i], edge, F);
+    }
+}
+
+static void long_double_left_straightedge(char **args, npy_intp *dimensions,
+                                          npy_intp* steps, void* data){
+    long i;
+    long n = dimensions[0];
+
+    long double *x           =  (long double *)args[0];
+    long double edge         = *(long double *)args[1];
+    long double F            = *(long double *)args[2];
+    complex long double *out =  (complex long double *)args[3];
+
+    for (i = 0; i < n; i++) {
+        out[i] = Left_Straightedge_Diffraction_Long_Double(x[i], edge, F);
+    }
+}
+
 #endif

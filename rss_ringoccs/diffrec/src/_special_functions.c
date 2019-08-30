@@ -402,6 +402,12 @@ PyUFuncGenericFunction lambertw_funcs[3] = {
     &long_double_lambertw
 };
 
+PyUFuncGenericFunction left_straightedge_funcs[3] = {
+    &float_left_straightedge,
+    &double_left_straightedge,
+    &long_double_left_straightedge
+};
+
 PyUFuncGenericFunction psi_funcs[1]  = {&double_psi};
 PyUFuncGenericFunction dpsi_funcs[1] = {&double_dpsi_dphi};
 
@@ -514,6 +520,7 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     PyObject *fresnel_sin;
     PyObject *fresnel_dpsi_dphi;
     PyObject *lambertw;
+    PyObject *left_straightedge;
     PyObject *resolution_inverse;
     PyObject *right_straightedge;
     PyObject *single_slit_diffraction;
@@ -579,6 +586,12 @@ PyMODINIT_FUNC PyInit__special_functions(void)
         PyUFunc_None, "lambertw", "lambertw_docstring", 0
     );
 
+    left_straightedge = PyUFunc_FromFuncAndData(
+        left_straightedge_funcs, PyuFunc_None_3, three_real_in_one_complex_out,
+        3, 3, 1, PyUFunc_None, "left_straightedge", 
+        "left_straightedge_docstring", 0
+    );
+
     resolution_inverse = PyUFunc_FromFuncAndData(
         res_inv_funcs, PyuFunc_None_3, one_real_in_one_real_out,
         3, 1, 1, PyUFunc_None, "resolution_inverse", 
@@ -631,6 +644,7 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     PyDict_SetItemString(d, "fresnel_scale", fresnel_scale);
     PyDict_SetItemString(d, "fresnel_sin", fresnel_sin);
     PyDict_SetItemString(d, "lambertw", lambertw);
+    PyDict_SetItemString(d, "left_straightedge", left_straightedge);
     PyDict_SetItemString(d, "resolution_inverse", resolution_inverse);
     PyDict_SetItemString(d, "right_straightedge", right_straightedge);
     PyDict_SetItemString(d, "sinc", sinc);
@@ -648,6 +662,7 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     Py_DECREF(fresnel_scale);
     Py_DECREF(fresnel_sin);
     Py_DECREF(lambertw);
+    Py_DECREF(left_straightedge);
     Py_DECREF(resolution_inverse);
     Py_DECREF(right_straightedge);
     Py_DECREF(sinc);
@@ -669,7 +684,12 @@ PyMODINIT_FUNC init__funcs(void)
     PyObject *fresnel_scale;
     PyObject *fresnel_sin;
     PyObject *fresnel_dpsi_dphi;
+    PyObject *lambertw;
+    PyObject *left_straightedge;
+    PyObject *resolution_inverse;
+    PyObject *right_straightedge;
     PyObject *single_slit_diffraction;
+    PyObject *sinc;
     PyObject *square_well_diffraction;
     PyObject *square_well_phase;
     PyObject *wavelength_to_wavenumber;
@@ -726,6 +746,34 @@ PyMODINIT_FUNC init__funcs(void)
         PyUFunc_None, "fresnel_sin", "fresnel_sin_docstring", 0
     );
 
+    lambertw = PyUFunc_FromFuncAndData(
+        lambertw_funcs, PyuFunc_None_3, one_real_in_one_real_out, 3, 1, 1,
+        PyUFunc_None, "lambertw", "lambertw_docstring", 0
+    );
+
+    left_straightedge = PyUFunc_FromFuncAndData(
+        left_straightedge_funcs, PyuFunc_None_3, three_real_in_one_complex_out,
+        3, 3, 1, PyUFunc_None, "left_straightedge", 
+        "left_straightedge_docstring", 0
+    );
+
+    resolution_inverse = PyUFunc_FromFuncAndData(
+        res_inv_funcs, PyuFunc_None_3, one_real_in_one_real_out,
+        3, 1, 1, PyUFunc_None, "resolution_inverse", 
+        "resolution_inverse_docstring", 0
+    );
+
+    right_straightedge = PyUFunc_FromFuncAndData(
+        right_straightedge_funcs, PyuFunc_None_3, three_real_in_one_complex_out,
+        3, 3, 1, PyUFunc_None, "right_straightedge", 
+        "right_straightedge_docstring", 0
+    );
+
+    sinc = PyUFunc_FromFuncAndData(
+        sinc_funcs, PyuFunc_None_3, one_real_in_one_real_out,
+        3, 1, 1, PyUFunc_None, "sinc",  "sinc_docstring", 0
+    );
+
     single_slit_diffraction = PyUFunc_FromFuncAndData(
         single_slit_funcs, PyuFunc_None_3, three_real_in_one_real_out,
         3, 3, 1, PyUFunc_None, "single_slit_diffraction", 
@@ -760,6 +808,11 @@ PyMODINIT_FUNC init__funcs(void)
     PyDict_SetItemString(d, "fresnel_dpsi_dphi", fresnel_dpsi_dphi);
     PyDict_SetItemString(d, "fresnel_scale", fresnel_scale);
     PyDict_SetItemString(d, "fresnel_sin", fresnel_sin);
+    PyDict_SetItemString(d, "lambertw", lambertw);
+    PyDict_SetItemString(d, "left_straightedge", left_straightedge);
+    PyDict_SetItemString(d, "resolution_inverse", resolution_inverse);
+    PyDict_SetItemString(d, "right_straightedge", right_straightedge);
+    PyDict_SetItemString(d, "sinc", sinc);
     PyDict_SetItemString(d, "single_slit_diffraction", single_slit_diffraction);
     PyDict_SetItemString(d, "square_well_diffraction", square_well_diffraction);
     PyDict_SetItemString(d, "square_well_phase", square_well_phase);
@@ -773,6 +826,11 @@ PyMODINIT_FUNC init__funcs(void)
     Py_DECREF(fresnel_dpsi_dphi);
     Py_DECREF(fresnel_scale);
     Py_DECREF(fresnel_sin);
+    Py_DECREF(lambertw);
+    Py_DECREF(left_straightedge);
+    Py_DECREF(resolution_inverse);
+    Py_DECREF(right_straightedge);
+    Py_DECREF(sinc);
     Py_DECREF(single_slit_diffraction);
     Py_DECREF(square_well_diffraction);
     Py_DECREF(square_well_phase);

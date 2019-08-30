@@ -663,7 +663,7 @@ complex double Fresnel_Transform_Newton_Double(
                                          phi_arr[i], B, D, EPS, toler);
 
         /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
-        psi     = Fresnel_Psi_Func(kD, r, x_arr[i], phi, phi_arr[i], B, D);
+        psi     = Fresnel_Psi_Double(kD, r, x_arr[i], phi, phi_arr[i], B, D);
         exp_psi = (cos(psi) - _Complex_I*sin(psi))*w_func[i];
 
         /*  Compute the transform with a Riemann sum. If the T_in pointer     *
@@ -759,7 +759,7 @@ complex double Fresnel_Transform_Newton_Norm_Double(
                                          phi_arr[i], B, D, EPS, toler);
 
         /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
-        psi     = Fresnel_Psi_Func(kD, r, x_arr[i], phi, phi_arr[i], B, D);
+        psi     = Fresnel_Psi_Double(kD, r, x_arr[i], phi, phi_arr[i], B, D);
         exp_psi = (cos(psi) - _Complex_I*sin(psi))*w_func[i];
 
         /*  Compute the norm using a Riemann sum as well.                     */

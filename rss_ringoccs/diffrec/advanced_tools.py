@@ -632,9 +632,9 @@ class ModelFromGEO(object):
             self.p_norm_actual_vals = np.zeros(np.size(self.rho_km_vals))
             self.p_norm_actual_vals[center] = 1.0/dx_km_desired
             if use_fresnel:
-                psi = (np.pi/2.0)*np.square((r0-r)/F[center])
+                psi = (np.pi/2.0)*np.square((rho-self.rho_km_vals)/F[center])
             else:
-                psi_vals = special_functions.fresnel_psi(
+                psi = special_functions.fresnel_psi(
                     kD_vals[center], self.rho_km_vals[center],
                     self.rho_km_vals, self.phi_rad_vals[center],
                     self.phi_rad_vals, self.B_rad_vals[center],
@@ -642,6 +642,7 @@ class ModelFromGEO(object):
                 )
 
             T_hat = np.exp(1j*psi)*(0.5-0.5j)/F[center]
+            self.psi = psi
         else:
             use_fresnel = False
             self.p_norm_vals = self.data_pow
@@ -679,6 +680,8 @@ class ModelFromGEO(object):
         self.t_ret_spm_vals = self.t_ret_spm_vals[crange]
         self.t_set_spm_vals = self.t_set_spm_vals[crange]
         self.w_km_vals = self.w_km_vals[crange]
+
+        self.psi = self.psi[crange]
 
         if echo:
             if verbose:

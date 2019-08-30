@@ -576,7 +576,7 @@ class ModelFromGEO(object):
 
         if (np.size(wrange) <= 1):
             raise IndexError(
-            """
+                """
                 \r\tError Encountered: rss_ringoccs
                 \r\t\t%s\n
                 \r\tRequested range is beyond available data.
@@ -584,7 +584,8 @@ class ModelFromGEO(object):
                 \r\t\tMaximum Possible Radius: %f
                 \r\t\tMinimum Requested Range: %f
                 \r\t\tMaximum Requested Range: %f
-            """ % (fname, rho_min, rho_max, np.min(self.rng), np.max(self.rng))
+                """ % (fname, rho_min, rho_max,
+                       np.min(self.rng), np.max(self.rng))
             )
         else:
             start = wrange[0]
@@ -613,11 +614,8 @@ class ModelFromGEO(object):
             self.p_norm_actual_vals[rstart:-1] = 1.0
 
             if use_fresnel:
-                center = np.min((self.rho_km_vals >= rho).nonzero())
-                x = window_functions.SQRT_PI_2*(rho-self.rho_km_vals)/F[center]
-                T_hat = (special_functions.fresnel_cos(x)+
-                         special_functions.fresnel_sin(x)*1j)*(0.5-0.5j)
-                T_hat = 0.5-T_hat/window_functions.SQRT_PI_2
+                T_hat = special_functions.right_straightedge(self.rho_km_vals,
+                                                             rho, F[center])
 
         elif (model == "leftstraightedge"):
             self.p_norm_actual_vals = np.zeros(np.size(self.rho_km_vals))
@@ -626,10 +624,8 @@ class ModelFromGEO(object):
 
             if use_fresnel:
                 center = np.max((self.rho_km_vals <= rho).nonzero())
-                x = window_functions.SQRT_PI_2*(rho-self.rho_km_vals)/F[center]
-                T_hat = (special_functions.fresnel_cos(x)+
-                         special_functions.fresnel_sin(x)*1j)*(0.5-0.5j)
-                T_hat = T_hat/window_functions.SQRT_PI_2 + 0.5
+                T_hat = special_functions.left_straightedge(self.rho_km_vals,
+                                                            rho, F[center])
 
         elif (model == "deltaimpulse"):
             center = np.min((self.rho_km_vals >= rho).nonzero())
@@ -654,9 +650,9 @@ class ModelFromGEO(object):
             T_in = self.p_norm_actual_vals.astype(complex)
             T_hat = special_functions.fresnel_transform(
                 T_in, self.rho_km_vals, F, self.w_km_vals,
-                start, n_used, wtype, norm, False, psitype,
+                start, n_used, wtype, norm, True, psitype,
                 self.phi_rad_vals, kD_vals, self.B_rad_vals, self.D_km_vals,
-                periapse, eccentricity, False
+                periapse, eccentricity
             )
 
         if verbose:
@@ -723,7 +719,7 @@ class ModelFromGEO(object):
                 T_in, self.rho_km_vals, F, self.w_km_vals,
                 start, n_used, wtype, norm, False, psitype,
                 self.phi_rad_vals, kD_vals, self.B_rad_vals, self.D_km_vals,
-                periapse, eccentricity, False
+                periapse, eccentricity
             )
             self.p_norm_vals = np.square(np.abs(T_hat))
             self.phase_rad_vals = np.arctan2(np.imag(T_hat), np.real(T_hat))

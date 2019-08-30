@@ -209,7 +209,7 @@ static void complex_double_fresnel_transform_quadratic(char **args,
     free(w_func);
 }
 
-static void complex_double_fresnel_legendre_transform(char **args,
+static void complex_double_fresnel_transform_legendre(char **args,
                                                       npy_intp *dimensions,
                                                       npy_intp *steps,
                                                       void* data){
@@ -439,7 +439,7 @@ PyUFuncGenericFunction f_quad_funcs[1] = {
 };
 
 PyUFuncGenericFunction f_legendre_funcs[1] = {
-    &complex_double_fresnel_legendre_transform
+    &complex_double_fresnel_transform_legendre
 };
 
 PyUFuncGenericFunction f_newtn_funcs[1] = {
@@ -508,7 +508,7 @@ static struct PyModuleDef moduledef = {PyModuleDef_HEAD_INIT,
 
 PyMODINIT_FUNC PyInit__diffraction_functions(void){
     PyObject *fresnel_transform_quadratic;
-    PyObject *fresnel_legendre_transform;
+    PyObject *fresnel_transform_legendre;
     PyObject *fresnel_transform_newton;
 
     PyObject *m, *d;
@@ -527,7 +527,7 @@ PyMODINIT_FUNC PyInit__diffraction_functions(void){
         "fresnel_transform_quadratic_docstring", 0
     );
 
-    fresnel_legendre_transform = PyUFunc_FromFuncAndData(
+    fresnel_transform_legendre = PyUFunc_FromFuncAndData(
         f_legendre_funcs, PyuFunc_data, legendre_data_types,
         1, 14, 1, PyUFunc_None, "fresnel_transform_cubic",
         "fresnel_transform_cubic_docstring", 0
@@ -543,10 +543,10 @@ PyMODINIT_FUNC PyInit__diffraction_functions(void){
     d = PyModule_GetDict(m);
 
     PyDict_SetItemString(d, "fresnel_transform_quadratic", fresnel_transform_quadratic);
-    PyDict_SetItemString(d, "fresnel_legendre_transform", fresnel_legendre_transform);
+    PyDict_SetItemString(d, "fresnel_transform_legendre", fresnel_transform_legendre);
     PyDict_SetItemString(d, "fresnel_transform_newton", fresnel_transform_newton);
     Py_DECREF(fresnel_transform_quadratic);
-    Py_DECREF(fresnel_legendre_transform);
+    Py_DECREF(fresnel_transform_legendre);
     Py_DECREF(fresnel_transform_newton);
     return m;
 }

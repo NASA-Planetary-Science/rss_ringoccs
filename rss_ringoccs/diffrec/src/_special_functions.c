@@ -408,8 +408,17 @@ PyUFuncGenericFunction left_straightedge_funcs[3] = {
     &long_double_left_straightedge
 };
 
-PyUFuncGenericFunction psi_funcs[1]  = {&double_psi};
-PyUFuncGenericFunction dpsi_funcs[1] = {&double_dpsi_dphi};
+PyUFuncGenericFunction psi_funcs[3] = {
+    &float_fresnel_psi,
+    &double_fresnel_psi,
+    &long_double_fresnel_psi
+};
+
+PyUFuncGenericFunction dpsi_funcs[3] = {
+    float_fresnel_dpsi_dphi,
+    &double_fresnel_dpsi_dphi,
+    &long_double_fresnel_dpsi_dphi
+};
 
 PyUFuncGenericFunction res_inv_funcs[3] = {
     &float_resolution_inverse,
@@ -455,12 +464,6 @@ PyUFuncGenericFunction wavelength_to_wavenumber_funcs[3] = {
 
 /*  Input and return types for double input and out.                          */
 static void *PyuFunc_None_3[3] = {NULL, NULL, NULL};
-static void *PyuFunc_data[1]   = {NULL};
-
-/* Input and return types for fresnel_psi.                                    */
-static char octo_double_types[8] = {NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE,
-                                    NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE,
-                                    NPY_DOUBLE, NPY_DOUBLE};
 
 static char one_real_in_one_real_out[6] = {NPY_FLOAT, NPY_FLOAT,
                                            NPY_DOUBLE, NPY_DOUBLE,
@@ -557,7 +560,7 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     );
 
     fresnel_dpsi_dphi = PyUFunc_FromFuncAndData(
-        dpsi_funcs, PyuFunc_data, octo_double_types, 1, 7, 1,
+        dpsi_funcs, PyuFunc_None_3, three_real_in_one_real_out, 3, 7, 1,
         PyUFunc_None, "fresnel_dpsi_dphi",  "fresnel_dpsi_dphi_docstring", 0
     );
 
@@ -567,7 +570,7 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     );
 
     fresnel_psi = PyUFunc_FromFuncAndData(
-        psi_funcs, PyuFunc_data, octo_double_types, 1, 7, 1,
+        psi_funcs, PyuFunc_None_3, three_real_in_one_real_out, 3, 7, 1,
         PyUFunc_None, "fresnel_psi",  "fresnel_psi_docstring", 0
     );
 

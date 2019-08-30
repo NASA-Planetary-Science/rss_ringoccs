@@ -14,24 +14,6 @@ except:
         """
     )
 
-def wavelength_to_wavenumber(lambda_km):
-    try:
-        return _special_functions.wavelength_to_wavenumber(lambda_km)
-    except KeyboardInterrupt:
-        raise
-    except:
-        raise TypeError(
-            """
-            \r\tError: rss_ringoccs
-            \r\t\tdiffrec.special_functions.wavelength_to_wavenumber\n
-            \r\tInput should be a numpy array of non-zero real numbers
-            \r\t(ints or floats), or a non-zero int or non-zero float.\n
-            \r\tUsage:
-            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. np.arange(3, 10)
-            \r\t\t>>> y = wavelength_to_wavenumber(x)
-            """
-        )
-
 def frequency_to_wavelength(freq_hz):
     try:
         return _special_functions.frequency_to_wavelength(freq_hz)
@@ -50,6 +32,7 @@ def frequency_to_wavelength(freq_hz):
             """
         )
 
+#TODO
 def savitzky_golay(y, window_size, order, deriv=0, rate=1):
     """
     Purpose:
@@ -193,7 +176,7 @@ def compute_norm_eq(w_func):
             \r\tInput should be a numpy array of real numbers (ints or floats),
             \r\tor a non-zero int or non-zero float.\n
             \r\tUsage:
-            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. np.arange(-5, 5)
+            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. numpy.arange(-5, 5)
             \r\t\t>>> y = frequency_to_wavelength(x)
             """
         )
@@ -414,61 +397,140 @@ def fresnel_d2psi_dphi2(kD, r, r0, phi, phi0, B, D):
 
     return psi_d2
 
-def max(x):
+def resolution_inverse(x):
     """
     Purpose:
-        Compute the maximum of a one dimensional numpy array.
-        This function was written to test use of the C-Python API.
+        Compute the inverse of :math:`y = x/(\\exp(-x)+x-1)`
     Arguments:
-        :x (*numpy.ndarray*):
-            A one dimensional numpy array of real numbers.
+        :x (*np.ndarray* or *float*):
+            Independent variable
     Outputs:
-        :max (*float* or *int*):
-            The maximum value of x.
+        :f (*np.ndarray* or *float*):
+            The inverse of :math:`x/(\\exp(-x)+x-1)`
+    Dependencies:
+        #. numpy
+        #. scipy.special
+    Method:
+        The inverse of :math:`x/(\\exp(-x)+x-1)` is computed using the
+        LambertW function. This function is the inverse of
+        :math:`y = x\\exp(x)`. This is computed using the scipy.special
+        subpackage using their lambertw function.
+    Warnings:
+        #. The real part of the argument must be greater than 1.
+        #. The scipy.special lambertw function is slightly
+           inaccurate when it's argument is near :math:`-1/e`. This
+           argument is :math:`z = \\exp(x/(1-x)) * x/(1-x)`
+    Examples:
+        Plot the function on the interval (1,2)
+
+        >>> import rss_ringoccs.diffcorr.special_functions as sf
+        >>> import numpy as np
+        >>> x = np.array(range(0,1001))*0.001+1.01
+        >>> y = sf.resolution_inverse(x)
+        >>> import matplotlib.pyplot as plt
+        >>> plt.show(plt.plot(x,y))
     """
     try:
-        return _special_functions.max(x)
+        return _special_functions.resolution_inverse(x)
     except KeyboardInterrupt:
         raise
     except:
         raise TypeError(
             """
             \r\tError: rss_ringoccs
-            \r\t\tdiffrec.special_functions.max\n
-            \r\tInput should be a numpy array of real numbers.\n
+            \r\t\tdiffrec.special_functions.resolution_inverse\n
+            \r\tInput should be a numpy array of real numbers (ints or floats),
+            \r\tor an int or a float.\n
             \r\tUsage:
-            \r\t\t>>> x = numpy.random.rand(100)
-            \r\t\t>>> y = max(x)\n
+            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. np.arange(-5, 5)
+            \r\t\t>>> y = resolution_inverse(x)
             """
         )
 
-def min(x):
-    """
-    Purpose:
-        Compute the maximum of a one dimensional numpy array.
-        This function was written to test use of the C-Python API.
-    Arguments:
-        :x (*numpy.ndarray*):
-            A one dimensional numpy array of real numbers.
-    Outputs:
-        :max (*float* or *int*):
-            The maximum value of x.
-    """
+def square_well_diffraction(x, a, b, F):
     try:
-        return _special_functions.min(x)
+        return _special_functions.square_well_diffraction(x, a, b, F)
     except KeyboardInterrupt:
         raise
     except:
         raise TypeError(
             """
             \r\tError: rss_ringoccs
-            \r\t\tdiffrec.special_functions.min\n
-            \r\tInput should be a numpy array of real numbers.\n
+            \r\t\tdiffrec.special_functions.square_well_diffraction\n
+            \r\tInput should be a numpy array of real numbers (ints or floats),
+            \r\tand three floats/ints.\n
             \r\tUsage:
-            \r\t\t>>> x = numpy.random.rand(100)
-            \r\t\t>>> y = min(x)\n
+            \r\t\t>>> x = np.arange(-10, 10, 0.01)
+            \r\t\t>>> a = -5.0
+            \r\t\t>>> b = 5.0
+            \r\t\t>>> F = 0.05
+            \r\t\t>>> y = square_well_diffraction(x, a, b, F)
             """
-        ) 
+        )
+
+def inverse_square_well_diffraction(x, a, b, F):
+    try:
+        return _special_functions.inverse_square_well_diffraction(x, a, b, F)
+    except KeyboardInterrupt:
+        raise
+    except:
+        raise TypeError(
+            """
+            \r\tError: rss_ringoccs
+            \r\t\tdiffrec.special_functions.inverse_square_well_diffraction\n
+            \r\tInput should be a numpy array of real numbers (ints or floats),
+            \r\tand three floats/ints.\n
+            \r\tUsage:
+            \r\t\t>>> x = np.arange(-10, 10, 0.01)
+            \r\t\t>>> a = -5.0
+            \r\t\t>>> b = 5.0
+            \r\t\t>>> F = 0.05
+            \r\t\t>>> y = inverse_square_well_diffraction(x, a, b, F)
+            """
+        )
+
+def double_slit_diffraction(x, z, a, d):
+    """
+        Purpose:
+            Compute diffraction through a double slit for the
+            variable x with a distance z from the slit and
+            slit parameter a and a distance d between the slits.
+            This assumes Fraunhofer diffraction.
+        Variables:
+            :x:
+                A real or complex argument, or numpy array.
+            :z (*float*):
+                The perpendicular distance from the slit
+                plane to the observer.
+            :a (*float*):
+                The slit parameter. This is a unitless paramter
+                defined as the ratio between the slit width and
+                the wavelength of the incoming signal.
+            :d (*float*):
+                The distance between slits.
+        Outputs:
+            :f:
+                Single slit diffraction pattern.
+    """
+    try:
+        return _special_functions.double_slit_diffraction(x, z, a, d)
+    except KeyboardInterrupt:
+        raise
+    except:
+        raise TypeError(
+            """
+            \r\tError: rss_ringoccs
+            \r\t\tdiffrec.special_functions.double_slit_diffraction\n
+            \r\tInput should be a numpy array of real numbers (ints or floats),
+            \r\tand three floats/ints.\n
+            \r\tUsage:
+            \r\t\t>>> x = np.arange(-10, 10, 0.01)
+            \r\t\t>>> z = 5.0
+            \r\t\t>>> a = 10.0
+            \r\t\t>>> d = 1.0
+            \r\t\t>>> y = double_slit_diffraction(x, z, a, d)
+            """
+        )
 
 def fresnel_cos(x):
     """
@@ -557,237 +619,6 @@ def fresnel_sin(x):
             \r\tUsage:
             \r\t\t>>> x = 1.0   # Or a numpy array, i.e. np.arange(-5, 5)
             \r\t\t>>> y = fresnel_sin(x)
-            """
-        )
-
-def lambertw(x):
-    try:
-        return _special_functions.lambertw(x)
-    except KeyboardInterrupt:
-        raise
-    except:
-        raise TypeError(
-            """
-            \r\tError: rss_ringoccs
-            \r\t\tdiffrec.special_functions.lambertw\n
-            \r\tInput should be a numpy array of real numbers (ints or floats),
-            \r\tor an int or a float.\n
-            \r\tUsage:
-            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. np.arange(-5, 5)
-            \r\t\t>>> y = lambertw(x)
-            """
-        )
-
-def resolution_inverse(x):
-    """
-    Purpose:
-        Compute the inverse of :math:`y = x/(\\exp(-x)+x-1)`
-    Arguments:
-        :x (*np.ndarray* or *float*):
-            Independent variable
-    Outputs:
-        :f (*np.ndarray* or *float*):
-            The inverse of :math:`x/(\\exp(-x)+x-1)`
-    Dependencies:
-        #. numpy
-        #. scipy.special
-    Method:
-        The inverse of :math:`x/(\\exp(-x)+x-1)` is computed using the
-        LambertW function. This function is the inverse of
-        :math:`y = x\\exp(x)`. This is computed using the scipy.special
-        subpackage using their lambertw function.
-    Warnings:
-        #. The real part of the argument must be greater than 1.
-        #. The scipy.special lambertw function is slightly
-           inaccurate when it's argument is near :math:`-1/e`. This
-           argument is :math:`z = \\exp(x/(1-x)) * x/(1-x)`
-    Examples:
-        Plot the function on the interval (1,2)
-
-        >>> import rss_ringoccs.diffcorr.special_functions as sf
-        >>> import numpy as np
-        >>> x = np.array(range(0,1001))*0.001+1.01
-        >>> y = sf.resolution_inverse(x)
-        >>> import matplotlib.pyplot as plt
-        >>> plt.show(plt.plot(x,y))
-    """
-    try:
-        return _special_functions.resolution_inverse(x)
-    except KeyboardInterrupt:
-        raise
-    except:
-        raise TypeError(
-            """
-            \r\tError: rss_ringoccs
-            \r\t\tdiffrec.special_functions.resolution_inverse\n
-            \r\tInput should be a numpy array of real numbers (ints or floats),
-            \r\tor an int or a float.\n
-            \r\tUsage:
-            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. np.arange(-5, 5)
-            \r\t\t>>> y = resolution_inverse(x)
-            """
-        )
-
-def sinc(x):
-    try:
-        return _special_functions.sinc(x)
-    except KeyboardInterrupt:
-        raise
-    except:
-        raise TypeError(
-            """
-            \r\tError: rss_ringoccs
-            \r\t\tdiffrec.special_functions.sinc\n
-            \r\tInput should be a numpy array of real numbers (ints or floats),
-            \r\tor an int or a float.\n
-            \r\tUsage:
-            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. np.arange(-5, 5)
-            \r\t\t>>> y = sinc(x)
-            """
-        )
-
-def square_well_diffraction(x, a, b, F):
-    try:
-        return _special_functions.square_well_diffraction(x, a, b, F)
-    except KeyboardInterrupt:
-        raise
-    except:
-        raise TypeError(
-            """
-            \r\tError: rss_ringoccs
-            \r\t\tdiffrec.special_functions.square_well_diffraction\n
-            \r\tInput should be a numpy array of real numbers (ints or floats),
-            \r\tand three floats/ints.\n
-            \r\tUsage:
-            \r\t\t>>> x = np.arange(-10, 10, 0.01)
-            \r\t\t>>> a = -5.0
-            \r\t\t>>> b = 5.0
-            \r\t\t>>> F = 0.05
-            \r\t\t>>> y = square_well_diffraction(x, a, b, F)
-            """
-        )
-
-def inverse_square_well_diffraction(x, a, b, F):
-    try:
-        return _special_functions.inverse_square_well_diffraction(x, a, b, F)
-    except KeyboardInterrupt:
-        raise
-    except:
-        raise TypeError(
-            """
-            \r\tError: rss_ringoccs
-            \r\t\tdiffrec.special_functions.inverse_square_well_diffraction\n
-            \r\tInput should be a numpy array of real numbers (ints or floats),
-            \r\tand three floats/ints.\n
-            \r\tUsage:
-            \r\t\t>>> x = np.arange(-10, 10, 0.01)
-            \r\t\t>>> a = -5.0
-            \r\t\t>>> b = 5.0
-            \r\t\t>>> F = 0.05
-            \r\t\t>>> y = inverse_square_well_diffraction(x, a, b, F)
-            """
-        )
-
-def square_well_phase(x, a, b, F):
-    try:
-        return _special_functions.square_well_phase(x, a, b, F)
-    except KeyboardInterrupt:
-        raise
-    except:
-        raise TypeError(
-            """
-            \r\tError: rss_ringoccs
-            \r\t\tdiffrec.special_functions.square_well_phase\n
-            \r\tInput should be a numpy array of real numbers (ints or floats),
-            \r\tand three floats/ints.\n
-            \r\tUsage:
-            \r\t\t>>> x = np.arange(-10, 10, 0.01)
-            \r\t\t>>> a = -5.0
-            \r\t\t>>> b = 5.0
-            \r\t\t>>> F = 0.05
-            \r\t\t>>> y = square_well_phase(x, a, b, F)
-            """
-        )
-
-def single_slit_diffraction(x, z, a):
-    """
-        Purpose:
-            Compute diffraction through a single slit for the
-            variable x with a distance z from the slit and
-            slit parameter a. This assume Fraunhofer diffraction.
-        Variables:
-            :x:
-                A real or complex argument, or numpy array.
-            :z (*float*):
-                The perpendicular distance from the slit plane to
-                the observer.
-            :a (*float*):
-                The slit parameter. This is a unitless paramter
-                defined as the ratio between the slit width and
-                the wavelength of the incoming signal.
-        Outputs:
-            :f:
-                Single slit diffraction pattern.
-    """
-    try:
-        return _special_functions.single_slit_diffraction(x, z, a)
-    except KeyboardInterrupt:
-        raise
-    except:
-        raise TypeError(
-            """
-            \r\tError: rss_ringoccs
-            \r\t\tdiffrec.special_functions.single_slit_diffraction\n
-            \r\tInput should be a numpy array of real numbers (ints or floats),
-            \r\tand three floats/ints.\n
-            \r\tUsage:
-            \r\t\t>>> x = numpy.arange(-10, 10, 0.01)
-            \r\t\t>>> z = 5.0
-            \r\t\t>>> a = 10.0
-            \r\t\t>>> y = single_slit_diffraction(x, z, a)
-            """
-        )
-
-def double_slit_diffraction(x, z, a, d):
-    """
-        Purpose:
-            Compute diffraction through a double slit for the
-            variable x with a distance z from the slit and
-            slit parameter a and a distance d between the slits.
-            This assumes Fraunhofer diffraction.
-        Variables:
-            :x:
-                A real or complex argument, or numpy array.
-            :z (*float*):
-                The perpendicular distance from the slit
-                plane to the observer.
-            :a (*float*):
-                The slit parameter. This is a unitless paramter
-                defined as the ratio between the slit width and
-                the wavelength of the incoming signal.
-            :d (*float*):
-                The distance between slits.
-        Outputs:
-            :f:
-                Single slit diffraction pattern.
-    """
-    try:
-        return _special_functions.double_slit_diffraction(x, z, a, d)
-    except KeyboardInterrupt:
-        raise
-    except:
-        raise TypeError(
-            """
-            \r\tError: rss_ringoccs
-            \r\t\tdiffrec.special_functions.double_slit_diffraction\n
-            \r\tInput should be a numpy array of real numbers (ints or floats),
-            \r\tand three floats/ints.\n
-            \r\tUsage:
-            \r\t\t>>> x = np.arange(-10, 10, 0.01)
-            \r\t\t>>> z = 5.0
-            \r\t\t>>> a = 10.0
-            \r\t\t>>> d = 1.0
-            \r\t\t>>> y = double_slit_diffraction(x, z, a, d)
             """
         )
 
@@ -897,6 +728,59 @@ def fresnel_transform_ellipse(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
             T_out[center] *= window_functions.window_norm(dx_km, ker, F)
     return T_out
 
+def fresnel_transform_legendre(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
+                               kD_vals, B_rad_vals, D_km_vals, w_km_vals, start,
+                               n_used, wtype, norm, fwd, psitype):
+
+    if (psitype == "fresnel4"):
+        ord = 3
+    elif (psitype == "fresnel6"):
+        ord = 5
+    elif (psitype == "fresnel8"):
+        ord = 7
+    else:
+        raise ValueError(
+            "\r\tError Encountered: rss_ringoccs"
+            "\r\t\tdiffrec.special_functions.fresnel_transform_legendre\n"
+            "\r\tpsitype must be set to 'fresnel4', 'fresnel6', or 'fresnel8'"
+        )
+
+    # Try using the C version of the Fresnel transform.
+    try:
+
+        # Compute the distance between two points (Sample spacing).
+        dx_km = rho_km_vals[1]-rho_km_vals[0]
+
+        # Compute the Fresnel transform.
+        return _diffraction_functions.fresnel_transform_legendre(
+            T_in, dx_km, F_km_vals, phi_rad_vals, kD_vals, B_rad_vals,
+            D_km_vals, w_km_vals, start, n_used,
+            window_functions.func_dict[wtype]["wnum"], int(norm), int(fwd), ord
+        )
+    except KeyboardInterrupt:
+        raise
+    except:
+        raise TypeError(
+            """
+            \r\tError Encountered: rss_ringoccs
+            \r\t\tdiffrec.special_functions.fresnel_transform_legendre\n
+            \r\tArguments:
+            \r\t\tT_in:         Complex numpy array.
+            \r\t\trho_km_vals:  Positive real valued numpy array.
+            \r\t\tF_km_vals:    Positive real valued numpy array.
+            \r\t\tphi_rad_vals  Real valued numpy array.
+            \r\t\tkD_vals:      Positive real valued numpy array.
+            \r\t\tB_rad_vals:   Real valued numpy array.
+            \r\t\tD_km_vals:    Positive real valued numpy array.
+            \r\t\tw_km_vals:    Positive real valued numpy array.
+            \r\t\tstart:        Integer.
+            \r\t\tn_used:       Integer.
+            \r\t\twtype:        String, name of the selected window.
+            \r\t\tnorm:         Boolean.
+            \r\t\tfwd:          Boolean.
+            """
+        )
+
 def fresnel_transform_newton(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
                              kD_vals, B_rad_vals, D_km_vals, w_km_vals, start,
                              n_used, wtype, norm, fwd):
@@ -953,64 +837,11 @@ def fresnel_transform_quadratic(T_in, rho_km_vals, F_km_vals, w_km_vals, start,
         raise TypeError(
             """
             \r\tError Encountered: rss_ringoccs
-            \r\t\tdiffrec.special_functions.fresnel_transform_newton\n
+            \r\t\tdiffrec.special_functions.fresnel_transform_quadratic\n
             \r\tArguments:
             \r\t\tT_in:         Complex numpy array.
             \r\t\trho_km_vals:  Positive real valued numpy array.
             \r\t\tF_km_vals:    Positive real valued numpy array.
-            \r\t\tw_km_vals:    Positive real valued numpy array.
-            \r\t\tstart:        Integer.
-            \r\t\tn_used:       Integer.
-            \r\t\twtype:        String, name of the selected window.
-            \r\t\tnorm:         Boolean.
-            \r\t\tfwd:          Boolean.
-            """
-        )
-
-def fresnel_legendre_transform(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
-                               kD_vals, B_rad_vals, D_km_vals, w_km_vals, start,
-                               n_used, wtype, norm, fwd, psitype):
-
-    if (psitype == "fresnel4"):
-        ord = 3
-    elif (psitype == "fresnel6"):
-        ord = 5
-    elif (psitype == "fresnel8"):
-        ord = 7
-    else:
-        raise ValueError(
-            "\r\tError Encountered: rss_ringoccs"
-            "\r\t\tdiffrec.special_functions.fresnel_legendre_transform\n"
-            "\r\tpsitype must be set to 'fresnel4', 'fresnel6', or 'fresnel8'"
-        )
-
-    # Try using the C version of the Fresnel transform.
-    try:
-
-        # Compute the distance between two points (Sample spacing).
-        dx_km = rho_km_vals[1]-rho_km_vals[0]
-
-        # Compute the Fresnel transform.
-        return _diffraction_functions.fresnel_legendre_transform(
-            T_in, dx_km, F_km_vals, phi_rad_vals, kD_vals, B_rad_vals,
-            D_km_vals, w_km_vals, start, n_used,
-            window_functions.func_dict[wtype]["wnum"], int(norm), int(fwd), ord
-        )
-    except KeyboardInterrupt:
-        raise
-    except:
-        raise TypeError(
-            """
-            \r\tError Encountered: rss_ringoccs
-            \r\t\tdiffrec.special_functions.fresnel_transform_newton\n
-            \r\tArguments:
-            \r\t\tT_in:         Complex numpy array.
-            \r\t\trho_km_vals:  Positive real valued numpy array.
-            \r\t\tF_km_vals:    Positive real valued numpy array.
-            \r\t\tphi_rad_vals  Real valued numpy array.
-            \r\t\tkD_vals:      Positive real valued numpy array.
-            \r\t\tB_rad_vals:   Real valued numpy array.
-            \r\t\tD_km_vals:    Positive real valued numpy array.
             \r\t\tw_km_vals:    Positive real valued numpy array.
             \r\t\tstart:        Integer.
             \r\t\tn_used:       Integer.
@@ -1066,7 +897,217 @@ def fresnel_transform(T_in, rho_km_vals, F_km_vals, w_km_vals, start, n_used,
                                         D_km_vals, w_km_vals, start, n_used,
                                         wtype, norm, fwd)
     else:
-        return fresnel_legendre_transform(T_in, rho_km_vals, F_km_vals,
+        return fresnel_transform_legendre(T_in, rho_km_vals, F_km_vals,
                                           phi_rad_vals, kD_vals, B_rad_vals,
                                           D_km_vals, w_km_vals, start, n_used,
                                           wtype, norm, fwd, psitype)
+
+def lambertw(x):
+    try:
+        return _special_functions.lambertw(x)
+    except KeyboardInterrupt:
+        raise
+    except:
+        raise TypeError(
+            """
+            \r\tError: rss_ringoccs
+            \r\t\tdiffrec.special_functions.lambertw\n
+            \r\tInput should be a numpy array of real numbers (ints or floats),
+            \r\tor an int or a float.\n
+            \r\tUsage:
+            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. np.arange(-5, 5)
+            \r\t\t>>> y = lambertw(x)
+            """
+        )
+
+def left_straightedge(x, edge, F):
+    try:
+        return _special_functions.left_straightedge(x, edge, F)
+    except KeyboardInterrupt:
+        raise
+    except:
+        raise TypeError(
+            """
+            \r\tError: rss_ringoccs
+            \r\t\tdiffrec.special_functions.left_straightedge\n
+            \r\tInput should be a numpy array of real numbers (ints or floats),
+            \r\tand two positive real numbers.\n
+            \r\tUsage:
+            \r\t\t>>> x = numpy.arange(0, 1000, 0.1)
+            \r\t\t>>> edge = 500.0
+            \r\t\t>>> F = 2.0
+            \r\t\t>>> y = left_straightedge(x, edge, F)
+            """
+        )
+
+def max(x):
+    """
+    Purpose:
+        Compute the maximum of a one dimensional numpy array.
+        This function was written to test use of the C-Python API.
+    Arguments:
+        :x (*numpy.ndarray*):
+            A one dimensional numpy array of real numbers.
+    Outputs:
+        :max (*float* or *int*):
+            The maximum value of x.
+    """
+    try:
+        return _special_functions.max(x)
+    except KeyboardInterrupt:
+        raise
+    except:
+        raise TypeError(
+            """
+            \r\tError: rss_ringoccs
+            \r\t\tdiffrec.special_functions.max\n
+            \r\tInput should be a numpy array of real numbers.\n
+            \r\tUsage:
+            \r\t\t>>> x = numpy.random.rand(100)
+            \r\t\t>>> y = max(x)\n
+            """
+        )
+
+def min(x):
+    """
+    Purpose:
+        Compute the maximum of a one dimensional numpy array.
+        This function was written to test use of the C-Python API.
+    Arguments:
+        :x (*numpy.ndarray*):
+            A one dimensional numpy array of real numbers.
+    Outputs:
+        :max (*float* or *int*):
+            The maximum value of x.
+    """
+    try:
+        return _special_functions.min(x)
+    except KeyboardInterrupt:
+        raise
+    except:
+        raise TypeError(
+            """
+            \r\tError: rss_ringoccs
+            \r\t\tdiffrec.special_functions.min\n
+            \r\tInput should be a numpy array of real numbers.\n
+            \r\tUsage:
+            \r\t\t>>> x = numpy.random.rand(100)
+            \r\t\t>>> y = min(x)\n
+            """
+        )
+
+def right_straightedge(x, edge, F):
+    try:
+        return _special_functions.right_straightedge(x, edge, F)
+    except KeyboardInterrupt:
+        raise
+    except:
+        raise TypeError(
+            """
+            \r\tError: rss_ringoccs
+            \r\t\tdiffrec.special_functions.right_straightedge\n
+            \r\tInput should be a numpy array of real numbers (ints or floats),
+            \r\tand two positive real numbers.\n
+            \r\tUsage:
+            \r\t\t>>> x = numpy.arange(0, 1000, 0.1)
+            \r\t\t>>> edge = 500.0
+            \r\t\t>>> F = 2.0
+            \r\t\t>>> y = right_straightedge(x, edge, F)
+            """
+        ) 
+
+def sinc(x):
+    try:
+        return _special_functions.sinc(x)
+    except KeyboardInterrupt:
+        raise
+    except:
+        raise TypeError(
+            """
+            \r\tError: rss_ringoccs
+            \r\t\tdiffrec.special_functions.sinc\n
+            \r\tInput should be a numpy array of real numbers (ints or floats),
+            \r\tor an int or a float.\n
+            \r\tUsage:
+            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. np.arange(-5, 5)
+            \r\t\t>>> y = sinc(x)
+            """
+        )
+
+def single_slit_diffraction(x, z, a):
+    """
+        Purpose:
+            Compute diffraction through a single slit for the
+            variable x with a distance z from the slit and
+            slit parameter a. This assume Fraunhofer diffraction.
+        Variables:
+            :x:
+                A real or complex argument, or numpy array.
+            :z (*float*):
+                The perpendicular distance from the slit plane to
+                the observer.
+            :a (*float*):
+                The slit parameter. This is a unitless paramter
+                defined as the ratio between the slit width and
+                the wavelength of the incoming signal.
+        Outputs:
+            :f:
+                Single slit diffraction pattern.
+    """
+    try:
+        return _special_functions.single_slit_diffraction(x, z, a)
+    except KeyboardInterrupt:
+        raise
+    except:
+        raise TypeError(
+            """
+            \r\tError: rss_ringoccs
+            \r\t\tdiffrec.special_functions.single_slit_diffraction\n
+            \r\tInput should be a numpy array of real numbers (ints or floats),
+            \r\tand three floats/ints.\n
+            \r\tUsage:
+            \r\t\t>>> x = numpy.arange(-10, 10, 0.01)
+            \r\t\t>>> z = 5.0
+            \r\t\t>>> a = 10.0
+            \r\t\t>>> y = single_slit_diffraction(x, z, a)
+            """
+        )
+
+def square_well_phase(x, a, b, F):
+    try:
+        return _special_functions.square_well_phase(x, a, b, F)
+    except KeyboardInterrupt:
+        raise
+    except:
+        raise TypeError(
+            """
+            \r\tError: rss_ringoccs
+            \r\t\tdiffrec.special_functions.square_well_phase\n
+            \r\tInput should be a numpy array of real numbers (ints or floats),
+            \r\tand three floats/ints.\n
+            \r\tUsage:
+            \r\t\t>>> x = np.arange(-10, 10, 0.01)
+            \r\t\t>>> a = -5.0
+            \r\t\t>>> b = 5.0
+            \r\t\t>>> F = 0.05
+            \r\t\t>>> y = square_well_phase(x, a, b, F)
+            """
+        )
+
+def wavelength_to_wavenumber(lambda_km):
+    try:
+        return _special_functions.wavelength_to_wavenumber(lambda_km)
+    except KeyboardInterrupt:
+        raise
+    except:
+        raise TypeError(
+            """
+            \r\tError: rss_ringoccs
+            \r\t\tdiffrec.special_functions.wavelength_to_wavenumber\n
+            \r\tInput should be a numpy array of non-zero real numbers
+            \r\t(ints or floats), or a non-zero int or non-zero float.\n
+            \r\tUsage:
+            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. np.arange(3, 10)
+            \r\t\t>>> y = wavelength_to_wavenumber(x)
+            """
+        )

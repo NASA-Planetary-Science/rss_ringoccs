@@ -8,7 +8,7 @@
 """
 
 import numpy as np
-from scipy.special import lambertw, iv
+from scipy.special import iv
 from rss_ringoccs.tools import error_check
 try:
     from . import _window_functions, special_functions
@@ -288,6 +288,7 @@ def kbmd35(x, W):
             """
         )
 
+# TODO
 def kbal(x, W, alpha):
     """
         Purpose:
@@ -335,6 +336,7 @@ def kbal(x, W, alpha):
     w_func = iv(0.0, alpha * np.sqrt(x))/iv(0.0, alpha)
     return w_func
 
+# TODO
 def kbmdal(x, W, al):
     """
         Purpose:
@@ -382,7 +384,6 @@ def kbmdal(x, W, al):
     w_func = (iv(0.0, alpha * np.sqrt(x))-1.0)/(iv(0.0, alpha)-1.0)
     return w_func
 
-# TODO
 def window_width(res, normeq, fsky, fres, rho_dot,
                  sigma, bfac=True, Return_P=False):
     """

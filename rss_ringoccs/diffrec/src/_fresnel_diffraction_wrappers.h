@@ -1,12 +1,6 @@
 #ifndef RSS_RINGOCCS_FRESNEL_DIFFRACTION_WRAPPERS_H
 #define RSS_RINGOCCS_FRESNEL_DIFFRACTION_WRAPPERS_H
 
-/* cosine and sine are defined here. */
-#include <math.h>
-
-/*  complex data types, as well as _Complex_I, are defined here.              */
-#include <complex.h>
-
 /*  Diffraction modeling functions, using Fresnel approximation, found here.  */
 #include "__fresnel_diffraction.h"
 
@@ -32,7 +26,7 @@
  *      data (void *):                                                        *
  *          Data pointer.                                                     *
  *  Notes:                                                                    *
- *      1.) This is a wrapper for Square_Well_Diffraction_Solution_Float,     *
+ *      1.) This is a wrapper for Square_Well_Diffraction_Float,              *
  *          which is defined in __fresnel_diffraction.h. This allows Python   *
  *          to that function, and allows for numpy arrays to be passed in. Ti *
  *          relies on the Numpy UFUNC API, as well as the C-Python API.       *
@@ -60,7 +54,7 @@ static void complex_float_square_well(char **args, npy_intp *dimensions,
 
     /* Loop over the square well function found in __fresnel_diffraction.h    */
     for (i = 0; i < n; i++) {
-        out[i] = Square_Well_Diffraction_Solution_Float(x[i], a, b, F);
+        out[i] = Square_Well_Diffraction_Float(x[i], a, b, F);
     }
 }
 
@@ -100,7 +94,7 @@ static void complex_double_square_well(char **args, npy_intp *dimensions,
 
     /* Loop over the square well function found in __fresnel_diffraction.h    */
     for (i = 0; i < n; i++) {
-        out[i] = Square_Well_Diffraction_Solution_Double(x[i], a, b, F);
+        out[i] = Square_Well_Diffraction_Double(x[i], a, b, F);
     }
 }
 
@@ -140,7 +134,7 @@ static void complex_long_double_square_well(char **args, npy_intp *dimensions,
 
     /* Loop over the square well function found in __fresnel_diffraction.h    */
     for (i = 0; i < n; i++) {
-        out[i] = Square_Well_Diffraction_Solution_Long_Double(x[i], a, b, F);
+        out[i] = Square_Well_Diffraction_Long_Double(x[i], a, b, F);
     }
 }
 
@@ -158,7 +152,7 @@ static void complex_float_inv_square_well(char **args, npy_intp *dimensions,
     complex float *out = (complex float *)args[4];
 
     for (i = 0; i < n; i++) {
-        out[i] = Inverted_Square_Well_Diffraction_Solution_Float(x[i], a, b, F);
+        out[i] = Inverted_Square_Well_Diffraction_Float(x[i], a, b, F);
     }
 }
 
@@ -174,7 +168,7 @@ static void complex_double_inv_square_well(char **args, npy_intp *dimensions,
     complex double *out = (complex double *)args[4];
 
     for (i = 0; i < n; i++) {
-        out[i] = Inverted_Square_Well_Diffraction_Solution_Double(x[i], a, b, F);
+        out[i] = Inverted_Square_Well_Diffraction_Double(x[i], a, b, F);
     }
 }
 
@@ -191,7 +185,7 @@ static void complex_long_double_inv_square_well(char **args,
     complex long double *out = (complex long double *)args[4];
 
     for (i = 0; i < n; i++) {
-        out[i] = Inverted_Square_Well_Diffraction_Solution_Double(x[i], a, b, F);
+        out[i] = Inverted_Square_Well_Diffraction_Double(x[i], a, b, F);
     }
 }
 

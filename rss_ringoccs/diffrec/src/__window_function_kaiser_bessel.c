@@ -107,7 +107,12 @@ double Kaiser_Bessel_2_5_Double(double x, double W){
     x = 2.0*x/W;
     x = 1.0 - x*x;
     if (x >= 0){
-        bessel_x = KAISER_BESSEL_2_5_A12;
+        bessel_x = x*KAISER_BESSEL_2_5_A18 + KAISER_BESSEL_2_5_A17;
+        bessel_x = x*bessel_x + KAISER_BESSEL_2_5_A16;
+        bessel_x = x*bessel_x + KAISER_BESSEL_2_5_A15;
+        bessel_x = x*bessel_x + KAISER_BESSEL_2_5_A14;
+        bessel_x = x*bessel_x + KAISER_BESSEL_2_5_A13;
+        bessel_x = x*bessel_x + KAISER_BESSEL_2_5_A12;
         bessel_x = x*bessel_x + KAISER_BESSEL_2_5_A11;
         bessel_x = x*bessel_x + KAISER_BESSEL_2_5_A10;
         bessel_x = x*bessel_x + KAISER_BESSEL_2_5_A09;
@@ -132,7 +137,16 @@ long double Kaiser_Bessel_2_5_Long_Double(long double x, long double W){
     x = 2.0*x/W;
     x = 1.0 - x*x;
     if (x >= 0){
-        bessel_x = KAISER_BESSEL_2_5_A12;
+        bessel_x = x*KAISER_BESSEL_2_5_A22 + KAISER_BESSEL_2_5_A21;
+        bessel_x = x*bessel_x + KAISER_BESSEL_2_5_A20;
+        bessel_x = x*bessel_x + KAISER_BESSEL_2_5_A19;
+        bessel_x = x*bessel_x + KAISER_BESSEL_2_5_A18;
+        bessel_x = x*bessel_x + KAISER_BESSEL_2_5_A17;
+        bessel_x = x*bessel_x + KAISER_BESSEL_2_5_A16;
+        bessel_x = x*bessel_x + KAISER_BESSEL_2_5_A15;
+        bessel_x = x*bessel_x + KAISER_BESSEL_2_5_A14;
+        bessel_x = x*bessel_x + KAISER_BESSEL_2_5_A13;
+        bessel_x = x*bessel_x + KAISER_BESSEL_2_5_A12;
         bessel_x = x*bessel_x + KAISER_BESSEL_2_5_A11;
         bessel_x = x*bessel_x + KAISER_BESSEL_2_5_A10;
         bessel_x = x*bessel_x + KAISER_BESSEL_2_5_A09;
@@ -158,14 +172,7 @@ float Kaiser_Bessel_3_5_Float(float x, float W){
     x = 2.0*x/W;
     x = 1.0 - x*x;
     if (x >= 0){
-        bessel_x = KAISER_BESSEL_3_5_A22;
-        bessel_x = x*bessel_x + KAISER_BESSEL_3_5_A21;
-        bessel_x = x*bessel_x + KAISER_BESSEL_3_5_A20;
-        bessel_x = x*bessel_x + KAISER_BESSEL_3_5_A19;
-        bessel_x = x*bessel_x + KAISER_BESSEL_3_5_A18;
-        bessel_x = x*bessel_x + KAISER_BESSEL_3_5_A17;
-        bessel_x = x*bessel_x + KAISER_BESSEL_3_5_A16;
-        bessel_x = x*bessel_x + KAISER_BESSEL_3_5_A15;
+        bessel_x = x*KAISER_BESSEL_3_5_A16 + MODIFIED_KAISER_BESSEL_3_5_A15;
         bessel_x = x*bessel_x + KAISER_BESSEL_3_5_A14;
         bessel_x = x*bessel_x + KAISER_BESSEL_3_5_A13;
         bessel_x = x*bessel_x + KAISER_BESSEL_3_5_A12;
@@ -193,10 +200,7 @@ double Kaiser_Bessel_3_5_Double(double x, double W){
     x = 2.0*x/W;
     x = 1.0 - x*x;
     if (x >= 0){
-        bessel_x = KAISER_BESSEL_3_5_A22;
-        bessel_x = x*bessel_x + KAISER_BESSEL_3_5_A21;
-        bessel_x = x*bessel_x + KAISER_BESSEL_3_5_A20;
-        bessel_x = x*bessel_x + KAISER_BESSEL_3_5_A19;
+        bessel_x = x*KAISER_BESSEL_3_5_A20 + MODIFIED_KAISER_BESSEL_3_5_A19;
         bessel_x = x*bessel_x + KAISER_BESSEL_3_5_A18;
         bessel_x = x*bessel_x + KAISER_BESSEL_3_5_A17;
         bessel_x = x*bessel_x + KAISER_BESSEL_3_5_A16;
@@ -228,7 +232,8 @@ long double Kaiser_Bessel_3_5_Long_Double(long double x, long double W){
     x = 2.0*x/W;
     x = 1.0 - x*x;
     if (x >= 0){
-        bessel_x = KAISER_BESSEL_3_5_A22;
+        bessel_x = x*KAISER_BESSEL_3_5_A24 + MODIFIED_KAISER_BESSEL_3_5_A23;
+        bessel_x = x*bessel_x + KAISER_BESSEL_3_5_A22;
         bessel_x = x*bessel_x + KAISER_BESSEL_3_5_A21;
         bessel_x = x*bessel_x + KAISER_BESSEL_3_5_A20;
         bessel_x = x*bessel_x + KAISER_BESSEL_3_5_A19;
@@ -255,5 +260,43 @@ long double Kaiser_Bessel_3_5_Long_Double(long double x, long double W){
     }
     else {
         return 0.0;
+    }
+}
+
+/*  Kaiser-Bessel function with arbitrary alpha.                              */
+float Kaiser_Bessel_Al_Float(float x, float W, float alpha){
+    if (alpha == 0.0){
+        return 1.0;
+    }
+    else {
+        x = 2.0*x/W;
+        x = 1.0 - x*x;
+        alpha *= ONE_PI;
+        return BesselI0_Float(alpha*sqrtf(x))/BesselI0_Float(alpha);
+    }
+}
+
+double Kaiser_Bessel_Al_Double(double x, double W, double alpha){
+    if (alpha == 0.0){
+        return 1.0;
+    }
+    else {
+        x = 2.0*x/W;
+        x = 1.0 - x*x;
+        alpha *= ONE_PI;
+        return BesselI0_Double(alpha*sqrt(x))/BesselI0_Double(alpha);
+    }
+}
+
+long double Kaiser_Bessel_Al_Long_Double(long double x, long double W,
+                                         long double alpha){
+    if (alpha == 0.0){
+        return 1.0;
+    }
+    else {
+        x = 2.0*x/W;
+        x = 1.0 - x*x;
+        alpha *= ONE_PI;
+        return BesselI0_Long_Double(alpha*sqrtl(x))/BesselI0_Long_Double(alpha);
     }
 }

@@ -1,8 +1,7 @@
 #ifndef RSS_RINGOCCS_WINDOW_NORMALIZATION_H
 #define RSS_RINGOCCS_WINDOW_NORMALIZATION_H
 
-#include "__math_constants.h"
-#include <math.h>
+#include "__window_functions.h"
 
 float Window_Normalization_Float(float *ker, long dim, float dx, float f_scale){
 

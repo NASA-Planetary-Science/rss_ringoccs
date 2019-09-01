@@ -1,9 +1,4 @@
-/*  Include guard to avoid importing this file twice.                         */
-#ifndef RSS_RINGOCCS_LAMBERTW_H
-#define RSS_RINGOCCS_LAMBERTW_H
-
-#include "__math_constants.h"
-#include <math.h>
+#include "__math_functions.h"
 
 float LambertW_Float(float x){
     float EPS = 1.0e-4;
@@ -103,5 +98,3 @@ long double LambertW_Long_Double(long double x){
         return INFINITY;
     }
 }
-
-#endif

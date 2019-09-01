@@ -1,4 +1,4 @@
-#include "__sinc.h"
+#include "__math_functions.h"
 
 float Sinc_Float(float x){
     if (x == 0){

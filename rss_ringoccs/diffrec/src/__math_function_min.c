@@ -1,5 +1,4 @@
-#ifndef RSS_RINGOCCS_MIN_H
-#define RSS_RINGOCCS_MIN_H
+#include "__math_functions.h"
 
 float Min_Float(float *arr, long n_elements){
     float min = arr[0];
@@ -67,7 +66,7 @@ long Min_Long(long *arr, long n_elements){
     return min;
 }
 
-long Min_Long_Long(long long *arr, long n_elements){
+long long Min_Long_Long(long long *arr, long n_elements){
     long long min = arr[0];
     long i;
     for (i = 1; i < n_elements; ++i){
@@ -77,5 +76,3 @@ long Min_Long_Long(long long *arr, long n_elements){
     }
     return min;
 }
-
-#endif

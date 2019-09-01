@@ -1,5 +1,4 @@
-#ifndef RSS_RINGOCCS_MAX_H
-#define RSS_RINGOCCS_MAX_H
+#include "__math_functions.h"
 
 float Max_Float(float *arr, long n_elements){
     float max = arr[0];
@@ -23,7 +22,7 @@ double Max_Double(double *arr, long n_elements){
     return max;
 }
 
-double Max_Long_Double(long double *arr, long n_elements){
+long double Max_Long_Double(long double *arr, long n_elements){
     long double max = arr[0];
     long i;
     for (i = 1; i < n_elements; ++i){
@@ -77,5 +76,3 @@ long long Max_Long_Long(long long *arr, long n_elements){
     }
     return max;
 }
-
-#endif

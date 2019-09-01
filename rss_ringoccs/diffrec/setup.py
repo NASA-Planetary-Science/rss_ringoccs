@@ -23,6 +23,9 @@ def configuration(parent_package=None, top_path=None):
             "src/__math_function_bessel.c",
             "src/__math_function_lambertw.c",
             "src/__math_function_legendre.c",
+            "src/__math_function_max.c",
+            "src/__math_function_min.c",
+            "src/__math_function_norm_eq_width.c",
             "src/__math_function_resolution_inverse.c",
             "src/_special_functions.c"
         ]

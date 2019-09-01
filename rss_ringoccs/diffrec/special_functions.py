@@ -52,6 +52,43 @@ def besselJ0(x):
             """
         )
 
+def besselI0(x):
+    """
+        Purpose:
+            Compute the Bessel Function J_0(x).
+        Variables:
+            :x (*np.ndarray* or *float*):
+                The independent variable.
+        Outputs:
+            :J_0 (*np.ndarray* or *float*):
+                The fresnel sine integral of x.
+        Notes:
+
+        Examples:
+            Compute the Fresnel Sine integral from -10 to 10, with
+            points spaced 0.01 apart.
+
+            >>> import rss_ringoccs.diffcorr.special_functions as sf
+            >>> import numpy as np
+            >>> x = np.arange(-10, 10, 0.01)
+            >>> y = sf.besselI0(x)
+    """
+    try:
+        return _special_functions.besselI0(x)
+    except KeyboardInterrupt:
+        raise
+    except:
+        raise TypeError(
+            """
+            \r\tError: rss_ringoccs
+            \r\t\tdiffrec.special_functions.besselI0\n
+            \r\tInput should be a numpy array of real numbers (ints or floats),
+            \r\tor a non-zero int or non-zero float.\n
+            \r\tUsage:
+            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. np.arange(-5, 5)
+            \r\t\t>>> y = besselI0(x)
+            """
+        )
 
 def frequency_to_wavelength(freq_hz):
     try:

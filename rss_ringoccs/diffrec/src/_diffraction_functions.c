@@ -78,29 +78,19 @@
 /*  To avoid compiler warnings about deprecated numpy stuff.                  */
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 
-/*  Various trig functions, complex variables, and more found here.           */
-#include <math.h>
-#include <complex.h>
-
 /*  Various header files required for the C-Python API to work.               */
 #include <Python.h>
 #include <numpy/ndarraytypes.h>
 #include <numpy/ufuncobject.h>
 
-/*  Various coefficients and constants defined here.                          */
-#include "__math_constants.h"
+#include "__math_functions.h"
 
 /*  Window functions and Fresnel transforms defined here.                     */
-#include "__misc_windows.h"
-#include "__kaiser_bessel.h"
-#include "__modified_kaiser_bessel.h"
+#include "__window_functions.h"
 #include "__diffraction_functions.h"
 
 /*  Functions for computing the Fresnel Kernel and Newton's Method.           */
 #include "__fresnel_kernel.h"
-
-/*  Functions for computing Legendre polynomials found here.                  */
-#include "__legendre.h"
 
 static void complex_double_fresnel_transform_quadratic(char **args,
                                                        npy_intp *dimensions,

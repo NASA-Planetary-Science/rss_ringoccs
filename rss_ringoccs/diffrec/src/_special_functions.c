@@ -17,6 +17,7 @@
 #include "_physics_functions_wrappers.h"
 #include "_resolution_inverse_function_wrappers.h"
 #include "_sinc_wrappers.h"
+#include "_math_function_wrappers.h"
 
 /*  Where compute_norm_eq lives, as well as max and min funcs.                */
 #include "__normalized_equivalent_width.h"
@@ -359,6 +360,12 @@ static PyMethodDef _special_functions_methods[] =
     {NULL, NULL, 0, NULL}
 };
 /*-------------------------DEFINE UNIVERSAL FUNCTIONS-------------------------*/
+PyUFuncGenericFunction besselJ0_funcs[3] = {
+    &float_besselJ0,
+    &double_besselJ0,
+    &long_double_besselJ0
+};
+
 PyUFuncGenericFunction double_slit_funcs[3] = {
     &float_double_slit_diffraction,
     &double_double_slit_diffraction,
@@ -493,6 +500,15 @@ static char four_real_in_one_complex_out[15] = {
     NPY_CLONGDOUBLE
 };
 
+static char seven_real_in_one_real_out[24] = {
+    NPY_FLOAT, NPY_FLOAT, NPY_FLOAT, NPY_FLOAT,
+    NPY_FLOAT, NPY_FLOAT, NPY_FLOAT, NPY_FLOAT,
+    NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE,
+    NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE,
+    NPY_LONGDOUBLE, NPY_LONGDOUBLE, NPY_LONGDOUBLE, NPY_LONGDOUBLE,
+    NPY_LONGDOUBLE, NPY_LONGDOUBLE, NPY_LONGDOUBLE, NPY_LONGDOUBLE
+};
+
 static char three_real_in_one_complex_out[12] = {
     NPY_FLOAT, NPY_FLOAT, NPY_FLOAT, NPY_CFLOAT,
     NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE, NPY_CDOUBLE,
@@ -514,6 +530,7 @@ static struct PyModuleDef moduledef = {
 
 PyMODINIT_FUNC PyInit__special_functions(void)
 {
+    PyObject *besselJ0;
     PyObject *double_slit_diffraction;
     PyObject *inverse_square_well_diffraction;
     PyObject *frequency_to_wavelength;
@@ -541,6 +558,12 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     import_array();
     import_umath();
 
+    besselJ0 = PyUFunc_FromFuncAndData(
+        besselJ0_funcs, PyuFunc_None_3, one_real_in_one_real_out,
+        3, 1, 1, PyUFunc_None, "besselJ0_diffraction", 
+        "besselJ0_docstring", 0
+    );
+
     double_slit_diffraction = PyUFunc_FromFuncAndData(
         double_slit_funcs, PyuFunc_None_3, four_real_in_one_real_out,
         3, 4, 1, PyUFunc_None, "double_slit_diffraction", 
@@ -560,7 +583,7 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     );
 
     fresnel_dpsi_dphi = PyUFunc_FromFuncAndData(
-        dpsi_funcs, PyuFunc_None_3, three_real_in_one_real_out, 3, 7, 1,
+        dpsi_funcs, PyuFunc_None_3, seven_real_in_one_real_out, 3, 7, 1,
         PyUFunc_None, "fresnel_dpsi_dphi",  "fresnel_dpsi_dphi_docstring", 0
     );
 
@@ -570,7 +593,7 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     );
 
     fresnel_psi = PyUFunc_FromFuncAndData(
-        psi_funcs, PyuFunc_None_3, three_real_in_one_real_out, 3, 7, 1,
+        psi_funcs, PyuFunc_None_3, seven_real_in_one_real_out, 3, 7, 1,
         PyUFunc_None, "fresnel_psi",  "fresnel_psi_docstring", 0
     );
 
@@ -638,6 +661,7 @@ PyMODINIT_FUNC PyInit__special_functions(void)
 
     d = PyModule_GetDict(m);
 
+    PyDict_SetItemString(d, "besselJ0", besselJ0);
     PyDict_SetItemString(d, "inverse_square_well_diffraction",
                          inverse_square_well_diffraction);
     PyDict_SetItemString(d, "frequency_to_wavelength", frequency_to_wavelength);
@@ -657,6 +681,7 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     PyDict_SetItemString(d, "wavelength_to_wavenumber",
                          wavelength_to_wavenumber);
 
+    Py_DECREF(besselJ0);
     Py_DECREF(inverse_square_well_diffraction);
     Py_DECREF(frequency_to_wavelength);
     Py_DECREF(fresnel_cos);

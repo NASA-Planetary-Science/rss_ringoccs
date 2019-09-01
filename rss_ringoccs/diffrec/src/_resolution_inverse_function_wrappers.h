@@ -4,7 +4,7 @@
 
 /*  Where npy_intp is defined.                                                */
 #include <numpy/ndarraytypes.h>
-#include "__resolution_inverse_function.h"
+#include "__math_functions.h"
 
 static void float_resolution_inverse(char **args, npy_intp *dimensions,
                                      npy_intp *steps, void *data){

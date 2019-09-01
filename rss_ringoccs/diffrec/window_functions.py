@@ -25,12 +25,6 @@ except:
 
 # Declare constants for multiples of pi.
 TWO_PI = 6.283185307179586476925287
-SQRT_PI_2 = 1.253314137315500251207883
-RCP_SQRT_2 = 0.7071067811865476
-
-# Declare constants for the reciprocal of e and the square root of 2.
-RCPR_E = 0.3678794411714423215955238
-SQRT_2 = 1.414213562373095048801689
 
 def rect(x, W):
     """

@@ -1,11 +1,7 @@
-#ifndef RSS_RINGOCCS_KAISER_BESSEL_H
-#define RSS_RINGOCCS_KAISER_BESSEL_H
-
-#include "__math_constants.h"
+#include "__window_functions.h"
 
 /*  Kaiser-Bessel function with alpha = 2pi                                  */
-float Kaiser_Bessel_2_0_Float(float x, float W)
-{
+float Kaiser_Bessel_2_0_Float(float x, float W){
     float bessel_x;
     x = 2.0*x/W;
     x = 1.0 - x*x;
@@ -30,8 +26,7 @@ float Kaiser_Bessel_2_0_Float(float x, float W)
     }
 }
 
-double Kaiser_Bessel_2_0_Double(double x, double W)
-{
+double Kaiser_Bessel_2_0_Double(double x, double W){
     double bessel_x;
     x = 2.0*x/W;
     x = 1.0 - x*x;
@@ -56,8 +51,7 @@ double Kaiser_Bessel_2_0_Double(double x, double W)
     }
 }
 
-long double Kaiser_Bessel_2_0_Long_Double(long double x, long double W)
-{
+long double Kaiser_Bessel_2_0_Long_Double(long double x, long double W){
     long double bessel_x;
     x = 2.0*x/W;
     x = 1.0 - x*x;
@@ -83,8 +77,7 @@ long double Kaiser_Bessel_2_0_Long_Double(long double x, long double W)
 }
 
 /*  Kaiser-Bessel function with alpha = 2.5pi.                               */
-float Kaiser_Bessel_2_5_Float(float x, float W)
-{
+float Kaiser_Bessel_2_5_Float(float x, float W){
     float bessel_x;
     x = 2.0*x/W;
     x = 1.0 - x*x;
@@ -109,8 +102,7 @@ float Kaiser_Bessel_2_5_Float(float x, float W)
     }
 }
 
-double Kaiser_Bessel_2_5_Double(double x, double W)
-{
+double Kaiser_Bessel_2_5_Double(double x, double W){
     double bessel_x;
     x = 2.0*x/W;
     x = 1.0 - x*x;
@@ -135,8 +127,7 @@ double Kaiser_Bessel_2_5_Double(double x, double W)
     }
 }
 
-long double Kaiser_Bessel_2_5_Long_Double(long double x, long double W)
-{
+long double Kaiser_Bessel_2_5_Long_Double(long double x, long double W){
     long double bessel_x;
     x = 2.0*x/W;
     x = 1.0 - x*x;
@@ -162,8 +153,7 @@ long double Kaiser_Bessel_2_5_Long_Double(long double x, long double W)
 }
 
 /*  Kaiser-Bessel function with alpha = 3.5pi.                               */
-float Kaiser_Bessel_3_5_Float(float x, float W)
-{
+float Kaiser_Bessel_3_5_Float(float x, float W){
     float bessel_x;
     x = 2.0*x/W;
     x = 1.0 - x*x;
@@ -198,8 +188,7 @@ float Kaiser_Bessel_3_5_Float(float x, float W)
     }
 }
 
-double Kaiser_Bessel_3_5_Double(double x, double W)
-{
+double Kaiser_Bessel_3_5_Double(double x, double W){
     double bessel_x;
     x = 2.0*x/W;
     x = 1.0 - x*x;
@@ -234,8 +223,7 @@ double Kaiser_Bessel_3_5_Double(double x, double W)
     }
 }
 
-long double Kaiser_Bessel_3_5_Long_Double(long double x, long double W)
-{
+long double Kaiser_Bessel_3_5_Long_Double(long double x, long double W){
     long double bessel_x;
     x = 2.0*x/W;
     x = 1.0 - x*x;
@@ -269,5 +257,3 @@ long double Kaiser_Bessel_3_5_Long_Double(long double x, long double W)
         return 0.0;
     }
 }
-
-#endif

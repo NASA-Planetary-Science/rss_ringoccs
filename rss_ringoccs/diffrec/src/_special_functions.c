@@ -20,9 +20,7 @@
 #include "_math_function_wrappers.h"
 
 /*  Where compute_norm_eq lives, as well as max and min funcs.                */
-#include "__normalized_equivalent_width.h"
-#include "__max.h"
-#include "__min.h"
+#include "__math_functions.h"
 
 /*  Various header files required for the C-Python API to work.               */
 #include <Python.h>

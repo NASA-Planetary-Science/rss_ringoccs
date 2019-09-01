@@ -217,6 +217,7 @@ PyMODINIT_FUNC PyInit__window_functions(void)
     PyObject *kbmdal;
     PyObject *rect;
     PyObject *m, *d;
+
     m = PyModule_Create(&moduledef);
     if (!m) {
         return NULL;
@@ -295,8 +296,16 @@ PyMODINIT_FUNC PyInit__window_functions(void)
 #else
 PyMODINIT_FUNC init__funcs(void)
 {
-    PyObject *rect, *coss, *kb25, *kb20, *kb35;
-    PyObject *kbmd25, *kbmd20, *kbmd35;
+    PyObject *coss;
+    PyObject *kb20;
+    PyObject *kb25;
+    PyObject *kb35;
+    PyObject *kbal;
+    PyObject *kbmd20;
+    PyObject *kbmd25;
+    PyObject *kbmd35;
+    PyObject *kbmdal;
+    PyObject *rect;
     PyObject *m, *d;
 
     m = Py_InitModule("__funcs", _window_functions_methods);
@@ -313,14 +322,25 @@ PyMODINIT_FUNC init__funcs(void)
     coss = PyUFunc_FromFuncAndData(coss_funcs, PyuFunc_data, ddd_types, 1, 2, 1,
                                    PyUFunc_None, "coss", "coss_docstring", 0);
 
-    kb25 = PyUFunc_FromFuncAndData(kb25_funcs, PyuFunc_data, ddd_types, 1, 2, 1,
-                                   PyUFunc_None, "kb25", "kb25_docstring", 0);
+    kb20 = PyUFunc_FromFuncAndData(
+        kb20_funcs, PyuFunc_None_3, two_real_in_one_real_out, 3, 2, 1,
+        PyUFunc_None, "kb20", "kb20_docstring", 0
+    );
 
-    kb20 = PyUFunc_FromFuncAndData(kb20_funcs, PyuFunc_data, ddd_types, 1, 2, 1,
-                                   PyUFunc_None, "kb20", "kb20_docstring", 0);
+    kb25 = PyUFunc_FromFuncAndData(
+        kb25_funcs, PyuFunc_None_3, two_real_in_one_real_out, 3, 2, 1,
+        PyUFunc_None, "kb25", "kb25_docstring", 0
+    );
 
-    kb35 = PyUFunc_FromFuncAndData(kb35_funcs, PyuFunc_data, ddd_types, 1, 2, 1,
-                                   PyUFunc_None, "kb35", "kb35_docstring", 0);
+    kb35 = PyUFunc_FromFuncAndData(
+        kb35_funcs, PyuFunc_None_3, two_real_in_one_real_out, 3, 2, 1,
+        PyUFunc_None, "kb35", "kb35_docstring", 0
+    );
+
+    kbal = PyUFunc_FromFuncAndData(
+        kbal_funcs, PyuFunc_None_3, three_real_in_one_real_out, 3, 3, 1,
+        PyUFunc_None, "kbal", "kbal_docstring", 0
+    );
 
     kbmd20 = PyUFunc_FromFuncAndData(kbmd20_funcs, PyuFunc_data, ddd_types,
                                      1, 2, 1, PyUFunc_None, "kbmd20",
@@ -334,22 +354,31 @@ PyMODINIT_FUNC init__funcs(void)
                                      1, 2, 1, PyUFunc_None, "kbmd35",
                                      "kbmd35_docstring", 0);
 
+    kbmdal = PyUFunc_FromFuncAndData(
+        kbmdal_funcs, PyuFunc_None_3, three_real_in_one_real_out, 3, 3, 1,
+        PyUFunc_None, "kbmdal", "kbmdal_docstring", 0
+    );
+
     d = PyModule_GetDict(m);
     PyDict_SetItemString(d, "kbmd20", kbmd20);
     PyDict_SetItemString(d, "kbmd25", kbmd25);
-    PyDict_SetItemString(d, "kbmd35", kbmd20);
+    PyDict_SetItemString(d, "kbmd35", kbmd35);
+    PyDict_SetItemString(d, "kbmdal", kbmdal);
     PyDict_SetItemString(d, "rect", rect);
     PyDict_SetItemString(d, "coss", coss);
     PyDict_SetItemString(d, "kb20", kb20);
     PyDict_SetItemString(d, "kb25", kb25);
-    PyDict_SetItemString(d, "kb35", kb20);
+    PyDict_SetItemString(d, "kb35", kb35);
+    PyDict_SetItemString(d, "kbal", kbal);
     Py_DECREF(kbmd20);
     Py_DECREF(kbmd25);
     Py_DECREF(kbmd35);
+    Py_DECREF(kbmdal);
     Py_DECREF(rect);
     Py_DECREF(coss);
     Py_DECREF(kb20);
     Py_DECREF(kb25);
     Py_DECREF(kb35);
+    Py_DECREF(kbal);
 }
 #endif

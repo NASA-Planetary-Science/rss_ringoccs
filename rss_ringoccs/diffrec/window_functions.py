@@ -387,7 +387,7 @@ def kbal(x, W, alpha):
             """
         )   
 
-def kbmdal(x, W, al):
+def kbmdal(x, W, alpha):
     """
     Purpose:
         Create a modifed Kaiser-Bessel window

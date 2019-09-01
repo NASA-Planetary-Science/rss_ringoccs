@@ -303,7 +303,7 @@ long double BesselI0_Long_Double(long double x){
     x = fabsl(x);
     long double bessel_I0, arg;
 
-    if (x < 17.0){
+    if (x < 19.0){
         arg = x*x;
         bessel_I0 = arg * BESSEL_I0_TAYLOR_24 + BESSEL_I0_TAYLOR_23;
         bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_22;
@@ -334,8 +334,7 @@ long double BesselI0_Long_Double(long double x){
     else if (x < 11356.34) {
         arg = 1.0/x;
 
-        bessel_I0 = arg * BESSEL_I0_ASYM_08 + BESSEL_I0_ASYM_07;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_ASYM_05;
+        bessel_I0 = arg * BESSEL_I0_ASYM_06 + BESSEL_I0_ASYM_05;
         bessel_I0 = arg * bessel_I0 + BESSEL_I0_ASYM_04;
         bessel_I0 = arg * bessel_I0 + BESSEL_I0_ASYM_03;
         bessel_I0 = arg * bessel_I0 + BESSEL_I0_ASYM_02;

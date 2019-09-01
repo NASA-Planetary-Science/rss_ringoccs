@@ -1,9 +1,7 @@
 #ifndef RSS_RINGOCCS_FRAUNHOFER_DIFFRACTION_H
 #define RSS_RINGOCCS_FRAUNHOFER_DIFFRACTION_H
 
-#include <math.h>
-#include "__sinc.h"
-#include "__math_constants.h"
+#include "__math_functions.h"
 
 /******************************************************************************
  *--------------------Single Slit Fraunhofer Diffraction----------------------*

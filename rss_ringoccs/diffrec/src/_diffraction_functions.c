@@ -83,14 +83,51 @@
 #include <numpy/ndarraytypes.h>
 #include <numpy/ufuncobject.h>
 
-#include "__math_functions.h"
-
 /*  Window functions and Fresnel transforms defined here.                     */
 #include "__window_functions.h"
 #include "__diffraction_functions.h"
+#include "__math_functions.h"
 
-/*  Functions for computing the Fresnel Kernel and Newton's Method.           */
-#include "__fresnel_kernel.h"
+/******************************************************************************
+ *  Function:                                                                 *
+ *      reset_window                                                          *
+ *  Purpose:                                                                  *
+ *      Compute an array of points from -width to zero, equally spaced by dx. *
+ *      This acts as the independent variable for later use.                  *
+ *  Arguments:                                                                *
+ *      x_arr (double *):                                                     *
+ *          Defined as rho-rho0, where rho0 is the ring radius of the point   *
+ *          being reconstructed, and rho is the dummy variable of integration *
+ *          which varies from rho0-W/2 to rho0, W being the window width.     *
+ *      w_func (double *):                                                    *
+ *          The window/tapering function, as a function of x_arr.             *
+ *      dx (double):                                                          *
+ *          The sample spacing, equivalent to x_arr[1] - x_arr[0].            *
+ *      width (double):                                                       *
+ *          The width of the window function.                                 *
+ *      nw_pts (long):                                                        *
+ *          Half the number of points in the window width. The symmetry of    *
+ *          the quadratic approximation allows one to perform the inversion   *
+ *          with only half of the window. This saves a lot of computation.    *
+ *      fw  double (*)(double, double):                                       *
+ *          Function pointer to the window function.                          *
+ *  Notes:                                                                    *
+ *      1.) This is a void function that takes in pointers as arguments. The  *
+ *          values of the pointers are changed within this function and there *
+ *          is no need to return anything. Hence, no return statement.        *
+ ******************************************************************************/
+static void reset_window(double *x_arr, double *w_func, double dx, double width,
+                         long nw_pts, double (*fw)(double, double)){
+
+    /*  Create a variable for indexing.                                       */
+    long i;
+
+    /* Loop over i, computing the window function and the x_arr variable.     */
+    for(i=0; i<nw_pts; ++i){
+        x_arr[i] = (i-nw_pts)*dx;
+        w_func[i] = fw(x_arr[i], width);
+    }
+}
 
 static void complex_double_fresnel_transform_quadratic(char **args,
                                                        npy_intp *dimensions,

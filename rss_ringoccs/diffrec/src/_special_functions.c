@@ -1,14 +1,13 @@
 /*  To avoid compiler warnings about deprecated numpy stuff.                  */
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 
-/* cosine and sine are defined here. */
-#include <math.h>
-
 /*  complex data types, as well as _Complex_I, are defined here.              */
 #include <complex.h>
 
+/*  compute_norm_eq, max and min found here. math.h included here as well.    */
+#include "__math_functions.h"
+
 /* Include fresnel integrals header. This includes frensel_sin/cos.           */
-#include "__fresnel_kernel.h"
 #include "_fraunhofer_diffraction_wrappers.h"
 #include "_fresnel_diffraction_wrappers.h"
 #include "_fresnel_integrals_wrappers.h"
@@ -18,9 +17,6 @@
 #include "_resolution_inverse_function_wrappers.h"
 #include "_sinc_wrappers.h"
 #include "_math_function_wrappers.h"
-
-/*  Where compute_norm_eq lives, as well as max and min funcs.                */
-#include "__math_functions.h"
 
 /*  Various header files required for the C-Python API to work.               */
 #include <Python.h>
@@ -364,6 +360,12 @@ PyUFuncGenericFunction besselJ0_funcs[3] = {
     &long_double_besselJ0
 };
 
+PyUFuncGenericFunction besselI0_funcs[3] = {
+    &float_besselI0,
+    &double_besselI0,
+    &long_double_besselI0
+};
+
 PyUFuncGenericFunction double_slit_funcs[3] = {
     &float_double_slit_diffraction,
     &double_double_slit_diffraction,
@@ -529,6 +531,7 @@ static struct PyModuleDef moduledef = {
 PyMODINIT_FUNC PyInit__special_functions(void)
 {
     PyObject *besselJ0;
+    PyObject *besselI0;
     PyObject *double_slit_diffraction;
     PyObject *inverse_square_well_diffraction;
     PyObject *frequency_to_wavelength;
@@ -560,6 +563,12 @@ PyMODINIT_FUNC PyInit__special_functions(void)
         besselJ0_funcs, PyuFunc_None_3, one_real_in_one_real_out,
         3, 1, 1, PyUFunc_None, "besselJ0_diffraction", 
         "besselJ0_docstring", 0
+    );
+
+    besselI0 = PyUFunc_FromFuncAndData(
+        besselI0_funcs, PyuFunc_None_3, one_real_in_one_real_out,
+        3, 1, 1, PyUFunc_None, "besselI0_diffraction", 
+        "besselI0_docstring", 0
     );
 
     double_slit_diffraction = PyUFunc_FromFuncAndData(
@@ -660,6 +669,7 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     d = PyModule_GetDict(m);
 
     PyDict_SetItemString(d, "besselJ0", besselJ0);
+    PyDict_SetItemString(d, "besselI0", besselI0);
     PyDict_SetItemString(d, "inverse_square_well_diffraction",
                          inverse_square_well_diffraction);
     PyDict_SetItemString(d, "frequency_to_wavelength", frequency_to_wavelength);
@@ -680,6 +690,7 @@ PyMODINIT_FUNC PyInit__special_functions(void)
                          wavelength_to_wavenumber);
 
     Py_DECREF(besselJ0);
+    Py_DECREF(besselI0);
     Py_DECREF(inverse_square_well_diffraction);
     Py_DECREF(frequency_to_wavelength);
     Py_DECREF(fresnel_cos);

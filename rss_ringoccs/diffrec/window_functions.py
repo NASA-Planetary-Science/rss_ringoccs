@@ -8,7 +8,6 @@
 """
 
 import numpy as np
-from scipy.special import iv
 from rss_ringoccs.tools import error_check
 try:
     from . import _window_functions, special_functions
@@ -23,22 +22,25 @@ except:
         """
     )
 
-# Declare constants for multiples of pi.
-TWO_PI = 6.283185307179586476925287
-
 def rect(x, W):
     """
-        Purpose:
-            Compute the rectangular window function.
-        Arguments:
-            :x (*np.ndarray*):
-                Real valued array used for the independent
-                variable, or x-axis.
-            :w_in (*float*):
-                Width of the window. Positive float.
-        Outputs:
-            :w_func (*np.ndarray*):
-                Window function of width w_in evaluated along x.
+    Purpose:
+        Compute the rectangular window function.
+    Arguments:
+        :x (*numpy.ndarray*):
+            Real valued array used for the independent
+            variable, or x-axis.
+        :w_in (*float*):
+            Width of the window. Positive float.
+    Outputs:
+        :w_func (*numpy.ndarray*):
+            Window function of width w_in evaluated along x.
+    Examples:
+        Compute a rectangular window of width 10 for an array x which
+        varies between -20 and 20, spaced 0.01 between points.
+            >>> x = numpy.arange(-20, 20, 0.01)
+            >>> W = 10.0
+            >>> y = rect(x, W)
     """
     try:
         return _window_functions.rect(x, W)
@@ -60,17 +62,23 @@ def rect(x, W):
 
 def coss(x, W):
     """
-        Purpose:
-            Compute the Cosine Squared Window Function.
-        Arguments:
-            :x (*np.ndarray*):
-                Real valued array used for the independent
-                variable, or x-axis.
-            :w_in (*float*):
-                Width of the window. Positive float.
-        Outputs:
-            :w_func (*np.ndarray*):
-                Window function of width w_in evaluated along x.
+    Purpose:
+        Compute the Cosine Squared Window Function.
+    Arguments:
+        :x (*numpy.ndarray*):
+            Real valued array used for the independent
+            variable, or x-axis.
+        :w_in (*float*):
+            Width of the window. Positive float.
+    Outputs:
+        :w_func (*numpy.ndarray*):
+            Window function of width w_in evaluated along x.
+    Examples:
+        Compute a squared cosine window of width 10 for an array x
+        which varies between -20 and 20, spaced 0.01 between points.
+            >>> x = numpy.arange(-20, 20, 0.01)
+            >>> W = 10.0
+            >>> y = coss(x, W)
     """
     try:
         return _window_functions.coss(x, W)
@@ -92,17 +100,23 @@ def coss(x, W):
 
 def kb20(x, W):
     """
-        Purpose:
-            Compute the Kaiser-Bessel 2.0 Window Function.
-        Arguments:
-            :x (*np.ndarray*):
-                Real valued array used for the independent
-                variable, or x-axis.
-            :w_in (*float*):
-                Width of the window. Positive float.
-        Outputs:
-            :w_func (*np.ndarray*):
-                Window function of width w_in evaluated along x.
+    Purpose:
+        Compute the Kaiser-Bessel 2.0 Window Function.
+    Arguments:
+        :x (*numpy.ndarray*):
+            Real valued array used for the independent
+            variable, or x-axis.
+        :w_in (*float*):
+            Width of the window. Positive float.
+    Outputs:
+        :w_func (*numpy.ndarray*):
+            Window function of width w_in evaluated along x.
+    Examples:
+        Compute a window of width 10 for an array x which
+        varies between -20 and 20, spaced 0.01 between points.
+            >>> x = numpy.arange(-20, 20, 0.01)
+            >>> W = 10.0
+            >>> y = kb20(x, W)
     """
     try:
         return _window_functions.kb20(x, W)
@@ -124,17 +138,23 @@ def kb20(x, W):
 
 def kb25(x, W):
     """
-        Purpose:
-            Compute the Kaiser-Bessel 2.5 Window Function.
-        Arguments:
-            :x (*np.ndarray*):
-                Real valued array used for the independent
-                variable, or x-axis.
-            :w_in (*float*):
-                Width of the window. Positive float.
-        Outputs:
-            :w_func (*np.ndarray*):
-                Window function of width w_in evaluated along x.
+    Purpose:
+        Compute the Kaiser-Bessel 2.5 Window Function.
+    Arguments:
+        :x (*numpy.ndarray*):
+            Real valued array used for the independent
+            variable, or x-axis.
+        :w_in (*float*):
+            Width of the window. Positive float.
+    Outputs:
+        :w_func (*numpy.ndarray*):
+            Window function of width w_in evaluated along x.
+    Examples:
+        Compute a window of width 10 for an array x which
+        varies between -20 and 20, spaced 0.01 between points.
+            >>> x = numpy.arange(-20, 20, 0.01)
+            >>> W = 10.0
+            >>> y = kb25(x, W)
     """
     try:
         return _window_functions.kb25(x, W)
@@ -158,15 +178,21 @@ def kb35(x, W):
     """
         Purpose:
             Compute the Kaiser-Bessel 3.5 Window Function.
-        Arguments:
-            :x (*np.ndarray*):
-                Real valued array used for the independent
-                variable, or x-axis.
-            :w_in (*float*):
-                Width of the window. Positive float.
-        Outputs:
-            :w_func (*np.ndarray*):
-                Window function of width w_in evaluated along x.
+    Arguments:
+        :x (*numpy.ndarray*):
+            Real valued array used for the independent
+            variable, or x-axis.
+        :w_in (*float*):
+            Width of the window. Positive float.
+    Outputs:
+        :w_func (*numpy.ndarray*):
+            Window function of width w_in evaluated along x.
+    Examples:
+        Compute a window of width 10 for an array x which
+        varies between -20 and 20, spaced 0.01 between points.
+            >>> x = numpy.arange(-20, 20, 0.01)
+            >>> W = 10.0
+            >>> y = kb35(x, W)
     """
     try:
         return _window_functions.kb35(x, W)
@@ -188,17 +214,23 @@ def kb35(x, W):
 
 def kbmd20(x, W):
     """
-        Purpose:
-            Compute the Modified Kaiser-Bessel 2.0 Window Function.
-        Arguments:
-            :x (*np.ndarray*):
-                Real valued array used for the independent
-                variable, or x-axis.
-            :w_in (*float*):
-                Width of the window. Positive float.
-        Outputs:
-            :w_func (*np.ndarray*):
-                Window function of width w_in evaluated along x.
+    Purpose:
+        Compute the Modified Kaiser-Bessel 2.0 Window Function.
+    Arguments:
+        :x (*numpy.ndarray*):
+            Real valued array used for the independent
+            variable, or x-axis.
+        :w_in (*float*):
+            Width of the window. Positive float.
+    Outputs:
+        :w_func (*numpy.ndarray*):
+            Window function of width w_in evaluated along x.
+    Examples:
+        Compute a window of width 10 for an array x which
+        varies between -20 and 20, spaced 0.01 between points.
+            >>> x = numpy.arange(-20, 20, 0.01)
+            >>> W = 10.0
+            >>> y = kbmd20(x, W)
     """
     try:
         return _window_functions.kbmd20(x, W)
@@ -220,17 +252,23 @@ def kbmd20(x, W):
 
 def kbmd25(x, W):
     """
-        Purpose:
-            Compute the Modified Kaiser-Bessel 2.5 Window Function.
-        Arguments:
-            :x (*np.ndarray*):
-                Real valued array used for the independent
-                variable, or x-axis.
-            :w_in (*float*):
-                Width of the window. Positive float.
-        Outputs:
-            :w_func (*np.ndarray*):
-                Window function of width w_in evaluated along x.
+    Purpose:
+        Compute the Modified Kaiser-Bessel 2.5 Window Function.
+    Arguments:
+        :x (*numpy.ndarray*):
+            Real valued array used for the independent
+            variable, or x-axis.
+        :w_in (*float*):
+            Width of the window. Positive float.
+    Outputs:
+        :w_func (*numpy.ndarray*):
+            Window function of width w_in evaluated along x.
+    Examples:
+        Compute a window of width 10 for an array x which
+        varies between -20 and 20, spaced 0.01 between points.
+            >>> x = numpy.arange(-20, 20, 0.01)
+            >>> W = 10.0
+            >>> y = kbmd25(x, W)
     """
     try:
         return _window_functions.kbmd25(x, W)
@@ -252,17 +290,23 @@ def kbmd25(x, W):
 
 def kbmd35(x, W):
     """
-        Purpose:
-            Compute the Modified Kaiser-Bessel 3.5 Window Function.
-        Arguments:
-            :x (*np.ndarray*):
-                Real valued array used for the independent
-                variable, or x-axis.
-            :w_in (*float*):
-                Width of the window. Positive float.
-        Outputs:
-            :w_func (*np.ndarray*):
-                Window function of width w_in evaluated along x.
+    Purpose:
+        Compute the Modified Kaiser-Bessel 3.5 Window Function.
+    Arguments:
+        :x (*numpy.ndarray*):
+            Real valued array used for the independent
+            variable, or x-axis.
+        :w_in (*float*):
+            Width of the window. Positive float.
+    Outputs:
+        :w_func (*numpy.ndarray*):
+            Window function of width w_in evaluated along x.
+    Examples:
+        Compute a window of width 10 for an array x which
+        varies between -20 and 20, spaced 0.01 between points.
+            >>> x = numpy.arange(-20, 20, 0.01)
+            >>> W = 10.0
+            >>> y = kbmd35(x, W)
     """
     try:
         return _window_functions.kbmd35(x, W)
@@ -282,101 +326,114 @@ def kbmd35(x, W):
             """
         )
 
-# TODO
 def kbal(x, W, alpha):
     """
-        Purpose:
-            Create a Kaiser-Bessel window with a user
-            specified alpha parameter.
-        Variables:
-            :W (*float*):
-                Window width.
-            :dx (*float*):
-                Width of one point.
-            :al (*float*):
-                The alpha parameter :math:`\\alpha_0`.
-        Outputs:
-            :w_func (*np.ndarray*):
-                The Kaiser-Bessel alpha window of width
-                w_in and spacing dx between points.
-        Notes:
-            #.  The Kaiser-Bessel window is computed using the
-                modified Bessel Function of the First Kind. It's
-                value is :math:`y = I_0(\\alpha\\sqrt{1-4x^2/w^2})/I_0(\\alpha)`,
-                where w is the window width.
-            #.  We automatically multiply the alpha parameter by pi,
-                so the kbal window function has an alpha value of
-                :math:`\\alpha = \\alpha_0 \\pi`
-            #.  The endpoints of the Kaiser-Bessel function tend to
-                zero faster than :math:`(1+2\\alpha) / \\exp(\\alpha)`
-        Warnings:
-            #.  None of the Kaiser-Bessel windows evaluate to zero at
-                their endpoints. The endpoints are :math:`1/I_0(\\alpha)`.
-                For small values of alpha this can create Gibb's like
-                effects in reconstruction do to the large
-                discontinuity in the window. For alpha values beyond
-                :math:`2.5\\pi` this effect is negligible.
+    Purpose:
+        Create a Kaiser-Bessel window with a user
+        specified alpha parameter.
+    Arguments:
+        :x (*numpy.ndarray*):
+            Real valued array used for the independent
+            variable, or x-axis.
+        :w_in (*float*):
+            Width of the window. Positive float.
+        :alpha (*float*):
+            The alpha parameter of the Kaiser-Bessel function.
+    Outputs:
+        :w_func (*numpy.ndarray*):
+            Window function of width w_in evaluated along x.
+    Examples:
+        Compute a window of width 10 for an array x which
+        varies between -20 and 20, spaced 0.01 between points, with
+        alpha set to 2.3
+            >>> x = numpy.arange(-20, 20, 0.01)
+            >>> W = 10.0
+            >>> alpha = 2.3
+            >>> y = kbal(x, W, alpha)
+    Notes:
+        #.  The Kaiser-Bessel window is computed using the
+            modified Bessel Function of the First Kind. It's
+            value is :math:`y = I_0(\\alpha\\sqrt{1-4x^2/w^2})/I_0(\\alpha)`,
+            where w is the window width.
+        #.  We automatically multiply the alpha parameter by pi,
+            so the kbal window function has an alpha value of
+            :math:`\\alpha = \\alpha_0 \\pi`
+        #.  The endpoints of the Kaiser-Bessel function tend to
+            zero faster than :math:`(1+2\\alpha) / \\exp(\\alpha)`
+    Warnings:
+        #.  None of the Kaiser-Bessel windows evaluate to zero at
+            their endpoints. The endpoints are :math:`1/I_0(\\alpha)`.
+            For small values of alpha this can create Gibb's like
+            effects in reconstruction do to the large
+            discontinuity in the window. For alpha values beyond
+            :math:`2.5\\pi` this effect is negligible.
     """
-    fname = "diffrec.window_functions.kbal"
-    error_check.check_is_real(x, "x", fname)
-    error_check.check_positive(W, "W", fname)
+    try:
+        return _window_functions.kbal(x, W, alpha)
+    except KeyboardInterrupt:
+        raise
+    except:
+        raise TypeError(
+            """
+            \r\tError: rss_ringoccs
+            \r\t\tdiffrec.window_functions.kbal\n
+            \r\tInput should be a numpy array of real numbers (ints or floats),
+            \r\tand two positive floating point numbers.
+            \r\tUsage:
+            \r\t\t>>> x = numpy.arange(-5, 5, 0.1)
+            \r\t\t>>> W = 5.0
+            \r\t\t>>> alpha = 2.5
+            \r\t\t>>> y = kbal(x, W, alpha)
+            """
+        )   
 
-    # Window functions have an odd number of points.
-    x = 1.0 - np.square(2.0*x/W)
-
-    # Compute window function.
-    x = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx / w_in
-    alpha *= np.pi
-    w_func = iv(0.0, alpha * np.sqrt(x))/iv(0.0, alpha)
-    return w_func
-
-# TODO
 def kbmdal(x, W, al):
     """
-        Purpose:
-            Create a modifed Kaiser-Bessel window
-            with a user specified alpha parameter.
-        Variables:
-            :W (*float*):
-                Window width.
-            :dx (*float*):
-                Width of one point.
-            :al (*float*):
-                The alpha parameter :math:`\\alpha_0`.
-        Outputs:
-            :w_func (*np.ndarray*):
-                The Kaiser-Bessel alpha window of width
-                and w_in spacing dx between points.
-        Notes:
-            #.  The Kaiser-Bessel window is computed using the
-                modified Bessel Function of the First Kind. It's
-                value is :math:`y = I_0(\\alpha\\sqrt{1-4x^2/w^2})/I_0(\\alpha)`,
-                where w is the window width.
-            #.  We automatically multiply the alpha parameter by pi,
-                so the kbal window function has an alpha value of
-                :math:`\\alpha = \\alpha_0\\pi`
-            #.  The endpoints of the Kaiser-Bessel function tend to
-                zero faster than :math:`(1+2\\alpha)) / \\exp(\\alpha)`
-        Warnings:
-            #.  None of the Kaiser-Bessel windows evaluate to zero at
-                their endpoints. The endpoints are :math:`1/I_0(\\alpha)`.
-                For small values of alpha this can create Gibb's like
-                effects in reconstruction due to the large
-                discontinuity in the window. For alpha values beyond
-                :math:`2.5\\pi` this effect is negligible.
+    Purpose:
+        Create a modifed Kaiser-Bessel window
+        with a user specified alpha parameter.
+    Arguments:
+        :x (*numpy.ndarray*):
+            Real valued array used for the independent
+            variable, or x-axis.
+        :w_in (*float*):
+            Width of the window. Positive float.
+        :alpha (*float*):
+            The alpha parameter of the Kaiser-Bessel function.
+    Outputs:
+        :w_func (*numpy.ndarray*):
+            Window function of width w_in evaluated along x.
+    Examples:
+        Compute a window of width 10 for an array x which
+        varies between -20 and 20, spaced 0.01 between points, with
+        alpha set to 2.3
+            >>> x = numpy.arange(-20, 20, 0.01)
+            >>> W = 10.0
+            >>> alpha = 2.3
+            >>> y = kbmdal(x, W, alpha)
+    Notes:
+        #.  This is a modification of the Kaiser-Bessel function
+            that has the property of evaluating to zero at the
+            endpoings, rather than 1/I_0(alpha * PI)
     """
-    fname = "diffrec.window_functions.kbal"
-    error_check.check_is_real(x, "x", fname)
-    error_check.check_positive(W, "W", fname)
-
-    # Window functions have an odd number of points.
-    x = 1.0 - np.square(2.0*x/W)
-
-    # Compute window function.
-    x = (np.arange(nw_pts) - ((nw_pts - 1) / 2.0)) * dx / w_in
-    alpha *= np.pi
-    w_func = (iv(0.0, alpha * np.sqrt(x))-1.0)/(iv(0.0, alpha)-1.0)
-    return w_func
+    try:
+        return _window_functions.kbmdal(x, W, alpha)
+    except KeyboardInterrupt:
+        raise
+    except:
+        raise TypeError(
+            """
+            \r\tError: rss_ringoccs
+            \r\t\tdiffrec.window_functions.kbmdal\n
+            \r\tInput should be a numpy array of real numbers (ints or floats),
+            \r\tand two positive floating point numbers.
+            \r\tUsage:
+            \r\t\t>>> x = numpy.arange(-5, 5, 0.1)
+            \r\t\t>>> W = 5.0
+            \r\t\t>>> alpha = 2.5
+            \r\t\t>>> y = kbmdal(x, W, alpha)
+            """
+        )  
 
 def window_width(res, normeq, fsky, fres, rho_dot,
                  sigma, bfac=True, Return_P=False):
@@ -389,18 +446,18 @@ def window_width(res, normeq, fsky, fres, rho_dot,
             The requested resolution.
         :normeq (*float*):
             The normalized equivalent width. Unitless.
-        :fsky (*float* or *np.ndarray*):
+        :fsky (*float* or *numpy.ndarray*):
             The sky frequency.
-        :fres (*float* or *np.ndarray*):
+        :fres (*float* or *numpy.ndarray*):
             The Fresnel scale.
-        :rdot (*float*) or (*np.ndarray*):
+        :rdot (*float*) or (*numpy.ndarray*):
             The time derivative of the ring radius.
     Output:
-        :w_vals (*np.ndarray*):
+        :w_vals (*numpy.ndarray*):
             The window width as a function of ring radius.
     """
     if bfac:
-        omega = TWO_PI * fsky
+        omega = 2.0*np.pi * fsky
         alpha = np.square(omega * sigma) / (2.0 * rho_dot)
         P = res / (alpha * np.square(fres))
 
@@ -447,13 +504,13 @@ def window_norm(ker, dx, f_scale):
     Purpose:
         Compute the window normalization
     Arguments:
-        :ker (*np.ndarray*):
+        :ker (*numpy.ndarray*):
             The Fresnel Kernel.
         :dx (*float*):
             The spacing between points in the window.
             This is equivalent to the sample spacing.
             This value is in kilometers.
-        :f_scale (*np.ndarray*):
+        :f_scale (*numpy.ndarray*):
             The Fresnel Scale in kilometers.
     Outputs:
         :norm_fact (*float*):

@@ -35,6 +35,12 @@ extern double BesselJ0_Double(double x);
 
 extern long double BesselJ0_Long_Double(long double x);
 
+extern float BesselI0_Float(float x);
+
+extern double BesselI0_Double(double x);
+
+extern long double BesselI0_Long_Double(long double x);
+
 
 extern float Max_Float(float *arr, long n_elements);
 

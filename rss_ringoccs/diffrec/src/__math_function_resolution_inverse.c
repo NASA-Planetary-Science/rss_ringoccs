@@ -1,10 +1,4 @@
-/*  Include guard to avoid importing this file twice.                         */
-#ifndef RSS_RINGOCCS_RESOLUTION_INVERSE_FUNCTION_H
-#define RSS_RINGOCCS_RESOLUTION_INVERSE_FUNCTION_H
-
-#include "__lambertw.h"
-#include "__math_constants.h"
-#include <math.h>
+#include "__math_functions.h"
 
 double Resolution_Inverse_Float(float x){
     float P1, P2;
@@ -50,5 +44,3 @@ long double Resolution_Inverse_Long_Double(long double x){
         return 0.0;
     }
 }
-
-#endif

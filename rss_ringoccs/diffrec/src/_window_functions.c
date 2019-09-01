@@ -6,7 +6,8 @@
 
 /*  Window functions defined here.                                            */
 #include "__window_functions.h"
-#include "__window_normalization.h"
+#include "_window_function_kaiser_bessel_wrappers.h"
+#include "_window_function_modified_kaiser_bessel_wrappers.h"
 
 /*  Various header files required for the C-Python API to work.               */
 #include <Python.h>
@@ -135,109 +136,60 @@ static void double_coss(char **args, npy_intp *dimensions,
     }
 }
 
-static void double_kb20(char **args, npy_intp *dimensions,
-                        npy_intp *steps, void *data)
-{
-    npy_intp i;
-    npy_intp n = dimensions[0];
-
-    double *x   =  (double *)args[0];
-    double  W   = *(double *)args[1];
-    double *out =  (double *)args[2];
-
-    for (i = 0; i < n; i++) {
-        out[i] = Kaiser_Bessel_2_0_Double(x[i], W);
-    }
-}
-
-static void double_kb25(char **args, npy_intp *dimensions,
-                        npy_intp *steps, void *data)
-{
-    npy_intp i;
-    npy_intp n = dimensions[0];
-
-    double *x   =  (double *)args[0];
-    double  W   = *(double *)args[1];
-    double *out =  (double *)args[2];
-
-    for (i = 0; i < n; i++) {
-        out[i] = Kaiser_Bessel_2_5_Double(x[i], W);
-    }
-}
-
-static void double_kb35(char **args, npy_intp *dimensions,
-                        npy_intp *steps, void *data)
-{
-    npy_intp i;
-    npy_intp n = dimensions[0];
-
-    double *x   =  (double *)args[0];
-    double  W   = *(double *)args[1];
-    double *out =  (double *)args[2];
-
-    for (i = 0; i < n; i++) {
-        out[i] = Kaiser_Bessel_3_5_Double(x[i], W);
-    }
-}
-
-static void double_kbmd20(char **args, npy_intp *dimensions,
-                          npy_intp* steps, void* data)
-{
-    npy_intp i;
-    npy_intp n = dimensions[0];
-
-    double *x   =  (double *)args[0];
-    double  W   = *(double *)args[1];
-    double *out =  (double *)args[2];
-
-    for (i = 0; i < n; i++) {
-        out[i] = Modified_Kaiser_Bessel_2_0_Double(x[i], W);
-    }
-}
-
-static void double_kbmd25(char **args, npy_intp *dimensions,
-                          npy_intp* steps, void* data)
-{
-    npy_intp i;
-    npy_intp n = dimensions[0];
-
-    double *x   =  (double *)args[0];
-    double  W   = *(double *)args[1];
-    double *out =  (double *)args[2];
-
-    for (i = 0; i < n; i++) {
-        out[i] = Modified_Kaiser_Bessel_2_5_Double(x[i], W);
-    }
-}
-
-static void double_kbmd35(char **args, npy_intp *dimensions,
-                          npy_intp* steps, void* data)
-{
-    npy_intp i;
-    npy_intp n = dimensions[0];
-
-    double *x   =  (double *)args[0];
-    double  W   = *(double *)args[1];
-    double *out =  (double *)args[2];
-
-    for (i = 0; i < n; i++) {
-        out[i] = Modified_Kaiser_Bessel_3_5_Double(x[i], W);
-    }
-}
-
 /* Define pointers to the C functions.                                        */
 PyUFuncGenericFunction rect_funcs[1]   = {&double_rect};
 PyUFuncGenericFunction coss_funcs[1]   = {&double_coss};
-PyUFuncGenericFunction kb20_funcs[1]   = {&double_kb20};
-PyUFuncGenericFunction kb25_funcs[1]   = {&double_kb25};
-PyUFuncGenericFunction kb35_funcs[1]   = {&double_kb35};
+
+PyUFuncGenericFunction kb20_funcs[3] = {
+    &float_kb20,
+    &double_kb20,
+    &long_double_kb20
+};
+
+PyUFuncGenericFunction kb25_funcs[3] = {
+    &float_kb25,
+    &double_kb25,
+    &long_double_kb25
+};
+PyUFuncGenericFunction kb35_funcs[3] = {
+    &float_kb35,
+    &double_kb35,
+    &long_double_kb35
+};
+
+PyUFuncGenericFunction kbal_funcs[3] = {
+    &float_kbal,
+    &double_kbal,
+    &long_double_kbal
+};
+
+PyUFuncGenericFunction kbmdal_funcs[3] = {
+    &float_kbmdal,
+    &double_kbmdal,
+    &long_double_kbmdal
+};
+
 PyUFuncGenericFunction kbmd20_funcs[1] = {&double_kbmd20};
 PyUFuncGenericFunction kbmd25_funcs[1] = {&double_kbmd25};
 PyUFuncGenericFunction kbmd35_funcs[1] = {&double_kbmd35};
 
 /* Input and return types for double input and out.                           */
 static char ddd_types[3]     = {NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE};
+
+static char two_real_in_one_real_out[9] = {
+    NPY_FLOAT, NPY_FLOAT, NPY_FLOAT,
+    NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE,
+    NPY_LONGDOUBLE, NPY_LONGDOUBLE, NPY_LONGDOUBLE
+};
+
+static char three_real_in_one_real_out[12] = {
+    NPY_FLOAT, NPY_FLOAT, NPY_FLOAT, NPY_FLOAT,
+    NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE,
+    NPY_LONGDOUBLE, NPY_LONGDOUBLE, NPY_LONGDOUBLE, NPY_LONGDOUBLE
+};
+
 static void *PyuFunc_data[1] = {NULL};
+static void *PyuFunc_None_3[3] = {NULL, NULL, NULL};
 
 #if PY_VERSION_HEX >= 0x03000000
 static struct PyModuleDef moduledef = {
@@ -254,8 +206,16 @@ static struct PyModuleDef moduledef = {
 
 PyMODINIT_FUNC PyInit__window_functions(void)
 {
-    PyObject *rect, *coss, *kb25, *kb20, *kb35;
-    PyObject *kbmd25, *kbmd20, *kbmd35;
+    PyObject *coss;
+    PyObject *kb20;
+    PyObject *kb25;
+    PyObject *kb35;
+    PyObject *kbal;
+    PyObject *kbmd20;
+    PyObject *kbmd25;
+    PyObject *kbmd35;
+    PyObject *kbmdal;
+    PyObject *rect;
     PyObject *m, *d;
     m = PyModule_Create(&moduledef);
     if (!m) {
@@ -271,14 +231,25 @@ PyMODINIT_FUNC PyInit__window_functions(void)
     coss = PyUFunc_FromFuncAndData(coss_funcs, PyuFunc_data, ddd_types, 1, 2, 1,
                                    PyUFunc_None, "coss", "coss_docstring", 0);
 
-    kb25 = PyUFunc_FromFuncAndData(kb25_funcs, PyuFunc_data, ddd_types, 1, 2, 1,
-                                   PyUFunc_None, "kb25", "kb25_docstring", 0);
+    kb20 = PyUFunc_FromFuncAndData(
+        kb20_funcs, PyuFunc_None_3, two_real_in_one_real_out, 3, 2, 1,
+        PyUFunc_None, "kb20", "kb20_docstring", 0
+    );
 
-    kb20 = PyUFunc_FromFuncAndData(kb20_funcs, PyuFunc_data, ddd_types, 1, 2, 1,
-                                   PyUFunc_None, "kb20", "kb20_docstring", 0);
+    kb25 = PyUFunc_FromFuncAndData(
+        kb25_funcs, PyuFunc_None_3, two_real_in_one_real_out, 3, 2, 1,
+        PyUFunc_None, "kb25", "kb25_docstring", 0
+    );
 
-    kb35 = PyUFunc_FromFuncAndData(kb35_funcs, PyuFunc_data, ddd_types, 1, 2, 1,
-                                   PyUFunc_None, "kb35", "kb35_docstring", 0);
+    kb35 = PyUFunc_FromFuncAndData(
+        kb35_funcs, PyuFunc_None_3, two_real_in_one_real_out, 3, 2, 1,
+        PyUFunc_None, "kb35", "kb35_docstring", 0
+    );
+
+    kbal = PyUFunc_FromFuncAndData(
+        kbal_funcs, PyuFunc_None_3, three_real_in_one_real_out, 3, 3, 1,
+        PyUFunc_None, "kbal", "kbal_docstring", 0
+    );
 
     kbmd20 = PyUFunc_FromFuncAndData(kbmd20_funcs, PyuFunc_data, ddd_types,
                                      1, 2, 1, PyUFunc_None, "kbmd20",
@@ -292,23 +263,32 @@ PyMODINIT_FUNC PyInit__window_functions(void)
                                      1, 2, 1, PyUFunc_None, "kbmd35",
                                      "kbmd35_docstring", 0);
 
+    kbmdal = PyUFunc_FromFuncAndData(
+        kbmdal_funcs, PyuFunc_None_3, three_real_in_one_real_out, 3, 3, 1,
+        PyUFunc_None, "kbmdal", "kbmdal_docstring", 0
+    );
+
     d = PyModule_GetDict(m);
     PyDict_SetItemString(d, "kbmd20", kbmd20);
     PyDict_SetItemString(d, "kbmd25", kbmd25);
-    PyDict_SetItemString(d, "kbmd35", kbmd20);
+    PyDict_SetItemString(d, "kbmd35", kbmd35);
+    PyDict_SetItemString(d, "kbmdal", kbmdal);
     PyDict_SetItemString(d, "rect", rect);
     PyDict_SetItemString(d, "coss", coss);
     PyDict_SetItemString(d, "kb20", kb20);
     PyDict_SetItemString(d, "kb25", kb25);
-    PyDict_SetItemString(d, "kb35", kb20);
+    PyDict_SetItemString(d, "kb35", kb35);
+    PyDict_SetItemString(d, "kbal", kbal);
     Py_DECREF(kbmd20);
     Py_DECREF(kbmd25);
     Py_DECREF(kbmd35);
+    Py_DECREF(kbmdal);
     Py_DECREF(rect);
     Py_DECREF(coss);
     Py_DECREF(kb20);
     Py_DECREF(kb25);
     Py_DECREF(kb35);
+    Py_DECREF(kbal);
 
     return m;
 }

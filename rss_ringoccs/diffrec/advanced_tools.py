@@ -642,7 +642,6 @@ class ModelFromGEO(object):
                 )
 
             T_hat = np.exp(1j*psi)*(0.5-0.5j)/F[center]
-            self.psi = psi
         else:
             use_fresnel = False
             self.p_norm_vals = self.data_pow
@@ -680,8 +679,6 @@ class ModelFromGEO(object):
         self.t_ret_spm_vals = self.t_ret_spm_vals[crange]
         self.t_set_spm_vals = self.t_set_spm_vals[crange]
         self.w_km_vals = self.w_km_vals[crange]
-
-        self.psi = self.psi[crange]
 
         if echo:
             if verbose:
@@ -724,6 +721,7 @@ class ModelFromGEO(object):
                 self.phi_rad_vals, kD_vals, self.B_rad_vals, self.D_km_vals,
                 periapse, eccentricity
             )
+
             self.p_norm_vals = np.square(np.abs(T_hat))
             self.phase_rad_vals = np.arctan2(np.imag(T_hat), np.real(T_hat))
 

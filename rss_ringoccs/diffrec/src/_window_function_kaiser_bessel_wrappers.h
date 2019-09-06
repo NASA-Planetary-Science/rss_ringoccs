@@ -8,21 +8,23 @@
 #include <numpy/ndarraytypes.h>
 
 static void float_kb20(char **args, npy_intp *dimensions,
-                       npy_intp *steps, void *data){
+                       npy_intp *steps, void *data)
+{
     npy_intp i;
-    npy_intp n = dimensions[0];
+    npy_intp n_elements = dimensions[0];
 
     float *x   =  (float *)args[0];
     float  W   = *(float *)args[1];
     float *out =  (float *)args[2];
 
-    for (i = 0; i < n; i++) {
+    for (i = 0; i < n_elements; i++) {
         out[i] = Kaiser_Bessel_2_0_Float(x[i], W);
     }
 }
 
 static void double_kb20(char **args, npy_intp *dimensions,
-                        npy_intp *steps, void *data){
+                        npy_intp *steps, void *data)
+{
     npy_intp i;
     npy_intp n = dimensions[0];
 
@@ -36,7 +38,8 @@ static void double_kb20(char **args, npy_intp *dimensions,
 }
 
 static void long_double_kb20(char **args, npy_intp *dimensions,
-                             npy_intp *steps, void *data){
+                             npy_intp *steps, void *data)
+{
     npy_intp i;
     npy_intp n = dimensions[0];
 

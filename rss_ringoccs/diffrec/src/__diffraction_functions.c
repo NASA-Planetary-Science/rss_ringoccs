@@ -77,7 +77,7 @@
  ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
  *  Date:       June 21, 2019                                                 *
- *****************************************************************************/
+ ******************************************************************************/
 #include "__diffraction_functions.h"
 
 /******************************************************************************
@@ -329,7 +329,8 @@ complex double Fresnel_Transform_Norm_Double(double *x_arr,
 complex double Fresnel_Legendre_Double(double *x_arr, complex double *T_in,
                                        double *w_func, double D, double *coeffs,
                                        double dx, double F, double kd,
-                                       long n_pts, int order, long center)
+                                       long n_pts, unsigned char order,
+                                       long center)
 {
     /*  Declare all necessary variables. i, j, and k are used for indexing.   */
     long i, j, k;
@@ -396,8 +397,8 @@ complex double Fresnel_Legendre_Double(double *x_arr, complex double *T_in,
 complex double Fresnel_Legendre_Norm_Double(double *x_arr, complex double *T_in,
                                             double *w_func, double D,
                                             double *coeffs, double dx, double F,
-                                            double kd, long n_pts, int order,
-                                            long center)
+                                            double kd, long n_pts,
+                                            unsigned char order, long center)
 {
     /*  Declare all necessary variables. i and j are used for indexing.       */
     long i, j, k;
@@ -716,7 +717,7 @@ void DiffractionCorrectionLegendre(DLPObj dlp)
     double Legendre_Coeff;
     double (*fw)(double, double);
     complex double (*FresT)(double*, complex double*, double*, double, double *,
-                            double, double, double, long, int, long);
+                            double, double, double, long, unsigned char, long);
 
     /*  Cast the selected window type to the fw pointer.                      */
     if      (dlp.wtype == 0){fw = &Rect_Window_Double;}

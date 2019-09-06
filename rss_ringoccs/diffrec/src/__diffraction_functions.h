@@ -2,14 +2,14 @@
 #ifndef RSS_RINGOCCS_DIFFRACTION_FUNCTIONS_H
 #define RSS_RINGOCCS_DIFFRACTION_FUNCTIONS_H
 
-/*  Various trig functions, complex variables, and more found here.           */
+/*  Various functions, complex variables, and more found here.                */
 #include <stdlib.h>
-#include <math.h>
 #include <complex.h>
 #include "__math_functions.h"
 #include "__window_functions.h"
 #include "__fresnel_kernel.h"
 
+/*  Structure that contains all of the necessary data.                        */
 typedef struct _dlpdataobj {
     complex double *T_in;
     double *rho_km_vals;
@@ -21,20 +21,14 @@ typedef struct _dlpdataobj {
     double *w_km_vals;
     long start;
     long n_used;
-    int wtype;
-    int use_norm;
-    int use_fwd;
-    int psitype;
-    int order;
+    unsigned char wtype;
+    unsigned char use_norm;
+    unsigned char use_fwd;
+    unsigned char order;
     complex double *T_out;
 } DLPObj;
 
-/*  Coefficients and constants defined here.                                  */
-#include "__math_constants.h"
-
-/*  Functions for computing the Fresnel Kernel and Newton's Method.           */
-#include "__fresnel_kernel.h"
-
+/*  Functions defined in __diffraction_functions.c                            */
 extern complex double Fresnel_Transform_Double(
     double *x_arr, complex double *T_in, double *w_func, double F, double dx,
     long n_pts, long center
@@ -48,13 +42,13 @@ extern complex double Fresnel_Transform_Norm_Double(
 extern complex double Fresnel_Legendre_Double(
     double *x_arr, complex double *T_in, double *w_func, double D,
     double *coeffs, double dx, double F, double kd, long n_pts,
-    int order, long center
+    unsigned char order, long center
 );
 
 extern complex double Fresnel_Legendre_Norm_Double(
     double *x_arr, complex double *T_in, double *w_func, double D,
     double *coeffs, double dx, double F, double kd, long n_pts,
-    int order, long center
+    unsigned char order, long center
 );
 
 extern complex double Fresnel_Transform_Newton_Double(

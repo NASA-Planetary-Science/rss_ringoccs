@@ -669,6 +669,7 @@ PyMODINIT_FUNC PyInit__special_functions(void)
 
     PyDict_SetItemString(d, "besselJ0", besselJ0);
     PyDict_SetItemString(d, "besselI0", besselI0);
+    PyDict_SetItemString(d, "double_slit_diffraction", double_slit_diffraction);
     PyDict_SetItemString(d, "inverse_square_well_diffraction",
                          inverse_square_well_diffraction);
     PyDict_SetItemString(d, "frequency_to_wavelength", frequency_to_wavelength);
@@ -688,6 +689,7 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     PyDict_SetItemString(d, "wavelength_to_wavenumber",
                          wavelength_to_wavenumber);
 
+    Py_DECREF(double_slit_diffraction);
     Py_DECREF(besselJ0);
     Py_DECREF(besselI0);
     Py_DECREF(inverse_square_well_diffraction);
@@ -836,6 +838,7 @@ PyMODINIT_FUNC init__funcs(void)
 
     d = PyModule_GetDict(m);
 
+    PyDict_SetItemString(d, "double_slit_diffraction", double_slit_diffraction);
     PyDict_SetItemString(d, "inverse_square_well_diffraction",
                          inverse_square_well_diffraction);
     PyDict_SetItemString(d, "frequency_to_wavelength", frequency_to_wavelength);
@@ -855,6 +858,7 @@ PyMODINIT_FUNC init__funcs(void)
     PyDict_SetItemString(d, "wavelength_to_wavenumber",
                          wavelength_to_wavenumber);
 
+    Py_DECREF(double_slit_diffraction);
     Py_DECREF(inverse_square_well_diffraction);
     Py_DECREF(frequency_to_wavelength);
     Py_DECREF(fresnel_cos);

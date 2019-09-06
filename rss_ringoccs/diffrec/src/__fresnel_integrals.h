@@ -79,6 +79,7 @@
 
 /*  Various coefficients and constants defined here.                          */
 #include "__math_constants.h"
+#include "__get_array.h"
 
 /******************************************************************************
  *----------------------------Fresnel Cosine----------------------------------*

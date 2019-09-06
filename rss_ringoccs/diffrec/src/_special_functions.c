@@ -30,7 +30,8 @@
  * improvement in performance, as opposed to the routines written purely in  *
  * Python. Successful compiling requires the Numpy and Python header files.  *
  *---------------------------------------------------------------------------*/
-static PyObject *compute_norm_eq(PyObject *self, PyObject *args){
+static PyObject *compute_norm_eq(PyObject *self, PyObject *args)
+{
     PyArrayObject *arr;
     PyObject *tuple = PyTuple_GetItem(args, 0);
 
@@ -140,7 +141,8 @@ static PyObject *compute_norm_eq(PyObject *self, PyObject *args){
     }
 }
 
-static PyObject *max(PyObject *self, PyObject *args){
+static PyObject *max(PyObject *self, PyObject *args)
+{
     PyArrayObject *arr;
     PyObject *tuple = PyTuple_GetItem(args, 0);
 
@@ -242,7 +244,8 @@ static PyObject *max(PyObject *self, PyObject *args){
     }
 }
 
-static PyObject *min(PyObject *self, PyObject *args){
+static PyObject *min(PyObject *self, PyObject *args)
+{
     PyArrayObject *arr;
     PyObject *tuple = PyTuple_GetItem(args, 0);
 
@@ -483,19 +486,15 @@ static char three_real_in_one_real_out[12] = {
 };
 
 static char four_real_in_one_real_out[15] = {
-    NPY_FLOAT, NPY_FLOAT, NPY_FLOAT, NPY_FLOAT,
-    NPY_FLOAT,
-    NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE,
-    NPY_DOUBLE,
+    NPY_FLOAT, NPY_FLOAT, NPY_FLOAT, NPY_FLOAT, NPY_FLOAT,
+    NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE,
     NPY_LONGDOUBLE, NPY_LONGDOUBLE, NPY_LONGDOUBLE, NPY_LONGDOUBLE,
     NPY_LONGDOUBLE
 };
 
 static char four_real_in_one_complex_out[15] = {
-    NPY_FLOAT, NPY_FLOAT, NPY_FLOAT, NPY_FLOAT,
-    NPY_CFLOAT,
-    NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE,
-    NPY_CDOUBLE,
+    NPY_FLOAT, NPY_FLOAT, NPY_FLOAT, NPY_FLOAT, NPY_CFLOAT,
+    NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE, NPY_CDOUBLE,
     NPY_LONGDOUBLE, NPY_LONGDOUBLE, NPY_LONGDOUBLE, NPY_LONGDOUBLE,
     NPY_CLONGDOUBLE
 };

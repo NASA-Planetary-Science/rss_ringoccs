@@ -7,42 +7,36 @@
 #include "__math_functions.h"
 
 static void float_resolution_inverse(char **args, npy_intp *dimensions,
-                                     npy_intp *steps, void *data){
-    npy_intp i;
-    npy_intp n = dimensions[0];
+                                     npy_intp *steps, void *data)
+{
+    npy_intp n_elements = dimensions[0];
 
-    float *in  = (float *)args[0];
-    float *out = (float *)args[1];
+    float *x = (float *)args[0];
+    float *y = (float *)args[1];
 
-    for (i = 0; i < n; i++) {
-        out[i] = Resolution_Inverse_Float(in[i]);
-    }
+    Get_Float_Array(x, y, n_elements, Resolution_Inverse_Float);
 }
 
 static void double_resolution_inverse(char **args, npy_intp *dimensions,
-                                      npy_intp *steps, void *data){
-    npy_intp i;
-    npy_intp n = dimensions[0];
+                                      npy_intp *steps, void *data)
+{
+    npy_intp dim = dimensions[0];
 
     double *in  = (double *)args[0];
     double *out = (double *)args[1];
 
-    for (i = 0; i < n; i++) {
-        out[i] = Resolution_Inverse_Double(in[i]);
-    }
+    Get_Double_Array(in, out, dim, Resolution_Inverse_Double);
 }
 
 static void long_double_resolution_inverse(char **args, npy_intp *dimensions,
-                                           npy_intp *steps, void *data){
-    npy_intp i;
-    npy_intp n = dimensions[0];
+                                           npy_intp *steps, void *data)
+{
+    npy_intp dim = dimensions[0];
 
     long double *in  = (long double *)args[0];
     long double *out = (long double *)args[1];
 
-    for (i = 0; i < n; i++) {
-        out[i] = Resolution_Inverse_Long_Double(in[i]);
-    }
+    Get_Long_Double_Array(in, out, dim, Resolution_Inverse_Long_Double);
 }
 
 #endif

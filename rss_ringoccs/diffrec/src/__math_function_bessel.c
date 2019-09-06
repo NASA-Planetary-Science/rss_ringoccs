@@ -50,8 +50,8 @@
  *      the Taylor expansion. This, combined with trial and error, produced   *
  *      these selected ranges.                                                *
  ******************************************************************************/
-float BesselJ0_Float(float x){
-
+float BesselJ0_Float(float x)
+{
     x = fabsf(x);
     float arg = x*x;
 
@@ -97,8 +97,8 @@ float BesselJ0_Float(float x){
     }
 }
 
-double BesselJ0_Double(double x){
-
+double BesselJ0_Double(double x)
+{
     x = fabs(x);
     double arg = x*x;
 
@@ -151,8 +151,8 @@ double BesselJ0_Double(double x){
     }
 }
 
-long double BesselJ0_Long_Double(long double x){
-
+long double BesselJ0_Long_Double(long double x)
+{
     x = fabsl(x);
     long double arg = x*x;
 
@@ -209,7 +209,8 @@ long double BesselJ0_Long_Double(long double x){
     }
 }
 
-float BesselI0_Float(float x){
+float BesselI0_Float(float x)
+{
 
     x = fabsf(x);
     float bessel_I0, arg;
@@ -249,8 +250,8 @@ float BesselI0_Float(float x){
     }
 }
 
-double BesselI0_Double(double x){
-
+double BesselI0_Double(double x)
+{
     x = fabs(x);
     double bessel_I0, arg;
 
@@ -298,8 +299,8 @@ double BesselI0_Double(double x){
     }
 }
 
-long double BesselI0_Long_Double(long double x){
-
+long double BesselI0_Long_Double(long double x)
+{
     x = fabsl(x);
     long double bessel_I0, arg;
 

@@ -84,374 +84,38 @@
 #include <numpy/ufuncobject.h>
 
 /*  Window functions and Fresnel transforms defined here.                     */
-#include "__window_functions.h"
 #include "__diffraction_functions.h"
-#include "__math_functions.h"
 
-/******************************************************************************
- *  Function:                                                                 *
- *      reset_window                                                          *
- *  Purpose:                                                                  *
- *      Compute an array of points from -width to zero, equally spaced by dx. *
- *      This acts as the independent variable for later use.                  *
- *  Arguments:                                                                *
- *      x_arr (double *):                                                     *
- *          Defined as rho-rho0, where rho0 is the ring radius of the point   *
- *          being reconstructed, and rho is the dummy variable of integration *
- *          which varies from rho0-W/2 to rho0, W being the window width.     *
- *      w_func (double *):                                                    *
- *          The window/tapering function, as a function of x_arr.             *
- *      dx (double):                                                          *
- *          The sample spacing, equivalent to x_arr[1] - x_arr[0].            *
- *      width (double):                                                       *
- *          The width of the window function.                                 *
- *      nw_pts (long):                                                        *
- *          Half the number of points in the window width. The symmetry of    *
- *          the quadratic approximation allows one to perform the inversion   *
- *          with only half of the window. This saves a lot of computation.    *
- *      fw  double (*)(double, double):                                       *
- *          Function pointer to the window function.                          *
- *  Notes:                                                                    *
- *      1.) This is a void function that takes in pointers as arguments. The  *
- *          values of the pointers are changed within this function and there *
- *          is no need to return anything. Hence, no return statement.        *
- ******************************************************************************/
-static void reset_window(double *x_arr, double *w_func, double dx, double width,
-                         long nw_pts, double (*fw)(double, double)){
+static void complex_double_fresnel_transform(char **args, npy_intp *dimensions,
+                                             npy_intp *steps, void *data)
+{
+    DLPObj dlp;
 
-    /*  Create a variable for indexing.                                       */
-    long i;
+    dlp.T_in         = (complex double *)args[0];
+    dlp.rho_km_vals  = (double *)args[1];
+    dlp.F_km_vals    = (double *)args[2];
+    dlp.phi_rad_vals = (double *)args[3];
+    dlp.kd_vals      = (double *)args[4];
+    dlp.B_rad_vals   = (double *)args[5];
+    dlp.D_km_vals    = (double *)args[6];
+    dlp.w_km_vals    = (double *)args[7];
+    dlp.start        = *(long *)args[8];
+    dlp.n_used       = *(long *)args[9];
+    dlp.wtype        = *(int *)args[10];
+    dlp.use_norm     = *(int *)args[11];
+    dlp.use_fwd      = *(int *)args[12];
+    dlp.order        = *(int *)args[13];
+    dlp.T_out        = (complex double *)args[14];
 
-    /* Loop over i, computing the window function and the x_arr variable.     */
-    for(i=0; i<nw_pts; ++i){
-        x_arr[i] = (i-nw_pts)*dx;
-        w_func[i] = fw(x_arr[i], width);
+    if (dlp.order == 0){
+        DiffractionCorrectionNewton(dlp);
     }
-}
-
-static void complex_double_fresnel_transform_quadratic(char **args,
-                                                       npy_intp *dimensions,
-                                                       npy_intp *steps,
-                                                       void *data){
-
-    /*  i and j used for indexing, nw_pts is number of points in window.     */
-    long i, j, nw_pts, center;
-
-    /*  w_init is window width (km), dx and two_dx are sample spacing (km).  */
-    double w_init, two_dx;
-
-    /*  Declare function pointers. fw is window function, FresT is Fresnel   *
-     *  transform. Options for FresT are with or without normalization.      */
-    double (*fw)(double, double);
-    complex double (*FresT)(double*, char*, double*, double,
-                            double, long, npy_intp);
-
-    /*  Grab all data passed in from Python.                                 */
-    char *T_in            = args[0];
-    double dx             = *(double *)args[1];
-    double *F_km_vals     =  (double *)args[2];
-    double *w_km_vals     =  (double *)args[3];
-    long start            = *(long *)args[4];
-    long n_used           = *(long *)args[5];
-    int wtype             = *(int *)args[6];
-    int use_norm          = *(int *)args[7];
-    int use_fwd           = *(int *)args[8];
-    complex double *T_out = (complex double *)args[9];
-
-    /*  Number of steps in memory from the ith point to the (i+1)th point.   */
-    npy_intp T_in_steps  = steps[0];
-
-    /*  Cast the selected window type to the fw pointer.                     */
-    if      (wtype == 0){fw = &Rect_Window_Double;}
-    else if (wtype == 1){fw = &Coss_Window_Double;}
-    else if (wtype == 2){fw = &Kaiser_Bessel_2_0_Double;}
-    else if (wtype == 3){fw = &Kaiser_Bessel_2_5_Double;}
-    else if (wtype == 4){fw = &Kaiser_Bessel_3_5_Double;}
-    else if (wtype == 5){fw = &Modified_Kaiser_Bessel_2_0_Double;}
-    else if (wtype == 6){fw = &Modified_Kaiser_Bessel_2_5_Double;}
-    else    {fw = &Modified_Kaiser_Bessel_3_5_Double;}
-
-    /*  Cast FresT to the appropriate function.                               */
-    if (use_norm){FresT = &Fresnel_Transform_Norm_Double;}
-    else {FresT = &Fresnel_Transform_Double;}
-
-    /* Move the pointers to the correct starting point. Compute window width.*/
-    T_in   += start*T_in_steps;
-    w_init  = w_km_vals[start];
-    center  = start;
-
-    /*  Compute some extra necessary variables.                               */
-    two_dx = 2.0*dx;
-    nw_pts = (long)(w_init / (two_dx));
-
-    /*  Reserve some memory for two arrays, the ring radius and the window    *
-     *  function. This will need to be reallocated later if the window width  *
-     *  changes by more than two_dx.                                          */
-    double* x_arr  = (double *)malloc(sizeof(double)*nw_pts);
-    double* w_func = (double *)malloc(sizeof(double)*nw_pts);
-
-    /*  Pass the x_arr array (ring radius) to the void function get_arr.      *
-     *  This alters the x_arr pointer so that it's values range from -W/2 to  *
-     *  zero, where W is the window width.                                    */
-    reset_window(x_arr, w_func, dx, w_init, nw_pts, fw);
-
-    /* Compute Window Functions, and compute pi/2 * x^2                       */
-    for(j=0; j<nw_pts; ++j){
-        x_arr[j] *= PI_BY_TWO*x_arr[j];
-
-        /*  If forward transform is selected, negate x_arr.                   */
-        x_arr[j] *= (use_fwd == 0) - (use_fwd == 1);
+    else if (dlp.order == 1){
+        DiffractionCorrectionFresnel(dlp);
     }
-
-    /*  Compute the Fresnel transform across the input data.                  */
-    for (i=0; i<=n_used; ++i){
-        if (fabs(w_init - w_km_vals[center]) >= two_dx) {
-            /* Reset w_init and recompute window function.                    */
-            w_init = w_km_vals[center];
-            nw_pts = (long)(w_init / two_dx);
-
-            /*  Reallocate memory, since the sizes of the arrays changed.     */
-            w_func = (double *)realloc(w_func, sizeof(double)*nw_pts);
-            x_arr  = (double *)realloc(x_arr, sizeof(double)*nw_pts);
-
-            /*  Reset the x_arr array to range between -W/2 and zero.         */
-            reset_window(x_arr, w_func, dx, w_init, nw_pts, fw);
-
-            /* Compute Window Functions, and compute pi/2 * x^2               */
-            for(j=0; j<nw_pts; ++j){
-                x_arr[j] *= PI_BY_TWO*x_arr[j];
-                x_arr[j] *= (use_fwd == 0) - (use_fwd == 1);
-            }
-        }
-
-        /*  Compute the Fresnel Transform about the current point.           */
-        T_out[center] = FresT(x_arr, T_in, w_func, F_km_vals[center], dx,
-                              nw_pts, T_in_steps);
-
-        /*  Move the pointers to the next point.                             */
-        center += 1;
-        T_in   += T_in_steps;
+    else {
+        DiffractionCorrectionLegendre(dlp);
     }
-    free(x_arr);
-    free(w_func);
-}
-
-static void complex_double_fresnel_transform_legendre(char **args,
-                                                      npy_intp *dimensions,
-                                                      npy_intp *steps,
-                                                      void* data){
-    long i, nw_pts, center;
-    double w_init, two_dx, cosb, sinp, cosp;
-    double Legendre_Coeff;
-    double (*fw)(double, double);
-    complex double (*FresT)(double*, char*, double*, double, double *,
-                            double, double, double, long, int, npy_intp);
-
-    char *T_in            = args[0];
-    double dx             = *(double *)args[1];
-    double *F_km_vals     =  (double *)args[2];
-    double *phi_rad_vals  =  (double *)args[3];
-    double *kd_vals       =  (double *)args[4];
-    double *B_rad_vals    =  (double *)args[5];
-    double *D_km_vals     =  (double *)args[6];
-    double *w_km_vals     =  (double *)args[7];
-    long start            = *(long *)args[8];
-    long n_used           = *(long *)args[9];
-    int wtype             = *(int *)args[10];
-    int use_norm          = *(int *)args[11];
-    int use_fwd           = *(int *)args[12];
-    int order             = *(int *)args[13];
-
-    complex double *T_out =  (complex double *)args[14];
-
-    npy_intp T_in_steps = steps[0];
-
-    /*  Cast the selected window type to the fw pointer.                      */
-    if      (wtype == 0){fw = &Rect_Window_Double;}
-    else if (wtype == 1){fw = &Coss_Window_Double;}
-    else if (wtype == 2){fw = &Kaiser_Bessel_2_0_Double;}
-    else if (wtype == 3){fw = &Kaiser_Bessel_2_5_Double;}
-    else if (wtype == 4){fw = &Kaiser_Bessel_3_5_Double;}
-    else if (wtype == 5){fw = &Modified_Kaiser_Bessel_2_0_Double;}
-    else if (wtype == 6){fw = &Modified_Kaiser_Bessel_2_5_Double;}
-    else                {fw = &Modified_Kaiser_Bessel_3_5_Double;}
-
-    if (use_norm){FresT = &Fresnel_Legendre_Norm_Double;}
-    else         {FresT = &Fresnel_Legendre_Double;}
-
-    /* Compute first window width and window function. */
-    T_in  += start * T_in_steps;
-    center = start;
-
-    if (use_fwd){
-        for (i=0; i <= n_used; ++i){
-            kd_vals[i] *= -1.0;
-        }
-    }
-
-    w_init = w_km_vals[center];
-    two_dx = 2.0*dx;
-    nw_pts = (long)(w_init / (two_dx));
-
-    double* x_arr              = (double *)malloc(sizeof(double) * nw_pts);
-    double* w_func             = (double *)malloc(sizeof(double) * nw_pts);
-    double* legendre_p         = (double *)malloc(sizeof(double) * (order+1));
-    double* alt_legendre_p     = (double *)malloc(sizeof(double) * order);
-    double* fresnel_ker_coeffs = (double *)malloc(sizeof(double) * order);
-
-    reset_window(x_arr, w_func, dx, w_init, nw_pts, fw);
-
-    for (i = 0; i <= n_used; ++i){
-        cosb            = cos(B_rad_vals[center]);
-        cosp            = cos(phi_rad_vals[center]);
-        sinp            = sin(phi_rad_vals[center]);
-        Legendre_Coeff  = cosb*sinp;
-        Legendre_Coeff *= Legendre_Coeff;
-        Legendre_Coeff  = 0.5*Legendre_Coeff/(1.0-Legendre_Coeff);
-
-        /* Compute Legendre Polynomials,                                      */
-        Legendre_Polynomials(legendre_p, cosb*cosp, order+1);
-        Alt_Legendre_Polynomials(alt_legendre_p, legendre_p, order);
-
-        /*  Compute the coefficients using Cauchy Products. First compute     *
-         *  the bottom triangle of the square in the product.                 */
-        Fresnel_Kernel_Coefficients(fresnel_ker_coeffs, legendre_p,
-                                    alt_legendre_p, Legendre_Coeff, order);
-
-        /*  If the window width changes significantly, recompute w_func.      */
-        if (fabs(w_init - w_km_vals[center]) >= two_dx) {
-
-            /* Reset w_init and recompute window function.                    */
-            w_init = w_km_vals[center];
-            nw_pts = (long)(w_init / two_dx);
-            w_func = (double *)realloc(w_func, sizeof(double)*nw_pts);
-            x_arr  = (double *)realloc(x_arr, sizeof(double)*nw_pts);
-            reset_window(x_arr, w_func, dx, w_init, nw_pts, fw);
-        }
-
-        /*  Compute the fresnel tranform about the current point.             */
-        T_out[center] = FresT(x_arr, T_in, w_func, D_km_vals[center],
-                              fresnel_ker_coeffs, dx, F_km_vals[center],
-                              kd_vals[center], nw_pts, order, T_in_steps);
-
-        /*  Increment T_in pointer using pointer arithmetic.                  */
-        T_in   += T_in_steps;
-        center += 1;
-    }
-
-    free(x_arr);
-    free(w_func);
-    free(legendre_p);
-    free(alt_legendre_p);
-    free(fresnel_ker_coeffs);
-}
-
-static void complex_double_fresnel_transform_newton(char **args,
-                                                    npy_intp *dimensions,
-                                                    npy_intp* steps,
-                                                    void* data){
-    long i, j, nw_pts, toler, center;
-    double w_init, dx, two_dx, EPS;
-
-    toler = 5;
-    EPS = 1.E-4;
-
-    double (*fw)(double, double);
-    complex double (*FresT)(double *, double *, char *, double *, double,
-                            double, double, double, double, long, double,
-                            double, long, npy_intp);
-
-    char *T_in            = args[0];
-    double *rho_km_vals   = (double *)args[1];
-    double *F_km_vals     = (double *)args[2];
-    double *phi_rad_vals  = (double *)args[3];
-    double *kd_vals       = (double *)args[4];
-    double *B_rad_vals    = (double *)args[5];
-    double *D_km_vals     = (double *)args[6];
-    double *w_km_vals     = (double *)args[7];
-    long start            = *(long *)args[8];
-    long n_used           = *(long *)args[9];
-    int wtype             = *(int *)args[10];
-    int use_norm          = *(int *)args[11];
-    int use_fwd           = *(int *)args[12];
-    complex double *T_out = (complex double *)args[13];
-
-    npy_intp T_in_steps     = steps[0];
-
-    /*  Cast the selected window type to the fw pointer.                      */
-    if      (wtype == 0){fw = &Rect_Window_Double;}
-    else if (wtype == 1){fw = &Coss_Window_Double;}
-    else if (wtype == 2){fw = &Kaiser_Bessel_2_0_Double;}
-    else if (wtype == 3){fw = &Kaiser_Bessel_2_5_Double;}
-    else if (wtype == 4){fw = &Kaiser_Bessel_3_5_Double;}
-    else if (wtype == 5){fw = &Modified_Kaiser_Bessel_2_0_Double;}
-    else if (wtype == 6){fw = &Modified_Kaiser_Bessel_2_5_Double;}
-    else                {fw = &Modified_Kaiser_Bessel_3_5_Double;}
-
-    if (use_norm){FresT = &Fresnel_Transform_Newton_Norm_Double;}
-    else {FresT = &Fresnel_Transform_Newton_Double;}
-
-    /* Compute first window width and window function. */
-    center = start;
-    T_in  += start * T_in_steps;
-
-    if (use_fwd){
-        for (i=0; i<=n_used; ++i){
-            kd_vals[center+i] *= -1.0;
-        }
-    }
-
-    w_init  = w_km_vals[center];
-    dx      = rho_km_vals[center+1] - rho_km_vals[center];
-    two_dx  = 2.0*dx;
-    nw_pts  = 2*((long)(w_init / (2.0 * dx)))+1;
-
-    double *x_arr   = (double *)malloc(sizeof(double) * nw_pts);
-    double *phi_arr = (double *)malloc(sizeof(double) * nw_pts);
-    double *w_func  = (double *)malloc(sizeof(double) * nw_pts);
-
-    for (j=0; j<nw_pts; ++j){
-        x_arr[j]   = rho_km_vals[center+j-(nw_pts-1)/2];
-        phi_arr[j] = phi_rad_vals[center+j-(nw_pts-1)/2];
-        w_func[j]  = fw(x_arr[j] - rho_km_vals[center], w_init);
-    }
-
-    for (i=0; i<=n_used; ++i){
-
-        /*  If the window width changes significantly, recompute w_func.  */
-        if (fabs(w_init - w_km_vals[center]) >= two_dx) {
-            // Reset w_init and recompute window function.
-            w_init  = w_km_vals[center];
-            nw_pts  = 2*((int)(w_init / (2.0 * dx)))+1;
-            w_func  = (double *)realloc(w_func,  sizeof(double) * nw_pts);
-            phi_arr = (double *)realloc(phi_arr, sizeof(double) * nw_pts);
-            x_arr   = (double *)realloc(x_arr,   sizeof(double) * nw_pts);
-            for (j=0; j<nw_pts; ++j){
-                x_arr[j]   = rho_km_vals[center+j-(nw_pts-1)/2];
-                phi_arr[j] = phi_rad_vals[center+j-(nw_pts-1)/2];
-                w_func[j]  = fw(x_arr[j] - rho_km_vals[center], w_init);
-            }
-        }
-        else {
-            for (j=0; j<nw_pts; ++j){
-                x_arr[j]   = rho_km_vals[center+j-(nw_pts-1)/2];
-                phi_arr[j] = phi_rad_vals[center+j-(nw_pts-1)/2];
-            }
-        }
-
-        /*  Compute the fresnel tranform about the current point.   */
-        T_out[center] = FresT(x_arr, phi_arr, T_in, w_func, kd_vals[center],
-                              rho_km_vals[center], B_rad_vals[center],
-                              D_km_vals[center], EPS, toler, dx,
-                              F_km_vals[center], nw_pts, T_in_steps);
-
-        /*  Increment pointers using pointer arithmetic.                      */
-        T_in   += T_in_steps;
-        center += 1;
-    }
-    free(x_arr);
-    free(phi_arr);
-    free(w_func);
 }
 
 /******************************************************************************
@@ -461,34 +125,13 @@ static void complex_double_fresnel_transform_newton(char **args,
 static PyMethodDef _diffraction_functions_methods[] = {{NULL, NULL, 0, NULL}};
 
 /* Define pointers to the C functions. */
-PyUFuncGenericFunction f_quad_funcs[1] = {
-    &complex_double_fresnel_transform_quadratic
+PyUFuncGenericFunction funcs[1] = {
+    &complex_double_fresnel_transform
 };
 
-PyUFuncGenericFunction f_legendre_funcs[1] = {
-    &complex_double_fresnel_transform_legendre
-};
-
-PyUFuncGenericFunction f_newtn_funcs[1] = {
-    &complex_double_fresnel_transform_newton
-};
-
-/* Input and return types for Quadratic Fresnel Transform */
-static char quad_data_types[10] = {
-    NPY_CDOUBLE,
-    NPY_DOUBLE,
-    NPY_DOUBLE,
-    NPY_DOUBLE,
-    NPY_LONG,
-    NPY_LONG,
-    NPY_LONG,
-    NPY_LONG,
-    NPY_LONG,
-    NPY_CDOUBLE
-};
 
 /* Input and return types for Quartic Fresnel Transform */
-static char legendre_data_types[15] = {
+static char data_types[15] = {
     NPY_CDOUBLE,
     NPY_DOUBLE,
     NPY_DOUBLE,
@@ -498,23 +141,6 @@ static char legendre_data_types[15] = {
     NPY_DOUBLE,
     NPY_DOUBLE,
     NPY_LONG,
-    NPY_LONG,
-    NPY_LONG,
-    NPY_LONG,
-    NPY_LONG,
-    NPY_LONG,
-    NPY_CDOUBLE
-};
-
-static char newton_data_types[14] = {
-    NPY_CDOUBLE,
-    NPY_DOUBLE,
-    NPY_DOUBLE,
-    NPY_DOUBLE,
-    NPY_DOUBLE,
-    NPY_DOUBLE,
-    NPY_DOUBLE,
-    NPY_DOUBLE,
     NPY_LONG,
     NPY_LONG,
     NPY_LONG,
@@ -534,10 +160,7 @@ static struct PyModuleDef moduledef = {PyModuleDef_HEAD_INIT,
                                        NULL, NULL, NULL, NULL};
 
 PyMODINIT_FUNC PyInit__diffraction_functions(void){
-    PyObject *fresnel_transform_quadratic;
-    PyObject *fresnel_transform_legendre;
-    PyObject *fresnel_transform_newton;
-
+    PyObject *fresnel_transform;
     PyObject *m, *d;
 
     m = PyModule_Create(&moduledef);
@@ -548,41 +171,20 @@ PyMODINIT_FUNC PyInit__diffraction_functions(void){
     import_array();
     import_umath();
 
-    fresnel_transform_quadratic = PyUFunc_FromFuncAndData(
-        f_quad_funcs, PyuFunc_data, quad_data_types,
-        1, 9, 1, PyUFunc_None, "fresnel_transform_quadratic",
-        "fresnel_transform_quadratic_docstring", 0
-    );
-
-    fresnel_transform_legendre = PyUFunc_FromFuncAndData(
-        f_legendre_funcs, PyuFunc_data, legendre_data_types,
-        1, 14, 1, PyUFunc_None, "fresnel_transform_cubic",
-        "fresnel_transform_cubic_docstring", 0
-    );
-
-
-    fresnel_transform_newton = PyUFunc_FromFuncAndData(
-        f_newtn_funcs, PyuFunc_data, newton_data_types,
-        1, 13, 1, PyUFunc_None, "fresnel_transform_newton",
-        "fresnel_transform_newton_docstring", 0
+    fresnel_transform = PyUFunc_FromFuncAndData(
+        funcs, PyuFunc_data, data_types, 1, 14, 1, PyUFunc_None,
+        "fresnel_transform", "fresnel_transform_docstring", 0
     );
 
     d = PyModule_GetDict(m);
 
-    PyDict_SetItemString(d, "fresnel_transform_quadratic", fresnel_transform_quadratic);
-    PyDict_SetItemString(d, "fresnel_transform_legendre", fresnel_transform_legendre);
-    PyDict_SetItemString(d, "fresnel_transform_newton", fresnel_transform_newton);
-    Py_DECREF(fresnel_transform_quadratic);
-    Py_DECREF(fresnel_transform_legendre);
-    Py_DECREF(fresnel_transform_newton);
+    PyDict_SetItemString(d, "fresnel_transform", fresnel_transform);
+    Py_DECREF(fresnel_transform);
     return m;
 }
 #else
 PyMODINIT_FUNC init__diffraction_functions(void){
-    PyObject *fresnel_transform_quadratic;
-    PyObject *fresnel_legendre_transform;
-    PyObject *fresnel_transform_newton;
-
+    PyObject *fresnel_transform;
     PyObject *m, *d;
 
     m = Py_InitModule("_diffraction_functions", _diffraction_functions_methods);
@@ -593,33 +195,15 @@ PyMODINIT_FUNC init__diffraction_functions(void){
     import_array();
     import_umath();
 
-    fresnel_transform_quadratic = PyUFunc_FromFuncAndData(
-        f_quad_funcs, PyuFunc_data, quad_data_types,
-        1, 9, 1, PyUFunc_None, "fresnel_transform_quadratic",
-        "fresnel_transform_quadratic_docstring", 0
-    );
-
-    fresnel_legendre_transform = PyUFunc_FromFuncAndData(
-        f_legendre_funcs, PyuFunc_data, legendre_data_types,
-        1, 14, 1, PyUFunc_None, "fresnel_transform_cubic",
-        "fresnel_transform_cubic_docstring", 0
-    );
-
-
-    fresnel_transform_newton = PyUFunc_FromFuncAndData(
-        f_newtn_funcs, PyuFunc_data, newton_data_types,
-        1, 13, 1, PyUFunc_None, "fresnel_transform_newton",
-        "fresnel_transform_newton_docstring", 0
+    fresnel_transform = PyUFunc_FromFuncAndData(
+        funcs, PyuFunc_data, data_types, 1, 14, 1, PyUFunc_None,
+        "fresnel_transform_", "fresnel_transform", 0
     );
 
     d = PyModule_GetDict(m);
 
-    PyDict_SetItemString(d, "fresnel_transform_quadratic", fresnel_transform_quadratic);
-    PyDict_SetItemString(d, "fresnel_legendre_transform", fresnel_legendre_transform);
-    PyDict_SetItemString(d, "fresnel_transform_newton", fresnel_transform_newton);
-    Py_DECREF(fresnel_transform_quadratic);
-    Py_DECREF(fresnel_legendre_transform);
-    Py_DECREF(fresnel_transform_newton);
+    PyDict_SetItemString(d, "fresnel_transform", fresnel_transform);
+    Py_DECREF(fresnel_transform);
     return m;
 }
 #endif

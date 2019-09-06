@@ -181,8 +181,8 @@ static void long_double_single_slit_diffraction(char **args,
  *          Python level, see special_functions.py.                           *
  ******************************************************************************/
 static void float_double_slit_diffraction(char **args, npy_intp *dimensions,
-                                          npy_intp* steps, void* data){
-
+                                          npy_intp* steps, void* data)
+{
     /* Declare i for indexing, n is the number of elements in the array.      */
     npy_intp i;
     npy_intp n = dimensions[0];
@@ -236,13 +236,13 @@ static void double_double_slit_diffraction(char **args, npy_intp *dimensions,
     npy_intp n = dimensions[0];
 
     /* Extract input data and convert to appropriate types.                   */
-    float *x  =  (float *)args[0];
-    float  z  = *(float *)args[1];
-    float  a  = *(float *)args[2];
-    float  d  = *(float *)args[3];
+    double *x  =  (double *)args[0];
+    double  z  = *(double *)args[1];
+    double  a  = *(double *)args[2];
+    double  d  = *(double *)args[3];
 
     /* The output is a pointer to a complex float.                            */
-    float *out = (float *)args[4];
+    double *out = (double *)args[4];
 
     /* Loop over the square well function found in __fresnel_diffraction.h    */
     for (i = 0; i < n; i++) {
@@ -285,13 +285,13 @@ static void long_double_double_slit_diffraction(char **args,
     npy_intp n = dimensions[0];
 
     /* Extract input data and convert to appropriate types.                   */
-    float *x  =  (float *)args[0];
-    float  z  = *(float *)args[1];
-    float  a  = *(float *)args[2];
-    float  d  = *(float *)args[3];
+    long double *x  =  (long double *)args[0];
+    long double  z  = *(long double *)args[1];
+    long double  a  = *(long double *)args[2];
+    long double  d  = *(long double *)args[3];
 
     /* The output is a pointer to a complex float.                            */
-    float *out = (float *)args[4];
+    long double *out = (long double *)args[4];
 
     /* Loop over the square well function found in __fresnel_diffraction.h    */
     for (i = 0; i < n; i++) {

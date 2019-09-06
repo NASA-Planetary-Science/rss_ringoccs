@@ -21,7 +21,8 @@
  *      1.) This function relies on the C99 standard, or higher.              *
  ******************************************************************************/
 complex float Inverted_Square_Well_Diffraction_Float(float x, float a,
-                                                     float b, float F){
+                                                     float b, float F)
+{
     float arg1 = SQRT_PI_BY_2*(a-x)/F;
     float arg2 = SQRT_PI_BY_2*(b-x)/F;
     complex float result = Fresnel_Heald_Rational_EPS_Minus_Eight_Func(arg2) -
@@ -49,7 +50,8 @@ complex float Inverted_Square_Well_Diffraction_Float(float x, float a,
  *      1.) This function relies on the C99 standard, or higher.              *
  ******************************************************************************/
 complex double Inverted_Square_Well_Diffraction_Double(double x, double a,
-                                                       double b, double F){
+                                                       double b, double F)
+{
     double arg1 = SQRT_PI_BY_2*(a-x)/F;
     double arg2 = SQRT_PI_BY_2*(b-x)/F;
     complex double result = Fresnel_Heald_Rational_EPS_Minus_Eight_Func(arg2) -

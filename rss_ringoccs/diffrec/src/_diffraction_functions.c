@@ -2,66 +2,8 @@
  *                          Diffraction Functions                             *
  ******************************************************************************
  *  Purpose:                                                                  *
- *      This file contains functions used for computing the Fresnel Inverse   *
- *      Transform on a set of diffraction limited data. There are several     *
- *      Methods of performing this:                                           *
- *          Fresnel Quadratic Approximation:                                  *
- *              Classic quadratic approximation from Fourier Optics.          *
- *          Legendre Expansions:                                              *
- *              Uses Legendre polynomials to approximate the Fresnel kernel.  *
- *          Newton-Raphon Method:                                             *
- *              Uses Newton-Raphson root finding method to compute the        *
- *              stationary value of the Fresnel kernel.                       *
- ******************************************************************************
- *  The Inverse Fresnel Transform:                                            *
- *                                                                            *
- *                W/2                                                         *
- *                 -                                                          *
- *                | |                                                         *
- *     T(rho) =   |   T_hat(r_0)w(r-r_0)exp(-i psi(r,r_0)) dr_0               *
- *              | |                                                           *
- *               -                                                            *
- *              -W/2                                                          *
- *                                                                            *
- *  Where T_hat is the diffracted data, w is the window function, r is        *
- *  the ring intercept point, and r_0 is a dummy variable of integration.     *
- *  psi is the Fresnel Kernel, and exp is simply the exponential function.    *
- ******************************************************************************
- *  The Normalization Scheme:                                                 *
- *      As the resolution get's too high, say 10 km or greater, the window    *
- *      width quickly shrinks to zero. Thus the integral will be close to     *
- *      zero. To account for this the option to normalize the integral by the *
- *      window width is offered. The normalization is defined as follows:     *
- *                                                                            *
- *                    |     _ +infinity           |                           *
- *                    |    | |                    |                           *
- *                    |    |    exp(-i psi(x)) dx |                           *
- *                    |  | |                      |                           *
- *                    |   -  -infinity            |                           *
- *          Norm =  __________________________________                        *
- *                  |    -  +W/2                    |                         *
- *                  |   | |                         |                         *
- *                  |   |    w(x) exp(-i psi(x)) dx |                         *
- *                  | | |                           |                         *
- *                  |  -   -W/2                     |                         *
- *                                                                            *
- *      This has the effect of making the free-space regions, or regions which*
- *      were not affected by diffraction, evaluate to approximately one,      *
- *      regardless of what resolution was chosen.                             *
- ******************************************************************************
- *                              DEFINED FUNCTIONS                             *
- ******************************************************************************
- *  complex_double_fresnel_transform_quadratic:                               *
- *      Computes the Fresnel Inverse Transform using Fresnel's approximation. *
- *      This is the fastest, but can be inaccurate for certain geometries.    *
- ******************************************************************************
- *  complex_double_fresnel_legendre_transform:                                *
- *      Approximates the transform using Legendre polynomials. This is very   *
- *      fast and accurate. It is the default method called from Python.       *
- ******************************************************************************
- *  complex_double_fresnel_transform_newton:                                  *
- *      Uses Newton-Raphson to compute the stationary value of the Fresnel    *
- *      Kernel. This is the most accurate, but also the slowest.              *
+ *      This file contains wrappers for the routines found in                 *
+ *      __diffraction_functions.c to allow use with the Python interpreter.   *
  ******************************************************************************
  *                             A FRIENDY WARNING                              *
  ******************************************************************************
@@ -101,10 +43,10 @@ static void complex_double_fresnel_transform(char **args, npy_intp *dimensions,
     dlp.w_km_vals    = (double *)args[7];
     dlp.start        = *(long *)args[8];
     dlp.n_used       = *(long *)args[9];
-    dlp.wtype        = *(int *)args[10];
-    dlp.use_norm     = *(int *)args[11];
-    dlp.use_fwd      = *(int *)args[12];
-    dlp.order        = *(int *)args[13];
+    dlp.wtype        = *(unsigned char *)args[10];
+    dlp.use_norm     = *(unsigned char *)args[11];
+    dlp.use_fwd      = *(unsigned char *)args[12];
+    dlp.order        = *(unsigned char *)args[13];
     dlp.T_out        = (complex double *)args[14];
 
     if (dlp.order == 0){
@@ -118,19 +60,12 @@ static void complex_double_fresnel_transform(char **args, npy_intp *dimensions,
     }
 }
 
-/******************************************************************************
- *----------------------------C Python API Stuff------------------------------*
- ******************************************************************************/
-
 static PyMethodDef _diffraction_functions_methods[] = {{NULL, NULL, 0, NULL}};
 
 /* Define pointers to the C functions. */
-PyUFuncGenericFunction funcs[1] = {
-    &complex_double_fresnel_transform
-};
+PyUFuncGenericFunction funcs[1] = {&complex_double_fresnel_transform};
 
-
-/* Input and return types for Quartic Fresnel Transform */
+/* Input and return types for the Fresnel Transform                           */
 static char data_types[15] = {
     NPY_CDOUBLE,
     NPY_DOUBLE,
@@ -142,24 +77,23 @@ static char data_types[15] = {
     NPY_DOUBLE,
     NPY_LONG,
     NPY_LONG,
-    NPY_LONG,
-    NPY_LONG,
-    NPY_LONG,
-    NPY_LONG,
+    NPY_UBYTE,
+    NPY_UBYTE,
+    NPY_UBYTE,
+    NPY_UBYTE,
     NPY_CDOUBLE
 };
 
 static void *PyuFunc_data[1] = {NULL};
 
 #if PY_VERSION_HEX >= 0x03000000
-static struct PyModuleDef moduledef = {PyModuleDef_HEAD_INIT,
-                                       "_diffraction_functions",
-                                       NULL,
-                                       -1,
-                                       _diffraction_functions_methods,
-                                       NULL, NULL, NULL, NULL};
+static struct PyModuleDef moduledef = {
+    PyModuleDef_HEAD_INIT, "_diffraction_functions", NULL, -1,
+    _diffraction_functions_methods, NULL, NULL, NULL, NULL
+};
 
-PyMODINIT_FUNC PyInit__diffraction_functions(void){
+PyMODINIT_FUNC PyInit__diffraction_functions(void)
+{
     PyObject *fresnel_transform;
     PyObject *m, *d;
 
@@ -183,7 +117,8 @@ PyMODINIT_FUNC PyInit__diffraction_functions(void){
     return m;
 }
 #else
-PyMODINIT_FUNC init__diffraction_functions(void){
+PyMODINIT_FUNC init__diffraction_functions(void)
+{
     PyObject *fresnel_transform;
     PyObject *m, *d;
 
@@ -197,7 +132,7 @@ PyMODINIT_FUNC init__diffraction_functions(void){
 
     fresnel_transform = PyUFunc_FromFuncAndData(
         funcs, PyuFunc_data, data_types, 1, 14, 1, PyUFunc_None,
-        "fresnel_transform_", "fresnel_transform", 0
+        "fresnel_transform_", "fresnel_transform_docstring", 0
     );
 
     d = PyModule_GetDict(m);

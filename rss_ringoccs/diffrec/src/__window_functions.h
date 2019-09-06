@@ -1,6 +1,7 @@
 #ifndef RSS_RINGOCCS_WINDOW_FUNCTIONS_H
 #define RSS_RINGOCCS_WINDOW_FUNCTIONS_H
 
+#include <complex.h>
 #include "__math_functions.h"
 
 /*  Kaiser-Bessel function with alpha = 2pi                                   */
@@ -85,6 +86,16 @@ extern double Window_Normalization_Long(long *ker, long dim,
 
 double Window_Normalization_Long_Long(long long *ker, long dim,
                                       double dx, double f_scale);
+
+extern float Window_Normalization_Complex_Float(complex float *ker, long dim,
+                                                float dx, float f_scale);
+
+extern double Window_Normalization_Complex_Double(complex double *ker, long dim,
+                                                  double dx, double f_scale);
+
+extern long double Window_Normalization_Complex_Long_Double(
+    complex long double *ker, long dim, long double dx, long double f_scale
+);
 
 /*  Kaiser-Bessel function with arbitrary alpha.                              */
 extern float Kaiser_Bessel_Al_Float(float x, float W, float alpha);

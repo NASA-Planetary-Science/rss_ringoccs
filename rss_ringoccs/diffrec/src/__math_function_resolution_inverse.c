@@ -1,6 +1,6 @@
 #include "__math_functions.h"
 
-double Resolution_Inverse_Float(float x){
+float Resolution_Inverse_Float(float x){
     float P1, P2;
     if (x <= 1.0){
         return nanf("0");

@@ -19,6 +19,7 @@ def configuration(parent_package=None, top_path=None):
             "src/__fresnel_integral_sine.c",
             "src/__fresnel_integral.c",
             "src/__fresnel_kernel.c",
+            "src/__get_array.c",
             "src/__math_function_bessel.c",
             "src/__math_function_lambertw.c",
             "src/__math_function_legendre.c",
@@ -43,6 +44,8 @@ def configuration(parent_package=None, top_path=None):
     config.add_extension('_diffraction_functions', [
             "src/_diffraction_functions.c",
             "src/__diffraction_functions.c",
+            "src/__fresnel_kernel.c",
+            "src/__math_function_bessel.c",
             "src/__math_function_legendre.c",
             "src/__window_function_squared_cosine.c",
             "src/__window_function_kaiser_bessel.c",

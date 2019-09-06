@@ -2,7 +2,8 @@
 
 /***********Left Straightedge Diffraction Using Fresnel Approximation**********/
 
-complex float Left_Straightedge_Diffraction_Float(float x, float edge, float F){
+complex float Left_Straightedge_Diffraction_Float(float x, float edge, float F)
+{
     complex float T_hat;
     float re, im;
 
@@ -16,7 +17,8 @@ complex float Left_Straightedge_Diffraction_Float(float x, float edge, float F){
 }
 
 complex double Left_Straightedge_Diffraction_Double(double x, double edge,
-                                                    double F){
+                                                    double F)
+{
     complex double T_hat;
     double re, im;
 
@@ -30,7 +32,8 @@ complex double Left_Straightedge_Diffraction_Double(double x, double edge,
 }
 
 complex long double Left_Straightedge_Diffraction_Long_Double(
-    long double x, long double edge, long double F){
+    long double x, long double edge, long double F)
+{
     complex long double T_hat;
     long double re, im;
 

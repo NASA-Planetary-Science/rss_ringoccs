@@ -8,8 +8,8 @@
 
 /*----------------------Single Precision Functions----------------------------*/
 
-float Fresnel_Cosine_Taylor_to_Asymptotic_Float(float x){
-
+float Fresnel_Cosine_Taylor_to_Asymptotic_Float(float x)
+{
     /* Variables for S(x) and powers of x, respectively. */
     float cx, arg;
     arg = x*x;
@@ -72,7 +72,8 @@ float Fresnel_Cosine_Taylor_to_Asymptotic_Float(float x){
     }
 }
 
-float Fresnel_Cosine_While_to_Asymptotic_Float(float x){
+float Fresnel_Cosine_While_to_Asymptotic_Float(float x)
+{
     float FRESNEL_COSINE_TAYLOR_COEFFICIENTS[30] = {
         FRESNEL_COSINE_TAYLOR_00, FRESNEL_COSINE_TAYLOR_01,
         FRESNEL_COSINE_TAYLOR_02, FRESNEL_COSINE_TAYLOR_03,
@@ -150,7 +151,8 @@ float Fresnel_Cosine_While_to_Asymptotic_Float(float x){
     }
 }
 
-float Fresnel_Cosine_Heald_Rational_EPS_Minus_Three_Float(float x){
+float Fresnel_Cosine_Heald_Rational_EPS_Minus_Three_Float(float x)
+{
     float A, R, a, b, c, d, sgn_x;
     sgn_x = (x>0)-(x<0);
     x *= SQRT_2_BY_PI*sgn_x;
@@ -178,7 +180,8 @@ float Fresnel_Cosine_Heald_Rational_EPS_Minus_Three_Float(float x){
     return sgn_x*(SQRT_PI_BY_8 - R*sinf(A));
 }
 
-float Fresnel_Cosine_Heald_Rational_EPS_Minus_Four_Float(float x){
+float Fresnel_Cosine_Heald_Rational_EPS_Minus_Four_Float(float x)
+{
     float A, R, a, b, c, d, sgn_x;
     sgn_x = (x>0)-(x<0);
     x *= SQRT_2_BY_PI*sgn_x;
@@ -208,7 +211,8 @@ float Fresnel_Cosine_Heald_Rational_EPS_Minus_Four_Float(float x){
     return sgn_x*(SQRT_PI_BY_8 - R*sinf(A));
 }
 
-float Fresnel_Cosine_Heald_Rational_EPS_Minus_Six_Float(float x){
+float Fresnel_Cosine_Heald_Rational_EPS_Minus_Six_Float(float x)
+{
     float A, R, a, b, c, d, sgn_x;
     sgn_x = (x>0)-(x<0);
     x *= SQRT_2_BY_PI*sgn_x;
@@ -242,7 +246,8 @@ float Fresnel_Cosine_Heald_Rational_EPS_Minus_Six_Float(float x){
     return sgn_x*(SQRT_PI_BY_8 - R*sinf(A));
 }
 
-float Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight_Float(float x){
+float Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight_Float(float x)
+{
     float A, R, a, b, c, d, sgn_x;
     sgn_x = (x>0)-(x<0);
     x *= SQRT_2_BY_PI*sgn_x;
@@ -286,8 +291,8 @@ float Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight_Float(float x){
 
 /*----------------------Double Precision Functions----------------------------*/
 
-double Fresnel_Cosine_Taylor_to_Asymptotic_Double(double x){
-
+double Fresnel_Cosine_Taylor_to_Asymptotic_Double(double x)
+{
     /* Variables for S(x) and powers of x, respectively. */
     double cx, arg;
     arg = x*x;
@@ -356,7 +361,8 @@ double Fresnel_Cosine_Taylor_to_Asymptotic_Double(double x){
     }
 }
 
-double Fresnel_Cosine_While_to_Asymptotic_Double(double x){
+double Fresnel_Cosine_While_to_Asymptotic_Double(double x)
+{
     double FRESNEL_COSINE_TAYLOR_COEFFICIENTS[27] = {
         FRESNEL_COSINE_TAYLOR_00, FRESNEL_COSINE_TAYLOR_01,
         FRESNEL_COSINE_TAYLOR_02, FRESNEL_COSINE_TAYLOR_03,
@@ -436,7 +442,8 @@ double Fresnel_Cosine_While_to_Asymptotic_Double(double x){
     }
 }
 
-double Fresnel_Cosine_Heald_Rational_EPS_Minus_Three_Double(double x){
+double Fresnel_Cosine_Heald_Rational_EPS_Minus_Three_Double(double x)
+{
     double A, R, a, b, c, d, sgn_x;
     sgn_x = (x>0)-(x<0);
     x *= SQRT_2_BY_PI*sgn_x;
@@ -464,7 +471,8 @@ double Fresnel_Cosine_Heald_Rational_EPS_Minus_Three_Double(double x){
     return sgn_x*(SQRT_PI_BY_8 - R*sin(A));
 }
 
-double Fresnel_Cosine_Heald_Rational_EPS_Minus_Four_Double(double x){
+double Fresnel_Cosine_Heald_Rational_EPS_Minus_Four_Double(double x)
+{
     double A, R, a, b, c, d, sgn_x;
     sgn_x = (x>0)-(x<0);
     x *= SQRT_2_BY_PI*sgn_x;
@@ -494,7 +502,8 @@ double Fresnel_Cosine_Heald_Rational_EPS_Minus_Four_Double(double x){
     return sgn_x*(SQRT_PI_BY_8 - R*sin(A));
 }
 
-double Fresnel_Cosine_Heald_Rational_EPS_Minus_Six_Double(double x){
+double Fresnel_Cosine_Heald_Rational_EPS_Minus_Six_Double(double x)
+{
     double A, R, a, b, c, d, sgn_x;
     sgn_x = (x>0)-(x<0);
     x *= SQRT_2_BY_PI*sgn_x;
@@ -528,7 +537,8 @@ double Fresnel_Cosine_Heald_Rational_EPS_Minus_Six_Double(double x){
     return sgn_x*(SQRT_PI_BY_8 - R*sin(A));
 }
 
-double Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight_Double(double x){
+double Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight_Double(double x)
+{
     double A, R, a, b, c, d, sgn_x;
     sgn_x = (x>0)-(x<0);
     x *= SQRT_2_BY_PI*sgn_x;
@@ -572,8 +582,8 @@ double Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight_Double(double x){
 
 /*--------------------Long Double Precision Functions-------------------------*/
 
-long double Fresnel_Cosine_Taylor_to_Asymptotic_Long_Double(long double x){
-
+long double Fresnel_Cosine_Taylor_to_Asymptotic_Long_Double(long double x)
+{
     /* Variables for S(x) and powers of x, respectively. */
     long double cx, arg;
     arg = x*x;
@@ -646,7 +656,8 @@ long double Fresnel_Cosine_Taylor_to_Asymptotic_Long_Double(long double x){
     }
 }
 
-long double Fresnel_Cosine_While_to_Asymptotic_Long_Long_Double(long double x){
+long double Fresnel_Cosine_While_to_Asymptotic_Long_Long_Double(long double x)
+{
     double FRESNEL_COSINE_TAYLOR_COEFFICIENTS[27] = {
         FRESNEL_COSINE_TAYLOR_00, FRESNEL_COSINE_TAYLOR_01,
         FRESNEL_COSINE_TAYLOR_02, FRESNEL_COSINE_TAYLOR_03,

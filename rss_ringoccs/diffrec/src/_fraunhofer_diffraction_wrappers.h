@@ -36,8 +36,8 @@
  *          Python level, see special_functions.py.                           *
  ******************************************************************************/
 static void float_single_slit_diffraction(char **args, npy_intp *dimensions,
-                                          npy_intp* steps, void* data){
-
+                                          npy_intp* steps, void* data)
+{
     /* Declare i for indexing, n is the number of elements in the array.      */
     npy_intp i;
     npy_intp n = dimensions[0];
@@ -83,8 +83,8 @@ static void float_single_slit_diffraction(char **args, npy_intp *dimensions,
  *          Python level, see special_functions.py.                           *
  ******************************************************************************/
 static void double_single_slit_diffraction(char **args, npy_intp *dimensions,
-                                           npy_intp* steps, void* data){
-
+                                           npy_intp* steps, void* data)
+{
     /* Declare i for indexing, n is the number of elements in the array.      */
     npy_intp i;
     npy_intp n = dimensions[0];
@@ -131,8 +131,8 @@ static void double_single_slit_diffraction(char **args, npy_intp *dimensions,
  ******************************************************************************/
 static void long_double_single_slit_diffraction(char **args,
                                                 npy_intp *dimensions,
-                                                npy_intp* steps, void* data){
-
+                                                npy_intp* steps, void* data)
+{
     /* Declare i for indexing, n is the number of elements in the array.      */
     npy_intp i;
     npy_intp n = dimensions[0];

@@ -51,7 +51,28 @@ static PyObject *window_norm(PyObject *self, PyObject *args){
         dim     = PyArray_DIMS(arr)[0];
         data    = PyArray_DATA(arr);
 
-        if (typenum == NPY_FLOAT){
+        if (typenum == NPY_CFLOAT){
+            return PyFloat_FromDouble(
+                Window_Normalization_Complex_Float(
+                    (complex float *)data, dim, dx, f_scale
+                )
+            );
+        }
+        else if (typenum == NPY_CDOUBLE){
+            return PyFloat_FromDouble(
+                Window_Normalization_Complex_Double(
+                    (complex double *)data, dim, dx, f_scale
+                )
+            );
+        }
+        else if (typenum == NPY_CLONGDOUBLE){
+            return PyFloat_FromDouble(
+                Window_Normalization_Complex_Long_Double(
+                    (complex long double *)data, dim, dx, f_scale
+                )
+            );
+        }
+        else if (typenum == NPY_FLOAT){
             return PyFloat_FromDouble(
                 Window_Normalization_Float((float *)data, dim, dx, f_scale)
             );

@@ -10,91 +10,82 @@
 /*  Wrappers for the frequency_to_wavelength function.                        */
 
 static void float_frequency_to_wavelength(char **args, npy_intp *dimensions,
-                                          npy_intp *steps, void *data){
-    long i;
-    long n = dimensions[0];
+                                          npy_intp *steps, void *data)
+{
+    npy_intp n_elements = dimensions[0];
 
-    float *in  = (float *)args[0];
-    float *out = (float *)args[1];
+    float *x = (float *)args[0];
+    float *y = (float *)args[1];
 
-    for (i = 0; i < n; i++) {
-        out[i] = Frequency_To_Wavelength_Float(in[i]);
-    }
+    Get_Float_Array(x, y, n_elements, Frequency_To_Wavelength_Float);
 }
 
 static void double_frequency_to_wavelength(char **args, npy_intp *dimensions,
-                                           npy_intp *steps, void *data){
-    long i;
-    long n = dimensions[0];
+                                           npy_intp *steps, void *data)
+{
+    npy_intp n_elements = dimensions[0];
 
-    double *in  = (double *)args[0];
-    double *out = (double *)args[1];
+    double *x = (double *)args[0];
+    double *y = (double *)args[1];
 
-    for (i = 0; i < n; i++) {
-        out[i] = Frequency_To_Wavelength_Double(in[i]);
-    }
+    Get_Double_Array(x, y, n_elements, Frequency_To_Wavelength_Double);
 }
 
 static void long_double_frequency_to_wavelength(char **args,
                                                 npy_intp *dimensions,
-                                                npy_intp *steps, void *data){
-    long i;
-    long n = dimensions[0];
+                                                npy_intp *steps, void *data)
+{
+    npy_intp n_elements = dimensions[0];
 
-    long double *in  = (long double *)args[0];
-    long double *out = (long double *)args[1];
+    long double *x = (long double *)args[0];
+    long double *y = (long double *)args[1];
 
-    for (i = 0; i < n; i++) {
-        out[i] = Frequency_To_Wavelength_Long_Double(in[i]);
-    }
+    Get_Long_Double_Array(x, y, n_elements,
+                          Frequency_To_Wavelength_Long_Double);
 }
 
 /*  Wrappers for the wavelength_to_wavenumber function.                       */
 
 static void float_wavelength_to_wavenumber(char **args, npy_intp *dimensions,
-                                           npy_intp *steps, void *data){
-    long i;
-    long n = dimensions[0];
+                                           npy_intp *steps, void *data)
+{
+    npy_intp n_elements = dimensions[0];
 
-    float *in  = (float *)args[0];
-    float *out = (float *)args[1];
+    float *x = (float *)args[0];
+    float *y = (float *)args[1];
 
-    for (i = 0; i < n; i++) {
-        out[i] = Wavelength_To_Wavenumber_Float(in[i]);
-    }
+    Get_Float_Array(x, y, n_elements, Wavelength_To_Wavenumber_Float);
 }
 
 static void double_wavelength_to_wavenumber(char **args, npy_intp *dimensions,
-                                            npy_intp *steps, void *data){
-    long i;
-    long n = dimensions[0];
+                                            npy_intp *steps, void *data)
+{
+    npy_intp n_elements = dimensions[0];
 
-    double *in  = (double *)args[0];
-    double *out = (double *)args[1];
+    double *x = (double *)args[0];
+    double *y = (double *)args[1];
 
-    for (i = 0; i < n; i++) {
-        out[i] = Wavelength_To_Wavenumber_Double(in[i]);
-    }
+    Get_Double_Array(x, y, n_elements, Wavelength_To_Wavenumber_Double);
 }
 
 static void long_double_wavelength_to_wavenumber(char **args,
                                                  npy_intp *dimensions,
-                                                 npy_intp *steps, void *data){
-    long i;
-    long n = dimensions[0];
+                                                 npy_intp *steps, void *data)
+{
+    npy_intp n_elements = dimensions[0];
 
-    long double *in  = (long double *)args[0];
-    long double *out = (long double *)args[1];
+    long double *x = (long double *)args[0];
+    long double *y = (long double *)args[1];
 
-    for (i = 0; i < n; i++) {
-        out[i] = Wavelength_To_Wavenumber_Long_Double(in[i]);
-    }
+    Get_Long_Double_Array(x, y, n_elements,
+                          Wavelength_To_Wavenumber_Long_Double);
 }
 
 /*  Wrappers for the Fresnel scale function.                                  */
 
 static void float_fresnel_scale(char **args, npy_intp *dimensions,
-                                npy_intp *steps, void *data){
+                                npy_intp *steps, void *data)
+{
     npy_intp i, j, k, l, m, dim;
 
     float *lambda  = (float *)args[0];
@@ -126,7 +117,8 @@ static void float_fresnel_scale(char **args, npy_intp *dimensions,
 }
 
 static void double_fresnel_scale(char **args, npy_intp *dimensions,
-                                 npy_intp *steps, void *data){
+                                 npy_intp *steps, void *data)
+{
     npy_intp i, j, k, l, m, dim;
 
     double *lambda  = (double *)args[0];
@@ -159,7 +151,8 @@ static void double_fresnel_scale(char **args, npy_intp *dimensions,
 }
 
 static void long_double_fresnel_scale(char **args, npy_intp *dimensions,
-                                      npy_intp *steps, void *data){
+                                      npy_intp *steps, void *data)
+{
     npy_intp i, j, k, l, m, dim;
 
     long double *lambda  = (long double *)args[0];

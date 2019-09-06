@@ -3,6 +3,7 @@
 
 #include <math.h>
 #include "__math_constants.h"
+#include "__get_array.h"
 
 extern float LambertW_Float(float x);
 
@@ -22,7 +23,7 @@ extern void Fresnel_Kernel_Coefficients(double *fresnel_ker_coeffs,
                                         double Legendre_Coeff, int order);
 
 
-extern double Resolution_Inverse_Float(float x);
+extern float Resolution_Inverse_Float(float x);
 
 extern double Resolution_Inverse_Double(double x);
 
@@ -34,6 +35,7 @@ extern float BesselJ0_Float(float x);
 extern double BesselJ0_Double(double x);
 
 extern long double BesselJ0_Long_Double(long double x);
+
 
 extern float BesselI0_Float(float x);
 

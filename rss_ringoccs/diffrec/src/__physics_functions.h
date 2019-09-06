@@ -3,6 +3,7 @@
 
 #include <math.h>
 #include "__math_constants.h"
+#include "__get_array.h"
 
 /*  Wavelength to Wavenumber function.                                        */
 

@@ -103,7 +103,10 @@ def calc_f_sky_recon(f_spm, rsr_inst, sc_name, f_uso, kernels):
     # if tracking mode is multi-way, use the uplink-downlink method
     else:
         # Transmission Station code
-        ts_code = spice.bodn2c(rsr_inst.ul_dsn)
+        if len(rsr_inst.ul_dsn.split('-')[-1]) != 2:
+            ts_code = rs_code
+        else:
+            ts_code = spice.bodn2c(rsr_inst.ul_dsn)
 
         for n in range(n_times):
             et = et_vals[n]

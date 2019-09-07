@@ -206,9 +206,9 @@ class Geometry(object):
             check_posz = np.logical_and(rz1>0, rz2>0)
             check_negz = np.logical_and(rz1<0, rz2<0)
             mask = ~(np.logical_or(check_posz, check_negz))
-            if (mask==False).all() is True:
+            if (mask==False).all() == True:
                 raise ValueError('No ring intercepts found!')
-            if (mask==True).all() is False:
+            if (mask==True).all() == False:
 
 
 
@@ -255,32 +255,44 @@ class Geometry(object):
 
         # Calculate uplink ring intercept point for post-USO events
         if year >= 2011:
-            sc_code = spice.bodn2c(spacecraft)
-            try:
-                ul_dsn_code = spice.bodn2c(ul_dsn)
-            except:
-                if verbose:
-                    print('\tUplink DSN station not found -- using Earth as observer')
+            self.rev_info['ul_dsn'] = ul_dsn
+            (t_ul_et_vals, t_ul_ret_vals, self.ul_rho_km_vals,
+                    self.ul_phi_rl_deg_vals, self.ul_phi_ora_deg_vals) = (
+                            cog.calc_uplink_geo(ul_dsn, t_set_et_vals,
+                                spacecraft, planet, nhat_p, ref=ref))
+            self.t_ul_spm_vals = et_to_spm(t_ul_et_vals)#, ref_doy=doy)
+            self.t_ul_ret_spm_vals = et_to_spm(t_ul_ret_vals)#, ref_doy=doy)
 
-                ul_dsn_code = spice.bodn2c('Earth')
-                ul_dsn = 'Earth'
-            t_ul_et_vals_list = []
-            for set_et in t_set_et_vals:
-                ul_et_vals, ltime = spice.ltime(set_et, sc_code, "<-",
-                        ul_dsn_code)
-                t_ul_et_vals_list.append(ul_et_vals)
-            t_ul_et_vals = np.array(t_ul_et_vals_list)
-            ul_rho_vec_km, ul_ret_et = cog.calc_rho_vec_km(
-                    t_set_et_vals, planet, ul_dsn, spacecraft)
-            ul_rho_vec_km, ul_ret_et = cog.calc_rho_vec_km(t_set_et_vals, planet, 'Earth', spacecraft, ring_frame=None)
-            ul_rho_km_vals = [spice.vnorm(vec) for vec in ul_rho_vec_km]
 
-            ul_phi_rl_deg_vals, ul_phi_ora_deg_vals = (
-                    cog.calc_phi_deg(t_set_et_vals, ul_rho_vec_km, spacecraft,
-                        ul_dsn, nhat_p, ref=ref))
-            self.ul_rho_km_vals = np.array(ul_rho_km_vals)
-            self.ul_phi_rl_deg_vals = np.array(ul_phi_rl_deg_vals)
-            self.ul_phi_ora_deg_vals = np.array(ul_phi_ora_deg_vals)
+            #sc_code = spice.bodn2c(spacecraft)
+            #self.rev_info['ul_dsn'] = ul_dsn
+
+            
+            #try:
+            #    ul_dsn_code = spice.bodn2c(ul_dsn)
+            #except:
+            #    if verbose:
+            #        print('\tUplink DSN station not found -- using Earth as observer')
+
+            #    ul_dsn_code = spice.bodn2c('Earth')
+            #    ul_dsn = 'Earth'
+            #t_ul_et_vals_list = []
+            #for set_et in t_set_et_vals:
+            #    ul_et_vals, ltime = spice.ltime(set_et, sc_code, "<-",
+            #            ul_dsn_code)
+            #    t_ul_et_vals_list.append(ul_et_vals)
+            #t_ul_et_vals = np.array(t_ul_et_vals_list)
+            #ul_rho_vec_km, ul_ret_et = cog.calc_rho_vec_km(
+            #        t_set_et_vals, planet, ul_dsn, spacecraft)
+            #ul_rho_vec_km, ul_ret_et = cog.calc_rho_vec_km(t_set_et_vals, planet, 'Earth', spacecraft, ring_frame=None)
+            #ul_rho_km_vals = [spice.vnorm(vec) for vec in ul_rho_vec_km]
+
+            #ul_phi_rl_deg_vals, ul_phi_ora_deg_vals = (
+            #        cog.calc_phi_deg(t_set_et_vals, ul_rho_vec_km, spacecraft,
+            #            ul_dsn, nhat_p, ref=ref))
+            #self.ul_rho_km_vals = np.array(ul_rho_km_vals)
+            #self.ul_phi_rl_deg_vals = np.array(ul_phi_rl_deg_vals)
+            #self.ul_phi_ora_deg_vals = np.array(ul_phi_ora_deg_vals)
 
 
 
@@ -399,6 +411,8 @@ class Geometry(object):
         if write_file:
             self.outfiles = write_output_files(self)
 
+
+
     def __get_naif_version(self):
         """
         Return NAIF toolkit version used.
@@ -474,9 +488,6 @@ class Geometry(object):
 
         ing_blocked = [x for x in t_oet_ing if x in atmos_blocked_spm]
         egr_blocked = [x for x in t_oet_egr if x in atmos_blocked_spm]
-                #self.add_info['False intercept points'] = (
-                #        'indices ' + str(inds[0]) + ' to ' + str(inds[-1])
-                #        + ', or OET from ' + str(t1) + ' to ' + str(t2))
 
         if len(ing_blocked) == n_ing:
             prof_dir = '"EGRESS"'

@@ -1,4 +1,5 @@
 """
+<<<<<<< HEAD
 :Purpose:
         Provide tools for reading in .TAB and .CSV files and converting
         the data into a usable instance of the DLP class.
@@ -7,11 +8,19 @@
     #. pandas
     #. numpy
     #. scipy
+=======
+    :Purpose:
+            Provide tools for reading in .TAB and .CSV files and converting
+            the data into a usable instance of the DLP class.
+
+    :Dependencies:
+        #. pandas
+        #. numpy
+>>>>>>> v1.3
 """
 
 import numpy as np
 import pandas as pd
-from scipy import interpolate
 from .history import write_history_dict, date_to_rev, rev_to_occ_info
 from . import error_check
 
@@ -592,9 +601,13 @@ class ExtractCSVData(object):
                 """ % (fname, dlp)
             )
         elif (drdt < 0.0).all():
-            occ = 'ingress'
+
+            # The rev is ingress, so flip GEO variables.
+            self.rho_dot_kms_vals = np.abs(self.rho_dot_kms_vals[::-1])
+            self.D_km_vals = self.D_km_vals[::-1]
+            geo_rho = geo_rho[::-1]
         elif (drdt > 0.0).all():
-            occ = 'egress'
+            pass
         else:
             raise ValueError(
                 """
@@ -604,6 +617,7 @@ class ExtractCSVData(object):
                 """ % (fname)
             )
 
+<<<<<<< HEAD
         if (occ == 'ingress'):
             crange = (self.rho_dot_kms_vals < 0.0).nonzero()
             self.rho_dot_kms_vals = self.rho_dot_kms_vals[::-1]
@@ -691,6 +705,12 @@ class ExtractCSVData(object):
         self.rho_dot_kms_vals = self.rho_dot_kms_vals[crange]
 
         del crange, geo_dat, cal_dat, dlp_dat
+=======
+        if verbose:
+            print("\tInterpolating Data...")
+
+        del geo_dat, cal_dat, dlp_dat
+>>>>>>> v1.3
 
         raw_mu = np.sin(np.abs(self.B_rad_vals))
         self.p_norm_vals = np.exp(-self.raw_tau_vals/raw_mu)
@@ -737,12 +757,10 @@ class ExtractCSVData(object):
         }
 
         input_kwds = {"TAU Data": self.tau}
-
         self.history = write_history_dict(input_vars, input_kwds, __file__)
-        var = geo.split("/")[-1]
 
         try:
-            var = var.split("_")
+            var = (geo.split("/")[-1]).split("_")
             band = '"%s"' % var[3][0]
             year = var[1]
             doy = var[2]
@@ -779,6 +797,4 @@ class ExtractCSVData(object):
 
         if verbose:
             print("\tHistory Complete.")
-
-        if verbose:
             print("\tExtract CSV Data Complete.")

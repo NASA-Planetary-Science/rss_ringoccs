@@ -6,9 +6,11 @@ fi
 osstring=`uname`
 
 if [ "$osstring" = "Darwin" ]; then
-	fil="Anaconda3-5.1.0-MacOSX-x86_64.sh"
+	BASH_FILE=bash_profile
+	fil="Anaconda3-2019.07-MacOSX-x86_64.sh"
 elif [ "$osstring" = "Linux" ]; then
-	fil="Anaconda3-5.1.0-Linux-x86_64.sh"
+	BASH_FILE=bashrc
+	fil="Anaconda3-2019.07-Linux-x86_64.sh"
 else
 	echo "Operating System not recognized"
 	echo "Only MacOSX and Linux supported"
@@ -24,7 +26,6 @@ webfil="$web$fil"
 # Go to your home directory
 MY_DIRECTORY=$(pwd)
 cd ~
-
 # Check to see if anaconda3 exists on your computer.
 if [ -d anaconda3 ]; then
 	echo -e ' \t ' "You already have Anaconda on your computer."
@@ -33,38 +34,61 @@ else
 	echo -e ' \t ' "Anaconda3 does not currently exist on your computer."
 	echo -e ' \t ' "Running setup scripts now..."
 
-	# Use cURL to download Anaconda 5.1.0.
+	# Use cURL to download Anaconda.
 	curl -Ok "$webfil"
 
 	# Run the Anaconda installer.
-	yes | bash "$fil" -b -p ~/anaconda3
+	chmod +x $fil
+	./$fil
 
 	# Remove the shell script from your home directory.
-	rm -f "$fil"
+	rm -f $fil
 fi
+
+# Source the bashrc/bash_profile file.
+source .$BASH_FILE
 
 # Check that anaconda3 is included in your path
 echo -e ' \t ' "Checking your PATH variable..."
-if [[ ":$PATH:" == *"~/anaconda3/bin"* ]]; then
+if [[ ":$PATH:" == *"/anaconda3/bin"* ]]; then
   echo -e ' \t ' "PATH variable is set"
 else
 	echo -e ' \t ' "Adding ~/anaconda3/bin to your PATH"
-	echo 'export "PATH=~/anaconda3/bin:$PATH"' >>~/.bash_profile
+	echo 'export PATH="~/anaconda3/bin:$PATH"' >>~/.$BASH_FILE
 fi
 
-# Source .bash_profile to update you path.
-echo -e ' \t ' "Sourcing .bash_profile"
+# Source .bashrc/.bash_profile to update you path.
+echo -e ' \t ' "Sourcing .bashrc/.bash_profile"
 echo -e ' \t ' "Make sure you are using Bash when running rss_ringoccs"
-source ~/.bash_profile
+source .$BASH_FILE
 
 # Update conda
+echo -e ' \t ' "Updating conda..."
 yes | conda update conda
 
 # Install Spiceypy
-yes | conda install -c https://conda.anaconda.org/andrewannex spiceypy
+echo -e ' \t ' "Installing spiceypy..."
+yes | conda install -c conda-forge spiceypy
 
-# Source the .bash_profile again after conda updates.
-source .bash_profile
+# Install PyMieScatt
+yes | conda install -c conda-forge pymiescatt
+
+# Source the .bashrc/.bash_profile again after conda updates.
+source .$BASH_FILE
 
 # Change back to working directory
 cd "$MY_DIRECTORY"
+
+# Install rss_ringoccs.
+cd ./rss_ringoccs/diffrec/
+
+# Remove any old compiled binary files.
+rm -f *.so
+
+# Compile the new binary files.
+python setup.py config --compiler=gnu99 build_ext --inplace
+rm -rf build/
+
+cd "$MY_DIRECTORY"
+
+echo "Installation complete"

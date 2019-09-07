@@ -267,7 +267,10 @@ class Normalization(object):
 
         # normalize corrected power to max corrected power inside occultation
         if len(gaps_spm)==2 or len(gaps_spm)==3:
-            pc_max = np.nanmax(pc[(spm>=gaps_spm[0][1])&(spm<=gaps_spm[-1][0])])
+            if gaps_spm[0][1] == gaps_spm[-1][0]:
+                pc_max = np.nanmax(pc[(spm>=gaps_spm[0][0])&(spm<=gaps_spm[-1][-1])])
+            else:
+                pc_max = np.nanmax(pc[(spm>=gaps_spm[0][1])&(spm<=gaps_spm[-1][0])])
         elif len(gaps_spm)==1:
             pc_max = np.nanmax(pc[(spm>gaps_spm[0][0])&(spm<=gaps_spm[0][1])])
         else:

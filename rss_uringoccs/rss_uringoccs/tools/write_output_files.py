@@ -24,6 +24,10 @@ sys.path.append('../../')
 import rss_ringoccs as rss
 sys.path.remove('../../')
 
+sys.path.append('../')
+import rss_uringoccs as urss
+sys.path.remove('../')
+
 import pdb
 import os
 
@@ -47,7 +51,7 @@ def write_output_files(inst):
     rev_info = inst.rev_info
 
     # Check for instance type and write that specific file
-    if isinstance(inst, rss.occgeo.Geometry):
+    if isinstance(inst, urss.occgeo.Geometry):
         filtyp = 'GEO'
 
     elif isinstance(inst, rss.diffrec.DiffractionCorrection):

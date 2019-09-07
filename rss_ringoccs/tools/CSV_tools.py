@@ -1,5 +1,4 @@
 """
-<<<<<<< HEAD
 :Purpose:
         Provide tools for reading in .TAB and .CSV files and converting
         the data into a usable instance of the DLP class.
@@ -8,15 +7,6 @@
     #. pandas
     #. numpy
     #. scipy
-=======
-    :Purpose:
-            Provide tools for reading in .TAB and .CSV files and converting
-            the data into a usable instance of the DLP class.
-
-    :Dependencies:
-        #. pandas
-        #. numpy
->>>>>>> v1.3
 """
 
 import numpy as np
@@ -617,7 +607,6 @@ class ExtractCSVData(object):
                 """ % (fname)
             )
 
-<<<<<<< HEAD
         if (occ == 'ingress'):
             crange = (self.rho_dot_kms_vals < 0.0).nonzero()
             self.rho_dot_kms_vals = self.rho_dot_kms_vals[::-1]
@@ -705,12 +694,6 @@ class ExtractCSVData(object):
         self.rho_dot_kms_vals = self.rho_dot_kms_vals[crange]
 
         del crange, geo_dat, cal_dat, dlp_dat
-=======
-        if verbose:
-            print("\tInterpolating Data...")
-
-        del geo_dat, cal_dat, dlp_dat
->>>>>>> v1.3
 
         raw_mu = np.sin(np.abs(self.B_rad_vals))
         self.p_norm_vals = np.exp(-self.raw_tau_vals/raw_mu)

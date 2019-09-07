@@ -19,7 +19,6 @@ from multiprocessing import Process
 from multiprocessing import Queue
 import numpy as np
 import os
-import pdb
 from scipy.signal import decimate
 import struct
 import sys
@@ -255,11 +254,8 @@ class RSRReader(object):
         # correct header info if not accurate
         if self.year > 2011 :
             self.track_mode = 2
-            if int(sfdu_hdr_dict['sh_ul_dss_id']) < 10 :
-                self.ul_dsn = 'DSS-'+rsr_file[-11:-9]
         else:
             self.track_mode = 1
-        #print(self.ul_dsn)
 
         self.sample_rate_khz = sfdu_hdr_dict['sh_sample_rate']
 

@@ -27,9 +27,6 @@ def write_dlp_series_data(dlp_inst, out_file):
         :dlp_inst (*class*): Instance of DiffractionLimitedProfile class
         :out_file (*str*): Path to output file
     """
-    format_str = ('%14.6F,' + '%10.6F,' + '%10.6F,' + '%12.6F,' + '%12.6F,'
-            + '%14.6E,' + '%14.6E,' + '%12.6F,' + '%14.6E,' + '%14.6F,'
-            + '%14.6F,' + '%14.6F,' + '%12.6F' + '%s')
 
 
     npts = len(dlp_inst.t_oet_spm_vals)
@@ -40,22 +37,57 @@ def write_dlp_series_data(dlp_inst, out_file):
             dlp_inst.p_norm_vals)
 
     f = open(out_file, 'w')
-    for n in range(npts):
-        f.write(format_str % (
-            dlp_inst.rho_km_vals[n],
-            dlp_inst.rho_corr_pole_km_vals[n],
-            dlp_inst.rho_corr_timing_km_vals[n],
-            np.degrees(dlp_inst.phi_rl_rad_vals[n]),
-            np.degrees(dlp_inst.phi_rad_vals[n]),
-            dlp_inst.p_norm_vals[n],
-            tau_norm_vals[n],
-            np.degrees(dlp_inst.phase_rad_vals[n]),
-            dlp_inst.raw_tau_threshold_vals[n],
-            dlp_inst.t_oet_spm_vals[n],
-            dlp_inst.t_ret_spm_vals[n],
-            dlp_inst.t_set_spm_vals[n],
-            np.degrees(dlp_inst.B_rad_vals[n]),
-            '\r\n'))
+
+    # add columns for uplink transmission time, uplink ring event time,
+    # uplink ring intercept, uplink ring longitude, uplink ring azimuth
+    if hasattr(dlp_inst, 'ul_rho_km_vals'):
+        format_str = ('%14.6F,' + '%10.6F,' + '%10.6F,' + '%12.6F,' + '%12.6F,'
+                + '%14.6E,' + '%14.6E,' + '%12.6F,' + '%14.6E,' + '%14.6F,'
+                + '%14.6F,' + '%14.6F,' + '%12.6F,'
+                + '%14.6F,'*3 + '%12.6F,' + '%12.6F' + '%s')
+
+        for n in range(npts):
+            f.write(format_str % (
+                dlp_inst.rho_km_vals[n],
+                dlp_inst.rho_corr_pole_km_vals[n],
+                dlp_inst.rho_corr_timing_km_vals[n],
+                np.degrees(dlp_inst.phi_rl_rad_vals[n]),
+                np.degrees(dlp_inst.phi_rad_vals[n]),
+                dlp_inst.p_norm_vals[n],
+                tau_norm_vals[n],
+                np.degrees(dlp_inst.phase_rad_vals[n]),
+                dlp_inst.raw_tau_threshold_vals[n],
+                dlp_inst.t_oet_spm_vals[n],
+                dlp_inst.t_ret_spm_vals[n],
+                dlp_inst.t_set_spm_vals[n],
+                np.degrees(dlp_inst.B_rad_vals[n]),
+                dlp_inst.t_ul_spm_vals[n],
+                dlp_inst.t_ul_ret_spm_vals[n],
+                dlp_inst.ul_rho_km_vals[n],
+                dlp_inst.ul_phi_rl_deg_vals[n],
+                dlp_inst.ul_phi_ora_deg_vals[n],
+                '\r\n'))
+    else:
+        format_str = ('%14.6F,' + '%10.6F,' + '%10.6F,' + '%12.6F,' + '%12.6F,'
+                + '%14.6E,' + '%14.6E,' + '%12.6F,' + '%14.6E,' + '%14.6F,'
+                + '%14.6F,' + '%14.6F,' + '%12.6F' + '%s')
+
+        for n in range(npts):
+            f.write(format_str % (
+                dlp_inst.rho_km_vals[n],
+                dlp_inst.rho_corr_pole_km_vals[n],
+                dlp_inst.rho_corr_timing_km_vals[n],
+                np.degrees(dlp_inst.phi_rl_rad_vals[n]),
+                np.degrees(dlp_inst.phi_rad_vals[n]),
+                dlp_inst.p_norm_vals[n],
+                tau_norm_vals[n],
+                np.degrees(dlp_inst.phase_rad_vals[n]),
+                dlp_inst.raw_tau_threshold_vals[n],
+                dlp_inst.t_oet_spm_vals[n],
+                dlp_inst.t_ret_spm_vals[n],
+                dlp_inst.t_set_spm_vals[n],
+                np.degrees(dlp_inst.B_rad_vals[n]),
+                '\r\n'))
             
     f.close()
     print('\tDLP data written to: ' + out_file)
@@ -89,9 +121,15 @@ def get_dlp_series_info(rev_info, dlp_inst, series_name, prof_dir):
     # Values for number of columns, number of bytes per column,
     #   number of bytes per column delimiter, number of bytes allocated to
     #   special characters per column
-    formats = ['"F14.6"', '"F10.6"', '"F10.6"', '"F12.6"', '"F12.6"'
-            , '"E14.6"' , '"E14.6"' , '"F12.6"' , '"E14.6"' , '"F14.6"'
-            , '"F14.6"' , '"F14.6"' , '"F12.6"']
+    if hasattr(dlp_inst, 'ul_rho_km_vals'):
+        formats = ['"F14.6"', '"F10.6"', '"F10.6"', '"F12.6"', '"F12.6"'
+                , '"E14.6"' , '"E14.6"' , '"F12.6"' , '"E14.6"' , '"F14.6"'
+                , '"F14.6"' , '"F14.6"' , '"F12.6"'
+                , '"F14.6"', '"F14.6"', '"F14.6"', '"F12.6"', '"F12.6"']
+    else:
+        formats = ['"F14.6"', '"F10.6"', '"F10.6"', '"F12.6"', '"F12.6"'
+                , '"E14.6"' , '"E14.6"' , '"F12.6"' , '"E14.6"' , '"F14.6"'
+                , '"F14.6"' , '"F14.6"' , '"F12.6"']
     ncol = len(formats)
 
     # Values for aligning equal signs
@@ -496,9 +534,6 @@ def get_dlp_series_info(rev_info, dlp_inst, series_name, prof_dir):
             , '"SPACECRAFT EVENT TIME"'
             , '"OBSERVED RING ELEVATION"'
             ]
-    n_objects = len(object_names)
-    data_types = ['ASCII_REAL'] * n_objects
-    formats = ['"F32.16"'] * n_objects
     units = ['"KILOMETER"', '"N/A"', '"N/A"', '"DEGREE"',
             '"DEGREE"', '"N/A"', '"N/A"', '"DEGREE"', '"N/A"', '"SECOND"',
             '"SECOND"', '"SECOND"', '"DEGREE"']
@@ -603,6 +638,57 @@ def get_dlp_series_info(rev_info, dlp_inst, series_name, prof_dir):
             + 'ring opening' + sd + 'angle (Earth elevation angle '
             + 'above the ring plane)."')
             ]
+    if hasattr(dlp_inst, 'ul_rho_km_vals'):
+        object_names.append('"UPLINK TRANSMISSION TIME"')
+        units.append('"SECOND"')
+        reference_times.append(OBJECT_REFERENCE_TIME)
+        object_descriptions.append((
+                '"The time at which photos were transmitted from' + sd
+                + 'the uplink DSN station, given in elapsed seconds after'
+                +  'the moment specified' + sd + 'by REFERENCE_TIME. This time '
+                +  'is earlier than the SPACECRAFT EVENT TIME by' + sd
+                + 'the light travel time between the spacecraft and uplink DSN '
+                + 'station."'))
+
+
+        object_names.append('"UPLINK RING EVENT TIME"')
+        units.append('"SECOND"')
+        reference_times.append(OBJECT_REFERENCE_TIME)
+        object_descriptions.append((
+            '"The time at which photons transmitted by the' + sd
+            + 'uplink DSN station arrive at the ring plane. UPLINK '
+            + 'RING EVENT TIME is' + sd + 'given in '
+            + 'elapsed seconds after the moment specified by REFERENCE_TIME."'))    
+        object_names.append('"UPLINK RING RADIUS"')
+        units.append('"KILOMETER"')
+        reference_times.append(es)
+        object_descriptions.append((
+            '"Radial distance from the center of Saturn to' + sd
+            + 'the ring-plane intercept point at the UPLINK RING EVENT TIME."'))
+
+        object_names.append('"UPLINK RING LONGITUDE"')
+        units.append('"DEGREE"')
+        reference_times.append(es)
+        object_descriptions.append((
+            '"Inertial (J2000) longitude in the ring plane' + sd
+            + 'of the ring-plane intercept point at the UPLINK RING EVENT '
+            + 'TIME."'))
+
+
+        object_names.append('"UPLINK OBSERVED RING AZIMUTH"')
+        units.append('"DEGREE"')
+        reference_times.append(es)
+        object_descriptions.append((
+            '"Measured at the uplink ring-plane intercept' + sd
+            + 'point, starting from the '
+            + 'direction of a photon heading to the spacecraft' + sd
+            + 'and ending at the direction of a local radial vector. '
+            + 'This angle is' + sd + 'projected into the ring plane and '
+            + 'measured in the prograde direction."'))
+    
+    
+    n_objects = len(object_names)
+    data_types = ['ASCII_REAL'] * n_objects
 
     object_values = []
     object_values.append(object_names)

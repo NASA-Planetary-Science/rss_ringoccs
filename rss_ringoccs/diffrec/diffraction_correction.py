@@ -376,6 +376,21 @@ class DiffractionCorrection(object):
             self.phi_rl_rad_vals = np.array(DLP.phi_rl_rad_vals)
             erm = "raw_tau_threshold_vals"
             self.raw_tau_threshold_vals = np.array(DLP.raw_tau_threshold_vals)
+            if hasattr(DLP, 'ul_rho_km_vals'):
+                erm = 'ul_rho_km_vals'
+                self.ul_rho_km_vals = np.array(DLP.ul_rho_km_vals)
+
+                erm = 't_ul_spm_vals'
+                self.t_ul_spm_vals = np.array(DLP.t_ul_spm_vals)
+
+                erm = 't_ul_ret_spm_vals'
+                self.t_ul_ret_spm_vals = np.array(DLP.t_ul_ret_spm_vals)
+
+                erm = 'ul_phi_rl_deg_vals'
+                self.ul_phi_rl_deg_vals = np.array(DLP.ul_phi_rl_deg_vals)
+
+                erm = 'ul_phi_ora_deg_vals'
+                self.ul_phi_ora_deg_vals = np.array(DLP.ul_phi_ora_deg_vals)
         except (TypeError, ValueError, NameError, AttributeError):
             raise TypeError(
                 """
@@ -757,6 +772,14 @@ class DiffractionCorrection(object):
         self.t_oet_spm_vals = self.t_oet_spm_vals[crange]
         self.t_ret_spm_vals = self.t_ret_spm_vals[crange]
         self.t_set_spm_vals = self.t_set_spm_vals[crange]
+
+        # Uplink geometry attributes.
+        if hasattr(self, 'ul_rho_km_vals'):
+            self.ul_rho_km_vals = self.ul_rho_km_vals[crange]
+            self.t_ul_spm_vals = self.t_ul_spm_vals[crange]
+            self.t_ul_ret_spm_vals = self.t_ul_ret_spm_vals[crange]
+            self.ul_phi_rl_deg_vals = self.ul_phi_rl_deg_vals[crange]
+            self.ul_phi_ora_deg_vals = self.ul_phi_ora_deg_vals[crange]
 
         # All other attributes.
         self.mu_vals = self.mu_vals[crange]

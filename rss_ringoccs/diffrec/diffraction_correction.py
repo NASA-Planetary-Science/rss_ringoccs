@@ -164,7 +164,7 @@ class DiffractionCorrection(object):
             History from DLP instance.
         :dx_km (*float*):
             Radial spacing for the data points (km).
-        :f_sky_hz_vals (*np.ndarray*):
+        :f_sky_hz_vals (*numpy.ndarray*):
             Recieved frequency from the spacecraft (Hz).
         :finish (*int*):
             Final point that was reconstructed.
@@ -175,9 +175,9 @@ class DiffractionCorrection(object):
             This contains system info and user info, including
             what operating system was used, username, hostname,
             computer name, and the inputs provided.
-        :lambda_sky_km_vals (*np.ndarray*):
+        :lambda_sky_km_vals (*numpy.ndarray*):
             Wavelength of recieved signal from spacecraft (km).
-        :mu_vals (*np.ndarray*):
+        :mu_vals (*numpy.ndarray*):
             The sine of the ring opening angle (Unitless).
         :n_used (*int*):
             Number of points that were reconstructed.
@@ -187,49 +187,49 @@ class DiffractionCorrection(object):
             Normalized equivalent width computed from window
             that was used during reconstruction. See the
             window_functions submodule for more information.
-        :p_norm_fwd_vals (*np.ndarray*):
+        :p_norm_fwd_vals (*numpy.ndarray*):
             Normalized power computer from the forward modelling
             of the reconstructed data. This will be a None type
             variable unless fwd=True is set. If the
             reconstruction went well, this should mimic the raw
             data, p_norm_vals.
-        :p_norm_vals (*np.ndarray*):
+        :p_norm_vals (*numpy.ndarray*):
             Normalized power from the diffracted signal. This is
             the square of the absolute value of the recieved
             complex transmittance.
-        :phase_fwd_vals (*np.ndarray*):
+        :phase_fwd_vals (*numpy.ndarray*):
             Phase computed from the forward model of the
             reconstructed data. This will be a None type
             variable unless fwd=True is set. If the
             reconstruction went well, this should mimic
             phase_rad_vals. This variable is in radians.
-        :phase_rad_vals (*np.ndarray*):
+        :phase_rad_vals (*numpy.ndarray*):
             Phase from the diffracted signal (Radians).
-        :phase_vals (*np.ndarray*):
+        :phase_vals (*numpy.ndarray*):
             Reconstructed phase (Radians).
-        :phi_rad_vals (*np.ndarray*):
+        :phi_rad_vals (*numpy.ndarray*):
             Ring azimuth angle of the ring intercept (Radians).
-        :phi_rl_rad_vals (*np.ndarray*):
+        :phi_rl_rad_vals (*numpy.ndarray*):
             Ring longitude angle (Radians).
-        :power_vals (*np.ndarray*):
+        :power_vals (*numpy.ndarray*):
             Normalized reconstructed power.
         :psitype (*str*):
             String for psitype (See keywords).
-        :raw_tau_threshold_vals (*np.ndarray*):
+        :raw_tau_threshold_vals (*numpy.ndarray*):
             Threshold optical depth for the diffracted data.
         :res (*float*):
             Requested resolution (See arguments). In kilometers.
-        :rho_corr_pole_km_vals (*np.ndarray*):
+        :rho_corr_pole_km_vals (*numpy.ndarray*):
             Radial corrections from the Planet's pole. This will
             be a None type variable unless provided in the
             DLP class. Otherwise, this is in kilometers.
-        :rho_corr_timing_km_vals (*np.ndarray*):
+        :rho_corr_timing_km_vals (*numpy.ndarray*):
             Radial corrections from timing offsets. This will be
             a None type variable unless provided in the DLP
             class. Otherwise, this is in kilometers.
-        :rho_dot_kms_vals (*np.ndarray*):
+        :rho_dot_kms_vals (*numpy.ndarray*):
             Time derivative of the ring intercept point (km/s).
-        :rho_km_vals (*np.ndarray*):
+        :rho_km_vals (*numpy.ndarray*):
             Ring-intercept-point (RIP) in kilometers.
         :rng (*list*):
             Range that was used for reconstruction. The actual
@@ -241,19 +241,19 @@ class DiffractionCorrection(object):
             Requested Allen deviation (See keywords).
         :start (*int*):
             First point that was reconstructed.
-        :t_oet_spm_vals (*np.ndarray*):
+        :t_oet_spm_vals (*numpy.ndarray*):
             Time the signal is measured on Earth.
-        :t_ret_spm_vals (*np.ndarray*):
+        :t_ret_spm_vals (*numpy.ndarray*):
             Time the signal passes through the diffracting medium.
-        :t_set_spm_vals (*np.ndarray*):
+        :t_set_spm_vals (*numpy.ndarray*):
             Time the signal is emitted from the spacecraft.
-        :tau_threshold_vals (*np.ndarray*):
+        :tau_threshold_vals (*numpy.ndarray*):
             Threshold optical depth of the reconstructed data.
-        :tau_vals (*np.ndarray*):
+        :tau_vals (*numpy.ndarray*):
             Optical depth of the reconstructed data.
         :verbose (*bool*):
             Boolean for Verbose (See keywords).
-        :w_km_vals (*np.ndarray*):
+        :w_km_vals (*numpy.ndarray*):
             Window width as a function of radius (km).
         :wtype (*str*):
             String for wtype (See keywords).
@@ -269,8 +269,6 @@ class DiffractionCorrection(object):
         if verbose:
             print("Processing Diffraction Correction:")
             print("\tRunning Error Check on Input Arguments...")
-        else:
-            pass
 
         error_check.check_type(wtype, str, "wtype", fname)
         error_check.check_type(fwd, bool, "fwd", fname)
@@ -347,42 +345,58 @@ class DiffractionCorrection(object):
 
         try:
             erm = "rho_km_vals"
-            self.rho_km_vals = np.array(DLP.rho_km_vals)
+            self.rho_km_vals = np.array(DLP.rho_km_vals).astype(float)
             erm = "p_norm_vals"
-            self.p_norm_vals = np.array(DLP.p_norm_vals)
+            self.p_norm_vals = np.array(DLP.p_norm_vals).astype(float)
             erm = "phase_rad_vals"
-            self.phase_rad_vals = np.array(DLP.phase_rad_vals)
+
+            # Negate phase for mathematical conventations.
+            self.phase_rad_vals = -np.array(DLP.phase_rad_vals).astype(float)
             erm = "B_rad_vals"
-            self.B_rad_vals = np.array(DLP.B_rad_vals)
+            self.B_rad_vals = np.array(DLP.B_rad_vals).astype(float)
             erm = "D_km_vals"
-            self.D_km_vals = np.array(DLP.D_km_vals)
+            self.D_km_vals = np.array(DLP.D_km_vals).astype(float)
             erm = "phi_rad_vals"
-            self.phi_rad_vals = np.array(DLP.phi_rad_vals)
+            self.phi_rad_vals = np.array(DLP.phi_rad_vals).astype(float)
             erm = "f_sky_hz_vals"
-            self.f_sky_hz_vals = np.array(DLP.f_sky_hz_vals)
+            self.f_sky_hz_vals = np.array(DLP.f_sky_hz_vals).astype(float)
             erm = "rho_dot_kms_vals"
-            self.rho_dot_kms_vals = np.array(DLP.rho_dot_kms_vals)
+            self.rho_dot_kms_vals = np.array(DLP.rho_dot_kms_vals).astype(float)
             erm = "t_oet_spm_vals"
-            self.t_oet_spm_vals = np.array(DLP.t_oet_spm_vals)
+            self.t_oet_spm_vals = np.array(DLP.t_oet_spm_vals).astype(float)
             erm = "t_ret_spm_vals"
-            self.t_ret_spm_vals = np.array(DLP.t_ret_spm_vals)
+            self.t_ret_spm_vals = np.array(DLP.t_ret_spm_vals).astype(float)
             erm = "t_set_spm_vals"
-            self.t_set_spm_vals = np.array(DLP.t_set_spm_vals)
+            self.t_set_spm_vals = np.array(DLP.t_set_spm_vals).astype(float)
             erm = "rho_corr_pole_km_vals"
             self.rho_corr_pole_km_vals = np.array(DLP.rho_corr_pole_km_vals)
             erm = "rho_corr_timing_km_vals"
             self.rho_corr_timing_km_vals = np.array(DLP.rho_corr_timing_km_vals)
             erm = "phi_rl_rad_vals"
-            self.phi_rl_rad_vals = np.array(DLP.phi_rl_rad_vals)
+            self.phi_rl_rad_vals = np.array(DLP.phi_rl_rad_vals).astype(float)
             erm = "raw_tau_threshold_vals"
             self.raw_tau_threshold_vals = np.array(DLP.raw_tau_threshold_vals)
+            if hasattr(DLP, 'ul_rho_km_vals'):
+                erm = 'ul_rho_km_vals'
+                self.ul_rho_km_vals = np.array(DLP.ul_rho_km_vals)
+
+                erm = 't_ul_spm_vals'
+                self.t_ul_spm_vals = np.array(DLP.t_ul_spm_vals)
+
+                erm = 't_ul_ret_spm_vals'
+                self.t_ul_ret_spm_vals = np.array(DLP.t_ul_ret_spm_vals)
+
+                erm = 'ul_phi_rl_deg_vals'
+                self.ul_phi_rl_deg_vals = np.array(DLP.ul_phi_rl_deg_vals)
+
+                erm = 'ul_phi_ora_deg_vals'
+                self.ul_phi_ora_deg_vals = np.array(DLP.ul_phi_ora_deg_vals)
         except (TypeError, ValueError, NameError, AttributeError):
             raise TypeError(
                 """
-                    \r\tError Encountered: rss_ringoccs
-                    \r\t\t%s\n
-                    \r\t%s could not be converted into a numpy array.\n
-                    \r\tCheck your DLP instance for errors.
+                \r\tError Encountered: rss_ringoccs\n\r\t\t%s\n
+                \r\t%s could not be converted into a numpy array.\n
+                \r\tCheck your DLP instance for errors.
                 """ % (fname, erm)
             )
 
@@ -414,9 +428,8 @@ class DiffractionCorrection(object):
         if (np.size(self.rho_km_vals) < 2):
             raise IndexError(
                 """
-                    \r\tError Encountered: rss_ringoccs
-                    \r\t\t%s\n
-                    \r\trho_km_vals has less than 2 points.
+                \r\tError Encountered: rss_ringoccs\n\r\t\t%s\n
+                \r\trho_km_vals has less than 2 points.
                 """ % fname
             )
         else:
@@ -437,14 +450,6 @@ class DiffractionCorrection(object):
         error_check.check_lengths(self.D_km_vals, self.rho_km_vals,
                                   "D_km_vals", "rho_km_vals", fname)
 
-        self.rho_dot_kms_vals = self.rho_dot_kms_vals.astype(float)
-        self.phase_rad_vals = -self.phase_rad_vals.astype(float)
-        self.f_sky_hz_vals = self.f_sky_hz_vals.astype(float)
-        self.phi_rad_vals = self.phi_rad_vals.astype(float)
-        self.p_norm_vals = self.p_norm_vals.astype(float)
-        self.B_rad_vals = self.B_rad_vals.astype(float)
-        self.D_km_vals = self.D_km_vals.astype(float)
-
         # Compute sampling distance (km)
         self.dx_km = self.rho_km_vals[1] - self.rho_km_vals[0]
 
@@ -452,26 +457,23 @@ class DiffractionCorrection(object):
         if (self.dx_km == 0.0):
             raise ValueError(
                 """
-                    \r\tError Encountered: rss_ringoccs
-                    \r\t\t%s\n
-                    \r\trho_km_vals[1]-rho_km_vals[0]=0.0
-                    \r\tThe sample spacing is zero.
+                \r\tError Encountered: rss_ringoccs\n\r\t\t%s\n
+                \r\tThe sample spacing (dx_km) is zero.
                 """ % (fname)
             )
         elif self.res < 1.999999*self.dx_km:
             raise ValueError(
                 """
-                    \r\tError Encountered: rss_ringoccs
-                    \r\t\t%s\n
-                    \r\tResolution is less than twice the sample spacing.
-                    \r\t\tRequested Resolution (km): %f
-                    \r\t\tSample Spacing (km): %f\n
-                    \r\tChoose a resolution GREATER than %f km\n
-                    \r\tPLEASE NOTE:
-                    \r\t\tTo be consistent with PDS results, a factor of 0.75
-                    \r\t\tis applied to the requested resolution. To ignore
-                    \r\t\tthis set the keyword 'res_factor=1.0'.
-                    \r\t\tres_factor is currently set to: %f
+                \r\tError Encountered: rss_ringoccs\n\r\t\t%s\n
+                \r\tResolution is less than twice the sample spacing.
+                \r\t\tRequested Resolution (km): %f
+                \r\t\tSample Spacing (km): %f\n
+                \r\tChoose a resolution GREATER than %f km\n
+                \r\tPLEASE NOTE:
+                \r\t\tTo be consistent with PDS results, a factor of 0.75
+                \r\t\tis applied to the requested resolution. To ignore
+                \r\t\tthis set the keyword 'res_factor=1.0'.
+                \r\t\tres_factor is currently set to: %f
                 """ % (fname, self.res, self.dx_km,
                        2.0*self.dx_km/res_factor, res_factor)
             )
@@ -487,30 +489,27 @@ class DiffractionCorrection(object):
         if (drho[0] < 0) and (drho[1] > 0):
             raise ValueError(
                 """
-                    \r\tError Encountered: rss_ringoccs
-                    \r\t\t%s\n
-                    \r\tdrho/dt has positive and negative values.
-                    \r\tYour input file is probably a chord occultation.
-                    \r\tDiffraction Correction can only be performed for
-                    \r\tone event at a time. That is, ingress or egress.\n
-                    \r\tTO CORRECT THIS:
-                    \r\t\tSplit the input into two parts: Ingress and Engress
-                    \r\t\tand perform diffraction correction twice.
+                \r\tError Encountered: rss_ringoccs\n\r\t\t%s\n
+                \r\tdrho/dt has positive and negative values.
+                \r\tYour input file is probably a chord occultation.
+                \r\tDiffraction Correction can only be performed for
+                \r\tone event at a time. That is, ingress or egress.\n
+                \r\tTO CORRECT THIS:
+                \r\t\tSplit the input into two parts: Ingress and Engress
+                \r\t\tand perform diffraction correction twice.
                 """ % (fname)
             )
         elif ((drho[0] == 0.0) or (drho[1] == 0.0)):
             raise ValueError(
                 """
-                    \r\tError Encountered: rss_ringoccs
-                    \r\t\t%s\n
-                    \r\tdrho/dt has zero valued elements.
-                    \r\tYour input file is probably a chord occultation.
-                    \r\tDiffraction Correction can only be performed for
-                    \r\tone event at a time. That is, ingress or egress.\n
-                    \r\tTO CORRECT THIS:
-                    \r\t\tSplit the input into two parts: Ingress and Engress
-                    \r\t\tand perform diffraction correction twice.
-                    \r\t\tIgnore the region where drho/dt is close to zero.
+                \r\tError Encountered: rss_ringoccs\n\r\t\t%s\n
+                \r\tdrho/dt has zero valued elements.
+                \r\tYour input file is probably a chord occultation.
+                \r\tDiffraction Correction can only be performed for
+                \r\tone event at a time. That is, ingress or egress.\n
+                \r\tTO CORRECT THIS:
+                \r\t\tSplit the input into two parts: Ingress and Engress
+                \r\t\tand perform diffraction correction twice.
                 """ % (fname)
             )
         elif (self.dx_km > 0) and (drho[1] < 0):
@@ -518,10 +517,9 @@ class DiffractionCorrection(object):
         elif (self.dx_km < 0) and (drho[0] > 0):
             raise ValueError(
                 """
-                    \r\tError Encountered:
-                    \r\t\t%s\n
-                    \r\trho_km_vals is decreasing yet rho_dot_kms_vals
-                    \r\tis positiive. Check DLP class for errors.
+                \r\tError Encountered:\n\r\t\t%s\n
+                \r\trho_km_vals is decreasing yet rho_dot_kms_vals
+                \r\tis positiive. Check DLP class for errors.
                 """ % (fname)
             )
         elif (self.dx_km < 0):
@@ -582,35 +580,32 @@ class DiffractionCorrection(object):
         if (np.size(wrange) == 0):
             raise ValueError(
                 """
-                    \r\tError Encountered: rss_ringoccs
-                    \r\t\t%s\n
-                    \r\tThe window width is too large to reconstruct anything.
-                    \r\t\tMinimum Available Radius:         %f
-                    \r\t\tMaximum Available Radius:         %f
-                    \r\t\tMinimum Required Window Width:    %f
-                    \r\t\tMaximum Required Window Width:    %f
+                \r\tError Encountered: rss_ringoccs\n\r\t\t%s\n
+                \r\tThe window width is too large to reconstruct anything.
+                \r\t\tMinimum Available Radius:         %f
+                \r\t\tMaximum Available Radius:         %f
+                \r\t\tMinimum Required Window Width:    %f
+                \r\t\tMaximum Required Window Width:    %f
                 """ % (fname, np.min(rho), np.max(rho), np.min(w), np.max(w))
             )
         elif (np.max(rho) < np.min(self.rng)):
             raise ValueError(
                 """
-                    \r\tError Encountered: rss_ringoccs
-                    \r\t\t%s\n
-                    \r\tMinimum requested range is greater than available data.
-                    \r\tYour Requested Minimum (km):    %f
-                    \r\tYour Requested Maximum (km):    %f
-                    \r\tMaximum Available Data (km):    %f
+                \r\tError Encountered: rss_ringoccs\n\r\t\t%s\n
+                \r\tMinimum requested range is greater than available data.
+                \r\tYour Requested Minimum (km):    %f
+                \r\tYour Requested Maximum (km):    %f
+                \r\tMaximum Available Data (km):    %f
                 """ % (fname, np.min(self.rng), np.max(self.rng), np.max(rho))
             )
         elif (np.min(rho) > np.max(self.rng)):
             raise ValueError(
                 """
-                    \r\tError Encountered: rss_ringoccs
-                    \r\t\t%s\n
-                    \r\tMaximum requested range is less than available data.
-                    \r\tYour Requested Minimum (km):    %f
-                    \r\tYour Requested Maximum (km):    %f
-                    \r\tMinimum Available Data (km):    %f
+                \r\tError Encountered: rss_ringoccs\n\r\t\t%s\n
+                \r\tMaximum requested range is less than available data.
+                \r\tYour Requested Minimum (km):    %f
+                \r\tYour Requested Maximum (km):    %f
+                \r\tMinimum Available Data (km):    %f
                 """ % (fname, np.min(self.rng), np.max(self.rng), np.min(rho))
             )
         else:
@@ -622,13 +617,12 @@ class DiffractionCorrection(object):
         if (np.size(wrange) <= 1):
             raise IndexError(
             """
-                \r\tError Encountered: rss_ringoccs
-                \r\t\t%s\n
-                \r\tRequested range is beyond available data.
-                \r\t\tMinimum Possible Radius: %f
-                \r\t\tMaximum Possible Radius: %f
-                \r\t\tMinimum Requested Range: %f
-                \r\t\tMaximum Requested Range: %f
+            \r\tError Encountered: rss_ringoccs\n\r\t\t%s\n
+            \r\tRequested range is beyond available data.
+            \r\t\tMinimum Possible Radius: %f
+            \r\t\tMaximum Possible Radius: %f
+            \r\t\tMinimum Requested Range: %f
+            \r\t\tMaximum Requested Range: %f
             """ % (fname, rho_min, rho_max, np.min(self.rng), np.max(self.rng))
             )
         else:
@@ -767,6 +761,14 @@ class DiffractionCorrection(object):
         self.lambda_sky_km_vals = self.lambda_sky_km_vals[crange]
         self.raw_tau_threshold_vals = self.raw_tau_threshold_vals[crange]
         self.tau_threshold_vals = self.tau_threshold_vals[crange]
+
+        # Uplink geometry attributes.
+        if hasattr(self, 'ul_rho_km_vals'):
+            self.ul_rho_km_vals = self.ul_rho_km_vals[crange]
+            self.t_ul_spm_vals = self.t_ul_spm_vals[crange]
+            self.t_ul_ret_spm_vals = self.t_ul_ret_spm_vals[crange]
+            self.ul_phi_rl_deg_vals = self.ul_phi_rl_deg_vals[crange]
+            self.ul_phi_ora_deg_vals = self.ul_phi_ora_deg_vals[crange]
 
         # If the forward model was run, trim those attributes as well.
         if fwd:

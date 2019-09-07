@@ -164,7 +164,7 @@ class Geometry(object):
         rsr_hist = rsr_inst.history
         (f_spm, f_sky) = rsr_inst.get_f_sky_pred()
 
-        ul_dsn = rsr_inst.ul_dsn
+
 
         self.rev_info = rsr_inst.rev_info
 
@@ -255,10 +255,16 @@ class Geometry(object):
 
         # Calculate uplink ring intercept point for post-USO events
         if year >= 2011:
+            ul_dsn = rsr_inst.ul_dsn
             self.rev_info['ul_dsn'] = ul_dsn
+            if len(ul_dsn.split('-')[1])!=2:
+                ul_dsn_used = 'Earth'
+                self.add_info['Uplink DSN used'] = ul_dsn_used
+            else:
+                ul_dsn_used = ul_dsn
             (t_ul_et_vals, t_ul_ret_vals, self.ul_rho_km_vals,
                     self.ul_phi_rl_deg_vals, self.ul_phi_ora_deg_vals) = (
-                            cog.calc_uplink_geo(ul_dsn, t_set_et_vals,
+                            cog.calc_uplink_geo(ul_dsn_used, t_set_et_vals,
                                 spacecraft, planet, nhat_p, ref=ref))
             self.t_ul_spm_vals = et_to_spm(t_ul_et_vals)#, ref_doy=doy)
             self.t_ul_ret_spm_vals = et_to_spm(t_ul_ret_vals)#, ref_doy=doy)

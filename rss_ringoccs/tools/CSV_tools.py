@@ -14,7 +14,7 @@ import pandas as pd
 from .history import write_history_dict, date_to_rev, rev_to_occ_info
 from . import error_check
 
-def get_geo(geo, verbose=True, use_deprecate=False):
+def get_geo(geo, verbose=True):
     """
     To extract a pandas DataFrame from a given GEO.TAB or GEO.CSV file.
 
@@ -58,47 +58,26 @@ def get_geo(geo, verbose=True, use_deprecate=False):
         print("\tExtracting Geo Data...")
 
     try:
-        if use_deprecate:
-            dfg = pd.read_csv(geo, delimiter=',',
-                              names=["t_oet_spm_vals",
-                                     "t_ret_spm_vals",
-                                     "t_set_spm_vals",
-                                     "rho_km_vals",
-                                     "phi_rl_deg_vals",
-                                     "phi_ora_deg_vals",
-                                     "B_deg_vals",
-                                     "D_km_vals",
-                                     "rho_dot_kms_vals",
-                                     "phi_rl_dot_kms_vals",
-                                     "F_km_vals",
-                                     "R_imp_km_vals",
-                                     "rx_km_vals",
-                                     "ry_km_vals",
-                                     "rz_km_vals",
-                                     "vx_kms_vals",
-                                     "vy_kms_vals",
-                                     "vz_kms_vals"])
-        else:
-            dfg = pd.read_csv(geo, delimiter=',',
-                              names=["t_oet_spm_vals",
-                                     "t_ret_spm_vals",
-                                     "t_set_spm_vals",
-                                     "rho_km_vals",
-                                     "phi_rl_deg_vals",
-                                     "phi_ora_deg_vals",
-                                     "B_deg_vals",
-                                     "D_km_vals",
-                                     "rho_dot_kms_vals",
-                                     "phi_rl_dot_kms_vals",
-                                     "F_km_vals",
-                                     "R_imp_km_vals",
-                                     "rx_km_vals",
-                                     "ry_km_vals",
-                                     "rz_km_vals",
-                                     "vx_kms_vals",
-                                     "vy_kms_vals",
-                                     "vz_kms_vals",
-                                     "obs_spacecract_lat_deg_vals"])
+        usecols = list(range(18))        
+        dfg = pd.read_csv(geo, delimiter=',',
+                                  names=["t_oet_spm_vals",
+                                         "t_ret_spm_vals",
+                                         "t_set_spm_vals",
+                                         "rho_km_vals",
+                                         "phi_rl_deg_vals",
+                                         "phi_ora_deg_vals",
+                                         "B_deg_vals",
+                                         "D_km_vals",
+                                         "rho_dot_kms_vals",
+                                         "phi_rl_dot_kms_vals",
+                                         "F_km_vals",
+                                         "R_imp_km_vals",
+                                         "rx_km_vals",
+                                         "ry_km_vals",
+                                         "rz_km_vals",
+                                         "vx_kms_vals",
+                                         "vy_kms_vals",
+                                         "vz_kms_vals"], usecols=usecols)
     except FileNotFoundError:
         raise FileNotFoundError(
             """
@@ -216,6 +195,7 @@ def get_dlp(dlp, verbose=True, use_deprecate=False):
                                      "t_set_spm_vals",
                                      "B_deg_vals"])
         else:
+            usecols = list(range(13))
             dfd = pd.read_csv(dlp, delimiter=',',
                               names=["rho_km_vals",
                                      "rho_corr_pole_km_vals",
@@ -229,7 +209,7 @@ def get_dlp(dlp, verbose=True, use_deprecate=False):
                                      "t_oet_spm_vals",
                                      "t_ret_spm_vals",
                                      "t_set_spm_vals",
-                                     "B_deg_vals"])
+                                     "B_deg_vals"], usecols=usecols)
     except FileNotFoundError:
         raise FileNotFoundError(
             """
@@ -442,7 +422,7 @@ class ExtractCSVData(object):
         self.tau = tau
 
         # Extract GEO, CAL, and DLP data.
-        geo_dat = get_geo(self.geo, verbose=verbose, use_deprecate=use_deprecate)
+        geo_dat = get_geo(self.geo, verbose=verbose)
         cal_dat = get_cal(self.cal, verbose=verbose)
         dlp_dat = get_dlp(self.dlp, verbose=verbose, use_deprecate=use_deprecate)
 

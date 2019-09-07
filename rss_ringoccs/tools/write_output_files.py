@@ -103,7 +103,10 @@ def construct_filepath(rev_info, filtyp):
     doy = rev_info['doy']
     band = rev_info['band'].split('"')[1]
     year = rev_info['year']
-    dsn = rev_info['dsn'].split('-')[-1]
+    if int(year)>2010:
+        dsn = rev_info['dsn'].split('-')[-1] + rev_info['ul_dsn'].split('-')[-1]
+    else:
+        dsn = rev_info['dsn'].split('-')[-1]
     rev = rev_info['rev_num']
 
 

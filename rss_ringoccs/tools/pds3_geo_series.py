@@ -36,31 +36,70 @@ def write_geo_series_data(geo_inst, out_file):
                   + '%16.6F,'*3 + '%14.6F,'*3 + '%12.6F' + '%s')
 
     npts = len(geo_inst.t_oet_spm_vals)
-
     f = open(out_file, 'w')
 
-    for n in range(npts):
-        f.write(format_str % (
-            geo_inst.t_oet_spm_vals[n],
-            geo_inst.t_ret_spm_vals[n],
-            geo_inst.t_set_spm_vals[n],
-            geo_inst.rho_km_vals[n],
-            geo_inst.phi_rl_deg_vals[n],
-            geo_inst.phi_ora_deg_vals[n],
-            geo_inst.B_deg_vals[n],
-            geo_inst.D_km_vals[n],
-            geo_inst.rho_dot_kms_vals[n],
-            geo_inst.phi_rl_dot_kms_vals[n],
-            geo_inst.F_km_vals[n],
-            geo_inst.R_imp_km_vals[n],
-            geo_inst.rx_km_vals[n],
-            geo_inst.ry_km_vals[n],
-            geo_inst.rz_km_vals[n],
-            geo_inst.vx_kms_vals[n],
-            geo_inst.vy_kms_vals[n],
-            geo_inst.vz_kms_vals[n],
-            geo_inst.elev_deg_vals[n],
-            '\r\n'))
+    # add columns for uplink transmission time, uplink ring event time,
+    # uplink ring intercept, uplink ring longitude, uplink ring azimuth
+    if hasattr(geo_inst, 'ul_rho_km_vals'):
+        format_str = ('%14.6F,'*4 + '%12.6F,'*3 + '%16.6F,' + '%14.6F,'*4
+                  + '%16.6F,'*3 + '%14.6F,'*3 + '%12.6F,' 
+                  + '%14.6F,'*3 + '%12.6F,' + '%12.6F'
+                  + '%s')
+        for n in range(npts):
+            f.write(format_str % (
+                geo_inst.t_oet_spm_vals[n],
+                geo_inst.t_ret_spm_vals[n],
+                geo_inst.t_set_spm_vals[n],
+                geo_inst.rho_km_vals[n],
+                geo_inst.phi_rl_deg_vals[n],
+                geo_inst.phi_ora_deg_vals[n],
+                geo_inst.B_deg_vals[n],
+                geo_inst.D_km_vals[n],
+                geo_inst.rho_dot_kms_vals[n],
+                geo_inst.phi_rl_dot_kms_vals[n],
+                geo_inst.F_km_vals[n],
+                geo_inst.R_imp_km_vals[n],
+                geo_inst.rx_km_vals[n],
+                geo_inst.ry_km_vals[n],
+                geo_inst.rz_km_vals[n],
+                geo_inst.vx_kms_vals[n],
+                geo_inst.vy_kms_vals[n],
+                geo_inst.vz_kms_vals[n],
+                geo_inst.elev_deg_vals[n],
+                geo_inst.t_ul_spm_vals[n],
+                geo_inst.t_ul_ret_spm_vals[n],
+                geo_inst.ul_rho_km_vals[n],
+                geo_inst.ul_phi_rl_deg_vals[n],
+                geo_inst.ul_phi_ora_deg_vals[n],
+                '\r\n'))
+    else:
+        format_str = ('%14.6F,'*4 + '%12.6F,'*3 + '%16.6F,' + '%14.6F,'*4
+                  + '%16.6F,'*3 + '%14.6F,'*3 + '%12.6F' + '%s')
+        for n in range(npts):
+            f.write(format_str % (
+                geo_inst.t_oet_spm_vals[n],
+                geo_inst.t_ret_spm_vals[n],
+                geo_inst.t_set_spm_vals[n],
+                geo_inst.rho_km_vals[n],
+                geo_inst.phi_rl_deg_vals[n],
+                geo_inst.phi_ora_deg_vals[n],
+                geo_inst.B_deg_vals[n],
+                geo_inst.D_km_vals[n],
+                geo_inst.rho_dot_kms_vals[n],
+                geo_inst.phi_rl_dot_kms_vals[n],
+                geo_inst.F_km_vals[n],
+                geo_inst.R_imp_km_vals[n],
+                geo_inst.rx_km_vals[n],
+                geo_inst.ry_km_vals[n],
+                geo_inst.rz_km_vals[n],
+                geo_inst.vx_kms_vals[n],
+                geo_inst.vy_kms_vals[n],
+                geo_inst.vz_kms_vals[n],
+                geo_inst.elev_deg_vals[n],
+                '\r\n'))
+
+
+
     f.close()
 
     print('\tGEO data written to: ' + out_file)
@@ -93,13 +132,29 @@ def get_geo_series_info(rev_info, geo_inst, series_name, prof_dir):
     # Values for number of columns, number of bytes per column,
     #   number of bytes per column delimiter, number of bytes allocated to
     #   special characters per column
-    formats = ['"F14.6"', '"F14.6"','"F14.6"', '"F14.6"',
-            '"F12.6"', '"F12.6"', '"F12.6"',
-            '"F16.6"',
-            '"F14.6"', '"F14.6"', '"F14.6"', '"F14.6"',
-            '"F16.6"', '"F16.6"', '"F16.6"',
-            '"F14.6"', '"F14.6"', '"F14.6"',
-            '"F12.6"']
+    if hasattr(geo_inst, 'ul_rho_km_vals'):
+        #formats = ('%14.6F,'*4 + '%12.6F,'*3 + '%16.6F,' + '%14.6F,'*4
+        #          + '%16.6F,'*3 + '%14.6F,'*3 + '%12.6F,' 
+        #          + '%14.6F,'*3 + '%12.6F,'*2 + '%12.6F'
+        #          + '%s')
+        formats = ['"F14.6"', '"F14.6"','"F14.6"', '"F14.6"',
+                '"F12.6"', '"F12.6"', '"F12.6"',
+                '"F16.6"',
+                '"F14.6"', '"F14.6"', '"F14.6"', '"F14.6"',
+                '"F16.6"', '"F16.6"', '"F16.6"',
+                '"F14.6"', '"F14.6"', '"F14.6"',
+                '"F12.6"',
+                '"F14.6"', '"F14.6"', '"F14.6"',
+                '"F12.6"', '"F12.6"']
+    else:
+        formats = ['"F14.6"', '"F14.6"','"F14.6"', '"F14.6"',
+                '"F12.6"', '"F12.6"', '"F12.6"',
+                '"F16.6"',
+                '"F14.6"', '"F14.6"', '"F14.6"', '"F14.6"',
+                '"F16.6"', '"F16.6"', '"F16.6"',
+                '"F14.6"', '"F14.6"', '"F14.6"',
+                '"F12.6"']
+
     ncol = len(formats)
 
     # Values for aligning equal signs
@@ -401,8 +456,6 @@ def get_geo_series_info(rev_info, geo_inst, series_name, prof_dir):
             , '"OBSERVED SPACECRAFT LATITUDE"'
             ]
 
-    n_objects = len(object_names)
-    data_types = ['ASCII_REAL'] * n_objects
     units = ['"SECOND"', '"SECOND"', '"SECOND"',
             '"KILOMETER"', '"DEGREE"', '"DEGREE"', '"DEGREE"',
             '"KILOMETER"', '"KM/SEC"', '"KM/SEC"',
@@ -549,6 +602,61 @@ def get_geo_series_info(rev_info, geo_inst, series_name, prof_dir):
             + 'computed in the topographic reference' + sd
             + 'frame of the DSN station based on the frame kernel."')
             ]
+
+    if hasattr(geo_inst, 'ul_rho_km_vals'):
+        object_names.append('"UPLINK TRANSMISSION TIME"')
+        units.append('"SECOND"')
+        reference_times.append(OBJECT_REFERENCE_TIME)
+        object_descriptions.append((
+                '"The time at which photos were transmitted from' + sd
+                + 'the uplink DSN station, given in elapsed seconds after'
+                +  'the moment specified' + sd + 'by REFERENCE_TIME. This time '
+                +  'is earlier than the SPACECRAFT EVENT TIME by' + sd
+                + 'the light travel time between the spacecraft and uplink DSN '
+                + 'station."'))
+
+
+        object_names.append('"UPLINK RING EVENT TIME"')
+        units.append('"SECOND"')
+        reference_times.append(OBJECT_REFERENCE_TIME)
+        object_descriptions.append((
+            '"The time at which photons transmitted by the' + sd
+            + 'uplink DSN station arrive at the ring plane. UPLINK '
+            + 'RING EVENT TIME is' + sd + 'given in '
+            + 'elapsed seconds after the moment specified by REFERENCE_TIME."'))
+
+
+        object_names.append('"UPLINK RING RADIUS"')
+        units.append('"KILOMETER"')
+        reference_times.append(es)
+        object_descriptions.append((
+            '"Radial distance from the center of Saturn to' + sd
+            + 'the ring-plane intercept point at the UPLINK RING EVENT TIME."'))
+
+        object_names.append('"UPLINK RING LONGITUDE"')
+        units.append('"DEGREE"')
+        reference_times.append(es)
+        object_descriptions.append((
+            '"Inertial (J2000) longitude in the ring plane' + sd
+            + 'of the ring-plane intercept point at the UPLINK RING EVENT '
+            + 'TIME."'))
+
+
+        object_names.append('"UPLINK OBSERVED RING AZIMUTH"')
+        units.append('"DEGREE"')
+        reference_times.append(es)
+        object_descriptions.append((
+            '"Measured at the uplink ring-plane intercept' + sd
+            + 'point, starting from the '
+            + 'direction of a photon heading to the spacecraft' + sd
+            + 'and ending at the direction of a local radial vector. '
+            + 'This angle is' + sd + 'projected into the ring plane and '
+            + 'measured in the prograde direction."'))
+
+    
+
+    n_objects = len(object_names)
+    data_types = ['ASCII_REAL'] * n_objects
 
 
 

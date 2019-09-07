@@ -39,6 +39,8 @@ def pre_resample(rho_km, vec, freq):
     """
     # initial radius and radial range
     r0 = round(rho_km[0])
+    while r0 < rho_km[0]:
+        r0 = r0 + 1.0/freq
     dr = abs(rho_km[-1] - r0)
 
     # Average radius spacing over region

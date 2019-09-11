@@ -9,7 +9,7 @@
  *          Legendre Expansion:                                               *
  *             Approximate the Fresnel kernel using Legendre polynomials.     *
  *          Newton-Raphson Method:                                            *
- *              Computes the Fresnel Transform by computing the stationary    *
+ *              Performs the Fresnel Transform by computing the stationary    *
  *              value of the Fresnel Kernel using the Newton-Raphson method.  *
  ******************************************************************************
  *  The Inverse Fresnel Transform:                                            *
@@ -24,7 +24,7 @@
  *                                                                            *
  *      Where T_hat is the diffracted data, w is the window function, r is    *
  *      the ring intercept point, and r_0 is a dummy variable of integration. *
- *      psi is the Fresnel Kernel, and exp is simply the exponential function.*
+ *      psi is the Fresnel Kernel, and exp is the exponential function.       *
  ******************************************************************************
  *  The Normalization Scheme:                                                 *
  *      As the resolution get's too high, say 10 km or larger, the window     *

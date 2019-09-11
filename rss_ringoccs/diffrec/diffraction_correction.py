@@ -1,10 +1,8 @@
 """
 Purpose:
-    Provide the DiffractionCorrection class for
-    performing the necessary mathematics to correct
-    for the diffraction effects that are obtained
-    during occultation observations of planetary
-    rings using radio waves.
+    Provide the DiffractionCorrection class for performing the
+    necessary mathematics to correct for the diffraction effects that
+    are obtained during occultation observations of planetary rings.
 Dependencies:
     #. numpy
     #. rss_ringoccs
@@ -261,63 +259,43 @@ class DiffractionCorrection(object):
     def __init__(self, DLP, res, rng="all", wtype="kbmd20", fwd=False,
                  norm=True, verbose=False, bfac=True, sigma=2.e-13,
                  psitype="fresnel4", write_file=False, res_factor=0.75,
-                 eccentricity=0.0, periapse=0.0):
+                 ecc=0.0, peri=0.0):
 
-        fname = "diffrec.diffraction_correction.DiffractionCorrection"
-        error_check.check_type(verbose, bool, "verbose", fname)
+        # Store the name of this class as a string (The "function name").
+        fn = "diffrec.diffraction_correction.DiffractionCorrection"
+        error_check.check_type(verbose, bool, "verbose", fn)
 
         if verbose:
             print("Processing Diffraction Correction:")
             print("\tRunning Error Check on Input Arguments...")
 
-        error_check.check_type(wtype, str, "wtype", fname)
-        error_check.check_type(fwd, bool, "fwd", fname)
-        error_check.check_type(bfac, bool, "bfac", fname)
-        error_check.check_type(norm, bool, "norm", fname)
-        error_check.check_type(write_file, bool, "write_file", fname)
+        error_check.check_type(fwd, bool, "fwd", fn)
+        error_check.check_type(bfac, bool, "bfac", fn)
+        error_check.check_type(norm, bool, "norm", fn)
+        error_check.check_type(write_file, bool, "write_file", fn)
 
-        res = error_check.check_type_and_convert(res, float, "res", fname)
-        sigma = error_check.check_type_and_convert(sigma, float, "sigma", fname)
+        res = error_check.check_type_and_convert(res, float, "res", fn)
+        sigma = error_check.check_type_and_convert(sigma, float, "sigma", fn)
         res_factor = error_check.check_type_and_convert(res_factor, float,
-                                                        "res_factor", fname)
-        eccentricity = error_check.check_type_and_convert(eccentricity, float,
-                                                          "eccentricity", fname)
-        periapse = error_check.check_type_and_convert(periapse, float,
-                                                      "periapse", fname)
+                                                        "res_factor", fn)
+        ecc = error_check.check_type_and_convert(ecc, float, "ecc", fn)
+        peri = error_check.check_type_and_convert(peri, float, "peri", fn)
 
         # Check that these variables are positive.
-        error_check.check_positive(res, "res", fname)
-        error_check.check_positive(sigma, "sigma", fname)
-        error_check.check_positive(res_factor, "res_factor", fname)
-        error_check.check_non_negative(eccentricity, "eccentricity", fname)
+        error_check.check_positive(res, "res", fn)
+        error_check.check_positive(sigma, "sigma", fn)
+        error_check.check_positive(res_factor, "res_factor", fn)
+        error_check.check_non_negative(ecc, "ecc", fn)
 
         # Check that the periapse is within [0, 2pi)
-        error_check.check_two_pi(periapse, "periapse", fname)
-
-        # Remove spaces/quotes from the wtype variable and set to lower case.
-        wtype = wtype.replace(" ", "").replace("'", "").replace('"', "")
-        wtype = wtype.lower()
+        error_check.check_two_pi(peri, "peri", fn)
 
         # Check that wtype is in the allowed list of window types.
-        if not (wtype in window_functions.func_dict):
-            erm = ""
-            for key in window_functions.func_dict:
-                erm = "%s\t\t'%s'\n" % (erm, key)
-            raise ValueError(
-                """
-                    \r\tError Encountered: rss_ringoccs
-                    \r\t\t%s\n
-                    \tIllegal string used for wtype.
-                    \r\t\tYour string: '%s'\n
-                    \r\tAllowed Strings:\n%s
-                """ % (fname, wtype, erm)
-            )
-        else:
-            pass
+        wtype = error_check.check_wtype(wtype, fn)
 
         # Check that range and psitype are legal inputs.
-        rng = error_check.check_range_input(rng, fname)
-        psitype = error_check.check_psitype(psitype, fname)
+        rng = error_check.check_range_input(rng, fn)
+        psitype = error_check.check_psitype(psitype, fn)
 
         if verbose:
             print("\tAssigning inputs as attributes...")
@@ -326,8 +304,6 @@ class DiffractionCorrection(object):
         self.p_norm_fwd_vals = None
         self.T_hat_fwd_vals = None
         self.phase_fwd_vals = None
-        self.eccentricity = eccentricity
-        self.periapse = periapse
         self.input_res = res
         self.verbose = verbose
         self.psitype = psitype
@@ -336,8 +312,10 @@ class DiffractionCorrection(object):
         self.sigma = sigma
         self.norm = norm
         self.bfac = bfac
+        self.peri = peri
         self.res = res*res_factor
         self.fwd = fwd
+        self.ecc = ecc
 
         # Retrieve variables from the DLP class, setting as attributes.
         if verbose:
@@ -352,6 +330,7 @@ class DiffractionCorrection(object):
 
             # Negate phase for mathematical conventations.
             self.phase_rad_vals = -np.array(DLP.phase_rad_vals).astype(float)
+
             erm = "B_rad_vals"
             self.B_rad_vals = np.array(DLP.B_rad_vals).astype(float)
             erm = "D_km_vals"
@@ -397,58 +376,66 @@ class DiffractionCorrection(object):
                 \r\tError Encountered: rss_ringoccs\n\r\t\t%s\n
                 \r\t%s could not be converted into a numpy array.\n
                 \r\tCheck your DLP instance for errors.
-                """ % (fname, erm)
+                """ % (fn, erm)
             )
 
-        self.dathist = DLP.history
+        try:
+            self.dathist = DLP.history
+        except:
+            raise AttributeError(
+                """
+                \r\tError Encountered: rss_ringoccs\n\r\t\t%s\n
+                \r\tYour DLP instance has no history attribute.
+                """ % fn
+        )
 
         # Run various error checks on all variables.
-        error_check.check_is_real(self.D_km_vals, "D_km_vals", fname)
-        error_check.check_is_real(self.B_rad_vals, "B_rad_vals", fname)
-        error_check.check_is_real(self.rho_km_vals, "rho_km_vals", fname)
-        error_check.check_is_real(self.p_norm_vals, "p_norm_vals", fname)
-        error_check.check_is_real(self.phi_rad_vals, "phi_rad_vals", fname)
-        error_check.check_is_real(self.f_sky_hz_vals, "f_sky_hz_vals", fname)
-        error_check.check_is_real(self.phase_rad_vals, "phase_rad_vals", fname)
-        error_check.check_is_real(self.rho_dot_kms_vals,
-                                  "rho_dot_kms_vals", fname)
+        error_check.check_is_real(self.D_km_vals, "D_km_vals", fn)
+        error_check.check_is_real(self.B_rad_vals, "B_rad_vals", fn)
+        error_check.check_is_real(self.rho_km_vals, "rho_km_vals", fn)
+        error_check.check_is_real(self.p_norm_vals, "p_norm_vals", fn)
+        error_check.check_is_real(self.phi_rad_vals, "phi_rad_vals", fn)
+        error_check.check_is_real(self.f_sky_hz_vals, "f_sky_hz_vals", fn)
+        error_check.check_is_real(self.phase_rad_vals, "phase_rad_vals", fn)
+        error_check.check_is_real(self.rho_dot_kms_vals, "rho_dot_kms_vals", fn)
 
-        error_check.check_positive(self.D_km_vals, "D_km_vals", fname)
-        error_check.check_positive(self.rho_km_vals, "rho_km_vals", fname)
-        error_check.check_positive(self.f_sky_hz_vals, "f_sky_hz_vals", fname)
-        error_check.check_non_negative(self.p_norm_vals, "p_norm_vals", fname)
+        # Check that these variables are positive.
+        error_check.check_positive(self.D_km_vals, "D_km_vals", fn)
+        error_check.check_positive(self.rho_km_vals, "rho_km_vals", fn)
+        error_check.check_positive(self.f_sky_hz_vals, "f_sky_hz_vals", fn)
 
-        error_check.check_two_pi(self.B_rad_vals, "B_rad_vals",
-                                 fname, deg=False)
-        error_check.check_two_pi(self.phi_rad_vals, "phi_rad_vals",
-                                 fname, deg=False)
-        error_check.check_two_pi(self.phase_rad_vals, "phase_rad_vals",
-                                 fname, deg=False)
+        # Check that p_norm_vals is non-negative.
+        error_check.check_non_negative(self.p_norm_vals, "p_norm_vals", fn)
+
+        # Check that these variables are within the range [0, 2pi)
+        error_check.check_two_pi(self.B_rad_vals, "B_rad_vals", fn)
+        error_check.check_two_pi(self.phi_rad_vals, "phi_rad_vals", fn)
+        error_check.check_two_pi(self.phase_rad_vals, "phase_rad_vals", fn)
 
         if (np.size(self.rho_km_vals) < 2):
             raise IndexError(
                 """
                 \r\tError Encountered: rss_ringoccs\n\r\t\t%s\n
                 \r\trho_km_vals has less than 2 points.
-                """ % fname
+                """ % fn
             )
         else:
             self.rho_km_vals = self.rho_km_vals.astype(float)
 
         error_check.check_lengths(self.rho_dot_kms_vals, self.rho_km_vals,
-                                  "rho_dot_kms_vals", "rho_km_vals", fname)
+                                  "rho_dot_kms_vals", "rho_km_vals", fn)
         error_check.check_lengths(self.phase_rad_vals, self.rho_km_vals,
-                                  "phase_rad_vals", "rho_km_vals", fname)
+                                  "phase_rad_vals", "rho_km_vals", fn)
         error_check.check_lengths(self.f_sky_hz_vals, self.rho_km_vals,
-                                  "f_sky_hz_vals", "rho_km_vals", fname)
+                                  "f_sky_hz_vals", "rho_km_vals", fn)
         error_check.check_lengths(self.phi_rad_vals, self.rho_km_vals,
-                                  "phi_rad_vals", "rho_km_vals", fname)
+                                  "phi_rad_vals", "rho_km_vals", fn)
         error_check.check_lengths(self.p_norm_vals, self.rho_km_vals,
-                                  "p_norm_vals", "rho_km_vals", fname)
+                                  "p_norm_vals", "rho_km_vals", fn)
         error_check.check_lengths(self.B_rad_vals, self.rho_km_vals,
-                                  "B_rad_vals", "rho_km_vals", fname)
+                                  "B_rad_vals", "rho_km_vals", fn)
         error_check.check_lengths(self.D_km_vals, self.rho_km_vals,
-                                  "D_km_vals", "rho_km_vals", fname)
+                                  "D_km_vals", "rho_km_vals", fn)
 
         # Compute sampling distance (km)
         self.dx_km = self.rho_km_vals[1] - self.rho_km_vals[0]
@@ -459,29 +446,29 @@ class DiffractionCorrection(object):
                 """
                 \r\tError Encountered: rss_ringoccs\n\r\t\t%s\n
                 \r\tThe sample spacing (dx_km) is zero.
-                """ % (fname)
+                """ % fn
             )
         elif self.res < 1.999999*self.dx_km:
             raise ValueError(
                 """
                 \r\tError Encountered: rss_ringoccs\n\r\t\t%s\n
                 \r\tResolution is less than twice the sample spacing.
-                \r\t\tRequested Resolution (km): %f
-                \r\t\tSample Spacing (km): %f\n
+                \r\t\tRequested Resolution (km):    %f
+                \r\t\tSample Spacing (km):          %f\n
                 \r\tChoose a resolution GREATER than %f km\n
                 \r\tPLEASE NOTE:
                 \r\t\tTo be consistent with PDS results, a factor of 0.75
                 \r\t\tis applied to the requested resolution. To ignore
                 \r\t\tthis set the keyword 'res_factor=1.0'.
                 \r\t\tres_factor is currently set to: %f
-                """ % (fname, self.res, self.dx_km,
+                """ % (fn, self.res, self.dx_km,
                        2.0*self.dx_km/res_factor, res_factor)
             )
         else:
             pass
 
         if verbose:
-            print("\tCheck Variables for Errors...")
+            print("\tChecking Variables for Errors...")
 
         # Check that rho_km_vals is increasing and the rev isn't a chord occ.
         drho = [np.min(self.rho_dot_kms_vals), np.max(self.rho_dot_kms_vals)]
@@ -497,7 +484,7 @@ class DiffractionCorrection(object):
                 \r\tTO CORRECT THIS:
                 \r\t\tSplit the input into two parts: Ingress and Engress
                 \r\t\tand perform diffraction correction twice.
-                """ % (fname)
+                """ % fn
             )
         elif ((drho[0] == 0.0) or (drho[1] == 0.0)):
             raise ValueError(
@@ -510,7 +497,7 @@ class DiffractionCorrection(object):
                 \r\tTO CORRECT THIS:
                 \r\t\tSplit the input into two parts: Ingress and Engress
                 \r\t\tand perform diffraction correction twice.
-                """ % (fname)
+                """ % fn
             )
         elif (self.dx_km > 0) and (drho[1] < 0):
             self.rho_dot_kms_vals = np.abs(self.rho_dot_kms_vals)
@@ -520,7 +507,7 @@ class DiffractionCorrection(object):
                 \r\tError Encountered:\n\r\t\t%s\n
                 \r\trho_km_vals is decreasing yet rho_dot_kms_vals
                 \r\tis positiive. Check DLP class for errors.
-                """ % (fname)
+                """ % fn
             )
         elif (self.dx_km < 0):
             self.rho_km_vals = self.rho_km_vals[::-1]
@@ -586,7 +573,7 @@ class DiffractionCorrection(object):
                 \r\t\tMaximum Available Radius:         %f
                 \r\t\tMinimum Required Window Width:    %f
                 \r\t\tMaximum Required Window Width:    %f
-                """ % (fname, np.min(rho), np.max(rho), np.min(w), np.max(w))
+                """ % (fn, np.min(rho), np.max(rho), np.min(w), np.max(w))
             )
         elif (np.max(rho) < np.min(self.rng)):
             raise ValueError(
@@ -596,7 +583,7 @@ class DiffractionCorrection(object):
                 \r\tYour Requested Minimum (km):    %f
                 \r\tYour Requested Maximum (km):    %f
                 \r\tMaximum Available Data (km):    %f
-                """ % (fname, np.min(self.rng), np.max(self.rng), np.max(rho))
+                """ % (fn, np.min(self.rng), np.max(self.rng), np.max(rho))
             )
         elif (np.min(rho) > np.max(self.rng)):
             raise ValueError(
@@ -606,7 +593,7 @@ class DiffractionCorrection(object):
                 \r\tYour Requested Minimum (km):    %f
                 \r\tYour Requested Maximum (km):    %f
                 \r\tMinimum Available Data (km):    %f
-                """ % (fname, np.min(self.rng), np.max(self.rng), np.min(rho))
+                """ % (fn, np.min(self.rng), np.max(self.rng), np.min(rho))
             )
         else:
             rho_min = np.min(rho[wrange])
@@ -623,7 +610,7 @@ class DiffractionCorrection(object):
             \r\t\tMaximum Possible Radius: %f
             \r\t\tMinimum Requested Range: %f
             \r\t\tMaximum Requested Range: %f
-            """ % (fname, rho_min, rho_max, np.min(self.rng), np.max(self.rng))
+            """ % (fn, rho_min, rho_max, np.min(self.rng), np.max(self.rng))
             )
         else:
             self.start = wrange[0]
@@ -645,8 +632,8 @@ class DiffractionCorrection(object):
             'sigma':        sigma,
             'psitype':      psitype,
             'res_factor':   res_factor,
-            'periapse':     periapse,
-            'eccentricity': eccentricity
+            'peri':         peri,
+            'ecc':          ecc
         }
 
         # Delete unnecessary variables for clarity.
@@ -815,5 +802,5 @@ class DiffractionCorrection(object):
             T_in, self.rho_km_vals, self.F_km_vals, self.w_km_vals,
             start, n_used, self.wtype, self.norm, fwd, self.psitype,
             self.phi_rad_vals, kD_vals, self.B_rad_vals, self.D_km_vals,
-            self.periapse, self.eccentricity
+            self.peri, self.ecc
         )

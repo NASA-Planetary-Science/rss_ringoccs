@@ -63,6 +63,7 @@ extern complex double Fresnel_Transform_Newton_Norm_Double(
     double F, long n_pts, long center
 );
 
+/*  Functions that compute the Fresnel Transform on a DLPObj instance.        */
 extern void DiffractionCorrectionFresnel(DLPObj dlp);
 
 extern void DiffractionCorrectionLegendre(DLPObj dlp);

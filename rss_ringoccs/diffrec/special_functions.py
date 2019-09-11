@@ -1,4 +1,4 @@
-import numpy as np
+import numpy
 from . import window_functions
 from rss_ringoccs.tools import error_check
 try:
@@ -19,10 +19,10 @@ def besselJ0(x):
         Purpose:
             Compute the Bessel Function J_0(x).
         Variables:
-            :x (*np.ndarray* or *float*):
+            :x (*numpy.ndarray* or *float*):
                 The independent variable.
         Outputs:
-            :J_0 (*np.ndarray* or *float*):
+            :J_0 (*numpy.ndarray* or *float*):
                 The fresnel sine integral of x.
         Notes:
 
@@ -32,7 +32,7 @@ def besselJ0(x):
 
             >>> import rss_ringoccs.diffcorr.special_functions as sf
             >>> import numpy as np
-            >>> x = np.arange(-10, 10, 0.01)
+            >>> x = numpy.arange(-10, 10, 0.01)
             >>> y = sf.besselJ0(x)
     """
     try:
@@ -47,7 +47,7 @@ def besselJ0(x):
             \r\tInput should be a numpy array of real numbers (ints or floats),
             \r\tor a non-zero int or non-zero float.\n
             \r\tUsage:
-            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. np.arange(-5, 5)
+            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. numpy.arange(-5, 5)
             \r\t\t>>> y = besselJ0(x)
             """
         )
@@ -57,10 +57,10 @@ def besselI0(x):
         Purpose:
             Compute the Bessel Function J_0(x).
         Variables:
-            :x (*np.ndarray* or *float*):
+            :x (*numpy.ndarray* or *float*):
                 The independent variable.
         Outputs:
-            :J_0 (*np.ndarray* or *float*):
+            :J_0 (*numpy.ndarray* or *float*):
                 The fresnel sine integral of x.
         Notes:
 
@@ -70,7 +70,7 @@ def besselI0(x):
 
             >>> import rss_ringoccs.diffcorr.special_functions as sf
             >>> import numpy as np
-            >>> x = np.arange(-10, 10, 0.01)
+            >>> x = numpy.arange(-10, 10, 0.01)
             >>> y = sf.besselI0(x)
     """
     try:
@@ -85,7 +85,7 @@ def besselI0(x):
             \r\tInput should be a numpy array of real numbers (ints or floats),
             \r\tor a non-zero int or non-zero float.\n
             \r\tUsage:
-            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. np.arange(-5, 5)
+            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. numpy.arange(-5, 5)
             \r\t\t>>> y = besselI0(x)
             """
         )
@@ -103,7 +103,7 @@ def frequency_to_wavelength(freq_hz):
             \r\tInput should be a numpy array of non-zero real numbers
             \r\t(ints or floats), or a non-zero int or non-zero float.\n
             \r\tUsage:
-            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. np.arange(3, 10)
+            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. numpy.arange(3, 10)
             \r\t\t>>> y = frequency_to_wavelength(x)
             """
         )
@@ -116,7 +116,7 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
         high frequency noise while maintaining many of the
         original features of the input data.
     Arguments:
-        :y (*np.ndarray*):
+        :y (*numpy.ndarray*):
             The input "Noisy" data.
         :window_size (*int*):
             The length of the window. Must be an odd number.
@@ -127,13 +127,13 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
         :deriv (*int*):
             The order of the derivative what will be computed.
     Output:
-        :y_smooth (*np.ndarray*):
+        :y_smooth (*numpy.ndarray*):
             The data smoothed by Savitzky-Golay filter.
     """
     try:
-        y = np.array(y)
-        window_size = np.abs(np.int(window_size))
-        order = np.abs(np.int(order))
+        y = numpy.array(y)
+        window_size = numpy.abs(numpy.int(window_size))
+        order = numpy.abs(numpy.int(order))
     except KeyboardInterrupt:
         raise
     except:
@@ -171,7 +171,7 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
     half_window = (window_size - 1) // 2
 
     # precompute coefficients
-    b = np.zeros((window_size, order+1))
+    b = numpy.zeros((window_size, order+1))
     b[..., 0] = 1
     for k in range(half_window):
         n0 = (half_window) - k
@@ -183,27 +183,27 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
             n *= -n0
             m *= n0
 
-    b = np.mat(b)
+    b = numpy.mat(b)
 
     m = 1
     for i in range(deriv):
         m *= rate*(deriv-i)
 
-    m *= np.linalg.pinv(b).A[deriv]
+    m *= numpy.linalg.pinv(b).A[deriv]
 
     # Pad the endpoints with values from the signal.
-    firstvals = y[0] - np.abs(y[1:half_window+1][::-1] - y[0])
-    lastvals = y[-1] + np.abs(y[-half_window-1:-1][::-1] - y[-1])
-    y = np.concatenate((firstvals, y, lastvals))
+    firstvals = y[0] - numpy.abs(y[1:half_window+1][::-1] - y[0])
+    lastvals = y[-1] + numpy.abs(y[-half_window-1:-1][::-1] - y[-1])
+    y = numpy.concatenate((firstvals, y, lastvals))
 
-    return np.convolve(m[::-1], y, mode='valid')
+    return numpy.convolve(m[::-1], y, mode='valid')
 
 def compute_norm_eq(w_func):
     """
     Purpose:
         Compute normalized equivalenth width of a given function.
     Arguments:
-        :w_func (*np.ndarray*):
+        :w_func (*numpy.ndarray*):
             Function to compute the normalized equivalent width.
     Outputs:
         :normeq (*float*):
@@ -262,16 +262,16 @@ def fresnel_scale(Lambda, d, phi, b):
     Purpose:
         Compute the Fresnel Scale.
     Arguments:
-        :Lambda (*np.ndarray* or *float*):
+        :Lambda (*numpy.ndarray* or *float*):
             Wavelength of the incoming signal.
-        :d (*np.ndarray* or *float*):
+        :d (*numpy.ndarray* or *float*):
             RIP-Spacecraft Distance.
-        :phi (*np.ndarray* or *float*):
+        :phi (*numpy.ndarray* or *float*):
             Ring azimuth angle.
-        :b (*np.ndarray* or *float*):
+        :b (*numpy.ndarray* or *float*):
             Ring opening angle.
     Output:
-        :fres (*np.ndarray* or *float*):
+        :fres (*numpy.ndarray* or *float*):
             The Fresnel scale.
     Note:
         :math:`\\lambda` and :math:`D` must be in the same units.
@@ -308,18 +308,18 @@ def fresnel_psi(kD, r, r0, phi, phi0, B, D):
             Wavenumber, unitless.
         :r (*float*):
             Radius of reconstructed point, in kilometers.
-        :r0 (*np.ndarray*):
+        :r0 (*numpy.ndarray*):
             Radius of region within window, in kilometers.
-        :phi (*np.ndarray*):
+        :phi (*numpy.ndarray*):
             Ring azimuth angle corresponding to r, radians.
-        :phi0 (*np.ndarray*):
+        :phi0 (*numpy.ndarray*):
             Ring azimuth angle corresponding to r0, radians.
         :B (*float*):
             Ring opening angle, in radians.
         :D (*float*):
             Spacecraft-RIP distance, in kilometers.
     Outputs:
-        :psi (*np.ndarray*):
+        :psi (*numpy.ndarray*):
             Geometric Function from Fresnel Kernel.
     """
     try:
@@ -346,11 +346,11 @@ def fresnel_dpsi_dphi(kD, r, r0, phi, phi0, B, D):
                 Wavenumber, unitless.
             :r (*float*):
                 Radius of reconstructed point, in kilometers.
-            :r0 (*np.ndarray*):
+            :r0 (*numpy.ndarray*):
                 Radius of region within window, in kilometers.
-            :phi (*np.ndarray*):
+            :phi (*numpy.ndarray*):
                 Ring azimuth angle corresponding to r, radians.
-            :phi0 (*np.ndarray*):
+            :phi0 (*numpy.ndarray*):
                 Ring azimuth angle corresponding to r0, radians.
             :B (*float*):
                 Ring opening angle, in radians.
@@ -386,11 +386,11 @@ def dpsi_ellipse(kD, r, r0, phi, phi0, B, D, ecc, peri):
                 Wavenumber, unitless.
             :r (*float*):
                 Radius of reconstructed point, in kilometers.
-            :r0 (*np.ndarray*):
+            :r0 (*numpy.ndarray*):
                 Radius of region within window, in kilometers.
-            :phi (*np.ndarray*):
+            :phi (*numpy.ndarray*):
                 Root values of :math:`\\mathrm{d}\\psi/\\mathrm{d}\\phi`, radians.
-            :phi0 (*np.ndarray*):
+            :phi0 (*numpy.ndarray*):
                 Ring azimuth angle corresponding to r0, radians.
             :B (*float*):
                 Ring opening angle, in radians.
@@ -402,23 +402,23 @@ def dpsi_ellipse(kD, r, r0, phi, phi0, B, D, ecc, peri):
                 respect to :math:`\\phi`.
     """
     # Compute Xi variable (MTR86 Equation 4b).
-    xi = (np.cos(B)/D) * (r * np.cos(phi) - r0 * np.cos(phi0))
+    xi = (numpy.cos(B)/D) * (r * numpy.cos(phi) - r0 * numpy.cos(phi0))
 
     # Compute Eta variable (MTR86 Equation 4c).
-    eta = (r0*r0 + r*r - 2.0*r*r0*np.cos(phi-phi0)) / (D*D)
+    eta = (r0*r0 + r*r - 2.0*r*r0*numpy.cos(phi-phi0)) / (D*D)
 
-    psi0 = np.sqrt(1.0+eta-2.0*xi)
+    psi0 = numpy.sqrt(1.0+eta-2.0*xi)
 
     # Compute derivatives.
-    dxi_phi = -(np.cos(B)/D) * (r*np.sin(phi))
-    deta_phi = 2.0*r*r0*np.sin(phi-phi0)/(D*D)
+    dxi_phi = -(numpy.cos(B)/D) * (r*numpy.sin(phi))
+    deta_phi = 2.0*r*r0*numpy.sin(phi-phi0)/(D*D)
 
-    dxi_rho = (np.cos(B)/D)*np.cos(phi)
-    deta_rho = 2.0*(r-r0*np.cos(phi-phi0)) / (D*D)
+    dxi_rho = (numpy.cos(B)/D)*numpy.cos(phi)
+    deta_rho = 2.0*(r-r0*numpy.cos(phi-phi0)) / (D*D)
 
     # Compute the partial derivative.
     psi_d1 = (deta_rho-2.0*dxi_rho)*(0.5/psi0) + dxi_rho
-    psi_d1 *= r*ecc*np.sin(phi-peri)/(1+ecc*np.cos(phi-peri))
+    psi_d1 *= r*ecc*numpy.sin(phi-peri)/(1+ecc*numpy.cos(phi-peri))
     psi_d1 += (deta_phi-2.0*dxi_phi)*(0.5/psi0) + dxi_phi
 
     psi_d1 *= kD
@@ -435,36 +435,36 @@ def fresnel_d2psi_dphi2(kD, r, r0, phi, phi0, B, D):
             Wavenumber, unitless.
         :r (*float*):
             Radius of reconstructed point, in kilometers.
-        :r0 (*np.ndarray*):
+        :r0 (*numpy.ndarray*):
             Radius of region within window, in kilometers.
-        :phi (*np.ndarray*):
+        :phi (*numpy.ndarray*):
             Root values of :math:`\\mathrm{d}\\psi/\\mathrm{d}\\phi`,
             radians.
-        :phi0 (*np.ndarray*):
+        :phi0 (*numpy.ndarray*):
             Ring azimuth angle corresponding to r0, radians.
         :B (*float*):
             Ring opening angle, in radians.
         :D (*float*):
             Spacecraft-RIP distance, in kilometers.
     Outputs:
-        :dpsi (*np.ndarray*):
+        :dpsi (*numpy.ndarray*):
             Second partial derivative of :math:`\\psi`
             with respect to :math:`\\phi`.
     """
     # Compute Xi variable (MTR86 Equation 4b).
-    xi = (np.cos(B)/D) * (r * np.cos(phi) - r0 * np.cos(phi0))
+    xi = (numpy.cos(B)/D) * (r * numpy.cos(phi) - r0 * numpy.cos(phi0))
 
     # Compute Eta variable (MTR86 Equation 4c).
-    eta = (r0*r0 + r*r - 2.0*r*r0*np.cos(phi-phi0)) / (D*D)
+    eta = (r0*r0 + r*r - 2.0*r*r0*numpy.cos(phi-phi0)) / (D*D)
 
-    psi0 = np.sqrt(1.0+eta-2.0*xi)
+    psi0 = numpy.sqrt(1.0+eta-2.0*xi)
 
     # Compute derivatives.
-    dxi = -(np.cos(B)/D) * (r*np.sin(phi))
-    dxi2 = -(np.cos(B)/D) * (r*np.cos(phi))
+    dxi = -(numpy.cos(B)/D) * (r*numpy.sin(phi))
+    dxi2 = -(numpy.cos(B)/D) * (r*numpy.cos(phi))
 
-    deta = 2.0*r*r0*np.sin(phi-phi0)/(D*D)
-    deta2 = 2.0*r*r0*np.cos(phi-phi0)/(D*D)
+    deta = 2.0*r*r0*numpy.sin(phi-phi0)/(D*D)
+    deta2 = 2.0*r*r0*numpy.cos(phi-phi0)/(D*D)
 
     # Compute the second partial derivative.
     psi_d2 = (-0.25/(psi0*psi0*psi0))*(deta-2.0*dxi)*(deta-2.0*dxi)
@@ -478,10 +478,10 @@ def resolution_inverse(x):
     Purpose:
         Compute the inverse of :math:`y = x/(\\exp(-x)+x-1)`
     Arguments:
-        :x (*np.ndarray* or *float*):
+        :x (*numpy.ndarray* or *float*):
             Independent variable
     Outputs:
-        :f (*np.ndarray* or *float*):
+        :f (*numpy.ndarray* or *float*):
             The inverse of :math:`x/(\\exp(-x)+x-1)`
     Dependencies:
         #. numpy
@@ -501,7 +501,7 @@ def resolution_inverse(x):
 
         >>> import rss_ringoccs.diffcorr.special_functions as sf
         >>> import numpy as np
-        >>> x = np.array(range(0,1001))*0.001+1.01
+        >>> x = numpy.array(range(0,1001))*0.001+1.01
         >>> y = sf.resolution_inverse(x)
         >>> import matplotlib.pyplot as plt
         >>> plt.show(plt.plot(x,y))
@@ -518,7 +518,7 @@ def resolution_inverse(x):
             \r\tInput should be a numpy array of real numbers (ints or floats),
             \r\tor an int or a float.\n
             \r\tUsage:
-            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. np.arange(-5, 5)
+            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. numpy.arange(-5, 5)
             \r\t\t>>> y = resolution_inverse(x)
             """
         )
@@ -536,7 +536,7 @@ def square_well_diffraction(x, a, b, F):
             \r\tInput should be a numpy array of real numbers (ints or floats),
             \r\tand three floats/ints.\n
             \r\tUsage:
-            \r\t\t>>> x = np.arange(-10, 10, 0.01)
+            \r\t\t>>> x = numpy.arange(-10, 10, 0.01)
             \r\t\t>>> a = -5.0
             \r\t\t>>> b = 5.0
             \r\t\t>>> F = 0.05
@@ -557,7 +557,7 @@ def inverse_square_well_diffraction(x, a, b, F):
             \r\tInput should be a numpy array of real numbers (ints or floats),
             \r\tand three floats/ints.\n
             \r\tUsage:
-            \r\t\t>>> x = np.arange(-10, 10, 0.01)
+            \r\t\t>>> x = numpy.arange(-10, 10, 0.01)
             \r\t\t>>> a = -5.0
             \r\t\t>>> b = 5.0
             \r\t\t>>> F = 0.05
@@ -600,7 +600,7 @@ def double_slit_diffraction(x, z, a, d):
             \r\tInput should be a numpy array of real numbers (ints or floats),
             \r\tand three floats/ints.\n
             \r\tUsage:
-            \r\t\t>>> x = np.arange(-10, 10, 0.01)
+            \r\t\t>>> x = numpy.arange(-10, 10, 0.01)
             \r\t\t>>> z = 5.0
             \r\t\t>>> a = 10.0
             \r\t\t>>> d = 1.0
@@ -613,10 +613,10 @@ def fresnel_cos(x):
     Purpose:
         Compute the Fresnel cosine function.
     Arguments:
-        :x (*np.ndarray* or *float*):
+        :x (*numpy.ndarray* or *float*):
             A real or complex number, or numpy array.
     Outputs:
-        :f_cos (*np.ndarray* or *float*):
+        :f_cos (*numpy.ndarray* or *float*):
             The fresnel cosine integral of x.
     Notes:
         #.  The Fresnel Cosine integral is the solution to the equation
@@ -633,7 +633,7 @@ def fresnel_cos(x):
 
         >>> import rss_ringoccs.diffcorr.special_functions as sf
         >>> import numpy as np
-        >>> x = np.arange(-10, 10, 0.01)
+        >>> x = numpy.arange(-10, 10, 0.01)
         >>> y = sf.fresnel_cos(x)
     """
     try:
@@ -648,7 +648,7 @@ def fresnel_cos(x):
             \r\tInput should be a numpy array of real numbers (ints or floats),
             \r\tor a non-zero int or non-zero float.\n
             \r\tUsage:
-            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. np.arange(-5, 5)
+            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. numpy.arange(-5, 5)
             \r\t\t>>> y = fresnel_cos(x)
             """
         )
@@ -658,10 +658,10 @@ def fresnel_sin(x):
         Purpose:
             Compute the Fresnel sine function.
         Variables:
-            :x (*np.ndarray* or *float*):
+            :x (*numpy.ndarray* or *float*):
                 The independent variable.
         Outputs:
-            :f_sin (*np.ndarray* or *float*):
+            :f_sin (*numpy.ndarray* or *float*):
                 The fresnel sine integral of x.
         Notes:
             #.  The Fresnel sine integral is the solution to the equation
@@ -678,7 +678,7 @@ def fresnel_sin(x):
 
             >>> import rss_ringoccs.diffcorr.special_functions as sf
             >>> import numpy as np
-            >>> x = np.arange(-10, 10, 0.01)
+            >>> x = numpy.arange(-10, 10, 0.01)
             >>> y = sf.fresnel_sin(x)
     """
     try:
@@ -693,7 +693,7 @@ def fresnel_sin(x):
             \r\tInput should be a numpy array of real numbers (ints or floats),
             \r\tor a non-zero int or non-zero float.\n
             \r\tUsage:
-            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. np.arange(-5, 5)
+            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. numpy.arange(-5, 5)
             \r\t\t>>> y = fresnel_sin(x)
             """
         )
@@ -743,10 +743,10 @@ def fresnel_transform(T_in, rho_km_vals, F_km_vals, w_km_vals, start, n_used,
         w_init = w_km_vals[start]
 
         # Number of points in the first window (Odd integer).
-        nw = int(2 * np.floor(w_init / (2.0 * dx_km)) + 1)
+        nw = int(2 * numpy.floor(w_init / (2.0 * dx_km)) + 1)
 
         # Indices for the data corresponding to current window.
-        crange = np.arange(int(start-(nw-1)/2), int(1+start+(nw-1)/2))
+        crange = numpy.arange(int(start-(nw-1)/2), int(1+start+(nw-1)/2))
 
         # Various geometry variables.
         r0 = rho_km_vals[crange]
@@ -757,7 +757,7 @@ def fresnel_transform(T_in, rho_km_vals, F_km_vals, w_km_vals, start, n_used,
         w_func = fw(x, w_init)
 
         # Perform the Fresnel Transform, point by point, via Riemann sums.
-        for i in np.arange(n_used):
+        for i in numpy.arange(n_used):
 
             # Current point being computed.
             center = start+i
@@ -768,16 +768,16 @@ def fresnel_transform(T_in, rho_km_vals, F_km_vals, w_km_vals, start, n_used,
             r = rho_km_vals[center]
 
             # If window widths changes too much, recompute the window function.
-            if (np.abs(w_init - w) >= 2.0 * dx_km):
+            if (numpy.abs(w_init - w) >= 2.0 * dx_km):
 
                 # Compute first window width and window function.
                 w_init = w_km_vals[center]
 
                 # Number of points in window (Odd integer).
-                nw = int(2 * np.floor(w_init / (2.0 * dx_km)) + 1)
+                nw = int(2 * numpy.floor(w_init / (2.0 * dx_km)) + 1)
 
                 # Indices for the data corresponding to this window.
-                crange = np.arange(int(center-(nw-1)/2), int(1+center+(nw-1)/2))
+                crange = numpy.arange(int(center-(nw-1)/2), int(1+center+(nw-1)/2))
 
                 # Ajdust ring radius by dx_km.
                 r0 = rho_km_vals[crange]
@@ -803,7 +803,7 @@ def fresnel_transform(T_in, rho_km_vals, F_km_vals, w_km_vals, start, n_used,
             psi_d1 = dpsi_ellipse(kD, r, r0, phi, phi0, b,
                                   d, eccentricity, periapse)
             loop = 0
-            while (np.max(np.abs(psi_d1)) > 1.0e-4):
+            while (numpy.max(numpy.abs(psi_d1)) > 1.0e-4):
                 psi_d1 = dpsi_ellipse(kD, r, r0, phi, phi0,
                                       b, d, eccentricity, periapse)
                 psi_d2 = fresnel_d2psi_dphi2(kD, r, r0, phi, phi0, b, d)
@@ -821,13 +821,13 @@ def fresnel_transform(T_in, rho_km_vals, F_km_vals, w_km_vals, start, n_used,
 
             # Compute kernel function for Fresnel inverse or forward model.
             if fwd:
-                ker = w_func*np.exp(1j*psi_vals)
+                ker = w_func*numpy.exp(1j*psi_vals)
             else:
-                ker = w_func*np.exp(-1j*psi_vals)
+                ker = w_func*numpy.exp(-1j*psi_vals)
 
             # Compute approximate Fresnel transform for current point.
             T = T_in[crange]
-            T_out[center] = np.sum(ker*T) * dx_km * (0.5+0.5j)/F
+            T_out[center] = numpy.sum(ker*T) * dx_km * (0.5+0.5j)/F
 
             # If normalization has been set, normalize the reconstruction
             if norm:
@@ -901,7 +901,7 @@ def lambertw(x):
             \r\tInput should be a numpy array of real numbers (ints or floats),
             \r\tor an int or a float.\n
             \r\tUsage:
-            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. np.arange(-5, 5)
+            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. numpy.arange(-5, 5)
             \r\t\t>>> y = lambertw(x)
             """
         )
@@ -1015,7 +1015,7 @@ def sinc(x):
             \r\tInput should be a numpy array of real numbers (ints or floats),
             \r\tor an int or a float.\n
             \r\tUsage:
-            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. np.arange(-5, 5)
+            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. numpy.arange(-5, 5)
             \r\t\t>>> y = sinc(x)
             """
         )
@@ -1072,7 +1072,7 @@ def square_well_phase(x, a, b, F):
             \r\tInput should be a numpy array of real numbers (ints or floats),
             \r\tand three floats/ints.\n
             \r\tUsage:
-            \r\t\t>>> x = np.arange(-10, 10, 0.01)
+            \r\t\t>>> x = numpy.arange(-10, 10, 0.01)
             \r\t\t>>> a = -5.0
             \r\t\t>>> b = 5.0
             \r\t\t>>> F = 0.05
@@ -1093,7 +1093,7 @@ def wavelength_to_wavenumber(lambda_km):
             \r\tInput should be a numpy array of non-zero real numbers
             \r\t(ints or floats), or a non-zero int or non-zero float.\n
             \r\tUsage:
-            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. np.arange(3, 10)
+            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. numpy.arange(3, 10)
             \r\t\t>>> y = wavelength_to_wavenumber(x)
             """
         )

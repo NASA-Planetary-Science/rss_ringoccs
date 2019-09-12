@@ -435,8 +435,7 @@ def kbmdal(x, W, alpha):
             """
         )  
 
-def window_width(res, normeq, fsky, fres, rho_dot,
-                 sigma, bfac=True, Return_P=False):
+def window_width(res, normeq, fsky, fres, rho_dot, sigma, bfac=True):
     """
     Purpose:
         Compute the window width as a function of ring radius.
@@ -467,15 +466,13 @@ def window_width(res, normeq, fsky, fres, rho_dot,
         if (numpy.size(Prange) == 0):
             raise IndexError(
                 """
-                \r\tError Encountered:
-                \r\t\trss_ringoccs.diffrec.DiffractionCorrection\n
-                \r\tThe P parameter in window width computation
-                \r\tis less than one for the entirety of the
-                \r\tdata set. Either rho_dot_km_vals is too small,
-                \r\tor F_km_vals is too large. Request a coarser
-                \r\tresolution, or check your data for errors.\n
-                \r\tAlternatively, you may set bfac=False as
-                \r\ta keyword to skip the use of the P parameter.
+                \r\tError Encountered: rss_ringoccs
+                \r\t\tdiffrec.special_functions.window_width\n
+                \r\tThe P parameter in window width computation is less than
+                \r\tone for the entirety of the data set. Either
+                \r\trho_dot_km_vals is too small, tor F_km_vals is too large.
+                \r\tRequest a coarser resolution, or check your data for
+                \r\terrors. Alternatively, you may set bfac=False as a keyword.
                 \r\tThis may result in inaccurate window width.
                 """
             )
@@ -494,10 +491,7 @@ def window_width(res, normeq, fsky, fres, rho_dot,
 
     w_vals *= normeq
 
-    if Return_P:
-        return w_vals, Prange
-    else:
-        return w_vals
+    return w_vals, Prange
 
 def window_norm(ker, dx, f_scale):
     """

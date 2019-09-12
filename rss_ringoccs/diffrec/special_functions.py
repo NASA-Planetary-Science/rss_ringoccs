@@ -6,8 +6,7 @@ try:
 except:
     raise ImportError(
         """
-        \r\tError: rss_ringoccs
-        \r\t\tdiffrec.special_functions\n
+        \r\tError: rss_ringoccs\n\r\t\tdiffrec.special_functions\n
         \r\tCould Not Import C Code. There was most likely an error
         \r\tin your installation of rss_ringoccs. Install GCC (C Compiler)
         \r\tand see the User's Guide for installation instructions.
@@ -657,31 +656,13 @@ def fresnel_sin(x):
         )
 
 def fresnel_transform(T_in, rho_km_vals, F_km_vals, w_km_vals, start, n_used,
-                      wtype, norm, fwd, psitype, phi_rad_vals=None,
-                      kD_vals=None, B_rad_vals=None, D_km_vals=None,
-                      periapse=None, eccentricity=None):
+                      wtype, norm, fwd, psitype, phi_rad_vals, kD_vals,
+                      B_rad_vals, D_km_vals, ecc, peri):
 
     fname = "diffrec.special_functions.fresnel_transform"
-    # Remove spaces/quotes from the wtype variable and set to lower case.
-    wtype = wtype.replace(" ", "").replace("'", "").replace('"', "")
-    wtype = wtype.lower()
 
-    # Check that wtype is in the allowed list of window types.
-    if not (wtype in window_functions.func_dict):
-        erm = ""
-        for key in window_functions.func_dict:
-            erm = "%s\t\t'%s'\n" % (erm, key)
-        raise ValueError(
-            """
-                \r\tError Encountered: rss_ringoccs
-                \r\t\t%s\n
-                \tIllegal string used for wtype.
-                \r\t\tYour string: '%s'\n
-                \r\tAllowed Strings:\n%s
-            """ % (fname, wtype, erm)
-        )
-    else:
-        pass
+    # Remove spaces/quotes from the wtype variable and set to lower case.
+    wtype = error_check.check_wtype(wtype, fname)
 
     # Check that range and psitype are legal inputs.
     psitype = error_check.check_psitype(psitype, fname)
@@ -758,12 +739,12 @@ def fresnel_transform(T_in, rho_km_vals, F_km_vals, w_km_vals, start, n_used,
             phi0 = phi_rad_vals[crange]
 
             # Compute Newton-Raphson perturbation
-            psi_d1 = dpsi_ellipse(kD, r, r0, phi, phi0, b,
-                                  d, eccentricity, periapse)
+            psi_d1 = fresnel_dpsi_dphi_ellipse(kD, r, r0, phi, phi0, b, d,
+                                               ecc, peri)
             loop = 0
             while (numpy.max(numpy.abs(psi_d1)) > 1.0e-4):
-                psi_d1 = dpsi_ellipse(kD, r, r0, phi, phi0,
-                                      b, d, eccentricity, periapse)
+                psi_d1 = fresnel_dpsi_dphi_ellipse(kD, r, r0, phi, phi0, b, d,
+                                                   ecc, peri)
                 psi_d2 = fresnel_d2psi_dphi2(kD, r, r0, phi, phi0, b, d)
 
                 # Newton-Raphson
@@ -818,7 +799,8 @@ def fresnel_transform(T_in, rho_km_vals, F_km_vals, w_km_vals, start, n_used,
         return _diffraction_functions.fresnel_transform(
             T_in, rho_km_vals, F_km_vals, phi_rad_vals, kD_vals, B_rad_vals,
             D_km_vals, w_km_vals, start, n_used,
-            window_functions.func_dict[wtype]["wnum"], int(norm), int(fwd), ord
+            window_functions.func_dict[wtype]["wnum"], int(norm), int(fwd),
+            ord, ecc, peri
         )
     except KeyboardInterrupt:
         raise

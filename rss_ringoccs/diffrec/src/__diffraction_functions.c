@@ -622,6 +622,104 @@ complex double Fresnel_Transform_Newton_Norm_Double(
     return T_out;
 }
 
+complex double Fresnel_Transform_Ellipse_Double(
+    double *x_arr, double *phi_arr, complex double *T_in, double *w_func,
+    double kD, double r, double B, double D, double EPS, long toler, double dx,
+    double F, long n_pts, long center, double ecc, double peri
+){
+
+    /*  Declare all necessary variables. i and j are used for indexing.       */
+    long i, j;
+
+    /*  The Fresnel kernel and ring azimuth angle.                            */
+    double psi, phi;
+    complex double T_out, exp_psi;
+
+    /*  Initialize T_out and norm to zero so we can loop over later.          */
+    T_out = 0.0;
+
+    /*  Symmetry is lost without the Legendre polynomials, or Fresnel         *
+     *  quadratic. Must compute everything from -W/2 to W/2.                  */
+    j = center-(int)((n_pts-1)/2);
+
+    /*  Use a Riemann Sum to approximate the Fresnel Inverse Integral.        */
+    for (i = 0; i<n_pts; ++i){
+
+        /*  Calculate the stationary value of psi with respect to phi.        */
+        phi = Newton_Raphson_Fresnel_Ellipse(kD, r, x_arr[i], phi_arr[i],
+                                             phi_arr[i], B, D, ecc, peri, EPS,
+                                             toler);
+
+        /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
+        psi     = Fresnel_Psi_Double(kD, r, x_arr[i], phi, phi_arr[i], B, D);
+        exp_psi = (cos(psi) - _Complex_I*sin(psi))*w_func[i];
+
+        /*  Compute the transform with a Riemann sum. If the T_in pointer     *
+         *  does not contain at least 2*n_pts+1 points, n_pts to the left and *
+         *  right of the center, then this will create a segmentation fault.  */
+        T_out += exp_psi * T_in[j];
+        j     += 1;
+    }
+
+    /*  Multiply result by the coefficient found in the Fresnel inverse.      */
+    T_out *= (0.5 + 0.5*_Complex_I) * dx / F;
+    return T_out;
+}
+
+complex double Fresnel_Transform_Ellipse_Norm_Double(
+    double *x_arr, double *phi_arr, complex double *T_in, double *w_func,
+    double kD, double r, double B, double D, double EPS, long toler, double dx,
+    double F, long n_pts, long center, double ecc, double peri
+){
+
+    /*  Declare all necessary variables. i and j are used for indexing.       */
+    long i, j;
+
+    /*  The Fresnel kernel and the stationary ring azimuth angle.             */
+    double psi, phi;
+    complex double T_out, exp_psi, norm;
+
+    /*  Initialize T_out and norm to zero so we can loop over later.          */
+    T_out = 0.0;
+    norm  = 0.0;
+
+    /*  Symmetry is lost without the Legendre polynomials, or Fresnel         *
+     *  quadratic. Must compute everything from -W/2 to W/2.                  */
+    j = center-(int)((n_pts-1)/2);
+
+    /*  Use a Riemann Sum to approximate the Fresnel Inverse Integral.        */
+    for (i = 0; i<n_pts; ++i){
+        /*  Calculate the stationary value of psi with respect to phi.        */
+        phi = Newton_Raphson_Fresnel_Ellipse(kD, r, x_arr[i], phi_arr[i],
+                                             phi_arr[i], B, D, ecc, peri, EPS,
+                                             toler);
+
+        /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
+        psi     = Fresnel_Psi_Double(kD, r, x_arr[i], phi, phi_arr[i], B, D);
+        exp_psi = (cos(psi) - _Complex_I*sin(psi))*w_func[i];
+
+        /*  Compute the norm using a Riemann sum as well.                     */
+        norm   += exp_psi;
+
+        /*  Compute the transform with a Riemann sum. If the T_in pointer     *
+         *  does not contain at least 2*n_pts+1 points, n_pts to the left and *
+         *  right of the center, then this will create a segmentation fault.  */
+        T_out += exp_psi * T_in[j];
+        j     += 1;
+    }
+
+    /*  The integral in the numerator of norm evaluates to F sqrt(2). Use     *
+     *  this in the calculation of the normalization. The cabs function       *
+     *  computes the absolute value of complex number (defined in complex.h). */
+    norm = SQRT_2 / cabs(norm);
+
+    /*  Multiply result by the coefficient found in the Fresnel inverse.      *
+     *  The 1/F term is omitted, since the F in the norm cancels this.        */
+    T_out *= (0.5 + 0.5*_Complex_I) * norm;
+    return T_out;
+}
+
+
 void DiffractionCorrectionFresnel(DLPObj dlp)
 {
     /*  i and j used for indexing, nw_pts is number of points in window.     */
@@ -820,7 +918,7 @@ void DiffractionCorrectionNewton(DLPObj dlp)
     else if (dlp.wtype == 4){fw = &Kaiser_Bessel_3_5_Double;}
     else if (dlp.wtype == 5){fw = &Modified_Kaiser_Bessel_2_0_Double;}
     else if (dlp.wtype == 6){fw = &Modified_Kaiser_Bessel_2_5_Double;}
-    else                     {fw = &Modified_Kaiser_Bessel_3_5_Double;}
+    else                    {fw = &Modified_Kaiser_Bessel_3_5_Double;}
 
     if (dlp.use_norm){FresT = &Fresnel_Transform_Newton_Norm_Double;}
     else {FresT = &Fresnel_Transform_Newton_Double;}
@@ -878,6 +976,94 @@ void DiffractionCorrectionNewton(DLPObj dlp)
                                   dlp.B_rad_vals[center], dlp.D_km_vals[center],
                                   EPS, toler, dx, dlp.F_km_vals[center],
                                   nw_pts, center);
+
+        /*  Increment pointers using pointer arithmetic.                      */
+        center += 1;
+    }
+    free(x_arr);
+    free(phi_arr);
+    free(w_func);
+}
+
+void DiffractionCorrectionEllipse(DLPObj dlp)
+{
+    long i, j, nw_pts, toler, center;
+    double w_init, dx, two_dx, EPS;
+
+    toler = 5;
+    EPS = 1.E-4;
+
+    double (*fw)(double, double);
+    complex double (*FresT)(double *, double *, complex double *, double *,
+                            double, double, double, double, double, long,
+                            double, double, long, long, double, double);
+
+    /*  Cast the selected window type to the fw pointer.                      */
+    if      (dlp.wtype == 0){fw = &Rect_Window_Double;}
+    else if (dlp.wtype == 1){fw = &Coss_Window_Double;}
+    else if (dlp.wtype == 2){fw = &Kaiser_Bessel_2_0_Double;}
+    else if (dlp.wtype == 3){fw = &Kaiser_Bessel_2_5_Double;}
+    else if (dlp.wtype == 4){fw = &Kaiser_Bessel_3_5_Double;}
+    else if (dlp.wtype == 5){fw = &Modified_Kaiser_Bessel_2_0_Double;}
+    else if (dlp.wtype == 6){fw = &Modified_Kaiser_Bessel_2_5_Double;}
+    else                    {fw = &Modified_Kaiser_Bessel_3_5_Double;}
+
+    if (dlp.use_norm){FresT = &Fresnel_Transform_Ellipse_Norm_Double;}
+    else {FresT = &Fresnel_Transform_Ellipse_Double;}
+
+    /* Compute first window width and window function. */
+    center = dlp.start;
+
+    if (dlp.use_fwd){
+        for (i=0; i<=dlp.n_used; ++i){
+            dlp.kd_vals[center+i] *= -1.0;
+        }
+    }
+
+    w_init  = dlp.w_km_vals[center];
+    dx      = dlp.rho_km_vals[center+1] - dlp.rho_km_vals[center];
+    two_dx  = 2.0*dx;
+    nw_pts  = 2*((long)(w_init / (2.0 * dx)))+1;
+
+    double *x_arr   = (double *)malloc(sizeof(double) * nw_pts);
+    double *phi_arr = (double *)malloc(sizeof(double) * nw_pts);
+    double *w_func  = (double *)malloc(sizeof(double) * nw_pts);
+
+    for (j=0; j<nw_pts; ++j){
+        x_arr[j]   = dlp.rho_km_vals[center+j-(nw_pts-1)/2];
+        phi_arr[j] = dlp.phi_rad_vals[center+j-(nw_pts-1)/2];
+        w_func[j]  = fw(x_arr[j] - dlp.rho_km_vals[center], w_init);
+    }
+
+    for (i=0; i<=dlp.n_used; ++i){
+
+        /*  If the window width changes significantly, recompute w_func.  */
+        if (fabs(w_init - dlp.w_km_vals[center]) >= two_dx) {
+            // Reset w_init and recompute window function.
+            w_init  = dlp.w_km_vals[center];
+            nw_pts  = 2*((int)(w_init / (2.0 * dx)))+1;
+            w_func  = (double *)realloc(w_func,  sizeof(double) * nw_pts);
+            phi_arr = (double *)realloc(phi_arr, sizeof(double) * nw_pts);
+            x_arr   = (double *)realloc(x_arr,   sizeof(double) * nw_pts);
+            for (j=0; j<nw_pts; ++j){
+                x_arr[j]   = dlp.rho_km_vals[center+j-(nw_pts-1)/2];
+                phi_arr[j] = dlp.phi_rad_vals[center+j-(nw_pts-1)/2];
+                w_func[j]  = fw(x_arr[j] - dlp.rho_km_vals[center], w_init);
+            }
+        }
+        else {
+            for (j=0; j<nw_pts; ++j){
+                x_arr[j]   = dlp.rho_km_vals[center+j-(nw_pts-1)/2];
+                phi_arr[j] = dlp.phi_rad_vals[center+j-(nw_pts-1)/2];
+            }
+        }
+
+        /*  Compute the fresnel tranform about the current point.   */
+        dlp.T_out[center] = FresT(x_arr, phi_arr, dlp.T_in, w_func,
+                                  dlp.kd_vals[center], dlp.rho_km_vals[center],
+                                  dlp.B_rad_vals[center], dlp.D_km_vals[center],
+                                  EPS, toler, dx, dlp.F_km_vals[center],
+                                  nw_pts, center, dlp.ecc, dlp.peri);
 
         /*  Increment pointers using pointer arithmetic.                      */
         center += 1;

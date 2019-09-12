@@ -19,6 +19,8 @@ typedef struct _dlpdataobj {
     double *B_rad_vals;
     double *D_km_vals;
     double *w_km_vals;
+    double ecc;
+    double peri;
     long start;
     long n_used;
     unsigned char wtype;
@@ -69,5 +71,7 @@ extern void DiffractionCorrectionFresnel(DLPObj dlp);
 extern void DiffractionCorrectionLegendre(DLPObj dlp);
 
 extern void DiffractionCorrectionNewton(DLPObj dlp);
+
+extern void DiffractionCorrectionEllipse(DLPObj dlp);
 
 #endif

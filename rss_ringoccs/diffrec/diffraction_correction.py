@@ -13,17 +13,6 @@ from rss_ringoccs.tools.history import write_history_dict
 from rss_ringoccs.tools.write_output_files import write_output_files
 from rss_ringoccs.tools import error_check
 from . import special_functions, window_functions
-try:
-    from . import _diffraction_functions
-except:
-    raise ImportError(
-        """
-        \rError: rss_ringoccs.diffrec.diffraction_correction
-        \r\tCould Not Import C Code. There was most likely an error
-        \r\tin your installation of rss_ringoccs. Install GCC (C Compiler)
-        \r\tand see the User's Guide for installation instructions.
-        """
-    )
 
 # Dictionary containing regions of interest within the Saturnian Rings.
 region_dict = {
@@ -802,5 +791,5 @@ class DiffractionCorrection(object):
             T_in, self.rho_km_vals, self.F_km_vals, self.w_km_vals,
             start, n_used, self.wtype, self.norm, fwd, self.psitype,
             self.phi_rad_vals, kD_vals, self.B_rad_vals, self.D_km_vals,
-            self.peri, self.ecc
+            self.ecc, self.peri
         )

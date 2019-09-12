@@ -28,7 +28,8 @@ def configuration(parent_package=None, top_path=None):
             "src/__math_function_norm_eq_width.c",
             "src/__math_function_resolution_inverse.c",
             "src/__math_function_sinc.c",
-            "src/_special_functions.c"
+            "src/_special_functions.c",
+            "src/__window_width.c"
         ]
     )
     config.add_extension('_window_functions', [

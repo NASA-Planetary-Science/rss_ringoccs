@@ -7,107 +7,111 @@ def fresnel_transform_ellipse(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
                               kD_vals, B_rad_vals, D_km_vals, w_km_vals, start,
                               n_used, peri, ecc, wtype, norm, fwd):
 
-    # Compute the sample spacing.
-    dx_km = rho_km_vals[1]-rho_km_vals[0]
+    if (psitype == "ellipse"):
 
-    # Extract the window function from the window function dictionary.
-    fw = window_functions.func_dict[wtype]["func"]
+        # Compute the sample spacing.
+        dx_km = rho_km_vals[1]-rho_km_vals[0]
 
-    # Create empty array for reconstruction / forward transform.
-    T_out = T_in * 0.0
+        # Extract the window function from the window function dictionary.
+        fw = window_functions.func_dict[wtype]["func"]
 
-    # Compute first window width and window function.
-    w_init = w_km_vals[start]
+        # Create empty array for reconstruction / forward transform.
+        T_out = T_in * 0.0
 
-    # Number of points in the first window (Odd integer).
-    nw = int(2 * np.floor(w_init / (2.0 * dx_km)) + 1)
+        # Compute first window width and window function.
+        w_init = w_km_vals[start]
 
-    # Indices for the data corresponding to current window.
-    crange = np.arange(int(start-(nw-1)/2), int(1+start+(nw-1)/2))
+        # Number of points in the first window (Odd integer).
+        nw = int(2 * numpy.floor(w_init / (2.0 * dx_km)) + 1)
 
-    # Various geometry variables.
-    r0 = rho_km_vals[crange]
-    r = rho_km_vals[start]
-    x = r-r0
+        # Indices for the data corresponding to current window.
+        crange = numpy.arange(int(start-(nw-1)/2), int(1+start+(nw-1)/2))
 
-    # Compute the first window function.
-    w_func = fw(x, w_init)
+        # Various geometry variables.
+        r0 = rho_km_vals[crange]
+        r = rho_km_vals[start]
+        x = r-r0
 
-    # Perform the Fresnel Transform, point by point, via Riemann sums.
-    for i in np.arange(n_used):
+        # Compute the first window function.
+        w_func = fw(x, w_init)
 
-        # Current point being computed.
-        center = start+i
+        # Perform the Fresnel Transform, point by point, via Riemann sums.
+        for i in numpy.arange(n_used):
 
-        # Current window width, Fresnel scale, and ring radius.
-        w = w_km_vals[center]
-        F = F_km_vals[center]
-        r = rho_km_vals[center]
+            # Current point being computed.
+            center = start+i
 
-        # If window widths changes too much, recompute the window function.
-        if (np.abs(w_init - w) >= 2.0 * dx_km):
+            # Current window width, Fresnel scale, and ring radius.
+            w = w_km_vals[center]
+            F = F_km_vals[center]
+            r = rho_km_vals[center]
 
-            # Compute first window width and window function.
-            w_init = w_km_vals[center]
+            # If window widths changes too much, recompute the window function.
+            if (numpy.abs(w_init - w) >= 2.0 * dx_km):
 
-            # Number of points in window (Odd integer).
-            nw = int(2 * np.floor(w_init / (2.0 * dx_km)) + 1)
+                # Compute first window width and window function.
+                w_init = w_km_vals[center]
 
-            # Indices for the data corresponding to this window.
-            crange = np.arange(int(center-(nw-1)/2), int(1+center+(nw-1)/2))
+                # Number of points in window (Odd integer).
+                nw = int(2 * numpy.floor(w_init / (2.0 * dx_km)) + 1)
 
-            # Ajdust ring radius by dx_km.
-            r0 = rho_km_vals[crange]
-            x = r-r0
+                # Indices for the data corresponding to this window.
+                crange = numpy.arange(int(center-(nw-1)/2), int(1+center+(nw-1)/2))
 
-            # Recompute the window function.
-            w_func = fw(x, w_init)
+                # Ajdust ring radius by dx_km.
+                r0 = rho_km_vals[crange]
+                x = r-r0
 
-        else:
+                # Recompute the window function.
+                w_func = fw(x, w_init)
 
-            # If width hasn't changed much, increment index variable.
-            crange += 1
-            r0 = rho_km_vals[crange]
+            else:
 
-        # Various geometry variables for the current point.
-        d = D_km_vals[crange]
-        b = B_rad_vals[crange]
-        kD = kD_vals[crange]
-        phi = phi_rad_vals[crange]
-        phi0 = phi_rad_vals[crange]
+                # If width hasn't changed much, increment index variable.
+                crange += 1
+                r0 = rho_km_vals[crange]
 
-        # Compute Newton-Raphson perturbation
-        psi_d1 = dpsi_ellipse(kD, r, r0, phi, phi0, b, d, ecc, peri)
-        loop = 0
-        while (np.max(np.abs(psi_d1)) > 1.0e-4):
-            psi_d1 = dpsi_ellipse(kD, r, r0, phi, phi0, b, d, ecc, peri)
-            psi_d2 = d2psi(kD, r, r0, phi, phi0, b, d)
+            # Various geometry variables for the current point.
+            d = D_km_vals[crange]
+            b = B_rad_vals[crange]
+            kD = kD_vals[crange]
+            phi = phi_rad_vals[crange]
+            phi0 = phi_rad_vals[crange]
 
-            # Newton-Raphson
-            phi += -(psi_d1 / psi_d2)
+            # Compute Newton-Raphson perturbation
+            psi_d1 = fresnel_dpsi_dphi_ellipse(kD, r, r0, phi, phi0, b, d,
+                                               ecc, peri)
+            loop = 0
+            while (numpy.max(numpy.abs(psi_d1)) > 1.0e-4):
+                psi_d1 = fresnel_dpsi_dphi_ellipse(kD, r, r0, phi, phi0, b, d,
+                                                   ecc, peri)
+                psi_d2 = fresnel_d2psi_dphi2(kD, r, r0, phi, phi0, b, d)
 
-            # Add one to loop variable for each iteration
-            loop += 1
-            if (loop > 4):
-                break
+                # Newton-Raphson
+                phi += -(psi_d1 / psi_d2)
 
-        # Compute Psi (Fresnel Kernel, MTR86 Equation 4).
-        psi_vals = fresnel_psi(kD, r, r0, phi, phi0, b, d)
+                # Add one to loop variable for each iteration
+                loop += 1
+                if (loop > 4):
+                    break
 
-        # Compute kernel function for Fresnel inverse or forward model.
-        if fwd:
-            ker = w_func*np.exp(1j*psi_vals)
-        else:
-            ker = w_func*np.exp(-1j*psi_vals)
+            # Compute Psi (Fresnel Kernel, MTR86 Equation 4).
+            psi_vals = fresnel_psi(kD, r, r0, phi, phi0, b, d)
 
-        # Compute approximate Fresnel transform for current point.
-        T = T_in[crange]
-        T_out[center] = np.sum(ker*T) * dx_km * (0.5+0.5j)/F
+            # Compute kernel function for Fresnel inverse or forward model.
+            if fwd:
+                ker = w_func*numpy.exp(1j*psi_vals)
+            else:
+                ker = w_func*numpy.exp(-1j*psi_vals)
 
-        # If normalization has been set, normalize the reconstruction
-        if norm:
-            T_out[center] *= window_functions.window_norm(dx_km, ker, F)
-    return T_out
+            # Compute approximate Fresnel transform for current point.
+            T = T_in[crange]
+            T_out[center] = numpy.sum(ker*T) * dx_km * (0.5+0.5j)/F
+
+            # If normalization has been set, normalize the reconstruction
+            if norm:
+                T_out[center] *= window_functions.window_norm(ker, dx_km, F)
+        return T_out
 
 def fresnel_transform_newton(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
                              kD_vals, B_rad_vals, D_km_vals, w_km_vals, start,
@@ -459,3 +463,4 @@ def fresnel_legendre_transform(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
         if norm:
             T_out[center] *= window_functions.window_norm(dx_km, ker, F)
     return T_out
+

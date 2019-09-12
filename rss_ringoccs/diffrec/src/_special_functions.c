@@ -6,6 +6,7 @@
 
 /*  compute_norm_eq, max and min found here. math.h included here as well.    */
 #include "__math_functions.h"
+#include "__window_width.h"
 
 /* Include fresnel integrals header. This includes frensel_sin/cos.           */
 #include "_fraunhofer_diffraction_wrappers.h"
@@ -30,6 +31,116 @@
  * improvement in performance, as opposed to the routines written purely in  *
  * Python. Successful compiling requires the Numpy and Python header files.  *
  *---------------------------------------------------------------------------*/
+
+void capsule_cleanup(PyObject *capsule) {
+    void *memory = PyCapsule_GetPointer(capsule, NULL);
+    free(memory);
+}
+
+static PyObject *wheregreater(PyObject *self, PyObject *args)
+{
+    PyObject *output, capsule;
+    PyArrayObject *arr;
+    double threshold;
+    long *dims;
+
+    if (PyArg_ParseTuple(args, "O!d", &PyArray_Type, &arr, &threshold)){
+
+        npy_int dim;
+        double *data;
+
+        // Check to make sure input isn't zero dimensional!
+        if (PyArray_NDIM(arr) != 1){
+            PyErr_Format(
+                PyExc_TypeError,
+                "rss_ringoccs.diffrec.special_functions.wheregreater\n"
+                "\r\tInput must be a one-dimensional array and a real number."
+            );
+            return NULL;
+        }
+
+        // Useful information about the data.
+        dim  = PyArray_DIMS(arr)[0];
+        data = (double *)PyArray_DATA(arr);
+
+        long **where    = WhereGreater(data, dim, threshold);
+        long *where_arr = where[0];
+        long where_dim  = *where[1];
+
+        dims = &where_dim;
+        output  = PyArray_SimpleNewFromData(1, dims, NPY_LONG, (void *)where_arr);
+        capsule = PyCapsule_New(where_arr, NULL, capsule_cleanup);
+
+        PyArray_SetBaseObject((PyArrayObject *)output, capsule);
+
+        free(where);
+        return output;
+    }
+    else {
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\r\trss_ringoccs.diffrec.math_functions.wheregreater\n"
+            "\r\t\tInput should be a numpy array of numbers and a real number."
+        );
+        return NULL;
+    }
+}
+
+static PyObject *window_width(PyObject *self, PyObject *args)
+{
+    PyArrayObject *fsky, *fres, *rho_dot;
+    double res, normeq, sigma;
+    unsigned char use_bfac;
+    if (PyArg_ParseTuple(args, "ddO!O!O!di", &res, &normeq,
+                         &PyArray_Type, &fsky, &PyArray_Type, &fres,
+                         &PyArray_Type, &rho_dot, &sigma, &use_bfac)){
+
+        npy_int dim;
+        double *fsky_data;
+
+        // Check to make sure input isn't zero dimensional!
+        if (PyArray_NDIM(fsky) != 1){
+            PyErr_Format(
+                PyExc_TypeError,
+                "\n\trss_ringoccs.diffrec.special_functions.compute_norm_eq\n"
+                "\r\t\tfsky must be a one-dimensional array."
+            );
+            return NULL;
+        }
+
+        if (PyArray_NDIM(fres) != 1){
+            PyErr_Format(
+                PyExc_TypeError,
+                "\n\trss_ringoccs.diffrec.special_functions.compute_norm_eq\n"
+                "\r\t\tfres must be a one-dimensional array."
+            );
+            return NULL;
+        }
+
+        if (PyArray_NDIM(rho_dot) != 1){
+            PyErr_Format(
+                PyExc_TypeError,
+                "\n\trss_ringoccs.diffrec.special_functions.compute_norm_eq\n"
+                "\r\t\rho_dot must be a one-dimensional array."
+            );
+            return NULL;
+        }
+
+        // Useful information about the data.
+        dim       = PyArray_DIMS(fsky)[0];
+        fsky_data = PyArray_DATA(fsky);
+        return NULL;
+    }
+    else {
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\r\trss_ringoccs.diffrec.math_functions.compute_norm_eq\n"
+            "\r\t\tInput should be a numpy array of numbers."
+        );
+        return NULL;
+    }
+}
+
 static PyObject *compute_norm_eq(PyObject *self, PyObject *args)
 {
     PyArrayObject *arr;
@@ -354,6 +465,8 @@ static PyMethodDef _special_functions_methods[] =
      METH_VARARGS, "Compute the normalized equivalent width of an array."},
     {"max", max, METH_VARARGS, "Compute the maximum of a numpy array."},
     {"min", min, METH_VARARGS, "Compute the minimum of a numpy array."},
+    {"wheregreater", wheregreater, METH_VARARGS,
+     "Compute the wheregreater of a numpy array."},
     {NULL, NULL, 0, NULL}
 };
 /*-------------------------DEFINE UNIVERSAL FUNCTIONS-------------------------*/

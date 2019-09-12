@@ -376,60 +376,26 @@ def fresnel_dpsi_dphi(kD, r, r0, phi, phi0, B, D):
             """
         )
 
-# TODO
-def dpsi_ellipse(kD, r, r0, phi, phi0, B, D, ecc, peri):
-    """
-        Purpose:
-            Compute :math:`\\mathrm{d}\\psi/\\mathrm{d}\\phi`
-        Arguments:
-            :kD (*float*):
-                Wavenumber, unitless.
-            :r (*float*):
-                Radius of reconstructed point, in kilometers.
-            :r0 (*numpy.ndarray*):
-                Radius of region within window, in kilometers.
-            :phi (*numpy.ndarray*):
-                Root values of :math:`\\mathrm{d}\\psi/\\mathrm{d}\\phi`, radians.
-            :phi0 (*numpy.ndarray*):
-                Ring azimuth angle corresponding to r0, radians.
-            :B (*float*):
-                Ring opening angle, in radians.
-            :D (*float*):
-                Spacecraft-RIP distance, in kilometers.
-        Outputs:
-            :dpsi (*array*):
-                Partial derivative of :math:`\\psi` with
-                respect to :math:`\\phi`.
-    """
-    # Compute Xi variable (MTR86 Equation 4b).
-    xi = (numpy.cos(B)/D) * (r * numpy.cos(phi) - r0 * numpy.cos(phi0))
+def fresnel_dpsi_dphi_ellipse(kD, r, r0, phi, phi0, B, D, ecc, peri):
+    try:
+        return _special_functions.fresnel_dpsi_dphi_ellipse(
+            kD, r, r0, phi, phi0, B, D, ecc, peri
+        )
+    except KeyboardInterrupt:
+        raise
+    except:
+        raise TypeError(
+            """
+            \r\tError: rss_ringoccs
+            \r\t\tdiffrec.special_functions.fresnel_dpsi_dphi_ellipse\n
+            \r\tInput should be nine numpy arrays of real numbers.\n
+            """
+        )
 
-    # Compute Eta variable (MTR86 Equation 4c).
-    eta = (r0*r0 + r*r - 2.0*r*r0*numpy.cos(phi-phi0)) / (D*D)
-
-    psi0 = numpy.sqrt(1.0+eta-2.0*xi)
-
-    # Compute derivatives.
-    dxi_phi = -(numpy.cos(B)/D) * (r*numpy.sin(phi))
-    deta_phi = 2.0*r*r0*numpy.sin(phi-phi0)/(D*D)
-
-    dxi_rho = (numpy.cos(B)/D)*numpy.cos(phi)
-    deta_rho = 2.0*(r-r0*numpy.cos(phi-phi0)) / (D*D)
-
-    # Compute the partial derivative.
-    psi_d1 = (deta_rho-2.0*dxi_rho)*(0.5/psi0) + dxi_rho
-    psi_d1 *= r*ecc*numpy.sin(phi-peri)/(1+ecc*numpy.cos(phi-peri))
-    psi_d1 += (deta_phi-2.0*dxi_phi)*(0.5/psi0) + dxi_phi
-
-    psi_d1 *= kD
-
-    return psi_d1
-
-# TODO
 def fresnel_d2psi_dphi2(kD, r, r0, phi, phi0, B, D):
     """
     Purpose:
-        Compute :math:`\\mathrm{d}^2\\psi/\\mathrm{d}\\phi^2`
+        Compute :math:`\\psi` (MTR Equation 4)
     Arguments:
         :kD (*float*):
             Wavenumber, unitless.
@@ -438,8 +404,7 @@ def fresnel_d2psi_dphi2(kD, r, r0, phi, phi0, B, D):
         :r0 (*numpy.ndarray*):
             Radius of region within window, in kilometers.
         :phi (*numpy.ndarray*):
-            Root values of :math:`\\mathrm{d}\\psi/\\mathrm{d}\\phi`,
-            radians.
+            Ring azimuth angle corresponding to r, radians.
         :phi0 (*numpy.ndarray*):
             Ring azimuth angle corresponding to r0, radians.
         :B (*float*):
@@ -447,31 +412,24 @@ def fresnel_d2psi_dphi2(kD, r, r0, phi, phi0, B, D):
         :D (*float*):
             Spacecraft-RIP distance, in kilometers.
     Outputs:
-        :dpsi (*numpy.ndarray*):
-            Second partial derivative of :math:`\\psi`
-            with respect to :math:`\\phi`.
+        :psi (*numpy.ndarray*):
+            Geometric Function from Fresnel Kernel.
     """
-    # Compute Xi variable (MTR86 Equation 4b).
-    xi = (numpy.cos(B)/D) * (r * numpy.cos(phi) - r0 * numpy.cos(phi0))
-
-    # Compute Eta variable (MTR86 Equation 4c).
-    eta = (r0*r0 + r*r - 2.0*r*r0*numpy.cos(phi-phi0)) / (D*D)
-
-    psi0 = numpy.sqrt(1.0+eta-2.0*xi)
-
-    # Compute derivatives.
-    dxi = -(numpy.cos(B)/D) * (r*numpy.sin(phi))
-    dxi2 = -(numpy.cos(B)/D) * (r*numpy.cos(phi))
-
-    deta = 2.0*r*r0*numpy.sin(phi-phi0)/(D*D)
-    deta2 = 2.0*r*r0*numpy.cos(phi-phi0)/(D*D)
-
-    # Compute the second partial derivative.
-    psi_d2 = (-0.25/(psi0*psi0*psi0))*(deta-2.0*dxi)*(deta-2.0*dxi)
-    psi_d2 += (0.5/psi0)*(deta2-2.0*dxi2)+dxi2
-    psi_d2 *= kD
-
-    return psi_d2
+    try:
+        return _special_functions.fresnel_d2psi_dphi2(kD, r, r0,
+                                                      phi, phi0, B, D)
+    except KeyboardInterrupt:
+        raise
+    except:
+        raise TypeError(
+            """
+            \r\tError: rss_ringoccs
+            \r\t\tdiffrec.special_functions.fresnel_psi\n
+            \r\tInput should be seven numpy arrays of real numbers.\n
+            \r\tUsage:
+            \r\t\t>>> y = fresnel_psi(kD, r, r0, phi, phi0, B, D)\n
+            """
+        )
 
 def resolution_inverse(x):
     """

@@ -7,7 +7,7 @@
         #. spicy
 """
 
-import numpy as np
+import numpy
 from rss_ringoccs.tools import error_check
 try:
     from . import _window_functions, special_functions
@@ -457,14 +457,14 @@ def window_width(res, normeq, fsky, fres, rho_dot,
             The window width as a function of ring radius.
     """
     if bfac:
-        omega = 2.0*np.pi * fsky
-        alpha = np.square(omega * sigma) / (2.0 * rho_dot)
-        P = res / (alpha * np.square(fres))
+        omega = 2.0*numpy.pi * fsky
+        alpha = numpy.square(omega * sigma) / (2.0 * rho_dot)
+        P = res / (alpha * numpy.square(fres))
 
         # Create a variable specifying where P>1 occurs.
         Prange = (P > 1.0).nonzero()[0]
 
-        if (np.size(Prange) == 0):
+        if (numpy.size(Prange) == 0):
             raise IndexError(
                 """
                 \r\tError Encountered:
@@ -485,11 +485,11 @@ def window_width(res, normeq, fsky, fres, rho_dot,
         P = P[Prange]
         alpha = alpha[Prange]
 
-        w_vals = np.zeros(np.size(rho_dot))
+        w_vals = numpy.zeros(numpy.size(rho_dot))
         w_vals[Prange] = special_functions.resolution_inverse(P)/alpha
 
     else:
-        w_vals = 2.0*np.square(fres)/res
+        w_vals = 2.0*numpy.square(fres)/res
         Prange = (fres > 0.0).nonzero()[0]
 
     w_vals *= normeq

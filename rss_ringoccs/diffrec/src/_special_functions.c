@@ -425,9 +425,21 @@ PyUFuncGenericFunction psi_funcs[3] = {
 };
 
 PyUFuncGenericFunction dpsi_funcs[3] = {
-    float_fresnel_dpsi_dphi,
+    &float_fresnel_dpsi_dphi,
     &double_fresnel_dpsi_dphi,
     &long_double_fresnel_dpsi_dphi
+};
+
+PyUFuncGenericFunction d2psi_funcs[3] = {
+    &float_fresnel_d2psi_dphi2,
+    &double_fresnel_d2psi_dphi2,
+    &long_double_fresnel_d2psi_dphi2
+};
+
+PyUFuncGenericFunction dpsi_ellipse_funcs[3] = {
+    &float_fresnel_dpsi_dphi_ellipse,
+    &double_fresnel_dpsi_dphi_ellipse,
+    &long_double_fresnel_dpsi_dphi_ellipse
 };
 
 PyUFuncGenericFunction res_inv_funcs[3] = {
@@ -508,6 +520,16 @@ static char seven_real_in_one_real_out[24] = {
     NPY_LONGDOUBLE, NPY_LONGDOUBLE, NPY_LONGDOUBLE, NPY_LONGDOUBLE
 };
 
+static char nine_real_in_one_real_out[30] = {
+    NPY_FLOAT, NPY_FLOAT, NPY_FLOAT, NPY_FLOAT, NPY_FLOAT,
+    NPY_FLOAT, NPY_FLOAT, NPY_FLOAT, NPY_FLOAT, NPY_FLOAT,
+    NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE,
+    NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE,
+    NPY_LONGDOUBLE, NPY_LONGDOUBLE, NPY_LONGDOUBLE, NPY_LONGDOUBLE,
+    NPY_LONGDOUBLE, NPY_LONGDOUBLE, NPY_LONGDOUBLE, NPY_LONGDOUBLE,
+    NPY_LONGDOUBLE, NPY_LONGDOUBLE
+};
+
 static char three_real_in_one_complex_out[12] = {
     NPY_FLOAT, NPY_FLOAT, NPY_FLOAT, NPY_CFLOAT,
     NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE, NPY_CDOUBLE,
@@ -536,9 +558,11 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     PyObject *frequency_to_wavelength;
     PyObject *fresnel_cos;
     PyObject *fresnel_psi;
+    PyObject *fresnel_dpsi_dphi;
+    PyObject *fresnel_d2psi_dphi2;
+    PyObject *fresnel_dpsi_dphi_ellipse;
     PyObject *fresnel_scale;
     PyObject *fresnel_sin;
-    PyObject *fresnel_dpsi_dphi;
     PyObject *lambertw;
     PyObject *left_straightedge;
     PyObject *resolution_inverse;
@@ -591,6 +615,17 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     fresnel_dpsi_dphi = PyUFunc_FromFuncAndData(
         dpsi_funcs, PyuFunc_None_3, seven_real_in_one_real_out, 3, 7, 1,
         PyUFunc_None, "fresnel_dpsi_dphi",  "fresnel_dpsi_dphi_docstring", 0
+    );
+
+    fresnel_d2psi_dphi2 = PyUFunc_FromFuncAndData(
+        d2psi_funcs, PyuFunc_None_3, seven_real_in_one_real_out, 3, 7, 1,
+        PyUFunc_None, "fresnel_d2psi_dphi2",  "fresnel_d2psi_dphi2_docstring", 0
+    );
+
+    fresnel_dpsi_dphi_ellipse = PyUFunc_FromFuncAndData(
+        dpsi_ellipse_funcs, PyuFunc_None_3, nine_real_in_one_real_out, 3, 9, 1,
+        PyUFunc_None, "fresnel_dpsi_dphi_ellipse", 
+        "fresnel_dpsi_dphi_ellipse_docstring", 0
     );
 
     fresnel_cos = PyUFunc_FromFuncAndData(
@@ -676,6 +711,9 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     PyDict_SetItemString(d, "fresnel_cos", fresnel_cos);
     PyDict_SetItemString(d, "fresnel_psi", fresnel_psi);
     PyDict_SetItemString(d, "fresnel_dpsi_dphi", fresnel_dpsi_dphi);
+    PyDict_SetItemString(d, "fresnel_d2psi_dphi2", fresnel_d2psi_dphi2);
+    PyDict_SetItemString(d, "fresnel_dpsi_dphi_ellipse",
+                         fresnel_dpsi_dphi_ellipse);
     PyDict_SetItemString(d, "fresnel_scale", fresnel_scale);
     PyDict_SetItemString(d, "fresnel_sin", fresnel_sin);
     PyDict_SetItemString(d, "lambertw", lambertw);
@@ -697,6 +735,8 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     Py_DECREF(fresnel_cos);
     Py_DECREF(fresnel_psi);
     Py_DECREF(fresnel_dpsi_dphi);
+    Py_DECREF(fresnel_d2psi_dphi2);
+    Py_DECREF(fresnel_dpsi_dphi_ellipse);
     Py_DECREF(fresnel_scale);
     Py_DECREF(fresnel_sin);
     Py_DECREF(lambertw);
@@ -714,14 +754,18 @@ PyMODINIT_FUNC PyInit__special_functions(void)
 #else
 PyMODINIT_FUNC init__funcs(void)
 {
+    PyObject *besselJ0;
+    PyObject *besselI0;
     PyObject *double_slit_diffraction;
     PyObject *inverse_square_well_diffraction;
     PyObject *frequency_to_wavelength;
     PyObject *fresnel_cos;
     PyObject *fresnel_psi;
+    PyObject *fresnel_dpsi_dphi;
+    PyObject *fresnel_d2psi_dphi2;
+    PyObject *fresnel_dpsi_dphi_ellipse;
     PyObject *fresnel_scale;
     PyObject *fresnel_sin;
-    PyObject *fresnel_dpsi_dphi;
     PyObject *lambertw;
     PyObject *left_straightedge;
     PyObject *resolution_inverse;
@@ -740,6 +784,18 @@ PyMODINIT_FUNC init__funcs(void)
 
     import_array();
     import_umath();
+
+    besselJ0 = PyUFunc_FromFuncAndData(
+        besselJ0_funcs, PyuFunc_None_3, one_real_in_one_real_out,
+        3, 1, 1, PyUFunc_None, "besselJ0_diffraction", 
+        "besselJ0_docstring", 0
+    );
+
+    besselI0 = PyUFunc_FromFuncAndData(
+        besselI0_funcs, PyuFunc_None_3, one_real_in_one_real_out,
+        3, 1, 1, PyUFunc_None, "besselI0_diffraction", 
+        "besselI0_docstring", 0
+    );
 
     double_slit_diffraction = PyUFunc_FromFuncAndData(
         double_slit_funcs, PyuFunc_None_3, four_real_in_one_real_out,
@@ -760,8 +816,19 @@ PyMODINIT_FUNC init__funcs(void)
     );
 
     fresnel_dpsi_dphi = PyUFunc_FromFuncAndData(
-        dpsi_funcs, PyuFunc_data, octo_double_types, 1, 7, 1,
+        dpsi_funcs, PyuFunc_None_3, seven_real_in_one_real_out, 3, 7, 1,
         PyUFunc_None, "fresnel_dpsi_dphi",  "fresnel_dpsi_dphi_docstring", 0
+    );
+
+    fresnel_d2psi_dphi2 = PyUFunc_FromFuncAndData(
+        d2psi_funcs, PyuFunc_None_3, seven_real_in_one_real_out, 3, 7, 1,
+        PyUFunc_None, "fresnel_d2psi_dphi2",  "fresnel_d2psi_dphi2_docstring", 0
+    );
+
+    fresnel_dpsi_dphi_ellipse = PyUFunc_FromFuncAndData(
+        dpsi_ellipse_funcs, PyuFunc_None_3, nine_real_in_one_real_out, 3, 9, 1,
+        PyUFunc_None, "fresnel_dpsi_dphi_ellipse", 
+        "fresnel_dpsi_dphi_ellipse_docstring", 0
     );
 
     fresnel_cos = PyUFunc_FromFuncAndData(
@@ -770,7 +837,7 @@ PyMODINIT_FUNC init__funcs(void)
     );
 
     fresnel_psi = PyUFunc_FromFuncAndData(
-        psi_funcs, PyuFunc_data, octo_double_types, 1, 7, 1,
+        psi_funcs, PyuFunc_None_3, seven_real_in_one_real_out, 3, 7, 1,
         PyUFunc_None, "fresnel_psi",  "fresnel_psi_docstring", 0
     );
 
@@ -838,6 +905,8 @@ PyMODINIT_FUNC init__funcs(void)
 
     d = PyModule_GetDict(m);
 
+    PyDict_SetItemString(d, "besselJ0", besselJ0);
+    PyDict_SetItemString(d, "besselI0", besselI0);
     PyDict_SetItemString(d, "double_slit_diffraction", double_slit_diffraction);
     PyDict_SetItemString(d, "inverse_square_well_diffraction",
                          inverse_square_well_diffraction);
@@ -845,6 +914,9 @@ PyMODINIT_FUNC init__funcs(void)
     PyDict_SetItemString(d, "fresnel_cos", fresnel_cos);
     PyDict_SetItemString(d, "fresnel_psi", fresnel_psi);
     PyDict_SetItemString(d, "fresnel_dpsi_dphi", fresnel_dpsi_dphi);
+    PyDict_SetItemString(d, "fresnel_d2psi_dphi2", fresnel_d2psi_dphi2);
+    PyDict_SetItemString(d, "fresnel_dpsi_dphi_ellipse",
+                         fresnel_dpsi_dphi_ellipse);
     PyDict_SetItemString(d, "fresnel_scale", fresnel_scale);
     PyDict_SetItemString(d, "fresnel_sin", fresnel_sin);
     PyDict_SetItemString(d, "lambertw", lambertw);
@@ -859,11 +931,15 @@ PyMODINIT_FUNC init__funcs(void)
                          wavelength_to_wavenumber);
 
     Py_DECREF(double_slit_diffraction);
+    Py_DECREF(besselJ0);
+    Py_DECREF(besselI0);
     Py_DECREF(inverse_square_well_diffraction);
     Py_DECREF(frequency_to_wavelength);
     Py_DECREF(fresnel_cos);
     Py_DECREF(fresnel_psi);
     Py_DECREF(fresnel_dpsi_dphi);
+    Py_DECREF(fresnel_d2psi_dphi2);
+    Py_DECREF(fresnel_dpsi_dphi_ellipse);
     Py_DECREF(fresnel_scale);
     Py_DECREF(fresnel_sin);
     Py_DECREF(lambertw);

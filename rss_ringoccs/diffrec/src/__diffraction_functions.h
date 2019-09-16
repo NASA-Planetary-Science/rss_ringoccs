@@ -31,39 +31,57 @@ typedef struct _dlpdataobj {
 } DLPObj;
 
 /*  Functions defined in __diffraction_functions.c                            */
-extern complex double Fresnel_Transform_Double(
-    double *x_arr, complex double *T_in, double *w_func, double F, double dx,
-    long n_pts, long center
-);
+extern complex double
+Fresnel_Transform_Double(double *x_arr, complex double *T_in, double *w_func,
+                         double F, double dx, long n_pts, long center);
 
-extern complex double Fresnel_Transform_Norm_Double(
-    double *x_arr, complex double *T_in, double *w_func, double F,
-    double dx, long n_pts, long center
-);
+extern complex double
+Fresnel_Transform_Norm_Double(double *x_arr, complex double *T_in,
+                              double *w_func, double F, double dx, long n_pts,
+                              long center);
 
-extern complex double Fresnel_Legendre_Double(
-    double *x_arr, complex double *T_in, double *w_func, double D,
-    double *coeffs, double dx, double F, double kd, long n_pts,
-    unsigned char order, long center
-);
+extern complex double
+Fresnel_Transform_Legendre_Double(double *x_arr, complex double *T_in,
+                                  double *w_func, double D, double *coeffs,
+                                  double dx, double F, double kd, long n_pts,
+                                  unsigned char order, long center);
 
-extern complex double Fresnel_Legendre_Norm_Double(
-    double *x_arr, complex double *T_in, double *w_func, double D,
-    double *coeffs, double dx, double F, double kd, long n_pts,
-    unsigned char order, long center
-);
+extern complex double
+Fresnel_Transform_Legendre_Norm_Double(double *x_arr, complex double *T_in,
+                                       double *w_func, double D, double *coeffs,
+                                       double dx, double F, double kd,
+                                       long n_pts, unsigned char order,
+                                       long center);
 
-extern complex double Fresnel_Transform_Newton_Double(
-    double *x_arr, double *phi_arr, complex double *T_in, double *w_func,
-    double kD, double r, double B, double D, double EPS, long toler, double dx,
-    double F, long n_pts, long center
-);
+extern complex double
+Fresnel_Transform_Newton_Double(double *x_arr, double *phi_arr,
+                                complex double *T_in, double *w_func,
+                                double kD, double r, double B, double D,
+                                double EPS, long toler, double dx, double F,
+                                long n_pts, long center);
 
-extern complex double Fresnel_Transform_Newton_Norm_Double(
-    double *x_arr, double *phi_arr, complex double *T_in, double *w_func,
-    double kD, double r, double B, double D, double EPS, long toler, double dx,
-    double F, long n_pts, long center
-);
+extern complex double
+Fresnel_Transform_Newton_Norm_Double(double *x_arr, double *phi_arr,
+                                     complex double *T_in, double *w_func,
+                                     double kD, double r, double B, double D,
+                                     double EPS, long toler, double dx,
+                                     double F, long n_pts, long center);
+
+extern complex double
+Fresnel_Transform_Ellipse_Double(double *x_arr, double *phi_arr,
+                                 complex double *T_in, double *w_func,
+                                 double kD, double r, double B, double D,
+                                 double EPS, long toler, double dx, double F,
+                                 long n_pts, long center, double ecc,
+                                 double peri);
+
+extern complex double
+Fresnel_Transform_Ellipse_Norm_Double(double *x_arr, double *phi_arr,
+                                      complex double *T_in, double *w_func,
+                                      double kD, double r, double B, double D,
+                                      double EPS, long toler, double dx,
+                                      double F, long n_pts, long center,
+                                      double ecc, double peri);
 
 /*  Functions that compute the Fresnel Transform on a DLPObj instance.        */
 extern void DiffractionCorrectionFresnel(DLPObj dlp);

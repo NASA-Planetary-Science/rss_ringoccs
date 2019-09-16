@@ -30,18 +30,33 @@ extern double Resolution_Inverse_Double(double x);
 extern long double Resolution_Inverse_Long_Double(long double x);
 
 
-extern float BesselJ0_Float(float x);
+extern float        BesselJ0_Float(float x);
+extern double       BesselJ0_Double(double x);
+extern long double  BesselJ0_Long_Double(long double x);
+extern double       BesselJ0_Char(char x);
+extern double       BesselJ0_UChar(unsigned char x);
+extern double       BesselJ0_Short(short x);
+extern double       BesselJ0_UShort(unsigned short x);
+extern double       BesselJ0_Int(int x);
+extern double       BesselJ0_UInt(unsigned int x);
+extern double       BesselJ0_Long(long x);
+extern double       BesselJ0_ULong(unsigned long x);
+extern double       BesselJ0_Long_Long(long long x);
+extern double       BesselJ0_ULong_Long(unsigned long long x);
 
-extern double BesselJ0_Double(double x);
-
-extern long double BesselJ0_Long_Double(long double x);
-
-
-extern float BesselI0_Float(float x);
-
-extern double BesselI0_Double(double x);
-
-extern long double BesselI0_Long_Double(long double x);
+extern float        BesselI0_Float(float x);
+extern double       BesselI0_Double(double x);
+extern long double  BesselI0_Long_Double(long double x);
+extern double       BesselI0_Char(char x);
+extern double       BesselI0_UChar(unsigned char x);
+extern double       BesselI0_Short(short x);
+extern double       BesselI0_UShort(unsigned short x);
+extern double       BesselI0_Int(int x);
+extern double       BesselI0_UInt(unsigned int x);
+extern double       BesselI0_Long(long x);
+extern double       BesselI0_ULong(unsigned long x);
+extern double       BesselI0_Long_Long(long long x);
+extern double       BesselI0_ULong_Long(unsigned long long x);
 
 
 extern float Max_Float(float *arr, long n_elements);

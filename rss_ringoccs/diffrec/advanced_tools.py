@@ -1,4 +1,4 @@
-import numpy as np
+import numpy
 from . import diffraction_correction, special_functions, window_functions
 from rss_ringoccs.tools import CSV_tools, error_check, history
 
@@ -18,7 +18,6 @@ class CompareTau(object):
         error_check.check_type(fwd, bool, "fwd", fname)
         error_check.check_type(norm, bool, "norm", fname)
         error_check.check_type(bfac, bool, "bfac", fname)
-        error_check.check_type(wtype, str, "wtype", fname)
         error_check.check_type(psitype, str, "psitype", fname)
 
         # Try converting certain inputs into floating point numbers.
@@ -33,38 +32,7 @@ class CompareTau(object):
         error_check.check_positive(res_factor, "res_factor", fname)
 
         # Check that the requested window type is a legal input.
-        if not isinstance(wtype, str):
-            erm = ""
-            for key in func_dict:
-                erm = "%s\t\t'%s'\n" % (erm, key)
-            raise TypeError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.CompareTau\n\n"
-                "\twtype must be a string.\n"
-                "\tYour input has type: %s\n"
-                "\tInput should have type: str\n"
-                "\tAllowed string are:\n%s" % (type(wtype).__name__, erm)
-            )
-        else:
-
-            # Remove spaces and quotes from the wtype variable.
-            wtype = wtype.replace(" ", "").replace("'", "").replace('"', "")
-
-            # Set wtype string to lower-case.
-            wtype = wtype.lower()
-            if not (wtype in window_functions.func_dict):
-                erm = ""
-                for key in window_functions.func_dict:
-                    erm = "%s\t\t'%s'\n" % (erm, key)
-                raise ValueError(
-                    "\n\tError Encountered:\n"
-                    "\t\trss_ringoccs.diffrec.CompareTau\n\n"
-                    "\tIllegal string used for wtype.\n"
-                    "\tYour string: '%s'\n"
-                    "\tAllowed Strings:\n%s" % (wtype, erm)
-                )
-            else:
-                pass
+        wtype = error_check.check_wtype(wtype, fname)
 
         # Check that range and psitype are legal inputs.
         rng = error_check.check_range_input(rng, fname)
@@ -77,20 +45,20 @@ class CompareTau(object):
         )
 
         self.rho_km_vals = rec.rho_km_vals
-        rmin = np.min(self.rho_km_vals)
-        rmax = np.max(self.rho_km_vals)
-        rstart = int(np.min((data.tau_rho-rmin>=0).nonzero()))
-        rfin = int(np.max((rmax-data.tau_rho>=0).nonzero()))
+        rmin = numpy.min(self.rho_km_vals)
+        rmax = numpy.max(self.rho_km_vals)
+        rstart = int(numpy.min((data.tau_rho-rmin>=0).nonzero()))
+        rfin = int(numpy.max((rmax-data.tau_rho>=0).nonzero()))
 
         self.tau_rho = data.tau_rho[rstart:rfin+1]
         self.tau_power = data.power_vals[rstart:rfin+1]
         self.tau_phase = data.phase_vals[rstart:rfin+1]
         self.tau_tau = data.tau_vals[rstart:rfin+1]
 
-        rmin = np.min(data.tau_rho)
-        rmax = np.max(data.tau_rho)
-        rstart = int(np.min((self.rho_km_vals-rmin>=0).nonzero()))
-        rfin = int(np.max((rmax-self.rho_km_vals>=0).nonzero()))
+        rmin = numpy.min(data.tau_rho)
+        rmax = numpy.max(data.tau_rho)
+        rstart = int(numpy.min((self.rho_km_vals-rmin>=0).nonzero()))
+        rfin = int(numpy.max((rmax-self.rho_km_vals>=0).nonzero()))
 
         self.rho_km_vals = rec.rho_km_vals[rstart:rfin+1]
         self.power_vals = rec.power_vals[rstart:rfin+1]
@@ -134,55 +102,41 @@ class FindOptimalResolution(object):
 
         if (not all(isinstance(x, str) for x in wlst)):
             raise TypeError(
-                "\n\tError Encountered:\n"
-                "\t\trss_ringoccs.diffrec.FindOptimalResolution\n\n"
-                "\twlst must be a list of strings.\n"
+                """
+                \n\r\tError Encountered: rss_ringoccs\n\r\t\t%s\n
+                \r\twlst must be a list of strings.
+                """ % fname
             )
         else:
             for i in range(len(wlst)):
-                wlst[i] = wlst[i].replace(" ", "").replace("'", "")
-                wlst[i] = wlst[i].replace('"', "").lower()
+                wlst[i] = error_check.check_wtype(wlst[i], fname)
 
-            if not all((wtype in window_functions.func_dict) for wtype in wlst):
-                erm = ""
-                for key in func_dict:
-                    erm = "%s\t\t'%s'\n" % (erm, key)
-                raise ValueError(
-                    "\n\tError Encountered:\n"
-                    "\t\trss_ringoccs.diffrec.FindOptimalResolution\n\n"
-                    "\tIllegal string used for wtype.\n"
-                    "\tYour strings: '%s'\n"
-                    "\tAllowed Strings:\n%s" % (wtype, erm)
-                )
-            else:
-                pass
-
-        nwins = np.size(wlst)
-        self.linf = np.zeros((nres, nwins))
-        self.l2 = np.zeros((nres, nwins))
-        self.ideal_res = np.zeros((nwins))
+        nwins = numpy.size(wlst)
+        self.linf = numpy.zeros((nres, nwins))
+        self.l2 = numpy.zeros((nres, nwins))
+        self.ideal_res = numpy.zeros((nwins))
         eres = sres + (nres-1)*dres
         res = sres
         data = CSV_tools.ExtractCSVData(geo, cal, dlp, tau=tau, verbose=verbose)
         rec = diffraction_correction.DiffractionCorrection(data, res, rng=rng,
-                                    wtype="kb35", verbose=False)
-        start = int(np.min((data.tau_rho-np.min(rec.rho_km_vals)>=0).nonzero()))
-        fin = int(np.max((np.max(rec.rho_km_vals)-data.tau_rho>=0).nonzero()))
+                                                           wtype="kb35")
+        start = int(numpy.min((data.tau_rho-numpy.min(rec.rho_km_vals)>=0).nonzero()))
+        fin = int(numpy.max((numpy.max(rec.rho_km_vals)-data.tau_rho>=0).nonzero()))
         tau_power = data.power_vals[start:fin+1]
-        for i in np.arange(nres):
+        for i in numpy.arange(nres):
             for j in range(nwins):
                 wtype = wlst[j]
                 recint = diffraction_correction.DiffractionCorrection(data, res, rng=rng, wtype=wtype)
-                p_int = np.abs(recint.power_vals - tau_power)
-                self.linf[i,j] = np.max(p_int)
-                self.l2[i,j] = np.sqrt(np.sum(p_int*p_int)*recint.dx_km)
+                p_int = numpy.abs(recint.power_vals - tau_power)
+                self.linf[i,j] = numpy.max(p_int)
+                self.l2[i,j] = numpy.sqrt(numpy.sum(p_int*p_int)*recint.dx_km)
 
                 if verbose:
                     print("%s %f %s %f %s %s"
                           % ('Res:',res,'Max:',eres,"WTYPE:",wtype))
 
             res += dres
-        self.ideal_res = sres+dres*np.argmin(self.linf, axis=0)
+        self.ideal_res = sres+dres*numpy.argmin(self.linf, axis=0)
 
 
 class ModelFromGEO(object):
@@ -201,7 +155,6 @@ class ModelFromGEO(object):
         error_check.check_type(bfac, bool, "bfac", fname)
         error_check.check_type(geo, str, "geo", fname)
         error_check.check_type(echo, bool, "echo", fname)
-        error_check.check_type(model, str, "model", fname)
         error_check.check_type(wtype, str, "wtype", fname)
         error_check.check_type(psitype, str, "psitype", fname)
         res = error_check.check_type_and_convert(res, float, "res", fname)
@@ -218,30 +171,7 @@ class ModelFromGEO(object):
         periapse = error_check.check_type_and_convert(periapse, float,
                                                       "periapse", fname)
 
-        model = model.replace(" ", "").replace("'", "").replace('"', "")
-        model = model.lower()
-
-        model_list = [
-            "deltaimpulse",
-            "rightstraightedge",
-            "leftstraightedge",
-            "squarewell",
-            "fromdata"
-        ]
-
-        if not (model in model_list):
-            erm = ""
-            for key in model_list:
-                erm = "%s\t\t'%s'\n" % (erm, key)
-            raise TypeError(
-                """
-                    \r\n\tError Encountered:\n
-                    \r\t\t%s\n\n
-                    \r\tIllegal model requested.
-                    \r\tYour input: %s
-                    \r\tAllowed options are:\n%s
-                """ % (fname, model, erm)
-            )
+        model = error_check.check_model(model, fname)
 
         error_check.check_positive(res, "res", fname)
         error_check.check_positive(width, "width", fname)
@@ -254,20 +184,18 @@ class ModelFromGEO(object):
             (not (type(data_rho) == type(None)))):
             raise TypeError(
                 """
-                    \n\r\tError Encountered: rss_ringoccs\n
-                    \r\t\t%s\n\n
-                    \r\tYou gave input for data_rho but not data_pow.\n
-                    \r\tPlease provide an input array for power.\n
+                \n\r\tError Encountered: rss_ringoccs\n\r\t\t%s\n
+                \r\tYou gave input for data_rho but not data_pow.
+                \r\tPlease provide an input array for power.
                 """ % (fname)
             )
         elif ((type(data_rho) == type(None)) and
               (not (type(data_pow) == type(None)))):
             raise TypeError(
                 """
-                    \n\r\tError Encountered: rss_ringoccs\n
-                    \r\t\t%s\n\n
-                    \r\tYou gave input for data_pow but not data_rho.\n
-                    \r\tPlease provide an input array for rho.\n
+                \n\r\tError Encountered: rss_ringoccs\n\r\t\t%s\n
+                \r\tYou gave input for data_pow but not data_rho.
+                \r\tPlease provide an input array for rho.
                 """ % (fname)
             )
         elif not ((type(data_rho) == type(None)) and
@@ -283,7 +211,7 @@ class ModelFromGEO(object):
                 error_check.check_lengths(data_rho, data_phase, "data_rho",
                                           "data_phase", fname)
             else:
-                data_phase = np.zeros(np.size(data_rho))
+                data_phase = numpy.zeros(numpy.size(data_rho))
         else:
             pass
 
@@ -293,33 +221,32 @@ class ModelFromGEO(object):
         try:
             # Create dummy variable in case an error occurs.
             errmess = "rho_km_vals"
-            self.rho_km_vals = np.array(data.rho_km_vals)
+            self.rho_km_vals = numpy.array(data.rho_km_vals)
             errmess = "phi_ora_rad_vals"
-            self.phi_rad_vals = np.array(data.phi_ora_deg_vals)
-            self.phi_rad_vals = np.deg2rad(self.phi_rad_vals)
+            self.phi_rad_vals = numpy.array(data.phi_ora_deg_vals)
+            self.phi_rad_vals = numpy.deg2rad(self.phi_rad_vals)
             errmess = "B_rad_vals"
-            self.B_rad_vals = np.array(data.B_deg_vals)
-            self.B_rad_vals = np.deg2rad(self.B_rad_vals)
+            self.B_rad_vals = numpy.array(data.B_deg_vals)
+            self.B_rad_vals = numpy.deg2rad(self.B_rad_vals)
             errmess = "t_oet_spm_vals"
-            self.t_oet_spm_vals = np.array(data.t_oet_spm_vals)
+            self.t_oet_spm_vals = numpy.array(data.t_oet_spm_vals)
             errmess = "t_ret_spm_vals"
-            self.t_ret_spm_vals = np.array(data.t_ret_spm_vals)
+            self.t_ret_spm_vals = numpy.array(data.t_ret_spm_vals)
             errmess = "t_set_spm_vals"
-            self.t_set_spm_vals = np.array(data.t_set_spm_vals)
+            self.t_set_spm_vals = numpy.array(data.t_set_spm_vals)
             errmess = "phi_rl_rad_vals"
-            self.phi_rl_rad_vals = np.array(data.phi_rl_deg_vals)
-            self.phi_rl_rad_vals = np.deg2rad(self.phi_rl_rad_vals)
+            self.phi_rl_rad_vals = numpy.array(data.phi_rl_deg_vals)
+            self.phi_rl_rad_vals = numpy.deg2rad(self.phi_rl_rad_vals)
             errmess = "D_km_vals"
-            self.D_km_vals = np.array(data.D_km_vals)
+            self.D_km_vals = numpy.array(data.D_km_vals)
             errmess = "rho_dot_kms_vals"
-            self.rho_dot_kms_vals = np.array(data.rho_dot_kms_vals)
+            self.rho_dot_kms_vals = numpy.array(data.rho_dot_kms_vals)
         except (ValueError, TypeError, NameError, AttributeError):
             raise TypeError(
                 """
-                    \r\tError Encountered: rss_ringoccs
-                    \r\t\t%s\n
-                    \r\tCould not convert %s into a numpy array.
-                    \r\tCheck input GEO file.
+                \r\tError Encountered: rss_ringoccs\n\r\t\t%s\n
+                \r\tCould not convert %s into a numpy array.
+                \r\tCheck input GEO file.
                 """ % (fname, errmess)
             )
 
@@ -331,10 +258,8 @@ class ModelFromGEO(object):
         error_check.check_is_real(self.t_oet_spm_vals, "t_oet_spm_vals", fname)
         error_check.check_is_real(self.t_ret_spm_vals, "t_ret_spm_vals", fname)
         error_check.check_is_real(self.t_set_spm_vals, "t_set_spm_vals", fname)
-        error_check.check_is_real(self.phi_rl_rad_vals,
-                                  "phi_rl_rad_vals", fname)
-        error_check.check_is_real(self.rho_dot_kms_vals,
-                                  "rho_dot_km_vals", fname)
+        error_check.check_is_real(self.phi_rl_rad_vals, "phi_rl_rad_vals", fname)
+        error_check.check_is_real(self.rho_dot_kms_vals, "rho_dot_km_vals", fname)
 
         error_check.check_positive(self.D_km_vals, "D_km_vals", fname)
         error_check.check_positive(self.rho_km_vals, "rho_km_vals", fname)
@@ -353,21 +278,21 @@ class ModelFromGEO(object):
             print("\tComputing Variables...")
 
         # Check that rho_km_vals is increasing and the rev isn't a chord occ.
-        drho = [np.min(self.rho_dot_kms_vals), np.max(self.rho_dot_kms_vals)]
+        drho = [numpy.min(self.rho_dot_kms_vals), numpy.max(self.rho_dot_kms_vals)]
         dx_km = self.rho_km_vals[1] - self.rho_km_vals[0]
 
         if (drho[0] < 0) and (drho[1] > 0):
             raise ValueError(
                 """
-                    \r\tError Encountered: rss_ringoccs
-                    \r\t\t%s\n
-                    \r\tdrho/dt has positive and negative values.
-                    \r\tYour input file is probably a chord occultation.
-                    \r\tDiffraction Correction can only be performed for
-                    \r\tone event at a time. That is, ingress or egress.\n
-                    \r\tTO CORRECT THIS:
-                    \r\t\tSplit the input into two parts: Ingress and Engress
-                    \r\t\tand perform diffraction correction twice.
+                \r\tError Encountered: rss_ringoccs
+                \r\t\t%s\n
+                \r\tdrho/dt has positive and negative values.
+                \r\tYour input file is probably a chord occultation.
+                \r\tDiffraction Correction can only be performed for
+                \r\tone event at a time. That is, ingress or egress.\n
+                \r\tTO CORRECT THIS:
+                \r\t\tSplit the input into two parts: Ingress and Engress
+                \r\t\tand perform diffraction correction twice.
                 """ % (fname)
             )
         elif ((drho[0] == 0.0) or (drho[1] == 0.0)):
@@ -386,7 +311,7 @@ class ModelFromGEO(object):
                 """ % (fname)
             )
         elif (dx_km > 0) and (drho[1] < 0):
-            self.rho_dot_kms_vals = np.abs(self.rho_dot_kms_vals)
+            self.rho_dot_kms_vals = numpy.abs(self.rho_dot_kms_vals)
         elif (dx_km < 0) and (drho[0] > 0):
             raise ValueError(
                 """
@@ -401,44 +326,44 @@ class ModelFromGEO(object):
             self.phi_rad_vals = self.phi_rad_vals[::-1]
             self.B_rad_vals = self.B_rad_vals[::-1]
             self.D_km_vals = self.D_km_vals[::-1]
-            self.rho_dot_kms_vals = np.abs(self.rho_dot_kms_vals[::-1])
+            self.rho_dot_kms_vals = numpy.abs(self.rho_dot_kms_vals[::-1])
         else:
             del drho
 
         geo_rho = self.rho_km_vals
-        self.rho_km_vals = np.arange(np.min(geo_rho), np.max(geo_rho), dx_km_desired)
+        self.rho_km_vals = numpy.arange(numpy.min(geo_rho), numpy.max(geo_rho), dx_km_desired)
 
         if verbose:
             print("\tInterpolating Data...")
 
-        self.rho_dot_kms_vals = np.interp(self.rho_km_vals, geo_rho, self.rho_dot_kms_vals)
-        self.phi_rl_rad_vals = np.interp(self.rho_km_vals, geo_rho, self.phi_rl_rad_vals)
-        self.t_ret_spm_vals = np.interp(self.rho_km_vals, geo_rho, self.t_ret_spm_vals)
-        self.t_oet_spm_vals = np.interp(self.rho_km_vals, geo_rho, self.t_oet_spm_vals)
-        self.t_set_spm_vals = np.interp(self.rho_km_vals, geo_rho, self.t_set_spm_vals)
-        self.phi_rad_vals = np.interp(self.rho_km_vals, geo_rho, self.phi_rad_vals)
-        self.B_rad_vals = np.interp(self.rho_km_vals, geo_rho, self.B_rad_vals)
-        self.D_km_vals = np.interp(self.rho_km_vals, geo_rho, self.D_km_vals)
+        self.rho_dot_kms_vals = numpy.interp(self.rho_km_vals, geo_rho, self.rho_dot_kms_vals)
+        self.phi_rl_rad_vals = numpy.interp(self.rho_km_vals, geo_rho, self.phi_rl_rad_vals)
+        self.t_ret_spm_vals = numpy.interp(self.rho_km_vals, geo_rho, self.t_ret_spm_vals)
+        self.t_oet_spm_vals = numpy.interp(self.rho_km_vals, geo_rho, self.t_oet_spm_vals)
+        self.t_set_spm_vals = numpy.interp(self.rho_km_vals, geo_rho, self.t_set_spm_vals)
+        self.phi_rad_vals = numpy.interp(self.rho_km_vals, geo_rho, self.phi_rad_vals)
+        self.B_rad_vals = numpy.interp(self.rho_km_vals, geo_rho, self.B_rad_vals)
+        self.D_km_vals = numpy.interp(self.rho_km_vals, geo_rho, self.D_km_vals)
         del geo_rho
 
         # Add 'fake' variables necessary for DiffractionCorrection class.
-        self.raw_tau_threshold_vals = np.zeros(np.size(self.rho_km_vals))
-        self.rho_corr_pole_km_vals = np.zeros(np.size(self.rho_km_vals))
-        self.rho_corr_timing_km_vals = np.zeros(np.size(self.rho_km_vals))
-        self.f_sky_hz_vals = np.zeros(np.size(self.rho_km_vals))
+        self.raw_tau_threshold_vals = numpy.zeros(numpy.size(self.rho_km_vals))
+        self.rho_corr_pole_km_vals = numpy.zeros(numpy.size(self.rho_km_vals))
+        self.rho_corr_timing_km_vals = numpy.zeros(numpy.size(self.rho_km_vals))
+        self.f_sky_hz_vals = numpy.zeros(numpy.size(self.rho_km_vals))
         self.f_sky_hz_vals += special_functions.frequency_to_wavelength(
             lambda_km
         )
 
         # Interpolate modeled data, if necessary.
         if not (type(data_rho) == type(None)):
-            rstart = np.min((data_rho >= np.min(self.rho_km_vals)).nonzero())
-            rfinsh = np.max((data_rho <= np.max(self.rho_km_vals)).nonzero())
+            rstart = numpy.min((data_rho >= numpy.min(self.rho_km_vals)).nonzero())
+            rfinsh = numpy.max((data_rho <= numpy.max(self.rho_km_vals)).nonzero())
             data_rho = data_rho[rstart:rfinsh]
             data_pow = data_pow[rstart:rfinsh]
             data_phase = data_phase[rstart:rfinsh]
 
-            self.data_pow = np.interp(self.rho_km_vals, data_rho, data_pow)
+            self.data_pow = numpy.interp(self.rho_km_vals, data_rho, data_pow)
         else:
             pass
 
@@ -499,11 +424,11 @@ class ModelFromGEO(object):
             "prof_dir": prof_dir
         }
 
-        center = np.min((self.rho_km_vals >= rho).nonzero())
+        center = numpy.min((self.rho_km_vals >= rho).nonzero())
         F = special_functions.fresnel_scale(
             lambda_km, self.D_km_vals[center],
             self.phi_rad_vals[center], self.B_rad_vals[center]
-        ) + np.zeros(np.size(self.rho_km_vals))
+        ) + numpy.zeros(numpy.size(self.rho_km_vals))
 
         kD_vals = special_functions.wavelength_to_wavenumber(lambda_km)
         kD_vals *= self.D_km_vals
@@ -519,9 +444,9 @@ class ModelFromGEO(object):
 
         # From the requested range, extract array of the form [a, b]
         if (isinstance(rng, str)):
-            self.rng = np.array(diffraction_correction.region_dict[rng])
+            self.rng = numpy.array(diffraction_correction.region_dict[rng])
         else:
-            self.rng = np.array([np.min(rng), np.max(rng)])
+            self.rng = numpy.array([numpy.min(rng), numpy.max(rng)])
 
         # Compute the smallest and largest allowed radii for reconstruction.
         crho = self.rho_km_vals[Prange]
@@ -529,11 +454,11 @@ class ModelFromGEO(object):
         rho_min = self.rho_km_vals[Prange]-self.w_km_vals[Prange]/2.0
         rho_max = self.rho_km_vals[Prange]+self.w_km_vals[Prange]/2.0
 
-        wrange = Prange[np.where((rho_min >= np.min(crho)) &
-                                 (rho_max <= np.max(crho)))]
+        wrange = Prange[numpy.where((rho_min >= numpy.min(crho)) &
+                                 (rho_max <= numpy.max(crho)))]
 
         # Check that there is enough data for reconstruction.
-        if (np.size(wrange) == 0):
+        if (numpy.size(wrange) == 0):
             raise ValueError(
                 """
                     \r\tError Encountered: rss_ringoccs
@@ -543,9 +468,9 @@ class ModelFromGEO(object):
                     \r\t\tMaximum Available Radius:         %f
                     \r\t\tMinimum Required Window Width:    %f
                     \r\t\tMaximum Required Window Width:    %f
-                """ % (fname, np.min(crho), np.max(crho), np.min(w), np.max(w))
+                """ % (fname, numpy.min(crho), numpy.max(crho), numpy.min(w), numpy.max(w))
             )
-        elif (np.max(crho) < np.min(self.rng)):
+        elif (numpy.max(crho) < numpy.min(self.rng)):
             raise ValueError(
                 """
                     \r\tError Encountered: rss_ringoccs
@@ -554,9 +479,9 @@ class ModelFromGEO(object):
                     \r\tYour Requested Minimum (km):    %f
                     \r\tYour Requested Maximum (km):    %f
                     \r\tMaximum Available Data (km):    %f
-                """ % (fname, np.min(self.rng), np.max(self.rng), np.max(crho))
+                """ % (fname, numpy.min(self.rng), numpy.max(self.rng), numpy.max(crho))
             )
-        elif (np.min(crho) > np.max(self.rng)):
+        elif (numpy.min(crho) > numpy.max(self.rng)):
             raise ValueError(
                 """
                     \r\tError Encountered: rss_ringoccs
@@ -565,16 +490,16 @@ class ModelFromGEO(object):
                     \r\tYour Requested Minimum (km): %f
                     \r\tYour Requested Maximum (km): %f
                     \r\tMinimum Available Data (km): %f\n
-                """ % (fname, np.min(self.rng), np.max(self.rng), np.min(crho))
+                """ % (fname, numpy.min(self.rng), numpy.max(self.rng), numpy.min(crho))
             )
         else:
-            rho_min = np.min(crho[wrange])
-            rho_max = np.max(crho[wrange])
+            rho_min = numpy.min(crho[wrange])
+            rho_max = numpy.max(crho[wrange])
 
-            wrange = wrange[np.where((crho[wrange] >= np.min(self.rng)) &
-                                    (crho[wrange] <= np.max(self.rng)))]
+            wrange = wrange[numpy.where((crho[wrange] >= numpy.min(self.rng)) &
+                                    (crho[wrange] <= numpy.max(self.rng)))]
 
-        if (np.size(wrange) <= 1):
+        if (numpy.size(wrange) <= 1):
             raise IndexError(
                 """
                 \r\tError Encountered: rss_ringoccs
@@ -585,7 +510,7 @@ class ModelFromGEO(object):
                 \r\t\tMinimum Requested Range: %f
                 \r\t\tMaximum Requested Range: %f
                 """ % (fname, rho_min, rho_max,
-                       np.min(self.rng), np.max(self.rng))
+                       numpy.min(self.rng), numpy.max(self.rng))
             )
         else:
             start = wrange[0]
@@ -596,21 +521,21 @@ class ModelFromGEO(object):
             print("\tComputing Forward Model...")
 
         if (model == "squarewell"):
-            self.p_norm_actual_vals = np.zeros(np.size(self.rho_km_vals))
+            self.p_norm_actual_vals = numpy.zeros(numpy.size(self.rho_km_vals))
             self.p_norm_actual_vals += 1.0
-            rstart = np.min((self.rho_km_vals>=rho-width/2.0).nonzero())
-            rfinsh = np.max((self.rho_km_vals<=rho+width/2.0).nonzero())
+            rstart = numpy.min((self.rho_km_vals>=rho-width/2.0).nonzero())
+            rfinsh = numpy.max((self.rho_km_vals<=rho+width/2.0).nonzero())
             self.p_norm_actual_vals[rstart:rfinsh+1] = 0.0
 
             if use_fresnel:
-                center = np.min((self.rho_km_vals >= rho).nonzero())
+                center = numpy.min((self.rho_km_vals >= rho).nonzero())
                 T_hat = special_functions.square_well_diffraction(
                     self.rho_km_vals, rho-width/2.0, rho+width/2.0, F[center]
                 )
 
         elif (model == "rightstraightedge"):
-            self.p_norm_actual_vals = np.zeros(np.size(self.rho_km_vals))
-            rstart = np.min((self.rho_km_vals>=rho).nonzero())
+            self.p_norm_actual_vals = numpy.zeros(numpy.size(self.rho_km_vals))
+            rstart = numpy.min((self.rho_km_vals>=rho).nonzero())
             self.p_norm_actual_vals[rstart:-1] = 1.0
 
             if use_fresnel:
@@ -618,21 +543,21 @@ class ModelFromGEO(object):
                                                              rho, F[center])
 
         elif (model == "leftstraightedge"):
-            self.p_norm_actual_vals = np.zeros(np.size(self.rho_km_vals))
-            rfinsh = np.max((self.rho_km_vals<=rho).nonzero())
+            self.p_norm_actual_vals = numpy.zeros(numpy.size(self.rho_km_vals))
+            rfinsh = numpy.max((self.rho_km_vals<=rho).nonzero())
             self.p_norm_actual_vals[0:rfinsh] = 1.0
 
             if use_fresnel:
-                center = np.max((self.rho_km_vals <= rho).nonzero())
+                center = numpy.max((self.rho_km_vals <= rho).nonzero())
                 T_hat = special_functions.left_straightedge(self.rho_km_vals,
                                                             rho, F[center])
 
         elif (model == "deltaimpulse"):
-            center = np.min((self.rho_km_vals >= rho).nonzero())
-            self.p_norm_actual_vals = np.zeros(np.size(self.rho_km_vals))
+            center = numpy.min((self.rho_km_vals >= rho).nonzero())
+            self.p_norm_actual_vals = numpy.zeros(numpy.size(self.rho_km_vals))
             self.p_norm_actual_vals[center] = 1.0/dx_km_desired
             if use_fresnel:
-                psi = (np.pi/2.0)*np.square((rho-self.rho_km_vals)/F[center])
+                psi = (numpy.pi/2.0)*numpy.square((rho-self.rho_km_vals)/F[center])
             else:
                 psi = special_functions.fresnel_psi(
                     kD_vals[center], self.rho_km_vals[center],
@@ -641,7 +566,7 @@ class ModelFromGEO(object):
                     self.D_km_vals[center]
                 )
 
-            T_hat = np.exp(1j*psi)*(0.5-0.5j)/F[center]
+            T_hat = numpy.exp(1j*psi)*(0.5-0.5j)/F[center]
         else:
             use_fresnel = False
             self.p_norm_vals = self.data_pow
@@ -658,10 +583,10 @@ class ModelFromGEO(object):
         if verbose:
             print("\tForward Model Complete.")
 
-        self.p_norm_vals = np.abs(T_hat)*np.abs(T_hat)
-        self.phase_rad_vals = -np.arctan2(np.imag(T_hat), np.real(T_hat))
+        self.p_norm_vals = numpy.abs(T_hat)*numpy.abs(T_hat)
+        self.phase_rad_vals = -numpy.arctan2(numpy.imag(T_hat), numpy.real(T_hat))
 
-        crange = np.arange(n_used)+start
+        crange = numpy.arange(n_used)+start
         self.B_rad_vals = self.B_rad_vals[crange]
         self.D_km_vals = self.D_km_vals[crange]
         self.f_sky_hz_vals = self.f_sky_hz_vals[crange]
@@ -687,7 +612,7 @@ class ModelFromGEO(object):
             F = F[crange]
             kD_vals = kD_vals[crange]
             n_shift = int(rho_shift/dx_km_desired)
-            self.phase_rad_vals = -np.roll(self.phase_rad_vals, n_shift)
+            self.phase_rad_vals = -numpy.roll(self.phase_rad_vals, n_shift)
 
             # Compute the window width. (See MTR86 Equations 19, 32, and 33).
             self.w_km_vals, Prange = window_functions.window_width(
@@ -701,18 +626,18 @@ class ModelFromGEO(object):
             rho_min = self.rho_km_vals[Prange]-self.w_km_vals[Prange]/2.0
             rho_max = self.rho_km_vals[Prange]+self.w_km_vals[Prange]/2.0
 
-            wrange = Prange[np.where((rho_min >= np.min(crho)) &
-                                    (rho_max <= np.max(crho)))]
+            wrange = Prange[numpy.where((rho_min >= numpy.min(crho)) &
+                                    (rho_max <= numpy.max(crho)))]
 
             start = wrange[0]
             finish = wrange[-1]
             n_used = 1 + (finish - start)
 
             T_in = (self.p_norm_actual_vals.astype(complex) *
-                    np.exp(1.0j*self.phase_rad_vals))
+                    numpy.exp(1.0j*self.phase_rad_vals))
 
             if not (type(data_phase) == type(None)):
-                self.data_phase = np.interp(self.rho_km_vals, data_rho, data_phase)
+                self.data_phase = numpy.interp(self.rho_km_vals, data_rho, data_phase)
                 self.phase_rad_vals -= self.data_phase
 
             T_hat = special_functions.fresnel_transform(
@@ -722,10 +647,10 @@ class ModelFromGEO(object):
                 periapse, eccentricity
             )
 
-            self.p_norm_vals = np.square(np.abs(T_hat))
-            self.phase_rad_vals = np.arctan2(np.imag(T_hat), np.real(T_hat))
+            self.p_norm_vals = numpy.square(numpy.abs(T_hat))
+            self.phase_rad_vals = numpy.arctan2(numpy.imag(T_hat), numpy.real(T_hat))
 
-            crange = np.arange(n_used)+start
+            crange = numpy.arange(n_used)+start
             self.B_rad_vals = self.B_rad_vals[crange]
             self.D_km_vals = self.D_km_vals[crange]
             self.f_sky_hz_vals = self.f_sky_hz_vals[crange]

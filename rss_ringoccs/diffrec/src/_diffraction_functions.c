@@ -33,24 +33,31 @@ static void complex_double_fresnel_transform(char **args, npy_intp *dimensions,
 {
     DLPObj dlp;
 
-    dlp.T_in         = (complex double *)args[0];
-    dlp.rho_km_vals  = (double *)args[1];
-    dlp.F_km_vals    = (double *)args[2];
-    dlp.phi_rad_vals = (double *)args[3];
-    dlp.kd_vals      = (double *)args[4];
-    dlp.B_rad_vals   = (double *)args[5];
-    dlp.D_km_vals    = (double *)args[6];
-    dlp.w_km_vals    = (double *)args[7];
+    dlp.T_in         =  (complex double *)args[0];
+    dlp.rho_km_vals  =  (double *)args[1];
+    dlp.F_km_vals    =  (double *)args[2];
+    dlp.phi_rad_vals =  (double *)args[3];
+    dlp.kd_vals      =  (double *)args[4];
+    dlp.B_rad_vals   =  (double *)args[5];
+    dlp.D_km_vals    =  (double *)args[6];
+    dlp.w_km_vals    =  (double *)args[7];
     dlp.start        = *(long *)args[8];
     dlp.n_used       = *(long *)args[9];
     dlp.wtype        = *(unsigned char *)args[10];
     dlp.use_norm     = *(unsigned char *)args[11];
     dlp.use_fwd      = *(unsigned char *)args[12];
     dlp.order        = *(unsigned char *)args[13];
-    dlp.T_out        = (complex double *)args[14];
+    dlp.ecc          = *(double *)args[14];
+    dlp.peri         = *(double *)args[15];
+    dlp.T_out        =  (complex double *)args[16];
 
     if (dlp.order == 0){
-        DiffractionCorrectionNewton(dlp);
+        if ((dlp.ecc == 0.0) && (dlp.peri == 0.0)){
+            DiffractionCorrectionNewton(dlp);
+        }
+        else {
+            DiffractionCorrectionEllipse(dlp);
+        }
     }
     else if (dlp.order == 1){
         DiffractionCorrectionFresnel(dlp);
@@ -66,7 +73,7 @@ static PyMethodDef _diffraction_functions_methods[] = {{NULL, NULL, 0, NULL}};
 PyUFuncGenericFunction funcs[1] = {&complex_double_fresnel_transform};
 
 /* Input and return types for the Fresnel Transform                           */
-static char data_types[15] = {
+static char data_types[17] = {
     NPY_CDOUBLE,
     NPY_DOUBLE,
     NPY_DOUBLE,
@@ -81,6 +88,8 @@ static char data_types[15] = {
     NPY_UBYTE,
     NPY_UBYTE,
     NPY_UBYTE,
+    NPY_DOUBLE,
+    NPY_DOUBLE,
     NPY_CDOUBLE
 };
 
@@ -106,7 +115,7 @@ PyMODINIT_FUNC PyInit__diffraction_functions(void)
     import_umath();
 
     fresnel_transform = PyUFunc_FromFuncAndData(
-        funcs, PyuFunc_data, data_types, 1, 14, 1, PyUFunc_None,
+        funcs, PyuFunc_data, data_types, 1, 16, 1, PyUFunc_None,
         "fresnel_transform", "fresnel_transform_docstring", 0
     );
 
@@ -131,7 +140,7 @@ PyMODINIT_FUNC init__diffraction_functions(void)
     import_umath();
 
     fresnel_transform = PyUFunc_FromFuncAndData(
-        funcs, PyuFunc_data, data_types, 1, 14, 1, PyUFunc_None,
+        funcs, PyuFunc_data, data_types, 1, 16, 1, PyUFunc_None,
         "fresnel_transform_", "fresnel_transform_docstring", 0
     );
 

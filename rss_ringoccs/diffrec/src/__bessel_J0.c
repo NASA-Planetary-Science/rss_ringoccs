@@ -1,8 +1,17 @@
-#include "__math_functions.h"
-
 /******************************************************************************
- *  Functions:                                                                *
- *      BesselJ0_Float, BesselJ0_Double, BesselJ0_Long_Double                 *
+ *                                Bessel J0                                   *
+ ******************************************************************************
+ *  This file contains functions for computing the Bessel J0 function.        * 
+ ******************************************************************************
+ * We define J_0(x) as the power series solution to the ODE:                  *
+ *                                                                            *
+ *      x^2y''(x) + xy'y(x) + x^2y(x) = 0                                     *
+ *                                                                            *
+ *  Where J_0 is the Bessel function of the First kind with alpha = 0.        *
+ ******************************************************************************
+ *                              DEFINED FUNCTIONS                             *
+ ******************************************************************************
+ *  BesselJ0                                                                  *
  *  Purpose:                                                                  *
  *      Compute the J_0 bessel function for a real argument.                  *
  *  Arguments:                                                                *
@@ -16,16 +25,16 @@
  *      can be defined by the following series:                               *
  *                                                                            *
  *                      _____                                                 *
- *          J_0(x)  =   \      (-1)^n x^2n /                                  *
- *                      /____             / (n)!^2 * 4^n                      *
+ *                      \      (-1)^n x^2n /                                  *
+ *         J_0(x)  =    /____             / (n)!^2 * 4^n                      *
  *                      n = 0                                                 *
  *                                                                            *
  *      For large arguments the asymptotic expansion is used. This is defined *
  *      by the following series:                                              *
  *                                                                            *
  *                      _____                                                 *
- *          J_0(x)  ~   \      cos(z) a_{2n} /    + sin(z) a_{2n+1} /         *
- *                      /____               / x^2n                 / x^{2n+1} *
+ *                      \      cos(z) a_{2n} /    + sin(z) a_{2n+1} /         *
+ *          J_0(x)  ~   /____               / x^2n                 / x^{2n+1} *
  *                      n = 0                                                 *
  *                                                                            *
  *      Where:                                                                *
@@ -50,11 +59,20 @@
  *      the Taylor expansion. This, combined with trial and error, produced   *
  *      these selected ranges.                                                *
  ******************************************************************************/
+
+/*  Needed for square root functions and exponentials.                        */
+#include <math.h>
+
+/*  Coefficients for the Taylor series and asymptotic expansions found here.  */
+#include "__math_constants.h"
+
+/*  Compute the Bessel J_0 function for a floating point number x.            */
 float BesselJ0_Float(float x)
 {
-    x = fabsf(x);
+    /*  Declare necessary variables.                                          */
     float arg = x*x;
 
+    /*  For small arguments, use the Taylor series of J_0.                    */
     if (arg < 50.0){
         float bessel_J0;
         bessel_J0 = arg * BESSEL_J0_TAYLOR_15 + BESSEL_J0_TAYLOR_14;
@@ -74,34 +92,47 @@ float BesselJ0_Float(float x)
         bessel_J0 = arg * bessel_J0 + BESSEL_J0_TAYLOR_00;
         return bessel_J0;
     }
+    /*  For large arguments use the asymptotic expansion.                     */
     else if (arg < 1.0e32) {
+
+        /*  Declare variables used in the asymptotic expansion.               */
         float sinarg, cosarg;
 
+        /*  J_0 is an even function so use the absolute value of x.           */
+        x = fabsf(x);
+
+        /*  The argument for the asymptotic expansion is 1/x^2.               */
         arg = 1.0/arg;
 
+        /*  Use Horner's method to compute the polynomial part.               */
         sinarg  = arg * BESSEL_J0_ASYM_07 + BESSEL_J0_ASYM_05;
         sinarg  = arg * sinarg + BESSEL_J0_ASYM_03;
         sinarg  = arg * sinarg + BESSEL_J0_ASYM_01;
+
+        /*  Multiply the output by the coefficient factor.                    */
         sinarg *= sinf(x - PI_BY_FOUR)/x;
 
+        /*  Do the same as above for the Cosine portion.                      */
         cosarg  = arg * BESSEL_J0_ASYM_06 + BESSEL_J0_ASYM_04;
         cosarg  = arg * cosarg + BESSEL_J0_ASYM_02;
         cosarg  = arg * cosarg + BESSEL_J0_ASYM_00;
         cosarg *= cosf(x - PI_BY_FOUR);
 
+        /*  Multiply the result by the coefficient and return.                */
         return (cosarg + sinarg)*SQRT_2_BY_PI/sqrtf(x);
 
     }
-    else {
-        return 0.0;
-    }
+    /*  For very large arguments, use the limit (which is zero).              */
+    else return 0.0;
 }
 
+/*  Compute the Bessel J_0 function for a double precision number x.          */
 double BesselJ0_Double(double x)
 {
-    x = fabs(x);
+    /*  Declare necessary variables.                                          */
     double arg = x*x;
 
+    /*  For small arguments, use the Taylor series of J_0.                    */
     if (arg < 150.0){
         double bessel_J0;
         bessel_J0 = arg * BESSEL_J0_TAYLOR_22 + BESSEL_J0_TAYLOR_21;
@@ -128,34 +159,47 @@ double BesselJ0_Double(double x)
         bessel_J0 = arg * bessel_J0 + BESSEL_J0_TAYLOR_00;
         return bessel_J0;
     }
+    /*  For large arguments use the asymptotic expansion.                     */
     else if (arg < 1.0e32) {
+
+        /*  Declare variables used in the asymptotic expansion.               */
         double sinarg, cosarg;
 
+        /*  J_0 is an even function so use the absolute value of x.           */
+        x = fabs(x);
+
+        /*  The argument for the asymptotic expansion is 1/x^2.               */
         arg = 1.0/arg;
 
+        /*  Use Horner's method to compute the polynomial part.               */
         sinarg  = arg * BESSEL_J0_ASYM_07 + BESSEL_J0_ASYM_05;
         sinarg  = arg * sinarg + BESSEL_J0_ASYM_03;
         sinarg  = arg * sinarg + BESSEL_J0_ASYM_01;
+
+        /*  Multiply the output by the coefficient factor.                    */
         sinarg *= sin(x - PI_BY_FOUR)/x;
 
+        /*  Do the same as above for the Cosine portion.                      */
         cosarg  = arg * BESSEL_J0_ASYM_06 + BESSEL_J0_ASYM_04;
         cosarg  = arg * cosarg + BESSEL_J0_ASYM_02;
         cosarg  = arg * cosarg + BESSEL_J0_ASYM_00;
         cosarg *= cos(x - PI_BY_FOUR);
 
+        /*  Multiply the result by the coefficient and return.                */
         return (cosarg + sinarg)*SQRT_2_BY_PI/sqrt(x);
 
     }
-    else {
-        return 0.0;
-    }
+    /*  For very large arguments, use the limit (which is zero).              */
+    else return 0.0;
 }
 
+/*  Compute the Bessel I_0 function for a long double precision number x.     */
 long double BesselJ0_Long_Double(long double x)
 {
-    x = fabsl(x);
+    /*  Declare necessary variables.                                          */
     long double arg = x*x;
 
+    /*  For small arguments, use the Taylor series of J_0.                    */
     if (arg < 150.0){
         long double bessel_J0;
         bessel_J0 = arg * BESSEL_J0_TAYLOR_24 + BESSEL_J0_TAYLOR_23;
@@ -184,168 +228,53 @@ long double BesselJ0_Long_Double(long double x)
         bessel_J0 = arg * bessel_J0 + BESSEL_J0_TAYLOR_00;
         return bessel_J0;
     }
+    /*  For large arguments use the asymptotic expansion.                     */
     else if (arg < 1.0e32) {
-        long double sinarg, cosarg;
 
+        /*  Declare variables used in the asymptotic expansion.               */
+        double sinarg, cosarg;
+
+        /*  J_0 is an even function so use the absolute value of x.           */
+        x = fabsl(x);
+
+        /*  The argument for the asymptotic expansion is 1/x^2.               */
         arg = 1.0/arg;
 
-        sinarg  = arg * BESSEL_J0_ASYM_09 + BESSEL_J0_ASYM_07;
-        sinarg  = arg * sinarg + BESSEL_J0_ASYM_05;
+        /*  Use Horner's method to compute the polynomial part.               */
+        sinarg  = arg * BESSEL_J0_ASYM_07 + BESSEL_J0_ASYM_05;
         sinarg  = arg * sinarg + BESSEL_J0_ASYM_03;
         sinarg  = arg * sinarg + BESSEL_J0_ASYM_01;
+
+        /*  Multiply the output by the coefficient factor.                    */
         sinarg *= sinl(x - PI_BY_FOUR)/x;
 
+        /*  Do the same as above for the Cosine portion.                      */
         cosarg  = arg * BESSEL_J0_ASYM_08 + BESSEL_J0_ASYM_06;
         cosarg  = arg * cosarg + BESSEL_J0_ASYM_04;
         cosarg  = arg * cosarg + BESSEL_J0_ASYM_02;
         cosarg  = arg * cosarg + BESSEL_J0_ASYM_00;
         cosarg *= cosl(x - PI_BY_FOUR);
 
+        /*  For very large arguments, use the limit (which is zero).              */
         return (cosarg + sinarg)*SQRT_2_BY_PI/sqrtl(x);
 
     }
-    else {
-        return 0.0;
-    }
+    /*  For very large arguments, use the limit (which is zero).              */
+    else return 0.0;
 }
 
-float BesselI0_Float(float x)
+/*  For all integer types, convert to double and then compute.                */
+double BesselJ0_Char(char x)            {return BesselJ0_Double((double) x);}
+double BesselJ0_UChar(unsigned char x)  {return BesselJ0_Double((double) x);}
+double BesselJ0_Short(short x)          {return BesselJ0_Double((double) x);}
+double BesselJ0_UShort(unsigned short x){return BesselJ0_Double((double) x);}
+double BesselJ0_Int(int x)              {return BesselJ0_Double((double) x);}
+double BesselJ0_UInt(unsigned int x)    {return BesselJ0_Double((double) x);}
+double BesselJ0_Long(long x)            {return BesselJ0_Double((double) x);}
+double BesselJ0_ULong(unsigned long x)  {return BesselJ0_Double((double) x);}
+double BesselJ0_Long_Long(long long x)  {return BesselJ0_Double((double) x);}
+
+double BesselJ0_ULong_Long(unsigned long long x)
 {
-
-    x = fabsf(x);
-    float bessel_I0, arg;
-
-    if (x < 12.0){
-        arg = x*x;
-        bessel_I0 = arg * BESSEL_I0_TAYLOR_16 + BESSEL_I0_TAYLOR_15;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_14;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_13;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_12;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_11;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_10;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_09;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_08;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_07;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_06;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_05;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_04;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_03;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_02;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_01;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_00;
-        return bessel_I0;
-    }
-    else if (x < 87.49) {
-        arg = 1.0/x;
-
-        bessel_I0 = arg * BESSEL_I0_ASYM_04 + BESSEL_I0_ASYM_03;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_ASYM_02;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_ASYM_01;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_ASYM_00;
-
-        return bessel_I0 * expf(x)/sqrtf(TWO_PI*x);
-    }
-    else {
-        return INFINITY;
-    }
-}
-
-double BesselI0_Double(double x)
-{
-    x = fabs(x);
-    double bessel_I0, arg;
-
-    if (x < 16.0){
-        arg = x*x;
-        bessel_I0 = arg * BESSEL_I0_TAYLOR_22 + BESSEL_I0_TAYLOR_21;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_20;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_19;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_18;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_17;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_16;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_15;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_14;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_13;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_12;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_11;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_10;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_09;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_08;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_07;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_06;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_05;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_04;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_03;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_02;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_01;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_00;
-        return bessel_I0;
-    }
-    else if (x < 709.0) {
-        arg = 1.0/x;
-
-        bessel_I0 = arg * BESSEL_I0_ASYM_06 + BESSEL_I0_ASYM_05;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_ASYM_04;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_ASYM_03;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_ASYM_02;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_ASYM_01;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_ASYM_00;
-
-        return bessel_I0 * exp(x)/sqrt(TWO_PI*x);
-
-    }
-    else {
-        return INFINITY;
-    }
-}
-
-long double BesselI0_Long_Double(long double x)
-{
-    x = fabsl(x);
-    long double bessel_I0, arg;
-
-    if (x < 19.0){
-        arg = x*x;
-        bessel_I0 = arg * BESSEL_I0_TAYLOR_24 + BESSEL_I0_TAYLOR_23;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_22;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_21;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_20;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_19;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_18;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_17;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_16;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_15;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_14;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_13;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_12;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_11;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_10;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_09;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_08;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_07;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_06;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_05;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_04;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_03;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_02;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_01;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_TAYLOR_00;
-        return bessel_I0;
-    }
-    else if (x < 11356.34) {
-        arg = 1.0/x;
-
-        bessel_I0 = arg * BESSEL_I0_ASYM_06 + BESSEL_I0_ASYM_05;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_ASYM_04;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_ASYM_03;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_ASYM_02;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_ASYM_01;
-        bessel_I0 = arg * bessel_I0 + BESSEL_I0_ASYM_00;
-
-        return bessel_I0 * expl(x)/sqrtl(TWO_PI*x);
-
-    }
-    else {
-        return INFINITY;
-    }
+    return BesselJ0_Double((double) x);
 }

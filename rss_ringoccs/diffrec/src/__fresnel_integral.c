@@ -1,7 +1,8 @@
 /*  Various Fresnel integral functions declared here.                         */
 #include "__fresnel_integrals.h"
 
-complex double Fresnel_Taylor_to_Asymptotic_Double(double x){
+complex double Fresnel_Taylor_to_Asymptotic_Double(double x)
+{
 
     /* Variables for S(x) and powers of x, respectively.                      */
     double arg, arg2;

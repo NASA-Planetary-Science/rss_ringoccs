@@ -7,15 +7,14 @@
         #. spicy
 """
 
-import numpy as np
+import numpy
 from rss_ringoccs.tools import error_check
 try:
     from . import _window_functions, special_functions
 except:
     raise ImportError(
         """
-        \r\tError: rss_ringoccs
-        \r\t\tdiffrec.window_functions\n
+        \r\tError: rss_ringoccs\n\r\t\tdiffrec.window_functions\n
         \r\tCould Not Import C Code. There was most likely an error
         \r\tin your installation of rss_ringoccs. Install GCC (C Compiler)
         \r\tand see the User's Guide for installation instructions.
@@ -435,8 +434,7 @@ def kbmdal(x, W, alpha):
             """
         )  
 
-def window_width(res, normeq, fsky, fres, rho_dot,
-                 sigma, bfac=True, Return_P=False):
+def window_width(res, normeq, fsky, fres, rho_dot, sigma, bfac=True):
     """
     Purpose:
         Compute the window width as a function of ring radius.
@@ -457,25 +455,23 @@ def window_width(res, normeq, fsky, fres, rho_dot,
             The window width as a function of ring radius.
     """
     if bfac:
-        omega = 2.0*np.pi * fsky
-        alpha = np.square(omega * sigma) / (2.0 * rho_dot)
-        P = res / (alpha * np.square(fres))
+        omega = 2.0*numpy.pi * fsky
+        alpha = numpy.square(omega * sigma) / (2.0 * rho_dot)
+        P = res / (alpha * numpy.square(fres))
 
         # Create a variable specifying where P>1 occurs.
         Prange = (P > 1.0).nonzero()[0]
 
-        if (np.size(Prange) == 0):
+        if (numpy.size(Prange) == 0):
             raise IndexError(
                 """
-                \r\tError Encountered:
-                \r\t\trss_ringoccs.diffrec.DiffractionCorrection\n
-                \r\tThe P parameter in window width computation
-                \r\tis less than one for the entirety of the
-                \r\tdata set. Either rho_dot_km_vals is too small,
-                \r\tor F_km_vals is too large. Request a coarser
-                \r\tresolution, or check your data for errors.\n
-                \r\tAlternatively, you may set bfac=False as
-                \r\ta keyword to skip the use of the P parameter.
+                \r\tError Encountered: rss_ringoccs
+                \r\t\tdiffrec.special_functions.window_width\n
+                \r\tThe P parameter in window width computation is less than
+                \r\tone for the entirety of the data set. Either
+                \r\trho_dot_km_vals is too small, tor F_km_vals is too large.
+                \r\tRequest a coarser resolution, or check your data for
+                \r\terrors. Alternatively, you may set bfac=False as a keyword.
                 \r\tThis may result in inaccurate window width.
                 """
             )
@@ -485,19 +481,16 @@ def window_width(res, normeq, fsky, fres, rho_dot,
         P = P[Prange]
         alpha = alpha[Prange]
 
-        w_vals = np.zeros(np.size(rho_dot))
+        w_vals = numpy.zeros(numpy.size(rho_dot))
         w_vals[Prange] = special_functions.resolution_inverse(P)/alpha
 
     else:
-        w_vals = 2.0*np.square(fres)/res
+        w_vals = 2.0*numpy.square(fres)/res
         Prange = (fres > 0.0).nonzero()[0]
 
     w_vals *= normeq
 
-    if Return_P:
-        return w_vals, Prange
-    else:
-        return w_vals
+    return w_vals, Prange
 
 def window_norm(ker, dx, f_scale):
     """

@@ -79,7 +79,6 @@
 
 /*  Various coefficients and constants defined here.                          */
 #include "__math_constants.h"
-#include "__get_array.h"
 
 /******************************************************************************
  *----------------------------Fresnel Cosine----------------------------------*
@@ -87,54 +86,38 @@
 
 /*----------------------Single Precision Functions----------------------------*/
 extern float Fresnel_Sine_Taylor_to_Asymptotic_Float(float x);
-
 extern float Fresnel_Sine_While_to_Asymptotic_Float(float x);
-
 extern float Fresnel_Sine_Heald_Rational_EPS_Minus_Three_Float(float x);
-
 extern float Fresnel_Sine_Heald_Rational_EPS_Minus_Four_Float(float x);
-
 extern float Fresnel_Sine_Heald_Rational_EPS_Minus_Six_Float(float x);
-
 extern float Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Float(float x);
 
 /*----------------------Double Precision Functions----------------------------*/
 extern double Fresnel_Sine_Taylor_to_Asymptotic_Double(double x);
-
 extern double Fresnel_Sine_While_to_Asymptotic_Double(double x);
-
 extern double Fresnel_Sine_Heald_Rational_EPS_Minus_Three_Double(double x);
-
 extern double Fresnel_Sine_Heald_Rational_EPS_Minus_Four_Double(double x);
-
 extern double Fresnel_Sine_Heald_Rational_EPS_Minus_Six_Double(double x);
-
 extern double Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Double(double x);
 
 /*--------------------Long Double Precision Functions-------------------------*/
-extern long double Fresnel_Sine_Taylor_to_Asymptotic_Long_Double(
-    long double x
-);
+extern long double
+Fresnel_Sine_Taylor_to_Asymptotic_Long_Double(long double x);
 
-extern long double Fresnel_Sine_While_to_Asymptotic_Long_Long_Double(
-    long double x
-);
+extern long double
+Fresnel_Sine_While_to_Asymptotic_Long_Long_Double(long double x);
 
-extern long double Fresnel_Sine_Heald_Rational_EPS_Minus_Three_Long_Double(
-    long double x
-);
+extern long double
+Fresnel_Sine_Heald_Rational_EPS_Minus_Three_Long_Double(long double x);
 
-extern long double Fresnel_Sine_Heald_Rational_EPS_Minus_Four_Long_Double(
-    long double x
-);
+extern long double
+Fresnel_Sine_Heald_Rational_EPS_Minus_Four_Long_Double(long double x);
 
-extern long double Fresnel_Sine_Heald_Rational_EPS_Minus_Six_Long_Double(
-    long double x
-);
+extern long double
+Fresnel_Sine_Heald_Rational_EPS_Minus_Six_Long_Double(long double x);
 
-extern long double Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Long_Double(
-    long double x
-);
+extern long double
+Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Long_Double(long double x);
 
 /******************************************************************************
  *-----------------------------Fresnel Sine-----------------------------------*
@@ -142,69 +125,48 @@ extern long double Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Long_Double(
 
 /*----------------------Single Precision Functions----------------------------*/
 extern float Fresnel_Cosine_Taylor_to_Asymptotic_Float(float x);
-
 extern float Fresnel_Cosine_While_to_Asymptotic_Float(float x);
-
 extern float Fresnel_Cosine_Heald_Rational_EPS_Minus_Three_Float(float x);
-
 extern float Fresnel_Cosine_Heald_Rational_EPS_Minus_Four_Float(float x);
-
 extern float Fresnel_Cosine_Heald_Rational_EPS_Minus_Six_Float(float x);
-
 extern float Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight_Float(float x);
 
 /*----------------------Double Precision Functions----------------------------*/
 extern double Fresnel_Cosine_Taylor_to_Asymptotic_Double(double x);
-
 extern double Fresnel_Cosine_While_to_Asymptotic_Double(double x);
-
 extern double Fresnel_Cosine_Heald_Rational_EPS_Minus_Three_Double(double x);
-
 extern double Fresnel_Cosine_Heald_Rational_EPS_Minus_Four_Double(double x);
-
 extern double Fresnel_Cosine_Heald_Rational_EPS_Minus_Six_Double(double x);
-
 extern double Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight_Double(double x);
 
 /*--------------------Long Double Precision Functions-------------------------*/
-extern long double Fresnel_Cosine_Taylor_to_Asymptotic_Long_Double(
-    long double x
-);
+extern long double
+Fresnel_Cosine_Taylor_to_Asymptotic_Long_Double(long double x);
 
-extern long double Fresnel_Cosine_While_to_Asymptotic_Long_Long_Double(
-    long double x
-);
+extern long double
+Fresnel_Cosine_While_to_Asymptotic_Long_Long_Double(long double x);
 
-extern long double Fresnel_Cosine_Heald_Rational_EPS_Minus_Three_Long_Double(
-    long double x
-);
+extern long double
+Fresnel_Cosine_Heald_Rational_EPS_Minus_Three_Long_Double(long double x);
 
-extern long double Fresnel_Cosine_Heald_Rational_EPS_Minus_Four_Long_Double(
-    long double x
-);
+extern long double
+Fresnel_Cosine_Heald_Rational_EPS_Minus_Four_Long_Double(long double x);
 
-extern long double Fresnel_Cosine_Heald_Rational_EPS_Minus_Six_Long_Double(
-    long double x
-);
+extern long double
+Fresnel_Cosine_Heald_Rational_EPS_Minus_Six_Long_Double(long double x);
 
-extern long double Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight_Long_Double(
-    long double x
-);
+extern long double
+Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight_Long_Double(long double x);
 
 /******************************************************************************
  *------------------------Complex Fresnel Integral----------------------------*
  ******************************************************************************/
 
 extern complex double Fresnel_Taylor_to_Asymptotic_Double(double x);
-
 extern complex double Fresnel_While_to_Asymptotic_Func(double x);
-
 extern complex double Fresnel_Heald_Rational_EPS_Minus_Three_Func(double x);
-
 extern complex double Fresnel_Heald_Rational_EPS_Minus_Four_Func(double x);
-
 extern complex double Fresnel_Heald_Rational_EPS_Minus_Six_Func(double x);
-
 extern complex double Fresnel_Heald_Rational_EPS_Minus_Eight_Func(double x);
 
 #endif

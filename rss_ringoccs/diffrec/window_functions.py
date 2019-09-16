@@ -14,8 +14,7 @@ try:
 except:
     raise ImportError(
         """
-        \r\tError: rss_ringoccs
-        \r\t\tdiffrec.window_functions\n
+        \r\tError: rss_ringoccs\n\r\t\tdiffrec.window_functions\n
         \r\tCould Not Import C Code. There was most likely an error
         \r\tin your installation of rss_ringoccs. Install GCC (C Compiler)
         \r\tand see the User's Guide for installation instructions.

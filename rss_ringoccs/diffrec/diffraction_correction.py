@@ -534,7 +534,7 @@ class DiffractionCorrection(object):
         # Compute the window width. (See MTR86 Equations 19, 32, and 33).
         self.w_km_vals, Prange = window_functions.window_width(
             self.res, self.norm_eq, self.f_sky_hz_vals, self.F_km_vals,
-            self.rho_dot_kms_vals, self.sigma, bfac=self.bfac, Return_P=True
+            self.rho_dot_kms_vals, self.sigma, bfac=self.bfac
         )
 
         # From the requested range, extract array of the form [a, b]

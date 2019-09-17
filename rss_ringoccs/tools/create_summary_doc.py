@@ -588,7 +588,14 @@ def plot_cal_overview(pdf, cal_inst, dlp_inst):
     t_oet_spm_dlp = dlp_inst.t_oet_spm_vals
 
     P_free_dlp = np.interp(t_oet_spm_dlp, t_oet_spm, P_free)
-    P_obs_dlp = savgol_filter(dlp_inst.p_norm_vals * P_free_dlp, 61, 3)
+    window_length = 61
+    if len(P_free_dlp) < window_length:
+        window_length = len(P_free_dlp)-1
+        if window_length % 2 == 0:
+            window_length = window_length-1
+
+
+    P_obs_dlp = savgol_filter(dlp_inst.p_norm_vals * P_free_dlp, window_length, 3)
 
     floor_fsky = int(np.nanmax(F_sky_hz/1.e6))
 
@@ -652,7 +659,12 @@ def plot_tau_overview(pdf, geo_inst, tau_inst):
 
 
     tau = tau_inst.tau_vals
-    tau1 = savgol_filter(tau, 123, 3)
+    window_length = 123
+    if len(tau) < window_length:
+        window_length = len(tau)-1
+        if window_length % 2 == 0:
+            window_length = window_length-1
+    tau1 = savgol_filter(tau, window_length, 3)
     rho_tau = tau_inst.rho_km_vals
     elev_deg = np.interp(tau_inst.t_oet_spm_vals, geo_inst.t_oet_spm_vals,
             geo_inst.elev_deg_vals)

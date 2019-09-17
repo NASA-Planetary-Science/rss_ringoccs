@@ -286,9 +286,6 @@ class DiffractionCorrection(object):
         rng = error_check.check_range_input(rng, fn)
         psitype = error_check.check_psitype(psitype, fn)
 
-        if verbose:
-            print("\tAssigning inputs as attributes...")
-
         # Assign variables as attributes.
         self.p_norm_fwd_vals = None
         self.T_hat_fwd_vals = None

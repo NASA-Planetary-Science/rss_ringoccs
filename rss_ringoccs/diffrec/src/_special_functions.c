@@ -471,73 +471,54 @@ static PyObject *max(PyObject *self, PyObject *args)
         void *data;
 
         // Check to make sure input isn't zero dimensional!
-        if (PyArray_NDIM(arr) != 1){
-            PyErr_Format(PyExc_TypeError,
-                         "\n\r\trss_ringoccs.diffrec.special_functions.max\n"
-                         "\r\t\tInput must be one dimensional.");
-            return NULL;
-        }
+        if (PyArray_NDIM(arr) != 1) goto FAIL;
 
         // Useful information about the data.
         typenum = PyArray_TYPE(arr);
         dim     = PyArray_DIMS(arr)[0];
         data    = PyArray_DATA(arr);
 
-        if (dim == 0){
-            PyErr_Format(PyExc_TypeError,
-                         "\n\r\trss_ringoccs.diffrec.math_functions.max\n"
-                         "\r\t\tInput is zero dimensional.");
-            return NULL;
-        }
+        if (dim == 0) goto FAIL;
 
-        if (typenum == NPY_FLOAT){
-            return PyFloat_FromDouble(
-                Max_Float((float *)data, dim)
-            );
-        }
-        else if (typenum == NPY_DOUBLE){
-            return PyFloat_FromDouble(
-                Max_Double((double *)data, dim)
-            );
-        }
-        else if (typenum == NPY_LONGDOUBLE){
-            return PyFloat_FromDouble(
-                Max_Long_Double((long double *)data, dim)
-            );
-        }
-        else if (typenum == NPY_SHORT){
-            return PyLong_FromLong(
-                Max_Short((short *)data, dim)
-            );
-        }
-        else if (typenum == NPY_INT){
-            return PyLong_FromLong(
-                Max_Int((int *)data, dim)
-            );
-        }
-        else if (typenum == NPY_LONG){
-            return PyLong_FromLong(
-                Max_Long((long *)data, dim)
-            );
-        }
-        else if (typenum == NPY_LONGLONG){
-            return PyLong_FromLong(
-                Max_Long_Long((long long *)data, dim)
-            );
-        }
-        else {
-            PyErr_Format(PyExc_TypeError,
-                         "\n\r\trss_ringoccs.diffrec.math_functions.max\n"
-                         "\r\t\tInput should be a numpy array of numbers.");
-            return NULL;
+        switch(typenum)
+        {
+            case NPY_FLOAT:
+                return PyFloat_FromDouble(Max_Float((float *)data, dim));
+            case NPY_DOUBLE:
+                return PyFloat_FromDouble(Max_Double((double *)data, dim));
+            case NPY_LONGDOUBLE:
+                return
+                PyFloat_FromDouble(Max_Long_Double((long double *)data, dim));
+            case NPY_SHORT:
+                return PyLong_FromLong(Max_Short((short *)data, dim));
+            case NPY_INT:
+                return PyLong_FromLong(Max_Int((int *)data, dim));
+            case NPY_LONG:
+                return PyLong_FromLong(Max_Long((long *)data, dim));
+            case NPY_LONGLONG:
+                return PyLong_FromLong(Max_Long_Long((long long *)data, dim));
+            default:
+                goto FAIL;
         }
     }
-    else {
+    else goto FAIL;
+    FAIL: {
         PyErr_Format(PyExc_TypeError,
-                     "\n\r\trss_ringoccs.diffrec.math_functions.max\n"
-                     "\r\t\tInput should be a numpy array of numbers.");
+                     "\n\r\trss_ringoccs.diffrec.special_functions.max\n"
+                     "\r\t\tInput should be a one dimensional numpy array of\n"
+                     "\r\t\treal numbers, or a float/int number.\n"
+                     "\r\t\tExample:\n"
+                     "\r\t\t\t>>> import numpy\n"
+                     "\r\t\t\t>>> import _special_functions as sf\n"
+                     "\r\t\t\t>>> x = numpy.random.rand(100)\n"
+                     "\r\t\t\t>>> y = sf.max(x)\n\n"
+                     "\r\t\tNOTE:\n"
+                     "\r\t\t\tOnly one dimensional numpy arrays are allowed.\n"
+                     "\r\t\t\tComplex numbers are not allowed. If the input\n"
+                     "\r\t\t\tis a single floating point or integer number,\n"
+                     "\r\t\t\tthe output will simply be that number.");
         return NULL;
-    }
+    };
 }
 
 static PyObject *min(PyObject *self, PyObject *args)
@@ -1070,6 +1051,106 @@ PyUFuncGenericFunction besselI0_funcs[13] = {
     &long_double_besselI0
 };
 
+/************Double Slit Diffraction Using Fraunhofer Approximation************/
+
+/******************************************************************************
+ *  Function:                                                                 *
+ *      float_double_slit_diffraction                                         *
+ *  Purpose:                                                                  *
+ *      Compute the diffraction pattern from a plane wave incident on a       *
+ *      single slit using the Fraunhofer approximation.                       *
+ *  Arguments:                                                                *
+ *      args (char **):                                                       *
+ *          Input and output arguments passed from python.                    *
+ *      dimensions (npy_intp *):                                              *
+ *          Dimensions of the arguments found in the args pointer.            *
+ *      steps (npy_intp):                                                     *
+ *          The number of strides in memory from the nth point to the (n+1)th *
+ *          point for the arguments found in the args pointer.                *
+ *      data (void *):                                                        *
+ *          Data pointer.                                                     *
+ *  Notes:                                                                    *
+ *      1.) This is a wrapper for Double_Slit_Fraunhofer_Diffraction_Float,   *
+ *          which is defined in __fraunhofer_diffraction.h. This allows       *
+ *          Python to use that function, and allows for numpy arrays to be    *
+ *          passed in. Relies on the Numpy UFUNC API and the C-Python API.    *
+ *                                                                            *
+ *      2.) This function relies on the C99 standard, or higher.              *
+ *                                                                            *
+ *      3.) There are no error checks in this code. This is handled at the    *
+ *          Python level, see special_functions.py.                           *
+ ******************************************************************************/
+static void float_double_slit_diffraction(char **args, npy_intp *dimensions,
+                                          npy_intp* steps, void* data)
+{
+    /* Declare i for indexing, n is the number of elements in the array.      */
+    npy_intp i;
+    npy_intp n = dimensions[0];
+
+    /* Extract input data and convert to appropriate types.                   */
+    float *x  =  (float *)args[0];
+    float  z  = *(float *)args[1];
+    float  a  = *(float *)args[2];
+    float  d  = *(float *)args[3];
+    float  l  = *(float *)args[4];
+
+    /* The output is a pointer to a complex float.                            */
+    float *out = (float *)args[5];
+
+    /* Loop over the square well function found in __fresnel_diffraction.h    */
+    for (i = 0; i < n; i++) {
+        out[i] = Double_Slit_Fraunhofer_Diffraction_Float(x[i], z, a, d, l);
+    }
+}
+
+static void double_double_slit_diffraction(char **args, npy_intp *dimensions,
+                                           npy_intp* steps, void* data)
+{
+    /* Declare i for indexing, n is the number of elements in the array.      */
+    npy_intp i;
+    npy_intp n = dimensions[0];
+
+    /* Extract input data and convert to appropriate types.                   */
+    double *x  =  (double *)args[0];
+    double  z  = *(double *)args[1];
+    double  a  = *(double *)args[2];
+    double  d  = *(double *)args[3];
+    double  l  = *(double *)args[4];
+
+    /* The output is a pointer to a complex float.                            */
+    double *out = (double *)args[5];
+
+    /* Loop over the square well function found in __fresnel_diffraction.h    */
+    for (i = 0; i < n; i++) {
+        out[i] = Double_Slit_Fraunhofer_Diffraction_Double(x[i], z, a, d, l);
+    }
+}
+
+static void long_double_double_slit_diffraction(char **args,
+                                                npy_intp *dimensions,
+                                                npy_intp* steps, void* data)
+{
+    /* Declare i for indexing, n is the number of elements in the array.      */
+    npy_intp i;
+    npy_intp n = dimensions[0];
+
+    /* Extract input data and convert to appropriate types.                   */
+    long double *x  =  (long double *)args[0];
+    long double  z  = *(long double *)args[1];
+    long double  a  = *(long double *)args[2];
+    long double  d  = *(long double *)args[3];
+    long double  l  = *(long double *)args[4];
+
+    /* The output is a pointer to a complex float.                            */
+    long double *out = (long double *)args[5];
+
+    /* Loop over the square well function found in __fresnel_diffraction.h    */
+    for (i = 0; i < n; i++) {
+        out[i] = Double_Slit_Fraunhofer_Diffraction_Long_Double(x[i], z,
+                                                                a, d, l);
+    }
+}
+
 PyUFuncGenericFunction double_slit_funcs[3] = {
     &float_double_slit_diffraction,
     &double_double_slit_diffraction,
@@ -1221,6 +1302,13 @@ static char four_real_in_one_real_out[15] = {
     NPY_LONGDOUBLE
 };
 
+static char five_real_in_one_real_out[18] = {
+    NPY_FLOAT, NPY_FLOAT, NPY_FLOAT, NPY_FLOAT, NPY_FLOAT, NPY_FLOAT,
+    NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE,
+    NPY_LONGDOUBLE, NPY_LONGDOUBLE, NPY_LONGDOUBLE, NPY_LONGDOUBLE,
+    NPY_LONGDOUBLE, NPY_LONGDOUBLE
+};
+
 static char four_real_in_one_complex_out[15] = {
     NPY_FLOAT, NPY_FLOAT, NPY_FLOAT, NPY_FLOAT, NPY_CFLOAT,
     NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE, NPY_CDOUBLE,
@@ -1310,8 +1398,8 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     );
 
     double_slit_diffraction = PyUFunc_FromFuncAndData(
-        double_slit_funcs, PyuFunc_None_3, four_real_in_one_real_out,
-        3, 4, 1, PyUFunc_None, "double_slit_diffraction", 
+        double_slit_funcs, PyuFunc_None_3, five_real_in_one_real_out,
+        3, 5, 1, PyUFunc_None, "double_slit_diffraction", 
         "double_slit_diffraction_docstring", 0
     );
 
@@ -1511,8 +1599,8 @@ PyMODINIT_FUNC init__funcs(void)
     );
 
     double_slit_diffraction = PyUFunc_FromFuncAndData(
-        double_slit_funcs, PyuFunc_None_3, four_real_in_one_real_out,
-        3, 4, 1, PyUFunc_None, "double_slit_diffraction", 
+        double_slit_funcs, PyuFunc_None_3, five_real_in_one_real_out,
+        3, 5, 1, PyUFunc_None, "double_slit_diffraction", 
         "double_slit_diffraction_docstring", 0
     );
 

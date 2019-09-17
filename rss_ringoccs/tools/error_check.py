@@ -16,7 +16,7 @@ def check_type(input_var, input_type, input_var_name, f_name):
 def check_type_and_convert(input_var, input_type, input_var_name, f_name):
     if not isinstance(input_var, input_type):
         try:
-            input_var = input_type(input_var)
+            return input_type(input_var)
         except (TypeError, ValueError):
             raise TypeError(
                 """
@@ -151,8 +151,7 @@ def check_range_input(rng, f_name):
     return rng
 
 def check_psitype(psitype, fname):
-    psi_types = ["fresnel", "fresnel4", "fresnel6",
-                 "fresnel8", "full", "ellipse"]
+    psi_types = ["fresnel", "fresnel4", "fresnel6", "fresnel8", "full"]
 
     # Cbeck that psitype is a valid string.
     try:

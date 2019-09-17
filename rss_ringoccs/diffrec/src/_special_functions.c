@@ -1268,6 +1268,10 @@ PyUFuncGenericFunction wavelength_to_wavenumber_funcs[3] = {
 
 /*  Input and return types for double input and out.                          */
 static void *PyuFunc_None_3[3] = {NULL, NULL, NULL};
+static void *PyuFunc_None_13[13] = {
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL
+    NULL, NULL, NULL, NULL, NULL, NULL
+};
 
 static char one_real_in_one_real_out[6] = {NPY_FLOAT, NPY_FLOAT,
                                            NPY_DOUBLE, NPY_DOUBLE,
@@ -1388,12 +1392,12 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     import_umath();
 
     besselJ0 = PyUFunc_FromFuncAndData(
-        besselJ0_funcs, PyuFunc_None_3, one_real_in_one_float_out, 13, 1, 1,
+        besselJ0_funcs, PyuFunc_None_13, one_real_in_one_float_out, 13, 1, 1,
         PyUFunc_None, "besselJ0_diffraction", "besselJ0_docstring", 0
     );
 
     besselI0 = PyUFunc_FromFuncAndData(
-        besselI0_funcs, PyuFunc_None_3, one_real_in_one_float_out, 13, 1, 1,
+        besselI0_funcs, PyuFunc_None_13, one_real_in_one_float_out, 13, 1, 1,
         PyUFunc_None, "besselI0_diffraction", "besselI0_docstring", 0
     );
 

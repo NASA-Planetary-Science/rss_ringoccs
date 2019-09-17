@@ -522,7 +522,7 @@ def inverse_square_well_diffraction(x, a, b, F):
             """
         )
 
-def double_slit_diffraction(x, z, a, d):
+def double_slit_diffraction(x, z, a, d, Lambda):
     """
         Purpose:
             Compute diffraction through a double slit for the
@@ -546,7 +546,7 @@ def double_slit_diffraction(x, z, a, d):
                 Single slit diffraction pattern.
     """
     try:
-        return _special_functions.double_slit_diffraction(x, z, a, d)
+        return _special_functions.double_slit_diffraction(x, z, a, d, Lambda)
     except KeyboardInterrupt:
         raise
     except:
@@ -555,13 +555,14 @@ def double_slit_diffraction(x, z, a, d):
             \r\tError: rss_ringoccs
             \r\t\tdiffrec.special_functions.double_slit_diffraction\n
             \r\tInput should be a numpy array of real numbers (ints or floats),
-            \r\tand three floats/ints.\n
+            \r\tand four floats/ints.\n
             \r\tUsage:
             \r\t\t>>> x = numpy.arange(-10, 10, 0.01)
             \r\t\t>>> z = 5.0
             \r\t\t>>> a = 10.0
             \r\t\t>>> d = 1.0
-            \r\t\t>>> y = double_slit_diffraction(x, z, a, d)
+            \r\t\t>>> Lambda = 0.1
+            \r\t\t>>> y = double_slit_diffraction(x, z, a, d, Lambda)
             """
         )
 

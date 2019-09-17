@@ -471,73 +471,54 @@ static PyObject *max(PyObject *self, PyObject *args)
         void *data;
 
         // Check to make sure input isn't zero dimensional!
-        if (PyArray_NDIM(arr) != 1){
-            PyErr_Format(PyExc_TypeError,
-                         "\n\r\trss_ringoccs.diffrec.special_functions.max\n"
-                         "\r\t\tInput must be one dimensional.");
-            return NULL;
-        }
+        if (PyArray_NDIM(arr) != 1) goto FAIL;
 
         // Useful information about the data.
         typenum = PyArray_TYPE(arr);
         dim     = PyArray_DIMS(arr)[0];
         data    = PyArray_DATA(arr);
 
-        if (dim == 0){
-            PyErr_Format(PyExc_TypeError,
-                         "\n\r\trss_ringoccs.diffrec.math_functions.max\n"
-                         "\r\t\tInput is zero dimensional.");
-            return NULL;
-        }
+        if (dim == 0) goto FAIL;
 
-        if (typenum == NPY_FLOAT){
-            return PyFloat_FromDouble(
-                Max_Float((float *)data, dim)
-            );
-        }
-        else if (typenum == NPY_DOUBLE){
-            return PyFloat_FromDouble(
-                Max_Double((double *)data, dim)
-            );
-        }
-        else if (typenum == NPY_LONGDOUBLE){
-            return PyFloat_FromDouble(
-                Max_Long_Double((long double *)data, dim)
-            );
-        }
-        else if (typenum == NPY_SHORT){
-            return PyLong_FromLong(
-                Max_Short((short *)data, dim)
-            );
-        }
-        else if (typenum == NPY_INT){
-            return PyLong_FromLong(
-                Max_Int((int *)data, dim)
-            );
-        }
-        else if (typenum == NPY_LONG){
-            return PyLong_FromLong(
-                Max_Long((long *)data, dim)
-            );
-        }
-        else if (typenum == NPY_LONGLONG){
-            return PyLong_FromLong(
-                Max_Long_Long((long long *)data, dim)
-            );
-        }
-        else {
-            PyErr_Format(PyExc_TypeError,
-                         "\n\r\trss_ringoccs.diffrec.math_functions.max\n"
-                         "\r\t\tInput should be a numpy array of numbers.");
-            return NULL;
+        switch(typenum)
+        {
+            case NPY_FLOAT:
+                return PyFloat_FromDouble(Max_Float((float *)data, dim));
+            case NPY_DOUBLE:
+                return PyFloat_FromDouble(Max_Double((double *)data, dim));
+            case NPY_LONGDOUBLE:
+                return
+                PyFloat_FromDouble(Max_Long_Double((long double *)data, dim));
+            case NPY_SHORT:
+                return PyLong_FromLong(Max_Short((short *)data, dim));
+            case NPY_INT:
+                return PyLong_FromLong(Max_Int((int *)data, dim));
+            case NPY_LONG:
+                return PyLong_FromLong(Max_Long((long *)data, dim));
+            case NPY_LONGLONG:
+                return PyLong_FromLong(Max_Long_Long((long long *)data, dim));
+            default:
+                goto FAIL;
         }
     }
-    else {
+    else goto FAIL;
+    FAIL: {
         PyErr_Format(PyExc_TypeError,
-                     "\n\r\trss_ringoccs.diffrec.math_functions.max\n"
-                     "\r\t\tInput should be a numpy array of numbers.");
+                     "\n\r\trss_ringoccs.diffrec.special_functions.max\n"
+                     "\r\t\tInput should be a one dimensional numpy array of\n"
+                     "\r\t\treal numbers, or a float/int number.\n"
+                     "\r\t\tExample:\n"
+                     "\r\t\t\t>>> import numpy\n"
+                     "\r\t\t\t>>> import _special_functions as sf\n"
+                     "\r\t\t\t>>> x = numpy.random.rand(100)\n"
+                     "\r\t\t\t>>> y = sf.max(x)\n\n"
+                     "\r\t\tNOTE:\n"
+                     "\r\t\t\tOnly one dimensional numpy arrays are allowed.\n"
+                     "\r\t\t\tComplex numbers are not allowed. If the input\n"
+                     "\r\t\t\tis a single floating point or integer number,\n"
+                     "\r\t\t\tthe output will simply be that number.");
         return NULL;
-    }
+    };
 }
 
 static PyObject *min(PyObject *self, PyObject *args)

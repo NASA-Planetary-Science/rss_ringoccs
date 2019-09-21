@@ -79,6 +79,7 @@
  *  Date:       June 21, 2019                                                 *
  ******************************************************************************/
 #include "__diffraction_functions.h"
+#include <stdio.h>
 
 /******************************************************************************
  *------------------------------DEFINE C FUNCTIONS----------------------------*
@@ -216,6 +217,7 @@ void DiffractionCorrectionFresnel(DLPObj dlp)
 
 void DiffractionCorrectionLegendre(DLPObj dlp)
 {
+    puts("Starting");
     long i, nw_pts, center;
     double w_init, dx, two_dx, cosb, sinp, cosp;
     double Legendre_Coeff;
@@ -250,13 +252,35 @@ void DiffractionCorrectionLegendre(DLPObj dlp)
     two_dx  = 2.0*dx;
     nw_pts  = 2*((long)(w_init / (2.0 * dx)))+1;
 
-    double* x_arr              = (double *)malloc(sizeof(double)*nw_pts);
+    double* x_arr = (double *)malloc(sizeof(double)*nw_pts);
     double* w_func             = (double *)malloc(sizeof(double)*nw_pts);
     double* legendre_p         = (double *)malloc(sizeof(double)*(dlp.order+1));
     double* alt_legendre_p     = (double *)malloc(sizeof(double)*dlp.order);
     double* fresnel_ker_coeffs = (double *)malloc(sizeof(double)*dlp.order);
 
-    reset_window(x_arr, w_func, dx, w_init, nw_pts, fw);
+    if (!x_arr) {
+        puts("Could not allocate memory for x_arr");
+        exit(0);
+    }
+    else if (!w_func) {
+        puts("Could not allocate memory for w_func");
+        exit(0);
+    }
+    else if (!legendre_p) {
+        puts("Could not allocate memory for legendre_p");
+        exit(0);
+    }
+    else if (!alt_legendre_p) {
+        puts("Could not allocate memory for alt_legendre_p");
+        exit(0);
+    }
+    else if (!fresnel_ker_coeffs) {
+        puts("Could not allocate memory for fresnel_ker_coeffs");
+        exit(0);
+    }
+    else{
+        reset_window(x_arr, w_func, dx, w_init, nw_pts, fw);
+    }
 
     for (i = 0; i <= dlp.n_used; ++i){
         cosb            = cos(dlp.B_rad_vals[center]);
@@ -281,8 +305,8 @@ void DiffractionCorrectionLegendre(DLPObj dlp)
             /* Reset w_init and recompute window function.                    */
             w_init = dlp.w_km_vals[center];
             nw_pts = (long)(w_init / two_dx);
-            w_func = (double *)realloc(w_func, sizeof(double)*nw_pts);
             x_arr  = (double *)realloc(x_arr, sizeof(double)*nw_pts);
+            w_func = (double *)realloc(w_func, sizeof(double)*nw_pts);
             reset_window(x_arr, w_func, dx, w_init, nw_pts, fw);
         }
 
@@ -301,6 +325,7 @@ void DiffractionCorrectionLegendre(DLPObj dlp)
     free(legendre_p);
     free(alt_legendre_p);
     free(fresnel_ker_coeffs);
+    puts("Done");
 }
 
 void DiffractionCorrectionNewton(DLPObj dlp)

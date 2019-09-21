@@ -1269,7 +1269,7 @@ PyUFuncGenericFunction wavelength_to_wavenumber_funcs[3] = {
 /*  Input and return types for double input and out.                          */
 static void *PyuFunc_None_3[3] = {NULL, NULL, NULL};
 static void *PyuFunc_None_13[13] = {
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL, NULL
 };
 

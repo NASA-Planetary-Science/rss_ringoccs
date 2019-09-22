@@ -13,7 +13,7 @@ import pandas as pd
 from .history import write_history_dict, date_to_rev, rev_to_occ_info
 from . import error_check
 
-def get_geo(geo, verbose=True):
+def get_geo(geo, verbose=True, use_deprecate=False):
     """
     To extract a pandas DataFrame from a given GEO.TAB or GEO.CSV file.
 

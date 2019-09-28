@@ -10,7 +10,7 @@
  *  1.) This code uses complex numbers throughout, and is compatible with the *
  *      C99 standard. To use this code, make sure your compiler supports C99  *
  *      or more recent standards of the C Programming Language.               *
- * 
+ *                                                                            *
  *  2.) This code acts as Python wrappers for the pure C functions found in   *
  *      __diffraction_correction.h. As such, there is usage of the C-Numpy    *
  *      UFuncs API, as well as the standard C-Python API. This allows numpy   *
@@ -53,17 +53,37 @@ static void complex_double_fresnel_transform(char **args, npy_intp *dimensions,
 
     if (dlp.order == 0){
         if ((dlp.ecc == 0.0) && (dlp.peri == 0.0)){
-            DiffractionCorrectionNewton(dlp);
+            DiffractionCorrectionNewton(&dlp);
         }
-        else {
-            DiffractionCorrectionEllipse(dlp);
-        }
+        else DiffractionCorrectionEllipse(&dlp);
     }
     else if (dlp.order == 1){
-        DiffractionCorrectionFresnel(dlp);
+        DiffractionCorrectionFresnel(&dlp);
     }
-    else {
-        DiffractionCorrectionLegendre(dlp);
+    else{
+        DiffractionCorrectionLegendre(&dlp);
+    }
+
+
+    if      (dlp.status == 0) return;
+    else if (dlp.status == 1){
+        puts("\rError Encountered: rss_ringoccs");
+        puts("\r\tspecial_functions.fresnel_transform\n\n");
+        puts("\rCould not extract data from inputs.\n");
+        exit(1);
+    }
+    else if (dlp.status == 2){
+        puts("\nError Encountered: rss_ringoccs");
+        puts("\tspecial_functions.fresnel_transform\n");
+        puts("Required window width goes beyond the available data range\n");
+        exit(2);
+    }
+    else if (dlp.status == 3){
+        puts("\rError Encountered: rss_ringoccs");
+        puts("\r\tspecial_functions.fresnel_transform\n");
+        puts("\rMalloc failed to create new variables.");
+        puts("\rYou are most likely out of memory.\n");
+        exit(3);
     }
 }
 

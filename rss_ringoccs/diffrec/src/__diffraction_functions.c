@@ -127,7 +127,15 @@ static void reset_window(double *x_arr, double *w_func, double dx, double width,
     }
 }
 
-void DiffractionCorrectionFresnel(DLPObj dlp)
+static int check_dlp_data(DLPObj *dlp){
+    if ((!dlp->T_in) || (!dlp->rho_km_vals)  || (!dlp->F_km_vals)
+                     || (!dlp->phi_rad_vals) || (!dlp->kd_vals)
+                     || (!dlp->B_rad_vals)   || (!dlp->D_km_vals)
+                     || (!dlp->w_km_vals)    || (!dlp->T_out)) return 0;
+    else return 1;
+}
+
+void DiffractionCorrectionFresnel(DLPObj *dlp)
 {
     /*  i and j used for indexing, nw_pts is number of points in window.     */
     long i, j, nw_pts, center;
@@ -142,27 +150,27 @@ void DiffractionCorrectionFresnel(DLPObj dlp)
                             double, long, long);
 
     /*  Cast the selected window type to the fw pointer.                     */
-    if      (dlp.wtype == 0){fw = &Rect_Window_Double;}
-    else if (dlp.wtype == 1){fw = &Coss_Window_Double;}
-    else if (dlp.wtype == 2){fw = &Kaiser_Bessel_2_0_Double;}
-    else if (dlp.wtype == 3){fw = &Kaiser_Bessel_2_5_Double;}
-    else if (dlp.wtype == 4){fw = &Kaiser_Bessel_3_5_Double;}
-    else if (dlp.wtype == 5){fw = &Modified_Kaiser_Bessel_2_0_Double;}
-    else if (dlp.wtype == 6){fw = &Modified_Kaiser_Bessel_2_5_Double;}
-    else                    {fw = &Modified_Kaiser_Bessel_3_5_Double;}
+    if      (dlp->wtype == 0){fw = &Rect_Window_Double;}
+    else if (dlp->wtype == 1){fw = &Coss_Window_Double;}
+    else if (dlp->wtype == 2){fw = &Kaiser_Bessel_2_0_Double;}
+    else if (dlp->wtype == 3){fw = &Kaiser_Bessel_2_5_Double;}
+    else if (dlp->wtype == 4){fw = &Kaiser_Bessel_3_5_Double;}
+    else if (dlp->wtype == 5){fw = &Modified_Kaiser_Bessel_2_0_Double;}
+    else if (dlp->wtype == 6){fw = &Modified_Kaiser_Bessel_2_5_Double;}
+    else                     {fw = &Modified_Kaiser_Bessel_3_5_Double;}
 
     /*  Cast FresT to the appropriate function.                               */
-    if (dlp.use_norm){FresT = &Fresnel_Transform_Norm_Double;}
-    else {FresT = &Fresnel_Transform_Double;}
+    if (dlp->use_norm){FresT = &Fresnel_Transform_Norm_Double;}
+    else              {FresT = &Fresnel_Transform_Double;}
 
     /* Move the pointers to the correct starting point. Compute window width.*/
-    center  = dlp.start;
+    center  = dlp->start;
 
     /*  Compute some extra necessary variables.                               */
-    w_init  = dlp.w_km_vals[center];
-    dx      = dlp.rho_km_vals[center+1] - dlp.rho_km_vals[center];
+    w_init  = dlp->w_km_vals[center];
+    dx      = dlp->rho_km_vals[center+1] - dlp->rho_km_vals[center];
     two_dx  = 2.0*dx;
-    nw_pts  = 2*((long)(w_init / (2.0 * dx)))+1;
+    nw_pts  = ((long)(w_init / two_dx))+1;
 
     /*  Reserve some memory for two arrays, the ring radius and the window    *
      *  function. This will need to be reallocated later if the window width  *
@@ -180,15 +188,15 @@ void DiffractionCorrectionFresnel(DLPObj dlp)
         x_arr[j] *= PI_BY_TWO*x_arr[j];
 
         /*  If forward transform is selected, negate x_arr.                   */
-        x_arr[j] *= (dlp.use_fwd == 0) - (dlp.use_fwd == 1);
+        x_arr[j] *= (dlp->use_fwd == 0) - (dlp->use_fwd == 1);
     }
 
     /*  Compute the Fresnel transform across the input data.                  */
-    for (i=0; i<=dlp.n_used; ++i){
-        if (fabs(w_init - dlp.w_km_vals[center]) >= two_dx) {
+    for (i=0; i<=dlp->n_used; ++i){
+        if (fabs(w_init - dlp->w_km_vals[center]) >= two_dx) {
             /* Reset w_init and recompute window function.                    */
-            w_init = dlp.w_km_vals[center];
-            nw_pts = (long)(w_init / two_dx);
+            w_init = dlp->w_km_vals[center];
+            nw_pts  = ((long)(w_init / two_dx))+1;
 
             /*  Reallocate memory, since the sizes of the arrays changed.     */
             w_func = (double *)realloc(w_func, sizeof(double)*nw_pts);
@@ -200,13 +208,13 @@ void DiffractionCorrectionFresnel(DLPObj dlp)
             /* Compute Window Functions, and compute pi/2 * x^2               */
             for(j=0; j<nw_pts; ++j){
                 x_arr[j] *= PI_BY_TWO*x_arr[j];
-                x_arr[j] *= (dlp.use_fwd == 0) - (dlp.use_fwd == 1);
+                x_arr[j] *= (dlp->use_fwd == 0) - (dlp->use_fwd == 1);
             }
         }
 
         /*  Compute the Fresnel Transform about the current point.           */
-        dlp.T_out[center] = FresT(x_arr, dlp.T_in, w_func,
-                                  dlp.F_km_vals[center], dx, nw_pts, center);
+        dlp->T_out[center] = FresT(x_arr, dlp->T_in, w_func,
+                                   dlp->F_km_vals[center], dx, nw_pts, center);
 
         /*  Move the pointers to the next point.                             */
         center += 1;
@@ -215,9 +223,19 @@ void DiffractionCorrectionFresnel(DLPObj dlp)
     free(w_func);
 }
 
-void DiffractionCorrectionLegendre(DLPObj dlp)
+void DiffractionCorrectionLegendre(DLPObj *dlp)
 {
-    puts("Starting");
+    /*  If everything executes smoothly, status should remain at zero.        */
+    dlp->status = 0;
+
+    /*  Check that the pointers to the data are not NULL.                     */
+    if (!(check_dlp_data(dlp))){
+
+        /*  One of the variables has null data, return to calling function.   */
+        dlp->status = 1;
+        return;
+    }
+
     long i, nw_pts, center;
     double w_init, dx, two_dx, cosb, sinp, cosp;
     double Legendre_Coeff;
@@ -226,109 +244,109 @@ void DiffractionCorrectionLegendre(DLPObj dlp)
                             double, double, double, long, unsigned char, long);
 
     /*  Cast the selected window type to the fw pointer.                      */
-    if      (dlp.wtype == 0){fw = &Rect_Window_Double;}
-    else if (dlp.wtype == 1){fw = &Coss_Window_Double;}
-    else if (dlp.wtype == 2){fw = &Kaiser_Bessel_2_0_Double;}
-    else if (dlp.wtype == 3){fw = &Kaiser_Bessel_2_5_Double;}
-    else if (dlp.wtype == 4){fw = &Kaiser_Bessel_3_5_Double;}
-    else if (dlp.wtype == 5){fw = &Modified_Kaiser_Bessel_2_0_Double;}
-    else if (dlp.wtype == 6){fw = &Modified_Kaiser_Bessel_2_5_Double;}
+    if      (dlp->wtype == 0){fw = &Rect_Window_Double;}
+    else if (dlp->wtype == 1){fw = &Coss_Window_Double;}
+    else if (dlp->wtype == 2){fw = &Kaiser_Bessel_2_0_Double;}
+    else if (dlp->wtype == 3){fw = &Kaiser_Bessel_2_5_Double;}
+    else if (dlp->wtype == 4){fw = &Kaiser_Bessel_3_5_Double;}
+    else if (dlp->wtype == 5){fw = &Modified_Kaiser_Bessel_2_0_Double;}
+    else if (dlp->wtype == 6){fw = &Modified_Kaiser_Bessel_2_5_Double;}
     else                    {fw = &Modified_Kaiser_Bessel_3_5_Double;}
 
-    if (dlp.use_norm){FresT = &Fresnel_Transform_Legendre_Norm_Double;}
-    else             {FresT = &Fresnel_Transform_Legendre_Double;}
+    if (dlp->use_norm){FresT = &Fresnel_Transform_Legendre_Norm_Double;}
+    else              {FresT = &Fresnel_Transform_Legendre_Double;}
 
     /* Compute first window width and window function. */
-    center = dlp.start;
+    center = dlp->start;
 
-    if (dlp.use_fwd){
-        for (i=0; i <= dlp.n_used; ++i){
-            dlp.kd_vals[i] *= -1.0;
+    if (dlp->use_fwd){
+        for (i=0; i <= dlp->n_used; ++i){
+            dlp->kd_vals[i] *= -1.0;
         }
     }
 
-    w_init  = dlp.w_km_vals[center];
-    dx      = dlp.rho_km_vals[center+1] - dlp.rho_km_vals[center];
+    w_init  = dlp->w_km_vals[center];
+    dx      = dlp->rho_km_vals[center+1] - dlp->rho_km_vals[center];
     two_dx  = 2.0*dx;
-    nw_pts  = 2*((long)(w_init / (2.0 * dx)))+1;
+    nw_pts  = ((long)(w_init / two_dx))+1;
 
-    double* x_arr = (double *)malloc(sizeof(double)*nw_pts);
-    double* w_func             = (double *)malloc(sizeof(double)*nw_pts);
-    double* legendre_p         = (double *)malloc(sizeof(double)*(dlp.order+1));
-    double* alt_legendre_p     = (double *)malloc(sizeof(double)*dlp.order);
-    double* fresnel_ker_coeffs = (double *)malloc(sizeof(double)*dlp.order);
-
-    if (!x_arr) {
-        puts("Could not allocate memory for x_arr");
-        exit(0);
-    }
-    else if (!w_func) {
-        puts("Could not allocate memory for w_func");
-        exit(0);
-    }
-    else if (!legendre_p) {
-        puts("Could not allocate memory for legendre_p");
-        exit(0);
-    }
-    else if (!alt_legendre_p) {
-        puts("Could not allocate memory for alt_legendre_p");
-        exit(0);
-    }
-    else if (!fresnel_ker_coeffs) {
-        puts("Could not allocate memory for fresnel_ker_coeffs");
-        exit(0);
-    }
-    else{
-        reset_window(x_arr, w_func, dx, w_init, nw_pts, fw);
+    if (center - nw_pts < 0){
+        /*  Invalid index for the for the first point. That is, the window    *
+         *  of integration required for the first point goes beyond the       *
+         *  available data. Return to calling function.                       */
+        dlp->status = 2;
+        return;
     }
 
-    for (i = 0; i <= dlp.n_used; ++i){
-        cosb            = cos(dlp.B_rad_vals[center]);
-        cosp            = cos(dlp.phi_rad_vals[center]);
-        sinp            = sin(dlp.phi_rad_vals[center]);
+    /*  Allocate memory for the independent variable and window function.     */
+    double *x_arr          = (double *)malloc(sizeof(double)*nw_pts);
+    double *w_func         = (double *)malloc(sizeof(double)*nw_pts);
+
+    /*  Also for the two Legendre polynomials.                                */
+    double *legendre_p     = (double *)malloc(sizeof(double)*(dlp->order+1));
+    double *alt_legendre_p = (double *)malloc(sizeof(double)*dlp->order);
+
+    /*  And finally for the coefficients of psi.                              */
+    double *fresnel_ker_coeffs = (double *)malloc(sizeof(double)*dlp->order);
+
+
+    if (!(x_arr)    ||    !(w_func)            ||    !(legendre_p)
+                    ||    !(alt_legendre_p)    ||    !(fresnel_ker_coeffs)){
+
+        /*  Malloc failed, return to calling function.                        */
+        dlp->status = 3;
+        return;
+    }
+
+    else reset_window(x_arr, w_func, dx, w_init, nw_pts, fw);
+
+    for (i = 0; i <= dlp->n_used; ++i){
+        cosb            = cos(dlp->B_rad_vals[center]);
+        cosp            = cos(dlp->phi_rad_vals[center]);
+        sinp            = sin(dlp->phi_rad_vals[center]);
         Legendre_Coeff  = cosb*sinp;
         Legendre_Coeff *= Legendre_Coeff;
         Legendre_Coeff  = 0.5*Legendre_Coeff/(1.0-Legendre_Coeff);
 
         /* Compute Legendre Polynomials,                                      */
-        Legendre_Polynomials(legendre_p, cosb*cosp, dlp.order+1);
-        Alt_Legendre_Polynomials(alt_legendre_p, legendre_p, dlp.order);
+        Legendre_Polynomials(legendre_p, cosb*cosp, dlp->order+1);
+        Alt_Legendre_Polynomials(alt_legendre_p, legendre_p, dlp->order);
 
         /*  Compute the coefficients using Cauchy Products. First compute     *
          *  the bottom triangle of the square in the product.                 */
         Fresnel_Kernel_Coefficients(fresnel_ker_coeffs, legendre_p,
-                                    alt_legendre_p, Legendre_Coeff, dlp.order);
+                                    alt_legendre_p, Legendre_Coeff,
+                                    dlp->order);
 
         /*  If the window width changes significantly, recompute w_func.      */
-        if (fabs(w_init - dlp.w_km_vals[center]) >= two_dx) {
+        if (fabs(w_init - dlp->w_km_vals[center]) >= two_dx) {
 
             /* Reset w_init and recompute window function.                    */
-            w_init = dlp.w_km_vals[center];
-            nw_pts = (long)(w_init / two_dx);
+            w_init = dlp->w_km_vals[center];
+            nw_pts = ((long)(w_init / two_dx))+1;
             x_arr  = (double *)realloc(x_arr, sizeof(double)*nw_pts);
             w_func = (double *)realloc(w_func, sizeof(double)*nw_pts);
             reset_window(x_arr, w_func, dx, w_init, nw_pts, fw);
         }
 
         /*  Compute the fresnel tranform about the current point.             */
-        dlp.T_out[center] = FresT(x_arr, dlp.T_in, w_func,
-                                  dlp.D_km_vals[center], fresnel_ker_coeffs, dx,
-                                  dlp.F_km_vals[center], dlp.kd_vals[center],
-                                  nw_pts, dlp.order, center);
+        dlp->T_out[center] = FresT(x_arr, dlp->T_in, w_func,
+                                   dlp->D_km_vals[center], fresnel_ker_coeffs,
+                                   dx, dlp->F_km_vals[center],
+                                   dlp->kd_vals[center], nw_pts,
+                                   dlp->order, center);
 
         /*  Increment T_in pointer using pointer arithmetic.                  */
         center += 1;
     }
-
     free(x_arr);
     free(w_func);
     free(legendre_p);
     free(alt_legendre_p);
     free(fresnel_ker_coeffs);
-    puts("Done");
 }
 
-void DiffractionCorrectionNewton(DLPObj dlp)
+void DiffractionCorrectionNewton(DLPObj *dlp)
 {
     long i, j, nw_pts, toler, center;
     double w_init, dx, two_dx, EPS;
@@ -342,29 +360,29 @@ void DiffractionCorrectionNewton(DLPObj dlp)
                             double, double, long, long);
 
     /*  Cast the selected window type to the fw pointer.                      */
-    if      (dlp.wtype == 0){fw = &Rect_Window_Double;}
-    else if (dlp.wtype == 1){fw = &Coss_Window_Double;}
-    else if (dlp.wtype == 2){fw = &Kaiser_Bessel_2_0_Double;}
-    else if (dlp.wtype == 3){fw = &Kaiser_Bessel_2_5_Double;}
-    else if (dlp.wtype == 4){fw = &Kaiser_Bessel_3_5_Double;}
-    else if (dlp.wtype == 5){fw = &Modified_Kaiser_Bessel_2_0_Double;}
-    else if (dlp.wtype == 6){fw = &Modified_Kaiser_Bessel_2_5_Double;}
+    if      (dlp->wtype == 0){fw = &Rect_Window_Double;}
+    else if (dlp->wtype == 1){fw = &Coss_Window_Double;}
+    else if (dlp->wtype == 2){fw = &Kaiser_Bessel_2_0_Double;}
+    else if (dlp->wtype == 3){fw = &Kaiser_Bessel_2_5_Double;}
+    else if (dlp->wtype == 4){fw = &Kaiser_Bessel_3_5_Double;}
+    else if (dlp->wtype == 5){fw = &Modified_Kaiser_Bessel_2_0_Double;}
+    else if (dlp->wtype == 6){fw = &Modified_Kaiser_Bessel_2_5_Double;}
     else                    {fw = &Modified_Kaiser_Bessel_3_5_Double;}
 
-    if (dlp.use_norm){FresT = &Fresnel_Transform_Newton_Norm_Double;}
-    else {FresT = &Fresnel_Transform_Newton_Double;}
+    if (dlp->use_norm){FresT = &Fresnel_Transform_Newton_Norm_Double;}
+    else              {FresT = &Fresnel_Transform_Newton_Double;}
 
     /* Compute first window width and window function. */
-    center = dlp.start;
+    center = dlp->start;
 
-    if (dlp.use_fwd){
-        for (i=0; i<=dlp.n_used; ++i){
-            dlp.kd_vals[center+i] *= -1.0;
+    if (dlp->use_fwd){
+        for (i=0; i<=dlp->n_used; ++i){
+            dlp->kd_vals[center+i] *= -1.0;
         }
     }
 
-    w_init  = dlp.w_km_vals[center];
-    dx      = dlp.rho_km_vals[center+1] - dlp.rho_km_vals[center];
+    w_init  = dlp->w_km_vals[center];
+    dx      = dlp->rho_km_vals[center+1] - dlp->rho_km_vals[center];
     two_dx  = 2.0*dx;
     nw_pts  = 2*((long)(w_init / (2.0 * dx)))+1;
 
@@ -373,40 +391,42 @@ void DiffractionCorrectionNewton(DLPObj dlp)
     double *w_func  = (double *)malloc(sizeof(double) * nw_pts);
 
     for (j=0; j<nw_pts; ++j){
-        x_arr[j]   = dlp.rho_km_vals[center+j-(nw_pts-1)/2];
-        phi_arr[j] = dlp.phi_rad_vals[center+j-(nw_pts-1)/2];
-        w_func[j]  = fw(x_arr[j] - dlp.rho_km_vals[center], w_init);
+        x_arr[j]   = dlp->rho_km_vals[center+j-(nw_pts-1)/2];
+        phi_arr[j] = dlp->phi_rad_vals[center+j-(nw_pts-1)/2];
+        w_func[j]  = fw(x_arr[j] - dlp->rho_km_vals[center], w_init);
     }
 
-    for (i=0; i<=dlp.n_used; ++i){
+    for (i=0; i<=dlp->n_used; ++i){
 
         /*  If the window width changes significantly, recompute w_func.  */
-        if (fabs(w_init - dlp.w_km_vals[center]) >= two_dx) {
+        if (fabs(w_init - dlp->w_km_vals[center]) >= two_dx) {
             // Reset w_init and recompute window function.
-            w_init  = dlp.w_km_vals[center];
+            w_init  = dlp->w_km_vals[center];
             nw_pts  = 2*((int)(w_init / (2.0 * dx)))+1;
             w_func  = (double *)realloc(w_func,  sizeof(double) * nw_pts);
             phi_arr = (double *)realloc(phi_arr, sizeof(double) * nw_pts);
             x_arr   = (double *)realloc(x_arr,   sizeof(double) * nw_pts);
             for (j=0; j<nw_pts; ++j){
-                x_arr[j]   = dlp.rho_km_vals[center+j-(nw_pts-1)/2];
-                phi_arr[j] = dlp.phi_rad_vals[center+j-(nw_pts-1)/2];
-                w_func[j]  = fw(x_arr[j] - dlp.rho_km_vals[center], w_init);
+                x_arr[j]   = dlp->rho_km_vals[center+j-(nw_pts-1)/2];
+                phi_arr[j] = dlp->phi_rad_vals[center+j-(nw_pts-1)/2];
+                w_func[j]  = fw(x_arr[j] - dlp->rho_km_vals[center], w_init);
             }
         }
         else {
             for (j=0; j<nw_pts; ++j){
-                x_arr[j]   = dlp.rho_km_vals[center+j-(nw_pts-1)/2];
-                phi_arr[j] = dlp.phi_rad_vals[center+j-(nw_pts-1)/2];
+                x_arr[j]   = dlp->rho_km_vals[center+j-(nw_pts-1)/2];
+                phi_arr[j] = dlp->phi_rad_vals[center+j-(nw_pts-1)/2];
             }
         }
 
         /*  Compute the fresnel tranform about the current point.   */
-        dlp.T_out[center] = FresT(x_arr, phi_arr, dlp.T_in, w_func,
-                                  dlp.kd_vals[center], dlp.rho_km_vals[center],
-                                  dlp.B_rad_vals[center], dlp.D_km_vals[center],
-                                  EPS, toler, dx, dlp.F_km_vals[center],
-                                  nw_pts, center);
+        dlp->T_out[center] = FresT(x_arr, phi_arr, dlp->T_in, w_func,
+                                   dlp->kd_vals[center],
+                                   dlp->rho_km_vals[center],
+                                   dlp->B_rad_vals[center],
+                                   dlp->D_km_vals[center],
+                                   EPS, toler, dx, dlp->F_km_vals[center],
+                                   nw_pts, center);
 
         /*  Increment pointers using pointer arithmetic.                      */
         center += 1;
@@ -416,7 +436,7 @@ void DiffractionCorrectionNewton(DLPObj dlp)
     free(w_func);
 }
 
-void DiffractionCorrectionEllipse(DLPObj dlp)
+void DiffractionCorrectionEllipse(DLPObj *dlp)
 {
     long i, j, nw_pts, toler, center;
     double w_init, dx, two_dx, EPS;
@@ -430,71 +450,74 @@ void DiffractionCorrectionEllipse(DLPObj dlp)
                             double, double, long, long, double, double);
 
     /*  Cast the selected window type to the fw pointer.                      */
-    if      (dlp.wtype == 0){fw = &Rect_Window_Double;}
-    else if (dlp.wtype == 1){fw = &Coss_Window_Double;}
-    else if (dlp.wtype == 2){fw = &Kaiser_Bessel_2_0_Double;}
-    else if (dlp.wtype == 3){fw = &Kaiser_Bessel_2_5_Double;}
-    else if (dlp.wtype == 4){fw = &Kaiser_Bessel_3_5_Double;}
-    else if (dlp.wtype == 5){fw = &Modified_Kaiser_Bessel_2_0_Double;}
-    else if (dlp.wtype == 6){fw = &Modified_Kaiser_Bessel_2_5_Double;}
-    else                    {fw = &Modified_Kaiser_Bessel_3_5_Double;}
+    if      (dlp->wtype == 0){fw = &Rect_Window_Double;}
+    else if (dlp->wtype == 1){fw = &Coss_Window_Double;}
+    else if (dlp->wtype == 2){fw = &Kaiser_Bessel_2_0_Double;}
+    else if (dlp->wtype == 3){fw = &Kaiser_Bessel_2_5_Double;}
+    else if (dlp->wtype == 4){fw = &Kaiser_Bessel_3_5_Double;}
+    else if (dlp->wtype == 5){fw = &Modified_Kaiser_Bessel_2_0_Double;}
+    else if (dlp->wtype == 6){fw = &Modified_Kaiser_Bessel_2_5_Double;}
+    else                     {fw = &Modified_Kaiser_Bessel_3_5_Double;}
 
-    if (dlp.use_norm){FresT = &Fresnel_Transform_Ellipse_Norm_Double;}
+    if (dlp->use_norm){FresT = &Fresnel_Transform_Ellipse_Norm_Double;}
     else {FresT = &Fresnel_Transform_Ellipse_Double;}
 
     /* Compute first window width and window function. */
-    center = dlp.start;
+    center = dlp->start;
 
-    if (dlp.use_fwd){
-        for (i=0; i<=dlp.n_used; ++i){
-            dlp.kd_vals[center+i] *= -1.0;
+    if (dlp->use_fwd){
+        for (i=0; i<=dlp->n_used; ++i){
+            dlp->kd_vals[center+i] *= -1.0;
         }
     }
 
-    w_init  = dlp.w_km_vals[center];
-    dx      = dlp.rho_km_vals[center+1] - dlp.rho_km_vals[center];
-    two_dx  = 2.0*dx;
-    nw_pts  = 2*((long)(w_init / (2.0 * dx)))+1;
+    w_init = dlp->w_km_vals[center];
+    dx     = dlp->rho_km_vals[center+1] - dlp->rho_km_vals[center];
+    two_dx = 2.0*dx;
+    nw_pts = 2*((long)(w_init / (2.0 * dx)))+1;
 
     double *x_arr   = (double *)malloc(sizeof(double) * nw_pts);
     double *phi_arr = (double *)malloc(sizeof(double) * nw_pts);
     double *w_func  = (double *)malloc(sizeof(double) * nw_pts);
 
     for (j=0; j<nw_pts; ++j){
-        x_arr[j]   = dlp.rho_km_vals[center+j-(nw_pts-1)/2];
-        phi_arr[j] = dlp.phi_rad_vals[center+j-(nw_pts-1)/2];
-        w_func[j]  = fw(x_arr[j] - dlp.rho_km_vals[center], w_init);
+        x_arr[j]   = dlp->rho_km_vals[center+j-(nw_pts-1)/2];
+        phi_arr[j] = dlp->phi_rad_vals[center+j-(nw_pts-1)/2];
+        w_func[j]  = fw(x_arr[j] - dlp->rho_km_vals[center], w_init);
     }
 
-    for (i=0; i<=dlp.n_used; ++i){
+    for (i=0; i<=dlp->n_used; ++i){
 
         /*  If the window width changes significantly, recompute w_func.  */
-        if (fabs(w_init - dlp.w_km_vals[center]) >= two_dx) {
+        if (fabs(w_init - dlp->w_km_vals[center]) >= two_dx) {
             // Reset w_init and recompute window function.
-            w_init  = dlp.w_km_vals[center];
+            w_init  = dlp->w_km_vals[center];
             nw_pts  = 2*((int)(w_init / (2.0 * dx)))+1;
             w_func  = (double *)realloc(w_func,  sizeof(double) * nw_pts);
             phi_arr = (double *)realloc(phi_arr, sizeof(double) * nw_pts);
             x_arr   = (double *)realloc(x_arr,   sizeof(double) * nw_pts);
             for (j=0; j<nw_pts; ++j){
-                x_arr[j]   = dlp.rho_km_vals[center+j-(nw_pts-1)/2];
-                phi_arr[j] = dlp.phi_rad_vals[center+j-(nw_pts-1)/2];
-                w_func[j]  = fw(x_arr[j] - dlp.rho_km_vals[center], w_init);
+                x_arr[j]   = dlp->rho_km_vals[center+j-(nw_pts-1)/2];
+                phi_arr[j] = dlp->phi_rad_vals[center+j-(nw_pts-1)/2];
+                w_func[j]  = fw(x_arr[j] - dlp->rho_km_vals[center], w_init);
             }
         }
         else {
             for (j=0; j<nw_pts; ++j){
-                x_arr[j]   = dlp.rho_km_vals[center+j-(nw_pts-1)/2];
-                phi_arr[j] = dlp.phi_rad_vals[center+j-(nw_pts-1)/2];
+                x_arr[j]   = dlp->rho_km_vals[center+j-(nw_pts-1)/2];
+                phi_arr[j] = dlp->phi_rad_vals[center+j-(nw_pts-1)/2];
             }
         }
 
         /*  Compute the fresnel tranform about the current point.   */
-        dlp.T_out[center] = FresT(x_arr, phi_arr, dlp.T_in, w_func,
-                                  dlp.kd_vals[center], dlp.rho_km_vals[center],
-                                  dlp.B_rad_vals[center], dlp.D_km_vals[center],
-                                  EPS, toler, dx, dlp.F_km_vals[center],
-                                  nw_pts, center, dlp.ecc, dlp.peri);
+        dlp->T_out[center] = FresT(x_arr, phi_arr, dlp->T_in, w_func,
+                                   dlp->kd_vals[center],
+                                   dlp->rho_km_vals[center],
+                                   dlp->B_rad_vals[center],
+                                   dlp->D_km_vals[center],
+                                   EPS, toler, dx,
+                                   dlp->F_km_vals[center],
+                                   nw_pts, center, dlp->ecc, dlp->peri);
 
         /*  Increment pointers using pointer arithmetic.                      */
         center += 1;

@@ -28,6 +28,7 @@ typedef struct _dlpdataobj {
     unsigned char use_fwd;
     unsigned char order;
     complex double *T_out;
+    unsigned char status;
 } DLPObj;
 
 /*  Functions defined in __diffraction_functions.c                            */
@@ -84,12 +85,9 @@ Fresnel_Transform_Ellipse_Norm_Double(double *x_arr, double *phi_arr,
                                       double ecc, double peri);
 
 /*  Functions that compute the Fresnel Transform on a DLPObj instance.        */
-extern void DiffractionCorrectionFresnel(DLPObj dlp);
-
-extern void DiffractionCorrectionLegendre(DLPObj dlp);
-
-extern void DiffractionCorrectionNewton(DLPObj dlp);
-
-extern void DiffractionCorrectionEllipse(DLPObj dlp);
+extern void DiffractionCorrectionFresnel(DLPObj *dlp);
+extern void DiffractionCorrectionLegendre(DLPObj *dlp);
+extern void DiffractionCorrectionNewton(DLPObj *dlp);
+extern void DiffractionCorrectionEllipse(DLPObj *dlp);
 
 #endif

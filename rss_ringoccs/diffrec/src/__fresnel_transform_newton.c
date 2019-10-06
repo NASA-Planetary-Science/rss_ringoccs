@@ -97,12 +97,13 @@ Fresnel_Transform_Newton_Double(double *x_arr, double *phi_arr,
     return T_out;
 }
 
-complex double Fresnel_Transform_Newton_Norm_Double(
-    double *x_arr, double *phi_arr, complex double *T_in, double *w_func,
-    double kD, double r, double B, double D, double EPS, long toler, double dx,
-    double F, long n_pts, long center
-){
-
+complex double
+Fresnel_Transform_Newton_Norm_Double(double *x_arr, double *phi_arr,
+                                     complex double *T_in, double *w_func,
+                                     double kD, double r, double B, double D,
+                                     double EPS, long toler, double dx,
+                                     double F, long n_pts, long center)
+{
     /*  Declare all necessary variables. i and j are used for indexing.       */
     long i, j;
 

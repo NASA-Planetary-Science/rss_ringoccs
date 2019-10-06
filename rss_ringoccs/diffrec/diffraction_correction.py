@@ -628,7 +628,22 @@ class DiffractionCorrection(object):
         if self.verbose:
             print("\tRunning Fresnel Inversion...")
 
-        self.T_vals = self.__ftrans(fwd=False)
+        # Compute product of wavenumber and RIP distance.
+        self.kD_vals = special_functions.wavelength_to_wavenumber(
+            self.lambda_sky_km_vals
+        ) * self.D_km_vals
+
+        self.T_vals = special_functions.fresnel_transform(
+            self.T_hat_vals, self.rho_km_vals, self.F_km_vals, self.w_km_vals,
+            self.start, self.n_used, self.wtype, self.norm, False, self.psitype,
+            self.phi_rad_vals, self.kD_vals, self.B_rad_vals, self.D_km_vals,
+            self.ecc, self.peri
+        )
+
+        self.tau_threshold_vals = (self.raw_tau_threshold_vals -
+                                   self.mu_vals*np.log(self.dx_km/self.res))
+
+        self.__trim_attributes(fwd=False)
 
         # Compute power and phase.
         if self.verbose:
@@ -645,10 +660,21 @@ class DiffractionCorrection(object):
             print("\tInversion Complete.")
 
         if self.fwd:
+            nw_fwd = int(np.ceil(np.max(self.w_km_vals) / (2.0 * self.dx_km)))
+            self.start = int(nw_fwd)
+            self.n_used = int(self.n_used - 2 * nw_fwd)
+
             if self.verbose:
                 print("\tComputing Forward Transform...")
 
-            self.T_hat_fwd_vals = self.__ftrans(fwd=True)
+            self.T_hat_fwd_vals = special_functions.fresnel_transform(
+                self.T_vals, self.rho_km_vals, self.F_km_vals, self.w_km_vals,
+                self.start, self.n_used, self.wtype, self.norm, True,
+                self.psitype, self.phi_rad_vals, self.kD_vals, self.B_rad_vals,
+                self.D_km_vals, self.ecc, self.peri
+            )
+            self.__trim_attributes(fwd=True)
+
             self.p_norm_fwd_vals = np.square(np.abs(self.T_hat_fwd_vals))
             self.phase_fwd_vals = -np.arctan2(np.imag(self.T_hat_fwd_vals),
                                               np.real(self.T_hat_fwd_vals))
@@ -663,11 +689,6 @@ class DiffractionCorrection(object):
         self.tau_vals[crange] = np.log(self.power_vals[crange])
         self.tau_vals[crange] *= -self.mu_vals[crange]
 
-        self.tau_threshold_vals = (self.raw_tau_threshold_vals -
-                                   self.mu_vals*np.log(self.dx_km/self.res))
-
-        self.__trim_attributes()
-
         self.history = write_history_dict(input_vars, input_kwds, __file__)
 
         # Set rev_info attribute from DLP instance.
@@ -680,7 +701,7 @@ class DiffractionCorrection(object):
         if self.verbose:
             print("\tDiffraction Correction Complete.")
 
-    def __trim_attributes(self):
+    def __trim_attributes(self, fwd):
         """
             Purpose:
                 Trim the attributes in the DiffractionCorrection
@@ -707,6 +728,7 @@ class DiffractionCorrection(object):
         self.F_km_vals = self.F_km_vals[crange]
         self.w_km_vals = self.w_km_vals[crange]
         self.D_km_vals = self.D_km_vals[crange]
+        self.kD_vals = self.kD_vals[crange]
 
         # Ring radius corrections.
         self.rho_corr_pole_km_vals = self.rho_corr_pole_km_vals[crange]
@@ -734,41 +756,6 @@ class DiffractionCorrection(object):
             self.ul_phi_rl_deg_vals = self.ul_phi_rl_deg_vals[crange]
             self.ul_phi_ora_deg_vals = self.ul_phi_ora_deg_vals[crange]
 
-    def __ftrans(self, fwd):
-        """
-            Purpose:
-                Compute the Fresnel Inversion.
-            Arguments:
-                :self:
-                    Instance of DiffractionCorrection class.
-            Keywords:
-                :fwd (*bool*):
-                    Boolean for whether or not the forward
-                    calculation is being performed.
-            Outputs:
-                :T_out (*np.ndarray*):
-                    Complex transmittance.
-        """
-        # Compute product of wavenumber and RIP distance.
-        kD_vals = special_functions.wavelength_to_wavenumber(
-            self.lambda_sky_km_vals
-        ) * self.D_km_vals
-
-        # If forward transform, adjust starting point by half a window.
         if fwd:
-            w_max = np.max(self.w_km_vals[self.start:self.start + self.n_used])
-            nw_fwd = int(np.ceil(w_max / (2.0 * self.dx_km)))
-            start = int(self.start + nw_fwd)
-            n_used = int(self.n_used - 2 * nw_fwd)
-            T_in = self.T_vals
-        else:
-            start = self.start
-            n_used = self.n_used
-            T_in = self.T_hat_vals
-
-        return special_functions.fresnel_transform(
-            T_in, self.rho_km_vals, self.F_km_vals, self.w_km_vals,
-            start, n_used, self.wtype, self.norm, fwd, self.psitype,
-            self.phi_rad_vals, kD_vals, self.B_rad_vals, self.D_km_vals,
-            self.ecc, self.peri
-        )
+            self.power_vals = self.power_vals[crange]
+            self.phase_vals = self.phase_vals[crange]

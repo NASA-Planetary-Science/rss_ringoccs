@@ -10,6 +10,7 @@ def configuration(parent_package=None, top_path=None):
         '_special_functions', [
             "src/__bessel_J0.c",
             "src/__bessel_I0.c",
+            "src/__diffraction_functions.c",
             "src/__fraunhofer_diffraction_double_slit.c",
             "src/__fraunhofer_diffraction_single_slit.c",
             "src/__fresnel_diffraction_inverted_square_well.c",
@@ -25,6 +26,10 @@ def configuration(parent_package=None, top_path=None):
             "src/__fresnel_integral_sine_while.c",
             "src/__fresnel_integral.c",
             "src/__fresnel_kernel.c",
+            "src/__fresnel_transform.c",
+            "src/__fresnel_transform_ellipse.c",
+            "src/__fresnel_transform_legendre.c",
+            "src/__fresnel_transform_newton.c",
             "src/__get_array.c",
             "src/__math_function_lambertw.c",
             "src/__math_function_legendre.c",
@@ -33,9 +38,13 @@ def configuration(parent_package=None, top_path=None):
             "src/__math_function_norm_eq_width.c",
             "src/__math_function_resolution_inverse.c",
             "src/__math_function_sinc.c",
-            "src/_special_functions.c",
             "src/__where_greater.c",
-            "src/__where_lesser.c"
+            "src/__where_lesser.c",
+            "src/__window_function_squared_cosine.c",
+            "src/__window_function_kaiser_bessel.c",
+            "src/__window_function_modified_kaiser_bessel.c",
+            "src/__window_function_rectangular.c",
+            "src/_special_functions.c",
         ]
     )
     config.add_extension('_window_functions', [
@@ -44,22 +53,6 @@ def configuration(parent_package=None, top_path=None):
             "src/__window_function_squared_cosine.c",
             "src/__window_function_kaiser_bessel.c",
             "src/__window_function_normalization.c",
-            "src/__window_function_modified_kaiser_bessel.c",
-            "src/__window_function_rectangular.c"
-        ]
-    )
-    config.add_extension('_diffraction_functions', [
-            "src/_diffraction_functions.c",
-            "src/__diffraction_functions.c",
-            "src/__fresnel_kernel.c",
-            "src/__bessel_I0.c",
-            "src/__math_function_legendre.c",
-            "src/__fresnel_transform.c",
-            "src/__fresnel_transform_ellipse.c",
-            "src/__fresnel_transform_legendre.c",
-            "src/__fresnel_transform_newton.c",
-            "src/__window_function_squared_cosine.c",
-            "src/__window_function_kaiser_bessel.c",
             "src/__window_function_modified_kaiser_bessel.c",
             "src/__window_function_rectangular.c"
         ]

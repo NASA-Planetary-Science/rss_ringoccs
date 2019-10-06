@@ -137,6 +137,17 @@ static int check_dlp_data(DLPObj *dlp){
 
 void DiffractionCorrectionFresnel(DLPObj *dlp)
 {
+    /*  If everything executes smoothly, status should remain at zero.        */
+    dlp->status = 0;
+
+    /*  Check that the pointers to the data are not NULL.                     */
+    if (!(check_dlp_data(dlp))){
+
+        /*  One of the variables has null data, return to calling function.   */
+        dlp->status = 1;
+        return;
+    }
+
     /*  i and j used for indexing, nw_pts is number of points in window.     */
     long i, j, nw_pts, center;
 
@@ -172,16 +183,33 @@ void DiffractionCorrectionFresnel(DLPObj *dlp)
     two_dx  = 2.0*dx;
     nw_pts  = ((long)(w_init / two_dx))+1;
 
+    if (center - nw_pts < 0){
+
+        /*  Invalid index for the for the first point. That is, the window    *
+         *  of integration required for the first point goes beyond the       *
+         *  available data. Return to calling function.                       */
+        dlp->n_used = nw_pts;
+        dlp->status = 2;
+        return;
+    }
+
     /*  Reserve some memory for two arrays, the ring radius and the window    *
      *  function. This will need to be reallocated later if the window width  *
      *  changes by more than two_dx.                                          */
     double* x_arr  = (double *)malloc(sizeof(double)*nw_pts);
     double* w_func = (double *)malloc(sizeof(double)*nw_pts);
 
-    /*  Pass the x_arr array (ring radius) to the void function get_arr.      *
-     *  This alters the x_arr pointer so that it's values range from -W/2 to  *
-     *  zero, where W is the window width.                                    */
-    reset_window(x_arr, w_func, dx, w_init, nw_pts, fw);
+
+    /*  Check that malloc was successfull then pass the x_arr array           *
+     *  (ring radius) to the void function reset_window. This alters x_arr so *
+     *  that it's values range from -W/2 to zero, W begin the window width.   */
+    if (!(x_arr) || !(w_func)){
+
+        /*  Malloc failed, return to calling function.                        */
+        dlp->status = 3;
+        return;
+    }
+    else reset_window(x_arr, w_func, dx, w_init, nw_pts, fw);
 
     /* Compute Window Functions, and compute pi/2 * x^2                       */
     for(j=0; j<nw_pts; ++j){
@@ -194,6 +222,7 @@ void DiffractionCorrectionFresnel(DLPObj *dlp)
     /*  Compute the Fresnel transform across the input data.                  */
     for (i=0; i<=dlp->n_used; ++i){
         if (fabs(w_init - dlp->w_km_vals[center]) >= two_dx) {
+
             /* Reset w_init and recompute window function.                    */
             w_init = dlp->w_km_vals[center];
             nw_pts  = ((long)(w_init / two_dx))+1;
@@ -212,13 +241,15 @@ void DiffractionCorrectionFresnel(DLPObj *dlp)
             }
         }
 
-        /*  Compute the Fresnel Transform about the current point.           */
-        dlp->T_out[center] = FresT(x_arr, dlp->T_in, w_func,
-                                   dlp->F_km_vals[center], dx, nw_pts, center);
+        /*  Compute the Fresnel Transform about the current point.            */
+        dlp->T_out[i] = FresT(x_arr, dlp->T_in, w_func,
+                              dlp->F_km_vals[center], dx, nw_pts, center);
 
-        /*  Move the pointers to the next point.                             */
+        /*  Move the pointers to the next point.                              */
         center += 1;
     }
+
+    /*  Free the variables allocated by malloc.                               */
     free(x_arr);
     free(w_func);
 }
@@ -268,12 +299,14 @@ void DiffractionCorrectionLegendre(DLPObj *dlp)
     w_init  = dlp->w_km_vals[center];
     dx      = dlp->rho_km_vals[center+1] - dlp->rho_km_vals[center];
     two_dx  = 2.0*dx;
-    nw_pts  = ((long)(w_init / two_dx))+1;
+    nw_pts  = (long)(w_init / two_dx)+1;
 
     if (center - nw_pts < 0){
+
         /*  Invalid index for the for the first point. That is, the window    *
          *  of integration required for the first point goes beyond the       *
          *  available data. Return to calling function.                       */
+        dlp->n_used = nw_pts;
         dlp->status = 2;
         return;
     }
@@ -289,7 +322,9 @@ void DiffractionCorrectionLegendre(DLPObj *dlp)
     /*  And finally for the coefficients of psi.                              */
     double *fresnel_ker_coeffs = (double *)malloc(sizeof(double)*dlp->order);
 
-
+    /*  Check that malloc was successfull then pass the x_arr array           *
+     *  (ring radius) to the void function reset_window. This alters x_arr so *
+     *  that it's values range from -W/2 to zero, W begin the window width.   */
     if (!(x_arr)    ||    !(w_func)            ||    !(legendre_p)
                     ||    !(alt_legendre_p)    ||    !(fresnel_ker_coeffs)){
 
@@ -297,7 +332,6 @@ void DiffractionCorrectionLegendre(DLPObj *dlp)
         dlp->status = 3;
         return;
     }
-
     else reset_window(x_arr, w_func, dx, w_init, nw_pts, fw);
 
     for (i = 0; i <= dlp->n_used; ++i){
@@ -330,15 +364,15 @@ void DiffractionCorrectionLegendre(DLPObj *dlp)
         }
 
         /*  Compute the fresnel tranform about the current point.             */
-        dlp->T_out[center] = FresT(x_arr, dlp->T_in, w_func,
-                                   dlp->D_km_vals[center], fresnel_ker_coeffs,
-                                   dx, dlp->F_km_vals[center],
-                                   dlp->kd_vals[center], nw_pts,
-                                   dlp->order, center);
+        dlp->T_out[i] = FresT(x_arr, dlp->T_in, w_func, dlp->D_km_vals[center],
+                              fresnel_ker_coeffs, dx, dlp->F_km_vals[center],
+                              dlp->kd_vals[center], nw_pts, dlp->order, center);
 
         /*  Increment T_in pointer using pointer arithmetic.                  */
         center += 1;
     }
+
+    /*  Free all variables allocated by malloc.                               */
     free(x_arr);
     free(w_func);
     free(legendre_p);
@@ -348,6 +382,17 @@ void DiffractionCorrectionLegendre(DLPObj *dlp)
 
 void DiffractionCorrectionNewton(DLPObj *dlp)
 {
+    /*  If everything executes smoothly, status should remain at zero.        */
+    dlp->status = 0;
+
+    /*  Check that the pointers to the data are not NULL.                     */
+    if (!(check_dlp_data(dlp))){
+
+        /*  One of the variables has null data, return to calling function.   */
+        dlp->status = 1;
+        return;
+    }
+
     long i, j, nw_pts, toler, center;
     double w_init, dx, two_dx, EPS;
 
@@ -386,9 +431,27 @@ void DiffractionCorrectionNewton(DLPObj *dlp)
     two_dx  = 2.0*dx;
     nw_pts  = 2*((long)(w_init / (2.0 * dx)))+1;
 
+    if (center - ((nw_pts-1)/2) < 0){
+
+        /*  Invalid index for the for the first point. That is, the window    *
+         *  of integration required for the first point goes beyond the       *
+         *  available data. Return to calling function.                       */
+        dlp->n_used = (nw_pts-1)/2;
+        dlp->status = 2;
+        return;
+    }
+
     double *x_arr   = (double *)malloc(sizeof(double) * nw_pts);
     double *phi_arr = (double *)malloc(sizeof(double) * nw_pts);
     double *w_func  = (double *)malloc(sizeof(double) * nw_pts);
+
+    /*  Check that malloc was successfull.                                    */
+    if (!(x_arr) || !(w_func) || !(phi_arr)){
+
+        /*  Malloc failed, return to calling function.                        */
+        dlp->status = 3;
+        return;
+    }
 
     for (j=0; j<nw_pts; ++j){
         x_arr[j]   = dlp->rho_km_vals[center+j-(nw_pts-1)/2];
@@ -398,7 +461,7 @@ void DiffractionCorrectionNewton(DLPObj *dlp)
 
     for (i=0; i<=dlp->n_used; ++i){
 
-        /*  If the window width changes significantly, recompute w_func.  */
+        /*  If the window width changes significantly, recompute w_func.      */
         if (fabs(w_init - dlp->w_km_vals[center]) >= two_dx) {
             // Reset w_init and recompute window function.
             w_init  = dlp->w_km_vals[center];
@@ -419,18 +482,18 @@ void DiffractionCorrectionNewton(DLPObj *dlp)
             }
         }
 
-        /*  Compute the fresnel tranform about the current point.   */
-        dlp->T_out[center] = FresT(x_arr, phi_arr, dlp->T_in, w_func,
-                                   dlp->kd_vals[center],
-                                   dlp->rho_km_vals[center],
-                                   dlp->B_rad_vals[center],
-                                   dlp->D_km_vals[center],
-                                   EPS, toler, dx, dlp->F_km_vals[center],
-                                   nw_pts, center);
+        /*  Compute the fresnel tranform about the current point.             */
+        dlp->T_out[i] = FresT(x_arr, phi_arr, dlp->T_in, w_func,
+                              dlp->kd_vals[center], dlp->rho_km_vals[center],
+                              dlp->B_rad_vals[center], dlp->D_km_vals[center],
+                              EPS, toler, dx, dlp->F_km_vals[center],
+                              nw_pts, center);
 
         /*  Increment pointers using pointer arithmetic.                      */
         center += 1;
     }
+
+    /*  Free variables allocated by malloc.                                   */
     free(x_arr);
     free(phi_arr);
     free(w_func);
@@ -438,6 +501,17 @@ void DiffractionCorrectionNewton(DLPObj *dlp)
 
 void DiffractionCorrectionEllipse(DLPObj *dlp)
 {
+    /*  If everything executes smoothly, status should remain at zero.        */
+    dlp->status = 0;
+
+    /*  Check that the pointers to the data are not NULL.                     */
+    if (!(check_dlp_data(dlp))){
+
+        /*  One of the variables has null data, return to calling function.   */
+        dlp->status = 1;
+        return;
+    }
+
     long i, j, nw_pts, toler, center;
     double w_init, dx, two_dx, EPS;
 
@@ -471,14 +545,32 @@ void DiffractionCorrectionEllipse(DLPObj *dlp)
         }
     }
 
-    w_init = dlp->w_km_vals[center];
-    dx     = dlp->rho_km_vals[center+1] - dlp->rho_km_vals[center];
-    two_dx = 2.0*dx;
-    nw_pts = 2*((long)(w_init / (2.0 * dx)))+1;
+    w_init  = dlp->w_km_vals[center];
+    dx      = dlp->rho_km_vals[center+1] - dlp->rho_km_vals[center];
+    two_dx  = 2.0*dx;
+    nw_pts  = 2*((long)(w_init / (2.0 * dx)))+1;
+
+    if (center - ((nw_pts-1)/2) < 0){
+
+        /*  Invalid index for the for the first point. That is, the window    *
+         *  of integration required for the first point goes beyond the       *
+         *  available data. Return to calling function.                       */
+        dlp->n_used = (nw_pts-1)/2;
+        dlp->status = 2;
+        return;
+    }
 
     double *x_arr   = (double *)malloc(sizeof(double) * nw_pts);
     double *phi_arr = (double *)malloc(sizeof(double) * nw_pts);
     double *w_func  = (double *)malloc(sizeof(double) * nw_pts);
+
+    /*  Check that malloc was successfull.                                    */
+    if (!(x_arr) || !(w_func) || !(phi_arr)){
+
+        /*  Malloc failed, return to calling function.                        */
+        dlp->status = 3;
+        return;
+    }
 
     for (j=0; j<nw_pts; ++j){
         x_arr[j]   = dlp->rho_km_vals[center+j-(nw_pts-1)/2];
@@ -510,14 +602,11 @@ void DiffractionCorrectionEllipse(DLPObj *dlp)
         }
 
         /*  Compute the fresnel tranform about the current point.   */
-        dlp->T_out[center] = FresT(x_arr, phi_arr, dlp->T_in, w_func,
-                                   dlp->kd_vals[center],
-                                   dlp->rho_km_vals[center],
-                                   dlp->B_rad_vals[center],
-                                   dlp->D_km_vals[center],
-                                   EPS, toler, dx,
-                                   dlp->F_km_vals[center],
-                                   nw_pts, center, dlp->ecc, dlp->peri);
+        dlp->T_out[i] = FresT(x_arr, phi_arr, dlp->T_in, w_func,
+                              dlp->kd_vals[center], dlp->rho_km_vals[center],
+                              dlp->B_rad_vals[center], dlp->D_km_vals[center],
+                              EPS, toler, dx, dlp->F_km_vals[center],
+                              nw_pts, center, dlp->ecc, dlp->peri);
 
         /*  Increment pointers using pointer arithmetic.                      */
         center += 1;

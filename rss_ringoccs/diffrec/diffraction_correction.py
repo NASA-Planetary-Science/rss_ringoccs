@@ -666,7 +666,7 @@ class DiffractionCorrection(object):
         self.tau_threshold_vals = (self.raw_tau_threshold_vals -
                                    self.mu_vals*np.log(self.dx_km/self.res))
 
-        self.__trim_attributes(self.fwd)
+        self.__trim_attributes()
 
         self.history = write_history_dict(input_vars, input_kwds, __file__)
 
@@ -680,23 +680,18 @@ class DiffractionCorrection(object):
         if self.verbose:
             print("\tDiffraction Correction Complete.")
 
-    def __trim_attributes(self, fwd):
+    def __trim_attributes(self):
         """
             Purpose:
                 Trim the attributes in the DiffractionCorrection
                 class so that only reconstructed points will be
                 returned to the user. All other unused points are
                 discarded.
-            Keywords:
-                :fwd (*bool*):
-                    Boolean for the forward calculation.
-                    If set to True, the forward variables
-                    will also be trimmed.
         """
         # Get rid of uncomputed values and keep only what was processed.
         start = self.start
         n_used = self.n_used
-        crange = np.arange(n_used)+start
+        crange = np.arange(n_used+1)+start
 
         # Ring radius, azimuth angle, diffracted power, and phase.
         self.rho_km_vals = self.rho_km_vals[crange]
@@ -706,10 +701,7 @@ class DiffractionCorrection(object):
 
         # Ring opening angle, normalized power, phase, and transmittance.
         self.B_rad_vals = self.B_rad_vals[crange]
-        self.power_vals = self.power_vals[crange]
-        self.phase_vals = self.phase_vals[crange]
         self.T_hat_vals = self.T_hat_vals[crange]
-        self.T_vals = self.T_vals[crange]
 
         # Fresnel scale, window width, and RIP-Spacecraft distance.
         self.F_km_vals = self.F_km_vals[crange]
@@ -727,7 +719,6 @@ class DiffractionCorrection(object):
 
         # All other attributes.
         self.mu_vals = self.mu_vals[crange]
-        self.tau_vals = self.tau_vals[crange]
         self.f_sky_hz_vals = self.f_sky_hz_vals[crange]
         self.phi_rl_rad_vals = self.phi_rl_rad_vals[crange]
         self.rho_dot_kms_vals = self.rho_dot_kms_vals[crange]
@@ -742,15 +733,6 @@ class DiffractionCorrection(object):
             self.t_ul_ret_spm_vals = self.t_ul_ret_spm_vals[crange]
             self.ul_phi_rl_deg_vals = self.ul_phi_rl_deg_vals[crange]
             self.ul_phi_ora_deg_vals = self.ul_phi_ora_deg_vals[crange]
-
-        # If the forward model was run, trim those attributes as well.
-        if fwd:
-            # Forward power
-            self.p_norm_fwd_vals = self.p_norm_fwd_vals[crange]
-
-            # Forward Transmittance and phase.
-            self.T_hat_fwd_vals = self.T_hat_fwd_vals[crange]
-            self.phase_fwd_vals = self.phase_fwd_vals[crange]
 
     def __ftrans(self, fwd):
         """

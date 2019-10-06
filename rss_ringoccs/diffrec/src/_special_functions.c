@@ -9,6 +9,9 @@
 #include "__where.h"
 #include "__get_array.h"
 
+/*  Window functions and Fresnel transforms defined here.                     */
+#include "__diffraction_functions.h"
+
 /* All wrapper functions defined within these files.                          */
 #include "_fraunhofer_diffraction_wrappers.h"
 #include "_fresnel_diffraction_wrappers.h"
@@ -625,6 +628,396 @@ static PyObject *min(PyObject *self, PyObject *args)
     }
 }
 
+static PyObject *fresnel_transform(PyObject *self, PyObject *args)
+{
+    PyObject *output, *capsule;
+    npy_int dim;
+    PyArrayObject *T_in,    *rho_km_vals, *F_km_vals, *phi_rad_vals;
+    PyArrayObject *kd_vals, *B_rad_vals,  *D_km_vals, *w_km_vals;
+    long start, n_used;
+    unsigned char wtype, use_norm, use_fwd, order;
+    double ecc, peri;
+
+
+    if (!(PyArg_ParseTuple(args, "O!O!O!O!O!O!O!O!llbbbbdd",
+                           &PyArray_Type, &T_in,
+                           &PyArray_Type, &rho_km_vals,
+                           &PyArray_Type, &F_km_vals,
+                           &PyArray_Type, &phi_rad_vals,
+                           &PyArray_Type, &kd_vals,
+                           &PyArray_Type, &B_rad_vals,
+                           &PyArray_Type, &D_km_vals,
+                           &PyArray_Type, &w_km_vals,
+                           &start, &n_used, &wtype, &use_norm,
+                           &use_fwd, &order, &ecc, &peri))){ 
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.fresnel_transform\n\n"
+            "\rInput should be one dimensional numpy arrays and\n"
+            "\rreal valued numbers. The following are expected:\n"
+            "\r\tT_in:        \t1-D complex numpy array\n"
+            "\r\trho_km_vals: \t1-D real numpy array\n"
+            "\r\tF_km_vals:   \t1-D real numpy array\n"
+            "\r\tphi_rad_vals:\t1-D real numpy array\n"
+            "\r\tkd_vals:     \t1-D real numpy array\n"
+            "\r\tB_rad_vals:  \t1-D real numpy array\n"
+            "\r\tD_km_vals:   \t1-D real numpy array\n"
+            "\r\tw_km_vals:   \t1-D real numpy array\n"
+            "\r\tstart:       \tPositive integer\n"
+            "\r\tn_used:      \tPositive integer\n"
+            "\r\twtype:       \tPositive integer\n"
+            "\r\tuse_norm:    \tPositive integer\n"
+            "\r\tuse_fwd:     \tPositive integer\n"
+            "\r\torder:       \tPositive integer\n"
+            "\r\tecc:         \tReal number\n"
+            "\r\tperi:        \tReal number\n\n"
+            "\rNOTE:\n"
+            "\r\tOnly one dimensional numpy arrays are allowed. Only\n"
+            "\r\tdouble types are supported. No current support for long\n"
+            "\r\tdouble or float. Set this in Python with\n"
+            "\r\tastype(numpy.float) or astype(numpy.float64).\n"
+        );
+        return NULL;
+    }
+
+    DLPObj dlp;
+
+    dlp.start    = start;
+    dlp.n_used   = n_used;
+    dlp.wtype    = wtype;
+    dlp.use_norm = use_norm;
+    dlp.use_fwd  = use_fwd;
+    dlp.order    = order;
+    dlp.ecc      = ecc;
+    dlp.peri     = peri;
+
+
+    dim = PyArray_DIMS(T_in)[0];
+
+    /*  Error checks on T_in.                                                 */
+    if (PyArray_TYPE(T_in) != NPY_CDOUBLE){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.fresnel_transform\n\n"
+            "\rFirst argument (T_in) must be a complex numpy array.\n"
+        );
+        return NULL;
+    }
+    else if (PyArray_NDIM(T_in) != 1){
+        PyErr_Format(
+            PyExc_IndexError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.fresnel_transform\n\n"
+            "\rFirst argument (T_in) must be one dimensional.\n"
+            "\r\tNumber of dimensions: %ld", PyArray_NDIM(T_in)
+        );
+        return NULL;
+    }
+    else dlp.T_in = (complex double *)PyArray_DATA(T_in);
+
+    /*  Error checks on rho_km_vals                                           */
+    if (PyArray_TYPE(rho_km_vals) != NPY_DOUBLE){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.fresnel_transform\n\n"
+            "\rSecond argument (rho_km_vals) must be a real numpy array.\n"
+        );
+        return NULL;
+    }
+    else if (PyArray_NDIM(rho_km_vals) != 1){
+        PyErr_Format(
+            PyExc_IndexError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.fresnel_transform\n\n"
+            "\rSecond argument (rho_km_vals) must be one dimensional.\n"
+        );
+        return NULL;
+    }
+    else if (PyArray_DIMS(rho_km_vals)[0] != dim){
+        PyErr_Format(
+            PyExc_IndexError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.fresnel_transform\n\n"
+            "\rrho_km_vals and T_in have a different number of elements.\n"
+        );
+        return NULL;
+    }
+    else dlp.rho_km_vals = (double *)PyArray_DATA(rho_km_vals);
+
+    /*  Error checks on F_km_vals.                                            */
+    if (PyArray_TYPE(F_km_vals) != NPY_DOUBLE){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.fresnel_transform\n\n"
+            "\rThird argument (F_km_vals) must be a real numpy array.\n"
+        );
+        return NULL;
+    }
+    else if (PyArray_NDIM(F_km_vals) != 1){
+        PyErr_Format(
+            PyExc_IndexError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.fresnel_transform\n\n"
+            "\rThird argument (F_km_vals) must be one dimensional.\n"
+        );
+        return NULL;
+    }
+    else if (PyArray_DIMS(F_km_vals)[0] != dim){
+        PyErr_Format(
+            PyExc_IndexError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.fresnel_transform\n\n"
+            "\rF_km_vals and T_in have a different number of elements.\n"
+        );
+        return NULL;
+    }
+    else dlp.F_km_vals = (double *)PyArray_DATA(F_km_vals);
+
+    /*  Error checks on phi_rad_vals.                                         */
+    if (PyArray_TYPE(phi_rad_vals) != NPY_DOUBLE){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.fresnel_transform\n\n"
+            "\rFourth argument (phi_rad_vals) must be a real numpy array.\n"
+        );
+        return NULL;
+    }
+    else if (PyArray_NDIM(phi_rad_vals) != 1){
+        PyErr_Format(
+            PyExc_IndexError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.fresnel_transform\n\n"
+            "\rFourth argument (phi_rad_vals) must be one dimensional.\n"
+        );
+        return NULL;
+    }
+    else if (PyArray_DIMS(phi_rad_vals)[0] != dim){
+        PyErr_Format(
+            PyExc_IndexError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.fresnel_transform\n\n"
+            "\rphi_rad_vals and T_in have a different number of elements.\n"
+        );
+        return NULL;
+    }
+    else dlp.phi_rad_vals = (double *)PyArray_DATA(phi_rad_vals);
+
+    /*  Error checks on kd_vals.                                              */
+    if (PyArray_TYPE(kd_vals) != NPY_DOUBLE){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.fresnel_transform\n\n"
+            "\rFifth argument (kd_vals) must be a real numpy array.\n"
+        );
+        return NULL;
+    }
+    else if (PyArray_NDIM(kd_vals) != 1){
+        PyErr_Format(
+            PyExc_IndexError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.fresnel_transform\n\n"
+            "\rFifth argument (kd_vals) must be one dimensional.\n"
+        );
+        return NULL;
+    }
+    else if (PyArray_DIMS(kd_vals)[0] != dim){
+        PyErr_Format(
+            PyExc_IndexError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.fresnel_transform\n\n"
+            "\rkd_vals and T_in have a different number of elements.\n"
+        );
+        return NULL;
+    }
+    else dlp.kd_vals = (double *)PyArray_DATA(kd_vals);
+
+    /*  Error checks on B_rad_vals.                                           */
+    if (PyArray_TYPE(B_rad_vals) != NPY_DOUBLE){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.fresnel_transform\n\n"
+            "\rSixth argument (B_rad_vals) must be a real numpy array.\n"
+        );
+        return NULL;
+    }
+    else if (PyArray_NDIM(B_rad_vals) != 1){
+        PyErr_Format(
+            PyExc_IndexError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.fresnel_transform\n\n"
+            "\rSixth argument (B_rad_vals) must be one dimensional.\n"
+        );
+        return NULL;
+    }
+    else if (PyArray_DIMS(B_rad_vals)[0] != dim){
+        PyErr_Format(
+            PyExc_IndexError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.fresnel_transform\n\n"
+            "\rB_rad_vals and T_in have a different number of elements.\n"
+        );
+        return NULL;
+    }
+    else dlp.B_rad_vals = (double *)PyArray_DATA(B_rad_vals);
+
+    /*  Error checks on D_km_vals.                                            */
+    if (PyArray_TYPE(D_km_vals) != NPY_DOUBLE){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.fresnel_transform\n\n"
+            "\rSeventh argument (D_km_vals) must be a real numpy array.\n"
+        );
+        return NULL;
+    }
+    else if (PyArray_NDIM(D_km_vals) != 1){
+        PyErr_Format(
+            PyExc_IndexError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.fresnel_transform\n\n"
+            "\rSeventh argument (D_km_vals) must be one dimensional.\n"
+        );
+        return NULL;
+    }
+    else if (PyArray_DIMS(B_rad_vals)[0] != dim){
+        PyErr_Format(
+            PyExc_IndexError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.fresnel_transform\n\n"
+            "\rD_km_vals and T_in have a different number of elements.\n"
+        );
+        return NULL;
+    }
+    else dlp.D_km_vals = (double *)PyArray_DATA(D_km_vals);
+
+    /*  Error checks on w_km_vals.                                            */
+    if (PyArray_TYPE(w_km_vals) != NPY_DOUBLE){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.fresnel_transform\n\n"
+            "\rEigth argument (w_km_vals) must be a real numpy array.\n"
+        );
+        return NULL;
+    }
+    else if (PyArray_NDIM(w_km_vals) != 1){
+        PyErr_Format(
+            PyExc_IndexError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.fresnel_transform\n\n"
+            "\rEigth argument (w_km_vals) must be one dimensional.\n"
+        );
+        return NULL;
+    }
+    else if (PyArray_DIMS(w_km_vals)[0] != dim){
+        PyErr_Format(
+            PyExc_IndexError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.fresnel_transform\n\n"
+            "\rw_km_vals and T_in have a different number of elements.\n"
+        );
+        return NULL;
+    }
+    else dlp.w_km_vals = (double *)PyArray_DATA(w_km_vals);
+
+    dlp.T_out = (complex double *)malloc((dlp.n_used+1)*sizeof(complex double));
+
+    if (dlp.order == 0){
+        if ((dlp.ecc == 0.0) && (dlp.peri == 0.0)){
+            DiffractionCorrectionNewton(&dlp);
+        }
+        else DiffractionCorrectionEllipse(&dlp);
+    }
+    else if (dlp.order == 1) DiffractionCorrectionFresnel(&dlp);
+    else DiffractionCorrectionLegendre(&dlp);
+
+    if (dlp.status == 0){
+
+        /*  Create a Numpy array object to be passed back to Python.          */
+        dlp.n_used += 1;
+        output = PyArray_SimpleNewFromData(1, &dlp.n_used,
+                                           NPY_CDOUBLE, (void *)dlp.T_out);
+
+        /*  This frees the variable at the Python level once it's destroyed.  */
+        capsule = PyCapsule_New(dlp.T_out, NULL, capsule_cleanup);
+        PyArray_SetBaseObject((PyArrayObject *)output, capsule);
+
+        /*  Return the results to Python.                                     */
+        return Py_BuildValue("N", output);
+    }
+    else if (dlp.status == 1){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.fresnel_transform\n\n"
+            "\rCould not extract data from inputs.\n"
+        );
+        return NULL;
+    }
+    else if (dlp.status == 2){
+        PyErr_Format(
+            PyExc_IndexError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.fresnel_transform\n\n"
+            "\r\tRequired window width goes beyond the available data range.\n"
+            "\r\t\tStarting Point:            \t%ld\n"
+            "\r\t\tNumber of Points in Window:\t%ld\n"
+            "\r\t\tDifference:                \t%ld\n\n"
+            "\r\tDifference must be positive.\n",
+            dlp.start, dlp.n_used, dlp.start-dlp.n_used
+        );
+        return NULL;
+    }
+    else if (dlp.status == 3){
+        PyErr_Format(
+            PyExc_MemoryError,
+            "\rError Encountered: rss_ringoccs"
+            "\r\tspecial_functions.fresnel_transform\n\n"
+            "\rMalloc failed to create new variables.\n"
+            "\rYou are most likely out of memory.\n"
+        );
+        return NULL;
+    }
+    else {
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.fresnel_transform\n\n"
+            "\rInput should be one dimensional numpy arrays and\n"
+            "\rreal valued numbers. The following are expected:\n"
+            "\r\tT_in:        \t1-D complex numpy array\n"
+            "\r\trho_km_vals: \t1-D real numpy array\n"
+            "\r\tF_km_vals:   \t1-D real numpy array\n"
+            "\r\tphi_rad_vals:\t1-D real numpy array\n"
+            "\r\tkd_vals:     \t1-D real numpy array\n"
+            "\r\tB_rad_vals:  \t1-D real numpy array\n"
+            "\r\tD_km_vals:   \t1-D real numpy array\n"
+            "\r\tw_km_vals:   \t1-D real numpy array\n"
+            "\r\tstart:       \tPositive integer\n"
+            "\r\tn_used:      \tPositive integer\n"
+            "\r\twtype:       \tPositive integer\n"
+            "\r\tuse_norm:    \tPositive integer\n"
+            "\r\tuse_fwd:     \tPositive integer\n"
+            "\r\torder:       \tPositive integer\n"
+            "\r\tecc:         \tReal number\n"
+            "\r\tperi:        \tReal number\n\n"
+            "\rNOTE:\n"
+            "\r\tOnly one dimensional numpy arrays are allowed. Only\n"
+            "\r\tdouble types are supported. No current support for long\n"
+            "\r\tdouble or float. Set this in Python with\n"
+            "\r\tastype(numpy.float) or astype(numpy.float64).\n"
+        );
+        return NULL;
+    }
+}
+
 static PyMethodDef _special_functions_methods[] =
 {
     {
@@ -632,6 +1025,12 @@ static PyMethodDef _special_functions_methods[] =
         compute_norm_eq,
         METH_VARARGS,
         "Compute the normalized equivalent width of an array."
+    },
+    {
+        "fresnel_transform",
+        fresnel_transform,
+        METH_VARARGS,
+        "Compute the Fresnel Transform."
     },
     {
         "max",

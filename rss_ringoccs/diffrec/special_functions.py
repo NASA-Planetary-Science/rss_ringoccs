@@ -2,7 +2,7 @@ import numpy
 from . import window_functions
 from rss_ringoccs.tools import error_check
 try:
-    from . import _special_functions, _diffraction_functions
+    from . import _special_functions
 except:
     raise ImportError(
         """
@@ -679,41 +679,13 @@ def fresnel_transform(T_in, rho_km_vals, F_km_vals, w_km_vals, start, n_used,
     else:
         ord = 0
 
-    # Try using the C version of the Fresnel transform.
-    try:
-
-        # Compute the Fresnel transform.
-        return _diffraction_functions.fresnel_transform(
-            T_in, rho_km_vals, F_km_vals, phi_rad_vals, kD_vals, B_rad_vals,
-            D_km_vals, w_km_vals, start, n_used,
-            window_functions.func_dict[wtype]["wnum"], int(norm), int(fwd),
-            ord, ecc, peri
-        )
-    except KeyboardInterrupt:
-        raise
-    except Exception as mes:
-        print(mes)
-        raise TypeError(
-            """
-            \r\tError Encountered: rss_ringoccs
-            \r\t\tdiffrec.special_functions.fresnel_transform\n
-            \r\tArguments:
-            \r\t\tT_in:         Complex numpy array.
-            \r\t\trho_km_vals:  Positive real valued numpy array.
-            \r\t\tF_km_vals:    Positive real valued numpy array.
-            \r\t\tphi_rad_vals  Real valued numpy array.
-            \r\t\tkD_vals:      Positive real valued numpy array.
-            \r\t\tB_rad_vals:   Real valued numpy array.
-            \r\t\tD_km_vals:    Positive real valued numpy array.
-            \r\t\tw_km_vals:    Positive real valued numpy array.
-            \r\t\tstart:        Integer.
-            \r\t\tn_used:       Integer.
-            \r\t\twtype:        String, name of the selected window.
-            \r\t\tnorm:         Boolean.
-            \r\t\tfwd:          Boolean.
-            \r\t\tpsitype:      String.
-            """
-        )
+    # Compute the Fresnel transform.
+    return _special_functions.fresnel_transform(
+        T_in, rho_km_vals, F_km_vals, phi_rad_vals, kD_vals, B_rad_vals,
+        D_km_vals, w_km_vals, start, n_used,
+        window_functions.func_dict[wtype]["wnum"], int(norm), int(fwd),
+        ord, ecc, peri
+    )
 
 def lambertw(x):
     try:

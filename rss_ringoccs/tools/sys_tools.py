@@ -144,7 +144,8 @@ def latex_summary_doc(pdffil, res_km, geo, cal, tau):
                     Optical Depth and
                     Phase Shift Profiles\\[1.0ex]
                     at \theRES\
-                    Resolution\\[2.5ex]}
+                    Resolution\footnote{
+                    This document was produced by \texttt{rss\_ringoccs}, a suite of open-source Python-based analysis tools for Cassini Radio Science (RSS) ring occultations. This was developed with funding provided by the NASA/JPL Cassini project.}\\[2.5ex]}
                 \large{\today}
             \end{center}
             \vspace{2ex}

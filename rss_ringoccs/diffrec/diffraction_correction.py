@@ -601,7 +601,7 @@ class DiffractionCorrection(object):
         else:
             self.start = wrange[0]
             self.finish = wrange[-1]
-            self.n_used = 1 + (self.finish - self.start)
+            self.n_used = self.finish - self.start
 
         # Create input variable and keyword dictionaries for history.
         input_vars = {

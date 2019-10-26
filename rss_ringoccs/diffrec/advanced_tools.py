@@ -178,8 +178,11 @@ class ModelFromGEO(object):
         error_check.check_positive(dx_km_desired, "dx_km_desired", fname)
         error_check.check_positive(lambda_km, "lambda_km", fname)
 
-        data = CSV_tools.get_geo(geo, verbose=verbose, use_deprecate=use_deprecate)
+        # Get the data from the selected CSV files.
+        data = CSV_tools.get_geo(geo, verbose=verbose,
+                                 use_deprecate=use_deprecate)
 
+        # If modeling from real data, check the inputs.
         if ((type(data_pow) == type(None)) and
             (not (type(data_rho) == type(None)))):
             raise TypeError(
@@ -218,6 +221,7 @@ class ModelFromGEO(object):
         if verbose:
             print("\tRetrieving Variables...")
 
+        # Attempt conversion of data to numpy arrays.
         try:
             # Create dummy variable in case an error occurs.
             errmess = "rho_km_vals"
@@ -336,6 +340,7 @@ class ModelFromGEO(object):
         if verbose:
             print("\tInterpolating Data...")
 
+        # Interpolate data to be spaced evenly in radius.
         self.rho_dot_kms_vals = numpy.interp(self.rho_km_vals, geo_rho, self.rho_dot_kms_vals)
         self.phi_rl_rad_vals = numpy.interp(self.rho_km_vals, geo_rho, self.phi_rl_rad_vals)
         self.t_ret_spm_vals = numpy.interp(self.rho_km_vals, geo_rho, self.t_ret_spm_vals)
@@ -347,13 +352,13 @@ class ModelFromGEO(object):
         del geo_rho
 
         # Add 'fake' variables necessary for DiffractionCorrection class.
-        self.raw_tau_threshold_vals = numpy.zeros(numpy.size(self.rho_km_vals))
-        self.rho_corr_pole_km_vals = numpy.zeros(numpy.size(self.rho_km_vals))
-        self.rho_corr_timing_km_vals = numpy.zeros(numpy.size(self.rho_km_vals))
-        self.f_sky_hz_vals = numpy.zeros(numpy.size(self.rho_km_vals))
-        self.f_sky_hz_vals += special_functions.frequency_to_wavelength(
-            lambda_km
-        )
+        n_pts = numpy.size(self.rho_km_vals)
+        self.raw_tau_threshold_vals = numpy.zeros(n_pts)
+        self.rho_corr_pole_km_vals = numpy.zeros(n_pts)
+        self.rho_corr_timing_km_vals = numpy.zeros(n_pts)
+        self.f_sky_hz_vals = (numpy.zeros(n_pts) +
+            special_functions.frequency_to_wavelength(lambda_km))
+        del n_pts
 
         # Interpolate modeled data, if necessary.
         if not (type(data_rho) == type(None)):
@@ -439,7 +444,7 @@ class ModelFromGEO(object):
         # Compute the window width. (See MTR86 Equations 19, 32, and 33).
         self.w_km_vals, Prange = window_functions.window_width(
             res, norm_eq, self.f_sky_hz_vals, F, self.rho_dot_kms_vals,
-            sigma, bfac=bfac, Return_P=True
+            sigma, bfac=bfac
         )
 
         # From the requested range, extract array of the form [a, b]
@@ -559,14 +564,39 @@ class ModelFromGEO(object):
             if use_fresnel:
                 psi = (numpy.pi/2.0)*numpy.square((rho-self.rho_km_vals)/F[center])
             else:
-                psi = special_functions.fresnel_psi(
-                    kD_vals[center], self.rho_km_vals[center],
-                    self.rho_km_vals, self.phi_rad_vals[center],
-                    self.phi_rad_vals, self.B_rad_vals[center],
-                    self.D_km_vals[center]
+                # Compute Newton-Raphson perturbation
+                kD = kD_vals[center]
+                r0 = self.rho_km_vals
+                r = r0[center]
+                phi0 = self.phi_rad_vals
+                phi = phi0[center]+numpy.zeros(numpy.size(r0))
+                B = self.B_rad_vals[center]
+                D = self.D_km_vals[center]
+
+                psi_d1 = special_functions.fresnel_dpsi_dphi(
+                    kD, r, r0, phi, phi0, B, D
                 )
+                loop = 0
+                while (numpy.max(numpy.abs(psi_d1)) > 1.0e-4):
+                    psi_d1 = special_functions.fresnel_dpsi_dphi(
+                        kD, r, r0, phi, phi0, B, D
+                    )
+                    psi_d2 = special_functions.fresnel_d2psi_dphi2(kD, r, r0,
+                                                                   phi, phi0,
+                                                                   B, D)
+
+                    # Newton-Raphson
+                    phi += -(psi_d1 / psi_d2)
+
+                    # Add one to loop variable for each iteration
+                    loop += 1
+                    if (loop > 3):
+                        break
+                psi = special_functions.fresnel_psi(kD, r, r0, phi, phi0, B, D)
 
             T_hat = numpy.exp(1j*psi)*(0.5-0.5j)/F[center]
+            self.r = self.rho_km_vals
+            self.psi = psi
         else:
             use_fresnel = False
             self.p_norm_vals = self.data_pow
@@ -579,6 +609,8 @@ class ModelFromGEO(object):
                 self.phi_rad_vals, kD_vals, self.B_rad_vals, self.D_km_vals,
                 periapse, eccentricity
             )
+        else:
+            T_hat = T_hat[start:start+n_used+1]
 
         if verbose:
             print("\tForward Model Complete.")
@@ -586,13 +618,11 @@ class ModelFromGEO(object):
         self.p_norm_vals = numpy.abs(T_hat)*numpy.abs(T_hat)
         self.phase_rad_vals = -numpy.arctan2(numpy.imag(T_hat), numpy.real(T_hat))
 
-        crange = numpy.arange(n_used)+start
+        crange = numpy.arange(n_used+1)+start
         self.B_rad_vals = self.B_rad_vals[crange]
         self.D_km_vals = self.D_km_vals[crange]
         self.f_sky_hz_vals = self.f_sky_hz_vals[crange]
         self.p_norm_actual_vals = self.p_norm_actual_vals[crange]
-        self.p_norm_vals = self.p_norm_vals[crange]
-        self.phase_rad_vals = self.phase_rad_vals[crange]
         self.phi_rad_vals = self.phi_rad_vals[crange]
         self.phi_rl_rad_vals = self.phi_rl_rad_vals[crange]
         self.raw_tau_threshold_vals = self.raw_tau_threshold_vals[crange]

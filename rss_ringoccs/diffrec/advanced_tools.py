@@ -141,11 +141,11 @@ class FindOptimalResolution(object):
 
 class ModelFromGEO(object):
     def __init__(self, geo, lambda_km, res, rho, width=100, dx_km_desired=0.25,
-                 wtype='kb25', norm=True, bfac=True, sigma=2.e-13,
+                 wtype='kb25', norm=True, bfac=True, sigma=2.e-13, opacity=None,
                  verbose=True, psitype='fresnel', use_fresnel=False,
-                 eccentricity=0.0, periapse=0.0, use_deprecate=False,
-                 res_factor=0.75, rng="all", model="squarewell", echo=False,
-                 rho_shift=0.0, data_rho=None, data_pow=None, data_phase=None):
+                 eccentricity=0.0, periapse=0.0, use_deprecate=False, rng="all",
+                 model="squarewell", echo=False, rho_shift=0.0,
+                 data_rho=None, data_pow=None, data_phase=None):
 
         # Check all input variables for errors.
         fname = "diffrec.advanced_tools.ModelFromGEO"
@@ -177,6 +177,12 @@ class ModelFromGEO(object):
         error_check.check_positive(width, "width", fname)
         error_check.check_positive(dx_km_desired, "dx_km_desired", fname)
         error_check.check_positive(lambda_km, "lambda_km", fname)
+
+        if opacity:
+            error_check.check_type(opacity, float, "opacity", fname)
+            error_check.check_non_negative(opacity, "opacity", fname)
+        else:
+            opacity = 0.0
 
         # Get the data from the selected CSV files.
         data = CSV_tools.get_geo(geo, verbose=verbose,
@@ -278,6 +284,17 @@ class ModelFromGEO(object):
         error_check.check_two_pi(self.phi_rl_rad_vals, "phi_rl_rad_vals",
                                  fname, deg=False)
 
+        if res < 1.999999*dx_km_desired:
+            raise ValueError(
+                """
+                \r\tError Encountered: rss_ringoccs\n\r\t\t%s\n
+                \r\tResolution is less than twice the sample spacing.
+                \r\t\tRequested Resolution (km):    %f
+                \r\t\tSample Spacing (km):          %f\n
+                \r\tChoose a resolution GREATER than %f km\n
+                """ % (fname, res, dx_km_desired, 2.0*dx_km_desired)
+            )
+
         if verbose:
             print("\tComputing Variables...")
 
@@ -332,45 +349,47 @@ class ModelFromGEO(object):
             self.D_km_vals = self.D_km_vals[::-1]
             self.rho_dot_kms_vals = numpy.abs(self.rho_dot_kms_vals[::-1])
         else:
-            del drho
+            del drho, dx_km
 
         geo_rho = self.rho_km_vals
-        self.rho_km_vals = numpy.arange(numpy.min(geo_rho), numpy.max(geo_rho), dx_km_desired)
+        self.rho_km_vals = numpy.arange(numpy.min(geo_rho),
+                                        numpy.max(geo_rho), dx_km_desired)
 
         if verbose:
             print("\tInterpolating Data...")
 
         # Interpolate data to be spaced evenly in radius.
-        self.rho_dot_kms_vals = numpy.interp(self.rho_km_vals, geo_rho, self.rho_dot_kms_vals)
-        self.phi_rl_rad_vals = numpy.interp(self.rho_km_vals, geo_rho, self.phi_rl_rad_vals)
-        self.t_ret_spm_vals = numpy.interp(self.rho_km_vals, geo_rho, self.t_ret_spm_vals)
-        self.t_oet_spm_vals = numpy.interp(self.rho_km_vals, geo_rho, self.t_oet_spm_vals)
-        self.t_set_spm_vals = numpy.interp(self.rho_km_vals, geo_rho, self.t_set_spm_vals)
-        self.phi_rad_vals = numpy.interp(self.rho_km_vals, geo_rho, self.phi_rad_vals)
-        self.B_rad_vals = numpy.interp(self.rho_km_vals, geo_rho, self.B_rad_vals)
-        self.D_km_vals = numpy.interp(self.rho_km_vals, geo_rho, self.D_km_vals)
-        del geo_rho
+        r = self.rho_km_vals
+        self.rho_dot_kms_vals = numpy.interp(r, geo_rho, self.rho_dot_kms_vals)
+        self.phi_rl_rad_vals = numpy.interp(r, geo_rho, self.phi_rl_rad_vals)
+        self.t_ret_spm_vals = numpy.interp(r, geo_rho, self.t_ret_spm_vals)
+        self.t_oet_spm_vals = numpy.interp(r, geo_rho, self.t_oet_spm_vals)
+        self.t_set_spm_vals = numpy.interp(r, geo_rho, self.t_set_spm_vals)
+        self.phi_rad_vals = numpy.interp(r, geo_rho, self.phi_rad_vals)
+        self.B_rad_vals = numpy.interp(r, geo_rho, self.B_rad_vals)
+        self.D_km_vals = numpy.interp(r, geo_rho, self.D_km_vals)
 
         # Add 'fake' variables necessary for DiffractionCorrection class.
-        n_pts = numpy.size(self.rho_km_vals)
+        n_pts = numpy.size(r)
         self.raw_tau_threshold_vals = numpy.zeros(n_pts)
         self.rho_corr_pole_km_vals = numpy.zeros(n_pts)
         self.rho_corr_timing_km_vals = numpy.zeros(n_pts)
         self.f_sky_hz_vals = (numpy.zeros(n_pts) +
             special_functions.frequency_to_wavelength(lambda_km))
-        del n_pts
 
         # Interpolate modeled data, if necessary.
         if not (type(data_rho) == type(None)):
-            rstart = numpy.min((data_rho >= numpy.min(self.rho_km_vals)).nonzero())
-            rfinsh = numpy.max((data_rho <= numpy.max(self.rho_km_vals)).nonzero())
+            rstart = numpy.min((data_rho >= numpy.min(r)).nonzero())
+            rfinsh = numpy.max((data_rho <= numpy.max(r)).nonzero())
             data_rho = data_rho[rstart:rfinsh]
             data_pow = data_pow[rstart:rfinsh]
             data_phase = data_phase[rstart:rfinsh]
 
-            self.data_pow = numpy.interp(self.rho_km_vals, data_rho, data_pow)
+            self.data_pow = numpy.interp(r, data_rho, data_pow)
         else:
             pass
+
+        del n_pts, geo_rho, r
 
         if verbose:
             print("\tWriting History...")
@@ -473,7 +492,8 @@ class ModelFromGEO(object):
                     \r\t\tMaximum Available Radius:         %f
                     \r\t\tMinimum Required Window Width:    %f
                     \r\t\tMaximum Required Window Width:    %f
-                """ % (fname, numpy.min(crho), numpy.max(crho), numpy.min(w), numpy.max(w))
+                """ % (fname, numpy.min(crho), numpy.max(crho),
+                       numpy.min(w), numpy.max(w))
             )
         elif (numpy.max(crho) < numpy.min(self.rng)):
             raise ValueError(
@@ -484,7 +504,8 @@ class ModelFromGEO(object):
                     \r\tYour Requested Minimum (km):    %f
                     \r\tYour Requested Maximum (km):    %f
                     \r\tMaximum Available Data (km):    %f
-                """ % (fname, numpy.min(self.rng), numpy.max(self.rng), numpy.max(crho))
+                """ % (fname, numpy.min(self.rng),
+                       numpy.max(self.rng), numpy.max(crho))
             )
         elif (numpy.min(crho) > numpy.max(self.rng)):
             raise ValueError(
@@ -495,7 +516,8 @@ class ModelFromGEO(object):
                     \r\tYour Requested Minimum (km): %f
                     \r\tYour Requested Maximum (km): %f
                     \r\tMinimum Available Data (km): %f\n
-                """ % (fname, numpy.min(self.rng), numpy.max(self.rng), numpy.min(crho))
+                """ % (fname, numpy.min(self.rng),
+                       numpy.max(self.rng), numpy.min(crho))
             )
         else:
             rho_min = numpy.min(crho[wrange])
@@ -530,25 +552,36 @@ class ModelFromGEO(object):
             self.p_norm_actual_vals += 1.0
             rstart = numpy.min((self.rho_km_vals>=rho-width/2.0).nonzero())
             rfinsh = numpy.max((self.rho_km_vals<=rho+width/2.0).nonzero())
-            self.p_norm_actual_vals[rstart:rfinsh+1] = 0.0
+            self.p_norm_actual_vals[rstart:rfinsh+1] = opacity
 
             if use_fresnel:
                 center = numpy.min((self.rho_km_vals >= rho).nonzero())
                 T_hat = special_functions.square_well_diffraction(
                     self.rho_km_vals, rho-width/2.0, rho+width/2.0, F[center]
                 )
+                if opacity:
+                    T_hat += special_functions.inverse_square_well_diffraction(
+                        self.rho_km_vals, rho-width/2.0,
+                        rho+width/2.0, F[center]
+                    ) * numpy.sqrt(opacity)
 
         elif (model == "rightstraightedge"):
             self.p_norm_actual_vals = numpy.zeros(numpy.size(self.rho_km_vals))
+            self.p_norm_actual_vals += opacity
             rstart = numpy.min((self.rho_km_vals>=rho).nonzero())
             self.p_norm_actual_vals[rstart:-1] = 1.0
 
             if use_fresnel:
                 T_hat = special_functions.right_straightedge(self.rho_km_vals,
                                                              rho, F[center])
+                if opacity:
+                    T_hat += special_functions.left_straightedge(
+                        self.rho_km_vals, rho, F[center]
+                    ) * numpy.sqrt(opacity)
 
         elif (model == "leftstraightedge"):
             self.p_norm_actual_vals = numpy.zeros(numpy.size(self.rho_km_vals))
+            self.p_norm_actual_vals += opacity
             rfinsh = numpy.max((self.rho_km_vals<=rho).nonzero())
             self.p_norm_actual_vals[0:rfinsh] = 1.0
 
@@ -556,6 +589,11 @@ class ModelFromGEO(object):
                 center = numpy.max((self.rho_km_vals <= rho).nonzero())
                 T_hat = special_functions.left_straightedge(self.rho_km_vals,
                                                             rho, F[center])
+
+                if opacity:
+                    T_hat += special_functions.right_straightedge(
+                        self.rho_km_vals, rho, F[center]
+                    ) * numpy.sqrt(opacity)
 
         elif (model == "deltaimpulse"):
             center = numpy.min((self.rho_km_vals >= rho).nonzero())
@@ -600,9 +638,10 @@ class ModelFromGEO(object):
         else:
             use_fresnel = False
             self.p_norm_vals = self.data_pow
+            self.p_norm_actual_vals = self.data_pow
 
         if ((not use_fresnel) and (not (model == "deltaimpulse"))):
-            T_in = self.p_norm_actual_vals.astype(complex)
+            T_in = numpy.sqrt(self.p_norm_actual_vals.astype(complex))
             T_hat = special_functions.fresnel_transform(
                 T_in, self.rho_km_vals, F, self.w_km_vals,
                 start, n_used, wtype, norm, True, psitype,
@@ -616,7 +655,8 @@ class ModelFromGEO(object):
             print("\tForward Model Complete.")
 
         self.p_norm_vals = numpy.abs(T_hat)*numpy.abs(T_hat)
-        self.phase_rad_vals = -numpy.arctan2(numpy.imag(T_hat), numpy.real(T_hat))
+        self.phase_rad_vals = -numpy.arctan2(numpy.imag(T_hat),
+                                             numpy.real(T_hat))
 
         crange = numpy.arange(n_used+1)+start
         self.B_rad_vals = self.B_rad_vals[crange]
@@ -644,20 +684,14 @@ class ModelFromGEO(object):
             n_shift = int(rho_shift/dx_km_desired)
             self.phase_rad_vals = -numpy.roll(self.phase_rad_vals, n_shift)
 
-            # Compute the window width. (See MTR86 Equations 19, 32, and 33).
-            self.w_km_vals, Prange = window_functions.window_width(
-                res, norm_eq, self.f_sky_hz_vals, F, self.rho_dot_kms_vals,
-                sigma, bfac=bfac, Return_P=True
-            )
 
             # Compute the smallest and largest allowed radii for reconstruction.
-            crho = self.rho_km_vals[Prange]
-            w = self.w_km_vals[Prange]
-            rho_min = self.rho_km_vals[Prange]-self.w_km_vals[Prange]/2.0
-            rho_max = self.rho_km_vals[Prange]+self.w_km_vals[Prange]/2.0
+            erho = self.rho_km_vals
+            rho_min = self.rho_km_vals-self.w_km_vals/2.0
+            rho_max = self.rho_km_vals+self.w_km_vals/2.0
 
-            wrange = Prange[numpy.where((rho_min >= numpy.min(crho)) &
-                                    (rho_max <= numpy.max(crho)))]
+            wrange = Prange[numpy.where((rho_min >= numpy.min(erho)) &
+                                    (rho_max <= numpy.max(erho)))]
 
             start = wrange[0]
             finish = wrange[-1]
@@ -667,7 +701,8 @@ class ModelFromGEO(object):
                     numpy.exp(1.0j*self.phase_rad_vals))
 
             if not (type(data_phase) == type(None)):
-                self.data_phase = numpy.interp(self.rho_km_vals, data_rho, data_phase)
+                self.data_phase = numpy.interp(self.rho_km_vals, data_rho,
+                                               data_phase)
                 self.phase_rad_vals -= self.data_phase
 
             T_hat = special_functions.fresnel_transform(
@@ -680,13 +715,11 @@ class ModelFromGEO(object):
             self.p_norm_vals = numpy.square(numpy.abs(T_hat))
             self.phase_rad_vals = numpy.arctan2(numpy.imag(T_hat), numpy.real(T_hat))
 
-            crange = numpy.arange(n_used)+start
+            crange = numpy.arange(n_used+1)+start
             self.B_rad_vals = self.B_rad_vals[crange]
             self.D_km_vals = self.D_km_vals[crange]
             self.f_sky_hz_vals = self.f_sky_hz_vals[crange]
             self.p_norm_actual_vals = self.p_norm_actual_vals[crange]
-            self.p_norm_vals = self.p_norm_vals[crange]
-            self.phase_rad_vals = self.phase_rad_vals[crange]
             self.phi_rad_vals = self.phi_rad_vals[crange]
             self.phi_rl_rad_vals = self.phi_rl_rad_vals[crange]
             self.raw_tau_threshold_vals = self.raw_tau_threshold_vals[crange]

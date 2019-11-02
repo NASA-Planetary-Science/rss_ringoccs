@@ -927,6 +927,25 @@ static PyObject *fresnel_transform(PyObject *self, PyObject *args)
     }
     else dlp.w_km_vals = (double *)PyArray_DATA(w_km_vals);
 
+    if (start > dim){
+        PyErr_Format(
+            PyExc_IndexError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.fresnel_transform\n\n"
+            "\rStarting index (start) is greater than the size of the array.\n"
+        );
+        return NULL;
+    }
+    else if (start+n_used > dim){
+        PyErr_Format(
+            PyExc_IndexError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.fresnel_transform\n\n"
+            "\rFinal index (start+n_used) is greater than size of array.\n"
+        );
+        return NULL;
+    }
+
     dlp.T_out = (complex double *)malloc((dlp.n_used+1)*sizeof(complex double));
 
     if (dlp.order == 0){

@@ -20,8 +20,7 @@
  *  Notes:                                                                    *
  *      1.) This function relies on the C99 standard, or higher.              *
  ******************************************************************************/
-complex float Inverted_Square_Well_Diffraction_Float(float x, float a,
-                                                     float b, float F)
+complex float Gap_Diffraction_Float(float x, float a, float b, float F)
 {
     float arg1 = SQRT_PI_BY_2*(a-x)/F;
     float arg2 = SQRT_PI_BY_2*(b-x)/F;
@@ -32,8 +31,7 @@ complex float Inverted_Square_Well_Diffraction_Float(float x, float a,
     return (0.5 - 0.5*_Complex_I)*result;
 }
 
-complex double Inverted_Square_Well_Diffraction_Double(double x, double a,
-                                                       double b, double F)
+complex double Gap_Diffraction_Double(double x, double a, double b, double F)
 {
     double arg1 = SQRT_PI_BY_2*(a-x)/F;
     double arg2 = SQRT_PI_BY_2*(b-x)/F;
@@ -44,9 +42,8 @@ complex double Inverted_Square_Well_Diffraction_Double(double x, double a,
     return (0.5 - 0.5*_Complex_I)*result;
 }
 
-complex long double
-Inverted_Square_Well_Diffraction_Long_Double(long double x, long double a,
-                                             long double b, long double F)
+complex long double Gap_Diffraction_Long_Double(long double x, long double a,
+                                                long double b, long double F)
 {
     long double arg1 = SQRT_PI_BY_2*(a-x)/F;
     long double arg2 = SQRT_PI_BY_2*(b-x)/F;
@@ -56,4 +53,56 @@ Inverted_Square_Well_Diffraction_Long_Double(long double x, long double a,
     result *= SQRT_2_BY_PI;
 
     return (0.5 - 0.5*_Complex_I)*result;
+}
+
+/*  For all integer types, convert to double and compute.                     */
+double Gap_Diffraction_Char(char x, double a, double b, double F)
+{
+    return Gap_Diffraction_Double((double)x, a, b, F);
+}
+
+double Gap_Diffraction_UChar(unsigned char x, double a, double b, double F)
+{
+    return Gap_Diffraction_Double((double)x, a, b, F);
+}
+
+double Gap_Diffraction_Short(short x, double a, double b, double F)
+{
+    return Gap_Diffraction_Double((double)x, a, b, F);
+}
+
+double Gap_Diffraction_UShort(unsigned short x, double a, double b, double F)
+{
+    return Gap_Diffraction_Double((double)x, a, b, F);
+}
+
+double Gap_Diffraction_Int(int x, double a, double b, double F)
+{
+    return Gap_Diffraction_Double((double)x, a, b, F);
+}
+
+double Gap_Diffraction_UInt(unsigned int x, double a, double b, double F)
+{
+    return Gap_Diffraction_Double((double)x, a, b, F);
+}
+
+double Gap_Diffraction_Long(long x, double a, double b, double F)
+{
+    return Gap_Diffraction_Double((double)x, a, b, F);
+}
+
+double Gap_Diffraction_ULong(unsigned long x, double a, double b, double F)
+{
+    return Gap_Diffraction_Double((double)x, a, b, F);
+}
+
+double Gap_Diffraction_Long_Long(long long x, double a, double b, double F)
+{
+    return Gap_Diffraction_Double((double)x, a, b, F);
+}
+
+double Gap_Diffraction_ULong_Long(unsigned long long x, double a,
+                                  double b, double F)
+{
+    return Gap_Diffraction_Double((double)x, a, b, F);
 }

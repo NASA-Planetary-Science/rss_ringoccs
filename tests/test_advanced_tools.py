@@ -27,18 +27,37 @@ def test_ModelFromGEO():
     rmin = 87410
     rmax = 87610
 
-    sw_width = 50.0
+    # The width for the square wave model.
+    sw_width = 5.0
+
+    # The width for the other models.
+    o_width = 100
+
+    # Number of waves calculus per point in the square wave model.
+    N_Waves = 20
+
     with PdfPages(outfile) as pdf:
         for model in ["Ringlet", "Gap", "Right Straight Edge",
-                      "Left Straight Edge", "Delta Impulse"]:
+                      "Left Straight Edge", "Square Wave", "Delta Impulse"]:
+            if (model == "Square Wave"):
+                width = sw_width
+            else:
+                width = o_width
+
             for opacity in {0.0, 0.3}:
+                if (opacity != 0) and ((model == "Square Wave") or
+                                       (model == "Delta Impulse")):
+                    continue
+
                 gdata = at.ModelFromGEO(geo, wav, res, rho, rng=rng,
                                         dx_km_desired=dxs, model=model,
-                                        opacity=opacity, verbose=False)
+                                        opacity=opacity, verbose=False,
+                                        width=width, N_Waves=N_Waves)
                 gdata_f = at.ModelFromGEO(geo, wav, res, rho, rng=rng,
                                           dx_km_desired=dxs, use_fresnel=True,
                                           model=model, opacity=opacity,
-                                          verbose=False)
+                                          verbose=False, width=width,
+                                          N_Waves=N_Waves)
                 rec = dc.DiffractionCorrection(gdata, res, rng=rng)
                 rec_f = dc.DiffractionCorrection(gdata_f, res, rng=rng)
 
@@ -70,7 +89,8 @@ def test_ModelFromGEO():
                 plt.ylabel("Normalized Power")
 
                 # Plot the modeled power.
-                plt.plot(gdata_f.rho_km_vals, gdata_f.p_norm_vals, 'r', label=lbf)
+                plt.plot(gdata_f.rho_km_vals, gdata_f.p_norm_vals,
+                         'r', label=lbf)
                 plt.plot(gdata.rho_km_vals, gdata.p_norm_vals, 'b', label=lbl)
 
                 plt.xlim(rmin, rmax)
@@ -92,7 +112,8 @@ def test_ModelFromGEO():
                 plt.locator_params(axis='x', nbins=8)
 
                 # Plot the reconstructed power.
-                plt.plot(gdata.rho_km_vals, gdata.p_norm_actual_vals, 'g', label=lba)
+                plt.plot(gdata.rho_km_vals, gdata.p_norm_actual_vals,
+                         'g', label=lba)
                 plt.plot(rec_f.rho_km_vals, rec_f.power_vals, 'r', label=rfm)
                 plt.plot(rec.rho_km_vals, rec.power_vals, 'b', label=rlb)
 
@@ -102,74 +123,6 @@ def test_ModelFromGEO():
                 # Append the plots to the pdf, close, and move on to the next one.
                 pdf.savefig(bbox_inches="tight", pad_inches=1)
                 plt.close()
-
-
-        model = "Square Wave"
-        gdata = at.ModelFromGEO(geo, wav, res, rho, rng=rng, width=sw_width,
-                                dx_km_desired=dxs, model=model, verbose=False)
-        gdata_f = at.ModelFromGEO(geo, wav, res, rho, rng=rng, width=sw_width,
-                                  dx_km_desired=dxs, use_fresnel=True,
-                                  model=model, verbose=False)
-
-        rec = dc.DiffractionCorrection(gdata, res, rng=rng)
-        rec_f = dc.DiffractionCorrection(gdata_f, res, rng=rng)
-
-        # Configurations for the plots.
-        plt.rc('font', family='serif')
-        plt.rc('font', size=10)
-        plt.figure(figsize=(8.5, 11))
-
-        # Title for the page.
-        plt.suptitle("ModelFromGEO - %s - 200m Model" % model, size=14)
-
-        # Use gridspec to create a 4-by-1 group of plots.
-        gs = gridspec.GridSpec(2, 1, hspace=0.0)
-
-        plt.subplot(gs[0, 0])
-
-        # Set up the tick parameters for the y axis.
-        plt.tick_params(axis='y', which='both', left=True,
-                        right=True, labelleft=True)
-        plt.locator_params(axis='y', nbins=4)
-
-        plt.title("Maxwell Ringlet - Rev007E Geometry Data")
-        plt.tick_params(axis='x', which='both', bottom=False,
-                        top=True, labelbottom=False)
-        plt.locator_params(axis='x', nbins=8)
-
-        # Set the label for the y-axis.
-        plt.ylabel("Normalized Power")
-
-        # Plot the modeled power.
-        plt.plot(gdata_f.rho_km_vals, gdata_f.p_norm_vals, 'r', label=lbf)
-        plt.plot(gdata.rho_km_vals, gdata.p_norm_vals, 'b', label=lbl)
-
-        plt.xlim(rmin, rmax)
-        plt.legend()
-        plt.subplot(gs[1, 0])
-
-        # Set up the tick parameters for the y axis.
-        plt.tick_params(axis='y', which='both', left=True,
-                        right=True, labelleft=True)
-        plt.locator_params(axis='y', nbins=4)
-
-        plt.xlabel("Ring Radius (km)")
-        plt.ylabel("Normalized Power")
-        plt.tick_params(axis='x', which='both', bottom=True,
-                        top=False, labelbottom=True)
-        plt.locator_params(axis='x', nbins=8)
-
-        # Plot the reconstructed power.
-        plt.plot(gdata.rho_km_vals, gdata.p_norm_actual_vals, 'g', label=lba)
-        plt.plot(rec_f.rho_km_vals, rec_f.power_vals, 'r', label=rfm)
-        plt.plot(rec.rho_km_vals, rec.power_vals, 'b', label=rlb)
-
-        plt.xlim(rmin, rmax)
-        plt.legend()
-
-        # Append the plots to the pdf, close, and move on to the next one.
-        pdf.savefig(bbox_inches="tight", pad_inches=1)
-        plt.close()
 
         # Test the arbitrary data modeling tool.
         data = ExtractCSVData(geo, cal, dlp, verbose=False)

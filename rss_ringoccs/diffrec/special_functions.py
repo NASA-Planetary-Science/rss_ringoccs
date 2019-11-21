@@ -480,47 +480,11 @@ def resolution_inverse(x):
             """
         )
 
-def square_well_diffraction(x, a, b, F):
-    try:
-        return _special_functions.square_well_diffraction(x, a, b, F)
-    except KeyboardInterrupt:
-        raise
-    except:
-        raise TypeError(
-            """
-            \r\tError: rss_ringoccs
-            \r\t\tdiffrec.special_functions.square_well_diffraction\n
-            \r\tInput should be a numpy array of real numbers (ints or floats),
-            \r\tand three floats/ints.\n
-            \r\tUsage:
-            \r\t\t>>> x = numpy.arange(-10, 10, 0.01)
-            \r\t\t>>> a = -5.0
-            \r\t\t>>> b = 5.0
-            \r\t\t>>> F = 0.05
-            \r\t\t>>> y = square_well_diffraction(x, a, b, F)
-            """
-        )
+def ringlet_diffraction(x, a, b, F):
+    return _special_functions.ringlet_diffraction(x, a, b, F)
 
-def inverse_square_well_diffraction(x, a, b, F):
-    try:
-        return _special_functions.inverse_square_well_diffraction(x, a, b, F)
-    except KeyboardInterrupt:
-        raise
-    except:
-        raise TypeError(
-            """
-            \r\tError: rss_ringoccs
-            \r\t\tdiffrec.special_functions.inverse_square_well_diffraction\n
-            \r\tInput should be a numpy array of real numbers (ints or floats),
-            \r\tand three floats/ints.\n
-            \r\tUsage:
-            \r\t\t>>> x = numpy.arange(-10, 10, 0.01)
-            \r\t\t>>> a = -5.0
-            \r\t\t>>> b = 5.0
-            \r\t\t>>> F = 0.05
-            \r\t\t>>> y = inverse_square_well_diffraction(x, a, b, F)
-            """
-        )
+def gap_diffraction(x, a, b, F):
+    return _special_functions.gap_diffraction(x, a, b, F)
 
 def double_slit_diffraction(x, z, a, d, Lambda):
     """
@@ -857,6 +821,9 @@ def single_slit_diffraction(x, z, a):
             \r\t\t>>> y = single_slit_diffraction(x, z, a)
             """
         )
+
+def square_wave_diffraction(x, W, F, N):
+    return _special_functions.square_wave_diffraction(x, W, F, N)
 
 def square_well_phase(x, a, b, F):
     try:

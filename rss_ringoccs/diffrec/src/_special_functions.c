@@ -14,7 +14,7 @@
 
 /* All wrapper functions defined within these files.                          */
 #include "_fraunhofer_diffraction_wrappers.h"
-#include "_fresnel_diffraction_wrappers.h"
+#include "__fresnel_diffraction.h"
 #include "_fresnel_integrals_wrappers.h"
 #include "_fresnel_kernel_wrappers.h"
 #include "_lambertw_wrappers.h"
@@ -27,6 +27,51 @@
 #include <numpy/ndarraytypes.h>
 #include <numpy/ufuncobject.h>
 
+/*  Make sure the name __get_where_pointer is available.                      */
+#ifdef __get_one_real_from_one_real
+#undef __get_one_real_from_one_real
+#endif
+
+#ifdef __get_complex_from_four_real
+#undef __get_complex_from_four_real
+#endif
+
+#ifdef __get_complex_from_three_real
+#undef __get_complex_from_three_real
+#endif
+
+/*  To avoid repeating the same code over and over again, define this macro   *
+ *  to be used for all of the where_lesser functions. Since the only thing    *
+ *  that changes between the various functions is the type of the input       *
+ *  pointer, the code is exactly the same.                                    */
+
+#define __get_one_real_from_one_real(x, y, dim, f) ({\
+    /*  Declare necessary variables.                                         */\
+    long i;\
+    \
+    for (i=0; i<dim; ++i){\
+        y[i] = (*f)(x[i]);\
+    }\
+})
+
+#define __get_complex_from_three_real(x, a, F, y, dim, f) ({\
+    /*  Declare necessary variables.                                         */\
+    long i;\
+    \
+    for (i=0; i<dim; ++i){\
+        y[i] = (*f)(x[i], a, F);\
+    }\
+})
+
+#define __get_complex_from_four_real(x, a, b, F, y, dim, f) ({\
+    /*  Declare necessary variables.                                         */\
+    long i;\
+    \
+    for (i=0; i<dim; ++i){\
+        y[i] = (*f)(x[i], a, b, F);\
+    }\
+})
+
 /*---------------------------DEFINE PYTHON FUNCTIONS--------------------------*
  *  This contains the Numpy-C and Python-C API parts that allow for the above *
  *  functions to be called in Python. Numpy arrays, as well as floating point *
@@ -37,7 +82,7 @@
 
 /*  This function frees the memory allocated to a pointer by malloc when the  *
  *  corresponding variable is destroyed at the Python level.                  */
-void capsule_cleanup(PyObject *capsule)
+static void capsule_cleanup(PyObject *capsule)
 {
     void *memory = PyCapsule_GetPointer(capsule, NULL);
     free(memory);
@@ -949,9 +994,8 @@ static PyObject *fresnel_transform(PyObject *self, PyObject *args)
     dlp.T_out = (complex double *)malloc((dlp.n_used+1)*sizeof(complex double));
 
     if (dlp.order == 0){
-        if ((dlp.ecc == 0.0) && (dlp.peri == 0.0)){
+        if ((dlp.ecc == 0.0) && (dlp.peri == 0.0))
             DiffractionCorrectionNewton(&dlp);
-        }
         else DiffractionCorrectionEllipse(&dlp);
     }
     else if (dlp.order == 1) DiffractionCorrectionFresnel(&dlp);
@@ -1037,6 +1081,812 @@ static PyObject *fresnel_transform(PyObject *self, PyObject *args)
     }
 }
 
+static PyObject *gap_diffraction(PyObject *self, PyObject *args)
+{
+    PyObject *output, *capsule;
+    PyArrayObject *rho;
+    double a, b, F;
+    char typenum;
+    long dim;
+    void *data;
+
+    if (!PyArg_ParseTuple(args, "O!ddd", &PyArray_Type, &rho, &a, &b, &F)){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.gap_diffraction\n\n"
+            "\rCould not parse inputs. Legal inputs are:\n"
+            "\r\trho:   Numpy Array of positive real numbers (Floats)\n"
+            "\r\ta:     Positive constant (Float)\n"
+            "\r\tb:     Positive constant (Float) greater than a\n"
+            "\r\tF      Positive constant (Float)\n\n"
+            "\rNotes:\n"
+            "\r\trho must be a non-empty one dimensional numpy array."
+        );
+        return NULL;
+    }
+
+    /*  Useful information about the data.                                */
+    typenum = (char)PyArray_TYPE(rho);
+    dim     = PyArray_DIMS(rho)[0];
+    data    = PyArray_DATA(rho);
+
+    /*  Check the inputs to make sure they're valid.                          */
+    if (PyArray_NDIM(rho) != 1){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.gap_diffraction\n\n"
+            "\rInput numpy array is not one-dimensional.\n"
+        );
+        return NULL;
+    }
+    else if (a >= b){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.gap_diffraction\n\n"
+            "\rInner radius is not less than outer radius (i.e. a >= b).\n"
+        );
+        return NULL;
+    }
+    else if (a <= 0.0){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.gap_diffraction\n\n"
+            "\rInner radius is negative. (i.e. a<0)\n"
+        );
+        return NULL;
+    }
+    else if (F < 0.0){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.gap_diffraction\n\n"
+            "\rFresnel scale is negative (i.e. F<0).\n"
+        );
+        return NULL;
+    }
+    else if (dim == 0){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.gap_diffraction\n\n"
+            "\rInput numpy array is empty.\n"
+        );
+    }
+
+    if (typenum == NPY_FLOAT){
+        complex float *T_hat;
+        T_hat = (complex float *)malloc(dim*sizeof(complex float));
+        __get_complex_from_four_real(((float *)data), a, b, F, T_hat,
+                                     dim, Gap_Diffraction_Float);
+        output = PyArray_SimpleNewFromData(1, &dim, NPY_CFLOAT, (void *)T_hat);
+        capsule = PyCapsule_New(T_hat, NULL, capsule_cleanup);
+    }
+    else if (typenum == NPY_DOUBLE){
+        complex double *T_hat;
+        T_hat = (complex double *)malloc(dim*sizeof(complex double));
+        __get_complex_from_four_real(((double *)data), a, b, F, T_hat, dim,
+                                     Gap_Diffraction_Double);
+        output = PyArray_SimpleNewFromData(1, &dim, NPY_CDOUBLE, (void *)T_hat);
+        capsule = PyCapsule_New(T_hat, NULL, capsule_cleanup);
+    }
+    else if (typenum == NPY_LONGDOUBLE){
+        complex long double *T_hat;
+        T_hat = (complex long double *)malloc(dim*sizeof(complex long double));
+        __get_complex_from_four_real(((long double *)data), a, b, F, T_hat,
+                                     dim, Gap_Diffraction_Long_Double);
+        output = PyArray_SimpleNewFromData(1, &dim, NPY_CLONGDOUBLE,
+                                           (void *)T_hat);
+        capsule = PyCapsule_New(T_hat, NULL, capsule_cleanup);
+    }
+    else {
+        complex double *T_hat;
+        T_hat = (complex double *)malloc(dim*sizeof(complex double));
+
+        if (typenum == NPY_BYTE){
+            __get_complex_from_four_real(((char *)data), a, b, F, T_hat, dim,
+                                         Gap_Diffraction_Char);
+        }
+        else if (typenum == NPY_UBYTE){
+            __get_complex_from_four_real(((unsigned char *)data), a, b, F,
+                                         T_hat, dim, Gap_Diffraction_UChar);
+        }
+        else if (typenum == NPY_SHORT){
+            __get_complex_from_four_real(((short *)data), a, b, F, T_hat, dim,
+                                         Gap_Diffraction_Short);
+        }
+        else if (typenum == NPY_USHORT){
+            __get_complex_from_four_real(((unsigned short *)data), a, b, F,
+                                         T_hat, dim, Gap_Diffraction_UShort);
+        }
+        else if (typenum == NPY_INT){
+            __get_complex_from_four_real(((int *)data), a, b, F, T_hat, dim,
+                                         Gap_Diffraction_Int);
+        }
+        else if (typenum == NPY_UINT){
+            __get_complex_from_four_real(((unsigned int *)data), a, b, F, T_hat,
+                                         dim, Gap_Diffraction_UInt);
+        }
+        else if (typenum == NPY_LONG){
+            __get_complex_from_four_real(((long *)data), a, b, F, T_hat, dim,
+                                         Gap_Diffraction_Long);
+        }
+        else if (typenum == NPY_ULONG){
+            __get_complex_from_four_real(((unsigned long *)data), a, b, F,
+                                         T_hat, dim, Gap_Diffraction_ULong);
+        }
+        else if (typenum == NPY_LONGLONG){
+            __get_complex_from_four_real(((long long *)data), a, b, F, T_hat,
+                                         dim, Gap_Diffraction_Long_Long);
+        }
+        else if (typenum == NPY_ULONG){
+            __get_complex_from_four_real(((unsigned long long *)data), a, b, F,
+                                         T_hat, dim,
+                                         Gap_Diffraction_ULong_Long);
+        }
+        else {
+            PyErr_Format(
+                PyExc_TypeError,
+                "\n\rError Encountered: rss_ringoccs\n"
+                "\r\tdiffrec.special_functions.gap_diffraction\n\n"
+                "\rInvalid data type for input numpy array. Input should be\n"
+                "\ra one dimensional numpy array of positive (floating point)\n"
+                "\rreal numbers."
+            );
+            return NULL;
+        }
+
+        output = PyArray_SimpleNewFromData(1, &dim, NPY_CDOUBLE, (void *)T_hat);
+        capsule = PyCapsule_New(T_hat, NULL, capsule_cleanup);
+    }
+
+    /*  This frees the variable at the Python level once it's destroyed.      */
+    PyArray_SetBaseObject((PyArrayObject *)output, capsule);
+
+    /*  Return the results to Python.                                         */
+    return Py_BuildValue("N", output);
+}
+
+static PyObject *ringlet_diffraction(PyObject *self, PyObject *args)
+{
+    PyObject *output, *capsule;
+    PyArrayObject *rho;
+    double a, b, F;
+    char typenum;
+    long dim;
+    void *data;
+
+    if (!PyArg_ParseTuple(args, "O!ddd", &PyArray_Type, &rho, &a, &b, &F)){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.ringlet_diffraction\n\n"
+            "\rCould not parse inputs. Legal inputs are:\n"
+            "\r\trho:   Numpy Array of positive real numbers (Floats)\n"
+            "\r\ta:     Positive constant (Float)\n"
+            "\r\tb:     Positive constant (Float) greater than a\n"
+            "\r\tF      Positive constant (Float)\n\n"
+            "\rNotes:\n"
+            "\r\trho must be a non-empty one dimensional numpy array."
+        );
+        return NULL;
+    }
+
+    /*  Useful information about the data.                                */
+    typenum = (char)PyArray_TYPE(rho);
+    dim     = PyArray_DIMS(rho)[0];
+    data    = PyArray_DATA(rho);
+
+    /*  Check the inputs to make sure they're valid.                          */
+    if (PyArray_NDIM(rho) != 1){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.ringlet_diffraction\n\n"
+            "\rInput numpy array is not one-dimensional.\n"
+        );
+        return NULL;
+    }
+    else if (a >= b){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.ringlet_diffraction\n\n"
+            "\rInner radius is not less than outer radius (i.e. a >= b).\n"
+        );
+        return NULL;
+    }
+    else if (a <= 0.0){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.ringlet_diffraction\n\n"
+            "\rInner radius is negative. (i.e. a<0)\n"
+        );
+        return NULL;
+    }
+    else if (F < 0.0){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.ringlet_diffraction\n\n"
+            "\rFresnel scale is negative (i.e. F<0).\n"
+        );
+        return NULL;
+    }
+    else if (dim == 0){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.ringlet_diffraction\n\n"
+            "\rInput numpy array is empty.\n"
+        );
+    }
+
+    if (typenum == NPY_FLOAT){
+        complex float *T_hat;
+        T_hat = (complex float *)malloc(dim*sizeof(complex float));
+
+        __get_complex_from_four_real(
+            ((float *)data), a, b, F, T_hat, dim,
+            Ringlet_Diffraction_Float
+        );
+
+        output = PyArray_SimpleNewFromData(1, &dim, NPY_CFLOAT, (void *)T_hat);
+        capsule = PyCapsule_New(T_hat, NULL, capsule_cleanup);
+    }
+    else if (typenum == NPY_LONGDOUBLE){
+        complex long double *T_hat;
+        T_hat = (complex long double *)malloc(dim*sizeof(complex long double));
+
+        __get_complex_from_four_real(
+            ((long double *)data), a, b, F, T_hat, dim,
+            Ringlet_Diffraction_Long_Double
+        );
+
+        output = PyArray_SimpleNewFromData(1, &dim, NPY_CLONGDOUBLE,
+                                           (void *)T_hat);
+        capsule = PyCapsule_New(T_hat, NULL, capsule_cleanup);
+    }
+    else {
+        complex double *T_hat;
+        T_hat = (complex double *)malloc(dim*sizeof(complex double));
+
+        if (typenum == NPY_DOUBLE){
+            __get_complex_from_four_real(
+                ((double *)data), a, b, F, T_hat, dim,
+                Ringlet_Diffraction_Double
+            );
+        }
+        else if (typenum == NPY_BYTE){
+            __get_complex_from_four_real(((char *)data), a, b, F, T_hat, dim,
+                                         Ringlet_Diffraction_Char);
+        }
+        else if (typenum == NPY_UBYTE){
+            __get_complex_from_four_real(((unsigned char *)data), a, b, F,
+                                         T_hat, dim, Ringlet_Diffraction_UChar);
+        }
+        else if (typenum == NPY_SHORT){
+            __get_complex_from_four_real(((short *)data), a, b, F, T_hat, dim,
+                                         Ringlet_Diffraction_Short);
+        }
+        else if (typenum == NPY_USHORT){
+            __get_complex_from_four_real(((unsigned short *)data), a, b, F,
+                                         T_hat, dim,
+                                         Ringlet_Diffraction_UShort);
+        }
+        else if (typenum == NPY_INT){
+            __get_complex_from_four_real(((int *)data), a, b, F, T_hat, dim,
+                                         Ringlet_Diffraction_Int);
+        }
+        else if (typenum == NPY_UINT){
+            __get_complex_from_four_real(((unsigned int *)data), a, b, F, T_hat,
+                                         dim, Ringlet_Diffraction_UInt);
+        }
+        else if (typenum == NPY_LONG){
+            __get_complex_from_four_real(((long *)data), a, b, F, T_hat, dim,
+                                         Ringlet_Diffraction_Long);
+        }
+        else if (typenum == NPY_ULONG){
+            __get_complex_from_four_real(((unsigned long *)data), a, b, F,
+                                         T_hat, dim, Ringlet_Diffraction_ULong);
+        }
+        else if (typenum == NPY_LONGLONG){
+            __get_complex_from_four_real(((long long *)data), a, b, F, T_hat,
+                                         dim, Ringlet_Diffraction_Long_Long);
+        }
+        else if (typenum == NPY_ULONG){
+            __get_complex_from_four_real(((unsigned long long *)data), a, b, F,
+                                         T_hat, dim,
+                                         Ringlet_Diffraction_ULong_Long);
+        }
+        else {
+            PyErr_Format(
+                PyExc_TypeError,
+                "\n\rError Encountered: rss_ringoccs\n"
+                "\r\tdiffrec.special_functions.ringlet_diffraction\n\n"
+                "\rInvalid data type for input numpy array. Input should be\n"
+                "\ra one dimensional numpy array of positive (floating point)\n"
+                "\rreal numbers."
+            );
+            return NULL;
+        }
+
+        output = PyArray_SimpleNewFromData(1, &dim, NPY_CDOUBLE, (void *)T_hat);
+        capsule = PyCapsule_New(T_hat, NULL, capsule_cleanup);
+    }
+
+    /*  This frees the variable at the Python level once it's destroyed.      */
+    PyArray_SetBaseObject((PyArrayObject *)output, capsule);
+
+    /*  Return the results to Python.                                         */
+    return Py_BuildValue("N", output);
+}
+
+static PyObject *right_straightedge(PyObject *self, PyObject *args)
+{
+    PyObject *output, *capsule;
+    PyArrayObject *rho;
+    double a, F;
+    char typenum;
+    long dim;
+    void *data;
+
+    if (!PyArg_ParseTuple(args, "O!dd", &PyArray_Type, &rho, &a, &F)){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.right_straightedge\n\n"
+            "\rCould not parse inputs. Legal inputs are:\n"
+            "\r\trho:   Numpy Array of positive real numbers (Floats)\n"
+            "\r\ta:     Positive constant (Float)\n"
+            "\r\tF      Positive constant (Float)\n\n"
+            "\rNotes:\n"
+            "\r\trho must be a non-empty one dimensional numpy array."
+        );
+        return NULL;
+    }
+
+    /*  Useful information about the data.                                */
+    typenum = (char)PyArray_TYPE(rho);
+    dim     = PyArray_DIMS(rho)[0];
+    data    = PyArray_DATA(rho);
+
+    /*  Check the inputs to make sure they're valid.                          */
+    if (PyArray_NDIM(rho) != 1){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.right_straightedge\n\n"
+            "\rInput numpy array is not one-dimensional.\n"
+        );
+        return NULL;
+    }
+    else if (a <= 0.0){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.right_straightedge\n\n"
+            "\rInner radius is negative. (i.e. a<0)\n"
+        );
+        return NULL;
+    }
+    else if (F < 0.0){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.right_straightedge\n\n"
+            "\rFresnel scale is negative (i.e. F<0).\n"
+        );
+        return NULL;
+    }
+    else if (dim == 0){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.right_straightedge\n\n"
+            "\rInput numpy array is empty.\n"
+        );
+    }
+
+    if (typenum == NPY_FLOAT){
+        complex float *T_hat;
+        T_hat = (complex float *)malloc(dim*sizeof(complex float));
+
+        __get_complex_from_three_real(
+            ((float *)data), a, F, T_hat, dim,
+            Right_Straightedge_Diffraction_Float
+        );
+
+        output = PyArray_SimpleNewFromData(1, &dim, NPY_CFLOAT, (void *)T_hat);
+        capsule = PyCapsule_New(T_hat, NULL, capsule_cleanup);
+    }
+    else if (typenum == NPY_LONGDOUBLE){
+        complex long double *T_hat;
+        T_hat = (complex long double *)malloc(dim*sizeof(complex long double));
+
+        __get_complex_from_three_real(
+            ((long double *)data), a, F, T_hat, dim,
+            Right_Straightedge_Diffraction_Long_Double
+        );
+
+        output = PyArray_SimpleNewFromData(1, &dim, NPY_CLONGDOUBLE,
+                                           (void *)T_hat);
+        capsule = PyCapsule_New(T_hat, NULL, capsule_cleanup);
+    }
+    else {
+        complex double *T_hat;
+        T_hat = (complex double *)malloc(dim*sizeof(complex double));
+
+        if (typenum == NPY_DOUBLE){
+            __get_complex_from_three_real(
+                ((double *)data), a, F, T_hat, dim,
+                Right_Straightedge_Diffraction_Double
+            );
+        }
+        else if (typenum == NPY_BYTE){
+            __get_complex_from_three_real(
+                ((char *)data), a, F, T_hat, dim,
+                Right_Straightedge_Diffraction_Char
+            );
+        }
+        else if (typenum == NPY_UBYTE){
+            __get_complex_from_three_real(
+                ((unsigned char *)data), a, F, T_hat, dim,
+                Right_Straightedge_Diffraction_UChar
+            );
+        }
+        else if (typenum == NPY_SHORT){
+            __get_complex_from_three_real(
+                ((short *)data), a, F, T_hat, dim,
+                Right_Straightedge_Diffraction_Short
+            );
+        }
+        else if (typenum == NPY_USHORT){
+            __get_complex_from_three_real(
+                ((unsigned short *)data), a, F, T_hat, dim,
+                Right_Straightedge_Diffraction_UShort
+            );
+        }
+        else if (typenum == NPY_INT){
+            __get_complex_from_three_real(
+                ((int *)data), a, F, T_hat, dim,
+                Right_Straightedge_Diffraction_Int
+            );
+        }
+        else if (typenum == NPY_UINT){
+            __get_complex_from_three_real(
+                ((unsigned int *)data), a, F, T_hat, dim,
+                Right_Straightedge_Diffraction_UInt);
+        }
+        else if (typenum == NPY_LONG){
+            __get_complex_from_three_real(
+                ((long *)data), a, F, T_hat, dim,
+                Right_Straightedge_Diffraction_Long
+            );
+        }
+        else if (typenum == NPY_ULONG){
+            __get_complex_from_three_real(
+                ((unsigned long *)data), a, F, T_hat, dim,
+                Right_Straightedge_Diffraction_ULong
+            );
+        }
+        else if (typenum == NPY_LONGLONG){
+            __get_complex_from_three_real(
+                ((long long *)data), a, F, T_hat, dim,
+                Right_Straightedge_Diffraction_Long_Long);
+        }
+        else if (typenum == NPY_ULONG){
+            __get_complex_from_three_real(
+                ((unsigned long long *)data), a, F, T_hat, dim,
+                Right_Straightedge_Diffraction_ULong_Long);
+        }
+        else {
+            PyErr_Format(
+                PyExc_TypeError,
+                "\n\rError Encountered: rss_ringoccs\n"
+                "\r\tdiffrec.special_functions.right_straightedge\n\n"
+                "\rInvalid data type for input numpy array. Input should be\n"
+                "\ra one dimensional numpy array of positive (floating point)\n"
+                "\rreal numbers."
+            );
+            return NULL;
+        }
+
+        output = PyArray_SimpleNewFromData(1, &dim, NPY_CDOUBLE, (void *)T_hat);
+        capsule = PyCapsule_New(T_hat, NULL, capsule_cleanup);
+    }
+
+    /*  This frees the variable at the Python level once it's destroyed.      */
+    PyArray_SetBaseObject((PyArrayObject *)output, capsule);
+
+    /*  Return the results to Python.                                         */
+    return Py_BuildValue("N", output);
+}
+
+static PyObject *left_straightedge(PyObject *self, PyObject *args)
+{
+    PyObject *output, *capsule;
+    PyArrayObject *rho;
+    double a, F;
+    char typenum;
+    long dim;
+    void *data;
+
+    if (!PyArg_ParseTuple(args, "O!dd", &PyArray_Type, &rho, &a, &F)){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.left_straightedge\n\n"
+            "\rCould not parse inputs. Legal inputs are:\n"
+            "\r\trho:   Numpy Array of positive real numbers (Floats)\n"
+            "\r\ta:     Positive constant (Float)\n"
+            "\r\tF      Positive constant (Float)\n\n"
+            "\rNotes:\n"
+            "\r\trho must be a non-empty one dimensional numpy array."
+        );
+        return NULL;
+    }
+
+    /*  Useful information about the data.                                */
+    typenum = (char)PyArray_TYPE(rho);
+    dim     = PyArray_DIMS(rho)[0];
+    data    = PyArray_DATA(rho);
+
+    /*  Check the inputs to make sure they're valid.                          */
+    if (PyArray_NDIM(rho) != 1){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.left_straightedge\n\n"
+            "\rInput numpy array is not one-dimensional.\n"
+        );
+        return NULL;
+    }
+    else if (a <= 0.0){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.left_straightedge\n\n"
+            "\rInner radius is negative. (i.e. a<0)\n"
+        );
+        return NULL;
+    }
+    else if (F < 0.0){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.left_straightedge\n\n"
+            "\rFresnel scale is negative (i.e. F<0).\n"
+        );
+        return NULL;
+    }
+    else if (dim == 0){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.left_straightedge\n\n"
+            "\rInput numpy array is empty.\n"
+        );
+    }
+
+    if (typenum == NPY_FLOAT){
+        complex float *T_hat;
+        T_hat = (complex float *)malloc(dim*sizeof(complex float));
+
+        __get_complex_from_three_real(
+            ((float *)data), a, F, T_hat, dim,
+            Left_Straightedge_Diffraction_Float
+        );
+
+        output = PyArray_SimpleNewFromData(1, &dim, NPY_CFLOAT, (void *)T_hat);
+        capsule = PyCapsule_New(T_hat, NULL, capsule_cleanup);
+    }
+    else if (typenum == NPY_LONGDOUBLE){
+        complex long double *T_hat;
+        T_hat = (complex long double *)malloc(dim*sizeof(complex long double));
+
+        __get_complex_from_three_real(
+            ((long double *)data), a, F, T_hat, dim,
+            Left_Straightedge_Diffraction_Long_Double
+        );
+
+        output = PyArray_SimpleNewFromData(1, &dim, NPY_CLONGDOUBLE,
+                                           (void *)T_hat);
+        capsule = PyCapsule_New(T_hat, NULL, capsule_cleanup);
+    }
+    else {
+        complex double *T_hat;
+        T_hat = (complex double *)malloc(dim*sizeof(complex double));
+
+        if (typenum == NPY_DOUBLE){
+            __get_complex_from_three_real(
+                ((double *)data), a, F, T_hat, dim,
+                Left_Straightedge_Diffraction_Double
+            );
+        }
+        else if (typenum == NPY_BYTE){
+            __get_complex_from_three_real(
+                ((char *)data), a, F, T_hat, dim,
+                Left_Straightedge_Diffraction_Char
+            );
+        }
+        else if (typenum == NPY_UBYTE){
+            __get_complex_from_three_real(
+                ((unsigned char *)data), a, F, T_hat, dim,
+                Left_Straightedge_Diffraction_UChar
+            );
+        }
+        else if (typenum == NPY_SHORT){
+            __get_complex_from_three_real(
+                ((short *)data), a, F, T_hat, dim,
+                Left_Straightedge_Diffraction_Short
+            );
+        }
+        else if (typenum == NPY_USHORT){
+            __get_complex_from_three_real(
+                ((unsigned short *)data), a, F, T_hat, dim,
+                Left_Straightedge_Diffraction_UShort
+            );
+        }
+        else if (typenum == NPY_INT){
+            __get_complex_from_three_real(
+                ((int *)data), a, F, T_hat, dim,
+                Left_Straightedge_Diffraction_Int
+            );
+        }
+        else if (typenum == NPY_UINT){
+            __get_complex_from_three_real(
+                ((unsigned int *)data), a, F, T_hat, dim,
+                Left_Straightedge_Diffraction_UInt);
+        }
+        else if (typenum == NPY_LONG){
+            __get_complex_from_three_real(
+                ((long *)data), a, F, T_hat, dim,
+                Left_Straightedge_Diffraction_Long
+            );
+        }
+        else if (typenum == NPY_ULONG){
+            __get_complex_from_three_real(
+                ((unsigned long *)data), a, F, T_hat, dim,
+                Left_Straightedge_Diffraction_ULong
+            );
+        }
+        else if (typenum == NPY_LONGLONG){
+            __get_complex_from_three_real(
+                ((long long *)data), a, F, T_hat, dim,
+                Left_Straightedge_Diffraction_Long_Long);
+        }
+        else if (typenum == NPY_ULONG){
+            __get_complex_from_three_real(
+                ((unsigned long long *)data), a, F, T_hat, dim,
+                Left_Straightedge_Diffraction_ULong_Long);
+        }
+        else {
+            PyErr_Format(
+                PyExc_TypeError,
+                "\n\rError Encountered: rss_ringoccs\n"
+                "\r\tdiffrec.special_functions.left_straightedge\n\n"
+                "\rInvalid data type for input numpy array. Input should be\n"
+                "\ra one dimensional numpy array of positive (floating point)\n"
+                "\rreal numbers."
+            );
+            return NULL;
+        }
+
+        output = PyArray_SimpleNewFromData(1, &dim, NPY_CDOUBLE, (void *)T_hat);
+        capsule = PyCapsule_New(T_hat, NULL, capsule_cleanup);
+    }
+
+    /*  This frees the variable at the Python level once it's destroyed.      */
+    PyArray_SetBaseObject((PyArrayObject *)output, capsule);
+
+    /*  Return the results to Python.                                         */
+    return Py_BuildValue("N", output);
+}
+
+static PyObject *square_wave_diffraction(PyObject *self, PyObject *args)
+{
+    PyObject *output, *capsule;
+    PyArrayObject *x_arr;
+    double W, F;
+    long N;
+    char typenum;
+    long dim;
+    void *data;
+    complex double *T_hat;
+
+    if (!PyArg_ParseTuple(args, "O!ddK", &PyArray_Type, &x_arr, &W, &F, &N)){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.square_wave_diffraction\n\n"
+            "\rCould not parse inputs. Legal inputs are:\n"
+            "\r\tx:     Numpy Array of positive real numbers (Floats)\n"
+            "\r\tW:     Positive constant (Float)\n"
+            "\r\tF:     Positive constant (Float)\n"
+            "\r\tN:     Positive Integer (Int)\n\n"
+            "\rNotes:\n"
+            "\r\trho must be a non-empty one dimensional numpy array."
+        );
+        return NULL;
+    }
+
+    /*  Useful information about the data.                                */
+    typenum = (char)PyArray_TYPE(x_arr);
+    dim     = PyArray_DIMS(x_arr)[0];
+    data    = PyArray_DATA(x_arr);
+
+    /*  Check the inputs to make sure they're valid.                          */
+    if (PyArray_NDIM(x_arr) != 1){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.square_wave_diffraction\n\n"
+            "\rInput numpy array is not one-dimensional.\n"
+        );
+        return NULL;
+    }
+    else if (W <= 0.0){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.square_wave_diffraction\n\n"
+            "\rWidth of wave is non-positive. (i.e. W<=0)\n"
+        );
+        return NULL;
+    }
+    else if (F <= 0.0){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.square_wave_diffraction\n\n"
+            "\rFresnel scale is non-positive (i.e. F<=0).\n"
+        );
+        return NULL;
+    }
+    else if (dim == 0){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.square_wave_diffraction\n\n"
+            "\rInput numpy array is empty.\n"
+        );
+    }
+
+    T_hat = (complex double *)malloc(dim*sizeof(complex double));
+    if (typenum == NPY_DOUBLE){
+            __get_complex_from_four_real(
+                ((double *)data), W, F, N, T_hat, dim,
+                Square_Wave_Diffraction_Double
+            );
+        }
+    else {
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.square_wave_diffraction\n\n"
+            "\rInvalid data type for input numpy array. Input should be\n"
+            "\ra one dimensional numpy array of positive (floating point)\n"
+            "\rreal numbers."
+        );
+        return NULL;
+    }
+
+    output = PyArray_SimpleNewFromData(1, &dim, NPY_CDOUBLE, (void *)T_hat);
+    capsule = PyCapsule_New(T_hat, NULL, capsule_cleanup);
+
+    /*  This frees the variable at the Python level once it's destroyed.      */
+    PyArray_SetBaseObject((PyArrayObject *)output, capsule);
+
+    /*  Return the results to Python.                                         */
+    return Py_BuildValue("N", output);
+}
+
+
 static PyMethodDef _special_functions_methods[] =
 {
     {
@@ -1050,6 +1900,126 @@ static PyMethodDef _special_functions_methods[] =
         fresnel_transform,
         METH_VARARGS,
         "Compute the Fresnel Transform."
+    },
+    {
+        "square_wave_diffraction",
+        square_wave_diffraction,
+        METH_VARARGS,
+        "Compute the normalized equivalent width of an array."
+    },
+    {
+        "gap_diffraction",
+        gap_diffraction,
+        METH_VARARGS,
+        "\r\t"
+        "Function:\n\r\t\t"
+        "_special_functions.gap_diffraction\n\r\t"
+        "Purpose\n\r\t\t"
+        "Compute the diffraction pattern of an annular gap in the plane.\n\r\t"
+        "Arguments:\n\r\t\t"
+        "rho (numpy.ndarray):\n\r\t\t\t"
+        "A numpy array of positive real numbers.\n\r\t\t"
+        "a (float)\n\r\t\t\t"
+        "A positive real number, the inner radius of the annulus.\n\r\t\t"
+        "b (float)\n\r\t\t\t"
+        "A positive real number, the outter radius of the annulus.\n\r\t\t"
+        "F (float)\n\r\t\t\t"
+        "A positive real number, the Fresnel scale (same units as rho).\n\r\t"
+        "Outputs:\n\r\t\t"
+        "T_hat (numpy.ndarray):\n\r\t\t\t"
+        "Numpy array of complex numbers equal to the diffraction pattern.\n\r\t"
+        "Example:\n\r\t\t"
+        ">>> import numpy\n\r\t\t"
+        ">>> import _special_functions\n\r\t\t"
+        ">>> x = numpy.arange(0,100,0.01)\n\r\t\t"
+        ">>> a = 45\n\r\t\t"
+        ">>> b = 55\n\r\t\t"
+        ">>> F = 0.05\n\r\t\t"
+        ">>> y = _special_functions.gap_diffraction(x, 45, 55, 0.05)"
+    },
+    {
+        "ringlet_diffraction",
+        ringlet_diffraction,
+        METH_VARARGS,
+        "\r\t"
+        "Function:\n\r\t\t"
+        "_special_functions.gap_diffraction\n\r\t"
+        "Purpose\n\r\t\t"
+        "Compute the diffraction pattern of a ringlet in the plane.\n\r\t"
+        "Arguments:\n\r\t\t"
+        "rho (numpy.ndarray):\n\r\t\t\t"
+        "A numpy array of positive real numbers.\n\r\t\t"
+        "a (float)\n\r\t\t\t"
+        "A positive real number, the inner radius of the ring.\n\r\t\t"
+        "b (float)\n\r\t\t\t"
+        "A positive real number, the outter radius of the ring.\n\r\t\t"
+        "F (float)\n\r\t\t\t"
+        "A positive real number, the Fresnel scale (same units as rho).\n\r\t"
+        "Outputs:\n\r\t\t"
+        "T_hat (numpy.ndarray):\n\r\t\t\t"
+        "Numpy array of complex numbers equal to the diffraction pattern.\n\r\t"
+        "Example:\n\r\t\t"
+        ">>> import numpy\n\r\t\t"
+        ">>> import _special_functions\n\r\t\t"
+        ">>> x = numpy.arange(0,100,0.01)\n\r\t\t"
+        ">>> a = 45\n\r\t\t"
+        ">>> b = 55\n\r\t\t"
+        ">>> F = 0.05\n\r\t\t"
+        ">>> y = _special_functions.ringlet_diffraction(x, a, b, F)"
+    },
+    {
+        "right_straightedge",
+        right_straightedge,
+        METH_VARARGS,
+        "\r\t"
+        "Function:\n\r\t\t"
+        "_special_functions.right_straightedge\n\r\t"
+        "Purpose\n\r\t\t"
+        "Compute the diffraction pattern of a straightedge.\n\r\t"
+        "Arguments:\n\r\t\t"
+        "rho (numpy.ndarray):\n\r\t\t\t"
+        "A numpy array of positive real numbers.\n\r\t\t"
+        "a (float)\n\r\t\t\t"
+        "A positive real number, starting point of the straightedge.\n\r\t\t"
+        "F (float)\n\r\t\t\t"
+        "A positive real number, the Fresnel scale (same units as rho).\n\r\t"
+        "Outputs:\n\r\t\t"
+        "T_hat (numpy.ndarray):\n\r\t\t\t"
+        "Numpy array of complex numbers equal to the diffraction pattern.\n\r\t"
+        "Example:\n\r\t\t"
+        ">>> import numpy\n\r\t\t"
+        ">>> import _special_functions\n\r\t\t"
+        ">>> x = numpy.arange(0,100,0.01)\n\r\t\t"
+        ">>> a = 45\n\r\t\t"
+        ">>> F = 0.05\n\r\t\t"
+        ">>> y = _special_functions.right_straightedge(x, a, F)"
+    },
+    {
+        "left_straightedge",
+        left_straightedge,
+        METH_VARARGS,
+        "\r\t"
+        "Function:\n\r\t\t"
+        "_special_functions.left_straightedge\n\r\t"
+        "Purpose\n\r\t\t"
+        "Compute the diffraction pattern of a straightedge.\n\r\t"
+        "Arguments:\n\r\t\t"
+        "rho (numpy.ndarray):\n\r\t\t\t"
+        "A numpy array of positive real numbers.\n\r\t\t"
+        "a (float)\n\r\t\t\t"
+        "A positive real number, starting point of the straightedge.\n\r\t\t"
+        "F (float)\n\r\t\t\t"
+        "A positive real number, the Fresnel scale (same units as rho).\n\r\t"
+        "Outputs:\n\r\t\t"
+        "T_hat (numpy.ndarray):\n\r\t\t\t"
+        "Numpy array of complex numbers equal to the diffraction pattern.\n\r\t"
+        "Example:\n\r\t\t"
+        ">>> import numpy\n\r\t\t"
+        ">>> import _special_functions\n\r\t\t"
+        ">>> x = numpy.arange(0,100,0.01)\n\r\t\t"
+        ">>> a = 45\n\r\t\t"
+        ">>> F = 0.05\n\r\t\t"
+        ">>> y = _special_functions.left_straightedge(x, a, F)"
     },
     {
         "max",
@@ -1575,12 +2545,6 @@ PyUFuncGenericFunction double_slit_funcs[3] = {
     &long_double_double_slit_diffraction
 };
 
-PyUFuncGenericFunction invsqwellsol_funcs[3] = {
-    &complex_float_inv_square_well,
-    &complex_double_inv_square_well,
-    &complex_long_double_inv_square_well
-};
-
 PyUFuncGenericFunction frequency_to_wavelength_funcs[3] = {
     &float_frequency_to_wavelength,
     &double_frequency_to_wavelength,
@@ -1610,12 +2574,6 @@ PyUFuncGenericFunction lambertw_funcs[3] = {
     &float_lambertw,
     &double_lambertw,
     &long_double_lambertw
-};
-
-PyUFuncGenericFunction left_straightedge_funcs[3] = {
-    &float_left_straightedge,
-    &double_left_straightedge,
-    &long_double_left_straightedge
 };
 
 PyUFuncGenericFunction psi_funcs[3] = {
@@ -1648,12 +2606,6 @@ PyUFuncGenericFunction res_inv_funcs[3] = {
     &long_double_resolution_inverse
 };
 
-PyUFuncGenericFunction right_straightedge_funcs[3] = {
-    &float_right_straightedge,
-    &double_right_straightedge,
-    &long_double_right_straightedge
-};
-
 PyUFuncGenericFunction sinc_funcs[3] = {
     &float_sinc,
     &double_sinc,
@@ -1664,18 +2616,6 @@ PyUFuncGenericFunction single_slit_funcs[3] = {
     &float_single_slit_diffraction,
     &double_single_slit_diffraction,
     &long_double_single_slit_diffraction
-};
-
-PyUFuncGenericFunction sqwellsol_funcs[3] = {
-    &complex_float_square_well,
-    &complex_double_square_well,
-    &complex_long_double_square_well
-};
-
-PyUFuncGenericFunction sqwellphase_funcs[3] = {
-    &float_square_well_phase,
-    &double_square_well_phase,
-    &long_double_square_well_phase
 };
 
 PyUFuncGenericFunction wavelength_to_wavenumber_funcs[3] = {
@@ -1731,13 +2671,6 @@ static char five_real_in_one_real_out[18] = {
     NPY_LONGDOUBLE, NPY_LONGDOUBLE
 };
 
-static char four_real_in_one_complex_out[15] = {
-    NPY_FLOAT, NPY_FLOAT, NPY_FLOAT, NPY_FLOAT, NPY_CFLOAT,
-    NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE, NPY_CDOUBLE,
-    NPY_LONGDOUBLE, NPY_LONGDOUBLE, NPY_LONGDOUBLE, NPY_LONGDOUBLE,
-    NPY_CLONGDOUBLE
-};
-
 static char seven_real_in_one_real_out[24] = {
     NPY_FLOAT, NPY_FLOAT, NPY_FLOAT, NPY_FLOAT,
     NPY_FLOAT, NPY_FLOAT, NPY_FLOAT, NPY_FLOAT,
@@ -1755,12 +2688,6 @@ static char nine_real_in_one_real_out[30] = {
     NPY_LONGDOUBLE, NPY_LONGDOUBLE, NPY_LONGDOUBLE, NPY_LONGDOUBLE,
     NPY_LONGDOUBLE, NPY_LONGDOUBLE, NPY_LONGDOUBLE, NPY_LONGDOUBLE,
     NPY_LONGDOUBLE, NPY_LONGDOUBLE
-};
-
-static char three_real_in_one_complex_out[12] = {
-    NPY_FLOAT, NPY_FLOAT, NPY_FLOAT, NPY_CFLOAT,
-    NPY_DOUBLE, NPY_DOUBLE, NPY_DOUBLE, NPY_CDOUBLE,
-    NPY_LONGDOUBLE, NPY_LONGDOUBLE, NPY_LONGDOUBLE, NPY_CLONGDOUBLE
 };
 
 #if PY_VERSION_HEX >= 0x03000000
@@ -1781,7 +2708,6 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     PyObject *besselJ0;
     PyObject *besselI0;
     PyObject *double_slit_diffraction;
-    PyObject *inverse_square_well_diffraction;
     PyObject *frequency_to_wavelength;
     PyObject *fresnel_cos;
     PyObject *fresnel_psi;
@@ -1791,13 +2717,9 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     PyObject *fresnel_scale;
     PyObject *fresnel_sin;
     PyObject *lambertw;
-    PyObject *left_straightedge;
     PyObject *resolution_inverse;
-    PyObject *right_straightedge;
     PyObject *single_slit_diffraction;
     PyObject *sinc;
-    PyObject *square_well_diffraction;
-    PyObject *square_well_phase;
     PyObject *wavelength_to_wavenumber;
     PyObject *m, *d;
 
@@ -1825,12 +2747,6 @@ PyMODINIT_FUNC PyInit__special_functions(void)
         "double_slit_diffraction_docstring", 0
     );
 
-    inverse_square_well_diffraction = PyUFunc_FromFuncAndData(
-        invsqwellsol_funcs, PyuFunc_None_3, four_real_in_one_complex_out,
-        3, 4, 1, PyUFunc_None, "inverse_square_well_diffraction", 
-        "inverse_square_well_diffraction_docstring", 0
-    );
-
     frequency_to_wavelength = PyUFunc_FromFuncAndData(
         frequency_to_wavelength_funcs, PyuFunc_None_3, one_real_in_one_real_out,
         3, 1, 1, PyUFunc_None, "frequency_to_wavelength",
@@ -1878,22 +2794,10 @@ PyMODINIT_FUNC PyInit__special_functions(void)
         PyUFunc_None, "lambertw", "lambertw_docstring", 0
     );
 
-    left_straightedge = PyUFunc_FromFuncAndData(
-        left_straightedge_funcs, PyuFunc_None_3, three_real_in_one_complex_out,
-        3, 3, 1, PyUFunc_None, "left_straightedge", 
-        "left_straightedge_docstring", 0
-    );
-
     resolution_inverse = PyUFunc_FromFuncAndData(
         res_inv_funcs, PyuFunc_None_3, one_real_in_one_real_out,
         3, 1, 1, PyUFunc_None, "resolution_inverse", 
         "resolution_inverse_docstring", 0
-    );
-
-    right_straightedge = PyUFunc_FromFuncAndData(
-        right_straightedge_funcs, PyuFunc_None_3, three_real_in_one_complex_out,
-        3, 3, 1, PyUFunc_None, "right_straightedge", 
-        "right_straightedge_docstring", 0
     );
 
     sinc = PyUFunc_FromFuncAndData(
@@ -1907,18 +2811,6 @@ PyMODINIT_FUNC PyInit__special_functions(void)
         "single_slit_diffraction_docstring", 0
     );
 
-    square_well_diffraction = PyUFunc_FromFuncAndData(
-        sqwellsol_funcs, PyuFunc_None_3, four_real_in_one_complex_out,
-        3, 4, 1, PyUFunc_None, "square_well_diffraction", 
-        "square_well_diffraction_docstring", 0
-    );
-
-    square_well_phase = PyUFunc_FromFuncAndData(
-        sqwellphase_funcs, PyuFunc_None_3, four_real_in_one_complex_out,
-        3, 4, 1, PyUFunc_None, "square_well_phase", 
-        "square_well_phase_docstring", 0
-    );
-
     wavelength_to_wavenumber = PyUFunc_FromFuncAndData(
         wavelength_to_wavenumber_funcs, PyuFunc_None_3,
         one_real_in_one_real_out, 3, 1, 1, PyUFunc_None,
@@ -1930,8 +2822,6 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     PyDict_SetItemString(d, "besselJ0", besselJ0);
     PyDict_SetItemString(d, "besselI0", besselI0);
     PyDict_SetItemString(d, "double_slit_diffraction", double_slit_diffraction);
-    PyDict_SetItemString(d, "inverse_square_well_diffraction",
-                         inverse_square_well_diffraction);
     PyDict_SetItemString(d, "frequency_to_wavelength", frequency_to_wavelength);
     PyDict_SetItemString(d, "fresnel_cos", fresnel_cos);
     PyDict_SetItemString(d, "fresnel_psi", fresnel_psi);
@@ -1942,20 +2832,15 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     PyDict_SetItemString(d, "fresnel_scale", fresnel_scale);
     PyDict_SetItemString(d, "fresnel_sin", fresnel_sin);
     PyDict_SetItemString(d, "lambertw", lambertw);
-    PyDict_SetItemString(d, "left_straightedge", left_straightedge);
     PyDict_SetItemString(d, "resolution_inverse", resolution_inverse);
-    PyDict_SetItemString(d, "right_straightedge", right_straightedge);
     PyDict_SetItemString(d, "sinc", sinc);
     PyDict_SetItemString(d, "single_slit_diffraction", single_slit_diffraction);
-    PyDict_SetItemString(d, "square_well_diffraction", square_well_diffraction);
-    PyDict_SetItemString(d, "square_well_phase", square_well_phase);
     PyDict_SetItemString(d, "wavelength_to_wavenumber",
                          wavelength_to_wavenumber);
 
     Py_DECREF(double_slit_diffraction);
     Py_DECREF(besselJ0);
     Py_DECREF(besselI0);
-    Py_DECREF(inverse_square_well_diffraction);
     Py_DECREF(frequency_to_wavelength);
     Py_DECREF(fresnel_cos);
     Py_DECREF(fresnel_psi);
@@ -1965,13 +2850,9 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     Py_DECREF(fresnel_scale);
     Py_DECREF(fresnel_sin);
     Py_DECREF(lambertw);
-    Py_DECREF(left_straightedge);
     Py_DECREF(resolution_inverse);
-    Py_DECREF(right_straightedge);
     Py_DECREF(sinc);
     Py_DECREF(single_slit_diffraction);
-    Py_DECREF(square_well_diffraction);
-    Py_DECREF(square_well_phase);
     Py_DECREF(wavelength_to_wavenumber);
 
     return m;
@@ -1982,7 +2863,6 @@ PyMODINIT_FUNC init__funcs(void)
     PyObject *besselJ0;
     PyObject *besselI0;
     PyObject *double_slit_diffraction;
-    PyObject *inverse_square_well_diffraction;
     PyObject *frequency_to_wavelength;
     PyObject *fresnel_cos;
     PyObject *fresnel_psi;
@@ -1992,13 +2872,9 @@ PyMODINIT_FUNC init__funcs(void)
     PyObject *fresnel_scale;
     PyObject *fresnel_sin;
     PyObject *lambertw;
-    PyObject *left_straightedge;
     PyObject *resolution_inverse;
-    PyObject *right_straightedge;
     PyObject *single_slit_diffraction;
     PyObject *sinc;
-    PyObject *square_well_diffraction;
-    PyObject *square_well_phase;
     PyObject *wavelength_to_wavenumber;
     PyObject *m, *d;
 
@@ -2011,12 +2887,12 @@ PyMODINIT_FUNC init__funcs(void)
     import_umath();
 
     besselJ0 = PyUFunc_FromFuncAndData(
-        besselJ0_funcs, PyuFunc_None_3, one_real_in_one_float_out, 13, 1, 1,
+        besselJ0_funcs, PyuFunc_None_13, one_real_in_one_float_out, 13, 1, 1,
         PyUFunc_None, "besselJ0_diffraction", "besselJ0_docstring", 0
     );
 
     besselI0 = PyUFunc_FromFuncAndData(
-        besselI0_funcs, PyuFunc_None_3, one_real_in_one_float_out, 13, 1, 1,
+        besselI0_funcs, PyuFunc_None_13, one_real_in_one_float_out, 13, 1, 1,
         PyUFunc_None, "besselI0_diffraction", "besselI0_docstring", 0
     );
 
@@ -2024,12 +2900,6 @@ PyMODINIT_FUNC init__funcs(void)
         double_slit_funcs, PyuFunc_None_3, five_real_in_one_real_out,
         3, 5, 1, PyUFunc_None, "double_slit_diffraction", 
         "double_slit_diffraction_docstring", 0
-    );
-
-    inverse_square_well_diffraction = PyUFunc_FromFuncAndData(
-        invsqwellsol_funcs, PyuFunc_None_3, four_real_in_one_complex_out,
-        3, 4, 1, PyUFunc_None, "inverse_square_well_diffraction", 
-        "inverse_square_well_diffraction_docstring", 0
     );
 
     frequency_to_wavelength = PyUFunc_FromFuncAndData(
@@ -2079,22 +2949,10 @@ PyMODINIT_FUNC init__funcs(void)
         PyUFunc_None, "lambertw", "lambertw_docstring", 0
     );
 
-    left_straightedge = PyUFunc_FromFuncAndData(
-        left_straightedge_funcs, PyuFunc_None_3, three_real_in_one_complex_out,
-        3, 3, 1, PyUFunc_None, "left_straightedge", 
-        "left_straightedge_docstring", 0
-    );
-
     resolution_inverse = PyUFunc_FromFuncAndData(
         res_inv_funcs, PyuFunc_None_3, one_real_in_one_real_out,
         3, 1, 1, PyUFunc_None, "resolution_inverse", 
         "resolution_inverse_docstring", 0
-    );
-
-    right_straightedge = PyUFunc_FromFuncAndData(
-        right_straightedge_funcs, PyuFunc_None_3, three_real_in_one_complex_out,
-        3, 3, 1, PyUFunc_None, "right_straightedge", 
-        "right_straightedge_docstring", 0
     );
 
     sinc = PyUFunc_FromFuncAndData(
@@ -2108,18 +2966,6 @@ PyMODINIT_FUNC init__funcs(void)
         "single_slit_diffraction_docstring", 0
     );
 
-    square_well_diffraction = PyUFunc_FromFuncAndData(
-        sqwellsol_funcs, PyuFunc_None_3, four_real_in_one_complex_out,
-        3, 4, 1, PyUFunc_None, "square_well_diffraction", 
-        "square_well_diffraction_docstring", 0
-    );
-
-    square_well_phase = PyUFunc_FromFuncAndData(
-        sqwellphase_funcs, PyuFunc_None_3, four_real_in_one_complex_out,
-        3, 4, 1, PyUFunc_None, "square_well_phase", 
-        "square_well_phase_docstring", 0
-    );
-
     wavelength_to_wavenumber = PyUFunc_FromFuncAndData(
         wavelength_to_wavenumber_funcs, PyuFunc_None_3,
         one_real_in_one_real_out, 3, 1, 1, PyUFunc_None,
@@ -2131,8 +2977,6 @@ PyMODINIT_FUNC init__funcs(void)
     PyDict_SetItemString(d, "besselJ0", besselJ0);
     PyDict_SetItemString(d, "besselI0", besselI0);
     PyDict_SetItemString(d, "double_slit_diffraction", double_slit_diffraction);
-    PyDict_SetItemString(d, "inverse_square_well_diffraction",
-                         inverse_square_well_diffraction);
     PyDict_SetItemString(d, "frequency_to_wavelength", frequency_to_wavelength);
     PyDict_SetItemString(d, "fresnel_cos", fresnel_cos);
     PyDict_SetItemString(d, "fresnel_psi", fresnel_psi);
@@ -2143,20 +2987,15 @@ PyMODINIT_FUNC init__funcs(void)
     PyDict_SetItemString(d, "fresnel_scale", fresnel_scale);
     PyDict_SetItemString(d, "fresnel_sin", fresnel_sin);
     PyDict_SetItemString(d, "lambertw", lambertw);
-    PyDict_SetItemString(d, "left_straightedge", left_straightedge);
     PyDict_SetItemString(d, "resolution_inverse", resolution_inverse);
-    PyDict_SetItemString(d, "right_straightedge", right_straightedge);
     PyDict_SetItemString(d, "sinc", sinc);
     PyDict_SetItemString(d, "single_slit_diffraction", single_slit_diffraction);
-    PyDict_SetItemString(d, "square_well_diffraction", square_well_diffraction);
-    PyDict_SetItemString(d, "square_well_phase", square_well_phase);
     PyDict_SetItemString(d, "wavelength_to_wavenumber",
                          wavelength_to_wavenumber);
 
     Py_DECREF(double_slit_diffraction);
     Py_DECREF(besselJ0);
     Py_DECREF(besselI0);
-    Py_DECREF(inverse_square_well_diffraction);
     Py_DECREF(frequency_to_wavelength);
     Py_DECREF(fresnel_cos);
     Py_DECREF(fresnel_psi);
@@ -2166,13 +3005,9 @@ PyMODINIT_FUNC init__funcs(void)
     Py_DECREF(fresnel_scale);
     Py_DECREF(fresnel_sin);
     Py_DECREF(lambertw);
-    Py_DECREF(left_straightedge);
     Py_DECREF(resolution_inverse);
-    Py_DECREF(right_straightedge);
     Py_DECREF(sinc);
     Py_DECREF(single_slit_diffraction);
-    Py_DECREF(square_well_diffraction);
-    Py_DECREF(square_well_phase);
     Py_DECREF(wavelength_to_wavenumber);
 
     return m;

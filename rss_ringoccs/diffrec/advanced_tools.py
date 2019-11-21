@@ -144,7 +144,7 @@ class ModelFromGEO(object):
                  wtype='kb25', norm=True, bfac=True, sigma=2.e-13, opacity=None,
                  verbose=True, psitype='fresnel', use_fresnel=False,
                  eccentricity=0.0, periapse=0.0, use_deprecate=False, rng="all",
-                 model="squarewell", echo=False, rho_shift=0.0,
+                 model="ringlet", echo=False, rho_shift=0.0, N_Waves=3,
                  data_rho=None, data_pow=None, data_phase=None):
 
         # Check all input variables for errors.
@@ -547,7 +547,7 @@ class ModelFromGEO(object):
         if verbose:
             print("\tComputing Forward Model...")
 
-        if (model == "squarewell"):
+        if (model == "ringlet"):
             self.p_norm_actual_vals = numpy.zeros(numpy.size(self.rho_km_vals))
             self.p_norm_actual_vals += 1.0
             rstart = numpy.min((self.rho_km_vals>=rho-width/2.0).nonzero())
@@ -556,11 +556,29 @@ class ModelFromGEO(object):
 
             if use_fresnel:
                 center = numpy.min((self.rho_km_vals >= rho).nonzero())
-                T_hat = special_functions.square_well_diffraction(
+                T_hat = special_functions.ringlet_diffraction(
                     self.rho_km_vals, rho-width/2.0, rho+width/2.0, F[center]
                 )
                 if opacity:
-                    T_hat += special_functions.inverse_square_well_diffraction(
+                    T_hat += special_functions.gap_diffraction(
+                        self.rho_km_vals, rho-width/2.0,
+                        rho+width/2.0, F[center]
+                    ) * numpy.sqrt(opacity)
+
+        elif (model == "gap"):
+            self.p_norm_actual_vals = numpy.zeros(numpy.size(self.rho_km_vals))
+            self.p_norm_actual_vals += opacity
+            rstart = numpy.min((self.rho_km_vals>=rho-width/2.0).nonzero())
+            rfinsh = numpy.max((self.rho_km_vals<=rho+width/2.0).nonzero())
+            self.p_norm_actual_vals[rstart:rfinsh+1] = 1.0
+
+            if use_fresnel:
+                center = numpy.min((self.rho_km_vals >= rho).nonzero())
+                T_hat = special_functions.gap_diffraction(
+                    self.rho_km_vals, rho-width/2.0, rho+width/2.0, F[center]
+                )
+                if opacity:
+                    T_hat += special_functions.ringlet_diffraction(
                         self.rho_km_vals, rho-width/2.0,
                         rho+width/2.0, F[center]
                     ) * numpy.sqrt(opacity)
@@ -594,6 +612,24 @@ class ModelFromGEO(object):
                     T_hat += special_functions.right_straightedge(
                         self.rho_km_vals, rho, F[center]
                     ) * numpy.sqrt(opacity)
+
+        elif (model == "squarewave"):
+            self.p_norm_actual_vals = numpy.zeros(numpy.size(self.rho_km_vals))
+            N = int((self.rho_km_vals[-1]-self.rho_km_vals[0])/(2*width))
+            n_width = int(width/dx_km_desired)
+            rstart = int(self.rho_km_vals[0]/(2*width))*2*width+width
+            nstart = numpy.min((self.rho_km_vals >= rstart).nonzero())
+            self.p_norm_actual_vals[0:nstart] = 1.0
+
+            nstart += n_width
+            for i in range(N-1):
+                self.p_norm_actual_vals[nstart+2*i*n_width:nstart+(2*i+1)*n_width] = 1.0
+
+            if use_fresnel:
+                T_hat = special_functions.square_wave_diffraction(
+                    self.rho_km_vals, width, F[center], N_Waves
+                )
+
 
         elif (model == "deltaimpulse"):
             center = numpy.min((self.rho_km_vals >= rho).nonzero())

@@ -234,7 +234,7 @@ def check_is_real(input_var, input_var_name, fname):
 
 def check_model(model, fname):
     model_list = ["deltaimpulse", "fromdata", "leftstraightedge",
-                  "rightstraightedge", "squarewell"]
+                  "rightstraightedge", "ringlet", "gap", "squarewave"]
 
     # Cbeck that wtype is a valid string.
     try:

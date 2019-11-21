@@ -1,6 +1,8 @@
 #ifndef RSS_RINGOCCS_GET_ARRAY_H
 #define RSS_RINGOCCS_GET_ARRAY_H
 
+#include <complex.h>
+
 extern void Get_Char_to_Double_Array(char *x, double *y,
                                      long dim, double (*f)(char));
 

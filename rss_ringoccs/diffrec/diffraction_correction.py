@@ -248,7 +248,7 @@ class DiffractionCorrection(object):
     def __init__(self, DLP, res, rng="all", wtype="kbmd20", fwd=False,
                  norm=True, verbose=False, bfac=True, sigma=2.e-13,
                  psitype="fresnel4", write_file=False, res_factor=0.75,
-                 ecc=0.0, peri=0.0):
+                 ecc=0.0, peri=0.0, perturb=[0,0,0,0,0]):
 
         # Store the name of this class as a string (The "function name").
         fn = "diffrec.diffraction_correction.DiffractionCorrection"
@@ -257,6 +257,19 @@ class DiffractionCorrection(object):
         if verbose:
             print("Processing Diffraction Correction:")
             print("\tRunning Error Check on Input Arguments...")
+
+        if (len(perturb) != 5):
+            raise IndexError(
+                "\rError Encountered: rss_ringoccs\n"
+                "\r\tdiffrec.diffraction_correction.DiffractionCorrection\n\n"
+                "\rperturb should be a list of five floating point numbers.\n"
+            )
+        else:
+            pass
+
+        for i in range(5):
+            perturb[i] = error_check.check_type_and_convert(perturb[i], float,
+                                                            "perturb", fn)
 
         error_check.check_type(fwd, bool, "fwd", fn)
         error_check.check_type(bfac, bool, "bfac", fn)
@@ -291,6 +304,7 @@ class DiffractionCorrection(object):
         self.T_hat_fwd_vals = None
         self.phase_fwd_vals = None
         self.input_res = res
+        self.perturb = perturb
         self.verbose = verbose
         self.psitype = psitype
         self.rngreq = rng
@@ -635,9 +649,9 @@ class DiffractionCorrection(object):
 
         self.T_vals = special_functions.fresnel_transform(
             self.T_hat_vals, self.rho_km_vals, self.F_km_vals, self.w_km_vals,
-            self.start, self.n_used, self.wtype, self.norm, False, self.psitype,
-            self.phi_rad_vals, self.kD_vals, self.B_rad_vals, self.D_km_vals,
-            self.ecc, self.peri
+            self.perturb, self.start, self.n_used, self.wtype, self.norm, False,
+            self.psitype, self.phi_rad_vals, self.kD_vals, self.B_rad_vals,
+            self.D_km_vals, self.ecc, self.peri
         )
 
         self.tau_threshold_vals = (self.raw_tau_threshold_vals -

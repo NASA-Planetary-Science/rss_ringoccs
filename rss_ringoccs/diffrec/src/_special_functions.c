@@ -675,16 +675,17 @@ static PyObject *min(PyObject *self, PyObject *args)
 
 static PyObject *fresnel_transform(PyObject *self, PyObject *args)
 {
-    PyObject *output, *capsule;
+    PyObject *output, *capsule, *perturb_list, *next, *iter;
     npy_int dim;
     PyArrayObject *T_in,    *rho_km_vals, *F_km_vals, *phi_rad_vals;
     PyArrayObject *kd_vals, *B_rad_vals,  *D_km_vals, *w_km_vals;
     long start, n_used;
+    int i;
     unsigned char wtype, use_norm, use_fwd, order;
     double ecc, peri;
 
 
-    if (!(PyArg_ParseTuple(args, "O!O!O!O!O!O!O!O!llbbbbdd",
+    if (!(PyArg_ParseTuple(args, "O!O!O!O!O!O!O!O!Ollbbbbdd",
                            &PyArray_Type, &T_in,
                            &PyArray_Type, &rho_km_vals,
                            &PyArray_Type, &F_km_vals,
@@ -693,8 +694,9 @@ static PyObject *fresnel_transform(PyObject *self, PyObject *args)
                            &PyArray_Type, &B_rad_vals,
                            &PyArray_Type, &D_km_vals,
                            &PyArray_Type, &w_km_vals,
-                           &start, &n_used, &wtype, &use_norm,
-                           &use_fwd, &order, &ecc, &peri))){ 
+                           &perturb_list, &start, &n_used,
+                           &wtype, &use_norm, &use_fwd,
+                           &order, &ecc, &peri))){ 
         PyErr_Format(
             PyExc_TypeError,
             "\n\rError Encountered: rss_ringoccs\n"
@@ -736,6 +738,42 @@ static PyObject *fresnel_transform(PyObject *self, PyObject *args)
     dlp.order    = order;
     dlp.ecc      = ecc;
     dlp.peri     = peri;
+
+    iter = PyObject_GetIter(perturb_list);
+    if (!iter) {
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.fresnel_transform\n\n"
+            "\rperturb should be a python list of five floats or ints.\n"
+        );
+        return NULL;
+    }
+
+    for (i = 0; i < 5; ++i){
+        next = PyIter_Next(iter);
+        if (!next) {
+            PyErr_Format(
+                PyExc_TypeError,
+                "\n\rError Encountered: rss_ringoccs\n"
+                "\r\tdiffrec.special_functions.fresnel_transform\n\n"
+                "\rperturb should be a python list of five floats or ints.\n"
+                "\rSize of your list: %d", i
+            );
+        }
+
+        if (PyLong_Check(next)) dlp.perturb[i] = (double)PyLong_AsLong(next);
+        else if (PyFloat_Check(next)) dlp.perturb[i] = PyFloat_AsDouble(next);
+        else {
+            PyErr_Format(
+                PyExc_TypeError,
+                "\n\rError Encountered: rss_ringoccs\n"
+                "\r\tdiffrec.special_functions.fresnel_transform\n\n"
+                "\rperturb should be a python list of five floats or ints.\n"
+                "\rYour list contains objects that are not real numbers.\n"
+            );
+        }
+    }
 
 
     dim = PyArray_DIMS(T_in)[0];
@@ -995,7 +1033,12 @@ static PyObject *fresnel_transform(PyObject *self, PyObject *args)
 
     if (dlp.order == 0){
         if ((dlp.ecc == 0.0) && (dlp.peri == 0.0))
-            DiffractionCorrectionNewton(&dlp);
+            if ((dlp.perturb[0] == 0) && (dlp.perturb[1] == 0) &&
+                (dlp.perturb[2] == 0) && (dlp.perturb[3] == 0) &&
+                (dlp.perturb[4] == 0)) {
+                DiffractionCorrectionNewton(&dlp);
+            }
+            else DiffractionCorrectionPerturbedNewton(&dlp);
         else DiffractionCorrectionEllipse(&dlp);
     }
     else if (dlp.order == 1) DiffractionCorrectionFresnel(&dlp);

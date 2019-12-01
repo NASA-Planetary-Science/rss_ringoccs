@@ -6,7 +6,7 @@ from rss_ringoccs.tools import CSV_tools, error_check, history
 class CompareTau(object):
     def __init__(self, geo, cal, dlp, tau, res, rng='all', wtype="kbmd20",
                  fwd=False, bfac=True, sigma=2.e-13, verbose=False, norm=True,
-                 psitype='fresnel4', res_factor=0.75):
+                 psitype='fresnel4', res_factor=0.75, perturb=[0,0,0,0,0]):
 
         # Check all input variables for errors.
         fname = "diffrec.advanced_tools.CompareTau"
@@ -41,7 +41,8 @@ class CompareTau(object):
         data = CSV_tools.ExtractCSVData(geo, cal, dlp, tau=tau, verbose=verbose)
         rec = diffraction_correction.DiffractionCorrection(
             data, res, rng=rng, wtype=wtype, fwd=fwd, norm=norm, bfac=bfac,
-            sigma=sigma, psitype=psitype, res_factor=res_factor, verbose=verbose
+            sigma=sigma, psitype=psitype, res_factor=res_factor,
+            verbose=verbose, perturb=perturb
         )
 
         self.rho_km_vals = rec.rho_km_vals
@@ -145,7 +146,8 @@ class ModelFromGEO(object):
                  verbose=True, psitype='fresnel', use_fresnel=False,
                  eccentricity=0.0, periapse=0.0, use_deprecate=False, rng="all",
                  model="ringlet", echo=False, rho_shift=0.0, N_Waves=3,
-                 data_rho=None, data_pow=None, data_phase=None):
+                 data_rho=None, data_pow=None, data_phase=None,
+                 perturb=[0,0,0,0,0]):
 
         # Check all input variables for errors.
         fname = "diffrec.advanced_tools.ModelFromGEO"
@@ -679,7 +681,7 @@ class ModelFromGEO(object):
         if ((not use_fresnel) and (not (model == "deltaimpulse"))):
             T_in = numpy.sqrt(self.p_norm_actual_vals.astype(complex))
             T_hat = special_functions.fresnel_transform(
-                T_in, self.rho_km_vals, F, self.w_km_vals,
+                T_in, self.rho_km_vals, F, self.w_km_vals, perturb,
                 start, n_used, wtype, norm, True, psitype,
                 self.phi_rad_vals, kD_vals, self.B_rad_vals, self.D_km_vals,
                 periapse, eccentricity
@@ -742,7 +744,7 @@ class ModelFromGEO(object):
                 self.phase_rad_vals -= self.data_phase
 
             T_hat = special_functions.fresnel_transform(
-                T_in, self.rho_km_vals, F, self.w_km_vals,
+                T_in, self.rho_km_vals, F, self.w_km_vals, perturb,
                 start, n_used, wtype, norm, False, psitype,
                 self.phi_rad_vals, kD_vals, self.B_rad_vals, self.D_km_vals,
                 periapse, eccentricity

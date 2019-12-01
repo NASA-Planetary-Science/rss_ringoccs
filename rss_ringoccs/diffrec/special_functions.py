@@ -620,8 +620,8 @@ def fresnel_sin(x):
             """
         )
 
-def fresnel_transform(T_in, rho_km_vals, F_km_vals, w_km_vals, start, n_used,
-                      wtype, norm, fwd, psitype, phi_rad_vals, kD_vals,
+def fresnel_transform(T_in, rho_km_vals, F_km_vals, w_km_vals, perturb, start,
+                      n_used, wtype, norm, fwd, psitype, phi_rad_vals, kD_vals,
                       B_rad_vals, D_km_vals, ecc, peri):
 
     fname = "diffrec.special_functions.fresnel_transform"
@@ -646,7 +646,7 @@ def fresnel_transform(T_in, rho_km_vals, F_km_vals, w_km_vals, start, n_used,
     # Compute the Fresnel transform.
     return _special_functions.fresnel_transform(
         T_in, rho_km_vals, F_km_vals, phi_rad_vals, kD_vals, B_rad_vals,
-        D_km_vals, w_km_vals, start, n_used,
+        D_km_vals, w_km_vals, perturb, start, n_used,
         window_functions.func_dict[wtype]["wnum"], int(norm), int(fwd),
         ord, ecc, peri
     )

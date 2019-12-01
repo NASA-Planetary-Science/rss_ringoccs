@@ -41,6 +41,10 @@ def test_CompareTAU():
     # Name of the output PDF file.
     outfile = "./Figures/CompareTAU_Test.pdf"
 
+    # Some labels.
+    rss = "rss_ringoccs"
+    pds = "PDS Results"
+
     # Run diffraction correction on the input data.
     TauInst = at.CompareTau(geo, cal, dlp, tau, res, rng=rng, wtype=wtype,
                             verbose=False, psitype=psitype, res_factor=res_f,
@@ -126,8 +130,8 @@ def test_CompareTAU():
                 plt.xlabel("Ring Radius (km)")
 
                 # Plot the plots.
-                plt.plot(TauInst.rho_km_vals, TauInst.tau_vals, 'b')
-                plt.plot(TauInst.rho_km_vals, TauInst.tau_tau, 'r')
+                plt.plot(TauInst.rho_km_vals, TauInst.tau_vals, 'b', label=rss)
+                plt.plot(TauInst.tau_rho, TauInst.tau_tau, 'r', label=pds)
 
                 # Compute the range for the x-axis.
                 rmin = RegDict[int(8*i_page+i_plot)][1] - 25.0
@@ -181,8 +185,8 @@ def test_CompareTAU():
                 plt.xlabel("Ring Radius (km)")
 
                 # Plot the plots.
-                plt.plot(TauInst.rho_km_vals, TauInst.tau_vals, 'b')
-                plt.plot(TauInst.rho_km_vals, TauInst.tau_tau, 'r')
+                plt.plot(TauInst.rho_km_vals, TauInst.tau_vals, 'b', label=rss)
+                plt.plot(TauInst.tau_rho, TauInst.tau_tau, 'r', label=pds)
 
                 # Compute the range of the x and y axes.
                 rmin = RegDict[int(8*(N_Pages-1)+i_plot)][1] - 15.0

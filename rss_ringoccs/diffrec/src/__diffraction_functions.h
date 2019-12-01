@@ -21,6 +21,7 @@ typedef struct _dlpdataobj {
     double *w_km_vals;
     double ecc;
     double peri;
+    double perturb[5];
     long start;
     long n_used;
     unsigned char wtype;
@@ -69,6 +70,23 @@ Fresnel_Transform_Newton_Norm_Double(double *x_arr, double *phi_arr,
                                      double F, long n_pts, long center);
 
 extern complex double
+Fresnel_Transform_Perturbed_Newton_Double(double *x_arr, double *phi_arr,
+                                          complex double *T_in, double *w_func,
+                                          double kD, double r, double B,
+                                          double D, double EPS, long toler,
+                                          double dx, double F, long n_pts,
+                                          long center, double perturb[5]);
+
+extern complex double
+Fresnel_Transform_Perturbed_Newton_Norm_Double(double *x_arr, double *phi_arr,
+                                               complex double *T_in,
+                                               double *w_func, double kD,
+                                               double r, double B, double D,
+                                               double EPS, long toler,
+                                               double dx, double F, long n_pts,
+                                               long center, double perturb[5]);
+
+extern complex double
 Fresnel_Transform_Ellipse_Double(double *x_arr, double *phi_arr,
                                  complex double *T_in, double *w_func,
                                  double kD, double r, double B, double D,
@@ -88,6 +106,7 @@ Fresnel_Transform_Ellipse_Norm_Double(double *x_arr, double *phi_arr,
 extern void DiffractionCorrectionFresnel(DLPObj *dlp);
 extern void DiffractionCorrectionLegendre(DLPObj *dlp);
 extern void DiffractionCorrectionNewton(DLPObj *dlp);
+extern void DiffractionCorrectionPerturbedNewton(DLPObj *dlp);
 extern void DiffractionCorrectionEllipse(DLPObj *dlp);
 
 #endif

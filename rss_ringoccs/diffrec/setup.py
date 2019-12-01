@@ -31,6 +31,7 @@ def configuration(parent_package=None, top_path=None):
             "src/__fresnel_transform_ellipse.c",
             "src/__fresnel_transform_legendre.c",
             "src/__fresnel_transform_newton.c",
+            "src/__fresnel_transform_perturbednewton.c",
             "src/__get_array.c",
             "src/__math_function_lambertw.c",
             "src/__math_function_legendre.c",

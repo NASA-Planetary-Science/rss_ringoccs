@@ -701,8 +701,8 @@ static PyObject *fresnel_transform(PyObject *self, PyObject *args)
             PyExc_TypeError,
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\tdiffrec.special_functions.fresnel_transform\n\n"
-            "\rInput should be one dimensional numpy arrays and\n"
-            "\rreal valued numbers. The following are expected:\n"
+            "\rCould not parse input variables. Inputs should be one\n"
+            "\rdimensional numpy arrays and real numbers:\n"
             "\r\tT_in:        \t1-D complex numpy array\n"
             "\r\trho_km_vals: \t1-D real numpy array\n"
             "\r\tF_km_vals:   \t1-D real numpy array\n"
@@ -723,7 +723,9 @@ static PyObject *fresnel_transform(PyObject *self, PyObject *args)
             "\r\tOnly one dimensional numpy arrays are allowed. Only\n"
             "\r\tdouble types are supported. No current support for long\n"
             "\r\tdouble or float. Set this in Python with\n"
-            "\r\tastype(numpy.float) or astype(numpy.float64).\n"
+            "\r\tastype(numpy.float) or astype(numpy.float64).\n\n"
+            "\r\tAlso note, order should be between 0 and 256."
+
         );
         return NULL;
     }

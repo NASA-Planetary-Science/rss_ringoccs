@@ -79,7 +79,6 @@
  *  Date:       June 21, 2019                                                 *
  ******************************************************************************/
 #include "__diffraction_functions.h"
-#include <stdio.h>
 
 /******************************************************************************
  *------------------------------DEFINE C FUNCTIONS----------------------------*
@@ -268,6 +267,7 @@ void DiffractionCorrectionLegendre(DLPObj *dlp)
     }
 
     long i, nw_pts, center;
+    bool IsEven;
     double w_init, dx, two_dx, cosb, sinp, cosp;
     double Legendre_Coeff;
     double (*fw)(double, double);
@@ -284,8 +284,22 @@ void DiffractionCorrectionLegendre(DLPObj *dlp)
     else if (dlp->wtype == 6){fw = &Modified_Kaiser_Bessel_2_5_Double;}
     else                    {fw = &Modified_Kaiser_Bessel_3_5_Double;}
 
-    if (dlp->use_norm){FresT = &Fresnel_Transform_Legendre_Norm_Double;}
-    else              {FresT = &Fresnel_Transform_Legendre_Double;}
+    if ((2*(dlp->order/2)) == dlp->order){
+        if (dlp->use_norm){
+            FresT = &Fresnel_Transform_Legendre_Norm_Odd_Double;
+        }
+        else {
+            FresT = &Fresnel_Transform_Legendre_Odd_Double;
+        }
+    }
+    else {
+        if (dlp->use_norm){
+            FresT = &Fresnel_Transform_Legendre_Norm_Even_Double;
+        }
+        else {
+            FresT = &Fresnel_Transform_Legendre_Even_Double;
+        }
+    }
 
     /* Compute first window width and window function. */
     center = dlp->start;
@@ -314,6 +328,13 @@ void DiffractionCorrectionLegendre(DLPObj *dlp)
     /*  Allocate memory for the independent variable and window function.     */
     double *x_arr          = (double *)malloc(sizeof(double)*nw_pts);
     double *w_func         = (double *)malloc(sizeof(double)*nw_pts);
+
+    if (2*(dlp->order/2) == dlp->order){
+        IsEven = False;
+    }
+    else {
+        IsEven = True;
+    }
 
     /*  Also for the two Legendre polynomials.                                */
     double *legendre_p     = (double *)malloc(sizeof(double)*(dlp->order+1));
@@ -350,7 +371,7 @@ void DiffractionCorrectionLegendre(DLPObj *dlp)
          *  the bottom triangle of the square in the product.                 */
         Fresnel_Kernel_Coefficients(fresnel_ker_coeffs, legendre_p,
                                     alt_legendre_p, Legendre_Coeff,
-                                    dlp->order);
+                                    dlp->order, IsEven);
 
         /*  If the window width changes significantly, recompute w_func.      */
         if (fabs(w_init - dlp->w_km_vals[center]) >= two_dx) {

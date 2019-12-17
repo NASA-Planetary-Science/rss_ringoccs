@@ -633,22 +633,18 @@ def fresnel_transform(T_in, rho_km_vals, F_km_vals, w_km_vals, perturb, start,
     psitype = error_check.check_psitype(psitype, fname)
 
     if (psitype == "fresnel"):
-        ord = 1
-    elif (psitype == "fresnel4"):
-        ord = 3
-    elif (psitype == "fresnel6"):
-        ord = 5
-    elif (psitype == "fresnel8"):
-        ord = 7
+        order = 1
+    elif ("fresnel" in psitype):
+        order = int(psitype[7::])-1
     else:
-        ord = 0
+        order = 0
 
     # Compute the Fresnel transform.
     return _special_functions.fresnel_transform(
         T_in, rho_km_vals, F_km_vals, phi_rad_vals, kD_vals, B_rad_vals,
         D_km_vals, w_km_vals, perturb, start, n_used,
         window_functions.func_dict[wtype]["wnum"], int(norm), int(fwd),
-        ord, ecc, peri
+        order, ecc, peri
     )
 
 def lambertw(x):

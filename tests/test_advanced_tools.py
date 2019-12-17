@@ -33,7 +33,7 @@ def test_CompareTAU():
     wtype="kbmd20"
 
     # The approximation to the Fresnel kernel that is used.
-    psitype="full"
+    psitype="Newton"
 
     # Perturb the Fresnel kernel by a small cubic polynomial.
     perturb = [0,0,0,0.3,0]
@@ -417,7 +417,10 @@ def test_ModelFromGEO():
 
 def test_Make_MTR_Figs():
     # Location of the data for Rev007E.
-    geo = "./Test_Data/Rev007E_X43_Maxwell_GEO.TAB"
+    # geo = "./Test_Data/Rev007E_X43_Maxwell_GEO.TAB"
+
+    # Location of the data for Voyager.
+    geo = "./Test_Data/VG1_SRING_GEO_20191119.TAB"
 
     # Resolution of reconstruction.
     res = 1.0
@@ -426,10 +429,10 @@ def test_Make_MTR_Figs():
     wav = 3.6e-5
 
     # Center of the model being analyzed.
-    rho = 87500
+    rho = 85000
 
     # Range of the input data being processed.
-    rng = [86000, 89000]
+    rng = [83000, 87000]
 
     # Sample size between data points, in kilometers.
     dxs = 0.05
@@ -443,7 +446,7 @@ def test_Make_MTR_Figs():
 
     # Use the delta impulse model for the plots.
     model = "Delta Impulse"
-    psitype = "fresnel4"
+    psitype = "Newton"
 
     with PdfPages(outfile) as pdf:
 
@@ -507,7 +510,72 @@ def test_Make_MTR_Figs():
             plt.xlim(rmin, rmax)
             plt.legend()
 
-            plt.ylim(6.5, 0)
+            plt.ylim(6.5, -0.2)
+
+            i += 1
+
+        # Append the plots to the pdf, close, and move on to the next one.
+        pdf.savefig(bbox_inches="tight", pad_inches=1)
+        plt.close()
+
+        # Configurations for the plots.
+        plt.rc('font', family='serif')
+        plt.rc('font', size=10)
+        plt.figure(figsize=(8.5, 11))
+
+        # Title for the page.
+        plt.suptitle("MTR Fig 4 - 1km Resolution - Maxwell Ringlet - Rev007E",
+                     size=14)
+
+        # Use gridspec to create a 2-by-1 group of plots.
+        gs = gridspec.GridSpec(2, 2, hspace=0.0, wspace=0.0)
+
+        i = 0
+        wtype="rect"
+
+        for psitype in ["Fresnel", "Fresnel 3", "Fresnel 4", "Newton"]:
+
+            # Run diffraction correction on both sets of modeled data.
+            rec = dc.DiffractionCorrection(gdata, res, rng=rng,
+                                           wtype=wtype, psitype=psitype)
+
+            # Select the first plot region.
+            plt.subplot(gs[i // 2, i % 2])
+
+            # Title for the plot, and tick parameters for the x-axis.
+            if (i // 2 == 1):
+                plt.tick_params(axis='x', which='both', bottom=True,
+                                top=False, labelbottom=True)
+                plt.xlabel("Ring Radius (km)")
+            else:
+                plt.tick_params(axis='x', which='both', bottom=False,
+                                top=True, labelbottom=False)
+
+            plt.locator_params(axis='x', nbins=8)
+
+            # Set the label for the y-axis.
+            if (i % 2 == 0):
+                plt.ylabel("Normalized Opacity")
+                plt.tick_params(axis='y', which='both', left=True,
+                                right=False, labelleft=True)
+            else:
+                plt.tick_params(axis='y', which='both', left=False,
+                                right=True, labelright=True, labelleft=False)
+
+            plt.locator_params(axis='y', nbins=3)
+
+            # Plot the modeled opacity.
+            nrho = numpy.min((rec.rho_km_vals >= rho).nonzero())
+            op = rec.T_vals/rec.T_vals[nrho]
+
+            op = -rec.mu_vals*numpy.log(numpy.abs(op))
+            plt.plot(rec.rho_km_vals, op, label=psitype)
+
+            # Set x axis range, and put the legend on top of plots.
+            plt.xlim(rmin, rmax)
+            plt.legend()
+
+            plt.ylim(3.2, -0.2)
 
             i += 1
 
@@ -517,6 +585,6 @@ def test_Make_MTR_Figs():
 
 
 if __name__ == "__main__":
-    test_CompareTAU()
-    test_ModelFromGEO()
+    # test_CompareTAU()
+    # test_ModelFromGEO()
     test_Make_MTR_Figs()

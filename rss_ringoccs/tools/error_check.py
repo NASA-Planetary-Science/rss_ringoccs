@@ -151,7 +151,6 @@ def check_range_input(rng, f_name):
     return rng
 
 def check_psitype(psitype, fname):
-    psi_types = ["fresnel", "fresnel4", "fresnel6", "fresnel8", "full"]
 
     # Cbeck that psitype is a valid string.
     try:
@@ -163,19 +162,34 @@ def check_psitype(psitype, fname):
             psitype = psitype.replace('"', "").lower()
 
             # Perform error check, print legal inputs if needed.
-            if not (psitype in psi_types):
+            if not ((psitype == "newton") or ("fresnel" in psitype)):
                 raise TypeError
             else:
+                if (psitype == "fresnel"):
+                    pass
+                elif ("fresnel" in psitype):
+                    try:
+                        order = int(psitype[7::])
+                        if ((order < 2) or (order > 256)):
+                            raise ValueError
+                        else:
+                            pass
+                    except:
+                        raise TypeError
+                else:
+                    pass
+
                 return psitype
     except TypeError:
-        erm = ""
-        for key in psi_types:
-            erm = "%s\t\t'%s'\n" % (erm, key)
+
         raise TypeError(
             """
             \r\tError Encountered: rss_ringoccs\n\r\t\t%s\n
-            \r\tpsitype must be a string. Allowed strings are:\n%s
-            """ % (fname, erm)
+            \r\tpsitype must be a string. Allowed strings are:
+            \r\t\t'Newton'
+            \r\t\t'Fresnel'
+            \r\t\t'Fresnel n'\t\t1<n<257 an integer
+            """ % (fname)
         )
 
 def check_wtype(wtype, fname):

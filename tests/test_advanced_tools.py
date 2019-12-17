@@ -415,6 +415,108 @@ def test_ModelFromGEO():
         pdf.savefig(bbox_inches="tight", pad_inches=1)
         plt.close()
 
+def test_Make_MTR_Figs():
+    # Location of the data for Rev007E.
+    geo = "./Test_Data/Rev007E_X43_Maxwell_GEO.TAB"
+
+    # Resolution of reconstruction.
+    res = 1.0
+
+    # Wavelength of light (in kilometers).
+    wav = 3.6e-5
+
+    # Center of the model being analyzed.
+    rho = 87500
+
+    # Range of the input data being processed.
+    rng = [86000, 89000]
+
+    # Sample size between data points, in kilometers.
+    dxs = 0.05
+
+    # Name of the output PDF file.
+    outfile = "./Figures/MTR_Figs.pdf"
+
+    # Range in the x-axis for the plots.
+    rmin = rho + res*12
+    rmax = rho - res*12
+
+    # Use the delta impulse model for the plots.
+    model = "Delta Impulse"
+    psitype = "fresnel4"
+
+    with PdfPages(outfile) as pdf:
+
+        # Create the modeled data without the Fresnel approximation.
+        gdata = at.ModelFromGEO(geo, wav, res, rho, rng=rng, dx_km_desired=dxs,
+                                model=model, verbose=False)
+
+        # Configurations for the plots.
+        plt.rc('font', family='serif')
+        plt.rc('font', size=10)
+        plt.figure(figsize=(8.5, 11))
+
+        # Title for the page.
+        plt.suptitle("MTR Fig 5 - 1km Resolution - Maxwell Ringlet - Rev007E",
+                     size=14)
+
+        # Use gridspec to create a 2-by-1 group of plots.
+        gs = gridspec.GridSpec(2, 2, hspace=0.0, wspace=0.0)
+
+        i = 0
+
+        for wtype in ["Rect", "Coss", "KB 25", "KB 35"]:
+
+            # Run diffraction correction on both sets of modeled data.
+            rec = dc.DiffractionCorrection(gdata, res, rng=rng,
+                                           wtype=wtype, psitype=psitype)
+
+            # Select the first plot region.
+            plt.subplot(gs[i // 2, i % 2])
+
+            # Title for the plot, and tick parameters for the x-axis.
+            if (i // 2 == 1):
+                plt.tick_params(axis='x', which='both', bottom=True,
+                                top=False, labelbottom=True)
+                plt.xlabel("Ring Radius (km)")
+            else:
+                plt.tick_params(axis='x', which='both', bottom=False,
+                                top=True, labelbottom=False)
+
+            plt.locator_params(axis='x', nbins=8)
+
+            # Set the label for the y-axis.
+            if (i % 2 == 0):
+                plt.ylabel("Normalized Opacity")
+                plt.tick_params(axis='y', which='both', left=True,
+                                right=False, labelleft=True)
+            else:
+                plt.tick_params(axis='y', which='both', left=False,
+                                right=True, labelright=True, labelleft=False)
+
+            plt.locator_params(axis='y', nbins=4)
+
+            # Plot the modeled opacity.
+            nrho = numpy.min((rec.rho_km_vals >= rho).nonzero())
+            op = rec.T_vals/rec.T_vals[nrho]
+
+            op = -rec.mu_vals*numpy.log(numpy.abs(op))
+            plt.plot(rec.rho_km_vals, op, label=wtype)
+
+            # Set x axis range, and put the legend on top of plots.
+            plt.xlim(rmin, rmax)
+            plt.legend()
+
+            plt.ylim(6.5, 0)
+
+            i += 1
+
+        # Append the plots to the pdf, close, and move on to the next one.
+        pdf.savefig(bbox_inches="tight", pad_inches=1)
+        plt.close()
+
+
 if __name__ == "__main__":
     test_CompareTAU()
     test_ModelFromGEO()
+    test_Make_MTR_Figs()

@@ -52,10 +52,11 @@
  *          The diffraction corrected profile.                                *
  ******************************************************************************/
 complex double
-Fresnel_Transform_Legendre_Double(double *x_arr, complex double *T_in,
-                                  double *w_func, double D, double *coeffs,
-                                  double dx, double F, double kd, long n_pts,
-                                  unsigned char order, long center)
+Fresnel_Transform_Legendre_Even_Double(double *x_arr, complex double *T_in,
+                                       double *w_func, double D,
+                                       double *coeffs, double dx, double F,
+                                       double kd, long n_pts,
+                                       unsigned char order, long center)
 {
     /*  Declare all necessary variables. i, j, and k are used for indexing.   */
     long i, j, k;
@@ -81,18 +82,19 @@ Fresnel_Transform_Legendre_Double(double *x_arr, complex double *T_in,
         x  = x_arr[i]*rcpr_D;
         x2 = x*x;
 
-        /*  Compute psi using Horner's Method for Polynomial Computation.     */
+        /*  Compute psi using Horner's Method for Polynomial Computation.  */
         psi_even = coeffs[order-1];
-        psi_odd = coeffs[order-2];
-        for (k=3; k<order-1; ++k){
+        psi_odd  = coeffs[order-2];
+        for (k=3; k<order-1;){
             psi_even = psi_even*x2 + coeffs[order-k];
             psi_odd  = psi_odd*x2 + coeffs[order-k-1];
+            k += 2;
         }
 
         /*  The leading term is x^2, so multiply by this and kD.              */
-        psi_even = psi_even*x2 + coeffs[0];
+        psi_even  = psi_even*x2 + coeffs[0];
         psi_even *= kd*x2;
-        psi_odd *= kd*x2*x;
+        psi_odd  *= kd*x2*x;
 
         /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
         psi = psi_even - psi_odd;
@@ -120,11 +122,11 @@ Fresnel_Transform_Legendre_Double(double *x_arr, complex double *T_in,
 }
 
 complex double
-Fresnel_Transform_Legendre_Norm_Double(double *x_arr, complex double *T_in,
-                                       double *w_func, double D, double *coeffs,
-                                       double dx, double F, double kd,
-                                       long n_pts, unsigned char order,
-                                       long center)
+Fresnel_Transform_Legendre_Norm_Even_Double(double *x_arr, complex double *T_in,
+                                            double *w_func, double D,
+                                            double *coeffs, double dx, double F,
+                                            double kd, long n_pts,
+                                            unsigned char order, long center)
 {
     /*  Declare all necessary variables. i and j are used for indexing.       */
     long i, j, k;
@@ -155,10 +157,11 @@ Fresnel_Transform_Legendre_Norm_Double(double *x_arr, complex double *T_in,
 
         /*  Compute psi using Horner's Method for Polynomial Computation.  */
         psi_even = coeffs[order-1];
-        psi_odd = coeffs[order-2];
-        for (k=3; k<order-1; ++k){
+        psi_odd  = coeffs[order-2];
+        for (k=3; k<order-1;){
             psi_even = psi_even*x2 + coeffs[order-k];
             psi_odd  = psi_odd*x2 + coeffs[order-k-1];
+            k += 2;
         }
 
         /*  The leading term is x^2, so multiply by this and kD.              */

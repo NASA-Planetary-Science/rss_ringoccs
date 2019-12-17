@@ -9,6 +9,10 @@
 #include "__window_functions.h"
 #include "__fresnel_kernel.h"
 
+typedef char bool;
+#define True 1
+#define False 0
+
 /*  Structure that contains all of the necessary data.                        */
 typedef struct _dlpdataobj {
     complex double *T_in;
@@ -43,17 +47,32 @@ Fresnel_Transform_Norm_Double(double *x_arr, complex double *T_in,
                               long center);
 
 extern complex double
-Fresnel_Transform_Legendre_Double(double *x_arr, complex double *T_in,
-                                  double *w_func, double D, double *coeffs,
-                                  double dx, double F, double kd, long n_pts,
-                                  unsigned char order, long center);
+Fresnel_Transform_Legendre_Even_Double(double *x_arr, complex double *T_in,
+                                      double *w_func, double D, double *coeffs,
+                                      double dx, double F, double kd,
+                                      long n_pts, unsigned char order,
+                                      long center);
 
 extern complex double
-Fresnel_Transform_Legendre_Norm_Double(double *x_arr, complex double *T_in,
-                                       double *w_func, double D, double *coeffs,
-                                       double dx, double F, double kd,
-                                       long n_pts, unsigned char order,
-                                       long center);
+Fresnel_Transform_Legendre_Norm_Even_Double(double *x_arr, complex double *T_in,
+                                            double *w_func, double D,
+                                            double *coeffs, double dx, double F,
+                                            double kd, long n_pts,
+                                            unsigned char order, long center);
+
+extern complex double
+Fresnel_Transform_Legendre_Odd_Double(double *x_arr, complex double *T_in,
+                                      double *w_func, double D, double *coeffs,
+                                      double dx, double F, double kd,
+                                      long n_pts, unsigned char order,
+                                      long center);
+
+extern complex double
+Fresnel_Transform_Legendre_Norm_Odd_Double(double *x_arr, complex double *T_in,
+                                           double *w_func, double D,
+                                           double *coeffs, double dx, double F,
+                                           double kd, long n_pts,
+                                           unsigned char order, long center);
 
 extern complex double
 Fresnel_Transform_Newton_Double(double *x_arr, double *phi_arr,

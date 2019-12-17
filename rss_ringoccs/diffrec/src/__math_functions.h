@@ -5,6 +5,10 @@
 #include "__math_constants.h"
 #include "__get_array.h"
 
+typedef char bool;
+#define True 1
+#define False 0
+
 extern float LambertW_Float(float x);
 
 extern double LambertW_Double(double x);
@@ -17,10 +21,10 @@ extern void Legendre_Polynomials(double *legendre_p, double x, int order);
 extern void Alt_Legendre_Polynomials(double *poly, double *legendre_p,
                                      int order);
 
-extern void Fresnel_Kernel_Coefficients(double *fresnel_ker_coeffs,
-                                        double *legendre_p,
-                                        double *alt_legendre_p,
-                                        double Legendre_Coeff, int order);
+extern void
+Fresnel_Kernel_Coefficients(double *fresnel_ker_coeffs, double *legendre_p,
+                            double *alt_legendre_p, double Legendre_Coeff,
+                            int order, bool IsEven);
 
 
 extern float Resolution_Inverse_Float(float x);

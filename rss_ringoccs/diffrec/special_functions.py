@@ -34,22 +34,7 @@ def besselJ0(x):
             >>> x = numpy.arange(-10, 10, 0.01)
             >>> y = sf.besselJ0(x)
     """
-    try:
-        return _special_functions.besselJ0(x)
-    except KeyboardInterrupt:
-        raise
-    except:
-        raise TypeError(
-            """
-            \r\tError: rss_ringoccs
-            \r\t\tdiffrec.special_functions.besselJ0\n
-            \r\tInput should be a numpy array of real numbers (ints or floats),
-            \r\tor a non-zero int or non-zero float.\n
-            \r\tUsage:
-            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. numpy.arange(-5, 5)
-            \r\t\t>>> y = besselJ0(x)
-            """
-        )
+    return _special_functions.besselJ0(x)
 
 def besselI0(x):
     """
@@ -72,22 +57,7 @@ def besselI0(x):
             >>> x = numpy.arange(-10, 10, 0.01)
             >>> y = sf.besselI0(x)
     """
-    try:
-        return _special_functions.besselI0(x)
-    except KeyboardInterrupt:
-        raise
-    except:
-        raise TypeError(
-            """
-            \r\tError: rss_ringoccs
-            \r\t\tdiffrec.special_functions.besselI0\n
-            \r\tInput should be a numpy array of real numbers (ints or floats),
-            \r\tor a non-zero int or non-zero float.\n
-            \r\tUsage:
-            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. numpy.arange(-5, 5)
-            \r\t\t>>> y = besselI0(x)
-            """
-        )
+    return _special_functions.besselI0(x)
 
 def frequency_to_wavelength(freq_hz):
     try:
@@ -239,22 +209,7 @@ def compute_norm_eq(w_func):
             >>> print(normeq)
             1.50015
     """
-    try:
-        return _special_functions.compute_norm_eq(w_func)
-    except KeyboardInterrupt:
-        raise
-    except:
-        raise TypeError(
-            """
-            \r\tError: rss_ringoccs
-            \r\t\tdiffrec.special_functions.wavelength_to_wavenumber\n
-            \r\tInput should be a numpy array of real numbers (ints or floats),
-            \r\tor a non-zero int or non-zero float.\n
-            \r\tUsage:
-            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. numpy.arange(-5, 5)
-            \r\t\t>>> y = frequency_to_wavelength(x)
-            """
-        )
+    return _special_functions.compute_norm_eq(w_func)
 
 def fresnel_scale(Lambda, d, phi, b):
     """
@@ -622,7 +577,7 @@ def fresnel_sin(x):
 
 def fresnel_transform(T_in, rho_km_vals, F_km_vals, w_km_vals, perturb, start,
                       n_used, wtype, norm, fwd, psitype, phi_rad_vals, kD_vals,
-                      B_rad_vals, D_km_vals, ecc, peri):
+                      B_rad_vals, D_km_vals, interp, ecc, peri):
 
     fname = "diffrec.special_functions.fresnel_transform"
 
@@ -644,7 +599,7 @@ def fresnel_transform(T_in, rho_km_vals, F_km_vals, w_km_vals, perturb, start,
         T_in, rho_km_vals, F_km_vals, phi_rad_vals, kD_vals, B_rad_vals,
         D_km_vals, w_km_vals, perturb, start, n_used,
         window_functions.func_dict[wtype]["wnum"], int(norm), int(fwd),
-        order, ecc, peri
+        order, interp, ecc, peri
     )
 
 def lambertw(x):
@@ -666,24 +621,7 @@ def lambertw(x):
         )
 
 def left_straightedge(x, edge, F):
-    try:
-        return _special_functions.left_straightedge(x, edge, F)
-    except KeyboardInterrupt:
-        raise
-    except:
-        raise TypeError(
-            """
-            \r\tError: rss_ringoccs
-            \r\t\tdiffrec.special_functions.left_straightedge\n
-            \r\tInput should be a numpy array of real numbers (ints or floats),
-            \r\tand two positive real numbers.\n
-            \r\tUsage:
-            \r\t\t>>> x = numpy.arange(0, 1000, 0.1)
-            \r\t\t>>> edge = 500.0
-            \r\t\t>>> F = 2.0
-            \r\t\t>>> y = left_straightedge(x, edge, F)
-            """
-        )
+    return _special_functions.left_straightedge(x, edge, F)
 
 def max(x):
     """
@@ -697,21 +635,7 @@ def max(x):
         :max (*float* or *int*):
             The maximum value of x.
     """
-    try:
-        return _special_functions.max(x)
-    except KeyboardInterrupt:
-        raise
-    except:
-        raise TypeError(
-            """
-            \r\tError: rss_ringoccs
-            \r\t\tdiffrec.special_functions.max\n
-            \r\tInput should be a numpy array of real numbers.\n
-            \r\tUsage:
-            \r\t\t>>> x = numpy.random.rand(100)
-            \r\t\t>>> y = max(x)\n
-            """
-        )
+    return _special_functions.max(x)
 
 def min(x):
     """
@@ -725,41 +649,10 @@ def min(x):
         :max (*float* or *int*):
             The maximum value of x.
     """
-    try:
-        return _special_functions.min(x)
-    except KeyboardInterrupt:
-        raise
-    except:
-        raise TypeError(
-            """
-            \r\tError: rss_ringoccs
-            \r\t\tdiffrec.special_functions.min\n
-            \r\tInput should be a numpy array of real numbers.\n
-            \r\tUsage:
-            \r\t\t>>> x = numpy.random.rand(100)
-            \r\t\t>>> y = min(x)\n
-            """
-        )
+    return _special_functions.min(x)
 
 def right_straightedge(x, edge, F):
-    try:
-        return _special_functions.right_straightedge(x, edge, F)
-    except KeyboardInterrupt:
-        raise
-    except:
-        raise TypeError(
-            """
-            \r\tError: rss_ringoccs
-            \r\t\tdiffrec.special_functions.right_straightedge\n
-            \r\tInput should be a numpy array of real numbers (ints or floats),
-            \r\tand two positive real numbers.\n
-            \r\tUsage:
-            \r\t\t>>> x = numpy.arange(0, 1000, 0.1)
-            \r\t\t>>> edge = 500.0
-            \r\t\t>>> F = 2.0
-            \r\t\t>>> y = right_straightedge(x, edge, F)
-            """
-        ) 
+    return _special_functions.right_straightedge(x, edge, F)
 
 def sinc(x):
     try:

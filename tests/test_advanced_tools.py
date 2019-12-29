@@ -423,7 +423,7 @@ def test_Make_MTR_Figs():
     geo = "./Test_Data/VG1_SRING_GEO_20191119.TAB"
 
     # Resolution of reconstruction.
-    res = 1.0
+    res = 0.5
 
     # Wavelength of light (in kilometers).
     wav = 3.6e-5
@@ -432,18 +432,18 @@ def test_Make_MTR_Figs():
     rho = 85000
 
     # Range of the input data being processed.
-    rng = [83000, 87000]
+    georng = [83000, 87000]
+    rng = [84990, 85010]
 
     # Sample size between data points, in kilometers.
-    dxs = 0.05
+    dxs = 0.01
 
     # Name of the output PDF file.
     outfile = "./Figures/MTR_Figs.pdf"
 
     # Range in the x-axis for the plots.
-    rmin = rho + res*12
-    rmax = rho - res*12
-
+    rmin = -7
+    rmax = 7
     # Use the delta impulse model for the plots.
     model = "Delta Impulse"
     psitype = "Newton"
@@ -451,8 +451,9 @@ def test_Make_MTR_Figs():
     with PdfPages(outfile) as pdf:
 
         # Create the modeled data without the Fresnel approximation.
-        gdata = at.ModelFromGEO(geo, wav, res, rho, rng=rng, dx_km_desired=dxs,
-                                model=model, verbose=False)
+        gdata = at.ModelFromGEO(geo, wav, res, rho, rng=georng,
+                                psitype="Newton", dx_km_desired=dxs,
+                                model=model, verbose=False, use_fresnel=False)
 
         # Configurations for the plots.
         plt.rc('font', family='serif')
@@ -504,13 +505,14 @@ def test_Make_MTR_Figs():
             op = rec.T_vals/rec.T_vals[nrho]
 
             op = -rec.mu_vals*numpy.log(numpy.abs(op))
-            plt.plot(rec.rho_km_vals, op, label=wtype)
+            x = (rec.rho_km_vals - rho)/res
+            plt.plot(x, op, label=wtype)
 
             # Set x axis range, and put the legend on top of plots.
             plt.xlim(rmin, rmax)
             plt.legend()
 
-            plt.ylim(6.5, -0.2)
+            plt.ylim(2.0, -0.2)
 
             i += 1
 
@@ -518,70 +520,79 @@ def test_Make_MTR_Figs():
         pdf.savefig(bbox_inches="tight", pad_inches=1)
         plt.close()
 
-        # Configurations for the plots.
-        plt.rc('font', family='serif')
-        plt.rc('font', size=10)
-        plt.figure(figsize=(8.5, 11))
+        res_factor = 1.0
+        wtype = "rect"
+        psitype = "Newton"
+        label=["Quadratic", "Cubic", "Quartic", "Newton"]
+        for sres in ["1.0", "0.5", "0.1"]:
+            # Configurations for the plots.
+            plt.rc('font', family='serif')
+            plt.rc('font', size=10)
+            plt.figure(figsize=(8.5, 11))
 
-        # Title for the page.
-        plt.suptitle("MTR Fig 4 - 1km Resolution - Maxwell Ringlet - Rev007E",
-                     size=14)
+            # Title for the page.
+            plt.suptitle(
+                "MTR Fig 4 - %s Resolution - Maxwell Ringlet - Rev007E" % sres,
+                size=14
+            )
 
-        # Use gridspec to create a 2-by-1 group of plots.
-        gs = gridspec.GridSpec(2, 2, hspace=0.0, wspace=0.0)
+            res = float(sres)
+            # Use gridspec to create a 2-by-1 group of plots.
+            gs = gridspec.GridSpec(2, 2, hspace=0.0, wspace=0.0)
 
-        i = 0
-        wtype="rect"
+            i = 0
+            for interp in [2, 3, 4, 0]:
 
-        for psitype in ["Fresnel", "Fresnel 3", "Fresnel 4", "Newton"]:
+                # Run diffraction correction on both sets of modeled data.
+                rec = dc.DiffractionCorrection(gdata, res, rng=rng,
+                                               interp=interp, wtype=wtype,
+                                               psitype=psitype,
+                                               res_factor=res_factor)
 
-            # Run diffraction correction on both sets of modeled data.
-            rec = dc.DiffractionCorrection(gdata, res, rng=rng,
-                                           wtype=wtype, psitype=psitype)
+                # Select the first plot region.
+                plt.subplot(gs[i // 2, i % 2])
 
-            # Select the first plot region.
-            plt.subplot(gs[i // 2, i % 2])
+                # Title for the plot, and tick parameters for the x-axis.
+                if (i // 2 == 1):
+                    plt.tick_params(axis='x', which='both', bottom=True,
+                                    top=False, labelbottom=True)
+                    plt.xlabel("Ring Radius (km)")
+                else:
+                    plt.tick_params(axis='x', which='both', bottom=False,
+                                    top=True, labelbottom=False)
 
-            # Title for the plot, and tick parameters for the x-axis.
-            if (i // 2 == 1):
-                plt.tick_params(axis='x', which='both', bottom=True,
-                                top=False, labelbottom=True)
-                plt.xlabel("Ring Radius (km)")
-            else:
-                plt.tick_params(axis='x', which='both', bottom=False,
-                                top=True, labelbottom=False)
+                plt.locator_params(axis='x', nbins=8)
 
-            plt.locator_params(axis='x', nbins=8)
+                # Set the label for the y-axis.
+                if (i % 2 == 0):
+                    plt.ylabel("Normalized Opacity")
+                    plt.tick_params(axis='y', which='both', left=True,
+                                    right=False, labelleft=True)
+                else:
+                    plt.tick_params(axis='y', which='both', left=False,
+                                    right=True, labelright=True, labelleft=False)
 
-            # Set the label for the y-axis.
-            if (i % 2 == 0):
-                plt.ylabel("Normalized Opacity")
-                plt.tick_params(axis='y', which='both', left=True,
-                                right=False, labelleft=True)
-            else:
-                plt.tick_params(axis='y', which='both', left=False,
-                                right=True, labelright=True, labelleft=False)
+                plt.locator_params(axis='y', nbins=3)
 
-            plt.locator_params(axis='y', nbins=3)
+                # Plot the modeled opacity.
+                nrho = numpy.min((rec.rho_km_vals >= rho).nonzero())
+                op = rec.T_vals/rec.T_vals[nrho]
 
-            # Plot the modeled opacity.
-            nrho = numpy.min((rec.rho_km_vals >= rho).nonzero())
-            op = rec.T_vals/rec.T_vals[nrho]
+                op = -rec.mu_vals*numpy.log(numpy.abs(op))
+                x = (rec.rho_km_vals - rho)/res
+                plt.plot(x, op, label=label[i])
 
-            op = -rec.mu_vals*numpy.log(numpy.abs(op))
-            plt.plot(rec.rho_km_vals, op, label=psitype)
+                # Set x axis range, and put the legend on top of plots.
+                plt.xlim(rmin, rmax)
+                plt.legend()
 
-            # Set x axis range, and put the legend on top of plots.
-            plt.xlim(rmin, rmax)
-            plt.legend()
+                plt.ylim(1.2, -0.2)
 
-            plt.ylim(3.2, -0.2)
+                i += 1
 
-            i += 1
-
-        # Append the plots to the pdf, close, and move on to the next one.
-        pdf.savefig(bbox_inches="tight", pad_inches=1)
-        plt.close()
+            # Append the plots to the pdf, close, and move on to the next one.
+            pdf.savefig(bbox_inches="tight", pad_inches=1)
+            plt.close()
 
 
 if __name__ == "__main__":

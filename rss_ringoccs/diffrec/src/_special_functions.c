@@ -1,76 +1,4 @@
-/*  To avoid compiler warnings about deprecated numpy stuff.                  */
-#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
-
-/*  complex data types, as well as _Complex_I, are defined here.              */
-#include <complex.h>
-
-/*  compute_norm_eq, max and min found here. math.h included here as well.    */
-#include "__math_functions.h"
-#include "__where.h"
-#include "__get_array.h"
-
-/*  Window functions and Fresnel transforms defined here.                     */
-#include "__diffraction_functions.h"
-
-/* All wrapper functions defined within these files.                          */
-#include "_fraunhofer_diffraction_wrappers.h"
-#include "__fresnel_diffraction.h"
-#include "_fresnel_integrals_wrappers.h"
-#include "_fresnel_kernel_wrappers.h"
-#include "_lambertw_wrappers.h"
-#include "_physics_functions_wrappers.h"
-#include "_resolution_inverse_function_wrappers.h"
-#include "_sinc_wrappers.h"
-
-/*  Various header files required for the C-Python API to work.               */
-#include <Python.h>
-#include <numpy/ndarraytypes.h>
-#include <numpy/ufuncobject.h>
-
-/*  Make sure the name __get_where_pointer is available.                      */
-#ifdef __get_one_real_from_one_real
-#undef __get_one_real_from_one_real
-#endif
-
-#ifdef __get_complex_from_four_real
-#undef __get_complex_from_four_real
-#endif
-
-#ifdef __get_complex_from_three_real
-#undef __get_complex_from_three_real
-#endif
-
-/*  To avoid repeating the same code over and over again, define this macro   *
- *  to be used for all of the where_lesser functions. Since the only thing    *
- *  that changes between the various functions is the type of the input       *
- *  pointer, the code is exactly the same.                                    */
-
-#define __get_one_real_from_one_real(x, y, dim, f) ({\
-    /*  Declare necessary variables.                                         */\
-    long i;\
-    \
-    for (i=0; i<dim; ++i){\
-        y[i] = (*f)(x[i]);\
-    }\
-})
-
-#define __get_complex_from_three_real(x, a, F, y, dim, f) ({\
-    /*  Declare necessary variables.                                         */\
-    long i;\
-    \
-    for (i=0; i<dim; ++i){\
-        y[i] = (*f)(x[i], a, F);\
-    }\
-})
-
-#define __get_complex_from_four_real(x, a, b, F, y, dim, f) ({\
-    /*  Declare necessary variables.                                         */\
-    long i;\
-    \
-    for (i=0; i<dim; ++i){\
-        y[i] = (*f)(x[i], a, b, F);\
-    }\
-})
+#include "special_functions.h"
 
 /*---------------------------DEFINE PYTHON FUNCTIONS--------------------------*
  *  This contains the Numpy-C and Python-C API parts that allow for the above *
@@ -88,291 +16,14 @@ static void capsule_cleanup(PyObject *capsule)
     free(memory);
 }
 
-/******************************************************************************
- *  Function:                                                                 *
- *      where_greater                                                         *
- *  Purpose:                                                                  *
- *      Given a numpy array arr, and a real number threshold, returns an      *
- *      array of alll indices n such that arr[n] > threshold.                 *
- *  Arguments:                                                                *
- *      arr (Numpy Array):                                                    *
- *          An arbitrary numpy array of real numbers.                         *
- *      threshold (double):                                                   *
- *          A real valued number. This is the value such that, for all n such *
- *          that arr[n] > threshold, the index n will be appended to the      *
- *          returning array.                                                  *
- *  Output:                                                                   *
- *      where_arr:                                                            *
- *          A numpy array of integer corresponding to the indices n such that *
- *          arr[n] > threshold.                                               *
- *  NOTES:                                                                    *
- *      1.) Values that are equal to threshold will not be included.          *
- *      2.) The input array MUST be one-dimensional.                          *
- *      3.) integer and floating point types are allowed, but complex are not.*
- ******************************************************************************/
-static PyObject *where_greater(PyObject *self, PyObject *args)
-{
-    /*  Declare necessary variables.                                          */
-    PyObject *output, *capsule;
-    PyArrayObject *arr;
-    double threshold;
-    long **where;
+/*  where_greater and where_less are defined here.                            */
+#include "_where.h"
 
-    /*  The input is a numpy array, proceed. Otherwise spit out an error.     */
-    if (PyArg_ParseTuple(args, "O!d", &PyArray_Type, &arr, &threshold)){
-        
-        /*  Declare some more necessary variables.                            */
-        npy_int typenum, dim;
-        void *data;
+/*  besselJ0 and besselI0 wrappers found here.                                */
+#include "_bessel.h"
 
-        /*  Check to make sure input is one dimensional.                      */
-        if (PyArray_NDIM(arr) != 1){
-            PyErr_Format(
-                PyExc_TypeError,
-                "rss_ringoccs.diffrec.special_functions.where_greater\n"
-                "\r\tInput must be a one-dimensional array and a real number."
-            );
-            return NULL;
-        }
-
-        /*   Useful information about the data.                               */
-        typenum = PyArray_TYPE(arr);
-        dim     = PyArray_DIMS(arr)[0];
-        data    = PyArray_DATA(arr);
-
-        /*  Compute the index array corresponding to the indices n such that  *
-         *  arr[n] > threshold. The returned pointer is created using malloc  *
-         *  so we must remember to free it later to avoid memory leaks.       */
-        switch(typenum)
-        {
-            case NPY_BYTE:
-                where = Where_Greater_Char((char *)data, dim, threshold);
-                break;
-            case NPY_UBYTE:
-                where =
-                Where_Greater_UChar((unsigned char *)data, dim, threshold);
-                break;
-            case NPY_SHORT:
-                where = Where_Greater_Short((short *)data, dim, threshold);
-                break;
-            case NPY_USHORT:
-                where =
-                Where_Greater_UShort((unsigned short *)data, dim, threshold);
-                break;
-            case NPY_INT:
-                where = Where_Greater_Int((int *)data, dim, threshold);
-                break;
-            case NPY_UINT:
-                where =
-                Where_Greater_UInt((unsigned int *)data, dim, threshold);
-                break;
-            case NPY_LONG:
-                where = Where_Greater_Long((long *)data, dim, threshold);
-                break;
-            case NPY_ULONG:
-                where =
-                Where_Greater_ULong((unsigned long *)data, dim, threshold);
-                break;
-            case NPY_LONGLONG:
-                where =
-                Where_Greater_Long_Long((long long *)data, dim, threshold);
-                break;
-            case NPY_ULONGLONG:
-                where = Where_Greater_ULong_Long((unsigned long long *)data,
-                                                 dim, threshold);
-                break;
-            case NPY_FLOAT:
-                where = Where_Greater_Float((float *)data, dim, threshold);
-                break;
-            case NPY_DOUBLE:
-                where = Where_Greater_Double((double *)data, dim, threshold);
-                break;
-            case NPY_LONGDOUBLE:
-                where =
-                Where_Greater_Long_Double((long double *)data, dim, threshold);
-                break;
-            default:
-                PyErr_Format(
-                    PyExc_TypeError,
-                    "\n\r\trss_ringoccs.diffrec.math_functions.where_greater\n"
-                    "\r\t\tInput numpy array should be real valued."
-                );
-                return NULL;
-        }
-
-        /*  The first element of where is the array of indices.               */
-        long *where_arr = where[0];
-
-        /*  The second element is the number of points in the index array.    */
-        long where_dim = *where[1];
-
-        /*  Create a Numpy array object to be passed back to Python.          */
-        output =
-        PyArray_SimpleNewFromData(1, &where_dim, NPY_LONG, (void *)where_arr);
-
-        /*  This frees the variable at the Python level once it's destroyed.  */
-        capsule = PyCapsule_New(where_arr, NULL, capsule_cleanup);
-        PyArray_SetBaseObject((PyArrayObject *)output, capsule);
-
-        /*  Where is created using malloc, so make sure to free it.           */
-        free(where);
-
-        /*  Return the results to Python.                                     */
-        return Py_BuildValue("N", output);
-    }
-    else {
-        /*  If he input is not a numpy array, return to Python with an error. */
-        PyErr_Format(
-            PyExc_TypeError,
-            "\n\r\trss_ringoccs.diffrec.special_functions.where_greater\n"
-            "\r\t\tInput should be a real numpy array and a real number."
-        );
-        return NULL;
-    }
-}
-
-/******************************************************************************
- *  Function:                                                                 *
- *      where_lesser                                                          *
- *  Purpose:                                                                  *
- *      Given a numpy array arr, and a real number threshold, returns an      *
- *      array of all indices n such that arr[n] < threshold.                  *
- *  Arguments:                                                                *
- *      arr (Numpy Array):                                                    *
- *          An arbitrary numpy array of real numbers.                         *
- *      threshold (double):                                                   *
- *          A real valued number. This is the value such that, for all n such *
- *          that arr[n] < threshold, the index n will be appended to the      *
- *          returning array.                                                  *
- *  Output:                                                                   *
- *      where_arr:                                                            *
- *          A numpy array of integer corresponding to the indices n such that *
- *          arr[n] < threshold.                                               *
- *  NOTES:                                                                    *
- *      1.) Values that are equal to threshold will not be included.          *
- *      2.) The input array MUST be one-dimensional.                          *
- *      3.) integer and floating point types are allowed, but complex are not.*
- ******************************************************************************/
-static PyObject *where_lesser(PyObject *self, PyObject *args)
-{
-    /*  Declare necessary variables.                                          */
-    PyObject *output, *capsule;
-    PyArrayObject *arr;
-    double threshold;
-    long **where;
-
-    /*  The input is a numpy array, proceed. Otherwise spit out an error.     */
-    if (PyArg_ParseTuple(args, "O!d", &PyArray_Type, &arr, &threshold)){
-
-        /*  Check to make sure input is one dimensional.                      */
-        if (PyArray_NDIM(arr) != 1){
-            PyErr_Format(
-                PyExc_TypeError,
-                "rss_ringoccs.diffrec.special_functions.where_greater\n"
-                "\r\tInput must be a one-dimensional array and a real number."
-            );
-            return NULL;
-        }
-
-        /*   Useful information about the data.                               */
-        npy_int typenum = PyArray_TYPE(arr);
-        npy_int dim     = PyArray_DIMS(arr)[0];
-
-        /*  Compute the index array corresponding to the indices n such that  *
-         *  arr[n] > threshold. The returned pointer is created using malloc  *
-         *  so we must remember to free it later to avoid memory leaks.       */
-        if (typenum == NPY_BYTE){
-            char *data = (char *)PyArray_DATA(arr);
-            where = Where_Lesser_Char(data, dim, threshold);
-        }
-        else if (typenum == NPY_UBYTE){
-            unsigned char *data = (unsigned char *)PyArray_DATA(arr);
-            where = Where_Lesser_UChar(data, dim, threshold);
-        }
-        else if (typenum == NPY_SHORT){
-            short *data = (short *)PyArray_DATA(arr);
-            where = Where_Lesser_Short(data, dim, threshold);
-        }
-        else if (typenum == NPY_USHORT){
-            unsigned short *data = (unsigned short *)PyArray_DATA(arr);
-            where = Where_Lesser_UShort(data, dim, threshold);
-        }
-        else if (typenum == NPY_INT){
-            int *data = (int *)PyArray_DATA(arr);
-            where = Where_Lesser_Int(data, dim, threshold);
-        }
-        else if (typenum == NPY_UINT){
-            unsigned int *data = (unsigned int *)PyArray_DATA(arr);
-            where = Where_Lesser_UInt(data, dim, threshold);
-        }
-        else if (typenum == NPY_LONG){
-            long *data = (long *)PyArray_DATA(arr);
-            where = Where_Lesser_Long(data, dim, threshold);
-        }
-        else if (typenum == NPY_ULONG){
-            unsigned long *data = (unsigned long *)PyArray_DATA(arr);
-            where = Where_Lesser_ULong(data, dim, threshold);
-        }
-        else if (typenum == NPY_LONGLONG){
-            long long *data = (long long *)PyArray_DATA(arr);
-            where = Where_Lesser_Long_Long(data, dim, threshold);
-        }
-        else if (typenum == NPY_ULONG){
-            unsigned long long *data = (unsigned long long *)PyArray_DATA(arr);
-            where = Where_Lesser_ULong_Long(data, dim, threshold);
-        }
-        else if (typenum == NPY_FLOAT){
-            float *data = (float *)PyArray_DATA(arr);
-            where = Where_Lesser_Float(data, dim, threshold);
-        }
-        else if (typenum == NPY_DOUBLE){
-            double *data = (double *)PyArray_DATA(arr);
-            where = Where_Lesser_Double(data, dim, threshold);
-        }
-        else if (typenum == NPY_LONGDOUBLE){
-            long double *data = (long double *)PyArray_DATA(arr);
-            where = Where_Lesser_Long_Double(data, dim, threshold);
-        }
-        else {
-            /*  If he input is not a numpy array, return to Python with an error. */
-            PyErr_Format(
-                PyExc_TypeError,
-                "\n\r\trss_ringoccs.diffrec.math_functions.where_greater\n"
-                "\r\t\tInput numpy array should be real valued."
-            );
-            return NULL;
-        }
-
-        /*  The first element of where is the array of indices.               */
-        long *where_arr = where[0];
-
-        /*  The second element is the number of points in the index array.    */
-        long where_dim = *where[1];
-
-        /*  Create a Numpy array object to be passed back to Python.          */
-        output  = PyArray_SimpleNewFromData(1, &where_dim, NPY_LONG,
-                                            (void *)where_arr);
-
-        /*  This frees the variable at the Python level once it's destroyed.  */
-        capsule = PyCapsule_New(where_arr, NULL, capsule_cleanup);
-        PyArray_SetBaseObject((PyArrayObject *)output, capsule);
-
-        /*  Where is created using malloc, so make sure to free it.           */
-        free(where);
-
-        /*  Return the results to Python.                                     */
-        return Py_BuildValue("N", output);
-    }
-    else {
-        /*  If he input is not a numpy array, return to Python with an error. */
-        PyErr_Format(
-            PyExc_TypeError,
-            "\n\r\trss_ringoccs.diffrec.math_functions.where_greater\n"
-            "\r\t\tInput should be a numpy array of numbers and a real number."
-        );
-        return NULL;
-    }
-}
+/*  Load in the sinc function.                                                */
+#include "_sinc.h"
 
 static PyObject *compute_norm_eq(PyObject *self, PyObject *args)
 {
@@ -681,11 +332,11 @@ static PyObject *fresnel_transform(PyObject *self, PyObject *args)
     PyArrayObject *kd_vals, *B_rad_vals,  *D_km_vals, *w_km_vals;
     long start, n_used;
     int i;
-    unsigned char wtype, use_norm, use_fwd, order;
+    unsigned char wtype, use_norm, use_fwd, order, interp;
     double ecc, peri;
 
 
-    if (!(PyArg_ParseTuple(args, "O!O!O!O!O!O!O!O!Ollbbbbdd",
+    if (!(PyArg_ParseTuple(args, "O!O!O!O!O!O!O!O!Ollbbbbbdd",
                            &PyArray_Type, &T_in,
                            &PyArray_Type, &rho_km_vals,
                            &PyArray_Type, &F_km_vals,
@@ -696,7 +347,7 @@ static PyObject *fresnel_transform(PyObject *self, PyObject *args)
                            &PyArray_Type, &w_km_vals,
                            &perturb_list, &start, &n_used,
                            &wtype, &use_norm, &use_fwd,
-                           &order, &ecc, &peri))){ 
+                           &order, &interp, &ecc, &peri))){ 
         PyErr_Format(
             PyExc_TypeError,
             "\n\rError Encountered: rss_ringoccs\n"
@@ -740,6 +391,7 @@ static PyObject *fresnel_transform(PyObject *self, PyObject *args)
     dlp.order    = order;
     dlp.ecc      = ecc;
     dlp.peri     = peri;
+    dlp.interp   = interp;
 
     iter = PyObject_GetIter(perturb_list);
     if (!iter) {
@@ -1090,6 +742,15 @@ static PyObject *fresnel_transform(PyObject *self, PyObject *args)
             "\r\tspecial_functions.fresnel_transform\n\n"
             "\rMalloc failed to create new variables.\n"
             "\rYou are most likely out of memory.\n"
+        );
+        return NULL;
+    }
+    else if (dlp.status == 4){
+        PyErr_Format(
+            PyExc_MemoryError,
+            "\rError Encountered: rss_ringoccs"
+            "\r\tspecial_functions.fresnel_transform\n\n"
+            "\rInterp should be either 0, 2, 3, or 4."
         );
         return NULL;
     }
@@ -1931,9 +1592,74 @@ static PyObject *square_wave_diffraction(PyObject *self, PyObject *args)
     return Py_BuildValue("N", output);
 }
 
+/*------------------------------BESSEL J0-------------------------------------*/
+
 
 static PyMethodDef _special_functions_methods[] =
 {
+    {
+        "besselJ0",
+        besselJ0,
+        METH_VARARGS,
+        "\r\t"
+        "Function:\n\r\t\t"
+        "special_functions.besselJ0\n\r\t"
+        "Purpose:\n\r\t\t"
+        "Compute the Zeroth Bessel Function of the First Kind (J0).\n\r\t"
+        "Arguments\n\r\t\t"
+        "x (numpy.ndarray):\n\r\t\t\t"
+        "A numpy array of real numbers. Independent variable for J_0(x)\n\r\t"
+        "Outputs:\n\r\t\t"
+        "J0\n\r\t\t\t"
+        "The Bessel Function J0 as a function of x.\n\r\t"
+        "Example:\n\r\t\t"
+        ">>> import numpy\n\r\t\t"
+        ">>> import _special_functions\n\r\t\t"
+        ">>> x = numpy.arange(0,100,0.01)\n\r\t\t"
+        ">>> y = _special_functions.besselJ0(x)"
+    },
+    {
+        "besselI0",
+        besselI0,
+        METH_VARARGS,
+        "\r\t"
+        "Function:\n\r\t\t"
+        "special_functions.besselI0\n\r\t"
+        "Purpose:\n\r\t\t"
+        "Compute the Zeroth Modified Bessel Function of the First Kind (I0)."
+        "\n\r\tArguments\n\r\t\t"
+        "x (numpy.ndarray):\n\r\t\t\t"
+        "A numpy array of real numbers. Independent variable for I_0(x)\n\r\t"
+        "Outputs:\n\r\t\t"
+        "I0 (numpy.ndarray):\n\r\t\t\t"
+        "The Bessel Function I0 as a function of x.\n\r\t"
+        "Example:\n\r\t\t"
+        ">>> import numpy\n\r\t\t"
+        ">>> import _special_functions\n\r\t\t"
+        ">>> x = numpy.arange(0,100,0.01)\n\r\t\t"
+        ">>> y = _special_functions.besselI0(x)"
+    },
+    {
+        "sinc",
+        sinc,
+        METH_VARARGS,
+        "\r\t"
+        "Function:\n\r\t\t"
+        "special_functions.sinc\n\r\t"
+        "Purpose:\n\r\t\t"
+        "Compute the sinc function, sin(x)/x."
+        "\n\r\tArguments\n\r\t\t"
+        "x (numpy.ndarray):\n\r\t\t\t"
+        "A numpy array of real numbers. Independent variable for sinc(x)\n\r\t"
+        "Outputs:\n\r\t\t"
+        "sinc (numpy.ndarray):\n\r\t\t\t"
+        "The sinc function of x.\n\r\t"
+        "Example:\n\r\t\t"
+        ">>> import numpy\n\r\t\t"
+        ">>> import _special_functions\n\r\t\t"
+        ">>> x = numpy.arange(0,100,0.01)\n\r\t\t"
+        ">>> y = _special_functions.sinc(x)"
+    },
     {
         "compute_norm_eq",
         compute_norm_eq,
@@ -2160,330 +1886,6 @@ static PyMethodDef _special_functions_methods[] =
 };
 /*-------------------------DEFINE UNIVERSAL FUNCTIONS-------------------------*/
 
-/*------------------------------BESSEL J0-------------------------------------*/
-static void char_besselJ0(char **args, npy_intp *dimensions,
-                          npy_intp *steps, void *data)
-{
-    npy_intp n_elements = dimensions[0];
-
-    char *x   = (char *)args[0];
-    double *y = (double *)args[1];
-
-    Get_Char_to_Double_Array(x, y, n_elements, BesselJ0_Char);
-}
-
-static void uchar_besselJ0(char **args, npy_intp *dimensions,
-                           npy_intp *steps, void *data)
-{
-    npy_intp n_elements = dimensions[0];
-
-    unsigned char *x = (unsigned char *)args[0];
-    double *y        = (double *)args[1];
-
-    Get_UChar_to_Double_Array(x, y, n_elements, BesselJ0_UChar);
-}
-
-static void short_besselJ0(char **args, npy_intp *dimensions,
-                           npy_intp *steps, void *data)
-{
-    npy_intp n_elements = dimensions[0];
-
-    short *x  = (short *)args[0];
-    double *y = (double *)args[1];
-
-    Get_Short_to_Double_Array(x, y, n_elements, BesselJ0_Short);
-}
-
-static void ushort_besselJ0(char **args, npy_intp *dimensions,
-                            npy_intp *steps, void *data)
-{
-    npy_intp n_elements = dimensions[0];
-
-    unsigned short *x = (unsigned short *)args[0];
-    double *y         = (double *)args[1];
-
-    Get_UShort_to_Double_Array(x, y, n_elements, BesselJ0_UShort);
-}
-
-static void int_besselJ0(char **args, npy_intp *dimensions,
-                         npy_intp *steps, void *data)
-{
-    npy_intp n_elements = dimensions[0];
-
-    int *x    = (int *)args[0];
-    double *y = (double *)args[1];
-
-    Get_Int_to_Double_Array(x, y, n_elements, BesselJ0_Int);
-}
-
-static void uint_besselJ0(char **args, npy_intp *dimensions,
-                          npy_intp *steps, void *data)
-{
-    npy_intp n_elements = dimensions[0];
-
-    unsigned int *x = (unsigned int *)args[0];
-    double *y       = (double *)args[1];
-
-    Get_UInt_to_Double_Array(x, y, n_elements, BesselJ0_UInt);
-}
-
-static void long_besselJ0(char **args, npy_intp *dimensions,
-                          npy_intp *steps, void *data)
-{
-    npy_intp n_elements = dimensions[0];
-
-    long *x   = (long *)args[0];
-    double *y = (double *)args[1];
-
-    Get_Long_to_Double_Array(x, y, n_elements, BesselJ0_Long);
-}
-
-static void ulong_besselJ0(char **args, npy_intp *dimensions,
-                           npy_intp *steps, void *data)
-{
-    npy_intp n_elements = dimensions[0];
-
-    unsigned long *x = (unsigned long *)args[0];
-    double *y        = (double *)args[1];
-
-    Get_ULong_to_Double_Array(x, y, n_elements, BesselJ0_ULong);
-}
-
-static void long_long_besselJ0(char **args, npy_intp *dimensions,
-                               npy_intp *steps, void *data)
-{
-    npy_intp n_elements = dimensions[0];
-
-    long long *x = (long long *)args[0];
-    double *y    = (double *)args[1];
-
-    Get_Long_Long_to_Double_Array(x, y, n_elements, BesselJ0_Long_Long);
-}
-
-static void ulong_long_besselJ0(char **args, npy_intp *dimensions,
-                                npy_intp *steps, void *data)
-{
-    npy_intp n_elements = dimensions[0];
-
-    unsigned long long *x = (unsigned long long *)args[0];
-    double *y             = (double *)args[1];
-
-    Get_ULong_Long_to_Double_Array(x, y, n_elements, BesselJ0_ULong_Long);
-}
-
-static void float_besselJ0(char **args, npy_intp *dimensions,
-                           npy_intp *steps, void *data)
-{
-    npy_intp n_elements = dimensions[0];
-
-    float *x = (float *)args[0];
-    float *y = (float *)args[1];
-
-    Get_Float_Array(x, y, n_elements, BesselJ0_Float);
-}
-
-static void double_besselJ0(char **args, npy_intp *dimensions,
-                            npy_intp *steps, void *data)
-{
-
-    npy_intp n_elements = dimensions[0];
-
-    double *x = (double *)args[0];
-    double *y = (double *)args[1];
-
-    Get_Double_Array(x, y, n_elements, BesselJ0_Double);
-}
-
-static void long_double_besselJ0(char **args, npy_intp *dimensions,
-                                 npy_intp *steps, void *data)
-{
-    npy_intp n_elements = dimensions[0];
-
-    long double *x = (long double *)args[0];
-    long double *y = (long double *)args[1];
-
-    Get_Long_Double_Array(x, y, n_elements, BesselJ0_Long_Double);
-}
-
-
-PyUFuncGenericFunction besselJ0_funcs[13] = {
-    &char_besselJ0,
-    &uchar_besselJ0,
-    &short_besselJ0,
-    &ushort_besselJ0,
-    &int_besselJ0,
-    &uint_besselJ0,
-    &long_besselJ0,
-    &ulong_besselJ0,
-    &long_long_besselJ0,
-    &ulong_long_besselJ0,
-    &float_besselJ0,
-    &double_besselJ0,
-    &long_double_besselJ0
-};
-
-/*------------------------------BESSEL I0-------------------------------------*/
-static void char_besselI0(char **args, npy_intp *dimensions,
-                          npy_intp *steps, void *data)
-{
-    npy_intp n_elements = dimensions[0];
-
-    char *x   = (char *)args[0];
-    double *y = (double *)args[1];
-
-    Get_Char_to_Double_Array(x, y, n_elements, BesselI0_Char);
-}
-
-static void uchar_besselI0(char **args, npy_intp *dimensions,
-                           npy_intp *steps, void *data)
-{
-    npy_intp n_elements = dimensions[0];
-
-    unsigned char *x = (unsigned char *)args[0];
-    double *y        = (double *)args[1];
-
-    Get_UChar_to_Double_Array(x, y, n_elements, BesselI0_UChar);
-}
-
-static void short_besselI0(char **args, npy_intp *dimensions,
-                           npy_intp *steps, void *data)
-{
-    npy_intp n_elements = dimensions[0];
-
-    short *x  = (short *)args[0];
-    double *y = (double *)args[1];
-
-    Get_Short_to_Double_Array(x, y, n_elements, BesselI0_Short);
-}
-
-static void ushort_besselI0(char **args, npy_intp *dimensions,
-                            npy_intp *steps, void *data)
-{
-    npy_intp n_elements = dimensions[0];
-
-    unsigned short *x = (unsigned short *)args[0];
-    double *y         = (double *)args[1];
-
-    Get_UShort_to_Double_Array(x, y, n_elements, BesselI0_UShort);
-}
-
-static void int_besselI0(char **args, npy_intp *dimensions,
-                         npy_intp *steps, void *data)
-{
-    npy_intp n_elements = dimensions[0];
-
-    int *x    = (int *)args[0];
-    double *y = (double *)args[1];
-
-    Get_Int_to_Double_Array(x, y, n_elements, BesselI0_Int);
-}
-
-static void uint_besselI0(char **args, npy_intp *dimensions,
-                          npy_intp *steps, void *data)
-{
-    npy_intp n_elements = dimensions[0];
-
-    unsigned int *x = (unsigned int *)args[0];
-    double *y       = (double *)args[1];
-
-    Get_UInt_to_Double_Array(x, y, n_elements, BesselI0_UInt);
-}
-
-static void long_besselI0(char **args, npy_intp *dimensions,
-                          npy_intp *steps, void *data)
-{
-    npy_intp n_elements = dimensions[0];
-
-    long *x   = (long *)args[0];
-    double *y = (double *)args[1];
-
-    Get_Long_to_Double_Array(x, y, n_elements, BesselI0_Long);
-}
-
-static void ulong_besselI0(char **args, npy_intp *dimensions,
-                           npy_intp *steps, void *data)
-{
-    npy_intp n_elements = dimensions[0];
-
-    unsigned long *x = (unsigned long *)args[0];
-    double *y        = (double *)args[1];
-
-    Get_ULong_to_Double_Array(x, y, n_elements, BesselI0_ULong);
-}
-
-static void long_long_besselI0(char **args, npy_intp *dimensions,
-                               npy_intp *steps, void *data)
-{
-    npy_intp n_elements = dimensions[0];
-
-    long long *x = (long long *)args[0];
-    double *y    = (double *)args[1];
-
-    Get_Long_Long_to_Double_Array(x, y, n_elements, BesselI0_Long_Long);
-}
-
-static void ulong_long_besselI0(char **args, npy_intp *dimensions,
-                                npy_intp *steps, void *data)
-{
-    npy_intp n_elements = dimensions[0];
-
-    unsigned long long *x = (unsigned long long *)args[0];
-    double *y             = (double *)args[1];
-
-    Get_ULong_Long_to_Double_Array(x, y, n_elements, BesselI0_ULong_Long);
-}
-
-static void float_besselI0(char **args, npy_intp *dimensions,
-                           npy_intp *steps, void *data)
-{
-    npy_intp n_elements = dimensions[0];
-
-    float *x = (float *)args[0];
-    float *y = (float *)args[1];
-
-    Get_Float_Array(x, y, n_elements, BesselI0_Float);
-}
-
-static void double_besselI0(char **args, npy_intp *dimensions,
-                            npy_intp *steps, void *data)
-{
-
-    npy_intp n_elements = dimensions[0];
-
-    double *x = (double *)args[0];
-    double *y = (double *)args[1];
-
-    Get_Double_Array(x, y, n_elements, BesselI0_Double);
-}
-
-static void long_double_besselI0(char **args, npy_intp *dimensions,
-                                 npy_intp *steps, void *data)
-{
-    npy_intp n_elements = dimensions[0];
-
-    long double *x = (long double *)args[0];
-    long double *y = (long double *)args[1];
-
-    Get_Long_Double_Array(x, y, n_elements, BesselI0_Long_Double);
-}
-
-
-PyUFuncGenericFunction besselI0_funcs[13] = {
-    &char_besselI0,
-    &uchar_besselI0,
-    &short_besselI0,
-    &ushort_besselI0,
-    &int_besselI0,
-    &uint_besselI0,
-    &long_besselI0,
-    &ulong_besselI0,
-    &long_long_besselI0,
-    &ulong_long_besselI0,
-    &float_besselI0,
-    &double_besselI0,
-    &long_double_besselI0
-};
-
 /************Double Slit Diffraction Using Fraunhofer Approximation************/
 
 /******************************************************************************
@@ -2600,7 +2002,6 @@ PyUFuncGenericFunction fresnel_cos_funcs[3] = {
     &float_fresnelcos,
     &double_fresnelcos,
     &long_double_fresnelcos
-
 };
 
 PyUFuncGenericFunction fresnel_scale_funcs[3] = {
@@ -2651,12 +2052,6 @@ PyUFuncGenericFunction res_inv_funcs[3] = {
     &long_double_resolution_inverse
 };
 
-PyUFuncGenericFunction sinc_funcs[3] = {
-    &float_sinc,
-    &double_sinc,
-    &long_double_sinc
-};
-
 PyUFuncGenericFunction single_slit_funcs[3] = {
     &float_single_slit_diffraction,
     &double_single_slit_diffraction,
@@ -2671,30 +2066,11 @@ PyUFuncGenericFunction wavelength_to_wavenumber_funcs[3] = {
 
 /*  Input and return types for double input and out.                          */
 static void *PyuFunc_None_3[3] = {NULL, NULL, NULL};
-static void *PyuFunc_None_13[13] = {
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL, NULL, NULL, NULL, NULL
-};
 
 static char one_real_in_one_real_out[6] = {NPY_FLOAT, NPY_FLOAT,
                                            NPY_DOUBLE, NPY_DOUBLE,
                                            NPY_LONGDOUBLE, NPY_LONGDOUBLE};
 
-static char one_real_in_one_float_out[26] = {
-    NPY_BYTE, NPY_DOUBLE,
-    NPY_UBYTE, NPY_DOUBLE,
-    NPY_SHORT, NPY_DOUBLE,
-    NPY_USHORT, NPY_DOUBLE,
-    NPY_INT, NPY_DOUBLE,
-    NPY_UINT, NPY_DOUBLE,
-    NPY_LONG, NPY_DOUBLE,
-    NPY_ULONG, NPY_DOUBLE,
-    NPY_LONGLONG, NPY_DOUBLE,
-    NPY_ULONGLONG, NPY_DOUBLE,
-    NPY_FLOAT, NPY_FLOAT,
-    NPY_DOUBLE, NPY_DOUBLE,
-    NPY_LONGDOUBLE, NPY_LONGDOUBLE
-};
 
 static char three_real_in_one_real_out[12] = {
     NPY_FLOAT, NPY_FLOAT, NPY_FLOAT, NPY_FLOAT,
@@ -2750,8 +2126,6 @@ static struct PyModuleDef moduledef = {
 
 PyMODINIT_FUNC PyInit__special_functions(void)
 {
-    PyObject *besselJ0;
-    PyObject *besselI0;
     PyObject *double_slit_diffraction;
     PyObject *frequency_to_wavelength;
     PyObject *fresnel_cos;
@@ -2764,7 +2138,6 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     PyObject *lambertw;
     PyObject *resolution_inverse;
     PyObject *single_slit_diffraction;
-    PyObject *sinc;
     PyObject *wavelength_to_wavenumber;
     PyObject *m, *d;
 
@@ -2776,16 +2149,6 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     import_array();
     import_umath();
 
-    besselJ0 = PyUFunc_FromFuncAndData(
-        besselJ0_funcs, PyuFunc_None_13, one_real_in_one_float_out, 13, 1, 1,
-        PyUFunc_None, "besselJ0_diffraction", "besselJ0_docstring", 0
-    );
-
-    besselI0 = PyUFunc_FromFuncAndData(
-        besselI0_funcs, PyuFunc_None_13, one_real_in_one_float_out, 13, 1, 1,
-        PyUFunc_None, "besselI0_diffraction", "besselI0_docstring", 0
-    );
-
     double_slit_diffraction = PyUFunc_FromFuncAndData(
         double_slit_funcs, PyuFunc_None_3, five_real_in_one_real_out,
         3, 5, 1, PyUFunc_None, "double_slit_diffraction", 
@@ -2845,11 +2208,6 @@ PyMODINIT_FUNC PyInit__special_functions(void)
         "resolution_inverse_docstring", 0
     );
 
-    sinc = PyUFunc_FromFuncAndData(
-        sinc_funcs, PyuFunc_None_3, one_real_in_one_real_out,
-        3, 1, 1, PyUFunc_None, "sinc",  "sinc_docstring", 0
-    );
-
     single_slit_diffraction = PyUFunc_FromFuncAndData(
         single_slit_funcs, PyuFunc_None_3, three_real_in_one_real_out,
         3, 3, 1, PyUFunc_None, "single_slit_diffraction", 
@@ -2864,8 +2222,6 @@ PyMODINIT_FUNC PyInit__special_functions(void)
 
     d = PyModule_GetDict(m);
 
-    PyDict_SetItemString(d, "besselJ0", besselJ0);
-    PyDict_SetItemString(d, "besselI0", besselI0);
     PyDict_SetItemString(d, "double_slit_diffraction", double_slit_diffraction);
     PyDict_SetItemString(d, "frequency_to_wavelength", frequency_to_wavelength);
     PyDict_SetItemString(d, "fresnel_cos", fresnel_cos);
@@ -2878,14 +2234,11 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     PyDict_SetItemString(d, "fresnel_sin", fresnel_sin);
     PyDict_SetItemString(d, "lambertw", lambertw);
     PyDict_SetItemString(d, "resolution_inverse", resolution_inverse);
-    PyDict_SetItemString(d, "sinc", sinc);
     PyDict_SetItemString(d, "single_slit_diffraction", single_slit_diffraction);
     PyDict_SetItemString(d, "wavelength_to_wavenumber",
                          wavelength_to_wavenumber);
 
     Py_DECREF(double_slit_diffraction);
-    Py_DECREF(besselJ0);
-    Py_DECREF(besselI0);
     Py_DECREF(frequency_to_wavelength);
     Py_DECREF(fresnel_cos);
     Py_DECREF(fresnel_psi);
@@ -2896,7 +2249,6 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     Py_DECREF(fresnel_sin);
     Py_DECREF(lambertw);
     Py_DECREF(resolution_inverse);
-    Py_DECREF(sinc);
     Py_DECREF(single_slit_diffraction);
     Py_DECREF(wavelength_to_wavenumber);
 
@@ -2905,8 +2257,6 @@ PyMODINIT_FUNC PyInit__special_functions(void)
 #else
 PyMODINIT_FUNC init__funcs(void)
 {
-    PyObject *besselJ0;
-    PyObject *besselI0;
     PyObject *double_slit_diffraction;
     PyObject *frequency_to_wavelength;
     PyObject *fresnel_cos;
@@ -2919,7 +2269,6 @@ PyMODINIT_FUNC init__funcs(void)
     PyObject *lambertw;
     PyObject *resolution_inverse;
     PyObject *single_slit_diffraction;
-    PyObject *sinc;
     PyObject *wavelength_to_wavenumber;
     PyObject *m, *d;
 
@@ -2930,16 +2279,6 @@ PyMODINIT_FUNC init__funcs(void)
 
     import_array();
     import_umath();
-
-    besselJ0 = PyUFunc_FromFuncAndData(
-        besselJ0_funcs, PyuFunc_None_13, one_real_in_one_float_out, 13, 1, 1,
-        PyUFunc_None, "besselJ0_diffraction", "besselJ0_docstring", 0
-    );
-
-    besselI0 = PyUFunc_FromFuncAndData(
-        besselI0_funcs, PyuFunc_None_13, one_real_in_one_float_out, 13, 1, 1,
-        PyUFunc_None, "besselI0_diffraction", "besselI0_docstring", 0
-    );
 
     double_slit_diffraction = PyUFunc_FromFuncAndData(
         double_slit_funcs, PyuFunc_None_3, five_real_in_one_real_out,
@@ -3000,11 +2339,6 @@ PyMODINIT_FUNC init__funcs(void)
         "resolution_inverse_docstring", 0
     );
 
-    sinc = PyUFunc_FromFuncAndData(
-        sinc_funcs, PyuFunc_None_3, one_real_in_one_real_out,
-        3, 1, 1, PyUFunc_None, "sinc",  "sinc_docstring", 0
-    );
-
     single_slit_diffraction = PyUFunc_FromFuncAndData(
         single_slit_funcs, PyuFunc_None_3, three_real_in_one_real_out,
         3, 3, 1, PyUFunc_None, "single_slit_diffraction", 
@@ -3019,8 +2353,6 @@ PyMODINIT_FUNC init__funcs(void)
 
     d = PyModule_GetDict(m);
 
-    PyDict_SetItemString(d, "besselJ0", besselJ0);
-    PyDict_SetItemString(d, "besselI0", besselI0);
     PyDict_SetItemString(d, "double_slit_diffraction", double_slit_diffraction);
     PyDict_SetItemString(d, "frequency_to_wavelength", frequency_to_wavelength);
     PyDict_SetItemString(d, "fresnel_cos", fresnel_cos);
@@ -3033,14 +2365,11 @@ PyMODINIT_FUNC init__funcs(void)
     PyDict_SetItemString(d, "fresnel_sin", fresnel_sin);
     PyDict_SetItemString(d, "lambertw", lambertw);
     PyDict_SetItemString(d, "resolution_inverse", resolution_inverse);
-    PyDict_SetItemString(d, "sinc", sinc);
     PyDict_SetItemString(d, "single_slit_diffraction", single_slit_diffraction);
     PyDict_SetItemString(d, "wavelength_to_wavenumber",
                          wavelength_to_wavenumber);
 
     Py_DECREF(double_slit_diffraction);
-    Py_DECREF(besselJ0);
-    Py_DECREF(besselI0);
     Py_DECREF(frequency_to_wavelength);
     Py_DECREF(fresnel_cos);
     Py_DECREF(fresnel_psi);
@@ -3051,7 +2380,6 @@ PyMODINIT_FUNC init__funcs(void)
     Py_DECREF(fresnel_sin);
     Py_DECREF(lambertw);
     Py_DECREF(resolution_inverse);
-    Py_DECREF(sinc);
     Py_DECREF(single_slit_diffraction);
     Py_DECREF(wavelength_to_wavenumber);
 

@@ -147,7 +147,7 @@ class ModelFromGEO(object):
                  eccentricity=0.0, periapse=0.0, use_deprecate=False, rng="all",
                  model="ringlet", echo=False, rho_shift=0.0, N_Waves=3,
                  data_rho=None, data_pow=None, data_phase=None,
-                 perturb=[0,0,0,0,0]):
+                 perturb=[0,0,0,0,0], interp=0):
 
         # Check all input variables for errors.
         fname = "diffrec.advanced_tools.ModelFromGEO"
@@ -158,6 +158,7 @@ class ModelFromGEO(object):
         error_check.check_type(geo, str, "geo", fname)
         error_check.check_type(echo, bool, "echo", fname)
         error_check.check_type(wtype, str, "wtype", fname)
+        error_check.check_type(interp, int, "interp", fname)
         error_check.check_type(psitype, str, "psitype", fname)
         res = error_check.check_type_and_convert(res, float, "res", fname)
         width = error_check.check_type_and_convert(width, float, "width", fname)
@@ -684,7 +685,7 @@ class ModelFromGEO(object):
                 T_in, self.rho_km_vals, F, self.w_km_vals, perturb,
                 start, n_used, wtype, norm, True, psitype,
                 self.phi_rad_vals, kD_vals, self.B_rad_vals, self.D_km_vals,
-                periapse, eccentricity
+                interp, periapse, eccentricity
             )
         else:
             T_hat = T_hat[start:start+n_used+1]
@@ -747,7 +748,7 @@ class ModelFromGEO(object):
                 T_in, self.rho_km_vals, F, self.w_km_vals, perturb,
                 start, n_used, wtype, norm, False, psitype,
                 self.phi_rad_vals, kD_vals, self.B_rad_vals, self.D_km_vals,
-                periapse, eccentricity
+                interp, periapse, eccentricity
             )
 
             self.p_norm_vals = numpy.square(numpy.abs(T_hat))

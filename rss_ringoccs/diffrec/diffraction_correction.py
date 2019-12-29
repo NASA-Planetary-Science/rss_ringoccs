@@ -248,7 +248,7 @@ class DiffractionCorrection(object):
     def __init__(self, DLP, res, rng="all", wtype="kbmd20", fwd=False,
                  norm=True, verbose=False, bfac=True, sigma=2.e-13,
                  psitype="fresnel4", write_file=False, res_factor=0.75,
-                 ecc=0.0, peri=0.0, perturb=[0,0,0,0,0]):
+                 ecc=0.0, peri=0.0, perturb=[0,0,0,0,0], interp=0):
 
         # Store the name of this class as a string (The "function name").
         fn = "diffrec.diffraction_correction.DiffractionCorrection"
@@ -275,6 +275,7 @@ class DiffractionCorrection(object):
         error_check.check_type(bfac, bool, "bfac", fn)
         error_check.check_type(norm, bool, "norm", fn)
         error_check.check_type(write_file, bool, "write_file", fn)
+        error_check.check_type(interp, int, "interp", fn)
 
         res = error_check.check_type_and_convert(res, float, "res", fn)
         sigma = error_check.check_type_and_convert(sigma, float, "sigma", fn)
@@ -308,6 +309,7 @@ class DiffractionCorrection(object):
         self.verbose = verbose
         self.psitype = psitype
         self.rngreq = rng
+        self.interp = interp
         self.wtype = wtype
         self.sigma = sigma
         self.norm = norm
@@ -651,7 +653,7 @@ class DiffractionCorrection(object):
             self.T_hat_vals, self.rho_km_vals, self.F_km_vals, self.w_km_vals,
             self.perturb, self.start, self.n_used, self.wtype, self.norm, False,
             self.psitype, self.phi_rad_vals, self.kD_vals, self.B_rad_vals,
-            self.D_km_vals, self.ecc, self.peri
+            self.D_km_vals, self.interp, self.ecc, self.peri
         )
 
         self.tau_threshold_vals = (self.raw_tau_threshold_vals -

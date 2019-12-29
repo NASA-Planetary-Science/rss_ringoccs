@@ -433,10 +433,44 @@ void DiffractionCorrectionNewton(DLPObj *dlp)
     else if (dlp->wtype == 4){fw = &Kaiser_Bessel_3_5_Double;}
     else if (dlp->wtype == 5){fw = &Modified_Kaiser_Bessel_2_0_Double;}
     else if (dlp->wtype == 6){fw = &Modified_Kaiser_Bessel_2_5_Double;}
-    else                    {fw = &Modified_Kaiser_Bessel_3_5_Double;}
+    else                     {fw = &Modified_Kaiser_Bessel_3_5_Double;}
 
-    if (dlp->use_norm){FresT = &Fresnel_Transform_Newton_Norm_Double;}
-    else              {FresT = &Fresnel_Transform_Newton_Double;}
+    if (dlp->use_norm){
+        if (dlp->interp == 0){
+            FresT = &Fresnel_Transform_Newton_Norm_Double;
+        }
+        else if (dlp->interp == 2){
+            FresT = &Fresnel_Transform_Quadratic_Norm_Double;
+        }
+        else if (dlp->interp == 3){
+            FresT = &Fresnel_Transform_Cubic_Norm_Double;
+        }
+        else if (dlp->interp == 4){
+            FresT = &Fresnel_Transform_Quartic_Norm_Double;
+        }
+        else {
+            dlp->status = 4;
+            return;
+        }
+    }
+    else {
+        if (dlp->interp == 0){
+            FresT = &Fresnel_Transform_Newton_Double;
+        }
+        else if (dlp->interp == 2){
+            FresT = &Fresnel_Transform_Quadratic_Double;
+        }
+        else if (dlp->interp == 3){
+            FresT = &Fresnel_Transform_Cubic_Double;
+        }
+        else if (dlp->interp == 4){
+            FresT = &Fresnel_Transform_Quartic_Double;
+        }
+        else {
+            dlp->status = 4;
+            return;
+        }
+    }
 
     /* Compute first window width and window function. */
     center = dlp->start;

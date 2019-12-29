@@ -1,5 +1,5 @@
-#ifndef RSS_RINGOCCS_WHERE_H
-#define RSS_RINGOCCS_WHERE_H
+#ifndef RSS_RINGOCCS___WHERE_H
+#define RSS_RINGOCCS___WHERE_H
 #include <stdlib.h>
 
 extern long **Where_Greater_Char(char *data, long dim, double threshold);

@@ -108,10 +108,18 @@ extern double Normeq_Long(long *w_func, long n_elements);
 extern double Normeq_Long_Long(long long *w_func, long n_elements);
 
 
-extern float Sinc_Float(float x);
-
-extern double Sinc_Double(double x);
-
-extern long double Sinc_Long_Double(long double x);
+extern float        Sinc_Float(float x);
+extern double       Sinc_Double(double x);
+extern long double  Sinc_Long_Double(long double x);
+extern double       Sinc_Char(char x);
+extern double       Sinc_UChar(unsigned char x);
+extern double       Sinc_Short(short x);
+extern double       Sinc_UShort(unsigned short x);
+extern double       Sinc_Int(int x);
+extern double       Sinc_UInt(unsigned int x);
+extern double       Sinc_Long(long x);
+extern double       Sinc_ULong(unsigned long x);
+extern double       Sinc_Long_Long(long long x);
+extern double       Sinc_ULong_Long(unsigned long long x);
 
 #endif

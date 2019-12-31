@@ -258,6 +258,8 @@ class DiffractionCorrection(object):
             print("Processing Diffraction Correction:")
             print("\tRunning Error Check on Input Arguments...")
 
+        error_check.check_type(perturb, list, "perturb", fn)
+
         if (len(perturb) != 5):
             raise IndexError(
                 "\rError Encountered: rss_ringoccs\n"

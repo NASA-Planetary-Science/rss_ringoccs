@@ -1592,9 +1592,6 @@ static PyObject *square_wave_diffraction(PyObject *self, PyObject *args)
     return Py_BuildValue("N", output);
 }
 
-/*------------------------------BESSEL J0-------------------------------------*/
-
-
 static PyMethodDef _special_functions_methods[] =
 {
     {
@@ -1986,12 +1983,6 @@ static void long_double_double_slit_diffraction(char **args,
     }
 }
 
-PyUFuncGenericFunction double_slit_funcs[3] = {
-    &float_double_slit_diffraction,
-    &double_double_slit_diffraction,
-    &long_double_double_slit_diffraction
-};
-
 PyUFuncGenericFunction frequency_to_wavelength_funcs[3] = {
     &float_frequency_to_wavelength,
     &double_frequency_to_wavelength,
@@ -2004,12 +1995,6 @@ PyUFuncGenericFunction fresnel_cos_funcs[3] = {
     &long_double_fresnelcos
 };
 
-PyUFuncGenericFunction fresnel_scale_funcs[3] = {
-    &float_fresnel_scale,
-    &double_fresnel_scale,
-    &long_double_fresnel_scale
-};
-
 PyUFuncGenericFunction fresnel_sin_funcs[3] = {
     &float_fresnelsin,
     &double_fresnelsin,
@@ -2020,6 +2005,30 @@ PyUFuncGenericFunction lambertw_funcs[3] = {
     &float_lambertw,
     &double_lambertw,
     &long_double_lambertw
+};
+
+PyUFuncGenericFunction res_inv_funcs[3] = {
+    &float_resolution_inverse,
+    &double_resolution_inverse,
+    &long_double_resolution_inverse
+};
+
+PyUFuncGenericFunction wavelength_to_wavenumber_funcs[3] = {
+    &float_wavelength_to_wavenumber,
+    &double_wavelength_to_wavenumber,
+    &long_double_wavelength_to_wavenumber
+};
+
+PyUFuncGenericFunction double_slit_funcs[3] = {
+    &float_double_slit_diffraction,
+    &double_double_slit_diffraction,
+    &long_double_double_slit_diffraction
+};
+
+PyUFuncGenericFunction fresnel_scale_funcs[3] = {
+    &float_fresnel_scale,
+    &double_fresnel_scale,
+    &long_double_fresnel_scale
 };
 
 PyUFuncGenericFunction psi_funcs[3] = {
@@ -2046,22 +2055,10 @@ PyUFuncGenericFunction dpsi_ellipse_funcs[3] = {
     &long_double_fresnel_dpsi_dphi_ellipse
 };
 
-PyUFuncGenericFunction res_inv_funcs[3] = {
-    &float_resolution_inverse,
-    &double_resolution_inverse,
-    &long_double_resolution_inverse
-};
-
 PyUFuncGenericFunction single_slit_funcs[3] = {
     &float_single_slit_diffraction,
     &double_single_slit_diffraction,
     &long_double_single_slit_diffraction
-};
-
-PyUFuncGenericFunction wavelength_to_wavenumber_funcs[3] = {
-    &float_wavelength_to_wavenumber,
-    &double_wavelength_to_wavenumber,
-    &long_double_wavelength_to_wavenumber
 };
 
 /*  Input and return types for double input and out.                          */

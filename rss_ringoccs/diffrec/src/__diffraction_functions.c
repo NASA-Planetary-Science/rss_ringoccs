@@ -81,11 +81,6 @@
 #include "__diffraction_functions.h"
 
 /******************************************************************************
- *------------------------------DEFINE C FUNCTIONS----------------------------*
- *  These are functions written in pure C without the use of the C-Python API.*
- ******************************************************************************/
-
-/******************************************************************************
  *  Function:                                                                 *
  *      reset_window                                                          *
  *  Purpose:                                                                  *
@@ -126,7 +121,9 @@ static void reset_window(double *x_arr, double *w_func, double dx, double width,
     }
 }
 
-static int check_dlp_data(DLPObj *dlp){
+static int check_dlp_data(DLPObj *dlp)
+{
+    /*  If any of these pointers are void, return 0. Else, pass.              */
     if ((!dlp->T_in) || (!dlp->rho_km_vals)  || (!dlp->F_km_vals)
                      || (!dlp->phi_rad_vals) || (!dlp->kd_vals)
                      || (!dlp->B_rad_vals)   || (!dlp->D_km_vals)
@@ -140,8 +137,8 @@ void DiffractionCorrectionFresnel(DLPObj *dlp)
     dlp->status = 0;
 
     /*  Check that the pointers to the data are not NULL.                     */
-    if (!(check_dlp_data(dlp))){
-
+    if (!(check_dlp_data(dlp)))
+    {
         /*  One of the variables has null data, return to calling function.   */
         dlp->status = 1;
         return;
@@ -160,21 +157,21 @@ void DiffractionCorrectionFresnel(DLPObj *dlp)
                             double, long, long);
 
     /*  Cast the selected window type to the fw pointer.                     */
-    if      (dlp->wtype == 0){fw = &Rect_Window_Double;}
-    else if (dlp->wtype == 1){fw = &Coss_Window_Double;}
-    else if (dlp->wtype == 2){fw = &Kaiser_Bessel_2_0_Double;}
-    else if (dlp->wtype == 3){fw = &Kaiser_Bessel_2_5_Double;}
-    else if (dlp->wtype == 4){fw = &Kaiser_Bessel_3_5_Double;}
-    else if (dlp->wtype == 5){fw = &Modified_Kaiser_Bessel_2_0_Double;}
-    else if (dlp->wtype == 6){fw = &Modified_Kaiser_Bessel_2_5_Double;}
-    else                     {fw = &Modified_Kaiser_Bessel_3_5_Double;}
+    if      (dlp->wtype == 0) fw = &Rect_Window_Double;
+    else if (dlp->wtype == 1) fw = &Coss_Window_Double;
+    else if (dlp->wtype == 2) fw = &Kaiser_Bessel_2_0_Double;
+    else if (dlp->wtype == 3) fw = &Kaiser_Bessel_2_5_Double;
+    else if (dlp->wtype == 4) fw = &Kaiser_Bessel_3_5_Double;
+    else if (dlp->wtype == 5) fw = &Modified_Kaiser_Bessel_2_0_Double;
+    else if (dlp->wtype == 6) fw = &Modified_Kaiser_Bessel_2_5_Double;
+    else                      fw = &Modified_Kaiser_Bessel_3_5_Double;
 
     /*  Cast FresT to the appropriate function.                               */
-    if (dlp->use_norm){FresT = &Fresnel_Transform_Norm_Double;}
-    else              {FresT = &Fresnel_Transform_Double;}
+    if (dlp->use_norm) FresT = &Fresnel_Transform_Norm_Double;
+    else               FresT = &Fresnel_Transform_Double;
 
     /* Move the pointers to the correct starting point. Compute window width.*/
-    center  = dlp->start;
+    center = dlp->start;
 
     /*  Compute some extra necessary variables.                               */
     w_init  = dlp->w_km_vals[center];
@@ -182,8 +179,8 @@ void DiffractionCorrectionFresnel(DLPObj *dlp)
     two_dx  = 2.0*dx;
     nw_pts  = ((long)(w_init / two_dx))+1;
 
-    if (center - nw_pts < 0){
-
+    if (center - nw_pts < 0)
+    {
         /*  Invalid index for the for the first point. That is, the window    *
          *  of integration required for the first point goes beyond the       *
          *  available data. Return to calling function.                       */
@@ -202,8 +199,8 @@ void DiffractionCorrectionFresnel(DLPObj *dlp)
     /*  Check that malloc was successfull then pass the x_arr array           *
      *  (ring radius) to the void function reset_window. This alters x_arr so *
      *  that it's values range from -W/2 to zero, W begin the window width.   */
-    if (!(x_arr) || !(w_func)){
-
+    if (!(x_arr) || !(w_func))
+    {
         /*  Malloc failed, return to calling function.                        */
         dlp->status = 3;
         return;
@@ -211,7 +208,10 @@ void DiffractionCorrectionFresnel(DLPObj *dlp)
     else reset_window(x_arr, w_func, dx, w_init, nw_pts, fw);
 
     /* Compute Window Functions, and compute pi/2 * x^2                       */
-    for(j=0; j<nw_pts; ++j){
+    for(j=0; j<nw_pts; ++j)
+    {
+        /*  The independent variable is pi/2 * ((rho-rho0)/F)^2. Compute      *
+         *  part of this. The 1/F^2 part is introduced later.                 */
         x_arr[j] *= PI_BY_TWO*x_arr[j];
 
         /*  If forward transform is selected, negate x_arr.                   */
@@ -219,12 +219,14 @@ void DiffractionCorrectionFresnel(DLPObj *dlp)
     }
 
     /*  Compute the Fresnel transform across the input data.                  */
-    for (i=0; i<=dlp->n_used; ++i){
-        if (fabs(w_init - dlp->w_km_vals[center]) >= two_dx) {
-
+    for (i=0; i<=dlp->n_used; ++i)
+    {
+        /*  If the window width has deviated more the 2*dx, reset variables.  */
+        if (fabs(w_init - dlp->w_km_vals[center]) >= two_dx)
+        {
             /* Reset w_init and recompute window function.                    */
             w_init = dlp->w_km_vals[center];
-            nw_pts  = ((long)(w_init / two_dx))+1;
+            nw_pts = ((long)(w_init / two_dx))+1;
 
             /*  Reallocate memory, since the sizes of the arrays changed.     */
             w_func = (double *)realloc(w_func, sizeof(double)*nw_pts);
@@ -234,8 +236,11 @@ void DiffractionCorrectionFresnel(DLPObj *dlp)
             reset_window(x_arr, w_func, dx, w_init, nw_pts, fw);
 
             /* Compute Window Functions, and compute pi/2 * x^2               */
-            for(j=0; j<nw_pts; ++j){
+            for(j=0; j<nw_pts; ++j)
+            {
                 x_arr[j] *= PI_BY_TWO*x_arr[j];
+
+                /*  Again, if forward calculation is set, negate x_arr.       */
                 x_arr[j] *= (dlp->use_fwd == 0) - (dlp->use_fwd == 1);
             }
         }
@@ -259,64 +264,89 @@ void DiffractionCorrectionLegendre(DLPObj *dlp)
     dlp->status = 0;
 
     /*  Check that the pointers to the data are not NULL.                     */
-    if (!(check_dlp_data(dlp))){
-
+    if (!(check_dlp_data(dlp)))
+    {
         /*  One of the variables has null data, return to calling function.   */
         dlp->status = 1;
         return;
     }
 
+    /*  i is used for indexing, nw_pts is the number of points in the window. */
     long i, nw_pts, center;
+
+    /*  IsEven is a boolean for determining the parity of the polynomial.     */
     bool IsEven;
-    double w_init, dx, two_dx, cosb, sinp, cosp;
-    double Legendre_Coeff;
+
+    /*  Variable for the number of Legendre coefficients to be computed.      */
+    unsigned char poly_order;
+
+    /*  Various other variables needed throughout.                            */
+    double w_init, dx, two_dx, cosb, sinp, cosp, Legendre_Coeff;
+
+    /*  Create function pointers for window function and Fresnel transform.   */
     double (*fw)(double, double);
     complex double (*FresT)(double*, complex double*, double*, double, double *,
                             double, double, double, long, unsigned char, long);
 
     /*  Cast the selected window type to the fw pointer.                      */
-    if      (dlp->wtype == 0){fw = &Rect_Window_Double;}
-    else if (dlp->wtype == 1){fw = &Coss_Window_Double;}
-    else if (dlp->wtype == 2){fw = &Kaiser_Bessel_2_0_Double;}
-    else if (dlp->wtype == 3){fw = &Kaiser_Bessel_2_5_Double;}
-    else if (dlp->wtype == 4){fw = &Kaiser_Bessel_3_5_Double;}
-    else if (dlp->wtype == 5){fw = &Modified_Kaiser_Bessel_2_0_Double;}
-    else if (dlp->wtype == 6){fw = &Modified_Kaiser_Bessel_2_5_Double;}
-    else                    {fw = &Modified_Kaiser_Bessel_3_5_Double;}
+    if      (dlp->wtype == 0) fw = &Rect_Window_Double;
+    else if (dlp->wtype == 1) fw = &Coss_Window_Double;
+    else if (dlp->wtype == 2) fw = &Kaiser_Bessel_2_0_Double;
+    else if (dlp->wtype == 3) fw = &Kaiser_Bessel_2_5_Double;
+    else if (dlp->wtype == 4) fw = &Kaiser_Bessel_3_5_Double;
+    else if (dlp->wtype == 5) fw = &Modified_Kaiser_Bessel_2_0_Double;
+    else if (dlp->wtype == 6) fw = &Modified_Kaiser_Bessel_2_5_Double;
+    else                      fw = &Modified_Kaiser_Bessel_3_5_Double;
 
-    if ((2*(dlp->order/2)) == dlp->order){
-        if (dlp->use_norm){
-            FresT = &Fresnel_Transform_Legendre_Norm_Odd_Double;
-        }
-        else {
-            FresT = &Fresnel_Transform_Legendre_Odd_Double;
-        }
+    /*  Set the IsEven boolean to the appropriate value. Since the linear and *
+     *  constant term are zero, even polynomials will have an odd number of   *
+     *  terms. For example, the quartic expansion has the quadratic, cubic,   *
+     *  quartic terms, and hence needs three coefficients. Thus, if the       *
+     *  dlp->order variable is an odd number, this corresponds to an even     *
+     *  polynomial and vice versa. Set IsEven accordingly.                    */
+    if (2*(dlp->order/2) == dlp->order) IsEven = False;
+    else IsEven = True;
+
+    /*  Select the appropriate Fresnel transform and set poly_order.          */
+    if (IsEven)
+    {
+        poly_order = dlp-> order;
+
+        /*  Select the even transform, with or without normalization.         */
+        if (dlp->use_norm) FresT = &Fresnel_Transform_Legendre_Norm_Even_Double;
+        else               FresT = &Fresnel_Transform_Legendre_Even_Double;
     }
-    else {
-        if (dlp->use_norm){
-            FresT = &Fresnel_Transform_Legendre_Norm_Even_Double;
-        }
-        else {
-            FresT = &Fresnel_Transform_Legendre_Even_Double;
-        }
+    else 
+    {
+        poly_order = dlp->order + 1;
+
+        /*  Choose the odd transform with or without normalization.           */
+        if (dlp->use_norm) FresT = &Fresnel_Transform_Legendre_Norm_Odd_Double;
+        else               FresT = &Fresnel_Transform_Legendre_Odd_Double;
     }
 
     /* Compute first window width and window function. */
     center = dlp->start;
 
-    if (dlp->use_fwd){
-        for (i=0; i <= dlp->n_used; ++i){
+    /*  If forward tranform is set, negate the kd_vals variable. This will    *
+     *  the equivalent effect of computing the forward calculation later.     */
+    if (dlp->use_fwd)
+    {
+        /*  Loop over all of kd_vals and negate the value.                    */
+        for (i=0; i <= dlp->n_used; ++i)
+        {
             dlp->kd_vals[i] *= -1.0;
         }
     }
 
+    /*  Compute more necessary data.                                          */
     w_init  = dlp->w_km_vals[center];
     dx      = dlp->rho_km_vals[center+1] - dlp->rho_km_vals[center];
     two_dx  = 2.0*dx;
     nw_pts  = (long)(w_init / two_dx)+1;
 
-    if (center - nw_pts < 0){
-
+    if (center - nw_pts < 0)
+    {
         /*  Invalid index for the for the first point. That is, the window    *
          *  of integration required for the first point goes beyond the       *
          *  available data. Return to calling function.                       */
@@ -329,33 +359,29 @@ void DiffractionCorrectionLegendre(DLPObj *dlp)
     double *x_arr          = (double *)malloc(sizeof(double)*nw_pts);
     double *w_func         = (double *)malloc(sizeof(double)*nw_pts);
 
-    if (2*(dlp->order/2) == dlp->order){
-        IsEven = False;
-    }
-    else {
-        IsEven = True;
-    }
-
     /*  Also for the two Legendre polynomials.                                */
-    double *legendre_p     = (double *)malloc(sizeof(double)*(dlp->order+1));
-    double *alt_legendre_p = (double *)malloc(sizeof(double)*dlp->order);
+    double *legendre_p     = (double *)malloc(sizeof(double)*(poly_order+1));
+    double *alt_legendre_p = (double *)malloc(sizeof(double)*poly_order);
 
     /*  And finally for the coefficients of psi.                              */
-    double *fresnel_ker_coeffs = (double *)malloc(sizeof(double)*dlp->order);
+    double *fresnel_ker_coeffs = (double *)malloc(sizeof(double)*poly_order);
 
     /*  Check that malloc was successfull then pass the x_arr array           *
      *  (ring radius) to the void function reset_window. This alters x_arr so *
      *  that it's values range from -W/2 to zero, W begin the window width.   */
     if (!(x_arr)    ||    !(w_func)            ||    !(legendre_p)
-                    ||    !(alt_legendre_p)    ||    !(fresnel_ker_coeffs)){
-
+                    ||    !(alt_legendre_p)    ||    !(fresnel_ker_coeffs))
+    {
         /*  Malloc failed, return to calling function.                        */
         dlp->status = 3;
         return;
     }
     else reset_window(x_arr, w_func, dx, w_init, nw_pts, fw);
 
-    for (i = 0; i <= dlp->n_used; ++i){
+    for (i = 0; i <= dlp->n_used; ++i)
+    {
+        /*  Compute some geometric information, and the scaling coefficient   *
+         *  for the Legendre polynomial expansion.                            */
         cosb            = cos(dlp->B_rad_vals[center]);
         cosp            = cos(dlp->phi_rad_vals[center]);
         sinp            = sin(dlp->phi_rad_vals[center]);
@@ -364,23 +390,26 @@ void DiffractionCorrectionLegendre(DLPObj *dlp)
         Legendre_Coeff  = 0.5*Legendre_Coeff/(1.0-Legendre_Coeff);
 
         /* Compute Legendre Polynomials,                                      */
-        Legendre_Polynomials(legendre_p, cosb*cosp, dlp->order+1);
-        Alt_Legendre_Polynomials(alt_legendre_p, legendre_p, dlp->order);
+        Legendre_Polynomials(legendre_p, cosb*cosp, poly_order+1);
+        Alt_Legendre_Polynomials(alt_legendre_p, legendre_p, poly_order);
 
         /*  Compute the coefficients using Cauchy Products. First compute     *
          *  the bottom triangle of the square in the product.                 */
         Fresnel_Kernel_Coefficients(fresnel_ker_coeffs, legendre_p,
-                                    alt_legendre_p, Legendre_Coeff,
-                                    dlp->order, IsEven);
+                                    alt_legendre_p, Legendre_Coeff, poly_order);
 
         /*  If the window width changes significantly, recompute w_func.      */
-        if (fabs(w_init - dlp->w_km_vals[center]) >= two_dx) {
-
+        if (fabs(w_init - dlp->w_km_vals[center]) >= two_dx)
+        {
             /* Reset w_init and recompute window function.                    */
             w_init = dlp->w_km_vals[center];
             nw_pts = ((long)(w_init / two_dx))+1;
+
+            /*  Reallocate x_arr and w_func since the sizes changed.          */
             x_arr  = (double *)realloc(x_arr, sizeof(double)*nw_pts);
             w_func = (double *)realloc(w_func, sizeof(double)*nw_pts);
+
+            /*  Recompute x_arr and w_func for the new sizes.                 */
             reset_window(x_arr, w_func, dx, w_init, nw_pts, fw);
         }
 
@@ -407,66 +436,80 @@ void DiffractionCorrectionNewton(DLPObj *dlp)
     dlp->status = 0;
 
     /*  Check that the pointers to the data are not NULL.                     */
-    if (!(check_dlp_data(dlp))){
-
+    if (!(check_dlp_data(dlp)))
+    {
         /*  One of the variables has null data, return to calling function.   */
         dlp->status = 1;
         return;
     }
 
-    long i, j, nw_pts, toler, center;
-    double w_init, dx, two_dx, EPS;
+    /*  Variables for indexing. nw_pts is the number of points in the window. */
+    long i, j, nw_pts, center;
 
+    /*  Toler is the number of iterations allowed in Newton-Raphson.          */
+    long toler;
+
+    /*  Some variables needed for reconstruction.                             */
+    double w_init, dx, two_dx;
+
+    /*  EPS is the maximum allowed error in the Newton-Raphson scheme.        */
+    double EPS;
+
+    /*  Set toler to 5 and EPS to e-4, reasonable for almost all cases.       */
     toler = 5;
     EPS = 1.E-4;
 
+    /*  Function pointers for the window function and the Fresnel transform.  */
     double (*fw)(double, double);
     complex double (*FresT)(double *, double *, complex double *, double *,
                             double, double, double, double, double, long,
                             double, double, long, long);
 
     /*  Cast the selected window type to the fw pointer.                      */
-    if      (dlp->wtype == 0){fw = &Rect_Window_Double;}
-    else if (dlp->wtype == 1){fw = &Coss_Window_Double;}
-    else if (dlp->wtype == 2){fw = &Kaiser_Bessel_2_0_Double;}
-    else if (dlp->wtype == 3){fw = &Kaiser_Bessel_2_5_Double;}
-    else if (dlp->wtype == 4){fw = &Kaiser_Bessel_3_5_Double;}
-    else if (dlp->wtype == 5){fw = &Modified_Kaiser_Bessel_2_0_Double;}
-    else if (dlp->wtype == 6){fw = &Modified_Kaiser_Bessel_2_5_Double;}
-    else                     {fw = &Modified_Kaiser_Bessel_3_5_Double;}
+    if      (dlp->wtype == 0) fw = &Rect_Window_Double;
+    else if (dlp->wtype == 1) fw = &Coss_Window_Double;
+    else if (dlp->wtype == 2) fw = &Kaiser_Bessel_2_0_Double;
+    else if (dlp->wtype == 3) fw = &Kaiser_Bessel_2_5_Double;
+    else if (dlp->wtype == 4) fw = &Kaiser_Bessel_3_5_Double;
+    else if (dlp->wtype == 5) fw = &Modified_Kaiser_Bessel_2_0_Double;
+    else if (dlp->wtype == 6) fw = &Modified_Kaiser_Bessel_2_5_Double;
+    else                      fw = &Modified_Kaiser_Bessel_3_5_Double;
 
-    if (dlp->use_norm){
-        if (dlp->interp == 0){
+    /*  Select the correct Fresnel transformation.                            */
+    if (dlp->use_norm)
+    {
+        if (dlp->interp == 0)
+        {
             FresT = &Fresnel_Transform_Newton_Norm_Double;
         }
-        else if (dlp->interp == 2){
+        else if (dlp->interp == 2)
+        {
             FresT = &Fresnel_Transform_Quadratic_Norm_Double;
         }
-        else if (dlp->interp == 3){
+        else if (dlp->interp == 3)
+        {
             FresT = &Fresnel_Transform_Cubic_Norm_Double;
         }
-        else if (dlp->interp == 4){
+        else if (dlp->interp == 4)
+        {
             FresT = &Fresnel_Transform_Quartic_Norm_Double;
         }
-        else {
+        else
+        {
+            /*  Illegal input for interp, return to calling function.         */
             dlp->status = 4;
             return;
         }
     }
-    else {
-        if (dlp->interp == 0){
-            FresT = &Fresnel_Transform_Newton_Double;
-        }
-        else if (dlp->interp == 2){
-            FresT = &Fresnel_Transform_Quadratic_Double;
-        }
-        else if (dlp->interp == 3){
-            FresT = &Fresnel_Transform_Cubic_Double;
-        }
-        else if (dlp->interp == 4){
-            FresT = &Fresnel_Transform_Quartic_Double;
-        }
-        else {
+    else
+    {
+        if (dlp->interp == 0)      FresT = &Fresnel_Transform_Newton_Double;
+        else if (dlp->interp == 2) FresT = &Fresnel_Transform_Quadratic_Double;
+        else if (dlp->interp == 3) FresT = &Fresnel_Transform_Cubic_Double;
+        else if (dlp->interp == 4) FresT = &Fresnel_Transform_Quartic_Double;
+        else
+        {
+            /*  Illegal input for interp, return to calling function.         */
             dlp->status = 4;
             return;
         }
@@ -475,19 +518,25 @@ void DiffractionCorrectionNewton(DLPObj *dlp)
     /* Compute first window width and window function. */
     center = dlp->start;
 
-    if (dlp->use_fwd){
-        for (i=0; i<=dlp->n_used; ++i){
-            dlp->kd_vals[center+i] *= -1.0;
+    /*  If forward tranform is set, negate the kd_vals variable. This will    *
+     *  the equivalent effect of computing the forward calculation later.     */
+    if (dlp->use_fwd)
+    {
+        /*  Loop over all of kd_vals and negate the value.                    */
+        for (i=0; i <= dlp->n_used; ++i)
+        {
+            dlp->kd_vals[i] *= -1.0;
         }
     }
 
+    /*  Compute some more variables.                                          */
     w_init  = dlp->w_km_vals[center];
     dx      = dlp->rho_km_vals[center+1] - dlp->rho_km_vals[center];
     two_dx  = 2.0*dx;
     nw_pts  = 2*((long)(w_init / (2.0 * dx)))+1;
 
-    if (center - ((nw_pts-1)/2) < 0){
-
+    if (center - ((nw_pts-1)/2) < 0)
+    {
         /*  Invalid index for the for the first point. That is, the window    *
          *  of integration required for the first point goes beyond the       *
          *  available data. Return to calling function.                       */
@@ -496,42 +545,55 @@ void DiffractionCorrectionNewton(DLPObj *dlp)
         return;
     }
 
+    /*  Allocate memory for these required variables.                         */
     double *x_arr   = (double *)malloc(sizeof(double) * nw_pts);
     double *phi_arr = (double *)malloc(sizeof(double) * nw_pts);
     double *w_func  = (double *)malloc(sizeof(double) * nw_pts);
 
     /*  Check that malloc was successfull.                                    */
-    if (!(x_arr) || !(w_func) || !(phi_arr)){
-
+    if (!(x_arr) || !(w_func) || !(phi_arr))
+    {
         /*  Malloc failed, return to calling function.                        */
         dlp->status = 3;
         return;
     }
 
-    for (j=0; j<nw_pts; ++j){
+    /*  Compute the rho and phi variables, and the window function.           */
+    for (j=0; j<nw_pts; ++j)
+    {
         x_arr[j]   = dlp->rho_km_vals[center+j-(nw_pts-1)/2];
         phi_arr[j] = dlp->phi_rad_vals[center+j-(nw_pts-1)/2];
         w_func[j]  = fw(x_arr[j] - dlp->rho_km_vals[center], w_init);
     }
 
-    for (i=0; i<=dlp->n_used; ++i){
-
+    /*  Run diffraction correction point by point.                            */
+    for (i=0; i<=dlp->n_used; ++i)
+    {
         /*  If the window width changes significantly, recompute w_func.      */
-        if (fabs(w_init - dlp->w_km_vals[center]) >= two_dx) {
-            // Reset w_init and recompute window function.
+        if (fabs(w_init - dlp->w_km_vals[center]) >= two_dx)
+        {
+            /* Reset w_init and recompute window function.                    */
             w_init  = dlp->w_km_vals[center];
             nw_pts  = 2*((int)(w_init / (2.0 * dx)))+1;
+
+            /*  Reallocate memory since the sizes have changed.               */
             w_func  = (double *)realloc(w_func,  sizeof(double) * nw_pts);
             phi_arr = (double *)realloc(phi_arr, sizeof(double) * nw_pts);
             x_arr   = (double *)realloc(x_arr,   sizeof(double) * nw_pts);
-            for (j=0; j<nw_pts; ++j){
+
+            /*  Recompute rho, phi, and the window function.                  */
+            for (j=0; j<nw_pts; ++j)
+            {
                 x_arr[j]   = dlp->rho_km_vals[center+j-(nw_pts-1)/2];
                 phi_arr[j] = dlp->phi_rad_vals[center+j-(nw_pts-1)/2];
                 w_func[j]  = fw(x_arr[j] - dlp->rho_km_vals[center], w_init);
             }
         }
-        else {
-            for (j=0; j<nw_pts; ++j){
+        else 
+        {
+            /*  Adjust rho and phi to the new range.                          */
+            for (j=0; j<nw_pts; ++j)
+            {
                 x_arr[j]   = dlp->rho_km_vals[center+j-(nw_pts-1)/2];
                 phi_arr[j] = dlp->phi_rad_vals[center+j-(nw_pts-1)/2];
             }
@@ -560,53 +622,71 @@ void DiffractionCorrectionPerturbedNewton(DLPObj *dlp)
     dlp->status = 0;
 
     /*  Check that the pointers to the data are not NULL.                     */
-    if (!(check_dlp_data(dlp))){
-
+    if (!(check_dlp_data(dlp)))
+    {
         /*  One of the variables has null data, return to calling function.   */
         dlp->status = 1;
         return;
     }
 
-    long i, j, nw_pts, toler, center;
-    double w_init, dx, two_dx, EPS;
+    /*  Variables for indexing, nw_pts is the number of points in the window. */
+    long i, j, nw_pts, center;
 
+    /*  Maximum number of iterations allowed in Newton-Raphson.               */
+    long toler;
+
+    /*  Some more necessary variables.                                        */
+    double w_init, dx, two_dx;
+
+    /*  The maximum allowed error in Newton-Raphson.                          */
+    double EPS;
+
+    /*  Set toler to 5 and EPS to e-4, both reasonable for almost all cases.  */
     toler = 5;
     EPS = 1.E-4;
 
+    /*  Function pointers for the window function and Fresnel transform.      */
     double (*fw)(double, double);
     complex double (*FresT)(double *, double *, complex double *, double *,
                             double, double, double, double, double, long,
                             double, double, long, long, double [5]);
 
     /*  Cast the selected window type to the fw pointer.                      */
-    if      (dlp->wtype == 0){fw = &Rect_Window_Double;}
-    else if (dlp->wtype == 1){fw = &Coss_Window_Double;}
-    else if (dlp->wtype == 2){fw = &Kaiser_Bessel_2_0_Double;}
-    else if (dlp->wtype == 3){fw = &Kaiser_Bessel_2_5_Double;}
-    else if (dlp->wtype == 4){fw = &Kaiser_Bessel_3_5_Double;}
-    else if (dlp->wtype == 5){fw = &Modified_Kaiser_Bessel_2_0_Double;}
-    else if (dlp->wtype == 6){fw = &Modified_Kaiser_Bessel_2_5_Double;}
-    else                    {fw = &Modified_Kaiser_Bessel_3_5_Double;}
+    if      (dlp->wtype == 0) fw = &Rect_Window_Double;
+    else if (dlp->wtype == 1) fw = &Coss_Window_Double;
+    else if (dlp->wtype == 2) fw = &Kaiser_Bessel_2_0_Double;
+    else if (dlp->wtype == 3) fw = &Kaiser_Bessel_2_5_Double;
+    else if (dlp->wtype == 4) fw = &Kaiser_Bessel_3_5_Double;
+    else if (dlp->wtype == 5) fw = &Modified_Kaiser_Bessel_2_0_Double;
+    else if (dlp->wtype == 6) fw = &Modified_Kaiser_Bessel_2_5_Double;
+    else                      fw = &Modified_Kaiser_Bessel_3_5_Double;
 
-    if (dlp->use_norm){FresT = &Fresnel_Transform_Perturbed_Newton_Norm_Double;}
-    else              {FresT = &Fresnel_Transform_Perturbed_Newton_Double;}
+    /*  Select the correct transform function.                                */
+    if (dlp->use_norm) FresT = &Fresnel_Transform_Perturbed_Newton_Norm_Double;
+    else               FresT = &Fresnel_Transform_Perturbed_Newton_Double;
 
-    /* Compute first window width and window function. */
+    /* Compute first window width and window function.                        */
     center = dlp->start;
 
-    if (dlp->use_fwd){
-        for (i=0; i<=dlp->n_used; ++i){
+    /*  If forward calculation is selected, negate kd_vals. This has the same *
+     *  effect as computation the forward model computation.                  */
+    if (dlp->use_fwd)
+    {
+        /*  Loop over kd_vals and negate each term.                           */
+        for (i=0; i<=dlp->n_used; ++i)
+        {
             dlp->kd_vals[center+i] *= -1.0;
         }
     }
 
+    /*  Compute some more necessary data.                                     */
     w_init  = dlp->w_km_vals[center];
     dx      = dlp->rho_km_vals[center+1] - dlp->rho_km_vals[center];
     two_dx  = 2.0*dx;
     nw_pts  = 2*((long)(w_init / (2.0 * dx)))+1;
 
-    if (center - ((nw_pts-1)/2) < 0){
-
+    if (center - ((nw_pts-1)/2) < 0)
+    {
         /*  Invalid index for the for the first point. That is, the window    *
          *  of integration required for the first point goes beyond the       *
          *  available data. Return to calling function.                       */
@@ -615,42 +695,54 @@ void DiffractionCorrectionPerturbedNewton(DLPObj *dlp)
         return;
     }
 
+    /*  Allocate memory for rho, phi, and the window function.                */
     double *x_arr   = (double *)malloc(sizeof(double) * nw_pts);
     double *phi_arr = (double *)malloc(sizeof(double) * nw_pts);
     double *w_func  = (double *)malloc(sizeof(double) * nw_pts);
 
     /*  Check that malloc was successfull.                                    */
-    if (!(x_arr) || !(w_func) || !(phi_arr)){
-
+    if (!(x_arr) || !(w_func) || !(phi_arr))
+    {
         /*  Malloc failed, return to calling function.                        */
         dlp->status = 3;
         return;
     }
 
-    for (j=0; j<nw_pts; ++j){
+    /*  Compute rho, phi, and the window function.                            */
+    for (j=0; j<nw_pts; ++j)
+    {
         x_arr[j]   = dlp->rho_km_vals[center+j-(nw_pts-1)/2];
         phi_arr[j] = dlp->phi_rad_vals[center+j-(nw_pts-1)/2];
         w_func[j]  = fw(x_arr[j] - dlp->rho_km_vals[center], w_init);
     }
 
-    for (i=0; i<=dlp->n_used; ++i){
-
+    for (i=0; i<=dlp->n_used; ++i)
+    {
         /*  If the window width changes significantly, recompute w_func.      */
-        if (fabs(w_init - dlp->w_km_vals[center]) >= two_dx) {
-            // Reset w_init and recompute window function.
+        if (fabs(w_init - dlp->w_km_vals[center]) >= two_dx)
+        {
+            /* Reset w_init and recompute window function.                    */
             w_init  = dlp->w_km_vals[center];
             nw_pts  = 2*((int)(w_init / (2.0 * dx)))+1;
+
+            /*  Reallocate memory since the sizes changed.                    */
             w_func  = (double *)realloc(w_func,  sizeof(double) * nw_pts);
             phi_arr = (double *)realloc(phi_arr, sizeof(double) * nw_pts);
             x_arr   = (double *)realloc(x_arr,   sizeof(double) * nw_pts);
-            for (j=0; j<nw_pts; ++j){
+
+            /*  Recompute rho, phi, and the window function.                  */
+            for (j=0; j<nw_pts; ++j)
+            {
                 x_arr[j]   = dlp->rho_km_vals[center+j-(nw_pts-1)/2];
                 phi_arr[j] = dlp->phi_rad_vals[center+j-(nw_pts-1)/2];
                 w_func[j]  = fw(x_arr[j] - dlp->rho_km_vals[center], w_init);
             }
         }
-        else {
-            for (j=0; j<nw_pts; ++j){
+        else
+        {
+            /*  Compute rho and phi about the new range.                      */
+            for (j=0; j<nw_pts; ++j)
+            {
                 x_arr[j]   = dlp->rho_km_vals[center+j-(nw_pts-1)/2];
                 phi_arr[j] = dlp->phi_rad_vals[center+j-(nw_pts-1)/2];
             }
@@ -679,8 +771,8 @@ void DiffractionCorrectionEllipse(DLPObj *dlp)
     dlp->status = 0;
 
     /*  Check that the pointers to the data are not NULL.                     */
-    if (!(check_dlp_data(dlp))){
-
+    if (!(check_dlp_data(dlp)))
+    {
         /*  One of the variables has null data, return to calling function.   */
         dlp->status = 1;
         return;
@@ -698,17 +790,17 @@ void DiffractionCorrectionEllipse(DLPObj *dlp)
                             double, double, long, long, double, double);
 
     /*  Cast the selected window type to the fw pointer.                      */
-    if      (dlp->wtype == 0){fw = &Rect_Window_Double;}
-    else if (dlp->wtype == 1){fw = &Coss_Window_Double;}
-    else if (dlp->wtype == 2){fw = &Kaiser_Bessel_2_0_Double;}
-    else if (dlp->wtype == 3){fw = &Kaiser_Bessel_2_5_Double;}
-    else if (dlp->wtype == 4){fw = &Kaiser_Bessel_3_5_Double;}
-    else if (dlp->wtype == 5){fw = &Modified_Kaiser_Bessel_2_0_Double;}
-    else if (dlp->wtype == 6){fw = &Modified_Kaiser_Bessel_2_5_Double;}
-    else                     {fw = &Modified_Kaiser_Bessel_3_5_Double;}
+    if      (dlp->wtype == 0) fw = &Rect_Window_Double;
+    else if (dlp->wtype == 1) fw = &Coss_Window_Double;
+    else if (dlp->wtype == 2) fw = &Kaiser_Bessel_2_0_Double;
+    else if (dlp->wtype == 3) fw = &Kaiser_Bessel_2_5_Double;
+    else if (dlp->wtype == 4) fw = &Kaiser_Bessel_3_5_Double;
+    else if (dlp->wtype == 5) fw = &Modified_Kaiser_Bessel_2_0_Double;
+    else if (dlp->wtype == 6) fw = &Modified_Kaiser_Bessel_2_5_Double;
+    else                      fw = &Modified_Kaiser_Bessel_3_5_Double;
 
-    if (dlp->use_norm){FresT = &Fresnel_Transform_Ellipse_Norm_Double;}
-    else {FresT = &Fresnel_Transform_Ellipse_Double;}
+    if (dlp->use_norm) FresT = &Fresnel_Transform_Ellipse_Norm_Double;
+    else               FresT = &Fresnel_Transform_Ellipse_Double;
 
     /* Compute first window width and window function. */
     center = dlp->start;

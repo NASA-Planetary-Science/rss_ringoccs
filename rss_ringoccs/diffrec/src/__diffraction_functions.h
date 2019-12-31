@@ -9,7 +9,10 @@
 #include "__window_functions.h"
 #include "__fresnel_kernel.h"
 
-typedef char bool;
+/*  Define the Boolean type as a single unsigned byte.                        */
+typedef unsigned char bool;
+
+/*  Define True and False.                                                    */
 #define True 1
 #define False 0
 
@@ -28,13 +31,13 @@ typedef struct _dlpdataobj {
     double perturb[5];
     long start;
     long n_used;
+    bool use_norm;
+    bool use_fwd;
     unsigned char wtype;
-    unsigned char use_norm;
-    unsigned char use_fwd;
     unsigned char order;
     unsigned char interp;
-    complex double *T_out;
     unsigned char status;
+    complex double *T_out;
 } DLPObj;
 
 /*  Functions defined in __diffraction_functions.c                            */

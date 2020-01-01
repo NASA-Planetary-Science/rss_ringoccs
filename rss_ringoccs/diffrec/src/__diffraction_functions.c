@@ -778,12 +778,23 @@ void DiffractionCorrectionEllipse(DLPObj *dlp)
         return;
     }
 
-    long i, j, nw_pts, toler, center;
-    double w_init, dx, two_dx, EPS;
+    /*  i and j are used for indexing, nw_pts is number of points in window.  */
+    long i, j, nw_pts, center;
 
+    /*  More necessary variables.                                             */
+    double w_init, dx, two_dx;
+
+    /*  toler is the maximum number of iterations allowed in Newton-Raphson.  */
+    long toler;
+
+    /*  The maximum error allowed in the Newton-Raphson scheme.               */
+    double EPS;
+
+    /*  Set toler to 5 and EPS to e-4, both reasonable for most purposes.     */
     toler = 5;
     EPS = 1.E-4;
 
+    /*  Function pointers for the window function and Fresnel transform.      */
     double (*fw)(double, double);
     complex double (*FresT)(double *, double *, complex double *, double *,
                             double, double, double, double, double, long,
@@ -799,14 +810,19 @@ void DiffractionCorrectionEllipse(DLPObj *dlp)
     else if (dlp->wtype == 6) fw = &Modified_Kaiser_Bessel_2_5_Double;
     else                      fw = &Modified_Kaiser_Bessel_3_5_Double;
 
+    /*  Select the appropriate transform function.                            */
     if (dlp->use_norm) FresT = &Fresnel_Transform_Ellipse_Norm_Double;
     else               FresT = &Fresnel_Transform_Ellipse_Double;
 
     /* Compute first window width and window function. */
     center = dlp->start;
 
-    if (dlp->use_fwd){
-        for (i=0; i<=dlp->n_used; ++i){
+    /*  If use_fwd, negate kd_vals. This is equivalent to forward computation.*/
+    if (dlp->use_fwd)
+    {
+        /*  Negate each term of kd_vals.                                      */
+        for (i=0; i<=dlp->n_used; ++i)
+        {
             dlp->kd_vals[center+i] *= -1.0;
         }
     }
@@ -816,8 +832,8 @@ void DiffractionCorrectionEllipse(DLPObj *dlp)
     two_dx  = 2.0*dx;
     nw_pts  = 2*((long)(w_init / (2.0 * dx)))+1;
 
-    if (center - ((nw_pts-1)/2) < 0){
-
+    if (center - ((nw_pts-1)/2) < 0)
+    {
         /*  Invalid index for the for the first point. That is, the window    *
          *  of integration required for the first point goes beyond the       *
          *  available data. Return to calling function.                       */
@@ -826,19 +842,22 @@ void DiffractionCorrectionEllipse(DLPObj *dlp)
         return;
     }
 
+    /*  Allocate memory for rho, phi, and the window function.                */
     double *x_arr   = (double *)malloc(sizeof(double) * nw_pts);
     double *phi_arr = (double *)malloc(sizeof(double) * nw_pts);
     double *w_func  = (double *)malloc(sizeof(double) * nw_pts);
 
     /*  Check that malloc was successfull.                                    */
-    if (!(x_arr) || !(w_func) || !(phi_arr)){
-
+    if (!(x_arr) || !(w_func) || !(phi_arr))
+    {
         /*  Malloc failed, return to calling function.                        */
         dlp->status = 3;
         return;
     }
 
-    for (j=0; j<nw_pts; ++j){
+    /*  Set rho, phi, and the window function to their starting values.       */
+    for (j=0; j<nw_pts; ++j)
+    {
         x_arr[j]   = dlp->rho_km_vals[center+j-(nw_pts-1)/2];
         phi_arr[j] = dlp->phi_rad_vals[center+j-(nw_pts-1)/2];
         w_func[j]  = fw(x_arr[j] - dlp->rho_km_vals[center], w_init);
@@ -846,28 +865,37 @@ void DiffractionCorrectionEllipse(DLPObj *dlp)
 
     for (i=0; i<=dlp->n_used; ++i){
 
-        /*  If the window width changes significantly, recompute w_func.  */
-        if (fabs(w_init - dlp->w_km_vals[center]) >= two_dx) {
-            // Reset w_init and recompute window function.
+        /*  If the window width changes significantly, recompute w_func.      */
+        if (fabs(w_init - dlp->w_km_vals[center]) >= two_dx)
+        {
+            /* Reset w_init and recompute window function.                    */
             w_init  = dlp->w_km_vals[center];
             nw_pts  = 2*((int)(w_init / (2.0 * dx)))+1;
+
+            /*  Reallocate memory since sizes have changed.                   */
             w_func  = (double *)realloc(w_func,  sizeof(double) * nw_pts);
             phi_arr = (double *)realloc(phi_arr, sizeof(double) * nw_pts);
             x_arr   = (double *)realloc(x_arr,   sizeof(double) * nw_pts);
-            for (j=0; j<nw_pts; ++j){
+
+            /*  Recompute rho, phi, and window function.                      */
+            for (j=0; j<nw_pts; ++j)
+            {
                 x_arr[j]   = dlp->rho_km_vals[center+j-(nw_pts-1)/2];
                 phi_arr[j] = dlp->phi_rad_vals[center+j-(nw_pts-1)/2];
                 w_func[j]  = fw(x_arr[j] - dlp->rho_km_vals[center], w_init);
             }
         }
-        else {
-            for (j=0; j<nw_pts; ++j){
+        else
+        {
+            /*  Adjust rho and phi to the new range.                          */
+            for (j=0; j<nw_pts; ++j)
+            {
                 x_arr[j]   = dlp->rho_km_vals[center+j-(nw_pts-1)/2];
                 phi_arr[j] = dlp->phi_rad_vals[center+j-(nw_pts-1)/2];
             }
         }
 
-        /*  Compute the fresnel tranform about the current point.   */
+        /*  Compute the fresnel tranform about the current point.             */
         dlp->T_out[i] = FresT(x_arr, phi_arr, dlp->T_in, w_func,
                               dlp->kd_vals[center], dlp->rho_km_vals[center],
                               dlp->B_rad_vals[center], dlp->D_km_vals[center],
@@ -877,6 +905,8 @@ void DiffractionCorrectionEllipse(DLPObj *dlp)
         /*  Increment pointers using pointer arithmetic.                      */
         center += 1;
     }
+
+    /*  Free allocated memory.                                                */
     free(x_arr);
     free(phi_arr);
     free(w_func);

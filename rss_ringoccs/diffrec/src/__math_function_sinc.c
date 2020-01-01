@@ -16,13 +16,13 @@ long double Sinc_Long_Double(long double x){
 }
 
 /*  For all integer types, convert to double and compute.                     */
-double Sinc_Char(char x)            {return Sinc_Double((double)x);}
-double Sinc_UChar(unsigned char x)  {return Sinc_Double((double)x);}
-double Sinc_Short(short x)          {return Sinc_Double((double)x);}
-double Sinc_UShort(unsigned short x){return Sinc_Double((double)x);}
-double Sinc_Int(int x)              {return Sinc_Double((double)x);}
-double Sinc_UInt(unsigned int x)    {return Sinc_Double((double)x);}
-double Sinc_Long(long x)            {return Sinc_Double((double)x);}
-double Sinc_ULong(unsigned long x)  {return Sinc_Double((double)x);}
-double Sinc_Long_Long(long long x)  {return Sinc_Double((double)x);}
+double Sinc_Char(char x)                     {return Sinc_Double((double)x);}
+double Sinc_UChar(unsigned char x)           {return Sinc_Double((double)x);}
+double Sinc_Short(short x)                   {return Sinc_Double((double)x);}
+double Sinc_UShort(unsigned short x)         {return Sinc_Double((double)x);}
+double Sinc_Int(int x)                       {return Sinc_Double((double)x);}
+double Sinc_UInt(unsigned int x)             {return Sinc_Double((double)x);}
+double Sinc_Long(long x)                     {return Sinc_Double((double)x);}
+double Sinc_ULong(unsigned long x)           {return Sinc_Double((double)x);}
+double Sinc_Long_Long(long long x)           {return Sinc_Double((double)x);}
 double Sinc_ULong_Long(unsigned long long x) {return Sinc_Double((double)x);}

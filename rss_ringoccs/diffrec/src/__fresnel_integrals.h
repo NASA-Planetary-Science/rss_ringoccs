@@ -81,7 +81,7 @@
 #include "__math_constants.h"
 
 /******************************************************************************
- *----------------------------Fresnel Cosine----------------------------------*
+ *------------------------------Fresnel Sine----------------------------------*
  ******************************************************************************/
 
 /*----------------------Single Precision Functions----------------------------*/
@@ -119,8 +119,23 @@ Fresnel_Sine_Heald_Rational_EPS_Minus_Six_Long_Double(long double x);
 extern long double
 Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Long_Double(long double x);
 
+
+/*  All other types.                                                          */
+extern double Fresnel_Sine_Taylor_to_Asymptotic_Char(char x);
+extern double Fresnel_Sine_Taylor_to_Asymptotic_UChar(unsigned char x);
+extern double Fresnel_Sine_Taylor_to_Asymptotic_Short(short x);
+extern double Fresnel_Sine_Taylor_to_Asymptotic_UShort(unsigned short x);
+extern double Fresnel_Sine_Taylor_to_Asymptotic_Int(int x);
+extern double Fresnel_Sine_Taylor_to_Asymptotic_UInt(unsigned int x);
+extern double Fresnel_Sine_Taylor_to_Asymptotic_Long(long x);
+extern double Fresnel_Sine_Taylor_to_Asymptotic_ULong(unsigned long x);
+extern double Fresnel_Sine_Taylor_to_Asymptotic_Long_Long(long long x);
+
+extern double
+Fresnel_Sine_Taylor_to_Asymptotic_ULong_Long(unsigned long long x);
+
 /******************************************************************************
- *-----------------------------Fresnel Sine-----------------------------------*
+ *-----------------------------Fresnel Cosine---------------------------------*
  ******************************************************************************/
 
 /*----------------------Single Precision Functions----------------------------*/
@@ -157,6 +172,20 @@ Fresnel_Cosine_Heald_Rational_EPS_Minus_Six_Long_Double(long double x);
 
 extern long double
 Fresnel_Cosine_Heald_Rational_EPS_Minus_Eight_Long_Double(long double x);
+
+/*  All other types.                                                          */
+extern double Fresnel_Cosine_Taylor_to_Asymptotic_Char(char x);
+extern double Fresnel_Cosine_Taylor_to_Asymptotic_UChar(unsigned char x);
+extern double Fresnel_Cosine_Taylor_to_Asymptotic_Short(short x);
+extern double Fresnel_Cosine_Taylor_to_Asymptotic_UShort(unsigned short x);
+extern double Fresnel_Cosine_Taylor_to_Asymptotic_Int(int x);
+extern double Fresnel_Cosine_Taylor_to_Asymptotic_UInt(unsigned int x);
+extern double Fresnel_Cosine_Taylor_to_Asymptotic_Long(long x);
+extern double Fresnel_Cosine_Taylor_to_Asymptotic_ULong(unsigned long x);
+extern double Fresnel_Cosine_Taylor_to_Asymptotic_Long_Long(long long x);
+
+extern double
+Fresnel_Cosine_Taylor_to_Asymptotic_ULong_Long(unsigned long long x);
 
 /******************************************************************************
  *------------------------Complex Fresnel Integral----------------------------*

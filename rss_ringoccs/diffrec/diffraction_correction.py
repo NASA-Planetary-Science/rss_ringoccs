@@ -12,7 +12,7 @@ import numpy as np
 from rss_ringoccs.tools.history import write_history_dict
 from rss_ringoccs.tools.write_output_files import write_output_files
 from rss_ringoccs.tools import error_check
-from . import special_functions, window_functions
+from . import special_functions
 
 # Dictionary containing regions of interest within the Saturnian Rings.
 region_dict = {
@@ -544,10 +544,10 @@ class DiffractionCorrection(object):
         )
 
         # Compute the Normalized Equaivalent Width (See MTR86 Equation 20)
-        self.norm_eq = window_functions.func_dict[wtype]["normeq"]
+        self.norm_eq = special_functions.func_dict[wtype]["normeq"]
 
         # Compute the window width. (See MTR86 Equations 19, 32, and 33).
-        self.w_km_vals, Prange = window_functions.window_width(
+        self.w_km_vals, Prange = special_functions.window_width(
             self.res, self.norm_eq, self.f_sky_hz_vals, self.F_km_vals,
             self.rho_dot_kms_vals, self.sigma, bfac=self.bfac
         )

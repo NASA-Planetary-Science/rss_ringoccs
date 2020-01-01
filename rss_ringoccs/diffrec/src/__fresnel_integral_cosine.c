@@ -211,3 +211,53 @@ long double Fresnel_Cosine_Taylor_to_Asymptotic_Long_Double(long double x)
         return ((x > 0) - (x < 0))*SQRT_PI_BY_8;
     }
 }
+
+/*  For all integer types, convert to double and compute.                     */
+double Fresnel_Cosine_Taylor_to_Asymptotic_Char(char x)
+{
+    return Fresnel_Cosine_Taylor_to_Asymptotic_Double((double)x);
+}
+
+double Fresnel_Cosine_Taylor_to_Asymptotic_UChar(unsigned char x)
+{
+    return Fresnel_Cosine_Taylor_to_Asymptotic_Double((double)x);
+}
+
+double Fresnel_Cosine_Taylor_to_Asymptotic_Short(short x)
+{
+    return Fresnel_Cosine_Taylor_to_Asymptotic_Double((double)x);
+}
+
+double Fresnel_Cosine_Taylor_to_Asymptotic_UShort(unsigned short x)
+{
+    return Fresnel_Cosine_Taylor_to_Asymptotic_Double((double)x);
+}
+
+double Fresnel_Cosine_Taylor_to_Asymptotic_Int(int x)
+{
+    return Fresnel_Cosine_Taylor_to_Asymptotic_Double((double)x);
+}
+
+double Fresnel_Cosine_Taylor_to_Asymptotic_UInt(unsigned int x)
+{
+    return Fresnel_Cosine_Taylor_to_Asymptotic_Double((double)x);
+}
+
+double Fresnel_Cosine_Taylor_to_Asymptotic_Long(long x)
+{
+    return Fresnel_Cosine_Taylor_to_Asymptotic_Double((double)x);
+}
+
+double Fresnel_Cosine_Taylor_to_Asymptotic_ULong(unsigned long x)
+{
+    return Fresnel_Cosine_Taylor_to_Asymptotic_Double((double)x);
+}
+double Fresnel_Cosine_Taylor_to_Asymptotic_Long_Long(long long x)
+{
+    return Fresnel_Cosine_Taylor_to_Asymptotic_Double((double)x);
+}
+
+double Fresnel_Cosine_Taylor_to_Asymptotic_ULong_Long(unsigned long long x)
+{
+    return Fresnel_Cosine_Taylor_to_Asymptotic_Double((double)x);
+}

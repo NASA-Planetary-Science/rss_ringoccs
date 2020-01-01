@@ -1,7 +1,7 @@
 import numpy
-from . import window_functions
 from rss_ringoccs.tools import error_check
 try:
+    from ._special_functions import *
     from . import _special_functions
 except:
     raise ImportError(
@@ -13,51 +13,16 @@ except:
         """
     )
 
-def besselJ0(x):
-    """
-        Purpose:
-            Compute the Bessel Function J_0(x).
-        Variables:
-            :x (*numpy.ndarray* or *float*):
-                The independent variable.
-        Outputs:
-            :J_0 (*numpy.ndarray* or *float*):
-                The fresnel sine integral of x.
-        Notes:
-
-        Examples:
-            Compute the Fresnel Sine integral from -10 to 10, with
-            points spaced 0.01 apart.
-
-            >>> import rss_ringoccs.diffcorr.special_functions as sf
-            >>> import numpy as np
-            >>> x = numpy.arange(-10, 10, 0.01)
-            >>> y = sf.besselJ0(x)
-    """
-    return _special_functions.besselJ0(x)
-
-def besselI0(x):
-    """
-        Purpose:
-            Compute the Bessel Function J_0(x).
-        Variables:
-            :x (*numpy.ndarray* or *float*):
-                The independent variable.
-        Outputs:
-            :J_0 (*numpy.ndarray* or *float*):
-                The fresnel sine integral of x.
-        Notes:
-
-        Examples:
-            Compute the Fresnel Sine integral from -10 to 10, with
-            points spaced 0.01 apart.
-
-            >>> import rss_ringoccs.diffcorr.special_functions as sf
-            >>> import numpy as np
-            >>> x = numpy.arange(-10, 10, 0.01)
-            >>> y = sf.besselI0(x)
-    """
-    return _special_functions.besselI0(x)
+func_dict = {
+    "rect":   {"func": rect,   "normeq": 1.00000000, "wnum": 0},
+    "coss":   {"func": coss,   "normeq": 1.50000000, "wnum": 1},
+    "kb20":   {"func": kb20,   "normeq": 1.49634231, "wnum": 2},
+    "kb25":   {"func": kb25,   "normeq": 1.65191895, "wnum": 3},
+    "kb35":   {"func": kb35,   "normeq": 1.92844639, "wnum": 4},
+    "kbmd20": {"func": kbmd20, "normeq": 1.52048382, "wnum": 5},
+    "kbmd25": {"func": kbmd25, "normeq": 1.65994438, "wnum": 6},
+    "kbmd35": {"func": kbmd35, "normeq": 1.52048382, "wnum": 7}
+}
 
 def frequency_to_wavelength(freq_hz):
     try:
@@ -166,50 +131,6 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
     y = numpy.concatenate((firstvals, y, lastvals))
 
     return numpy.convolve(m[::-1], y, mode='valid')
-
-def compute_norm_eq(w_func):
-    """
-    Purpose:
-        Compute normalized equivalenth width of a given function.
-    Arguments:
-        :w_func (*numpy.ndarray*):
-            Function to compute the normalized equivalent width.
-    Outputs:
-        :normeq (*float*):
-            The normalized equivalent width of w_func.
-    Notes:
-        The normalized equivalent width is computed using Riemann
-        sums to approximate integrals. Therefore large dx values
-        (Spacing between points) will result in an inaccurate
-        normeq. One should keep this in mind during calculations.
-    Examples:
-        Compute the Kaiser-Bessel 2.5 window of width 30km and
-        spacing 0.1 and compute the normalized equivalent width:
-            >>> from rss_ringoccs import diffrec as dc
-            >>> w = dc.window_functions.kb25(30, 0.1)
-            >>> normeq = dc.special_functions.compute_norm_eq(w)
-            >>> print(normeq)
-            1.6573619266424229
-        In contrast, the actual value is 1.6519208.
-        Compute the normalized equivalent width for the squared
-        cosine window of width 10 and spacing 0.25.
-            >>> from rss_ringoccs import diffrec as dc
-            >>> w = dc.window_functions.coss(10, 0.25)
-            >>> normeq = dc.special_functions.compute_norm_eq(w)
-            >>> print(normeq)
-            1.5375000000000003
-        The normalized equivalent width of the squared cosine
-        function can be computed exactly using standard methods
-        from a calculus course. It's value is exactly 1.5
-        If we use a smaller dx when computing w, we get a better
-        approximation. Use width 10 and spacing 0.001.
-            >>> from rss_ringoccs import diffrec as dc
-            >>> w = dc.window_functions.coss(10, 0.001)
-            >>> normeq = dc.special_functions.compute_norm_eq(w)
-            >>> print(normeq)
-            1.50015
-    """
-    return _special_functions.compute_norm_eq(w_func)
 
 def fresnel_scale(Lambda, d, phi, b):
     """
@@ -438,9 +359,6 @@ def resolution_inverse(x):
 def ringlet_diffraction(x, a, b, F):
     return _special_functions.ringlet_diffraction(x, a, b, F)
 
-def gap_diffraction(x, a, b, F):
-    return _special_functions.gap_diffraction(x, a, b, F)
-
 def double_slit_diffraction(x, z, a, d, Lambda):
     """
         Purpose:
@@ -485,96 +403,6 @@ def double_slit_diffraction(x, z, a, d, Lambda):
             """
         )
 
-def fresnel_cos(x):
-    """
-    Purpose:
-        Compute the Fresnel cosine function.
-    Arguments:
-        :x (*numpy.ndarray* or *float*):
-            A real or complex number, or numpy array.
-    Outputs:
-        :f_cos (*numpy.ndarray* or *float*):
-            The fresnel cosine integral of x.
-    Notes:
-        #.  The Fresnel Cosine integral is the solution to the equation
-            :math:`\\mathrm{d}y/\\mathrm{d}x = \\cos(\\frac\\pi 2 x^2)`,
-            :math:`y(0) = 0`. In other words,
-            :math:`y = \\int_{t=0}^{x}\\cos(\\frac\\pi 2 t^2)\\mathrm{d}t`
-        #.  The Fresnel Cosine integral is used for the solution
-            of diffraction through a square well. Because of this
-            it is useful for forward modeling problems in
-            radiative transfer and diffraction.
-    Examples:
-        Compute and the Fresnel Cosine integral from -10 to 10, with
-            points spaced 0.01 apart.
-
-        >>> import rss_ringoccs.diffcorr.special_functions as sf
-        >>> import numpy as np
-        >>> x = numpy.arange(-10, 10, 0.01)
-        >>> y = sf.fresnel_cos(x)
-    """
-    try:
-        return _special_functions.fresnel_cos(x)
-    except KeyboardInterrupt:
-        raise
-    except:
-        raise TypeError(
-            """
-            \r\tError: rss_ringoccs
-            \r\t\tdiffrec.special_functions.fresnel_cos\n
-            \r\tInput should be a numpy array of real numbers (ints or floats),
-            \r\tor a non-zero int or non-zero float.\n
-            \r\tUsage:
-            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. numpy.arange(-5, 5)
-            \r\t\t>>> y = fresnel_cos(x)
-            """
-        )
-
-def fresnel_sin(x):
-    """
-        Purpose:
-            Compute the Fresnel sine function.
-        Variables:
-            :x (*numpy.ndarray* or *float*):
-                The independent variable.
-        Outputs:
-            :f_sin (*numpy.ndarray* or *float*):
-                The fresnel sine integral of x.
-        Notes:
-            #.  The Fresnel sine integral is the solution to the equation
-                :math:`\\mathrm{d}y/\\mathrm{d}x = \\sin(\\frac\\pi 2 x^2)`,
-                :math:`y(0) = 0`. In other words,
-                :math:`y = \\int_{t=0}^{x}\\sin(\\frac\\pi 2 t^2) dt`
-            #.  The Fresnel sine integral is used for the solution
-                of diffraction through a square well. Because of this
-                is is useful for forward modeling problems in
-                radiative transfer and diffraction.
-        Examples:
-            Compute the Fresnel Sine integral from -10 to 10, with
-            points spaced 0.01 apart.
-
-            >>> import rss_ringoccs.diffcorr.special_functions as sf
-            >>> import numpy as np
-            >>> x = numpy.arange(-10, 10, 0.01)
-            >>> y = sf.fresnel_sin(x)
-    """
-    try:
-        return _special_functions.fresnel_sin(x)
-    except KeyboardInterrupt:
-        raise
-    except:
-        raise TypeError(
-            """
-            \r\tError: rss_ringoccs
-            \r\t\tdiffrec.special_functions.fresnel_sin\n
-            \r\tInput should be a numpy array of real numbers (ints or floats),
-            \r\tor a non-zero int or non-zero float.\n
-            \r\tUsage:
-            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. numpy.arange(-5, 5)
-            \r\t\t>>> y = fresnel_sin(x)
-            """
-        )
-
 def fresnel_transform(T_in, rho_km_vals, F_km_vals, w_km_vals, perturb, start,
                       n_used, wtype, norm, fwd, psitype, phi_rad_vals, kD_vals,
                       B_rad_vals, D_km_vals, interp, ecc, peri):
@@ -598,8 +426,7 @@ def fresnel_transform(T_in, rho_km_vals, F_km_vals, w_km_vals, perturb, start,
     return _special_functions.fresnel_transform(
         T_in, rho_km_vals, F_km_vals, phi_rad_vals, kD_vals, B_rad_vals,
         D_km_vals, w_km_vals, perturb, start, n_used,
-        window_functions.func_dict[wtype]["wnum"], int(norm), int(fwd),
-        order, interp, ecc, peri
+        func_dict[wtype]["wnum"], int(norm), int(fwd), order, interp, ecc, peri
     )
 
 def lambertw(x):
@@ -617,58 +444,6 @@ def lambertw(x):
             \r\tUsage:
             \r\t\t>>> x = 1.0   # Or a numpy array, i.e. numpy.arange(-5, 5)
             \r\t\t>>> y = lambertw(x)
-            """
-        )
-
-def left_straightedge(x, edge, F):
-    return _special_functions.left_straightedge(x, edge, F)
-
-def max(x):
-    """
-    Purpose:
-        Compute the maximum of a one dimensional numpy array.
-        This function was written to test use of the C-Python API.
-    Arguments:
-        :x (*numpy.ndarray*):
-            A one dimensional numpy array of real numbers.
-    Outputs:
-        :max (*float* or *int*):
-            The maximum value of x.
-    """
-    return _special_functions.max(x)
-
-def min(x):
-    """
-    Purpose:
-        Compute the maximum of a one dimensional numpy array.
-        This function was written to test use of the C-Python API.
-    Arguments:
-        :x (*numpy.ndarray*):
-            A one dimensional numpy array of real numbers.
-    Outputs:
-        :max (*float* or *int*):
-            The maximum value of x.
-    """
-    return _special_functions.min(x)
-
-def right_straightedge(x, edge, F):
-    return _special_functions.right_straightedge(x, edge, F)
-
-def sinc(x):
-    try:
-        return _special_functions.sinc(x)
-    except KeyboardInterrupt:
-        raise
-    except:
-        raise TypeError(
-            """
-            \r\tError: rss_ringoccs
-            \r\t\tdiffrec.special_functions.sinc\n
-            \r\tInput should be a numpy array of real numbers (ints or floats),
-            \r\tor an int or a float.\n
-            \r\tUsage:
-            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. numpy.arange(-5, 5)
-            \r\t\t>>> y = sinc(x)
             """
         )
 
@@ -711,9 +486,6 @@ def single_slit_diffraction(x, z, a):
             """
         )
 
-def square_wave_diffraction(x, W, F, N):
-    return _special_functions.square_wave_diffraction(x, W, F, N)
-
 def square_well_phase(x, a, b, F):
     try:
         return _special_functions.square_well_phase(x, a, b, F)
@@ -736,19 +508,62 @@ def square_well_phase(x, a, b, F):
         )
 
 def wavelength_to_wavenumber(lambda_km):
-    try:
-        return _special_functions.wavelength_to_wavenumber(lambda_km)
-    except KeyboardInterrupt:
-        raise
-    except:
-        raise TypeError(
-            """
-            \r\tError: rss_ringoccs
-            \r\t\tdiffrec.special_functions.wavelength_to_wavenumber\n
-            \r\tInput should be a numpy array of non-zero real numbers
-            \r\t(ints or floats), or a non-zero int or non-zero float.\n
-            \r\tUsage:
-            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. numpy.arange(3, 10)
-            \r\t\t>>> y = wavelength_to_wavenumber(x)
-            """
-        )
+    return _special_functions.wavelength_to_wavenumber(lambda_km)
+
+def window_width(res, normeq, fsky, fres, rho_dot, sigma, bfac=True):
+    """
+    Purpose:
+        Compute the window width as a function of ring radius.
+        This is given from MTR86 Equations 19, 32, and 33.
+    Variables:
+        :res (*float*):
+            The requested resolution.
+        :normeq (*float*):
+            The normalized equivalent width. Unitless.
+        :fsky (*float* or *numpy.ndarray*):
+            The sky frequency.
+        :fres (*float* or *numpy.ndarray*):
+            The Fresnel scale.
+        :rdot (*float*) or (*numpy.ndarray*):
+            The time derivative of the ring radius.
+    Output:
+        :w_vals (*numpy.ndarray*):
+            The window width as a function of ring radius.
+    """
+    if bfac:
+        omega = 2.0*numpy.pi * fsky
+        alpha = numpy.square(omega * sigma) / (2.0 * rho_dot)
+        P = res / (alpha * numpy.square(fres))
+
+        # Create a variable specifying where P>1 occurs.
+        Prange = (P > 1.0).nonzero()[0]
+
+        if (numpy.size(Prange) == 0):
+            raise IndexError(
+                """
+                \r\tError Encountered: rss_ringoccs
+                \r\t\tdiffrec.special_functions.window_width\n
+                \r\tThe P parameter in window width computation is less than
+                \r\tone for the entirety of the data set. Either
+                \r\trho_dot_km_vals is too small, tor F_km_vals is too large.
+                \r\tRequest a coarser resolution, or check your data for
+                \r\terrors. Alternatively, you may set bfac=False as a keyword.
+                \r\tThis may result in inaccurate window width.
+                """
+            )
+        else:
+            pass
+
+        P = P[Prange]
+        alpha = alpha[Prange]
+
+        w_vals = numpy.zeros(numpy.size(rho_dot))
+        w_vals[Prange] = resolution_inverse(P)/alpha
+
+    else:
+        w_vals = 2.0*numpy.square(fres)/res
+        Prange = (fres > 0.0).nonzero()[0]
+
+    w_vals *= normeq
+
+    return w_vals, Prange

@@ -596,6 +596,6 @@ def test_Make_MTR_Figs():
 
 
 if __name__ == "__main__":
-    # test_CompareTAU()
-    # test_ModelFromGEO()
+    test_CompareTAU()
+    test_ModelFromGEO()
     test_Make_MTR_Figs()

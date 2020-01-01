@@ -1,5 +1,5 @@
 import numpy
-from . import diffraction_correction, special_functions, window_functions
+from . import diffraction_correction, special_functions
 from rss_ringoccs.tools import CSV_tools, error_check, history
 
 
@@ -461,10 +461,10 @@ class ModelFromGEO(object):
         kD_vals *= self.D_km_vals
 
         # Compute the Normalized Equaivalent Width (See MTR86 Equation 20)
-        norm_eq = window_functions.func_dict[wtype]["normeq"]
+        norm_eq = special_functions.func_dict[wtype]["normeq"]
 
         # Compute the window width. (See MTR86 Equations 19, 32, and 33).
-        self.w_km_vals, Prange = window_functions.window_width(
+        self.w_km_vals, Prange = special_functions.window_width(
             res, norm_eq, self.f_sky_hz_vals, F, self.rho_dot_kms_vals,
             sigma, bfac=bfac
         )

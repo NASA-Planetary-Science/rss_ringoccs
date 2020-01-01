@@ -16,14 +16,24 @@ static void capsule_cleanup(PyObject *capsule)
     free(memory);
 }
 
-/*  where_greater and where_less are defined here.                            */
+/*  Load the various functions for the module.                                */
 #include "_where.h"
-
-/*  besselJ0 and besselI0 wrappers found here.                                */
 #include "_bessel.h"
-
-/*  Load in the sinc function.                                                */
 #include "_sinc.h"
+#include "_window_norm.h"
+#include "_rect.h"
+#include "_coss.h"
+#include "_kb20.h"
+#include "_kb25.h"
+#include "_kb35.h"
+#include "_kbal.h"
+#include "_kbmd20.h"
+#include "_kbmd25.h"
+#include "_kbmd35.h"
+#include "_kbmdal.h"
+#include "_minmax.h"
+#include "_fresnel_cos.h"
+#include "_fresnel_sin.h"
 
 static PyObject *compute_norm_eq(PyObject *self, PyObject *args)
 {
@@ -132,194 +142,6 @@ static PyObject *compute_norm_eq(PyObject *self, PyObject *args)
             "\n\r\trss_ringoccs.diffrec.math_functions.compute_norm_eq\n"
             "\r\t\tInput should be a numpy array of numbers."
         );
-        return NULL;
-    }
-}
-
-static PyObject *max(PyObject *self, PyObject *args)
-{
-    PyArrayObject *arr;
-    PyObject *tuple = PyTuple_GetItem(args, 0);
-
-    if (PyLong_Check(tuple)){
-        long max;
-        if (PyArg_ParseTuple(args, "l", &max)){
-            return PyLong_FromLong(max);
-        }
-        else {
-            PyErr_Format(PyExc_TypeError,
-                         "\n\r\trss_ringoccs.diffrec.special_functions.max\n"
-                         "\r\t\tCould not parse int type input.");
-            return NULL;
-        }
-    }
-    else if (PyFloat_Check(tuple)){
-        double max;
-        if(PyArg_ParseTuple(args, "d", &max)){
-            return PyFloat_FromDouble(max);
-        }
-        else {
-            PyErr_Format(PyExc_TypeError,
-                         "\n\r\trss_ringoccs.diffrec.special_functions.max\n"
-                         "\r\t\tCould not parse float type input.");
-            return NULL;
-        }
-    }
-    else if (PyArg_ParseTuple(args, "O!", &PyArray_Type, &arr)){
-        npy_int typenum, dim;
-        void *data;
-
-        // Check to make sure input isn't zero dimensional!
-        if (PyArray_NDIM(arr) != 1) goto FAIL;
-
-        // Useful information about the data.
-        typenum = PyArray_TYPE(arr);
-        dim     = PyArray_DIMS(arr)[0];
-        data    = PyArray_DATA(arr);
-
-        if (dim == 0) goto FAIL;
-
-        switch(typenum)
-        {
-            case NPY_FLOAT:
-                return PyFloat_FromDouble(Max_Float((float *)data, dim));
-            case NPY_DOUBLE:
-                return PyFloat_FromDouble(Max_Double((double *)data, dim));
-            case NPY_LONGDOUBLE:
-                return
-                PyFloat_FromDouble(Max_Long_Double((long double *)data, dim));
-            case NPY_SHORT:
-                return PyLong_FromLong(Max_Short((short *)data, dim));
-            case NPY_INT:
-                return PyLong_FromLong(Max_Int((int *)data, dim));
-            case NPY_LONG:
-                return PyLong_FromLong(Max_Long((long *)data, dim));
-            case NPY_LONGLONG:
-                return PyLong_FromLong(Max_Long_Long((long long *)data, dim));
-            default:
-                goto FAIL;
-        }
-    }
-    else goto FAIL;
-    FAIL: {
-        PyErr_Format(PyExc_TypeError,
-                     "\n\r\trss_ringoccs.diffrec.special_functions.max\n"
-                     "\r\t\tInput should be a one dimensional numpy array of\n"
-                     "\r\t\treal numbers, or a float/int number.\n"
-                     "\r\t\tExample:\n"
-                     "\r\t\t\t>>> import numpy\n"
-                     "\r\t\t\t>>> import _special_functions as sf\n"
-                     "\r\t\t\t>>> x = numpy.random.rand(100)\n"
-                     "\r\t\t\t>>> y = sf.max(x)\n\n"
-                     "\r\t\tNOTE:\n"
-                     "\r\t\t\tOnly one dimensional numpy arrays are allowed.\n"
-                     "\r\t\t\tComplex numbers are not allowed. If the input\n"
-                     "\r\t\t\tis a single floating point or integer number,\n"
-                     "\r\t\t\tthe output will simply be that number.");
-        return NULL;
-    };
-}
-
-static PyObject *min(PyObject *self, PyObject *args)
-{
-    PyArrayObject *arr;
-    PyObject *tuple = PyTuple_GetItem(args, 0);
-
-    if (PyLong_Check(tuple)){
-        long min;
-        if (PyArg_ParseTuple(args, "l", &min)){
-            return PyLong_FromLong(min);
-        }
-        else {
-            PyErr_Format(PyExc_TypeError,
-                         "\n\r\trss_ringoccs.diffrec.math_functions.min\n"
-                         "\r\t\tCould not parse int type input.");
-            return NULL;
-        }
-    }
-    else if (PyFloat_Check(tuple)){
-        double min;
-        if(PyArg_ParseTuple(args, "d", &min)){
-            return PyFloat_FromDouble(min);
-        }
-        else {
-            PyErr_Format(PyExc_TypeError,
-                         "\n\r\trss_ringoccs.diffrec.math_functions.min\n"
-                         "\r\t\tCould not parse float type input.");
-            return NULL;
-        }
-    }
-    else if (PyArg_ParseTuple(args, "O!", &PyArray_Type, &arr)){
-        npy_int typenum, dim;
-        void *data;
-
-        // Check to make sure input isn't zero dimensional!
-        if (PyArray_NDIM(arr) != 1){
-            PyErr_Format(PyExc_TypeError,
-                         "\n\r\trss_ringoccs.diffrec.math_functions.min\n"
-                         "\r\t\tInput must be one dimensional.");
-            return NULL;
-        }
-
-        // Useful information about the data.
-        typenum = PyArray_TYPE(arr);
-        dim     = PyArray_DIMS(arr)[0];
-        data    = PyArray_DATA(arr);
-
-        if (dim == 0){
-            PyErr_Format(PyExc_TypeError,
-                         "\n\r\trss_ringoccs.diffrec.math_functions.min\n"
-                         "\r\t\tInput is zero dimensional.");
-            return NULL;
-        }
-
-        if (typenum == NPY_FLOAT){
-            return PyFloat_FromDouble(
-                Min_Float((float *)data, dim)
-            );
-        }
-        else if (typenum == NPY_DOUBLE){
-            return PyFloat_FromDouble(
-                Min_Double((double *)data, dim)
-            );
-        }
-        else if (typenum == NPY_LONGDOUBLE){
-            return PyFloat_FromDouble(
-                Min_Long_Double((long double *)data, dim)
-            );
-        }
-        else if (typenum == NPY_SHORT){
-            return PyLong_FromLong(
-                Min_Short((short *)data, dim)
-            );
-        }
-        else if (typenum == NPY_INT){
-            return PyLong_FromLong(
-                Min_Int((int *)data, dim)
-            );
-        }
-        else if (typenum == NPY_LONG){
-            return PyLong_FromLong(
-                Min_Long((long *)data, dim)
-            );
-        }
-        else if (typenum == NPY_LONGLONG){
-            return PyLong_FromLong(
-                Min_Long_Long((long long *)data, dim)
-            );
-        }
-        else {
-            PyErr_Format(PyExc_TypeError,
-                         "\n\r\trss_ringoccs.diffrec.math_functions.min\n"
-                         "\r\t\tInput should be a numpy array of numbers.");
-            return NULL;
-        }
-    }
-    else {
-        PyErr_Format(PyExc_TypeError,
-                     "rss_ringoccs.diffrec.math_functions.min\n"
-                     "\n\r\trss_ringoccs.diffrec.math_functions.min\n"
-                     "\r\t\tInput should be a numpy array of numbers.");
         return NULL;
     }
 }
@@ -1595,6 +1417,247 @@ static PyObject *square_wave_diffraction(PyObject *self, PyObject *args)
 static PyMethodDef _special_functions_methods[] =
 {
     {
+        "coss",
+        coss,
+        METH_VARARGS,
+        "\r\t"
+        "Function:\n\r\t\t"
+        "special_functions.coss\n\r\t"
+        "Purpose:\n\r\t\t"
+        "Compute the squared cosine window function.\n\r\t"
+        "Arguments\n\r\t\t"
+        "x (numpy.ndarray):\n\r\t\t\t"
+        "A numpy array of real numbers. Independent variable for coss(x)."
+        "\n\r\t\tW (float):\n\r\t\t\t"
+        "The width of the window function.\n\r\t"
+        "Outputs:\n\r\t\t"
+        "coss (numpy.ndarray):\n\r\t\t\t"
+        "The squared cosine function of x.\n\r\t"
+        "Example:\n\r\t\t"
+        ">>> import numpy\n\r\t\t"
+        ">>> import special_functions\n\r\t\t"
+        ">>> x = numpy.arange(-20,20,0.1)\n\r\t\t"
+        ">>> W = 10.0\n\r\t\t"
+        ">>> y = special_functions.coss(x, W)"
+    },
+    {
+        "rect",
+        rect,
+        METH_VARARGS,
+        "\r\t"
+        "Function:\n\r\t\t"
+        "special_functions.rect\n\r\t"
+        "Purpose:\n\r\t\t"
+        "Compute the rectangular window function.\n\r\t"
+        "Arguments\n\r\t\t"
+        "x (numpy.ndarray):\n\r\t\t\t"
+        "A numpy array of real numbers. Independent variable for rect(x)\n\r\t"
+        "W (float):\n\r\t\t\t"
+        "The width of the window function.\n\r\t"
+        "Outputs:\n\r\t\t"
+        "rect (numpy.ndarray):\n\r\t\t\t"
+        "The rect function of x.\n\r\t"
+        "Example:\n\r\t\t"
+        ">>> import numpy\n\r\t\t"
+        ">>> import special_functions\n\r\t\t"
+        ">>> x = numpy.arange(-20,20,0.1)\n\r\t\t"
+        ">>> W = 10.0"
+        ">>> y = special_functions.rect(x, W)"
+    },
+    {
+        "kb20",
+        kb20,
+        METH_VARARGS,
+        "\r\t"
+        "Function:\n\r\t\t"
+        "special_functions.kb20\n\r\t"
+        "Purpose:\n\r\t\t"
+        "Compute the Kaiser-Bessel function with alpha = 2.0."
+        "\n\r\tArguments\n\r\t\t"
+        "x (numpy.ndarray):\n\r\t\t\t"
+        "A numpy array of real numbers. Independent variable for kb20(x)\n\r\t"
+        "W (float):\n\r\t\t\t"
+        "The width of the Kaiser-Bessel window.\n\r\t"
+        "Outputs:\n\r\t\t"
+        "kb20 (numpy.ndarray):\n\r\t\t\t"
+        "The kb20 function of x.\n\r\t"
+        "Example:\n\r\t\t"
+        ">>> import numpy\n\r\t\t"
+        ">>> import special_functions\n\r\t\t"
+        ">>> x = numpy.arange(-20,20,0.1)\n\r\t\t"
+        ">>> W = 10.0"
+        ">>> y = special_functions.kb20(x, W)"
+    },
+    {
+        "kb25",
+        kb25,
+        METH_VARARGS,
+        "\r\t"
+        "Function:\n\r\t\t"
+        "special_functions.kb25\n\r\t"
+        "Purpose:\n\r\t\t"
+        "Compute the Kaiser-Bessel function with alpha = 2.5."
+        "\n\r\tArguments\n\r\t\t"
+        "x (numpy.ndarray):\n\r\t\t\t"
+        "A numpy array of real numbers. Independent variable for kb25(x)\n\r\t"
+        "W (float):\n\r\t\t\t"
+        "The width of the Kaiser-Bessel window.\n\r\t"
+        "Outputs:\n\r\t\t"
+        "kb25 (numpy.ndarray):\n\r\t\t\t"
+        "The kb25 function of x.\n\r\t"
+        "Example:\n\r\t\t"
+        ">>> import numpy\n\r\t\t"
+        ">>> import special_functions\n\r\t\t"
+        ">>> x = numpy.arange(-20,20,0.1)\n\r\t\t"
+        ">>> W = 10.0"
+        ">>> y = special_functions.kb25(x, W)"
+    },
+    {
+        "kb35",
+        kb35,
+        METH_VARARGS,
+        "\r\t"
+        "Function:\n\r\t\t"
+        "special_functions.kb35\n\r\t"
+        "Purpose:\n\r\t\t"
+        "Compute the Kaiser-Bessel function with alpha = 3.5."
+        "\n\r\tArguments\n\r\t\t"
+        "x (numpy.ndarray):\n\r\t\t\t"
+        "A numpy array of real numbers. Independent variable for kb35(x)\n\r\t"
+        "W (float):\n\r\t\t\t"
+        "The width of the Kaiser-Bessel window.\n\r\t"
+        "Outputs:\n\r\t\t"
+        "kb35 (numpy.ndarray):\n\r\t\t\t"
+        "The kb35 function of x.\n\r\t"
+        "Example:\n\r\t\t"
+        ">>> import numpy\n\r\t\t"
+        ">>> import special_functions\n\r\t\t"
+        ">>> x = numpy.arange(-20,20,0.1)\n\r\t\t"
+        ">>> W = 10.0"
+        ">>> y = special_functions.kb35(x, W)"
+    },
+    {
+        "kbal",
+        kbal,
+        METH_VARARGS,
+        "\r\t"
+        "Function:\n\r\t\t"
+        "special_functions.kbal\n\r\t"
+        "Purpose:\n\r\t\t"
+        "Compute the Kaiser-Bessel function with arbitrary alpha."
+        "\n\r\tArguments\n\r\t\t"
+        "x (numpy.ndarray):\n\r\t\t\t"
+        "A numpy array of real numbers. Independent variable for kbal(x)\n\r\t"
+        "W (float):\n\r\t\t\t"
+        "The width of the Kaiser-Bessel window.\n\r\t"
+        "Outputs:\n\r\t\t"
+        "kbal (numpy.ndarray):\n\r\t\t\t"
+        "The kbal function of x.\n\r\t"
+        "Example:\n\r\t\t"
+        ">>> import numpy\n\r\t\t"
+        ">>> import special_functions\n\r\t\t"
+        ">>> x = numpy.arange(-20,20,0.1)\n\r\t\t"
+        ">>> W = 10.0\n\r\t\t"
+        ">>> alpha = 1.8\n\r\t\t"
+        ">>> y = special_functions.kbal(x, W, alpha)"
+    },
+    {
+        "kbmd20",
+        kbmd20,
+        METH_VARARGS,
+        "\r\t"
+        "Function:\n\r\t\t"
+        "special_functions.kbmd20\n\r\t"
+        "Purpose:\n\r\t\t"
+        "Compute the Modified Kaiser-Bessel function with alpha = 2.0."
+        "\n\r\tArguments\n\r\t\t"
+        "x (numpy.ndarray):\n\r\t\t\t"
+        "A numpy array of real numbers. Independent variable for kbmd20(x)"
+        "\n\r\tW (float):\n\r\t\t\t"
+        "The width of the Kaiser-Bessel window.\n\r\t"
+        "Outputs:\n\r\t\t"
+        "kbmd20 (numpy.ndarray):\n\r\t\t\t"
+        "The kbmd20 function of x.\n\r\t"
+        "Example:\n\r\t\t"
+        ">>> import numpy\n\r\t\t"
+        ">>> import special_functions\n\r\t\t"
+        ">>> x = numpy.arange(-20,20,0.1)\n\r\t\t"
+        ">>> W = 10.0"
+        ">>> y = special_functions.kbmd20(x, W)"
+    },
+    {
+        "kbmd25",
+        kbmd25,
+        METH_VARARGS,
+        "\r\t"
+        "Function:\n\r\t\t"
+        "special_functions.kbmd25\n\r\t"
+        "Purpose:\n\r\t\t"
+        "Compute the Modified Kaiser-Bessel function with alpha = 2.5."
+        "\n\r\tArguments\n\r\t\t"
+        "x (numpy.ndarray):\n\r\t\t\t"
+        "A numpy array of real numbers. Independent variable for kbmd25(x)"
+        "\n\r\tW (float):\n\r\t\t\t"
+        "The width of the Kaiser-Bessel window.\n\r\t"
+        "Outputs:\n\r\t\t"
+        "kbmd25 (numpy.ndarray):\n\r\t\t\t"
+        "The kbmd25 function of x.\n\r\t"
+        "Example:\n\r\t\t"
+        ">>> import numpy\n\r\t\t"
+        ">>> import special_functions\n\r\t\t"
+        ">>> x = numpy.arange(-20,20,0.1)\n\r\t\t"
+        ">>> W = 10.0"
+        ">>> y = special_functions.kbmd25(x, W)"
+    },
+    {
+        "kbmd35",
+        kbmd35,
+        METH_VARARGS,
+        "\r\t"
+        "Function:\n\r\t\t"
+        "special_functions.kbmd35\n\r\t"
+        "Purpose:\n\r\t\t"
+        "Compute the Modified Kaiser-Bessel function with alpha = 3.5."
+        "\n\r\tArguments\n\r\t\t"
+        "x (numpy.ndarray):\n\r\t\t\t"
+        "A numpy array of real numbers. Independent variable for kbmd35(x)"
+        "\n\r\tW (float):\n\r\t\t\t"
+        "The width of the Kaiser-Bessel window.\n\r\t"
+        "Outputs:\n\r\t\t"
+        "kbmd35 (numpy.ndarray):\n\r\t\t\t"
+        "The kbmd35 function of x.\n\r\t"
+        "Example:\n\r\t\t"
+        ">>> import numpy\n\r\t\t"
+        ">>> import special_functions\n\r\t\t"
+        ">>> x = numpy.arange(-20,20,0.1)\n\r\t\t"
+        ">>> W = 10.0"
+        ">>> y = special_functions.kbmd35(x, W)"
+    },
+    {
+        "kbmdal",
+        kbmdal,
+        METH_VARARGS,
+        "\r\t"
+        "Function:\n\r\t\t"
+        "special_functions.kbmdal\n\r\t"
+        "Purpose:\n\r\t\t"
+        "Compute the Modified Kaiser-Bessel function with arbitrary alpha."
+        "\n\r\tArguments\n\r\t\t"
+        "x (numpy.ndarray):\n\r\t\t\t"
+        "A numpy array of real numbers. Independent variable for kbmdal(x)"
+        "\n\r\tW (float):\n\r\t\t\t"
+        "The width of the Kaiser-Bessel window.\n\r\t"
+        "Outputs:\n\r\t\t"
+        "kbmdal (numpy.ndarray):\n\r\t\t\t"
+        "The kbmdal function of x.\n\r\t"
+        "Example:\n\r\t\t"
+        ">>> import numpy\n\r\t\t"
+        ">>> import special_functions\n\r\t\t"
+        ">>> x = numpy.arange(-20,20,0.1)\n\r\t\t"
+        ">>> W = 10.0"
+        ">>> y = special_functions.kbmdal(x, W)"
+    },
+    {
         "besselJ0",
         besselJ0,
         METH_VARARGS,
@@ -1611,9 +1674,9 @@ static PyMethodDef _special_functions_methods[] =
         "The Bessel Function J0 as a function of x.\n\r\t"
         "Example:\n\r\t\t"
         ">>> import numpy\n\r\t\t"
-        ">>> import _special_functions\n\r\t\t"
+        ">>> import special_functions\n\r\t\t"
         ">>> x = numpy.arange(0,100,0.01)\n\r\t\t"
-        ">>> y = _special_functions.besselJ0(x)"
+        ">>> y = special_functions.besselJ0(x)"
     },
     {
         "besselI0",
@@ -1632,9 +1695,51 @@ static PyMethodDef _special_functions_methods[] =
         "The Bessel Function I0 as a function of x.\n\r\t"
         "Example:\n\r\t\t"
         ">>> import numpy\n\r\t\t"
-        ">>> import _special_functions\n\r\t\t"
+        ">>> import special_functions\n\r\t\t"
         ">>> x = numpy.arange(0,100,0.01)\n\r\t\t"
-        ">>> y = _special_functions.besselI0(x)"
+        ">>> y = special_functions.besselI0(x)"
+    },
+    {
+        "fresnel_sin",
+        fresnel_sin,
+        METH_VARARGS,
+        "\r\t"
+        "Function:\n\r\t\t"
+        "special_functions.fresnel_sin\n\r\t"
+        "Purpose:\n\r\t\t"
+        "Compute the Fresnel sine function."
+        "\n\r\tArguments\n\r\t\t"
+        "x (numpy.ndarray):\n\r\t\t\t"
+        "A numpy array of real numbers. Independent variable for fresnel_sin(x)"
+        "\n\r\tOutputs:\n\r\t\t"
+        "fresnel_sin (numpy.ndarray):\n\r\t\t\t"
+        "The fresnel sine function of x.\n\r\t"
+        "Example:\n\r\t\t"
+        ">>> import numpy\n\r\t\t"
+        ">>> import special_functions\n\r\t\t"
+        ">>> x = numpy.arange(0, 10, 0.01)\n\r\t\t"
+        ">>> y = special_functions.fresnel_sin(x)"
+    },
+    {
+        "fresnel_cos",
+        fresnel_cos,
+        METH_VARARGS,
+        "\r\t"
+        "Function:\n\r\t\t"
+        "special_functions.fresnel_cos\n\r\t"
+        "Purpose:\n\r\t\t"
+        "Compute the Fresnel cosine function."
+        "\n\r\tArguments\n\r\t\t"
+        "x (numpy.ndarray):\n\r\t\t\t"
+        "A numpy array of real numbers. Independent variable for fresnel_cos(x)"
+        "\n\r\tOutputs:\n\r\t\t"
+        "fresnel_cos (numpy.ndarray):\n\r\t\t\t"
+        "The fresnel sine function of x.\n\r\t"
+        "Example:\n\r\t\t"
+        ">>> import numpy\n\r\t\t"
+        ">>> import special_functions\n\r\t\t"
+        ">>> x = numpy.arange(0, 10, 0.01)\n\r\t\t"
+        ">>> y = special_functions.fresnel_cos(x)"
     },
     {
         "sinc",
@@ -1653,15 +1758,51 @@ static PyMethodDef _special_functions_methods[] =
         "The sinc function of x.\n\r\t"
         "Example:\n\r\t\t"
         ">>> import numpy\n\r\t\t"
-        ">>> import _special_functions\n\r\t\t"
+        ">>> import special_functions\n\r\t\t"
         ">>> x = numpy.arange(0,100,0.01)\n\r\t\t"
-        ">>> y = _special_functions.sinc(x)"
+        ">>> y = special_functions.sinc(x)"
     },
     {
         "compute_norm_eq",
         compute_norm_eq,
         METH_VARARGS,
-        "Compute the normalized equivalent width of an array."
+        "\r\t"
+        "Function:\n\r\t\t"
+        "special_functions.compute_norm_eq\n\r\t"
+        "Purpose:\n\r\t\t"
+        "Compute normalized equivalenth width of a given function.\n\r\t"
+        "Arguments:\n\r\t\t"
+        "w_func (*numpy.ndarray*):\n\r\t\t\t"
+        "Function to compute the normalized equivalent width.\n\r\t"
+        "Outputs:\n\r\t\t"
+        "normeq (*float*):\n\r\t\t\t"
+        "The normalized equivalent width of w_func.\n\r\t"
+        "Notes:\n\r\t\t"
+        "The normalized equivalent width is computed using Riemann\n\r\t\t"
+        "sums to approximate integrals. Therefore large dx values\n\r\t\t"
+        "(Spacing between points) will result in an inaccurate\n\r\t\t"
+        "normeq. One should keep this in mind during calculations.\n\r\t"
+        "Examples:\n\r\t\t"
+        "Compute the Kaiser-Bessel 2.5 window of width 20km and\n\r\t\t"
+        "spacing 0.1 and compute the normalized equivalent width:\n\r\t\t\t"
+        ">>> import special_functions\n\r\t\t\t"
+        ">>> import numpy\n\r\t\t\t"
+        ">>> x = numpy.arange(-10, 10, 0.1)\n\r\t\t\t"
+        ">>> w = special_functions.kb25(x, 20)\n\r\t\t\t"
+        ">>> special_functions.compute_norm_eq(w)\n\r\t\t\t"
+        "1.651925635118099\n\r\t\t"
+        "In contrast, the actual value is 1.6519208. Compute the\n\r\t\t"
+        "normalized equivalent width for the squared cosine window of\n\r\t\t"
+        "width 20 and spacing 0.25.\n\r\t\t\t"
+        ">>> import special_functions\n\r\t\t\t"
+        ">>> import numpy\n\r\t\t\t"
+        ">>> x = numpy.arange(-10, 10, 0.25)\n\r\t\t\t"
+        ">>> w = special_functions.kb25(x, 20)\n\r\t\t\t"
+        ">>> special_functions.compute_norm_eq(w)\n\r\t\t\t"
+        "1.5000000000000013\n\r\t\t"
+        "The normalized equivalent width of the squared cosine\n\r\t\t"
+        "function can be computed exactly using standard methods\n\r\t\t"
+        "from a calculus course. It's value is exactly 1.5."
     },
     {
         "fresnel_transform",
@@ -1681,7 +1822,7 @@ static PyMethodDef _special_functions_methods[] =
         METH_VARARGS,
         "\r\t"
         "Function:\n\r\t\t"
-        "_special_functions.gap_diffraction\n\r\t"
+        "special_functions.gap_diffraction\n\r\t"
         "Purpose\n\r\t\t"
         "Compute the diffraction pattern of an annular gap in the plane.\n\r\t"
         "Arguments:\n\r\t\t"
@@ -1698,12 +1839,12 @@ static PyMethodDef _special_functions_methods[] =
         "Numpy array of complex numbers equal to the diffraction pattern.\n\r\t"
         "Example:\n\r\t\t"
         ">>> import numpy\n\r\t\t"
-        ">>> import _special_functions\n\r\t\t"
+        ">>> import special_functions\n\r\t\t"
         ">>> x = numpy.arange(0,100,0.01)\n\r\t\t"
         ">>> a = 45\n\r\t\t"
         ">>> b = 55\n\r\t\t"
         ">>> F = 0.05\n\r\t\t"
-        ">>> y = _special_functions.gap_diffraction(x, 45, 55, 0.05)"
+        ">>> y = special_functions.gap_diffraction(x, 45, 55, 0.05)"
     },
     {
         "ringlet_diffraction",
@@ -1711,7 +1852,7 @@ static PyMethodDef _special_functions_methods[] =
         METH_VARARGS,
         "\r\t"
         "Function:\n\r\t\t"
-        "_special_functions.gap_diffraction\n\r\t"
+        "special_functions.gap_diffraction\n\r\t"
         "Purpose\n\r\t\t"
         "Compute the diffraction pattern of a ringlet in the plane.\n\r\t"
         "Arguments:\n\r\t\t"
@@ -1728,12 +1869,12 @@ static PyMethodDef _special_functions_methods[] =
         "Numpy array of complex numbers equal to the diffraction pattern.\n\r\t"
         "Example:\n\r\t\t"
         ">>> import numpy\n\r\t\t"
-        ">>> import _special_functions\n\r\t\t"
+        ">>> import special_functions\n\r\t\t"
         ">>> x = numpy.arange(0,100,0.01)\n\r\t\t"
         ">>> a = 45\n\r\t\t"
         ">>> b = 55\n\r\t\t"
         ">>> F = 0.05\n\r\t\t"
-        ">>> y = _special_functions.ringlet_diffraction(x, a, b, F)"
+        ">>> y = special_functions.ringlet_diffraction(x, a, b, F)"
     },
     {
         "right_straightedge",
@@ -1741,7 +1882,7 @@ static PyMethodDef _special_functions_methods[] =
         METH_VARARGS,
         "\r\t"
         "Function:\n\r\t\t"
-        "_special_functions.right_straightedge\n\r\t"
+        "special_functions.right_straightedge\n\r\t"
         "Purpose\n\r\t\t"
         "Compute the diffraction pattern of a straightedge.\n\r\t"
         "Arguments:\n\r\t\t"
@@ -1756,11 +1897,11 @@ static PyMethodDef _special_functions_methods[] =
         "Numpy array of complex numbers equal to the diffraction pattern.\n\r\t"
         "Example:\n\r\t\t"
         ">>> import numpy\n\r\t\t"
-        ">>> import _special_functions\n\r\t\t"
+        ">>> import special_functions\n\r\t\t"
         ">>> x = numpy.arange(0,100,0.01)\n\r\t\t"
         ">>> a = 45\n\r\t\t"
         ">>> F = 0.05\n\r\t\t"
-        ">>> y = _special_functions.right_straightedge(x, a, F)"
+        ">>> y = special_functions.right_straightedge(x, a, F)"
     },
     {
         "left_straightedge",
@@ -1768,7 +1909,7 @@ static PyMethodDef _special_functions_methods[] =
         METH_VARARGS,
         "\r\t"
         "Function:\n\r\t\t"
-        "_special_functions.left_straightedge\n\r\t"
+        "special_functions.left_straightedge\n\r\t"
         "Purpose\n\r\t\t"
         "Compute the diffraction pattern of a straightedge.\n\r\t"
         "Arguments:\n\r\t\t"
@@ -1783,11 +1924,11 @@ static PyMethodDef _special_functions_methods[] =
         "Numpy array of complex numbers equal to the diffraction pattern.\n\r\t"
         "Example:\n\r\t\t"
         ">>> import numpy\n\r\t\t"
-        ">>> import _special_functions\n\r\t\t"
+        ">>> import special_functions\n\r\t\t"
         ">>> x = numpy.arange(0,100,0.01)\n\r\t\t"
         ">>> a = 45\n\r\t\t"
         ">>> F = 0.05\n\r\t\t"
-        ">>> y = _special_functions.left_straightedge(x, a, F)"
+        ">>> y = special_functions.left_straightedge(x, a, F)"
     },
     {
         "max",
@@ -1795,7 +1936,7 @@ static PyMethodDef _special_functions_methods[] =
         METH_VARARGS,
         "\r\t"
         "Function:\n\r\t\t"
-        "_special_functions.max\n\r\t"
+        "special_functions.max\n\r\t"
         "Purpose\n\r\t\t"
         "Compute the maximum of a numpy array.\n\r\t"
         "Arguments:\n\r\t\t"
@@ -1806,9 +1947,9 @@ static PyMethodDef _special_functions_methods[] =
         "The maximum value of the input array.\n\r\t"
         "Example:\n\r\t\t"
         ">>> import numpy\n\r\t\t"
-        ">>> import _special_functions\n\r\t\t"
+        ">>> import special_functions\n\r\t\t"
         ">>> x = numpy.random.rand(100)\n\r\t\t"
-        ">>> y = _special_functions.max(x)"
+        ">>> y = special_functions.max(x)"
     },
     {
         "min",
@@ -1816,7 +1957,7 @@ static PyMethodDef _special_functions_methods[] =
         METH_VARARGS,
         "\r\t"
         "Function:\n\r\t\t"
-        "_special_functions.min\n\r\t"
+        "special_functions.min\n\r\t"
         "Purpose\n\r\t\t"
         "Compute the minimum of a numpy array.\n\r\t"
         "Arguments:\n\r\t\t"
@@ -1829,7 +1970,7 @@ static PyMethodDef _special_functions_methods[] =
         ">>> import numpy\n\r\t\t"
         ">>> import _special_functions\n\r\t\t"
         ">>> x = numpy.random.rand(100)\n\r\t\t"
-        ">>> y = _special_functions.min(x)"
+        ">>> y = special_functions.min(x)"
     },
     {
         "where_greater",
@@ -1837,7 +1978,7 @@ static PyMethodDef _special_functions_methods[] =
         METH_VARARGS,
         "\r\t"
         "Function:\n\r\t\t"
-        "_special_functions.where_greater\n\r\t"
+        "special_functions.where_greater\n\r\t"
         "Purpose\n\r\t\t"
         "Given a real-valued numpy array arr, and a real number\n\r\t\t"
         "threshold, compute the indices n such that arr[n] > threshold\n\r\t"
@@ -1851,9 +1992,9 @@ static PyMethodDef _special_functions_methods[] =
         "The array of indices such that arr[n] > threshold.\n\r\t"
         "Example:\n\r\t\t"
         ">>> import numpy\n\r\t\t"
-        ">>> import _special_functions\n\r\t\t"
+        ">>> import special_functions\n\r\t\t"
         ">>> x = numpy.arange(-5, 5, 0.01)\n\r\t\t"
-        ">>> y = _special_functions.where_greater(x, 1.0)"
+        ">>> y = special_functions.where_greater(x, 1.0)"
     },
     {
         "where_lesser",
@@ -1861,7 +2002,7 @@ static PyMethodDef _special_functions_methods[] =
         METH_VARARGS,
         "\r\t"
         "Function:\n\r\t\t"
-        "_special_functions.where_lesser\n\r\t"
+        "special_functions.where_lesser\n\r\t"
         "Purpose\n\r\t\t"
         "Given a real-valued numpy array arr, and a real number\n\r\t\t"
         "threshold, compute the indices n such that arr[n] < threshold\n\r\t"
@@ -1875,9 +2016,37 @@ static PyMethodDef _special_functions_methods[] =
         "The array of indices such that arr[n] < threshold.\n\r\t"
         "Example:\n\r\t\t"
         ">>> import numpy\n\r\t\t"
-        ">>> import _special_functions\n\r\t\t"
+        ">>> import special_functions\n\r\t\t"
         ">>> x = numpy.arange(-5, 5, 0.01)\n\r\t\t"
-        ">>> y = _special_functions.where_lesser(x, 1.0)"
+        ">>> y = special_functions.where_lesser(x, 1.0)"
+    },
+    {
+        "window_norm",
+        window_norm,
+        METH_VARARGS,
+        "\r\t"
+        "Function:\n\r\t\t"
+        "special_functions.window_norm\n\r\t"
+        "Purpose\n\r\t\t"
+        "Compute the window normalization scheme.\n\r\t"
+        "Arguments:\n\r\t\t"
+        "ker (numpy.ndarray):\n\r\t\t\t"
+        "A numpy array of real numbers, the input function.\n\r\t\t"
+        "dx (int or float):\n\r\t\t\t"
+        "The sample spacing of the input function.\n\r\t\t"
+        "f_scale (int or float):\n\r\t\t\t"
+        "The Fresnel scale in the same units as dx.\n\r\t\t"
+        "Outputs:\n\r\t\t"
+        "window_norm (float):\n\r\t\t\t"
+        "The normalization factor.\n\r\t"
+        "Example:\n\r\t\t"
+        ">>> import numpy\n\r\t\t"
+        ">>> import special_functions\n\r\t\t"
+        ">>> dx = 0.1"
+        ">>> x = numpy.arange(-10,10,dx)\n\r\t\t"
+        ">>> ker = special_functions.coss(x, 5)"
+        ">>> f_scale = 0.5"
+        ">>> y = special_functions.window_norm(ker, dx, f_scale)"
     },
     {NULL, NULL, 0, NULL}
 };
@@ -1987,18 +2156,6 @@ PyUFuncGenericFunction frequency_to_wavelength_funcs[3] = {
     &float_frequency_to_wavelength,
     &double_frequency_to_wavelength,
     &long_double_frequency_to_wavelength
-};
-
-PyUFuncGenericFunction fresnel_cos_funcs[3] = {
-    &float_fresnelcos,
-    &double_fresnelcos,
-    &long_double_fresnelcos
-};
-
-PyUFuncGenericFunction fresnel_sin_funcs[3] = {
-    &float_fresnelsin,
-    &double_fresnelsin,
-    &long_double_fresnelsin
 };
 
 PyUFuncGenericFunction lambertw_funcs[3] = {
@@ -2125,13 +2282,11 @@ PyMODINIT_FUNC PyInit__special_functions(void)
 {
     PyObject *double_slit_diffraction;
     PyObject *frequency_to_wavelength;
-    PyObject *fresnel_cos;
     PyObject *fresnel_psi;
     PyObject *fresnel_dpsi_dphi;
     PyObject *fresnel_d2psi_dphi2;
     PyObject *fresnel_dpsi_dphi_ellipse;
     PyObject *fresnel_scale;
-    PyObject *fresnel_sin;
     PyObject *lambertw;
     PyObject *resolution_inverse;
     PyObject *single_slit_diffraction;
@@ -2174,11 +2329,6 @@ PyMODINIT_FUNC PyInit__special_functions(void)
         "fresnel_dpsi_dphi_ellipse_docstring", 0
     );
 
-    fresnel_cos = PyUFunc_FromFuncAndData(
-        fresnel_cos_funcs, PyuFunc_None_3, one_real_in_one_real_out, 3, 1, 1,
-        PyUFunc_None, "fresnel_cos", "fresnel_cos_docstring", 0
-    );
-
     fresnel_psi = PyUFunc_FromFuncAndData(
         psi_funcs, PyuFunc_None_3, seven_real_in_one_real_out, 3, 7, 1,
         PyUFunc_None, "fresnel_psi",  "fresnel_psi_docstring", 0
@@ -2187,11 +2337,6 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     fresnel_scale = PyUFunc_FromFuncAndData(
         fresnel_scale_funcs, PyuFunc_None_3, four_real_in_one_real_out, 3, 4, 1,
         PyUFunc_None, "fresnel_scale", "fresnel_scale_docstring", 0
-    );
-
-    fresnel_sin = PyUFunc_FromFuncAndData(
-        fresnel_sin_funcs, PyuFunc_None_3, one_real_in_one_real_out, 3, 1, 1,
-        PyUFunc_None, "fresnel_sin", "fresnel_sin_docstring", 0
     );
 
     lambertw = PyUFunc_FromFuncAndData(
@@ -2221,14 +2366,12 @@ PyMODINIT_FUNC PyInit__special_functions(void)
 
     PyDict_SetItemString(d, "double_slit_diffraction", double_slit_diffraction);
     PyDict_SetItemString(d, "frequency_to_wavelength", frequency_to_wavelength);
-    PyDict_SetItemString(d, "fresnel_cos", fresnel_cos);
     PyDict_SetItemString(d, "fresnel_psi", fresnel_psi);
     PyDict_SetItemString(d, "fresnel_dpsi_dphi", fresnel_dpsi_dphi);
     PyDict_SetItemString(d, "fresnel_d2psi_dphi2", fresnel_d2psi_dphi2);
     PyDict_SetItemString(d, "fresnel_dpsi_dphi_ellipse",
                          fresnel_dpsi_dphi_ellipse);
     PyDict_SetItemString(d, "fresnel_scale", fresnel_scale);
-    PyDict_SetItemString(d, "fresnel_sin", fresnel_sin);
     PyDict_SetItemString(d, "lambertw", lambertw);
     PyDict_SetItemString(d, "resolution_inverse", resolution_inverse);
     PyDict_SetItemString(d, "single_slit_diffraction", single_slit_diffraction);
@@ -2237,13 +2380,11 @@ PyMODINIT_FUNC PyInit__special_functions(void)
 
     Py_DECREF(double_slit_diffraction);
     Py_DECREF(frequency_to_wavelength);
-    Py_DECREF(fresnel_cos);
     Py_DECREF(fresnel_psi);
     Py_DECREF(fresnel_dpsi_dphi);
     Py_DECREF(fresnel_d2psi_dphi2);
     Py_DECREF(fresnel_dpsi_dphi_ellipse);
     Py_DECREF(fresnel_scale);
-    Py_DECREF(fresnel_sin);
     Py_DECREF(lambertw);
     Py_DECREF(resolution_inverse);
     Py_DECREF(single_slit_diffraction);
@@ -2256,13 +2397,11 @@ PyMODINIT_FUNC init__funcs(void)
 {
     PyObject *double_slit_diffraction;
     PyObject *frequency_to_wavelength;
-    PyObject *fresnel_cos;
     PyObject *fresnel_psi;
     PyObject *fresnel_dpsi_dphi;
     PyObject *fresnel_d2psi_dphi2;
     PyObject *fresnel_dpsi_dphi_ellipse;
     PyObject *fresnel_scale;
-    PyObject *fresnel_sin;
     PyObject *lambertw;
     PyObject *resolution_inverse;
     PyObject *single_slit_diffraction;
@@ -2305,11 +2444,6 @@ PyMODINIT_FUNC init__funcs(void)
         "fresnel_dpsi_dphi_ellipse_docstring", 0
     );
 
-    fresnel_cos = PyUFunc_FromFuncAndData(
-        fresnel_cos_funcs, PyuFunc_None_3, one_real_in_one_real_out, 3, 1, 1,
-        PyUFunc_None, "fresnel_cos", "fresnel_cos_docstring", 0
-    );
-
     fresnel_psi = PyUFunc_FromFuncAndData(
         psi_funcs, PyuFunc_None_3, seven_real_in_one_real_out, 3, 7, 1,
         PyUFunc_None, "fresnel_psi",  "fresnel_psi_docstring", 0
@@ -2318,11 +2452,6 @@ PyMODINIT_FUNC init__funcs(void)
     fresnel_scale = PyUFunc_FromFuncAndData(
         fresnel_scale_funcs, PyuFunc_None_3, four_real_in_one_real_out, 3, 4, 1,
         PyUFunc_None, "fresnel_scale", "fresnel_scale_docstring", 0
-    );
-
-    fresnel_sin = PyUFunc_FromFuncAndData(
-        fresnel_sin_funcs, PyuFunc_None_3, one_real_in_one_real_out, 3, 1, 1,
-        PyUFunc_None, "fresnel_sin", "fresnel_sin_docstring", 0
     );
 
     lambertw = PyUFunc_FromFuncAndData(
@@ -2352,14 +2481,12 @@ PyMODINIT_FUNC init__funcs(void)
 
     PyDict_SetItemString(d, "double_slit_diffraction", double_slit_diffraction);
     PyDict_SetItemString(d, "frequency_to_wavelength", frequency_to_wavelength);
-    PyDict_SetItemString(d, "fresnel_cos", fresnel_cos);
     PyDict_SetItemString(d, "fresnel_psi", fresnel_psi);
     PyDict_SetItemString(d, "fresnel_dpsi_dphi", fresnel_dpsi_dphi);
     PyDict_SetItemString(d, "fresnel_d2psi_dphi2", fresnel_d2psi_dphi2);
     PyDict_SetItemString(d, "fresnel_dpsi_dphi_ellipse",
                          fresnel_dpsi_dphi_ellipse);
     PyDict_SetItemString(d, "fresnel_scale", fresnel_scale);
-    PyDict_SetItemString(d, "fresnel_sin", fresnel_sin);
     PyDict_SetItemString(d, "lambertw", lambertw);
     PyDict_SetItemString(d, "resolution_inverse", resolution_inverse);
     PyDict_SetItemString(d, "single_slit_diffraction", single_slit_diffraction);
@@ -2368,13 +2495,11 @@ PyMODINIT_FUNC init__funcs(void)
 
     Py_DECREF(double_slit_diffraction);
     Py_DECREF(frequency_to_wavelength);
-    Py_DECREF(fresnel_cos);
     Py_DECREF(fresnel_psi);
     Py_DECREF(fresnel_dpsi_dphi);
     Py_DECREF(fresnel_d2psi_dphi2);
     Py_DECREF(fresnel_dpsi_dphi_ellipse);
     Py_DECREF(fresnel_scale);
-    Py_DECREF(fresnel_sin);
     Py_DECREF(lambertw);
     Py_DECREF(resolution_inverse);
     Py_DECREF(single_slit_diffraction);

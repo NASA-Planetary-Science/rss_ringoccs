@@ -48,17 +48,8 @@ def configuration(parent_package=None, top_path=None):
             "src/__window_function_kaiser_bessel.c",
             "src/__window_function_modified_kaiser_bessel.c",
             "src/__window_function_rectangular.c",
-            "src/_special_functions.c",
-        ]
-    )
-    config.add_extension('_window_functions', [
-            "src/_window_functions.c",
-            "src/__math_function_bessel_I0.c",
-            "src/__window_function_squared_cosine.c",
-            "src/__window_function_kaiser_bessel.c",
             "src/__window_function_normalization.c",
-            "src/__window_function_modified_kaiser_bessel.c",
-            "src/__window_function_rectangular.c"
+            "src/special_functions.c",
         ]
     )
 

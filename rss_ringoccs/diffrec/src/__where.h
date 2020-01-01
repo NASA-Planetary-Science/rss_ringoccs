@@ -55,7 +55,8 @@ extern long **Where_Lesser_Long(long *data, long dim, double threshold);
 extern long **
 Where_Lesser_ULong(unsigned long *data, long dim, double threshold);
 
-extern long **Where_Lesser_Long_Long(long long *data, long dim, double threshold);
+extern long **
+Where_Lesser_Long_Long(long long *data, long dim, double threshold);
 
 extern long **
 Where_Lesser_ULong_Long(unsigned long long *data, long dim, double threshold);

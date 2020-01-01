@@ -11,6 +11,7 @@
 #include "__math_functions.h"
 #include "__where.h"
 #include "__get_array.h"
+#include "__window_functions.h"
 
 /*  Window functions and Fresnel transforms defined here.                     */
 #include "__diffraction_functions.h"
@@ -18,7 +19,6 @@
 /* All wrapper functions defined within these files.                          */
 #include "_fraunhofer_diffraction_wrappers.h"
 #include "__fresnel_diffraction.h"
-#include "_fresnel_integrals_wrappers.h"
 #include "_fresnel_kernel_wrappers.h"
 #include "_lambertw_wrappers.h"
 #include "_physics_functions_wrappers.h"
@@ -29,9 +29,17 @@
 #include <numpy/ndarraytypes.h>
 #include <numpy/ufuncobject.h>
 
-/*  Make sure the name __get_where_pointer is available.                      */
+/*  Make sure these names are available.                                      */
 #ifdef __get_one_real_from_one_real
 #undef __get_one_real_from_one_real
+#endif
+
+#ifdef __get_one_real_from_two_real
+#undef __get_one_real_from_two_real
+#endif
+
+#ifdef __get_one_real_from_three_real
+#undef __get_one_real_from_three_real
 #endif
 
 #ifdef __get_complex_from_four_real
@@ -42,10 +50,8 @@
 #undef __get_complex_from_three_real
 #endif
 
-/*  To avoid repeating the same code over and over again, define this macro   *
- *  to be used for all of the where_lesser functions. Since the only thing    *
- *  that changes between the various functions is the type of the input       *
- *  pointer, the code is exactly the same.                                    */
+/*  To avoid repeating the same code over and over again, define these macros *
+ *  to be used for looping over functions.                                    */
 
 #define __get_one_real_from_one_real(x, y, dim, f) ({\
     /*  Declare necessary variables.                                         */\
@@ -53,6 +59,24 @@
     \
     for (i=0; i<dim; ++i){\
         y[i] = (*f)(x[i]);\
+    }\
+})
+
+#define __get_one_real_from_two_real(x1, x2, y, dim, f) ({\
+    /*  Declare necessary variables.                                         */\
+    long i;\
+    \
+    for (i=0; i<dim; ++i){\
+        y[i] = (*f)(x1[i], x2);\
+    }\
+})
+
+#define __get_one_real_from_three_real(x1, x2, x3, y, dim, f) ({\
+    /*  Declare necessary variables.                                         */\
+    long i;\
+    \
+    for (i=0; i<dim; ++i){\
+        y[i] = (*f)(x1[i], x2, x3);\
     }\
 })
 

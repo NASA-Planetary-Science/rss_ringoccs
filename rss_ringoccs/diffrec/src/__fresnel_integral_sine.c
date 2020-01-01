@@ -89,7 +89,8 @@
  ******************************************************************************/
 
 /*----------------------Single Precision Functions----------------------------*/
-float Fresnel_Sine_Taylor_to_Asymptotic_Float(float x){
+float Fresnel_Sine_Taylor_to_Asymptotic_Float(float x)
+{
     /* Variables for S(x) and powers of x, respectively. */
     float sx;
     float arg = x*x;
@@ -98,7 +99,8 @@ float Fresnel_Sine_Taylor_to_Asymptotic_Float(float x){
      * use the asymptotic expansion. For values near 3.076, accuracy of 5   *
      * decimals is guaranteed. Higher precicion outside this region. When   *
      * |x| > 1.e8, S(x) returns +/- sqrt(pi/8) to 8 decimals.               */
-    if (arg < 9.0){
+    if (arg < 9.0)
+    {
         x *= arg;
         arg *= arg;
         sx = arg * FRESNEL_SINE_TAYLOR_16 + FRESNEL_SINE_TAYLOR_15;
@@ -143,18 +145,18 @@ float Fresnel_Sine_Taylor_to_Asymptotic_Float(float x){
 
         sx = cosarg + sinarg;
         sx *= x;
+
         /*  (x > 0) - (x < 0) is a quick way to return sign(x) and avoids an  *
          *  expensive if-then statement. Output for the asymptotic expansion  *
          *  is f(|x|) + sign(x) * sqrt(pi/8). Error goes like 1/x^15.         */
         return sx + ((x > 0) - (x < 0))*SQRT_PI_BY_8;
     }
-    else {
-        /* For large values, return the limit of S(x) as x -> +/- infinity. */
-        return ((x > 0) - (x < 0))*SQRT_PI_BY_8;
-    }
+    /*  For large values, return the limit of S(x) as x -> +/- infinity.      */
+    else return ((x > 0) - (x < 0))*SQRT_PI_BY_8;
 }
 
-float Fresnel_Sine_While_to_Asymptotic_Float(float x){
+float Fresnel_Sine_While_to_Asymptotic_Float(float x)
+{
     float FRESNEL_SINE_TAYLOR_COEFFICIENTS[30] = {
         FRESNEL_SINE_TAYLOR_00, FRESNEL_SINE_TAYLOR_01,
         FRESNEL_SINE_TAYLOR_02, FRESNEL_SINE_TAYLOR_03,
@@ -235,7 +237,8 @@ float Fresnel_Sine_While_to_Asymptotic_Float(float x){
     }
 }
 
-float Fresnel_Sine_Heald_Rational_EPS_Minus_Three_Float(float x){
+float Fresnel_Sine_Heald_Rational_EPS_Minus_Three_Float(float x)
+{
     float A, R, a, b, c, d, sgn_x;
     sgn_x = (x>0)-(x<0);
     x *= SQRT_2_BY_PI*sgn_x;
@@ -263,7 +266,8 @@ float Fresnel_Sine_Heald_Rational_EPS_Minus_Three_Float(float x){
     return sgn_x*(SQRT_PI_BY_8 - R*cosf(A));
 }
 
-float Fresnel_Sine_Heald_Rational_EPS_Minus_Four_Float(float x){
+float Fresnel_Sine_Heald_Rational_EPS_Minus_Four_Float(float x)
+{
     float A, R, a, b, c, d, sgn_x;
     sgn_x = (x>0)-(x<0);
     x *= SQRT_2_BY_PI*sgn_x;
@@ -293,7 +297,8 @@ float Fresnel_Sine_Heald_Rational_EPS_Minus_Four_Float(float x){
     return sgn_x*(SQRT_PI_BY_8 - R*cosf(A));
 }
 
-float Fresnel_Sine_Heald_Rational_EPS_Minus_Six_Float(float x){
+float Fresnel_Sine_Heald_Rational_EPS_Minus_Six_Float(float x)
+{
     float A, R, a, b, c, d, sgn_x;
     sgn_x = (x>0)-(x<0);
     x *= SQRT_2_BY_PI*sgn_x;
@@ -327,7 +332,8 @@ float Fresnel_Sine_Heald_Rational_EPS_Minus_Six_Float(float x){
     return sgn_x*(SQRT_PI_BY_8 - R*cosf(A));
 }
 
-float Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Float(float x){
+float Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Float(float x)
+{
     float A, R, a, b, c, d, sgn_x;
     sgn_x = (x>0)-(x<0);
     x *= SQRT_2_BY_PI*sgn_x;
@@ -371,7 +377,8 @@ float Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Float(float x){
 
 /*----------------------Double Precision Functions----------------------------*/
 
-double Fresnel_Sine_Taylor_to_Asymptotic_Double(double x){
+double Fresnel_Sine_Taylor_to_Asymptotic_Double(double x)
+{
     /* Variables for S(x) and powers of x, respectively. */
     double sx;
     double arg = x*x;
@@ -436,13 +443,12 @@ double Fresnel_Sine_Taylor_to_Asymptotic_Double(double x){
          *  is f(|x|) + sign(x) * sqrt(pi/8). Error goes like 1/x^15.         */
         return sx + ((x > 0) - (x < 0))*SQRT_PI_BY_8;
     }
-    else {
-        /* For large values, return the limit of S(x) as x -> +/- infinity. */
-        return ((x > 0) - (x < 0))*SQRT_PI_BY_8;
-    }
+    /*  For large values, return the limit of S(x) as x -> +/- infinity.      */
+    else return ((x > 0) - (x < 0))*SQRT_PI_BY_8;
 }
 
-double Fresnel_Sine_While_to_Asymptotic_Double(double x){
+double Fresnel_Sine_While_to_Asymptotic_Double(double x)
+{
     double FRESNEL_SINE_TAYLOR_COEFFICIENTS[30] = {
         FRESNEL_SINE_TAYLOR_00, FRESNEL_SINE_TAYLOR_01,
         FRESNEL_SINE_TAYLOR_02, FRESNEL_SINE_TAYLOR_03,
@@ -523,7 +529,8 @@ double Fresnel_Sine_While_to_Asymptotic_Double(double x){
     }
 }
 
-double Fresnel_Sine_Heald_Rational_EPS_Minus_Three_Double(double x){
+double Fresnel_Sine_Heald_Rational_EPS_Minus_Three_Double(double x)
+{
     double A, R, a, b, c, d, sgn_x;
     sgn_x = (x>0)-(x<0);
     x *= SQRT_2_BY_PI*sgn_x;
@@ -551,7 +558,8 @@ double Fresnel_Sine_Heald_Rational_EPS_Minus_Three_Double(double x){
     return sgn_x*(SQRT_PI_BY_8 - R*cos(A));
 }
 
-double Fresnel_Sine_Heald_Rational_EPS_Minus_Four_Double(double x){
+double Fresnel_Sine_Heald_Rational_EPS_Minus_Four_Double(double x)
+{
     double A, R, a, b, c, d, sgn_x;
     sgn_x = (x>0)-(x<0);
     x *= SQRT_2_BY_PI*sgn_x;
@@ -581,7 +589,8 @@ double Fresnel_Sine_Heald_Rational_EPS_Minus_Four_Double(double x){
     return sgn_x*(SQRT_PI_BY_8 - R*cos(A));
 }
 
-double Fresnel_Sine_Heald_Rational_EPS_Minus_Six_Double(double x){
+double Fresnel_Sine_Heald_Rational_EPS_Minus_Six_Double(double x)
+{
     double A, R, a, b, c, d, sgn_x;
     sgn_x = (x>0)-(x<0);
     x *= SQRT_2_BY_PI*sgn_x;
@@ -615,7 +624,8 @@ double Fresnel_Sine_Heald_Rational_EPS_Minus_Six_Double(double x){
     return sgn_x*(SQRT_PI_BY_8 - R*cos(A));
 }
 
-double Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Double(double x){
+double Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Double(double x)
+{
     double A, R, a, b, c, d, sgn_x;
     sgn_x = (x>0)-(x<0);
     x *= SQRT_2_BY_PI*sgn_x;
@@ -659,7 +669,8 @@ double Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Double(double x){
 
 /*--------------------Long Double Precision Functions-------------------------*/
 
-long double Fresnel_Sine_Taylor_to_Asymptotic_Long_Double(long double x){
+long double Fresnel_Sine_Taylor_to_Asymptotic_Long_Double(long double x)
+{
     /* Variables for S(x) and powers of x, respectively. */
     long double sx;
     long double arg = x*x;
@@ -668,7 +679,8 @@ long double Fresnel_Sine_Taylor_to_Asymptotic_Long_Double(long double x){
      * use the asymptotic expansion. For values near 3.076, accuracy of 5   *
      * decimals is guaranteed. Higher precicion outside this region. When   *
      * |x| > 1.e8, S(x) returns +/- sqrt(pi/8) to 8 decimals.               */
-    if (arg < 11.68){
+    if (arg < 11.68)
+    {
         x *= arg;
         arg *= arg;
         sx = arg * FRESNEL_SINE_TAYLOR_24 + FRESNEL_SINE_TAYLOR_23;
@@ -726,13 +738,12 @@ long double Fresnel_Sine_Taylor_to_Asymptotic_Long_Double(long double x){
          *  is f(|x|) + sign(x) * sqrt(pi/8). Error goes like 1/x^15.         */
         return sx + ((x > 0) - (x < 0))*SQRT_PI_BY_8;
     }
-    else {
-        /* For large values, return the limit of S(x) as x -> +/- infinity. */
-        return ((x > 0) - (x < 0))*SQRT_PI_BY_8;
-    }
+    /* For large values, return the limit of S(x) as x -> +/- infinity.       */
+    else return ((x > 0) - (x < 0))*SQRT_PI_BY_8;
 }
 
-long double Fresnel_Sine_While_to_Asymptotic_Long_Double(long double x){
+long double Fresnel_Sine_While_to_Asymptotic_Long_Double(long double x)
+{
     long double FRESNEL_SINE_TAYLOR_COEFFICIENTS[30] = {
         FRESNEL_SINE_TAYLOR_00, FRESNEL_SINE_TAYLOR_01,
         FRESNEL_SINE_TAYLOR_02, FRESNEL_SINE_TAYLOR_03,
@@ -760,11 +771,13 @@ long double Fresnel_Sine_While_to_Asymptotic_Long_Double(long double x){
     /* For small x use the Taylor expansion to compute C(x). For larger x,  *
      * use the asymptotic expansion. For values near 3.076, accuracy of 5   *
      * decimals is guaranteed. Higher precicion outside this region.        */
-    if (arg < 9.0){
+    if (arg < 9.0)
+    {
         int i = 0;
         long double term = arg*FRESNEL_SINE_TAYLOR_COEFFICIENTS[0];
         sx = term;
-        while (term > EPS){
+        while (term > EPS)
+        {
             /* Odd terms have a negative coefficients.
                Compute two terms at a time to compare with EPS. */
             i += 1;
@@ -780,7 +793,8 @@ long double Fresnel_Sine_While_to_Asymptotic_Long_Double(long double x){
         }
         return x*sx;
     }
-    else if (arg < 1.0e16) {
+    else if (arg < 1.0e16)
+    {
         double sinarg, cosarg;
         cosarg = cosl(arg);
         sinarg = sinl(arg);
@@ -807,15 +821,13 @@ long double Fresnel_Sine_While_to_Asymptotic_Long_Double(long double x){
          *  is f(|x|) + sign(x) * sqrt(pi/8). Error goes like 1/x^15.         */
         return sx + ((x > 0) - (x < 0))*SQRT_PI_BY_8;
     }
-    else {
-        /* For large values, return the limit of S(x) as x -> +/- infinity. */
-        return ((x > 0) - (x < 0))*SQRT_PI_BY_8;
-    }
+    /*  For large values, return the limit of S(x) as x -> +/- infinity.      */
+    else return ((x > 0) - (x < 0))*SQRT_PI_BY_8;
 }
 
-long double Fresnel_Sine_Heald_Rational_EPS_Minus_Three_Long_Double(
-    long double x
-){
+long double
+Fresnel_Sine_Heald_Rational_EPS_Minus_Three_Long_Double(long double x)
+{
     long double A, R, a, b, c, d, sgn_x;
     sgn_x = (x>0)-(x<0);
     x *= SQRT_2_BY_PI*sgn_x;
@@ -843,9 +855,9 @@ long double Fresnel_Sine_Heald_Rational_EPS_Minus_Three_Long_Double(
     return sgn_x*(SQRT_PI_BY_8 - R*cosl(A));
 }
 
-long double Fresnel_Sine_Heald_Rational_EPS_Minus_Four_Long_Double(
-    long double x
-){
+long double
+Fresnel_Sine_Heald_Rational_EPS_Minus_Four_Long_Double(long double x)
+{
     long double A, R, a, b, c, d, sgn_x;
     sgn_x = (x>0)-(x<0);
     x *= SQRT_2_BY_PI*sgn_x;
@@ -875,9 +887,9 @@ long double Fresnel_Sine_Heald_Rational_EPS_Minus_Four_Long_Double(
     return sgn_x*(SQRT_PI_BY_8 - R*cosl(A));
 }
 
-long double Fresnel_Sine_Heald_Rational_EPS_Minus_Six_Long_Double(
-    long double x
-){
+long double
+Fresnel_Sine_Heald_Rational_EPS_Minus_Six_Long_Double(long double x)
+{
     long double A, R, a, b, c, d, sgn_x;
     sgn_x = (x>0)-(x<0);
     x *= SQRT_2_BY_PI*sgn_x;
@@ -911,9 +923,9 @@ long double Fresnel_Sine_Heald_Rational_EPS_Minus_Six_Long_Double(
     return sgn_x*(SQRT_PI_BY_8 - R*cosl(A));
 }
 
-long double Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Long_Double(
-    long double x
-){
+long double
+Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Long_Double(long double x)
+{
     long double A, R, a, b, c, d, sgn_x;
     sgn_x = (x>0)-(x<0);
     x *= SQRT_2_BY_PI*sgn_x;
@@ -953,4 +965,54 @@ long double Fresnel_Sine_Heald_Rational_EPS_Minus_Eight_Long_Double(
     R *= SQRT_PI_BY_2;
 
     return sgn_x*(SQRT_PI_BY_8 - R*cosl(A));
+}
+
+/*  For all integer types, convert to double and compute.                     */
+double Fresnel_Sine_Taylor_to_Asymptotic_Char(char x)
+{
+    return Fresnel_Sine_Taylor_to_Asymptotic_Double((double)x);
+}
+
+double Fresnel_Sine_Taylor_to_Asymptotic_UChar(unsigned char x)
+{
+    return Fresnel_Sine_Taylor_to_Asymptotic_Double((double)x);
+}
+
+double Fresnel_Sine_Taylor_to_Asymptotic_Short(short x)
+{
+    return Fresnel_Sine_Taylor_to_Asymptotic_Double((double)x);
+}
+
+double Fresnel_Sine_Taylor_to_Asymptotic_UShort(unsigned short x)
+{
+    return Fresnel_Sine_Taylor_to_Asymptotic_Double((double)x);
+}
+
+double Fresnel_Sine_Taylor_to_Asymptotic_Int(int x)
+{
+    return Fresnel_Sine_Taylor_to_Asymptotic_Double((double)x);
+}
+
+double Fresnel_Sine_Taylor_to_Asymptotic_UInt(unsigned int x)
+{
+    return Fresnel_Sine_Taylor_to_Asymptotic_Double((double)x);
+}
+
+double Fresnel_Sine_Taylor_to_Asymptotic_Long(long x)
+{
+    return Fresnel_Sine_Taylor_to_Asymptotic_Double((double)x);
+}
+
+double Fresnel_Sine_Taylor_to_Asymptotic_ULong(unsigned long x)
+{
+    return Fresnel_Sine_Taylor_to_Asymptotic_Double((double)x);
+}
+double Fresnel_Sine_Taylor_to_Asymptotic_Long_Long(long long x)
+{
+    return Fresnel_Sine_Taylor_to_Asymptotic_Double((double)x);
+}
+
+double Fresnel_Sine_Taylor_to_Asymptotic_ULong_Long(unsigned long long x)
+{
+    return Fresnel_Sine_Taylor_to_Asymptotic_Double((double)x);
 }

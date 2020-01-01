@@ -7,11 +7,11 @@
  *--------------------Single Slit Fraunhofer Diffraction----------------------*
  ******************************************************************************/
 
-extern float Single_Slit_Fraunhofer_Diffraction_Float(float x, float z,
-                                                      float a);
+extern float
+Single_Slit_Fraunhofer_Diffraction_Float(float x, float z, float a);
 
-extern double Single_Slit_Fraunhofer_Diffraction_Double(double x, double z,
-                                                        double a);
+extern double
+Single_Slit_Fraunhofer_Diffraction_Double(double x, double z, double a);
 
 extern long double
 Single_Slit_Fraunhofer_Diffraction_Long_Double(long double x, long double z,

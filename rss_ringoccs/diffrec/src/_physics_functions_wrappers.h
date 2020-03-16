@@ -1,11 +1,8 @@
 #ifndef RSS_RINGOCCS_PHYSICS_FUNCTIONS_WRAPPERS_H
 #define RSS_RINGOCCS_PHYSICS_FUNCTIONS_WRAPPERS_H
 
-/*  Where npy_intp is defined.                                                */
-#include <numpy/ndarraytypes.h>
-
 /*  Location of the C functions to be wrapped.                                */
-#include "__physics_functions.h"
+#include "special_functions.h"
 
 /*  Wrappers for the frequency_to_wavelength function.                        */
 

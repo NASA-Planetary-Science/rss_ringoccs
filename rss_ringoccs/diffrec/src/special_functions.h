@@ -1,33 +1,16 @@
 #ifndef RSS_RINGOCCS_SPECIAL_FUNCTIONS_H
 #define RSS_RINGOCCS_SPECIAL_FUNCTIONS_H
 
-/*  To avoid compiler warnings about deprecated numpy stuff.                  */
-#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
-
 /*  complex data types, as well as _Complex_I, are defined here.              */
 #include <complex.h>
+#include <stdlib.h>
 
 /*  compute_norm_eq, max and min found here. math.h included here as well.    */
+#include "__fresnel_diffraction.h"
 #include "__math_functions.h"
-#include "__where.h"
 #include "__get_array.h"
 #include "__window_functions.h"
-
-/*  Window functions and Fresnel transforms defined here.                     */
 #include "__diffraction_functions.h"
-
-/* All wrapper functions defined within these files.                          */
-#include "_fraunhofer_diffraction_wrappers.h"
-#include "__fresnel_diffraction.h"
-#include "_fresnel_kernel_wrappers.h"
-#include "_lambertw_wrappers.h"
-#include "_physics_functions_wrappers.h"
-#include "_resolution_inverse_function_wrappers.h"
-
-/*  Various header files required for the C-Python API to work.               */
-#include <Python.h>
-#include <numpy/ndarraytypes.h>
-#include <numpy/ufuncobject.h>
 
 /*  Make sure these names are available.                                      */
 #ifdef __get_one_real_from_one_real
@@ -97,5 +80,148 @@
         y[i] = (*f)(x[i], a, b, F);\
     }\
 })
+
+/******************************************************************************
+ *--------------------Single Slit Fraunhofer Diffraction----------------------*
+ ******************************************************************************/
+
+extern float
+Single_Slit_Fraunhofer_Diffraction_Float(float x, float z, float a);
+
+extern double
+Single_Slit_Fraunhofer_Diffraction_Double(double x, double z, double a);
+
+extern long double
+Single_Slit_Fraunhofer_Diffraction_Long_Double(long double x, long double z,
+                                               long double a);
+
+/******************************************************************************
+ *--------------------Double Slit Fraunhofer Diffraction----------------------*
+ ******************************************************************************/
+
+extern float
+Double_Slit_Fraunhofer_Diffraction_Float(float x, float z, float a,
+                                         float d, float lambda);
+
+extern double
+Double_Slit_Fraunhofer_Diffraction_Double(double x, double z, double a,
+                                          double d, double lambda);
+
+extern long double
+Double_Slit_Fraunhofer_Diffraction_Long_Double(long double x, long double z,
+                                               long double a, long double d,
+                                               long double lambda);
+
+/******************************************************************************
+ *------------------------------Fresnel Scale---------------------------------*
+ ******************************************************************************/
+
+extern float
+Fresnel_Scale_Float(float lambda, float d, float phi, float b);
+
+extern double
+Fresnel_Scale_Double(double lambda, double d, double phi, double b);
+
+extern long double
+Fresnel_Scale_Long_Double(long double lambda, long double d,
+                          long double phi, long double b);
+
+/******************************************************************************
+ *--------------------------Frequency to Wavelength---------------------------*
+ ******************************************************************************/
+
+extern float        Frequency_To_Wavelength_Float(float frequency);
+extern double       Frequency_To_Wavelength_Double(double frequency);
+extern long double  Frequency_To_Wavelength_Long_Double(long double frequency);
+
+/******************************************************************************
+ *-------------------------Wavelength to Wavenumber---------------------------*
+ ******************************************************************************/
+
+extern float        Wavelength_To_Wavenumber_Float(float frequency);
+extern double       Wavelength_To_Wavenumber_Double(double frequency);
+extern long double  Wavelength_To_Wavenumber_Long_Double(long double frequency);
+
+/******************************************************************************
+ *-----------------------------------Where------------------------------------*
+ ******************************************************************************/
+
+extern long **
+Where_Greater_Char(char *data, long dim, double threshold);
+
+extern long **
+Where_Greater_UChar(unsigned char *data, long dim, double threshold);
+
+extern long **
+Where_Greater_Short(short *data, long dim, double threshold);
+
+extern long **
+Where_Greater_UShort(unsigned short *data, long dim, double threshold);
+
+extern long **
+Where_Greater_Int(int *data, long dim, double threshold);
+
+extern long **
+Where_Greater_UInt(unsigned int *data, long dim, double threshold);
+
+extern long **
+Where_Greater_Long(long *data, long dim, double threshold);
+
+extern long **
+Where_Greater_ULong(unsigned long *data, long dim, double threshold);
+
+extern long **
+Where_Greater_Long_Long(long long *data, long dim, double threshold);
+
+extern long **
+Where_Greater_ULong_Long(unsigned long long *data, long dim, double threshold);
+
+extern long **
+Where_Greater_Float(float *data, long dim, double threshold);
+
+extern long **
+Where_Greater_Double(double *data, long dim, double threshold);
+
+extern long **
+Where_Greater_Long_Double(long double *data, long dim, long double threshold);
+
+extern long **
+Where_Lesser_Char(char *data, long dim, double threshold);
+
+extern long **
+Where_Lesser_UChar(unsigned char *data, long dim, double threshold);
+
+extern long **
+Where_Lesser_Short(short *data, long dim, double threshold);
+
+extern long **
+Where_Lesser_UShort(unsigned short *data, long dim, double threshold);
+
+extern long **
+Where_Lesser_Int(int *data, long dim, double threshold);
+
+extern long **
+Where_Lesser_UInt(unsigned int *data, long dim, double threshold);
+
+extern long **
+Where_Lesser_Long(long *data, long dim, double threshold);
+
+extern long **
+Where_Lesser_ULong(unsigned long *data, long dim, double threshold);
+
+extern long **
+Where_Lesser_Long_Long(long long *data, long dim, double threshold);
+
+extern long **
+Where_Lesser_ULong_Long(unsigned long long *data, long dim, double threshold);
+
+extern long **
+Where_Lesser_Float(float *data, long dim, double threshold);
+
+extern long **
+Where_Lesser_Double(double *data, long dim, double threshold);
+
+extern long **
+Where_Lesser_Long_Double(long double *data, long dim, long double threshold);
 
 #endif

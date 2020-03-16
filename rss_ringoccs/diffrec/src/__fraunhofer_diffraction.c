@@ -46,7 +46,7 @@
  *      desired (float, double, long double).                                 *
  ******************************************************************************/
 
-#include "__fraunhofer_diffraction.h"
+#include "special_functions.h"
 
 float Double_Slit_Fraunhofer_Diffraction_Float(float x, float z, float a,
                                                float d, float lambda)
@@ -86,11 +86,10 @@ double Double_Slit_Fraunhofer_Diffraction_Double(double x, double z, double a,
     return var_1*var_2/var_3;
 }
 
-long double Double_Slit_Fraunhofer_Diffraction_Long_Double(long double x,
-                                                           long double z,
-                                                           long double a,
-                                                           long double d,
-                                                           long double lambda)
+long double
+Double_Slit_Fraunhofer_Diffraction_Long_Double(long double x, long double z,
+                                               long double a, long double d,
+                                               long double lambda)
 {
     float sin_theta = x/sqrtl(x*x + z*z);
     a = a/lambda;
@@ -106,4 +105,24 @@ long double Double_Slit_Fraunhofer_Diffraction_Long_Double(long double x,
     var_3       *= var_3;
 
     return var_1*var_2/var_3;
+}
+
+float Single_Slit_Fraunhofer_Diffraction_Float(float x, float z, float a)
+{
+    float result = Sinc_Float(a*x/z);
+    return result*result;
+}
+
+double Single_Slit_Fraunhofer_Diffraction_Double(double x, double z, double a)
+{
+    double result = Sinc_Double(a*x/z);
+    return result*result;
+}
+
+long double Single_Slit_Fraunhofer_Diffraction_Long_Double(long double x,
+                                                           long double z,
+                                                           long double a)
+{
+    long double result = Sinc_Long_Double(a*x/z);
+    return result*result;
 }

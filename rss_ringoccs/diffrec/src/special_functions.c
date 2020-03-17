@@ -31,7 +31,6 @@ static void capsule_cleanup(PyObject *capsule)
 
 /* All wrapper functions defined within these files.                          */
 #include "_fresnel_kernel_wrappers.h"
-#include "_lambertw_wrappers.h"
 #include "_physics_functions_wrappers.h"
 #include "_resolution_inverse_function_wrappers.h"
 
@@ -1679,7 +1678,6 @@ static PyObject *fresnel_sin(PyObject *self, PyObject *args)
                 ((double *)data), y, dim,
                 Fresnel_Sine_Taylor_to_Asymptotic_Double
             );
-
         }
         else if (typenum == NPY_BYTE)
         {
@@ -2233,6 +2231,111 @@ static PyObject *fresnel_transform(PyObject *self, PyObject *args)
     }
 }
 
+static PyObject *lambertw(PyObject *self, PyObject *args)
+{
+    PyObject *output, *capsule;
+    PyArrayObject *x;
+    char typenum;
+    long dim;
+    void *data;
+
+    if (!PyArg_ParseTuple(args, "O!", &PyArray_Type, &x)){
+        PyErr_Format(PyExc_TypeError,
+                     "\n\rError Encountered: rss_ringoccs\n"
+                     "\r\tdiffrec.special_functions.lambertw\n\n"
+                     "\rCould not parse inputs. Legal inputs are:\n"
+                     "\r\tx: Numpy Array of real numbers (Floats)\n\rNotes:\n"
+                     "\r\tx must be a non-empty one dimensional numpy array.");
+        return NULL;
+    }
+
+    /*  Useful information about the data.                                */
+    typenum = (char)PyArray_TYPE(x);
+    dim     = PyArray_DIMS(x)[0];
+    data    = PyArray_DATA(x);
+
+    /*  Check the inputs to make sure they're valid.                          */
+    if (PyArray_NDIM(x) != 1){
+        PyErr_Format(PyExc_TypeError, "\n\rError Encountered: rss_ringoccs\n"
+                                      "\r\tdiffrec.special_functions.lambertw\n"
+                                      "\n\rInput is not 1-dimensional.\n");
+        return NULL;
+    }
+    else if (dim == 0){
+        PyErr_Format(PyExc_TypeError, "\n\rError Encountered: rss_ringoccs\n"
+                                      "\r\tdiffrec.special_functions.lambertw\n"
+                                      "\n\rInput numpy array is empty.\n");
+    }
+
+    if (typenum == NPY_FLOAT){
+        float *y;
+        y = (float *)malloc(dim*sizeof(float));
+        __get_one_real_from_one_real(((float *)data), y, dim, LambertW_Float);
+        output  = PyArray_SimpleNewFromData(1, &dim, NPY_FLOAT, (void *)y);
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);
+    }
+    else if (typenum == NPY_LONGDOUBLE){
+        long double *y;
+        y = (long double *)malloc(dim*sizeof(long double));
+        __get_one_real_from_one_real(((long double *)data), y, dim,
+                                     LambertW_Long_Double);
+        output  = PyArray_SimpleNewFromData(1, &dim, NPY_LONGDOUBLE, (void *)y);
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);
+    }
+    else {
+        double *y;
+        y = (double *)malloc(dim*sizeof(double));
+
+        if (typenum == NPY_DOUBLE)
+            __get_one_real_from_one_real(((double *)data), y, dim,
+                                         LambertW_Double);
+        else if (typenum == NPY_BYTE)
+            __get_one_real_from_one_real(((char *)data), y, dim, LambertW_Char);
+        else if (typenum == NPY_UBYTE)
+            __get_one_real_from_one_real(((unsigned char *)data),
+                                         y, dim, LambertW_UChar);
+        else if (typenum == NPY_SHORT)
+            __get_one_real_from_one_real(((short *)data),
+                                         y, dim, LambertW_Short);
+        else if (typenum == NPY_USHORT)
+            __get_one_real_from_one_real(((unsigned short *)data),
+                                         y, dim, LambertW_UShort);
+        else if (typenum == NPY_INT)
+            __get_one_real_from_one_real(((int *)data), y, dim, LambertW_Int);
+        else if (typenum == NPY_UINT)
+            __get_one_real_from_one_real(((unsigned int *)data),
+                                         y, dim, LambertW_UInt);
+        else if (typenum == NPY_LONG)
+            __get_one_real_from_one_real(((long *)data), y, dim, LambertW_Long);
+        else if (typenum == NPY_ULONG)
+            __get_one_real_from_one_real(((unsigned long *)data),
+                                         y, dim, LambertW_ULong);
+        else if (typenum == NPY_LONGLONG)
+            __get_one_real_from_one_real(((long long *)data), y,
+                                         dim, LambertW_Long_Long);
+        else if (typenum == NPY_ULONG)
+            __get_one_real_from_one_real(((unsigned long long *)data), y, dim,
+                                         LambertW_Long_Long);
+        else {
+            PyErr_Format(PyExc_TypeError,
+                         "\n\rError Encountered: rss_ringoccs\n"
+                         "\r\tdiffrec.special_functions.LambertW\n\n"
+                         "\rInvalid data type for input array. Input should be"
+                         "\n\ra 1-dimensional array of real numbers.\n");
+            return NULL;
+        }
+
+        output  = PyArray_SimpleNewFromData(1, &dim, NPY_DOUBLE, (void *)y);
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);
+    }
+
+    /*  This frees the variable at the Python level once it's destroyed.      */
+    PyArray_SetBaseObject((PyArrayObject *)output, capsule);
+
+    /*  Return the results to Python.                                         */
+    return Py_BuildValue("N", output);
+}
+
 static PyObject *sinc(PyObject *self, PyObject *args)
 {
     PyObject *output, *capsule;
@@ -2272,8 +2375,7 @@ static PyObject *sinc(PyObject *self, PyObject *args)
     if (typenum == NPY_FLOAT){
         float *y;
         y = (float *)malloc(dim*sizeof(float));
-        __get_one_real_from_one_real(((float *)data), y, dim,
-                                     Sinc_Float);
+        __get_one_real_from_one_real(((float *)data), y, dim, Sinc_Float);
         output  = PyArray_SimpleNewFromData(1, &dim, NPY_FLOAT, (void *)y);
         capsule = PyCapsule_New(y, NULL, capsule_cleanup);
     }
@@ -3757,6 +3859,27 @@ static PyMethodDef _special_functions_methods[] =
         ">>> y = special_functions.fresnel_cos(x)"
     },
     {
+        "lambertw",
+        lambertw,
+        METH_VARARGS,
+        "\r\t"
+        "Function:\n\r\t\t"
+        "special_functions.lambertw\n\r\t"
+        "Purpose:\n\r\t\t"
+        "Compute the Lambert W function, inverse of x*exp(x)."
+        "\n\r\tArguments\n\r\t\t"
+        "x (numpy.ndarray):\n\r\t\t\t"
+        "A numpy array of real numbers. Independent variable.\n\r\t"
+        "Outputs:\n\r\t\t"
+        "y (numpy.ndarray):\n\r\t\t\t"
+        "The Lambert W function of x.\n\r\t"
+        "Example:\n\r\t\t"
+        ">>> import numpy\n\r\t\t"
+        ">>> import special_functions\n\r\t\t"
+        ">>> x = numpy.arange(0,100,0.01)\n\r\t\t"
+        ">>> y = special_functions.lambertw(x)"
+    },
+    {
         "sinc",
         sinc,
         METH_VARARGS,
@@ -4264,12 +4387,6 @@ PyUFuncGenericFunction frequency_to_wavelength_funcs[3] = {
     &long_double_frequency_to_wavelength
 };
 
-PyUFuncGenericFunction lambertw_funcs[3] = {
-    &float_lambertw,
-    &double_lambertw,
-    &long_double_lambertw
-};
-
 PyUFuncGenericFunction res_inv_funcs[3] = {
     &float_resolution_inverse,
     &double_resolution_inverse,
@@ -4392,7 +4509,6 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     PyObject *fresnel_d2psi_dphi2;
     PyObject *fresnel_dpsi_dphi_ellipse;
     PyObject *fresnel_scale;
-    PyObject *lambertw;
     PyObject *resolution_inverse;
     PyObject *single_slit_diffraction;
     PyObject *wavelength_to_wavenumber;
@@ -4444,11 +4560,6 @@ PyMODINIT_FUNC PyInit__special_functions(void)
         PyUFunc_None, "fresnel_scale", "fresnel_scale_docstring", 0
     );
 
-    lambertw = PyUFunc_FromFuncAndData(
-        lambertw_funcs, PyuFunc_None_3, one_real_in_one_real_out, 3, 1, 1,
-        PyUFunc_None, "lambertw", "lambertw_docstring", 0
-    );
-
     resolution_inverse = PyUFunc_FromFuncAndData(
         res_inv_funcs, PyuFunc_None_3, one_real_in_one_real_out,
         3, 1, 1, PyUFunc_None, "resolution_inverse", 
@@ -4477,7 +4588,6 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     PyDict_SetItemString(d, "fresnel_dpsi_dphi_ellipse",
                          fresnel_dpsi_dphi_ellipse);
     PyDict_SetItemString(d, "fresnel_scale", fresnel_scale);
-    PyDict_SetItemString(d, "lambertw", lambertw);
     PyDict_SetItemString(d, "resolution_inverse", resolution_inverse);
     PyDict_SetItemString(d, "single_slit_diffraction", single_slit_diffraction);
     PyDict_SetItemString(d, "wavelength_to_wavenumber",
@@ -4490,7 +4600,6 @@ PyMODINIT_FUNC PyInit__special_functions(void)
     Py_DECREF(fresnel_d2psi_dphi2);
     Py_DECREF(fresnel_dpsi_dphi_ellipse);
     Py_DECREF(fresnel_scale);
-    Py_DECREF(lambertw);
     Py_DECREF(resolution_inverse);
     Py_DECREF(single_slit_diffraction);
     Py_DECREF(wavelength_to_wavenumber);
@@ -4507,7 +4616,6 @@ PyMODINIT_FUNC init__funcs(void)
     PyObject *fresnel_d2psi_dphi2;
     PyObject *fresnel_dpsi_dphi_ellipse;
     PyObject *fresnel_scale;
-    PyObject *lambertw;
     PyObject *resolution_inverse;
     PyObject *single_slit_diffraction;
     PyObject *wavelength_to_wavenumber;
@@ -4559,11 +4667,6 @@ PyMODINIT_FUNC init__funcs(void)
         PyUFunc_None, "fresnel_scale", "fresnel_scale_docstring", 0
     );
 
-    lambertw = PyUFunc_FromFuncAndData(
-        lambertw_funcs, PyuFunc_None_3, one_real_in_one_real_out, 3, 1, 1,
-        PyUFunc_None, "lambertw", "lambertw_docstring", 0
-    );
-
     resolution_inverse = PyUFunc_FromFuncAndData(
         res_inv_funcs, PyuFunc_None_3, one_real_in_one_real_out,
         3, 1, 1, PyUFunc_None, "resolution_inverse", 
@@ -4592,7 +4695,6 @@ PyMODINIT_FUNC init__funcs(void)
     PyDict_SetItemString(d, "fresnel_dpsi_dphi_ellipse",
                          fresnel_dpsi_dphi_ellipse);
     PyDict_SetItemString(d, "fresnel_scale", fresnel_scale);
-    PyDict_SetItemString(d, "lambertw", lambertw);
     PyDict_SetItemString(d, "resolution_inverse", resolution_inverse);
     PyDict_SetItemString(d, "single_slit_diffraction", single_slit_diffraction);
     PyDict_SetItemString(d, "wavelength_to_wavenumber",
@@ -4605,7 +4707,6 @@ PyMODINIT_FUNC init__funcs(void)
     Py_DECREF(fresnel_d2psi_dphi2);
     Py_DECREF(fresnel_dpsi_dphi_ellipse);
     Py_DECREF(fresnel_scale);
-    Py_DECREF(lambertw);
     Py_DECREF(resolution_inverse);
     Py_DECREF(single_slit_diffraction);
     Py_DECREF(wavelength_to_wavenumber);

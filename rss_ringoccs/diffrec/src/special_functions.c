@@ -24,24 +24,233 @@ static void capsule_cleanup(PyObject *capsule)
 }
 
 /*  Load the various functions for the module.                                */
-#include "_bessel.h"
-#include "_sinc.h"
 #include "_window_norm.h"
-#include "_kb25.h"
-#include "_kb35.h"
 #include "_kbal.h"
-#include "_kbmd25.h"
-#include "_kbmd35.h"
 #include "_kbmdal.h"
 #include "_minmax.h"
-#include "_fresnel_cos.h"
-#include "_fresnel_sin.h"
 
 /* All wrapper functions defined within these files.                          */
 #include "_fresnel_kernel_wrappers.h"
 #include "_lambertw_wrappers.h"
 #include "_physics_functions_wrappers.h"
 #include "_resolution_inverse_function_wrappers.h"
+
+static PyObject *besselJ0(PyObject *self, PyObject *args)
+{
+    PyObject *output, *capsule;
+    PyArrayObject *x;
+    char typenum;
+    long dim;
+    void *data;
+
+    if (!PyArg_ParseTuple(args, "O!", &PyArray_Type, &x)){
+        PyErr_Format(PyExc_TypeError,
+                     "\n\rError Encountered: rss_ringoccs\n"
+                     "\r\tdiffrec.special_functions.besselJ0\n\n"
+                     "\rCould not parse inputs. Legal inputs are:\n"
+                     "\r\tx: Numpy Array of real numbers (Floats)\n\rNotes:\n"
+                     "\r\tx must be a non-empty one dimensional numpy array.");
+        return NULL;
+    }
+
+    /*  Useful information about the data.                                */
+    typenum = (char)PyArray_TYPE(x);
+    dim     = PyArray_DIMS(x)[0];
+    data    = PyArray_DATA(x);
+
+    /*  Check the inputs to make sure they're valid.                          */
+    if (PyArray_NDIM(x) != 1){
+        PyErr_Format(PyExc_TypeError, "\n\rError Encountered: rss_ringoccs\n"
+                                      "\r\tdiffrec.special_functions.besselJ0\n"
+                                      "\n\rInput is not 1-dimensional.\n");
+        return NULL;
+    }
+    else if (dim == 0){
+        PyErr_Format(PyExc_TypeError, "\n\rError Encountered: rss_ringoccs\n"
+                                      "\r\tdiffrec.special_functions.besselJ0"
+                                      "\n\n\rInput numpy array is empty.\n");
+    }
+
+    if (typenum == NPY_FLOAT){
+        float *y;
+        y = (float *)malloc(dim*sizeof(float));
+        __get_one_real_from_one_real(((float *)data), y, dim, BesselJ0_Float);
+        output  = PyArray_SimpleNewFromData(1, &dim, NPY_FLOAT, (void *)y);
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);
+    }
+    else if (typenum == NPY_DOUBLE){
+        double *y;
+        y = (double *)malloc(dim*sizeof(double));
+        __get_one_real_from_one_real(((double *)data), y, dim, BesselJ0_Double);
+        output  = PyArray_SimpleNewFromData(1, &dim, NPY_DOUBLE, (void *)y);
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);
+    }
+    else if (typenum == NPY_LONGDOUBLE){
+        long double *y;
+        y = (long double *)malloc(dim*sizeof(long double));
+        __get_one_real_from_one_real(((long double *)data), y, dim,
+                                     BesselJ0_Long_Double);
+        output  = PyArray_SimpleNewFromData(1, &dim, NPY_LONGDOUBLE, (void *)y);
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);
+    }
+    else {
+        double *y;
+        y = (double *)malloc(dim*sizeof(double));
+
+        if (typenum == NPY_BYTE)
+            __get_one_real_from_one_real(((char *)data), y, dim, BesselJ0_Char);
+        else if (typenum == NPY_UBYTE)
+            __get_one_real_from_one_real(((unsigned char *)data),
+                                         y, dim, BesselJ0_UChar);
+        else if (typenum == NPY_SHORT)
+            __get_one_real_from_one_real(((short *)data),
+                                         y, dim, BesselJ0_Short);
+        else if (typenum == NPY_USHORT)
+            __get_one_real_from_one_real(((unsigned short *)data),
+                                         y, dim, BesselJ0_UShort);
+        else if (typenum == NPY_INT)
+            __get_one_real_from_one_real(((int *)data), y, dim, BesselJ0_Int);
+        else if (typenum == NPY_UINT)
+            __get_one_real_from_one_real(((unsigned int *)data),
+                                         y, dim, BesselJ0_UInt);
+        else if (typenum == NPY_LONG)
+            __get_one_real_from_one_real(((long *)data), y, dim, BesselJ0_Long);
+        else if (typenum == NPY_ULONG)
+            __get_one_real_from_one_real(((unsigned long *)data),
+                                         y, dim, BesselJ0_ULong);
+        else if (typenum == NPY_LONGLONG)
+            __get_one_real_from_one_real(((long long *)data), y,
+                                         dim, BesselJ0_Long_Long);
+        else if (typenum == NPY_ULONG)
+            __get_one_real_from_one_real(((unsigned long long *)data), y, dim,
+                                         BesselJ0_Long_Long);
+        else {
+            PyErr_Format(PyExc_TypeError,
+                         "\n\rError Encountered: rss_ringoccs\n"
+                         "\r\tdiffrec.special_functions.besselJ0\n\n"
+                         "\rInvalid data type for input array. Input should be"
+                         "\n\ra 1-dimensional array of real numbers.\n");
+            return NULL;
+        }
+
+        output  = PyArray_SimpleNewFromData(1, &dim, NPY_DOUBLE, (void *)y);
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);
+    }
+
+    /*  This frees the variable at the Python level once it's destroyed.      */
+    PyArray_SetBaseObject((PyArrayObject *)output, capsule);
+
+    /*  Return the results to Python.                                         */
+    return Py_BuildValue("N", output);
+}
+
+static PyObject *besselI0(PyObject *self, PyObject *args)
+{
+    PyObject *output, *capsule;
+    PyArrayObject *x;
+    char typenum;
+    long dim;
+    void *data;
+
+    if (!PyArg_ParseTuple(args, "O!", &PyArray_Type, &x)){
+        PyErr_Format(PyExc_TypeError,
+                     "\n\rError Encountered: rss_ringoccs\n"
+                     "\r\tdiffrec.special_functions.besselI0\n\n"
+                     "\rCould not parse inputs. Legal inputs are:\n"
+                     "\r\tx: Numpy Array of real numbers (Floats)\n\rNotes:\n"
+                     "\r\tx must be a non-empty 1-dimensional array.");
+        return NULL;
+    }
+
+    /*  Useful information about the data.                                */
+    typenum = (char)PyArray_TYPE(x);
+    dim     = PyArray_DIMS(x)[0];
+    data    = PyArray_DATA(x);
+
+    /*  Check the inputs to make sure they're valid.                          */
+    if (PyArray_NDIM(x) != 1){
+        PyErr_Format(PyExc_TypeError,
+                     "\n\rError Encountered: rss_ringoccs\n"
+                     "\r\tdiffrec.special_functions.besselI0\n"
+                     "\n\rInput array is not 1-dimensional.\n");
+        return NULL;
+    }
+    else if (dim == 0){
+        PyErr_Format(PyExc_TypeError, "\n\rError Encountered: rss_ringoccs\n"
+                                      "\r\tdiffrec.special_functions.besselI0"
+                                      "\n\n\rInput numpy array is empty.\n");
+    }
+
+    if (typenum == NPY_FLOAT){
+        float *y;
+        y = (float *)malloc(dim*sizeof(float));
+        __get_one_real_from_one_real(((float *)data), y, dim,
+                                     BesselI0_Float);
+        output  = PyArray_SimpleNewFromData(1, &dim, NPY_FLOAT, (void *)y);
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);
+    }
+    else if (typenum == NPY_LONGDOUBLE){
+        long double *y;
+        y = (long double *)malloc(dim*sizeof(long double));
+        __get_one_real_from_one_real(((long double *)data), y, dim,
+                                     BesselI0_Long_Double);
+        output  = PyArray_SimpleNewFromData(1, &dim, NPY_LONGDOUBLE, (void *)y);
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);
+    }
+    else
+    {
+        double *y;
+        y = (double *)malloc(dim*sizeof(double));
+
+        if (typenum == NPY_DOUBLE)
+            __get_one_real_from_one_real(((double *)data), y, dim,
+                                         BesselI0_Double);
+        else if (typenum == NPY_BYTE)
+            __get_one_real_from_one_real(((char *)data), y, dim, BesselI0_Char);
+        else if (typenum == NPY_UBYTE)
+            __get_one_real_from_one_real(((unsigned char *)data),
+                                         y, dim, BesselI0_UChar);
+        else if (typenum == NPY_SHORT)
+            __get_one_real_from_one_real(((short *)data),
+                                         y, dim, BesselI0_Short);
+        else if (typenum == NPY_USHORT)
+            __get_one_real_from_one_real(((unsigned short *)data),
+                                         y, dim, BesselI0_UShort);
+        else if (typenum == NPY_INT)
+            __get_one_real_from_one_real(((int *)data), y, dim, BesselI0_Int);
+        else if (typenum == NPY_UINT)
+            __get_one_real_from_one_real(((unsigned int *)data),
+                                         y, dim, BesselI0_UInt);
+        else if (typenum == NPY_LONG)
+            __get_one_real_from_one_real(((long *)data), y, dim, BesselI0_Long);
+        else if (typenum == NPY_ULONG)
+            __get_one_real_from_one_real(((unsigned long *)data),
+                                         y, dim, BesselI0_ULong);
+        else if (typenum == NPY_LONGLONG)
+            __get_one_real_from_one_real(((long long *)data), y,
+                                         dim, BesselI0_Long_Long);
+        else if (typenum == NPY_ULONG)
+            __get_one_real_from_one_real(((unsigned long long *)data), y, dim,
+                                         BesselI0_Long_Long);
+        else {
+            PyErr_Format(PyExc_TypeError,
+                         "\n\rError Encountered: rss_ringoccs\n"
+                         "\r\tdiffrec.special_functions.besselI0\n\n"
+                         "\rInvalid data type for input array. Input should be"
+                         "\n\ra 1-dimensional array of real numbers.\n");
+            return NULL;
+        }
+
+        output  = PyArray_SimpleNewFromData(1, &dim, NPY_DOUBLE, (void *)y);
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);
+    }
+
+    /*  This frees the variable at the Python level once it's destroyed.      */
+    PyArray_SetBaseObject((PyArrayObject *)output, capsule);
+
+    /*  Return the results to Python.                                         */
+    return Py_BuildValue("N", output);
+}
 
 static PyObject *rect(PyObject *self, PyObject *args)
 {
@@ -428,6 +637,298 @@ static PyObject *kb20(PyObject *self, PyObject *args)
     return Py_BuildValue("N", output);
 }
 
+static PyObject *kb25(PyObject *self, PyObject *args)
+{
+    PyObject *output, *capsule;
+    PyArrayObject *x;
+    double dx;
+    char typenum;
+    long dim;
+    void *data;
+
+    if (!PyArg_ParseTuple(args, "O!d", &PyArray_Type, &x, &dx))
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.kb25\n\n"
+            "\rCould not parse inputs. Legal inputs are:\n"
+            "\r\tx:     Numpy Array of real numbers (Floats)\n"
+            "\r\tdx:    Positive real number (Float)\n"
+            "\rNotes:\n"
+            "\r\tx must be a non-empty one dimensional numpy array."
+        );
+        return NULL;
+    }
+
+    /*  Useful information about the data.                                */
+    typenum = (char)PyArray_TYPE(x);
+    dim     = PyArray_DIMS(x)[0];
+    data    = PyArray_DATA(x);
+
+    /*  Check the inputs to make sure they're valid.                          */
+    if (PyArray_NDIM(x) != 1)
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.kb25\n\n"
+            "\rInput numpy array is not one-dimensional.\n"
+        );
+        return NULL;
+    }
+    else if (dim == 0)
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.kb25\n\n"
+            "\rInput numpy array is empty.\n"
+        );
+        return NULL;
+    }
+
+    /*  Check that dx is positive.                                            */
+    if (dx <= 0)
+    {
+        PyErr_Format(
+            PyExc_ValueError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.kb25\n\n"
+            "\rdx must be a positive number.\n"
+        );
+        return NULL;
+    }
+
+    if (typenum == NPY_FLOAT)
+    {
+        float *y;
+        y = (float *)malloc(dim*sizeof(float));
+        __get_one_real_from_two_real(((float *)data), dx, y, dim,
+                                     Kaiser_Bessel_2_5_Float);
+        output = PyArray_SimpleNewFromData(1, &dim, NPY_FLOAT, (void *)y);
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);
+    }
+    else if (typenum == NPY_LONGDOUBLE)
+    {
+        long double *y;
+        y = (long double *)malloc(dim*sizeof(long double));
+        __get_one_real_from_two_real(((long double *)data), dx, y, dim,
+                                     Kaiser_Bessel_2_5_Long_Double);
+        output = PyArray_SimpleNewFromData(1, &dim, NPY_LONGDOUBLE, (void *)y);
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);
+    }
+    else
+    {
+        double *y;
+        y = (double *)malloc(dim*sizeof(double));
+
+        if (typenum == NPY_DOUBLE)
+        {
+            __get_one_real_from_two_real(((double *)data), dx, y, dim,
+                                         Kaiser_Bessel_2_5_Double);
+        }
+        else if (typenum == NPY_BYTE)
+        {
+            __get_one_real_from_two_real(((char *)data), dx, y, dim,
+                                         Kaiser_Bessel_2_5_Char);
+        }
+        else if (typenum == NPY_UBYTE)
+        {
+            __get_one_real_from_two_real(((unsigned char *)data), dx, y, dim,
+                                         Kaiser_Bessel_2_5_UChar);
+        }
+        else if (typenum == NPY_SHORT)
+        {
+            __get_one_real_from_two_real(((short *)data), dx, y, dim,
+                                         Kaiser_Bessel_2_5_Short);
+        }
+        else if (typenum == NPY_USHORT)
+        {
+            __get_one_real_from_two_real(((unsigned short *)data), dx, y, dim,
+                                         Kaiser_Bessel_2_5_UShort);
+        }
+        else if (typenum == NPY_INT)
+        {
+            __get_one_real_from_two_real(((int *)data), dx, y, dim,
+                                         Kaiser_Bessel_2_5_Int);
+        }
+        else if (typenum == NPY_UINT)
+        {
+            __get_one_real_from_two_real(((unsigned int *)data), dx, y, dim,
+                                         Kaiser_Bessel_2_5_UInt);
+        }
+        else if (typenum == NPY_LONG)
+        {
+            __get_one_real_from_two_real(((long *)data), dx, y, dim,
+                                         Kaiser_Bessel_2_5_Long);
+        }
+        else if (typenum == NPY_ULONG)
+        {
+            __get_one_real_from_two_real(((unsigned long *)data), dx, y, dim,
+                                         Kaiser_Bessel_2_5_ULong);
+        }
+        else if (typenum == NPY_LONGLONG)
+        {
+            __get_one_real_from_two_real(((long long *)data), dx, y, dim,
+                                         Kaiser_Bessel_2_5_Long_Long);
+        }
+        else if (typenum == NPY_ULONG)
+        {
+            __get_one_real_from_two_real(((unsigned long long *)data), dx, y,
+                                         dim, Kaiser_Bessel_2_5_ULong_Long);
+        }
+        else
+        {
+            PyErr_Format(
+                PyExc_TypeError,
+                "\n\rError Encountered: rss_ringoccs\n"
+                "\r\tdiffrec.special_functions.kb25\n\n"
+                "\rInvalid data type for input numpy array. Input should be\n"
+                "\ra one dimensional numpy array of real numbers (float).\n"
+            );
+            return NULL;
+        }
+
+        output = PyArray_SimpleNewFromData(1, &dim, NPY_DOUBLE, (void *)y);
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);
+    }
+
+    /*  This frees the variable at the Python level once it's destroyed.      */
+    PyArray_SetBaseObject((PyArrayObject *)output, capsule);
+
+    /*  Return the results to Python.                                         */
+    return Py_BuildValue("N", output);
+}
+
+static PyObject *kb35(PyObject *self, PyObject *args)
+{
+    PyObject *output, *capsule;
+    PyArrayObject *x;
+    double dx;
+    char typenum;
+    long dim;
+    void *data;
+
+    if (!PyArg_ParseTuple(args, "O!d", &PyArray_Type, &x, &dx))
+    {
+        PyErr_Format(PyExc_TypeError,
+                     "\n\rError Encountered: rss_ringoccs\n"
+                     "\r\tdiffrec.special_functions.kb35\n\n"
+                     "\rCould not parse inputs. Legal inputs are:\n"
+                     "\r\tx:     Numpy Array of real numbers (Floats)\n"
+                     "\r\tdx:    Positive real number (Float)\n\rNotes:\n"
+                     "\r\tx must be a non-empty one dimensional numpy array.");
+        return NULL;
+    }
+
+    /*  Useful information about the data.                                */
+    typenum = (char)PyArray_TYPE(x);
+    dim     = PyArray_DIMS(x)[0];
+    data    = PyArray_DATA(x);
+
+    /*  Check the inputs to make sure they're valid.                          */
+    if (PyArray_NDIM(x) != 1)
+    {
+        PyErr_Format(PyExc_TypeError, "\n\rError Encountered: rss_ringoccs\n"
+                                      "\r\tdiffrec.special_functions.kb35\n\n"
+                                      "\rInput array is not 1-dimensional.\n");
+        return NULL;
+    }
+    else if (dim == 0)
+    {
+        PyErr_Format(PyExc_TypeError, "\n\rError Encountered: rss_ringoccs\n"
+                                      "\r\tdiffrec.special_functions.kb35\n\n"
+                                      "\rInput numpy array is empty.\n");
+        return NULL;
+    }
+
+    /*  Check that dx is positive.                                            */
+    if (dx <= 0)
+    {
+        PyErr_Format(PyExc_ValueError, "\n\rError Encountered: rss_ringoccs\n"
+                                       "\r\tdiffrec.special_functions.kb35\n\n"
+                                       "\rdx must be a positive number.\n");
+        return NULL;
+    }
+
+    if (typenum == NPY_FLOAT)
+    {
+        float *y;
+        y = (float *)malloc(dim*sizeof(float));
+        __get_one_real_from_two_real(((float *)data), dx, y, dim,
+                                     Kaiser_Bessel_3_5_Float);
+        output  = PyArray_SimpleNewFromData(1, &dim, NPY_FLOAT, (void *)y);
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);
+    }
+    else if (typenum == NPY_LONGDOUBLE)
+    {
+        long double *y;
+        y = (long double *)malloc(dim*sizeof(long double));
+        __get_one_real_from_two_real(((long double *)data), dx, y, dim,
+                                     Kaiser_Bessel_3_5_Long_Double);
+        output  = PyArray_SimpleNewFromData(1, &dim, NPY_LONGDOUBLE, (void *)y);
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);
+    }
+    else
+    {
+        double *y;
+        y = (double *)malloc(dim*sizeof(double));
+
+        if (typenum == NPY_DOUBLE)
+            __get_one_real_from_two_real(((double *)data), dx, y, dim,
+                                         Kaiser_Bessel_3_5_Double);
+        else if (typenum == NPY_BYTE)
+            __get_one_real_from_two_real(((char *)data), dx, y, dim,
+                                         Kaiser_Bessel_3_5_Char);
+        else if (typenum == NPY_UBYTE)
+            __get_one_real_from_two_real(((unsigned char *)data), dx, y, dim,
+                                         Kaiser_Bessel_3_5_UChar);
+        else if (typenum == NPY_SHORT)
+            __get_one_real_from_two_real(((short *)data), dx, y, dim,
+                                         Kaiser_Bessel_3_5_Short);
+        else if (typenum == NPY_USHORT)
+            __get_one_real_from_two_real(((unsigned short *)data), dx, y, dim,
+                                         Kaiser_Bessel_3_5_UShort);
+        else if (typenum == NPY_INT)
+            __get_one_real_from_two_real(((int *)data), dx, y, dim,
+                                         Kaiser_Bessel_3_5_Int);
+        else if (typenum == NPY_UINT)
+            __get_one_real_from_two_real(((unsigned int *)data), dx, y, dim,
+                                         Kaiser_Bessel_3_5_UInt);
+        else if (typenum == NPY_LONG)
+            __get_one_real_from_two_real(((long *)data), dx, y, dim,
+                                         Kaiser_Bessel_3_5_Long);
+        else if (typenum == NPY_ULONG)
+            __get_one_real_from_two_real(((unsigned long *)data), dx, y, dim,
+                                         Kaiser_Bessel_3_5_ULong);
+        else if (typenum == NPY_LONGLONG)
+            __get_one_real_from_two_real(((long long *)data), dx, y, dim,
+                                         Kaiser_Bessel_3_5_Long_Long);
+        else if (typenum == NPY_ULONG)
+            __get_one_real_from_two_real(((unsigned long long *)data), dx, y,
+                                         dim, Kaiser_Bessel_3_5_ULong_Long);
+        else
+        {
+            PyErr_Format(PyExc_TypeError,
+                         "\n\rError Encountered: rss_ringoccs\n"
+                         "\r\tdiffrec.special_functions.kb35\n\n"
+                         "\rInvalid data type for input array. Input should be"
+                         "\n\ra 1-dimensional array of real numbers.\n");
+            return NULL;
+        }
+
+        output  = PyArray_SimpleNewFromData(1, &dim, NPY_DOUBLE, (void *)y);
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);
+    }
+
+    /*  This frees the variable at the Python level once it's destroyed.      */
+    PyArray_SetBaseObject((PyArrayObject *)output, capsule);
+
+    /*  Return the results to Python.                                         */
+    return Py_BuildValue("N", output);
+}
+
 static PyObject *kbmd20(PyObject *self, PyObject *args)
 {
     PyObject *output, *capsule;
@@ -557,6 +1058,276 @@ static PyObject *kbmd20(PyObject *self, PyObject *args)
     return Py_BuildValue("N", output);
 }
 
+static PyObject *kbmd25(PyObject *self, PyObject *args)
+{
+    PyObject *output, *capsule;
+    PyArrayObject *x;
+    double dx;
+    char typenum;
+    long dim;
+    void *data;
+
+    if (!PyArg_ParseTuple(args, "O!d", &PyArray_Type, &x, &dx))
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.kbmd25\n\n"
+            "\rCould not parse inputs. Legal inputs are:\n"
+            "\r\tx:     Numpy Array of real numbers (Floats)\n"
+            "\r\tdx:    Positive real number (Float)\n"
+            "\rNotes:\n"
+            "\r\tx must be a non-empty one dimensional numpy array."
+        );
+        return NULL;
+    }
+
+    /*  Useful information about the data.                                */
+    typenum = (char)PyArray_TYPE(x);
+    dim     = PyArray_DIMS(x)[0];
+    data    = PyArray_DATA(x);
+
+    /*  Check the inputs to make sure they're valid.                          */
+    if (PyArray_NDIM(x) != 1)
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.kbmd25\n\n"
+            "\rInput numpy array is not one-dimensional.\n"
+        );
+        return NULL;
+    }
+    else if (dim == 0)
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.kbmd25\n\n"
+            "\rInput numpy array is empty.\n"
+        );
+        return NULL;
+    }
+
+    /*  Check that dx is positive.                                            */
+    if (dx <= 0)
+    {
+        PyErr_Format(
+            PyExc_ValueError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.kbmd25\n\n"
+            "\rdx must be a positive number.\n"
+        );
+        return NULL;
+    }
+
+    if (typenum == NPY_FLOAT)
+    {
+        float *y;
+        y = (float *)malloc(dim*sizeof(float));
+        __get_one_real_from_two_real(((float *)data), dx, y, dim,
+                                     Modified_Kaiser_Bessel_2_5_Float);
+        output = PyArray_SimpleNewFromData(1, &dim, NPY_FLOAT, (void *)y);
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);
+    }
+    else if (typenum == NPY_LONGDOUBLE)
+    {
+        long double *y;
+        y = (long double *)malloc(dim*sizeof(long double));
+        __get_one_real_from_two_real(((long double *)data), dx, y, dim,
+                                     Modified_Kaiser_Bessel_2_5_Long_Double);
+        output = PyArray_SimpleNewFromData(1, &dim, NPY_LONGDOUBLE, (void *)y);
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);
+    }
+    else
+    {
+        double *y;
+        y = (double *)malloc(dim*sizeof(double));
+
+        if (typenum == NPY_DOUBLE)
+            __get_one_real_from_two_real(((double *)data), dx, y, dim,
+                                         Modified_Kaiser_Bessel_2_5_Double);
+        else if (typenum == NPY_BYTE)
+            __get_one_real_from_two_real(((char *)data), dx, y, dim,
+                                         Modified_Kaiser_Bessel_2_5_Char);
+        else if (typenum == NPY_UBYTE)
+            __get_one_real_from_two_real(((unsigned char *)data), dx, y, dim,
+                                         Modified_Kaiser_Bessel_2_5_UChar);
+        else if (typenum == NPY_SHORT)
+            __get_one_real_from_two_real(((short *)data), dx, y, dim,
+                                         Modified_Kaiser_Bessel_2_5_Short);
+        else if (typenum == NPY_USHORT)
+            __get_one_real_from_two_real(((unsigned short *)data), dx, y, dim,
+                                         Modified_Kaiser_Bessel_2_5_UShort);
+        else if (typenum == NPY_INT)
+            __get_one_real_from_two_real(((int *)data), dx, y, dim,
+                                         Modified_Kaiser_Bessel_2_5_Int);
+        else if (typenum == NPY_UINT)
+            __get_one_real_from_two_real(((unsigned int *)data), dx, y, dim,
+                                         Modified_Kaiser_Bessel_2_5_UInt);
+        else if (typenum == NPY_LONG)
+            __get_one_real_from_two_real(((long *)data), dx, y, dim,
+                                         Modified_Kaiser_Bessel_2_5_Long);
+        else if (typenum == NPY_ULONG)
+            __get_one_real_from_two_real(((unsigned long *)data), dx, y, dim,
+                                         Modified_Kaiser_Bessel_2_5_ULong);
+        else if (typenum == NPY_LONGLONG)
+            __get_one_real_from_two_real(((long long *)data), dx, y, dim,
+                                         Modified_Kaiser_Bessel_2_5_Long_Long);
+        else if (typenum == NPY_ULONG)
+            __get_one_real_from_two_real(((unsigned long long *)data),
+                                         dx, y, dim,
+                                         Modified_Kaiser_Bessel_2_5_ULong_Long);
+        else
+        {
+            PyErr_Format(PyExc_TypeError,
+                         "\n\rError Encountered: rss_ringoccs\n"
+                         "\r\tdiffrec.special_functions.kbmd25\n\n"
+                         "\rInvalid data type for input array. Input should be"
+                         "\n\ra one dimensional array of real numbers.\n");
+            return NULL;
+        }
+
+        output = PyArray_SimpleNewFromData(1, &dim, NPY_DOUBLE, (void *)y);
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);
+    }
+
+    /*  This frees the variable at the Python level once it's destroyed.      */
+    PyArray_SetBaseObject((PyArrayObject *)output, capsule);
+
+    /*  Return the results to Python.                                         */
+    return Py_BuildValue("N", output);
+}
+
+static PyObject *kbmd35(PyObject *self, PyObject *args)
+{
+    PyObject *output, *capsule;
+    PyArrayObject *x;
+    double dx;
+    char typenum;
+    long dim;
+    void *data;
+
+    if (!PyArg_ParseTuple(args, "O!d", &PyArray_Type, &x, &dx))
+    {
+        PyErr_Format(PyExc_TypeError,
+                     "\n\rError Encountered: rss_ringoccs\n"
+                     "\r\tdiffrec.special_functions.kbmd35\n\n"
+                     "\rCould not parse inputs. Legal inputs are:\n"
+                     "\r\tx:     Numpy Array of real numbers (Floats)\n"
+                     "\r\tdx:    Positive real number (Float)\n\rNotes:\n"
+                     "\r\tx must be a non-empty one dimensional numpy array.");
+        return NULL;
+    }
+
+    /*  Useful information about the data.                                */
+    typenum = (char)PyArray_TYPE(x);
+    dim     = PyArray_DIMS(x)[0];
+    data    = PyArray_DATA(x);
+
+    /*  Check the inputs to make sure they're valid.                          */
+    if (PyArray_NDIM(x) != 1)
+    {
+        PyErr_Format(PyExc_TypeError, "\n\rError Encountered: rss_ringoccs\n"
+                                      "\r\tdiffrec.special_functions.kbmd35\n\n"
+                                      "\rInput array is not 1-dimensional.\n");
+        return NULL;
+    }
+    else if (dim == 0)
+    {
+        PyErr_Format(PyExc_TypeError, "\n\rError Encountered: rss_ringoccs\n"
+                                      "\r\tdiffrec.special_functions.kbmd35\n\n"
+                                      "\rInput numpy array is empty.\n");
+        return NULL;
+    }
+
+    /*  Check that dx is positive.                                            */
+    if (dx <= 0)
+    {
+        PyErr_Format(PyExc_ValueError, "\n\rError Encountered: rss_ringoccs\n"
+                                       "\r\tdiffrec.special_functions.kbmd35"
+                                       "\n\n\rdx must be a positive number.\n");
+        return NULL;
+    }
+
+    if (typenum == NPY_FLOAT)
+    {
+        float *y;
+        y = (float *)malloc(dim*sizeof(float));
+        __get_one_real_from_two_real(((float *)data), dx, y, dim,
+                                     Modified_Kaiser_Bessel_3_5_Float);
+        output  = PyArray_SimpleNewFromData(1, &dim, NPY_FLOAT, (void *)y);
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);
+    }
+    else if (typenum == NPY_LONGDOUBLE)
+    {
+        long double *y;
+        y = (long double *)malloc(dim*sizeof(long double));
+        __get_one_real_from_two_real(((long double *)data), dx, y, dim,
+                                     Modified_Kaiser_Bessel_3_5_Long_Double);
+        output  = PyArray_SimpleNewFromData(1, &dim, NPY_LONGDOUBLE, (void *)y);
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);
+    }
+    else
+    {
+        double *y;
+        y = (double *)malloc(dim*sizeof(double));
+
+        if (typenum == NPY_DOUBLE)
+            __get_one_real_from_two_real(((double *)data), dx, y, dim,
+                                         Modified_Kaiser_Bessel_3_5_Double);
+        else if (typenum == NPY_BYTE)
+            __get_one_real_from_two_real(((char *)data), dx, y, dim,
+                                         Modified_Kaiser_Bessel_3_5_Char);
+        else if (typenum == NPY_UBYTE)
+            __get_one_real_from_two_real(((unsigned char *)data), dx, y, dim,
+                                         Modified_Kaiser_Bessel_3_5_UChar);
+        else if (typenum == NPY_SHORT)
+            __get_one_real_from_two_real(((short *)data), dx, y, dim,
+                                         Modified_Kaiser_Bessel_3_5_Short);
+        else if (typenum == NPY_USHORT)
+            __get_one_real_from_two_real(((unsigned short *)data), dx, y, dim,
+                                         Modified_Kaiser_Bessel_3_5_UShort);
+        else if (typenum == NPY_INT)
+            __get_one_real_from_two_real(((int *)data), dx, y, dim,
+                                         Modified_Kaiser_Bessel_3_5_Int);
+        else if (typenum == NPY_UINT)
+            __get_one_real_from_two_real(((unsigned int *)data), dx, y, dim,
+                                         Modified_Kaiser_Bessel_3_5_UInt);
+        else if (typenum == NPY_LONG)
+            __get_one_real_from_two_real(((long *)data), dx, y, dim,
+                                         Modified_Kaiser_Bessel_3_5_Long);
+        else if (typenum == NPY_ULONG)
+            __get_one_real_from_two_real(((unsigned long *)data), dx, y, dim,
+                                         Modified_Kaiser_Bessel_3_5_ULong);
+        else if (typenum == NPY_LONGLONG)
+            __get_one_real_from_two_real(((long long *)data), dx, y, dim,
+                                         Modified_Kaiser_Bessel_3_5_Long_Long);
+        else if (typenum == NPY_ULONG)
+            __get_one_real_from_two_real(((unsigned long long *)data),
+                                         dx, y, dim,
+                                         Modified_Kaiser_Bessel_3_5_ULong_Long);
+        else
+        {
+            PyErr_Format(PyExc_TypeError,
+                         "\n\rError Encountered: rss_ringoccs\n"
+                         "\r\tdiffrec.special_functions.kbmd35\n\n"
+                         "\rInvalid data type for input array. Input should be"
+                         "\n\ra 1-dimensional array of real numbers.\n");
+            return NULL;
+        }
+
+        output  = PyArray_SimpleNewFromData(1, &dim, NPY_DOUBLE, (void *)y);
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);
+    }
+
+    /*  This frees the variable at the Python level once it's destroyed.      */
+    PyArray_SetBaseObject((PyArrayObject *)output, capsule);
+
+    /*  Return the results to Python.                                         */
+    return Py_BuildValue("N", output);
+}
+
 static PyObject *compute_norm_eq(PyObject *self, PyObject *args)
 {
     PyArrayObject *arr;
@@ -666,6 +1437,337 @@ static PyObject *compute_norm_eq(PyObject *self, PyObject *args)
         );
         return NULL;
     }
+}
+
+static PyObject *fresnel_cos(PyObject *self, PyObject *args)
+{
+    PyObject *output, *capsule;
+    PyArrayObject *x;
+    char typenum;
+    long dim;
+    void *data;
+
+    if (!PyArg_ParseTuple(args, "O!", &PyArray_Type, &x)){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.fresnel_cos\n\n"
+            "\rCould not parse inputs. Legal inputs are:\n"
+            "\r\tx: Numpy Array of real numbers (Floats)\n"
+            "\rNotes:\n"
+            "\r\tx must be a non-empty one dimensional numpy array."
+        );
+        return NULL;
+    }
+
+    /*  Useful information about the data.                                */
+    typenum = (char)PyArray_TYPE(x);
+    dim     = PyArray_DIMS(x)[0];
+    data    = PyArray_DATA(x);
+
+    /*  Check the inputs to make sure they're valid.                          */
+    if (PyArray_NDIM(x) != 1){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.fresnel_cos\n\n"
+            "\rInput numpy array is not one-dimensional.\n"
+        );
+        return NULL;
+    }
+    else if (dim == 0){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.fresnel_cos\n\n"
+            "\rInput numpy array is empty.\n"
+        );
+    }
+
+    if (typenum == NPY_FLOAT){
+        float *y;
+        y = (float *)malloc(dim*sizeof(float));
+        __get_one_real_from_one_real(((float *)data), y, dim,
+                                     Fresnel_Cosine_Taylor_to_Asymptotic_Float);
+        output = PyArray_SimpleNewFromData(1, &dim, NPY_FLOAT, (void *)y);
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);
+    }
+    else if (typenum == NPY_LONGDOUBLE){
+        long double *y;
+        y = (long double *)malloc(dim*sizeof(long double));
+        __get_one_real_from_one_real(
+            ((long double *)data), y, dim,
+            Fresnel_Cosine_Taylor_to_Asymptotic_Long_Double
+        );
+
+        output = PyArray_SimpleNewFromData(1, &dim, NPY_LONGDOUBLE, (void *)y);
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);
+    }
+    else {
+        double *y;
+        y = (double *)malloc(dim*sizeof(double));
+
+        if (typenum == NPY_DOUBLE)
+        {
+            __get_one_real_from_one_real(
+                ((double *)data), y, dim,
+                Fresnel_Cosine_Taylor_to_Asymptotic_Double
+            );
+
+        }
+        else if (typenum == NPY_BYTE)
+        {
+            __get_one_real_from_one_real(
+                ((char *)data), y, dim, Fresnel_Cosine_Taylor_to_Asymptotic_Char
+            );
+        }
+        else if (typenum == NPY_UBYTE)
+        {
+            __get_one_real_from_one_real(
+                ((unsigned char *)data), y, dim,
+                Fresnel_Cosine_Taylor_to_Asymptotic_UChar
+            );
+        }
+        else if (typenum == NPY_SHORT)
+        {
+            __get_one_real_from_one_real(
+                ((short *)data), y, dim,
+                Fresnel_Cosine_Taylor_to_Asymptotic_Short
+            );
+        }
+        else if (typenum == NPY_USHORT)
+        {
+            __get_one_real_from_one_real(
+                ((unsigned short *)data), y, dim,
+                Fresnel_Cosine_Taylor_to_Asymptotic_UShort
+            );
+        }
+        else if (typenum == NPY_INT)
+        {
+            __get_one_real_from_one_real(
+                ((int *)data), y, dim, Fresnel_Cosine_Taylor_to_Asymptotic_Int
+            );
+        }
+        else if (typenum == NPY_UINT)
+        {
+            __get_one_real_from_one_real(
+                ((unsigned int *)data), y, dim,
+                Fresnel_Cosine_Taylor_to_Asymptotic_UInt
+            );
+        }
+        else if (typenum == NPY_LONG)
+        {
+            __get_one_real_from_one_real(
+                ((long *)data), y, dim, Fresnel_Cosine_Taylor_to_Asymptotic_Long
+            );
+        }
+        else if (typenum == NPY_ULONG)
+        {
+            __get_one_real_from_one_real(
+                ((unsigned long *)data), y, dim,
+                Fresnel_Cosine_Taylor_to_Asymptotic_ULong
+            );
+        }
+        else if (typenum == NPY_LONGLONG)
+        {
+            __get_one_real_from_one_real(
+                ((long long *)data), y, dim,
+                Fresnel_Cosine_Taylor_to_Asymptotic_Long_Long
+            );
+        }
+        else if (typenum == NPY_ULONG)
+        {
+            __get_one_real_from_one_real(
+                ((unsigned long long *)data), y, dim,
+                Fresnel_Cosine_Taylor_to_Asymptotic_Long_Long
+            );
+        }
+        else
+        {
+            PyErr_Format(
+                PyExc_TypeError,
+                "\n\rError Encountered: rss_ringoccs\n"
+                "\r\tdiffrec.special_functions.fresnel_cos\n\n"
+                "\rInvalid data type for input numpy array. Input should be\n"
+                "\ra one dimensional numpy array of real numbers (float).\n"
+            );
+            return NULL;
+        }
+
+        output = PyArray_SimpleNewFromData(1, &dim, NPY_DOUBLE, (void *)y);
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);
+    }
+
+    /*  This frees the variable at the Python level once it's destroyed.      */
+    PyArray_SetBaseObject((PyArrayObject *)output, capsule);
+
+    /*  Return the results to Python.                                         */
+    return Py_BuildValue("N", output);
+}
+
+static PyObject *fresnel_sin(PyObject *self, PyObject *args)
+{
+    PyObject *output, *capsule;
+    PyArrayObject *x;
+    char typenum;
+    long dim;
+    void *data;
+
+    if (!PyArg_ParseTuple(args, "O!", &PyArray_Type, &x)){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.fresnel_sin\n\n"
+            "\rCould not parse inputs. Legal inputs are:\n"
+            "\r\tx: Numpy Array of real numbers (Floats)\n"
+            "\rNotes:\n"
+            "\r\tx must be a non-empty one dimensional numpy array."
+        );
+        return NULL;
+    }
+
+    /*  Useful information about the data.                                */
+    typenum = (char)PyArray_TYPE(x);
+    dim     = PyArray_DIMS(x)[0];
+    data    = PyArray_DATA(x);
+
+    /*  Check the inputs to make sure they're valid.                          */
+    if (PyArray_NDIM(x) != 1){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.fresnel_sin\n\n"
+            "\rInput numpy array is not one-dimensional.\n"
+        );
+        return NULL;
+    }
+    else if (dim == 0){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.fresnel_sin\n\n"
+            "\rInput numpy array is empty.\n"
+        );
+    }
+
+    if (typenum == NPY_FLOAT){
+        float *y;
+        y = (float *)malloc(dim*sizeof(float));
+        __get_one_real_from_one_real(((float *)data), y, dim,
+                                     Fresnel_Sine_Taylor_to_Asymptotic_Float);
+        output = PyArray_SimpleNewFromData(1, &dim, NPY_FLOAT, (void *)y);
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);
+    }
+    else if (typenum == NPY_LONGDOUBLE){
+        long double *y;
+        y = (long double *)malloc(dim*sizeof(long double));
+        __get_one_real_from_one_real(
+            ((long double *)data), y, dim,
+            Fresnel_Sine_Taylor_to_Asymptotic_Long_Double
+        );
+
+        output = PyArray_SimpleNewFromData(1, &dim, NPY_LONGDOUBLE, (void *)y);
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);
+    }
+    else {
+        double *y;
+        y = (double *)malloc(dim*sizeof(double));
+
+        if (typenum == NPY_DOUBLE)
+        {
+            __get_one_real_from_one_real(
+                ((double *)data), y, dim,
+                Fresnel_Sine_Taylor_to_Asymptotic_Double
+            );
+
+        }
+        else if (typenum == NPY_BYTE)
+        {
+            __get_one_real_from_one_real(
+                ((char *)data), y, dim, Fresnel_Sine_Taylor_to_Asymptotic_Char
+            );
+        }
+        else if (typenum == NPY_UBYTE)
+        {
+            __get_one_real_from_one_real(
+                ((unsigned char *)data), y, dim,
+                Fresnel_Sine_Taylor_to_Asymptotic_UChar
+            );
+        }
+        else if (typenum == NPY_SHORT)
+        {
+            __get_one_real_from_one_real(
+                ((short *)data), y, dim, Fresnel_Sine_Taylor_to_Asymptotic_Short
+            );
+        }
+        else if (typenum == NPY_USHORT)
+        {
+            __get_one_real_from_one_real(
+                ((unsigned short *)data), y, dim,
+                Fresnel_Sine_Taylor_to_Asymptotic_UShort
+            );
+        }
+        else if (typenum == NPY_INT)
+        {
+            __get_one_real_from_one_real(
+                ((int *)data), y, dim, Fresnel_Sine_Taylor_to_Asymptotic_Int
+            );
+        }
+        else if (typenum == NPY_UINT)
+        {
+            __get_one_real_from_one_real(
+                ((unsigned int *)data), y, dim,
+                Fresnel_Sine_Taylor_to_Asymptotic_UInt
+            );
+        }
+        else if (typenum == NPY_LONG)
+        {
+            __get_one_real_from_one_real(
+                ((long *)data), y, dim, Fresnel_Sine_Taylor_to_Asymptotic_Long
+            );
+        }
+        else if (typenum == NPY_ULONG)
+        {
+            __get_one_real_from_one_real(
+                ((unsigned long *)data), y, dim,
+                Fresnel_Sine_Taylor_to_Asymptotic_ULong
+            );
+        }
+        else if (typenum == NPY_LONGLONG)
+        {
+            __get_one_real_from_one_real(
+                ((long long *)data), y, dim,
+                Fresnel_Sine_Taylor_to_Asymptotic_Long_Long
+            );
+        }
+        else if (typenum == NPY_ULONG)
+        {
+            __get_one_real_from_one_real(
+                ((unsigned long long *)data), y, dim,
+                Fresnel_Sine_Taylor_to_Asymptotic_Long_Long
+            );
+        }
+        else
+        {
+            PyErr_Format(
+                PyExc_TypeError,
+                "\n\rError Encountered: rss_ringoccs\n"
+                "\r\tdiffrec.special_functions.fresnel_sin\n\n"
+                "\rInvalid data type for input numpy array. Input should be\n"
+                "\ra one dimensional numpy array of real numbers (float).\n"
+            );
+            return NULL;
+        }
+
+        output = PyArray_SimpleNewFromData(1, &dim, NPY_DOUBLE, (void *)y);
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);
+    }
+
+    /*  This frees the variable at the Python level once it's destroyed.      */
+    PyArray_SetBaseObject((PyArrayObject *)output, capsule);
+
+    /*  Return the results to Python.                                         */
+    return Py_BuildValue("N", output);
 }
 
 static PyObject *fresnel_transform(PyObject *self, PyObject *args)
@@ -1129,6 +2231,111 @@ static PyObject *fresnel_transform(PyObject *self, PyObject *args)
         );
         return NULL;
     }
+}
+
+static PyObject *sinc(PyObject *self, PyObject *args)
+{
+    PyObject *output, *capsule;
+    PyArrayObject *x;
+    char typenum;
+    long dim;
+    void *data;
+
+    if (!PyArg_ParseTuple(args, "O!", &PyArray_Type, &x)){
+        PyErr_Format(PyExc_TypeError,
+                     "\n\rError Encountered: rss_ringoccs\n"
+                     "\r\tdiffrec.special_functions.sinc\n\n"
+                     "\rCould not parse inputs. Legal inputs are:\n"
+                     "\r\tx: Numpy Array of real numbers (Floats)\n\rNotes:\n"
+                     "\r\tx must be a non-empty one dimensional numpy array.");
+        return NULL;
+    }
+
+    /*  Useful information about the data.                                */
+    typenum = (char)PyArray_TYPE(x);
+    dim     = PyArray_DIMS(x)[0];
+    data    = PyArray_DATA(x);
+
+    /*  Check the inputs to make sure they're valid.                          */
+    if (PyArray_NDIM(x) != 1){
+        PyErr_Format(PyExc_TypeError, "\n\rError Encountered: rss_ringoccs\n"
+                                      "\r\tdiffrec.special_functions.sinc\n\n"
+                                      "\rInput array is not 1-dimensional.\n");
+        return NULL;
+    }
+    else if (dim == 0){
+        PyErr_Format(PyExc_TypeError, "\n\rError Encountered: rss_ringoccs\n"
+                                      "\r\tdiffrec.special_functions.sinc\n\n"
+                                      "\rInput numpy array is empty.\n");
+    }
+
+    if (typenum == NPY_FLOAT){
+        float *y;
+        y = (float *)malloc(dim*sizeof(float));
+        __get_one_real_from_one_real(((float *)data), y, dim,
+                                     Sinc_Float);
+        output  = PyArray_SimpleNewFromData(1, &dim, NPY_FLOAT, (void *)y);
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);
+    }
+    else if (typenum == NPY_LONGDOUBLE){
+        long double *y;
+        y = (long double *)malloc(dim*sizeof(long double));
+        __get_one_real_from_one_real(((long double *)data), y, dim,
+                                     Sinc_Long_Double);
+        output  = PyArray_SimpleNewFromData(1, &dim, NPY_LONGDOUBLE, (void *)y);
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);
+    }
+    else {
+        double *y;
+        y = (double *)malloc(dim*sizeof(double));
+
+        if (typenum == NPY_DOUBLE)
+            __get_one_real_from_one_real(((double *)data), y, dim, Sinc_Double);
+        else if (typenum == NPY_BYTE)
+            __get_one_real_from_one_real(((char *)data), y, dim, Sinc_Char);
+        else if (typenum == NPY_UBYTE)
+            __get_one_real_from_one_real(((unsigned char *)data),
+                                         y, dim, Sinc_UChar);
+        else if (typenum == NPY_SHORT)
+            __get_one_real_from_one_real(((short *)data),
+                                         y, dim, Sinc_Short);
+        else if (typenum == NPY_USHORT)
+            __get_one_real_from_one_real(((unsigned short *)data),
+                                         y, dim, Sinc_UShort);
+        else if (typenum == NPY_INT)
+            __get_one_real_from_one_real(((int *)data), y, dim, Sinc_Int);
+        else if (typenum == NPY_UINT)
+            __get_one_real_from_one_real(((unsigned int *)data),
+                                         y, dim, Sinc_UInt);
+        else if (typenum == NPY_LONG)
+            __get_one_real_from_one_real(((long *)data), y, dim, Sinc_Long);
+        else if (typenum == NPY_ULONG)
+            __get_one_real_from_one_real(((unsigned long *)data),
+                                         y, dim, Sinc_ULong);
+        else if (typenum == NPY_LONGLONG)
+            __get_one_real_from_one_real(((long long *)data), y,
+                                         dim, Sinc_Long_Long);
+        else if (typenum == NPY_ULONG)
+            __get_one_real_from_one_real(((unsigned long long *)data), y, dim,
+                                         Sinc_Long_Long);
+        else {
+            PyErr_Format(PyExc_TypeError,
+                         "\n\rError Encountered: rss_ringoccs\n"
+                         "\r\tdiffrec.special_functions.sinc\n\n"
+                         "\rInvalid data type for input array. Input should be"
+                         "\n\ra 1-dimensional array of real numbers.\n");
+            return NULL;
+        }
+
+        output  = PyArray_SimpleNewFromData(1, &dim, NPY_DOUBLE, (void *)y);
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);
+    }
+
+    /*  This frees the variable at the Python level once it's destroyed.      */
+    PyArray_SetBaseObject((PyArrayObject *)output, capsule);
+
+    /*  Return the results to Python.                                         */
+    return Py_BuildValue("N", output);
 }
 
 static PyObject *gap_diffraction(PyObject *self, PyObject *args)

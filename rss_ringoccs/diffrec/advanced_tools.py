@@ -685,7 +685,7 @@ class ModelFromGEO(object):
                 T_in, self.rho_km_vals, F, self.w_km_vals, perturb,
                 start, n_used, wtype, norm, True, psitype,
                 self.phi_rad_vals, kD_vals, self.B_rad_vals, self.D_km_vals,
-                interp, periapse, eccentricity
+                interp, eccentricity, periapse 
             )
         else:
             T_hat = T_hat[start:start+n_used+1]
@@ -748,7 +748,7 @@ class ModelFromGEO(object):
                 T_in, self.rho_km_vals, F, self.w_km_vals, perturb,
                 start, n_used, wtype, norm, False, psitype,
                 self.phi_rad_vals, kD_vals, self.B_rad_vals, self.D_km_vals,
-                interp, periapse, eccentricity
+                interp, eccentricity, periapse
             )
 
             self.p_norm_vals = numpy.square(numpy.abs(T_hat))

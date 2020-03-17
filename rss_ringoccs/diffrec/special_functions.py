@@ -356,9 +356,6 @@ def resolution_inverse(x):
             """
         )
 
-def ringlet_diffraction(x, a, b, F):
-    return _special_functions.ringlet_diffraction(x, a, b, F)
-
 def double_slit_diffraction(x, z, a, d, Lambda):
     """
         Purpose:

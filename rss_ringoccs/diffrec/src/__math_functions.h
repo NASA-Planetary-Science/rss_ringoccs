@@ -51,6 +51,20 @@ extern double       BesselI0_ULong(unsigned long x);
 extern double       BesselI0_Long_Long(long long x);
 extern double       BesselI0_ULong_Long(unsigned long long x);
 
+extern float        LambertW_Float(float x);
+extern double       LambertW_Double(double x);
+extern long double  LambertW_Long_Double(long double x);
+extern double       LambertW_Char(char x);
+extern double       LambertW_UChar(unsigned char x);
+extern double       LambertW_Short(short x);
+extern double       LambertW_UShort(unsigned short x);
+extern double       LambertW_Int(int x);
+extern double       LambertW_UInt(unsigned int x);
+extern double       LambertW_Long(long x);
+extern double       LambertW_ULong(unsigned long x);
+extern double       LambertW_Long_Long(long long x);
+extern double       LambertW_ULong_Long(unsigned long long x);
+
 extern float        Max_Float(float *arr, long n_elements);
 extern double       Max_Double(double *arr, long n_elements);
 extern long         double Max_Long_Double(long double *arr, long n_elements);

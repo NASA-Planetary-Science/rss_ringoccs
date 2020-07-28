@@ -1,4 +1,23 @@
 /******************************************************************************
+ *                                 LICENSE                                    *
+ ******************************************************************************
+ *  This file is part of rss_ringoccs.                                        *
+ *                                                                            *
+ *  rss_ringoccs is free software: you can redistribute it and/or modify it   *
+ *  it under the terms of the GNU General Public License as published by      *
+ *  the Free Software Foundation, either version 3 of the License, or         *
+ *  (at your option) any later version.                                       *
+ *                                                                            *
+ *  rss_ringoccs is distributed in the hope that it will be useful,           *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+ *  GNU General Public License for more details.                              *
+ *                                                                            *
+ *  You should have received a copy of the GNU General Public License         *
+ *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
+ ******************************************************************************/
+
+/******************************************************************************
  *                          Diffraction Functions                             *
  ******************************************************************************
  *  Purpose:                                                                  *
@@ -75,9 +94,22 @@
  *  standard. To use this code, make sure your compiler supports C99 or more  *
  *  recent standards of the C Programming Language.                           *
  ******************************************************************************
+ *  It is anticipated that many users of this code will have experience in    *
+ *  either Python or IDL, but not C. Many comments are left to explain as     *
+ *  much as possible. Vagueness or unclear code should be reported to:        *
+ *  https://github.com/NASA-Planetary-Science/rss_ringoccs/issues             *
+ ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
  *  Date:       June 21, 2019                                                 *
  ******************************************************************************/
+
+/*  The malloc and realloc functions are contained in stdlib.h. Various       *
+ *  diffraction-based functions are found in __fresnel_kernel.h and           *
+ *  __window_functions.h. The DLPObj is defined in __diffraction_functions.h. */
+#include <stdlib.h>
+#include "__math_constants.h"
+#include "__window_functions.h"
+#include "__fresnel_kernel.h"
 #include "__diffraction_functions.h"
 
 /******************************************************************************
@@ -101,7 +133,7 @@
  *          Half the number of points in the window width. The symmetry of    *
  *          the quadratic approximation allows one to perform the inversion   *
  *          with only half of the window. This saves a lot of computation.    *
- *      fw  double (*)(double, double):                                       *
+ *      fw (double (*)(double, double)):                                      *
  *          Function pointer to the window function.                          *
  *  Notes:                                                                    *
  *      1.) This is a void function that takes in pointers as arguments. The  *
@@ -121,6 +153,23 @@ static void reset_window(double *x_arr, double *w_func, double dx, double width,
     }
 }
 
+/******************************************************************************
+ *  Function:                                                                 *
+ *      check_dlp_data                                                        *
+ *  Purpose:                                                                  *
+ *      Check if the input DLP data is valid.                                 *
+ *  Arguments:                                                                *
+ *      dlp (DLPObj *):                                                       *
+ *          An instance of the DLPObj structure defined in                    *
+ *          __diffraction_functions.h.                                        *
+ *  Output:                                                                   *
+ *      Out (Boolean):                                                        *
+ *          An integer, either 0 or 1 depending on if the checks passed.      *
+ *  Notes:                                                                    *
+ *      1.) This is a "static" function meanings its use is limited to this   *
+ *          file. Its only real purpose is for checking DLP instances which   *
+ *          are the inputs to the various diffraction correction functions.   *
+ ******************************************************************************/
 static int check_dlp_data(DLPObj *dlp)
 {
     /*  If any of these pointers are void, return 0. Else, pass.              */
@@ -131,6 +180,122 @@ static int check_dlp_data(DLPObj *dlp)
     else return 1;
 }
 
+/******************************************************************************
+ *  Function:                                                                 *
+ *      check_data_range                                                      *
+ *  Purpose:                                                                  *
+ *      Check if the window ranges needed for reconstruction are permitted by *
+ *      the available data. This check is important to avoid segmentation     *
+ *      faults at runtime.                                                    *
+ *  Arguments:                                                                *
+ *      dlp (DLPObj *):                                                       *
+ *          An instance of the DLPObj structure defined in                    *
+ *          __diffraction_functions.h.                                        *
+ *  Output:                                                                   *
+ *      Out (Boolean):                                                        *
+ *          An integer, either 0 or 1 depending on if the checks passed.      *
+ *  Notes:                                                                    *
+ *      1.) This is a "static" function meanings its use is limited to this   *
+ *          file. Its only real purpose is for checking DLP instances which   *
+ *          are the inputs to the various diffraction correction functions.   *
+ *      2.) If the check fails, there is something wrong with the input data. *
+ *          Removing this check may result in a "segmentation fault 11" error *
+ *          at runtime with no additional error message, a scenario one would *
+ *          like to avoid.                                                    *
+ ******************************************************************************/
+static int check_data_range(DLPObj *dlp, double two_dx)
+{
+    /* Create variables to check what the minimum and maximum indices are.    */
+    long current_min, current_max;
+
+    /* Variable for keeping track of the largest window needed in the loop.   */
+    long max_nw_pts = 0;
+
+    /* The index corresponding to the largest window.                         */
+    long worst_point_min = dlp->start;
+    long worst_point_max = dlp->start;
+
+    /* Variables to keep track of the min and max window indices.             */
+    long min_requested = dlp->start;
+    long max_requested = min_requested + dlp->n_used;
+
+    /* The number of elements to check.                                       */
+    long N = max_requested;
+
+    /* Variable for indexing the for loop.                                    */
+    long i;
+
+    /* Variables for the window size and number of points in the window.      */
+    double win_size;
+    long nw_pts;
+
+    /* Loop through every point, check window width, and ensure you have      *
+     * enough data to the left and right for data processing.                 */
+    for (i=dlp->start; i<=N; ++i){
+        /*  Gather the window size and number of points in the window.        */
+        win_size = dlp->w_km_vals[i];
+        nw_pts = ((long)(win_size / two_dx))+1;
+
+        /*  The smallest radius needed for the window corresponds to the      *
+         *  current point minus the number of points in the window. Similarly *
+         *  the maximum corresponds to the sum. Compute these.                */
+        current_min = i-nw_pts;
+        current_max = i+nw_pts;
+
+        /*  If current_min is smaller than min_requested reset min_requrested *
+         *  and similarly if current_max is larger than max_requested.        */
+        if (current_min < min_requested){
+            min_requested = current_min;
+            worst_point_min = i;
+        }
+        else if (current_max < max_requested){
+            worst_point_max = i;
+            max_requested = current_max;
+        }
+        if (nw_pts > max_nw_pts) max_nw_pts = nw_pts;
+    }
+
+    /*  If min_requested is negative, the window is too larger. Similarly, if *
+     *  max_requested goes between the size of the array.                     */
+    if (min_requested < 0){
+        dlp->start  = worst_point_min;
+        dlp->n_used = max_nw_pts;
+        return 0;
+    }
+    else if (max_requested > dlp->arr_size){
+        dlp->start  = worst_point_max;
+        dlp->n_used = max_nw_pts;
+        return 0;
+    }
+    else return 1;
+}
+
+/******************************************************************************
+ *  Function:                                                                 *
+ *      DiffractionCorrectionFresnel                                          *
+ *  Purpose:                                                                  *
+ *      Compute the Fresnel transform using the classic Fresnel quadratic     *
+ *      approximation to the fresnel kernel.                                  *
+ *  Arguments:                                                                *
+ *      dlp (DLPObj *):                                                       *
+ *          An instance of the DLPObj structure defined in                    *
+ *          __diffraction_correction.h. This contains all of the necessary    *
+ *          data for diffraction correction, including the geometry of the    *
+ *          occultation and actual power and phase data.                      *
+ *  Output:                                                                   *
+ *      Nothing (void):                                                       *
+ *          This is a void function, so no actual output is provided. However *
+ *          the T_out pointer within the dlp structure will be changed at the *
+ *          end, containing the diffraction correction data.                  *
+ *  Notes:                                                                    *
+ *      1.) This code uses the Fresnel approximation which has been known to  *
+ *          fail for several different occultations, especially ones of very  *
+ *          low angle (small B values). Take this into consideration when     *
+ *          performing any analysis.                                          *
+ *      2.) While this may be inaccurate for certain occultations, it is      *
+ *          immensely fast, capable of processing the entire Rev007 E         *
+ *          in less than a second at 1km resolution.                          *
+ ******************************************************************************/
 void DiffractionCorrectionFresnel(DLPObj *dlp)
 {
     /*  If everything executes smoothly, status should remain at zero.        */
@@ -170,7 +335,7 @@ void DiffractionCorrectionFresnel(DLPObj *dlp)
     if (dlp->use_norm) FresT = &Fresnel_Transform_Norm_Double;
     else               FresT = &Fresnel_Transform_Double;
 
-    /* Move the pointers to the correct starting point. Compute window width.*/
+    /*  Retrieve the starting point from the DLPObj instance.                 */
     center = dlp->start;
 
     /*  Compute some extra necessary variables.                               */
@@ -179,12 +344,11 @@ void DiffractionCorrectionFresnel(DLPObj *dlp)
     two_dx  = 2.0*dx;
     nw_pts  = ((long)(w_init / two_dx))+1;
 
-    if (center - nw_pts < 0)
+    // Check to ensure you have enough data to the left.
+    if (!check_data_range(dlp, two_dx))
     {
-        /*  Invalid index for the for the first point. That is, the window    *
-         *  of integration required for the first point goes beyond the       *
-         *  available data. Return to calling function.                       */
-        dlp->n_used = nw_pts;
+        /*  One of the points has too large of a window width to process.     *
+         *  Returning with error message.                                     */
         dlp->status = 2;
         return;
     }
@@ -194,7 +358,6 @@ void DiffractionCorrectionFresnel(DLPObj *dlp)
      *  changes by more than two_dx.                                          */
     double* x_arr  = (double *)malloc(sizeof(double)*nw_pts);
     double* w_func = (double *)malloc(sizeof(double)*nw_pts);
-
 
     /*  Check that malloc was successfull then pass the x_arr array           *
      *  (ring radius) to the void function reset_window. This alters x_arr so *
@@ -214,14 +377,19 @@ void DiffractionCorrectionFresnel(DLPObj *dlp)
          *  part of this. The 1/F^2 part is introduced later.                 */
         x_arr[j] *= PI_BY_TWO*x_arr[j];
 
-        /*  If forward transform is selected, negate x_arr.                   */
+        /*  If forward transform is selected, negate x_arr. This is a quick   *
+         *  way to multiply by +/- 1. (dlp->use_fwd == 0) is a Boolean which  *
+         *  will be 1 if the statement is true and 0 if false. Similarly for  *
+         *  (dlp->use_fwd == 1). Hence this returns +/- 1.                    */
         x_arr[j] *= (dlp->use_fwd == 0) - (dlp->use_fwd == 1);
     }
 
     /*  Compute the Fresnel transform across the input data.                  */
     for (i=0; i<=dlp->n_used; ++i)
     {
-        /*  If the window width has deviated more the 2*dx, reset variables.  */
+        /*  If the window width has deviated more the 2*dx, reset variables.  *
+         *  fabs is the absolute value function for double precision          *
+         *  variables and is defined in the built-in math.h.                  */
         if (fabs(w_init - dlp->w_km_vals[center]) >= two_dx)
         {
             /* Reset w_init and recompute window function.                    */

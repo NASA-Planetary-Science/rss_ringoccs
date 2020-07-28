@@ -4,10 +4,10 @@
 
 /*  Various functions, complex variables, and more found here.                */
 #include <stdlib.h>
-#include <complex.h>
 #include "__math_functions.h"
 #include "__window_functions.h"
 #include "__fresnel_kernel.h"
+#include <complex.h>
 
 /*  Define the Boolean type as a single unsigned byte.                        */
 typedef unsigned char bool;
@@ -31,6 +31,7 @@ typedef struct _dlpdataobj {
     double perturb[5];
     long start;
     long n_used;
+    long arr_size;
     bool use_norm;
     bool use_fwd;
     unsigned char wtype;
@@ -40,7 +41,9 @@ typedef struct _dlpdataobj {
     complex double *T_out;
 } DLPObj;
 
-/*  Functions defined in __diffraction_functions.c                            */
+/******************************************************************************
+ *  Functions defined in __diffraction_functions.c                            *
+ ******************************************************************************/
 extern complex double
 Fresnel_Transform_Double(double *x_arr, complex double *T_in, double *w_func,
                          double F, double dx, long n_pts, long center);

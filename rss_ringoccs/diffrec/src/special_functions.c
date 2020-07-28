@@ -1771,7 +1771,6 @@ static PyObject *fresnel_sin(PyObject *self, PyObject *args)
 static PyObject *fresnel_transform(PyObject *self, PyObject *args)
 {
     PyObject *output, *capsule, *perturb_list, *next, *iter;
-    npy_int dim;
     PyArrayObject *T_in,    *rho_km_vals, *F_km_vals, *phi_rad_vals;
     PyArrayObject *kd_vals, *B_rad_vals,  *D_km_vals, *w_km_vals;
     long start, n_used;
@@ -1874,7 +1873,7 @@ static PyObject *fresnel_transform(PyObject *self, PyObject *args)
     }
 
 
-    dim = PyArray_DIMS(T_in)[0];
+    dlp.arr_size = PyArray_DIMS(T_in)[0];
 
     /*  Error checks on T_in.                                                 */
     if (PyArray_TYPE(T_in) != NPY_CDOUBLE){
@@ -1917,7 +1916,7 @@ static PyObject *fresnel_transform(PyObject *self, PyObject *args)
         );
         return NULL;
     }
-    else if (PyArray_DIMS(rho_km_vals)[0] != dim){
+    else if (PyArray_DIMS(rho_km_vals)[0] != dlp.arr_size){
         PyErr_Format(
             PyExc_IndexError,
             "\n\rError Encountered: rss_ringoccs\n"
@@ -1947,7 +1946,7 @@ static PyObject *fresnel_transform(PyObject *self, PyObject *args)
         );
         return NULL;
     }
-    else if (PyArray_DIMS(F_km_vals)[0] != dim){
+    else if (PyArray_DIMS(F_km_vals)[0] != dlp.arr_size){
         PyErr_Format(
             PyExc_IndexError,
             "\n\rError Encountered: rss_ringoccs\n"
@@ -1977,7 +1976,7 @@ static PyObject *fresnel_transform(PyObject *self, PyObject *args)
         );
         return NULL;
     }
-    else if (PyArray_DIMS(phi_rad_vals)[0] != dim){
+    else if (PyArray_DIMS(phi_rad_vals)[0] != dlp.arr_size){
         PyErr_Format(
             PyExc_IndexError,
             "\n\rError Encountered: rss_ringoccs\n"
@@ -2007,7 +2006,7 @@ static PyObject *fresnel_transform(PyObject *self, PyObject *args)
         );
         return NULL;
     }
-    else if (PyArray_DIMS(kd_vals)[0] != dim){
+    else if (PyArray_DIMS(kd_vals)[0] != dlp.arr_size){
         PyErr_Format(
             PyExc_IndexError,
             "\n\rError Encountered: rss_ringoccs\n"
@@ -2037,7 +2036,7 @@ static PyObject *fresnel_transform(PyObject *self, PyObject *args)
         );
         return NULL;
     }
-    else if (PyArray_DIMS(B_rad_vals)[0] != dim){
+    else if (PyArray_DIMS(B_rad_vals)[0] != dlp.arr_size){
         PyErr_Format(
             PyExc_IndexError,
             "\n\rError Encountered: rss_ringoccs\n"
@@ -2067,7 +2066,7 @@ static PyObject *fresnel_transform(PyObject *self, PyObject *args)
         );
         return NULL;
     }
-    else if (PyArray_DIMS(B_rad_vals)[0] != dim){
+    else if (PyArray_DIMS(B_rad_vals)[0] != dlp.arr_size){
         PyErr_Format(
             PyExc_IndexError,
             "\n\rError Encountered: rss_ringoccs\n"
@@ -2097,7 +2096,7 @@ static PyObject *fresnel_transform(PyObject *self, PyObject *args)
         );
         return NULL;
     }
-    else if (PyArray_DIMS(w_km_vals)[0] != dim){
+    else if (PyArray_DIMS(w_km_vals)[0] != dlp.arr_size){
         PyErr_Format(
             PyExc_IndexError,
             "\n\rError Encountered: rss_ringoccs\n"
@@ -2108,7 +2107,7 @@ static PyObject *fresnel_transform(PyObject *self, PyObject *args)
     }
     else dlp.w_km_vals = (double *)PyArray_DATA(w_km_vals);
 
-    if (start > dim){
+    if (start > dlp.arr_size){
         PyErr_Format(
             PyExc_IndexError,
             "\n\rError Encountered: rss_ringoccs\n"
@@ -2117,7 +2116,7 @@ static PyObject *fresnel_transform(PyObject *self, PyObject *args)
         );
         return NULL;
     }
-    else if (start+n_used > dim){
+    else if (start+n_used > dlp.arr_size){
         PyErr_Format(
             PyExc_IndexError,
             "\n\rError Encountered: rss_ringoccs\n"
@@ -2171,11 +2170,15 @@ static PyObject *fresnel_transform(PyObject *self, PyObject *args)
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\tdiffrec.special_functions.fresnel_transform\n\n"
             "\r\tRequired window width goes beyond the available data range.\n"
-            "\r\t\tStarting Point:            \t%ld\n"
+            "\r\t\tBad Point (Index):         \t%ld\n"
             "\r\t\tNumber of Points in Window:\t%ld\n"
-            "\r\t\tDifference:                \t%ld\n\n"
-            "\r\tDifference must be positive.\n",
-            dlp.start, dlp.n_used, dlp.start-dlp.n_used
+            "\r\t\tDifference:                \t%ld\n"
+            "\r\t\tSum:                       \t%ld\n"
+            "\r\t\tArray Size:                \t%ld\n"
+            "\r\tDifference must be positive and sum must\n"
+            "\r\tbe less than array size.\n",
+            dlp.start, dlp.n_used, dlp.start-dlp.n_used, dlp.start+dlp.n_used,
+            dlp.arr_size
         );
         return NULL;
     }

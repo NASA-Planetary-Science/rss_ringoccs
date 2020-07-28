@@ -426,6 +426,36 @@ void DiffractionCorrectionFresnel(DLPObj *dlp)
     free(w_func);
 }
 
+/******************************************************************************
+ *  Function:                                                                 *
+ *      DiffractionCorrectionLegendre                                         *
+ *  Purpose:                                                                  *
+ *      Compute the Fresnel transform using Legendre polynomials to           *
+ *      approximate the fresnel kernel.                                       *
+ *  Arguments:                                                                *
+ *      dlp (DLPObj *):                                                       *
+ *          An instance of the DLPObj structure defined in                    *
+ *          __diffraction_correction.h. This contains all of the necessary    *
+ *          data for diffraction correction, including the geometry of the    *
+ *          occultation and actual power and phase data.                      *
+ *  Output:                                                                   *
+ *      Nothing (void):                                                       *
+ *          This is a void function, so no actual output is provided. However *
+ *          the T_out pointer within the dlp structure will be changed at the *
+ *          end, containing the diffraction correction data.                  *
+ *  Notes:                                                                    *
+ *      1.) This routine allows for any selection of polynomial of degree     *
+ *          greater than or equal to 2, though for degree 2 it is better to   *
+ *          use the Fresnel option since the symmetry nearly doubles the      *
+ *          speed of the computation. For anything higher than degree 8 there *
+ *          is no real change in the accuracy, even for low inclination       *
+ *          occultation observations.                                         *
+ *      2.) Like the Fresnel approximation, the Legendre approximation has    *
+ *          issues reconstructing data at low B angles. This is because the   *
+ *          Legendre approximation assumes the first iteration of the Newton  *
+ *          Raphson method is good enough, whereas in reality 3-4 iterations  *
+ *          may be needed, like in Rev133.                                    *
+ ******************************************************************************/
 void DiffractionCorrectionLegendre(DLPObj *dlp)
 {
     /*  If everything executes smoothly, status should remain at zero.        */
@@ -478,7 +508,7 @@ void DiffractionCorrectionLegendre(DLPObj *dlp)
     /*  Select the appropriate Fresnel transform and set poly_order.          */
     if (IsEven)
     {
-        poly_order = dlp-> order;
+        poly_order = dlp->order;
 
         /*  Select the even transform, with or without normalization.         */
         if (dlp->use_norm) FresT = &Fresnel_Transform_Legendre_Norm_Even_Double;
@@ -496,7 +526,7 @@ void DiffractionCorrectionLegendre(DLPObj *dlp)
     /* Compute first window width and window function. */
     center = dlp->start;
 
-    /*  If forward tranform is set, negate the kd_vals variable. This will    *
+    /*  If forward tranform is set, negate the kd_vals variable. This has     *
      *  the equivalent effect of computing the forward calculation later.     */
     if (dlp->use_fwd)
     {
@@ -508,17 +538,16 @@ void DiffractionCorrectionLegendre(DLPObj *dlp)
     }
 
     /*  Compute more necessary data.                                          */
-    w_init  = dlp->w_km_vals[center];
-    dx      = dlp->rho_km_vals[center+1] - dlp->rho_km_vals[center];
-    two_dx  = 2.0*dx;
-    nw_pts  = (long)(w_init / two_dx)+1;
+    w_init = dlp->w_km_vals[center];
+    dx     = dlp->rho_km_vals[center+1] - dlp->rho_km_vals[center];
+    two_dx = 2.0*dx;
+    nw_pts = (long)(w_init / two_dx)+1;
 
-    if (center - nw_pts < 0)
+    /* Check to ensure you have enough data to the left.                      */
+    if (!check_data_range(dlp, two_dx))
     {
-        /*  Invalid index for the for the first point. That is, the window    *
-         *  of integration required for the first point goes beyond the       *
-         *  available data. Return to calling function.                       */
-        dlp->n_used = nw_pts;
+        /*  One of the points has too large of a window width to process.     *
+         *  Returning with error message.                                     */
         dlp->status = 2;
         return;
     }
@@ -536,7 +565,7 @@ void DiffractionCorrectionLegendre(DLPObj *dlp)
 
     /*  Check that malloc was successfull then pass the x_arr array           *
      *  (ring radius) to the void function reset_window. This alters x_arr so *
-     *  that it's values range from -W/2 to zero, W begin the window width.   */
+     *  that it's values range from -W/2 to zero, W being the window width.   */
     if (!(x_arr)    ||    !(w_func)            ||    !(legendre_p)
                     ||    !(alt_legendre_p)    ||    !(fresnel_ker_coeffs))
     {
@@ -546,6 +575,7 @@ void DiffractionCorrectionLegendre(DLPObj *dlp)
     }
     else reset_window(x_arr, w_func, dx, w_init, nw_pts, fw);
 
+    /* Loop through each point and begin the reconstruction.                  */
     for (i = 0; i <= dlp->n_used; ++i)
     {
         /*  Compute some geometric information, and the scaling coefficient   *

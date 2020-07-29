@@ -107,6 +107,8 @@
  *  diffraction-based functions are found in __fresnel_kernel.h and           *
  *  __window_functions.h. The DLPObj is defined in __diffraction_functions.h. */
 #include <stdlib.h>
+#include <math.h>
+#include <complex.h>
 #include "__math_constants.h"
 #include "__window_functions.h"
 #include "__fresnel_kernel.h"
@@ -628,6 +630,37 @@ void DiffractionCorrectionLegendre(DLPObj *dlp)
     free(fresnel_ker_coeffs);
 }
 
+/******************************************************************************
+ *  Function:                                                                 *
+ *      DiffractionCorrectionNewton                                           *
+ *  Purpose:                                                                  *
+ *      Compute the Fresnel transform using the Newton-Raphson method to      *
+ *      compute the stationary value of the Fresnel-Kernel.                   *
+ *  Arguments:                                                                *
+ *      dlp (DLPObj *):                                                       *
+ *          An instance of the DLPObj structure defined in                    *
+ *          __diffraction_correction.h. This contains all of the necessary    *
+ *          data for diffraction correction, including the geometry of the    *
+ *          occultation and actual power and phase data.                      *
+ *  Output:                                                                   *
+ *      Nothing (void):                                                       *
+ *          This is a void function, so no actual output is provided. However *
+ *          the T_out pointer within the dlp structure will be changed at the *
+ *          end, containing the diffraction correction data.                  *
+ *  Notes:                                                                    *
+ *      1.) This method is the most accurate, but much slower than the        *
+ *          Fresnel and Legendre options. It is accurate for every Rev of the *
+ *          Cassini mission with the exception of the Rev133 occultation      *
+ *          of which only the Ka band produces accurate results. For X and S  *
+ *          bands one needs to use the Perturbed Newton method.               *
+ *      2.) The polynomials from the MTR86 are available via the dlp.interp   *
+ *          variable. These polynomials are slower and less accurate than the *
+ *          normal Newton method since to compute the polynomials the         *
+ *          Newton-Raphson method must be performed, and hence the            *
+ *          polynomials increase the number of computations needed. The real  *
+ *          use of them arises if one uses FFT methods. This routine does NOT *
+ *          use FFTs, but rather ordinary integration.                        *
+ ******************************************************************************/
 void DiffractionCorrectionNewton(DLPObj *dlp)
 {
     /*  If everything executes smoothly, status should remain at zero.        */
@@ -716,7 +749,7 @@ void DiffractionCorrectionNewton(DLPObj *dlp)
     /* Compute first window width and window function. */
     center = dlp->start;
 
-    /*  If forward tranform is set, negate the kd_vals variable. This will    *
+    /*  If forward tranform is set, negate the kd_vals variable. This has     *
      *  the equivalent effect of computing the forward calculation later.     */
     if (dlp->use_fwd)
     {
@@ -733,12 +766,11 @@ void DiffractionCorrectionNewton(DLPObj *dlp)
     two_dx  = 2.0*dx;
     nw_pts  = 2*((long)(w_init / (2.0 * dx)))+1;
 
-    if (center - ((nw_pts-1)/2) < 0)
+    /* Check to ensure you have enough data to the left.                      */
+    if (!check_data_range(dlp, two_dx))
     {
-        /*  Invalid index for the for the first point. That is, the window    *
-         *  of integration required for the first point goes beyond the       *
-         *  available data. Return to calling function.                       */
-        dlp->n_used = (nw_pts-1)/2;
+        /*  One of the points has too large of a window width to process.     *
+         *  Returning with error message.                                     */
         dlp->status = 2;
         return;
     }
@@ -814,6 +846,50 @@ void DiffractionCorrectionNewton(DLPObj *dlp)
     free(w_func);
 }
 
+/******************************************************************************
+ *  Function:                                                                 *
+ *      DiffractionCorrectionPerturbedNewton                                  *
+ *  Purpose:                                                                  *
+ *      Compute the Fresnel transform using the Newton-Raphson method to      *
+ *      compute the stationary value of the Fresnel-Kernel. The user may then *
+ *      perturb the Fresnel kernel with an arbitrary quartic polynomial.      *
+ *  Arguments:                                                                *
+ *      dlp (DLPObj *):                                                       *
+ *          An instance of the DLPObj structure defined in                    *
+ *          __diffraction_correction.h. This contains all of the necessary    *
+ *          data for diffraction correction, including the geometry of the    *
+ *          occultation and actual power and phase data.                      *
+ *  Output:                                                                   *
+ *      Nothing (void):                                                       *
+ *          This is a void function, so no actual output is provided. However *
+ *          the T_out pointer within the dlp structure will be changed at the *
+ *          end, containing the diffraction correction data.                  *
+ *  Notes:                                                                    *
+ *      1.) This method can be very accurate, but requires guess and check    *
+ *          work from the user since there is no magical input of polynomials *
+ *          that works uniformly. If using for Saturn based data, the Encke   *
+ *          gap is your friend. Start with the polynomials set to zero, which *
+ *          is just the standard Newton-Raphson method. Then look to the      *
+ *          Encke gap which lies between ~132900-134200 km. A good            *
+ *          reconstruction should have produced a near perfect square well    *
+ *          (see below). If it is not a square well, perturb the cubic and    *
+ *          quartic terms until it is. The quadratic term is usually fine and *
+ *          the linear term is nearly zero so you most likely do not need to  *
+ *          waste time with these.                                            *
+ *                                                                            *
+ *          Power                                                             *
+ *         |                     _________________                            *
+ *         |                     |               |                            *
+ *         |                     |               |                            *
+ *         |                     |               |                            *
+ *         |                     |               |                            *
+ *         |                     |               |                            *
+ *         |                     |               |                            *
+ *         | ____________________|               |____________________        *
+ *         |                         Encke Gap                                *
+ *         |_______________________________________________________________   *
+ *                                                                    Radius  *
+ ******************************************************************************/
 void DiffractionCorrectionPerturbedNewton(DLPObj *dlp)
 {
     /*  If everything executes smoothly, status should remain at zero.        */
@@ -867,7 +943,7 @@ void DiffractionCorrectionPerturbedNewton(DLPObj *dlp)
     center = dlp->start;
 
     /*  If forward calculation is selected, negate kd_vals. This has the same *
-     *  effect as computation the forward model computation.                  */
+     *  effect as computing the forward model.                                */
     if (dlp->use_fwd)
     {
         /*  Loop over kd_vals and negate each term.                           */
@@ -883,12 +959,11 @@ void DiffractionCorrectionPerturbedNewton(DLPObj *dlp)
     two_dx  = 2.0*dx;
     nw_pts  = 2*((long)(w_init / (2.0 * dx)))+1;
 
-    if (center - ((nw_pts-1)/2) < 0)
+    /* Check to ensure you have enough data to the left.                      */
+    if (!check_data_range(dlp, two_dx))
     {
-        /*  Invalid index for the for the first point. That is, the window    *
-         *  of integration required for the first point goes beyond the       *
-         *  available data. Return to calling function.                       */
-        dlp->n_used = (nw_pts-1)/2;
+        /*  One of the points has too large of a window width to process.     *
+         *  Returning with error message.                                     */
         dlp->status = 2;
         return;
     }
@@ -963,6 +1038,32 @@ void DiffractionCorrectionPerturbedNewton(DLPObj *dlp)
     free(w_func);
 }
 
+/******************************************************************************
+ *  Function:                                                                 *
+ *      DiffractionCorrectionEllipse                                          *
+ *  Purpose:                                                                  *
+ *      Compute the Fresnel transform using the Newton-Raphson method to      *
+ *      compute the stationary value of the Fresnel-Kernel and introducing a  *
+ *      perturbation to account for eccentric rings.                          *
+ *  Arguments:                                                                *
+ *      dlp (DLPObj *):                                                       *
+ *          An instance of the DLPObj structure defined in                    *
+ *          __diffraction_correction.h. This contains all of the necessary    *
+ *          data for diffraction correction, including the geometry of the    *
+ *          occultation and actual power and phase data.                      *
+ *  Output:                                                                   *
+ *      Nothing (void):                                                       *
+ *          This is a void function, so no actual output is provided. However *
+ *          the T_out pointer within the dlp structure will be changed at the *
+ *          end, containing the diffraction correction data.                  *
+ *  Notes:                                                                    *
+ *      1.) This function is only needed for Uranus data where the            *
+ *          eccentricity is significant enough to effect the circular         *
+ *          approximation employed by the main routines.                      *
+ *      2.) As of now (July 2020) this routine is unable to perfectly         *
+ *          reproduce the results from Gresh's paper. Correcting this is on   *
+ *          the rss_ringoccs TODO list.                                       *
+ ******************************************************************************/
 void DiffractionCorrectionEllipse(DLPObj *dlp)
 {
     /*  If everything executes smoothly, status should remain at zero.        */
@@ -1030,12 +1131,11 @@ void DiffractionCorrectionEllipse(DLPObj *dlp)
     two_dx  = 2.0*dx;
     nw_pts  = 2*((long)(w_init / (2.0 * dx)))+1;
 
-    if (center - ((nw_pts-1)/2) < 0)
+    /* Check to ensure you have enough data to the left.                      */
+    if (!check_data_range(dlp, two_dx))
     {
-        /*  Invalid index for the for the first point. That is, the window    *
-         *  of integration required for the first point goes beyond the       *
-         *  available data. Return to calling function.                       */
-        dlp->n_used = (nw_pts-1)/2;
+        /*  One of the points has too large of a window width to process.     *
+         *  Returning with error message.                                     */
         dlp->status = 2;
         return;
     }

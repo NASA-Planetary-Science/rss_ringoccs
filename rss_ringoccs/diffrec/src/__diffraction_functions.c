@@ -106,12 +106,6 @@
 /*  The malloc and realloc functions are contained in stdlib.h. Various       *
  *  diffraction-based functions are found in __fresnel_kernel.h and           *
  *  __window_functions.h. The DLPObj is defined in __diffraction_functions.h. */
-#include <stdlib.h>
-#include <math.h>
-#include <complex.h>
-#include "__math_constants.h"
-#include "__window_functions.h"
-#include "__fresnel_kernel.h"
 #include "__diffraction_functions.h"
 
 /******************************************************************************

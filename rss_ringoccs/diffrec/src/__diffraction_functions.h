@@ -4,10 +4,12 @@
 
 /*  Various functions, complex variables, and more found here.                */
 #include <stdlib.h>
+#include <math.h>
+#include <complex.h>
+#include "__math_constants.h"
 #include "__math_functions.h"
 #include "__window_functions.h"
 #include "__fresnel_kernel.h"
-#include <complex.h>
 
 /*  Define the Boolean type as a single unsigned byte.                        */
 typedef unsigned char bool;

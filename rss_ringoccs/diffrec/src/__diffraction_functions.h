@@ -178,5 +178,6 @@ extern void DiffractionCorrectionLegendre(DLPObj *dlp);
 extern void DiffractionCorrectionNewton(DLPObj *dlp);
 extern void DiffractionCorrectionPerturbedNewton(DLPObj *dlp);
 extern void DiffractionCorrectionEllipse(DLPObj *dlp);
+extern void DiffractionCorrectionSimpleFFT(DLPObj *dlp);
 
 #endif

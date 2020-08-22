@@ -93,6 +93,8 @@
  *  This code uses complex numbers throughout, and is compatible with the C99 *
  *  standard. To use this code, make sure your compiler supports C99 or more  *
  *  recent standards of the C Programming Language.                           *
+ *  In addition, for full use of all the routines one will need the FFTW      *
+ *  library. Installation instruction can be found in the rss_ringoccs PDF.   *
  ******************************************************************************
  *  It is anticipated that many users of this code will have experience in    *
  *  either Python or IDL, but not C. Many comments are left to explain as     *
@@ -101,7 +103,17 @@
  ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
  *  Date:       June 21, 2019                                                 *
+ ******************************************************************************
+ *                               History                                      *
+ ******************************************************************************
  ******************************************************************************/
+
+/* Include this BEFORE including fftw3.h. Contains complex numbers.           */
+#include <complex.h>
+
+/*  C Library for using FFT routines. This is NOT part of the standard C      *
+ *  and you'll need to compile/build before compiling/using these routines.   */
+#include <fftw3.h>
 
 /*  The malloc and realloc functions are contained in stdlib.h. Various       *
  *  diffraction-based functions are found in __fresnel_kernel.h and           *
@@ -1202,4 +1214,201 @@ void DiffractionCorrectionEllipse(DLPObj *dlp)
     free(x_arr);
     free(phi_arr);
     free(w_func);
+}
+
+/******************************************************************************
+ *  Function:                                                                 *
+ *      DiffractionCorrectionSimpleFFT                                        *
+ *  Purpose:                                                                  *
+ *      Compute the Fresnel transform using an FFT about the center of the    *
+ *      data. This is the fastest method, but assumes the geometry about the  *
+ *      midpoint is an accurate representation of the entire occultation.
+ *  Arguments:                                                                *
+ *      dlp (DLPObj *):                                                       *
+ *          An instance of the DLPObj structure defined in                    *
+ *          __diffraction_correction.h. This contains all of the necessary    *
+ *          data for diffraction correction, including the geometry of the    *
+ *          occultation and actual power and phase data.                      *
+ *  Output:                                                                   *
+ *      Nothing (void):                                                       *
+ *          This is a void function, so no actual output is provided. However *
+ *          the T_out pointer within the dlp structure will be changed at the *
+ *          end, containing the diffraction correction data.                  *
+ *  Notes:                                                                    *
+ *      1.) This method is the fast, but least accurate. It is very accurate  *
+ *          near the midpoint, but assumes the geometry of this point is a    *
+ *          fair representative of all of the geometry. The further one gets  *
+ *          from the midpoint, the less accurate this is.                     *
+ *      2.) This function uses FFTW, which is a NON-STANDARD C Library. Since *
+ *          there is no FFT routine in the standard C library, FFTW has       *
+ *          somewhat become the de facto standard.                            *
+ ******************************************************************************/
+void DiffractionCorrectionSimpleFFT(DLPObj *dlp)
+{
+    /*  If everything executes smoothly, status should remain at zero.        */
+    dlp->status = 0;
+
+    /*  Check that the pointers to the data are not NULL.                     */
+    if (!(check_dlp_data(dlp)))
+    {
+        /*  One of the variables has null data, return to calling function.   */
+        dlp->status = 1;
+        return;
+    }
+
+    /*  Variable for indexing.                                                */
+    long i, i_shift;
+
+    /*  Some variables needed for reconstruction.                             */
+    double dx, norm;
+    complex double *ker;
+    complex double *fft_ker;
+    complex double *fft_in;
+    complex double *fft_out;
+    complex double *T_in;
+    complex double *T_out;
+
+    /*  Variable for the center of the data set.                              */
+    long center = dlp->start + (dlp->n_used/2);
+
+    /*  Compute the distance between samples.                                 */
+    dx = dlp->rho_km_vals[center+1] - dlp->rho_km_vals[center];
+
+    /*  Number of points in half the window.                                  */
+    long nw_pts = (long)(dlp->w_km_vals[center]/(2.0*dx));
+
+    /*  Number of points in the data set.                                     */
+    long data_size = dlp->n_used+2*nw_pts+1;
+
+    /* Variables for shifting and keeping track of indexing.                  */
+    long shift = data_size/2;
+    long current_point;
+
+    /*  Toler is the number of iterations allowed in Newton-Raphson.          */
+    long toler;
+
+    /*  EPS is the maximum allowed error in the Newton-Raphson scheme.        */
+    double EPS;
+
+    /*  Set toler to 5 and EPS to e-4, reasonable for almost all cases.       */
+    toler = 5;
+    EPS = 1.E-4;
+
+    /*  Function pointers for the window function                             */
+    double (*fw)(double, double);
+
+    /*  Cast the selected window type to the fw pointer.                      */
+    if      (dlp->wtype == 0) fw = &Rect_Window_Double;
+    else if (dlp->wtype == 1) fw = &Coss_Window_Double;
+    else if (dlp->wtype == 2) fw = &Kaiser_Bessel_2_0_Double;
+    else if (dlp->wtype == 3) fw = &Kaiser_Bessel_2_5_Double;
+    else if (dlp->wtype == 4) fw = &Kaiser_Bessel_3_5_Double;
+    else if (dlp->wtype == 5) fw = &Modified_Kaiser_Bessel_2_0_Double;
+    else if (dlp->wtype == 6) fw = &Modified_Kaiser_Bessel_2_5_Double;
+    else                      fw = &Modified_Kaiser_Bessel_3_5_Double;
+
+    /*  Scale factor for the FFT.                                             */
+    complex double scale_factor = 0.5*dx*(1.0+_Complex_I)/((data_size)^2);
+
+    /*  Allocate memory for the Fresnel kernel and other variables.           */
+    ker     = (complex double *)malloc(sizeof(complex double)*(data_size));
+    fft_ker = (complex double *)malloc(sizeof(complex double)*(data_size));
+    fft_in  = (complex double *)malloc(sizeof(complex double)*(data_size));
+    fft_out = (complex double *)malloc(sizeof(complex double)*(data_size));
+    T_in    = (complex double *)malloc(sizeof(complex double)*(data_size));
+    T_out   = (complex double *)malloc(sizeof(complex double)*(data_size));
+
+    /*  The fresnel kernel.                                                   */
+    double psi;
+
+    /*  Stationary value for the Fresnel kernel.                              */
+    double phi;
+
+    /*  Independent variable for the window function.                         */
+    double window_func_x;
+
+    /*  Window width of the midpoint.                                         */
+    double window_width = dlp->w_km_vals[center];
+
+    /* Radius of the midpoint.                                                */
+    double rho = dlp->rho_km_vals[center];
+
+    /*  Complex exponential of Fresnel kernel, weighted by window function.   */
+    complex double arg;
+
+    /*  Compute the windowing function and Psi.                               */
+    for (i=0; i < data_size; ++i)
+    {
+        current_point = dlp->start+i-nw_pts;
+        window_func_x = rho-dlp->rho_km_vals[current_point];
+        phi = Newton_Raphson_Fresnel_Psi(dlp->kd_vals[current_point], rho,
+                                         dlp->rho_km_vals[current_point],
+                                         dlp->phi_rad_vals[current_point],
+                                         dlp->phi_rad_vals[current_point],
+                                         dlp->B_rad_vals[current_point],
+                                         dlp->D_km_vals[current_point],
+                                         EPS, toler);
+        psi = -Fresnel_Psi_Double(dlp->kd_vals[current_point], rho,
+                                  dlp->rho_km_vals[current_point], phi,
+                                  dlp->phi_rad_vals[current_point],
+                                  dlp->B_rad_vals[current_point],
+                                  dlp->D_km_vals[current_point]);
+
+        /*  If forward tranform is set, negate the Fresnel kernel.            */
+        if (dlp->use_fwd) psi *= -1.0;
+
+        arg  = cos(psi)+_Complex_I*sin(psi);
+        arg *= fw(window_func_x, window_width);
+        T_in[i] = dlp->T_in[current_point];
+        ker[i] = arg;
+    }
+
+    /*  Select the correct Fresnel transformation.                            */
+    if (dlp->use_norm)norm = 1.0;
+    else norm = 1.0;
+
+    /* Check to ensure you have enough data to the left.                      */
+    if (!check_data_range(dlp, 2.0*dx))
+    {
+        /*  One of the points has too large of a window width to process.     *
+         *  Returning with error message.                                     */
+        dlp->status = 2;
+        return;
+    }
+
+    /*  Check that malloc was successful.                                     */
+    if (!(ker))
+    {
+        /*  Malloc failed, return to calling function.                        */
+        dlp->status = 3;
+        return;
+    }
+
+    fftw_plan p;
+    p = fftw_plan_dft_1d(data_size, ker, fft_ker, FFTW_FORWARD, FFTW_ESTIMATE);
+    fftw_execute(p);
+
+    p = fftw_plan_dft_1d(data_size, T_in, fft_in, FFTW_FORWARD, FFTW_ESTIMATE);
+    fftw_execute(p);
+
+    for(i=0; i<=data_size; ++i) fft_out[i] = fft_ker[i]*fft_in[i];
+
+    p = fftw_plan_dft_1d(data_size, fft_out, T_out, FFTW_BACKWARD, FFTW_ESTIMATE);
+    fftw_execute(p);
+    fftw_destroy_plan(p);
+
+    for(i=0; i<=dlp->n_used; ++i)
+    {
+        i_shift = (nw_pts+i + shift) % (data_size);
+        dlp->T_out[i] = T_out[i_shift];
+        dlp->T_out[i] *= scale_factor/dlp->F_km_vals[dlp->start+i];
+    }
+
+    /*  Free variables allocated by malloc.                                   */
+    free(ker);
+    free(fft_ker);
+    free(fft_in);
+    free(fft_out);
+    free(T_in);
+    free(T_out);
 }

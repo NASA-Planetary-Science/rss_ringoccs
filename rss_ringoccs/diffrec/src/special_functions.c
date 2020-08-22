@@ -1775,11 +1775,11 @@ static PyObject *fresnel_transform(PyObject *self, PyObject *args)
     PyArrayObject *kd_vals, *B_rad_vals,  *D_km_vals, *w_km_vals;
     long start, n_used;
     int i;
-    unsigned char wtype, use_norm, use_fwd, order, interp;
+    unsigned char wtype, use_norm, use_fft, use_fwd, order, interp;
     double ecc, peri;
 
 
-    if (!(PyArg_ParseTuple(args, "O!O!O!O!O!O!O!O!Ollbbbbbdd",
+    if (!(PyArg_ParseTuple(args, "O!O!O!O!O!O!O!O!Ollbbbbbbdd",
                            &PyArray_Type, &T_in,
                            &PyArray_Type, &rho_km_vals,
                            &PyArray_Type, &F_km_vals,
@@ -1789,7 +1789,7 @@ static PyObject *fresnel_transform(PyObject *self, PyObject *args)
                            &PyArray_Type, &D_km_vals,
                            &PyArray_Type, &w_km_vals,
                            &perturb_list, &start, &n_used,
-                           &wtype, &use_norm, &use_fwd,
+                           &wtype, &use_norm, &use_fwd, &use_fft,
                            &order, &interp, &ecc, &peri))){ 
         PyErr_Format(
             PyExc_TypeError,
@@ -2128,19 +2128,21 @@ static PyObject *fresnel_transform(PyObject *self, PyObject *args)
 
     dlp.T_out = (complex double *)malloc((dlp.n_used+1)*sizeof(complex double));
 
-    if (dlp.order == 0){
-        if ((dlp.ecc == 0.0) && (dlp.peri == 0.0))
-            if ((dlp.perturb[0] == 0) && (dlp.perturb[1] == 0) &&
-                (dlp.perturb[2] == 0) && (dlp.perturb[3] == 0) &&
-                (dlp.perturb[4] == 0)) {
-                DiffractionCorrectionNewton(&dlp);
-            }
-            else DiffractionCorrectionPerturbedNewton(&dlp);
-        else DiffractionCorrectionEllipse(&dlp);
+    if (use_fft) DiffractionCorrectionSimpleFFT(&dlp);
+    else {
+        if (dlp.order == 0){
+            if ((dlp.ecc == 0.0) && (dlp.peri == 0.0))
+                if ((dlp.perturb[0] == 0) && (dlp.perturb[1] == 0) &&
+                    (dlp.perturb[2] == 0) && (dlp.perturb[3] == 0) &&
+                    (dlp.perturb[4] == 0)) {
+                    DiffractionCorrectionNewton(&dlp);
+                }
+                else DiffractionCorrectionPerturbedNewton(&dlp);
+            else DiffractionCorrectionEllipse(&dlp);
+        }
+        else if (dlp.order == 1) DiffractionCorrectionFresnel(&dlp);
+        else DiffractionCorrectionLegendre(&dlp);
     }
-    else if (dlp.order == 1) DiffractionCorrectionFresnel(&dlp);
-    else DiffractionCorrectionLegendre(&dlp);
-
     if (dlp.status == 0){
 
         /*  Create a Numpy array object to be passed back to Python.          */

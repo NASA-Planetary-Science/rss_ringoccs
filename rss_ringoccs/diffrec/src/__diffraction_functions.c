@@ -15,9 +15,7 @@
  *                                                                            *
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
- ******************************************************************************/
-
-/******************************************************************************
+ ******************************************************************************
  *                          Diffraction Functions                             *
  ******************************************************************************
  *  Purpose:                                                                  *
@@ -30,6 +28,11 @@
  *          Newton-Raphson Method:                                            *
  *              Performs the Fresnel Transform by computing the stationary    *
  *              value of the Fresnel Kernel using the Newton-Raphson method.  *
+ *          Simple FFT Method:                                                *
+ *              Uses an FFT to compute the Fresnel transform. This assumes    *
+ *              the geometry about the center of the data set is an accurate  *
+ *              representative of the entire occultation. Hence, this method  *
+ *              accurate around the center and inaccurate towards the edges.  *
  ******************************************************************************
  *  The Inverse Fresnel Transform:                                            *
  *                                                                            *
@@ -44,6 +47,18 @@
  *      Where T_hat is the diffracted data, w is the window function, r is    *
  *      the ring intercept point, and r_0 is a dummy variable of integration. *
  *      psi is the Fresnel Kernel, and exp is the exponential function.       *
+ *                                                                            *
+ *      For near-constant geometry, or regions where the geometry does not    *
+ *      depend to heavily on phi, psi is approximately a function of the form *
+ *      psi(rho,rho_0) = f(rho-rho_0) and so this integral is a convolution   *
+ *      of w * exp(-i psi) and T_hat. Using the convolution theorem, we get:  *
+ *                                                                            *
+ *      F(T)   =    F(T_hat) * F(w * exp(-i psi))                             *
+ *                                                                            *
+ *      T      =    F^-1(F(T_hat) * F(w * exp(-i psi)))                       *
+ *                                                                            *
+ *      Where F(f) is the Fourier transform of f, and F^-1 is the inverse     *
+ *      Fourier transform.                                                    *
  ******************************************************************************
  *  The Normalization Scheme:                                                 *
  *      As the resolution get's too high, say 10 km or larger, the window     *
@@ -93,6 +108,7 @@
  *  This code uses complex numbers throughout, and is compatible with the C99 *
  *  standard. To use this code, make sure your compiler supports C99 or more  *
  *  recent standards of the C Programming Language.                           *
+ *                                                                            *
  *  In addition, for full use of all the routines one will need the FFTW      *
  *  library. Installation instruction can be found in the rss_ringoccs PDF.   *
  ******************************************************************************
@@ -104,21 +120,26 @@
  *  Author:     Ryan Maguire, Wellesley College                               *
  *  Date:       June 21, 2019                                                 *
  ******************************************************************************
- *                               History                                      *
+ *                                History                                     *
  ******************************************************************************
+ *  2019/06/21 (Ryan Maguire):                                                *
+ *      Initial commit.                                                       *
+ *  2020/07/28 (Ryan Maguire):                                                *
+ *      Clarified comments, fixed bug in error checks.                        *
+ *  2020/08/22 (Ryan Maguire):                                                *
+ *      Added FFT routine.                                                    *
  ******************************************************************************/
 
-/* Include this BEFORE including fftw3.h. Contains complex numbers.           */
-#include <complex.h>
+/*  The malloc and realloc functions are contained in stdlib.h. Various       *
+ *  diffraction-based functions are found in __fresnel_kernel.h and           *
+ *  __window_functions.h. The DLPObj is defined in __diffraction_functions.h. *
+ *  This file includes <complex.h> which must be include BEFORE <fftw3.h>.    *
+ *  Do NOT swap the order of these include files.                             */
+#include "__diffraction_functions.h"
 
 /*  C Library for using FFT routines. This is NOT part of the standard C      *
  *  and you'll need to compile/build before compiling/using these routines.   */
 #include <fftw3.h>
-
-/*  The malloc and realloc functions are contained in stdlib.h. Various       *
- *  diffraction-based functions are found in __fresnel_kernel.h and           *
- *  __window_functions.h. The DLPObj is defined in __diffraction_functions.h. */
-#include "__diffraction_functions.h"
 
 /******************************************************************************
  *  Function:                                                                 *

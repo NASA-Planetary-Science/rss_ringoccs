@@ -51,7 +51,8 @@ def configuration(parent_package=None, top_path=None):
             "src/__window_function_rectangular.c",
             "src/__window_function_normalization.c",
             "src/special_functions.c",
-        ]
+        ],
+        extra_compile_args = ["-lfftw3", "-lm"]
     )
 
     return config

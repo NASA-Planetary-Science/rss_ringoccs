@@ -34,7 +34,9 @@ typedef struct _dlpdataobj {
     long arr_size;
     bool use_norm;
     bool use_fwd;
-    unsigned char wtype;
+    bool use_fft;
+    const char *wtype;
+    const char *psitype;
     unsigned char order;
     unsigned char interp;
     unsigned char status;

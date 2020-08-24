@@ -332,33 +332,6 @@ def double_slit_diffraction(x, z, a, d, Lambda):
             """
         )
 
-def fresnel_transform(T_in, rho_km_vals, F_km_vals, w_km_vals, perturb, start,
-                      n_used, wtype, norm, fwd, use_fft, psitype, phi_rad_vals,
-                      kD_vals, B_rad_vals, D_km_vals, interp, ecc, peri):
-
-    fname = "diffrec.special_functions.fresnel_transform"
-
-    # Remove spaces/quotes from the wtype variable and set to lower case.
-    wtype = error_check.check_wtype(wtype, fname)
-
-    # Check that range and psitype are legal inputs.
-    psitype = error_check.check_psitype(psitype, fname)
-
-    if (psitype == "fresnel"):
-        order = 1
-    elif ("fresnel" in psitype):
-        order = int(psitype[7::])-1
-    else:
-        order = 0
-
-    # Compute the Fresnel transform.
-    return _special_functions.fresnel_transform(
-        T_in, rho_km_vals, F_km_vals, phi_rad_vals, kD_vals, B_rad_vals,
-        D_km_vals, w_km_vals, perturb, start, n_used,
-        func_dict[wtype]["wnum"], int(norm), int(fwd), int(use_fft), order,
-        interp, ecc, peri
-    )
-
 def single_slit_diffraction(x, z, a):
     """
         Purpose:

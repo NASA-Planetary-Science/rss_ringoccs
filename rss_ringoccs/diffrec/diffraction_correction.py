@@ -655,11 +655,13 @@ class DiffractionCorrection(object):
             self.lambda_sky_km_vals
         ) * self.D_km_vals
 
+        # Compute the Fresnel transform.
         self.T_vals = special_functions.fresnel_transform(
-            self.T_hat_vals, self.rho_km_vals, self.F_km_vals, self.w_km_vals,
-            self.perturb, self.start, self.n_used, self.wtype, self.norm, False,
-            self.use_fft, self.psitype, self.phi_rad_vals, self.kD_vals,
-            self.B_rad_vals, self.D_km_vals, self.interp, self.ecc, self.peri
+            self.T_hat_vals, self.rho_km_vals, self.F_km_vals,
+            self.phi_rad_vals, self.kD_vals, self.B_rad_vals, self.D_km_vals,
+            self.w_km_vals, self.perturb, self.start, self.n_used, self.wtype,
+            self.psitype, self.norm, False, self.use_fft, self.interp, self.ecc,
+            self.peri
         )
 
         self.tau_threshold_vals = (self.raw_tau_threshold_vals -

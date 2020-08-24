@@ -140,6 +140,9 @@
 /*  All of the kernel functions (psi) found here.                             */
 #include "_fresnel_kernel.h"
 
+/*  Needed for strcmp, used to check equality of two strings.                 */
+#include <string.h>
+
 /*  C Library for using FFT routines. This is NOT part of the standard C      *
  *  and you'll need to compile/build before compiling/using these routines.   */
 #include <fftw3.h>
@@ -222,7 +225,7 @@ static int check_dlp_data(DLPObj *dlp)
  *  Arguments:                                                                *
  *      dlp (DLPObj *):                                                       *
  *          An instance of the DLPObj structure defined in                    *
- *          _diffraction_functions.h.                                        *
+ *          _diffraction_functions.h.                                         *
  *  Output:                                                                   *
  *      Out (Boolean):                                                        *
  *          An integer, either 0 or 1 depending on if the checks passed.      *
@@ -302,6 +305,30 @@ static int check_data_range(DLPObj *dlp, double two_dx)
     else return 1;
 }
 
+#ifdef select_window_func
+#undef select_window_func
+#endif
+
+#define select_window_func(fw, dlp)                                            \
+{                                                                              \
+    /*  Cast the selected window type to the fw pointer.                     */\
+    if      (strcmp(dlp->wtype, "rect") == 0)   fw = &Rect_Window_Double;      \
+    else if (strcmp(dlp->wtype, "coss") == 0)   fw = &Coss_Window_Double;      \
+    else if (strcmp(dlp->wtype, "kb20") == 0)   fw = &Kaiser_Bessel_2_0_Double;\
+    else if (strcmp(dlp->wtype, "kb25") == 0)   fw = &Kaiser_Bessel_2_5_Double;\
+    else if (strcmp(dlp->wtype, "kb35") == 0)   fw = &Kaiser_Bessel_3_5_Double;\
+    else if (strcmp(dlp->wtype, "kbmd20") == 0)                                \
+        fw = &Modified_Kaiser_Bessel_2_0_Double;                               \
+    else if (strcmp(dlp->wtype, "kbmd25") == 0)                                \
+        fw = &Modified_Kaiser_Bessel_2_5_Double;                               \
+    else if (strcmp(dlp->wtype, "kbmd35") == 0)                                \
+        fw = &Modified_Kaiser_Bessel_3_5_Double;                               \
+    else {                                                                     \
+        dlp->status = 5;                                                       \
+        return;                                                                \
+    }                                                                          \
+}
+
 /******************************************************************************
  *  Function:                                                                 *
  *      DiffractionCorrectionFresnel                                          *
@@ -353,15 +380,9 @@ void DiffractionCorrectionFresnel(DLPObj *dlp)
     complex double (*FresT)(double*, complex double*, double*, double,
                             double, long, long);
 
-    /*  Cast the selected window type to the fw pointer.                     */
-    if      (dlp->wtype == 0) fw = &Rect_Window_Double;
-    else if (dlp->wtype == 1) fw = &Coss_Window_Double;
-    else if (dlp->wtype == 2) fw = &Kaiser_Bessel_2_0_Double;
-    else if (dlp->wtype == 3) fw = &Kaiser_Bessel_2_5_Double;
-    else if (dlp->wtype == 4) fw = &Kaiser_Bessel_3_5_Double;
-    else if (dlp->wtype == 5) fw = &Modified_Kaiser_Bessel_2_0_Double;
-    else if (dlp->wtype == 6) fw = &Modified_Kaiser_Bessel_2_5_Double;
-    else                      fw = &Modified_Kaiser_Bessel_3_5_Double;
+    /*  Cast the selected window type to the fw pointer.                      */
+    select_window_func(fw, dlp);
+    if (!(dlp->status == 0)) return;
 
     /*  Cast FresT to the appropriate function.                               */
     if (dlp->use_norm) FresT = &Fresnel_Transform_Norm_Double;
@@ -519,14 +540,8 @@ void DiffractionCorrectionLegendre(DLPObj *dlp)
                             double, double, double, long, unsigned char, long);
 
     /*  Cast the selected window type to the fw pointer.                      */
-    if      (dlp->wtype == 0) fw = &Rect_Window_Double;
-    else if (dlp->wtype == 1) fw = &Coss_Window_Double;
-    else if (dlp->wtype == 2) fw = &Kaiser_Bessel_2_0_Double;
-    else if (dlp->wtype == 3) fw = &Kaiser_Bessel_2_5_Double;
-    else if (dlp->wtype == 4) fw = &Kaiser_Bessel_3_5_Double;
-    else if (dlp->wtype == 5) fw = &Modified_Kaiser_Bessel_2_0_Double;
-    else if (dlp->wtype == 6) fw = &Modified_Kaiser_Bessel_2_5_Double;
-    else                      fw = &Modified_Kaiser_Bessel_3_5_Double;
+    select_window_func(fw, dlp);
+    if (!(dlp->status == 0)) return;
 
     /*  Set the IsEven boolean to the appropriate value. Since the linear and *
      *  constant term are zero, even polynomials will have an odd number of   *
@@ -727,14 +742,8 @@ void DiffractionCorrectionNewton(DLPObj *dlp)
                             double, double, long, long);
 
     /*  Cast the selected window type to the fw pointer.                      */
-    if      (dlp->wtype == 0) fw = &Rect_Window_Double;
-    else if (dlp->wtype == 1) fw = &Coss_Window_Double;
-    else if (dlp->wtype == 2) fw = &Kaiser_Bessel_2_0_Double;
-    else if (dlp->wtype == 3) fw = &Kaiser_Bessel_2_5_Double;
-    else if (dlp->wtype == 4) fw = &Kaiser_Bessel_3_5_Double;
-    else if (dlp->wtype == 5) fw = &Modified_Kaiser_Bessel_2_0_Double;
-    else if (dlp->wtype == 6) fw = &Modified_Kaiser_Bessel_2_5_Double;
-    else                      fw = &Modified_Kaiser_Bessel_3_5_Double;
+    select_window_func(fw, dlp);
+    if (!(dlp->status == 0)) return;
 
     /*  Select the correct Fresnel transformation.                            */
     if (dlp->use_norm)
@@ -956,14 +965,8 @@ void DiffractionCorrectionPerturbedNewton(DLPObj *dlp)
                             double, double, long, long, double [5]);
 
     /*  Cast the selected window type to the fw pointer.                      */
-    if      (dlp->wtype == 0) fw = &Rect_Window_Double;
-    else if (dlp->wtype == 1) fw = &Coss_Window_Double;
-    else if (dlp->wtype == 2) fw = &Kaiser_Bessel_2_0_Double;
-    else if (dlp->wtype == 3) fw = &Kaiser_Bessel_2_5_Double;
-    else if (dlp->wtype == 4) fw = &Kaiser_Bessel_3_5_Double;
-    else if (dlp->wtype == 5) fw = &Modified_Kaiser_Bessel_2_0_Double;
-    else if (dlp->wtype == 6) fw = &Modified_Kaiser_Bessel_2_5_Double;
-    else                      fw = &Modified_Kaiser_Bessel_3_5_Double;
+    select_window_func(fw, dlp);
+    if (!(dlp->status == 0)) return;
 
     /*  Select the correct transform function.                                */
     if (dlp->use_norm) FresT = &Fresnel_Transform_Perturbed_Newton_Norm_Double;
@@ -1130,14 +1133,8 @@ void DiffractionCorrectionEllipse(DLPObj *dlp)
                             double, double, long, long, double, double);
 
     /*  Cast the selected window type to the fw pointer.                      */
-    if      (dlp->wtype == 0) fw = &Rect_Window_Double;
-    else if (dlp->wtype == 1) fw = &Coss_Window_Double;
-    else if (dlp->wtype == 2) fw = &Kaiser_Bessel_2_0_Double;
-    else if (dlp->wtype == 3) fw = &Kaiser_Bessel_2_5_Double;
-    else if (dlp->wtype == 4) fw = &Kaiser_Bessel_3_5_Double;
-    else if (dlp->wtype == 5) fw = &Modified_Kaiser_Bessel_2_0_Double;
-    else if (dlp->wtype == 6) fw = &Modified_Kaiser_Bessel_2_5_Double;
-    else                      fw = &Modified_Kaiser_Bessel_3_5_Double;
+    select_window_func(fw, dlp);
+    if (!(dlp->status == 0)) return;
 
     /*  Select the appropriate transform function.                            */
     if (dlp->use_norm) FresT = &Fresnel_Transform_Ellipse_Norm_Double;
@@ -1327,14 +1324,8 @@ void DiffractionCorrectionSimpleFFT(DLPObj *dlp)
     double (*fw)(double, double);
 
     /*  Cast the selected window type to the fw pointer.                      */
-    if      (dlp->wtype == 0) fw = &Rect_Window_Double;
-    else if (dlp->wtype == 1) fw = &Coss_Window_Double;
-    else if (dlp->wtype == 2) fw = &Kaiser_Bessel_2_0_Double;
-    else if (dlp->wtype == 3) fw = &Kaiser_Bessel_2_5_Double;
-    else if (dlp->wtype == 4) fw = &Kaiser_Bessel_3_5_Double;
-    else if (dlp->wtype == 5) fw = &Modified_Kaiser_Bessel_2_0_Double;
-    else if (dlp->wtype == 6) fw = &Modified_Kaiser_Bessel_2_5_Double;
-    else                      fw = &Modified_Kaiser_Bessel_3_5_Double;
+    select_window_func(fw, dlp);
+    if (!(dlp->status == 0)) return;
 
     /*  Scale factor for the FFT.                                             */
     complex double scale_factor = 0.5*dx*(1.0+_Complex_I)/((data_size+1)^2);

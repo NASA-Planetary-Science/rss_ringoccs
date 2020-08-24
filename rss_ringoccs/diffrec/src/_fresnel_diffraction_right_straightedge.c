@@ -47,54 +47,5 @@ complex long double Right_Straightedge_Diffraction_Long_Double(long double x,
 }
 
 /*  For all integer types, convert to double and compute.                     */
-double Right_Straightedge_Diffraction_Char(char x, double a, double F)
-{
-    return Right_Straightedge_Diffraction_Double((double)x, a, F);
-}
-
-double Right_Straightedge_Diffraction_UChar(unsigned char x, double a, double F)
-{
-    return Right_Straightedge_Diffraction_Double((double)x, a, F);
-}
-
-double Right_Straightedge_Diffraction_Short(short x, double a, double F)
-{
-    return Right_Straightedge_Diffraction_Double((double)x, a, F);
-}
-
-double Right_Straightedge_Diffraction_UShort(unsigned short x, double a,
-                                             double F)
-{
-    return Right_Straightedge_Diffraction_Double((double)x, a, F);
-}
-
-double Right_Straightedge_Diffraction_Int(int x, double a, double F)
-{
-    return Right_Straightedge_Diffraction_Double((double)x, a, F);
-}
-
-double Right_Straightedge_Diffraction_UInt(unsigned int x, double a, double F)
-{
-    return Right_Straightedge_Diffraction_Double((double)x, a, F);
-}
-
-double Right_Straightedge_Diffraction_Long(long x, double a, double F)
-{
-    return Right_Straightedge_Diffraction_Double((double)x, a, F);
-}
-
-double Right_Straightedge_Diffraction_ULong(unsigned long x, double a, double F)
-{
-    return Right_Straightedge_Diffraction_Double((double)x, a, F);
-}
-
-double Right_Straightedge_Diffraction_Long_Long(long long x, double a, double F)
-{
-    return Right_Straightedge_Diffraction_Double((double)x, a, F);
-}
-
-double Right_Straightedge_Diffraction_ULong_Long(unsigned long long x, double a,
-                                                 double F)
-{
-    return Right_Straightedge_Diffraction_Double((double)x, a, F);
-}
+RSSRINGOCCSNonFloatInputThreeVarForFloatOutput(Right_Straightedge_Diffraction,
+                                               complex double);

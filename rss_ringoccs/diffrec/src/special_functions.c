@@ -19,6 +19,318 @@
  *  Python. Successful compiling requires the Numpy and Python header files.  *
  *----------------------------------------------------------------------------*/
 
+/*  Make sure these names are available.                                      */
+#ifdef _array_from_one
+#undef _array_from_one
+#endif
+
+/*  Make sure these names are available.                                      */
+#ifdef _array_from_two
+#undef _array_from_two
+#endif
+
+#ifdef _get_one_real_from_three_real
+#undef _get_one_real_from_three_real
+#endif
+
+#ifdef _get_complex_from_four_real
+#undef _get_complex_from_four_real
+#endif
+
+#ifdef _get_complex_from_three_real
+#undef _get_complex_from_three_real
+#endif
+
+#ifdef OneVarFunctionForNumpy
+#undef OneVarFunctionForNumpy
+#endif
+
+#ifdef WindowFunctionForNumpy
+#undef WindowFunctionForNumpy
+#endif
+
+#ifdef VarToString
+#undef VarToString
+#endif
+
+#define VarToString(Var) (#Var)
+
+/*  To avoid repeating the same code over and over again, define these macros *
+ *  to be used for looping over functions.                                    */
+#define _array_from_one(x, y, dim, f) ({                                    \
+    /*  Declare necessary variables.                                      */\
+    long i;                                                                 \
+    for (i=0; i<dim; ++i)   y[i] = (*f)(x[i]);                              \
+})
+
+#define _array_from_two(x1, x2, y, dim, f) ({                               \
+    /*  Declare necessary variables.                                      */\
+    long i;                                                                 \
+    for (i=0; i<dim; ++i)   y[i] = (*f)(x1[i], x2);                         \
+})
+
+#define _get_one_real_from_three_real(x1, x2, x3, y, dim, f) ({             \
+    /*  Declare necessary variables.                                      */\
+    long i;                                                                 \
+    for (i=0; i<dim; ++i)   y[i] = (*f)(x1[i], x2, x3);                     \
+})
+
+#define _get_complex_from_three_real(x, a, F, y, dim, f) ({                 \
+    /*  Declare necessary variables.                                      */\
+    long i;                                                                 \
+    for (i=0; i<dim; ++i)   y[i] = (*f)(x[i], a, F);                        \
+})
+
+#define _get_complex_from_four_real(x, a, b, F, y, dim, f) ({\
+    /*  Declare necessary variables.                                         */\
+    long i;\
+    \
+    for (i=0; i<dim; ++i){\
+        y[i] = (*f)(x[i], a, b, F);\
+    }\
+})
+
+/*  Again, to avoid repetition, the code used in the API for numpy is arrays  *
+ *  is identical for all functions with the exception of the function name.   *
+ *  This preprocessor function saves thousands of lines of code, all of which *
+ *  would be just copy/paste otherwise.                                       */
+#define OneVarFunctionForNumpy(FuncName, CName)\
+static PyObject * FuncName(PyObject *self, PyObject *args)\
+{\
+    /*  Declare necessary variables.                                         */\
+    PyObject *output, *capsule;\
+    PyArrayObject *x;\
+    char typenum;\
+    long dim;\
+    void *data;\
+    \
+    /*  Parse the data from Python and try to convert it to a usable format. */\
+    if (!PyArg_ParseTuple(args, "O!", &PyArray_Type, &x)){\
+        PyErr_Format(PyExc_TypeError,\
+                     "\n\rError Encountered: rss_ringoccs\n"\
+                     "\r\tdiffrec.special_functions.%s\n\n"\
+                     "\rCould not parse inputs. Legal inputs are:\n"\
+                     "\r\tx: Numpy Array of real numbers (Floats)\n\rNotes:\n"\
+                     "\r\tx must be a non-empty one dimensional numpy array.",\
+                     VarToString(FuncName));\
+        return NULL;\
+    }\
+    \
+    /*  Grab useful information about the data.                              */\
+    typenum = (char)PyArray_TYPE(x);\
+    dim     = PyArray_DIMS(x)[0];\
+    data    = PyArray_DATA(x);\
+    \
+    /*  Check the inputs to make sure they're valid.                         */\
+    if (PyArray_NDIM(x) != 1){\
+        PyErr_Format(PyExc_TypeError, "\n\rError Encountered: rss_ringoccs\n"\
+                                      "\r\tdiffrec.special_functions.%s\n"\
+                                      "\n\rInput is not 1-dimensional.\n",\
+                                      VarToString(FuncName));\
+        return NULL;\
+    }\
+    else if (dim == 0){\
+        PyErr_Format(PyExc_TypeError, "\n\rError Encountered: rss_ringoccs\n"\
+                                      "\r\tdiffrec.special_functions.%s"\
+                                      "\n\n\rInput numpy array is empty.\n",\
+                                      VarToString(FuncName));\
+    }\
+    \
+    if (typenum == NPY_FLOAT){                                              \
+        float *y;                                                           \
+        y = (float *)malloc(dim*sizeof(float));                             \
+        _array_from_one(((float *)data), y, dim, CName##_Float);            \
+        output  = PyArray_SimpleNewFromData(1, &dim, NPY_FLOAT, (void *)y); \
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);                  \
+    }                                                                       \
+    else if (typenum == NPY_DOUBLE){                                        \
+        double *y;                                                          \
+        y = (double *)malloc(dim*sizeof(double));                           \
+        _array_from_one(((double *)data), y, dim, CName##_Double);          \
+        output  = PyArray_SimpleNewFromData(1, &dim, NPY_DOUBLE, (void *)y);\
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);                  \
+    }                                                                       \
+    else if (typenum == NPY_LONGDOUBLE){                                    \
+        long double *y;                                                     \
+        y = (long double *)malloc(dim*sizeof(long double));                 \
+        _array_from_one(((long double *)data), y, dim,CName##_Long_Double); \
+        output = PyArray_SimpleNewFromData(1, &dim, NPY_LONGDOUBLE, (void *)y);\
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);                  \
+    }                                                                       \
+    else {                                                                  \
+        double *y;                                                          \
+        y = (double *)malloc(dim*sizeof(double));                           \
+        if (typenum == NPY_BYTE)                                            \
+            _array_from_one(((char *)data), y, dim, CName##_Char);          \
+        else if (typenum == NPY_UBYTE)                                      \
+            _array_from_one(((unsigned char *)data), y, dim, CName##_UChar);\
+        else if (typenum == NPY_SHORT)                                      \
+            _array_from_one(((short *)data), y, dim, CName##_Short);        \
+        else if (typenum == NPY_USHORT)                                     \
+            _array_from_one(((unsigned short *)data), y, dim, CName##_UShort);\
+        else if (typenum == NPY_INT)                                        \
+            _array_from_one(((int *)data), y, dim, CName##_Int);            \
+        else if (typenum == NPY_UINT)                                       \
+            _array_from_one(((unsigned int *)data), y, dim, CName##_UInt);  \
+        else if (typenum == NPY_LONG)                                       \
+            _array_from_one(((long *)data), y, dim, CName##_Long);          \
+        else if (typenum == NPY_ULONG)                                      \
+            _array_from_one(((unsigned long *)data), y, dim, CName##_ULong);\
+        else if (typenum == NPY_LONGLONG)                                   \
+            _array_from_one(((long long *)data), y, dim, CName##_Long_Long);\
+        else if (typenum == NPY_ULONG)                                      \
+            _array_from_one(((unsigned long long *)data), y, dim,           \
+                            CName##_Long_Long);                             \
+        else {                                                              \
+            PyErr_Format(PyExc_TypeError,                                   \
+                         "\n\rError Encountered: rss_ringoccs\n"            \
+                         "\r\tdiffrec.special_functions.%s\n\n"             \
+                         "\rInvalid data type for input array. Input should be"\
+                         "\n\ra 1-dimensional array of real numbers.\n",    \
+                         VarToString(FuncName));                            \
+            return NULL;                                                    \
+        }                                                                   \
+                                                                            \
+        output  = PyArray_SimpleNewFromData(1, &dim, NPY_DOUBLE, (void *)y);\
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);                  \
+    }                                                                       \
+                                                                            \
+    /*  This frees the variable at the Python level once it's destroyed.  */\
+    PyArray_SetBaseObject((PyArrayObject *)output, capsule);\
+                                                                            \
+    /*  Return the results to Python.                                     */\
+    return Py_BuildValue("N", output);                                      \
+}
+
+#define WindowFunctionForNumpy(FuncName, CName)\
+static PyObject * FuncName(PyObject *self, PyObject *args)\
+{\
+    PyObject *output, *capsule;\
+    PyArrayObject *x;\
+    double dx;\
+    char typenum;\
+    long dim;\
+    void *data;\
+    \
+    if (!PyArg_ParseTuple(args, "O!d", &PyArray_Type, &x, &dx))\
+    {\
+        PyErr_Format(PyExc_TypeError,\
+                     "\n\rError Encountered: rss_ringoccs\n"\
+                     "\r\tdiffrec.special_functions.%s\n\n"\
+                     "\rCould not parse inputs. Legal inputs are:\n"\
+                     "\r\tx:     Numpy Array of real numbers (Floats)\n"\
+                     "\r\tdx:    Positive real number (Float)\n\rNotes:\n"\
+                     "\r\tx must be a non-empty one dimensional numpy array.",\
+                     VarToString(FuncName));\
+        return NULL;\
+    }\
+    \
+    /*  Useful information about the data.                                   */\
+    typenum = (char)PyArray_TYPE(x);\
+    dim     = PyArray_DIMS(x)[0];\
+    data    = PyArray_DATA(x);\
+    \
+    /*  Check the inputs to make sure they're valid.                         */\
+    if (PyArray_NDIM(x) != 1)\
+    {\
+        PyErr_Format(PyExc_TypeError, "\n\rError Encountered: rss_ringoccs\n"\
+                                      "\r\tdiffrec.special_functions.%s\n\n"\
+                                      "\rInput array is not 1-dimensional.\n",\
+                                      VarToString(FuncName));\
+        return NULL;\
+    }\
+    else if (dim == 0)\
+    {\
+        PyErr_Format(PyExc_TypeError, "\n\rError Encountered: rss_ringoccs\n"\
+                                      "\r\tdiffrec.special_functions.%s\n\n"\
+                                      "\rInput numpy array is empty.\n",\
+                                      VarToString(FuncName));\
+        return NULL;\
+    }\
+    \
+    /*  Check that dx is positive.                                           */\
+    if (dx <= 0)\
+    {\
+        PyErr_Format(PyExc_ValueError, "\n\rError Encountered: rss_ringoccs\n"\
+                                       "\r\tdiffrec.special_functions.%s\n\n"\
+                                       "\rdx must be a positive number.\n",\
+                                       VarToString(FuncName));\
+        return NULL;\
+    }\
+    \
+    if (typenum == NPY_FLOAT)                                               \
+    {                                                                       \
+        float *y;                                                           \
+        y = (float *)malloc(dim*sizeof(float));                             \
+        _array_from_two(((float *)data), dx, y, dim, CName##_Float);        \
+        output = PyArray_SimpleNewFromData(1, &dim, NPY_FLOAT, (void *)y);  \
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);                  \
+    }                                                                       \
+    else if (typenum == NPY_LONGDOUBLE)                                     \
+    {                                                                       \
+        long double *y;                                                     \
+        y = (long double *)malloc(dim*sizeof(long double));                 \
+        _array_from_two(((long double *)data), dx, y, dim,                  \
+                        CName##_Long_Double);                               \
+        output = PyArray_SimpleNewFromData(1, &dim, NPY_LONGDOUBLE, (void *)y);\
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);                  \
+    }                                                                       \
+    else                                                                    \
+    {                                                                       \
+        double *y;                                                          \
+        y = (double *)malloc(dim*sizeof(double));                           \
+                                                                            \
+        if (typenum == NPY_DOUBLE)                                          \
+            _array_from_two(((double *)data), dx, y, dim, CName##_Double);  \
+        else if (typenum == NPY_BYTE)                                       \
+            _array_from_two(((char *)data), dx, y, dim, CName##_Char);      \
+        else if (typenum == NPY_UBYTE)                                      \
+            _array_from_two(((unsigned char *)data), dx, y, dim,            \
+                            CName##_UChar);                                 \
+        else if (typenum == NPY_SHORT)                                      \
+            _array_from_two(((short *)data), dx, y, dim, CName##_Short);    \
+        else if (typenum == NPY_USHORT)                                     \
+            _array_from_two(((unsigned short *)data), dx, y, dim,           \
+                            CName##_UShort);                                \
+        else if (typenum == NPY_INT)                                        \
+            _array_from_two(((int *)data), dx, y, dim, CName##_Int);        \
+        else if (typenum == NPY_UINT)                                       \
+            _array_from_two(((unsigned int *)data), dx, y, dim, CName##_UInt);\
+        else if (typenum == NPY_LONG)                                       \
+            _array_from_two(((long *)data), dx, y, dim, CName##_Long);      \
+        else if (typenum == NPY_ULONG)                                      \
+            _array_from_two(((unsigned long *)data), dx, y, dim,            \
+                            CName##_ULong);                                 \
+        else if (typenum == NPY_LONGLONG)                                   \
+            _array_from_two(((long long *)data), dx, y, dim,                \
+                            CName##_Long_Long);                             \
+        else if (typenum == NPY_ULONG)                                      \
+            _array_from_two(((unsigned long long *)data), dx, y,            \
+                            dim, CName##_ULong_Long);                       \
+        else                                                                \
+        {                                                                   \
+            PyErr_Format(PyExc_TypeError,                                   \
+                         "\n\rError Encountered: rss_ringoccs\n"            \
+                         "\r\tdiffrec.special_functions.%s\n\n"             \
+                         "\rInvalid data type for input array. Input should\n"\
+                         "\rbe a 1-dimensional numpy array of real numbers.\n",\
+                         VarToString(FuncName));                            \
+            return NULL;                                                    \
+        }                                                                   \
+                                                                            \
+        output = PyArray_SimpleNewFromData(1, &dim, NPY_DOUBLE, (void *)y); \
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);                  \
+    }                                                                       \
+                                                                            \
+    /*  This frees the variable at the Python level once it's destroyed.  */\
+    PyArray_SetBaseObject((PyArrayObject *)output, capsule);                \
+                                                                            \
+    /*  Return the results to Python.                                     */\
+    return Py_BuildValue("N", output);                                      \
+}
+
+
+
 /*  This function frees the memory allocated to a pointer by malloc when the  *
  *  corresponding variable is destroyed at the Python level.                  */
 static void capsule_cleanup(PyObject *capsule)

@@ -93,12 +93,119 @@ double FuncName##_ULong_Long(unsigned long long x, double y)                \
     return FuncName##_Double((double)x, y);                                 \
 }
 
+/*  This code is for generating the code for the straightedge routines.       */
+#ifdef RSSRINGOCCSNonFloatInputThreeVarForFloatOutput
+#undef RSSRINGOCCSNonFloatInputThreeVarForFloatOutput
+#endif
+
+#define RSSRINGOCCSNonFloatInputThreeVarForFloatOutput(FuncName, type)      \
+type FuncName##_Char(char x, double a, double F)                            \
+{                                                                           \
+    return FuncName##_Double((double)x, a, F);                              \
+}                                                                           \
+type FuncName##_UChar(unsigned char x, double a, double F)                  \
+{                                                                           \
+    return FuncName##_Double((double)x, a, F);                              \
+}                                                                           \
+type FuncName##_Short(short x, double a, double F)                          \
+{                                                                           \
+    return FuncName##_Double((double)x, a, F);                              \
+}                                                                           \
+type FuncName##_UShort(unsigned short x, double a, double F)                \
+{                                                                           \
+    return FuncName##_Double((double)x, a, F);                              \
+}                                                                           \
+type FuncName##_Int(int x, double a, double F)                              \
+{                                                                           \
+    return FuncName##_Double((double)x, a, F);                              \
+}                                                                           \
+type FuncName##_UInt(unsigned int x, double a, double F)                    \
+{                                                                           \
+    return FuncName##_Double((double)x, a, F);                              \
+}                                                                           \
+type FuncName##_Long(long x, double a, double F)                            \
+{                                                                           \
+    return FuncName##_Double((double)x, a, F);                              \
+}                                                                           \
+type FuncName##_ULong(unsigned long x, double a, double F)                  \
+{                                                                           \
+    return FuncName##_Double((double)x, a, F);                              \
+}                                                                           \
+type FuncName##_Long_Long(long long x, double a, double F)                  \
+{                                                                           \
+    return FuncName##_Double((double)x, a, F);                              \
+}                                                                           \
+type FuncName##_ULong_Long(unsigned long long x, double a, double F)        \
+{                                                                           \
+    return FuncName##_Double((double)x, a, F);                              \
+}
+
+/*  This code is for generating the code for diffraction modeling functions.  */
+#ifdef RSSRINGOCCSNonFloatInputFourVarForFloatOutput
+#undef RSSRINGOCCSNonFloatInputFourVarForFloatOutput
+#endif
+
+#define RSSRINGOCCSNonFloatInputFourVarForFloatOutput(FuncName, type)\
+type FuncName##_Char(char x, double a, double b, double F)                  \
+{                                                                           \
+    return FuncName##_Double((double)x, a, b, F);                           \
+}                                                                           \
+type FuncName##_UChar(unsigned char x, double a, double b, double F)        \
+{                                                                           \
+    return FuncName##_Double((double)x, a, b, F);                           \
+}                                                                           \
+type FuncName##_Short(short x, double a, double b, double F)                \
+{                                                                           \
+    return FuncName##_Double((double)x, a, b, F);                           \
+}                                                                           \
+type FuncName##_UShort(unsigned short x, double a, double b, double F)      \
+{                                                                           \
+    return FuncName##_Double((double)x, a, b, F);                           \
+}                                                                           \
+type FuncName##_Int(int x, double a, double b, double F)                    \
+{                                                                           \
+    return FuncName##_Double((double)x, a, b, F);                           \
+}                                                                           \
+type FuncName##_UInt(unsigned int x, double a, double b, double F)          \
+{                                                                           \
+    return FuncName##_Double((double)x, a, b, F);                           \
+}                                                                           \
+type FuncName##_Long(long x, double a, double b, double F)                  \
+{                                                                           \
+    return FuncName##_Double((double)x, a, b, F);                           \
+}                                                                           \
+type FuncName##_ULong(unsigned long x, double a, double b, double F)        \
+{                                                                           \
+    return FuncName##_Double((double)x, a, b, F);                           \
+}                                                                           \
+type FuncName##_Long_Long(long long x, double a, double b, double F)        \
+{                                                                           \
+    return FuncName##_Double((double)x, a, b, F);                           \
+}                                                                           \
+type                                                                        \
+FuncName##_ULong_Long(unsigned long long x, double a, double b, double F)   \
+{                                                                           \
+    return FuncName##_Double((double)x, a, b, F);                           \
+}
 
 /*  These lines are repeated over and over in this header file to define the  *
  *  various math functions. Use this preprocessor function to save lines of   *
  *  code, stay consistent with naming conventions, and add clarity.           */
 #ifdef RSSRINGOCCSGenerateExternFunctions
 #undef RSSRINGOCCSGenerateExternFunctions
+#endif
+
+/*  Macros to avoid repetition and ensure consistency in naming convention.   */
+#ifdef RSSRINGOCCSTwoVarWindowFuncExtern
+#undef RSSRINGOCCSTwoVarWindowFuncExtern
+#endif
+
+#ifdef RSSRINGOCCSDiffractionModelingExtern
+#undef RSSRINGOCCSDiffractionModelingExtern
+#endif
+
+#ifdef RSSRINGOCCSStraightedgeModelingExtern
+#undef RSSRINGOCCSStraightedgeModelingExtern
 #endif
 
 #define RSSRINGOCCSGenerateExternFunctions(FuncName)                        \
@@ -115,11 +222,6 @@ extern double       FuncName##_Long(long x);                                \
 extern double       FuncName##_ULong(unsigned long x);                      \
 extern double       FuncName##_Long_Long(long long x);                      \
 extern double       FuncName##_ULong_Long(unsigned long long x);
-
-/*  Macro to avoid repetition and ensure consistency in naming convention.    */
-#ifdef RSSRINGOCCSTwoVarWindowFuncExtern
-#undef RSSRINGOCCSTwoVarWindowFuncExtern
-#endif
 
 #define RSSRINGOCCSTwoVarWindowFuncExtern(FuncName)                         \
 extern float        FuncName##_Float(float x, float W);                     \
@@ -152,6 +254,57 @@ extern double FuncName##_ULong(unsigned long x, double W, double alpha);    \
 extern double FuncName##_Long_Long(long long x, double W, double alpha);    \
 extern double                                                               \
 FuncName##_ULong_Long(unsigned long long x, double W, double alpha);
+
+#define RSSRINGOCCSDiffractionModelingExtern(FuncName, type)                \
+type float                                                                  \
+FuncName##_Float(float x, float a, float b, float F);                       \
+type double                                                                 \
+FuncName##_Double(double x, double a, double b, double F);                  \
+type long double                                                            \
+FuncName##_Long_Double(long double x, long double a,                        \
+                       long double b, long double F);                       \
+type double                                                                 \
+FuncName##_Char(char x, double a, double b, double F);                      \
+type double                                                                 \
+FuncName##_UChar(unsigned char x, double a, double b, double F);            \
+type double                                                                 \
+FuncName##_Short(short x, double a, double b, double F);                    \
+type double                                                                 \
+FuncName##_UShort(unsigned short x, double a, double b, double F);          \
+type double                                                                 \
+FuncName##_Int(int x, double a, double b, double F);                        \
+type double                                                                 \
+FuncName##_UInt(unsigned int x, double a, double b, double F);              \
+type double                                                                 \
+FuncName##_Long(long x, double a, double b, double F);                      \
+type double                                                                 \
+FuncName##_ULong(unsigned long x, double a, double b, double F);            \
+type double                                                                 \
+FuncName##_Long_Long(long long x, double a, double b, double F);            \
+type double                                                                 \
+FuncName##_ULong_Long(unsigned long long x, double a, double b, double F);
+
+#define RSSRINGOCCSStraightedgeModelingExtern(FuncName)                     \
+extern complex float    FuncName##_Float(float x, float edge, float F);     \
+extern complex double   FuncName##_Double(double x, double edge, double F); \
+extern complex long double                                                  \
+FuncName##_Long_Double(long double x, long double edge, long double F);     \
+extern complex double   FuncName##_Char(char x, double edge, double F);     \
+extern complex double                                                       \
+FuncName##_UChar(unsigned char x, double edge, double F);                   \
+extern complex double   FuncName##_Short(short x, double edge, double F);   \
+extern complex double                                                       \
+FuncName##_UShort(unsigned short x, double edge, double F);                 \
+extern complex double   FuncName##_Int(int x, double edge, double F);       \
+extern complex double                                                       \
+FuncName##_UInt(unsigned int x, double edge, double F);                     \
+extern complex double   FuncName##_Long(long x, double edge, double F);     \
+extern complex double                                                       \
+FuncName##_ULong(unsigned long x, double edge, double F);                   \
+extern complex double                                                       \
+FuncName##_Long_Long(long long x, double edge, double F);                   \
+extern complex double                                                       \
+FuncName##_ULong_Long(unsigned long long x, double edge, double F);
 
 /*  Generate extern function names for all of the math functions.             */
 RSSRINGOCCSGenerateExternFunctions(BesselJ0);
@@ -192,8 +345,19 @@ RSSRINGOCCSTwoVarWindowFuncExtern(Coss_Window);
 RSSRINGOCCSThreeVarWindowFuncExtern(Kaiser_Bessel_Al);
 RSSRINGOCCSThreeVarWindowFuncExtern(Modified_Kaiser_Bessel_Al);
 
+/*  The ringlet and gap modeling functions.                                   */
+RSSRINGOCCSDiffractionModelingExtern(Ringlet_Diffraction, extern complex);
+RSSRINGOCCSDiffractionModelingExtern(Gap_Diffraction, extern complex);
+RSSRINGOCCSDiffractionModelingExtern(Ringlet_Diffraction_Phase, extern);
+
+/*  Left and right straightedge modeling tools.                               */
+RSSRINGOCCSStraightedgeModelingExtern(Right_Straightedge_Diffraction);
+RSSRINGOCCSStraightedgeModelingExtern(Left_Straightedge_Diffraction);
+
 #undef RSSRINGOCCSTwoVarWindowFuncExtern
 #undef RSSRINGOCCSThreeVarWindowFuncExtern
+#undef RSSRINGOCCSDiffractionModelingExtern
+#undef RSSRINGOCCSStraightedgeModelingExtern
 
 extern void Legendre_Polynomials(double *legendre_p, double x, int order);
 
@@ -264,316 +428,6 @@ Window_Normalization_Complex_Double(complex double *ker, long dim,
 extern long double
 Window_Normalization_Complex_Long_Double(complex long double *ker, long dim,
                                          long double dx, long double f_scale);
-
-/*  Make sure these names are available.                                      */
-#ifdef _get_one_real_from_three_real
-#undef _get_one_real_from_three_real
-#endif
-
-#ifdef _get_complex_from_four_real
-#undef _get_complex_from_four_real
-#endif
-
-#ifdef _get_complex_from_three_real
-#undef _get_complex_from_three_real
-#endif
-
-#ifdef OneVarFunctionForNumpy
-#undef OneVarFunctionForNumpy
-#endif
-
-#ifdef WindowFunctionForNumpy
-#undef WindowFunctionForNumpy
-#endif
-
-#ifdef VarToString
-#undef VarToString
-#endif
-
-#define VarToString(Var) (#Var)
-
-/*  To avoid repeating the same code over and over again, define these macros *
- *  to be used for looping over functions.                                    */
-#define _get_one_real_from_three_real(x1, x2, x3, y, dim, f) ({\
-    /*  Declare necessary variables.                                         */\
-    long i;\
-    \
-    for (i=0; i<dim; ++i){\
-        y[i] = (*f)(x1[i], x2, x3);\
-    }\
-})
-
-#define _get_complex_from_three_real(x, a, F, y, dim, f) ({\
-    /*  Declare necessary variables.                                         */\
-    long i;\
-    \
-    for (i=0; i<dim; ++i){\
-        y[i] = (*f)(x[i], a, F);\
-    }\
-})
-
-#define _get_complex_from_four_real(x, a, b, F, y, dim, f) ({\
-    /*  Declare necessary variables.                                         */\
-    long i;\
-    \
-    for (i=0; i<dim; ++i){\
-        y[i] = (*f)(x[i], a, b, F);\
-    }\
-})
-
-/*  Again, to avoid repetition, the code used in the API for numpy is arrays  *
- *  is identical for all functions with the exception of the function name.   *
- *  This preprocessor function saves thousands of lines of code, all of which *
- *  would be just copy/paste otherwise.                                       */
-#define OneVarFunctionForNumpy(FuncName, CName)\
-static PyObject * FuncName(PyObject *self, PyObject *args)\
-{\
-    /*  Declare necessary variables.                                         */\
-    PyObject *output, *capsule;\
-    PyArrayObject *x;\
-    char typenum;\
-    long dim;\
-    void *data;\
-    \
-    /*  Parse the data from Python and try to convert it to a usable format. */\
-    if (!PyArg_ParseTuple(args, "O!", &PyArray_Type, &x)){\
-        PyErr_Format(PyExc_TypeError,\
-                     "\n\rError Encountered: rss_ringoccs\n"\
-                     "\r\tdiffrec.special_functions.%s\n\n"\
-                     "\rCould not parse inputs. Legal inputs are:\n"\
-                     "\r\tx: Numpy Array of real numbers (Floats)\n\rNotes:\n"\
-                     "\r\tx must be a non-empty one dimensional numpy array.",\
-                     VarToString(FuncName));\
-        return NULL;\
-    }\
-    \
-    /*  Grab useful information about the data.                              */\
-    typenum = (char)PyArray_TYPE(x);\
-    dim     = PyArray_DIMS(x)[0];\
-    data    = PyArray_DATA(x);\
-    \
-    /*  Check the inputs to make sure they're valid.                         */\
-    if (PyArray_NDIM(x) != 1){\
-        PyErr_Format(PyExc_TypeError, "\n\rError Encountered: rss_ringoccs\n"\
-                                      "\r\tdiffrec.special_functions.%s\n"\
-                                      "\n\rInput is not 1-dimensional.\n",\
-                                      VarToString(FuncName));\
-        return NULL;\
-    }\
-    else if (dim == 0){\
-        PyErr_Format(PyExc_TypeError, "\n\rError Encountered: rss_ringoccs\n"\
-                                      "\r\tdiffrec.special_functions.%s"\
-                                      "\n\n\rInput numpy array is empty.\n",\
-                                      VarToString(FuncName));\
-    }\
-    \
-    if (typenum == NPY_FLOAT){\
-        float *y;\
-        y = (float *)malloc(dim*sizeof(float));\
-        _get_one_real_from_one_real(((float *)data), y, dim, CName##_Float);\
-        output  = PyArray_SimpleNewFromData(1, &dim, NPY_FLOAT, (void *)y);\
-        capsule = PyCapsule_New(y, NULL, capsule_cleanup);\
-    }\
-    else if (typenum == NPY_DOUBLE){\
-        double *y;\
-        y = (double *)malloc(dim*sizeof(double));\
-        _get_one_real_from_one_real(((double *)data), y, dim, CName##_Double);\
-        output  = PyArray_SimpleNewFromData(1, &dim, NPY_DOUBLE, (void *)y);\
-        capsule = PyCapsule_New(y, NULL, capsule_cleanup);\
-    }\
-    else if (typenum == NPY_LONGDOUBLE){\
-        long double *y;\
-        y = (long double *)malloc(dim*sizeof(long double));\
-        _get_one_real_from_one_real(((long double *)data), y, dim,\
-                                     CName##_Long_Double);\
-        output = PyArray_SimpleNewFromData(1, &dim, NPY_LONGDOUBLE, (void *)y);\
-        capsule = PyCapsule_New(y, NULL, capsule_cleanup);\
-    }\
-    else {\
-        double *y;\
-        y = (double *)malloc(dim*sizeof(double));\
-        \
-        if (typenum == NPY_BYTE)\
-            _get_one_real_from_one_real(((char *)data), y, dim, CName##_Char);\
-        else if (typenum == NPY_UBYTE)\
-            _get_one_real_from_one_real(((unsigned char *)data),\
-                                         y, dim, CName##_UChar);\
-        else if (typenum == NPY_SHORT)\
-            _get_one_real_from_one_real(((short *)data),\
-                                         y, dim, CName##_Short);\
-        else if (typenum == NPY_USHORT)\
-            _get_one_real_from_one_real(((unsigned short *)data),\
-                                         y, dim, CName##_UShort);\
-        else if (typenum == NPY_INT)\
-            _get_one_real_from_one_real(((int *)data), y, dim, CName##_Int);\
-        else if (typenum == NPY_UINT)\
-            _get_one_real_from_one_real(((unsigned int *)data),\
-                                         y, dim, CName##_UInt);\
-        else if (typenum == NPY_LONG)\
-            _get_one_real_from_one_real(((long *)data), y, dim, CName##_Long);\
-        else if (typenum == NPY_ULONG)\
-            _get_one_real_from_one_real(((unsigned long *)data),\
-                                         y, dim, CName##_ULong);\
-        else if (typenum == NPY_LONGLONG)\
-            _get_one_real_from_one_real(((long long *)data), y,\
-                                         dim, CName##_Long_Long);\
-        else if (typenum == NPY_ULONG)\
-            _get_one_real_from_one_real(((unsigned long long *)data), y, dim,\
-                                         CName##_Long_Long);\
-        else {\
-            PyErr_Format(PyExc_TypeError,\
-                         "\n\rError Encountered: rss_ringoccs\n"\
-                         "\r\tdiffrec.special_functions.%s\n\n"\
-                         "\rInvalid data type for input array. Input should be"\
-                         "\n\ra 1-dimensional array of real numbers.\n",\
-                         VarToString(FuncName));\
-            return NULL;\
-        }\
-        \
-        output  = PyArray_SimpleNewFromData(1, &dim, NPY_DOUBLE, (void *)y);\
-        capsule = PyCapsule_New(y, NULL, capsule_cleanup);\
-    }\
-    \
-    /*  This frees the variable at the Python level once it's destroyed.     */\
-    PyArray_SetBaseObject((PyArrayObject *)output, capsule);\
-    \
-    /*  Return the results to Python.                                        */\
-    return Py_BuildValue("N", output);\
-}
-
-#define WindowFunctionForNumpy(FuncName, CName)\
-static PyObject * FuncName(PyObject *self, PyObject *args)\
-{\
-    PyObject *output, *capsule;\
-    PyArrayObject *x;\
-    double dx;\
-    char typenum;\
-    long dim;\
-    void *data;\
-    \
-    if (!PyArg_ParseTuple(args, "O!d", &PyArray_Type, &x, &dx))\
-    {\
-        PyErr_Format(PyExc_TypeError,\
-                     "\n\rError Encountered: rss_ringoccs\n"\
-                     "\r\tdiffrec.special_functions.%s\n\n"\
-                     "\rCould not parse inputs. Legal inputs are:\n"\
-                     "\r\tx:     Numpy Array of real numbers (Floats)\n"\
-                     "\r\tdx:    Positive real number (Float)\n\rNotes:\n"\
-                     "\r\tx must be a non-empty one dimensional numpy array.",\
-                     VarToString(FuncName));\
-        return NULL;\
-    }\
-    \
-    /*  Useful information about the data.                                   */\
-    typenum = (char)PyArray_TYPE(x);\
-    dim     = PyArray_DIMS(x)[0];\
-    data    = PyArray_DATA(x);\
-    \
-    /*  Check the inputs to make sure they're valid.                         */\
-    if (PyArray_NDIM(x) != 1)\
-    {\
-        PyErr_Format(PyExc_TypeError, "\n\rError Encountered: rss_ringoccs\n"\
-                                      "\r\tdiffrec.special_functions.%s\n\n"\
-                                      "\rInput array is not 1-dimensional.\n",\
-                                      VarToString(FuncName));\
-        return NULL;\
-    }\
-    else if (dim == 0)\
-    {\
-        PyErr_Format(PyExc_TypeError, "\n\rError Encountered: rss_ringoccs\n"\
-                                      "\r\tdiffrec.special_functions.%s\n\n"\
-                                      "\rInput numpy array is empty.\n",\
-                                      VarToString(FuncName));\
-        return NULL;\
-    }\
-    \
-    /*  Check that dx is positive.                                           */\
-    if (dx <= 0)\
-    {\
-        PyErr_Format(PyExc_ValueError, "\n\rError Encountered: rss_ringoccs\n"\
-                                       "\r\tdiffrec.special_functions.%s\n\n"\
-                                       "\rdx must be a positive number.\n",\
-                                       VarToString(FuncName));\
-        return NULL;\
-    }\
-    \
-    if (typenum == NPY_FLOAT)\
-    {\
-        float *y;\
-        y = (float *)malloc(dim*sizeof(float));\
-        _get_one_real_from_two_real(((float *)data), dx, y, dim,\
-                                     CName##_Float);\
-        output = PyArray_SimpleNewFromData(1, &dim, NPY_FLOAT, (void *)y);\
-        capsule = PyCapsule_New(y, NULL, capsule_cleanup);\
-    }\
-    else if (typenum == NPY_LONGDOUBLE)\
-    {\
-        long double *y;\
-        y = (long double *)malloc(dim*sizeof(long double));\
-        _get_one_real_from_two_real(((long double *)data), dx, y, dim,\
-                                     CName##_Long_Double);\
-        output = PyArray_SimpleNewFromData(1, &dim, NPY_LONGDOUBLE, (void *)y);\
-        capsule = PyCapsule_New(y, NULL, capsule_cleanup);\
-    }\
-    else\
-    {\
-        double *y;\
-        y = (double *)malloc(dim*sizeof(double));\
-        \
-        if (typenum == NPY_DOUBLE)\
-            _get_one_real_from_two_real(((double *)data), dx, y, dim,\
-                                         CName##_Double);\
-        else if (typenum == NPY_BYTE)\
-            _get_one_real_from_two_real(((char *)data), dx, y, dim,\
-                                         CName##_Char);\
-        else if (typenum == NPY_UBYTE)\
-            _get_one_real_from_two_real(((unsigned char *)data), dx, y, dim,\
-                                         CName##_UChar);\
-        else if (typenum == NPY_SHORT)\
-            _get_one_real_from_two_real(((short *)data), dx, y, dim,\
-                                         CName##_Short);\
-        else if (typenum == NPY_USHORT)\
-            _get_one_real_from_two_real(((unsigned short *)data), dx, y, dim,\
-                                         CName##_UShort);\
-        else if (typenum == NPY_INT)\
-            _get_one_real_from_two_real(((int *)data), dx, y, dim,\
-                                         CName##_Int);\
-        else if (typenum == NPY_UINT)\
-            _get_one_real_from_two_real(((unsigned int *)data), dx, y, dim,\
-                                         CName##_UInt);\
-        else if (typenum == NPY_LONG)\
-            _get_one_real_from_two_real(((long *)data), dx, y, dim,\
-                                         CName##_Long);\
-        else if (typenum == NPY_ULONG)\
-            _get_one_real_from_two_real(((unsigned long *)data), dx, y, dim,\
-                                         CName##_ULong);\
-        else if (typenum == NPY_LONGLONG)\
-            _get_one_real_from_two_real(((long long *)data), dx, y, dim,\
-                                         CName##_Long_Long);\
-        else if (typenum == NPY_ULONG)\
-            _get_one_real_from_two_real(((unsigned long long *)data), dx, y,\
-                                         dim, CName##_ULong_Long);\
-        else\
-        {\
-            PyErr_Format(PyExc_TypeError,\
-                         "\n\rError Encountered: rss_ringoccs\n"\
-                         "\r\tdiffrec.special_functions.%s\n\n"\
-                         "\rInvalid data type for input array. Input should\n"\
-                         "\rbe a 1-dimensional numpy array of real numbers.\n",\
-                         VarToString(FuncName));\
-            return NULL;\
-        }\
-        \
-        output = PyArray_SimpleNewFromData(1, &dim, NPY_DOUBLE, (void *)y);\
-        capsule = PyCapsule_New(y, NULL, capsule_cleanup);\
-    }\
-    \
-    /*  This frees the variable at the Python level once it's destroyed.     */\
-    PyArray_SetBaseObject((PyArrayObject *)output, capsule);\
-    \
-    /*  Return the results to Python.                                        */\
-    return Py_BuildValue("N", output);\
-}
 
 /******************************************************************************
  *--------------------Single Slit Fraunhofer Diffraction----------------------*
@@ -701,200 +555,6 @@ Where_Lesser_Double(double *data, long dim, double threshold);
 
 extern long **
 Where_Lesser_Long_Double(long double *data, long dim, long double threshold);
-
-/*-------------Ringlet Diffraction Using Fresnel Approximation----------------*/
-
-extern complex float
-Ringlet_Diffraction_Float(float x, float a, float b, float F);
-
-extern complex double
-Ringlet_Diffraction_Double(double x, double a, double b, double F);
-
-extern complex long double
-Ringlet_Diffraction_Long_Double(long double x, long double a,
-                                long double b, long double F);
-
-extern double
-Ringlet_Diffraction_Char(char x, double a, double b, double F);
-
-extern double
-Ringlet_Diffraction_UChar(unsigned char x, double a, double b, double F);
-
-extern double
-Ringlet_Diffraction_Short(short x, double a, double b, double F);
-
-extern double
-Ringlet_Diffraction_UShort(unsigned short x, double a, double b, double F);
-
-extern double
-Ringlet_Diffraction_Int(int x, double a, double b, double F);
-
-extern double
-Ringlet_Diffraction_UInt(unsigned int x, double a, double b, double F);
-
-extern double
-Ringlet_Diffraction_Long(long x, double a, double b, double F);
-
-extern double
-Ringlet_Diffraction_ULong(unsigned long x, double a, double b, double F);
-
-extern double
-Ringlet_Diffraction_Long_Long(long long x, double a, double b, double F);
-
-extern double
-Ringlet_Diffraction_ULong_Long(unsigned long long x, double a,
-                               double b, double F);
-
-/*----------------Gap Diffraction Using Fresnel Approximation-----------------*/
-
-extern complex float
-Gap_Diffraction_Float(float x, float a, float b, float F);
-
-extern complex double
-Gap_Diffraction_Double(double x, double a, double b, double F);
-
-extern complex long double
-Gap_Diffraction_Long_Double(long double x, long double a,
-                            long double b, long double F);
-
-extern double
-Gap_Diffraction_Char(char x, double a, double b, double F);
-
-extern double
-Gap_Diffraction_UChar(unsigned char x, double a, double b, double F);
-
-extern double
-Gap_Diffraction_Short(short x, double a, double b, double F);
-
-extern double
-Gap_Diffraction_UShort(unsigned short x, double a, double b, double F);
-
-extern double
-Gap_Diffraction_Int(int x, double a, double b, double F);
-
-extern double
-Gap_Diffraction_UInt(unsigned int x, double a, double b, double F);
-
-extern double
-Gap_Diffraction_Long(long x, double a, double b, double F);
-
-extern double
-Gap_Diffraction_ULong(unsigned long x, double a, double b, double F);
-
-extern double
-Gap_Diffraction_Long_Long(long long x, double a, double b, double F);
-
-extern double
-Gap_Diffraction_ULong_Long(unsigned long long x, double a,
-                           double b, double F);
-
-/*-----------Ringlet Diffraction Phase Using Fresnel Approximation------------*/
-
-extern float
-Ringlet_Diffraction_Phase_Float(float x, float a, float b, float F);
-
-extern double
-Ringlet_Diffraction_Phase_Double(double x, double a, double b, double F);
-
-extern long double
-Ringlet_Diffraction_Phase_Long_Double(long double x, long double a,
-                                      long double b, long double F);
-
-/*--------Right Straight-Edge Diffraction Using Fresnel Approximation---------*/
-
-extern complex float
-Right_Straightedge_Diffraction_Float(float x, float edge, float F);
-
-extern complex double
-Right_Straightedge_Diffraction_Double(double x, double edge, double F);
-
-extern complex long double
-Right_Straightedge_Diffraction_Long_Double(long double x, long double edge,
-                                           long double F);
-
-extern double
-Right_Straightedge_Diffraction_Char(char x, double a, double F);
-
-extern double
-Right_Straightedge_Diffraction_UChar(unsigned char x, double a, double F);
-
-extern double
-Right_Straightedge_Diffraction_Short(short x, double a, double F);
-
-extern double
-Right_Straightedge_Diffraction_UShort(unsigned short x, double a, double F);
-
-extern double
-Right_Straightedge_Diffraction_Int(int x, double a, double F);
-
-extern double
-Right_Straightedge_Diffraction_UInt(unsigned int x, double a, double F);
-
-extern double
-Right_Straightedge_Diffraction_Long(long x, double a, double F);
-
-extern double
-Right_Straightedge_Diffraction_ULong(unsigned long x, double a, double F);
-
-extern double
-Right_Straightedge_Diffraction_Long_Long(long long x, double a, double F);
-
-extern double
-Right_Straightedge_Diffraction_ULong_Long(unsigned long long x,
-                                          double a, double F);
-
-/*---------Left Straight-Edge Diffraction Using Fresnel Approximation---------*/
-
-extern complex float
-Left_Straightedge_Diffraction_Float(float x, float edge, float F);
-
-extern complex double
-Left_Straightedge_Diffraction_Double(double x, double edge, double F);
-
-extern complex long double
-Left_Straightedge_Diffraction_Long_Double(long double x, long double edge,
-                                          long double F);
-
-extern complex float
-Left_Straightedge_Diffraction_Float(float x, float edge, float F);
-
-extern complex double
-Left_Straightedge_Diffraction_Double(double x, double edge, double F);
-
-extern complex long double
-Left_Straightedge_Diffraction_Long_Double(long double x, long double edge,
-                                          long double F);
-
-extern double
-Left_Straightedge_Diffraction_Char(char x, double a, double F);
-
-extern double
-Left_Straightedge_Diffraction_UChar(unsigned char x, double a, double F);
-
-extern double
-Left_Straightedge_Diffraction_Short(short x, double a, double F);
-
-extern double
-Left_Straightedge_Diffraction_UShort(unsigned short x, double a, double F);
-
-extern double
-Left_Straightedge_Diffraction_Int(int x, double a, double F);
-
-extern double
-Left_Straightedge_Diffraction_UInt(unsigned int x, double a, double F);
-
-extern double
-Left_Straightedge_Diffraction_Long(long x, double a, double F);
-
-extern double
-Left_Straightedge_Diffraction_ULong(unsigned long x, double a, double F);
-
-extern double
-Left_Straightedge_Diffraction_Long_Long(long long x, double a, double F);
-
-extern double
-Left_Straightedge_Diffraction_ULong_Long(unsigned long long x,
-                                         double a, double F);
 
 /*------------Square Wave Diffraction Using Fresnel Approximation-------------*/
 extern complex double

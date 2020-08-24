@@ -107,3 +107,7 @@ long double Ringlet_Diffraction_Phase_Long_Double(long double x, long double a,
          Fresnel_Sin_Long_Double(b) - Fresnel_Sin_Long_Double(a));
     return atan2(im, re);
 }
+
+/*  For all integer types, convert to double and compute.                     */
+RSSRINGOCCSNonFloatInputFourVarForFloatOutput(Ringlet_Diffraction_Phase,
+                                              double);

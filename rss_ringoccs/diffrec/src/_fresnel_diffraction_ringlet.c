@@ -98,53 +98,5 @@ Ringlet_Diffraction_Long_Double(long double x, long double a,
 }
 
 /*  For all integer types, convert to double and compute.                     */
-double Ringlet_Diffraction_Char(char x, double a, double b, double F)
-{
-    return Ringlet_Diffraction_Double((double)x, a, b, F);
-}
-
-double Ringlet_Diffraction_UChar(unsigned char x, double a, double b, double F)
-{
-    return Ringlet_Diffraction_Double((double)x, a, b, F);
-}
-
-double Ringlet_Diffraction_Short(short x, double a, double b, double F)
-{
-    return Ringlet_Diffraction_Double((double)x, a, b, F);
-}
-
-double Ringlet_Diffraction_UShort(unsigned short x, double a, double b, double F)
-{
-    return Ringlet_Diffraction_Double((double)x, a, b, F);
-}
-
-double Ringlet_Diffraction_Int(int x, double a, double b, double F)
-{
-    return Ringlet_Diffraction_Double((double)x, a, b, F);
-}
-
-double Ringlet_Diffraction_UInt(unsigned int x, double a, double b, double F)
-{
-    return Ringlet_Diffraction_Double((double)x, a, b, F);
-}
-
-double Ringlet_Diffraction_Long(long x, double a, double b, double F)
-{
-    return Ringlet_Diffraction_Double((double)x, a, b, F);
-}
-
-double Ringlet_Diffraction_ULong(unsigned long x, double a, double b, double F)
-{
-    return Ringlet_Diffraction_Double((double)x, a, b, F);
-}
-
-double Ringlet_Diffraction_Long_Long(long long x, double a, double b, double F)
-{
-    return Ringlet_Diffraction_Double((double)x, a, b, F);
-}
-
-double Ringlet_Diffraction_ULong_Long(unsigned long long x, double a,
-                                      double b, double F)
-{
-    return Ringlet_Diffraction_Double((double)x, a, b, F);
-}
+RSSRINGOCCSNonFloatInputFourVarForFloatOutput(Ringlet_Diffraction,
+                                              complex double);

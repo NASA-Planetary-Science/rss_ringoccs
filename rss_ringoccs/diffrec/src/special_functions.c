@@ -10,6 +10,8 @@
 /*  compute_norm_eq, max and min found here. math.h included here as well.    */
 #include "_diffraction_functions.h"
 #include "_fresnel_kernel.h"
+#include <string.h>
+#include <ctype.h>
 
 /*---------------------------DEFINE PYTHON FUNCTIONS--------------------------*
  *  This contains the Numpy-C and Python-C API parts that allow for the above *
@@ -329,8 +331,6 @@ static PyObject * FuncName(PyObject *self, PyObject *args)\
     return Py_BuildValue("N", output);                                      \
 }
 
-
-
 /*  This function frees the memory allocated to a pointer by malloc when the  *
  *  corresponding variable is destroyed at the Python level.                  */
 static void capsule_cleanup(PyObject *capsule)
@@ -477,22 +477,29 @@ static PyObject *fresnel_transform(PyObject *self, PyObject *args)
     PyArrayObject *kd_vals, *B_rad_vals,  *D_km_vals, *w_km_vals;
     long start, n_used;
     int i;
-    unsigned char wtype, use_norm, use_fft, use_fwd, order, interp;
+    unsigned char use_norm, use_fft, use_fwd, interp;
+    const char *wtype;
+    const char *psitype;
     double ecc, peri;
 
+    size_t fresnel_len = strlen("fresnel");
+    int BaseTen = 10;
 
-    if (!(PyArg_ParseTuple(args, "O!O!O!O!O!O!O!O!Ollbbbbbbdd",
-                           &PyArray_Type, &T_in,
-                           &PyArray_Type, &rho_km_vals,
-                           &PyArray_Type, &F_km_vals,
-                           &PyArray_Type, &phi_rad_vals,
-                           &PyArray_Type, &kd_vals,
-                           &PyArray_Type, &B_rad_vals,
-                           &PyArray_Type, &D_km_vals,
-                           &PyArray_Type, &w_km_vals,
-                           &perturb_list, &start, &n_used,
-                           &wtype, &use_norm, &use_fwd, &use_fft,
-                           &order, &interp, &ecc, &peri))){ 
+    if (!(PyArg_ParseTuple(args, "O!O!O!O!O!O!O!O!Ollsspppbdd",
+                           &PyArray_Type,   &T_in,
+                           &PyArray_Type,   &rho_km_vals,
+                           &PyArray_Type,   &F_km_vals,
+                           &PyArray_Type,   &phi_rad_vals,
+                           &PyArray_Type,   &kd_vals,
+                           &PyArray_Type,   &B_rad_vals,
+                           &PyArray_Type,   &D_km_vals,
+                           &PyArray_Type,   &w_km_vals,
+                           &perturb_list,   &start,
+                           &n_used,         &wtype,
+                           &psitype,        &use_norm,
+                           &use_fwd,        &use_fft,
+                           &interp,         &ecc,
+                           &peri))){ 
         PyErr_Format(
             PyExc_TypeError,
             "\n\rError Encountered: rss_ringoccs\n"
@@ -509,9 +516,10 @@ static PyObject *fresnel_transform(PyObject *self, PyObject *args)
             "\r\tw_km_vals:   \t1-D real numpy array\n"
             "\r\tstart:       \tPositive integer\n"
             "\r\tn_used:      \tPositive integer\n"
-            "\r\twtype:       \tPositive integer\n"
-            "\r\tuse_norm:    \tPositive integer\n"
-            "\r\tuse_fwd:     \tPositive integer\n"
+            "\r\twtype:       \tString\n"
+            "\r\tuse_norm:    \tBoolean\n"
+            "\r\tuse_fwd:     \tBoolean\n"
+            "\r\tuse_fft:     \tBoolean\n"
             "\r\torder:       \tPositive integer\n"
             "\r\tecc:         \tReal number\n"
             "\r\tperi:        \tReal number\n\n"
@@ -521,19 +529,89 @@ static PyObject *fresnel_transform(PyObject *self, PyObject *args)
             "\r\tdouble or float. Set this in Python with\n"
             "\r\tastype(numpy.float) or astype(numpy.float64).\n\n"
             "\r\tAlso note, order should be between 0 and 256."
-
         );
         return NULL;
     }
 
+    /*  Create an instance of the DLP Object which will contain the data.     */
     DLPObj dlp;
+
+    /*  Get the size of the wtype and psitype strings.                        */
+    size_t wtype_length = strlen(wtype);
+    size_t psitype_length = strlen(psitype);
+
+    /*  Create variables to convert wtype and psitype to lowercase.           */
+    char *wtype_lowercase   = malloc(sizeof(char) * wtype_length + 1);
+    char *psitype_lowercase = malloc(sizeof(char) * wtype_length + 1);
+
+    /*  Make a copy of the wtype from Python. Do NOT alter wtype itself.      */
+    strcpy(wtype_lowercase, wtype);
+    strcpy(psitype_lowercase, psitype);
+
+    /*  Loop over the strings and convert to lower case.                      */
+    for (i=0; i<wtype_length; ++i)   wtype_lowercase[i]   = tolower(wtype[i]);
+    for (i=0; i<psitype_length; ++i) psitype_lowercase[i] = tolower(psitype[i]);
+    
+    dlp.wtype   = wtype_lowercase;
+    dlp.psitype = psitype_lowercase;
+
+    if (!(strcmp(dlp.wtype, "rect")) && !(strcmp(dlp.wtype, "coss")) &&
+        !(strcmp(dlp.wtype, "rect")) && !(strcmp(dlp.wtype, "coss")) &&
+        !(strcmp(dlp.wtype, "rect")) && !(strcmp(dlp.wtype, "coss"))){
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.fresnel_transform\n\n"
+            "\r\tIllegal string for wtype. Allowed strings are:\n"
+            "\r\t\trect:    Rectangular Window\n"
+            "\r\t\tcoss:    Squared Cosine Window\n"
+            "\r\t\tkb20:    Kaiser-Bessel with alpha=2.0 pi\n"
+            "\r\t\tkb25:    Kaiser-Bessel with alpha=2.5 pi\n"
+            "\r\t\tkb35:    Kaiser-Bessel with alpha=3.5 pi\n"
+            "\r\t\tkbmd20:  Modified Kaiser-Bessel with alpha=2.0 pi\n"
+            "\r\t\tkbmd25:  Modified Kaiser-Bessel with alpha=2.5 pi\n"
+            "\r\t\tkbmd35:  Modified Kaiser-Bessel with alpha=3.5 pi\n"
+        );
+        return NULL;
+    }
+
+    if (!(strcmp(dlp.psitype, "newton")) && !(strstr(dlp.psitype, "fresnel")))
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.fresnel_transform\n\n"
+            "\r\tIllegal string for psitype. Allowed strings are:\n"
+            "\r\t\tnewton:     Newton-Raphson method\n"
+            "\r\t\tfresnel:    Quadratic Fresnel approximation\n"
+            "\r\t\tfresnel:    Legendre polynomial approximation with 1<n<256\n"
+        );
+        return NULL;
+    }
+
+    if      (strcmp(dlp.psitype, "fresnel") == 0) dlp.order = 1;
+    else if (strcmp(dlp.psitype, "newton") == 0)  dlp.order = 0;
+    else if (strncmp(dlp.psitype, "fresnel", fresnel_len) == 0){
+        const char *psitype_num = &dlp.psitype[fresnel_len];
+        dlp.order = strtol(psitype_num, NULL, BaseTen);
+    }
+    else {
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.fresnel_transform\n\n"
+            "\r\tIllegal string for psitype. Allowed strings are:\n"
+            "\r\t\tnewton:     Newton-Raphson method\n"
+            "\r\t\tfresnel:    Quadratic Fresnel approximation\n"
+            "\r\t\tfresnel:    Legendre polynomial approximation with 1<n<256\n"
+        );
+        return NULL;
+    }
 
     dlp.start    = start;
     dlp.n_used   = n_used;
-    dlp.wtype    = wtype;
     dlp.use_norm = use_norm;
     dlp.use_fwd  = use_fwd;
-    dlp.order    = order;
     dlp.ecc      = ecc;
     dlp.peri     = peri;
     dlp.interp   = interp;
@@ -573,7 +651,6 @@ static PyObject *fresnel_transform(PyObject *self, PyObject *args)
             );
         }
     }
-
 
     dlp.arr_size = PyArray_DIMS(T_in)[0];
 
@@ -902,6 +979,23 @@ static PyObject *fresnel_transform(PyObject *self, PyObject *args)
             "\rError Encountered: rss_ringoccs"
             "\r\tspecial_functions.fresnel_transform\n\n"
             "\rInterp should be either 0, 2, 3, or 4."
+        );
+        return NULL;
+    }
+    else if (dlp.status == 5){
+        PyErr_Format(
+            PyExc_MemoryError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.fresnel_transform\n\n"
+            "\r\tIllegal string for wtype. Allowed string are:\n"
+            "\r\t\trect\t\tRectangular Window\n"
+            "\r\t\tcoss\t\tSquared Cosine Window\n"
+            "\r\t\tkb20\t\tKaiser-Bessel with alpha=2.0 pi\n"
+            "\r\t\tkb25\t\tKaiser-Bessel with alpha=2.5 pi\n"
+            "\r\t\tkb35\t\tKaiser-Bessel with alpha=3.5 pi\n"
+            "\r\t\tkbmd20\t\tModified Kaiser-Bessel with alpha=2.0 pi\n"
+            "\r\t\tkbmd25\t\tModified Kaiser-Bessel with alpha=2.5 pi\n"
+            "\r\t\tkbmd35\t\tModified Kaiser-Bessel with alpha=3.5 pi\n"
         );
         return NULL;
     }

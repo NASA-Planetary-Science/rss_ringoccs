@@ -7,6 +7,10 @@
 #include <numpy/ufuncobject.h>
 #include "special_functions.h"
 
+/*  compute_norm_eq, max and min found here. math.h included here as well.    */
+#include "_diffraction_functions.h"
+#include "_fresnel_kernel.h"
+
 /*---------------------------DEFINE PYTHON FUNCTIONS--------------------------*
  *  This contains the Numpy-C and Python-C API parts that allow for the above *
  *  functions to be called in Python. Numpy arrays, as well as floating point *
@@ -23,23 +27,17 @@ static void capsule_cleanup(PyObject *capsule)
     free(memory);
 }
 
-/*  Load the various functions for the module.                                */
-#include "_window_norm.h"
-#include "_kbal.h"
-#include "_kbmdal.h"
-#include "_minmax.h"
-
-/* All wrapper functions defined within these files.                          */
-#include "_physics_functions_wrappers.h"
-
 /*  Generate the code for the functions. These preprocessor functions are     *
  *  defined in special_functions.h.                                           */
 OneVarFunctionForNumpy(besselJ0, BesselJ0);
 OneVarFunctionForNumpy(besselI0, BesselI0);
 OneVarFunctionForNumpy(sinc, Sinc);
-OneVarFunctionForNumpy(fresnel_sin, Fresnel_Sine_Taylor_to_Asymptotic);
-OneVarFunctionForNumpy(fresnel_cos, Fresnel_Cosine_Taylor_to_Asymptotic);
+OneVarFunctionForNumpy(fresnel_sin, Fresnel_Sin);
+OneVarFunctionForNumpy(fresnel_cos, Fresnel_Cos);
 OneVarFunctionForNumpy(lambertw, LambertW);
+OneVarFunctionForNumpy(wavelength_to_wavenumber, Wavelength_To_Wavenumber);
+OneVarFunctionForNumpy(frequency_to_wavelength, Frequency_To_Wavelength);
+OneVarFunctionForNumpy(resolution_inverse, Resolution_Inverse);
 WindowFunctionForNumpy(rect, Rect_Window);
 WindowFunctionForNumpy(coss, Coss_Window);
 WindowFunctionForNumpy(kb20, Kaiser_Bessel_2_0);
@@ -707,7 +705,7 @@ static PyObject *gap_diffraction(PyObject *self, PyObject *args)
     if (typenum == NPY_FLOAT){
         complex float *T_hat;
         T_hat = (complex float *)malloc(dim*sizeof(complex float));
-        __get_complex_from_four_real(((float *)data), a, b, F, T_hat,
+        _get_complex_from_four_real(((float *)data), a, b, F, T_hat,
                                      dim, Gap_Diffraction_Float);
         output = PyArray_SimpleNewFromData(1, &dim, NPY_CFLOAT, (void *)T_hat);
         capsule = PyCapsule_New(T_hat, NULL, capsule_cleanup);
@@ -715,7 +713,7 @@ static PyObject *gap_diffraction(PyObject *self, PyObject *args)
     else if (typenum == NPY_DOUBLE){
         complex double *T_hat;
         T_hat = (complex double *)malloc(dim*sizeof(complex double));
-        __get_complex_from_four_real(((double *)data), a, b, F, T_hat, dim,
+        _get_complex_from_four_real(((double *)data), a, b, F, T_hat, dim,
                                      Gap_Diffraction_Double);
         output = PyArray_SimpleNewFromData(1, &dim, NPY_CDOUBLE, (void *)T_hat);
         capsule = PyCapsule_New(T_hat, NULL, capsule_cleanup);
@@ -723,7 +721,7 @@ static PyObject *gap_diffraction(PyObject *self, PyObject *args)
     else if (typenum == NPY_LONGDOUBLE){
         complex long double *T_hat;
         T_hat = (complex long double *)malloc(dim*sizeof(complex long double));
-        __get_complex_from_four_real(((long double *)data), a, b, F, T_hat,
+        _get_complex_from_four_real(((long double *)data), a, b, F, T_hat,
                                      dim, Gap_Diffraction_Long_Double);
         output = PyArray_SimpleNewFromData(1, &dim, NPY_CLONGDOUBLE,
                                            (void *)T_hat);
@@ -734,43 +732,43 @@ static PyObject *gap_diffraction(PyObject *self, PyObject *args)
         T_hat = (complex double *)malloc(dim*sizeof(complex double));
 
         if (typenum == NPY_BYTE){
-            __get_complex_from_four_real(((char *)data), a, b, F, T_hat, dim,
+            _get_complex_from_four_real(((char *)data), a, b, F, T_hat, dim,
                                          Gap_Diffraction_Char);
         }
         else if (typenum == NPY_UBYTE){
-            __get_complex_from_four_real(((unsigned char *)data), a, b, F,
+            _get_complex_from_four_real(((unsigned char *)data), a, b, F,
                                          T_hat, dim, Gap_Diffraction_UChar);
         }
         else if (typenum == NPY_SHORT){
-            __get_complex_from_four_real(((short *)data), a, b, F, T_hat, dim,
+            _get_complex_from_four_real(((short *)data), a, b, F, T_hat, dim,
                                          Gap_Diffraction_Short);
         }
         else if (typenum == NPY_USHORT){
-            __get_complex_from_four_real(((unsigned short *)data), a, b, F,
+            _get_complex_from_four_real(((unsigned short *)data), a, b, F,
                                          T_hat, dim, Gap_Diffraction_UShort);
         }
         else if (typenum == NPY_INT){
-            __get_complex_from_four_real(((int *)data), a, b, F, T_hat, dim,
+            _get_complex_from_four_real(((int *)data), a, b, F, T_hat, dim,
                                          Gap_Diffraction_Int);
         }
         else if (typenum == NPY_UINT){
-            __get_complex_from_four_real(((unsigned int *)data), a, b, F, T_hat,
+            _get_complex_from_four_real(((unsigned int *)data), a, b, F, T_hat,
                                          dim, Gap_Diffraction_UInt);
         }
         else if (typenum == NPY_LONG){
-            __get_complex_from_four_real(((long *)data), a, b, F, T_hat, dim,
+            _get_complex_from_four_real(((long *)data), a, b, F, T_hat, dim,
                                          Gap_Diffraction_Long);
         }
         else if (typenum == NPY_ULONG){
-            __get_complex_from_four_real(((unsigned long *)data), a, b, F,
+            _get_complex_from_four_real(((unsigned long *)data), a, b, F,
                                          T_hat, dim, Gap_Diffraction_ULong);
         }
         else if (typenum == NPY_LONGLONG){
-            __get_complex_from_four_real(((long long *)data), a, b, F, T_hat,
+            _get_complex_from_four_real(((long long *)data), a, b, F, T_hat,
                                          dim, Gap_Diffraction_Long_Long);
         }
         else if (typenum == NPY_ULONG){
-            __get_complex_from_four_real(((unsigned long long *)data), a, b, F,
+            _get_complex_from_four_real(((unsigned long long *)data), a, b, F,
                                          T_hat, dim,
                                          Gap_Diffraction_ULong_Long);
         }
@@ -877,7 +875,7 @@ static PyObject *ringlet_diffraction(PyObject *self, PyObject *args)
         complex float *T_hat;
         T_hat = (complex float *)malloc(dim*sizeof(complex float));
 
-        __get_complex_from_four_real(
+        _get_complex_from_four_real(
             ((float *)data), a, b, F, T_hat, dim,
             Ringlet_Diffraction_Float
         );
@@ -889,7 +887,7 @@ static PyObject *ringlet_diffraction(PyObject *self, PyObject *args)
         complex long double *T_hat;
         T_hat = (complex long double *)malloc(dim*sizeof(complex long double));
 
-        __get_complex_from_four_real(
+        _get_complex_from_four_real(
             ((long double *)data), a, b, F, T_hat, dim,
             Ringlet_Diffraction_Long_Double
         );
@@ -903,50 +901,50 @@ static PyObject *ringlet_diffraction(PyObject *self, PyObject *args)
         T_hat = (complex double *)malloc(dim*sizeof(complex double));
 
         if (typenum == NPY_DOUBLE){
-            __get_complex_from_four_real(
+            _get_complex_from_four_real(
                 ((double *)data), a, b, F, T_hat, dim,
                 Ringlet_Diffraction_Double
             );
         }
         else if (typenum == NPY_BYTE){
-            __get_complex_from_four_real(((char *)data), a, b, F, T_hat, dim,
+            _get_complex_from_four_real(((char *)data), a, b, F, T_hat, dim,
                                          Ringlet_Diffraction_Char);
         }
         else if (typenum == NPY_UBYTE){
-            __get_complex_from_four_real(((unsigned char *)data), a, b, F,
+            _get_complex_from_four_real(((unsigned char *)data), a, b, F,
                                          T_hat, dim, Ringlet_Diffraction_UChar);
         }
         else if (typenum == NPY_SHORT){
-            __get_complex_from_four_real(((short *)data), a, b, F, T_hat, dim,
+            _get_complex_from_four_real(((short *)data), a, b, F, T_hat, dim,
                                          Ringlet_Diffraction_Short);
         }
         else if (typenum == NPY_USHORT){
-            __get_complex_from_four_real(((unsigned short *)data), a, b, F,
+            _get_complex_from_four_real(((unsigned short *)data), a, b, F,
                                          T_hat, dim,
                                          Ringlet_Diffraction_UShort);
         }
         else if (typenum == NPY_INT){
-            __get_complex_from_four_real(((int *)data), a, b, F, T_hat, dim,
+            _get_complex_from_four_real(((int *)data), a, b, F, T_hat, dim,
                                          Ringlet_Diffraction_Int);
         }
         else if (typenum == NPY_UINT){
-            __get_complex_from_four_real(((unsigned int *)data), a, b, F, T_hat,
+            _get_complex_from_four_real(((unsigned int *)data), a, b, F, T_hat,
                                          dim, Ringlet_Diffraction_UInt);
         }
         else if (typenum == NPY_LONG){
-            __get_complex_from_four_real(((long *)data), a, b, F, T_hat, dim,
+            _get_complex_from_four_real(((long *)data), a, b, F, T_hat, dim,
                                          Ringlet_Diffraction_Long);
         }
         else if (typenum == NPY_ULONG){
-            __get_complex_from_four_real(((unsigned long *)data), a, b, F,
+            _get_complex_from_four_real(((unsigned long *)data), a, b, F,
                                          T_hat, dim, Ringlet_Diffraction_ULong);
         }
         else if (typenum == NPY_LONGLONG){
-            __get_complex_from_four_real(((long long *)data), a, b, F, T_hat,
+            _get_complex_from_four_real(((long long *)data), a, b, F, T_hat,
                                          dim, Ringlet_Diffraction_Long_Long);
         }
         else if (typenum == NPY_ULONG){
-            __get_complex_from_four_real(((unsigned long long *)data), a, b, F,
+            _get_complex_from_four_real(((unsigned long long *)data), a, b, F,
                                          T_hat, dim,
                                          Ringlet_Diffraction_ULong_Long);
         }
@@ -1043,7 +1041,7 @@ static PyObject *right_straightedge(PyObject *self, PyObject *args)
         complex float *T_hat;
         T_hat = (complex float *)malloc(dim*sizeof(complex float));
 
-        __get_complex_from_three_real(
+        _get_complex_from_three_real(
             ((float *)data), a, F, T_hat, dim,
             Right_Straightedge_Diffraction_Float
         );
@@ -1055,7 +1053,7 @@ static PyObject *right_straightedge(PyObject *self, PyObject *args)
         complex long double *T_hat;
         T_hat = (complex long double *)malloc(dim*sizeof(complex long double));
 
-        __get_complex_from_three_real(
+        _get_complex_from_three_real(
             ((long double *)data), a, F, T_hat, dim,
             Right_Straightedge_Diffraction_Long_Double
         );
@@ -1069,65 +1067,65 @@ static PyObject *right_straightedge(PyObject *self, PyObject *args)
         T_hat = (complex double *)malloc(dim*sizeof(complex double));
 
         if (typenum == NPY_DOUBLE){
-            __get_complex_from_three_real(
+            _get_complex_from_three_real(
                 ((double *)data), a, F, T_hat, dim,
                 Right_Straightedge_Diffraction_Double
             );
         }
         else if (typenum == NPY_BYTE){
-            __get_complex_from_three_real(
+            _get_complex_from_three_real(
                 ((char *)data), a, F, T_hat, dim,
                 Right_Straightedge_Diffraction_Char
             );
         }
         else if (typenum == NPY_UBYTE){
-            __get_complex_from_three_real(
+            _get_complex_from_three_real(
                 ((unsigned char *)data), a, F, T_hat, dim,
                 Right_Straightedge_Diffraction_UChar
             );
         }
         else if (typenum == NPY_SHORT){
-            __get_complex_from_three_real(
+            _get_complex_from_three_real(
                 ((short *)data), a, F, T_hat, dim,
                 Right_Straightedge_Diffraction_Short
             );
         }
         else if (typenum == NPY_USHORT){
-            __get_complex_from_three_real(
+            _get_complex_from_three_real(
                 ((unsigned short *)data), a, F, T_hat, dim,
                 Right_Straightedge_Diffraction_UShort
             );
         }
         else if (typenum == NPY_INT){
-            __get_complex_from_three_real(
+            _get_complex_from_three_real(
                 ((int *)data), a, F, T_hat, dim,
                 Right_Straightedge_Diffraction_Int
             );
         }
         else if (typenum == NPY_UINT){
-            __get_complex_from_three_real(
+            _get_complex_from_three_real(
                 ((unsigned int *)data), a, F, T_hat, dim,
                 Right_Straightedge_Diffraction_UInt);
         }
         else if (typenum == NPY_LONG){
-            __get_complex_from_three_real(
+            _get_complex_from_three_real(
                 ((long *)data), a, F, T_hat, dim,
                 Right_Straightedge_Diffraction_Long
             );
         }
         else if (typenum == NPY_ULONG){
-            __get_complex_from_three_real(
+            _get_complex_from_three_real(
                 ((unsigned long *)data), a, F, T_hat, dim,
                 Right_Straightedge_Diffraction_ULong
             );
         }
         else if (typenum == NPY_LONGLONG){
-            __get_complex_from_three_real(
+            _get_complex_from_three_real(
                 ((long long *)data), a, F, T_hat, dim,
                 Right_Straightedge_Diffraction_Long_Long);
         }
         else if (typenum == NPY_ULONG){
-            __get_complex_from_three_real(
+            _get_complex_from_three_real(
                 ((unsigned long long *)data), a, F, T_hat, dim,
                 Right_Straightedge_Diffraction_ULong_Long);
         }
@@ -1224,7 +1222,7 @@ static PyObject *left_straightedge(PyObject *self, PyObject *args)
         complex float *T_hat;
         T_hat = (complex float *)malloc(dim*sizeof(complex float));
 
-        __get_complex_from_three_real(
+        _get_complex_from_three_real(
             ((float *)data), a, F, T_hat, dim,
             Left_Straightedge_Diffraction_Float
         );
@@ -1236,7 +1234,7 @@ static PyObject *left_straightedge(PyObject *self, PyObject *args)
         complex long double *T_hat;
         T_hat = (complex long double *)malloc(dim*sizeof(complex long double));
 
-        __get_complex_from_three_real(
+        _get_complex_from_three_real(
             ((long double *)data), a, F, T_hat, dim,
             Left_Straightedge_Diffraction_Long_Double
         );
@@ -1250,65 +1248,65 @@ static PyObject *left_straightedge(PyObject *self, PyObject *args)
         T_hat = (complex double *)malloc(dim*sizeof(complex double));
 
         if (typenum == NPY_DOUBLE){
-            __get_complex_from_three_real(
+            _get_complex_from_three_real(
                 ((double *)data), a, F, T_hat, dim,
                 Left_Straightedge_Diffraction_Double
             );
         }
         else if (typenum == NPY_BYTE){
-            __get_complex_from_three_real(
+            _get_complex_from_three_real(
                 ((char *)data), a, F, T_hat, dim,
                 Left_Straightedge_Diffraction_Char
             );
         }
         else if (typenum == NPY_UBYTE){
-            __get_complex_from_three_real(
+            _get_complex_from_three_real(
                 ((unsigned char *)data), a, F, T_hat, dim,
                 Left_Straightedge_Diffraction_UChar
             );
         }
         else if (typenum == NPY_SHORT){
-            __get_complex_from_three_real(
+            _get_complex_from_three_real(
                 ((short *)data), a, F, T_hat, dim,
                 Left_Straightedge_Diffraction_Short
             );
         }
         else if (typenum == NPY_USHORT){
-            __get_complex_from_three_real(
+            _get_complex_from_three_real(
                 ((unsigned short *)data), a, F, T_hat, dim,
                 Left_Straightedge_Diffraction_UShort
             );
         }
         else if (typenum == NPY_INT){
-            __get_complex_from_three_real(
+            _get_complex_from_three_real(
                 ((int *)data), a, F, T_hat, dim,
                 Left_Straightedge_Diffraction_Int
             );
         }
         else if (typenum == NPY_UINT){
-            __get_complex_from_three_real(
+            _get_complex_from_three_real(
                 ((unsigned int *)data), a, F, T_hat, dim,
                 Left_Straightedge_Diffraction_UInt);
         }
         else if (typenum == NPY_LONG){
-            __get_complex_from_three_real(
+            _get_complex_from_three_real(
                 ((long *)data), a, F, T_hat, dim,
                 Left_Straightedge_Diffraction_Long
             );
         }
         else if (typenum == NPY_ULONG){
-            __get_complex_from_three_real(
+            _get_complex_from_three_real(
                 ((unsigned long *)data), a, F, T_hat, dim,
                 Left_Straightedge_Diffraction_ULong
             );
         }
         else if (typenum == NPY_LONGLONG){
-            __get_complex_from_three_real(
+            _get_complex_from_three_real(
                 ((long long *)data), a, F, T_hat, dim,
                 Left_Straightedge_Diffraction_Long_Long);
         }
         else if (typenum == NPY_ULONG){
-            __get_complex_from_three_real(
+            _get_complex_from_three_real(
                 ((unsigned long long *)data), a, F, T_hat, dim,
                 Left_Straightedge_Diffraction_ULong_Long);
         }
@@ -1406,7 +1404,7 @@ static PyObject *square_wave_diffraction(PyObject *self, PyObject *args)
 
     T_hat = (complex double *)malloc(dim*sizeof(complex double));
     if (typenum == NPY_DOUBLE){
-            __get_complex_from_four_real(
+            _get_complex_from_four_real(
                 ((double *)data), W, F, N, T_hat, dim,
                 Square_Wave_Diffraction_Double
             );
@@ -1717,6 +1715,648 @@ static PyObject *where_lesser(PyObject *self, PyObject *args)
         );
         return NULL;
     }
+}
+
+static PyObject *kbal(PyObject *self, PyObject *args)
+{
+    PyObject *output, *capsule;
+    PyArrayObject *x;
+    double dx, alpha;
+    char typenum;
+    long dim;
+    void *data;
+
+    if (!PyArg_ParseTuple(args, "O!dd", &PyArray_Type, &x, &dx, &alpha))
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.kbal\n\n"
+            "\rCould not parse inputs. Legal inputs are:\n"
+            "\r\tx:     Numpy Array of real numbers (Floats)\n"
+            "\r\tdx:    Positive real number (Float)\n"
+            "\rNotes:\n"
+            "\r\tx must be a non-empty one dimensional numpy array."
+        );
+        return NULL;
+    }
+
+    /*  Useful information about the data.                                */
+    typenum = (char)PyArray_TYPE(x);
+    dim     = PyArray_DIMS(x)[0];
+    data    = PyArray_DATA(x);
+
+    /*  Check the inputs to make sure they're valid.                          */
+    if (PyArray_NDIM(x) != 1)
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.kbal\n\n"
+            "\rInput numpy array is not one-dimensional.\n"
+        );
+        return NULL;
+    }
+    else if (dim == 0)
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.kbal\n\n"
+            "\rInput numpy array is empty.\n"
+        );
+        return NULL;
+    }
+
+    /*  Check that dx is positive.                                            */
+    if (dx <= 0)
+    {
+        PyErr_Format(
+            PyExc_ValueError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.kbal\n\n"
+            "\rdx must be a positive number.\n"
+        );
+        return NULL;
+    }
+    else if (alpha < 0)
+    {
+        PyErr_Format(
+            PyExc_ValueError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.kbal\n\n"
+            "\ralpha must be a non-negative number (float).\n"
+        );
+        return NULL;
+    }
+
+    if (typenum == NPY_FLOAT)
+    {
+        float *y;
+        y = (float *)malloc(dim*sizeof(float));
+        _get_one_real_from_three_real(((float *)data), dx, alpha, y, dim,
+                                     Kaiser_Bessel_Al_Float);
+        output = PyArray_SimpleNewFromData(1, &dim, NPY_FLOAT, (void *)y);
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);
+    }
+    else if (typenum == NPY_LONGDOUBLE)
+    {
+        long double *y;
+        y = (long double *)malloc(dim*sizeof(long double));
+        _get_one_real_from_three_real(((long double *)data), dx, alpha, y, dim,
+                                     Kaiser_Bessel_Al_Long_Double);
+        output = PyArray_SimpleNewFromData(1, &dim, NPY_LONGDOUBLE, (void *)y);
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);
+    }
+    else
+    {
+        double *y;
+        y = (double *)malloc(dim*sizeof(double));
+
+        if (typenum == NPY_DOUBLE)
+        {
+            _get_one_real_from_three_real(((double *)data), dx, alpha, y, dim,
+                                           Kaiser_Bessel_Al_Double);
+        }
+        else if (typenum == NPY_BYTE)
+        {
+            _get_one_real_from_three_real(((char *)data), dx, alpha, y, dim,
+                                           Kaiser_Bessel_Al_Char);
+        }
+        else if (typenum == NPY_UBYTE)
+        {
+            _get_one_real_from_three_real(((unsigned char *)data), dx, alpha,
+                                           y, dim, Kaiser_Bessel_Al_UChar);
+        }
+        else if (typenum == NPY_SHORT)
+        {
+            _get_one_real_from_three_real(((short *)data), dx, alpha, y, dim,
+                                           Kaiser_Bessel_Al_Short);
+        }
+        else if (typenum == NPY_USHORT)
+        {
+            _get_one_real_from_three_real(((unsigned short *)data), dx, alpha, y,
+                                           dim, Kaiser_Bessel_Al_UShort);
+        }
+        else if (typenum == NPY_INT)
+        {
+            _get_one_real_from_three_real(((int *)data), dx, alpha, y, dim,
+                                           Kaiser_Bessel_Al_Int);
+        }
+        else if (typenum == NPY_UINT)
+        {
+            _get_one_real_from_three_real(((unsigned int *)data), dx, alpha, y,
+                                           dim, Kaiser_Bessel_Al_UInt);
+        }
+        else if (typenum == NPY_LONG)
+        {
+            _get_one_real_from_three_real(((long *)data), dx, alpha, y, dim,
+                                           Kaiser_Bessel_Al_Long);
+        }
+        else if (typenum == NPY_ULONG)
+        {
+            _get_one_real_from_three_real(((unsigned long *)data), dx, alpha, y,
+                                           dim, Kaiser_Bessel_Al_ULong);
+        }
+        else if (typenum == NPY_LONGLONG)
+        {
+            _get_one_real_from_three_real(((long long *)data), dx, alpha, y, dim,
+                                           Kaiser_Bessel_Al_Long_Long);
+        }
+        else if (typenum == NPY_ULONG)
+        {
+            _get_one_real_from_three_real(((unsigned long long *)data), dx,
+                                           alpha, y, dim,
+                                           Kaiser_Bessel_Al_ULong_Long);
+        }
+        else
+        {
+            PyErr_Format(
+                PyExc_TypeError,
+                "\n\rError Encountered: rss_ringoccs\n"
+                "\r\tdiffrec.special_functions.kbal\n\n"
+                "\rInvalid data type for input numpy array. Input should be\n"
+                "\ra one dimensional numpy array of real numbers (float).\n"
+            );
+            return NULL;
+        }
+
+        output = PyArray_SimpleNewFromData(1, &dim, NPY_DOUBLE, (void *)y);
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);
+    }
+
+    /*  This frees the variable at the Python level once it's destroyed.      */
+    PyArray_SetBaseObject((PyArrayObject *)output, capsule);
+
+    /*  Return the results to Python.                                         */
+    return Py_BuildValue("N", output);
+}
+
+static PyObject *kbmdal(PyObject *self, PyObject *args)
+{
+    PyObject *output, *capsule;
+    PyArrayObject *x;
+    double dx, alpha;
+    char typenum;
+    long dim;
+    void *data;
+
+    if (!PyArg_ParseTuple(args, "O!dd", &PyArray_Type, &x, &dx, &alpha))
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.kbmdal\n\n"
+            "\rCould not parse inputs. Legal inputs are:\n"
+            "\r\tx:     Numpy Array of real numbers (Floats)\n"
+            "\r\tdx:    Positive real number (Float)\n"
+            "\rNotes:\n"
+            "\r\tx must be a non-empty one dimensional numpy array."
+        );
+        return NULL;
+    }
+
+    /*  Useful information about the data.                                */
+    typenum = (char)PyArray_TYPE(x);
+    dim     = PyArray_DIMS(x)[0];
+    data    = PyArray_DATA(x);
+
+    /*  Check the inputs to make sure they're valid.                          */
+    if (PyArray_NDIM(x) != 1)
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.kbmdal\n\n"
+            "\rInput numpy array is not one-dimensional.\n"
+        );
+        return NULL;
+    }
+    else if (dim == 0)
+    {
+        PyErr_Format(
+            PyExc_TypeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.kbmdal\n\n"
+            "\rInput numpy array is empty.\n"
+        );
+        return NULL;
+    }
+
+    /*  Check that dx is positive.                                            */
+    if (dx <= 0)
+    {
+        PyErr_Format(
+            PyExc_ValueError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.kbmdal\n\n"
+            "\rdx must be a positive number.\n"
+        );
+        return NULL;
+    }
+    else if (alpha < 0)
+    {
+        PyErr_Format(
+            PyExc_ValueError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.special_functions.kbmdal\n\n"
+            "\ralpha must be a non-negative number (float).\n"
+        );
+        return NULL;
+    }
+
+    if (typenum == NPY_FLOAT)
+    {
+        float *y;
+        y = (float *)malloc(dim*sizeof(float));
+        _get_one_real_from_three_real(((float *)data), dx, alpha, y, dim,
+                                     Modified_Kaiser_Bessel_Al_Float);
+        output = PyArray_SimpleNewFromData(1, &dim, NPY_FLOAT, (void *)y);
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);
+    }
+    else if (typenum == NPY_LONGDOUBLE)
+    {
+        long double *y;
+        y = (long double *)malloc(dim*sizeof(long double));
+        _get_one_real_from_three_real(((long double *)data), dx, alpha, y, dim,
+                                     Modified_Kaiser_Bessel_Al_Long_Double);
+        output = PyArray_SimpleNewFromData(1, &dim, NPY_LONGDOUBLE, (void *)y);
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);
+    }
+    else
+    {
+        double *y;
+        y = (double *)malloc(dim*sizeof(double));
+
+        if (typenum == NPY_DOUBLE)
+        {
+            _get_one_real_from_three_real(((double *)data), dx, alpha, y, dim,
+                                           Modified_Kaiser_Bessel_Al_Double);
+        }
+        else if (typenum == NPY_BYTE)
+        {
+            _get_one_real_from_three_real(((char *)data), dx, alpha, y, dim,
+                                           Modified_Kaiser_Bessel_Al_Char);
+        }
+        else if (typenum == NPY_UBYTE)
+        {
+            _get_one_real_from_three_real(((unsigned char *)data), dx,
+                                           alpha, y, dim,
+                                           Modified_Kaiser_Bessel_Al_UChar);
+        }
+        else if (typenum == NPY_SHORT)
+        {
+            _get_one_real_from_three_real(((short *)data), dx, alpha, y, dim,
+                                           Modified_Kaiser_Bessel_Al_Short);
+        }
+        else if (typenum == NPY_USHORT)
+        {
+            _get_one_real_from_three_real(((unsigned short *)data), dx,
+                                           alpha, y, dim,
+                                           Modified_Kaiser_Bessel_Al_UShort);
+        }
+        else if (typenum == NPY_INT)
+        {
+            _get_one_real_from_three_real(((int *)data), dx, alpha, y, dim,
+                                           Modified_Kaiser_Bessel_Al_Int);
+        }
+        else if (typenum == NPY_UINT)
+        {
+            _get_one_real_from_three_real(((unsigned int *)data), dx, alpha, y,
+                                           dim, Modified_Kaiser_Bessel_Al_UInt);
+        }
+        else if (typenum == NPY_LONG)
+        {
+            _get_one_real_from_three_real(((long *)data), dx, alpha, y, dim,
+                                           Modified_Kaiser_Bessel_Al_Long);
+        }
+        else if (typenum == NPY_ULONG)
+        {
+            _get_one_real_from_three_real(((unsigned long *)data), dx,
+                                           alpha, y, dim,
+                                           Modified_Kaiser_Bessel_Al_ULong);
+        }
+        else if (typenum == NPY_LONGLONG)
+        {
+            _get_one_real_from_three_real(((long long *)data), dx, alpha, y, dim,
+                                           Modified_Kaiser_Bessel_Al_Long_Long);
+        }
+        else if (typenum == NPY_ULONG)
+        {
+            _get_one_real_from_three_real(((unsigned long long *)data), dx,
+                                           alpha, y, dim,
+                                           Modified_Kaiser_Bessel_Al_ULong_Long);
+        }
+        else
+        {
+            PyErr_Format(
+                PyExc_TypeError,
+                "\n\rError Encountered: rss_ringoccs\n"
+                "\r\tdiffrec.special_functions.kbmdal\n\n"
+                "\rInvalid data type for input numpy array. Input should be\n"
+                "\ra one dimensional numpy array of real numbers (float).\n"
+            );
+            return NULL;
+        }
+
+        output = PyArray_SimpleNewFromData(1, &dim, NPY_DOUBLE, (void *)y);
+        capsule = PyCapsule_New(y, NULL, capsule_cleanup);
+    }
+
+    /*  This frees the variable at the Python level once it's destroyed.      */
+    PyArray_SetBaseObject((PyArrayObject *)output, capsule);
+
+    /*  Return the results to Python.                                         */
+    return Py_BuildValue("N", output);
+}
+
+static PyObject *max(PyObject *self, PyObject *args)
+{
+    PyArrayObject *arr;
+    PyObject *tuple = PyTuple_GetItem(args, 0);
+
+    if (PyLong_Check(tuple)){
+        long max;
+        if (PyArg_ParseTuple(args, "l", &max)){
+            return PyLong_FromLong(max);
+        }
+        else {
+            PyErr_Format(PyExc_TypeError,
+                         "\n\r\trss_ringoccs.diffrec.special_functions.max\n"
+                         "\r\t\tCould not parse int type input.");
+            return NULL;
+        }
+    }
+    else if (PyFloat_Check(tuple)){
+        double max;
+        if(PyArg_ParseTuple(args, "d", &max)){
+            return PyFloat_FromDouble(max);
+        }
+        else {
+            PyErr_Format(PyExc_TypeError,
+                         "\n\r\trss_ringoccs.diffrec.special_functions.max\n"
+                         "\r\t\tCould not parse float type input.");
+            return NULL;
+        }
+    }
+    else if (PyArg_ParseTuple(args, "O!", &PyArray_Type, &arr)){
+        npy_int typenum, dim;
+        void *data;
+
+        // Check to make sure input isn't zero dimensional!
+        if (PyArray_NDIM(arr) != 1) goto FAIL;
+
+        // Useful information about the data.
+        typenum = PyArray_TYPE(arr);
+        dim     = PyArray_DIMS(arr)[0];
+        data    = PyArray_DATA(arr);
+
+        if (dim == 0) goto FAIL;
+
+        switch(typenum)
+        {
+            case NPY_FLOAT:
+                return PyFloat_FromDouble(Max_Float((float *)data, dim));
+            case NPY_DOUBLE:
+                return PyFloat_FromDouble(Max_Double((double *)data, dim));
+            case NPY_LONGDOUBLE:
+                return
+                PyFloat_FromDouble(Max_Long_Double((long double *)data, dim));
+            case NPY_SHORT:
+                return PyLong_FromLong(Max_Short((short *)data, dim));
+            case NPY_INT:
+                return PyLong_FromLong(Max_Int((int *)data, dim));
+            case NPY_LONG:
+                return PyLong_FromLong(Max_Long((long *)data, dim));
+            case NPY_LONGLONG:
+                return PyLong_FromLong(Max_Long_Long((long long *)data, dim));
+            default:
+                goto FAIL;
+        }
+    }
+    else goto FAIL;
+    FAIL: {
+        PyErr_Format(PyExc_TypeError,
+                     "\n\r\trss_ringoccs.diffrec.special_functions.max\n"
+                     "\r\t\tInput should be a one dimensional numpy array of\n"
+                     "\r\t\treal numbers, or a float/int number.\n"
+                     "\r\t\tExample:\n"
+                     "\r\t\t\t>>> import numpy\n"
+                     "\r\t\t\t>>> import _special_functions as sf\n"
+                     "\r\t\t\t>>> x = numpy.random.rand(100)\n"
+                     "\r\t\t\t>>> y = sf.max(x)\n\n"
+                     "\r\t\tNOTE:\n"
+                     "\r\t\t\tOnly one dimensional numpy arrays are allowed.\n"
+                     "\r\t\t\tComplex numbers are not allowed. If the input\n"
+                     "\r\t\t\tis a single floating point or integer number,\n"
+                     "\r\t\t\tthe output will simply be that number.");
+        return NULL;
+    };
+}
+
+static PyObject *min(PyObject *self, PyObject *args)
+{
+    PyArrayObject *arr;
+    PyObject *tuple = PyTuple_GetItem(args, 0);
+
+    if (PyLong_Check(tuple)){
+        long min;
+        if (PyArg_ParseTuple(args, "l", &min)){
+            return PyLong_FromLong(min);
+        }
+        else {
+            PyErr_Format(PyExc_TypeError,
+                         "\n\r\trss_ringoccs.diffrec.math_functions.min\n"
+                         "\r\t\tCould not parse int type input.");
+            return NULL;
+        }
+    }
+    else if (PyFloat_Check(tuple)){
+        double min;
+        if(PyArg_ParseTuple(args, "d", &min)){
+            return PyFloat_FromDouble(min);
+        }
+        else {
+            PyErr_Format(PyExc_TypeError,
+                         "\n\r\trss_ringoccs.diffrec.math_functions.min\n"
+                         "\r\t\tCould not parse float type input.");
+            return NULL;
+        }
+    }
+    else if (PyArg_ParseTuple(args, "O!", &PyArray_Type, &arr)){
+        npy_int typenum, dim;
+        void *data;
+
+        // Check to make sure input isn't zero dimensional!
+        if (PyArray_NDIM(arr) != 1){
+            PyErr_Format(PyExc_TypeError,
+                         "\n\r\trss_ringoccs.diffrec.math_functions.min\n"
+                         "\r\t\tInput must be one dimensional.");
+            return NULL;
+        }
+
+        // Useful information about the data.
+        typenum = PyArray_TYPE(arr);
+        dim     = PyArray_DIMS(arr)[0];
+        data    = PyArray_DATA(arr);
+
+        if (dim == 0){
+            PyErr_Format(PyExc_TypeError,
+                         "\n\r\trss_ringoccs.diffrec.math_functions.min\n"
+                         "\r\t\tInput is zero dimensional.");
+            return NULL;
+        }
+
+        if (typenum == NPY_FLOAT){
+            return PyFloat_FromDouble(
+                Min_Float((float *)data, dim)
+            );
+        }
+        else if (typenum == NPY_DOUBLE){
+            return PyFloat_FromDouble(
+                Min_Double((double *)data, dim)
+            );
+        }
+        else if (typenum == NPY_LONGDOUBLE){
+            return PyFloat_FromDouble(
+                Min_Long_Double((long double *)data, dim)
+            );
+        }
+        else if (typenum == NPY_SHORT){
+            return PyLong_FromLong(
+                Min_Short((short *)data, dim)
+            );
+        }
+        else if (typenum == NPY_INT){
+            return PyLong_FromLong(
+                Min_Int((int *)data, dim)
+            );
+        }
+        else if (typenum == NPY_LONG){
+            return PyLong_FromLong(
+                Min_Long((long *)data, dim)
+            );
+        }
+        else if (typenum == NPY_LONGLONG){
+            return PyLong_FromLong(
+                Min_Long_Long((long long *)data, dim)
+            );
+        }
+        else {
+            PyErr_Format(PyExc_TypeError,
+                         "\n\r\trss_ringoccs.diffrec.math_functions.min\n"
+                         "\r\t\tInput should be a numpy array of numbers.");
+            return NULL;
+        }
+    }
+    else {
+        PyErr_Format(PyExc_TypeError,
+                     "rss_ringoccs.diffrec.math_functions.min\n"
+                     "\n\r\trss_ringoccs.diffrec.math_functions.min\n"
+                     "\r\t\tInput should be a numpy array of numbers.");
+        return NULL;
+    }
+}
+
+static PyObject *window_norm(PyObject *self, PyObject *args){
+    PyArrayObject *arr;
+    PyObject *tuple = PyTuple_GetItem(args, 0);
+    double dx, f_scale;
+
+    if (PyLong_Check(tuple)){
+        long ker;
+        PyArg_ParseTuple(args, "ldd", &ker, &dx, &f_scale);
+        return PyFloat_FromDouble(
+            Window_Normalization_Long(&ker, 1, dx, f_scale)
+        );
+    }
+    else if (PyFloat_Check(tuple)){
+        double ker;
+        PyArg_ParseTuple(args, "ddd", &ker, &dx, &f_scale);
+        return PyFloat_FromDouble(
+            Window_Normalization_Double(&ker, 1, dx, f_scale)
+        );
+    }
+    else if (PyArg_ParseTuple(args, "O!dd", &PyArray_Type,
+                              &arr, &dx, &f_scale)){
+        npy_int typenum, dim;
+        void *data;
+
+        // Check to make sure input isn't zero dimensional!
+        if (PyArray_NDIM(arr) != 1){
+            PyErr_Format(PyExc_TypeError,
+                         "rss_ringoccs.diffrec.math_functions.min\n"
+                         "\rInput must be a one-dimensional array.");
+            return NULL;
+        }
+
+        // Useful information about the data.
+        typenum = PyArray_TYPE(arr);
+        dim     = PyArray_DIMS(arr)[0];
+        data    = PyArray_DATA(arr);
+
+        if (typenum == NPY_CFLOAT){
+            return PyFloat_FromDouble(
+                Window_Normalization_Complex_Float(
+                    (complex float *)data, dim, dx, f_scale
+                )
+            );
+        }
+        else if (typenum == NPY_CDOUBLE){
+            return PyFloat_FromDouble(
+                Window_Normalization_Complex_Double(
+                    (complex double *)data, dim, dx, f_scale
+                )
+            );
+        }
+        else if (typenum == NPY_CLONGDOUBLE){
+            return PyFloat_FromDouble(
+                Window_Normalization_Complex_Long_Double(
+                    (complex long double *)data, dim, dx, f_scale
+                )
+            );
+        }
+        else if (typenum == NPY_FLOAT){
+            return PyFloat_FromDouble(
+                Window_Normalization_Float((float *)data, dim, dx, f_scale)
+            );
+        }
+        else if (typenum == NPY_DOUBLE){
+            return PyFloat_FromDouble(
+                Window_Normalization_Double((double *)data, dim, dx, f_scale)
+            );
+        }
+        else if (typenum == NPY_LONGDOUBLE){
+            return PyFloat_FromDouble(
+                Window_Normalization_Long_Double((long double *)data,
+                                                 dim, dx, f_scale)
+            );
+        }
+        else if (typenum == NPY_INT){
+            return PyLong_FromLong(
+                Window_Normalization_Int((int *)data, dim, dx, f_scale)
+            );
+        }
+        else if (typenum == NPY_LONG){
+            return PyLong_FromLong(
+                Window_Normalization_Long((long *)data, dim, dx, f_scale)
+            );
+        }
+        else {
+            PyErr_Format(PyExc_TypeError,
+                        "rss_ringoccs.diffrec.math_functions.min\n"
+                        "\rInput should be a numpy array of real numbers"
+                        "or a floating point/integer value.");
+            return NULL;
+        }
+    }
+    else {
+        PyErr_Format(PyExc_TypeError,
+                     "rss_ringoccs.diffrec.math_functions.min\n"
+                     "\rInput should be a numpy array of numbers,"
+                     "or a floating point/integer value.");
+        return NULL;
+    }  
 }
 
 static PyMethodDef _special_functions_methods[] =
@@ -2137,6 +2777,27 @@ static PyMethodDef _special_functions_methods[] =
         "Compute the Fresnel Transform."
     },
     {
+        "frequency_to_wavelength",
+        frequency_to_wavelength,
+        METH_VARARGS,
+        "\r\t"
+        "Function:\n\r\t\t"
+        "special_functions.frequency_to_wavelength\n\r\t"
+        "Purpose\n\r\t\t"
+        "Convert a non-zero frequency to the equivalent wavelength.\n\r\t"
+        "Arguments:\n\r\t\t"
+        "frequency (numpy.ndarray/int/float/list):\n\r\t\t\t"
+        "A numpy array or list of real numbers, input frequency in Hz.\n\r\t\t"
+        "Outputs:\n\r\t\t"
+        "wavelength (numpy.ndarry/list/float):\n\r\t\t\t"
+        "The corresponding wavelength in km.\n\r\t"
+        "Example:\n\r\t\t"
+        ">>> import numpy\n\r\t\t"
+        ">>> import special_functions\n\r\t\t"
+        ">>> x = numpy.arange(1,10,0.1)"
+        ">>> y = special_functions.frequency_to_wavelength(x)"
+    },
+    {
         "square_wave_diffraction",
         square_wave_diffraction,
         METH_VARARGS,
@@ -2299,6 +2960,48 @@ static PyMethodDef _special_functions_methods[] =
         ">>> y = special_functions.min(x)"
     },
     {
+        "wavelength_to_wavenumber",
+        wavelength_to_wavenumber,
+        METH_VARARGS,
+        "\r\t"
+        "Function:\n\r\t\t"
+        "special_functions.wavelength_to_wavenumber\n\r\t"
+        "Purpose\n\r\t\t"
+        "Convert a non-zero wavelength to the equivalent wavenumber.\n\r\t"
+        "Arguments:\n\r\t\t"
+        "wavelength (numpy.ndarray/int/float/list):\n\r\t\t\t"
+        "A numpy array or list of real numbers, the input wavelength.\n\r\t\t"
+        "Outputs:\n\r\t\t"
+        "wavenumber (float):\n\r\t\t\t"
+        "The corresponding wavenumber.\n\r\t"
+        "Example:\n\r\t\t"
+        ">>> import numpy\n\r\t\t"
+        ">>> import special_functions\n\r\t\t"
+        ">>> x = numpy.arange(1,10,0.1)"
+        ">>> y = special_functions.wavelength_to_wavenumber(x)"
+    },
+    {
+        "resolution_inverse",
+        resolution_inverse,
+        METH_VARARGS,
+        "\r\t"
+        "Function:\n\r\t\t"
+        "special_functions.resolution_inverse\n\r\t"
+        "Purpose\n\r\t\t"
+        "Compute the inverse of y = x/(exp(-x)+x-1).\n\r\t"
+        "Arguments:\n\r\t\t"
+        "x (numpy.ndarray/int/float/list):\n\r\t\t\t"
+        "A numpy array or list of real numbers.\n\r\t\t"
+        "Outputs:\n\r\t\t"
+        "y (float):\n\r\t\t\t"
+        "The inverse of x/(exp(-x)+x-1).\n\r\t"
+        "Example:\n\r\t\t"
+        ">>> import numpy\n\r\t\t"
+        ">>> import special_functions\n\r\t\t"
+        ">>> x = numpy.arange(1,10,0.1)"
+        ">>> y = special_functions.resolution_inverse(x)"
+    },
+    {
         "where_greater",
         where_greater,
         METH_VARARGS,
@@ -2378,6 +3081,109 @@ static PyMethodDef _special_functions_methods[] =
 };
 /*-------------------------DEFINE UNIVERSAL FUNCTIONS-------------------------*/
 
+/*  Wrappers for the Fresnel scale function.                                  */
+
+static void float_fresnel_scale(char **args, npy_intp *dimensions,
+                                npy_intp *steps, void *data)
+{
+    npy_intp i, j, k, l, m, dim;
+
+    float *lambda  = (float *)args[0];
+    float *d       = (float *)args[1];
+    float *phi     = (float *)args[2];
+    float *b       = (float *)args[3];
+    float *out     = (float *)args[4];
+
+    npy_intp l_step = (steps[0] != 0);
+    npy_intp d_step = (steps[1] != 0);
+    npy_intp p_step = (steps[2] != 0);
+    npy_intp b_step = (steps[3] != 0);
+
+    dim = dimensions[0];
+
+    j = 0;
+    k = 0;
+    l = 0;
+    m = 0;
+
+    for (i = 0; i < dim; i++) {
+        out[i] = Fresnel_Scale_Float(lambda[j], d[k], phi[l], b[m]);
+
+        j += l_step;
+        k += d_step;
+        l += p_step;
+        m += b_step;
+    }
+}
+
+static void double_fresnel_scale(char **args, npy_intp *dimensions,
+                                 npy_intp *steps, void *data)
+{
+    npy_intp i, j, k, l, m, dim;
+
+    double *lambda  = (double *)args[0];
+    double *d       = (double *)args[1];
+    double *phi     = (double *)args[2];
+    double *b       = (double *)args[3];
+    double *out     = (double *)args[4];
+
+    npy_intp l_step = (steps[0] != 0);
+    npy_intp d_step = (steps[1] != 0);
+    npy_intp p_step = (steps[2] != 0);
+    npy_intp b_step = (steps[3] != 0);
+
+    dim = dimensions[0];
+
+
+    j = 0;
+    k = 0;
+    l = 0;
+    m = 0;
+
+    for (i = 0; i < dim; i++) {
+        out[i] = Fresnel_Scale_Double(lambda[j], d[k], phi[l], b[m]);
+
+        j += l_step;
+        k += d_step;
+        l += p_step;
+        m += b_step;
+    }
+}
+
+static void long_double_fresnel_scale(char **args, npy_intp *dimensions,
+                                      npy_intp *steps, void *data)
+{
+    npy_intp i, j, k, l, m, dim;
+
+    long double *lambda  = (long double *)args[0];
+    long double *d       = (long double *)args[1];
+    long double *phi     = (long double *)args[2];
+    long double *b       = (long double *)args[3];
+    long double *out     = (long double *)args[4];
+
+    npy_intp l_step = (steps[0] != 0);
+    npy_intp d_step = (steps[1] != 0);
+    npy_intp p_step = (steps[2] != 0);
+    npy_intp b_step = (steps[3] != 0);
+
+    dim = dimensions[0];
+    
+
+    j = 0;
+    k = 0;
+    l = 0;
+    m = 0;
+
+    for (i = 0; i < dim; i++) {
+        out[i] = Fresnel_Scale_Long_Double(lambda[j], d[k], phi[l], b[m]);
+
+        j += l_step;
+        k += d_step;
+        l += p_step;
+        m += b_step;
+    }
+}
+
 /************Double Slit Diffraction Using Fraunhofer Approximation************/
 
 /******************************************************************************
@@ -2398,7 +3204,7 @@ static PyMethodDef _special_functions_methods[] =
  *          Data pointer.                                                     *
  *  Notes:                                                                    *
  *      1.) This is a wrapper for Double_Slit_Fraunhofer_Diffraction_Float,   *
- *          which is defined in __fraunhofer_diffraction.h. This allows       *
+ *          which is defined in _fraunhofer_diffraction.h. This allows       *
  *          Python to use that function, and allows for numpy arrays to be    *
  *          passed in. Relies on the Numpy UFUNC API and the C-Python API.    *
  *                                                                            *
@@ -2424,7 +3230,7 @@ static void float_double_slit_diffraction(char **args, npy_intp *dimensions,
     /* The output is a pointer to a complex float.                            */
     float *out = (float *)args[5];
 
-    /* Loop over the square well function found in __fresnel_diffraction.h    */
+    /* Loop over the square well function found in _fresnel_diffraction.h    */
     for (i = 0; i < n; i++) {
         out[i] = Double_Slit_Fraunhofer_Diffraction_Float(x[i], z, a, d, l);
     }
@@ -2447,7 +3253,7 @@ static void double_double_slit_diffraction(char **args, npy_intp *dimensions,
     /* The output is a pointer to a complex float.                            */
     double *out = (double *)args[5];
 
-    /* Loop over the square well function found in __fresnel_diffraction.h    */
+    /* Loop over the square well function found in _fresnel_diffraction.h    */
     for (i = 0; i < n; i++) {
         out[i] = Double_Slit_Fraunhofer_Diffraction_Double(x[i], z, a, d, l);
     }
@@ -2471,7 +3277,7 @@ static void long_double_double_slit_diffraction(char **args,
     /* The output is a pointer to a complex float.                            */
     long double *out = (long double *)args[5];
 
-    /* Loop over the square well function found in __fresnel_diffraction.h    */
+    /* Loop over the square well function found in _fresnel_diffraction.h    */
     for (i = 0; i < n; i++) {
         out[i] = Double_Slit_Fraunhofer_Diffraction_Long_Double(x[i], z,
                                                                 a, d, l);
@@ -2496,7 +3302,7 @@ static void long_double_double_slit_diffraction(char **args,
  *          Data pointer.                                                     *
  *  Notes:                                                                    *
  *      1.) This is a wrapper for Single_Slit_Fraunhofer_Diffraction_Float,   *
- *          which is defined in __fraunhofer_diffraction.h. This allows       *
+ *          which is defined in _fraunhofer_diffraction.h. This allows       *
  *          Python to use that function, and allows for numpy arrays to be    *
  *          passed in. Relies on the Numpy UFUNC API and the C-Python API.    *
  *                                                                            *
@@ -2520,7 +3326,7 @@ static void float_single_slit_diffraction(char **args, npy_intp *dimensions,
     /* The output is a pointer to a complex float.                            */
     float *out = (float *)args[3];
 
-    /* Loop over the square well function found in __fresnel_diffraction.h    */
+    /* Loop over the square well function found in _fresnel_diffraction.h    */
     for (i = 0; i < n; i++) {
         out[i] = Single_Slit_Fraunhofer_Diffraction_Float(x[i], z, a);
     }
@@ -2541,7 +3347,7 @@ static void double_single_slit_diffraction(char **args, npy_intp *dimensions,
     /* The output is a pointer to a complex float.                            */
     double *out = (double *)args[3];
 
-    /* Loop over the square well function found in __fresnel_diffraction.h    */
+    /* Loop over the square well function found in _fresnel_diffraction.h    */
     for (i = 0; i < n; i++) {
         out[i] = Single_Slit_Fraunhofer_Diffraction_Double(x[i], z, a);
     }
@@ -2563,46 +3369,13 @@ static void long_double_single_slit_diffraction(char **args,
     /* The output is a pointer to a complex float.                            */
     long double *out = (long double *)args[3];
 
-    /* Loop over the square well function found in __fresnel_diffraction.h    */
+    /* Loop over the square well function found in _fresnel_diffraction.h    */
     for (i = 0; i < n; i++) {
         out[i] = Single_Slit_Fraunhofer_Diffraction_Long_Double(x[i], z, a);
     }
 }
 
-static void float_resolution_inverse(char **args, npy_intp *dimensions,
-                                     npy_intp *steps, void *data)
-{
-    npy_intp n_elements = dimensions[0];
-
-    float *x = (float *)args[0];
-    float *y = (float *)args[1];
-
-    Get_Float_Array(x, y, n_elements, Resolution_Inverse_Float);
-}
-
-static void double_resolution_inverse(char **args, npy_intp *dimensions,
-                                      npy_intp *steps, void *data)
-{
-    npy_intp dim = dimensions[0];
-
-    double *in  = (double *)args[0];
-    double *out = (double *)args[1];
-
-    Get_Double_Array(in, out, dim, Resolution_Inverse_Double);
-}
-
-static void long_double_resolution_inverse(char **args, npy_intp *dimensions,
-                                           npy_intp *steps, void *data)
-{
-    npy_intp dim = dimensions[0];
-
-    long double *in  = (long double *)args[0];
-    long double *out = (long double *)args[1];
-
-    Get_Long_Double_Array(in, out, dim, Resolution_Inverse_Long_Double);
-}
-
-/*  Functions from __fresnel_kernel.h                                         */
+/*  Functions from _fresnel_kernel.h                                         */
 static void float_fresnel_psi(char **args, npy_intp *dimensions,
                               npy_intp* steps, void* data)
 {
@@ -2765,7 +3538,6 @@ static void long_double_fresnel_psi(char **args, npy_intp *dimensions,
         D_i    += D_steps;
     }
 }
-
 
 static void float_fresnel_dpsi_dphi(char **args, npy_intp *dimensions,
                                     npy_intp* steps, void* data)
@@ -3272,24 +4044,6 @@ static void long_double_fresnel_dpsi_dphi_ellipse(char **args,
     }
 }
 
-PyUFuncGenericFunction frequency_to_wavelength_funcs[3] = {
-    &float_frequency_to_wavelength,
-    &double_frequency_to_wavelength,
-    &long_double_frequency_to_wavelength
-};
-
-PyUFuncGenericFunction res_inv_funcs[3] = {
-    &float_resolution_inverse,
-    &double_resolution_inverse,
-    &long_double_resolution_inverse
-};
-
-PyUFuncGenericFunction wavelength_to_wavenumber_funcs[3] = {
-    &float_wavelength_to_wavenumber,
-    &double_wavelength_to_wavenumber,
-    &long_double_wavelength_to_wavenumber
-};
-
 PyUFuncGenericFunction double_slit_funcs[3] = {
     &float_double_slit_diffraction,
     &double_double_slit_diffraction,
@@ -3334,10 +4088,6 @@ PyUFuncGenericFunction single_slit_funcs[3] = {
 
 /*  Input and return types for double input and out.                          */
 static void *PyuFunc_None_3[3] = {NULL, NULL, NULL};
-
-static char one_real_in_one_real_out[6] = {NPY_FLOAT, NPY_FLOAT,
-                                           NPY_DOUBLE, NPY_DOUBLE,
-                                           NPY_LONGDOUBLE, NPY_LONGDOUBLE};
 
 static char three_real_in_one_real_out[12] = {
     NPY_FLOAT, NPY_FLOAT, NPY_FLOAT, NPY_FLOAT,
@@ -3394,15 +4144,12 @@ static struct PyModuleDef moduledef = {
 PyMODINIT_FUNC PyInit__special_functions(void)
 {
     PyObject *double_slit_diffraction;
-    PyObject *frequency_to_wavelength;
     PyObject *fresnel_psi;
     PyObject *fresnel_dpsi_dphi;
     PyObject *fresnel_d2psi_dphi2;
     PyObject *fresnel_dpsi_dphi_ellipse;
     PyObject *fresnel_scale;
-    PyObject *resolution_inverse;
     PyObject *single_slit_diffraction;
-    PyObject *wavelength_to_wavenumber;
     PyObject *m, *d;
 
     m = PyModule_Create(&moduledef);
@@ -3419,12 +4166,6 @@ PyMODINIT_FUNC PyInit__special_functions(void)
         "double_slit_diffraction_docstring", 0
     );
 
-    frequency_to_wavelength = PyUFunc_FromFuncAndData(
-        frequency_to_wavelength_funcs, PyuFunc_None_3, one_real_in_one_real_out,
-        3, 1, 1, PyUFunc_None, "frequency_to_wavelength",
-        "frequency_to_wavelength_docstring", 0
-    );
-
     fresnel_dpsi_dphi = PyUFunc_FromFuncAndData(
         dpsi_funcs, PyuFunc_None_3, seven_real_in_one_real_out, 3, 7, 1,
         PyUFunc_None, "fresnel_dpsi_dphi",  "fresnel_dpsi_dphi_docstring", 0
@@ -3451,68 +4192,46 @@ PyMODINIT_FUNC PyInit__special_functions(void)
         PyUFunc_None, "fresnel_scale", "fresnel_scale_docstring", 0
     );
 
-    resolution_inverse = PyUFunc_FromFuncAndData(
-        res_inv_funcs, PyuFunc_None_3, one_real_in_one_real_out,
-        3, 1, 1, PyUFunc_None, "resolution_inverse", 
-        "resolution_inverse_docstring", 0
-    );
-
     single_slit_diffraction = PyUFunc_FromFuncAndData(
         single_slit_funcs, PyuFunc_None_3, three_real_in_one_real_out,
         3, 3, 1, PyUFunc_None, "single_slit_diffraction", 
         "single_slit_diffraction_docstring", 0
     );
 
-    wavelength_to_wavenumber = PyUFunc_FromFuncAndData(
-        wavelength_to_wavenumber_funcs, PyuFunc_None_3,
-        one_real_in_one_real_out, 3, 1, 1, PyUFunc_None,
-        "wavelength_to_wavenumber", "wavelength_to_wavenumber_docstring", 0
-    );
-
     d = PyModule_GetDict(m);
 
     PyDict_SetItemString(d, "double_slit_diffraction", double_slit_diffraction);
-    PyDict_SetItemString(d, "frequency_to_wavelength", frequency_to_wavelength);
     PyDict_SetItemString(d, "fresnel_psi", fresnel_psi);
     PyDict_SetItemString(d, "fresnel_dpsi_dphi", fresnel_dpsi_dphi);
     PyDict_SetItemString(d, "fresnel_d2psi_dphi2", fresnel_d2psi_dphi2);
     PyDict_SetItemString(d, "fresnel_dpsi_dphi_ellipse",
                          fresnel_dpsi_dphi_ellipse);
     PyDict_SetItemString(d, "fresnel_scale", fresnel_scale);
-    PyDict_SetItemString(d, "resolution_inverse", resolution_inverse);
     PyDict_SetItemString(d, "single_slit_diffraction", single_slit_diffraction);
-    PyDict_SetItemString(d, "wavelength_to_wavenumber",
-                         wavelength_to_wavenumber);
 
     Py_DECREF(double_slit_diffraction);
-    Py_DECREF(frequency_to_wavelength);
     Py_DECREF(fresnel_psi);
     Py_DECREF(fresnel_dpsi_dphi);
     Py_DECREF(fresnel_d2psi_dphi2);
     Py_DECREF(fresnel_dpsi_dphi_ellipse);
     Py_DECREF(fresnel_scale);
-    Py_DECREF(resolution_inverse);
     Py_DECREF(single_slit_diffraction);
-    Py_DECREF(wavelength_to_wavenumber);
 
     return m;
 }
 #else
-PyMODINIT_FUNC init__funcs(void)
+PyMODINIT_FUNC init_funcs(void)
 {
     PyObject *double_slit_diffraction;
-    PyObject *frequency_to_wavelength;
     PyObject *fresnel_psi;
     PyObject *fresnel_dpsi_dphi;
     PyObject *fresnel_d2psi_dphi2;
     PyObject *fresnel_dpsi_dphi_ellipse;
     PyObject *fresnel_scale;
-    PyObject *resolution_inverse;
     PyObject *single_slit_diffraction;
-    PyObject *wavelength_to_wavenumber;
     PyObject *m, *d;
 
-    m = Py_InitModule("__funcs", _special_functions_methods);
+    m = Py_InitModule("_funcs", _special_functions_methods);
     if (m == NULL) {
         return;
     }
@@ -3526,12 +4245,6 @@ PyMODINIT_FUNC init__funcs(void)
         "double_slit_diffraction_docstring", 0
     );
 
-    frequency_to_wavelength = PyUFunc_FromFuncAndData(
-        frequency_to_wavelength_funcs, PyuFunc_None_3, one_real_in_one_real_out,
-        3, 1, 1, PyUFunc_None, "frequency_to_wavelength",
-        "frequency_to_wavelength_docstring", 0
-    );
-
     fresnel_dpsi_dphi = PyUFunc_FromFuncAndData(
         dpsi_funcs, PyuFunc_None_3, seven_real_in_one_real_out, 3, 7, 1,
         PyUFunc_None, "fresnel_dpsi_dphi",  "fresnel_dpsi_dphi_docstring", 0
@@ -3558,49 +4271,31 @@ PyMODINIT_FUNC init__funcs(void)
         PyUFunc_None, "fresnel_scale", "fresnel_scale_docstring", 0
     );
 
-    resolution_inverse = PyUFunc_FromFuncAndData(
-        res_inv_funcs, PyuFunc_None_3, one_real_in_one_real_out,
-        3, 1, 1, PyUFunc_None, "resolution_inverse", 
-        "resolution_inverse_docstring", 0
-    );
-
     single_slit_diffraction = PyUFunc_FromFuncAndData(
         single_slit_funcs, PyuFunc_None_3, three_real_in_one_real_out,
         3, 3, 1, PyUFunc_None, "single_slit_diffraction", 
         "single_slit_diffraction_docstring", 0
     );
 
-    wavelength_to_wavenumber = PyUFunc_FromFuncAndData(
-        wavelength_to_wavenumber_funcs, PyuFunc_None_3,
-        one_real_in_one_real_out, 3, 1, 1, PyUFunc_None,
-        "wavelength_to_wavenumber", "wavelength_to_wavenumber_docstring", 0
-    );
 
     d = PyModule_GetDict(m);
 
     PyDict_SetItemString(d, "double_slit_diffraction", double_slit_diffraction);
-    PyDict_SetItemString(d, "frequency_to_wavelength", frequency_to_wavelength);
     PyDict_SetItemString(d, "fresnel_psi", fresnel_psi);
     PyDict_SetItemString(d, "fresnel_dpsi_dphi", fresnel_dpsi_dphi);
     PyDict_SetItemString(d, "fresnel_d2psi_dphi2", fresnel_d2psi_dphi2);
     PyDict_SetItemString(d, "fresnel_dpsi_dphi_ellipse",
                          fresnel_dpsi_dphi_ellipse);
     PyDict_SetItemString(d, "fresnel_scale", fresnel_scale);
-    PyDict_SetItemString(d, "resolution_inverse", resolution_inverse);
     PyDict_SetItemString(d, "single_slit_diffraction", single_slit_diffraction);
-    PyDict_SetItemString(d, "wavelength_to_wavenumber",
-                         wavelength_to_wavenumber);
 
     Py_DECREF(double_slit_diffraction);
-    Py_DECREF(frequency_to_wavelength);
     Py_DECREF(fresnel_psi);
     Py_DECREF(fresnel_dpsi_dphi);
     Py_DECREF(fresnel_d2psi_dphi2);
     Py_DECREF(fresnel_dpsi_dphi_ellipse);
     Py_DECREF(fresnel_scale);
-    Py_DECREF(resolution_inverse);
     Py_DECREF(single_slit_diffraction);
-    Py_DECREF(wavelength_to_wavenumber);
 
     return m;
 }

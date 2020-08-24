@@ -24,24 +24,6 @@ func_dict = {
     "kbmd35": {"func": kbmd35, "normeq": 1.52048382, "wnum": 7}
 }
 
-def frequency_to_wavelength(freq_hz):
-    try:
-        return _special_functions.frequency_to_wavelength(freq_hz)
-    except KeyboardInterrupt:
-        raise
-    except:
-        raise TypeError(
-            """
-            \r\tError: rss_ringoccs
-            \r\t\tdiffrec.special_functions.wavelength_to_wavenumber\n
-            \r\tInput should be a numpy array of non-zero real numbers
-            \r\t(ints or floats), or a non-zero int or non-zero float.\n
-            \r\tUsage:
-            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. numpy.arange(3, 10)
-            \r\t\t>>> y = frequency_to_wavelength(x)
-            """
-        )
-
 #TODO
 def savitzky_golay(y, window_size, order, deriv=0, rate=1):
     """
@@ -306,56 +288,6 @@ def fresnel_d2psi_dphi2(kD, r, r0, phi, phi0, B, D):
             """
         )
 
-def resolution_inverse(x):
-    """
-    Purpose:
-        Compute the inverse of :math:`y = x/(\\exp(-x)+x-1)`
-    Arguments:
-        :x (*numpy.ndarray* or *float*):
-            Independent variable
-    Outputs:
-        :f (*numpy.ndarray* or *float*):
-            The inverse of :math:`x/(\\exp(-x)+x-1)`
-    Dependencies:
-        #. numpy
-        #. scipy.special
-    Method:
-        The inverse of :math:`x/(\\exp(-x)+x-1)` is computed using the
-        LambertW function. This function is the inverse of
-        :math:`y = x\\exp(x)`. This is computed using the scipy.special
-        subpackage using their lambertw function.
-    Warnings:
-        #. The real part of the argument must be greater than 1.
-        #. The scipy.special lambertw function is slightly
-           inaccurate when it's argument is near :math:`-1/e`. This
-           argument is :math:`z = \\exp(x/(1-x)) * x/(1-x)`
-    Examples:
-        Plot the function on the interval (1,2)
-
-        >>> import rss_ringoccs.diffcorr.special_functions as sf
-        >>> import numpy as np
-        >>> x = numpy.array(range(0,1001))*0.001+1.01
-        >>> y = sf.resolution_inverse(x)
-        >>> import matplotlib.pyplot as plt
-        >>> plt.show(plt.plot(x,y))
-    """
-    try:
-        return _special_functions.resolution_inverse(x)
-    except KeyboardInterrupt:
-        raise
-    except:
-        raise TypeError(
-            """
-            \r\tError: rss_ringoccs
-            \r\t\tdiffrec.special_functions.resolution_inverse\n
-            \r\tInput should be a numpy array of real numbers (ints or floats),
-            \r\tor an int or a float.\n
-            \r\tUsage:
-            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. numpy.arange(-5, 5)
-            \r\t\t>>> y = resolution_inverse(x)
-            """
-        )
-
 def double_slit_diffraction(x, z, a, d, Lambda):
     """
         Purpose:
@@ -427,24 +359,6 @@ def fresnel_transform(T_in, rho_km_vals, F_km_vals, w_km_vals, perturb, start,
         interp, ecc, peri
     )
 
-def lambertw(x):
-    try:
-        return _special_functions.lambertw(x)
-    except KeyboardInterrupt:
-        raise
-    except:
-        raise TypeError(
-            """
-            \r\tError: rss_ringoccs
-            \r\t\tdiffrec.special_functions.lambertw\n
-            \r\tInput should be a numpy array of real numbers (ints or floats),
-            \r\tor an int or a float.\n
-            \r\tUsage:
-            \r\t\t>>> x = 1.0   # Or a numpy array, i.e. numpy.arange(-5, 5)
-            \r\t\t>>> y = lambertw(x)
-            """
-        )
-
 def single_slit_diffraction(x, z, a):
     """
         Purpose:
@@ -504,9 +418,6 @@ def square_well_phase(x, a, b, F):
             \r\t\t>>> y = square_well_phase(x, a, b, F)
             """
         )
-
-def wavelength_to_wavenumber(lambda_km):
-    return _special_functions.wavelength_to_wavenumber(lambda_km)
 
 def window_width(res, normeq, fsky, fres, rho_dot, sigma, bfac=True):
     """

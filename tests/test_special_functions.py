@@ -17,6 +17,13 @@ def p_bessel_I0(x):
     except:
         return scipy.special.iv(0, x.astype(numpy.float))
 
+"""
+    The following are old routines kept for the sake of preserve a pure Python
+    implementation of the diffraction correction algorithm. As of v1.2 and
+    onwards the routines that are actually used by rss_ringoccs are written in
+    the C programming language, code found in rss_ringoccs/diffrec/src/.
+"""
+
 def fresnel_transform_ellipse(T_in, rho_km_vals, F_km_vals, phi_rad_vals,
                               kD_vals, B_rad_vals, D_km_vals, w_km_vals, start,
                               n_used, peri, ecc, wtype, norm, fwd):

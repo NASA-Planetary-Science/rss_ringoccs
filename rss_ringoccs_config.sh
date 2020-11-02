@@ -20,6 +20,8 @@ fi
 
 echo "Running rss_ringoccs_config Script:"
 
+exit 1
+
 web="https://repo.continuum.io/archive/"
 webfil="$web$fil"
 

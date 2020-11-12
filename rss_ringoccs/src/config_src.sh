@@ -26,11 +26,17 @@ rm -f *.so
 rm -f *.o
 
 echo "Compiling rss_ringoccs..."
-CompilerArgs="-std=c89 -ansi -pedantic -pedantic-errors -Wall -Wextra"
-CompilerArgs="$CompilerArgs -Wpedantic -Wmisleading-indentation"
-CompilerArgs="$CompilerArgs -Wmissing-prototypes -Wold-style-definition"
-CompilerArgs="$CompilerArgs -Wstrict-prototypes"
-CompilerArgs="$CompilerArgs -I../../ -DNDEBUG -g -fPIC -O2 -c"
+CompilerArgs1="-std=c89 -ansi -pedantic -pedantic-errors -Wall -Wextra"
+CompilerArgs2="-Wpedantic -Wmisleading-indentation"
+CompilerArgs3="-Wmissing-prototypes -Wold-style-definition"
+CompilerArgs4="-Wstrict-prototypes -I../../ -DNDEBUG -g -fPIC -O2 -c"
+CompilerArgs="$CompilerArgs1 $CompilerArgs2 $CompilerArgs3 $CompilerArgs4"
+
+echo -e "\n\tCompiler Options:"
+echo -e "\t\t$CompilerArgs1"
+echo -e "\t\t$CompilerArgs2"
+echo -e "\t\t$CompilerArgs3"
+echo -e "\t\t$CompilerArgs4"
 
 echo -e "\n\tCompiling rss_ringoccs/src/complex/"
 for filename in complex/*.c; do
@@ -50,7 +56,7 @@ for filename in special_functions/*.c; do
     $CC $CompilerArgs $filename
 done
 
-echo "Building rss_ringoccs Shared Object (.so file)"
+echo -e "\nBuilding rss_ringoccs Shared Object (.so file)"
 
 sharedobjectlist=""
 for filename in ./*.o; do

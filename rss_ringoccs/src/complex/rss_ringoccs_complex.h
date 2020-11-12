@@ -978,6 +978,11 @@ extern rssringoccs_ComplexDouble
 rssringoccs_Complex_Poly_Real_Coeffs(double *coeffs, unsigned int degree,
                                      rssringoccs_ComplexDouble z);
 
+extern rssringoccs_ComplexDouble
+rssringoccs_Complex_Poly_Complex_Coeffs(rssringoccs_ComplexDouble *coeffs,
+                                        unsigned int degree,
+                                        rssringoccs_ComplexDouble z);
+
 /******************************************************************************
  *  Function:                                                                 *
  *      rssringoccs_Complex_Erf                                               *

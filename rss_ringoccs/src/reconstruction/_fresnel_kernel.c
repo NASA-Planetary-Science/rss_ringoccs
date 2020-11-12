@@ -355,9 +355,8 @@ double Newton_Raphson_Fresnel_Psi(double kD, double r, double r0,
         dphi  = Fresnel_dPsi_dPhi_Double(kD, r, r0, phi, phi0, B, D);
         phi  -= dphi/Fresnel_d2Psi_dPhi2_Double(kD, r, r0, phi, phi0, B, D);
         ++i;
-        if (i > toler){
+        if (i > toler)
             break;
-        }
     }
     return phi;
 }

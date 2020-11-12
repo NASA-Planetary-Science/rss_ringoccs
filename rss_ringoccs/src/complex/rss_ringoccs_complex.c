@@ -362,4 +362,4 @@ rssringoccs_Complex_Divide(rssringoccs_ComplexDouble z0,
 }
 
 #endif
-/*  End of #ifdef __RSS_RINGOCCS_HAS_COMPLEX_H_                               */
+/*  End of #if _RSS_RINGOCCS_USING_COMPLEX_H_ == 1                            */

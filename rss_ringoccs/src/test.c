@@ -1,23 +1,37 @@
+#include <rss_ringoccs/src/complex/rss_ringoccs_complex.h>
 #include <stdio.h>
-#include <rss_ringoccs_complex.h>
 
 int main(void)
 {
-    double real, imag;
-    rssringoccs_ComplexDouble z0, z1, erf_z;
+    rssringoccs_ComplexDouble z0, z1, z2;
+    rssringoccs_ComplexDouble exp_z0, exp_z1, exp_z2;
+    double re, im, exp_re, exp_im;
 
-    z0 = rssringoccs_Complex_Rect(1.0, 1.0);
-    z1 = rssringoccs_Complex_Rect(0.0, 3.1);
+    z0 = rssringoccs_Complex_One;
+    z1 = rssringoccs_Complex_Rect(0.0, 3.1415926);
+    z2 = rssringoccs_Complex_Rect(1.0, 1.0);
 
-    erf_z = rssringoccs_Complex_Erf(z0);
-    real = rssringoccs_Complex_Real_Part(erf_z);
-    imag = rssringoccs_Complex_Imag_Part(erf_z);
-    printf("erf(1+1i) = %f + i%f\n", real, imag);
+    exp_z0 = rssringoccs_Complex_Exp(z0);
+    exp_z1 = rssringoccs_Complex_Exp(z1);
+    exp_z2 = rssringoccs_Complex_Exp(z2);
 
-    erf_z = rssringoccs_Complex_Erf(z1);
-    real = rssringoccs_Complex_Real_Part(erf_z);
-    imag = rssringoccs_Complex_Imag_Part(erf_z);
-    printf("erf(1+1i) = %f + i%f\n", real, imag);
+    re = rssringoccs_Complex_Real_Part(z0);
+    im = rssringoccs_Complex_Imag_Part(z0);
+    exp_re = rssringoccs_Complex_Real_Part(exp_z0);
+    exp_im = rssringoccs_Complex_Imag_Part(exp_z0);
+    printf("exp(%f + i%f) = %f + i%f\n", re, im, exp_re, exp_im);
+
+    re = rssringoccs_Complex_Real_Part(z1);
+    im = rssringoccs_Complex_Imag_Part(z1);
+    exp_re = rssringoccs_Complex_Real_Part(exp_z1);
+    exp_im = rssringoccs_Complex_Imag_Part(exp_z1);
+    printf("exp(%f + i%f) = %f + i%f\n", re, im, exp_re, exp_im);
+
+    re = rssringoccs_Complex_Real_Part(z2);
+    im = rssringoccs_Complex_Imag_Part(z2);
+    exp_re = rssringoccs_Complex_Real_Part(exp_z2);
+    exp_im = rssringoccs_Complex_Imag_Part(exp_z2);
+    printf("exp(%f + i%f) = %f + i%f\n", re, im, exp_re, exp_im);
 
     return 0;
 }

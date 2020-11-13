@@ -440,6 +440,13 @@ rssringoccs_Complex_Sqrt(rssringoccs_ComplexDouble z);
 extern rssringoccs_ComplexDouble
 rssringoccs_Complex_Log(rssringoccs_ComplexDouble z);
 
+extern rssringoccs_ComplexDouble
+rssringoccs_Complex_Pow(rssringoccs_ComplexDouble z0,
+                        rssringoccs_ComplexDouble z1);
+
+extern rssringoccs_ComplexDouble
+rssringoccs_Complex_Real_Pow(rssringoccs_ComplexDouble z, double x);
+
 /******************************************************************************
  *  Function:                                                                 *
  *      rssringoccs_Complex_Sin                                               *

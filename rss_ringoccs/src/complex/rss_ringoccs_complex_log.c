@@ -46,6 +46,66 @@
  *  Date:       November 12, 2020                                             *
  ******************************************************************************/
 
+/******************************************************************************
+ *  Example:                                                                  *
+ *      Let's compute the complex log of the values 1, -1, and i.             *
+ *                                                                            *
+ *      #include <rss_ringoccs/src/complex/rss_ringoccs_complex.h>            *
+ *      #include <stdio.h>                                                    *
+ *                                                                            *
+ *      int main(void)                                                        *
+ *      {                                                                     *
+ *          rssringoccs_ComplexDouble z0, z1, z2;                             *
+ *          rssringoccs_ComplexDouble log_z0, log_z1, log_z2;                 *
+ *          double re, im, log_re, log_im;                                    *
+ *                                                                            *
+ *          z0 = rssringoccs_Complex_One;                                     *
+ *          z1 = rssringoccs_Complex_Rect(-1.0, 0.0);                         *
+ *          z2 = rssringoccs_Imaginary_Unit;                                  *
+ *                                                                            *
+ *          log_z0 = rssringoccs_Complex_Log(z0);                             *
+ *          log_z1 = rssringoccs_Complex_Log(z1);                             *
+ *          log_z2 = rssringoccs_Complex_Log(z2);                             *
+ *                                                                            *
+ *          re = rssringoccs_Complex_Real_Part(z0);                           *
+ *          im = rssringoccs_Complex_Imag_Part(z0);                           *
+ *          log_re = rssringoccs_Complex_Real_Part(log_z0);                   *
+ *          log_im = rssringoccs_Complex_Imag_Part(log_z0);                   *
+ *          printf("log(%f + i%f) = %f + i%f\n", re, im, log_re, log_im);     *
+ *                                                                            *
+ *          re = rssringoccs_Complex_Real_Part(z1);                           *
+ *          im = rssringoccs_Complex_Imag_Part(z1);                           *
+ *          log_re = rssringoccs_Complex_Real_Part(log_z1);                   *
+ *          log_im = rssringoccs_Complex_Imag_Part(log_z1);                   *
+ *          printf("log(%f + i%f) = %f + i%f\n", re, im, log_re, log_im);     *
+ *                                                                            *
+ *          re = rssringoccs_Complex_Real_Part(z2);                           *
+ *          im = rssringoccs_Complex_Imag_Part(z2);                           *
+ *          log_re = rssringoccs_Complex_Real_Part(log_z2);                   *
+ *          log_im = rssringoccs_Complex_Imag_Part(log_z2);                   *
+ *          printf("log(%f + i%f) = %f + i%f\n", re, im, log_re, log_im);     *
+ *                                                                            *
+ *          return 0;                                                         *
+ *      }                                                                     *
+ *                                                                            *
+ *      Naming this test.c and placing it in rss_ringoccs/src/ we can compile *
+ *      this with:                                                            *
+ *                                                                            *
+ *          gcc -I../../ -L/usr/local/lib/ test.c -o test -lrssringoccs       *
+ *                                                                            *
+ *      If librssringoccs is not in /usr/local/lib/ (this is the default      *
+ *      location it is placed in when built via config_src.sh), then change   *
+ *      the -L option to the correct location. Change the -I location so that *
+ *      rss_ringoccs/ is in your path, if needed.                             *
+ *                                                                            *
+ *      Running the executable with ./test, this outputs:                     *
+ *          log(1.000000 + i0.000000) = 0.000000 + i0.000000                  *
+ *          log(-1.000000 + i0.000000) = 0.000000 + i3.141593                 *
+ *          log(0.000000 + i1.000000) = 0.000000 + i1.570796                  *
+ *      In agreement with known values of the complex logarithm. That is,     *
+ *      log(1) = 0, log(-1) = ipi, and log(i) = i pi / 2.                     *
+ ******************************************************************************/
+
 /*  Header file which contains aliases for the function in the standard C     *
  *  library math.h. This allows compatibility of C89 and C99 math.h headers.  */
 #include <rss_ringoccs/src/math/rss_ringoccs_math.h>
@@ -54,7 +114,7 @@
 #include "rss_ringoccs_complex.h"
 
 /*  Compute the complex log of a complex number z = r exp(i theta) where      *
- *  theta is a real number between -pi/2 and pi/2.                            */
+ *  theta is a real number between -pi and pi.                                */
 rssringoccs_ComplexDouble
 rssringoccs_Complex_Log(rssringoccs_ComplexDouble z)
 {

@@ -1,6 +1,6 @@
 /*  Header file which contains aliases for the function in the standard C     *
  *  library math.h. This allows compatibility of C89 and C99 math.h headers.  */
-#include "rss_ringoccs_math.h"
+#include <rss_ringoccs/include/rss_ringoccs_math.h>
 
 /*  These macros are for computing the error function following the methods   *
  *  in Abramowitz and Stegun's classic text. The maximum error is less than   *

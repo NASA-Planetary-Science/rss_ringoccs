@@ -18,7 +18,7 @@
  *  algorithms for the curious user which are accurate, but relatively        *
  *  simple. It contains Bessel, Fresnel, and Lambert functions, as well as    *
  *  some physics-based conversion functions (frequency-to-wavelength, etc.).  */
-#include <rss_ringoccs/src/special_functions/rss_ringoccs_special_functions.h>
+#include <rss_ringoccs/include/rss_ringoccs_special_functions.h>
 
 /*---------------------------DEFINE PYTHON FUNCTIONS--------------------------*
  *  This contains the Numpy-C and Python-C API parts that allow for the above *

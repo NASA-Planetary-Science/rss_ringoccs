@@ -1,10 +1,13 @@
 /*  The C standard library header math.h is included here, as are aliases for *
  *  various functions, the macros INFINITY and NAN, as well as the max legal  *
  *  values for the exponential function which don't return INFINITY.          */
-#include <rss_ringoccs/src/math/rss_ringoccs_math.h>
+#include <rss_ringoccs/include/rss_ringoccs_math.h>
+
+/*  Complex variables and functions defined here.                             */
+#include <rss_ringoccs/include/rss_ringoccs_complex.h>
 
 /*  Prototypes for these functions declared here.                             */
-#include "rss_ringoccs_special_functions.h"
+#include <rss_ringoccs/include/rss_ringoccs_special_functions.h>
 
 #define _define_coss_window(type, Type)                                        \
 type rssringoccs_Coss_Window_##Type(type x, type W)                            \

@@ -47,7 +47,7 @@
 #define RSS_RINGOCCS_COMPLEX_H
 
 /*  Booleans defined here. Needed for the FFT routines.                       */
-#include <rss_ringoccs/src/rss_ringoccs_bool.h>
+#include <rss_ringoccs/include/rss_ringoccs_bool.h>
 
 /*  This is commented out since rss_ringoccs does not assume C99 compliance.  */
 

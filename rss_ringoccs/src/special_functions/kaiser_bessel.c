@@ -1,8 +1,8 @@
 /*  The C Standard Library header for math functions and more found here.     */
-#include <rss_ringoccs/src/math/rss_ringoccs_math.h>
+#include <rss_ringoccs/include/rss_ringoccs_math.h>
 
-/*  Prototypes defined here.                                                  */
-#include "rss_ringoccs_special_functions.h"
+/*  Prototypes for these functions declared here.                             */
+#include <rss_ringoccs/include/rss_ringoccs_special_functions.h>
 
 #define _define_kaiser_bessel(type, Type)                                      \
 type rssringoccs_Kaiser_Bessel_##Type(type x, type W, type alpha)              \

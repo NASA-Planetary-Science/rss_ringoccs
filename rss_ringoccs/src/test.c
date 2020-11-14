@@ -1,4 +1,4 @@
-#include <rss_ringoccs/src/complex/rss_ringoccs_complex.h>
+#include <rss_ringoccs/include/rss_ringoccs_complex.h>
 #include <stdio.h>
 
 int main(void)
@@ -20,4 +20,3 @@ int main(void)
     printf("((1+i)/sqrt(2))^2 = %f + i%f\n", re, im);
     return 0;
 }
-

@@ -1,8 +1,8 @@
 /*  The speed of light is defined here.                                       */
-#include <rss_ringoccs/src/math/rss_ringoccs_math.h>
+#include <rss_ringoccs/include/rss_ringoccs_math.h>
 
 /*  Prototypes for these functions declared here.                             */
-#include "rss_ringoccs_special_functions.h"
+#include <rss_ringoccs/include/rss_ringoccs_special_functions.h>
 
 /*  Convert a frequency (in hertz) to a wavelength (in kilometers).           */
 #define _define_freq_to_wave(type, Type)                                       \

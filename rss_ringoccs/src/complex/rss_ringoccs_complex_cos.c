@@ -45,65 +45,6 @@
  *      Frozen for v1.3.                                                      *
  ******************************************************************************/
 
-/******************************************************************************
- *  Example:                                                                  *
- *      Let's compute the complex cosine of the values pi, i pi, and 0.       *
- *                                                                            *
- *      #include <rss_ringoccs/rss_ringoccs_complex.h>                        *
- *      #include <stdio.h>                                                    *
- *                                                                            *
- *      int main(void)                                                        *
- *      {                                                                     *
- *          rssringoccs_ComplexDouble z0, z1, z2;                             *
- *          rssringoccs_ComplexDouble cos_z0, cos_z1, cos_z2;                 *
- *          double re, im, cos_re, cos_im;                                    *
- *                                                                            *
- *          z0 = rssringoccs_Complex_Zero;                                    *
- *          z1 = rssringoccs_Complex_Rect(0.0, 3.1415926);                    *
- *          z2 = rssringoccs_Complex_Rect(3.1415926, 0.0);                    *
- *                                                                            *
- *          cos_z0 = rssringoccs_Complex_Cos(z0);                             *
- *          cos_z1 = rssringoccs_Complex_Cos(z1);                             *
- *          cos_z2 = rssringoccs_Complex_Cos(z2);                             *
- *                                                                            *
- *          re = rssringoccs_Complex_Real_Part(z0);                           *
- *          im = rssringoccs_Complex_Imag_Part(z0);                           *
- *          cos_re = rssringoccs_Complex_Real_Part(cos_z0);                   *
- *          cos_im = rssringoccs_Complex_Imag_Part(cos_z0);                   *
- *          printf("cos(%f + i%f) = %f + i%f\n", re, im, cos_re, cos_im);     *
- *                                                                            *
- *          re = rssringoccs_Complex_Real_Part(z1);                           *
- *          im = rssringoccs_Complex_Imag_Part(z1);                           *
- *          cos_re = rssringoccs_Complex_Real_Part(cos_z1);                   *
- *          cos_im = rssringoccs_Complex_Imag_Part(cos_z1);                   *
- *          printf("cos(%f + i%f) = %f + i%f\n", re, im, cos_re, cos_im);     *
- *                                                                            *
- *          re = rssringoccs_Complex_Real_Part(z2);                           *
- *          im = rssringoccs_Complex_Imag_Part(z2);                           *
- *          cos_re = rssringoccs_Complex_Real_Part(cos_z2);                   *
- *          cos_im = rssringoccs_Complex_Imag_Part(cos_z2);                   *
- *          printf("cos(%f + i%f) = %f + i%f\n", re, im, cos_re, cos_im);     *
- *                                                                            *
- *          return 0;                                                         *
- *      }                                                                     *
- *                                                                            *
- *      Naming this test.c and placing it in rss_ringoccs/src/ we can compile *
- *      this with:                                                            *
- *                                                                            *
- *          gcc -I../../ -L/usr/local/lib/ test.c -o test -lrssringoccs       *
- *                                                                            *
- *      If librssringoccs is not in /usr/local/lib/ (this is the default      *
- *      location it is placed in when built via config_src.sh), then change   *
- *      the -L option to the correct location. Change the -I location so that *
- *      rss_ringoccs/ is in your path, if needed.                             *
- *                                                                            *
- *      Running the executable with ./test, this outputs:                     *
- *          cos(0.000000 + i0.000000) = 1.000000 + i-0.000000                 *
- *          cos(0.000000 + i3.141593) = 11.591953 + i-0.000000                *
- *          cos(3.141593 + i0.000000) = -1.000000 + i-0.000000                *
- *      In agreement with known values of the complex cosine.                 *
- ******************************************************************************/
-
 /*  Header file which contains aliases for the function in the standard C     *
  *  library math.h. This allows compatibility of C89 and C99 math.h headers.  */
 #include <rss_ringoccs/include/rss_ringoccs_math.h>

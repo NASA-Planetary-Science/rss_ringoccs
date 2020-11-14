@@ -1,5 +1,5 @@
-/*  Prototypes defined here.                                                  */
-#include "rss_ringoccs_special_functions.h"
+/*  Prototypes for these functions declared here.                             */
+#include <rss_ringoccs/include/rss_ringoccs_special_functions.h>
 
 #define _define_normeq(intype, InType, outtype)                                \
 outtype rssringoccs_Normeq_##InType(intype *w_func, long N_elements)           \

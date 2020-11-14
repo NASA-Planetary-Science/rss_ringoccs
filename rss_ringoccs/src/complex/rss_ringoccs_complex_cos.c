@@ -26,6 +26,7 @@
  *      called ANSI C) support, so this file will be a part of the build.     *
  ******************************************************************************
  *                               DEPENDENCIES                                 *
+ ******************************************************************************
  *  1.) rss_ringoccs_math.h:                                                  *
  *          This file provides compatibility between the two standard math.h  *
  *          header files (C89 vs C99 math.h). If C99 math.h exists, it simply *
@@ -37,13 +38,18 @@
  ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
  *  Date:       November 12, 2020                                             *
+ ******************************************************************************
+ *                             Revision History                               *
+ ******************************************************************************
+ *  2020/11/14 (Ryan Maguire):                                                *
+ *      Frozen for v1.3.                                                      *
  ******************************************************************************/
 
 /******************************************************************************
  *  Example:                                                                  *
  *      Let's compute the complex cosine of the values pi, i pi, and 0.       *
  *                                                                            *
- *      #include <rss_ringoccs/src/complex/rss_ringoccs_complex.h>            *
+ *      #include <rss_ringoccs/rss_ringoccs_complex.h>                        *
  *      #include <stdio.h>                                                    *
  *                                                                            *
  *      int main(void)                                                        *
@@ -100,10 +106,10 @@
 
 /*  Header file which contains aliases for the function in the standard C     *
  *  library math.h. This allows compatibility of C89 and C99 math.h headers.  */
-#include <rss_ringoccs/src/math/rss_ringoccs_math.h>
+#include <rss_ringoccs/include/rss_ringoccs_math.h>
 
 /*  Where the prototypes are declared and where complex types are defined.    */
-#include "rss_ringoccs_complex.h"
+#include <rss_ringoccs/include/rss_ringoccs_complex.h>
 
 /*  Compute the cosine of a complex number.                                   */
 rssringoccs_ComplexDouble rssringoccs_Complex_Cos(rssringoccs_ComplexDouble z)

@@ -1,11 +1,11 @@
 /*  The C Standard Library header for math functions.                         */
-#include <rss_ringoccs/src/math/rss_ringoccs_math.h>
+#include <rss_ringoccs/include/rss_ringoccs_math.h>
 
-/*  Support for complex variables found here.                                 */
-#include <rss_ringoccs/src/complex/rss_ringoccs_complex.h>
+/*  Complex variables and functions defined here.                             */
+#include <rss_ringoccs/include/rss_ringoccs_complex.h>
 
-/*  Prototype for functions found here.                                       */
-#include "rss_ringoccs_special_functions.h"
+/*  Prototypes for these functions declared here.                             */
+#include <rss_ringoccs/include/rss_ringoccs_special_functions.h>
 
 /* Coefficients for up to 8 significant digits. */
 #define FRESNEL_HEALD_RATIONAL_EPS_8_A00 1.0

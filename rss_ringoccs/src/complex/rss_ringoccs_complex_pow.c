@@ -42,6 +42,10 @@
  ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
  *  Date:       November 12, 2020                                             *
+ ******************************************************************************
+ *                                History                                     *
+ *  2020/11/14 (Ryan Maguire):                                                *
+ *      Frozen for v1.3.                                                      *
  ******************************************************************************/
 
 /******************************************************************************
@@ -90,10 +94,10 @@
 
 /*  Header file which contains aliases for the function in the standard C     *
  *  library math.h. This allows compatibility of C89 and C99 math.h headers.  */
-#include <rss_ringoccs/src/math/rss_ringoccs_math.h>
+#include <rss_ringoccs/include/rss_ringoccs_math.h>
 
 /*  Where the prototypes are declared and where complex types are defined.    */
-#include "rss_ringoccs_complex.h"
+#include <rss_ringoccs/include/rss_ringoccs_complex.h>
 
 /*  Compute the complex power z0^z1.                                          */
 rssringoccs_ComplexDouble

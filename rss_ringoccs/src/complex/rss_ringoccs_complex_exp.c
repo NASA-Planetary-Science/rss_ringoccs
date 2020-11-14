@@ -39,65 +39,6 @@
  *  Date:       November 12, 2020                                             *
  ******************************************************************************/
 
-/******************************************************************************
- *  Example:                                                                  *
- *      Let's compute the complex exponential of the values 1, i pi, and 1+i. *
- *                                                                            *
- *      #include <rss_ringoccs/src/complex/rss_ringoccs_complex.h>            *
- *      #include <stdio.h>                                                    *
- *                                                                            *
- *      int main(void)                                                        *
- *      {                                                                     *
- *          rssringoccs_ComplexDouble z0, z1, z2;                             *
- *          rssringoccs_ComplexDouble exp_z0, exp_z1, exp_z2;                 *
- *          double re, im, exp_re, exp_im;                                    *
- *                                                                            *
- *          z0 = rssringoccs_Complex_One;                                     *
- *          z1 = rssringoccs_Complex_Rect(0.0, 3.1415926);                    *
- *          z2 = rssringoccs_Complex_Rect(1.0, 1.0);                          *
- *                                                                            *
- *          exp_z0 = rssringoccs_Complex_Exp(z0);                             *
- *          exp_z1 = rssringoccs_Complex_Exp(z1);                             *
- *          exp_z2 = rssringoccs_Complex_Exp(z2);                             *
- *                                                                            *
- *          re = rssringoccs_Complex_Real_Part(z0);                           *
- *          im = rssringoccs_Complex_Imag_Part(z0);                           *
- *          exp_re = rssringoccs_Complex_Real_Part(exp_z0);                   *
- *          exp_im = rssringoccs_Complex_Imag_Part(exp_z0);                   *
- *          printf("exp(%f + i%f) = %f + i%f\n", re, im, exp_re, exp_im);     *
- *                                                                            *
- *          re = rssringoccs_Complex_Real_Part(z1);                           *
- *          im = rssringoccs_Complex_Imag_Part(z1);                           *
- *          exp_re = rssringoccs_Complex_Real_Part(exp_z1);                   *
- *          exp_im = rssringoccs_Complex_Imag_Part(exp_z1);                   *
- *          printf("exp(%f + i%f) = %f + i%f\n", re, im, exp_re, exp_im);     *
- *                                                                            *
- *          re = rssringoccs_Complex_Real_Part(z2);                           *
- *          im = rssringoccs_Complex_Imag_Part(z2);                           *
- *          exp_re = rssringoccs_Complex_Real_Part(exp_z2);                   *
- *          exp_im = rssringoccs_Complex_Imag_Part(exp_z2);                   *
- *          printf("exp(%f + i%f) = %f + i%f\n", re, im, exp_re, exp_im);     *
- *                                                                            *
- *          return 0;                                                         *
- *      }                                                                     *
- *                                                                            *
- *      Naming this test.c and placing it in rss_ringoccs/src/ we can compile *
- *      this with:                                                            *
- *                                                                            *
- *          gcc -I../../ -L/usr/local/lib/ test.c -o test -lrssringoccs       *
- *                                                                            *
- *      If librssringoccs is not in /usr/local/lib/ (this is the default      *
- *      location it is placed in when built via config_src.sh), then change   *
- *      the -L option to the correct location. Change the -I location so that *
- *      rss_ringoccs/ is in your path, if needed.                             *
- *                                                                            *
- *      Running the executable with ./test, this outputs:                     *
- *          exp(1.000000 + i0.000000) = 2.718282 + i0.000000                  *
- *          exp(0.000000 + i3.141593) = -1.000000 + i0.000000                 *
- *          exp(1.000000 + i1.000000) = 1.468694 + i2.287355                  *
- *      In agreement with known values of the complex exponential.            *
- ******************************************************************************/
-
 /*  Header file which contains aliases for the function in the standard C     *
  *  library math.h. This allows compatibility of C89 and C99 math.h headers.  */
 #include <rss_ringoccs/include/rss_ringoccs_math.h>

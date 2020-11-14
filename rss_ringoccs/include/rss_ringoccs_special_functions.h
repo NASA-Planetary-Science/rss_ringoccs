@@ -2,10 +2,10 @@
 #define RSS_RINGOCCS_SPECIAL_FUNCTIONS_H
 
 /*  complex data types, as well as _Complex_I, are defined here.              */
-#include <rss_ringoccs/src/complex/rss_ringoccs_complex.h>
+#include <rss_ringoccs/include/rss_ringoccs_complex.h>
 
 /*  Boolean data type defined here.                                           */
-#include <rss_ringoccs/src/rss_ringoccs_bool.h>
+#include <rss_ringoccs/include/rss_ringoccs_bool.h>
 
 /*  Prototypes for these functions declared here.                             */
 #include "rss_ringoccs_special_functions.h"

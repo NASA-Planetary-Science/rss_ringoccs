@@ -1,5 +1,5 @@
-/*  Prototypes defined here.                                                  */
-#include "rss_ringoccs_special_functions.h"
+/*  Prototypes for these functions declared here.                             */
+#include <rss_ringoccs/include/rss_ringoccs_special_functions.h>
 
 #define MinFuncFromType(type, Type)                                            \
 type rssringoccs_Min_##Type(type *arr, long n_elements)                        \

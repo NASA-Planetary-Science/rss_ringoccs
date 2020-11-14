@@ -53,7 +53,7 @@
 #include <stdlib.h>
 
 /*  Where the prototypes are declared and where complex types are defined.    */
-#include "rss_ringoccs_complex.h"
+#include <rss_ringoccs/include/rss_ringoccs_complex.h>
 
 /*  Use Horner's method to compute a polynomial of a complex variable z with  *
  *  real coefficients.                                                        */

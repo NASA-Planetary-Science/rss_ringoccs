@@ -1,8 +1,8 @@
-/*  The two pi is defined here.                                               */
-#include <rss_ringoccs/src/math/rss_ringoccs_math.h>
+/*  The C Standard Library header for math functions and more found here.     */
+#include <rss_ringoccs/include/rss_ringoccs_math.h>
 
 /*  Prototypes for these functions declared here.                             */
-#include "rss_ringoccs_special_functions.h"
+#include <rss_ringoccs/include/rss_ringoccs_special_functions.h>
 
 /*  Convert a wavelength to a wavelength.                                     */
 #define _define_wavelength_to_wavenumber(type, Type)                           \

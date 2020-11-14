@@ -1,8 +1,8 @@
 /*  The C Standard Library header for math functions and more found here.     */
-#include <rss_ringoccs/src/math/rss_ringoccs_math.h>
+#include <rss_ringoccs/include/rss_ringoccs_math.h>
 
-/*  Prototypes defined here.                                                  */
-#include "rss_ringoccs_special_functions.h"
+/*  Prototypes for these functions declared here.                             */
+#include <rss_ringoccs/include/rss_ringoccs_special_functions.h>
 
 /* Taylor Expansion of Kaiser-Bessel Function, alpha = 2.0 Pi                 */
 #define KAISER_BESSEL_2_0_A00   1.14799345379586479212325625173e-2

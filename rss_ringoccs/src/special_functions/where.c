@@ -1,7 +1,7 @@
 #include <stdlib.h>
 
 /*  Prototypes for these functions declared here.                             */
-#include "rss_ringoccs_special_functions.h"
+#include <rss_ringoccs/include/rss_ringoccs_special_functions.h>
 
 /*  To avoid repeating the same code over and over again, define this macro   *
  *  to be used for all of the where_greater functions. Since the only thing   *

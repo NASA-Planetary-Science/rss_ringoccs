@@ -83,16 +83,13 @@
 /*  The C standard library header math.h is included here, as are aliases for *
  *  various functions, the macros INFINITY and NAN, as well as the max legal  *
  *  values for the exponential function which don't return INFINITY.          */
-#include <rss_ringoccs/src/math/rss_ringoccs_math.h>
+#include <rss_ringoccs/include/rss_ringoccs_math.h>
 
 /*  Complex variables and functions defined here.                             */
-#include <rss_ringoccs/src/complex/rss_ringoccs_complex.h>
+#include <rss_ringoccs/include/rss_ringoccs_complex.h>
 
 /*  Prototypes for these functions declared here.                             */
-#include "rss_ringoccs_special_functions.h"
-
-/*  Prototypes for these functions declared here.                             */
-#include "rss_ringoccs_special_functions.h"
+#include <rss_ringoccs/include/rss_ringoccs_special_functions.h>
 
 /*  Taylor Expansion of Bessel J_0(x).                                        */
 #define BESSEL_J0_TAYLOR_00  1.0

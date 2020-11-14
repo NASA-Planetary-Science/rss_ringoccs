@@ -1,7 +1,7 @@
 #include <stdlib.h>
-#include <rss_ringoccs/src/rss_ringoccs_bool.h>
-#include <rss_ringoccs/src/math/rss_ringoccs_math.h>
-#include <rss_ringoccs/src/complex/rss_ringoccs_complex.h>
+#include <rss_ringoccs/include/rss_ringoccs_bool.h>
+#include <rss_ringoccs/include/rss_ringoccs_math.h>
+#include <rss_ringoccs/include/rss_ringoccs_complex.h>
 
 rssringoccs_ComplexDouble *
 rssringoccs_FFT_Cooley_Tukey_ComplexDouble(rssringoccs_ComplexDouble *in,

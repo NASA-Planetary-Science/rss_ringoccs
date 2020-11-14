@@ -1,5 +1,5 @@
-/*  Prototypes defined here.                                                  */
-#include "rss_ringoccs_special_functions.h"
+/*  Prototypes for these functions declared here.                             */
+#include <rss_ringoccs/include/rss_ringoccs_special_functions.h>
 
 void rssringoccs_Legendre_Polynomials(double *legendre_p, double x, int order)
 {

@@ -61,10 +61,13 @@
  ******************************************************************************/
 
 /*  The C Standard Library header for math functions and more defined here.   */
-#include <rss_ringoccs/src/math/rss_ringoccs_math.h>
+#include <rss_ringoccs/include/rss_ringoccs_math.h>
+
+/*  Complex variables and functions defined here.                             */
+#include <rss_ringoccs/include/rss_ringoccs_complex.h>
 
 /*  Prototypes for these functions declared here.                             */
-#include "rss_ringoccs_special_functions.h"
+#include <rss_ringoccs/include/rss_ringoccs_special_functions.h>
 
 /* Define Coefficients for the Fresnel Cosine Taylor Expansion.               */
 #define FRESNEL_COSINE_TAYLOR_00    1.0

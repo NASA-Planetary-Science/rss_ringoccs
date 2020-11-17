@@ -570,6 +570,12 @@ rssringoccs_Complex_Tan(rssringoccs_ComplexDouble z);
 extern const rssringoccs_ComplexDouble rssringoccs_Imaginary_Unit;
 extern const rssringoccs_ComplexDouble rssringoccs_Complex_Zero;
 extern const rssringoccs_ComplexDouble rssringoccs_Complex_One;
+extern const rssringoccs_ComplexDouble rssringoccs_Complex_NaN;
+extern const rssringoccs_ComplexDouble rssringoccs_Complex_Infinity;
+
+extern rssringoccs_Bool
+rssringoccs_Complex_Compare(rssringoccs_ComplexDouble z,
+                            rssringoccs_ComplexDouble w);
 
 /******************************************************************************
  *  Function:                                                                 *

@@ -18,14 +18,13 @@ import numpy
 if (platform.system() == "Darwin"):
     os.environ["CFLAGS"] = "-mmacosx-version-min=%s" % platform.mac_ver()[0]
 
-
 setup(name='special_functions',
       version='1.3',
       description='Common math and physics functions',
       author='Ryan Maguire',
       ext_modules=[
           Extension('special_functions',
-                    ['rss_ringoccs/src/specialfunctionsmodule.c'],
+                    ['rss_ringoccs/src/modules/specialfunctionsmodule.c'],
                     include_dirs=[numpy.get_include()],
                     library_dirs=['/usr/local/lib'],
                     libraries=['rssringoccs'])

@@ -12,6 +12,21 @@
 const rssringoccs_ComplexDouble rssringoccs_Imaginary_Unit = _Complex_I;
 const rssringoccs_ComplexDouble rssringoccs_Complex_Zero = 0.0;
 const rssringoccs_ComplexDouble rssringoccs_Complex_One = 1.0;
+const rssringoccs_ComplexDouble rssringoccs_Complex_NaN = rssringoccs_NaN;
+const rssringoccs_ComplexDouble
+    rssringoccs_Complex_Infinity = rssringoccs_Infinity;
+
+/*  C99 allows complex values to be compared like normal real numbers, so     *
+ *  just use this.                                                            */
+rssringoccs_Bool
+rssringoccs_Complex_Compare(rssringoccs_ComplexDouble z,
+                            rssringoccs_ComplexDouble w)
+{
+    if (z == w)
+        return rssringoccs_True;
+    else
+        return rssringoccs_False;
+}
 
 /*  Function for creating a new complex number from two real numbers.         */
 rssringoccs_ComplexDouble rssringoccs_Complex_Rect(double x, double y)
@@ -123,6 +138,11 @@ rssringoccs_Complex_Divide(rssringoccs_ComplexDouble z0,
 const rssringoccs_ComplexDouble rssringoccs_Imaginary_Unit = {{0.0, 1.0}};
 const rssringoccs_ComplexDouble rssringoccs_Complex_Zero   = {{0.0, 0.0}};
 const rssringoccs_ComplexDouble rssringoccs_Complex_One    = {{1.0, 0.0}};
+const rssringoccs_ComplexDouble
+    rssringoccs_Complex_NaN = {{rssringoccs_NaN, rssringoccs_NaN}};
+const rssringoccs_ComplexDouble
+    rssringoccs_Complex_Infinity = {{rssringoccs_Infinity,
+                                     rssringoccs_Infinity}};
 
 /*  In C99 you can simply do double _Complex z = x + _Complex_I*y since       *
  *  complex variables are primitive data types, but in C89 we need to create  *
@@ -179,6 +199,29 @@ double rssringoccs_Complex_Imag_Part(rssringoccs_ComplexDouble z)
      *  array contained in a rssringoccs_ComplexDouble struct. Return this.   */
     imag = z.dat[1];
     return imag;
+}
+
+/*  C does not allow structures to be compared, so we need to compare the     *
+ *  members of the two rssringoccs_ComplexDouble structs.                     */
+rssringoccs_Bool
+rssringoccs_Complex_Compare(rssringoccs_ComplexDouble z,
+                            rssringoccs_ComplexDouble w)
+{
+    /*  Declare necessary variables. C89 requires this at the top.            */
+    double z_real, z_imag, w_real, w_imag;
+
+    /*  Extract the real and imaginary parts from z and w.                    */
+    z_real = rssringoccs_Complex_Real_Part(z);
+    z_imag = rssringoccs_Complex_Imag_Part(z);
+    w_real = rssringoccs_Complex_Real_Part(w);
+    w_imag = rssringoccs_Complex_Imag_Part(w);
+
+    /*  Two complex numbers are equal if and only if their real and imaginary *
+     *  parts are both equal, so check this.                                  */
+    if ((z_real == w_real) && (z_imag == w_imag))
+        return rssringoccs_True;
+    else
+        return rssringoccs_False;
 }
 
 rssringoccs_ComplexDouble

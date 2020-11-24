@@ -279,6 +279,9 @@ extern float rssringoccs_Erf_Float(float x);
 extern double rssringoccs_Erf_Double(double x);
 extern long double rssringoccs_Erf_LongDouble(long double x);
 
+extern long rssringoccs_Factorial(int n);
+extern long rssringoccs_Falling_Factorial(int x, int N);
+
 extern float
 rssringoccs_Float_Poly_Float_Coeffs(float *coeffs,
                                     unsigned int degree, float x);
@@ -291,6 +294,25 @@ extern long double
 rssringoccs_LongDouble_Poly_LongDouble_Coeffs(long double *coeffs,
                                               unsigned int degree,
                                               long double x);
+
+extern float
+rssringoccs_Float_Poly_Deriv_Float_Coeffs(float *coeffs,
+                                          unsigned int degree,
+                                          unsigned int deriv,
+                                          float x);
+
+extern double
+rssringoccs_Double_Poly_Deriv_Double_Coeffs(double *coeffs,
+                                            unsigned int degree,
+                                            unsigned int deriv,
+                                            double x);
+
+extern long double
+rssringoccs_LongDouble_Poly_Deriv_LongDouble_Coeffs(long double *coeffs,
+                                                    unsigned int degree,
+                                                    unsigned int deriv,
+                                                    long double x);
+
 
 #endif
 /*  End of include guard.                                                     */

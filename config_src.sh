@@ -54,6 +54,12 @@ for filename in rss_ringoccs/src/math/*.c; do
     $CC $CompilerArgs $filename
 done
 
+echo -e "\n\tCompiling rss_ringoccs/src/geometry/"
+for filename in rss_ringoccs/src/geometry/*.c; do
+    echo -e "\t\tCompiling: $filename"
+    $CC $CompilerArgs $filename
+done
+
 echo -e "\n\tCompiling rss_ringoccs/src/numerical/"
 for filename in rss_ringoccs/src/numerical/*.c; do
     echo -e "\t\tCompiling: $filename"

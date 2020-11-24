@@ -42,9 +42,10 @@ int main(void)
      *  graph of J_0(x) we can guess that a root lies between 2 and 3.        */
     double x0 = 2.0;
     double root;
+    unsigned int max_iters = 20;
 
     /*  Use Newton-Raphson to compute the root.                               */
-    root = rssringoccs_Newton_Raphson_Double(x0, f, f_prime);
+    root = rssringoccs_Newton_Raphson_Double(x0, f, f_prime, max_iters);
 
     /*  Print the result.                                                     */
     printf("First positive root of J_0: %f\n", root);

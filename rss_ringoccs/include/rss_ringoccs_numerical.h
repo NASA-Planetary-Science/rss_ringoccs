@@ -25,22 +25,54 @@
 
 extern float
 rssringoccs_Newton_Raphson_Float(float x, float (*f)(float),
-                                 float (*f_prime)(float));
+                                 float (*f_prime)(float),
+                                 unsigned int max_iters);
 
 extern double
 rssringoccs_Newton_Raphson_Double(double x, double (*f)(double),
-                                  double (*f_prime)(double));
+                                  double (*f_prime)(double),
+                                  unsigned int max_iters);
 
 extern long double
 rssringoccs_Newton_Raphson_LongDouble(long double x,
                                       long double (*f)(long double),
-                                      long double (*f_prime)(long double));
+                                      long double (*f_prime)(long double),
+                                      unsigned int max_iters);
 
 extern rssringoccs_ComplexDouble
 rssringoccs_Newton_Raphson_Complex(
     rssringoccs_ComplexDouble z,
     rssringoccs_ComplexDouble (*f)(rssringoccs_ComplexDouble),
-    rssringoccs_ComplexDouble (*f_prime)(rssringoccs_ComplexDouble)
+    rssringoccs_ComplexDouble (*f_prime)(rssringoccs_ComplexDouble),
+    unsigned int max_iters
+);
+
+extern float
+rssringoccs_Halleys_Method_Float(float x, float (*f)(float),
+                                 float (*f_prime)(float),
+                                 float (*f_2prime)(float),
+                                 unsigned int max_iters);
+
+extern double
+rssringoccs_Halleys_Method_Double(double x, double (*f)(double),
+                                  double (*f_prime)(double),
+                                  double (*f_2prime)(double),
+                                  unsigned int max_iters);
+
+extern long double
+rssringoccs_Halleys_Method_LongDouble(long double x,
+                                      long double (*f)(long double),
+                                      long double (*f_prime)(long double),
+                                      long double (*f_2prime)(long double),
+                                      unsigned int max_iters);
+
+extern rssringoccs_ComplexDouble
+rssringoccs_Halleys_Method_Complex(
+    rssringoccs_ComplexDouble z,
+    rssringoccs_ComplexDouble (*f)(rssringoccs_ComplexDouble),
+    rssringoccs_ComplexDouble (*f_prime)(rssringoccs_ComplexDouble),
+    rssringoccs_ComplexDouble (*f_2prime)(rssringoccs_ComplexDouble),
+    unsigned int max_iters
 );
 
 #endif

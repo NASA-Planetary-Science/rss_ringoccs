@@ -38,11 +38,11 @@ static rssringoccs_ComplexDouble f(rssringoccs_ComplexDouble z)
     return z_cubed_minus_1;
 }
 
-/*  The derivative is f'(z) = 2z^2, so create this.                           */
+/*  The derivative is f'(z) = 3z^2, so create this.                           */
 static rssringoccs_ComplexDouble f_prime(rssringoccs_ComplexDouble z)
 {
     rssringoccs_ComplexDouble w;
-    w = rssringoccs_Complex_Scale(2.0, rssringoccs_Complex_Multiply(z, z));
+    w = rssringoccs_Complex_Scale(3.0, rssringoccs_Complex_Multiply(z, z));
     return w;
 }
 
@@ -70,6 +70,9 @@ int main(void)
     double y_min = -1.0;
     double y_max =  1.0;
 
+    /*  The number of iterations allows in the Newton-Raphson scheme.         */
+    unsigned int max_iters = 20;
+
     /*  The number of pixels in the x and y axes. If you want a higher        *
      *  resolution for the output fractal, increase this number. It is best   *
      *  to make n*1024 where n is some positive integer.                      */
@@ -89,7 +92,7 @@ int main(void)
 
     /*  Declare a variable for the output file and give it write permission.  */
     FILE *fp;
-    fp = fopen("newton_cubic_fractal.ppm", "w");
+    fp = fopen("newton_fractal.ppm", "w");
 
     /*  Needed to create the output ppm file. This is the preamble.           */
     fprintf(fp, "P6\n%d %d\n255\n", size, size);
@@ -111,7 +114,7 @@ int main(void)
             z = rssringoccs_Complex_Rect(z_x, z_y);
 
             /*  Use the Newton-Raphson function to compute a root.            */
-            root = rssringoccs_Newton_Raphson_Complex(z, f, f_prime);
+            root = rssringoccs_Newton_Raphson_Complex(z, f, f_prime, max_iters);
 
             /*  Find which root the final iteration is closest too.           */
             min = rssringoccs_Complex_Abs(

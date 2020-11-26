@@ -17,7 +17,7 @@
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
 
-/*  This program plots the real and imaginary parts of the comple cosine      *
+/*  This program plots the real and imaginary parts of the comple sine        *
  *  function using a color gradient to represent the values.                  */
 
 /*  Needed for creating the output file.                                      */
@@ -26,7 +26,7 @@
 /*  Contains malloc and free.                                                 */
 #include <stdlib.h>
 
-/*  We'll need the cosh function.                                             */
+/*  We'll need the sinh function.                                             */
 #include <rss_ringoccs/include/rss_ringoccs_math.h>
 
 /*  If rss_ringoccs built correctly, rss_ringoccs_complex.h is located in     *
@@ -87,7 +87,7 @@ int main(void)
     double y_max =  4.0;
 
     /*  Variables for the min and max of the real and imaginary parts of      *
-     *  cos(z) in the region of interest.                                     */
+     *  sin(z) in the region of interest.                                     */
     double min, max;
 
     /*  Declare variables needed for the computation.                         */
@@ -102,14 +102,14 @@ int main(void)
     if (x_max <= x_min)
     {
         puts("Error Encountered: rss_ringoccs\n"
-             "\tcomplex_cos_plots.c\n\n"
+             "\tcomplex_sin_plots.c\n\n"
              "x_min is greater than or equal to x_max.\n");
         exit(0);
     }
     else if (y_max <= y_min)
     {
         puts("Error Encountered: rss_ringoccs\n"
-             "\tcomplex_cos_plots.c\n\n"
+             "\tcomplex_sin_plots.c\n\n"
              "y_min is greater than or equal to y_max.\n");
         exit(0);
     }
@@ -118,14 +118,14 @@ int main(void)
     if (size == 0)
     {
         puts("Error Encountered: rss_ringoccs\n"
-             "\tcomplex_cos_plots.c\n\n"
+             "\tcomplex_sin_plots.c\n\n"
              "Input size is zero. Aborting computation.\n");
         exit(0);
     }
     else if (size == 1)
     {
         puts("Error Encountered: rss_ringoccs\n"
-             "\tcomplex_cos_plots.c\n\n"
+             "\tcomplex_sin_plots.c\n\n"
              "Input size is one. This will cause divide-by-zero.\n"
              "Aborting computation.\n");
         exit(0);
@@ -135,19 +135,19 @@ int main(void)
     fp = malloc(sizeof(*fp) * 2);
 
     /*  Create the files and give them write permissions.                     */
-    fp[0] = fopen("complex_cos_real_part.ppm", "w");
-    fp[1] = fopen("complex_cos_imag_part.ppm", "w");
+    fp[0] = fopen("complex_sin_real_part.ppm", "w");
+    fp[1] = fopen("complex_sin_imag_part.ppm", "w");
 
     /*  Find the min and max of the function so we can set the color scale.   */
     if (fabs(y_min) < fabs(y_max))
-        max = rssringoccs_Cosh_Double(y_max);
+        max = rssringoccs_Sinh_Double(y_max);
     else
-        max = rssringoccs_Cosh_Double(y_min);
+        max = rssringoccs_Sinh_Double(y_min);
 
     /*  Compress the maximum to a smaller range.                              */
     max = atan(max);
 
-    /*  For complex cos, the minimum is just minus the maximum.               */
+    /*  For complex sin, the minimum is just minus the maximum.               */
     min = -max;
 
     /*  Needed to create the output ppm file. This is the preamble.           */
@@ -161,7 +161,7 @@ int main(void)
      *  the rectangle [x_min, x_max] x [y_min, y_max] we'll need this term.   */
     rcp_factor = 1.0 / (size - 1.0);
 
-    /*  Loop over each pixel and color it based on the value of cos(x+iy).    */
+    /*  Loop over each pixel and color it based on the value of sin(x+iy).    */
     for (y=0; y<size; ++y)
     {
         /*  We want to center z_y so scale and shift. This makes the output   *
@@ -176,8 +176,8 @@ int main(void)
             /*  Set z to x+iy.                                                */
             z = rssringoccs_Complex_Rect(z_x, z_y);
 
-            /*  Compute the complex cosine of z.                              */
-            w = rssringoccs_Complex_Cos(z);
+            /*  Compute the complex sine of z.                                */
+            w = rssringoccs_Complex_Sin(z);
 
             /*  Extract the real and imaginary parts of w.                    */
             w_x = rssringoccs_Complex_Real_Part(w);
@@ -201,7 +201,7 @@ int main(void)
 /******************************************************************************
  *  We can compile this with:                                                 *
  *                                                                            *
- *      gcc complex_cos_plots.c -o test -lrssringoccs                         *
+ *      gcc complex_sin_plots.c -o test -lrssringoccs                         *
  *                                                                            *
  *  If librssringoccs is not in /usr/local/lib/ (this is the default          *
  *  location it is placed in when built via config_src.sh), then change       *
@@ -209,11 +209,11 @@ int main(void)
  *  your path, add the -I option as follows:                                  *
  *                                                                            *
  *      gcc -I/usr/local/include/ -L/usr/local/lib/                           *
- *              complex_cos_example.c -o test -lrssringoccs                   *
+ *              complex_sin_example.c -o test -lrssringoccs                   *
  *                                                                            *
  *  Running ./test will generate two figure:                                  *
- *      complex_cos_real_part.ppm                                             *
- *      complex_cos_imag_part.ppm                                             *
+ *      complex_sin_real_part.ppm                                             *
+ *      complex_sin_imag_part.ppm                                             *
  *  Which you can view using your favorite image tool. MacOS preview works    *
  *  via open filename.ppm, and gio works on Linux distributions via           *
  *  gio open filename.ppm.                                                    *
@@ -221,5 +221,5 @@ int main(void)
  *  This has been tested with several flags to check for strict compliance to *
  *  the C89 standard. The following compiles on gcc and clang:                *
  *      gcc -pedantic -Wall -Wextra -pedantic-errors -std=c89                 *
- *          -ansi -O3 complex_cos_plots.c -o test -lrssringoccs               *
+ *          -ansi -O3 complex_sin_plots.c -o test -lrssringoccs               *
  ******************************************************************************/

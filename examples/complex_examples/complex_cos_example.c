@@ -23,11 +23,11 @@
  *  /usr/local/include/rss_ringoccs/include. We can include this as follows:  */
 #include <rss_ringoccs/include/rss_ringoccs_complex.h>
 
+/*  ONE_PI is defined here.                                                   */
+#include <rss_ringoccs/include/rss_ringoccs_math.h>
+
 /*  We'll use stdio to print the results.                                     */
 #include <stdio.h>
-
-/*  Define a constant for the value pi.                                       */
-const double pi = 3.14159265358979323846264338327950288419716939937510;
 
 int main(void)
 {
@@ -42,8 +42,8 @@ int main(void)
 
     /*  Set z0, z1, and z2 to 0, i pi, and pi, respectively.                  */
     z[0] = rssringoccs_Complex_Zero;
-    z[1] = rssringoccs_Complex_Rect(0.0, pi);
-    z[2] = rssringoccs_Complex_Rect(pi, 0.0);
+    z[1] = rssringoccs_Complex_Rect(0.0, ONE_PI);
+    z[2] = rssringoccs_Complex_Rect(ONE_PI, 0.0);
 
     /*  Loop over the results and print them.                                 */
     for (n=0; n<3; ++n)
@@ -67,7 +67,7 @@ int main(void)
 /******************************************************************************
  *  We can compile this with:                                                 *
  *                                                                            *
- *      gcc -L/usr/local/lib/ complex_cos_example.c -o test -lrssringoccs     *
+ *      gcc complex_cos_example.c -o test -lrssringoccs                       *
  *                                                                            *
  *  If librssringoccs is not in /usr/local/lib/ (this is the default          *
  *  location it is placed in when built via config_src.sh), then change       *

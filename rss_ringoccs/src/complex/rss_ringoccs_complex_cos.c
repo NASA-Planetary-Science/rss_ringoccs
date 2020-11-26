@@ -19,11 +19,7 @@
  *                        rss_ringoccs_complex_cos                            *
  ******************************************************************************
  *  Purpose:                                                                  *
- *      Contains the source code for the complex cosine function. If          *
- *      rss_ringoccs was built with C99 complex.h support, this function is   *
- *      not compiled and instead rssringoccs_Complex_Cos is just an alias for *
- *      the ccos function. By default rss_ringoccs builds with C89 (commonly  *
- *      called ANSI C) support, so this file will be a part of the build.     *
+ *      Contains the source code for the complex cosine function.             *
  ******************************************************************************
  *                               DEPENDENCIES                                 *
  ******************************************************************************
@@ -64,10 +60,10 @@ rssringoccs_ComplexDouble rssringoccs_Complex_Cos(rssringoccs_ComplexDouble z)
     y = rssringoccs_Complex_Imag_Part(z);
 
     /*  The real part is cos(x)cosh(y).                                       */
-    real = rssringoccs_Cos_Double(x)*rssringoccs_Cosh_Double(y);
+    real = rssringoccs_Cos_Double(x) * rssringoccs_Cosh_Double(y);
 
     /*  And the imaginary part is -sin(x)sinh(y).                             */
-    imag = -rssringoccs_Sin_Double(x)*rssringoccs_Sinh_Double(y);
+    imag = -rssringoccs_Sin_Double(x) * rssringoccs_Sinh_Double(y);
 
     /*  Use rssringoccs_Complex_Rect to create the output and return.         */
     cos_z = rssringoccs_Complex_Rect(real, imag);

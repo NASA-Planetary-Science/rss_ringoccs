@@ -16,7 +16,7 @@
     poly = t*poly;
 
 #define _define_abramowitz_and_stegun_erf(type, Name)                          \
-type rssringoccs_Erf_##Name(type x)                                            \
+type rssringoccs_##Name##_Erf(type x)                                          \
 {                                                                              \
     /*  Declare necessary variables. C89 requires declarations at the top.   */\
     type erf_x, t, poly, exp_minus_x_sq, abs_x;                                \
@@ -59,7 +59,7 @@ type rssringoccs_Erf_##Name(type x)                                            \
 #define FOUR_BY_PI        1.27323954473516268615107010698011
 
 #define _define_winitzki_erf(type, Name)                                       \
-type rssringoccs_Erf_##Name(type x)                                            \
+type rssringoccs_##Name##_Erf(type x)                                          \
 {                                                                              \
     /*  Declare necessary variables. C89 requires declarations at the top.   */\
     type erf_x, rat, num, denom, x_sq, val;                                    \

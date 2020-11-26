@@ -193,7 +193,7 @@ float rssringoccs_Bessel_J0_Float(float x)
         cosarg *= rssringoccs_Cos_Float(x - PI_BY_FOUR);
 
         /*  Multiply the result by the coefficient and return.                */
-        bessel_J0 = (cosarg + sinarg)*SQRT_2_BY_PI;
+        bessel_J0 = (cosarg + sinarg)*SQRT_TWO_BY_PI;
         bessel_J0 = bessel_J0 / rssringoccs_Sqrt_Float(x);
     }
 
@@ -265,7 +265,7 @@ double rssringoccs_Bessel_J0_Double(double x)
         cosarg *= rssringoccs_Cos_Double(x - PI_BY_FOUR);
 
         /*  Multiply the result by the coefficient and return.                */
-        bessel_J0 = (cosarg + sinarg)*SQRT_2_BY_PI;
+        bessel_J0 = (cosarg + sinarg)*SQRT_TWO_BY_PI;
         bessel_J0 = bessel_J0 / rssringoccs_Sqrt_Double(x);
     }
 
@@ -340,7 +340,7 @@ long double rssringoccs_Bessel_J0_LongDouble(long double x)
         cosarg *= rssringoccs_Cos_LongDouble(x - PI_BY_FOUR);
 
         /*  For very large arguments, use the limit (which is zero).          */
-        bessel_J0 = (cosarg + sinarg)*SQRT_2_BY_PI;
+        bessel_J0 = (cosarg + sinarg)*SQRT_TWO_BY_PI;
         bessel_J0 = bessel_J0 / rssringoccs_Sqrt_LongDouble(x);
     }
 

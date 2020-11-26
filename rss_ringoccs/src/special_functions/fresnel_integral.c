@@ -42,7 +42,7 @@ rssringoccs_ComplexDouble rssringoccs_Fresnel_Integral_Double(double x)
     double A, R, a, b, c, d, sgn_x, cx, sx;
     rssringoccs_ComplexDouble out;
     sgn_x = (x>0)-(x<0);
-    x *= SQRT_2_BY_PI*sgn_x;
+    x *= SQRT_TWO_BY_PI*sgn_x;
 
     /* Compute the Numerator of the A_jk Function.                            */
     a = FRESNEL_HEALD_RATIONAL_EPS_8_A04*x + FRESNEL_HEALD_RATIONAL_EPS_8_A03;

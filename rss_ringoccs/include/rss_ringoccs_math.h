@@ -133,7 +133,8 @@
 #define SQRT_ONE_BY_2_PI    0.3989422804014326779399461
 #define SQRT_PI_BY_8        0.6266570686577501256039413
 #define SQRT_PI_BY_2        1.2533141373155002512078830
-#define SQRT_2_BY_PI        0.7978845608028653558798921
+#define SQRT_ONE_BY_PI      0.5641895835477562869480794
+#define SQRT_TWO_BY_PI      0.7978845608028653558798921
 #define PI_BY_TWO           1.570796326794896619231321691639751440
 #define PI_BY_FOUR          0.785398163397448309615660845819875721
 #define ONE_PI              3.141592653589793238462643383279502880
@@ -275,9 +276,17 @@ extern float rssringoccs_Tanh_Float(float x);
 extern double rssringoccs_Tanh_Double(double x);
 extern long double rssringoccs_Tanh_LongDouble(long double x);
 
-extern float rssringoccs_Erf_Float(float x);
-extern double rssringoccs_Erf_Double(double x);
-extern long double rssringoccs_Erf_LongDouble(long double x);
+extern float rssringoccs_Float_Erf(float x);
+extern double rssringoccs_Double_Erf(double x);
+extern long double rssringoccs_LongDouble_Erf(long double x);
+
+extern float rssringoccs_Float_Erfc(float x);
+extern double rssringoccs_Double_Erfc(double x);
+extern long double rssringoccs_LongDouble_Erfc(long double x);
+
+extern float rssringoccs_Erfcx_Float(float x);
+extern double rssringoccs_Erfcx_Double(double x);
+extern long double rssringoccs_Erfcx_LongDouble(long double x);
 
 extern long rssringoccs_Factorial(int n);
 extern long rssringoccs_Falling_Factorial(int x, int N);

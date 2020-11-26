@@ -1046,6 +1046,9 @@ rssringoccs_Complex_Poly_Complex_Coeffs(rssringoccs_ComplexDouble *coeffs,
 extern rssringoccs_ComplexDouble
 rssringoccs_Complex_Erf(rssringoccs_ComplexDouble z);
 
+extern rssringoccs_ComplexDouble
+rssringoccs_Complex_Erfc(rssringoccs_ComplexDouble z);
+
 extern rssringoccs_ComplexDouble *
 rssringoccs_FFT_Cooley_Tukey_ComplexDouble(rssringoccs_ComplexDouble *in,
                                            long N, rssringoccs_Bool inverse);

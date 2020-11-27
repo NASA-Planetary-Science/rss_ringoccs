@@ -151,8 +151,8 @@ float rssringoccs_Fresnel_Cos_Float(float x)
     }
     else if (arg < 1.0e16)
     {
-        cos_x_squared = rssringoccs_Cos_Float(arg);
-        sin_x_squared = rssringoccs_Sin_Float(arg);
+        cos_x_squared = rssringoccs_Float_Cos(arg);
+        sin_x_squared = rssringoccs_Float_Sin(arg);
 
         arg = 1.0/arg;
         sin_x_squared *= arg;
@@ -228,8 +228,8 @@ double rssringoccs_Fresnel_Cos_Double(double x)
     }
     else if (arg < 1.0e16)
     {
-        cos_x_squared = rssringoccs_Cos_Double(arg);
-        sin_x_squared = rssringoccs_Sin_Double(arg);
+        cos_x_squared = rssringoccs_Double_Cos(arg);
+        sin_x_squared = rssringoccs_Double_Sin(arg);
 
         arg = 1.0/arg;
         sin_x_squared *= arg;
@@ -309,8 +309,8 @@ long double rssringoccs_Fresnel_Cos_LongDouble(long double x)
     }
     else if (arg < 1.0e16)
     {
-        cos_x_squared = rssringoccs_Cos_LongDouble(arg);
-        sin_x_squared = rssringoccs_Sin_LongDouble(arg);
+        cos_x_squared = rssringoccs_LongDouble_Cos(arg);
+        sin_x_squared = rssringoccs_LongDouble_Sin(arg);
 
         arg = 1.0/arg;
         sin_x_squared *= arg;

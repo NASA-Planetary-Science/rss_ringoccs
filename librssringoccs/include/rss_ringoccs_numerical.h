@@ -75,5 +75,16 @@ rssringoccs_Halleys_Method_Complex(
     unsigned int max_iters
 );
 
+extern float
+rssringoccs_Float_Five_Point_Derivative(float (*f)(float), float x, float h);
+
+extern double
+rssringoccs_Double_Five_Point_Derivative(double (*f)(double),
+                                         double x, double h);
+
+extern long double
+rssringoccs_LongDouble_Five_Point_Derivative(long double (*f)(long double),
+                                             long double x, long double h);
+
 #endif
 /*  End of include guard: #ifndef _RSS_RINGOCCS_NUMERICAL_H_                  */

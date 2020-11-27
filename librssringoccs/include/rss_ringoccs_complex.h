@@ -94,19 +94,8 @@
  *  functions and macros defined within.                                      */
 #include <complex.h>
 
-/*  You have complex.h support, so we'll just alias the various functions.    */
+/*  You have complex.h support, so we'll just typedef double _Complex.        */
 typedef double _Complex rssringoccs_ComplexDouble;
-#define rssringoccs_Complex_Abs cabs
-#define rssringoccs_Complex_Argument carg
-#define rssringoccs_Complex_Real_Part creal
-#define rssringoccs_Complex_Imag_Part cimag
-#define rssringoccs_Complex_Conjugate conj
-#define rssringoccs_Complex_Exp cexp
-#define rssringoccs_Complex_Sqrt csqrt
-#define rssringoccs_Complex_Log clog
-#define rssringoccs_Complex_Sin csin
-#define rssringoccs_Complex_Cos ccos
-#define rssringoccs_Complex_Tan ctan
 
 #else
 /*  If we get here, your compiler does not support complex.h, or you have     *
@@ -122,6 +111,9 @@ typedef double _Complex rssringoccs_ComplexDouble;
 typedef struct {
     double dat[2];
 } rssringoccs_ComplexDouble;
+
+#endif
+/*  End of #ifdef __RSS_RINGOCCS_HAS_COMPLEX_H_                               */
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -562,9 +554,6 @@ rssringoccs_Complex_Cos(rssringoccs_ComplexDouble z);
  ******************************************************************************/
 extern rssringoccs_ComplexDouble
 rssringoccs_Complex_Tan(rssringoccs_ComplexDouble z);
-
-#endif
-/*  End of #ifdef __RSS_RINGOCCS_HAS_COMPLEX_H_                               */
 
 /*  Useful constants used throughout computations.                            */
 extern const rssringoccs_ComplexDouble rssringoccs_Imaginary_Unit;

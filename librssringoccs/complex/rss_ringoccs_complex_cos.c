@@ -60,10 +60,10 @@ rssringoccs_ComplexDouble rssringoccs_Complex_Cos(rssringoccs_ComplexDouble z)
     y = rssringoccs_Complex_Imag_Part(z);
 
     /*  The real part is cos(x)cosh(y).                                       */
-    real = rssringoccs_Cos_Double(x) * rssringoccs_Cosh_Double(y);
+    real = rssringoccs_Double_Cos(x) * rssringoccs_Cosh_Double(y);
 
     /*  And the imaginary part is -sin(x)sinh(y).                             */
-    imag = -rssringoccs_Sin_Double(x) * rssringoccs_Sinh_Double(y);
+    imag = -rssringoccs_Double_Sin(x) * rssringoccs_Sinh_Double(y);
 
     /*  Use rssringoccs_Complex_Rect to create the output and return.         */
     cos_z = rssringoccs_Complex_Rect(real, imag);

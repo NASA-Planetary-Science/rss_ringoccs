@@ -24,7 +24,7 @@ setup(name='special_functions',
       author='Ryan Maguire',
       ext_modules=[
           Extension('special_functions',
-                    ['rss_ringoccs/src/modules/specialfunctionsmodule.c'],
+                    ['rss_ringoccs/src/specialfunctionsmodule.c'],
                     include_dirs=[numpy.get_include()],
                     library_dirs=['/usr/local/lib'],
                     libraries=['rssringoccs'])

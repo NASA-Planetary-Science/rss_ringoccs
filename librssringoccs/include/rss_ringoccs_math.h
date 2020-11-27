@@ -112,10 +112,14 @@
  *  is also (incorrectly) referred to as the ANSI C version. If you have C99  *
  *  available, change the __HAS_C99_MATH_H__ to 1 and rebuild rss_ringoccs.   */
 
-/*  Assuming you do not have C99 math.h, so set __HAS_C99_MATH_H__ to 0.      */
-#ifndef __HAS_C99_MATH_H__
+/*  Check which version of C you are compiling with and set the macro         *
+ *  __HAS_C99_MATH_H__ accordingly.                                           */
+#if __STDC_VERSION__ >= 199901L
+#define __HAS_C99_MATH_H__ 1
+#else
 #define __HAS_C99_MATH_H__ 0
 #endif
+/*  End of #if __STDC_VERSION__ >= 199901L                                    */
 
 /*  Include the standard library header math.h. We're only going to alias     *
  *  functions we ever use in rss_ringoccs, sin, cos, fabs, exp, atan2.        */
@@ -153,34 +157,15 @@
 #define MAX_DOUBLE_BASE_E   DBL_MAX_10_EXP * NATURAL_LOG_OF_10
 #define MAX_LDOUBLE_BASE_E  LDBL_MAX_10_EXP * NATURAL_LOG_OF_10
 
-/*  NOTE:                                                                     *
- *      All of the functions have extra parentheses around the x. For example,*
- *      we define sine for floats by using:                                   *
- *          #define rssringoccs_Sin_Float(x) sin((double)(x))                 *
- *      The C preprocessor takes whatever x is and literaly replaces it into  *
- *      the function. So if you input rssringoccs_Sin_Float(x+y), then this   *
- *      would become sin((double)x+y) if not for the extra parentheses. What  *
- *      we want is sin((double)(x+y)).                                        */
-
 /*  Aliases for the sine trig function found in math.h.                       */
-#define rssringoccs_Sin_Double(x)       sin((x))
-#if __HAS_C99_MATH_H__ != 0
-#define rssringoccs_Sin_Float(x)        sinf((x))
-#define rssringoccs_Sin_LongDouble(x)   sinl((x))
-#else
-#define rssringoccs_Sin_Float(x)        sin((double)(x))
-#define rssringoccs_Sin_LongDouble(x)   sin((double)(x))
-#endif
+extern float rssringoccs_Float_Sin(float x);
+extern double rssringoccs_Double_Sin(double x);
+extern long double rssringoccs_LongDouble_Sin(long double x);
 
 /*  Aliases for the cosine trig function found in math.h.                     */
-#define rssringoccs_Cos_Double(x)       cos(x)
-#if __HAS_C99_MATH_H__ != 0
-#define rssringoccs_Cos_Float(x)        cosf(x)
-#define rssringoccs_Cos_LongDouble(x)   cosl(x)
-#else
-#define rssringoccs_Cos_Float(x)        cos((double)(x))
-#define rssringoccs_Cos_LongDouble(x)   cos((double)(x))
-#endif
+extern float rssringoccs_Float_Cos(float x);
+extern double rssringoccs_Double_Cos(double x);
+extern long double rssringoccs_LongDouble_Cos(long double x);
 
 /*  Aliases for the cosine tan function found in math.h.                      */
 #define rssringoccs_Tan_Double(x)       tan(x)
@@ -284,9 +269,9 @@ extern float rssringoccs_Float_Erfc(float x);
 extern double rssringoccs_Double_Erfc(double x);
 extern long double rssringoccs_LongDouble_Erfc(long double x);
 
-extern float rssringoccs_Erfcx_Float(float x);
-extern double rssringoccs_Erfcx_Double(double x);
-extern long double rssringoccs_Erfcx_LongDouble(long double x);
+extern float rssringoccs_Float_Erfcx(float x);
+extern double rssringoccs_Double_Erfcx(double x);
+extern long double rssringoccs_LongDouble_Erfcx(long double x);
 
 extern long rssringoccs_Factorial(int n);
 extern long rssringoccs_Falling_Factorial(int x, int N);

@@ -22,7 +22,7 @@ type rssringoccs_Coss_Window_##Type(type x, type W)                            \
     if (abs_x <= W/2.0)                                                        \
     {                                                                          \
         abs_x *= ONE_PI/W;                                                     \
-        coss_x = rssringoccs_Cos_##Type(abs_x);                                \
+        coss_x = rssringoccs_##Type##_Cos(abs_x);                              \
         coss_x *= coss_x;                                                      \
     }                                                                          \
     else                                                                       \

@@ -18,7 +18,7 @@
  ******************************************************************************
  *                                Bessel J0                                   *
  ******************************************************************************
- *  This file contains functions for computing the Bessel J0 function.        * 
+ *  This file contains functions for computing the Bessel J0 function.        *
  ******************************************************************************
  * We define J_0(x) as the power series solution to the ODE:                  *
  *                                                                            *
@@ -184,13 +184,13 @@ float rssringoccs_Bessel_J0_Float(float x)
         sinarg  = arg * sinarg + BESSEL_J0_ASYM_01;
 
         /*  Multiply the output by the coefficient factor.                    */
-        sinarg *= rssringoccs_Sin_Float(x - PI_BY_FOUR)/x;
+        sinarg *= rssringoccs_Float_Sin(x - PI_BY_FOUR)/x;
 
         /*  Do the same as above for the Cosine portion.                      */
         cosarg  = arg * BESSEL_J0_ASYM_06 + BESSEL_J0_ASYM_04;
         cosarg  = arg * cosarg + BESSEL_J0_ASYM_02;
         cosarg  = arg * cosarg + BESSEL_J0_ASYM_00;
-        cosarg *= rssringoccs_Cos_Float(x - PI_BY_FOUR);
+        cosarg *= rssringoccs_Float_Cos(x - PI_BY_FOUR);
 
         /*  Multiply the result by the coefficient and return.                */
         bessel_J0 = (cosarg + sinarg)*SQRT_TWO_BY_PI;
@@ -256,13 +256,13 @@ double rssringoccs_Bessel_J0_Double(double x)
         sinarg  = arg * sinarg + BESSEL_J0_ASYM_01;
 
         /*  Multiply the output by the coefficient factor.                    */
-        sinarg *= rssringoccs_Sin_Double(x - PI_BY_FOUR)/x;
+        sinarg *= rssringoccs_Double_Sin(x - PI_BY_FOUR)/x;
 
         /*  Do the same as above for the Cosine portion.                      */
         cosarg  = arg * BESSEL_J0_ASYM_06 + BESSEL_J0_ASYM_04;
         cosarg  = arg * cosarg + BESSEL_J0_ASYM_02;
         cosarg  = arg * cosarg + BESSEL_J0_ASYM_00;
-        cosarg *= rssringoccs_Cos_Double(x - PI_BY_FOUR);
+        cosarg *= rssringoccs_Double_Cos(x - PI_BY_FOUR);
 
         /*  Multiply the result by the coefficient and return.                */
         bessel_J0 = (cosarg + sinarg)*SQRT_TWO_BY_PI;
@@ -330,14 +330,14 @@ long double rssringoccs_Bessel_J0_LongDouble(long double x)
         sinarg  = arg * sinarg + BESSEL_J0_ASYM_01;
 
         /*  Multiply the output by the coefficient factor.                    */
-        sinarg *= rssringoccs_Sin_LongDouble(x - PI_BY_FOUR)/x;
+        sinarg *= rssringoccs_LongDouble_Sin(x - PI_BY_FOUR)/x;
 
         /*  Do the same as above for the Cosine portion.                      */
         cosarg  = arg * BESSEL_J0_ASYM_08 + BESSEL_J0_ASYM_06;
         cosarg  = arg * cosarg + BESSEL_J0_ASYM_04;
         cosarg  = arg * cosarg + BESSEL_J0_ASYM_02;
         cosarg  = arg * cosarg + BESSEL_J0_ASYM_00;
-        cosarg *= rssringoccs_Cos_LongDouble(x - PI_BY_FOUR);
+        cosarg *= rssringoccs_LongDouble_Cos(x - PI_BY_FOUR);
 
         /*  For very large arguments, use the limit (which is zero).          */
         bessel_J0 = (cosarg + sinarg)*SQRT_TWO_BY_PI;

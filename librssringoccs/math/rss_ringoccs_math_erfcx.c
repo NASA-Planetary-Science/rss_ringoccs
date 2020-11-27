@@ -1,7 +1,7 @@
 /*  Header file which contains aliases for the function in the standard C     *
  *  library math.h. This allows compatibility of C89 and C99 math.h headers.  */
 #include <rss_ringoccs/include/rss_ringoccs_math.h>
-#include <stdio.h>
+
 static double erfcx_chebyshev_table(double y100)
 {
     /*  Declare necessary variables. C89 requires declarations at the top of  *
@@ -18,7 +18,7 @@ static double erfcx_chebyshev_table(double y100)
 
     /*  Use the following lookup table to compute the Chebyshev coefficients  *
      *  corresponding to 100*y (which we've labelled y100).                   */
-    switch ((int) y100)
+    switch (y100_int)
     {
         case 0:
         {
@@ -1141,7 +1141,7 @@ static double erfcx_chebyshev_table(double y100)
     return out;
 }
 
-double rssringoccs_Erfcx_Double(double x)
+double rssringoccs_Double_Erfcx(double x)
 {
     double out, x2, x4, numer, denom;
     if (x >= 0)
@@ -1193,18 +1193,18 @@ double rssringoccs_Erfcx_Double(double x)
     return out;
 }
 
-float rssringoccs_Erfcx_Float(float x)
+float rssringoccs_Float_Erfcx(float x)
 {
     float out;
-    out = rssringoccs_Erfcx_Double((float)x);
+    out = rssringoccs_Double_Erfcx((float)x);
 
     return out;
 }
 
-long double rssringoccs_Erfcx_LongDouble(long double x)
+long double rssringoccs_LongDouble_Erfcx(long double x)
 {
     long double out;
-    out = rssringoccs_Erfcx_Double((long double)x);
+    out = rssringoccs_Double_Erfcx((long double)x);
 
     return out;
 }

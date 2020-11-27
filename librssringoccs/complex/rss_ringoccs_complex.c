@@ -14,7 +14,8 @@ const rssringoccs_ComplexDouble rssringoccs_Complex_Zero = 0.0;
 const rssringoccs_ComplexDouble rssringoccs_Complex_One = 1.0;
 const rssringoccs_ComplexDouble rssringoccs_Complex_NaN = rssringoccs_NaN;
 const rssringoccs_ComplexDouble
-    rssringoccs_Complex_Infinity = rssringoccs_Infinity;
+    rssringoccs_Complex_Infinity = rssringoccs_Infinity +
+                                   _Complex_I*rssringoccs_Infinity;
 
 /*  C99 allows complex values to be compared like normal real numbers, so     *
  *  just use this.                                                            */
@@ -49,8 +50,8 @@ rssringoccs_ComplexDouble rssringoccs_Complex_Polar(double r, double theta)
     /*  We use Euler's formula to compute z = r*exp(i*theta) and write this   *
      *  as z = r*cos(theta) + i*r*sin(theta). We compute the real and         *
      *  imaginary parts and then combine them.                                */
-    real = r*rssringoccs_Cos_Double(theta);
-    imag = r*rssringoccs_Sin_Double(theta);
+    real = r*rssringoccs_Double_Cos(theta);
+    imag = r*rssringoccs_Double_Sin(theta);
     z = real + rssringoccs_Imaginary_Unit*imag;
     return z;
 }
@@ -169,8 +170,8 @@ rssringoccs_ComplexDouble rssringoccs_Complex_Polar(double r, double theta)
     double real, imag;
 
     /*  Use Euler's formula for the polar representation of a complex number. */
-    real = r * rssringoccs_Cos_Double(theta);
-    imag = r * rssringoccs_Sin_Double(theta);
+    real = r * rssringoccs_Double_Cos(theta);
+    imag = r * rssringoccs_Double_Sin(theta);
 
     /*  Use rssringoccs_ComplexRect to compute the complex number and return. */
     z = rssringoccs_Complex_Rect(real, imag);

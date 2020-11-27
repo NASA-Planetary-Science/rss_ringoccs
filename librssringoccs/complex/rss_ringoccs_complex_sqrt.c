@@ -18,8 +18,8 @@ rssringoccs_ComplexDouble rssringoccs_Complex_Sqrt(rssringoccs_ComplexDouble z)
     /*  Once in the form r*exp(i*theta), the square root is compute as        *
      *  sqrt(z) = sqrt(r) * exp(i*theta / 2). r is non-negative, so this is   *
      *  well defined for all z.                                               */
-    real = sqrt_r*rssringoccs_Cos_Double(0.5*theta);
-    imag = sqrt_r*rssringoccs_Sin_Double(0.5*theta);
+    real = sqrt_r*rssringoccs_Double_Cos(0.5*theta);
+    imag = sqrt_r*rssringoccs_Double_Sin(0.5*theta);
 
     /*  Use rssringoccs_ComplexRect to compute and return sqrt_z.             */
     sqrt_z = rssringoccs_Complex_Rect(real, imag);

@@ -20,83 +20,40 @@
 /*  This program plots the real and imaginary parts of the complex error      *
  *  function using a color gradient to represent the values.                  */
 
-/*  Needed for creating the output file.                                      */
+/*  stdio is need for creating the output file. stdlib is needed for exit.    *
+ *  We'll use librssringoccs for plotting and using complex numbers.          */
 #include <stdio.h>
-
-/*  Contains malloc and free.                                                 */
 #include <stdlib.h>
-
-#include <cerf.h>
-
-/*  We'll need the sinh function.                                             */
-#include <rss_ringoccs/include/rss_ringoccs_math.h>
-
-/*  If rss_ringoccs built correctly, rss_ringoccs_complex.h is located in     *
- *  /usr/local/include/rss_ringoccs/include. We can include this as follows:  */
 #include <rss_ringoccs/include/rss_ringoccs_complex.h>
+#include <rss_ringoccs/include/rss_ringoccs_ppm_plot.h>
+
+/******************************************************************************
+ ******************************************************************************
+ *                          Begin User Input                                  *
+ ******************************************************************************
+ ******************************************************************************/
 
 /*  The number of pixels in the x and y axes.                                 */
-const unsigned int size = 4*1024;
+const unsigned int size = 1024;
 
-/*  This function is used to set the current pixel of the output ppm to the   *
- *  desired color. fp is the filename we'll be using.                         */
-static void color(double mag, FILE *fp)
-{
-    /*  Declare variables for the color. We'll compute the color in RGB       *
-     *  format, hence the need for these three variables.                     */
-    unsigned char red, green, blue;
+/* Values for the min and max of the x and y axes.                            */
+const double x_min = -4.0;
+const double x_max =  4.0;
+const double y_min = -4.0;
+const double y_max =  4.0;
 
-    /*  Use an RGB rainbow gradient to color the current pixel. We'll set     *
-     *  blue to correspond to the least value and red for the greatest, with  *
-     *  a continuous gradient in between.                                     */
-    if (mag < 64)
-    {
-        red   = (unsigned char)0;
-        green = (unsigned char)4*mag;
-        blue  = (unsigned char)255;
-    }
-    else if (mag < 128)
-    {
-        red   = (unsigned char)0;
-        green = (unsigned char)255;
-        blue  = (unsigned char)(255 - 4*(mag - 64));
-    }
-    else if (mag < 192)
-    {
-        red   = (unsigned char)4*(mag-128);
-        green = (unsigned char)255;
-        blue  = (unsigned char)0;
-    }
-    else
-    {
-        red   = (unsigned char)255;
-        green = (unsigned char)(255 - 4*(mag-192));
-        blue  = (unsigned char)0;
-    }
-
-    /*  Color the current pixel.                                              */
-    fputc(red,   fp);
-    fputc(green, fp);
-    fputc(blue,  fp);
-}
+/******************************************************************************
+ ******************************************************************************
+ *                           End User Input                                   *
+ ******************************************************************************
+ ******************************************************************************/
 
 int main(void)
 {
-    /* Values for the min and max of the x and y axes.                        */
-    double x_min = -10.0;
-    double x_max =  10.0;
-    double y_min = -10.0;
-    double y_max =  10.0;
-
-    /*  Variables for the min and max of the real and imaginary parts of      *
-     *  erf(z) in the region of interest.                                     */
-    double min, max;
-
     /*  Declare variables needed for the computation.                         */
     unsigned int x, y;
-    double z_x, z_y, w_x, w_y, rcp_factor, bx, by, mag, max_re, max_im;
+    double z_x, z_y, w_x, w_y, rcp_factor;
     rssringoccs_ComplexDouble z, w;
-    complex double a, b;
 
     /*  Declare a variable for the output files.                              */
     FILE **fp;
@@ -141,28 +98,13 @@ int main(void)
     fp[0] = fopen("complex_erf_real_part.ppm", "w");
     fp[1] = fopen("complex_erf_imag_part.ppm", "w");
 
-    /*  Find the min and max of the function so we can set the color scale.   */
-    max = PI_BY_TWO;
-    min = 0.0;
-
     /*  Needed to create the output ppm file. This is the preamble.           */
     fprintf(fp[0], "P6\n%d %d\n255\n", size, size);
     fprintf(fp[1], "P6\n%d %d\n255\n", size, size);
 
-    /*  Translate max to be positive.                                         */
-    max = max - min;
-
     /*  To translate from the pixel (x, y) to the point (z_x, z_y) lying in   *
      *  the rectangle [x_min, x_max] x [y_min, y_max] we'll need this term.   */
     rcp_factor = 1.0 / (size - 1.0);
-
-    double the_x_re, the_y_re, the_x_im, the_y_im;
-    max_re = 0.0;
-    max_im = 0.0;
-    the_x_re = 0.0;
-    the_y_re = 0.0;
-    the_x_im = 0.0;
-    the_y_im = 0.0;
 
     /*  Loop over each pixel and color it based on the value of erf(x+iy).    */
     for (y=0; y<size; ++y)
@@ -178,50 +120,20 @@ int main(void)
 
             /*  Set z to x+iy.                                                */
             z = rssringoccs_Complex_Rect(z_x, z_y);
-            a = z_x + _Complex_I*z_y;
 
             /*  Compute the complex erf of z.                                 */
             w = rssringoccs_Complex_Erfc(z);
-            b = cerfc(a);
 
             /*  Extract the real and imaginary parts of w.                    */
             w_x = rssringoccs_Complex_Real_Part(w);
             w_y = rssringoccs_Complex_Imag_Part(w);
-            bx = creal(b);
-            by = cimag(b);
-
-            if (cabs(a) < 4.5)
-            {
-            mag = fabs(bx-w_x)/fabs(bx);
-            if (max_re < mag)
-            {
-                the_x_re = z_x;
-                the_y_re = z_y;
-                max_re = mag;
-            }
-
-            mag = fabs(by-w_y)/fabs(by);
-            if (max_im < mag)
-            {
-                the_x_im = z_x;
-                the_y_im = z_y;
-                max_im = mag;
-            }
-            }
-            w_x = fabs(w_x - bx);
-            w_y = fabs(w_y - by);
-
-            /*  Scale w_x and w_y to lie in the range [0, 255].               */
-            w_x = 255*(atan(w_x) - min)/max;
-            w_y = 255*(atan(w_y) - min)/max;
 
             /*  Color the current pixel.                                      */
-            color(w_x, fp[0]);
-            color(w_y, fp[1]);
+            rssringoccs_RGB_Scaled_Gradient(w_x, fp[0]);
+            rssringoccs_RGB_Scaled_Gradient(w_y, fp[1]);
         }
     }
 
-    printf("%f %f %f\n%f %f %f\n", the_x_re, the_y_re, max_re, the_x_im, the_y_im, max_im);
     /*  Free the memory allocated to fp.                                      */
     free(fp);
     return 0;

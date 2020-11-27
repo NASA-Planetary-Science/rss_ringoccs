@@ -87,6 +87,12 @@ for filename in special_functions/*.c; do
     $CC $CompilerArgs $filename
 done
 
+echo -e "\n\tCompiling ppm_plot/"
+for filename in ppm_plot/*.c; do
+    echo -e "\t\tCompiling: $filename"
+    $CC $CompilerArgs $filename
+done
+
 echo -e "\nBuilding rss_ringoccs Shared Object (.so file)"
 
 sharedobjectlist=""
@@ -105,7 +111,7 @@ includedir="/usr/local/include/rss_ringoccs/"
 #   Check if /usr/local/include/rss_ringoccs/ is already a directory. If not
 #   then create this via mkdir.
 [ ! -d "$includedir" ] && sudo mkdir -p "$includedir/include/"
-sudo cp -r include/ "$includedir/include/"
+sudo cp -r ../include/ "$includedir/include/"
 
 echo "Cleaning up..."
 rm -f *.o

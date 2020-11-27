@@ -17,11 +17,11 @@
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
 
-#include <rss_ringoccs/include/rss_ringoccs_complex.h>
-
 /*  Include guard for this file to prevent including this twice.              */
 #ifndef _RSS_RINGOCCS_NUMERICAL_H_
 #define _RSS_RINGOCCS_NUMERICAL_H_
+
+#include <rss_ringoccs/include/rss_ringoccs_complex.h>
 
 extern float
 rssringoccs_Newton_Raphson_Float(float x, float (*f)(float),

@@ -12,7 +12,7 @@ type rssringoccs_Sinc_##Type(type x)                                           \
     if (x == 0.0)                                                              \
         y = 1.0;                                                               \
     else                                                                       \
-        y = rssringoccs_Sin_##Type(x)/x;                                       \
+        y = rssringoccs_##Type##_Sin(x)/x;                                     \
                                                                                \
     return y;                                                                  \
 }

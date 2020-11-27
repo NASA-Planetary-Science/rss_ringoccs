@@ -31,43 +31,46 @@ rm -f *.o
 
 echo "Compiling rss_ringoccs..."
 CompilerArgs1="-std=c89 -ansi -pedantic -pedantic-errors -Wall -Wextra"
-CompilerArgs2="-Wpedantic -Wmisleading-indentation"
-CompilerArgs3="-Wmissing-prototypes -Wold-style-definition"
-CompilerArgs4="-Wstrict-prototypes -I./ -DNDEBUG -g -fPIC -O2 -c"
-CompilerArgs="$CompilerArgs1 $CompilerArgs2 $CompilerArgs3 $CompilerArgs4"
+CompilerArgs2="-Wpedantic -Wmisleading-indentation -Winit-self"
+CompilerArgs3="-Wmissing-prototypes -Wold-style-definition -Wold-style-cast"
+CompilerArgs4="-Wmissing-declarations "
+CompilerArgs5="-Wstrict-prototypes -I./ -DNDEBUG -g -fPIC -O3 -c"
+CompilerArgs="$CompilerArgs1 $CompilerArgs2 $CompilerArgs3"
+CompilerArgs="$CompilerArgs $CompilerArgs4 $CompilerArgs5"
 
 echo -e "\n\tCompiler Options:"
 echo -e "\t\t$CompilerArgs1"
 echo -e "\t\t$CompilerArgs2"
 echo -e "\t\t$CompilerArgs3"
 echo -e "\t\t$CompilerArgs4"
+echo -e "\t\t$CompilerArgs5"
 
-echo -e "\n\tCompiling rss_ringoccs/src/complex/"
-for filename in rss_ringoccs/src/complex/*.c; do
+echo -e "\n\tCompiling complex/"
+for filename in complex/*.c; do
     echo -e "\t\tCompiling: $filename"
     $CC $CompilerArgs $filename
 done
 
-echo -e "\n\tCompiling rss_ringoccs/src/math/"
-for filename in rss_ringoccs/src/math/*.c; do
+echo -e "\n\tCompiling math/"
+for filename in math/*.c; do
     echo -e "\t\tCompiling: $filename"
     $CC $CompilerArgs $filename
 done
 
-echo -e "\n\tCompiling rss_ringoccs/src/geometry/"
-for filename in rss_ringoccs/src/geometry/*.c; do
+echo -e "\n\tCompiling geometry/"
+for filename in geometry/*.c; do
     echo -e "\t\tCompiling: $filename"
     $CC $CompilerArgs $filename
 done
 
-echo -e "\n\tCompiling rss_ringoccs/src/numerical/"
-for filename in rss_ringoccs/src/numerical/*.c; do
+echo -e "\n\tCompiling numerical/"
+for filename in numerical/*.c; do
     echo -e "\t\tCompiling: $filename"
     $CC $CompilerArgs $filename
 done
 
-echo -e "\n\tCompiling rss_ringoccs/src/special_functions/"
-for filename in rss_ringoccs/src/special_functions/*.c; do
+echo -e "\n\tCompiling special_functions/"
+for filename in special_functions/*.c; do
     echo -e "\t\tCompiling: $filename"
     $CC $CompilerArgs $filename
 done
@@ -90,19 +93,9 @@ includedir="/usr/local/include/rss_ringoccs/"
 #   Check if /usr/local/include/rss_ringoccs/ is already a directory. If not
 #   then create this via mkdir.
 [ ! -d "$includedir" ] && sudo mkdir -p "$includedir/include/"
-sudo cp -r rss_ringoccs/include/ "$includedir/include/"
+sudo cp -r include/ "$includedir/include/"
 
 echo "Cleaning up..."
 rm -f *.o
 
 echo "Done"
-
-echo -e "\nBuilding modules...\n"
-python setup.py config build_ext --inplace
-
-rm -rf build/
-
-#   Move the compiled shared objects (.so) files to the rss_ringoccs/ folder.
-#   This way you can import them directly into python if the rss_ringoccs
-#   package is in your path.
-mv *.so ./rss_ringoccs/

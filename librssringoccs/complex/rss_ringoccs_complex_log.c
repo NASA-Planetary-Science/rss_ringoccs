@@ -127,7 +127,7 @@ rssringoccs_Complex_Log(rssringoccs_ComplexDouble z)
     theta = rssringoccs_Complex_Argument(z);
 
     /*  The real part is just ln(r), and the imaginary part is theta.         */
-    real = rssringoccs_Log_Double(r);
+    real = rssringoccs_Double_Log(r);
 
     /*  Use rssringoccs_Complex_Rect to create the complex number and return. */
     ln_z = rssringoccs_Complex_Rect(real, theta);

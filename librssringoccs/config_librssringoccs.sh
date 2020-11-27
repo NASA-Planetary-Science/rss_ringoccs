@@ -34,7 +34,7 @@ CompilerArgs1="-std=c89 -ansi -pedantic -pedantic-errors -Wall -Wextra"
 CompilerArgs2="-Wpedantic -Wmisleading-indentation -Winit-self"
 CompilerArgs3="-Wmissing-prototypes -Wold-style-definition -Wold-style-cast"
 CompilerArgs4="-Wmissing-declarations "
-CompilerArgs5="-Wstrict-prototypes -I./ -DNDEBUG -g -fPIC -O3 -c"
+CompilerArgs5="-Wstrict-prototypes -I../../ -I./ -DNDEBUG -g -fPIC -O3 -c"
 CompilerArgs="$CompilerArgs1 $CompilerArgs2 $CompilerArgs3"
 CompilerArgs="$CompilerArgs $CompilerArgs4 $CompilerArgs5"
 
@@ -45,14 +45,26 @@ echo -e "\t\t$CompilerArgs3"
 echo -e "\t\t$CompilerArgs4"
 echo -e "\t\t$CompilerArgs5"
 
+echo -e "\n\tCompiling math/"
+for filename in math/*.c; do
+    echo -e "\t\tCompiling: $filename"
+    $CC $CompilerArgs $filename
+done
+
 echo -e "\n\tCompiling complex/"
 for filename in complex/*.c; do
     echo -e "\t\tCompiling: $filename"
     $CC $CompilerArgs $filename
 done
 
-echo -e "\n\tCompiling math/"
-for filename in math/*.c; do
+echo -e "\n\tCompiling fft/"
+for filename in fft/*.c; do
+    echo -e "\t\tCompiling: $filename"
+    $CC $CompilerArgs $filename
+done
+
+echo -e "\n\tCompiling diffraction/"
+for filename in diffraction/*.c; do
     echo -e "\t\tCompiling: $filename"
     $CC $CompilerArgs $filename
 done

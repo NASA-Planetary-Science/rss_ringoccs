@@ -253,7 +253,7 @@ double rssringoccs_Complex_Abs(rssringoccs_ComplexDouble z)
     imag = rssringoccs_Complex_Imag_Part(z);
 
     /*  The absolute value is just sqrt(x^2 + y^2) so compute this.           */
-    abs_value = rssringoccs_Sqrt_Double(real*real + imag*imag);
+    abs_value = rssringoccs_Double_Sqrt(real*real + imag*imag);
     return abs_value;
 }
 
@@ -269,7 +269,7 @@ double rssringoccs_Complex_Argument(rssringoccs_ComplexDouble z)
     imag = rssringoccs_Complex_Imag_Part(z);
 
     /*  Compute the argument using arctan and return.                         */
-    theta = rssringoccs_Arctan_Double(imag, real);
+    theta = rssringoccs_Double_Arctan2(imag, real);
     return theta;
 }
 

@@ -40,7 +40,7 @@ rssringoccs_Inverse_Orthographic_Projection(rssringoccs_TwoVector P,
 
         /*  The z component of our sphere is chosen so that x^2+y^2+z^2=r^2   *
          *  and so that it is positive.                                       */
-        z = rssringoccs_Sqrt_Double(radius*radius - x*x - y*y);
+        z = rssringoccs_Double_Sqrt(radius*radius - x*x - y*y);
 
         /*  The point on the sphere now satisfies x*X + y*Y + z*u_hat. We     *
          *  compute this and return.                                          */

@@ -16,16 +16,14 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
- *                        rss_ringoccs_complex_exp                            *
+ *            rss_ringoccs_left_straightedge_fresnel_diffraction              *
  ******************************************************************************
  *  Purpose:                                                                  *
- *      Contains the source code for the complex exponention function. If     *
- *      rss_ringoccs was built with C99 complex.h support, this function is   *
- *      not compiled and instead rssringoccs_Complex_Exp is just an alias for *
- *      the cexp function. By default rss_ringoccs builds with C89 (commonly  *
- *      called ANSI C) support, so this file will be a part of the build.     *
+ *      Contains the source code for the Fresnel diffraction of a left        *
+ *      straightedge.                                                         *
  ******************************************************************************
  *                               DEPENDENCIES                                 *
+ ******************************************************************************
  *  1.) rss_ringoccs_math.h:                                                  *
  *          This file provides compatibility between the two standard math.h  *
  *          header files (C89 vs C99 math.h). If C99 math.h exists, it simply *
@@ -33,39 +31,46 @@
  *          it defines the functions missing in the earlier version.          *
  *  2.) rss_ringoccs_complex.h:                                               *
  *          Header file where rssringoccs_ComplexDouble is defined, as well   *
- *          as the prototype for rssringoccs_Complex_Exp.                     *
+ *          as the prototype for rssringoccs_Complex_Cos.                     *
  ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
- *  Date:       November 12, 2020                                             *
+ *  Date:       November 27, 2020                                             *
+ ******************************************************************************
+ *                             Revision History                               *
+ ******************************************************************************
+ *  2020/11/27 (Ryan Maguire):                                                *
+ *      Frozen for v1.3.                                                      *
  ******************************************************************************/
 
 /*  Header file which contains aliases for the function in the standard C     *
  *  library math.h. This allows compatibility of C89 and C99 math.h headers.  */
 #include <rss_ringoccs/include/rss_ringoccs_math.h>
 
-/*  Where the prototypes are declared and where complex types are defined.    */
+/*  Definition of rssringoccs_ComplexDouble found here.                       */
 #include <rss_ringoccs/include/rss_ringoccs_complex.h>
 
-/*  Compute the complex exponential of a complex number z = x + iy.           */
-rssringoccs_ComplexDouble rssringoccs_Complex_Exp(rssringoccs_ComplexDouble z)
+/*  The Fresnel integrals are found here.                                     */
+#include <rss_ringoccs/include/rss_ringoccs_special_functions.h>
+
+/*  Header file containing the prototypes for the functions.                  */
+#include <rss_ringoccs/include/rss_ringoccs_diffraction.h>
+
+rssringoccs_ComplexDouble
+rssringoccs_Complex_Left_Straightedge_Diffraction(double x, double edge,
+                                                  double F)
 {
-    /*  Declare necessary variables. C89 requires declarations at the top.    */
-    rssringoccs_ComplexDouble exp_z;
-    double real, imag;
-    double exp_real, exp_z_real, exp_z_imag;
+    rssringoccs_ComplexDouble T_hat, scale;
+    double re, im;
 
-    /*  Extract the real and imaginary part from z.                           */
-    real = rssringoccs_Complex_Real_Part(z);
-    imag = rssringoccs_Complex_Imag_Part(z);
+    scale = rssringoccs_Complex_Rect(SQRT_ONE_BY_TWO_PI, -SQRT_ONE_BY_TWO_PI);
+    x = SQRT_PI_BY_2*(edge-x)/F;
 
-    /*  We'll use the fact that exp(x+iy) = exp(x)*exp(iy). Then we'll use    *
-     *  Euler's formula to write exp(iy) as cos(y) + i*sin(y), giving us      *
-     *  exp(z) = exp(x)*cos(y) + i*exp(x)*sin(y).                             */
-    exp_real = rssringoccs_Double_Exp(real);
-    exp_z_real = exp_real * rssringoccs_Double_Cos(imag);
-    exp_z_imag = exp_real * rssringoccs_Double_Sin(imag);
+    im = rssringoccs_Double_Fresnel_Sin(x);
+    re = rssringoccs_Double_Fresnel_Cos(x);
 
-    /*  Use rssringoccs_Complex_Rect to create the output and return.         */
-    exp_z = rssringoccs_Complex_Rect(exp_z_real, exp_z_imag);
-    return exp_z;
+    T_hat = rssringoccs_Complex_Rect(re, im);
+
+    T_hat = rssringoccs_Complex_Multiply(scale, T_hat);
+    T_hat = rssringoccs_Complex_Add(rssringoccs_Complex_Rect(0.5, 0.0), T_hat);
+    return T_hat;
 }

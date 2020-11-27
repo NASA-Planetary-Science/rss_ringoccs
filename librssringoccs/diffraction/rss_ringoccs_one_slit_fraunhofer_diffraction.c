@@ -16,10 +16,11 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
- *                        rss_ringoccs_complex_cos                            *
+ *              rss_ringoccs_one_slit_fraunhofer_diffraction                  *
  ******************************************************************************
  *  Purpose:                                                                  *
- *      Contains the source code for the complex cosine function.             *
+ *      Contains the source code for the Fraunhofer diffraction modeling of   *
+ *      a single slit.                                                        *
  ******************************************************************************
  *                               DEPENDENCIES                                 *
  ******************************************************************************
@@ -28,16 +29,13 @@
  *          header files (C89 vs C99 math.h). If C99 math.h exists, it simply *
  *          provides aliases for the functions, and if C89 math.h is used     *
  *          it defines the functions missing in the earlier version.          *
- *  2.) rss_ringoccs_complex.h:                                               *
- *          Header file where rssringoccs_ComplexDouble is defined, as well   *
- *          as the prototype for rssringoccs_Complex_Cos.                     *
  ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
- *  Date:       November 12, 2020                                             *
+ *  Date:       November 27, 2020                                             *
  ******************************************************************************
  *                             Revision History                               *
  ******************************************************************************
- *  2020/11/14 (Ryan Maguire):                                                *
+ *  2020/11/27 (Ryan Maguire):                                                *
  *      Frozen for v1.3.                                                      *
  ******************************************************************************/
 
@@ -45,27 +43,70 @@
  *  library math.h. This allows compatibility of C89 and C99 math.h headers.  */
 #include <rss_ringoccs/include/rss_ringoccs_math.h>
 
-/*  Where the prototypes are declared and where complex types are defined.    */
-#include <rss_ringoccs/include/rss_ringoccs_complex.h>
+/*  The Fresnel integrals are found here.                                     */
+#include <rss_ringoccs/include/rss_ringoccs_special_functions.h>
 
-/*  Compute the cosine of a complex number.                                   */
-rssringoccs_ComplexDouble rssringoccs_Complex_Cos(rssringoccs_ComplexDouble z)
+/*  Header file containing the prototypes for the functions.                  */
+#include <rss_ringoccs/include/rss_ringoccs_diffraction.h>
+
+float
+rssringoccs_Float_One_Slit_Fraunhofer_Diffraction(float x, float z, float a)
 {
-    /*  Declare necessary variables. C89 requires declarations at the top.    */
-    double x, y, real, imag;
-    rssringoccs_ComplexDouble cos_z;
+    /*  Declare necessary variables.                                          */
+    float result;
 
-    /*  Extract the real and imaginary parts from z.                          */
-    x = rssringoccs_Complex_Real_Part(z);
-    y = rssringoccs_Complex_Imag_Part(z);
+    /*  If z is zero we'll return 0.0. Sinc(x) tends to zero for both         *
+     *  x -> +infinity and x -> -infinity.                                    */
+    if (z == 0.0)
+        result = 0.0;
+    else
+    {
+        /*  Single slit is computed in terms of the sinc function.            */
+        result  = rssringoccs_Float_Sinc(a*x/z);
+        result *= result;
+    }
 
-    /*  The real part is cos(x)cosh(y).                                       */
-    real = rssringoccs_Double_Cos(x) * rssringoccs_Double_Cosh(y);
+    return result;
+}
 
-    /*  And the imaginary part is -sin(x)sinh(y).                             */
-    imag = -rssringoccs_Double_Sin(x) * rssringoccs_Double_Sinh(y);
+double
+rssringoccs_Double_One_Slit_Fraunhofer_Diffraction(double x, double z, double a)
+{
+    /*  Declare necessary variables.                                          */
+    double result;
 
-    /*  Use rssringoccs_Complex_Rect to create the output and return.         */
-    cos_z = rssringoccs_Complex_Rect(real, imag);
-    return cos_z;
+    /*  If z is zero we'll return 0.0. Sinc(x) tends to zero for both         *
+     *  x -> +infinity and x -> -infinity.                                    */
+    if (z == 0.0)
+        result = 0.0;
+    else
+    {
+        /*  Single slit is computed in terms of the sinc function.            */
+        result  = rssringoccs_Double_Sinc(a*x/z);
+        result *= result;
+    }
+
+    return result;
+}
+
+long double
+rssringoccs_LongDouble_One_Slit_Fraunhofer_Diffraction(long double x,
+                                                       long double z,
+                                                       long double a)
+{
+    /*  Declare necessary variables.                                          */
+    long double result;
+
+    /*  If z is zero we'll return 0.0. Sinc(x) tends to zero for both         *
+     *  x -> +infinity and x -> -infinity.                                    */
+    if (z == 0.0)
+        result = 0.0;
+    else
+    {
+        /*  Single slit is computed in terms of the sinc function.            */
+        result  = rssringoccs_LongDouble_Sinc(a*x/z);
+        result *= result;
+    }
+
+    return result;
 }

@@ -69,7 +69,7 @@ double rssringoccs_Euclidean_Norm_2D(rssringoccs_TwoVector P)
     x = rssringoccs_TwoVector_X(P);
     y = rssringoccs_TwoVector_Y(P);
 
-    norm = rssringoccs_Sqrt_Double(x*x + y*y);
+    norm = rssringoccs_Double_Sqrt(x*x + y*y);
     return norm;
 }
 
@@ -81,7 +81,7 @@ double rssringoccs_Euclidean_Norm_3D(rssringoccs_ThreeVector P)
     y = rssringoccs_ThreeVector_Y(P);
     z = rssringoccs_ThreeVector_Z(P);
 
-    norm = rssringoccs_Sqrt_Double(x*x + y*y + z*z);
+    norm = rssringoccs_Double_Sqrt(x*x + y*y + z*z);
     return norm;
 }
 

@@ -30,7 +30,7 @@ type rssringoccs_Halleys_Method_##Type(type x, type (*f)(type),                \
     n = 1;                                                                     \
                                                                                \
     /*  Continuing this computation until the error is below the threshold.  */\
-    while(rssringoccs_Abs_##Type(dx) > EPS)                                    \
+    while(rssringoccs_##Type##_Abs(dx) > EPS)                                  \
     {                                                                          \
         y = f(x);                                                              \
         y_prime = f_prime(x);                                                  \

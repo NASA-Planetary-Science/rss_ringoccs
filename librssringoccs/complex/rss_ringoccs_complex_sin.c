@@ -16,8 +16,8 @@ rssringoccs_ComplexDouble rssringoccs_Complex_Sin(rssringoccs_ComplexDouble z)
     y = rssringoccs_Complex_Imag_Part(z);
 
     /*  The real part is sin(x)cosh(y).                                       */
-    real = rssringoccs_Double_Sin(x)*rssringoccs_Double_Sinh(y);
-    imag = rssringoccs_Double_Cos(x)*rssringoccs_Double_Cosh(y);
+    real = rssringoccs_Double_Sin(x)*rssringoccs_Double_Cosh(y);
+    imag = rssringoccs_Double_Cos(x)*rssringoccs_Double_Sinh(y);
 
     /*  Use rssringoccs_Complex_Rect to create the output and return.         */
     sin_z = rssringoccs_Complex_Rect(real, imag);

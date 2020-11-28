@@ -224,6 +224,9 @@ extern long double rssringoccs_LongDouble_Arctan2(long double y, long double x);
 #define rssringoccs_NaN NAN
 #endif
 
+#define rssringoccs_Is_Inf(x) ((x) == ((x)+1))
+#define rssringoccs_Is_NaN(x) ((x) != (x))
+
 /*  The following functions are not required in C89/C90 implementations of    *
  *  math.h. The algorithms for their computations are very straight-forward,  *
  *  reducing the definitions to computations using sin, cos, exp, etc. We     *
@@ -259,6 +262,8 @@ extern long double rssringoccs_LongDouble_Faddeeva_Im(long double x);
 
 extern long rssringoccs_Factorial(int n);
 extern long rssringoccs_Falling_Factorial(int x, int N);
+
+extern double rssringoccs_Double_Copysign(double x, double y);
 
 extern float
 rssringoccs_Float_Poly_Float_Coeffs(float *coeffs,

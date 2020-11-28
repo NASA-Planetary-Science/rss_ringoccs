@@ -1196,7 +1196,7 @@ double rssringoccs_Double_Erfcx(double x)
 float rssringoccs_Float_Erfcx(float x)
 {
     float out;
-    out = rssringoccs_Double_Erfcx((float)x);
+    out = rssringoccs_Double_Erfcx((double)x);
 
     return out;
 }
@@ -1204,7 +1204,7 @@ float rssringoccs_Float_Erfcx(float x)
 long double rssringoccs_LongDouble_Erfcx(long double x)
 {
     long double out;
-    out = rssringoccs_Double_Erfcx((long double)x);
+    out = rssringoccs_Double_Erfcx((double)x);
 
     return out;
 }

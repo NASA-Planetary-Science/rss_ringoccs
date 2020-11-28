@@ -1038,5 +1038,8 @@ rssringoccs_Complex_Erf(rssringoccs_ComplexDouble z);
 extern rssringoccs_ComplexDouble
 rssringoccs_Complex_Erfc(rssringoccs_ComplexDouble z);
 
+extern rssringoccs_ComplexDouble
+rssringoccs_Complex_Faddeeva(rssringoccs_ComplexDouble z);
+
 #endif
 /*  End of include guard.                                                     */

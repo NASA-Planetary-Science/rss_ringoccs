@@ -253,6 +253,10 @@ extern float rssringoccs_Float_Erfcx(float x);
 extern double rssringoccs_Double_Erfcx(double x);
 extern long double rssringoccs_LongDouble_Erfcx(long double x);
 
+extern float rssringoccs_Float_Faddeeva_Im(float x);
+extern double rssringoccs_Double_Faddeeva_Im(double x);
+extern long double rssringoccs_LongDouble_Faddeeva_Im(long double x);
+
 extern long rssringoccs_Factorial(int n);
 extern long rssringoccs_Falling_Factorial(int x, int N);
 

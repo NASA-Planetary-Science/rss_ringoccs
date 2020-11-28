@@ -12,7 +12,7 @@ rssringoccs_Complex_Erf(rssringoccs_ComplexDouble z)
     rssringoccs_ComplexDouble erfz, temp;
 
     temp = rssringoccs_Complex_Erfc(z);
-    erfz = rssringoccs_Complex_Subtract(rssringoccs_Complex_One, z);
+    erfz = rssringoccs_Complex_Subtract(rssringoccs_Complex_One, temp);
 
     return erfz;
 }

@@ -126,8 +126,8 @@ rssringoccs_Complex_Real_Pow(rssringoccs_ComplexDouble z, double x)
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     rssringoccs_ComplexDouble z_to_the_x, ln_z, x_ln_z;
 
-    /*  We can write x^y as exp(y ln(x)) and this is how we'll compute for    *
-     *  complex powers. First compute log(z1).                                */
+    /*  We can write z^x as exp(x ln(z)) and this is how we'll compute for    *
+     *  complex powers. First compute log(z).                                 */
     ln_z = rssringoccs_Complex_Log(z);
 
     /*  Next use rssringoccs_Complex_Scale to compute the product with x.     */

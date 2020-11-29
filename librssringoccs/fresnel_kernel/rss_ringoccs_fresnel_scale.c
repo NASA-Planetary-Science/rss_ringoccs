@@ -1,4 +1,5 @@
 #include <math.h>
+#include <rss_ringoccs/include/rss_ringoccs_fresnel_kernel.h>
 
 float Fresnel_Scale_Float(float lambda, float d, float phi, float b)
 {
@@ -29,7 +30,7 @@ Fresnel_Scale_Double(double lambda, double d, double phi, double b)
 
 
 extern long double
-Fresnel_Scale_Long_Double(long double lambda, long double d,
+Fresnel_Scale_LongDouble(long double lambda, long double d,
                           long double phi, long double b)
 {
     long double cb_2_sp_2, sb_2;

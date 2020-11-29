@@ -81,6 +81,12 @@ for filename in numerical/*.c; do
     $CC $CompilerArgs $filename
 done
 
+echo -e "\n\tCompiling fresnel_kernel/"
+for filename in fresnel_kernel/*.c; do
+    echo -e "\t\tCompiling: $filename"
+    $CC $CompilerArgs $filename
+done
+
 echo -e "\n\tCompiling special_functions/"
 for filename in special_functions/*.c; do
     echo -e "\t\tCompiling: $filename"

@@ -1,24 +1,6 @@
 /*  Include guard to avoid importing this file twice.                         */
-#ifndef RSS_RINGOCCS_FRESNEL_KERNEL_H
-#define RSS_RINGOCCS_FRESNEL_KERNEL_H
-
-/******************************************************************************
- *  Functions defined in _fresnel_kernel.c                                   *
- ******************************************************************************/
-
-/*---------------------------Newton-Raphson Function--------------------------*/
-extern float
-Newton_Raphson_Float(float x, float (*f)(float), float (*f_prime)(float),
-                     float EPS, long toler);
-
-extern double
-Newton_Raphson_Double(double x, double (*f)(double),
-                      double (*f_prime)(double), double EPS, long toler);
-
-extern long double
-Newton_Raphson_Long_Double(long double x, long double (*f)(long double),
-                           long double (*f_prime)(long double), long double EPS,
-                           long toler);
+#ifndef _RSS_RINGOCCS_FRESNEL_KERNEL_H_
+#define _RSS_RINGOCCS_FRESNEL_KERNEL_H_
 
 /*----------------------------The Fresnel Kernel------------------------------*/
 extern float Fresnel_Psi_Float(float kD, float r, float r0, float phi,
@@ -84,5 +66,15 @@ extern double
 Newton_Raphson_Fresnel_Ellipse(double kD,   double r, double r0, double phi,
                                double phi0, double B, double D,  double ecc,
                                double peri, double EPS, unsigned char toler);
+
+/*  Fresnel scale.  */
+extern float Fresnel_Scale_Float(float lambda, float d, float phi, float b);
+
+extern double
+Fresnel_Scale_Double(double lambda, double d, double phi, double b);
+
+extern long double
+Fresnel_Scale_LongDouble(long double lambda, long double d,
+                         long double phi, long double b);
 
 #endif

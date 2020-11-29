@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <math.h>
 #include <rss_ringoccs/include/rss_ringoccs_complex.h>
 #include <rss_ringoccs/include/rss_ringoccs_ppm_plot.h>
 
@@ -21,10 +22,12 @@ int main(void)
     unsigned int x, y, n;
     double z_x, z_y, norm;
     double rcp_factor;
-    int maxIterations = 512;
+    int maxIterations = 256;
     rssringoccs_ComplexDouble z, e, mu;
 
     unsigned int size = 1024;
+    double red, green, blue;
+    unsigned char r, g, b;
 
     const double x_min = 0.065;
     const double x_max = 0.425;
@@ -36,7 +39,7 @@ int main(void)
     e  = rssringoccs_Complex_Rect(1.5, 0.0);
     mu = rssringoccs_Complex_Rect(-0.2, 0.0);
 
-    fp = fopen("glynn_fractal.ppm", "w");
+    fp = fopen("glynn_fractal_periodic_palette.ppm", "w");
     fprintf(fp, "P6\n%d %d\n255\n", size, size);
 
     rcp_factor = 1.0/(size-1.0);
@@ -70,7 +73,20 @@ int main(void)
                     break;
             }
 
-            rssringoccs_RGB_Linear_Gradient((double)n, 0, maxIterations-1, fp);
+            red = sin(0.1*n);
+            red = red*red;
+
+            green = sin(0.2*n - 0.78);
+            green = green*green;
+
+            blue = sin(0.03*n - 1.78);
+            blue = blue*blue;
+
+            r = (unsigned char)(255*red);
+            g = (unsigned char)(255*green);
+            b = (unsigned char)(255*blue);
+
+            rssringoccs_Color(r, g, b, fp);
         }
         printf("%d\n", y);
     }

@@ -6,7 +6,7 @@
  *  only need to alias this function.                                         */
 double rssringoccs_Double_Log(double x)
 {
-    return exp(x);
+    return log(x);
 }
 
 #if __HAS_C99_MATH_H__ == 0
@@ -15,12 +15,12 @@ double rssringoccs_Double_Log(double x)
  *  make the code forward compatible. We'll do this in a very simple manner.  */
 float rssringoccs_Float_Log(float x)
 {
-    return exp((double)x);
+    return log((double)x);
 }
 
 long double rssringoccs_LongDouble_Log(long double x)
 {
-    return exp((double)x);
+    return log((double)x);
 }
 
 /*  Now have the functions declared in rss_ringoccs_math.h point to these.    */
@@ -30,12 +30,12 @@ long double rssringoccs_LongDouble_Log(long double x)
  *  simply use to these.                                                      */
 float rssringoccs_Float_Log(float x)
 {
-    return expf(x);
+    return logf(x);
 }
 
 long double rssringoccs_LongDouble_Log(long double x)
 {
-    return expl(x);
+    return logl(x);
 }
 #endif
 /*  End of #if __HAS_C99_MATH_H__ == 0                                        */

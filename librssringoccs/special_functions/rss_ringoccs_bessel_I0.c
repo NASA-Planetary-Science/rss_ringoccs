@@ -187,8 +187,8 @@ static double __asym_double[7] = {
     0.57250142097473144531250
 };
 
-static unsigned int __taylor_longdouble_deg = 28;
-static unsigned int __asym_longdouble_deg = 8;
+static unsigned int __taylor_LDouble_deg = 28;
+static unsigned int __asym_LDouble_deg = 8;
 static long double __taylor_longdouble[29] = {
     1.0L,                                 0.25L,
     1.56250e-2L,                          4.34027777777777777777777777778e-4L,
@@ -235,7 +235,7 @@ float rssringoccs_Float_Bessel_I0(float x)
         arg = abs_x*abs_x;
 
         /*  Compute the Taylor series for bessel I0.                          */
-        bessel_I0 = rssringoccs_Float_Poly_Float_Coeffs(
+        bessel_I0 = rssringoccs_Real_Poly_Float_Coeffs(
             __taylor_float, __taylor_float_deg, arg
         );
     }
@@ -249,7 +249,7 @@ float rssringoccs_Float_Bessel_I0(float x)
         arg = 1.0/abs_x;
 
         /*  Compute the polynomial term using Horner's Method.                */
-        bessel_I0 = rssringoccs_Float_Poly_Float_Coeffs(
+        bessel_I0 = rssringoccs_Real_Poly_Float_Coeffs(
             __asym_float, __asym_float_deg, arg
         );
 
@@ -288,7 +288,7 @@ double rssringoccs_Double_Bessel_I0(double x)
         arg = abs_x*abs_x;
 
         /*  Compute the Taylor series for bessel I0.                          */
-        bessel_I0 = rssringoccs_Double_Poly_Double_Coeffs(
+        bessel_I0 = rssringoccs_Real_Poly_Double_Coeffs(
             __taylor_double, __taylor_double_deg, arg
         );
     }
@@ -302,7 +302,7 @@ double rssringoccs_Double_Bessel_I0(double x)
         arg = 1.0/abs_x;
 
         /*  Compute the polynomial part of the asymptotic expansion.          */
-        bessel_I0 = rssringoccs_Double_Poly_Double_Coeffs(
+        bessel_I0 = rssringoccs_Real_Poly_Double_Coeffs(
             __asym_double, __asym_double_deg, arg
         );
 
@@ -323,7 +323,7 @@ double rssringoccs_Double_Bessel_I0(double x)
 
 /*  Compute the Bessel I_0 function for a long double precision value x. This *
  *  returns long double precision, maximum relative error ~1.e-14.            */
-long double rssringoccs_LongDouble_Bessel_I0(long double x)
+long double rssringoccs_LDouble_Bessel_I0(long double x)
 {
     /*  Declare necessary variables.                                          */
     long double bessel_I0, arg, abs_x;
@@ -331,7 +331,7 @@ long double rssringoccs_LongDouble_Bessel_I0(long double x)
     /*  I_0 is symmetric so compute the absolute value of x and use that.     *
      *  Abs_LongDouble is defined in rss_ringoccs_math.h, it is an alias for  *
      *  fabsl, if available, and fabs otherwise.                              */
-    abs_x = rssringoccs_LongDouble_Abs(x);
+    abs_x = rssringoccs_LDouble_Abs(x);
 
     /*  For small arguments, use a Taylor series to approximate I_0.          */
     if (abs_x < 19.0)
@@ -339,8 +339,8 @@ long double rssringoccs_LongDouble_Bessel_I0(long double x)
         /*  The series is in powers of x^2, so use Horner's method with that. */
         arg = abs_x*abs_x;
 
-        bessel_I0 = rssringoccs_LongDouble_Poly_LongDouble_Coeffs(
-            __taylor_longdouble, __taylor_longdouble_deg, arg
+        bessel_I0 = rssringoccs_Real_Poly_LDouble_Coeffs(
+            __taylor_longdouble, __taylor_LDouble_deg, arg
         );
     }
 
@@ -352,16 +352,16 @@ long double rssringoccs_LongDouble_Bessel_I0(long double x)
         /*  The asymptotic expansion is in terms of 1/x.                      */
         arg = 1.0/abs_x;
 
-        bessel_I0 = rssringoccs_LongDouble_Poly_LongDouble_Coeffs(
-            __asym_longdouble, __asym_longdouble_deg, arg
+        bessel_I0 = rssringoccs_Real_Poly_LDouble_Coeffs(
+            __asym_longdouble, __asym_LDouble_deg, arg
         );
 
         /*  Multiply by the coefficient factor and return. Exp_LongDouble and *
          *  Sqrt_LongDouble are aliases for expl and sqrtl, respectively, if  *
          *  available, and exp and sqrt otherwise. They are defined in        *
          *  rss_ringoccs_math.h. TWO_PI is in rss_ringoccs_math.h.            */
-        bessel_I0 *= rssringoccs_LongDouble_Exp(abs_x) /
-                     rssringoccs_LongDouble_Sqrt(TWO_PI*abs_x);
+        bessel_I0 *= rssringoccs_LDouble_Exp(abs_x) /
+                     rssringoccs_LDouble_Sqrt(TWO_PI*abs_x);
     }
 
     /*  For very large inputs, return INFINITY. This is standard in C99, and  *
@@ -382,20 +382,20 @@ rssringoccs_Complex_Bessel_I0(rssringoccs_ComplexDouble z)
     double abs_z, abs_z_real, z_real, z_imag, real_bessel;
 
     /*  Extract the real part of z.                                           */
-    z_real = rssringoccs_ComplexDouble_Real_Part(z);
+    z_real = rssringoccs_CDouble_Real_Part(z);
 
     /*  Compute the magnitude of z and the absolute value of its real part.   */
-    abs_z = rssringoccs_ComplexDouble_Abs(z);
+    abs_z = rssringoccs_CDouble_Abs(z);
 
     /*  If the real part is zero we obtain the Bessel J0 function.            */
     if (z_real == 0)
     {
         /*  Compute the imaginary part of z and use this to compute Bessel J0.*/
-        z_imag = rssringoccs_ComplexDouble_Imag_Part(z);
+        z_imag = rssringoccs_CDouble_Imag_Part(z);
         real_bessel = rssringoccs_Double_Bessel_J0(z_imag);
 
         /*  The output is I0 = J0 + 0*Imaginary_Unit.                         */
-        bessel_I0 = rssringoccs_ComplexDouble_Rect(real_bessel, 0.0);
+        bessel_I0 = rssringoccs_CDouble_Rect(real_bessel, 0.0);
         return bessel_I0;
     }
 
@@ -404,7 +404,7 @@ rssringoccs_Complex_Bessel_I0(rssringoccs_ComplexDouble z)
      *  change the output, however the asymptotic expansion requires z to lie *
      *  in the right part of the plane.                                       */
     if (z_real < 0.0)
-        z = rssringoccs_ComplexDouble_Multiply_Real(-1.0, z);
+        z = rssringoccs_CDouble_Multiply_Real(-1.0, z);
 
     /*  The magnitude of the real part determines if we can use the           *
      *  asymptotic expansion or not. Large real parts result in float         *
@@ -415,8 +415,8 @@ rssringoccs_Complex_Bessel_I0(rssringoccs_ComplexDouble z)
     if (abs_z < 16.0)
     {
         /*  The series is in powers of z^2, so use Horner's method with that. */
-        arg = rssringoccs_ComplexDouble_Multiply(z, z);
-        bessel_I0 = rssringoccs_ComplexDouble_Poly_Real_Coeffs(
+        arg = rssringoccs_CDouble_Multiply(z, z);
+        bessel_I0 = rssringoccs_CDouble_Poly_Real_Coeffs(
             __taylor_double, __taylor_double_deg, arg
         );
 
@@ -428,23 +428,23 @@ rssringoccs_Complex_Bessel_I0(rssringoccs_ComplexDouble z)
     else if (abs_z_real < MAX_DOUBLE_BASE_E)
     {
         /*  The asymptotic expansion is in terms of 1/z.                      */
-        arg = rssringoccs_ComplexDouble_Reciprocal(z);
-        bessel_I0 = rssringoccs_ComplexDouble_Poly_Real_Coeffs(
+        arg = rssringoccs_CDouble_Reciprocal(z);
+        bessel_I0 = rssringoccs_CDouble_Poly_Real_Coeffs(
             __asym_double, __asym_double_deg, arg
         );
 
         /*  Multiply by the coefficient factor and return.                    */
-        arg = rssringoccs_ComplexDouble_Multiply_Real(TWO_PI, z);
-        exp_arg = rssringoccs_ComplexDouble_Exp(z);
+        arg = rssringoccs_CDouble_Multiply_Real(TWO_PI, z);
+        exp_arg = rssringoccs_CDouble_Exp(z);
         sqrt_arg = rssringoccs_Complex_Sqrt(arg);
-        arg = rssringoccs_ComplexDouble_Divide(exp_arg, sqrt_arg);
-        bessel_I0 = rssringoccs_ComplexDouble_Multiply(bessel_I0, arg);
+        arg = rssringoccs_CDouble_Divide(exp_arg, sqrt_arg);
+        bessel_I0 = rssringoccs_CDouble_Multiply(bessel_I0, arg);
     }
 
     /*  For very large inputs, return INFINITY. INFINITY is standard in C99,  *
      *  and provided in rss_ringoccs_math.h otherwise.                        */
     else
-        bessel_I0 = rssringoccs_ComplexDouble_Rect(rssringoccs_Infinity,
+        bessel_I0 = rssringoccs_CDouble_Rect(rssringoccs_Infinity,
                                                    rssringoccs_Infinity);
 
     return bessel_I0;

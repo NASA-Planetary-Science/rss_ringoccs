@@ -18,11 +18,14 @@ long rssringoccs_Falling_Factorial(int x, int N)
     int n;
     long falling_factorial = x;
 
-    if (N >= x)
+    if (N == 0)
+        return 1;
+    else if (N > x)
         return 0;
-
-    for (n=1; n<=N; ++n)
-        falling_factorial *= (x-n);
-
-    return falling_factorial;
+    else
+    {
+        for (n=1; n<N; ++n)
+            falling_factorial *= (x-n);
+        return falling_factorial;
+    }
 }

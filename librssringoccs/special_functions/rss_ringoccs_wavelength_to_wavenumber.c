@@ -14,4 +14,4 @@ type rssringoccs_##Type##_Wavelength_To_Wavenumber(type lambda)                \
 
 _define_wavelength_to_wavenumber(float, Float)
 _define_wavelength_to_wavenumber(double, Double)
-_define_wavelength_to_wavenumber(long double, LongDouble)
+_define_wavelength_to_wavenumber(long double, LDouble)

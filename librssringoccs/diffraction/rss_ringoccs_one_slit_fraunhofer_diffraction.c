@@ -90,7 +90,7 @@ rssringoccs_Double_One_Slit_Fraunhofer_Diffraction(double x, double z, double a)
 }
 
 long double
-rssringoccs_LongDouble_One_Slit_Fraunhofer_Diffraction(long double x,
+rssringoccs_LDouble_One_Slit_Fraunhofer_Diffraction(long double x,
                                                        long double z,
                                                        long double a)
 {
@@ -104,7 +104,7 @@ rssringoccs_LongDouble_One_Slit_Fraunhofer_Diffraction(long double x,
     else
     {
         /*  Single slit is computed in terms of the sinc function.            */
-        result  = rssringoccs_LongDouble_Sinc(a*x/z);
+        result  = rssringoccs_LDouble_Sinc(a*x/z);
         result *= result;
     }
 

@@ -22,12 +22,12 @@ double rssringoccs_Double_Cosh(double x)
     return cosh_x;
 }
 
-long double rssringoccs_LongDouble_Cosh(long double x)
+long double rssringoccs_LDouble_Cosh(long double x)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     long double cosh_x;
 
     /*  The definition of sinh(x) is [exp(x) - exp(-x)]/2, so return this.    */
-    cosh_x = 0.5*(rssringoccs_LongDouble_Exp(x)+rssringoccs_LongDouble_Exp(-x));
+    cosh_x = 0.5*(rssringoccs_LDouble_Exp(x)+rssringoccs_LDouble_Exp(-x));
     return cosh_x;
 }

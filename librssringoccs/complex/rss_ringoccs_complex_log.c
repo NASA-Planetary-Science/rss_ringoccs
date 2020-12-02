@@ -56,20 +56,20 @@
 /*  Compute the complex log of a complex number z = r exp(i theta) where      *
  *  theta is a real number between -pi and pi.                                */
 rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Log(rssringoccs_ComplexDouble z)
+rssringoccs_CDouble_Log(rssringoccs_ComplexDouble z)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     double r, theta, real;
     rssringoccs_ComplexDouble ln_z;
 
     /*  Get the polar representation of the complex number z.                 */
-    r = rssringoccs_ComplexDouble_Abs(z);
-    theta = rssringoccs_ComplexDouble_Argument(z);
+    r = rssringoccs_CDouble_Abs(z);
+    theta = rssringoccs_CDouble_Argument(z);
 
     /*  The real part is just ln(r), and the imaginary part is theta.         */
     real = rssringoccs_Double_Log(r);
 
     /*  Use rssringoccs_Complex_Rect to create the complex number and return. */
-    ln_z = rssringoccs_ComplexDouble_Rect(real, theta);
+    ln_z = rssringoccs_CDouble_Rect(real, theta);
     return ln_z;
 }

@@ -141,7 +141,7 @@ extern const rssringoccs_ComplexDouble rssringoccs_Complex_Infinity;
 
 /******************************************************************************
  *  Function:                                                                 *
- *      rssringoccs_ComplexDouble_Abs                                         *
+ *      rssringoccs_CDouble_Abs                                         *
  *  Purpose:                                                                  *
  *      Compute the absolute value of a complex number. This is equivalent to *
  *      the cabs function found in complex.h (C99).                           *
@@ -154,17 +154,17 @@ extern const rssringoccs_ComplexDouble rssringoccs_Complex_Infinity;
  *          z = x + iy, then abs_z = sqrt(x^2 + y^2)                          *
  ******************************************************************************/
 extern float
-rssringoccs_ComplexFloat_Abs(rssringoccs_ComplexFloat z);
+rssringoccs_CFloat_Abs(rssringoccs_ComplexFloat z);
 
 extern double
-rssringoccs_ComplexDouble_Abs(rssringoccs_ComplexDouble z);
+rssringoccs_CDouble_Abs(rssringoccs_ComplexDouble z);
 
 extern long double
-rssringoccs_ComplexLongDouble_Abs(rssringoccs_ComplexLongDouble z);
+rssringoccs_CLDouble_Abs(rssringoccs_ComplexLongDouble z);
 
 /******************************************************************************
  *  Function:                                                                 *
- *      rssringoccs_ComplexDouble_Abs_Squared                                 *
+ *      rssringoccs_CDouble_Abs_Squared                                 *
  *  Purpose:                                                                  *
  *      Compute the square of the absolute value of a complex number z. This  *
  *      is useful for when |z|^2 is needed so we can avoid an expensive and   *
@@ -178,13 +178,13 @@ rssringoccs_ComplexLongDouble_Abs(rssringoccs_ComplexLongDouble z);
  *          The square of the absolute value of z, |z|^2.                     *
  ******************************************************************************/
 extern float
-rssringoccs_ComplexFloat_Abs_Squared(rssringoccs_ComplexFloat z);
+rssringoccs_CFloat_Abs_Squared(rssringoccs_ComplexFloat z);
 
 extern double
-rssringoccs_ComplexDouble_Abs_Squared(rssringoccs_ComplexDouble z);
+rssringoccs_CDouble_Abs_Squared(rssringoccs_ComplexDouble z);
 
 extern long double
-rssringoccs_ComplexLongDouble_Abs_Squared(rssringoccs_ComplexLongDouble z);
+rssringoccs_CLDouble_Abs_Squared(rssringoccs_ComplexLongDouble z);
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -209,13 +209,13 @@ rssringoccs_ComplexLongDouble_Abs_Squared(rssringoccs_ComplexLongDouble z);
  *      included GNU's glibc/gcc and clang.                                   *
  ******************************************************************************/
 extern float
-rssringoccs_ComplexFloat_Argument(rssringoccs_ComplexFloat z);
+rssringoccs_CFloat_Argument(rssringoccs_ComplexFloat z);
 
 extern double
-rssringoccs_ComplexDouble_Argument(rssringoccs_ComplexDouble z);
+rssringoccs_CDouble_Argument(rssringoccs_ComplexDouble z);
 
 extern long double
-rssringoccs_ComplexLongDouble_Argument(rssringoccs_ComplexLongDouble z);
+rssringoccs_CLDouble_Argument(rssringoccs_ComplexLongDouble z);
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -231,13 +231,13 @@ rssringoccs_ComplexLongDouble_Argument(rssringoccs_ComplexLongDouble z);
  *          The real part of z.                                               *
  ******************************************************************************/
 extern float
-rssringoccs_ComplexFloat_Real_Part(rssringoccs_ComplexFloat z);
+rssringoccs_CFloat_Real_Part(rssringoccs_ComplexFloat z);
 
 extern double
-rssringoccs_ComplexDouble_Real_Part(rssringoccs_ComplexDouble z);
+rssringoccs_CDouble_Real_Part(rssringoccs_ComplexDouble z);
 
 extern long double
-rssringoccs_ComplexLongDouble_Real_Part(rssringoccs_ComplexLongDouble z);
+rssringoccs_CLDouble_Real_Part(rssringoccs_ComplexLongDouble z);
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -253,24 +253,24 @@ rssringoccs_ComplexLongDouble_Real_Part(rssringoccs_ComplexLongDouble z);
  *          The imaginary part of z.                                          *
  ******************************************************************************/
 extern float
-rssringoccs_ComplexFloat_Imag_Part(rssringoccs_ComplexFloat z);
+rssringoccs_CFloat_Imag_Part(rssringoccs_ComplexFloat z);
 
 extern double
-rssringoccs_ComplexDouble_Imag_Part(rssringoccs_ComplexDouble z);
+rssringoccs_CDouble_Imag_Part(rssringoccs_ComplexDouble z);
 
 extern long double
-rssringoccs_ComplexLongDouble_Imag_Part(rssringoccs_ComplexLongDouble z);
+rssringoccs_CLDouble_Imag_Part(rssringoccs_ComplexLongDouble z);
 
 extern rssringoccs_Bool
-rssringoccs_ComplexFloat_Compare(rssringoccs_ComplexFloat z,
+rssringoccs_CFloat_Compare(rssringoccs_ComplexFloat z,
                                  rssringoccs_ComplexFloat w);
 
 extern rssringoccs_Bool
-rssringoccs_ComplexDouble_Compare(rssringoccs_ComplexDouble z,
+rssringoccs_CDouble_Compare(rssringoccs_ComplexDouble z,
                                   rssringoccs_ComplexDouble w);
 
 extern rssringoccs_Bool
-rssringoccs_ComplexLongDouble_Compare(rssringoccs_ComplexLongDouble z,
+rssringoccs_CLDouble_Compare(rssringoccs_ComplexLongDouble z,
                                       rssringoccs_ComplexLongDouble w);
 
 /******************************************************************************
@@ -288,13 +288,13 @@ rssringoccs_ComplexLongDouble_Compare(rssringoccs_ComplexLongDouble z,
  *          The complex conjugate of z.                                       *
  ******************************************************************************/
 extern rssringoccs_ComplexFloat
-rssringoccs_ComplexFloat_Conjugate(rssringoccs_ComplexFloat z);
+rssringoccs_CFloat_Conjugate(rssringoccs_ComplexFloat z);
 
 extern rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Conjugate(rssringoccs_ComplexDouble z);
+rssringoccs_CDouble_Conjugate(rssringoccs_ComplexDouble z);
 
 extern rssringoccs_ComplexLongDouble
-rssringoccs_ComplexLongDouble_Conjugate(rssringoccs_ComplexLongDouble z);
+rssringoccs_CLDouble_Conjugate(rssringoccs_ComplexLongDouble z);
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -320,13 +320,13 @@ rssringoccs_ComplexLongDouble_Conjugate(rssringoccs_ComplexLongDouble z);
  *      So we compute using the trig functions and the real exponential.      *
  ******************************************************************************/
 extern rssringoccs_ComplexFloat
-rssringoccs_ComplexFloat_Exp(rssringoccs_ComplexFloat z);
+rssringoccs_CFloat_Exp(rssringoccs_ComplexFloat z);
 
 extern rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Exp(rssringoccs_ComplexDouble z);
+rssringoccs_CDouble_Exp(rssringoccs_ComplexDouble z);
 
 extern rssringoccs_ComplexLongDouble
-rssringoccs_ComplexLongDouble_Exp(rssringoccs_ComplexLongDouble z);
+rssringoccs_CLDouble_Exp(rssringoccs_ComplexLongDouble z);
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -391,13 +391,13 @@ rssringoccs_Complex_Sqrt(rssringoccs_ComplexDouble z);
  *      This will ouptut 0.346574 + 0.785398i. i.e. ln(1+i) = 0.3465+0.7853i. *
  ******************************************************************************/
 extern rssringoccs_ComplexFloat
-rssringoccs_ComplexFloat_Log(rssringoccs_ComplexFloat z);
+rssringoccs_CFloat_Log(rssringoccs_ComplexFloat z);
 
 extern rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Log(rssringoccs_ComplexDouble z);
+rssringoccs_CDouble_Log(rssringoccs_ComplexDouble z);
 
 extern rssringoccs_ComplexLongDouble
-rssringoccs_ComplexLongDouble_Log(rssringoccs_ComplexLongDouble z);
+rssringoccs_CLDouble_Log(rssringoccs_ComplexLongDouble z);
 
 extern rssringoccs_ComplexDouble
 rssringoccs_Complex_Pow(rssringoccs_ComplexDouble z0,
@@ -423,17 +423,17 @@ rssringoccs_Complex_Real_Pow(rssringoccs_ComplexDouble z, double x);
  *      sine yielding sin(x+iy) = sin(x)cosh(y) + i * cos(x)sinh(y).          *
  ******************************************************************************/
 extern rssringoccs_ComplexFloat
-rssringoccs_ComplexFloat_Sin(rssringoccs_ComplexFloat z);
+rssringoccs_CFloat_Sin(rssringoccs_ComplexFloat z);
 
 extern rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Sin(rssringoccs_ComplexDouble z);
+rssringoccs_CDouble_Sin(rssringoccs_ComplexDouble z);
 
 extern rssringoccs_ComplexLongDouble
-rssringoccs_ComplexLongDouble_Sin(rssringoccs_ComplexLongDouble z);
+rssringoccs_CLDouble_Sin(rssringoccs_ComplexLongDouble z);
 
 /******************************************************************************
  *  Function:                                                                 *
- *      rssringoccs_ComplexDouble_Cos                                         *
+ *      rssringoccs_CDouble_Cos                                         *
  *  Purpose:                                                                  *
  *      Compute the cosine of a complex number z.                             *
  *  Arguments:                                                                *
@@ -448,13 +448,13 @@ rssringoccs_ComplexLongDouble_Sin(rssringoccs_ComplexLongDouble z);
  *      sine yielding cos(x+iy) = cos(x)cosh(y) - i * sin(x)sinh(y).          *
  ******************************************************************************/
 extern rssringoccs_ComplexFloat
-rssringoccs_ComplexFloat_Cos(rssringoccs_ComplexFloat z);
+rssringoccs_CFloat_Cos(rssringoccs_ComplexFloat z);
 
 extern rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Cos(rssringoccs_ComplexDouble z);
+rssringoccs_CDouble_Cos(rssringoccs_ComplexDouble z);
 
 extern rssringoccs_ComplexLongDouble
-rssringoccs_ComplexLongDouble_Cos(rssringoccs_ComplexLongDouble z);
+rssringoccs_CLDouble_Cos(rssringoccs_ComplexLongDouble z);
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -518,13 +518,13 @@ rssringoccs_Complex_Tan(rssringoccs_ComplexDouble z);
  *          The complex number x + iy.                                        *
  ******************************************************************************/
 extern rssringoccs_ComplexFloat
-rssringoccs_ComplexFloat_Rect(float x, float y);
+rssringoccs_CFloat_Rect(float x, float y);
 
 extern rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Rect(double x, double y);
+rssringoccs_CDouble_Rect(double x, double y);
 
 extern rssringoccs_ComplexLongDouble
-rssringoccs_ComplexLongDouble_Rect(long double x, long double y);
+rssringoccs_CLDouble_Rect(long double x, long double y);
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -542,7 +542,7 @@ rssringoccs_ComplexLongDouble_Rect(long double x, long double y);
  *          The complex number r exp(i theta).                                *
  ******************************************************************************/
 extern rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Polar(double r, double theta);
+rssringoccs_CDouble_Polar(double r, double theta);
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -568,35 +568,35 @@ rssringoccs_ComplexDouble_Polar(double r, double theta);
  *      perform conversions first. Similarly with Add_Imag.                   *
  ******************************************************************************/
 extern rssringoccs_ComplexFloat
-rssringoccs_ComplexFloat_Add(rssringoccs_ComplexFloat z1,
+rssringoccs_CFloat_Add(rssringoccs_ComplexFloat z1,
                              rssringoccs_ComplexFloat z2);
 
 extern rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Add(rssringoccs_ComplexDouble z1,
+rssringoccs_CDouble_Add(rssringoccs_ComplexDouble z1,
                               rssringoccs_ComplexDouble z2);
 
 extern rssringoccs_ComplexLongDouble
-rssringoccs_ComplexLongDouble_Add(rssringoccs_ComplexLongDouble z1,
+rssringoccs_CLDouble_Add(rssringoccs_ComplexLongDouble z1,
                                   rssringoccs_ComplexLongDouble z2);
 
 extern rssringoccs_ComplexFloat
-rssringoccs_ComplexFloat_Add_Real(float x, rssringoccs_ComplexFloat z);
+rssringoccs_CFloat_Add_Real(float x, rssringoccs_ComplexFloat z);
 
 extern rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Add_Real(double x, rssringoccs_ComplexDouble z);
+rssringoccs_CDouble_Add_Real(double x, rssringoccs_ComplexDouble z);
 
 extern rssringoccs_ComplexLongDouble
-rssringoccs_ComplexLongDouble_Add_Real(long double x,
+rssringoccs_CLDouble_Add_Real(long double x,
                                        rssringoccs_ComplexLongDouble z);
 
 extern rssringoccs_ComplexFloat
-rssringoccs_ComplexFloat_Add_Imag(float y, rssringoccs_ComplexFloat z);
+rssringoccs_CFloat_Add_Imag(float y, rssringoccs_ComplexFloat z);
 
 extern rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Add_Imag(double y, rssringoccs_ComplexDouble z);
+rssringoccs_CDouble_Add_Imag(double y, rssringoccs_ComplexDouble z);
 
 extern rssringoccs_ComplexLongDouble
-rssringoccs_ComplexLongDouble_Add_Imag(long double y,
+rssringoccs_CLDouble_Add_Imag(long double y,
                                        rssringoccs_ComplexLongDouble z);
 
 /******************************************************************************
@@ -617,35 +617,35 @@ rssringoccs_ComplexLongDouble_Add_Imag(long double y,
  *      the first entry minus the second. That is, z0 - z1.                   *
  ******************************************************************************/
 extern rssringoccs_ComplexFloat
-rssringoccs_ComplexFloat_Subtract(rssringoccs_ComplexFloat z1,
+rssringoccs_CFloat_Subtract(rssringoccs_ComplexFloat z1,
                                   rssringoccs_ComplexFloat z2);
 
 extern rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Subtract(rssringoccs_ComplexDouble z1,
+rssringoccs_CDouble_Subtract(rssringoccs_ComplexDouble z1,
                                    rssringoccs_ComplexDouble z2);
 
 extern rssringoccs_ComplexLongDouble
-rssringoccs_ComplexLongDouble_Subtract(rssringoccs_ComplexLongDouble z1,
+rssringoccs_CLDouble_Subtract(rssringoccs_ComplexLongDouble z1,
                                        rssringoccs_ComplexLongDouble z2);
 
 extern rssringoccs_ComplexFloat
-rssringoccs_ComplexFloat_Subtract_Real(float x, rssringoccs_ComplexFloat z);
+rssringoccs_CFloat_Subtract_Real(float x, rssringoccs_ComplexFloat z);
 
 extern rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Subtract_Real(double x, rssringoccs_ComplexDouble z);
+rssringoccs_CDouble_Subtract_Real(double x, rssringoccs_ComplexDouble z);
 
 extern rssringoccs_ComplexLongDouble
-rssringoccs_ComplexLongDouble_Subtract_Real(long double x,
+rssringoccs_CLDouble_Subtract_Real(long double x,
                                             rssringoccs_ComplexLongDouble z);
 
 extern rssringoccs_ComplexFloat
-rssringoccs_ComplexFloat_Subtract_Imag(float y, rssringoccs_ComplexFloat z);
+rssringoccs_CFloat_Subtract_Imag(float y, rssringoccs_ComplexFloat z);
 
 extern rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Subtract_Imag(double y, rssringoccs_ComplexDouble z);
+rssringoccs_CDouble_Subtract_Imag(double y, rssringoccs_ComplexDouble z);
 
 extern rssringoccs_ComplexLongDouble
-rssringoccs_ComplexLongDouble_Subtract_Imag(long double y,
+rssringoccs_CLDouble_Subtract_Imag(long double y,
                                             rssringoccs_ComplexLongDouble z);
 
 /******************************************************************************
@@ -668,35 +668,35 @@ rssringoccs_ComplexLongDouble_Subtract_Imag(long double y,
  *      we need a function for computing the product of two complex values.   *
  ******************************************************************************/
 extern rssringoccs_ComplexFloat
-rssringoccs_ComplexFloat_Multiply(rssringoccs_ComplexFloat z1,
+rssringoccs_CFloat_Multiply(rssringoccs_ComplexFloat z1,
                                   rssringoccs_ComplexFloat z2);
 
 extern rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Multiply(rssringoccs_ComplexDouble z1,
+rssringoccs_CDouble_Multiply(rssringoccs_ComplexDouble z1,
                                    rssringoccs_ComplexDouble z2);
 
 extern rssringoccs_ComplexLongDouble
-rssringoccs_ComplexLongDouble_Multiply(rssringoccs_ComplexLongDouble z1,
+rssringoccs_CLDouble_Multiply(rssringoccs_ComplexLongDouble z1,
                                        rssringoccs_ComplexLongDouble z2);
 
 extern rssringoccs_ComplexFloat
-rssringoccs_ComplexFloat_Multiply_Real(float x, rssringoccs_ComplexFloat z);
+rssringoccs_CFloat_Multiply_Real(float x, rssringoccs_ComplexFloat z);
 
 extern rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Multiply_Real(double x, rssringoccs_ComplexDouble z);
+rssringoccs_CDouble_Multiply_Real(double x, rssringoccs_ComplexDouble z);
 
 extern rssringoccs_ComplexLongDouble
-rssringoccs_ComplexLongDouble_Multiply_Real(long double x,
+rssringoccs_CLDouble_Multiply_Real(long double x,
                                             rssringoccs_ComplexLongDouble z);
 
 extern rssringoccs_ComplexFloat
-rssringoccs_ComplexFloat_Multiply_Imag(float x, rssringoccs_ComplexFloat z);
+rssringoccs_CFloat_Multiply_Imag(float x, rssringoccs_ComplexFloat z);
 
 extern rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Multiply_Imag(double x, rssringoccs_ComplexDouble z);
+rssringoccs_CDouble_Multiply_Imag(double x, rssringoccs_ComplexDouble z);
 
 extern rssringoccs_ComplexLongDouble
-rssringoccs_ComplexLongDouble_Multiply_Imag(long double x,
+rssringoccs_CLDouble_Multiply_Imag(long double x,
                                             rssringoccs_ComplexLongDouble z);
 
 /******************************************************************************
@@ -746,7 +746,7 @@ rssringoccs_Complex_Scale(double x, rssringoccs_ComplexDouble z);
 
 /******************************************************************************
  *  Function:                                                                 *
- *      rssringoccs_ComplexDouble_Reciprocal                                  *
+ *      rssringoccs_CDouble_Reciprocal                                  *
  *  Purpose:                                                                  *
  *     Compute the reciprocal (or inverse) of a complex number.               *
  *  Arguments:                                                                *
@@ -762,17 +762,17 @@ rssringoccs_Complex_Scale(double x, rssringoccs_ComplexDouble z);
  *      the result is NaN + iNaN.                                             *
  ******************************************************************************/
 extern rssringoccs_ComplexFloat
-rssringoccs_ComplexFloat_Reciprocal(rssringoccs_ComplexFloat z);
+rssringoccs_CFloat_Reciprocal(rssringoccs_ComplexFloat z);
 
 extern rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Reciprocal(rssringoccs_ComplexDouble z);
+rssringoccs_CDouble_Reciprocal(rssringoccs_ComplexDouble z);
 
 extern rssringoccs_ComplexLongDouble
-rssringoccs_ComplexLongDouble_Reciprocal(rssringoccs_ComplexLongDouble z);
+rssringoccs_CLDouble_Reciprocal(rssringoccs_ComplexLongDouble z);
 
 /******************************************************************************
  *  Function:                                                                 *
- *      rssringoccs_ComplexDouble_Divide                                      *
+ *      rssringoccs_CDouble_Divide                                      *
  *  Purpose:                                                                  *
  *     Compute the quotient of a complex number z0 by z1.                     *
  *  Arguments:                                                                *
@@ -793,15 +793,15 @@ rssringoccs_ComplexLongDouble_Reciprocal(rssringoccs_ComplexLongDouble z);
  *      not z1/z0. That is, we divide the first entry by the second.          *
  ******************************************************************************/
 extern rssringoccs_ComplexFloat
-rssringoccs_ComplexFloat_Divide(rssringoccs_ComplexFloat z1,
+rssringoccs_CFloat_Divide(rssringoccs_ComplexFloat z1,
                                 rssringoccs_ComplexFloat z2);
 
 extern rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Divide(rssringoccs_ComplexDouble z1,
+rssringoccs_CDouble_Divide(rssringoccs_ComplexDouble z1,
                                  rssringoccs_ComplexDouble z2);
 
 extern rssringoccs_ComplexLongDouble
-rssringoccs_ComplexLongDouble_Divide(rssringoccs_ComplexLongDouble z1,
+rssringoccs_CLDouble_Divide(rssringoccs_ComplexLongDouble z1,
                                      rssringoccs_ComplexLongDouble z2);
 
 /******************************************************************************
@@ -868,13 +868,19 @@ rssringoccs_ComplexLongDouble_Divide(rssringoccs_ComplexLongDouble z1,
  *      is roughly exp(1) = e.                                                *
  ******************************************************************************/
 extern rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Poly_Real_Coeffs(double *coeffs, unsigned int degree,
+rssringoccs_CDouble_Poly_Real_Coeffs(double *coeffs, unsigned int degree,
                                            rssringoccs_ComplexDouble z);
 
 extern rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Poly_Complex_Coeffs(rssringoccs_ComplexDouble *coeffs,
+rssringoccs_CDouble_Poly_Complex_Coeffs(rssringoccs_ComplexDouble *coeffs,
                                               unsigned int degree,
                                               rssringoccs_ComplexDouble z);
+
+extern rssringoccs_ComplexDouble
+rssringoccs_CDouble_Poly_Deriv_Real_Coeffs(double *coeffs,
+                                                 unsigned int degree,
+                                                 unsigned int deriv,
+                                                 rssringoccs_ComplexDouble z);
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -924,13 +930,13 @@ rssringoccs_ComplexDouble_Poly_Complex_Coeffs(rssringoccs_ComplexDouble *coeffs,
  *      converges to 1 for certain arguments (angles/phases).                 *
  ******************************************************************************/
 extern rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Erf(rssringoccs_ComplexDouble z);
+rssringoccs_CDouble_Erf(rssringoccs_ComplexDouble z);
 
 extern rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Erfc(rssringoccs_ComplexDouble z);
+rssringoccs_CDouble_Erfc(rssringoccs_ComplexDouble z);
 
 extern rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Faddeeva(rssringoccs_ComplexDouble z);
+rssringoccs_CDouble_Faddeeva(rssringoccs_ComplexDouble z);
 
 #endif
 /*  End of include guard.                                                     */

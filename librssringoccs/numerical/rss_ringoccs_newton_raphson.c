@@ -57,7 +57,7 @@ __do_newton_raphson(float, Float)
 #define EPS 1.0e-16
 
 __do_newton_raphson(double, Double)
-__do_newton_raphson(long double, LongDouble)
+__do_newton_raphson(long double, LDouble)
 
 rssringoccs_ComplexDouble
 rssringoccs_Newton_Raphson_Complex(
@@ -77,27 +77,27 @@ rssringoccs_Newton_Raphson_Complex(
 
     /*  If the derivative is zero at your initial guess, Newton-Raphson       *
      *  fails. Return Not-a-Number in this case.                              */
-    if (rssringoccs_ComplexDouble_Compare(w_prime, rssringoccs_Complex_Zero))
+    if (rssringoccs_CDouble_Compare(w_prime, rssringoccs_Complex_Zero))
         return rssringoccs_Complex_NaN;
 
     /*  Compute the first iteration of Newton-Raphson.                        */
-    dz = rssringoccs_ComplexDouble_Divide(w, w_prime);
-    z  = rssringoccs_ComplexDouble_Subtract(z, dz);
+    dz = rssringoccs_CDouble_Divide(w, w_prime);
+    z  = rssringoccs_CDouble_Subtract(z, dz);
 
     /*  The first iteration has been computed above, so set n to 1.           */
     n = 1;
 
     /*  Continuing this computation until the error is below the threshold.   */
-    while(rssringoccs_ComplexDouble_Abs(dz) > EPS)
+    while(rssringoccs_CDouble_Abs(dz) > EPS)
     {
         w = (*f)(z);
         w_prime = (*f_prime)(z);
 
-        if (rssringoccs_ComplexDouble_Compare(w_prime, rssringoccs_Complex_Zero))
+        if (rssringoccs_CDouble_Compare(w_prime, rssringoccs_Complex_Zero))
             return rssringoccs_Complex_NaN;
 
-        dz = rssringoccs_ComplexDouble_Divide(w, w_prime);
-        z  = rssringoccs_ComplexDouble_Subtract(z, dz);
+        dz = rssringoccs_CDouble_Divide(w, w_prime);
+        z  = rssringoccs_CDouble_Subtract(z, dz);
         ++n;
 
         /*  Break if too many iterations have been run.                       */

@@ -43,18 +43,18 @@
 
 /*  Function for computing the reciprocal (or inverse) of a complex number.   */
 rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Reciprocal(rssringoccs_ComplexDouble z)
+rssringoccs_CDouble_Reciprocal(rssringoccs_ComplexDouble z)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     rssringoccs_ComplexDouble conj_z, rcpr_z;
     double rcp_abs_z_sq;
 
     /*  Compute the conjugate of z and its absolute value.                    */
-    conj_z = rssringoccs_ComplexDouble_Conjugate(z);
-    rcp_abs_z_sq = rssringoccs_ComplexDouble_Abs_Squared(z);
+    conj_z = rssringoccs_CDouble_Conjugate(z);
+    rcp_abs_z_sq = rssringoccs_CDouble_Abs_Squared(z);
 
     /*  The inverse of z is conj_z / abs_z^2, so return this.                 */
-    rcpr_z = rssringoccs_ComplexDouble_Multiply_Real(rcp_abs_z_sq, conj_z);
+    rcpr_z = rssringoccs_CDouble_Multiply_Real(rcp_abs_z_sq, conj_z);
     return rcpr_z;
 }
 
@@ -62,7 +62,7 @@ rssringoccs_ComplexDouble_Reciprocal(rssringoccs_ComplexDouble z)
 
 /*  Function for computing 1/z for non-zero z.                                */
 rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Reciprocal(rssringoccs_ComplexDouble z)
+rssringoccs_CDouble_Reciprocal(rssringoccs_ComplexDouble z)
 {
     return 1.0/z;
 }

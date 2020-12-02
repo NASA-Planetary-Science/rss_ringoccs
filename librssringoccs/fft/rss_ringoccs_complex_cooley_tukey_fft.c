@@ -43,7 +43,7 @@ rssringoccs_Complex_FFT_Cooley_Tukey(rssringoccs_ComplexDouble *in,
 
     /*  The "twiddle" factors are just the complex exponentials that occur    *
      *  inside the discrete Fourier transform. Allocate memory for this and   *
-     *  the "scratch" factor. Per C99 recommendations we do not cast malloc.  */ 
+     *  the "scratch" factor. Per C99 recommendations we do not cast malloc.  */
     twiddles = malloc(sizeof(*twiddles) * N);
     scratch  = malloc(sizeof(*scratch)  * N);
 
@@ -56,7 +56,7 @@ rssringoccs_Complex_FFT_Cooley_Tukey(rssringoccs_ComplexDouble *in,
 
     /*  Compute the "twiddle" factors. No idea why it's called this.          */
     for (k = 0; k<N; ++k)
-        twiddles[k] = rssringoccs_ComplexDouble_Polar(1.0, k * factor);
+        twiddles[k] = rssringoccs_CDouble_Polar(1.0, k * factor);
 
     /*  Set "E" pointer to point to the initial address of the "in" pointer.  */
     E = in;
@@ -87,9 +87,9 @@ rssringoccs_Complex_FFT_Cooley_Tukey(rssringoccs_ComplexDouble *in,
             	D = E + skip;
 
             	/* twiddle *D to get dre and dim                              */
-            	d = rssringoccs_ComplexDouble_Multiply(t, *D);
-                *Xp  = rssringoccs_ComplexDouble_Add(*E, d);
-                *Xp2 = rssringoccs_ComplexDouble_Subtract(*E, d);
+            	d = rssringoccs_CDouble_Multiply(t, *D);
+                *Xp  = rssringoccs_CDouble_Add(*E, d);
+                *Xp2 = rssringoccs_CDouble_Subtract(*E, d);
                 ++Xp;
                 ++Xp2;
                 ++E;
@@ -111,7 +111,7 @@ rssringoccs_Complex_FFT_Cooley_Tukey(rssringoccs_ComplexDouble *in,
     {
         factor = 1.0/N;
         for (k=0; k<N; ++k)
-            out[k] = rssringoccs_ComplexDouble_Multiply_Real(factor, out[k]);
+            out[k] = rssringoccs_CDouble_Multiply_Real(factor, out[k]);
     }
 
     return out;

@@ -65,13 +65,13 @@ rssringoccs_Complex_Pow(rssringoccs_ComplexDouble z0,
 
     /*  We can write x^y as exp(y ln(x)) and this is how we'll compute for    *
      *  complex powers. First compute log(z1).                                */
-    ln_z0 = rssringoccs_ComplexDouble_Log(z0);
+    ln_z0 = rssringoccs_CDouble_Log(z0);
 
     /*  Next use rssringoccs_Complex_Multiply to compute the product with z0. */
-    z1_ln_z0 = rssringoccs_ComplexDouble_Multiply(z1, ln_z0);
+    z1_ln_z0 = rssringoccs_CDouble_Multiply(z1, ln_z0);
 
     /*  And finally exponentiate.                                             */
-    z0_to_the_z1 = rssringoccs_ComplexDouble_Exp(z1_ln_z0);
+    z0_to_the_z1 = rssringoccs_CDouble_Exp(z1_ln_z0);
     return z0_to_the_z1;
 }
 
@@ -84,12 +84,12 @@ rssringoccs_Complex_Real_Pow(rssringoccs_ComplexDouble z, double x)
 
     /*  We can write z^x as exp(x ln(z)) and this is how we'll compute for    *
      *  complex powers. First compute log(z).                                 */
-    ln_z = rssringoccs_ComplexDouble_Log(z);
+    ln_z = rssringoccs_CDouble_Log(z);
 
     /*  Next use rssringoccs_Complex_Scale to compute the product with x.     */
-    x_ln_z = rssringoccs_ComplexDouble_Multiply_Real(x, ln_z);
+    x_ln_z = rssringoccs_CDouble_Multiply_Real(x, ln_z);
 
     /*  And finally exponentiate.                                             */
-    z_to_the_x = rssringoccs_ComplexDouble_Exp(x_ln_z);
+    z_to_the_x = rssringoccs_CDouble_Exp(x_ln_z);
     return z_to_the_x;
 }

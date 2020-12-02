@@ -38,7 +38,7 @@
 #if _RSS_RINGOCCS_USING_COMPLEX_H_ == 0
 
 /*  This function is equivalent to the cimag function in complex.h (C99).     */
-float rssringoccs_ComplexFloat_Imag_Part(rssringoccs_ComplexFloat z)
+float rssringoccs_CFloat_Imag_Part(rssringoccs_ComplexFloat z)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     float imag;
@@ -49,7 +49,7 @@ float rssringoccs_ComplexFloat_Imag_Part(rssringoccs_ComplexFloat z)
     return imag;
 }
 
-double rssringoccs_ComplexDouble_Imag_Part(rssringoccs_ComplexDouble z)
+double rssringoccs_CDouble_Imag_Part(rssringoccs_ComplexDouble z)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     double imag;
@@ -61,7 +61,7 @@ double rssringoccs_ComplexDouble_Imag_Part(rssringoccs_ComplexDouble z)
 }
 
 long double
-rssringoccs_ComplexLongDouble_Imag_Part(rssringoccs_ComplexLongDouble z)
+rssringoccs_CLDouble_Imag_Part(rssringoccs_ComplexLongDouble z)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     long double imag;
@@ -74,18 +74,18 @@ rssringoccs_ComplexLongDouble_Imag_Part(rssringoccs_ComplexLongDouble z)
 
 #else
 
-float rssringoccs_ComplexFloat_Imag_Part(rssringoccs_ComplexFloat z)
+float rssringoccs_CFloat_Imag_Part(rssringoccs_ComplexFloat z)
 {
     return cimagf(z);
 }
 
-double rssringoccs_ComplexDouble_Imag_Part(rssringoccs_ComplexDouble z)
+double rssringoccs_CDouble_Imag_Part(rssringoccs_ComplexDouble z)
 {
     return cimag(z);
 }
 
 long double
-rssringoccs_ComplexLongDouble_Imag_Part(rssringoccs_ComplexLongDouble z)
+rssringoccs_CLDouble_Imag_Part(rssringoccs_ComplexLongDouble z)
 {
     return cimagl(z);
 }

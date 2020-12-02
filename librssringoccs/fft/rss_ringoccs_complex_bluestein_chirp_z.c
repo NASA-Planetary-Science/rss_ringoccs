@@ -77,8 +77,8 @@ rssringoccs_Complex_FFT_Bluestein_Chirp_Z(rssringoccs_ComplexDouble *in, long N,
     {
         m = n+1-N;
         m2_chirp_factor = m*m*chirp_factor;
-        chirp[n] = rssringoccs_ComplexDouble_Polar(1.0, m2_chirp_factor);
-        rcpr_chirp[n] = rssringoccs_ComplexDouble_Reciprocal(chirp[n]);
+        chirp[n] = rssringoccs_CDouble_Polar(1.0, m2_chirp_factor);
+        rcpr_chirp[n] = rssringoccs_CDouble_Reciprocal(chirp[n]);
     }
 
     /*  Now pad the rest of chirp with zeros so that it is a power of two.    */
@@ -87,7 +87,7 @@ rssringoccs_Complex_FFT_Bluestein_Chirp_Z(rssringoccs_ComplexDouble *in, long N,
 
     /*  Set the x_in array to in times chirp, and then pad with zero.         */
     for (n=0; n<N; ++n)
-        x_in[n] = rssringoccs_ComplexDouble_Multiply(chirp[n+N-1], in[n]);
+        x_in[n] = rssringoccs_CDouble_Multiply(chirp[n+N-1], in[n]);
 
     /*  Now pad the rest with zeros.                                          */
     for (n=N; n<N_pow_2; ++n)
@@ -116,9 +116,9 @@ rssringoccs_Complex_FFT_Bluestein_Chirp_Z(rssringoccs_ComplexDouble *in, long N,
         free(chirp);
         return NULL;
     }
-    
+
     for (n=0; n<N_pow_2; ++n)
-        x_in[n] = rssringoccs_ComplexDouble_Multiply(fft_x_in[n], fft_rcpr_chirp[n]);
+        x_in[n] = rssringoccs_CDouble_Multiply(fft_x_in[n], fft_rcpr_chirp[n]);
 
     fft_x_in = rssringoccs_Complex_FFT_Cooley_Tukey(x_in, N_pow_2,
                                                     rssringoccs_True);
@@ -137,14 +137,14 @@ rssringoccs_Complex_FFT_Bluestein_Chirp_Z(rssringoccs_ComplexDouble *in, long N,
     for(n=0; n<N; ++n)
     {
         m = n+N-1;
-        out[n] = rssringoccs_ComplexDouble_Multiply(fft_x_in[m], chirp[m]);
+        out[n] = rssringoccs_CDouble_Multiply(fft_x_in[m], chirp[m]);
     }
 
     if (inverse)
     {
         inverse_factor = 1.0/N;
         for (n=0; n<N; ++n)
-            out[n] = rssringoccs_ComplexDouble_Multiply_Real(inverse_factor, out[n]);
+            out[n] = rssringoccs_CDouble_Multiply_Real(inverse_factor, out[n]);
     }
 
     /*  Don't forget to free everything!!!                                    */

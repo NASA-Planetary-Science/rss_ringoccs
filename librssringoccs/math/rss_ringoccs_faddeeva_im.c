@@ -1295,7 +1295,7 @@ static double chebyshev_lookup_table(double y100, double x)
             coeffs[4] = 0.016931216931216931217;
             deg = 5;
 
-            out = x*rssringoccs_Double_Poly_Double_Coeffs(coeffs, deg, t);
+            out = x*rssringoccs_Real_Poly_Double_Coeffs(coeffs, deg, t);
             return out;
         }
 
@@ -1304,9 +1304,9 @@ static double chebyshev_lookup_table(double y100, double x)
             return rssringoccs_NaN;
     }
 
-    /*  Use rssringoccs_Double_Poly_Double_Coeffs to evaluate the             *
+    /*  Use rssringoccs_Real_Poly_Double_Coeffs to evaluate the             *
      *  polynomial in t via Horner's method and return.                       */
-    out = rssringoccs_Double_Poly_Double_Coeffs(coeffs, deg, t);
+    out = rssringoccs_Real_Poly_Double_Coeffs(coeffs, deg, t);
     return out;
 }
 
@@ -1372,7 +1372,7 @@ float rssringoccs_Float_Faddeeva_Im(float x)
     return out;
 }
 
-long double rssringoccs_LongDouble_Faddeeva_Im(long double x)
+long double rssringoccs_LDouble_Faddeeva_Im(long double x)
 {
     long double out;
     out = rssringoccs_Double_Faddeeva_Im((double)x);

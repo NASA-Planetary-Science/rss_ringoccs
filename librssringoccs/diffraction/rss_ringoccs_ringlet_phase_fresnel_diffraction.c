@@ -144,7 +144,7 @@ rssringoccs_Double_Ringlet_Diffraction_Phase(double x, double a,
  *      1.) This function relies on the C99 standard, or higher.              *
  ******************************************************************************/
 long double
-rssringoccs_LongDouble_Ringlet_Diffraction_Phase(long double x, long double a,
+rssringoccs_LDouble_Ringlet_Diffraction_Phase(long double x, long double a,
                                                  long double b, long double F)
 {
     long double re, im, arg1, arg2, fs1, fs2, fc1, fc2, out;
@@ -152,14 +152,14 @@ rssringoccs_LongDouble_Ringlet_Diffraction_Phase(long double x, long double a,
     arg1 = SQRT_PI_BY_2*(a-x)/F;
     arg2 = SQRT_PI_BY_2*(b-x)/F;
 
-    fs1 = rssringoccs_LongDouble_Fresnel_Sin(arg1);
-    fs2 = rssringoccs_LongDouble_Fresnel_Sin(arg2);
-    fc1 = rssringoccs_LongDouble_Fresnel_Cos(arg1);
-    fc2 = rssringoccs_LongDouble_Fresnel_Cos(arg2);
+    fs1 = rssringoccs_LDouble_Fresnel_Sin(arg1);
+    fs2 = rssringoccs_LDouble_Fresnel_Sin(arg2);
+    fc1 = rssringoccs_LDouble_Fresnel_Cos(arg1);
+    fc2 = rssringoccs_LDouble_Fresnel_Cos(arg2);
 
     im = SQRT_ONE_BY_TWO_PI * (fs2 - fs1 -  fc2 + fc1);
     re = 1.0 - SQRT_ONE_BY_TWO_PI * (fc2 - fc1 + fs2 - fs1);
-    out = rssringoccs_LongDouble_Arctan2(im, re);
+    out = rssringoccs_LDouble_Arctan2(im, re);
 
     return out;
 }

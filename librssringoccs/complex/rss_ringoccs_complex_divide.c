@@ -43,7 +43,7 @@
 
 /*  Single precision complex division.                                        */
 rssringoccs_ComplexFloat
-rssringoccs_ComplexFloat_Divide(rssringoccs_ComplexFloat z0,
+rssringoccs_CFloat_Divide(rssringoccs_ComplexFloat z0,
                                 rssringoccs_ComplexFloat z1)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
@@ -52,28 +52,28 @@ rssringoccs_ComplexFloat_Divide(rssringoccs_ComplexFloat z0,
     float div_re, div_im;
 
     /*  Extract the real and imaginary parts from the inputs.                 */
-    real0 = rssringoccs_ComplexFloat_Real_Part(z0);
-    real1 = rssringoccs_ComplexFloat_Real_Part(z1);
-    imag0 = rssringoccs_ComplexFloat_Imag_Part(z0);
-    imag1 = rssringoccs_ComplexFloat_Imag_Part(z1);
+    real0 = rssringoccs_CFloat_Real_Part(z0);
+    real1 = rssringoccs_CFloat_Real_Part(z1);
+    imag0 = rssringoccs_CFloat_Imag_Part(z0);
+    imag1 = rssringoccs_CFloat_Imag_Part(z1);
 
     /*  The denominator for both real and imaginary parts is |z1|^2.          */
-    denom = 1.0 / rssringoccs_ComplexFloat_Abs_Squared(z1);
+    denom = 1.0 / rssringoccs_CFloat_Abs_Squared(z1);
 
     /*  We compute based on the fact that z0/z1 = z0 * (z1)^-1 and use the    *
      *  formular for the reciprocal of a complex number.                      */
     div_re = (real0*real1 + imag0*imag1)*denom;
     div_im = (imag0*real1 - real0*imag1)*denom;
 
-    /*  Use rssringoccs_ComplexFloat_Rect to create the output and return.    */
-    div = rssringoccs_ComplexFloat_Rect(div_re, div_im);
+    /*  Use rssringoccs_CFloat_Rect to create the output and return.    */
+    div = rssringoccs_CFloat_Rect(div_re, div_im);
     return div;
 }
-/*  End of rssringoccs_ComplexFloat_Divide.                                   */
+/*  End of rssringoccs_CFloat_Divide.                                   */
 
 /*  Double precision complex division.                                        */
 rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Divide(rssringoccs_ComplexDouble z0,
+rssringoccs_CDouble_Divide(rssringoccs_ComplexDouble z0,
                                  rssringoccs_ComplexDouble z1)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
@@ -82,28 +82,28 @@ rssringoccs_ComplexDouble_Divide(rssringoccs_ComplexDouble z0,
     double div_re, div_im;
 
     /*  Extract the real and imaginary parts from the inputs.                 */
-    real0 = rssringoccs_ComplexDouble_Real_Part(z0);
-    real1 = rssringoccs_ComplexDouble_Real_Part(z1);
-    imag0 = rssringoccs_ComplexDouble_Imag_Part(z0);
-    imag1 = rssringoccs_ComplexDouble_Imag_Part(z1);
+    real0 = rssringoccs_CDouble_Real_Part(z0);
+    real1 = rssringoccs_CDouble_Real_Part(z1);
+    imag0 = rssringoccs_CDouble_Imag_Part(z0);
+    imag1 = rssringoccs_CDouble_Imag_Part(z1);
 
     /*  The denominator for both real and imaginary parts is |z1|^2.          */
-    denom = 1.0 / rssringoccs_ComplexDouble_Abs_Squared(z1);
+    denom = 1.0 / rssringoccs_CDouble_Abs_Squared(z1);
 
     /*  We compute based on the fact that z0/z1 = z0 * (z1)^-1 and use the    *
      *  formular for the reciprocal of a complex number.                      */
     div_re = (real0*real1 + imag0*imag1)*denom;
     div_im = (imag0*real1 - real0*imag1)*denom;
 
-    /*  Use rssringoccs_ComplexDouble_Rect to create the output and return.   */
-    div = rssringoccs_ComplexDouble_Rect(div_re, div_im);
+    /*  Use rssringoccs_CDouble_Rect to create the output and return.   */
+    div = rssringoccs_CDouble_Rect(div_re, div_im);
     return div;
 }
-/*  End of rssringoccs_ComplexDouble_Divide.                                  */
+/*  End of rssringoccs_CDouble_Divide.                                  */
 
 /*  Long double precision complex division.                                   */
 rssringoccs_ComplexLongDouble
-rssringoccs_ComplexLongDouble_Divide(rssringoccs_ComplexLongDouble z0,
+rssringoccs_CLDouble_Divide(rssringoccs_ComplexLongDouble z0,
                                      rssringoccs_ComplexLongDouble z1)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
@@ -112,24 +112,24 @@ rssringoccs_ComplexLongDouble_Divide(rssringoccs_ComplexLongDouble z0,
     long double div_re, div_im;
 
     /*  Extract the real and imaginary parts from the inputs.                 */
-    real0 = rssringoccs_ComplexLongDouble_Real_Part(z0);
-    real1 = rssringoccs_ComplexLongDouble_Real_Part(z1);
-    imag0 = rssringoccs_ComplexLongDouble_Imag_Part(z0);
-    imag1 = rssringoccs_ComplexLongDouble_Imag_Part(z1);
+    real0 = rssringoccs_CLDouble_Real_Part(z0);
+    real1 = rssringoccs_CLDouble_Real_Part(z1);
+    imag0 = rssringoccs_CLDouble_Imag_Part(z0);
+    imag1 = rssringoccs_CLDouble_Imag_Part(z1);
 
     /*  The denominator for both real and imaginary parts is |z1|^2.          */
-    denom = 1.0 / rssringoccs_ComplexLongDouble_Abs_Squared(z1);
+    denom = 1.0 / rssringoccs_CLDouble_Abs_Squared(z1);
 
     /*  We compute based on the fact that z0/z1 = z0 * (z1)^-1 and use the    *
      *  formular for the reciprocal of a complex number.                      */
     div_re = (real0*real1 + imag0*imag1)*denom;
     div_im = (imag0*real1 - real0*imag1)*denom;
 
-    /*  Use rssringoccs_ComplexLongDouble_Rect and return output.             */
-    div = rssringoccs_ComplexLongDouble_Rect(div_re, div_im);
+    /*  Use rssringoccs_CLDouble_Rect and return output.             */
+    div = rssringoccs_CLDouble_Rect(div_re, div_im);
     return div;
 }
-/*  End of rssringoccs_ComplexLongDouble_Divide.                              */
+/*  End of rssringoccs_CLDouble_Divide.                              */
 
 #else
 /*  Else statement for #if _RSS_RINGOCCS_USING_COMPLEX_H_ == 0.               */
@@ -138,29 +138,29 @@ rssringoccs_ComplexLongDouble_Divide(rssringoccs_ComplexLongDouble z0,
 
 /*  Single precision complex division.                                        */
 rssringoccs_ComplexFloat
-rssringoccs_ComplexFloat_Divide(rssringoccs_ComplexFloat z0,
+rssringoccs_CFloat_Divide(rssringoccs_ComplexFloat z0,
                                 rssringoccs_ComplexFloat z1)
 {
     return z0/z1;
 }
-/*  End of rssringoccs_ComplexFloat_Divide.                                   */
+/*  End of rssringoccs_CFloat_Divide.                                   */
 
 /*  Double precision complex division.                                        */
 rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Divide(rssringoccs_ComplexDouble z0,
+rssringoccs_CDouble_Divide(rssringoccs_ComplexDouble z0,
                                  rssringoccs_ComplexDouble z1)
 {
     return z0/z1;
 }
-/*  End of rssringoccs_ComplexDouble_Divide.                                  */
+/*  End of rssringoccs_CDouble_Divide.                                  */
 
 /*  Long double precision complex division.                                   */
 rssringoccs_ComplexLongDouble
-rssringoccs_ComplexLongDouble_Divide(rssringoccs_ComplexLongDouble z0,
+rssringoccs_CLDouble_Divide(rssringoccs_ComplexLongDouble z0,
                                      rssringoccs_ComplexLongDouble z1)
 {
     return z0/z1;
 }
-/*  End of rssringoccs_ComplexLongDouble_Divide.                              */
+/*  End of rssringoccs_CLDouble_Divide.                              */
 
 #endif

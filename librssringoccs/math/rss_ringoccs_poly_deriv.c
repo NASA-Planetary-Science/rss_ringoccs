@@ -8,10 +8,9 @@
  *  library math.h. This allows compatibility of C89 and C99 math.h headers.  */
 #include <rss_ringoccs/include/rss_ringoccs_math.h>
 
-float rssringoccs_Float_Poly_Deriv_Float_Coeffs(float *coeffs,
-                                                unsigned int degree,
-                                                unsigned int deriv,
-                                                float x)
+float rssringoccs_Real_Poly_Deriv_Float_Coeffs(float *coeffs,
+                                               unsigned int degree,
+                                               unsigned int deriv, float x)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     float poly;
@@ -42,10 +41,9 @@ float rssringoccs_Float_Poly_Deriv_Float_Coeffs(float *coeffs,
     return poly;
 }
 
-double rssringoccs_Double_Poly_Deriv_Double_Coeffs(double *coeffs,
-                                                   unsigned int degree,
-                                                   unsigned int deriv,
-                                                   double x)
+double rssringoccs_Real_Poly_Deriv_Double_Coeffs(double *coeffs,
+                                                 unsigned int degree,
+                                                 unsigned int deriv, double x)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     double poly;
@@ -82,10 +80,10 @@ double rssringoccs_Double_Poly_Deriv_Double_Coeffs(double *coeffs,
 }
 
 long double
-rssringoccs_LongDouble_Poly_Deriv_LongDouble_Coeffs(long double *coeffs,
-                                                    unsigned int degree,
-                                                    unsigned int deriv,
-                                                    long double x)
+rssringoccs_Real_Poly_Deriv_LDouble_Coeffs(long double *coeffs,
+                                           unsigned int degree,
+                                           unsigned int deriv,
+                                           long double x)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     long double poly;

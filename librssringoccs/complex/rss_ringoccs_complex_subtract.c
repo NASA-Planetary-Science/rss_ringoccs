@@ -43,7 +43,7 @@
 
 /*  Single precision complex addition.                                        */
 rssringoccs_ComplexFloat
-rssringoccs_ComplexFloat_Subtract(rssringoccs_ComplexFloat z0,
+rssringoccs_CFloat_Subtract(rssringoccs_ComplexFloat z0,
                                   rssringoccs_ComplexFloat z1)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
@@ -53,23 +53,23 @@ rssringoccs_ComplexFloat_Subtract(rssringoccs_ComplexFloat z0,
     float sum_re, sum_im;
 
     /*  Extract the real and imaginary parts from the inputs.                 */
-    real0 = rssringoccs_ComplexFloat_Real_Part(z0);
-    real1 = rssringoccs_ComplexFloat_Real_Part(z1);
-    imag0 = rssringoccs_ComplexFloat_Imag_Part(z0);
-    imag1 = rssringoccs_ComplexFloat_Imag_Part(z1);
+    real0 = rssringoccs_CFloat_Real_Part(z0);
+    real1 = rssringoccs_CFloat_Real_Part(z1);
+    imag0 = rssringoccs_CFloat_Imag_Part(z0);
+    imag1 = rssringoccs_CFloat_Imag_Part(z1);
 
     /*  The sum of two complex numbers simply adds their components.          */
     sum_re = real0 - real1;
     sum_im = imag0 - imag1;
 
     /*  Create the output from sum_re and sum_im and return.                  */
-    sum = rssringoccs_ComplexFloat_Rect(sum_re, sum_im);
+    sum = rssringoccs_CFloat_Rect(sum_re, sum_im);
     return sum;
 }
 
 /*  Double precision complex addition.                                        */
 rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Subtract(rssringoccs_ComplexDouble z0,
+rssringoccs_CDouble_Subtract(rssringoccs_ComplexDouble z0,
                                    rssringoccs_ComplexDouble z1)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
@@ -79,23 +79,23 @@ rssringoccs_ComplexDouble_Subtract(rssringoccs_ComplexDouble z0,
     double sum_re, sum_im;
 
     /*  Extract the real and imaginary parts from the inputs.                 */
-    real0 = rssringoccs_ComplexDouble_Real_Part(z0);
-    real1 = rssringoccs_ComplexDouble_Real_Part(z1);
-    imag0 = rssringoccs_ComplexDouble_Imag_Part(z0);
-    imag1 = rssringoccs_ComplexDouble_Imag_Part(z1);
+    real0 = rssringoccs_CDouble_Real_Part(z0);
+    real1 = rssringoccs_CDouble_Real_Part(z1);
+    imag0 = rssringoccs_CDouble_Imag_Part(z0);
+    imag1 = rssringoccs_CDouble_Imag_Part(z1);
 
     /*  The sum of two complex numbers simply adds their components.          */
     sum_re = real0 - real1;
     sum_im = imag0 - imag1;
 
     /*  Create the output from sum_re and sum_im and return.                  */
-    sum = rssringoccs_ComplexDouble_Rect(sum_re, sum_im);
+    sum = rssringoccs_CDouble_Rect(sum_re, sum_im);
     return sum;
 }
 
 /*  Long double precision complex addition.                                   */
 rssringoccs_ComplexLongDouble
-rssringoccs_ComplexLongDouble_Subtract(rssringoccs_ComplexLongDouble z0,
+rssringoccs_CLDouble_Subtract(rssringoccs_ComplexLongDouble z0,
                                        rssringoccs_ComplexLongDouble z1)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
@@ -105,63 +105,63 @@ rssringoccs_ComplexLongDouble_Subtract(rssringoccs_ComplexLongDouble z0,
     long double sum_re, sum_im;
 
     /*  Extract the real and imaginary parts from the inputs.                 */
-    real0 = rssringoccs_ComplexLongDouble_Real_Part(z0);
-    real1 = rssringoccs_ComplexLongDouble_Real_Part(z1);
-    imag0 = rssringoccs_ComplexLongDouble_Imag_Part(z0);
-    imag1 = rssringoccs_ComplexLongDouble_Imag_Part(z1);
+    real0 = rssringoccs_CLDouble_Real_Part(z0);
+    real1 = rssringoccs_CLDouble_Real_Part(z1);
+    imag0 = rssringoccs_CLDouble_Imag_Part(z0);
+    imag1 = rssringoccs_CLDouble_Imag_Part(z1);
 
     /*  The sum of two complex numbers simply adds their components.          */
     sum_re = real0 - real1;
     sum_im = imag0 - imag1;
 
     /*  Create the output from sum_re and sum_im and return.                  */
-    sum = rssringoccs_ComplexLongDouble_Rect(sum_re, sum_im);
+    sum = rssringoccs_CLDouble_Rect(sum_re, sum_im);
     return sum;
 }
 
 /*  Single precision complex addition where one variable is real.             */
 rssringoccs_ComplexFloat
-rssringoccs_ComplexFloat_Subtract_Real(float x, rssringoccs_ComplexFloat z)
+rssringoccs_CFloat_Subtract_Real(float x, rssringoccs_ComplexFloat z)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     rssringoccs_ComplexFloat sum;
     float real, imag, sum_re;
 
     /*  Extract the real and imaginary parts from the inputs.                 */
-    real = rssringoccs_ComplexFloat_Real_Part(z);
-    imag = rssringoccs_ComplexFloat_Imag_Part(z);
+    real = rssringoccs_CFloat_Real_Part(z);
+    imag = rssringoccs_CFloat_Imag_Part(z);
 
     /*  Add the real variable to the real part of z.                          */
     sum_re = x - real;
 
     /*  Create the output from sum_re and imag and return.                    */
-    sum = rssringoccs_ComplexFloat_Rect(sum_re, -imag);
+    sum = rssringoccs_CFloat_Rect(sum_re, -imag);
     return sum;
 }
 
 /*  Double precision complex addition where one variable is real.             */
 rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Subtract_Real(double x, rssringoccs_ComplexDouble z)
+rssringoccs_CDouble_Subtract_Real(double x, rssringoccs_ComplexDouble z)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     rssringoccs_ComplexDouble sum;
     double real, imag, sum_re;
 
     /*  Extract the real and imaginary parts from the inputs.                 */
-    real = rssringoccs_ComplexDouble_Real_Part(z);
-    imag = rssringoccs_ComplexDouble_Imag_Part(z);
+    real = rssringoccs_CDouble_Real_Part(z);
+    imag = rssringoccs_CDouble_Imag_Part(z);
 
     /*  Add the real variable to the real part of z.                          */
     sum_re = x - real;
 
     /*  Create the output from sum_re and imag and return.                    */
-    sum = rssringoccs_ComplexDouble_Rect(sum_re, -imag);
+    sum = rssringoccs_CDouble_Rect(sum_re, -imag);
     return sum;
 }
 
 /*  Long double precision complex addition where one variable is real.        */
 rssringoccs_ComplexLongDouble
-rssringoccs_ComplexLongDouble_Subtract_Real(long double x,
+rssringoccs_CLDouble_Subtract_Real(long double x,
                                             rssringoccs_ComplexLongDouble z)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
@@ -169,60 +169,60 @@ rssringoccs_ComplexLongDouble_Subtract_Real(long double x,
     long double real, imag, sum_re;
 
     /*  Extract the real and imaginary parts from the inputs.                 */
-    real = rssringoccs_ComplexLongDouble_Real_Part(z);
-    imag = rssringoccs_ComplexLongDouble_Imag_Part(z);
+    real = rssringoccs_CLDouble_Real_Part(z);
+    imag = rssringoccs_CLDouble_Imag_Part(z);
 
     /*  Add the real variable to the real part of z.                          */
     sum_re = x - real;
 
     /*  Create the output from sum_re and imag and return.                    */
-    sum = rssringoccs_ComplexLongDouble_Rect(sum_re, -imag);
+    sum = rssringoccs_CLDouble_Rect(sum_re, -imag);
     return sum;
 }
 
 /*  Single precision complex addition where one variable is imaginary.        */
 rssringoccs_ComplexFloat
-rssringoccs_ComplexFloat_Subtract_Imag(float y, rssringoccs_ComplexFloat z)
+rssringoccs_CFloat_Subtract_Imag(float y, rssringoccs_ComplexFloat z)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     rssringoccs_ComplexFloat sum;
     float real, imag, sum_im;
 
     /*  Extract the real and imaginary parts from the inputs.                 */
-    real = rssringoccs_ComplexFloat_Real_Part(z);
-    imag = rssringoccs_ComplexFloat_Imag_Part(z);
+    real = rssringoccs_CFloat_Real_Part(z);
+    imag = rssringoccs_CFloat_Imag_Part(z);
 
     /*  Add the imaginary variable to the imaginary part of z.                */
     sum_im = y - imag;
 
     /*  Create the output from real and sum_im and return.                    */
-    sum = rssringoccs_ComplexFloat_Rect(-real, sum_im);
+    sum = rssringoccs_CFloat_Rect(-real, sum_im);
     return sum;
 }
 
 /*  Double precision complex addition where one variable is imaginary.        */
 rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Subtract_Imag(double y, rssringoccs_ComplexDouble z)
+rssringoccs_CDouble_Subtract_Imag(double y, rssringoccs_ComplexDouble z)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     rssringoccs_ComplexDouble sum;
     double real, imag, sum_im;
 
     /*  Extract the real and imaginary parts from the inputs.                 */
-    real = rssringoccs_ComplexDouble_Real_Part(z);
-    imag = rssringoccs_ComplexDouble_Imag_Part(z);
+    real = rssringoccs_CDouble_Real_Part(z);
+    imag = rssringoccs_CDouble_Imag_Part(z);
 
     /*  Add the imaginary variable to the imaginary part of z.                */
     sum_im = y - imag;
 
     /*  Create the output from real and sum_im and return.                    */
-    sum = rssringoccs_ComplexDouble_Rect(-real, sum_im);
+    sum = rssringoccs_CDouble_Rect(-real, sum_im);
     return sum;
 }
 
 /*  Long double precision complex addition where one variable is real.        */
 rssringoccs_ComplexLongDouble
-rssringoccs_ComplexLongDouble_Subtract_Imag(long double y,
+rssringoccs_CLDouble_Subtract_Imag(long double y,
                                             rssringoccs_ComplexLongDouble z)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
@@ -230,14 +230,14 @@ rssringoccs_ComplexLongDouble_Subtract_Imag(long double y,
     long double real, imag, sum_im;
 
     /*  Extract the real and imaginary parts from the inputs.                 */
-    real = rssringoccs_ComplexLongDouble_Real_Part(z);
-    imag = rssringoccs_ComplexLongDouble_Imag_Part(z);
+    real = rssringoccs_CLDouble_Real_Part(z);
+    imag = rssringoccs_CLDouble_Imag_Part(z);
 
     /*  Add the imaginary variable to the imaginary part of z.                */
     sum_im = y - imag;
 
     /*  Create the output from real and sum_im and return.                    */
-    sum = rssringoccs_ComplexLongDouble_Rect(-real, sum_im);
+    sum = rssringoccs_CLDouble_Rect(-real, sum_im);
     return sum;
 }
 
@@ -247,54 +247,54 @@ rssringoccs_ComplexLongDouble_Subtract_Imag(long double y,
 
 /*  Single precision complex addition.                                        */
 rssringoccs_ComplexFloat
-rssringoccs_ComplexFloat_Subtract(rssringoccs_ComplexFloat z0,
+rssringoccs_CFloat_Subtract(rssringoccs_ComplexFloat z0,
                                   rssringoccs_ComplexFloat z1)
 {
     return z0 - z1;
 }
 
 rssringoccs_ComplexFloat
-rssringoccs_ComplexFloat_Subtract_Real(float x, rssringoccs_ComplexFloat z)
+rssringoccs_CFloat_Subtract_Real(float x, rssringoccs_ComplexFloat z)
 {
     return x - z;
 }
 
 rssringoccs_ComplexFloat
-rssringoccs_ComplexFloat_Subtract_Imag(float y, rssringoccs_ComplexFloat z)
+rssringoccs_CFloat_Subtract_Imag(float y, rssringoccs_ComplexFloat z)
 {
     return _Complex_I*y - z;
 }
 
 /*  Double precision complex addition.                                        */
 rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Subtract(rssringoccs_ComplexDouble z0,
+rssringoccs_CDouble_Subtract(rssringoccs_ComplexDouble z0,
                                    rssringoccs_ComplexDouble z1)
 {
     return z0 - z1;
 }
 
 rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Subtract_Real(double x, rssringoccs_ComplexDouble z)
+rssringoccs_CDouble_Subtract_Real(double x, rssringoccs_ComplexDouble z)
 {
     return x - z;
 }
 
 rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Subtract_Imag(double y, rssringoccs_ComplexDouble z)
+rssringoccs_CDouble_Subtract_Imag(double y, rssringoccs_ComplexDouble z)
 {
     return _Complex_I*y - z;
 }
 
 /*  Long double precision complex addition.                                   */
 rssringoccs_ComplexLongDouble
-rssringoccs_ComplexLongDouble_Subtract(rssringoccs_ComplexLongDouble z0,
+rssringoccs_CLDouble_Subtract(rssringoccs_ComplexLongDouble z0,
                                        rssringoccs_ComplexLongDouble z1)
 {
     return z0 - z1;
 }
 
 rssringoccs_ComplexLongDouble
-rssringoccs_ComplexLongDouble_Subtract_Real(long double x,
+rssringoccs_CLDouble_Subtract_Real(long double x,
                                             rssringoccs_ComplexLongDouble z)
 {
     return x - z;
@@ -302,7 +302,7 @@ rssringoccs_ComplexLongDouble_Subtract_Real(long double x,
 
 
 rssringoccs_ComplexLongDouble
-rssringoccs_ComplexLongDouble_Subtract_Imag(long double y,
+rssringoccs_CLDouble_Subtract_Imag(long double y,
                                             rssringoccs_ComplexLongDouble z)
 {
     return _Complex_I*y - z;

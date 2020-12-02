@@ -51,34 +51,15 @@ int size = 1024;
 /*  Maximum number of iterations in the Newton-Raphson method before quitting.*/
 unsigned int max_iters = 32;
 
-/*  The function we're working with is f(z) = z^3 - 1, so create this.        */
-static rssringoccs_ComplexDouble f(rssringoccs_ComplexDouble z)
-{
-    rssringoccs_ComplexDouble z_cubed, z_cubed_minus_1;
-
-    z_cubed =
-        rssringoccs_ComplexDouble_Multiply(rssringoccs_ComplexDouble_Multiply(z, z), z);
-
-    z_cubed_minus_1 = rssringoccs_ComplexDouble_Subtract(z_cubed,
-                                                   rssringoccs_Complex_One);
-
-    return z_cubed_minus_1;
-}
-
-/*  The derivative is f'(z) = 3z^2, so create this.                           */
-static rssringoccs_ComplexDouble f_prime(rssringoccs_ComplexDouble z)
-{
-    rssringoccs_ComplexDouble w;
-    w = rssringoccs_ComplexDouble_Multiply_Real(3.0, rssringoccs_ComplexDouble_Multiply(z, z));
-    return w;
-}
+double coeffs[4] = {-1.0, 0.0, 0.0, 1.0};
+const unsigned int degree = 3;
 
 /*  We can be more general and set up fractals for general polynomials. This  *
  *  cubic will have three roots, so set NRoots to 3, and compute the roots.   */
 #define NRoots 3
-rssringoccs_ComplexDouble ROOT_1 = {{1.0, 0.0}};
-rssringoccs_ComplexDouble ROOT_2 = {{-0.5, +0.8660254037844386}};
-rssringoccs_ComplexDouble ROOT_3 = {{-0.5, -0.8660254037844386}};
+const rssringoccs_ComplexDouble ROOT_1 = {{1.0, 0.0}};
+const rssringoccs_ComplexDouble ROOT_2 = {{-0.5, +0.8660254037844386}};
+const rssringoccs_ComplexDouble ROOT_3 = {{-0.5, -0.8660254037844386}};
 
 /*  This function is used to set the current pixel of the output ppm to the   *
  *  desired color. fp is the filename we'll be using.                         */
@@ -173,8 +154,9 @@ int main(void)
                     z = (rssringoccs_ComplexDouble *)&proj_P;
 
                     /*  Use the Newton-Raphson function to compute a root.    */
-                    root = rssringoccs_Newton_Raphson_Complex(*z, f, f_prime,
-                                                              max_iters);
+                    root = rssringoccs_Newton_Raphson_ComplexDouble_Poly_Real(
+                        *z, coeffs, degree, max_iters
+                    );
 
                     /*  Find which root the final iteration is closest too.   */
                     min = rssringoccs_ComplexDouble_Abs(

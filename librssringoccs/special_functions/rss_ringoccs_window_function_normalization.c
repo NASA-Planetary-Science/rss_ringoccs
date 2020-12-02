@@ -33,7 +33,7 @@ type rssringoccs_##Type##_Window_Normalization(type *ker, long dim,            \
 
 _define_window_normalization(float, Float)
 _define_window_normalization(double, Double)
-_define_window_normalization(long double, LongDouble)
+_define_window_normalization(long double, LDouble)
 
 
 double
@@ -48,9 +48,9 @@ rssringoccs_Complex_Window_Normalization(rssringoccs_ComplexDouble *ker,
     rssringoccs_ComplexDouble T1 = rssringoccs_Complex_Zero;
 
     for (n=0; n<dim; ++n)
-        T1 = rssringoccs_ComplexDouble_Add(T1, ker[n]);
+        T1 = rssringoccs_CDouble_Add(T1, ker[n]);
 
-    abs_T1 = dx*rssringoccs_ComplexDouble_Abs(T1);
+    abs_T1 = dx*rssringoccs_CDouble_Abs(T1);
 
     /* Return the normalization factor.                                       */
     out = SQRT_2 * f_scale / abs_T1;

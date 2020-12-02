@@ -43,7 +43,7 @@
 
 /*  Single precision complex multiplication.                                  */
 rssringoccs_ComplexFloat
-rssringoccs_ComplexFloat_Multiply(rssringoccs_ComplexFloat z0,
+rssringoccs_CFloat_Multiply(rssringoccs_ComplexFloat z0,
                                   rssringoccs_ComplexFloat z1)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
@@ -53,10 +53,10 @@ rssringoccs_ComplexFloat_Multiply(rssringoccs_ComplexFloat z0,
     float prod_re, prod_im;
 
     /*  Extract the real and imaginary parts from the inputs.                 */
-    real0 = rssringoccs_ComplexFloat_Real_Part(z0);
-    real1 = rssringoccs_ComplexFloat_Real_Part(z1);
-    imag0 = rssringoccs_ComplexFloat_Imag_Part(z0);
-    imag1 = rssringoccs_ComplexFloat_Imag_Part(z1);
+    real0 = rssringoccs_CFloat_Real_Part(z0);
+    real1 = rssringoccs_CFloat_Real_Part(z1);
+    imag0 = rssringoccs_CFloat_Imag_Part(z0);
+    imag1 = rssringoccs_CFloat_Imag_Part(z1);
 
     /*  The product uses the distributive law in combination with the fact    *
      *  that i^2 = -1. This gives us the following formulas:                  */
@@ -64,13 +64,13 @@ rssringoccs_ComplexFloat_Multiply(rssringoccs_ComplexFloat z0,
     prod_im = real0*imag1 + imag0*real1;
 
     /*  Create the output from prod_re and prod_im and return.                */
-    prod = rssringoccs_ComplexFloat_Rect(prod_re, prod_im);
+    prod = rssringoccs_CFloat_Rect(prod_re, prod_im);
     return prod;
 }
 
 /*  Double precision complex multiplication.                                  */
 rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Multiply(rssringoccs_ComplexDouble z0,
+rssringoccs_CDouble_Multiply(rssringoccs_ComplexDouble z0,
                                    rssringoccs_ComplexDouble z1)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
@@ -80,10 +80,10 @@ rssringoccs_ComplexDouble_Multiply(rssringoccs_ComplexDouble z0,
     double prod_re, prod_im;
 
     /*  Extract the real and imaginary parts from the inputs.                 */
-    real0 = rssringoccs_ComplexDouble_Real_Part(z0);
-    real1 = rssringoccs_ComplexDouble_Real_Part(z1);
-    imag0 = rssringoccs_ComplexDouble_Imag_Part(z0);
-    imag1 = rssringoccs_ComplexDouble_Imag_Part(z1);
+    real0 = rssringoccs_CDouble_Real_Part(z0);
+    real1 = rssringoccs_CDouble_Real_Part(z1);
+    imag0 = rssringoccs_CDouble_Imag_Part(z0);
+    imag1 = rssringoccs_CDouble_Imag_Part(z1);
 
     /*  The product uses the distributive law in combination with the fact    *
      *  that i^2 = -1. This gives us the following formulas:                  */
@@ -91,13 +91,13 @@ rssringoccs_ComplexDouble_Multiply(rssringoccs_ComplexDouble z0,
     prod_im = real0*imag1 + imag0*real1;
 
     /*  Create the output from prod_re and prod_im and return.                */
-    prod = rssringoccs_ComplexDouble_Rect(prod_re, prod_im);
+    prod = rssringoccs_CDouble_Rect(prod_re, prod_im);
     return prod;
 }
 
 /*  Long double precision complex multiplication.                             */
 rssringoccs_ComplexLongDouble
-rssringoccs_ComplexLongDouble_Multiply(rssringoccs_ComplexLongDouble z0,
+rssringoccs_CLDouble_Multiply(rssringoccs_ComplexLongDouble z0,
                                        rssringoccs_ComplexLongDouble z1)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
@@ -107,10 +107,10 @@ rssringoccs_ComplexLongDouble_Multiply(rssringoccs_ComplexLongDouble z0,
     long double prod_re, prod_im;
 
     /*  Extract the real and imaginary parts from the inputs.                 */
-    real0 = rssringoccs_ComplexLongDouble_Real_Part(z0);
-    real1 = rssringoccs_ComplexLongDouble_Real_Part(z1);
-    imag0 = rssringoccs_ComplexLongDouble_Imag_Part(z0);
-    imag1 = rssringoccs_ComplexLongDouble_Imag_Part(z1);
+    real0 = rssringoccs_CLDouble_Real_Part(z0);
+    real1 = rssringoccs_CLDouble_Real_Part(z1);
+    imag0 = rssringoccs_CLDouble_Imag_Part(z0);
+    imag1 = rssringoccs_CLDouble_Imag_Part(z1);
 
     /*  The product uses the distributive law in combination with the fact    *
      *  that i^2 = -1. This gives us the following formulas:                  */
@@ -118,24 +118,24 @@ rssringoccs_ComplexLongDouble_Multiply(rssringoccs_ComplexLongDouble z0,
     prod_im = real0*imag1 + imag0*real1;
 
     /*  Create the output from prod_re and prod_im and return.                */
-    prod = rssringoccs_ComplexLongDouble_Rect(prod_re, prod_im);
+    prod = rssringoccs_CLDouble_Rect(prod_re, prod_im);
     return prod;
 }
 
 /*  Double precision complex multiplication.                                  */
 rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Multiply_Real(double x, rssringoccs_ComplexDouble z)
+rssringoccs_CDouble_Multiply_Real(double x, rssringoccs_ComplexDouble z)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     rssringoccs_ComplexDouble prod;
     double real, imag;
 
     /*  Extract the real and imaginary parts from the inputs.                 */
-    real = rssringoccs_ComplexDouble_Real_Part(z);
-    imag = rssringoccs_ComplexDouble_Imag_Part(z);
+    real = rssringoccs_CDouble_Real_Part(z);
+    imag = rssringoccs_CDouble_Imag_Part(z);
 
     /*  Create the output from prod_re and prod_im and return.                */
-    prod = rssringoccs_ComplexDouble_Rect(x*real, x*imag);
+    prod = rssringoccs_CDouble_Rect(x*real, x*imag);
     return prod;
 }
 
@@ -146,54 +146,54 @@ rssringoccs_ComplexDouble_Multiply_Real(double x, rssringoccs_ComplexDouble z)
 
 /*  Single precision complex addition.                                        */
 rssringoccs_ComplexFloat
-rssringoccs_ComplexFloat_Multiply(rssringoccs_ComplexFloat z0,
+rssringoccs_CFloat_Multiply(rssringoccs_ComplexFloat z0,
                                   rssringoccs_ComplexFloat z1)
 {
     return z0 * z1;
 }
 
 rssringoccs_ComplexFloat
-rssringoccs_ComplexFloat_Multiply_Real(float x, rssringoccs_ComplexFloat z)
+rssringoccs_CFloat_Multiply_Real(float x, rssringoccs_ComplexFloat z)
 {
     return x * z;
 }
 
 rssringoccs_ComplexFloat
-rssringoccs_ComplexFloat_Multiply_Imag(float y, rssringoccs_ComplexFloat z)
+rssringoccs_CFloat_Multiply_Imag(float y, rssringoccs_ComplexFloat z)
 {
     return _Complex_I*y * z;
 }
 
 /*  Double precision complex addition.                                        */
 rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Multiply(rssringoccs_ComplexDouble z0,
+rssringoccs_CDouble_Multiply(rssringoccs_ComplexDouble z0,
                                    rssringoccs_ComplexDouble z1)
 {
     return z0 * z1;
 }
 
 rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Multiply_Real(double x, rssringoccs_ComplexDouble z)
+rssringoccs_CDouble_Multiply_Real(double x, rssringoccs_ComplexDouble z)
 {
     return x * z;
 }
 
 rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Multiply_Imag(double y, rssringoccs_ComplexDouble z)
+rssringoccs_CDouble_Multiply_Imag(double y, rssringoccs_ComplexDouble z)
 {
     return _Complex_I*y * z;
 }
 
 /*  Long double precision complex addition.                                   */
 rssringoccs_ComplexLongDouble
-rssringoccs_ComplexLongDouble_Multiply(rssringoccs_ComplexLongDouble z0,
+rssringoccs_CLDouble_Multiply(rssringoccs_ComplexLongDouble z0,
                                        rssringoccs_ComplexLongDouble z1)
 {
     return z0 * z1;
 }
 
 rssringoccs_ComplexLongDouble
-rssringoccs_ComplexLongDouble_Subtract_Real(long double x,
+rssringoccs_CLDouble_Subtract_Real(long double x,
                                             rssringoccs_ComplexLongDouble z)
 {
     return x * z;
@@ -201,7 +201,7 @@ rssringoccs_ComplexLongDouble_Subtract_Real(long double x,
 
 
 rssringoccs_ComplexLongDouble
-rssringoccs_ComplexLongDouble_Subtract_Imag(long double y,
+rssringoccs_CLDouble_Subtract_Imag(long double y,
                                             rssringoccs_ComplexLongDouble z)
 {
     return _Complex_I*y * z;

@@ -49,57 +49,57 @@
 
 /*  Single precision complex conjugate function (conjf equivalent).           */
 rssringoccs_ComplexFloat
-rssringoccs_ComplexFloat_Conjugate(rssringoccs_ComplexFloat z)
+rssringoccs_CFloat_Conjugate(rssringoccs_ComplexFloat z)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     float real, imag;
     rssringoccs_ComplexFloat conj_z;
 
     /*  Extract the values from the complex number.                           */
-    real = rssringoccs_ComplexFloat_Real_Part(z);
-    imag = rssringoccs_ComplexFloat_Imag_Part(z);
+    real = rssringoccs_CFloat_Real_Part(z);
+    imag = rssringoccs_CFloat_Imag_Part(z);
 
     /*  The complex conjugate of x+iy is just x-iy, compute this.             */
-    conj_z = rssringoccs_ComplexFloat_Rect(real, -imag);
+    conj_z = rssringoccs_CFloat_Rect(real, -imag);
     return conj_z;
 }
-/*  End of rssringoccs_ComplexFloat_Conjugate.                                */
+/*  End of rssringoccs_CFloat_Conjugate.                                */
 
 /*  Double precision complex conjugate function (conj equivalent).            */
 rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Conjugate(rssringoccs_ComplexDouble z)
+rssringoccs_CDouble_Conjugate(rssringoccs_ComplexDouble z)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     double real, imag;
     rssringoccs_ComplexDouble conj_z;
 
     /*  Extract the values from the complex number.                           */
-    real = rssringoccs_ComplexDouble_Real_Part(z);
-    imag = rssringoccs_ComplexDouble_Imag_Part(z);
+    real = rssringoccs_CDouble_Real_Part(z);
+    imag = rssringoccs_CDouble_Imag_Part(z);
 
     /*  The complex conjugate of x+iy is just x-iy, compute this.             */
-    conj_z = rssringoccs_ComplexDouble_Rect(real, -imag);
+    conj_z = rssringoccs_CDouble_Rect(real, -imag);
     return conj_z;
 }
-/*  End of rssringoccs_ComplexDouble_Conjugate.                               */
+/*  End of rssringoccs_CDouble_Conjugate.                               */
 
 /*  Long double precision complex conjugate function (conjl equivalent).      */
 rssringoccs_ComplexLongDouble
-rssringoccs_ComplexLongDouble_Conjugate(rssringoccs_ComplexLongDouble z)
+rssringoccs_CLDouble_Conjugate(rssringoccs_ComplexLongDouble z)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     long double real, imag;
     rssringoccs_ComplexLongDouble conj_z;
 
     /*  Extract the values from the complex number.                           */
-    real = rssringoccs_ComplexLongDouble_Real_Part(z);
-    imag = rssringoccs_ComplexLongDouble_Imag_Part(z);
+    real = rssringoccs_CLDouble_Real_Part(z);
+    imag = rssringoccs_CLDouble_Imag_Part(z);
 
     /*  The complex conjugate of x+iy is just x-iy, compute this.             */
-    conj_z = rssringoccs_ComplexLongDouble_Rect(real, -imag);
+    conj_z = rssringoccs_CLDouble_Rect(real, -imag);
     return conj_z;
 }
-/*  End of rssringoccs_ComplexLongDouble_Conjugate.                           */
+/*  End of rssringoccs_CLDouble_Conjugate.                           */
 
 #else
 /*  Else statement for #if _RSS_RINGOCCS_USING_COMPLEX_H_ == 0.               */
@@ -108,26 +108,26 @@ rssringoccs_ComplexLongDouble_Conjugate(rssringoccs_ComplexLongDouble z)
  *  functions found in the library.                                           */
 
 /*  Single precision complex conjugate.                                       */
-float rssringoccs_ComplexFloat_Conjugate(rssringoccs_ComplexFloat z)
+float rssringoccs_CFloat_Conjugate(rssringoccs_ComplexFloat z)
 {
     return conjf(z);
 }
-/*  End of rssringoccs_ComplexFloat_Conjugate.                                */
+/*  End of rssringoccs_CFloat_Conjugate.                                */
 
 /*  Double precision complex conjugate.                                       */
-double rssringoccs_ComplexDouble_Conjugate(rssringoccs_ComplexDouble z)
+double rssringoccs_CDouble_Conjugate(rssringoccs_ComplexDouble z)
 {
     return conj(z);
 }
-/*  End of rssringoccs_ComplexDouble_Conjugate.                               */
+/*  End of rssringoccs_CDouble_Conjugate.                               */
 
 /*  Long double precision complex conjugate.                                  */
 long double
-rssringoccs_ComplexLongDouble_Conjugate(rssringoccs_ComplexLongDouble z)
+rssringoccs_CLDouble_Conjugate(rssringoccs_ComplexLongDouble z)
 {
     return conjl(z);
 }
-/*  End of rssringoccs_ComplexLongDouble_Conjugate.                           */
+/*  End of rssringoccs_CLDouble_Conjugate.                           */
 
 #endif
 /*  End of #if _RSS_RINGOCCS_USING_COMPLEX_H_ == 0.                           */

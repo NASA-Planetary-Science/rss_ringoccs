@@ -18,7 +18,7 @@ float rssringoccs_Float_Sin(float x)
     return sin((double)x);
 }
 
-long double rssringoccs_LongDouble_Sin(long double x)
+long double rssringoccs_LDouble_Sin(long double x)
 {
     return sin((double)x);
 }
@@ -33,7 +33,7 @@ float rssringoccs_Float_Sin(float x)
     return sinf(x);
 }
 
-long double rssringoccs_LongDouble_Sin(long double x)
+long double rssringoccs_LDouble_Sin(long double x)
 {
     return sinl(x);
 }

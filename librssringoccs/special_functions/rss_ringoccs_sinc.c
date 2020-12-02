@@ -19,4 +19,4 @@ type rssringoccs_##Type##_Sinc(type x)                                         \
 
 _define_sinc(float, Float)
 _define_sinc(double, Double)
-_define_sinc(long double, LongDouble)
+_define_sinc(long double, LDouble)

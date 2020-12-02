@@ -37,7 +37,7 @@
 #define RSSRINGOCCSGenerateExternFunctions(FuncName)                           \
 extern float rssringoccs_Float_##FuncName(float x);                            \
 extern double rssringoccs_Double_##FuncName(double x);                         \
-extern long double  rssringoccs_LongDouble_##FuncName(long double x);          \
+extern long double  rssringoccs_LDouble_##FuncName(long double x);          \
 extern rssringoccs_ComplexDouble                                               \
 rssringoccs_Complex_##FuncName(rssringoccs_ComplexDouble x);
 
@@ -45,13 +45,13 @@ rssringoccs_Complex_##FuncName(rssringoccs_ComplexDouble x);
 extern float rssringoccs_Float_##FuncName(float x, float W);                   \
 extern double rssringoccs_Double_##FuncName(double x, double W);               \
 extern long double                                                             \
-rssringoccs_LongDouble_##FuncName(long double x, long double W);
+rssringoccs_LDouble_##FuncName(long double x, long double W);
 
 #define RSSRINGOCCSThreeVarWindowFuncExtern(FuncName)                          \
 extern float  rssringoccs_Float_##FuncName(float x, float W, float alpha);     \
 extern double rssringoccs_Double_##FuncName(double x, double W, double alpha); \
 extern long double                                                             \
-rssringoccs_LongDouble_##FuncName(long double x, long double W,                \
+rssringoccs_LDouble_##FuncName(long double x, long double W,                \
                                   long double alpha);
 
 /*  Generate extern function names for all of the math functions.             */
@@ -66,7 +66,7 @@ RSSRINGOCCSGenerateExternFunctions(Fresnel_Sin)
 
 extern float rssringoccs_Float_Resolution_Inverse(float x);
 extern double rssringoccs_Double_Resolution_Inverse(double x);
-extern long double rssringoccs_LongDouble_Resolution_Inverse(long double x);
+extern long double rssringoccs_LDouble_Resolution_Inverse(long double x);
 
 extern rssringoccs_ComplexDouble rssringoccs_Complex_Fresnel_Integral(double x);
 
@@ -116,7 +116,7 @@ extern double
 Fresnel_Scale_Double(double lambda, double d, double phi, double b);
 
 extern long double
-Fresnel_Scale_LongDouble(long double lambda, long double d,
+Fresnel_Scale_LDouble(long double lambda, long double d,
                          long double phi, long double b);
 
 extern float
@@ -126,7 +126,7 @@ extern double
 rssringoccs_Max_Double(double *arr, long n_elements);
 
 extern long double
-rssringoccs_Max_LongDouble(long double *arr, long n_elements);
+rssringoccs_Max_LDouble(long double *arr, long n_elements);
 
 extern char
 rssringoccs_Max_Char(char *arr, long n_elements);
@@ -160,7 +160,7 @@ extern double
 rssringoccs_Min_Double(double *arr, long n_elements);
 
 extern long double
-rssringoccs_Min_LongDouble(long double *arr, long n_elements);
+rssringoccs_Min_LDouble(long double *arr, long n_elements);
 
 extern char
 rssringoccs_Min_Char(char *arr, long n_elements);
@@ -194,7 +194,7 @@ extern double
 rssringoccs_Normeq_Double(double *w_func, long n_elements);
 
 extern long double
-rssringoccs_Normeq_LongDouble(long double *w_func, long n_elements);
+rssringoccs_Normeq_LDouble(long double *w_func, long n_elements);
 
 extern double
 rssringoccs_Normeq_Short(short *w_func, long n_elements);
@@ -216,7 +216,7 @@ rssringoccs_Double_Window_Normalization(double *ker, long dim,
                                         double dx, double f_scale);
 
 extern long double
-rssringoccs_LongDouble_Window_Normalization(long double *ker,
+rssringoccs_LDouble_Window_Normalization(long double *ker,
                                             long dim, long double dx,
                                             long double f_scale);
 
@@ -266,7 +266,7 @@ rssringoccs_Where_##FuncName##_Double(double *data, long dim,                  \
                                       double threshold);                       \
                                                                                \
 extern long **                                                                 \
-rssringoccs_Where_##FuncName##_LongDouble(long double *data, long dim,         \
+rssringoccs_Where_##FuncName##_LDouble(long double *data, long dim,         \
                                           long double threshold);
 
 WhereExternFuncs(Lesser)
@@ -313,7 +313,7 @@ rssringoccs_Where_LesserGreater_Double(double *data, long dim,
                                        double lower, double upper);
 
 extern long **
-rssringoccs_Where_LesserGreater_LongDouble(long double *data, long dim,
+rssringoccs_Where_LesserGreater_LDouble(long double *data, long dim,
                                            long double lower,
                                            long double upper);
 

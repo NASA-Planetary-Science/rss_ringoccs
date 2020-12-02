@@ -40,7 +40,7 @@
 
 /*  Create a double precision complex number from its polar coordinates.      */
 rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Polar(double r, double theta)
+rssringoccs_CDouble_Polar(double r, double theta)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     rssringoccs_ComplexDouble z;
@@ -50,8 +50,8 @@ rssringoccs_ComplexDouble_Polar(double r, double theta)
     real = r * rssringoccs_Double_Cos(theta);
     imag = r * rssringoccs_Double_Sin(theta);
 
-    /*  Use rssringoccs_ComplexDouble_Rect to compute and return.             */
-    z = rssringoccs_ComplexDouble_Rect(real, imag);
+    /*  Use rssringoccs_CDouble_Rect to compute and return.             */
+    z = rssringoccs_CDouble_Rect(real, imag);
     return z;
 }
-/*  End of rssringoccs_ComplexDouble_Polar.                                   */
+/*  End of rssringoccs_CDouble_Polar.                                   */

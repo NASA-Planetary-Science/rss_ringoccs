@@ -18,7 +18,7 @@ float rssringoccs_Float_Arctan2(float y, float x)
     return atan2((double)y, (double)x);
 }
 
-long double rssringoccs_LongDouble_Arctan2(long double y, long double x)
+long double rssringoccs_LDouble_Arctan2(long double y, long double x)
 {
     return atan2((double)y, (double)x);
 }
@@ -33,7 +33,7 @@ float rssringoccs_Float_Arctan2(float y, float x)
     return atan2f(y, x);
 }
 
-long double rssringoccs_LongDouble_Arctan2(long double y, long double x)
+long double rssringoccs_LDouble_Arctan2(long double y, long double x)
 {
     return atan2l(y, x);
 }

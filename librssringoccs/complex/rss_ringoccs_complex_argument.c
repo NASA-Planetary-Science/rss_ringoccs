@@ -48,53 +48,53 @@
 #if _RSS_RINGOCCS_USING_COMPLEX_H_ == 0
 
 /*  Single precision complex argument function (cargf equivalent).            */
-float rssringoccs_ComplexFloat_Argument(rssringoccs_ComplexFloat z)
+float rssringoccs_CFloat_Argument(rssringoccs_ComplexFloat z)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     float real, imag, theta;
 
     /*  Extract the real and imaginary parts from the input complex number.   */
-    real = rssringoccs_ComplexFloat_Real_Part(z);
-    imag = rssringoccs_ComplexFloat_Imag_Part(z);
+    real = rssringoccs_CFloat_Real_Part(z);
+    imag = rssringoccs_CFloat_Imag_Part(z);
 
     /*  Compute the argument using arctan and return.                         */
     theta = rssringoccs_Float_Arctan2(imag, real);
     return theta;
 }
-/*  End of rssringoccs_ComplexFloat_Argument.                                 */
+/*  End of rssringoccs_CFloat_Argument.                                 */
 
 /*  Double precision complex argument function (carg equivalent).             */
-double rssringoccs_ComplexDouble_Argument(rssringoccs_ComplexDouble z)
+double rssringoccs_CDouble_Argument(rssringoccs_ComplexDouble z)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     double real, imag, theta;
 
     /*  Extract the real and imaginary parts from the input complex number.   */
-    real = rssringoccs_ComplexDouble_Real_Part(z);
-    imag = rssringoccs_ComplexDouble_Imag_Part(z);
+    real = rssringoccs_CDouble_Real_Part(z);
+    imag = rssringoccs_CDouble_Imag_Part(z);
 
     /*  Compute the argument using arctan and return.                         */
     theta = rssringoccs_Double_Arctan2(imag, real);
     return theta;
 }
-/*  End of rssringoccs_ComplexDouble_Argument.                                */
+/*  End of rssringoccs_CDouble_Argument.                                */
 
 /*  Long double precision complex argument function (cargl equivalent).       */
 long double
-rssringoccs_ComplexLongDouble_Argument(rssringoccs_ComplexLongDouble z)
+rssringoccs_CLDouble_Argument(rssringoccs_ComplexLongDouble z)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     long double real, imag, theta;
 
     /*  Extract the real and imaginary parts from the input complex number.   */
-    real = rssringoccs_ComplexLongDouble_Real_Part(z);
-    imag = rssringoccs_ComplexLongDouble_Imag_Part(z);
+    real = rssringoccs_CLDouble_Real_Part(z);
+    imag = rssringoccs_CLDouble_Imag_Part(z);
 
     /*  Compute the argument using arctan and return.                         */
-    theta = rssringoccs_LongDouble_Arctan2(imag, real);
+    theta = rssringoccs_LDouble_Arctan2(imag, real);
     return theta;
 }
-/*  End of rssringoccs_ComplexLongDouble_Argument.                            */
+/*  End of rssringoccs_CLDouble_Argument.                            */
 
 #else
 /*  Else statement for #if _RSS_RINGOCCS_USING_COMPLEX_H_ == 0.               */
@@ -103,26 +103,26 @@ rssringoccs_ComplexLongDouble_Argument(rssringoccs_ComplexLongDouble z)
  *  functions found in the library.                                           */
 
 /*  Single precision complex argument function.                               */
-float rssringoccs_ComplexFloat_Argument(rssringoccs_ComplexFloat z)
+float rssringoccs_CFloat_Argument(rssringoccs_ComplexFloat z)
 {
     return cargf(z);
 }
-/*  End of rssringoccs_ComplexFloat_Argument.                                 */
+/*  End of rssringoccs_CFloat_Argument.                                 */
 
 /*  Double precision complex argument function.                               */
-double rssringoccs_ComplexDouble_Argument(rssringoccs_ComplexDouble z)
+double rssringoccs_CDouble_Argument(rssringoccs_ComplexDouble z)
 {
     return carg(z);
 }
-/*  End of rssringoccs_ComplexDouble_Argument.                                */
+/*  End of rssringoccs_CDouble_Argument.                                */
 
 /*  Long double precision complex argument function.                          */
 long double
-rssringoccs_ComplexLongDouble_Argument(rssringoccs_ComplexLongDouble z)
+rssringoccs_CLDouble_Argument(rssringoccs_ComplexLongDouble z)
 {
     return cargl(z);
 }
-/*  End of rssringoccs_ComplexLongDouble_Argument.                            */
+/*  End of rssringoccs_CLDouble_Argument.                            */
 
 #endif
 /*  End of #if _RSS_RINGOCCS_USING_COMPLEX_H_ == 0.                           */

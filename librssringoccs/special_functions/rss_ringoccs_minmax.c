@@ -17,7 +17,7 @@ type rssringoccs_Min_##Type(type *arr, long n_elements)                        \
 
 MinFuncFromType(float, Float)
 MinFuncFromType(double, Double)
-MinFuncFromType(long double, LongDouble)
+MinFuncFromType(long double, LDouble)
 MinFuncFromType(char, Char)
 MinFuncFromType(unsigned char, UChar)
 MinFuncFromType(short, Short)
@@ -43,7 +43,7 @@ type rssringoccs_Max_##Type(type *arr, long n_elements)                        \
 
 MaxFuncFromType(float, Float)
 MaxFuncFromType(double, Double)
-MaxFuncFromType(long double, LongDouble)
+MaxFuncFromType(long double, LDouble)
 MaxFuncFromType(char, Char)
 MaxFuncFromType(unsigned char, UChar)
 MaxFuncFromType(short, Short)

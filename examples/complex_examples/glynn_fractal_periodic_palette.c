@@ -25,7 +25,7 @@ int main(void)
     int maxIterations = 256;
     rssringoccs_ComplexDouble z, e, mu;
 
-    unsigned int size = 1024;
+    unsigned int size = 2*1024;
     double red, green, blue;
     unsigned char r, g, b;
 
@@ -88,7 +88,6 @@ int main(void)
 
             rssringoccs_Color(r, g, b, fp);
         }
-        printf("%d\n", y);
     }
     return 0;
 }

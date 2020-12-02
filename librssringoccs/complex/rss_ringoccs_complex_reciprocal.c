@@ -16,49 +16,55 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
- *            rss_ringoccs_right_straightedge_fresnel_diffraction             *
+ *                        rss_ringoccs_complex_add                            *
  ******************************************************************************
  *  Purpose:                                                                  *
- *      Contains the source code for the Fresnel diffraction of a right       *
- *      straightedge.                                                         *
+ *      Contains the source code for complex addition.                        *
  ******************************************************************************
  *                               DEPENDENCIES                                 *
  ******************************************************************************
- *  1.) rss_ringoccs_math.h:                                                  *
- *          This file provides compatibility between the two standard math.h  *
- *          header files (C89 vs C99 math.h). If C99 math.h exists, it simply *
- *          provides aliases for the functions, and if C89 math.h is used     *
- *          it defines the functions missing in the earlier version.          *
- *  2.) rss_ringoccs_complex.h:                                               *
- *          Header file where rssringoccs_ComplexDouble is defined, as well   *
- *          as the prototype for rssringoccs_Complex_Cos.                     *
+ *  1.) rss_ringoccs_complex.h:                                               *
+ *          Header where complex types and function prototypes are defined.   *
  ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
- *  Date:       November 27, 2020                                             *
- ******************************************************************************
- *                             Revision History                               *
- ******************************************************************************
- *  2020/11/27 (Ryan Maguire):                                                *
- *      Frozen for v1.3.                                                      *
+ *  Date:       November 30, 2020                                             *
  ******************************************************************************/
 
-/*  Header file which contains aliases for the function in the standard C     *
- *  library math.h. This allows compatibility of C89 and C99 math.h headers.  */
-#include <rss_ringoccs/include/rss_ringoccs_math.h>
-
-/*  Definition of rssringoccs_ComplexDouble found here.                       */
+/*  Where the prototypes are declared and where complex types are defined.    */
 #include <rss_ringoccs/include/rss_ringoccs_complex.h>
 
-/*  Header file containing the prototypes for the functions.                  */
-#include <rss_ringoccs/include/rss_ringoccs_diffraction.h>
+/*  If _RSS_RINGOCCS_USING_COMPLEX_H_ is set to zero, then C99 complex.h has  *
+ *  not been included and we must define our own algorithms.                  */
+#if _RSS_RINGOCCS_USING_COMPLEX_H_ == 0
 
+/*  In C99, since _Complex is a built-in data type, given double _Complex z1  *
+ *  and double _Complex z2, you can just do z1 * z2. Structs cannot be        *
+ *  multiplied so we need a function for computing this.                      */
+
+/*  Function for computing the reciprocal (or inverse) of a complex number.   */
 rssringoccs_ComplexDouble
-rssringoccs_Complex_Right_Straightedge_Diffraction(double x, double edge,
-                                                   double F)
+rssringoccs_ComplexDouble_Reciprocal(rssringoccs_ComplexDouble z)
 {
-    rssringoccs_ComplexDouble left_edge, T_hat;
+    /*  Declare necessary variables. C89 requires declarations at the top.    */
+    rssringoccs_ComplexDouble conj_z, rcpr_z;
+    double rcp_abs_z_sq;
 
-    left_edge = rssringoccs_Complex_Left_Straightedge_Diffraction(x, edge, F);
-    T_hat = rssringoccs_ComplexDouble_Subtract_Real(1.0, left_edge);
-    return T_hat;
+    /*  Compute the conjugate of z and its absolute value.                    */
+    conj_z = rssringoccs_ComplexDouble_Conjugate(z);
+    rcp_abs_z_sq = rssringoccs_ComplexDouble_Abs_Squared(z);
+
+    /*  The inverse of z is conj_z / abs_z^2, so return this.                 */
+    rcpr_z = rssringoccs_ComplexDouble_Multiply_Real(rcp_abs_z_sq, conj_z);
+    return rcpr_z;
 }
+
+#else
+
+/*  Function for computing 1/z for non-zero z.                                */
+rssringoccs_ComplexDouble
+rssringoccs_ComplexDouble_Reciprocal(rssringoccs_ComplexDouble z)
+{
+    return 1.0/z;
+}
+
+#endif

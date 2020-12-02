@@ -48,16 +48,45 @@
 /*  Where the prototypes are declared and where complex types are defined.    */
 #include <rss_ringoccs/include/rss_ringoccs_complex.h>
 
-/*  Compute the cosine of a complex number.                                   */
-rssringoccs_ComplexDouble rssringoccs_Complex_Cos(rssringoccs_ComplexDouble z)
+/*  If _RSS_RINGOCCS_USING_COMPLEX_H_ is set to zero, then C99 complex.h has  *
+ *  not been included and we must define our own algorithms.                  */
+#if _RSS_RINGOCCS_USING_COMPLEX_H_ == 0
+
+/*  Single precision complex cosine.                                          */
+rssringoccs_ComplexFloat
+rssringoccs_ComplexFloat_Cos(rssringoccs_ComplexFloat z)
+{
+    /*  Declare necessary variables. C89 requires declarations at the top.    */
+    float x, y, real, imag;
+    rssringoccs_ComplexFloat cos_z;
+
+    /*  Extract the real and imaginary parts from z.                          */
+    x = rssringoccs_ComplexFloat_Real_Part(z);
+    y = rssringoccs_ComplexFloat_Imag_Part(z);
+
+    /*  The real part is cos(x)cosh(y).                                       */
+    real = rssringoccs_Float_Cos(x) * rssringoccs_Float_Cosh(y);
+
+    /*  And the imaginary part is -sin(x)sinh(y).                             */
+    imag = -rssringoccs_Float_Sin(x) * rssringoccs_Float_Sinh(y);
+
+    /*  Use rssringoccs_Complex_Rect to create the output and return.         */
+    cos_z = rssringoccs_ComplexFloat_Rect(real, imag);
+    return cos_z;
+}
+/*  End of rssringoccs_ComplexFloat_Cos.                                      */
+
+/*  Double precision complex cosine.                                          */
+rssringoccs_ComplexDouble
+rssringoccs_ComplexDouble_Cos(rssringoccs_ComplexDouble z)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     double x, y, real, imag;
     rssringoccs_ComplexDouble cos_z;
 
     /*  Extract the real and imaginary parts from z.                          */
-    x = rssringoccs_Complex_Real_Part(z);
-    y = rssringoccs_Complex_Imag_Part(z);
+    x = rssringoccs_ComplexDouble_Real_Part(z);
+    y = rssringoccs_ComplexDouble_Imag_Part(z);
 
     /*  The real part is cos(x)cosh(y).                                       */
     real = rssringoccs_Double_Cos(x) * rssringoccs_Double_Cosh(y);
@@ -66,6 +95,64 @@ rssringoccs_ComplexDouble rssringoccs_Complex_Cos(rssringoccs_ComplexDouble z)
     imag = -rssringoccs_Double_Sin(x) * rssringoccs_Double_Sinh(y);
 
     /*  Use rssringoccs_Complex_Rect to create the output and return.         */
-    cos_z = rssringoccs_Complex_Rect(real, imag);
+    cos_z = rssringoccs_ComplexDouble_Rect(real, imag);
     return cos_z;
 }
+/*  End of rssringoccs_ComplexDouble_Cos.                                     */
+
+/*  Long double precision complex cosine.                                     */
+rssringoccs_ComplexLongDouble
+rssringoccs_ComplexLongDouble_Cos(rssringoccs_ComplexLongDouble z)
+{
+    /*  Declare necessary variables. C89 requires declarations at the top.    */
+    long double x, y, real, imag;
+    rssringoccs_ComplexLongDouble cos_z;
+
+    /*  Extract the real and imaginary parts from z.                          */
+    x = rssringoccs_ComplexLongDouble_Real_Part(z);
+    y = rssringoccs_ComplexLongDouble_Imag_Part(z);
+
+    /*  The real part is cos(x)cosh(y).                                       */
+    real = rssringoccs_LongDouble_Cos(x) * rssringoccs_LongDouble_Cosh(y);
+
+    /*  And the imaginary part is -sin(x)sinh(y).                             */
+    imag = -rssringoccs_LongDouble_Sin(x) * rssringoccs_LongDouble_Sinh(y);
+
+    /*  Use rssringoccs_Complex_Rect to create the output and return.         */
+    cos_z = rssringoccs_ComplexLongDouble_Rect(real, imag);
+    return cos_z;
+}
+/*  End of rssringoccs_ComplexLongDouble_Cos.                                 */
+
+#else
+/*  Else statement for #if _RSS_RINGOCCS_USING_COMPLEX_H_ == 0.               */
+
+/*  If we get here we have complex.h support so we'll just alias the          *
+ *  functions found in the library.                                           */
+
+/*  Single precision complex cosine.                                          */
+rssringoccs_ComplexFloat
+rssringoccs_ComplexFloat_Cos(rssringoccs_ComplexFloat z)
+{
+    return ccosf(z);
+}
+/*  End of rssringoccs_ComplexLongDouble_Cos.                                 */
+
+/*  Double precision complex cosine.                                          */
+rssringoccs_ComplexDouble
+rssringoccs_ComplexDouble_Cos(rssringoccs_ComplexDouble z)
+{
+    return ccos(z);
+}
+/*  End of rssringoccs_ComplexDouble_Cos.                                     */
+
+/*  Long double precision complex cosine.                                     */
+rssringoccs_ComplexLongDouble
+rssringoccs_ComplexLongDouble_Cos(rssringoccs_ComplexLongDouble z)
+{
+    return ccosl(z);
+}
+/*  End of rssringoccs_ComplexLongDouble_Cos.                                 */
+
+#endif
+/*  End of #if _RSS_RINGOCCS_USING_COMPLEX_H_ == 0.                           */

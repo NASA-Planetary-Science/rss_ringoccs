@@ -19,9 +19,8 @@
  *                           rss_ringoccs_complex                             *
  ******************************************************************************
  *  Purpose:                                                                  *
- *      Define rssringoccs_ComplexDouble data type and provide various        *
- *      functions for creating complex variables and performing basic         *
- *      arithmetic. If complex.h is available, we simply alias the functions. *
+ *      Define complex data types and provide various functions for           *
+ *      creating complex variables and performing complex arithmetic.         *
  ******************************************************************************
  *                               DEPENDENCIES                                 *
  *  1.) complex.h (if your compiler supports C99. None otherwise):            *
@@ -30,7 +29,8 @@
  *                                 WARNINGS                                   *
  *  1.) If your compiler supports C99 complex.h and you would rather use the  *
  *      built-in complex data type and complex functions with rss_ringoccs,   *
- *      you must uncomment #define __RSS_RINGOCCS_HAS_COMPLEX_H_.             *
+ *      you must build rss_ringoccs with such a configuration beforehand.     *
+ *      See the config script config_librssringoccs.sh for details.           *
  ******************************************************************************
  *                            A NOTE ON COMMENTS                              *
  *  It is anticipated that many users of this code will have experience in    *
@@ -38,26 +38,29 @@
  *  much as possible. Vagueness or unclear code should be reported to:        *
  *  https://github.com/NASA-Planetary-Science/rss_ringoccs/issues             *
  ******************************************************************************
+ *                                EXAMPLES                                    *
+ *  Examples of all of the functions can be found in:                         *
+ *      rss_ringoccs/examples/complex_examples/                               *
+ ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
  *  Date:       September 13, 2020                                            *
+ ******************************************************************************
+ *                             Revision History                               *
+ ******************************************************************************
+ *  2020/11/30 (Ryan Maguire):                                                *
+ *      Added float and long double precision complex types.                  *
  ******************************************************************************/
 
 /*  Include guard to prevent including this file twice.                       */
-#ifndef RSS_RINGOCCS_COMPLEX_H
-#define RSS_RINGOCCS_COMPLEX_H
+#ifndef _RSS_RINGOCCS_COMPLEX_H_
+#define _RSS_RINGOCCS_COMPLEX_H_
 
-/*  Booleans defined here. Needed for the FFT routines.                       */
+/*  Booleans defined here. Needed for the FFT and compare routines.           */
 #include <rss_ringoccs/include/rss_ringoccs_bool.h>
 
-/*  This is commented out since rss_ringoccs does not assume C99 compliance.  */
-
-/*
- * #define __RSS_RINGOCCS_HAS_COMPLEX_H_
- */
-
 /*  C99 requires complex.h, but C11 makes it optional. If you have C99        *
- *  support and would like to use built-in complex numbers, uncomment out     *
- *  #define __RSS_RINGOCCS_HAS_COMPLEX_H_ above, then rebuild rss_ringoccs.   *
+ *  support and would like to use built-in complex numbers, change the setup  *
+ *  script config_librssringoccs.sh. See that file for details.               *
  *  When tested against something simple like the complex exponential         *
  *  function, the cexp provided by glibc (GNU C library) for complex.h is     *
  *  slightly faster than rss_ringoccs. This was tested on an array of one     *
@@ -67,24 +70,21 @@
  *      C99 Time: 0.022602                                                    *
  *  This is not to say one can't achieve better times with C89 compliant code.*
  *  rss_ringoccs uses simple, but effective algorithms, not necessary the     *
- *  fastest. Still, ~0.027 seconds for a very large array isn't bad.          *
- *  Note, the two times computed above use rss_ringoccs with C89 support and  *
- *  rss_ringoccs with C99 support, respectively. rss_ringoccs simply aliases  *
- *  cexp as rssringoccs_Complex_Exp, so they compute the exact same thing,    *
- *  whereas C89 rss_ringoccs has an algorithm implemented for the complex     *
- *  exponential. The code was compiled using gcc 10 with -O3 optimization.    *
- *  For 10 million points the times were:                                     *
+ *  fastest. Still, ~0.027 seconds for a very large array isn't bad. The code *
+ *  was compiled using gcc 10 with -O3 optimization. For 10 million points    *
+ *  the times were:                                                           *
  *      C89 Time: 0.267769                                                    *
  *      C99 Time: 0.231087                                                    *
  *  Which seems linear.                                                       */
 
-/*  We'll only use C99 if the user requested (defined the                     *
- *  __RSS_RINGOCCS_HAS_COMPLEX_H_ macro), and the compiler supports it. The   *
- *  __STDC_VERSION__ should be, at least, C99 capable, and the                *
- *  __STDC_NO_COMPLEX__ macro should not be defined.                          */
-#if defined(__RSS_RINGOCCS_HAS_COMPLEX_H_) &&                                  \
-    !defined(__STDC_NO_COMPLEX__)          &&                                  \
-    __STDC_VERSION__ >= 199901L
+/*  We'll only use C99 if the compiler supports it. The __STDC_VERSION__      *
+ *  should be 199901L or higher and the __STDC_NO_COMPLEX__ macro should not  *
+ *  be defined. By default the -std=c89 and -ansi flags are enabled for the   *
+ *  compiler in the config_librssringoccs.sh script. This will set            *
+ *  __STDC_VERSION__ to its C89 value. Remove -ansi and change -std=c89 to    *
+ *  -std=c99 if you want complex.h support. If you are using a compiler other *
+ *  than clang or gcc, see it's documentation for details.                    */
+#if !defined(__STDC_NO_COMPLEX__) && __STDC_VERSION__ >= 199901L
 
 /*  The various .c files will check if this is 1 or 0 to compile the right    *
  *  code, depending on if you have complex.h or not.                          */
@@ -97,6 +97,10 @@
 /*  You have complex.h support, so we'll just typedef double _Complex.        */
 typedef double _Complex rssringoccs_ComplexDouble;
 
+/*  Typedef single and long double precision equivalents.                     */
+typedef float _Complex rssringoccs_ComplexFloat;
+typedef long double _Complex rssringoccs_ComplexLongDouble;
+
 #else
 /*  If we get here, your compiler does not support complex.h, or you have     *
  *  chosen to use C89 compliant code. Either way, we'll need to create        *
@@ -107,17 +111,37 @@ typedef double _Complex rssringoccs_ComplexDouble;
 
 /*  The GNU Scientific Library (GSL) v2.6 defines complex variables via a     *
  *  data structure containing a single array double dat[2];. If you are using *
- *  the GSL v2.6, you can use rss_ringoccs functions with that library.       */
+ *  the GSL v2.6, you can use rss_ringoccs functions with that library. That  *
+ *  is, if we have a pointer rssringoccs_ComplexDouble *z; and another        *
+ *  pointer gsl_complex *w; we can safely cast via:                           *
+ *      z = (rssringoccs_ComplexDouble *)&w;                                  *
+ *  And similarly we can do w = (gsl_complex *)&z;                            */
 typedef struct {
     double dat[2];
 } rssringoccs_ComplexDouble;
 
+/*  Define single and long double precision equivalents.                      */
+typedef struct {
+    float dat[2];
+} rssringoccs_ComplexFloat;
+
+typedef struct {
+    long double dat[2];
+} rssringoccs_ComplexLongDouble;
+
 #endif
-/*  End of #ifdef __RSS_RINGOCCS_HAS_COMPLEX_H_                               */
+/*  End of #if !defined(__STDC_NO_COMPLEX__) && __STDC_VERSION__ >= 199901L   */
+
+/*  Useful constants used throughout computations.                            */
+extern const rssringoccs_ComplexDouble rssringoccs_Imaginary_Unit;
+extern const rssringoccs_ComplexDouble rssringoccs_Complex_Zero;
+extern const rssringoccs_ComplexDouble rssringoccs_Complex_One;
+extern const rssringoccs_ComplexDouble rssringoccs_Complex_NaN;
+extern const rssringoccs_ComplexDouble rssringoccs_Complex_Infinity;
 
 /******************************************************************************
  *  Function:                                                                 *
- *      rssringoccs_Complex_Abs                                               *
+ *      rssringoccs_ComplexDouble_Abs                                         *
  *  Purpose:                                                                  *
  *      Compute the absolute value of a complex number. This is equivalent to *
  *      the cabs function found in complex.h (C99).                           *
@@ -128,25 +152,39 @@ typedef struct {
  *      double abs_z:                                                         *
  *          The absolute value of z, computed by the Pythagorean formula. If  *
  *          z = x + iy, then abs_z = sqrt(x^2 + y^2)                          *
- *  Example:                                                                  *
- *          #include <stdio.h>                                                *
- *          #include <rss_ringoccs_complex.h>                                 *
- *                                                                            *
- *          int main(void)                                                    *
- *          {                                                                 *
- *              double abs_z;                                                 *
- *              rssringoccs_ComplexDouble z;                                  *
- *                                                                            *
- *              z = rssringoccs_Complex_Rect(1.0, 1.0);                       *
- *              abs_z = rssringoccs_Complex_Abs(z);                           *
- *                                                                            *
- *              printf("%f\n", abs_z);                                        *
- *              return 0;                                                     *
- *          }                                                                 *
- *                                                                            *
- *      This will ouptut 1.414..., the square root of two.                    *
  ******************************************************************************/
-extern double rssringoccs_Complex_Abs(rssringoccs_ComplexDouble z);
+extern float
+rssringoccs_ComplexFloat_Abs(rssringoccs_ComplexFloat z);
+
+extern double
+rssringoccs_ComplexDouble_Abs(rssringoccs_ComplexDouble z);
+
+extern long double
+rssringoccs_ComplexLongDouble_Abs(rssringoccs_ComplexLongDouble z);
+
+/******************************************************************************
+ *  Function:                                                                 *
+ *      rssringoccs_ComplexDouble_Abs_Squared                                 *
+ *  Purpose:                                                                  *
+ *      Compute the square of the absolute value of a complex number z. This  *
+ *      is useful for when |z|^2 is needed so we can avoid an expensive and   *
+ *      redundant square root calculation. We can just compute x*x + y*y for  *
+ *      the complex number z = x + iy.                                        *
+ *  Arguments:                                                                *
+ *      rssringoccs_ComplexDouble z:                                          *
+ *          A complex number.                                                 *
+ *  Output:                                                                   *
+ *      double abs_z:                                                         *
+ *          The square of the absolute value of z, |z|^2.                     *
+ ******************************************************************************/
+extern float
+rssringoccs_ComplexFloat_Abs_Squared(rssringoccs_ComplexFloat z);
+
+extern double
+rssringoccs_ComplexDouble_Abs_Squared(rssringoccs_ComplexDouble z);
+
+extern long double
+rssringoccs_ComplexLongDouble_Abs_Squared(rssringoccs_ComplexLongDouble z);
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -169,25 +207,15 @@ extern double rssringoccs_Complex_Abs(rssringoccs_ComplexDouble z);
  *      Using the function on the complex zero (0, 0) returns 0.0 on          *
  *      implementations that support IEEE floating-point arithmetic. This     *
  *      included GNU's glibc/gcc and clang.                                   *
- *  Example:                                                                  *
- *          #include <stdio.h>                                                *
- *          #include <rss_ringoccs_complex.h>                                 *
- *                                                                            *
- *          int main(void)                                                    *
- *          {                                                                 *
- *              double theta;                                                 *
- *              rssringoccs_ComplexDouble z;                                  *
- *                                                                            *
- *              z = rssringoccs_Complex_Rect(1.0, 1.0);                       *
- *              theta = rssringoccs_Complex_Argument(z);                      *
- *                                                                            *
- *              printf("%f\n", theta);                                        *
- *              return 0;                                                     *
- *          }                                                                 *
- *                                                                            *
- *      This will ouptut 0.7853..., pi/4.                                     *
  ******************************************************************************/
-extern double rssringoccs_Complex_Argument(rssringoccs_ComplexDouble z);
+extern float
+rssringoccs_ComplexFloat_Argument(rssringoccs_ComplexFloat z);
+
+extern double
+rssringoccs_ComplexDouble_Argument(rssringoccs_ComplexDouble z);
+
+extern long double
+rssringoccs_ComplexLongDouble_Argument(rssringoccs_ComplexLongDouble z);
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -201,25 +229,15 @@ extern double rssringoccs_Complex_Argument(rssringoccs_ComplexDouble z);
  *  Output:                                                                   *
  *      double real:                                                          *
  *          The real part of z.                                               *
- *  Example:                                                                  *
- *          #include <stdio.h>                                                *
- *          #include <rss_ringoccs_complex.h>                                 *
- *                                                                            *
- *          int main(void)                                                    *
- *          {                                                                 *
- *              double z_real;                                                *
- *              rssringoccs_ComplexDouble z;                                  *
- *                                                                            *
- *              z = rssringoccs_Complex_Rect(1.0, 1.0);                       *
- *              z_real = rssringoccs_Complex_Real_Part(z);                    *
- *                                                                            *
- *              printf("%f\n", z_real);                                       *
- *              return 0;                                                     *
- *          }                                                                 *
- *                                                                            *
- *      This will ouptut 1.0.                                                 *
  ******************************************************************************/
-extern double rssringoccs_Complex_Real_Part(rssringoccs_ComplexDouble z);
+extern float
+rssringoccs_ComplexFloat_Real_Part(rssringoccs_ComplexFloat z);
+
+extern double
+rssringoccs_ComplexDouble_Real_Part(rssringoccs_ComplexDouble z);
+
+extern long double
+rssringoccs_ComplexLongDouble_Real_Part(rssringoccs_ComplexLongDouble z);
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -233,25 +251,27 @@ extern double rssringoccs_Complex_Real_Part(rssringoccs_ComplexDouble z);
  *  Output:                                                                   *
  *      double real:                                                          *
  *          The imaginary part of z.                                          *
- *  Example:                                                                  *
- *          #include <stdio.h>                                                *
- *          #include <rss_ringoccs_complex.h>                                 *
- *                                                                            *
- *          int main(void)                                                    *
- *          {                                                                 *
- *              double z_imag;                                                *
- *              rssringoccs_ComplexDouble z;                                  *
- *                                                                            *
- *              z = rssringoccs_Complex_Rect(1.0, 1.0);                       *
- *              z_imag = rssringoccs_Complex_Imag_Part(z);                    *
- *                                                                            *
- *              printf("%f\n", z_imag);                                       *
- *              return 0;                                                     *
- *          }                                                                 *
- *                                                                            *
- *      This will ouptut 1.0.                                                 *
  ******************************************************************************/
-extern double rssringoccs_Complex_Imag_Part(rssringoccs_ComplexDouble z);
+extern float
+rssringoccs_ComplexFloat_Imag_Part(rssringoccs_ComplexFloat z);
+
+extern double
+rssringoccs_ComplexDouble_Imag_Part(rssringoccs_ComplexDouble z);
+
+extern long double
+rssringoccs_ComplexLongDouble_Imag_Part(rssringoccs_ComplexLongDouble z);
+
+extern rssringoccs_Bool
+rssringoccs_ComplexFloat_Compare(rssringoccs_ComplexFloat z,
+                                 rssringoccs_ComplexFloat w);
+
+extern rssringoccs_Bool
+rssringoccs_ComplexDouble_Compare(rssringoccs_ComplexDouble z,
+                                  rssringoccs_ComplexDouble w);
+
+extern rssringoccs_Bool
+rssringoccs_ComplexLongDouble_Compare(rssringoccs_ComplexLongDouble z,
+                                      rssringoccs_ComplexLongDouble w);
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -266,29 +286,15 @@ extern double rssringoccs_Complex_Imag_Part(rssringoccs_ComplexDouble z);
  *  Output:                                                                   *
  *      rssringoccs_ComplexDouble conj_z:                                     *
  *          The complex conjugate of z.                                       *
- *  Example:                                                                  *
- *          #include <stdio.h>                                                *
- *          #include <rss_ringoccs_complex.h>                                 *
- *                                                                            *
- *          int main(void)                                                    *
- *          {                                                                 *
- *              double real, imag;                                            *
- *              rssringoccs_ComplexDouble z, conj_z;                          *
- *                                                                            *
- *              z = rssringoccs_Complex_Rect(1.0, 1.0);                       *
- *              conj_z = rssringoccs_Complex_Conjugate(z);                    *
- *                                                                            *
- *              real = rssringoccs_Complex_Real_Part(conj_z);                 *
- *              imag = rssringoccs_Complex_Imag_Part(conj_z);                 *
- *                                                                            *
- *              printf("%f + %fi\n", real, imag);                             *
- *              return 0;                                                     *
- *          }                                                                 *
- *                                                                            *
- *      This will ouptut 1.0 + -1.0i.                                         *
  ******************************************************************************/
+extern rssringoccs_ComplexFloat
+rssringoccs_ComplexFloat_Conjugate(rssringoccs_ComplexFloat z);
+
 extern rssringoccs_ComplexDouble
-rssringoccs_Complex_Conjugate(rssringoccs_ComplexDouble z);
+rssringoccs_ComplexDouble_Conjugate(rssringoccs_ComplexDouble z);
+
+extern rssringoccs_ComplexLongDouble
+rssringoccs_ComplexLongDouble_Conjugate(rssringoccs_ComplexLongDouble z);
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -312,30 +318,15 @@ rssringoccs_Complex_Conjugate(rssringoccs_ComplexDouble z);
  *                 = exp(x)exp(iy)                                            *
  *                 = exp(x)cos(y) + i exp(x)sin(y)                            *
  *      So we compute using the trig functions and the real exponential.      *
- *  Example:                                                                  *
- *          #include <stdio.h>                                                *
- *          #include <rss_ringoccs_math.h>                                    *
- *          #include <rss_ringoccs_complex.h>                                 *
- *                                                                            *
- *          int main(void)                                                    *
- *          {                                                                 *
- *              double real, imag;                                            *
- *              rssringoccs_ComplexDouble z, exp_z;                           *
- *                                                                            *
- *              z = rssringoccs_Complex_Rect(0.0, ONE_PI);                    *
- *              exp_z = rssringoccs_Complex_Exp(z);                           *
- *                                                                            *
- *              real = rssringoccs_Complex_Real_Part(exp_z);                  *
- *              imag = rssringoccs_Complex_Imag_Part(exp_z);                  *
- *                                                                            *
- *              printf("%f + %fi\n", real, imag);                             *
- *              return 0;                                                     *
- *          }                                                                 *
- *                                                                            *
- *      This will ouptut -1.0 + 0.0i. i.e., exp(i pi) = -1                    *
  ******************************************************************************/
+extern rssringoccs_ComplexFloat
+rssringoccs_ComplexFloat_Exp(rssringoccs_ComplexFloat z);
+
 extern rssringoccs_ComplexDouble
-rssringoccs_Complex_Exp(rssringoccs_ComplexDouble z);
+rssringoccs_ComplexDouble_Exp(rssringoccs_ComplexDouble z);
+
+extern rssringoccs_ComplexLongDouble
+rssringoccs_ComplexLongDouble_Exp(rssringoccs_ComplexLongDouble z);
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -357,36 +348,6 @@ rssringoccs_Complex_Exp(rssringoccs_ComplexDouble z);
  *      the range -pi < theta <= pi. Because of this there is a branch cut    *
  *      along the negative x axis. rss_ringoccs does not provide the option   *
  *      to choose a different branch.                                         *
- *  Example:                                                                  *
- *          #include <stdio.h>                                                *
- *          #include <rss_ringoccs_math.h>                                    *
- *          #include <rss_ringoccs_complex.h>                                 *
- *                                                                            *
- *          int main(void)                                                    *
- *          {                                                                 *
- *              double real, imag;                                            *
- *              rssringoccs_ComplexDouble z, sqrt_z;                          *
- *                                                                            *
- *              sqrt_z = rssringoccs_Complex_Sqrt(rssringoccs_Imaginary_Unit);*
- *                                                                            *
- *              real = rssringoccs_Complex_Real_Part(sqrt_z);                 *
- *              imag = rssringoccs_Complex_Imag_Part(sqrt_z);                 *
- *                                                                            *
- *              printf("%f + %fi\n", real, imag);                             *
- *                                                                            *
- *              z = rssringoccs_Complex_Rect(-1.0, 0.0);                      *
- *              sqrt_z = rssringoccs_Complex_Sqrt(z);                         *
- *                                                                            *
- *              real = rssringoccs_Complex_Real_Part(sqrt_z);                 *
- *              imag = rssringoccs_Complex_Imag_Part(sqrt_z);                 *
- *                                                                            *
- *              printf("%f + %fi\n", real, imag);                             *
- *              return 0;                                                     *
- *          }                                                                 *
- *                                                                            *
- *      This will ouptut 0.707107 + 0.707107i, i.e. (1+i)/sqrt(2), and then   *
- *      0.000000 + 1.000000i. This exemplifies the branch cut. We have        *
- *      sqrt(-1) = 0 + 1i, and not 0 + -1i.                                   *
  ******************************************************************************/
 extern rssringoccs_ComplexDouble
 rssringoccs_Complex_Sqrt(rssringoccs_ComplexDouble z);
@@ -429,8 +390,14 @@ rssringoccs_Complex_Sqrt(rssringoccs_ComplexDouble z);
  *                                                                            *
  *      This will ouptut 0.346574 + 0.785398i. i.e. ln(1+i) = 0.3465+0.7853i. *
  ******************************************************************************/
+extern rssringoccs_ComplexFloat
+rssringoccs_ComplexFloat_Log(rssringoccs_ComplexFloat z);
+
 extern rssringoccs_ComplexDouble
-rssringoccs_Complex_Log(rssringoccs_ComplexDouble z);
+rssringoccs_ComplexDouble_Log(rssringoccs_ComplexDouble z);
+
+extern rssringoccs_ComplexLongDouble
+rssringoccs_ComplexLongDouble_Log(rssringoccs_ComplexLongDouble z);
 
 extern rssringoccs_ComplexDouble
 rssringoccs_Complex_Pow(rssringoccs_ComplexDouble z0,
@@ -454,33 +421,19 @@ rssringoccs_Complex_Real_Pow(rssringoccs_ComplexDouble z, double x);
  *      We simply use the fact that sin(x+iy) = sin(x)cos(iy)+cos(x)sin(iy)   *
  *      and then invoke the definition of hyperbolic cosine and hyperbolic    *
  *      sine yielding sin(x+iy) = sin(x)cosh(y) + i * cos(x)sinh(y).          *
- *  Example:                                                                  *
- *          #include <stdio.h>                                                *
- *          #include <rss_ringoccs_complex.h>                                 *
- *                                                                            *
- *          int main(void)                                                    *
- *          {                                                                 *
- *              double real, imag;                                            *
- *              rssringoccs_ComplexDouble z, sin_z;                           *
- *                                                                            *
- *              z = rssringoccs_Complex_Rect(1.0, 1.0);                       *
- *              sin_z = rssringoccs_Complex_Sin(z);                           *
- *                                                                            *
- *              real = rssringoccs_Complex_Real_Part(sin_z);                  *
- *              imag = rssringoccs_Complex_Imag_Part(sin_z);                  *
- *                                                                            *
- *              printf("%f + %fi\n", real, imag);                             *
- *              return 0;                                                     *
- *          }                                                                 *
- *                                                                            *
- *      This will ouptut 1.298458 + 0.634964i i.e. sin(1+i)=1.29845+0.63496i. *
  ******************************************************************************/
+extern rssringoccs_ComplexFloat
+rssringoccs_ComplexFloat_Sin(rssringoccs_ComplexFloat z);
+
 extern rssringoccs_ComplexDouble
-rssringoccs_Complex_Sin(rssringoccs_ComplexDouble z);
+rssringoccs_ComplexDouble_Sin(rssringoccs_ComplexDouble z);
+
+extern rssringoccs_ComplexLongDouble
+rssringoccs_ComplexLongDouble_Sin(rssringoccs_ComplexLongDouble z);
 
 /******************************************************************************
  *  Function:                                                                 *
- *      rssringoccs_Complex_Cos                                               *
+ *      rssringoccs_ComplexDouble_Cos                                         *
  *  Purpose:                                                                  *
  *      Compute the cosine of a complex number z.                             *
  *  Arguments:                                                                *
@@ -493,29 +446,15 @@ rssringoccs_Complex_Sin(rssringoccs_ComplexDouble z);
  *      We simply use the fact that cos(x+iy) = cos(x)cos(iy)-sin(x)sin(iy)   *
  *      and then invoke the definition of hyperbolic cosine and hyperbolic    *
  *      sine yielding cos(x+iy) = cos(x)cosh(y) - i * sin(x)sinh(y).          *
- *  Example:                                                                  *
- *          #include <stdio.h>                                                *
- *          #include <rss_ringoccs_complex.h>                                 *
- *                                                                            *
- *          int main(void)                                                    *
- *          {                                                                 *
- *              double real, imag;                                            *
- *              rssringoccs_ComplexDouble z, cos_z;                           *
- *                                                                            *
- *              z = rssringoccs_Complex_Rect(1.0, 1.0);                       *
- *              cos_z = rssringoccs_Complex_Cos(z);                           *
- *                                                                            *
- *              real = rssringoccs_Complex_Real_Part(cos_z);                  *
- *              imag = rssringoccs_Complex_Imag_Part(cos_z);                  *
- *                                                                            *
- *              printf("%f + %fi\n", real, imag);                             *
- *              return 0;                                                     *
- *          }                                                                 *
- *                                                                            *
- *      This will ouptut 1.298458 + 0.634964i i.e. sin(1+i)=1.29845+0.63496i. *
  ******************************************************************************/
+extern rssringoccs_ComplexFloat
+rssringoccs_ComplexFloat_Cos(rssringoccs_ComplexFloat z);
+
 extern rssringoccs_ComplexDouble
-rssringoccs_Complex_Cos(rssringoccs_ComplexDouble z);
+rssringoccs_ComplexDouble_Cos(rssringoccs_ComplexDouble z);
+
+extern rssringoccs_ComplexLongDouble
+rssringoccs_ComplexLongDouble_Cos(rssringoccs_ComplexLongDouble z);
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -555,17 +494,6 @@ rssringoccs_Complex_Cos(rssringoccs_ComplexDouble z);
 extern rssringoccs_ComplexDouble
 rssringoccs_Complex_Tan(rssringoccs_ComplexDouble z);
 
-/*  Useful constants used throughout computations.                            */
-extern const rssringoccs_ComplexDouble rssringoccs_Imaginary_Unit;
-extern const rssringoccs_ComplexDouble rssringoccs_Complex_Zero;
-extern const rssringoccs_ComplexDouble rssringoccs_Complex_One;
-extern const rssringoccs_ComplexDouble rssringoccs_Complex_NaN;
-extern const rssringoccs_ComplexDouble rssringoccs_Complex_Infinity;
-
-extern rssringoccs_Bool
-rssringoccs_Complex_Compare(rssringoccs_ComplexDouble z,
-                            rssringoccs_ComplexDouble w);
-
 /******************************************************************************
  *  Function:                                                                 *
  *      rssringoccs_Complex_Rect                                              *
@@ -588,28 +516,15 @@ rssringoccs_Complex_Compare(rssringoccs_ComplexDouble z,
  *  Output:                                                                   *
  *      rssringoccs_ComplexDouble z:                                          *
  *          The complex number x + iy.                                        *
- *  Example:                                                                  *
- *          #include <stdio.h>                                                *
- *          #include <rss_ringoccs_complex.h>                                 *
- *                                                                            *
- *          int main(void)                                                    *
- *          {                                                                 *
- *              double abs_z, real, imag;                                     *
- *              rssringoccs_ComplexDouble z;                                  *
- *                                                                            *
- *              z = rssringoccs_Complex_Rect(1.0, 1.0);                       *
- *              abs_z = rssringoccs_Complex_Abs(z);                           *
- *              real = rssringoccs_Complex_Real_Part(z);                      *
- *              imag = rssringoccs_Complex_Imag_Part(z);                      *
- *                                                                            *
- *              printf("|%f + %fi| = %f\n", real, imag, abs_z);               *
- *              return 0;                                                     *
- *          }                                                                 *
- *                                                                            *
- *      This creates the complex number 1+1i. The output prints:              *
- *          |1.000000 + 1.000000i| = 1.414214                                 *
  ******************************************************************************/
-extern rssringoccs_ComplexDouble rssringoccs_Complex_Rect(double x, double y);
+extern rssringoccs_ComplexFloat
+rssringoccs_ComplexFloat_Rect(float x, float y);
+
+extern rssringoccs_ComplexDouble
+rssringoccs_ComplexDouble_Rect(double x, double y);
+
+extern rssringoccs_ComplexLongDouble
+rssringoccs_ComplexLongDouble_Rect(long double x, long double y);
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -625,28 +540,9 @@ extern rssringoccs_ComplexDouble rssringoccs_Complex_Rect(double x, double y);
  *  Output:                                                                   *
  *      rssringoccs_ComplexDouble z:                                          *
  *          The complex number r exp(i theta).                                *
- *  Example:                                                                  *
- *          #include <stdio.h>                                                *
- *          #include <rss_ringoccs_math.h>                                    *
- *          #include <rss_ringoccs_complex.h>                                 *
- *                                                                            *
- *          int main(void)                                                    *
- *          {                                                                 *
- *              double real, imag;                                            *
- *              rssringoccs_ComplexDouble z;                                  *
- *                                                                            *
- *              z = rssringoccs_Complex_Polar(1.0, PI_BY_FOUR);               *
- *              real = rssringoccs_Complex_Real_Part(z);                      *
- *              imag = rssringoccs_Complex_Imag_Part(z);                      *
- *                                                                            *
- *              printf("%f + %fi\n", real, imag);                             *
- *              return 0;                                                     *
- *          }                                                                 *
- *                                                                            *
- *      This outputs 0.707107 + 0.707107i, i.e. (1+i1)/sqrt(2).               *
  ******************************************************************************/
 extern rssringoccs_ComplexDouble
-rssringoccs_Complex_Polar(double r, double theta);
+rssringoccs_ComplexDouble_Polar(double r, double theta);
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -661,37 +557,47 @@ rssringoccs_Complex_Polar(double r, double theta);
  *  Output:                                                                   *
  *      rssringoccs_ComplexDouble sum:                                        *
  *          The sum of z0 and z1.                                             *
- *  NOTE:                                                                     *
+ *  NOTES:                                                                    *
  *      In C99, since _Complex is a built-in data type, given double _Complex *
  *      z0 and double _Complex z1, you can just do z0 + z1. In C89 we use     *
  *      structs to define complex numbers. Structs cannot be added, so we     *
  *      need a function for computing the sum of two complex values.          *
- *  Example:                                                                  *
- *          #include <stdio.h>                                                *
- *          #include <rss_ringoccs_complex.h>                                 *
  *                                                                            *
- *          int main(void)                                                    *
- *          {                                                                 *
- *              double real, imag;                                            *
- *              rssringoccs_ComplexDouble z0, z1, sum;                        *
- *                                                                            *
- *              z0 = rssringoccs_Complex_Rect(1.0, 2.0);                      *
- *              z1 = rssringoccs_Complex_Rect(2.0, 2.0);                      *
- *                                                                            *
- *              sum = rssringoccs_Complex_Add(z0, z1);                        *
- *                                                                            *
- *              real = rssringoccs_Complex_Real_Part(sum);                    *
- *              imag = rssringoccs_Complex_Imag_Part(sum);                    *
- *                                                                            *
- *              printf("%f + %fi\n", real, imag);                             *
- *              return 0;                                                     *
- *          }                                                                 *
- *                                                                            *
- *      This outputs 3.0 + 4.0i, i.e. (1+2i) + (2+2i) = 3+4i.                 *
+ *      For convenience we also provide Add_Real functions which allow one to *
+ *      compute the sum of a real number with a complex one without having to *
+ *      perform conversions first. Similarly with Add_Imag.                   *
  ******************************************************************************/
+extern rssringoccs_ComplexFloat
+rssringoccs_ComplexFloat_Add(rssringoccs_ComplexFloat z1,
+                             rssringoccs_ComplexFloat z2);
+
 extern rssringoccs_ComplexDouble
-rssringoccs_Complex_Add(rssringoccs_ComplexDouble z1,
-                        rssringoccs_ComplexDouble z2);
+rssringoccs_ComplexDouble_Add(rssringoccs_ComplexDouble z1,
+                              rssringoccs_ComplexDouble z2);
+
+extern rssringoccs_ComplexLongDouble
+rssringoccs_ComplexLongDouble_Add(rssringoccs_ComplexLongDouble z1,
+                                  rssringoccs_ComplexLongDouble z2);
+
+extern rssringoccs_ComplexFloat
+rssringoccs_ComplexFloat_Add_Real(float x, rssringoccs_ComplexFloat z);
+
+extern rssringoccs_ComplexDouble
+rssringoccs_ComplexDouble_Add_Real(double x, rssringoccs_ComplexDouble z);
+
+extern rssringoccs_ComplexLongDouble
+rssringoccs_ComplexLongDouble_Add_Real(long double x,
+                                       rssringoccs_ComplexLongDouble z);
+
+extern rssringoccs_ComplexFloat
+rssringoccs_ComplexFloat_Add_Imag(float y, rssringoccs_ComplexFloat z);
+
+extern rssringoccs_ComplexDouble
+rssringoccs_ComplexDouble_Add_Imag(double y, rssringoccs_ComplexDouble z);
+
+extern rssringoccs_ComplexLongDouble
+rssringoccs_ComplexLongDouble_Add_Imag(long double y,
+                                       rssringoccs_ComplexLongDouble z);
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -709,32 +615,38 @@ rssringoccs_Complex_Add(rssringoccs_ComplexDouble z1,
  *  NOTE:                                                                     *
  *      Subtraction is not commutative, so given (z0, z1), this computes      *
  *      the first entry minus the second. That is, z0 - z1.                   *
- *  Example:                                                                  *
- *          #include <stdio.h>                                                *
- *          #include <rss_ringoccs_complex.h>                                 *
- *                                                                            *
- *          int main(void)                                                    *
- *          {                                                                 *
- *              double real, imag;                                            *
- *              rssringoccs_ComplexDouble z0, z1, diff;                       *
- *                                                                            *
- *              z0 = rssringoccs_Complex_Rect(1.0, 2.0);                      *
- *              z1 = rssringoccs_Complex_Rect(2.0, 2.0);                      *
- *                                                                            *
- *              diff = rssringoccs_Complex_Subtract(z0, z1);                  *
- *                                                                            *
- *              real = rssringoccs_Complex_Real_Part(diff);                   *
- *              imag = rssringoccs_Complex_Imag_Part(diff);                   *
- *                                                                            *
- *              printf("%f + %fi\n", real, imag);                             *
- *              return 0;                                                     *
- *          }                                                                 *
- *                                                                            *
- *      This outputs -1.0 + 0.0i, i.e. (1+2i) - (2+2i) = -1+0i.               *
  ******************************************************************************/
+extern rssringoccs_ComplexFloat
+rssringoccs_ComplexFloat_Subtract(rssringoccs_ComplexFloat z1,
+                                  rssringoccs_ComplexFloat z2);
+
 extern rssringoccs_ComplexDouble
-rssringoccs_Complex_Subtract(rssringoccs_ComplexDouble z1,
-                             rssringoccs_ComplexDouble z2);
+rssringoccs_ComplexDouble_Subtract(rssringoccs_ComplexDouble z1,
+                                   rssringoccs_ComplexDouble z2);
+
+extern rssringoccs_ComplexLongDouble
+rssringoccs_ComplexLongDouble_Subtract(rssringoccs_ComplexLongDouble z1,
+                                       rssringoccs_ComplexLongDouble z2);
+
+extern rssringoccs_ComplexFloat
+rssringoccs_ComplexFloat_Subtract_Real(float x, rssringoccs_ComplexFloat z);
+
+extern rssringoccs_ComplexDouble
+rssringoccs_ComplexDouble_Subtract_Real(double x, rssringoccs_ComplexDouble z);
+
+extern rssringoccs_ComplexLongDouble
+rssringoccs_ComplexLongDouble_Subtract_Real(long double x,
+                                            rssringoccs_ComplexLongDouble z);
+
+extern rssringoccs_ComplexFloat
+rssringoccs_ComplexFloat_Subtract_Imag(float y, rssringoccs_ComplexFloat z);
+
+extern rssringoccs_ComplexDouble
+rssringoccs_ComplexDouble_Subtract_Imag(double y, rssringoccs_ComplexDouble z);
+
+extern rssringoccs_ComplexLongDouble
+rssringoccs_ComplexLongDouble_Subtract_Imag(long double y,
+                                            rssringoccs_ComplexLongDouble z);
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -754,32 +666,38 @@ rssringoccs_Complex_Subtract(rssringoccs_ComplexDouble z1,
  *      z1 and double _Complex z2, you can just do z1 * z2. In C89 we use     *
  *      structs to define complex numbers. Structs cannot be multiplied, so   *
  *      we need a function for computing the product of two complex values.   *
- *  Example:                                                                  *
- *          #include <stdio.h>                                                *
- *          #include <rss_ringoccs_complex.h>                                 *
- *                                                                            *
- *          int main(void)                                                    *
- *          {                                                                 *
- *              double real, imag;                                            *
- *              rssringoccs_ComplexDouble z0, z1, prod;                       *
- *                                                                            *
- *              z0 = rssringoccs_Complex_Rect(1.0, 2.0);                      *
- *              z1 = rssringoccs_Complex_Rect(2.0, 2.0);                      *
- *                                                                            *
- *              prod = rssringoccs_Complex_Multiply(z0, z1);                  *
- *                                                                            *
- *              real = rssringoccs_Complex_Real_Part(prod);                   *
- *              imag = rssringoccs_Complex_Imag_Part(prod);                   *
- *                                                                            *
- *              printf("%f + %fi\n", real, imag);                             *
- *              return 0;                                                     *
- *          }                                                                 *
- *                                                                            *
- *      This outputs -2.0 + 6.0i, i.e. (1+2i)*(2+2i) = -2+6i.                 *
  ******************************************************************************/
+extern rssringoccs_ComplexFloat
+rssringoccs_ComplexFloat_Multiply(rssringoccs_ComplexFloat z1,
+                                  rssringoccs_ComplexFloat z2);
+
 extern rssringoccs_ComplexDouble
-rssringoccs_Complex_Multiply(rssringoccs_ComplexDouble z1,
-                             rssringoccs_ComplexDouble z2);
+rssringoccs_ComplexDouble_Multiply(rssringoccs_ComplexDouble z1,
+                                   rssringoccs_ComplexDouble z2);
+
+extern rssringoccs_ComplexLongDouble
+rssringoccs_ComplexLongDouble_Multiply(rssringoccs_ComplexLongDouble z1,
+                                       rssringoccs_ComplexLongDouble z2);
+
+extern rssringoccs_ComplexFloat
+rssringoccs_ComplexFloat_Multiply_Real(float x, rssringoccs_ComplexFloat z);
+
+extern rssringoccs_ComplexDouble
+rssringoccs_ComplexDouble_Multiply_Real(double x, rssringoccs_ComplexDouble z);
+
+extern rssringoccs_ComplexLongDouble
+rssringoccs_ComplexLongDouble_Multiply_Real(long double x,
+                                            rssringoccs_ComplexLongDouble z);
+
+extern rssringoccs_ComplexFloat
+rssringoccs_ComplexFloat_Multiply_Imag(float x, rssringoccs_ComplexFloat z);
+
+extern rssringoccs_ComplexDouble
+rssringoccs_ComplexDouble_Multiply_Imag(double x, rssringoccs_ComplexDouble z);
+
+extern rssringoccs_ComplexLongDouble
+rssringoccs_ComplexLongDouble_Multiply_Imag(long double x,
+                                            rssringoccs_ComplexLongDouble z);
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -828,7 +746,7 @@ rssringoccs_Complex_Scale(double x, rssringoccs_ComplexDouble z);
 
 /******************************************************************************
  *  Function:                                                                 *
- *      rssringoccs_Complex_Reciprocal                                        *
+ *      rssringoccs_ComplexDouble_Reciprocal                                  *
  *  Purpose:                                                                  *
  *     Compute the reciprocal (or inverse) of a complex number.               *
  *  Arguments:                                                                *
@@ -842,33 +760,19 @@ rssringoccs_Complex_Scale(double x, rssringoccs_ComplexDouble z);
  *      true, depending on your system, you will either get +infinity for both*
  *      real and imaginary parts, or an error will occur. On MacOS and Linux  *
  *      the result is NaN + iNaN.                                             *
- *  Example:                                                                  *
- *          #include <stdio.h>                                                *
- *          #include <rss_ringoccs_complex.h>                                 *
- *                                                                            *
- *          int main(void)                                                    *
- *          {                                                                 *
- *              double real, imag;                                            *
- *              rssringoccs_ComplexDouble z, inv_z;                           *
- *                                                                            *
- *              z = rssringoccs_Complex_Rect(1.0, 1.0);                       *
- *              inv_z = rssringoccs_Complex_Reciprocal(z);                    *
- *                                                                            *
- *              real = rssringoccs_Complex_Real_Part(inv_z);                  *
- *              imag = rssringoccs_Complex_Imag_Part(inv_z);                  *
- *                                                                            *
- *              printf("1/z = %f + i%f\n", real, imag);                       *
- *              return 0;                                                     *
- *          }                                                                 *
- *                                                                            *
- *      This outputs 1/z = 0.5 + i-0.5. i.e., 1/(1+1i) = 0.5 - 0.5i.          *
  ******************************************************************************/
+extern rssringoccs_ComplexFloat
+rssringoccs_ComplexFloat_Reciprocal(rssringoccs_ComplexFloat z);
+
 extern rssringoccs_ComplexDouble
-rssringoccs_Complex_Reciprocal(rssringoccs_ComplexDouble z);
+rssringoccs_ComplexDouble_Reciprocal(rssringoccs_ComplexDouble z);
+
+extern rssringoccs_ComplexLongDouble
+rssringoccs_ComplexLongDouble_Reciprocal(rssringoccs_ComplexLongDouble z);
 
 /******************************************************************************
  *  Function:                                                                 *
- *      rssringoccs_Complex_Divide                                            *
+ *      rssringoccs_ComplexDouble_Divide                                      *
  *  Purpose:                                                                  *
  *     Compute the quotient of a complex number z0 by z1.                     *
  *  Arguments:                                                                *
@@ -887,31 +791,18 @@ rssringoccs_Complex_Reciprocal(rssringoccs_ComplexDouble z);
  *                                                                            *
  *      Division is not commutative, so given (z0, z1), this returns z0/z1 and*
  *      not z1/z0. That is, we divide the first entry by the second.          *
- *  Example:                                                                  *
- *          #include <stdio.h>                                                *
- *          #include <rss_ringoccs_complex.h>                                 *
- *                                                                            *
- *          int main(void)                                                    *
- *          {                                                                 *
- *              double real, imag;                                            *
- *              rssringoccs_ComplexDouble z0, z1, quotient;                   *
- *                                                                            *
- *              z0 = rssringoccs_Complex_Rect(2.0, 1.0);                      *
- *              z1 = rssringoccs_Complex_Rect(-1.0, 4.0);                     *
- *              quotient = rssringoccs_Complex_Divide(z0, z1);                *
- *                                                                            *
- *              real = rssringoccs_Complex_Real_Part(quotient);               *
- *              imag = rssringoccs_Complex_Imag_Part(quotient);               *
- *                                                                            *
- *              printf("z0/z1 = %f + i%f\n", real, imag);                     *
- *              return 0;                                                     *
- *          }                                                                 *
- *                                                                            *
- *      This outputs z0/z1 = 0.117647 + i-0.529412.                           *
  ******************************************************************************/
+extern rssringoccs_ComplexFloat
+rssringoccs_ComplexFloat_Divide(rssringoccs_ComplexFloat z1,
+                                rssringoccs_ComplexFloat z2);
+
 extern rssringoccs_ComplexDouble
-rssringoccs_Complex_Divide(rssringoccs_ComplexDouble z1,
-                           rssringoccs_ComplexDouble z2);
+rssringoccs_ComplexDouble_Divide(rssringoccs_ComplexDouble z1,
+                                 rssringoccs_ComplexDouble z2);
+
+extern rssringoccs_ComplexLongDouble
+rssringoccs_ComplexLongDouble_Divide(rssringoccs_ComplexLongDouble z1,
+                                     rssringoccs_ComplexLongDouble z2);
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -977,13 +868,13 @@ rssringoccs_Complex_Divide(rssringoccs_ComplexDouble z1,
  *      is roughly exp(1) = e.                                                *
  ******************************************************************************/
 extern rssringoccs_ComplexDouble
-rssringoccs_Complex_Poly_Real_Coeffs(double *coeffs, unsigned int degree,
-                                     rssringoccs_ComplexDouble z);
+rssringoccs_ComplexDouble_Poly_Real_Coeffs(double *coeffs, unsigned int degree,
+                                           rssringoccs_ComplexDouble z);
 
 extern rssringoccs_ComplexDouble
-rssringoccs_Complex_Poly_Complex_Coeffs(rssringoccs_ComplexDouble *coeffs,
-                                        unsigned int degree,
-                                        rssringoccs_ComplexDouble z);
+rssringoccs_ComplexDouble_Poly_Complex_Coeffs(rssringoccs_ComplexDouble *coeffs,
+                                              unsigned int degree,
+                                              rssringoccs_ComplexDouble z);
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -1033,13 +924,13 @@ rssringoccs_Complex_Poly_Complex_Coeffs(rssringoccs_ComplexDouble *coeffs,
  *      converges to 1 for certain arguments (angles/phases).                 *
  ******************************************************************************/
 extern rssringoccs_ComplexDouble
-rssringoccs_Complex_Erf(rssringoccs_ComplexDouble z);
+rssringoccs_ComplexDouble_Erf(rssringoccs_ComplexDouble z);
 
 extern rssringoccs_ComplexDouble
-rssringoccs_Complex_Erfc(rssringoccs_ComplexDouble z);
+rssringoccs_ComplexDouble_Erfc(rssringoccs_ComplexDouble z);
 
 extern rssringoccs_ComplexDouble
-rssringoccs_Complex_Faddeeva(rssringoccs_ComplexDouble z);
+rssringoccs_ComplexDouble_Faddeeva(rssringoccs_ComplexDouble z);
 
 #endif
 /*  End of include guard.                                                     */

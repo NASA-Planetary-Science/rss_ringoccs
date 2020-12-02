@@ -57,9 +57,9 @@ static rssringoccs_ComplexDouble f(rssringoccs_ComplexDouble z)
     rssringoccs_ComplexDouble z_cubed, z_cubed_minus_1;
 
     z_cubed =
-        rssringoccs_Complex_Multiply(rssringoccs_Complex_Multiply(z, z), z);
+        rssringoccs_ComplexDouble_Multiply(rssringoccs_ComplexDouble_Multiply(z, z), z);
 
-    z_cubed_minus_1 = rssringoccs_Complex_Subtract(z_cubed,
+    z_cubed_minus_1 = rssringoccs_ComplexDouble_Subtract(z_cubed,
                                                    rssringoccs_Complex_One);
 
     return z_cubed_minus_1;
@@ -69,7 +69,7 @@ static rssringoccs_ComplexDouble f(rssringoccs_ComplexDouble z)
 static rssringoccs_ComplexDouble f_prime(rssringoccs_ComplexDouble z)
 {
     rssringoccs_ComplexDouble w;
-    w = rssringoccs_Complex_Scale(3.0, rssringoccs_Complex_Multiply(z, z));
+    w = rssringoccs_ComplexDouble_Multiply_Real(3.0, rssringoccs_ComplexDouble_Multiply(z, z));
     return w;
 }
 
@@ -177,15 +177,15 @@ int main(void)
                                                               max_iters);
 
                     /*  Find which root the final iteration is closest too.   */
-                    min = rssringoccs_Complex_Abs(
-                        rssringoccs_Complex_Subtract(root, roots[0])
+                    min = rssringoccs_ComplexDouble_Abs(
+                        rssringoccs_ComplexDouble_Subtract(root, roots[0])
                     );
                     ind = 0;
 
                     for (n=1; n<NRoots; ++n)
                     {
-                        temp = rssringoccs_Complex_Abs(
-                            rssringoccs_Complex_Subtract(root, roots[n])
+                        temp = rssringoccs_ComplexDouble_Abs(
+                            rssringoccs_ComplexDouble_Subtract(root, roots[n])
                         );
                         if (temp < min) {
                             min = temp;

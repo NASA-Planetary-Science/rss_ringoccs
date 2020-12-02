@@ -77,7 +77,7 @@ rssringoccs_Complex_Ringlet_Diffraction(double x, double a, double b, double F)
 
     /*  The ringlet is just 1 - gap, so compute the gap and subtract.         */
     gap = rssringoccs_Complex_Gap_Diffraction(x, a, b, F);
-    out = rssringoccs_Complex_Subtract(rssringoccs_Complex_One, gap);
+    out = rssringoccs_ComplexDouble_Subtract_Real(1.0, gap);
 
     return out;
 }

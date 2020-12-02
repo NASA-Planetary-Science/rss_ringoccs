@@ -47,7 +47,8 @@
 #include <rss_ringoccs/include/rss_ringoccs_complex.h>
 
 /*  Compute the complex exponential of a complex number z = x + iy.           */
-rssringoccs_ComplexDouble rssringoccs_Complex_Exp(rssringoccs_ComplexDouble z)
+rssringoccs_ComplexDouble
+rssringoccs_ComplexDouble_Exp(rssringoccs_ComplexDouble z)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     rssringoccs_ComplexDouble exp_z;
@@ -55,8 +56,8 @@ rssringoccs_ComplexDouble rssringoccs_Complex_Exp(rssringoccs_ComplexDouble z)
     double exp_real, exp_z_real, exp_z_imag;
 
     /*  Extract the real and imaginary part from z.                           */
-    real = rssringoccs_Complex_Real_Part(z);
-    imag = rssringoccs_Complex_Imag_Part(z);
+    real = rssringoccs_ComplexDouble_Real_Part(z);
+    imag = rssringoccs_ComplexDouble_Imag_Part(z);
 
     /*  We'll use the fact that exp(x+iy) = exp(x)*exp(iy). Then we'll use    *
      *  Euler's formula to write exp(iy) as cos(y) + i*sin(y), giving us      *
@@ -66,6 +67,6 @@ rssringoccs_ComplexDouble rssringoccs_Complex_Exp(rssringoccs_ComplexDouble z)
     exp_z_imag = exp_real * rssringoccs_Double_Sin(imag);
 
     /*  Use rssringoccs_Complex_Rect to create the output and return.         */
-    exp_z = rssringoccs_Complex_Rect(exp_z_real, exp_z_imag);
+    exp_z = rssringoccs_ComplexDouble_Rect(exp_z_real, exp_z_imag);
     return exp_z;
 }

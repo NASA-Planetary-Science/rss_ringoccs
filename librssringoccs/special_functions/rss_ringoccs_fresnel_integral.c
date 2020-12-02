@@ -81,6 +81,6 @@ rssringoccs_ComplexDouble rssringoccs_Complex_Fresnel_Integral(double x)
     cx = sgn_x*(SQRT_PI_BY_8 - R*rssringoccs_Double_Sin(A));
     sx = sgn_x*(SQRT_PI_BY_8 - R*rssringoccs_Double_Cos(A));
 
-    out = rssringoccs_Complex_Rect(cx, sx);
+    out = rssringoccs_ComplexDouble_Rect(cx, sx);
     return out;
 }

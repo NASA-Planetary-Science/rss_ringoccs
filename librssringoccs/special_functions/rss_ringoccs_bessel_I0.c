@@ -382,20 +382,20 @@ rssringoccs_Complex_Bessel_I0(rssringoccs_ComplexDouble z)
     double abs_z, abs_z_real, z_real, z_imag, real_bessel;
 
     /*  Extract the real part of z.                                           */
-    z_real = rssringoccs_Complex_Real_Part(z);
+    z_real = rssringoccs_ComplexDouble_Real_Part(z);
 
     /*  Compute the magnitude of z and the absolute value of its real part.   */
-    abs_z = rssringoccs_Complex_Abs(z);
+    abs_z = rssringoccs_ComplexDouble_Abs(z);
 
     /*  If the real part is zero we obtain the Bessel J0 function.            */
     if (z_real == 0)
     {
         /*  Compute the imaginary part of z and use this to compute Bessel J0.*/
-        z_imag = rssringoccs_Complex_Imag_Part(z);
+        z_imag = rssringoccs_ComplexDouble_Imag_Part(z);
         real_bessel = rssringoccs_Double_Bessel_J0(z_imag);
 
         /*  The output is I0 = J0 + 0*Imaginary_Unit.                         */
-        bessel_I0 = rssringoccs_Complex_Rect(real_bessel, 0.0);
+        bessel_I0 = rssringoccs_ComplexDouble_Rect(real_bessel, 0.0);
         return bessel_I0;
     }
 
@@ -404,7 +404,7 @@ rssringoccs_Complex_Bessel_I0(rssringoccs_ComplexDouble z)
      *  change the output, however the asymptotic expansion requires z to lie *
      *  in the right part of the plane.                                       */
     if (z_real < 0.0)
-        z = rssringoccs_Complex_Scale(-1.0, z);
+        z = rssringoccs_ComplexDouble_Multiply_Real(-1.0, z);
 
     /*  The magnitude of the real part determines if we can use the           *
      *  asymptotic expansion or not. Large real parts result in float         *
@@ -415,8 +415,8 @@ rssringoccs_Complex_Bessel_I0(rssringoccs_ComplexDouble z)
     if (abs_z < 16.0)
     {
         /*  The series is in powers of z^2, so use Horner's method with that. */
-        arg = rssringoccs_Complex_Multiply(z, z);
-        bessel_I0 = rssringoccs_Complex_Poly_Real_Coeffs(
+        arg = rssringoccs_ComplexDouble_Multiply(z, z);
+        bessel_I0 = rssringoccs_ComplexDouble_Poly_Real_Coeffs(
             __taylor_double, __taylor_double_deg, arg
         );
 
@@ -428,24 +428,24 @@ rssringoccs_Complex_Bessel_I0(rssringoccs_ComplexDouble z)
     else if (abs_z_real < MAX_DOUBLE_BASE_E)
     {
         /*  The asymptotic expansion is in terms of 1/z.                      */
-        arg = rssringoccs_Complex_Reciprocal(z);
-        bessel_I0 = rssringoccs_Complex_Poly_Real_Coeffs(
+        arg = rssringoccs_ComplexDouble_Reciprocal(z);
+        bessel_I0 = rssringoccs_ComplexDouble_Poly_Real_Coeffs(
             __asym_double, __asym_double_deg, arg
         );
 
         /*  Multiply by the coefficient factor and return.                    */
-        arg = rssringoccs_Complex_Scale(TWO_PI, z);
-        exp_arg = rssringoccs_Complex_Exp(z);
+        arg = rssringoccs_ComplexDouble_Multiply_Real(TWO_PI, z);
+        exp_arg = rssringoccs_ComplexDouble_Exp(z);
         sqrt_arg = rssringoccs_Complex_Sqrt(arg);
-        arg = rssringoccs_Complex_Divide(exp_arg, sqrt_arg);
-        bessel_I0 = rssringoccs_Complex_Multiply(bessel_I0, arg);
+        arg = rssringoccs_ComplexDouble_Divide(exp_arg, sqrt_arg);
+        bessel_I0 = rssringoccs_ComplexDouble_Multiply(bessel_I0, arg);
     }
 
     /*  For very large inputs, return INFINITY. INFINITY is standard in C99,  *
      *  and provided in rss_ringoccs_math.h otherwise.                        */
     else
-        bessel_I0 = rssringoccs_Complex_Rect(rssringoccs_Infinity,
-                                             rssringoccs_Infinity);
+        bessel_I0 = rssringoccs_ComplexDouble_Rect(rssringoccs_Infinity,
+                                                   rssringoccs_Infinity);
 
     return bessel_I0;
 }

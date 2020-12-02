@@ -83,56 +83,56 @@ rssringoccs_Halleys_Method_Complex(
     w_prime = f_prime(z);
     w_2prime = f_2prime(z);
 
-    denom = rssringoccs_Complex_Subtract(
-        rssringoccs_Complex_Scale(
-            2.0 , rssringoccs_Complex_Multiply(w_prime, w_prime)
+    denom = rssringoccs_ComplexDouble_Subtract(
+        rssringoccs_ComplexDouble_Multiply_Real(
+            2.0 , rssringoccs_ComplexDouble_Multiply(w_prime, w_prime)
         ),
-        rssringoccs_Complex_Multiply(w, w_2prime)
+        rssringoccs_ComplexDouble_Multiply(w, w_2prime)
     );
 
     /*  Check that the denominator is non-zero.                               */
-    if (rssringoccs_Complex_Compare(denom, rssringoccs_Complex_Zero))
+    if (rssringoccs_ComplexDouble_Compare(denom, rssringoccs_Complex_Zero))
         return rssringoccs_Complex_NaN;
 
     /*  Compute the first iteration of Newton-Raphson.                        */
-    dz = rssringoccs_Complex_Divide(
-        rssringoccs_Complex_Scale(
-            2.0, rssringoccs_Complex_Multiply(w, w_prime)
+    dz = rssringoccs_ComplexDouble_Divide(
+        rssringoccs_ComplexDouble_Multiply_Real(
+            2.0, rssringoccs_ComplexDouble_Multiply(w, w_prime)
         ),
         denom
     );
 
-    z = rssringoccs_Complex_Subtract(z, dz);
+    z = rssringoccs_ComplexDouble_Subtract(z, dz);
 
     /*  The first iteration has been computed above, so set n to 1.           */
     n = 1;
 
     /*  Continuing this computation until the error is below the threshold.   */
-    while(rssringoccs_Complex_Abs(dz) > EPS)
+    while(rssringoccs_ComplexDouble_Abs(dz) > EPS)
     {
         w = f(z);
         w_prime = f_prime(z);
         w_2prime = f_2prime(z);
 
-        denom = rssringoccs_Complex_Subtract(
-            rssringoccs_Complex_Scale(
-                2.0 , rssringoccs_Complex_Multiply(w_prime, w_prime)
+        denom = rssringoccs_ComplexDouble_Subtract(
+            rssringoccs_ComplexDouble_Multiply_Real(
+                2.0 , rssringoccs_ComplexDouble_Multiply(w_prime, w_prime)
             ),
-            rssringoccs_Complex_Multiply(w, w_2prime)
+            rssringoccs_ComplexDouble_Multiply(w, w_2prime)
         );
 
         /*  Check that the denominator is non-zero.                           */
-        if (rssringoccs_Complex_Compare(denom, rssringoccs_Complex_Zero))
+        if (rssringoccs_ComplexDouble_Compare(denom, rssringoccs_Complex_Zero))
             return rssringoccs_Complex_NaN;
 
-        dz = rssringoccs_Complex_Divide(
-            rssringoccs_Complex_Scale(
-                2.0, rssringoccs_Complex_Multiply(w, w_prime)
+        dz = rssringoccs_ComplexDouble_Divide(
+            rssringoccs_ComplexDouble_Multiply_Real(
+                2.0, rssringoccs_ComplexDouble_Multiply(w, w_prime)
             ),
             denom
         );
 
-        z = rssringoccs_Complex_Subtract(z, dz);
+        z = rssringoccs_ComplexDouble_Subtract(z, dz);
         ++n;
 
         /*  Break if too many iterations have been run.                       */

@@ -105,16 +105,16 @@ void rssringoccs_Easy_Complex_Plots(
             z_x = x * (x_max - x_min) * x_rcp_factor + x_min;
 
             /*  Set z to x+iy.                                                */
-            z = rssringoccs_Complex_Rect(z_x, z_y);
+            z = rssringoccs_ComplexDouble_Rect(z_x, z_y);
 
             /*  Compute the complex cosine of z.                              */
             w = func(z);
 
             /*  Extract the real and imaginary parts of w.                    */
-            w_x = rssringoccs_Complex_Real_Part(w);
-            w_y = rssringoccs_Complex_Imag_Part(w);
-            arg = rssringoccs_Complex_Argument(w);
-            mag = rssringoccs_Complex_Abs(w);
+            w_x = rssringoccs_ComplexDouble_Real_Part(w);
+            w_y = rssringoccs_ComplexDouble_Imag_Part(w);
+            arg = rssringoccs_ComplexDouble_Argument(w);
+            mag = rssringoccs_ComplexDouble_Abs(w);
 
             /*  Color the current pixel.                                      */
             rssringoccs_RGB_Scaled_Gradient(w_x, fp[0]);

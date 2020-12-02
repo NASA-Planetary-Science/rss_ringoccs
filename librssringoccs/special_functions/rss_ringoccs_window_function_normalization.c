@@ -48,9 +48,9 @@ rssringoccs_Complex_Window_Normalization(rssringoccs_ComplexDouble *ker,
     rssringoccs_ComplexDouble T1 = rssringoccs_Complex_Zero;
 
     for (n=0; n<dim; ++n)
-        T1 = rssringoccs_Complex_Add(T1, ker[n]);
+        T1 = rssringoccs_ComplexDouble_Add(T1, ker[n]);
 
-    abs_T1 = dx*rssringoccs_Complex_Abs(T1);
+    abs_T1 = dx*rssringoccs_ComplexDouble_Abs(T1);
 
     /* Return the normalization factor.                                       */
     out = SQRT_2 * f_scale / abs_T1;

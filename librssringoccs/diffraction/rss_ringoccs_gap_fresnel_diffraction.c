@@ -80,7 +80,7 @@ rssringoccs_Complex_Gap_Diffraction(double x, double a, double b, double F)
     rssringoccs_ComplexDouble z1, z2, out, scale;
 
     /*  The scale factor for the integral is (1-i)/sqrt(2 pi).                */
-    scale = rssringoccs_Complex_Rect(SQRT_ONE_BY_TWO_PI, -SQRT_ONE_BY_TWO_PI);
+    scale = rssringoccs_ComplexDouble_Rect(SQRT_ONE_BY_TWO_PI, -SQRT_ONE_BY_TWO_PI);
 
     /*  The bounds of the integral are sqrt(pi/2)(a-x)/F and                  *
      *  sqrt(pi/2)(b-x)/F, and the output is computed in terms of this.       */
@@ -93,8 +93,8 @@ rssringoccs_Complex_Gap_Diffraction(double x, double a, double b, double F)
 
     /*  The output is the difference of z2 and z1 scaled by the factor        *
      *  sqrt(1/2 pi) * (1 - i), so compute this.                              */
-    out = rssringoccs_Complex_Subtract(z2, z1);
-    out = rssringoccs_Complex_Multiply(out, scale);
+    out = rssringoccs_ComplexDouble_Subtract(z2, z1);
+    out = rssringoccs_ComplexDouble_Multiply(out, scale);
 
     return out;
 }

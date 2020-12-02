@@ -72,7 +72,6 @@ int main(void)
 
             rssringoccs_RGB_Linear_Gradient((double)n, 0, maxIterations-1, fp);
         }
-        printf("%d\n", y);
     }
     return 0;
 }

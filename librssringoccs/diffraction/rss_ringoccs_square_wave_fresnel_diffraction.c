@@ -75,7 +75,7 @@ rssringoccs_Complex_Square_Wave_Diffraction(double x, double W,
         b += 2*W;
 
         summand = rssringoccs_Complex_Gap_Diffraction(x, a, b, F);
-        T_hat = rssringoccs_Complex_Add(summand, T_hat);
+        T_hat = rssringoccs_ComplexDouble_Add(summand, T_hat);
     }
     return T_hat;
 }

@@ -5,14 +5,15 @@
 /*  Where the prototypes are declared and where complex types are defined.    */
 #include <rss_ringoccs/include/rss_ringoccs_complex.h>
 
-rssringoccs_ComplexDouble rssringoccs_Complex_Erfc(rssringoccs_ComplexDouble z)
+rssringoccs_ComplexDouble
+rssringoccs_ComplexDouble_Erfc(rssringoccs_ComplexDouble z)
 {
     double z_x, z_y, w_x, w_y;
     double mRe_z2, mIm_z2;
     rssringoccs_ComplexDouble w, temp;
 
-    z_x = rssringoccs_Complex_Real_Part(z);
-    z_y = rssringoccs_Complex_Imag_Part(z);
+    z_x = rssringoccs_ComplexDouble_Real_Part(z);
+    z_y = rssringoccs_ComplexDouble_Imag_Part(z);
 
     if (z_x == 0.0)
     {
@@ -30,7 +31,7 @@ rssringoccs_ComplexDouble rssringoccs_Complex_Erfc(rssringoccs_ComplexDouble z)
         else
             w_y = -exp(z_y*z_y) * rssringoccs_Double_Faddeeva_Im(z_y);
 
-        w = rssringoccs_Complex_Rect(w_x, w_y);
+        w = rssringoccs_ComplexDouble_Rect(w_x, w_y);
     }
     else if (z_y == 0.0)
     {
@@ -43,7 +44,7 @@ rssringoccs_ComplexDouble rssringoccs_Complex_Erfc(rssringoccs_ComplexDouble z)
             else
                 w_x = 2.0;
 
-            w = rssringoccs_Complex_Rect(w_x, w_y);
+            w = rssringoccs_ComplexDouble_Rect(w_x, w_y);
         }
         else
         {
@@ -53,7 +54,7 @@ rssringoccs_ComplexDouble rssringoccs_Complex_Erfc(rssringoccs_ComplexDouble z)
             else
                 w_x = 2.0 - exp(-z_x*z_x) * rssringoccs_Double_Erfcx(z_x);
 
-            w = rssringoccs_Complex_Rect(w_x, w_y);
+            w = rssringoccs_ComplexDouble_Rect(w_x, w_y);
         }
     }
     else
@@ -71,28 +72,26 @@ rssringoccs_ComplexDouble rssringoccs_Complex_Erfc(rssringoccs_ComplexDouble z)
                 w_x = 0.0;
             else
                 w_x = 2.0;
-            w = rssringoccs_Complex_Rect(w_x, w_y);
+            w = rssringoccs_ComplexDouble_Rect(w_x, w_y);
         }
         else
         {
             if (z_x >= 0.0)
             {
-                temp = rssringoccs_Complex_Rect(mRe_z2, mIm_z2);
-                temp = rssringoccs_Complex_Exp(temp);
-                w = rssringoccs_Complex_Rect(-z_y, z_x);
-                w = rssringoccs_Complex_Faddeeva(w);
-                w = rssringoccs_Complex_Multiply(w, temp);
+                temp = rssringoccs_ComplexDouble_Rect(mRe_z2, mIm_z2);
+                temp = rssringoccs_ComplexDouble_Exp(temp);
+                w = rssringoccs_ComplexDouble_Rect(-z_y, z_x);
+                w = rssringoccs_ComplexDouble_Faddeeva(w);
+                w = rssringoccs_ComplexDouble_Multiply(w, temp);
             }
             else
             {
-                temp = rssringoccs_Complex_Rect(mRe_z2, mIm_z2);
-                temp = rssringoccs_Complex_Exp(temp);
-                w = rssringoccs_Complex_Rect(z_y, -z_x);
-                w = rssringoccs_Complex_Faddeeva(w);
-                w = rssringoccs_Complex_Multiply(w, temp);
-                w = rssringoccs_Complex_Subtract(
-                    rssringoccs_Complex_Rect(2.0, 0.0), w
-                );
+                temp = rssringoccs_ComplexDouble_Rect(mRe_z2, mIm_z2);
+                temp = rssringoccs_ComplexDouble_Exp(temp);
+                w = rssringoccs_ComplexDouble_Rect(z_y, -z_x);
+                w = rssringoccs_ComplexDouble_Faddeeva(w);
+                w = rssringoccs_ComplexDouble_Multiply(w, temp);
+                w = rssringoccs_ComplexDouble_Subtract_Real(2.0, w);
             }
         }
     }

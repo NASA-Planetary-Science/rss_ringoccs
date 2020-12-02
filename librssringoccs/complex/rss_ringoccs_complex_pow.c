@@ -48,50 +48,6 @@
  *      Frozen for v1.3.                                                      *
  ******************************************************************************/
 
-/******************************************************************************
- *  Example:                                                                  *
- *      Let's compute the complex power i^i and ((1+i)/sqrt(2))^2             *
- *                                                                            *
- *          #include <rss_ringoccs/src/complex/rss_ringoccs_complex.h>        *
- *          #include <stdio.h>                                                *
- *                                                                            *
- *          int main(void)                                                    *
- *          {                                                                 *
- *              rssringoccs_ComplexDouble z, pow;                             *
- *              double re, im;                                                *
- *                                                                            *
- *              pow = rssringoccs_Complex_Pow(rssringoccs_Imaginary_Unit,     *
- *                                            rssringoccs_Imaginary_Unit);    *
- *              re = rssringoccs_Complex_Real_Part(pow);                      *
- *              im = rssringoccs_Complex_Imag_Part(pow);                      *
- *              printf("i^i = %f + i%f\n", re, im);                           *
- *                                                                            *
- *              z = rssringoccs_Complex_Rect(0.7071067811865476,              *
- *                                           0.7071067811865476);             *
- *              pow = rssringoccs_Complex_Real_Pow(z, 2);                     *
- *              re = rssringoccs_Complex_Real_Part(pow);                      *
- *              im = rssringoccs_Complex_Imag_Part(pow);                      *
- *              printf("((1+i)/sqrt(2))^2 = %f + i%f\n", re, im);             *
- *              return 0;                                                     *
- *          }                                                                 *
- *                                                                            *
- *      Naming this test.c and placing it in rss_ringoccs/src/ we can compile *
- *      this with:                                                            *
- *                                                                            *
- *          gcc -I../../ -L/usr/local/lib/ test.c -o test -lrssringoccs       *
- *                                                                            *
- *      If librssringoccs is not in /usr/local/lib/ (this is the default      *
- *      location it is placed in when built via config_src.sh), then change   *
- *      the -L option to the correct location. Change the -I location so that *
- *      rss_ringoccs/ is in your path, if needed.                             *
- *                                                                            *
- *      Running the executable with ./test, this outputs:                     *
- *          i^i = 0.207880 + i0.000000                                        *
- *          ((1+i)/sqrt(2))^2 = 0.000000 + i1.000000                          *
- *      So, oddly enough, i^i is a real number. It is exp(-pi/2). This also   *
- *      shows that (1+i)/sqrt(2) is a square root of i.                       *
- ******************************************************************************/
-
 /*  Header file which contains aliases for the function in the standard C     *
  *  library math.h. This allows compatibility of C89 and C99 math.h headers.  */
 #include <rss_ringoccs/include/rss_ringoccs_math.h>
@@ -109,13 +65,13 @@ rssringoccs_Complex_Pow(rssringoccs_ComplexDouble z0,
 
     /*  We can write x^y as exp(y ln(x)) and this is how we'll compute for    *
      *  complex powers. First compute log(z1).                                */
-    ln_z0 = rssringoccs_Complex_Log(z0);
+    ln_z0 = rssringoccs_ComplexDouble_Log(z0);
 
     /*  Next use rssringoccs_Complex_Multiply to compute the product with z0. */
-    z1_ln_z0 = rssringoccs_Complex_Multiply(z1, ln_z0);
+    z1_ln_z0 = rssringoccs_ComplexDouble_Multiply(z1, ln_z0);
 
     /*  And finally exponentiate.                                             */
-    z0_to_the_z1 = rssringoccs_Complex_Exp(z1_ln_z0);
+    z0_to_the_z1 = rssringoccs_ComplexDouble_Exp(z1_ln_z0);
     return z0_to_the_z1;
 }
 
@@ -128,12 +84,12 @@ rssringoccs_Complex_Real_Pow(rssringoccs_ComplexDouble z, double x)
 
     /*  We can write z^x as exp(x ln(z)) and this is how we'll compute for    *
      *  complex powers. First compute log(z).                                 */
-    ln_z = rssringoccs_Complex_Log(z);
+    ln_z = rssringoccs_ComplexDouble_Log(z);
 
     /*  Next use rssringoccs_Complex_Scale to compute the product with x.     */
-    x_ln_z = rssringoccs_Complex_Scale(x, ln_z);
+    x_ln_z = rssringoccs_ComplexDouble_Multiply_Real(x, ln_z);
 
     /*  And finally exponentiate.                                             */
-    z_to_the_x = rssringoccs_Complex_Exp(x_ln_z);
+    z_to_the_x = rssringoccs_ComplexDouble_Exp(x_ln_z);
     return z_to_the_x;
 }

@@ -278,7 +278,7 @@ double rssringoccs_Double_Fresnel_Sin(double x)
     return sx;
 }
 
-long double rssringoccs_LongDouble_Fresnel_Sin(long double x)
+long double rssringoccs_LDouble_Fresnel_Sin(long double x)
 {
     /* Variables for S(x) and powers of x, respectively. */
     long double sx;
@@ -321,8 +321,8 @@ long double rssringoccs_LongDouble_Fresnel_Sin(long double x)
     }
     else if (arg < 1.0e16)
     {
-        cos_x_squared = rssringoccs_LongDouble_Cos(arg);
-        sin_x_squared = rssringoccs_LongDouble_Sin(arg);
+        cos_x_squared = rssringoccs_LDouble_Cos(arg);
+        sin_x_squared = rssringoccs_LDouble_Sin(arg);
 
         arg = 1.0/arg;
         cos_x_squared *= arg;

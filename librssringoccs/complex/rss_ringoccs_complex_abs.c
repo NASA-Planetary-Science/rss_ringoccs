@@ -38,6 +38,8 @@
  ******************************************************************************
  *  2020/12/01 (Ryan Maguire):                                                *
  *      Added abs squared functions.                                          *
+ *  2020/12/02 (Ryan Maguire):                                                *
+ *      Moved abs squared functions to their own file.                        *
  *      Frozen for v1.3.                                                      *
  ******************************************************************************/
 
@@ -53,52 +55,52 @@
 #if _RSS_RINGOCCS_USING_COMPLEX_H_ == 0
 
 /*  Single precision complex abs function (cabsf equivalent).                 */
-float rssringoccs_ComplexFloat_Abs(rssringoccs_ComplexFloat z)
+float rssringoccs_CFloat_Abs(rssringoccs_ComplexFloat z)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     float real, imag, abs_value;
 
     /*  Extract the real and imaginary parts from the input complex number.   */
-    real = rssringoccs_ComplexFloat_Real_Part(z);
-    imag = rssringoccs_ComplexFloat_Imag_Part(z);
+    real = rssringoccs_CFloat_Real_Part(z);
+    imag = rssringoccs_CFloat_Imag_Part(z);
 
     /*  The absolute value is just sqrt(x^2 + y^2) so compute this.           */
     abs_value = rssringoccs_Float_Sqrt(real*real + imag*imag);
     return abs_value;
 }
-/*  End of rssringoccs_ComplexFloat_Abs.                                      */
+/*  End of rssringoccs_CFloat_Abs.                                            */
 
 /*  Double precision complex abs function (cabs equivalent).                  */
-double rssringoccs_ComplexDouble_Abs(rssringoccs_ComplexDouble z)
+double rssringoccs_CDouble_Abs(rssringoccs_ComplexDouble z)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     double real, imag, abs_value;
 
     /*  Extract the real and imaginary parts from the input complex number.   */
-    real = rssringoccs_ComplexDouble_Real_Part(z);
-    imag = rssringoccs_ComplexDouble_Imag_Part(z);
+    real = rssringoccs_CDouble_Real_Part(z);
+    imag = rssringoccs_CDouble_Imag_Part(z);
 
     /*  The absolute value is just sqrt(x^2 + y^2) so compute this.           */
     abs_value = rssringoccs_Double_Sqrt(real*real + imag*imag);
     return abs_value;
 }
-/*  End of rssringoccs_ComplexDouble_Abs.                                     */
+/*  End of rssringoccs_CDouble_Abs.                                           */
 
 /*  Long double precision complex abs function (cabsl equivalent).            */
-long double rssringoccs_ComplexLongDouble_Abs(rssringoccs_ComplexLongDouble z)
+long double rssringoccs_CLDouble_Abs(rssringoccs_ComplexLongDouble z)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     long double real, imag, abs_value;
 
     /*  Extract the real and imaginary parts from the input complex number.   */
-    real = rssringoccs_ComplexLongDouble_Real_Part(z);
-    imag = rssringoccs_ComplexLongDouble_Imag_Part(z);
+    real = rssringoccs_CLDouble_Real_Part(z);
+    imag = rssringoccs_CLDouble_Imag_Part(z);
 
     /*  The absolute value is just sqrt(x^2 + y^2) so compute this.           */
-    abs_value = rssringoccs_LongDouble_Sqrt(real*real + imag*imag);
+    abs_value = rssringoccs_LDouble_Sqrt(real*real + imag*imag);
     return abs_value;
 }
-/*  End of rssringoccs_ComplexLongDouble_Abs.                                 */
+/*  End of rssringoccs_CLDouble_Abs.                                          */
 
 #else
 /*  Else statement for #if _RSS_RINGOCCS_USING_COMPLEX_H_ == 0.               */
@@ -107,77 +109,25 @@ long double rssringoccs_ComplexLongDouble_Abs(rssringoccs_ComplexLongDouble z)
  *  functions found in the library.                                           */
 
 /*  Single precision absolute value function, alias for cabsf.                */
-float rssringoccs_ComplexFloat_Abs(rssringoccs_ComplexFloat z)
+float rssringoccs_CFloat_Abs(rssringoccs_ComplexFloat z)
 {
     return cabsf(z);
 }
-/*  End of rssringoccs_ComplexFloat_Abs.                                      */
+/*  End of rssringoccs_CFloat_Abs.                                            */
 
 /*  Double precision absolute value function, alias for cabs.                 */
-double rssringoccs_ComplexDouble_Abs(rssringoccs_ComplexDouble z)
+double rssringoccs_CDouble_Abs(rssringoccs_ComplexDouble z)
 {
     return cabs(z);
 }
-/*  End of rssringoccs_ComplexDouble_Abs.                                     */
+/*  End of rssringoccs_CDouble_Abs.                                           */
 
 /*  Long double precision absolute value function, alias for cabsl.           */
-long double rssringoccs_ComplexLongDouble_Abs(rssringoccs_ComplexLongDouble z)
+long double rssringoccs_CLDouble_Abs(rssringoccs_ComplexLongDouble z)
 {
     return cabsl(z);
 }
-/*  End of rssringoccs_ComplexLongDouble_Abs.                                 */
+/*  End of rssringoccs_CLDouble_Abs.                                          */
 
 #endif
 /*  End of #if _RSS_RINGOCCS_USING_COMPLEX_H_ == 0.                           */
-
-/*  C99 does not provide |z|^2 functions, so we can use the same algorithm    *
- *  for both the C89 and C99 renditions of rss_ringoccs.                      */
-
-/*  Single precision abs squared function.                                    */
-float rssringoccs_ComplexFloat_Abs_Squared(rssringoccs_ComplexFloat z)
-{
-    /*  Declare necessary variables. C89 requires declarations at the top.    */
-    float real, imag, abs_sq;
-
-    /*  Extract the real and imaginary parts from the input complex number.   */
-    real = rssringoccs_ComplexFloat_Real_Part(z);
-    imag = rssringoccs_ComplexFloat_Imag_Part(z);
-
-    /*  |z|^2 = x^2 + y^2 so compute this.                                    */
-    abs_sq = real*real + imag*imag;
-    return abs_sq;
-}
-/*  End of rssringoccs_ComplexFloat_Abs_Square.                               */
-
-/*  Double precision abs squared function.                                    */
-double rssringoccs_ComplexDouble_Abs_Squared(rssringoccs_ComplexDouble z)
-{
-    /*  Declare necessary variables. C89 requires declarations at the top.    */
-    double real, imag, abs_sq;
-
-    /*  Extract the real and imaginary parts from the input complex number.   */
-    real = rssringoccs_ComplexDouble_Real_Part(z);
-    imag = rssringoccs_ComplexDouble_Imag_Part(z);
-
-    /*  |z|^2 = x^2 + y^2 so compute this.                                    */
-    abs_sq = real*real + imag*imag;
-    return abs_sq;
-}
-/*  End of rssringoccs_ComplexDouble_Abs_Square.                              */
-
-/*  Long double precision abs squared function.                               */
-long double
-rssringoccs_ComplexLongDouble_Abs_Squared(rssringoccs_ComplexLongDouble z)
-{
-    /*  Declare necessary variables. C89 requires declarations at the top.    */
-    long double real, imag, abs_sq;
-
-    /*  Extract the real and imaginary parts from the input complex number.   */
-    real = rssringoccs_ComplexLongDouble_Real_Part(z);
-    imag = rssringoccs_ComplexLongDouble_Imag_Part(z);
-
-    /*  |z|^2 = x^2 + y^2 so compute this.                                    */
-    abs_sq = real*real + imag*imag;
-    return abs_sq;
-}
-/*  End of rssringoccs_ComplexLongDouble_Abs_Square.                          */

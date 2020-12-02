@@ -33,4 +33,4 @@ type rssringoccs_##Type##_Coss_Window(type x, type W)                          \
 
 _define_coss_window(float, Float)
 _define_coss_window(double, Double)
-_define_coss_window(long double, LongDouble)
+_define_coss_window(long double, LDouble)

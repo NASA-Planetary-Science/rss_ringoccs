@@ -38,7 +38,7 @@
 #if _RSS_RINGOCCS_USING_COMPLEX_H_ == 0
 
 /*  Create single precision complex numbers in Cartesian coordinates.         */
-rssringoccs_ComplexFloat rssringoccs_ComplexFloat_Rect(float x, float y)
+rssringoccs_ComplexFloat rssringoccs_CFloat_Rect(float x, float y)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     rssringoccs_ComplexFloat z;
@@ -48,10 +48,10 @@ rssringoccs_ComplexFloat rssringoccs_ComplexFloat_Rect(float x, float y)
     z.dat[1] = y;
     return z;
 }
-/*  End of rssringoccs_ComplexFloat_Rect.                                     */
+/*  End of rssringoccs_CFloat_Rect.                                     */
 
 /*  Create double precision complex numbers in Cartesian coordinates.         */
-rssringoccs_ComplexDouble rssringoccs_ComplexDouble_Rect(double x, double y)
+rssringoccs_ComplexDouble rssringoccs_CDouble_Rect(double x, double y)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     rssringoccs_ComplexDouble z;
@@ -61,11 +61,11 @@ rssringoccs_ComplexDouble rssringoccs_ComplexDouble_Rect(double x, double y)
     z.dat[1] = y;
     return z;
 }
-/*  End of rssringoccs_ComplexDouble_Rect.                                    */
+/*  End of rssringoccs_CDouble_Rect.                                    */
 
 /*  Create long double precision complex numbers in Cartesian coordinates.    */
 rssringoccs_ComplexLongDouble
-rssringoccs_ComplexLongDouble_Rect(long double x, long double y)
+rssringoccs_CLDouble_Rect(long double x, long double y)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     rssringoccs_ComplexLongDouble z;
@@ -75,32 +75,32 @@ rssringoccs_ComplexLongDouble_Rect(long double x, long double y)
     z.dat[1] = y;
     return z;
 }
-/*  End of rssringoccs_ComplexLongDouble_Rect.                                */
+/*  End of rssringoccs_CLDouble_Rect.                                */
 
 #else
 /*  Else statement for #if _RSS_RINGOCCS_USING_COMPLEX_H_ == 0.               */
 
 /*  Create single precision complex numbers in Cartesian coordinates.         */
-rssringoccs_ComplexFloat rssringoccs_ComplexFloat_Rect(float x, float y)
+rssringoccs_ComplexFloat rssringoccs_CFloat_Rect(float x, float y)
 {
     return x + _Complex_I*y;
 }
-/*  End of rssringoccs_ComplexFloat_Rect.                                     */
+/*  End of rssringoccs_CFloat_Rect.                                     */
 
 /*  Create double precision complex numbers in Cartesian coordinates.         */
-rssringoccs_ComplexDouble rssringoccs_ComplexDouble_Rect(double x, double y)
+rssringoccs_ComplexDouble rssringoccs_CDouble_Rect(double x, double y)
 {
     return x + _Complex_I*y;
 }
-/*  End of rssringoccs_ComplexDouble_Rect.                                    */
+/*  End of rssringoccs_CDouble_Rect.                                    */
 
 /*  Create long double precision complex numbers in Cartesian coordinates.    */
 rssringoccs_ComplexLongDouble
-rssringoccs_ComplexLongDouble_Rect(long double x, long double y)
+rssringoccs_CLDouble_Rect(long double x, long double y)
 {
     return x + _Complex_I*y;
 }
-/*  End of rssringoccs_ComplexLongDouble_Rect.                                */
+/*  End of rssringoccs_CLDouble_Rect.                                */
 
 #endif
 /*  End of #if _RSS_RINGOCCS_USING_COMPLEX_H_ == 0.                           */

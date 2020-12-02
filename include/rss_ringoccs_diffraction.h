@@ -25,7 +25,7 @@ rssringoccs_Complex_Square_Wave_Diffraction(double x, double W,
                                             double F, unsigned int N);
 
 extern long double
-rssringoccs_LongDouble_Ringlet_Diffraction_Phase(long double x, long double a,
+rssringoccs_LDouble_Ringlet_Diffraction_Phase(long double x, long double a,
                                                  long double b, long double F);
 
 /*  Left and right straightedge modeling tools.                               */
@@ -49,7 +49,7 @@ rssringoccs_Double_One_Slit_Fraunhofer_Diffraction(double x, double z,
                                                    double a);
 
 extern long double
-rssringoccs_LongDouble_One_Slit_Fraunhofer_Diffraction(long double x,
+rssringoccs_LDouble_One_Slit_Fraunhofer_Diffraction(long double x,
                                                        long double z,
                                                        long double a);
 
@@ -66,7 +66,7 @@ rssringoccs_Double_Two_Slit_Fraunhofer_Diffraction(double x, double z, double a,
                                                    double d, double lambda);
 
 extern long double
-rssringoccs_LongDouble_Two_Slit_Fraunhofer_Diffraction(long double x,
+rssringoccs_LDouble_Two_Slit_Fraunhofer_Diffraction(long double x,
                                                        long double z,
                                                        long double a,
                                                        long double d,

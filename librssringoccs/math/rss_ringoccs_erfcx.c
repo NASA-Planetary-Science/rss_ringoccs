@@ -1135,9 +1135,9 @@ static double erfcx_chebyshev_table(double y100)
         }
     }
 
-    /*  Use rssringoccs_Double_Poly_Double_Coeffs to evaluate the             *
+    /*  Use rssringoccs_Real_Poly_Double_Coeffs to evaluate the             *
      *  polynomial in t via Horner's method and return.                       */
-    out = rssringoccs_Double_Poly_Double_Coeffs(coeffs, 6, t);
+    out = rssringoccs_Real_Poly_Double_Coeffs(coeffs, 6, t);
     return out;
 }
 
@@ -1201,7 +1201,7 @@ float rssringoccs_Float_Erfcx(float x)
     return out;
 }
 
-long double rssringoccs_LongDouble_Erfcx(long double x)
+long double rssringoccs_LDouble_Erfcx(long double x)
 {
     long double out;
     out = rssringoccs_Double_Erfcx((double)x);

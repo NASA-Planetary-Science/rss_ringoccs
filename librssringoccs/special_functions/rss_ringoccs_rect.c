@@ -21,4 +21,4 @@ type rssringoccs_##Type##_Rect_Window(type x, type W)                          \
 
 _define_rect_window(float, Float)
 _define_rect_window(double, Double)
-_define_rect_window(long double, LongDouble)
+_define_rect_window(long double, LDouble)

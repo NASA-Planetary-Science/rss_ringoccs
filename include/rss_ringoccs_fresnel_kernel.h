@@ -74,7 +74,7 @@ extern double
 Fresnel_Scale_Double(double lambda, double d, double phi, double b);
 
 extern long double
-Fresnel_Scale_LongDouble(long double lambda, long double d,
-                         long double phi, long double b);
+Fresnel_Scale_LDouble(long double lambda, long double d,
+                      long double phi, long double b);
 
 #endif

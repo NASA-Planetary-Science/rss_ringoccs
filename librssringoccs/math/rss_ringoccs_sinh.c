@@ -22,12 +22,12 @@ double rssringoccs_Double_Sinh(double x)
     return sinh_x;
 }
 
-long double rssringoccs_LongDouble_Sinh(long double x)
+long double rssringoccs_LDouble_Sinh(long double x)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     long double sinh_x;
 
     /*  The definition of sinh(x) is [exp(x) - exp(-x)]/2, so return this.    */
-    sinh_x = 0.5*(rssringoccs_LongDouble_Exp(x)-rssringoccs_LongDouble_Exp(-x));
+    sinh_x = 0.5*(rssringoccs_LDouble_Exp(x)-rssringoccs_LDouble_Exp(-x));
     return sinh_x;
 }

@@ -18,7 +18,7 @@ float rssringoccs_Float_Abs(float x)
     return fabs((double)x);
 }
 
-long double rssringoccs_LongDouble_Abs(long double x)
+long double rssringoccs_LDouble_Abs(long double x)
 {
     return fabs((double)x);
 }
@@ -33,7 +33,7 @@ float rssringoccs_Float_Abs(float x)
     return fabsf(x);
 }
 
-long double rssringoccs_LongDouble_Abs(long double x)
+long double rssringoccs_LDouble_Abs(long double x)
 {
     return fabsl(x);
 }

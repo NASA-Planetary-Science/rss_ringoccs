@@ -25,4 +25,4 @@ type rssringoccs_##Type##_Resolution_Inverse(type x)                           \
 
 _define_resolution_inverse(float, Float)
 _define_resolution_inverse(double, Double)
-_define_resolution_inverse(long double, LongDouble)
+_define_resolution_inverse(long double, LDouble)

@@ -61,7 +61,7 @@ CreateWhereFunction(long, Long, double)
 CreateWhereFunction(unsigned long, ULong, double)
 CreateWhereFunction(float, Float, float)
 CreateWhereFunction(double, Double, double)
-CreateWhereFunction(long double, LongDouble, long double)
+CreateWhereFunction(long double, LDouble, long double)
 
 /*  Erase the CreateWhereFunction macro.                                      */
 #undef CreateWhereFunction
@@ -118,7 +118,7 @@ CreateWhereFunction(long, Long, double)
 CreateWhereFunction(unsigned long, ULong, double)
 CreateWhereFunction(float, Float, float)
 CreateWhereFunction(double, Double, double)
-CreateWhereFunction(long double, LongDouble, long double)
+CreateWhereFunction(long double, LDouble, long double)
 
 #undef CreateWhereFunction
 
@@ -175,4 +175,4 @@ CreateWhereFunction(long, Long, double)
 CreateWhereFunction(unsigned long, ULong, double)
 CreateWhereFunction(float, Float, float)
 CreateWhereFunction(double, Double, double)
-CreateWhereFunction(long double, LongDouble, long double)
+CreateWhereFunction(long double, LDouble, long double)

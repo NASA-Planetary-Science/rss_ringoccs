@@ -11,8 +11,8 @@ rssringoccs_ComplexDouble rssringoccs_Complex_Tan(rssringoccs_ComplexDouble z)
     rssringoccs_ComplexDouble sin_z, cos_z, tan_z;
 
     /*  Compute sin(z), cos(z), and then return sin(z)/cos(z).                */
-    sin_z = rssringoccs_ComplexDouble_Sin(z);
-    cos_z = rssringoccs_ComplexDouble_Cos(z);
-    tan_z = rssringoccs_ComplexDouble_Divide(sin_z, cos_z);
+    sin_z = rssringoccs_CDouble_Sin(z);
+    cos_z = rssringoccs_CDouble_Cos(z);
+    tan_z = rssringoccs_CDouble_Divide(sin_z, cos_z);
     return tan_z;
 }

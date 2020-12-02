@@ -18,7 +18,7 @@ float rssringoccs_Float_Exp(float x)
     return exp((double)x);
 }
 
-long double rssringoccs_LongDouble_Exp(long double x)
+long double rssringoccs_LDouble_Exp(long double x)
 {
     return exp((double)x);
 }
@@ -33,7 +33,7 @@ float rssringoccs_Float_Exp(float x)
     return expf(x);
 }
 
-long double rssringoccs_LongDouble_Exp(long double x)
+long double rssringoccs_LDouble_Exp(long double x)
 {
     return expl(x);
 }

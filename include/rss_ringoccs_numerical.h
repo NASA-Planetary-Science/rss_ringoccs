@@ -34,10 +34,10 @@ rssringoccs_Newton_Raphson_Double(double x, double (*f)(double),
                                   unsigned int max_iters);
 
 extern long double
-rssringoccs_Newton_Raphson_LongDouble(long double x,
-                                      long double (*f)(long double),
-                                      long double (*f_prime)(long double),
-                                      unsigned int max_iters);
+rssringoccs_Newton_Raphson_LDouble(long double x,
+                                   long double (*f)(long double),
+                                   long double (*f_prime)(long double),
+                                   unsigned int max_iters);
 
 extern rssringoccs_ComplexDouble
 rssringoccs_Newton_Raphson_Complex(
@@ -60,11 +60,11 @@ rssringoccs_Halleys_Method_Double(double x, double (*f)(double),
                                   unsigned int max_iters);
 
 extern long double
-rssringoccs_Halleys_Method_LongDouble(long double x,
-                                      long double (*f)(long double),
-                                      long double (*f_prime)(long double),
-                                      long double (*f_2prime)(long double),
-                                      unsigned int max_iters);
+rssringoccs_Halleys_Method_LDouble(long double x,
+                                   long double (*f)(long double),
+                                   long double (*f_prime)(long double),
+                                   long double (*f_2prime)(long double),
+                                   unsigned int max_iters);
 
 extern rssringoccs_ComplexDouble
 rssringoccs_Halleys_Method_Complex(
@@ -83,8 +83,15 @@ rssringoccs_Double_Five_Point_Derivative(double (*f)(double),
                                          double x, double h);
 
 extern long double
-rssringoccs_LongDouble_Five_Point_Derivative(long double (*f)(long double),
+rssringoccs_LDouble_Five_Point_Derivative(long double (*f)(long double),
                                              long double x, long double h);
+
+
+extern rssringoccs_ComplexDouble
+rssringoccs_Newton_Raphson_CDouble_Poly_Real(
+    rssringoccs_ComplexDouble z, double *coeffs, unsigned int degree,
+    unsigned int max_iters
+);
 
 #endif
 /*  End of include guard: #ifndef _RSS_RINGOCCS_NUMERICAL_H_                  */

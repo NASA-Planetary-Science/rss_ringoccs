@@ -45,17 +45,17 @@
 
 /*  Single precision complex comparison.                                      */
 rssringoccs_Bool
-rssringoccs_ComplexFloat_Compare(rssringoccs_ComplexFloat z,
+rssringoccs_CFloat_Compare(rssringoccs_ComplexFloat z,
                                  rssringoccs_ComplexFloat w)
 {
     /*  Declare necessary variables. C89 requires this at the top.            */
     float z_real, z_imag, w_real, w_imag;
 
     /*  Extract the real and imaginary parts from z and w.                    */
-    z_real = rssringoccs_ComplexFloat_Real_Part(z);
-    z_imag = rssringoccs_ComplexFloat_Imag_Part(z);
-    w_real = rssringoccs_ComplexFloat_Real_Part(w);
-    w_imag = rssringoccs_ComplexFloat_Imag_Part(w);
+    z_real = rssringoccs_CFloat_Real_Part(z);
+    z_imag = rssringoccs_CFloat_Imag_Part(z);
+    w_real = rssringoccs_CFloat_Real_Part(w);
+    w_imag = rssringoccs_CFloat_Imag_Part(w);
 
     /*  Two complex numbers are equal if and only if their real and imaginary *
      *  parts are both equal, so check this.                                  */
@@ -64,21 +64,22 @@ rssringoccs_ComplexFloat_Compare(rssringoccs_ComplexFloat z,
     else
         return rssringoccs_False;
 }
-/*  End of rssringoccs_ComplexFloat_Compare.                                  */
+/*  End of rssringoccs_CFloat_Compare.                                  */
+
 
 /*  Double precision complex comparison.                                      */
 rssringoccs_Bool
-rssringoccs_ComplexDouble_Compare(rssringoccs_ComplexDouble z,
+rssringoccs_CDouble_Compare(rssringoccs_ComplexDouble z,
                                   rssringoccs_ComplexDouble w)
 {
     /*  Declare necessary variables. C89 requires this at the top.            */
     double z_real, z_imag, w_real, w_imag;
 
     /*  Extract the real and imaginary parts from z and w.                    */
-    z_real = rssringoccs_ComplexDouble_Real_Part(z);
-    z_imag = rssringoccs_ComplexDouble_Imag_Part(z);
-    w_real = rssringoccs_ComplexDouble_Real_Part(w);
-    w_imag = rssringoccs_ComplexDouble_Imag_Part(w);
+    z_real = rssringoccs_CDouble_Real_Part(z);
+    z_imag = rssringoccs_CDouble_Imag_Part(z);
+    w_real = rssringoccs_CDouble_Real_Part(w);
+    w_imag = rssringoccs_CDouble_Imag_Part(w);
 
     /*  Two complex numbers are equal if and only if their real and imaginary *
      *  parts are both equal, so check this.                                  */
@@ -87,21 +88,21 @@ rssringoccs_ComplexDouble_Compare(rssringoccs_ComplexDouble z,
     else
         return rssringoccs_False;
 }
-/*  End of rssringoccs_ComplexDouble_Compare.                                 */
+/*  End of rssringoccs_CDouble_Compare.                                 */
 
 /*  Long double precision complex comparison.                                 */
 rssringoccs_Bool
-rssringoccs_ComplexLongDouble_Compare(rssringoccs_ComplexLongDouble z,
+rssringoccs_CLDouble_Compare(rssringoccs_ComplexLongDouble z,
                                       rssringoccs_ComplexLongDouble w)
 {
     /*  Declare necessary variables. C89 requires this at the top.            */
     long double z_real, z_imag, w_real, w_imag;
 
     /*  Extract the real and imaginary parts from z and w.                    */
-    z_real = rssringoccs_ComplexLongDouble_Real_Part(z);
-    z_imag = rssringoccs_ComplexLongDouble_Imag_Part(z);
-    w_real = rssringoccs_ComplexLongDouble_Real_Part(w);
-    w_imag = rssringoccs_ComplexLongDouble_Imag_Part(w);
+    z_real = rssringoccs_CLDouble_Real_Part(z);
+    z_imag = rssringoccs_CLDouble_Imag_Part(z);
+    w_real = rssringoccs_CLDouble_Real_Part(w);
+    w_imag = rssringoccs_CLDouble_Imag_Part(w);
 
     /*  Two complex numbers are equal if and only if their real and imaginary *
      *  parts are both equal, so check this.                                  */
@@ -110,7 +111,7 @@ rssringoccs_ComplexLongDouble_Compare(rssringoccs_ComplexLongDouble z,
     else
         return rssringoccs_False;
 }
-/*  End of rssringoccs_ComplexLongDouble_Compare.                             */
+/*  End of rssringoccs_CLDouble_Compare.                             */
 
 #else
 /*  Else statement for #if _RSS_RINGOCCS_USING_COMPLEX_H_ == 0.               */
@@ -119,7 +120,7 @@ rssringoccs_ComplexLongDouble_Compare(rssringoccs_ComplexLongDouble z,
 
 /*  Single precision complex comparison.                                      */
 rssringoccs_Bool
-rssringoccs_ComplexFloat_Compare(rssringoccs_ComplexFloat z,
+rssringoccs_CFloat_Compare(rssringoccs_ComplexFloat z,
                                  rssringoccs_ComplexFloat w)
 {
     if (z == w)
@@ -130,7 +131,7 @@ rssringoccs_ComplexFloat_Compare(rssringoccs_ComplexFloat z,
 
 /*  Double precision complex comparison.                                      */
 rssringoccs_Bool
-rssringoccs_ComplexDouble_Compare(rssringoccs_ComplexDouble z,
+rssringoccs_CDouble_Compare(rssringoccs_ComplexDouble z,
                                   rssringoccs_ComplexDouble w)
 {
     if (z == w)
@@ -141,7 +142,7 @@ rssringoccs_ComplexDouble_Compare(rssringoccs_ComplexDouble z,
 
 /*  Long double precision complex comparison.                                 */
 rssringoccs_Bool
-rssringoccs_ComplexLongDouble_Compare(rssringoccs_ComplexLongDouble z,
+rssringoccs_CLDouble_Compare(rssringoccs_ComplexLongDouble z,
                                       rssringoccs_ComplexLongDouble w)
 {
     if (z == w)

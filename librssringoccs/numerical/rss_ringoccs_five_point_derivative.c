@@ -32,7 +32,7 @@ double rssringoccs_Double_Five_Point_Derivative(double (*f)(double),
 }
 
 long double
-rssringoccs_LongDouble_Five_Point_Derivative(long double (*f)(long double),
+rssringoccs_LDouble_Five_Point_Derivative(long double (*f)(long double),
                                              long double x, long double h)
 {
     long double y0, y1 ,y2, y3, der;

@@ -16,10 +16,10 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
- *                        rss_ringoccs_complex_add                            *
+ *                        rss_ringoccs_complex_abs                            *
  ******************************************************************************
  *  Purpose:                                                                  *
- *      Contains the source code for complex addition.                        *
+ *      Contains the source code for f(z) = |z|^2.                            *
  ******************************************************************************
  *                               DEPENDENCIES                                 *
  ******************************************************************************
@@ -28,66 +28,65 @@
  ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
  *  Date:       November 30, 2020                                             *
+ ******************************************************************************
+ *                             Revision History                               *
+ ******************************************************************************
+ *  2020/12/02 (Ryan Maguire):                                                *
+ *      Moved functions here from rss_ringoccs_complex_abs.c                  *
+ *      Frozen for v1.3.                                                      *
  ******************************************************************************/
 
 /*  Where the prototypes are declared and where complex types are defined.    */
 #include <rss_ringoccs/include/rss_ringoccs_complex.h>
 
-/*  If _RSS_RINGOCCS_USING_COMPLEX_H_ is set to zero, then C99 complex.h has  *
- *  not been included and we must define our own algorithms.                  */
-#if _RSS_RINGOCCS_USING_COMPLEX_H_ == 0
+/*  C99 does not provide |z|^2 functions, so we can use the same algorithm    *
+ *  for both the C89 and C99 renditions of rss_ringoccs.                      */
 
-/*  This function is equivalent to the creal function in complex.h (C99).     */
-float rssringoccs_CFloat_Real_Part(rssringoccs_ComplexFloat z)
+/*  Single precision abs squared function.                                    */
+float rssringoccs_CFloat_Abs_Squared(rssringoccs_ComplexFloat z)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
-    float real;
+    float real, imag, abs_sq;
 
-    /*  The real component is stored as the first entry in the dat array      *
-     *  contained in a rssringoccs_ComplexDouble struct. Return this.         */
-    real = z.dat[0];
-    return real;
+    /*  Extract the real and imaginary parts from the input complex number.   */
+    real = rssringoccs_CFloat_Real_Part(z);
+    imag = rssringoccs_CFloat_Imag_Part(z);
+
+    /*  |z|^2 = x^2 + y^2 so compute this.                                    */
+    abs_sq = real*real + imag*imag;
+    return abs_sq;
 }
+/*  End of rssringoccs_CFloat_Abs_Squared.                                    */
 
-double rssringoccs_CDouble_Real_Part(rssringoccs_ComplexDouble z)
+/*  Double precision abs squared function.                                    */
+double rssringoccs_CDouble_Abs_Squared(rssringoccs_ComplexDouble z)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
-    double real;
+    double real, imag, abs_sq;
 
-    /*  The real component is stored as the first entry in the dat array      *
-     *  contained in a rssringoccs_ComplexDouble struct. Return this.         */
-    real = z.dat[0];
-    return real;
+    /*  Extract the real and imaginary parts from the input complex number.   */
+    real = rssringoccs_CDouble_Real_Part(z);
+    imag = rssringoccs_CDouble_Imag_Part(z);
+
+    /*  |z|^2 = x^2 + y^2 so compute this.                                    */
+    abs_sq = real*real + imag*imag;
+    return abs_sq;
 }
+/*  End of rssringoccs_CDouble_Abs_Squared.                                   */
 
+/*  Long double precision abs squared function.                               */
 long double
-rssringoccs_CLDouble_Real_Part(rssringoccs_ComplexLongDouble z)
+rssringoccs_CLDouble_Abs_Squared(rssringoccs_ComplexLongDouble z)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
-    long double real;
+    long double real, imag, abs_sq;
 
-    /*  The real component is stored as the first entry in the dat array      *
-     *  contained in a rssringoccs_ComplexDouble struct. Return this.         */
-    real = z.dat[0];
-    return real;
+    /*  Extract the real and imaginary parts from the input complex number.   */
+    real = rssringoccs_CLDouble_Real_Part(z);
+    imag = rssringoccs_CLDouble_Imag_Part(z);
+
+    /*  |z|^2 = x^2 + y^2 so compute this.                                    */
+    abs_sq = real*real + imag*imag;
+    return abs_sq;
 }
-
-#else
-
-double rssringoccs_CFloat_Real_Part(rssringoccs_ComplexFloat z)
-{
-    return crealf(z);
-}
-
-double rssringoccs_CDouble_Real_Part(rssringoccs_ComplexDouble z)
-{
-    return creal(z);
-}
-
-long double
-rssringoccs_CLDouble_Real_Part(rssringoccs_ComplexLongDouble z)
-{
-    return creall(z);
-}
-
-#endif
+/*  End of rssringoccs_CLDouble_Abs_Squared.                                  */

@@ -18,10 +18,10 @@ double rssringoccs_Double_Erfc(double x)
     return erfc;
 }
 
-long double rssringoccs_LongDouble_Erfc(long double x)
+long double rssringoccs_LDouble_Erfc(long double x)
 {
     long double erfc;
-    erfc = rssringoccs_LongDouble_Exp(x*x)*rssringoccs_LongDouble_Erfcx(x);
+    erfc = rssringoccs_LDouble_Exp(x*x)*rssringoccs_LDouble_Erfcx(x);
 
     return erfc;
 }

@@ -136,7 +136,7 @@ rssringoccs_Double_Two_Slit_Fraunhofer_Diffraction(double x, double z, double a,
 }
 
 long double
-rssringoccs_LongDouble_Two_Slit_Fraunhofer_Diffraction(long double x,
+rssringoccs_LDouble_Two_Slit_Fraunhofer_Diffraction(long double x,
                                                        long double z,
                                                        long double a,
                                                        long double d,
@@ -146,7 +146,7 @@ rssringoccs_LongDouble_Two_Slit_Fraunhofer_Diffraction(long double x,
     long double sin_theta, var_1, var_2, var_3, norm, scaled_a, scaled_d, out;
 
     /*  Compute the length of the point (x, z) in the plane.                  */
-    norm = rssringoccs_LongDouble_Sqrt(x*x + z*z);
+    norm = rssringoccs_LDouble_Sqrt(x*x + z*z);
 
     /*  If norm is zero, the result is undefined. Return NaN in this case.    */
     if (norm == 0.0)
@@ -166,13 +166,13 @@ rssringoccs_LongDouble_Two_Slit_Fraunhofer_Diffraction(long double x,
          *  the ordinary sine function. Since sinc and sine are more          *
          *  expensive than multiplication (computationally) it is better to   *
          *  compute sinc/sine once, and then square this.                     */
-        var_1  = rssringoccs_LongDouble_Sinc(a*sin_theta);
+        var_1  = rssringoccs_LDouble_Sinc(a*sin_theta);
         var_1 *= var_1;
 
-        var_2  = rssringoccs_LongDouble_Sin(TWO_PI*d*sin_theta);
+        var_2  = rssringoccs_LDouble_Sin(TWO_PI*d*sin_theta);
         var_2 *= var_2;
 
-        var_3  = 2.0*rssringoccs_LongDouble_Sin(ONE_PI*d*sin_theta);
+        var_3  = 2.0*rssringoccs_LDouble_Sin(ONE_PI*d*sin_theta);
         var_3 *= var_3;
 
         out = var_1*var_2/var_3;

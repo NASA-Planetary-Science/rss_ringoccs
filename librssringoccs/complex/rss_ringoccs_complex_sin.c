@@ -6,21 +6,21 @@
 #include <rss_ringoccs/include/rss_ringoccs_complex.h>
 
 rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Sin(rssringoccs_ComplexDouble z)
+rssringoccs_CDouble_Sin(rssringoccs_ComplexDouble z)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     double x, y, real, imag;
     rssringoccs_ComplexDouble sin_z;
 
     /*  Extract the real and imaginary parts from z.                          */
-    x = rssringoccs_ComplexDouble_Real_Part(z);
-    y = rssringoccs_ComplexDouble_Imag_Part(z);
+    x = rssringoccs_CDouble_Real_Part(z);
+    y = rssringoccs_CDouble_Imag_Part(z);
 
     /*  The real part is sin(x)cosh(y).                                       */
     real = rssringoccs_Double_Sin(x)*rssringoccs_Double_Cosh(y);
     imag = rssringoccs_Double_Cos(x)*rssringoccs_Double_Sinh(y);
 
     /*  Use rssringoccs_Complex_Rect to create the output and return.         */
-    sin_z = rssringoccs_ComplexDouble_Rect(real, imag);
+    sin_z = rssringoccs_CDouble_Rect(real, imag);
     return sin_z;
 }

@@ -18,7 +18,7 @@ float rssringoccs_Float_Sqrt(float x)
     return sqrt((double)x);
 }
 
-long double rssringoccs_LongDouble_Sqrt(long double x)
+long double rssringoccs_LDouble_Sqrt(long double x)
 {
     return sqrt((double)x);
 }
@@ -33,7 +33,7 @@ float rssringoccs_Float_Sqrt(float x)
     return sqrtf(x);
 }
 
-long double rssringoccs_LongDouble_Sqrt(long double x)
+long double rssringoccs_LDouble_Sqrt(long double x)
 {
     return sqrtl(x);
 }

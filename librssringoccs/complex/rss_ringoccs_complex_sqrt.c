@@ -13,8 +13,8 @@ rssringoccs_Complex_Sqrt(rssringoccs_ComplexDouble z)
     rssringoccs_ComplexDouble sqrt_z;
 
     /*  We need z in polar coordinates, so compute r and theta.               */
-    sqrt_r = rssringoccs_Double_Sqrt(rssringoccs_ComplexDouble_Abs(z));
-    theta = rssringoccs_ComplexDouble_Argument(z);
+    sqrt_r = rssringoccs_Double_Sqrt(rssringoccs_CDouble_Abs(z));
+    theta = rssringoccs_CDouble_Argument(z);
 
     /*  Once in the form r*exp(i*theta), the square root is compute as        *
      *  sqrt(z) = sqrt(r) * exp(i*theta / 2). r is non-negative, so this is   *
@@ -23,6 +23,6 @@ rssringoccs_Complex_Sqrt(rssringoccs_ComplexDouble z)
     imag = sqrt_r*rssringoccs_Double_Sin(0.5*theta);
 
     /*  Use rssringoccs_ComplexRect to compute and return sqrt_z.             */
-    sqrt_z = rssringoccs_ComplexDouble_Rect(real, imag);
+    sqrt_z = rssringoccs_CDouble_Rect(real, imag);
     return sqrt_z;
 }

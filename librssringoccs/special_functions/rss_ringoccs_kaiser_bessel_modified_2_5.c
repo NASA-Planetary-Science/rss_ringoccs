@@ -102,7 +102,7 @@ double rssringoccs_Double_Modified_Kaiser_Bessel_2_5(double x, double W)
 }
 
 long double
-rssringoccs_LongDouble_Modified_Kaiser_Bessel_2_5(long double x, long double W)
+rssringoccs_LDouble_Modified_Kaiser_Bessel_2_5(long double x, long double W)
 {
     long double bessel_x, arg;
     arg = 2.0*x/W;

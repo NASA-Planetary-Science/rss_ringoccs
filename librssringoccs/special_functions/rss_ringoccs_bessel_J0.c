@@ -277,7 +277,7 @@ double rssringoccs_Double_Bessel_J0(double x)
 }
 
 /*  Compute the Bessel I_0 function for a long double precision number x.     */
-long double rssringoccs_LongDouble_Bessel_J0(long double x)
+long double rssringoccs_LDouble_Bessel_J0(long double x)
 {
     /*  Declare necessary variables. C89 requires declaring these at the top. */
     long double bessel_J0, arg;
@@ -319,7 +319,7 @@ long double rssringoccs_LongDouble_Bessel_J0(long double x)
     else if (arg < 1.0e32)
     {
         /*  J_0 is an even function so use the absolute value of x.           */
-        x = rssringoccs_LongDouble_Abs(x);
+        x = rssringoccs_LDouble_Abs(x);
 
         /*  The argument for the asymptotic expansion is 1/x^2.               */
         arg = 1.0/arg;
@@ -330,18 +330,18 @@ long double rssringoccs_LongDouble_Bessel_J0(long double x)
         sinarg  = arg * sinarg + BESSEL_J0_ASYM_01;
 
         /*  Multiply the output by the coefficient factor.                    */
-        sinarg *= rssringoccs_LongDouble_Sin(x - PI_BY_FOUR)/x;
+        sinarg *= rssringoccs_LDouble_Sin(x - PI_BY_FOUR)/x;
 
         /*  Do the same as above for the Cosine portion.                      */
         cosarg  = arg * BESSEL_J0_ASYM_08 + BESSEL_J0_ASYM_06;
         cosarg  = arg * cosarg + BESSEL_J0_ASYM_04;
         cosarg  = arg * cosarg + BESSEL_J0_ASYM_02;
         cosarg  = arg * cosarg + BESSEL_J0_ASYM_00;
-        cosarg *= rssringoccs_LongDouble_Cos(x - PI_BY_FOUR);
+        cosarg *= rssringoccs_LDouble_Cos(x - PI_BY_FOUR);
 
         /*  For very large arguments, use the limit (which is zero).          */
         bessel_J0 = (cosarg + sinarg)*SQRT_TWO_BY_PI;
-        bessel_J0 = bessel_J0 / rssringoccs_LongDouble_Sqrt(x);
+        bessel_J0 = bessel_J0 / rssringoccs_LDouble_Sqrt(x);
     }
 
     /*  For very large arguments, use the limit (which is zero).              */

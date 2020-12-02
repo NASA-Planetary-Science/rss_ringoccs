@@ -18,7 +18,7 @@ float rssringoccs_Float_Cos(float x)
     return cos((double)x);
 }
 
-long double rssringoccs_LongDouble_Cos(long double x)
+long double rssringoccs_LDouble_Cos(long double x)
 {
     return cos((double)x);
 }
@@ -33,7 +33,7 @@ float rssringoccs_Float_Cos(float x)
     return cosf(x);
 }
 
-long double rssringoccs_LongDouble_Cos(long double x)
+long double rssringoccs_LDouble_Cos(long double x)
 {
     return cosl(x);
 }

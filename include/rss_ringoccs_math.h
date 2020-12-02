@@ -160,52 +160,47 @@
 /*  Aliases for the sine trig function found in math.h.                       */
 extern float rssringoccs_Float_Sin(float x);
 extern double rssringoccs_Double_Sin(double x);
-extern long double rssringoccs_LongDouble_Sin(long double x);
+extern long double rssringoccs_LDouble_Sin(long double x);
 
 /*  Aliases for the cosine trig function found in math.h.                     */
 extern float rssringoccs_Float_Cos(float x);
 extern double rssringoccs_Double_Cos(double x);
-extern long double rssringoccs_LongDouble_Cos(long double x);
+extern long double rssringoccs_LDouble_Cos(long double x);
 
 /*  Aliases for the cosine tan function found in math.h.                      */
-#define rssringoccs_Tan_Double(x)       tan(x)
-#if __HAS_C99_MATH_H__ != 0
-#define rssringoccs_Tan_Float(x)        tanf(x)
-#define rssringoccs_Tan_LongDouble(x)   tanl(x)
-#else
-#define rssringoccs_Tan_Float(x)        tan((double)(x))
-#define rssringoccs_Tan_LongDouble(x)   tan((double)(x))
-#endif
+extern float rssringoccs_Float_Tan(float x);
+extern double rssringoccs_Double_Tan(double x);
+extern long double rssringoccs_LDouble_Tan(long double x);
 
 /*  Aliases for the square root function found in math.h.                     */
 extern float rssringoccs_Float_Sqrt(float x);
 extern double rssringoccs_Double_Sqrt(double x);
-extern long double rssringoccs_LongDouble_Sqrt(long double x);
+extern long double rssringoccs_LDouble_Sqrt(long double x);
 
 /*  Aliases for the exponential function found in math.h.                     */
 extern float rssringoccs_Float_Exp(float x);
 extern double rssringoccs_Double_Exp(double x);
-extern long double rssringoccs_LongDouble_Exp(long double x);
+extern long double rssringoccs_LDouble_Exp(long double x);
 
 /*  Aliases for the exponential function found in math.h.                     */
 extern float rssringoccs_Float_Log(float x);
 extern double rssringoccs_Double_Log(double x);
-extern long double rssringoccs_LongDouble_Log(long double x);
+extern long double rssringoccs_LDouble_Log(long double x);
 
 /*  Aliases for the absolute value function found in math.h.                  */
 extern float rssringoccs_Float_Abs(float x);
 extern double rssringoccs_Double_Abs(double x);
-extern long double rssringoccs_LongDouble_Abs(long double x);
+extern long double rssringoccs_LDouble_Abs(long double x);
 
 /*  Aliases for the atan function found in math.h.                            */
 extern float rssringoccs_Float_Arctan(float x);
 extern double rssringoccs_Double_Arctan(double x);
-extern long double rssringoccs_LongDouble_Arctan(long double x);
+extern long double rssringoccs_LDouble_Arctan(long double x);
 
 /*  Aliases for the atan2 function found in math.h.                           */
 extern float rssringoccs_Float_Arctan2(float y, float x);
 extern double rssringoccs_Double_Arctan2(double y, double x);
-extern long double rssringoccs_LongDouble_Arctan2(long double y, long double x);
+extern long double rssringoccs_LDouble_Arctan2(long double y, long double x);
 
 /*  If INFINITY is not defined, set it to the HUGE_VAL macro that is          *
  *  specified in math.h. Most compilers already have an INFINITY macro, but   *
@@ -234,31 +229,31 @@ extern long double rssringoccs_LongDouble_Arctan2(long double y, long double x);
 
 extern float rssringoccs_Float_Sinh(float x);
 extern double rssringoccs_Double_Sinh(double x);
-extern long double rssringoccs_LongDouble_Sinh(long double x);
+extern long double rssringoccs_LDouble_Sinh(long double x);
 
 extern float rssringoccs_Float_Cosh(float x);
 extern double rssringoccs_Double_Cosh(double x);
-extern long double rssringoccs_LongDouble_Cosh(long double x);
+extern long double rssringoccs_LDouble_Cosh(long double x);
 
 extern float rssringoccs_Float_Tanh(float x);
 extern double rssringoccs_Double_Tanh(double x);
-extern long double rssringoccs_LongDouble_Tanh(long double x);
+extern long double rssringoccs_LDouble_Tanh(long double x);
 
 extern float rssringoccs_Float_Erf(float x);
 extern double rssringoccs_Double_Erf(double x);
-extern long double rssringoccs_LongDouble_Erf(long double x);
+extern long double rssringoccs_LDouble_Erf(long double x);
 
 extern float rssringoccs_Float_Erfc(float x);
 extern double rssringoccs_Double_Erfc(double x);
-extern long double rssringoccs_LongDouble_Erfc(long double x);
+extern long double rssringoccs_LDouble_Erfc(long double x);
 
 extern float rssringoccs_Float_Erfcx(float x);
 extern double rssringoccs_Double_Erfcx(double x);
-extern long double rssringoccs_LongDouble_Erfcx(long double x);
+extern long double rssringoccs_LDouble_Erfcx(long double x);
 
 extern float rssringoccs_Float_Faddeeva_Im(float x);
 extern double rssringoccs_Double_Faddeeva_Im(double x);
-extern long double rssringoccs_LongDouble_Faddeeva_Im(long double x);
+extern long double rssringoccs_LDouble_Faddeeva_Im(long double x);
 
 extern long rssringoccs_Factorial(int n);
 extern long rssringoccs_Falling_Factorial(int x, int N);
@@ -266,35 +261,31 @@ extern long rssringoccs_Falling_Factorial(int x, int N);
 extern double rssringoccs_Double_Copysign(double x, double y);
 
 extern float
-rssringoccs_Float_Poly_Float_Coeffs(float *coeffs,
-                                    unsigned int degree, float x);
+rssringoccs_Real_Poly_Float_Coeffs(float *coeffs, unsigned int degree, float x);
 
 extern double
-rssringoccs_Double_Poly_Double_Coeffs(double *coeffs,
-                                      unsigned int degree, double x);
+rssringoccs_Real_Poly_Double_Coeffs(double *coeffs,
+                                    unsigned int degree,
+                                    double x);
 
 extern long double
-rssringoccs_LongDouble_Poly_LongDouble_Coeffs(long double *coeffs,
-                                              unsigned int degree,
-                                              long double x);
+rssringoccs_Real_Poly_LDouble_Coeffs(long double *coeffs,
+                                     unsigned int degree,
+                                     long double x);
 
 extern float
-rssringoccs_Float_Poly_Deriv_Float_Coeffs(float *coeffs,
-                                          unsigned int degree,
-                                          unsigned int deriv,
-                                          float x);
+rssringoccs_Real_Poly_Deriv_Float_Coeffs(float *coeffs, unsigned int degree,
+                                         unsigned int deriv, float x);
 
 extern double
-rssringoccs_Double_Poly_Deriv_Double_Coeffs(double *coeffs,
-                                            unsigned int degree,
-                                            unsigned int deriv,
-                                            double x);
+rssringoccs_Real_Poly_Deriv_Double_Coeffs(double *coeffs, unsigned int degree,
+                                          unsigned int deriv, double x);
 
 extern long double
-rssringoccs_LongDouble_Poly_Deriv_LongDouble_Coeffs(long double *coeffs,
-                                                    unsigned int degree,
-                                                    unsigned int deriv,
-                                                    long double x);
+rssringoccs_Real_Poly_Deriv_LDouble_Coeffs(long double *coeffs,
+                                           unsigned int degree,
+                                           unsigned int deriv,
+                                           long double x);
 
 
 #endif

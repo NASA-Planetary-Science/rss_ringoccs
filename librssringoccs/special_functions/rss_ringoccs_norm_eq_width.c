@@ -26,7 +26,7 @@ outtype rssringoccs_Normeq_##InType(intype *w_func, long N_elements)           \
 
 _define_normeq(float, Float, float)
 _define_normeq(double, Double, double)
-_define_normeq(long double, LongDouble, long double)
+_define_normeq(long double, LDouble, long double)
 _define_normeq(int, Int, double)
 _define_normeq(short, Short, double)
 _define_normeq(long, Long, double)

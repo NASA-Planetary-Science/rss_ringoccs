@@ -38,4 +38,4 @@ type rssringoccs_##Type##_Kaiser_Bessel(type x, type W, type alpha)            \
 
 _define_kaiser_bessel(float, Float)
 _define_kaiser_bessel(double, Double)
-_define_kaiser_bessel(long double, LongDouble)
+_define_kaiser_bessel(long double, LDouble)

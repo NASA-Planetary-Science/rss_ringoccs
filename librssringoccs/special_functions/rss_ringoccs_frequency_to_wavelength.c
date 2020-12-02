@@ -14,4 +14,4 @@ type rssringoccs_##Type##_Frequency_To_Wavelength(type frequency)              \
 
 _define_freq_to_wave(float, Float)
 _define_freq_to_wave(double, Double)
-_define_freq_to_wave(long double, LongDouble)
+_define_freq_to_wave(long double, LDouble)

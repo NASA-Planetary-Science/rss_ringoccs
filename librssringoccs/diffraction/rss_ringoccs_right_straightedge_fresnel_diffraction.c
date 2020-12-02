@@ -59,6 +59,6 @@ rssringoccs_Complex_Right_Straightedge_Diffraction(double x, double edge,
     rssringoccs_ComplexDouble left_edge, T_hat;
 
     left_edge = rssringoccs_Complex_Left_Straightedge_Diffraction(x, edge, F);
-    T_hat = rssringoccs_ComplexDouble_Subtract_Real(1.0, left_edge);
+    T_hat = rssringoccs_CDouble_Subtract_Real(1.0, left_edge);
     return T_hat;
 }

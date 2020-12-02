@@ -18,7 +18,7 @@ float rssringoccs_Float_Log(float x)
     return log((double)x);
 }
 
-long double rssringoccs_LongDouble_Log(long double x)
+long double rssringoccs_LDouble_Log(long double x)
 {
     return log((double)x);
 }
@@ -33,7 +33,7 @@ float rssringoccs_Float_Log(float x)
     return logf(x);
 }
 
-long double rssringoccs_LongDouble_Log(long double x)
+long double rssringoccs_LDouble_Log(long double x)
 {
     return logl(x);
 }

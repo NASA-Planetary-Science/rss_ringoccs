@@ -66,7 +66,7 @@ static const double expa2n2[] = {
 };
 
 rssringoccs_ComplexDouble
-rssringoccs_ComplexDouble_Faddeeva(rssringoccs_ComplexDouble z)
+rssringoccs_CDouble_Faddeeva(rssringoccs_ComplexDouble z)
 {
     int n, dn;
     double z_x, z_y, abs_x, abs_y;
@@ -96,8 +96,8 @@ rssringoccs_ComplexDouble_Faddeeva(rssringoccs_ComplexDouble z)
     /*  a^2.                                                                  */
     const double a2 = 0.268657157075235951582;
 
-    z_x = rssringoccs_ComplexDouble_Real_Part(z);
-    z_y = rssringoccs_ComplexDouble_Imag_Part(z);
+    z_x = rssringoccs_CDouble_Real_Part(z);
+    z_y = rssringoccs_CDouble_Imag_Part(z);
 
     /*  Purely imaginary input, purely real output.                           *
      *  However, use creal(z) to give correct sign of 0 in cimag(w).          */
@@ -105,14 +105,14 @@ rssringoccs_ComplexDouble_Faddeeva(rssringoccs_ComplexDouble z)
     {
         w_x = rssringoccs_Double_Erfcx(z_y);
         w_y = 0.0;
-        w = rssringoccs_ComplexDouble_Rect(w_x, w_y);
+        w = rssringoccs_CDouble_Rect(w_x, w_y);
         return w;
     }
     else if (z_y == 0)
     {
         w_x = rssringoccs_Double_Exp(-z_x*z_y);
         w_y = rssringoccs_Double_Faddeeva_Im(z_x);
-        w = rssringoccs_ComplexDouble_Rect(w_x, w_y);
+        w = rssringoccs_CDouble_Rect(w_x, w_y);
         return w;
     }
 
@@ -165,7 +165,7 @@ rssringoccs_ComplexDouble_Faddeeva(rssringoccs_ComplexDouble z)
                     denom = SQRT_ONE_BY_PI / (xs + abs_y_by_xs*abs_y);
                     w_x = denom*abs_y_by_xs;
                     w_y = denom;
-                    w = rssringoccs_ComplexDouble_Rect(w_x, w_y);
+                    w = rssringoccs_CDouble_Rect(w_x, w_y);
                 }
                 else if (rssringoccs_Is_Inf(abs_y))
                 {
@@ -181,7 +181,7 @@ rssringoccs_ComplexDouble_Faddeeva(rssringoccs_ComplexDouble z)
                         w_y = 0.0;
                     }
 
-                    w = rssringoccs_ComplexDouble_Rect(w_x, w_y);
+                    w = rssringoccs_CDouble_Rect(w_x, w_y);
                     return w;
                 }
                 else
@@ -190,7 +190,7 @@ rssringoccs_ComplexDouble_Faddeeva(rssringoccs_ComplexDouble z)
                     denom = SQRT_ONE_BY_PI / (xs_by_abs_y*xs + abs_y);
                     w_x = denom;
                     w_y = denom*xs_by_abs_y;
-                    w = rssringoccs_ComplexDouble_Rect(w_x, w_y);
+                    w = rssringoccs_CDouble_Rect(w_x, w_y);
                 }
             }
 
@@ -202,7 +202,7 @@ rssringoccs_ComplexDouble_Faddeeva(rssringoccs_ComplexDouble z)
                 denom = SQRT_ONE_BY_PI / (dr*dr + di*di);
                 w_x = denom * (xs*di - abs_y*dr);
                 w_y = denom * (xs*dr + abs_y*di);
-                w = rssringoccs_ComplexDouble_Rect(w_x, w_y);
+                w = rssringoccs_CDouble_Rect(w_x, w_y);
             }
         }
 
@@ -230,7 +230,7 @@ rssringoccs_ComplexDouble_Faddeeva(rssringoccs_ComplexDouble z)
             denom = SQRT_ONE_BY_TWO_PI / (wr*wr + wi*wi);
             w_x = denom*wi;
             w_y = denom*wr;
-            w = rssringoccs_ComplexDouble_Rect(w_x, w_y);
+            w = rssringoccs_CDouble_Rect(w_x, w_y);
         }
 
         if (z_y < 0)
@@ -239,10 +239,10 @@ rssringoccs_ComplexDouble_Faddeeva(rssringoccs_ComplexDouble z)
              *  in exp(-z*z).                                                 */
             w_x = (abs_y - xs) * (xs + abs_y);
             w_y = 2*xs*z_y;
-            temp = rssringoccs_ComplexDouble_Rect(w_x, w_y);
-            temp = rssringoccs_ComplexDouble_Exp(temp);
-            temp = rssringoccs_ComplexDouble_Multiply_Real(2.0, temp);
-            w = rssringoccs_ComplexDouble_Subtract(temp, w);
+            temp = rssringoccs_CDouble_Rect(w_x, w_y);
+            temp = rssringoccs_CDouble_Exp(temp);
+            temp = rssringoccs_CDouble_Multiply_Real(2.0, temp);
+            w = rssringoccs_CDouble_Subtract(temp, w);
 
             return w;
         }
@@ -270,7 +270,7 @@ rssringoccs_ComplexDouble_Faddeeva(rssringoccs_ComplexDouble z)
 
         if (rssringoccs_Is_Inf(z_y))
         {
-            w = rssringoccs_ComplexDouble_Rect(z_y, z_y);
+            w = rssringoccs_CDouble_Rect(z_y, z_y);
             return w;
         }
 
@@ -342,7 +342,7 @@ rssringoccs_ComplexDouble_Faddeeva(rssringoccs_ComplexDouble z)
             sinxy = sin(abs_x*z_y);
             w_x = (expx2erfcxy - c*z_y*sum1) * cos(2*abs_x*z_y) +
                   (c*abs_x*expx2) * sinxy * rssringoccs_Double_Sinc(abs_x*z_y);
-            w = rssringoccs_ComplexDouble_Rect(w_x, 0.0);
+            w = rssringoccs_CDouble_Rect(w_x, 0.0);
         }
         else
         {
@@ -354,7 +354,7 @@ rssringoccs_ComplexDouble_Faddeeva(rssringoccs_ComplexDouble z)
             coef2 = c*xs*expx2;
             w_x = coef1 * cos2xy + coef2 * sinxy * rssringoccs_Double_Sinc(xs*z_y);
             w_y = coef2 * rssringoccs_Double_Sinc(2*xs*z_y) - coef1 * sin2xy;
-            w = rssringoccs_ComplexDouble_Rect(w_x, w_y);
+            w = rssringoccs_CDouble_Rect(w_x, w_y);
         }
     }
 
@@ -365,21 +365,21 @@ rssringoccs_ComplexDouble_Faddeeva(rssringoccs_ComplexDouble z)
         {
             w_x = rssringoccs_NaN;
             w_y = rssringoccs_NaN;
-            w = rssringoccs_ComplexDouble_Rect(w_x, w_y);
+            w = rssringoccs_CDouble_Rect(w_x, w_y);
             return w;
         }
         else if (rssringoccs_Is_NaN(z_y))
         {
             w_x = rssringoccs_NaN;
             w_y = rssringoccs_NaN;
-            w = rssringoccs_ComplexDouble_Rect(w_x, w_y);
+            w = rssringoccs_CDouble_Rect(w_x, w_y);
             return w;
         }
 
         /*  |y| < 1e-10, so we only need exp(-x*x) term (round instead of     *
          *  ceil as in original paper; note that x/a > 1 here).               */
         re_temp = exp(-z_x*z_x);
-        w = rssringoccs_ComplexDouble_Rect(re_temp, 0.0);
+        w = rssringoccs_CDouble_Rect(re_temp, 0.0);
 
         /*  sum in both directions, starting at n0.                           */
         n0 = floor(abs_x/a + 0.5);
@@ -422,8 +422,8 @@ finish:
     {
         w_x = (0.5*c)*z_y*(sum2+sum3);
         w_y = (0.5*c)*rssringoccs_Double_Copysign(sum5-sum4, z_x);
-        temp = rssringoccs_ComplexDouble_Rect(w_x, w_y);
-        w = rssringoccs_ComplexDouble_Add(w, temp);
+        temp = rssringoccs_CDouble_Rect(w_x, w_y);
+        w = rssringoccs_CDouble_Add(w, temp);
         return w;
     }
 }

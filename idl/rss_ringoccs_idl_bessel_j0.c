@@ -32,8 +32,9 @@
  ******************************************************************************/
 
 #include <rss_ringoccs/include/rss_ringoccs_special_functions.h>
+#include <stdio.h>
 
-/*  The function will be callable from IDL via the string                     *
+/*  This function will be callable from IDL via the string                    *
  *  'rssringoccs_IDL_Bessel_J0' using the CALL_EXTERNAL routine.              */
 void rssringoccs_IDL_Bessel_J0(int argc, void *argv[])
 {
@@ -42,6 +43,17 @@ void rssringoccs_IDL_Bessel_J0(int argc, void *argv[])
 
     /*  Size is the size of the input IDL array.                              */
     long n, size;
+
+    /*  We're expecting three inputs, so check this.                          */
+    if (argc != 3)
+    {
+        printf("\nError: rss_ringoccs\n"
+               "\trssringoccs_IDL_Bessel_J0\n\n"
+               "Invalid number of arguments. Expected 3.\n"
+               "Number of inputs provided: %d\n"
+               "Aborting computation and returning.\n\n", argc);
+        return;
+    }
 
     /*  Get the parameters passed from IDL.                                   */
     x    = (double *)argv[0];

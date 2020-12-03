@@ -16,7 +16,7 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
- *                        rss_ringoccs_complex_add                            *
+ *                     rss_ringoccs_complex_add_imag                          *
  ******************************************************************************
  *  Purpose:                                                                  *
  *      Contains the source code for complex addition.                        *
@@ -27,11 +27,12 @@
  *          Header where complex types and function prototypes are defined.   *
  ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
- *  Date:       November 30, 2020                                             *
+ *  Date:       December 3, 2020                                              *
  ******************************************************************************
  *                             Revision History                               *
  ******************************************************************************
- *  2020/12/02 (Ryan Maguire):                                                *
+ *  2020/12/03 (Ryan Maguire):                                                *
+ *      Moved here from rss_ringoccs_complex_add.c.                           *
  *      Frozen for v1.3.                                                      *
  ******************************************************************************/
 
@@ -42,90 +43,74 @@
  *  not been included and we must define our own algorithms.                  */
 #if _RSS_RINGOCCS_USING_COMPLEX_H_ == 0
 
-/*  In C99, since _Complex is a built-in data type, given double _Complex z1  *
- *  and double _Complex z2, you can just do z1 + z2. With C89 we use structs  *
- *  to define complex numbers. Structs cannot be added, so we need a function *
- *  for computing the sum of two complex values.                              */
+/*  In C99, since _Complex is a built-in data type, doubles and _Complex      *
+ *  doubles can be added via y*_Complex_I + z. With C89 we use structs to     *
+ *  define complex numbers. Since we can't add a double to a struct, and      *
+ *  since the _Complex_I macro is undefined, we need a function for computing *
+ *  the sum of complex numbers with imaginary ones.                           */
 
-/*  Single precision complex addition.                                        */
+/*  Single precision complex addition where one variable is imaginary.        */
 rssringoccs_ComplexFloat
-rssringoccs_CFloat_Add(rssringoccs_ComplexFloat z0, rssringoccs_ComplexFloat z1)
+rssringoccs_CFloat_Add_Imag(float y, rssringoccs_ComplexFloat z)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     rssringoccs_ComplexFloat sum;
-    float real0, real1;
-    float imag0, imag1;
-    float sum_re, sum_im;
+    float real, imag, sum_im;
 
     /*  Extract the real and imaginary parts from the inputs.                 */
-    real0 = rssringoccs_CFloat_Real_Part(z0);
-    real1 = rssringoccs_CFloat_Real_Part(z1);
-    imag0 = rssringoccs_CFloat_Imag_Part(z0);
-    imag1 = rssringoccs_CFloat_Imag_Part(z1);
+    real = rssringoccs_CFloat_Real_Part(z);
+    imag = rssringoccs_CFloat_Imag_Part(z);
 
-    /*  The sum of two complex numbers simply adds their components.          */
-    sum_re = real0 + real1;
-    sum_im = imag0 + imag1;
+    /*  Add the imaginary variable to the imaginary part of z.                */
+    sum_im = y + imag;
 
-    /*  Create the output from sum_re and sum_im and return.                  */
-    sum = rssringoccs_CFloat_Rect(sum_re, sum_im);
+    /*  Create the output from real and sum_im and return.                    */
+    sum = rssringoccs_CFloat_Rect(real, sum_im);
     return sum;
 }
-/*  End of rssringoccs_CFloat_Add.                                            */
+/*  End of rssringoccs_CFloat_Add_Imag.                                       */
 
-/*  Double precision complex addition.                                        */
+/*  Double precision complex addition where one variable is imaginary.        */
 rssringoccs_ComplexDouble
-rssringoccs_CDouble_Add(rssringoccs_ComplexDouble z0,
-                        rssringoccs_ComplexDouble z1)
+rssringoccs_CDouble_Add_Imag(double y, rssringoccs_ComplexDouble z)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     rssringoccs_ComplexDouble sum;
-    double real0, real1;
-    double imag0, imag1;
-    double sum_re, sum_im;
+    double real, imag, sum_im;
 
     /*  Extract the real and imaginary parts from the inputs.                 */
-    real0 = rssringoccs_CDouble_Real_Part(z0);
-    real1 = rssringoccs_CDouble_Real_Part(z1);
-    imag0 = rssringoccs_CDouble_Imag_Part(z0);
-    imag1 = rssringoccs_CDouble_Imag_Part(z1);
+    real = rssringoccs_CDouble_Real_Part(z);
+    imag = rssringoccs_CDouble_Imag_Part(z);
 
-    /*  The sum of two complex numbers simply adds their components.          */
-    sum_re = real0 + real1;
-    sum_im = imag0 + imag1;
+    /*  Add the imaginary variable to the imaginary part of z.                */
+    sum_im = y + imag;
 
-    /*  Create the output from sum_re and sum_im and return.                  */
-    sum = rssringoccs_CDouble_Rect(sum_re, sum_im);
+    /*  Create the output from real and sum_im and return.                    */
+    sum = rssringoccs_CDouble_Rect(real, sum_im);
     return sum;
 }
-/*  End of rssringoccs_CDouble_Add.                                           */
+/*  End of rssringoccs_CDouble_Add_Imag.                                      */
 
-/*  Long double precision complex addition.                                   */
+/*  Long double precision complex addition where one variable is imaginary.   */
 rssringoccs_ComplexLongDouble
-rssringoccs_CLDouble_Add(rssringoccs_ComplexLongDouble z0,
-                         rssringoccs_ComplexLongDouble z1)
+rssringoccs_CLDouble_Add_Imag(long double y, rssringoccs_ComplexLongDouble z)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     rssringoccs_ComplexLongDouble sum;
-    long double real0, real1;
-    long double imag0, imag1;
-    long double sum_re, sum_im;
+    long double real, imag, sum_im;
 
     /*  Extract the real and imaginary parts from the inputs.                 */
-    real0 = rssringoccs_CLDouble_Real_Part(z0);
-    real1 = rssringoccs_CLDouble_Real_Part(z1);
-    imag0 = rssringoccs_CLDouble_Imag_Part(z0);
-    imag1 = rssringoccs_CLDouble_Imag_Part(z1);
+    real = rssringoccs_CLDouble_Real_Part(z);
+    imag = rssringoccs_CLDouble_Imag_Part(z);
 
-    /*  The sum of two complex numbers simply adds their components.          */
-    sum_re = real0 + real1;
-    sum_im = imag0 + imag1;
+    /*  Add the imaginary variable to the imaginary part of z.                */
+    sum_im = y + imag;
 
-    /*  Create the output from sum_re and sum_im and return.                  */
-    sum = rssringoccs_CLDouble_Rect(sum_re, sum_im);
+    /*  Create the output from real and sum_im and return.                    */
+    sum = rssringoccs_CLDouble_Rect(real, sum_im);
     return sum;
 }
-/*  End of rssringoccs_CLDouble_Add.                                          */
+/*  End of rssringoccs_CLDouble_Add_Imag.                                     */
 
 #else
 /*  Else statement for #if _RSS_RINGOCCS_USING_COMPLEX_H_ == 0.               */
@@ -135,29 +120,27 @@ rssringoccs_CLDouble_Add(rssringoccs_ComplexLongDouble z0,
 
 /*  Single precision complex addition.                                        */
 rssringoccs_ComplexFloat
-rssringoccs_CFloat_Add(rssringoccs_ComplexFloat z0, rssringoccs_ComplexFloat z1)
+rssringoccs_CFloat_Add_Imag(float y, rssringoccs_ComplexFloat z)
 {
-    return z0 + z1;
+    return _Complex_I*y + z;
 }
-/*  End of rssringoccs_CFloat_Add.                                            */
+/*  End of rssringoccs_CFloat_Add_Imag.                                       */
 
 /*  Double precision complex addition.                                        */
 rssringoccs_ComplexDouble
-rssringoccs_CDouble_Add(rssringoccs_ComplexDouble z0,
-                        rssringoccs_ComplexDouble z1)
+rssringoccs_CDouble_Add_Imag(double y, rssringoccs_ComplexDouble z)
 {
-    return z0 + z1;
+    return _Complex_I*y + z;
 }
-/*  End of rssringoccs_CDouble_Add.                                           */
+/*  End of rssringoccs_CDouble_Add_Imag.                                      */
 
 /*  Long double precision complex addition.                                   */
 rssringoccs_ComplexLongDouble
-rssringoccs_CLDouble_Add(rssringoccs_ComplexLongDouble z0,
-                         rssringoccs_ComplexLongDouble z1)
+rssringoccs_CLDouble_Add_Imag(long double y, rssringoccs_ComplexLongDouble z)
 {
-    return z0 + z1;
+    return _Complex_I*y + z;
 }
-/*  End of rssringoccs_CLDouble_Add.                                          */
+/*  End of rssringoccs_CLDouble_Add_Imag.                                     */
 
 #endif
 /*  End of #if _RSS_RINGOCCS_USING_COMPLEX_H_ == 0.                           */

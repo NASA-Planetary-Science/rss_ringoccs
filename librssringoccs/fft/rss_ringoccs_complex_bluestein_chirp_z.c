@@ -83,7 +83,7 @@ rssringoccs_Complex_FFT_Bluestein_Chirp_Z(rssringoccs_ComplexDouble *in, long N,
 
     /*  Now pad the rest of chirp with zeros so that it is a power of two.    */
     for (n=chirp_size; n<N_pow_2; ++n)
-        rcpr_chirp[n] = rssringoccs_Complex_Zero;
+        rcpr_chirp[n] = rssringoccs_CDouble_Zero;
 
     /*  Set the x_in array to in times chirp, and then pad with zero.         */
     for (n=0; n<N; ++n)
@@ -91,7 +91,7 @@ rssringoccs_Complex_FFT_Bluestein_Chirp_Z(rssringoccs_ComplexDouble *in, long N,
 
     /*  Now pad the rest with zeros.                                          */
     for (n=N; n<N_pow_2; ++n)
-        x_in[n] = rssringoccs_Complex_Zero;
+        x_in[n] = rssringoccs_CDouble_Zero;
 
     /*  Lastly, we need to compute the forward FFTs of x_in and chirp, and    *
      *  then compute the inverse fourier transform of the product. We'll need *

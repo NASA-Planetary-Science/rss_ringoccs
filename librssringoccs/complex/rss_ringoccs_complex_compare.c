@@ -28,6 +28,11 @@
  ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
  *  Date:       November 30, 2020                                             *
+ ******************************************************************************
+ *                             Revision History                               *
+ ******************************************************************************
+ *  2020/12/02 (Ryan Maguire):                                                *
+ *      Frozen for v1.3.                                                      *
  ******************************************************************************/
 
 /*  Boolean data type and True/False are defined here.                        */
@@ -46,7 +51,7 @@
 /*  Single precision complex comparison.                                      */
 rssringoccs_Bool
 rssringoccs_CFloat_Compare(rssringoccs_ComplexFloat z,
-                                 rssringoccs_ComplexFloat w)
+                           rssringoccs_ComplexFloat w)
 {
     /*  Declare necessary variables. C89 requires this at the top.            */
     float z_real, z_imag, w_real, w_imag;
@@ -64,13 +69,12 @@ rssringoccs_CFloat_Compare(rssringoccs_ComplexFloat z,
     else
         return rssringoccs_False;
 }
-/*  End of rssringoccs_CFloat_Compare.                                  */
-
+/*  End of rssringoccs_CFloat_Compare.                                        */
 
 /*  Double precision complex comparison.                                      */
 rssringoccs_Bool
 rssringoccs_CDouble_Compare(rssringoccs_ComplexDouble z,
-                                  rssringoccs_ComplexDouble w)
+                            rssringoccs_ComplexDouble w)
 {
     /*  Declare necessary variables. C89 requires this at the top.            */
     double z_real, z_imag, w_real, w_imag;
@@ -88,12 +92,12 @@ rssringoccs_CDouble_Compare(rssringoccs_ComplexDouble z,
     else
         return rssringoccs_False;
 }
-/*  End of rssringoccs_CDouble_Compare.                                 */
+/*  End of rssringoccs_CDouble_Compare.                                       */
 
 /*  Long double precision complex comparison.                                 */
 rssringoccs_Bool
 rssringoccs_CLDouble_Compare(rssringoccs_ComplexLongDouble z,
-                                      rssringoccs_ComplexLongDouble w)
+                             rssringoccs_ComplexLongDouble w)
 {
     /*  Declare necessary variables. C89 requires this at the top.            */
     long double z_real, z_imag, w_real, w_imag;
@@ -111,45 +115,48 @@ rssringoccs_CLDouble_Compare(rssringoccs_ComplexLongDouble z,
     else
         return rssringoccs_False;
 }
-/*  End of rssringoccs_CLDouble_Compare.                             */
+/*  End of rssringoccs_CLDouble_Compare.                                      */
 
 #else
 /*  Else statement for #if _RSS_RINGOCCS_USING_COMPLEX_H_ == 0.               */
 
-/*  C99 allows complex values to be compared like normal real numbers.        */
+/*  C99 allows complex values to be compared just like real numbers.          */
 
 /*  Single precision complex comparison.                                      */
 rssringoccs_Bool
 rssringoccs_CFloat_Compare(rssringoccs_ComplexFloat z,
-                                 rssringoccs_ComplexFloat w)
+                           rssringoccs_ComplexFloat w)
 {
     if (z == w)
         return rssringoccs_True;
     else
         return rssringoccs_False;
 }
+/*  End of rssringoccs_CFloat_Compare.                                        */
 
 /*  Double precision complex comparison.                                      */
 rssringoccs_Bool
 rssringoccs_CDouble_Compare(rssringoccs_ComplexDouble z,
-                                  rssringoccs_ComplexDouble w)
+                            rssringoccs_ComplexDouble w)
 {
     if (z == w)
         return rssringoccs_True;
     else
         return rssringoccs_False;
 }
+/*  End of rssringoccs_CDouble_Compare.                                       */
 
 /*  Long double precision complex comparison.                                 */
 rssringoccs_Bool
 rssringoccs_CLDouble_Compare(rssringoccs_ComplexLongDouble z,
-                                      rssringoccs_ComplexLongDouble w)
+                             rssringoccs_ComplexLongDouble w)
 {
     if (z == w)
         return rssringoccs_True;
     else
         return rssringoccs_False;
 }
+/*  End of rssringoccs_CLDouble_Compare.                                      */
 
 #endif
 /*  End of #if _RSS_RINGOCCS_USING_COMPLEX_H_ == 0.                           */

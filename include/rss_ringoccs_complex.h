@@ -23,22 +23,26 @@
  *      creating complex variables and performing complex arithmetic.         *
  ******************************************************************************
  *                               DEPENDENCIES                                 *
+ ******************************************************************************
  *  1.) complex.h (if your compiler supports C99. None otherwise):            *
  *      Standard library for complex types.                                   *
  ******************************************************************************
  *                                 WARNINGS                                   *
+ ******************************************************************************
  *  1.) If your compiler supports C99 complex.h and you would rather use the  *
  *      built-in complex data type and complex functions with rss_ringoccs,   *
  *      you must build rss_ringoccs with such a configuration beforehand.     *
  *      See the config script config_librssringoccs.sh for details.           *
  ******************************************************************************
  *                            A NOTE ON COMMENTS                              *
+ ******************************************************************************
  *  It is anticipated that many users of this code will have experience in    *
  *  either Python or IDL, but not C. Many comments are left to explain as     *
  *  much as possible. Vagueness or unclear code should be reported to:        *
  *  https://github.com/NASA-Planetary-Science/rss_ringoccs/issues             *
  ******************************************************************************
  *                                EXAMPLES                                    *
+ ******************************************************************************
  *  Examples of all of the functions can be found in:                         *
  *      rss_ringoccs/examples/complex_examples/                               *
  ******************************************************************************
@@ -52,8 +56,11 @@
  ******************************************************************************/
 
 /*  Include guard to prevent including this file twice.                       */
-#ifndef _RSS_RINGOCCS_COMPLEX_H_
-#define _RSS_RINGOCCS_COMPLEX_H_
+#ifndef __RSS_RINGOCCS_COMPLEX_H__
+#define __RSS_RINGOCCS_COMPLEX_H__
+
+/*  Config header file containing the macros for how to build rss_ringoccs.   */
+#include <rss_ringoccs/include/rss_ringoccs_config.h>
 
 /*  Booleans defined here. Needed for the FFT and compare routines.           */
 #include <rss_ringoccs/include/rss_ringoccs_bool.h>
@@ -76,6 +83,9 @@
  *      C89 Time: 0.267769                                                    *
  *      C99 Time: 0.231087                                                    *
  *  Which seems linear.                                                       */
+
+/*  Check if the user has requested building using C99 compliant code.        */
+#if __RSS_RINGOCCS_USING_COMPLEX_H__ == 1
 
 /*  We'll only use C99 if the compiler supports it. The __STDC_VERSION__      *
  *  should be 199901L or higher and the __STDC_NO_COMPLEX__ macro should not  *
@@ -102,9 +112,21 @@ typedef float _Complex rssringoccs_ComplexFloat;
 typedef long double _Complex rssringoccs_ComplexLongDouble;
 
 #else
-/*  If we get here, your compiler does not support complex.h, or you have     *
- *  chosen to use C89 compliant code. Either way, we'll need to create        *
- *  various functions to enable complex arithmetic.                           */
+/*  Else for #if !defined(__STDC_NO_COMPLEX__) && __STDC_VERSION__ >= 199901L */
+
+/*  If we get here, then you've requested C99 complex.h but your compiler     *
+ *  not support it. Abort compiling with an error.                            */
+
+#error __RSS_RINGOCCS_USING_COMPLEX_H__ set to 1 but you do not have complex.h
+
+#endif
+/*  End of #if !defined(__STDC_NO_COMPLEX__) && __STDC_VERSION__ >= 199901L.  */
+
+#else
+/*  Else statement for #if __RSS_RINGOCCS_USING_COMPLEX_H__ == 1.             */
+
+/*  This is the default build for rss_ringoccs. The code is strictly C89      *
+ *  compliant and attempts to be as portable as possible.                     */
 
 /*  Set the _RSS_RINGOCCS_USING_COMPLEX_H_ macro to zero.                     */
 #define _RSS_RINGOCCS_USING_COMPLEX_H_ 0
@@ -130,18 +152,39 @@ typedef struct {
 } rssringoccs_ComplexLongDouble;
 
 #endif
-/*  End of #if !defined(__STDC_NO_COMPLEX__) && __STDC_VERSION__ >= 199901L   */
+/*  End of __RSS_RINGOCCS_USING_COMPLEX_H__ == 1.                             */
 
 /*  Useful constants used throughout computations.                            */
-extern const rssringoccs_ComplexDouble rssringoccs_Imaginary_Unit;
-extern const rssringoccs_ComplexDouble rssringoccs_Complex_Zero;
-extern const rssringoccs_ComplexDouble rssringoccs_Complex_One;
-extern const rssringoccs_ComplexDouble rssringoccs_Complex_NaN;
-extern const rssringoccs_ComplexDouble rssringoccs_Complex_Infinity;
+
+/*  The imaginary unit, z = 0 + i 1.                                          */
+extern const rssringoccs_ComplexFloat rssringoccs_CFloat_I;
+extern const rssringoccs_ComplexDouble rssringoccs_CDouble_I;
+extern const rssringoccs_ComplexLongDouble rssringoccs_CLDouble_I;
+
+/*  Complex zero, z = 0 + i0.                                                 */
+extern const rssringoccs_ComplexFloat rssringoccs_CFloat_Zero;
+extern const rssringoccs_ComplexDouble rssringoccs_CDouble_Zero;
+extern const rssringoccs_ComplexLongDouble rssringoccs_CLDouble_Zero;
+
+/*  Complex one, z = 1 + i0.                                                  */
+extern const rssringoccs_ComplexFloat rssringoccs_CFloat_One;
+extern const rssringoccs_ComplexDouble rssringoccs_CDouble_One;
+extern const rssringoccs_ComplexLongDouble rssringoccs_CLDouble_One;
+
+/*  Complex Not-a-Number, set to NaN + i NaN.                                 */
+extern const rssringoccs_ComplexFloat rssringoccs_CFloat_NaN;
+extern const rssringoccs_ComplexDouble rssringoccs_CDouble_NaN;
+extern const rssringoccs_ComplexLongDouble rssringoccs_CLDouble_NaN;
+
+/*  Complex infinity, set to inf + i inf. This is the "north pole" on the     *
+ *  Riemann sphere.                                                           */
+extern const rssringoccs_ComplexFloat rssringoccs_CFloat_Infinity;
+extern const rssringoccs_ComplexDouble rssringoccs_CDouble_Infinity;
+extern const rssringoccs_ComplexLongDouble rssringoccs_CLDouble_Infinity;
 
 /******************************************************************************
  *  Function:                                                                 *
- *      rssringoccs_CDouble_Abs                                         *
+ *      rssringoccs_CDouble_Abs                                               *
  *  Purpose:                                                                  *
  *      Compute the absolute value of a complex number. This is equivalent to *
  *      the cabs function found in complex.h (C99).                           *
@@ -164,7 +207,7 @@ rssringoccs_CLDouble_Abs(rssringoccs_ComplexLongDouble z);
 
 /******************************************************************************
  *  Function:                                                                 *
- *      rssringoccs_CDouble_Abs_Squared                                 *
+ *      rssringoccs_CDouble_Abs_Squared                                       *
  *  Purpose:                                                                  *
  *      Compute the square of the absolute value of a complex number z. This  *
  *      is useful for when |z|^2 is needed so we can avoid an expensive and   *
@@ -174,7 +217,7 @@ rssringoccs_CLDouble_Abs(rssringoccs_ComplexLongDouble z);
  *      rssringoccs_ComplexDouble z:                                          *
  *          A complex number.                                                 *
  *  Output:                                                                   *
- *      double abs_z:                                                         *
+ *      double abs_sq:                                                        *
  *          The square of the absolute value of z, |z|^2.                     *
  ******************************************************************************/
 extern float
@@ -188,7 +231,91 @@ rssringoccs_CLDouble_Abs_Squared(rssringoccs_ComplexLongDouble z);
 
 /******************************************************************************
  *  Function:                                                                 *
- *      rssringoccs_Complex_Argument                                          *
+ *      rssringoccs_CDouble_Add                                               *
+ *  Purpose:                                                                  *
+ *      Add two complex numbers.                                              *
+ *  Arguments:                                                                *
+ *      rssringoccs_ComplexDouble z0:                                         *
+ *          A complex number.                                                 *
+ *      rssringoccs_ComplexDouble z1:                                         *
+ *          Another complex number.                                           *
+ *  Output:                                                                   *
+ *      rssringoccs_ComplexDouble sum:                                        *
+ *          The sum of z0 and z1.                                             *
+ *  NOTES:                                                                    *
+ *      In C99, since _Complex is a built-in data type, given double _Complex *
+ *      z0 and double _Complex z1, you can just do z0 + z1. In C89 we use     *
+ *      structs to define complex numbers. Structs cannot be added, so we     *
+ *      need a function for computing the sum of two complex values.          *
+ ******************************************************************************/
+extern rssringoccs_ComplexFloat
+rssringoccs_CFloat_Add(rssringoccs_ComplexFloat z1,
+                             rssringoccs_ComplexFloat z2);
+
+extern rssringoccs_ComplexDouble
+rssringoccs_CDouble_Add(rssringoccs_ComplexDouble z1,
+                              rssringoccs_ComplexDouble z2);
+
+extern rssringoccs_ComplexLongDouble
+rssringoccs_CLDouble_Add(rssringoccs_ComplexLongDouble z1,
+                                  rssringoccs_ComplexLongDouble z2);
+
+/******************************************************************************
+ *  Function:                                                                 *
+ *      rssringoccs_CDouble_Add_Real                                          *
+ *  Purpose:                                                                  *
+ *      Add a real number to a complex one.                                   *
+ *  Arguments:                                                                *
+ *      double x:                                                             *
+ *          A real number.                                                    *
+ *      rssringoccs_ComplexDouble z:                                          *
+ *          A complex number.                                                 *
+ *  Output:                                                                   *
+ *      rssringoccs_ComplexDouble sum:                                        *
+ *          The sum of x and z.                                               *
+ *  NOTES:                                                                    *
+ *      This function is provided for convenience. It is somewhat laborious   *
+ *      to convert a real number to a complex number and then use             *
+ *      rssringoccs_CDouble_Add to add the two complex numbers, so this       *
+ *      function can be used to skip the intermediate step.                   *
+ ******************************************************************************/
+extern rssringoccs_ComplexFloat
+rssringoccs_CFloat_Add_Real(float x, rssringoccs_ComplexFloat z);
+
+extern rssringoccs_ComplexDouble
+rssringoccs_CDouble_Add_Real(double x, rssringoccs_ComplexDouble z);
+
+extern rssringoccs_ComplexLongDouble
+rssringoccs_CLDouble_Add_Real(long double x,
+                                       rssringoccs_ComplexLongDouble z);
+
+/******************************************************************************
+ *  Function:                                                                 *
+ *      rssringoccs_CDouble_Add_Imag                                          *
+ *  Purpose:                                                                  *
+ *      Add an imaginary number to a complex one.                             *
+ *  Arguments:                                                                *
+ *      double y:                                                             *
+ *          An imaginary number.                                              *
+ *      rssringoccs_ComplexDouble z:                                          *
+ *          A complex number.                                                 *
+ *  Output:                                                                   *
+ *      rssringoccs_ComplexDouble sum:                                        *
+ *          The sum of y and z.                                               *
+ ******************************************************************************/
+extern rssringoccs_ComplexFloat
+rssringoccs_CFloat_Add_Imag(float y, rssringoccs_ComplexFloat z);
+
+extern rssringoccs_ComplexDouble
+rssringoccs_CDouble_Add_Imag(double y, rssringoccs_ComplexDouble z);
+
+extern rssringoccs_ComplexLongDouble
+rssringoccs_CLDouble_Add_Imag(long double y,
+                                       rssringoccs_ComplexLongDouble z);
+
+/******************************************************************************
+ *  Function:                                                                 *
+ *      rssringoccs_CDouble_Argument                                          *
  *  Purpose:                                                                  *
  *      Compute the argument (phase) of a non-zero complex number. This is    *
  *      equivalent of carg found in complex.h (C99).                          *
@@ -206,7 +333,7 @@ rssringoccs_CLDouble_Abs_Squared(rssringoccs_ComplexLongDouble z);
  *                                                                            *
  *      Using the function on the complex zero (0, 0) returns 0.0 on          *
  *      implementations that support IEEE floating-point arithmetic. This     *
- *      included GNU's glibc/gcc and clang.                                   *
+ *      includes GNU's glibc/gcc and clang.                                   *
  ******************************************************************************/
 extern float
 rssringoccs_CFloat_Argument(rssringoccs_ComplexFloat z);
@@ -216,6 +343,34 @@ rssringoccs_CDouble_Argument(rssringoccs_ComplexDouble z);
 
 extern long double
 rssringoccs_CLDouble_Argument(rssringoccs_ComplexLongDouble z);
+
+/******************************************************************************
+ *  Function:                                                                 *
+ *      rssringoccs_CDouble_Compare                                           *
+ *  Purpose:                                                                  *
+ *      Compare two complex numbers z0 and z1. This returns true if both the  *
+ *      real and imaginary parts of z0 and z1 are identical, and false        *
+ *      otherwise.                                                            *
+ *  Arguments:                                                                *
+ *      rssringoccs_ComplexDouble z0:                                         *
+ *          A complex number.                                                 *
+ *      rssringoccs_ComplexDouble z1:                                         *
+ *          A complex number.                                                 *
+ *  Output:                                                                   *
+ *      rssringoccs_Bool comp:                                                *
+ *          A Boolean indicating whether or not z0 and z1 are the same.       *
+ ******************************************************************************/
+extern rssringoccs_Bool
+rssringoccs_CFloat_Compare(rssringoccs_ComplexFloat z,
+                                 rssringoccs_ComplexFloat w);
+
+extern rssringoccs_Bool
+rssringoccs_CDouble_Compare(rssringoccs_ComplexDouble z,
+                                  rssringoccs_ComplexDouble w);
+
+extern rssringoccs_Bool
+rssringoccs_CLDouble_Compare(rssringoccs_ComplexLongDouble z,
+                                      rssringoccs_ComplexLongDouble w);
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -260,18 +415,6 @@ rssringoccs_CDouble_Imag_Part(rssringoccs_ComplexDouble z);
 
 extern long double
 rssringoccs_CLDouble_Imag_Part(rssringoccs_ComplexLongDouble z);
-
-extern rssringoccs_Bool
-rssringoccs_CFloat_Compare(rssringoccs_ComplexFloat z,
-                                 rssringoccs_ComplexFloat w);
-
-extern rssringoccs_Bool
-rssringoccs_CDouble_Compare(rssringoccs_ComplexDouble z,
-                                  rssringoccs_ComplexDouble w);
-
-extern rssringoccs_Bool
-rssringoccs_CLDouble_Compare(rssringoccs_ComplexLongDouble z,
-                                      rssringoccs_ComplexLongDouble w);
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -543,61 +686,6 @@ rssringoccs_CLDouble_Rect(long double x, long double y);
  ******************************************************************************/
 extern rssringoccs_ComplexDouble
 rssringoccs_CDouble_Polar(double r, double theta);
-
-/******************************************************************************
- *  Function:                                                                 *
- *      rssringoccs_Complex_Add                                               *
- *  Purpose:                                                                  *
- *      Add two complex numbers.                                              *
- *  Arguments:                                                                *
- *      rssringoccs_ComplexDouble z0:                                         *
- *          A complex number.                                                 *
- *      rssringoccs_ComplexDouble z1:                                         *
- *          Another complex number.                                           *
- *  Output:                                                                   *
- *      rssringoccs_ComplexDouble sum:                                        *
- *          The sum of z0 and z1.                                             *
- *  NOTES:                                                                    *
- *      In C99, since _Complex is a built-in data type, given double _Complex *
- *      z0 and double _Complex z1, you can just do z0 + z1. In C89 we use     *
- *      structs to define complex numbers. Structs cannot be added, so we     *
- *      need a function for computing the sum of two complex values.          *
- *                                                                            *
- *      For convenience we also provide Add_Real functions which allow one to *
- *      compute the sum of a real number with a complex one without having to *
- *      perform conversions first. Similarly with Add_Imag.                   *
- ******************************************************************************/
-extern rssringoccs_ComplexFloat
-rssringoccs_CFloat_Add(rssringoccs_ComplexFloat z1,
-                             rssringoccs_ComplexFloat z2);
-
-extern rssringoccs_ComplexDouble
-rssringoccs_CDouble_Add(rssringoccs_ComplexDouble z1,
-                              rssringoccs_ComplexDouble z2);
-
-extern rssringoccs_ComplexLongDouble
-rssringoccs_CLDouble_Add(rssringoccs_ComplexLongDouble z1,
-                                  rssringoccs_ComplexLongDouble z2);
-
-extern rssringoccs_ComplexFloat
-rssringoccs_CFloat_Add_Real(float x, rssringoccs_ComplexFloat z);
-
-extern rssringoccs_ComplexDouble
-rssringoccs_CDouble_Add_Real(double x, rssringoccs_ComplexDouble z);
-
-extern rssringoccs_ComplexLongDouble
-rssringoccs_CLDouble_Add_Real(long double x,
-                                       rssringoccs_ComplexLongDouble z);
-
-extern rssringoccs_ComplexFloat
-rssringoccs_CFloat_Add_Imag(float y, rssringoccs_ComplexFloat z);
-
-extern rssringoccs_ComplexDouble
-rssringoccs_CDouble_Add_Imag(double y, rssringoccs_ComplexDouble z);
-
-extern rssringoccs_ComplexLongDouble
-rssringoccs_CLDouble_Add_Imag(long double y,
-                                       rssringoccs_ComplexLongDouble z);
 
 /******************************************************************************
  *  Function:                                                                 *

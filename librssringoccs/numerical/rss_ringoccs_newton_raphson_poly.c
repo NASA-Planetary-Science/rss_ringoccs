@@ -21,9 +21,9 @@ rssringoccs_Newton_Raphson_CDouble_Poly_Real(
 
     /*  If the derivative is zero at your initial guess, Newton-Raphson       *
      *  fails. Return Not-a-Number in this case.                              */
-    comp = rssringoccs_CDouble_Compare(wp, rssringoccs_Complex_Zero);
+    comp = rssringoccs_CDouble_Compare(wp, rssringoccs_CDouble_Zero);
     if (comp)
-        return rssringoccs_Complex_NaN;
+        return rssringoccs_CDouble_NaN;
 
     /*  Compute the first iteration of Newton-Raphson.                        */
     dz = rssringoccs_CDouble_Divide(w, wp);
@@ -39,10 +39,10 @@ rssringoccs_Newton_Raphson_CDouble_Poly_Real(
         wp = rssringoccs_CDouble_Poly_Deriv_Real_Coeffs(coeffs, degree,
                                                               1, z);
 
-        comp = rssringoccs_CDouble_Compare(wp, rssringoccs_Complex_Zero);
+        comp = rssringoccs_CDouble_Compare(wp, rssringoccs_CDouble_Zero);
 
         if (comp)
-            return rssringoccs_Complex_NaN;
+            return rssringoccs_CDouble_NaN;
 
         dz = rssringoccs_CDouble_Divide(w, wp);
         z  = rssringoccs_CDouble_Subtract(z, dz);

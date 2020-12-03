@@ -120,7 +120,7 @@ rssringoccs_CDouble_Faddeeva(rssringoccs_ComplexDouble z)
     abs_y = rssringoccs_Double_Abs(z_y);
 
     /*  Initialize the output to 0+i0.                                        */
-    w = rssringoccs_Complex_Zero;
+    w = rssringoccs_CDouble_Zero;
 
     /*  And initialize all of the sum variables to zero.                      */
     sum1 = 0.0;

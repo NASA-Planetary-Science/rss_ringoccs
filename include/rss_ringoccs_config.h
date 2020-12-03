@@ -16,28 +16,35 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
- *                            rss_ringoccs_bool                               *
+ *                            rss_ringoccs_config                             *
  ******************************************************************************
  *  Purpose:                                                                  *
- *      Define bool, false, and true for C89/C90 compilers. If your compiler  *
- *      supports stdbool (i.e., C99, C11, or C18), then the built-in _Bool    *
- *      is compatible with what we've defined here.                           *
+ *      Provide macros describing how to build rss_ringoccs. This includes    *
+ *      the macros for using C99 complex and C99 math.h. The default build    *
+ *      assumes C89 compliance and does not use any of the features from C99. *
  ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
- *  Date:       September 12, 2020                                            *
+ *  Date:       December 2, 2020                                              *
  ******************************************************************************/
 
 /*  Include guard to prevent including this file twice.                       */
-#ifndef __RSS_RINGOCCS_BOOL_H__
-#define __RSS_RINGOCCS_BOOL_H__
+#ifndef __RSS_RINGOCCS_CONFIG_H__
+#define __RSS_RINGOCCS_CONFIG_H__
 
-/*  The C99, C11, and C18 standards require support for booleans, but it is   *
- *  not available in C89/C90. We've typedef'd Booleans as rssringoccs_Bool to *
- *  avoid naming conflicts with C99 and higher Booleans. If you compiler      *
- *  supports Booleans, you should be able to use stdbools with rss_ringoccs.  */
+/*  Set this value to either 0 or 1. Setting it to zero means we'll use the   *
+ *  complex data types defined in rss_ringoccs_complex.h instead of the       *
+ *  ones provided by C99, setting it to 1 uses C99 complex.h. By default      *
+ *  rss_ringoccs does not assume you have a C99 capable compiler and          *
+ *  builds using C89/C90 (also known as ANSI C) compliant code.               */
+#define __RSS_RINGOCCS_USING_COMPLEX_H__ 0
 
-/*  We prepend rssringoccs onto False, True, and Bool to avoid name conflicts.*/
-typedef enum {rssringoccs_False, rssringoccs_True} rssringoccs_Bool;
+/*  There are subtle differences between the C89/C90 and C99 math.h header    *
+ *  files. The C99 math.h is a superset of the C89 one. rss_ringoccs provides *
+ *  the functions that are missing in rss_ringoccs_math.h. If you have a      *
+ *  compiler that supports C99 math.h, then setting this macro to 1 will make *
+ *  rss_ringoccs alias those functions rather than providing new algorithms.  *
+ *  By default we do not assume C99 compliance.                               */
+#define __RSS_RINGOCCS_USING_C99_MATH_H__ 0
 
 #endif
 /*  End of include guard.                                                     */

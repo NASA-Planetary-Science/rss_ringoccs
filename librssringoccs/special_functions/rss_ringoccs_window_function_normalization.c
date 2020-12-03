@@ -45,7 +45,7 @@ rssringoccs_Complex_Window_Normalization(rssringoccs_ComplexDouble *ker,
     double abs_T1, out;
 
     /*  Compute the Free-Space integral.                                      */
-    rssringoccs_ComplexDouble T1 = rssringoccs_Complex_Zero;
+    rssringoccs_ComplexDouble T1 = rssringoccs_CDouble_Zero;
 
     for (n=0; n<dim; ++n)
         T1 = rssringoccs_CDouble_Add(T1, ker[n]);

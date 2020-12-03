@@ -77,8 +77,8 @@ rssringoccs_Newton_Raphson_Complex(
 
     /*  If the derivative is zero at your initial guess, Newton-Raphson       *
      *  fails. Return Not-a-Number in this case.                              */
-    if (rssringoccs_CDouble_Compare(w_prime, rssringoccs_Complex_Zero))
-        return rssringoccs_Complex_NaN;
+    if (rssringoccs_CDouble_Compare(w_prime, rssringoccs_CDouble_Zero))
+        return rssringoccs_CDouble_NaN;
 
     /*  Compute the first iteration of Newton-Raphson.                        */
     dz = rssringoccs_CDouble_Divide(w, w_prime);
@@ -93,8 +93,8 @@ rssringoccs_Newton_Raphson_Complex(
         w = (*f)(z);
         w_prime = (*f_prime)(z);
 
-        if (rssringoccs_CDouble_Compare(w_prime, rssringoccs_Complex_Zero))
-            return rssringoccs_Complex_NaN;
+        if (rssringoccs_CDouble_Compare(w_prime, rssringoccs_CDouble_Zero))
+            return rssringoccs_CDouble_NaN;
 
         dz = rssringoccs_CDouble_Divide(w, w_prime);
         z  = rssringoccs_CDouble_Subtract(z, dz);

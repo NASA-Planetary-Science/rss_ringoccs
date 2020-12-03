@@ -36,7 +36,7 @@ rssringoccs_CDouble_Poly_Deriv_Real_Coeffs(double *coeffs,
      *  a constant. Check this. If degree is zero, we'll just return the      *
      *  zeroth coefficient (a constant polynomial).                           */
     if (degree < deriv)
-        poly = rssringoccs_Complex_Zero;
+        poly = rssringoccs_CDouble_Zero;
     else if (degree == deriv)
         poly = rssringoccs_CDouble_Rect(coeffs[degree], 0.0);
     else

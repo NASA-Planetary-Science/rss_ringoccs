@@ -23,22 +23,15 @@
  ******************************************************************************
  *                               DEPENDENCIES                                 *
  ******************************************************************************
- *  1.) rss_ringoccs_math.h:                                                  *
- *          This file provides compatibility between the two standard math.h  *
- *          header files (C89 vs C99 math.h). If C99 math.h exists, it simply *
- *          provides aliases for the functions, and if C89 math.h is used     *
- *          it defines the functions missing in the earlier version.          *
- *  2.) rss_ringoccs_complex.h:                                               *
- *          Header file where rssringoccs_ComplexDouble is defined, as well   *
- *          as the prototype for rssringoccs_Complex_Cos.                     *
+ *  1.) rss_ringoccs_complex.h:                                               *
+ *          Header where complex types and function prototypes are defined.   *
  ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
  *  Date:       November 30, 2020                                             *
+ ******************************************************************************
+ *  2020/12/02 (Ryan Maguire):                                                *
+ *      Frozen for v1.3.                                                      *
  ******************************************************************************/
-
-/*  Header file which contains aliases for the functions in the standard C    *
- *  library math.h. This allows compatibility of C89 and C99 math.h headers.  */
-#include <rss_ringoccs/include/rss_ringoccs_math.h>
 
 /*  Where the prototypes are declared and where complex types are defined.    */
 #include <rss_ringoccs/include/rss_ringoccs_complex.h>

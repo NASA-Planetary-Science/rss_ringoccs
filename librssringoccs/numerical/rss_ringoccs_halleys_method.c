@@ -91,8 +91,8 @@ rssringoccs_Halleys_Method_Complex(
     );
 
     /*  Check that the denominator is non-zero.                               */
-    if (rssringoccs_CDouble_Compare(denom, rssringoccs_Complex_Zero))
-        return rssringoccs_Complex_NaN;
+    if (rssringoccs_CDouble_Compare(denom, rssringoccs_CDouble_Zero))
+        return rssringoccs_CDouble_NaN;
 
     /*  Compute the first iteration of Newton-Raphson.                        */
     dz = rssringoccs_CDouble_Divide(
@@ -122,8 +122,8 @@ rssringoccs_Halleys_Method_Complex(
         );
 
         /*  Check that the denominator is non-zero.                           */
-        if (rssringoccs_CDouble_Compare(denom, rssringoccs_Complex_Zero))
-            return rssringoccs_Complex_NaN;
+        if (rssringoccs_CDouble_Compare(denom, rssringoccs_CDouble_Zero))
+            return rssringoccs_CDouble_NaN;
 
         dz = rssringoccs_CDouble_Divide(
             rssringoccs_CDouble_Multiply_Real(

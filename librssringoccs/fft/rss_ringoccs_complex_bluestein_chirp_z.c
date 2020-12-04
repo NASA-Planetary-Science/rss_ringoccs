@@ -66,9 +66,9 @@ rssringoccs_Complex_FFT_Bluestein_Chirp_Z(rssringoccs_ComplexDouble *in, long N,
     x_in       = malloc(sizeof(*x_in)       * N_pow_2);
 
     if (inverse)
-        chirp_factor = M_PI/N;
+        chirp_factor = ONE_PI/N;
     else
-        chirp_factor = -M_PI/N;
+        chirp_factor = -ONE_PI/N;
 
     /*  Set the values for the "chirp" factor, which is simply the complex    *
      *  exponential of (k^2 / 2) * (+/- 2 pi i / N). The +/- depends on       *

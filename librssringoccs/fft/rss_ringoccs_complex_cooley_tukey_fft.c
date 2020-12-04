@@ -50,9 +50,9 @@ rssringoccs_Complex_FFT_Cooley_Tukey(rssringoccs_ComplexDouble *in,
     /*  If we are performing an inverse Fourier transform, the factor inside  *
      *  the exponential is 2 pi / N. Forward transform is minus this.         */
     if (inverse)
-        factor = 2.0 * M_PI/N;
+        factor = TWO_PI/N;
     else
-        factor = -2.0 * M_PI/N;
+        factor = -TWO_PI/N;
 
     /*  Compute the "twiddle" factors. No idea why it's called this.          */
     for (k = 0; k<N; ++k)

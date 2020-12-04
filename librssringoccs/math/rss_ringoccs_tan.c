@@ -11,12 +11,12 @@ double rssringoccs_Double_Tan(double x)
 
 float rssringoccs_Float_Tan(float x)
 {
-    return tan((double)x);
+    return (float)tan((double)x);
 }
 
 long double rssringoccs_LDouble_Tan(long double x)
 {
-    return tan((double)x);
+    return (long double)tan((double)x);
 }
 
 /*  Now have the functions declared in rss_ringoccs_math.h point to these.    */

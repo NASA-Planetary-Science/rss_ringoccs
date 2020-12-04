@@ -70,11 +70,11 @@ rssringoccs_CFloat_Cos(rssringoccs_ComplexFloat z)
     /*  And the imaginary part is -sin(x)sinh(y).                             */
     imag = -rssringoccs_Float_Sin(x) * rssringoccs_Float_Sinh(y);
 
-    /*  Use rssringoccs_Complex_Rect to create the output and return.         */
+    /*  Create the output and return.                                         */
     cos_z = rssringoccs_CFloat_Rect(real, imag);
     return cos_z;
 }
-/*  End of rssringoccs_CFloat_Cos.                                      */
+/*  End of rssringoccs_CFloat_Cos.                                            */
 
 /*  Double precision complex cosine.                                          */
 rssringoccs_ComplexDouble
@@ -94,11 +94,11 @@ rssringoccs_CDouble_Cos(rssringoccs_ComplexDouble z)
     /*  And the imaginary part is -sin(x)sinh(y).                             */
     imag = -rssringoccs_Double_Sin(x) * rssringoccs_Double_Sinh(y);
 
-    /*  Use rssringoccs_Complex_Rect to create the output and return.         */
+    /*  Create the output and return.                                         */
     cos_z = rssringoccs_CDouble_Rect(real, imag);
     return cos_z;
 }
-/*  End of rssringoccs_CDouble_Cos.                                     */
+/*  End of rssringoccs_CDouble_Cos.                                           */
 
 /*  Long double precision complex cosine.                                     */
 rssringoccs_ComplexLongDouble

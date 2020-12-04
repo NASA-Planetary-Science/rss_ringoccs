@@ -15,12 +15,13 @@ double rssringoccs_Double_Arctan2(double y, double x)
  *  make the code forward compatible. We'll do this in a very simple manner.  */
 float rssringoccs_Float_Arctan2(float y, float x)
 {
-    return atan2((double)y, (double)x);
+    return (float)atan2((double)y, (double)x);
 }
 
 long double rssringoccs_LDouble_Arctan2(long double y, long double x)
 {
-    return atan2((double)y, (double)x);
+    return (long double)
+    atan2((double)y, (double)x);
 }
 
 /*  Now have the functions declared in rss_ringoccs_math.h point to these.    */

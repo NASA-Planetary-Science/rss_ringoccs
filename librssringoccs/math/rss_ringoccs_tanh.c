@@ -15,7 +15,7 @@ float rssringoccs_Float_Tanh(float x)
 double rssringoccs_Double_Tanh(double x)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
-    float tanh_x;
+    double tanh_x;
 
     /*  The definition of than(x) is sinh(x)/cosh(x), so return this.         */
     tanh_x = rssringoccs_Double_Sinh(x) / rssringoccs_Double_Cosh(-x);
@@ -25,7 +25,7 @@ double rssringoccs_Double_Tanh(double x)
 long double rssringoccs_LDouble_Tanh(long double x)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
-    float tanh_x;
+    long double tanh_x;
 
     /*  The definition of than(x) is sinh(x)/cosh(x), so return this.         */
     tanh_x = rssringoccs_LDouble_Sinh(x) / rssringoccs_LDouble_Cosh(-x);

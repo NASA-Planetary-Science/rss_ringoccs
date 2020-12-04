@@ -5,7 +5,7 @@
 float rssringoccs_Float_Erf(float x)
 {
     float erfc;
-    erfc = 1.0 - rssringoccs_Float_Erfc(x);
+    erfc = 1.0F - rssringoccs_Float_Erfc(x);
 
     return erfc;
 }
@@ -21,7 +21,7 @@ double rssringoccs_Double_Erf(double x)
 long double rssringoccs_LDouble_Erf(long double x)
 {
     long double erfc;
-    erfc = 1.0 - rssringoccs_LDouble_Erfc(x);
+    erfc = 1.0L - rssringoccs_LDouble_Erfc(x);
 
     return erfc;
 }

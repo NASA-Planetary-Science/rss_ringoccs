@@ -77,13 +77,13 @@ rssringoccs_Float_Two_Slit_Fraunhofer_Diffraction(float x, float z, float a,
          *  the ordinary sine function. Since sinc and sine are more          *
          *  expensive than multiplication (computationally) it is better to   *
          *  compute sinc/sine once, and then square this.                     */
-        var_1  = rssringoccs_Float_Sinc(a*sin_theta);
+        var_1  = rssringoccs_Float_Sinc(scaled_a*sin_theta);
         var_1 *= var_1;
 
-        var_2  = rssringoccs_Float_Sin(TWO_PI*d*sin_theta);
+        var_2  = rssringoccs_Float_Sin(TWO_PI*scaled_d*sin_theta);
         var_2 *= var_2;
 
-        var_3  = 2.0*rssringoccs_Float_Sin(ONE_PI*d*sin_theta);
+        var_3  = 2.0*rssringoccs_Float_Sin(ONE_PI*scaled_d*sin_theta);
         var_3 *= var_3;
 
         out = var_1*var_2/var_3;
@@ -120,13 +120,13 @@ rssringoccs_Double_Two_Slit_Fraunhofer_Diffraction(double x, double z, double a,
          *  the ordinary sine function. Since sinc and sine are more          *
          *  expensive than multiplication (computationally) it is better to   *
          *  compute sinc/sine once, and then square this.                     */
-        var_1  = rssringoccs_Double_Sinc(a*sin_theta);
+        var_1  = rssringoccs_Double_Sinc(scaled_a*sin_theta);
         var_1 *= var_1;
 
-        var_2  = rssringoccs_Double_Sin(TWO_PI*d*sin_theta);
+        var_2  = rssringoccs_Double_Sin(TWO_PI*scaled_d*sin_theta);
         var_2 *= var_2;
 
-        var_3  = 2.0*rssringoccs_Double_Sin(ONE_PI*d*sin_theta);
+        var_3  = 2.0*rssringoccs_Double_Sin(ONE_PI*scaled_d*sin_theta);
         var_3 *= var_3;
 
         out = var_1*var_2/var_3;
@@ -166,13 +166,13 @@ rssringoccs_LDouble_Two_Slit_Fraunhofer_Diffraction(long double x,
          *  the ordinary sine function. Since sinc and sine are more          *
          *  expensive than multiplication (computationally) it is better to   *
          *  compute sinc/sine once, and then square this.                     */
-        var_1  = rssringoccs_LDouble_Sinc(a*sin_theta);
+        var_1  = rssringoccs_LDouble_Sinc(scaled_a*sin_theta);
         var_1 *= var_1;
 
-        var_2  = rssringoccs_LDouble_Sin(TWO_PI*d*sin_theta);
+        var_2  = rssringoccs_LDouble_Sin(TWO_PI*scaled_d*sin_theta);
         var_2 *= var_2;
 
-        var_3  = 2.0*rssringoccs_LDouble_Sin(ONE_PI*d*sin_theta);
+        var_3  = 2.0*rssringoccs_LDouble_Sin(ONE_PI*scaled_d*sin_theta);
         var_3 *= var_3;
 
         out = var_1*var_2/var_3;

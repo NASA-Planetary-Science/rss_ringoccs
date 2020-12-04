@@ -8,7 +8,7 @@ float rssringoccs_Float_Cosh(float x)
     float cosh_x;
 
     /*  The definition of cosh(x) is [exp(x) + exp(-x)]/2, so return this.    */
-    cosh_x = 0.5*(rssringoccs_Float_Exp(x) + rssringoccs_Float_Exp(-x));
+    cosh_x = 0.5F*(rssringoccs_Float_Exp(x) + rssringoccs_Float_Exp(-x));
     return cosh_x;
 }
 
@@ -28,6 +28,6 @@ long double rssringoccs_LDouble_Cosh(long double x)
     long double cosh_x;
 
     /*  The definition of sinh(x) is [exp(x) - exp(-x)]/2, so return this.    */
-    cosh_x = 0.5*(rssringoccs_LDouble_Exp(x)+rssringoccs_LDouble_Exp(-x));
+    cosh_x = 0.5L*(rssringoccs_LDouble_Exp(x)+rssringoccs_LDouble_Exp(-x));
     return cosh_x;
 }

@@ -2,10 +2,10 @@
  *  library math.h. This allows compatibility of C89 and C99 math.h headers.  */
 #include <rss_ringoccs/include/rss_ringoccs_math.h>
 
-long rssringoccs_Factorial(int N)
+unsigned long rssringoccs_Factorial(unsigned int N)
 {
-    int n;
-    long factorial = 1;
+    unsigned int n;
+    unsigned long factorial = 1;
 
     for (n=1; n<=N; ++n)
         factorial *= n;
@@ -13,19 +13,20 @@ long rssringoccs_Factorial(int N)
     return factorial;
 }
 
-long rssringoccs_Falling_Factorial(int x, int N)
+unsigned long rssringoccs_Falling_Factorial(unsigned int x, unsigned int N)
 {
-    int n;
-    long falling_factorial = x;
+    unsigned int n;
+    unsigned long falling_factorial;
 
     if (N == 0)
-        return 1;
+        falling_factorial = 1;
     else if (N > x)
-        return 0;
+        falling_factorial = 0;
     else
     {
+        falling_factorial = x;
         for (n=1; n<N; ++n)
             falling_factorial *= (x-n);
-        return falling_factorial;
     }
+    return falling_factorial;
 }

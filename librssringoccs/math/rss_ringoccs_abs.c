@@ -15,12 +15,12 @@ double rssringoccs_Double_Abs(double x)
  *  make the code forward compatible. We'll do this in a very simple manner.  */
 float rssringoccs_Float_Abs(float x)
 {
-    return fabs((double)x);
+    return (float)fabs((double)x);
 }
 
 long double rssringoccs_LDouble_Abs(long double x)
 {
-    return fabs((double)x);
+    return (long double)fabs((double)x);
 }
 
 /*  Now have the functions declared in rss_ringoccs_math.h point to these.    */

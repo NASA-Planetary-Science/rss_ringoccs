@@ -86,10 +86,10 @@ const rssringoccs_ComplexFloat rssringoccs_CFloat_I    = {{0.0F, 1.0F}};
 const rssringoccs_ComplexFloat rssringoccs_CFloat_Zero = {{0.0F, 0.0F}};
 const rssringoccs_ComplexFloat rssringoccs_CFloat_One  = {{1.0F, 0.0F}};
 const rssringoccs_ComplexFloat
-    rssringoccs_CFloat_NaN = {{rssringoccs_NaN, rssringoccs_NaN}};
+    rssringoccs_CFloat_NaN = {{rssringoccs_NaN_F, rssringoccs_NaN_F}};
 const rssringoccs_ComplexFloat
-    rssringoccs_CFloat_Infinity = {{rssringoccs_Infinity,
-                                     rssringoccs_Infinity}};
+    rssringoccs_CFloat_Infinity = {{rssringoccs_Infinity_F,
+                                     rssringoccs_Infinity_F}};
 
 /*  Double precision constants.                                               */
 const rssringoccs_ComplexDouble rssringoccs_CDouble_I    = {{0.0, 1.0}};
@@ -106,10 +106,10 @@ const rssringoccs_ComplexLongDouble rssringoccs_CLDouble_I    = {{0.0L, 1.0L}};
 const rssringoccs_ComplexLongDouble rssringoccs_CLDouble_Zero = {{0.0L, 0.0L}};
 const rssringoccs_ComplexLongDouble rssringoccs_CLDouble_One  = {{1.0L, 0.0L}};
 const rssringoccs_ComplexLongDouble
-    rssringoccs_CLDouble_NaN = {{rssringoccs_NaN, rssringoccs_NaN}};
+    rssringoccs_CLDouble_NaN = {{rssringoccs_NaN_L, rssringoccs_NaN_L}};
 const rssringoccs_ComplexLongDouble
-    rssringoccs_CLDouble_Infinity = {{rssringoccs_Infinity,
-                                     rssringoccs_Infinity}};
+    rssringoccs_CLDouble_Infinity = {{rssringoccs_Infinity_L,
+                                     rssringoccs_Infinity_L}};
 
 #endif
 /*  End of #if _RSS_RINGOCCS_USING_COMPLEX_H_ == 1                            */

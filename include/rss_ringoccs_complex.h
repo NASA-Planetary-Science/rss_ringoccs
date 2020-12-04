@@ -374,6 +374,31 @@ rssringoccs_CLDouble_Compare(rssringoccs_ComplexLongDouble z,
 
 /******************************************************************************
  *  Function:                                                                 *
+ *      rssringoccs_CDouble_Cos                                               *
+ *  Purpose:                                                                  *
+ *      Compute the cosine of a complex number z.                             *
+ *  Arguments:                                                                *
+ *      rssringoccs_ComplexDouble z:                                          *
+ *          A complex number.                                                 *
+ *  Output:                                                                   *
+ *      rssringoccs_ComplexDouble sin_z:                                      *
+ *          The cosine of z.                                                  *
+ *  NOTE:                                                                     *
+ *      We simply use the fact that cos(x+iy) = cos(x)cos(iy)-sin(x)sin(iy)   *
+ *      and then invoke the definition of hyperbolic cosine and hyperbolic    *
+ *      sine yielding cos(x+iy) = cos(x)cosh(y) - i * sin(x)sinh(y).          *
+ ******************************************************************************/
+extern rssringoccs_ComplexFloat
+rssringoccs_CFloat_Cos(rssringoccs_ComplexFloat z);
+
+extern rssringoccs_ComplexDouble
+rssringoccs_CDouble_Cos(rssringoccs_ComplexDouble z);
+
+extern rssringoccs_ComplexLongDouble
+rssringoccs_CLDouble_Cos(rssringoccs_ComplexLongDouble z);
+
+/******************************************************************************
+ *  Function:                                                                 *
  *      rssringoccs_Complex_Real_Part                                         *
  *  Purpose:                                                                  *
  *      Return the real part of a complex number. This is equivalent to creal *
@@ -573,31 +598,6 @@ rssringoccs_CDouble_Sin(rssringoccs_ComplexDouble z);
 
 extern rssringoccs_ComplexLongDouble
 rssringoccs_CLDouble_Sin(rssringoccs_ComplexLongDouble z);
-
-/******************************************************************************
- *  Function:                                                                 *
- *      rssringoccs_CDouble_Cos                                         *
- *  Purpose:                                                                  *
- *      Compute the cosine of a complex number z.                             *
- *  Arguments:                                                                *
- *      rssringoccs_ComplexDouble z:                                          *
- *          A complex number.                                                 *
- *  Output:                                                                   *
- *      rssringoccs_ComplexDouble sin_z:                                      *
- *          The cosine of z.                                                  *
- *  NOTE:                                                                     *
- *      We simply use the fact that cos(x+iy) = cos(x)cos(iy)-sin(x)sin(iy)   *
- *      and then invoke the definition of hyperbolic cosine and hyperbolic    *
- *      sine yielding cos(x+iy) = cos(x)cosh(y) - i * sin(x)sinh(y).          *
- ******************************************************************************/
-extern rssringoccs_ComplexFloat
-rssringoccs_CFloat_Cos(rssringoccs_ComplexFloat z);
-
-extern rssringoccs_ComplexDouble
-rssringoccs_CDouble_Cos(rssringoccs_ComplexDouble z);
-
-extern rssringoccs_ComplexLongDouble
-rssringoccs_CLDouble_Cos(rssringoccs_ComplexLongDouble z);
 
 /******************************************************************************
  *  Function:                                                                 *

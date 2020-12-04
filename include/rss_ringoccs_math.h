@@ -214,7 +214,7 @@ extern long double rssringoccs_LDouble_Arctan2(long double y, long double x);
 /*  If NAN is not defined, we'll use the CPYTHON method of defining NAN, the  *
  *  source code of which is contained in python/cpython/Include/pymath.h.     */
 #ifndef NAN
-#define rssringoccs_NaN (INFINITY * 0.0)
+#define rssringoccs_NaN (rssringoccs_Infinity * 0.0)
 #else
 #define rssringoccs_NaN NAN
 #endif

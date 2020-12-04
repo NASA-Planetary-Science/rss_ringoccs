@@ -34,7 +34,7 @@ float rssringoccs_Real_Poly_Deriv_Float_Coeffs(float *coeffs,
     poly = rssringoccs_Falling_Factorial(degree, deriv)*coeffs[0];
 
     /*  Use Horner's method of polynomial computation.                        */
-    for (n=1; n<=degree; ++n)
+    for (n=1; n<=N; ++n)
         poly = x*poly +
             rssringoccs_Falling_Factorial(degree-n, deriv)*coeffs[degree-n];
 

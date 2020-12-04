@@ -15,12 +15,12 @@ double rssringoccs_Double_Sin(double x)
  *  make the code forward compatible. We'll do this in a very simple manner.  */
 float rssringoccs_Float_Sin(float x)
 {
-    return sin((double)x);
+    return (float)sin((double)x);
 }
 
 long double rssringoccs_LDouble_Sin(long double x)
 {
-    return sin((double)x);
+    return (long double)sin((double)x);
 }
 
 /*  Now have the functions declared in rss_ringoccs_math.h point to these.    */

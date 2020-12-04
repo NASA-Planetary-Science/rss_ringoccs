@@ -15,12 +15,12 @@ double rssringoccs_Double_Sqrt(double x)
  *  make the code forward compatible. We'll do this in a very simple manner.  */
 float rssringoccs_Float_Sqrt(float x)
 {
-    return sqrt((double)x);
+    return (float)sqrt((double)x);
 }
 
 long double rssringoccs_LDouble_Sqrt(long double x)
 {
-    return sqrt((double)x);
+    return (long double)sqrt((double)x);
 }
 
 /*  Now have the functions declared in rss_ringoccs_math.h point to these.    */

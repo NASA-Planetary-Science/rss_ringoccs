@@ -15,12 +15,12 @@ double rssringoccs_Double_Cos(double x)
  *  make the code forward compatible. We'll do this in a very simple manner.  */
 float rssringoccs_Float_Cos(float x)
 {
-    return cos((double)x);
+    return (float)cos((double)x);
 }
 
 long double rssringoccs_LDouble_Cos(long double x)
 {
-    return cos((double)x);
+    return (long double)cos((double)x);
 }
 
 /*  Now have the functions declared in rss_ringoccs_math.h point to these.    */

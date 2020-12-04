@@ -15,12 +15,12 @@ double rssringoccs_Double_Log(double x)
  *  make the code forward compatible. We'll do this in a very simple manner.  */
 float rssringoccs_Float_Log(float x)
 {
-    return log((double)x);
+    return (float)log((double)x);
 }
 
 long double rssringoccs_LDouble_Log(long double x)
 {
-    return log((double)x);
+    return (long double)log((double)x);
 }
 
 /*  Now have the functions declared in rss_ringoccs_math.h point to these.    */

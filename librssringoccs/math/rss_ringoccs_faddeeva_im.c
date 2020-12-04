@@ -7,7 +7,8 @@ static double chebyshev_lookup_table(double y100, double x)
     /*  Declare necessary variables. C89 requires declarations at the top of  *
      *  a block.                                                              */
     double out, t, coeffs[9];
-    int y100_int, deg;
+    int y100_int;
+    unsigned int deg;
 
     /*  The switch depends on the integer part of y100, so extract this.      */
     y100_int = (int)y100;
@@ -1321,7 +1322,7 @@ double rssringoccs_Double_Faddeeva_Im(double x)
         {
             /*  For very large values simply use the first term.              */
             if (x > 5e7)
-                out = SQRT_ONE_BY_TWO_PI / x;
+                out = rssringoccs_Sqrt_One_By_Two_Pi / x;
 
             /*  And use five terms for not-so-large values.                   */
             else
@@ -1330,7 +1331,7 @@ double rssringoccs_Double_Faddeeva_Im(double x)
                 x4 = x2*x2;
                 numer = x4 - 4.5*x2 + 2.0;
                 denom = x*(x4 - 5.0*x2 + 3.75);
-                out = SQRT_ONE_BY_TWO_PI * numer / denom;
+                out = rssringoccs_Sqrt_One_By_Two_Pi * numer / denom;
             }
         }
         else
@@ -1345,7 +1346,7 @@ double rssringoccs_Double_Faddeeva_Im(double x)
         {
             /*  For very large values simply use the first term.              */
             if (x < -5e7)
-                out = SQRT_ONE_BY_TWO_PI / x;
+                out = rssringoccs_Sqrt_One_By_Two_Pi / x;
 
             /*  And use five terms for not-so-large values.                   */
             else
@@ -1354,7 +1355,7 @@ double rssringoccs_Double_Faddeeva_Im(double x)
                 x4 = x2*x2;
                 numer = x4 - 4.5*x2 + 2.0;
                 denom = x*(x4 - 5.0*x2 + 3.75);
-                out = SQRT_ONE_BY_TWO_PI * numer / denom;
+                out = rssringoccs_Sqrt_One_By_Two_Pi * numer / denom;
             }
         }
         else
@@ -1367,7 +1368,7 @@ double rssringoccs_Double_Faddeeva_Im(double x)
 float rssringoccs_Float_Faddeeva_Im(float x)
 {
     float out;
-    out = rssringoccs_Double_Faddeeva_Im((double)x);
+    out = (float)rssringoccs_Double_Faddeeva_Im((double)x);
 
     return out;
 }
@@ -1375,7 +1376,7 @@ float rssringoccs_Float_Faddeeva_Im(float x)
 long double rssringoccs_LDouble_Faddeeva_Im(long double x)
 {
     long double out;
-    out = rssringoccs_Double_Faddeeva_Im((double)x);
+    out = (long double)rssringoccs_Double_Faddeeva_Im((double)x);
 
     return out;
 }

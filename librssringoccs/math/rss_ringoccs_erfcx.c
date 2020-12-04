@@ -1152,7 +1152,7 @@ double rssringoccs_Double_Erfcx(double x)
             /*  For very large values use only the first term to avoid        *
              *  overflow.                                                     */
             if (x > 5e7)
-                out = SQRT_ONE_BY_PI / x;
+                out = rssringoccs_Sqrt_One_By_Pi / x;
 
             /*  For smaller values use 5 terms of the continued fraction.     */
             else
@@ -1162,7 +1162,7 @@ double rssringoccs_Double_Erfcx(double x)
                 numer = x4 + 4.5*x2 + 2.0;
                 denom = x*(x4 + 5.0*x2 + 3.75);
 
-                out = SQRT_ONE_BY_PI * numer / denom;
+                out = rssringoccs_Sqrt_One_By_Pi * numer / denom;
             }
         }
 
@@ -1176,7 +1176,7 @@ double rssringoccs_Double_Erfcx(double x)
          *  MAX_DOUBLE_BASE_E is the largest value where exp(x) will return   *
          *  less than infinity. Since the function is asymptotic to exp(x^2)  *
          *  we take the square root of this and compare x with that.          */
-        if (x < -rssringoccs_Double_Sqrt(MAX_DOUBLE_BASE_E))
+        if (x < -rssringoccs_Double_Sqrt(rssringoccs_Max_Double_Base_E))
             out = rssringoccs_Infinity;
 
         /*  For smaller values, but not too small, use the asymptotic         *
@@ -1196,7 +1196,7 @@ double rssringoccs_Double_Erfcx(double x)
 float rssringoccs_Float_Erfcx(float x)
 {
     float out;
-    out = rssringoccs_Double_Erfcx((double)x);
+    out = (float)rssringoccs_Double_Erfcx((double)x);
 
     return out;
 }
@@ -1204,7 +1204,7 @@ float rssringoccs_Float_Erfcx(float x)
 long double rssringoccs_LDouble_Erfcx(long double x)
 {
     long double out;
-    out = rssringoccs_Double_Erfcx((double)x);
+    out = (long double)rssringoccs_Double_Erfcx((double)x);
 
     return out;
 }

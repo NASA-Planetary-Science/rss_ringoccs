@@ -129,33 +129,71 @@
  *  values for your system.                                                   */
 #include <float.h>
 
-/*  This number is needed for computing the smallest value which will yield   *
- *  INFINITY or HUGE_VAL with the exponential function.                       */
-#define NATURAL_LOG_OF_10 2.302585092994045684017991
-
 /* Define Miscellaneous Constants.                                            */
-#define SQRT_ONE_BY_TWO_PI  0.3989422804014326779399461
-#define SQRT_PI_BY_8        0.6266570686577501256039413
-#define SQRT_PI_BY_2        1.2533141373155002512078830
-#define SQRT_ONE_BY_PI      0.5641895835477562869480794
-#define SQRT_TWO_BY_PI      0.7978845608028653558798921
-#define PI_BY_TWO           1.570796326794896619231321691639751440
-#define PI_BY_FOUR          0.785398163397448309615660845819875721
-#define ONE_PI              3.141592653589793238462643383279502880
-#define TWO_PI              6.283185307179586476925286766559005768
-#define SQRT_2              1.414213562373095048801688724209698080
-#define RCPR_EULER_E        0.367879441171442321595523770161460867
-#define ONE_BY_SQRT_PI      0.564189583547756286948079451560772585
-#define TWO_BY_SQRT_PI      1.128379167095512573896158903121545171
 
-/*  Define the speed of light in kilometers per second.                       */
-#define SPEED_OF_LIGHT_KMS  299792.4580
+/*  Single precision constants.                                               */
+#define rssringoccs_Sqrt_One_By_Two_Pi_F    0.398942280F
+#define rssringoccs_Sqrt_Pi_By_Eight_F      0.626657069F
+#define rssringoccs_Sqrt_Pi_By_Two_F        1.253314137F
+#define rssringoccs_Sqrt_One_By_Pi_F        0.564189584F
+#define rssringoccs_Sqrt_Two_By_Pi_F        0.797884561F
+#define rssringoccs_Two_By_Sqrt_Pi_F        1.128379167F
+#define rssringoccs_Pi_By_Two_F             1.570796327F
+#define rssringoccs_Py_By_Four_F            0.785398163F
+#define rssringoccs_One_Pi_F                3.141592654F
+#define rssringoccs_Two_Pi_F                6.283185307F
+#define rssringoccs_Sqrt_Two_F              1.414213562F
+#define rssringoccs_Rcpr_Euler_E_F          0.367879441F
+#define rssringoccs_Euler_E_F               2.718281828F
+#define rssringoccs_Natural_Log_Of_10_F     2.302585093F
+
+/*  Double precision constants.                                               */
+#define rssringoccs_Sqrt_One_By_Two_Pi      0.39894228040143267
+#define rssringoccs_Sqrt_Pi_By_Eight        0.62665706865775012
+#define rssringoccs_Sqrt_Pi_By_Two          1.25331413731550025
+#define rssringoccs_Sqrt_One_By_Pi          0.56418958354775628
+#define rssringoccs_Sqrt_Two_By_Pi          0.79788456080286535
+#define rssringoccs_Two_By_Sqrt_Pi          1.12837916709551257
+#define rssringoccs_Pi_By_Two               1.57079632679489661
+#define rssringoccs_Py_By_Four              0.78539816339744830
+#define rssringoccs_One_Pi                  3.14159265358979323
+#define rssringoccs_Two_Pi                  6.28318530717958647
+#define rssringoccs_Sqrt_Two                1.41421356237309504
+#define rssringoccs_Rcpr_Euler_E            0.36787944117144232
+#define rssringoccs_Euler_E                 2.71828182845904523
+#define rssringoccs_Natural_Log_Of_10       2.30258509299404568
+
+/*  Long double precision constants.                                          */
+#define rssringoccs_Sqrt_One_By_Two_Pi_L    0.3989422804014326779399461L
+#define rssringoccs_Sqrt_Pi_By_Eight_L      0.6266570686577501256039413L
+#define rssringoccs_Sqrt_Pi_By_Two_L        1.2533141373155002512078830L
+#define rssringoccs_Sqrt_One_By_Pi_L        0.5641895835477562869480795L
+#define rssringoccs_Sqrt_Two_By_Pi_L        0.7978845608028653558798921L
+#define rssringoccs_Two_By_Sqrt_Pi_L        1.1283791670955125738961590L
+#define rssringoccs_Pi_By_Two_L             1.5707963267948966192313220L
+#define rssringoccs_Py_By_Four_L            0.7853981633974483096156608L
+#define rssringoccs_One_Pi_L                3.1415926535897932384626430L
+#define rssringoccs_Two_Pi_L                6.2831853071795864769252870L
+#define rssringoccs_Sqrt_Two_L              1.4142135623730950488016890L
+#define rssringoccs_Rcpr_Euler_E_L          0.3678794411714423215955238L
+#define rssringoccs_Euler_E_L               2.7182818284590452353602875L
+#define rssringoccs_Natural_Log_Of_10_L     2.3025850929940456840179910L
+
+/*  The speed of light in km/s.                                               */
+#define rssringoccs_Speed_Of_Light_KMS_F  299792.4580F
+#define rssringoccs_Speed_Of_Light_KMS    299792.4580F
+#define rssringoccs_Speed_Of_Light_KMS_L  299792.4580L
 
 /*  Macros for the largest values of float, double, and long double,          *
  *  respectively, that will not return INFINITY when exp(x) is computed.      */
-#define MAX_FLOAT_BASE_E    FLT_MAX_10_EXP * NATURAL_LOG_OF_10
-#define MAX_DOUBLE_BASE_E   DBL_MAX_10_EXP * NATURAL_LOG_OF_10
-#define MAX_LDOUBLE_BASE_E  LDBL_MAX_10_EXP * NATURAL_LOG_OF_10
+#define rssringoccs_Max_Float_Base_E    (FLT_MAX_10_EXP *                      \
+                                         rssringoccs_Natural_Log_Of_10_F)
+
+#define rssringoccs_Max_Double_Base_E   (DBL_MAX_10_EXP *                      \
+                                         rssringoccs_Natural_Log_Of_10)
+
+#define rssringoccs_Max_LDouble_Base_E  (LDBL_MAX_10_EXP *                     \
+                                         rssringoccs_Natural_Log_Of_10_L)
 
 /*  Aliases for the sine trig function found in math.h.                       */
 extern float rssringoccs_Float_Sin(float x);
@@ -202,22 +240,17 @@ extern float rssringoccs_Float_Arctan2(float y, float x);
 extern double rssringoccs_Double_Arctan2(double y, double x);
 extern long double rssringoccs_LDouble_Arctan2(long double y, long double x);
 
-/*  If INFINITY is not defined, set it to the HUGE_VAL macro that is          *
- *  specified in math.h. Most compilers already have an INFINITY macro, but   *
- *  it is not required in the C89 standard.                                   */
-#ifndef INFINITY
-#define rssringoccs_Infinity HUGE_VAL
-#else
-#define rssringoccs_Infinity INFINITY
-#endif
+/*  Set INFINITY to the HUGE_VAL macro that is specified in math.h. Most      *
+ *  implementations already have an INFINITY macro, but it is not required.   */
+#define rssringoccs_Infinity (HUGE_VAL)
+#define rssringoccs_Infinity_F ((float)(rssringoccs_Infinity))
+#define rssringoccs_Infinity_L ((long double)(rssringoccs_Infinity))
 
-/*  If NAN is not defined, we'll use the CPYTHON method of defining NAN, the  *
- *  source code of which is contained in python/cpython/Include/pymath.h.     */
-#ifndef NAN
+/*  We'll use the CPYTHON method of defining NAN, the source code of which is *
+ *   contained in python/cpython/Include/pymath.h.                            */
 #define rssringoccs_NaN (rssringoccs_Infinity * 0.0)
-#else
-#define rssringoccs_NaN NAN
-#endif
+#define rssringoccs_NaN_F ((float)(rssringoccs_NaN))
+#define rssringoccs_NaN_L ((long double)(rssringoccs_NaN))
 
 #define rssringoccs_Is_Inf(x) ((x) == ((x)+1))
 #define rssringoccs_Is_NaN(x) ((x) != (x))
@@ -255,8 +288,10 @@ extern float rssringoccs_Float_Faddeeva_Im(float x);
 extern double rssringoccs_Double_Faddeeva_Im(double x);
 extern long double rssringoccs_LDouble_Faddeeva_Im(long double x);
 
-extern long rssringoccs_Factorial(int n);
-extern long rssringoccs_Falling_Factorial(int x, int N);
+extern unsigned long rssringoccs_Factorial(unsigned int n);
+
+extern unsigned long
+rssringoccs_Falling_Factorial(unsigned int x, unsigned int N);
 
 extern double rssringoccs_Double_Copysign(double x, double y);
 

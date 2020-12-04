@@ -32,7 +32,7 @@ rm -f *.o
 echo "Compiling rss_ringoccs..."
 CompilerArgs1="-std=c89 -ansi -pedantic -pedantic-errors -Wall -Wextra"
 CompilerArgs2="-Wpedantic -Wmisleading-indentation -Winit-self"
-CompilerArgs3="-Wmissing-prototypes -Wold-style-definition -Wold-style-cast"
+CompilerArgs3="-Wmissing-prototypes -Wold-style-definition"
 CompilerArgs4="-Wmissing-declarations "
 CompilerArgs5="-Wstrict-prototypes -I../../ -I./ -DNDEBUG -g -fPIC -O3 -c"
 CompilerArgs="$CompilerArgs1 $CompilerArgs2 $CompilerArgs3"

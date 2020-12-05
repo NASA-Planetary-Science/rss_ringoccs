@@ -34,25 +34,9 @@
  *      For float and long double functions rss_ringoccs uses, if available,  *
  *      these functions. Here we provide aliases for the functions in math.h  *
  *      depending on whether or not the __HAS_C99_MATH_H__ macro is defined   *
- *      (it's defined in this file before the #include <math.h> statement).   *
- *      The functions have the following aliases if __HAS_C99_MATH_H__ is set:*
- *          Func_Float      = funcf                                           *
- *          Func_Double     = func                                            *
- *          Func_LongDouble = funcl                                           *
- *      If not, we do type conversion:                                        *
- *          Func_Float(x)      = func((double)(x))                            *
- *          Func_Double(x)     = func((x))                                    *
- *          Func_LongDouble(x) = func((double)(x))                            *
- *      Note the extra parentheses surrounding the "x" in the func. This is   *
- *      because the preprocessor takes whatever you give it and write this    *
- *      verbatim into the expression provided. If we did:                     *
- *          Func_Float(x) = func((double)x)                                   *
- *      Then doing something like Func_Float(x+y) will return                 *
- *      func((double)x+y), so only x gets converted to double, which defeats  *
- *      the purpose. With the extra parentheses we get                        *
- *      Func_Float(x+y) = func((double)(x+y)), which is what we want.         *
+ *      (it's defined in rss_ringoccs_config.h).                              *
  *                                                                            *
- *      This also provides NAN and INFINITY macros if they are not set.       *
+ *      This file also provides NAN and INFINITY macros if they are not set.  *
  *      NOTE:                                                                 *
  *          INFINITY is set as the standard macro HUGE_VAL defined in math.h  *
  *          and for most implementations this should do. Indeed, this is the  *
@@ -74,16 +58,9 @@
  *              or INF/INF works. Define Py_NO_NAN in pyconfig.h if your      *
  *              platform doesn't support NaNs.                                *
  *          If necessary, redefine NAN here to whatever your platform allows. *
- ******************************************************************************
- *                            A FRIENDLY WARNING                              *
- ******************************************************************************
- *  If your implementation supports the C89/C90 math.h header file, and is    *
- *  lacking the extra function declarations, you will need to comment out the *
- *  #define __HAS_C99_MATH_H__ statement or you will have compiler errors.    *
- *  If HUGE_VAL and HUGE_VAL*0 don't correspond to infinity and nan,          *
- *  respectively, on your system you will need to alter those macros. This    *
- *  has worked on macOS and linux systems when tested, however the GNU glibc  *
- *  implementation provides those macros already, so no extra effort needed.  *
+ *      Lastly, this file provides a bunch of constants that are commonly     *
+ *      used, as well as various math functions that are not included in      *
+ *      either C89 or C99 math.h.                                             *
  ******************************************************************************
  *                               DEPENDENCIES                                 *
  ******************************************************************************
@@ -105,21 +82,42 @@
  ******************************************************************************/
 
 /*  Include guard for this file to prevent including this twice.              */
-#ifndef _RSS_RINGOCCS_MATH_H_
-#define _RSS_RINGOCCS_MATH_H_
+#ifndef __RSS_RINGOCCS_MATH_H__
+#define __RSS_RINGOCCS_MATH_H__
+
+/*  The __RSS_RINGOCCS_USING_C99_MATH_H__ macro is found here.                */
+#include <rss_ringoccs/include/rss_ringoccs_config.h>
 
 /*  It is not assumed you have C99 math.h, but rather the C89 math.h, which   *
- *  is also (incorrectly) referred to as the ANSI C version. If you have C99  *
- *  available, change the __HAS_C99_MATH_H__ to 1 and rebuild rss_ringoccs.   */
+ *  is also referred to as the ANSI C version. If you have C99 available,     *
+ *  change __HAS_C99_MATH_H__ in rss_ringoccs_config.h to 1 and then          *
+ *  rebuild rss_ringoccs. Some implementations of the C99 standard don't      *
+ *  define float/long double versions of math functions and simply do         *
+ *  something like sinf(x) = (float)sin((double)x), so there is no difference.*/
 
 /*  Check which version of C you are compiling with and set the macro         *
  *  __HAS_C99_MATH_H__ accordingly.                                           */
+#if __RSS_RINGOCCS_USING_C99_MATH_H__ == 1
+
 #if __STDC_VERSION__ >= 199901L
 #define __HAS_C99_MATH_H__ 1
+
 #else
-#define __HAS_C99_MATH_H__ 0
+/*  Else statement for #if __STDC_VERSION__ >= 199901L.                       */
+
+/*  You requested C99 math.h but don't have it. Abort with error.             */
+#error Requested C99 math.h but your compiler does not support it.
+
 #endif
 /*  End of #if __STDC_VERSION__ >= 199901L                                    */
+
+#else
+/*  Else statement for #if __RSS_RINGOCCS_USING_C99_MATH_H__ == 1.            */
+
+#define __HAS_C99_MATH_H__ 0
+
+#endif
+/*  End of #if __RSS_RINGOCCS_USING_C99_MATH_H__ == 1.                        */
 
 /*  Include the standard library header math.h. We're only going to alias     *
  *  functions we ever use in rss_ringoccs, sin, cos, fabs, exp, atan2.        */
@@ -181,7 +179,7 @@
 
 /*  The speed of light in km/s.                                               */
 #define rssringoccs_Speed_Of_Light_KMS_F  299792.4580F
-#define rssringoccs_Speed_Of_Light_KMS    299792.4580F
+#define rssringoccs_Speed_Of_Light_KMS    299792.4580
 #define rssringoccs_Speed_Of_Light_KMS_L  299792.4580L
 
 /*  Macros for the largest values of float, double, and long double,          *
@@ -321,7 +319,6 @@ rssringoccs_Real_Poly_Deriv_LDouble_Coeffs(long double *coeffs,
                                            unsigned int degree,
                                            unsigned int deriv,
                                            long double x);
-
 
 #endif
 /*  End of include guard.                                                     */

@@ -60,8 +60,8 @@ rssringoccs_Float_Two_Slit_Fraunhofer_Diffraction(float x, float z, float a,
     norm = rssringoccs_Float_Sqrt(x*x + z*z);
 
     /*  If norm is zero, the result is undefined. Return NaN in this case.    */
-    if (norm == 0.0)
-        out = rssringoccs_NaN;
+    if (norm == 0.0F)
+        out = rssringoccs_NaN_F;
     else
     {
         /*  Using the fact that sin(theta) = x/r, where r is the hypotenus,   *
@@ -80,10 +80,10 @@ rssringoccs_Float_Two_Slit_Fraunhofer_Diffraction(float x, float z, float a,
         var_1  = rssringoccs_Float_Sinc(scaled_a*sin_theta);
         var_1 *= var_1;
 
-        var_2  = rssringoccs_Float_Sin(TWO_PI*scaled_d*sin_theta);
+        var_2  = rssringoccs_Float_Sin(rssringoccs_Two_Pi_F*scaled_d*sin_theta);
         var_2 *= var_2;
 
-        var_3  = 2.0*rssringoccs_Float_Sin(ONE_PI*scaled_d*sin_theta);
+        var_3  = 2.0F*rssringoccs_Float_Sin(rssringoccs_One_Pi_F*scaled_d*sin_theta);
         var_3 *= var_3;
 
         out = var_1*var_2/var_3;
@@ -123,10 +123,10 @@ rssringoccs_Double_Two_Slit_Fraunhofer_Diffraction(double x, double z, double a,
         var_1  = rssringoccs_Double_Sinc(scaled_a*sin_theta);
         var_1 *= var_1;
 
-        var_2  = rssringoccs_Double_Sin(TWO_PI*scaled_d*sin_theta);
+        var_2  = rssringoccs_Double_Sin(rssringoccs_Two_Pi*scaled_d*sin_theta);
         var_2 *= var_2;
 
-        var_3  = 2.0*rssringoccs_Double_Sin(ONE_PI*scaled_d*sin_theta);
+        var_3  = 2.0*rssringoccs_Double_Sin(rssringoccs_One_Pi*scaled_d*sin_theta);
         var_3 *= var_3;
 
         out = var_1*var_2/var_3;
@@ -169,10 +169,10 @@ rssringoccs_LDouble_Two_Slit_Fraunhofer_Diffraction(long double x,
         var_1  = rssringoccs_LDouble_Sinc(scaled_a*sin_theta);
         var_1 *= var_1;
 
-        var_2  = rssringoccs_LDouble_Sin(TWO_PI*scaled_d*sin_theta);
+        var_2  = rssringoccs_LDouble_Sin(rssringoccs_Two_Pi_L*scaled_d*sin_theta);
         var_2 *= var_2;
 
-        var_3  = 2.0*rssringoccs_LDouble_Sin(ONE_PI*scaled_d*sin_theta);
+        var_3  = 2.0L*rssringoccs_LDouble_Sin(rssringoccs_One_Pi_L*scaled_d*sin_theta);
         var_3 *= var_3;
 
         out = var_1*var_2/var_3;

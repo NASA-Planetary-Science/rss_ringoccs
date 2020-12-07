@@ -21,7 +21,7 @@ type rssringoccs_##Type##_Coss_Window(type x, type W)                          \
     /*  Compute the cosine squared window function.                          */\
     if (abs_x <= W/2.0)                                                        \
     {                                                                          \
-        abs_x *= ONE_PI/W;                                                     \
+        abs_x *= rssringoccs_One_Pi/W;                                                     \
         coss_x = rssringoccs_##Type##_Cos(abs_x);                              \
         coss_x *= coss_x;                                                      \
     }                                                                          \

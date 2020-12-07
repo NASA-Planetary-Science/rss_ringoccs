@@ -137,7 +137,7 @@
 #define rssringoccs_Sqrt_Two_By_Pi_F        0.797884561F
 #define rssringoccs_Two_By_Sqrt_Pi_F        1.128379167F
 #define rssringoccs_Pi_By_Two_F             1.570796327F
-#define rssringoccs_Py_By_Four_F            0.785398163F
+#define rssringoccs_Pi_By_Four_F            0.785398163F
 #define rssringoccs_One_Pi_F                3.141592654F
 #define rssringoccs_Two_Pi_F                6.283185307F
 #define rssringoccs_Sqrt_Two_F              1.414213562F
@@ -153,7 +153,7 @@
 #define rssringoccs_Sqrt_Two_By_Pi          0.79788456080286535
 #define rssringoccs_Two_By_Sqrt_Pi          1.12837916709551257
 #define rssringoccs_Pi_By_Two               1.57079632679489661
-#define rssringoccs_Py_By_Four              0.78539816339744830
+#define rssringoccs_Pi_By_Four              0.78539816339744830
 #define rssringoccs_One_Pi                  3.14159265358979323
 #define rssringoccs_Two_Pi                  6.28318530717958647
 #define rssringoccs_Sqrt_Two                1.41421356237309504
@@ -169,7 +169,7 @@
 #define rssringoccs_Sqrt_Two_By_Pi_L        0.7978845608028653558798921L
 #define rssringoccs_Two_By_Sqrt_Pi_L        1.1283791670955125738961590L
 #define rssringoccs_Pi_By_Two_L             1.5707963267948966192313220L
-#define rssringoccs_Py_By_Four_L            0.7853981633974483096156608L
+#define rssringoccs_Pi_By_Four_L            0.7853981633974483096156608L
 #define rssringoccs_One_Pi_L                3.1415926535897932384626430L
 #define rssringoccs_Two_Pi_L                6.2831853071795864769252870L
 #define rssringoccs_Sqrt_Two_L              1.4142135623730950488016890L
@@ -257,6 +257,10 @@ extern long double rssringoccs_LDouble_Arctan2(long double y, long double x);
  *  math.h. The algorithms for their computations are very straight-forward,  *
  *  reducing the definitions to computations using sin, cos, exp, etc. We     *
  *  provide them here for portability.                                        */
+
+extern float rssringoccs_Float_Sinc(float x);
+extern double rssringoccs_Double_Sinc(double x);
+extern long double rssringoccs_LDouble_Sinc(long double x);
 
 extern float rssringoccs_Float_Sinh(float x);
 extern double rssringoccs_Double_Sinh(double x);

@@ -120,7 +120,8 @@ void rssringoccs_Easy_Complex_Plots(
             rssringoccs_RGB_Scaled_Gradient(w_x, fp[0]);
             rssringoccs_RGB_Scaled_Gradient(w_y, fp[1]);
             rssringoccs_RGB_Scaled_Gradient(mag, fp[3]);
-            rssringoccs_RGB_Linear_Gradient(arg, -ONE_PI, ONE_PI, fp[4]);
+            rssringoccs_RGB_Linear_Gradient(arg, -rssringoccs_One_Pi,
+                                            rssringoccs_One_Pi, fp[4]);
         }
     }
 

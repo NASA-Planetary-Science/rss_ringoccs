@@ -63,12 +63,6 @@ for filename in fft/*.c; do
     $CC $CompilerArgs $filename
 done
 
-echo -e "\n\tCompiling diffraction/"
-for filename in diffraction/*.c; do
-    echo -e "\t\tCompiling: $filename"
-    $CC $CompilerArgs $filename
-done
-
 echo -e "\n\tCompiling geometry/"
 for filename in geometry/*.c; do
     echo -e "\t\tCompiling: $filename"
@@ -77,6 +71,12 @@ done
 
 echo -e "\n\tCompiling numerical/"
 for filename in numerical/*.c; do
+    echo -e "\t\tCompiling: $filename"
+    $CC $CompilerArgs $filename
+done
+
+echo -e "\n\tCompiling diffraction/"
+for filename in diffraction/*.c; do
     echo -e "\t\tCompiling: $filename"
     $CC $CompilerArgs $filename
 done

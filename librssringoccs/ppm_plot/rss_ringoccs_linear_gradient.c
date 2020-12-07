@@ -18,7 +18,7 @@ rssringoccs_RGB_Linear_Gradient(double val, double min, double max, FILE *fp)
     if (scaled < 64)
     {
         red   = (unsigned char)0;
-        green = (unsigned char)4*scaled;
+        green = (unsigned char)(4.0*scaled);
         blue  = (unsigned char)255;
     }
     else if (scaled < 128)
@@ -29,7 +29,7 @@ rssringoccs_RGB_Linear_Gradient(double val, double min, double max, FILE *fp)
     }
     else if (scaled < 192)
     {
-        red   = (unsigned char)4*(scaled-128);
+        red   = (unsigned char)(4.0*(scaled-128.0));
         green = (unsigned char)255;
         blue  = (unsigned char)0;
     }

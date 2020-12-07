@@ -42,7 +42,7 @@ rssringoccs_ComplexDouble rssringoccs_Complex_Fresnel_Integral(double x)
     double A, R, a, b, c, d, sgn_x, cx, sx;
     rssringoccs_ComplexDouble out;
     sgn_x = (x>0)-(x<0);
-    x *= SQRT_TWO_BY_PI*sgn_x;
+    x *= rssringoccs_Sqrt_Two_By_Pi*sgn_x;
 
     /* Compute the Numerator of the A_jk Function.                            */
     a = FRESNEL_HEALD_RATIONAL_EPS_8_A04*x + FRESNEL_HEALD_RATIONAL_EPS_8_A03;
@@ -74,12 +74,12 @@ rssringoccs_ComplexDouble rssringoccs_Complex_Fresnel_Integral(double x)
     d = x*d + FRESNEL_HEALD_RATIONAL_EPS_8_D00;
 
     A = a/b-x*x;
-    A *= PI_BY_TWO;
+    A *= rssringoccs_Pi_By_Two;
     R = c/d;
-    R *= SQRT_PI_BY_2;
+    R *= rssringoccs_Sqrt_Pi_By_Two;
 
-    cx = sgn_x*(SQRT_PI_BY_8 - R*rssringoccs_Double_Sin(A));
-    sx = sgn_x*(SQRT_PI_BY_8 - R*rssringoccs_Double_Cos(A));
+    cx = sgn_x*(rssringoccs_Sqrt_Pi_By_Eight - R*rssringoccs_Double_Sin(A));
+    sx = sgn_x*(rssringoccs_Sqrt_Pi_By_Eight - R*rssringoccs_Double_Cos(A));
 
     out = rssringoccs_CDouble_Rect(cx, sx);
     return out;

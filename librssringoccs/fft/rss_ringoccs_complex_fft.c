@@ -3,7 +3,7 @@
 #include <rss_ringoccs/include/rss_ringoccs_fft.h>
 
 rssringoccs_ComplexDouble *
-rssringoccs_Complex_FFT(rssringoccs_ComplexDouble *in, long N,
+rssringoccs_Complex_FFT(rssringoccs_ComplexDouble *in, unsigned long N,
                         rssringoccs_Bool inverse)
 {
     rssringoccs_ComplexDouble *out;

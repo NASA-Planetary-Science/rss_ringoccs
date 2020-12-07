@@ -243,7 +243,7 @@ float rssringoccs_Float_Bessel_I0(float x)
     /*  For larger values, use the asymptotic expansion. MAX_FLOAT_BASE_E is  *
      *  the largest float x which doesn't return INFINITY. It is defined in   *
      *  rss_ringocc_math.h.                                                   */
-    else if (abs_x < MAX_FLOAT_BASE_E)
+    else if (abs_x < rssringoccs_Max_Float_Base_E)
     {
         /*  The asymptotic expansion is in terms of 1/x.                      */
         arg = 1.0/abs_x;
@@ -256,10 +256,10 @@ float rssringoccs_Float_Bessel_I0(float x)
         /*  Multiply by the coefficient factor and return. Exp_Float and      *
          *  Sqrt_Float are aliases for expf and sqrtf, respectively, if your  *
          *  platform provides it, and exp and sqrt, respectively, otherwise.  *
-         *  They are defined in rss_ringoccs_math.h. The TWO_PI macros is     *
+         *  They are defined in rss_ringoccs_math.h. The rssringoccs_Two_Pi macros is     *
          *  defined in rss_ringoccs_math.h.                                   */
         bessel_I0 *= rssringoccs_Float_Exp(abs_x) /
-                     rssringoccs_Float_Sqrt(TWO_PI*abs_x);
+                     rssringoccs_Float_Sqrt(rssringoccs_Two_Pi*abs_x);
     }
 
     /*  For very large inputs, return INFINITY. INFINITY is standard in C99,  *
@@ -296,7 +296,7 @@ double rssringoccs_Double_Bessel_I0(double x)
     /*  For larger values, use the asymptotic expansion. MAX_DOUBLE_BASE_E is *
      *  defined in rss_ringoccs_math.h, it's the largest value for a double   *
      *  which won't return INFINITY for exp(x).                               */
-    else if (abs_x < MAX_DOUBLE_BASE_E)
+    else if (abs_x < rssringoccs_Max_Double_Base_E)
     {
         /*  The asymptotic expansion is in terms of 1/x.                      */
         arg = 1.0/abs_x;
@@ -308,9 +308,9 @@ double rssringoccs_Double_Bessel_I0(double x)
 
         /*  Multiply by the coefficient factor and return. Exp_Double and     *
          *  Sqrt_Double are aliases for exp and sqrt, respectively, defined   *
-         *  in rss_ringoccs_math.h. TWO_PI is in rss_ringoccs_math.h.         */
+         *  in rss_ringoccs_math.h. rssringoccs_Two_Pi is in rss_ringoccs_math.h.         */
         bessel_I0 *= rssringoccs_Double_Exp(abs_x) /
-                     rssringoccs_Double_Sqrt(TWO_PI*abs_x);
+                     rssringoccs_Double_Sqrt(rssringoccs_Two_Pi*abs_x);
     }
 
     /*  For very large inputs, return INFINITY. INFINITY is standard in C99,  *
@@ -347,7 +347,7 @@ long double rssringoccs_LDouble_Bessel_I0(long double x)
     /*  For larger values, use the asymptotic expansion. MAX_LDOUBLE_BASE_E   *
      *  is defined in rss_ringoccs_math.h, it's the largest value for a       *
      *  long double which won't return INFINITY for exp(x).                   */
-    else if (abs_x < MAX_LDOUBLE_BASE_E)
+    else if (abs_x < rssringoccs_Max_LDouble_Base_E)
     {
         /*  The asymptotic expansion is in terms of 1/x.                      */
         arg = 1.0/abs_x;
@@ -359,9 +359,9 @@ long double rssringoccs_LDouble_Bessel_I0(long double x)
         /*  Multiply by the coefficient factor and return. Exp_LongDouble and *
          *  Sqrt_LongDouble are aliases for expl and sqrtl, respectively, if  *
          *  available, and exp and sqrt otherwise. They are defined in        *
-         *  rss_ringoccs_math.h. TWO_PI is in rss_ringoccs_math.h.            */
+         *  rss_ringoccs_math.h. rssringoccs_Two_Pi is in rss_ringoccs_math.h.            */
         bessel_I0 *= rssringoccs_LDouble_Exp(abs_x) /
-                     rssringoccs_LDouble_Sqrt(TWO_PI*abs_x);
+                     rssringoccs_LDouble_Sqrt(rssringoccs_Two_Pi*abs_x);
     }
 
     /*  For very large inputs, return INFINITY. This is standard in C99, and  *
@@ -425,7 +425,7 @@ rssringoccs_Complex_Bessel_I0(rssringoccs_ComplexDouble z)
     /*  For larger values, use the asymptotic expansion. MAX_DOUBLE_BASE_E is *
      *  defined in rss_ringoccs_math.h, it's the largest value for a double   *
      *  which won't return INFINITY for exp(x).                               */
-    else if (abs_z_real < MAX_DOUBLE_BASE_E)
+    else if (abs_z_real < rssringoccs_Max_Double_Base_E)
     {
         /*  The asymptotic expansion is in terms of 1/z.                      */
         arg = rssringoccs_CDouble_Reciprocal(z);
@@ -434,7 +434,7 @@ rssringoccs_Complex_Bessel_I0(rssringoccs_ComplexDouble z)
         );
 
         /*  Multiply by the coefficient factor and return.                    */
-        arg = rssringoccs_CDouble_Multiply_Real(TWO_PI, z);
+        arg = rssringoccs_CDouble_Multiply_Real(rssringoccs_Two_Pi, z);
         exp_arg = rssringoccs_CDouble_Exp(z);
         sqrt_arg = rssringoccs_Complex_Sqrt(arg);
         arg = rssringoccs_CDouble_Divide(exp_arg, sqrt_arg);

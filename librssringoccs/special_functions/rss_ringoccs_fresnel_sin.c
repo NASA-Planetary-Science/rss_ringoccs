@@ -194,12 +194,12 @@ float rssringoccs_Float_Fresnel_Sin(float x)
         /*  (x > 0) - (x < 0) is a quick way to return sign(x) and avoids an  *
          *  expensive if-then statement. Output for the asymptotic expansion  *
          *  is f(|x|) + sign(x) * sqrt(pi/8). Error goes like 1/x^15.         */
-        sx = sx + ((x > 0) - (x < 0))*SQRT_PI_BY_8;
+        sx = sx + ((x > 0) - (x < 0))*rssringoccs_Sqrt_Pi_By_Eight;
     }
 
     /*  For large values, return the limit of S(x) as x -> +/- infinity.      */
     else
-        sx = ((x > 0) - (x < 0))*SQRT_PI_BY_8;
+        sx = ((x > 0) - (x < 0))*rssringoccs_Sqrt_Pi_By_Eight;
 
     return sx;
 }
@@ -269,11 +269,11 @@ double rssringoccs_Double_Fresnel_Sin(double x)
         /*  (x > 0) - (x < 0) is a quick way to return sign(x) and avoids an  *
          *  expensive if-then statement. Output for the asymptotic expansion  *
          *  is f(|x|) + sign(x) * sqrt(pi/8). Error goes like 1/x^15.         */
-        sx = sx + ((x > 0) - (x < 0))*SQRT_PI_BY_8;
+        sx = sx + ((x > 0) - (x < 0))*rssringoccs_Sqrt_Pi_By_Eight;
     }
     /*  For large values, return the limit of S(x) as x -> +/- infinity.      */
     else
-        sx = ((x > 0) - (x < 0))*SQRT_PI_BY_8;
+        sx = ((x > 0) - (x < 0))*rssringoccs_Sqrt_Pi_By_Eight;
 
     return sx;
 }
@@ -346,12 +346,12 @@ long double rssringoccs_LDouble_Fresnel_Sin(long double x)
         /*  (x > 0) - (x < 0) is a quick way to return sign(x) and avoids an  *
          *  expensive if-then statement. Output for the asymptotic expansion  *
          *  is f(|x|) + sign(x) * sqrt(pi/8). Error goes like 1/x^15.         */
-        sx = sx + ((x > 0) - (x < 0))*SQRT_PI_BY_8;
+        sx = sx + ((x > 0) - (x < 0))*rssringoccs_Sqrt_Pi_By_Eight;
     }
 
     /* For large values, return the limit of S(x) as x -> +/- infinity.       */
     else
-        sx = ((x > 0) - (x < 0))*SQRT_PI_BY_8;
+        sx = ((x > 0) - (x < 0))*rssringoccs_Sqrt_Pi_By_Eight;
 
     return sx;
 }

@@ -9,7 +9,7 @@
 type rssringoccs_##Type##_Wavelength_To_Wavenumber(type lambda)                \
 {                                                                              \
     /*  The conversion is the two pi over the wavelength.                    */\
-    return TWO_PI / lambda;                                                    \
+    return rssringoccs_Two_Pi / lambda;                                                    \
 }
 
 _define_wavelength_to_wavenumber(float, Float)

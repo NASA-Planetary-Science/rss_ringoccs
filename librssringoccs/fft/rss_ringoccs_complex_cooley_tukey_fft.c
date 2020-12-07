@@ -6,10 +6,10 @@
 
 rssringoccs_ComplexDouble *
 rssringoccs_Complex_FFT_Cooley_Tukey(rssringoccs_ComplexDouble *in,
-                                     long N, rssringoccs_Bool inverse)
+                                     unsigned long N, rssringoccs_Bool inverse)
 {
     /*  We'll need several variables for indexing the pointers.               */
-    long k, m, n, skip;
+    unsigned long k, m, n, skip;
 
     /*  Boolean for determining if we're on an even iteration.                */
     rssringoccs_Bool evenIteration = N & 0x55555555;
@@ -50,9 +50,9 @@ rssringoccs_Complex_FFT_Cooley_Tukey(rssringoccs_ComplexDouble *in,
     /*  If we are performing an inverse Fourier transform, the factor inside  *
      *  the exponential is 2 pi / N. Forward transform is minus this.         */
     if (inverse)
-        factor = TWO_PI/N;
+        factor = rssringoccs_Two_Pi/N;
     else
-        factor = -TWO_PI/N;
+        factor = -rssringoccs_Two_Pi/N;
 
     /*  Compute the "twiddle" factors. No idea why it's called this.          */
     for (k = 0; k<N; ++k)

@@ -58,7 +58,6 @@ rssringoccs_LDouble_##FuncName(long double x, long double W,                \
 RSSRINGOCCSGenerateExternFunctions(Bessel_J0)
 RSSRINGOCCSGenerateExternFunctions(Bessel_I0)
 RSSRINGOCCSGenerateExternFunctions(LambertW)
-RSSRINGOCCSGenerateExternFunctions(Sinc)
 RSSRINGOCCSGenerateExternFunctions(Wavelength_To_Wavenumber)
 RSSRINGOCCSGenerateExternFunctions(Frequency_To_Wavelength)
 RSSRINGOCCSGenerateExternFunctions(Fresnel_Cos)

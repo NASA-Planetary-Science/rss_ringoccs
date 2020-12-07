@@ -8,14 +8,15 @@
 
 extern rssringoccs_ComplexDouble *
 rssringoccs_Complex_FFT_Cooley_Tukey(rssringoccs_ComplexDouble *in,
-                                     long N, rssringoccs_Bool inverse);
+                                     unsigned long N, rssringoccs_Bool inverse);
 
 extern rssringoccs_ComplexDouble *
 rssringoccs_Complex_FFT_Bluestein_Chirp_Z(rssringoccs_ComplexDouble *in,
-                                          long N, rssringoccs_Bool inverse);
+                                          unsigned long N,
+                                          rssringoccs_Bool inverse);
 
 extern rssringoccs_ComplexDouble *
 rssringoccs_Complex_FFT(rssringoccs_ComplexDouble *in,
-                        long N, rssringoccs_Bool inverse);
+                        unsigned long N, rssringoccs_Bool inverse);
 
 #endif

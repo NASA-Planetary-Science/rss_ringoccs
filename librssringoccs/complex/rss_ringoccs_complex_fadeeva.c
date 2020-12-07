@@ -162,7 +162,8 @@ rssringoccs_CDouble_Faddeeva(rssringoccs_ComplexDouble z)
                 if (abs_x > abs_y)
                 {
                     abs_y_by_xs = abs_y / xs;
-                    denom = SQRT_ONE_BY_PI / (xs + abs_y_by_xs*abs_y);
+                    denom = rssringoccs_Sqrt_One_By_Pi /
+                            (xs + abs_y_by_xs*abs_y);
                     w_x = denom*abs_y_by_xs;
                     w_y = denom;
                     w = rssringoccs_CDouble_Rect(w_x, w_y);
@@ -187,7 +188,8 @@ rssringoccs_CDouble_Faddeeva(rssringoccs_ComplexDouble z)
                 else
                 {
                     xs_by_abs_y = xs / abs_y;
-                    denom = SQRT_ONE_BY_PI / (xs_by_abs_y*xs + abs_y);
+                    denom = rssringoccs_Sqrt_One_By_Pi /
+                            (xs_by_abs_y*xs + abs_y);
                     w_x = denom;
                     w_y = denom*xs_by_abs_y;
                     w = rssringoccs_CDouble_Rect(w_x, w_y);
@@ -199,7 +201,7 @@ rssringoccs_CDouble_Faddeeva(rssringoccs_ComplexDouble z)
             {
                 dr = xs*xs - abs_y*abs_y - 0.5;
                 di = 2.0*xs*abs_y;
-                denom = SQRT_ONE_BY_PI / (dr*dr + di*di);
+                denom = rssringoccs_Sqrt_One_By_Pi / (dr*dr + di*di);
                 w_x = denom * (xs*di - abs_y*dr);
                 w_y = denom * (xs*dr + abs_y*di);
                 w = rssringoccs_CDouble_Rect(w_x, w_y);
@@ -227,7 +229,7 @@ rssringoccs_CDouble_Faddeeva(rssringoccs_ComplexDouble z)
                 nu -= 0.5;
             }
             /*  w(z) = i/sqrt(pi) / w:                                        */
-            denom = SQRT_ONE_BY_TWO_PI / (wr*wr + wi*wi);
+            denom = rssringoccs_Sqrt_One_By_Pi / (wr*wr + wi*wi);
             w_x = denom*wi;
             w_y = denom*wr;
             w = rssringoccs_CDouble_Rect(w_x, w_y);

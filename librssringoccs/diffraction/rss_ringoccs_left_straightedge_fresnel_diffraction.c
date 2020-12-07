@@ -62,8 +62,9 @@ rssringoccs_Complex_Left_Straightedge_Diffraction(double x, double edge,
     rssringoccs_ComplexDouble T_hat, scale;
     double re, im;
 
-    scale = rssringoccs_CDouble_Rect(SQRT_ONE_BY_TWO_PI, -SQRT_ONE_BY_TWO_PI);
-    x = SQRT_PI_BY_2*(edge-x)/F;
+    scale = rssringoccs_CDouble_Rect(rssringoccs_Sqrt_One_By_Two_Pi,
+                                     -rssringoccs_Sqrt_One_By_Two_Pi);
+    x = rssringoccs_Sqrt_Pi_By_Two*(edge-x)/F;
 
     im = rssringoccs_Double_Fresnel_Sin(x);
     re = rssringoccs_Double_Fresnel_Cos(x);

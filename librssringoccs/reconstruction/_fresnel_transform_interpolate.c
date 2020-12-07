@@ -200,7 +200,7 @@ Fresnel_Transform_Quadratic_Norm_Double(double *x_arr, double *phi_arr,
     /*  The integral in the numerator of norm evaluates to F sqrt(2). Use     *
      *  this in the calculation of the normalization. The cabs function       *
      *  computes the absolute value of complex number (defined in complex.h). */
-    norm = SQRT_2 / cabs(norm);
+    norm = rssringoccs_Sqrt_Two / cabs(norm);
 
     /*  Multiply result by the coefficient found in the Fresnel inverse.      *
      *  The 1/F term is omitted, since the F in the norm cancels this.        */
@@ -342,7 +342,7 @@ Fresnel_Transform_Cubic_Norm_Double(double *x_arr, double *phi_arr,
     /*  The integral in the numerator of norm evaluates to F sqrt(2). Use     *
      *  this in the calculation of the normalization. The cabs function       *
      *  computes the absolute value of complex number (defined in complex.h). */
-    norm = SQRT_2 / cabs(norm);
+    norm = rssringoccs_Sqrt_Two / cabs(norm);
 
     /*  Multiply result by the coefficient found in the Fresnel inverse.      *
      *  The 1/F term is omitted, since the F in the norm cancels this.        */
@@ -489,7 +489,7 @@ Fresnel_Transform_Quartic_Norm_Double(double *x_arr, double *phi_arr,
     /*  The integral in the numerator of norm evaluates to F sqrt(2). Use     *
      *  this in the calculation of the normalization. The cabs function       *
      *  computes the absolute value of complex number (defined in complex.h). */
-    norm = SQRT_2 / cabs(norm);
+    norm = rssringoccs_Sqrt_Two / cabs(norm);
 
     /*  Multiply result by the coefficient found in the Fresnel inverse.      *
      *  The 1/F term is omitted, since the F in the norm cancels this.        */

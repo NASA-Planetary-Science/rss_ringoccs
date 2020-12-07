@@ -57,8 +57,8 @@ rssringoccs_Float_One_Slit_Fraunhofer_Diffraction(float x, float z, float a)
 
     /*  If z is zero we'll return 0.0. Sinc(x) tends to zero for both         *
      *  x -> +infinity and x -> -infinity.                                    */
-    if (z == 0.0)
-        result = 0.0;
+    if (z == 0.0F)
+        result = 0.0F;
     else
     {
         /*  Single slit is computed in terms of the sinc function.            */

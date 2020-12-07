@@ -73,16 +73,16 @@ rssringoccs_Float_Ringlet_Diffraction_Phase(float x, float a, float b, float F)
 {
     float re, im, arg1, arg2, fs1, fs2, fc1, fc2, out;
 
-    arg1 = SQRT_PI_BY_2*(a-x)/F;
-    arg2 = SQRT_PI_BY_2*(b-x)/F;
+    arg1 = rssringoccs_Sqrt_Pi_By_Two_F*(a-x)/F;
+    arg2 = rssringoccs_Sqrt_Pi_By_Two_F*(b-x)/F;
 
     fs1 = rssringoccs_Float_Fresnel_Sin(arg1);
     fs2 = rssringoccs_Float_Fresnel_Sin(arg2);
     fc1 = rssringoccs_Float_Fresnel_Cos(arg1);
     fc2 = rssringoccs_Float_Fresnel_Cos(arg2);
 
-    im = SQRT_ONE_BY_TWO_PI * (fs2 - fs1 -  fc2 + fc1);
-    re = 1.0 - SQRT_ONE_BY_TWO_PI * (fc2 - fc1 + fs2 - fs1);
+    im = rssringoccs_Sqrt_One_By_Two_Pi_F * (fs2 - fs1 -  fc2 + fc1);
+    re = 1.0 - rssringoccs_Sqrt_One_By_Two_Pi_F * (fc2 - fc1 + fs2 - fs1);
     out = rssringoccs_Float_Arctan2(im, re);
 
     return out;
@@ -111,16 +111,16 @@ rssringoccs_Double_Ringlet_Diffraction_Phase(double x, double a,
 {
     double re, im, arg1, arg2, fs1, fs2, fc1, fc2, out;
 
-    arg1 = SQRT_PI_BY_2*(a-x)/F;
-    arg2 = SQRT_PI_BY_2*(b-x)/F;
+    arg1 = rssringoccs_Sqrt_Pi_By_Two*(a-x)/F;
+    arg2 = rssringoccs_Sqrt_Pi_By_Two*(b-x)/F;
 
     fs1 = rssringoccs_Double_Fresnel_Sin(arg1);
     fs2 = rssringoccs_Double_Fresnel_Sin(arg2);
     fc1 = rssringoccs_Double_Fresnel_Cos(arg1);
     fc2 = rssringoccs_Double_Fresnel_Cos(arg2);
 
-    im = SQRT_ONE_BY_TWO_PI * (fs2 - fs1 -  fc2 + fc1);
-    re = 1.0 - SQRT_ONE_BY_TWO_PI * (fc2 - fc1 + fs2 - fs1);
+    im = rssringoccs_Sqrt_One_By_Two_Pi * (fs2 - fs1 -  fc2 + fc1);
+    re = 1.0 - rssringoccs_Sqrt_One_By_Two_Pi * (fc2 - fc1 + fs2 - fs1);
     out = rssringoccs_Double_Arctan2(im, re);
 
     return out;
@@ -149,16 +149,16 @@ rssringoccs_LDouble_Ringlet_Diffraction_Phase(long double x, long double a,
 {
     long double re, im, arg1, arg2, fs1, fs2, fc1, fc2, out;
 
-    arg1 = SQRT_PI_BY_2*(a-x)/F;
-    arg2 = SQRT_PI_BY_2*(b-x)/F;
+    arg1 = rssringoccs_Sqrt_Pi_By_Two_L*(a-x)/F;
+    arg2 = rssringoccs_Sqrt_Pi_By_Two_L*(b-x)/F;
 
     fs1 = rssringoccs_LDouble_Fresnel_Sin(arg1);
     fs2 = rssringoccs_LDouble_Fresnel_Sin(arg2);
     fc1 = rssringoccs_LDouble_Fresnel_Cos(arg1);
     fc2 = rssringoccs_LDouble_Fresnel_Cos(arg2);
 
-    im = SQRT_ONE_BY_TWO_PI * (fs2 - fs1 -  fc2 + fc1);
-    re = 1.0 - SQRT_ONE_BY_TWO_PI * (fc2 - fc1 + fs2 - fs1);
+    im = rssringoccs_Sqrt_One_By_Two_Pi_L * (fs2 - fs1 -  fc2 + fc1);
+    re = 1.0 - rssringoccs_Sqrt_One_By_Two_Pi_L * (fc2 - fc1 + fs2 - fs1);
     out = rssringoccs_LDouble_Arctan2(im, re);
 
     return out;

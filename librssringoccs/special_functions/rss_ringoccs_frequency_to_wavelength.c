@@ -9,7 +9,7 @@
 type rssringoccs_##Type##_Frequency_To_Wavelength(type frequency)              \
 {                                                                              \
     /*  The conversion is the speed of light divided by the input frequency. */\
-    return SPEED_OF_LIGHT_KMS / frequency;                                     \
+    return rssringoccs_Speed_Of_Light_KMS / frequency;                         \
 }
 
 _define_freq_to_wave(float, Float)

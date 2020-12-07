@@ -25,7 +25,7 @@ type rssringoccs_##Type##_Modified_Kaiser_Bessel(type x, type W, type alpha)   \
             arg = 2.0*abs_x/W;                                                 \
             arg = rssringoccs_##Type##_Sqrt(1.0 - arg*arg);                    \
                                                                                \
-            alpha *= ONE_PI;                                                   \
+            alpha *= rssringoccs_One_Pi;                                                   \
             kbmd = (rssringoccs_##Type##_Bessel_I0(alpha * arg) - 1.0) /       \
                    (rssringoccs_##Type##_Bessel_I0(alpha) - 1.0);              \
         }                                                                      \

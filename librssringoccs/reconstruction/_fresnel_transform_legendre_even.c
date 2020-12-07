@@ -198,7 +198,7 @@ Fresnel_Transform_Legendre_Norm_Even_Double(double *x_arr, complex double *T_in,
     /*  The integral in the numerator of norm evaluates to F sqrt(2). Use     *
      *  this in the calculation of the normalization. The cabs function       *
      *  computes the absolute value of complex number (defined in complex.h). */
-    norm = SQRT_2 / cabs(norm);
+    norm = rssringoccs_Sqrt_Two / cabs(norm);
 
     /*  Multiply result by the coefficient found in the Fresnel inverse.      */
     T_out *= (0.5 + 0.5*_Complex_I) * norm;

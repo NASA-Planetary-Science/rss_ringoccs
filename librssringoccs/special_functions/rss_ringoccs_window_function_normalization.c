@@ -27,7 +27,7 @@ type rssringoccs_##Type##_Window_Normalization(type *ker, long dim,            \
     T1 = rssringoccs_##Type##_Abs(T1 * dx);                                    \
                                                                                \
     /* Return the normalization factor.                                      */\
-    out = SQRT_2 * f_scale / T1;                                               \
+    out = rssringoccs_Sqrt_Two * f_scale / T1;                                               \
     return out;                                                                \
 }
 
@@ -53,6 +53,6 @@ rssringoccs_Complex_Window_Normalization(rssringoccs_ComplexDouble *ker,
     abs_T1 = dx*rssringoccs_CDouble_Abs(T1);
 
     /* Return the normalization factor.                                       */
-    out = SQRT_2 * f_scale / abs_T1;
+    out = rssringoccs_Sqrt_Two * f_scale / abs_T1;
     return out;
 }

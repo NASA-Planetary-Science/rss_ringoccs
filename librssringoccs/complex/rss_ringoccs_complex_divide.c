@@ -58,7 +58,7 @@ rssringoccs_CFloat_Divide(rssringoccs_ComplexFloat z0,
     imag1 = rssringoccs_CFloat_Imag_Part(z1);
 
     /*  The denominator for both real and imaginary parts is |z1|^2.          */
-    denom = 1.0 / rssringoccs_CFloat_Abs_Squared(z1);
+    denom = 1.0F / rssringoccs_CFloat_Abs_Squared(z1);
 
     /*  We compute based on the fact that z0/z1 = z0 * (z1)^-1 and use the    *
      *  formular for the reciprocal of a complex number.                      */
@@ -118,7 +118,7 @@ rssringoccs_CLDouble_Divide(rssringoccs_ComplexLongDouble z0,
     imag1 = rssringoccs_CLDouble_Imag_Part(z1);
 
     /*  The denominator for both real and imaginary parts is |z1|^2.          */
-    denom = 1.0 / rssringoccs_CLDouble_Abs_Squared(z1);
+    denom = 1.0L / rssringoccs_CLDouble_Abs_Squared(z1);
 
     /*  We compute based on the fact that z0/z1 = z0 * (z1)^-1 and use the    *
      *  formular for the reciprocal of a complex number.                      */

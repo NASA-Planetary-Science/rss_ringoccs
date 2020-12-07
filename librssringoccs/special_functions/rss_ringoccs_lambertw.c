@@ -8,13 +8,13 @@ float rssringoccs_Float_LambertW(float x)
 {
     float EPS = 1.0e-4;
     float x0, dx, exp_x0;
-    if ((x < INFINITY) && (x>-RCPR_EULER_E))
+    if ((x < INFINITY) && (x>-rssringoccs_Rcpr_Euler_E))
     {
         if (x > 2.0)
             x0 = logf(x/logf(x));
-        else if (x > -RCPR_EULER_E)
+        else if (x > -rssringoccs_Rcpr_Euler_E)
             x0 = x;
-        else if (x == -RCPR_EULER_E)
+        else if (x == -rssringoccs_Rcpr_Euler_E)
             return -1.0;
         else
             return nanf("0");
@@ -33,9 +33,9 @@ float rssringoccs_Float_LambertW(float x)
         }
         return x0;
     }
-    else if (x==-RCPR_EULER_E)
+    else if (x==-rssringoccs_Rcpr_Euler_E)
         return -1.0;
-    else if (x<-RCPR_EULER_E)
+    else if (x<-rssringoccs_Rcpr_Euler_E)
         return rssringoccs_NaN;
     else
         return rssringoccs_Infinity;
@@ -45,15 +45,15 @@ double rssringoccs_Double_LambertW(double x)
 {
     double EPS = 1.0e-8;
     double x0, dx, exp_x0;
-    if ((x < INFINITY) && (x>-RCPR_EULER_E))
+    if ((x < INFINITY) && (x>-rssringoccs_Rcpr_Euler_E))
     {
         if (x > 2.0){
             x0 = log(x/log(x));
         }
-        else if (x > -RCPR_EULER_E){
+        else if (x > -rssringoccs_Rcpr_Euler_E){
             x0 = x;
         }
-        else if (x == -RCPR_EULER_E){
+        else if (x == -rssringoccs_Rcpr_Euler_E){
             return -1.0;
         }
         else {
@@ -71,9 +71,9 @@ double rssringoccs_Double_LambertW(double x)
         }
         return x0;
     }
-    else if (x==-RCPR_EULER_E)
+    else if (x==-rssringoccs_Rcpr_Euler_E)
         return -1.0;
-    else if (x<-RCPR_EULER_E)
+    else if (x<-rssringoccs_Rcpr_Euler_E)
         return NAN;
     else
         return INFINITY;
@@ -83,15 +83,15 @@ long double rssringoccs_LDouble_LambertW(long double x)
 {
     long double EPS = 1.0e-16;
     long double x0, dx, exp_x0;
-    if ((x < INFINITY) && (x>-RCPR_EULER_E))
+    if ((x < INFINITY) && (x>-rssringoccs_Rcpr_Euler_E))
     {
         if (x > 2.0){
             x0 = logl(x/logl(x));
         }
-        else if (x > -RCPR_EULER_E){
+        else if (x > -rssringoccs_Rcpr_Euler_E){
             x0 = x;
         }
-        else if (x == -RCPR_EULER_E){
+        else if (x == -rssringoccs_Rcpr_Euler_E){
             return -1.0;
         }
         else {
@@ -109,9 +109,9 @@ long double rssringoccs_LDouble_LambertW(long double x)
         }
         return x0;
     }
-    else if (x==-RCPR_EULER_E)
+    else if (x==-rssringoccs_Rcpr_Euler_E)
         return -1.0;
-    else if (x<-RCPR_EULER_E)
+    else if (x<-rssringoccs_Rcpr_Euler_E)
         return NAN;
     else
         return INFINITY;

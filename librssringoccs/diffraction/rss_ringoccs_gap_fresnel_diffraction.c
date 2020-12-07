@@ -80,12 +80,13 @@ rssringoccs_Complex_Gap_Diffraction(double x, double a, double b, double F)
     rssringoccs_ComplexDouble z1, z2, out, scale;
 
     /*  The scale factor for the integral is (1-i)/sqrt(2 pi).                */
-    scale = rssringoccs_CDouble_Rect(SQRT_ONE_BY_TWO_PI, -SQRT_ONE_BY_TWO_PI);
+    scale = rssringoccs_CDouble_Rect(rssringoccs_Sqrt_One_By_Two_Pi,
+                                     -rssringoccs_Sqrt_One_By_Two_Pi);
 
     /*  The bounds of the integral are sqrt(pi/2)(a-x)/F and                  *
      *  sqrt(pi/2)(b-x)/F, and the output is computed in terms of this.       */
-    arg1 = SQRT_PI_BY_2*(a-x)/F;
-    arg2 = SQRT_PI_BY_2*(b-x)/F;
+    arg1 = rssringoccs_Sqrt_Pi_By_Two*(a-x)/F;
+    arg2 = rssringoccs_Sqrt_Pi_By_Two*(b-x)/F;
 
     /*  Compute the Fresnel integrals of the two arguments.                   */
     z1 = rssringoccs_Complex_Fresnel_Integral(arg1);

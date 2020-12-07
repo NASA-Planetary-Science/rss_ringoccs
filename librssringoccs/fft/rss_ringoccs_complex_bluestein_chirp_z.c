@@ -5,19 +5,20 @@
 #include <rss_ringoccs/include/rss_ringoccs_fft.h>
 
 rssringoccs_ComplexDouble *
-rssringoccs_Complex_FFT_Bluestein_Chirp_Z(rssringoccs_ComplexDouble *in, long N,
+rssringoccs_Complex_FFT_Bluestein_Chirp_Z(rssringoccs_ComplexDouble *in,
+                                          unsigned long N,
                                           rssringoccs_Bool inverse)
 {
     /*  The chirp factors range from -(N-1) to N-1, inclusive.                */
-    long chirp_size;
+    unsigned long chirp_size;
 
     /*  We're going to use the radix-2 FFT to compute the FFT of an arbitrary *
      *  array. We'll need the next highest power of 2 greater than N. Use     *
      *  bitwise operations to do this.                                        */
-    long N_pow_2;
+    unsigned long N_pow_2;
 
     /*  Variables for indexing.                                               */
-    long n, m;
+    unsigned long n, m;
 
     /*  We'll need some variables declared. These will be our arrays.         */
     rssringoccs_ComplexDouble *chirp;
@@ -66,9 +67,9 @@ rssringoccs_Complex_FFT_Bluestein_Chirp_Z(rssringoccs_ComplexDouble *in, long N,
     x_in       = malloc(sizeof(*x_in)       * N_pow_2);
 
     if (inverse)
-        chirp_factor = ONE_PI/N;
+        chirp_factor = rssringoccs_One_Pi/N;
     else
-        chirp_factor = -ONE_PI/N;
+        chirp_factor = -rssringoccs_One_Pi/N;
 
     /*  Set the values for the "chirp" factor, which is simply the complex    *
      *  exponential of (k^2 / 2) * (+/- 2 pi i / N). The +/- depends on       *

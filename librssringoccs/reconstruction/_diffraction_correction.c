@@ -603,7 +603,7 @@ void DiffractionCorrectionFresnel(DLPObj *dlp)
     {
         /*  The independent variable is pi/2 * ((rho-rho0)/F)^2. Compute      *
          *  part of this. The 1/F^2 part is introduced later.                 */
-        x_arr[m] *= PI_BY_TWO*x_arr[m];
+        x_arr[m] *= rssringoccs_Pi_By_Two*x_arr[m];
 
         /*  Use the fwd_factor to computer forward or inverse transform.      */
         x_arr[m] *= fwd_factor;
@@ -631,7 +631,7 @@ void DiffractionCorrectionFresnel(DLPObj *dlp)
             /* Compute Window Functions, and compute pi/2 * x^2               */
             for(n=0; n<nw_pts; ++n)
             {
-                x_arr[n] *= PI_BY_TWO*x_arr[j];
+                x_arr[n] *= rssringoccs_Pi_By_Two*x_arr[j];
 
                 /*  Again, if forward calculation is set, negate x_arr.       */
                 x_arr[n] *= fwd_factor;
@@ -735,7 +735,7 @@ void DiffractionCorrectionLegendre(DLPObj *dlp)
         if (dlp->use_norm) FresT = &Fresnel_Transform_Legendre_Norm_Even_Double;
         else               FresT = &Fresnel_Transform_Legendre_Even_Double;
     }
-    else 
+    else
     {
         poly_order = dlp->order + 1;
 
@@ -1028,7 +1028,7 @@ void DiffractionCorrectionNewton(DLPObj *dlp)
                 w_func[j]  = fw(x_arr[j] - dlp->rho_km_vals[center], w_init);
             }
         }
-        else 
+        else
         {
             /*  Adjust rho and phi to the new range.                          */
             for (j=0; j<nw_pts; ++j)

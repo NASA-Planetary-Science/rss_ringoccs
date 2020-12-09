@@ -1,41 +1,89 @@
-/*  Header file which contains aliases for the function in the standard C     *
- *  library math.h. This allows compatibility of C89 and C99 math.h headers.  */
+/******************************************************************************
+ *                                 LICENSE                                    *
+ ******************************************************************************
+ *  This file is part of rss_ringoccs.                                        *
+ *                                                                            *
+ *  rss_ringoccs is free software: you can redistribute it and/or modify it   *
+ *  it under the terms of the GNU General Public License as published by      *
+ *  the Free Software Foundation, either version 3 of the License, or         *
+ *  (at your option) any later version.                                       *
+ *                                                                            *
+ *  rss_ringoccs is distributed in the hope that it will be useful,           *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+ *  GNU General Public License for more details.                              *
+ *                                                                            *
+ *  You should have received a copy of the GNU General Public License         *
+ *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
+ ******************************************************************************
+ *                             rss_ringoccs_abs                               *
+ ******************************************************************************
+ *  Purpose:                                                                  *
+ *      Contains the source code for the absolute value.                      *
+ ******************************************************************************
+ *                               DEPENDENCIES                                 *
+ ******************************************************************************
+ *  1.) rss_ringoccs_math.h:                                                  *
+ *          This file provides compatibility between the two standard math.h  *
+ *          header files (C89 vs C99 math.h). If C99 math.h exists, it simply *
+ *          provides aliases for the functions, and if C89 math.h is used     *
+ *          it defines the functions missing in the earlier version.          *
+ ******************************************************************************
+ *  Author:     Ryan Maguire, Wellesley College                               *
+ *  Date:       November 1, 2020                                              *
+ ******************************************************************************
+ *                             Revision History                               *
+ ******************************************************************************
+ *  2020/12/08 (Ryan Maguire):                                                *
+ *      Frozen for v1.3.                                                      *
+ ******************************************************************************/
+
+/*  Header file where the prototypes for these functions are defined.         */
 #include <rss_ringoccs/include/rss_ringoccs_math.h>
 
-/*  The "double" version of cos is defined in both C89 and C99 math.h so we   *
- *  only need to alias this function.                                         */
+/*  Since the absolute value function is very simple, we simply provide the   *
+ *  algorithms here rather than pass the arguments to fabs, fabsf, or fabsfl. *
+ *  There is essentially no time difference. Using gcc with -O2 optimization  *
+ *  on an array of 1 million random elements in [-1, 1] gave the following    *
+ *  times (in seconds):                                                       *
+ *      fabs:         0.003328                                                *
+ *      rss_ringoccs: 0.003743                                                *
+ *  -O3 optimization gives:                                                   *
+ *      fabs:         0.003409                                                *
+ *      rss_ringoccs: 0.003493                                                *
+ *  So, no real difference. These times were computed on an iMac 2017 3.4GHz  *
+ *  quad-core running MacOS Catalina 10.15.7. Converting a long double to a   *
+ *  double will lose precision, hence the reason we provide this simple code. */
+
+/*  Single precision absolute value function (fabsf equivalent).              */
+float rssringoccs_Float_Abs(float x)
+{
+    /*  If x is positive return it, otherwise return its negative.            */
+    if (x >= 0.0F)
+        return x;
+    else
+        return -x;
+}
+/*  End of rssringoccs_Float_Abs.                                             */
+
+/*  Double precision absolute value function (fabs equivalent).               */
 double rssringoccs_Double_Abs(double x)
 {
-    return fabs(x);
+    /*  If x is positive return it, otherwise return its negative.            */
+    if (x >= 0.0)
+        return x;
+    else
+        return -x;
 }
+/*  End of rssringoccs_Double_Abs.                                            */
 
-#if __HAS_C99_MATH_H__ == 0
-
-/*  C89 math.h does not have cosf or cosfl, so we'll need to provide these to  *
- *  make the code forward compatible. We'll do this in a very simple manner.  */
-float rssringoccs_Float_Abs(float x)
-{
-    return (float)fabs((double)x);
-}
-
+/*  Long double precision absolute value function (fabsl equivalent).         */
 long double rssringoccs_LDouble_Abs(long double x)
 {
-    return (long double)fabs((double)x);
+    /*  If x is positive return it, otherwise return its negative.            */
+    if (x >= 0.0L)
+        return x;
+    else
+        return -x;
 }
-
-/*  Now have the functions declared in rss_ringoccs_math.h point to these.    */
-#else
-
-/*  C99 provides float and long double support for their math functions, so   *
- *  simply use to these.                                                      */
-float rssringoccs_Float_Abs(float x)
-{
-    return fabsf(x);
-}
-
-long double rssringoccs_LDouble_Abs(long double x)
-{
-    return fabsl(x);
-}
-#endif
-/*  End of #if __HAS_C99_MATH_H__ == 0                                        */
+/*  End of rssringoccs_LDouble_Abs.                                           */

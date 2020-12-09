@@ -19,9 +19,11 @@
  *                            rss_ringoccs_math                               *
  ******************************************************************************
  *  Purpose:                                                                  *
- *      This header file allows for compatibility of rss_ringoccs for users   *
- *      of the C89/C90 math.h header file, and the C99/C11 math.h. The later  *
- *      versions of math.h provide the following:                             *
+ *      This header file is provided to improve the portability of            *
+ *      rss_ringoccs. The C99 math library is a superset of the C89/C90       *
+ *      version and contains float and long double support for all of the     *
+ *      standard functions. So if "func" is provided in C89/C90, C99 contains *
+ *      func as well as:                                                      *
  *          funcf:                                                            *
  *              Float version of func.                                        *
  *          funcl:                                                            *
@@ -36,9 +38,18 @@
  *      depending on whether or not the __HAS_C99_MATH_H__ macro is defined   *
  *      (it's defined in rss_ringoccs_config.h).                              *
  *                                                                            *
- *      This file also provides NAN and INFINITY macros if they are not set.  *
+ *      There are also new functions in the C99 version, such as the          *
+ *      hyperbolic trig functions, the copysign function, and more. We provide*
+ *      the prototypes for these here, and the algorithms for these functions *
+ *      can be found in the math/ subdirectory of librssringoccs.             *
+ *                                                                            *
+ *      We do not assume you are using a C99 capable compiler and instead     *
+ *      assume strict C89/C90 (also called ANSI C) compliance. The code still *
+ *      compiles on C99 and C11 compliant compilers.                          *
+ *                                                                            *
+ *      This file also provides NaN and infinity macros if they are not set.  *
  *      NOTE:                                                                 *
- *          INFINITY is set as the standard macro HUGE_VAL defined in math.h  *
+ *          Infinity is set as the standard macro HUGE_VAL defined in math.h  *
  *          and for most implementations this should do. Indeed, this is the  *
  *          same manner the Py_HUGE_VAL is set. The python source code issues *
  *          the following warning (cpython/Include/pymath.h):                 *
@@ -50,7 +61,7 @@
  *              is defined incorrectly, fiddle your Python config to          *
  *              #define Py_HUGE_VAL to something that works on your platform. *
  *                                                                            *
- *          Similarly, NAN is defined as HUGE_VAL * 0, which should be        *
+ *          Similarly, NaN is defined as HUGE_VAL * 0, which should be        *
  *          infinity times zero, which is Not-A-Number. Python does this as   *
  *          well, issuing the following warning:                              *
  *              Py_NAN                                                        *
@@ -59,8 +70,7 @@
  *              platform doesn't support NaNs.                                *
  *          If necessary, redefine NAN here to whatever your platform allows. *
  *      Lastly, this file provides a bunch of constants that are commonly     *
- *      used, as well as various math functions that are not included in      *
- *      either C89 or C99 math.h.                                             *
+ *      used, like sqrt(2) and multiples of pi.                               *
  ******************************************************************************
  *                               DEPENDENCIES                                 *
  ******************************************************************************
@@ -69,6 +79,9 @@
  *  2.) float.h:                                                              *
  *      Standard library which contains macros for the smallest and largest   *
  *      values allowed by your system.                                        *
+ *  3.) rss_ringoccs_config.h:                                                *
+ *      Header file which contains the __HAS_C99_MATH_H__ macro. This macro   *
+ *      tells the compiler how to build librssringoccs.
  ******************************************************************************
  *                            A NOTE ON COMMENTS                              *
  ******************************************************************************
@@ -81,7 +94,7 @@
  *  Date:       September 12, 2020                                            *
  ******************************************************************************/
 
-/*  Include guard for this file to prevent including this twice.              */
+/*  Include guard for this file to prevent including it twice.                */
 #ifndef __RSS_RINGOCCS_MATH_H__
 #define __RSS_RINGOCCS_MATH_H__
 
@@ -99,7 +112,11 @@
  *  __HAS_C99_MATH_H__ accordingly.                                           */
 #if __RSS_RINGOCCS_USING_C99_MATH_H__ == 1
 
+/*  The __STDC_VERSION__ macro should be set to C99 or higher. Check this.    */
 #if __STDC_VERSION__ >= 199901L
+
+/*  You've requested C99 math.h and have support for it, so set the           *
+ *  __HAS_C99_MATH_H__ macro to 1.                                            */
 #define __HAS_C99_MATH_H__ 1
 
 #else
@@ -114,6 +131,7 @@
 #else
 /*  Else statement for #if __RSS_RINGOCCS_USING_C99_MATH_H__ == 1.            */
 
+/*  You have not requested C99 math.h, so set __HAS_C99_MATH_H__ to 0.        */
 #define __HAS_C99_MATH_H__ 0
 
 #endif
@@ -137,6 +155,7 @@
 #define rssringoccs_Sqrt_Two_By_Pi_F        0.797884561F
 #define rssringoccs_Two_By_Sqrt_Pi_F        1.128379167F
 #define rssringoccs_Pi_By_Two_F             1.570796327F
+#define rssringoccs_Three_Pi_By_Four_F      2.356194490F
 #define rssringoccs_Pi_By_Four_F            0.785398163F
 #define rssringoccs_One_Pi_F                3.141592654F
 #define rssringoccs_Two_Pi_F                6.283185307F
@@ -153,6 +172,7 @@
 #define rssringoccs_Sqrt_Two_By_Pi          0.79788456080286535
 #define rssringoccs_Two_By_Sqrt_Pi          1.12837916709551257
 #define rssringoccs_Pi_By_Two               1.57079632679489661
+#define rssringoccs_Three_Pi_By_Four        2.35619449019234492
 #define rssringoccs_Pi_By_Four              0.78539816339744830
 #define rssringoccs_One_Pi                  3.14159265358979323
 #define rssringoccs_Two_Pi                  6.28318530717958647
@@ -169,6 +189,7 @@
 #define rssringoccs_Sqrt_Two_By_Pi_L        0.7978845608028653558798921L
 #define rssringoccs_Two_By_Sqrt_Pi_L        1.1283791670955125738961590L
 #define rssringoccs_Pi_By_Two_L             1.5707963267948966192313220L
+#define rssringoccs_Three_Pi_By_Four_L      2.3561944901923449288469830L
 #define rssringoccs_Pi_By_Four_L            0.7853981633974483096156608L
 #define rssringoccs_One_Pi_L                3.1415926535897932384626430L
 #define rssringoccs_Two_Pi_L                6.2831853071795864769252870L
@@ -192,6 +213,89 @@
 
 #define rssringoccs_Max_LDouble_Base_E  (LDBL_MAX_10_EXP *                     \
                                          rssringoccs_Natural_Log_Of_10_L)
+
+/******************************************************************************
+ *  Function:                                                                 *
+ *      rssringoccs_Double_Abs                                                *
+ *  Purpose:                                                                  *
+ *      Compute the absolute value of a real number (fabs alias).             *
+ *  Arguments:                                                                *
+ *      double x:                                                             *
+ *          A real number.                                                    *
+ *  Output:                                                                   *
+ *      double abs_x:                                                         *
+ *          The absolute value of x, |x|.                                     *
+ ******************************************************************************/
+extern float rssringoccs_Float_Abs(float x);
+extern double rssringoccs_Double_Abs(double x);
+extern long double rssringoccs_LDouble_Abs(long double x);
+
+/******************************************************************************
+ *  Function:                                                                 *
+ *      rssringoccs_Double_Arctan                                             *
+ *  Purpose:                                                                  *
+ *      Compute the arctan (inverse tangent) of a real number.                *
+ *  Arguments:                                                                *
+ *      double x:                                                             *
+ *          A real number.                                                    *
+ *  Output:                                                                   *
+ *      double atan_x:                                                        *
+ *          The inverse tangent of x, tan^-1(x).                              *
+ ******************************************************************************/
+extern float rssringoccs_Float_Arctan(float x);
+extern double rssringoccs_Double_Arctan(double x);
+extern long double rssringoccs_LDouble_Arctan(long double x);
+
+/******************************************************************************
+ *  Function:                                                                 *
+ *      rssringoccs_Double_Arctan2                                            *
+ *  Purpose:                                                                  *
+ *      Compute the 2-dimensional arctan (inverse tangent) of a point in the  *
+ *      Cartesian plane. This is the angle the point makes with the positive  *
+ *      x-axis.                                                               *
+ *  Arguments:                                                                *
+ *      double y:                                                             *
+ *          A real number.                                                    *
+ *      double x:                                                             *
+ *          Another real number.                                              *
+ *  Output:                                                                   *
+ *      double atan:                                                          *
+ *          The angle the point (x,y) makes with (1,0) in the plane.          *
+ *  NOTES:                                                                    *
+ *      By convention dating back to (at least) the 1970s, Arctan2 takes the  *
+ *      input as (y,x), not (x,y). i.e. the first argument is the y           *
+ *      component and the second argument is the x component. This is contrary*
+ *      to most 2 dimensional functions that want their inputs as (x,y).      *
+ *      This is probably because we are trying to compute tan^-1(y/x) but     *
+ *      need to be careful about the signs of y and x, so we write            *
+ *      arctan(y,x).                                                          *
+ *                                                                            *
+ *      This returns a number between -pi and pi, so there is a "branch cut"  *
+ *      along the negative x axis. Because of this, use of this function      *
+ *      in complex routines results in actual branch cuts.                    *
+ ******************************************************************************/
+extern float rssringoccs_Float_Arctan2(float y, float x);
+extern double rssringoccs_Double_Arctan2(double y, double x);
+extern long double rssringoccs_LDouble_Arctan2(long double y, long double x);
+
+/******************************************************************************
+ *  Function:                                                                 *
+ *      rssringoccs_Double_Copysign                                           *
+ *  Purpose:                                                                  *
+ *      Given two numbers x and y, returns a value that has the magnitude of  *
+ *      x and the sign of y.                                                  *
+ *  Arguments:                                                                *
+ *      double x:                                                             *
+ *          A real number.                                                    *
+ *      double y:                                                             *
+ *          Another real number.                                              *
+ *  Output:                                                                   *
+ *      double z:                                                             *
+ *          The value sgn(y) * |x|.                                           *
+ ******************************************************************************/
+extern float rssringoccs_Float_Copysign(float x, float y);
+extern double rssringoccs_Double_Copysign(double x, double y);
+extern long double rssringoccs_LDouble_Copysign(long double x, long double y);
 
 /*  Aliases for the sine trig function found in math.h.                       */
 extern float rssringoccs_Float_Sin(float x);
@@ -222,21 +326,6 @@ extern long double rssringoccs_LDouble_Exp(long double x);
 extern float rssringoccs_Float_Log(float x);
 extern double rssringoccs_Double_Log(double x);
 extern long double rssringoccs_LDouble_Log(long double x);
-
-/*  Aliases for the absolute value function found in math.h.                  */
-extern float rssringoccs_Float_Abs(float x);
-extern double rssringoccs_Double_Abs(double x);
-extern long double rssringoccs_LDouble_Abs(long double x);
-
-/*  Aliases for the atan function found in math.h.                            */
-extern float rssringoccs_Float_Arctan(float x);
-extern double rssringoccs_Double_Arctan(double x);
-extern long double rssringoccs_LDouble_Arctan(long double x);
-
-/*  Aliases for the atan2 function found in math.h.                           */
-extern float rssringoccs_Float_Arctan2(float y, float x);
-extern double rssringoccs_Double_Arctan2(double y, double x);
-extern long double rssringoccs_LDouble_Arctan2(long double y, long double x);
 
 /*  Set INFINITY to the HUGE_VAL macro that is specified in math.h. Most      *
  *  implementations already have an INFINITY macro, but it is not required.   */
@@ -294,8 +383,6 @@ extern unsigned long rssringoccs_Factorial(unsigned int n);
 
 extern unsigned long
 rssringoccs_Falling_Factorial(unsigned int x, unsigned int N);
-
-extern double rssringoccs_Double_Copysign(double x, double y);
 
 extern float
 rssringoccs_Real_Poly_Float_Coeffs(float *coeffs, unsigned int degree, float x);

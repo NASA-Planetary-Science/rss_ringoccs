@@ -57,47 +57,7 @@ for filename in complex/*.c; do
     $CC $CompilerArgs $filename
 done
 
-echo -e "\n\tCompiling fft/"
-for filename in fft/*.c; do
-    echo -e "\t\tCompiling: $filename"
-    $CC $CompilerArgs $filename
-done
 
-echo -e "\n\tCompiling geometry/"
-for filename in geometry/*.c; do
-    echo -e "\t\tCompiling: $filename"
-    $CC $CompilerArgs $filename
-done
-
-echo -e "\n\tCompiling numerical/"
-for filename in numerical/*.c; do
-    echo -e "\t\tCompiling: $filename"
-    $CC $CompilerArgs $filename
-done
-
-echo -e "\n\tCompiling diffraction/"
-for filename in diffraction/*.c; do
-    echo -e "\t\tCompiling: $filename"
-    $CC $CompilerArgs $filename
-done
-
-echo -e "\n\tCompiling fresnel_kernel/"
-for filename in fresnel_kernel/*.c; do
-    echo -e "\t\tCompiling: $filename"
-    $CC $CompilerArgs $filename
-done
-
-echo -e "\n\tCompiling special_functions/"
-for filename in special_functions/*.c; do
-    echo -e "\t\tCompiling: $filename"
-    $CC $CompilerArgs $filename
-done
-
-echo -e "\n\tCompiling ppm_plot/"
-for filename in ppm_plot/*.c; do
-    echo -e "\t\tCompiling: $filename"
-    $CC $CompilerArgs $filename
-done
 
 echo -e "\nBuilding rss_ringoccs Shared Object (.so file)"
 

@@ -2,22 +2,23 @@
 #include <rss_ringoccs/include/rss_ringoccs_complex.h>
 #include <rss_ringoccs/include/rss_ringoccs_ppm_plot.h>
 
+double coeffsa[32] = {
+    0.0,  341.0,    0.0, 0.0, 0.0, 0.0,  67518.0,   0.0, 0.0, 0.0,
+    0.0, -398505.0, 0.0, 0.0, 0.0, 0.0, -1060200.0, 0.0, 0.0, 0.0,
+    0.0,  326895.0, 0.0, 0.0, 0.0, 0.0,  10602.0,   0.0, 0.0, 0.0,
+    0.0, -19.0
+};
+
+double coeffsb[31] = {
+    -19.0,     0.0, 0.0, 0.0, 0.0, -10602.0,   0.0, 0.0, 0.0, 0.0,
+     326895.0, 0.0, 0.0, 0.0, 0.0,  1060200.0, 0.0, 0.0, 0.0, 0.0,
+    -398505.0, 0.0, 0.0, 0.0, 0.0, -67518.0,   0.0, 0.0, 0.0, 0.0,
+     341.0
+};
+
 static rssringoccs_ComplexDouble func(rssringoccs_ComplexDouble z)
 {
     rssringoccs_ComplexDouble f, g, out;
-    double coeffsa[32] = {
-        0.0,  341.0,    0.0, 0.0, 0.0, 0.0,  67518.0,   0.0, 0.0, 0.0,
-        0.0, -398505.0, 0.0, 0.0, 0.0, 0.0, -1060200.0, 0.0, 0.0, 0.0,
-        0.0,  326895.0, 0.0, 0.0, 0.0, 0.0,  10602.0,   0.0, 0.0, 0.0,
-        0.0, -19.0
-    };
-
-    double coeffsb[31] = {
-        -19.0,     0.0, 0.0, 0.0, 0.0, -10602.0,   0.0, 0.0, 0.0, 0.0,
-         326895.0, 0.0, 0.0, 0.0, 0.0,  1060200.0, 0.0, 0.0, 0.0, 0.0,
-        -398505.0, 0.0, 0.0, 0.0, 0.0, -67518.0,   0.0, 0.0, 0.0, 0.0,
-         341.0
-    };
 
     f = rssringoccs_CDouble_Poly_Real_Coeffs(coeffsa, 31, z);
     g = rssringoccs_CDouble_Poly_Real_Coeffs(coeffsb, 30, z);
@@ -33,14 +34,14 @@ int main(void)
     double rcp_factor;
     rssringoccs_ComplexDouble z;
 
-    unsigned int size = 1024;
-    unsigned int maxIterations = 16;
+    unsigned int size = 4*1024;
+    unsigned int maxIterations = 256;
 
-    const double x_min = -5.0;
-    const double x_max =  5.0;
-    const double y_min = -5.0;
-    const double y_max =  5.0;
-    const double radius = 8.0;
+    const double x_min = -1.0;
+    const double x_max =  1.0;
+    const double y_min = -1.0;
+    const double y_max =  1.0;
+    const double radius = 20.0;
 
     fp = fopen("julia_set.ppm", "w");
     fprintf(fp, "P6\n%d %d\n255\n", size, size);

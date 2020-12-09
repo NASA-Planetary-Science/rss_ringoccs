@@ -46,5 +46,36 @@
  *  By default we do not assume C99 compliance.                               */
 #define __RSS_RINGOCCS_USING_C99_MATH_H__ 0
 
+/*  If long double precision (80, 96, or 128 bit format, 24 decimal accuracy) *
+ *  is needed for calculations but your platform lacks sinl or is strictly    *
+ *  C89 compliant, rss_ringoccs provides simple yet accurate code for         *
+ *  computing the various trig functions. When tested against sinl on a       *
+ *  massive array of 10^8 points evenly distributed throughout -10 to 10 we   *
+ *  get the following times (in seconds):                                     *
+ *      C99:          4.586321                                                *
+ *      rss_ringoccs: 5.659821                                                *
+ *  Both outputs had long double precision and the maximum absolute           *
+ *  difference was ~ 10^-16. By default we assume you want the standard       *
+ *  library functions. If you do not have sinl, rss_ringoccs creates a sinl   *
+ *  function via:                                                             *
+ *      sinl(x) = (long double)sin((double)x)                                 *
+ *  That is, we simply cast the input and use the standard sin function. This *
+ *  will lose precision, but is faster. If you would like to implement our    *
+ *  algorithms, set __RSS_RINGOCCS_USE_TRIG_ALGORITHMS__ to 1. The algorithms *
+ *  use lookup tables in combination with Taylor series and a few trig        *
+ *  identities. sin(x) is computed as follows:                                *
+ *                                                                            *
+ *      sin(x) = sin(y + 2pi k)                                               *
+ *             = sin(y)                                                       *
+ *             = sin(y' + dy)                                                 *
+ *             = sin(y')cos(dy) + cos(y')sin(dy)                              *
+ *                                                                            *
+ *  So we get x into the range [-pi, pi] and write y = y'+dy where            *
+ *  y' = 0.01*floor(100*y) and dy = y-y'. So the y' take on a small amount of *
+ *  possible values and cos(y') and sin(y') are computed via lookup tables.   *
+ *  dy is small and can be accurately computed via a Taylor series using very *
+ *  few terms. Cosine is defined similarly.                                   */
+#define __RSS_RINGOCCS_USE_TRIG_ALGORITHMS__ 0
+
 #endif
 /*  End of include guard.                                                     */

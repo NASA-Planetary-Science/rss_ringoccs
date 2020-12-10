@@ -40,7 +40,7 @@
  *      positive or not, returning x for non-negative and -x otherwise.       *
  *  Notes:                                                                    *
  *      fabsf and fabsl are not provided in C89/C90 implementations of the    *
- *      language, and instead type conversion are made in the fabs function.  *
+ *      language, and instead type conversions are made in the fabs function. *
  *      Since the absolute value function is very simple, we simply provide   *
  *      the algorithms here rather than pass the arguments to fabs, fabsf, or *
  *      fabsfl. There is essentially no time difference. Using gcc with -O2   *

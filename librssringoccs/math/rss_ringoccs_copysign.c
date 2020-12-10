@@ -34,7 +34,7 @@
  ******************************************************************************
  *                             Revision History                               *
  ******************************************************************************
- *  2020/12/08 (Ryan Maguire):                                                *
+ *  2020/12/10 (Ryan Maguire):                                                *
  *      Frozen for v1.3.                                                      *
  ******************************************************************************/
 
@@ -60,7 +60,7 @@ float rssringoccs_Float_Copysign(float x, float y)
 
     /*  And lastly, if y is zero, return zero.                                */
     else
-        out = 0.0;
+        out = 0.0F;
 
     return out;
 }
@@ -69,14 +69,15 @@ float rssringoccs_Float_Copysign(float x, float y)
 /*  Double precision copysign function.                                       */
 double rssringoccs_Double_Copysign(double x, double y)
 {
+    /*  Declare necessary variables. C89 requires declarations at the top.    */
     double out;
 
     /*  If y is negative, compute -|x|.                                       */
-    if (y < 0)
+    if (y < 0.0)
         out = -rssringoccs_Double_Abs(x);
 
     /*  If y is positive, compute |x|.                                        */
-    else if (0 < y)
+    else if (0.0 < y)
         out = rssringoccs_Double_Abs(x);
 
     /*  And lastly, if y is zero, return zero.                                */
@@ -86,3 +87,25 @@ double rssringoccs_Double_Copysign(double x, double y)
     return out;
 }
 /*  End of rssringoccs_Double_Copysign.                                       */
+
+/*  Long double precision copysign function.                                  */
+long double rssringoccs_LDouble_Copysign(long double x, long double y)
+{
+    /*  Declare necessary variables. C89 requires declarations at the top.    */
+    long double out;
+
+    /*  If y is negative, compute -|x|.                                       */
+    if (y < 0.0L)
+        out = -rssringoccs_LDouble_Abs(x);
+
+    /*  If y is positive, compute |x|.                                        */
+    else if (0.0L < y)
+        out = rssringoccs_LDouble_Abs(x);
+
+    /*  And lastly, if y is zero, return zero.                                */
+    else
+        out = 0.0L;
+
+    return out;
+}
+/*  End of rssringoccs_LDouble_Copysign.                                      */

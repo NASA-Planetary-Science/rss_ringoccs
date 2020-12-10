@@ -297,15 +297,42 @@ extern float rssringoccs_Float_Copysign(float x, float y);
 extern double rssringoccs_Double_Copysign(double x, double y);
 extern long double rssringoccs_LDouble_Copysign(long double x, long double y);
 
+/******************************************************************************
+ *  Function:                                                                 *
+ *      rssringoccs_Double_Cos                                                *
+ *  Purpose:                                                                  *
+ *      Computes the cosine of a real number.                                 *
+ *  Arguments:                                                                *
+ *      double x:                                                             *
+ *          A real number.                                                    *
+ *  Output:                                                                   *
+ *      double cos_x:                                                         *
+ *          The cosine of x, cos(x).                                          *
+ ******************************************************************************/
+extern float rssringoccs_Float_Cos(float x);
+extern double rssringoccs_Double_Cos(double x);
+extern long double rssringoccs_LDouble_Cos(long double x);
+
+/******************************************************************************
+ *  Function:                                                                 *
+ *      rssringoccs_Double_Cosh                                               *
+ *  Purpose:                                                                  *
+ *      Computes the hyperbolic cosine of a real number.                      *
+ *  Arguments:                                                                *
+ *      double x:                                                             *
+ *          A real number.                                                    *
+ *  Output:                                                                   *
+ *      double cos_x:                                                         *
+ *          The hyperbolic cosine of x, cosh(x).                              *
+ ******************************************************************************/
+extern float rssringoccs_Float_Cosh(float x);
+extern double rssringoccs_Double_Cosh(double x);
+extern long double rssringoccs_LDouble_Cosh(long double x);
+
 /*  Aliases for the sine trig function found in math.h.                       */
 extern float rssringoccs_Float_Sin(float x);
 extern double rssringoccs_Double_Sin(double x);
 extern long double rssringoccs_LDouble_Sin(long double x);
-
-/*  Aliases for the cosine trig function found in math.h.                     */
-extern float rssringoccs_Float_Cos(float x);
-extern double rssringoccs_Double_Cos(double x);
-extern long double rssringoccs_LDouble_Cos(long double x);
 
 /*  Aliases for the cosine tan function found in math.h.                      */
 extern float rssringoccs_Float_Tan(float x);
@@ -354,10 +381,6 @@ extern long double rssringoccs_LDouble_Sinc(long double x);
 extern float rssringoccs_Float_Sinh(float x);
 extern double rssringoccs_Double_Sinh(double x);
 extern long double rssringoccs_LDouble_Sinh(long double x);
-
-extern float rssringoccs_Float_Cosh(float x);
-extern double rssringoccs_Double_Cosh(double x);
-extern long double rssringoccs_LDouble_Cosh(long double x);
 
 extern float rssringoccs_Float_Tanh(float x);
 extern double rssringoccs_Double_Tanh(double x);

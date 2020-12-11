@@ -32,16 +32,16 @@ int main(void)
     unsigned int x, y, n;
     double z_x, z_y, norm;
     double rcp_factor;
-    rssringoccs_ComplexDouble z;
+    rssringoccs_ComplexDouble z_0, z_1, z_2, dist;
 
     unsigned int size = 4*1024;
-    unsigned int maxIterations = 256;
+    unsigned int maxIterations = 12;
 
-    const double x_min = -1.0;
-    const double x_max =  1.0;
-    const double y_min = -1.0;
-    const double y_max =  1.0;
-    const double radius = 20.0;
+    const double x_min = -100.0;
+    const double x_max =  100.0;
+    const double y_min = -100.0;
+    const double y_max =  100.0;
+    const double eps = 1.0e-4;
 
     fp = fopen("julia_set.ppm", "w");
     fprintf(fp, "P6\n%d %d\n255\n", size, size);
@@ -54,15 +54,19 @@ int main(void)
         for (x=0; x<size; ++x)
         {
             z_x = x * (x_max - x_min) * rcp_factor + x_min;
-            z = rssringoccs_CDouble_Rect(z_x, z_y);
+            z_0 = rssringoccs_CDouble_Rect(z_x, z_y);
 
             for(n = 0; n < maxIterations; n++)
             {
-                z = func(z);
-                norm = rssringoccs_CDouble_Abs(z);
+                z_1 = func(z_0);
+                z_2 = func(z_1);
+                dist = rssringoccs_CDouble_Subtract(z_0, z_2);
+                norm = rssringoccs_CDouble_Abs(dist);
 
-                if(norm > radius)
+                if(norm < eps)
                     break;
+                else
+                    z_0 = z_1;
             }
 
             if(n == maxIterations)

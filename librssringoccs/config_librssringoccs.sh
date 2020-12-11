@@ -57,7 +57,17 @@ for filename in complex/*.c; do
     $CC $CompilerArgs $filename
 done
 
+echo -e "\n\tCompiling geometry/"
+for filename in geometry/*.c; do
+    echo -e "\t\tCompiling: $filename"
+    $CC $CompilerArgs $filename
+done
 
+echo -e "\n\tCompiling ppm_plot/"
+for filename in ppm_plot/*.c; do
+    echo -e "\t\tCompiling: $filename"
+    $CC $CompilerArgs $filename
+done
 
 echo -e "\nBuilding rss_ringoccs Shared Object (.so file)"
 

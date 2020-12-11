@@ -19,7 +19,7 @@
  *                             rss_ringoccs_abs                               *
  ******************************************************************************
  *  Purpose:                                                                  *
- *      Contains the source code for the absolute value.                      *
+ *      Contains the source code for the absolute value function.             *
  ******************************************************************************
  *                             DEFINED FUNCTIONS                              *
  ******************************************************************************
@@ -29,6 +29,10 @@
  *      rssringoccs_LDouble_Abs:                                              *
  *  Purpose:                                                                  *
  *      Computes the absolute value of a real number.                         *
+ *                   --                                                       *
+ *                  |   x,  x > 0                                             *
+ *          |x|  =  |  -x,  else                                              *
+ *                   --                                                       *
  *  Arguments:                                                                *
  *      x (float/double/long double):                                         *
  *          A real number, the argument for |x|.                              *
@@ -94,22 +98,32 @@
 /*  Single precision absolute value function (fabsf equivalent).              */
 float rssringoccs_Float_Abs(float x)
 {
+    /*  Declare necessary variables. C89 requires declarations at the top.    */
+    float abs_x;
+
     /*  If x is positive return it, otherwise return its negative.            */
     if (x >= 0.0F)
-        return x;
+        abs_x = x;
     else
-        return -x;
+        abs_x = -x;
+
+    return abs_x;
 }
 /*  End of rssringoccs_Float_Abs.                                             */
 
 /*  Double precision absolute value function (fabs equivalent).               */
 double rssringoccs_Double_Abs(double x)
 {
+    /*  Declare necessary variables. C89 requires declarations at the top.    */
+    double abs_x;
+
     /*  If x is positive return it, otherwise return its negative.            */
     if (x >= 0.0)
-        return x;
+        abs_x = x;
     else
-        return -x;
+        abs_x = -x;
+
+    return abs_x;
 }
 /*  End of rssringoccs_Double_Abs.                                            */
 

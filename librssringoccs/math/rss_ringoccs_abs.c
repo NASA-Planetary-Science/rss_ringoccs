@@ -37,7 +37,7 @@
  *      x (float/double/long double):                                         *
  *          A real number, the argument for |x|.                              *
  *  Output:                                                                   *
- *      abs_x:                                                                *
+ *      abs_x (float/double/long double):                                     *
  *          The absolute value of x.                                          *
  *  Method:                                                                   *
  *      This uses a simple if-then statement to check if the input is         *
@@ -78,7 +78,7 @@
  *                            A FRIENDLY WARNING                              *
  ******************************************************************************
  *  This code is compatible with the C89/C90 standard. The setup script that  *
- *  is used to compile this in config_librssringoccs.sh uses gcc and has the *
+ *  is used to compile this in config_librssringoccs.sh uses gcc and has the  *
  *  -pedantic and =std=c89 flags to check for compliance. If you edit this to *
  *  use C99 features (built-in complex, built-in booleans, C++ style comments *
  *  and etc.), or GCC extensions, you will need to edit the config script.    *

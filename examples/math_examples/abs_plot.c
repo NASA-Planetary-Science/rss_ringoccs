@@ -42,7 +42,7 @@ const unsigned int size = 1024;
 int main(void)
 {
     /* Values for the min and max of the x and y axes.                        */
-    double x_min =  -1.2;
+    double x_min = -1.2;
     double x_max =  1.2;
     double y_min = -0.2;
     double y_max =  1.2;
@@ -143,9 +143,12 @@ int main(void)
             else
                 fputc(BLACK, fp);
         }
+        /*  End of looping over the x variable.                               */
     }
+    /*  End of looping over the y variable.                                   */
     return 0;
 }
+/*  End of main.                                                              */
 
 /******************************************************************************
  *  We can compile this with:                                                 *

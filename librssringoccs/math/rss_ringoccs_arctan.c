@@ -21,6 +21,29 @@
  *  Purpose:                                                                  *
  *      Contains the source code for the inverse tangent function.            *
  ******************************************************************************
+ *                             DEFINED FUNCTIONS                              *
+ ******************************************************************************
+ *  Function Name:                                                            *
+ *      rssringoccs_Float_Arctan:                                             *
+ *      rssringoccs_Double_Arctan:                                            *
+ *      rssringoccs_LDouble_Arctan:                                           *
+ *  Purpose:                                                                  *
+ *      Computes arctangent of a real number:                                 *
+ *          arctan(x) = tan^-1(x)                                             *
+ *  Arguments:                                                                *
+ *      x (float/double/long double):                                         *
+ *          A real number, the argument for arctan.                           *
+ *  Output:                                                                   *
+ *      arctan_x (float/double/long double):                                  *
+ *          The arctangent of x.                                              *
+ *  Method:                                                                   *
+ *      Passes arguments to atanf, atan, atanl if available, and converts the *
+ *      arguments to doubles and passes them to atan if not.                  *
+ *  Notes:                                                                    *
+ *      It is not assumed you have a C99 compliant compiler. If you do and    *
+ *      would like to use those library functions, set the macro              *
+ *      __RSS_RINGOCCS_USING_C99_MATH_H__ to 1 in rss_ringoccs_configs.h.     *
+ ******************************************************************************
  *                               DEPENDENCIES                                 *
  ******************************************************************************
  *  1.) rss_ringoccs_math.h:                                                  *
@@ -28,6 +51,21 @@
  *          header files (C89 vs C99 math.h). If C99 math.h exists, it simply *
  *          provides aliases for the functions, and if C89 math.h is used     *
  *          it defines the functions missing in the earlier version.          *
+ ******************************************************************************
+ *                            A NOTE ON COMMENTS                              *
+ ******************************************************************************
+ *  It is anticipated that many users of this code will have experience in    *
+ *  either Python or IDL, but not C. Many comments are left to explain as     *
+ *  much as possible. Vagueness or unclear code should be reported to:        *
+ *  https://github.com/NASA-Planetary-Science/rss_ringoccs/issues             *
+ ******************************************************************************
+ *                            A FRIENDLY WARNING                              *
+ ******************************************************************************
+ *  This code is compatible with the C89/C90 standard. The setup script that  *
+ *  is used to compile this in config_librssringoccs.sh uses gcc and has the  *
+ *  -pedantic and =std=c89 flags to check for compliance. If you edit this to *
+ *  use C99 features (built-in complex, built-in booleans, C++ style comments *
+ *  and etc.), or GCC extensions, you will need to edit the config script.    *
  ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
  *  Date:       November 1, 2020                                              *

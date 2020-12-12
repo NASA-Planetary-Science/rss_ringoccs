@@ -21,6 +21,27 @@
  *  Purpose:                                                                  *
  *      Contains the source code for the copysign function defined in C99.    *
  ******************************************************************************
+ *                             DEFINED FUNCTIONS                              *
+ ******************************************************************************
+ *  Function Name:                                                            *
+ *      rssringoccs_Float_Abs:                                                *
+ *      rssringoccs_Double_Abs:                                               *
+ *      rssringoccs_LDouble_Abs:                                              *
+ *  Purpose:                                                                  *
+ *      Computes the product of sgn(y) with |x|.                              *
+ *          copysign(x, y) = sgn(y) * |x|                                     *
+ *  Arguments:                                                                *
+ *      x (float/double/long double):                                         *
+ *          A real number.                                                    *
+ *      y (float/double/long double):                                         *
+ *          Another real number.                                              *
+ *  Output:                                                                   *
+ *      copysign_x (float/double/long double):                                *
+ *          The value sgn(y) * |x|.                                           *
+ *  Method:                                                                   *
+ *      Check the sign of y with an if-then statement and compute |x|, -|x|,  *
+ *      or zero accordingly.                                                  *
+ ******************************************************************************
  *                               DEPENDENCIES                                 *
  ******************************************************************************
  *  1.) rss_ringoccs_math.h:                                                  *
@@ -28,6 +49,21 @@
  *          header files (C89 vs C99 math.h). If C99 math.h exists, it simply *
  *          provides aliases for the functions, and if C89 math.h is used     *
  *          it defines the functions missing in the earlier version.          *
+ ******************************************************************************
+ *                            A NOTE ON COMMENTS                              *
+ ******************************************************************************
+ *  It is anticipated that many users of this code will have experience in    *
+ *  either Python or IDL, but not C. Many comments are left to explain as     *
+ *  much as possible. Vagueness or unclear code should be reported to:        *
+ *  https://github.com/NASA-Planetary-Science/rss_ringoccs/issues             *
+ ******************************************************************************
+ *                            A FRIENDLY WARNING                              *
+ ******************************************************************************
+ *  This code is compatible with the C89/C90 standard. The setup script that  *
+ *  is used to compile this in config_librssringoccs.sh uses gcc and has the  *
+ *  -pedantic and =std=c89 flags to check for compliance. If you edit this to *
+ *  use C99 features (built-in complex, built-in booleans, C++ style comments *
+ *  and etc.), or GCC extensions, you will need to edit the config script.    *
  ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
  *  Date:       December 8, 2020                                              *

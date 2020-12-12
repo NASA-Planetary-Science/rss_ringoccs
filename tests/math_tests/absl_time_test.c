@@ -18,7 +18,7 @@
  ******************************************************************************
  *  Purpose:                                                                  *
  *      Provide tests for the accuracy and efficiency of rss_ringoccs         *
- *      absolute value function at single precision compared to the one       *
+ *      absolute value function at long double precision compared to the one  *
  *      provided by the C99 standard in math.h.                               *
  ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
@@ -41,21 +41,20 @@
 int main(void)
 {
     /*  Declare necessary variables.                                          */
-    float max_err, temp, start, end, x, dx;
-    float *y0, *y1;
-    unsigned int n, N, ind;
+    long double max_err, temp, start, end, x, dx;
+    long double *y0, *y1;
+    unsigned int n, N;
     clock_t t1, t2;
 
     /*  We'll do our time test with 100 million points.                       */
     N = 1e8;
 
     /*  We'll have the variable range from -100 to 100.                       */
-    start = 100.0F;
-    end = 100.0F;
+    start = -100.0L;
+    end = 100.0L;
 
-    /*  Set the initial values for ind and max_err to zero.                   */
-    ind = 0;
-    max_err = 0.0F;
+    /*  Set the initial value for max_err to zero.                            */
+    max_err = 0.0L;
 
     /*  And we'll increment evenly throughout the region.                     */
     dx = (end - start) / N;
@@ -65,13 +64,13 @@ int main(void)
     y1 = malloc(sizeof(*y1) * N);
 
     /*  Set x to the starting value and grab the current time.                */
-    x = -start;
+    x = start;
     t1 = clock();
 
-    /*  Perform the calculation for the C99 standard library function fabsf.  */
+    /*  Perform the calculation for the C99 standard library function fabsl.  */
     for (n=0; n<N; ++n)
     {
-        y0[n] = fabsf(x);
+        y0[n] = fabsl(x);
         x += dx;
     }
 
@@ -84,15 +83,15 @@ int main(void)
     printf("C99:          %f\n", (double)(t2-t1)/CLOCKS_PER_SEC);
 
     /*  Restart the computation for the rss_ringoccs function.                */
-    x = -start;
+    x = start;
 
     /*  Reset the clock.                                                      */
     t1 = clock();
 
-    /*  Perform the computation using rssringoccs_Float_Abs instead.          */
+    /*  Perform the computation using rssringoccs_LDouble_Abs instead.        */
     for (n=0; n<N; ++n)
     {
-        y1[n] = rssringoccs_Float_Abs(x);
+        y1[n] = rssringoccs_LDouble_Abs(x);
         x += dx;
     }
 
@@ -106,19 +105,16 @@ int main(void)
     for (n=0; n<N; ++n)
     {
         /*  We'll use the standard library function to check the error.       */
-        temp = fabsf(y0[n] - y1[n]);
+        temp = fabsl(y0[n] - y1[n]);
 
         /*  Check if the error got larger and set max_err accordingly.        */
         if (max_err < temp)
-        {
             max_err = temp;
-            ind = n;
-        }
     }
     /*  End of for loop computing |y0-y1|.                                    */
 
-    /*  Print out the error to 8 decimals (assumes 32-bit precision).         */
-    printf("Max Error: %.8f\n", max_err);
+    /*  Print out the error to 24 decimals (assumes 96-bit precision).        */
+    printf("Max Error: %.24Lf\n", max_err);
 
     /*  Free the pointers we've malloc'd.                                     */
     free(y0);
@@ -134,15 +130,14 @@ int main(void)
  *      This is NOT the regular gcc from GNU. To use this on apple devices    *
  *      requires homebrew.                                                    *
  *                                                                            *
- *  No optimization:                                                          *
- *      gcc -Wall -Wextra -Wconversion -Wpedantic -pedantic -pedantic-errors  *
- *          -std=c89 -ansi absf_time_test.c -o test -lrssringoccs             *
- *      C99:          0.374127                                                *
- *      rss_ringoccs: 0.405311                                                *
- *      Max Error: 0.00000000                                                 *
  *  -O3 optimization:                                                         *
- *      gcc -Wall -Wextra -Wconversion -Wpedantic -pedantic -pedantic-errors  *
- *          -O3 -std=c89 -ansi absf_time_test.c -o test -lrssringoccs         *
- *      C99:          0.129045                                                *
- *      rss_ringoccs: 0.290840                                                *
- *      Max Error: 0.00000000                                                 */
+ *      gcc -Wconversion -O3 -Wall -Wextra -Wpedantic                         *
+ *          -pedantic absl_time_test.c -o test -lrssringoccs                  *
+ *      C99:          0.667850                                                *
+ *      rss_ringoccs: 1.083205                                                *
+ *      Max Error: 0.000000000000000000000000                                 *
+ *  No optimization:                                                          *
+ *      gcc absl_time_test.c -o test -lrssringoccs                            *
+ *      C99:          1.154483                                                *
+ *      rss_ringoccs: 1.566479                                                *
+ *      Max Error: 0.000000000000000000000000                                 */

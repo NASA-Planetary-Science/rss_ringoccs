@@ -43,34 +43,42 @@
 /*  Needed for malloc.                                                        */
 #include <stdlib.h>
 
+/*  Routine for comparing fabs with rssringoccs_Double_Abs.                   */
 int main(void)
 {
-    /*  Declare necessary variables.                                          */
-    double max_err, temp, start, end, x, dx;
+    /*  Set the start and end for the values we're testing.                   */
+    double start = -100.0;
+    double end   =  100.0;
+
+    /*  Declare variables for sampling the region [start, end].               */
+    double x, dx;
+
+    /*  Declare variables for computing the maximum difference between fabs   *
+     *  and rssringoccs_Double_Abs.                                           */
+    double max_err = 0.0;
+    double temp;
+
+    /*  Declare two pointers to represent arrays for fabs(x) and              *
+     *  rssringoccs_Double_Abs(x), respectively.                              */
     double *y0, *y1;
-    unsigned int n, N, ind;
+
+    /*  Declare a dummy variable for indexing and a variable for the number   *
+     *  of points we're sampling in the range [start, end].                   */
+    unsigned int n;
+    unsigned int N = 1e8;
+
+    /*  Declare variables for computing computation time.                     */
     clock_t t1, t2;
 
-    /*  We'll do our time test with 100 million points.                       */
-    N = 1e8;
-
-    /*  We'll have the variable range from -100 to 100.                       */
-    start = 100.0;
-    end = 100.0;
-
-    /*  And we'll increment evenly throughout the region.                     */
+    /*  We'll increment evenly throughout the region.                         */
     dx = (end - start) / N;
-
-    /*  Set the initial values for ind and max_err to zero.                   */
-    ind = 0;
-    max_err = 0.0;
 
     /*  Allocate memory for the two pointers we've declared.                  */
     y0 = malloc(sizeof(*y0) * N);
     y1 = malloc(sizeof(*y1) * N);
 
     /*  Set x to the starting value and grab the current time.                */
-    x = -start;
+    x = start;
     t1 = clock();
 
     /*  Perform the calculation for the C99 standard library function fabs.   */
@@ -84,12 +92,12 @@ int main(void)
     t2 = clock();
 
     /*  t2-t1 is the number of clock cycles that have passed between grabbing *
-     *  t1 and t2. To convert this to second, use the macro CLOCKS_PER_SEC    *
+     *  t1 and t2. To convert this to seconds, use the macro CLOCKS_PER_SEC   *
      *  provided in time.h.                                                   */
     printf("C99:          %f\n", (double)(t2-t1)/CLOCKS_PER_SEC);
 
     /*  Restart the computation for the rss_ringoccs function.                */
-    x = -start;
+    x = start;
 
     /*  Reset the clock.                                                      */
     t1 = clock();
@@ -121,12 +129,9 @@ int main(void)
 
         /*  Check if the error got larger and set max_err accordingly.        */
         if (max_err < temp)
-        {
             max_err = temp;
-            ind = n;
-        }
     }
-    /*  End of for loop computing |y0-y1|.                                    */
+    /*  End of for-loop computing |y0-y1|.                                    */
 
     /*  Print out the error to 16 decimals (assumes 64-bit precision).        */
     printf("Max Error: %.16f\n", max_err);
@@ -139,7 +144,7 @@ int main(void)
 /*  End of main.                                                              */
 
 /*  This was compiled with various options on an iMac 2017 3.4GHz quad-core   *
- *  running MacOS Catalina 10.15.7. It produces the following times:          *
+ *  running MacOS Catalina 10.15.7. It produced the following times:          *
  *      NOTE: On MacOS gcc is aliased to LLVM's clang:                        *
  *          gcc --version                                                     *
  *          Apple clang version 12.0.0 (clang-1200.0.32.27)                   *
@@ -151,13 +156,13 @@ int main(void)
  *      C99:          0.513468                                                *
  *      rss_ringoccs: 0.537242                                                *
  *      Max Error: 0.0000000000000000                                         *
- *  c89 option, O2 optimization.                                              *
+ *  c89 option, -O2 optimization.                                             *
  *      gcc -O2 -Wall -Wextra -Wpedantic -pedantic -std=c89                   *
  *              -ansi abs_time_test.c -o test -lrssringoccs                   *
  *      C99:          0.264355                                                *
  *      rss_ringoccs: 0.449514                                                *
  *      Max Error: 0.0000000000000000                                         *
- *  c89 option, O3 optimization:                                              *
+ *  c89 option, -O3 optimization:                                             *
  *      gcc -O2 -Wall -Wextra -Wpedantic -pedantic -std=c89                   *
  *              -ansi abs_time_test.c -o test -lrssringoccs                   *
  *      C99:          0.268884                                                *

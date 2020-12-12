@@ -17,55 +17,36 @@
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
  *  Purpose:                                                                  *
- *      Provides an example of using the complex cosine function.             *
+ *      Plot the scaled complementary error function erfcx(x)                 *
  ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
  *  Date:       December 11, 2020                                             *
  ******************************************************************************/
 
-/*  Let's compute the complex cosine of the values pi, i pi, and 0.           */
-
-/*  Complex cosine is declared here.                                          */
-#include <rss_ringoccs/include/rss_ringoccs_complex.h>
-
-/*  rssringoccs_One_Pi is defined here.                                       */
+/*  The absolute value function is found here.                                */
 #include <rss_ringoccs/include/rss_ringoccs_math.h>
 
-/*  We'll use stdio to print the results.                                     */
-#include <stdio.h>
+/*  Plotting routines defined here.                                           */
+#include <rss_ringoccs/include/rss_ringoccs_ppm_plot.h>
 
-/*  Routine for computing the complex cosine of 0, i pi, and pi.              */
+/*  Routine for plotting the scaled complementary error function.             */
 int main(void)
 {
-    /*  Declare necessary variables. C89 requires declarations at the top.    */
-    rssringoccs_ComplexDouble z[3];
-    rssringoccs_ComplexDouble w[3];
-    double re_z, im_z, re_w, im_w;
+    /* Values for the min and max of the x and y axes.                        */
+    double x_min = -0.6;
+    double x_max =  4.2;
+    double y_min = -0.6;
+    double y_max =  1.8;
 
-    /*  And declare a variable for indexing.                                  */
-    int n;
+    /*  The number of pixels in the x axes.                                   */
+    const unsigned int x_size = 4*1024;
 
-    /*  Set z0, z1, and z2 to 0, i pi, and pi, respectively.                  */
-    z[0] = rssringoccs_CDouble_Zero;
-    z[1] = rssringoccs_CDouble_Rect(0.0, rssringoccs_One_Pi);
-    z[2] = rssringoccs_CDouble_Rect(rssringoccs_One_Pi, 0.0);
+    /*  The number of pixels in the y axes.                                   */
+    const unsigned int y_size = 2*1024;
 
-    /*  Loop over the results and print them.                                 */
-    for (n=0; n<3; ++n)
-    {
-        /*  Compute the complex cosine of the nth value.                      */
-        w[n] = rssringoccs_CDouble_Cos(z[n]);
-
-        /*  Extract the real and imaginary parts from z[n] and w[n].          */
-        re_z = rssringoccs_CDouble_Real_Part(z[n]);
-        im_z = rssringoccs_CDouble_Imag_Part(z[n]);
-        re_w = rssringoccs_CDouble_Real_Part(w[n]);
-        im_w = rssringoccs_CDouble_Imag_Part(w[n]);
-
-        /*  And finally, print the result to the screen.                      */
-        printf("cos(%f + i%f) = %f + i%f\n", re_z, im_z, re_w, im_w);
-    }
-    /*  End of for loop computing cos(z).                                     */
+    /*  Plot the figure using the rss_ringoccs ppm_plot routines.             */
+    rssringoccs_Easy_Real_Plots("erfcx", rssringoccs_Double_Erfcx,
+                                 x_size, y_size, x_min, x_max, y_min, y_max);
 
     return 0;
 }
@@ -74,25 +55,22 @@ int main(void)
 /******************************************************************************
  *  We can compile this with:                                                 *
  *                                                                            *
- *      gcc complex_cos_example.c -o test -lrssringoccs                       *
+ *      gcc erfcx_plot.c -o test -lrssringoccs                                *
  *                                                                            *
  *  If librssringoccs is not in /usr/local/lib/ (this is the default          *
- *  location it is placed in when built via config_librssringoccs.sh), change *
+ *  location it is placed in when built via config_src.sh), then change       *
  *  the -L option to the correct location. If /usr/local/include/ is not in   *
  *  your path, add the -I option as follows:                                  *
  *                                                                            *
  *      gcc -I/usr/local/include/ -L/usr/local/lib/                           *
- *              complex_cos_example.c -o test -lrssringoccs                   *
+ *              erfcx_plot.c -o test -lrssringoccs                            *
  *                                                                            *
- *  This example is also C89 compliant and compiles with the following flags: *
+ *  Running ./test will generate the figure erfcx_plot.pgm which you can view *
+ *  using your favorite image tool. MacOS preview works via open filename.pgm *
+ *  and gio works on Linux distributions via gio open filename.pgm.           *
  *                                                                            *
- *      gcc -Wconversion -pedantic -Wall -Wextra -std=c89 -ansi               *
- *          -Wpedantic complex_cos_example.c -o test -lrssringoccs            *
- *                                                                            *
- *  Note, this should all be one line. This outputs an executable "test".     *
- *  Running the executable with ./test, this outputs:                         *
- *      cos(0.000000 + i0.000000) = 1.000000 + i-0.000000                     *
- *      cos(0.000000 + i3.141593) = 11.591953 + i-0.000000                    *
- *      cos(3.141593 + i0.000000) = -1.000000 + i-0.000000                    *
- *  In agreement with known values of the complex cosine.                     *
+ *  This has been tested with several flags to check for strict compliance to *
+ *  the C89 standard. The following compiles on gcc and clang:                *
+ *      gcc -pedantic -Wall -Wextra -pedantic-errors -std=c89                 *
+ *          -ansi -O3 erfcx_plot.c -o test -lrssringoccs                      *
  ******************************************************************************/

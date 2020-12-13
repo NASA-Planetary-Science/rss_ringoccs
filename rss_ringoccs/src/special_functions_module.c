@@ -19,6 +19,8 @@
  *  simple. It contains Bessel, Fresnel, and Lambert functions, as well as    *
  *  some physics-based conversion functions (frequency-to-wavelength, etc.).  */
 #include <rss_ringoccs/include/rss_ringoccs_special_functions.h>
+#include <rss_ringoccs/include/rss_ringoccs_math.h>
+#include <rss_ringoccs/include/rss_ringoccs_fft.h>
 
 /*---------------------------DEFINE PYTHON FUNCTIONS--------------------------*
  *  This contains the Numpy-C and Python-C API parts that allow for the above *
@@ -158,7 +160,7 @@ static PyObject * FuncName(PyObject *self, PyObject *args)                     \
     if (PyLong_Check(x) || PyFloat_Check(x))                                   \
     {                                                                          \
         x_val = PyFloat_AsDouble(x);                                           \
-        y_val = CName##_Double(x_val);                                         \
+        y_val = rssringoccs_Double_##CName(x_val);                             \
         return PyFloat_FromDouble(y_val);                                      \
     }                                                                          \
     else if (PyList_Check(x))                                                  \
@@ -180,7 +182,7 @@ static PyObject * FuncName(PyObject *self, PyObject *args)                     \
             }                                                                  \
                                                                                \
             x_val = PyFloat_AsDouble(nth_item);                                \
-            y_val = CName##_Double(x_val);                                     \
+            y_val = rssringoccs_Double_##CName(x_val);                         \
             PyList_SET_ITEM(output, n, PyFloat_FromDouble(y_val));             \
         }                                                                      \
         return output;                                                         \
@@ -222,11 +224,13 @@ static PyObject * FuncName(PyObject *self, PyObject *args)                     \
     }                                                                          \
                                                                                \
     if (typenum == NPY_FLOAT)                                                  \
-        out = _get_array_from_one_float(data, dim, CName##_Float);             \
+        out = _get_array_from_one_float(data, dim, rssringoccs_Float_##CName); \
     else if (typenum == NPY_DOUBLE)                                            \
-        out = _get_array_from_one_double(data, dim, CName##_Double);           \
+        out = _get_array_from_one_double(data, dim,                            \
+                                         rssringoccs_Double_##CName);          \
     else if (typenum == NPY_LONGDOUBLE)                                        \
-        out = _get_array_from_one_longdouble(data, dim, CName##_LongDouble);   \
+        out = _get_array_from_one_longdouble(data, dim,                        \
+                                             rssringoccs_LDouble_##CName);     \
     else                                                                       \
     {                                                                          \
         /*  Try to convert the input numpy array to double and compute.      */\
@@ -249,7 +253,8 @@ static PyObject * FuncName(PyObject *self, PyObject *args)                     \
             data = PyArray_DATA((PyArrayObject *)new_x);                       \
                                                                                \
         /*  loop over the data and compute with CName_Double.                */\
-        out = _get_array_from_one_double(data, dim, CName##_Double);           \
+        out = _get_array_from_one_double(data, dim,                            \
+                                         rssringoccs_Double_##CName);          \
         typenum = NPY_DOUBLE;                                                  \
     }                                                                          \
                                                                                \
@@ -263,9 +268,6 @@ static PyObject * FuncName(PyObject *self, PyObject *args)                     \
     return Py_BuildValue("N", output);                                         \
 }
 
-#ifdef WindowFunctionForNumpy
-#undef WindowFunctionForNumpy
-#endif
 #define WindowFunctionForNumpy(FuncName, CName)                                \
 static PyObject * FuncName(PyObject *self, PyObject *args)                     \
 {                                                                              \
@@ -302,7 +304,7 @@ static PyObject * FuncName(PyObject *self, PyObject *args)                     \
     if (PyLong_Check(x) || PyFloat_Check(x))                                   \
     {                                                                          \
         x_val = PyFloat_AsDouble(x);                                           \
-        y_val = CName##_Double(x_val, W);                                      \
+        y_val = rssringoccs_Double_##CName(x_val, W);                          \
         return PyFloat_FromDouble(y_val);                                      \
     }                                                                          \
     else if (PyList_Check(x))                                                  \
@@ -324,7 +326,7 @@ static PyObject * FuncName(PyObject *self, PyObject *args)                     \
             }                                                                  \
                                                                                \
             x_val = PyFloat_AsDouble(nth_item);                                \
-            y_val = CName##_Double(x_val, W);                                  \
+            y_val = rssringoccs_Double_##CName(x_val, W);                      \
             PyList_SET_ITEM(output, n, PyFloat_FromDouble(y_val));             \
         }                                                                      \
         return output;                                                         \
@@ -366,12 +368,14 @@ static PyObject * FuncName(PyObject *self, PyObject *args)                     \
     }                                                                          \
                                                                                \
     if (typenum == NPY_FLOAT)                                                  \
-        out = _get_array_from_two_float(data, W, dim, CName##_Float);          \
+        out = _get_array_from_two_float(data, W, dim,                          \
+                                        rssringoccs_Float_##CName);            \
     else if (typenum == NPY_DOUBLE)                                            \
-        out = _get_array_from_two_double(data, W, dim, CName##_Double);        \
+        out = _get_array_from_two_double(data, W, dim,                         \
+                                         rssringoccs_Double_##CName);          \
     else if (typenum == NPY_LONGDOUBLE)                                        \
         out = _get_array_from_two_longdouble(data, W, dim,                     \
-                                              CName##_LongDouble);             \
+                                              rssringoccs_LDouble_##CName);    \
     else                                                                       \
     {                                                                          \
         /*  Try to convert the input numpy array to double and compute.      */\
@@ -394,7 +398,8 @@ static PyObject * FuncName(PyObject *self, PyObject *args)                     \
             data = PyArray_DATA((PyArrayObject *)new_x);                       \
                                                                                \
         /*  loop over the data and compute with CName_Double.                */\
-        out = _get_array_from_two_double(data, W, dim, CName##_Double);        \
+        out = _get_array_from_two_double(data, W, dim,                         \
+                                         rssringoccs_Double_##CName);          \
         typenum = NPY_DOUBLE;                                                  \
     }                                                                          \
                                                                                \
@@ -454,7 +459,7 @@ static PyObject * FuncName(PyObject *self, PyObject *args)                     \
     if (PyLong_Check(x) || PyFloat_Check(x))                                   \
     {                                                                          \
         x_val = PyFloat_AsDouble(x);                                           \
-        y_val = CName##_Double(x_val, W, alpha);                               \
+        y_val = rssringoccs_Double_##CName(x_val, W, alpha);                   \
         return PyFloat_FromDouble(y_val);                                      \
     }                                                                          \
     else if (PyList_Check(x))                                                  \
@@ -476,7 +481,7 @@ static PyObject * FuncName(PyObject *self, PyObject *args)                     \
             }                                                                  \
                                                                                \
             x_val = PyFloat_AsDouble(nth_item);                                \
-            y_val = CName##_Double(x_val, W, alpha);                           \
+            y_val = rssringoccs_Double_##CName(x_val, W, alpha);               \
             PyList_SET_ITEM(output, n, PyFloat_FromDouble(y_val));             \
         }                                                                      \
         return output;                                                         \
@@ -518,13 +523,14 @@ static PyObject * FuncName(PyObject *self, PyObject *args)                     \
     }                                                                          \
                                                                                \
     if (typenum == NPY_FLOAT)                                                  \
-        out = _get_array_from_three_float(data, W, alpha, dim, CName##_Float); \
+        out = _get_array_from_three_float(data, W, alpha, dim,                 \
+                                         rssringoccs_Float_##CName);           \
     else if (typenum == NPY_DOUBLE)                                            \
-        out = _get_array_from_three_double(data, W, alpha,                     \
-                                           dim, CName##_Double);               \
+        out = _get_array_from_three_double(data, W, alpha, dim,                \
+                                           rssringoccs_Double_##CName);        \
     else if (typenum == NPY_LONGDOUBLE)                                        \
         out = _get_array_from_three_longdouble(data, W, alpha, dim,            \
-                                                CName##_LongDouble);           \
+                                               rssringoccs_LDouble_##CName);   \
     else                                                                       \
     {                                                                          \
         /*  Try to convert the input numpy array to double and compute.      */\
@@ -548,7 +554,7 @@ static PyObject * FuncName(PyObject *self, PyObject *args)                     \
                                                                                \
         /*  loop over the data and compute with CName_Double.                */\
         out = _get_array_from_three_double(data, W, alpha,                     \
-                                           dim, CName##_Double);               \
+                                           dim, rssringoccs_Double_##CName);   \
         typenum = NPY_DOUBLE;                                                  \
     }                                                                          \
                                                                                \
@@ -614,7 +620,7 @@ static PyObject *FuncName(PyObject *self, PyObject *args)                      \
             return PyFloat_FromDouble(CName##_Double((double *)data, dim));    \
         else if (typenum == NPY_LONGDOUBLE)                                    \
             return PyFloat_FromDouble(                                         \
-                CName##_LongDouble((long double *)data, dim)                   \
+                CName##_LDouble((long double *)data, dim)                      \
             );                                                                 \
         else if (typenum == NPY_BYTE)                                          \
             return PyLong_FromLong(CName##_Char((char *)data, dim));           \
@@ -657,29 +663,26 @@ static PyObject *FuncName(PyObject *self, PyObject *args)                      \
 
 /*  Generate the code for the functions. These preprocessor functions are     *
  *  defined in special_functions.h.                                           */
-OneVarFunctionForNumpy(besselJ0, rssringoccs_Bessel_J0)
-OneVarFunctionForNumpy(besselI0, rssringoccs_Bessel_I0)
-OneVarFunctionForNumpy(sinc, rssringoccs_Sinc)
-OneVarFunctionForNumpy(fresnel_sin, rssringoccs_Fresnel_Sin)
-OneVarFunctionForNumpy(fresnel_cos, rssringoccs_Fresnel_Cos)
-OneVarFunctionForNumpy(lambertw, rssringoccs_LambertW)
-OneVarFunctionForNumpy(wavelength_to_wavenumber,
-                       rssringoccs_Wavelength_To_Wavenumber)
+OneVarFunctionForNumpy(besselJ0,                 Bessel_J0)
+OneVarFunctionForNumpy(besselI0,                 Bessel_I0)
+OneVarFunctionForNumpy(sinc,                     Sinc)
+OneVarFunctionForNumpy(fresnel_sin,              Fresnel_Sin)
+OneVarFunctionForNumpy(fresnel_cos,              Fresnel_Cos)
+OneVarFunctionForNumpy(lambertw,                 LambertW)
+OneVarFunctionForNumpy(wavelength_to_wavenumber, Wavelength_To_Wavenumber)
+OneVarFunctionForNumpy(frequency_to_wavelength,  Frequency_To_Wavelength)
+OneVarFunctionForNumpy(resolution_inverse,       Resolution_Inverse)
 
-OneVarFunctionForNumpy(frequency_to_wavelength,
-                       rssringoccs_Frequency_To_Wavelength)
-OneVarFunctionForNumpy(resolution_inverse, rssringoccs_Resolution_Inverse)
-
-WindowFunctionForNumpy(rect, rssringoccs_Rect_Window)
-WindowFunctionForNumpy(coss, rssringoccs_Coss_Window)
-WindowFunctionForNumpy(kb20, rssringoccs_Kaiser_Bessel_2_0)
-WindowFunctionForNumpy(kb25, rssringoccs_Kaiser_Bessel_2_5)
-WindowFunctionForNumpy(kb35, rssringoccs_Kaiser_Bessel_3_5)
-WindowFunctionForNumpy(kbmd20, rssringoccs_Modified_Kaiser_Bessel_2_0)
-WindowFunctionForNumpy(kbmd25, rssringoccs_Modified_Kaiser_Bessel_2_5)
-WindowFunctionForNumpy(kbmd35, rssringoccs_Modified_Kaiser_Bessel_3_5)
-WindowFunctionAlForNumpy(kbal, rssringoccs_Kaiser_Bessel)
-WindowFunctionAlForNumpy(kbmdal, rssringoccs_Modified_Kaiser_Bessel)
+WindowFunctionForNumpy(rect,   Rect_Window)
+WindowFunctionForNumpy(coss,   Coss_Window)
+WindowFunctionForNumpy(kb20,   Kaiser_Bessel_2_0)
+WindowFunctionForNumpy(kb25,   Kaiser_Bessel_2_5)
+WindowFunctionForNumpy(kb35,   Kaiser_Bessel_3_5)
+WindowFunctionForNumpy(kbmd20, Modified_Kaiser_Bessel_2_0)
+WindowFunctionForNumpy(kbmd25, Modified_Kaiser_Bessel_2_5)
+WindowFunctionForNumpy(kbmd35, Modified_Kaiser_Bessel_3_5)
+WindowFunctionAlForNumpy(kbal, Kaiser_Bessel)
+WindowFunctionAlForNumpy(kbmdal, Modified_Kaiser_Bessel)
 MinMaxFunctionForNumpy(min, rssringoccs_Min)
 MinMaxFunctionForNumpy(max, rssringoccs_Max)
 
@@ -758,15 +761,7 @@ static PyObject *fft(PyObject *self, PyObject *args)
     /*  Get a pointer to the actual data from the array. Allocate memory for  *
      *  the data of the output numpy array, which we'll call T_hat.           */
     in  = (rssringoccs_ComplexDouble *)PyArray_DATA((PyArrayObject *)arr);
-    out = malloc(sizeof(*out) * dim);
-
-    /*  If dim is a power of two, we can use the basic Cooley-Tukey FFT.      */
-    if ((dim & (dim-1)) == 0)
-        out = rssringoccs_FFT_Cooley_Tukey_ComplexDouble(in, dim, inverse);
-
-    /*  If not, we resort the Bluestein's Chirp Z transform for the FFT.      */
-    else
-        out = rssringoccs_FFT_Bluestein_Chirp_Z_ComplexDouble(in, dim, inverse);
+    out = rssringoccs_Complex_FFT(in, dim, inverse);
 
     /*  Set the output and capsule, ensuring no memory leaks occur.           */
     output = PyArray_SimpleNewFromData(1, &dim, NPY_CDOUBLE, (void *)out);
@@ -786,9 +781,8 @@ static PyObject *compute_norm_eq(PyObject *self, PyObject *args)
 
     if (PyLong_Check(tuple)){
         long normeq;
-        if (PyArg_ParseTuple(args, "l", &normeq)){
+        if (PyArg_ParseTuple(args, "l", &normeq))
             return PyLong_FromLong(normeq);
-        }
         else {
             PyErr_Format(
                 PyExc_TypeError,
@@ -848,7 +842,7 @@ static PyObject *compute_norm_eq(PyObject *self, PyObject *args)
         }
         else if (typenum == NPY_LONGDOUBLE){
             return PyFloat_FromDouble(
-                rssringoccs_Normeq_LongDouble((long double *)data, dim)
+                rssringoccs_Normeq_LDouble((long double *)data, dim)
             );
         }
         else if (typenum == NPY_SHORT){
@@ -978,7 +972,7 @@ static PyObject *where_greater(PyObject *self, PyObject *args)
                 break;
             case NPY_LONGDOUBLE:
                 where =
-                rssringoccs_Where_Greater_LongDouble((long double *)data, dim, threshold);
+                rssringoccs_Where_Greater_LDouble((long double *)data, dim, threshold);
                 break;
             default:
                 PyErr_Format(
@@ -1113,7 +1107,7 @@ static PyObject *where_lesser(PyObject *self, PyObject *args)
         }
         else if (typenum == NPY_LONGDOUBLE){
             long double *data = (long double *)PyArray_DATA(arr);
-            where = rssringoccs_Where_Lesser_LongDouble(data, dim, threshold);
+            where = rssringoccs_Where_Lesser_LDouble(data, dim, threshold);
         }
         else {
             /*  If he input is not a numpy array, return to Python with an error. */
@@ -1166,7 +1160,7 @@ static PyObject *window_norm(PyObject *self, PyObject *args){
         double ker;
         PyArg_ParseTuple(args, "ddd", &ker, &dx, &f_scale);
         return PyFloat_FromDouble(
-            rssringoccs_Window_Normalization_Double(&ker, 1, dx, f_scale)
+            rssringoccs_Double_Window_Normalization(&ker, 1, dx, f_scale)
         );
     }
     else if (PyArg_ParseTuple(args, "O!dd", &PyArray_Type,
@@ -1189,24 +1183,24 @@ static PyObject *window_norm(PyObject *self, PyObject *args){
 
         if (typenum == NPY_CDOUBLE){
             return PyFloat_FromDouble(
-                rssringoccs_Window_Normalization_ComplexDouble(
+                rssringoccs_Complex_Window_Normalization(
                     (rssringoccs_ComplexDouble *)data, dim, dx, f_scale
                 )
             );
         }
         else if (typenum == NPY_FLOAT){
             return PyFloat_FromDouble(
-                rssringoccs_Window_Normalization_Float((float *)data, dim, dx, f_scale)
+                rssringoccs_Float_Window_Normalization((float *)data, dim, dx, f_scale)
             );
         }
         else if (typenum == NPY_DOUBLE){
             return PyFloat_FromDouble(
-                rssringoccs_Window_Normalization_Double((double *)data, dim, dx, f_scale)
+                rssringoccs_Double_Window_Normalization((double *)data, dim, dx, f_scale)
             );
         }
         else if (typenum == NPY_LONGDOUBLE){
             return PyFloat_FromDouble(
-                rssringoccs_Window_Normalization_LongDouble((long double *)data,
+                rssringoccs_LDouble_Window_Normalization((long double *)data,
                                                 dim, dx, f_scale)
             );
         }
@@ -1215,7 +1209,7 @@ static PyObject *window_norm(PyObject *self, PyObject *args){
                  (typenum == NPY_LONG)      || (typenum == NPY_ULONG))
         {
             return PyFloat_FromDouble(
-                rssringoccs_Window_Normalization_Double((double *)data, dim, dx, f_scale)
+                rssringoccs_Double_Window_Normalization((double *)data, dim, dx, f_scale)
             );
         }
         else {

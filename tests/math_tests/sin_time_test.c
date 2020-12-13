@@ -18,14 +18,19 @@
  ******************************************************************************
  *  Purpose:                                                                  *
  *      Provide tests for the accuracy and efficiency of rss_ringoccs         *
- *      absolute value function at long double precision compared to the one  *
- *      provided by the C99 standard in math.h.                               *
+ *      absolute value function compared to the one provided by the C99       *
+ *      standard in math.h.                                                   *
+ *  NOTE:                                                                     *
+ *      If rss_ringoccs was built with the macro                              *
+ *      __RSS_RINGOCCS_USE_TRIG_ALGORITHMS__ was set to 0 in                  *
+ *      rss_ringoccs_config.h, then this test is redundant since sin and      *
+ *      rssringoccs_Double_Sin are the same thing.                            *
  ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
  *  Date:       December 11, 2020                                             *
  ******************************************************************************/
 
-/*  The absolute value functions are found here.                              */
+/*  The sine functions are found here.                                        */
 #include <rss_ringoccs/include/rss_ringoccs_math.h>
 #include <math.h>
 
@@ -46,20 +51,20 @@
  *      We can then link via -lrssringoccs_compare (see below).               */
 #include "../rss_ringoccs_compare_funcs.h"
 
-/*  Routine for comparing fabsl with rssringoccs_LDouble_Abs.                 */
+/*  Routine for comparing fabs with rssringoccs_Double_Abs.                   */
 int main(void)
 {
     /*  Set the start and end for the values we're testing.                   */
-    long double start = -100.0L;
-    long double end   =  100.0L;
+    double start = -100.0;
+    double end   =  100.0;
 
     /*  We'll test on 100 million points between start and end.               */
     unsigned long N = 1e8;
 
     /*  Use the compare function to test rssringoccs_Double_Abs against fabs. */
-    rssringoccs_Compare_LDouble_Funcs("C99", fabsl,
-                                      "rss_ringoccs", rssringoccs_LDouble_Abs,
-                                      start, end, N);
+    rssringoccs_Compare_Double_Funcs("C99", sin,
+                                     "rss_ringoccs", rssringoccs_Double_Sin,
+                                     start, end, N);
 
     return 0;
 }
@@ -72,18 +77,18 @@ int main(void)
  *          Apple clang version 12.0.0 (clang-1200.0.32.27)                   *
  *      This is NOT the regular gcc from GNU. To use gcc on apple devices     *
  *      requires homebrew.                                                    *
- *  c99 option, -O3 opimization:                                              *
- *      gcc -Wall -Wextra -Wpedantic -Wconversion -std=c99 -O3                *
- *              absl_time_test.c -o test -lrssringoccs -lrssringoccs_compare  *
- *      C99:          1.319463                                                *
- *      rss_ringoccs: 1.430057                                                *
- *      Max Error: 0.000000000000000000000000                                 *
- *  c99 option, no optimization.                                              *
- *      gcc -pedantic -Wall -Wextra -Wpedantic -Wconversion -std=c99          *
- *              absl_time_test.c -o test -lrssringoccs -lrssringoccs_compare  *
- *      C99:          1.352705                                                *
- *      rss_ringoccs: 1.465069                                                *
- *      Max Error: 0.000000000000000000000000                                 *
+ *  c89 option, -O3 opimization:                                              *
+ *      gcc -Wall -Wextra -Wpedantic -Wconversion -std=c89 -ansi -O3          *
+ *              sin_time_test.c -o test -lrssringoccs -lrssringoccs_compare   *
+ *      C99:          1.299570                                                *
+ *      rss_ringoccs: 1.321913                                                *
+ *      Max Error: 0.0000000000000000                                         *
+ *  c89 option, no optimization.                                              *
+ *      gcc -pedantic -Wall -Wextra -Wpedantic -Wconversion -std=c89 -ansi    *
+ *              sin_time_test.c -o test -lrssringoccs -lrssringoccs_compare   *
+ *      C99:          0.563751                                                *
+ *      rss_ringoccs: 0.612806                                                *
+ *      Max Error: 0.0000000000000000                                         *
  *  NOTE:                                                                     *
  *      These times will differ on different devices and on different         *
  *      compilers.                                                            */

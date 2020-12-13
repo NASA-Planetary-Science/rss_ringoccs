@@ -9,28 +9,66 @@
 /*  Prototypes for these functions declared here.                             */
 #include <rss_ringoccs/include/rss_ringoccs_special_functions.h>
 
-#define _define_coss_window(type, Type)                                        \
-type rssringoccs_##Type##_Coss_Window(type x, type W)                          \
-{                                                                              \
-    /*  Declare necessary variables. C89 requires declaring these at the top.*/\
-    type abs_x, coss_x;                                                        \
-                                                                               \
-    /*  Get the absolute value of x.                                         */\
-    abs_x = rssringoccs_##Type##_Abs(x);                                       \
-                                                                               \
-    /*  Compute the cosine squared window function.                          */\
-    if (abs_x <= W/2.0)                                                        \
-    {                                                                          \
-        abs_x *= rssringoccs_One_Pi/W;                                                     \
-        coss_x = rssringoccs_##Type##_Cos(abs_x);                              \
-        coss_x *= coss_x;                                                      \
-    }                                                                          \
-    else                                                                       \
-        coss_x = 0.0;                                                          \
-                                                                               \
-    return coss_x;                                                             \
+
+float rssringoccs_Float_Coss_Window(float x, float W)
+{
+    /*  Declare necessary variables. C89 requires declaring these at the top. */
+    float abs_x, coss_x, arg;
+
+    /*  Get the absolute value of x.                                          */
+    abs_x = rssringoccs_Float_Abs(x);
+
+    /*  Compute the cosine squared window function.                           */
+    if (abs_x <= W/2.0F)
+    {
+        arg    = abs_x * rssringoccs_One_Pi_F/W;
+        coss_x = rssringoccs_Float_Cos(arg);
+        coss_x *= coss_x;
+    }
+    else
+        coss_x = 0.0F;
+
+    return coss_x;
 }
 
-_define_coss_window(float, Float)
-_define_coss_window(double, Double)
-_define_coss_window(long double, LDouble)
+double rssringoccs_Double_Coss_Window(double x, double W)
+{
+    /*  Declare necessary variables. C89 requires declaring these at the top. */
+    double abs_x, coss_x, arg;
+
+    /*  Get the absolute value of x.                                          */
+    abs_x = rssringoccs_Double_Abs(x);
+
+    /*  Compute the cosine squared window function.                           */
+    if (abs_x <= W/2.0)
+    {
+        arg    = abs_x * rssringoccs_One_Pi/W;
+        coss_x = rssringoccs_Double_Cos(arg);
+        coss_x *= coss_x;
+    }
+    else
+        coss_x = 0.0;
+
+    return coss_x;
+}
+
+long double rssringoccs_LDouble_Coss_Window(long double x, long double W)
+{
+    /*  Declare necessary variables. C89 requires declaring these at the top. */
+    long double abs_x, coss_x, arg;
+
+    /*  Get the absolute value of x.                                          */
+    abs_x = rssringoccs_LDouble_Abs(x);
+
+    /*  Compute the cosine squared window function.                           */
+    if (abs_x <= W/2.0L)
+    {
+        arg    = abs_x * rssringoccs_One_Pi_L/W;
+        coss_x = rssringoccs_LDouble_Cos(arg);
+        coss_x *= coss_x;
+    }
+    else
+        coss_x = 0.0L;
+
+    return coss_x;
+}

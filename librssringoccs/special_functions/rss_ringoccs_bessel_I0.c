@@ -147,19 +147,19 @@
 static unsigned int __taylor_float_deg = 16;
 static unsigned int __asym_float_deg = 4;
 static float __taylor_float[17] = {
-    1.0f,                                 0.25f,
-    1.56250e-2f,                          4.34027777777777777777777777778e-4f,
-    6.78168402777777777777777777778e-6f,  6.78168402777777777777777777778e-8f,
-    4.70950279706790123456790123457e-10f, 2.40280754952443940539178634417e-12f,
-    9.38596699032984142731166540690e-15f, 2.89690339207711155163940290337e-17f,
-    7.24225848019277887909850725841e-20f, 1.49633439673404522295423703686e-22f,
-    2.59780277210771740096221707789e-25f, 3.84290350903508491266600159451e-28f,
-    4.90166263907536340901275713585e-31f, 5.44629182119484823223639681761e-34f,
-    5.31864435663559397679335626720e-37f
+    1.0F,                                 0.25F,
+    1.56250e-2F,                          4.34027777777777777777777777778e-4F,
+    6.78168402777777777777777777778e-6F,  6.78168402777777777777777777778e-8F,
+    4.70950279706790123456790123457e-10F, 2.40280754952443940539178634417e-12F,
+    9.38596699032984142731166540690e-15F, 2.89690339207711155163940290337e-17F,
+    7.24225848019277887909850725841e-20F, 1.49633439673404522295423703686e-22F,
+    2.59780277210771740096221707789e-25F, 3.84290350903508491266600159451e-28F,
+    4.90166263907536340901275713585e-31F, 5.44629182119484823223639681761e-34F,
+    5.31864435663559397679335626720e-37F
 };
 
 static float __asym_float[5] = {
-    1.0f, 0.1250f, 0.07031250f, 0.07324218750f, 0.1121520996093750f
+    1.0F, 0.1250F, 0.07031250F, 0.07324218750F, 0.1121520996093750F
 };
 
 static unsigned int __taylor_double_deg = 24;
@@ -208,11 +208,11 @@ static long double __taylor_longdouble[29] = {
 };
 
 static long double __asym_longdouble[9] = {
-    1.0,                            0.1250,
-    0.07031250,                     0.07324218750,
-    0.1121520996093750,             0.2271080017089843750,
-    0.57250142097473144531250,      1.72772750258445739746093750,
-    6.07404200127348303794860839844
+    1.0L,                            0.1250L,
+    0.07031250L,                     0.07324218750L,
+    0.1121520996093750L,             0.2271080017089843750L,
+    0.57250142097473144531250L,      1.72772750258445739746093750L,
+    6.07404200127348303794860839844L
 };
 
 /*  Compute the Bessel I_0 function for a floating point number x. This       *
@@ -228,7 +228,7 @@ float rssringoccs_Float_Bessel_I0(float x)
     abs_x = rssringoccs_Float_Abs(x);
 
     /*  For small arguments, use a Taylor series to approximate I_0.          */
-    if (abs_x < 12.0)
+    if (abs_x < 12.0F)
     {
         /*  The series is in powers of x^2, so use Horner's method of         *
          *  polynomial computation with that.                                 */
@@ -246,7 +246,7 @@ float rssringoccs_Float_Bessel_I0(float x)
     else if (abs_x < rssringoccs_Max_Float_Base_E)
     {
         /*  The asymptotic expansion is in terms of 1/x.                      */
-        arg = 1.0/abs_x;
+        arg = 1.0F/abs_x;
 
         /*  Compute the polynomial term using Horner's Method.                */
         bessel_I0 = rssringoccs_Real_Poly_Float_Coeffs(
@@ -259,13 +259,13 @@ float rssringoccs_Float_Bessel_I0(float x)
          *  They are defined in rss_ringoccs_math.h. The rssringoccs_Two_Pi macros is     *
          *  defined in rss_ringoccs_math.h.                                   */
         bessel_I0 *= rssringoccs_Float_Exp(abs_x) /
-                     rssringoccs_Float_Sqrt(rssringoccs_Two_Pi*abs_x);
+                     rssringoccs_Float_Sqrt(rssringoccs_Two_Pi_F*abs_x);
     }
 
     /*  For very large inputs, return INFINITY. INFINITY is standard in C99,  *
      *  but defined in rss_ringoccs_math.h if not available.                  */
     else
-        bessel_I0 = rssringoccs_Infinity;
+        bessel_I0 = rssringoccs_Infinity_F;
 
     return bessel_I0;
 }
@@ -361,13 +361,13 @@ long double rssringoccs_LDouble_Bessel_I0(long double x)
          *  available, and exp and sqrt otherwise. They are defined in        *
          *  rss_ringoccs_math.h. rssringoccs_Two_Pi is in rss_ringoccs_math.h.            */
         bessel_I0 *= rssringoccs_LDouble_Exp(abs_x) /
-                     rssringoccs_LDouble_Sqrt(rssringoccs_Two_Pi*abs_x);
+                     rssringoccs_LDouble_Sqrt(rssringoccs_Two_Pi_L*abs_x);
     }
 
     /*  For very large inputs, return INFINITY. This is standard in C99, and  *
      *  provided in rss_ringoccs_math.h otherwise.                            */
     else
-        bessel_I0 = rssringoccs_Infinity;
+        bessel_I0 = rssringoccs_Infinity_L;
 
     return bessel_I0;
 }

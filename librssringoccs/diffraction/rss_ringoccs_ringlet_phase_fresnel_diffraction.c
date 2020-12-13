@@ -82,7 +82,7 @@ rssringoccs_Float_Ringlet_Diffraction_Phase(float x, float a, float b, float F)
     fc2 = rssringoccs_Float_Fresnel_Cos(arg2);
 
     im = rssringoccs_Sqrt_One_By_Two_Pi_F * (fs2 - fs1 -  fc2 + fc1);
-    re = 1.0 - rssringoccs_Sqrt_One_By_Two_Pi_F * (fc2 - fc1 + fs2 - fs1);
+    re = 1.0F - rssringoccs_Sqrt_One_By_Two_Pi_F * (fc2 - fc1 + fs2 - fs1);
     out = rssringoccs_Float_Arctan2(im, re);
 
     return out;
@@ -158,7 +158,7 @@ rssringoccs_LDouble_Ringlet_Diffraction_Phase(long double x, long double a,
     fc2 = rssringoccs_LDouble_Fresnel_Cos(arg2);
 
     im = rssringoccs_Sqrt_One_By_Two_Pi_L * (fs2 - fs1 -  fc2 + fc1);
-    re = 1.0 - rssringoccs_Sqrt_One_By_Two_Pi_L * (fc2 - fc1 + fs2 - fs1);
+    re = 1.0L - rssringoccs_Sqrt_One_By_Two_Pi_L * (fc2 - fc1 + fs2 - fs1);
     out = rssringoccs_LDouble_Arctan2(im, re);
 
     return out;

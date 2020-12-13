@@ -50,13 +50,13 @@ rssringoccs_Complex_FFT_Cooley_Tukey(rssringoccs_ComplexDouble *in,
     /*  If we are performing an inverse Fourier transform, the factor inside  *
      *  the exponential is 2 pi / N. Forward transform is minus this.         */
     if (inverse)
-        factor = rssringoccs_Two_Pi/N;
+        factor = rssringoccs_Two_Pi/(double)N;
     else
-        factor = -rssringoccs_Two_Pi/N;
+        factor = -rssringoccs_Two_Pi/(double)N;
 
     /*  Compute the "twiddle" factors. No idea why it's called this.          */
     for (k = 0; k<N; ++k)
-        twiddles[k] = rssringoccs_CDouble_Polar(1.0, k * factor);
+        twiddles[k] = rssringoccs_CDouble_Polar(1.0, (double)(k) * factor);
 
     /*  Set "E" pointer to point to the initial address of the "in" pointer.  */
     E = in;
@@ -109,7 +109,7 @@ rssringoccs_Complex_FFT_Cooley_Tukey(rssringoccs_ComplexDouble *in,
     /*  The inverse Fourier transform has a 1/N factor in front of the sum.   */
     if (inverse)
     {
-        factor = 1.0/N;
+        factor = 1.0/(double)N;
         for (k=0; k<N; ++k)
             out[k] = rssringoccs_CDouble_Multiply_Real(factor, out[k]);
     }

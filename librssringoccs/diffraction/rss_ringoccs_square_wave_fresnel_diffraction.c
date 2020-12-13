@@ -55,11 +55,12 @@ rssringoccs_ComplexDouble
 rssringoccs_Complex_Square_Wave_Diffraction(double x, double W,
                                             double F, unsigned int N)
 {
-    int n, N_Waves;
-    double a, b;
+    unsigned int n, N_Waves;
+    double a, b, wave_start;
     rssringoccs_ComplexDouble T_hat, summand;
 
-    a = 2*W*((long)(x/(2*W)) - N);
+    wave_start = floor(x/2.0*W);
+    a = 2.0*W*wave_start - (double)N;
 
     if (a<0)
         a=0;

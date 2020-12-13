@@ -18,14 +18,18 @@
  ******************************************************************************
  *  Purpose:                                                                  *
  *      Provide tests for the accuracy and efficiency of rss_ringoccs         *
- *      absolute value function at long double precision compared to the one  *
- *      provided by the C99 standard in math.h.                               *
+ *      sine function compared to the one provided in math.h.                 *
+ *  NOTE:                                                                     *
+ *      If rss_ringoccs was built with the macro                              *
+ *      __RSS_RINGOCCS_USE_TRIG_ALGORITHMS__ was set to 0 in                  *
+ *      rss_ringoccs_config.h, then this test is redundant since sinl and     *
+ *      rssringoccs_LDouble_Sin are the same thing.                            *
  ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
- *  Date:       December 11, 2020                                             *
+ *  Date:       December 12, 2020                                             *
  ******************************************************************************/
 
-/*  The absolute value functions are found here.                              */
+/*  The sine functions are found here.                                        */
 #include <rss_ringoccs/include/rss_ringoccs_math.h>
 #include <math.h>
 
@@ -46,7 +50,7 @@
  *      We can then link via -lrssringoccs_compare (see below).               */
 #include "../rss_ringoccs_compare_funcs.h"
 
-/*  Routine for comparing fabsl with rssringoccs_LDouble_Abs.                 */
+/*  Routine for comparing sinl with rssringoccs_LDouble_Sin.                  */
 int main(void)
 {
     /*  Set the start and end for the values we're testing.                   */
@@ -56,34 +60,12 @@ int main(void)
     /*  We'll test on 100 million points between start and end.               */
     unsigned long N = 1e8;
 
-    /*  Use the compare function to test rssringoccs_Double_Abs against fabs. */
-    rssringoccs_Compare_LDouble_Funcs("C99", fabsl,
-                                      "rss_ringoccs", rssringoccs_LDouble_Abs,
+    /*  Use the compare function to test rssringoccs_LDouble_Sin against sinl.*/
+    rssringoccs_Compare_LDouble_Funcs("C99", sinl,
+                                      "rss_ringoccs", rssringoccs_LDouble_Sin,
                                       start, end, N);
 
     return 0;
 }
 /*  End of main.                                                              */
 
-/*  This was compiled with various options on an iMac 2017 3.4GHz quad-core   *
- *  running MacOS Catalina 10.15.7. It produced the following times:          *
- *      NOTE: On MacOS gcc is aliased to LLVM's clang:                        *
- *          gcc --version                                                     *
- *          Apple clang version 12.0.0 (clang-1200.0.32.27)                   *
- *      This is NOT the regular gcc from GNU. To use gcc on apple devices     *
- *      requires homebrew.                                                    *
- *  c99 option, -O3 opimization:                                              *
- *      gcc -Wall -Wextra -Wpedantic -Wconversion -std=c99 -O3                *
- *              absl_time_test.c -o test -lrssringoccs -lrssringoccs_compare  *
- *      C99:          1.319463                                                *
- *      rss_ringoccs: 1.430057                                                *
- *      Max Error: 0.000000000000000000000000                                 *
- *  c99 option, no optimization.                                              *
- *      gcc -pedantic -Wall -Wextra -Wpedantic -Wconversion -std=c99          *
- *              absl_time_test.c -o test -lrssringoccs -lrssringoccs_compare  *
- *      C99:          1.352705                                                *
- *      rss_ringoccs: 1.465069                                                *
- *      Max Error: 0.000000000000000000000000                                 *
- *  NOTE:                                                                     *
- *      These times will differ on different devices and on different         *
- *      compilers.                                                            */

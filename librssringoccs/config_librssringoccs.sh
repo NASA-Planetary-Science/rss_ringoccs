@@ -23,7 +23,7 @@
 #   clang and gcc on both linux and mac systems using strict compiler options to
 #   ensure compliance with the ANSI standard. Changing this to a different
 #   compiler "should" work, though it hasn't been tested.
-CC=gcc
+CC=gcc-10
 
 echo -e "\nClearing older files..."
 rm -f *.so
@@ -32,8 +32,8 @@ rm -f *.o
 echo "Compiling rss_ringoccs..."
 CompilerArgs1="-std=c89 -ansi -pedantic -pedantic-errors -Wall -Wextra"
 CompilerArgs2="-Wpedantic -Wmisleading-indentation -Wmissing-field-initializers"
-CompilerArgs3="-Wmissing-prototypes -Wold-style-definition -Winit-self"
-CompilerArgs4="-Wmissing-declarations -Wconversion -Wdouble-promotion"
+CompilerArgs3="-Wmissing-prototypes -Wold-style-definition -Winit-self -Warith-conversion"
+CompilerArgs4="-Wmissing-declarations"
 CompilerArgs5="-Wstrict-prototypes -I../../ -I./ -DNDEBUG -g -fPIC -O3 -c"
 CompilerArgs="$CompilerArgs1 $CompilerArgs2 $CompilerArgs3"
 CompilerArgs="$CompilerArgs $CompilerArgs4 $CompilerArgs5"
@@ -59,6 +59,42 @@ done
 
 echo -e "\n\tCompiling geometry/"
 for filename in geometry/*.c; do
+    echo -e "\t\tCompiling: $filename"
+    $CC $CompilerArgs $filename
+done
+
+echo -e "\n\tCompiling numerical/"
+for filename in numerical/*.c; do
+    echo -e "\t\tCompiling: $filename"
+    $CC $CompilerArgs $filename
+done
+
+echo -e "\n\tCompiling fft/"
+for filename in fft/*.c; do
+    echo -e "\t\tCompiling: $filename"
+    $CC $CompilerArgs $filename
+done
+
+echo -e "\n\tCompiling fresnel_kernel/"
+for filename in fresnel_kernel/*.c; do
+    echo -e "\t\tCompiling: $filename"
+    $CC $CompilerArgs $filename
+done
+
+echo -e "\n\tCompiling diffraction/"
+for filename in diffraction/*.c; do
+    echo -e "\t\tCompiling: $filename"
+    $CC $CompilerArgs $filename
+done
+
+echo -e "\n\tCompiling special_functions/"
+for filename in special_functions/*.c; do
+    echo -e "\t\tCompiling: $filename"
+    $CC $CompilerArgs $filename
+done
+
+echo -e "\n\tCompiling reconstruction/"
+for filename in reconstruction/*.c; do
     echo -e "\t\tCompiling: $filename"
     $CC $CompilerArgs $filename
 done

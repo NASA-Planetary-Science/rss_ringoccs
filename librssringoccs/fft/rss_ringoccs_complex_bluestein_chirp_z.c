@@ -33,10 +33,6 @@ rssringoccs_Complex_FFT_Bluestein_Chirp_Z(rssringoccs_ComplexDouble *in,
     double m2_chirp_factor;
     double inverse_factor;
 
-    /*  N should be a positive integer.                                       */
-    if (N<0)
-        return NULL;
-
     chirp_size = N+N-1;
 
     /*  Now, to get the highest power of two greater than N, think of how you *
@@ -56,7 +52,7 @@ rssringoccs_Complex_FFT_Bluestein_Chirp_Z(rssringoccs_ComplexDouble *in,
         ++n;
 
         /*  We're going to set N_pow_2 to 1000...000 where there are i zeros. */
-        N_pow_2 = 1 << n;
+        N_pow_2 = 1ul << n;
     }
 
     /*  Allocate memory for x_in and chirp, which will be a power of two in   *
@@ -67,9 +63,9 @@ rssringoccs_Complex_FFT_Bluestein_Chirp_Z(rssringoccs_ComplexDouble *in,
     x_in       = malloc(sizeof(*x_in)       * N_pow_2);
 
     if (inverse)
-        chirp_factor = rssringoccs_One_Pi/N;
+        chirp_factor = rssringoccs_One_Pi/(double)N;
     else
-        chirp_factor = -rssringoccs_One_Pi/N;
+        chirp_factor = -rssringoccs_One_Pi/(double)N;
 
     /*  Set the values for the "chirp" factor, which is simply the complex    *
      *  exponential of (k^2 / 2) * (+/- 2 pi i / N). The +/- depends on       *
@@ -77,7 +73,7 @@ rssringoccs_Complex_FFT_Bluestein_Chirp_Z(rssringoccs_ComplexDouble *in,
     for (n=0; n<chirp_size; ++n)
     {
         m = n+1-N;
-        m2_chirp_factor = m*m*chirp_factor;
+        m2_chirp_factor = (double)(m*m)*chirp_factor;
         chirp[n] = rssringoccs_CDouble_Polar(1.0, m2_chirp_factor);
         rcpr_chirp[n] = rssringoccs_CDouble_Reciprocal(chirp[n]);
     }
@@ -143,7 +139,7 @@ rssringoccs_Complex_FFT_Bluestein_Chirp_Z(rssringoccs_ComplexDouble *in,
 
     if (inverse)
     {
-        inverse_factor = 1.0/N;
+        inverse_factor = 1.0/(double)N;
         for (n=0; n<N; ++n)
             out[n] = rssringoccs_CDouble_Multiply_Real(inverse_factor, out[n]);
     }

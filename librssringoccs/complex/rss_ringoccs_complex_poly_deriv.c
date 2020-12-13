@@ -17,7 +17,7 @@ rssringoccs_CDouble_Poly_Deriv_Real_Coeffs(double *coeffs,
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     rssringoccs_ComplexDouble poly;
-    double temp;
+    double temp, factor;
     unsigned int n;
 
     /*  If the input coefficient pointer is NULL, trying to access it will    *
@@ -42,19 +42,21 @@ rssringoccs_CDouble_Poly_Deriv_Real_Coeffs(double *coeffs,
     else
     {
         /*  Set poly to a_{N}*z + a_{N-1} where N is the degree.              */
-        temp = rssringoccs_Falling_Factorial(degree, deriv)*coeffs[degree];
+        factor = (double)rssringoccs_Falling_Factorial(degree, deriv);
+        temp = factor*coeffs[degree];
         poly = rssringoccs_CDouble_Multiply_Real(temp, z);
 
-        temp = rssringoccs_Falling_Factorial(degree-1, deriv)*coeffs[degree-1];
-        poly = rssringoccs_CDouble_Add_Real(temp, poly);
+        factor = (double)rssringoccs_Falling_Factorial(degree-1, deriv);
+        temp   = factor*coeffs[degree-1];
+        poly   = rssringoccs_CDouble_Add_Real(temp, poly);
 
         /*  Use Horner's method of polynomial computation.                    */
         for (n=2; n<=degree-deriv; ++n)
         {
-            poly =  rssringoccs_CDouble_Multiply(poly, z);
-            temp =  rssringoccs_Falling_Factorial(degree-n, deriv);
-            temp *= coeffs[degree-n];
-            poly =  rssringoccs_CDouble_Add_Real(temp, poly);
+            poly   =  rssringoccs_CDouble_Multiply(poly, z);
+            factor = (double)rssringoccs_Falling_Factorial(degree-n, deriv);
+            temp  *= coeffs[degree-n];
+            poly   =  rssringoccs_CDouble_Add_Real(temp, poly);
         }
     }
     return poly;

@@ -130,10 +130,15 @@ double rssringoccs_Double_Abs(double x)
 /*  Long double precision absolute value function (fabsl equivalent).         */
 long double rssringoccs_LDouble_Abs(long double x)
 {
+    /*  Declare necessary variables. C89 requires declarations at the top.    */
+    long double abs_x;
+
     /*  If x is positive return it, otherwise return its negative.            */
     if (x >= 0.0L)
-        return x;
+        abs_x = x;
     else
-        return -x;
+        abs_x = -x;
+
+    return abs_x;
 }
 /*  End of rssringoccs_LDouble_Abs.                                           */

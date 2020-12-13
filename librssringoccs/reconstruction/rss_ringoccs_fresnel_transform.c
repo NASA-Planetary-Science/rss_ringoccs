@@ -1,6 +1,7 @@
-#include <math.h>
-#include <complex.h>
-#include <rss_ringoccs_math_constants.h>
+
+#include <rss_ringoccs/include/rss_ringoccs_math.h>
+#include <rss_ringoccs/include/rss_ringoccs_complex.h>
+#include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -39,25 +40,26 @@
  *      T_out (complex double):                                               *
  *          The diffraction corrected profile.                                *
  ******************************************************************************/
-complex double Fresnel_Transform_Double(double *x_arr, complex double *T_in,
-                                        double *w_func, double F, double dx,
-                                        long n_pts, long center)
+rssringoccs_ComplexDouble
+Fresnel_Transform_Double(double *x_arr, rssringoccs_ComplexDouble *T_in,
+                         double *w_func, double F, double dx,
+                         unsigned long n_pts, unsigned long center)
 {
     /*  Declare all necessary variables. i and j are used for indexing.       */
-    long i, j;
+    unsigned long m, n;
 
     /*  rcpr_F and rcpr_F2 are the reciprocal of the Fresnel scale, and the   *
      *  square of this. x is used as the argument of the Fresnel kernel.      */
-    double x, rcpr_F, rcpr_F2;
+    double x, rcpr_F, rcpr_F2, cos_x, sin_x;
 
     /*  exp_negative_ix is used for the Fresnel kernel.                       */
-    complex double T_out, exp_negative_ix;
+    rssringoccs_ComplexDouble T_out, exp_negative_ix, integrand, arg;
 
     /*  Initialize the T_out variable to zero, so we can loop over later.     */
-    T_out = 0.0;
+    T_out = rssringoccs_CDouble_Zero;
 
     /*  From symmetry we need only compute -W/2 to zero, so start at -n_pts.  */
-    j = n_pts;
+    n = n_pts;
 
     /*  Division is more expensive than multiplication, so store the          *
      *  reciprocal of F as a variable and compute with that.                  */
@@ -65,51 +67,58 @@ complex double Fresnel_Transform_Double(double *x_arr, complex double *T_in,
     rcpr_F2 = rcpr_F*rcpr_F;
 
     /*  Use a Riemann Sum to approximate the Fresnel Inverse Integral.        */
-    for (i = 0; i<n_pts; ++i){
-        x = x_arr[i]*rcpr_F2;
+    for (m = 0; m<n_pts; ++m)
+    {
+        x = x_arr[m]*rcpr_F2;
 
         /*  Use Euler's Theorem to compute exp(-ix). Scale by window function.*/
-        exp_negative_ix = (cos(x) - _Complex_I*sin(x)) * w_func[i];
+        cos_x = rssringoccs_Double_Cos(x);
+        sin_x = rssringoccs_Double_Sin(x);
+        arg = rssringoccs_CDouble_Rect(cos_x, -sin_x);
+        exp_negative_ix = rssringoccs_CDouble_Multiply_Real(w_func[m], arg);
 
         /*  Take advantage of the symmetry of the quadratic approximation.    *
          *  This cuts the number of computations roughly in half. If the T_in *
          *  pointer does not contain at least 2*n_pts+1 points, n_pts to the  *
          *  left and n_pts to the right of the center, then this will create  *
          *  a segmentation fault, crashing the program.                       */
-        T_out += exp_negative_ix * (T_in[center - j] + T_in[center + j]);
-        j -= 1;
+        integrand = rssringoccs_CDouble_Add(T_in[center - n], T_in[center + n]);
+        integrand = rssringoccs_CDouble_Multiply(exp_negative_ix, integrand);
+        T_out = rssringoccs_CDouble_Add(T_out, integrand);
+        n -= 1;
     }
 
     /*  Add the central point in the Riemann sum. This is the center of the   *
      *  window function. That is, where w_func = 1.                           */
-    T_out += T_in[center];
+    T_out = rssringoccs_CDouble_Add(T_out, T_in[center]);
 
     /*  Multiply result by the coefficient found in the Fresnel inverse.      */
-    T_out *= (0.5+0.5*_Complex_I)*dx*rcpr_F;
+    arg   = rssringoccs_CDouble_Rect(0.5*dx*rcpr_F, 0.5*dx*rcpr_F);
+    T_out = rssringoccs_CDouble_Multiply(arg, T_out);
     return T_out;
 }
 
-complex double Fresnel_Transform_Norm_Double(double *x_arr,
-                                             complex double *T_in,
-                                             double *w_func, double F,
-                                             double dx, long n_pts, long center)
+rssringoccs_ComplexDouble
+Fresnel_Transform_Norm_Double(double *x_arr, rssringoccs_ComplexDouble *T_in,
+                              double *w_func, double F,
+                              unsigned long n_pts, unsigned long center)
 {
     /*  Declare all necessary variables. i and j are used for indexing.       */
-    long i, j;
+    unsigned long m, n;
 
     /*  rcpr_F and rcpr_F2 are the reciprocal of the Fresnel scale, and the   *
      *  square of this. x is used as the argument of the Fresnel kernel.      */
-    double x, rcpr_F, rcpr_F2;
+    double x, rcpr_F, rcpr_F2, cos_x, sin_x, abs_norm, real_norm;
 
     /*  exp_negative_ix is the Fresnel kernel, norm is the normalization.     */
-    complex double T_out, exp_negative_ix, norm;
+    rssringoccs_ComplexDouble T_out, exp_negative_ix, norm, integrand, arg;
 
     /*  Initialize T_out and norm to zero, so we can loop over later.         */
-    T_out  = 0.0;
-    norm   = 0.0;
+    T_out = rssringoccs_CDouble_Zero;
+    norm  = rssringoccs_CDouble_Zero;
 
     /*  From symmetry we need only compute -W/2 to zero, so start at -n_pts.  */
-    j = n_pts;
+    n = n_pts;
 
     /*  Division is more expensive than multiplication, so store the          *
      *  reciprical of F as a variable and compute with that.                  */
@@ -117,36 +126,45 @@ complex double Fresnel_Transform_Norm_Double(double *x_arr,
     rcpr_F2 = rcpr_F*rcpr_F;
 
     /*  Use a Riemann Sum to approximate the Fresnel Inverse Integral.        */
-    for (i = 0; i<n_pts; ++i){
-        x = x_arr[i]*rcpr_F2;
+    for (m = 0; m<n_pts; ++m)
+    {
+        x = x_arr[m]*rcpr_F2;
 
         /*  Use Euler's Theorem to compute exp(-ix). Scale by window function.*/
-        exp_negative_ix = (cos(x) - _Complex_I*sin(x)) * w_func[i];
+        cos_x = rssringoccs_Double_Cos(x);
+        sin_x = rssringoccs_Double_Sin(x);
+        arg = rssringoccs_CDouble_Rect(cos_x, -sin_x);
+        exp_negative_ix = rssringoccs_CDouble_Multiply_Real(w_func[m], arg);
 
         /*  Compute denominator portion of norm using a Riemann Sum.          */
-        norm  += 2.0*exp_negative_ix;
+        arg  = rssringoccs_CDouble_Multiply_Real(2.0, exp_negative_ix);
+        norm = rssringoccs_CDouble_Add(norm, arg);
 
         /*  Take advantage of the symmetry of the quadratic approximation.    *
          *  This cuts the number of computations roughly in half. If the T_in *
          *  pointer does not contain at least 2*n_pts+1 points, n_pts to the  *
          *  left and n_pts to the right of the center, then this will create  *
          *  a segmentation fault, crashing the program.                       */
-        T_out += exp_negative_ix * (T_in[center + j] + T_in[center - j]);
-        j -= 1;
+        integrand = rssringoccs_CDouble_Add(T_in[center - n], T_in[center + n]);
+        integrand = rssringoccs_CDouble_Multiply(exp_negative_ix, integrand);
+        T_out = rssringoccs_CDouble_Add(T_out, integrand);
+        n -= 1;
     }
 
     /*  Add the central point in the Riemann sum. This is center of the       *
      *  window function. That is, where w_func = 1.                           */
-    T_out += T_in[center];
-    norm  += 1.0;
+    T_out = rssringoccs_CDouble_Add(T_out, T_in[center]);
+    norm  = rssringoccs_CDouble_Add_Real(1.0, norm);
 
     /*  The integral in the numerator of norm evaluates to F sqrt(2). Use     *
      *  this in the calculation of the normalization. The cabs function       *
      *  computes the absolute value of complex number (defined in complex.h). */
-    norm = rssringoccs_Sqrt_Two / cabs(norm);
+    abs_norm = rssringoccs_CDouble_Abs(norm);
+    real_norm = rssringoccs_Sqrt_Two / abs_norm;
 
     /*  Multiply result by the coefficient found in the Fresnel inverse.      *
      *  The 1/F term is omitted, since the F in the norm cancels this.        */
-    T_out *= (0.5+0.5*_Complex_I)*norm;
+    arg   = rssringoccs_CDouble_Rect(0.5*real_norm, 0.5*real_norm);
+    T_out = rssringoccs_CDouble_Multiply(arg, T_out);
     return T_out;
 }

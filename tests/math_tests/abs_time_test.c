@@ -20,11 +20,6 @@
  *      Provide tests for the accuracy and efficiency of rss_ringoccs         *
  *      absolute value function compared to the one provided by the C99       *
  *      standard in math.h.                                                   *
- *  NOTE:                                                                     *
- *      If rss_ringoccs was built with C99 math.h support, i.e. the macro     *
- *      __RSS_RINGOCCS_USING_C99_MATH_H__ was set to 1 in                     *
- *      rss_ringoccs_config.h, then this test is redundant since fabs and     *
- *      rssringoccs_Double_Abs are the same thing.                            *
  ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
  *  Date:       December 11, 2020                                             *
@@ -34,14 +29,22 @@
 #include <rss_ringoccs/include/rss_ringoccs_math.h>
 #include <math.h>
 
-/*  Library for timing computations.                                          */
-#include <time.h>
-
-/*  Needed for printing the outputs.                                          */
-#include <stdio.h>
-
-/*  Needed for malloc.                                                        */
-#include <stdlib.h>
+/*  The comparison functions are found here.                                  *
+ *  NOTE:                                                                     *
+ *      You will need to compile rss_ringoccs_compare_funcs.c. This file and  *
+ *      the functions found in rss_ringoccs_compare_funcs.h are NOT found in  *
+ *      librssringoccs. We can compile via:                                   *
+ *                                                                            *
+ *          gcc -O3 -pedantic -Wall -Wconversion -Wextra -Wpedantic           *
+ *              rss_ringoccs_compare_funcs.c -shared                          *
+ *                  -o librssringoccs_compare.so                              *
+ *                                                                            *
+ *      In the examples below we placed the output file in /usr/local/lib/:   *
+ *                                                                            *
+ *          mv librssringoccs_compare.so /usr/local/lib/                      *
+ *                                                                            *
+ *      We can then link via -lrssringoccs_compare (see below).               */
+#include "../rss_ringoccs_compare_funcs.h"
 
 /*  Routine for comparing fabs with rssringoccs_Double_Abs.                   */
 int main(void)
@@ -50,95 +53,14 @@ int main(void)
     double start = -100.0;
     double end   =  100.0;
 
-    /*  Declare variables for sampling the region [start, end].               */
-    double x, dx;
+    /*  We'll test on 100 million points between start and end.               */
+    unsigned long N = 1e8;
 
-    /*  Declare variables for computing the maximum difference between fabs   *
-     *  and rssringoccs_Double_Abs.                                           */
-    double max_err = 0.0;
-    double temp;
+    /*  Use the compare function to test rssringoccs_Double_Abs against fabs. */
+    rssringoccs_Compare_Double_Funcs("C99", fabs,
+                                     "rss_ringoccs", rssringoccs_Double_Abs,
+                                     start, end, N);
 
-    /*  Declare two pointers to represent arrays for fabs(x) and              *
-     *  rssringoccs_Double_Abs(x), respectively.                              */
-    double *y0, *y1;
-
-    /*  Declare a dummy variable for indexing and a variable for the number   *
-     *  of points we're sampling in the range [start, end].                   */
-    unsigned int n;
-    unsigned int N = 1e8;
-
-    /*  Declare variables for computing computation time.                     */
-    clock_t t1, t2;
-
-    /*  We'll increment evenly throughout the region.                         */
-    dx = (end - start) / N;
-
-    /*  Allocate memory for the two pointers we've declared.                  */
-    y0 = malloc(sizeof(*y0) * N);
-    y1 = malloc(sizeof(*y1) * N);
-
-    /*  Set x to the starting value and grab the current time.                */
-    x = start;
-    t1 = clock();
-
-    /*  Perform the calculation for the C99 standard library function fabs.   */
-    for (n=0; n<N; ++n)
-    {
-        y0[n] = fabs(x);
-        x += dx;
-    }
-
-    /*  Grab the current clock time again.                                    */
-    t2 = clock();
-
-    /*  t2-t1 is the number of clock cycles that have passed between grabbing *
-     *  t1 and t2. To convert this to seconds, use the macro CLOCKS_PER_SEC   *
-     *  provided in time.h.                                                   */
-    printf("C99:          %f\n", (double)(t2-t1)/CLOCKS_PER_SEC);
-
-    /*  Restart the computation for the rss_ringoccs function.                */
-    x = start;
-
-    /*  Reset the clock.                                                      */
-    t1 = clock();
-
-    /*  Perform the computation using rssringoccs_Double_Abs instead of fabs. */
-    for (n=0; n<N; ++n)
-    {
-        y1[n] = rssringoccs_Double_Abs(x);
-        x += dx;
-    }
-
-    /*  Grab the time again.                                                  */
-    t2 = clock();
-
-    /*  Print out how long it took for rss_ringoccs to compute.               */
-    printf("rss_ringoccs: %f\n", (double)(t2-t1)/CLOCKS_PER_SEC);
-
-    /*  NOTE:                                                                 *
-     *      Without the following comparison of the two pointers y0 and y1,   *
-     *      some compilers may see the above computations as redundant with   *
-     *      optimization on, and skip them. The resulting times will be close *
-     *      to zero for both fabs and rssringoccs_Double_Abs.                 */
-
-    /*  Compute the maximum absolute error between rss_ringoccs and C99.      */
-    for (n=0; n<N; ++n)
-    {
-        /*  We'll use the standard library function to check the error.       */
-        temp = fabs(y0[n] - y1[n]);
-
-        /*  Check if the error got larger and set max_err accordingly.        */
-        if (max_err < temp)
-            max_err = temp;
-    }
-    /*  End of for-loop computing |y0-y1|.                                    */
-
-    /*  Print out the error to 16 decimals (assumes 64-bit precision).        */
-    printf("Max Error: %.16f\n", max_err);
-
-    /*  Free the pointers we've malloc'd.                                     */
-    free(y0);
-    free(y1);
     return 0;
 }
 /*  End of main.                                                              */
@@ -150,46 +72,17 @@ int main(void)
  *          Apple clang version 12.0.0 (clang-1200.0.32.27)                   *
  *      This is NOT the regular gcc from GNU. To use gcc on apple devices     *
  *      requires homebrew.                                                    *
- *  c89 option, no optimization:                                              *
- *      gcc -Wall -Wextra -Wpedantic -pedantic -std=c89                       *
- *              -ansi abs_time_test.c -o test -lrssringoccs                   *
- *      C99:          0.513468                                                *
- *      rss_ringoccs: 0.537242                                                *
+ *  c89 option, -O3 opimization:                                              *
+ *      gcc -Wall -Wextra -Wpedantic -Wconversion -std=c89 -ansi -O3          *
+ *              abs_time_test.c -o test -lrssringoccs -lrssringoccs_compare   *
+ *      C99:          0.562831                                                *
+ *      rss_ringoccs: 0.581634                                                *
  *      Max Error: 0.0000000000000000                                         *
- *  c89 option, -O2 optimization.                                             *
- *      gcc -O2 -Wall -Wextra -Wpedantic -pedantic -std=c89                   *
- *              -ansi abs_time_test.c -o test -lrssringoccs                   *
- *      C99:          0.264355                                                *
- *      rss_ringoccs: 0.449514                                                *
- *      Max Error: 0.0000000000000000                                         *
- *  c89 option, -O3 optimization:                                             *
- *      gcc -O2 -Wall -Wextra -Wpedantic -pedantic -std=c89                   *
- *              -ansi abs_time_test.c -o test -lrssringoccs                   *
- *      C99:          0.268884                                                *
- *      rss_ringoccs: 0.446283                                                *
- *      Max Error: 0.0000000000000000                                         *
- *  c99 option, no optimization.                                              *
- *       gcc  -Wall -Wextra -Wpedantic -pedantic                              *
- *              -std=c99 abs_time_test.c -o test -lrssringoccs                *
- *      C99:          0.500101                                                *
- *      rss_ringoccs: 0.528889                                                *
- *      Max Error: 0.0000000000000000                                         *
- *  c99 option, -O2 optimization:                                             *
- *      gcc -O2 -Wall -Wextra -Wpedantic -pedantic                            *
- *              -std=c99 abs_time_test.c -o test -lrssringoccs                *
- *      C99:          0.264327                                                *
- *      rss_ringoccs: 0.446251                                                *
- *      Max Error: 0.0000000000000000                                         *
- *  c99 option, -O3 optimization:                                             *
- *      gcc -O3 -Wall -Wextra -Wpedantic -pedantic                            *
- *              -std=c99 abs_time_test.c -o test -lrssringoccs                *
- *      C99:          0.268204                                                *
- *      rss_ringoccs: 0.448208                                                *
- *      Max Error: 0.0000000000000000                                         *
- *  Default, -O3 optimization.                                                *
- *      gcc -O3 abs_time_test.c -o test -lrssringoccs                         *
- *      C99:          0.284114                                                *
- *      rss_ringoccs: 0.465479                                                *
+ *  c89 option, no optimization.                                              *
+ *      gcc -pedantic -Wall -Wextra -Wpedantic -Wconversion -std=c89 -ansi    *
+ *              abs_time_test.c -o test -lrssringoccs -lrssringoccs_compare   *
+ *      C99:          0.563751                                                *
+ *      rss_ringoccs: 0.612806                                                *
  *      Max Error: 0.0000000000000000                                         *
  *  NOTE:                                                                     *
  *      These times will differ on different devices and on different         *

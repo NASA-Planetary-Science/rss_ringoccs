@@ -104,8 +104,7 @@ Fresnel_Transform_Newton_Norm_Double(double *x_arr, double *phi_arr,
                                      rssringoccs_ComplexDouble *T_in,
                                      double *w_func, double kD, double r,
                                      double B, double D, double EPS,
-                                     unsigned long toler, double dx,
-                                     double F, unsigned long n_pts,
+                                     unsigned long toler, unsigned long n_pts,
                                      unsigned long center);
 
 extern rssringoccs_ComplexDouble
@@ -174,7 +173,6 @@ Fresnel_Transform_Perturbed_Newton_Norm_Double(double *x_arr, double *phi_arr,
                                                double *w_func, double kD,
                                                double r, double B, double D,
                                                double EPS, unsigned long toler,
-                                               double dx, double F,
                                                unsigned long n_pts,
                                                unsigned long center,
                                                double perturb[5]);

@@ -25,7 +25,7 @@ int main(void)
     unsigned int maxIterations = 256;
     rssringoccs_ComplexDouble z, e, mu;
 
-    unsigned int size = 1024;
+    unsigned int size = 4*1024;
     double red, green, blue;
     unsigned char r, g, b;
 

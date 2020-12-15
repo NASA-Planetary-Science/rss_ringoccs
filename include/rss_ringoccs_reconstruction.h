@@ -86,8 +86,8 @@ extern rssringoccs_ComplexDouble
 Fresnel_Transform_Legendre_Norm_Odd_Double(double *x_arr,
                                            rssringoccs_ComplexDouble *T_in,
                                            double *w_func, double D,
-                                           double *coeffs, double dx, double F,
-                                           double kd, unsigned long n_pts,
+                                           double *coeffs, double kd,
+                                           unsigned long n_pts,
                                            unsigned char order,
                                            unsigned long center);
 

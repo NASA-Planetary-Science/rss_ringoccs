@@ -518,7 +518,7 @@ rssringoccs_CLDouble_Exp(rssringoccs_ComplexLongDouble z);
  *      to choose a different branch.                                         *
  ******************************************************************************/
 extern rssringoccs_ComplexDouble
-rssringoccs_Complex_Sqrt(rssringoccs_ComplexDouble z);
+rssringoccs_CDouble_Sqrt(rssringoccs_ComplexDouble z);
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -568,11 +568,11 @@ extern rssringoccs_ComplexLongDouble
 rssringoccs_CLDouble_Log(rssringoccs_ComplexLongDouble z);
 
 extern rssringoccs_ComplexDouble
-rssringoccs_Complex_Pow(rssringoccs_ComplexDouble z0,
+rssringoccs_CDouble_Pow(rssringoccs_ComplexDouble z0,
                         rssringoccs_ComplexDouble z1);
 
 extern rssringoccs_ComplexDouble
-rssringoccs_Complex_Real_Pow(rssringoccs_ComplexDouble z, double x);
+rssringoccs_CDouble_Real_Pow(rssringoccs_ComplexDouble z, double x);
 
 /******************************************************************************
  *  Function:                                                                 *

@@ -35,6 +35,8 @@
 /*  2D and 3D vectors are defined here, as well as the stereographic and      *
  *  inverse orthographic projections.                                         */
 #include <rss_ringoccs/include/rss_ringoccs_geometry.h>
+#include <rss_ringoccs/include/rss_ringoccs_complex.h>
+#include <rss_ringoccs/include/rss_ringoccs_ppm_plot.h>
 
 /*  This variable acts as the location of the observer looking at the sphere. *
  *  we'll perform our inverse orthographic projection about this point. Note  *
@@ -46,7 +48,7 @@ rssringoccs_ThreeVector camera_pos = {{1.0, 1.0, 1.0}};
 /*  The number of pixels in the x and y axes. If you want a higher resolution *
  *  for the output fractal, increase this number. It is best to make n*1024   *
  *  where n is some positive integer.                                         */
-int size = 1024;
+const unsigned int size = 1024;
 
 /*  Maximum number of iterations in the Newton-Raphson method before quitting.*/
 unsigned int max_iters = 32;
@@ -60,15 +62,6 @@ const unsigned int degree = 3;
 const rssringoccs_ComplexDouble ROOT_1 = {{1.0, 0.0}};
 const rssringoccs_ComplexDouble ROOT_2 = {{-0.5, +0.8660254037844386}};
 const rssringoccs_ComplexDouble ROOT_3 = {{-0.5, -0.8660254037844386}};
-
-/*  This function is used to set the current pixel of the output ppm to the   *
- *  desired color. fp is the filename we'll be using.                         */
-static void color(char red, char green, char blue, FILE *fp)
-{
-    fputc(red,   fp);
-    fputc(green, fp);
-    fputc(blue,  fp);
-}
 
 int main(void)
 {
@@ -86,7 +79,7 @@ int main(void)
     rssringoccs_ComplexDouble roots[NRoots] = {ROOT_1, ROOT_2, ROOT_3};
 
     /*  More dummy variables to loop over.                                    */
-    int x, y, n, ind;
+    unsigned int x, y, n, ind;
     double z_x, z_y, min, temp, Pz, norm;
     rssringoccs_ComplexDouble *z, root;
 
@@ -134,7 +127,7 @@ int main(void)
             z_x = x * (x_max - x_min)/(size - 1) + x_min;
 
             if ((z_x*z_x + z_y*z_y >= 1.0))
-                color((char)0, (char)0, (char)0, fp);
+                rssringoccs_Color((char)0, (char)0, (char)0, fp);
             else
             {
                 planar_Z = rssringoccs_TwoVector_Rect(z_x, z_y);
@@ -142,7 +135,7 @@ int main(void)
                 Pz = rssringoccs_ThreeVector_Z(P);
 
                 if (Pz > 0.999999)
-                    color((char)0, (char)0, (char)0, fp);
+                    rssringoccs_Color((char)0, (char)0, (char)0, fp);
                 else
                 {
                     proj_P = rssringoccs_Stereographic_Projection(P);
@@ -154,20 +147,20 @@ int main(void)
                     z = (rssringoccs_ComplexDouble *)&proj_P;
 
                     /*  Use the Newton-Raphson function to compute a root.    */
-                    root = rssringoccs_Newton_Raphson_ComplexDouble_Poly_Real(
+                    root = rssringoccs_Newton_Raphson_CDouble_Poly_Real(
                         *z, coeffs, degree, max_iters
                     );
 
                     /*  Find which root the final iteration is closest too.   */
-                    min = rssringoccs_ComplexDouble_Abs(
-                        rssringoccs_ComplexDouble_Subtract(root, roots[0])
+                    min = rssringoccs_CDouble_Abs(
+                        rssringoccs_CDouble_Subtract(root, roots[0])
                     );
                     ind = 0;
 
                     for (n=1; n<NRoots; ++n)
                     {
-                        temp = rssringoccs_ComplexDouble_Abs(
-                            rssringoccs_ComplexDouble_Subtract(root, roots[n])
+                        temp = rssringoccs_CDouble_Abs(
+                            rssringoccs_CDouble_Subtract(root, roots[n])
                         );
                         if (temp < min) {
                             min = temp;
@@ -180,7 +173,7 @@ int main(void)
                         brightness[n] = colors[ind][n];
 
                     /*  Color the current pixel.                              */
-                    color(brightness[0], brightness[1], brightness[2], fp);
+                    rssringoccs_Color(brightness[0], brightness[1], brightness[2], fp);
                 }
             }
 

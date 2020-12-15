@@ -57,7 +57,7 @@
 
 /*  Compute the complex power z0^z1.                                          */
 rssringoccs_ComplexDouble
-rssringoccs_Complex_Pow(rssringoccs_ComplexDouble z0,
+rssringoccs_CDouble_Pow(rssringoccs_ComplexDouble z0,
                         rssringoccs_ComplexDouble z1)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
@@ -77,7 +77,7 @@ rssringoccs_Complex_Pow(rssringoccs_ComplexDouble z0,
 
 /*  Compute the complex power z^x for x real.                                 */
 rssringoccs_ComplexDouble
-rssringoccs_Complex_Real_Pow(rssringoccs_ComplexDouble z, double x)
+rssringoccs_CDouble_Real_Pow(rssringoccs_ComplexDouble z, double x)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     rssringoccs_ComplexDouble z_to_the_x, ln_z, x_ln_z;

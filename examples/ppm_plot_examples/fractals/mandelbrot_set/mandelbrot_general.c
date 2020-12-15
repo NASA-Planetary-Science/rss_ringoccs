@@ -22,7 +22,7 @@ int main(void)
     unsigned char red, green, blue;
     double z_x, z_y, norm;
     double rcp_factor;
-    int maxIterations = 256;
+    unsigned int maxIterations = 256;
     rssringoccs_ComplexDouble z, c;
 
     unsigned int size = 1024;

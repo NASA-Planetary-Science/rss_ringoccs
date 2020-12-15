@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <math.h>
+#include <rss_ringoccs/include/rss_ringoccs_math.h>
 #include <rss_ringoccs/include/rss_ringoccs_complex.h>
 #include <rss_ringoccs/include/rss_ringoccs_ppm_plot.h>
 
@@ -10,8 +10,8 @@ glynn_func(rssringoccs_ComplexDouble z, rssringoccs_ComplexDouble e,
     rssringoccs_ComplexDouble out;
 
 
-    out = rssringoccs_Complex_Pow(z, e);
-    out = rssringoccs_Complex_Add(out, mu);
+    out = rssringoccs_CDouble_Pow(z, e);
+    out = rssringoccs_CDouble_Add(out, mu);
     return out;
 }
 
@@ -22,10 +22,10 @@ int main(void)
     unsigned int x, y, n;
     double z_x, z_y, norm;
     double rcp_factor;
-    int maxIterations = 256;
+    unsigned int maxIterations = 256;
     rssringoccs_ComplexDouble z, e, mu;
 
-    unsigned int size = 2*1024;
+    unsigned int size = 1024;
     double red, green, blue;
     unsigned char r, g, b;
 
@@ -36,8 +36,8 @@ int main(void)
 
     double radius = 4.0;
 
-    e  = rssringoccs_Complex_Rect(1.5, 0.0);
-    mu = rssringoccs_Complex_Rect(-0.2, 0.0);
+    e  = rssringoccs_CDouble_Rect(1.5, 0.0);
+    mu = rssringoccs_CDouble_Rect(-0.2, 0.0);
 
     fp = fopen("glynn_fractal_periodic_palette.ppm", "w");
     fprintf(fp, "P6\n%d %d\n255\n", size, size);
@@ -57,7 +57,7 @@ int main(void)
             z_x = x * (x_max - x_min) * rcp_factor + x_min;
 
             /*  Compute the complex number z_x + i z_y.                       */
-            z = rssringoccs_Complex_Rect(z_x, z_y);
+            z = rssringoccs_CDouble_Rect(z_x, z_y);
 
             /*  Start the iteration process.                                  */
             for(n = 0; n < maxIterations; ++n)
@@ -67,19 +67,19 @@ int main(void)
                 z = glynn_func(z, e, mu);
 
                 /*  Check for divergence.                                     */
-                norm = rssringoccs_Complex_Abs(z);
+                norm = rssringoccs_CDouble_Abs(z);
 
                 if(norm > radius)
                     break;
             }
 
-            red = sin(0.1*n);
+            red = rssringoccs_Double_Sin(0.1*n);
             red = red*red;
 
-            green = sin(0.2*n - 0.78);
+            green = rssringoccs_Double_Sin(0.2*n - 0.78);
             green = green*green;
 
-            blue = sin(0.03*n - 1.78);
+            blue = rssringoccs_Double_Sin(0.03*n - 1.78);
             blue = blue*blue;
 
             r = (unsigned char)(255*red);

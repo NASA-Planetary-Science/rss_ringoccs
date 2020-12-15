@@ -789,51 +789,6 @@ rssringoccs_CLDouble_Multiply_Imag(long double x,
 
 /******************************************************************************
  *  Function:                                                                 *
- *      rssringoccs_Complex_Scale                                             *
- *  Purpose:                                                                  *
- *     Scale a complex number by a real one.                                  *
- *  Arguments:                                                                *
- *      double x:                                                             *
- *          A real number.                                                    *
- *      rssringoccs_ComplexDouble z1:                                         *
- *          A complex number.                                                 *
- *  Output:                                                                   *
- *      rssringoccs_ComplexDouble scale:                                      *
- *          The product x*z.                                                  *
- *  NOTE:                                                                     *
- *      In C99, since _Complex is a built-in data type, given double x and a  *
- *      double _Complex z, you can just do x * z. In C89 we use structs to    *
- *      define complex numbers. Structs cannot be multiplied by real numbers  *
- *      so we need a function for computing the product of a real number with *
- *      a complex one.                                                        *
- *  Example:                                                                  *
- *          #include <stdio.h>                                                *
- *          #include <rss_ringoccs_complex.h>                                 *
- *                                                                            *
- *          int main(void)                                                    *
- *          {                                                                 *
- *              double x, abs_z, abs_scale;                                   *
- *              rssringoccs_ComplexDouble z, scale;                           *
- *                                                                            *
- *              x = 2.0;                                                      *
- *              z = rssringoccs_Complex_Rect(1.0, 1.0);                       *
- *              scale = rssringoccs_Complex_Scale(x, z);                      *
- *                                                                            *
- *              abs_z = rssringoccs_Complex_Abs(z);                           *
- *              abs_scale = rssringoccs_Complex_Abs(scale);                   *
- *                                                                            *
- *              printf("|z| = %f\t |xz| = %f\n", abs_z, abs_scale);           *
- *              return 0;                                                     *
- *          }                                                                 *
- *                                                                            *
- *      This outputs |z| = 1.414214	 |xz| = 2.828427. i.e., |z| = sqrt(2) and *
- *      |2z| = 2*sqrt(2).                                                     *
- ******************************************************************************/
-extern rssringoccs_ComplexDouble
-rssringoccs_Complex_Scale(double x, rssringoccs_ComplexDouble z);
-
-/******************************************************************************
- *  Function:                                                                 *
  *      rssringoccs_CDouble_Reciprocal                                  *
  *  Purpose:                                                                  *
  *     Compute the reciprocal (or inverse) of a complex number.               *

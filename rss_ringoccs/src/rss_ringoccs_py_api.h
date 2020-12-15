@@ -7,6 +7,20 @@
 
 #include <Python.h>
 #include <structmember.h>
+#include <rss_ringoccs/include/rss_ringoccs_complex.h>
+
+typedef PyObject (*rssringoccs_PyFunc)(PyObject *, PyObject *);
+
+typedef struct rssringoccs_Generic_Function_Obj {
+    long (*long_func)(long);
+    float (*float_func)(float);
+    double (*double_func)(double);
+    long double (*ldouble_func)(long double);
+    rssringoccs_ComplexDouble (*cdouble_from_real_func)(double);
+    rssringoccs_ComplexDouble
+        (*cdouble_from_complex_func)(rssringoccs_ComplexDouble);
+    const char *func_name;
+} rssringoccs_Generic_Function_Obj;
 
 typedef struct {
     PyObject_HEAD

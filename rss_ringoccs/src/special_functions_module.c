@@ -22,6 +22,10 @@
 #include <rss_ringoccs/include/rss_ringoccs_math.h>
 #include <rss_ringoccs/include/rss_ringoccs_fft.h>
 
+#include "auxiliary.h"
+
+#define VarToString(Var) (#Var)
+
 /*---------------------------DEFINE PYTHON FUNCTIONS--------------------------*
  *  This contains the Numpy-C and Python-C API parts that allow for the above *
  *  functions to be called in Python. Numpy arrays, as well as floating point *
@@ -29,48 +33,6 @@
  *  improvement in performance, as opposed to the routines written purely in  *
  *  Python. Successful compiling requires the Numpy and Python header files.  *
  *----------------------------------------------------------------------------*/
-
-/*  This function frees the memory allocated to a pointer by malloc when the  *
- *  corresponding variable is destroyed at the Python level.                  */
-static void capsule_cleanup(PyObject *capsule)
-{
-    void *memory = PyCapsule_GetPointer(capsule, NULL);
-    free(memory);
-}
-
-#ifdef VarToString
-#undef VarToString
-#endif
-
-#define VarToString(Var) (#Var)
-
-/*  To avoid repeating the same code over and over again, define these macros *
- *  to be used for looping over functions.                                    */
-#ifdef RSS_RINGOCCS_GetArrFromOneTypeFunc
-#undef RSS_RINGOCCS_GetArrFromOneTypeFunc
-#endif
-
-#define RSS_RINGOCCS_GetArrFromOneTypeFunc(type, name)                         \
-static void *_get_array_from_one_##name(void *in, long dim, type (*f)(type))   \
-{                                                                              \
-    long n;                                                                    \
-    void *out;                                                                 \
-    type *out_data;                                                            \
-                                                                               \
-    out_data = malloc(sizeof(*out_data)*dim);                                  \
-                                                                               \
-    for (n=0; n<dim; ++n)                                                      \
-        out_data[n] = f(((type *)in)[n]);                                      \
-                                                                               \
-    out = out_data;                                                            \
-    return out;                                                                \
-}
-
-RSS_RINGOCCS_GetArrFromOneTypeFunc(float, float)
-RSS_RINGOCCS_GetArrFromOneTypeFunc(double, double)
-RSS_RINGOCCS_GetArrFromOneTypeFunc(long double, longdouble)
-
-#undef RSS_RINGOCCS_GetArrFromOneTypeFunc
 
 #ifdef RSS_RINGOCCS_GetArrFromTwoTypeFunc
 #undef RSS_RINGOCCS_GetArrFromTwoTypeFunc
@@ -92,6 +54,7 @@ static void *_get_array_from_two_##name(void *in, type param1, long dim,       \
     out = out_data;                                                            \
     return out;                                                                \
 }
+
 
 RSS_RINGOCCS_GetArrFromTwoTypeFunc(float, float)
 RSS_RINGOCCS_GetArrFromTwoTypeFunc(double, double)
@@ -126,147 +89,6 @@ RSS_RINGOCCS_GetArrFromThreeTypeFunc(double, double)
 RSS_RINGOCCS_GetArrFromThreeTypeFunc(long double, longdouble)
 
 #undef RSS_RINGOCCS_GetArrFromThreeTypeFunc
-
-/*  Again, to avoid repetition, the code used in the API for numpy is arrays  *
- *  is identical for all functions with the exception of the function name.   *
- *  This preprocessor function saves thousands of lines of code, all of which *
- *  would be just copy/paste otherwise.                                       */
-#ifdef OneVarFunctionForNumpy
-#undef OneVarFunctionForNumpy
-#endif
-
-#define OneVarFunctionForNumpy(FuncName, CName)                                \
-static PyObject * FuncName(PyObject *self, PyObject *args)                     \
-{                                                                              \
-    /*  Declare necessary variables.                                         */\
-    PyObject *capsule, *output, *x, *nth_item;                                 \
-    long n, dim;                                                               \
-    double x_val, y_val;                                                       \
-    void *data, *out;                                                          \
-    char typenum;                                                              \
-                                                                               \
-    /*  Parse the data from Python and try to convert it to a usable format. */\
-    if (!PyArg_ParseTuple(args, "O", &x))                                      \
-    {                                                                          \
-        PyErr_Format(PyExc_TypeError,                                          \
-                     "\n\rError Encountered: rss_ringoccs\n"                   \
-                     "\r\tspecial_functions.%s\n\n"                            \
-                     "\rCould not parse inputs. Legal inputs are:\n"           \
-                     "\r\tx: Numpy Array of real numbers (Floats)\n\rNotes:\n" \
-                     "\r\tx must be a non-empty one dimensional numpy array.", \
-                     VarToString(FuncName));                                   \
-        return NULL;                                                           \
-    }                                                                          \
-    if (PyLong_Check(x) || PyFloat_Check(x))                                   \
-    {                                                                          \
-        x_val = PyFloat_AsDouble(x);                                           \
-        y_val = rssringoccs_Double_##CName(x_val);                             \
-        return PyFloat_FromDouble(y_val);                                      \
-    }                                                                          \
-    else if (PyList_Check(x))                                                  \
-    {                                                                          \
-        dim    = PyList_Size(x);                                               \
-        output = PyList_New(dim);                                              \
-                                                                               \
-        for (n=0; n<dim; ++n)                                                  \
-        {                                                                      \
-            nth_item = PyList_GET_ITEM(x, n);                                  \
-            if (!PyFloat_Check(nth_item) && !PyLong_Check(nth_item))           \
-            {                                                                  \
-                PyErr_Format(PyExc_TypeError,                                  \
-                             "\n\rError Encountered: rss_ringoccs\n"           \
-                             "\r\tspecial_functions.%s\n\n"                    \
-                             "\rInput list must contain real numbers only.\n", \
-                             VarToString(FuncName));                           \
-                return NULL;                                                   \
-            }                                                                  \
-                                                                               \
-            x_val = PyFloat_AsDouble(nth_item);                                \
-            y_val = rssringoccs_Double_##CName(x_val);                         \
-            PyList_SET_ITEM(output, n, PyFloat_FromDouble(y_val));             \
-        }                                                                      \
-        return output;                                                         \
-    }                                                                          \
-    else if (!(PyArray_Check(x)))                                              \
-    {                                                                          \
-        PyErr_Format(PyExc_TypeError,                                          \
-             "\n\rError Encountered: rss_ringoccs\n"                           \
-             "\r\tspecial_functions.%s\n\n"                                    \
-             "\rCould not parse inputs. Legal inputs are:\n"                   \
-             "\r\tx: Numpy Array of real numbers (Floats)\n\rNotes:\n"         \
-             "\r\tx must be a non-empty one dimensional numpy array.\n",       \
-             VarToString(FuncName));                                           \
-        return NULL;                                                           \
-    }                                                                          \
-                                                                               \
-    /*  If you get here, then the input is a numpy array. Grab some useful   */\
-    /*  information about the data using numpy's API functions.              */\
-    typenum = PyArray_TYPE((PyArrayObject *)x);                                \
-    dim     = PyArray_DIMS((PyArrayObject *)x)[0];                             \
-    data    = PyArray_DATA((PyArrayObject *)x);                                \
-                                                                               \
-    /*  Check the inputs to make sure they're valid.                         */\
-    if (PyArray_NDIM((PyArrayObject *)x) != 1){                                \
-        PyErr_Format(PyExc_TypeError,                                          \
-                     "\n\rError Encountered: rss_ringoccs\n"                   \
-                     "\r\tspecial_functions.%s\n"                              \
-                     "\n\rInput is not 1-dimensional.\n",                      \
-                     VarToString(FuncName));                                   \
-        return NULL;                                                           \
-    }                                                                          \
-    else if (dim == 0){                                                        \
-        PyErr_Format(PyExc_TypeError,                                          \
-                     "\n\rError Encountered: rss_ringoccs\n"                   \
-                     "\r\tspecial_functions.%s"                                \
-                     "\n\n\rInput numpy array is empty.\n",                    \
-                     VarToString(FuncName));                                   \
-        return NULL;                                                           \
-    }                                                                          \
-                                                                               \
-    if (typenum == NPY_FLOAT)                                                  \
-        out = _get_array_from_one_float(data, dim, rssringoccs_Float_##CName); \
-    else if (typenum == NPY_DOUBLE)                                            \
-        out = _get_array_from_one_double(data, dim,                            \
-                                         rssringoccs_Double_##CName);          \
-    else if (typenum == NPY_LONGDOUBLE)                                        \
-        out = _get_array_from_one_longdouble(data, dim,                        \
-                                             rssringoccs_LDouble_##CName);     \
-    else                                                                       \
-    {                                                                          \
-        /*  Try to convert the input numpy array to double and compute.      */\
-        PyObject *new_x = PyArray_FromObject(x, NPY_DOUBLE, 1, 1);             \
-                                                                               \
-        /*  If PyArray_FromObject failed, newrho should be NULL. Check this. */\
-        if (!(new_x))                                                          \
-        {                                                                      \
-            PyErr_Format(PyExc_TypeError,                                      \
-                        "\n\rError Encountered: rss_ringoccs\n"                \
-                        "\r\ttspecial_functions.%s\n\n"                        \
-                        "\rInvalid data type for input array. Input should"    \
-                        "\n\rbe a 1-dimensional array of real numbers.\n",     \
-                        VarToString(FuncName));                                \
-            return NULL;                                                       \
-        }                                                                      \
-                                                                               \
-        /*  If it passed, get a pointer to the data inside the numpy array.  */\
-        else                                                                   \
-            data = PyArray_DATA((PyArrayObject *)new_x);                       \
-                                                                               \
-        /*  loop over the data and compute with CName_Double.                */\
-        out = _get_array_from_one_double(data, dim,                            \
-                                         rssringoccs_Double_##CName);          \
-        typenum = NPY_DOUBLE;                                                  \
-    }                                                                          \
-                                                                               \
-    output  = PyArray_SimpleNewFromData(1, &dim, typenum, out);                \
-    capsule = PyCapsule_New(out, NULL, capsule_cleanup);                       \
-                                                                               \
-    /*  This frees the variable at the Python level once it's destroyed.  */   \
-    PyArray_SetBaseObject((PyArrayObject *)output, capsule);                   \
-                                                                               \
-    /*  Return the results to Python.                                     */   \
-    return Py_BuildValue("N", output);                                         \
-}
 
 #define WindowFunctionForNumpy(FuncName, CName)                                \
 static PyObject * FuncName(PyObject *self, PyObject *args)                     \
@@ -661,17 +483,132 @@ static PyObject *FuncName(PyObject *self, PyObject *args)                      \
     };                                                                         \
 }
 
-/*  Generate the code for the functions. These preprocessor functions are     *
- *  defined in special_functions.h.                                           */
-OneVarFunctionForNumpy(besselJ0,                 Bessel_J0)
-OneVarFunctionForNumpy(besselI0,                 Bessel_I0)
-OneVarFunctionForNumpy(sinc,                     Sinc)
-OneVarFunctionForNumpy(fresnel_sin,              Fresnel_Sin)
-OneVarFunctionForNumpy(fresnel_cos,              Fresnel_Cos)
-OneVarFunctionForNumpy(lambertw,                 LambertW)
-OneVarFunctionForNumpy(wavelength_to_wavenumber, Wavelength_To_Wavenumber)
-OneVarFunctionForNumpy(frequency_to_wavelength,  Frequency_To_Wavelength)
-OneVarFunctionForNumpy(resolution_inverse,       Resolution_Inverse)
+
+static PyObject *besselI0(PyObject *self, PyObject *args)
+{
+    rssringoccs_Generic_Function_Obj c_funcs;
+
+    c_funcs.long_func = NULL;
+    c_funcs.float_func = rssringoccs_Float_Bessel_I0;
+    c_funcs.double_func = rssringoccs_Double_Bessel_I0;
+    c_funcs.ldouble_func = rssringoccs_LDouble_Bessel_I0;
+    c_funcs.cdouble_from_real_func = NULL;
+    c_funcs.cdouble_from_complex_func = rssringoccs_CDouble_Bessel_I0;
+
+    return rssringoccs_Get_Py_Func_From_C(self, args, &c_funcs);
+}
+
+static PyObject *besselJ0(PyObject *self, PyObject *args)
+{
+    rssringoccs_Generic_Function_Obj c_funcs;
+
+    c_funcs.long_func = NULL;
+    c_funcs.float_func = rssringoccs_Float_Bessel_J0;
+    c_funcs.double_func = rssringoccs_Double_Bessel_J0;
+    c_funcs.ldouble_func = rssringoccs_LDouble_Bessel_J0;
+    c_funcs.cdouble_from_real_func = NULL;
+    c_funcs.cdouble_from_complex_func = NULL;
+
+    return rssringoccs_Get_Py_Func_From_C(self, args, &c_funcs);
+}
+
+static PyObject *sinc(PyObject *self, PyObject *args)
+{
+    rssringoccs_Generic_Function_Obj c_funcs;
+
+    c_funcs.long_func = NULL;
+    c_funcs.float_func = rssringoccs_Float_Sinc;
+    c_funcs.double_func = rssringoccs_Double_Sinc;
+    c_funcs.ldouble_func = rssringoccs_LDouble_Sinc;
+    c_funcs.cdouble_from_real_func = NULL;
+    c_funcs.cdouble_from_complex_func = NULL;
+
+    return rssringoccs_Get_Py_Func_From_C(self, args, &c_funcs);
+}
+
+static PyObject *fresnel_sin(PyObject *self, PyObject *args)
+{
+    rssringoccs_Generic_Function_Obj c_funcs;
+
+    c_funcs.long_func = NULL;
+    c_funcs.float_func = rssringoccs_Float_Fresnel_Sin;
+    c_funcs.double_func = rssringoccs_Double_Fresnel_Sin;
+    c_funcs.ldouble_func = rssringoccs_LDouble_Fresnel_Sin;
+    c_funcs.cdouble_from_real_func = NULL;
+    c_funcs.cdouble_from_complex_func = NULL;
+
+    return rssringoccs_Get_Py_Func_From_C(self, args, &c_funcs);
+}
+
+static PyObject *fresnel_cos(PyObject *self, PyObject *args)
+{
+    rssringoccs_Generic_Function_Obj c_funcs;
+
+    c_funcs.long_func = NULL;
+    c_funcs.float_func = rssringoccs_Float_Fresnel_Cos;
+    c_funcs.double_func = rssringoccs_Double_Fresnel_Cos;
+    c_funcs.ldouble_func = rssringoccs_LDouble_Fresnel_Cos;
+    c_funcs.cdouble_from_real_func = NULL;
+    c_funcs.cdouble_from_complex_func = NULL;
+
+    return rssringoccs_Get_Py_Func_From_C(self, args, &c_funcs);
+}
+
+static PyObject *lambertw(PyObject *self, PyObject *args)
+{
+    rssringoccs_Generic_Function_Obj c_funcs;
+
+    c_funcs.long_func = NULL;
+    c_funcs.float_func = rssringoccs_Float_LambertW;
+    c_funcs.double_func = rssringoccs_Double_LambertW;
+    c_funcs.ldouble_func = rssringoccs_LDouble_LambertW;
+    c_funcs.cdouble_from_real_func = NULL;
+    c_funcs.cdouble_from_complex_func = NULL;
+
+    return rssringoccs_Get_Py_Func_From_C(self, args, &c_funcs);
+}
+
+static PyObject *wavelength_to_wavenumber(PyObject *self, PyObject *args)
+{
+    rssringoccs_Generic_Function_Obj c_funcs;
+
+    c_funcs.long_func = NULL;
+    c_funcs.float_func = rssringoccs_Float_Wavelength_To_Wavenumber;
+    c_funcs.double_func = rssringoccs_Double_Wavelength_To_Wavenumber;
+    c_funcs.ldouble_func = rssringoccs_LDouble_Wavelength_To_Wavenumber;
+    c_funcs.cdouble_from_real_func = NULL;
+    c_funcs.cdouble_from_complex_func = NULL;
+
+    return rssringoccs_Get_Py_Func_From_C(self, args, &c_funcs);
+}
+
+static PyObject *frequency_to_wavelength(PyObject *self, PyObject *args)
+{
+    rssringoccs_Generic_Function_Obj c_funcs;
+
+    c_funcs.long_func = NULL;
+    c_funcs.float_func = rssringoccs_Float_Frequency_To_Wavelength;
+    c_funcs.double_func = rssringoccs_Double_Frequency_To_Wavelength;
+    c_funcs.ldouble_func = rssringoccs_LDouble_Frequency_To_Wavelength;
+    c_funcs.cdouble_from_real_func = NULL;
+    c_funcs.cdouble_from_complex_func = NULL;
+
+    return rssringoccs_Get_Py_Func_From_C(self, args, &c_funcs);
+}
+
+static PyObject *resolution_inverse(PyObject *self, PyObject *args)
+{
+    rssringoccs_Generic_Function_Obj c_funcs;
+
+    c_funcs.long_func = NULL;
+    c_funcs.float_func = rssringoccs_Float_Resolution_Inverse;
+    c_funcs.double_func = rssringoccs_Double_Resolution_Inverse;
+    c_funcs.ldouble_func = rssringoccs_LDouble_Resolution_Inverse;
+    c_funcs.cdouble_from_real_func = NULL;
+    c_funcs.cdouble_from_complex_func = NULL;
+
+    return rssringoccs_Get_Py_Func_From_C(self, args, &c_funcs);
+}
 
 WindowFunctionForNumpy(rect,   Rect_Window)
 WindowFunctionForNumpy(coss,   Coss_Window)
@@ -685,94 +622,6 @@ WindowFunctionAlForNumpy(kbal, Kaiser_Bessel)
 WindowFunctionAlForNumpy(kbmdal, Modified_Kaiser_Bessel)
 MinMaxFunctionForNumpy(min, rssringoccs_Min)
 MinMaxFunctionForNumpy(max, rssringoccs_Max)
-
-static PyObject *fft(PyObject *self, PyObject *args)
-{
-    /*  We'll need output and capsule for safely creating the output array    *
-     *  and ensuring we don't have a memory leak. rho is the input variable.  */
-    PyObject *output, *capsule, *arr_in, *arr;
-
-    /*  Variable for the size of the input array or list.                     */
-    long dim;
-    int inverse;
-
-    /*  Variables needed for the array data.                                  */
-    rssringoccs_ComplexDouble *in, *out;
-
-    /*  Try to parse the user input, returning error if this fails.           */
-    if (!PyArg_ParseTuple(args, "Op", &arr_in, &inverse))
-    {
-        PyErr_Format(
-            PyExc_TypeError,
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tspecial_functions.fft\n\n"
-            "\rCould not parse inputs. Legal inputs are:\n"
-            "\r\trx:      Numpy Array of real or complex numbers (Floats)\n\n"
-            "\rKeywords:\n"
-            "\r\tinverse: Compute inverse FFT.\n"
-        );
-        return NULL;
-    }
-
-    /*  If the user supplied a float or int, simply return the value.         */
-    if (PyLong_Check(arr_in) || PyFloat_Check(arr_in))
-        return arr_in;
-
-    PyArray_Descr *arr_type = PyArray_DescrFromType(NPY_CDOUBLE);
-    arr = PyArray_FromAny(arr_in, arr_type, 1, 1, NPY_ARRAY_BEHAVED, NULL);
-
-    if (!arr)
-    {
-        PyErr_Format(PyExc_TypeError,
-                    "\n\rError Encountered: rss_ringoccs\n"
-                    "\r\tspecial_functions.fft\n\n"
-                    "\rInvalid data type for one of the input arrays. Input\n"
-                    "\rshoule be a 1-dimensional array of real numbers.\n");
-        return NULL;
-    }
-
-    /*  Check the inputs to make sure they're valid.                          */
-    if (PyArray_NDIM((PyArrayObject *)arr) != 1)
-    {
-        PyErr_Format(
-            PyExc_TypeError,
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tspecial_functions.fft\n\n"
-            "\rInput numpy array is not one-dimensional.\n"
-        );
-        return NULL;
-    }
-
-    /*  Get the size of the input numpy array.                                */
-    dim = PyArray_DIMS((PyArrayObject *)arr)[0];
-
-    /*  Check that the array isn't empty. Raise error otherwise.              */
-    if (dim == 0)
-    {
-        PyErr_Format(
-            PyExc_TypeError,
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tspecial_functions.fft\n\n"
-            "\rInput numpy array is empty.\n"
-        );
-        return NULL;
-    }
-
-    /*  Get a pointer to the actual data from the array. Allocate memory for  *
-     *  the data of the output numpy array, which we'll call T_hat.           */
-    in  = (rssringoccs_ComplexDouble *)PyArray_DATA((PyArrayObject *)arr);
-    out = rssringoccs_Complex_FFT(in, dim, inverse);
-
-    /*  Set the output and capsule, ensuring no memory leaks occur.           */
-    output = PyArray_SimpleNewFromData(1, &dim, NPY_CDOUBLE, (void *)out);
-    capsule = PyCapsule_New((void *)out, NULL, capsule_cleanup);
-
-    /*  This frees the variable at the Python level once it's destroyed.      */
-    PyArray_SetBaseObject((PyArrayObject *)output, capsule);
-
-    /*  Return the results to Python.                                         */
-    return Py_BuildValue("N", output);
-}
 
 static PyObject *compute_norm_eq(PyObject *self, PyObject *args)
 {
@@ -1232,12 +1081,6 @@ static PyObject *window_norm(PyObject *self, PyObject *args){
 static PyMethodDef special_functions_methods[] =
 {
     {
-        "fft",
-        fft,
-        METH_VARARGS,
-        "Compute FFT of real or complex valued input."
-    },
-    {
         "coss",
         coss,
         METH_VARARGS,
@@ -1403,7 +1246,7 @@ static PyMethodDef special_functions_methods[] =
         ">>> import numpy\n\r\t\t"
         ">>> import special_functions\n\r\t\t"
         ">>> x = numpy.arange(-20,20,0.1)\n\r\t\t"
-        ">>> W = 10.0"
+        ">>> W = 10.0\n\r\t\t"
         ">>> y = special_functions.kbmd20(x, W)"
     },
     {
@@ -1427,7 +1270,7 @@ static PyMethodDef special_functions_methods[] =
         ">>> import numpy\n\r\t\t"
         ">>> import special_functions\n\r\t\t"
         ">>> x = numpy.arange(-20,20,0.1)\n\r\t\t"
-        ">>> W = 10.0"
+        ">>> W = 10.0\n\r\t\t"
         ">>> y = special_functions.kbmd25(x, W)"
     },
     {

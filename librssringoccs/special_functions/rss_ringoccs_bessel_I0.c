@@ -375,7 +375,7 @@ long double rssringoccs_LDouble_Bessel_I0(long double x)
 /*  Compute the Bessel I_0 function for a complex value z. This               *
  *  returns double precision, maximum error ~1.e-9.                           */
 rssringoccs_ComplexDouble
-rssringoccs_Complex_Bessel_I0(rssringoccs_ComplexDouble z)
+rssringoccs_CDouble_Bessel_I0(rssringoccs_ComplexDouble z)
 {
     /*  Declare necessary variables. C89 requires this at the top.            */
     rssringoccs_ComplexDouble bessel_I0, arg, exp_arg, sqrt_arg;

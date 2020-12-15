@@ -37,9 +37,9 @@
 #define RSSRINGOCCSGenerateExternFunctions(FuncName)                           \
 extern float rssringoccs_Float_##FuncName(float x);                            \
 extern double rssringoccs_Double_##FuncName(double x);                         \
-extern long double  rssringoccs_LDouble_##FuncName(long double x);          \
+extern long double  rssringoccs_LDouble_##FuncName(long double x);             \
 extern rssringoccs_ComplexDouble                                               \
-rssringoccs_Complex_##FuncName(rssringoccs_ComplexDouble x);
+rssringoccs_CDouble_##FuncName(rssringoccs_ComplexDouble x);
 
 #define RSSRINGOCCSTwoVarWindowFuncExtern(FuncName)                            \
 extern float rssringoccs_Float_##FuncName(float x, float W);                   \

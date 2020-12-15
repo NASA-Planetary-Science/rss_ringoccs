@@ -7,8 +7,8 @@ quartic(rssringoccs_ComplexDouble z, rssringoccs_ComplexDouble c)
 {
     rssringoccs_ComplexDouble out;
 
-    out = rssringoccs_Complex_Real_Pow(z, 4.0);
-    out = rssringoccs_Complex_Add(out, c);
+    out = rssringoccs_CDouble_Real_Pow(z, 4.0);
+    out = rssringoccs_CDouble_Add(out, c);
     return out;
 }
 
@@ -20,7 +20,7 @@ int main(void)
     unsigned char red, green, blue;
     double z_x, z_y, norm;
     double rcp_factor;
-    int maxIterations = 256;
+    unsigned int maxIterations = 256;
     rssringoccs_ComplexDouble z, c;
 
     unsigned int size = 1024;
@@ -50,10 +50,10 @@ int main(void)
             z_x = x * (x_max - x_min) * rcp_factor + x_min;
 
             /*  Compute the complex number z_x + i z_y.                       */
-            c = rssringoccs_Complex_Rect(z_x, z_y);
+            c = rssringoccs_CDouble_Rect(z_x, z_y);
 
             /*  Reset starting Real and Imaginary parts to zero.              */
-            z = rssringoccs_Complex_Zero;
+            z = rssringoccs_CDouble_Zero;
 
             /*  Start the iteration process.                                  */
             for(n = 0; n < maxIterations; n++)
@@ -63,7 +63,7 @@ int main(void)
                 z = quartic(z, c);
 
                 /*  Check for divergence.                                     */
-                norm = rssringoccs_Complex_Abs(z);
+                norm = rssringoccs_CDouble_Abs(z);
 
                 if(norm > radius)
                     break;

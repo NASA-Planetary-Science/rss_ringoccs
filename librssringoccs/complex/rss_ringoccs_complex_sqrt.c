@@ -6,7 +6,7 @@
 #include <rss_ringoccs/include/rss_ringoccs_complex.h>
 
 rssringoccs_ComplexDouble
-rssringoccs_Complex_Sqrt(rssringoccs_ComplexDouble z)
+rssringoccs_CDouble_Sqrt(rssringoccs_ComplexDouble z)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     double sqrt_r, theta, real, imag;

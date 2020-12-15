@@ -20,8 +20,11 @@
 /*  We'll need stdio to write to the output ppm file.                         */
 #include <stdio.h>
 
-/*  Halley's method is defined here.                                          */
+/*  The Newton-Raphson routine is found here. Note the rss_ringoccs_complex.h *
+ *  is included by rss_ringoccs_numerical.h so we don't need to include again.*/
 #include <rss_ringoccs/include/rss_ringoccs_numerical.h>
+#include <rss_ringoccs/include/rss_ringoccs_complex.h>
+#include <rss_ringoccs/include/rss_ringoccs_ppm_plot.h>
 
 /*  The number of pixels in the x and y axes. If you want a higher resolution *
  *  for the output fractal, increase this number. It is best to make n*1024   *
@@ -37,28 +40,28 @@ static rssringoccs_ComplexDouble f(rssringoccs_ComplexDouble z)
     rssringoccs_ComplexDouble poly;
     double coeffs[4] = {-1.0, 0.0, 0.0, 1.0};
 
-    poly = rssringoccs_Complex_Poly_Real_Coeffs(coeffs, 3, z);
+    poly = rssringoccs_CDouble_Poly_Real_Coeffs(coeffs, 3, z);
     return poly;
 }
 
 /*  The derivative is f'(z) = 3*z^2/                                          */
 static rssringoccs_ComplexDouble f_prime(rssringoccs_ComplexDouble z)
 {
-    rssringoccs_ComplexDouble poly, out;
+    rssringoccs_ComplexDouble poly;
     double coeffs[3] = {0.0, 0.0, 3.0};
 
-    poly = rssringoccs_Complex_Poly_Real_Coeffs(coeffs, 2, z);
-    return out;
+    poly = rssringoccs_CDouble_Poly_Real_Coeffs(coeffs, 2, z);
+    return poly;
 }
 
 /*  The derivative is f''(z) = 6z, so create this.                            */
 static rssringoccs_ComplexDouble f_2prime(rssringoccs_ComplexDouble z)
 {
-    rssringoccs_ComplexDouble poly, out;
-    double coeffs[3] = {0.0, 6.0};
+    rssringoccs_ComplexDouble poly;
+    double coeffs[2] = {0.0, 6.0};
 
-    poly = rssringoccs_Complex_Poly_Real_Coeffs(coeffs, 1, z);
-    return out;
+    poly = rssringoccs_CDouble_Poly_Real_Coeffs(coeffs, 1, z);
+    return poly;
 }
 
 /*  We can be more general and set up fractals for general polynomials. This  *
@@ -67,15 +70,6 @@ static rssringoccs_ComplexDouble f_2prime(rssringoccs_ComplexDouble z)
 rssringoccs_ComplexDouble ROOT_1 = {{1.0, 0.0}};
 rssringoccs_ComplexDouble ROOT_2 = {{-0.5, +0.8660254037844386}};
 rssringoccs_ComplexDouble ROOT_3 = {{-0.5, -0.8660254037844386}};
-
-/*  This function is used to set the current pixel of the output ppm to the   *
- *  desired color. fp is the filename we'll be using.                         */
-static void color(char red, char green, char blue, FILE *fp)
-{
-    fputc(red,   fp);
-    fputc(green, fp);
-    fputc(blue,  fp);
-}
 
 int main(void)
 {
@@ -89,7 +83,7 @@ int main(void)
     rssringoccs_ComplexDouble roots[NRoots] = {ROOT_1, ROOT_2, ROOT_3};
 
     /*  More dummy variables to loop over.                                    */
-    int x, y, n, ind;
+    unsigned int x, y, n, ind;
     double z_x, z_y, min, temp;
     rssringoccs_ComplexDouble z, root;
 
@@ -118,22 +112,22 @@ int main(void)
             z_x = x * (x_max - x_min)/(size - 1) + x_min;
 
             /*  Set out current guess to z_x + i z_y.                         */
-            z = rssringoccs_Complex_Rect(z_x, z_y);
+            z = rssringoccs_CDouble_Rect(z_x, z_y);
 
             /*  Use the Newton-Raphson function to compute a root.            */
             root = rssringoccs_Halleys_Method_Complex(z, f, f_prime,
                                                       f_2prime, max_iters);
 
             /*  Find which root the final iteration is closest too.           */
-            min = rssringoccs_Complex_Abs(
-                rssringoccs_Complex_Subtract(root, roots[0])
+            min = rssringoccs_CDouble_Abs(
+                rssringoccs_CDouble_Subtract(root, roots[0])
             );
             ind = 0;
 
             for (n=1; n<NRoots; ++n)
             {
-                temp = rssringoccs_Complex_Abs(
-                    rssringoccs_Complex_Subtract(root, roots[n])
+                temp = rssringoccs_CDouble_Abs(
+                    rssringoccs_CDouble_Subtract(root, roots[n])
                 );
                 if (temp < min) {
                     min = temp;
@@ -146,7 +140,7 @@ int main(void)
                 brightness[n] = colors[ind][n];
 
             /*  Color the current pixel.                                      */
-            color(brightness[0], brightness[1], brightness[2], fp);
+            rssringoccs_Color(brightness[0], brightness[1], brightness[2], fp);
         }
     }
     return 0;

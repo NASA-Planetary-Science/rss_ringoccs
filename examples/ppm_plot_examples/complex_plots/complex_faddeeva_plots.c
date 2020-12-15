@@ -28,17 +28,17 @@
 int main(void)
 {
     /*  The number of pixels in the x and y axes.                             */
-    const unsigned int size = 8*1024;
+    const unsigned int size = 4*1024;
 
     /* Values for the min and max of the x and y axes.                        */
-    const double x_min = -100.0;
-    const double x_max =  100.0;
-    const double y_min = -100.0;
-    const double y_max =  100.0;
+    const double x_min = -4.0;
+    const double x_max =  4.0;
+    const double y_min = -4.0;
+    const double y_max =  4.0;
 
     /*  Use rssringoccs_Easy_Complex_Plots to produce the plots.              */
     rssringoccs_Easy_Complex_Plots("complex_faddeeva",
-                                   rssringoccs_Complex_Faddeeva,
+                                   rssringoccs_CDouble_Faddeeva,
                                    size, size, x_min, x_max, y_min, y_max);
     return 0;
 }

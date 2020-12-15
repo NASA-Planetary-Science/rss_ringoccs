@@ -23,17 +23,19 @@
 /*  The Newton-Raphson routine is found here. Note the rss_ringoccs_complex.h *
  *  is included by rss_ringoccs_numerical.h so we don't need to include again.*/
 #include <rss_ringoccs/include/rss_ringoccs_numerical.h>
+#include <rss_ringoccs/include/rss_ringoccs_complex.h>
+#include <rss_ringoccs/include/rss_ringoccs_ppm_plot.h>
 
 /*  The function we're working with is f(z) = z^3 - 1, so create this.        */
 static rssringoccs_ComplexDouble f(rssringoccs_ComplexDouble z)
 {
     rssringoccs_ComplexDouble z_cubed, z_cubed_minus_1;
 
-    z_cubed = rssringoccs_Complex_Multiply(rssringoccs_Complex_Multiply(z, z),
+    z_cubed = rssringoccs_CDouble_Multiply(rssringoccs_CDouble_Multiply(z, z),
                                            z);
 
-    z_cubed_minus_1 = rssringoccs_Complex_Subtract(z_cubed,
-                                                   rssringoccs_Complex_One);
+    z_cubed_minus_1 = rssringoccs_CDouble_Subtract(z_cubed,
+                                                   rssringoccs_CDouble_One);
 
     return z_cubed_minus_1;
 }
@@ -42,7 +44,7 @@ static rssringoccs_ComplexDouble f(rssringoccs_ComplexDouble z)
 static rssringoccs_ComplexDouble f_prime(rssringoccs_ComplexDouble z)
 {
     rssringoccs_ComplexDouble w;
-    w = rssringoccs_Complex_Scale(3.0, rssringoccs_Complex_Multiply(z, z));
+    w = rssringoccs_CDouble_Multiply_Real(3.0, rssringoccs_CDouble_Multiply(z, z));
     return w;
 }
 
@@ -76,13 +78,13 @@ int main(void)
     /*  The number of pixels in the x and y axes. If you want a higher        *
      *  resolution for the output fractal, increase this number. It is best   *
      *  to make n*1024 where n is some positive integer.                      */
-    int size  = 2*1024;
+    const unsigned int size  = 4*1024;
 
     /* List the roots of z^3 - 1.                                             */
     rssringoccs_ComplexDouble roots[NRoots] = {ROOT_1, ROOT_2, ROOT_3};
 
     /*  More dummy variables to loop over.                                    */
-    int x, y, n, ind;
+    unsigned int x, y, n, ind;
     double z_x, z_y, min, temp;
     rssringoccs_ComplexDouble z, root;
 
@@ -111,21 +113,21 @@ int main(void)
             z_x = x * (x_max - x_min)/(size - 1) + x_min;
 
             /*  Set out current guess to z_x + i z_y.                         */
-            z = rssringoccs_Complex_Rect(z_x, z_y);
+            z = rssringoccs_CDouble_Rect(z_x, z_y);
 
             /*  Use the Newton-Raphson function to compute a root.            */
             root = rssringoccs_Newton_Raphson_Complex(z, f, f_prime, max_iters);
 
             /*  Find which root the final iteration is closest too.           */
-            min = rssringoccs_Complex_Abs(
-                rssringoccs_Complex_Subtract(root, roots[0])
+            min = rssringoccs_CDouble_Abs(
+                rssringoccs_CDouble_Subtract(root, roots[0])
             );
             ind = 0;
 
             for (n=1; n<NRoots; ++n)
             {
-                temp = rssringoccs_Complex_Abs(
-                    rssringoccs_Complex_Subtract(root, roots[n])
+                temp = rssringoccs_CDouble_Abs(
+                    rssringoccs_CDouble_Subtract(root, roots[n])
                 );
                 if (temp < min) {
                     min = temp;

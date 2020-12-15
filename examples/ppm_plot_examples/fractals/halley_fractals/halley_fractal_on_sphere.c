@@ -35,6 +35,8 @@
 /*  2D and 3D vectors are defined here, as well as the stereographic and      *
  *  inverse orthographic projections.                                         */
 #include <rss_ringoccs/include/rss_ringoccs_geometry.h>
+#include <rss_ringoccs/include/rss_ringoccs_complex.h>
+#include <rss_ringoccs/include/rss_ringoccs_ppm_plot.h>
 
 /*  This variable acts as the location of the observer looking at the sphere. *
  *  we'll perform our inverse orthographic projection about this point. Note  *
@@ -57,8 +59,8 @@ static rssringoccs_ComplexDouble f(rssringoccs_ComplexDouble z)
     rssringoccs_ComplexDouble poly, out;
     double coeffs[4] = {-1.0, 0.0, 0.0, 1.0};
 
-    poly = rssringoccs_Complex_Poly_Real_Coeffs(coeffs, 3, z);
-    out = rssringoccs_Complex_Multiply(rssringoccs_Complex_Exp(z), poly);
+    poly = rssringoccs_CDouble_Poly_Real_Coeffs(coeffs, 3, z);
+    out = rssringoccs_CDouble_Multiply(rssringoccs_CDouble_Exp(z), poly);
 
     return out;
 }
@@ -69,19 +71,18 @@ static rssringoccs_ComplexDouble f_prime(rssringoccs_ComplexDouble z)
     rssringoccs_ComplexDouble poly, out;
     double coeffs[4] = {-1.0, 0.0, 3.0, 1.0};
 
-    poly = rssringoccs_Complex_Poly_Real_Coeffs(coeffs, 3, z);
-    out = rssringoccs_Complex_Multiply(rssringoccs_Complex_Exp(z), poly);
+    poly = rssringoccs_CDouble_Poly_Real_Coeffs(coeffs, 3, z);
+    out = rssringoccs_CDouble_Multiply(rssringoccs_CDouble_Exp(z), poly);
     return out;
 }
 
-/*  The derivative is f''(z) = 6z, so create this.                            */
 static rssringoccs_ComplexDouble f_2prime(rssringoccs_ComplexDouble z)
 {
     rssringoccs_ComplexDouble poly, out;
     double coeffs[4] = {-1.0, 6.0, 6.0, 1.0};
 
-    poly = rssringoccs_Complex_Poly_Real_Coeffs(coeffs, 3, z);
-    out = rssringoccs_Complex_Multiply(rssringoccs_Complex_Exp(z), poly);
+    poly = rssringoccs_CDouble_Poly_Real_Coeffs(coeffs, 3, z);
+    out = rssringoccs_CDouble_Multiply(rssringoccs_CDouble_Exp(z), poly);
     return out;
 }
 
@@ -92,15 +93,6 @@ rssringoccs_ComplexDouble ROOT_1 = {{1.0, 0.0}};
 rssringoccs_ComplexDouble ROOT_2 = {{-0.5, +0.8660254037844386}};
 rssringoccs_ComplexDouble ROOT_3 = {{-0.5, -0.8660254037844386}};
 
-/*  This function is used to set the current pixel of the output ppm to the   *
- *  desired color. fp is the filename we'll be using.                         */
-static void color(char red, char green, char blue, FILE *fp)
-{
-    fputc(red,   fp);
-    fputc(green, fp);
-    fputc(blue,  fp);
-}
-
 int main(void)
 {
     /* Values for the min and max of the x and y axes.                        */
@@ -108,9 +100,6 @@ int main(void)
     double x_max =  1.0;
     double y_min = -1.0;
     double y_max =  1.0;
-
-    /*  We'll create our drawing on the unit sphere.                          */
-    double radius = 1.0;
 
     /*  Declare some necessary variables for the geometry.                    */
     rssringoccs_TwoVector proj_P, planar_Z;
@@ -120,7 +109,7 @@ int main(void)
     rssringoccs_ComplexDouble roots[NRoots] = {ROOT_1, ROOT_2, ROOT_3};
 
     /*  More dummy variables to loop over.                                    */
-    int x, y, n, ind;
+    unsigned int x, y, n, ind;
     double z_x, z_y, min, temp, Pz, norm;
     rssringoccs_ComplexDouble *z, root;
 
@@ -148,7 +137,7 @@ int main(void)
         u = rssringoccs_Normalize_ThreeVector(camera_pos);
 
     /* Open and name the file and give it write permission.                   */
-    fp = fopen("newton_fractal_on_sphere.ppm", "w");
+    fp = fopen("halley_fractal_on_sphere.ppm", "w");
 
     /*  Needed to create the output ppm file. This is the preamble.           */
     fprintf(fp, "P6\n%d %d\n255\n", size, size);
@@ -168,7 +157,7 @@ int main(void)
             z_x = x * (x_max - x_min)/(size - 1) + x_min;
 
             if ((z_x*z_x + z_y*z_y >= 1.0))
-                color((char)0, (char)0, (char)0, fp);
+                rssringoccs_Color((char)0, (char)0, (char)0, fp);
             else
             {
                 planar_Z = rssringoccs_TwoVector_Rect(z_x, z_y);
@@ -176,7 +165,7 @@ int main(void)
                 Pz = rssringoccs_ThreeVector_Z(P);
 
                 if (Pz > 0.999999)
-                    color((char)0, (char)0, (char)0, fp);
+                    rssringoccs_Color((char)0, (char)0, (char)0, fp);
                 else
                 {
                     proj_P = rssringoccs_Stereographic_Projection(P);
@@ -193,15 +182,15 @@ int main(void)
                                                               max_iters);
 
                     /*  Find which root the final iteration is closest too.   */
-                    min = rssringoccs_Complex_Abs(
-                        rssringoccs_Complex_Subtract(root, roots[0])
+                    min = rssringoccs_CDouble_Abs(
+                        rssringoccs_CDouble_Subtract(root, roots[0])
                     );
                     ind = 0;
 
                     for (n=1; n<NRoots; ++n)
                     {
-                        temp = rssringoccs_Complex_Abs(
-                            rssringoccs_Complex_Subtract(root, roots[n])
+                        temp = rssringoccs_CDouble_Abs(
+                            rssringoccs_CDouble_Subtract(root, roots[n])
                         );
                         if (temp < min) {
                             min = temp;
@@ -214,7 +203,7 @@ int main(void)
                         brightness[n] = colors[ind][n];
 
                     /*  Color the current pixel.                              */
-                    color(brightness[0], brightness[1], brightness[2], fp);
+                    rssringoccs_Color(brightness[0], brightness[1], brightness[2], fp);
                 }
             }
 

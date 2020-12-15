@@ -436,7 +436,7 @@ rssringoccs_CDouble_Bessel_I0(rssringoccs_ComplexDouble z)
         /*  Multiply by the coefficient factor and return.                    */
         arg = rssringoccs_CDouble_Multiply_Real(rssringoccs_Two_Pi, z);
         exp_arg = rssringoccs_CDouble_Exp(z);
-        sqrt_arg = rssringoccs_Complex_Sqrt(arg);
+        sqrt_arg = rssringoccs_CDouble_Sqrt(arg);
         arg = rssringoccs_CDouble_Divide(exp_arg, sqrt_arg);
         bessel_I0 = rssringoccs_CDouble_Multiply(bessel_I0, arg);
     }

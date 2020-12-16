@@ -19,8 +19,7 @@
 
 #include <rss_ringoccs/include/rss_ringoccs_math.h>
 #include <rss_ringoccs/include/rss_ringoccs_complex.h>
-#include <rss_ringoccs/include/rss_ringoccs_fresnel_kernel.h>
-#include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
+#include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
 /******************************************************************************
  *  Function:                                                                 *

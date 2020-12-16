@@ -20,7 +20,7 @@
 #include <rss_ringoccs/include/rss_ringoccs_math.h>
 #include <rss_ringoccs/include/rss_ringoccs_complex.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_kernel.h>
-#include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
+#include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -76,39 +76,54 @@
  *          The diffraction corrected profile.                                *
  ******************************************************************************/
 rssringoccs_ComplexDouble
-Fresnel_Transform_Newton_Double(double *x_arr, double *phi_arr,
-                                rssringoccs_ComplexDouble *T_in, double *w_func,
-                                double kD, double r, double B, double D,
-                                double EPS, unsigned long toler, double dx,
-                                double F, unsigned long n_pts,
-                                unsigned long center)
+Fresnel_Transform_Perturbed_Newton_Double(double *x_arr, double *phi_arr,
+                                          rssringoccs_ComplexDouble *T_in,
+                                          double *w_func, double kD,
+                                          double r, double B, double D,
+                                          double EPS, unsigned long toler,
+                                          double dx, double F,
+                                          unsigned long n_pts,
+                                          unsigned long center,
+                                          double perturb[5])
 {
     /*  Declare all necessary variables. i and j are used for indexing.       */
     unsigned long m, n;
 
     /*  The Fresnel kernel and ring azimuth angle.                            */
-    double psi, phi, cos_psi, sin_psi, rcpr_F;
+    double psi, phi, x, poly, cos_psi, sin_psi, rcpr_F;
     rssringoccs_ComplexDouble T_out, exp_psi, integrand;
 
     /*  Initialize T_out and norm to zero so we can loop over later.          */
     T_out = rssringoccs_CDouble_Zero;
-    rcpr_F = 1.0/F;
+    rcpr_F  = 1.0/F;
 
     /*  Symmetry is lost without the Legendre polynomials, or Fresnel         *
      *  quadratic. Must compute everything from -W/2 to W/2.                  */
-    n = center-(int)((n_pts-1)/2);
+    n = center-(long)((n_pts-1)/2);
 
     /*  Use a Riemann Sum to approximate the Fresnel Inverse Integral.        */
     for (m = 0; m<n_pts; ++m)
     {
+        /*  Factor for the polynomial perturbation.                           */
+        x = (r-x_arr[m])/D;
+
         /*  Calculate the stationary value of psi with respect to phi.        */
         phi = Newton_Raphson_Fresnel_Psi(kD, r, x_arr[m], phi_arr[m],
                                          phi_arr[m], B, D, EPS, toler);
 
-        /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
-        psi = rssringoccs_Double_Fresnel_Psi(kD, r, x_arr[m],
-                                             phi, phi_arr[m], B, D);
+        /*  Compute psi and perturb by the requested polynomial.              */
+        psi = rssringoccs_Double_Fresnel_Psi(kD, r, x_arr[m], phi,
+                                             phi_arr[m], B, D);
 
+        /*  Use Horner's method to compute the polynomial.                    */
+        poly  = x*perturb[4]+perturb[3];
+        poly  = poly*x + perturb[2];
+        poly  = poly*x + perturb[1];
+        poly  = poly*x + perturb[0];
+        poly *= kD;
+        psi += poly;
+
+        /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
         cos_psi = rssringoccs_Double_Cos(psi);
         sin_psi = rssringoccs_Double_Sin(psi);
         exp_psi = rssringoccs_CDouble_Rect(cos_psi, -sin_psi);

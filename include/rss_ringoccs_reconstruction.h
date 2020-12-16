@@ -40,16 +40,15 @@ typedef struct TAUOBj {
     const char *psitype;
     unsigned char order;
     unsigned char interp;
-    unsigned char status;
     rssringoccs_ComplexDouble *T_out;
-} TAUObj;
+} rssringoccs_TAUObj;
 
 /*  Functions that compute the Fresnel Transform on a DLPObj instance.        */
-extern void DiffractionCorrectionFresnel(TAUObj *dlp);
-extern void DiffractionCorrectionLegendre(TAUObj *dlp);
-extern void DiffractionCorrectionNewton(TAUObj *dlp);
-extern void DiffractionCorrectionPerturbedNewton(TAUObj *dlp);
-extern void DiffractionCorrectionEllipse(TAUObj *dlp);
-extern void DiffractionCorrectionSimpleFFT(TAUObj *dlp);
+extern void DiffractionCorrectionFresnel(rssringoccs_TAUObj *dlp);
+extern void DiffractionCorrectionLegendre(rssringoccs_TAUObj *dlp);
+extern void DiffractionCorrectionNewton(rssringoccs_TAUObj *dlp);
+extern void DiffractionCorrectionPerturbedNewton(rssringoccs_TAUObj *dlp);
+extern void DiffractionCorrectionEllipse(rssringoccs_TAUObj *dlp);
+extern void DiffractionCorrectionSimpleFFT(rssringoccs_TAUObj *dlp);
 
 #endif

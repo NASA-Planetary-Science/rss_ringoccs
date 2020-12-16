@@ -19,6 +19,21 @@
 #define KBMD25NormEQ 1.65994438
 #define KBMD35NormEQ 1.52048382
 
+/*  typedef for the window function pointers. Window functions take in two    *
+ *  doubles (the x-value and the window width), and return a double.          *
+ *  The function pointer works as follows:                                    *
+ *      return_type  (*type_name)(type_var1, type_var2, ...)                  *
+ *  So, let's typedef this for the window function.                           */
+typedef double (*rss_ringoccs_window_func)(double, double);
+
+extern void reset_window(double *x_arr, double *w_func, double dx, double width,
+                         long nw_pts, rss_ringoccs_window_func fw);
+
+/*  As a side comment, the FresT function pointer takes a different number of *
+ *  variables depending on which method of diffraction correction is being    *
+ *  performed, so we can't just typedef it here. We'll need to declare it     *
+ *  individually for each diffraction correction method instead.              */
+
 /*  These lines are repeated over and over in this header file to define the  *
  *  various math functions. Use this preprocessor function to save lines of   *
  *  code, stay consistent with naming conventions, and add clarity.           */

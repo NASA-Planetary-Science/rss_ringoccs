@@ -93,6 +93,12 @@ for filename in special_functions/*.c; do
     $CC $CompilerArgs $filename
 done
 
+echo -e "\n\tCompiling fresnel_trasnform/"
+for filename in fresnel_transform/*.c; do
+    echo -e "\t\tCompiling: $filename"
+    $CC $CompilerArgs $filename
+done
+
 echo -e "\n\tCompiling reconstruction/"
 for filename in reconstruction/*.c; do
     echo -e "\t\tCompiling: $filename"

@@ -756,7 +756,7 @@ static PyObject *where_greater(PyObject *self, PyObject *args)
     PyObject *output, *capsule;
     PyArrayObject *arr;
     double threshold;
-    long **where;
+    unsigned long **where;
 
     /*  The input is a numpy array, proceed. Otherwise spit out an error.     */
     if (PyArg_ParseTuple(args, "O!d", &PyArray_Type, &arr, &threshold)){
@@ -833,10 +833,10 @@ static PyObject *where_greater(PyObject *self, PyObject *args)
         }
 
         /*  The first element of where is the array of indices.               */
-        long *where_arr = where[0];
+        unsigned long *where_arr = where[0];
 
         /*  The second element is the number of points in the index array.    */
-        long where_dim = *where[1];
+        long where_dim = (long)*where[1];
 
         /*  Create a Numpy array object to be passed back to Python.          */
         output =
@@ -891,7 +891,7 @@ static PyObject *where_lesser(PyObject *self, PyObject *args)
     PyObject *output, *capsule;
     PyArrayObject *arr;
     double threshold;
-    long **where;
+    unsigned long **where;
     long typenum, dim;
 
     /*  The input is a numpy array, proceed. Otherwise spit out an error.     */
@@ -969,10 +969,10 @@ static PyObject *where_lesser(PyObject *self, PyObject *args)
         }
 
         /*  The first element of where is the array of indices.               */
-        long *where_arr = where[0];
+        unsigned long *where_arr = where[0];
 
         /*  The second element is the number of points in the index array.    */
-        long where_dim = *where[1];
+        long where_dim = (long)*where[1];
 
         /*  Create a Numpy array object to be passed back to Python.          */
         output  = PyArray_SimpleNewFromData(1, &where_dim, NPY_LONG,

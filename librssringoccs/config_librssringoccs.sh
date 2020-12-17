@@ -47,7 +47,7 @@ echo -e "\t\t$CompilerArgs5"
 
 echo -e "\n\tCompiling reconstruction/"
 for filename in reconstruction/*.c; do
-    echo -e "\t\tCompiling: $filename\n\n\n\n\n\n"
+    echo -e "\t\tCompiling: $filename"
     $CC $CompilerArgs $filename
 done
 

@@ -41,7 +41,7 @@ float rssringoccs_Float_Modified_Kaiser_Bessel_2_5(float x, float W)
 {
     float bessel_x, arg;
     arg = 2.0*x/W;
-    arg = 1.0 - x*x;
+    arg = 1.0 - arg*arg;
 
     /*  arg > 0 means x is within the window. We use a Taylor series for the  *
      *  modified Kaiser-Bessel function.                                      */
@@ -73,7 +73,7 @@ double rssringoccs_Double_Modified_Kaiser_Bessel_2_5(double x, double W)
 {
     double bessel_x, arg;
     arg = 2.0*x/W;
-    arg = 1.0 - x*x;
+    arg = 1.0 - arg*arg;
 
     /*  arg > 0 means x is within the window. We use a Taylor series for the  *
      *  modified Kaiser-Bessel function.                                      */
@@ -106,7 +106,7 @@ rssringoccs_LDouble_Modified_Kaiser_Bessel_2_5(long double x, long double W)
 {
     long double bessel_x, arg;
     arg = 2.0*x/W;
-    arg = 1.0 - x*x;
+    arg = 1.0 - arg*arg;
 
     if (arg > 0)
     {

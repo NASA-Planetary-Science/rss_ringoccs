@@ -3,8 +3,9 @@
 #define __RSS_RINGOCCS_RECONSTRUCTION_H__
 
 /*  Various functions, complex variables, and more found here.                */
-#include <rss_ringoccs/include/rss_ringoccs_complex.h>
 #include <rss_ringoccs/include/rss_ringoccs_bool.h>
+#include <rss_ringoccs/include/rss_ringoccs_complex.h>
+#include <rss_ringoccs/include/rss_ringoccs_special_functions.h>
 
 /*  Structure that contains all of the necessary data.                        */
 typedef struct TAUOBj {
@@ -13,6 +14,9 @@ typedef struct TAUOBj {
     double *F_km_vals;
     double *phi_rad_vals;
     double *kd_vals;
+    double *f_sky_hz_vals;
+    double *rho_dot_kms_vals;
+    double *raw_tau_threshold_vals;
     double *B_rad_vals;
     double *D_km_vals;
     double *w_km_vals;
@@ -35,20 +39,38 @@ typedef struct TAUOBj {
     rssringoccs_Bool use_fwd;
     rssringoccs_Bool use_fft;
     rssringoccs_Bool error_occurred;
-    const char *error_message;
-    const char *wtype;
-    const char *psitype;
+    char *error_message;
+    char *wtype;
+    char *psitype;
     unsigned char order;
     unsigned char interp;
     rssringoccs_ComplexDouble *T_out;
 } rssringoccs_TAUObj;
 
-/*  Functions that compute the Fresnel Transform on a DLPObj instance.        */
-extern void DiffractionCorrectionFresnel(rssringoccs_TAUObj *dlp);
-extern void DiffractionCorrectionLegendre(rssringoccs_TAUObj *dlp);
-extern void DiffractionCorrectionNewton(rssringoccs_TAUObj *dlp);
-extern void DiffractionCorrectionPerturbedNewton(rssringoccs_TAUObj *dlp);
-extern void DiffractionCorrectionEllipse(rssringoccs_TAUObj *dlp);
-extern void DiffractionCorrectionSimpleFFT(rssringoccs_TAUObj *dlp);
+extern void ReverseDoubleArray(double *arr, long arrsize);
+extern void GetRangeFromString(char *range, double *rng_list);
+extern void GetNormeqFromString(char *wtype, double *norm_eq);
+extern void check_tau_data(rssringoccs_TAUObj *tau);
+extern void check_tau_data_range(rssringoccs_TAUObj *dlp, double two_dx);
+
+
+extern void select_window_func(rss_ringoccs_window_func *fw,
+                               rssringoccs_TAUObj *tau);
+
+extern void rssringoccs_Set_Tau_Error_Message(const char *mess,
+                                              rssringoccs_TAUObj *tau);
+
+
+extern void reset_window(double *x_arr, double *w_func, double dx, double width,
+                         long nw_pts, rss_ringoccs_window_func fw);
+
+/*  Functions that compute the Fresnel Transform on a TAUObj instance.        */
+extern void DiffractionCorrectionFresnel(rssringoccs_TAUObj *tau);
+extern void DiffractionCorrectionFresnelNorm(rssringoccs_TAUObj *tau);
+extern void DiffractionCorrectionLegendre(rssringoccs_TAUObj *tau);
+extern void DiffractionCorrectionNewton(rssringoccs_TAUObj *tau);
+extern void DiffractionCorrectionEllipse(rssringoccs_TAUObj *tau);
+extern void DiffractionCorrectionSimpleFFT(rssringoccs_TAUObj *tau);
+extern void DiffractionCorrectionPerturbedNewton(rssringoccs_TAUObj *tau);
 
 #endif

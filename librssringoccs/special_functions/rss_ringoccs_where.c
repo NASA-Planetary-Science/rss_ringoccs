@@ -9,36 +9,30 @@
  *  pointer, the code is exactly the same.                                    */
 
 #define CreateWhereFunction(type, Type, threshtype)                            \
-long **rssringoccs_Where_Greater_##Type(type *data, long dim,                  \
+unsigned long **rssringoccs_Where_Greater_##Type(type *data, unsigned long dim,\
                                         threshtype threshold)                  \
 {                                                                              \
     /*  Declare necessary variables.                                         */\
-    long i;                                                                    \
-    long *dummy;                                                               \
-    long *arr;                                                                 \
-    long **where;                                                              \
-    long arr_size = 0;                                                         \
+    unsigned long i;                                                           \
+    unsigned long *arr;                                                        \
+    unsigned long **where;                                                     \
+    unsigned long arr_size = 0;                                                \
                                                                                \
     /*  Create a dummy array to store the correct indices in for now.        */\
-    dummy = (long *)malloc(sizeof(long) * dim);                                \
+    arr = malloc(sizeof(*arr) * dim);                                          \
                                                                                \
     /*  Loop over the input array data to check which indices match.         */\
     for (i=0; i<dim; ++i)                                                      \
     {                                                                          \
         if (data[i] > threshold)                                               \
         {                                                                      \
-            dummy[arr_size] = i;                                               \
+            arr[arr_size] = i;                                                 \
             arr_size += 1;                                                     \
         }                                                                      \
     }                                                                          \
                                                                                \
     /*  Resize the array dummy to avoid hogging extra memory.                */\
-    arr = (long *)malloc(sizeof(long) * arr_size);                             \
-    for (i=0; i<arr_size; ++i)                                                 \
-        arr[i] = dummy[i];                                                     \
-                                                                               \
-    /*  Since arr now contains all of the necessary info, free dummy.        */\
-    free(dummy);                                                               \
+    arr = realloc(arr, sizeof(*arr) * arr_size);                               \
                                                                                \
     /*  Declare a pointer to a pointer to containg all info to be returned.  */\
     where = malloc(sizeof(*where) * 2);                                        \
@@ -47,7 +41,8 @@ long **rssringoccs_Where_Greater_##Type(type *data, long dim,                  \
     where[0] = arr;                                                            \
                                                                                \
     /*  The second index is the size of the returning array.                 */\
-    where[1] = &arr_size;                                                      \
+    where[1] = malloc(sizeof(*where[1]));                                      \
+    *where[1] = arr_size;                                                      \
     return where;                                                              \
 }
  
@@ -67,44 +62,40 @@ CreateWhereFunction(long double, LDouble, long double)
 #undef CreateWhereFunction
 
 #define CreateWhereFunction(type, Type, threshtype)                            \
-long **rssringoccs_Where_Lesser_##Type(type *data, long dim,                   \
+unsigned long **rssringoccs_Where_Lesser_##Type(type *data, unsigned long dim, \
                                        threshtype threshold)                   \
 {                                                                              \
     /*  Declare necessary variables.                                         */\
-    long i;                                                                    \
-    long *dummy;                                                               \
-    long *arr;                                                                 \
-    long **where;                                                              \
-    long arr_size = 0;                                                         \
+    unsigned long i;                                                           \
+    unsigned long *arr;                                                        \
+    unsigned long **where;                                                     \
+    unsigned long arr_size = 0;                                                \
                                                                                \
     /*  Create a dummy array to store the correct indices in for now.        */\
-    dummy = (long *)malloc(sizeof(long) * dim);                                \
+    arr = malloc(sizeof(*arr) * dim);                                          \
                                                                                \
     /*  Loop over the input array data to check which indices match.         */\
     for (i=0; i<dim; ++i)                                                      \
     {                                                                          \
-        if (data[i] < threshold){                                              \
-            dummy[arr_size] = i;                                               \
+        if (data[i] < threshold)                                               \
+        {                                                                      \
+            arr[arr_size] = i;                                                 \
             arr_size += 1;                                                     \
         }                                                                      \
     }                                                                          \
                                                                                \
     /*  Resize the array dummy to avoid hogging extra memory.                */\
-    arr = (long *)malloc(sizeof(long) * arr_size);                             \
-    for (i=0; i<arr_size; ++i)                                                 \
-        arr[i] = dummy[i];                                                     \
-                                                                               \
-    /*  Since arr now contains all of the necessary info, free dummy.        */\
-    free(dummy);                                                               \
+    arr = realloc(arr, sizeof(*arr) * arr_size);                               \
                                                                                \
     /*  Declare a pointer to a pointer to containg all info to be returned.  */\
-    where = (long **)malloc(sizeof(long) * 2);                                 \
+    where = malloc(sizeof(*where) * 2);                                        \
                                                                                \
     /*  The first index is the actual array of indices.                      */\
     where[0] = arr;                                                            \
                                                                                \
     /*  The second index is the size of the returning array.                 */\
-    where[1] = &arr_size;                                                      \
+    where[1] = malloc(sizeof(*where[1]));                                      \
+    *where[1] = arr_size;                                                      \
     return where;                                                              \
 }
 
@@ -123,47 +114,44 @@ CreateWhereFunction(long double, LDouble, long double)
 #undef CreateWhereFunction
 
 #define CreateWhereFunction(type, Type, threshtype)\
-long **rssringoccs_Where_LesserGreater_##Type(type *data, long dim,            \
+unsigned long **rssringoccs_Where_LesserGreater_##Type(type *data, unsigned long dim,\
                                               threshtype lower,                \
                                               threshtype upper)                \
 {                                                                              \
     /*  Declare necessary variables.                                         */\
-    long i;                                                                    \
-    long *dummy;                                                               \
-    long *arr;                                                                 \
-    long **where;                                                              \
-    long arr_size = 0;                                                         \
+    unsigned long i;                                                           \
+    unsigned long *arr;                                                        \
+    unsigned long **where;                                                     \
+    unsigned long arr_size = 0;                                                \
                                                                                \
     /*  Create a dummy array to store the correct indices in for now.        */\
-    dummy = (long *)malloc(sizeof(long) * dim);                                \
+    arr = malloc(sizeof(*arr) * dim);                                          \
                                                                                \
     /*  Loop over the input array data to check which indices match.         */\
-    for (i=0; i<dim; ++i) {                                                    \
+    for (i=0; i<dim; ++i)                                                      \
+    {                                                                          \
         if ((data[i] > lower) && (data[i] < upper))                            \
         {                                                                      \
-            dummy[arr_size] = i;                                               \
+            arr[arr_size] = i;                                                 \
             arr_size += 1;                                                     \
         }                                                                      \
     }                                                                          \
                                                                                \
     /*  Resize the array dummy to avoid hogging extra memory.                */\
-    arr = (long *)malloc(sizeof(long) * arr_size);                             \
-    for (i=0; i<arr_size; ++i)                                                 \
-        arr[i] = dummy[i];                                                     \
-                                                                               \
-    /*  Since arr now contains all of the necessary info, free dummy.        */\
-    free(dummy);                                                               \
+    arr = realloc(arr, sizeof(*arr) * arr_size);                               \
                                                                                \
     /*  Declare a pointer to a pointer to containg all info to be returned.  */\
-    where = (long **)malloc(sizeof(long) * 2);                                 \
+    where = malloc(sizeof(*where) * 2);                                        \
                                                                                \
     /*  The first index is the actual array of indices.                      */\
     where[0] = arr;                                                            \
                                                                                \
     /*  The second index is the size of the returning array.                 */\
-    where[1] = &arr_size;                                                      \
+    where[1] = malloc(sizeof(*where[1]));                                      \
+    *where[1] = arr_size;                                                      \
     return where;                                                              \
 }
+
 
 CreateWhereFunction(char, Char, double)
 CreateWhereFunction(unsigned char, UChar, double)

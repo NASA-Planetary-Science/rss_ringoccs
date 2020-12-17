@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <rss_ringoccs/include/rss_ringoccs_math.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
@@ -30,8 +29,9 @@
  *          immensely fast, capable of processing the entire Rev007 E         *
  *          occultation accurately in less than a second at 1km resolution.   *
  ******************************************************************************/
-void DiffractionCorrectionFresnel(rssringoccs_TAUObj *tau)
+void DiffractionCorrectionFresnelNorm(rssringoccs_TAUObj *tau)
 {
+
     /*  m and n used for indexing, nw_pts is number of points in window.      */
     unsigned long m, n, nw_pts, center;
 
@@ -47,9 +47,6 @@ void DiffractionCorrectionFresnel(rssringoccs_TAUObj *tau)
      *  type rss_ringoccs_window_func was declared at the start of this file. *
      *  Be sure to free this at the end!                                      */
     rss_ringoccs_window_func fw;
-
-    /*  This should remain at false.                                          */
-    tau->error_occurred = rssringoccs_False;
 
     if (tau->use_fwd)
         fwd_factor = -1.0;
@@ -84,7 +81,6 @@ void DiffractionCorrectionFresnel(rssringoccs_TAUObj *tau)
      *  there's no problem. If not, this next step may cause a segmentation   *
      *  fault.                                                                */
     w_init = tau->w_km_vals[center];
-    printf("%f\n", w_init);
 
     /*  It is also assumed these pointers have at least two elements of       *
      *  doubles being pointed to. Again, DiffractionCorrection checks this.   *
@@ -159,8 +155,8 @@ void DiffractionCorrectionFresnel(rssringoccs_TAUObj *tau)
             nw_pts = ((long)(w_init / two_dx))+1;
 
             /*  Reallocate memory, since the sizes of the arrays changed.     */
-            w_func = realloc(w_func, sizeof(*w_func) * nw_pts);
-            x_arr  = realloc(x_arr,  sizeof(*x_arr)  * nw_pts);
+            w_func = (double *)realloc(w_func, sizeof(double)*nw_pts);
+            x_arr  = (double *)realloc(x_arr, sizeof(double)*nw_pts);
 
             /*  Reset the x_arr array to range between -W/2 and zero.         */
             reset_window(x_arr, w_func, dx, w_init, nw_pts, fw);
@@ -176,9 +172,9 @@ void DiffractionCorrectionFresnel(rssringoccs_TAUObj *tau)
         }
 
         /*  Compute the Fresnel Transform about the current point.            */
-        tau->T_out[m] = Fresnel_Transform_Double(x_arr, tau->T_in, w_func,
-                                                 tau->F_km_vals[center], dx,
-                                                 nw_pts, center);
+        tau->T_out[m] = Fresnel_Transform_Norm_Double(x_arr, tau->T_in, w_func,
+                                                      tau->F_km_vals[center],
+                                                      nw_pts, center);
 
         /*  Move the pointers to the next point.                              */
         center += 1;

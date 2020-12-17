@@ -31,17 +31,16 @@ setup(name='special_functions',
         ]
      )
 
-#   setup(name='diffrec',
-#         version='1.3',
-#         description='Diffraction correction and modeling',
-#         author='Ryan Maguire',
-#         ext_modules=[
-#             Extension('diffrec',
-#                       ['diffractioncorrectionmodule.c'],
-#                       include_dirs=[numpy.get_include(), '../include/',
-#                                     '../special_functions/'],
-#                       library_dirs=['./'],
-#                       libraries=['rssringoccsdiffractioncorrection'])
-#           ]
-#        )
+setup(name='diffrec',
+      version='1.3',
+      description='Diffraction correction and modeling',
+      author='Ryan Maguire',
+      ext_modules=[
+          Extension('diffrec',
+                    ['rss_ringoccs/src/diffraction_correction_class.c'],
+                    include_dirs=[numpy.get_include()],
+                    library_dirs=['/usr/local/lib'],
+                    libraries=['rssringoccs'])
+        ]
+     )
 

@@ -45,6 +45,8 @@
 
 /*  Prototypes for these functions found here.                                */
 #include "rss_ringoccs_compare_funcs.h"
+#include <rss_ringoccs/include/rss_ringoccs_complex.h>
+#include <complex.h>
 
 /*  Routine for comparing two real valued functions at single precision.      */
 void
@@ -157,7 +159,6 @@ rssringoccs_Compare_Float_Funcs(const char *f0_name, float (*f0)(float),
     free(y1);
 }
 /*  End of rssringoccs_Compare_Float_Funcs.                                   */
-
 
 /*  Routine for comparing two real valued functions at double precision.      */
 void
@@ -386,3 +387,181 @@ rssringoccs_Compare_LDouble_Funcs(const char *f0_name,
     free(y1);
 }
 /*  End of rssringoccs_Compare_LDouble_Funcs.                                 */
+
+/*  Routine for comparing two complex valued functions at single precision.   */
+void
+rssringoccs_Compare_CFloat_Funcs(const char *f0_name,
+                                 rssringoccs_ComplexFloat
+                                   (*f0)(rssringoccs_ComplexFloat),
+                                 const char *f1_name,
+                                 float _Complex
+                                   (*f1)(float _Complex),
+                                 float start,
+                                 float end,
+                                 unsigned long N)
+{
+    /*  Declare variables for sampling the region [start, end].               */
+    float x, y, ds;
+    float x_c, y_c, x_s, y_s, dx, dy;
+
+    /*  Declare variables for computing the maximum difference between the    *
+     *  two provided functions f0 and f1.                                     */
+    float max_err = 0.0F;
+    float temp;
+
+    /*  Declare two pointers to represent arrays for f0(x) and f1(x).         */
+    rssringoccs_ComplexFloat **z0;
+    float _Complex **z1;
+
+    /*  Declare a dummy variable for indexing.                                */
+    unsigned long m, n;
+
+    /*  Declare variables for computing computation time.                     */
+    clock_t t1, t2;
+
+    /*  Error check to make sure the user provided valid inputs.              */
+    if (start >= end)
+    {
+        puts("\nError Encountered: rss_ringoccs\n"
+             "\r\trssringoccs_Compare_Float_Funcs\n\n"
+             "start is greater than or equal to end.\n"
+             "Abort computation.\n");
+        exit(0);
+    }
+    else if (N == 0)
+    {
+        puts("\nError Encountered: rss_ringoccs\n"
+             "\r\trssringoccs_Compare_Float_Funcs\n\n"
+             "Input sample size is zero. Aborting computation.\n");
+        exit(0);
+    }
+
+    /*  We'll increment evenly throughout the region.                         */
+    ds = (end - start) / N;
+
+    /*  Allocate memory for the two pointers we've declared.                  */
+    z0 = malloc(sizeof(*z0) * N);
+    z1 = malloc(sizeof(*z1) * N);
+
+    for (m=0; m<N; ++m)
+    {
+        z0[m] = malloc(sizeof(*z0[m]) * N);
+        z1[m] = malloc(sizeof(*z1[m]) * N);
+    }
+
+    /*  Set x to the starting value and grab the current time.                */
+    x = start;
+    y = start;
+    t1 = clock();
+
+    /*  Perform the calculation for the f0 function.                          */
+    for (m=0; m<N; ++m)
+    {
+        for (n=0; n<N; ++n)
+        {
+            z0[m][n] = f0(rssringoccs_CFloat_Rect(x, y));
+            x += ds;
+        }
+        y += ds;
+    }
+
+    /*  Grab the current clock time again.                                    */
+    t2 = clock();
+
+    /*  t2-t1 is the number of clock cycles that have passed between grabbing *
+     *  t1 and t2. To convert this to seconds, use the macro CLOCKS_PER_SEC   *
+     *  provided in time.h.                                                   */
+    printf("%s: %f\n", f0_name, (double)(t2-t1)/CLOCKS_PER_SEC);
+
+    /*  Restart the computation for the f1 function.                          */
+    x = start;
+    y = start;
+
+    /*  Reset the clock.                                                      */
+    t1 = clock();
+
+    /*  Perform the computation using f1 instead of f0.                       */
+    for (m=0; m<N; ++m)
+    {
+        for (n=0; n<N; ++n)
+        {
+            z1[m][n] = f1(x + _Complex_I*y);
+            x += ds;
+        }
+        y += ds;
+    }
+
+    /*  Grab the time again.                                                  */
+    t2 = clock();
+
+    /*  Print out how long it took for f1 to compute.                         */
+    printf("%s: %f\n", f1_name, (double)(t2-t1)/CLOCKS_PER_SEC);
+
+    /*  NOTE:                                                                 *
+     *      Without the following comparison of the two pointers y0 and y1,   *
+     *      some compilers may see the above computations as redundant with   *
+     *      optimization on, and skip them. The resulting times will be close *
+     *      to zero for both f0 and f1.                                       */
+
+    /*  Compute the maximum absolute error between f0 and f1.                 */
+    for (m=0; m<N; ++m)
+    {
+        for (n=0; n<N; ++n)
+        {
+            x_s = rssringoccs_CFloat_Real_Part(z0[m][n]);
+            y_s = rssringoccs_CFloat_Imag_Part(z0[m][n]);
+
+            x_c = creal(z1[m][n]);
+            y_c = cimag(z1[m][n]);
+
+            dx = x_s - x_c;
+            dy = y_s - y_c;
+
+            /*  We'll use the standard library function to check the error.   */
+            temp = sqrtf(dx*dx + dy*dy);
+
+            /*  Check if the error got larger and set max_err accordingly.    */
+            if (max_err < temp)
+                max_err = temp;
+        }
+    }
+    /*  End of for-loop computing |y0-y1|.                                    */
+
+    /*  Print out the error to 8 decimals (assumes 32-bit precision).         */
+    printf("Max Error: %.8f\n", max_err);
+
+    /*  Free the pointers we've malloc'd.                                     */
+    for (m=0; m<N; ++m)
+    {
+        free(z0[m]);
+        free(z1[m]);
+    }
+
+    free(z0);
+    free(z1);
+}
+/*  End of rssringoccs_Compare_Float_Funcs.                                   */
+
+extern void
+rssringoccs_Compare_CDouble_Funcs(const char *f0_name,
+                                  rssringoccs_ComplexDouble
+                                    (*f0)(rssringoccs_ComplexDouble),
+                                  const char *f1_name,
+                                  double _Complex
+                                    (*f1)(double _Complex),
+                                  double start,
+                                  double end,
+                                  unsigned long N);
+
+
+extern void
+rssringoccs_Compare_CLDouble_Funcs(const char *f0_name,
+                                   rssringoccs_ComplexLongDouble
+                                     (*f0)(rssringoccs_ComplexLongDouble),
+                                   const char *f1_name,
+                                   long double _Complex
+                                     (*f1)(long double _Complex),
+                                   long double start,
+                                   long double end,
+                                   unsigned long N);
+

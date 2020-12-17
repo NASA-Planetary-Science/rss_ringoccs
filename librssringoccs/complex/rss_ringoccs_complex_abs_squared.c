@@ -16,15 +16,50 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
- *                        rss_ringoccs_complex_abs                            *
+ *                    rss_ringoccs_complex_abs_squared                        *
  ******************************************************************************
  *  Purpose:                                                                  *
  *      Contains the source code for f(z) = |z|^2.                            *
+ ******************************************************************************
+ *                             DEFINED FUNCTIONS                              *
+ ******************************************************************************
+ *  Function Name:                                                            *
+ *      rssringoccs_CFloat_Abs_Squared:                                       *
+ *      rssringoccs_CDouble_Abs_Squared:                                      *
+ *      rssringoccs_CLDouble_Abs_Squared:                                     *
+ *  Purpose:                                                                  *
+ *      Computes the square of the absolute value, f(z) = |z|^2:              *
+ *                                                                            *
+ *          f(z) = f(x + iy) = x^2 + y^2                                      *
+ *                                                                            *
+ *  Arguments:                                                                *
+ *      z (rssringoccs_ComplexFloat/ComplexDouble/ComplexLongDouble):         *
+ *          A complex number.                                                 *
+ *  Output:                                                                   *
+ *      abs_sq_z (float/double/long double):                                  *
+ *          The square of the absolute value of z.                            *
+ *  Method:                                                                   *
+ *      Extract the real and imaginary parts of z and return x^2 + y^2.       *
  ******************************************************************************
  *                               DEPENDENCIES                                 *
  ******************************************************************************
  *  1.) rss_ringoccs_complex.h:                                               *
  *          Header where complex types and function prototypes are defined.   *
+ ******************************************************************************
+ *                            A NOTE ON COMMENTS                              *
+ ******************************************************************************
+ *  It is anticipated that many users of this code will have experience in    *
+ *  either Python or IDL, but not C. Many comments are left to explain as     *
+ *  much as possible. Vagueness or unclear code should be reported to:        *
+ *  https://github.com/NASA-Planetary-Science/rss_ringoccs/issues             *
+ ******************************************************************************
+ *                            A FRIENDLY WARNING                              *
+ ******************************************************************************
+ *  This code is compatible with the C89/C90 standard. The setup script that  *
+ *  is used to compile this in config_librssringoccs.sh uses gcc and has the  *
+ *  -pedantic and =std=c89 flags to check for compliance. If you edit this to *
+ *  use C99 features (built-in complex, built-in booleans, C++ style comments *
+ *  and etc.), or GCC extensions, you will need to edit the config script.    *
  ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
  *  Date:       November 30, 2020                                             *

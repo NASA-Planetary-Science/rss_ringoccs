@@ -44,19 +44,20 @@
  *      We can then link via -lrssringoccs_compare (see below).               */
 #include "../rss_ringoccs_compare_funcs.h"
 
-/*  Routine for comparing ccos with rssringoccs_CDouble_Cos.                  */
+/*  Routine for comparing ccosf with rssringoccs_CFloat_Cos.                  */
 int main(void)
 {
     /*  Set the start and end for the values we're testing.                   */
-    double start = -1.0;
-    double end   =  1.0;
+    float start = -1.0F;
+    float end   =  1.0F;
 
     /*  We'll test on 100 million points between start and end.               */
     unsigned long N = 1e4;
 
-    /*  Use the compare function to test rssringoccs_Double_Abs against fabs. */
-    rssringoccs_Compare_CDouble_Funcs("rss_ringoccs", rssringoccs_CDouble_Cos,
-                                      "C99", ccos, start, end, N);
+    /*  Use the compare function to test rssringoccs_CFloat_Abs against cabsf.*/
+    rssringoccs_Compare_Real_CFloat_Funcs("rss_ringoccs",
+                                          rssringoccs_CFloat_Abs,
+                                          "C99", cabsf, start, end, N);
 
     return 0;
 }
@@ -65,14 +66,14 @@ int main(void)
 /******************************************************************************
  *  Compileable with:                                                         *
  *      gcc -O3 -Wall -Wpedantic -Wextra -pedantic -pedantic-errors           *
- *          -std=c99 complex_cos_time_test.c -o test -lrssringoccs            *
+ *          -std=c99 complex_absf_time_test.c -o test -lrssringoccs           *
  *              -lrssringoccs_compare                                         *
  *  Output (iMac 2017 3.4 GHz Intel Quad-Core i5):                            *
- *      rss_ringoccs: 5.915511                                                *
- *      C99: 3.965554                                                         *
- *      Max Error: 0.0000000000000004                                         *
+ *      rss_ringoccs: 0.896212                                                *
+ *      C99: 1.887401                                                         *
+ *      Max Error: 0.00024414                                                 *
  *  With -O3 optimization:                                                    *
- *      rss_ringoccs: 5.861064                                                *
- *      C99: 4.131632                                                         *
- *      Max Error: 0.0000000000000004                                         *
+ *      rss_ringoccs: 0.896489                                                *
+ *      C99: 1.826349                                                         *
+ *      Max Error: 0.00024414                                                 *
  ******************************************************************************/

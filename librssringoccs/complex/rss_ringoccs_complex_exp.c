@@ -63,8 +63,23 @@ rssringoccs_CDouble_Exp(rssringoccs_ComplexDouble z)
      *  Euler's formula to write exp(iy) as cos(y) + i*sin(y), giving us      *
      *  exp(z) = exp(x)*cos(y) + i*exp(x)*sin(y).                             */
     exp_real = rssringoccs_Double_Exp(real);
-    exp_z_real = exp_real * rssringoccs_Double_Cos(imag);
-    exp_z_imag = exp_real * rssringoccs_Double_Sin(imag);
+
+    /*  In the case that z is real, use the real valued exponential. This     *
+     *  avoid the result of exp(inf) = inf + i nan. The imaginary part of     *
+     *  complex exp(inf) will be exp(inf) * sin(0) = inf * 0 which results in *
+     *  nan. This if-then statement avoids this.                              */
+    if (imag == 0.0)
+    {
+        exp_z_real = exp_real;
+        exp_z_imag = 0.0;
+    }
+
+    /*  When we have non-zero imaginary part, resort to Euler's formula.      */
+    else
+    {
+        exp_z_real = exp_real * rssringoccs_Double_Cos(imag);
+        exp_z_imag = exp_real * rssringoccs_Double_Sin(imag);
+    }
 
     /*  Use rssringoccs_Complex_Rect to create the output and return.         */
     exp_z = rssringoccs_CDouble_Rect(exp_z_real, exp_z_imag);

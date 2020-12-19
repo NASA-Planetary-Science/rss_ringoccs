@@ -46,7 +46,7 @@ int main(void)
     /*  And declare a variable for indexing.                                  */
     int n;
 
-    /*  Set z0, z1, and z2 to 0, i pi, and pi, respectively.                  */
+    /*  Set the test values in the array z.                                   */
     z[0] = rssringoccs_CDouble_Zero;
     z[1] = rssringoccs_CDouble_One;
     z[2] = rssringoccs_CDouble_Rect(1.0, 1.0);
@@ -58,17 +58,17 @@ int main(void)
     /*  Loop over the results and print them.                                 */
     for (n=0; n<7; ++n)
     {
-        /*  Compute the complex cosine of the nth value.                      */
+        /*  Compute |z|^2 of the nth value.                                   */
         w[n] = rssringoccs_CDouble_Abs_Squared(z[n]);
 
-        /*  Extract the real and imaginary parts from z[n] and w[n].          */
+        /*  Extract the real and imaginary parts from z[n].                   */
         re_z = rssringoccs_CDouble_Real_Part(z[n]);
         im_z = rssringoccs_CDouble_Imag_Part(z[n]);
 
         /*  And finally, print the result to the screen.                      */
         printf("|%f + i%f|^2 = %f\n", re_z, im_z, w[n]);
     }
-    /*  End of for loop computing cos(z).                                     */
+    /*  End of for loop computing |z|^2.                                      */
 
     return 0;
 }

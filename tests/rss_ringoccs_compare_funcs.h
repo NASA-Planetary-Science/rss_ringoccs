@@ -54,8 +54,7 @@ rssringoccs_Compare_LDouble_Funcs(const char *f0_name,
                                   long double (*f0)(long double),
                                   const char *f1_name,
                                   long double (*f1)(long double),
-                                  long double start,
-                                  long double end,
+                                  long double start, long double end,
                                   unsigned long N);
 
 extern void
@@ -65,9 +64,7 @@ rssringoccs_Compare_CFloat_Funcs(const char *f0_name,
                                  const char *f1_name,
                                  float _Complex
                                    (*f1)(float _Complex),
-                                 float start,
-                                 float end,
-                                 unsigned long N);
+                                 float start, float end, unsigned long N);
 
 extern void
 rssringoccs_Compare_CDouble_Funcs(const char *f0_name,
@@ -76,9 +73,7 @@ rssringoccs_Compare_CDouble_Funcs(const char *f0_name,
                                   const char *f1_name,
                                   double _Complex
                                     (*f1)(double _Complex),
-                                  double start,
-                                  double end,
-                                  unsigned long N);
+                                  double start, double end, unsigned long N);
 
 
 extern void
@@ -88,9 +83,33 @@ rssringoccs_Compare_CLDouble_Funcs(const char *f0_name,
                                    const char *f1_name,
                                    long double _Complex
                                      (*f1)(long double _Complex),
-                                   long double start,
-                                   long double end,
+                                   long double start, long double end,
                                    unsigned long N);
+
+extern void
+rssringoccs_Compare_Real_CFloat_Funcs(const char *f0_name,
+                                      float (*f0)(rssringoccs_ComplexFloat),
+                                      const char *f1_name,
+                                      float (*f1)(float _Complex),
+                                      float start, float end, unsigned long N);
+
+extern void
+rssringoccs_Compare_Real_CDouble_Funcs(const char *f0_name,
+                                       double (*f0)(rssringoccs_ComplexDouble),
+                                       const char *f1_name,
+                                       double (*f1)(double _Complex),
+                                       double start, double end,
+                                       unsigned long N);
+
+
+extern void
+rssringoccs_Compare_Real_CLDouble_Funcs(const char *f0_name,
+                                        long double
+                                          (*f0)(rssringoccs_ComplexLongDouble),
+                                        const char *f1_name,
+                                        long double (*f1)(long double _Complex),
+                                        long double start, long double end,
+                                        unsigned long N);
 
 #endif
 /*  End of include guard.                                                     */

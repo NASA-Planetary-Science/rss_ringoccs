@@ -17,39 +17,39 @@
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
  *  Purpose:                                                                  *
- *      Provides an example of using the complex cosine function.             *
+ *      Provides an example of using the absolute value function.             *
  ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
- *  Date:       December 11, 2020                                             *
+ *  Date:       December 19, 2020                                             *
  ******************************************************************************/
 
-/*  Let's compute the complex cosine of the values pi, i pi, and 0, as well   *
- *  as complex and real nan and inf.                                          */
+/*  Let's compute |z| for 0, 1, 1+i, nan, infinity, complex nan, and          *
+ *  complex infinity.                                                         */
 
-/*  Complex cosine is declared here.                                          */
+/*  Complex functions defined here.                                           */
 #include <rss_ringoccs/include/rss_ringoccs_complex.h>
 
-/*  rssringoccs_One_Pi and real nan and inf are defined here.                 */
+/*  Real nan and inf found here.                                              */
 #include <rss_ringoccs/include/rss_ringoccs_math.h>
 
 /*  We'll use stdio to print the results.                                     */
 #include <stdio.h>
 
-/*  Routine for computing the complex cosine of various test values.          */
+/*  Routine for computing |z| for a few test values.                          */
 int main(void)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     rssringoccs_ComplexDouble z[7];
-    rssringoccs_ComplexDouble w[7];
-    double re_z, im_z, re_w, im_w;
+    double w[7];
+    double re_z, im_z;
 
     /*  And declare a variable for indexing.                                  */
     int n;
 
     /*  Set the test values in the array z.                                   */
     z[0] = rssringoccs_CDouble_Zero;
-    z[1] = rssringoccs_CDouble_Rect(0.0, rssringoccs_One_Pi);
-    z[2] = rssringoccs_CDouble_Rect(rssringoccs_One_Pi, 0.0);
+    z[1] = rssringoccs_CDouble_One;
+    z[2] = rssringoccs_CDouble_Rect(1.0, 1.0);
     z[3] = rssringoccs_CDouble_Rect(rssringoccs_NaN, 0.0);
     z[4] = rssringoccs_CDouble_Rect(rssringoccs_Infinity, 0.0);
     z[5] = rssringoccs_CDouble_NaN;
@@ -58,19 +58,17 @@ int main(void)
     /*  Loop over the results and print them.                                 */
     for (n=0; n<7; ++n)
     {
-        /*  Compute the complex cosine of the nth value.                      */
-        w[n] = rssringoccs_CDouble_Cos(z[n]);
+        /*  Compute |z| of the nth value.                                     */
+        w[n] = rssringoccs_CDouble_Abs(z[n]);
 
-        /*  Extract the real and imaginary parts from z[n] and w[n].          */
+        /*  Extract the real and imaginary parts from z[n].                   */
         re_z = rssringoccs_CDouble_Real_Part(z[n]);
         im_z = rssringoccs_CDouble_Imag_Part(z[n]);
-        re_w = rssringoccs_CDouble_Real_Part(w[n]);
-        im_w = rssringoccs_CDouble_Imag_Part(w[n]);
 
         /*  And finally, print the result to the screen.                      */
-        printf("cos(%f + i%f) = %f + i%f\n", re_z, im_z, re_w, im_w);
+        printf("|%f + i%f| = %f\n", re_z, im_z, w[n]);
     }
-    /*  End of for loop computing cos(z).                                     */
+    /*  End of for loop computing |z|.                                        */
 
     return 0;
 }
@@ -79,7 +77,7 @@ int main(void)
 /******************************************************************************
  *  We can compile this with:                                                 *
  *                                                                            *
- *      gcc complex_cos_example.c -o test -lrssringoccs                       *
+ *      gcc complex_abs_example.c -o test -lrssringoccs                       *
  *                                                                            *
  *  If librssringoccs is not in /usr/local/lib/ (this is the default          *
  *  location it is placed in when built via config_librssringoccs.sh), change *
@@ -87,20 +85,20 @@ int main(void)
  *  your path, add the -I option as follows:                                  *
  *                                                                            *
  *      gcc -I/usr/local/include/ -L/usr/local/lib/                           *
- *              complex_cos_example.c -o test -lrssringoccs                   *
+ *              complex_abs_example.c -o test -lrssringoccs                   *
  *                                                                            *
  *  This example is also C89 compliant and compiles with the following flags: *
  *                                                                            *
  *      gcc -Wconversion -pedantic -Wall -Wextra -std=c89 -ansi               *
- *          -Wpedantic complex_cos_example.c -o test -lrssringoccs            *
+ *          -Wpedantic complex_abs_example.c -o test -lrssringoccs            *
  *                                                                            *
  *  Note, this should all be one line. This outputs an executable "test".     *
  *  Running the executable with ./test, this outputs:                         *
- *      cos(0.000000 + i0.000000) = 1.000000 + i-0.000000                     *
- *      cos(0.000000 + i3.141593) = 11.591953 + i-0.000000                    *
- *      cos(3.141593 + i0.000000) = -1.000000 + i-0.000000                    *
- *      cos(nan + i0.000000) = nan + inan                                     *
- *      cos(inf + i0.000000) = nan + inan                                     *
- *      cos(nan + inan) = nan + inan                                          *
- *      cos(inf + iinf) = nan + inan                                          *
+ *      |0.000000 + i0.000000| = 0.000000                                     *
+ *      |1.000000 + i0.000000| = 1.000000                                     *
+ *      |1.000000 + i1.000000| = 1.414214                                     *
+ *      |nan + i0.000000| = nan                                               *
+ *      |inf + i0.000000| = inf                                               *
+ *      |nan + inan| = nan                                                    *
+ *      |inf + iinf| = inf                                                    *
  ******************************************************************************/

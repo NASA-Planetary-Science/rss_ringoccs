@@ -17,14 +17,11 @@
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
- *  Date:       December 19, 2020                                             *
+ *  Date:       December 20, 2020                                             *
  ******************************************************************************/
 
-/*  rss_ringoccs complex routines found here.                                 */
+/*  All necessary complex data types found in these two files.                */
 #include <rss_ringoccs/include/rss_ringoccs_complex.h>
-
-/*  C99 complex functions found here. Note, your compiler must support        *
- *  complex variables to run this test.                                       */
 #include <complex.h>
 
 /*  The comparison functions are found here.                                  *
@@ -47,7 +44,45 @@
  *      We can then link via -lrssringoccs_compare (see below).               */
 #include "../rss_ringoccs_compare_funcs.h"
 
-/*  Routine for testing rssringoccs_CDouble_Cos.                              */
+/*  C99 does not provide an abs squared function, so let's create one using   *
+ *  the built-in _Complex data type.                                          */
+static double cabs_sq(_Complex double z)
+{
+    /*  Declare necessary variables.                                          */
+    double x, y, abs_sq;
+
+    /*  Use the creal and cimag functions found in complex.h to extract the   *
+     *  real and imaginary parts from the input z.                            */
+    x = creal(z);
+    y = cimag(z);
+
+    /*  |z|^2 = x^2 + y^2 so return this.                                     */
+    abs_sq = x*x + y*y;
+    return abs_sq;
+}
+
+/*  The rssringoccs_CDouble_Abs_Squared function was written with clarity in  *
+ *  mind. We can save calls to the functions rssringoccs_CDouble_Real_Part    *
+ *  and rssringoccs_CDouble_Imag_Part by directly accessing the data member   *
+ *  of the rssringoccs_ComplexDouble struct. This looks a little more cryptic *
+ *  and is most likely an example of premature optimization. Nonetheless, the *
+ *  time test is provided here.                                               */
+static double rss_cabs_sq(rssringoccs_ComplexDouble z)
+{
+    /*  Declare necessary variables.                                          */
+    double x, y, abs_sq;
+
+    /*  Access the real and imaginary parts of the struct z directly, rather  *
+     *  than making calls to rssringoccs_CDouble_Real/Imag_Part.              */
+    x = z.dat[0];
+    y = z.dat[1];
+
+    /*  |z|^2 = x^2 + y^2 so return this.                                     */
+    abs_sq = x*x + y*y;
+    return abs_sq;
+}
+
+/*  Routine for comparing cabs_sq with rss_cabs_sq.                           */
 int main(void)
 {
     /*  Set the start and end for the values we're testing.                   */
@@ -59,8 +94,8 @@ int main(void)
     unsigned long N = 1e4;
 
     /*  Use the compare function found in rss_ringoccs_compare_funcs.h.       */
-    rssringoccs_Compare_CDouble_Funcs("rss_ringoccs", rssringoccs_CDouble_Cos,
-                                      "C99", ccos, start, end, N);
+    rssringoccs_Compare_Real_CDouble_Funcs("rss_ringoccs", rss_cabs_sq,
+                                           "C99", cabs_sq, start, end, N);
 
     return 0;
 }
@@ -69,14 +104,22 @@ int main(void)
 /******************************************************************************
  *  Compileable with:                                                         *
  *      gcc -O3 -Wall -Wpedantic -Wextra -pedantic -pedantic-errors           *
- *          -std=c99 complex_cos_time_test.c -o test -lrssringoccs            *
- *              -lrssringoccs_compare                                         *
+ *          -std=c99 complex_abs_squared_alt_time_test.c -o test              *
+ *              -lrssringoccs -lrssringoccs_compare                           *
  *  Output (iMac 2017 3.4 GHz Intel Quad-Core i5):                            *
- *      rss_ringoccs: 5.915511                                                *
- *      C99: 3.965554                                                         *
- *      Max Error: 0.0000000000000004                                         *
+ *      rss_ringoccs: 0.692513                                                *
+ *      C99: 0.664646                                                         *
+ *      Max Error: 0.0000000000000000                                         *
  *  With -O3 optimization:                                                    *
- *      rss_ringoccs: 5.861064                                                *
- *      C99: 4.131632                                                         *
- *      Max Error: 0.0000000000000004                                         *
+ *      rss_ringoccs: 0.633626                                                *
+ *      C99: 0.560142                                                         *
+ *      Max Error: 0.0000000000000000                                         *
  ******************************************************************************/
+
+/*  For comparison, the times for rssringoccs_CDouble_Abs_Squared are:        *
+ *      Optimization:       0.816004                                          *
+ *      w/o optimization:   0.817405                                          *
+ *  These tests were performed on a grid of 100 million points in the complex *
+ *  plane and took less than a second. Avoiding calls to the two functions    *
+ *  rssringoccs_CDouble_Real/Imag_Part saves 0.2 seconds over 100 million     *
+ *  computations, which is barely noticeable.                                 */

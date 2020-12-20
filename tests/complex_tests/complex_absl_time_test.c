@@ -35,26 +35,30 @@
  *                                                                            *
  *          gcc -O3 -pedantic -Wall -Wconversion -Wextra -Wpedantic           *
  *              rss_ringoccs_compare_funcs.c -shared                          *
- *                  -o librssringoccs_compare.so                              *
+ *                  -o librssringoccs_compare.so -lrssringoccs                *
  *                                                                            *
- *      In the examples below we placed the output file in /usr/local/lib/:   *
+ *      You will need to have librssringoccs already built so we can link it  *
+ *      to this new comparison library. In the examples below we placed the   *
+ *      output file in /usr/local/lib/:                                       *
  *                                                                            *
  *          mv librssringoccs_compare.so /usr/local/lib/                      *
  *                                                                            *
+ *      You may need to add sudo to move files in /usr/.                      *
  *      We can then link via -lrssringoccs_compare (see below).               */
 #include "../rss_ringoccs_compare_funcs.h"
 
-/*  Routine for comparing ccosf with rssringoccs_CFloat_Cos.                  */
+/*  Routine for testing rssringoccs_CLDouble_Abs.                             */
 int main(void)
 {
     /*  Set the start and end for the values we're testing.                   */
     long double start = -1.0L;
     long double end   =  1.0L;
 
-    /*  We'll test on 100 million points between start and end.               */
+    /*  We'll test on a square grid of 100 million points from (start, start) *
+     *  the (end, end) in the complex plane.                                  */
     unsigned long N = 1e4;
 
-    /*  Use the compare function to test rssringoccs_CFloat_Abs against cabsf.*/
+    /*  Use the compare function found in rss_ringoccs_compare_funcs.h.       */
     rssringoccs_Compare_Real_CLDouble_Funcs("rss_ringoccs",
                                             rssringoccs_CLDouble_Abs,
                                             "C99", cabsl, start, end, N);

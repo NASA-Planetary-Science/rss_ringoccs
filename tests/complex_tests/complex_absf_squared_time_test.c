@@ -17,7 +17,7 @@
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
- *  Date:       December 19, 2020                                             *
+ *  Date:       December 20, 2020                                             *
  ******************************************************************************/
 
 /*  rss_ringoccs complex routines found here.                                 */
@@ -47,20 +47,38 @@
  *      We can then link via -lrssringoccs_compare (see below).               */
 #include "../rss_ringoccs_compare_funcs.h"
 
-/*  Routine for testing rssringoccs_CDouble_Cos.                              */
+/*  C99 does not provide an abs squared function, so let's create one using   *
+ *  the built-in _Complex data type.                                          */
+static float cabsf_sq(_Complex float z)
+{
+    /*  Declare necessary variables.                                          */
+    float x, y, abs_sq;
+
+    /*  Use the creal and cimag functions found in complex.h to extract the   *
+     *  real and imaginary parts from the input z.                            */
+    x = crealf(z);
+    y = cimagf(z);
+
+    /*  |z|^2 = x^2 + y^2 so return this.                                     */
+    abs_sq = x*x + y*y;
+    return abs_sq;
+}
+
+/*  Routine for testing rssringoccs_CFloat_Abs_Squared.                       */
 int main(void)
 {
     /*  Set the start and end for the values we're testing.                   */
-    double start = -1.0;
-    double end   =  1.0;
+    float start = -1.0F;
+    float end   =  1.0F;
 
     /*  We'll test on a square grid of 100 million points from (start, start) *
      *  the (end, end) in the complex plane.                                  */
     unsigned long N = 1e4;
 
     /*  Use the compare function found in rss_ringoccs_compare_funcs.h.       */
-    rssringoccs_Compare_CDouble_Funcs("rss_ringoccs", rssringoccs_CDouble_Cos,
-                                      "C99", ccos, start, end, N);
+    rssringoccs_Compare_Real_CFloat_Funcs("rss_ringoccs",
+                                          rssringoccs_CFloat_Abs_Squared,
+                                          "C99", cabsf_sq, start, end, N);
 
     return 0;
 }
@@ -69,14 +87,14 @@ int main(void)
 /******************************************************************************
  *  Compileable with:                                                         *
  *      gcc -O3 -Wall -Wpedantic -Wextra -pedantic -pedantic-errors           *
- *          -std=c99 complex_cos_time_test.c -o test -lrssringoccs            *
+ *          -std=c99 complex_absf_squared_time_test.c -o test -lrssringoccs   *
  *              -lrssringoccs_compare                                         *
  *  Output (iMac 2017 3.4 GHz Intel Quad-Core i5):                            *
- *      rss_ringoccs: 5.915511                                                *
- *      C99: 3.965554                                                         *
- *      Max Error: 0.0000000000000004                                         *
+ *      rss_ringoccs: 0.757358                                                *
+ *      C99: 0.543301                                                         *
+ *      Max Error: 0.00000000                                                 *
  *  With -O3 optimization:                                                    *
- *      rss_ringoccs: 5.861064                                                *
- *      C99: 4.131632                                                         *
- *      Max Error: 0.0000000000000004                                         *
+ *      rss_ringoccs: 0.758329                                                *
+ *      C99: 0.446654                                                         *
+ *      Max Error: 0.00000000                                                 *
  ******************************************************************************/

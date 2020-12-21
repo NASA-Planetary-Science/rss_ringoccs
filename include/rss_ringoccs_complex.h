@@ -736,6 +736,10 @@ extern rssringoccs_ComplexLongDouble
 rssringoccs_CLDouble_Subtract_Imag(long double y,
                                             rssringoccs_ComplexLongDouble z);
 
+extern double
+rssringoccs_CDouble_Dist(rssringoccs_ComplexDouble z0,
+                         rssringoccs_ComplexDouble z1);
+
 /******************************************************************************
  *  Function:                                                                 *
  *      rssringoccs_Complex_Multiply                                          *

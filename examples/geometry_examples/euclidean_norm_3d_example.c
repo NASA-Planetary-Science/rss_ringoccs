@@ -48,7 +48,7 @@ int main(void)
     p = rssringoccs_ThreeVector_Rect(x, y, z);
 
     /*  Compute the norm of p.                                                */
-    norm = rssringoccs_Euclidean_Norm_3D(p);
+    norm = rssringoccs_ThreeVector_Euclidean_Norm(p);
 
     /*  Print the result:                                                     */
     printf("||(%f, %f, %f)|| = %f\n", x, y, z, norm);

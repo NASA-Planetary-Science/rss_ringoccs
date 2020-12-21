@@ -65,7 +65,7 @@ rssringoccs_Stereographic_Projection(rssringoccs_ThreeVector P)
     /*  We will perform stereographic projection on the sphere centered at    *
      *  the origin which contains the given point. To do this we'll first     *
      *  need to compute the Euclidean norm of this point.                     */
-    norm = rssringoccs_Euclidean_Norm_3D(P);
+    norm = rssringoccs_ThreeVector_Euclidean_Norm(P);
 
     /*  In the special case of P = 0, stereographic projection is not defined *
      *  and we can't say it's the "point at infinity." We'll just return      *

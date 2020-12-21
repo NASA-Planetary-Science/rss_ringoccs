@@ -45,12 +45,6 @@ echo -e "\t\t$CompilerArgs3"
 echo -e "\t\t$CompilerArgs4"
 echo -e "\t\t$CompilerArgs5"
 
-echo -e "\n\tCompiling reconstruction/"
-for filename in reconstruction/*.c; do
-    echo -e "\t\tCompiling: $filename"
-    $CC $CompilerArgs $filename
-done
-
 echo -e "\n\tCompiling math/"
 for filename in math/*.c; do
     echo -e "\t\tCompiling: $filename"
@@ -101,6 +95,12 @@ done
 
 echo -e "\n\tCompiling fresnel_trasnform/"
 for filename in fresnel_transform/*.c; do
+    echo -e "\t\tCompiling: $filename"
+    $CC $CompilerArgs $filename
+done
+
+echo -e "\n\tCompiling reconstruction/"
+for filename in reconstruction/*.c; do
     echo -e "\t\tCompiling: $filename"
     $CC $CompilerArgs $filename
 done

@@ -75,7 +75,6 @@ rssringoccs_Compare_CDouble_Funcs(const char *f0_name,
                                     (*f1)(double _Complex),
                                   double start, double end, unsigned long N);
 
-
 extern void
 rssringoccs_Compare_CLDouble_Funcs(const char *f0_name,
                                    rssringoccs_ComplexLongDouble

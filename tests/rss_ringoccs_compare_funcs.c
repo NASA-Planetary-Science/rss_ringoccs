@@ -998,7 +998,7 @@ rssringoccs_Compare_Real_CDouble_Funcs(const char *f0_name,
 
     /*  Declare variables for computing the maximum difference between the    *
      *  two provided functions f0 and f1.                                     */
-    double max_err = 0.0F;
+    double max_err = 0.0;
     double temp;
 
     /*  Declare two pointers to represent arrays for f0(x) and f1(x).         */
@@ -1077,7 +1077,7 @@ rssringoccs_Compare_Real_CDouble_Funcs(const char *f0_name,
     {
         for (n=0; n<N; ++n)
         {
-            z1[m][n] = f1(x + _Complex_I*y);
+            z1[m][n] = f1(x + (double)_Complex_I*y);
             x += ds;
         }
         y += ds;
@@ -1138,7 +1138,7 @@ rssringoccs_Compare_Real_CLDouble_Funcs(const char *f0_name,
 
     /*  Declare variables for computing the maximum difference between the    *
      *  two provided functions f0 and f1.                                     */
-    long double max_err = 0.0F;
+    long double max_err = 0.0L;
     long double temp;
 
     /*  Declare two pointers to represent arrays for f0(x) and f1(x).         */
@@ -1217,7 +1217,7 @@ rssringoccs_Compare_Real_CLDouble_Funcs(const char *f0_name,
     {
         for (n=0; n<N; ++n)
         {
-            z1[m][n] = f1(x + _Complex_I*y);
+            z1[m][n] = f1(x + (long double)_Complex_I*y);
             x += ds;
         }
         y += ds;

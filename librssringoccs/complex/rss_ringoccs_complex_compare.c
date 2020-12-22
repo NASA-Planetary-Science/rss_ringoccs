@@ -21,10 +21,46 @@
  *  Purpose:                                                                  *
  *      Contains the source code for comparing complex data types.            *
  ******************************************************************************
+ *                             DEFINED FUNCTIONS                              *
+ ******************************************************************************
+ *  Function Name:                                                            *
+ *      rssringoccs_CFloat_Compare:                                           *
+ *      rssringoccs_CDouble_Compare:                                          *
+ *      rssringoccs_CLDouble_Compare:                                         *
+ *  Purpose:                                                                  *
+ *      Compares two complex numbers.                                         *
+ *  Arguments:                                                                *
+ *      z0 (rssringoccs_ComplexFloat/ComplexDouble/ComplexLongDouble):        *
+ *          A complex number.                                                 *
+ *      z1 (rssringoccs_ComplexFloat/ComplexDouble/ComplexLongDouble):        *
+ *          Another complex number.                                           *
+ *  Output:                                                                   *
+ *      compare (rssringoccs_Bool):                                           *
+ *          True if z0 = z1, false otherwise.                                 *
+ *  Method:                                                                   *
+ *      Extract the real and imaginary parts of both inputs and compare them. *
+ ******************************************************************************
  *                               DEPENDENCIES                                 *
  ******************************************************************************
  *  1.) rss_ringoccs_complex.h:                                               *
  *          Header where complex types and function prototypes are defined.   *
+ *  2.) rss_ringoccs_bool.h:                                                  *
+ *          Header containing Boolean typedef.                                *
+ ******************************************************************************
+ *                            A NOTE ON COMMENTS                              *
+ ******************************************************************************
+ *  It is anticipated that many users of this code will have experience in    *
+ *  either Python or IDL, but not C. Many comments are left to explain as     *
+ *  much as possible. Vagueness or unclear code should be reported to:        *
+ *  https://github.com/NASA-Planetary-Science/rss_ringoccs/issues             *
+ ******************************************************************************
+ *                            A FRIENDLY WARNING                              *
+ ******************************************************************************
+ *  This code is compatible with the C89/C90 standard. The setup script that  *
+ *  is used to compile this in config_librssringoccs.sh uses gcc and has the  *
+ *  -pedantic and =std=c89 flags to check for compliance. If you edit this to *
+ *  use C99 features (built-in complex, built-in booleans, C++ style comments *
+ *  and etc.), or GCC extensions, you will need to edit the config script.    *
  ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
  *  Date:       November 30, 2020                                             *

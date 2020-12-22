@@ -21,10 +21,45 @@
  *  Purpose:                                                                  *
  *      Contains the source code for complex addition.                        *
  ******************************************************************************
+ *                             DEFINED FUNCTIONS                              *
+ ******************************************************************************
+ *  Function Name:                                                            *
+ *      rssringoccs_CFloat_Add_Real:                                          *
+ *      rssringoccs_CDouble_Add_Real:                                         *
+ *      rssringoccs_CLDouble_Add_Real:                                        *
+ *  Purpose:                                                                  *
+ *      Adds a real number to a complex one.                                  *
+ *                                                                            *
+ *          w = z + x = (a + ib) + x = (a + x) + ib                           *
+ *                                                                            *
+ *  Arguments:                                                                *
+ *      x (float/double/long double):                                         *
+ *          The real number we wish to add to z.                              *
+ *      z (rssringoccs_ComplexFloat/ComplexDouble/ComplexLongDouble):         *
+ *          A complex number.                                                 *
+ *  Output:                                                                   *
+ *      w (rssringoccs_ComplexFloat/ComplexDouble/ComplexLongDouble):         *
+ *          The sum of z and x.                                               *
+ ******************************************************************************
  *                               DEPENDENCIES                                 *
  ******************************************************************************
  *  1.) rss_ringoccs_complex.h:                                               *
  *          Header where complex types and function prototypes are defined.   *
+ ******************************************************************************
+ *                            A NOTE ON COMMENTS                              *
+ ******************************************************************************
+ *  It is anticipated that many users of this code will have experience in    *
+ *  either Python or IDL, but not C. Many comments are left to explain as     *
+ *  much as possible. Vagueness or unclear code should be reported to:        *
+ *  https://github.com/NASA-Planetary-Science/rss_ringoccs/issues             *
+ ******************************************************************************
+ *                            A FRIENDLY WARNING                              *
+ ******************************************************************************
+ *  This code is compatible with the C89/C90 standard. The setup script that  *
+ *  is used to compile this in config_librssringoccs.sh uses gcc and has the  *
+ *  -pedantic and =std=c89 flags to check for compliance. If you edit this to *
+ *  use C99 features (built-in complex, built-in booleans, C++ style comments *
+ *  and etc.), or GCC extensions, you will need to edit the config script.    *
  ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
  *  Date:       December 3, 2020                                              *

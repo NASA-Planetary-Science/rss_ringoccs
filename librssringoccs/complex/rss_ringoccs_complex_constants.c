@@ -46,34 +46,57 @@
 #if _RSS_RINGOCCS_USING_COMPLEX_H_ == 1
 
 /*  Single precision constants.                                               */
-const rssringoccs_ComplexFloat rssringoccs_CFloat_I    = 1.0F*_Complex_I;
-const rssringoccs_ComplexFloat rssringoccs_CFloat_Zero = 0.0F;
-const rssringoccs_ComplexFloat rssringoccs_CFloat_One  = 1.0F;
 const rssringoccs_ComplexFloat
-    rssringoccs_CFloat_NaN = rssringoccs_NaN + rssringoccs_NaN*_Complex_I;
-const rssringoccs_ComplexDouble
-    rssringoccs_CFloat_Infinity = rssringoccs_Infinity +
-                                  rssringoccs_Infinity*_Complex_I;
+rssringoccs_CFloat_I = _Complex_I;
+
+const rssringoccs_ComplexFloat
+rssringoccs_CFloat_Zero = 0.0F;
+
+const rssringoccs_ComplexFloat
+rssringoccs_CFloat_One  = 1.0F;
+
+const rssringoccs_ComplexFloat
+rssringoccs_CFloat_NaN = rssringoccs_NaN_F + rssringoccs_NaN_F*_Complex_I;
+
+const rssringoccs_ComplexFloat
+rssringoccs_CFloat_Infinity = rssringoccs_Infinity_F +
+                              rssringoccs_Infinity_F*_Complex_I;
 
 /*  Double precision constants.                                               */
-const rssringoccs_ComplexDouble rssringoccs_CDouble_I    = _Complex_I;
-const rssringoccs_ComplexDouble rssringoccs_CDouble_Zero = 0.0;
-const rssringoccs_ComplexDouble rssringoccs_CDouble_One  = 1.0l
 const rssringoccs_ComplexDouble
-    rssringoccs_CDouble_NaN = rssringoccs_NaN + rssringoccs_NaN*_Complex_I;
+rssringoccs_CDouble_I = (double _Complex)_Complex_I;
+
 const rssringoccs_ComplexDouble
-    rssringoccs_CDouble_Infinity = rssringoccs_Infinity +
-                                   rssringoccs_Infinity*_Complex_I;
+rssringoccs_CDouble_Zero = 0.0;
+
+const rssringoccs_ComplexDouble
+rssringoccs_CDouble_One  = 1.0;
+
+const rssringoccs_ComplexDouble
+rssringoccs_CDouble_NaN = rssringoccs_NaN +
+                          (double _Complex)_Complex_I*rssringoccs_NaN;
+
+const rssringoccs_ComplexDouble
+rssringoccs_CDouble_Infinity = rssringoccs_Infinity +
+                               (double _Complex)_Complex_I*rssringoccs_Infinity;
 
 /*  Long double precision constants.                                          */
-const rssringoccs_ComplexLongDouble rssringoccs_CLDouble_I    = 1.0L*_Complex_I;
-const rssringoccs_ComplexLongDouble rssringoccs_CLDouble_Zero = 0.0L;
-const rssringoccs_ComplexLongDouble rssringoccs_CLDouble_One  = 1.0L;
 const rssringoccs_ComplexLongDouble
-    rssringoccs_CLDouble_NaN = rssringoccs_NaN + rssringoccs_NaN*_Complex_I;
+rssringoccs_CLDouble_I = (long double _Complex)_Complex_I;
+
 const rssringoccs_ComplexLongDouble
-    rssringoccs_CLDouble_Infinity = rssringoccs_Infinity +
-                                    rssringoccs_Infinity*_Complex_I;
+rssringoccs_CLDouble_Zero = 0.0L;
+
+const rssringoccs_ComplexLongDouble
+rssringoccs_CLDouble_One = 1.0L;
+
+const rssringoccs_ComplexLongDouble
+rssringoccs_CLDouble_NaN = rssringoccs_NaN_L +
+                           (long double _Complex)_Complex_I*rssringoccs_NaN_L;
+
+const rssringoccs_ComplexLongDouble
+rssringoccs_CLDouble_Infinity = rssringoccs_Infinity_L +
+    (long double _Complex)_Complex_I*rssringoccs_Infinity_L;
 
 #else
 /*  Else statement for #if _RSS_RINGOCCS_USING_COMPLEX_H_ == 1.               */
@@ -82,34 +105,54 @@ const rssringoccs_ComplexLongDouble
  *  constants using the rss_ringoccs complex data types.                      */
 
 /*  Single precision constants.                                               */
-const rssringoccs_ComplexFloat rssringoccs_CFloat_I    = {{0.0F, 1.0F}};
-const rssringoccs_ComplexFloat rssringoccs_CFloat_Zero = {{0.0F, 0.0F}};
-const rssringoccs_ComplexFloat rssringoccs_CFloat_One  = {{1.0F, 0.0F}};
 const rssringoccs_ComplexFloat
-    rssringoccs_CFloat_NaN = {{rssringoccs_NaN_F, rssringoccs_NaN_F}};
+rssringoccs_CFloat_I = {{0.0F, 1.0F}};
+
 const rssringoccs_ComplexFloat
-    rssringoccs_CFloat_Infinity = {{rssringoccs_Infinity_F,
-                                     rssringoccs_Infinity_F}};
+rssringoccs_CFloat_Zero = {{0.0F, 0.0F}};
+
+const rssringoccs_ComplexFloat
+rssringoccs_CFloat_One = {{1.0F, 0.0F}};
+
+const rssringoccs_ComplexFloat
+rssringoccs_CFloat_NaN = {{rssringoccs_NaN_F, rssringoccs_NaN_F}};
+
+const rssringoccs_ComplexFloat
+rssringoccs_CFloat_Infinity = {{rssringoccs_Infinity_F,
+                                rssringoccs_Infinity_F}};
 
 /*  Double precision constants.                                               */
-const rssringoccs_ComplexDouble rssringoccs_CDouble_I    = {{0.0, 1.0}};
-const rssringoccs_ComplexDouble rssringoccs_CDouble_Zero = {{0.0, 0.0}};
-const rssringoccs_ComplexDouble rssringoccs_CDouble_One  = {{1.0, 0.0}};
 const rssringoccs_ComplexDouble
-    rssringoccs_CDouble_NaN = {{rssringoccs_NaN, rssringoccs_NaN}};
+rssringoccs_CDouble_I = {{0.0, 1.0}};
+
 const rssringoccs_ComplexDouble
-    rssringoccs_CDouble_Infinity = {{rssringoccs_Infinity,
-                                     rssringoccs_Infinity}};
+rssringoccs_CDouble_Zero = {{0.0, 0.0}};
+
+const rssringoccs_ComplexDouble
+rssringoccs_CDouble_One = {{1.0, 0.0}};
+
+const rssringoccs_ComplexDouble
+rssringoccs_CDouble_NaN = {{rssringoccs_NaN, rssringoccs_NaN}};
+
+const rssringoccs_ComplexDouble
+rssringoccs_CDouble_Infinity = {{rssringoccs_Infinity, rssringoccs_Infinity}};
 
 /*  Long double precision constants.                                          */
-const rssringoccs_ComplexLongDouble rssringoccs_CLDouble_I    = {{0.0L, 1.0L}};
-const rssringoccs_ComplexLongDouble rssringoccs_CLDouble_Zero = {{0.0L, 0.0L}};
-const rssringoccs_ComplexLongDouble rssringoccs_CLDouble_One  = {{1.0L, 0.0L}};
 const rssringoccs_ComplexLongDouble
-    rssringoccs_CLDouble_NaN = {{rssringoccs_NaN_L, rssringoccs_NaN_L}};
+rssringoccs_CLDouble_I = {{0.0L, 1.0L}};
+
 const rssringoccs_ComplexLongDouble
-    rssringoccs_CLDouble_Infinity = {{rssringoccs_Infinity_L,
-                                     rssringoccs_Infinity_L}};
+rssringoccs_CLDouble_Zero = {{0.0L, 0.0L}};
+
+const rssringoccs_ComplexLongDouble
+rssringoccs_CLDouble_One = {{1.0L, 0.0L}};
+
+const rssringoccs_ComplexLongDouble
+rssringoccs_CLDouble_NaN = {{rssringoccs_NaN_L, rssringoccs_NaN_L}};
+
+const rssringoccs_ComplexLongDouble
+rssringoccs_CLDouble_Infinity = {{rssringoccs_Infinity_L,
+                                  rssringoccs_Infinity_L}};
 
 #endif
 /*  End of #if _RSS_RINGOCCS_USING_COMPLEX_H_ == 1                            */

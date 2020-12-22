@@ -47,7 +47,7 @@
  *      We can then link via -lrssringoccs_compare (see below).               */
 #include "../rss_ringoccs_compare_funcs.h"
 
-/*  Routine for testing rssringoccs_CLDouble_Abs.                             */
+/*  Routine for testing rssringoccs_CLDouble_Cos.                             */
 int main(void)
 {
     /*  Set the start and end for the values we're testing.                   */
@@ -69,7 +69,7 @@ int main(void)
 /******************************************************************************
  *  Compileable with:                                                         *
  *      gcc -O3 -Wall -Wpedantic -Wextra -pedantic -pedantic-errors           *
- *          -std=c99 complex_cosf_time_test.c -o test -lrssringoccs           *
+ *          -std=c99 complex_cosl_time_test.c -o test -lrssringoccs           *
  *              -lrssringoccs_compare                                         *
  *  Output (iMac 2017 3.4 GHz Intel Quad-Core i5):                            *
  *      rss_ringoccs: 11.772154                                               *

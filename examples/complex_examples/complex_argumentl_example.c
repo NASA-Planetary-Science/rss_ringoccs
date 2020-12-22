@@ -17,10 +17,10 @@
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
  *  Purpose:                                                                  *
- *      Provides an example of using the absolute value function.             *
+ *      Provides an example of using the complex argument function.           *
  ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
- *  Date:       December 19, 2020                                             *
+ *  Date:       December 22, 2020                                             *
  ******************************************************************************/
 
 /*  Complex functions defined here.                                           */
@@ -76,7 +76,7 @@ int main(void)
 /******************************************************************************
  *  We can compile this with:                                                 *
  *                                                                            *
- *      gcc complex_argument_example.c -o test -lrssringoccs                  *
+ *      gcc complex_argumentl_example.c -o test -lrssringoccs                 *
  *                                                                            *
  *  If librssringoccs is not in /usr/local/lib/ (this is the default          *
  *  location it is placed in when built via config_librssringoccs.sh), change *
@@ -84,12 +84,12 @@ int main(void)
  *  your path, add the -I option as follows:                                  *
  *                                                                            *
  *      gcc -I/usr/local/include/ -L/usr/local/lib/                           *
- *              complex_argument_example.c -o test -lrssringoccs              *
+ *              complex_argumentl_example.c -o test -lrssringoccs             *
  *                                                                            *
  *  This example is also C89 compliant and compiles with the following flags: *
  *                                                                            *
  *      gcc -Wconversion -pedantic -Wall -Wextra -std=c89 -ansi               *
- *          -Wpedantic complex_argument_example.c -o test -lrssringoccs       *
+ *          -Wpedantic complex_argumentl_example.c -o test -lrssringoccs      *
  *                                                                            *
  *  Note, this should all be one line. This outputs an executable "test".     *
  *  Running the executable with ./test, this outputs:                         *

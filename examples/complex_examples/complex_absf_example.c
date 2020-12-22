@@ -50,8 +50,8 @@ int main(void)
     z[0] = rssringoccs_CFloat_Zero;
     z[1] = rssringoccs_CFloat_One;
     z[2] = rssringoccs_CFloat_Rect(1.0F, 1.0F);
-    z[3] = rssringoccs_CFloat_Rect(rssringoccs_NaN, 0.0F);
-    z[4] = rssringoccs_CFloat_Rect(rssringoccs_Infinity, 0.0F);
+    z[3] = rssringoccs_CFloat_Rect(rssringoccs_NaN_F, 0.0F);
+    z[4] = rssringoccs_CFloat_Rect(rssringoccs_Infinity_F, 0.0F);
     z[5] = rssringoccs_CFloat_NaN;
     z[6] = rssringoccs_CFloat_Infinity;
 

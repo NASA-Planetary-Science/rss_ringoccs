@@ -138,16 +138,16 @@ typedef long double _Complex rssringoccs_ComplexLongDouble;
  *  pointer gsl_complex *w; we can safely cast via:                           *
  *      z = (rssringoccs_ComplexDouble *)&w;                                  *
  *  And similarly we can do w = (gsl_complex *)&z;                            */
-typedef struct {
+typedef struct rssringoccs_ComplexDouble {
     double dat[2];
 } rssringoccs_ComplexDouble;
 
 /*  Define single and long double precision equivalents.                      */
-typedef struct {
+typedef struct rssringoccs_ComplexFloat {
     float dat[2];
 } rssringoccs_ComplexFloat;
 
-typedef struct {
+typedef struct rssringoccs_ComplexLongDouble {
     long double dat[2];
 } rssringoccs_ComplexLongDouble;
 
@@ -372,6 +372,29 @@ rssringoccs_CLDouble_Compare(rssringoccs_ComplexLongDouble z,
 
 /******************************************************************************
  *  Function:                                                                 *
+ *      rssringoccs_CDouble_Conjugate                                         *
+ *  Purpose:                                                                  *
+ *      Returns the complex conjugate of a complex number z. This is          *
+ *      equivalent to conj found in complex.h (C99). If z = x + iy, the       *
+ *      complex conjugate of z is conj_z = x - iy.                            *
+ *  Arguments:                                                                *
+ *      rssringoccs_ComplexDouble z:                                          *
+ *          A complex number.                                                 *
+ *  Output:                                                                   *
+ *      rssringoccs_ComplexDouble conj_z:                                     *
+ *          The complex conjugate of z.                                       *
+ ******************************************************************************/
+extern rssringoccs_ComplexFloat
+rssringoccs_CFloat_Conjugate(rssringoccs_ComplexFloat z);
+
+extern rssringoccs_ComplexDouble
+rssringoccs_CDouble_Conjugate(rssringoccs_ComplexDouble z);
+
+extern rssringoccs_ComplexLongDouble
+rssringoccs_CLDouble_Conjugate(rssringoccs_ComplexLongDouble z);
+
+/******************************************************************************
+ *  Function:                                                                 *
  *      rssringoccs_CDouble_Cos                                               *
  *  Purpose:                                                                  *
  *      Compute the cosine of a complex number z.                             *
@@ -438,29 +461,6 @@ rssringoccs_CDouble_Imag_Part(rssringoccs_ComplexDouble z);
 
 extern long double
 rssringoccs_CLDouble_Imag_Part(rssringoccs_ComplexLongDouble z);
-
-/******************************************************************************
- *  Function:                                                                 *
- *      rssringoccs_Complex_Conjugate                                         *
- *  Purpose:                                                                  *
- *      Returns the complex conjugate of a complex number z. This is          *
- *      equivalent to conj found in complex.h (C99). If z = x + iy, the       *
- *      complex conjugate of z is conj_z = x - iy.                            *
- *  Arguments:                                                                *
- *      rssringoccs_ComplexDouble z:                                          *
- *          A complex number.                                                 *
- *  Output:                                                                   *
- *      rssringoccs_ComplexDouble conj_z:                                     *
- *          The complex conjugate of z.                                       *
- ******************************************************************************/
-extern rssringoccs_ComplexFloat
-rssringoccs_CFloat_Conjugate(rssringoccs_ComplexFloat z);
-
-extern rssringoccs_ComplexDouble
-rssringoccs_CDouble_Conjugate(rssringoccs_ComplexDouble z);
-
-extern rssringoccs_ComplexLongDouble
-rssringoccs_CLDouble_Conjugate(rssringoccs_ComplexLongDouble z);
 
 /******************************************************************************
  *  Function:                                                                 *

@@ -17,7 +17,7 @@
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
- *  Date:       December 19, 2020                                             *
+ *  Date:       December 22, 2020                                             *
  ******************************************************************************/
 
 /*  rss_ringoccs complex routines found here.                                 */
@@ -47,7 +47,7 @@
  *      We can then link via -lrssringoccs_compare (see below).               */
 #include "../rss_ringoccs_compare_funcs.h"
 
-/*  Routine for testing rssringoccs_CFloat_Cos.                               */
+/*  Routine for testing rssringoccs_CFloat_Conjugate.                         */
 int main(void)
 {
     /*  Set the start and end for the values we're testing.                   */
@@ -58,9 +58,10 @@ int main(void)
      *  the (end, end) in the complex plane.                                  */
     unsigned long N = 1e4;
 
-    /*  Use the compare function to test rssringoccs_Double_Abs against fabs. */
-    rssringoccs_Compare_CFloat_Funcs("rss_ringoccs", rssringoccs_CFloat_Cos,
-                                     "C99", ccosf, start, end, N);
+    /*  Use the compare function found in rss_ringoccs_compare_funcs.h.       */
+    rssringoccs_Compare_CFloat_Funcs("rss_ringoccs",
+                                     rssringoccs_CFloat_Conjugate,
+                                     "C99", conjf, start, end, N);
 
     return 0;
 }
@@ -69,14 +70,14 @@ int main(void)
 /******************************************************************************
  *  Compileable with:                                                         *
  *      gcc -O3 -Wall -Wpedantic -Wextra -pedantic -pedantic-errors           *
- *          -std=c99 complex_cosf_time_test.c -o test -lrssringoccs           *
+ *          -std=c99 complex_conjugatef_time_test.c -o test -lrssringoccs     *
  *              -lrssringoccs_compare                                         *
  *  Output (iMac 2017 3.4 GHz Intel Quad-Core i5):                            *
- *      rss_ringoccs: 7.036885                                                *
- *      C99: 7.848082                                                         *
- *      Max Error: 0.00000027                                                 *
+ *      rss_ringoccs: 1.048852                                                *
+ *      C99: 1.147636                                                         *
+ *      Max Error: 0.00000000                                                 *
  *  With -O3 optimization:                                                    *
- *      rss_ringoccs: 6.838415                                                *
- *      C99: 5.244334                                                         *
- *      Max Error: 0.00000027                                                 *
+ *      rss_ringoccs: 1.045051                                                *
+ *      C99: 1.110177                                                         *
+ *      Max Error: 0.00000000                                                 *
  ******************************************************************************/

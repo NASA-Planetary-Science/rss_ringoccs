@@ -286,8 +286,7 @@ extern rssringoccs_ComplexDouble
 rssringoccs_CDouble_Add_Real(double x, rssringoccs_ComplexDouble z);
 
 extern rssringoccs_ComplexLongDouble
-rssringoccs_CLDouble_Add_Real(long double x,
-                                       rssringoccs_ComplexLongDouble z);
+rssringoccs_CLDouble_Add_Real(long double x, rssringoccs_ComplexLongDouble z);
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -310,8 +309,7 @@ extern rssringoccs_ComplexDouble
 rssringoccs_CDouble_Add_Imag(double y, rssringoccs_ComplexDouble z);
 
 extern rssringoccs_ComplexLongDouble
-rssringoccs_CLDouble_Add_Imag(long double y,
-                                       rssringoccs_ComplexLongDouble z);
+rssringoccs_CLDouble_Add_Imag(long double y, rssringoccs_ComplexLongDouble z);
 
 /******************************************************************************
  *  Function:                                                                 *

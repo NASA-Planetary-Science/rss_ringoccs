@@ -1077,7 +1077,7 @@ rssringoccs_Compare_Real_CDouble_Funcs(const char *f0_name,
     {
         for (n=0; n<N; ++n)
         {
-            z1[m][n] = f1(x + (double)_Complex_I*y);
+            z1[m][n] = f1(x + (double _Complex)_Complex_I*y);
             x += ds;
         }
         y += ds;
@@ -1217,7 +1217,7 @@ rssringoccs_Compare_Real_CLDouble_Funcs(const char *f0_name,
     {
         for (n=0; n<N; ++n)
         {
-            z1[m][n] = f1(x + (long double)_Complex_I*y);
+            z1[m][n] = f1(x + (long double _Complex)_Complex_I*y);
             x += ds;
         }
         y += ds;

@@ -57,7 +57,7 @@ rssringoccs_CFloat_Add_Imag(float y, rssringoccs_ComplexFloat z)
     rssringoccs_ComplexFloat sum;
     float real, imag, sum_im;
 
-    /*  Extract the real and imaginary parts from the inputs.                 */
+    /*  Extract the real and imaginary parts from the input.                  */
     real = rssringoccs_CFloat_Real_Part(z);
     imag = rssringoccs_CFloat_Imag_Part(z);
 
@@ -78,7 +78,7 @@ rssringoccs_CDouble_Add_Imag(double y, rssringoccs_ComplexDouble z)
     rssringoccs_ComplexDouble sum;
     double real, imag, sum_im;
 
-    /*  Extract the real and imaginary parts from the inputs.                 */
+    /*  Extract the real and imaginary parts from the input.                  */
     real = rssringoccs_CDouble_Real_Part(z);
     imag = rssringoccs_CDouble_Imag_Part(z);
 
@@ -99,7 +99,7 @@ rssringoccs_CLDouble_Add_Imag(long double y, rssringoccs_ComplexLongDouble z)
     rssringoccs_ComplexLongDouble sum;
     long double real, imag, sum_im;
 
-    /*  Extract the real and imaginary parts from the inputs.                 */
+    /*  Extract the real and imaginary parts from the input.                  */
     real = rssringoccs_CLDouble_Real_Part(z);
     imag = rssringoccs_CLDouble_Imag_Part(z);
 
@@ -122,7 +122,7 @@ rssringoccs_CLDouble_Add_Imag(long double y, rssringoccs_ComplexLongDouble z)
 rssringoccs_ComplexFloat
 rssringoccs_CFloat_Add_Imag(float y, rssringoccs_ComplexFloat z)
 {
-    return _Complex_I*y + z;
+    return (float)_Complex_I*y + z;
 }
 /*  End of rssringoccs_CFloat_Add_Imag.                                       */
 
@@ -130,7 +130,7 @@ rssringoccs_CFloat_Add_Imag(float y, rssringoccs_ComplexFloat z)
 rssringoccs_ComplexDouble
 rssringoccs_CDouble_Add_Imag(double y, rssringoccs_ComplexDouble z)
 {
-    return _Complex_I*y + z;
+    return (double)_Complex_I*y + z;
 }
 /*  End of rssringoccs_CDouble_Add_Imag.                                      */
 
@@ -138,7 +138,7 @@ rssringoccs_CDouble_Add_Imag(double y, rssringoccs_ComplexDouble z)
 rssringoccs_ComplexLongDouble
 rssringoccs_CLDouble_Add_Imag(long double y, rssringoccs_ComplexLongDouble z)
 {
-    return _Complex_I*y + z;
+    return (long double)_Complex_I*y + z;
 }
 /*  End of rssringoccs_CLDouble_Add_Imag.                                     */
 

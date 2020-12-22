@@ -17,7 +17,7 @@
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
- *  Date:       December 19, 2020                                             *
+ *  Date:       December 22, 2020                                             *
  ******************************************************************************/
 
 /*  rss_ringoccs complex routines found here.                                 */
@@ -47,20 +47,30 @@
  *      We can then link via -lrssringoccs_compare (see below).               */
 #include "../rss_ringoccs_compare_funcs.h"
 
-/*  Routine for testing rssringoccs_CFloat_Cos.                               */
+/*  A "fast" conjugate which avoids retrieving the complex variables via      *
+ *  rssringoccs_CDouble_Real_Part and rssringoccs_CDouble_Imag_Part and       *
+ *  avoids creating the output via rssringoccs_CDouble_Rect. We simply negate *
+ *  the imaginary part of the input and return it.                            */
+static rssringoccs_ComplexDouble rss_conj(rssringoccs_ComplexDouble z)
+{
+    z.dat[1] = -z.dat[1];
+    return z;
+}
+
+/*  Routine for testing rss_conj defined above.                               */
 int main(void)
 {
     /*  Set the start and end for the values we're testing.                   */
-    float start = -1.0F;
-    float end   =  1.0F;
+    double start = -1.0;
+    double end   =  1.0;
 
     /*  We'll test on a square grid of 100 million points from (start, start) *
      *  the (end, end) in the complex plane.                                  */
     unsigned long N = 1e4;
 
-    /*  Use the compare function to test rssringoccs_Double_Abs against fabs. */
-    rssringoccs_Compare_CFloat_Funcs("rss_ringoccs", rssringoccs_CFloat_Cos,
-                                     "C99", ccosf, start, end, N);
+    /*  Use the compare function found in rss_ringoccs_compare_funcs.h.       */
+    rssringoccs_Compare_CDouble_Funcs("rss_ringoccs", rss_conj,
+                                      "C99", conj, start, end, N);
 
     return 0;
 }
@@ -69,14 +79,21 @@ int main(void)
 /******************************************************************************
  *  Compileable with:                                                         *
  *      gcc -O3 -Wall -Wpedantic -Wextra -pedantic -pedantic-errors           *
- *          -std=c99 complex_cosf_time_test.c -o test -lrssringoccs           *
+ *          -std=c99 complex_conjugate_time_test.c -o test -lrssringoccs      *
  *              -lrssringoccs_compare                                         *
  *  Output (iMac 2017 3.4 GHz Intel Quad-Core i5):                            *
- *      rss_ringoccs: 7.036885                                                *
- *      C99: 7.848082                                                         *
- *      Max Error: 0.00000027                                                 *
+ *      rss_ringoccs: 1.384617                                                *
+ *      C99: 1.083972                                                         *
+ *      Max Error: 0.0000000000000000                                         *
  *  With -O3 optimization:                                                    *
- *      rss_ringoccs: 6.838415                                                *
- *      C99: 5.244334                                                         *
- *      Max Error: 0.00000027                                                 *
+ *      rss_ringoccs: 1.177583                                                *
+ *      C99: 1.305011                                                         *
+ *      Max Error: 0.0000000000000000                                         *
+ ******************************************************************************/
+
+/******************************************************************************
+ *  For comparison, the rssringoccs_CDouble_Conjugate times are:              *
+ *      rss_ringoccs: 1.485245                                                *
+ *  With -O3 optimization:                                                    *
+ *      rss_ringoccs: 1.260294                                                *
  ******************************************************************************/

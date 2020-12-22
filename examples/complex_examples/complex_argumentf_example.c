@@ -17,10 +17,10 @@
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
  *  Purpose:                                                                  *
- *      Provides an example of using the absolute value function.             *
+ *      Provides an example of using the complex argument function.           *
  ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
- *  Date:       December 19, 2020                                             *
+ *  Date:       December 22, 2020                                             *
  ******************************************************************************/
 
 /*  Complex functions defined here.                                           */

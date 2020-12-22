@@ -56,7 +56,7 @@ rssringoccs_CFloat_Add_Real(float x, rssringoccs_ComplexFloat z)
     rssringoccs_ComplexFloat sum;
     float real, imag, sum_re;
 
-    /*  Extract the real and imaginary parts from the inputs.                 */
+    /*  Extract the real and imaginary parts from the input.                  */
     real = rssringoccs_CFloat_Real_Part(z);
     imag = rssringoccs_CFloat_Imag_Part(z);
 
@@ -77,7 +77,7 @@ rssringoccs_CDouble_Add_Real(double x, rssringoccs_ComplexDouble z)
     rssringoccs_ComplexDouble sum;
     double real, imag, sum_re;
 
-    /*  Extract the real and imaginary parts from the inputs.                 */
+    /*  Extract the real and imaginary parts from the input.                  */
     real = rssringoccs_CDouble_Real_Part(z);
     imag = rssringoccs_CDouble_Imag_Part(z);
 
@@ -98,7 +98,7 @@ rssringoccs_CLDouble_Add_Real(long double x, rssringoccs_ComplexLongDouble z)
     rssringoccs_ComplexLongDouble sum;
     long double real, imag, sum_re;
 
-    /*  Extract the real and imaginary parts from the inputs.                 */
+    /*  Extract the real and imaginary parts from the input.                  */
     real = rssringoccs_CLDouble_Real_Part(z);
     imag = rssringoccs_CLDouble_Imag_Part(z);
 

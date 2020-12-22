@@ -36,36 +36,36 @@
 int main(void)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
-    rssringoccs_ComplexDouble z[9];
-    double w[9];
-    double re_z, im_z;
+    rssringoccs_ComplexLongDouble z[9];
+    long double w[9];
+    long double re_z, im_z;
 
     /*  And declare a variable for indexing.                                  */
     int n;
 
     /*  Set the test values in the array z.                                   */
-    z[0] = rssringoccs_CDouble_Zero;
-    z[1] = rssringoccs_CDouble_One;
-    z[2] = rssringoccs_CDouble_Rect(1.0, 1.0);
-    z[3] = rssringoccs_CDouble_I;
-    z[4] = rssringoccs_CDouble_Rect(-1.0, 1.0);
-    z[5] = rssringoccs_CDouble_Rect(-1.0, 0.0);
-    z[6] = rssringoccs_CDouble_Rect(-1.0, -1.0);
-    z[7] = rssringoccs_CDouble_Rect(0.0, -1.0);
-    z[8] = rssringoccs_CDouble_Rect(1.0, -1.0);
+    z[0] = rssringoccs_CLDouble_Zero;
+    z[1] = rssringoccs_CLDouble_One;
+    z[2] = rssringoccs_CLDouble_Rect(1.0L, 1.0L);
+    z[3] = rssringoccs_CLDouble_I;
+    z[4] = rssringoccs_CLDouble_Rect(-1.0L, 1.0L);
+    z[5] = rssringoccs_CLDouble_Rect(-1.0L, 0.0L);
+    z[6] = rssringoccs_CLDouble_Rect(-1.0L, -1.0L);
+    z[7] = rssringoccs_CLDouble_Rect(0.0L, -1.0L);
+    z[8] = rssringoccs_CLDouble_Rect(1.0L, -1.0L);
 
     /*  Loop over the results and print them.                                 */
     for (n=0; n<9; ++n)
     {
         /*  Compute arg(z) of the nth value.                                  */
-        w[n] = rssringoccs_CDouble_Argument(z[n]);
+        w[n] = rssringoccs_CLDouble_Argument(z[n]);
 
         /*  Extract the real and imaginary parts from z[n].                   */
-        re_z = rssringoccs_CDouble_Real_Part(z[n]);
-        im_z = rssringoccs_CDouble_Imag_Part(z[n]);
+        re_z = rssringoccs_CLDouble_Real_Part(z[n]);
+        im_z = rssringoccs_CLDouble_Imag_Part(z[n]);
 
         /*  And finally, print the result to the screen.                      */
-        printf("arg(%f + i%f) = %f\n", re_z, im_z, w[n]);
+        printf("arg(%Lf + i%Lf) = %Lf\n", re_z, im_z, w[n]);
     }
     /*  End of for loop computing arg(z).                                     */
 

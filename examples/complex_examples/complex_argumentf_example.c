@@ -36,33 +36,33 @@
 int main(void)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
-    rssringoccs_ComplexDouble z[9];
-    double w[9];
-    double re_z, im_z;
+    rssringoccs_ComplexFloat z[9];
+    float w[9];
+    float re_z, im_z;
 
     /*  And declare a variable for indexing.                                  */
     int n;
 
     /*  Set the test values in the array z.                                   */
-    z[0] = rssringoccs_CDouble_Zero;
-    z[1] = rssringoccs_CDouble_One;
-    z[2] = rssringoccs_CDouble_Rect(1.0, 1.0);
-    z[3] = rssringoccs_CDouble_I;
-    z[4] = rssringoccs_CDouble_Rect(-1.0, 1.0);
-    z[5] = rssringoccs_CDouble_Rect(-1.0, 0.0);
-    z[6] = rssringoccs_CDouble_Rect(-1.0, -1.0);
-    z[7] = rssringoccs_CDouble_Rect(0.0, -1.0);
-    z[8] = rssringoccs_CDouble_Rect(1.0, -1.0);
+    z[0] = rssringoccs_CFloat_Zero;
+    z[1] = rssringoccs_CFloat_One;
+    z[2] = rssringoccs_CFloat_Rect(1.0F, 1.0F);
+    z[3] = rssringoccs_CFloat_I;
+    z[4] = rssringoccs_CFloat_Rect(-1.0F, 1.0f);
+    z[5] = rssringoccs_CFloat_Rect(-1.0F, 0.0f);
+    z[6] = rssringoccs_CFloat_Rect(-1.0F, -1.0f);
+    z[7] = rssringoccs_CFloat_Rect(0.0F, -1.0F);
+    z[8] = rssringoccs_CFloat_Rect(1.0F, -1.0F);
 
     /*  Loop over the results and print them.                                 */
     for (n=0; n<9; ++n)
     {
         /*  Compute arg(z) of the nth value.                                  */
-        w[n] = rssringoccs_CDouble_Argument(z[n]);
+        w[n] = rssringoccs_CFloat_Argument(z[n]);
 
         /*  Extract the real and imaginary parts from z[n].                   */
-        re_z = rssringoccs_CDouble_Real_Part(z[n]);
-        im_z = rssringoccs_CDouble_Imag_Part(z[n]);
+        re_z = rssringoccs_CFloat_Real_Part(z[n]);
+        im_z = rssringoccs_CFloat_Imag_Part(z[n]);
 
         /*  And finally, print the result to the screen.                      */
         printf("arg(%f + i%f) = %f\n", re_z, im_z, w[n]);
@@ -76,7 +76,7 @@ int main(void)
 /******************************************************************************
  *  We can compile this with:                                                 *
  *                                                                            *
- *      gcc complex_argument_example.c -o test -lrssringoccs                  *
+ *      gcc complex_argumentf_example.c -o test -lrssringoccs                 *
  *                                                                            *
  *  If librssringoccs is not in /usr/local/lib/ (this is the default          *
  *  location it is placed in when built via config_librssringoccs.sh), change *
@@ -84,12 +84,12 @@ int main(void)
  *  your path, add the -I option as follows:                                  *
  *                                                                            *
  *      gcc -I/usr/local/include/ -L/usr/local/lib/                           *
- *              complex_argument_example.c -o test -lrssringoccs              *
+ *              complex_argumentf_example.c -o test -lrssringoccs             *
  *                                                                            *
  *  This example is also C89 compliant and compiles with the following flags: *
  *                                                                            *
  *      gcc -Wconversion -pedantic -Wall -Wextra -std=c89 -ansi               *
- *          -Wpedantic complex_argument_example.c -o test -lrssringoccs       *
+ *          -Wpedantic complex_argumentf_example.c -o test -lrssringoccs      *
  *                                                                            *
  *  Note, this should all be one line. This outputs an executable "test".     *
  *  Running the executable with ./test, this outputs:                         *

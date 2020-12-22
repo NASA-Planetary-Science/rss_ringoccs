@@ -21,6 +21,34 @@
  *  Purpose:                                                                  *
  *      Contains the source code for the complex argument.                    *
  ******************************************************************************
+ *                             DEFINED FUNCTIONS                              *
+ ******************************************************************************
+ *  Function Name:                                                            *
+ *      rssringoccs_CFloat_Argument:                                          *
+ *      rssringoccs_CDouble_Argument:                                         *
+ *      rssringoccs_CLDouble_Argument:                                        *
+ *  Purpose:                                                                  *
+ *      Computes the argument of a complex number:                            *
+ *                                                                            *
+ *          arg(z) =  arg(r * exp(i theta)) = theta                           *
+ *                                                                            *
+ *      Equivalently:                                                         *
+ *                                                                            *
+ *          arg(z) = arg(x + iy) = arctan(y, x)                               *
+ *                                                                            *
+ *  Arguments:                                                                *
+ *      z (rssringoccs_ComplexFloat/ComplexDouble/ComplexLongDouble):         *
+ *          A complex number.                                                 *
+ *  Output:                                                                   *
+ *      arg (float/double/long double):                                       *
+ *          The argument of z.                                                *
+ *  Method:                                                                   *
+ *      Extract the real and imaginary parts and return atan2(y, x).          *
+ *  NOTES:                                                                    *
+ *      Because the atan2 function is used, there is a discontinuity along    *
+ *      the negative real axis. That is, the argument returns a real value    *
+ *      in the interval (-pi, pi] (+pi is inclusive).                         *
+ ******************************************************************************
  *                               DEPENDENCIES                                 *
  ******************************************************************************
  *  1.) rss_ringoccs_math.h:                                                  *
@@ -30,6 +58,21 @@
  *          it defines the functions missing in the earlier version.          *
  *  2.) rss_ringoccs_complex.h:                                               *
  *          Header where complex types and function prototypes are defined.   *
+ ******************************************************************************
+ *                            A NOTE ON COMMENTS                              *
+ ******************************************************************************
+ *  It is anticipated that many users of this code will have experience in    *
+ *  either Python or IDL, but not C. Many comments are left to explain as     *
+ *  much as possible. Vagueness or unclear code should be reported to:        *
+ *  https://github.com/NASA-Planetary-Science/rss_ringoccs/issues             *
+ ******************************************************************************
+ *                            A FRIENDLY WARNING                              *
+ ******************************************************************************
+ *  This code is compatible with the C89/C90 standard. The setup script that  *
+ *  is used to compile this in config_librssringoccs.sh uses gcc and has the  *
+ *  -pedantic and =std=c89 flags to check for compliance. If you edit this to *
+ *  use C99 features (built-in complex, built-in booleans, C++ style comments *
+ *  and etc.), or GCC extensions, you will need to edit the config script.    *
  ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
  *  Date:       November 30, 2020                                             *

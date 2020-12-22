@@ -157,7 +157,7 @@ rssringoccs_CLDouble_Add_Imag(long double y, rssringoccs_ComplexLongDouble z)
 rssringoccs_ComplexFloat
 rssringoccs_CFloat_Add_Imag(float y, rssringoccs_ComplexFloat z)
 {
-    return (float)_Complex_I*y + z;
+    return (float _Complex)_Complex_I*y + z;
 }
 /*  End of rssringoccs_CFloat_Add_Imag.                                       */
 
@@ -165,7 +165,7 @@ rssringoccs_CFloat_Add_Imag(float y, rssringoccs_ComplexFloat z)
 rssringoccs_ComplexDouble
 rssringoccs_CDouble_Add_Imag(double y, rssringoccs_ComplexDouble z)
 {
-    return (double)_Complex_I*y + z;
+    return (double _Complex)_Complex_I*y + z;
 }
 /*  End of rssringoccs_CDouble_Add_Imag.                                      */
 
@@ -173,7 +173,7 @@ rssringoccs_CDouble_Add_Imag(double y, rssringoccs_ComplexDouble z)
 rssringoccs_ComplexLongDouble
 rssringoccs_CLDouble_Add_Imag(long double y, rssringoccs_ComplexLongDouble z)
 {
-    return (long double)_Complex_I*y + z;
+    return (long double _Complex)_Complex_I*y + z;
 }
 /*  End of rssringoccs_CLDouble_Add_Imag.                                     */
 

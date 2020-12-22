@@ -262,6 +262,29 @@ rssringoccs_CLDouble_Add(rssringoccs_ComplexLongDouble z1,
 
 /******************************************************************************
  *  Function:                                                                 *
+ *      rssringoccs_CDouble_Add_Imag                                          *
+ *  Purpose:                                                                  *
+ *      Add an imaginary number to a complex one.                             *
+ *  Arguments:                                                                *
+ *      double y:                                                             *
+ *          An imaginary number.                                              *
+ *      rssringoccs_ComplexDouble z:                                          *
+ *          A complex number.                                                 *
+ *  Output:                                                                   *
+ *      rssringoccs_ComplexDouble sum:                                        *
+ *          The sum of y and z.                                               *
+ ******************************************************************************/
+extern rssringoccs_ComplexFloat
+rssringoccs_CFloat_Add_Imag(float y, rssringoccs_ComplexFloat z);
+
+extern rssringoccs_ComplexDouble
+rssringoccs_CDouble_Add_Imag(double y, rssringoccs_ComplexDouble z);
+
+extern rssringoccs_ComplexLongDouble
+rssringoccs_CLDouble_Add_Imag(long double y, rssringoccs_ComplexLongDouble z);
+
+/******************************************************************************
+ *  Function:                                                                 *
  *      rssringoccs_CDouble_Add_Real                                          *
  *  Purpose:                                                                  *
  *      Add a real number to a complex one.                                   *
@@ -287,29 +310,6 @@ rssringoccs_CDouble_Add_Real(double x, rssringoccs_ComplexDouble z);
 
 extern rssringoccs_ComplexLongDouble
 rssringoccs_CLDouble_Add_Real(long double x, rssringoccs_ComplexLongDouble z);
-
-/******************************************************************************
- *  Function:                                                                 *
- *      rssringoccs_CDouble_Add_Imag                                          *
- *  Purpose:                                                                  *
- *      Add an imaginary number to a complex one.                             *
- *  Arguments:                                                                *
- *      double y:                                                             *
- *          An imaginary number.                                              *
- *      rssringoccs_ComplexDouble z:                                          *
- *          A complex number.                                                 *
- *  Output:                                                                   *
- *      rssringoccs_ComplexDouble sum:                                        *
- *          The sum of y and z.                                               *
- ******************************************************************************/
-extern rssringoccs_ComplexFloat
-rssringoccs_CFloat_Add_Imag(float y, rssringoccs_ComplexFloat z);
-
-extern rssringoccs_ComplexDouble
-rssringoccs_CDouble_Add_Imag(double y, rssringoccs_ComplexDouble z);
-
-extern rssringoccs_ComplexLongDouble
-rssringoccs_CLDouble_Add_Imag(long double y, rssringoccs_ComplexLongDouble z);
 
 /******************************************************************************
  *  Function:                                                                 *

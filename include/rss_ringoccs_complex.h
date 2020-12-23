@@ -402,7 +402,7 @@ rssringoccs_CLDouble_Conjugate(rssringoccs_ComplexLongDouble z);
  *      rssringoccs_ComplexDouble z:                                          *
  *          A complex number.                                                 *
  *  Output:                                                                   *
- *      rssringoccs_ComplexDouble sin_z:                                      *
+ *      rssringoccs_ComplexDouble cos_z:                                      *
  *          The cosine of z.                                                  *
  *  NOTE:                                                                     *
  *      We simply use the fact that cos(x+iy) = cos(x)cos(iy)-sin(x)sin(iy)   *

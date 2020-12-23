@@ -21,6 +21,33 @@
  *  Purpose:                                                                  *
  *      Contains the source code for the complex cosine function.             *
  ******************************************************************************
+ *  Function Name:                                                            *
+ *      rssringoccs_CFloat_Cos:                                               *
+ *      rssringoccs_CDouble_Cos:                                              *
+ *      rssringoccs_CLDouble_Cos:                                             *
+ *  Purpose:                                                                  *
+ *      Computes the complex cosine of a complex number.                      *
+ *  Arguments:                                                                *
+ *      z (rssringoccs_ComplexFloat/ComplexDouble/ComplexLongDouble):         *
+ *          A complex number.                                                 *
+ *  Output:                                                                   *
+ *      cos_z (rssringoccs_ComplexFloat/ComplexDouble/ComplexLongDouble):     *
+ *          The complex cosine of z.                                          *
+ *  Method:                                                                   *
+ *      Given two real numbers x and y, we have the following formula:        *
+ *                                                                            *
+ *          cos(x + y) = cos(x)cos(y) - sin(x)sin(y)                          *
+ *                                                                            *
+ *      We can then write:                                                    *
+ *                                                                            *
+ *          cos(z) = cos(x + iy) = cos(x)cos(iy) - sin(x)sin(iy)              *
+ *                                                                            *
+ *      Invoking the definition of the hyperbolic trig functions cosh and     *
+ *      sinh, we obtain the following expression using real-valued functions: *
+ *                                                                            *
+ *          cos(z) = cos(x)cosh(y) - i sin(x)sinh(y)                          *
+ *                                                                            *
+ ******************************************************************************
  *                               DEPENDENCIES                                 *
  ******************************************************************************
  *  1.) rss_ringoccs_math.h:                                                  *
@@ -31,6 +58,21 @@
  *  2.) rss_ringoccs_complex.h:                                               *
  *          Header file where rssringoccs_ComplexDouble is defined, as well   *
  *          as the prototype for rssringoccs_Complex_Cos.                     *
+ ******************************************************************************
+ *                            A NOTE ON COMMENTS                              *
+ ******************************************************************************
+ *  It is anticipated that many users of this code will have experience in    *
+ *  either Python or IDL, but not C. Many comments are left to explain as     *
+ *  much as possible. Vagueness or unclear code should be reported to:        *
+ *  https://github.com/NASA-Planetary-Science/rss_ringoccs/issues             *
+ ******************************************************************************
+ *                            A FRIENDLY WARNING                              *
+ ******************************************************************************
+ *  This code is compatible with the C89/C90 standard. The setup script that  *
+ *  is used to compile this in config_librssringoccs.sh uses gcc and has the  *
+ *  -pedantic and -std=c89 flags to check for compliance. If you edit this to *
+ *  use C99 features (built-in complex, built-in booleans, C++ style comments *
+ *  and etc.), or GCC extensions, you will need to edit the config script.    *
  ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
  *  Date:       November 12, 2020                                             *
@@ -122,7 +164,7 @@ rssringoccs_CLDouble_Cos(rssringoccs_ComplexLongDouble z)
     cos_z = rssringoccs_CLDouble_Rect(real, imag);
     return cos_z;
 }
-/*  End of rssringoccs_CLDouble_Cos.                                 */
+/*  End of rssringoccs_CLDouble_Cos.                                          */
 
 #else
 /*  Else statement for #if _RSS_RINGOCCS_USING_COMPLEX_H_ == 0.               */
@@ -136,7 +178,7 @@ rssringoccs_CFloat_Cos(rssringoccs_ComplexFloat z)
 {
     return ccosf(z);
 }
-/*  End of rssringoccs_CLDouble_Cos.                                 */
+/*  End of rssringoccs_CLDouble_Cos.                                          */
 
 /*  Double precision complex cosine.                                          */
 rssringoccs_ComplexDouble
@@ -144,7 +186,7 @@ rssringoccs_CDouble_Cos(rssringoccs_ComplexDouble z)
 {
     return ccos(z);
 }
-/*  End of rssringoccs_CDouble_Cos.                                     */
+/*  End of rssringoccs_CDouble_Cos.                                           */
 
 /*  Long double precision complex cosine.                                     */
 rssringoccs_ComplexLongDouble
@@ -152,7 +194,7 @@ rssringoccs_CLDouble_Cos(rssringoccs_ComplexLongDouble z)
 {
     return ccosl(z);
 }
-/*  End of rssringoccs_CLDouble_Cos.                                 */
+/*  End of rssringoccs_CLDouble_Cos.                                          */
 
 #endif
 /*  End of #if _RSS_RINGOCCS_USING_COMPLEX_H_ == 0.                           */

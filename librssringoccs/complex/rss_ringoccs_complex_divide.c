@@ -44,7 +44,7 @@
 /*  Single precision complex division.                                        */
 rssringoccs_ComplexFloat
 rssringoccs_CFloat_Divide(rssringoccs_ComplexFloat z0,
-                                rssringoccs_ComplexFloat z1)
+                          rssringoccs_ComplexFloat z1)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     rssringoccs_ComplexFloat div;
@@ -65,16 +65,16 @@ rssringoccs_CFloat_Divide(rssringoccs_ComplexFloat z0,
     div_re = (real0*real1 + imag0*imag1)*denom;
     div_im = (imag0*real1 - real0*imag1)*denom;
 
-    /*  Use rssringoccs_CFloat_Rect to create the output and return.    */
+    /*  Use rssringoccs_CFloat_Rect to create the output and return.          */
     div = rssringoccs_CFloat_Rect(div_re, div_im);
     return div;
 }
-/*  End of rssringoccs_CFloat_Divide.                                   */
+/*  End of rssringoccs_CFloat_Divide.                                         */
 
 /*  Double precision complex division.                                        */
 rssringoccs_ComplexDouble
 rssringoccs_CDouble_Divide(rssringoccs_ComplexDouble z0,
-                                 rssringoccs_ComplexDouble z1)
+                           rssringoccs_ComplexDouble z1)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     rssringoccs_ComplexDouble div;
@@ -95,16 +95,16 @@ rssringoccs_CDouble_Divide(rssringoccs_ComplexDouble z0,
     div_re = (real0*real1 + imag0*imag1)*denom;
     div_im = (imag0*real1 - real0*imag1)*denom;
 
-    /*  Use rssringoccs_CDouble_Rect to create the output and return.   */
+    /*  Use rssringoccs_CDouble_Rect to create the output and return.         */
     div = rssringoccs_CDouble_Rect(div_re, div_im);
     return div;
 }
-/*  End of rssringoccs_CDouble_Divide.                                  */
+/*  End of rssringoccs_CDouble_Divide.                                        */
 
 /*  Long double precision complex division.                                   */
 rssringoccs_ComplexLongDouble
 rssringoccs_CLDouble_Divide(rssringoccs_ComplexLongDouble z0,
-                                     rssringoccs_ComplexLongDouble z1)
+                            rssringoccs_ComplexLongDouble z1)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     rssringoccs_ComplexLongDouble div;
@@ -125,11 +125,11 @@ rssringoccs_CLDouble_Divide(rssringoccs_ComplexLongDouble z0,
     div_re = (real0*real1 + imag0*imag1)*denom;
     div_im = (imag0*real1 - real0*imag1)*denom;
 
-    /*  Use rssringoccs_CLDouble_Rect and return output.             */
+    /*  Use rssringoccs_CLDouble_Rect and return output.                      */
     div = rssringoccs_CLDouble_Rect(div_re, div_im);
     return div;
 }
-/*  End of rssringoccs_CLDouble_Divide.                              */
+/*  End of rssringoccs_CLDouble_Divide.                                       */
 
 #else
 /*  Else statement for #if _RSS_RINGOCCS_USING_COMPLEX_H_ == 0.               */
@@ -139,28 +139,29 @@ rssringoccs_CLDouble_Divide(rssringoccs_ComplexLongDouble z0,
 /*  Single precision complex division.                                        */
 rssringoccs_ComplexFloat
 rssringoccs_CFloat_Divide(rssringoccs_ComplexFloat z0,
-                                rssringoccs_ComplexFloat z1)
+                          rssringoccs_ComplexFloat z1)
 {
     return z0/z1;
 }
-/*  End of rssringoccs_CFloat_Divide.                                   */
+/*  End of rssringoccs_CFloat_Divide.                                         */
 
 /*  Double precision complex division.                                        */
 rssringoccs_ComplexDouble
 rssringoccs_CDouble_Divide(rssringoccs_ComplexDouble z0,
-                                 rssringoccs_ComplexDouble z1)
+                           rssringoccs_ComplexDouble z1)
 {
     return z0/z1;
 }
-/*  End of rssringoccs_CDouble_Divide.                                  */
+/*  End of rssringoccs_CDouble_Divide.                                        */
 
 /*  Long double precision complex division.                                   */
 rssringoccs_ComplexLongDouble
 rssringoccs_CLDouble_Divide(rssringoccs_ComplexLongDouble z0,
-                                     rssringoccs_ComplexLongDouble z1)
+                            rssringoccs_ComplexLongDouble z1)
 {
     return z0/z1;
 }
-/*  End of rssringoccs_CLDouble_Divide.                              */
+/*  End of rssringoccs_CLDouble_Divide.                                       */
 
 #endif
+/*  End of #if _RSS_RINGOCCS_USING_COMPLEX_H_ == 0.                           */

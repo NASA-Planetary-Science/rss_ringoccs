@@ -420,6 +420,68 @@ rssringoccs_CLDouble_Cos(rssringoccs_ComplexLongDouble z);
 
 /******************************************************************************
  *  Function:                                                                 *
+ *      rssringoccs_CDouble_Dist                                              *
+ *  Purpose:                                                                  *
+ *      Compute the distance between two points in the complex plane.         *
+ *  Arguments:                                                                *
+ *      rssringoccs_ComplexDouble z:                                          *
+ *          A complex number.                                                 *
+ *  Output:                                                                   *
+ *      rssringoccs_ComplexDouble cos_z:                                      *
+ *          The cosine of z.                                                  *
+ *  NOTE:                                                                     *
+ *      This function is provided to save one from performing                 *
+ *      rssringoccs_CDouble_Subtract followed by rssringoccs_CDouble_Abs.     *
+ *      This saves a redundant function call and makes code look cleaner.     *
+ ******************************************************************************/
+extern float
+rssringoccs_CFloat_Dist(rssringoccs_ComplexFloat z0,
+                        rssringoccs_ComplexFloat z1);
+
+extern double
+rssringoccs_CDouble_Dist(rssringoccs_ComplexDouble z0,
+                         rssringoccs_ComplexDouble z1);
+
+extern long double
+rssringoccs_CLDouble_Dist(rssringoccs_ComplexLongDouble z0,
+                          rssringoccs_ComplexLongDouble z1);
+
+/******************************************************************************
+ *  Function:                                                                 *
+ *      rssringoccs_CDouble_Divide                                      *
+ *  Purpose:                                                                  *
+ *     Compute the quotient of a complex number z0 by z1.                     *
+ *  Arguments:                                                                *
+ *      rssringoccs_ComplexDouble z0:                                         *
+ *          A complex number.                                                 *
+ *      rssringoccs_ComplexDouble z1:                                         *
+ *          Another complex number.                                           *
+ *  Output:                                                                   *
+ *      rssringoccs_ComplexDouble quotient:                                   *
+ *          The complex number z0 / z1.                                       *
+ *  NOTE:                                                                     *
+ *      No error check is performed on whether or not z1 = 0+0i. If this is   *
+ *      true, depending on your system, you will either get +infinity for both*
+ *      real and imaginary parts, or an error will occur. On MacOS and Linux  *
+ *      the result is NaN + iNaN.                                             *
+ *                                                                            *
+ *      Division is not commutative, so given (z0, z1), this returns z0/z1 and*
+ *      not z1/z0. That is, we divide the first entry by the second.          *
+ ******************************************************************************/
+extern rssringoccs_ComplexFloat
+rssringoccs_CFloat_Divide(rssringoccs_ComplexFloat z1,
+                          rssringoccs_ComplexFloat z2);
+
+extern rssringoccs_ComplexDouble
+rssringoccs_CDouble_Divide(rssringoccs_ComplexDouble z1,
+                           rssringoccs_ComplexDouble z2);
+
+extern rssringoccs_ComplexLongDouble
+rssringoccs_CLDouble_Divide(rssringoccs_ComplexLongDouble z1,
+                            rssringoccs_ComplexLongDouble z2);
+
+/******************************************************************************
+ *  Function:                                                                 *
  *      rssringoccs_Complex_Real_Part                                         *
  *  Purpose:                                                                  *
  *      Return the real part of a complex number. This is equivalent to creal *
@@ -734,9 +796,7 @@ extern rssringoccs_ComplexLongDouble
 rssringoccs_CLDouble_Subtract_Imag(long double y,
                                             rssringoccs_ComplexLongDouble z);
 
-extern double
-rssringoccs_CDouble_Dist(rssringoccs_ComplexDouble z0,
-                         rssringoccs_ComplexDouble z1);
+
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -814,40 +874,6 @@ rssringoccs_CDouble_Reciprocal(rssringoccs_ComplexDouble z);
 
 extern rssringoccs_ComplexLongDouble
 rssringoccs_CLDouble_Reciprocal(rssringoccs_ComplexLongDouble z);
-
-/******************************************************************************
- *  Function:                                                                 *
- *      rssringoccs_CDouble_Divide                                      *
- *  Purpose:                                                                  *
- *     Compute the quotient of a complex number z0 by z1.                     *
- *  Arguments:                                                                *
- *      rssringoccs_ComplexDouble z0:                                         *
- *          A complex number.                                                 *
- *      rssringoccs_ComplexDouble z1:                                         *
- *          Another complex number.                                           *
- *  Output:                                                                   *
- *      rssringoccs_ComplexDouble quotient:                                   *
- *          The complex number z0 / z1.                                       *
- *  NOTE:                                                                     *
- *      No error check is performed on whether or not z1 = 0+0i. If this is   *
- *      true, depending on your system, you will either get +infinity for both*
- *      real and imaginary parts, or an error will occur. On MacOS and Linux  *
- *      the result is NaN + iNaN.                                             *
- *                                                                            *
- *      Division is not commutative, so given (z0, z1), this returns z0/z1 and*
- *      not z1/z0. That is, we divide the first entry by the second.          *
- ******************************************************************************/
-extern rssringoccs_ComplexFloat
-rssringoccs_CFloat_Divide(rssringoccs_ComplexFloat z1,
-                                rssringoccs_ComplexFloat z2);
-
-extern rssringoccs_ComplexDouble
-rssringoccs_CDouble_Divide(rssringoccs_ComplexDouble z1,
-                                 rssringoccs_ComplexDouble z2);
-
-extern rssringoccs_ComplexLongDouble
-rssringoccs_CLDouble_Divide(rssringoccs_ComplexLongDouble z1,
-                                     rssringoccs_ComplexLongDouble z2);
 
 /******************************************************************************
  *  Function:                                                                 *

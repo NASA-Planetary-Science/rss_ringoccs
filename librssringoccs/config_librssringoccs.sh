@@ -32,7 +32,7 @@ rm -f *.o
 echo "Compiling rss_ringoccs..."
 CompilerArgs1="-std=c89 -ansi -pedantic -pedantic-errors -Wall -Wextra"
 CompilerArgs2="-Wpedantic -Wmisleading-indentation -Wmissing-field-initializers"
-CompilerArgs3="-Wmissing-prototypes -Wold-style-definition -Winit-self -Warith-conversion"
+CompilerArgs3="-Wmissing-prototypes -Wold-style-definition -Winit-self"
 CompilerArgs4="-Wmissing-declarations"
 CompilerArgs5="-Wstrict-prototypes -I../../ -I./ -DNDEBUG -g -fPIC -O3 -c"
 CompilerArgs="$CompilerArgs1 $CompilerArgs2 $CompilerArgs3"
@@ -48,19 +48,19 @@ echo -e "\t\t$CompilerArgs5"
 echo -e "\n\tCompiling math/"
 for filename in math/*.c; do
     echo -e "\t\tCompiling: $filename"
-    $CC $CompilerArgs $filename
+    $CC -Wconversion -Wdouble-promotion $CompilerArgs $filename
 done
 
 echo -e "\n\tCompiling complex/"
 for filename in complex/*.c; do
     echo -e "\t\tCompiling: $filename"
-    $CC $CompilerArgs $filename
+    $CC -Wconversion -Wdouble-promotion $CompilerArgs $filename
 done
 
 echo -e "\n\tCompiling geometry/"
 for filename in geometry/*.c; do
     echo -e "\t\tCompiling: $filename"
-    $CC $CompilerArgs $filename
+    $CC -Wconversion -Wdouble-promotion $CompilerArgs $filename
 done
 
 echo -e "\n\tCompiling numerical/"
@@ -93,7 +93,7 @@ for filename in special_functions/*.c; do
     $CC $CompilerArgs $filename
 done
 
-echo -e "\n\tCompiling fresnel_trasnform/"
+echo -e "\n\tCompiling fresnel_transform/"
 for filename in fresnel_transform/*.c; do
     echo -e "\t\tCompiling: $filename"
     $CC $CompilerArgs $filename

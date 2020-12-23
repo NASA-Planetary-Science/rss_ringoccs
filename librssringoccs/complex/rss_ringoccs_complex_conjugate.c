@@ -57,7 +57,7 @@
  ******************************************************************************
  *  This code is compatible with the C89/C90 standard. The setup script that  *
  *  is used to compile this in config_librssringoccs.sh uses gcc and has the  *
- *  -pedantic and =std=c89 flags to check for compliance. If you edit this to *
+ *  -pedantic and -std=c89 flags to check for compliance. If you edit this to *
  *  use C99 features (built-in complex, built-in booleans, C++ style comments *
  *  and etc.), or GCC extensions, you will need to edit the config script.    *
  ******************************************************************************
@@ -91,7 +91,7 @@ rssringoccs_CFloat_Conjugate(rssringoccs_ComplexFloat z)
     conj_z = rssringoccs_CFloat_Rect(real, -imag);
     return conj_z;
 }
-/*  End of rssringoccs_CFloat_Conjugate.                                */
+/*  End of rssringoccs_CFloat_Conjugate.                                      */
 
 /*  Double precision complex conjugate function (conj equivalent).            */
 rssringoccs_ComplexDouble
@@ -109,7 +109,7 @@ rssringoccs_CDouble_Conjugate(rssringoccs_ComplexDouble z)
     conj_z = rssringoccs_CDouble_Rect(real, -imag);
     return conj_z;
 }
-/*  End of rssringoccs_CDouble_Conjugate.                               */
+/*  End of rssringoccs_CDouble_Conjugate.                                     */
 
 /*  Long double precision complex conjugate function (conjl equivalent).      */
 rssringoccs_ComplexLongDouble
@@ -127,7 +127,7 @@ rssringoccs_CLDouble_Conjugate(rssringoccs_ComplexLongDouble z)
     conj_z = rssringoccs_CLDouble_Rect(real, -imag);
     return conj_z;
 }
-/*  End of rssringoccs_CLDouble_Conjugate.                           */
+/*  End of rssringoccs_CLDouble_Conjugate.                                    */
 
 #else
 /*  Else statement for #if _RSS_RINGOCCS_USING_COMPLEX_H_ == 0.               */
@@ -136,26 +136,28 @@ rssringoccs_CLDouble_Conjugate(rssringoccs_ComplexLongDouble z)
  *  functions found in the library.                                           */
 
 /*  Single precision complex conjugate.                                       */
-float rssringoccs_CFloat_Conjugate(rssringoccs_ComplexFloat z)
+rssringoccs_ComplexFloat
+rssringoccs_CFloat_Conjugate(rssringoccs_ComplexFloat z)
 {
     return conjf(z);
 }
-/*  End of rssringoccs_CFloat_Conjugate.                                */
+/*  End of rssringoccs_CFloat_Conjugate.                                      */
 
 /*  Double precision complex conjugate.                                       */
-double rssringoccs_CDouble_Conjugate(rssringoccs_ComplexDouble z)
+rssringoccs_ComplexDouble
+rssringoccs_CDouble_Conjugate(rssringoccs_ComplexDouble z)
 {
     return conj(z);
 }
-/*  End of rssringoccs_CDouble_Conjugate.                               */
+/*  End of rssringoccs_CDouble_Conjugate.                                     */
 
 /*  Long double precision complex conjugate.                                  */
-long double
+rssringoccs_ComplexLongDouble
 rssringoccs_CLDouble_Conjugate(rssringoccs_ComplexLongDouble z)
 {
     return conjl(z);
 }
-/*  End of rssringoccs_CLDouble_Conjugate.                           */
+/*  End of rssringoccs_CLDouble_Conjugate.                                    */
 
 #endif
 /*  End of #if _RSS_RINGOCCS_USING_COMPLEX_H_ == 0.                           */

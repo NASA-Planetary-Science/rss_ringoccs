@@ -11,9 +11,9 @@
 
 rssringoccs_ComplexDouble
 rssringoccs_CDouble_Poly_Deriv_Real_Coeffs(double *coeffs,
-                                                 unsigned int degree,
-                                                 unsigned int deriv,
-                                                 rssringoccs_ComplexDouble z)
+                                           unsigned int degree,
+                                           unsigned int deriv,
+                                           rssringoccs_ComplexDouble z)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     rssringoccs_ComplexDouble poly;

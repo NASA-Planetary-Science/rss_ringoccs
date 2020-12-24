@@ -21,10 +21,64 @@
  *  Purpose:                                                                  *
  *      Contains the source code for complex division.                        *
  ******************************************************************************
+ *                             DEFINED FUNCTIONS                              *
+ ******************************************************************************
+ *  Function Name:                                                            *
+ *      rssringoccs_CFloat_Divide:                                            *
+ *      rssringoccs_CDouble_Divide:                                           *
+ *      rssringoccs_CLDouble_Divide:                                          *
+ *  Purpose:                                                                  *
+ *      Divides two complex numbers.                                          *
+ *                                                                            *
+ *          div(z, w) = z / w                                                 *
+ *                                                                            *
+ *  Arguments:                                                                *
+ *      z (rssringoccs_ComplexFloat/ComplexDouble/ComplexLongDouble):         *
+ *          A complex number.                                                 *
+ *      w (rssringoccs_ComplexFloat/ComplexDouble/ComplexLongDouble):         *
+ *          Another complex number.                                           *
+ *  Output:                                                                   *
+ *      z_by_w (rssringoccs_ComplexFloat/ComplexDouble/ComplexLongDouble):    *
+ *          The quotient z / w.                                               *
+ *  Method:                                                                   *
+ *      Use the fact that z / w = z * w^-1. The reciprocal formula for w      *
+ *      yields:                                                               *
+ *                                                                            *
+ *          w^-1 = (c + id)^-1 = (c - id)/(c^2 + d^2)                         *
+ *                                                                            *
+ *      We then use complex multiplication with this value on z = a + ib:     *
+ *                                                                            *
+ *          z/w = (a + ib)/(c + id)                                           *
+ *              = (a + ib)(c - id)/(c^2 + d^2)                                *
+ *              = (ac + bd)/(c^2 + d^2) + i (bc - ad)/(c^2 + d^2)             *
+ *                                                                            *
+ *  NOTES:                                                                    *
+ *      No error check is performed on the inputs. If the denominator is zero *
+ *      this should return NaN + i NaN on most systems since the resulting    *
+ *      computation has a 0/0 in it.                                          *
+ *                                                                            *
+ *      Division is not commutative. rssringoccs_CDouble_Divide(z, w) returns *
+ *      z/w and NOT w/z. That is, we divide the first entry by the second.    *
+ ******************************************************************************
  *                               DEPENDENCIES                                 *
  ******************************************************************************
  *  1.) rss_ringoccs_complex.h:                                               *
  *          Header where complex types and function prototypes are defined.   *
+ ******************************************************************************
+ *                            A NOTE ON COMMENTS                              *
+ ******************************************************************************
+ *  It is anticipated that many users of this code will have experience in    *
+ *  either Python or IDL, but not C. Many comments are left to explain as     *
+ *  much as possible. Vagueness or unclear code should be reported to:        *
+ *  https://github.com/NASA-Planetary-Science/rss_ringoccs/issues             *
+ ******************************************************************************
+ *                            A FRIENDLY WARNING                              *
+ ******************************************************************************
+ *  This code is compatible with the C89/C90 standard. The setup script that  *
+ *  is used to compile this in config_librssringoccs.sh uses gcc and has the  *
+ *  -pedantic and -std=c89 flags to check for compliance. If you edit this to *
+ *  use C99 features (built-in complex, built-in booleans, C++ style comments *
+ *  and etc.), or GCC extensions, you will need to edit the config script.    *
  ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
  *  Date:       November 30, 2020                                             *

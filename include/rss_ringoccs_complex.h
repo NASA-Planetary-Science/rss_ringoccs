@@ -482,6 +482,51 @@ rssringoccs_CLDouble_Divide(rssringoccs_ComplexLongDouble z1,
 
 /******************************************************************************
  *  Function:                                                                 *
+ *      rssringoccs_CDouble_Erf                                               *
+ *  Purpose:                                                                  *
+ *     Compute the complex error function of z, erf(z).                       *
+ *  Arguments:                                                                *
+ *      rssringoccs_ComplexDouble z:                                          *
+ *          A complex number.                                                 *
+ *  Output:                                                                   *
+ *      rssringoccs_ComplexDouble erf_z:                                      *
+ *          The error function evaluated at z.                                *
+ ******************************************************************************/
+extern rssringoccs_ComplexFloat
+rssringoccs_CFloat_Erf(rssringoccs_ComplexFloat z);
+
+extern rssringoccs_ComplexDouble
+rssringoccs_CDouble_Erf(rssringoccs_ComplexDouble z);
+
+extern rssringoccs_ComplexLongDouble
+rssringoccs_CLDouble_Erf(rssringoccs_ComplexLongDouble z);
+
+/******************************************************************************
+ *  Function:                                                                 *
+ *      rssringoccs_CDouble_Erfc                                              *
+ *  Purpose:                                                                  *
+ *     Compute the complementary complex error function of z, erf(z).         *
+ *  Arguments:                                                                *
+ *      rssringoccs_ComplexDouble z:                                          *
+ *          A complex number.                                                 *
+ *  Output:                                                                   *
+ *      rssringoccs_ComplexDouble erf_z:                                      *
+ *          The complementary error function evaluated at z.                  *
+ ******************************************************************************/
+extern rssringoccs_ComplexFloat
+rssringoccs_CFloat_Erfc(rssringoccs_ComplexFloat z);
+
+extern rssringoccs_ComplexDouble
+rssringoccs_CDouble_Erfc(rssringoccs_ComplexDouble z);
+
+extern rssringoccs_ComplexLongDouble
+rssringoccs_CLDouble_Erfc(rssringoccs_ComplexLongDouble z);
+
+extern rssringoccs_ComplexDouble
+rssringoccs_CDouble_Faddeeva(rssringoccs_ComplexDouble z);
+
+/******************************************************************************
+ *  Function:                                                                 *
  *      rssringoccs_Complex_Real_Part                                         *
  *  Purpose:                                                                  *
  *      Return the real part of a complex number. This is equivalent to creal *
@@ -952,62 +997,6 @@ rssringoccs_CDouble_Poly_Deriv_Real_Coeffs(double *coeffs,
                                                  unsigned int degree,
                                                  unsigned int deriv,
                                                  rssringoccs_ComplexDouble z);
-
-/******************************************************************************
- *  Function:                                                                 *
- *      rssringoccs_Complex_Erf                                               *
- *  Purpose:                                                                  *
- *     Compute the complex error function of z, erf(z).                       *
- *  Arguments:                                                                *
- *      rssringoccs_ComplexDouble z:                                          *
- *          A complex number.                                                 *
- *  Output:                                                                   *
- *      rssringoccs_ComplexDouble erf_z:                                      *
- *          The error function evaluated at z.                                *
- *  NOTE:                                                                     *
- *      The algorithm implemented uses a Taylor series for complex values     *
- *      with magnitude less than 3 and an asymptotic series otherwise. The    *
- *      error is about 10^-7 for values within a reasonable distance from the *
- *      origin (say, magnitude less than 10). For certain arguments the       *
- *      error function quickly converges to 1, and for others it explodes     *
- *      asymptotically like ~exp(x^2).                                        *
- *  Example:                                                                  *
- *          #include <stdio.h>                                                *
- *          #include <rss_ringoccs_complex.h>                                 *
- *                                                                            *
- *          int main(void)                                                    *
- *          {                                                                 *
- *              double real, imag;                                            *
- *              rssringoccs_ComplexDouble z0, z1, erf_z;                      *
- *                                                                            *
- *              z0 = rssringoccs_Complex_Rect(1.0, 1.0);                      *
- *              z1 = rssringoccs_Complex_Rect(10.0, 4.0);                     *
- *                                                                            *
- *              erf_z = rssringoccs_Complex_Erf(z0);                          *
- *              real = rssringoccs_Complex_Real_Part(erf_z);                  *
- *              imag = rssringoccs_Complex_Imag_Part(erf_z);                  *
- *              printf("erf(1+1i) = %f + i%f\n", real, imag);                 *
- *                                                                            *
- *              erf_z = rssringoccs_Complex_Erf(z1);                          *
- *              real = rssringoccs_Complex_Real_Part(erf_z);                  *
- *              imag = rssringoccs_Complex_Imag_Part(erf_z);                  *
- *              printf("erf(10+4i) = %f + i%f\n", real, imag);                *
- *                                                                            *
- *              return 0;                                                     *
- *          }                                                                 *
- *                                                                            *
- *      This outputs erf(1+1i) = 1.316151 + i0.190453 and then                *
- *      erf(10+4i) = 1.000000 + i-0.000000, demonstrating how quickly erf     *
- *      converges to 1 for certain arguments (angles/phases).                 *
- ******************************************************************************/
-extern rssringoccs_ComplexDouble
-rssringoccs_CDouble_Erf(rssringoccs_ComplexDouble z);
-
-extern rssringoccs_ComplexDouble
-rssringoccs_CDouble_Erfc(rssringoccs_ComplexDouble z);
-
-extern rssringoccs_ComplexDouble
-rssringoccs_CDouble_Faddeeva(rssringoccs_ComplexDouble z);
 
 #endif
 /*  End of include guard.                                                     */

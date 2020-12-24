@@ -86,6 +86,34 @@ rssringoccs_Compare_CLDouble_Funcs(const char *f0_name,
                                    unsigned long N);
 
 extern void
+rssringoccs_RelCompare_CFloat_Funcs(const char *f0_name,
+                                    rssringoccs_ComplexFloat
+                                      (*f0)(rssringoccs_ComplexFloat),
+                                    const char *f1_name,
+                                    float _Complex
+                                      (*f1)(float _Complex),
+                                    float start, float end, unsigned long N);
+
+extern void
+rssringoccs_RelCompare_CDouble_Funcs(const char *f0_name,
+                                     rssringoccs_ComplexDouble
+                                       (*f0)(rssringoccs_ComplexDouble),
+                                     const char *f1_name,
+                                     double _Complex
+                                       (*f1)(double _Complex),
+                                     double start, double end, unsigned long N);
+
+extern void
+rssringoccs_RelCompare_CLDouble_Funcs(const char *f0_name,
+                                      rssringoccs_ComplexLongDouble
+                                        (*f0)(rssringoccs_ComplexLongDouble),
+                                      const char *f1_name,
+                                      long double _Complex
+                                        (*f1)(long double _Complex),
+                                      long double start, long double end,
+                                      unsigned long N);
+
+extern void
 rssringoccs_Compare_Real_CFloat_Funcs(const char *f0_name,
                                       float (*f0)(rssringoccs_ComplexFloat),
                                       const char *f1_name,

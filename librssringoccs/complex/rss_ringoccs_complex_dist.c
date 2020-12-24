@@ -38,7 +38,7 @@
  *      w (rssringoccs_ComplexFloat/ComplexDouble/ComplexLongDouble):         *
  *          Another complex number.                                           *
  *  Output:                                                                   *
- *      dist (rssringoccs_ComplexFloat/ComplexDouble/ComplexLongDouble):      *
+ *      dist (float/double/long double):                                      *
  *          The distance between z and w.                                     *
  *  Method:                                                                   *
  *      Treat the points as elements of the Euclidean plane and use           *

@@ -23,7 +23,7 @@
 #   clang and gcc on both linux and mac systems using strict compiler options to
 #   ensure compliance with the ANSI standard. Changing this to a different
 #   compiler "should" work, though it hasn't been tested.
-CC=gcc-10
+CC=gcc
 
 echo -e "\nClearing older files..."
 rm -f *.so

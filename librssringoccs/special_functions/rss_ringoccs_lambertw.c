@@ -6,27 +6,65 @@
 
 float rssringoccs_Float_LambertW(float x)
 {
-    float EPS = 1.0e-4;
+    float EPS = 1.0e-4F;
     float x0, dx, exp_x0;
-    if ((x < INFINITY) && (x>-rssringoccs_Rcpr_Euler_E))
+    if ((x < rssringoccs_Infinity_F) && (x>-rssringoccs_Rcpr_Euler_E))
     {
-        if (x > 2.0)
-            x0 = logf(x/logf(x));
+        if (x > 2.0F)
+            x0 = rssringoccs_Float_Log(x/rssringoccs_Float_Log(x));
         else if (x > -rssringoccs_Rcpr_Euler_E)
             x0 = x;
         else if (x == -rssringoccs_Rcpr_Euler_E)
-            return -1.0;
+            return -1.0F;
         else
-            return nanf("0");
+            return rssringoccs_NaN_F;
 
-        exp_x0 = expf(x0);
+        exp_x0 = rssringoccs_Float_Exp(x0);
         dx = (x0*exp_x0-x)/(exp_x0*(x0+1.0) -
                             (x0+2.0)*(x0*exp_x0-x)/(2.0*x0+2.0));
         x0 = x0 - dx;
 
-        while (fabsf(dx) > EPS)
+        while (rssringoccs_Float_Abs(dx) > EPS)
         {
-            exp_x0 = expf(x0);
+            exp_x0 = rssringoccs_Float_Exp(x0);
+            dx = (x0*exp_x0-x)/(exp_x0*(x0+1.0) -
+                                (x0+2.0)*(x0*exp_x0-x)/(2.0*x0+2.0));
+            x0 = x0 - dx;
+        }
+        return x0;
+    }
+    else if (x==-rssringoccs_Rcpr_Euler_E)
+        return -1.0F;
+    else if (x<-rssringoccs_Rcpr_Euler_E)
+        return rssringoccs_NaN;
+    else
+        return rssringoccs_Infinity;
+}
+
+double rssringoccs_Double_LambertW(double x)
+{
+    double EPS = 1.0e-8;
+    double x0, dx, exp_x0;
+    if ((x < rssringoccs_Infinity) && (x>-rssringoccs_Rcpr_Euler_E))
+    {
+        if (x > 2.0){
+            x0 = rssringoccs_Double_Log(x/rssringoccs_Double_Log(x));
+        }
+        else if (x > -rssringoccs_Rcpr_Euler_E){
+            x0 = x;
+        }
+        else if (x == -rssringoccs_Rcpr_Euler_E){
+            return -1.0;
+        }
+        else {
+            return rssringoccs_NaN;
+        }
+        exp_x0 = rssringoccs_Double_Exp(x0);
+        dx = (x0*exp_x0-x)/(exp_x0*(x0+1.0) -
+                            (x0+2.0)*(x0*exp_x0-x)/(2.0*x0+2.0));
+        x0 = x0 - dx;
+        while (rssringoccs_Double_Abs(dx) > EPS){
+            exp_x0 = rssringoccs_Double_Log(x0);
             dx = (x0*exp_x0-x)/(exp_x0*(x0+1.0) -
                                 (x0+2.0)*(x0*exp_x0-x)/(2.0*x0+2.0));
             x0 = x0 - dx;
@@ -41,52 +79,14 @@ float rssringoccs_Float_LambertW(float x)
         return rssringoccs_Infinity;
 }
 
-double rssringoccs_Double_LambertW(double x)
-{
-    double EPS = 1.0e-8;
-    double x0, dx, exp_x0;
-    if ((x < INFINITY) && (x>-rssringoccs_Rcpr_Euler_E))
-    {
-        if (x > 2.0){
-            x0 = log(x/log(x));
-        }
-        else if (x > -rssringoccs_Rcpr_Euler_E){
-            x0 = x;
-        }
-        else if (x == -rssringoccs_Rcpr_Euler_E){
-            return -1.0;
-        }
-        else {
-            return nan("0");
-        }
-        exp_x0 = exp(x0);
-        dx = (x0*exp_x0-x)/(exp_x0*(x0+1.0) -
-                            (x0+2.0)*(x0*exp_x0-x)/(2.0*x0+2.0));
-        x0 = x0 - dx;
-        while (fabs(dx) > EPS){
-            exp_x0 = exp(x0);
-            dx = (x0*exp_x0-x)/(exp_x0*(x0+1.0) -
-                                (x0+2.0)*(x0*exp_x0-x)/(2.0*x0+2.0));
-            x0 = x0 - dx;
-        }
-        return x0;
-    }
-    else if (x==-rssringoccs_Rcpr_Euler_E)
-        return -1.0;
-    else if (x<-rssringoccs_Rcpr_Euler_E)
-        return NAN;
-    else
-        return INFINITY;
-}
-
 long double rssringoccs_LDouble_LambertW(long double x)
 {
     long double EPS = 1.0e-16;
     long double x0, dx, exp_x0;
-    if ((x < INFINITY) && (x>-rssringoccs_Rcpr_Euler_E))
+    if ((x < rssringoccs_Infinity_L) && (x>-rssringoccs_Rcpr_Euler_E))
     {
         if (x > 2.0){
-            x0 = logl(x/logl(x));
+            x0 = rssringoccs_LDouble_Log(x/rssringoccs_LDouble_Log(x));
         }
         else if (x > -rssringoccs_Rcpr_Euler_E){
             x0 = x;
@@ -95,14 +95,14 @@ long double rssringoccs_LDouble_LambertW(long double x)
             return -1.0;
         }
         else {
-            return nanl("0");
+            return rssringoccs_NaN_L;
         }
-        exp_x0 = expl(x0);
+        exp_x0 = rssringoccs_LDouble_Exp(x0);
         dx = (x0*exp_x0-x)/(exp_x0*(x0+1.0) -
                             (x0+2.0)*(x0*exp_x0-x)/(2.0*x0+2.0));
         x0 = x0 - dx;
-        while (fabsl(dx) > EPS){
-            exp_x0 = expl(x0);
+        while (rssringoccs_LDouble_Abs(dx) > EPS){
+            exp_x0 = rssringoccs_LDouble_Exp(x0);
             dx = (x0*exp_x0-x)/(exp_x0*(x0+1.0) -
                                 (x0+2.0)*(x0*exp_x0-x)/(2.0*x0+2.0));
             x0 = x0 - dx;
@@ -112,7 +112,7 @@ long double rssringoccs_LDouble_LambertW(long double x)
     else if (x==-rssringoccs_Rcpr_Euler_E)
         return -1.0;
     else if (x<-rssringoccs_Rcpr_Euler_E)
-        return NAN;
+        return rssringoccs_NaN_L;
     else
-        return INFINITY;
+        return rssringoccs_Infinity_L;
 }

@@ -1,6 +1,5 @@
 
 #include <rss_ringoccs/include/rss_ringoccs_math.h>
-#include <rss_ringoccs/include/rss_ringoccs_special_functions.h>
 #include <rss_ringoccs/include/rss_ringoccs_complex.h>
 
 /******************************************************************************

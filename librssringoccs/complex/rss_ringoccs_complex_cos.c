@@ -56,8 +56,7 @@
  *          provides aliases for the functions, and if C89 math.h is used     *
  *          it defines the functions missing in the earlier version.          *
  *  2.) rss_ringoccs_complex.h:                                               *
- *          Header file where rssringoccs_ComplexDouble is defined, as well   *
- *          as the prototype for rssringoccs_Complex_Cos.                     *
+ *          Header where complex types and function prototypes are defined.   *
  ******************************************************************************
  *                            A NOTE ON COMMENTS                              *
  ******************************************************************************

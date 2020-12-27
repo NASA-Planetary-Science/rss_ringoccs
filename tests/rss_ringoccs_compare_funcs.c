@@ -462,6 +462,7 @@ rssringoccs_Compare_CFloat_Funcs(const char *f0_name,
             z0[m][n] = f0(rssringoccs_CFloat_Rect(x, y));
             x += ds;
         }
+        x = start;
         y += ds;
     }
 
@@ -488,6 +489,7 @@ rssringoccs_Compare_CFloat_Funcs(const char *f0_name,
             z1[m][n] = f1(x + _Complex_I*y);
             x += ds;
         }
+        x = start;
         y += ds;
     }
 
@@ -543,14 +545,14 @@ rssringoccs_Compare_CFloat_Funcs(const char *f0_name,
 /*  End of rssringoccs_Compare_CFloat_Funcs.                                  */
 
 void
-rssringoccs_Compare_CDouble_Funcs(const char *f0_name,
-                                  rssringoccs_ComplexDouble
-                                    (*f0)(rssringoccs_ComplexDouble),
-                                  const char *f1_name,
-                                  double _Complex
-                                    (*f1)(double _Complex),
-                                  double start, double end,
-                                  unsigned long N)
+rssringoccs_Compare_CDouble_Funcs(
+    const char *f0_name,
+    rssringoccs_ComplexDouble (*f0)(rssringoccs_ComplexDouble),
+    const char *f1_name,
+    double _Complex (*f1)(double _Complex),
+    const double start,
+    const double end,
+    const unsigned long N)
 {
     /*  Declare variables for sampling the region [start, end].               */
     double x, y, ds;
@@ -614,6 +616,7 @@ rssringoccs_Compare_CDouble_Funcs(const char *f0_name,
             z0[m][n] = f0(rssringoccs_CDouble_Rect(x, y));
             x += ds;
         }
+        x = start;
         y += ds;
     }
 
@@ -640,6 +643,7 @@ rssringoccs_Compare_CDouble_Funcs(const char *f0_name,
             z1[m][n] = f1(x + (double _Complex)_Complex_I * y);
             x += ds;
         }
+        x = start;
         y += ds;
     }
 
@@ -767,6 +771,7 @@ rssringoccs_Compare_CLDouble_Funcs(const char *f0_name,
             z0[m][n] = f0(rssringoccs_CLDouble_Rect(x, y));
             x += ds;
         }
+        x = start;
         y += ds;
     }
 
@@ -793,6 +798,7 @@ rssringoccs_Compare_CLDouble_Funcs(const char *f0_name,
             z1[m][n] = f1(x + (long double _Complex)_Complex_I*y);
             x += ds;
         }
+        x = start;
         y += ds;
     }
 
@@ -921,6 +927,7 @@ rssringoccs_RelCompare_CFloat_Funcs(const char *f0_name,
             z0[m][n] = f0(rssringoccs_CFloat_Rect(x, y));
             x += ds;
         }
+        x = start;
         y += ds;
     }
 
@@ -947,6 +954,7 @@ rssringoccs_RelCompare_CFloat_Funcs(const char *f0_name,
             z1[m][n] = f1(x + _Complex_I*y);
             x += ds;
         }
+        x = start;
         y += ds;
     }
 
@@ -1073,6 +1081,7 @@ rssringoccs_RelCompare_CDouble_Funcs(const char *f0_name,
             z0[m][n] = f0(rssringoccs_CDouble_Rect(x, y));
             x += ds;
         }
+        x = start;
         y += ds;
     }
 
@@ -1099,6 +1108,7 @@ rssringoccs_RelCompare_CDouble_Funcs(const char *f0_name,
             z1[m][n] = f1(x + (double _Complex)_Complex_I * y);
             x += ds;
         }
+        x = start;
         y += ds;
     }
 
@@ -1226,6 +1236,7 @@ rssringoccs_RelCompare_CLDouble_Funcs(const char *f0_name,
             z0[m][n] = f0(rssringoccs_CLDouble_Rect(x, y));
             x += ds;
         }
+        x = start;
         y += ds;
     }
 
@@ -1252,6 +1263,7 @@ rssringoccs_RelCompare_CLDouble_Funcs(const char *f0_name,
             z1[m][n] = f1(x + (long double _Complex)_Complex_I*y);
             x += ds;
         }
+        x = start;
         y += ds;
     }
 
@@ -1375,6 +1387,7 @@ rssringoccs_Compare_Real_CFloat_Funcs(const char *f0_name,
             z0[m][n] = f0(rssringoccs_CFloat_Rect(x, y));
             x += ds;
         }
+        x = start;
         y += ds;
     }
 
@@ -1401,6 +1414,7 @@ rssringoccs_Compare_Real_CFloat_Funcs(const char *f0_name,
             z1[m][n] = f1(x + _Complex_I*y);
             x += ds;
         }
+        x = start;
         y += ds;
     }
 
@@ -1514,6 +1528,7 @@ rssringoccs_Compare_Real_CDouble_Funcs(const char *f0_name,
             z0[m][n] = f0(rssringoccs_CDouble_Rect(x, y));
             x += ds;
         }
+        x = start;
         y += ds;
     }
 
@@ -1540,6 +1555,7 @@ rssringoccs_Compare_Real_CDouble_Funcs(const char *f0_name,
             z1[m][n] = f1(x + (double _Complex)_Complex_I*y);
             x += ds;
         }
+        x = start;
         y += ds;
     }
 
@@ -1654,6 +1670,7 @@ rssringoccs_Compare_Real_CLDouble_Funcs(const char *f0_name,
             z0[m][n] = f0(rssringoccs_CLDouble_Rect(x, y));
             x += ds;
         }
+        x = start;
         y += ds;
     }
 
@@ -1680,6 +1697,7 @@ rssringoccs_Compare_Real_CLDouble_Funcs(const char *f0_name,
             z1[m][n] = f1(x + (long double _Complex)_Complex_I*y);
             x += ds;
         }
+        x = start;
         y += ds;
     }
 

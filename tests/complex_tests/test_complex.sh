@@ -5,10 +5,11 @@ CompilerArgs2="-Wpedantic -Wmisleading-indentation -Wmissing-field-initializers"
 CompilerArgs3="-Wmissing-prototypes -Wold-style-definition -Winit-self "
 CompilerArgs4="-Wmissing-declarations -Wstrict-prototypes"
 CompilerArgs="$CompilerArgs1 $CompilerArgs2 $CompilerArgs3 $CompilerArgs4"
+LinkerFlags="-lrssringoccs -lrssringoccs_compare -lcerf"
 
 for filename in ./*.c; do
     echo -e "\nTest: $filename"
-    $CC $CompilerArgs $filename -o test -lrssringoccs -lrssringoccs_compare
+    $CC $CompilerArgs $filename -o test $LinkerFlags
     ./test
     rm -f test
 done

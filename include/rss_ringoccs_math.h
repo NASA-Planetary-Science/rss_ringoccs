@@ -214,6 +214,17 @@
 #define rssringoccs_Max_LDouble_Base_E  (LDBL_MAX_10_EXP *                     \
                                          rssringoccs_Natural_Log_Of_10_L)
 
+/*  Macros for the smallest values of float, double, and long double,         *
+ *  respectively, that will not return 0 when exp(x) is computed.             */
+#define rssringoccs_Min_Float_Base_E    (FLT_MIN_10_EXP *                      \
+                                         rssringoccs_Natural_Log_Of_10_F)
+
+#define rssringoccs_Min_Double_Base_E   (DBL_MIN_10_EXP *                      \
+                                         rssringoccs_Natural_Log_Of_10)
+
+#define rssringoccs_Min_LDouble_Base_E  (LDBL_MIN_10_EXP *                     \
+                                         rssringoccs_Natural_Log_Of_10_L)
+
 /******************************************************************************
  *  Function:                                                                 *
  *      rssringoccs_Double_Abs                                                *

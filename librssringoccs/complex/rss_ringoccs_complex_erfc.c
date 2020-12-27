@@ -308,6 +308,7 @@ rssringoccs_CDouble_Erfc(rssringoccs_ComplexDouble z)
 rssringoccs_ComplexFloat
 rssringoccs_CFloat_Erfc(rssringoccs_ComplexFloat z)
 {
+    /*  Declare all necessary variales. C89 requires this at the top.         */
     float x, y;
     rssringoccs_ComplexDouble z_double, erfc_z_double;
     rssringoccs_ComplexFloat erfc_z;
@@ -337,6 +338,7 @@ rssringoccs_CFloat_Erfc(rssringoccs_ComplexFloat z)
 rssringoccs_ComplexLongDouble
 rssringoccs_CLDouble_Erfc(rssringoccs_ComplexLongDouble z)
 {
+    /*  Declare all necessary variales. C89 requires this at the top.         */
     long double x, y;
     rssringoccs_ComplexDouble z_double, erfc_z_double;
     rssringoccs_ComplexLongDouble erfc_z;

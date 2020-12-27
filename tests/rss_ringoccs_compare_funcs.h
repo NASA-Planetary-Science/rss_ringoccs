@@ -67,13 +67,14 @@ rssringoccs_Compare_CFloat_Funcs(const char *f0_name,
                                  float start, float end, unsigned long N);
 
 extern void
-rssringoccs_Compare_CDouble_Funcs(const char *f0_name,
-                                  rssringoccs_ComplexDouble
-                                    (*f0)(rssringoccs_ComplexDouble),
-                                  const char *f1_name,
-                                  double _Complex
-                                    (*f1)(double _Complex),
-                                  double start, double end, unsigned long N);
+rssringoccs_Compare_CDouble_Funcs(
+    const char *f0_name,
+    rssringoccs_ComplexDouble (*f0)(rssringoccs_ComplexDouble),
+    const char *f1_name,
+    double _Complex (*f1)(double _Complex),
+    const double start,
+    const double end,
+    const unsigned long N);
 
 extern void
 rssringoccs_Compare_CLDouble_Funcs(const char *f0_name,

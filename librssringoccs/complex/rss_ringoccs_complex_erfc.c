@@ -33,10 +33,13 @@
  *                            infinity                                        *
  *                               -                                            *
  *                      2       | |                                           *
- *          Erf(z) = -------    |   exp(-t^2) dt                              *
+ *          Erf(z) = -------    |   exp(-t^2) dt = 1 - Erf(z)                 *
  *                   sqrt(pi) | |                                             *
  *                             -                                              *
  *                             z                                              *
+ *                                                                            *
+ *      Note, the integral formula only applied to real z. For complex we use *
+ *      the expression 1 - Erf(z) as the definition.                          *
  *  Arguments:                                                                *
  *      z (rssringoccs_ComplexFloat/ComplexDouble/ComplexLongDouble):         *
  *          A complex number.                                                 *
@@ -165,8 +168,8 @@ rssringoccs_CDouble_Erfc(rssringoccs_ComplexDouble z)
 
         /*  For large values of the imaginary part, Erfc tends to infinity.   *
          *  Since the imaginary part of the Faddeeva function tends to zero   *
-         *  we'd end up with infinity*0 resulting in a NaN. We hand this case *
-         *  seperately.                                                       */
+         *  we'd end up with infinity*0 resulting in a NaN. We handle this    *
+         *  case seperately.                                                  */
 
         /*  If the square of the y component is greater than the              *
          *  rssringoccs_Max_Double_Base_E macro, exp(y^2) will return         *
@@ -193,42 +196,74 @@ rssringoccs_CDouble_Erfc(rssringoccs_ComplexDouble z)
         /*  Create the output complex number using rssringoccs_CDouble_Rect.  */
         w = rssringoccs_CDouble_Rect(w_x, w_y);
     }
+    /*  End of if (z_x == 0.0).                                               */
 
     /*  If the input is purely real, we can use the real valued complementary *
-     *  error function, which can be computed from the Erfcx function.        */
+     *  error function, which can be computed from the Erfcx function. Erfcx  *
+     *  is a scaled error function defined by erfcx(x) = exp(x^2)*erfc(x).    */
     else if (z_y == 0.0)
     {
-        /*  Underflow.                                                        */
-        if (z_x*z_x > 750)
+        /*  The imaginary part of erfc(x) is also zero since erf(x) has no    *
+         *  imaginary part and erfc(x) = 1-erf(x). Set w_y to minus z_y in    *
+         *  case a "signed zero" is needed in a computation.                  */
+        w_y = -z_y;
+
+        /*  Check for underflow. The macro rssringoccs_Min_Double_Base_E is   *
+         *  the smallest value which will not yield zero when exp(x) is       *
+         *  computed. We need to check if -x^2 will result in and underflow.  */
+        if (-z_x*z_x < rssringoccs_Min_Double_Base_E)
         {
-            w_y = -z_y;
+            /*  If x is positive and -x^2 < rssringoccs_Min_Double_Base_E,    *
+             *  then erf(x) is 1 to many decimals, and erfc(x) = 0.           */
             if (z_x >= 0.0)
                 w_x = 0.0;
+
+            /*  For negative x erf(x) is roughly -1, so erfc(x) = 1-(-1) = 2. */
             else
                 w_x = 2.0;
-
-            w = rssringoccs_CDouble_Rect(w_x, w_y);
         }
+
+        /*  If x^2 is small enough that we won't underflow, use the Erfcx     *
+         *  function and apply the formula described above.                   */
         else
         {
-            w_y = -z_y;
+            /*  For positive x we can use erfc(x) = exp(-x^2) erfcx(x).       */
             if (z_x >= 0.0)
                 w_x = exp(-z_x*z_x) * rssringoccs_Double_Erfcx(z_x);
+
+            /*  And for negative we use the reflection formula for erfc.      */
             else
                 w_x = 2.0 - exp(-z_x*z_x) * rssringoccs_Double_Erfcx(z_x);
-
-            w = rssringoccs_CDouble_Rect(w_x, w_y);
         }
+
+        /*  Create the output complex number using rssringoccs_CDouble_Rect.  */
+        w = rssringoccs_CDouble_Rect(w_x, w_y);
     }
+    /*  End of else statement else if (z_y == 0.0).                           */
+
+    /*  For the more general z = x + iy where x and y are non-zero we'll use  *
+     *  the complex Faddeeva function w(z). This is defined by                *
+     *  w(z) = exp(-z^2) erfc(-iz).                                           */
     else
     {
+        /*  Compute the real part of -z^2 = -(x+iy)^2 = y^2 - x^2 - i2xy. We  *
+         *  can save a multiplication by writing y^2-x^2 = (y-x)(x+y). This   *
+         *  also has the added caution of potentially avoiding underflow.     */
         mRe_z2 = (z_y - z_x) * (z_x + z_y);
 
-        /*  Im(-z^2).                                                         */
-        mIm_z2 = -2*z_x*z_y;
+        /*  Similarly, compute the imaginary part of -z^2.                    */
+        mIm_z2 = -2.0*z_x*z_y;
 
-        /*  Underflow case.                                                   */
-        if (mRe_z2 < -750)
+        /*  In the underflow case where the real part has a value less then   *
+         *  the macro rssringoccs_Min_Double_Base_E we'll simply return       *
+         *  2.0. We have erfc(z) = exp(-z^2) w(iz). Expanding this yields:    *
+         *                                                                    *
+         *      erfc(z) = exp(-mRe_z2 + i mIm_z2) w(iz)                       *
+         *              = exp(-mRe_z2)(cos(mIm_z2) + i sin(mIm_z2)) w(iz)     *
+         *                                                                    *
+         *  The exp term will dominate the imaginary part and the real part   *
+         *  is determined by the sign of x.                                   */
+        if (mRe_z2 < rssringoccs_Min_Double_Base_E)
         {
             w_y = 0.0;
             if (z_x >= 0.0)
@@ -237,6 +272,8 @@ rssringoccs_CDouble_Erfc(rssringoccs_ComplexDouble z)
                 w_x = 2.0;
             w = rssringoccs_CDouble_Rect(w_x, w_y);
         }
+
+        /*  If we won't underflow, use the complex Faddeeva function.         */
         else
         {
             if (z_x >= 0.0)
@@ -247,6 +284,8 @@ rssringoccs_CDouble_Erfc(rssringoccs_ComplexDouble z)
                 w = rssringoccs_CDouble_Faddeeva(w);
                 w = rssringoccs_CDouble_Multiply(w, temp);
             }
+
+            /*  For negative x, use the reflection formula.                   */
             else
             {
                 temp = rssringoccs_CDouble_Rect(mRe_z2, mIm_z2);
@@ -257,9 +296,13 @@ rssringoccs_CDouble_Erfc(rssringoccs_ComplexDouble z)
                 w = rssringoccs_CDouble_Subtract_Real(2.0, w);
             }
         }
+        /*  End of if (mRe_z2 < rssringoccs_Min_Double_Base_E).               */
     }
+    /*  End of else statement for if (z_x == 0.0).                            */
+
     return w;
 }
+/*  End of rssringoccs_CDouble_Erfc.                                          */
 
 /*  Single precision complex complementary error function.                    */
 rssringoccs_ComplexFloat

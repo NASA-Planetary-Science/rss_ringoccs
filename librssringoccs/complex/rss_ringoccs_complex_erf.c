@@ -43,7 +43,7 @@
  *      w (rssringoccs_ComplexFloat/ComplexDouble/ComplexLongDouble):         *
  *          Another complex number.                                           *
  *  Output:                                                                   *
- *      z_by_w (rssringoccs_ComplexFloat/ComplexDouble/ComplexLongDouble):    *
+ *      erf_z (rssringoccs_ComplexFloat/ComplexDouble/ComplexLongDouble):     *
  *          The quotient z / w.                                               *
  *  Method:                                                                   *
  *      Use the complementary error function Erfc(z) and apply the formula:   *

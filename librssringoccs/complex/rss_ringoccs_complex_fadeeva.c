@@ -1,3 +1,142 @@
+/******************************************************************************
+ *                                 LICENSE                                    *
+ ******************************************************************************
+ *  This file is part of rss_ringoccs.                                        *
+ *                                                                            *
+ *  rss_ringoccs is free software: you can redistribute it and/or modify it   *
+ *  it under the terms of the GNU General Public License as published by      *
+ *  the Free Software Foundation, either version 3 of the License, or         *
+ *  (at your option) any later version.                                       *
+ *                                                                            *
+ *  rss_ringoccs is distributed in the hope that it will be useful,           *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+ *  GNU General Public License for more details.                              *
+ *                                                                            *
+ *  You should have received a copy of the GNU General Public License         *
+ *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
+ ******************************************************************************
+ *                     rss_ringoccs_complex_faddeeva                          *
+ ******************************************************************************
+ *  Purpose:                                                                  *
+ *      Contains the source code for the Faddeeva function.                   *
+ ******************************************************************************
+ *                             DEFINED FUNCTIONS                              *
+ ******************************************************************************
+ *  Function Name:                                                            *
+ *      rssringoccs_CFloat_Faddeeva:                                          *
+ *      rssringoccs_CDouble_Faddeeva:                                         *
+ *      rssringoccs_CLDouble_Faddeeva:                                        *
+ *  Purpose:                                                                  *
+ *      Computes the Faddeeva function w(z):                                  *
+ *                                                                            *
+ *          w(z) = exp(-z^2) Erfc(-iz)                                        *
+ *                                                                            *
+ *      Where Erfc is the complementary error function.                       *
+ *  Arguments:                                                                *
+ *      z (rssringoccs_ComplexFloat/ComplexDouble/ComplexLongDouble):         *
+ *          A complex number.                                                 *
+ *  Output:                                                                   *
+ *      w (rssringoccs_ComplexFloat/ComplexDouble/ComplexLongDouble):         *
+ *          The Faddeeva function w(z).                                       *
+ *  Method:                                                                   *
+ *      Analyze the input to see which region of the complex plane it lies in *
+ *      and use the fadeeva and Erfcx functions to compute.                   *
+ *  NOTES:                                                                    *
+ *      No actual float or long double algorithms have been implemented by    *
+ *      rss_ringoccs. We simply cast to double and compute using that version.*
+ *                                                                            *
+ *      This is an alteration of the MIT Faddeeva package. It has been        *
+ *      altered to be C89/C90 compliant and uses the rest of the rss_ringoccs *
+ *      complex routines to perform the computation. The original authors are:*
+ *          Steven G. Johnson, Massachusetts Institute of Technology          *
+ *          Joachim Wuttke, Forschungszentrum Jülich, 2013                    *
+ *      Original license and copyright notice found below. Most of the        *
+ *      original code has been rewritten so that complex.h/C99 features are   *
+ *      NOT required. This file compiles with gcc using the -std=c89 -ansi    *
+ *      -Wall -Wextra and -Wpedantic options.                                 *
+ ******************************************************************************
+ *                               DEPENDENCIES                                 *
+ ******************************************************************************
+ *  1.) rss_ringoccs_complex.h:                                               *
+ *          Header where complex types and function prototypes are defined.   *
+ *  2.) rss_ringoccs_math.h:                                                  *
+ *          Header file containing lots of real-valued math functions.        *
+ ******************************************************************************
+ *                            A NOTE ON COMMENTS                              *
+ ******************************************************************************
+ *  It is anticipated that many users of this code will have experience in    *
+ *  either Python or IDL, but not C. Many comments are left to explain as     *
+ *  much as possible. Vagueness or unclear code should be reported to:        *
+ *  https://github.com/NASA-Planetary-Science/rss_ringoccs/issues             *
+ ******************************************************************************
+ *                            A FRIENDLY WARNING                              *
+ ******************************************************************************
+ *  This code is compatible with the C89/C90 standard. The setup script that  *
+ *  is used to compile this in config_librssringoccs.sh uses gcc and has the  *
+ *  -pedantic and -std=c89 flags to check for compliance. If you edit this to *
+ *  use C99 features (built-in complex, built-in booleans, C++ style comments *
+ *  and etc.), or GCC extensions, you will need to edit the config script.    *
+ ******************************************************************************
+ *  Author:     Ryan Maguire, Wellesley College                               *
+ *  Date:       December 28, 2020                                             *
+ ******************************************************************************/
+
+/******************************************************************************
+ *                             LIBCERF LICENSE                                *
+ ******************************************************************************/
+
+/* Library libcerf:
+ *   Compute complex error functions, based on a new implementation of
+ *   Faddeeva's w_of_z. Also provide Dawson and Voigt functions.
+ *
+ * File w_of_z.c:
+ *   Computation of Faddeeva's complex scaled error function,
+ *      w(z) = exp(-z^2) * erfc(-i*z),
+ *   nameless function (7.1.3) of Abramowitz&Stegun (1964),
+ *   also known as the plasma dispersion function.
+ *
+ *   This implementation uses a combination of different algorithms.
+ *   See man 3 w_of_z for references.
+ *
+ * Copyright:
+ *   (C) 2012 Massachusetts Institute of Technology
+ *   (C) 2013 Forschungszentrum Jülich GmbH
+ *
+ * Licence:
+ *   Permission is hereby granted, free of charge, to any person obtaining
+ *   a copy of this software and associated documentation files (the
+ *   "Software"), to deal in the Software without restriction, including
+ *   without limitation the rights to use, copy, modify, merge, publish,
+ *   distribute, sublicense, and/or sell copies of the Software, and to
+ *   permit persons to whom the Software is furnished to do so, subject to
+ *   the following conditions:
+ *
+ *   The above copyright notice and this permission notice shall be
+ *   included in all copies or substantial portions of the Software.
+ *
+ *   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ *   EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ *   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ *   NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ *   LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ *   OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ *   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * Authors:
+ *   Steven G. Johnson, Massachusetts Institute of Technology, 2012, core author
+ *   Joachim Wuttke, Forschungszentrum Jülich, 2013, package maintainer
+ *
+ * Website:
+ *   http://apps.jcns.fz-juelich.de/libcerf
+ *
+ * Revision history:
+ *   ../CHANGELOG
+ *
+ * Man page:
+ *   w_of_z(3)
+ */
+
 
 #include <rss_ringoccs/include/rss_ringoccs_math.h>
 #include <rss_ringoccs/include/rss_ringoccs_complex.h>
@@ -64,9 +203,13 @@ static const double expa2n2[] = {
     0.0
 };
 
+/*  Double precsision complex Faddeeva function.                              */
 rssringoccs_ComplexDouble
 rssringoccs_CDouble_Faddeeva(rssringoccs_ComplexDouble z)
 {
+    /*  Declare necessary variables. We'll declare all variables used in any  *
+     *  branch here for clarity. C89/C90 requires variables to be delcared at *
+     *  the top of a code block and does not allow mixed declarations/code.   */
     int n, dn;
     double z_x, z_y, abs_x, abs_y;
     double w_x, w_y;
@@ -84,22 +227,28 @@ rssringoccs_CDouble_Faddeeva(rssringoccs_ComplexDouble z)
     double exp1, exp1dn;
     rssringoccs_ComplexDouble w, temp;
 
-    const double relerr = DBL_EPSILON;
-
-    /*  pi / sqrt(-log(eps*0.5)).                                             */
+    /*  Define a to be pi / sqrt(-ln(DBL_EPSILON*0.5)). This value assumes    *
+     *  DBL_EPSILON = 2.22045e-16. This is in compliance with IEEE 754 double *
+     *  format which uses 52 bits for the mantissa. This yields 2^-52  which  *
+     *  is roughly 2.2e-16.                                                   */
     const double a = 0.518321480430085929872;
 
-    /*  (2/pi) * a;                                                           */
+    /*  Set c to 2*a/pi.                                                      */
     const double c = 0.329973702884629072537;
 
-    /*  a^2.                                                                  */
+    /*  And store a^2 as a variable.                                          */
     const double a2 = 0.268657157075235951582;
 
+    /*  Extract the real and imaginary parts from the input z.                */
     z_x = rssringoccs_CDouble_Real_Part(z);
     z_y = rssringoccs_CDouble_Imag_Part(z);
 
-    /*  Purely imaginary input, purely real output.                           *
-     *  However, use creal(z) to give correct sign of 0 in cimag(w).          */
+    /*  If we have a purely imaginary input, we get a purely real output. We  *
+     *  have:                                                                 *
+     *      w(iy) = exp(-(iy)^2) Erfc(-i(iy))                                 *
+     *            = exp(y^2) Erfc(y)                                          *
+     *  And Erfc of a real number is again real. exp(y^2) Erfc(y) is the      *
+     *  definition of the Erfcx function, so use this.                        */
     if (z_x == 0.0)
     {
         w_x = rssringoccs_Double_Erfcx(z_y);
@@ -107,14 +256,21 @@ rssringoccs_CDouble_Faddeeva(rssringoccs_ComplexDouble z)
         w = rssringoccs_CDouble_Rect(w_x, w_y);
         return w;
     }
+
+    /*  For a purely real input, we have:                                     *
+     *      w(x) = exp(-x^2) Erfc(-ix)                                        *
+     *  So we need the complementary function for a purely imaginary input.   *
+     *  We can use the imaginary part of the Faddeeva function for this.      *
+     *  rssringoccs_Double_Faddeeva_Im is defined in rss_ringoccs_math.h.     */
     else if (z_y == 0)
     {
-        w_x = rssringoccs_Double_Exp(-z_x*z_y);
+        w_x = rssringoccs_Double_Exp(-z_x*z_x);
         w_y = rssringoccs_Double_Faddeeva_Im(z_x);
         w = rssringoccs_CDouble_Rect(w_x, w_y);
         return w;
     }
 
+    /*  Get the absolute values of both the real and imaginary parts of z.    */
     abs_x = rssringoccs_Double_Abs(z_x);
     abs_y = rssringoccs_Double_Abs(z_y);
 
@@ -128,9 +284,11 @@ rssringoccs_CDouble_Faddeeva(rssringoccs_ComplexDouble z)
     sum4 = 0.0;
     sum5 = 0.0;
 
-/*  The continued fraction algorithm is faster. As pointed out by M. Zaghloul *
- *  the continued fraction seems to give a large relative error in Re w(z)    *
- *  for |x| ~ 6 and small |y|, so use algorithm 816 in this region.           */
+    /*  Original comment from libcerf:                                        *
+     *      The continued fraction algorithm is faster. As pointed out by M.  *
+     *      Zaghloul the continued fraction seems to give a large relative    *
+     *      error in Re w(z) for |x| ~ 6 and small |y|, so use algorithm 816  *
+     *      in this region.                                                   */
     if (abs_y > 7.0 || ((abs_x > 6.0) && ((abs_y > 0.1) ||
                                          ((abs_x > 8.0) && (abs_y > 1e-10)) ||
                                          (abs_x > 28.0))))
@@ -265,7 +423,6 @@ rssringoccs_CDouble_Faddeeva(rssringoccs_ComplexDouble z)
      *  below.  Therefore, we use x < 10 here.                                */
     else if (abs_x < 10)
     {
-
         prod2ax = 1.0;
         prodm2ax = 1.0;
 
@@ -302,7 +459,7 @@ rssringoccs_CDouble_Faddeeva(rssringoccs_ComplexDouble z)
                 sum5 += coef*(2*a)*n*rssringoccs_Double_Sinh((2*a)*n*abs_x);
 
                 /*  test convergence via sum3.                                */
-                if (coef * prod2ax < relerr * sum3)
+                if (coef * prod2ax < DBL_EPSILON * sum3)
                     break;
             }
         }
@@ -325,7 +482,7 @@ rssringoccs_CDouble_Faddeeva(rssringoccs_ComplexDouble z)
                 sum5 += (coef * prod2ax) * (a*n);
                 /*  Test convergence via sum5, since this sum has the slowest *
                  *  decay.                                                    */
-                if ((coef * prod2ax) * (a*n) < relerr * sum5)
+                if ((coef * prod2ax) * (a*n) < DBL_EPSILON * sum5)
                     break;
             }
         }
@@ -403,7 +560,7 @@ rssringoccs_CDouble_Faddeeva(rssringoccs_ComplexDouble z)
             tm /= (a2*(nm*nm) + z_y*z_y);
             sum3 += tp + tm;
             sum5 += a * (np * tp + nm * tm);
-            if (a * (np * tp + nm * tm) < relerr * sum5)
+            if (a * (np * tp + nm * tm) < DBL_EPSILON * sum5)
                 goto finish;
         }
         /*  loop over n0+dn terms only (since n0-dn <= 0).                    */
@@ -414,7 +571,7 @@ rssringoccs_CDouble_Faddeeva(rssringoccs_ComplexDouble z)
             ) / (a2*(np*np) + z_y*z_y);
             sum3 += tp;
             sum5 += a * np * tp;
-            if (a * np * tp < relerr * sum5)
+            if (a * np * tp < DBL_EPSILON * sum5)
                 goto finish;
         }
     }

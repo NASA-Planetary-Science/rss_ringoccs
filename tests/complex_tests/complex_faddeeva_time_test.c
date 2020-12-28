@@ -20,12 +20,22 @@
  *  Date:       December 19, 2020                                             *
  ******************************************************************************/
 
+/******************************************************************************
+ *  NOTES:                                                                    *
+ *      The error functions grows faster than exp(y^2) for z = 0 + iy.        *
+ *      Because of this, the test here calculates the relative error, which   *
+ *      0.0000000000000004 (see below). The worst absolute error is           *
+ *      618970019642690137449562112.0000000000000000. Since the value of this *
+ *      function has magnitude ~10^42 at this point, we see why the absolute  *
+ *      error is so huge.                                                     *
+ ******************************************************************************/
+
 /*  rss_ringoccs complex routines found here.                                 */
 #include <rss_ringoccs/include/rss_ringoccs_complex.h>
 
-/*  C99 complex functions found here. Note, your compiler must support        *
- *  complex variables to run this test.                                       */
-#include <complex.h>
+/*  Complex error function provided by the MIT Faddeeva package found here.   *
+ *  You must have the library installed and in your path to use this test.    */
+#include <cerf.h>
 
 /*  The comparison functions are found here.                                  *
  *  NOTE:                                                                     *
@@ -47,7 +57,7 @@
  *      We can then link via -lrssringoccs_compare (see below).               */
 #include "../rss_ringoccs_compare_funcs.h"
 
-/*  Routine for testing rssringoccs_CDouble_Exp.                              */
+/*  Routine for testing rssringoccs_CDouble_Erf.                              */
 int main(void)
 {
     /*  Set the start and end for the values we're testing.                   */
@@ -59,8 +69,9 @@ int main(void)
     unsigned long N = 1e4;
 
     /*  Use the compare function found in rss_ringoccs_compare_funcs.h.       */
-    rssringoccs_Compare_CDouble_Funcs("rss_ringoccs", rssringoccs_CDouble_Exp,
-                                      "C99", cexp, start, end, N);
+    rssringoccs_RelCompare_CDouble_Funcs("rss_ringoccs",
+                                         rssringoccs_CDouble_Faddeeva,
+                                         "libcerf", w_of_z, start, end, N);
 
     return 0;
 }
@@ -69,14 +80,15 @@ int main(void)
 /******************************************************************************
  *  Compileable with:                                                         *
  *      gcc -O3 -Wall -Wpedantic -Wextra -pedantic -pedantic-errors           *
- *          -std=c99 complex_exp_time_test.c -o test -lrssringoccs            *
- *              -lrssringoccs_compare                                         *
+ *          -std=c99 complex_erf_time_test.c -o test -lrssringoccs            *
+ *              -lrssringoccs_compare -lcerf                                  *
+ *      Don't forget to link libcerf as well!                                 *
  *  Output (iMac 2017 3.4 GHz Intel Quad-Core i5):                            *
- *      rss_ringoccs: 5.915511                                                *
- *      C99: 3.965554                                                         *
- *      Max Error: 0.0000000000000004                                         *
+ *      rss_ringoccs: 1.922353                                                *
+ *      libcerf: 1.076348                                                     *
+ *      Max Relative Error: 0.0000000000000004                                *
  *  With -O3 optimization:                                                    *
- *      rss_ringoccs: 5.861064                                                *
- *      C99: 4.131632                                                         *
- *      Max Error: 0.0000000000000004                                         *
+ *      rss_ringoccs: 1.928797                                                *
+ *      libcerf: 1.182088                                                     *
+ *      Max Relative Error: 0.0000000000000004                                *
  ******************************************************************************/

@@ -47,20 +47,20 @@
  *      We can then link via -lrssringoccs_compare (see below).               */
 #include "../rss_ringoccs_compare_funcs.h"
 
-/*  Routine for testing rssringoccs_CDouble_Exp.                              */
+/*  Routine for testing rssringoccs_CFloat_Exp.                               */
 int main(void)
 {
     /*  Set the start and end for the values we're testing.                   */
-    double start = -10.0;
-    double end   =  10.0;
+    float start = -10.0F;
+    float end   =  10.0F;
 
     /*  We'll test on a square grid of 100 million points from (start, start) *
      *  the (end, end) in the complex plane.                                  */
     unsigned long N = 1e4;
 
     /*  Use the compare function found in rss_ringoccs_compare_funcs.h.       */
-    rssringoccs_Compare_CDouble_Funcs("rss_ringoccs", rssringoccs_CDouble_Exp,
-                                      "C99", cexp, start, end, N);
+    rssringoccs_Compare_CFloat_Funcs("rss_ringoccs", rssringoccs_CFloat_Exp,
+                                     "C99", cexpf, start, end, N);
 
     return 0;
 }

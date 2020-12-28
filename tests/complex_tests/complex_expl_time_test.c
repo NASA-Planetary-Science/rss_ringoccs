@@ -51,16 +51,16 @@
 int main(void)
 {
     /*  Set the start and end for the values we're testing.                   */
-    double start = -10.0;
-    double end   =  10.0;
+    long double start = -10.0L;
+    long double end   =  10.0L;
 
     /*  We'll test on a square grid of 100 million points from (start, start) *
      *  the (end, end) in the complex plane.                                  */
     unsigned long N = 1e4;
 
     /*  Use the compare function found in rss_ringoccs_compare_funcs.h.       */
-    rssringoccs_Compare_CDouble_Funcs("rss_ringoccs", rssringoccs_CDouble_Exp,
-                                      "C99", cexp, start, end, N);
+    rssringoccs_Compare_CLDouble_Funcs("rss_ringoccs", rssringoccs_CLDouble_Exp,
+                                       "C99", cexpl, start, end, N);
 
     return 0;
 }
@@ -69,7 +69,7 @@ int main(void)
 /******************************************************************************
  *  Compileable with:                                                         *
  *      gcc -O3 -Wall -Wpedantic -Wextra -pedantic -pedantic-errors           *
- *          -std=c99 complex_exp_time_test.c -o test -lrssringoccs            *
+ *          -std=c99 complex_expl_time_test.c -o test -lrssringoccs           *
  *              -lrssringoccs_compare                                         *
  *  Output (iMac 2017 3.4 GHz Intel Quad-Core i5):                            *
  *      rss_ringoccs: 5.915511                                                *

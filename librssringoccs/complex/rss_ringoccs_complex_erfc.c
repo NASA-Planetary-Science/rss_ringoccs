@@ -44,7 +44,7 @@
  *      z (rssringoccs_ComplexFloat/ComplexDouble/ComplexLongDouble):         *
  *          A complex number.                                                 *
  *  Output:                                                                   *
- *      z_by_w (rssringoccs_ComplexFloat/ComplexDouble/ComplexLongDouble):    *
+ *      erfc_z (rssringoccs_ComplexFloat/ComplexDouble/ComplexLongDouble):    *
  *          The complementary error function, Erfc(z).                        *
  *  Method:                                                                   *
  *      Analyze the input to see which region of the complex plane it lies in *
@@ -68,6 +68,8 @@
  ******************************************************************************
  *  1.) rss_ringoccs_complex.h:                                               *
  *          Header where complex types and function prototypes are defined.   *
+ *  2.) rss_ringoccs_math.h:                                                  *
+ *          Header file containing lots of real-valued math functions.        *
  ******************************************************************************
  *                            A NOTE ON COMMENTS                              *
  ******************************************************************************

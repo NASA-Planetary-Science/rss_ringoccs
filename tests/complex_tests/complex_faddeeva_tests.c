@@ -66,13 +66,23 @@ int main(void)
 
     /*  We'll test on a square grid of 100 million points from (start, start) *
      *  the (end, end) in the complex plane.                                  */
-    unsigned long N = 1e4;
+    unsigned long N = 1e3;
 
     /*  Use the compare function found in rss_ringoccs_compare_funcs.h.       */
     rssringoccs_RelCompare_CDouble_Funcs("rss_ringoccs",
                                          rssringoccs_CDouble_Faddeeva,
                                          "libcerf", w_of_z, start, end, N);
 
+
+
+    /*  And run an accuracy test over a larger region of the complex plane.   */
+    start = -5000.0;
+    end   =  5000.0;
+    N = 1e3;
+
+    rssringoccs_Accuracy_CDouble_Funcs("rss_ringoccs",
+                                        rssringoccs_CDouble_Faddeeva,
+                                        "libcerf", w_of_z, start, end, N);
     return 0;
 }
 /*  End of main.                                                              */

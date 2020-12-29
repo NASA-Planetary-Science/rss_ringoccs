@@ -220,7 +220,7 @@ rssringoccs_CDouble_Faddeeva(rssringoccs_ComplexDouble z)
     double c0, c1, c2, c3, c4;
     double nu, wi, wr;
     double prod2ax, prodm2ax, expx2;
-    double sinxy, sin2xy, cos2xy, coef1, coef2;
+    double sinxy, sin2xy, cos2xy, coef1, coef2, sincxy, sinc2xy;
     double x2, ax2, exp2ax, expm2ax, expx2erfcxy;
     double re_temp, n0, dx;
     double np, nm, tp, tm;
@@ -293,16 +293,17 @@ rssringoccs_CDouble_Faddeeva(rssringoccs_ComplexDouble z)
                                          ((abs_x > 8.0) && (abs_y > 1e-10)) ||
                                          (abs_x > 28.0))))
     {
-        /*  Poppe & Wijers suggest using a number of terms                    *
-         *      nu = 3 + 1442 / (26*rho + 77)                                 *
-         *  where rho = sqrt((x/x0)^2 + (y/y0)^2) where x0=6.3, y0=4.4.       *
-         *  (They only use this expansion for rho >= 1, but rho a little      *
-         *  less than 1 seems okay too). Instead, I did my own fit to a       *
-         *  slightly different function that avoids the hypotenuse            *
-         *  calculation, using NLopt to minimize the sum of the squares of    *
-         *  the errors in nu with the constraint that the estimated nu be     *
-         *  >= minimum nu to attain machine precision. I also separate the    *
-         *  regions where nu == 2 and nu == 1.                                */
+        /*  Original comment from libcerf:
+         *      Poppe & Wijers suggest using a number of terms                *
+         *          nu = 3 + 1442 / (26*rho + 77)                             *
+         *      where rho = sqrt((x/x0)^2 + (y/y0)^2) where x0=6.3, y0=4.4.   *
+         *      (They only use this expansion for rho >= 1, but rho a little  *
+         *      less than 1 seems okay too). Instead, I did my own fit to a   *
+         *      slightly different function that avoids the hypotenuse        *
+         *      calculation, using NLopt to minimize the sum of the squares of*
+         *      the errors in nu with the constraint that the estimated nu be *
+         *      >= minimum nu to attain machine precision. I also separate the*
+         *      regions where nu == 2 and nu == 1.                            */
 
         /*  Compute for -z if y < 0.                                          */
         if (z_y < 0.0)
@@ -325,21 +326,19 @@ rssringoccs_CDouble_Faddeeva(rssringoccs_ComplexDouble z)
                     w_y = denom;
                     w = rssringoccs_CDouble_Rect(w_x, w_y);
                 }
+                /*  Use the limiting behavior of w(x+iy) if y = inf.          */
                 else if (rssringoccs_Is_Inf(abs_y))
                 {
+                    /*  Check if the x component is a NaN. If it is, or if    *
+                     *  if the y component is negative infinity, return       *
+                     *  complex NaN.                                          */
                     if ((rssringoccs_Is_NaN(z_x)) || (z_y < 0.0))
+                        w = rssringoccs_CDouble_NaN;
 
-                    {
-                        w_x = rssringoccs_NaN;
-                        w_y = rssringoccs_NaN;
-                    }
+                    /*  In the limiting case with y = +infinity we get zero.  */
                     else
-                    {
-                        w_x = 0.0;
-                        w_y = 0.0;
-                    }
+                        w = rssringoccs_CDouble_Zero;
 
-                    w = rssringoccs_CDouble_Rect(w_x, w_y);
                     return w;
                 }
                 else
@@ -495,23 +494,27 @@ rssringoccs_CDouble_Faddeeva(rssringoccs_ComplexDouble z)
             expx2erfcxy = 2*exp(z_y*z_y-abs_x*abs_x);
 
         /*  Imaginary terms cancel.                                           */
-        if (z_y > 5)
+        if (z_y > 5.0)
         {
-            sinxy = sin(abs_x*z_y);
-            w_x = (expx2erfcxy - c*z_y*sum1) * cos(2*abs_x*z_y) +
-                  (c*abs_x*expx2) * sinxy * rssringoccs_Double_Sinc(abs_x*z_y);
+            sinxy = rssringoccs_Double_Sin(abs_x*z_y);
+            sincxy = rssringoccs_Double_Sinc(abs_x*z_y);
+            cos2xy = rssringoccs_Double_Cos(2.0*abs_x*z_y);
+            w_x = (expx2erfcxy - c*z_y*sum1)*cos2xy +
+                  c*abs_x*expx2*sinxy*sincxy;
             w = rssringoccs_CDouble_Rect(w_x, 0.0);
         }
         else
         {
             xs = z_x;
-            sinxy = sin(xs*z_y);
-            sin2xy = sin(2*xs*z_y);
-            cos2xy = cos(2*xs*z_y);
+            sinxy = rssringoccs_Double_Sin(xs*z_y);
+            sin2xy = rssringoccs_Double_Sin(2.0*xs*z_y);
+            cos2xy = rssringoccs_Double_Cos(2.0*xs*z_y);
             coef1 = expx2erfcxy - c*z_y*sum1;
             coef2 = c*xs*expx2;
-            w_x = coef1 * cos2xy + coef2 * sinxy * rssringoccs_Double_Sinc(xs*z_y);
-            w_y = coef2 * rssringoccs_Double_Sinc(2*xs*z_y) - coef1 * sin2xy;
+            sincxy = rssringoccs_Double_Sinc(xs*z_y);
+            sinc2xy = rssringoccs_Double_Sinc(2*xs*z_y);
+            w_x = coef1 * cos2xy + coef2 * sinxy * sincxy;
+            w_y = coef2 * sinc2xy - coef1 * sin2xy;
             w = rssringoccs_CDouble_Rect(w_x, w_y);
         }
     }

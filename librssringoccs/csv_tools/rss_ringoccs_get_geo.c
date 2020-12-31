@@ -1,8 +1,24 @@
-
-
-
-
-
+/******************************************************************************
+ *                                 LICENSE                                    *
+ ******************************************************************************
+ *  This file is part of rss_ringoccs.                                        *
+ *                                                                            *
+ *  rss_ringoccs is free software: you can redistribute it and/or modify it   *
+ *  it under the terms of the GNU General Public License as published by      *
+ *  the Free Software Foundation, either version 3 of the License, or         *
+ *  (at your option) any later version.                                       *
+ *                                                                            *
+ *  rss_ringoccs is distributed in the hope that it will be useful,           *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+ *  GNU General Public License for more details.                              *
+ *                                                                            *
+ *  You should have received a copy of the GNU General Public License         *
+ *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
+ ******************************************************************************
+ *  Author:     Ryan Maguire, Wellesley College                               *
+ *  Date:       December 31, 2020                                             *
+ ******************************************************************************/
 
 #include <rss_ringoccs/include/rss_ringoccs_bool.h>
 #include <rss_ringoccs/include/rss_ringoccs_string.h>
@@ -10,36 +26,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
-/*  Sets all of the pointers inside a geo struct to NULL. Use this on error   *
- *  the returned geo struct doesn't accidentally have it's pointers free'd    *
- *  when they weren't malloc'd. On error a user should call                   *
- *  rssringoccs_Destroy_GeoCSV to free the pointer to a rssringoccs_GeoCSV    *
- *  struct to avoid memory leaks. This function will check if a pointer in    *
- *  struct is NULL and try to free it if it is not. The error_message is not  *
- *  nullified so the user can print out what happened.                        */
-static void __nullify_geo(rssringoccs_GeoCSV *geo)
-{
-    geo->t_oet_spm_vals = NULL;
-    geo->t_ret_spm_vals = NULL;
-    geo->t_set_spm_vals = NULL;
-    geo->rho_km_vals = NULL;
-    geo->phi_rl_deg_vals = NULL;
-    geo->phi_ora_deg_vals = NULL;
-    geo->B_deg_vals = NULL;
-    geo->D_km_vals = NULL;
-    geo->rho_dot_kms_vals = NULL;
-    geo->phi_rl_dot_kms_vals = NULL;
-    geo->F_km_vals = NULL;
-    geo->R_imp_km_vals = NULL;
-    geo->rx_km_vals = NULL;
-    geo->ry_km_vals = NULL;
-    geo->rz_km_vals = NULL;
-    geo->vx_kms_vals = NULL;
-    geo->vy_kms_vals = NULL;
-    geo->vz_kms_vals = NULL;
-    geo->obs_spacecract_lat_deg_vals = NULL;
-}
 
 rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
                                         rssringoccs_Bool use_deprecated)
@@ -62,7 +48,29 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
         return NULL;
     }
 
-    /*  Set the error_message to a NULL pointer so we can check if it's empty.*/
+    /*  Initialize the pointers in the geo struct to NULL. The function       *
+     *  rssringoccs_Destroy_GeoCSV_Members will check which members are NULL  *
+     *  and attempt to free those that aren't. Freeing a pointer that wasn't  *
+     *  malloc'd will crash the program, hence this initialization.           */
+    geo->t_oet_spm_vals = NULL;
+    geo->t_ret_spm_vals = NULL;
+    geo->t_set_spm_vals = NULL;
+    geo->rho_km_vals = NULL;
+    geo->phi_rl_deg_vals = NULL;
+    geo->phi_ora_deg_vals = NULL;
+    geo->B_deg_vals = NULL;
+    geo->D_km_vals = NULL;
+    geo->rho_dot_kms_vals = NULL;
+    geo->phi_rl_dot_kms_vals = NULL;
+    geo->F_km_vals = NULL;
+    geo->R_imp_km_vals = NULL;
+    geo->rx_km_vals = NULL;
+    geo->ry_km_vals = NULL;
+    geo->rz_km_vals = NULL;
+    geo->vx_kms_vals = NULL;
+    geo->vy_kms_vals = NULL;
+    geo->vz_kms_vals = NULL;
+    geo->obs_spacecract_lat_deg_vals = NULL;
     geo->error_message = NULL;
 
     /*  Try to open the input file.                                           */
@@ -78,7 +86,6 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
             "fopen returned NULL. Failed to open file for reading.\n"
             "It is likely the filename is incorrect or does not exist.\n"
         );
-        __nullify_geo(geo);
         return geo;
     }
 
@@ -114,7 +121,6 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
             "use_deprecated is set to true but the input CSV does not have\n"
             "18 columns. Aborting computation.\n"
         );
-        __nullify_geo(geo);
         return geo;
     }
 
@@ -128,7 +134,6 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
             "use_deprecated is set to false but the input CSV does not have\n"
             "19 columns. Aborting computation.\n"
         );
-        __nullify_geo(geo);
         return geo;
     }
 
@@ -143,7 +148,9 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
             "Malloc returned NULL. Failed to allocate memory for.\n"
             "t_oet_spm_vals. Aborting computation and returning.\n"
         );
-        __nullify_geo(geo);
+
+        /*  Free the variables that have been malloc'd so far.                */
+        rssringoccs_Destroy_GeoCSV_Members(geo);
         return geo;
     }
 
@@ -159,10 +166,8 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
             "t_ret_spm_vals. Aborting computation and returning.\n"
         );
 
-        /*  Free the variables that were successfully malloc'd since we are   *
-         *  returning with error.                                             */
-        free(geo->t_oet_spm_vals);
-        __nullify_geo(geo);
+        /*  Free the variables that have been malloc'd so far.                */
+        rssringoccs_Destroy_GeoCSV_Members(geo);
         return geo;
     }
 
@@ -178,11 +183,8 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
             "t_set_spm_vals. Aborting computation and returning.\n"
         );
 
-        /*  Free the variables that were successfully malloc'd since we are   *
-         *  returning with error.                                             */
-        free(geo->t_oet_spm_vals);
-        free(geo->t_ret_spm_vals);
-        __nullify_geo(geo);
+        /*  Free the variables that have been malloc'd so far.                */
+        rssringoccs_Destroy_GeoCSV_Members(geo);
         return geo;
     }
 
@@ -198,12 +200,8 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
             "rho_km_vals. Aborting computation and returning.\n"
         );
 
-        /*  Free the variables that were successfully malloc'd since we are   *
-         *  returning with error.                                             */
-        free(geo->t_oet_spm_vals);
-        free(geo->t_ret_spm_vals);
-        free(geo->t_set_spm_vals);
-        __nullify_geo(geo);
+        /*  Free the variables that have been malloc'd so far.                */
+        rssringoccs_Destroy_GeoCSV_Members(geo);
         return geo;
     }
 
@@ -219,13 +217,8 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
             "phi_rl_deg_vals. Aborting computation and returning.\n"
         );
 
-        /*  Free the variables that were successfully malloc'd since we are   *
-         *  returning with error.                                             */
-        free(geo->t_oet_spm_vals);
-        free(geo->t_ret_spm_vals);
-        free(geo->t_set_spm_vals);
-        free(geo->rho_km_vals);
-        __nullify_geo(geo);
+        /*  Free the variables that have been malloc'd so far.                */
+        rssringoccs_Destroy_GeoCSV_Members(geo);
         return geo;
     }
 
@@ -241,14 +234,8 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
             "phi_ora_deg_vals. Aborting computation and returning.\n"
         );
 
-        /*  Free the variables that were successfully malloc'd since we are   *
-         *  returning with error.                                             */
-        free(geo->t_oet_spm_vals);
-        free(geo->t_ret_spm_vals);
-        free(geo->t_set_spm_vals);
-        free(geo->rho_km_vals);
-        free(geo->phi_rl_deg_vals);
-        __nullify_geo(geo);
+        /*  Free the variables that have been malloc'd so far.                */
+        rssringoccs_Destroy_GeoCSV_Members(geo);
         return geo;
     }
 
@@ -264,15 +251,8 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
             "B_deg_vals. Aborting computation and returning.\n"
         );
 
-        /*  Free the variables that were successfully malloc'd since we are   *
-         *  returning with error.                                             */
-        free(geo->t_oet_spm_vals);
-        free(geo->t_ret_spm_vals);
-        free(geo->t_set_spm_vals);
-        free(geo->rho_km_vals);
-        free(geo->phi_rl_deg_vals);
-        free(geo->phi_ora_deg_vals);
-        __nullify_geo(geo);
+        /*  Free the variables that have been malloc'd so far.                */
+        rssringoccs_Destroy_GeoCSV_Members(geo);
         return geo;
     }
 
@@ -288,16 +268,8 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
             "D_km_vals. Aborting computation and returning.\n"
         );
 
-        /*  Free the variables that were successfully malloc'd since we are   *
-         *  returning with error.                                             */
-        free(geo->t_oet_spm_vals);
-        free(geo->t_ret_spm_vals);
-        free(geo->t_set_spm_vals);
-        free(geo->rho_km_vals);
-        free(geo->phi_rl_deg_vals);
-        free(geo->phi_ora_deg_vals);
-        free(geo->B_deg_vals);
-        __nullify_geo(geo);
+        /*  Free the variables that have been malloc'd so far.                */
+        rssringoccs_Destroy_GeoCSV_Members(geo);
         return geo;
     }
 
@@ -313,17 +285,8 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
             "rho_dot_kms_vals. Aborting computation and returning.\n"
         );
 
-        /*  Free the variables that were successfully malloc'd since we are   *
-         *  returning with error.                                             */
-        free(geo->t_oet_spm_vals);
-        free(geo->t_ret_spm_vals);
-        free(geo->t_set_spm_vals);
-        free(geo->rho_km_vals);
-        free(geo->phi_rl_deg_vals);
-        free(geo->phi_ora_deg_vals);
-        free(geo->B_deg_vals);
-        free(geo->D_km_vals);
-        __nullify_geo(geo);
+        /*  Free the variables that have been malloc'd so far.                */
+        rssringoccs_Destroy_GeoCSV_Members(geo);
         return geo;
     }
 
@@ -340,18 +303,8 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
             "phi_rl_dot_kms_vals. Aborting computation and returning.\n"
         );
 
-        /*  Free the variables that were successfully malloc'd since we are   *
-         *  returning with error.                                             */
-        free(geo->t_oet_spm_vals);
-        free(geo->t_ret_spm_vals);
-        free(geo->t_set_spm_vals);
-        free(geo->rho_km_vals);
-        free(geo->phi_rl_deg_vals);
-        free(geo->phi_ora_deg_vals);
-        free(geo->B_deg_vals);
-        free(geo->D_km_vals);
-        free(geo->rho_dot_kms_vals);
-        __nullify_geo(geo);
+        /*  Free the variables that have been malloc'd so far.                */
+        rssringoccs_Destroy_GeoCSV_Members(geo);
         return geo;
     }
 
@@ -367,19 +320,8 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
             "F_km_vals. Aborting computation and returning.\n"
         );
 
-        /*  Free the variables that were successfully malloc'd since we are   *
-         *  returning with error.                                             */
-        free(geo->t_oet_spm_vals);
-        free(geo->t_ret_spm_vals);
-        free(geo->t_set_spm_vals);
-        free(geo->rho_km_vals);
-        free(geo->phi_rl_deg_vals);
-        free(geo->phi_ora_deg_vals);
-        free(geo->B_deg_vals);
-        free(geo->D_km_vals);
-        free(geo->rho_dot_kms_vals);
-        free(geo->phi_rl_dot_kms_vals);
-        __nullify_geo(geo);
+        /*  Free the variables that have been malloc'd so far.                */
+        rssringoccs_Destroy_GeoCSV_Members(geo);
         return geo;
     }
 
@@ -395,20 +337,8 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
             "R_imp_km_vals. Aborting computation and returning.\n"
         );
 
-        /*  Free the variables that were successfully malloc'd since we are   *
-         *  returning with error.                                             */
-        free(geo->t_oet_spm_vals);
-        free(geo->t_ret_spm_vals);
-        free(geo->t_set_spm_vals);
-        free(geo->rho_km_vals);
-        free(geo->phi_rl_deg_vals);
-        free(geo->phi_ora_deg_vals);
-        free(geo->B_deg_vals);
-        free(geo->D_km_vals);
-        free(geo->rho_dot_kms_vals);
-        free(geo->phi_rl_dot_kms_vals);
-        free(geo->F_km_vals);
-        __nullify_geo(geo);
+        /*  Free the variables that have been malloc'd so far.                */
+        rssringoccs_Destroy_GeoCSV_Members(geo);
         return geo;
     }
 
@@ -424,21 +354,8 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
             "rx_km_vals. Aborting computation and returning.\n"
         );
 
-        /*  Free the variables that were successfully malloc'd since we are   *
-         *  returning with error.                                             */
-        free(geo->t_oet_spm_vals);
-        free(geo->t_ret_spm_vals);
-        free(geo->t_set_spm_vals);
-        free(geo->rho_km_vals);
-        free(geo->phi_rl_deg_vals);
-        free(geo->phi_ora_deg_vals);
-        free(geo->B_deg_vals);
-        free(geo->D_km_vals);
-        free(geo->rho_dot_kms_vals);
-        free(geo->phi_rl_dot_kms_vals);
-        free(geo->F_km_vals);
-        free(geo->R_imp_km_vals);
-        __nullify_geo(geo);
+        /*  Free the variables that have been malloc'd so far.                */
+        rssringoccs_Destroy_GeoCSV_Members(geo);
         return geo;
     }
 
@@ -454,22 +371,8 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
             "ry_km_vals. Aborting computation and returning.\n"
         );
 
-        /*  Free the variables that were successfully malloc'd since we are   *
-         *  returning with error.                                             */
-        free(geo->t_oet_spm_vals);
-        free(geo->t_ret_spm_vals);
-        free(geo->t_set_spm_vals);
-        free(geo->rho_km_vals);
-        free(geo->phi_rl_deg_vals);
-        free(geo->phi_ora_deg_vals);
-        free(geo->B_deg_vals);
-        free(geo->D_km_vals);
-        free(geo->rho_dot_kms_vals);
-        free(geo->phi_rl_dot_kms_vals);
-        free(geo->F_km_vals);
-        free(geo->R_imp_km_vals);
-        free(geo->rx_km_vals);
-        __nullify_geo(geo);
+        /*  Free the variables that have been malloc'd so far.                */
+        rssringoccs_Destroy_GeoCSV_Members(geo);
         return geo;
     }
 
@@ -485,23 +388,8 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
             "rz_km_vals. Aborting computation and returning.\n"
         );
 
-        /*  Free the variables that were successfully malloc'd since we are   *
-         *  returning with error.                                             */
-        free(geo->t_oet_spm_vals);
-        free(geo->t_ret_spm_vals);
-        free(geo->t_set_spm_vals);
-        free(geo->rho_km_vals);
-        free(geo->phi_rl_deg_vals);
-        free(geo->phi_ora_deg_vals);
-        free(geo->B_deg_vals);
-        free(geo->D_km_vals);
-        free(geo->rho_dot_kms_vals);
-        free(geo->phi_rl_dot_kms_vals);
-        free(geo->F_km_vals);
-        free(geo->R_imp_km_vals);
-        free(geo->rx_km_vals);
-        free(geo->ry_km_vals);
-        __nullify_geo(geo);
+        /*  Free the variables that have been malloc'd so far.                */
+        rssringoccs_Destroy_GeoCSV_Members(geo);
         return geo;
     }
 
@@ -517,24 +405,8 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
             "vx_kms_vals. Aborting computation and returning.\n"
         );
 
-        /*  Free the variables that were successfully malloc'd since we are   *
-         *  returning with error.                                             */
-        free(geo->t_oet_spm_vals);
-        free(geo->t_ret_spm_vals);
-        free(geo->t_set_spm_vals);
-        free(geo->rho_km_vals);
-        free(geo->phi_rl_deg_vals);
-        free(geo->phi_ora_deg_vals);
-        free(geo->B_deg_vals);
-        free(geo->D_km_vals);
-        free(geo->rho_dot_kms_vals);
-        free(geo->phi_rl_dot_kms_vals);
-        free(geo->F_km_vals);
-        free(geo->R_imp_km_vals);
-        free(geo->rx_km_vals);
-        free(geo->ry_km_vals);
-        free(geo->rz_km_vals);
-        __nullify_geo(geo);
+        /*  Free the variables that have been malloc'd so far.                */
+        rssringoccs_Destroy_GeoCSV_Members(geo);
         return geo;
     }
 
@@ -550,25 +422,8 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
             "vy_kms_vals. Aborting computation and returning.\n"
         );
 
-        /*  Free the variables that were successfully malloc'd since we are   *
-         *  returning with error.                                             */
-        free(geo->t_oet_spm_vals);
-        free(geo->t_ret_spm_vals);
-        free(geo->t_set_spm_vals);
-        free(geo->rho_km_vals);
-        free(geo->phi_rl_deg_vals);
-        free(geo->phi_ora_deg_vals);
-        free(geo->B_deg_vals);
-        free(geo->D_km_vals);
-        free(geo->rho_dot_kms_vals);
-        free(geo->phi_rl_dot_kms_vals);
-        free(geo->F_km_vals);
-        free(geo->R_imp_km_vals);
-        free(geo->rx_km_vals);
-        free(geo->ry_km_vals);
-        free(geo->rz_km_vals);
-        free(geo->vx_kms_vals);
-        __nullify_geo(geo);
+        /*  Free the variables that have been malloc'd so far.                */
+        rssringoccs_Destroy_GeoCSV_Members(geo);
         return geo;
     }
 
@@ -584,26 +439,8 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
             "vz_kms_vals. Aborting computation and returning.\n"
         );
 
-        /*  Free the variables that were successfully malloc'd since we are   *
-         *  returning with error.                                             */
-        free(geo->t_oet_spm_vals);
-        free(geo->t_ret_spm_vals);
-        free(geo->t_set_spm_vals);
-        free(geo->rho_km_vals);
-        free(geo->phi_rl_deg_vals);
-        free(geo->phi_ora_deg_vals);
-        free(geo->B_deg_vals);
-        free(geo->D_km_vals);
-        free(geo->rho_dot_kms_vals);
-        free(geo->phi_rl_dot_kms_vals);
-        free(geo->F_km_vals);
-        free(geo->R_imp_km_vals);
-        free(geo->rx_km_vals);
-        free(geo->ry_km_vals);
-        free(geo->rz_km_vals);
-        free(geo->vx_kms_vals);
-        free(geo->vy_kms_vals);
-        __nullify_geo(geo);
+        /*  Free the variables that have been malloc'd so far.                */
+        rssringoccs_Destroy_GeoCSV_Members(geo);
         return geo;
     }
 
@@ -627,27 +464,8 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
                 "Aborting computation and returning.\n"
             );
 
-            /*  Free the variables that were successfully malloc'd since we   *
-             *  are returning with error.                                     */
-            free(geo->t_oet_spm_vals);
-            free(geo->t_ret_spm_vals);
-            free(geo->t_set_spm_vals);
-            free(geo->rho_km_vals);
-            free(geo->phi_rl_deg_vals);
-            free(geo->phi_ora_deg_vals);
-            free(geo->B_deg_vals);
-            free(geo->D_km_vals);
-            free(geo->rho_dot_kms_vals);
-            free(geo->phi_rl_dot_kms_vals);
-            free(geo->F_km_vals);
-            free(geo->R_imp_km_vals);
-            free(geo->rx_km_vals);
-            free(geo->ry_km_vals);
-            free(geo->rz_km_vals);
-            free(geo->vx_kms_vals);
-            free(geo->vy_kms_vals);
-            free(geo->vz_kms_vals);
-            __nullify_geo(geo);
+        /*  Free the variables that have been malloc'd so far.                */
+        rssringoccs_Destroy_GeoCSV_Members(geo);
             return geo;
         }
     }
@@ -720,4 +538,3 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
 
     return geo;
 }
-

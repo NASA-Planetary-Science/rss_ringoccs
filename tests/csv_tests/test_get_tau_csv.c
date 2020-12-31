@@ -29,50 +29,62 @@ static void write_val(FILE *fp, double x, double y)
 
 int main(void)
 {
-    rssringoccs_GeoCSV *geo;
-    unsigned long n;
+    rssringoccs_TauCSV *tau;
+    unsigned long n, start_n, end_n;
+    double start = 87400.0;
+    double end   = 87600.0;
     FILE *fp;
 
-    geo = rssringoccs_Get_Geo("../Test_Data/Rev007E_X43_Maxwell_GEO.TAB",
+    tau = rssringoccs_Get_Tau("../Test_Data/Rev007E_X43_Maxwell_TAU_1000M.TAB",
                               rssringoccs_False);
-    if (geo == NULL)
+    if (tau == NULL)
     {
         puts("Error Encountered: rss_ringoccs\n"
-             "\ttest_get_geo_csv\n\n"
-             "rssringoccs_Get_Geo returned NULL.\n");
+             "\ttest_get_tau_csv\n\n"
+             "rssringoccs_Get_Tau returned NULL.\n");
         return -1;
     }
-    else if (geo->error_occurred)
+    else if (tau->error_occurred)
     {
-        if (geo->error_message == NULL)
+        if (tau->error_message == NULL)
         {
             puts("Error Encountered: rss_ringoccs\n"
-                "\ttest_get_geo_csv\n\n"
-                "geo->error_occurred set to true with no error message.\n");
-            rssringoccs_Destroy_GeoCSV(&geo);
+                "\ttest_get_tau_csv\n\n"
+                "tau->error_occurred set to true with no error message.\n");
+            rssringoccs_Destroy_TauCSV(&tau);
             return -1;
         }
         else
         {
             printf("Error Encountered: rss_ringoccs\n"
-                   "\ttest_get_geo_csv\n\n"
-                   "geo->error_occurred set to true. Printing error:\n\n%s",
-                   geo->error_message);
-            rssringoccs_Destroy_GeoCSV(&geo);
+                   "\ttest_get_tau_csv\n\n"
+                   "tau->error_occurred set to true. Printing error:\n\n%s",
+                   tau->error_message);
+            rssringoccs_Destroy_TauCSV(&tau);
             return -1;
         }
     }
 
-    fp = fopen("rev007_plot_binary", "w");
+    fp = fopen("rev007_tau_binary", "w");
 
-    for (n=0; n<geo->n_elements; ++n)
-        write_val(fp, geo->rho_km_vals[n], geo->F_km_vals[n]);
+    n = 0;
+    while (tau->rho_km_vals[n] < start)
+        n++;
+
+    start_n = n;
+
+    while(tau->rho_km_vals[n] < end)
+        n++;
+
+    end_n = n;
+
+    for (n=start_n; n<end_n; ++n)
+        write_val(fp, tau->rho_km_vals[n], tau->power_vals[n]);
 
     fclose(fp);
 
-    system("graph --font-size 0.03 -T ps -I d < rev007_plot_binary > plot.ps");
-    system("rm -f rev007_plot_binary");
-    rssringoccs_Destroy_GeoCSV(&geo);
+    system("graph --font-size 0.03 -T ps -I d < rev007_tau_binary > plot.ps");
+    system("rm -f rev007_tau_binary");
+    rssringoccs_Destroy_TauCSV(&tau);
     return 0;
-
 }

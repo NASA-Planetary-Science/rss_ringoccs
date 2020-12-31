@@ -23,22 +23,36 @@
 #include <stdlib.h>
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
 
-void rssringoccs_Destroy_GeoCSV(rssringoccs_GeoCSV **geo)
-{
-    rssringoccs_GeoCSV *geo_inst = *geo;
+/*  Macro for freeing and nullifying the members of the geo CSV structs.      */
+#define DESTROY_GEO_VAR(var) if (var != NULL){free(var); var = NULL;}
 
-    if (geo_inst == NULL)
+/*  Free's all members of a rssringoccs_GeoCSV pointer except the             *
+ *  error_message. Members are set to NULL after freeing.                     */
+void rssringoccs_Destroy_GeoCSV_Members(rssringoccs_GeoCSV *geo)
+{
+    /*  If the pointer is NULL, there's nothing to do. Simply return.         */
+    if (geo == NULL)
         return;
 
-    rssringoccs_Destroy_GeoCSV_Members(geo_inst);
-
-    if (geo_inst->error_message != NULL)
-    {
-        free(geo_inst->error_message);
-        geo_inst->error_message = NULL;
-    }
-
-    free(geo_inst);
-    *geo = NULL;
-    return;
+    /*  Destroy every variable except the error_message.                      */
+    DESTROY_GEO_VAR(geo->t_oet_spm_vals);
+    DESTROY_GEO_VAR(geo->t_ret_spm_vals);
+    DESTROY_GEO_VAR(geo->t_set_spm_vals);
+    DESTROY_GEO_VAR(geo->rho_km_vals);
+    DESTROY_GEO_VAR(geo->phi_rl_deg_vals);
+    DESTROY_GEO_VAR(geo->phi_ora_deg_vals);
+    DESTROY_GEO_VAR(geo->B_deg_vals);
+    DESTROY_GEO_VAR(geo->D_km_vals);
+    DESTROY_GEO_VAR(geo->rho_dot_kms_vals);
+    DESTROY_GEO_VAR(geo->phi_rl_dot_kms_vals);
+    DESTROY_GEO_VAR(geo->F_km_vals);
+    DESTROY_GEO_VAR(geo->R_imp_km_vals);
+    DESTROY_GEO_VAR(geo->rx_km_vals);
+    DESTROY_GEO_VAR(geo->ry_km_vals);
+    DESTROY_GEO_VAR(geo->rz_km_vals);
+    DESTROY_GEO_VAR(geo->vx_kms_vals);
+    DESTROY_GEO_VAR(geo->vy_kms_vals);
+    DESTROY_GEO_VAR(geo->vz_kms_vals);
+    DESTROY_GEO_VAR(geo->obs_spacecract_lat_deg_vals);
 }
+/*  End of rssringoccs_Destroy_GeoCSV_Members.                                */

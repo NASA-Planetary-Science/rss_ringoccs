@@ -65,10 +65,116 @@ typedef struct rssringoccs_GeoCSV {
     char *error_message;
 } rssringoccs_GeoCSV;
 
+/*  Data structure for the DLP.TAB files on the PDS.                          */
+typedef struct rssringoccs_DLPCSV {
+    double *rho_km_vals;
+    double *rho_corr_pole_km_vals;
+    double *rho_corr_timing_km_vals;
+    double *phi_rl_deg_vals;
+    double *phi_ora_deg_vals;
+    double *p_norm_vals;
+    double *raw_tau_vals;
+    double *phase_deg_vals;
+    double *raw_tau_threshold_vals;
+    double *t_oet_spm_vals;
+    double *t_ret_spm_vals;
+    double *t_set_spm_vals;
+    double *B_deg_vals;
+    unsigned long n_elements;
+    rssringoccs_Bool error_occurred;
+    char *error_message;
+} rssringoccs_DLPCSV;
+
+/*  Data structure for the CAL.TAB files on the PDS.                          */
+typedef struct rssringoccs_CalCSV {
+    double *t_oet_spm_vals;
+    double *f_sky_pred_vals;
+    double *f_sky_resid_fit_vals;
+    double *p_free_vals;
+    unsigned long n_elements;
+    rssringoccs_Bool error_occurred;
+    char *error_message;
+} rssringoccs_CalCSV;
+
+/*  Data structure for the TAU.TAB files on the PDS.                          */
+typedef struct rssringoccs_TauCSV {
+    double *rho_km_vals;
+    double *rho_corr_pole_km_vals;
+    double *rho_corr_timing_km_vals;
+    double *phi_rl_deg_vals;
+    double *phi_ora_deg_vals;
+    double *power_vals;
+    double *raw_tau_vals;
+    double *phase_deg_vals;
+    double *raw_tau_threshold_vals;
+    double *t_oet_spm_vals;
+    double *t_ret_spm_vals;
+    double *t_set_spm_vals;
+    double *B_deg_vals;
+    unsigned long n_elements;
+    rssringoccs_Bool error_occurred;
+    char *error_message;
+} rssringoccs_TauCSV;
+
+/*  Data structure that contains all of the data from all four CSV formats    *
+ *  interpolated so that the values are a function of radius, not time.       */
+typedef struct rssringoccs_CSVData {
+    double *B_rad_vals;
+    double *D_km_vals;
+    double *f_sky_hz_vals;
+    double *p_norm_vals;
+    double *power_vals;
+    double *phase_rad_vals;
+    double *phase_vals;
+    double *phi_rad_vals;
+    double *phi_rl_rad_vals;
+    double *raw_tau_threshold_vals;
+    double *rho_corr_pole_km_vals;
+    double *rho_corr_timing_km_vals;
+    double *rho_dot_kms_vals;
+    double *rho_km_vals;
+    double *rx_km_vals;
+    double *ry_km_vals;
+    double *rz_km_vals;
+    double *t_oet_spm_vals;
+    double *t_ret_spm_vals;
+    double *t_set_spm_vals;
+    double *tau_rho;
+    double *tau_power;
+    double *tau_vals;
+    unsigned long n_elements;
+    rssringoccs_Bool error_occurred;
+    char *error_message;
+} rssringoccs_CSVData;
+
 extern rssringoccs_GeoCSV *
 rssringoccs_Get_Geo(const char *filename, rssringoccs_Bool use_deprecated);
 
+extern void rssringoccs_Destroy_GeoCSV_Members(rssringoccs_GeoCSV *geo);
 extern void rssringoccs_Destroy_GeoCSV(rssringoccs_GeoCSV **geo);
+
+extern rssringoccs_DLPCSV *
+rssringoccs_Get_DLP(const char *filename, rssringoccs_Bool use_deprecated);
+
+extern void rssringoccs_Destroy_DLPCSV_Members(rssringoccs_DLPCSV *dlp);
+extern void rssringoccs_Destroy_DLPCSV(rssringoccs_DLPCSV **dlp);
+
+extern rssringoccs_CalCSV *rssringoccs_Get_Cal(const char *filename);
+extern void rssringoccs_Destroy_CalCSV_Members(rssringoccs_CalCSV *cal);
+extern void rssringoccs_Destroy_CalCSV(rssringoccs_CalCSV **cal);
+
+extern rssringoccs_TauCSV *
+rssringoccs_Get_Tau(const char *filename, rssringoccs_Bool use_deprecated);
+
+extern void rssringoccs_Destroy_TauCSV_Members(rssringoccs_TauCSV *dlp);
+extern void rssringoccs_Destroy_TauCSV(rssringoccs_TauCSV **dlp);
+
+extern rssringoccs_CSVData *
+rssringoccs_Extract_CSV_Data(const char *geo,
+                             const char *cal,
+                             const char *dlp,
+                             const char *tau,
+                             rssringoccs_Bool use_deprecated);
 
 #endif
 /*  End of include guard.                                                     */

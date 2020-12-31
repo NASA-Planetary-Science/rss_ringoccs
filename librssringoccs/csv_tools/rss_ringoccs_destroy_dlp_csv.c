@@ -23,22 +23,22 @@
 #include <stdlib.h>
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
 
-void rssringoccs_Destroy_GeoCSV(rssringoccs_GeoCSV **geo)
+void rssringoccs_Destroy_DLPCSV(rssringoccs_DLPCSV **dlp)
 {
-    rssringoccs_GeoCSV *geo_inst = *geo;
+    rssringoccs_DLPCSV *dlp_inst = *dlp;
 
-    if (geo_inst == NULL)
+    if (dlp_inst == NULL)
         return;
 
-    rssringoccs_Destroy_GeoCSV_Members(geo_inst);
+    rssringoccs_Destroy_DLPCSV_Members(dlp_inst);
 
-    if (geo_inst->error_message != NULL)
+    if (dlp_inst->error_message != NULL)
     {
-        free(geo_inst->error_message);
-        geo_inst->error_message = NULL;
+        free(dlp_inst->error_message);
+        dlp_inst->error_message = NULL;
     }
 
-    free(geo_inst);
-    *geo = NULL;
+    free(dlp_inst);
+    *dlp = NULL;
     return;
 }

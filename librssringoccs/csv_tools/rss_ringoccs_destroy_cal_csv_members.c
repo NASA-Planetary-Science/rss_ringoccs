@@ -23,22 +23,21 @@
 #include <stdlib.h>
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
 
-void rssringoccs_Destroy_GeoCSV(rssringoccs_GeoCSV **geo)
-{
-    rssringoccs_GeoCSV *geo_inst = *geo;
+/*  Macro for freeing and nullifying the members of the geo CSV structs.      */
+#define DESTROY_CAL_VAR(var) if (var != NULL){free(var); var = NULL;}
 
-    if (geo_inst == NULL)
+/*  Free's all members of a rssringoccs_GeoCSV pointer except the             *
+ *  error_message. Members are set to NULL after freeing.                     */
+void rssringoccs_Destroy_CalCSV_Members(rssringoccs_CalCSV *cal)
+{
+    /*  If the pointer is NULL, there's nothing to do. Simply return.         */
+    if (cal == NULL)
         return;
 
-    rssringoccs_Destroy_GeoCSV_Members(geo_inst);
-
-    if (geo_inst->error_message != NULL)
-    {
-        free(geo_inst->error_message);
-        geo_inst->error_message = NULL;
-    }
-
-    free(geo_inst);
-    *geo = NULL;
-    return;
+    /*  Destroy every variable except the error_message.                      */
+    DESTROY_CAL_VAR(cal->t_oet_spm_vals);
+    DESTROY_CAL_VAR(cal->f_sky_pred_vals);
+    DESTROY_CAL_VAR(cal->f_sky_resid_fit_vals);
+    DESTROY_CAL_VAR(cal->p_free_vals);
 }
+/*  End of rssringoccs_Destroy_CalCSV_Members.                                */

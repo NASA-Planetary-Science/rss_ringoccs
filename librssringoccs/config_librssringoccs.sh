@@ -33,7 +33,7 @@ echo "Compiling rss_ringoccs..."
 CompilerArgs1="-std=c89 -ansi -pedantic -pedantic-errors -Wall -Wextra"
 CompilerArgs2="-Wpedantic -Wmisleading-indentation -Wmissing-field-initializers"
 CompilerArgs3="-Wmissing-prototypes -Wold-style-definition -Winit-self"
-CompilerArgs4="-Wmissing-declarations"
+CompilerArgs4="-Wmissing-declarations -Wnull-dereference " # -Wconversion -Wdouble-promotion"
 CompilerArgs5="-Wstrict-prototypes -I../../ -I./ -DNDEBUG -g -fPIC -O3 -c"
 CompilerArgs="$CompilerArgs1 $CompilerArgs2 $CompilerArgs3"
 CompilerArgs="$CompilerArgs $CompilerArgs4 $CompilerArgs5"
@@ -48,19 +48,19 @@ echo -e "\t\t$CompilerArgs5"
 echo -e "\n\tCompiling math/"
 for filename in math/*.c; do
     echo -e "\t\tCompiling: $filename"
-    $CC -Wconversion -Wdouble-promotion $CompilerArgs $filename
+    $CC $CompilerArgs $filename
 done
 
 echo -e "\n\tCompiling complex/"
 for filename in complex/*.c; do
     echo -e "\t\tCompiling: $filename"
-    $CC -Wconversion -Wdouble-promotion $CompilerArgs $filename
+    $CC $CompilerArgs $filename
 done
 
-echo -e "\n\tCompiling geometry/"
-for filename in geometry/*.c; do
+echo -e "\n\tCompiling special_functions/"
+for filename in special_functions/*.c; do
     echo -e "\t\tCompiling: $filename"
-    $CC -Wconversion -Wdouble-promotion $CompilerArgs $filename
+    $CC $CompilerArgs $filename
 done
 
 echo -e "\n\tCompiling numerical/"
@@ -69,8 +69,20 @@ for filename in numerical/*.c; do
     $CC $CompilerArgs $filename
 done
 
+echo -e "\n\tCompiling interpolate/"
+for filename in interpolate/*.c; do
+    echo -e "\t\tCompiling: $filename"
+    $CC $CompilerArgs $filename
+done
+
 echo -e "\n\tCompiling fft/"
 for filename in fft/*.c; do
+    echo -e "\t\tCompiling: $filename"
+    $CC $CompilerArgs $filename
+done
+
+echo -e "\n\tCompiling geometry/"
+for filename in geometry/*.c; do
     echo -e "\t\tCompiling: $filename"
     $CC $CompilerArgs $filename
 done
@@ -87,12 +99,6 @@ for filename in diffraction/*.c; do
     $CC $CompilerArgs $filename
 done
 
-echo -e "\n\tCompiling special_functions/"
-for filename in special_functions/*.c; do
-    echo -e "\t\tCompiling: $filename"
-    $CC $CompilerArgs $filename
-done
-
 echo -e "\n\tCompiling fresnel_transform/"
 for filename in fresnel_transform/*.c; do
     echo -e "\t\tCompiling: $filename"
@@ -101,6 +107,18 @@ done
 
 echo -e "\n\tCompiling reconstruction/"
 for filename in reconstruction/*.c; do
+    echo -e "\t\tCompiling: $filename"
+    $CC $CompilerArgs $filename
+done
+
+echo -e "\n\tCompiling string/"
+for filename in string/*.c; do
+    echo -e "\t\tCompiling: $filename"
+    $CC $CompilerArgs $filename
+done
+
+echo -e "\n\tCompiling csv_tools/"
+for filename in csv_tools/*.c; do
     echo -e "\t\tCompiling: $filename"
     $CC $CompilerArgs $filename
 done

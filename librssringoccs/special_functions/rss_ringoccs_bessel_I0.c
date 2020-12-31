@@ -334,7 +334,7 @@ long double rssringoccs_LDouble_Bessel_I0(long double x)
     abs_x = rssringoccs_LDouble_Abs(x);
 
     /*  For small arguments, use a Taylor series to approximate I_0.          */
-    if (abs_x < 19.0)
+    if (abs_x < 19.0L)
     {
         /*  The series is in powers of x^2, so use Horner's method with that. */
         arg = abs_x*abs_x;
@@ -350,7 +350,7 @@ long double rssringoccs_LDouble_Bessel_I0(long double x)
     else if (abs_x < rssringoccs_Max_LDouble_Base_E)
     {
         /*  The asymptotic expansion is in terms of 1/x.                      */
-        arg = 1.0/abs_x;
+        arg = 1.0L/abs_x;
 
         bessel_I0 = rssringoccs_Real_Poly_LDouble_Coeffs(
             __asym_longdouble, __asym_LDouble_deg, arg

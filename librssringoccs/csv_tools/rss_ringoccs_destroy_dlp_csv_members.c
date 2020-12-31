@@ -23,22 +23,30 @@
 #include <stdlib.h>
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
 
-void rssringoccs_Destroy_GeoCSV(rssringoccs_GeoCSV **geo)
-{
-    rssringoccs_GeoCSV *geo_inst = *geo;
+/*  Macro for freeing and nullifying the members of the geo CSV structs.      */
+#define DESTROY_DLP_VAR(var) if (var != NULL){free(var); var = NULL;}
 
-    if (geo_inst == NULL)
+/*  Free's all members of a rssringoccs_GeoCSV pointer except the             *
+ *  error_message. Members are set to NULL after freeing.                     */
+void rssringoccs_Destroy_DLPCSV_Members(rssringoccs_DLPCSV *dlp)
+{
+    /*  If the pointer is NULL, there's nothing to do. Simply return.         */
+    if (dlp == NULL)
         return;
 
-    rssringoccs_Destroy_GeoCSV_Members(geo_inst);
-
-    if (geo_inst->error_message != NULL)
-    {
-        free(geo_inst->error_message);
-        geo_inst->error_message = NULL;
-    }
-
-    free(geo_inst);
-    *geo = NULL;
-    return;
+    /*  Destroy every variable except the error_message.                      */
+    DESTROY_DLP_VAR(dlp->rho_km_vals);
+    DESTROY_DLP_VAR(dlp->rho_corr_pole_km_vals);
+    DESTROY_DLP_VAR(dlp->rho_corr_timing_km_vals);
+    DESTROY_DLP_VAR(dlp->phi_rl_deg_vals);
+    DESTROY_DLP_VAR(dlp->phi_ora_deg_vals);
+    DESTROY_DLP_VAR(dlp->p_norm_vals);
+    DESTROY_DLP_VAR(dlp->raw_tau_vals);
+    DESTROY_DLP_VAR(dlp->phase_deg_vals);
+    DESTROY_DLP_VAR(dlp->raw_tau_threshold_vals);
+    DESTROY_DLP_VAR(dlp->t_oet_spm_vals);
+    DESTROY_DLP_VAR(dlp->t_ret_spm_vals);
+    DESTROY_DLP_VAR(dlp->t_set_spm_vals);
+    DESTROY_DLP_VAR(dlp->B_deg_vals);
 }
+/*  End of rssringoccs_Destroy_GeoCSV_Members.                                */

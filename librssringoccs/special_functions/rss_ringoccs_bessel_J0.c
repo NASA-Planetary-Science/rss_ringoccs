@@ -93,9 +93,9 @@
 
 /*  Taylor Expansion of Bessel J_0(x).                                        */
 static float taylorf[17] = {
-     1.0L,
-    -0.25L,
-     1.56250e-2L,
+     1.0F,
+    -0.25F,
+     1.56250e-2F,
     -4.340277777F,
      6.781684027F,
     -6.781684027F,
@@ -116,34 +116,34 @@ static double taylor[31] = {
      1.0,
     -0.25,
      1.56250e-2,
-    -4.34027777777777777e-4L,
-     6.78168402777777777e-6L,
-    -6.78168402777777777e-8L,
-     4.70950279706790123e-10L,
-    -2.40280754952443940e-12L,
-     9.38596699032984142e-15L,
-    -2.89690339207711155e-17L,
-     7.24225848019277887e-20L,
-    -1.49633439673404522e-22L,
-     2.59780277210771740e-25L,
-    -3.84290350903508491e-28L,
-     4.90166263907536340e-31L,
-    -5.44629182119484823e-34L,
-     5.31864435663559397e-37L,
-    -4.60090342269515049e-40L,
-     3.55007980146230748e-43L,
-    -2.45850401763317692e-46L,
-     1.53656501102073557e-49L,
-    -8.71068600351890918e-53L,
-     4.49932128280935391e-56L,
-    -2.12633330945621640e-59L,
-     9.22887721118149482e-63L,
-    -3.69155088447259792e-66L,
-     1.36521852236412645e-69L,
-    -4.68181934967121554e-73L,
-     1.49292708854311720e-76L,
-    -4.43795210625183472e-80L,
-     1.23276447395884297e-83L
+    -4.34027777777777777e-4,
+     6.78168402777777777e-6,
+    -6.78168402777777777e-8,
+     4.70950279706790123e-10,
+    -2.40280754952443940e-12,
+     9.38596699032984142e-15,
+    -2.89690339207711155e-17,
+     7.24225848019277887e-20,
+    -1.49633439673404522e-22,
+     2.59780277210771740e-25,
+    -3.84290350903508491e-28,
+     4.90166263907536340e-31,
+    -5.44629182119484823e-34,
+     5.31864435663559397e-37,
+    -4.60090342269515049e-40,
+     3.55007980146230748e-43,
+    -2.45850401763317692e-46,
+     1.53656501102073557e-49,
+    -8.71068600351890918e-53,
+     4.49932128280935391e-56,
+    -2.12633330945621640e-59,
+     9.22887721118149482e-63,
+    -3.69155088447259792e-66,
+     1.36521852236412645e-69,
+    -4.68181934967121554e-73,
+     1.49292708854311720e-76,
+    -4.43795210625183472e-80,
+     1.23276447395884297e-83
 };
 
 
@@ -182,6 +182,19 @@ static long double taylorl[31] = {
 };
 
 /*  Asympotic Expansion of Bessel J_0(x).                                     */
+#define BESSEL_J0_ASYM_00_F  1.0F
+#define BESSEL_J0_ASYM_01_F  0.1250F
+#define BESSEL_J0_ASYM_02_F -0.07031250F
+#define BESSEL_J0_ASYM_03_F -0.07324218750F
+#define BESSEL_J0_ASYM_04_F  0.1121520996093750F
+#define BESSEL_J0_ASYM_05_F  0.2271080017089843750F
+#define BESSEL_J0_ASYM_06_F -0.57250142097473144531250F
+#define BESSEL_J0_ASYM_07_F -1.72772750258445739746093750F
+#define BESSEL_J0_ASYM_08_F  6.07404200127348303794860839844F
+#define BESSEL_J0_ASYM_09_F  24.3805296995560638606548309326F
+#define BESSEL_J0_ASYM_10_F -110.017140269246738171204924583F
+#define BESSEL_J0_ASYM_11_F -551.335896122020585607970133424F
+
 #define BESSEL_J0_ASYM_00  1.0
 #define BESSEL_J0_ASYM_01  0.1250
 #define BESSEL_J0_ASYM_02 -0.07031250
@@ -194,6 +207,19 @@ static long double taylorl[31] = {
 #define BESSEL_J0_ASYM_09  24.3805296995560638606548309326
 #define BESSEL_J0_ASYM_10 -110.017140269246738171204924583
 #define BESSEL_J0_ASYM_11 -551.335896122020585607970133424
+
+#define BESSEL_J0_ASYM_00_L  1.0L
+#define BESSEL_J0_ASYM_01_L  0.1250L
+#define BESSEL_J0_ASYM_02_L -0.07031250L
+#define BESSEL_J0_ASYM_03_L -0.07324218750L
+#define BESSEL_J0_ASYM_04_L  0.1121520996093750L
+#define BESSEL_J0_ASYM_05_L  0.2271080017089843750L
+#define BESSEL_J0_ASYM_06_L -0.57250142097473144531250L
+#define BESSEL_J0_ASYM_07_L -1.72772750258445739746093750L
+#define BESSEL_J0_ASYM_08_L  6.07404200127348303794860839844L
+#define BESSEL_J0_ASYM_09_L  24.3805296995560638606548309326L
+#define BESSEL_J0_ASYM_10_L -110.017140269246738171204924583L
+#define BESSEL_J0_ASYM_11_L -551.335896122020585607970133424L
 
 
 /*  Compute the Bessel J_0 function for a floating point number x.            */
@@ -227,30 +253,30 @@ float rssringoccs_Float_Bessel_J0(float x)
         x = rssringoccs_Float_Abs(x);
 
         /*  The argument for the asymptotic expansion is 1/x^2.               */
-        arg = 1.0/arg;
+        arg = 1.0F/arg;
 
         /*  Use Horner's method to compute the polynomial part.               */
-        sinarg  = arg * BESSEL_J0_ASYM_07 + BESSEL_J0_ASYM_05;
-        sinarg  = arg * sinarg + BESSEL_J0_ASYM_03;
-        sinarg  = arg * sinarg + BESSEL_J0_ASYM_01;
+        sinarg  = arg * BESSEL_J0_ASYM_07_F + BESSEL_J0_ASYM_05_F;
+        sinarg  = arg * sinarg + BESSEL_J0_ASYM_03_F;
+        sinarg  = arg * sinarg + BESSEL_J0_ASYM_01_F;
 
         /*  Multiply the output by the coefficient factor.                    */
-        sinarg *= rssringoccs_Float_Sin(x - rssringoccs_Pi_By_Four)/x;
+        sinarg *= rssringoccs_Float_Sin(x - rssringoccs_Pi_By_Four_F)/x;
 
         /*  Do the same as above for the Cosine portion.                      */
-        cosarg  = arg * BESSEL_J0_ASYM_06 + BESSEL_J0_ASYM_04;
-        cosarg  = arg * cosarg + BESSEL_J0_ASYM_02;
-        cosarg  = arg * cosarg + BESSEL_J0_ASYM_00;
-        cosarg *= rssringoccs_Float_Cos(x - rssringoccs_Pi_By_Four);
+        cosarg  = arg * BESSEL_J0_ASYM_06_F + BESSEL_J0_ASYM_04_F;
+        cosarg  = arg * cosarg + BESSEL_J0_ASYM_02_F;
+        cosarg  = arg * cosarg + BESSEL_J0_ASYM_00_F;
+        cosarg *= rssringoccs_Float_Cos(x - rssringoccs_Pi_By_Four_F);
 
         /*  Multiply the result by the coefficient and return.                */
-        bessel_J0 = (cosarg + sinarg)*rssringoccs_Sqrt_Two_By_Pi;
+        bessel_J0 = (cosarg + sinarg)*rssringoccs_Sqrt_Two_By_Pi_F;
         bessel_J0 = bessel_J0 / rssringoccs_Float_Sqrt(x);
     }
 
     /*  For very large arguments, use the limit (which is zero).              */
     else
-        bessel_J0 = 0.0;
+        bessel_J0 = 0.0F;
 
     return bessel_J0;
 }
@@ -288,6 +314,8 @@ double rssringoccs_Double_Bessel_J0(double x)
         bessel_J0 = rssringoccs_Real_Poly_Double_Coeffs(taylor, 29U, arg);
     else if (arg < 196.0)
         bessel_J0 = rssringoccs_Real_Poly_Double_Coeffs(taylor, 30U, arg);
+    else if (arg < 225.0)
+        bessel_J0 = rssringoccs_Real_Poly_Double_Coeffs(taylor, 31U, arg);
 
     /*  For large arguments use the asymptotic expansion.                     */
     else if (arg < 1.0e32)
@@ -359,37 +387,37 @@ long double rssringoccs_LDouble_Bessel_J0(long double x)
         bessel_J0 = rssringoccs_Real_Poly_LDouble_Coeffs(taylorl, 30U, arg);
 
     /*  For large arguments use the asymptotic expansion.                     */
-    else if (arg < 1.0e32)
+    else if (arg < 1.0e32L)
     {
         /*  J_0 is an even function so use the absolute value of x.           */
         x = rssringoccs_LDouble_Abs(x);
 
         /*  The argument for the asymptotic expansion is 1/x^2.               */
-        arg = 1.0/arg;
+        arg = 1.0L/arg;
 
         /*  Use Horner's method to compute the polynomial part.               */
-        sinarg  = arg * BESSEL_J0_ASYM_07 + BESSEL_J0_ASYM_05;
-        sinarg  = arg * sinarg + BESSEL_J0_ASYM_03;
-        sinarg  = arg * sinarg + BESSEL_J0_ASYM_01;
+        sinarg  = arg * BESSEL_J0_ASYM_07_L + BESSEL_J0_ASYM_05_L;
+        sinarg  = arg * sinarg + BESSEL_J0_ASYM_03_L;
+        sinarg  = arg * sinarg + BESSEL_J0_ASYM_01_L;
 
         /*  Multiply the output by the coefficient factor.                    */
-        sinarg *= rssringoccs_LDouble_Sin(x - rssringoccs_Pi_By_Four)/x;
+        sinarg *= rssringoccs_LDouble_Sin(x - rssringoccs_Pi_By_Four_L)/x;
 
         /*  Do the same as above for the Cosine portion.                      */
-        cosarg  = arg * BESSEL_J0_ASYM_08 + BESSEL_J0_ASYM_06;
-        cosarg  = arg * cosarg + BESSEL_J0_ASYM_04;
-        cosarg  = arg * cosarg + BESSEL_J0_ASYM_02;
-        cosarg  = arg * cosarg + BESSEL_J0_ASYM_00;
-        cosarg *= rssringoccs_LDouble_Cos(x - rssringoccs_Pi_By_Four);
+        cosarg  = arg * BESSEL_J0_ASYM_08_L + BESSEL_J0_ASYM_06_L;
+        cosarg  = arg * cosarg + BESSEL_J0_ASYM_04_L;
+        cosarg  = arg * cosarg + BESSEL_J0_ASYM_02_L;
+        cosarg  = arg * cosarg + BESSEL_J0_ASYM_00_L;
+        cosarg *= rssringoccs_LDouble_Cos(x - rssringoccs_Pi_By_Four_L);
 
         /*  For very large arguments, use the limit (which is zero).          */
-        bessel_J0 = (cosarg + sinarg)*rssringoccs_Sqrt_Two_By_Pi;
+        bessel_J0 = (cosarg + sinarg)*rssringoccs_Sqrt_Two_By_Pi_L;
         bessel_J0 = bessel_J0 / rssringoccs_LDouble_Sqrt(x);
     }
 
     /*  For very large arguments, use the limit (which is zero).              */
     else
-        bessel_J0 = 0.0;
+        bessel_J0 = 0.0L;
 
     return bessel_J0;
 }

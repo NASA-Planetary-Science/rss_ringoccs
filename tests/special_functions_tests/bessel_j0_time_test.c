@@ -39,11 +39,11 @@
 int main(void)
 {
     /*  Set the start and end for the values we're testing.                   */
-    double start = 0;
-    double end   = 100;
+    double start = -1000;
+    double end   =  1000;
 
     /*  We'll test on 100 million points between start and end.               */
-    unsigned long N = 1e7;
+    unsigned long N = 1e8;
 
     /*  Use the compare function to test rssringoccs_Double_Abs against fabs. */
     rssringoccs_Compare_Double_Funcs("gsl-2.6",

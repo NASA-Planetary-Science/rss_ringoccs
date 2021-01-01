@@ -147,7 +147,7 @@ includedir="/usr/local/include/rss_ringoccs/"
 #   Check if /usr/local/include/rss_ringoccs/ is already a directory. If not
 #   then create this via mkdir.
 [ ! -d "$includedir" ] && sudo mkdir -p "$includedir/include/"
-sudo cp -r ../include/ "$includedir/include/"
+sudo cp ../include/* "$includedir/include/"
 
 echo "Cleaning up..."
 rm -f *.o

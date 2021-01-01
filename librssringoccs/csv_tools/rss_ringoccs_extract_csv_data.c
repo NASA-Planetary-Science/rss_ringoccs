@@ -246,6 +246,10 @@ rssringoccs_Extract_CSV_Data(const char *geo,
             = dlp_dat->raw_tau_threshold_vals[n];
     }
 
+    geo_rho     = geo_dat->rho_km_vals;
+    geo_D       = geo_dat->D_km_vals;
+    geo_rho_dot = geo_dat->rho_dot_kms_vals;
+
     min_dr_dt = -rssringoccs_Infinity;
     max_dr_dt = rssringoccs_Infinity;
     for (n=0; n<csv_data->n_elements-1; ++n)
@@ -293,7 +297,9 @@ rssringoccs_Extract_CSV_Data(const char *geo,
     }
     else if (max_dr_dt < 0.0)
     {
-
+        rssringoccs_Reverse_Double_Array(geo_rho, geo_dat->n_elements);
+        rssringoccs_Reverse_Double_Array(geo_rho_dot, geo_dat->n_elements);
+        rssringoccs_Reverse_Double_Array(geo_D, geo_dat->n_elements);
     }
 
     rssringoccs_Destroy_GeoCSV(&geo_dat);

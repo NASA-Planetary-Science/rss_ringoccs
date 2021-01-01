@@ -1,5 +1,8 @@
-
-
+#include <stdlib.h>
+#include <rss_ringoccs/include/rss_ringoccs_math.h>
+#include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
+#include <rss_ringoccs/include/rss_ringoccs_special_functions.h>
+#include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -31,107 +34,87 @@
  *          Raphson method is good enough, whereas in reality 3-4 iterations  *
  *          may be needed, like in Rev133.                                    *
  ******************************************************************************/
-void DiffractionCorrectionLegendre(DLPObj *dlp)
+void DiffractionCorrectionLegendre(rssringoccs_TAUObj *tau)
 {
-    /*  If everything executes smoothly, status should remain at zero.        */
-    dlp->status = 0;
-
-    /*  Check that the pointers to the data are not NULL.                     */
-    if (!(check_dlp_data(dlp)))
-    {
-        /*  One of the variables has null data, return to calling function.   */
-        dlp->status = 1;
-        return;
-    }
-
     /*  i is used for indexing, nw_pts is the number of points in the window. */
-    long i, nw_pts, center;
-
-    /*  IsEven is a boolean for determining the parity of the polynomial.     */
-    bool IsEven;
+    unsigned long i, nw_pts, center;
 
     /*  Variable for the number of Legendre coefficients to be computed.      */
     unsigned char poly_order;
 
+    /*  IsEven is a boolean for determining the parity of the polynomial.     */
+    rssringoccs_Bool IsEven;
+
     /*  Various other variables needed throughout.                            */
     double w_init, dx, two_dx, cosb, sinp, cosp, Legendre_Coeff;
+    double *x_arr, *w_func, *legendre_p, *alt_legendre_p, *fresnel_ker_coeffs;
 
     /*  Create function pointers for window function and Fresnel transform.   */
-    rss_ringoccs_window_func fw = malloc(sizeof(rss_ringoccs_window_func));
-    complex double (*FresT)(double*, complex double*, double*, double, double *,
-                            double, double, double, long, unsigned char, long);
+    rss_ringoccs_window_func fw;
+
+    /*  This should remain at false.                                          */
+    tau->error_occurred = rssringoccs_False;
+
+    /*  Check that the pointers to the data are not NULL.                     */
+    check_tau_data(tau);
+    if (tau->error_occurred)
+        return;
 
     /*  Cast the selected window type to the fw pointer.                      */
-    select_window_func(fw, dlp);
-    if (!(dlp->status == 0))
+    select_window_func(&fw, tau);
+    if (tau->error_occurred)
         return;
 
     /*  Set the IsEven boolean to the appropriate value. Since the linear and *
      *  constant term are zero, even polynomials will have an odd number of   *
      *  terms. For example, the quartic expansion has the quadratic, cubic,   *
      *  quartic terms, and hence needs three coefficients. Thus, if the       *
-     *  dlp->order variable is an odd number, this corresponds to an even     *
+     *  tau->order variable is an odd number, this corresponds to an even     *
      *  polynomial and vice versa. Set IsEven accordingly.                    */
-    if (2*(dlp->order/2) == dlp->order) IsEven = false;
-    else IsEven = true;
+    if (tau->order & 1)
+        IsEven = rssringoccs_True;
+    else
+        IsEven = rssringoccs_False;
 
     /*  Select the appropriate Fresnel transform and set poly_order.          */
     if (IsEven)
-    {
-        poly_order = dlp->order;
-
-        /*  Select the even transform, with or without normalization.         */
-        if (dlp->use_norm) FresT = &Fresnel_Transform_Legendre_Norm_Even_Double;
-        else               FresT = &Fresnel_Transform_Legendre_Even_Double;
-    }
+        poly_order = tau->order;
     else
-    {
-        poly_order = dlp->order + 1;
-
-        /*  Choose the odd transform with or without normalization.           */
-        if (dlp->use_norm) FresT = &Fresnel_Transform_Legendre_Norm_Odd_Double;
-        else               FresT = &Fresnel_Transform_Legendre_Odd_Double;
-    }
+        poly_order = tau->order + 1;
 
     /* Compute first window width and window function. */
-    center = dlp->start;
+    center = tau->start;
 
     /*  If forward tranform is set, negate the kd_vals variable. This has     *
      *  the equivalent effect of computing the forward calculation later.     */
-    if (dlp->use_fwd)
+    if (tau->use_fwd)
     {
         /*  Loop over all of kd_vals and negate the value.                    */
-        for (i=0; i <= dlp->n_used; ++i)
-        {
-            dlp->kd_vals[i] *= -1.0;
-        }
+        for (i=0; i <= tau->n_used; ++i)
+            tau->kd_vals[i] *= -1.0;
     }
 
     /*  Compute more necessary data.                                          */
-    w_init = dlp->w_km_vals[center];
-    dx     = dlp->rho_km_vals[center+1] - dlp->rho_km_vals[center];
+    w_init = tau->w_km_vals[center];
+    dx     = tau->rho_km_vals[center+1] - tau->rho_km_vals[center];
     two_dx = 2.0*dx;
     nw_pts = (long)(w_init / two_dx)+1;
 
     /* Check to ensure you have enough data to the left.                      */
-    if (!check_data_range(dlp, two_dx))
-    {
-        /*  One of the points has too large of a window width to process.     *
-         *  Returning with error message.                                     */
-        dlp->status = 2;
+    check_tau_data_range(tau, two_dx);
+    if (tau->error_occurred)
         return;
-    }
 
     /*  Allocate memory for the independent variable and window function.     */
-    double *x_arr          = (double *)malloc(sizeof(double)*nw_pts);
-    double *w_func         = (double *)malloc(sizeof(double)*nw_pts);
+    x_arr  = malloc(sizeof(*x_arr)*nw_pts);
+    w_func = malloc(sizeof(*w_func)*nw_pts);
 
     /*  Also for the two Legendre polynomials.                                */
-    double *legendre_p     = (double *)malloc(sizeof(double)*(poly_order+1));
-    double *alt_legendre_p = (double *)malloc(sizeof(double)*poly_order);
+    legendre_p     = malloc(sizeof(*legendre_p)*(poly_order+1));
+    alt_legendre_p = malloc(sizeof(*alt_legendre_p)*poly_order);
 
     /*  And finally for the coefficients of psi.                              */
-    double *fresnel_ker_coeffs = (double *)malloc(sizeof(double)*poly_order);
+    fresnel_ker_coeffs = malloc(sizeof(*fresnel_ker_coeffs)*poly_order);
 
     /*  Check that malloc was successfull then pass the x_arr array           *
      *  (ring radius) to the void function reset_window. This alters x_arr so *
@@ -140,37 +123,40 @@ void DiffractionCorrectionLegendre(DLPObj *dlp)
                     ||    !(alt_legendre_p)    ||    !(fresnel_ker_coeffs))
     {
         /*  Malloc failed, return to calling function.                        */
-        dlp->status = 3;
+        tau->error_occurred = rssringoccs_True;
         return;
     }
-    else reset_window(x_arr, w_func, dx, w_init, nw_pts, fw);
+    else
+        reset_window(x_arr, w_func, dx, w_init, nw_pts, fw);
 
     /* Loop through each point and begin the reconstruction.                  */
-    for (i = 0; i <= dlp->n_used; ++i)
+    for (i = 0; i <= tau->n_used; ++i)
     {
         /*  Compute some geometric information, and the scaling coefficient   *
          *  for the Legendre polynomial expansion.                            */
-        cosb            = cos(dlp->B_rad_vals[center]);
-        cosp            = cos(dlp->phi_rad_vals[center]);
-        sinp            = sin(dlp->phi_rad_vals[center]);
+        cosb            = cos(tau->B_rad_vals[center]);
+        cosp            = cos(tau->phi_rad_vals[center]);
+        sinp            = sin(tau->phi_rad_vals[center]);
         Legendre_Coeff  = cosb*sinp;
         Legendre_Coeff *= Legendre_Coeff;
         Legendre_Coeff  = 0.5*Legendre_Coeff/(1.0-Legendre_Coeff);
 
         /* Compute Legendre Polynomials,                                      */
-        Legendre_Polynomials(legendre_p, cosb*cosp, poly_order+1);
-        Alt_Legendre_Polynomials(alt_legendre_p, legendre_p, poly_order);
+        rssringoccs_Legendre_Polynomials(legendre_p, cosb*cosp, poly_order+1);
+        rssringoccs_Alt_Legendre_Polynomials(alt_legendre_p,
+                                             legendre_p, poly_order);
 
         /*  Compute the coefficients using Cauchy Products. First compute     *
          *  the bottom triangle of the square in the product.                 */
-        Fresnel_Kernel_Coefficients(fresnel_ker_coeffs, legendre_p,
-                                    alt_legendre_p, Legendre_Coeff, poly_order);
+        rssringoccs_Fresnel_Kernel_Coefficients(fresnel_ker_coeffs, legendre_p,
+                                                alt_legendre_p, Legendre_Coeff,
+                                                poly_order);
 
         /*  If the window width changes significantly, recompute w_func.      */
-        if (fabs(w_init - dlp->w_km_vals[center]) >= two_dx)
+        if (fabs(w_init - tau->w_km_vals[center]) >= two_dx)
         {
             /* Reset w_init and recompute window function.                    */
-            w_init = dlp->w_km_vals[center];
+            w_init = tau->w_km_vals[center];
             nw_pts = ((long)(w_init / two_dx))+1;
 
             /*  Reallocate x_arr and w_func since the sizes changed.          */
@@ -182,9 +168,10 @@ void DiffractionCorrectionLegendre(DLPObj *dlp)
         }
 
         /*  Compute the fresnel tranform about the current point.             */
-        dlp->T_out[i] = FresT(x_arr, dlp->T_in, w_func, dlp->D_km_vals[center],
-                              fresnel_ker_coeffs, dx, dlp->F_km_vals[center],
-                              dlp->kd_vals[center], nw_pts, dlp->order, center);
+        tau->T_out[i] = Fresnel_Transform_Legendre_Even_Double(
+            x_arr, tau->T_in, w_func, tau->D_km_vals[center],
+            fresnel_ker_coeffs, dx, tau->F_km_vals[center],
+            tau->kd_vals[center], nw_pts, tau->order, center);
 
         /*  Increment T_in pointer using pointer arithmetic.                  */
         center += 1;

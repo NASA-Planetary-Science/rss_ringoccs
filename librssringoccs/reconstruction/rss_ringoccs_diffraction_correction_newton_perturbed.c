@@ -5,10 +5,11 @@
 
 /******************************************************************************
  *  Function:                                                                 *
- *      DiffractionCorrectionNewton                                           *
+ *      DiffractionCorrectionPerturbedNewton                                  *
  *  Purpose:                                                                  *
  *      Compute the Fresnel transform using the Newton-Raphson method to      *
- *      compute the stationary value of the Fresnel-Kernel.                   *
+ *      compute the stationary value of the Fresnel-Kernel. The user may then *
+ *      perturb the Fresnel kernel with an arbitrary quartic polynomial.      *
  *  Arguments:                                                                *
  *      dlp (DLPObj *):                                                       *
  *          An instance of the DLPObj structure defined in                    *
@@ -21,20 +22,32 @@
  *          the T_out pointer within the dlp structure will be changed at the *
  *          end, containing the diffraction correction data.                  *
  *  Notes:                                                                    *
- *      1.) This method is the most accurate, but much slower than the        *
- *          Fresnel and Legendre options. It is accurate for every Rev of the *
- *          Cassini mission with the exception of the Rev133 occultation      *
- *          of which only the Ka band produces accurate results. For X and S  *
- *          bands one needs to use the Perturbed Newton method.               *
- *      2.) The polynomials from the MTR86 are available via the dlp.interp   *
- *          variable. These polynomials are slower and less accurate than the *
- *          normal Newton method since to compute the polynomials the         *
- *          Newton-Raphson method must be performed, and hence the            *
- *          polynomials increase the number of computations needed. The real  *
- *          use of them arises if one uses FFT methods. This routine does NOT *
- *          use FFTs, but rather ordinary integration.                        *
+ *      1.) This method can be very accurate, but requires guess and check    *
+ *          work from the user since there is no magical input of polynomials *
+ *          that works uniformly. If using for Saturn based data, the Encke   *
+ *          gap is your friend. Start with the polynomials set to zero, which *
+ *          is just the standard Newton-Raphson method. Then look to the      *
+ *          Encke gap which lies between ~132900-134200 km. A good            *
+ *          reconstruction should have produced a near perfect square well    *
+ *          (see below). If it is not a square well, perturb the cubic and    *
+ *          quartic terms until it is. The quadratic term is usually fine and *
+ *          the linear term is nearly zero so you most likely do not need to  *
+ *          waste time with these.                                            *
+ *                                                                            *
+ *          Power                                                             *
+ *         |                     _________________                            *
+ *         |                     |               |                            *
+ *         |                     |               |                            *
+ *         |                     |               |                            *
+ *         |                     |               |                            *
+ *         |                     |               |                            *
+ *         |                     |               |                            *
+ *         | ____________________|               |________________________    *
+ *         |                         Encke Gap                                *
+ *         |_______________________________________________________________   *
+ *                                                                    Radius  *
  ******************************************************************************/
-void DiffractionCorrectionNewton(rssringoccs_TAUObj *tau)
+void DiffractionCorrectionPerturbedNewton(rssringoccs_TAUObj *tau)
 {
     /*  Variables for indexing. nw_pts is the number of points in the window. */
     unsigned long i, j, nw_pts, center;
@@ -176,10 +189,10 @@ void DiffractionCorrectionNewton(rssringoccs_TAUObj *tau)
             }
 
             /*  Compute the fresnel tranform about the current point.         */
-            tau->T_out[i] = Fresnel_Transform_Newton_Norm_Double(
+            tau->T_out[i] = Fresnel_Transform_Perturbed_Newton_Norm_Double(
                 x_arr, phi_arr, tau->T_in, w_func, tau->kd_vals[center],
                 tau->rho_km_vals[center], tau->B_rad_vals[center],
-                tau->D_km_vals[center], EPS, toler, nw_pts, center
+                tau->D_km_vals[center], EPS, toler, nw_pts, center, tau->perturb
             );
 
             /*  Increment pointers using pointer arithmetic.                  */
@@ -222,11 +235,11 @@ void DiffractionCorrectionNewton(rssringoccs_TAUObj *tau)
             }
 
             /*  Compute the fresnel tranform about the current point.         */
-            tau->T_out[i] = Fresnel_Transform_Newton_Double(
+            tau->T_out[i] = Fresnel_Transform_Perturbed_Newton_Double(
                 x_arr, phi_arr, tau->T_in, w_func, tau->kd_vals[center],
                 tau->rho_km_vals[center], tau->B_rad_vals[center],
                 tau->D_km_vals[center], EPS, toler, dx, tau->F_km_vals[center],
-                nw_pts, center
+                nw_pts, center, tau->perturb
             );
 
             /*  Increment pointers using pointer arithmetic.                  */

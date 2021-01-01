@@ -63,8 +63,9 @@ double rssringoccs_Double_LambertW(double x)
         dx = (x0*exp_x0-x)/(exp_x0*(x0+1.0) -
                             (x0+2.0)*(x0*exp_x0-x)/(2.0*x0+2.0));
         x0 = x0 - dx;
-        while (rssringoccs_Double_Abs(dx) > EPS){
-            exp_x0 = rssringoccs_Double_Log(x0);
+        while (rssringoccs_Double_Abs(dx) > EPS)
+        {
+            exp_x0 = rssringoccs_Double_Exp(x0);
             dx = (x0*exp_x0-x)/(exp_x0*(x0+1.0) -
                                 (x0+2.0)*(x0*exp_x0-x)/(2.0*x0+2.0));
             x0 = x0 - dx;

@@ -96,7 +96,7 @@ Fresnel_Transform_Newton_Double(double *x_arr, double *phi_arr,
 
     /*  Symmetry is lost without the Legendre polynomials, or Fresnel         *
      *  quadratic. Must compute everything from -W/2 to W/2.                  */
-    n = center-(int)((n_pts-1)/2);
+    n = center-(long)((n_pts-1)/2);
 
     /*  Use a Riemann Sum to approximate the Fresnel Inverse Integral.        */
     for (m = 0; m<n_pts; ++m)
@@ -117,7 +117,7 @@ Fresnel_Transform_Newton_Double(double *x_arr, double *phi_arr,
         /*  Compute the transform with a Riemann sum. If the T_in pointer     *
          *  does not contain at least 2*n_pts+1 points, n_pts to the left and *
          *  right of the center, then this will create a segmentation fault.  */
-        integrand = rssringoccs_CDouble_Multiply(exp_psi, T_in[m]);
+        integrand = rssringoccs_CDouble_Multiply(exp_psi, T_in[n]);
         T_out     = rssringoccs_CDouble_Add(T_out, integrand);
         n += 1;
     }

@@ -100,10 +100,6 @@
  *      that are then passed to the Python interpreter will still be freed    *
  *      when Python no longer needs it. Without this we will have serious     *
  *      memory leaks. It is primiarly used for safely returning numpy arrays. *
- *  ReverseDoubleArray:                                                       *
- *      The standard O(n) algorithm for taking an array and reversing its     *
- *      order. This is equivalent to arr = arr[::-1] for a numpy array arr    *
- *      in Python 3.                                                          *
  ******************************************************************************
  *                            A FRIENDLY WARNING                              *
  ******************************************************************************
@@ -1389,14 +1385,14 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
     }
     else if (dx_km<0.0)
     {
-        ReverseDoubleArray(tau.rho_km_vals,      tau.arr_size);
-        ReverseDoubleArray(tau.phi_rad_vals,     tau.arr_size);
-        ReverseDoubleArray(tau.B_rad_vals,       tau.arr_size);
-        ReverseDoubleArray(tau.D_km_vals,        tau.arr_size);
-        ReverseDoubleArray(tau.phase_rad_vals,   tau.arr_size);
-        ReverseDoubleArray(tau.p_norm_vals,      tau.arr_size);
-        ReverseDoubleArray(tau.f_sky_hz_vals,    tau.arr_size);
-        ReverseDoubleArray(tau.rho_dot_kms_vals, tau.arr_size);
+        rssringoccs_Reverse_Double_Array(tau.rho_km_vals,      tau.arr_size);
+        rssringoccs_Reverse_Double_Array(tau.phi_rad_vals,     tau.arr_size);
+        rssringoccs_Reverse_Double_Array(tau.B_rad_vals,       tau.arr_size);
+        rssringoccs_Reverse_Double_Array(tau.D_km_vals,        tau.arr_size);
+        rssringoccs_Reverse_Double_Array(tau.phase_rad_vals,   tau.arr_size);
+        rssringoccs_Reverse_Double_Array(tau.p_norm_vals,      tau.arr_size);
+        rssringoccs_Reverse_Double_Array(tau.f_sky_hz_vals,    tau.arr_size);
+        rssringoccs_Reverse_Double_Array(tau.rho_dot_kms_vals, tau.arr_size);
         for(i=0; i<tau.arr_size; ++i)
             tau.rho_dot_kms_vals[i] = fabs(tau.rho_dot_kms_vals[i]);
         dx_km *= -1.0;
@@ -1450,8 +1446,8 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
     {
         w_fac = self->norm_eq;
         double omega;
-        double *alpha  = (double *)malloc(sizeof(double) * tau.arr_size);
-        double *P_vals = (double *)malloc(sizeof(double) * tau.arr_size);
+        double *alpha  = malloc(sizeof(*alpha) * tau.arr_size);
+        double *P_vals = malloc(sizeof(*P_vals) * tau.arr_size);
 
         for(i=0; i<tau.arr_size; ++i)
         {
@@ -1550,7 +1546,7 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
         free(wrange);
 
         wrange = rssringoccs_Where_LesserGreater_Double(tau.rho_km_vals, tau.arr_size,
-                                                        self->range[0], self->range[1]);
+                                                        min_val, max_val);
         wrange_Index = wrange[0];
         wrange_Size = *wrange[1];
 
@@ -1563,13 +1559,8 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
     tau.n_used = self->n_used;
 
     /*  For the first inverse calculatiion, tau.use_fwd must be set to false. */
-    tau.use_fwd = rssringoccs_False;
-
-    if (self->use_norm)
-        tau.use_norm = rssringoccs_True;
-
-    if (self->use_fft)
-        tau.use_fft = rssringoccs_True;
+    tau.use_fwd = self->use_fft;
+    tau.use_norm = self->use_norm;
 
     tau.kd_vals = (double *)malloc(sizeof(double) * tau.arr_size);
     for(i=0; i<tau.arr_size; ++i)
@@ -1630,10 +1621,20 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
     time_t t1, t2;
 
     t1 = clock();
-    if (tau.order == 0)
-        DiffractionCorrectionNewton(&tau);
-    else
+    if (strcmp(tau.psitype, "fresnel") == 0)
         DiffractionCorrectionFresnel(&tau);
+    else if (strcmp(tau.psitype, "newton") == 0)
+    {
+        if ((tau.perturb[0] == 0) && (tau.perturb[1] == 0) &&
+            (tau.perturb[2] == 0) && (tau.perturb[3] == 0) &&
+            (tau.perturb[4] == 0))
+            DiffractionCorrectionNewton(&tau);
+        else
+            DiffractionCorrectionPerturbedNewton(&tau);
+
+    }
+    else
+        DiffractionCorrectionNewton(&tau);
     t2 = clock();
 
     printf("%f\n", (double)(t2-t1) / CLOCKS_PER_SEC);

@@ -454,5 +454,14 @@ rssringoccs_Real_Poly_Deriv_LDouble_Coeffs(long double *coeffs,
                                            unsigned int deriv,
                                            long double x);
 
+extern void
+rssringoccs_Reverse_Float_Array(float *arr, unsigned long arrsize);
+
+extern void
+rssringoccs_Reverse_Double_Array(double *arr, unsigned long arrsize);
+
+extern void
+rssringoccs_Reverse_LDouble_Array(long double *arr, unsigned long arrsize);
+
 #endif
 /*  End of include guard.                                                     */

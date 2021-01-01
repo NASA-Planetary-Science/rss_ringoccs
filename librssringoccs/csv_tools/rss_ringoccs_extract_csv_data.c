@@ -21,11 +21,31 @@
  ******************************************************************************/
 
 #include <rss_ringoccs/include/rss_ringoccs_bool.h>
+#include <rss_ringoccs/include/rss_ringoccs_math.h>
 #include <rss_ringoccs/include/rss_ringoccs_string.h>
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
+#include <rss_ringoccs/include/rss_ringoccs_interpolate.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
+#define __MALLOC_CSV_VAR__(var)                                                \
+    csv_data->var = malloc(sizeof(*csv_data->var)*csv_data->n_elements);       \
+    if (csv_data->var == NULL)                                                 \
+    {                                                                          \
+        csv_data->error_occurred = rssringoccs_True;                           \
+        csv_data->error_message = rssringoccs_strdup(                          \
+            "Error Encountered: rss_ringoccs\n"                                \
+            "\trssringoccs_Extract_CSV_Data\n\n"                               \
+            "Malloc returned NULL for csv_data member. Aborting.\n"            \
+        );                                                                     \
+        rssringoccs_Destroy_GeoCSV(&geo_dat);                                  \
+        rssringoccs_Destroy_DLPCSV(&dlp_dat);                                  \
+        rssringoccs_Destroy_CalCSV(&cal_dat);                                  \
+        rssringoccs_Destroy_TauCSV(&tau_dat);                                  \
+        rssringoccs_Destroy_CSV_Members(csv_data);                             \
+        return csv_data;                                                       \
+    }
 
 rssringoccs_CSVData *
 rssringoccs_Extract_CSV_Data(const char *geo,
@@ -39,6 +59,7 @@ rssringoccs_Extract_CSV_Data(const char *geo,
     rssringoccs_CalCSV  *cal_dat;
     rssringoccs_TauCSV  *tau_dat;
     rssringoccs_CSVData *csv_data;
+    unsigned long n;
 
     csv_data = malloc(sizeof(*csv_data));
 
@@ -49,6 +70,33 @@ rssringoccs_Extract_CSV_Data(const char *geo,
              "Malloc failed and returned NULL for csv_data. Returning.\n");
         return NULL;
     }
+
+    /*  Initialize the members to NULL. This will prevent functions from      *
+     *  trying to free pointers that weren't malloc'd in the event of error.  */
+    csv_data->B_rad_vals = NULL;
+    csv_data->D_km_vals = NULL;
+    csv_data->f_sky_hz_vals = NULL;
+    csv_data->p_norm_vals = NULL;
+    csv_data->power_vals = NULL;
+    csv_data->phase_rad_vals = NULL;
+    csv_data->phase_vals = NULL;
+    csv_data->phi_rad_vals = NULL;
+    csv_data->phi_rl_rad_vals = NULL;
+    csv_data->raw_tau_threshold_vals = NULL;
+    csv_data->rho_corr_pole_km_vals = NULL;
+    csv_data->rho_corr_timing_km_vals = NULL;
+    csv_data->rho_dot_kms_vals = NULL;
+    csv_data->rho_km_vals = NULL;
+    csv_data->rx_km_vals = NULL;
+    csv_data->ry_km_vals = NULL;
+    csv_data->rz_km_vals = NULL;
+    csv_data->t_oet_spm_vals = NULL;
+    csv_data->t_ret_spm_vals = NULL;
+    csv_data->t_set_spm_vals = NULL;
+    csv_data->tau_rho = NULL;
+    csv_data->tau_power = NULL;
+    csv_data->tau_vals = NULL;
+    csv_data->error_message = NULL;
 
     geo_dat = rssringoccs_Get_Geo(geo, use_deprecated);
     if (geo_dat == NULL)
@@ -102,6 +150,40 @@ rssringoccs_Extract_CSV_Data(const char *geo,
         rssringoccs_Destroy_DLPCSV(&dlp_dat);
         rssringoccs_Destroy_CalCSV(&cal_dat);
         return csv_data;
+    }
+
+    /*  Grab the number of elements from the DLP CSV. This will be the number *
+     *  of elements in the output.                                            */
+    csv_data->n_elements = dlp_dat->n_elements;
+
+    /*  The __MALLOC_CSV_VAR__ macro contains an if-then statement with       *
+     *  braces {} hence there is no need for a semi-colon at the end.         */
+    __MALLOC_CSV_VAR__(rho_km_vals)
+    __MALLOC_CSV_VAR__(raw_tau_vals)
+    __MALLOC_CSV_VAR__(phase_rad_vals)
+    __MALLOC_CSV_VAR__(phi_rad_vals)
+    __MALLOC_CSV_VAR__(B_rad_vals)
+    __MALLOC_CSV_VAR__(t_oet_spm_vals)
+    __MALLOC_CSV_VAR__(t_ret_spm_vals)
+    __MALLOC_CSV_VAR__(t_set_spm_vals)
+    __MALLOC_CSV_VAR__(rho_corr_pole_km_vals)
+    __MALLOC_CSV_VAR__(rho_corr_timing_km_vals)
+    __MALLOC_CSV_VAR__(phi_rl_rad_vals)
+    __MALLOC_CSV_VAR__(raw_tau_threshold_vals)
+
+    for (n=0; n<csv_data->n_elements; ++n)
+    {
+        csv_data->rho_km_vals[n]  = dlp_dat->rho_km_vals[n];
+        csv_data->raw_tau_vals[n] = dlp_dat->raw_tau_vals[n];
+        csv_data->phase_rad_vals[n]
+            = rssringoccs_Deg_To_Rad*dlp_dat->phase_deg_vals[n];
+        csv_data->phi_rad_vals[n]
+            = rssringoccs_Deg_To_Rad*dlp_dat->phi_ora_deg_vals[n];
+        csv_data->B_rad_vals[n]
+            = rssringoccs_Deg_To_Rad*dlp_dat->B_deg_vals[n];
+        csv_data->t_ret_spm_vals[n] = dlp_dat->t_ret_spm_vals[n];
+        csv_data->t_set_spm_vals[n] = dlp_dat->t_set_spm_vals[n];
+        csv_data->t_oet_spm_vals[n] = dlp_dat->t_oet_spm_vals[n];
     }
 
     rssringoccs_Destroy_GeoCSV(&geo_dat);

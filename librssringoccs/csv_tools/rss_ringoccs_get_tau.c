@@ -58,9 +58,9 @@ rssringoccs_TauCSV *rssringoccs_Get_Tau(const char *filename,
     tau->phi_rl_deg_vals = NULL;
     tau->phi_ora_deg_vals = NULL;
     tau->power_vals = NULL;
-    tau->raw_tau_vals = NULL;
+    tau->tau_vals = NULL;
     tau->phase_deg_vals = NULL;
-    tau->raw_tau_threshold_vals = NULL;
+    tau->tau_threshold_vals = NULL;
     tau->t_oet_spm_vals = NULL;
     tau->t_ret_spm_vals = NULL;
     tau->t_set_spm_vals = NULL;
@@ -286,16 +286,16 @@ rssringoccs_TauCSV *rssringoccs_Get_Tau(const char *filename,
         return tau;
     }
 
-    /*  Allocate memory for raw_tau_vals and check for error.                 */
-    tau->raw_tau_vals = malloc(sizeof(*tau->raw_tau_vals) * line_count);
-    if (tau->raw_tau_vals == NULL)
+    /*  Allocate memory for tau_vals and check for error.                     */
+    tau->tau_vals = malloc(sizeof(*tau->tau_vals) * line_count);
+    if (tau->tau_vals == NULL)
     {
         tau->error_occurred = rssringoccs_True;
         tau->error_message = rssringoccs_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\ttrssringoccs_Get_Tau\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
-            "raw_tau_vals. Aborting computation and returning.\n"
+            "tau_vals. Aborting computation and returning.\n"
         );
 
         /*  Free the variables that have been malloc'd so far.                */
@@ -320,17 +320,17 @@ rssringoccs_TauCSV *rssringoccs_Get_Tau(const char *filename,
         return tau;
     }
 
-    /*  Allocate memory for raw_tau_threshold_vals and check for error.       */
-    tau->raw_tau_threshold_vals
-        = malloc(sizeof(*tau->raw_tau_threshold_vals) * line_count);
-    if (tau->raw_tau_threshold_vals == NULL)
+    /*  Allocate memory for tau_threshold_vals and check for error.       */
+    tau->tau_threshold_vals
+        = malloc(sizeof(*tau->tau_threshold_vals) * line_count);
+    if (tau->tau_threshold_vals == NULL)
     {
         tau->error_occurred = rssringoccs_True;
         tau->error_message = rssringoccs_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\ttrssringoccs_Get_Tau\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
-            "raw_tau_threshold_vals. Aborting computation and returning.\n"
+            "tau_threshold_vals. Aborting computation and returning.\n"
         );
 
         /*  Free the variables that have been malloc'd so far.                */
@@ -389,13 +389,13 @@ rssringoccs_TauCSV *rssringoccs_Get_Tau(const char *filename,
         }
 
         record = strtok(NULL, ",");
-        tau->raw_tau_vals[n] = atof(record);
+        tau->tau_vals[n] = atof(record);
 
         record = strtok(NULL, ",");
         tau->phase_deg_vals[n] = atof(record);
 
         record = strtok(NULL, ",");
-        tau->raw_tau_threshold_vals[n] = atof(record);
+        tau->tau_threshold_vals[n] = atof(record);
 
         record = strtok(NULL, ",");
         tau->t_oet_spm_vals[n] = atof(record);

@@ -198,6 +198,15 @@
 #define rssringoccs_Euler_E_L               2.7182818284590452353602875L
 #define rssringoccs_Natural_Log_Of_10_L     2.3025850929940456840179910L
 
+/*  Degrees to radians conversion, and vice-versa.                            */
+#define rssringoccs_Deg_To_Rad_F 1.745329251e-2F
+#define rssringoccs_Deg_To_Rad   1.74532925199432957e-2
+#define rssringoccs_Deg_To_Rad_L 1.74532925199432957692369076e-2L
+
+#define rssringoccs_Rad_To_Deg_F 57.295779513F
+#define rssringoccs_Rad_To_Deg   57.29577951308232087
+#define rssringoccs_Rad_To_Deg_L 57.29577951308232087679815481L
+
 /*  The speed of light in km/s.                                               */
 #define rssringoccs_Speed_Of_Light_KMS_F  299792.4580F
 #define rssringoccs_Speed_Of_Light_KMS    299792.4580

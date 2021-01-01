@@ -82,7 +82,7 @@ Fresnel_Transform_Perturbed_Newton_Norm_Double(double *x_arr, double *phi_arr,
         /*  Compute the transform with a Riemann sum. If the T_in pointer     *
          *  does not contain at least 2*n_pts+1 points, n_pts to the left and *
          *  right of the center, then this will create a segmentation fault.  */
-        integrand = rssringoccs_CDouble_Multiply(exp_psi, T_in[m]);
+        integrand = rssringoccs_CDouble_Multiply(exp_psi, T_in[n]);
         T_out     = rssringoccs_CDouble_Add(T_out, integrand);
         n += 1;
     }

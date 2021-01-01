@@ -47,12 +47,10 @@ typedef struct TAUOBj {
     rssringoccs_ComplexDouble *T_out;
 } rssringoccs_TAUObj;
 
-extern void ReverseDoubleArray(double *arr, long arrsize);
 extern void GetRangeFromString(char *range, double *rng_list);
 extern void GetNormeqFromString(char *wtype, double *norm_eq);
 extern void check_tau_data(rssringoccs_TAUObj *tau);
 extern void check_tau_data_range(rssringoccs_TAUObj *dlp, double two_dx);
-
 
 extern void select_window_func(rss_ringoccs_window_func *fw,
                                rssringoccs_TAUObj *tau);
@@ -66,7 +64,6 @@ extern void reset_window(double *x_arr, double *w_func, double dx, double width,
 
 /*  Functions that compute the Fresnel Transform on a TAUObj instance.        */
 extern void DiffractionCorrectionFresnel(rssringoccs_TAUObj *tau);
-extern void DiffractionCorrectionFresnelNorm(rssringoccs_TAUObj *tau);
 extern void DiffractionCorrectionLegendre(rssringoccs_TAUObj *tau);
 extern void DiffractionCorrectionNewton(rssringoccs_TAUObj *tau);
 extern void DiffractionCorrectionEllipse(rssringoccs_TAUObj *tau);

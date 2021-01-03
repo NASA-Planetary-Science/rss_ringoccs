@@ -23,7 +23,7 @@
 #   clang and gcc on both linux and mac systems using strict compiler options to
 #   ensure compliance with the ANSI standard. Changing this to a different
 #   compiler "should" work, though it hasn't been tested.
-CC=gcc
+CC=gcc-10
 
 echo -e "\nClearing older files..."
 rm -f *.so
@@ -33,7 +33,7 @@ echo "Compiling rss_ringoccs..."
 CompilerArgs1="-std=c89 -ansi -pedantic -pedantic-errors -Wall -Wextra"
 CompilerArgs2="-Wpedantic -Wmisleading-indentation -Wmissing-field-initializers"
 CompilerArgs3="-Wmissing-prototypes -Wold-style-definition -Winit-self"
-CompilerArgs4="-Wmissing-declarations -Wnull-dereference " # -Wconversion -Wdouble-promotion"
+CompilerArgs4="-Wmissing-declarations -Wnull-dereference -Wwrite-strings" # -Wconversion -Wdouble-promotion"
 CompilerArgs5="-Wstrict-prototypes -I../../ -I./ -DNDEBUG -g -fPIC -O3 -c"
 CompilerArgs="$CompilerArgs1 $CompilerArgs2 $CompilerArgs3"
 CompilerArgs="$CompilerArgs $CompilerArgs4 $CompilerArgs5"

@@ -1,3 +1,186 @@
+/******************************************************************************
+ *                                 LICENSE                                    *
+ ******************************************************************************
+ *  This file is part of rss_ringoccs.                                        *
+ *                                                                            *
+ *  rss_ringoccs is free software: you can redistribute it and/or modify it   *
+ *  it under the terms of the GNU General Public License as published by      *
+ *  the Free Software Foundation, either version 3 of the License, or         *
+ *  (at your option) any later version.                                       *
+ *                                                                            *
+ *  rss_ringoccs is distributed in the hope that it will be useful,           *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+ *  GNU General Public License for more details.                              *
+ *                                                                            *
+ *  You should have received a copy of the GNU General Public License         *
+ *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
+ ******************************************************************************
+ *                          Diffraction Correction                            *
+ ******************************************************************************
+ *  Purpose:                                                                  *
+ *      This file contains routines to compute the Fresnel transform for      *
+ *      diffraction reconstruction or forward modeling.                       *
+ *          Fresnel Quadratic Approximations:                                 *
+ *              Classic quadratic approximation used in Fourier optics.       *
+ *          Legendre Expansion:                                               *
+ *             Approximate the Fresnel kernel using Legendre polynomials.     *
+ *          Newton-Raphson Method:                                            *
+ *              Performs the Fresnel Transform by computing the stationary    *
+ *              value of the Fresnel Kernel using the Newton-Raphson method.  *
+ *          Simple FFT Method:                                                *
+ *              Uses an FFT to compute the Fresnel transform. This assumes    *
+ *              the geometry about the center of the data set is an accurate  *
+ *              representative of the entire occultation. Hence the method is *
+ *              accurate around the center and inaccurate towards the edges.  *
+ ******************************************************************************
+ *  The Inverse Fresnel Transform:                                            *
+ *                                                                            *
+ *                           infinity                                         *
+ *                              -                                             *
+ *                    1 + i    | |                                            *
+ *         T(rho)  =  ------   |   T_hat(r_0)w(r-r_0)exp(-i psi(r,r_0)) dr_0  *
+ *                      2F   | |                                              *
+ *                            -                                               *
+ *                          -infinity                                         *
+ *                                                                            *
+ *      Where T_hat is the diffracted data, w is the window function, r is    *
+ *      the ring intercept point, and r_0 is a dummy variable of integration. *
+ *      psi is the Fresnel Kernel, and exp is the exponential function. The   *
+ *      scale factor F is the Fresnel scale which is dependent on the         *
+ *      geometry of the occultation.                                          *
+ *                                                                            *
+ *      For near-constant geometry, or regions where the geometry does not    *
+ *      depend heavily on phi, psi is approximately a function of the form    *
+ *      psi(rho,rho_0) = f(rho-rho_0) and so this integral is a convolution   *
+ *      of w * exp(-i psi) and T_hat. Using the convolution theorem, we get:  *
+ *                                                                            *
+ *      F(T)   =    F(T_hat) * F(w * exp(-i psi))                             *
+ *                                                                            *
+ *      T      =    F^-1(F(T_hat) * F(w * exp(-i psi)))                       *
+ *                                                                            *
+ *      Where F(f) is the Fourier transform of f, and F^-1 is the inverse     *
+ *      Fourier transform.                                                    *
+ ******************************************************************************
+ *  The Normalization Scheme:                                                 *
+ *      As the resolution get's too high, say 10 km or larger, the window     *
+ *      width quickly shrinks to zero and the integral will be approximately  *
+ *      zero. To account for this, the option to normalize the integral by    *
+ *      the window width is offered. The normalization is defined as follows: *
+ *                                                                            *
+ *                    |     _ +infinity           |                           *
+ *                    |    | |                    |                           *
+ *                    |    |    exp(-i psi(x)) dx |                           *
+ *                    |  | |                      |                           *
+ *                    |   -  -infinity            |                           *
+ *          Norm =  __________________________________                        *
+ *                  |    -  +W/2                    |                         *
+ *                  |   | |                         |                         *
+ *                  |   |    w(x) exp(-i psi(x)) dx |                         *
+ *                  | | |                           |                         *
+ *                  |  -   -W/2                     |                         *
+ *                                                                            *
+ *      This has the effect of making the free-space regions, which are       *
+ *      regions that are not affected by diffraction, evaluate to one,        *
+ *      regardless of what (positive) resolution was chosen.                  *
+ ******************************************************************************
+ *                              DEFINED FUNCTIONS                             *
+ ******************************************************************************
+ *  reset_window:                                                             *
+ *      Void function that takes in a pointer to a double array and creates   *
+ *      an array of values for the ring radius within half a window width of  *
+ *      the ring intercept point. Do to symmetry, only the values to the left *
+ *      of the ring intercept point are computed. This also computes the      *
+ *      window function as a function of this array.                          *
+ ******************************************************************************
+ *  Fresnel_Transform_Double / Fresnel_Transform_Norm_Double                  *
+ *      Computes the Fresnel transform using a quadratic approximation to the *
+ *      Fresnel kernel, with or without normalization.                        *
+ ******************************************************************************
+ *  Fresnel_Legendre_Double / Fresnel_Legendre_Norm_Double                    *
+ *      Computes the Fresnel Transform using Legendre Polynomials to          *
+ *      approximate the Fresnel kernel to various powers (1<n<256).           *
+ ******************************************************************************
+ *  Fresnel_Transform_Newton_Double / Fresnel_Transform_Newton_Norm_Double    *
+ *      Computes the Fresnel inverse transform using Newton-Raphson to        *
+ *      compute the stationary value of the Fresnel kernel.                   *
+ ******************************************************************************
+ *                            A FRIENDLY WARNING                              *
+ ******************************************************************************
+ *  This code uses complex numbers throughout, and is compatible with the C99 *
+ *  standard. To use this code, make sure your compiler supports C99 or more  *
+ *  recent standards of the C Programming Language.                           *
+ ******************************************************************************
+ *                               DEPENDENCIES                                 *
+ ******************************************************************************
+ *  1.) complex.h:                                                            *
+ *      A standard library header file where complex types are defined and    *
+ *      various functions for manipulating complex values. This is available  *
+ *      in the C99 standard and higher (C11, C18).                            *
+ *  2.) string.h:                                                             *
+ *      A standard library header file used for dealing with strings. This is *
+ *      primarily used for checking the psitype and wtype inputs.             *
+ *  3.) stdbool.h:                                                            *
+ *      A standard library header file used for dealing with Booleans. It     *
+ *      provides the alias bool for the built-in _Bool type. It also provides *
+ *      true and false macros. Requires C99 or higher.                        *
+ ******************************************************************************
+ *                            A NOTE ON COMMENTS                              *
+ ******************************************************************************
+ *  It is anticipated that many users of this code will have experience in    *
+ *  either Python or IDL, but not C. Many comments are left to explain as     *
+ *  much as possible. Vagueness or unclear code should be reported to:        *
+ *  https://github.com/NASA-Planetary-Science/rss_ringoccs/issues             *
+ ******************************************************************************
+ *                          A NOTE ON CONVENTIONS                             *
+ ******************************************************************************
+ *  1.) i is a complex number, we'll use n for indexing. Max index values for *
+ *      a for loop or while loop should be either capital N, or preferrably   *
+ *      a variable name describing what this limit is. i.e. if it's the size  *
+ *      of an array, call it arr_size.                                        *
+ *  2.) Do not cast malloc. While this is required in C++, it is not in C and *
+ *      the official documentation even frowns upon it. That is, do this:     *
+ *          double *ptr;                                                      *
+ *          long N;                                                           *
+ *          ...                                                               *
+ *          ptr = malloc(sizeof(*ptr) * N);                                   *
+ *      and not:                                                              *
+ *          ptr = (double *)malloc(sizeof(*ptr) * N);                         *
+ *      malloc returns a void pointer and this is automatically and safely    *
+ *      promoted to whatever the type of ptr is.                              *
+ *  3.) While not frowned upon, the following makes maintenance easier.       *
+ *      Instead of using malloc like (for a pointer to a double):             *
+ *          ptr = malloc(sizeof(double) * N);                                 *
+ *      Use:                                                                  *
+ *          ptr = malloc(sizeof(*ptr) * N);                                   *
+ *  4.) Declare variables towards the top of the code and not inside a for    *
+ *      loop. It's extremely ugly. The following is good:                     *
+ *          long k;                                                           *
+ *          long N = 100;                                                     *
+ *          for (k=0; k<N; ++k)                                               *
+ *              do stuff                                                      *
+ *      And this looks horrid:                                                *
+ *          long N = 100;                                                     *
+ *          for (long k=0; k<N; ++k)                                          *
+ *              do stuff                                                      *
+ *  5.) If a number is needed in a for loop, even once, declare or set it as  *
+ *      a macro, rather than having the number verbatim in the loop. If the   *
+ *      the number needs to change it's easier to keep track this way.        *
+ ******************************************************************************
+ *  Author:     Ryan Maguire, Wellesley College                               *
+ *  Date:       June 21, 2019                                                 *
+ ******************************************************************************
+ *                                History                                     *
+ ******************************************************************************
+ *  2019/06/21 (Ryan Maguire):                                                *
+ *      Initial commit.                                                       *
+ *  2020/07/28 (Ryan Maguire):                                                *
+ *      Clarified comments, fixed bug in error checks.                        *
+ *  2020/08/22 (Ryan Maguire):                                                *
+ *      Added FFT routine.                                                    *
+ *  2020/09/06 (Ryan Maguire):                                                *
+ *      Removed FFTW dependence. Replaced with new rss_ringoccs FFT routine.  *
+ ******************************************************************************/
 #include <stdlib.h>
 #include <rss_ringoccs/include/rss_ringoccs_math.h>
 #include <rss_ringoccs/include/rss_ringoccs_bool.h>

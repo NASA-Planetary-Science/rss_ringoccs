@@ -242,26 +242,6 @@
     y = out;                                                                   \
 })
 
-/*  For when a value/array so be non-negative.                                */
-#define RSS_RINGOCCSNegValueError(FuncName, VarName)                           \
-PyErr_Format(                                                                  \
-    PyExc_ValueError,                                                          \
-    "\n\rError Encountered: rss_ringoccs\n"                                    \
-    "\r\tdiffrec.%s\n\n"                                                       \
-    "\r%s must be positive.",                                                  \
-    VarToString(FuncName), VarToString(VarName)                                \
-);
-
-/*  Raise this when a value should be between -2pi and 2pi.                   */
-#define RSS_RINGOCCSTwoPiValueError(FuncName, VarName)                         \
-PyErr_Format(                                                                  \
-    PyExc_ValueError,                                                          \
-    "\n\rError Encountered: rss_ringoccs\n"                                    \
-    "\r\tdiffrec.%s\n\n"                                                       \
-    "\r%s must be between minus two pi and two pi (radians).",                 \
-    VarToString(FuncName), VarToString(VarName)                                \
-);
-
 /*  Macro for raising the appropriate python error if the DLP instance is     *
  *  missing an attribute. This is equivalent to the following in python       *
  *      if not hasattr(tauin, attr_name):                                     *
@@ -384,65 +364,6 @@ Py_INCREF(PyArray_##VarName);                                                  \
 self->VarName = PyArray_##VarName;                                             \
 Py_XDECREF(tmp);
 
-/*  Macro for checking if all of the elements of an array are positive.       */
-#define RSS_RINGOCCSCheckArrayPositive(varname, arrsize)                       \
-if (rssringoccs_Min_Double(varname, arrsize) <= 0.0)                           \
-{                                                                              \
-    PyErr_Format(                                                              \
-        PyExc_IndexError,                                                      \
-        "\n\rError Encountered: rss_ringoccs\n"                                \
-        "\r\tdiffrec.DiffractionCorrection\n\n"                                \
-        "\r%s contains non-positive values.\n",                                \
-        VarToString(varname)                                                   \
-    );                                                                         \
-    return -1;                                                                 \
-}
-
-/*  Macro for checking if the values of a numpy array fall between -2pi,2pi.  */
-#define RSS_RINGOCCSCheckArrayTwoPi(varname, arrsize)                          \
-if ((rssringoccs_Min_Double(varname, arrsize) < -rssringoccs_Two_Pi) ||        \
-    (rssringoccs_Max_Double(varname, arrsize) > rssringoccs_Two_Pi))           \
-{                                                                              \
-    PyErr_Format(                                                              \
-        PyExc_IndexError,                                                      \
-        "\n\rError Encountered: rss_ringoccs\n"                                \
-        "\r\tdiffrec.DiffractionCorrection\n\n"                                \
-        "\r%s contains values outside of [-2pi, 2pi].\n",                      \
-        VarToString(varname)                                                   \
-    );                                                                         \
-    return -1;                                                                 \
-}
-
-#define RSS_RINGOCCSRangeError(range_input)                                    \
-    PyErr_Format(                                                              \
-        PyExc_ValueError,                                                      \
-        "\n\rError Encountered: rss_ringoccs\n"                                \
-        "\r\tdiffrec.DiffractionCorrection\n\n"                                \
-        "\rIllegal string for rng. Allowed strings are:\n"                     \
-        "\r\tall               [1.0, 400000.0]\n"                              \
-        "\r\tbesselbarnard     [120210.0, 120330.0]\n"                         \
-        "\r\tbessel-barnard    [120210.0, 120330.0]\n"                         \
-        "\r\tcringripples      [77690.0, 77760.0]\n"                           \
-        "\r\tencke             [132900.0, 134200.0]\n"                         \
-        "\r\tenckegap          [132900.0, 134200.0]\n"                         \
-        "\r\therschel          [118100.0, 118380.0]\n"                         \
-        "\r\therschelgap       [118100.0, 118380.0]\n"                         \
-        "\r\thuygens           [117650.0, 117950.0]\n"                         \
-        "\r\thuygensringlet    [117650.0, 117950.0]\n"                         \
-        "\r\tjanusepimetheus   [96200.0, 96800.0]\n"                           \
-        "\r\tjeffreys          [118900.0, 119000.0]\n"                         \
-        "\r\tjeffreysgap       [118900.0, 119000.0]\n"                         \
-        "\r\tkuiper            [119300.0, 119500.0]\n"                         \
-        "\r\tkuipergap         [119300.0, 119500.0]\n"                         \
-        "\r\tmaxwell           [87410.0, 87610.0]\n"                           \
-        "\r\tmaxwellringlet    [87410.0, 87610.0]\n"                           \
-        "\r\trussell           [118550.0, 118660.0]\n"                         \
-        "\r\trussellgap        [118550.0, 118660.0]\n"                         \
-        "\r\ttitan             [77870.0, 77930.0]\n"                           \
-        "\r\ttitanringlet      [77870.0, 77930.0\n\n"                          \
-        "\rYour string:         %s",                                           \
-        range_input                                                            \
-    );
 
 /*  This function frees the memory allocated to a pointer by malloc when the  *
  *  corresponding variable is destroyed at the Python level. Without this you *
@@ -659,21 +580,6 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
     /*  Create an instance of the DLPObj (C struct).                          */
     rssringoccs_TAUObj tau;
 
-    /*  Check that interp is a legal value.                                   */
-    if ((0 <= self->interp) && (self->interp <=4))
-        tau.interp = self->interp;
-    else
-    {
-        PyErr_Format(
-            PyExc_ValueError,
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tdiffrec.DiffractionCorrection\n\n"
-            "\rinterp should be an integer between 0 and 4.\n"
-            "\rYour input: %d\n", self->interp
-        );
-        return -1;
-    }
-
     /*  Check that the input perturb is a list with 5 elements.               */
     if (!(perturb))
     {
@@ -780,16 +686,8 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
         return -1;
     }
 
-    rssringoccs_Tau_Set_WType(self->wtype, tau);
-    rssringoccs_Tau_Set_Psitype(self->psitype, tau);
-
     /*  Check that all of the following variables are positive using the      *
      *  RSS_RINGOCCSNegValueError preprocessor functions defined above.       */
-    if (self->input_res<=0.0)
-    {
-        RSS_RINGOCCSNegValueError(DiffractionCorrection, res);
-        return -1;
-    }
     else if (self->sigma<=0.0)
     {
         RSS_RINGOCCSNegValueError(DiffractionCorrection, sigma);
@@ -1010,6 +908,11 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
         return -1;
     }
 
+    rssringoccs_Tau_Set_WType(self->wtype, tau);
+    rssringoccs_Tau_Set_Psitype(self->psitype, tau);
+    rssringoccs_Tau_Set_Range_From_String(rng_string, tau);
+    tau.interp = self->interp;
+
     if (self->verbose)
         puts("\tRetrieving variables from DLP instance...");
 
@@ -1150,371 +1053,17 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
     self->dathist = history;
     Py_XDECREF(tmp);
 
-    RSS_RINGOCCSCheckArrayPositive(tau.D_km_vals, tau.arr_size);
-    RSS_RINGOCCSCheckArrayPositive(tau.rho_km_vals, tau.arr_size);
-    RSS_RINGOCCSCheckArrayPositive(tau.f_sky_hz_vals, tau.arr_size);
-    RSS_RINGOCCSCheckArrayTwoPi(tau.B_rad_vals, tau.arr_size);
-    RSS_RINGOCCSCheckArrayTwoPi(tau.phi_rad_vals, tau.arr_size);
-
-    /*  Make sure the power isn't negative.                                   */
-    if (rssringoccs_Min_Double(tau.p_norm_vals, tau.arr_size) < 0.0)
-    {
-        PyErr_Format(
-            PyExc_IndexError,
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tdiffrec.DiffractionCorrection\n\n"
-            "\ttau.p_norm_vals contains non-positive values.\n"
-        );
-        return -1;
-    }
-
-    /*  Run an error check as to whether or not this is an egress, ingress,   *
-     *  or chord occultation, and if the data can be processed accordingly.   */
-    double min_val = rssringoccs_Min_Double(tau.rho_dot_kms_vals, tau.arr_size);
-    double max_val = rssringoccs_Max_Double(tau.rho_dot_kms_vals, tau.arr_size);
-    double dx_km   = tau.rho_km_vals[1] - tau.rho_km_vals[0];
-
-    if (dx_km == 0.0)
-    {
-        PyErr_Format(
-            PyExc_ValueError,
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tdiffrec.DiffractionCorrection\n\n"
-            "\rdx_km is zero: rho_km_vals[1]-rho_km_vals[0] = 0.\n\n"
-        );
-        return -1;
-    }
-    else if (self->res < 1.99*dx_km)
-    {
-        PyErr_Format(
-            PyExc_ValueError,
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tdiffrec.DiffractionCorrection\n\n"
-            "\rResolution is less than twice the sample space.\n"
-            "\r\tRequested resolution (km):     %f\n"
-            "\r\tSample spacing (km):           %f\n\n"
-            "\r\tChoose a resolution GREATER than %f (km)\n\n"
-            "\rPLEASE NOTE:\n"
-            "\r\tTo be consistent with PDS results, a factor of 0.75 is\n"
-            "\r\tapplied to the requested resolution. To ignore set, set\n"
-            "\r\tthe 'res_factor=0' when calling DiffractionCorrection.\n"
-            "\r\t\tres_factor currently set to:    %f",
-            self->res, dx_km, 2.0*dx_km/self->res_factor, self->res_factor
-        );
-        return -1;
-    }
-
-    if ((min_val < 0.0) && (max_val > 0.0))
-    {
-        PyErr_Format(
-            PyExc_ValueError,
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tdiffrec.DiffractionCorrection\n\n"
-            "\r\tdrho/dt has positive and negative values.\n"
-            "\r\tYour input file is probably a chord occultation.\n"
-            "\r\tDiffraction Correction can only be performed for\n"
-            "\r\tone event at a time. That is, ingress or egress.\n\n"
-            "\r\tTO CORRECT THIS:\n"
-            "\r\t\tSplit the input into two parts: Ingress and Engress\n"
-            "\r\t\tand perform diffraction correction twice.\n\n"
-        );
-        return -1;
-    }
-    else if ((min_val == 0.0) || (max_val == 0.0))
-    {
-        PyErr_Format(
-            PyExc_ValueError,
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tdiffrec.DiffractionCorrection\n\n"
-            "\r\tdrho/dt has zero valued elements.\n"
-            "\r\tYour input file is probably a chord occultation.\n"
-            "\r\tDiffraction Correction can only be performed for\n"
-            "\r\tone event at a time. That is, ingress or egress.\n\n"
-            "\r\tTO CORRECT THIS:\n"
-            "\r\t\tSplit the input into two parts: Ingress and Engress\n"
-            "\r\t\tand perform diffraction correction twice.\n\n"
-        );
-        return -1;
-    }
-    else if ((dx_km>0.0) && (max_val<0.0))
-    {
-        for(i=0; i<tau.arr_size; ++i)
-            tau.rho_dot_kms_vals[i] = fabs(tau.rho_dot_kms_vals[i]);
-    }
-    else if ((dx_km < 0.0) && (min_val > 0.0))
-    {
-        PyErr_Format(
-            PyExc_ValueError,
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tdiffrec.DiffractionCorrection\n\n"
-            "\r\trho_km_vals is decreasing yet rho_dot_kms_vals\n"
-            "\r\tis positiive. Check DLP class for errors.\n\n"
-        );
-        return -1;
-    }
-    else if (dx_km<0.0)
-    {
-        rssringoccs_Reverse_Double_Array(tau.rho_km_vals,      tau.arr_size);
-        rssringoccs_Reverse_Double_Array(tau.phi_rad_vals,     tau.arr_size);
-        rssringoccs_Reverse_Double_Array(tau.B_rad_vals,       tau.arr_size);
-        rssringoccs_Reverse_Double_Array(tau.D_km_vals,        tau.arr_size);
-        rssringoccs_Reverse_Double_Array(tau.phase_rad_vals,   tau.arr_size);
-        rssringoccs_Reverse_Double_Array(tau.p_norm_vals,      tau.arr_size);
-        rssringoccs_Reverse_Double_Array(tau.f_sky_hz_vals,    tau.arr_size);
-        rssringoccs_Reverse_Double_Array(tau.rho_dot_kms_vals, tau.arr_size);
-        for(i=0; i<tau.arr_size; ++i)
-            tau.rho_dot_kms_vals[i] = fabs(tau.rho_dot_kms_vals[i]);
-        dx_km *= -1.0;
-    }
-
     if (self->verbose)
         puts("\tComputing Necessary Variables...");
-
-    double *lambda_sky = (double *)malloc(sizeof(double) * tau.arr_size);
-    double *mu_vals    = (double *)malloc(sizeof(double) * tau.arr_size);
-
-    /*  Allocate memory for the diffracted data and the fresnel scale.        */
-    tau.T_in      = malloc(sizeof(*tau.T_in)      * tau.arr_size);
-    tau.F_km_vals = malloc(sizeof(*tau.F_km_vals) * tau.arr_size);
-
-    for (i=0; i<tau.arr_size; ++i)
-    {
-        /*  Compute the complex amplitude, T_hat_vals.                        */
-        tau.T_in[i] = rssringoccs_CDouble_Polar(sqrt(tau.p_norm_vals[i]),
-                                                tau.phase_rad_vals[i]);
-
-        /*  Compute the wavelength lambda and scale-factor mu.                */
-        lambda_sky[i] = rssringoccs_Double_Frequency_To_Wavelength(tau.f_sky_hz_vals[i]);
-
-        mu_vals[i]    = sin(fabs(tau.B_rad_vals[i]));
-
-        /*  And finally, compute the Fresnel scale.                           */
-        tau.F_km_vals[i]  = rssringoccs_Double_Fresnel_Scale(lambda_sky[i],
-                                                             tau.D_km_vals[i],
-                                                             tau.phi_rad_vals[i],
-                                                             tau.B_rad_vals[i]);
-    }
 
     /*  Get the normalized equivalent width of the window type.               */
     GetNormeqFromString(tau.wtype, &self->norm_eq);
 
-    /*  Use calloc to both allocate memory for tau.w_km_vals (like malloc)    *
-     *  and initialize the data to zero (unlike malloc). This is similar to   *
-     *  numpy.zeros(tau.arr_size) in Python.                                  */
-    tau.w_km_vals = calloc(tau.arr_size, sizeof(double));
-
-    /*  Declare long pointer-to-pointer which stores the indices where        *
-     *  F_km_vals is non-zero in the first slot (Prange[0]), and the size of  *
-     *  this array in the second (*Prange[1]).                                */
-    unsigned long **Prange;
-    unsigned long *Prange_Index;
-    unsigned long Prange_Size;
-    double w_fac;
-
-    if (self->bfac)
-    {
-        w_fac = self->norm_eq;
-        double omega;
-        double *alpha  = malloc(sizeof(*alpha) * tau.arr_size);
-        double *P_vals = malloc(sizeof(*P_vals) * tau.arr_size);
-
-        for(i=0; i<tau.arr_size; ++i)
-        {
-            omega      = rssringoccs_Two_Pi * tau.f_sky_hz_vals[i];
-            alpha[i]   = omega * self->sigma;
-            alpha[i]  *= alpha[i] * 0.5 / tau.rho_dot_kms_vals[i];
-            P_vals[i]  = self->res/(alpha[i]*tau.F_km_vals[i]*tau.F_km_vals[i]);
-        }
-
-        Prange = rssringoccs_Where_Greater_Double(P_vals, tau.arr_size, 1.0);
-        Prange_Index = Prange[0];
-        Prange_Size  = *Prange[1];
-
-        for (i=0; i<Prange_Size; ++i)
-            tau.w_km_vals[Prange_Index[i]] = w_fac *
-                rssringoccs_Double_Resolution_Inverse(P_vals[Prange_Index[i]]) / alpha[i];
-
-        free(P_vals);
-        free(alpha);
-    }
-    else
-    {
-        w_fac = self->norm_eq/self->res;
-
-        for (i=0; i<tau.arr_size; ++i)
-            tau.w_km_vals[i] = 2.0*tau.F_km_vals[i]*tau.F_km_vals[i]*w_fac;
-
-        Prange = rssringoccs_Where_Greater_Double(tau.F_km_vals, tau.arr_size, 0.0);
-        Prange_Index = Prange[0];
-        Prange_Size  = *Prange[1];
-    }
-
-    double *rho_legal = malloc(sizeof(*rho_legal) * Prange_Size);
-
-    for(i=0; i<Prange_Size; ++i)
-        rho_legal[i] = tau.rho_km_vals[Prange_Index[i]] -
-                       0.5*tau.w_km_vals[Prange_Index[i]];
-
-    max_val = rssringoccs_Max_Double(rho_legal, Prange_Size);
-
-    for(i=0; i<Prange_Size; ++i)
-        rho_legal[i] = tau.rho_km_vals[Prange_Index[i]] +
-                       0.5*tau.w_km_vals[Prange_Index[i]];
-    min_val = rssringoccs_Min_Double(rho_legal, Prange_Size);
-
-    unsigned long **wrange = rssringoccs_Where_LesserGreater_Double(tau.rho_km_vals, tau.arr_size,
-                                                                    min_val, max_val);
-    unsigned long *wrange_Index = wrange[0];
-    unsigned long wrange_Size = *wrange[1];
-
-
-    if (wrange_Size == 0)
-    {
-        PyErr_Format(
-            PyExc_ValueError,
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tdiffrec.DiffractionCorrection\n\n"
-            "\r\tThe window width is too large to reconstruct anything.\n"
-        );
-        return -1;
-    }
-    else if (max_val < self->range[0])
-    {
-        PyErr_Format(
-            PyExc_ValueError,
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tdiffrec.DiffractionCorrection\n\n"
-            "\r\tMinimum requested range is greater than available data.\n"
-            "\r\t\tYour Requested Minimum (km):    %lld\n"
-            "\r\t\tYour Requested Maximum (km):    %lld\n"
-            "\r\t\tMaximum Available Data (km):    %lld\n",
-            (long long)self->range[0], (long long)self->range[1],
-            (long long)max_val
-        );
-        return -1;
-    }
-    else if (min_val > self->range[1])
-    {
-        PyErr_Format(
-            PyExc_ValueError,
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tdiffrec.DiffractionCorrection\n\n"
-            "\r\tMinimum requested range is greater than available data.\n"
-            "\r\t\tYour Requested Minimum:  %lld km\n"
-            "\r\t\tYour Requested Maximum:  %lld km\n"
-            "\r\t\tMinimum Available Data:  %lld km\n",
-            (long long)self->range[0], (long long)self->range[1],
-            (long long)max_val
-        );
-        return -1;
-    }
-    else
-    {
-        free(wrange[0]);
-        free(wrange[1]);
-        free(wrange);
-
-        wrange = rssringoccs_Where_LesserGreater_Double(tau.rho_km_vals, tau.arr_size,
-                                                        min_val, max_val);
-        wrange_Index = wrange[0];
-        wrange_Size = *wrange[1];
-
-        self->start = wrange_Index[0];
-        self->finish = wrange_Index[wrange_Size-1];
-        self->n_used = self->finish - self->start;
-    }
-
-    tau.start  = self->start;
-    tau.n_used = self->n_used;
-
     /*  For the first inverse calculatiion, tau.use_fwd must be set to false. */
-    tau.use_fwd = self->use_fft;
+    tau.use_fwd = self->use_fwd;
     tau.use_norm = self->use_norm;
 
-    tau.kd_vals = (double *)malloc(sizeof(double) * tau.arr_size);
-    for(i=0; i<tau.arr_size; ++i)
-        tau.kd_vals[i] = rssringoccs_Double_Wavelength_To_Wavenumber(lambda_sky[i]) *
-                     tau.D_km_vals[i];
-
-    /*  Free the variables you don't need anymore.                            */
-    free(wrange_Index);
-    free(wrange);
-    free(Prange_Index);
-    free(Prange);
-    free(rho_legal);
-    free(lambda_sky);
-
-    if (tau.start > tau.arr_size){
-        PyErr_Format(
-            PyExc_IndexError,
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tdiffrec.special_functions.fresnel_transform\n\n"
-            "\rStarting index (start) is greater than the size of the array.\n"
-        );
-        return -1;
-    }
-    else if (tau.start+tau.n_used > tau.arr_size){
-        PyErr_Format(
-            PyExc_IndexError,
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tdiffrec.special_functions.fresnel_transform\n\n"
-            "\rFinal index (start+n_used) is greater than size of array.\n"
-        );
-        return -1;
-    }
-
-    tau.T_out = malloc((tau.n_used+1)*sizeof(*tau.T_out));
-    /*
-    if (self->use_fft)
-        DiffractionCorrectionSimpleFFT(&tau);
-    else
-    {
-        if (tau.order == 0)
-        {
-            if ((tau.ecc == 0.0) && (tau.peri == 0.0))
-                if ((tau.perturb[0] == 0) && (tau.perturb[1] == 0) &&
-                    (tau.perturb[2] == 0) && (tau.perturb[3] == 0) &&
-                    (tau.perturb[4] == 0))
-                    DiffractionCorrectionNewton(&tau);
-                else
-                    DiffractionCorrectionPerturbedNewton(&tau);
-            else
-                DiffractionCorrectionEllipse(&tau);
-        }
-        else if (tau.order == 1)
-            DiffractionCorrectionFresnel(&tau);
-        else
-            DiffractionCorrectionLegendre(&tau);
-    }
-    */
-    time_t t1, t2;
-
-    t1 = clock();
-    if (strcmp(tau.psitype, "fresnel") == 0)
-        DiffractionCorrectionFresnel(&tau);
-    else if (strcmp(tau.psitype, "newton") == 0)
-    {
-        if ((tau.perturb[0] == 0) && (tau.perturb[1] == 0) &&
-            (tau.perturb[2] == 0) && (tau.perturb[3] == 0) &&
-            (tau.perturb[4] == 0))
-            DiffractionCorrectionNewton(&tau);
-        else
-            DiffractionCorrectionPerturbedNewton(&tau);
-
-    }
-    else
-        DiffractionCorrectionNewton(&tau);
-    t2 = clock();
-
     printf("%f\n", (double)(t2-t1) / CLOCKS_PER_SEC);
-
-    if (tau.error_occurred)
-    {
-        PyErr_Format(PyExc_RuntimeError, tau.error_message);
-        return -1;
-    }
-    else
-        tau.n_used += 1;
 
     RSS_RINGOCCSSetArray(self, tau, rho_km_vals, tmp, NPY_DOUBLE,
                          tau.start, tau.n_used);

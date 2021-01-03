@@ -1,0 +1,36 @@
+
+#include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
+
+void rssringoccs_Tau_Compute_Vars(rssringoccs_TAUObj *tau)
+{
+    double *lambda_sky = (double *)malloc(sizeof(double) * tau.arr_size);
+    double *mu_vals    = (double *)malloc(sizeof(double) * tau.arr_size);
+
+    /*  Allocate memory for the diffracted data and the fresnel scale.        */
+    tau.T_in      = malloc(sizeof(*tau.T_in)      * tau.arr_size);
+    tau.F_km_vals = malloc(sizeof(*tau.F_km_vals) * tau.arr_size);
+
+    for (i=0; i<tau.arr_size; ++i)
+    {
+        /*  Compute the complex amplitude, T_hat_vals.                        */
+        tau.T_in[i] = rssringoccs_CDouble_Polar(sqrt(tau.p_norm_vals[i]),
+                                                tau.phase_rad_vals[i]);
+
+        /*  Compute the wavelength lambda and scale-factor mu.                */
+        lambda_sky[i] = rssringoccs_Double_Frequency_To_Wavelength(tau.f_sky_hz_vals[i]);
+
+        mu_vals[i]    = sin(fabs(tau.B_rad_vals[i]));
+
+        /*  And finally, compute the Fresnel scale.                           */
+        tau.F_km_vals[i]  = rssringoccs_Double_Fresnel_Scale(lambda_sky[i],
+                                                             tau.D_km_vals[i],
+                                                             tau.phi_rad_vals[i],
+                                                             tau.B_rad_vals[i]);
+    tau.kd_vals = (double *)malloc(sizeof(double) * tau.arr_size);
+    for(i=0; i<tau.arr_size; ++i)
+        tau.kd_vals[i] = rssringoccs_Double_Wavelength_To_Wavenumber(lambda_sky[i]) *
+                     tau.D_km_vals[i];
+    }
+
+    free(lambda_sky);
+}

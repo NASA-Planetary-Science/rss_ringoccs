@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <rss_ringoccs/include/rss_ringoccs_math.h>
+#include <rss_ringoccs/include/rss_ringoccs_string.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 
@@ -47,7 +48,7 @@
  *         |_______________________________________________________________   *
  *                                                                    Radius  *
  ******************************************************************************/
-void DiffractionCorrectionPerturbedNewton(rssringoccs_TAUObj *tau)
+void rssringoccs_Diffraction_Correction_PerturbedNewton(rssringoccs_TAUObj *tau)
 {
     /*  Variables for indexing. nw_pts is the number of points in the window. */
     unsigned long i, j, nw_pts, center;
@@ -62,18 +63,13 @@ void DiffractionCorrectionPerturbedNewton(rssringoccs_TAUObj *tau)
     /*  EPS is the maximum allowed error in the Newton-Raphson scheme.        */
     double EPS;
 
-    rss_ringoccs_window_func fw;
+    rssringoccs_window_func fw = tau->window_func;
 
     /*  If everything executes smoothly, status should remain at zero.        */
     tau->error_occurred = rssringoccs_False;
 
     /*  Check that the pointers to the data are not NULL.                     */
-    check_tau_data(tau);
-    if (tau->error_occurred)
-        return;
-
-    /*  Cast the selected window type to the fw pointer.                      */
-    select_window_func(&fw, tau);
+    rssringoccs_Check_Tau_Data(tau);
     if (tau->error_occurred)
         return;
 
@@ -100,7 +96,7 @@ void DiffractionCorrectionPerturbedNewton(rssringoccs_TAUObj *tau)
     nw_pts  = 2*((long)(w_init / two_dx))+1;
 
     /* Check to ensure you have enough data to the left.                      */
-    check_tau_data_range(tau, two_dx);
+    rssringoccs_Check_Tau_Data_Range(tau);
     if (tau->error_occurred)
         return;
 
@@ -112,33 +108,33 @@ void DiffractionCorrectionPerturbedNewton(rssringoccs_TAUObj *tau)
     /*  Check that malloc was successfull.                                    */
     if (!(x_arr))
     {
-        rssringoccs_Set_Tau_Error_Message(
+        tau->error_occurred = rssringoccs_True;
+        tau->error_message = rssringoccs_strdup(
             "\n\rError Encountered: rss_ringoccs\n\n"
             "\r\tDiffractionCorrectionFresnel\n\n"
-            "\rMalloc failed and returned NULL for x_arr. Returning.\n\n",
-            tau
+            "\rMalloc failed and returned NULL for x_arr. Returning.\n\n"
         );
         return;
     }
 
     if (!(w_func))
     {
-        rssringoccs_Set_Tau_Error_Message(
+        tau->error_occurred = rssringoccs_True;
+        tau->error_message = rssringoccs_strdup(
             "\n\rError Encountered: rss_ringoccs\n\n"
             "\r\tDiffractionCorrectionFresnel\n\n"
-            "\rMalloc failed and returned NULL for w_func. Returning.\n\n",
-            tau
+            "\rMalloc failed and returned NULL for w_func. Returning.\n\n"
         );
         return;
     }
 
     if (!(phi_arr))
     {
-        rssringoccs_Set_Tau_Error_Message(
+        tau->error_occurred = rssringoccs_True;
+        tau->error_message = rssringoccs_strdup(
             "\n\rError Encountered: rss_ringoccs\n\n"
             "\r\tDiffractionCorrectionFresnel\n\n"
-            "\rMalloc failed and returned NULL for phi_arr. Returning.\n\n",
-            tau
+            "\rMalloc failed and returned NULL for phi_arr. Returning.\n\n"
         );
         return;
     }

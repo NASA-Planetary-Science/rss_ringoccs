@@ -1,8 +1,9 @@
+#include <rss_ringoccs/include/rss_ringoccs_string.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 
 /******************************************************************************
  *  Function:                                                                 *
- *      check_data_range                                                      *
+ *      rssringoccs_Check_Tau_Data_Range                                      *
  *  Purpose:                                                                  *
  *      Check if the window ranges needed for reconstruction are permitted by *
  *      the available data. This check is important to avoid segmentation     *
@@ -23,7 +24,7 @@
  *          at runtime with no additional error message, a scenario one would *
  *          like to avoid.                                                    *
  ******************************************************************************/
-void check_tau_data_range(rssringoccs_TAUObj *tau, double two_dx)
+void rssringoccs_Check_Tau_Data_Range(rssringoccs_TAUObj *tau)
 {
     /* Create variables to check what the minimum and maximum indices are.    */
     long current_min, current_max;
@@ -39,8 +40,11 @@ void check_tau_data_range(rssringoccs_TAUObj *tau, double two_dx)
     long n;
 
     /* Variables for the window size and number of points in the window.      */
-    double win_size;
+    double win_size, two_dx;
     long nw_pts;
+
+    /*  Set the two_dx value from the tau object.                             */
+    two_dx = 2.0 * tau->dx;
 
     /* Loop through every point, check window width, and ensure you have      *
      * enough data to the left and right for data processing.                 */
@@ -72,21 +76,25 @@ void check_tau_data_range(rssringoccs_TAUObj *tau, double two_dx)
     /*  If min_requested is negative, the window is too large. Similarly, if  *
      *  max_requested goes between the size of the array.                     */
     if (min_requested < 0)
-        rssringoccs_Set_Tau_Error_Message(
+    {
+        tau->error_occurred = rssringoccs_True;
+        tau->error_message = rssringoccs_strdup(
             "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tcheck_tau_data_range\n\n"
+            "\r\trssringoccs_Check_Tau_Data_Range\n\n"
             "\rRequested data range goes beyond the range available. The\n"
             "\rrequested minimum in radius is less than the minimum radius\n"
-            "\ravailable. Returning.\n\n",
-            tau
+            "\ravailable. Returning.\n\n"
         );
+    }
     else if (max_requested > (long)tau->arr_size)
-        rssringoccs_Set_Tau_Error_Message(
+    {
+        tau->error_occurred = rssringoccs_True;
+        tau->error_message = rssringoccs_strdup(
             "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tcheck_tau_data_range\n\n"
+            "\r\trssringoccs_Check_Tau_Data_Range\n\n"
             "\rRequested data range goes beyond the range available. The\n"
             "\rrequested maximum in radius is greater than the maximum radius\n"
-            "\ravailable. Returning.\n\n",
-            tau
+            "\ravailable. Returning.\n\n"
         );
+    }
 }

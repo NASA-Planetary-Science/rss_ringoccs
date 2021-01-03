@@ -1,5 +1,6 @@
-
+#include <stdlib.h>
 #include <string.h>
+#include <rss_ringoccs/include/rss_ringoccs_string.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 #include <rss_ringoccs/include/rss_ringoccs_special_functions.h>
 
@@ -20,24 +21,34 @@
  *  is false. Instead, do the following:                                      *
  *      if (strcmp(string, same_string) == 0)                                 *
  *          do stuff;                                                         */
-void GetNormeqFromString(char *wtype, double *norm_eq)
+void
+rssringoccs_Tau_Get_Normeq_From_String(const char *wtype,
+                                       rssringoccs_TAUObj *tau)
 {
+    if (tau == NULL)
+        return;
+
+    if (tau->wtype != NULL)
+        free(tau->wtype);
+
+    tau->wtype = rssringoccs_strdup(wtype);
+
     if (strcmp(wtype, "rect") == 0)
-        *norm_eq = RectNormEQ;
+        tau->normeq = RectNormEQ;
     else if (strcmp(wtype, "coss") == 0)
-        *norm_eq = CossNormEQ;
+        tau->normeq = CossNormEQ;
     else if (strcmp(wtype, "kb20") == 0)
-        *norm_eq = KB20NormEQ;
+        tau->normeq = KB20NormEQ;
     else if (strcmp(wtype, "kb25") == 0)
-        *norm_eq = KB25NormEQ;
+        tau->normeq = KB25NormEQ;
     else if (strcmp(wtype, "kb35") == 0)
-        *norm_eq = KB35NormEQ;
+        tau->normeq = KB35NormEQ;
     else if (strcmp(wtype, "kbmd20") == 0)
-        *norm_eq = KBMD20NormEQ;
+        tau->normeq = KBMD20NormEQ;
     else if (strcmp(wtype, "kbmd25") == 0)
-        *norm_eq = KBMD25NormEQ;
+        tau->normeq = KBMD25NormEQ;
     else if (strcmp(wtype, "kbmd35") == 0)
-        *norm_eq = KBMD35NormEQ;
+        tau->normeq = KBMD35NormEQ;
     else
-        *norm_eq = -1.0;
+        tau->normeq = -1.0;
 }

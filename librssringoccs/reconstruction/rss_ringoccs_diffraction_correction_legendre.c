@@ -6,14 +6,14 @@
 
 /******************************************************************************
  *  Function:                                                                 *
- *      DiffractionCorrectionLegendre                                         *
+ *      rssringoccs_Diffraction_Correction_Legendre                           *
  *  Purpose:                                                                  *
  *      Compute the Fresnel transform using Legendre polynomials to           *
  *      approximate the fresnel kernel.                                       *
  *  Arguments:                                                                *
  *      dlp (DLPObj *):                                                       *
  *          An instance of the DLPObj structure defined in                    *
- *          _diffraction_correction.h. This contains all of the necessary    *
+ *          _diffraction_correction.h. This contains all of the necessary     *
  *          data for diffraction correction, including the geometry of the    *
  *          occultation and actual power and phase data.                      *
  *  Output:                                                                   *
@@ -34,7 +34,7 @@
  *          Raphson method is good enough, whereas in reality 3-4 iterations  *
  *          may be needed, like in Rev133.                                    *
  ******************************************************************************/
-void DiffractionCorrectionLegendre(rssringoccs_TAUObj *tau)
+void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
 {
     /*  i is used for indexing, nw_pts is the number of points in the window. */
     unsigned long i, nw_pts, center;
@@ -50,18 +50,13 @@ void DiffractionCorrectionLegendre(rssringoccs_TAUObj *tau)
     double *x_arr, *w_func, *legendre_p, *alt_legendre_p, *fresnel_ker_coeffs;
 
     /*  Create function pointers for window function and Fresnel transform.   */
-    rss_ringoccs_window_func fw;
+    rssringoccs_window_func fw = tau->window_func;
 
     /*  This should remain at false.                                          */
     tau->error_occurred = rssringoccs_False;
 
     /*  Check that the pointers to the data are not NULL.                     */
-    check_tau_data(tau);
-    if (tau->error_occurred)
-        return;
-
-    /*  Cast the selected window type to the fw pointer.                      */
-    select_window_func(&fw, tau);
+    rssringoccs_Check_Tau_Data(tau);
     if (tau->error_occurred)
         return;
 
@@ -101,7 +96,7 @@ void DiffractionCorrectionLegendre(rssringoccs_TAUObj *tau)
     nw_pts = (long)(w_init / two_dx)+1;
 
     /* Check to ensure you have enough data to the left.                      */
-    check_tau_data_range(tau, two_dx);
+    rssringoccs_Check_Tau_Data_Range(tau);
     if (tau->error_occurred)
         return;
 
@@ -127,7 +122,7 @@ void DiffractionCorrectionLegendre(rssringoccs_TAUObj *tau)
         return;
     }
     else
-        reset_window(x_arr, w_func, dx, w_init, nw_pts, fw);
+        rssringoccs_Tau_Reset_Window(x_arr, w_func, dx, w_init, nw_pts, fw);
 
     /* Loop through each point and begin the reconstruction.                  */
     for (i = 0; i <= tau->n_used; ++i)
@@ -164,7 +159,7 @@ void DiffractionCorrectionLegendre(rssringoccs_TAUObj *tau)
             w_func = (double *)realloc(w_func, sizeof(double)*nw_pts);
 
             /*  Recompute x_arr and w_func for the new sizes.                 */
-            reset_window(x_arr, w_func, dx, w_init, nw_pts, fw);
+            rssringoccs_Tau_Reset_Window(x_arr, w_func, dx, w_init, nw_pts, fw);
         }
 
         /*  Compute the fresnel tranform about the current point.             */

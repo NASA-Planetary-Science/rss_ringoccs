@@ -413,17 +413,6 @@ if ((rssringoccs_Min_Double(varname, arrsize) < -rssringoccs_Two_Pi) ||        \
     return -1;                                                                 \
 }
 
-#define RSS_RINGOCCSPsitypeError                                               \
-    PyErr_Format(                                                              \
-        PyExc_ValueError,                                                      \
-        "\n\rError Encountered: rss_ringoccs\n"                                \
-        "\r\tdiffrec.DiffractionCorrection\n\n"                                \
-        "\r\tIllegal string for psitype. Allowed strings are:\n"               \
-        "\r\t\tnewton:     Newton-Raphson method\n"                            \
-        "\r\t\tfresnel:    Quadratic Fresnel approximation\n"                  \
-        "\r\t\tfresneln:   Legendre polynomial approximation with 1<n<256\n"   \
-    );
-
 #define RSS_RINGOCCSRangeError(range_input)                                    \
     PyErr_Format(                                                              \
         PyExc_ValueError,                                                      \
@@ -791,124 +780,8 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
         return -1;
     }
 
-    /*  Run error checks on the input strings, including conversion to lower  *
-     *  case. Note that this does NOT remove white space from the strings,    *
-     *  additional white space will result in an invalid string. It is a bit  *
-     *  of a pain to resize the strings and remove white space, so instead    *
-     *  this program only accepts strings without additional spaces.          */
-
-    /*  Get the size of the wtype and psitype strings. strlen is a C standard *
-     *  library function that can be found in string.h.                       */
-    unsigned long wtype_length   = strlen(self->wtype);
-    unsigned long psitype_length = strlen(self->psitype);
-
-    /*  Create variables to convert wtype and psitype to lowercase. Malloc is *
-     *  a standard library function for allocating memory found in stdlib.h.  *
-     *  we allocate +1 more than needed since strings in C are NULL           *
-     *  terminated, and hence we need extra room for the NULL.                */
-    tau.wtype   = malloc(sizeof(*tau.wtype)   * (wtype_length + 1));
-    tau.psitype = malloc(sizeof(*tau.psitype) * (wtype_length + 1));
-
-    /*  Make a copy of the strings from python. Do NOT alter actual strings.  *
-     *  strcpy is a C standard library function found in string.h.            */
-    strcpy(tau.wtype, self->wtype);
-    strcpy(tau.psitype, self->psitype);
-
-    /*  Loop over the strings and convert to lower case. tolower is a C       *
-     *  standard library function found in ctype.h, and NOT string.h. The     *
-     *  reasons are unbeknownst to be, but knownst to others.                 */
-    for (i=0; i<wtype_length; ++i)
-        tau.wtype[i] = tolower(self->wtype[i]);
-
-    for (i=0; i<psitype_length; ++i)
-        tau.psitype[i] = tolower(self->psitype[i]);
-
-    /*  Check that wtype is a legal value. Return ValueError otherwise.       *
-     *  strcmp is found in string.h and can return positive, negative, or     *
-     *  zero depending on if one string is "larger" than the other. It        *
-     *  returns zero if the strings are identical, so DO NOT set:             *
-     *      if (strcmp(string1, string2))                                     *
-     *          do stuff;                                                     *
-     *  since strcmp will return 0 if string1 = string2.                      */
-    if (!(strcmp(tau.wtype, "rect") == 0) &&
-        !(strcmp(tau.wtype, "coss") == 0) &&
-        !(strcmp(tau.wtype, "kb20") == 0) &&
-        !(strcmp(tau.wtype, "kb25") == 0) &&
-        !(strcmp(tau.wtype, "kb35") == 0) &&
-        !(strcmp(tau.wtype, "kbmd20") == 0) &&
-        !(strcmp(tau.wtype, "kbmd25") == 0) &&
-        !(strcmp(tau.wtype, "kbmd35") == 0))
-    {
-        PyErr_Format(
-            PyExc_ValueError,
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tdiffrec.DiffractionCorrection\n\n"
-            "\r\tIllegal string for wtype. Allowed strings are:\n"
-            "\r\t\trect:    Rectangular Window\n"
-            "\r\t\tcoss:    Squared Cosine Window\n"
-            "\r\t\tkb20:    Kaiser-Bessel with alpha=2.0 pi\n"
-            "\r\t\tkb25:    Kaiser-Bessel with alpha=2.5 pi\n"
-            "\r\t\tkb35:    Kaiser-Bessel with alpha=3.5 pi\n"
-            "\r\t\tkbmd20:  Modified Kaiser-Bessel with alpha=2.0 pi\n"
-            "\r\t\tkbmd25:  Modified Kaiser-Bessel with alpha=2.5 pi\n"
-            "\r\t\tkbmd35:  Modified Kaiser-Bessel with alpha=3.5 pi\n"
-        );
-        return -1;
-    }
-
-    /*  Check that psitype is legal. The strstr is a C standard library       *
-     *  function (from string.h) that checks if the second string is          *
-     *  contained in the first. So strstr(tau.psitype, "fresnel") is          *
-     *  equivalent to the Python code ("fresnel" in tau.psitype)              */
-    if (!(strcmp(tau.psitype, "newton") == 0) &&
-         (strstr(tau.psitype, "fresnel") == NULL))
-    {
-        /*  The macro RSS_RINGOCCSPsitypeError already has a semi-colon at    *
-         *  the end so we don't need to add a new one here.                   */
-        RSS_RINGOCCSPsitypeError
-        return -1;
-    }
-
-    /*  If psitype is just "fresnel", set order to 1. The code will           *
-     *  automatically pass the dlp instance to the correct function.          */
-    if (strcmp(tau.psitype, "fresnel") == 0)
-        tau.order = 1;
-
-    /*  If psitype is "newton", set order to 1. This will mean the dlp        *
-     *  instance is passed to the Newton-Raphson function.                    */
-    else if (strcmp(tau.psitype, "newton") == 0)
-        tau.order = 0;
-
-    /*  strncmp is a C standard library function that compares the first n    *
-     *  elements of two strings. If the first seven elements of tau.psitype   *
-     *  are "fresnel", but the string is not exactly "fresnel", try to parse  *
-     *  the rest of it and extract a value. For example, if                   *
-     *  tau.psitype = "fresnel4", try to extract the "4".                     */
-    else if (strncmp(tau.psitype, "fresnel", FRESNEL_STR_LENGTH) == 0)
-    {
-        /*  Create a variable equal to the last elements of tau.psitype.      */
-        const char *psitype_num = &tau.psitype[FRESNEL_STR_LENGTH];
-
-        /*  Try to convert the last elements to an integer using the strtol   *
-         *  function, which is a part of the C standard library. It stands    *
-         *  for "string to long". Equivalent of (int)"number" in Python.      */
-        tau.order = strtol(psitype_num, NULL, BASETEN);
-
-        /*  strtol returns 0 if it couldn't convert string to number. If this *
-         *  happens the user likely provided a faulty string. Raise an error. */
-        if (tau.order == 0)
-        {
-            RSS_RINGOCCSPsitypeError
-            return -1;
-        }
-    }
-
-    /*  Illegal psitype was passed, return with error.                        */
-    else
-    {
-        RSS_RINGOCCSPsitypeError
-        return -1;
-    }
+    rssringoccs_Tau_Set_WType(self->wtype, tau);
+    rssringoccs_Tau_Set_Psitype(self->psitype, tau);
 
     /*  Check that all of the following variables are positive using the      *
      *  RSS_RINGOCCSNegValueError preprocessor functions defined above.       */
@@ -1268,10 +1141,6 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
     }
     else
         history = PyObject_GetAttrString(DLPInst, "history");
-
-    /*  The input phase needs to be negated due to mathematical conventions.  */
-    for (i=0; i<tau.arr_size; ++i)
-        tau.phase_rad_vals[i] = -tau.phase_rad_vals[i];
 
     /*  Store the dlp history inside of the DiffractionCorrection class. This *
      *  tmp, Py_INCREF, Py_XDECREF method is recommended in the Python C-API  *

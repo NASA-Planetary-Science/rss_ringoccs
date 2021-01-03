@@ -41,12 +41,15 @@ typedef struct rssringoccs_TAUObj {
     double *phi_rl_rad_vals;
     double *p_norm_vals;
     double *phase_rad_vals;
-    double dx;
+    double dx_km;
     double normeq;
+    double sigma;
     double ecc;
     double peri;
+    double res;
     double perturb[5];
     double rng_list[2];
+    double rng_req[2];
     unsigned long start;
     unsigned long n_used;
     unsigned long arr_size;
@@ -64,8 +67,7 @@ typedef struct rssringoccs_TAUObj {
     unsigned char interp;
 } rssringoccs_TAUObj;
 
-extern void rssringoccs_Reconstruction(rssringoccs_DLPObj *dlp,
-                                       rssringoccs_TAUObj *tau);
+extern void rssringoccs_Reconstruction(rssringoccs_TAUObj *tau);
 
 extern void
 rssringoccs_Tau_Set_WType(const char *wtype, rssringoccs_TAUObj *tau);
@@ -73,7 +75,12 @@ rssringoccs_Tau_Set_WType(const char *wtype, rssringoccs_TAUObj *tau);
 extern void
 rssringoccs_Tau_Set_Psitype(const char *psitype, rssringoccs_TAUObj* tau);
 
-extern rssringoccs_TAUObj *rssringoccs_Create_TAUObj(void);
+extern void
+rssringoccs_Tau_Set_Range_From_String(const char *range,
+                                      rssringoccs_TAUObj* tau);
+
+extern rssringoccs_TAUObj *
+rssringoccs_Create_TAUObj(rssringoccs_DLPObj *dlp, double res);
 
 extern void
 rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau);
@@ -83,18 +90,13 @@ rssringoccs_Copy_DLP_Data_To_Tau(rssringoccs_DLPObj *dlp,
                                  rssringoccs_TAUObj *tau);
 
 extern void
-rssringoccs_Tau_Get_Range_From_String(const char *range,
-                                      rssringoccs_TAUObj* tau);
-
-extern void
-rssringoccs_Tau_Get_Normeq_From_String(const char *wtype,
-                                       rssringoccs_TAUObj *tau);
+rssringoccs_Check_Tau_Data_Range(rssringoccs_TAUObj *dlp);
 
 extern void
 rssringoccs_Check_Tau_Data(rssringoccs_TAUObj *tau);
 
 extern void
-rssringoccs_Check_Tau_Data_Range(rssringoccs_TAUObj *dlp);
+rssringoccs_Tau_Check_Occ_Type(rssringoccs_TAUObj *tau);
 
 extern void
 rssringoccs_Tau_Select_Window_Func(rssringoccs_TAUObj *tau);

@@ -69,14 +69,23 @@ void rssringoccs_Tau_Set_WType(const char *wtype, rssringoccs_TAUObj *tau)
 
     tau->wtype = realloc(tau->wtype, new_str_len);
 
-    if (!(strcmp(tau->wtype, "rect") == 0)   &&
-        !(strcmp(tau->wtype, "coss") == 0)   &&
-        !(strcmp(tau->wtype, "kb20") == 0)   &&
-        !(strcmp(tau->wtype, "kb25") == 0)   &&
-        !(strcmp(tau->wtype, "kb35") == 0)   &&
-        !(strcmp(tau->wtype, "kbmd20") == 0) &&
-        !(strcmp(tau->wtype, "kbmd25") == 0) &&
-        !(strcmp(tau->wtype, "kbmd35") == 0))
+    if (strcmp(tau->wtype, "rect") == 0)
+        tau->normeq = RectNormEQ;
+    else if (strcmp(tau->wtype, "coss") == 0)
+        tau->normeq = CossNormEQ;
+    else if (strcmp(tau->wtype, "kb20") == 0)
+        tau->normeq = KB20NormEQ;
+    else if (strcmp(tau->wtype, "kb25") == 0)
+        tau->normeq = KB25NormEQ;
+    else if (strcmp(tau->wtype, "kb35") == 0)
+        tau->normeq = KB35NormEQ;
+    else if (strcmp(tau->wtype, "kbmd20") == 0)
+        tau->normeq = KBMD20NormEQ;
+    else if (strcmp(tau->wtype, "kbmd25") == 0)
+        tau->normeq = KBMD25NormEQ;
+    else if (strcmp(tau->wtype, "kbmd35") == 0)
+        tau->normeq = KBMD35NormEQ;
+    else
     {
         tau->error_occurred = rssringoccs_True;
         tau->error_message = rssringoccs_strdup(
@@ -92,5 +101,6 @@ void rssringoccs_Tau_Set_WType(const char *wtype, rssringoccs_TAUObj *tau)
             "\r\t\tkbmd25:  Modified Kaiser-Bessel with alpha=2.5 pi\n"
             "\r\t\tkbmd35:  Modified Kaiser-Bessel with alpha=3.5 pi\n"
         );
+        tau->normeq = -1.0;
     }
 }

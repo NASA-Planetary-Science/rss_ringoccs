@@ -1,4 +1,3 @@
-/*  Various trig functions are defined here.                                  */
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 #include <rss_ringoccs/include/rss_ringoccs_special_functions.h>
 
@@ -34,8 +33,9 @@
  *          are defined using km/s, and the CSV files which contain the       *
  *          occultation data store values in kilometers.                      *
  ******************************************************************************/
-void reset_window(double *x_arr, double *w_func, double dx, double width,
-                  long nw_pts, rss_ringoccs_window_func fw)
+void rssringoccs_Tau_Reset_Window(double *x_arr, double *w_func, double dx,
+                                  double width, long nw_pts,
+                                  rssringoccs_window_func fw)
 {
     /*  Create a variable for indexing.                                       */
     long n;

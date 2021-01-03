@@ -24,10 +24,7 @@
  *  The function pointer works as follows:                                    *
  *      return_type  (*type_name)(type_var1, type_var2, ...)                  *
  *  So, let's typedef this for the window function.                           */
-typedef double (*rss_ringoccs_window_func)(double, double);
-
-extern void reset_window(double *x_arr, double *w_func, double dx, double width,
-                         long nw_pts, rss_ringoccs_window_func fw);
+typedef double (*rssringoccs_window_func)(double, double);
 
 /*  As a side comment, the FresT function pointer takes a different number of *
  *  variables depending on which method of diffraction correction is being    *

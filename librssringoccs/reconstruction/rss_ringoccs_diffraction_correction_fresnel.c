@@ -1,5 +1,7 @@
 #include <stdlib.h>
 #include <rss_ringoccs/include/rss_ringoccs_math.h>
+#include <rss_ringoccs/include/rss_ringoccs_bool.h>
+#include <rss_ringoccs/include/rss_ringoccs_string.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 
@@ -29,7 +31,7 @@
  *          immensely fast, capable of processing the entire Rev007 E         *
  *          occultation accurately in less than a second at 1km resolution.   *
  ******************************************************************************/
-void DiffractionCorrectionFresnel(rssringoccs_TAUObj *tau)
+void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj *tau)
 {
     /*  m and n used for indexing, nw_pts is number of points in window.      */
     unsigned long m, n, nw_pts, center;
@@ -43,9 +45,9 @@ void DiffractionCorrectionFresnel(rssringoccs_TAUObj *tau)
     double fwd_factor;
 
     /*  Declare the window function pointer and allocate memory for it. The   *
-     *  type rss_ringoccs_window_func was declared at the start of this file. *
+     *  type rssringoccs_window_func was declared at the start of this file.  *
      *  Be sure to free this at the end!                                      */
-    rss_ringoccs_window_func fw;
+    rssringoccs_window_func fw = tau->window_func;
 
     /*  This should remain at false.                                          */
     tau->error_occurred = rssringoccs_False;
@@ -56,16 +58,7 @@ void DiffractionCorrectionFresnel(rssringoccs_TAUObj *tau)
         fwd_factor = 1.0;
 
     /*  Check that the pointers to the data are not NULL.                     */
-    check_tau_data(tau);
-    if (tau->error_occurred)
-        return;
-
-    /*  Cast the selected window type to the fw pointer.                      */
-    select_window_func(&fw, tau);
-
-    /*  select_window_func sets tau->status to 5 if it could not successfully *
-     *  parse tau->wtype. As stated, its our responsibility to check this     *
-     *  whenever using the function. Check and return to caller if it failed. */
+    rssringoccs_Check_Tau_Data(tau);
     if (tau->error_occurred)
         return;
 
@@ -92,10 +85,10 @@ void DiffractionCorrectionFresnel(rssringoccs_TAUObj *tau)
 
     /*  And now, some more variables we'll be using.                          */
     two_dx = 2.0*dx;
-    nw_pts = ((long)(w_init / two_dx))+1;
+    nw_pts = ((long)(w_init / two_dx)) + 1;
 
     /* Check to ensure you have enough data to the left.                      */
-    check_tau_data_range(tau, two_dx);
+    rssringoccs_Check_Tau_Data_Range(tau);
     if (tau->error_occurred)
         return;
 
@@ -111,27 +104,27 @@ void DiffractionCorrectionFresnel(rssringoccs_TAUObj *tau)
      *  that it's values range from -W/2 to zero, W begin the window width.   */
     if (!(x_arr))
     {
-        rssringoccs_Set_Tau_Error_Message(
+        tau->error_occurred = rssringoccs_True;
+        tau->error_message = rssringoccs_strdup(
             "\n\rError Encountered: rss_ringoccs\n\n"
             "\r\tDiffractionCorrectionFresnel\n\n"
-            "\rMalloc failed and returned NULL for x_arr. Returning.\n\n",
-            tau
+            "\rMalloc failed and returned NULL for x_arr. Returning.\n\n"
         );
         return;
     }
 
     if (!(w_func))
     {
-        rssringoccs_Set_Tau_Error_Message(
+        tau->error_occurred = rssringoccs_True;
+        tau->error_message = rssringoccs_strdup(
             "\n\rError Encountered: rss_ringoccs\n\n"
             "\r\tDiffractionCorrectionFresnel\n\n"
-            "\rMalloc failed and returned NULL for w_func. Returning.\n\n",
-            tau
+            "\rMalloc failed and returned NULL for w_func. Returning.\n\n"
         );
         return;
     }
 
-    reset_window(x_arr, w_func, dx, w_init, nw_pts, fw);
+    rssringoccs_Tau_Reset_Window(x_arr, w_func, dx, w_init, nw_pts, fw);
 
     /* Compute Window Functions, and compute pi/2 * x^2                       */
     for(m=0; m<nw_pts; ++m)
@@ -164,7 +157,8 @@ void DiffractionCorrectionFresnel(rssringoccs_TAUObj *tau)
                 x_arr  = (double *)realloc(x_arr, sizeof(double)*nw_pts);
 
                 /*  Reset the x_arr array to range between -W/2 and zero.     */
-                reset_window(x_arr, w_func, dx, w_init, nw_pts, fw);
+                rssringoccs_Tau_Reset_Window(x_arr, w_func, dx,
+                                             w_init, nw_pts, fw);
 
                 /* Compute Window Functions, and compute pi/2 * x^2.          */
                 for(n=0; n<nw_pts; ++n)
@@ -204,7 +198,8 @@ void DiffractionCorrectionFresnel(rssringoccs_TAUObj *tau)
                 x_arr  = realloc(x_arr,  sizeof(*x_arr)  * nw_pts);
 
                 /*  Reset the x_arr array to range between -W/2 and zero.     */
-                reset_window(x_arr, w_func, dx, w_init, nw_pts, fw);
+                rssringoccs_Tau_Reset_Window(x_arr, w_func, dx,
+                                             w_init, nw_pts, fw);
 
                 /* Compute Window Functions, and compute pi/2 * x^2.          */
                 for(n=0; n<nw_pts; ++n)

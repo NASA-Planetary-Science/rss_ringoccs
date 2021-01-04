@@ -20,7 +20,6 @@ import numpy as np
 from spiceypy import spiceypy as spice
 from ..tools.spm_to_et import spm_to_et
 
-
 # Product of the gravitational constant by the Sun mass
 MUS = 1.3271244002331E+11
 

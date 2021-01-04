@@ -171,7 +171,6 @@
  *  "314" to the integer 314.                                                 */
 #include <stdlib.h>
 #include <stdio.h>
-#include <time.h>
 
 /*  To help manipulate strings, both native C strings const char* and char*,  *
  *  as well as Python strings passed by the user, include string.h. This is a *
@@ -179,12 +178,6 @@
  *  (compares first n characters of string), strcpy (string-copy), strncpy,   *
  *  and strlen (string-length), all of which are used at some point.          */
 #include <string.h>
-
-/*  Useful library for manipulate strings, it contains the tolower function   *
- *  which takes a string like "ABC123abc" and return "abc123abc". Since all   *
- *  of the strings passed to the diffraction correction routines need to be   *
- *  lower-case, we will make use of this frequently.                          */
-#include <ctype.h>
 
 /*  The following are NON-STANDARD header files that MUST BE IN YOUR PATH.    *
  *  If you installed python using anaconda then Python.h should automatically *
@@ -203,176 +196,15 @@
 #include "rss_ringoccs_py_api.h"
 #include <rss_ringoccs/include/rss_ringoccs_bool.h>
 #include <rss_ringoccs/include/rss_ringoccs_math.h>
+#include <rss_ringoccs/include/rss_ringoccs_string.h>
 #include <rss_ringoccs/include/rss_ringoccs_complex.h>
-#include <rss_ringoccs/include/rss_ringoccs_special_functions.h>
+#include <rss_ringoccs/include/rss_ringoccs_calibration.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_kernel.h>
+#include <rss_ringoccs/include/rss_ringoccs_special_functions.h>
 
-/*  To avoid repeating the same code over and over again, we'll define a few  *
- *  preprocessor functions (macros). First make sure the names are available. */
-
-/*  This macro takes a the word Var and converts to a string at compile time. */
-#ifdef VarToString
-#undef VarToString
-#endif
-
-#ifdef _array_from_three
-#undef _array_from_three
-#endif
-
-#ifdef _array_from_four
-#undef _array_from_four
-#endif
-
-#define VarToString(Var) (#Var)
-
-#define _array_from_three(x1, x2, x3, y, dim, intype, outtype, f) ({           \
-    unsgiend long i;                                                           \
-    outtype *out = (outtype *)malloc(sizeof(outtype)*dim);                     \
-    for (i=0; i<dim; ++i)                                                      \
-        out[i] = (*f)(((intype *)x1)[i], x2, x3);                              \
-    y = out;                                                                   \
-})
-
-#define _array_from_four(x1, x2, x3, x4, y, dim, intype, outtype, f) ({        \
-    unsigned long i;                                                           \
-    outtype *out = (outtype *)malloc(sizeof(outtype)*dim);                     \
-    for (i=0; i<dim; ++i)                                                      \
-        out[i] = (*f)(((intype *)x1)[i], x2, x3, x4);                          \
-    y = out;                                                                   \
-})
-
-/*  Macro for raising the appropriate python error if the DLP instance is     *
- *  missing an attribute. This is equivalent to the following in python       *
- *      if not hasattr(tauin, attr_name):                                     *
- *          raise AttributeError(                                             *
- *              """                                                           *
- *              Error message                                                 *
- *              """                                                           *
- *          )                                                                 *
- *      else:                                                                 *
- *          pass                                                              *
- *  It then checks that the variable is a numpy array using numpy's API. This *
- *  is equivalent to the following:                                           *
- *      if not isinstance(varname, numpy.ndarray):                            *
- *          raise TypeError(                                                  *
- *              """                                                           *
- *              Error message                                                 *
- *              """                                                           *
- *          )                                                                 *
- *      else:                                                                 *
- *          pass                                                              *
- *  Next we try to convert the numpy array to an array of double, which is    *
- *  equivalent to using the astype method of the ndarray numpy object:        *
- *      arr = arr.astype(float)                                               *
- *  Finally, we check that the array is one dimensional and that it has the   *
- *  same number of elements as the input rho_km_vals array. If this passes,   *
- *  we pointer the pointer ptr to the data of the array.                      */
-#define RSS_RINGOCCSCheckArray(ptr, tauin, attr_name, tmp, arr, length)        \
-if (!PyObject_HasAttrString(tauin, VarToString(attr_name)))                    \
-{                                                                              \
-    PyErr_Format(                                                              \
-        PyExc_AttributeError,                                                  \
-        "\n\rError Encountered: rss_ringoccs\n"                                \
-        "\r\tdiffrec.DiffractionCorrection\n\n"                                \
-        "\rInput DLP Instance is missing the following attribute:\n"           \
-        "\r\t%s\n\n", VarToString(attr_name)                                   \
-    );                                                                         \
-    return -1;                                                                 \
-}                                                                              \
-else                                                                           \
-    tmp = PyObject_GetAttrString(tauin, VarToString(attr_name));               \
-                                                                               \
-if (!PyArray_Check(tmp))                                                       \
-{                                                                              \
-    PyErr_Format(                                                              \
-        PyExc_TypeError,                                                       \
-        "\n\rError Encountered: rss_ringoccs\n"                                \
-        "\r\tdiffrec.DiffractionCorrection\n\n"                                \
-        "\r%s must be a numpy array.\n",                                       \
-        VarToString(varname)                                                   \
-    );                                                                         \
-    return -1;                                                                 \
-}                                                                              \
-else                                                                           \
-    arr = PyArray_FromObject(tmp, NPY_DOUBLE, 1, 1);                           \
-                                                                               \
-/*  If PyArray_FromObject failed arr should be NULL. If so, raise error.     */\
-if (!arr)                                                                      \
-{                                                                              \
-    PyErr_Format(                                                              \
-        PyExc_TypeError,                                                       \
-        "\n\rError Encountered: rss_ringoccs\n"                                \
-        "\r\tdiffrec.DiffractionCorrection\n\n"                                \
-        "\rCould not convert %s to double array. Input is most\n",             \
-        "\rlikely complex numbers or contains a string.\n\n",                  \
-        VarToString(varname)                                                   \
-    );                                                                         \
-    return -1;                                                                 \
-}                                                                              \
-                                                                               \
-/*  Currently we only allow for one dimensional inputs.                      */\
-else if (PyArray_NDIM((PyArrayObject *)arr) != 1)                              \
-{                                                                              \
-    PyErr_Format(                                                              \
-        PyExc_IndexError,                                                      \
-        "\n\rError Encountered: rss_ringoccs\n"                                \
-        "\r\tdiffrec.DiffractionCorrection\n\n"                                \
-        "\r%s must be a one-dimensional numpy array.\n",                       \
-        VarToString(varname)                                                   \
-    );                                                                         \
-    return -1;                                                                 \
-}                                                                              \
-                                                                               \
-/*  arr should have the same number of elements as rho_km_vals, which we are */\
-/*  passing to this preprocessor functions as "length".                      */\
-else if (PyArray_DIMS((PyArrayObject *)arr)[0] != (long)length)                \
-{                                                                              \
-    PyErr_Format(                                                              \
-        PyExc_IndexError,                                                      \
-        "\n\rError Encountered: rss_ringoccs\n"                                \
-        "\r\tdiffrec.DiffractionCorrection\n\n"                                \
-        "\r%s and rho_km_vals have a different number of elements.\n",         \
-        VarToString(varname)                                                   \
-    );                                                                         \
-    return -1;                                                                 \
-}                                                                              \
-                                                                               \
-/*  If every passed, set ptr to point to the data inside the array arr.      */\
-else                                                                           \
-    ptr = (double *)PyArray_DATA((PyArrayObject *)arr);
-
-/*  Use this for setting the data into the DiffractionCorrection class.      */\
-#define RSS_RINGOCCSSetArray(self, tau, VarName, tmp, typenum, start, length)  \
-PyObject *PyArray_##VarName;                                                   \
-PyObject *PyCapsule_##VarName;                                                 \
-double *VarName = malloc(sizeof(double) * length);                             \
-long pylength = (long)length;                                                  \
-                                                                               \
-for (i=0; i<length; ++i)                                                       \
-    VarName[i] = tau.VarName[i+start];                                         \
-                                                                               \
-PyArray_##VarName = PyArray_SimpleNewFromData(1, &pylength, typenum,           \
-                                             (void *)VarName);                 \
-PyCapsule_##VarName = PyCapsule_New((void *)VarName, NULL, capsule_cleanup);   \
-                                                                               \
-/*  This frees the variable at the Python level once it's destroyed.         */\
-PyArray_SetBaseObject((PyArrayObject *)PyArray_##VarName, PyCapsule_##VarName);\
-                                                                               \
-tmp = self->VarName;                                                           \
-Py_INCREF(PyArray_##VarName);                                                  \
-self->VarName = PyArray_##VarName;                                             \
-Py_XDECREF(tmp);
-
-
-/*  This function frees the memory allocated to a pointer by malloc when the  *
- *  corresponding variable is destroyed at the Python level. Without this you *
- *  will have serious memory leaks, so do not remove!                         */
-static void capsule_cleanup(PyObject *capsule)
-{
-    void *memory = PyCapsule_GetPointer(capsule, NULL);
-    free(memory);
-}
+#include "rss_ringoccs_Py_DLP_to_C_DLP.c"
+#include "rss_ringoccs_C_Tau_to_Py_Tau.c"
 
 /*  Deallocating function for the DiffractionCorrection class.                */
 static void Diffrec_dealloc(PyDiffrecObj *self)
@@ -413,6 +245,11 @@ static void Diffrec_dealloc(PyDiffrecObj *self)
  *  equivalent of the __init__ function defined in a normal python class.     */
 static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
 {
+    /*  Declare variables for a DLP and Tau object.                           */
+    rssringoccs_DLPObj *dlp;
+    rssringoccs_TAUObj *tau;
+    char *rng_string;
+
     /*  The list of the keywords accepted by the DiffractionCorrection class. *
      *  dlp and res are REQUIRED inputs, the rest are optional. If the user   *
      *  does not provide these optional keywords, we must set them ourselves. */
@@ -421,7 +258,7 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
         "res",
         "rng",
         "wtype",
-        "fwd",
+        "use_fwd",
         "use_norm",
         "use_fft",
         "verbose",
@@ -445,7 +282,6 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
     PyObject *iter;
     PyObject *next;
     PyObject *tmp;
-    PyObject *arr;
     PyObject *history;
     PyObject *rngreq;
     PyObject *perturb;
@@ -470,11 +306,11 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
     self->psitype = "fresnel4";
 
     /*  Default range is "all", denoting [1.0, 400000.0]. We'll set later.    */
-    rngreq = NULL;
+    rngreq = PyBytes_FromString("all");;
 
     /*  By default, forward computations are not run, FFTs are not used, and  *
      *  the run is silent (verbose is off).                                   */
-    self->fwd = rssringoccs_False;
+    self->use_fwd = rssringoccs_False;
     self->use_fft = rssringoccs_False;
     self->verbose = rssringoccs_False;
 
@@ -514,10 +350,6 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
     /*  If the range input is a list, it should have exactly two elements.    */
     const int RANGE_LEN = 2;
 
-    /*  Useful numbers for checking the input psitype and wtype.              */
-    const int FRESNEL_STR_LENGTH = 7;
-    const int BASETEN = 10;
-
     /*  Extract the inputs and keywords supplied by the user. If the data     *
      *  cannot be extracted, raise a type error and return to caller. A short *
      *  explaination of PyArg_ParseTupleAndKeywords. The inputs args and kwds *
@@ -534,7 +366,7 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "|Od$OspppppdspdddOb:", kwlist,
                                      &DLPInst,          &self->input_res,
                                      &rngreq,           &self->wtype,
-                                     &self->fwd,        &self->use_norm,
+                                     &self->use_fwd,    &self->use_norm,
                                      &self->use_fft,    &self->verbose,
                                      &self->bfac,       &self->sigma,
                                      &self->psitype,    &self->write_file,
@@ -553,7 +385,7 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
             "\rKeywords:\n"
             "\rrng         \tThe requested range (str or list).\n"
             "\rwtype       \tThe requested window type (str).\n"
-            "\rfwd         \tForward computation (bool).\n"
+            "\ruse_fwd     \tForward computation (bool).\n"
             "\ruse_norm    \tWindow normalization (bool).\n"
             "\ruse_fft     \tComputation using FFTs (bool).\n"
             "\rverbose     \tPrint status updates (bool).\n"
@@ -570,15 +402,97 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
         return -1;
     }
 
+    if (self->verbose)
+        puts("\tDiffraction Correction: Retrieving history from DLP...");
+
+    if (!PyObject_HasAttrString(DLPInst, "history"))
+    {
+        PyErr_Format(
+            PyExc_AttributeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.DiffractionCorrection\n\n"
+            "\rInput DLP Instance is missing the following attribute:\n"
+            "\r\thistory\n\n"
+        );
+        return -1;
+    }
+    else
+        history = PyObject_GetAttrString(DLPInst, "history");
+
+    /*  Store the dlp history inside of the DiffractionCorrection class. This *
+     *  tmp, Py_INCREF, Py_XDECREF method is recommended in the Python C-API  *
+     *  documentation as a means of safely storing the variable.              */
+    tmp = self->dathist;
+    Py_INCREF(history);
+    self->dathist = history;
+    Py_XDECREF(tmp);
+
     /*  If verbose was set, print a status update.                            */
     if (self->verbose)
+        puts("Diffraction Correction: Passing Python variables to C...");
+
+    dlp = rssringoccs_Py_DLP_to_C_DLP(DLPInst);
+
+    if (dlp == NULL)
     {
-        puts("Processing Diffraction Correction");
-        puts("\tRunning Error Check on Input Arguments...");
+        PyErr_Format(
+            PyExc_RuntimeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.DiffractionCorrection\n\n"
+            "\rFailed to pass variables to C. rssringoccs_Py_DLP_to_C_DLP\n"
+            "\rreturned NULL. Returning.\n\n"
+        );
+        return -1;
     }
 
-    /*  Create an instance of the DLPObj (C struct).                          */
-    rssringoccs_TAUObj tau;
+    if (dlp->error_occurred)
+    {
+        if (dlp->error_message == NULL)
+        {
+            PyErr_Format(
+                PyExc_RuntimeError,
+                "\n\rError Encountered: rss_ringoccs\n"
+                "\r\tdiffrec.DiffractionCorrection\n\n"
+                "\rFailed to pass variables to C. rssringoccs_Py_DLP_to_C_DLP\n"
+                "\rreturned a dlp with error_occurred set to True. No\n"
+                "\rerror message was set. Returning.\n\n"
+            );
+        }
+        else
+        {
+            PyErr_Format(PyExc_RuntimeError, "%s", dlp->error_message);
+            free(dlp->error_message);
+        }
+        free(dlp);
+        return -1;
+    }
+
+    tau = rssringoccs_Create_TAUObj(dlp, self->input_res * self->res_factor);
+    if (tau->error_occurred)
+    {
+        if (tau->error_message)
+            PyErr_Format(PyExc_RuntimeError, "%s\n", tau->error_message);
+        else
+            PyErr_Format(
+                PyExc_RuntimeError,
+                "\n\rError Encountered: rss_ringoccs\n"
+                "\r\tdiffrec.DiffractionCorrection\n\n"
+                "\rtau returned with error_occurred set to true but no\n"
+                "\rerror message. Returning.\n\n"
+            );
+
+        return -1;
+    }
+
+    tau->sigma    = self->sigma;
+    tau->bfac     = self->bfac;
+    tau->ecc      = self->ecc;
+    tau->peri     = self->peri;
+    tau->interp   = self->interp;
+    tau->use_fwd  = self->use_fwd;
+    tau->use_norm = self->use_norm;
+    tau->use_fft  = self->use_fft;
+    tau->verbose  = self->verbose;
 
     /*  Check that the input perturb is a list with 5 elements.               */
     if (!(perturb))
@@ -586,10 +500,6 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
         /*  No perturb was provided by the user, so set everything to None.   */
         tmp = self->perturb;
         perturb = Py_None;
-
-        /*  tau.perturb still needs to be set, so loop over and set to zero.  */
-        for (i=0; i<PERTURB_LEN; ++i)
-            tau.perturb[i] = 0.0;
 
         /*  Safely store perturb in self. This method is recommended in the   *
          *  C-Python API documentation.                                       */
@@ -628,7 +538,7 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
         }
 
         /*  Loop over the elements of the list, see if they can be converted  *
-         *  to doubles, and store them in the tau.perturb variable.           */
+         *  to doubles, and store them in the tau->perturb variable.          */
         for (i=0; i<PERTURB_LEN; ++i)
         {
             next = PyIter_Next(iter);
@@ -647,11 +557,11 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
 
             /*  If the element is an integer, convert to double and save it.  */
             if (PyLong_Check(next))
-                tau.perturb[i] = (double)PyLong_AsLong(next);
+                tau->perturb[i] = PyLong_AsDouble(next);
 
             /*  Convert from Python float to C double with PyFloat_AsDouble.  */
             else if (PyFloat_Check(next))
-                tau.perturb[i] = PyFloat_AsDouble(next);
+                tau->perturb[i] = PyFloat_AsDouble(next);
 
             /*  Invalid data type for one of the entries. Return with error.  */
             else
@@ -678,7 +588,7 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
     else
     {
         PyErr_Format(
-            PyExc_TypeError,
+            PyExc_RuntimeError,
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\tdiffrec.DiffractionCorrection\n\n"
             "\rperturb should be a python list of five floats or ints.\n"
@@ -686,66 +596,13 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
         return -1;
     }
 
-    /*  Check that all of the following variables are positive using the      *
-     *  RSS_RINGOCCSNegValueError preprocessor functions defined above.       */
-    else if (self->sigma<=0.0)
-    {
-        RSS_RINGOCCSNegValueError(DiffractionCorrection, sigma);
-        return -1;
-    }
-    else if (self->res_factor<=0.0)
-    {
-        RSS_RINGOCCSNegValueError(DiffractionCorrection, res_factor);
-        return -1;
-    }
-
-    if (self->ecc<0.0)
-    {
-        RSS_RINGOCCSNegValueError(DiffractionCorrection, ecc);
-        return -1;  
-    }
-    else
-        tau.ecc = self->ecc;
-
-    /*  Check that peri lies in the range -2pi<peri<2pi.                      */
-    if (fabs(self->peri)>rssringoccs_Two_Pi)
-    {
-        RSS_RINGOCCSTwoPiValueError(DiffractionCorrection, peri);
-        return -1;
-    }
-    else
-        tau.peri = self->peri;
-
-    /*  Compute the actual resolution to be used for processing.              */
-    self->res = self->input_res * self->res_factor;
-
-    /*  If rngreq is still NULL the user didn't supply a range. Set to "all". */
-    if (!(rngreq))
-        rngreq = PyBytes_FromString("all");
-
     /*  If the rng variable is a string, make sure it is a legal value and    *
      *  try to extract the corresponding values in kilometers.                */
     if PyBytes_Check(rngreq)
     {
         /*  Convert the Python string to a C string via PyBytes_AsString. */
-        char *rng_string = PyBytes_AsString(rngreq);
-
-        /*  Set variable equal to the length of the string.                   */
-        unsigned long rng_length = strlen(rng_string);
-
-        /*  Convert the string to lower-case.                                 */
-        for (i=0; i<rng_length; ++i)
-            rng_string[i] = tolower(rng_string[i]);
-
-        /*  Pass the string into the get range function. This function stores *
-         *  the corresponding values in self->range and returns 1 on success, *
-         *  and returns 0 on failure. If fails, return with error.            */
-        GetRangeFromString(rng_string, self->range);
-        if (self->range[0] < 0.0)
-        {
-            RSS_RINGOCCSRangeError(rng_string)
-            return -1;
-        }
+        rng_string = PyBytes_AsString(rngreq);
+        rssringoccs_Tau_Set_Range_From_String(rng_string, tau);
 
         /*  Store the rngreq in the diffraction correction class.             */
         tmp = self->rngreq;
@@ -763,33 +620,7 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
          *  C API recommends not altering the string, so we create a copy of  *
          *  it using strcpy (from string.h).                                  */
         const char *rng_string_cpy = PyUnicode_AsUTF8(rngreq);
-
-        /*  Set variable equal to the length of the string.                   */
-        unsigned long rng_length = strlen(rng_string_cpy);
-
-        /*  Allocate enough memory for rng_string so strcpy doesn't fail.     */
-        char *rng_string = (char *)malloc(sizeof(char) * rng_length + 1);
-
-        /*  strcpy is a standard library function contained in string.h.      */
-        strcpy(rng_string, rng_string_cpy);
-
-        /*  Convert the string to lower-case.                                 */
-        for (i=0; i<rng_length; ++i)
-            rng_string[i] = tolower(rng_string[i]);
-
-        /*  Pass the string into the get range function. This function stores *
-         *  the corresponding values in self->range and returns 1 on success, *
-         *  and returns 0 on failure. If fails, return with error.            */
-        GetRangeFromString(rng_string, self->range);
-        if (self->range[0] < 0.0)
-        {
-            RSS_RINGOCCSRangeError(rng_string)
-            return -1;
-        }
-
-        /*  If the above succeeded, we have the range so free rng_string.     */
-        else
-            free(rng_string);
+        rssringoccs_Tau_Set_Range_From_String(rng_string_cpy, tau);
 
         /*  Set the rngreq variable in self.                                  */
         tmp = self->rngreq;
@@ -867,6 +698,9 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
             self->range[1] = temp_range_val;
         }
 
+        tau->rng_list[0] = self->range[0];
+        tau->rng_list[1] = self->range[1];
+
         /*  Set the rngreq variable.                                          */
         tmp = self->rngreq;
         Py_INCREF(rngreq);
@@ -908,196 +742,43 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
         return -1;
     }
 
+    if (tau->error_occurred)
+    {
+        if (tau->error_message)
+            PyErr_Format(PyExc_RuntimeError, "%s\n", tau->error_message);
+        else
+            PyErr_Format(
+                PyExc_RuntimeError,
+                "\n\rError Encountered: rss_ringoccs\n"
+                "\r\tdiffrec.DiffractionCorrection\n\n"
+                "\rtau returned with error_occurred set to true but no\n"
+                "\rerror message. Returning.\n\n"
+            );
+
+        return -1;
+    }
+
     rssringoccs_Tau_Set_WType(self->wtype, tau);
     rssringoccs_Tau_Set_Psitype(self->psitype, tau);
-    rssringoccs_Tau_Set_Range_From_String(rng_string, tau);
-    tau.interp = self->interp;
+    rssringoccs_Reconstruction(tau);
 
-    if (self->verbose)
-        puts("\tRetrieving variables from DLP instance...");
-
-    /*  Next we're going to run error checks on the input numpy arrays which  *
-     *  should be contained inside of the DLPInst object. We'll check that    *
-     *  these attributes exist, that they are numpy arrays, are 1 dimensional,*
-     *  and have the same number of elements as rho_km_vals. We'll also       *
-     *  convert the arrays to double and retrieve a pointer to the data.      *
-     *  First, we need to make sure rho_km_vals is a legal numpy array and    *
-     *  extract the length of it. Check that rho_km_vals exists in DLPInst.   */
-    if (!PyObject_HasAttrString(DLPInst, "rho_km_vals"))
+    if (tau->error_occurred)
     {
-        PyErr_Format(
-            PyExc_AttributeError,
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tdiffrec.DiffractionCorrection\n\n"
-            "\rInput DLP Instance is missing the following attribute:\n"
-            "\r\trho_km_vals\n\n"
-        );
+        if (tau->error_message)
+            PyErr_Format(PyExc_RuntimeError, "%s\n", tau->error_message);
+        else
+            PyErr_Format(
+                PyExc_RuntimeError,
+                "\n\rError Encountered: rss_ringoccs\n"
+                "\r\tdiffrec.DiffractionCorrection\n\n"
+                "\rtau returned with error_occurred set to true but no\n"
+                "\rerror message. Returning.\n\n"
+            );
+
         return -1;
     }
 
-    /*  If it exists, get a pointer to it.                                    */
-    else
-        tmp = PyObject_GetAttrString(DLPInst, "rho_km_vals");
-
-    /*  Now make sure rho_km_vals is a numpy array.                           */
-    if (!PyArray_Check(tmp))
-    {
-        PyErr_Format(
-            PyExc_TypeError,
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tdiffrec.DiffractionCorrection\n\n"
-            "\rrho_km_vals must be a numpy array.\n"
-        );
-        return -1;
-    }
-
-    /*  If rho_km_vals is a numpy array, try to convert it to double.         */
-    else
-        arr = PyArray_FromObject(tmp, NPY_DOUBLE, 1, 1);
-
-    /*  If PyArray_FromObject failed arr should be NULL. If so, raise error. */
-    if (!arr)
-    {
-        PyErr_Format(
-            PyExc_TypeError,
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tdiffrec.DiffractionCorrection\n\n"
-            "\rCould not convert rho_km_vals to double array. Input is most\n",
-            "\rlikely complex numbers or contains a string.\n\n"
-        );
-        return -1;
-    }
-
-    /*  Currently we only allow for one dimensional inputs.                   */
-    else if (PyArray_NDIM((PyArrayObject *)arr) != 1)
-    {
-        PyErr_Format(
-            PyExc_IndexError,
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tdiffrec.DiffractionCorrection\n\n"
-            "\rrho_km_vals must be a one-dimensional numpy array.\n"
-        );
-        return -1;
-    }
-
-    /*  If every passed, set tau.rho_km_vals to point to the data inside arr. */
-    tau.rho_km_vals = (double *)PyArray_DATA((PyArrayObject *)arr);
-    tau.arr_size = PyArray_DIMS((PyArrayObject *)arr)[0];
-
-    /*  Check that there's actually data to process.                          */
-    if (tau.arr_size<2)
-    {
-        PyErr_Format(
-            PyExc_ValueError,
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tdiffrec.DiffractionCorrection\n\n"
-            "\rrho_km_vals has less than 2 points.\n\n"
-        );
-        return -1;
-    }
-
-    /*  Check all of the variables for errors ensuring they are the correct   *
-     *  size and have the right dimension. This is done using the             *
-     *  RSS_RINGOCCSCheckArray preprocessor function defined at the start of  *
-     *  this file.                                                            */
-    RSS_RINGOCCSCheckArray(tau.rho_km_vals, DLPInst, rho_km_vals,
-                           tmp, arr, tau.arr_size);
-    RSS_RINGOCCSCheckArray(tau.B_rad_vals, DLPInst, B_rad_vals,
-                           tmp, arr, tau.arr_size);
-    RSS_RINGOCCSCheckArray(tau.phi_rad_vals, DLPInst, phi_rad_vals,
-                           tmp, arr, tau.arr_size);
-    RSS_RINGOCCSCheckArray(tau.D_km_vals, DLPInst, D_km_vals,
-                           tmp, arr, tau.arr_size);
-    RSS_RINGOCCSCheckArray(tau.f_sky_hz_vals, DLPInst, f_sky_hz_vals,
-                           tmp, arr, tau.arr_size);
-    RSS_RINGOCCSCheckArray(tau.rho_dot_kms_vals, DLPInst,
-                           rho_dot_kms_vals, tmp, arr, tau.arr_size);
-    RSS_RINGOCCSCheckArray(tau.t_oet_spm_vals, DLPInst,
-                           t_oet_spm_vals, tmp, arr, tau.arr_size);
-    RSS_RINGOCCSCheckArray(tau.t_ret_spm_vals, DLPInst,
-                           t_ret_spm_vals, tmp, arr, tau.arr_size);
-    RSS_RINGOCCSCheckArray(tau.t_set_spm_vals, DLPInst,
-                           t_set_spm_vals, tmp, arr, tau.arr_size);
-    RSS_RINGOCCSCheckArray(tau.rho_corr_pole_km_vals, DLPInst,
-                           rho_corr_pole_km_vals,tmp, arr, tau.arr_size);
-    RSS_RINGOCCSCheckArray(tau.rho_corr_timing_km_vals, DLPInst,
-                           rho_corr_timing_km_vals, tmp, arr, tau.arr_size);
-    RSS_RINGOCCSCheckArray(tau.raw_tau_threshold_vals, DLPInst,
-                           raw_tau_threshold_vals, tmp, arr, tau.arr_size);
-    RSS_RINGOCCSCheckArray(tau.phi_rl_rad_vals, DLPInst,
-                           phi_rl_rad_vals, tmp, arr, tau.arr_size);
-    RSS_RINGOCCSCheckArray(tau.p_norm_vals, DLPInst, p_norm_vals,
-                           tmp, arr, tau.arr_size);
-    RSS_RINGOCCSCheckArray(tau.phase_rad_vals, DLPInst,
-                           phase_rad_vals, tmp, arr, tau.arr_size);
-
-    if (!PyObject_HasAttrString(DLPInst, "history"))
-    {
-        PyErr_Format(
-            PyExc_AttributeError,
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tdiffrec.DiffractionCorrection\n\n"
-            "\rInput DLP Instance is missing the following attribute:\n"
-            "\r\thistory\n\n"
-        );
-        return -1;   
-    }
-    else
-        history = PyObject_GetAttrString(DLPInst, "history");
-
-    /*  Store the dlp history inside of the DiffractionCorrection class. This *
-     *  tmp, Py_INCREF, Py_XDECREF method is recommended in the Python C-API  *
-     *  documentation as a means of safely storing the variable.              */
-    tmp = self->dathist;
-    Py_INCREF(history);
-    self->dathist = history;
-    Py_XDECREF(tmp);
-
-    if (self->verbose)
-        puts("\tComputing Necessary Variables...");
-
-    /*  Get the normalized equivalent width of the window type.               */
-    GetNormeqFromString(tau.wtype, &self->norm_eq);
-
-    /*  For the first inverse calculatiion, tau.use_fwd must be set to false. */
-    tau.use_fwd = self->use_fwd;
-    tau.use_norm = self->use_norm;
-
-    printf("%f\n", (double)(t2-t1) / CLOCKS_PER_SEC);
-
-    RSS_RINGOCCSSetArray(self, tau, rho_km_vals, tmp, NPY_DOUBLE,
-                         tau.start, tau.n_used);
-
-    long pynused = (long)tau.n_used;
-    PyObject *T_out = PyArray_SimpleNewFromData(1, &pynused,
-                                                NPY_CDOUBLE, (void *)tau.T_out);
-
-    tmp = self->T_vals;
-    Py_INCREF(T_out);
-    self->T_vals = T_out;
-    Py_XDECREF(tmp);
-
-    PyObject *T_in = PyArray_SimpleNewFromData(1, &pynused,
-                                               NPY_CDOUBLE, (void *)tau.T_in);
-
-    tmp = self->T_hat_vals;
-    Py_INCREF(T_in);
-    self->T_hat_vals = T_in;
-    Py_XDECREF(tmp);
-
-    /*  Reset the phase to normal. This is very important! We modified the    *
-     *  data in the dlp_inst directly, rather than steal a copy, so we need   *
-     *  to put it back. Luckily, we only negated it. So just re-negate it.    */
-    for (i=0; i<tau.arr_size; ++i)
-        tau.phase_rad_vals[i] = -tau.phase_rad_vals[i];
-
-    /*  New free everything we've malloc'd, or we'll have memory leaks. Do    *
-     *  NOT free the stuff malloc'd that we are storing in self. This will be *
-     *  freed once the instance of the DiffractionCorrection class is         *
-     *  destroyed. Only free the C-level stuff.                               */
-    free(tau.wtype);
-    free(tau.psitype);
-    free(tau.kd_vals);
+    rssringoccs_C_Tau_to_Py_Tau((PyDiffrecObj *)self, tau);
 
     return 1;
 }
@@ -1197,7 +878,7 @@ static PyMemberDef Custom_members[] = {
      "Print status updates"},
     {"use_norm", T_BOOL, offsetof(PyDiffrecObj, use_norm), 0,
      "Use of window normalization"},
-    {"fwd", T_BOOL, offsetof(PyDiffrecObj, fwd), 0,
+    {"use_fwd", T_BOOL, offsetof(PyDiffrecObj, use_fwd), 0,
      "Forward modeling Boolean"},
 
     {NULL}  /* Sentinel */

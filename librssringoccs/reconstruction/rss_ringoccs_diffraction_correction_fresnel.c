@@ -241,7 +241,7 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj *tau)
         fwd_factor = 1.0;
 
     /*  Check that the pointers to the data are not NULL.                     */
-    rssringoccs_Check_Tau_Data(tau);
+    rssringoccs_Tau_Check_Data(tau);
     if (tau->error_occurred)
         return;
 
@@ -271,7 +271,7 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj *tau)
     nw_pts = ((long)(w_init / two_dx)) + 1;
 
     /* Check to ensure you have enough data to the left.                      */
-    rssringoccs_Check_Tau_Data_Range(tau);
+    rssringoccs_Tau_Check_Data_Range(tau);
     if (tau->error_occurred)
         return;
 

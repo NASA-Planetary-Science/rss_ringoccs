@@ -16,7 +16,7 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
- *                      rss_ringoccs_check_tau_data                           *
+ *                      rss_ringoccs_tau_check_data                           *
  ******************************************************************************
  *  Purpose:                                                                  *
  *      Checks the relevant points in a rssringoccs_TAUObj pointer to see if  *
@@ -87,7 +87,7 @@
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 
 /*  Function for checking the pointers in a rssringoccs_TAUObj pointer.       */
-void rssringoccs_Check_Tau_Data(rssringoccs_TAUObj *tau)
+void rssringoccs_Tau_Check_Data(rssringoccs_TAUObj *tau)
 {
     /*  First, check that the actual rssringoccs_TAUObj pointer is not NULL.  */
     if (tau == NULL)
@@ -149,7 +149,7 @@ void rssringoccs_Check_Tau_Data(rssringoccs_TAUObj *tau)
         );
         return;
     }
-    else if (tau->kd_vals == NULL)
+    else if (tau->k_vals == NULL)
     {
         tau->error_occurred = rssringoccs_True;
         tau->error_message = rssringoccs_strdup(

@@ -14,13 +14,64 @@ void rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau)
     unsigned long *Prange_Index, *wrange_Index;
     unsigned long Prange_Size, wrange_Size;
     unsigned long n;
-    double w_fac, omega, min_val, max_val;
+    double w_fac, omega, min_val, max_val, F;
     double *alpha, *P_vals, *rho_legal;
 
     if (tau == NULL)
         return;
-    else if (tau->error_occurred)
+
+    if (tau->error_occurred)
         return;
+
+    if (tau->rng_list[0] <= tau->rho_km_vals[0])
+    {
+        tau->rng_list[0] = tau->rho_km_vals[0];
+        tau->start = 0;
+    }
+    else if (tau->rng_list[0] > tau->rho_km_vals[tau->arr_size-1])
+    {
+        tau->error_occurred = rssringoccs_True;
+        tau->error_message = rssringoccs_strdup(
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\trssringoccs_Tau_Get_Window_Width\n\n"
+            "\rMinimum requested radius is greater than the largest\n"
+            "\rradius available in the data. Returning.\n"
+        );
+        return;
+    }
+    else
+    {
+        n = 0;
+        while (tau->rho_km_vals[n] < tau->rng_list[0])
+            n++;
+
+        tau->start = n;
+    }
+
+    if (tau->rng_list[1] >= tau->rho_km_vals[tau->arr_size-1])
+    {
+        tau->rng_list[1] = tau->rho_km_vals[tau->arr_size-1];
+        tau->n_used = tau->arr_size - tau->start;
+    }
+    else if (tau->rng_list[1] < tau->rho_km_vals[0])
+    {
+        tau->error_occurred = rssringoccs_True;
+        tau->error_message = rssringoccs_strdup(
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\trssringoccs_Tau_Get_Window_Width\n\n"
+            "\rMaximum requested radius is less than the smallest\n"
+            "\rradius available in the data. Returning.\n"
+        );
+        return;
+    }
+    else
+    {
+        n = tau->start;
+        while (tau->rho_km_vals[n] <= tau->rng_list[1])
+            n++;
+
+        tau->n_used = n - tau->start;
+    }
 
     if (tau->w_km_vals != NULL)
     {
@@ -43,23 +94,24 @@ void rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau)
     if (tau->bfac)
     {
         w_fac = tau->normeq;
-        alpha  = malloc(sizeof(*alpha) * tau->arr_size);
-        P_vals = malloc(sizeof(*P_vals) * tau->arr_size);
+        alpha  = malloc(sizeof(*alpha) * tau->n_used);
+        P_vals = malloc(sizeof(*P_vals) * tau->n_used);
 
-        for(n=0; n<tau->arr_size; ++n)
+        for(n = 0; n < tau->n_used; ++n)
         {
-            omega     = rssringoccs_Two_Pi * tau->f_sky_hz_vals[n];
+            F         = tau->F_km_vals[n + tau->start];
+            omega     = rssringoccs_Two_Pi * tau->f_sky_hz_vals[n+tau->start];
             alpha[n]  = omega * tau->sigma;
             alpha[n] *= alpha[n] * 0.5 / tau->rho_dot_kms_vals[n];
-            P_vals[n] = tau->res/(alpha[n]*tau->F_km_vals[n]*tau->F_km_vals[n]);
+            P_vals[n] = tau->res/(alpha[n]*F*F);
         }
 
-        Prange = rssringoccs_Where_Greater_Double(P_vals, tau->arr_size, 1.0);
+        Prange = rssringoccs_Where_Greater_Double(P_vals, tau->n_used, 1.0);
         Prange_Index = Prange[0];
         Prange_Size  = *Prange[1];
 
         for (n=0; n<Prange_Size; ++n)
-            tau->w_km_vals[Prange_Index[n]] = w_fac *
+            tau->w_km_vals[tau->start + Prange_Index[n]] = w_fac *
                 rssringoccs_Double_Resolution_Inverse(P_vals[Prange_Index[n]]) /
                 alpha[n];
 
@@ -70,11 +122,14 @@ void rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau)
     {
         w_fac = tau->normeq/tau->res;
 
-        for (n=0; n < tau->arr_size; ++n)
-            tau->w_km_vals[n] = 2.0*tau->F_km_vals[n]*tau->F_km_vals[n]*w_fac;
+        for (n=0; n < tau->n_used; ++n)
+        {
+            F = tau->F_km_vals[n + tau->start];
+            tau->w_km_vals[n+tau->start] = 2.0*F*F*w_fac;
+        }
 
         Prange = rssringoccs_Where_Greater_Double(tau->F_km_vals,
-                                                  tau->arr_size, 0.0);
+                                                  tau->n_used, 0.0);
         Prange_Index = Prange[0];
         Prange_Size  = *Prange[1];
     }
@@ -106,7 +161,7 @@ void rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau)
         );
         return;
     }
-    else if (max_val < tau->rng_req[0])
+    else if (max_val < tau->rng_list[0])
     {
         tau->error_occurred = rssringoccs_True;
         tau->error_message = rssringoccs_strdup(
@@ -118,7 +173,7 @@ void rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau)
         free(wrange);
         return;
     }
-    else if (min_val > tau->rng_req[1])
+    else if (min_val > tau->rng_list[1])
     {
         tau->error_occurred = rssringoccs_True;
         tau->error_message = rssringoccs_strdup(
@@ -132,10 +187,13 @@ void rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau)
     }
     else
     {
+        if (wrange_Index[0] > tau->start)
+            tau->start = wrange_Index[0];
+
+        if ((tau->start + tau->n_used) > wrange_Index[wrange_Size - 1])
+            tau->n_used = wrange_Index[wrange_Size-1] - tau->start;
         free(wrange_Index);
         free(wrange);
-        tau->start = wrange_Index[0];
-        tau->n_used = wrange_Index[wrange_Size-1] - tau->start;
     }
 
     if (tau->start > tau->arr_size){

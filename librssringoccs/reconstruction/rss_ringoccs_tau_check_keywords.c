@@ -16,16 +16,15 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
- *                   rss_ringoccs_check_tau_data_range                        *
+ *                    rss_ringoccs_tau_check_keywords                         *
  ******************************************************************************
  *  Purpose:                                                                  *
- *      Check the data stored in an rssringoccs_TAUObj pointer and determines *
- *      if there is enough data to perform diffraction correction.            *
+ *      Checks all of the keywords specified by a user for the tau object.
  ******************************************************************************
  *                             DEFINED FUNCTIONS                              *
  ******************************************************************************
  *  Function Name:                                                            *
- *      rssringoccs_Check_Tau_Data_Range:                                     *
+ *      rssringoccs_Tau_Check_Keywords:                                        *
  *  Purpose:                                                                  *
  *      Runs an error check on a rssringoccs_TAUObj pointer.                  *
  *  Arguments:                                                                *
@@ -34,10 +33,7 @@
  *  Output:                                                                   *
  *      None (void).                                                          *
  *  Method:                                                                   *
- *      Loop through the requested reconstruction region and see if there is  *
- *      enough data to the left and right of each point to perform the        *
- *      inversion. Given a point rho, there should be rho-W/2 to rho+W/2 of   *
- *      data where W is the window width stored in tau->w_km_vals.            *
+ *      Check that the keywords have legal values, setting errors if not.     *
  *  NOTES:                                                                    *
  *      1.) This function sets the tau->error_occured Boolean to true on      *
  *          error. It is the user's responsibility to check that this Boolean *
@@ -77,118 +73,94 @@
  *  and etc.), or GCC extensions, you will need to edit the config script.    *
  ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
- *  Date:       January 1, 2021                                               *
+ *  Date:       January 4, 2021                                               *
  ******************************************************************************/
 
 /*  Include the necessary header files.                                       */
 #include <stdlib.h>
 #include <rss_ringoccs/include/rss_ringoccs_bool.h>
+#include <rss_ringoccs/include/rss_ringoccs_math.h>
 #include <rss_ringoccs/include/rss_ringoccs_string.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 
-/*  Function for checking the data range of a rssringoccs_TAUObj pointer.     */
-void rssringoccs_Check_Tau_Data_Range(rssringoccs_TAUObj *tau)
+void rssringoccs_Tau_Check_Keywords(rssringoccs_TAUObj *tau)
 {
-    /*  As a side not, C89/C90 does not allow mixed code. All declaration     *
-     *  must be made at the top of a code block.                              */
-
-    /*  Declare a variable to check what the maximum index is.                */
-    unsigned long current_max;
-
-    /*  Variable to keep track of the max window indices.                     */
-    unsigned long max_requested;
-
-    /*  Variables for indexing the for loop.                                  */
-    unsigned long n, start, end;
-
-    /*  Variable for the reciprocal of 2.0 * dx.                              */
-    double rcpr_two_dx;
-
-    /*  And a variable for the number of points in a window.                  */
-    unsigned long nw_pts;
-
-    /*  Check that the input rssringoccs_TAUObj pointer is not NULL before    *
-     *  trying to access it's members.                                        */
     if (tau == NULL)
         return;
 
-    /*  Check that the rssringoccs_TAUObj pointer does not have its           *
-     *  error_occurred member set to true.                                    */
     if (tau->error_occurred)
         return;
 
-    /*  Check that tau->dx_km is not zero to avoid divide-by-zero.            */
-    if (tau->dx_km <= 0.0)
+    if (tau->res <= 0.0)
     {
         tau->error_occurred = rssringoccs_True;
         tau->error_message = rssringoccs_strdup(
             "\n\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_Check_Tau_Data_Range\n\n"
-            "\rtau->dx_km is not positive. Returning.\n"
+            "\r\trssringoccs_Tau_Check_Keywords\n\n"
+            "\rInput res (resolution, in km) is not positive. Returning.\n\n"
         );
         return;
     }
-
-    /*  Set the values of the user-requested min and max indices.             */
-    start = tau->start;
-    end   = start + tau->n_used;
-
-    /*  Initialize the max_requested variable to end.                         */
-    max_requested = end;
-
-    /*  Set the rcpr_two_dx value from the tau object. Division is more       *
-     *  expensive computationally than multiplication, so we store the        *
-     *  reciprocal of 2 * dx and compute with that.                           */
-    rcpr_two_dx = 0.5 / tau->dx_km;
-
-    /*  Loop through every point, check window width, and ensure you have     *
-     *  enough data to the left and right for data processing.                */
-    for (n = start; n <= end; ++n)
-    {
-        /*  Compute the number of points needed in a window.                  */
-        nw_pts = ((unsigned long)(tau->w_km_vals[n] * rcpr_two_dx)) + 1;
-
-        /*  If n - nw_pts is negative, then the window goes beyond the        *
-         *  available data. Since our integer variables are declared as       *
-         *  unsigned, n - nw_pts can't be negative. To avoid error, we simply *
-         *  check if n < nw_pts. If it is, we raise an error and return.      */
-        if (n < nw_pts)
-        {
-            tau->error_occurred = rssringoccs_True;
-            tau->error_message = rssringoccs_strdup(
-                "\n\rError Encountered: rss_ringoccs\n"
-                "\r\trssringoccs_Check_Tau_Data_Range\n\n"
-                "\rNot enough data to perform diffraction correction. The\n"
-                "\rrequested region has points with a window width that go\n"
-                "\rbeyond the minimum radius you have. Returning.\n"
-            );
-            return;
-        }
-
-        /*  The largest radius needed for the window corresponds to the       *
-         *  current point plus the number of points in the window.            */
-        current_max = n + nw_pts;
-
-        /*  If current_max is larger than max_requested, we have a bigger     *
-         *  index and need to reset the value.                                */
-        if (current_max < max_requested)
-            max_requested = current_max;
-    }
-    /*  End of for loop computing the number of points for the windows.       */
-
-    /*  If max_requested goes between the size of the array, we have illegal  *
-     *  values. Return with error.                                            */
-    if (max_requested > tau->arr_size)
+    else if (tau->sigma <= 0.0)
     {
         tau->error_occurred = rssringoccs_True;
         tau->error_message = rssringoccs_strdup(
             "\n\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_Check_Tau_Data_Range\n\n"
-            "\rNot enough data to perform diffraction correction. The\n"
-            "\rrequested region has points with a window width that go\n"
-            "\rbeyond the maximum radius you have. Returning.\n"
+            "\r\trssringoccs_Tau_Check_Keywords\n\n"
+            "\rInput sigma (Allen deviation) is not positive. Returning.\n\n"
+        );
+        return;
+    }
+    else if (tau->peri < -rssringoccs_Two_Pi)
+    {
+        tau->error_occurred = rssringoccs_True;
+        tau->error_message = rssringoccs_strdup(
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\trssringoccs_Tau_Check_Keywords\n\n"
+            "\rInput peri (periapse, in radians) less than -2pi. Returning.\n\n"
+        );
+        return;
+    }
+    else if (tau->peri > rssringoccs_Two_Pi)
+    {
+        tau->error_occurred = rssringoccs_True;
+        tau->error_message = rssringoccs_strdup(
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\trssringoccs_Tau_Check_Keywords\n\n"
+            "\rInput peri (periapse, in radians) greater than 2pi.\n"
+            "\rReturning.\n\n"
+        );
+        return;
+    }
+    else if (tau->ecc < 0.0)
+    {
+        tau->error_occurred = rssringoccs_True;
+        tau->error_message = rssringoccs_strdup(
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\trssringoccs_Tau_Check_Keywords\n\n"
+            "\rInput ecc (eccentricity) is negative. Returning.\n\n"
+        );
+        return;
+    }
+    else if (tau->rng_list[0] < 0.0)
+    {
+        tau->error_occurred = rssringoccs_True;
+        tau->error_message = rssringoccs_strdup(
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\trssringoccs_Tau_Check_Keywords\n\n"
+            "\rStarting value for range is negative. Returning.\n\n"
+        );
+        return;
+    }
+    else if (tau->rng_list[0] > tau->rng_list[1])
+    {
+        tau->error_occurred = rssringoccs_True;
+        tau->error_message = rssringoccs_strdup(
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\trssringoccs_Tau_Check_Keywords\n\n"
+            "\rStarting value for range is greater than final value.\n"
+            "\rReturning.\n\n"
         );
         return;
     }
 }
-/*  End of rssringoccs_Check_Tau_Data_Range.                                  */

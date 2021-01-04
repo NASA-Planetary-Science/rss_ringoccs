@@ -12,7 +12,6 @@ Arguments:
 
 import numpy as np
 import os
-import pdb
 import struct
 import sys
 

@@ -40,41 +40,40 @@ void rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj *tau)
     /*  Variables for indexing. nw_pts is the number of points in the window. */
     unsigned long i, j, nw_pts, center;
 
-    /*  Toler is the number of iterations allowed in Newton-Raphson.          */
-    long toler;
-
     /*  Some variables needed for reconstruction.                             */
     double w_init, dx, two_dx;
     double *x_arr, *phi_arr, *w_func;
 
     /*  EPS is the maximum allowed error in the Newton-Raphson scheme.        */
-    double EPS;
+    double EPS = 1.E-4;
 
-    rssringoccs_window_func fw = tau->window_func;
+    /*  Toler is the number of iterations allowed in Newton-Raphson.          */
+    unsigned long toler = 5;
+
+    /*  Declare a function pointer for the window function.                   */
+    rssringoccs_window_func fw;
 
     /*  If everything executes smoothly, status should remain at zero.        */
     tau->error_occurred = rssringoccs_False;
 
     /*  Check that the pointers to the data are not NULL.                     */
-    rssringoccs_Check_Tau_Data(tau);
+    rssringoccs_Tau_Check_Data(tau);
     if (tau->error_occurred)
         return;
 
-
-    /*  Set toler to 5 and EPS to e-4, reasonable for almost all cases.       */
-    toler = 5;
-    EPS = 1.E-4;
+    /*  Grab the function pointer for the window function.                    */
+    fw = tau->window_func
 
     /* Compute first window width and window function. */
     center = tau->start;
 
-    /*  If forward tranform is set, negate the kd_vals variable. This has     *
+    /*  If forward tranform is set, negate the k_vals variable. This has      *
      *  the equivalent effect of computing the forward calculation later.     */
     if (tau->use_fwd)
     {
-        /*  Loop over all of kd_vals and negate the value.                    */
+        /*  Loop over all of k_vals and negate the value.                     */
         for (i=0; i <= tau->n_used; ++i)
-            tau->kd_vals[i] *= -1.0;
+            tau->k_vals[i] *= -1.0;
     }
 
     /*  Compute some more variables.                                          */
@@ -84,7 +83,7 @@ void rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj *tau)
     nw_pts  = 2*((long)(w_init / two_dx))+1;
 
     /* Check to ensure you have enough data to the left.                      */
-    rssringoccs_Check_Tau_Data_Range(tau);
+    rssringoccs_Tau_Check_Data_Range(tau);
     if (tau->error_occurred)
         return;
 
@@ -174,7 +173,7 @@ void rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj *tau)
 
             /*  Compute the fresnel tranform about the current point.         */
             tau->T_out[i] = Fresnel_Transform_Newton_Norm_Double(
-                x_arr, phi_arr, tau->T_in, w_func, tau->kd_vals[center],
+                x_arr, phi_arr, tau->T_in, w_func, tau->k_vals[center],
                 tau->rho_km_vals[center], tau->B_rad_vals[center],
                 tau->D_km_vals[center], EPS, toler, nw_pts, center
             );
@@ -220,7 +219,7 @@ void rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj *tau)
 
             /*  Compute the fresnel tranform about the current point.         */
             tau->T_out[i] = Fresnel_Transform_Newton_Double(
-                x_arr, phi_arr, tau->T_in, w_func, tau->kd_vals[center],
+                x_arr, phi_arr, tau->T_in, w_func, tau->k_vals[center],
                 tau->rho_km_vals[center], tau->B_rad_vals[center],
                 tau->D_km_vals[center], EPS, toler, dx, tau->F_km_vals[center],
                 nw_pts, center

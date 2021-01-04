@@ -25,7 +25,7 @@ typedef struct rssringoccs_TAUObj {
     double *rho_km_vals;
     double *F_km_vals;
     double *phi_rad_vals;
-    double *kd_vals;
+    double *k_vals;
     double *f_sky_hz_vals;
     double *rho_dot_kms_vals;
     double *raw_tau_threshold_vals;
@@ -40,7 +40,10 @@ typedef struct rssringoccs_TAUObj {
     double *tau_threshold_vals;
     double *phi_rl_rad_vals;
     double *p_norm_vals;
+    double *power_vals;
     double *phase_rad_vals;
+    double *phase_vals;
+    double *tau_vals;
     double dx_km;
     double normeq;
     double sigma;
@@ -59,6 +62,7 @@ typedef struct rssringoccs_TAUObj {
     rssringoccs_Bool use_fwd;
     rssringoccs_Bool use_fft;
     rssringoccs_Bool bfac;
+    rssringoccs_Bool verbose;
     rssringoccs_Bool error_occurred;
     char *error_message;
     char *wtype;
@@ -83,23 +87,32 @@ extern rssringoccs_TAUObj *
 rssringoccs_Create_TAUObj(rssringoccs_DLPObj *dlp, double res);
 
 extern void
-rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau);
-
-extern void
 rssringoccs_Copy_DLP_Data_To_Tau(rssringoccs_DLPObj *dlp,
                                  rssringoccs_TAUObj *tau);
 
 extern void
-rssringoccs_Check_Tau_Data_Range(rssringoccs_TAUObj *dlp);
+rssringoccs_Tau_Check_Data_Range(rssringoccs_TAUObj *dlp);
 
 extern void
-rssringoccs_Check_Tau_Data(rssringoccs_TAUObj *tau);
+rssringoccs_Tau_Check_Data(rssringoccs_TAUObj *tau);
+
+extern void
+rssringoccs_Tau_Check_Keywords(rssringoccs_TAUObj *tau);
 
 extern void
 rssringoccs_Tau_Check_Occ_Type(rssringoccs_TAUObj *tau);
 
 extern void
 rssringoccs_Tau_Select_Window_Func(rssringoccs_TAUObj *tau);
+
+extern void
+rssringoccs_Tau_Compute_Vars(rssringoccs_TAUObj *tau);
+
+extern void
+rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau);
+
+extern void
+rssringoccs_Tau_Finish(rssringoccs_TAUObj* tau);
 
 extern void
 rssringoccs_Tau_Reset_Window(double *x_arr, double *w_func, double dx,

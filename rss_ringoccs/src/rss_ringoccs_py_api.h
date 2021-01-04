@@ -10,6 +10,7 @@
 #include <structmember.h>
 #include <rss_ringoccs/include/rss_ringoccs_bool.h>
 #include <rss_ringoccs/include/rss_ringoccs_complex.h>
+#include <rss_ringoccs/include/rss_ringoccs_calibration.h>
 
 typedef PyObject (*rssringoccs_PyFunc)(PyObject *, PyObject *);
 
@@ -59,7 +60,7 @@ typedef struct {
     PyObject         *perturb;
     PyObject         *rngreq;
     rssringoccs_Bool  bfac;
-    rssringoccs_Bool  fwd;
+    rssringoccs_Bool  use_fwd;
     rssringoccs_Bool  use_norm;
     rssringoccs_Bool  use_fft;
     rssringoccs_Bool  verbose;

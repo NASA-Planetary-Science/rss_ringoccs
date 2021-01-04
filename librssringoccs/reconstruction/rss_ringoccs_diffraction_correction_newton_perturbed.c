@@ -69,7 +69,7 @@ void rssringoccs_Diffraction_Correction_PerturbedNewton(rssringoccs_TAUObj *tau)
     tau->error_occurred = rssringoccs_False;
 
     /*  Check that the pointers to the data are not NULL.                     */
-    rssringoccs_Check_Tau_Data(tau);
+    rssringoccs_Tau_Check_Data(tau);
     if (tau->error_occurred)
         return;
 
@@ -80,13 +80,13 @@ void rssringoccs_Diffraction_Correction_PerturbedNewton(rssringoccs_TAUObj *tau)
     /* Compute first window width and window function. */
     center = tau->start;
 
-    /*  If forward tranform is set, negate the kd_vals variable. This has     *
+    /*  If forward tranform is set, negate the k_vals variable. This has      *
      *  the equivalent effect of computing the forward calculation later.     */
     if (tau->use_fwd)
     {
-        /*  Loop over all of kd_vals and negate the value.                    */
+        /*  Loop over all of k_vals and negate the value.                     */
         for (i=0; i <= tau->n_used; ++i)
-            tau->kd_vals[i] *= -1.0;
+            tau->k_vals[i] *= -1.0;
     }
 
     /*  Compute some more variables.                                          */
@@ -96,7 +96,7 @@ void rssringoccs_Diffraction_Correction_PerturbedNewton(rssringoccs_TAUObj *tau)
     nw_pts  = 2*((long)(w_init / two_dx))+1;
 
     /* Check to ensure you have enough data to the left.                      */
-    rssringoccs_Check_Tau_Data_Range(tau);
+    rssringoccs_Tau_Check_Data_Range(tau);
     if (tau->error_occurred)
         return;
 
@@ -186,7 +186,7 @@ void rssringoccs_Diffraction_Correction_PerturbedNewton(rssringoccs_TAUObj *tau)
 
             /*  Compute the fresnel tranform about the current point.         */
             tau->T_out[i] = Fresnel_Transform_Perturbed_Newton_Norm_Double(
-                x_arr, phi_arr, tau->T_in, w_func, tau->kd_vals[center],
+                x_arr, phi_arr, tau->T_in, w_func, tau->k_vals[center],
                 tau->rho_km_vals[center], tau->B_rad_vals[center],
                 tau->D_km_vals[center], EPS, toler, nw_pts, center, tau->perturb
             );
@@ -232,7 +232,7 @@ void rssringoccs_Diffraction_Correction_PerturbedNewton(rssringoccs_TAUObj *tau)
 
             /*  Compute the fresnel tranform about the current point.         */
             tau->T_out[i] = Fresnel_Transform_Perturbed_Newton_Double(
-                x_arr, phi_arr, tau->T_in, w_func, tau->kd_vals[center],
+                x_arr, phi_arr, tau->T_in, w_func, tau->k_vals[center],
                 tau->rho_km_vals[center], tau->B_rad_vals[center],
                 tau->D_km_vals[center], EPS, toler, dx, tau->F_km_vals[center],
                 nw_pts, center, tau->perturb

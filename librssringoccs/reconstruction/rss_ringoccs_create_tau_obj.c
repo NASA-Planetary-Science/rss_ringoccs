@@ -122,7 +122,7 @@ rssringoccs_Create_TAUObj(rssringoccs_DLPObj *dlp, double res)
     tau->rho_km_vals = NULL;
     tau->F_km_vals = NULL;
     tau->phi_rad_vals = NULL;
-    tau->kd_vals = NULL;
+    tau->k_vals = NULL;
     tau->f_sky_hz_vals = NULL;
     tau->rho_dot_kms_vals = NULL;
     tau->raw_tau_threshold_vals = NULL;

@@ -1,6 +1,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <rss_ringoccs/include/rss_ringoccs_string.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 
@@ -21,7 +22,6 @@ rssringoccs_Tau_Set_Range_From_String(const char *range,
                                       rssringoccs_TAUObj *tau)
 {
     unsigned long str_len;
-    unsigned long new_str_len, n;
     char *range_str;
 
     if (tau == NULL)
@@ -53,32 +53,11 @@ rssringoccs_Tau_Set_Range_From_String(const char *range,
         return;
     }
 
-    range_str = malloc(sizeof(*range_str) * str_len);
-    new_str_len = 0;
-    n = 0;
+    range_str = malloc(sizeof(*range_str) * (str_len+1));
 
-    while(range[n])
-    {
-        if (isspace(range[n]))
-        {
-            range_str[new_str_len] = tolower(range[n]);
-            ++new_str_len;
-        }
-        ++n;
-    }
-
-    if (new_str_len == 0)
-    {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
-            "\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_Tau_Get_Range_From_String\n\n"
-            "\rInput string is only spaces. Returning.\n"
-        );
-        return;
-    }
-
-    range_str = realloc(range_str, new_str_len);
+    strcpy(range_str, range);
+    rssringoccs_Remove_Spaces(range_str);
+    rssringoccs_Make_Lower(range_str);
 
     if (strcmp(range_str, "all") == 0)
     {

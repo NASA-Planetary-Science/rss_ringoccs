@@ -48,7 +48,7 @@ void rssringoccs_Tau_Set_WType(const char *wtype, rssringoccs_TAUObj *tau)
 
     while(wtype[n])
     {
-        if (isspace(wtype[n]))
+        if (!isspace(wtype[n]))
         {
             tau->wtype[new_str_len] = tolower(wtype[n]);
             ++new_str_len;

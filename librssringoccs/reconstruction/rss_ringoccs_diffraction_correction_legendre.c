@@ -56,7 +56,7 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
     tau->error_occurred = rssringoccs_False;
 
     /*  Check that the pointers to the data are not NULL.                     */
-    rssringoccs_Check_Tau_Data(tau);
+    rssringoccs_Tau_Check_Data(tau);
     if (tau->error_occurred)
         return;
 
@@ -80,13 +80,13 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
     /* Compute first window width and window function. */
     center = tau->start;
 
-    /*  If forward tranform is set, negate the kd_vals variable. This has     *
+    /*  If forward tranform is set, negate the k_vals variable. This has      *
      *  the equivalent effect of computing the forward calculation later.     */
     if (tau->use_fwd)
     {
-        /*  Loop over all of kd_vals and negate the value.                    */
+        /*  Loop over all of k_vals and negate the value.                     */
         for (i=0; i <= tau->n_used; ++i)
-            tau->kd_vals[i] *= -1.0;
+            tau->k_vals[i] *= -1.0;
     }
 
     /*  Compute more necessary data.                                          */
@@ -96,7 +96,7 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
     nw_pts = (long)(w_init / two_dx)+1;
 
     /* Check to ensure you have enough data to the left.                      */
-    rssringoccs_Check_Tau_Data_Range(tau);
+    rssringoccs_Tau_Check_Data_Range(tau);
     if (tau->error_occurred)
         return;
 
@@ -166,7 +166,7 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
         tau->T_out[i] = Fresnel_Transform_Legendre_Even_Double(
             x_arr, tau->T_in, w_func, tau->D_km_vals[center],
             fresnel_ker_coeffs, dx, tau->F_km_vals[center],
-            tau->kd_vals[center], nw_pts, tau->order, center);
+            tau->k_vals[center], nw_pts, tau->order, center);
 
         /*  Increment T_in pointer using pointer arithmetic.                  */
         center += 1;

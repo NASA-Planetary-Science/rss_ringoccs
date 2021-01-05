@@ -29,6 +29,11 @@ rssringoccs_Tau_Set_Psitype(const char *psitype, rssringoccs_TAUObj* tau)
         tau->order  = 0;
         tau->psinum = rssringoccs_DR_NewtonD;
     }
+    else if (strcmp(tau->psitype, "newtondold") == 0)
+    {
+        tau->order  = 0;
+        tau->psinum = rssringoccs_DR_NewtonDOld;
+    }
     else if (strcmp(tau->psitype, "newtondphi") == 0)
     {
         tau->order  = 0;

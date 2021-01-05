@@ -1,12 +1,10 @@
 import os
 import sys
 sys.path.append('../')
-from rss_uringoccs.tools.history import write_history_dict
-from rss_uringoccs.tools.write_output_files import write_output_files
-sys.path.remove('../')
-sys.path.append('../../')
+from rss_ringoccs.tools.history import write_history_dict
+from rss_ringoccs.tools.write_output_files import write_uranus_output_files
 import rss_ringoccs.diffrec.diffraction_correction as DiffCorr
-sys.path.remove('../../')
+sys.path.remove('../')
 import pipeline_params as pipe
 import numpy as np
 import matplotlib.pyplot as plt

@@ -45,7 +45,8 @@ Fresnel_Transform_Cubic_Norm_Double(double *x_arr, double *phi_arr,
                                          phi_arr[i], B, D, EPS, toler);
 
         /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
-        psi_n[i] = rssringoccs_Double_Fresnel_Psi(kD, r, x_arr[i], phi, phi_arr[i], B, D);
+        psi_n[i] = rssringoccs_Double_Fresnel_Psi(kD, r, x_arr[i], phi,
+                                                  phi_arr[i], B, D);
     }
 
     psi_half_mean = (psi_n[(n_pts-1)/4] + psi_n[3*(n_pts-1)/4]) / 2.0;

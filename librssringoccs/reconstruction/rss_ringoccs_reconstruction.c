@@ -21,6 +21,8 @@ void rssringoccs_Reconstruction(rssringoccs_TAUObj *tau)
         rssringoccs_Diffraction_Correction_Legendre(tau);
     else if (tau->psinum == rssringoccs_DR_NewtonD)
         rssringoccs_Diffraction_Correction_Newton_D(tau);
+    else if (tau->psinum == rssringoccs_DR_NewtonDOld)
+        rssringoccs_Diffraction_Correction_Newton_D_Old(tau);
     else
         rssringoccs_Diffraction_Correction_Newton(tau);
 

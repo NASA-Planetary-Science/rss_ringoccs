@@ -1,9 +1,9 @@
 import numpy as np
 import sys
 sys.path.append('../')
-import rss_uringoccs.calibration.calc_tau_thresh as ctt
-from rss_uringoccs.calibration.resample_IQ import resample_IQ
-from rss_uringoccs.tools.write_output_files import construct_filepath
+import rss_ringoccs.calibration.calc_tau_thresh as ctt
+from rss_ringoccs.calibration.resample_IQ import resample_IQ
+from rss_ringoccs.tools.write_uranus_output_files import construct_filepath
 sys.path.remove('../')
 import phase_unwrap_params as unwrap
 import pipeline_params as pipe

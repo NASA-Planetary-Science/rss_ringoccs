@@ -2,7 +2,7 @@
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_kernel.h>
 
 float
-rssringoccs_Float_Fresnel_d2Psi_dPhi2(float kD,   float r, float r0, float phi,
+rssringoccs_Float_Fresnel_d2Psi_dPhi2(float k,   float r, float r0, float phi,
                                       float phi0, float B, float D)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
@@ -49,13 +49,13 @@ rssringoccs_Float_Fresnel_d2Psi_dPhi2(float kD,   float r, float r0, float phi,
     /*  Compute the second partial derivative.                                */
     psi_d2  = (-0.25F/(psi0*psi0*psi0)) * (deta - 2.0F*dxi) * (deta - 2.0F*dxi);
     psi_d2 += (0.5F/psi0) * (deta2 - 2.0F*dxi2) + dxi2;
-    psi_d2 *= kD;
+    psi_d2 *= k*D;
 
     return psi_d2;
 }
 
 double
-rssringoccs_Double_Fresnel_d2Psi_dPhi2(double kD, double r, double r0,
+rssringoccs_Double_Fresnel_d2Psi_dPhi2(double k, double r, double r0,
                                        double phi, double phi0, double B,
                                        double D)
 {
@@ -103,13 +103,13 @@ rssringoccs_Double_Fresnel_d2Psi_dPhi2(double kD, double r, double r0,
     /*  Compute the second partial derivative.                                */
     psi_d2  = (-0.25/(psi0*psi0*psi0)) * (deta - 2.0*dxi) * (deta - 2.0*dxi);
     psi_d2 += (0.5/psi0) * (deta2 - 2.0*dxi2) + dxi2;
-    psi_d2 *= kD;
+    psi_d2 *= k*D;
 
     return psi_d2;
 }
 
 long double
-rssringoccs_LDouble_Fresnel_d2Psi_dPhi2(long double kD,   long double r,
+rssringoccs_LDouble_Fresnel_d2Psi_dPhi2(long double k,   long double r,
                                         long double r0,   long double phi,
                                         long double phi0, long double B,
                                         long double D)
@@ -158,7 +158,7 @@ rssringoccs_LDouble_Fresnel_d2Psi_dPhi2(long double kD,   long double r,
     /*  Compute the second partial derivative.                                */
     psi_d2  = (-0.25L/(psi0*psi0*psi0)) * (deta - 2.0L*dxi) * (deta - 2.0L*dxi);
     psi_d2 += (0.5L/psi0) * (deta2 - 2.0L*dxi2) + dxi2;
-    psi_d2 *= kD;
+    psi_d2 *= k*D;
 
     return psi_d2;
 }

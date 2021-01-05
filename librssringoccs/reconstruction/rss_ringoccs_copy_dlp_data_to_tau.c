@@ -257,6 +257,9 @@ void rssringoccs_Copy_DLP_Data_To_Tau(rssringoccs_DLPObj *dlp,
     __MALLOC_TAU_VAR__(phi_rl_rad_vals)
     __MALLOC_TAU_VAR__(p_norm_vals)
     __MALLOC_TAU_VAR__(phase_rad_vals)
+    __MALLOC_TAU_VAR__(rx_km_vals)
+    __MALLOC_TAU_VAR__(ry_km_vals)
+    __MALLOC_TAU_VAR__(rz_km_vals)
 
     /*  Loop through the entries of all of the pointers and set the nth value *
      *  of a tau member to the nth value of the corresponding dlp member.     */
@@ -276,6 +279,9 @@ void rssringoccs_Copy_DLP_Data_To_Tau(rssringoccs_DLPObj *dlp,
         tau->phi_rl_rad_vals[n] = dlp->phi_rl_rad_vals[n];
         tau->p_norm_vals[n] = dlp->p_norm_vals[n];
         tau->raw_tau_threshold_vals[n] = dlp->raw_tau_threshold_vals[n];
+        tau->rx_km_vals[n] = dlp->rx_km_vals[n];
+        tau->ry_km_vals[n] = dlp->ry_km_vals[n];
+        tau->rz_km_vals[n] = dlp->rz_km_vals[n];
 
         /*  The phase needs to be negated due to mathematical conventions.    */
         tau->phase_rad_vals[n] = -dlp->phase_rad_vals[n];

@@ -66,6 +66,23 @@ Fresnel_Transform_Newton_Norm_Double(double *x_arr, double *phi_arr,
                                      unsigned long center);
 
 extern rssringoccs_ComplexDouble
+Fresnel_Transform_Newton_D_Double(double *x_arr, double *phi_arr,
+                                  rssringoccs_ComplexDouble *T_in, double *w_func,
+                                  double kD, double r, double B, double EPS,
+                                  unsigned long toler, double dx,
+                                  double F, unsigned long n_pts,
+                                  unsigned long center, double rx, double ry,
+                                  double rz);
+
+extern rssringoccs_ComplexDouble
+Fresnel_Transform_Newton_D_Norm_Double(double *x_arr, double *phi_arr,
+                                       rssringoccs_ComplexDouble *T_in,
+                                       double *w_func, double k, double r,
+                                       double B, double EPS, long toler,
+                                       long n_pts, long center,
+                                       double rx, double ry, double rz);
+
+extern rssringoccs_ComplexDouble
 Fresnel_Transform_Quadratic_Double(double *x_arr, double *phi_arr,
                                    rssringoccs_ComplexDouble *T_in,
                                    double *w_func, double kD, double r,

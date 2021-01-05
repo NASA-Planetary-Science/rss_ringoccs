@@ -226,6 +226,9 @@ rssringoccs_DLPObj *rssringoccs_Py_DLP_to_C_DLP(PyObject *py_dlp)
     dlp->t_oet_spm_vals = __extract_data(dlp, py_dlp, "t_oet_spm_vals");
     dlp->t_ret_spm_vals = __extract_data(dlp, py_dlp, "t_ret_spm_vals");
     dlp->t_set_spm_vals = __extract_data(dlp, py_dlp, "t_set_spm_vals");
+    dlp->rx_km_vals = __extract_data(dlp, py_dlp, "rx_km_vals");
+    dlp->ry_km_vals = __extract_data(dlp, py_dlp, "ry_km_vals");
+    dlp->rz_km_vals = __extract_data(dlp, py_dlp, "rz_km_vals");
 
     dlp->rho_corr_pole_km_vals
         = __extract_data(dlp, py_dlp, "rho_corr_pole_km_vals");

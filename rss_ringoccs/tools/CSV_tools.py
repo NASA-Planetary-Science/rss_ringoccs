@@ -470,6 +470,9 @@ class ExtractCSVData(object):
             self.D_km_vals = np.array(geo_dat.D_km_vals)
             errmess = "rho_dot_kms_vals"
             self.rho_dot_kms_vals = np.array(geo_dat.rho_dot_kms_vals)
+            rx_geo = np.array(geo_dat.rx_km_vals)
+            ry_geo = np.array(geo_dat.ry_km_vals)
+            rz_geo = np.array(geo_dat.rz_km_vals)
 
             errmess = "cal_spm"
             cal_spm = np.array(cal_dat.spm_vals)
@@ -599,6 +602,9 @@ class ExtractCSVData(object):
         self.D_km_vals = np.interp(self.rho_km_vals, geo_rho, self.D_km_vals)
         self.rho_dot_kms_vals = np.interp(self.rho_km_vals, geo_rho,
                                           self.rho_dot_kms_vals)
+        self.rx_km_vals = np.interp(self.rho_km_vals, geo_rho, rx_geo)
+        self.ry_km_vals = np.interp(self.rho_km_vals, geo_rho, ry_geo)
+        self.rz_km_vals = np.interp(self.rho_km_vals, geo_rho, rz_geo)
 
         del raw_mu, geo_rho
 

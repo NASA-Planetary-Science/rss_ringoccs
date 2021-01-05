@@ -21,6 +21,9 @@ typedef struct rssringoccs_DLPObj {
     double *p_norm_vals;
     double *phase_rad_vals;
     double *raw_tau_threshold_vals;
+    double *rx_km_vals;
+    double *ry_km_vals;
+    double *rz_km_vals;
     unsigned long arr_size;
     rssringoccs_Bool error_occurred;
     char *error_message;

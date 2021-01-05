@@ -36,8 +36,6 @@ def et_to_spm(et_vals, kernels=None, ref_doy=None):
         npts = len(et_vals)
     if npts == 0:
         return []
-        
-
 
     spm_vals = []
 
@@ -67,15 +65,16 @@ def et_to_spm(et_vals, kernels=None, ref_doy=None):
             spm_vals_cont[ind+1:] = spm_vals_cont[ind+1:] + spm_brk
         spm_vals = spm_vals_cont
 
+    # check if ref_doy is the same as current reference doy
     if ref_doy:
-        # check if ref_doy is the same as current reference doy
         utc_start = spice.et2utc(et_vals[0], "ISOD", 16)
         doy_start = (utc_start[5:8])
         days_past = int(doy_start) - int(ref_doy)
         if days_past < 0:
-            raise ValueError("Reference doy is after the first entry of et_vals!")
+            raise ValueError(
+                "Reference doy is after the first entry of et_vals!"
+            )
         else:
-            spm_vals = np.asarray(spm_vals) + days_past*24.*60.*60.
-        
+            spm_vals = np.asarray(spm_vals) + days_past*24.0*60.0*60.0
 
     return np.array(spm_vals)

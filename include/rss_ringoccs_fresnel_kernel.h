@@ -16,10 +16,15 @@ rssringoccs_LDouble_Fresnel_Psi(long double k, long double r,
                                 long double r0, long double phi,
                                 long double phi0, long double B, long double D);
 
-extern double Newton_Raphson_Fresnel_Psi_D(double kD, double r, double r0,
+extern double Newton_Raphson_Fresnel_Psi_D(double k, double r, double r0,
                                            double phi, double phi0, double B,
                                            double EPS, long toler, double rx,
                                            double ry, double rz);
+
+extern double
+Newton_Raphson_Fresnel_Psi_D_Old(double k, double r, double r0, double phi,
+                                 double phi0, double B, double EPS, long toler,
+                                 double rx, double ry, double rz);
 
 /*----------------The First Derivative of the Fresnel Kernel------------------*/
 extern float

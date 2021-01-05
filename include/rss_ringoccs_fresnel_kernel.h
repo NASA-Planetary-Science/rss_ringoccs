@@ -22,7 +22,7 @@ extern double Newton_Raphson_Fresnel_Psi_D(double k, double r, double r0,
                                            double ry, double rz);
 
 extern double
-Newton_Raphson_Fresnel_Psi_D_Old(double k, double r, double r0, double phi,
+Newton_Raphson_Fresnel_Psi_D_Old(double kD, double r, double r0, double phi,
                                  double phi0, double B, double EPS, long toler,
                                  double rx, double ry, double rz);
 

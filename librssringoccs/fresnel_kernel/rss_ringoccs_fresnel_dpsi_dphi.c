@@ -2,7 +2,7 @@
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_kernel.h>
 
 float
-rssringoccs_Float_Fresnel_dPsi_dPhi(float kD, float r, float r0, float phi,
+rssringoccs_Float_Fresnel_dPsi_dPhi(float k, float r, float r0, float phi,
                                     float phi0, float B, float D)
 {
     float xi, eta, psi0, dxi, deta, cos_B, rcpr_D, rcpr_D_squared, cos_B_by_D;
@@ -40,13 +40,13 @@ rssringoccs_Float_Fresnel_dPsi_dPhi(float kD, float r, float r0, float phi,
     /*  Compute derivatives (Use calculus before hand).                       */
     dxi  = -cos_B_by_D * (r * sin_phi);
     deta = factor * sin_phi_phi0;
-    dpsi = kD * ((0.5F/psi0)*(deta - 2.0F*dxi) + dxi);
+    dpsi = k*D * ((0.5F/psi0)*(deta - 2.0F*dxi) + dxi);
 
     return dpsi;
 }
 
 double
-rssringoccs_Double_Fresnel_dPsi_dPhi(double kD, double r, double r0, double phi,
+rssringoccs_Double_Fresnel_dPsi_dPhi(double k, double r, double r0, double phi,
                                      double phi0, double B, double D)
 {
     double xi, eta, psi0, dxi, deta, cos_B, rcpr_D, rcpr_D_squared, cos_B_by_D;
@@ -84,13 +84,13 @@ rssringoccs_Double_Fresnel_dPsi_dPhi(double kD, double r, double r0, double phi,
     /*  Compute derivatives (Use calculus before hand).                       */
     dxi  = -cos_B_by_D * (r * sin_phi);
     deta = factor * sin_phi_phi0;
-    dpsi = kD * ((0.5/psi0)*(deta - 2.0*dxi) + dxi);
+    dpsi = k*D * ((0.5/psi0)*(deta - 2.0*dxi) + dxi);
 
     return dpsi;
 }
 
 long double
-rssringoccs_LDouble_Fresnel_dPsi_dPhi(long double kD, long double r,
+rssringoccs_LDouble_Fresnel_dPsi_dPhi(long double k, long double r,
                                      long double r0, long double phi,
                                      long double phi0, long double B,
                                      long double D)
@@ -130,7 +130,7 @@ rssringoccs_LDouble_Fresnel_dPsi_dPhi(long double kD, long double r,
     /*  Compute derivatives (Use calculus before hand).                       */
     dxi  = -cos_B_by_D * (r * sin_phi);
     deta = factor * sin_phi_phi0;
-    dpsi = kD * ((0.5L/psi0)*(deta - 2.0L*dxi) + dxi);
+    dpsi = k*D * ((0.5L/psi0)*(deta - 2.0L*dxi) + dxi);
 
     return dpsi;
 }

@@ -23,63 +23,60 @@
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
 rssringoccs_ComplexDouble
-Fresnel_Transform_Newton_Norm_Double(double *x_arr, double *phi_arr,
-                                     rssringoccs_ComplexDouble *T_in,
-                                     double *w_func, double kD, double r,
-                                     double B, double D, double EPS,
-                                     unsigned long toler, unsigned long n_pts,
-                                     unsigned long center)
+Fresnel_Transform_Newton_D_Double(double *x_arr, double *phi_arr,
+                                  rssringoccs_ComplexDouble *T_in, double *w_func,
+                                  double k, double r, double B, double EPS,
+                                  unsigned long toler, double dx,
+                                  double F, unsigned long n_pts,
+                                  unsigned long center, double rx, double ry,
+                                  double rz)
 {
     /*  Declare all necessary variables. i and j are used for indexing.       */
-    unsigned long m, n;
+    unsigned long i, j;
 
     /*  The Fresnel kernel and the stationary ring azimuth angle.             */
-    double psi, phi, cos_psi, sin_psi, real_norm, abs_norm;
-    rssringoccs_ComplexDouble T_out, exp_psi, norm, integrand;
+    double psi, phi, x, y, drx, dry, D, exp_psi_re, exp_psi_im;
+    rssringoccs_ComplexDouble T_out, exp_psi, integrand;
+    double rcpr_F = 1.0/F;
 
     /*  Initialize T_out and norm to zero so we can loop over later.          */
     T_out = rssringoccs_CDouble_Zero;
-    norm  = rssringoccs_CDouble_Zero;
 
     /*  Symmetry is lost without the Legendre polynomials, or Fresnel         *
      *  quadratic. Must compute everything from -W/2 to W/2.                  */
-    n = center-(long)((n_pts-1)/2);
+    j = center-(long)((n_pts-1)/2);
 
     /*  Use a Riemann Sum to approximate the Fresnel Inverse Integral.        */
-    for (m = 0; m<n_pts; ++m)
+    for (i = 0; i<n_pts; ++i)
     {
         /*  Calculate the stationary value of psi with respect to phi.        */
-        phi = Newton_Raphson_Fresnel_Psi(kD, r, x_arr[m], phi_arr[m],
-                                         phi_arr[m], B, D, EPS, toler);
+        phi = Newton_Raphson_Fresnel_Psi_D(k, r, x_arr[i], phi_arr[i],
+                                           phi_arr[i], B, EPS, toler, rx, ry, rz);
+
+        x = x_arr[i] * cos(phi);
+        y = x_arr[i] * sin(phi);
+        drx = x-rx;
+        dry = y-ry;
+        D = sqrt(drx*drx + dry*dry + rz*rz);
 
         /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
-        psi     = rssringoccs_Double_Fresnel_Psi(kD, r, x_arr[m], phi,
-                                                 phi_arr[m], B, D);
-        cos_psi = rssringoccs_Double_Cos(psi);
-        sin_psi = rssringoccs_Double_Sin(psi);
-        exp_psi = rssringoccs_CDouble_Rect(cos_psi, -sin_psi);
-        exp_psi = rssringoccs_CDouble_Multiply_Real(w_func[m], exp_psi);
+        psi        = rssringoccs_Double_Fresnel_Psi(k, r, x_arr[i], phi,
+                                                    phi_arr[i], B, D);
+        exp_psi_re = cos(psi)*w_func[i];
+        exp_psi_im = -sin(psi)*w_func[i];
+        exp_psi = rssringoccs_CDouble_Rect(exp_psi_re, exp_psi_im);
 
-        /*  Compute the norm using a Riemann sum as well.                     */
-        norm = rssringoccs_CDouble_Add(norm, exp_psi);
 
         /*  Compute the transform with a Riemann sum. If the T_in pointer     *
          *  does not contain at least 2*n_pts+1 points, n_pts to the left and *
          *  right of the center, then this will create a segmentation fault.  */
-        integrand = rssringoccs_CDouble_Multiply(exp_psi, T_in[n]);
+        integrand = rssringoccs_CDouble_Multiply(exp_psi, T_in[j]);
         T_out     = rssringoccs_CDouble_Add(T_out, integrand);
-        n += 1;
+        j += 1;
     }
 
-    /*  The integral in the numerator of norm evaluates to F sqrt(2). Use     *
-     *  this in the calculation of the normalization. The cabs function       *
-     *  computes the absolute value of complex number (defined in complex.h). */
-    abs_norm = rssringoccs_CDouble_Abs(norm);
-    real_norm = rssringoccs_Sqrt_Two / abs_norm;
-
-    /*  Multiply result by the coefficient found in the Fresnel inverse.      *
-     *  The 1/F term is omitted, since the F in the norm cancels this.        */
-    integrand = rssringoccs_CDouble_Rect(0.5*real_norm, 0.5*real_norm);
+    /*  Multiply result by the coefficient found in the Fresnel inverse.      */
+    integrand = rssringoccs_CDouble_Rect(0.5*dx*rcpr_F, 0.5*dx*rcpr_F);
     T_out     = rssringoccs_CDouble_Multiply(integrand, T_out);
     return T_out;
 }

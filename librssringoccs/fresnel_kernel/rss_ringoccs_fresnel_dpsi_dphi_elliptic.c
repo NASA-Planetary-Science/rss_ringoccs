@@ -2,7 +2,7 @@
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_kernel.h>
 
 float
-rssringoccs_Float_Fresnel_dPsi_dPhi_Ellipse(float kD,  float r,    float r0,
+rssringoccs_Float_Fresnel_dPsi_dPhi_Ellipse(float k,  float r,    float r0,
                                             float phi, float phi0, float B,
                                             float D,   float ecc,  float peri)
 {
@@ -63,12 +63,12 @@ rssringoccs_Float_Fresnel_dPsi_dPhi_Ellipse(float kD,  float r,    float r0,
     dpsi_phi = (deta_phi - 2.0F * dxi_phi) * (0.5F / psi0) + dxi_phi;
 
     /*  Compute the partial derivative.                                       */
-    psi_d1  = kD*(dpsi_phi + dpsi_rho*drho_phi);
+    psi_d1  = k*D*(dpsi_phi + dpsi_rho*drho_phi);
     return psi_d1;
 }
 
 double
-rssringoccs_Double_Fresnel_dPsi_dPhi_Ellipse(double kD, double r, double r0,
+rssringoccs_Double_Fresnel_dPsi_dPhi_Ellipse(double k, double r, double r0,
                                              double phi, double phi0, double B,
                                              double D, double ecc, double peri)
 {
@@ -126,12 +126,12 @@ rssringoccs_Double_Fresnel_dPsi_dPhi_Ellipse(double kD, double r, double r0,
     dpsi_phi = (deta_phi - 2.0 * dxi_phi) * (0.5 / psi0) + dxi_phi;
 
     /*  Compute the partial derivative.                                       */
-    psi_d1  = kD*(dpsi_phi + dpsi_rho*drho_phi);
+    psi_d1  = k*D*(dpsi_phi + dpsi_rho*drho_phi);
     return psi_d1;
 }
 
 long double
-rssringoccs_LDouble_Fresnel_dPsi_dPhi_Ellipse(long double kD,   long double r,
+rssringoccs_LDouble_Fresnel_dPsi_dPhi_Ellipse(long double k,   long double r,
                                               long double r0,   long double phi,
                                               long double phi0, long double B,
                                               long double D,    long double ecc,
@@ -191,6 +191,6 @@ rssringoccs_LDouble_Fresnel_dPsi_dPhi_Ellipse(long double kD,   long double r,
     dpsi_phi = (deta_phi - 2.0L * dxi_phi) * (0.5L / psi0) + dxi_phi;
 
     /*  Compute the partial derivative.                                       */
-    psi_d1  = kD*(dpsi_phi + dpsi_rho*drho_phi);
+    psi_d1  = k*D*(dpsi_phi + dpsi_rho*drho_phi);
     return psi_d1;
 }

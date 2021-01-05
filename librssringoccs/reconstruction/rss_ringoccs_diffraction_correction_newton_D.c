@@ -35,7 +35,7 @@
  *          use of them arises if one uses FFT methods. This routine does NOT *
  *          use FFTs, but rather ordinary integration.                        *
  ******************************************************************************/
-void rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj *tau)
+void rssringoccs_Diffraction_Correction_Newton_D(rssringoccs_TAUObj *tau)
 {
     /*  Variables for indexing. nw_pts is the number of points in the window. */
     unsigned long i, j, nw_pts, center;
@@ -172,10 +172,11 @@ void rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj *tau)
             }
 
             /*  Compute the fresnel tranform about the current point.         */
-            tau->T_out[i] = Fresnel_Transform_Newton_Norm_Double(
+            tau->T_out[i] = Fresnel_Transform_Newton_D_Norm_Double(
                 x_arr, phi_arr, tau->T_in, w_func, tau->k_vals[center],
-                tau->rho_km_vals[center], tau->B_rad_vals[center],
-                tau->D_km_vals[center], EPS, toler, nw_pts, center
+                tau->rho_km_vals[center], tau->B_rad_vals[center],EPS, toler,
+                nw_pts, center, tau->rx_km_vals[center],
+                tau->ry_km_vals[center], tau->rz_km_vals[center]
             );
 
             /*  Increment pointers using pointer arithmetic.                  */
@@ -218,11 +219,12 @@ void rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj *tau)
             }
 
             /*  Compute the fresnel tranform about the current point.         */
-            tau->T_out[i] = Fresnel_Transform_Newton_Double(
+            tau->T_out[i] = Fresnel_Transform_Newton_D_Double(
                 x_arr, phi_arr, tau->T_in, w_func, tau->k_vals[center],
                 tau->rho_km_vals[center], tau->B_rad_vals[center],
-                tau->D_km_vals[center], EPS, toler, dx, tau->F_km_vals[center],
-                nw_pts, center
+                EPS, toler, dx, tau->F_km_vals[center], nw_pts, center,
+                tau->rx_km_vals[center], tau->ry_km_vals[center],
+                tau->rz_km_vals[center]
             );
 
             /*  Increment pointers using pointer arithmetic.                  */

@@ -2,7 +2,7 @@
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_kernel.h>
 
 float
-rssringoccs_Float_Fresnel_Psi(float kD, float r, float r0, float phi,
+rssringoccs_Float_Fresnel_Psi(float k, float r, float r0, float phi,
                               float phi0, float B, float D)
 {
     float xi, eta, rcpr_D, rcpr_D_squared, cos_B, cos_phi, cos_phi0;
@@ -24,13 +24,13 @@ rssringoccs_Float_Fresnel_Psi(float kD, float r, float r0, float phi,
     eta  = (r0*r0 + r*r - 2.0F*r*r0*cos_phi_phi0) * rcpr_D_squared;
 
     /* Sign of xi swapped from MTR86.                                         */
-    psi = kD * (rssringoccs_Float_Sqrt(1.0F + eta - 2.0F*xi) + xi - 1.0F);
+    psi = k*D * (rssringoccs_Float_Sqrt(1.0F + eta - 2.0F*xi) + xi - 1.0F);
 
     return psi;
 }
 
 double
-rssringoccs_Double_Fresnel_Psi(double kD, double r, double r0, double phi,
+rssringoccs_Double_Fresnel_Psi(double k, double r, double r0, double phi,
                                double phi0, double B, double D)
 {
     double xi, eta, rcpr_D, rcpr_D_squared, cos_B, cos_phi, cos_phi0;
@@ -52,13 +52,13 @@ rssringoccs_Double_Fresnel_Psi(double kD, double r, double r0, double phi,
     eta  = (r0*r0 + r*r - 2.0*r*r0*cos_phi_phi0) * rcpr_D_squared;
 
     /* Sign of xi swapped from MTR86.                                         */
-    psi = kD * (rssringoccs_Double_Sqrt(1.0 + eta - 2.0*xi) + xi - 1.0);
+    psi = k*D * (rssringoccs_Double_Sqrt(1.0 + eta - 2.0*xi) + xi - 1.0);
 
     return psi;
 }
 
 long double
-rssringoccs_LDouble_Fresnel_Psi(long double kD, long double r, long double r0,
+rssringoccs_LDouble_Fresnel_Psi(long double k, long double r, long double r0,
                                 long double phi, long double phi0, long double B,
                                 long double D)
 {
@@ -81,7 +81,7 @@ rssringoccs_LDouble_Fresnel_Psi(long double kD, long double r, long double r0,
     eta  = (r0*r0 + r*r - 2.0L*r*r0*cos_phi_phi0) * rcpr_D_squared;
 
     /* Sign of xi swapped from MTR86.                                         */
-    psi = kD * (rssringoccs_LDouble_Sqrt(1.0L + eta - 2.0L*xi) + xi - 1.0L);
+    psi = k*D * (rssringoccs_LDouble_Sqrt(1.0L + eta - 2.0L*xi) + xi - 1.0L);
 
     return psi;
 }

@@ -44,6 +44,9 @@ typedef struct rssringoccs_TAUObj {
     double *phase_rad_vals;
     double *phase_vals;
     double *tau_vals;
+    double *rx_km_vals;
+    double *ry_km_vals;
+    double *rz_km_vals;
     double dx_km;
     double normeq;
     double sigma;
@@ -137,5 +140,8 @@ rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau);
 
 extern void
 rssringoccs_Diffraction_Correction_PerturbedNewton(rssringoccs_TAUObj *tau);
+
+extern void
+rssringoccs_Diffraction_Correction_Newton_D(rssringoccs_TAUObj *tau);
 
 #endif

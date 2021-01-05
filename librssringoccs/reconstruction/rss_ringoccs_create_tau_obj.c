@@ -140,6 +140,9 @@ rssringoccs_Create_TAUObj(rssringoccs_DLPObj *dlp, double res)
     tau->phase_rad_vals = NULL;
     tau->wtype = NULL;
     tau->psitype = NULL;
+    tau->rx_km_vals = NULL;
+    tau->ry_km_vals = NULL;
+    tau->rz_km_vals = NULL;
 
     /*  Set the error_occurred member to false and the error_message to NULL. *
      *  If no errors occur during processing, these variables will remain     *

@@ -7,9 +7,9 @@ from scipy.integrate import simps
 import spiceypy as spice
 import sys
 sys.path.append('../')
-import rss_uringoccs.reader.vgr_uranus_reader as vur
-from rss_uringoccs.occgeo import occgeo_uranus as occgeo
-from rss_uringoccs.tools.write_output_files import construct_filepath
+import rss_ringoccs.rsr_reader.vgr_uranus_reader as vur
+from rss_ringoccs.occgeo import occgeo
+from rss_ringoccs.tools.write_uranus_output_files import construct_filepath
 sys.path.remove('../')
 import pipeline_params as pipe
 ### suppress any annoying warning messages

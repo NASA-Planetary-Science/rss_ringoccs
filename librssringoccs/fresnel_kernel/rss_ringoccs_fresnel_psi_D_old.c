@@ -43,13 +43,13 @@ static double __d2psi(double kD, double r, double r0, double phi,
     return kD*psi_d2;
 }
 
-double Newton_Raphson_Fresnel_Psi_D_Old(double k, double r, double r0,
+double Newton_Raphson_Fresnel_Psi_D_Old(double kD, double r, double r0,
                                         double phi, double phi0, double B,
                                         double EPS, long toler, double rx,
                                         double ry, double rz)
 {
     double dphi;
-    double D, kD;
+    double D;
     double x, y, dx, dy;
     long i = 0;
     x = r0 * cos(phi);
@@ -57,7 +57,6 @@ double Newton_Raphson_Fresnel_Psi_D_Old(double k, double r, double r0,
     dx = x-rx;
     dy = y-ry;
     D = sqrt(dx*dx + dy*dy + rz*rz);
-    kD = k*D;
     dphi  = __dpsi(kD, r, r0, phi, phi0, B, D);
 
     while(fabs(dphi) > EPS){

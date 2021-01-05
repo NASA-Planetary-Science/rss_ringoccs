@@ -22,10 +22,23 @@
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_kernel.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
+static double __psi(double kD, double r, double r0, double phi,
+                    double phi0, double B, double D)
+{
+    double xi, eta;
+
+    /*  Compute xi variable (MTR86 Equation 4b) and eta (Equation 4c).        */
+    xi   = (cos(B)/D) * (r * cos(phi) - r0 * cos(phi0));
+    eta  = (r0*r0 + r*r - 2.0*r*r0*cos(phi-phi0)) / (D*D);
+
+    /* Sign of xi swapped from MTR86.                                         */
+    return kD * (sqrt(1.0+eta-2.0*xi) + xi - 1.0);
+}
+
 rssringoccs_ComplexDouble
 Fresnel_Transform_Newton_D_Old_Double(double *x_arr, double *phi_arr,
                                       rssringoccs_ComplexDouble *T_in,
-                                      double *w_func, double k, double r,
+                                      double *w_func, double kD, double r,
                                       double B, double EPS, unsigned long toler,
                                       double dx, double F, unsigned long n_pts,
                                       unsigned long center, double rx,
@@ -49,31 +62,22 @@ Fresnel_Transform_Newton_D_Old_Double(double *x_arr, double *phi_arr,
     /*  Use a Riemann Sum to approximate the Fresnel Inverse Integral.        */
     for (i = 0; i<n_pts; ++i)
     {
-        x = x_arr[i] * cos(phi);
-        y = x_arr[i] * sin(phi);
-        dx = x-rx;
-        dy = y-ry;
-        D = sqrt(dx*dx + dy*dy + rz*rz);
-        kD = k*D;
-
         /*  Calculate the stationary value of psi with respect to phi.        */
-        phi = Newton_Raphson_Fresnel_Psi_D_Old(k, r, x_arr[i], phi_arr[i],
+        phi = Newton_Raphson_Fresnel_Psi_D_Old(kD, r, x_arr[i], phi_arr[i],
                                                phi_arr[i], B, EPS, toler,
                                                rx, ry, rz);
 
         x = x_arr[i] * cos(phi);
         y = x_arr[i] * sin(phi);
-        dx = x-rx;
-        dy = y-ry;
-        D = sqrt(dx*dx + dy*dy + rz*rz);
+        drx = x-rx;
+        dry = y-ry;
+        D = sqrt(drx*drx + dry*dry + rz*rz);
 
         /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
-        psi = kD*rssringoccs_Double_Fresnel_Psi(1.0, r, x_arr[i], phi,
-                                                phi_arr[i], B, D);
+        psi = __psi(kD, r, x_arr[i], phi, phi_arr[i], B, D);
         exp_psi_re = cos(psi)*w_func[i];
         exp_psi_im = -sin(psi)*w_func[i];
         exp_psi = rssringoccs_CDouble_Rect(exp_psi_re, exp_psi_im);
-
 
         /*  Compute the transform with a Riemann sum. If the T_in pointer     *
          *  does not contain at least 2*n_pts+1 points, n_pts to the left and *

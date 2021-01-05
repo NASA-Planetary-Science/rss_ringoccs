@@ -173,7 +173,7 @@ void rssringoccs_Diffraction_Correction_Newton_D_Old(rssringoccs_TAUObj *tau)
 
             /*  Compute the fresnel tranform about the current point.         */
             tau->T_out[i] = Fresnel_Transform_Newton_D_Old_Norm_Double(
-                x_arr, phi_arr, tau->T_in, w_func, tau->k_vals[center],
+                x_arr, phi_arr, tau->T_in, w_func, tau->k_vals[center]*tau->D_km_vals[center],
                 tau->rho_km_vals[center], tau->B_rad_vals[center],EPS, toler,
                 nw_pts, center, tau->rx_km_vals[center],
                 tau->ry_km_vals[center], tau->rz_km_vals[center]
@@ -220,7 +220,7 @@ void rssringoccs_Diffraction_Correction_Newton_D_Old(rssringoccs_TAUObj *tau)
 
             /*  Compute the fresnel tranform about the current point.         */
             tau->T_out[i] = Fresnel_Transform_Newton_D_Old_Double(
-                x_arr, phi_arr, tau->T_in, w_func, tau->k_vals[center],
+                x_arr, phi_arr, tau->T_in, w_func, tau->k_vals[center]*tau->D_km_vals[center],
                 tau->rho_km_vals[center], tau->B_rad_vals[center],
                 EPS, toler, dx, tau->F_km_vals[center], nw_pts, center,
                 tau->rx_km_vals[center], tau->ry_km_vals[center],

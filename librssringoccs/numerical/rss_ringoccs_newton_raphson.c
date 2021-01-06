@@ -146,3 +146,5 @@ rssringoccs_Newton_Raphson_Complex(
 
     return z;
 }
+
+#undef EPS

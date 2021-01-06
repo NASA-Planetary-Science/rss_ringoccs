@@ -86,6 +86,23 @@
 #include <rss_ringoccs/include/rss_ringoccs_string.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 
+/*  Macro for checking the data in a tau object. This is to save repetitive   *
+ *  code. It simply checks if a certain pointer in tau is NULL. The #var      *
+ *  preprocessor directive treats var as a string literal. Note that since    *
+ *  this macro ends with braces, we do not need semi-colons when calling it.  */
+#define CHECK_DATA_MEMBER(var)                                                 \
+    if (tau->var == NULL)                                                      \
+    {                                                                          \
+        tau->error_occurred = rssringoccs_True;                                \
+        tau->error_message = rssringoccs_strdup(                               \
+            "\n\rError Encountered: rss_ringoccs\n"                            \
+            "\r\trssringoccs_Check_Tau_Data\n\n"                               \
+            "\rInput tau has "#var" set to NULL. Returning.\n\n"               \
+        );                                                                     \
+        return;                                                                \
+    }
+/*  End of CHECK_DATA_MEMBER macro.                                           */
+
 /*  Function for checking the pointers in a rssringoccs_TAUObj pointer.       */
 void rssringoccs_Tau_Check_Data(rssringoccs_TAUObj *tau)
 {
@@ -98,97 +115,20 @@ void rssringoccs_Tau_Check_Data(rssringoccs_TAUObj *tau)
         return;
 
     /*  If any of these pointers are NULL, set the error_occurred member to   *
-     *  true, set an error message, and return.                               */
-    if (tau->T_in == NULL)
-    {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_Check_Tau_Data\n\n"
-            "\rInput tau has T_in set to NULL. Returning.\n\n"
-        );
-        return;
-    }
-    else if (tau->T_out == NULL)
-    {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_Check_Tau_Data\n\n"
-            "\rInput tau has T_out set to NULL. Returning.\n\n"
-        );
-        return;
-    }
-    else if (tau->rho_km_vals == NULL)
-    {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tcheck_tau_data\n\n"
-            "\rInput tau has rho_km_vals set to NULL. Returning.\n\n"
-        );
-        return;
-    }
-    else if (tau->F_km_vals == NULL)
-    {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tcheck_tau_data\n\n"
-            "\rInput tau has F_km_vals set to NULL. Returning.\n\n"
-        );
-        return;
-    }
-    else if (tau->phi_rad_vals == NULL)
-    {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tcheck_tau_data\n\n"
-            "\rInput tau has phi_rad_vals set to NULL. Returning.\n\n"
-        );
-        return;
-    }
-    else if (tau->k_vals == NULL)
-    {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tcheck_tau_data\n\n"
-            "\rInput tau has kd_vals set to NULL. Returning.\n\n"
-        );
-        return;
-    }
-    else if (tau->B_rad_vals == NULL)
-    {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tcheck_tau_data\n\n"
-            "\rInput tau has B_rad_vals set to NULL. Returning.\n\n"
-        );
-        return;
-    }
-    else if (tau->D_km_vals == NULL)
-    {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tcheck_tau_data\n\n"
-            "\rInput tau has D_km_vals set to NULL. Returning.\n\n"
-        );
-        return;
-    }
-    else if (tau->w_km_vals == NULL)
-    {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tcheck_tau_data\n\n"
-            "\rInput tau has w_km_vals set to NULL. Returning.\n\n"
-        );
-        return;
-    }
-    /*  If of if-statements checking if pointers are NULL.                    */
+     *  true, set an error message, and return. The CHECK_DATA_MEMBER macro   *
+     *  ends with braces {} so we do not need a semi-colon at the end of each *
+     *  line.                                                                 */
+    CHECK_DATA_MEMBER(T_in)
+    CHECK_DATA_MEMBER(T_out)
+    CHECK_DATA_MEMBER(rho_km_vals)
+    CHECK_DATA_MEMBER(F_km_vals)
+    CHECK_DATA_MEMBER(phi_rad_vals)
+    CHECK_DATA_MEMBER(k_vals)
+    CHECK_DATA_MEMBER(B_rad_vals)
+    CHECK_DATA_MEMBER(D_km_vals)
+    CHECK_DATA_MEMBER(rx_km_vals)
+    CHECK_DATA_MEMBER(ry_km_vals)
+    CHECK_DATA_MEMBER(rz_km_vals)
+    CHECK_DATA_MEMBER(w_km_vals)
 }
 /*  End of rssringoccs_Check_Tau_Data.                                        */

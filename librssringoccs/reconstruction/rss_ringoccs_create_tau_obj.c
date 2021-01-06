@@ -137,7 +137,10 @@ rssringoccs_Create_TAUObj(rssringoccs_DLPObj *dlp, double res)
     tau->tau_threshold_vals = NULL;
     tau->phi_rl_rad_vals = NULL;
     tau->p_norm_vals = NULL;
+    tau->power_vals = NULL;
     tau->phase_rad_vals = NULL;
+    tau->phase_vals = NULL;
+    tau->tau_vals = NULL;
     tau->wtype = NULL;
     tau->psitype = NULL;
     tau->rx_km_vals = NULL;
@@ -169,7 +172,7 @@ rssringoccs_Create_TAUObj(rssringoccs_DLPObj *dlp, double res)
         tau->error_message = rssringoccs_strdup(
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Create_TAUObj\n\n"
-            "\rInput dlp is NULL. Returning.\n"
+            "\rInput dlp has error_occurred set to true. Returning.\n"
         );
         return tau;
     }
@@ -224,7 +227,7 @@ rssringoccs_Create_TAUObj(rssringoccs_DLPObj *dlp, double res)
     {
         tau->error_occurred = rssringoccs_True;
         tau->error_message = rssringoccs_strdup(
-            "\rError Encountered: rss_ringoccs\n"
+            "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Create_TAUObj\n\n"
             "\rrssringoccs_strdup failed to set tau->psitype. Returning.\n"
         );
@@ -261,6 +264,10 @@ rssringoccs_Create_TAUObj(rssringoccs_DLPObj *dlp, double res)
     /*  By default, we do not use the interpolation methods defined in MTR86. */
     tau->interp = 0;
 
+    /*  Set the default values for the Newton Raphson algorithm.              */
+    tau->EPS = 1.0e-4;
+    tau->toler = 4U;
+
     /**************************************************************************
      *  Grab the data from the DLP and compute some extra variables. This     *
      *  function computes the following for tau:                              *
@@ -281,6 +288,9 @@ rssringoccs_Create_TAUObj(rssringoccs_DLPObj *dlp, double res)
      *      phi_rl_rad_vals                                                   *
      *      p_norm_vals                                                       *
      *      phase_rad_vals                                                    *
+     *      rx_km_vals                                                        *
+     *      ry_km_vals                                                        *
+     *      rz_km_vals                                                        *
      *  This function also checks that the arrays have valid entries.         *
      **************************************************************************/
     rssringoccs_Copy_DLP_Data_To_Tau(dlp, tau);

@@ -1,11 +1,16 @@
 
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 
 void rssringoccs_Reconstruction(rssringoccs_TAUObj *tau)
 {
+    if (tau == NULL)
+        return;
+
+    if (tau->error_occurred)
+        return;
+
     rssringoccs_Tau_Check_Keywords(tau);
     rssringoccs_Tau_Check_Occ_Type(tau);
     rssringoccs_Tau_Compute_Vars(tau);
@@ -19,10 +24,6 @@ void rssringoccs_Reconstruction(rssringoccs_TAUObj *tau)
         rssringoccs_Diffraction_Correction_Fresnel(tau);
     else if (tau->psinum == rssringoccs_DR_Legendre)
         rssringoccs_Diffraction_Correction_Legendre(tau);
-    else if (tau->psinum == rssringoccs_DR_NewtonD)
-        rssringoccs_Diffraction_Correction_Newton_D(tau);
-    else if (tau->psinum == rssringoccs_DR_NewtonDOld)
-        rssringoccs_Diffraction_Correction_Newton_D_Old(tau);
     else
         rssringoccs_Diffraction_Correction_Newton(tau);
 

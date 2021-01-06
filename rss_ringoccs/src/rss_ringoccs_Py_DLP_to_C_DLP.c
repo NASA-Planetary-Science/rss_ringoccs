@@ -30,7 +30,6 @@ static double *__extract_data(rssringoccs_DLPObj *dlp, PyObject *py_dlp,
 {
     PyObject *tmp;
     PyObject *arr;
-    char *errmes;
     unsigned long len;
 
     if (dlp == NULL)
@@ -42,16 +41,15 @@ static double *__extract_data(rssringoccs_DLPObj *dlp, PyObject *py_dlp,
     if (!PyObject_HasAttrString(py_dlp, var_name))
     {
         dlp->error_occurred = rssringoccs_True;
-        errmes = malloc(sizeof(*errmes) * 256);
+        dlp->error_message = malloc(sizeof(*dlp->error_message) * 256);
         sprintf(
-            errmes,
+            dlp->error_message,
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\tdiffrec.DiffractionCorrection\n\n"
             "\rInput DLP Instance is missing the following attribute:\n"
             "\r\t%s\n\n",
             var_name
         );
-        dlp->error_message = errmes;
         return NULL;
     }
     else
@@ -60,15 +58,14 @@ static double *__extract_data(rssringoccs_DLPObj *dlp, PyObject *py_dlp,
     if (!PyArray_Check(tmp))
     {
         dlp->error_occurred = rssringoccs_True;
-        errmes = malloc(sizeof(*errmes) * 256);
+        dlp->error_message = malloc(sizeof(*dlp->error_message) * 256);
         sprintf(
-            errmes,
+            dlp->error_message,
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\tdiffrec.DiffractionCorrection\n\n"
             "\r%s must be a numpy array.\n",
             var_name
         );
-        dlp->error_message = errmes;
         return NULL;
     }
     else
@@ -80,15 +77,14 @@ static double *__extract_data(rssringoccs_DLPObj *dlp, PyObject *py_dlp,
     if (!arr)
     {
         dlp->error_occurred = rssringoccs_True;
-        errmes = malloc(sizeof(*errmes) * 256);
+        dlp->error_message = malloc(sizeof(*dlp->error_message) * 256);
         sprintf(
-            errmes,
+            dlp->error_message,
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\tdiffrec.DiffractionCorrection\n\n"
             "\r%s must be a numpy array.\n",
             var_name
         );
-        dlp->error_message = errmes;
         return NULL;
     }
 
@@ -96,15 +92,14 @@ static double *__extract_data(rssringoccs_DLPObj *dlp, PyObject *py_dlp,
     else if (PyArray_NDIM((PyArrayObject *)arr) != 1)
     {
         dlp->error_occurred = rssringoccs_True;
-        errmes = malloc(sizeof(*errmes) * 256);
+        dlp->error_message = malloc(sizeof(*dlp->error_message) * 256);
         sprintf(
-            errmes,
+            dlp->error_message,
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\tdiffrec.DiffractionCorrection\n\n"
             "\r%s must be a one-dimensional numpy array.\n",
             var_name
         );
-        dlp->error_message = errmes;
         return NULL;
     }
 
@@ -112,15 +107,14 @@ static double *__extract_data(rssringoccs_DLPObj *dlp, PyObject *py_dlp,
     else if (len != dlp->arr_size)
     {
         dlp->error_occurred = rssringoccs_True;
-        errmes = malloc(sizeof(*errmes) * 256);
+        dlp->error_message = malloc(sizeof(*dlp->error_message) * 256);
         sprintf(
-            errmes,
+            dlp->error_message,
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\tdiffrec.DiffractionCorrection\n\n"
             "\r%s and rho_km_vals have a different number of elements.\n",
             var_name
         );
-        dlp->error_message = errmes;
         return NULL;
     }
 
@@ -132,7 +126,12 @@ rssringoccs_DLPObj *rssringoccs_Py_DLP_to_C_DLP(PyObject *py_dlp)
 {
     PyObject *tmp;
     PyObject *arr;
-    rssringoccs_DLPObj *dlp = malloc(sizeof(*dlp));
+    rssringoccs_DLPObj *dlp;
+
+    if (py_dlp == NULL)
+        return NULL;
+
+    dlp = malloc(sizeof(*dlp));
     if (dlp == NULL)
         return dlp;
 
@@ -218,29 +217,29 @@ rssringoccs_DLPObj *rssringoccs_Py_DLP_to_C_DLP(PyObject *py_dlp)
     dlp->rho_km_vals = (double *)PyArray_DATA((PyArrayObject *)arr);
     dlp->arr_size = PyArray_DIMS((PyArrayObject *)arr)[0];
 
-    dlp->phi_rad_vals = __extract_data(dlp, py_dlp, "phi_rad_vals");
-    dlp->B_rad_vals = __extract_data(dlp, py_dlp, "B_rad_vals");
-    dlp->D_km_vals = __extract_data(dlp, py_dlp, "D_km_vals");
-    dlp->f_sky_hz_vals = __extract_data(dlp, py_dlp, "f_sky_hz_vals");
+    dlp->p_norm_vals      = __extract_data(dlp, py_dlp, "p_norm_vals");
+    dlp->phase_rad_vals   = __extract_data(dlp, py_dlp, "phase_rad_vals");
+    dlp->phi_rad_vals     = __extract_data(dlp, py_dlp, "phi_rad_vals");
+    dlp->phi_rl_rad_vals  = __extract_data(dlp, py_dlp, "phi_rl_rad_vals");
+    dlp->B_rad_vals       = __extract_data(dlp, py_dlp, "B_rad_vals");
+    dlp->D_km_vals        = __extract_data(dlp, py_dlp, "D_km_vals");
+    dlp->f_sky_hz_vals    = __extract_data(dlp, py_dlp, "f_sky_hz_vals");
     dlp->rho_dot_kms_vals = __extract_data(dlp, py_dlp, "rho_dot_kms_vals");
-    dlp->t_oet_spm_vals = __extract_data(dlp, py_dlp, "t_oet_spm_vals");
-    dlp->t_ret_spm_vals = __extract_data(dlp, py_dlp, "t_ret_spm_vals");
-    dlp->t_set_spm_vals = __extract_data(dlp, py_dlp, "t_set_spm_vals");
-    dlp->rx_km_vals = __extract_data(dlp, py_dlp, "rx_km_vals");
-    dlp->ry_km_vals = __extract_data(dlp, py_dlp, "ry_km_vals");
-    dlp->rz_km_vals = __extract_data(dlp, py_dlp, "rz_km_vals");
+    dlp->t_oet_spm_vals   = __extract_data(dlp, py_dlp, "t_oet_spm_vals");
+    dlp->t_ret_spm_vals   = __extract_data(dlp, py_dlp, "t_ret_spm_vals");
+    dlp->t_set_spm_vals   = __extract_data(dlp, py_dlp, "t_set_spm_vals");
+    dlp->rx_km_vals       = __extract_data(dlp, py_dlp, "rx_km_vals");
+    dlp->ry_km_vals       = __extract_data(dlp, py_dlp, "ry_km_vals");
+    dlp->rz_km_vals       = __extract_data(dlp, py_dlp, "rz_km_vals");
 
     dlp->rho_corr_pole_km_vals
         = __extract_data(dlp, py_dlp, "rho_corr_pole_km_vals");
 
     dlp->rho_corr_timing_km_vals
         = __extract_data(dlp, py_dlp, "rho_corr_timing_km_vals");
-    dlp->phi_rl_rad_vals = __extract_data(dlp, py_dlp, "phi_rl_rad_vals");
-    dlp->p_norm_vals = __extract_data(dlp, py_dlp, "p_norm_vals");
-    dlp->phase_rad_vals = __extract_data(dlp, py_dlp, "phase_rad_vals");
+
     dlp->raw_tau_threshold_vals
         = __extract_data(dlp, py_dlp, "raw_tau_threshold_vals");
 
     return dlp;
-
 }

@@ -249,3 +249,5 @@ rssringoccs_Halleys_Method_Complex(
 
     return z;
 }
+
+#undef EPS

@@ -120,6 +120,7 @@
             "\r"#var" is not NULL. It is likely you've already set the data\n" \
             "\rfor this tau object. Returning.\n"                              \
         );                                                                     \
+        return;                                                                \
     }                                                                          \
                                                                                \
     /*  Allocate memory for the variable.                                    */\
@@ -158,7 +159,7 @@
 /*  Use this macro to save on repetitive code. It is for checking that all of *
  *  of the values of a given member in the tau object fall within [-2pi, 2pi].*
  *  Note, it implicitly has min and max defined. These are declared at the    *
- *  top of the main function.                                                 */
+ *  top of the rssringoccs_Copy_DLP_Data_To_Tau function.                     */
 #define __TAU_CHECK_TWO_PI__(var)                                              \
     /*  Compute the minimum and maximum of var.                              */\
     min = rssringoccs_Min_Double(tau->var, tau->arr_size);                     \

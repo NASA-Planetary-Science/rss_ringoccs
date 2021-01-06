@@ -17,29 +17,29 @@
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
- *  Date:       December 31, 2020                                             *
+ *  Date:       January 5, 2020                                               *
  ******************************************************************************/
 
 #include <stdlib.h>
-#include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
+#include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 
-void rssringoccs_Destroy_CalCSV(rssringoccs_CalCSV **cal)
+void rssringoccs_Destroy_Tau(rssringoccs_TAUObj **tau)
 {
-    rssringoccs_CalCSV *cal_inst = *cal;
+    rssringoccs_TAUObj *tau_inst = *tau;
 
-    if (cal_inst == NULL)
+    if (tau_inst == NULL)
         return;
 
-    rssringoccs_Destroy_CalCSV_Members(cal_inst);
+    rssringoccs_Destroy_Tau_Members(tau_inst);
 
-    if (cal_inst->error_message != NULL)
+    if (tau_inst->error_message != NULL)
     {
-        free(cal_inst->error_message);
-        cal_inst->error_message = NULL;
+        free(tau_inst->error_message);
+        tau_inst->error_message = NULL;
     }
 
-    free(cal_inst);
-    *cal = NULL;
+    free(tau_inst);
+    *tau = NULL;
     return;
 }
-/*  End of rssringoccs_Destroy_CalCSV.                                        */
+/*  End of rssringoccs_Destroy_Tau.                                           */

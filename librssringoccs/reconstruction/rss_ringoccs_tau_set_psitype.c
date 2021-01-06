@@ -1,4 +1,10 @@
 #include <stdlib.h>
+
+/*  To help manipulate strings, both native C strings const char* and char*,  *
+ *  as well as Python strings passed by the user, include string.h. This is a *
+ *  standard library header containing strcmp (string-compare), strncmp       *
+ *  (compares first n characters of string), strcpy (string-copy), strncpy,   *
+ *  and strlen (string-length), all of which are used at some point.          */
 #include <string.h>
 #include <rss_ringoccs/include/rss_ringoccs_bool.h>
 #include <rss_ringoccs/include/rss_ringoccs_string.h>
@@ -10,10 +16,15 @@ rssringoccs_Tau_Set_Psitype(const char *psitype, rssringoccs_TAUObj* tau)
     if (tau == NULL)
         return;
 
+    if (tau->error_occurred)
+        return;
+
     if (tau->psitype != NULL)
         free(tau->psitype);
 
     tau->psitype = rssringoccs_strdup(psitype);
+    rssringoccs_Remove_Spaces(tau->psitype);
+    rssringoccs_Make_Lower(tau->psitype);
 
     /*  Check that psitype is legal. The strstr is a C standard library       *
      *  function (from string.h) that checks if the second string is          *

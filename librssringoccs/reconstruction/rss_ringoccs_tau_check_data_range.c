@@ -82,6 +82,7 @@
 
 /*  Include the necessary header files.                                       */
 #include <stdlib.h>
+#include <stdio.h>
 #include <rss_ringoccs/include/rss_ringoccs_bool.h>
 #include <rss_ringoccs/include/rss_ringoccs_string.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
@@ -94,9 +95,6 @@ void rssringoccs_Tau_Check_Data_Range(rssringoccs_TAUObj *tau)
 
     /*  Declare a variable to check what the maximum index is.                */
     unsigned long current_max;
-
-    /*  Variable to keep track of the max window indices.                     */
-    unsigned long max_requested;
 
     /*  Variables for indexing the for loop.                                  */
     unsigned long n, start, end;
@@ -133,9 +131,6 @@ void rssringoccs_Tau_Check_Data_Range(rssringoccs_TAUObj *tau)
     start = tau->start;
     end   = start + tau->n_used;
 
-    /*  Initialize the max_requested variable to end.                         */
-    max_requested = end;
-
     /*  Set the rcpr_two_dx value from the tau object. Division is more       *
      *  expensive computationally than multiplication, so we store the        *
      *  reciprocal of 2 * dx and compute with that.                           */
@@ -143,10 +138,10 @@ void rssringoccs_Tau_Check_Data_Range(rssringoccs_TAUObj *tau)
 
     /*  Loop through every point, check window width, and ensure you have     *
      *  enough data to the left and right for data processing.                */
-    for (n = start; n <= end; ++n)
+    for (n = start; n < end; ++n)
     {
         /*  Compute the number of points needed in a window.                  */
-        nw_pts = ((unsigned long)(tau->w_km_vals[n] * rcpr_two_dx)) + 1;
+        nw_pts = ((unsigned long)(tau->w_km_vals[n] * rcpr_two_dx));
 
         /*  If n - nw_pts is negative, then the window goes beyond the        *
          *  available data. Since our integer variables are declared as       *
@@ -162,6 +157,7 @@ void rssringoccs_Tau_Check_Data_Range(rssringoccs_TAUObj *tau)
                 "\rrequested region has points with a window width that go\n"
                 "\rbeyond the minimum radius you have. Returning.\n"
             );
+            printf("%lu %lu\n", n, nw_pts);
             return;
         }
 
@@ -169,26 +165,24 @@ void rssringoccs_Tau_Check_Data_Range(rssringoccs_TAUObj *tau)
          *  current point plus the number of points in the window.            */
         current_max = n + nw_pts;
 
-        /*  If current_max is larger than max_requested, we have a bigger     *
-         *  index and need to reset the value.                                */
-        if (current_max < max_requested)
-            max_requested = current_max;
+        /*  If max_requested goes between the size of the array, we have      *
+         *  illegal values. Return with error.                                */
+        if (current_max > tau->arr_size)
+        {
+            tau->error_occurred = rssringoccs_True;
+            tau->error_message = rssringoccs_strdup(
+                "\n\rError Encountered: rss_ringoccs\n"
+                "\r\trssringoccs_Check_Tau_Data_Range\n\n"
+                "\rNot enough data to perform diffraction correction. The\n"
+                "\rrequested region has points with a window width that go\n"
+                "\rbeyond the maximum radius you have. Returning.\n"
+            );
+            printf("%lu %lu\n", n, nw_pts);
+            return;
+        }
     }
     /*  End of for loop computing the number of points for the windows.       */
 
-    /*  If max_requested goes between the size of the array, we have illegal  *
-     *  values. Return with error.                                            */
-    if (max_requested > tau->arr_size)
-    {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_Check_Tau_Data_Range\n\n"
-            "\rNot enough data to perform diffraction correction. The\n"
-            "\rrequested region has points with a window width that go\n"
-            "\rbeyond the maximum radius you have. Returning.\n"
-        );
-        return;
-    }
+
 }
 /*  End of rssringoccs_Check_Tau_Data_Range.                                  */

@@ -83,14 +83,18 @@
 #include <rss_ringoccs/include/rss_ringoccs_string.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 
+/*  Function for checking the keyword arguments of a tau object.              */
 void rssringoccs_Tau_Check_Keywords(rssringoccs_TAUObj *tau)
 {
+    /*  If tau is NULL we can't access its members. Return.                   */
     if (tau == NULL)
         return;
 
+    /*  Check if the error_occurred member was set to true before proceeding. */
     if (tau->error_occurred)
         return;
 
+    /*  A valid resolution must be positive.                                  */
     if (tau->res <= 0.0)
     {
         tau->error_occurred = rssringoccs_True;
@@ -101,6 +105,8 @@ void rssringoccs_Tau_Check_Keywords(rssringoccs_TAUObj *tau)
         );
         return;
     }
+
+    /*  The Allen deviation must be positive.                                 */
     else if (tau->sigma <= 0.0)
     {
         tau->error_occurred = rssringoccs_True;
@@ -111,6 +117,8 @@ void rssringoccs_Tau_Check_Keywords(rssringoccs_TAUObj *tau)
         );
         return;
     }
+
+    /*  The periapse is allowed to be between -2pi and 2pi, inclusive.        */
     else if (tau->peri < -rssringoccs_Two_Pi)
     {
         tau->error_occurred = rssringoccs_True;
@@ -132,6 +140,8 @@ void rssringoccs_Tau_Check_Keywords(rssringoccs_TAUObj *tau)
         );
         return;
     }
+
+    /*  Eccentricity can be positive or zero. No negative values allowed.     */
     else if (tau->ecc < 0.0)
     {
         tau->error_occurred = rssringoccs_True;
@@ -142,6 +152,8 @@ void rssringoccs_Tau_Check_Keywords(rssringoccs_TAUObj *tau)
         );
         return;
     }
+
+    /*  Lastly, check the requested range values.                             */
     else if (tau->rng_list[0] < 0.0)
     {
         tau->error_occurred = rssringoccs_True;
@@ -164,3 +176,4 @@ void rssringoccs_Tau_Check_Keywords(rssringoccs_TAUObj *tau)
         return;
     }
 }
+/*  End of rssringoccs_Tau_Check_Keywords.                                    */

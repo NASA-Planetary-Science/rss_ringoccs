@@ -171,13 +171,7 @@
  *  "314" to the integer 314.                                                 */
 #include <stdlib.h>
 #include <stdio.h>
-
-/*  To help manipulate strings, both native C strings const char* and char*,  *
- *  as well as Python strings passed by the user, include string.h. This is a *
- *  standard library header containing strcmp (string-compare), strncmp       *
- *  (compares first n characters of string), strcpy (string-copy), strncpy,   *
- *  and strlen (string-length), all of which are used at some point.          */
-#include <string.h>
+#include <time.h>
 
 /*  The following are NON-STANDARD header files that MUST BE IN YOUR PATH.    *
  *  If you installed python using anaconda then Python.h should automatically *
@@ -193,7 +187,6 @@
 
 /*  This contains the PyDiffrecObj, using the C-Python API, which allows us   *
  *  to define the DiffractionCorrection class in C.                           */
-#include "rss_ringoccs_py_api.h"
 #include <rss_ringoccs/include/rss_ringoccs_bool.h>
 #include <rss_ringoccs/include/rss_ringoccs_math.h>
 #include <rss_ringoccs/include/rss_ringoccs_string.h>
@@ -203,8 +196,12 @@
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_kernel.h>
 #include <rss_ringoccs/include/rss_ringoccs_special_functions.h>
 
+#include "rss_ringoccs_py_api.h"
 #include "rss_ringoccs_Py_DLP_to_C_DLP.c"
 #include "rss_ringoccs_C_Tau_to_Py_Tau.c"
+#include "rss_ringoccs_Get_Py_Perturb.c"
+#include "rss_ringoccs_Get_Py_Range.c"
+#include "rss_ringoccs_Get_Py_Vars_From_Self.c"
 
 /*  Deallocating function for the DiffractionCorrection class.                */
 static void Diffrec_dealloc(PyDiffrecObj *self)
@@ -213,7 +210,6 @@ static void Diffrec_dealloc(PyDiffrecObj *self)
     Py_XDECREF(self->D_km_vals);
     Py_XDECREF(self->F_km_vals);
     Py_XDECREF(self->f_sky_hz_vals);
-    Py_XDECREF(self->outfiles);
     Py_XDECREF(self->p_norm_fwd_vals);
     Py_XDECREF(self->p_norm_vals);
     Py_XDECREF(self->phase_fwd_vals);
@@ -236,8 +232,12 @@ static void Diffrec_dealloc(PyDiffrecObj *self)
     Py_XDECREF(self->w_km_vals);
     Py_XDECREF(self->dathist);
     Py_XDECREF(self->history);
-    Py_XDECREF(self->perturb);
-    Py_XDECREF(self->rngreq);
+    Py_XDECREF(self->T_hat_vals);
+    Py_XDECREF(self->T_hat_fwd_vals);
+    Py_XDECREF(self->T_vals);
+    Py_XDECREF(self->rx_km_vals);
+    Py_XDECREF(self->ry_km_vals);
+    Py_XDECREF(self->rz_km_vals);
     Py_TYPE(self)->tp_free((PyObject *) self);
 }
 
@@ -248,7 +248,10 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
     /*  Declare variables for a DLP and Tau object.                           */
     rssringoccs_DLPObj *dlp;
     rssringoccs_TAUObj *tau;
-    char *rng_string;
+
+    /*  For computing the calculation time.                                   */
+    clock_t t1 = clock();
+    clock_t t2;
 
     /*  The list of the keywords accepted by the DiffractionCorrection class. *
      *  dlp and res are REQUIRED inputs, the rest are optional. If the user   *
@@ -274,13 +277,8 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
         NULL
     };
 
-    /*  Variable for indexing.                                                */
-    unsigned long i;
-
     /*  Python objects needed throughout the computation.                     */
     PyObject *DLPInst;
-    PyObject *iter;
-    PyObject *next;
     PyObject *tmp;
     PyObject *history;
     PyObject *rngreq;
@@ -344,12 +342,6 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
     /*  Default polynomial perturbation is off.                               */
     perturb = NULL;
 
-    /*  The perturb variable is a list and should contain exactly 5 elements. */
-    const int PERTURB_LEN = 5;
-
-    /*  If the range input is a list, it should have exactly two elements.    */
-    const int RANGE_LEN = 2;
-
     /*  Extract the inputs and keywords supplied by the user. If the data     *
      *  cannot be extracted, raise a type error and return to caller. A short *
      *  explaination of PyArg_ParseTupleAndKeywords. The inputs args and kwds *
@@ -403,7 +395,10 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
     }
 
     if (self->verbose)
+    {
+        puts("Diffraction Correction:");
         puts("\tDiffraction Correction: Retrieving history from DLP...");
+    }
 
     if (!PyObject_HasAttrString(DLPInst, "history"))
     {
@@ -429,7 +424,7 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
 
     /*  If verbose was set, print a status update.                            */
     if (self->verbose)
-        puts("Diffraction Correction: Passing Python variables to C...");
+        puts("\tDiffraction Correction: Converting Py DLP to C DLP...");
 
     dlp = rssringoccs_Py_DLP_to_C_DLP(DLPInst);
 
@@ -467,285 +462,50 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
         return -1;
     }
 
+    /*  If verbose was set, print a status update.                            */
+    if (self->verbose)
+        puts("\tDiffraction Correction: Creating C Tau object...");
+
     tau = rssringoccs_Create_TAUObj(dlp, self->input_res * self->res_factor);
-    if (tau->error_occurred)
-    {
-        if (tau->error_message)
-            PyErr_Format(PyExc_RuntimeError, "%s\n", tau->error_message);
-        else
-            PyErr_Format(
-                PyExc_RuntimeError,
-                "\n\rError Encountered: rss_ringoccs\n"
-                "\r\tdiffrec.DiffractionCorrection\n\n"
-                "\rtau returned with error_occurred set to true but no\n"
-                "\rerror message. Returning.\n\n"
-            );
 
-        return -1;
-    }
+    if (self->verbose)
+        puts("\tDiffraction Correction: Passing Py variables to tau...");
 
-    tau->sigma    = self->sigma;
-    tau->bfac     = self->bfac;
-    tau->ecc      = self->ecc;
-    tau->peri     = self->peri;
-    tau->interp   = self->interp;
-    tau->use_fwd  = self->use_fwd;
-    tau->use_norm = self->use_norm;
-    tau->use_fft  = self->use_fft;
-    tau->verbose  = self->verbose;
+    rssringoccs_Get_Py_Vars_From_Self(tau, self);
+    rssringoccs_Get_Py_Perturb(tau, perturb);
+    rssringoccs_Get_Py_Range(tau, rngreq);
+    rssringoccs_Tau_Set_WType(self->wtype, tau);
+    rssringoccs_Tau_Set_Psitype(self->psitype, tau);
 
-    /*  Check that the input perturb is a list with 5 elements.               */
-    if (!(perturb))
-    {
-        /*  No perturb was provided by the user, so set everything to None.   */
-        tmp = self->perturb;
-        perturb = Py_None;
+    if (self->verbose)
+        puts("\tDiffraction Correction: Running reconstruction...");
 
-        /*  Safely store perturb in self. This method is recommended in the   *
-         *  C-Python API documentation.                                       */
-        Py_INCREF(perturb);
-        self->perturb = perturb;
-        Py_XDECREF(tmp);
-    }
+    rssringoccs_Reconstruction(tau);
 
-    /*  If the user supplied a perturb list, parse it and extract values.     */
-    else if (PyList_Check(perturb))
-    {
-        /*  If the list is not the correct size, raise an error.              */
-        if (!(PyList_Size(perturb) == PERTURB_LEN))
-        {
-            PyErr_Format(
-                PyExc_IndexError,
-                "\n\rError Encountered: rss_ringoccs\n"
-                "\r\tdiffrec.DiffractionCorrection\n\n"
-                "\rperturb should be a python list of five floats or ints.\n"
-                "\rYour list has %d elements\n", PyList_Size(self->perturb)
-            );
-            return -1;
-        }
+    if (self->verbose)
+        puts("\tDiffraction Correction: Converting C tau to Py tau...");
 
-        iter = PyObject_GetIter(perturb);
-        if (!iter)
-        {
-            /*  The list is empty, return with an error.                      */
-            PyErr_Format(
-                PyExc_IndexError,
-                "\n\rError Encountered: rss_ringoccs\n"
-                "\r\tdiffrec.DiffractionCorrection\n\n"
-                "\rperturb should be a python list of five floats or ints.\n"
-            );
-            return -1;
-        }
+    rssringoccs_C_Tau_to_Py_Tau(self, tau);
 
-        /*  Loop over the elements of the list, see if they can be converted  *
-         *  to doubles, and store them in the tau->perturb variable.          */
-        for (i=0; i<PERTURB_LEN; ++i)
-        {
-            next = PyIter_Next(iter);
-            if (!next)
-            {
-                /*  The list is not big enough, return with error.            */
-                PyErr_Format(
-                    PyExc_IndexError,
-                    "\n\rError Encountered: rss_ringoccs\n"
-                    "\r\tdiffrec.DiffractionCorrection\n\n"
-                    "\rperturb should be a python list of five floats or\n"
-                    "\rints. Your list has size: %d", i
-                );
-                return -1;
-            }
-
-            /*  If the element is an integer, convert to double and save it.  */
-            if (PyLong_Check(next))
-                tau->perturb[i] = PyLong_AsDouble(next);
-
-            /*  Convert from Python float to C double with PyFloat_AsDouble.  */
-            else if (PyFloat_Check(next))
-                tau->perturb[i] = PyFloat_AsDouble(next);
-
-            /*  Invalid data type for one of the entries. Return with error.  */
-            else
-            {
-                PyErr_Format(
-                    PyExc_TypeError,
-                    "\n\rError Encountered: rss_ringoccs\n"
-                    "\r\tdiffrec.DiffractionCorrection\n\n"
-                    "\rperturb should be a python list of five floats/ints.\n"
-                    "\rYour list contains objects that are not real numbers.\n"
-                );
-                return -1;
-            }
-        }
-
-        /*  Store the perturb variable in the DiffractionCorrection class.    */
-        tmp = self->perturb;
-        Py_INCREF(perturb);
-        self->perturb = perturb;
-        Py_XDECREF(tmp);
-    }
-
-    /*  The input was not a list. Return with error.                          */
-    else
+    if (tau == NULL)
     {
         PyErr_Format(
             PyExc_RuntimeError,
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\tdiffrec.DiffractionCorrection\n\n"
-            "\rperturb should be a python list of five floats or ints.\n"
+            "\rrssringoccs_Create_TAUObj returned NULL for tau. Returning.\n\n"
         );
-        return -1;
-    }
 
-    /*  If the rng variable is a string, make sure it is a legal value and    *
-     *  try to extract the corresponding values in kilometers.                */
-    if PyBytes_Check(rngreq)
-    {
-        /*  Convert the Python string to a C string via PyBytes_AsString. */
-        rng_string = PyBytes_AsString(rngreq);
-        rssringoccs_Tau_Set_Range_From_String(rng_string, tau);
-
-        /*  Store the rngreq in the diffraction correction class.             */
-        tmp = self->rngreq;
-        Py_INCREF(rngreq);
-        self->rngreq = rngreq;
-        Py_XDECREF(tmp);
-    }
-
-    /*  If the rng variable is a unicode object (type of string from python)  *
-     *  make sure it is a legal value and try to extract the corresponding    *
-     *  values in kilometers.                                                 */
-    else if PyUnicode_Check(rngreq)
-    {
-        /*  Convert the Python string to a C string via PyUnicode_AsUTF8. The *
-         *  C API recommends not altering the string, so we create a copy of  *
-         *  it using strcpy (from string.h).                                  */
-        const char *rng_string_cpy = PyUnicode_AsUTF8(rngreq);
-        rssringoccs_Tau_Set_Range_From_String(rng_string_cpy, tau);
-
-        /*  Set the rngreq variable in self.                                  */
-        tmp = self->rngreq;
-        Py_INCREF(rngreq);
-        self->rngreq = rngreq;
-        Py_XDECREF(tmp);
-    }
-
-    /*  If the requested range is a list, try to parse the elements.          */
-    else if PyList_Check(rngreq)
-    {
-        if (!(PyList_Size(rngreq) == RANGE_LEN))
-        {
-            PyErr_Format(
-                PyExc_IndexError,
-                "\n\rError Encountered: rss_ringoccs\n"
-                "\r\tdiffrec.DiffractionCorrection\n\n"
-                "\rrng should be a python list of two floats or ints.\n"
-                "\rYour list has %d elements\n", PyList_Size(rngreq)
-            );
-            return -1;
-        }
-
-        iter = PyObject_GetIter(rngreq);
-        if (!iter)
-        {
-            /*  The list is empty, return with an error.                      */
-            PyErr_Format(
-                PyExc_TypeError,
-                "\n\rError Encountered: rss_ringoccs\n"
-                "\r\tdiffrec.DiffractionCorrection\n\n"
-                "\rrng should be a python list of two floats or ints.\n"
-            );
-            return -1;
-        }
-
-        for (i=0; i<RANGE_LEN; ++i)
-        {
-            next = PyIter_Next(iter);
-            if (!next)
-            {
-                PyErr_Format(
-                    PyExc_TypeError,
-                    "\n\rError Encountered: rss_ringoccs\n"
-                    "\r\tdiffrec.DiffractionCorrection\n\n"
-                    "\rrng should be a python list of two floats or ints.\n"
-                    "\rSize of your list: %d", i
-                );
-                return -1;
-            }
-
-            /*  Try to parse the elements. Return with error if this fails.   */
-            if (PyLong_Check(next))
-                self->range[i] = (double)PyLong_AsLong(next);
-            else if (PyFloat_Check(next))
-                self->range[i] = PyFloat_AsDouble(next);
-            else
-            {
-                PyErr_Format(
-                    PyExc_TypeError,
-                    "\n\rError Encountered: rss_ringoccs\n"
-                    "\r\tdiffrec.DiffractionCorrection\n\n"
-                    "\rrng should be a python list of two floats or ints.\n"
-                    "\rYour list contains objects that are not real numbers.\n"
-                );
-                return -1;
-            }
-        }
-
-        /*  If the user provided values [a, b] with b<a, switch them around.  */
-        if (self->range[1] < self->range[0])
-        {
-            double temp_range_val = self->range[0];
-            self->range[0] = self->range[1];
-            self->range[1] = temp_range_val;
-        }
-
-        tau->rng_list[0] = self->range[0];
-        tau->rng_list[1] = self->range[1];
-
-        /*  Set the rngreq variable.                                          */
-        tmp = self->rngreq;
-        Py_INCREF(rngreq);
-        self->rngreq = rngreq;
-        Py_XDECREF(tmp);
-    }
-
-    /*  Illegal rng requested. Return with error.                             */
-    else
-    {
-        PyErr_Format(
-            PyExc_ValueError,
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tdiffrec.DiffractionCorrection\n\n"
-            "\rrng must be a list of two real numbers or a string.\n"
-            "\rAllowed strings are:\n"
-            "\r\tall               [1.0, 400000.0]\n"
-            "\r\tbesselbarnard     [120210.0, 120330.0]\n"
-            "\r\tbessel-barnard    [120210.0, 120330.0]\n"
-            "\r\tcringripples      [77690.0, 77760.0]\n"
-            "\r\tencke             [132900.0, 134200.0]\n"
-            "\r\tenckegap          [132900.0, 134200.0]\n"
-            "\r\therschel          [118100.0, 118380.0]\n"
-            "\r\therschelgap       [118100.0, 118380.0]\n"
-            "\r\thuygens           [117650.0, 117950.0]\n"
-            "\r\thuygensringlet    [117650.0, 117950.0]\n"
-            "\r\tjanusepimetheus   [96200.0, 96800.0]\n"
-            "\r\tjeffreys          [118900.0, 119000.0]\n"
-            "\r\tjeffreysgap       [118900.0, 119000.0]\n"
-            "\r\tkuiper            [119300.0, 119500.0]\n"
-            "\r\tkuipergap         [119300.0, 119500.0]\n"
-            "\r\tmaxwell           [87410.0, 87610.0]\n"
-            "\r\tmaxwellringlet    [87410.0, 87610.0]\n"
-            "\r\trussell           [118550.0, 118660.0]\n"
-            "\r\trussellgap        [118550.0, 118660.0]\n"
-            "\r\ttitan             [77870.0, 77930.0]\n"
-            "\r\ttitanringlet      [77870.0, 77930.0\n\n"
-        );
         return -1;
     }
 
     if (tau->error_occurred)
     {
         if (tau->error_message)
+        {
             PyErr_Format(PyExc_RuntimeError, "%s\n", tau->error_message);
+            free(tau->error_message);
+        }
         else
             PyErr_Format(
                 PyExc_RuntimeError,
@@ -755,30 +515,30 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
                 "\rerror message. Returning.\n\n"
             );
 
+        rssringoccs_Destroy_Tau(&tau);
         return -1;
     }
 
-    rssringoccs_Tau_Set_WType(self->wtype, tau);
-    rssringoccs_Tau_Set_Psitype(self->psitype, tau);
-    rssringoccs_Reconstruction(tau);
+    free(tau->psitype);
+    free(tau->wtype);
 
-    if (tau->error_occurred)
-    {
-        if (tau->error_message)
-            PyErr_Format(PyExc_RuntimeError, "%s\n", tau->error_message);
-        else
-            PyErr_Format(
-                PyExc_RuntimeError,
-                "\n\rError Encountered: rss_ringoccs\n"
-                "\r\tdiffrec.DiffractionCorrection\n\n"
-                "\rtau returned with error_occurred set to true but no\n"
-                "\rerror message. Returning.\n\n"
-            );
+    /*  We are now freeing the C tau object. The data pointers are still      *
+     *  accessible via the self PyObject. Note, we are freeing the pointer to *
+     *  the rssringoccs_TAUObj and NOT the pointers inside the object. The    *
+     *  data is still available in self.                                      */
+    free(tau);
 
-        return -1;
-    }
+    /*  Similarly, we free the DLP. This does not free the data from the      *
+     *  input DLP PyObject. Those are also still available.                   */
+    free(dlp);
 
-    rssringoccs_C_Tau_to_Py_Tau((PyDiffrecObj *)self, tau);
+    t2 = clock();
+
+    if (self->verbose)
+        printf(
+            "\tDiffraction Correction: Computation Time %f\n",
+            (double)(t2 - t1)/CLOCKS_PER_SEC
+        );
 
     return 1;
 }
@@ -801,87 +561,266 @@ static PyMethodDef DiffractionCorrection_methods[] =
 };
 
 static PyMemberDef Custom_members[] = {
-    {"rho_km_vals", T_OBJECT_EX, offsetof(PyDiffrecObj, rho_km_vals), 0,
-     "Ring radius"},
-    {"phase_rad_vals", T_OBJECT_EX, offsetof(PyDiffrecObj, phase_rad_vals), 0,
-     "Phase"},
-    {"B_rad_vals", T_OBJECT_EX, offsetof(PyDiffrecObj, B_rad_vals), 0,
-     "Ring inclination angle"},
-    {"D_km_vals", T_OBJECT_EX, offsetof(PyDiffrecObj, D_km_vals), 0,
-     "Spacecraft to ring-intercept point distance"},
-    {"F_km_vals", T_OBJECT_EX, offsetof(PyDiffrecObj, F_km_vals), 0,
-     "Fresnel scale"},
-    {"T_hat_fwd_vals", T_OBJECT_EX, offsetof(PyDiffrecObj, T_hat_fwd_vals), 0,
-     "Forward modeling of data"},
-    {"T_hat_vals", T_OBJECT_EX, offsetof(PyDiffrecObj, T_hat_vals), 0,
-     "Raw diffraction data"},
-    {"T_vals", T_OBJECT_EX, offsetof(PyDiffrecObj, T_vals), 0,
-     "Diffraction corrected data"},
-    {"f_sky_hz_vals", T_OBJECT_EX, offsetof(PyDiffrecObj, f_sky_hz_vals), 0,
-     "Frequency of the input signal"},
-    {"outfiles", T_OBJECT_EX, offsetof(PyDiffrecObj, outfiles), 0,
-     "CSV of corrected data"},
-    {"p_norm_fwd_vals", T_OBJECT_EX, offsetof(PyDiffrecObj, p_norm_fwd_vals), 0,
-     "Forward modeling of power"},
-    {"p_norm_vals", T_OBJECT_EX, offsetof(PyDiffrecObj, p_norm_vals), 0,
-     "Raw power data"},
-    {"phase_fwd_vals", T_OBJECT_EX, offsetof(PyDiffrecObj, phase_fwd_vals), 0,
-     "Forward modeling of phase"},
-    {"phase_vals", T_OBJECT_EX, offsetof(PyDiffrecObj, phase_vals), 0,
-     "Diffraction corrected phase"},
-    {"phi_rad_vals", T_OBJECT_EX, offsetof(PyDiffrecObj, phi_rad_vals), 0,
-     "Ring azimuth angle"},
-    {"phi_rl_rad_vals", T_OBJECT_EX, offsetof(PyDiffrecObj, phi_rl_rad_vals), 0,
-     "Ring longitude angle"},
-    {"power_vals", T_OBJECT_EX, offsetof(PyDiffrecObj, power_vals), 0,
-     "Diffraction corrected power"},
-    {"raw_tau_threshold_vals", T_OBJECT_EX,
-     offsetof(PyDiffrecObj, raw_tau_threshold_vals), 0,
-     "Raw threshold optical depth"},
-    {"rev_info", T_OBJECT_EX, offsetof(PyDiffrecObj, rev_info), 0,
-     "Information about the occultation"},
-    {"rho_corr_pole_km_vals", T_OBJECT_EX,
-     offsetof(PyDiffrecObj, rho_corr_pole_km_vals), 0,
-     "Ring radius with pole correction."},
-    {"rho_corr_timing_km_vals", T_OBJECT_EX,
-     offsetof(PyDiffrecObj, rho_corr_timing_km_vals), 0,
-     "Ring radius with timing correction."},
-    {"rho_dot_kms_vals", T_OBJECT_EX,
-     offsetof(PyDiffrecObj, rho_dot_kms_vals), 0,
-     "Time derivative of the ring radius."},
-    {"t_oet_spm_vals", T_OBJECT_EX, offsetof(PyDiffrecObj, t_oet_spm_vals), 0,
-     "Observed event time in seconds past midnight"},
-    {"t_ret_spm_vals", T_OBJECT_EX, offsetof(PyDiffrecObj, t_ret_spm_vals), 0,
-     "Ring event time in seconds past midnight"},
-    {"t_set_spm_vals", T_OBJECT_EX, offsetof(PyDiffrecObj, t_set_spm_vals), 0,
-     "Spacecraft event time in seconds past midnight"},
-    {"tau_threshold_vals", T_OBJECT_EX,
-     offsetof(PyDiffrecObj, tau_threshold_vals), 0,
-     "Diffraction corrected threshold optical depth"},
-    {"tau_vals", T_OBJECT_EX, offsetof(PyDiffrecObj, tau_vals), 0,
-     "Optical depth"},
-    {"w_km_vals", T_OBJECT_EX, offsetof(PyDiffrecObj, w_km_vals), 0,
-     "window width as a function of ring radius"},
-    {"dathist", T_OBJECT_EX, offsetof(PyDiffrecObj, dathist), 0,
-     "History of input dlp instance"},
-    {"history", T_OBJECT_EX, offsetof(PyDiffrecObj, history), 0,
-     "History of this tau instance"},
-    {"perturb", T_OBJECT_EX, offsetof(PyDiffrecObj, perturb), 0,
-     "Coefficients for perturbation polynomial"},
-    {"rngreq", T_OBJECT_EX, offsetof(PyDiffrecObj, rngreq), 0,
-     "Range requested by user"},
-    {"use_fft", T_BOOL, offsetof(PyDiffrecObj, use_fft), 0,
-     "Use of FFTs for data processing"},
-    {"bfac", T_BOOL, offsetof(PyDiffrecObj, bfac), 0,
-     "Use of b-factor in window width"},
-    {"verbose", T_BOOL, offsetof(PyDiffrecObj, verbose), 0,
-     "Print status updates"},
-    {"use_norm", T_BOOL, offsetof(PyDiffrecObj, use_norm), 0,
-     "Use of window normalization"},
-    {"use_fwd", T_BOOL, offsetof(PyDiffrecObj, use_fwd), 0,
-     "Forward modeling Boolean"},
-
-    {NULL}  /* Sentinel */
+    {
+        "rho_km_vals",
+        T_OBJECT_EX,
+        offsetof(PyDiffrecObj, rho_km_vals),
+        0,
+        "Ring radius."
+    },
+    {
+        "phase_rad_vals",
+        T_OBJECT_EX,
+        offsetof(PyDiffrecObj, phase_rad_vals),
+        0,
+        "Raw diffracted phase."
+    },
+    {
+        "B_rad_vals",
+        T_OBJECT_EX,
+        offsetof(PyDiffrecObj, B_rad_vals),
+        0,
+        "Ring inclination angle."
+    },
+    {
+        "D_km_vals",
+        T_OBJECT_EX,
+        offsetof(PyDiffrecObj, D_km_vals),
+        0,
+        "Spacecraft to ring-intercept point distance."
+    },
+    {
+        "rx_km_vals",
+        T_OBJECT_EX,
+        offsetof(PyDiffrecObj, rx_km_vals),
+        0,
+        "x coordinate of the spacecraft in planetocentric frame."
+    },
+    {
+        "ry_km_vals",
+        T_OBJECT_EX,
+        offsetof(PyDiffrecObj, ry_km_vals),
+        0,
+        "y coordinate of the spacecraft in planetocentric frame."
+    },
+    {
+        "rz_km_vals",
+        T_OBJECT_EX,
+        offsetof(PyDiffrecObj, rz_km_vals),
+        0,
+        "z coordinate of the spacecraft in planetocentric frame."
+    },
+    {
+        "F_km_vals",
+        T_OBJECT_EX,
+        offsetof(PyDiffrecObj, F_km_vals),
+        0,
+        "Fresnel scale."
+    },
+    {
+        "T_hat_fwd_vals",
+        T_OBJECT_EX,
+        offsetof(PyDiffrecObj, T_hat_fwd_vals),
+        0,
+        "Complex transmittance of the forward modeling data."
+    },
+    {
+        "T_hat_vals",
+        T_OBJECT_EX, offsetof(PyDiffrecObj, T_hat_vals),
+        0,
+        "Raw diffraction data"
+    },
+    {
+        "T_vals",
+        T_OBJECT_EX, offsetof(PyDiffrecObj, T_vals),
+        0,
+        "Diffraction corrected data"
+    },
+    {
+        "f_sky_hz_vals",
+        T_OBJECT_EX,
+        offsetof(PyDiffrecObj, f_sky_hz_vals),
+        0,
+        "Frequency of the input signal"
+    },
+    {
+        "p_norm_fwd_vals",
+        T_OBJECT_EX,
+        offsetof(PyDiffrecObj, p_norm_fwd_vals),
+        0,
+        "Forward modeling of power"
+    },
+    {
+        "p_norm_vals",
+        T_OBJECT_EX,
+        offsetof(PyDiffrecObj, p_norm_vals),
+        0,
+        "Raw power data"
+    },
+    {
+        "phase_fwd_vals",
+        T_OBJECT_EX,
+        offsetof(PyDiffrecObj, phase_fwd_vals),
+        0,
+        "Forward modeling of phase"
+    },
+    {
+        "phase_vals",
+        T_OBJECT_EX,
+        offsetof(PyDiffrecObj, phase_vals),
+        0,
+        "Diffraction corrected phase"
+    },
+    {
+        "phi_rad_vals",
+        T_OBJECT_EX,
+        offsetof(PyDiffrecObj, phi_rad_vals),
+        0,
+        "Ring azimuth angle"
+    },
+    {
+        "phi_rl_rad_vals",
+        T_OBJECT_EX,
+        offsetof(PyDiffrecObj, phi_rl_rad_vals),
+        0,
+        "Ring longitude angle"
+    },
+    {
+        "power_vals",
+        T_OBJECT_EX,
+        offsetof(PyDiffrecObj, power_vals),
+        0,
+        "Diffraction corrected power"
+    },
+    {
+        "raw_tau_threshold_vals",
+        T_OBJECT_EX,
+        offsetof(PyDiffrecObj, raw_tau_threshold_vals),
+        0,
+        "Raw threshold optical depth"
+    },
+    {
+        "rev_info",
+        T_OBJECT_EX,
+        offsetof(PyDiffrecObj, rev_info),
+        0,
+        "Information about the occultation"
+    },
+    {
+        "rho_corr_pole_km_vals",
+        T_OBJECT_EX,
+        offsetof(PyDiffrecObj, rho_corr_pole_km_vals),
+        0,
+        "Ring radius with pole correction."
+    },
+    {
+        "rho_corr_timing_km_vals",
+        T_OBJECT_EX,
+        offsetof(PyDiffrecObj, rho_corr_timing_km_vals),
+        0,
+        "Ring radius with timing correction."
+    },
+    {
+        "rho_dot_kms_vals",
+        T_OBJECT_EX,
+        offsetof(PyDiffrecObj, rho_dot_kms_vals),
+        0,
+        "Time derivative of the ring radius."
+    },
+    {
+        "t_oet_spm_vals",
+        T_OBJECT_EX,
+        offsetof(PyDiffrecObj, t_oet_spm_vals),
+        0,
+        "Observed event time in seconds past midnight"
+    },
+    {
+        "t_ret_spm_vals",
+        T_OBJECT_EX,
+        offsetof(PyDiffrecObj, t_ret_spm_vals),
+        0,
+        "Ring event time in seconds past midnight"
+    },
+    {
+        "t_set_spm_vals",
+        T_OBJECT_EX,
+        offsetof(PyDiffrecObj, t_set_spm_vals),
+        0,
+        "Spacecraft event time in seconds past midnight"
+    },
+    {
+        "tau_threshold_vals",
+        T_OBJECT_EX,
+        offsetof(PyDiffrecObj, tau_threshold_vals),
+        0,
+        "Diffraction corrected threshold optical depth"
+    },
+    {
+        "tau_vals",
+        T_OBJECT_EX,
+        offsetof(PyDiffrecObj, tau_vals),
+        0,
+        "Optical depth"
+    },
+    {
+        "w_km_vals",
+        T_OBJECT_EX,
+        offsetof(PyDiffrecObj, w_km_vals),
+        0,
+        "window width as a function of ring radius"
+    },
+    {
+        "dathist",
+        T_OBJECT_EX,
+        offsetof(PyDiffrecObj, dathist),
+        0,
+        "History of input dlp instance"
+    },
+    {
+        "history",
+        T_OBJECT_EX,
+        offsetof(PyDiffrecObj, history),
+        0,
+        "History of this tau instance"
+    },
+    {
+        "use_fft",
+        T_BOOL,
+        offsetof(PyDiffrecObj, use_fft),
+        0,
+        "Use of FFTs for data processing"
+    },
+    {
+        "bfac",
+        T_BOOL,
+        offsetof(PyDiffrecObj, bfac),
+        0,
+        "Use of b-factor in window width"
+    },
+    {
+        "verbose",
+        T_BOOL,
+        offsetof(PyDiffrecObj, verbose),
+        0,
+        "Print status updates"
+    },
+    {
+        "use_norm",
+        T_BOOL,
+        offsetof(PyDiffrecObj, use_norm),
+        0,
+        "Use of window normalization"
+    },
+    {
+        "use_fwd",
+        T_BOOL,
+        offsetof(PyDiffrecObj, use_fwd),
+        0,
+        "Forward modeling Boolean"
+    },
+    {
+        NULL
+    }  /* Sentinel */
 };
 
 static PyTypeObject DiffrecType = {
@@ -901,13 +840,14 @@ static PyTypeObject DiffrecType = {
 static PyModuleDef moduledef = {
     PyModuleDef_HEAD_INIT,
     .m_name = "custom",
-    .m_doc = "Example module that creates an extension type.",
+    .m_doc = "Module containing the rss_ringoccs class.",
     .m_size = -1,
 };
 
 PyMODINIT_FUNC PyInit_diffrec(void)
 {
     PyObject *m;
+    int pymod_addobj;
     if (PyType_Ready(&DiffrecType) < 0)
         return NULL;
 
@@ -917,8 +857,10 @@ PyMODINIT_FUNC PyInit_diffrec(void)
         return NULL;
 
     Py_INCREF(&DiffrecType);
-    if (PyModule_AddObject(m, "DiffractionCorrection",
-                           (PyObject *) &DiffrecType) < 0)
+    pymod_addobj = PyModule_AddObject(m, "DiffractionCorrection",
+                                      (PyObject *) &DiffrecType);
+
+    if (pymod_addobj < 0)
     {
         Py_DECREF(&DiffrecType);
         Py_DECREF(m);

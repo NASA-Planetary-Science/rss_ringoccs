@@ -205,7 +205,7 @@ void rssringoccs_Diffraction_Correction_PerturbedNewton(rssringoccs_TAUObj *tau)
             {
                 /* Reset w_init and recompute window function.                */
                 w_init  = tau->w_km_vals[center];
-                nw_pts  = 2*((int)(w_init / (2.0 * dx)))+1;
+                nw_pts  = 2*((unsigned long)(w_init / (2.0 * dx)))+1;
 
                 /*  Reallocate memory since the sizes have changed.           */
                 w_func  = realloc(w_func,  sizeof(double) * nw_pts);

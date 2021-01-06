@@ -501,12 +501,7 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
 
     if (tau->error_occurred)
     {
-        if (tau->error_message)
-        {
-            PyErr_Format(PyExc_RuntimeError, "%s\n", tau->error_message);
-            free(tau->error_message);
-        }
-        else
+        if (tau->error_message == NULL)
             PyErr_Format(
                 PyExc_RuntimeError,
                 "\n\rError Encountered: rss_ringoccs\n"
@@ -514,6 +509,8 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
                 "\rtau returned with error_occurred set to true but no\n"
                 "\rerror message. Returning.\n\n"
             );
+        else
+            PyErr_Format(PyExc_RuntimeError, "%s\n", tau->error_message);
 
         rssringoccs_Destroy_Tau(&tau);
         return -1;

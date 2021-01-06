@@ -67,5 +67,6 @@ sudo cp ../include/* "$includedir/include/"
 
 echo "Cleaning up..."
 rm -f *.o
+rm -f monster.c
 
 echo "Done"

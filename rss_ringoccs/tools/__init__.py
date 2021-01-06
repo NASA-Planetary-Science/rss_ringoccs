@@ -11,6 +11,7 @@ Purpose:
     processing pipeline.
 """
 
+from .advanced_tools import CompareTau
 from .spm_to_et import spm_to_et
 from .et_to_spm import et_to_spm
 from .CSV_tools import ExtractCSVData

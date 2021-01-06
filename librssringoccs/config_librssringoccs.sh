@@ -45,88 +45,12 @@ echo -e "\t\t$CompilerArgs3"
 echo -e "\t\t$CompilerArgs4"
 echo -e "\t\t$CompilerArgs5"
 
-echo -e "\n\tCompiling math/"
-for filename in math/*.c; do
-    echo -e "\t\tCompiling: $filename"
-    $CC $CompilerArgs $filename
-done
-
-echo -e "\n\tCompiling complex/"
-for filename in complex/*.c; do
-    echo -e "\t\tCompiling: $filename"
-    $CC $CompilerArgs $filename
-done
-
-echo -e "\n\tCompiling special_functions/"
-for filename in special_functions/*.c; do
-    echo -e "\t\tCompiling: $filename"
-    $CC $CompilerArgs $filename
-done
-
-echo -e "\n\tCompiling numerical/"
-for filename in numerical/*.c; do
-    echo -e "\t\tCompiling: $filename"
-    $CC $CompilerArgs $filename
-done
-
-echo -e "\n\tCompiling interpolate/"
-for filename in interpolate/*.c; do
-    echo -e "\t\tCompiling: $filename"
-    $CC $CompilerArgs $filename
-done
-
-echo -e "\n\tCompiling fft/"
-for filename in fft/*.c; do
-    echo -e "\t\tCompiling: $filename"
-    $CC $CompilerArgs $filename
-done
-
-echo -e "\n\tCompiling geometry/"
-for filename in geometry/*.c; do
-    echo -e "\t\tCompiling: $filename"
-    $CC $CompilerArgs $filename
-done
-
-echo -e "\n\tCompiling fresnel_kernel/"
-for filename in fresnel_kernel/*.c; do
-    echo -e "\t\tCompiling: $filename"
-    $CC $CompilerArgs $filename
-done
-
-echo -e "\n\tCompiling diffraction/"
-for filename in diffraction/*.c; do
-    echo -e "\t\tCompiling: $filename"
-    $CC $CompilerArgs $filename
-done
-
-echo -e "\n\tCompiling fresnel_transform/"
-for filename in fresnel_transform/*.c; do
-    echo -e "\t\tCompiling: $filename"
-    $CC $CompilerArgs $filename
-done
-
-echo -e "\n\tCompiling reconstruction/"
-for filename in reconstruction/*.c; do
-    echo -e "\t\tCompiling: $filename"
-    $CC $CompilerArgs $filename
-done
-
-echo -e "\n\tCompiling string/"
-for filename in string/*.c; do
-    echo -e "\t\tCompiling: $filename"
-    $CC $CompilerArgs $filename
-done
-
-echo -e "\n\tCompiling csv_tools/"
-for filename in csv_tools/*.c; do
-    echo -e "\t\tCompiling: $filename"
-    $CC $CompilerArgs $filename
-done
-
-echo -e "\n\tCompiling ppm_plot/"
-for filename in ppm_plot/*.c; do
-    echo -e "\t\tCompiling: $filename"
-    $CC $CompilerArgs $filename
+for dir in */; do
+    echo -e "\n\tCompiling $dir"
+    for filename in $dir*.c; do
+        echo -e "\t\tCompiling: $filename"
+        $CC $CompilerArgs $filename
+    done
 done
 
 echo -e "\nBuilding rss_ringoccs Shared Object (.so file)"

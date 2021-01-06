@@ -21,7 +21,6 @@ void
 rssringoccs_Tau_Set_Range_From_String(const char *range,
                                       rssringoccs_TAUObj *tau)
 {
-    unsigned long str_len;
     char *range_str;
 
     if (tau == NULL)
@@ -41,21 +40,8 @@ rssringoccs_Tau_Set_Range_From_String(const char *range,
         return;
     }
 
-    str_len = strlen(range);
-    if (str_len == 0)
-    {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
-            "\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_Tau_Get_Range_From_String\n\n"
-            "\rInput string is empty. Returning.\n"
-        );
-        return;
-    }
 
-    range_str = malloc(sizeof(*range_str) * (str_len+1));
-
-    strcpy(range_str, range);
+    range_str = rssringoccs_strdup(range);
     rssringoccs_Remove_Spaces(range_str);
     rssringoccs_Make_Lower(range_str);
 

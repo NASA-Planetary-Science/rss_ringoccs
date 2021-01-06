@@ -4,6 +4,7 @@
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 #include <rss_ringoccs/include/rss_ringoccs_special_functions.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 void rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau)
 {
@@ -14,7 +15,7 @@ void rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau)
     unsigned long *Prange_Index, *wrange_Index;
     unsigned long Prange_Size, wrange_Size;
     unsigned long n;
-    double w_fac, omega, min_val, max_val, F;
+    double w_fac, omega, F;
     double *alpha, *P_vals, *rho_legal;
 
     if (tau == NULL)
@@ -31,11 +32,20 @@ void rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau)
     else if (tau->rng_list[0] > tau->rho_km_vals[tau->arr_size-1])
     {
         tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_message = malloc(sizeof(*tau->error_message)*512);
+        if (tau->error_message == NULL)
+            return;
+
+        sprintf(
+            tau->error_message,
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Get_Window_Width\n\n"
             "\rMinimum requested radius is greater than the largest\n"
-            "\rradius available in the data. Returning.\n"
+            "\rradius available in the data.\n"
+            "\r\tRequested Radii: %f %f\n"
+            "\r\tAvailable Radii: %f %f\n",
+            tau->rng_list[0], tau->rng_list[1],
+            tau->rho_km_vals[0], tau->rho_km_vals[tau->arr_size-1]
         );
         return;
     }
@@ -45,6 +55,7 @@ void rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau)
         while (tau->rho_km_vals[n] < tau->rng_list[0])
             n++;
 
+        tau->rng_list[0] = tau->rho_km_vals[n];
         tau->start = n;
     }
 
@@ -56,11 +67,20 @@ void rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau)
     else if (tau->rng_list[1] < tau->rho_km_vals[0])
     {
         tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_message = malloc(sizeof(*tau->error_message)*512);
+        if (tau->error_message == NULL)
+            return;
+
+        sprintf(
+            tau->error_message,
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Get_Window_Width\n\n"
-            "\rMaximum requested radius is less than the smallest\n"
-            "\rradius available in the data. Returning.\n"
+            "\rMinimum requested radius is greater than the largest\n"
+            "\rradius available in the data.\n"
+            "\r\tRequested Radii: %f %f\n"
+            "\r\tAvailable Radii: %f %f\n",
+            tau->rng_list[0], tau->rng_list[1],
+            tau->rho_km_vals[0], tau->rho_km_vals[tau->arr_size-1]
         );
         return;
     }
@@ -70,6 +90,7 @@ void rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau)
         while (tau->rho_km_vals[n] <= tau->rng_list[1])
             n++;
 
+        tau->rng_list[1] = tau->rho_km_vals[n];
         tau->n_used = n - tau->start;
     }
 
@@ -117,6 +138,8 @@ void rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau)
 
         free(P_vals);
         free(alpha);
+        free(Prange_Index);
+        free(Prange);
     }
     else
     {
@@ -127,28 +150,53 @@ void rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau)
             F = tau->F_km_vals[n + tau->start];
             tau->w_km_vals[n+tau->start] = 2.0*F*F*w_fac;
         }
-
-        Prange = rssringoccs_Where_Greater_Double(tau->F_km_vals,
-                                                  tau->n_used, 0.0);
-        Prange_Index = Prange[0];
-        Prange_Size  = *Prange[1];
     }
 
-    rho_legal = malloc(sizeof(*rho_legal) * Prange_Size);
+    rho_legal = malloc(sizeof(*rho_legal) * tau->n_used);
 
-    for(n=0; n<Prange_Size; ++n)
-        rho_legal[n] = tau->rho_km_vals[Prange_Index[n]] +
-                       0.5*tau->w_km_vals[Prange_Index[n]];
+    for(n=0; n<tau->n_used; ++n)
+        rho_legal[n] = tau->rho_km_vals[tau->start + n] -
+                       0.5*tau->w_km_vals[tau->start + n];
 
-    min_val = rssringoccs_Min_Double(rho_legal, Prange_Size);
-    max_val = rssringoccs_Max_Double(rho_legal, Prange_Size);
-    wrange = rssringoccs_Where_LesserGreater_Double(tau->rho_km_vals,
-                                                    tau->arr_size,
-                                                    min_val, max_val);
+    wrange = rssringoccs_Where_Greater_Double(rho_legal, tau->n_used,
+                                              tau->rho_km_vals[0]);
     wrange_Index = wrange[0];
     wrange_Size = *wrange[1];
-    free(Prange_Index);
-    free(Prange);
+
+    if (wrange_Size == 0)
+    {
+        tau->error_occurred = rssringoccs_True;
+        tau->error_message = rssringoccs_strdup(
+            "\rError Encountered: rss_ringoccs\n"
+            "\r\trssringoccs_Tau_Get_Window_Width\n\n"
+            "\rThe window width is too large to reconstruct anything.\n"
+            "\rThere is not enough data to the left of any point. That is,\n"
+            "\rrho_km_vals[n] - w_km_vals[n]/2 is less than rho_km_vals[0]\n"
+            "\rfor all n. Returning with error.\n"
+        );
+        free(wrange_Index);
+        free(wrange);
+        return;
+    }
+    else if (wrange_Index[0] > 0)
+    {
+        tau->start  += wrange_Index[0];
+        tau->n_used -= wrange_Index[0];
+    }
+
+    free(wrange_Index);
+    free(wrange);
+
+    for(n=0; n<tau->n_used; ++n)
+        rho_legal[n] = tau->rho_km_vals[tau->start + n] +
+                       0.5*tau->w_km_vals[tau->start + n];
+
+    wrange = rssringoccs_Where_Lesser_Double(
+        rho_legal, tau->n_used, tau->rho_km_vals[tau->arr_size-1]
+    );
+
+    wrange_Index = wrange[0];
+    wrange_Size = *wrange[1];
     free(rho_legal);
 
     if (wrange_Size == 0)
@@ -157,60 +205,56 @@ void rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau)
         tau->error_message = rssringoccs_strdup(
             "\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Get_Window_Width\n\n"
-            "\r\tThe window width is too large to reconstruct anything.\n"
+            "\rThe window width is too large to reconstruct anything.\n"
+            "\rThere is not enough data to the left of any point. That is,\n"
+            "\rrho_km_vals[n] + w_km_vals[n]/2 is less than rho_km_vals[0]\n"
+            "\rfor all n. Returning with error.\n"
         );
         return;
     }
-    else if (max_val < tau->rng_list[0])
-    {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
-            "\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_Tau_Get_Window_Width\n\n"
-            "\r\tMinimum requested range is greater than available data.\n"
-        );
-        free(wrange_Index);
-        free(wrange);
-        return;
-    }
-    else if (min_val > tau->rng_list[1])
-    {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
-            "\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_Tau_Get_Window_Width\n\n"
-            "\r\tMinimum requested range is greater than available data.\n"
-        );
-        free(wrange_Index);
-        free(wrange);
-        return;
-    }
-    else
-    {
-        if (wrange_Index[0] > tau->start)
-            tau->start = wrange_Index[0];
+    else if (wrange_Index[wrange_Size-1] < tau->n_used)
+        tau->n_used = wrange_Size-1;
 
-        if ((tau->start + tau->n_used) > wrange_Index[wrange_Size - 1])
-            tau->n_used = wrange_Index[wrange_Size-1] - tau->start;
-        free(wrange_Index);
-        free(wrange);
-    }
+    free(wrange_Index);
+    free(wrange);
 
-    if (tau->start > tau->arr_size){
+    if (tau->start > tau->arr_size)
+    {
         tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_message = malloc(sizeof(*tau->error_message)*512);
+        if (tau->error_message == NULL)
+            return;
+
+        sprintf(
+            tau->error_message,
             "\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Get_Window_Width\n\n"
             "\rStarting index (start) is greater than the size of the array.\n"
+            "\r\ttau->start:    %lu\n"
+            "\r\ttau->n_used:   %lu\n"
+            "\r\tstart+n_used:  %lu\n"
+            "\r\ttau->arr_size: %lu\n",
+            tau->start, tau->n_used, tau->start+tau->n_used, tau->arr_size
         );
         return;
     }
-    else if (tau->start + tau->n_used > tau->arr_size){
+    else if ((tau->start + tau->n_used) > tau->arr_size)
+    {
         tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_message = malloc(sizeof(*tau->error_message)*512);
+        if (tau->error_message == NULL)
+            return;
+
+        sprintf(
+            tau->error_message,
             "\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Get_Window_Width\n\n"
             "\rFinal index (start+n_used) is greater than size of array.\n"
+            "\r\ttau->start:    %lu\n"
+            "\r\ttau->n_used:   %lu\n"
+            "\r\tstart+n_used:  %lu\n"
+            "\r\ttau->arr_size: %lu\n",
+            tau->start, tau->n_used, tau->start+tau->n_used, tau->arr_size
         );
         return;
     }

@@ -23,60 +23,76 @@
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
 rssringoccs_ComplexDouble
-Fresnel_Transform_Newton_D_Double(double *x_arr, double *phi_arr,
-                                  rssringoccs_ComplexDouble *T_in, double *w_func,
-                                  double k, double r, double B, double EPS,
-                                  unsigned long toler, double dx,
-                                  double F, unsigned long n_pts,
-                                  unsigned long center, double rx, double ry,
-                                  double rz)
+Fresnel_Transform_Newton_D_Double(rssringoccs_TAUObj *tau,
+                                  double *w_func,
+                                  unsigned long n_pts,
+                                  unsigned long center)
 {
     /*  Declare all necessary variables. i and j are used for indexing.       */
-    unsigned long i, j;
+    unsigned long m, offset;
 
     /*  The Fresnel kernel and the stationary ring azimuth angle.             */
-    double psi, phi, x, y, drx, dry, D, exp_psi_re, exp_psi_im;
+    double psi, phi, x, y, z, dx, dy, D, exp_psi_re, exp_psi_im, factor;
     rssringoccs_ComplexDouble T_out, exp_psi, integrand;
-    double rcpr_F = 1.0/F;
 
     /*  Initialize T_out and norm to zero so we can loop over later.          */
-    T_out = rssringoccs_CDouble_Zero;
+    T_out  = rssringoccs_CDouble_Zero;
+    factor = 0.5 * tau->dx_km / tau->F_km_vals[center];
 
     /*  Symmetry is lost without the Legendre polynomials, or Fresnel         *
      *  quadratic. Must compute everything from -W/2 to W/2.                  */
-    j = center-(long)((n_pts-1)/2);
+    offset = center-(long)((n_pts-1)/2);
 
     /*  Use a Riemann Sum to approximate the Fresnel Inverse Integral.        */
-    for (i = 0; i<n_pts; ++i)
+    for (m = 0; m < n_pts; ++m)
     {
         /*  Calculate the stationary value of psi with respect to phi.        */
-        phi = Newton_Raphson_Fresnel_Psi_D(k, r, x_arr[i], phi_arr[i],
-                                           phi_arr[i], B, EPS, toler, rx, ry, rz);
+        phi = Newton_Raphson_Fresnel_Psi_D(
+            tau->k_vals[center],
+            tau->rho_km_vals[center],
+            tau->rho_km_vals[offset],
+            tau->phi_rad_vals[offset],
+            tau->phi_rad_vals[offset],
+            tau->B_rad_vals[center],
+            tau->EPS,
+            tau->toler,
+            tau->rx_km_vals[center],
+            tau->ry_km_vals[center],
+            tau->rz_km_vals[center]
+        );
 
-        x = x_arr[i] * cos(phi);
-        y = x_arr[i] * sin(phi);
-        drx = x-rx;
-        dry = y-ry;
-        D = sqrt(drx*drx + dry*dry + rz*rz);
+        x = tau->rho_km_vals[offset] * cos(phi);
+        y = tau->rho_km_vals[offset] * sin(phi);
+        z = tau->rz_km_vals[center];
+        dx = x - tau->rx_km_vals[center];
+        dy = y - tau->ry_km_vals[center];
+        D = sqrt(dx*dx + dy*dy + z*z);
 
         /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
-        psi        = rssringoccs_Double_Fresnel_Psi(k, r, x_arr[i], phi,
-                                                    phi_arr[i], B, D);
-        exp_psi_re = cos(psi)*w_func[i];
-        exp_psi_im = -sin(psi)*w_func[i];
-        exp_psi = rssringoccs_CDouble_Rect(exp_psi_re, exp_psi_im);
+        psi = rssringoccs_Double_Fresnel_Psi(
+            tau->k_vals[center],
+            tau->rho_km_vals[center],
+            tau->rho_km_vals[offset],
+            phi,
+            tau->phi_rad_vals[offset],
+            tau->B_rad_vals[center],
+            D
+        );
 
+        exp_psi_re = cos(psi)*w_func[m];
+        exp_psi_im = -sin(psi)*w_func[m];
+        exp_psi = rssringoccs_CDouble_Rect(exp_psi_re, exp_psi_im);
 
         /*  Compute the transform with a Riemann sum. If the T_in pointer     *
          *  does not contain at least 2*n_pts+1 points, n_pts to the left and *
          *  right of the center, then this will create a segmentation fault.  */
-        integrand = rssringoccs_CDouble_Multiply(exp_psi, T_in[j]);
+        integrand = rssringoccs_CDouble_Multiply(exp_psi, tau->T_in[offset]);
         T_out     = rssringoccs_CDouble_Add(T_out, integrand);
-        j += 1;
+        offset += 1;
     }
 
     /*  Multiply result by the coefficient found in the Fresnel inverse.      */
-    integrand = rssringoccs_CDouble_Rect(0.5*dx*rcpr_F, 0.5*dx*rcpr_F);
+    integrand = rssringoccs_CDouble_Rect(factor, factor);
     T_out     = rssringoccs_CDouble_Multiply(integrand, T_out);
     return T_out;
 }

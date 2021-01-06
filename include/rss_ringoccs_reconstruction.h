@@ -57,6 +57,8 @@ typedef struct rssringoccs_TAUObj {
     double perturb[5];
     double rng_list[2];
     double rng_req[2];
+    double EPS;
+    unsigned char toler;
     unsigned long start;
     unsigned long n_used;
     unsigned long arr_size;
@@ -74,6 +76,11 @@ typedef struct rssringoccs_TAUObj {
     unsigned char order;
     unsigned char interp;
 } rssringoccs_TAUObj;
+
+typedef rssringoccs_ComplexDouble (*rssringoccs_FresT)(rssringoccs_TAUObj *,
+                                                       double *,
+                                                       unsigned long,
+                                                       unsigned long);
 
 extern void rssringoccs_Reconstruction(rssringoccs_TAUObj *tau);
 
@@ -107,9 +114,6 @@ extern void
 rssringoccs_Tau_Check_Occ_Type(rssringoccs_TAUObj *tau);
 
 extern void
-rssringoccs_Tau_Select_Window_Func(rssringoccs_TAUObj *tau);
-
-extern void
 rssringoccs_Tau_Compute_Vars(rssringoccs_TAUObj *tau);
 
 extern void
@@ -117,6 +121,12 @@ rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau);
 
 extern void
 rssringoccs_Tau_Finish(rssringoccs_TAUObj* tau);
+
+extern void
+rssringoccs_Destroy_Tau_Members(rssringoccs_TAUObj *tau);
+
+extern void
+rssringoccs_Destroy_Tau(rssringoccs_TAUObj **tau);
 
 extern void
 rssringoccs_Tau_Reset_Window(double *x_arr, double *w_func, double dx,
@@ -134,18 +144,9 @@ extern void
 rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj *tau);
 
 extern void
-rssringoccs_Diffraction_Correction_Ellipse(rssringoccs_TAUObj *tau);
-
-extern void
 rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau);
 
 extern void
 rssringoccs_Diffraction_Correction_PerturbedNewton(rssringoccs_TAUObj *tau);
-
-extern void
-rssringoccs_Diffraction_Correction_Newton_D(rssringoccs_TAUObj *tau);
-
-extern void
-rssringoccs_Diffraction_Correction_Newton_D_Old(rssringoccs_TAUObj *tau);
 
 #endif

@@ -201,7 +201,7 @@ void rssringoccs_Tau_Check_Occ_Type(rssringoccs_TAUObj *tau)
 
     /*  If dx_km is negative and rho_dot_kms_vals is positive, there is most  *
      *  likely an error. Rather than assuming what the occultation is and     *
-     *  proceed with fingers cross, return an error. The user should fix      *
+     *  proceeding with fingers cross, return an error. The user should fix   *
      *  DLP data so the dx_km is positive.                                    */
     else if ((tau->dx_km < 0.0) && (min_val > 0.0))
     {
@@ -233,6 +233,19 @@ void rssringoccs_Tau_Check_Occ_Type(rssringoccs_TAUObj *tau)
         rssringoccs_Reverse_Double_Array(tau->p_norm_vals,      tau->arr_size);
         rssringoccs_Reverse_Double_Array(tau->f_sky_hz_vals,    tau->arr_size);
         rssringoccs_Reverse_Double_Array(tau->rho_dot_kms_vals, tau->arr_size);
+        rssringoccs_Reverse_Double_Array(tau->t_oet_spm_vals,   tau->arr_size);
+        rssringoccs_Reverse_Double_Array(tau->t_ret_spm_vals,   tau->arr_size);
+        rssringoccs_Reverse_Double_Array(tau->t_set_spm_vals,   tau->arr_size);
+        rssringoccs_Reverse_Double_Array(tau->phi_rl_rad_vals,  tau->arr_size);
+        rssringoccs_Reverse_Double_Array(tau->rx_km_vals,       tau->arr_size);
+        rssringoccs_Reverse_Double_Array(tau->ry_km_vals,       tau->arr_size);
+        rssringoccs_Reverse_Double_Array(tau->rz_km_vals,       tau->arr_size);
+        rssringoccs_Reverse_Double_Array(tau->raw_tau_threshold_vals,
+                                         tau->arr_size);
+        rssringoccs_Reverse_Double_Array(tau->rho_corr_pole_km_vals,
+                                         tau->arr_size);
+        rssringoccs_Reverse_Double_Array(tau->rho_corr_timing_km_vals,
+                                         tau->arr_size);
 
         for(n=0; n<tau->arr_size; ++n)
             tau->rho_dot_kms_vals[n]

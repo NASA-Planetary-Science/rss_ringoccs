@@ -55,3 +55,5 @@ rssringoccs_Newton_Raphson_CDouble_Poly_Real(
 
     return z;
 }
+
+#undef EPS

@@ -7,9 +7,6 @@
 
 void rssringoccs_Tau_Set_WType(const char *wtype, rssringoccs_TAUObj *tau)
 {
-    unsigned long str_len;
-    unsigned long new_str_len, n;
-
     if (tau == NULL)
         return;
 
@@ -30,61 +27,50 @@ void rssringoccs_Tau_Set_WType(const char *wtype, rssringoccs_TAUObj *tau)
     if (tau->wtype != NULL)
         free(tau->wtype);
 
-    str_len = strlen(wtype);
-    if (str_len == 0)
-    {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
-            "\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_Tau_Set_WType\n\n"
-            "\rInput string is empty. Returning.\n"
-        );
-        return;
-    }
-
-    tau->wtype = malloc(sizeof(*tau->wtype) * str_len);
-    new_str_len = 0;
-    n = 0;
-
-    while(wtype[n])
-    {
-        if (!isspace(wtype[n]))
-        {
-            tau->wtype[new_str_len] = tolower(wtype[n]);
-            ++new_str_len;
-        }
-        ++n;
-    }
-
-    if (new_str_len == 0)
-    {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
-            "\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_Tau_Set_WType\n\n"
-            "\rInput string is only spaces. Returning.\n"
-        );
-        return;
-    }
-
-    tau->wtype = realloc(tau->wtype, new_str_len);
+    tau->wtype = rssringoccs_strdup(wtype);
+    rssringoccs_Remove_Spaces(tau->wtype);
+    rssringoccs_Make_Lower(tau->wtype);
 
     if (strcmp(tau->wtype, "rect") == 0)
+    {
         tau->normeq = RectNormEQ;
+        tau->window_func = rssringoccs_Double_Rect_Window;
+    }
     else if (strcmp(tau->wtype, "coss") == 0)
+    {
         tau->normeq = CossNormEQ;
+        tau->window_func = rssringoccs_Double_Coss_Window;
+    }
     else if (strcmp(tau->wtype, "kb20") == 0)
+    {
         tau->normeq = KB20NormEQ;
+        tau->window_func = rssringoccs_Double_Kaiser_Bessel_2_0;
+    }
     else if (strcmp(tau->wtype, "kb25") == 0)
+    {
         tau->normeq = KB25NormEQ;
+        tau->window_func = rssringoccs_Double_Kaiser_Bessel_2_5;
+    }
     else if (strcmp(tau->wtype, "kb35") == 0)
+    {
         tau->normeq = KB35NormEQ;
+        tau->window_func = rssringoccs_Double_Kaiser_Bessel_3_5;
+    }
     else if (strcmp(tau->wtype, "kbmd20") == 0)
+    {
         tau->normeq = KBMD20NormEQ;
+        tau->window_func = rssringoccs_Double_Modified_Kaiser_Bessel_2_0;
+    }
     else if (strcmp(tau->wtype, "kbmd25") == 0)
+    {
         tau->normeq = KBMD25NormEQ;
+        tau->window_func = rssringoccs_Double_Modified_Kaiser_Bessel_2_5;
+    }
     else if (strcmp(tau->wtype, "kbmd35") == 0)
+    {
         tau->normeq = KBMD35NormEQ;
+        tau->window_func = rssringoccs_Double_Modified_Kaiser_Bessel_3_5;
+    }
     else
     {
         tau->error_occurred = rssringoccs_True;

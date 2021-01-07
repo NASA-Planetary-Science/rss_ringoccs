@@ -6,7 +6,7 @@ from rss_ringoccs.tools import CSV_tools, error_check, history
 class CompareTau(object):
     def __init__(self, geo, cal, dlp, tau, res, rng='all', wtype="kbmd20",
                  fwd=False, bfac=True, sigma=2.e-13, verbose=False, norm=True,
-                 psitype='fresnel4', res_factor=0.75, perturb=[0,0,0,0,0]):
+                 psitype='newton', res_factor=0.75, perturb=[0,0,0,0,0]):
 
         # Check all input variables for errors.
         fname = "diffrec.advanced_tools.CompareTau"

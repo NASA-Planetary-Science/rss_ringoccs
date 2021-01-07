@@ -64,7 +64,7 @@ rssringoccs_Tau_Set_Psitype(const char *psitype, rssringoccs_TAUObj* tau)
      *  are "fresnel", but the string is not exactly "fresnel", try to parse  *
      *  the rest of it and extract a value. For example, if                   *
      *  tau.psitype = "fresnel4", try to extract the "4".                     */
-    else if (strncmp(tau->psitype, "fresnel", 7))
+    else if (strncmp(tau->psitype, "fresnel", 7) == 0)
     {
         const char *fresnelnum = &tau->psitype[7];
         tau->order = strtol(fresnelnum, NULL, 10);
@@ -75,6 +75,7 @@ rssringoccs_Tau_Set_Psitype(const char *psitype, rssringoccs_TAUObj* tau)
         tau->order = 0;
         tau->psinum = rssringoccs_DR_None;
         tau->error_occurred = rssringoccs_True;
+        puts(tau->psitype);
         tau->error_message = rssringoccs_strdup(
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\tdiffrec.DiffractionCorrection\n\n"

@@ -258,11 +258,12 @@ rssringoccs_Get_Py_Func_From_C(PyObject *self, PyObject *args,
     /*  Declare necessary variables.                                          */
     PyObject *capsule, *output, *x, *nth_item;
     PyArrayObject *x_as_arr;
-    long n, dim, strides;
+    long n, dim;
     double *new_x;
     rssringoccs_Bool error_occured = rssringoccs_False;
     void *data, *out;
     int typenum;
+    out = NULL;
 
     if (c_func->func_name == NULL)
     {
@@ -335,7 +336,6 @@ rssringoccs_Get_Py_Func_From_C(PyObject *self, PyObject *args,
     x_as_arr = (PyArrayObject *)x;
     typenum = PyArray_TYPE(x_as_arr);
     dim     = (unsigned long)PyArray_DIM(x_as_arr, 0);
-    strides = (unsigned long)PyArray_STRIDE(x_as_arr, 0);
     data    = PyArray_DATA(x_as_arr);
 
     /*  Check the inputs to make sure they're valid.                         */
@@ -449,6 +449,15 @@ rssringoccs_Get_Py_Func_From_C(PyObject *self, PyObject *args,
              "\n\rError Encountered: rss_ringoccs\n"
              "\r\t%s\n\n"
              "\rCould not parse inputs.\n",
+             c_func->func_name);
+        return NULL;
+    }
+    else if (out == NULL)
+    {
+        PyErr_Format(PyExc_RuntimeError,
+             "\n\rError Encountered: rss_ringoccs\n"
+             "\r\t%s\n\n"
+             "\rCould not parse inputs. out returned NULL.\n",
              c_func->func_name);
         return NULL;
     }

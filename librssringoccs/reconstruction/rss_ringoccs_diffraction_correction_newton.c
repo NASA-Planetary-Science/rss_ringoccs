@@ -83,6 +83,8 @@ void rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj *tau)
             FresT = Fresnel_Transform_Newton_Norm_Double;
         else if (tau->psinum == rssringoccs_DR_NewtonD)
             FresT = Fresnel_Transform_Newton_D_Norm_Double;
+        else if (tau->psinum == rssringoccs_DR_NewtonDPhi)
+            FresT = Fresnel_Transform_Newton_dD_dphi_Norm_Double;
         else
             FresT = Fresnel_Transform_Newton_D_Old_Norm_Double;
     }
@@ -92,6 +94,8 @@ void rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj *tau)
             FresT = Fresnel_Transform_Newton_Double;
         else if (tau->psinum == rssringoccs_DR_NewtonD)
             FresT = Fresnel_Transform_Newton_D_Double;
+        else if (tau->psinum == rssringoccs_DR_NewtonDPhi)
+            FresT =  Fresnel_Transform_Newton_dD_dphi_Double;
         else
             FresT = Fresnel_Transform_Newton_D_Old_Double;
     }

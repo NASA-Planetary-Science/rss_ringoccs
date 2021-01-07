@@ -75,7 +75,6 @@ rssringoccs_Tau_Set_Psitype(const char *psitype, rssringoccs_TAUObj* tau)
         tau->order = 0;
         tau->psinum = rssringoccs_DR_None;
         tau->error_occurred = rssringoccs_True;
-        puts(tau->psitype);
         tau->error_message = rssringoccs_strdup(
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\tdiffrec.DiffractionCorrection\n\n"

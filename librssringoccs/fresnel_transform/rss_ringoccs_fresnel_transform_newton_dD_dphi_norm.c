@@ -23,11 +23,12 @@
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
 rssringoccs_ComplexDouble
-Fresnel_Transform_Newton_D_Old_Norm_Double(rssringoccs_TAUObj *tau,
-                                           double *w_func,
-                                           unsigned long n_pts,
-                                           unsigned long center)
+Fresnel_Transform_Newton_dD_dphi_Norm_Double(rssringoccs_TAUObj *tau,
+                                             double *w_func,
+                                             unsigned long n_pts,
+                                             unsigned long center)
 {
+
     /*  Declare all necessary variables. i and j are used for indexing.       */
     unsigned long m, offset;
 
@@ -48,7 +49,7 @@ Fresnel_Transform_Newton_D_Old_Norm_Double(rssringoccs_TAUObj *tau,
     for (m = 0; m<n_pts; ++m)
     {
         /*  Calculate the stationary value of psi with respect to phi.        */
-        phi = Newton_Raphson_Fresnel_Psi_D_Old(
+        phi = Newton_Raphson_Fresnel_Psi_dD_dphi(
             tau->k_vals[center]*tau->D_km_vals[center],
             tau->rho_km_vals[center],
             tau->rho_km_vals[offset],
@@ -70,8 +71,8 @@ Fresnel_Transform_Newton_D_Old_Norm_Double(rssringoccs_TAUObj *tau,
         D = sqrt(dx*dx + dy*dy + z*z);
 
         /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
-        psi = rssringoccs_Double_Fresnel_Psi_Old(
-            tau->k_vals[center]*tau->D_km_vals[center],
+        psi = rssringoccs_Double_Fresnel_Psi(
+            tau->k_vals[center],
             tau->rho_km_vals[center],
             tau->rho_km_vals[offset],
             phi,

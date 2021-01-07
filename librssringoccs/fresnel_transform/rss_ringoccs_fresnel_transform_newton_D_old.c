@@ -22,19 +22,6 @@
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_kernel.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
-static double __psi(double kD, double r, double r0, double phi,
-                    double phi0, double B, double D)
-{
-    double xi, eta;
-
-    /*  Compute xi variable (MTR86 Equation 4b) and eta (Equation 4c).        */
-    xi   = (cos(B)/D) * (r * cos(phi) - r0 * cos(phi0));
-    eta  = (r0*r0 + r*r - 2.0*r*r0*cos(phi-phi0)) / (D*D);
-
-    /* Sign of xi swapped from MTR86.                                         */
-    return kD * (sqrt(1.0+eta-2.0*xi) + xi - 1.0);
-}
-
 rssringoccs_ComplexDouble
 Fresnel_Transform_Newton_D_Old_Double(rssringoccs_TAUObj *tau,
                                       double *w_func,
@@ -82,7 +69,7 @@ Fresnel_Transform_Newton_D_Old_Double(rssringoccs_TAUObj *tau,
         D = sqrt(dx*dx + dy*dy + z*z);
 
         /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
-        psi = __psi(
+        psi = rssringoccs_Double_Fresnel_Psi_Old(
             tau->k_vals[center]*tau->D_km_vals[center],
             tau->rho_km_vals[center],
             tau->rho_km_vals[offset],

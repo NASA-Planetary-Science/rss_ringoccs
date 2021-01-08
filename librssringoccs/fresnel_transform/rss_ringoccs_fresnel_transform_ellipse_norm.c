@@ -108,7 +108,6 @@ Fresnel_Transform_Ellipse_Norm_Double(rssringoccs_TAUObj *tau,
     /*  The integral in the numerator of norm evaluates to F sqrt(2). Use     *
      *  this in the calculation of the normalization. The cabs function       *
      *  computes the absolute value of complex number (defined in complex.h). */
-    norm  = rssringoccs_CDouble_Add_Real(1.0, norm);
     abs_norm = rssringoccs_CDouble_Abs(norm);
     real_norm = rssringoccs_Sqrt_Two / abs_norm;
 

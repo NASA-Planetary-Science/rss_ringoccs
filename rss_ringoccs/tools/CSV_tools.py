@@ -76,7 +76,8 @@ def get_geo(geo, verbose=True, use_deprecate=False):
                                      "rz_km_vals",
                                      "vx_kms_vals",
                                      "vy_kms_vals",
-                                     "vz_kms_vals"])
+                                     "vz_kms_vals"],
+                                     usecols=list(range(18)))
         else:
             dfg = pd.read_csv(geo, delimiter=',',
                               names=["t_oet_spm_vals",
@@ -97,7 +98,8 @@ def get_geo(geo, verbose=True, use_deprecate=False):
                                      "vx_kms_vals",
                                      "vy_kms_vals",
                                      "vz_kms_vals",
-                                     "obs_spacecract_lat_deg_vals"])
+                                     "obs_spacecract_lat_deg_vals"],
+                                     usecols=list(range(19)))
     except FileNotFoundError:
         raise FileNotFoundError(
             """
@@ -146,7 +148,8 @@ def get_cal(cal, verbose=True):
                           names=["spm_vals",
                                  "f_sky_pred_vals",
                                  "f_sky_resid_fit_vals",
-                                 "p_free_vals"])
+                                 "p_free_vals"],
+                                 usecols=list(range(4)))
     except FileNotFoundError:
         raise FileNotFoundError(
             """
@@ -213,9 +216,9 @@ def get_dlp(dlp, verbose=True, use_deprecate=False):
                                      "t_oet_spm_vals",
                                      "t_ret_spm_vals",
                                      "t_set_spm_vals",
-                                     "B_deg_vals"])
+                                     "B_deg_vals"],
+                                     usecols=list(range(12)))
         else:
-            usecols = list(range(13))
             dfd = pd.read_csv(dlp, delimiter=',',
                               names=["rho_km_vals",
                                      "rho_corr_pole_km_vals",
@@ -229,7 +232,7 @@ def get_dlp(dlp, verbose=True, use_deprecate=False):
                                      "t_oet_spm_vals",
                                      "t_ret_spm_vals",
                                      "t_set_spm_vals",
-                                     "B_deg_vals"], usecols=usecols)
+                                     "B_deg_vals"], usecols=list(range(13)))
     except FileNotFoundError:
         raise FileNotFoundError(
             """
@@ -442,7 +445,7 @@ class ExtractCSVData(object):
         self.tau = tau
 
         # Extract GEO, CAL, and DLP data.
-        geo_dat = get_geo(self.geo, verbose=verbose)
+        geo_dat = get_geo(self.geo, verbose=verbose, use_deprecate=use_deprecate)
         cal_dat = get_cal(self.cal, verbose=verbose)
         dlp_dat = get_dlp(self.dlp, verbose=verbose, use_deprecate=use_deprecate)
 
@@ -704,3 +707,241 @@ class ExtractCSVData(object):
         if verbose:
             print("\tHistory Complete.")
             print("\tExtract CSV Data Complete.")
+
+
+class GetUranusData(object):
+    def __init__(self, geodata, dlpdata, tau=None, verbose=False):
+        fname = "tools.CSV_tools.ExtractCSVData"
+        error_check.check_type(geodata, str, "geo", fname)
+        error_check.check_type(dlpdata, str, "dlp", fname)
+        error_check.check_type(verbose, bool, "verbose", fname)
+        if (not isinstance(tau, type(None))):
+            error_check.check_type(tau, str, "tau", fname)
+
+        geo_dat = get_geo(geodata, verbose=verbose)
+
+        dlp_dat = pd.read_csv(
+            dlpdata, delimiter=',',
+            names=[
+                "rho_km_vals",
+                "null1",
+                "null2",
+                "phi_rl_rad_vals",
+                "phi_rad_vals",
+                "p_norm_vals",
+                "raw_tau_vals",
+                "phase_rad_vals",
+                "raw_tau_threshold_vals",
+                "t_oet_spm_vals",
+                "t_ret_spm_vals",
+                "t_set_spm_vals",
+                "B_rad_vals",
+                "rho_dot_kms_vals",
+                "F_km_vals",
+                "D_km_vals",
+                "f_sky_hz_vals"
+            ],
+            usecols=list(range(17))
+        )
+
+        if verbose:
+            print("\tRetrieving Variables...")
+
+        try:
+            # Read in DLP. Create dummy variable in case an error occurs.
+            errmess = "rho_km_vals"
+            self.rho_km_vals = np.array(dlp_dat.rho_km_vals)
+            errmess = "raw_tau_vals"
+            self.raw_tau_vals = np.array(dlp_dat.raw_tau_vals)
+            errmess = "phase_rad_vals"
+            self.phase_rad_vals = np.array(dlp_dat.phase_rad_vals)
+            errmess = "phi_ora_rad_vals"
+            self.phi_rad_vals = np.array(dlp_dat.phi_rad_vals)
+            errmess = "B_rad_vals"
+            self.B_rad_vals = np.array(dlp_dat.B_rad_vals)
+            errmess = "t_oet_spm_vals"
+            self.t_oet_spm_vals = np.array(dlp_dat.t_oet_spm_vals)
+            errmess = "t_ret_spm_vals"
+            self.t_ret_spm_vals = np.array(dlp_dat.t_ret_spm_vals)
+            errmess = "t_set_spm_vals"
+            self.t_set_spm_vals = np.array(dlp_dat.t_set_spm_vals)
+            errmess = "rho_corr_pole_km_vals"
+            self.rho_corr_pole_km_vals = np.array(dlp_dat.rho_km_vals)
+            errmess = "rho_corr_pole_km_vals"
+            self.rho_corr_timing_km_vals = np.array(dlp_dat.rho_km_vals)
+            errmess = "phi_rl_rad_vals"
+            self.phi_rl_rad_vals = np.array(dlp_dat.phi_rl_rad_vals)
+            errmess = "raw_tau_threshold_vals"
+            self.raw_tau_threshold_vals = np.array(dlp_dat.raw_tau_threshold_vals)
+            errmess = "p_norm_vals"
+            self.p_norm_vals = np.array(dlp_dat.p_norm_vals)
+            errmess = "D_km_vals"
+            self.D_km_vals = np.array(dlp_dat.D_km_vals)
+            errmess = "f_sky_hz_vals"
+            self.f_sky_hz_vals = np.array(dlp_dat.f_sky_hz_vals)
+            errmess = "rho_dot_kms_vals"
+            self.rho_dot_kms_vals = np.array(dlp_dat.rho_dot_kms_vals)
+
+            # Grab remaining necessary info from GEO
+            errmess = "geo_rho"
+            geo_rho = np.array(geo_dat.rho_km_vals)
+            errmess = "rx_geo"
+            rx_geo = np.array(geo_dat.rx_km_vals)
+            errmess = "ry_geo"
+            ry_geo = np.array(geo_dat.ry_km_vals)
+            errmess = "rz_geo"
+            rz_geo = np.array(geo_dat.rz_km_vals)
+
+        except (ValueError, TypeError, NameError, AttributeError):
+            raise TypeError(
+                """
+                    \r\tError Encountered: rss_ringoccs
+                    \r\t\t%s\n
+                    \r\tCould not convert %s into a numpy array.
+                    \r\tCheck input GEO, CAL, and DLP files.
+                """ % (fname, errmess)
+            )
+
+        error_check.check_is_real(self.raw_tau_threshold_vals,
+                                  "raw_tau_threshold_vals", fname)
+        error_check.check_is_real(self.rho_dot_kms_vals,
+                                  "rho_dot_kms_vals",fname)
+        error_check.check_is_real(self.phi_rl_rad_vals,
+                                  "phi_rl_rad_vals", fname)
+        error_check.check_is_real(self.t_oet_spm_vals, "t_oet_spm_vals", fname)
+        error_check.check_is_real(self.t_ret_spm_vals, "t_ret_spm_vals", fname)
+        error_check.check_is_real(self.t_set_spm_vals, "t_set_spm_vals", fname)
+        error_check.check_is_real(self.phase_rad_vals, "phase_rad_vals", fname)
+        error_check.check_is_real(self.f_sky_hz_vals, "f_sky_hz_vals", fname)
+        error_check.check_is_real(self.raw_tau_vals, "raw_tau_vals", fname)
+        error_check.check_is_real(self.phi_rad_vals, "phi_rad_vals", fname)
+        error_check.check_is_real(self.rho_km_vals, "rho_km_vals", fname)
+        error_check.check_is_real(self.B_rad_vals, "B_rad_vals", fname)
+        error_check.check_is_real(self.D_km_vals, "D_km_vals", fname)
+        error_check.check_is_real(geo_rho, "geo_rho", fname)
+
+        error_check.check_positive(self.t_oet_spm_vals, "t_oet_spm_vals", fname)
+        error_check.check_positive(self.t_ret_spm_vals, "t_ret_spm_vals", fname)
+        error_check.check_positive(self.t_set_spm_vals, "t_set_spm_vals", fname)
+        error_check.check_positive(self.f_sky_hz_vals, "f_sky_hz_vals", fname)
+        error_check.check_positive(self.rho_km_vals, "rho_km_vals", fname)
+        error_check.check_positive(self.D_km_vals, "D_km_vals", fname)
+        error_check.check_positive(geo_rho, "geo_rho", fname)
+
+        error_check.check_two_pi(self.phi_rl_rad_vals, "phi_rl_rad_vals",
+                                 fname, deg=False)
+        error_check.check_two_pi(self.phase_rad_vals, "phase_rad_vals",
+                                 fname, deg=False)
+        error_check.check_two_pi(self.phi_rad_vals, "phi_rad_vals",
+                                 fname, deg=False)
+        error_check.check_two_pi(self.B_rad_vals, "B_rad_vals",
+                                 fname, deg=False)
+
+        error_check.check_lengths(self.t_set_spm_vals, self.rho_km_vals,
+                                  "t_set_spm_vals", "rho_km_vals", fname)
+        error_check.check_lengths(self.t_ret_spm_vals, self.rho_km_vals,
+                                  "t_ret_spm_vals", "rho_km_vals", fname)
+        error_check.check_lengths(self.t_oet_spm_vals, self.rho_km_vals,
+                                  "t_oet_spm_vals", "rho_km_vals", fname)
+        error_check.check_lengths(self.phase_rad_vals, self.rho_km_vals,
+                                  "phase_rad_vals", "rho_km_vals", fname)
+        error_check.check_lengths(self.phi_rad_vals, self.rho_km_vals,
+                                  "phi_rad_vals", "rho_km_vals", fname)
+        error_check.check_lengths(self.raw_tau_vals, self.rho_km_vals,
+                                  "raw_tau_vals", "rho_km_vals", fname)
+        error_check.check_lengths(self.B_rad_vals, self.rho_km_vals,
+                                  "B_rad_vals", "rho_km_vals", fname)
+        error_check.check_lengths(self.D_km_vals, self.rho_km_vals,
+                                  "D_km_vals", "rho_km_vals", fname)
+        error_check.check_lengths(self.rho_dot_kms_vals, self.rho_km_vals,
+                                  "D_km_vals", "rho_km_vals", fname)
+
+        if verbose:
+            print("\tComputing Variables...")
+
+        dr = np.diff(self.rho_km_vals)
+        dt = np.diff(self.t_set_spm_vals)
+
+        drdt = dr/dt
+
+        if (np.min(drdt) < 0.0) and (np.max (drdt) > 0.0):
+           raise ValueError(
+                """
+                    \r\tError Encountered: rss_ringoccs
+                    \r\t\t%s\n
+                    \r\tdrho/dt has positive and negative values.
+                    \r\tCheck your DLP file for errors.
+                    \r\tYour file: %s
+                """ % (fname, dlp)
+            )
+        elif (np.size((drdt == 0).nonzero()) != 0):
+            raise ValueError(
+                """
+                    \r\tError Encountered: rss_ringoccs
+                    \r\t\t%s\n
+                    \r\tdrho/dt has zero valued elements.
+                    \r\tCheck your DLP file for errors.
+                    \r\tYour file: %s
+                """ % (fname, dlp)
+            )
+        elif (drdt < 0.0).all():
+
+            # The rev is ingress, so flip GEO variables.
+            self.rho_dot_kms_vals = np.abs(self.rho_dot_kms_vals[::-1])
+            self.D_km_vals = self.D_km_vals[::-1]
+            geo_rho = geo_rho[::-1]
+        elif (drdt > 0.0).all():
+            pass
+        else:
+            raise ValueError(
+                """
+                    \r\tError Encountered: rss_ringoccs
+                    \r\t\t%s\n
+                    \r\tCould not determine occultation type.
+                """ % (fname)
+            )
+
+        if verbose:
+            print("\tInterpolating Data...")
+
+        self.rx_km_vals = np.interp(self.rho_km_vals, geo_rho, rx_geo)
+        self.ry_km_vals = np.interp(self.rho_km_vals, geo_rho, ry_geo)
+        self.rz_km_vals = np.interp(self.rho_km_vals, geo_rho, rz_geo)
+
+        if (not isinstance(tau, type(None))):
+            tau_dat = get_tau(tau, verbose=verbose, use_deprecate=False)
+            tm = np.sin(np.abs(np.deg2rad(tau_dat.B_deg_vals)))
+            rmin = np.min(tau_dat.rho_km_vals)
+            rmax = np.max(tau_dat.rho_km_vals)
+            rfin = int(np.max((rmax-self.rho_km_vals>=0).nonzero()))
+            rstart = int(np.min((self.rho_km_vals-rmin>=0).nonzero()))
+            self.tau_rho = self.rho_km_vals[rstart:rfin+1]
+            self.tau_vals = np.interp(self.tau_rho, tau_dat.rho_km_vals,
+                                      tau_dat.raw_tau_vals)
+            self.phase_vals = np.interp(self.tau_rho, tau_dat.rho_km_vals,
+                                        np.deg2rad(tau_dat.phase_deg_vals))
+            tm = np.interp(self.tau_rho, tau_dat.rho_km_vals, tm)
+            self.power_vals = np.exp(-self.tau_vals/tm)
+            del tau_dat, tm, rmin, rmax, rfin, rstart
+        else:
+            self.tau_rho = None
+            self.tau_vals = None
+            self.phase_vals = None
+            self.power_vals = None
+
+        if verbose:
+            print("\tData Extraction Complete.")
+            print("\tWriting History...")
+
+        input_vars = {
+            "GEO Data": geodata,
+            "DLP Data": dlpdata
+            }
+        input_kwds = {
+            "Use of Verbose":  verbose
+            }
+        self.history = write_history_dict(input_vars, input_kwds, __file__)
+
+        if verbose:
+            printf("Data Extraction Complete.")
+

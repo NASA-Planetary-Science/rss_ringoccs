@@ -61,10 +61,10 @@ Fresnel_Transform_Legendre_Norm_Even_Double(double *x_arr,
         /*  Compute psi using Horner's Method for Polynomial Computation.  */
         psi_even = coeffs[order-1];
         psi_odd  = coeffs[order-2];
-        for (k=3; k<order-1;){
+        for (k = 3; k < order-1; k += 2)
+        {
             psi_even = psi_even*x2 + coeffs[order-k];
             psi_odd  = psi_odd*x2 + coeffs[order-k-1];
-            k += 2;
         }
 
         /*  The leading term is x^2, so multiply by this and kD.              */

@@ -15,6 +15,7 @@ typedef enum {
     rssringoccs_DR_NewtonD,
     rssringoccs_DR_NewtonDOld,
     rssringoccs_DR_NewtonDPhi,
+    rssringoccs_DR_NewtonPerturb,
     rssringoccs_DR_Elliptical,
     rssringoccs_DR_None
 } rssringoccs_Psitype_Enum;
@@ -145,8 +146,5 @@ rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj *tau);
 
 extern void
 rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau);
-
-extern void
-rssringoccs_Diffraction_Correction_PerturbedNewton(rssringoccs_TAUObj *tau);
 
 #endif

@@ -22,19 +22,14 @@
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_kernel.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
-
 rssringoccs_ComplexDouble
-Fresnel_Transform_Perturbed_Newton_Norm_Double(double *x_arr, double *phi_arr,
-                                               rssringoccs_ComplexDouble *T_in,
-                                               double *w_func, double kD,
-                                               double r, double B, double D,
-                                               double EPS, unsigned long toler,
+Fresnel_Transform_Perturbed_Newton_Norm_Double(rssringoccs_TAUObj *tau,
+                                               double *w_func,
                                                unsigned long n_pts,
-                                               unsigned long center,
-                                               double perturb[5])
+                                               unsigned long center)
 {
     /*  Declare all necessary variables. i and j are used for indexing.       */
-    unsigned long m, n;
+    unsigned long m, offset;
 
     /*  The Fresnel kernel and the stationary ring azimuth angle.             */
     double psi, phi, x, poly, cos_psi, sin_psi, abs_norm, real_norm;
@@ -46,35 +41,51 @@ Fresnel_Transform_Perturbed_Newton_Norm_Double(double *x_arr, double *phi_arr,
 
     /*  Symmetry is lost without the Legendre polynomials, or Fresnel         *
      *  quadratic. Must compute everything from -W/2 to W/2.                  */
-    n = center-(long)((n_pts-1)/2);
+    offset = center - (unsigned long)((n_pts-1)/2);
 
     /*  Use a Riemann Sum to approximate the Fresnel Inverse Integral.        */
-    for (m = 0; m<n_pts; ++m)
+    for (m = 0; m < n_pts; ++m)
     {
         /*  Factor for the polynomial perturbation.                           */
-        x = (r-x_arr[m])/D;
+        x = (tau->rho_km_vals[center]-tau->rho_km_vals[offset]) /
+            tau->D_km_vals[center];
 
         /*  Calculate the stationary value of psi with respect to phi.        */
-        phi = Newton_Raphson_Fresnel_Psi(kD, r, x_arr[m], phi_arr[m],
-                                         phi_arr[m], B, D, EPS, toler);
+        phi = Newton_Raphson_Fresnel_Psi(
+            tau->k_vals[center],
+            tau->rho_km_vals[center],
+            tau->rho_km_vals[offset],
+            tau->phi_rad_vals[offset],
+            tau->phi_rad_vals[offset],
+            tau->B_rad_vals[center],
+            tau->D_km_vals[center],
+            tau->EPS,
+            tau->toler
+        );
 
-        /*  Compute psi and perturb by the requested polynomial.              */
-        psi = rssringoccs_Double_Fresnel_Psi(kD, r, x_arr[m], phi,
-                                             phi_arr[m], B, D);
+        /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
+        psi = rssringoccs_Double_Fresnel_Psi(
+            tau->k_vals[center],
+            tau->rho_km_vals[center],
+            tau->rho_km_vals[offset],
+            phi,
+            tau->phi_rad_vals[offset],
+            tau->B_rad_vals[center],
+            tau->D_km_vals[center]
+        );
 
         /*  Use Horner's method to compute the polynomial.                    */
-        poly  = x*perturb[4]+perturb[3];
-        poly  = poly*x + perturb[2];
-        poly  = poly*x + perturb[1];
-        poly  = poly*x + perturb[0];
-        poly *= kD;
+        poly  = x*tau->perturb[4] + tau->perturb[3];
+        poly  = poly*x + tau->perturb[2];
+        poly  = poly*x + tau->perturb[1];
+        poly  = poly*x + tau->perturb[0];
+        poly *= tau->k_vals[center] * tau->D_km_vals[center];
         psi  += poly;
 
         /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
-        cos_psi = rssringoccs_Double_Cos(psi);
-        sin_psi = rssringoccs_Double_Sin(psi);
+        cos_psi = w_func[m]*rssringoccs_Double_Cos(psi);
+        sin_psi = w_func[m]*rssringoccs_Double_Sin(psi);
         exp_psi = rssringoccs_CDouble_Rect(cos_psi, -sin_psi);
-        exp_psi = rssringoccs_CDouble_Multiply_Real(w_func[m], exp_psi);
 
         /*  Compute the norm using a Riemann sum as well.                     */
         norm = rssringoccs_CDouble_Add(norm, exp_psi);
@@ -82,9 +93,9 @@ Fresnel_Transform_Perturbed_Newton_Norm_Double(double *x_arr, double *phi_arr,
         /*  Compute the transform with a Riemann sum. If the T_in pointer     *
          *  does not contain at least 2*n_pts+1 points, n_pts to the left and *
          *  right of the center, then this will create a segmentation fault.  */
-        integrand = rssringoccs_CDouble_Multiply(exp_psi, T_in[n]);
+        integrand = rssringoccs_CDouble_Multiply(exp_psi, tau->T_in[offset]);
         T_out     = rssringoccs_CDouble_Add(T_out, integrand);
-        n += 1;
+        offset += 1;
     }
 
     /*  The integral in the numerator of norm evaluates to F sqrt(2). Use     *

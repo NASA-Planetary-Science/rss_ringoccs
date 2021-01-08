@@ -75,8 +75,8 @@ rssringoccs_Double_Fresnel_dPsi_dPhi_Ellipse(double k, double r, double r0,
     double xi, eta, psi0, psi_d1, dxi_phi, deta_phi, dxi_rho, deta_rho;
     double cos_B, cos_phi, sin_phi, cos_phi0, sin_phi0;
     double rcpr_D, rcpr_D_squared, cos_phi_phi0, sin_phi_phi0;
-    double xi_factor, eta_factor, dpsi_rho, dpsi_phi, drho_phi, semi_major;
-    double cos_phi_peri, sin_phi_peri, ecc_factor, ecc_cos_factor;
+    double xi_factor, eta_factor, dpsi_rho, dpsi_phi, drho_phi;
+    double cos_phi_peri, sin_phi_peri, factor, ecc_cos_factor;
 
     /*  Compute 1/D and it's square to save the number of divisions we need   *
      *  to compute. Multiplication is usually ~10 times faster.               */
@@ -93,9 +93,8 @@ rssringoccs_Double_Fresnel_dPsi_dPhi_Ellipse(double k, double r, double r0,
     sin_phi_peri = rssringoccs_Double_Sin(phi - peri);
 
     /*  These terms appear do to the eccentricity.                            */
-    ecc_factor     = 1.0 - ecc*ecc;
     ecc_cos_factor = 1.0 + ecc * cos_phi_peri;
-    semi_major     = r * ecc_cos_factor / ecc_factor;
+    factor = r * ecc_cos_factor;
 
     /*  Since we've computed cos and sin of phi and phi0, cos and sin of      *
      *  phi-phi0 can be computed without the need to call cos and sin again.  */
@@ -119,8 +118,7 @@ rssringoccs_Double_Fresnel_dPsi_dPhi_Ellipse(double k, double r, double r0,
     dxi_rho  = xi_factor * cos_phi;
     deta_rho = 2.0 * (r - r0 * cos_phi_phi0) * rcpr_D_squared;
 
-    drho_phi = semi_major*ecc*ecc_factor*sin_phi_peri /
-               (ecc_cos_factor*ecc_cos_factor);
+    drho_phi = factor*ecc*sin_phi_peri / (ecc_cos_factor*ecc_cos_factor);
 
     dpsi_rho = (deta_rho - 2.0 * dxi_rho) * (0.5 / psi0) + dxi_rho;
     dpsi_phi = (deta_phi - 2.0 * dxi_phi) * (0.5 / psi0) + dxi_phi;

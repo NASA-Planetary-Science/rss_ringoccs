@@ -103,9 +103,9 @@
 
 /*  It is not assumed you have C99 math.h, but rather the C89 math.h, which   *
  *  is also referred to as the ANSI C version. If you have C99 available,     *
- *  change __HAS_C99_MATH_H__ in rss_ringoccs_config.h to 1 and then          *
- *  rebuild rss_ringoccs. Some implementations of the C99 standard don't      *
- *  define float/long double versions of math functions and simply do         *
+ *  change __RSS_RINGOCCS_USING_C99_MATH_H__ in rss_ringoccs_config.h to 1    *
+ *  and then rebuild rss_ringoccs. Some implementations of the C99 standard   *
+ *  don't define float/long double versions of math functions and simply do   *
  *  something like sinf(x) = (float)sin((double)x), so there is no difference.*/
 
 /*  Check which version of C you are compiling with and set the macro         *
@@ -138,7 +138,7 @@
 /*  End of #if __RSS_RINGOCCS_USING_C99_MATH_H__ == 1.                        */
 
 /*  Include the standard library header math.h. We're only going to alias     *
- *  functions we ever use in rss_ringoccs, sin, cos, fabs, exp, atan2.        */
+ *  functions we ever use in rss_ringoccs, sin, cos, fabs, exp, atan2, etc.   */
 #include <math.h>
 
 /*  And this header file contains macros for the smallest and largest allowed *

@@ -1,3 +1,10 @@
+#include <stdlib.h>
+#include <rss_ringoccs/include/rss_ringoccs_math.h>
+#include <rss_ringoccs/include/rss_ringoccs_string.h>
+#include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
+#include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
+#include <rss_ringoccs/include/rss_ringoccs_fft.h>
+
 /******************************************************************************
  *  Function:                                                                 *
  *      DiffractionCorrectionSimpleFFT                                        *
@@ -25,21 +32,43 @@
  *          there is no FFT routine in the standard C library, FFTW has       *
  *          somewhat become the de facto standard.                            *
  ******************************************************************************/
-void DiffractionCorrectionSimpleFFT(DLPObj *dlp)
+void DiffractionCorrectionSimpleFFT(rssringoccs_TAUObj *tau)
 {
-    /*  If everything executes smoothly, status should remain at zero.        */
-    dlp->status = 0;
+    /*  Variables for indexing. nw_pts is the number of points in the window. */
+    unsigned long i, j, offset, nw_pts, center;
+
+    /*  Some variables needed for reconstruction.                             */
+    double w_init, dx, two_dx;
+    double *w_func;
 
     /*  Check that the pointers to the data are not NULL.                     */
-    if (!(check_dlp_data(dlp)))
-    {
-        /*  One of the variables has null data, return to calling function.   */
-        dlp->status = 1;
+    rssringoccs_Tau_Check_Data(tau);
+    if (tau->error_occurred)
         return;
+
+    /* Compute first window width and window function. */
+    center = tau->start;
+
+    /*  If forward tranform is set, negate the k_vals variable. This has      *
+     *  the equivalent effect of computing the forward calculation later.     */
+    if (tau->use_fwd)
+    {
+        /*  Loop over all of k_vals and negate the value.                     */
+        for (i=0; i <= tau->n_used; ++i)
+            tau->k_vals[i] *= -1.0;
     }
 
-    /*  Variable for indexing.                                                */
-    long i, i_shift;
+    /*  Compute some more variables.                                          */
+    w_init = tau->w_km_vals[center];
+    dx     = tau->rho_km_vals[center+1] - tau->rho_km_vals[center];
+    two_dx = 2.0*dx;
+    nw_pts = 2*((long)(w_init / two_dx))+1;
+    offset = center - (long)((nw_pts-1)/2);
+
+    /* Check to ensure you have enough data to the left.                      */
+    rssringoccs_Tau_Check_Data_Range(tau);
+    if (tau->error_occurred)
+        return;
 
     /*  Some variables needed for reconstruction.                             */
     double dx, norm;
@@ -144,8 +173,10 @@ void DiffractionCorrectionSimpleFFT(DLPObj *dlp)
     }
 
     /*  Select the correct Fresnel transformation.                            */
-    if (dlp->use_norm)norm = 1.0;
-    else norm = 1.0;
+    if (dlp->use_norm)
+        norm = 1.0;
+    else
+        norm = 1.0;
 
     /* Check to ensure you have enough data to the left.                      */
     if (!check_data_range(dlp, 2.0*dx))

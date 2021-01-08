@@ -28,7 +28,6 @@ Fresnel_Transform_Ellipse_Double(rssringoccs_TAUObj *tau,
     for (m = 0; m < n_pts; ++m)
     {
         /*  Calculate the stationary value of psi with respect to phi.        */
-        /*  Calculate the stationary value of psi with respect to phi.        */
         phi = rssringoccs_Double_Newton_Raphson_Fresnel_Ellipse(
             tau->k_vals[center],
             tau->rho_km_vals[center],
@@ -70,7 +69,7 @@ Fresnel_Transform_Ellipse_Double(rssringoccs_TAUObj *tau,
         /*  Compute the transform with a Riemann sum. If the T_in pointer     *
          *  does not contain at least 2*n_pts+1 points, n_pts to the left and *
          *  right of the center, then this will create a segmentation fault.  */
-        integrand = rssringoccs_CDouble_Multiply(exp_psi, tau->T_in[m]);
+        integrand = rssringoccs_CDouble_Multiply(exp_psi, tau->T_in[offset]);
         T_out     = rssringoccs_CDouble_Add(T_out, integrand);
         offset += 1;
     }

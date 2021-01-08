@@ -100,9 +100,11 @@ extern double
 rssringoccs_Double_Newton_Raphson_Fresnel_Ellipse(double k, double r,
                                                   double r0, double phi,
                                                   double phi0, double B,
-                                                  double D, double ecc,
-                                                  double peri, double EPS,
-                                                  unsigned char toler);
+                                                  double ecc, double peri,
+                                                  double EPS,
+                                                  unsigned char toler,
+                                                  double rx, double ry,
+                                                  double rz);
 
 /*  Fresnel scale.  */
 extern float

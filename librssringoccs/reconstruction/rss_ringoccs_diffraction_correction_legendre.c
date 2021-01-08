@@ -125,7 +125,7 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
         rssringoccs_Tau_Reset_Window(x_arr, w_func, dx, w_init, nw_pts, fw);
 
     /* Loop through each point and begin the reconstruction.                  */
-    for (i = 0; i <= tau->n_used; ++i)
+    for (i = 0; i < tau->n_used; ++i)
     {
         /*  Compute some geometric information, and the scaling coefficient   *
          *  for the Legendre polynomial expansion.                            */

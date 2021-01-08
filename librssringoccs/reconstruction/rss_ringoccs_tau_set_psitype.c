@@ -26,10 +26,6 @@ rssringoccs_Tau_Set_Psitype(const char *psitype, rssringoccs_TAUObj* tau)
     rssringoccs_Remove_Spaces(tau->psitype);
     rssringoccs_Make_Lower(tau->psitype);
 
-    /*  Check that psitype is legal. The strstr is a C standard library       *
-     *  function (from string.h) that checks if the second string is          *
-     *  contained in the first. So strstr(tau.psitype, "fresnel") is          *
-     *  equivalent to the Python code ("fresnel" in tau.psitype)              */
     if (strcmp(tau->psitype, "newton") == 0)
     {
         tau->order  = 0;
@@ -49,6 +45,11 @@ rssringoccs_Tau_Set_Psitype(const char *psitype, rssringoccs_TAUObj* tau)
     {
         tau->order  = 0;
         tau->psinum = rssringoccs_DR_NewtonDPhi;
+    }
+    else if (strcmp(tau->psitype, "ellipse") == 0)
+    {
+        tau->order  = 0;
+        tau->psinum = rssringoccs_DR_Elliptical;
     }
 
     /*  If psitype is just "fresnel", set order to 1. The code will           *
@@ -77,9 +78,13 @@ rssringoccs_Tau_Set_Psitype(const char *psitype, rssringoccs_TAUObj* tau)
         tau->error_occurred = rssringoccs_True;
         tau->error_message = rssringoccs_strdup(
             "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tdiffrec.DiffractionCorrection\n\n"
+            "\r\trssringoccs_Tau_Set_Psitype\n\n"
             "\r\tIllegal string for psitype. Allowed strings are:\n"
             "\r\t\tnewton:     Newton-Raphson method\n"
+            "\r\t\tnewtond:    Newton-Raphson with D perturbation.\n"
+            "\r\t\tnewtondold: Newton-Raphson with the old D algorithm.\n"
+            "\r\t\tnewtondphi: Newton-Raphson with dD/dphi perturbation.\n"
+            "\r\t\tellipse:    Newton-Raphson with elliptical perturbation.\n"
             "\r\t\tfresnel:    Quadratic Fresnel approximation\n"
             "\r\t\tfresneln:   Legendre polynomial approximation with 1<n<256\n"
         );

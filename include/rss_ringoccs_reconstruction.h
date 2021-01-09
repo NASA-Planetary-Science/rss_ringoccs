@@ -16,6 +16,7 @@ typedef enum {
     rssringoccs_DR_NewtonDOld,
     rssringoccs_DR_NewtonDPhi,
     rssringoccs_DR_NewtonPerturb,
+    rssringoccs_DR_SimpleFFT,
     rssringoccs_DR_Elliptical,
     rssringoccs_DR_None
 } rssringoccs_Psitype_Enum;
@@ -67,7 +68,6 @@ typedef struct rssringoccs_TAUObj {
     rssringoccs_Psitype_Enum psinum;
     rssringoccs_Bool use_norm;
     rssringoccs_Bool use_fwd;
-    rssringoccs_Bool use_fft;
     rssringoccs_Bool bfac;
     rssringoccs_Bool verbose;
     rssringoccs_Bool error_occurred;

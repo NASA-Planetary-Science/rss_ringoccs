@@ -263,7 +263,6 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
         "wtype",
         "use_fwd",
         "use_norm",
-        "use_fft",
         "verbose",
         "bfac",
         "sigma",
@@ -309,7 +308,6 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
     /*  By default, forward computations are not run, FFTs are not used, and  *
      *  the run is silent (verbose is off).                                   */
     self->use_fwd = rssringoccs_False;
-    self->use_fft = rssringoccs_False;
     self->verbose = rssringoccs_False;
 
     /*  Using the bfac guarantees accurate window sizes in the case of a poor *
@@ -355,16 +353,15 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
      *  symbold means everything after is optional. s is a string, p is a     *
      *  Boolean (p for "predicate"). b is an integer, and the colon : denotes *
      *  that the input list has ended.                                        */
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|Od$OspppppdspdddOb:", kwlist,
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|Od$OsppppdspdddOb:", kwlist,
                                      &DLPInst,          &self->input_res,
                                      &rngreq,           &self->wtype,
                                      &self->use_fwd,    &self->use_norm,
-                                     &self->use_fft,    &self->verbose,
-                                     &self->bfac,       &self->sigma,
-                                     &self->psitype,    &self->write_file,
-                                     &self->res_factor, &self->ecc,
-                                     &self->peri,       &perturb,
-                                     &self->interp))
+                                     &self->verbose,    &self->bfac,
+                                     &self->sigma,      &self->psitype,
+                                     &self->write_file, &self->res_factor,
+                                     &self->ecc,        &self->peri,
+                                     &perturb,          &self->interp))
     {
         PyErr_Format(
             PyExc_TypeError,
@@ -379,7 +376,6 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
             "\r\twtype     \tThe requested window type (str).\n"
             "\r\tuse_fwd   \tForward computation (bool).\n"
             "\r\tuse_norm  \tWindow normalization (bool).\n"
-            "\r\tuse_fft   \tComputation using FFTs (bool).\n"
             "\r\tverbose   \tPrint status updates (bool).\n"
             "\r\tbfac      \tUse b-factor in window width (bool).\n"
             "\r\tsigma     \tThe Allen deviation (float).\n"
@@ -779,13 +775,6 @@ static PyMemberDef Custom_members[] = {
         offsetof(PyDiffrecObj, history),
         0,
         "History of this tau instance"
-    },
-    {
-        "use_fft",
-        T_BOOL,
-        offsetof(PyDiffrecObj, use_fft),
-        0,
-        "Use of FFTs for data processing"
     },
     {
         "bfac",

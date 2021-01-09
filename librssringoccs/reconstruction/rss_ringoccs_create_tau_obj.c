@@ -194,7 +194,6 @@ rssringoccs_Create_TAUObj(rssringoccs_DLPObj *dlp, double res)
     /*  Set the default processing keywords.                                  */
     tau->bfac     = rssringoccs_True;
     tau->use_norm = rssringoccs_True;
-    tau->use_fft  = rssringoccs_False;
     tau->use_fwd  = rssringoccs_False;
 
     /*  The default window is the modified Kaiser-Bessel with 2.0 alpha.      */

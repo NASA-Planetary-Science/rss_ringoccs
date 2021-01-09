@@ -12,8 +12,6 @@
 #include <rss_ringoccs/include/rss_ringoccs_complex.h>
 #include <rss_ringoccs/include/rss_ringoccs_calibration.h>
 
-typedef PyObject (*rssringoccs_PyFunc)(PyObject *, PyObject *);
-
 typedef struct rssringoccs_Generic_Function_Obj {
     long (*long_func)(long);
     float (*float_func)(float);
@@ -62,7 +60,6 @@ typedef struct {
     rssringoccs_Bool   bfac;
     rssringoccs_Bool   use_fwd;
     rssringoccs_Bool   use_norm;
-    rssringoccs_Bool   use_fft;
     rssringoccs_Bool   verbose;
     rssringoccs_Bool   write_file;
     double             ecc;

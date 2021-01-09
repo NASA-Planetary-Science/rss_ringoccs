@@ -51,6 +51,11 @@ rssringoccs_Tau_Set_Psitype(const char *psitype, rssringoccs_TAUObj* tau)
         tau->order  = 0;
         tau->psinum = rssringoccs_DR_Elliptical;
     }
+    else if (strcmp(tau->psitype, "simplefft") == 0)
+    {
+        tau->order = 0;
+        tau->psinum = rssringoccs_DR_SimpleFFT;
+    }
 
     /*  If psitype is just "fresnel", set order to 1. The code will           *
      *  automatically pass the dlp instance to the correct function.          */
@@ -68,25 +73,47 @@ rssringoccs_Tau_Set_Psitype(const char *psitype, rssringoccs_TAUObj* tau)
     else if (strncmp(tau->psitype, "fresnel", 7) == 0)
     {
         const char *fresnelnum = &tau->psitype[7];
-        tau->order = strtol(fresnelnum, NULL, 10);
+        tau->order = (unsigned char)atol(fresnelnum);
         tau->psinum = rssringoccs_DR_Legendre;
+
+        if (tau->order == 0)
+        {
+            tau->error_occurred = rssringoccs_True;
+            tau->error_message = rssringoccs_strdup(
+                "\n\rError Encountered: rss_ringoccs\n"
+                "\r\trssringoccs_Tau_Set_Psitype\n\n"
+                "\rCould not parse psitype. atol returned zero. Your input\n"
+                "\rhas 'fresnel' in it but either has an invalid entry after,\n"
+                "\ror a zero after.\n"
+            );
+            return;
+        }
     }
     else
     {
+        char errmes1[1024];
+        const char *errmes2 =
+            "\r\tnewtondold: Newton-Raphson with the old D algorithm.\n"
+            "\r\tnewtondphi: Newton-Raphson with dD/dphi perturbation.\n"
+            "\r\tsimplefft:  A single FFT of the entire data set.\n"
+            "\r\tellipse:    Newton-Raphson with elliptical perturbation.\n"
+            "\r\tfresnel:    Quadratic Fresnel approximation\n"
+            "\r\tfresneln:   Legendre polynomial approximation with 1<n<256\n";
+
+        strcpy(
+            errmes1,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\trssringoccs_Tau_Set_Psitype\n\n"
+            "\rIllegal string for psitype. Allowed strings:\n"
+            "\r\tnewton:     Newton-Raphson method\n"
+            "\r\tnewtond:    Newton-Raphson with D perturbation.\n"
+        );
+
+        strcat(errmes1, errmes2);
+
         tau->order = 0;
         tau->psinum = rssringoccs_DR_None;
         tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_Tau_Set_Psitype\n\n"
-            "\r\tIllegal string for psitype. Allowed strings are:\n"
-            "\r\t\tnewton:     Newton-Raphson method\n"
-            "\r\t\tnewtond:    Newton-Raphson with D perturbation.\n"
-            "\r\t\tnewtondold: Newton-Raphson with the old D algorithm.\n"
-            "\r\t\tnewtondphi: Newton-Raphson with dD/dphi perturbation.\n"
-            "\r\t\tellipse:    Newton-Raphson with elliptical perturbation.\n"
-            "\r\t\tfresnel:    Quadratic Fresnel approximation\n"
-            "\r\t\tfresneln:   Legendre polynomial approximation with 1<n<256\n"
-        );
+        tau->error_message = rssringoccs_strdup(errmes1);
     }
 }

@@ -27,6 +27,5 @@ void rssringoccs_Get_Py_Vars_From_Self(rssringoccs_TAUObj *tau,
     tau->interp   = self->interp;
     tau->use_fwd  = self->use_fwd;
     tau->use_norm = self->use_norm;
-    tau->use_fft  = self->use_fft;
     tau->verbose  = self->verbose;
 }

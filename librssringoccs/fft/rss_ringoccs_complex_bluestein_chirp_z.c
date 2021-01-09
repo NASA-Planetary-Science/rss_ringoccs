@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <rss_ringoccs/include/rss_ringoccs_bool.h>
 #include <rss_ringoccs/include/rss_ringoccs_math.h>
 #include <rss_ringoccs/include/rss_ringoccs_complex.h>
@@ -96,10 +97,12 @@ rssringoccs_Complex_FFT_Bluestein_Chirp_Z(rssringoccs_ComplexDouble *in,
     fft_x_in = rssringoccs_Complex_FFT_Cooley_Tukey(x_in, N_pow_2,
                                                     rssringoccs_False);
 
-    if (!fft_x_in)
+    if (fft_x_in == NULL)
     {
+        puts("fft_x_in 1 failed.");
         free(x_in);
         free(chirp);
+        free(rcpr_chirp);
         return NULL;
     }
 
@@ -107,21 +110,26 @@ rssringoccs_Complex_FFT_Bluestein_Chirp_Z(rssringoccs_ComplexDouble *in,
         rcpr_chirp, N_pow_2, rssringoccs_False
     );
 
-    if (!fft_x_in)
+    if (fft_rcpr_chirp == NULL)
     {
+        puts("fft_rcpr_chirp 1 failed.");
         free(x_in);
         free(chirp);
+        free(rcpr_chirp);
+        free(fft_x_in);
         return NULL;
     }
 
     for (n=0; n<N_pow_2; ++n)
         x_in[n] = rssringoccs_CDouble_Multiply(fft_x_in[n], fft_rcpr_chirp[n]);
 
+    free(fft_x_in);
     fft_x_in = rssringoccs_Complex_FFT_Cooley_Tukey(x_in, N_pow_2,
                                                     rssringoccs_True);
 
-    if (!fft_x_in)
+    if (fft_x_in == NULL)
     {
+        puts("fft_x_in 2 failed.");
         free(x_in);
         free(chirp);
         free(fft_rcpr_chirp);

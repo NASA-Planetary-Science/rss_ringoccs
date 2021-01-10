@@ -99,37 +99,27 @@ Fresnel_Transform_Perturbed_Newton_Norm_Double(rssringoccs_TAUObj *tau,
                                                unsigned long n_pts,
                                                unsigned long center);
 
-extern rssringoccs_ComplexDouble
-Fresnel_Transform_Quadratic_Double(double *x_arr, double *phi_arr,
-                                   rssringoccs_ComplexDouble *T_in,
-                                   double *w_func, double kD, double r,
-                                   double B, double D, double EPS,
-                                   unsigned long toler, double dx, double F,
-                                   unsigned long n_pts, unsigned long center);
+extern void
+Fresnel_Transform_Quadratic_Double(rssringoccs_TAUObj *tau,
+                                   double *w_func,
+                                   unsigned long n_pts,
+                                   unsigned long center);
 
-extern rssringoccs_ComplexDouble
-Fresnel_Transform_Quadratic_Norm_Double(double *x_arr, double *phi_arr,
-                                        rssringoccs_ComplexDouble *T_in,
-                                        double *w_func, double kD, double r,
-                                        double B, double D, double EPS,
-                                        unsigned long toler,
+extern void
+Fresnel_Transform_Quadratic_Norm_Double(rssringoccs_TAUObj *tau,
+                                        double *w_func,
                                         unsigned long n_pts,
                                         unsigned long center);
 
-extern rssringoccs_ComplexDouble
-Fresnel_Transform_Cubic_Double(double *x_arr, double *phi_arr,
-                               rssringoccs_ComplexDouble *T_in, double *w_func,
-                               double kD, double r, double B, double D,
-                               double EPS, unsigned long toler, double dx,
-                               double F, unsigned long n_pts,
+extern void
+Fresnel_Transform_Cubic_Double(rssringoccs_TAUObj *tau,
+                               double *w_func,
+                               unsigned long n_pts,
                                unsigned long center);
 
-extern rssringoccs_ComplexDouble
-Fresnel_Transform_Cubic_Norm_Double(double *x_arr, double *phi_arr,
-                                    rssringoccs_ComplexDouble *T_in,
-                                    double *w_func, double kD, double r,
-                                    double B, double D, double EPS,
-                                    unsigned long toler,
+extern void
+Fresnel_Transform_Cubic_Norm_Double(rssringoccs_TAUObj *tau,
+                                    double *w_func,
                                     unsigned long n_pts,
                                     unsigned long center);
 

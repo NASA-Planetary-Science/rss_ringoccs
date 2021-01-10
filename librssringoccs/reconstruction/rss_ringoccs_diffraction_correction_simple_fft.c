@@ -185,7 +185,8 @@ void rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau)
         i_shift       = (nw_pts + i + shift) % (data_size);
         rcpr_F        = 1.0/tau->F_km_vals[tau->start + i];
         arg           = rssringoccs_CDouble_Rect(factor*rcpr_F, factor*rcpr_F);
-        tau->T_out[i] = rssringoccs_CDouble_Multiply(arg, T_out[i_shift]);
+        tau->T_out[tau->start + i]
+            = rssringoccs_CDouble_Multiply(arg, T_out[i_shift]);
     }
 
     /*  Free variables allocated by malloc.                                   */

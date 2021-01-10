@@ -5,16 +5,16 @@
 #include <stdlib.h>
 
 void
-Fresnel_Transform_Quartic_Double(rssringoccs_TAUObj *tau,
-                                 double *w_func,
-                                 unsigned long n_pts,
-                                 unsigned long center)
+Fresnel_Transform_Quartic_D_Double(rssringoccs_TAUObj *tau,
+                                   double *w_func,
+                                   unsigned long n_pts,
+                                   unsigned long center)
 {
     /*  Declare all necessary variables. i and j are used for indexing.       */
     unsigned long i, ind[4], offset;
 
     /*  The Fresnel kernel and ring azimuth angle.                            */
-    double C[3], factor, rcpr_w, rcpr_w_sq, psi_n[4], x;
+    double C[4], factor, rcpr_w, rcpr_w_sq, psi_n[4], x, y, z, dx, dy, D;
     double psi, phi, sin_psi, cos_psi;
     double psi_half_mean, psi_half_diff;
     double psi_full_mean, psi_full_diff;
@@ -40,17 +40,26 @@ Fresnel_Transform_Quartic_Double(rssringoccs_TAUObj *tau,
     for (i = 0; i < 4; ++i)
     {
 
-        phi = Newton_Raphson_Fresnel_Psi(
+        phi = Newton_Raphson_Fresnel_Psi_dD_dphi(
             tau->k_vals[center],
             tau->rho_km_vals[center],
             tau->rho_km_vals[offset + ind[i]],
             tau->phi_rad_vals[offset + ind[i]],
             tau->phi_rad_vals[offset + ind[i]],
             tau->B_rad_vals[center],
-            tau->D_km_vals[center],
             tau->EPS,
-            tau->toler
+            tau->toler,
+            tau->rx_km_vals[center],
+            tau->ry_km_vals[center],
+            tau->rz_km_vals[center]
         );
+
+        x = tau->rho_km_vals[offset + ind[i]] * cos(phi);
+        y = tau->rho_km_vals[offset + ind[i]] * sin(phi);
+        z = tau->rz_km_vals[center];
+        dx = x - tau->rx_km_vals[center];
+        dy = y - tau->ry_km_vals[center];
+        D = sqrt(dx*dx + dy*dy + z*z);
 
         psi_n[i] = rssringoccs_Double_Fresnel_Psi(
             tau->k_vals[center],
@@ -59,7 +68,7 @@ Fresnel_Transform_Quartic_Double(rssringoccs_TAUObj *tau,
             phi,
             tau->phi_rad_vals[offset + ind[i]],
             tau->B_rad_vals[center],
-            tau->D_km_vals[center]
+            D
         );
     }
 
@@ -68,17 +77,19 @@ Fresnel_Transform_Quartic_Double(rssringoccs_TAUObj *tau,
     psi_half_diff = psi_n[1] - psi_n[2];
     psi_full_diff = psi_n[0] - psi_n[3];
 
-    C[0] = (16*psi_half_mean-psi_full_mean)*rcpr_w_sq*1.33333333333333333333333;
-    C[1] = (psi_full_diff-2.0*psi_half_diff)*rcpr_w_sq*rcpr_w*5.333333333333333;
-    C[2] = (psi_full_mean-4.0*psi_half_mean)*rcpr_w_sq*rcpr_w_sq*21.33333333333;
+    C[0] = (8*psi_half_diff - psi_full_diff) * rcpr_w * 0.333333333333333333333;
+    C[1] = (16*psi_half_mean-psi_full_mean)*rcpr_w_sq*1.33333333333333333333333;
+    C[2] = (psi_full_diff-2.0*psi_half_diff)*rcpr_w_sq*rcpr_w*5.333333333333333;
+    C[3] = (psi_full_mean-4.0*psi_half_mean)*rcpr_w_sq*rcpr_w_sq*21.33333333333;
 
     for (i = 0; i<n_pts; ++i){
 
         x = tau->rho_km_vals[center] - tau->rho_km_vals[offset];
-        psi = C[2];
+        psi = C[3];
+        psi = psi*x + C[2];
         psi = psi*x + C[1];
         psi = psi*x + C[0];
-        psi = psi*x*x;
+        psi = psi*x;
 
         cos_psi = w_func[i]*rssringoccs_Double_Cos(psi);
         sin_psi = w_func[i]*rssringoccs_Double_Sin(psi);

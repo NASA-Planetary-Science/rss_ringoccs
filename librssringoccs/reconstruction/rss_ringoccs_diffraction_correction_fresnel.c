@@ -231,9 +231,16 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj *tau)
      *  type rssringoccs_window_func was declared at the start of this file.  *
      *  Be sure to free this at the end!                                      */
     rssringoccs_window_func fw = tau->window_func;
+    void (*FresT)(rssringoccs_TAUObj *, double *, double *,
+                  unsigned long, unsigned long);
 
     /*  This should remain at false.                                          */
     tau->error_occurred = rssringoccs_False;
+
+    if (tau->use_norm)
+        FresT = Fresnel_Transform_Norm_Double;
+    else
+        FresT = Fresnel_Transform_Double;
 
     if (tau->use_fwd)
         fwd_factor = -1.0;
@@ -264,7 +271,7 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj *tau)
      *  doubles being pointed to. Again, DiffractionCorrection checks this.   *
      *  Hence dlp->rho_km_vals[center] and dlp->rho_km_vals[center+1] should  *
      *  be initialized. If not, you will get a segmentation fault.            */
-    dx = tau->rho_km_vals[center+1] - tau->rho_km_vals[center];
+    dx = tau->dx_km;
 
     /*  And now, some more variables we'll be using.                          */
     two_dx = 2.0*dx;
@@ -320,88 +327,41 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj *tau)
         x_arr[m] *= fwd_factor;
     }
 
-    /*  Compute the Fresnel transform across the input data.                  */
-    if (tau->use_norm)
+    /*  Compute the Fresnel transform across the input data.              */
+    for (m=0; m<=tau->n_used; ++m)
     {
-        /*  Compute the Fresnel transform across the input data.              */
-        for (m=0; m<=tau->n_used; ++m)
+        /*  If the window width has deviated more the 2*dx, reset         *
+         *  variables. fabs is the absolute value function for double     *
+         *  precision variables and is defined in the built-in math.h.    */
+        if (fabs(w_init - tau->w_km_vals[center]) >= two_dx)
         {
-            /*  If the window width has deviated more the 2*dx, reset         *
-             *  variables. fabs is the absolute value function for double     *
-             *  precision variables and is defined in the built-in math.h.    */
-            if (fabs(w_init - tau->w_km_vals[center]) >= two_dx)
+            /* Reset w_init and recompute window function.                */
+            w_init = tau->w_km_vals[center];
+            nw_pts = ((long)(w_init / two_dx))+1;
+
+            /*  Reallocate memory, since the sizes of the arrays changed. */
+            w_func = (double *)realloc(w_func, sizeof(double)*nw_pts);
+            x_arr  = (double *)realloc(x_arr, sizeof(double)*nw_pts);
+
+            /*  Reset the x_arr array to range between -W/2 and zero.     */
+            rssringoccs_Tau_Reset_Window(x_arr, w_func, dx,
+                                         w_init, nw_pts, fw);
+
+            /* Compute Window Functions, and compute pi/2 * x^2.          */
+            for(n=0; n<nw_pts; ++n)
             {
-                /* Reset w_init and recompute window function.                */
-                w_init = tau->w_km_vals[center];
-                nw_pts = ((long)(w_init / two_dx))+1;
+                x_arr[n] *= rssringoccs_Pi_By_Two*x_arr[n];
 
-                /*  Reallocate memory, since the sizes of the arrays changed. */
-                w_func = (double *)realloc(w_func, sizeof(double)*nw_pts);
-                x_arr  = (double *)realloc(x_arr, sizeof(double)*nw_pts);
-
-                /*  Reset the x_arr array to range between -W/2 and zero.     */
-                rssringoccs_Tau_Reset_Window(x_arr, w_func, dx,
-                                             w_init, nw_pts, fw);
-
-                /* Compute Window Functions, and compute pi/2 * x^2.          */
-                for(n=0; n<nw_pts; ++n)
-                {
-                    x_arr[n] *= rssringoccs_Pi_By_Two*x_arr[n];
-
-                    /*  Again, if forward calculation is set, negate x_arr.   */
-                    x_arr[n] *= fwd_factor;
-                }
+                /*  Again, if forward calculation is set, negate x_arr.   */
+                x_arr[n] *= fwd_factor;
             }
-
-            /*  Compute the Fresnel Transform about the current point.        */
-            tau->T_out[m] = Fresnel_Transform_Norm_Double(
-                x_arr, tau->T_in, w_func,
-                tau->F_km_vals[center], nw_pts, center
-            );
-
-            /*  Move the pointers to the next point.                          */
-            center += 1;
         }
-    }
-    else
-    {
-        for (m=0; m<=tau->n_used; ++m)
-        {
-            /*  If the window width has deviated more the 2*dx, reset         *
-             *  variables. fabs is the absolute value function for double     *
-             *  precision variables and is defined in the built-in math.h.    */
-            if (fabs(w_init - tau->w_km_vals[center]) >= two_dx)
-            {
-                /* Reset w_init and recompute window function.                */
-                w_init = tau->w_km_vals[center];
-                nw_pts = ((long)(w_init / two_dx))+1;
 
-                /*  Reallocate memory, since the sizes of the arrays changed. */
-                w_func = realloc(w_func, sizeof(*w_func) * nw_pts);
-                x_arr  = realloc(x_arr,  sizeof(*x_arr)  * nw_pts);
+        /*  Compute the Fresnel Transform about the current point.        */
+        FresT(tau, x_arr, w_func, nw_pts, center);
 
-                /*  Reset the x_arr array to range between -W/2 and zero.     */
-                rssringoccs_Tau_Reset_Window(x_arr, w_func, dx,
-                                             w_init, nw_pts, fw);
-
-                /* Compute Window Functions, and compute pi/2 * x^2.          */
-                for(n=0; n<nw_pts; ++n)
-                {
-                    x_arr[n] *= rssringoccs_Pi_By_Two*x_arr[n];
-
-                    /*  Again, if forward calculation is set, negate x_arr.   */
-                    x_arr[n] *= fwd_factor;
-                }
-            }
-
-            /*  Compute the Fresnel Transform about the current point.        */
-            tau->T_out[m] = Fresnel_Transform_Double(x_arr, tau->T_in, w_func,
-                                                    tau->F_km_vals[center], dx,
-                                                    nw_pts, center);
-
-            /*  Move the pointers to the next point.                          */
-            center += 1;
-        }
+        /*  Move the pointers to the next point.                          */
+        center += 1;
     }
 
     /*  Free the variables allocated by malloc.                               */

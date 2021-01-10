@@ -52,14 +52,20 @@ void rssringoccs_Destroy_Tau_Members(rssringoccs_TAUObj *tau)
     DESTROY_TAU_VAR(tau->tau_threshold_vals);
     DESTROY_TAU_VAR(tau->phi_rl_rad_vals);
     DESTROY_TAU_VAR(tau->p_norm_vals);
+    DESTROY_TAU_VAR(tau->p_norm_fwd_vals);
     DESTROY_TAU_VAR(tau->power_vals);
     DESTROY_TAU_VAR(tau->phase_rad_vals);
+    DESTROY_TAU_VAR(tau->phase_fwd_vals);
     DESTROY_TAU_VAR(tau->phase_vals);
     DESTROY_TAU_VAR(tau->tau_vals);
+    DESTROY_TAU_VAR(tau->tau_fwd_vals);
     DESTROY_TAU_VAR(tau->rx_km_vals);
     DESTROY_TAU_VAR(tau->ry_km_vals);
     DESTROY_TAU_VAR(tau->rz_km_vals);
     DESTROY_TAU_VAR(tau->wtype);
     DESTROY_TAU_VAR(tau->psitype);
+    DESTROY_TAU_VAR(tau->T_in);
+    DESTROY_TAU_VAR(tau->T_out);
+    DESTROY_TAU_VAR(tau->T_fwd);
 }
 /*  End of rssringoccs_Destroy_Tau_Members.                                   */

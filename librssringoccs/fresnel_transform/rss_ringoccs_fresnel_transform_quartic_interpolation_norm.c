@@ -14,7 +14,7 @@ Fresnel_Transform_Quartic_Norm_Double(rssringoccs_TAUObj *tau,
     unsigned long i, ind[4], offset;
 
     /*  The Fresnel kernel and ring azimuth angle.                            */
-    double C[3], abs_norm, real_norm;
+    double C[4], abs_norm, real_norm;
     double psi_n[4], psi_half_diff, psi_full_diff;
     double psi, phi, rcpr_w, rcpr_w_sq;
     double psi_half_mean, psi_full_mean, cos_psi, sin_psi, x;
@@ -66,17 +66,19 @@ Fresnel_Transform_Quartic_Norm_Double(rssringoccs_TAUObj *tau,
     psi_half_diff = psi_n[1] - psi_n[2];
     psi_full_diff = psi_n[0] - psi_n[3];
 
-    C[0] = (16*psi_half_mean-psi_full_mean)*rcpr_w_sq*1.33333333333333333333333;
-    C[1] = (psi_full_diff-2.0*psi_half_diff)*rcpr_w_sq*rcpr_w*5.333333333333333;
-    C[2] = (psi_full_mean-4.0*psi_half_mean)*rcpr_w_sq*rcpr_w_sq*21.33333333333;
+    C[0] = (8*psi_half_diff - psi_full_diff) * rcpr_w * 0.333333333333333333333;
+    C[1] = (16*psi_half_mean-psi_full_mean)*rcpr_w_sq*1.33333333333333333333333;
+    C[2] = (psi_full_diff-2.0*psi_half_diff)*rcpr_w_sq*rcpr_w*5.333333333333333;
+    C[3] = (psi_full_mean-4.0*psi_half_mean)*rcpr_w_sq*rcpr_w_sq*21.33333333333;
 
     for (i = 0; i<n_pts; ++i)
     {
         x = tau->rho_km_vals[center] - tau->rho_km_vals[offset];
-        psi = C[2];
+        psi = C[3];
+        psi = psi*x + C[2];
         psi = psi*x + C[1];
         psi = psi*x + C[0];
-        psi = psi*x*x;
+        psi = psi*x;
 
         cos_psi = w_func[i]*rssringoccs_Double_Cos(psi);
         sin_psi = w_func[i]*rssringoccs_Double_Sin(psi);

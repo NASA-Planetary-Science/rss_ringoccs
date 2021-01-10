@@ -40,6 +40,10 @@ rssringoccs_Tau_Set_Psitype(const char *psitype, rssringoccs_TAUObj* tau)
         tau->psinum = rssringoccs_DR_Elliptical;
     else if (strcmp(tau->psitype, "simplefft") == 0)
         tau->psinum = rssringoccs_DR_SimpleFFT;
+    else if (strcmp(tau->psitype, "quadratic") == 0)
+        tau->psinum = rssringoccs_DR_Quadratic;
+    else if (strcmp(tau->psitype, "cubic") == 0)
+        tau->psinum = rssringoccs_DR_Cubic;
     else if (strcmp(tau->psitype, "quartic") == 0)
         tau->psinum = rssringoccs_DR_Quartic;
     else if (strcmp(tau->psitype, "quarticd") == 0)
@@ -75,9 +79,8 @@ rssringoccs_Tau_Set_Psitype(const char *psitype, rssringoccs_TAUObj* tau)
     {
         char errmes1[1024];
         const char *errmes2 =
-            "\r\tnewtondold: Newton-Raphson with the old D algorithm.\n"
-            "\r\tnewtondphi: Newton-Raphson with dD/dphi perturbation.\n"
-            "\r\tsimplefft:  A single FFT of the entire data set.\n"
+            "\r\tquadratic:  Quadratic interpolation of newton-raphson."
+            "\r\tcubic:      Cubic interpolation of newton-raphson."
             "\r\tquartic:    Quartic interpolation of newton-raphson."
             "\r\tquarticd:   Quartic interpolation with D perturbation."
             "\r\tellipse:    Newton-Raphson with elliptical perturbation.\n"
@@ -91,6 +94,9 @@ rssringoccs_Tau_Set_Psitype(const char *psitype, rssringoccs_TAUObj* tau)
             "\rIllegal string for psitype. Allowed strings:\n"
             "\r\tnewton:     Newton-Raphson method\n"
             "\r\tnewtond:    Newton-Raphson with D perturbation.\n"
+            "\r\tnewtondold: Newton-Raphson with the old D algorithm.\n"
+            "\r\tnewtondphi: Newton-Raphson with dD/dphi perturbation.\n"
+            "\r\tsimplefft:  A single FFT of the entire data set.\n"
         );
 
         strcat(errmes1, errmes2);

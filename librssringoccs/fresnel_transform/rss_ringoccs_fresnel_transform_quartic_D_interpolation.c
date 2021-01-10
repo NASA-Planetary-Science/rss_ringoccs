@@ -25,9 +25,9 @@ Fresnel_Transform_Quartic_D_Double(rssringoccs_TAUObj *tau,
     factor = 0.5 * tau->dx_km / tau->F_km_vals[center];
 
     ind[0] = 0;
-    ind[1] = n_pts/4;
-    ind[2] = 3*n_pts/4;
-    ind[3] = n_pts;
+    ind[1] = (n_pts-1)/4;
+    ind[2] = 3*(n_pts-1)/4;
+    ind[3] = n_pts - 1;
 
     /*  Initialize T_out and norm to zero so we can loop over later.          */
     tau->T_out[center] = rssringoccs_CDouble_Zero;

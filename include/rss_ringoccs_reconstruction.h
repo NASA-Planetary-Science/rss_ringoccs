@@ -16,6 +16,8 @@ typedef enum {
     rssringoccs_DR_NewtonDOld,
     rssringoccs_DR_NewtonDPhi,
     rssringoccs_DR_NewtonPerturb,
+    rssringoccs_DR_Quadratic,
+    rssringoccs_DR_Cubic,
     rssringoccs_DR_Quartic,
     rssringoccs_DR_QuarticD,
     rssringoccs_DR_SimpleFFT,

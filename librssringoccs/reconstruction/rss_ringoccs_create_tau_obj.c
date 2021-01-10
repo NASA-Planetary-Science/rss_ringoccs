@@ -119,6 +119,7 @@ rssringoccs_Create_TAUObj(rssringoccs_DLPObj *dlp, double res)
      *  not NULL are assumed to be malloc'd pointers that can be free'd.      */
     tau->T_in = NULL;
     tau->T_out = NULL;
+    tau->T_fwd = NULL;
     tau->rho_km_vals = NULL;
     tau->F_km_vals = NULL;
     tau->phi_rad_vals = NULL;
@@ -137,9 +138,12 @@ rssringoccs_Create_TAUObj(rssringoccs_DLPObj *dlp, double res)
     tau->tau_threshold_vals = NULL;
     tau->phi_rl_rad_vals = NULL;
     tau->p_norm_vals = NULL;
+    tau->p_norm_fwd_vals = NULL;
     tau->power_vals = NULL;
     tau->phase_rad_vals = NULL;
+    tau->phase_fwd_vals = NULL;
     tau->phase_vals = NULL;
+    tau->tau_fwd_vals = NULL;
     tau->tau_vals = NULL;
     tau->wtype = NULL;
     tau->psitype = NULL;
@@ -259,9 +263,6 @@ rssringoccs_Create_TAUObj(rssringoccs_DLPObj *dlp, double res)
      *  available data and store these in the rng_list member later.          */
     tau->rng_req[0] = 1.0;
     tau->rng_req[1] = 4.0e5;
-
-    /*  By default, we do not use the interpolation methods defined in MTR86. */
-    tau->interp = 0;
 
     /*  Set the default values for the Newton Raphson algorithm.              */
     tau->EPS = 1.0e-4;

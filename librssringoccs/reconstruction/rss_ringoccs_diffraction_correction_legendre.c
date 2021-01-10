@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <rss_ringoccs/include/rss_ringoccs_math.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 #include <rss_ringoccs/include/rss_ringoccs_special_functions.h>
@@ -52,6 +53,9 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
     /*  Create function pointers for window function and Fresnel transform.   */
     rssringoccs_window_func fw = tau->window_func;
 
+    void (*FresT)(rssringoccs_TAUObj *, double *, double *, double *,
+                  unsigned long, unsigned long);
+
     /*  This should remain at false.                                          */
     tau->error_occurred = rssringoccs_False;
 
@@ -76,6 +80,21 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
         poly_order = tau->order;
     else
         poly_order = tau->order + 1;
+
+    if (tau->use_norm)
+    {
+        if (IsEven)
+            FresT = Fresnel_Transform_Legendre_Norm_Even_Double;
+        else
+            FresT = Fresnel_Transform_Legendre_Norm_Odd_Double;
+    }
+    else
+    {
+        if (IsEven)
+            FresT = Fresnel_Transform_Legendre_Even_Double;
+        else
+            FresT = Fresnel_Transform_Legendre_Odd_Double;
+    }
 
     /* Compute first window width and window function. */
     center = tau->start;
@@ -163,10 +182,7 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
         }
 
         /*  Compute the fresnel tranform about the current point.             */
-        tau->T_out[i] = Fresnel_Transform_Legendre_Even_Double(
-            x_arr, tau->T_in, w_func, tau->D_km_vals[center],
-            fresnel_ker_coeffs, dx, tau->F_km_vals[center],
-            tau->k_vals[center], nw_pts, tau->order, center);
+        FresT(tau, x_arr, w_func, fresnel_ker_coeffs, nw_pts, center);
 
         /*  Increment T_in pointer using pointer arithmetic.                  */
         center += 1;

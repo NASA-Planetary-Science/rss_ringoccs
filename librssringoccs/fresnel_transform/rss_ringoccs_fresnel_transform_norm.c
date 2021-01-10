@@ -21,10 +21,10 @@
 #include <rss_ringoccs/include/rss_ringoccs_complex.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
-rssringoccs_ComplexDouble
-Fresnel_Transform_Norm_Double(double *x_arr, rssringoccs_ComplexDouble *T_in,
-                              double *w_func, double F,
-                              unsigned long n_pts, unsigned long center)
+void
+Fresnel_Transform_Norm_Double(rssringoccs_TAUObj *tau, double *x_arr,
+                              double *w_func, unsigned long n_pts,
+                              unsigned long center)
 {
     /*  Declare all necessary variables. i and j are used for indexing.       */
     unsigned long m, n;
@@ -34,18 +34,22 @@ Fresnel_Transform_Norm_Double(double *x_arr, rssringoccs_ComplexDouble *T_in,
     double x, rcpr_F, rcpr_F2, cos_x, sin_x, abs_norm, real_norm;
 
     /*  exp_negative_ix is the Fresnel kernel, norm is the normalization.     */
-    rssringoccs_ComplexDouble T_out, exp_negative_ix, norm, integrand, arg;
+    rssringoccs_ComplexDouble exp_negative_ix, norm, integrand, arg;
 
-    /*  Initialize T_out and norm to zero, so we can loop over later.         */
-    T_out = rssringoccs_CDouble_Zero;
-    norm  = rssringoccs_CDouble_Zero;
+    /*  Start with the central point in the Riemann sum. This is center of    *
+     *  window function. That is, where w_func = 1. This is just T_in at      *
+     *  the central point. This also initializes T_out.                       */
+    tau->T_out[center] = tau->T_in[center];
+
+    /*  Initialize norm to zero, so we can loop over later.                   */
+    norm = rssringoccs_CDouble_Zero;
 
     /*  From symmetry we need only compute -W/2 to zero, so start at -n_pts.  */
     n = n_pts;
 
     /*  Division is more expensive than multiplication, so store the          *
      *  reciprical of F as a variable and compute with that.                  */
-    rcpr_F  = 1.0/F;
+    rcpr_F  = 1.0/tau->F_km_vals[center];
     rcpr_F2 = rcpr_F*rcpr_F;
 
     /*  Use a Riemann Sum to approximate the Fresnel Inverse Integral.        */
@@ -68,22 +72,20 @@ Fresnel_Transform_Norm_Double(double *x_arr, rssringoccs_ComplexDouble *T_in,
          *  pointer does not contain at least 2*n_pts+1 points, n_pts to the  *
          *  left and n_pts to the right of the center, then this will create  *
          *  a segmentation fault, crashing the program.                       */
-        integrand = rssringoccs_CDouble_Add(T_in[center - n], T_in[center + n]);
+        integrand = rssringoccs_CDouble_Add(tau->T_in[center - n],
+                                            tau->T_in[center + n]);
         integrand = rssringoccs_CDouble_Multiply(exp_negative_ix, integrand);
-        T_out = rssringoccs_CDouble_Add(T_out, integrand);
+        tau->T_out[center] = rssringoccs_CDouble_Add(tau->T_out[center],
+                                                     integrand);
         n -= 1;
     }
 
-    /*  Add the central point in the Riemann sum. This is center of the       *
-     *  window function. That is, where w_func = 1.                           */
-    T_out = rssringoccs_CDouble_Add(T_out, T_in[center]);
     norm  = rssringoccs_CDouble_Add_Real(1.0, norm);
     abs_norm = rssringoccs_CDouble_Abs(norm);
     real_norm = rssringoccs_Sqrt_Two / abs_norm;
 
     /*  Multiply result by the coefficient found in the Fresnel inverse.      *
      *  The 1/F term is omitted, since the F in the norm cancels this.        */
-    arg   = rssringoccs_CDouble_Rect(0.5*real_norm, 0.5*real_norm);
-    T_out = rssringoccs_CDouble_Multiply(arg, T_out);
-    return T_out;
+    arg = rssringoccs_CDouble_Rect(0.5*real_norm, 0.5*real_norm);
+    tau->T_out[center] = rssringoccs_CDouble_Multiply(arg, tau->T_out[center]);
 }

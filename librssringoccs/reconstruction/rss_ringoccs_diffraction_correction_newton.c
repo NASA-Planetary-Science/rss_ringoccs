@@ -55,15 +55,6 @@ void rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj *tau)
     /* Compute first window width and window function. */
     center = tau->start;
 
-    /*  If forward tranform is set, negate the k_vals variable. This has      *
-     *  the equivalent effect of computing the forward calculation later.     */
-    if (tau->use_fwd)
-    {
-        /*  Loop over all of k_vals and negate the value.                     */
-        for (i=0; i <= tau->n_used; ++i)
-            tau->k_vals[i] *= -1.0;
-    }
-
     /*  Compute some more variables.                                          */
     w_init = tau->w_km_vals[center];
     dx     = tau->rho_km_vals[center+1] - tau->rho_km_vals[center];
@@ -89,6 +80,10 @@ void rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj *tau)
             FresT = Fresnel_Transform_Perturbed_Newton_Norm_Double;
         else if (tau->psinum == rssringoccs_DR_Elliptical)
             FresT = Fresnel_Transform_Ellipse_Norm_Double;
+        else if (tau->psinum == rssringoccs_DR_Quartic)
+            FresT = Fresnel_Transform_Quartic_Norm_Double;
+        else if (tau->psinum == rssringoccs_DR_QuarticD)
+            FresT = Fresnel_Transform_Quartic_D_Norm_Double;
         else
             FresT = Fresnel_Transform_Newton_D_Old_Norm_Double;
     }
@@ -104,12 +99,16 @@ void rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj *tau)
             FresT = Fresnel_Transform_Perturbed_Newton_Double;
         else if (tau->psinum == rssringoccs_DR_Elliptical)
             FresT = Fresnel_Transform_Ellipse_Double;
+        else if (tau->psinum == rssringoccs_DR_Quartic)
+            FresT = Fresnel_Transform_Quartic_Double;
+        else if (tau->psinum == rssringoccs_DR_QuarticD)
+            FresT = Fresnel_Transform_Quartic_D_Double;
         else
             FresT = Fresnel_Transform_Newton_D_Old_Double;
     }
 
     /*  Allocate memory for these required variables.                         */
-    w_func = malloc(sizeof(*w_func)  * nw_pts);
+    w_func = malloc(sizeof(*w_func) * nw_pts);
 
     if (!(w_func))
     {
@@ -154,7 +153,7 @@ void rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj *tau)
         }
 
         /*  Compute the fresnel tranform about the current point.         */
-        tau->T_out[i] = FresT(tau, w_func, nw_pts, center);
+        FresT(tau, w_func, nw_pts, center);
 
         /*  Increment pointers using pointer arithmetic.                  */
         center += 1;

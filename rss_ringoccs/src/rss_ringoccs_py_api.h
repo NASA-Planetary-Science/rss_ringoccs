@@ -51,6 +51,7 @@ typedef struct {
     PyObject          *t_set_spm_vals;
     PyObject          *tau_threshold_vals;
     PyObject          *tau_vals;
+    PyObject          *tau_fwd_vals;
     PyObject          *w_km_vals;
     PyObject          *dathist;
     PyObject          *history;
@@ -69,7 +70,6 @@ typedef struct {
     double             sigma;
     const char        *psitype;
     const char        *wtype;
-    unsigned char      interp;
 } PyDiffrecObj;
 
 #endif

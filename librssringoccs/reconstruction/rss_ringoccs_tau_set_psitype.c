@@ -27,43 +27,25 @@ rssringoccs_Tau_Set_Psitype(const char *psitype, rssringoccs_TAUObj* tau)
     rssringoccs_Make_Lower(tau->psitype);
 
     if (strcmp(tau->psitype, "newton") == 0)
-    {
-        tau->order  = 0;
         tau->psinum = rssringoccs_DR_Newton;
-    }
     else if (strcmp(tau->psitype, "newtond") == 0)
-    {
-        tau->order  = 0;
         tau->psinum = rssringoccs_DR_NewtonD;
-    }
     else if (strcmp(tau->psitype, "newtondold") == 0)
-    {
-        tau->order  = 0;
         tau->psinum = rssringoccs_DR_NewtonDOld;
-    }
     else if (strcmp(tau->psitype, "newtondphi") == 0)
-    {
-        tau->order  = 0;
         tau->psinum = rssringoccs_DR_NewtonDPhi;
-    }
+    else if (strcmp(tau->psitype, "newtonperturb") == 0)
+        tau->psinum = rssringoccs_DR_NewtonPerturb;
     else if (strcmp(tau->psitype, "ellipse") == 0)
-    {
-        tau->order  = 0;
         tau->psinum = rssringoccs_DR_Elliptical;
-    }
     else if (strcmp(tau->psitype, "simplefft") == 0)
-    {
-        tau->order = 0;
         tau->psinum = rssringoccs_DR_SimpleFFT;
-    }
-
-    /*  If psitype is just "fresnel", set order to 1. The code will           *
-     *  automatically pass the dlp instance to the correct function.          */
+    else if (strcmp(tau->psitype, "quartic") == 0)
+        tau->psinum = rssringoccs_DR_Quartic;
+    else if (strcmp(tau->psitype, "quarticd") == 0)
+        tau->psinum = rssringoccs_DR_QuarticD;
     else if (strcmp(tau->psitype, "fresnel") == 0)
-    {
-        tau->order  = 0;
         tau->psinum = rssringoccs_DR_Fresnel;
-    }
 
     /*  strncmp is a C standard library function that compares the first n    *
      *  elements of two strings. If the first seven elements of tau.psitype   *
@@ -96,6 +78,8 @@ rssringoccs_Tau_Set_Psitype(const char *psitype, rssringoccs_TAUObj* tau)
             "\r\tnewtondold: Newton-Raphson with the old D algorithm.\n"
             "\r\tnewtondphi: Newton-Raphson with dD/dphi perturbation.\n"
             "\r\tsimplefft:  A single FFT of the entire data set.\n"
+            "\r\tquartic:    Quartic interpolation of newton-raphson."
+            "\r\tquarticd:   Quartic interpolation with D perturbation."
             "\r\tellipse:    Newton-Raphson with elliptical perturbation.\n"
             "\r\tfresnel:    Quadratic Fresnel approximation\n"
             "\r\tfresneln:   Legendre polynomial approximation with 1<n<256\n";

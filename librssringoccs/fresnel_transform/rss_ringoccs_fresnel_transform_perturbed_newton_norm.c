@@ -22,7 +22,7 @@
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_kernel.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
-rssringoccs_ComplexDouble
+void
 Fresnel_Transform_Perturbed_Newton_Norm_Double(rssringoccs_TAUObj *tau,
                                                double *w_func,
                                                unsigned long n_pts,
@@ -33,11 +33,11 @@ Fresnel_Transform_Perturbed_Newton_Norm_Double(rssringoccs_TAUObj *tau,
 
     /*  The Fresnel kernel and the stationary ring azimuth angle.             */
     double psi, phi, x, poly, cos_psi, sin_psi, abs_norm, real_norm;
-    rssringoccs_ComplexDouble T_out, exp_psi, norm, integrand;
+    rssringoccs_ComplexDouble exp_psi, norm, integrand;
 
     /*  Initialize T_out and norm to zero so we can loop over later.          */
-    T_out = rssringoccs_CDouble_Zero;
-    norm  = rssringoccs_CDouble_Zero;
+    tau->T_out[center] = rssringoccs_CDouble_Zero;
+    norm = rssringoccs_CDouble_Zero;
 
     /*  Symmetry is lost without the Legendre polynomials, or Fresnel         *
      *  quadratic. Must compute everything from -W/2 to W/2.                  */
@@ -94,20 +94,20 @@ Fresnel_Transform_Perturbed_Newton_Norm_Double(rssringoccs_TAUObj *tau,
          *  does not contain at least 2*n_pts+1 points, n_pts to the left and *
          *  right of the center, then this will create a segmentation fault.  */
         integrand = rssringoccs_CDouble_Multiply(exp_psi, tau->T_in[offset]);
-        T_out     = rssringoccs_CDouble_Add(T_out, integrand);
+        tau->T_out[center] = rssringoccs_CDouble_Add(tau->T_out[center],
+                                                     integrand);
         offset += 1;
     }
 
     /*  The integral in the numerator of norm evaluates to F sqrt(2). Use     *
      *  this in the calculation of the normalization. The cabs function       *
      *  computes the absolute value of complex number (defined in complex.h). */
-    norm  = rssringoccs_CDouble_Add_Real(1.0, norm);
     abs_norm = rssringoccs_CDouble_Abs(norm);
     real_norm = rssringoccs_Sqrt_Two / abs_norm;
 
     /*  Multiply result by the coefficient found in the Fresnel inverse.      *
      *  The 1/F term is omitted, since the F in the norm cancels this.        */
     integrand = rssringoccs_CDouble_Rect(0.5*real_norm, 0.5*real_norm);
-    T_out     = rssringoccs_CDouble_Multiply(integrand, T_out);
-    return T_out;
+    tau->T_out[center] = rssringoccs_CDouble_Multiply(integrand,
+                                                      tau->T_out[center]);
 }

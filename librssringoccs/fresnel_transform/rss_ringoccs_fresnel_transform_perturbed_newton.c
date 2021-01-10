@@ -75,7 +75,7 @@
  *      T_out (complex double):                                               *
  *          The diffraction corrected profile.                                *
  ******************************************************************************/
-rssringoccs_ComplexDouble
+void
 Fresnel_Transform_Perturbed_Newton_Double(rssringoccs_TAUObj *tau,
                                           double *w_func,
                                           unsigned long n_pts,
@@ -86,10 +86,10 @@ Fresnel_Transform_Perturbed_Newton_Double(rssringoccs_TAUObj *tau,
 
     /*  The Fresnel kernel and ring azimuth angle.                            */
     double psi, phi, x, poly, cos_psi, sin_psi, factor;
-    rssringoccs_ComplexDouble T_out, exp_psi, integrand;
+    rssringoccs_ComplexDouble exp_psi, integrand;
 
     /*  Initialize T_out and norm to zero so we can loop over later.          */
-    T_out = rssringoccs_CDouble_Zero;
+    tau->T_out[center] = rssringoccs_CDouble_Zero;
     factor = 0.5 * tau->dx_km / tau->F_km_vals[center];
 
     /*  Symmetry is lost without the Legendre polynomials, or Fresnel         *
@@ -144,12 +144,13 @@ Fresnel_Transform_Perturbed_Newton_Double(rssringoccs_TAUObj *tau,
          *  does not contain at least 2*n_pts+1 points, n_pts to the left and *
          *  right of the center, then this will create a segmentation fault.  */
         integrand = rssringoccs_CDouble_Multiply(exp_psi, tau->T_in[offset]);
-        T_out     = rssringoccs_CDouble_Add(T_out, integrand);
+        tau->T_out[center] = rssringoccs_CDouble_Add(tau->T_out[center],
+                                                     integrand);
         offset += 1;
     }
 
     /*  Multiply result by the coefficient found in the Fresnel inverse.      */
     integrand = rssringoccs_CDouble_Rect(factor, factor);
-    T_out     = rssringoccs_CDouble_Multiply(integrand, T_out);
-    return T_out;
+    tau->T_out[center] = rssringoccs_CDouble_Multiply(integrand,
+                                                      tau->T_out[center]);
 }

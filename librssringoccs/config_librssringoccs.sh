@@ -34,7 +34,7 @@ CompilerArgs1="-std=c89 -ansi -pedantic -pedantic-errors -Wall -Wextra"
 CompilerArgs2="-Wpedantic -Wmisleading-indentation -Wmissing-field-initializers"
 CompilerArgs3="-Wmissing-prototypes -Wold-style-definition -Winit-self"
 CompilerArgs4="-Wmissing-declarations -Wnull-dereference -Wwrite-strings" # -Wconversion -Wdouble-promotion"
-CompilerArgs5="-Wstrict-prototypes -I../../ -I./ -DNDEBUG -g -fPIC -O3 -c"
+CompilerArgs5="-Wstrict-prototypes -I../../ -I./ -DNDEBUG -g -fPIC -O3 -flto -c"
 CompilerArgs="$CompilerArgs1 $CompilerArgs2 $CompilerArgs3"
 CompilerArgs="$CompilerArgs $CompilerArgs4 $CompilerArgs5"
 
@@ -60,7 +60,7 @@ for filename in ./*.o; do
     sharedobjectlist="$sharedobjectlist $filename"
 done
 
-$CC $sharedobjectlist -shared -o librssringoccs.so -lm
+$CC $sharedobjectlist -O3 -flto -shared -o librssringoccs.so -lm
 
 echo "Moving to /usr/local/lib/librssringoccs.so"
 sudo mv librssringoccs.so /usr/local/lib/librssringoccs.so

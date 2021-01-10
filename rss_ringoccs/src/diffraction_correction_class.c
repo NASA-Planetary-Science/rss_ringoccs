@@ -229,6 +229,7 @@ static void Diffrec_dealloc(PyDiffrecObj *self)
     Py_XDECREF(self->t_set_spm_vals);
     Py_XDECREF(self->tau_threshold_vals);
     Py_XDECREF(self->tau_vals);
+    Py_XDECREF(self->tau_fwd_vals);
     Py_XDECREF(self->w_km_vals);
     Py_XDECREF(self->dathist);
     Py_XDECREF(self->history);
@@ -272,7 +273,6 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
         "ecc",
         "peri",
         "perturb",
-        "interp",
         NULL
     };
 
@@ -334,9 +334,6 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
     self->ecc = 0.0;
     self->peri = 0.0;
 
-    /*  By default, polynomial interpolation is off.                          */
-    self->interp = 0;
-
     /*  Default polynomial perturbation is off.                               */
     perturb = NULL;
 
@@ -353,7 +350,7 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
      *  symbold means everything after is optional. s is a string, p is a     *
      *  Boolean (p for "predicate"). b is an integer, and the colon : denotes *
      *  that the input list has ended.                                        */
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|Od$OsppppdspdddOb:", kwlist,
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|Od$OsppppdspdddO:", kwlist,
                                      &DLPInst,          &self->input_res,
                                      &rngreq,           &self->wtype,
                                      &self->use_fwd,    &self->use_norm,
@@ -361,7 +358,7 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
                                      &self->sigma,      &self->psitype,
                                      &self->write_file, &self->res_factor,
                                      &self->ecc,        &self->peri,
-                                     &perturb,          &self->interp))
+                                     &perturb))
     {
         PyErr_Format(
             PyExc_TypeError,
@@ -385,7 +382,6 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
             "\r\tecc       \tEccentricity of rings (bool).\n"
             "\r\tperi      \tPeriapse of rings (bool).\n"
             "\r\tperturb   \tRequested perturbation to Fresnel kernel (list).\n"
-            "\r\tinterp    \tPolynomial interpolation to kernel (int).\n"
         );
         return -1;
     }
@@ -752,6 +748,13 @@ static PyMemberDef Custom_members[] = {
         "tau_vals",
         T_OBJECT_EX,
         offsetof(PyDiffrecObj, tau_vals),
+        0,
+        "Optical depth"
+    },
+    {
+        "tau_fwd_vals",
+        T_OBJECT_EX,
+        offsetof(PyDiffrecObj, tau_fwd_vals),
         0,
         "Optical depth"
     },

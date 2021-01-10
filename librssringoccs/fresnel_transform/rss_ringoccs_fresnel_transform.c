@@ -58,9 +58,8 @@
  *      T_out (complex double):                                               *
  *          The diffraction corrected profile.                                *
  ******************************************************************************/
-rssringoccs_ComplexDouble
-Fresnel_Transform_Double(double *x_arr, rssringoccs_ComplexDouble *T_in,
-                         double *w_func, double F, double dx,
+void
+Fresnel_Transform_Double(rssringoccs_TAUObj *tau, double *x_arr, double *w_func,
                          unsigned long n_pts, unsigned long center)
 {
     /*  Declare all necessary variables. i and j are used for indexing.       */
@@ -68,21 +67,24 @@ Fresnel_Transform_Double(double *x_arr, rssringoccs_ComplexDouble *T_in,
 
     /*  rcpr_F and rcpr_F2 are the reciprocal of the Fresnel scale, and the   *
      *  square of this. x is used as the argument of the Fresnel kernel.      */
-    double x, rcpr_F, rcpr_F2, cos_x, sin_x;
+    double x, rcpr_F, rcpr_F2, cos_x, sin_x, factor;
 
     /*  exp_negative_ix is used for the Fresnel kernel.                       */
-    rssringoccs_ComplexDouble T_out, exp_negative_ix, integrand, arg;
+    rssringoccs_ComplexDouble exp_negative_ix, integrand, arg;
 
-    /*  Initialize the T_out variable to zero, so we can loop over later.     */
-    T_out = rssringoccs_CDouble_Zero;
+    /*  Start with the central point in the Riemann sum. This is center of    *
+     *  window function. That is, where w_func = 1. This is just T_in at      *
+     *  the central point. This also initializes T_out.                       */
+    tau->T_out[center] = tau->T_in[center];
 
     /*  From symmetry we need only compute -W/2 to zero, so start at -n_pts.  */
     n = n_pts;
 
     /*  Division is more expensive than multiplication, so store the          *
      *  reciprocal of F as a variable and compute with that.                  */
-    rcpr_F  = 1.0/F;
+    rcpr_F  = 1.0/tau->F_km_vals[center];
     rcpr_F2 = rcpr_F*rcpr_F;
+    factor  = 0.5*tau->dx_km*rcpr_F;
 
     /*  Use a Riemann Sum to approximate the Fresnel Inverse Integral.        */
     for (m = 0; m<n_pts; ++m)
@@ -100,18 +102,15 @@ Fresnel_Transform_Double(double *x_arr, rssringoccs_ComplexDouble *T_in,
          *  pointer does not contain at least 2*n_pts+1 points, n_pts to the  *
          *  left and n_pts to the right of the center, then this will create  *
          *  a segmentation fault, crashing the program.                       */
-        integrand = rssringoccs_CDouble_Add(T_in[center - n], T_in[center + n]);
+        integrand = rssringoccs_CDouble_Add(tau->T_in[center - n],
+                                            tau->T_in[center + n]);
         integrand = rssringoccs_CDouble_Multiply(exp_negative_ix, integrand);
-        T_out = rssringoccs_CDouble_Add(T_out, integrand);
+        tau->T_out[center] = rssringoccs_CDouble_Add(tau->T_out[center],
+                                                     integrand);
         n -= 1;
     }
 
-    /*  Add the central point in the Riemann sum. This is the center of the   *
-     *  window function. That is, where w_func = 1.                           */
-    T_out = rssringoccs_CDouble_Add(T_out, T_in[center]);
-
     /*  Multiply result by the coefficient found in the Fresnel inverse.      */
-    arg   = rssringoccs_CDouble_Rect(0.5*dx*rcpr_F, 0.5*dx*rcpr_F);
-    T_out = rssringoccs_CDouble_Multiply(arg, T_out);
-    return T_out;
+    arg   = rssringoccs_CDouble_Rect(factor, factor);
+    tau->T_out[center] = rssringoccs_CDouble_Multiply(arg, tau->T_out[center]);
 }

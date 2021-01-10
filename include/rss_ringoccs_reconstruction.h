@@ -16,6 +16,8 @@ typedef enum {
     rssringoccs_DR_NewtonDOld,
     rssringoccs_DR_NewtonDPhi,
     rssringoccs_DR_NewtonPerturb,
+    rssringoccs_DR_Quartic,
+    rssringoccs_DR_QuarticD,
     rssringoccs_DR_SimpleFFT,
     rssringoccs_DR_Elliptical,
     rssringoccs_DR_None
@@ -25,6 +27,7 @@ typedef enum {
 typedef struct rssringoccs_TAUObj {
     rssringoccs_ComplexDouble *T_in;
     rssringoccs_ComplexDouble *T_out;
+    rssringoccs_ComplexDouble *T_fwd;
     double *rho_km_vals;
     double *F_km_vals;
     double *phi_rad_vals;
@@ -43,9 +46,12 @@ typedef struct rssringoccs_TAUObj {
     double *tau_threshold_vals;
     double *phi_rl_rad_vals;
     double *p_norm_vals;
+    double *p_norm_fwd_vals;
     double *power_vals;
     double *phase_rad_vals;
+    double *phase_fwd_vals;
     double *phase_vals;
+    double *tau_fwd_vals;
     double *tau_vals;
     double *rx_km_vals;
     double *ry_km_vals;
@@ -75,13 +81,10 @@ typedef struct rssringoccs_TAUObj {
     char *wtype;
     char *psitype;
     unsigned char order;
-    unsigned char interp;
 } rssringoccs_TAUObj;
 
-typedef rssringoccs_ComplexDouble (*rssringoccs_FresT)(rssringoccs_TAUObj *,
-                                                       double *,
-                                                       unsigned long,
-                                                       unsigned long);
+typedef void (*rssringoccs_FresT)(rssringoccs_TAUObj *, double *,
+                                  unsigned long, unsigned long);
 
 extern void rssringoccs_Reconstruction(rssringoccs_TAUObj *tau);
 

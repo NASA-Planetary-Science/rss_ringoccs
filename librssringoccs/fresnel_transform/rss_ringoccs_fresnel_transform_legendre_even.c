@@ -72,13 +72,10 @@
  *      T_out (complex double):                                               *
  *          The diffraction corrected profile.                                *
  ******************************************************************************/
-rssringoccs_ComplexDouble
-Fresnel_Transform_Legendre_Even_Double(double *x_arr,
-                                       rssringoccs_ComplexDouble *T_in,
-                                       double *w_func, double D,
-                                       double *coeffs, double dx, double F,
-                                       double kd, unsigned long n_pts,
-                                       unsigned char order,
+void
+Fresnel_Transform_Legendre_Even_Double(rssringoccs_TAUObj *tau, double *x_arr,
+                                       double *w_func, double *coeffs,
+                                       unsigned long n_pts,
                                        unsigned long center)
 {
     /*  Declare all necessary variables. i, j, and k are used for indexing.   */
@@ -87,19 +84,16 @@ Fresnel_Transform_Legendre_Even_Double(double *x_arr,
 
     /*  Variables for the Fresnel kernel and ring radii.                      */
     double x, x2, psi, sin_psi, cos_psi;
-    double psi_even, psi_odd;
-    double rcpr_D, rcpr_F;
-    rssringoccs_ComplexDouble exp_negative_psi, exp_positive_psi, T_out;
-    rssringoccs_ComplexDouble integrand;
+    double psi_even, psi_odd, rcpr_D, factor;
+    rssringoccs_ComplexDouble exp_negative_psi, exp_positive_psi, integrand;
 
     /*  Division is more expension than division, so store the reciprocal     *
      *  of D as a variable and compute with that.                             */
-    rcpr_D = 1.0/D;
-    rcpr_F = 1.0/F;
+    rcpr_D = 1.0/tau->D_km_vals[center];
+    factor = 0.5*tau->dx_km/tau->F_km_vals[center];
 
     /*  Initialize T_out to zero so we can loop over later.                   */
-    T_out = rssringoccs_CDouble_Zero;
-
+    tau->T_out[center] = rssringoccs_CDouble_Zero;
     j = n_pts;
 
     /*  Use a Riemann Sum to approximate the Fresnel Inverse Integral.        */
@@ -109,53 +103,52 @@ Fresnel_Transform_Legendre_Even_Double(double *x_arr,
         x2 = x*x;
 
         /*  Compute psi using Horner's Method for Polynomial Computation.  */
-        psi_even = coeffs[order-1];
-        psi_odd  = coeffs[order-2];
-        for (k=3; k<order-1;){
-            psi_even = psi_even*x2 + coeffs[order-k];
-            psi_odd  = psi_odd*x2 + coeffs[order-k-1];
-            k += 2;
+        psi_even = coeffs[tau->order-1];
+        psi_odd  = coeffs[tau->order-2];
+        for (k=3; k<tau->order-1; k += 2)
+        {
+            psi_even = psi_even*x2 + coeffs[tau->order-k];
+            psi_odd  = psi_odd*x2  + coeffs[tau->order-k-1];
         }
 
         /*  The leading term is x^2, so multiply by this and kD.              */
         psi_even  = psi_even*x2 + coeffs[0];
-        psi_even *= kd*x2;
-        psi_odd  *= kd*x2*x;
+        psi_even *= tau->k_vals[center]*tau->D_km_vals[center] * x2;
+        psi_odd  *= tau->k_vals[center]*tau->D_km_vals[center] * x2 * x;
 
         /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
         psi = psi_even - psi_odd;
-        cos_psi = rssringoccs_Double_Cos(psi);
-        sin_psi = rssringoccs_Double_Sin(psi);
+        cos_psi = w_func[i]*rssringoccs_Double_Cos(psi);
+        sin_psi = w_func[i]*rssringoccs_Double_Sin(psi);
         exp_negative_psi = rssringoccs_CDouble_Rect(cos_psi, -sin_psi);
-        exp_negative_psi = rssringoccs_CDouble_Multiply_Real(w_func[i],
-                                                             exp_negative_psi);
 
         /*  Compute the right side of exp(-ipsi) using Euler's Formula.       */
         psi = psi_even + psi_odd;
-        cos_psi = rssringoccs_Double_Cos(psi);
-        sin_psi = rssringoccs_Double_Sin(psi);
+        cos_psi = w_func[i]*rssringoccs_Double_Cos(psi);
+        sin_psi = w_func[i]*rssringoccs_Double_Sin(psi);
         exp_positive_psi = rssringoccs_CDouble_Rect(cos_psi, -sin_psi);
-        exp_positive_psi = rssringoccs_CDouble_Multiply_Real(w_func[i],
-                                                             exp_positive_psi);
 
         /*  Compute the transform with a Riemann sum. If the T_in pointer     *
          *  does not contain at least 2*n_pts+1 points, n_pts to the left and *
          *  right of the center, then this will create a segmentation fault.  */
         integrand = rssringoccs_CDouble_Multiply(exp_negative_psi,
-                                                 T_in[center-j]);
-        T_out = rssringoccs_CDouble_Add(T_out, integrand);
+                                                 tau->T_in[center-j]);
+        tau->T_out[center] = rssringoccs_CDouble_Add(tau->T_out[center],
+                                                     integrand);
         integrand = rssringoccs_CDouble_Multiply(exp_positive_psi,
-                                                 T_in[center+j]);
-        T_out = rssringoccs_CDouble_Add(T_out, integrand);
+                                                 tau->T_in[center+j]);
+        tau->T_out[center] = rssringoccs_CDouble_Add(tau->T_out[center],
+                                                     integrand);
         j -= 1;
     }
 
     /*  Add the central point in the Riemann sum. This is center of the       *
      *  window function. That is, where w_func = 1.                           */
-    T_out = rssringoccs_CDouble_Add(T_out, T_in[center]);
+    tau->T_out[center] = rssringoccs_CDouble_Add(tau->T_out[center],
+                                                 tau->T_in[center]);
 
     /*  Multiply result by the coefficient found in the Fresnel inverse.      */
-    integrand = rssringoccs_CDouble_Rect(0.5*dx*rcpr_F, 0.5*dx*rcpr_F);
-    T_out     = rssringoccs_CDouble_Multiply(integrand, T_out);
-    return T_out;
+    integrand = rssringoccs_CDouble_Rect(factor, factor);
+    tau->T_out[center] = rssringoccs_CDouble_Multiply(integrand,
+                                                      tau->T_out[center]);
 }

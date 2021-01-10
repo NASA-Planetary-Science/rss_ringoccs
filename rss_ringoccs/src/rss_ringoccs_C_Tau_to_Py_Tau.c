@@ -48,6 +48,7 @@ static void __set_cvar(PyObject **py_ptr, rssringoccs_ComplexDouble **ptr,
 static void rssringoccs_C_Tau_to_Py_Tau(PyDiffrecObj *py_tau,
                                         rssringoccs_TAUObj *tau)
 {
+    PyObject *tmp;
     if (tau == NULL)
         return;
 
@@ -100,13 +101,40 @@ static void rssringoccs_C_Tau_to_Py_Tau(PyDiffrecObj *py_tau,
 
     __set_var(&py_tau->tau_threshold_vals,
               &tau->tau_threshold_vals, tau->arr_size);
+
+    if (tau->T_fwd == NULL)
+    {
+        tmp = py_tau->T_hat_fwd_vals;
+        Py_INCREF(Py_None);
+        py_tau->T_hat_fwd_vals = Py_None;
+        Py_XDECREF(tmp);
+
+        tmp = py_tau->p_norm_fwd_vals;
+        Py_INCREF(Py_None);
+        py_tau->p_norm_fwd_vals = Py_None;
+        Py_XDECREF(tmp);
+
+        tmp = py_tau->phase_fwd_vals;
+        Py_INCREF(Py_None);
+        py_tau->phase_fwd_vals = Py_None;
+        Py_XDECREF(tmp);
+
+        tmp = py_tau->tau_fwd_vals;
+        Py_INCREF(Py_None);
+        py_tau->tau_fwd_vals = Py_None;
+        Py_XDECREF(tmp);
+    }
+    else
+    {
+        __set_cvar(&py_tau->T_hat_fwd_vals, &tau->T_fwd, tau->arr_size);
+        __set_var(&py_tau->p_norm_fwd_vals,
+                  &tau->p_norm_fwd_vals, tau->arr_size);
+        __set_var(&py_tau->phase_fwd_vals, &tau->phase_fwd_vals, tau->arr_size);
+        __set_var(&py_tau->tau_fwd_vals, &tau->tau_fwd_vals, tau->arr_size);
+    }
 }
 
 /*  To edit:
-    PyObject          *p_norm_fwd_vals;
-    PyObject          *phase_fwd_vals;
-    PyObject          *T_hat_fwd_vals;
     PyObject          *rev_info;
-    PyObject          *dathist;
     PyObject          *history;
 */

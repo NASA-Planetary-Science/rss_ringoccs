@@ -233,6 +233,8 @@ static void Diffrec_dealloc(PyDiffrecObj *self)
     Py_XDECREF(self->w_km_vals);
     Py_XDECREF(self->dathist);
     Py_XDECREF(self->history);
+    Py_XDECREF(self->input_vars);
+    Py_XDECREF(self->input_kwds);
     Py_XDECREF(self->T_hat_vals);
     Py_XDECREF(self->T_hat_fwd_vals);
     Py_XDECREF(self->T_vals);
@@ -279,7 +281,7 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
     /*  Python objects needed throughout the computation.                     */
     PyObject *DLPInst;
     PyObject *tmp;
-    PyObject *history;
+    PyObject *dlp_tmp;
     PyObject *rngreq;
     PyObject *perturb;
 
@@ -404,14 +406,36 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
         return -1;
     }
     else
-        history = PyObject_GetAttrString(DLPInst, "history");
+        dlp_tmp = PyObject_GetAttrString(DLPInst, "history");
 
     /*  Store the dlp history inside of the DiffractionCorrection class. This *
      *  tmp, Py_INCREF, Py_XDECREF method is recommended in the Python C-API  *
      *  documentation as a means of safely storing the variable.              */
     tmp = self->dathist;
-    Py_INCREF(history);
-    self->dathist = history;
+    Py_INCREF(dlp_tmp);
+    self->dathist = dlp_tmp;
+    Py_XDECREF(tmp);
+
+    if (!PyObject_HasAttrString(DLPInst, "rev_info"))
+    {
+        PyErr_Format(
+            PyExc_AttributeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.DiffractionCorrection\n\n"
+            "\rInput DLP Instance is missing the following attribute:\n"
+            "\r\trev_info\n\n"
+        );
+        return -1;
+    }
+    else
+        dlp_tmp = PyObject_GetAttrString(DLPInst, "rev_info");
+
+    /*  Store the dlp history inside of the DiffractionCorrection class. This *
+     *  tmp, Py_INCREF, Py_XDECREF method is recommended in the Python C-API  *
+     *  documentation as a means of safely storing the variable.              */
+    tmp = self->rev_info;
+    Py_INCREF(dlp_tmp);
+    self->rev_info = dlp_tmp;
     Py_XDECREF(tmp);
 
     /*  If verbose was set, print a status update.                            */
@@ -520,6 +544,41 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
     /*  Similarly, we free the DLP. This does not free the data from the      *
      *  input DLP PyObject. Those are also still available.                   */
     free(dlp);
+
+    if (self->verbose)
+        puts("\tDiffraction Correction: Building arguments dictionary...");
+
+    dlp_tmp = Py_BuildValue(
+        "{s:O,s:d}",
+        "dlp_inst", self->dathist,
+        "res",      self->input_res
+    );
+
+    tmp = self->input_vars;
+    Py_INCREF(dlp_tmp);
+    self->input_vars = dlp_tmp;
+    Py_XDECREF(tmp);
+
+    if (self->verbose)
+        puts("\tDiffraction Correction: Building keywords dictionary...");
+
+    dlp_tmp = Py_BuildValue(
+        "{s:O,s:s,s:s,s:d,s:d,s:d,s:d,s:O,s:O}",
+        "rng",        rngreq,
+        "wtype",      self->wtype,
+        "psitype",    self->psitype,
+        "sigma",      self->sigma,
+        "ecc",        self->ecc,
+        "peri",       self->peri,
+        "res_factor", self->res_factor,
+        "use_norm",   PyBool_FromLong(self->use_norm),
+        "bfac",       PyBool_FromLong(self->bfac)
+    );
+
+    tmp = self->input_kwds;
+    Py_INCREF(dlp_tmp);
+    self->input_kwds = dlp_tmp;
+    Py_XDECREF(tmp);
 
     t2 = clock();
 
@@ -777,7 +836,21 @@ static PyMemberDef Custom_members[] = {
         T_OBJECT_EX,
         offsetof(PyDiffrecObj, history),
         0,
-        "History of this tau instance"
+        "History of the tau instance"
+    },
+    {
+        "input_vars",
+        T_OBJECT_EX,
+        offsetof(PyDiffrecObj, input_vars),
+        0,
+        "Dictionary of input arguments used to create this instance."
+    },
+    {
+        "input_kwds",
+        T_OBJECT_EX,
+        offsetof(PyDiffrecObj, input_kwds),
+        0,
+        "Dictionary of input keywords used to create this instance."
     },
     {
         "bfac",
@@ -806,6 +879,41 @@ static PyMemberDef Custom_members[] = {
         offsetof(PyDiffrecObj, use_fwd),
         0,
         "Forward modeling Boolean"
+    },
+    {
+        "ecc",
+        T_DOUBLE,
+        offsetof(PyDiffrecObj, ecc),
+        0,
+        "Eccentricity of Rings"
+    },
+    {
+        "peri",
+        T_DOUBLE,
+        offsetof(PyDiffrecObj, peri),
+        0,
+        "Periapse of Rings, azimuth angle in radians."
+    },
+    {
+        "input_res",
+        T_DOUBLE,
+        offsetof(PyDiffrecObj, input_res),
+        0,
+        "User requested input resolution."
+    },
+    {
+        "res_factor",
+        T_DOUBLE,
+        offsetof(PyDiffrecObj, res_factor),
+        0,
+        "User requested scale factor for the input resolution."
+    },
+    {
+        "sigma",
+        T_DOUBLE,
+        offsetof(PyDiffrecObj, sigma),
+        0,
+        "Allen deviation."
     },
     {
         NULL

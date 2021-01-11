@@ -11,7 +11,7 @@ import warnings
 warnings.simplefilter('ignore', np.RankWarning)
 import matplotlib.pyplot as plt
 from scipy.interpolate import splrep, splev
-from scipy.signal import savgol_filter,argrelmax
+from scipy.signal import argrelmax
 import sys
 
 from .calc_f_sky_recon import calc_f_sky_recon

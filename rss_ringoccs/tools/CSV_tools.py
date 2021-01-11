@@ -698,8 +698,9 @@ class ExtractCSVData(object):
                     \r\twrite_file option will not work with this instance of
                     \r\tthe ExtractCSVData class. This can still be used with
                     \r\tDiffractionCorrection if write_file=False is set.\n
-                    \r\tTo correct, re-run within pipeline directory.
-                """
+                    \r\tTo correct, re-run within pipeline directory.\n
+                    \rOriginal error message:\n%s
+                """ % err
             )
 
             self.rev_info = None

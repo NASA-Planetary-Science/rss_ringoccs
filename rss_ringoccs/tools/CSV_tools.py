@@ -1,12 +1,10 @@
 """
-:Purpose:
-        Provide tools for reading in .TAB and .CSV files and converting
-        the data into a usable instance of the DLP class.
-
-:Dependencies:
-    #. pandas
-    #. numpy
-    #. scipy
+    :Purpose:
+            Provide tools for reading in .TAB and .CSV files and converting
+            the data into a usable instance of the DLP class.
+    :Dependencies:
+        #. pandas
+        #. numpy
 """
 
 import numpy as np
@@ -17,7 +15,6 @@ from . import error_check
 def get_geo(geo, verbose=True, use_deprecate=False):
     """
     To extract a pandas DataFrame from a given GEO.TAB or GEO.CSV file.
-
     Arguments
         :geo (*str*):
             A string containing the location of
@@ -44,7 +41,6 @@ def get_geo(geo, verbose=True, use_deprecate=False):
             |   vy_kms_vals
             |   vz_kms_vals
             |   obs_spacecract_lat_deg_vals
-
     Keywords
         :verbose (*bool*):
             A Boolean for printing out auxiliary
@@ -614,93 +610,10 @@ class ExtractCSVData(object):
                 """ % (fname)
             )
 
-        if (occ == 'ingress'):
-            crange = (self.rho_dot_kms_vals < 0.0).nonzero()
-            self.rho_dot_kms_vals = self.rho_dot_kms_vals[::-1]
-            self.D_km_vals = self.D_km_vals[::-1]
-            geo_rho = geo_rho[::-1]
-        elif (occ == 'egress'):
-            crange = (self.rho_dot_kms_vals > 0.0).nonzero()
-        else:
-            crange_e = (self.rho_dot_kms_vals > 0.0).nonzero()
-            crange_i = (self.rho_dot_kms_vals < 0.0).nonzero()
-            n_e = np.size(crange_e)
-            n_i = np.size(crange_i)
-            if (n_e != 0) and (n_i !=0):
-                raise ValueError(
-                    """
-                        \r\tError Encountered: rss_ringoccs
-                        \r\t\t%s\n
-                        \r\trho_dot_kms_vals has positive and negative values.
-                        \r\tThis is likely a chord occultation.
-                        \r\tSet occ='ingress' or occ='egress'
-                    """ % (fname)
-                )
-            elif (n_e == 0) and (n_i == 0):
-                raise ValueError(
-                    """
-                        \r\tError Encountered: rss_ringoccs
-                        \r\t\t%s\n
-                        \r\trho_dot_kms_vals is either zero or empty.
-                        \r\tCheck input geo file for errors.
-                        \r\tYour file: %s
-                    """ % (fname, geo)
-                )
-            elif (n_e != 0) and (n_i == 0):
-                crange = crange_e
-                occ    = 'egress'
-            elif (n_e == 0) and (n_i != 0):
-                crange = crange_i
-                occ    = 'ingress'
-            else:
-                raise ValueError(
-                    """
-                        \r\tError Encountered: rss_ringoccs
-                        \r\t\t%s\n
-                        \r\tCould not determine what type of occultation
-                        \r\tthis is. Set occ='ingress' or occ='egress'.
-                    """ % (fname)
-                )
-
-            del n_e, n_i, crange_e, crange_i
-
-        if (np.size(crange) == 0):
-            if (occ == 'ingress'):
-                raise TypeError(
-                    """
-                        \r\tError Encountered: rss_ringoccs
-                        \r\t\t%s\n
-                        \r\trho_dot_kms_vals is never negative.
-                    """ % fname
-                )
-            elif (occ == 'egress'):
-                raise TypeError(
-                    """
-                        \r\tError Encountered: rss_ringoccs
-                        \r\t\t%s\n
-                        \r\trho_dot_kms_vals is never negative.
-                    """ % fname
-                )
-            else:
-                raise TypeError(
-                    """
-                        \r\tError Encountered: rss_ringoccs
-                        \r\t\t%s\n
-                        \r\tCould not determine occultation type.
-                        \r\tCheck your input GEO file.
-                    """ % fname
-                )
-        else:
-            pass
-
         if verbose:
             print("\tInterpolating Data...")
 
-        geo_rho = geo_rho[crange]
-        self.D_km_vals = self.D_km_vals[crange]
-        self.rho_dot_kms_vals = self.rho_dot_kms_vals[crange]
-
-        del crange, geo_dat, cal_dat, dlp_dat
+        del geo_dat, cal_dat, dlp_dat
 
         raw_mu = np.sin(np.abs(self.B_rad_vals))
         self.p_norm_vals = np.exp(-self.raw_tau_vals/raw_mu)
@@ -795,7 +708,7 @@ class ExtractCSVData(object):
 
 
 class GetUranusData(object):
-    def __init__(self, geodata, dlpdata, tau=None, verbose=False):
+    def __init__(self, geodata, dlpdata, tau=None, verbose=False, occ="E"):
         fname = "tools.CSV_tools.ExtractCSVData"
         error_check.check_type(geodata, str, "geo", fname)
         error_check.check_type(dlpdata, str, "dlp", fname)
@@ -1027,6 +940,17 @@ class GetUranusData(object):
             }
         self.history = write_history_dict(input_vars, input_kwds, __file__)
 
+        self.rev_info = {
+            "rsr_file": 'UNK',
+            "band": '"X"',
+            "year": '1986',
+            "doy": '25',
+            "dsn": 'DSS-43',
+            "occ_dir": '"BOTH"',
+            "planetary_occ_flag": '"None"',
+            "rev_num": '000',
+            "prof_dir": '"%s"e' % occ
+        }
+
         if verbose:
             printf("Data Extraction Complete.")
-

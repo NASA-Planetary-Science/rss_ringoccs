@@ -1,3 +1,100 @@
+/******************************************************************************
+ *                                 LICENSE                                    *
+ ******************************************************************************
+ *  This file is part of rss_ringoccs.                                        *
+ *                                                                            *
+ *  rss_ringoccs is free software: you can redistribute it and/or modify it   *
+ *  it under the terms of the GNU General Public License as published by      *
+ *  the Free Software Foundation, either version 3 of the License, or         *
+ *  (at your option) any later version.                                       *
+ *                                                                            *
+ *  rss_ringoccs is distributed in the hope that it will be useful,           *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+ *  GNU General Public License for more details.                              *
+ *                                                                            *
+ *  You should have received a copy of the GNU General Public License         *
+ *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
+ ******************************************************************************
+ *                            rss_ringoccs_erfcx                              *
+ ******************************************************************************
+ *  Purpose:                                                                  *
+ *      Contains the source code for the scaled error function Erfcx.         *
+ *  NOTES:                                                                    *
+ *      This is a rewrite of the libcerf library that uses C89/C90 compliant  *
+ *      code, together with the tools of librssringoccs. Original libcerf     *
+ *      license included below.                                               *
+ ******************************************************************************
+ *                               DEPENDENCIES                                 *
+ ******************************************************************************
+ *  1.) rss_ringoccs_math.h:                                                  *
+ *          This file provides compatibility between the two standard math.h  *
+ *          header files (C89 vs C99 math.h). If C99 math.h exists, it simply *
+ *          provides aliases for the functions, and if C89 math.h is used     *
+ *          it defines the functions missing in the earlier version.          *
+ ******************************************************************************
+ *  Author:     Ryan Maguire, Wellesley College                               *
+ *  Date:       December 10, 2020                                             *
+ ******************************************************************************
+ *                             Revision History                               *
+ ******************************************************************************
+ *  2020/12/10 (Ryan Maguire):                                                *
+ *      Frozen for v1.3.                                                      *
+ ******************************************************************************/
+
+/******************************************************************************
+ *                             LIBCERF LICENSE                                *
+ ******************************************************************************/
+
+/* Library libcerf:
+ *   Compute complex error functions, based on a new implementation of
+ *   Faddeeva's w_of_z. Also provide Dawson and Voigt functions.
+ *
+ * File erfcx.c:
+ *   Compute erfcx(x) = exp(x^2) erfc(x) function, for real x,
+ *   using a novel algorithm that is much faster than DERFC of SLATEC.
+ *   This function is used in the computation of Faddeeva, Dawson, and
+ *   other complex error functions.
+ *
+ * Copyright:
+ *   (C) 2012 Massachusetts Institute of Technology
+ *   (C) 2013 Forschungszentrum Jülich GmbH
+ *
+ * Licence:
+ *   Permission is hereby granted, free of charge, to any person obtaining
+ *   a copy of this software and associated documentation files (the
+ *   "Software"), to deal in the Software without restriction, including
+ *   without limitation the rights to use, copy, modify, merge, publish,
+ *   distribute, sublicense, and/or sell copies of the Software, and to
+ *   permit persons to whom the Software is furnished to do so, subject to
+ *   the following conditions:
+ *
+ *   The above copyright notice and this permission notice shall be
+ *   included in all copies or substantial portions of the Software.
+ *
+ *   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ *   EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ *   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ *   NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ *   LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ *   OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ *   WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * Authors:
+ *   Steven G. Johnson, Massachusetts Institute of Technology, 2012, core author
+ *   Joachim Wuttke, Forschungszentrum Jülich, 2013, package maintainer
+ *
+ * Website:
+ *   http://apps.jcns.fz-juelich.de/libcerf
+ *
+ * Revision history:
+ *   ../CHANGELOG
+ *
+ * Manual page:
+ *   man 3 erfcx
+ */
+
+
 /*  Header file which contains aliases for the function in the standard C     *
  *  library math.h. This allows compatibility of C89 and C99 math.h headers.  */
 #include <rss_ringoccs/include/rss_ringoccs_math.h>

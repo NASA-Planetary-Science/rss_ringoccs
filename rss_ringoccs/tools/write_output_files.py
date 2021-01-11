@@ -53,7 +53,6 @@ def write_output_files(inst, add_text=None):
         add = add_text
     else:
         add = ''
-    rev_info = inst.rev_info
 
     # Check for instance type and write that specific file
     if isinstance(inst, rss.occgeo.Geometry):
@@ -70,8 +69,9 @@ def write_output_files(inst, add_text=None):
     #elif isinstance(inst, rss.scatter.Scatter):
     #    filtyp = 'SCATTER_' + inst.band + (inst.dsn).split('-')[1] + add
     else:
-        print('invalid instance!')
+        raise TypeError('invalid instance for write_output_files.')
 
+    rev_info = inst.rev_info
     outfiles = construct_output_filename(rev_info, inst, filtyp)
     return outfiles
 

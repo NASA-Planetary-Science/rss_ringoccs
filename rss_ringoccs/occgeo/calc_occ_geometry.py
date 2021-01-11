@@ -869,6 +869,8 @@ def get_freespace(t_ret_spm_vals, year, doy, rho_km_vals,
         if len(gaps_spm_egr)!=0 and len(gaps_spm_ing)!=0:
             if gaps_spm_egr[0][0] < gaps_spm_ing[0][0]:
                 gaps_spm = gaps_spm_egr.tolist() + gaps_spm_ing.tolist()
+            else:
+                gaps_spm = gaps_spm_ing.tolist() + gaps_spm_egr.tolist()
         else:
             gaps_spm = gaps_spm_ing.tolist() + gaps_spm_egr.tolist()
 

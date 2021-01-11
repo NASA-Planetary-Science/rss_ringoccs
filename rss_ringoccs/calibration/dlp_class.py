@@ -101,6 +101,7 @@ class DiffractionLimitedProfile(object):
         spm_full = rsr_inst.spm_vals
         IQ_m = rsr_inst.IQ_m
 
+
         spm_geo = geo_inst.t_oet_spm_vals
         rho_km_geo = geo_inst.rho_km_vals
         rho_dot_kms_geo = geo_inst.rho_dot_kms_vals
@@ -112,6 +113,9 @@ class DiffractionLimitedProfile(object):
         phi_ora_deg_geo = geo_inst.phi_ora_deg_vals
         phi_rl_deg_geo = geo_inst.phi_rl_deg_vals
         D_km_geo = geo_inst.D_km_vals
+        rx_km_geo = geo_inst.rx_km_vals
+        ry_km_geo = geo_inst.ry_km_vals
+        rz_km_geo = geo_inst.rz_km_vals
         prof_dir = geo_inst.rev_info['prof_dir']
 
 
@@ -120,6 +124,16 @@ class DiffractionLimitedProfile(object):
         f_sky_pred_cal = cal_inst.f_sky_hz_vals
         p_free_cal = cal_inst.p_free_vals
         IQ_c = cal_inst.IQ_c
+
+        if (spm_full > max(spm_geo)).any() or (
+                spm_full < min(spm_geo)).any():
+            ind1 = np.where(spm_full == spm_geo[0])[0][0]
+            ind2 = np.where(spm_full == spm_geo[-1])[0][0]
+
+
+            spm_full = spm_full[ind1:ind2]
+            IQ_m = IQ_m[ind1:ind2]
+            IQ_c = IQ_c[ind1:ind2]
 
         # interpolate coef to convert SPM to rho
         spm_to_rho = splrep(spm_geo, rho_km_geo)
@@ -179,10 +193,10 @@ class DiffractionLimitedProfile(object):
         spm_thresh = tau_thresh_inst.spm_vals
 
         self.__interp_and_set_attr(rho_km_desired, spm_desired, p_norm_vals,
-                spm_cal, phase_rad_vals, spm_geo, rho_dot_kms_geo,
-                B_deg_geo, F_km_geo, t_ret_spm_geo, t_set_spm_geo,
-                D_km_geo, phi_ora_deg_geo, phi_rl_deg_geo, f_sky_pred_cal,
-                tau_thresh, spm_thresh, prof_dir)
+                spm_cal, phase_rad_vals, spm_geo, rho_dot_kms_geo, B_deg_geo,
+                F_km_geo, t_ret_spm_geo, t_set_spm_geo, D_km_geo, rx_km_geo,
+                ry_km_geo, rz_km_geo, phi_ora_deg_geo, phi_rl_deg_geo,
+                f_sky_pred_cal, tau_thresh, spm_thresh, prof_dir)
 
         if hasattr(geo_inst, 'ul_rho_km_vals'):
 
@@ -232,8 +246,8 @@ class DiffractionLimitedProfile(object):
     def __interp_and_set_attr(self, rho_km_desired, spm_desired,
             p_norm_vals, spm_cal, phase_rad_vals, spm_geo, rho_dot_kms_geo,
             B_deg_vals, F_km_geo, t_ret_geo, t_set_geo,
-            D_km_geo, phi_ora_deg_vals, phi_rl_deg_vals, f_sky_pred_cal,
-            tau_thresh, spm_thresh, prof_dir):
+            D_km_geo, rx_km_geo, ry_km_geo, rz_km_geo, phi_ora_deg_vals,
+            phi_rl_deg_vals, f_sky_pred_cal, tau_thresh, spm_thresh, prof_dir):
 
         B_rad_geo = np.radians(B_deg_vals)
         phi_ora_rad_geo = np.radians(phi_ora_deg_vals)
@@ -305,6 +319,10 @@ class DiffractionLimitedProfile(object):
         #t_set_spm_vals_interp = splev(spm_desired, spm_to_set)
         t_set_spm_vals_interp = np.interp(spm_desired, spm_geo, t_set_geo)
 
+        # spacecraft position relative to planetocentric frame.
+        rx_km_vals_interp = np.interp(spm_desired, spm_geo, rx_km_geo)
+        ry_km_vals_interp = np.interp(spm_desired, spm_geo, rx_km_geo)
+        rz_km_vals_interp = np.interp(spm_desired, spm_geo, rx_km_geo)
 
         # FILLERS FOR RADIUS CORRECTION
         rho_corr_pole_km_vals = np.zeros(len(spm_desired))
@@ -318,6 +336,9 @@ class DiffractionLimitedProfile(object):
 
         self.B_rad_vals = B_rad_vals_interp
         self.D_km_vals = D_km_vals_interp
+        self.rx_km_vals = rx_km_vals_interp
+        self.ry_km_vals = ry_km_vals_interp
+        self.rz_km_vals = rz_km_vals_interp
         self.F_km_vals = F_km_vals_interp
         self.f_sky_hz_vals = f_sky_hz_vals_interp
         self.phi_rad_vals = phi_ora_rad_vals_interp
@@ -390,6 +411,7 @@ class DiffractionLimitedProfile(object):
             cal_inst.IQ_c = IQ_c[ind1:ind2]
 
 
+
         if prof_dir == '"INGRESS"':
             dlp_egr = None
             dlp_ing = cls(rsr_inst, geo_inst, cal_inst, dr_km, verbose=verbose,
@@ -417,12 +439,16 @@ class DiffractionLimitedProfile(object):
             cal_egr = copy.deepcopy(cal_inst)
 
             # For ingress occ, remove 1s from the end
+            ind_geo_ing = np.argwhere(
+                            geo_inst.t_oet_spm_vals == (ind_spm1-1.))[0][0]
             ind_rsr_ing = np.argwhere(
                             rsr_inst.spm_vals == (ind_spm1-1.))[0][0]
             ind_cal_ing = np.argwhere(
                             cal_inst.t_oet_spm_vals == (ind_spm1-1.))[0][0]
 
             # For egress occ, remove 1s from the beginning
+            ind_geo_egr = np.argwhere(
+                            geo_inst.t_oet_spm_vals == (ind_spm1+1.))[0][0]
             ind_rsr_egr = np.argwhere(
                             rsr_inst.spm_vals == (ind_spm1+1.))[0][0]
             ind_cal_egr = np.argwhere(
@@ -453,16 +479,16 @@ class DiffractionLimitedProfile(object):
                         cal_inst.f_offset_fit_vals[ind_cal_egr:])
 
             # split geometry attributes
-            geo_ing.rho_km_vals = geo_inst.rho_km_vals[:ind]
-            geo_ing.rho_dot_kms_vals = geo_inst.rho_dot_kms_vals[:ind]
-            geo_ing.t_oet_spm_vals = geo_inst.t_oet_spm_vals[:ind]
-            geo_ing.t_ret_spm_vals = geo_inst.t_ret_spm_vals[:ind]
-            geo_ing.t_set_spm_vals = geo_inst.t_set_spm_vals[:ind]
-            geo_ing.B_deg_vals = geo_inst.B_deg_vals[:ind]
-            geo_ing.phi_ora_deg_vals = geo_inst.phi_ora_deg_vals[:ind]
-            geo_ing.phi_rl_deg_vals = geo_inst.phi_rl_deg_vals[:ind]
-            geo_ing.D_km_vals = geo_inst.D_km_vals[:ind]
-            geo_ing.F_km_vals = geo_inst.F_km_vals[:ind]
+            geo_ing.rho_km_vals = geo_inst.rho_km_vals[:ind_geo_ing]
+            geo_ing.rho_dot_kms_vals = geo_inst.rho_dot_kms_vals[:ind_geo_ing]
+            geo_ing.t_oet_spm_vals = geo_inst.t_oet_spm_vals[:ind_geo_ing]
+            geo_ing.t_ret_spm_vals = geo_inst.t_ret_spm_vals[:ind_geo_ing]
+            geo_ing.t_set_spm_vals = geo_inst.t_set_spm_vals[:ind_geo_ing]
+            geo_ing.B_deg_vals = geo_inst.B_deg_vals[:ind_geo_ing]
+            geo_ing.phi_ora_deg_vals = geo_inst.phi_ora_deg_vals[:ind_geo_ing]
+            geo_ing.phi_rl_deg_vals = geo_inst.phi_rl_deg_vals[:ind_geo_ing]
+            geo_ing.D_km_vals = geo_inst.D_km_vals[:ind_geo_ing]
+            geo_ing.F_km_vals = geo_inst.F_km_vals[:ind_geo_ing]
             dr1 = geo_ing.rho_km_vals[1] - geo_ing.rho_km_vals[0]
             if dr1 < 0:
                 geo_ing.rev_info['prof_dir'] = '"INGRESS"'
@@ -471,33 +497,33 @@ class DiffractionLimitedProfile(object):
             geo_ing.rev_info['DIR'] = 'CHORD'
 
             if hasattr(geo_inst, 'ul_rho_km_vals'):
-                geo_ing.t_ul_spm_vals = geo_inst.t_ul_spm_vals[:ind]
-                geo_ing.t_ul_ret_spm_vals = geo_inst.t_ul_ret_spm_vals[:ind]
-                geo_ing.ul_rho_km_vals = geo_inst.ul_rho_km_vals[:ind]
-                geo_ing.ul_phi_rl_deg_vals = geo_inst.ul_phi_rl_deg_vals[:ind]
-                geo_ing.ul_phi_ora_deg_vals = geo_inst.ul_phi_ora_deg_vals[:ind]
+                geo_ing.t_ul_spm_vals = geo_inst.t_ul_spm_vals[:ind_geo_ing]
+                geo_ing.t_ul_ret_spm_vals = geo_inst.t_ul_ret_spm_vals[:ind_geo_ing]
+                geo_ing.ul_rho_km_vals = geo_inst.ul_rho_km_vals[:ind_geo_ing]
+                geo_ing.ul_phi_rl_deg_vals = geo_inst.ul_phi_rl_deg_vals[:ind_geo_ing]
+                geo_ing.ul_phi_ora_deg_vals = geo_inst.ul_phi_ora_deg_vals[:ind_geo_ing]
 
-                geo_egr.t_ul_spm_vals = geo_inst.t_ul_spm_vals[ind:]
-                geo_egr.t_ul_ret_spm_vals = geo_inst.t_ul_ret_spm_vals[ind:]
-                geo_egr.ul_rho_km_vals = geo_inst.ul_rho_km_vals[ind:]
-                geo_egr.ul_phi_rl_deg_vals = geo_inst.ul_phi_rl_deg_vals[ind:]
-                geo_egr.ul_phi_ora_deg_vals = geo_inst.ul_phi_ora_deg_vals[ind:]
+                geo_egr.t_ul_spm_vals = geo_inst.t_ul_spm_vals[ind_geo_egr:]
+                geo_egr.t_ul_ret_spm_vals = geo_inst.t_ul_ret_spm_vals[ind_geo_egr:]
+                geo_egr.ul_rho_km_vals = geo_inst.ul_rho_km_vals[ind_geo_egr:]
+                geo_egr.ul_phi_rl_deg_vals = geo_inst.ul_phi_rl_deg_vals[ind_geo_egr:]
+                geo_egr.ul_phi_ora_deg_vals = geo_inst.ul_phi_ora_deg_vals[ind_geo_egr:]
 
 
             dlp_ing = cls(rsr_ing, geo_ing, cal_ing, dr_km, verbose=verbose,
                     write_file=write_file, profile_range=profile_range)
 
 
-            geo_egr.rho_km_vals = geo_inst.rho_km_vals[ind:]
-            geo_egr.rho_dot_kms_vals = geo_inst.rho_dot_kms_vals[ind:]
-            geo_egr.t_oet_spm_vals = geo_inst.t_oet_spm_vals[ind:]
-            geo_egr.t_ret_spm_vals = geo_inst.t_ret_spm_vals[ind:]
-            geo_egr.t_set_spm_vals = geo_inst.t_set_spm_vals[ind:]
-            geo_egr.B_deg_vals = geo_inst.B_deg_vals[ind:]
-            geo_egr.phi_ora_deg_vals = geo_inst.phi_ora_deg_vals[ind:]
-            geo_egr.phi_rl_deg_vals = geo_inst.phi_rl_deg_vals[ind:]
-            geo_egr.D_km_vals = geo_inst.D_km_vals[ind:]
-            geo_egr.F_km_vals = geo_inst.F_km_vals[ind:]
+            geo_egr.rho_km_vals = geo_inst.rho_km_vals[ind_geo_egr:]
+            geo_egr.rho_dot_kms_vals = geo_inst.rho_dot_kms_vals[ind_geo_egr:]
+            geo_egr.t_oet_spm_vals = geo_inst.t_oet_spm_vals[ind_geo_egr:]
+            geo_egr.t_ret_spm_vals = geo_inst.t_ret_spm_vals[ind_geo_egr:]
+            geo_egr.t_set_spm_vals = geo_inst.t_set_spm_vals[ind_geo_egr:]
+            geo_egr.B_deg_vals = geo_inst.B_deg_vals[ind_geo_egr:]
+            geo_egr.phi_ora_deg_vals = geo_inst.phi_ora_deg_vals[ind_geo_egr:]
+            geo_egr.phi_rl_deg_vals = geo_inst.phi_rl_deg_vals[ind_geo_egr:]
+            geo_egr.D_km_vals = geo_inst.D_km_vals[ind_geo_egr:]
+            geo_egr.F_km_vals = geo_inst.F_km_vals[ind_geo_egr:]
             dr2 = geo_egr.rho_km_vals[1] - geo_egr.rho_km_vals[0]
             if dr2 < 0:
                 geo_egr.rev_info['prof_dir'] = '"INGRESS"'

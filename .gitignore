@@ -11,3 +11,5 @@ data/
 .vscode/
 __pycache__
 *~
+*.ppm
+*.o

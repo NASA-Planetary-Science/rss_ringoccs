@@ -42,6 +42,8 @@ typedef struct {
     PyObject          *T_vals;
     PyObject          *raw_tau_threshold_vals;
     PyObject          *rev_info;
+    PyObject          *input_vars;
+    PyObject          *input_kwds;
     PyObject          *rho_corr_pole_km_vals;
     PyObject          *rho_corr_timing_km_vals;
     PyObject          *rho_dot_kms_vals;

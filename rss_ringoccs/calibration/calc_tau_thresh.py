@@ -25,8 +25,6 @@
 """
 
 import numpy as np
-import matplotlib.pyplot as plt
-from scipy.interpolate import splrep,splev
 from scipy.signal import spectrogram
 
 class calc_tau_thresh(object):
@@ -132,4 +130,7 @@ Revision history
     Jan 11 2018 - sflury -- updated doc strings and method for
                             selecting the first and last thousand secs
                             of the occultation data set
+    Nov 13 2020 - rmaguire -- Removed unused imports:
+        import matplotlib.pyplot as plt
+        from scipy.interpolate import splrep,splev
 """

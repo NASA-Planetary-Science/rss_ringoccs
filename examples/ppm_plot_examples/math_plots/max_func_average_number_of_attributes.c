@@ -116,7 +116,7 @@ int main(void)
     unsigned int max_arr_length = 100U;
 
     /*  Define the number of iterations we'll run for each m < arr_max.       */
-    double iter_max = 1000U;
+    unsigned int iter_max = 1000U;
 
     /*  Define the size of the box we'll be plotting to.                      */
     double x_min = 1.0;

@@ -5,6 +5,10 @@ if [ ! "$BASH_VERSION" ] ; then
 fi
 web="https://naif.jpl.nasa.gov/pub/"
 input=../tables/complete_list_of_kernels.txt
+
+# Create an error log.
+touch get_kernels_error_log.txt
+
 while IFS= read -r dirfil
 do
     localdirfil="../kernels/$dirfil"
@@ -17,9 +21,15 @@ do
 			curl --create-dirs -o $localdirfil $webdirfil
 		else
 			echo "URL does not exist: $webdirfil"
-			exit 1
+            echo "URL does not exist: $webdirfil" >> get_kernels_error_log.txt
 		fi
 	else
     		echo Current File "$localdirfil" already exists.
 	fi
 done < "$input"
+
+# If the error log is empty, remove it.
+if [ ! -s get_kernels_error_log.txt ]
+then
+    rm -f get_kernels_error_log.txt
+fi

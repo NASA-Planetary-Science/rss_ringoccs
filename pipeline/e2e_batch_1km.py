@@ -1,6 +1,8 @@
 import sys
 sys.path.append('../')
 import rss_ringoccs as rss
+from rss_ringoccs.tools.history import write_history_dict
+from rss_ringoccs.tools.write_output_files import write_output_files
 sys.path.remove('../')
 import traceback
 import time
@@ -72,6 +74,7 @@ for ind in range(nfiles):
 
         # print RSR file
         print(rsr_file)
+
         # Create instance with rsr file contents
         rsr_inst = rss.rsr_reader.RSRReader(rsr_file, verbose=verbose,
                 decimate_16khz_to_1khz=decimate_16khz_to_1khz)
@@ -92,25 +95,37 @@ for ind in range(nfiles):
                     rsr_inst, geo_inst, cal_inst, dr_km_desired,
                     profile_range=profile_range,
                     write_file=write_file, verbose=verbose))
+
         # Invert profile for full occultation
         if dlp_inst_ing is not None:
-            tau_inst = (rss.diffrec.DiffractionCorrection(
-                    dlp_inst_ing, res_km,
-                    rng=inversion_range, res_factor=res_factor,
-                    psitype=psitype, wtype=wtype, fwd=fwd,
-                    norm=norm, bfac=bfac, write_file=write_file,
-                    verbose=verbose))
-            rss.tools.plot_summary_doc_v2(geo_inst, cal_inst, dlp_inst_ing,
-                    tau_inst)
+            tau_inst = rss.diffrec.DiffractionCorrection(dlp_inst_ing, res_km,
+                rng=inversion_range, res_factor=res_factor, psitype=psitype,
+                wtype=wtype, use_fwd=fwd, use_norm=norm, bfac=bfac,
+                verbose=verbose)
+
+            rss.tools.plot_summary_doc_v2(geo_inst, cal_inst,
+                                          dlp_inst_ing, tau_inst)
+
+            if write_file:
+                    tau_inst.history = write_history_dict(rec.input_vars,
+                                                          rec.input_kwds,
+                                                          __file__)
+                    outfiles = write_output_files(tau_inst)
+
         if dlp_inst_egr is not None:
-            tau_inst = (rss.diffrec.DiffractionCorrection(
-                    dlp_inst_egr, res_km,
-                    rng=inversion_range, res_factor=res_factor,
-                    psitype=psitype, wtype=wtype, fwd=fwd,
-                    norm=norm, bfac=bfac, write_file=write_file,
-                    verbose=verbose))
-            rss.tools.plot_summary_doc_v2(geo_inst, cal_inst, dlp_inst_egr,
-                    tau_inst)
+            tau_inst = rss.diffrec.DiffractionCorrection(
+                dlp_inst_egr, res_km, rng=inversion_range,
+                res_factor=res_factor, psitype=psitype, wtype=wtype,
+                use_norm=norm, bfac=bfac, verbose=verbose)
+
+            if write_file:
+                    tau_inst.history = write_history_dict(rec.input_vars,
+                                                          rec.input_kwds,
+                                                          __file__)
+                    outfiles = write_output_files(tau_inst)
+
+            rss.tools.plot_summary_doc_v2(geo_inst, cal_inst,
+                                          dlp_inst_egr, tau_inst)
 
         et = time.time()
         run_time = str((et-st)/60.)
@@ -119,11 +134,11 @@ for ind in range(nfiles):
         sys.exit()
     except:
         tb = traceback.format_exc()
+        print("%d: Failed. Printing error message to ../output/%s"
+              % (ind, err_file))
         fail_file.write('-'*48+'\n')
-        print(tb)
         fail_file.write('  '+rsr_file+'\n'+'-'*36+'\n\n'+ 'n='+
                          str(ind)+'\n'+ tb+'\n')
-
 
 final_time = time.time()
 total_batch_time = (final_time - init_time)/60./60.

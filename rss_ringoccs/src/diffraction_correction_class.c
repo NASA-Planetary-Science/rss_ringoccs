@@ -304,7 +304,7 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
     self->psitype = "fresnel4";
 
     /*  Default range is "all", denoting [1.0, 400000.0]. We'll set later.    */
-    rngreq = PyBytes_FromString("all");;
+    rngreq = PyUnicode_FromString("all");
 
     /*  By default, forward computations are not run, FFTs are not used, and  *
      *  the run is silent (verbose is off).                                   */

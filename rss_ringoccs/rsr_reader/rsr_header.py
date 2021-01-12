@@ -144,11 +144,15 @@ def rsr_header(rsr_file):
     n_pts = round((end_spm_of_rsr - sh_sfdu_seconds) / dt)
     spm_vals = float(sh_sfdu_seconds) + dt * np.arange(n_pts)
 
-    out_dict = {'spm_vals': spm_vals, 'doy': sfdu_hdr_dict['sh_doy'],
+    out_dict = {
+        'spm_vals': spm_vals,
+        'doy': sfdu_hdr_dict['sh_doy'],
         'year': sfdu_hdr_dict['sh_year'],
         'dsn': 'DSS-' + str(sfdu_hdr_dict['sh_dss_id']),
         'band': sfdu_hdr_dict['sh_dl_band'],
-        'sample_rate_khz': sfdu_hdr_dict['sh_sample_rate']}
+        'sample_rate_khz':
+        sfdu_hdr_dict['sh_sample_rate']
+    }
 
     if out_dict['year'] == 0:
         out_dict['year'] = sfdu_hdr_dict['sh_sfdu_year']

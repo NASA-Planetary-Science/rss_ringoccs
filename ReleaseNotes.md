@@ -1,9 +1,13 @@
 # Release Notes #
 
+rss_ringoccs does not run on Python 3.8 or 3.9 and needs to be used on 3.6.
+There is active work in rewriting the code in C89/C90 compliant code for future
+portability, using the C-Python API to allow users the convenience of Python.
 
-## rss_ringoccs V1.3 ##
 
-Release date: 2019 August 30
+## rss_ringoccs V1.3-beta ##
+
+Release date: 2021, January 12
 
 ### Changes from V1.2 ###
 

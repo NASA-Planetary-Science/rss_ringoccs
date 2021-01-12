@@ -64,7 +64,6 @@ typedef struct {
     rssringoccs_Bool   use_fwd;
     rssringoccs_Bool   use_norm;
     rssringoccs_Bool   verbose;
-    rssringoccs_Bool   write_file;
     double             ecc;
     double             input_res;
     double             peri;

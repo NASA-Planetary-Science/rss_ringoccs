@@ -270,7 +270,6 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
         "bfac",
         "sigma",
         "psitype",
-        "write_file",
         "res_factor",
         "ecc",
         "peri",
@@ -327,10 +326,6 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
      *  PDS results. No justification is known to me.                         */
     self->res_factor = 0.75;
 
-    /*  The write files option allows the user to export the end result to a  *
-     *  CSV. Default is set to false.                                         */
-    self->write_file = rssringoccs_False;
-
     /*  The default geometry assumes the rings are circular, so we set both   *
      *  the eccentricity and the periapse to zero.                            */
     self->ecc = 0.0;
@@ -352,15 +347,14 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
      *  symbold means everything after is optional. s is a string, p is a     *
      *  Boolean (p for "predicate"). b is an integer, and the colon : denotes *
      *  that the input list has ended.                                        */
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|Od$OsppppdspdddO:", kwlist,
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|Od$OsppppdsdddO:", kwlist,
                                      &DLPInst,          &self->input_res,
                                      &rngreq,           &self->wtype,
                                      &self->use_fwd,    &self->use_norm,
                                      &self->verbose,    &self->bfac,
                                      &self->sigma,      &self->psitype,
-                                     &self->write_file, &self->res_factor,
-                                     &self->ecc,        &self->peri,
-                                     &perturb))
+                                     &self->res_factor, &self->ecc,
+                                     &self->peri,       &perturb))
     {
         PyErr_Format(
             PyExc_TypeError,
@@ -379,7 +373,6 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
             "\r\tbfac      \tUse b-factor in window width (bool).\n"
             "\r\tsigma     \tThe Allen deviation (float).\n"
             "\r\tpsitype   \tRequested Frensel kernel approximation (str).\n"
-            "\r\twrite_file\tWrite output to file (bool).\n"
             "\r\tres_factor\tScaling factor for resolution (float).\n"
             "\r\tecc       \tEccentricity of rings (bool).\n"
             "\r\tperi      \tPeriapse of rings (bool).\n"

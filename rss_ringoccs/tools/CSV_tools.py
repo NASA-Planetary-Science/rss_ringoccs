@@ -2,7 +2,6 @@
     :Purpose:
             Provide tools for reading in .TAB and .CSV files and converting
             the data into a usable instance of the DLP class.
-
     :Dependencies:
         #. pandas
         #. numpy
@@ -16,7 +15,6 @@ from . import error_check
 def get_geo(geo, verbose=True, use_deprecate=False):
     """
     To extract a pandas DataFrame from a given GEO.TAB or GEO.CSV file.
-
     Arguments
         :geo (*str*):
             A string containing the location of
@@ -43,7 +41,6 @@ def get_geo(geo, verbose=True, use_deprecate=False):
             |   vy_kms_vals
             |   vz_kms_vals
             |   obs_spacecract_lat_deg_vals
-
     Keywords
         :verbose (*bool*):
             A Boolean for printing out auxiliary
@@ -711,7 +708,7 @@ class ExtractCSVData(object):
 
 
 class GetUranusData(object):
-    def __init__(self, geodata, dlpdata, tau=None, verbose=False):
+    def __init__(self, geodata, dlpdata, tau=None, verbose=False, occ="E"):
         fname = "tools.CSV_tools.ExtractCSVData"
         error_check.check_type(geodata, str, "geo", fname)
         error_check.check_type(dlpdata, str, "dlp", fname)
@@ -943,6 +940,17 @@ class GetUranusData(object):
             }
         self.history = write_history_dict(input_vars, input_kwds, __file__)
 
+        self.rev_info = {
+            "rsr_file": 'UNK',
+            "band": '"X"',
+            "year": '1986',
+            "doy": '25',
+            "dsn": 'DSS-43',
+            "occ_dir": '"BOTH"',
+            "planetary_occ_flag": '"None"',
+            "rev_num": '000',
+            "prof_dir": '"%s"e' % occ
+        }
+
         if verbose:
             printf("Data Extraction Complete.")
-

@@ -573,7 +573,7 @@ class ExtractCSVData(object):
 
         drdt = dr/dt
 
-        if (np.min(drdt) < 0.0) and (np.max (drdt) > 0.0):
+        if (np.min(drdt) < 0.0) and (np.max(drdt) > 0.0):
            raise ValueError(
                 """
                     \r\tError Encountered: rss_ringoccs
@@ -598,6 +598,9 @@ class ExtractCSVData(object):
             # The rev is ingress, so flip GEO variables.
             self.rho_dot_kms_vals = np.abs(self.rho_dot_kms_vals[::-1])
             self.D_km_vals = self.D_km_vals[::-1]
+            rx_geo = rx_geo[::-1]
+            ry_geo = ry_geo[::-1]
+            rz_geo = rz_geo[::-1]
             geo_rho = geo_rho[::-1]
         elif (drdt > 0.0).all():
             pass

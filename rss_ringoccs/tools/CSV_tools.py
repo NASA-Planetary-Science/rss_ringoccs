@@ -602,6 +602,7 @@ class ExtractCSVData(object):
             ry_geo = ry_geo[::-1]
             rz_geo = rz_geo[::-1]
             geo_rho = geo_rho[::-1]
+            self.f_sky_hz_vals = self.f_sky_hz_vals[::-1]
         elif (drdt > 0.0).all():
             pass
         else:

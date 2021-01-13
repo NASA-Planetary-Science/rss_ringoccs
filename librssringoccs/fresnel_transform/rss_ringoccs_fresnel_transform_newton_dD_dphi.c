@@ -48,12 +48,12 @@ Fresnel_Transform_Newton_dD_dphi_Double(rssringoccs_TAUObj *tau,
     {
         /*  Calculate the stationary value of psi with respect to phi.        */
         phi = Newton_Raphson_Fresnel_Psi_dD_dphi(
-            tau->k_vals[center],
+            tau->k_vals[offset],
             tau->rho_km_vals[center],
             tau->rho_km_vals[offset],
             tau->phi_rad_vals[offset],
             tau->phi_rad_vals[offset],
-            tau->B_rad_vals[center],
+            tau->B_rad_vals[offset],
             tau->EPS,
             tau->toler,
             tau->rx_km_vals[center],
@@ -70,12 +70,12 @@ Fresnel_Transform_Newton_dD_dphi_Double(rssringoccs_TAUObj *tau,
 
         /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
         psi = rssringoccs_Double_Fresnel_Psi(
-            tau->k_vals[center],
+            tau->k_vals[offset],
             tau->rho_km_vals[center],
             tau->rho_km_vals[offset],
             phi,
             tau->phi_rad_vals[offset],
-            tau->B_rad_vals[center],
+            tau->B_rad_vals[offset],
             D
         );
 

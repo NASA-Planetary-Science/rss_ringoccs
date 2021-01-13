@@ -17,13 +17,12 @@ double Newton_Raphson_Fresnel_Psi_dD_dphi(double k, double r, double r0,
     dx = x-rx;
     dy = y-ry;
     D = sqrt(dx*dx + dy*dy + rz*rz);
-    dphi  = rssringoccs_Double_Fresnel_dPsi_dPhi(k, r, r0, phi, phi0, B, D);
+    dphi = rssringoccs_Double_Fresnel_dPsi_dPhi_D(
+        k, r, r0, phi, phi0, B, rx, ry, rz
+    );
 
     while(fabs(dphi) > EPS)
     {
-        dphi  = rssringoccs_Double_Fresnel_dPsi_dPhi_D(
-            k, r, r0, phi, phi0, B, rx, ry, rz
-        );
         phi  -= dphi/rssringoccs_Double_Fresnel_d2Psi_dPhi2(k, r, r0, phi,
                                                             phi0, B, D);
         ++i;
@@ -35,6 +34,9 @@ double Newton_Raphson_Fresnel_Psi_dD_dphi(double k, double r, double r0,
         dx = x-rx;
         dy = y-ry;
         D = sqrt(dx*dx + dy*dy + rz*rz);
+        dphi  = rssringoccs_Double_Fresnel_dPsi_dPhi_D(
+            k, r, r0, phi, phi0, B, rx, ry, rz
+        );
     }
     return phi;
 }

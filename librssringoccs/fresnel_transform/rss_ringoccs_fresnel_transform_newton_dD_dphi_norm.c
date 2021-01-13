@@ -50,7 +50,7 @@ Fresnel_Transform_Newton_dD_dphi_Norm_Double(rssringoccs_TAUObj *tau,
     {
         /*  Calculate the stationary value of psi with respect to phi.        */
         phi = Newton_Raphson_Fresnel_Psi_dD_dphi(
-            tau->k_vals[center]*tau->D_km_vals[center],
+            tau->k_vals[center],
             tau->rho_km_vals[center],
             tau->rho_km_vals[offset],
             tau->phi_rad_vals[offset],

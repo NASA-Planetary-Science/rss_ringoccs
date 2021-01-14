@@ -35,16 +35,18 @@ class calc_freq_offset(object):
         :f_offset (*np.ndarray*): Frequency offset, or frequency at max power
 
     """
-    def __init__(self,rsr_inst,spm_min,spm_max,dt_freq=2.):
+    def __init__(self, rsr_inst, spm_min, spm_max, dt_freq=2.):
 
         # Get raw SPM and raw I & Q from RSR instance
         self.spm_vals = rsr_inst.spm_vals
         self.IQ_m = rsr_inst.IQ_m
+
         # raw SPM sampling rate in seconds
         self.dt = self.spm_vals[1]-self.spm_vals[0]
 
         # set frequency sampling as attribute
         self.dt_freq = dt_freq
+
         # set lower and upper limits to sampling
         self.spm_min = spm_min
         self.spm_max = spm_max
@@ -64,6 +66,7 @@ class calc_freq_offset(object):
         # storage lists -- later converted to arrays and stored as attributes
         spms = []
         freqs = []
+
         # iteratively compute peak frequency
         for spm_mid in np.arange(self.spm_min,self.spm_max+delta_t_cent,
                 delta_t_cent):
@@ -81,7 +84,7 @@ class calc_freq_offset(object):
         self.f_spm = np.array(spms)
         self.f_offset = np.array(freqs)
 
-    def __find_peak_freq(self,time,IQ,df=0.001,hwid=0.2):
+    def __find_peak_freq(self, time, IQ, df=0.001, hwid=0.2):
         """
         Computes continuous FFT, finds frequency at max power
 
@@ -98,20 +101,26 @@ class calc_freq_offset(object):
 
         # Get FFT frequencies
         f = np.fft.fftfreq(IQ.size,d=self.dt)
+
         # Compute FFT
         IQ_fft = np.fft.fft(IQ)
+
         # Compute power
         power = (np.absolute(IQ_fft) ** 2) / (float(len(IQ)) ** 2)
+
         # Find frequency of max power
         f_max = f[np.argmax(power)]
 
         ### refine with continuous FT near first peak
         # frequencies within hwid Hz of peak
-        freq = np.arange(f_max-hwid,f_max+hwid+df,df)
+        freq = np.arange(f_max - hwid, f_max + hwid + df, df)
+
         # get continuous FT within hwid Hz of peak
         IQ_fft = np.array([np.sum(IQ*np.exp(-2j*np.pi*time*f)) for f in freq])
+
         # Compute power
         power = (np.absolute(IQ_fft) ** 2) / (float(len(IQ)) ** 2)
+
         # Find frequency of max power
         #if abs(f_max - freq[np.argmax(power)]) < hwid:
         f_max = freq[np.argmax(power)]

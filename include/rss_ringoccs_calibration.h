@@ -3,6 +3,7 @@
 #define __RSS_RINGOCCS_CALIBRATION_H__
 
 #include <rss_ringoccs/include/rss_ringoccs_bool.h>
+#include <rss_ringoccs/include/rss_ringoccs_complex.h>
 
 /*  Structure that contains all of the necessary data.                        */
 typedef struct rssringoccs_DLPObj {
@@ -28,5 +29,32 @@ typedef struct rssringoccs_DLPObj {
     rssringoccs_Bool error_occurred;
     char *error_message;
 } rssringoccs_DLPObj;
+
+typedef struct rssringoccs_CalcFreqOffsetObj {
+    /*  Observed event time at full sampling.                                 */
+    double *t_oet_spm_vals;
+
+    /*  Uncorrected real and imaginary components of signal.                  */
+    rssringoccs_ComplexDouble *IQ_m;
+
+    /*  Raw time sampling from spm_vals.                                      */
+    double dt;
+
+    /*  Half the width of the FFT window.                                     */
+    double dt_freq;
+
+    /*  Minimum time for sampling.                                            */
+    double t_oet_spm_min;
+
+    /*  Maximum time for sampling.                                            */
+    double t_oet_spm_max;
+
+    /*  Observed event time for frequency.                                    */
+    double *f_oet_spm_vals;
+
+    /*  Frequency offset, or frequency at max power.                          */
+    double *f_offset_hz_vals;
+} rssringoccs_CalcFreqOffsetObj;
+/*  End of rssringoccs_CalcFreqOffsetObj definition.                          */
 
 #endif

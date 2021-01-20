@@ -61,7 +61,7 @@ void draw_pic(double *arr, unsigned int arr_length)
     /*  Set the boundaries of the box.                                        */
     double y_min = 0.0;
     double y_max = 0.5*arr_length;
-    double pixel_width = 1.0;
+    double pixel_width = 4.0;
 
     /*  Variables for coloring the current pixel.                             */
     unsigned char black = 0U;

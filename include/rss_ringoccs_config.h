@@ -46,6 +46,8 @@
  *  By default we do not assume C99 compliance.                               */
 #define __RSS_RINGOCCS_USING_C99_MATH_H__ 0
 
+#define __RSS_RINGOCCS_USE_LOG_ALGORITHM__ 0
+
 /*  If long double precision (80, 96, or 128 bit format, 24 decimal accuracy) *
  *  is needed for calculations but your platform lacks sinl or is strictly    *
  *  C89 compliant, rss_ringoccs provides simple yet accurate code for         *

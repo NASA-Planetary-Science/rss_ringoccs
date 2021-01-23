@@ -5,14 +5,55 @@
 
 #if __RSS_RINGOCCS_USE_LOG_ALGORITHM__ != 0
 
-static double __log_coeffs[6] = {
-    2.000000000000000,
-    0.6666666666666667,
-    0.4000000000000000,
-    0.2857142857142857,
-    0.2222222222222222,
-    0.1818181818181818
+static float __log_coeffs_f[6] = {
+    2.000000000F,
+    0.666666667F,
+    0.400000000F,
+    0.285714285F,
+    0.222222222F,
+    0.181818181F
 };
+
+static double __log_coeffs[11] = {
+    2.0000000000000000,
+    0.66666666666666667,
+    0.40000000000000000,
+    0.28571428571428571,
+    0.22222222222222222,
+    0.18181818181818182,
+    0.15384615384615385,
+    0.13333333333333333,
+    0.11764705882352941,
+    0.10526315789473684,
+    0.095238095238095238
+};
+
+float rssringoccs_Float_Log(float x)
+{
+	rssringoccs_IEE754_Word32 w, frac;
+	unsigned int low, high;
+	float exponent, poly, A, A_sq;
+	float out;
+
+	if (x < 0.0F)
+		return rssringoccs_NaN_F;
+	else if (x == 0.0F)
+		return -rssringoccs_Infinity_F;
+	else
+		w.real = x;
+
+	low  = rssringoccs_Get_Low_Word32(w);
+	high = rssringoccs_Get_High_Word32(w);
+
+	exponent = (float)high - 127.0;
+	frac.integer = 0x3F800000 + low;
+    A = (frac.real-1.0)/(frac.real+1);
+    A_sq = A*A;
+    poly = rssringoccs_Real_Poly_Float_Coeffs(__log_coeffs_f, 5U, A_sq);
+
+	out = rssringoccs_Natural_Log_of_2_F*exponent + A*poly;
+	return out;
+}
 
 double rssringoccs_Double_Log(double x)
 {
@@ -24,7 +65,7 @@ double rssringoccs_Double_Log(double x)
 	if (x < 0.0)
 		return rssringoccs_NaN;
 	else if (x == 0.0)
-		return -HUGE_VAL;
+		return -rssringoccs_Infinity;
 	else
 		w.real = x;
 
@@ -35,15 +76,10 @@ double rssringoccs_Double_Log(double x)
 	frac.integer = (0x3FFUL << 52) + low;
     A = (frac.real-1.0)/(frac.real+1);
     A_sq = A*A;
-    poly = rssringoccs_Real_Poly_Double_Coeffs(__log_coeffs, 5U, A_sq);
+    poly = rssringoccs_Real_Poly_Double_Coeffs(__log_coeffs, 10U, A_sq);
 
 	out = rssringoccs_Natural_Log_of_2*exponent + A*poly;
 	return out;
-}
-
-float rssringoccs_Float_Log(float x)
-{
-    return (float)rssringoccs_Double_Log((float) x);
 }
 
 long double rssringoccs_LDouble_Log(long double x)

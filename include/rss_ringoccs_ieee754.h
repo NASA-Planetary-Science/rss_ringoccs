@@ -51,11 +51,20 @@
 #ifndef __RSS_RINGOCCS_IEEE754_H__
 #define __RSS_RINGOCCS_IEEE754_H__
 
+typedef union word32 {
+	float real;
+	unsigned int integer;
+	unsigned char bits[4];
+} rssringoccs_IEE754_Word32;
+
 typedef union word64 {
 	double real;
 	unsigned long integer;
 	unsigned char bits[8];
 } rssringoccs_IEE754_Word64;
+
+unsigned int rssringoccs_Get_High_Word32(rssringoccs_IEE754_Word32 x);
+unsigned int rssringoccs_Get_Low_Word32(rssringoccs_IEE754_Word32 x);
 
 unsigned long rssringoccs_Get_High_Word64(rssringoccs_IEE754_Word64 x);
 unsigned long rssringoccs_Get_Low_Word64(rssringoccs_IEE754_Word64 x);

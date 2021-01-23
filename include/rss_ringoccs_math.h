@@ -162,6 +162,7 @@
 #define rssringoccs_Sqrt_Two_F              1.414213562F
 #define rssringoccs_Rcpr_Euler_E_F          0.367879441F
 #define rssringoccs_Euler_E_F               2.718281828F
+#define rssringoccs_Natural_Log_of_2_F      0.693147181F
 #define rssringoccs_Natural_Log_Of_10_F     2.302585093F
 
 /*  Double precision constants.                                               */
@@ -179,6 +180,7 @@
 #define rssringoccs_Sqrt_Two                1.41421356237309504
 #define rssringoccs_Rcpr_Euler_E            0.36787944117144232
 #define rssringoccs_Euler_E                 2.71828182845904523
+#define rssringoccs_Natural_Log_of_2        0.69314718055994531
 #define rssringoccs_Natural_Log_Of_10       2.30258509299404568
 
 /*  Long double precision constants.                                          */
@@ -196,6 +198,7 @@
 #define rssringoccs_Sqrt_Two_L              1.4142135623730950488016890L
 #define rssringoccs_Rcpr_Euler_E_L          0.3678794411714423215955238L
 #define rssringoccs_Euler_E_L               2.7182818284590452353602875L
+#define rssringoccs_Natural_Log_of_2_L      0.6931471805599453094172321L
 #define rssringoccs_Natural_Log_Of_10_L     2.3025850929940456840179910L
 
 /*  Degrees to radians conversion, and vice-versa.                            */

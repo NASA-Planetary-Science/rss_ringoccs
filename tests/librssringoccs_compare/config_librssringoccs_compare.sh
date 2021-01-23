@@ -7,7 +7,7 @@ rm -f *.so
 rm -f *.o
 
 echo "Compiling rss_ringoccs..."
-CompilerArgs1="-std=c99 -pedantic -pedantic-errors -Wall -Wextra"
+CompilerArgs1="-std=c99 -pedantic -pedantic-errors -Wall -Wextra -Wdouble-promotion"
 CompilerArgs2="-Wpedantic -Wmisleading-indentation -Wmissing-field-initializers"
 CompilerArgs3="-Wmissing-prototypes -Wold-style-definition -Winit-self"
 CompilerArgs4="-Wmissing-declarations -Wstrict-prototypes -I./ -O3 -c"
@@ -22,7 +22,7 @@ echo -e "\t\t$CompilerArgs4"
 echo -e "\n\tCompiling Test Functions:"
 for filename in ./*.c; do
     echo -e "\t\tCompiling: $filename"
-    $CC -Wconversion -Wdouble-promotion $CompilerArgs $filename
+    $CC $CompilerArgs $filename
 done
 
 echo -e "\nBuilding Shared Object (.so file)"

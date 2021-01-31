@@ -51,12 +51,18 @@
 #ifndef __RSS_RINGOCCS_IEEE754_H__
 #define __RSS_RINGOCCS_IEEE754_H__
 
+/*  Data type for a 32-bit floating point number. This is assumed to          *
+ *  correspond to the float data type. Note that char is assumed to be 8 bits.*
+ *  Also, an unsigned int is assumed to be 32-bit.                            */
 typedef union word32 {
 	float real;
 	unsigned int integer;
 	unsigned char bits[4];
 } rssringoccs_IEE754_Word32;
 
+/*  Data type for a 64-bit floating point number. This is assumed to          *
+ *  correspond to the double data type. Note that char is assumed to be 8     *
+ *  bits. Also, an unsigned long is assumed to be 32-bit.                     */
 typedef union word64 {
 	double real;
 	unsigned long integer;
@@ -70,3 +76,4 @@ unsigned long rssringoccs_Get_High_Word64(rssringoccs_IEE754_Word64 x);
 unsigned long rssringoccs_Get_Low_Word64(rssringoccs_IEE754_Word64 x);
 
 #endif
+/*  End of #ifndef __RSS_RINGOCCS_IEEE754_H__.                                */

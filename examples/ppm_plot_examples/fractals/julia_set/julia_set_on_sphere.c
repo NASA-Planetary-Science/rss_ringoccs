@@ -102,7 +102,7 @@ int main(void)
 
     /*  Normalize the camera vector and set this to u. First check that the   *
      *  user didn't provide the zero vector since this will cause an error.   */
-    norm = rssringoccs_Euclidean_Norm_3D(camera_pos);
+    norm = rssringoccs_ThreeVector_Euclidean_Norm(camera_pos);
 
     if (norm == 0.0)
     {
@@ -114,7 +114,7 @@ int main(void)
         exit(0);
     }
     else
-        u = rssringoccs_Normalize_ThreeVector(camera_pos);
+        u = rssringoccs_ThreeVector_Normalize(camera_pos);
 
     /* Open and name the file and give it write permission.                   */
     fp = fopen("julia_set_on_sphere.ppm", "w");

@@ -20,15 +20,15 @@
  *  Date:       December 31, 2020                                             *
  ******************************************************************************/
 
-#include <rss_ringoccs/include/rss_ringoccs_bool.h>
-#include <rss_ringoccs/include/rss_ringoccs_string.h>
+#include <libtmpl/include/tmpl_string.h>
+#include <libtmpl/include/tmpl_bool.h>
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
 rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
-                                        rssringoccs_Bool use_deprecated)
+                                        tmpl_Bool use_deprecated)
 {
     rssringoccs_GeoCSV *geo;
     FILE *fp;
@@ -79,8 +79,8 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
     /*  If fopen returned NULL, the file likely does not exist. Return error. */
     if (fp == NULL)
     {
-        geo->error_occurred = rssringoccs_True;
-        geo->error_message = rssringoccs_strdup(
+        geo->error_occurred = tmpl_True;
+        geo->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_Get_Geo\n\n"
             "fopen returned NULL. Failed to open file for reading.\n"
@@ -114,8 +114,8 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
     /*  If use_deprecated was set to true, column_count must be 18. Check.    */
     if ((column_count != 18) && (use_deprecated))
     {
-        geo->error_occurred = rssringoccs_True;
-        geo->error_message = rssringoccs_strdup(
+        geo->error_occurred = tmpl_True;
+        geo->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_Get_Geo\n\n"
             "use_deprecated is set to true but the input CSV does not have\n"
@@ -127,8 +127,8 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
     /*  And if use_deprecated is false, we need 19 column. Check this.        */
     else if ((column_count != 19) && (!use_deprecated))
     {
-        geo->error_occurred = rssringoccs_True;
-        geo->error_message = rssringoccs_strdup(
+        geo->error_occurred = tmpl_True;
+        geo->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_Get_Geo\n\n"
             "use_deprecated is set to false but the input CSV does not have\n"
@@ -141,8 +141,8 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
     geo->t_oet_spm_vals = malloc(sizeof(*geo->t_oet_spm_vals) * line_count);
     if (geo->t_oet_spm_vals == NULL)
     {
-        geo->error_occurred = rssringoccs_True;
-        geo->error_message = rssringoccs_strdup(
+        geo->error_occurred = tmpl_True;
+        geo->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_Get_Geo\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -158,8 +158,8 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
     geo->t_ret_spm_vals = malloc(sizeof(*geo->t_ret_spm_vals) * line_count);
     if (geo->t_ret_spm_vals == NULL)
     {
-        geo->error_occurred = rssringoccs_True;
-        geo->error_message = rssringoccs_strdup(
+        geo->error_occurred = tmpl_True;
+        geo->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_Get_Geo\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -175,8 +175,8 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
     geo->t_set_spm_vals = malloc(sizeof(*geo->t_set_spm_vals) * line_count);
     if (geo->t_set_spm_vals == NULL)
     {
-        geo->error_occurred = rssringoccs_True;
-        geo->error_message = rssringoccs_strdup(
+        geo->error_occurred = tmpl_True;
+        geo->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_Get_Geo\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -192,8 +192,8 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
     geo->rho_km_vals = malloc(sizeof(*geo->rho_km_vals) * line_count);
     if (geo->rho_km_vals == NULL)
     {
-        geo->error_occurred = rssringoccs_True;
-        geo->error_message = rssringoccs_strdup(
+        geo->error_occurred = tmpl_True;
+        geo->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_Get_Geo\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -209,8 +209,8 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
     geo->phi_rl_deg_vals = malloc(sizeof(*geo->phi_rl_deg_vals) * line_count);
     if (geo->phi_rl_deg_vals == NULL)
     {
-        geo->error_occurred = rssringoccs_True;
-        geo->error_message = rssringoccs_strdup(
+        geo->error_occurred = tmpl_True;
+        geo->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_Get_Geo\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -226,8 +226,8 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
     geo->phi_ora_deg_vals = malloc(sizeof(*geo->phi_ora_deg_vals) * line_count);
     if (geo->phi_ora_deg_vals == NULL)
     {
-        geo->error_occurred = rssringoccs_True;
-        geo->error_message = rssringoccs_strdup(
+        geo->error_occurred = tmpl_True;
+        geo->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_Get_Geo\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -243,8 +243,8 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
     geo->B_deg_vals = malloc(sizeof(*geo->B_deg_vals) * line_count);
     if (geo->B_deg_vals == NULL)
     {
-        geo->error_occurred = rssringoccs_True;
-        geo->error_message = rssringoccs_strdup(
+        geo->error_occurred = tmpl_True;
+        geo->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_Get_Geo\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -260,8 +260,8 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
     geo->D_km_vals = malloc(sizeof(*geo->D_km_vals) * line_count);
     if (geo->D_km_vals == NULL)
     {
-        geo->error_occurred = rssringoccs_True;
-        geo->error_message = rssringoccs_strdup(
+        geo->error_occurred = tmpl_True;
+        geo->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_Get_Geo\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -277,8 +277,8 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
     geo->rho_dot_kms_vals = malloc(sizeof(*geo->rho_dot_kms_vals) * line_count);
     if (geo->rho_dot_kms_vals == NULL)
     {
-        geo->error_occurred = rssringoccs_True;
-        geo->error_message = rssringoccs_strdup(
+        geo->error_occurred = tmpl_True;
+        geo->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_Get_Geo\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -295,8 +295,8 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
         malloc(sizeof(*geo->phi_rl_dot_kms_vals)*line_count);
     if (geo->phi_rl_dot_kms_vals == NULL)
     {
-        geo->error_occurred = rssringoccs_True;
-        geo->error_message = rssringoccs_strdup(
+        geo->error_occurred = tmpl_True;
+        geo->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_Get_Geo\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -312,8 +312,8 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
     geo->F_km_vals = malloc(sizeof(*geo->F_km_vals) * line_count);
     if (geo->F_km_vals == NULL)
     {
-        geo->error_occurred = rssringoccs_True;
-        geo->error_message = rssringoccs_strdup(
+        geo->error_occurred = tmpl_True;
+        geo->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_Get_Geo\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -329,8 +329,8 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
     geo->R_imp_km_vals = malloc(sizeof(*geo->R_imp_km_vals) * line_count);
     if (geo->R_imp_km_vals == NULL)
     {
-        geo->error_occurred = rssringoccs_True;
-        geo->error_message = rssringoccs_strdup(
+        geo->error_occurred = tmpl_True;
+        geo->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_Get_Geo\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -346,8 +346,8 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
     geo->rx_km_vals = malloc(sizeof(*geo->rx_km_vals) * line_count);
     if (geo->rx_km_vals == NULL)
     {
-        geo->error_occurred = rssringoccs_True;
-        geo->error_message = rssringoccs_strdup(
+        geo->error_occurred = tmpl_True;
+        geo->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_Get_Geo\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -363,8 +363,8 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
     geo->ry_km_vals = malloc(sizeof(*geo->ry_km_vals) * line_count);
     if (geo->ry_km_vals == NULL)
     {
-        geo->error_occurred = rssringoccs_True;
-        geo->error_message = rssringoccs_strdup(
+        geo->error_occurred = tmpl_True;
+        geo->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_Get_Geo\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -380,8 +380,8 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
     geo->rz_km_vals = malloc(sizeof(*geo->rz_km_vals) * line_count);
     if (geo->rz_km_vals == NULL)
     {
-        geo->error_occurred = rssringoccs_True;
-        geo->error_message = rssringoccs_strdup(
+        geo->error_occurred = tmpl_True;
+        geo->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_Get_Geo\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -397,8 +397,8 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
     geo->vx_kms_vals = malloc(sizeof(*geo->vx_kms_vals) * line_count);
     if (geo->vx_kms_vals == NULL)
     {
-        geo->error_occurred = rssringoccs_True;
-        geo->error_message = rssringoccs_strdup(
+        geo->error_occurred = tmpl_True;
+        geo->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_Get_Geo\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -414,8 +414,8 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
     geo->vy_kms_vals = malloc(sizeof(*geo->vy_kms_vals) * line_count);
     if (geo->vy_kms_vals == NULL)
     {
-        geo->error_occurred = rssringoccs_True;
-        geo->error_message = rssringoccs_strdup(
+        geo->error_occurred = tmpl_True;
+        geo->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_Get_Geo\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -431,8 +431,8 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
     geo->vz_kms_vals = malloc(sizeof(*geo->vz_kms_vals) * line_count);
     if (geo->vz_kms_vals == NULL)
     {
-        geo->error_occurred = rssringoccs_True;
-        geo->error_message = rssringoccs_strdup(
+        geo->error_occurred = tmpl_True;
+        geo->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_Get_Geo\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -455,8 +455,8 @@ rssringoccs_GeoCSV *rssringoccs_Get_Geo(const char *filename,
             malloc(sizeof(*geo->obs_spacecract_lat_deg_vals) * line_count);
         if (geo->obs_spacecract_lat_deg_vals == NULL)
         {
-            geo->error_occurred = rssringoccs_True;
-            geo->error_message = rssringoccs_strdup(
+            geo->error_occurred = tmpl_True;
+            geo->error_message = tmpl_strdup(
                 "Error Encountered: rss_ringoccs\n"
                 "\trssringoccs_Get_Geo\n\n"
                 "Malloc returned NULL. Failed to allocate memory for.\n"

@@ -20,7 +20,8 @@
  *  Date:       December 31, 2020                                             *
  ******************************************************************************/
 
-#include <rss_ringoccs/include/rss_ringoccs_string.h>
+#include <libtmpl/include/tmpl_string.h>
+#include <libtmpl/include/tmpl_bool.h>
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -62,8 +63,8 @@ rssringoccs_CalCSV *rssringoccs_Get_Cal(const char *filename)
     /*  If fopen returned NULL, the file likely does not exist. Return error. */
     if (fp == NULL)
     {
-        cal->error_occurred = rssringoccs_True;
-        cal->error_message = rssringoccs_strdup(
+        cal->error_occurred = tmpl_True;
+        cal->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_Get_Cal\n\n"
             "fopen returned NULL. Failed to open file for reading.\n"
@@ -97,8 +98,8 @@ rssringoccs_CalCSV *rssringoccs_Get_Cal(const char *filename)
     /*  There should be 4 columns. Check this.                                */
     if (column_count != 4)
     {
-        cal->error_occurred = rssringoccs_True;
-        cal->error_message = rssringoccs_strdup(
+        cal->error_occurred = tmpl_True;
+        cal->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\ttrssringoccs_Get_Cal\n\n"
             "Input CSV does not have 4 columns. Aborting computation.\n"
@@ -110,8 +111,8 @@ rssringoccs_CalCSV *rssringoccs_Get_Cal(const char *filename)
     cal->t_oet_spm_vals = malloc(sizeof(*cal->t_oet_spm_vals) * line_count);
     if (cal->t_oet_spm_vals == NULL)
     {
-        cal->error_occurred = rssringoccs_True;
-        cal->error_message = rssringoccs_strdup(
+        cal->error_occurred = tmpl_True;
+        cal->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\ttrssringoccs_Get_Cal\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -127,8 +128,8 @@ rssringoccs_CalCSV *rssringoccs_Get_Cal(const char *filename)
     cal->f_sky_pred_vals = malloc(sizeof(*cal->f_sky_pred_vals) * line_count);
     if (cal->f_sky_pred_vals == NULL)
     {
-        cal->error_occurred = rssringoccs_True;
-        cal->error_message = rssringoccs_strdup(
+        cal->error_occurred = tmpl_True;
+        cal->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\ttrssringoccs_Get_Cal\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -145,8 +146,8 @@ rssringoccs_CalCSV *rssringoccs_Get_Cal(const char *filename)
         = malloc(sizeof(*cal->f_sky_resid_fit_vals) * line_count);
     if (cal->f_sky_resid_fit_vals == NULL)
     {
-        cal->error_occurred = rssringoccs_True;
-        cal->error_message = rssringoccs_strdup(
+        cal->error_occurred = tmpl_True;
+        cal->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\ttrssringoccs_Get_Cal\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -162,8 +163,8 @@ rssringoccs_CalCSV *rssringoccs_Get_Cal(const char *filename)
     cal->p_free_vals = malloc(sizeof(*cal->p_free_vals) * line_count);
     if (cal->p_free_vals == NULL)
     {
-        cal->error_occurred = rssringoccs_True;
-        cal->error_message = rssringoccs_strdup(
+        cal->error_occurred = tmpl_True;
+        cal->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\ttrssringoccs_Get_Cal\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"

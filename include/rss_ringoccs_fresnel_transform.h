@@ -3,7 +3,6 @@
 #define __RSS_RINGOCCS_FRESNEL_TRANFORM_H__
 
 /*  Various functions, complex variables, and more found here.                */
-#include <rss_ringoccs/include/rss_ringoccs_complex.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 
 extern void

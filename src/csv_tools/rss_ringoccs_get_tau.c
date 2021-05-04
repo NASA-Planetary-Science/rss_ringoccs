@@ -20,15 +20,15 @@
  *  Date:       December 31, 2020                                             *
  ******************************************************************************/
 
-#include <rss_ringoccs/include/rss_ringoccs_bool.h>
-#include <rss_ringoccs/include/rss_ringoccs_string.h>
+#include <libtmpl/include/tmpl_string.h>
+#include <libtmpl/include/tmpl_bool.h>
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
 rssringoccs_TauCSV *rssringoccs_Get_Tau(const char *filename,
-                                        rssringoccs_Bool use_deprecated)
+                                        tmpl_Bool use_deprecated)
 {
     rssringoccs_TauCSV *tau;
     FILE *fp;
@@ -73,8 +73,8 @@ rssringoccs_TauCSV *rssringoccs_Get_Tau(const char *filename,
     /*  If fopen returned NULL, the file likely does not exist. Return error. */
     if (fp == NULL)
     {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_Get_Tau\n\n"
             "fopen returned NULL. Failed to open file for reading.\n"
@@ -108,8 +108,8 @@ rssringoccs_TauCSV *rssringoccs_Get_Tau(const char *filename,
     /*  If use_deprecated was set to true, column_count must be 18. Check.    */
     if ((column_count != 12) && (use_deprecated))
     {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_Get_Tau\n\n"
             "use_deprecated is set to true but the input CSV does not have\n"
@@ -121,8 +121,8 @@ rssringoccs_TauCSV *rssringoccs_Get_Tau(const char *filename,
     /*  And if use_deprecated is false, we need 19 column. Check this.        */
     else if ((column_count != 13) && (!use_deprecated))
     {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\ttrssringoccs_Get_Tau\n\n"
             "use_deprecated is set to false but the input CSV does not have\n"
@@ -135,8 +135,8 @@ rssringoccs_TauCSV *rssringoccs_Get_Tau(const char *filename,
     tau->t_oet_spm_vals = malloc(sizeof(*tau->t_oet_spm_vals) * line_count);
     if (tau->t_oet_spm_vals == NULL)
     {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\ttrssringoccs_Get_Tau\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -152,8 +152,8 @@ rssringoccs_TauCSV *rssringoccs_Get_Tau(const char *filename,
     tau->t_ret_spm_vals = malloc(sizeof(*tau->t_ret_spm_vals) * line_count);
     if (tau->t_ret_spm_vals == NULL)
     {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\ttrssringoccs_Get_Tau\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -169,8 +169,8 @@ rssringoccs_TauCSV *rssringoccs_Get_Tau(const char *filename,
     tau->t_set_spm_vals = malloc(sizeof(*tau->t_set_spm_vals) * line_count);
     if (tau->t_set_spm_vals == NULL)
     {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\ttrssringoccs_Get_Tau\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -186,8 +186,8 @@ rssringoccs_TauCSV *rssringoccs_Get_Tau(const char *filename,
     tau->rho_km_vals = malloc(sizeof(*tau->rho_km_vals) * line_count);
     if (tau->rho_km_vals == NULL)
     {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\ttrssringoccs_Get_Tau\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -204,8 +204,8 @@ rssringoccs_TauCSV *rssringoccs_Get_Tau(const char *filename,
         = malloc(sizeof(*tau->rho_corr_pole_km_vals) * line_count);
     if (tau->rho_corr_pole_km_vals == NULL)
     {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\ttrssringoccs_Get_Tau\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -222,8 +222,8 @@ rssringoccs_TauCSV *rssringoccs_Get_Tau(const char *filename,
         = malloc(sizeof(*tau->rho_corr_timing_km_vals) * line_count);
     if (tau->rho_corr_timing_km_vals == NULL)
     {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\ttrssringoccs_Get_Tau\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -239,8 +239,8 @@ rssringoccs_TauCSV *rssringoccs_Get_Tau(const char *filename,
     tau->phi_rl_deg_vals = malloc(sizeof(*tau->phi_rl_deg_vals) * line_count);
     if (tau->phi_rl_deg_vals == NULL)
     {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\ttrssringoccs_Get_Tau\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -256,8 +256,8 @@ rssringoccs_TauCSV *rssringoccs_Get_Tau(const char *filename,
     tau->phi_ora_deg_vals = malloc(sizeof(*tau->phi_ora_deg_vals) * line_count);
     if (tau->phi_ora_deg_vals == NULL)
     {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\ttrssringoccs_Get_Tau\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -273,8 +273,8 @@ rssringoccs_TauCSV *rssringoccs_Get_Tau(const char *filename,
     tau->B_deg_vals = malloc(sizeof(*tau->B_deg_vals) * line_count);
     if (tau->B_deg_vals == NULL)
     {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\ttrssringoccs_Get_Tau\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -290,8 +290,8 @@ rssringoccs_TauCSV *rssringoccs_Get_Tau(const char *filename,
     tau->tau_vals = malloc(sizeof(*tau->tau_vals) * line_count);
     if (tau->tau_vals == NULL)
     {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\ttrssringoccs_Get_Tau\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -307,8 +307,8 @@ rssringoccs_TauCSV *rssringoccs_Get_Tau(const char *filename,
     tau->phase_deg_vals = malloc(sizeof(*tau->phase_deg_vals) * line_count);
     if (tau->phase_deg_vals == NULL)
     {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\ttrssringoccs_Get_Tau\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -325,8 +325,8 @@ rssringoccs_TauCSV *rssringoccs_Get_Tau(const char *filename,
         = malloc(sizeof(*tau->tau_threshold_vals) * line_count);
     if (tau->tau_threshold_vals == NULL)
     {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\ttrssringoccs_Get_Tau\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -349,8 +349,8 @@ rssringoccs_TauCSV *rssringoccs_Get_Tau(const char *filename,
             malloc(sizeof(*tau->power_vals) * line_count);
         if (tau->power_vals == NULL)
         {
-            tau->error_occurred = rssringoccs_True;
-            tau->error_message = rssringoccs_strdup(
+            tau->error_occurred = tmpl_True;
+            tau->error_message = tmpl_strdup(
                 "Error Encountered: rss_ringoccs\n"
                 "\trssringoccs_Get_Tau\n\n"
                 "Malloc returned NULL. Failed to allocate memory for.\n"

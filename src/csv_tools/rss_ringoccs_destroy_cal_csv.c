@@ -25,7 +25,12 @@
 
 void rssringoccs_Destroy_CalCSV(rssringoccs_CalCSV **cal)
 {
-    rssringoccs_CalCSV *cal_inst = *cal;
+    rssringoccs_CalCSV *cal_inst;
+
+    if (cal == NULL)
+        return;
+
+    cal_inst = *cal;
 
     if (cal_inst == NULL)
         return;
@@ -43,3 +48,4 @@ void rssringoccs_Destroy_CalCSV(rssringoccs_CalCSV **cal)
     return;
 }
 /*  End of rssringoccs_Destroy_CalCSV.                                        */
+

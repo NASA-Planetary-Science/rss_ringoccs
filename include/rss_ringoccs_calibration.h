@@ -2,8 +2,8 @@
 #ifndef __RSS_RINGOCCS_CALIBRATION_H__
 #define __RSS_RINGOCCS_CALIBRATION_H__
 
-#include <rss_ringoccs/include/rss_ringoccs_bool.h>
-#include <rss_ringoccs/include/rss_ringoccs_complex.h>
+#include <libtmpl/include/tmpl_bool.h>
+#include <libtmpl/include/tmpl_complex.h>
 
 /*  Structure that contains all of the necessary data.                        */
 typedef struct rssringoccs_DLPObj {
@@ -26,7 +26,7 @@ typedef struct rssringoccs_DLPObj {
     double *ry_km_vals;
     double *rz_km_vals;
     unsigned long arr_size;
-    rssringoccs_Bool error_occurred;
+    tmpl_Bool error_occurred;
     char *error_message;
 } rssringoccs_DLPObj;
 
@@ -35,7 +35,7 @@ typedef struct rssringoccs_CalcFreqOffsetObj {
     double *t_oet_spm_vals;
 
     /*  Uncorrected real and imaginary components of signal.                  */
-    rssringoccs_ComplexDouble *IQ_m;
+    tmpl_ComplexDouble *IQ_m;
 
     /*  Raw time sampling from spm_vals.                                      */
     double dt;

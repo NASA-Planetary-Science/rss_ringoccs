@@ -1,4 +1,4 @@
-#include <rss_ringoccs/include/rss_ringoccs_math.h>
+#include <libtmpl/include/tmpl_math.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_kernel.h>
 
 float
@@ -16,13 +16,13 @@ rssringoccs_Float_Fresnel_d2Psi_dPhi2(float k,   float r, float r0, float phi,
     rcpr_D_squared = rcpr_D * rcpr_D;
 
     /*  Precompute cosines and sines to save on computations.                 */
-    cos_B   = rssringoccs_Float_Cos(B);
+    cos_B   = tmpl_Float_Cos(B);
 
-    cos_phi = rssringoccs_Float_Cos(phi);
-    sin_phi = rssringoccs_Float_Sin(phi);
+    cos_phi = tmpl_Float_Cos(phi);
+    sin_phi = tmpl_Float_Sin(phi);
 
-    cos_phi0 = rssringoccs_Float_Cos(phi0);
-    sin_phi0 = rssringoccs_Float_Sin(phi0);
+    cos_phi0 = tmpl_Float_Cos(phi0);
+    sin_phi0 = tmpl_Float_Sin(phi0);
 
     /*  Since we've computed cos and sin of phi and phi0, cos and sin of      *
      *  phi-phi0 can be computed without the need to call cos and sin again.  */
@@ -38,7 +38,7 @@ rssringoccs_Float_Fresnel_d2Psi_dPhi2(float k,   float r, float r0, float phi,
     /*  Compute xi variable (MTR86 Equation 4b) and eta (Equation 4c).        */
     xi   = xi_factor * (r * cos_phi - r0 * cos_phi0);
     eta  = (r0*r0 + r*r)*rcpr_D_squared - eta_factor*cos_phi_phi0;
-    psi0 = rssringoccs_Float_Sqrt(1.0F + eta - 2.0F*xi);
+    psi0 = tmpl_Float_Sqrt(1.0F + eta - 2.0F*xi);
 
     /*  Compute derivatives.                                                  */
     dxi   = -xi_factor * (r * sin_phi);
@@ -70,13 +70,13 @@ rssringoccs_Double_Fresnel_d2Psi_dPhi2(double k, double r, double r0,
     rcpr_D_squared = rcpr_D * rcpr_D;
 
     /*  Precompute cosines and sines to save on computations.                 */
-    cos_B   = rssringoccs_Double_Cos(B);
+    cos_B   = tmpl_Double_Cos(B);
 
-    cos_phi = rssringoccs_Double_Cos(phi);
-    sin_phi = rssringoccs_Double_Sin(phi);
+    cos_phi = tmpl_Double_Cos(phi);
+    sin_phi = tmpl_Double_Sin(phi);
 
-    cos_phi0 = rssringoccs_Double_Cos(phi0);
-    sin_phi0 = rssringoccs_Double_Sin(phi0);
+    cos_phi0 = tmpl_Double_Cos(phi0);
+    sin_phi0 = tmpl_Double_Sin(phi0);
 
     /*  Since we've computed cos and sin of phi and phi0, cos and sin of      *
      *  phi-phi0 can be computed without the need to call cos and sin again.  */
@@ -92,7 +92,7 @@ rssringoccs_Double_Fresnel_d2Psi_dPhi2(double k, double r, double r0,
     /*  Compute xi variable (MTR86 Equation 4b) and eta (Equation 4c).        */
     xi   = xi_factor * (r * cos_phi - r0 * cos_phi0);
     eta  = (r0*r0 + r*r)*rcpr_D_squared - eta_factor*cos_phi_phi0;
-    psi0 = rssringoccs_Double_Sqrt(1.0 + eta - 2.0*xi);
+    psi0 = tmpl_Double_Sqrt(1.0 + eta - 2.0*xi);
 
     /*  Compute derivatives.                                                  */
     dxi   = -xi_factor * (r * sin_phi);
@@ -125,13 +125,13 @@ rssringoccs_LDouble_Fresnel_d2Psi_dPhi2(long double k,   long double r,
     rcpr_D_squared = rcpr_D * rcpr_D;
 
     /*  Precompute cosines and sines to save on computations.                 */
-    cos_B   = rssringoccs_LDouble_Cos(B);
+    cos_B   = tmpl_LDouble_Cos(B);
 
-    cos_phi = rssringoccs_LDouble_Cos(phi);
-    sin_phi = rssringoccs_LDouble_Sin(phi);
+    cos_phi = tmpl_LDouble_Cos(phi);
+    sin_phi = tmpl_LDouble_Sin(phi);
 
-    cos_phi0 = rssringoccs_LDouble_Cos(phi0);
-    sin_phi0 = rssringoccs_LDouble_Sin(phi0);
+    cos_phi0 = tmpl_LDouble_Cos(phi0);
+    sin_phi0 = tmpl_LDouble_Sin(phi0);
 
     /*  Since we've computed cos and sin of phi and phi0, cos and sin of      *
      *  phi-phi0 can be computed without the need to call cos and sin again.  */
@@ -147,7 +147,7 @@ rssringoccs_LDouble_Fresnel_d2Psi_dPhi2(long double k,   long double r,
     /*  Compute xi variable (MTR86 Equation 4b) and eta (Equation 4c).        */
     xi   = xi_factor * (r * cos_phi - r0 * cos_phi0);
     eta  = (r0*r0 + r*r)*rcpr_D_squared - eta_factor*cos_phi_phi0;
-    psi0 = rssringoccs_LDouble_Sqrt(1.0L + eta - 2.0L*xi);
+    psi0 = tmpl_LDouble_Sqrt(1.0L + eta - 2.0L*xi);
 
     /*  Compute derivatives.                                                  */
     dxi   = -xi_factor * (r * sin_phi);

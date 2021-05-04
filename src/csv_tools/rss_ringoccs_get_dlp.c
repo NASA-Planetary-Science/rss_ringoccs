@@ -20,15 +20,15 @@
  *  Date:       December 31, 2020                                             *
  ******************************************************************************/
 
-#include <rss_ringoccs/include/rss_ringoccs_bool.h>
-#include <rss_ringoccs/include/rss_ringoccs_string.h>
+#include <libtmpl/include/tmpl_string.h>
+#include <libtmpl/include/tmpl_bool.h>
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
 rssringoccs_DLPCSV *rssringoccs_Get_DLP(const char *filename,
-                                        rssringoccs_Bool use_deprecated)
+                                        tmpl_Bool use_deprecated)
 {
     rssringoccs_DLPCSV *dlp;
     FILE *fp;
@@ -73,8 +73,8 @@ rssringoccs_DLPCSV *rssringoccs_Get_DLP(const char *filename,
     /*  If fopen returned NULL, the file likely does not exist. Return error. */
     if (fp == NULL)
     {
-        dlp->error_occurred = rssringoccs_True;
-        dlp->error_message = rssringoccs_strdup(
+        dlp->error_occurred = tmpl_True;
+        dlp->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_Get_DLP\n\n"
             "fopen returned NULL. Failed to open file for reading.\n"
@@ -108,8 +108,8 @@ rssringoccs_DLPCSV *rssringoccs_Get_DLP(const char *filename,
     /*  If use_deprecated was set to true, column_count must be 18. Check.    */
     if ((column_count != 12) && (use_deprecated))
     {
-        dlp->error_occurred = rssringoccs_True;
-        dlp->error_message = rssringoccs_strdup(
+        dlp->error_occurred = tmpl_True;
+        dlp->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_Get_DLP\n\n"
             "use_deprecated is set to true but the input CSV does not have\n"
@@ -121,8 +121,8 @@ rssringoccs_DLPCSV *rssringoccs_Get_DLP(const char *filename,
     /*  And if use_deprecated is false, we need 19 column. Check this.        */
     else if ((column_count != 13) && (!use_deprecated))
     {
-        dlp->error_occurred = rssringoccs_True;
-        dlp->error_message = rssringoccs_strdup(
+        dlp->error_occurred = tmpl_True;
+        dlp->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\ttrssringoccs_Get_DLP\n\n"
             "use_deprecated is set to false but the input CSV does not have\n"
@@ -135,8 +135,8 @@ rssringoccs_DLPCSV *rssringoccs_Get_DLP(const char *filename,
     dlp->t_oet_spm_vals = malloc(sizeof(*dlp->t_oet_spm_vals) * line_count);
     if (dlp->t_oet_spm_vals == NULL)
     {
-        dlp->error_occurred = rssringoccs_True;
-        dlp->error_message = rssringoccs_strdup(
+        dlp->error_occurred = tmpl_True;
+        dlp->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\ttrssringoccs_Get_DLP\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -152,8 +152,8 @@ rssringoccs_DLPCSV *rssringoccs_Get_DLP(const char *filename,
     dlp->t_ret_spm_vals = malloc(sizeof(*dlp->t_ret_spm_vals) * line_count);
     if (dlp->t_ret_spm_vals == NULL)
     {
-        dlp->error_occurred = rssringoccs_True;
-        dlp->error_message = rssringoccs_strdup(
+        dlp->error_occurred = tmpl_True;
+        dlp->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\ttrssringoccs_Get_DLP\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -169,8 +169,8 @@ rssringoccs_DLPCSV *rssringoccs_Get_DLP(const char *filename,
     dlp->t_set_spm_vals = malloc(sizeof(*dlp->t_set_spm_vals) * line_count);
     if (dlp->t_set_spm_vals == NULL)
     {
-        dlp->error_occurred = rssringoccs_True;
-        dlp->error_message = rssringoccs_strdup(
+        dlp->error_occurred = tmpl_True;
+        dlp->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\ttrssringoccs_Get_DLP\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -186,8 +186,8 @@ rssringoccs_DLPCSV *rssringoccs_Get_DLP(const char *filename,
     dlp->rho_km_vals = malloc(sizeof(*dlp->rho_km_vals) * line_count);
     if (dlp->rho_km_vals == NULL)
     {
-        dlp->error_occurred = rssringoccs_True;
-        dlp->error_message = rssringoccs_strdup(
+        dlp->error_occurred = tmpl_True;
+        dlp->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\ttrssringoccs_Get_DLP\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -204,8 +204,8 @@ rssringoccs_DLPCSV *rssringoccs_Get_DLP(const char *filename,
         = malloc(sizeof(*dlp->rho_corr_pole_km_vals) * line_count);
     if (dlp->rho_corr_pole_km_vals == NULL)
     {
-        dlp->error_occurred = rssringoccs_True;
-        dlp->error_message = rssringoccs_strdup(
+        dlp->error_occurred = tmpl_True;
+        dlp->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\ttrssringoccs_Get_DLP\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -222,8 +222,8 @@ rssringoccs_DLPCSV *rssringoccs_Get_DLP(const char *filename,
         = malloc(sizeof(*dlp->rho_corr_timing_km_vals) * line_count);
     if (dlp->rho_corr_timing_km_vals == NULL)
     {
-        dlp->error_occurred = rssringoccs_True;
-        dlp->error_message = rssringoccs_strdup(
+        dlp->error_occurred = tmpl_True;
+        dlp->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\ttrssringoccs_Get_DLP\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -239,8 +239,8 @@ rssringoccs_DLPCSV *rssringoccs_Get_DLP(const char *filename,
     dlp->phi_rl_deg_vals = malloc(sizeof(*dlp->phi_rl_deg_vals) * line_count);
     if (dlp->phi_rl_deg_vals == NULL)
     {
-        dlp->error_occurred = rssringoccs_True;
-        dlp->error_message = rssringoccs_strdup(
+        dlp->error_occurred = tmpl_True;
+        dlp->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\ttrssringoccs_Get_DLP\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -256,8 +256,8 @@ rssringoccs_DLPCSV *rssringoccs_Get_DLP(const char *filename,
     dlp->phi_ora_deg_vals = malloc(sizeof(*dlp->phi_ora_deg_vals) * line_count);
     if (dlp->phi_ora_deg_vals == NULL)
     {
-        dlp->error_occurred = rssringoccs_True;
-        dlp->error_message = rssringoccs_strdup(
+        dlp->error_occurred = tmpl_True;
+        dlp->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\ttrssringoccs_Get_DLP\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -273,8 +273,8 @@ rssringoccs_DLPCSV *rssringoccs_Get_DLP(const char *filename,
     dlp->B_deg_vals = malloc(sizeof(*dlp->B_deg_vals) * line_count);
     if (dlp->B_deg_vals == NULL)
     {
-        dlp->error_occurred = rssringoccs_True;
-        dlp->error_message = rssringoccs_strdup(
+        dlp->error_occurred = tmpl_True;
+        dlp->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\ttrssringoccs_Get_DLP\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -290,8 +290,8 @@ rssringoccs_DLPCSV *rssringoccs_Get_DLP(const char *filename,
     dlp->raw_tau_vals = malloc(sizeof(*dlp->raw_tau_vals) * line_count);
     if (dlp->raw_tau_vals == NULL)
     {
-        dlp->error_occurred = rssringoccs_True;
-        dlp->error_message = rssringoccs_strdup(
+        dlp->error_occurred = tmpl_True;
+        dlp->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\ttrssringoccs_Get_DLP\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -307,8 +307,8 @@ rssringoccs_DLPCSV *rssringoccs_Get_DLP(const char *filename,
     dlp->phase_deg_vals = malloc(sizeof(*dlp->phase_deg_vals) * line_count);
     if (dlp->phase_deg_vals == NULL)
     {
-        dlp->error_occurred = rssringoccs_True;
-        dlp->error_message = rssringoccs_strdup(
+        dlp->error_occurred = tmpl_True;
+        dlp->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\ttrssringoccs_Get_DLP\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -325,8 +325,8 @@ rssringoccs_DLPCSV *rssringoccs_Get_DLP(const char *filename,
         = malloc(sizeof(*dlp->raw_tau_threshold_vals) * line_count);
     if (dlp->raw_tau_threshold_vals == NULL)
     {
-        dlp->error_occurred = rssringoccs_True;
-        dlp->error_message = rssringoccs_strdup(
+        dlp->error_occurred = tmpl_True;
+        dlp->error_message = tmpl_strdup(
             "Error Encountered: rss_ringoccs\n"
             "\ttrssringoccs_Get_DLP\n\n"
             "Malloc returned NULL. Failed to allocate memory for.\n"
@@ -349,8 +349,8 @@ rssringoccs_DLPCSV *rssringoccs_Get_DLP(const char *filename,
             malloc(sizeof(*dlp->p_norm_vals) * line_count);
         if (dlp->p_norm_vals == NULL)
         {
-            dlp->error_occurred = rssringoccs_True;
-            dlp->error_message = rssringoccs_strdup(
+            dlp->error_occurred = tmpl_True;
+            dlp->error_message = tmpl_strdup(
                 "Error Encountered: rss_ringoccs\n"
                 "\trssringoccs_Get_DLP\n\n"
                 "Malloc returned NULL. Failed to allocate memory for.\n"

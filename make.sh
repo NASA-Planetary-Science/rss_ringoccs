@@ -1,18 +1,16 @@
-
+#!/bin/bash
 
 CC=gcc
 
 echo -e "\nClearing older files..."
-rm -f *.so
-rm -f *.o
-rm -f monster.c
+rm -f *.so *.o
 
 echo "Compiling rss_ringoccs..."
 CompilerArgs1="-std=c89 -ansi -pedantic -pedantic-errors -Wall -Wextra"
 CompilerArgs2="-Wpedantic -Wmisleading-indentation -Wmissing-field-initializers"
 CompilerArgs3="-Wmissing-prototypes -Wold-style-definition -Winit-self"
-CompilerArgs4="-Wmissing-declarations -Wnull-dereference -Wwrite-strings"
-CompilerArgs5="-Wstrict-prototypes -I../../ -I./ -DNDEBUG -g -fPIC -O3 -c"
+CompilerArgs4="-Wmissing-declarations -Wnull-dereference -Wwrite-strings" #-Wconversion -Wdouble-promotion"
+CompilerArgs5="-Wstrict-prototypes -I../../ -I./ -DNDEBUG -g -fPIC -O3 -flto -c"
 CompilerArgs="$CompilerArgs1 $CompilerArgs2 $CompilerArgs3"
 CompilerArgs="$CompilerArgs $CompilerArgs4 $CompilerArgs5"
 
@@ -23,36 +21,16 @@ echo -e "\t\t$CompilerArgs3"
 echo -e "\t\t$CompilerArgs4"
 echo -e "\t\t$CompilerArgs5"
 
-touch monster.c
-
-echo "#include <stdio.h>" >> monster.c
-echo "#include <stdlib.h>" >> monster.c
-echo "#include <string.h>" >> monster.c
-echo "#include <math.h>" >> monster.c
-echo "#include <ctype.h>" >> monster.c
-echo "#include <float.h>" >> monster.c
-
-for filename in ../include/*.h; do
-    echo "#include \"$filename\"" >> monster.c
-done
-
 for dir in */; do
+    echo -e "\n\tCompiling $dir"
     for filename in $dir*.c; do
-        echo "#include \"$filename\"" >> monster.c
+        echo -e "\t\tCompiling: $filename"
+        $CC $CompilerArgs $filename
     done
 done
 
-echo "Compiling"
-$CC $CompilerArgs monster.c
-
 echo -e "\nBuilding rss_ringoccs Shared Object (.so file)"
-
-sharedobjectlist=""
-for filename in ./*.o; do
-    sharedobjectlist="$sharedobjectlist $filename"
-done
-
-$CC $sharedobjectlist -shared -o librssringoccs.so -lm
+$CC ./*.o -O3 -flto -shared -o librssringoccs.so -lm
 
 echo "Moving to /usr/local/lib/librssringoccs.so"
 sudo mv librssringoccs.so /usr/local/lib/librssringoccs.so
@@ -67,6 +45,17 @@ sudo cp ../include/* "$includedir/include/"
 
 echo "Cleaning up..."
 rm -f *.o
-rm -f monster.c
+
+echo "Done"
+
+echo -e "\nBuilding modules...\n"
+python3 setup.py config build_ext --inplace
+
+rm -rf build/
+
+#   Move the compiled shared objects (.so) files to the rss_ringoccs/ folder.
+#   This way you can import them directly into python if the rss_ringoccs
+#   package is in your path.
+mv *.so ./rss_ringoccs/
 
 echo "Done"

@@ -760,7 +760,7 @@ static PyObject *where_greater(PyObject *self, PyObject *args)
 
     /*  The input is a numpy array, proceed. Otherwise spit out an error.     */
     if (PyArg_ParseTuple(args, "O!d", &PyArray_Type, &arr, &threshold)){
-        
+
         /*  Declare some more necessary variables.                            */
         long typenum, dim;
         void *data;
@@ -1075,7 +1075,7 @@ static PyObject *window_norm(PyObject *self, PyObject *args){
                      "\rInput should be a numpy array of numbers,"
                      "or a floating point/integer value.");
         return NULL;
-    }  
+    }
 }
 
 static PyMethodDef special_functions_methods[] =

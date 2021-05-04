@@ -96,9 +96,11 @@
 
 /*  Include all necessary headers.                                            */
 #include <stdlib.h>
-#include <rss_ringoccs/include/rss_ringoccs_bool.h>
-#include <rss_ringoccs/include/rss_ringoccs_math.h>
-#include <rss_ringoccs/include/rss_ringoccs_string.h>
+
+#include <libtmpl/include/tmpl_bool.h>
+#include <libtmpl/include/tmpl_math.h>
+#include <libtmpl/include/tmpl_string.h>
+
 #include <rss_ringoccs/include/rss_ringoccs_calibration.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 
@@ -113,7 +115,7 @@
     /*  Check if the variable is not NULL. It should be at the start.        */\
     if (tau->var != NULL)                                                      \
     {                                                                          \
-        tau->error_occurred = rssringoccs_True;                                \
+        tau->error_occurred = tmpl_True;                                       \
         tau->error_message = rssringoccs_strdup(                               \
             "\n\rError Encountered: rss_ringoccs\n"                            \
             "\r\trssringoccs_Copy_DLP_Data_To_Tau\n\n"                         \
@@ -129,8 +131,8 @@
     /*  Check if malloc failed.                                              */\
     if (tau->var == NULL)                                                      \
     {                                                                          \
-        tau->error_occurred = rssringoccs_True;                                \
-        tau->error_message = rssringoccs_strdup(                               \
+        tau->error_occurred = tmpl_True;                                       \
+        tau->error_message = tmpl_strdup(                                      \
             "\n\rError Encountered: rss_ringoccs\n"                            \
             "\r\trssringoccs_Copy_DLP_Data_To_Tau\n\n"                         \
             "\rMalloc failed and returned NULL for "#var". Returning.\n\n"     \
@@ -200,8 +202,8 @@ void rssringoccs_Copy_DLP_Data_To_Tau(rssringoccs_DLPObj *dlp,
     /*  If the dlp pointer is NULL, raise and error and return.               */
     if (dlp == NULL)
     {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Copy_DLP_Data_To_Tau\n\n"
             "Input dlp pointer is NULL. Returning.\n"
@@ -213,8 +215,8 @@ void rssringoccs_Copy_DLP_Data_To_Tau(rssringoccs_DLPObj *dlp,
      *  pointer's error_occurred member to true and exit.                     */
     if (dlp->error_occurred)
     {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Copy_DLP_Data_To_Tau\n\n"
             "\rInput dlp pointer has the error_occurred member set to True.\n"
@@ -229,8 +231,8 @@ void rssringoccs_Copy_DLP_Data_To_Tau(rssringoccs_DLPObj *dlp,
      *  compute dx_km. Return with error.                                     */
     if (tau->arr_size <= 1)
     {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Copy_DLP_Data_To_Tau\n\n"
             "\rInput arrays have less than 2 points. It is impossible to\n"

@@ -21,7 +21,7 @@ echo -e "\t\t$CompilerArgs3"
 echo -e "\t\t$CompilerArgs4"
 echo -e "\t\t$CompilerArgs5"
 
-for dir in */; do
+for dir in ./src/*/; do
     echo -e "\n\tCompiling $dir"
     for filename in $dir*.c; do
         echo -e "\t\tCompiling: $filename"

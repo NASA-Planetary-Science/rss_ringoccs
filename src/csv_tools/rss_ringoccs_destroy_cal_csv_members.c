@@ -41,3 +41,4 @@ void rssringoccs_Destroy_CalCSV_Members(rssringoccs_CalCSV *cal)
     DESTROY_CAL_VAR(cal->p_free_vals);
 }
 /*  End of rssringoccs_Destroy_CalCSV_Members.                                */
+

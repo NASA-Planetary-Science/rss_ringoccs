@@ -3,7 +3,7 @@
  ******************************************************************************
  *  This file is part of rss_ringoccs.                                        *
  *                                                                            *
- *  rss_ringoccs is free software: you can redistribute it and/or modify it   *
+ *  rss_ringoccs is free software: you can redistribute it and/or modify      *
  *  it under the terms of the GNU General Public License as published by      *
  *  the Free Software Foundation, either version 3 of the License, or         *
  *  (at your option) any later version.                                       *
@@ -23,26 +23,38 @@
 #include <stdlib.h>
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
 
+/*  Function for freeing the memory in a CalCSV object.                       */
 void rssringoccs_Destroy_CalCSV(rssringoccs_CalCSV **cal)
 {
+    /*  Used for the pointer to the CSV object.                               */
     rssringoccs_CalCSV *cal_inst;
 
+    /*  If the input pointer is NULL, simply return.                          */
     if (cal == NULL)
         return;
 
+    /*  Otherwise, get a pointer to the CalCSV object.                        */
     cal_inst = *cal;
 
+    /*  If this is NULL, there's no need to free it. Return.                  */
     if (cal_inst == NULL)
         return;
 
+    /*  Free all of the pointers inside the CalCSV object.                    */
     rssringoccs_Destroy_CalCSV_Members(cal_inst);
 
+    /*  If an error occured along the way, the error_message variable is      *
+     *  malloced and a string is stored. Check if we need to free this.       */
     if (cal_inst->error_message != NULL)
     {
         free(cal_inst->error_message);
+
+        /*  To avoid freeing twice, reset the pointer to NULL.                */
         cal_inst->error_message = NULL;
     }
 
+    /*  Free the pointer to the object and set it to NULL to avoid freeing    *
+     *  this object twice.                                                    */
     free(cal_inst);
     *cal = NULL;
     return;

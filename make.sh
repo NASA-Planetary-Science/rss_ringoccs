@@ -51,7 +51,7 @@ if [ $CC == "gcc" ]; then
 #   Clang has different compiler options, so specify those here if using clang.
 elif [ $CC == "clang" ]; then
     CArgs1="$STDVER -pedantic -pedantic-errors -Wall -Wextra -Wpedantic"
-    CArgs2="-Wmissing-field-initializers -Wconversion"
+    CArgs2="-Wmissing-field-initializers -Wconversion -Weverything"
     CArgs3="-Wmissing-prototypes -Wold-style-definition -Winit-self"
     CArgs4="-Wmissing-declarations -Wnull-dereference -Wwrite-strings"
     CArgs5="-Wdouble-promotion -Wfloat-conversion -Wstrict-prototypes"

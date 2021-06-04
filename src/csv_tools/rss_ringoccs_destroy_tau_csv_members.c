@@ -3,7 +3,7 @@
  ******************************************************************************
  *  This file is part of rss_ringoccs.                                        *
  *                                                                            *
- *  rss_ringoccs is free software: you can redistribute it and/or modify it   *
+ *  rss_ringoccs is free software: you can redistribute it and/or modify      *
  *  it under the terms of the GNU General Public License as published by      *
  *  the Free Software Foundation, either version 3 of the License, or         *
  *  (at your option) any later version.                                       *
@@ -22,6 +22,11 @@
 
 #include <stdlib.h>
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
+
+/*  Check if this macro name is available.                                    */
+#ifdef DESTROY_TAU_VAR
+#undef DESTROY_TAU_VAR
+#endif
 
 /*  Macro for freeing and nullifying the members of the geo CSV structs.      */
 #define DESTROY_TAU_VAR(var) if (var != NULL){free(var); var = NULL;}
@@ -50,3 +55,7 @@ void rssringoccs_Destroy_TauCSV_Members(rssringoccs_TauCSV *tau)
     DESTROY_TAU_VAR(tau->B_deg_vals);
 }
 /*  End of rssringoccs_Destroy_TauCSV_Members.                                */
+
+/*  Undefine the macro function.                                              */
+#undef DESTROY_TAU_VAR
+

@@ -1,6 +1,6 @@
 /*  Include guard to avoid importing this file twice.                         */
-#ifndef _RSS_RINGOCCS_FRESNEL_KERNEL_H_
-#define _RSS_RINGOCCS_FRESNEL_KERNEL_H_
+#ifndef RSS_RINGOCCS_FRESNEL_KERNEL_H
+#define RSS_RINGOCCS_FRESNEL_KERNEL_H
 
 /*----------------------------The Fresnel Kernel------------------------------*/
 extern float

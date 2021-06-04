@@ -1,6 +1,6 @@
 /*  Include guard to avoid importing this file twice.                         */
-#ifndef __RSS_RINGOCCS_FRESNEL_TRANFORM_H__
-#define __RSS_RINGOCCS_FRESNEL_TRANFORM_H__
+#ifndef RSS_RINGOCCS_FRESNEL_TRANFORM_H
+#define RSS_RINGOCCS_FRESNEL_TRANFORM_H
 
 /*  Various functions, complex variables, and more found here.                */
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>

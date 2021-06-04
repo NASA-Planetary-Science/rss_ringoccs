@@ -3,7 +3,7 @@
  ******************************************************************************
  *  This file is part of rss_ringoccs.                                        *
  *                                                                            *
- *  rss_ringoccs is free software: you can redistribute it and/or modify it   *
+ *  rss_ringoccs is free software: you can redistribute it and/or modify      *
  *  it under the terms of the GNU General Public License as published by      *
  *  the Free Software Foundation, either version 3 of the License, or         *
  *  (at your option) any later version.                                       *
@@ -33,8 +33,8 @@
  ******************************************************************************/
 
 /*  Include guard to prevent including this file twice.                       */
-#ifndef __RSS_RINGOCCS_CSV_TOOLS_H__
-#define __RSS_RINGOCCS_CSV_TOOLS_H__
+#ifndef RSS_RINGOCCS_CSV_TOOLS_H
+#define RSS_RINGOCCS_CSV_TOOLS_H
 
 /*  Boolean data types defined here.                                          */
 #include <libtmpl/include/tmpl_bool.h>
@@ -60,7 +60,7 @@ typedef struct rssringoccs_GeoCSV {
     double *vy_kms_vals;
     double *vz_kms_vals;
     double *obs_spacecract_lat_deg_vals;
-    unsigned long n_elements;
+    unsigned long int n_elements;
     tmpl_Bool error_occurred;
     char *error_message;
 } rssringoccs_GeoCSV;
@@ -80,7 +80,7 @@ typedef struct rssringoccs_DLPCSV {
     double *t_ret_spm_vals;
     double *t_set_spm_vals;
     double *B_deg_vals;
-    unsigned long n_elements;
+    unsigned long int n_elements;
     tmpl_Bool error_occurred;
     char *error_message;
 } rssringoccs_DLPCSV;
@@ -91,7 +91,7 @@ typedef struct rssringoccs_CalCSV {
     double *f_sky_pred_vals;
     double *f_sky_resid_fit_vals;
     double *p_free_vals;
-    unsigned long n_elements;
+    unsigned long int n_elements;
     tmpl_Bool error_occurred;
     char *error_message;
 } rssringoccs_CalCSV;
@@ -111,7 +111,7 @@ typedef struct rssringoccs_TauCSV {
     double *t_ret_spm_vals;
     double *t_set_spm_vals;
     double *B_deg_vals;
-    unsigned long n_elements;
+    unsigned long int n_elements;
     tmpl_Bool error_occurred;
     char *error_message;
 } rssringoccs_TauCSV;
@@ -143,7 +143,7 @@ typedef struct rssringoccs_CSVData {
     double *tau_rho;
     double *tau_power;
     double *tau_vals;
-    unsigned long n_elements;
+    unsigned long int n_elements;
     tmpl_Bool error_occurred;
     char *error_message;
 } rssringoccs_CSVData;
@@ -181,3 +181,4 @@ extern void rssringoccs_Destroy_CSV_Members(rssringoccs_CSVData *csv);
 
 #endif
 /*  End of include guard.                                                     */
+

@@ -1,6 +1,6 @@
 /*  Include guard to avoid importing this file twice.                         */
-#ifndef __RSS_RINGOCCS_CALIBRATION_H__
-#define __RSS_RINGOCCS_CALIBRATION_H__
+#ifndef RSS_RINGOCCS_CALIBRATION_H
+#define RSS_RINGOCCS_CALIBRATION_H
 
 #include <libtmpl/include/tmpl_bool.h>
 #include <libtmpl/include/tmpl_complex.h>

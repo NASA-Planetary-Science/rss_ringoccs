@@ -3,7 +3,7 @@
  ******************************************************************************
  *  This file is part of rss_ringoccs.                                        *
  *                                                                            *
- *  rss_ringoccs is free software: you can redistribute it and/or modify it   *
+ *  rss_ringoccs is free software: you can redistribute it and/or modify      *
  *  it under the terms of the GNU General Public License as published by      *
  *  the Free Software Foundation, either version 3 of the License, or         *
  *  (at your option) any later version.                                       *
@@ -27,25 +27,50 @@
 #include <stdio.h>
 #include <string.h>
 
+/*  Check if the macro name is available.                                     */
+#ifdef MALLOC_GEO_VAR
+#undef MALLOC_GEO_VAR
+#endif
+
+/*  Macro function for safely allocating memory for the variables. This       *
+ *  checks if malloc fails, and does not simply assume it passed.             */
+#define MALLOC_GEO_VAR(var)                                                    \
+    cal->var = malloc(sizeof(*cal->var) * line_count);                         \
+    if (cal->var == NULL)                                                      \
+    {                                                                          \
+        cal->error_occurred = tmpl_True;                                       \
+        cal->error_message = tmpl_strdup(                                      \
+            "Error Encountered: rss_ringoccs\n"                                \
+            "\ttrssringoccs_Get_Cal\n\n"                                       \
+            "Malloc returned NULL. Failed to allocate memory for var.\n"       \
+            "Aborting computation and returning.\n"                            \
+        );                                                                     \
+                                                                               \
+        /*  Free the variables that have been malloc'd so far.               */\
+        rssringoccs_Destroy_CalCSV_Members(cal);                               \
+        return cal;                                                            \
+    }                                                                          \
+
+/*  Function for extracting the data from a CAL.TAB file.                     */
 rssringoccs_CalCSV *rssringoccs_Get_Cal(const char *filename)
 {
+    /*  Pointer to a CalCSV struct.                                           */
     rssringoccs_CalCSV *cal;
+
+    /*  File object for the file we're reading.                               */
     FILE *fp;
     char buffer[1024];
     char *record, *line;
     int ch;
-    unsigned long line_count, column_count, n;
+    unsigned int column_count;
+    unsigned long int line_count, n;
 
+    /*  Allocate memory for the CalCSV object.                                */
     cal = malloc(sizeof(*cal));
 
     /*  Check if malloc failed.                                               */
     if (cal == NULL)
-    {
-        puts("Error Encountered: rss_ringoccs\n"
-             "\trssringoccs_Get_Cal\n\n"
-             "Malloc failed and returned NULL for cal. Returning.\n");
         return NULL;
-    }
 
     /*  Initialize the pointers in the cal struct to NULL. The function       *
      *  rssringoccs_Destroy_CalCSV_Members will check which members are NULL  *
@@ -74,25 +99,35 @@ rssringoccs_CalCSV *rssringoccs_Get_Cal(const char *filename)
     }
 
     /*  Count the number of lines in the CSV.                                 */
-    line_count = 0;
-    while(!feof(fp))
+    line_count = 0UL;
+    while (!feof(fp))
     {
         ch = fgetc(fp);
-        if(ch == '\n')
+        if (ch == '\n')
             line_count++;
     }
+
+    /*  Reset the file back to the start.                                     */
     rewind(fp);
     cal->n_elements = line_count;
 
     /*  And count the number of columns.                                      */
-    column_count = 0;
-    line = fgets(buffer,sizeof(buffer), fp);
+    column_count = 0U;
+    line = fgets(buffer, sizeof(buffer), fp);
+
+    /*  CAL.TAB files are comma separeted, so count the number of commas.     */
     record = strtok(line, ",");
     while (record != NULL)
     {
         record = strtok(NULL, ",");
         column_count++;
+
+        /*  The CAL file should have exactly 4 columns.                       */
+        if (column_count > 4U)
+            break;
     }
+
+    /*  Reset the file back to the start.                                     */
     rewind(fp);
 
     /*  There should be 4 columns. Check this.                                */
@@ -107,77 +142,17 @@ rssringoccs_CalCSV *rssringoccs_Get_Cal(const char *filename)
         return cal;
     }
 
-    /*  Allocate memory for t_oet_spm_vals and check for error.               */
-    cal->t_oet_spm_vals = malloc(sizeof(*cal->t_oet_spm_vals) * line_count);
-    if (cal->t_oet_spm_vals == NULL)
-    {
-        cal->error_occurred = tmpl_True;
-        cal->error_message = tmpl_strdup(
-            "Error Encountered: rss_ringoccs\n"
-            "\ttrssringoccs_Get_Cal\n\n"
-            "Malloc returned NULL. Failed to allocate memory for.\n"
-            "t_oet_spm_vals. Aborting computation and returning.\n"
-        );
+    /*  Use the MALLOC_GEO_VAR macro function to allocate memory and check    *
+     *  for errors. This macro ends with an if-then statement, and ends in    *
+     *  curly braces {}, hence no need for a semi-colon here.                 */
+    MALLOC_GEO_VAR(t_oet_spm_vals)
+    MALLOC_GEO_VAR(f_sky_pred_vals)
+    MALLOC_GEO_VAR(f_sky_resid_fit_vals)
+    MALLOC_GEO_VAR(p_free_vals)
 
-        /*  Free the variables that have been malloc'd so far.                */
-        rssringoccs_Destroy_CalCSV_Members(cal);
-        return cal;
-    }
-
-    /*  Allocate memory for f_sky_pred_vals and check for error.              */
-    cal->f_sky_pred_vals = malloc(sizeof(*cal->f_sky_pred_vals) * line_count);
-    if (cal->f_sky_pred_vals == NULL)
-    {
-        cal->error_occurred = tmpl_True;
-        cal->error_message = tmpl_strdup(
-            "Error Encountered: rss_ringoccs\n"
-            "\ttrssringoccs_Get_Cal\n\n"
-            "Malloc returned NULL. Failed to allocate memory for.\n"
-            "f_sky_pred_vals. Aborting computation and returning.\n"
-        );
-
-        /*  Free the variables that have been malloc'd so far.                */
-        rssringoccs_Destroy_CalCSV_Members(cal);
-        return cal;
-    }
-
-    /*  Allocate memory for f_sky_resid_fit_vals and check for error.         */
-    cal->f_sky_resid_fit_vals
-        = malloc(sizeof(*cal->f_sky_resid_fit_vals) * line_count);
-    if (cal->f_sky_resid_fit_vals == NULL)
-    {
-        cal->error_occurred = tmpl_True;
-        cal->error_message = tmpl_strdup(
-            "Error Encountered: rss_ringoccs\n"
-            "\ttrssringoccs_Get_Cal\n\n"
-            "Malloc returned NULL. Failed to allocate memory for.\n"
-            "f_sky_resid_fit_vals. Aborting computation and returning.\n"
-        );
-
-        /*  Free the variables that have been malloc'd so far.                */
-        rssringoccs_Destroy_CalCSV_Members(cal);
-        return cal;
-    }
-
-    /*  Allocate memory for p_free_vals and check for error.                  */
-    cal->p_free_vals = malloc(sizeof(*cal->p_free_vals) * line_count);
-    if (cal->p_free_vals == NULL)
-    {
-        cal->error_occurred = tmpl_True;
-        cal->error_message = tmpl_strdup(
-            "Error Encountered: rss_ringoccs\n"
-            "\ttrssringoccs_Get_Cal\n\n"
-            "Malloc returned NULL. Failed to allocate memory for.\n"
-            "p_free_vals. Aborting computation and returning.\n"
-        );
-
-        /*  Free the variables that have been malloc'd so far.                */
-        rssringoccs_Destroy_CalCSV_Members(cal);
-        return cal;
-    }
-
+    /*  Read in all of the data.                                              */
     line = fgets(buffer, sizeof(buffer), fp);
-    n = 0;
+    n = 0U;
     while(line != NULL)
     {
         record = strtok(line, ",");
@@ -196,5 +171,12 @@ rssringoccs_CalCSV *rssringoccs_Get_Cal(const char *filename)
         ++n;
     }
 
+    /*  Close the file.                                                       */
+    fclose(fp);
     return cal;
 }
+/*  End of rssringoccs_Get_Cal.                                               */
+
+/*  Undefine the Macro function.                                              */
+#undef MALLOC_GEO_VAR
+

@@ -23,10 +23,15 @@
 #include <stdlib.h>
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
 
-/*  Macro for freeing and nullifying the members of the geo CSV structs.      */
+/*  Check if this macro name is available.                                    */
+#ifdef DESTROY_DLP_VAR
+#undef DESTROY_DLP_VAR
+#endif
+
+/*  Macro for freeing and nullifying the members of the dlp CSV structs.      */
 #define DESTROY_DLP_VAR(var) if (var != NULL){free(var); var = NULL;}
 
-/*  Free's all members of a rssringoccs_GeoCSV pointer except the             *
+/*  Free's all members of a rssringoccs_DLPCSV pointer except the             *
  *  error_message. Members are set to NULL after freeing.                     */
 void rssringoccs_Destroy_DLPCSV_Members(rssringoccs_DLPCSV *dlp)
 {
@@ -49,4 +54,8 @@ void rssringoccs_Destroy_DLPCSV_Members(rssringoccs_DLPCSV *dlp)
     DESTROY_DLP_VAR(dlp->t_set_spm_vals);
     DESTROY_DLP_VAR(dlp->B_deg_vals);
 }
-/*  End of rssringoccs_Destroy_GeoCSV_Members.                                */
+/*  End of rssringoccs_Destroy_DLPCSV_Members.                                */
+
+/*  Undefine the macro function.                                              */
+#undef DESTROY_DLP_VAR
+

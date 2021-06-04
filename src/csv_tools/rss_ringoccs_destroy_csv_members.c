@@ -3,7 +3,7 @@
  ******************************************************************************
  *  This file is part of rss_ringoccs.                                        *
  *                                                                            *
- *  rss_ringoccs is free software: you can redistribute it and/or modify it   *
+ *  rss_ringoccs is free software: you can redistribute it and/or modify      *
  *  it under the terms of the GNU General Public License as published by      *
  *  the Free Software Foundation, either version 3 of the License, or         *
  *  (at your option) any later version.                                       *
@@ -23,10 +23,15 @@
 #include <stdlib.h>
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
 
-/*  Macro for freeing and nullifying the members of the geo CSV structs.      */
+/*  Check if this macro name has been defined.                                */
+#ifdef DESTROY_CSV_VAR
+#undef DESTROY_CSV_VAR
+#endif
+
+/*  Macro for freeing and nullifying the members of the CSV struct.           */
 #define DESTROY_CSV_VAR(var) if (var != NULL){free(var); var = NULL;}
 
-/*  Free's all members of a rssringoccs_GeoCSV pointer except the             *
+/*  Free's all members of a rssringoccs_CSVData pointer except the            *
  *  error_message. Members are set to NULL after freeing.                     */
 void rssringoccs_Destroy_CSV_Members(rssringoccs_CSVData *csv)
 {
@@ -39,6 +44,7 @@ void rssringoccs_Destroy_CSV_Members(rssringoccs_CSVData *csv)
     DESTROY_CSV_VAR(csv->D_km_vals);
     DESTROY_CSV_VAR(csv->f_sky_hz_vals);
     DESTROY_CSV_VAR(csv->p_norm_vals);
+    DESTROY_CSV_VAR(csv->raw_tau_vals);
     DESTROY_CSV_VAR(csv->power_vals);
     DESTROY_CSV_VAR(csv->phase_rad_vals);
     DESTROY_CSV_VAR(csv->phase_vals);
@@ -59,4 +65,8 @@ void rssringoccs_Destroy_CSV_Members(rssringoccs_CSVData *csv)
     DESTROY_CSV_VAR(csv->tau_power);
     DESTROY_CSV_VAR(csv->tau_vals);
 }
-/*  End of rssringoccs_Destroy_GeoCSV_Members.                                */
+/*  End of rssringoccs_Destroy_CSV_Members.                                   */
+
+/*  Undefine the macro function.                                              */
+#undef DESTROY_CSV_VAR
+

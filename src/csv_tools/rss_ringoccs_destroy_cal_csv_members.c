@@ -3,7 +3,7 @@
  ******************************************************************************
  *  This file is part of rss_ringoccs.                                        *
  *                                                                            *
- *  rss_ringoccs is free software: you can redistribute it and/or modify it   *
+ *  rss_ringoccs is free software: you can redistribute it and/or modify      *
  *  it under the terms of the GNU General Public License as published by      *
  *  the Free Software Foundation, either version 3 of the License, or         *
  *  (at your option) any later version.                                       *
@@ -23,10 +23,15 @@
 #include <stdlib.h>
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
 
-/*  Macro for freeing and nullifying the members of the geo CSV structs.      */
+/*  Check if this macro name has been defined.                                */
+#ifdef DESTROY_CAL_VAR
+#undef DESTROY_CAL_VAR
+#endif
+
+/*  Macro for freeing and nullifying the members of the cal CSV structs.      */
 #define DESTROY_CAL_VAR(var) if (var != NULL){free(var); var = NULL;}
 
-/*  Free's all members of a rssringoccs_GeoCSV pointer except the             *
+/*  Free's all members of a rssringoccs_CalCSV pointer except the             *
  *  error_message. Members are set to NULL after freeing.                     */
 void rssringoccs_Destroy_CalCSV_Members(rssringoccs_CalCSV *cal)
 {
@@ -41,4 +46,7 @@ void rssringoccs_Destroy_CalCSV_Members(rssringoccs_CalCSV *cal)
     DESTROY_CAL_VAR(cal->p_free_vals);
 }
 /*  End of rssringoccs_Destroy_CalCSV_Members.                                */
+
+/*  Unded the macro function.                                                 */
+#undef DESTROY_CAL_VAR
 

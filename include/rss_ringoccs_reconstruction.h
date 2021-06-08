@@ -1,12 +1,14 @@
 /*  Include guard to avoid importing this file twice.                         */
-#ifndef __RSS_RINGOCCS_RECONSTRUCTION_H__
-#define __RSS_RINGOCCS_RECONSTRUCTION_H__
+#ifndef RSS_RINGOCCS_RECONSTRUCTION_H
+#define RSS_RINGOCCS_RECONSTRUCTION_H
 
 /*  Various functions, complex variables, and more found here.                */
-#include <rss_ringoccs/include/rss_ringoccs_bool.h>
-#include <rss_ringoccs/include/rss_ringoccs_complex.h>
+#include <libtmpl/include/tmpl_bool.h>
+#include <libtmpl/include/tmpl_complex.h>
 #include <rss_ringoccs/include/rss_ringoccs_calibration.h>
 #include <rss_ringoccs/include/rss_ringoccs_special_functions.h>
+
+typedef double (*rssringoccs_window_func)(double, double);
 
 typedef enum {
     rssringoccs_DR_Fresnel,
@@ -27,9 +29,9 @@ typedef enum {
 
 /*  Structure that contains all of the necessary data.                        */
 typedef struct rssringoccs_TAUObj {
-    rssringoccs_ComplexDouble *T_in;
-    rssringoccs_ComplexDouble *T_out;
-    rssringoccs_ComplexDouble *T_fwd;
+    tmpl_ComplexDouble *T_in;
+    tmpl_ComplexDouble *T_out;
+    tmpl_ComplexDouble *T_fwd;
     double *rho_km_vals;
     double *F_km_vals;
     double *phi_rad_vals;
@@ -74,11 +76,11 @@ typedef struct rssringoccs_TAUObj {
     unsigned long arr_size;
     rssringoccs_window_func window_func;
     rssringoccs_Psitype_Enum psinum;
-    rssringoccs_Bool use_norm;
-    rssringoccs_Bool use_fwd;
-    rssringoccs_Bool bfac;
-    rssringoccs_Bool verbose;
-    rssringoccs_Bool error_occurred;
+    tmpl_Bool use_norm;
+    tmpl_Bool use_fwd;
+    tmpl_Bool bfac;
+    tmpl_Bool verbose;
+    tmpl_Bool error_occurred;
     char *error_message;
     char *wtype;
     char *psitype;
@@ -86,7 +88,7 @@ typedef struct rssringoccs_TAUObj {
 } rssringoccs_TAUObj;
 
 typedef void (*rssringoccs_FresT)(rssringoccs_TAUObj *, double *,
-                                  unsigned long, unsigned long);
+                                  unsigned long int, unsigned long int);
 
 extern void rssringoccs_Reconstruction(rssringoccs_TAUObj *tau);
 

@@ -1,4 +1,26 @@
-#include <rss_ringoccs/include/rss_ringoccs_math.h>
+/******************************************************************************
+ *                                 LICENSE                                    *
+ ******************************************************************************
+ *  This file is part of rss_ringoccs.                                        *
+ *                                                                            *
+ *  rss_ringoccs is free software: you can redistribute it and/or modify      *
+ *  it under the terms of the GNU General Public License as published by      *
+ *  the Free Software Foundation, either version 3 of the License, or         *
+ *  (at your option) any later version.                                       *
+ *                                                                            *
+ *  rss_ringoccs is distributed in the hope that it will be useful,           *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+ *  GNU General Public License for more details.                              *
+ *                                                                            *
+ *  You should have received a copy of the GNU General Public License         *
+ *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
+ ******************************************************************************
+ *  Author:     Ryan Maguire, Wellesley College                               *
+ *  Date:       June 8, 2021                                                  *
+ ******************************************************************************/
+
+#include <math.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_kernel.h>
 
 double Newton_Raphson_Fresnel_Psi(double k, double r, double r0,
@@ -8,7 +30,7 @@ double Newton_Raphson_Fresnel_Psi(double k, double r, double r0,
     double dphi, err;
     unsigned char n = 0;
     dphi  = rssringoccs_Double_Fresnel_dPsi_dPhi(k, r, r0, phi, phi0, B, D);
-    err = rssringoccs_Double_Abs(dphi);
+    err = fabs(dphi);
     while(err > EPS)
     {
         dphi  = rssringoccs_Double_Fresnel_dPsi_dPhi(k, r, r0, phi,
@@ -19,7 +41,7 @@ double Newton_Raphson_Fresnel_Psi(double k, double r, double r0,
         if (n > toler)
             break;
 
-        err = rssringoccs_Double_Abs(dphi);
+        err = fabs(dphi);
     }
     return phi;
 }

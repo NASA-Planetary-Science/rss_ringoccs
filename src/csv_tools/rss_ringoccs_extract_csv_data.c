@@ -197,36 +197,41 @@ rssringoccs_Extract_CSV_Data(const char *geo,
     }
 
     /*  Extract the data from the TAU.TAB file.                               */
-    tau_dat = rssringoccs_Get_Tau(tau, use_deprecated);
+    if (tau)
+    {
+        tau_dat = rssringoccs_Get_Tau(tau, use_deprecated);
 
-    /*  Check for errors.                                                     */
-    if (tau_dat == NULL)
-    {
-        csv_data->error_occurred = tmpl_True;
-        csv_data->error_message = tmpl_strdup(
-            "Error Encountered: rss_ringoccs\n"
-            "\trssringoccs_Extract_CSV_Data\n\n"
-            "rssringoccs_Get_Tau returned NULL for tau_dat. Aborting.\n"
-        );
-        rssringoccs_Destroy_GeoCSV(&geo_dat);
-        rssringoccs_Destroy_DLPCSV(&dlp_dat);
-        rssringoccs_Destroy_CalCSV(&cal_dat);
-        return csv_data;
+        /*  Check for errors.                                                     */
+        if (tau_dat == NULL)
+        {
+            csv_data->error_occurred = tmpl_True;
+            csv_data->error_message = tmpl_strdup(
+                "Error Encountered: rss_ringoccs\n"
+                "\trssringoccs_Extract_CSV_Data\n\n"
+                "rssringoccs_Get_Tau returned NULL for tau_dat. Aborting.\n"
+            );
+            rssringoccs_Destroy_GeoCSV(&geo_dat);
+            rssringoccs_Destroy_DLPCSV(&dlp_dat);
+            rssringoccs_Destroy_CalCSV(&cal_dat);
+            return csv_data;
+        }
+        else if (tau_dat->n_elements == 0U)
+        {
+            csv_data->error_occurred = tmpl_True;
+            csv_data->error_message = tmpl_strdup(
+                "Error Encountered: rss_ringoccs\n"
+                "\trssringoccs_Extract_CSV_Data\n\n"
+                "rssringoccs_Get_TAU returned an empty struct. Aborting.\n"
+            );
+            rssringoccs_Destroy_GeoCSV(&geo_dat);
+            rssringoccs_Destroy_DLPCSV(&dlp_dat);
+            rssringoccs_Destroy_CalCSV(&cal_dat);
+            rssringoccs_Destroy_TauCSV(&tau_dat);
+            return csv_data;
+        }
     }
-    else if (tau_dat->n_elements == 0U)
-    {
-        csv_data->error_occurred = tmpl_True;
-        csv_data->error_message = tmpl_strdup(
-            "Error Encountered: rss_ringoccs\n"
-            "\trssringoccs_Extract_CSV_Data\n\n"
-            "rssringoccs_Get_TAU returned an empty struct. Aborting.\n"
-        );
-        rssringoccs_Destroy_GeoCSV(&geo_dat);
-        rssringoccs_Destroy_DLPCSV(&dlp_dat);
-        rssringoccs_Destroy_CalCSV(&cal_dat);
-        rssringoccs_Destroy_TauCSV(&tau_dat);
-        return csv_data;
-    }
+    else
+        tau_dat = NULL;
 
     /*  Grab the number of elements from the DLP CSV. This will be the number *
      *  of elements in the output.                                            */

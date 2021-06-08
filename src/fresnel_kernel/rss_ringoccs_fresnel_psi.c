@@ -24,8 +24,8 @@
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_kernel.h>
 
 double
-rssringoccs_Double_Fresnel_Psi(double k, double r, double r0, double phi,
-                               double phi0, double B, double D)
+rssringoccs_Fresnel_Psi(double k, double r, double r0, double phi,
+                        double phi0, double B, double D)
 {
     double xi, eta, rcpr_D, rcpr_D_squared, cos_B, cos_phi, cos_phi0;
     double cos_phi_phi0, psi;

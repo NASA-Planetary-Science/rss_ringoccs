@@ -24,9 +24,9 @@
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_kernel.h>
 
 double
-rssringoccs_Double_Fresnel_dPsi_dPhi_Ellipse(double k, double r, double r0,
-                                             double phi, double phi0, double B,
-                                             double D, double ecc, double peri)
+rssringoccs_Fresnel_dPsi_dPhi_Ellipse(double k, double r, double r0, double phi,
+                                      double phi0, double B, double D,
+                                      double ecc, double peri)
 {
     double xi, eta, psi0, psi_d1, dxi_phi, deta_phi, dxi_rho, deta_rho;
     double cos_B, cos_phi, sin_phi, cos_phi0, sin_phi0;

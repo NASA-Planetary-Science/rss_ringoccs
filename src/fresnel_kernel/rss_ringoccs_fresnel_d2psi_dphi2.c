@@ -25,9 +25,8 @@
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_kernel.h>
 
 double
-rssringoccs_Double_Fresnel_d2Psi_dPhi2(double k, double r, double r0,
-                                       double phi, double phi0, double B,
-                                       double D)
+rssringoccs_Fresnel_d2Psi_dPhi2(double k, double r, double r0, double phi,
+                                double phi0, double B, double D)
 {
     /*  Declare necessary variables. C89 requires declarations at the top.    */
     double xi, eta, psi0, dxi, dxi2, deta, deta2, psi_d2, rcpr_D;

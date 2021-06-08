@@ -2,7 +2,7 @@
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_kernel.h>
 
 double
-rssringoccs_Double_Fresnel_Scale(double lambda, double d, double phi, double b)
+rssringoccs_Fresnel_Scale(double lambda, double d, double phi, double b)
 {
     double cb_2_sp_2, sb_2, f_scale;
 

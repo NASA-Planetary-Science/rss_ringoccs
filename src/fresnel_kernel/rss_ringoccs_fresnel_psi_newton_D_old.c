@@ -65,15 +65,16 @@ static double __d2psi(double kD, double r, double r0, double phi,
     return kD*psi_d2;
 }
 
-double Newton_Raphson_Fresnel_Psi_D_Old(double kD, double r, double r0,
-                                        double phi, double phi0, double B,
-                                        double EPS, long toler, double rx,
-                                        double ry, double rz)
+double
+rssringoccs_Newton_Raphson_Fresnel_Psi_D_Old(double kD, double r, double r0,
+                                             double phi, double phi0, double B,
+                                             double EPS, unsigned int toler,
+                                             double rx, double ry, double rz)
 {
     double dphi;
     double D;
     double x, y, dx, dy;
-    long i = 0;
+    unsigned int i = 0U;
     x = r0 * cos(phi);
     y = r0 * sin(phi);
     dx = x-rx;

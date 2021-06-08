@@ -1,9 +1,10 @@
-#include <rss_ringoccs/include/rss_ringoccs_math.h>
-#include <rss_ringoccs/include/rss_ringoccs_complex.h>
+
+#include <libtmpl/include/tmpl_complex.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_kernel.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 
 void
 Fresnel_Transform_Cubic_Norm_Double(rssringoccs_TAUObj *tau,
@@ -12,14 +13,15 @@ Fresnel_Transform_Cubic_Norm_Double(rssringoccs_TAUObj *tau,
                                     unsigned long center)
 {
     /*  Declare all necessary variables. i and j are used for indexing.       */
-    unsigned long i, ind[4], offset;
+    unsigned long int ind[4], offset;
+    unsigned int i;
 
     /*  The Fresnel kernel and ring azimuth angle.                            */
     double C[3], abs_norm, real_norm;
     double psi_n[4], psi_half_diff, psi_full_diff;
     double psi, phi, rcpr_w, rcpr_w_sq;
     double psi_half_mean, psi_full_mean, cos_psi, sin_psi, x;
-    rssringoccs_ComplexDouble exp_psi, norm, integrand;
+    tmpl_ComplexDouble exp_psi, norm, integrand;
 
     rcpr_w = 1.0 / tau->w_km_vals[center];
     rcpr_w_sq = rcpr_w * rcpr_w;
@@ -29,14 +31,14 @@ Fresnel_Transform_Cubic_Norm_Double(rssringoccs_TAUObj *tau,
     ind[3] = n_pts - 1;
 
     /*  Initialize T_out and norm to zero so we can loop over later.          */
-    tau->T_out[center] = rssringoccs_CDouble_Zero;
-    norm = rssringoccs_CDouble_Zero;
+    tau->T_out[center] = tmpl_CDouble_Zero;
+    norm = tmpl_CDouble_Zero;
 
     /*  Symmetry is lost without the Legendre polynomials, or Fresnel         *
      *  quadratic. Must compute everything from -W/2 to W/2.                  */
     offset = center-(unsigned long)((n_pts-1)/2);
 
-    for (i = 0; i < 4; ++i)
+    for (i = 0U; i < 4U; ++i)
     {
 
         phi = Newton_Raphson_Fresnel_Psi(

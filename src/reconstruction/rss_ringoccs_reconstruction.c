@@ -1,14 +1,14 @@
 
 #include <stdlib.h>
-#include <rss_ringoccs/include/rss_ringoccs_bool.h>
-#include <rss_ringoccs/include/rss_ringoccs_string.h>
-#include <rss_ringoccs/include/rss_ringoccs_complex.h>
+#include <libtmpl/include/tmpl_bool.h>
+#include <libtmpl/include/tmpl_string.h>
+#include <libtmpl/include/tmpl_complex.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 
 void rssringoccs_Reconstruction(rssringoccs_TAUObj *tau)
 {
-    rssringoccs_ComplexDouble *temp_T_in;
-    rssringoccs_Bool temp_fwd;
+    tmpl_ComplexDouble *temp_T_in;
+    tmpl_Bool temp_fwd;
     unsigned long n, temp_start, temp_n_used, nw_pts;
     double w_left, w_right, w_max;
 
@@ -28,7 +28,7 @@ void rssringoccs_Reconstruction(rssringoccs_TAUObj *tau)
     rssringoccs_Tau_Check_Data(tau);
 
     temp_fwd = tau->use_fwd;
-    tau->use_fwd = rssringoccs_False;
+    tau->use_fwd = tmpl_False;
 
     if      (tau->psinum == rssringoccs_DR_Fresnel)
         rssringoccs_Diffraction_Correction_Fresnel(tau);
@@ -66,8 +66,8 @@ void rssringoccs_Reconstruction(rssringoccs_TAUObj *tau)
 
         if (tau->n_used <= 2*nw_pts)
         {
-            tau->error_occurred = rssringoccs_True;
-            tau->error_message = rssringoccs_strdup(
+            tau->error_occurred = tmpl_True;
+            tau->error_message = tmpl_strdup(
                 "\n\rError Encountered: rss_ringoccs\n"
                 "\r\trssringoccs_Reconstruction\n\n"
                 "\rNot enough data available to perform the forward model.\n"
@@ -96,7 +96,7 @@ void rssringoccs_Reconstruction(rssringoccs_TAUObj *tau)
             tau->k_vals[tau->start + n] *= -1.0;
 
         tau->T_fwd = tau->T_out;
-        tau->T_out = tau->T_in;;
+        tau->T_out = tau->T_in;
         tau->T_in  = temp_T_in;
 
     }

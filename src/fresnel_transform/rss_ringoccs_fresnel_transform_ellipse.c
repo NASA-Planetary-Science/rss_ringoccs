@@ -4,10 +4,10 @@
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
 void
-Fresnel_Transform_Ellipse_Double(rssringoccs_TAUObj *tau,
-                                 double *w_func,
-                                 unsigned long n_pts,
-                                 unsigned long center)
+rssringoccs_Fresnel_Transform_Ellipse(rssringoccs_TAUObj *tau,
+                                      double *w_func,
+                                      unsigned long n_pts,
+                                      unsigned long center)
 {
     /*  Declare all necessary variables. i and j are used for indexing.       */
     unsigned long int m, offset;

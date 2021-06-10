@@ -40,25 +40,25 @@ void rssringoccs_Destroy_GeoCSV_Members(rssringoccs_GeoCSV *geo)
         return;
 
     /*  Destroy every variable except the error_message.                      */
-    DESTROY_GEO_VAR(geo->t_oet_spm_vals);
-    DESTROY_GEO_VAR(geo->t_ret_spm_vals);
-    DESTROY_GEO_VAR(geo->t_set_spm_vals);
-    DESTROY_GEO_VAR(geo->rho_km_vals);
-    DESTROY_GEO_VAR(geo->phi_rl_deg_vals);
-    DESTROY_GEO_VAR(geo->phi_ora_deg_vals);
-    DESTROY_GEO_VAR(geo->B_deg_vals);
-    DESTROY_GEO_VAR(geo->D_km_vals);
-    DESTROY_GEO_VAR(geo->rho_dot_kms_vals);
-    DESTROY_GEO_VAR(geo->phi_rl_dot_kms_vals);
-    DESTROY_GEO_VAR(geo->F_km_vals);
-    DESTROY_GEO_VAR(geo->R_imp_km_vals);
-    DESTROY_GEO_VAR(geo->rx_km_vals);
-    DESTROY_GEO_VAR(geo->ry_km_vals);
-    DESTROY_GEO_VAR(geo->rz_km_vals);
-    DESTROY_GEO_VAR(geo->vx_kms_vals);
-    DESTROY_GEO_VAR(geo->vy_kms_vals);
-    DESTROY_GEO_VAR(geo->vz_kms_vals);
-    DESTROY_GEO_VAR(geo->obs_spacecract_lat_deg_vals);
+    DESTROY_GEO_VAR(geo->t_oet_spm_vals)
+    DESTROY_GEO_VAR(geo->t_ret_spm_vals)
+    DESTROY_GEO_VAR(geo->t_set_spm_vals)
+    DESTROY_GEO_VAR(geo->rho_km_vals)
+    DESTROY_GEO_VAR(geo->phi_rl_deg_vals)
+    DESTROY_GEO_VAR(geo->phi_ora_deg_vals)
+    DESTROY_GEO_VAR(geo->B_deg_vals)
+    DESTROY_GEO_VAR(geo->D_km_vals)
+    DESTROY_GEO_VAR(geo->rho_dot_kms_vals)
+    DESTROY_GEO_VAR(geo->phi_rl_dot_kms_vals)
+    DESTROY_GEO_VAR(geo->F_km_vals)
+    DESTROY_GEO_VAR(geo->R_imp_km_vals)
+    DESTROY_GEO_VAR(geo->rx_km_vals)
+    DESTROY_GEO_VAR(geo->ry_km_vals)
+    DESTROY_GEO_VAR(geo->rz_km_vals)
+    DESTROY_GEO_VAR(geo->vx_kms_vals)
+    DESTROY_GEO_VAR(geo->vy_kms_vals)
+    DESTROY_GEO_VAR(geo->vz_kms_vals)
+    DESTROY_GEO_VAR(geo->obs_spacecract_lat_deg_vals)
 }
 /*  End of rssringoccs_Destroy_GeoCSV_Members.                                */
 

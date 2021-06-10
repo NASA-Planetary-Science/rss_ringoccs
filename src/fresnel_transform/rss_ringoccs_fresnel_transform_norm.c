@@ -17,14 +17,15 @@
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
 
-#include <rss_ringoccs/include/rss_ringoccs_math.h>
-#include <rss_ringoccs/include/rss_ringoccs_complex.h>
+#include <math.h>
+#include <libtmpl/include/tmpl_math.h>
+#include <libtmpl/include/tmpl_complex.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
 void
-Fresnel_Transform_Norm_Double(rssringoccs_TAUObj *tau, double *x_arr,
-                              double *w_func, unsigned long n_pts,
-                              unsigned long center)
+rssringoccs_Fresnel_Transform_Norm(rssringoccs_TAUObj *tau, double *x_arr,
+                                   double *w_func, unsigned long n_pts,
+                                   unsigned long center)
 {
     /*  Declare all necessary variables. i and j are used for indexing.       */
     unsigned long m, n;
@@ -34,7 +35,7 @@ Fresnel_Transform_Norm_Double(rssringoccs_TAUObj *tau, double *x_arr,
     double x, rcpr_F, rcpr_F2, cos_x, sin_x, abs_norm, real_norm;
 
     /*  exp_negative_ix is the Fresnel kernel, norm is the normalization.     */
-    rssringoccs_ComplexDouble exp_negative_ix, norm, integrand, arg;
+    tmpl_ComplexDouble exp_negative_ix, norm, integrand, arg;
 
     /*  Start with the central point in the Riemann sum. This is center of    *
      *  window function. That is, where w_func = 1. This is just T_in at      *
@@ -42,7 +43,7 @@ Fresnel_Transform_Norm_Double(rssringoccs_TAUObj *tau, double *x_arr,
     tau->T_out[center] = tau->T_in[center];
 
     /*  Initialize norm to zero, so we can loop over later.                   */
-    norm = rssringoccs_CDouble_Zero;
+    norm = tmpl_CDouble_Zero;
 
     /*  From symmetry we need only compute -W/2 to zero, so start at -n_pts.  */
     n = n_pts;
@@ -58,34 +59,33 @@ Fresnel_Transform_Norm_Double(rssringoccs_TAUObj *tau, double *x_arr,
         x = x_arr[m]*rcpr_F2;
 
         /*  Use Euler's Theorem to compute exp(-ix). Scale by window function.*/
-        cos_x = rssringoccs_Double_Cos(x);
-        sin_x = rssringoccs_Double_Sin(x);
-        arg = rssringoccs_CDouble_Rect(cos_x, -sin_x);
-        exp_negative_ix = rssringoccs_CDouble_Multiply_Real(w_func[m], arg);
+        cos_x = cos(x);
+        sin_x = sin(x);
+        arg = tmpl_CDouble_Rect(cos_x, -sin_x);
+        exp_negative_ix = tmpl_CDouble_Multiply_Real(w_func[m], arg);
 
         /*  Compute denominator portion of norm using a Riemann Sum.          */
-        arg  = rssringoccs_CDouble_Multiply_Real(2.0, exp_negative_ix);
-        norm = rssringoccs_CDouble_Add(norm, arg);
+        arg  = tmpl_CDouble_Multiply_Real(2.0, exp_negative_ix);
+        norm = tmpl_CDouble_Add(norm, arg);
 
         /*  Take advantage of the symmetry of the quadratic approximation.    *
          *  This cuts the number of computations roughly in half. If the T_in *
          *  pointer does not contain at least 2*n_pts+1 points, n_pts to the  *
          *  left and n_pts to the right of the center, then this will create  *
          *  a segmentation fault, crashing the program.                       */
-        integrand = rssringoccs_CDouble_Add(tau->T_in[center - n],
-                                            tau->T_in[center + n]);
-        integrand = rssringoccs_CDouble_Multiply(exp_negative_ix, integrand);
-        tau->T_out[center] = rssringoccs_CDouble_Add(tau->T_out[center],
-                                                     integrand);
-        n -= 1;
+        integrand = tmpl_CDouble_Add(tau->T_in[center - n],
+                                     tau->T_in[center + n]);
+        integrand = tmpl_CDouble_Multiply(exp_negative_ix, integrand);
+        tau->T_out[center] = tmpl_CDouble_Add(tau->T_out[center], integrand);
+        n--;
     }
 
-    norm  = rssringoccs_CDouble_Add_Real(1.0, norm);
-    abs_norm = rssringoccs_CDouble_Abs(norm);
-    real_norm = rssringoccs_Sqrt_Two / abs_norm;
+    norm  = tmpl_CDouble_Add_Real(1.0, norm);
+    abs_norm = tmpl_CDouble_Abs(norm);
+    real_norm = tmpl_Sqrt_Two / abs_norm;
 
     /*  Multiply result by the coefficient found in the Fresnel inverse.      *
      *  The 1/F term is omitted, since the F in the norm cancels this.        */
-    arg = rssringoccs_CDouble_Rect(0.5*real_norm, 0.5*real_norm);
-    tau->T_out[center] = rssringoccs_CDouble_Multiply(arg, tau->T_out[center]);
+    arg = tmpl_CDouble_Rect(0.5*real_norm, 0.5*real_norm);
+    tau->T_out[center] = tmpl_CDouble_Multiply(arg, tau->T_out[center]);
 }

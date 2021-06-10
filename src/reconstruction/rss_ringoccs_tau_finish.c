@@ -1,7 +1,8 @@
 
 #include <stdlib.h>
-#include <rss_ringoccs/include/rss_ringoccs_math.h>
-#include <rss_ringoccs/include/rss_ringoccs_complex.h>
+#include <math.h>
+#include <libtmpl/include/tmpl_math.h>
+#include <libtmpl/include/tmpl_complex.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 
 static void __resize_array(double **ptr, unsigned long start, unsigned long len)
@@ -19,10 +20,10 @@ static void __resize_array(double **ptr, unsigned long start, unsigned long len)
     *ptr = temp;
 }
 
-static void __resize_carray(rssringoccs_ComplexDouble **ptr,
+static void __resize_carray(tmpl_ComplexDouble **ptr,
                             unsigned long start, unsigned long len)
 {
-    rssringoccs_ComplexDouble *temp, *data;
+    tmpl_ComplexDouble *temp, *data;
     unsigned long n;
     temp = malloc(sizeof(*temp) * len);
     data = *ptr;
@@ -84,30 +85,27 @@ void rssringoccs_Tau_Finish(rssringoccs_TAUObj* tau)
     __resize_array(&tau->p_norm_vals, tau->start, len);
     __resize_array(&tau->phase_rad_vals, tau->start, len);
 
-    factor = rssringoccs_Double_Log(tau->dx_km / tau->res);
+    factor = log(tau->dx_km / tau->res);
 
     for (n = 0; n < len; ++n)
     {
-        tau->power_vals[n] = rssringoccs_CDouble_Abs_Squared(tau->T_out[n]);
-        tau->phase_vals[n] = rssringoccs_CDouble_Argument(tau->T_out[n]);
+        tau->power_vals[n] = tmpl_CDouble_Abs_Squared(tau->T_out[n]);
+        tau->phase_vals[n] = tmpl_CDouble_Argument(tau->T_out[n]);
 
-        mu = rssringoccs_Double_Sin(rssringoccs_Double_Abs(tau->B_rad_vals[n]));
-        tau->tau_vals[n] = -mu*rssringoccs_Double_Log(tau->power_vals[n]);
+        mu = sin(fabs(tau->B_rad_vals[n]));
+        tau->tau_vals[n] = -mu*log(tau->power_vals[n]);
         tau->tau_threshold_vals[n] = tau->raw_tau_threshold_vals[n] - factor*mu;
 
         if (tau->use_fwd)
         {
-            tau->p_norm_fwd_vals[n]
-                = rssringoccs_CDouble_Abs_Squared(tau->T_fwd[n]);
+            tau->p_norm_fwd_vals[n] = tmpl_CDouble_Abs_Squared(tau->T_fwd[n]);
 
             /*  We multiplied by (1+i)/F instead of (1-i)/F, which is what    *
              *  the forward transformation wants. (1-i)/(1+i) = -i, which     *
              *  translates to a translation in phase of 3 pi / 2, or -pi/2.   */
-            tau->phase_fwd_vals[n]
-                = rssringoccs_CDouble_Argument(tau->T_fwd[n]) -
-                  rssringoccs_Pi_By_Two;
-            tau->tau_fwd_vals[n]
-                = -mu*rssringoccs_Double_Log(tau->p_norm_fwd_vals[n]);
+            tau->phase_fwd_vals[n] = tmpl_CDouble_Argument(tau->T_fwd[n]) -
+                                      tmpl_Pi_By_Two;
+            tau->tau_fwd_vals[n] = -mu*log(tau->p_norm_fwd_vals[n]);
         }
     }
 

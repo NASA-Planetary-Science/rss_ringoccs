@@ -1,10 +1,11 @@
 #include <stdlib.h>
-#include <rss_ringoccs/include/rss_ringoccs_math.h>
-#include <rss_ringoccs/include/rss_ringoccs_string.h>
-#include <rss_ringoccs/include/rss_ringoccs_complex.h>
+#include <math.h>
+#include <libtmpl/include/tmpl_math.h>
+#include <libtmpl/include/tmpl_string.h>
+#include <libtmpl/include/tmpl_complex.h>
+#include <libtmpl/include/tmpl_optics.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_kernel.h>
-
 
 /*  Macro for checking if certain pointers in the tau object are NULL.        *
  *  Several of the inputs should NOT be NULL when calling this function. Note *
@@ -13,8 +14,8 @@
 #define CHECK_OLD_TAU_MEMBERS(var)                                             \
     if (tau->var == NULL)                                                      \
     {                                                                          \
-        tau->error_occurred = rssringoccs_True;                                \
-        tau->error_message = rssringoccs_strdup(                               \
+        tau->error_occurred = tmpl_True;                                \
+        tau->error_message = tmpl_strdup(                               \
             "\n\rError Encountered: rss_ringoccs\n"                            \
             "\r\trssringoccs_Tau_Compute_Vars\n\n"                             \
             "\rInput tau has "#var" set to NULL. Returning.\n\n"               \
@@ -30,8 +31,8 @@
 #define CHECK_NEW_TAU_MEMBERS(var)                                             \
     if (tau->var != NULL)                                                      \
     {                                                                          \
-        tau->error_occurred = rssringoccs_True;                                \
-        tau->error_message = rssringoccs_strdup(                               \
+        tau->error_occurred = tmpl_True;                                \
+        tau->error_message = tmpl_strdup(                               \
             "\n\rError Encountered: rss_ringoccs\n"                            \
             "\r\trssringoccs_Tau_Compute_Vars\n\n"                             \
             "\rInput tau->"#var" is not NULL. It is likely you've already\n"   \
@@ -50,8 +51,8 @@
     /*  Check if malloc failed.                                              */\
     if (tau->var == NULL)                                                      \
     {                                                                          \
-        tau->error_occurred = rssringoccs_True;                                \
-        tau->error_message = rssringoccs_strdup(                               \
+        tau->error_occurred = tmpl_True;                                \
+        tau->error_message = tmpl_strdup(                               \
             "\n\rError Encountered: rss_ringoccs\n"                            \
             "\r\trssringoccs_Copy_DLP_Data_To_Tau\n\n"                         \
             "\rMalloc failed and returned NULL for "#var". Returning.\n\n"     \
@@ -100,25 +101,21 @@ void rssringoccs_Tau_Compute_Vars(rssringoccs_TAUObj *tau)
     for (n = 0; n < tau->arr_size; ++n)
     {
         /*  Compute the complex amplitude, T_hat_vals.                        */
-        tau->T_in[n] = rssringoccs_CDouble_Polar(
-            rssringoccs_Double_Sqrt(tau->p_norm_vals[n]),
-            tau->phase_rad_vals[n]
-        );
+        tau->T_in[n] = tmpl_CDouble_Polar(sqrt(tau->p_norm_vals[n]),
+                                          tau->phase_rad_vals[n]);
 
         /*  Compute the wavelength lambda.                                    */
         lambda_sky =
-            rssringoccs_Double_Frequency_To_Wavelength(tau->f_sky_hz_vals[n]);
+            tmpl_Double_Frequency_To_Wavelength(tau->f_sky_hz_vals[n]);
 
         /*  Use the wagelength to compute the wavenumber.                     */
-        tau->k_vals[n]
-            = rssringoccs_Double_Wavelength_To_Wavenumber(lambda_sky);
+        tau->k_vals[n] = tmpl_Double_Wavelength_To_Wavenumber(lambda_sky);
 
         /*  And finally, compute the Fresnel scale.                           */
-        tau->F_km_vals[n]
-            = rssringoccs_Double_Fresnel_Scale(lambda_sky,
-                                               tau->D_km_vals[n],
-                                               tau->phi_rad_vals[n],
-                                               tau->B_rad_vals[n]);
+        tau->F_km_vals[n] = rssringoccs_Fresnel_Scale(lambda_sky,
+                                                      tau->D_km_vals[n],
+                                                      tau->phi_rad_vals[n],
+                                                      tau->B_rad_vals[n]);
     }
     /*  End of for loop for k, T, and F.                                      */
 }

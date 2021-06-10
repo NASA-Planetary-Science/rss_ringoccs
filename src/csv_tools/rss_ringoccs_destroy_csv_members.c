@@ -40,30 +40,30 @@ void rssringoccs_Destroy_CSV_Members(rssringoccs_CSVData *csv)
         return;
 
     /*  Destroy every variable except the error_message.                      */
-    DESTROY_CSV_VAR(csv->B_rad_vals);
-    DESTROY_CSV_VAR(csv->D_km_vals);
-    DESTROY_CSV_VAR(csv->f_sky_hz_vals);
-    DESTROY_CSV_VAR(csv->p_norm_vals);
-    DESTROY_CSV_VAR(csv->raw_tau_vals);
-    DESTROY_CSV_VAR(csv->power_vals);
-    DESTROY_CSV_VAR(csv->phase_rad_vals);
-    DESTROY_CSV_VAR(csv->phase_vals);
-    DESTROY_CSV_VAR(csv->phi_rad_vals);
-    DESTROY_CSV_VAR(csv->phi_rl_rad_vals);
-    DESTROY_CSV_VAR(csv->raw_tau_threshold_vals);
-    DESTROY_CSV_VAR(csv->rho_corr_pole_km_vals);
-    DESTROY_CSV_VAR(csv->rho_corr_timing_km_vals);
-    DESTROY_CSV_VAR(csv->rho_dot_kms_vals);
-    DESTROY_CSV_VAR(csv->rho_km_vals);
-    DESTROY_CSV_VAR(csv->rx_km_vals);
-    DESTROY_CSV_VAR(csv->ry_km_vals);
-    DESTROY_CSV_VAR(csv->rz_km_vals);
-    DESTROY_CSV_VAR(csv->t_oet_spm_vals);
-    DESTROY_CSV_VAR(csv->t_ret_spm_vals);
-    DESTROY_CSV_VAR(csv->t_set_spm_vals);
-    DESTROY_CSV_VAR(csv->tau_rho);
-    DESTROY_CSV_VAR(csv->tau_power);
-    DESTROY_CSV_VAR(csv->tau_vals);
+    DESTROY_CSV_VAR(csv->B_rad_vals)
+    DESTROY_CSV_VAR(csv->D_km_vals)
+    DESTROY_CSV_VAR(csv->f_sky_hz_vals)
+    DESTROY_CSV_VAR(csv->p_norm_vals)
+    DESTROY_CSV_VAR(csv->raw_tau_vals)
+    DESTROY_CSV_VAR(csv->power_vals)
+    DESTROY_CSV_VAR(csv->phase_rad_vals)
+    DESTROY_CSV_VAR(csv->phase_vals)
+    DESTROY_CSV_VAR(csv->phi_rad_vals)
+    DESTROY_CSV_VAR(csv->phi_rl_rad_vals)
+    DESTROY_CSV_VAR(csv->raw_tau_threshold_vals)
+    DESTROY_CSV_VAR(csv->rho_corr_pole_km_vals)
+    DESTROY_CSV_VAR(csv->rho_corr_timing_km_vals)
+    DESTROY_CSV_VAR(csv->rho_dot_kms_vals)
+    DESTROY_CSV_VAR(csv->rho_km_vals)
+    DESTROY_CSV_VAR(csv->rx_km_vals)
+    DESTROY_CSV_VAR(csv->ry_km_vals)
+    DESTROY_CSV_VAR(csv->rz_km_vals)
+    DESTROY_CSV_VAR(csv->t_oet_spm_vals)
+    DESTROY_CSV_VAR(csv->t_ret_spm_vals)
+    DESTROY_CSV_VAR(csv->t_set_spm_vals)
+    DESTROY_CSV_VAR(csv->tau_rho)
+    DESTROY_CSV_VAR(csv->tau_power)
+    DESTROY_CSV_VAR(csv->tau_vals)
 }
 /*  End of rssringoccs_Destroy_CSV_Members.                                   */
 

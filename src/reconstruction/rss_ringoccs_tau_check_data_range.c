@@ -82,9 +82,8 @@
 
 /*  Include the necessary header files.                                       */
 #include <stdlib.h>
-#include <stdio.h>
-#include <rss_ringoccs/include/rss_ringoccs_bool.h>
-#include <rss_ringoccs/include/rss_ringoccs_string.h>
+#include <libtmpl/include/tmpl_bool.h>
+#include <libtmpl/include/tmpl_string.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 
 /*  Function for checking the data range of a rssringoccs_TAUObj pointer.     */
@@ -118,8 +117,8 @@ void rssringoccs_Tau_Check_Data_Range(rssringoccs_TAUObj *tau)
     /*  Check that tau->dx_km is not zero to avoid divide-by-zero.            */
     if (tau->dx_km <= 0.0)
     {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Check_Tau_Data_Range\n\n"
             "\rtau->dx_km is not positive. Returning.\n"
@@ -149,15 +148,14 @@ void rssringoccs_Tau_Check_Data_Range(rssringoccs_TAUObj *tau)
          *  check if n < nw_pts. If it is, we raise an error and return.      */
         if (n < nw_pts)
         {
-            tau->error_occurred = rssringoccs_True;
-            tau->error_message = rssringoccs_strdup(
+            tau->error_occurred = tmpl_True;
+            tau->error_message = tmpl_strdup(
                 "\n\rError Encountered: rss_ringoccs\n"
                 "\r\trssringoccs_Check_Tau_Data_Range\n\n"
                 "\rNot enough data to perform diffraction correction. The\n"
                 "\rrequested region has points with a window width that go\n"
                 "\rbeyond the minimum radius you have. Returning.\n"
             );
-            printf("%lu %lu\n", n, nw_pts);
             return;
         }
 
@@ -169,20 +167,17 @@ void rssringoccs_Tau_Check_Data_Range(rssringoccs_TAUObj *tau)
          *  illegal values. Return with error.                                */
         if (current_max > tau->arr_size)
         {
-            tau->error_occurred = rssringoccs_True;
-            tau->error_message = rssringoccs_strdup(
+            tau->error_occurred = tmpl_True;
+            tau->error_message = tmpl_strdup(
                 "\n\rError Encountered: rss_ringoccs\n"
                 "\r\trssringoccs_Check_Tau_Data_Range\n\n"
                 "\rNot enough data to perform diffraction correction. The\n"
                 "\rrequested region has points with a window width that go\n"
                 "\rbeyond the maximum radius you have. Returning.\n"
             );
-            printf("%lu %lu\n", n, nw_pts);
             return;
         }
     }
     /*  End of for loop computing the number of points for the windows.       */
-
-
 }
 /*  End of rssringoccs_Check_Tau_Data_Range.                                  */

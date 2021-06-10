@@ -181,10 +181,11 @@
  *  2020/09/06 (Ryan Maguire):                                                *
  *      Removed FFTW dependence. Replaced with new rss_ringoccs FFT routine.  *
  ******************************************************************************/
+#include <math.h>
 #include <stdlib.h>
-#include <rss_ringoccs/include/rss_ringoccs_math.h>
-#include <rss_ringoccs/include/rss_ringoccs_bool.h>
-#include <rss_ringoccs/include/rss_ringoccs_string.h>
+#include <libtmpl/include/tmpl_math.h>
+#include <libtmpl/include/tmpl_bool.h>
+#include <libtmpl/include/tmpl_string.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 
@@ -235,12 +236,12 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj *tau)
                   unsigned long, unsigned long);
 
     /*  This should remain at false.                                          */
-    tau->error_occurred = rssringoccs_False;
+    tau->error_occurred = tmpl_False;
 
     if (tau->use_norm)
-        FresT = Fresnel_Transform_Norm_Double;
+        FresT = rssringoccs_Fresnel_Transform_Norm;
     else
-        FresT = Fresnel_Transform_Double;
+        FresT = rssringoccs_Fresnel_Transform;
 
     if (tau->use_fwd)
         fwd_factor = -1.0;
@@ -275,7 +276,7 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj *tau)
 
     /*  And now, some more variables we'll be using.                          */
     two_dx = 2.0*dx;
-    nw_pts = ((long)(w_init / two_dx)) + 1;
+    nw_pts = (unsigned long)(w_init / two_dx) + 1UL;
 
     /* Check to ensure you have enough data to the left.                      */
     rssringoccs_Tau_Check_Data_Range(tau);
@@ -294,8 +295,8 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj *tau)
      *  that it's values range from -W/2 to zero, W begin the window width.   */
     if (!(x_arr))
     {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
             "\n\rError Encountered: rss_ringoccs\n\n"
             "\r\tDiffractionCorrectionFresnel\n\n"
             "\rMalloc failed and returned NULL for x_arr. Returning.\n\n"
@@ -305,8 +306,8 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj *tau)
 
     if (!(w_func))
     {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
             "\n\rError Encountered: rss_ringoccs\n\n"
             "\r\tDiffractionCorrectionFresnel\n\n"
             "\rMalloc failed and returned NULL for w_func. Returning.\n\n"
@@ -321,7 +322,7 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj *tau)
     {
         /*  The independent variable is pi/2 * ((rho-rho0)/F)^2. Compute      *
          *  part of this. The 1/F^2 part is introduced later.                 */
-        x_arr[m] *= rssringoccs_Pi_By_Two*x_arr[m];
+        x_arr[m] *= tmpl_Pi_By_Two*x_arr[m];
 
         /*  Use the fwd_factor to computer forward or inverse transform.      */
         x_arr[m] *= fwd_factor;
@@ -337,11 +338,11 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj *tau)
         {
             /* Reset w_init and recompute window function.                */
             w_init = tau->w_km_vals[center];
-            nw_pts = ((long)(w_init / two_dx))+1;
+            nw_pts = ((unsigned long)(w_init / two_dx)) + 1UL;
 
             /*  Reallocate memory, since the sizes of the arrays changed. */
-            w_func = (double *)realloc(w_func, sizeof(double)*nw_pts);
-            x_arr  = (double *)realloc(x_arr, sizeof(double)*nw_pts);
+            w_func = realloc(w_func, sizeof(double)*nw_pts);
+            x_arr  = realloc(x_arr, sizeof(double)*nw_pts);
 
             /*  Reset the x_arr array to range between -W/2 and zero.     */
             rssringoccs_Tau_Reset_Window(x_arr, w_func, dx,
@@ -350,7 +351,7 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj *tau)
             /* Compute Window Functions, and compute pi/2 * x^2.          */
             for(n=0; n<nw_pts; ++n)
             {
-                x_arr[n] *= rssringoccs_Pi_By_Two*x_arr[n];
+                x_arr[n] *= tmpl_Pi_By_Two*x_arr[n];
 
                 /*  Again, if forward calculation is set, negate x_arr.   */
                 x_arr[n] *= fwd_factor;

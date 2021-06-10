@@ -1,5 +1,5 @@
-#include <rss_ringoccs/include/rss_ringoccs_math.h>
-#include <rss_ringoccs/include/rss_ringoccs_complex.h>
+#include <math.h>
+#include <libtmpl/include/tmpl_complex.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_kernel.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 #include <stdlib.h>
@@ -68,10 +68,10 @@
  ******************************************************************************/
 
 void
-Fresnel_Transform_Quadratic_Double(rssringoccs_TAUObj *tau,
-                                   double *w_func,
-                                   unsigned long n_pts,
-                                   unsigned long center)
+rssringoccs_Fresnel_Transform_Quadratic(rssringoccs_TAUObj *tau,
+                                        double *w_func,
+                                        unsigned long n_pts,
+                                        unsigned long center)
 {
     /*  Declare all necessary variables. i and j are used for indexing.       */
     unsigned long i, ind[4], offset;
@@ -81,7 +81,7 @@ Fresnel_Transform_Quadratic_Double(rssringoccs_TAUObj *tau,
     double psi, phi, sin_psi, cos_psi;
     double psi_half_mean, psi_half_diff;
     double psi_full_mean, psi_full_diff;
-    rssringoccs_ComplexDouble exp_psi, integrand;
+    tmpl_ComplexDouble exp_psi, integrand;
 
     rcpr_w = 1.0 / tau->w_km_vals[center];
     rcpr_w_sq = rcpr_w * rcpr_w;
@@ -93,17 +93,17 @@ Fresnel_Transform_Quadratic_Double(rssringoccs_TAUObj *tau,
     ind[3] = n_pts - 1;
 
     /*  Initialize T_out and norm to zero so we can loop over later.          */
-    tau->T_out[center] = rssringoccs_CDouble_Zero;
+    tau->T_out[center] = tmpl_CDouble_Zero;
 
     /*  Symmetry is lost without the Legendre polynomials, or Fresnel         *
      *  quadratic. Must compute everything from -W/2 to W/2.                  */
-    offset = center-(unsigned long)((n_pts-1)/2);
+    offset = center - (n_pts - 1UL) / 2UL;
 
      /*  Use a Riemann Sum to approximate the Fresnel Inverse Integral.        */
     for (i = 0; i < 4; ++i)
     {
 
-        phi = Newton_Raphson_Fresnel_Psi(
+        phi = rssringoccs_Newton_Raphson_Fresnel_Psi(
             tau->k_vals[center],
             tau->rho_km_vals[center],
             tau->rho_km_vals[offset + ind[i]],
@@ -115,7 +115,7 @@ Fresnel_Transform_Quadratic_Double(rssringoccs_TAUObj *tau,
             tau->toler
         );
 
-        psi_n[i] = rssringoccs_Double_Fresnel_Psi(
+        psi_n[i] = rssringoccs_Fresnel_Psi(
             tau->k_vals[center],
             tau->rho_km_vals[center],
             tau->rho_km_vals[offset + ind[i]],
@@ -140,17 +140,15 @@ Fresnel_Transform_Quadratic_Double(rssringoccs_TAUObj *tau,
         psi = C[1]*x + C[0];
         psi = psi*x;
 
-        cos_psi = w_func[i]*rssringoccs_Double_Cos(psi);
-        sin_psi = w_func[i]*rssringoccs_Double_Sin(psi);
-        exp_psi = rssringoccs_CDouble_Rect(cos_psi, -sin_psi);
-        integrand = rssringoccs_CDouble_Multiply(exp_psi, tau->T_in[offset]);
-        tau->T_out[center] = rssringoccs_CDouble_Add(tau->T_out[center],
-                                                     integrand);
+        cos_psi = w_func[i]*cos(psi);
+        sin_psi = w_func[i]*sin(psi);
+        exp_psi = tmpl_CDouble_Rect(cos_psi, -sin_psi);
+        integrand = tmpl_CDouble_Multiply(exp_psi, tau->T_in[offset]);
+        tau->T_out[center] = tmpl_CDouble_Add(tau->T_out[center], integrand);
         offset += 1;
     }
 
     /*  Multiply result by the coefficient found in the Fresnel inverse.      */
-    integrand = rssringoccs_CDouble_Rect(factor, factor);
-    tau->T_out[center] = rssringoccs_CDouble_Multiply(integrand,
-                                                      tau->T_out[center]);
+    integrand = tmpl_CDouble_Rect(factor, factor);
+    tau->T_out[center] = tmpl_CDouble_Multiply(integrand, tau->T_out[center]);
 }

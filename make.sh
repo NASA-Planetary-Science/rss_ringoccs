@@ -36,6 +36,8 @@ else
     LinkerArgs="-O3 -I/usr/local/include/ -flto -shared -o $SONAME -lm"
 fi
 
+LinkerArgs="$LinkerArgs -ltmpl"
+
 # Location where the .h files will be stored.
 INCLUDE_TARGET=/usr/local/include/rss_ringoccs
 
@@ -126,6 +128,9 @@ $CC ./*.o $LinkerArgs
 echo "Moving to /usr/local/lib/librssringoccs.so"
 sudo mv $SONAME $SODIR
 
+echo "Cleaning up..."
+rm -f *.so *.o
+
 LDPATH=/usr/local/lib
 if [[ $LD_LIBRARY_PATH == "" ]]; then
     CREATE_NEW_LD_PATH="LD_LIBRARY_PATH=$LDPATH"
@@ -140,3 +145,16 @@ elif [[ $LD_LIBRARY_PATH != *"$LDPATH"* ]]; then
     echo "export LD_LIBRARY_PATH" >> ~/.bashrc
     source ~/.bashrc
 fi
+
+
+echo -e "\nBuilding modules...\n"
+python3 setup.py config build_ext --inplace
+
+rm -rf build/
+
+#   Move the compiled shared objects (.so) files to the rss_ringoccs/ folder.
+#   This way you can import them directly into python if the rss_ringoccs
+#   package is in your path.
+mv *.so ./rss_ringoccs/
+
+

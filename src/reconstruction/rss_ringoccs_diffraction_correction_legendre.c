@@ -1,8 +1,8 @@
 #include <stdlib.h>
-#include <stdio.h>
-#include <rss_ringoccs/include/rss_ringoccs_math.h>
+#include <math.h>
+#include <libtmpl/include/tmpl_math.h>
+#include <libtmpl/include/tmpl_special_functions.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
-#include <rss_ringoccs/include/rss_ringoccs_special_functions.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 
 /******************************************************************************
@@ -41,10 +41,10 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
     unsigned long i, nw_pts, center;
 
     /*  Variable for the number of Legendre coefficients to be computed.      */
-    unsigned char poly_order;
+    unsigned int poly_order;
 
     /*  IsEven is a boolean for determining the parity of the polynomial.     */
-    rssringoccs_Bool IsEven;
+    tmpl_Bool IsEven;
 
     /*  Various other variables needed throughout.                            */
     double w_init, dx, two_dx, cosb, sinp, cosp, Legendre_Coeff;
@@ -57,7 +57,7 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
                   unsigned long, unsigned long);
 
     /*  This should remain at false.                                          */
-    tau->error_occurred = rssringoccs_False;
+    tau->error_occurred = tmpl_False;
 
     /*  Check that the pointers to the data are not NULL.                     */
     rssringoccs_Tau_Check_Data(tau);
@@ -71,9 +71,9 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
      *  tau->order variable is an odd number, this corresponds to an even     *
      *  polynomial and vice versa. Set IsEven accordingly.                    */
     if (tau->order & 1)
-        IsEven = rssringoccs_True;
+        IsEven = tmpl_True;
     else
-        IsEven = rssringoccs_False;
+        IsEven = tmpl_False;
 
     /*  Select the appropriate Fresnel transform and set poly_order.          */
     if (IsEven)
@@ -84,16 +84,16 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
     if (tau->use_norm)
     {
         if (IsEven)
-            FresT = Fresnel_Transform_Legendre_Norm_Even_Double;
+            FresT = rssringoccs_Fresnel_Transform_Legendre_Norm_Even;
         else
-            FresT = Fresnel_Transform_Legendre_Norm_Odd_Double;
+            FresT = rssringoccs_Fresnel_Transform_Legendre_Norm_Odd;
     }
     else
     {
         if (IsEven)
-            FresT = Fresnel_Transform_Legendre_Even_Double;
+            FresT = rssringoccs_Fresnel_Transform_Legendre_Even;
         else
-            FresT = Fresnel_Transform_Legendre_Odd_Double;
+            FresT = rssringoccs_Fresnel_Transform_Legendre_Odd;
     }
 
     /* Compute first window width and window function. */
@@ -112,7 +112,7 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
     w_init = tau->w_km_vals[center];
     dx     = tau->rho_km_vals[center+1] - tau->rho_km_vals[center];
     two_dx = 2.0*dx;
-    nw_pts = (long)(w_init / two_dx)+1;
+    nw_pts = (unsigned long)(w_init / two_dx) + 1UL;
 
     /* Check to ensure you have enough data to the left.                      */
     rssringoccs_Tau_Check_Data_Range(tau);
@@ -137,7 +137,7 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
                     ||    !(alt_legendre_p)    ||    !(fresnel_ker_coeffs))
     {
         /*  Malloc failed, return to calling function.                        */
-        tau->error_occurred = rssringoccs_True;
+        tau->error_occurred = tmpl_True;
         return;
     }
     else
@@ -156,26 +156,25 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
         Legendre_Coeff  = 0.5*Legendre_Coeff/(1.0-Legendre_Coeff);
 
         /* Compute Legendre Polynomials,                                      */
-        rssringoccs_Legendre_Polynomials(legendre_p, cosb*cosp, poly_order+1);
-        rssringoccs_Alt_Legendre_Polynomials(alt_legendre_p,
-                                             legendre_p, poly_order);
+        tmpl_Legendre_Polynomials(legendre_p, cosb*cosp, poly_order+1);
+        tmpl_Alt_Legendre_Polynomials(alt_legendre_p, legendre_p, poly_order);
 
         /*  Compute the coefficients using Cauchy Products. First compute     *
          *  the bottom triangle of the square in the product.                 */
-        rssringoccs_Fresnel_Kernel_Coefficients(fresnel_ker_coeffs, legendre_p,
-                                                alt_legendre_p, Legendre_Coeff,
-                                                poly_order);
+        tmpl_Fresnel_Kernel_Coefficients(fresnel_ker_coeffs, legendre_p,
+                                         alt_legendre_p, Legendre_Coeff,
+                                         poly_order);
 
         /*  If the window width changes significantly, recompute w_func.      */
         if (fabs(w_init - tau->w_km_vals[center]) >= two_dx)
         {
             /* Reset w_init and recompute window function.                    */
             w_init = tau->w_km_vals[center];
-            nw_pts = ((long)(w_init / two_dx))+1;
+            nw_pts = (unsigned long)(w_init / two_dx) + 1UL;
 
             /*  Reallocate x_arr and w_func since the sizes changed.          */
-            x_arr  = (double *)realloc(x_arr, sizeof(double)*nw_pts);
-            w_func = (double *)realloc(w_func, sizeof(double)*nw_pts);
+            x_arr  = realloc(x_arr, sizeof(double)*nw_pts);
+            w_func = realloc(w_func, sizeof(double)*nw_pts);
 
             /*  Recompute x_arr and w_func for the new sizes.                 */
             rssringoccs_Tau_Reset_Window(x_arr, w_func, dx, w_init, nw_pts, fw);

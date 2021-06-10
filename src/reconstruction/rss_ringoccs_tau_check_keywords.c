@@ -19,12 +19,12 @@
  *                    rss_ringoccs_tau_check_keywords                         *
  ******************************************************************************
  *  Purpose:                                                                  *
- *      Checks all of the keywords specified by a user for the tau object.
+ *      Checks all of the keywords specified by a user for the tau object.    *
  ******************************************************************************
  *                             DEFINED FUNCTIONS                              *
  ******************************************************************************
  *  Function Name:                                                            *
- *      rssringoccs_Tau_Check_Keywords:                                        *
+ *      rssringoccs_Tau_Check_Keywords:                                       *
  *  Purpose:                                                                  *
  *      Runs an error check on a rssringoccs_TAUObj pointer.                  *
  *  Arguments:                                                                *
@@ -78,9 +78,9 @@
 
 /*  Include the necessary header files.                                       */
 #include <stdlib.h>
-#include <rss_ringoccs/include/rss_ringoccs_bool.h>
-#include <rss_ringoccs/include/rss_ringoccs_math.h>
-#include <rss_ringoccs/include/rss_ringoccs_string.h>
+#include <libtmpl/include/tmpl_bool.h>
+#include <libtmpl/include/tmpl_math.h>
+#include <libtmpl/include/tmpl_string.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 
 /*  Function for checking the keyword arguments of a tau object.              */
@@ -97,8 +97,8 @@ void rssringoccs_Tau_Check_Keywords(rssringoccs_TAUObj *tau)
     /*  A valid resolution must be positive.                                  */
     if (tau->res <= 0.0)
     {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Check_Keywords\n\n"
             "\rInput res (resolution, in km) is not positive. Returning.\n\n"
@@ -109,8 +109,8 @@ void rssringoccs_Tau_Check_Keywords(rssringoccs_TAUObj *tau)
     /*  The Allen deviation must be positive.                                 */
     else if (tau->sigma <= 0.0)
     {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Check_Keywords\n\n"
             "\rInput sigma (Allen deviation) is not positive. Returning.\n\n"
@@ -119,20 +119,20 @@ void rssringoccs_Tau_Check_Keywords(rssringoccs_TAUObj *tau)
     }
 
     /*  The periapse is allowed to be between -2pi and 2pi, inclusive.        */
-    else if (tau->peri < -rssringoccs_Two_Pi)
+    else if (tau->peri < -tmpl_Two_Pi)
     {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Check_Keywords\n\n"
             "\rInput peri (periapse, in radians) less than -2pi. Returning.\n\n"
         );
         return;
     }
-    else if (tau->peri > rssringoccs_Two_Pi)
+    else if (tau->peri > tmpl_Two_Pi)
     {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Check_Keywords\n\n"
             "\rInput peri (periapse, in radians) greater than 2pi.\n"
@@ -144,8 +144,8 @@ void rssringoccs_Tau_Check_Keywords(rssringoccs_TAUObj *tau)
     /*  Eccentricity can be positive or zero. No negative values allowed.     */
     else if (tau->ecc < 0.0)
     {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Check_Keywords\n\n"
             "\rInput ecc (eccentricity) is negative. Returning.\n\n"
@@ -156,8 +156,8 @@ void rssringoccs_Tau_Check_Keywords(rssringoccs_TAUObj *tau)
     /*  Lastly, check the requested range values.                             */
     else if (tau->rng_list[0] < 0.0)
     {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Check_Keywords\n\n"
             "\rStarting value for range is negative. Returning.\n\n"
@@ -166,8 +166,8 @@ void rssringoccs_Tau_Check_Keywords(rssringoccs_TAUObj *tau)
     }
     else if (tau->rng_list[0] > tau->rng_list[1])
     {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Check_Keywords\n\n"
             "\rStarting value for range is greater than final value.\n"

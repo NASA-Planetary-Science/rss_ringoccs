@@ -69,7 +69,7 @@ typedef struct rssringoccs_TAUObj {
     double rng_list[2];
     double rng_req[2];
     double EPS;
-    unsigned char toler;
+    unsigned int toler;
     unsigned long start;
     unsigned long n_used;
     unsigned long arr_size;
@@ -83,7 +83,7 @@ typedef struct rssringoccs_TAUObj {
     char *error_message;
     char *wtype;
     char *psitype;
-    unsigned char order;
+    unsigned int order;
 } rssringoccs_TAUObj;
 
 typedef void (*rssringoccs_FresT)(rssringoccs_TAUObj *, double *,
@@ -137,7 +137,7 @@ rssringoccs_Destroy_Tau(rssringoccs_TAUObj **tau);
 
 extern void
 rssringoccs_Tau_Reset_Window(double *x_arr, double *w_func, double dx,
-                             double width, long nw_pts,
+                             double width, unsigned long nw_pts,
                              rssringoccs_window_func fw);
 
 /*  Functions that compute the Fresnel Transform on a TAUObj instance.        */

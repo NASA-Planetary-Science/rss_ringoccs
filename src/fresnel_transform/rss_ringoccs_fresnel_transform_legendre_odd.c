@@ -17,8 +17,8 @@
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
 
-#include <rss_ringoccs/include/rss_ringoccs_math.h>
-#include <rss_ringoccs/include/rss_ringoccs_complex.h>
+#include <math.h>
+#include <libtmpl/include/tmpl_complex.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
 /******************************************************************************
@@ -73,19 +73,20 @@
  *          The diffraction corrected profile.                                *
  ******************************************************************************/
 void
-Fresnel_Transform_Legendre_Odd_Double(rssringoccs_TAUObj *tau, double *x_arr,
-                                      double *w_func, double *coeffs,
-                                      unsigned long n_pts,
-                                      unsigned long center)
+rssringoccs_Fresnel_Transform_Legendre_Odd(rssringoccs_TAUObj *tau,
+                                           double *x_arr, double *w_func,
+                                           double *coeffs,
+                                           unsigned long n_pts,
+                                           unsigned long center)
 {
     /*  Declare all necessary variables. i, j, and k are used for indexing.   */
     unsigned long i, j;
-    unsigned char k;
+    unsigned int k;
 
     /*  Variables for the Fresnel kernel and ring radii.                      */
     double x, x2, psi, sin_psi, cos_psi;
     double psi_even, psi_odd, rcpr_D, factor;
-    rssringoccs_ComplexDouble exp_negative_psi, exp_positive_psi, integrand;
+    tmpl_ComplexDouble exp_negative_psi, exp_positive_psi, integrand;
 
     /*  Division is more expension than division, so store the reciprocal     *
      *  of D as a variable and compute with that.                             */
@@ -93,7 +94,7 @@ Fresnel_Transform_Legendre_Odd_Double(rssringoccs_TAUObj *tau, double *x_arr,
     factor = 0.5*tau->dx_km/tau->F_km_vals[center];
 
     /*  Initialize T_out to zero so we can loop over later.                   */
-    tau->T_out[center] = rssringoccs_CDouble_Zero;
+    tau->T_out[center] = tmpl_CDouble_Zero;
     j = n_pts;
 
     /*  Use a Riemann Sum to approximate the Fresnel Inverse Integral.        */
@@ -117,37 +118,34 @@ Fresnel_Transform_Legendre_Odd_Double(rssringoccs_TAUObj *tau, double *x_arr,
 
         /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
         psi = psi_even - psi_odd;
-        cos_psi = w_func[i]*rssringoccs_Double_Cos(psi);
-        sin_psi = w_func[i]*rssringoccs_Double_Sin(psi);
-        exp_negative_psi = rssringoccs_CDouble_Rect(cos_psi, -sin_psi);
+        cos_psi = w_func[i]*cos(psi);
+        sin_psi = w_func[i]*sin(psi);
+        exp_negative_psi = tmpl_CDouble_Rect(cos_psi, -sin_psi);
 
         /*  Compute the right side of exp(-ipsi) using Euler's Formula.       */
         psi = psi_even + psi_odd;
-        cos_psi = w_func[i]*rssringoccs_Double_Cos(psi);
-        sin_psi = w_func[i]*rssringoccs_Double_Sin(psi);
-        exp_positive_psi = rssringoccs_CDouble_Rect(cos_psi, -sin_psi);
+        cos_psi = w_func[i]*cos(psi);
+        sin_psi = w_func[i]*sin(psi);
+        exp_positive_psi = tmpl_CDouble_Rect(cos_psi, -sin_psi);
 
         /*  Compute the transform with a Riemann sum. If the T_in pointer     *
          *  does not contain at least 2*n_pts+1 points, n_pts to the left and *
          *  right of the center, then this will create a segmentation fault.  */
-        integrand = rssringoccs_CDouble_Multiply(exp_negative_psi,
-                                                 tau->T_in[center-j]);
-        tau->T_out[center] = rssringoccs_CDouble_Add(tau->T_out[center],
-                                                     integrand);
-        integrand = rssringoccs_CDouble_Multiply(exp_positive_psi,
-                                                 tau->T_in[center+j]);
-        tau->T_out[center] = rssringoccs_CDouble_Add(tau->T_out[center],
-                                                     integrand);
-        j -= 1;
+        integrand = tmpl_CDouble_Multiply(exp_negative_psi,
+                                          tau->T_in[center-j]);
+        tau->T_out[center] = tmpl_CDouble_Add(tau->T_out[center], integrand);
+        integrand = tmpl_CDouble_Multiply(exp_positive_psi,
+                                          tau->T_in[center+j]);
+        tau->T_out[center] = tmpl_CDouble_Add(tau->T_out[center], integrand);
+        j--;
     }
 
     /*  Add the central point in the Riemann sum. This is center of the       *
      *  window function. That is, where w_func = 1.                           */
-    tau->T_out[center] = rssringoccs_CDouble_Add(tau->T_out[center],
-                                                 tau->T_in[center]);
+    tau->T_out[center] = tmpl_CDouble_Add(tau->T_out[center],
+                                          tau->T_in[center]);
 
     /*  Multiply result by the coefficient found in the Fresnel inverse.      */
-    integrand = rssringoccs_CDouble_Rect(factor, factor);
-    tau->T_out[center] = rssringoccs_CDouble_Multiply(integrand,
-                                                      tau->T_out[center]);
+    integrand = tmpl_CDouble_Rect(factor, factor);
+    tau->T_out[center] = tmpl_CDouble_Multiply(integrand, tau->T_out[center]);
 }

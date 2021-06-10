@@ -178,6 +178,12 @@
  *  be included in your path. Also, if you are using the setup.py script      *
  *  provided then inclusion of these files should be done for you.            */
 #include <Python.h>
+#include <structmember.h>
+
+/*  To avoid compiler warnings about deprecated numpy stuff.                  */
+#define PY_SSIZE_T_CLEAN
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+
 #include <numpy/ndarraytypes.h>
 #include <numpy/ufuncobject.h>
 
@@ -187,21 +193,673 @@
 
 /*  This contains the PyDiffrecObj, using the C-Python API, which allows us   *
  *  to define the DiffractionCorrection class in C.                           */
-#include <rss_ringoccs/include/rss_ringoccs_bool.h>
-#include <rss_ringoccs/include/rss_ringoccs_math.h>
-#include <rss_ringoccs/include/rss_ringoccs_string.h>
-#include <rss_ringoccs/include/rss_ringoccs_complex.h>
+#include <libtmpl/include/tmpl_bool.h>
+#include <libtmpl/include/tmpl_math.h>
+#include <libtmpl/include/tmpl_string.h>
+#include <libtmpl/include/tmpl_complex.h>
+#include <libtmpl/include/tmpl_special_functions.h>
 #include <rss_ringoccs/include/rss_ringoccs_calibration.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_kernel.h>
-#include <rss_ringoccs/include/rss_ringoccs_special_functions.h>
 
-#include "rss_ringoccs_py_api.h"
-#include "rss_ringoccs_Py_DLP_to_C_DLP.c"
-#include "rss_ringoccs_C_Tau_to_Py_Tau.c"
-#include "rss_ringoccs_Get_Py_Perturb.c"
-#include "rss_ringoccs_Get_Py_Range.c"
-#include "rss_ringoccs_Get_Py_Vars_From_Self.c"
+typedef struct {
+    PyObject_HEAD
+    PyObject   *B_rad_vals;
+    PyObject   *D_km_vals;
+    PyObject   *F_km_vals;
+    PyObject   *f_sky_hz_vals;
+    PyObject   *p_norm_fwd_vals;
+    PyObject   *p_norm_vals;
+    PyObject   *phase_fwd_vals;
+    PyObject   *phase_rad_vals;
+    PyObject   *phase_vals;
+    PyObject   *phi_rad_vals;
+    PyObject   *phi_rl_rad_vals;
+    PyObject   *power_vals;
+    PyObject   *T_hat_vals;
+    PyObject   *T_hat_fwd_vals;
+    PyObject   *T_vals;
+    PyObject   *raw_tau_threshold_vals;
+    PyObject   *rev_info;
+    PyObject   *input_vars;
+    PyObject   *input_kwds;
+    PyObject   *rho_corr_pole_km_vals;
+    PyObject   *rho_corr_timing_km_vals;
+    PyObject   *rho_dot_kms_vals;
+    PyObject   *rho_km_vals;
+    PyObject   *t_oet_spm_vals;
+    PyObject   *t_ret_spm_vals;
+    PyObject   *t_set_spm_vals;
+    PyObject   *tau_threshold_vals;
+    PyObject   *tau_vals;
+    PyObject   *tau_fwd_vals;
+    PyObject   *w_km_vals;
+    PyObject   *dathist;
+    PyObject   *history;
+    PyObject   *rx_km_vals;
+    PyObject   *ry_km_vals;
+    PyObject   *rz_km_vals;
+    tmpl_Bool   bfac;
+    tmpl_Bool   use_fwd;
+    tmpl_Bool   use_norm;
+    tmpl_Bool   verbose;
+    double      ecc;
+    double      input_res;
+    double      peri;
+    double      res_factor;
+    double      sigma;
+    const char *psitype;
+    const char *wtype;
+} PyDiffrecObj;
+
+
+/*  Macro for raising the appropriate python error if the DLP instance is     *
+ *  missing an attribute. This is equivalent to the following in python       *
+ *      if not hasattr(tauin, attr_name):                                     *
+ *          raise AttributeError(                                             *
+ *              """                                                           *
+ *              Error message                                                 *
+ *              """                                                           *
+ *          )                                                                 *
+ *      else:                                                                 *
+ *          pass                                                              *
+ *  It then checks that the variable is a numpy array using numpy's API. This *
+ *  is equivalent to the following:                                           *
+ *      if not isinstance(varname, numpy.ndarray):                            *
+ *          raise TypeError(                                                  *
+ *              """                                                           *
+ *              Error message                                                 *
+ *              """                                                           *
+ *          )                                                                 *
+ *      else:                                                                 *
+ *          pass                                                              *
+ *  Next we try to convert the numpy array to an array of double, which is    *
+ *  equivalent to using the astype method of the ndarray numpy object:        *
+ *      arr = arr.astype(float)                                               *
+ *  Finally, we check that the array is one dimensional and that it has the   *
+ *  same number of elements as the input rho_km_vals array. If this passes,   *
+ *  we pointer the pointer ptr to the data of the array.                      */
+static double *__extract_data(rssringoccs_DLPObj *dlp, PyObject *py_dlp,
+                              const char *var_name)
+{
+    PyObject *tmp;
+    PyObject *arr;
+    unsigned long len;
+
+    if (dlp == NULL)
+        return NULL;
+
+    if (dlp->error_occurred)
+        return NULL;
+
+    if (!PyObject_HasAttrString(py_dlp, var_name))
+    {
+        dlp->error_occurred = tmpl_True;
+        dlp->error_message = malloc(sizeof(*dlp->error_message) * 256);
+        sprintf(
+            dlp->error_message,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.DiffractionCorrection\n\n"
+            "\rInput DLP Instance is missing the following attribute:\n"
+            "\r\t%s\n\n",
+            var_name
+        );
+        return NULL;
+    }
+    else
+        tmp = PyObject_GetAttrString(py_dlp, var_name);
+
+    if (!PyArray_Check(tmp))
+    {
+        dlp->error_occurred = tmpl_True;
+        dlp->error_message = malloc(sizeof(*dlp->error_message) * 256);
+        sprintf(
+            dlp->error_message,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.DiffractionCorrection\n\n"
+            "\r%s must be a numpy array.\n",
+            var_name
+        );
+        return NULL;
+    }
+    else
+        arr = PyArray_FromObject(tmp, NPY_DOUBLE, 1, 1);
+
+    len = (unsigned long)PyArray_DIMS((PyArrayObject *)arr)[0];
+
+    /*  If PyArray_FromObject failed arr should be NULL. If so, raise error.  */
+    if (!arr)
+    {
+        dlp->error_occurred = tmpl_True;
+        dlp->error_message = malloc(sizeof(*dlp->error_message) * 256);
+        sprintf(
+            dlp->error_message,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.DiffractionCorrection\n\n"
+            "\r%s must be a numpy array.\n",
+            var_name
+        );
+        return NULL;
+    }
+
+    /*  Currently we only allow for one dimensional inputs.                   */
+    else if (PyArray_NDIM((PyArrayObject *)arr) != 1)
+    {
+        dlp->error_occurred = tmpl_True;
+        dlp->error_message = malloc(sizeof(*dlp->error_message) * 256);
+        sprintf(
+            dlp->error_message,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.DiffractionCorrection\n\n"
+            "\r%s must be a one-dimensional numpy array.\n",
+            var_name
+        );
+        return NULL;
+    }
+
+    /*  arr should have the same number of elements as rho_km_vals.           */
+    else if (len != dlp->arr_size)
+    {
+        dlp->error_occurred = tmpl_True;
+        dlp->error_message = malloc(sizeof(*dlp->error_message) * 256);
+        sprintf(
+            dlp->error_message,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.DiffractionCorrection\n\n"
+            "\r%s and rho_km_vals have a different number of elements.\n",
+            var_name
+        );
+        return NULL;
+    }
+
+    /*  If every passed, set ptr to point to the data inside the array arr.   */
+    return (double *)PyArray_DATA((PyArrayObject *)arr);;
+}
+
+rssringoccs_DLPObj *rssringoccs_Py_DLP_to_C_DLP(PyObject *py_dlp)
+{
+    PyObject *tmp;
+    PyObject *arr;
+    rssringoccs_DLPObj *dlp;
+
+    if (py_dlp == NULL)
+        return NULL;
+
+    dlp = malloc(sizeof(*dlp));
+    if (dlp == NULL)
+        return dlp;
+
+    dlp->error_occurred = tmpl_False;
+    dlp->error_message = NULL;
+
+    if (py_dlp == NULL)
+    {
+        dlp->error_occurred = tmpl_True;
+        dlp->error_message = tmpl_strdup(
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.DiffractionCorrection\n\n"
+            "\rInput DLP Instance is NULL.\n"
+        );
+        return dlp;
+    }
+
+    /*  Next we're going to run error checks on the input numpy arrays which  *
+     *  should be contained inside of the DLPInst object. We'll check that    *
+     *  these attributes exist, that they are numpy arrays, are 1 dimensional,*
+     *  and have the same number of elements as rho_km_vals. We'll also       *
+     *  convert the arrays to double and retrieve a pointer to the data.      *
+     *  First, we need to make sure rho_km_vals is a legal numpy array and    *
+     *  extract the length of it. Check that rho_km_vals exists in DLPInst.   */
+    if (!PyObject_HasAttrString(py_dlp, "rho_km_vals"))
+    {
+        dlp->error_occurred = tmpl_True;
+        dlp->error_message = tmpl_strdup(
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.DiffractionCorrection\n\n"
+            "\rInput DLP Instance is missing the following attribute:\n"
+            "\r\trho_km_vals\n\n"
+        );
+        return dlp;
+    }
+
+    /*  If it exists, get a pointer to it.                                    */
+    else
+        tmp = PyObject_GetAttrString(py_dlp, "rho_km_vals");
+
+    /*  Now make sure rho_km_vals is a numpy array.                           */
+    if (!PyArray_Check(tmp))
+    {
+        dlp->error_occurred = tmpl_True;
+        dlp->error_message = tmpl_strdup(
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.DiffractionCorrection\n\n"
+            "\rrho_km_vals must be a numpy array.\n"
+        );
+        return dlp;
+    }
+
+    /*  If rho_km_vals is a numpy array, try to convert it to double.         */
+    else
+        arr = PyArray_FromObject(tmp, NPY_DOUBLE, 1, 1);
+
+    /*  If PyArray_FromObject failed arr should be NULL. If so, raise error. */
+    if (!arr)
+    {
+        dlp->error_occurred = tmpl_True;
+        dlp->error_message = tmpl_strdup(
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.DiffractionCorrection\n\n"
+            "\rCould not convert rho_km_vals to double array. Input is most\n"
+            "\rlikely complex numbers or contains a string.\n\n"
+        );
+        return dlp;
+    }
+
+    /*  Currently we only allow for one dimensional inputs.                   */
+    else if (PyArray_NDIM((PyArrayObject *)arr) != 1)
+    {
+        dlp->error_occurred = tmpl_True;
+        dlp->error_message = tmpl_strdup(
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tdiffrec.DiffractionCorrection\n\n"
+            "\rrho_km_vals must be a one-dimensional numpy array.\n"
+        );
+        return dlp;
+    }
+
+    /*  If every passed, set tau.rho_km_vals to point to the data inside arr. */
+    dlp->rho_km_vals = (double *)PyArray_DATA((PyArrayObject *)arr);
+    dlp->arr_size = PyArray_DIMS((PyArrayObject *)arr)[0];
+
+    dlp->p_norm_vals      = __extract_data(dlp, py_dlp, "p_norm_vals");
+    dlp->phase_rad_vals   = __extract_data(dlp, py_dlp, "phase_rad_vals");
+    dlp->phi_rad_vals     = __extract_data(dlp, py_dlp, "phi_rad_vals");
+    dlp->phi_rl_rad_vals  = __extract_data(dlp, py_dlp, "phi_rl_rad_vals");
+    dlp->B_rad_vals       = __extract_data(dlp, py_dlp, "B_rad_vals");
+    dlp->D_km_vals        = __extract_data(dlp, py_dlp, "D_km_vals");
+    dlp->f_sky_hz_vals    = __extract_data(dlp, py_dlp, "f_sky_hz_vals");
+    dlp->rho_dot_kms_vals = __extract_data(dlp, py_dlp, "rho_dot_kms_vals");
+    dlp->t_oet_spm_vals   = __extract_data(dlp, py_dlp, "t_oet_spm_vals");
+    dlp->t_ret_spm_vals   = __extract_data(dlp, py_dlp, "t_ret_spm_vals");
+    dlp->t_set_spm_vals   = __extract_data(dlp, py_dlp, "t_set_spm_vals");
+    dlp->rx_km_vals       = __extract_data(dlp, py_dlp, "rx_km_vals");
+    dlp->ry_km_vals       = __extract_data(dlp, py_dlp, "ry_km_vals");
+    dlp->rz_km_vals       = __extract_data(dlp, py_dlp, "rz_km_vals");
+
+    dlp->rho_corr_pole_km_vals
+        = __extract_data(dlp, py_dlp, "rho_corr_pole_km_vals");
+
+    dlp->rho_corr_timing_km_vals
+        = __extract_data(dlp, py_dlp, "rho_corr_timing_km_vals");
+
+    dlp->raw_tau_threshold_vals
+        = __extract_data(dlp, py_dlp, "raw_tau_threshold_vals");
+
+    return dlp;
+}
+
+
+/*  This function frees the memory allocated to a pointer by malloc when the  *
+ *  corresponding variable is destroyed at the Python level. Without this you *
+ *  will have serious memory leaks, so do not remove!                         */
+static void capsule_cleanup(PyObject *capsule)
+{
+    void *memory = PyCapsule_GetPointer(capsule, NULL);
+    free(memory);
+}
+
+static void __set_var(PyObject **py_ptr, double **ptr, unsigned long len)
+{
+    PyObject *arr;
+    PyObject *capsule;
+    PyObject *tmp;
+    long pylength = (long)len;
+
+    arr     = PyArray_SimpleNewFromData(1, &pylength, NPY_DOUBLE, *ptr);
+    capsule = PyCapsule_New((void *) (*ptr), NULL, capsule_cleanup);
+
+    PyArray_SetBaseObject((PyArrayObject *)arr, capsule);
+
+    tmp = *py_ptr;
+    Py_INCREF(arr);
+    *py_ptr = arr;
+    Py_XDECREF(tmp);
+}
+
+static void __set_cvar(PyObject **py_ptr, tmpl_ComplexDouble **ptr,
+                       unsigned long len)
+{
+    PyObject *arr;
+    PyObject *capsule;
+    PyObject *tmp;
+    long pylength = (long)len;
+
+    arr     = PyArray_SimpleNewFromData(1, &pylength, NPY_CDOUBLE, *ptr);
+    capsule = PyCapsule_New((void *)(*ptr), NULL, capsule_cleanup);
+
+    PyArray_SetBaseObject((PyArrayObject *)arr, capsule);
+
+    tmp = *py_ptr;
+    Py_INCREF(arr);
+    *py_ptr = arr;
+    Py_XDECREF(tmp);
+}
+
+static void rssringoccs_C_Tau_to_Py_Tau(PyDiffrecObj *py_tau,
+                                        rssringoccs_TAUObj *tau)
+{
+    PyObject *tmp;
+    if (tau == NULL)
+        return;
+
+    if (tau->error_occurred)
+        return;
+
+    if (py_tau == NULL)
+    {
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\trssringoccs_C_Tau_to_Py_Tau\n\n"
+            "\rInput py_tau is NULL. Aborting.n"
+        );
+        return;
+    }
+
+    __set_cvar(&py_tau->T_hat_vals,      &tau->T_in,             tau->arr_size);
+    __set_cvar(&py_tau->T_vals,          &tau->T_out,            tau->arr_size);
+
+    __set_var(&py_tau->rho_km_vals,      &tau->rho_km_vals,      tau->arr_size);
+    __set_var(&py_tau->B_rad_vals,       &tau->B_rad_vals,       tau->arr_size);
+    __set_var(&py_tau->D_km_vals,        &tau->D_km_vals,        tau->arr_size);
+    __set_var(&py_tau->F_km_vals,        &tau->F_km_vals,        tau->arr_size);
+    __set_var(&py_tau->f_sky_hz_vals,    &tau->f_sky_hz_vals,    tau->arr_size);
+    __set_var(&py_tau->p_norm_vals,      &tau->p_norm_vals,      tau->arr_size);
+    __set_var(&py_tau->phase_rad_vals,   &tau->phase_rad_vals,   tau->arr_size);
+    __set_var(&py_tau->phase_vals,       &tau->phase_vals,       tau->arr_size);
+    __set_var(&py_tau->phi_rad_vals,     &tau->phi_rad_vals,     tau->arr_size);
+    __set_var(&py_tau->phi_rl_rad_vals,  &tau->phi_rl_rad_vals,  tau->arr_size);
+    __set_var(&py_tau->power_vals,       &tau->power_vals,       tau->arr_size);
+    __set_var(&py_tau->rho_dot_kms_vals, &tau->rho_dot_kms_vals, tau->arr_size);
+    __set_var(&py_tau->t_oet_spm_vals,   &tau->t_oet_spm_vals,   tau->arr_size);
+    __set_var(&py_tau->t_ret_spm_vals,   &tau->t_ret_spm_vals,   tau->arr_size);
+    __set_var(&py_tau->t_set_spm_vals,   &tau->t_set_spm_vals,   tau->arr_size);
+    __set_var(&py_tau->tau_vals,         &tau->tau_vals,         tau->arr_size);
+    __set_var(&py_tau->w_km_vals,        &tau->w_km_vals,        tau->arr_size);
+    __set_var(&py_tau->rx_km_vals,       &tau->rx_km_vals,       tau->arr_size);
+    __set_var(&py_tau->ry_km_vals,       &tau->ry_km_vals,       tau->arr_size);
+    __set_var(&py_tau->rz_km_vals,       &tau->rz_km_vals,       tau->arr_size);
+
+    __set_var(&py_tau->raw_tau_threshold_vals,
+              &tau->raw_tau_threshold_vals, tau->arr_size);
+
+    __set_var(&py_tau->rho_corr_pole_km_vals,
+              &tau->rho_corr_pole_km_vals, tau->arr_size);
+
+    __set_var(&py_tau->rho_corr_timing_km_vals,
+              &tau->rho_corr_timing_km_vals, tau->arr_size);
+
+    __set_var(&py_tau->tau_threshold_vals,
+              &tau->tau_threshold_vals, tau->arr_size);
+
+    if (tau->T_fwd == NULL)
+    {
+        tmp = py_tau->T_hat_fwd_vals;
+        Py_INCREF(Py_None);
+        py_tau->T_hat_fwd_vals = Py_None;
+        Py_XDECREF(tmp);
+
+        tmp = py_tau->p_norm_fwd_vals;
+        Py_INCREF(Py_None);
+        py_tau->p_norm_fwd_vals = Py_None;
+        Py_XDECREF(tmp);
+
+        tmp = py_tau->phase_fwd_vals;
+        Py_INCREF(Py_None);
+        py_tau->phase_fwd_vals = Py_None;
+        Py_XDECREF(tmp);
+
+        tmp = py_tau->tau_fwd_vals;
+        Py_INCREF(Py_None);
+        py_tau->tau_fwd_vals = Py_None;
+        Py_XDECREF(tmp);
+    }
+    else
+    {
+        __set_cvar(&py_tau->T_hat_fwd_vals, &tau->T_fwd, tau->arr_size);
+        __set_var(&py_tau->p_norm_fwd_vals,
+                  &tau->p_norm_fwd_vals, tau->arr_size);
+        __set_var(&py_tau->phase_fwd_vals, &tau->phase_fwd_vals, tau->arr_size);
+        __set_var(&py_tau->tau_fwd_vals, &tau->tau_fwd_vals, tau->arr_size);
+    }
+}
+
+/*  To edit:
+    PyObject          *rev_info;
+    PyObject          *history;
+*/
+
+static void
+rssringoccs_Get_Py_Perturb(rssringoccs_TAUObj *tau, PyObject *perturb)
+{
+    PyObject *iter;
+    PyObject *next;
+    unsigned int n;
+
+    if (tau == NULL)
+        return;
+
+    if (tau->error_occurred)
+        return;
+
+    /*  Check that the input perturb is a list with 5 elements.               */
+    if (!perturb)
+    {
+        for (n=0; n<5; ++n)
+            tau->perturb[n] = 0.0;
+    }
+
+    /*  If the user supplied a perturb list, parse it and extract values.     */
+    else if (PyList_Check(perturb))
+    {
+        /*  If the list is not the correct size, raise an error.              */
+        if (PyList_Size(perturb) != 5)
+        {
+            tau->error_occurred = tmpl_True;
+            tau->error_message = tmpl_strdup(
+                "\rError Encountered: rss_ringoccs\n"
+                "\r\trssringoccs_Get_Py_Perturb\n\n"
+                "\rInput perturb is a list but does not have 5 entries.\n"
+                "\rperturb must be a list of five real numbers.\n"
+            );
+            return;
+        }
+
+        iter = PyObject_GetIter(perturb);
+
+        /*  Loop over the elements of the list, see if they can be converted  *
+         *  to doubles, and store them in the tau->perturb variable.          */
+        for (n = 0; n < 5; ++n)
+        {
+            next = PyIter_Next(iter);
+
+            /*  If the element is an integer, convert to double and save it.  */
+            if (PyLong_Check(next))
+                tau->perturb[n] = PyLong_AsDouble(next);
+
+            /*  Convert from Python float to C double with PyFloat_AsDouble.  */
+            else if (PyFloat_Check(next))
+                tau->perturb[n] = PyFloat_AsDouble(next);
+
+            /*  Invalid data type for one of the entries. Return with error.  */
+            else
+            {
+                tau->error_occurred = tmpl_True;
+                tau->error_message = tmpl_strdup(
+                    "\rError Encountered: rss_ringoccs\n"
+                    "\r\trssringoccs_Get_Py_Perturb\n\n"
+                    "\rInput perturb has entries that are not real numbers.\n"
+                    "\rAll five entries for the perturb list must be numbers.\n"
+                );
+                return;
+            }
+        }
+    }
+
+    /*  The input was not a list. Return with error.                          */
+    else
+    {
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
+            "\rError Encountered: rss_ringoccs\n"
+            "\r\trssringoccs_Get_Py_Perturb\n\n"
+            "\rInput perturb is not a list.\n"
+        );
+        return;
+    }
+}
+
+static void rssringoccs_Get_Py_Range(rssringoccs_TAUObj *tau, PyObject *rngreq)
+{
+    PyObject *iter;
+    PyObject *next;
+    unsigned int n;
+
+    if (tau == NULL)
+        return;
+
+    if (tau->error_occurred)
+        return;
+
+    if (rngreq == NULL)
+    {
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\trssringoccs_C_Tau_to_Py_Tau\n\n"
+            "\rInput rngreq is NULL. Aborting.n"
+        );
+        return;
+    }
+
+    /*  If the rng variable is a string, make sure it is a legal value and    *
+     *  try to extract the corresponding values in kilometers.                */
+    if PyBytes_Check(rngreq)
+        rssringoccs_Tau_Set_Range_From_String(PyBytes_AsString(rngreq), tau);
+
+    /*  If the rng variable is a unicode object (type of string from python)  *
+     *  make sure it is a legal value and try to extract the corresponding    *
+     *  values in kilometers.                                                 */
+    else if PyUnicode_Check(rngreq)
+
+        /*  Convert the Python string to a C string via PyUnicode_AsUTF8. The *
+         *  C API recommends not altering the string, so we create a copy of  *
+         *  it using strcpy (from string.h).                                  */
+        rssringoccs_Tau_Set_Range_From_String(PyUnicode_AsUTF8(rngreq), tau);
+
+    /*  If the requested range is a list, try to parse the elements.          */
+    else if PyList_Check(rngreq)
+    {
+        if (PyList_Size(rngreq) != 2)
+        {
+            tau->error_occurred = tmpl_True;
+            tau->error_message = tmpl_strdup(
+                "\rError Encountered: rss_ringoccs\n"
+                "\r\trssringoccs_Get_Py_Range\n\n"
+                "\rInput range is a list but does not have 2 entries.\n"
+                "\rrng must be a list of two real numbers.\n"
+            );
+            return;
+        }
+
+        iter = PyObject_GetIter(rngreq);
+
+        for (n = 0; n < 2; ++n)
+        {
+            next = PyIter_Next(iter);
+
+            /*  Try to parse the elements. Return with error if this fails.   */
+            if (PyLong_Check(next))
+                tau->rng_list[n] = PyLong_AsDouble(next);
+            else if (PyFloat_Check(next))
+                tau->rng_list[n] = PyFloat_AsDouble(next);
+            else
+            {
+                tau->error_occurred = tmpl_True;
+                tau->error_message = tmpl_strdup(
+                    "\rError Encountered: rss_ringoccs\n"
+                    "\r\trssringoccs_Get_Py_Range\n\n"
+                    "\rInput rng has entries that are not real numbers.\n"
+                    "\rBoth entries for the rng list must be numbers.\n"
+                );
+                return;
+            }
+        }
+    }
+
+    /*  Illegal rng requested. Return with error.                             */
+    else
+    {
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\trssringoccs_Get_Py_Range\n\n"
+            "\rrng must be a list of two real numbers or a string.\n"
+            "\rAllowed strings are:\n"
+            "\r\tall               [1.0, 400000.0]\n"
+            "\r\tbesselbarnard     [120210.0, 120330.0]\n"
+            "\r\tbessel-barnard    [120210.0, 120330.0]\n"
+            "\r\tcringripples      [77690.0, 77760.0]\n"
+            "\r\tencke             [132900.0, 134200.0]\n"
+            "\r\tenckegap          [132900.0, 134200.0]\n"
+            "\r\therschel          [118100.0, 118380.0]\n"
+            "\r\therschelgap       [118100.0, 118380.0]\n"
+            "\r\thuygens           [117650.0, 117950.0]\n"
+            "\r\thuygensringlet    [117650.0, 117950.0]\n"
+            "\r\tjanusepimetheus   [96200.0, 96800.0]\n"
+            "\r\tjeffreys          [118900.0, 119000.0]\n"
+            "\r\tjeffreysgap       [118900.0, 119000.0]\n"
+            "\r\tkuiper            [119300.0, 119500.0]\n"
+            "\r\tkuipergap         [119300.0, 119500.0]\n"
+            "\r\tmaxwell           [87410.0, 87610.0]\n"
+            "\r\tmaxwellringlet    [87410.0, 87610.0]\n"
+            "\r\trussell           [118550.0, 118660.0]\n"
+            "\r\trussellgap        [118550.0, 118660.0]\n"
+            "\r\ttitan             [77870.0, 77930.0]\n"
+            "\r\ttitanringlet      [77870.0, 77930.0\n\n"
+        );
+        return;
+    }
+}
+
+static void rssringoccs_Get_Py_Vars_From_Self(rssringoccs_TAUObj *tau,
+                                       PyDiffrecObj *self)
+{
+    if (tau == NULL)
+        return;
+
+    if (tau->error_occurred)
+        return;
+
+    if (self == NULL)
+    {
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\trssringoccs_C_Tau_to_Py_Tau\n\n"
+            "\rInput self is NULL. Aborting.n"
+        );
+        return;
+    }
+
+    tau->sigma    = self->sigma;
+    tau->bfac     = self->bfac;
+    tau->ecc      = self->ecc;
+    tau->peri     = self->peri;
+    tau->use_fwd  = self->use_fwd;
+    tau->use_norm = self->use_norm;
+    tau->verbose  = self->verbose;
+}
 
 /*  Deallocating function for the DiffractionCorrection class.                */
 static void Diffrec_dealloc(PyDiffrecObj *self)
@@ -308,15 +966,15 @@ static int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
 
     /*  By default, forward computations are not run, FFTs are not used, and  *
      *  the run is silent (verbose is off).                                   */
-    self->use_fwd = rssringoccs_False;
-    self->verbose = rssringoccs_False;
+    self->use_fwd = tmpl_False;
+    self->verbose = tmpl_False;
 
     /*  Using the bfac guarantees accurate window sizes in the case of a poor *
      *  Allen deviation. Window normalization is also recommended since the   *
      *  integral is scaled by the width of the window, and hence for small    *
      *  window sizes the result might return close to zero.                   */
-    self->bfac = rssringoccs_True;
-    self->use_norm = rssringoccs_True;
+    self->bfac = tmpl_True;
+    self->use_norm = tmpl_True;
 
     /*  The default sigma value is the one for Cassini.                       */
     self->sigma = 2.0e-13;

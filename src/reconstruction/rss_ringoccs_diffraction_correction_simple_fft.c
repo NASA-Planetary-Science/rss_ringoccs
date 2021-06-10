@@ -1,10 +1,11 @@
 #include <stdlib.h>
-#include <rss_ringoccs/include/rss_ringoccs_math.h>
-#include <rss_ringoccs/include/rss_ringoccs_string.h>
+#include <math.h>
+#include <libtmpl/include/tmpl_math.h>
+#include <libtmpl/include/tmpl_string.h>
+#include <libtmpl/include/tmpl_fft.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_kernel.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
-#include <rss_ringoccs/include/rss_ringoccs_fft.h>
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -42,13 +43,13 @@ void rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau)
     /*  Some variables needed for reconstruction.                             */
     double w_init, psi, phi, window_func_x, factor, rcpr_F;
     double w_thresh, arg_norm, D, x, y, z, dx, dy;
-    rssringoccs_ComplexDouble *ker;
-    rssringoccs_ComplexDouble *fft_ker;
-    rssringoccs_ComplexDouble *fft_in;
-    rssringoccs_ComplexDouble *fft_out;
-    rssringoccs_ComplexDouble *T_in;
-    rssringoccs_ComplexDouble *T_out;
-    rssringoccs_ComplexDouble arg;
+    tmpl_ComplexDouble *ker;
+    tmpl_ComplexDouble *fft_ker;
+    tmpl_ComplexDouble *fft_in;
+    tmpl_ComplexDouble *fft_out;
+    tmpl_ComplexDouble *T_in;
+    tmpl_ComplexDouble *T_out;
+    tmpl_ComplexDouble arg;
 
     /*  Check that the pointers to the data are not NULL.                     */
     rssringoccs_Tau_Check_Data(tau);
@@ -91,7 +92,7 @@ void rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau)
                         tau->rho_km_vals[current_point];
         if (fabs(window_func_x) <= w_thresh)
         {
-            phi = Newton_Raphson_Fresnel_Psi_D(
+            phi = rssringoccs_Newton_Raphson_Fresnel_Psi_D(
                 tau->k_vals[current_point],
                 tau->rho_km_vals[center],
                 tau->rho_km_vals[current_point],
@@ -105,16 +106,16 @@ void rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau)
                 tau->rz_km_vals[current_point]
             );
 
-            x = tau->rho_km_vals[current_point] * rssringoccs_Double_Cos(phi);
-            y = tau->rho_km_vals[current_point] * rssringoccs_Double_Sin(phi);
+            x = tau->rho_km_vals[current_point] * cos(phi);
+            y = tau->rho_km_vals[current_point] * sin(phi);
             z = tau->rz_km_vals[current_point];
 
             dx = x - tau->rx_km_vals[current_point];
             dy = y - tau->ry_km_vals[current_point];
 
-            D = rssringoccs_Double_Sqrt(dx*dx + dy*dy + z*z);
+            D = sqrt(dx*dx + dy*dy + z*z);
 
-            psi = -rssringoccs_Double_Fresnel_Psi(
+            psi = -rssringoccs_Fresnel_Psi(
                 tau->k_vals[current_point],
                 tau->rho_km_vals[center],
                 tau->rho_km_vals[current_point],
@@ -129,52 +130,52 @@ void rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau)
                 psi *= -1.0;
 
             arg_norm = tau->window_func(window_func_x, tau->w_km_vals[center]);
-            ker[i]   = rssringoccs_CDouble_Polar(arg_norm, psi);
+            ker[i] = tmpl_CDouble_Polar(arg_norm, psi);
         }
         else
-            ker[i] = rssringoccs_CDouble_Zero;
+            ker[i] = tmpl_CDouble_Zero;
 
 
         T_in[i] = tau->T_in[current_point];
     }
 
-    fft_ker = rssringoccs_Complex_FFT(ker,  data_size, rssringoccs_False);
+    fft_ker = tmpl_CDouble_FFT(ker, data_size, tmpl_False);
     if (fft_ker == NULL)
     {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
             "\n\rError Encountered: rss_ringoccs:\n"
             "\r\trssringoccs_Diffraction_Correction_SimpleFFT\n"
-            "\rrssringoccs_Complex_FFT returned NULL for fft_ker.\n"
+            "\rmpl_CDouble_FFT returned NULL for fft_ker.\n"
             "\rAborting.\n\n"
         );
         return;
     }
 
-    fft_in  = rssringoccs_Complex_FFT(T_in, data_size, rssringoccs_False);
+    fft_in  = tmpl_CDouble_FFT(T_in, data_size, tmpl_False);
     if (fft_in == NULL)
     {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
             "\n\rError Encountered: rss_ringoccs:\n"
             "\r\trssringoccs_Diffraction_Correction_SimpleFFT\n"
-            "\rrssringoccs_Complex_FFT returned NULL for fft_in.\n"
+            "\rtmpl_CDouble_FFT returned NULL for fft_in.\n"
             "\rAborting.\n\n"
         );
         return;
     }
 
     for (i = 0; i < data_size; ++i)
-        fft_out[i] = rssringoccs_CDouble_Multiply(fft_ker[i], fft_in[i]);
+        fft_out[i] = tmpl_CDouble_Multiply(fft_ker[i], fft_in[i]);
 
-    T_out = rssringoccs_Complex_FFT(fft_out, data_size, rssringoccs_True);
+    T_out = tmpl_CDouble_FFT(fft_out, data_size, tmpl_True);
     if (T_out == NULL)
     {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
             "\n\rError Encountered: rss_ringoccs:\n"
             "\r\trssringoccs_Diffraction_Correction_SimpleFFT\n"
-            "\rrssringoccs_Complex_FFT returned NULL for T_out.\n"
+            "\rtmpl_CDouble_FFT returned NULL for T_out.\n"
             "\rAborting.\n\n"
         );
         return;
@@ -182,11 +183,10 @@ void rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau)
 
     for(i = 0; i < tau->n_used; ++i)
     {
-        i_shift       = (nw_pts + i + shift) % (data_size);
-        rcpr_F        = 1.0/tau->F_km_vals[tau->start + i];
-        arg           = rssringoccs_CDouble_Rect(factor*rcpr_F, factor*rcpr_F);
-        tau->T_out[tau->start + i]
-            = rssringoccs_CDouble_Multiply(arg, T_out[i_shift]);
+        i_shift = (nw_pts + i + shift) % (data_size);
+        rcpr_F = 1.0/tau->F_km_vals[tau->start + i];
+        arg = tmpl_CDouble_Rect(factor*rcpr_F, factor*rcpr_F);
+        tau->T_out[tau->start + i] = tmpl_CDouble_Multiply(arg, T_out[i_shift]);
     }
 
     /*  Free variables allocated by malloc.                                   */

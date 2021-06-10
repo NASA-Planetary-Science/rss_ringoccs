@@ -23,14 +23,15 @@
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
 void
-Fresnel_Transform_Legendre_Norm_Even_Double(rssringoccs_TAUObj *tau,
-                                            double *x_arr, double *w_func,
-                                            double *coeffs, unsigned long n_pts,
-                                            unsigned long center)
+rssringoccs_Fresnel_Transform_Legendre_Norm_Even(rssringoccs_TAUObj *tau,
+                                                 double *x_arr, double *w_func,
+                                                 double *coeffs,
+                                                 unsigned long n_pts,
+                                                 unsigned long center)
 {
     /*  Declare all necessary variables. i and j are used for indexing.       */
     unsigned long i, j;
-    unsigned char k;
+    unsigned int k;
 
     /*  Variables for the Fresnel kernel and ring radii.                      */
     double x, x2, psi;
@@ -57,7 +58,7 @@ Fresnel_Transform_Legendre_Norm_Even_Double(rssringoccs_TAUObj *tau,
         /*  Compute psi using Horner's Method for Polynomial Computation.  */
         psi_even = coeffs[tau->order-1];
         psi_odd  = coeffs[tau->order-2];
-        for (k = 3; k < tau->order-1; k += 2)
+        for (k = 3U; k < tau->order-1; k += 2U)
         {
             psi_even = psi_even*x2 + coeffs[tau->order-k];
             psi_odd  = psi_odd*x2  + coeffs[tau->order-k-1];

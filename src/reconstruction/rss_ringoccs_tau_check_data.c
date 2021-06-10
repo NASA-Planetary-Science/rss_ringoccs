@@ -82,8 +82,8 @@
 
 /*  Include the necessary header files.                                       */
 #include <stdlib.h>
-#include <rss_ringoccs/include/rss_ringoccs_bool.h>
-#include <rss_ringoccs/include/rss_ringoccs_string.h>
+#include <libtmpl/include/tmpl_bool.h>
+#include <libtmpl/include/tmpl_string.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 
 /*  Macro for checking the data in a tau object. This is to save repetitive   *
@@ -93,8 +93,8 @@
 #define CHECK_DATA_MEMBER(var)                                                 \
     if (tau->var == NULL)                                                      \
     {                                                                          \
-        tau->error_occurred = rssringoccs_True;                                \
-        tau->error_message = rssringoccs_strdup(                               \
+        tau->error_occurred = tmpl_True;                                       \
+        tau->error_message = tmpl_strdup(                                      \
             "\n\rError Encountered: rss_ringoccs\n"                            \
             "\r\trssringoccs_Check_Tau_Data\n\n"                               \
             "\rInput tau has "#var" set to NULL. Returning.\n\n"               \

@@ -96,10 +96,12 @@
 
 /*  Include all necessary headers.                                            */
 #include <stdlib.h>
+#include <math.h>
 
 #include <libtmpl/include/tmpl_bool.h>
 #include <libtmpl/include/tmpl_math.h>
 #include <libtmpl/include/tmpl_string.h>
+#include <libtmpl/include/tmpl_special_functions.h>
 
 #include <rss_ringoccs/include/rss_ringoccs_calibration.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
@@ -111,12 +113,12 @@
 /*  Use this macro to save on repetitive code. It checks if tau->var is NULL, *
  *  attempts to malloc memory for tau->var if it is, and then checks to see   *
  *  if malloc failed.                                                         */
-#define __MALLOC_TAU_VAR__(var)                                                \
+#define MALLOC_TAU_VAR(var)                                                    \
     /*  Check if the variable is not NULL. It should be at the start.        */\
     if (tau->var != NULL)                                                      \
     {                                                                          \
         tau->error_occurred = tmpl_True;                                       \
-        tau->error_message = rssringoccs_strdup(                               \
+        tau->error_message = tmpl_strdup(                                      \
             "\n\rError Encountered: rss_ringoccs\n"                            \
             "\r\trssringoccs_Copy_DLP_Data_To_Tau\n\n"                         \
             "\r"#var" is not NULL. It is likely you've already set the data\n" \
@@ -143,13 +145,13 @@
 
 /*  Use this macro to save on repetitive code. It is for checking that all of *
  *  of the values of a given member in the tau object are non-negative.       */
-#define __TAU_CHECK_NON_NEGATIVE__(var)                                        \
+#define TAU_CHECK_NON_NEGATIVE(var)                                            \
     /*  Use rssringoccs_Min_Double to compute the minimum value and check if */\
     /*  it is negative. Return error if it is.                               */\
-    if (rssringoccs_Min_Double(tau->var, tau->arr_size) < 0.0)                 \
+    if (tmpl_Min_Double(tau->var, tau->arr_size) < 0.0)                        \
     {                                                                          \
-        tau->error_occurred = rssringoccs_True;                                \
-        tau->error_message = rssringoccs_strdup(                               \
+        tau->error_occurred = tmpl_True;                                       \
+        tau->error_message = tmpl_strdup(                                      \
             "\n\rError Encountered: rss_ringoccs\n"                            \
             "\r\trssringoccs_Copy_DLP_Data_To_Tau\n\n"                         \
             "\r"#var" has negative valued entries. Returning.\n"               \
@@ -162,16 +164,16 @@
  *  of the values of a given member in the tau object fall within [-2pi, 2pi].*
  *  Note, it implicitly has min and max defined. These are declared at the    *
  *  top of the rssringoccs_Copy_DLP_Data_To_Tau function.                     */
-#define __TAU_CHECK_TWO_PI__(var)                                              \
+#define TAU_CHECK_TWO_PI(var)                                                  \
     /*  Compute the minimum and maximum of var.                              */\
-    min = rssringoccs_Min_Double(tau->var, tau->arr_size);                     \
-    max = rssringoccs_Max_Double(tau->var, tau->arr_size);                     \
+    min = tmpl_Min_Double(tau->var, tau->arr_size);                            \
+    max = tmpl_Max_Double(tau->var, tau->arr_size);                            \
                                                                                \
     /*  Check if var falls within the interval [-2pi, 2pi].                  */\
-    if ((min < -rssringoccs_Two_Pi) || (max > rssringoccs_Two_Pi))             \
+    if ((min < -tmpl_Two_Pi) || (max > tmpl_Two_Pi))                           \
     {                                                                          \
-        tau->error_occurred = rssringoccs_True;                                \
-        tau->error_message = rssringoccs_strdup(                               \
+        tau->error_occurred = tmpl_True;                                       \
+        tau->error_message = tmpl_strdup(                                      \
             "\n\rError Encountered: rss_ringoccs\n"                            \
             "\r\trssringoccs_Copy_DLP_Data_To_Tau\n\n"                         \
             "\r"#var" has values outside of [-2pi, 2pi]. Returning.\n"         \
@@ -245,24 +247,24 @@ void rssringoccs_Copy_DLP_Data_To_Tau(rssringoccs_DLPObj *dlp,
      *  braces {}. Because of this, we do not need a semi-colon at the end.   *
      *  This macro allocates memory for the members of the tau object and     *
      *  checks for errors.                                                    */
-    __MALLOC_TAU_VAR__(rho_km_vals)
-    __MALLOC_TAU_VAR__(phi_rad_vals)
-    __MALLOC_TAU_VAR__(f_sky_hz_vals)
-    __MALLOC_TAU_VAR__(rho_dot_kms_vals)
-    __MALLOC_TAU_VAR__(raw_tau_threshold_vals)
-    __MALLOC_TAU_VAR__(B_rad_vals)
-    __MALLOC_TAU_VAR__(D_km_vals)
-    __MALLOC_TAU_VAR__(t_oet_spm_vals)
-    __MALLOC_TAU_VAR__(t_ret_spm_vals)
-    __MALLOC_TAU_VAR__(t_set_spm_vals)
-    __MALLOC_TAU_VAR__(rho_corr_pole_km_vals)
-    __MALLOC_TAU_VAR__(rho_corr_timing_km_vals)
-    __MALLOC_TAU_VAR__(phi_rl_rad_vals)
-    __MALLOC_TAU_VAR__(p_norm_vals)
-    __MALLOC_TAU_VAR__(phase_rad_vals)
-    __MALLOC_TAU_VAR__(rx_km_vals)
-    __MALLOC_TAU_VAR__(ry_km_vals)
-    __MALLOC_TAU_VAR__(rz_km_vals)
+    MALLOC_TAU_VAR(rho_km_vals)
+    MALLOC_TAU_VAR(phi_rad_vals)
+    MALLOC_TAU_VAR(f_sky_hz_vals)
+    MALLOC_TAU_VAR(rho_dot_kms_vals)
+    MALLOC_TAU_VAR(raw_tau_threshold_vals)
+    MALLOC_TAU_VAR(B_rad_vals)
+    MALLOC_TAU_VAR(D_km_vals)
+    MALLOC_TAU_VAR(t_oet_spm_vals)
+    MALLOC_TAU_VAR(t_ret_spm_vals)
+    MALLOC_TAU_VAR(t_set_spm_vals)
+    MALLOC_TAU_VAR(rho_corr_pole_km_vals)
+    MALLOC_TAU_VAR(rho_corr_timing_km_vals)
+    MALLOC_TAU_VAR(phi_rl_rad_vals)
+    MALLOC_TAU_VAR(p_norm_vals)
+    MALLOC_TAU_VAR(phase_rad_vals)
+    MALLOC_TAU_VAR(rx_km_vals)
+    MALLOC_TAU_VAR(ry_km_vals)
+    MALLOC_TAU_VAR(rz_km_vals)
 
     /*  Loop through the entries of all of the pointers and set the nth value *
      *  of a tau member to the nth value of the corresponding dlp member.     */
@@ -296,8 +298,8 @@ void rssringoccs_Copy_DLP_Data_To_Tau(rssringoccs_DLPObj *dlp,
     /*  Check if dx_km is a legal value.                                      */
     if (tau->dx_km == 0.0)
     {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
             "\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Copy_DLP_Data_To_Tau\n\n"
             "\rdx_km = 0. rho_km_vals[1] - rho_km_vals[0] = 0. Returning.\n"
@@ -309,10 +311,10 @@ void rssringoccs_Copy_DLP_Data_To_Tau(rssringoccs_DLPObj *dlp,
      *  res is a legal value, compare it with twice the absolute value of     *
      *  dx_km. To avoid floating round-off error (which has happened the      *
      *  Cassini team, hence this edit) set the value to 1.99 instead of 2.0.  */
-    else if (tau->res < 1.99 * rssringoccs_Double_Abs(tau->dx_km))
+    else if (tau->res < 1.99 * fabs(tau->dx_km))
     {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Copy_DLP_Data_To_Tau\n\n"
             "\rResolution is less than twice the sample space.\n"
@@ -324,16 +326,16 @@ void rssringoccs_Copy_DLP_Data_To_Tau(rssringoccs_DLPObj *dlp,
     /*  The following members of tau should be non-negative for all entries.  *
      *  The __TAU_CHECK_NON_NEGATIVE__ contains an if statement and ends with *
      *  braces {}. Hence we do not need a semi-colon at the end.              */
-    __TAU_CHECK_NON_NEGATIVE__(rho_km_vals)
-    __TAU_CHECK_NON_NEGATIVE__(D_km_vals)
-    __TAU_CHECK_NON_NEGATIVE__(f_sky_hz_vals)
-    __TAU_CHECK_NON_NEGATIVE__(p_norm_vals)
+    TAU_CHECK_NON_NEGATIVE(rho_km_vals)
+    TAU_CHECK_NON_NEGATIVE(D_km_vals)
+    TAU_CHECK_NON_NEGATIVE(f_sky_hz_vals)
+    TAU_CHECK_NON_NEGATIVE(p_norm_vals)
 
     /*  Check that the following variables for angles fall within [-2pi, 2pi].*
      *  Like the other two macros, the __TAU_CHECK_TWO_PI__ macro ends with   *
      *  braces {} so we do not need a semi-colon at the end of these lines.   */
-    __TAU_CHECK_TWO_PI__(B_rad_vals)
-    __TAU_CHECK_TWO_PI__(phi_rad_vals)
-    __TAU_CHECK_TWO_PI__(phase_rad_vals)
+    TAU_CHECK_TWO_PI(B_rad_vals)
+    TAU_CHECK_TWO_PI(phi_rad_vals)
+    TAU_CHECK_TWO_PI(phase_rad_vals)
 }
 /*  End of rssringoccs_Copy_DLP_Data_To_Tau.                                  */

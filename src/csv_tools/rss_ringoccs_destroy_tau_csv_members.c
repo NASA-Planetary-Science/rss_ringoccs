@@ -40,19 +40,19 @@ void rssringoccs_Destroy_TauCSV_Members(rssringoccs_TauCSV *tau)
         return;
 
     /*  Destroy every variable except the error_message.                      */
-    DESTROY_TAU_VAR(tau->rho_km_vals);
-    DESTROY_TAU_VAR(tau->rho_corr_pole_km_vals);
-    DESTROY_TAU_VAR(tau->rho_corr_timing_km_vals);
-    DESTROY_TAU_VAR(tau->phi_rl_deg_vals);
-    DESTROY_TAU_VAR(tau->phi_ora_deg_vals);
-    DESTROY_TAU_VAR(tau->power_vals);
-    DESTROY_TAU_VAR(tau->tau_vals);
-    DESTROY_TAU_VAR(tau->phase_deg_vals);
-    DESTROY_TAU_VAR(tau->tau_threshold_vals);
-    DESTROY_TAU_VAR(tau->t_oet_spm_vals);
-    DESTROY_TAU_VAR(tau->t_ret_spm_vals);
-    DESTROY_TAU_VAR(tau->t_set_spm_vals);
-    DESTROY_TAU_VAR(tau->B_deg_vals);
+    DESTROY_TAU_VAR(tau->rho_km_vals)
+    DESTROY_TAU_VAR(tau->rho_corr_pole_km_vals)
+    DESTROY_TAU_VAR(tau->rho_corr_timing_km_vals)
+    DESTROY_TAU_VAR(tau->phi_rl_deg_vals)
+    DESTROY_TAU_VAR(tau->phi_ora_deg_vals)
+    DESTROY_TAU_VAR(tau->power_vals)
+    DESTROY_TAU_VAR(tau->tau_vals)
+    DESTROY_TAU_VAR(tau->phase_deg_vals)
+    DESTROY_TAU_VAR(tau->tau_threshold_vals)
+    DESTROY_TAU_VAR(tau->t_oet_spm_vals)
+    DESTROY_TAU_VAR(tau->t_ret_spm_vals)
+    DESTROY_TAU_VAR(tau->t_set_spm_vals)
+    DESTROY_TAU_VAR(tau->B_deg_vals)
 }
 /*  End of rssringoccs_Destroy_TauCSV_Members.                                */
 

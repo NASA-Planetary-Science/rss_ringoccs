@@ -6,8 +6,8 @@
  *  (compares first n characters of string), strcpy (string-copy), strncpy,   *
  *  and strlen (string-length), all of which are used at some point.          */
 #include <string.h>
-#include <rss_ringoccs/include/rss_ringoccs_bool.h>
-#include <rss_ringoccs/include/rss_ringoccs_string.h>
+#include <libtmpl/include/tmpl_bool.h>
+#include <libtmpl/include/tmpl_string.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 
 void
@@ -22,9 +22,9 @@ rssringoccs_Tau_Set_Psitype(const char *psitype, rssringoccs_TAUObj* tau)
     if (tau->psitype != NULL)
         free(tau->psitype);
 
-    tau->psitype = rssringoccs_strdup(psitype);
-    rssringoccs_Remove_Spaces(tau->psitype);
-    rssringoccs_Make_Lower(tau->psitype);
+    tau->psitype = tmpl_strdup(psitype);
+    tmpl_Remove_Spaces(tau->psitype);
+    tmpl_Make_Lower(tau->psitype);
 
     if (strcmp(tau->psitype, "newton") == 0)
         tau->psinum = rssringoccs_DR_Newton;
@@ -64,8 +64,8 @@ rssringoccs_Tau_Set_Psitype(const char *psitype, rssringoccs_TAUObj* tau)
 
         if (tau->order == 0)
         {
-            tau->error_occurred = rssringoccs_True;
-            tau->error_message = rssringoccs_strdup(
+            tau->error_occurred = tmpl_True;
+            tau->error_message = tmpl_strdup(
                 "\n\rError Encountered: rss_ringoccs\n"
                 "\r\trssringoccs_Tau_Set_Psitype\n\n"
                 "\rCould not parse psitype. atol returned zero. Your input\n"
@@ -103,7 +103,7 @@ rssringoccs_Tau_Set_Psitype(const char *psitype, rssringoccs_TAUObj* tau)
 
         tau->order = 0;
         tau->psinum = rssringoccs_DR_None;
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(errmes1);
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(errmes1);
     }
 }

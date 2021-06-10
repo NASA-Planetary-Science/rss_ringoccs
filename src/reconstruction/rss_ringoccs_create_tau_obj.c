@@ -89,11 +89,12 @@
  ******************************************************************************/
 
 /*  Include all necessary header files.                                       */
-#include <rss_ringoccs/include/rss_ringoccs_bool.h>
-#include <rss_ringoccs/include/rss_ringoccs_string.h>
+#include <libtmpl/include/tmpl_bool.h>
+#include <libtmpl/include/tmpl_string.h>
+#include <libtmpl/include/tmpl_window_functions.h>
 #include <rss_ringoccs/include/rss_ringoccs_calibration.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
-#include <rss_ringoccs/include/rss_ringoccs_special_functions.h>
+
 #include <stdlib.h>
 
 /*  Function for allocating memory for a Tau object and setting the default   *
@@ -154,14 +155,14 @@ rssringoccs_Create_TAUObj(rssringoccs_DLPObj *dlp, double res)
     /*  Set the error_occurred member to false and the error_message to NULL. *
      *  If no errors occur during processing, these variables will remain     *
      *  unchanged. Check them throughout to ensure no illegal actions happen. */
-    tau->error_occurred = rssringoccs_False;
+    tau->error_occurred = tmpl_False;
     tau->error_message = NULL;
 
     /*  Check if the input dlp is NULL.                                       */
     if (dlp == NULL)
     {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Create_TAUObj\n\n"
             "\rInput dlp is NULL. Returning.\n"
@@ -172,8 +173,8 @@ rssringoccs_Create_TAUObj(rssringoccs_DLPObj *dlp, double res)
     /*  Check if the input dlp has its error_occurred member set to true.     */
     if (dlp->error_occurred)
     {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Create_TAUObj\n\n"
             "\rInput dlp has error_occurred set to true. Returning.\n"
@@ -187,8 +188,8 @@ rssringoccs_Create_TAUObj(rssringoccs_DLPObj *dlp, double res)
     /*  Check that the resolution is a legal value.                           */
     if (tau->res <= 0.0)
     {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Create_TAUObj\n\n"
             "\rInput res is not positive. Returning.\n"
@@ -196,18 +197,18 @@ rssringoccs_Create_TAUObj(rssringoccs_DLPObj *dlp, double res)
     }
 
     /*  Set the default processing keywords.                                  */
-    tau->bfac     = rssringoccs_True;
-    tau->use_norm = rssringoccs_True;
-    tau->use_fwd  = rssringoccs_False;
+    tau->bfac     = tmpl_True;
+    tau->use_norm = tmpl_True;
+    tau->use_fwd  = tmpl_False;
 
     /*  The default window is the modified Kaiser-Bessel with 2.0 alpha.      */
-    tau->wtype = rssringoccs_strdup("kbmd20");
+    tau->wtype = tmpl_strdup("kbmd20");
 
     /*  Check that rssringoccs_strdup did not fail.                           */
     if (tau->wtype == NULL)
     {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Create_TAUObj\n\n"
             "\rrssringoccs_strdup failed to set tau->wtype. Returning.\n"
@@ -219,17 +220,17 @@ rssringoccs_Create_TAUObj(rssringoccs_DLPObj *dlp, double res)
     tau->normeq = KBMD20NormEQ;
 
     /*  Set the window function to kbmd20. This can be changed later.         */
-    tau->window_func = rssringoccs_Double_Modified_Kaiser_Bessel_2_0;
+    tau->window_func = tmpl_Double_Modified_Kaiser_Bessel_2_0;
 
     /*  And the default psitype is Fresnel processing using quartic           *
      *  Legendre polynomials.                                                 */
-    tau->psitype = rssringoccs_strdup("fresnel4");
+    tau->psitype = tmpl_strdup("fresnel4");
 
     /*  Check that rssringoccs_strdup did not fail.                           */
     if (tau->psitype == NULL)
     {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Create_TAUObj\n\n"
             "\rrssringoccs_strdup failed to set tau->psitype. Returning.\n"

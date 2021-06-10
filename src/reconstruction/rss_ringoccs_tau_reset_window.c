@@ -1,5 +1,4 @@
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
-#include <rss_ringoccs/include/rss_ringoccs_special_functions.h>
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -34,16 +33,16 @@
  *          occultation data store values in kilometers.                      *
  ******************************************************************************/
 void rssringoccs_Tau_Reset_Window(double *x_arr, double *w_func, double dx,
-                                  double width, long nw_pts,
+                                  double width, unsigned long nw_pts,
                                   rssringoccs_window_func fw)
 {
     /*  Create a variable for indexing.                                       */
-    long n;
+    unsigned long n;
 
     /* Loop over n, computing the window function and the x_arr variable.     */
-    for(n=0; n<nw_pts; ++n)
+    for(n = 0U; n < nw_pts; ++n)
     {
-        x_arr[n]  = (n-nw_pts)*dx;
+        x_arr[n]  = (double)(n - nw_pts)*dx;
         w_func[n] = fw(x_arr[n], width);
     }
 }

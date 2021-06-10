@@ -59,8 +59,9 @@
  *          The diffraction corrected profile.                                *
  ******************************************************************************/
 void
-Fresnel_Transform_Double(rssringoccs_TAUObj *tau, double *x_arr, double *w_func,
-                         unsigned long n_pts, unsigned long center)
+rssringoccs_Fresnel_Transform(rssringoccs_TAUObj *tau, double *x_arr,
+                              double *w_func, unsigned long n_pts,
+                              unsigned long center)
 {
     /*  Declare all necessary variables. i and j are used for indexing.       */
     unsigned long int m, n;

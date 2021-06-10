@@ -1,8 +1,9 @@
-#include <rss_ringoccs/include/rss_ringoccs_bool.h>
-#include <rss_ringoccs/include/rss_ringoccs_math.h>
-#include <rss_ringoccs/include/rss_ringoccs_string.h>
+#include <libtmpl/include/tmpl_bool.h>
+#include <libtmpl/include/tmpl_math.h>
+#include <libtmpl/include/tmpl_optics.h>
+#include <libtmpl/include/tmpl_string.h>
+#include <libtmpl/include/tmpl_special_functions.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
-#include <rss_ringoccs/include/rss_ringoccs_special_functions.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -31,7 +32,7 @@ void rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau)
     }
     else if (tau->rng_list[0] > tau->rho_km_vals[tau->arr_size-1])
     {
-        tau->error_occurred = rssringoccs_True;
+        tau->error_occurred = tmpl_True;
         tau->error_message = malloc(sizeof(*tau->error_message)*512);
         if (tau->error_message == NULL)
             return;
@@ -66,7 +67,7 @@ void rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau)
     }
     else if (tau->rng_list[1] < tau->rho_km_vals[0])
     {
-        tau->error_occurred = rssringoccs_True;
+        tau->error_occurred = tmpl_True;
         tau->error_message = malloc(sizeof(*tau->error_message)*512);
         if (tau->error_message == NULL)
             return;
@@ -96,8 +97,8 @@ void rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau)
 
     if (tau->w_km_vals != NULL)
     {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
             "\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Get_Window_Width\n\n"
             "\rtau->w_km_vals is not NULL. You have either already processed\n"
@@ -121,19 +122,19 @@ void rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau)
         for(n = 0; n < tau->n_used; ++n)
         {
             F         = tau->F_km_vals[n + tau->start];
-            omega     = rssringoccs_Two_Pi * tau->f_sky_hz_vals[n+tau->start];
+            omega     = tmpl_Two_Pi * tau->f_sky_hz_vals[n+tau->start];
             alpha[n]  = omega * tau->sigma;
             alpha[n] *= alpha[n] * 0.5 / tau->rho_dot_kms_vals[n];
             P_vals[n] = tau->res/(alpha[n]*F*F);
         }
 
-        Prange = rssringoccs_Where_Greater_Double(P_vals, tau->n_used, 1.0);
+        Prange = tmpl_Where_Greater_Double(P_vals, tau->n_used, 1.0);
         Prange_Index = Prange[0];
         Prange_Size  = *Prange[1];
 
         for (n=0; n<Prange_Size; ++n)
             tau->w_km_vals[tau->start + Prange_Index[n]] = w_fac *
-                rssringoccs_Double_Resolution_Inverse(P_vals[Prange_Index[n]]) /
+                tmpl_Double_Resolution_Inverse(P_vals[Prange_Index[n]]) /
                 alpha[n];
 
         free(P_vals);
@@ -158,15 +159,15 @@ void rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau)
         rho_legal[n] = tau->rho_km_vals[tau->start + n] -
                        0.5*tau->w_km_vals[tau->start + n];
 
-    wrange = rssringoccs_Where_Greater_Double(rho_legal, tau->n_used,
+    wrange = tmpl_Where_Greater_Double(rho_legal, tau->n_used,
                                               tau->rho_km_vals[0]);
     wrange_Index = wrange[0];
     wrange_Size = *wrange[1];
 
     if (wrange_Size == 0)
     {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
             "\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Get_Window_Width\n\n"
             "\rThe window width is too large to reconstruct anything.\n"
@@ -191,9 +192,8 @@ void rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau)
         rho_legal[n] = tau->rho_km_vals[tau->start + n] +
                        0.5*tau->w_km_vals[tau->start + n];
 
-    wrange = rssringoccs_Where_Lesser_Double(
-        rho_legal, tau->n_used, tau->rho_km_vals[tau->arr_size-1]
-    );
+    wrange = tmpl_Where_Lesser_Double(rho_legal, tau->n_used,
+                                      tau->rho_km_vals[tau->arr_size-1]);
 
     wrange_Index = wrange[0];
     wrange_Size = *wrange[1];
@@ -201,8 +201,8 @@ void rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau)
 
     if (wrange_Size == 0)
     {
-        tau->error_occurred = rssringoccs_True;
-        tau->error_message = rssringoccs_strdup(
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
             "\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Get_Window_Width\n\n"
             "\rThe window width is too large to reconstruct anything.\n"
@@ -220,7 +220,7 @@ void rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau)
 
     if (tau->start > tau->arr_size)
     {
-        tau->error_occurred = rssringoccs_True;
+        tau->error_occurred = tmpl_True;
         tau->error_message = malloc(sizeof(*tau->error_message)*512);
         if (tau->error_message == NULL)
             return;
@@ -240,7 +240,7 @@ void rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau)
     }
     else if ((tau->start + tau->n_used) > tau->arr_size)
     {
-        tau->error_occurred = rssringoccs_True;
+        tau->error_occurred = tmpl_True;
         tau->error_message = malloc(sizeof(*tau->error_message)*512);
         if (tau->error_message == NULL)
             return;

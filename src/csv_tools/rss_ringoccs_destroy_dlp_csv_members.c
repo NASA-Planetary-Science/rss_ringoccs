@@ -40,19 +40,19 @@ void rssringoccs_Destroy_DLPCSV_Members(rssringoccs_DLPCSV *dlp)
         return;
 
     /*  Destroy every variable except the error_message.                      */
-    DESTROY_DLP_VAR(dlp->rho_km_vals);
-    DESTROY_DLP_VAR(dlp->rho_corr_pole_km_vals);
-    DESTROY_DLP_VAR(dlp->rho_corr_timing_km_vals);
-    DESTROY_DLP_VAR(dlp->phi_rl_deg_vals);
-    DESTROY_DLP_VAR(dlp->phi_ora_deg_vals);
-    DESTROY_DLP_VAR(dlp->p_norm_vals);
-    DESTROY_DLP_VAR(dlp->raw_tau_vals);
-    DESTROY_DLP_VAR(dlp->phase_deg_vals);
-    DESTROY_DLP_VAR(dlp->raw_tau_threshold_vals);
-    DESTROY_DLP_VAR(dlp->t_oet_spm_vals);
-    DESTROY_DLP_VAR(dlp->t_ret_spm_vals);
-    DESTROY_DLP_VAR(dlp->t_set_spm_vals);
-    DESTROY_DLP_VAR(dlp->B_deg_vals);
+    DESTROY_DLP_VAR(dlp->rho_km_vals)
+    DESTROY_DLP_VAR(dlp->rho_corr_pole_km_vals)
+    DESTROY_DLP_VAR(dlp->rho_corr_timing_km_vals)
+    DESTROY_DLP_VAR(dlp->phi_rl_deg_vals)
+    DESTROY_DLP_VAR(dlp->phi_ora_deg_vals)
+    DESTROY_DLP_VAR(dlp->p_norm_vals)
+    DESTROY_DLP_VAR(dlp->raw_tau_vals)
+    DESTROY_DLP_VAR(dlp->phase_deg_vals)
+    DESTROY_DLP_VAR(dlp->raw_tau_threshold_vals)
+    DESTROY_DLP_VAR(dlp->t_oet_spm_vals)
+    DESTROY_DLP_VAR(dlp->t_ret_spm_vals)
+    DESTROY_DLP_VAR(dlp->t_set_spm_vals)
+    DESTROY_DLP_VAR(dlp->B_deg_vals)
 }
 /*  End of rssringoccs_Destroy_DLPCSV_Members.                                */
 

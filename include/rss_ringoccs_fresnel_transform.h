@@ -6,156 +6,155 @@
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 
 extern void
-Fresnel_Transform_Double(rssringoccs_TAUObj *tau, double *x_arr, double *w_func,
-                         unsigned long n_pts, unsigned long center);
-
-extern void
-Fresnel_Transform_Norm_Double(rssringoccs_TAUObj *tau, double *x_arr,
+rssringoccs_Fresnel_Transform(rssringoccs_TAUObj *tau, double *x_arr,
                               double *w_func, unsigned long n_pts,
                               unsigned long center);
 
 extern void
-Fresnel_Transform_Legendre_Even_Double(rssringoccs_TAUObj *tau, double *x_arr,
-                                       double *w_func, double *coeffs,
-                                       unsigned long n_pts,
-                                       unsigned long center);
+rssringoccs_Fresnel_Transform_Norm(rssringoccs_TAUObj *tau, double *x_arr,
+                                   double *w_func, unsigned long n_pts,
+                                   unsigned long center);
 
 extern void
-Fresnel_Transform_Legendre_Norm_Even_Double(rssringoccs_TAUObj *tau,
+rssringoccs_Fresnel_Transform_Legendre_Even(rssringoccs_TAUObj *tau,
                                             double *x_arr, double *w_func,
                                             double *coeffs, unsigned long n_pts,
                                             unsigned long center);
 
 extern void
-Fresnel_Transform_Legendre_Odd_Double(rssringoccs_TAUObj *tau, double *x_arr,
-                                      double *w_func, double *coeffs,
-                                      unsigned long n_pts,
-                                      unsigned long center);
+rssringoccs_Fresnel_Transform_Legendre_Norm_Even(rssringoccs_TAUObj *tau,
+                                                 double *x_arr, double *w_func,
+                                                 double *coeffs,
+                                                 unsigned long n_pts,
+                                                 unsigned long center);
 
 extern void
-Fresnel_Transform_Legendre_Norm_Odd_Double(rssringoccs_TAUObj *tau,
+rssringoccs_Fresnel_Transform_Legendre_Odd(rssringoccs_TAUObj *tau,
                                            double *x_arr, double *w_func,
                                            double *coeffs, unsigned long n_pts,
                                            unsigned long center);
 
 extern void
-Fresnel_Transform_Newton_Double(rssringoccs_TAUObj *tau,
-                                double *w_func,
-                                unsigned long n_pts,
-                                unsigned long center);
+rssringoccs_Fresnel_Transform_Legendre_Norm_Odd(rssringoccs_TAUObj *tau,
+                                                double *x_arr, double *w_func,
+                                                double *coeffs,
+                                                unsigned long n_pts,
+                                                unsigned long center);
 
 extern void
-Fresnel_Transform_Newton_Norm_Double(rssringoccs_TAUObj *tau,
-                                     double *w_func,
-                                     unsigned long n_pts,
-                                     unsigned long center);
+rssringoccs_Fresnel_Transform_Newton(rssringoccs_TAUObj *tau, double *w_func,
+                                     unsigned long n_pts, unsigned long center);
 
 extern void
-Fresnel_Transform_Newton_D_Double(rssringoccs_TAUObj *tau,
-                                  double *w_func,
-                                  unsigned long n_pts,
-                                  unsigned long center);
+rssringoccs_Fresnel_Transform_Newton_Norm(rssringoccs_TAUObj *tau,
+                                          double *w_func, unsigned long n_pts,
+                                          unsigned long center);
 
 extern void
-Fresnel_Transform_Newton_D_Norm_Double(rssringoccs_TAUObj *tau,
-                                       double *w_func,
+rssringoccs_Fresnel_Transform_Newton_D(rssringoccs_TAUObj *tau, double *w_func,
                                        unsigned long n_pts,
                                        unsigned long center);
 
 extern void
-Fresnel_Transform_Newton_D_Old_Double(rssringoccs_TAUObj *tau,
-                                      double *w_func,
-                                      unsigned long n_pts,
-                                      unsigned long center);
+rssringoccs_Fresnel_Transform_Newton_D_Norm(rssringoccs_TAUObj *tau,
+                                            double *w_func,
+                                            unsigned long n_pts,
+                                            unsigned long center);
 
 extern void
-Fresnel_Transform_Newton_D_Old_Norm_Double(rssringoccs_TAUObj *tau,
+rssringoccs_Fresnel_Transform_Newton_D_Old(rssringoccs_TAUObj *tau,
                                            double *w_func,
                                            unsigned long n_pts,
                                            unsigned long center);
 
 extern void
-Fresnel_Transform_Newton_dD_dphi_Double(rssringoccs_TAUObj *tau,
-                                        double *w_func,
-                                        unsigned long n_pts,
-                                        unsigned long center);
+rssringoccs_Fresnel_Transform_Newton_D_Old_Norm(rssringoccs_TAUObj *tau,
+                                                double *w_func,
+                                                unsigned long n_pts,
+                                                unsigned long center);
 
 extern void
-Fresnel_Transform_Newton_dD_dphi_Norm_Double(rssringoccs_TAUObj *tau,
+rssringoccs_Fresnel_Transform_Newton_dD_dphi(rssringoccs_TAUObj *tau,
                                              double *w_func,
                                              unsigned long n_pts,
                                              unsigned long center);
 
 extern void
-Fresnel_Transform_Perturbed_Newton_Double(rssringoccs_TAUObj *tau,
-                                          double *w_func,
-                                          unsigned long n_pts,
-                                          unsigned long center);
+rssringoccs_Fresnel_Transform_Newton_dD_dphi_Norm(rssringoccs_TAUObj *tau,
+                                                  double *w_func,
+                                                  unsigned long n_pts,
+                                                  unsigned long center);
 
 extern void
-Fresnel_Transform_Perturbed_Newton_Norm_Double(rssringoccs_TAUObj *tau,
+rssringoccs_Fresnel_Transform_Perturbed_Newton(rssringoccs_TAUObj *tau,
                                                double *w_func,
                                                unsigned long n_pts,
                                                unsigned long center);
 
 extern void
-Fresnel_Transform_Quadratic_Double(rssringoccs_TAUObj *tau,
-                                   double *w_func,
-                                   unsigned long n_pts,
-                                   unsigned long center);
+rssringoccs_Fresnel_Transform_Perturbed_Newton_Norm(rssringoccs_TAUObj *tau,
+                                                    double *w_func,
+                                                    unsigned long n_pts,
+                                                    unsigned long center);
 
 extern void
-Fresnel_Transform_Quadratic_Norm_Double(rssringoccs_TAUObj *tau,
+rssringoccs_Fresnel_Transform_Quadratic(rssringoccs_TAUObj *tau,
                                         double *w_func,
                                         unsigned long n_pts,
                                         unsigned long center);
 
 extern void
-Fresnel_Transform_Cubic_Double(rssringoccs_TAUObj *tau,
-                               double *w_func,
-                               unsigned long n_pts,
-                               unsigned long center);
+rssringoccs_Fresnel_Transform_Quadratic_Norm(rssringoccs_TAUObj *tau,
+                                             double *w_func,
+                                             unsigned long n_pts,
+                                             unsigned long center);
 
 extern void
-Fresnel_Transform_Cubic_Norm_Double(rssringoccs_TAUObj *tau,
+rssringoccs_Fresnel_Transform_Cubic(rssringoccs_TAUObj *tau,
                                     double *w_func,
                                     unsigned long n_pts,
                                     unsigned long center);
 
 extern void
-Fresnel_Transform_Quartic_Double(rssringoccs_TAUObj *tau,
-                                 double *w_func,
-                                 unsigned long n_pts,
-                                 unsigned long center);
+rssringoccs_Fresnel_Transform_Cubic_Norm(rssringoccs_TAUObj *tau,
+                                         double *w_func,
+                                         unsigned long n_pts,
+                                         unsigned long center);
 
 extern void
-Fresnel_Transform_Quartic_Norm_Double(rssringoccs_TAUObj *tau,
+rssringoccs_Fresnel_Transform_Quartic(rssringoccs_TAUObj *tau,
                                       double *w_func,
                                       unsigned long n_pts,
                                       unsigned long center);
 
 extern void
-Fresnel_Transform_Quartic_D_Double(rssringoccs_TAUObj *tau,
-                                   double *w_func,
-                                   unsigned long n_pts,
-                                   unsigned long center);
+rssringoccs_Fresnel_Transform_Quartic_Norm(rssringoccs_TAUObj *tau,
+                                           double *w_func,
+                                           unsigned long n_pts,
+                                           unsigned long center);
 
 extern void
-Fresnel_Transform_Quartic_D_Norm_Double(rssringoccs_TAUObj *tau,
+rssringoccs_Fresnel_Transform_Quartic_D(rssringoccs_TAUObj *tau,
                                         double *w_func,
                                         unsigned long n_pts,
                                         unsigned long center);
 
 extern void
-Fresnel_Transform_Ellipse_Double(rssringoccs_TAUObj *tau,
-                                 double *w_func,
-                                 unsigned long n_pts,
-                                 unsigned long center);
+rssringoccs_Fresnel_Transform_Quartic_D_Norm(rssringoccs_TAUObj *tau,
+                                             double *w_func,
+                                             unsigned long n_pts,
+                                             unsigned long center);
 
 extern void
-Fresnel_Transform_Ellipse_Norm_Double(rssringoccs_TAUObj *tau,
+rssringoccs_Fresnel_Transform_Ellipse(rssringoccs_TAUObj *tau,
                                       double *w_func,
                                       unsigned long n_pts,
                                       unsigned long center);
+
+extern void
+rssringoccs_Fresnel_Transform_Ellipse_Norm(rssringoccs_TAUObj *tau,
+                                           double *w_func,
+                                           unsigned long n_pts,
+                                           unsigned long center);
 
 #endif

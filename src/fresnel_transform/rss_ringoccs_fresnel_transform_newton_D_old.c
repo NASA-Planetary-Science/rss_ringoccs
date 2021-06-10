@@ -17,37 +17,37 @@
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
 
-#include <rss_ringoccs/include/rss_ringoccs_math.h>
-#include <rss_ringoccs/include/rss_ringoccs_complex.h>
+#include <math.h>
+#include <libtmpl/include/tmpl_complex.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_kernel.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
 void
-Fresnel_Transform_Newton_D_Old_Double(rssringoccs_TAUObj *tau,
-                                      double *w_func,
-                                      unsigned long n_pts,
-                                      unsigned long center)
+rssringoccs_Fresnel_Transform_Newton_D_Old(rssringoccs_TAUObj *tau,
+                                           double *w_func,
+                                           unsigned long n_pts,
+                                           unsigned long center)
 {
     /*  Declare all necessary variables. i and j are used for indexing.       */
     unsigned long m, offset;
 
     /*  The Fresnel kernel and the stationary ring azimuth angle.             */
     double psi, phi, x, y, z, dx, dy, D, exp_psi_re, exp_psi_im, factor;
-    rssringoccs_ComplexDouble exp_psi, integrand;
+    tmpl_ComplexDouble exp_psi, integrand;
 
     /*  Initialize T_out and norm to zero so we can loop over later.          */
-    tau->T_out[center] = rssringoccs_CDouble_Zero;
+    tau->T_out[center] = tmpl_CDouble_Zero;
     factor = 0.5 * tau->dx_km / tau->F_km_vals[center];
 
     /*  Symmetry is lost without the Legendre polynomials, or Fresnel         *
      *  quadratic. Must compute everything from -W/2 to W/2.                  */
-    offset = center-(long)((n_pts-1)/2);
+    offset = center - (n_pts - 1UL) / 2UL;
 
     /*  Use a Riemann Sum to approximate the Fresnel Inverse Integral.        */
     for (m = 0; m<n_pts; ++m)
     {
         /*  Calculate the stationary value of psi with respect to phi.        */
-        phi = Newton_Raphson_Fresnel_Psi_D_Old(
+        phi = rssringoccs_Newton_Raphson_Fresnel_Psi_D_Old(
             tau->k_vals[center]*tau->D_km_vals[center],
             tau->rho_km_vals[center],
             tau->rho_km_vals[offset],
@@ -69,7 +69,7 @@ Fresnel_Transform_Newton_D_Old_Double(rssringoccs_TAUObj *tau,
         D = sqrt(dx*dx + dy*dy + z*z);
 
         /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
-        psi = rssringoccs_Double_Fresnel_Psi_Old(
+        psi = rssringoccs_Fresnel_Psi_Old(
             tau->k_vals[center]*tau->D_km_vals[center],
             tau->rho_km_vals[center],
             tau->rho_km_vals[offset],
@@ -81,19 +81,17 @@ Fresnel_Transform_Newton_D_Old_Double(rssringoccs_TAUObj *tau,
 
         exp_psi_re = cos(psi)*w_func[m];
         exp_psi_im = -sin(psi)*w_func[m];
-        exp_psi = rssringoccs_CDouble_Rect(exp_psi_re, exp_psi_im);
+        exp_psi = tmpl_CDouble_Rect(exp_psi_re, exp_psi_im);
 
         /*  Compute the transform with a Riemann sum. If the T_in pointer     *
          *  does not contain at least 2*n_pts+1 points, n_pts to the left and *
          *  right of the center, then this will create a segmentation fault.  */
-        integrand = rssringoccs_CDouble_Multiply(exp_psi, tau->T_in[offset]);
-        tau->T_out[center] = rssringoccs_CDouble_Add(tau->T_out[center],
-                                                     integrand);
+        integrand = tmpl_CDouble_Multiply(exp_psi, tau->T_in[offset]);
+        tau->T_out[center] = tmpl_CDouble_Add(tau->T_out[center], integrand);
         offset += 1;
     }
 
     /*  Multiply result by the coefficient found in the Fresnel inverse.      */
-    integrand = rssringoccs_CDouble_Rect(factor, factor);
-    tau->T_out[center] = rssringoccs_CDouble_Multiply(integrand,
-                                                      tau->T_out[center]);
+    integrand = tmpl_CDouble_Rect(factor, factor);
+    tau->T_out[center] = tmpl_CDouble_Multiply(integrand, tau->T_out[center]);
 }

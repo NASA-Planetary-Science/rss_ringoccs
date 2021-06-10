@@ -40,10 +40,10 @@ void rssringoccs_Destroy_CalCSV_Members(rssringoccs_CalCSV *cal)
         return;
 
     /*  Destroy every variable except the error_message.                      */
-    DESTROY_CAL_VAR(cal->t_oet_spm_vals);
-    DESTROY_CAL_VAR(cal->f_sky_pred_vals);
-    DESTROY_CAL_VAR(cal->f_sky_resid_fit_vals);
-    DESTROY_CAL_VAR(cal->p_free_vals);
+    DESTROY_CAL_VAR(cal->t_oet_spm_vals)
+    DESTROY_CAL_VAR(cal->f_sky_pred_vals)
+    DESTROY_CAL_VAR(cal->f_sky_resid_fit_vals)
+    DESTROY_CAL_VAR(cal->p_free_vals)
 }
 /*  End of rssringoccs_Destroy_CalCSV_Members.                                */
 

@@ -9,7 +9,7 @@ rssringoccs_Fresnel_Scale(double lambda, double d, double phi, double b)
     cb_2_sp_2  = cos(b)*sin(phi);
     cb_2_sp_2 *= cb_2_sp_2;
 
-    sb_2 = cos(b);
+    sb_2 = sin(b);
     sb_2 *= sb_2;
 
     f_scale = sqrt(0.5*lambda*d*(1.0 - cb_2_sp_2)/sb_2);

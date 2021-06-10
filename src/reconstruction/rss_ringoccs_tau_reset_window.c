@@ -42,7 +42,7 @@ void rssringoccs_Tau_Reset_Window(double *x_arr, double *w_func, double dx,
     /* Loop over n, computing the window function and the x_arr variable.     */
     for(n = 0U; n < nw_pts; ++n)
     {
-        x_arr[n]  = (double)(n - nw_pts)*dx;
+        x_arr[n]  = ((double)n - (double)nw_pts)*dx;
         w_func[n] = fw(x_arr[n], width);
     }
 }

@@ -160,7 +160,7 @@ void rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau)
                        0.5*tau->w_km_vals[tau->start + n];
 
     wrange = tmpl_Where_Greater_Double(rho_legal, tau->n_used,
-                                              tau->rho_km_vals[0]);
+                                       tau->rho_km_vals[0]);
     wrange_Index = wrange[0];
     wrange_Size = *wrange[1];
 

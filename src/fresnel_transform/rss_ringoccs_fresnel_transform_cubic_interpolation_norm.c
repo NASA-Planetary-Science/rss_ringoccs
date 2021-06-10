@@ -1,10 +1,9 @@
 
+#include <math.h>
+#include <libtmpl/include/tmpl_math.h>
 #include <libtmpl/include/tmpl_complex.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_kernel.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
 
 void
 Fresnel_Transform_Cubic_Norm_Double(rssringoccs_TAUObj *tau,
@@ -41,7 +40,7 @@ Fresnel_Transform_Cubic_Norm_Double(rssringoccs_TAUObj *tau,
     for (i = 0U; i < 4U; ++i)
     {
 
-        phi = Newton_Raphson_Fresnel_Psi(
+        phi = rssringoccs_Newton_Raphson_Fresnel_Psi(
             tau->k_vals[center],
             tau->rho_km_vals[center],
             tau->rho_km_vals[offset + ind[i]],
@@ -53,7 +52,7 @@ Fresnel_Transform_Cubic_Norm_Double(rssringoccs_TAUObj *tau,
             tau->toler
         );
 
-        psi_n[i] = rssringoccs_Double_Fresnel_Psi(
+        psi_n[i] = rssringoccs_Fresnel_Psi(
             tau->k_vals[center],
             tau->rho_km_vals[center],
             tau->rho_km_vals[offset + ind[i]],
@@ -81,25 +80,24 @@ Fresnel_Transform_Cubic_Norm_Double(rssringoccs_TAUObj *tau,
         psi = psi*x + C[0];
         psi = psi*x;
 
-        cos_psi = w_func[i]*rssringoccs_Double_Cos(psi);
-        sin_psi = w_func[i]*rssringoccs_Double_Sin(psi);
-        exp_psi = rssringoccs_CDouble_Rect(cos_psi, -sin_psi);
-        integrand = rssringoccs_CDouble_Multiply(exp_psi, tau->T_in[offset]);
-        tau->T_out[center] = rssringoccs_CDouble_Add(tau->T_out[center],
-                                                     integrand);
-        norm = rssringoccs_CDouble_Add(norm, exp_psi);
+        cos_psi = w_func[i]*cos(psi);
+        sin_psi = w_func[i]*sin(psi);
+        exp_psi = tmpl_CDouble_Rect(cos_psi, -sin_psi);
+        integrand = tmpl_CDouble_Multiply(exp_psi, tau->T_in[offset]);
+        tau->T_out[center] = tmpl_CDouble_Add(tau->T_out[center], integrand);
+        norm = tmpl_CDouble_Add(norm, exp_psi);
         offset += 1;
     }
 
     /*  The integral in the numerator of norm evaluates to F sqrt(2). Use     *
      *  this in the calculation of the normalization. The cabs function       *
      *  computes the absolute value of complex number (defined in complex.h). */
-    abs_norm = rssringoccs_CDouble_Abs(norm);
-    real_norm = rssringoccs_Sqrt_Two / abs_norm;
+    abs_norm = tmpl_CDouble_Abs(norm);
+    real_norm = tmpl_Sqrt_Two / abs_norm;
 
     /*  Multiply result by the coefficient found in the Fresnel inverse.      *
      *  The 1/F term is omitted, since the F in the norm cancels this.        */
-    integrand = rssringoccs_CDouble_Rect(0.5*real_norm, 0.5*real_norm);
-    tau->T_out[center] = rssringoccs_CDouble_Multiply(integrand,
+    integrand = tmpl_CDouble_Rect(0.5*real_norm, 0.5*real_norm);
+    tau->T_out[center] = tmpl_CDouble_Multiply(integrand,
                                                       tau->T_out[center]);
 }

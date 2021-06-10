@@ -17,8 +17,8 @@
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
 
-#include <rss_ringoccs/include/rss_ringoccs_math.h>
-#include <rss_ringoccs/include/rss_ringoccs_complex.h>
+#include <math.h>
+#include <libtmpl/include/tmpl_complex.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
 /******************************************************************************
@@ -63,14 +63,14 @@ Fresnel_Transform_Double(rssringoccs_TAUObj *tau, double *x_arr, double *w_func,
                          unsigned long n_pts, unsigned long center)
 {
     /*  Declare all necessary variables. i and j are used for indexing.       */
-    unsigned long m, n;
+    unsigned long int m, n;
 
     /*  rcpr_F and rcpr_F2 are the reciprocal of the Fresnel scale, and the   *
      *  square of this. x is used as the argument of the Fresnel kernel.      */
     double x, rcpr_F, rcpr_F2, cos_x, sin_x, factor;
 
     /*  exp_negative_ix is used for the Fresnel kernel.                       */
-    rssringoccs_ComplexDouble exp_negative_ix, integrand, arg;
+    tmpl_ComplexDouble exp_negative_ix, integrand, arg;
 
     /*  Start with the central point in the Riemann sum. This is center of    *
      *  window function. That is, where w_func = 1. This is just T_in at      *
@@ -92,25 +92,24 @@ Fresnel_Transform_Double(rssringoccs_TAUObj *tau, double *x_arr, double *w_func,
         x = x_arr[m]*rcpr_F2;
 
         /*  Use Euler's Theorem to compute exp(-ix). Scale by window function.*/
-        cos_x = rssringoccs_Double_Cos(x);
-        sin_x = rssringoccs_Double_Sin(x);
-        arg = rssringoccs_CDouble_Rect(cos_x, -sin_x);
-        exp_negative_ix = rssringoccs_CDouble_Multiply_Real(w_func[m], arg);
+        cos_x = cos(x);
+        sin_x = sin(x);
+        arg = tmpl_CDouble_Rect(cos_x, -sin_x);
+        exp_negative_ix = tmpl_CDouble_Multiply_Real(w_func[m], arg);
 
         /*  Take advantage of the symmetry of the quadratic approximation.    *
          *  This cuts the number of computations roughly in half. If the T_in *
          *  pointer does not contain at least 2*n_pts+1 points, n_pts to the  *
          *  left and n_pts to the right of the center, then this will create  *
          *  a segmentation fault, crashing the program.                       */
-        integrand = rssringoccs_CDouble_Add(tau->T_in[center - n],
-                                            tau->T_in[center + n]);
-        integrand = rssringoccs_CDouble_Multiply(exp_negative_ix, integrand);
-        tau->T_out[center] = rssringoccs_CDouble_Add(tau->T_out[center],
-                                                     integrand);
-        n -= 1;
+        integrand = tmpl_CDouble_Add(tau->T_in[center - n],
+                                     tau->T_in[center + n]);
+        integrand = tmpl_CDouble_Multiply(exp_negative_ix, integrand);
+        tau->T_out[center] = tmpl_CDouble_Add(tau->T_out[center], integrand);
+        n--;
     }
 
     /*  Multiply result by the coefficient found in the Fresnel inverse.      */
-    arg   = rssringoccs_CDouble_Rect(factor, factor);
-    tau->T_out[center] = rssringoccs_CDouble_Multiply(arg, tau->T_out[center]);
+    arg = tmpl_CDouble_Rect(factor, factor);
+    tau->T_out[center] = tmpl_CDouble_Multiply(arg, tau->T_out[center]);
 }

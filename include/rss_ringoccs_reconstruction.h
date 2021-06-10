@@ -6,7 +6,6 @@
 #include <libtmpl/include/tmpl_bool.h>
 #include <libtmpl/include/tmpl_complex.h>
 #include <rss_ringoccs/include/rss_ringoccs_calibration.h>
-#include <rss_ringoccs/include/rss_ringoccs_special_functions.h>
 
 typedef double (*rssringoccs_window_func)(double, double);
 

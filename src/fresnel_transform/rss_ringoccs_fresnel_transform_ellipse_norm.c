@@ -17,8 +17,9 @@
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
 
-#include <rss_ringoccs/include/rss_ringoccs_math.h>
-#include <rss_ringoccs/include/rss_ringoccs_complex.h>
+#include <math.h>
+#include <libtmpl/include/tmpl_math.h>
+#include <libtmpl/include/tmpl_complex.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_kernel.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
@@ -35,11 +36,11 @@ Fresnel_Transform_Ellipse_Norm_Double(rssringoccs_TAUObj *tau,
     /*  The Fresnel kernel and the stationary ring azimuth angle.             */
     double psi, phi, cos_psi, sin_psi, abs_norm, real_norm, x, y, z, dx, dy, D;
     double ecc_factor, ecc_cos_factor, semi_major, rho;
-    rssringoccs_ComplexDouble exp_psi, norm, integrand;
+    tmpl_ComplexDouble exp_psi, norm, integrand;
 
     /*  Initialize T_out and norm to zero so we can loop over later.          */
-    tau->T_out[center] = rssringoccs_CDouble_Zero;
-    norm  = rssringoccs_CDouble_Zero;
+    tau->T_out[center] = tmpl_CDouble_Zero;
+    norm = tmpl_CDouble_Zero;
 
     /*  Symmetry is lost without the Legendre polynomials, or Fresnel         *
      *  quadratic. Must compute everything from -W/2 to W/2.                  */
@@ -50,10 +51,10 @@ Fresnel_Transform_Ellipse_Norm_Double(rssringoccs_TAUObj *tau,
     for (m = 0; m < n_pts; ++m)
     {
         /*  Calculate the stationary value of psi with respect to phi.        */
-        ecc_cos_factor = 1.0 + tau->ecc * rssringoccs_Double_Cos(tau->phi_rad_vals[center] - tau->peri);
+        ecc_cos_factor = 1.0 + tau->ecc * cos(tau->phi_rad_vals[center] - tau->peri);
         semi_major     = tau->rho_km_vals[center] * ecc_cos_factor / ecc_factor;
 
-        phi = rssringoccs_Double_Newton_Raphson_Fresnel_Ellipse(
+        phi = rssringoccs_Newton_Raphson_Fresnel_Ellipse(
             tau->k_vals[center],
             tau->rho_km_vals[center],
             tau->rho_km_vals[offset],
@@ -76,11 +77,11 @@ Fresnel_Transform_Ellipse_Norm_Double(rssringoccs_TAUObj *tau,
         dy = y - tau->ry_km_vals[center];
         D = sqrt(dx*dx + dy*dy + z*z);
 
-        ecc_cos_factor = 1.0 + tau->ecc * rssringoccs_Double_Cos(phi - tau->peri);
+        ecc_cos_factor = 1.0 + tau->ecc * cos(phi - tau->peri);
         rho = semi_major * ecc_factor / ecc_cos_factor;
 
         /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
-        psi = rssringoccs_Double_Fresnel_Psi(
+        psi = rssringoccs_Fresnel_Psi(
             tau->k_vals[center],
             rho,
             tau->rho_km_vals[offset],
@@ -90,31 +91,29 @@ Fresnel_Transform_Ellipse_Norm_Double(rssringoccs_TAUObj *tau,
             D
         );
 
-        cos_psi = w_func[m]*rssringoccs_Double_Cos(psi);
-        sin_psi = w_func[m]*rssringoccs_Double_Sin(psi);
-        exp_psi = rssringoccs_CDouble_Rect(cos_psi, -sin_psi);
+        cos_psi = w_func[m]*cos(psi);
+        sin_psi = w_func[m]*sin(psi);
+        exp_psi = tmpl_CDouble_Rect(cos_psi, -sin_psi);
 
         /*  Compute the norm using a Riemann sum as well.                     */
-        norm = rssringoccs_CDouble_Add(norm, exp_psi);
+        norm = tmpl_CDouble_Add(norm, exp_psi);
 
         /*  Compute the transform with a Riemann sum. If the T_in pointer     *
          *  does not contain at least 2*n_pts+1 points, n_pts to the left and *
          *  right of the center, then this will create a segmentation fault.  */
-        integrand = rssringoccs_CDouble_Multiply(exp_psi, tau->T_in[offset]);
-        tau->T_out[center] = rssringoccs_CDouble_Add(tau->T_out[center],
-                                                     integrand);
-        offset   += 1;
+        integrand = tmpl_CDouble_Multiply(exp_psi, tau->T_in[offset]);
+        tau->T_out[center] = tmpl_CDouble_Add(tau->T_out[center], integrand);
+        offset += 1;
     }
 
     /*  The integral in the numerator of norm evaluates to F sqrt(2). Use     *
      *  this in the calculation of the normalization. The cabs function       *
      *  computes the absolute value of complex number (defined in complex.h). */
-    abs_norm = rssringoccs_CDouble_Abs(norm);
-    real_norm = rssringoccs_Sqrt_Two / abs_norm;
+    abs_norm = tmpl_CDouble_Abs(norm);
+    real_norm = tmpl_Sqrt_Two / abs_norm;
 
     /*  Multiply result by the coefficient found in the Fresnel inverse.      *
      *  The 1/F term is omitted, since the F in the norm cancels this.        */
-    integrand = rssringoccs_CDouble_Rect(0.5*real_norm, 0.5*real_norm);
-    tau->T_out[center] = rssringoccs_CDouble_Multiply(integrand,
-                                                      tau->T_out[center]);
+    integrand = tmpl_CDouble_Rect(0.5*real_norm, 0.5*real_norm);
+    tau->T_out[center] = tmpl_CDouble_Multiply(integrand, tau->T_out[center]);
 }

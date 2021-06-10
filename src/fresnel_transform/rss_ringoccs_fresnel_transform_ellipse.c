@@ -1,5 +1,5 @@
-#include <rss_ringoccs/include/rss_ringoccs_math.h>
-#include <rss_ringoccs/include/rss_ringoccs_complex.h>
+#include <math.h>
+#include <libtmpl/include/tmpl_complex.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_kernel.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
@@ -10,14 +10,14 @@ Fresnel_Transform_Ellipse_Double(rssringoccs_TAUObj *tau,
                                  unsigned long center)
 {
     /*  Declare all necessary variables. i and j are used for indexing.       */
-    unsigned long m, offset;
+    unsigned long int m, offset;
 
     /*  The Fresnel kernel and ring azimuth angle.                            */
     double psi, phi, cos_psi, sin_psi, factor, x, y, z, dx, dy, D;
-    rssringoccs_ComplexDouble exp_psi, integrand;
+    tmpl_ComplexDouble exp_psi, integrand;
 
     /*  Initialize T_out and norm to zero so we can loop over later.          */
-    tau->T_out[center] = rssringoccs_CDouble_Zero;
+    tau->T_out[center] = tmpl_CDouble_Zero;
     factor = 0.5 * tau->dx_km / tau->F_km_vals[center];
 
     /*  Symmetry is lost without the Legendre polynomials, or Fresnel         *
@@ -28,7 +28,7 @@ Fresnel_Transform_Ellipse_Double(rssringoccs_TAUObj *tau,
     for (m = 0; m < n_pts; ++m)
     {
         /*  Calculate the stationary value of psi with respect to phi.        */
-        phi = rssringoccs_Double_Newton_Raphson_Fresnel_Ellipse(
+        phi = rssringoccs_Newton_Raphson_Fresnel_Ellipse(
             tau->k_vals[center],
             tau->rho_km_vals[center],
             tau->rho_km_vals[offset],
@@ -52,7 +52,7 @@ Fresnel_Transform_Ellipse_Double(rssringoccs_TAUObj *tau,
         D = sqrt(dx*dx + dy*dy + z*z);
 
         /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
-        psi = rssringoccs_Double_Fresnel_Psi(
+        psi = rssringoccs_Fresnel_Psi(
             tau->k_vals[center],
             tau->rho_km_vals[center],
             tau->rho_km_vals[offset],
@@ -62,21 +62,19 @@ Fresnel_Transform_Ellipse_Double(rssringoccs_TAUObj *tau,
             D
         );
 
-        cos_psi = w_func[m]*rssringoccs_Double_Cos(psi);
-        sin_psi = w_func[m]*rssringoccs_Double_Sin(psi);
-        exp_psi = rssringoccs_CDouble_Rect(cos_psi, -sin_psi);
+        cos_psi = w_func[m]*cos(psi);
+        sin_psi = w_func[m]*sin(psi);
+        exp_psi = tmpl_CDouble_Rect(cos_psi, -sin_psi);
 
         /*  Compute the transform with a Riemann sum. If the T_in pointer     *
          *  does not contain at least 2*n_pts+1 points, n_pts to the left and *
          *  right of the center, then this will create a segmentation fault.  */
-        integrand = rssringoccs_CDouble_Multiply(exp_psi, tau->T_in[offset]);
-        tau->T_out[center] = rssringoccs_CDouble_Add(tau->T_out[center],
-                                                     integrand);
+        integrand = tmpl_CDouble_Multiply(exp_psi, tau->T_in[offset]);
+        tau->T_out[center] = tmpl_CDouble_Add(tau->T_out[center], integrand);
         offset += 1;
     }
 
     /*  Multiply result by the coefficient found in the Fresnel inverse.      */
-    integrand = rssringoccs_CDouble_Rect(factor, factor);
-    tau->T_out[center] = rssringoccs_CDouble_Multiply(integrand,
-                                                      tau->T_out[center]);
+    integrand = tmpl_CDouble_Rect(factor, factor);
+    tau->T_out[center] = tmpl_CDouble_Multiply(integrand, tau->T_out[center]);
 }

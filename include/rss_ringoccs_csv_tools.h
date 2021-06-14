@@ -124,9 +124,7 @@ typedef struct rssringoccs_CSVData {
     double *f_sky_hz_vals;
     double *p_norm_vals;
     double *raw_tau_vals;
-    double *power_vals;
     double *phase_rad_vals;
-    double *phase_vals;
     double *phi_rad_vals;
     double *phi_rl_rad_vals;
     double *raw_tau_threshold_vals;
@@ -141,6 +139,7 @@ typedef struct rssringoccs_CSVData {
     double *t_ret_spm_vals;
     double *t_set_spm_vals;
     double *tau_rho;
+    double *tau_phase;
     double *tau_power;
     double *tau_vals;
     unsigned long int n_elements;
@@ -179,6 +178,7 @@ rssringoccs_Extract_CSV_Data(const char *geo,
 
 extern void rssringoccs_Destroy_CSV_Members(rssringoccs_CSVData *csv);
 
+extern void rssringoccs_Destroy_CSV(rssringoccs_CSVData **csv);
+
 #endif
 /*  End of include guard.                                                     */
-

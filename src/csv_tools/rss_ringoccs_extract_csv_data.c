@@ -26,8 +26,7 @@
 #include <libtmpl/include/tmpl_interpolate.h>
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
 #include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include <math.h>
 
 /*  Macro function for safely allocating memory for the variables. This       *
  *  checks if malloc fails, and does not simply assume it passed.             */
@@ -69,20 +68,15 @@ rssringoccs_Extract_CSV_Data(const char *geo,
     unsigned long n;
 
     /*  Variables for checking the geometry of the occultation.               */
-    double min_dr_dt, max_dr_dt, temp;
-    double *geo_rho, *geo_rho_dot, *geo_D;
+    double min_dr_dt, max_dr_dt, temp, raw_mu;
+    double *cal_f_sky_hz_vals;
 
     /*  Allocate memory for the CSV object.                                   */
     csv_data = malloc(sizeof(*csv_data));
 
     /*  Check if malloc failed.                                               */
     if (csv_data == NULL)
-    {
-        puts("Error Encountered: rss_ringoccs\n"
-             "\trssringoccs_Extract_CSV_Data\n\n"
-             "Malloc failed and returned NULL for csv_data. Returning.\n");
         return NULL;
-    }
 
     /*  Initialize the members to NULL. This will prevent functions from      *
      *  trying to free pointers that weren't malloc'd in the event of error.  */
@@ -90,10 +84,8 @@ rssringoccs_Extract_CSV_Data(const char *geo,
     csv_data->D_km_vals = NULL;
     csv_data->f_sky_hz_vals = NULL;
     csv_data->p_norm_vals = NULL;
-    csv_data->power_vals = NULL;
     csv_data->raw_tau_vals = NULL;
     csv_data->phase_rad_vals = NULL;
-    csv_data->phase_vals = NULL;
     csv_data->phi_rad_vals = NULL;
     csv_data->phi_rl_rad_vals = NULL;
     csv_data->raw_tau_threshold_vals = NULL;
@@ -109,8 +101,10 @@ rssringoccs_Extract_CSV_Data(const char *geo,
     csv_data->t_set_spm_vals = NULL;
     csv_data->tau_rho = NULL;
     csv_data->tau_power = NULL;
+    csv_data->tau_phase = NULL;
     csv_data->tau_vals = NULL;
     csv_data->error_message = NULL;
+    csv_data->error_occurred = tmpl_False;
 
     /*  Extract the data from the GEO.TAB file.                               */
     geo_dat = rssringoccs_Get_Geo(geo, use_deprecated);
@@ -196,6 +190,26 @@ rssringoccs_Extract_CSV_Data(const char *geo,
         return csv_data;
     }
 
+    cal_f_sky_hz_vals = malloc(sizeof(*cal_f_sky_hz_vals)*cal_dat->n_elements);
+
+    if (cal_f_sky_hz_vals == NULL)
+    {
+        csv_data->error_occurred = tmpl_True;
+        csv_data->error_message = tmpl_strdup(
+            "Error Encountered: rss_ringoccs\n"
+            "\trssringoccs_Extract_CSV_Data\n\n"
+            "malloc returned NULL for cal_f_sky_hz_vals. Aborting.\n"
+        );
+        rssringoccs_Destroy_GeoCSV(&geo_dat);
+        rssringoccs_Destroy_DLPCSV(&dlp_dat);
+        rssringoccs_Destroy_CalCSV(&cal_dat);
+        return csv_data;
+    }
+
+    for (n = 0UL; n < cal_dat->n_elements; ++n)
+        cal_f_sky_hz_vals[n] = cal_dat->f_sky_pred_vals[n] - 
+                               cal_dat->f_sky_resid_fit_vals[n];
+
     /*  Extract the data from the TAU.TAB file.                               */
     if (tau)
     {
@@ -241,6 +255,7 @@ rssringoccs_Extract_CSV_Data(const char *geo,
      *  braces {} hence there is no need for a semi-colon at the end.         */
     MALLOC_CSV_VAR(rho_km_vals)
     MALLOC_CSV_VAR(raw_tau_vals)
+    MALLOC_CSV_VAR(p_norm_vals)
     MALLOC_CSV_VAR(phase_rad_vals)
     MALLOC_CSV_VAR(phi_rad_vals)
     MALLOC_CSV_VAR(B_rad_vals)
@@ -251,40 +266,45 @@ rssringoccs_Extract_CSV_Data(const char *geo,
     MALLOC_CSV_VAR(rho_corr_timing_km_vals)
     MALLOC_CSV_VAR(phi_rl_rad_vals)
     MALLOC_CSV_VAR(raw_tau_threshold_vals)
+    MALLOC_CSV_VAR(f_sky_hz_vals)
+    MALLOC_CSV_VAR(D_km_vals)
+    MALLOC_CSV_VAR(rho_dot_kms_vals)
+    MALLOC_CSV_VAR(rx_km_vals)
+    MALLOC_CSV_VAR(ry_km_vals)
+    MALLOC_CSV_VAR(rz_km_vals)
 
     /*  Extract the DLP variables and store them in the CSV struct.           */
     for (n = 0U; n < csv_data->n_elements; ++n)
     {
-        csv_data->rho_km_vals[n]  = dlp_dat->rho_km_vals[n];
+        csv_data->rho_km_vals[n] = dlp_dat->rho_km_vals[n];
         csv_data->raw_tau_vals[n] = dlp_dat->raw_tau_vals[n];
         csv_data->phase_rad_vals[n]
             = tmpl_Deg_to_Rad*dlp_dat->phase_deg_vals[n];
         csv_data->phi_rad_vals[n]
             = tmpl_Deg_to_Rad*dlp_dat->phi_ora_deg_vals[n];
-        csv_data->B_rad_vals[n]
-            = tmpl_Deg_to_Rad*dlp_dat->B_deg_vals[n];
+        csv_data->B_rad_vals[n] = tmpl_Deg_to_Rad*dlp_dat->B_deg_vals[n];
         csv_data->t_ret_spm_vals[n] = dlp_dat->t_ret_spm_vals[n];
         csv_data->t_set_spm_vals[n] = dlp_dat->t_set_spm_vals[n];
         csv_data->t_oet_spm_vals[n] = dlp_dat->t_oet_spm_vals[n];
-        csv_data->rho_corr_pole_km_vals[n]
-            = dlp_dat->rho_corr_pole_km_vals[n];
+        csv_data->rho_corr_pole_km_vals[n] = dlp_dat->rho_corr_pole_km_vals[n];
         csv_data->rho_corr_timing_km_vals[n]
             = dlp_dat->rho_corr_timing_km_vals[n];
         csv_data->phi_rl_rad_vals[n]
             = tmpl_Deg_to_Rad*dlp_dat->phi_rl_deg_vals[n];
         csv_data->raw_tau_threshold_vals[n]
             = dlp_dat->raw_tau_threshold_vals[n];
+        raw_mu = sin(fabs(csv_data->B_rad_vals[n]));
+        csv_data->p_norm_vals[n] = exp(-csv_data->raw_tau_vals[n] / raw_mu);
     }
 
-    geo_rho     = geo_dat->rho_km_vals;
-    geo_D       = geo_dat->D_km_vals;
-    geo_rho_dot = geo_dat->rho_dot_kms_vals;
+    temp = (csv_data->rho_km_vals[1] - csv_data->rho_km_vals[0]) /
+           (csv_data->t_set_spm_vals[1] - csv_data->t_set_spm_vals[0]);
 
-    min_dr_dt = -tmpl_Infinity;
-    max_dr_dt = tmpl_Infinity;
+    min_dr_dt = temp;
+    max_dr_dt = temp;
 
     /*  Find the minimum and maximum of drho/dt.                              */
-    for (n = 0U; n < csv_data->n_elements - 1U; ++n)
+    for (n = 1U; n < csv_data->n_elements - 1U; ++n)
     {
         temp = (csv_data->rho_km_vals[n+1U] - csv_data->rho_km_vals[n])   /
                (csv_data->t_set_spm_vals[n+1U] - csv_data->t_set_spm_vals[n]);
@@ -331,10 +351,46 @@ rssringoccs_Extract_CSV_Data(const char *geo,
     }
     else if (max_dr_dt < 0.0)
     {
-        tmpl_Reverse_Double_Array(geo_rho, geo_dat->n_elements);
-        tmpl_Reverse_Double_Array(geo_rho_dot, geo_dat->n_elements);
-        tmpl_Reverse_Double_Array(geo_D, geo_dat->n_elements);
+        tmpl_Reverse_Double_Array(geo_dat->rho_km_vals, geo_dat->n_elements);
+        tmpl_Reverse_Double_Array(geo_dat->rho_dot_kms_vals,
+                                  geo_dat->n_elements);
+        tmpl_Reverse_Double_Array(geo_dat->D_km_vals, geo_dat->n_elements);
     }
+
+    tmpl_Double_Sorted_Interp1d(geo_dat->rho_km_vals,
+                                geo_dat->D_km_vals,
+                                geo_dat->n_elements,
+                                csv_data->rho_km_vals,
+                                csv_data->D_km_vals,
+                                csv_data->n_elements);
+
+    tmpl_Double_Sorted_Interp1d(geo_dat->rho_km_vals,
+                                geo_dat->rho_dot_kms_vals,
+                                geo_dat->n_elements,
+                                csv_data->rho_km_vals,
+                                csv_data->rho_dot_kms_vals,
+                                csv_data->n_elements);
+
+    tmpl_Double_Sorted_Interp1d(geo_dat->rho_km_vals,
+                                geo_dat->rx_km_vals,
+                                geo_dat->n_elements,
+                                csv_data->rho_km_vals,
+                                csv_data->rx_km_vals,
+                                csv_data->n_elements);
+
+    tmpl_Double_Sorted_Interp1d(geo_dat->rho_km_vals,
+                                geo_dat->ry_km_vals,
+                                geo_dat->n_elements,
+                                csv_data->rho_km_vals,
+                                csv_data->ry_km_vals,
+                                csv_data->n_elements);
+
+    tmpl_Double_Sorted_Interp1d(geo_dat->rho_km_vals,
+                                geo_dat->rz_km_vals,
+                                geo_dat->n_elements,
+                                csv_data->rho_km_vals,
+                                csv_data->rz_km_vals,
+                                csv_data->n_elements);
 
     /*  Free the Geo, Cal, DLP, and TAU structs.                              */
     rssringoccs_Destroy_GeoCSV(&geo_dat);

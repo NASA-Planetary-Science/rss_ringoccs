@@ -17,7 +17,7 @@
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
  *  Purpose:                                                                  *
- *      Function for free'ing a Cal CSV object and free'ing all of the        *
+ *      Function for free'ing a CSV object and free'ing all of the            *
  *      pointers contained inside the struct.                                 *
  ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
@@ -27,40 +27,40 @@
 #include <stdlib.h>
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
 
-/*  Function for freeing the memory in a CalCSV object.                       */
-void rssringoccs_Destroy_CalCSV(rssringoccs_CalCSV **cal)
+/*  Function for freeing the memory in a CSV object.                          */
+void rssringoccs_Destroy_CSV(rssringoccs_CSVData **csv)
 {
     /*  Used for the pointer to the CSV object.                               */
-    rssringoccs_CalCSV *cal_inst;
+    rssringoccs_CSVData *csv_inst;
 
     /*  If the input pointer is NULL, simply return.                          */
-    if (cal == NULL)
+    if (csv == NULL)
         return;
 
-    /*  Otherwise, get a pointer to the CalCSV object.                        */
-    cal_inst = *cal;
+    /*  Otherwise, get a pointer to the CSV object.                           */
+    csv_inst = *csv;
 
     /*  If this is NULL, there's no need to free it. Return.                  */
-    if (cal_inst == NULL)
+    if (csv_inst == NULL)
         return;
 
-    /*  Free all of the pointers inside the CalCSV object.                    */
-    rssringoccs_Destroy_CalCSV_Members(cal_inst);
+    /*  Free all of the pointers inside the CSV object.                       */
+    rssringoccs_Destroy_CSV_Members(csv_inst);
 
     /*  If an error occured along the way, the error_message variable is      *
      *  malloced and a string is stored. Check if we need to free this.       */
-    if (cal_inst->error_message != NULL)
+    if (csv_inst->error_message != NULL)
     {
-        free(cal_inst->error_message);
+        free(csv_inst->error_message);
 
         /*  To avoid freeing twice, reset the pointer to NULL.                */
-        cal_inst->error_message = NULL;
+        csv_inst->error_message = NULL;
     }
 
     /*  Free the pointer to the object and set it to NULL to avoid freeing    *
      *  this object twice.                                                    */
-    free(cal_inst);
-    *cal = NULL;
+    free(csv_inst);
+    *csv = NULL;
     return;
 }
-/*  End of rssringoccs_Destroy_CalCSV.                                        */
+/*  End of rssringoccs_Destroy_CSV.                                           */

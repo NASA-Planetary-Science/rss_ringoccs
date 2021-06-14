@@ -45,9 +45,7 @@ void rssringoccs_Destroy_CSV_Members(rssringoccs_CSVData *csv)
     DESTROY_CSV_VAR(csv->f_sky_hz_vals)
     DESTROY_CSV_VAR(csv->p_norm_vals)
     DESTROY_CSV_VAR(csv->raw_tau_vals)
-    DESTROY_CSV_VAR(csv->power_vals)
     DESTROY_CSV_VAR(csv->phase_rad_vals)
-    DESTROY_CSV_VAR(csv->phase_vals)
     DESTROY_CSV_VAR(csv->phi_rad_vals)
     DESTROY_CSV_VAR(csv->phi_rl_rad_vals)
     DESTROY_CSV_VAR(csv->raw_tau_threshold_vals)
@@ -62,6 +60,7 @@ void rssringoccs_Destroy_CSV_Members(rssringoccs_CSVData *csv)
     DESTROY_CSV_VAR(csv->t_ret_spm_vals)
     DESTROY_CSV_VAR(csv->t_set_spm_vals)
     DESTROY_CSV_VAR(csv->tau_rho)
+    DESTROY_CSV_VAR(csv->tau_phase)
     DESTROY_CSV_VAR(csv->tau_power)
     DESTROY_CSV_VAR(csv->tau_vals)
 }
@@ -69,4 +68,3 @@ void rssringoccs_Destroy_CSV_Members(rssringoccs_CSVData *csv)
 
 /*  Undefine the macro function.                                              */
 #undef DESTROY_CSV_VAR
-

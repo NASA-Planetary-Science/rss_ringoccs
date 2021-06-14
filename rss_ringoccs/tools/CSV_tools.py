@@ -507,64 +507,6 @@ class ExtractCSVData(object):
                 """ % (fname, errmess)
             )
 
-        error_check.check_is_real(self.rho_corr_timing_km_vals,
-                                  "rho_corr_timing_km_vals", fname)
-        error_check.check_is_real(self.raw_tau_threshold_vals,
-                                  "raw_tau_threshold_vals", fname)
-        error_check.check_is_real(self.rho_corr_pole_km_vals,
-                                  "rho_corr_pole_km_vals", fname)
-        error_check.check_is_real(self.rho_dot_kms_vals,
-                                  "rho_dot_kms_vals",fname)
-        error_check.check_is_real(self.phi_rl_rad_vals,
-                                  "phi_rl_rad_vals", fname)
-        error_check.check_is_real(self.t_oet_spm_vals, "t_oet_spm_vals", fname)
-        error_check.check_is_real(self.t_ret_spm_vals, "t_ret_spm_vals", fname)
-        error_check.check_is_real(self.t_set_spm_vals, "t_set_spm_vals", fname)
-        error_check.check_is_real(self.phase_rad_vals, "phase_rad_vals", fname)
-        error_check.check_is_real(self.f_sky_hz_vals, "f_sky_hz_vals", fname)
-        error_check.check_is_real(self.raw_tau_vals, "raw_tau_vals", fname)
-        error_check.check_is_real(self.phi_rad_vals, "phi_rad_vals", fname)
-        error_check.check_is_real(self.rho_km_vals, "rho_km_vals", fname)
-        error_check.check_is_real(self.B_rad_vals, "B_rad_vals", fname)
-        error_check.check_is_real(self.D_km_vals, "D_km_vals", fname)
-        error_check.check_is_real(geo_rho, "geo_rho", fname)
-
-        error_check.check_positive(self.t_oet_spm_vals, "t_oet_spm_vals", fname)
-        error_check.check_positive(self.t_ret_spm_vals, "t_ret_spm_vals", fname)
-        error_check.check_positive(self.t_set_spm_vals, "t_set_spm_vals", fname)
-        error_check.check_positive(self.f_sky_hz_vals, "f_sky_hz_vals", fname)
-        error_check.check_positive(self.rho_km_vals, "rho_km_vals", fname)
-        error_check.check_positive(self.D_km_vals, "D_km_vals", fname)
-        error_check.check_positive(geo_rho, "geo_rho", fname)
-
-        error_check.check_two_pi(self.phi_rl_rad_vals, "phi_rl_rad_vals",
-                                 fname, deg=False)
-        error_check.check_two_pi(self.phase_rad_vals, "phase_rad_vals",
-                                 fname, deg=False)
-        error_check.check_two_pi(self.phi_rad_vals, "phi_rad_vals",
-                                 fname, deg=False)
-        error_check.check_two_pi(self.B_rad_vals, "B_rad_vals",
-                                 fname, deg=False)
-
-        error_check.check_lengths(self.t_set_spm_vals, self.rho_km_vals,
-                                  "t_set_spm_vals", "rho_km_vals", fname)
-        error_check.check_lengths(self.t_ret_spm_vals, self.rho_km_vals,
-                                  "t_ret_spm_vals", "rho_km_vals", fname)
-        error_check.check_lengths(self.t_oet_spm_vals, self.rho_km_vals,
-                                  "t_oet_spm_vals", "rho_km_vals", fname)
-        error_check.check_lengths(self.phase_rad_vals, self.rho_km_vals,
-                                  "phase_rad_vals", "rho_km_vals", fname)
-        error_check.check_lengths(self.phi_rad_vals, self.rho_km_vals,
-                                  "phi_rad_vals", "rho_km_vals", fname)
-        error_check.check_lengths(self.raw_tau_vals, self.rho_km_vals,
-                                  "raw_tau_vals", "rho_km_vals", fname)
-        error_check.check_lengths(self.B_rad_vals, self.rho_km_vals,
-                                  "B_rad_vals", "rho_km_vals", fname)
-        error_check.check_lengths(self.D_km_vals, geo_rho,
-                                  "D_km_vals", "rho_km_vals", fname)
-        error_check.check_lengths(self.rho_dot_kms_vals, geo_rho,
-                                  "D_km_vals", "rho_km_vals", fname)
-
         if verbose:
             print("\tComputing Variables...")
 

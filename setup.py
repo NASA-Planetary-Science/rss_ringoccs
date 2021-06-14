@@ -24,10 +24,15 @@ setup(name='diffrec',
       author='Ryan Maguire',
       ext_modules=[
           Extension('diffrec',
-                    ['rss_ringoccs/diffrec/diffraction_correction_class.c'],
+                    ['rss_ringoccs/rss_ringoccs_diffraction_correction_class.c'],
                     include_dirs=[numpy.get_include()],
                     library_dirs=['/usr/local/lib'],
-                    libraries=['rssringoccs'])
+                    libraries=['rssringoccs']),
+          Extension('csvtools',
+                    ['rss_ringoccs/rss_ringoccs_extract_csv_data_class.c'],
+                    include_dirs=[numpy.get_include()],
+                    library_dirs=['/usr/local/lib'],
+                    libraries=['rssringoccs']),
         ]
      )
 

@@ -6,6 +6,7 @@
 #include <libtmpl/include/tmpl_bool.h>
 #include <libtmpl/include/tmpl_complex.h>
 #include <rss_ringoccs/include/rss_ringoccs_calibration.h>
+#include <rss_ringoccs/include/rss_ringoccs_history.h>
 
 typedef double (*rssringoccs_window_func)(double, double);
 
@@ -84,6 +85,7 @@ typedef struct rssringoccs_TAUObj {
     char *wtype;
     char *psitype;
     unsigned int order;
+    rssringoccs_HistoryObj *history;
 } rssringoccs_TAUObj;
 
 typedef void (*rssringoccs_FresT)(rssringoccs_TAUObj *, double *,
@@ -152,5 +154,8 @@ rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj *tau);
 
 extern void
 rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau);
+
+extern void
+rssringoccs_Write_TAU_History(rssringoccs_TAUObj *tau);
 
 #endif

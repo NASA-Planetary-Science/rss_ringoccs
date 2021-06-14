@@ -95,6 +95,7 @@ from . import occgeo
 from . import calibration
 from . import diffrec
 from . import scatter
+from . import csvtools
 
 """
 History:

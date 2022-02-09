@@ -20,13 +20,13 @@
  *  Date:       May 27, 2021                                                  *
  ******************************************************************************/
 
-#include <cspice/include/SpiceUsr.h>
+/* #include <cspice/include/SpiceUsr.h>
 #include <rss_ringoccs/include/rss_ringoccs_occultation_geometry.h>
 
 void
 rssringoccs_Calc_B_Deg(double *et_vals, char *spacecraft, char *dsn,
                        tmpl_ThreeVector nhat_p, char *kernels, char *ref)
 {
-    return;    
+    return;
 }
-
+*/

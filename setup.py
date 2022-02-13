@@ -18,21 +18,32 @@ import numpy
 if (platform.system() == "Darwin"):
     os.environ["CFLAGS"] = "-mmacosx-version-min=%s" % platform.mac_ver()[0]
 
-setup(name='diffrec',
-      version='1.3',
-      description='Diffraction correction and modeling',
-      author='Ryan Maguire',
-      ext_modules=[
-          Extension('diffrec',
-                    ['rss_ringoccs/rss_ringoccs_diffraction_correction_class.c'],
-                    include_dirs=[numpy.get_include()],
-                    library_dirs=['/usr/local/lib'],
-                    libraries=['rssringoccs']),
-          Extension('csvtools',
-                    ['rss_ringoccs/rss_ringoccs_extract_csv_data_class.c'],
-                    include_dirs=[numpy.get_include()],
-                    library_dirs=['/usr/local/lib'],
-                    libraries=['rssringoccs']),
-        ]
-     )
+srclist = []
+for d in os.listdir("src/"):
+    directory = "src/%s" % d
+    for file in os.listdir(directory):
+        srclist.append("%s/%s" % (directory, file))
+
+for file in os.listdir("rss_ringoccs/crssringoccs"):
+    srclist.append("rss_ringoccs/crssringoccs/%s" % file)
+
+setup(
+    name='rss_ringoccs',
+    version='1.3',
+    description='C Tools for rss_ringoccs',
+    author='Ryan Maguire',
+    ext_modules=[
+        Extension(
+            'crssringoccs',
+            srclist,
+            include_dirs=[
+                numpy.get_include(),
+                '../',
+                '/usr/local/include'
+            ],
+            library_dirs=['/usr/local/lib'],
+            libraries=['tmpl']
+        )
+    ]
+)
 

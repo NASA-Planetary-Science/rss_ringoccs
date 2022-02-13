@@ -28,7 +28,7 @@ typedef enum {
 } rssringoccs_Psitype_Enum;
 
 /*  Structure that contains all of the necessary data.                        */
-typedef struct rssringoccs_TAUObj {
+typedef struct rssringoccs_TAUObj_Def {
     tmpl_ComplexDouble *T_in;
     tmpl_ComplexDouble *T_out;
     tmpl_ComplexDouble *T_fwd;

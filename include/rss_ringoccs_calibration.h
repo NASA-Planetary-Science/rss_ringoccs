@@ -6,7 +6,7 @@
 #include <libtmpl/include/tmpl_complex.h>
 
 /*  Structure that contains all of the necessary data.                        */
-typedef struct rssringoccs_DLPObj {
+typedef struct rssringoccs_DLPObj_Def {
     double *rho_km_vals;
     double *phi_rad_vals;
     double *B_rad_vals;
@@ -30,7 +30,7 @@ typedef struct rssringoccs_DLPObj {
     char *error_message;
 } rssringoccs_DLPObj;
 
-typedef struct rssringoccs_CalcFreqOffsetObj {
+typedef struct rssringoccs_CalcFreqOffsetObj_Def {
     /*  Observed event time at full sampling.                                 */
     double *t_oet_spm_vals;
 

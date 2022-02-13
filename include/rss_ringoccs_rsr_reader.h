@@ -37,7 +37,7 @@ typedef unsigned long long int rssringoccs_uint_64;
 #error "neither long nor long long is 64 bits. Cannot read RSR files."
 #endif
 
-typedef struct rssringoccs_SFDUObj {
+typedef struct rssringoccs_SFDUObj_Def {
     rssringoccs_int_8 authority[4];
     rssringoccs_int_8 version;
     rssringoccs_int_8 class;
@@ -46,12 +46,12 @@ typedef struct rssringoccs_SFDUObj {
     rssringoccs_uint_64 length;
 } rssringoccs_SFDUObj;
 
-typedef struct rssringoccs_HeaderAggregationObj {
+typedef struct rssringoccs_HeaderAggregationObj_Def {
     rssringoccs_uint_16 type;
     rssringoccs_uint_16 length;
 } rssringoccs_HeaderAggregationObj;
 
-typedef struct rssringoccs_RSRPrimaryHeaderObj {
+typedef struct rssringoccs_RSRPrimaryHeaderObj_Def {
     rssringoccs_uint_16 type;
     rssringoccs_uint_16 length;
     rssringoccs_uint_8 data_major;
@@ -60,7 +60,7 @@ typedef struct rssringoccs_RSRPrimaryHeaderObj {
     rssringoccs_uint_8 format_code;
 } rssringoccs_RSRPrimaryHeaderObj;
 
-typedef struct rssringoccs_RSRSecondaryHeaderObj {
+typedef struct rssringoccs_RSRSecondaryHeaderObj_Def {
     rssringoccs_int_8 reserved;
     rssringoccs_int_8 ul_band;
     rssringoccs_int_8 dl_band;

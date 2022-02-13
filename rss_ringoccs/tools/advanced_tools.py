@@ -1,5 +1,5 @@
 import numpy
-from rss_ringoccs import diffrec
+import rss_ringoccs as rss
 from rss_ringoccs.tools import CSV_tools, error_check, history
 
 
@@ -38,7 +38,7 @@ class CompareTau(object):
         rng = error_check.check_range_input(rng, fname)
 
         data = CSV_tools.ExtractCSVData(geo, cal, dlp, tau=tau, verbose=verbose)
-        rec = diffrec.DiffractionCorrection(
+        rec = rss.DiffractionCorrection(
             data, res, rng=rng, wtype=wtype, use_fwd=fwd, use_norm=norm,
             bfac=bfac, sigma=sigma, psitype=psitype, res_factor=res_factor,
             verbose=verbose, perturb=perturb
@@ -118,7 +118,7 @@ class FindOptimalResolution(object):
         eres = sres + (nres-1)*dres
         res = sres
         data = CSV_tools.ExtractCSVData(geo, cal, dlp, tau=tau, verbose=verbose)
-        rec = diffrec.DiffractionCorrection(data, res, rng=rng,
+        rec = rss.DiffractionCorrection(data, res, rng=rng,
                                                            wtype="kb35")
         start = int(numpy.min((data.tau_rho-numpy.min(rec.rho_km_vals)>=0).nonzero()))
         fin = int(numpy.max((numpy.max(rec.rho_km_vals)-data.tau_rho>=0).nonzero()))
@@ -126,7 +126,7 @@ class FindOptimalResolution(object):
         for i in numpy.arange(nres):
             for j in range(nwins):
                 wtype = wlst[j]
-                recint = diffrec.DiffractionCorrection(data, res, rng=rng, wtype=wtype)
+                recint = rss.DiffractionCorrection(data, res, rng=rng, wtype=wtype)
                 p_int = numpy.abs(recint.power_vals - tau_power)
                 self.linf[i,j] = numpy.max(p_int)
                 self.l2[i,j] = numpy.sqrt(numpy.sum(p_int*p_int)*recint.dx_km)
@@ -470,7 +470,7 @@ class ModelFromGEO(object):
 
         # From the requested range, extract array of the form [a, b]
         if (isinstance(rng, str)):
-            self.rng = numpy.array(diffrec.region_dict[rng])
+            self.rng = numpy.array(rss.region_dict[rng])
         else:
             self.rng = numpy.array([numpy.min(rng), numpy.max(rng)])
 

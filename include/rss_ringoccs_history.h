@@ -3,7 +3,7 @@
 #ifndef RSS_RINGOCCS_HISTORY_H
 #define RSS_RINGOCCS_HISTORY_H
 
-typedef struct _rssringoccs_HistoryObj {
+typedef struct rssringoccs_HistoryObj_Def {
     char *rssocc_version;
     char *user_name;
     char *host_name;

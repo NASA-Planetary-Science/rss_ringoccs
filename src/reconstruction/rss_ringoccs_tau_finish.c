@@ -5,7 +5,7 @@
 #include <libtmpl/include/tmpl_complex.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 
-static void __resize_array(double **ptr, unsigned long start, unsigned long len)
+static void resize_array(double **ptr, unsigned long start, unsigned long len)
 {
     double *temp, *data;
     unsigned long n;
@@ -20,7 +20,7 @@ static void __resize_array(double **ptr, unsigned long start, unsigned long len)
     *ptr = temp;
 }
 
-static void __resize_carray(tmpl_ComplexDouble **ptr,
+static void resize_carray(tmpl_ComplexDouble **ptr,
                             unsigned long start, unsigned long len)
 {
     tmpl_ComplexDouble *temp, *data;
@@ -61,29 +61,29 @@ void rssringoccs_Tau_Finish(rssringoccs_TAUObj* tau)
         tau->tau_fwd_vals    = malloc(sizeof(*tau->tau_fwd_vals)    * len);
     }
 
-    __resize_carray(&tau->T_in, tau->start, len);
-    __resize_carray(&tau->T_out, tau->start, len);
+    resize_carray(&tau->T_in, tau->start, len);
+    resize_carray(&tau->T_out, tau->start, len);
     if (tau->use_fwd)
-        __resize_carray(&tau->T_fwd, tau->start, len);
+        resize_carray(&tau->T_fwd, tau->start, len);
 
-    __resize_array(&tau->rho_km_vals, tau->start, len);
-    __resize_array(&tau->F_km_vals, tau->start, len);
-    __resize_array(&tau->phi_rad_vals, tau->start, len);
-    __resize_array(&tau->k_vals, tau->start, len);
-    __resize_array(&tau->f_sky_hz_vals, tau->start, len);
-    __resize_array(&tau->rho_dot_kms_vals, tau->start, len);
-    __resize_array(&tau->raw_tau_threshold_vals, tau->start, len);
-    __resize_array(&tau->B_rad_vals, tau->start, len);
-    __resize_array(&tau->D_km_vals, tau->start, len);
-    __resize_array(&tau->w_km_vals, tau->start, len);
-    __resize_array(&tau->t_oet_spm_vals, tau->start, len);
-    __resize_array(&tau->t_ret_spm_vals, tau->start, len);
-    __resize_array(&tau->t_set_spm_vals, tau->start, len);
-    __resize_array(&tau->rho_corr_pole_km_vals, tau->start, len);
-    __resize_array(&tau->rho_corr_timing_km_vals, tau->start, len);
-    __resize_array(&tau->phi_rl_rad_vals, tau->start, len);
-    __resize_array(&tau->p_norm_vals, tau->start, len);
-    __resize_array(&tau->phase_rad_vals, tau->start, len);
+    resize_array(&tau->rho_km_vals, tau->start, len);
+    resize_array(&tau->F_km_vals, tau->start, len);
+    resize_array(&tau->phi_rad_vals, tau->start, len);
+    resize_array(&tau->k_vals, tau->start, len);
+    resize_array(&tau->f_sky_hz_vals, tau->start, len);
+    resize_array(&tau->rho_dot_kms_vals, tau->start, len);
+    resize_array(&tau->raw_tau_threshold_vals, tau->start, len);
+    resize_array(&tau->B_rad_vals, tau->start, len);
+    resize_array(&tau->D_km_vals, tau->start, len);
+    resize_array(&tau->w_km_vals, tau->start, len);
+    resize_array(&tau->t_oet_spm_vals, tau->start, len);
+    resize_array(&tau->t_ret_spm_vals, tau->start, len);
+    resize_array(&tau->t_set_spm_vals, tau->start, len);
+    resize_array(&tau->rho_corr_pole_km_vals, tau->start, len);
+    resize_array(&tau->rho_corr_timing_km_vals, tau->start, len);
+    resize_array(&tau->phi_rl_rad_vals, tau->start, len);
+    resize_array(&tau->p_norm_vals, tau->start, len);
+    resize_array(&tau->phase_rad_vals, tau->start, len);
 
     factor = log(tau->dx_km / tau->res);
 

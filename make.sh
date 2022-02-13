@@ -1,8 +1,36 @@
 #!/bin/bash
 
+################################################################################
+#                                  LICENSE                                     #
+################################################################################
+#   This file is part of libtmpl.                                              #
+#                                                                              #
+#   libtmpl is free software: you can redistribute it and/or modify            #
+#   it under the terms of the GNU General Public License as published by       #
+#   the Free Software Foundation, either version 3 of the License, or          #
+#   (at your option) any later version.                                        #
+#                                                                              #
+#   libtmpl is distributed in the hope that it will be useful,                 #
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of             #
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              #
+#   GNU General Public License for more details.                               #
+#                                                                              #
+#   You should have received a copy of the GNU General Public License          #
+#   along with libtmpl.  If not, see <https://www.gnu.org/licenses/>.          #
+################################################################################
+#   Author:     Ryan Maguire                                                   #
+#   Date:       February 13, 2022                                              #
+################################################################################
+
+# This file is for developers and internal use. It has many pedantic compiler
+# arguments to ensure strict ANSI compliant C code.
+
+# Choose whatever C compiler you want. Tested with gcc, clang, tcc, and pcc
+# on GNU/Linux (Debian, Ubuntu, Fedora, and more) and FreeBSD 12.1.
 CC=cc
 STDVER="-std=c89"
 USEOMP=0
+ExtraArgs=""
 
 for arg in "$@"; do
     if [ "$arg" == "" ]; then
@@ -10,151 +38,78 @@ for arg in "$@"; do
     elif [[ "$arg" == *"-cc"* ]]; then
         CC=${arg#*=}
     elif [[ "$arg" == *"-std"* ]]; then
-    	STDVER=$arg
+        STDVER=$arg
     elif [ "$arg" == "-omp" ]; then
         USEOMP=1
     else
-        echo "Invalid argument"
-        echo "$arg"
-        exit 0
+        ExtraArgs="$ExtraArgs ${arg#*=}"
     fi
 done
 
 if [ $USEOMP == 1 ]; then
-    STDVER="$STDVER -fopenmp"
+    ExtraArgs="$ExtraArgs -fopenmp"
 fi
 
-# Name of the created Share Object file (.so).
-SONAME="librssringoccs.so"
+# Compiler arguments. All of these are supported by gcc, tcc, pcc, and clang.
+CArgs1="-pedantic -Wall -Wextra -Wpedantic -Wmissing-field-initializers"
+CArgs2="-Wconversion -Wmissing-prototypes -Wmissing-declarations"
+CArgs3="-Winit-self -Wnull-dereference -Wwrite-strings -Wdouble-promotion"
+CArgs4="-Wfloat-conversion -Wstrict-prototypes -Wold-style-definition"
+CArgs5="-I../ -I/usr/local/include -DNDEBUG -g -fPIC -O3 -flto -c"
+CompilerArgs="$STDVER $ExtraArgs $CArgs1 $CArgs2 $CArgs3 $CArgs4 $CArgs5"
 
-# Location to store SONAME at the end of building.
-SODIR="/usr/local/lib"
-
+# Linking arguments.
+# -O3 is optimization level 3.
+# -I../ means include the parent directory so libtmpl/ is in the path.
+# -flto is link time optimization.
+# -lm means link against the standard math library.
+# -o means create an output.
+# -shared means the output is a shared object, like a library file.
 if [ $USEOMP == 1 ]; then
-    LinkerArgs="-O3 -I/usr/local/include/ -flto -fopenmp -shared -o $SONAME -lm"
+    LinkerArgs="-O3 -flto -fopenmp -shared -o librssringoccs.so -lm -ltmpl"
 else
-    LinkerArgs="-O3 -I/usr/local/include/ -flto -shared -o $SONAME -lm"
+    LinkerArgs="-O3 -flto -shared -o librssringoccs.so -lm -ltmpl"
 fi
 
-LinkerArgs="$LinkerArgs -ltmpl"
-
-# Location where the .h files will be stored.
-INCLUDE_TARGET=/usr/local/include/rss_ringoccs
-
-if [ $CC == "gcc" ]; then
-    CArgs1="$STDVER -pedantic -pedantic-errors -Wall -Wextra -Wpedantic"
-    CArgs2="-Wmisleading-indentation -Wmissing-field-initializers -Wconversion"
-    CArgs3="-Wmissing-prototypes -Wold-style-definition -Winit-self"
-    CArgs4="-Wmissing-declarations -Wnull-dereference -Wwrite-strings"
-    CArgs5="-Wdouble-promotion -Wfloat-conversion -Wstrict-prototypes"
-    CArgs6="-I/usr/local/include/ -DNDEBUG -g -fPIC -O3 -flto -c"
-    CompilerArgs="$CArgs1 $CArgs2 $CArgs3 $CArgs4 $CArgs5 $CArgs6"
-
-#   Clang has different compiler options, so specify those here if using clang.
-elif [ $CC == "clang" ]; then
-    CArgs1="$STDVER -pedantic -pedantic-errors -Wall -Wextra -Wpedantic"
-    CArgs2="-Wmissing-field-initializers -Wconversion -Weverything"
-    CArgs3="-Wmissing-prototypes -Wold-style-definition -Winit-self"
-    CArgs4="-Wmissing-declarations -Wnull-dereference -Wwrite-strings"
-    CArgs5="-Wdouble-promotion -Wfloat-conversion -Wstrict-prototypes"
-    CArgs6="-I/usr/local/include/ -DNDEBUG -g -fPIC -O3 -flto -c"
-    CompilerArgs="$CArgs1 $CArgs2 $CArgs3 $CArgs4 $CArgs5 $CArgs6"
-elif [ $CC == "tcc" ]; then
-    CArgs1="$STDVER -pedantic -Wall -Wextra -Wpedantic"
-    CArgs2="-Wmisleading-indentation -Wmissing-field-initializers -Wconversion"
-    CArgs3="-Wmissing-prototypes -Wold-style-definition -Winit-self"
-    CArgs4="-Wmissing-declarations -Wnull-dereference -Wwrite-strings"
-    CArgs5="-Wdouble-promotion -Wfloat-conversion -Wstrict-prototypes"
-    CArgs6="-I/usr/local/include/ -DNDEBUG -g -fPIC -O3 -flto -c"
-    CompilerArgs="$CArgs1 $CArgs2 $CArgs3 $CArgs4 $CArgs5 $CArgs6"
-elif [ $CC == "pcc" ]; then
-    CArgs1="$STDVER -pedantic -Wall -Wextra -Wpedantic"
-    CArgs2="-Wmisleading-indentation -Wmissing-field-initializers -Wconversion"
-    CArgs3="-Wmissing-prototypes -Wold-style-definition -Winit-self"
-    CArgs4="-Wmissing-declarations -Wnull-dereference -Wwrite-strings"
-    CArgs5="-Wdouble-promotion -Wfloat-conversion -Wstrict-prototypes"
-    CArgs6="-I/usr/local/include/ -DNDEBUG -g -fPIC -O3 -flto -c"
-    CompilerArgs="$CArgs1 $CArgs2 $CArgs3 $CArgs4 $CArgs5 $CArgs6"
-elif [ $CC == "cc" ]; then
-    CArgs1="$STDVER -pedantic -Wall -Wextra -Wpedantic"
-    CArgs2="-Wmisleading-indentation -Wmissing-field-initializers -Wconversion"
-    CArgs3="-Wmissing-prototypes -Wold-style-definition -Winit-self"
-    CArgs4="-Wmissing-declarations -Wnull-dereference -Wwrite-strings"
-    CArgs5="-Wdouble-promotion -Wfloat-conversion -Wstrict-prototypes"
-    CArgs6="-I/usr/local/include/ -DNDEBUG -g -fPIC -O3 -flto -c"
-    CompilerArgs="$CArgs1 $CArgs2 $CArgs3 $CArgs4 $CArgs5 $CArgs6"
-fi
-
-echo -e "\nClearing older files..."
-rm -f *.so *.o
-
-if [ -d "$INCLUDE_TARGET" ]; then
-    sudo rm -rf "$INCLUDE_TARGET";
-fi
-
-if [ -d "$SODIR/$SONAME" ]; then
-    sudo rm -f "$SODIR/$SONAME";
-fi
-
-echo "Copying include/ directory to /usr/local/include/rss_ringoccs/"
-sudo mkdir -p "$INCLUDE_TARGET/include/"
-sudo cp ./include/*.h "$INCLUDE_TARGET/include/"
+# There may be left-over .so and .o files from a previous build. Remove those
+# to avoid a faulty build.
+echo "Clearing older files..."
+rm -f *.so *.o *.obj *.lib
 
 echo "Compiling librssringoccs..."
-echo -e "\n\tCompiler Options:"
-echo -e "\t\tCompiler: $CC"
-echo -e "\t\t$CArgs1"
-echo -e "\t\t$CArgs2"
-echo -e "\t\t$CArgs3"
-echo -e "\t\t$CArgs4"
-echo -e "\t\t$CArgs5"
-echo -e "\t\t$CArgs6"
+echo "    Compiler:"
+echo "        $CC"
+echo "    Version:"
+echo "        $STDVER"
+echo "    Compiler Options:"
+echo "        $CArgs1"
+echo "        $CArgs2"
+echo "        $CArgs3"
+echo "        $CArgs4"
+echo "        $CArgs5"
+echo "    Extra Compiler Arguments:"
+echo "        $ExtraArgs"
 
-#   Loop over all directories in src/ and compile all .c files.
+# Loop over all directories in src/ and compile all .c files.
 for dir in ./src/*; do
-    echo -e "\n\tCompiling $dir"
+    echo ""
+    echo "    Compiling $dir"
     for filename in $dir/*.c; do
-        echo -e "\t\tCompiling: $filename"
+        echo "        Compiling: $filename"
         if !($CC $CompilerArgs $filename); then
             exit 1
         fi
     done
 done
 
-echo -e "\nBuilding librssringoccs Shared Object (.so file)"
-
-$CC ./*.o $LinkerArgs
-
-echo "Moving to /usr/local/lib/librssringoccs.so"
-sudo mv $SONAME $SODIR
-
-echo "Cleaning up..."
-rm -f *.so *.o
-
-LDPATH=/usr/local/lib
-if [[ $LD_LIBRARY_PATH == "" ]]; then
-    CREATE_NEW_LD_PATH="LD_LIBRARY_PATH=$LDPATH"
-    echo -e "\n# Needed for loading librssringoccs." >> ~/.bashrc
-    echo "$CREATE_NEW_LD_PATH" >> ~/.bashrc
-    echo "export LD_LIBRARY_PATH" >> ~/.bashrc
-    source ~/.bashrc
-elif [[ $LD_LIBRARY_PATH != *"$LDPATH"* ]]; then
-    CREATE_NEW_LD_PATH="LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$LDPATH"
-    echo -e "\n# Needed for loading librssringoccs." >> ~/.bashrc
-    echo "$CREATE_NEW_LD_PATH" >> ~/.bashrc
-    echo "export LD_LIBRARY_PATH" >> ~/.bashrc
-    source ~/.bashrc
+echo ""
+echo "Building libtmpl Shared Object (.so file)"
+if !($CC ./*.o $LinkerArgs); then
+    exit 1
 fi
 
+echo "Cleaning up..."
+rm -f *.o
 
-echo -e "\nBuilding modules...\n"
-python3 setup.py config build_ext --inplace
-
-rm -rf build/
-
-#   Move the compiled shared objects (.so) files to the rss_ringoccs/ folder.
-#   This way you can import them directly into python if the rss_ringoccs
-#   package is in your path.
-mv *.so ./rss_ringoccs/
-
+echo "Done"
 

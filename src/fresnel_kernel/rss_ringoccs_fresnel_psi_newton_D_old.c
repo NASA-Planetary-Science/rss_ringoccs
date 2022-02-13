@@ -23,7 +23,7 @@
 #include <math.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_kernel.h>
 
-static double __dpsi(double kD, double r, double r0, double phi,
+static double dpsi(double kD, double r, double r0, double phi,
                      double phi0, double B, double D)
 {
     double xi, eta, psi0, dxi, deta;
@@ -42,7 +42,7 @@ static double __dpsi(double kD, double r, double r0, double phi,
     return kD * ((0.5/psi0)*(deta-2.0*dxi) + dxi);
 }
 
-static double __d2psi(double kD, double r, double r0, double phi,
+static double d2psi(double kD, double r, double r0, double phi,
                       double phi0, double B, double D)
 {
     double xi, eta, psi0, dxi, dxi2, deta, deta2, psi_d2;
@@ -80,12 +80,12 @@ rssringoccs_Newton_Raphson_Fresnel_Psi_D_Old(double kD, double r, double r0,
     dx = x-rx;
     dy = y-ry;
     D = sqrt(dx*dx + dy*dy + rz*rz);
-    dphi  = __dpsi(kD, r, r0, phi, phi0, B, D);
+    dphi = dpsi(kD, r, r0, phi, phi0, B, D);
 
     while(fabs(dphi) > EPS)
     {
-        dphi  = __dpsi(kD, r, r0, phi, phi0, B, D);
-        phi  -= dphi/__d2psi(kD, r, r0, phi, phi0, B, D);
+        dphi  = dpsi(kD, r, r0, phi, phi0, B, D);
+        phi  -= dphi/d2psi(kD, r, r0, phi, phi0, B, D);
         ++i;
         if (i > toler)
             break;

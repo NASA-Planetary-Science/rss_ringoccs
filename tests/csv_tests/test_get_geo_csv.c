@@ -16,8 +16,8 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
+#include <libtmpl/include/tmpl.h>
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
-#include <rss_ringoccs/include/rss_ringoccs_bool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -33,8 +33,10 @@ int main(void)
     unsigned long n;
     FILE *fp;
 
-    geo = rssringoccs_Get_Geo("../Test_Data/Rev007E_X43_Maxwell_GEO.TAB",
-                              rssringoccs_False);
+    geo = rssringoccs_Get_Geo(
+        "../Test_Data/Rev007E_X43_Maxwell_GEO.TAB", tmpl_False
+    );
+
     if (geo == NULL)
     {
         puts("Error Encountered: rss_ringoccs\n"

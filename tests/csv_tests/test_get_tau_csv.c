@@ -16,8 +16,8 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
+#include <libtmpl/include/tmpl.h>
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
-#include <rss_ringoccs/include/rss_ringoccs_bool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -35,8 +35,10 @@ int main(void)
     double end   = 87600.0;
     FILE *fp;
 
-    tau = rssringoccs_Get_Tau("../Test_Data/Rev007E_X43_Maxwell_TAU_1000M.TAB",
-                              rssringoccs_False);
+    tau = rssringoccs_Get_Tau(
+        "../Test_Data/Rev007E_X43_Maxwell_TAU_1000M.TAB", tmpl_False
+    );
+
     if (tau == NULL)
     {
         puts("Error Encountered: rss_ringoccs\n"

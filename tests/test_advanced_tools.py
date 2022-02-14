@@ -5,8 +5,8 @@ from matplotlib import gridspec
 import sys
 sys.path.append("../")
 from rss_ringoccs.tools.CSV_tools import ExtractCSVData
-import rss_ringoccs.diffrec.advanced_tools as at
-import rss_ringoccs.diffrec.diffraction_correction as dc
+import rss_ringoccs.tools.advanced_tools as at
+import rss_ringoccs
 
 
 def test_CompareTAU():
@@ -30,16 +30,16 @@ def test_CompareTAU():
     rng = [74500, 90500]
 
     # Select window type for reconstruction.
-    wtype="kbmd20"
+    wtype = "kbmd20"
 
     # The approximation to the Fresnel kernel that is used.
-    psitype="Newton"
+    psitype = "newtondold"
 
     # Perturb the Fresnel kernel by a small cubic polynomial.
     perturb = [0,0,0,0.3,0]
 
     # Name of the output PDF file.
-    outfile = "./Figures/CompareTAU_Test.pdf"
+    outfile = "./CompareTAU_Test.pdf"
 
     # Run diffraction correction on the input data.
     TauInst = at.CompareTau(geo, cal, dlp, tau, res, rng=rng, wtype=wtype,
@@ -228,7 +228,7 @@ def test_ModelFromGEO():
     dxs = 0.05
 
     # Name of the output PDF file.
-    outfile = "./Figures/ModelFromGEO_Test.pdf"
+    outfile = "./ModelFromGEO_Test.pdf"
 
     # Some labels for the plots.
     lbl = "Forward Model"
@@ -275,8 +275,8 @@ def test_ModelFromGEO():
                                          N_Waves=N_Waves)
 
                 # Run diffraction correction on both sets of modeled data.
-                rec = dc.DiffractionCorrection(gdata, res, rng=rng)
-                rec_f = dc.DiffractionCorrection(gdataf, res, rng=rng)
+                rec = rss_ringoccs.DiffractionCorrection(gdata, res, rng=rng)
+                rec_f = rss_ringoccs.DiffractionCorrection(gdataf, res, rng=rng)
 
                 # Configurations for the plots.
                 plt.rc('font', family='serif')
@@ -347,13 +347,13 @@ def test_ModelFromGEO():
 
         # Test the arbitrary data modeling tool.
         data = ExtractCSVData(geo, cal, dlp, verbose=False)
-        rec = dc.DiffractionCorrection(data, 1.0, rng=[85000, 89000])
+        rec = rss_ringoccs.DiffractionCorrection(data, 1.0, rng=[85000, 89000])
         gdata = at.ModelFromGEO(geo, wav, res, rho, rng=rng, dx_km_desired=dxs,
                                 model="fromdata", data_rho=rec.rho_km_vals,
                                 data_pow=rec.power_vals, verbose=False,
                                 data_phase=rec.phase_rad_vals)
 
-        grec = dc.DiffractionCorrection(gdata, 1.0, rng=rng)
+        grec = rss_ringoccs.DiffractionCorrection(gdata, 1.0, rng=rng)
 
         # Configurations for the plots.
         plt.rc('font', family='serif')
@@ -439,7 +439,7 @@ def test_Make_MTR_Figs():
     dxs = 0.01
 
     # Name of the output PDF file.
-    outfile = "./Figures/MTR_Figs.pdf"
+    outfile = "./MTR_Figs.pdf"
 
     # Range in the x-axis for the plots.
     rmin = -7
@@ -472,8 +472,9 @@ def test_Make_MTR_Figs():
         for wtype in ["Rect", "Coss", "KB 25", "KB 35"]:
 
             # Run diffraction correction on both sets of modeled data.
-            rec = dc.DiffractionCorrection(gdata, res, rng=rng,
-                                           wtype=wtype, psitype=psitype)
+            rec = rss_ringoccs.DiffractionCorrection(
+                gdata, res, rng=rng, wtype=wtype, psitype=psitype
+            )
 
             # Select the first plot region.
             plt.subplot(gs[i // 2, i % 2])
@@ -544,10 +545,10 @@ def test_Make_MTR_Figs():
             for interp in [2, 3, 4, 0]:
 
                 # Run diffraction correction on both sets of modeled data.
-                rec = dc.DiffractionCorrection(gdata, res, rng=rng,
-                                               interp=interp, wtype=wtype,
-                                               psitype=psitype,
-                                               res_factor=res_factor)
+                rec = rss_ringoccs.DiffractionCorrection(
+                    gdata, res, rng=rng, interp=interp, wtype=wtype,
+                    psitype=psitype, res_factor=res_factor
+                )
 
                 # Select the first plot region.
                 plt.subplot(gs[i // 2, i % 2])
@@ -597,5 +598,5 @@ def test_Make_MTR_Figs():
 
 if __name__ == "__main__":
     test_CompareTAU()
-    test_ModelFromGEO()
-    test_Make_MTR_Figs()
+    # test_ModelFromGEO()
+    # test_Make_MTR_Figs()

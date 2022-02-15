@@ -105,7 +105,6 @@ int ExtractCSVData_init(PyCSVObj *self, PyObject *args, PyObject *kwds)
     }
 
     rssringoccs_C_CSV_to_Py_CSV(self, csv);
-
     csv_tmp = Py_BuildValue(
         "{s:s,s:s,s:s}",
         "geo", geo_str,
@@ -116,6 +115,16 @@ int ExtractCSVData_init(PyCSVObj *self, PyObject *args, PyObject *kwds)
     tmp = self->input_vars;
     Py_INCREF(csv_tmp);
     self->input_vars = csv_tmp;
+    Py_XDECREF(tmp);
+
+    tmp = self->input_kwds;
+    Py_INCREF(Py_None);
+    self->input_kwds = Py_None;
+    Py_XDECREF(tmp);
+
+    tmp = self->rev_info;
+    Py_INCREF(Py_None);
+    self->rev_info = Py_None;
     Py_XDECREF(tmp);
 
     return 1;

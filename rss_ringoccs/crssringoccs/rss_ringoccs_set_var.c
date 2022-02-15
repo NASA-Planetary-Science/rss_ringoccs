@@ -47,14 +47,22 @@ void set_var(PyObject **py_ptr, double **ptr, unsigned long int len)
         }
     }
 
-    arr = PyArray_SimpleNewFromData(1, &pylength, NPY_DOUBLE, *ptr);
-    capsule = PyCapsule_New((void *) (*ptr), NULL, capsule_cleanup);
-
-    PyArray_SetBaseObject((PyArrayObject *)arr, capsule);
-
-    tmp = *py_ptr;
-    Py_INCREF(arr);
-    *py_ptr = arr;
-    Py_XDECREF(tmp);
+    if (*ptr != NULL)
+    {
+        arr = PyArray_SimpleNewFromData(1, &pylength, NPY_DOUBLE, *ptr);
+        capsule = PyCapsule_New((void *) (*ptr), NULL, capsule_cleanup);
+        PyArray_SetBaseObject((PyArrayObject *)arr, capsule);
+        tmp = *py_ptr;
+        Py_INCREF(arr);
+        *py_ptr = arr;
+        Py_XDECREF(tmp);
+    }
+    else
+    {
+        tmp = *py_ptr;
+        Py_INCREF(Py_None);
+        *py_ptr = Py_None;
+        Py_XDECREF(tmp);
+    }
 }
 

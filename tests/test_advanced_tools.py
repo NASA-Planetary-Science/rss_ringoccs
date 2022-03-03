@@ -33,7 +33,7 @@ def test_CompareTAU():
     wtype = "kbmd20"
 
     # The approximation to the Fresnel kernel that is used.
-    psitype = "newtondold"
+    psitype = "newtondphi"
 
     # Perturb the Fresnel kernel by a small cubic polynomial.
     perturb = [0,0,0,0.3,0]
@@ -102,7 +102,7 @@ def test_CompareTAU():
             plt.figure(figsize=(8.5, 11))
             plt.suptitle("%s Reconstructions: %s Resolution"
                          % (rev, res), size=14)
-            
+
             # Use gridspec to create 4-by-2 plots.
             gs = gridspec.GridSpec(4, 2, wspace=0.5, hspace=0.5)
 
@@ -170,7 +170,7 @@ def test_CompareTAU():
                                 right=True, labelleft=True)
                 plt.tick_params(axis='x', which='both', bottom=True,
                                 top=True, labelbottom=True)
-                
+
                 # Number of ticks for the x and y axes.
                 plt.locator_params(axis='y', nbins=3)
                 plt.locator_params(axis='x', nbins=4)

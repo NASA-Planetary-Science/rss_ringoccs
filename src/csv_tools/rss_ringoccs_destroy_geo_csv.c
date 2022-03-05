@@ -16,6 +16,10 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
+ *  Purpose:                                                                  *
+ *      Function for free'ing a Geo CSV object and free'ing all of the        *
+ *      pointers contained inside the struct.                                 *
+ ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
  *  Date:       December 31, 2020                                             *
  ******************************************************************************/
@@ -43,8 +47,8 @@ void rssringoccs_Destroy_GeoCSV(rssringoccs_GeoCSV **geo)
     /*  Free all of the members in the GeoCSV object.                         */
     rssringoccs_Destroy_GeoCSV_Members(geo_inst);
 
-    /*  If an error occured, error_message is malloced and a string is stored *
-     *  in the variable. Free the pointer if this is the case.                */
+    /*  If an error occurred, error_message is malloced and a string is       *
+     *  stored in the variable. Free the pointer if this is the case.         */
     if (geo_inst->error_message != NULL)
     {
         free(geo_inst->error_message);
@@ -59,4 +63,3 @@ void rssringoccs_Destroy_GeoCSV(rssringoccs_GeoCSV **geo)
     return;
 }
 /*  End of rssringoccs_Destroy_GeoCSV.                                        */
-

@@ -47,7 +47,7 @@ void rssringoccs_Destroy_CSV(rssringoccs_CSVData **csv)
     /*  Free all of the pointers inside the CSV object.                       */
     rssringoccs_Destroy_CSV_Members(csv_inst);
 
-    /*  If an error occured along the way, the error_message variable is      *
+    /*  If an error occurred along the way, the error_message variable is     *
      *  malloced and a string is stored. Check if we need to free this.       */
     if (csv_inst->error_message != NULL)
     {

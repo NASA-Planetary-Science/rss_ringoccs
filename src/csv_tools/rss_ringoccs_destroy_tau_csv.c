@@ -16,6 +16,10 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
+ *  Purpose:                                                                  *
+ *      Function for free'ing a Tau CSV object and free'ing all of the        *
+ *      pointers contained inside the struct.                                 *
+ ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
  *  Date:       December 31, 2020                                             *
  ******************************************************************************/
@@ -43,7 +47,7 @@ void rssringoccs_Destroy_TauCSV(rssringoccs_TauCSV **tau)
     /*  Free all of the members of the TauCSV object.                         */
     rssringoccs_Destroy_TauCSV_Members(tau_inst);
 
-    /*  If an error occurs, the error_message variable is malloced and a      *
+    /*  If an error occurred, the error_message variable is malloced and a    *
      *  string is stored in it. Free this pointer if this is the case.        */
     if (tau_inst->error_message != NULL)
     {

@@ -16,6 +16,9 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
+ *  Purpose:                                                                  *
+ *      Free all of the pointers in a TauCSV object.                          *
+ ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
  *  Date:       December 31, 2020                                             *
  ******************************************************************************/
@@ -58,4 +61,3 @@ void rssringoccs_Destroy_TauCSV_Members(rssringoccs_TauCSV *tau)
 
 /*  Undefine the macro function.                                              */
 #undef DESTROY_TAU_VAR
-

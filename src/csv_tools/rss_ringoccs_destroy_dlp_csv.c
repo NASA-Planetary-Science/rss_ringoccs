@@ -16,6 +16,10 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
+ *  Purpose:                                                                  *
+ *      Function for free'ing a DLP CSV object and free'ing all of the        *
+ *      pointers contained inside the struct.                                 *
+ ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
  *  Date:       December 31, 2020                                             *
  ******************************************************************************/
@@ -43,7 +47,7 @@ void rssringoccs_Destroy_DLPCSV(rssringoccs_DLPCSV **dlp)
     /*  Free all of the members inside the DLP object.                        */
     rssringoccs_Destroy_DLPCSV_Members(dlp_inst);
 
-    /*  If an error occured, the error_message variable is malloced and a     *
+    /*  If an error occurred, the error_message variable is malloced and a    *
      *  string is stored inside of it. Free this pointer if this is true.     */
     if (dlp_inst->error_message != NULL)
     {
@@ -60,4 +64,3 @@ void rssringoccs_Destroy_DLPCSV(rssringoccs_DLPCSV **dlp)
     return;
 }
 /*  End of rssringoccs_Destroy_DLPCSV.                                        */
-

@@ -16,6 +16,9 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
+ *  Purpose:                                                                  *
+ *      Free all of the pointers in a CSVData object.                         *
+ ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
  *  Date:       January 1, 2021                                               *
  ******************************************************************************/

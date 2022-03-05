@@ -16,6 +16,9 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
+ *  Purpose:                                                                  *
+ *      Free all of the pointers in a DLPCSV object.                          *
+ ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
  *  Date:       December 31, 2020                                             *
  ******************************************************************************/
@@ -28,7 +31,7 @@
 #undef DESTROY_DLP_VAR
 #endif
 
-/*  Macro for freeing and nullifying the members of the dlp CSV structs.      */
+/*  Macro for freeing and nullifying the members of the dlp CSV struct.       */
 #define DESTROY_DLP_VAR(var) if (var != NULL){free(var); var = NULL;}
 
 /*  Free's all members of a rssringoccs_DLPCSV pointer except the             *
@@ -58,4 +61,3 @@ void rssringoccs_Destroy_DLPCSV_Members(rssringoccs_DLPCSV *dlp)
 
 /*  Undefine the macro function.                                              */
 #undef DESTROY_DLP_VAR
-

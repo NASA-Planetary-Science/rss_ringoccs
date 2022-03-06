@@ -16,6 +16,9 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
+ *  Purpose:                                                                  *
+ *      Extracts all diffraction data from a DLP CSV.                         *
+ ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
  *  Date:       December 31, 2020                                             *
  ******************************************************************************/
@@ -27,26 +30,59 @@
 #include <stdio.h>
 #include <string.h>
 
-rssringoccs_DLPCSV *rssringoccs_Get_DLP(const char *filename,
-                                        tmpl_Bool use_deprecated)
-{
-    rssringoccs_DLPCSV *dlp;
-    FILE *fp;
-    char buffer[1024];
-    char *record, *line;
-    int ch;
-    unsigned long line_count, column_count, n;
+/*  Check if the macro name is available.                                     */
+#ifdef MALLOC_DLP_VAR
+#undef MALLOC_DLP_VAR
+#endif
 
+/*  Macro function for safely allocating memory for the variables. This       *
+ *  checks if malloc fails, and does not simply assume it passed.             */
+#define MALLOC_DLP_VAR(var)                                                    \
+    dlp->var = malloc(sizeof(*dlp->var) * dlp->n_elements);                    \
+    if (dlp->var == NULL)                                                      \
+    {                                                                          \
+        dlp->error_occurred = tmpl_True;                                       \
+        dlp->error_message = tmpl_strdup(                                      \
+            "Error Encountered: rss_ringoccs\n"                                \
+            "\ttrssringoccs_Get_DLP\n\n"                                       \
+            "Malloc returned NULL. Failed to allocate memory for " #var ".\n"  \
+            "Aborting computation and returning.\n"                            \
+        );                                                                     \
+                                                                               \
+        /*  Free the variables that have been malloc'd so far.               */\
+        rssringoccs_Destroy_DLPCSV_Members(dlp);                               \
+        fclose(fp);                                                            \
+        return dlp;                                                            \
+    }
+
+/*  Function for extracting the data from a DLP.TAB file.                     */
+rssringoccs_DLPCSV *
+rssringoccs_Get_DLP(const char *filename, tmpl_Bool use_deprecated)
+{
+    /*  Pointer to the DLP struct.                                            */
+    rssringoccs_DLPCSV *dlp;
+
+    /*  File pointer for the CSV file.                                        */
+    FILE *fp;
+
+    /*  Buffer for reading the file line by line.                             */
+    char buffer[1024];
+
+    /*  Variables for parsing the contents of the CSV file.                   */
+    char *record, *line;
+
+    /*  Variable for storing the output of fgetc.                             */
+    int ch;
+
+    unsigned int column_count = 0U;
+    unsigned long int n = 0UL;
+
+    /*  Allocate memory for the dlp data.                                     */
     dlp = malloc(sizeof(*dlp));
 
     /*  Check if malloc failed.                                               */
     if (dlp == NULL)
-    {
-        puts("Error Encountered: rss_ringoccs\n"
-             "\trssringoccs_Get_DLP\n\n"
-             "Malloc failed and returned NULL for dlp. Returning.\n");
         return NULL;
-    }
 
     /*  Initialize the pointers in the dlp struct to NULL. The function       *
      *  rssringoccs_Destroy_DLPCSV_Members will check which members are NULL  *
@@ -66,6 +102,8 @@ rssringoccs_DLPCSV *rssringoccs_Get_DLP(const char *filename,
     dlp->t_set_spm_vals = NULL;
     dlp->B_deg_vals = NULL;
     dlp->error_message = NULL;
+    dlp->n_elements = 0UL;
+    dlp->error_occurred = tmpl_False;
 
     /*  Try to open the input file.                                           */
     fp = fopen(filename, "r");
@@ -84,28 +122,36 @@ rssringoccs_DLPCSV *rssringoccs_Get_DLP(const char *filename,
     }
 
     /*  Count the number of lines in the CSV.                                 */
-    line_count = 0;
-    while(!feof(fp))
+    while (!feof(fp))
     {
         ch = fgetc(fp);
         if(ch == '\n')
-            line_count++;
+            dlp->n_elements++;
     }
+
+    /*  Reset the file back to the start.                                     */
     rewind(fp);
-    dlp->n_elements = line_count;
 
     /*  And count the number of columns.                                      */
-    column_count = 0;
-    line = fgets(buffer,sizeof(buffer), fp);
+    line = fgets(buffer, sizeof(buffer), fp);
+
+    /*  DLP.TAB files are comma separeted, so count the number of commas.     */
     record = strtok(line, ",");
+
     while (record != NULL)
     {
         record = strtok(NULL, ",");
         column_count++;
+
+        /*  The DLP file should have 12 or 13 columns.                        */
+        if (column_count > 13U)
+            break;
     }
+
+    /*  Reset the file back to the start.                                     */
     rewind(fp);
 
-    /*  If use_deprecated was set to true, column_count must be 18. Check.    */
+    /*  If use_deprecated was set to true, column_count must be 12. Check.    */
     if ((column_count != 12) && (use_deprecated))
     {
         dlp->error_occurred = tmpl_True;
@@ -115,10 +161,11 @@ rssringoccs_DLPCSV *rssringoccs_Get_DLP(const char *filename,
             "use_deprecated is set to true but the input CSV does not have\n"
             "12 columns. Aborting computation.\n"
         );
+        fclose(fp);
         return dlp;
     }
 
-    /*  And if use_deprecated is false, we need 19 column. Check this.        */
+    /*  And if use_deprecated is false, we need 13 column. Check this.        */
     else if ((column_count != 13) && (!use_deprecated))
     {
         dlp->error_occurred = tmpl_True;
@@ -128,243 +175,37 @@ rssringoccs_DLPCSV *rssringoccs_Get_DLP(const char *filename,
             "use_deprecated is set to false but the input CSV does not have\n"
             "13 columns. Aborting computation.\n"
         );
+        fclose(fp);
         return dlp;
     }
 
-    /*  Allocate memory for t_oet_spm_vals and check for error.               */
-    dlp->t_oet_spm_vals = malloc(sizeof(*dlp->t_oet_spm_vals) * line_count);
-    if (dlp->t_oet_spm_vals == NULL)
-    {
-        dlp->error_occurred = tmpl_True;
-        dlp->error_message = tmpl_strdup(
-            "Error Encountered: rss_ringoccs\n"
-            "\ttrssringoccs_Get_DLP\n\n"
-            "Malloc returned NULL. Failed to allocate memory for.\n"
-            "t_oet_spm_vals. Aborting computation and returning.\n"
-        );
+    /*  Use the MALLOC_DLP_VAR macro function to allocate memory and check    *
+     *  for errors. This macro ends with an if-then statement, and ends in    *
+     *  curly braces {}, hence no need for a semi-colon here.                 */
+    MALLOC_DLP_VAR(t_oet_spm_vals)
+    MALLOC_DLP_VAR(t_ret_spm_vals)
+    MALLOC_DLP_VAR(t_set_spm_vals)
+    MALLOC_DLP_VAR(rho_km_vals)
+    MALLOC_DLP_VAR(rho_corr_pole_km_vals)
+    MALLOC_DLP_VAR(rho_corr_timing_km_vals)
+    MALLOC_DLP_VAR(phi_rl_deg_vals)
+    MALLOC_DLP_VAR(phi_ora_deg_vals)
+    MALLOC_DLP_VAR(B_deg_vals)
+    MALLOC_DLP_VAR(raw_tau_vals)
+    MALLOC_DLP_VAR(phase_deg_vals)
+    MALLOC_DLP_VAR(raw_tau_threshold_vals)
 
-        /*  Free the variables that have been malloc'd so far.                */
-        rssringoccs_Destroy_DLPCSV_Members(dlp);
-        return dlp;
+
+    /*  If we're using the older deprecated format, there are 13 columns.     *
+     *  Allocate memory for p_norm_vals as well.                              */
+    if (!use_deprecated)
+    {
+        MALLOC_DLP_VAR(p_norm_vals)
     }
 
-    /*  Allocate memory for t_ret_spm_vals and check for error.               */
-    dlp->t_ret_spm_vals = malloc(sizeof(*dlp->t_ret_spm_vals) * line_count);
-    if (dlp->t_ret_spm_vals == NULL)
-    {
-        dlp->error_occurred = tmpl_True;
-        dlp->error_message = tmpl_strdup(
-            "Error Encountered: rss_ringoccs\n"
-            "\ttrssringoccs_Get_DLP\n\n"
-            "Malloc returned NULL. Failed to allocate memory for.\n"
-            "t_ret_spm_vals. Aborting computation and returning.\n"
-        );
-
-        /*  Free the variables that have been malloc'd so far.                */
-        rssringoccs_Destroy_DLPCSV_Members(dlp);
-        return dlp;
-    }
-
-    /*  Allocate memory for t_set_spm_vals and check for error.               */
-    dlp->t_set_spm_vals = malloc(sizeof(*dlp->t_set_spm_vals) * line_count);
-    if (dlp->t_set_spm_vals == NULL)
-    {
-        dlp->error_occurred = tmpl_True;
-        dlp->error_message = tmpl_strdup(
-            "Error Encountered: rss_ringoccs\n"
-            "\ttrssringoccs_Get_DLP\n\n"
-            "Malloc returned NULL. Failed to allocate memory for.\n"
-            "t_set_spm_vals. Aborting computation and returning.\n"
-        );
-
-        /*  Free the variables that have been malloc'd so far.                */
-        rssringoccs_Destroy_DLPCSV_Members(dlp);
-        return dlp;
-    }
-
-    /*  Allocate memory for rho_km_vals and check for error.                  */
-    dlp->rho_km_vals = malloc(sizeof(*dlp->rho_km_vals) * line_count);
-    if (dlp->rho_km_vals == NULL)
-    {
-        dlp->error_occurred = tmpl_True;
-        dlp->error_message = tmpl_strdup(
-            "Error Encountered: rss_ringoccs\n"
-            "\ttrssringoccs_Get_DLP\n\n"
-            "Malloc returned NULL. Failed to allocate memory for.\n"
-            "rho_km_vals. Aborting computation and returning.\n"
-        );
-
-        /*  Free the variables that have been malloc'd so far.                */
-        rssringoccs_Destroy_DLPCSV_Members(dlp);
-        return dlp;
-    }
-
-    /*  Allocate memory for rho_corr_pole_km_vals and check for error.        */
-    dlp->rho_corr_pole_km_vals
-        = malloc(sizeof(*dlp->rho_corr_pole_km_vals) * line_count);
-    if (dlp->rho_corr_pole_km_vals == NULL)
-    {
-        dlp->error_occurred = tmpl_True;
-        dlp->error_message = tmpl_strdup(
-            "Error Encountered: rss_ringoccs\n"
-            "\ttrssringoccs_Get_DLP\n\n"
-            "Malloc returned NULL. Failed to allocate memory for.\n"
-            "rho_corr_pole_km_vals. Aborting computation and returning.\n"
-        );
-
-        /*  Free the variables that have been malloc'd so far.                */
-        rssringoccs_Destroy_DLPCSV_Members(dlp);
-        return dlp;
-    }
-
-    /*  Allocate memory for rho_corr_timing_km_vals and check for error.      */
-    dlp->rho_corr_timing_km_vals
-        = malloc(sizeof(*dlp->rho_corr_timing_km_vals) * line_count);
-    if (dlp->rho_corr_timing_km_vals == NULL)
-    {
-        dlp->error_occurred = tmpl_True;
-        dlp->error_message = tmpl_strdup(
-            "Error Encountered: rss_ringoccs\n"
-            "\ttrssringoccs_Get_DLP\n\n"
-            "Malloc returned NULL. Failed to allocate memory for.\n"
-            "rho_corr_timing_km_vals. Aborting computation and returning.\n"
-        );
-
-        /*  Free the variables that have been malloc'd so far.                */
-        rssringoccs_Destroy_DLPCSV_Members(dlp);
-        return dlp;
-    }
-
-    /*  Allocate memory for phi_rl_deg_vals and check for error.              */
-    dlp->phi_rl_deg_vals = malloc(sizeof(*dlp->phi_rl_deg_vals) * line_count);
-    if (dlp->phi_rl_deg_vals == NULL)
-    {
-        dlp->error_occurred = tmpl_True;
-        dlp->error_message = tmpl_strdup(
-            "Error Encountered: rss_ringoccs\n"
-            "\ttrssringoccs_Get_DLP\n\n"
-            "Malloc returned NULL. Failed to allocate memory for.\n"
-            "phi_rl_deg_vals. Aborting computation and returning.\n"
-        );
-
-        /*  Free the variables that have been malloc'd so far.                */
-        rssringoccs_Destroy_DLPCSV_Members(dlp);
-        return dlp;
-    }
-
-    /*  Allocate memory for phi_ora_deg_vals and check for error.             */
-    dlp->phi_ora_deg_vals = malloc(sizeof(*dlp->phi_ora_deg_vals) * line_count);
-    if (dlp->phi_ora_deg_vals == NULL)
-    {
-        dlp->error_occurred = tmpl_True;
-        dlp->error_message = tmpl_strdup(
-            "Error Encountered: rss_ringoccs\n"
-            "\ttrssringoccs_Get_DLP\n\n"
-            "Malloc returned NULL. Failed to allocate memory for.\n"
-            "phi_ora_deg_vals. Aborting computation and returning.\n"
-        );
-
-        /*  Free the variables that have been malloc'd so far.                */
-        rssringoccs_Destroy_DLPCSV_Members(dlp);
-        return dlp;
-    }
-
-    /*  Allocate memory for B_deg_vals and check for error.                   */
-    dlp->B_deg_vals = malloc(sizeof(*dlp->B_deg_vals) * line_count);
-    if (dlp->B_deg_vals == NULL)
-    {
-        dlp->error_occurred = tmpl_True;
-        dlp->error_message = tmpl_strdup(
-            "Error Encountered: rss_ringoccs\n"
-            "\ttrssringoccs_Get_DLP\n\n"
-            "Malloc returned NULL. Failed to allocate memory for.\n"
-            "B_deg_vals. Aborting computation and returning.\n"
-        );
-
-        /*  Free the variables that have been malloc'd so far.                */
-        rssringoccs_Destroy_DLPCSV_Members(dlp);
-        return dlp;
-    }
-
-    /*  Allocate memory for raw_tau_vals and check for error.                 */
-    dlp->raw_tau_vals = malloc(sizeof(*dlp->raw_tau_vals) * line_count);
-    if (dlp->raw_tau_vals == NULL)
-    {
-        dlp->error_occurred = tmpl_True;
-        dlp->error_message = tmpl_strdup(
-            "Error Encountered: rss_ringoccs\n"
-            "\ttrssringoccs_Get_DLP\n\n"
-            "Malloc returned NULL. Failed to allocate memory for.\n"
-            "raw_tau_vals. Aborting computation and returning.\n"
-        );
-
-        /*  Free the variables that have been malloc'd so far.                */
-        rssringoccs_Destroy_DLPCSV_Members(dlp);
-        return dlp;
-    }
-
-    /*  Allocate memory for phase_deg_vals and check for error.               */
-    dlp->phase_deg_vals = malloc(sizeof(*dlp->phase_deg_vals) * line_count);
-    if (dlp->phase_deg_vals == NULL)
-    {
-        dlp->error_occurred = tmpl_True;
-        dlp->error_message = tmpl_strdup(
-            "Error Encountered: rss_ringoccs\n"
-            "\ttrssringoccs_Get_DLP\n\n"
-            "Malloc returned NULL. Failed to allocate memory for.\n"
-            "phase_deg_vals. Aborting computation and returning.\n"
-        );
-
-        /*  Free the variables that have been malloc'd so far.                */
-        rssringoccs_Destroy_DLPCSV_Members(dlp);
-        return dlp;
-    }
-
-    /*  Allocate memory for raw_tau_threshold_vals and check for error.       */
-    dlp->raw_tau_threshold_vals
-        = malloc(sizeof(*dlp->raw_tau_threshold_vals) * line_count);
-    if (dlp->raw_tau_threshold_vals == NULL)
-    {
-        dlp->error_occurred = tmpl_True;
-        dlp->error_message = tmpl_strdup(
-            "Error Encountered: rss_ringoccs\n"
-            "\ttrssringoccs_Get_DLP\n\n"
-            "Malloc returned NULL. Failed to allocate memory for.\n"
-            "raw_tau_threshold_vals. Aborting computation and returning.\n"
-        );
-
-        /*  Free the variables that have been malloc'd so far.                */
-        rssringoccs_Destroy_DLPCSV_Members(dlp);
-        return dlp;
-    }
-
-    /*  If we're using the older deprecated format, there are 18 columns. Set *
-     *  the p_norm_vals to NULL.                                              */
-    if (use_deprecated)
-        dlp->p_norm_vals = NULL;
-    else
-    {
-        /*  Allocate memory for p_norm_vals.                                  */
-        dlp->p_norm_vals =
-            malloc(sizeof(*dlp->p_norm_vals) * line_count);
-        if (dlp->p_norm_vals == NULL)
-        {
-            dlp->error_occurred = tmpl_True;
-            dlp->error_message = tmpl_strdup(
-                "Error Encountered: rss_ringoccs\n"
-                "\trssringoccs_Get_DLP\n\n"
-                "Malloc returned NULL. Failed to allocate memory for.\n"
-                "p_norm_vals. Aborting computation and returning.\n"
-            );
-
-            /*  Free the variables that have been malloc'd so far.            */
-            rssringoccs_Destroy_DLPCSV_Members(dlp);
-            return dlp;
-        }
-    }
-
+    /*  Read in all of the data.                                              */
     line = fgets(buffer, sizeof(buffer), fp);
-    n = 0;
+
     while(line != NULL)
     {
         record = strtok(line, ",");
@@ -413,5 +254,11 @@ rssringoccs_DLPCSV *rssringoccs_Get_DLP(const char *filename,
         ++n;
     }
 
+    /*  Close the file.                                                       */
+    fclose(fp);
     return dlp;
 }
+/*  End of rssringoccs_Get_DLP.                                               */
+
+/*  Undefine the Macro function.                                              */
+#undef MALLOC_DLP_VAR

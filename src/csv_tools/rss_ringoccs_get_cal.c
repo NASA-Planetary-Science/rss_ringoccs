@@ -17,7 +17,7 @@
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
  *  Purpose:                                                                  *
- *      Extracts all geometry data from a Geo CSV.                            *
+ *      Extracts all data from a Calibration CSV.                             *
  ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
  *  Date:       December 31, 2020                                             *
@@ -51,8 +51,9 @@
                                                                                \
         /*  Free the variables that have been malloc'd so far.               */\
         rssringoccs_Destroy_CalCSV_Members(cal);                               \
+        fclose(fp);                                                            \
         return cal;                                                            \
-    }                                                                          \
+    }
 
 /*  Function for extracting the data from a CAL.TAB file.                     */
 rssringoccs_CalCSV *rssringoccs_Get_Cal(const char *filename)
@@ -72,7 +73,7 @@ rssringoccs_CalCSV *rssringoccs_Get_Cal(const char *filename)
     /*  Variable for storing the output of fgetc.                             */
     int ch;
     unsigned int column_count = 0U;
-    unsigned long int n = 0U;
+    unsigned long int n = 0UL;
 
     /*  Allocate memory for the CalCSV object.                                */
     cal = malloc(sizeof(*cal));
@@ -148,6 +149,7 @@ rssringoccs_CalCSV *rssringoccs_Get_Cal(const char *filename)
             "\ttrssringoccs_Get_Cal\n\n"
             "Input CSV does not have 4 columns. Aborting computation.\n"
         );
+        fclose(fp);
         return cal;
     }
 
@@ -188,4 +190,3 @@ rssringoccs_CalCSV *rssringoccs_Get_Cal(const char *filename)
 
 /*  Undefine the Macro function.                                              */
 #undef MALLOC_CAL_VAR
-

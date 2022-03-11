@@ -54,7 +54,7 @@ for ind in range(nfiles):
                     write_file=args.write_file, verbose=args.verbose))
         # Invert profile for full occultation
         if dlp_inst_ing is not None:
-            tau_inst = (rss.diffrec.DiffractionCorrection(
+            tau_inst = (rss.DiffractionCorrection(
                     dlp_inst_ing, args.res_km,
                     rng=args.inversion_range, res_factor=args.res_factor,
                     psitype=args.psitype, wtype=args.wtype, fwd=args.fwd,
@@ -63,7 +63,7 @@ for ind in range(nfiles):
             rss.tools.plot_summary_doc_v2(geo_inst, cal_inst, dlp_inst_ing,
                     tau_inst)
         if dlp_inst_egr is not None:
-            tau_inst = (rss.diffrec.DiffractionCorrection(
+            tau_inst = (rss.DiffractionCorrection(
                     dlp_inst_egr, args.res_km,
                     rng=args.inversion_range, res_factor=args.res_factor,
                     psitype=args.psitype, wtype=args.wtype, fwd=args.fwd,

@@ -1,5 +1,5 @@
 /******************************************************************************
- *                                 LICENSE                                    *
+ *                                  LICENSE                                   *
  ******************************************************************************
  *  This file is part of rss_ringoccs.                                        *
  *                                                                            *
@@ -23,7 +23,10 @@
  *  Date:       December 31, 2020                                             *
  ******************************************************************************/
 
+/*  free is found here, as is NULL.                                           */
 #include <stdlib.h>
+
+/*  rssringoccs_TauCSV typedef here, and function prototype given.            */
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
 
 /*  Check if this macro name is available.                                    */
@@ -31,7 +34,7 @@
 #undef DESTROY_TAU_VAR
 #endif
 
-/*  Macro for freeing and nullifying the members of the geo CSV structs.      */
+/*  Macro for freeing and nullifying the members of the Tau CSV structs.      */
 #define DESTROY_TAU_VAR(var) if (var != NULL){free(var); var = NULL;}
 
 /*  Free's all members of a rssringoccs_TauCSV pointer except the             *

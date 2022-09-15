@@ -1,5 +1,5 @@
 /******************************************************************************
- *                                 LICENSE                                    *
+ *                                  LICENSE                                   *
  ******************************************************************************
  *  This file is part of rss_ringoccs.                                        *
  *                                                                            *
@@ -23,7 +23,10 @@
  *  Date:       January 1, 2021                                               *
  ******************************************************************************/
 
+/*  free is found here, as is NULL.                                           */
 #include <stdlib.h>
+
+/*  rssringoccs_CSVData typedef here, and function prototype given.           */
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
 
 /*  Check if this macro name has been defined.                                */

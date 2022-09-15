@@ -1,5 +1,5 @@
 /******************************************************************************
- *                                 LICENSE                                    *
+ *                                  LICENSE                                   *
  ******************************************************************************
  *  This file is part of rss_ringoccs.                                        *
  *                                                                            *
@@ -20,10 +20,7 @@
  *  Date:       December 31, 2020                                             *
  ******************************************************************************/
 
-#include <libtmpl/include/tmpl_bool.h>
-#include <libtmpl/include/tmpl_math.h>
-#include <libtmpl/include/tmpl_string.h>
-#include <libtmpl/include/tmpl_interpolate.h>
+#include <libtmpl/include/tmpl.h>
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
 #include <stdlib.h>
 #include <math.h>
@@ -56,16 +53,16 @@ rssringoccs_Extract_CSV_Data(const char *geo,
                              tmpl_Bool use_deprecated)
 {
     /*  Pointers for the Geo, Cal, DLP, and Tau CSV objects.                  */
-    rssringoccs_GeoCSV  *geo_dat;
-    rssringoccs_DLPCSV  *dlp_dat;
-    rssringoccs_CalCSV  *cal_dat;
-    rssringoccs_TauCSV  *tau_dat;
+    rssringoccs_GeoCSV *geo_dat;
+    rssringoccs_DLPCSV *dlp_dat;
+    rssringoccs_CalCSV *cal_dat;
+    rssringoccs_TauCSV *tau_dat;
 
     /*  A pointer to the CSV object.                                          */
     rssringoccs_CSVData *csv_data;
 
     /*  Variable for indexing.                                                */
-    unsigned long n;
+    unsigned long int n;
 
     /*  Variables for checking the geometry of the occultation.               */
     double min_dr_dt, max_dr_dt, temp, raw_mu;
@@ -215,7 +212,7 @@ rssringoccs_Extract_CSV_Data(const char *geo,
     {
         tau_dat = rssringoccs_Get_Tau(tau, use_deprecated);
 
-        /*  Check for errors.                                                     */
+        /*  Check for errors.                                                 */
         if (tau_dat == NULL)
         {
             csv_data->error_occurred = tmpl_True;

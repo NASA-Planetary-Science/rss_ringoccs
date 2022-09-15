@@ -1,5 +1,5 @@
 /******************************************************************************
- *                                 LICENSE                                    *
+ *                                  LICENSE                                   *
  ******************************************************************************
  *  This file is part of rss_ringoccs.                                        *
  *                                                                            *
@@ -24,7 +24,10 @@
  *  Date:       December 31, 2020                                             *
  ******************************************************************************/
 
+/*  free is found here, as is NULL.                                           */
 #include <stdlib.h>
+
+/*  rssringoccs_GeoCSV typedef here, and function prototype given.            */
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
 
 /*  Function for freeing all of the memory in a GeoCSV struct.                */

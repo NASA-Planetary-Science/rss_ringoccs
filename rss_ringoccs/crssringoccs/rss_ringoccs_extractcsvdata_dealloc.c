@@ -16,7 +16,7 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
-#include <rss_ringoccs/include/crss_ringoccs.h>
+#include "crss_ringoccs.h"
 
 void ExtractCSVData_dealloc(PyCSVObj *self)
 {

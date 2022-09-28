@@ -25,7 +25,7 @@
  *  Author:     Ryan Maguire, Wellesley College                               *
  *  Date:       June 22, 2019                                                 *
  ******************************************************************************/
-#include <rss_ringoccs/include/crss_ringoccs.h>
+#include "crss_ringoccs.h"
 
 /*  Numpy header files.                                                       */
 #include <numpy/ndarraytypes.h>

@@ -166,8 +166,7 @@
  *  top of the rssringoccs_Copy_DLP_Data_To_Tau function.                     */
 #define TAU_CHECK_TWO_PI(var)                                                  \
     /*  Compute the minimum and maximum of var.                              */\
-    min = tmpl_Double_Array_Min(tau->var, tau->arr_size);                      \
-    max = tmpl_Double_Array_Max(tau->var, tau->arr_size);                      \
+    tmpl_Double_Array_MinMax(tau->var, tau->arr_size, &min, &max);             \
                                                                                \
     /*  Check if var falls within the interval [-2pi, 2pi].                  */\
     if ((min < -tmpl_Two_Pi) || (max > tmpl_Two_Pi))                           \

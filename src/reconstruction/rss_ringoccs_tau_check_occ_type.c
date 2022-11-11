@@ -92,8 +92,8 @@
 void rssringoccs_Tau_Check_Occ_Type(rssringoccs_TAUObj *tau)
 {
     /*  Declare necessary variables. C89 requires this at the top.            */
-    double min_val;
-    double max_val;
+    double min;
+    double max;
     unsigned long n;
 
     /*  Check if the tau pointer is NULL, returning if it is.                 */
@@ -144,16 +144,13 @@ void rssringoccs_Tau_Check_Occ_Type(rssringoccs_TAUObj *tau)
         return;
     }
 
-    /*  Compute the minimum and maximum of rho_dot_kms_vals. The functions    *
-     *  rssringoccs_Min_Double and rssringoccs_Max_Double are defined in      *
-     *  rss_ringoccs_math.h.                                                  */
-    min_val = tmpl_Min_Double(tau->rho_dot_kms_vals, tau->arr_size);
-    max_val = tmpl_Max_Double(tau->rho_dot_kms_vals, tau->arr_size);
+    /*  Compute the minimum and maximum of rho_dot_kms_vals.                  */
+    tmpl_Double_Array_MinMax(tau->rho_dot_kms_vals, tau->arr_size, &min, &max);
 
     /*  If rho_dot_kms_vals has both negative and positive values, then the   *
      *  occultation is a chord-occ and we can't continue, or there is an      *
      *  error in the DLP data. In either case, return with error.             */
-    if ((min_val < 0.0) && (max_val > 0.0))
+    if ((min < 0.0) && (max > 0.0))
     {
         tau->error_occurred = tmpl_True;
         tau->error_message = tmpl_strdup(
@@ -173,7 +170,7 @@ void rssringoccs_Tau_Check_Occ_Type(rssringoccs_TAUObj *tau)
     /*  If there are entries of rho_dot_kms_vals that are zero, again it is   *
      *  likely that the data comes from a chord occultation and the file was  *
      *  improperly split into egress and ingress portions. Return error.      */
-    else if ((min_val == 0.0) || (max_val == 0.0))
+    else if ((min == 0.0) || (max == 0.0))
     {
         tau->error_occurred = tmpl_True;
         tau->error_message = tmpl_strdup(
@@ -193,7 +190,7 @@ void rssringoccs_Tau_Check_Occ_Type(rssringoccs_TAUObj *tau)
     /*  If rho_dot_kms_vals is negative but dx_km is positive, then we have   *
      *  an ingress occultation and need to compute with the absolute value    *
      *  of rho_dot_kms_vals. Compute this and store in the tau object.        */
-    else if ((tau->dx_km > 0.0) && (max_val < 0.0))
+    else if ((tau->dx_km > 0.0) && (max < 0.0))
     {
         for(n=0; n<tau->arr_size; ++n)
             tau->rho_dot_kms_vals[n] = fabs(tau->rho_dot_kms_vals[n]);
@@ -203,7 +200,7 @@ void rssringoccs_Tau_Check_Occ_Type(rssringoccs_TAUObj *tau)
      *  likely an error. Rather than assuming what the occultation is and     *
      *  proceeding with fingers cross, return an error. The user should fix   *
      *  DLP data so the dx_km is positive.                                    */
-    else if ((tau->dx_km < 0.0) && (min_val > 0.0))
+    else if ((tau->dx_km < 0.0) && (min > 0.0))
     {
         tau->error_occurred = tmpl_True;
         tau->error_message = tmpl_strdup(

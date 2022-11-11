@@ -146,9 +146,9 @@
 /*  Use this macro to save on repetitive code. It is for checking that all of *
  *  of the values of a given member in the tau object are non-negative.       */
 #define TAU_CHECK_NON_NEGATIVE(var)                                            \
-    /*  Use rssringoccs_Min_Double to compute the minimum value and check if */\
+    /*  Use tmpl_Double_Array_Min to compute the minimum value and check if  */\
     /*  it is negative. Return error if it is.                               */\
-    if (tmpl_Min_Double(tau->var, tau->arr_size) < 0.0)                        \
+    if (tmpl_Double_Array_Min(tau->var, tau->arr_size) < 0.0)                  \
     {                                                                          \
         tau->error_occurred = tmpl_True;                                       \
         tau->error_message = tmpl_strdup(                                      \
@@ -166,8 +166,8 @@
  *  top of the rssringoccs_Copy_DLP_Data_To_Tau function.                     */
 #define TAU_CHECK_TWO_PI(var)                                                  \
     /*  Compute the minimum and maximum of var.                              */\
-    min = tmpl_Min_Double(tau->var, tau->arr_size);                            \
-    max = tmpl_Max_Double(tau->var, tau->arr_size);                            \
+    min = tmpl_Double_Array_Min(tau->var, tau->arr_size);                      \
+    max = tmpl_Double_Array_Max(tau->var, tau->arr_size);                      \
                                                                                \
     /*  Check if var falls within the interval [-2pi, 2pi].                  */\
     if ((min < -tmpl_Two_Pi) || (max > tmpl_Two_Pi))                           \

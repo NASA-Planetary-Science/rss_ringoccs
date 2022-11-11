@@ -1,4 +1,9 @@
-from distutils.core import setup, Extension
+# Python is swapping distutils with setuptools.
+try:
+    from setuptools import setup, Extension
+except ImportError:
+    from distutils.core import setup, Extension
+
 import os, platform
 
 # Numpy is needed for the get_include function which tells us where various
@@ -19,30 +24,28 @@ if (platform.system() == "Darwin"):
     os.environ["CFLAGS"] = "-mmacosx-version-min=%s" % platform.mac_ver()[0]
 
 srclist = []
-for d in os.listdir("src/"):
-    directory = "src/%s" % d
-    for file in os.listdir(directory):
-        srclist.append("%s/%s" % (directory, file))
 
 for file in os.listdir("rss_ringoccs/crssringoccs"):
-    srclist.append("rss_ringoccs/crssringoccs/%s" % file)
+
+    # Only add .c files.
+    if (file[-1] == "c"):
+        srclist.append("rss_ringoccs/crssringoccs/%s" % file)
 
 setup(
-    name='rss_ringoccs',
-    version='1.3',
-    description='C Tools for rss_ringoccs',
-    author='Ryan Maguire',
+    name = "rss_ringoccs",
+    version = "1.3",
+    description = "C Tools for rss_ringoccs",
+    author = "Ryan Maguire",
     ext_modules=[
         Extension(
-            'crssringoccs',
+            "crssringoccs",
             srclist,
             include_dirs=[
                 numpy.get_include(),
-                '../',
-                '/usr/local/include'
+                "/usr/local/include"
             ],
-            library_dirs=['/usr/local/lib'],
-            libraries=['tmpl']
+            library_dirs=["/usr/local/lib"],
+            libraries=["tmpl", "rssringoccs"]
         )
     ]
 )

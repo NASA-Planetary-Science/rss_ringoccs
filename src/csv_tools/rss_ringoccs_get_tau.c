@@ -35,7 +35,7 @@ rssringoccs_TauCSV *rssringoccs_Get_Tau(const char *filename,
     char buffer[1024];
     char *record, *line;
     int ch;
-    unsigned long line_count, column_count, n;
+    size_t line_count, column_count, n;
 
     tau = malloc(sizeof(*tau));
 

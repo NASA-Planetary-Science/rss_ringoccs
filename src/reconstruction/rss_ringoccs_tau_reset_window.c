@@ -33,11 +33,11 @@
  *          occultation data store values in kilometers.                      *
  ******************************************************************************/
 void rssringoccs_Tau_Reset_Window(double *x_arr, double *w_func, double dx,
-                                  double width, unsigned long nw_pts,
+                                  double width, size_t nw_pts,
                                   rssringoccs_window_func fw)
 {
     /*  Create a variable for indexing.                                       */
-    unsigned long n;
+    size_t n;
 
     /* Loop over n, computing the window function and the x_arr variable.     */
     for(n = 0U; n < nw_pts; ++n)

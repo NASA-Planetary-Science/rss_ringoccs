@@ -5,6 +5,9 @@
 #include <libtmpl/include/tmpl_bool.h>
 #include <libtmpl/include/tmpl_complex.h>
 
+/*  size_t typedef is given here.                                             */
+#include <stdlib.h>
+
 /*  Structure that contains all of the necessary data.                        */
 typedef struct rssringoccs_DLPObj_Def {
     double *rho_km_vals;
@@ -25,7 +28,7 @@ typedef struct rssringoccs_DLPObj_Def {
     double *rx_km_vals;
     double *ry_km_vals;
     double *rz_km_vals;
-    unsigned long arr_size;
+    size_t arr_size;
     tmpl_Bool error_occurred;
     char *error_message;
 } rssringoccs_DLPObj;

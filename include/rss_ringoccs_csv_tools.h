@@ -30,6 +30,9 @@
 /*  Boolean data types defined here.                                          */
 #include <libtmpl/include/tmpl_bool.h>
 
+/*  size_t typedef is given here.                                             */
+#include <stdlib.h>
+
 /*  Data structure for the GEO.TAB files on the PDS.                          */
 typedef struct rssringoccs_GeoCSV_Def {
     double *t_oet_spm_vals;
@@ -51,7 +54,7 @@ typedef struct rssringoccs_GeoCSV_Def {
     double *vy_kms_vals;
     double *vz_kms_vals;
     double *obs_spacecract_lat_deg_vals;
-    unsigned long int n_elements;
+    size_t n_elements;
     tmpl_Bool error_occurred;
     char *error_message;
 } rssringoccs_GeoCSV;
@@ -71,7 +74,7 @@ typedef struct rssringoccs_DLPCSV_Def {
     double *t_ret_spm_vals;
     double *t_set_spm_vals;
     double *B_deg_vals;
-    unsigned long int n_elements;
+    size_t n_elements;
     tmpl_Bool error_occurred;
     char *error_message;
 } rssringoccs_DLPCSV;
@@ -82,7 +85,7 @@ typedef struct rssringoccs_CalCSV_Def {
     double *f_sky_pred_vals;
     double *f_sky_resid_fit_vals;
     double *p_free_vals;
-    unsigned long int n_elements;
+    size_t n_elements;
     tmpl_Bool error_occurred;
     char *error_message;
 } rssringoccs_CalCSV;
@@ -102,7 +105,7 @@ typedef struct rssringoccs_TauCSV_Def {
     double *t_ret_spm_vals;
     double *t_set_spm_vals;
     double *B_deg_vals;
-    unsigned long int n_elements;
+    size_t n_elements;
     tmpl_Bool error_occurred;
     char *error_message;
 } rssringoccs_TauCSV;
@@ -133,7 +136,7 @@ typedef struct rssringoccs_CSVData_Def {
     double *tau_phase;
     double *tau_power;
     double *tau_vals;
-    unsigned long int n_elements;
+    size_t n_elements;
     tmpl_Bool error_occurred;
     char *error_message;
 } rssringoccs_CSVData;

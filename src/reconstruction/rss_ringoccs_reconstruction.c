@@ -9,7 +9,7 @@ void rssringoccs_Reconstruction(rssringoccs_TAUObj *tau)
 {
     tmpl_ComplexDouble *temp_T_in;
     tmpl_Bool temp_fwd;
-    unsigned long n, temp_start, temp_n_used, nw_pts;
+    size_t n, temp_start, temp_n_used, nw_pts;
     double w_left, w_right, w_max;
 
     if (tau == NULL)
@@ -60,7 +60,7 @@ void rssringoccs_Reconstruction(rssringoccs_TAUObj *tau)
         else
             w_max = w_left;
 
-        nw_pts = (unsigned long) (w_max / (tau->dx_km * 2.0));
+        nw_pts = (size_t) (w_max / (tau->dx_km * 2.0));
         temp_start = tau->start;
         temp_n_used = tau->n_used;
 

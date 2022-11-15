@@ -5,9 +5,7 @@
 
 #include <libtmpl/include/tmpl_euclidean_spatial_geometry.h>
 
-extern void
-rssringoccs_Calc_B_Deg(double *et_vals, char *spacecraft, char *dsn,
-                       tmpl_ThreeVector nhat_p, char *kernels, char *ref);
+extern double rssringoccs_Double_Light_Distance(double t0, double t1);
 
 #endif
 

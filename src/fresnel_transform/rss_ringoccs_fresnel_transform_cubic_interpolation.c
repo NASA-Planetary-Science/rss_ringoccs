@@ -6,11 +6,11 @@
 void
 rssringoccs_Fresnel_Transform_Cubic(rssringoccs_TAUObj *tau,
                                     double *w_func,
-                                    unsigned long n_pts,
-                                    unsigned long center)
+                                    size_t n_pts,
+                                    size_t center)
 {
     /*  Declare all necessary variables. i and j are used for indexing.       */
-    unsigned long i, ind[4], offset;
+    size_t i, ind[4], offset;
 
     /*  The Fresnel kernel and ring azimuth angle.                            */
     double C[3], factor, rcpr_w, rcpr_w_sq, psi_n[4], x;
@@ -33,7 +33,7 @@ rssringoccs_Fresnel_Transform_Cubic(rssringoccs_TAUObj *tau,
 
     /*  Symmetry is lost without the Legendre polynomials, or Fresnel         *
      *  quadratic. Must compute everything from -W/2 to W/2.                  */
-    offset = center-(unsigned long)((n_pts-1)/2);
+    offset = center - ((n_pts-1) >> 1);
 
      /*  Use a Riemann Sum to approximate the Fresnel Inverse Integral.       */
     for (i = 0; i < 4; ++i)

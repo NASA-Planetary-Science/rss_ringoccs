@@ -1,5 +1,5 @@
 /******************************************************************************
- *                                 LICENSE                                    *
+ *                                  LICENSE                                   *
  ******************************************************************************
  *  This file is part of rss_ringoccs.                                        *
  *                                                                            *
@@ -16,17 +16,16 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
- *  Author:     Ryan Maguire, Wellesley College                               *
- *  Date:       May 27, 2021                                                  *
+ *  Author:     Ryan Maguire                                                  *
+ *  Date:       November 11, 2022                                             *
  ******************************************************************************/
 
-/* #include <cspice/include/SpiceUsr.h>
+#include <libtmpl/include/tmpl.h>
 #include <rss_ringoccs/include/rss_ringoccs_occultation_geometry.h>
 
-void
-rssringoccs_Calc_B_Deg(double *et_vals, char *spacecraft, char *dsn,
-                       tmpl_ThreeVector nhat_p, char *kernels, char *ref)
+/*  Function for computing the distance light travels in time t1-t0.          */
+double rssringoccs_Double_Light_Distance(double t0, double t1)
 {
-    return;
+    return tmpl_Speed_Of_Light_KMS*tmpl_Double_Dist(t0, t1);
 }
-*/
+/*  End rssringoccs_Double_Light_Distance.                                    */

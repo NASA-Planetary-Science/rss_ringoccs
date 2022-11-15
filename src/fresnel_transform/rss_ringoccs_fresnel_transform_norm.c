@@ -24,11 +24,10 @@
 
 void
 rssringoccs_Fresnel_Transform_Norm(rssringoccs_TAUObj *tau, double *x_arr,
-                                   double *w_func, unsigned long n_pts,
-                                   unsigned long center)
+                                   double *w_func, size_t n_pts, size_t center)
 {
     /*  Declare all necessary variables. i and j are used for indexing.       */
-    unsigned long m, n;
+    size_t m, n;
 
     /*  rcpr_F and rcpr_F2 are the reciprocal of the Fresnel scale, and the   *
      *  square of this. x is used as the argument of the Fresnel kernel.      */

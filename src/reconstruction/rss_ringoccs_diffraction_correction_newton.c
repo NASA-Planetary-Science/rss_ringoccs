@@ -39,7 +39,7 @@
 void rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj *tau)
 {
     /*  Variables for indexing. nw_pts is the number of points in the window. */
-    unsigned long i, j, offset, nw_pts, center;
+    size_t i, j, offset, nw_pts, center;
 
     /*  Some variables needed for reconstruction.                             */
     double w_init, dx, two_dx;
@@ -60,7 +60,7 @@ void rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj *tau)
     w_init = tau->w_km_vals[center];
     dx     = tau->rho_km_vals[center+1] - tau->rho_km_vals[center];
     two_dx = 2.0*dx;
-    nw_pts = 2UL*((unsigned long)(w_init / two_dx)) + 1UL;
+    nw_pts = 2UL*((size_t)(w_init / two_dx)) + 1UL;
     offset = center - (nw_pts - 1UL) / 2UL;
 
     /* Check to ensure you have enough data to the left.                      */
@@ -147,7 +147,7 @@ void rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj *tau)
         {
             /* Reset w_init and recompute window function.                */
             w_init = tau->w_km_vals[center];
-            nw_pts = 2*((unsigned long)(w_init / (2.0 * dx))) + 1UL;
+            nw_pts = 2*((size_t)(w_init / (2.0 * dx))) + 1UL;
             offset = center - (nw_pts - 1UL) / 2UL;
 
             /*  Reallocate memory since the sizes have changed.           */

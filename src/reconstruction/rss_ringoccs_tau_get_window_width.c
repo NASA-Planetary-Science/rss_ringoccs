@@ -12,10 +12,10 @@ void rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau)
     /*  Declare long pointer-to-pointer which stores the indices where        *
      *  F_km_vals is non-zero in the first slot (Prange[0]), and the size of  *
      *  this array in the second (*Prange[1]).                                */
-    unsigned long **Prange, **wrange;
-    unsigned long *Prange_Index, *wrange_Index;
-    unsigned long Prange_Size, wrange_Size;
-    unsigned long n;
+    size_t **Prange, **wrange;
+    size_t *Prange_Index, *wrange_Index;
+    size_t Prange_Size, wrange_Size;
+    size_t n;
     double w_fac, omega, F;
     double *alpha, *P_vals, *rho_legal;
 

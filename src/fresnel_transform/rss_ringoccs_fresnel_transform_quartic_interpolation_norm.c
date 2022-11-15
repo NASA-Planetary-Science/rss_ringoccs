@@ -8,11 +8,10 @@
 void
 rssringoccs_Fresnel_Transform_Quartic_Norm(rssringoccs_TAUObj *tau,
                                            double *w_func,
-                                           unsigned long n_pts,
-                                           unsigned long center)
+                                           size_t n_pts, size_t center)
 {
     /*  Declare all necessary variables. i and j are used for indexing.       */
-    unsigned long i, ind[4], offset;
+    size_t i, ind[4], offset;
 
     /*  The Fresnel kernel and ring azimuth angle.                            */
     double C[4], abs_norm, real_norm;

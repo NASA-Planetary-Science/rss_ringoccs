@@ -75,7 +75,7 @@ rssringoccs_Get_DLP(const char *filename, tmpl_Bool use_deprecated)
     int ch;
 
     unsigned int column_count = 0U;
-    unsigned long int n = 0UL;
+    size_t n = 0;
 
     /*  Allocate memory for the dlp data.                                     */
     dlp = malloc(sizeof(*dlp));

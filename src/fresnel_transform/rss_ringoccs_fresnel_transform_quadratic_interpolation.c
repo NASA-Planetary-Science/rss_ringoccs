@@ -68,13 +68,11 @@
  ******************************************************************************/
 
 void
-rssringoccs_Fresnel_Transform_Quadratic(rssringoccs_TAUObj *tau,
-                                        double *w_func,
-                                        unsigned long n_pts,
-                                        unsigned long center)
+rssringoccs_Fresnel_Transform_Quadratic(rssringoccs_TAUObj *tau, double *w_func,
+                                        size_t n_pts, size_t center)
 {
     /*  Declare all necessary variables. i and j are used for indexing.       */
-    unsigned long i, ind[4], offset;
+    size_t i, ind[4], offset;
 
     /*  The Fresnel kernel and ring azimuth angle.                            */
     double C[2], factor, rcpr_w, rcpr_w_sq, psi_n[4], x;

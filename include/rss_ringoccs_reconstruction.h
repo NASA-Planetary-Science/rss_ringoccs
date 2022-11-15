@@ -8,6 +8,9 @@
 #include <rss_ringoccs/include/rss_ringoccs_calibration.h>
 #include <rss_ringoccs/include/rss_ringoccs_history.h>
 
+/*  size_t typedef is given here.                                             */
+#include <stdlib.h>
+
 typedef double (*rssringoccs_window_func)(double, double);
 
 typedef enum {
@@ -71,9 +74,9 @@ typedef struct rssringoccs_TAUObj_Def {
     double rng_req[2];
     double EPS;
     unsigned int toler;
-    unsigned long start;
-    unsigned long n_used;
-    unsigned long arr_size;
+    size_t start;
+    size_t n_used;
+    size_t arr_size;
     rssringoccs_window_func window_func;
     rssringoccs_Psitype_Enum psinum;
     tmpl_Bool use_norm;
@@ -89,7 +92,7 @@ typedef struct rssringoccs_TAUObj_Def {
 } rssringoccs_TAUObj;
 
 typedef void (*rssringoccs_FresT)(rssringoccs_TAUObj *, double *,
-                                  unsigned long int, unsigned long int);
+                                  size_t, size_t);
 
 extern void rssringoccs_Reconstruction(rssringoccs_TAUObj *tau);
 
@@ -139,7 +142,7 @@ rssringoccs_Destroy_Tau(rssringoccs_TAUObj **tau);
 
 extern void
 rssringoccs_Tau_Reset_Window(double *x_arr, double *w_func, double dx,
-                             double width, unsigned long nw_pts,
+                             double width, size_t nw_pts,
                              rssringoccs_window_func fw);
 
 /*  Functions that compute the Fresnel Transform on a TAUObj instance.        */

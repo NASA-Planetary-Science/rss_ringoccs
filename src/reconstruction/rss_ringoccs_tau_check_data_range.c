@@ -93,16 +93,16 @@ void rssringoccs_Tau_Check_Data_Range(rssringoccs_TAUObj *tau)
      *  must be made at the top of a code block.                              */
 
     /*  Declare a variable to check what the maximum index is.                */
-    unsigned long current_max;
+    size_t current_max;
 
     /*  Variables for indexing the for loop.                                  */
-    unsigned long n, start, end;
+    size_t n, start, end;
 
     /*  Variable for the reciprocal of 2.0 * dx.                              */
     double rcpr_two_dx;
 
     /*  And a variable for the number of points in a window.                  */
-    unsigned long nw_pts;
+    size_t nw_pts;
 
     /*  Check that the input rssringoccs_TAUObj pointer is not NULL before    *
      *  trying to access it's members.                                        */
@@ -140,7 +140,7 @@ void rssringoccs_Tau_Check_Data_Range(rssringoccs_TAUObj *tau)
     for (n = start; n < end; ++n)
     {
         /*  Compute the number of points needed in a window.                  */
-        nw_pts = ((unsigned long)(tau->w_km_vals[n] * rcpr_two_dx));
+        nw_pts = ((size_t)(tau->w_km_vals[n] * rcpr_two_dx));
 
         /*  If n - nw_pts is negative, then the window goes beyond the        *
          *  available data. Since our integer variables are declared as       *

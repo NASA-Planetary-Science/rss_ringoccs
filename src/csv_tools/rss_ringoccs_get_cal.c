@@ -73,7 +73,7 @@ rssringoccs_CalCSV *rssringoccs_Get_Cal(const char *filename)
     /*  Variable for storing the output of fgetc.                             */
     int ch;
     unsigned int column_count = 0U;
-    unsigned long int n = 0UL;
+    size_t n = 0;
 
     /*  Allocate memory for the CalCSV object.                                */
     cal = malloc(sizeof(*cal));

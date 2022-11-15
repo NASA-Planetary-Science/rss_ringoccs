@@ -65,7 +65,7 @@
 void rssringoccs_Tau_Compute_Vars(rssringoccs_TAUObj *tau)
 {
     /*  Declare necessary variables. C89 requires this at the top.            */
-    unsigned long n;
+    size_t n;
     double lambda_sky;
 
     /*  Check if the tau pointer is NULL, returning if it is.                 */

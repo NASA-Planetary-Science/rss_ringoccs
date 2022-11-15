@@ -6,11 +6,10 @@
 void
 rssringoccs_Fresnel_Transform_Ellipse(rssringoccs_TAUObj *tau,
                                       double *w_func,
-                                      unsigned long n_pts,
-                                      unsigned long center)
+                                      size_t n_pts, size_t center)
 {
     /*  Declare all necessary variables. i and j are used for indexing.       */
-    unsigned long int m, offset;
+    size_t m, offset;
 
     /*  The Fresnel kernel and ring azimuth angle.                            */
     double psi, phi, cos_psi, sin_psi, factor, x, y, z, dx, dy, D;
@@ -22,7 +21,7 @@ rssringoccs_Fresnel_Transform_Ellipse(rssringoccs_TAUObj *tau,
 
     /*  Symmetry is lost without the Legendre polynomials, or Fresnel         *
      *  quadratic. Must compute everything from -W/2 to W/2.                  */
-    offset = center-(unsigned long)((n_pts-1)/2);
+    offset = center - ((n_pts-1) >> 1);
 
     /*  Use a Riemann Sum to approximate the Fresnel Inverse Integral.        */
     for (m = 0; m < n_pts; ++m)

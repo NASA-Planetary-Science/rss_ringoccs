@@ -218,7 +218,7 @@
 void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj *tau)
 {
     /*  m and n used for indexing, nw_pts is number of points in window.      */
-    unsigned long m, n, nw_pts, center;
+    size_t m, n, nw_pts, center;
 
     /*  w_init is window width (km), dx and two_dx are sample spacing (km).   */
     double w_init, dx, two_dx;
@@ -232,8 +232,7 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj *tau)
      *  type rssringoccs_window_func was declared at the start of this file.  *
      *  Be sure to free this at the end!                                      */
     rssringoccs_window_func fw = tau->window_func;
-    void (*FresT)(rssringoccs_TAUObj *, double *, double *,
-                  unsigned long, unsigned long);
+    void (*FresT)(rssringoccs_TAUObj *, double *, double *, size_t, size_t);
 
     /*  This should remain at false.                                          */
     tau->error_occurred = tmpl_False;
@@ -276,7 +275,7 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj *tau)
 
     /*  And now, some more variables we'll be using.                          */
     two_dx = 2.0*dx;
-    nw_pts = (unsigned long)(w_init / two_dx) + 1UL;
+    nw_pts = (size_t)(w_init / two_dx) + 1UL;
 
     /* Check to ensure you have enough data to the left.                      */
     rssringoccs_Tau_Check_Data_Range(tau);
@@ -338,7 +337,7 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj *tau)
         {
             /* Reset w_init and recompute window function.                */
             w_init = tau->w_km_vals[center];
-            nw_pts = ((unsigned long)(w_init / two_dx)) + 1UL;
+            nw_pts = ((size_t)(w_init / two_dx)) + 1UL;
 
             /*  Reallocate memory, since the sizes of the arrays changed. */
             w_func = realloc(w_func, sizeof(double)*nw_pts);

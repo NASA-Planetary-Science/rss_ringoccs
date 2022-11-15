@@ -37,8 +37,7 @@
 void rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau)
 {
     /*  Variables for indexing. nw_pts is the number of points in the window. */
-    unsigned long i, nw_pts, center, data_size;
-    unsigned long shift, current_point, i_shift;
+    size_t i, nw_pts, center, data_size, shift, current_point, i_shift;
 
     /*  Some variables needed for reconstruction.                             */
     double w_init, psi, phi, window_func_x, factor, rcpr_F;
@@ -66,7 +65,7 @@ void rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau)
 
     /*  Compute some more variables.                                          */
     w_init = tau->w_km_vals[center];
-    nw_pts = (unsigned long)(w_init / (tau->dx_km * 2.0));
+    nw_pts = (size_t)(w_init / (tau->dx_km * 2.0));
 
     /*  Number of points in the data set, the start/end point and array size. */
     data_size = tau->n_used + 2*nw_pts + 1;

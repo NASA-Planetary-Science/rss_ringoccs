@@ -38,7 +38,7 @@
 void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
 {
     /*  i is used for indexing, nw_pts is the number of points in the window. */
-    unsigned long i, nw_pts, center;
+    size_t i, nw_pts, center;
 
     /*  Variable for the number of Legendre coefficients to be computed.      */
     unsigned int poly_order;
@@ -54,7 +54,7 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
     rssringoccs_window_func fw = tau->window_func;
 
     void (*FresT)(rssringoccs_TAUObj *, double *, double *, double *,
-                  unsigned long, unsigned long);
+                  size_t, size_t);
 
     /*  This should remain at false.                                          */
     tau->error_occurred = tmpl_False;
@@ -112,7 +112,7 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
     w_init = tau->w_km_vals[center];
     dx     = tau->rho_km_vals[center+1] - tau->rho_km_vals[center];
     two_dx = 2.0*dx;
-    nw_pts = (unsigned long)(w_init / two_dx) + 1UL;
+    nw_pts = (size_t)(w_init / two_dx) + 1UL;
 
     /* Check to ensure you have enough data to the left.                      */
     rssringoccs_Tau_Check_Data_Range(tau);
@@ -170,7 +170,7 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
         {
             /* Reset w_init and recompute window function.                    */
             w_init = tau->w_km_vals[center];
-            nw_pts = (unsigned long)(w_init / two_dx) + 1UL;
+            nw_pts = (size_t)(w_init / two_dx) + 1UL;
 
             /*  Reallocate x_arr and w_func since the sizes changed.          */
             x_arr  = realloc(x_arr, sizeof(double)*nw_pts);

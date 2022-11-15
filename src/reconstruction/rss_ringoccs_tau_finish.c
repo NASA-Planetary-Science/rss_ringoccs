@@ -5,10 +5,10 @@
 #include <libtmpl/include/tmpl_complex.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 
-static void resize_array(double **ptr, unsigned long start, unsigned long len)
+static void resize_array(double **ptr, size_t start, size_t len)
 {
     double *temp, *data;
-    unsigned long n;
+    size_t n;
     temp = malloc(sizeof(*temp) * len);
 
     data = *ptr;
@@ -20,11 +20,10 @@ static void resize_array(double **ptr, unsigned long start, unsigned long len)
     *ptr = temp;
 }
 
-static void resize_carray(tmpl_ComplexDouble **ptr,
-                            unsigned long start, unsigned long len)
+static void resize_carray(tmpl_ComplexDouble **ptr, size_t start, size_t len)
 {
     tmpl_ComplexDouble *temp, *data;
-    unsigned long n;
+    size_t n;
     temp = malloc(sizeof(*temp) * len);
     data = *ptr;
 
@@ -38,8 +37,7 @@ static void resize_carray(tmpl_ComplexDouble **ptr,
 void rssringoccs_Tau_Finish(rssringoccs_TAUObj* tau)
 {
     double mu, factor;
-    unsigned long n;
-    unsigned long len;
+    size_t n, len;
 
     if (tau == NULL)
         return;

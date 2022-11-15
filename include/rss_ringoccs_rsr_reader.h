@@ -31,7 +31,7 @@ typedef unsigned long int rssringoccs_uint_32;
 
 #if ULONG_MAX == 0xFFFFFFFFFFFFFFFF
 typedef unsigned long int rssringoccs_uint_64;
-#elif defined(ULONG_MAX) && ULONG_MAX == 0xFFFFFFFFFFFFFFFF
+#elif ULLONG_MAX == 0xFFFFFFFFFFFFFFFF
 typedef unsigned long long int rssringoccs_uint_64;
 #else 
 #error "neither long nor long long is 64 bits. Cannot read RSR files."

@@ -25,11 +25,10 @@
 void
 rssringoccs_Fresnel_Transform_Newton_D_Old(rssringoccs_TAUObj *tau,
                                            double *w_func,
-                                           unsigned long n_pts,
-                                           unsigned long center)
+                                           size_t n_pts, size_t center)
 {
     /*  Declare all necessary variables. i and j are used for indexing.       */
-    unsigned long m, offset;
+    size_t m, offset;
 
     /*  The Fresnel kernel and the stationary ring azimuth angle.             */
     double psi, phi, x, y, z, dx, dy, D, exp_psi_re, exp_psi_im, factor;

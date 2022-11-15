@@ -27,11 +27,10 @@ void
 rssringoccs_Fresnel_Transform_Legendre_Norm_Odd(rssringoccs_TAUObj *tau,
                                                 double *x_arr, double *w_func,
                                                 double *coeffs,
-                                                unsigned long n_pts,
-                                                unsigned long center)
+                                                size_t n_pts, size_t center)
 {
     /*  Declare all necessary variables. i and j are used for indexing.       */
-    unsigned long i, j;
+    size_t i, j;
     unsigned int k;
 
     /*  Variables for the Fresnel kernel and ring radii.                      */

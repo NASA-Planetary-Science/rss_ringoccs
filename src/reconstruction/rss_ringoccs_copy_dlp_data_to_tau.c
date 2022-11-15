@@ -186,7 +186,7 @@ void rssringoccs_Copy_DLP_Data_To_Tau(rssringoccs_DLPObj *dlp,
                                       rssringoccs_TAUObj *tau)
 {
     /*  Declare necessary variables. C89 requires this at the top.            */
-    unsigned long n;
+    size_t n;
 
     /*  These variables are used in the __TAU_CHECK_TWO_PI__ macro. Do not    *
      *  remove their declarations.                                            */

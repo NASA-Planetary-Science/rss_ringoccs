@@ -222,24 +222,24 @@ void rssringoccs_Tau_Check_Occ_Type(rssringoccs_TAUObj *tau)
      *  in rss_ringoccs_math.h.                                               */
     else if (tau->dx_km < 0.0)
     {
-        tmpl_Double_Reverse_Array(tau->rho_km_vals,      tau->arr_size);
-        tmpl_Double_Reverse_Array(tau->phi_rad_vals,     tau->arr_size);
-        tmpl_Double_Reverse_Array(tau->B_rad_vals,       tau->arr_size);
-        tmpl_Double_Reverse_Array(tau->D_km_vals,        tau->arr_size);
-        tmpl_Double_Reverse_Array(tau->phase_rad_vals,   tau->arr_size);
-        tmpl_Double_Reverse_Array(tau->p_norm_vals,      tau->arr_size);
-        tmpl_Double_Reverse_Array(tau->f_sky_hz_vals,    tau->arr_size);
-        tmpl_Double_Reverse_Array(tau->rho_dot_kms_vals, tau->arr_size);
-        tmpl_Double_Reverse_Array(tau->t_oet_spm_vals,   tau->arr_size);
-        tmpl_Double_Reverse_Array(tau->t_ret_spm_vals,   tau->arr_size);
-        tmpl_Double_Reverse_Array(tau->t_set_spm_vals,   tau->arr_size);
-        tmpl_Double_Reverse_Array(tau->phi_rl_rad_vals,  tau->arr_size);
-        tmpl_Double_Reverse_Array(tau->rx_km_vals,       tau->arr_size);
-        tmpl_Double_Reverse_Array(tau->ry_km_vals,       tau->arr_size);
-        tmpl_Double_Reverse_Array(tau->rz_km_vals,       tau->arr_size);
-        tmpl_Double_Reverse_Array(tau->raw_tau_threshold_vals, tau->arr_size);
-        tmpl_Double_Reverse_Array(tau->rho_corr_pole_km_vals, tau->arr_size);
-        tmpl_Double_Reverse_Array(tau->rho_corr_timing_km_vals, tau->arr_size);
+        tmpl_Double_Array_Reverse(tau->rho_km_vals,      tau->arr_size);
+        tmpl_Double_Array_Reverse(tau->phi_rad_vals,     tau->arr_size);
+        tmpl_Double_Array_Reverse(tau->B_rad_vals,       tau->arr_size);
+        tmpl_Double_Array_Reverse(tau->D_km_vals,        tau->arr_size);
+        tmpl_Double_Array_Reverse(tau->phase_rad_vals,   tau->arr_size);
+        tmpl_Double_Array_Reverse(tau->p_norm_vals,      tau->arr_size);
+        tmpl_Double_Array_Reverse(tau->f_sky_hz_vals,    tau->arr_size);
+        tmpl_Double_Array_Reverse(tau->rho_dot_kms_vals, tau->arr_size);
+        tmpl_Double_Array_Reverse(tau->t_oet_spm_vals,   tau->arr_size);
+        tmpl_Double_Array_Reverse(tau->t_ret_spm_vals,   tau->arr_size);
+        tmpl_Double_Array_Reverse(tau->t_set_spm_vals,   tau->arr_size);
+        tmpl_Double_Array_Reverse(tau->phi_rl_rad_vals,  tau->arr_size);
+        tmpl_Double_Array_Reverse(tau->rx_km_vals,       tau->arr_size);
+        tmpl_Double_Array_Reverse(tau->ry_km_vals,       tau->arr_size);
+        tmpl_Double_Array_Reverse(tau->rz_km_vals,       tau->arr_size);
+        tmpl_Double_Array_Reverse(tau->raw_tau_threshold_vals, tau->arr_size);
+        tmpl_Double_Array_Reverse(tau->rho_corr_pole_km_vals, tau->arr_size);
+        tmpl_Double_Array_Reverse(tau->rho_corr_timing_km_vals, tau->arr_size);
 
         for(n=0; n<tau->arr_size; ++n)
             tau->rho_dot_kms_vals[n] = fabs(tau->rho_dot_kms_vals[n]);

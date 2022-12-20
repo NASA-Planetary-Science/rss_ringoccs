@@ -348,10 +348,10 @@ rssringoccs_Extract_CSV_Data(const char *geo,
     }
     else if (max_dr_dt < 0.0)
     {
-        tmpl_Double_Reverse_Array(geo_dat->rho_km_vals, geo_dat->n_elements);
-        tmpl_Double_Reverse_Array(geo_dat->rho_dot_kms_vals,
+        tmpl_Double_Array_Reverse(geo_dat->rho_km_vals, geo_dat->n_elements);
+        tmpl_Double_Array_Reverse(geo_dat->rho_dot_kms_vals,
                                   geo_dat->n_elements);
-        tmpl_Double_Reverse_Array(geo_dat->D_km_vals, geo_dat->n_elements);
+        tmpl_Double_Array_Reverse(geo_dat->D_km_vals, geo_dat->n_elements);
     }
 
     tmpl_Double_Sorted_Interp1d(geo_dat->rho_km_vals,

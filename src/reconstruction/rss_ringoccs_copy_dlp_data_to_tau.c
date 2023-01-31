@@ -101,7 +101,7 @@
 #include <libtmpl/include/tmpl_bool.h>
 #include <libtmpl/include/tmpl_math.h>
 #include <libtmpl/include/tmpl_string.h>
-#include <libtmpl/include/tmpl_special_functions.h>
+#include <libtmpl/include/tmpl_special_functions_real.h>
 
 #include <rss_ringoccs/include/rss_ringoccs_calibration.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>

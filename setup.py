@@ -47,6 +47,14 @@ setup(
             library_dirs=["/usr/local/lib"],
             libraries=["tmpl", "rssringoccs"]
         )
+    ],
+    packages=[
+        "rss_ringoccs",
+        "rss_ringoccs.calibration",
+        "rss_ringoccs.occgeo",
+        "rss_ringoccs.rsr_reader",
+        "rss_ringoccs.scatter",
+        "rss_ringoccs.tools"
     ]
 )
 

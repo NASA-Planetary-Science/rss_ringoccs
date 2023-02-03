@@ -25,11 +25,11 @@ BUILD_DIR := ./build
 SRC_DIRS := ./src
 
 ifdef OMP
-CFLAGS := -fopenmp -I../ -O3 -fPIC -flto -DNDEBUG -c
-LFLAGS := -fopenmp -O3 -flto -shared -lm -ltmpl
+CFLAGS := $(EXTRA_FLAGS) -fopenmp -I../ -O3 -fPIC -flto -DNDEBUG -c
+LFLAGS := $(EXTRA_LFLAGS) -fopenmp -O3 -flto -shared -lm -ltmpl
 else
-CFLAGS := -I../ -O3 -fPIC -flto -DNDEBUG -c
-LFLAGS := -O3 -flto -shared -lm -ltmpl
+CFLAGS := $(EXTRA_FLAGS) -I../ -O3 -fPIC -flto -DNDEBUG -c
+LFLAGS := $(EXTRA_LFLAGS) -O3 -flto -shared -lm -ltmpl
 endif
 
 CWARN := -Wall -Wextra -Wpedantic

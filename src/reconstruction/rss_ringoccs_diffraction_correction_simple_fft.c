@@ -78,8 +78,14 @@ void rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau)
 
     /*  Allocate memory for the Fresnel kernel and other variables.           */
     ker     = malloc(sizeof(*ker)     * data_size);
-    fft_out = malloc(sizeof(*fft_out) * data_size);
     T_in    = malloc(sizeof(*T_in)    * data_size);
+
+    /*  We can reuse the memory allocated for the in variables for the out    *
+     *  variables. This saves four calls to malloc and redundant memory use.  */
+    fft_in = T_in;
+    fft_ker = ker;
+    fft_out = fft_in;
+    T_out = T_in;
 
     w_thresh = 0.5*tau->w_km_vals[center];
 
@@ -89,6 +95,7 @@ void rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau)
         current_point = tau->start + i - nw_pts;
         window_func_x = tau->rho_km_vals[center] -
                         tau->rho_km_vals[current_point];
+
         if (fabs(window_func_x) <= w_thresh)
         {
             phi = rssringoccs_Newton_Raphson_Fresnel_Psi_D(
@@ -138,47 +145,13 @@ void rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau)
         T_in[i] = tau->T_in[current_point];
     }
 
-    fft_ker = tmpl_CDouble_FFT(ker, data_size, tmpl_False);
-    if (fft_ker == NULL)
-    {
-        tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_strdup(
-            "\n\rError Encountered: rss_ringoccs:\n"
-            "\r\trssringoccs_Diffraction_Correction_SimpleFFT\n"
-            "\rmpl_CDouble_FFT returned NULL for fft_ker.\n"
-            "\rAborting.\n\n"
-        );
-        return;
-    }
-
-    fft_in  = tmpl_CDouble_FFT(T_in, data_size, tmpl_False);
-    if (fft_in == NULL)
-    {
-        tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_strdup(
-            "\n\rError Encountered: rss_ringoccs:\n"
-            "\r\trssringoccs_Diffraction_Correction_SimpleFFT\n"
-            "\rtmpl_CDouble_FFT returned NULL for fft_in.\n"
-            "\rAborting.\n\n"
-        );
-        return;
-    }
+    tmpl_CDouble_FFT(ker, fft_ker, data_size);
+    tmpl_CDouble_FFT(T_in, fft_in, data_size);
 
     for (i = 0; i < data_size; ++i)
         fft_out[i] = tmpl_CDouble_Multiply(fft_ker[i], fft_in[i]);
 
-    T_out = tmpl_CDouble_FFT(fft_out, data_size, tmpl_True);
-    if (T_out == NULL)
-    {
-        tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_strdup(
-            "\n\rError Encountered: rss_ringoccs:\n"
-            "\r\trssringoccs_Diffraction_Correction_SimpleFFT\n"
-            "\rtmpl_CDouble_FFT returned NULL for T_out.\n"
-            "\rAborting.\n\n"
-        );
-        return;
-    }
+    tmpl_CDouble_IFFT(fft_out, T_out, data_size);
 
     for(i = 0; i < tau->n_used; ++i)
     {
@@ -190,9 +163,5 @@ void rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau)
 
     /*  Free variables allocated by malloc.                                   */
     free(ker);
-    free(fft_ker);
-    free(fft_in);
-    free(fft_out);
     free(T_in);
-    free(T_out);
 }

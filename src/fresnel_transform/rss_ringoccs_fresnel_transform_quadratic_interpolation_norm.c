@@ -2,7 +2,7 @@
 #include <math.h>
 #include <libtmpl/include/tmpl_math.h>
 #include <libtmpl/include/tmpl_complex.h>
-#include <rss_ringoccs/include/rss_ringoccs_fresnel_kernel.h>
+#include <libtmpl/include/tmpl_cyl_fresnel_optics.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 #include <stdlib.h>
 
@@ -36,28 +36,29 @@ rssringoccs_Fresnel_Transform_Quadratic_Norm(rssringoccs_TAUObj *tau,
      *  quadratic. Must compute everything from -W/2 to W/2.                  */
     offset = center - (n_pts - 1UL) / 2UL;
 
+     /*  Use a Riemann Sum to approximate the Fresnel Inverse Integral.       */
     for (i = 0; i < 4; ++i)
     {
-        phi = rssringoccs_Newton_Raphson_Fresnel_Psi(
-            tau->k_vals[center],
-            tau->rho_km_vals[center],
-            tau->rho_km_vals[offset + ind[i]],
-            tau->phi_rad_vals[offset + ind[i]],
-            tau->phi_rad_vals[offset + ind[i]],
-            tau->B_rad_vals[center],
-            tau->D_km_vals[center],
-            tau->EPS,
-            tau->toler
+        phi = tmpl_Double_Stationary_Cyl_Fresnel_Psi_Newton(
+            tau->k_vals[center],                /* Wavenumber. */
+            tau->rho_km_vals[center],           /* Dummy radius. */
+            tau->rho_km_vals[offset + ind[i]],  /* Ring radius. */
+            tau->phi_rad_vals[offset + ind[i]], /* Dummy azimuthal angle. */
+            tau->phi_rad_vals[offset + ind[i]], /* Ring azimuthal angle. */
+            tau->B_rad_vals[center],            /* Ring opening angle. */
+            tau->D_km_vals[center],             /* Observer distance. */
+            tau->EPS,                           /* Allowed error. */
+            tau->toler                          /* Max number of iterations. */
         );
 
-        psi_n[i] = rssringoccs_Fresnel_Psi(
-            tau->k_vals[center],
-            tau->rho_km_vals[center],
-            tau->rho_km_vals[offset + ind[i]],
-            phi,
-            tau->phi_rad_vals[offset + ind[i]],
-            tau->B_rad_vals[center],
-            tau->D_km_vals[center]
+        psi_n[i] = tmpl_Double_Cyl_Fresnel_Psi(
+            tau->k_vals[center],                /* Wavenumber. */
+            tau->rho_km_vals[center],           /* Dummy radius. */
+            tau->rho_km_vals[offset + ind[i]],  /* Ring radius. */
+            phi,                                /* Stationary azimuth. */
+            tau->phi_rad_vals[offset + ind[i]], /* Ring azimuth. */
+            tau->B_rad_vals[center],            /* Ring opening. */
+            tau->D_km_vals[center]              /* Observer distance. */
         );
     }
 

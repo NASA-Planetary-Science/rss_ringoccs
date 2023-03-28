@@ -2,7 +2,7 @@
 #include <math.h>
 #include <libtmpl/include/tmpl_math.h>
 #include <libtmpl/include/tmpl_complex.h>
-#include <rss_ringoccs/include/rss_ringoccs_fresnel_kernel.h>
+#include <libtmpl/include/tmpl_cyl_fresnel_optics.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
 void
@@ -17,7 +17,7 @@ rssringoccs_Fresnel_Transform_Quartic_D_Norm(rssringoccs_TAUObj *tau,
     double C[4], abs_norm, real_norm;
     double psi_n[4], psi_half_diff, psi_full_diff;
     double psi, phi, rcpr_w, rcpr_w_sq;
-    double psi_half_mean, psi_full_mean, cos_psi, sin_psi, x, y, z, dx, dy, D;
+    double psi_half_mean, psi_full_mean, cos_psi, sin_psi, D, x;
     tmpl_ComplexDouble exp_psi, norm, integrand;
 
     rcpr_w = 1.0 / tau->w_km_vals[center];
@@ -38,28 +38,29 @@ rssringoccs_Fresnel_Transform_Quartic_D_Norm(rssringoccs_TAUObj *tau,
     for (i = 0; i < 4; ++i)
     {
 
-        phi = rssringoccs_Newton_Raphson_Fresnel_Psi_dD_dphi(
+        phi = tmpl_Double_Stationary_Cyl_Fresnel_Psi_dD_dPhi_Newton(
             tau->k_vals[center],
             tau->rho_km_vals[center],
             tau->rho_km_vals[offset + ind[i]],
             tau->phi_rad_vals[offset + ind[i]],
             tau->phi_rad_vals[offset + ind[i]],
             tau->B_rad_vals[center],
-            tau->EPS,
-            tau->toler,
             tau->rx_km_vals[center],
             tau->ry_km_vals[center],
-            tau->rz_km_vals[center]
+            tau->rz_km_vals[center],
+            tau->EPS,
+            tau->toler
         );
 
-        x = tau->rho_km_vals[offset + ind[i]] * cos(phi);
-        y = tau->rho_km_vals[offset + ind[i]] * sin(phi);
-        z = tau->rz_km_vals[center];
-        dx = x - tau->rx_km_vals[center];
-        dy = y - tau->ry_km_vals[center];
-        D = sqrt(dx*dx + dy*dy + z*z);
+        D = tmpl_Double_Cyl_Fresnel_Observer_Distance(
+            tau->rho_km_vals[center],   /* Ring radius. */
+            phi,                        /* Stationary azimuth angle. */
+            tau->rx_km_vals[center],    /* Cassini x coordinate. */
+            tau->ry_km_vals[center],    /* Cassini y coordinate. */
+            tau->rz_km_vals[center]     /* Cassini z coordinate. */
+        );
 
-        psi_n[i] = rssringoccs_Fresnel_Psi(
+        psi_n[i] = tmpl_Double_Cyl_Fresnel_Psi(
             tau->k_vals[center],
             tau->rho_km_vals[center],
             tau->rho_km_vals[offset + ind[i]],

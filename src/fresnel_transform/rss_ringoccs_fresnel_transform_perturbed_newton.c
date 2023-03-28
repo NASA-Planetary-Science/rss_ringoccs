@@ -19,7 +19,7 @@
 
 #include <math.h>
 #include <libtmpl/include/tmpl_complex.h>
-#include <rss_ringoccs/include/rss_ringoccs_fresnel_kernel.h>
+#include <libtmpl/include/tmpl_cyl_fresnel_optics.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
 /******************************************************************************
@@ -103,27 +103,27 @@ rssringoccs_Fresnel_Transform_Perturbed_Newton(rssringoccs_TAUObj *tau,
             tau->D_km_vals[center];
 
         /*  Calculate the stationary value of psi with respect to phi.        */
-        phi = rssringoccs_Newton_Raphson_Fresnel_Psi(
-            tau->k_vals[center],
-            tau->rho_km_vals[center],
-            tau->rho_km_vals[offset],
-            tau->phi_rad_vals[offset],
-            tau->phi_rad_vals[offset],
-            tau->B_rad_vals[center],
-            tau->D_km_vals[center],
-            tau->EPS,
-            tau->toler
+        phi = tmpl_Double_Stationary_Cyl_Fresnel_Psi_Newton(
+            tau->k_vals[center],        /* Wavenumber. */
+            tau->rho_km_vals[center],   /* Dummy radius. */
+            tau->rho_km_vals[offset],   /* Ring radius. */
+            tau->phi_rad_vals[offset],  /* Dummy azimuthal angle. */
+            tau->phi_rad_vals[offset],  /* Ring azimuth angle. */
+            tau->B_rad_vals[center],    /* Ring opening angle. */
+            tau->D_km_vals[center],     /* Observer distance. */
+            tau->EPS,                   /* Allowed error. */
+            tau->toler                  /* Max number of iterations. */
         );
 
         /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
-        psi = rssringoccs_Fresnel_Psi(
-            tau->k_vals[center],
-            tau->rho_km_vals[center],
-            tau->rho_km_vals[offset],
-            phi,
-            tau->phi_rad_vals[offset],
-            tau->B_rad_vals[center],
-            tau->D_km_vals[center]
+        psi = tmpl_Double_Cyl_Fresnel_Psi(
+            tau->k_vals[center],        /* Wavenumber. */
+            tau->rho_km_vals[center],   /* Dummy radius. */
+            tau->rho_km_vals[offset],   /* Ring radius. */
+            phi,                        /* Stationary azimuth angle. */
+            tau->phi_rad_vals[offset],  /* Ring azimuth angle. */
+            tau->B_rad_vals[center],    /* Ring opening angle. */
+            tau->D_km_vals[center]      /* Observer distance. */
         );
 
         /*  Use Horner's method to compute the polynomial.                    */

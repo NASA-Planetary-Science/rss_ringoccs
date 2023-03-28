@@ -20,7 +20,7 @@
 #include <math.h>
 #include <libtmpl/include/tmpl_math.h>
 #include <libtmpl/include/tmpl_complex.h>
-#include <rss_ringoccs/include/rss_ringoccs_fresnel_kernel.h>
+#include <libtmpl/include/tmpl_cyl_fresnel_optics.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
 void
@@ -33,7 +33,7 @@ rssringoccs_Fresnel_Transform_Ellipse_Norm(rssringoccs_TAUObj *tau,
     size_t m, offset;
 
     /*  The Fresnel kernel and the stationary ring azimuth angle.             */
-    double psi, phi, cos_psi, sin_psi, abs_norm, real_norm, x, y, z, dx, dy, D;
+    double psi, phi, cos_psi, sin_psi, abs_norm, real_norm, D;
     double ecc_factor, ecc_cos_factor, semi_major, rho;
     tmpl_ComplexDouble exp_psi, norm, integrand;
 
@@ -53,34 +53,36 @@ rssringoccs_Fresnel_Transform_Ellipse_Norm(rssringoccs_TAUObj *tau,
         ecc_cos_factor = 1.0 + tau->ecc * cos(tau->phi_rad_vals[center] - tau->peri);
         semi_major     = tau->rho_km_vals[center] * ecc_cos_factor / ecc_factor;
 
-        phi = rssringoccs_Newton_Raphson_Fresnel_Ellipse(
+        /*  Calculate the stationary value of psi with respect to phi.        */
+        phi = tmpl_Double_Stationary_Elliptical_Fresnel_Psi_Newton(
             tau->k_vals[center],
             tau->rho_km_vals[center],
             tau->rho_km_vals[offset],
-            tau->phi_rad_vals[center],
+            tau->phi_rad_vals[offset],
             tau->phi_rad_vals[offset],
             tau->B_rad_vals[center],
             tau->ecc,
             tau->peri,
+            tau->rx_km_vals[center],
+            tau->ry_km_vals[center],
+            tau->rz_km_vals[center],
             tau->EPS,
-            tau->toler,
+            tau->toler
+        );
+
+        D = tmpl_Double_Cyl_Fresnel_Observer_Distance(
+            tau->rho_km_vals[offset],
+            phi,
             tau->rx_km_vals[center],
             tau->ry_km_vals[center],
             tau->rz_km_vals[center]
         );
 
-        x = tau->rho_km_vals[offset] * cos(phi);
-        y = tau->rho_km_vals[offset] * sin(phi);
-        z = tau->rz_km_vals[center];
-        dx = x - tau->rx_km_vals[center];
-        dy = y - tau->ry_km_vals[center];
-        D = sqrt(dx*dx + dy*dy + z*z);
-
         ecc_cos_factor = 1.0 + tau->ecc * cos(phi - tau->peri);
         rho = semi_major * ecc_factor / ecc_cos_factor;
 
         /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
-        psi = rssringoccs_Fresnel_Psi(
+        psi = tmpl_Double_Cyl_Fresnel_Psi(
             tau->k_vals[center],
             rho,
             tau->rho_km_vals[offset],

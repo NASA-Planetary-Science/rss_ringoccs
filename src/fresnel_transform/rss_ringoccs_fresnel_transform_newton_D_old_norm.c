@@ -20,7 +20,7 @@
 #include <math.h>
 #include <libtmpl/include/tmpl_math.h>
 #include <libtmpl/include/tmpl_complex.h>
-#include <rss_ringoccs/include/rss_ringoccs_fresnel_kernel.h>
+#include <libtmpl/include/tmpl_cyl_fresnel_optics.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
 void
@@ -32,8 +32,7 @@ rssringoccs_Fresnel_Transform_Newton_D_Old_Norm(rssringoccs_TAUObj *tau,
     size_t m, offset;
 
     /*  The Fresnel kernel and the stationary ring azimuth angle.             */
-    double psi, phi, x, y, z, dx, dy, D;
-    double exp_psi_re, exp_psi_im, abs_norm, real_norm;
+    double psi, phi, D, exp_psi_re, exp_psi_im, abs_norm, real_norm;
     tmpl_ComplexDouble exp_psi, norm, integrand;
 
     /*  Initialize T_out and norm to zero so we can loop over later.          */
@@ -48,36 +47,39 @@ rssringoccs_Fresnel_Transform_Newton_D_Old_Norm(rssringoccs_TAUObj *tau,
     for (m = 0; m<n_pts; ++m)
     {
         /*  Calculate the stationary value of psi with respect to phi.        */
-        phi = rssringoccs_Newton_Raphson_Fresnel_Psi_D_Old(
+        phi = tmpl_Double_Stationary_Cyl_Fresnel_Psi_D_Newton_Old(
+            /* Weighted wavenumber, unitless. */
             tau->k_vals[center]*tau->D_km_vals[center],
-            tau->rho_km_vals[center],
-            tau->rho_km_vals[offset],
-            tau->phi_rad_vals[offset],
-            tau->phi_rad_vals[offset],
-            tau->B_rad_vals[center],
-            tau->EPS,
-            tau->toler,
-            tau->rx_km_vals[center],
-            tau->ry_km_vals[center],
-            tau->rz_km_vals[center]
+            tau->rho_km_vals[center],   /* Dummy ring radius. */
+            tau->rho_km_vals[offset],   /* Ring radius. */
+            tau->phi_rad_vals[offset],  /* Dummy azimuth angle. */
+            tau->phi_rad_vals[offset],  /* Azimuth angle. */
+            tau->B_rad_vals[center],    /* Ring opening angle. */
+            tau->rx_km_vals[center],    /* Cassini x coordinate. */
+            tau->ry_km_vals[center],    /* Cassini y coordinate. */
+            tau->rz_km_vals[center],    /* Cassini z coordinate. */
+            tau->EPS,                   /* Allowed error. */
+            tau->toler                  /* Maximum number of iterations. */
         );
 
-        x = tau->rho_km_vals[offset] * cos(phi);
-        y = tau->rho_km_vals[offset] * sin(phi);
-        z = tau->rz_km_vals[center];
-        dx = x - tau->rx_km_vals[center];
-        dy = y - tau->ry_km_vals[center];
-        D = sqrt(dx*dx + dy*dy + z*z);
+        D = tmpl_Double_Cyl_Fresnel_Observer_Distance(
+            tau->rho_km_vals[offset],   /* Ring radius. */
+            phi,                        /* Stationary azimuth angle. */
+            tau->rx_km_vals[center],    /* Cassini x coordinate. */
+            tau->ry_km_vals[center],    /* Cassini y coordinate. */
+            tau->rz_km_vals[center]     /* Cassini z coordinate. */
+        );
 
         /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
-        psi = rssringoccs_Fresnel_Psi_Old(
+        psi = tmpl_Double_Cyl_Fresnel_Psi_Alt(
+            /* Weighted wavenumber, unitless. */
             tau->k_vals[center]*tau->D_km_vals[center],
-            tau->rho_km_vals[center],
-            tau->rho_km_vals[offset],
-            phi,
-            tau->phi_rad_vals[offset],
-            tau->B_rad_vals[center],
-            D
+            tau->rho_km_vals[center],   /* Dummy radius. */
+            tau->rho_km_vals[offset],   /* Ring radius. */
+            phi,                        /* Stationary azimuth angle.*/
+            tau->phi_rad_vals[offset],  /* Ring azimuth angle. */
+            tau->B_rad_vals[center],    /* Ring opening angle. */
+            D                           /* Observer distance. */
         );
 
         exp_psi_re = cos(psi)*w_func[m];

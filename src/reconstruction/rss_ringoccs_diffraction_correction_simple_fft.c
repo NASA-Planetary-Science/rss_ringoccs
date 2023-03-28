@@ -99,34 +99,34 @@ void rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau)
         if (fabs(window_func_x) <= w_thresh)
         {
             phi = tmpl_Double_Stationary_Cyl_Fresnel_Psi_D_Newton(
-                tau->k_vals[current_point],
+                tau->k_vals[center],
                 tau->rho_km_vals[center],
                 tau->rho_km_vals[current_point],
                 tau->phi_rad_vals[current_point],
                 tau->phi_rad_vals[current_point],
-                tau->B_rad_vals[current_point],
-                tau->rx_km_vals[current_point],
-                tau->ry_km_vals[current_point],
-                tau->rz_km_vals[current_point],
+                tau->B_rad_vals[center],
+                tau->rx_km_vals[center],
+                tau->ry_km_vals[center],
+                tau->rz_km_vals[center],
                 tau->EPS,
                 tau->toler
             );
 
             D = tmpl_Double_Cyl_Fresnel_Observer_Distance(
-                tau->rx_km_vals[current_point],    /* Ring radius. */
+                tau->rho_km_vals[current_point],   /* Ring radius. */
                 phi,                               /* Stationary azimuth. */
-                tau->rx_km_vals[current_point],    /* Cassini x coordinate. */
-                tau->ry_km_vals[current_point],    /* Cassini y coordinate. */
-                tau->rz_km_vals[current_point]     /* Cassini z coordinate. */
+                tau->rx_km_vals[center],           /* Cassini x coordinate. */
+                tau->ry_km_vals[center],           /* Cassini y coordinate. */
+                tau->rz_km_vals[center]            /* Cassini z coordinate. */
             );
 
             psi = -tmpl_Double_Cyl_Fresnel_Psi(
-                tau->k_vals[current_point],
+                tau->k_vals[center],
                 tau->rho_km_vals[center],
                 tau->rho_km_vals[current_point],
                 phi,
                 tau->phi_rad_vals[current_point],
-                tau->B_rad_vals[current_point],
+                tau->B_rad_vals[center],
                 D
             );
 

@@ -4,8 +4,8 @@
 #include <libtmpl/include/tmpl_string.h>
 #include <libtmpl/include/tmpl_complex.h>
 #include <libtmpl/include/tmpl_optics.h>
+#include <libtmpl/include/tmpl_cyl_fresnel_optics.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
-#include <rss_ringoccs/include/rss_ringoccs_fresnel_kernel.h>
 
 /*  Macro for checking if certain pointers in the tau object are NULL.        *
  *  Several of the inputs should NOT be NULL when calling this function. Note *
@@ -112,10 +112,10 @@ void rssringoccs_Tau_Compute_Vars(rssringoccs_TAUObj *tau)
         tau->k_vals[n] = tmpl_Double_Wavelength_To_Wavenumber(lambda_sky);
 
         /*  And finally, compute the Fresnel scale.                           */
-        tau->F_km_vals[n] = rssringoccs_Fresnel_Scale(lambda_sky,
-                                                      tau->D_km_vals[n],
-                                                      tau->phi_rad_vals[n],
-                                                      tau->B_rad_vals[n]);
+        tau->F_km_vals[n] = tmpl_Double_Cyl_Fresnel_Scale(
+            lambda_sky, tau->D_km_vals[n],
+            tau->phi_rad_vals[n], tau->B_rad_vals[n]
+        );
     }
     /*  End of for loop for k, T, and F.                                      */
 }

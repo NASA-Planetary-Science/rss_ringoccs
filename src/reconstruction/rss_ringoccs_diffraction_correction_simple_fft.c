@@ -3,7 +3,7 @@
 #include <libtmpl/include/tmpl_math.h>
 #include <libtmpl/include/tmpl_string.h>
 #include <libtmpl/include/tmpl_fft.h>
-#include <rss_ringoccs/include/rss_ringoccs_fresnel_kernel.h>
+#include <libtmpl/include/tmpl_cyl_fresnel_optics.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 
@@ -41,7 +41,7 @@ void rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau)
 
     /*  Some variables needed for reconstruction.                             */
     double w_init, psi, phi, window_func_x, factor, rcpr_F;
-    double w_thresh, arg_norm, D, x, y, z, dx, dy;
+    double w_thresh, arg_norm, D;
     tmpl_ComplexDouble *ker;
     tmpl_ComplexDouble *fft_ker;
     tmpl_ComplexDouble *fft_in;
@@ -98,30 +98,29 @@ void rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau)
 
         if (fabs(window_func_x) <= w_thresh)
         {
-            phi = rssringoccs_Newton_Raphson_Fresnel_Psi_D(
+            phi = tmpl_Double_Stationary_Cyl_Fresnel_Psi_D_Newton(
                 tau->k_vals[current_point],
                 tau->rho_km_vals[center],
                 tau->rho_km_vals[current_point],
                 tau->phi_rad_vals[current_point],
                 tau->phi_rad_vals[current_point],
                 tau->B_rad_vals[current_point],
-                tau->EPS,
-                tau->toler,
                 tau->rx_km_vals[current_point],
                 tau->ry_km_vals[current_point],
-                tau->rz_km_vals[current_point]
+                tau->rz_km_vals[current_point],
+                tau->EPS,
+                tau->toler
             );
 
-            x = tau->rho_km_vals[current_point] * cos(phi);
-            y = tau->rho_km_vals[current_point] * sin(phi);
-            z = tau->rz_km_vals[current_point];
+            D = tmpl_Double_Cyl_Fresnel_Observer_Distance(
+                tau->rx_km_vals[current_point],    /* Ring radius. */
+                phi,                               /* Stationary azimuth. */
+                tau->rx_km_vals[current_point],    /* Cassini x coordinate. */
+                tau->ry_km_vals[current_point],    /* Cassini y coordinate. */
+                tau->rz_km_vals[current_point]     /* Cassini z coordinate. */
+            );
 
-            dx = x - tau->rx_km_vals[current_point];
-            dy = y - tau->ry_km_vals[current_point];
-
-            D = sqrt(dx*dx + dy*dy + z*z);
-
-            psi = -rssringoccs_Fresnel_Psi(
+            psi = -tmpl_Double_Cyl_Fresnel_Psi(
                 tau->k_vals[current_point],
                 tau->rho_km_vals[center],
                 tau->rho_km_vals[current_point],

@@ -1,0 +1,24 @@
+target_sources(
+    librssringoccs
+    PRIVATE
+        rss_ringoccs_copy_dlp_data_to_tau.c
+        rss_ringoccs_create_tau_obj.c
+        rss_ringoccs_destroy_tau.c
+        rss_ringoccs_destroy_tau_members.c
+        rss_ringoccs_diffraction_correction_fresnel.c
+        rss_ringoccs_diffraction_correction_legendre.c
+        rss_ringoccs_diffraction_correction_newton.c
+        rss_ringoccs_diffraction_correction_simple_fft.c
+        rss_ringoccs_reconstruction.c
+        rss_ringoccs_tau_check_data.c
+        rss_ringoccs_tau_check_data_range.c
+        rss_ringoccs_tau_check_keywords.c
+        rss_ringoccs_tau_check_occ_type.c
+        rss_ringoccs_tau_compute_vars.c
+        rss_ringoccs_tau_finish.c
+        rss_ringoccs_tau_get_window_width.c
+        rss_ringoccs_tau_reset_window.c
+        rss_ringoccs_tau_set_psitype.c
+        rss_ringoccs_tau_set_range_from_string.c
+        rss_ringoccs_tau_set_wtype.c
+)

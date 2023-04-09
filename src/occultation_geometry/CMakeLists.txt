@@ -1,0 +1,1 @@
+target_sources(librssringoccs PRIVATE rss_ringoccs_light_distance.c)

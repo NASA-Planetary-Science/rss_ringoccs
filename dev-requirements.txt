@@ -1,0 +1,15 @@
+pre-commit
+cmake
+gersemi
+black
+mypy
+types-requests
+pyupgrade
+pandas-stubs
+scikit-build
+flake8
+pytest
+pytest-cov
+tox
+
+-r docs/requirements.txt

@@ -59,6 +59,7 @@ generate_export_header(
     STATIC_DEFINE SHARED_EXPORTS_BUILT_AS_STATIC
 )
 target_include_directories(librssringoccs PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
+target_link_libraries(librssringoccs PRIVATE tmpl::tmpl)
 file(GLOB LIBRSSRINGOCCS_HEADERS ../include/*.h)
 set_target_properties(
     librssringoccs

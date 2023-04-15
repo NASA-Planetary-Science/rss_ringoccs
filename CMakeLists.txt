@@ -2,13 +2,9 @@ cmake_minimum_required(VERSION 3.20)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 include(CompilerOptions)
+include(ConanHelpers)
+conan_instalL(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR})
 
-# We use vcpkg to retrieve a build of GSL
-include(FetchVcpkg)
-set(CMAKE_TOOLCHAIN_FILE ${vcpkg_toolchain_file}
-    CACHE STRING "Vcpkg toolchain file"
-)
-message("CMAKE_TOOLCHAIN_FILE: ${CMAKE_TOOLCHAIN_FILE}")
 include(FetchLibTmpl)
 
 if(SKBUILD)

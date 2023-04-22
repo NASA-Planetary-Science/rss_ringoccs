@@ -45,11 +45,11 @@ target_include_directories(
 )
 
 add_subdirectory("csv_tools")
-add_subdirectory("fresnel_kernel")
 add_subdirectory("fresnel_transform")
 add_subdirectory("history")
 add_subdirectory("occultation_geometry")
 add_subdirectory("reconstruction")
+
 target_compile_definitions(librssringoccs PUBLIC -DNDEBUG)
 generate_export_header(
     librssringoccs # generates the export header shared_EXPORTS.h automatically

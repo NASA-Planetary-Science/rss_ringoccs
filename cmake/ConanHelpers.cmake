@@ -8,7 +8,7 @@ function(conan_install)
     cmake_parse_arguments(${prefix} "${noValues}" "${singleValues}" "${multiValues}" ${ARGN})
 
     execute_process(
-        COMMAND conan install --build=missing --output-folder ${${prefix}OUTPUT_DIR} ${${prefix}SOURCE_DIR}
+        COMMAND conan install --build=missing --output-folder ${${prefix}_OUTPUT_DIR} ${${prefix}_SOURCE_DIR}
         COMMAND_ECHO STDOUT
         COMMAND_ERROR_IS_FATAL ANY
     )

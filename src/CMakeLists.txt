@@ -106,7 +106,7 @@ else()
     configure_file("../cmake/__config__.py.in" "__config__.py")
 
     install(
-        TARGETS librssringoccs tmpl::tmpl
+        TARGETS librssringoccs tmpl
         DESTINATION ${LIBRSSRINGOCCS_LIB_PACKAGE_DIR}
     )
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/__config__.py" DESTINATION .)

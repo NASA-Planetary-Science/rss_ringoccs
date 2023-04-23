@@ -3,6 +3,8 @@
 #ifndef RSS_RINGOCCS_HISTORY_H
 #define RSS_RINGOCCS_HISTORY_H
 
+#include "librssringoccs_exports.h"
+
 typedef struct rssringoccs_HistoryObj_Def {
     char *rssocc_version;
     char *user_name;
@@ -13,7 +15,7 @@ typedef struct rssringoccs_HistoryObj_Def {
     char **input_kwds;
 } rssringoccs_HistoryObj;
 
-extern char *
+RSS_RINGOCCS_EXPORT extern char *
 rssringoccs_Date_to_Rev(unsigned int year, unsigned int doy);
 
 #endif

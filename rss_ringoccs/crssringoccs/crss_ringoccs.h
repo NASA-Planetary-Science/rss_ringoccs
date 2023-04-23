@@ -45,6 +45,8 @@
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
 
+#include "librssringoccs_exports.h"
+
 /*  The definition of the DiffractionCorrection class as a C struct.          */
 typedef struct PyDiffrecObj_Def {
     PyObject_HEAD
@@ -124,42 +126,42 @@ typedef struct PyCSVObj_Def {
 } PyCSVObj;
 
 
-extern void
+RSS_RINGOCCS_EXPORT extern void
 set_var(PyObject **py_ptr, double **ptr, unsigned long int len);
 
-extern void capsule_cleanup(PyObject *capsule);
+RSS_RINGOCCS_EXPORT extern void capsule_cleanup(PyObject *capsule);
 
-extern double *
+RSS_RINGOCCS_EXPORT extern double *
 extract_data(rssringoccs_DLPObj *dlp, PyObject *py_dlp, const char *var_name);
 
-extern rssringoccs_DLPObj *
+RSS_RINGOCCS_EXPORT extern rssringoccs_DLPObj *
 rssringoccs_Py_DLP_to_C_DLP(PyObject *py_dlp);
 
-extern void
+RSS_RINGOCCS_EXPORT extern void
 rssringoccs_C_Tau_to_Py_Tau(PyDiffrecObj *py_tau, rssringoccs_TAUObj *tau);
 
-extern void
+RSS_RINGOCCS_EXPORT extern void
 rssringoccs_Get_Py_Perturb(rssringoccs_TAUObj *tau, PyObject *perturb);
 
-extern void rssringoccs_Get_Py_Range(rssringoccs_TAUObj *tau, PyObject *rngreq);
+RSS_RINGOCCS_EXPORT extern void rssringoccs_Get_Py_Range(rssringoccs_TAUObj *tau, PyObject *rngreq);
 
-extern void
+RSS_RINGOCCS_EXPORT extern void
 rssringoccs_Get_Py_Vars_From_Tau_Self(rssringoccs_TAUObj *tau,
                                       PyDiffrecObj *self);
 
-extern void Diffrec_dealloc(PyDiffrecObj *self);
+RSS_RINGOCCS_EXPORT extern void Diffrec_dealloc(PyDiffrecObj *self);
 
-extern int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds);
+RSS_RINGOCCS_EXPORT extern int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds);
 
-extern PyTypeObject DiffrecType;
+RSS_RINGOCCS_EXPORT extern PyTypeObject DiffrecType;
 
-extern void
+RSS_RINGOCCS_EXPORT extern void
 rssringoccs_C_CSV_to_Py_CSV(PyCSVObj *py_csv, rssringoccs_CSVData *csv);
 
-extern void ExtractCSVData_dealloc(PyCSVObj *self);
+RSS_RINGOCCS_EXPORT extern void ExtractCSVData_dealloc(PyCSVObj *self);
 
-extern int
+RSS_RINGOCCS_EXPORT extern int
 ExtractCSVData_init(PyCSVObj *self, PyObject *args, PyObject *kwds);
 
-extern PyTypeObject ExtractCSVDataType;
+RSS_RINGOCCS_EXPORT extern PyTypeObject ExtractCSVDataType;
 

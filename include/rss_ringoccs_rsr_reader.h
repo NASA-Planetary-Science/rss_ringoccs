@@ -2,6 +2,8 @@
 #ifndef RSS_RINGOCCS_RSR_READER_H
 #define RSS_RINGOCCS_RSR_READER_H
 
+#include "librssringoccs_exports.h"
+
 #include <limits.h>
 
 #if CHAR_BIT == 8
@@ -155,10 +157,10 @@ typedef struct rssringoccs_RSRHeaderObj {
 /*  End of rssringoccs_RSRHeaderObj definition.                               */
 
 /*  Function for extracting the data from an rsr_file, given its path.        */
-extern rssringoccs_RSRHeaderObj *
+RSS_RINGOCCS_EXPORT extern rssringoccs_RSRHeaderObj *
 rssringoccs_Get_RSR_Header(const char *rsr_file);
 
-extern rssringoccs_RDRObj *
+RSS_RINGOCCS_EXPORT extern rssringoccs_RDRObj *
 rssringoccs_Get_RDR_Object(const char *rsr_file);
 
 #endif

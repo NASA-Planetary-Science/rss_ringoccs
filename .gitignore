@@ -13,3 +13,4 @@ __pycache__
 *.ppm
 *.o
 .idea/
+CMakeUserPresets.json

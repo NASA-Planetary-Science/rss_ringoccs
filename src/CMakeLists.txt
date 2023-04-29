@@ -17,7 +17,7 @@ project(rssringoccs_library)
 #    file(GLOB_RECURSE CFILES "*.c")
 #    set_source_files_properties(${CFILES} PROPERTIES LANGUAGE CXX)
 #endif()
-
+find_package(cspice REQUIRED)
 add_library(librssringoccs SHARED)
 if(UNIX)
     target_link_libraries(librssringoccs PRIVATE m)
@@ -59,7 +59,7 @@ generate_export_header(
     STATIC_DEFINE SHARED_EXPORTS_BUILT_AS_STATIC
 )
 target_include_directories(librssringoccs PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
-target_link_libraries(librssringoccs PRIVATE tmpl::tmpl)
+target_link_libraries(librssringoccs PRIVATE tmpl::tmpl cspice::cspice)
 file(GLOB LIBRSSRINGOCCS_HEADERS ../include/*.h)
 set_target_properties(
     librssringoccs

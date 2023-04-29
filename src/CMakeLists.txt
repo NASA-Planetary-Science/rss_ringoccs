@@ -78,7 +78,7 @@ add_library(rss::librssringoccs ALIAS librssringoccs)
 if(NOT DEFINED SKBUILD)
     include(GNUInstallDirs)
     install(
-        TARGETS librssringoccs
+        TARGETS librssringoccs tmpl
         RUNTIME
         DESTINATION ${CMAKE_INSTALL_BINDIR}
         LIBRARY

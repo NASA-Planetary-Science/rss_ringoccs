@@ -4,7 +4,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(CompilerOptions)
 include(ConanHelpers)
 conan_instalL(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR})
-
+list(APPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_BINARY_DIR})
 include(FetchLibTmpl)
 
 if(SKBUILD)

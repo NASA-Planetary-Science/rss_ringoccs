@@ -29,19 +29,14 @@ if(OpenMP_C_FOUND)
 endif()
 
 if(IPO_SUPPORTED)
-    set_property(
-        TARGET librssringoccs
-        PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE
-    )
+    set_property(TARGET librssringoccs PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 else()
     message(WARNING "IPO is not supported: ${output}")
 endif()
 
 target_include_directories(
     librssringoccs
-    PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/../include
-        ${CMAKE_CURRENT_SOURCE_DIR}/../..
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../include ${CMAKE_CURRENT_SOURCE_DIR}/../..
 )
 
 add_subdirectory("csv_tools")
@@ -105,9 +100,6 @@ else()
 
     configure_file("../cmake/__config__.py.in" "__config__.py")
 
-    install(
-        TARGETS librssringoccs tmpl
-        DESTINATION ${LIBRSSRINGOCCS_LIB_PACKAGE_DIR}
-    )
+    install(TARGETS librssringoccs tmpl DESTINATION ${LIBRSSRINGOCCS_LIB_PACKAGE_DIR})
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/__config__.py" DESTINATION .)
 endif()

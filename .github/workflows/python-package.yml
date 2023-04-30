@@ -21,6 +21,15 @@ jobs:
         steps:
         -   uses: actions/checkout@v3
 
+        - name: Install Conan
+          id: conan
+          uses: turtlebrowser/get-conan@main
+          with:
+              version: 2.0.4
+
+        - name: Create default Conan profile
+          run: conan profile detect --force
+
         -   name: Set up Python ${{ matrix.python-version }}
             uses: actions/setup-python@v4
             with:

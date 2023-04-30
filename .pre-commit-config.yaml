@@ -52,7 +52,7 @@ repos:
     rev: v2.8.0
     hooks:
     -   id: pretty-format-yaml
-        args: [--autofix, --indent, '4']
+        args: [--preserve-quotes, --autofix, --indent, '4']
         files: y[a]?ml
 -   repo: https://github.com/BlankSpruce/gersemi #cmake formatter
     rev: 0.8.3

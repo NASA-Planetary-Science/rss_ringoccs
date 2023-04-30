@@ -73,7 +73,7 @@ add_library(rss::librssringoccs ALIAS librssringoccs)
 if(NOT DEFINED SKBUILD)
     include(GNUInstallDirs)
     install(
-        TARGETS librssringoccs tmpl
+        TARGETS librssringoccs
         RUNTIME
         DESTINATION ${CMAKE_INSTALL_BINDIR}
         LIBRARY
@@ -82,6 +82,15 @@ if(NOT DEFINED SKBUILD)
         DESTINATION ${CMAKE_INSTALL_LIBDIR}
         PUBLIC_HEADER
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}}
+    )
+    install(
+        TARGETS tmpl
+        RUNTIME
+        DESTINATION ${CMAKE_INSTALL_BINDIR}
+        LIBRARY
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}
     )
 else()
     if(MACOSX)

@@ -20,10 +20,10 @@ else()
 endif()
 
 fetchcontent_declare(
-    tmpl_checkout
+    libtmpl
     GIT_REPOSITORY https://github.com/tcumby/libtmpl.git
     GIT_TAG add-cmake-build-system-redo
     SOURCE_DIR libtmpl
 )
 
-fetchcontent_makeavailable(tmpl_checkout)
+fetchcontent_makeavailable(libtmpl)

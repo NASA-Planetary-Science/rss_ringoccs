@@ -36,7 +36,7 @@ endif()
 
 target_include_directories(
     librssringoccs
-    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../include ${CMAKE_CURRENT_SOURCE_DIR}/../..
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../include ${CMAKE_CURRENT_SOURCE_DIR}/../.. ${libtmpl_SOURCE_DIR}/..
 )
 
 add_subdirectory("csv_tools")

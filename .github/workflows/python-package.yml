@@ -21,6 +21,8 @@ jobs:
         steps:
         -   uses: actions/checkout@v3
 
+        - uses: stevenwdv/setup-fasm@v1
+
         - name: Install Conan
           id: conan
           uses: turtlebrowser/get-conan@main

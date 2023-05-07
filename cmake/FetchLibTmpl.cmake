@@ -30,4 +30,9 @@ fetchcontent_declare(
 fetchcontent_makeavailable(libtmpl)
 
 cmake_path(GET libtmpl_SOURCE_DIR PARENT_PATH  libtmpl_PARENT_DIR)
-set(libtmpl_INCLUDE_DIRS "${libtmpl_PARENT_DIR}" "${libtmpl_SOURCE_DIR}" "${libtmpl_SOURCE_DIR/include}")
+set(libtmpl_INCLUDE_DIRS
+    "${libtmpl_PARENT_DIR}"
+    "${libtmpl_SOURCE_DIR}"
+    "${libtmpl_SOURCE_DIR}/include"
+    "${libtmpl_BINARY_DIR}/include"
+)

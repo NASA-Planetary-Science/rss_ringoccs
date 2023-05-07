@@ -27,3 +27,5 @@ fetchcontent_declare(
 )
 
 fetchcontent_makeavailable(libtmpl)
+
+cmake_path(GET libtmpl_SOURCE_DIR PARENT_PATH  libtmpl_PARENT_DIR)

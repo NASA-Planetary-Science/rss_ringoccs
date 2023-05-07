@@ -24,7 +24,7 @@ foreach(app ${test_apps})
         ${app}
         PROPERTIES C_STANDARD 99 INTERPROCEDURAL_OPTIMIZATION ${IPO_SUPPORTED}
     )
-    target_include_directories(${app} PUBLIC "${RSS_RINGOCCS_PARENT_DIR}" "${libtmpl_PARENT_DIR}")
+    target_include_directories(${app} PUBLIC "${RSS_RINGOCCS_PARENT_DIR}" ${libtmpl_INCLUDE_DIRS})
     target_link_libraries(${app} PRIVATE rss::librssringoccs)
     if(UNIX)
         target_link_libraries(${app} PRIVATE m)

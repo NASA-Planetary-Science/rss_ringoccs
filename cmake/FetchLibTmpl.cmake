@@ -19,20 +19,16 @@ else()
     set(LIBTMPL_USE_OMP ON)
 endif()
 
-fetchcontent_declare(
+FetchContent_Declare(
     libtmpl
     GIT_REPOSITORY https://github.com/tcumby/libtmpl.git
     GIT_TAG add-cmake-build-system-redo
-    SOURCE_DIR
-    libtmpl
+    SOURCE_DIR libtmpl
 )
 
-fetchcontent_makeavailable(libtmpl)
+FetchContent_MakeAvailable(libtmpl)
 
-cmake_path(GET libtmpl_SOURCE_DIR PARENT_PATH  libtmpl_PARENT_DIR)
-set(libtmpl_INCLUDE_DIRS
-    "${libtmpl_PARENT_DIR}"
-    "${libtmpl_SOURCE_DIR}"
-    "${libtmpl_SOURCE_DIR}/include"
-    "${libtmpl_BINARY_DIR}/include"
+cmake_path(GET libtmpl_SOURCE_DIR PARENT_PATH libtmpl_PARENT_DIR)
+set(libtmpl_INCLUDE_DIRS "${libtmpl_PARENT_DIR}" "${libtmpl_SOURCE_DIR}" "${libtmpl_SOURCE_DIR}/include"
+                         "${libtmpl_BINARY_DIR}/include"
 )

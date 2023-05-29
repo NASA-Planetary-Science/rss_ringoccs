@@ -35,13 +35,7 @@ if(GCC)
     set(CMAKE_C_FLAGS_DEBUG_INIT ${extraOpts})
 
     if(CMAKE_C_COMPILE_OPTIONS_IPO MATCHES "-fno-fat-lto-objects")
-        string(
-            REPLACE
-            "-fno-fat-lto-objects"
-            ""
-            ${CMAKE_C_COMPILE_OPTIONS_IPO}
-            CMAKE_C_COMPILE_OPTIONS_IPO
-        )
+        string(REPLACE "-fno-fat-lto-objects" "" ${CMAKE_C_COMPILE_OPTIONS_IPO} CMAKE_C_COMPILE_OPTIONS_IPO)
     endif()
 else()
     message(FATAL_ERROR "gcc was not found")

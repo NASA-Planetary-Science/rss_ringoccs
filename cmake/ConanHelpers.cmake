@@ -9,7 +9,6 @@ function(conan_install)
 
     execute_process(
         COMMAND conan install --build=missing --output-folder ${${prefix}_OUTPUT_DIR} ${${prefix}_SOURCE_DIR}
-        COMMAND_ECHO STDOUT
-        COMMAND_ERROR_IS_FATAL ANY
+                COMMAND_ECHO STDOUT COMMAND_ERROR_IS_FATAL ANY
     )
 endfunction()

@@ -3,7 +3,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 include(CompilerOptions)
 include(ConanHelpers)
-conan_instalL(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR})
+conan_install(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR})
 list(APPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_BINARY_DIR})
 include(FetchLibTmpl)
 
@@ -28,25 +28,29 @@ option(BUILD_EXAMPLES "Build all examples" TRUE)
 option(BUILD_TESTS "Build all tests" TRUE)
 option(ENABLE_ASAN "Enable build with Clang's Address Sanitizer" FALSE)
 
-set(RSS_RINGOCCS_PARENT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/.." CACHE PATH "" FORCE)
-set(RSS_RINGOCCS_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}" CACHE PATH "" FORCE)
+set(RSS_RINGOCCS_PARENT_DIR
+    "${CMAKE_CURRENT_SOURCE_DIR}/.."
+    CACHE PATH "" FORCE
+)
+set(RSS_RINGOCCS_SOURCE_DIR
+    "${CMAKE_CURRENT_SOURCE_DIR}"
+    CACHE PATH "" FORCE
+)
 
 project(rss_ringoccs)
 
 cmake_policy(SET CMP0069 NEW)
 include(CheckIPOSupported)
 # Optional IPO. Do not use IPO if it's not supported by compiler.
-check_ipo_supported(RESULT IPO_SUPPORTED OUTPUT IPO_CHECK_OUTPUT LANGUAGES C)
+check_ipo_supported(
+    RESULT IPO_SUPPORTED
+    OUTPUT IPO_CHECK_OUTPUT
+    LANGUAGES C
+)
 if(IPO_SUPPORTED)
-    message(
-        STATUS
-        "Interprocedural Optimization/Link-Time Optimization is supported."
-    )
+    message(STATUS "Interprocedural Optimization/Link-Time Optimization is supported.")
 else()
-    message(
-        WARNING
-        "Interprocedural Optimization/Link-Time Optimization is not supported: ${IPO_CHECK_OUTPUT}"
-    )
+    message(WARNING "Interprocedural Optimization/Link-Time Optimization is not supported: ${IPO_CHECK_OUTPUT}")
 endif()
 
 add_subdirectory("src")

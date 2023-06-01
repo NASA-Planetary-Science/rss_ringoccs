@@ -244,8 +244,9 @@ if [ $INPLACE == 0 ]; then
 
     # Copy the header files to the appropriate directory.
     echo "Copying include/ directory to $INCLUDE_TARGET"
+    mkdir -p /usr/local/lib/
     mkdir -p "$INCLUDE_TARGET"
-    cp -r ./include/ "$INCLUDE_TARGET"
+    cp -r ./include "$INCLUDE_TARGET"
 
     # Move the shared object file to the appropriate directory.
     echo "Moving $SONAME to $SODIR"

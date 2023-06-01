@@ -60,8 +60,9 @@ clean:
 	rm -f $(TARGET_LIB)
 
 install:
-	mkdir -p /usr/local/include/rss_ringoccs/include/
-	cp ./include/*.h /usr/local/include/rss_ringoccs/include/
+	mkdir -p /usr/local/lib/
+	mkdir -p /usr/local/include/rss_ringoccs/
+	cp -r ./include /usr/local/include/rss_ringoccs/
 	cp $(TARGET_LIB) /usr/local/lib/$(TARGET_LIB)
 
 uninstall:

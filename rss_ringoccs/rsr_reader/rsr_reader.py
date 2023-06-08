@@ -1,11 +1,9 @@
-#!/usr/bin/env python
 """
 
 :Purpose:
     Class to create an instance linked to an RSR file
 
 :Dependencies:
-    #. multiprocessing
     #. numpy
     #. os
     #. scipy
@@ -14,9 +12,6 @@
     #. time
 """
 
-import multiprocessing
-from multiprocessing import Process
-from multiprocessing import Queue
 import numpy as np
 import os
 from scipy.signal import decimate
@@ -48,9 +43,15 @@ class RSRReader(object):
             will be True for any subsequent calls from the instance until
             you explicitly set it to False. This keyword is linked to the
             private attribute __decimate_16khz_to_1khz
-        :cpu_count (*int*):
-            Number of cores to use when reading data in from
-            file. Default is number of cores on your computer
+        :apply_bias_correction (*bool*):
+            Optional Boolean argument which, if set to True (the default)
+            will apply a bias correction to the RSR data by returning
+            2*k+1 for each raw k entry, after applying 2s complement to 
+            raw data read as UNSIGNED shorts. Otherwise, return raw entry.
+            This option should be set to True to get proper values of RSR
+            data but can be set to False to enable comparison with results
+            when the bias correction is ignored, as was the case in rss_ringoccs
+            prior to 2023 March 27.
         :verbose (*bool*):
             Optional boolean variable which, when set to True,
             prints the header attributes that were set
@@ -166,7 +167,8 @@ class RSRReader(object):
     __field_names = (__sfdu_field_names + __ha_field_names + __ph_field_names
         + __sh_field_names + __data_field_names)
 
-    def __init__(self, rsr_file, decimate_16khz_to_1khz=True, verbose=False):
+    def __init__(self, rsr_file, decimate_16khz_to_1khz=True, 
+                 apply_bias_correction=True,verbose=False):
 
         if not isinstance(verbose, bool):
             print('WARNING (RSRReader): verbose input should be Boolean. '
@@ -180,12 +182,21 @@ class RSRReader(object):
                 + 'trying to use 1 or 0, then you should use the built-in '
                 + 'Python booleans instead')
             decimate_16khz_to_1khz = False
+            
+        if not isinstance(apply_bias_correction, bool):
+            print('WARNING (RSRReader.get_IQ): Expected Boolean input for '
+                + 'apply_bias_correction keyword. Set to True. '
+                + 'Ignoring input. If you\'re '
+                + 'trying to use 1 or 0, then you should use the built-in '
+                + 'Python booleans instead')
+            apply_bias_correction = True
+
 
         self.rsr_file = rsr_file
 
-        # Default argment for __set_IQ and cpu_count
+        # Default argment for __set_IQ 
         self.__decimate_16khz_to_1khz = decimate_16khz_to_1khz
-        self.__cpu_count = multiprocessing.cpu_count()
+        self.__apply_bias_correction = apply_bias_correction
 
         # Record information about the run
         self.__set_history()
@@ -193,6 +204,7 @@ class RSRReader(object):
         if verbose:
             print('\nExtracting information from RSR file...')
             print('\tReading header information...')
+            print('\tapply_bias_correction is',self.__apply_bias_correction)
         # Length of SFDU header, and a function to read the header in the
         # proper format
         struct_hdr_fmt = (self.__endian + self.__sfdu_format + self.__ha_format
@@ -209,7 +221,6 @@ class RSRReader(object):
         except FileNotFoundError as err:
             print('ERROR (RSRReader): File not found! {}'.format(err))
             sys.exit()
-
         # Unpack SFDU header
         sfdu_hdr = struct_unpack_hdr(sfdu_hdr_raw)
 
@@ -227,7 +238,7 @@ class RSRReader(object):
         sh_bits_per_sample = sfdu_hdr_dict['sh_bits_per_sample']
         bytes_per_sample = sh_bits_per_sample / 8
         data_length_per_sfdu = sfdu_hdr_dict['Data_length']
-        n_pts_per_sfdu = np.int(data_length_per_sfdu / (2 * bytes_per_sample))
+        n_pts_per_sfdu = int(data_length_per_sfdu / (2 * bytes_per_sample))
 
         # Set fgain for threshold optical depth calculation
         self.fxgain_px_no = sfdu_hdr_dict['sh_fgain_px_no']
@@ -239,6 +250,8 @@ class RSRReader(object):
         dt = 1.0 / sh_sample_rate_hz
         end_spm_of_rsr = sh_sfdu_seconds + n_pts_per_sfdu * n_sfdu * dt
         n_pts = round((end_spm_of_rsr - sh_sfdu_seconds) / dt)
+        
+        # set SPM - this is a surprisingly time-consuming step
         spm_vals = float(sh_sfdu_seconds) + dt * np.arange(n_pts)
 
         # Set RSR header attributes
@@ -251,6 +264,7 @@ class RSRReader(object):
             self.ul_dsn = 'DSS-'+str(sfdu_hdr_dict['sh_ul_dss_id'])
         self.band = chr(sfdu_hdr_dict['sh_dl_band'][0])
         self.ul_band = chr(sfdu_hdr_dict['sh_ulband'][0])
+
         # correct header info if not accurate
         if self.year > 2011 :
             self.track_mode = 2
@@ -269,7 +283,6 @@ class RSRReader(object):
         self.__n_pts_per_sfdu = n_pts_per_sfdu
         self.__n_sfdu = n_sfdu
 
-
         self.__set_IQ(verbose=verbose)
 
         # Set rev info for file creation
@@ -283,7 +296,6 @@ class RSRReader(object):
             print('\t\tDSN:\t\t\t' + str(self.dsn))
             print('\t\tBand:\t\t\t' + str(self.band))
             print('\t\tSampling rate in kHz:\t' + str(self.sample_rate_khz))
-
 
     def __set_sfdu_unpack(self, spm_range):
         """
@@ -311,9 +323,14 @@ class RSRReader(object):
             end_sfdu = self.__n_sfdu
 
         # Format in which to read rest of RSR file one SFDU at a time
-        data_format = (self.__data_header_format
-            + np.int(self.__n_pts_per_sfdu) * 'hh')
 
+        if self.__apply_bias_correction:
+            format_string = 'HH' # unsigned short
+        else:
+            format_string = 'hh' # signed short
+        data_format = (self.__data_header_format
+            + int(self.__n_pts_per_sfdu) * format_string)
+        
         # Format to read RSR file in
         rsr_fmt = (self.__endian + self.__sfdu_format + self.__ha_format
             + self.__ph_format + self.__sh_format + data_format)
@@ -404,7 +421,7 @@ class RSRReader(object):
 
         # Arrays to contain sets of frequency polynomials
         rfif_lo_array = np.zeros(self.__end_sfdu - self.__start_sfdu + 1)
-        ddc_lo_array = np.zeros(self.__end_sfdu - self.__start_sfdu + 1)
+        ddc_lo_array  = np.zeros(self.__end_sfdu - self.__start_sfdu + 1)
         freq_poly1_array = np.zeros(self.__end_sfdu - self.__start_sfdu + 1)
         freq_poly2_array = np.zeros(self.__end_sfdu - self.__start_sfdu + 1)
         freq_poly3_array = np.zeros(self.__end_sfdu - self.__start_sfdu + 1)
@@ -495,27 +512,13 @@ class RSRReader(object):
         spm_range = [min(spm_vals), max(spm_vals)]
         self.__set_sfdu_unpack(spm_range)
 
-        # Reduce SPM array to match the I and Q arrays to be made
-        spm_vals = self.spm_vals[self.__n_pts_per_sfdu * self.__start_sfdu:
-            self.__n_pts_per_sfdu * (self.__end_sfdu + 1)]
+# read the data in one round, without parsing out to different CPUs
+# since multiprocessing fails with newer versions of Python
 
-        # Multiprocessing to retrieve data from RSR file
-        results = []
-        queues = [Queue() for i in range(self.__cpu_count)]
-        n_loops = self.__end_sfdu - self.__start_sfdu + 1
-        n_per_core = int(np.floor(n_loops / self.__cpu_count))
-        loop_args = [(i * n_per_core, (i + 1) * n_per_core, n_loops,
-            queues[i]) for i in range(self.__cpu_count)]
-        loop_args[-1] = ((self.__cpu_count - 1) * n_per_core,
-            self.__end_sfdu + 1, n_loops, queues[-1])
-        jobs = [Process(target=self.__loop, args=(a)) for a in loop_args]
-        for j in jobs:
-            j.start()
-        for q in queues:
-            results.append(q.get())
-        for j in jobs:
-            j.join()
-        IQ_m = np.hstack(results)
+        apply_bias_correction = self.__apply_bias_correction
+        i_start = 0
+        i_end = self.__end_sfdu + 1
+        IQ_m = self.__loop(i_start,i_end,apply_bias_correction=apply_bias_correction)
 
         # Decimate 16kHz file to 1kHz spacing if specified
         if decimate_16khz_to_1khz & (self.sample_rate_khz == 16):
@@ -536,49 +539,82 @@ class RSRReader(object):
 
         self.spm_vals = spm_vals
         self.IQ_m = IQ_m
-
-    def __loop(self, i_start, i_end, n_loops, queue=0):
+        
+    def __loop(self,i_start, i_end,apply_bias_correction=True):
         """
         Purpose:
-            Function to perform loop for multiprocessing
+            Function to perform loop without multiprocessing
 
         Arguments:
             :i_start (*int*):
                 SFDU number to start indexing at
             :i_end (*int*):
                 SFDU number to stop indexing at
-            :n_loops (*int*):
-                Number of loops that this for loop will go through
-                for each processor
-            :queue (*object*):
-                multiprocessing.Queue instance
         """
 
-        I_array = np.zeros(len(range(i_start, i_end)) * self.__n_pts_per_sfdu)
-        Q_array = np.zeros(len(range(i_start, i_end)) * self.__n_pts_per_sfdu)
-        i_iter = 0
-        for i_sfdu in range(i_start, i_end):
-            sfdu = self.__rsr_struct[i_sfdu * self.__sfdu_len:
-                i_sfdu * self.__sfdu_len + self.__sfdu_len]
+        if apply_bias_correction:
+            I_raw_array = np.zeros(len(range(i_start, i_end)) * self.__n_pts_per_sfdu,dtype=np.ushort)
+            Q_raw_array = np.zeros(len(range(i_start, i_end)) * self.__n_pts_per_sfdu,dtype=np.ushort)
+            i_iter = 0
+            for i_sfdu in range(i_start, i_end):
+                sfdu = self.__rsr_struct[i_sfdu * self.__sfdu_len:
+                    i_sfdu * self.__sfdu_len + self.__sfdu_len]
 
-            # If EOF is reached
-            if len(sfdu) == 0:
-                break
+                # If EOF is reached
+                if len(sfdu) == 0:
+                    break
 
-            # Unpack SFDU into readable format
-            s = self.__sfdu_unpack(sfdu)
-            s_dict = dict(zip(self.__field_names, s))
+                # Unpack SFDU into readable format
+                s = self.__sfdu_unpack(sfdu)
+                s_dict = dict(zip(self.__field_names, s))
 
-            I_array[i_iter * self.__n_pts_per_sfdu:
-                (i_iter + 1) * self.__n_pts_per_sfdu] = (
-                s[-2 * self.__n_pts_per_sfdu + 1::2])
-            Q_array[i_iter * self.__n_pts_per_sfdu:
-                (i_iter + 1) * self.__n_pts_per_sfdu] = (
-                s[-2 * self.__n_pts_per_sfdu::2])
+                I_raw_array[i_iter * self.__n_pts_per_sfdu:
+                    (i_iter + 1) * self.__n_pts_per_sfdu] = (
+                    s[-2 * self.__n_pts_per_sfdu + 1::2])
+                Q_raw_array[i_iter * self.__n_pts_per_sfdu:
+                    (i_iter + 1) * self.__n_pts_per_sfdu] = (
+                    s[-2 * self.__n_pts_per_sfdu::2])
+                
+                i_iter += 1
 
-            i_iter += 1
+        # apply twos-complement to unsigned shorts - assume RSR data are 16-bit
+            I_array = I_raw_array.astype(float)
+            Q_array = Q_raw_array.astype(float)
+            L = np.where(I_array > 2**15)
+            I_array[L] -= 2**16
+            L = np.where(Q_array > 2**15)
+            Q_array[L] -= 2**16
 
-        queue.put(I_array + 1j * Q_array)
+            IQm =  ((I_array*2)+1) + 1j * ((Q_array*2)+1) 
+                       
+        # apply_bias_correction = False:
+        else:
+            I_array = np.zeros(len(range(i_start, i_end)) * self.__n_pts_per_sfdu)
+            Q_array = np.zeros(len(range(i_start, i_end)) * self.__n_pts_per_sfdu)
+            i_iter = 0
+            for i_sfdu in range(i_start, i_end):
+                sfdu = self.__rsr_struct[i_sfdu * self.__sfdu_len:
+                    i_sfdu * self.__sfdu_len + self.__sfdu_len]
+
+                # If EOF is reached
+                if len(sfdu) == 0:
+                    break
+
+                # Unpack SFDU into readable format
+                s = self.__sfdu_unpack(sfdu)
+                s_dict = dict(zip(self.__field_names, s))
+
+                I_array[i_iter * self.__n_pts_per_sfdu:
+                    (i_iter + 1) * self.__n_pts_per_sfdu] = (
+                    s[-2 * self.__n_pts_per_sfdu + 1::2])
+                Q_array[i_iter * self.__n_pts_per_sfdu:
+                    (i_iter + 1) * self.__n_pts_per_sfdu] = (
+                    s[-2 * self.__n_pts_per_sfdu::2])
+                i_iter += 1
+
+            IQm =  I_array + 1j * Q_array
+                       
+        return IQm
 
     def __set_history(self):
         """
@@ -591,10 +627,14 @@ class RSRReader(object):
             'decimate_16khz_to_1khz': self.__decimate_16khz_to_1khz}
 
         self.history = write_history_dict(input_var_dict, input_kw_dict,
-                __file__)
+               __file__)
 
     def __set_rev_info(self):
         self.rev_info = get_rev_info(self)
 """
 Revisions:
+    2023 March 27 - rfrench@wellesley.edu
+        Remove multiprocessing, which failed with Python3.6 and later
+        add apply_bias_correction keyword, tested against Dick Simpson's
+        Fortran code.
 """

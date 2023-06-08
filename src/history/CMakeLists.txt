@@ -1,0 +1,1 @@
+target_sources(librssringoccs PRIVATE rss_ringoccs_date_to_rev.c)

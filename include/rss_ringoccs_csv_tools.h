@@ -1,9 +1,9 @@
 /******************************************************************************
- *                                 LICENSE                                    *
+ *                                  LICENSE                                   *
  ******************************************************************************
  *  This file is part of rss_ringoccs.                                        *
  *                                                                            *
- *  rss_ringoccs is free software: you can redistribute it and/or modify it   *
+ *  rss_ringoccs is free software: you can redistribute it and/or modify      *
  *  it under the terms of the GNU General Public License as published by      *
  *  the Free Software Foundation, either version 3 of the License, or         *
  *  (at your option) any later version.                                       *
@@ -16,31 +16,27 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
- *                         rss_ringoccs_csv_tools                             *
- ******************************************************************************
  *  Purpose:                                                                  *
  *      Provide tools for extracting data from the .TAB files on the NASA PDS.*
- ******************************************************************************
- *                            A NOTE ON COMMENTS                              *
- ******************************************************************************
- *  It is anticipated that many users of this code will have experience in    *
- *  either Python or IDL, but not C. Many comments are left to explain as     *
- *  much as possible. Vagueness or unclear code should be reported to:        *
- *  https://github.com/NASA-Planetary-Science/rss_ringoccs/issues             *
  ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
  *  Date:       December 30, 2020                                             *
  ******************************************************************************/
 
 /*  Include guard to prevent including this file twice.                       */
-#ifndef __RSS_RINGOCCS_CSV_TOOLS_H__
-#define __RSS_RINGOCCS_CSV_TOOLS_H__
+#ifndef RSS_RINGOCCS_CSV_TOOLS_H
+#define RSS_RINGOCCS_CSV_TOOLS_H
 
 /*  Boolean data types defined here.                                          */
-#include <rss_ringoccs/include/rss_ringoccs_bool.h>
+#include <libtmpl/include/tmpl_bool.h>
+
+#include "librssringoccs_exports.h"
+
+/*  size_t typedef is given here.                                             */
+#include <stdlib.h>
 
 /*  Data structure for the GEO.TAB files on the PDS.                          */
-typedef struct rssringoccs_GeoCSV {
+typedef struct rssringoccs_GeoCSV_Def {
     double *t_oet_spm_vals;
     double *t_ret_spm_vals;
     double *t_set_spm_vals;
@@ -60,13 +56,13 @@ typedef struct rssringoccs_GeoCSV {
     double *vy_kms_vals;
     double *vz_kms_vals;
     double *obs_spacecract_lat_deg_vals;
-    unsigned long n_elements;
-    rssringoccs_Bool error_occurred;
+    size_t n_elements;
+    tmpl_Bool error_occurred;
     char *error_message;
 } rssringoccs_GeoCSV;
 
 /*  Data structure for the DLP.TAB files on the PDS.                          */
-typedef struct rssringoccs_DLPCSV {
+typedef struct rssringoccs_DLPCSV_Def {
     double *rho_km_vals;
     double *rho_corr_pole_km_vals;
     double *rho_corr_timing_km_vals;
@@ -80,24 +76,24 @@ typedef struct rssringoccs_DLPCSV {
     double *t_ret_spm_vals;
     double *t_set_spm_vals;
     double *B_deg_vals;
-    unsigned long n_elements;
-    rssringoccs_Bool error_occurred;
+    size_t n_elements;
+    tmpl_Bool error_occurred;
     char *error_message;
 } rssringoccs_DLPCSV;
 
 /*  Data structure for the CAL.TAB files on the PDS.                          */
-typedef struct rssringoccs_CalCSV {
+typedef struct rssringoccs_CalCSV_Def {
     double *t_oet_spm_vals;
     double *f_sky_pred_vals;
     double *f_sky_resid_fit_vals;
     double *p_free_vals;
-    unsigned long n_elements;
-    rssringoccs_Bool error_occurred;
+    size_t n_elements;
+    tmpl_Bool error_occurred;
     char *error_message;
 } rssringoccs_CalCSV;
 
 /*  Data structure for the TAU.TAB files on the PDS.                          */
-typedef struct rssringoccs_TauCSV {
+typedef struct rssringoccs_TauCSV_Def {
     double *rho_km_vals;
     double *rho_corr_pole_km_vals;
     double *rho_corr_timing_km_vals;
@@ -111,22 +107,20 @@ typedef struct rssringoccs_TauCSV {
     double *t_ret_spm_vals;
     double *t_set_spm_vals;
     double *B_deg_vals;
-    unsigned long n_elements;
-    rssringoccs_Bool error_occurred;
+    size_t n_elements;
+    tmpl_Bool error_occurred;
     char *error_message;
 } rssringoccs_TauCSV;
 
 /*  Data structure that contains all of the data from all four CSV formats    *
  *  interpolated so that the values are a function of radius, not time.       */
-typedef struct rssringoccs_CSVData {
+typedef struct rssringoccs_CSVData_Def {
     double *B_rad_vals;
     double *D_km_vals;
     double *f_sky_hz_vals;
     double *p_norm_vals;
     double *raw_tau_vals;
-    double *power_vals;
     double *phase_rad_vals;
-    double *phase_vals;
     double *phi_rad_vals;
     double *phi_rl_rad_vals;
     double *raw_tau_threshold_vals;
@@ -141,43 +135,46 @@ typedef struct rssringoccs_CSVData {
     double *t_ret_spm_vals;
     double *t_set_spm_vals;
     double *tau_rho;
+    double *tau_phase;
     double *tau_power;
     double *tau_vals;
-    unsigned long n_elements;
-    rssringoccs_Bool error_occurred;
+    size_t n_elements;
+    tmpl_Bool error_occurred;
     char *error_message;
 } rssringoccs_CSVData;
 
-extern rssringoccs_GeoCSV *
-rssringoccs_Get_Geo(const char *filename, rssringoccs_Bool use_deprecated);
+RSS_RINGOCCS_EXPORT extern rssringoccs_GeoCSV *
+rssringoccs_Get_Geo(const char *filename, tmpl_Bool use_deprecated);
 
-extern void rssringoccs_Destroy_GeoCSV_Members(rssringoccs_GeoCSV *geo);
-extern void rssringoccs_Destroy_GeoCSV(rssringoccs_GeoCSV **geo);
+RSS_RINGOCCS_EXPORT extern void rssringoccs_Destroy_GeoCSV_Members(rssringoccs_GeoCSV *geo);
+RSS_RINGOCCS_EXPORT extern void rssringoccs_Destroy_GeoCSV(rssringoccs_GeoCSV **geo);
 
-extern rssringoccs_DLPCSV *
-rssringoccs_Get_DLP(const char *filename, rssringoccs_Bool use_deprecated);
+RSS_RINGOCCS_EXPORT extern rssringoccs_DLPCSV *
+rssringoccs_Get_DLP(const char *filename, tmpl_Bool use_deprecated);
 
-extern void rssringoccs_Destroy_DLPCSV_Members(rssringoccs_DLPCSV *dlp);
-extern void rssringoccs_Destroy_DLPCSV(rssringoccs_DLPCSV **dlp);
+RSS_RINGOCCS_EXPORT extern void rssringoccs_Destroy_DLPCSV_Members(rssringoccs_DLPCSV *dlp);
+RSS_RINGOCCS_EXPORT extern void rssringoccs_Destroy_DLPCSV(rssringoccs_DLPCSV **dlp);
 
-extern rssringoccs_CalCSV *rssringoccs_Get_Cal(const char *filename);
-extern void rssringoccs_Destroy_CalCSV_Members(rssringoccs_CalCSV *cal);
-extern void rssringoccs_Destroy_CalCSV(rssringoccs_CalCSV **cal);
+RSS_RINGOCCS_EXPORT extern rssringoccs_CalCSV *rssringoccs_Get_Cal(const char *filename);
+RSS_RINGOCCS_EXPORT extern void rssringoccs_Destroy_CalCSV_Members(rssringoccs_CalCSV *cal);
+RSS_RINGOCCS_EXPORT extern void rssringoccs_Destroy_CalCSV(rssringoccs_CalCSV **cal);
 
-extern rssringoccs_TauCSV *
-rssringoccs_Get_Tau(const char *filename, rssringoccs_Bool use_deprecated);
+RSS_RINGOCCS_EXPORT extern rssringoccs_TauCSV *
+rssringoccs_Get_Tau(const char *filename, tmpl_Bool use_deprecated);
 
-extern void rssringoccs_Destroy_TauCSV_Members(rssringoccs_TauCSV *dlp);
-extern void rssringoccs_Destroy_TauCSV(rssringoccs_TauCSV **dlp);
+RSS_RINGOCCS_EXPORT extern void rssringoccs_Destroy_TauCSV_Members(rssringoccs_TauCSV *dlp);
+RSS_RINGOCCS_EXPORT extern void rssringoccs_Destroy_TauCSV(rssringoccs_TauCSV **dlp);
 
-extern rssringoccs_CSVData *
+RSS_RINGOCCS_EXPORT extern rssringoccs_CSVData *
 rssringoccs_Extract_CSV_Data(const char *geo,
                              const char *cal,
                              const char *dlp,
                              const char *tau,
-                             rssringoccs_Bool use_deprecated);
+                             tmpl_Bool use_deprecated);
 
-extern void rssringoccs_Destroy_CSV_Members(rssringoccs_CSVData *csv);
+RSS_RINGOCCS_EXPORT extern void rssringoccs_Destroy_CSV_Members(rssringoccs_CSVData *csv);
+
+RSS_RINGOCCS_EXPORT extern void rssringoccs_Destroy_CSV(rssringoccs_CSVData **csv);
 
 #endif
 /*  End of include guard.                                                     */

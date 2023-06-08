@@ -89,11 +89,11 @@
         ..  http://mathworld.wolfram.com/Erf.html
 """
 
+from crssringoccs import *
 from . import tools
 from . import rsr_reader
 from . import occgeo
 from . import calibration
-from . import diffrec
 from . import scatter
 
 """

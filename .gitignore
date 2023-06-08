@@ -4,7 +4,6 @@
 *.rst
 *.bat
 *.so
-Makefile
 kernels/
 output/
 data/
@@ -13,3 +12,5 @@ __pycache__
 *~
 *.ppm
 *.o
+.idea/
+CMakeUserPresets.json

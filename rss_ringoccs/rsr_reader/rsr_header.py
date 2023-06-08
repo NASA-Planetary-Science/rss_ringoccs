@@ -13,7 +13,6 @@ Arguments:
 import numpy as np
 import os
 import struct
-import sys
 
 
 __endian = '>'
@@ -68,25 +67,41 @@ __sh_field_names = [
     'sh_fgain_if_bandwidth',
     'sh_frov_flag',
     'sh_attenuation',
-    'sh_adc_rms', 'sh_adc_peak',
-    'sh_year', 'sh_doy', 'sh_seconds',
+    'sh_adc_rms',
+    'sh_adc_peak',
+    'sh_year',
+    'sh_doy',
+    'sh_seconds',
     'sh_bits_per_sample',
     'sh_data_error',
     'sh_sample_rate',
     'sh_ddc_lo',
-    'sh_rfif_lo', 'sh_sfdu_year', 'sh_sfdu_doy', 'sh_sfdu_seconds',
-    'sh_predicts_time_shift', 'sh_predicts_freq_override',
-    'sh_predicts_freq_rate', 'sh_predicts_freq_offset',
+    'sh_rfif_lo',
+    'sh_sfdu_year',
+    'sh_sfdu_doy',
+    'sh_sfdu_seconds',
+    'sh_predicts_time_shift',
+    'sh_predicts_freq_override',
+    'sh_predicts_freq_rate',
+    'sh_predicts_freq_offset',
     'sh_sub_channel_freq',
-    'sh_rf_freq_point_1', 'sh_rf_freq_point_2', 'sh_rf_freq_point_3',
-    'sh_schan_freq_point_1', 'sh_schan_freq_point_2',
+    'sh_rf_freq_point_1',
+    'sh_rf_freq_point_2',
+    'sh_rf_freq_point_3',
+    'sh_schan_freq_point_1',
+    'sh_schan_freq_point_2',
     'sh_schan_freq_point_3',
-    'sh_schan_freq_poly_coef_1', 'sh_schan_freq_poly_coef_2',
+    'sh_schan_freq_poly_coef_1',
+    'sh_schan_freq_poly_coef_2',
     'sh_schan_freq_poly_coef_3',
     'sh_schan_accum_phase',
-    'sh_schan_phase_poly_coef_1', 'sh_schan_phase_poly_coef_2',
-    'sh_schan_phase_poly_coef_3', 'sh_schan_phase_poly_coef_4',
-    'sh_reserved2a', 'sh_reserved2b']
+    'sh_schan_phase_poly_coef_1',
+    'sh_schan_phase_poly_coef_2',
+    'sh_schan_phase_poly_coef_3',
+    'sh_schan_phase_poly_coef_4',
+    'sh_reserved2a',
+    'sh_reserved2b'
+]
 __sh_format = 'hh' + 'BBh' + 'hBB' + 'BBcBHccBBbBBBBBHHIBBHHHHH' + 22 * 'd'
 
 # Data
@@ -120,8 +135,9 @@ def rsr_header(rsr_file):
         with open(rsr_file, 'rb') as f:
             sfdu_hdr_raw = f.read(struct_hdr_len)
     except FileNotFoundError as err:
-        print('ERROR (rsr_header): File not found! {}', format(err))
-        sys.exit()
+        raise FileNotFoundError(
+            'ERROR (rsr_header): File not found! {}', format(err)
+        )
 
     # Unpack SFDU header
     sfdu_hdr = struct_unpack_hdr(sfdu_hdr_raw)
@@ -144,11 +160,15 @@ def rsr_header(rsr_file):
     n_pts = round((end_spm_of_rsr - sh_sfdu_seconds) / dt)
     spm_vals = float(sh_sfdu_seconds) + dt * np.arange(n_pts)
 
-    out_dict = {'spm_vals': spm_vals, 'doy': sfdu_hdr_dict['sh_doy'],
+    out_dict = {
+        'spm_vals': spm_vals,
+        'doy': sfdu_hdr_dict['sh_doy'],
         'year': sfdu_hdr_dict['sh_year'],
         'dsn': 'DSS-' + str(sfdu_hdr_dict['sh_dss_id']),
         'band': sfdu_hdr_dict['sh_dl_band'],
-        'sample_rate_khz': sfdu_hdr_dict['sh_sample_rate']}
+        'sample_rate_khz':
+        sfdu_hdr_dict['sh_sample_rate']
+    }
 
     if out_dict['year'] == 0:
         out_dict['year'] = sfdu_hdr_dict['sh_sfdu_year']

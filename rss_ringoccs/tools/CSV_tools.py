@@ -507,64 +507,6 @@ class ExtractCSVData(object):
                 """ % (fname, errmess)
             )
 
-        error_check.check_is_real(self.rho_corr_timing_km_vals,
-                                  "rho_corr_timing_km_vals", fname)
-        error_check.check_is_real(self.raw_tau_threshold_vals,
-                                  "raw_tau_threshold_vals", fname)
-        error_check.check_is_real(self.rho_corr_pole_km_vals,
-                                  "rho_corr_pole_km_vals", fname)
-        error_check.check_is_real(self.rho_dot_kms_vals,
-                                  "rho_dot_kms_vals",fname)
-        error_check.check_is_real(self.phi_rl_rad_vals,
-                                  "phi_rl_rad_vals", fname)
-        error_check.check_is_real(self.t_oet_spm_vals, "t_oet_spm_vals", fname)
-        error_check.check_is_real(self.t_ret_spm_vals, "t_ret_spm_vals", fname)
-        error_check.check_is_real(self.t_set_spm_vals, "t_set_spm_vals", fname)
-        error_check.check_is_real(self.phase_rad_vals, "phase_rad_vals", fname)
-        error_check.check_is_real(self.f_sky_hz_vals, "f_sky_hz_vals", fname)
-        error_check.check_is_real(self.raw_tau_vals, "raw_tau_vals", fname)
-        error_check.check_is_real(self.phi_rad_vals, "phi_rad_vals", fname)
-        error_check.check_is_real(self.rho_km_vals, "rho_km_vals", fname)
-        error_check.check_is_real(self.B_rad_vals, "B_rad_vals", fname)
-        error_check.check_is_real(self.D_km_vals, "D_km_vals", fname)
-        error_check.check_is_real(geo_rho, "geo_rho", fname)
-
-        error_check.check_positive(self.t_oet_spm_vals, "t_oet_spm_vals", fname)
-        error_check.check_positive(self.t_ret_spm_vals, "t_ret_spm_vals", fname)
-        error_check.check_positive(self.t_set_spm_vals, "t_set_spm_vals", fname)
-        error_check.check_positive(self.f_sky_hz_vals, "f_sky_hz_vals", fname)
-        error_check.check_positive(self.rho_km_vals, "rho_km_vals", fname)
-        error_check.check_positive(self.D_km_vals, "D_km_vals", fname)
-        error_check.check_positive(geo_rho, "geo_rho", fname)
-
-        error_check.check_two_pi(self.phi_rl_rad_vals, "phi_rl_rad_vals",
-                                 fname, deg=False)
-        error_check.check_two_pi(self.phase_rad_vals, "phase_rad_vals",
-                                 fname, deg=False)
-        error_check.check_two_pi(self.phi_rad_vals, "phi_rad_vals",
-                                 fname, deg=False)
-        error_check.check_two_pi(self.B_rad_vals, "B_rad_vals",
-                                 fname, deg=False)
-
-        error_check.check_lengths(self.t_set_spm_vals, self.rho_km_vals,
-                                  "t_set_spm_vals", "rho_km_vals", fname)
-        error_check.check_lengths(self.t_ret_spm_vals, self.rho_km_vals,
-                                  "t_ret_spm_vals", "rho_km_vals", fname)
-        error_check.check_lengths(self.t_oet_spm_vals, self.rho_km_vals,
-                                  "t_oet_spm_vals", "rho_km_vals", fname)
-        error_check.check_lengths(self.phase_rad_vals, self.rho_km_vals,
-                                  "phase_rad_vals", "rho_km_vals", fname)
-        error_check.check_lengths(self.phi_rad_vals, self.rho_km_vals,
-                                  "phi_rad_vals", "rho_km_vals", fname)
-        error_check.check_lengths(self.raw_tau_vals, self.rho_km_vals,
-                                  "raw_tau_vals", "rho_km_vals", fname)
-        error_check.check_lengths(self.B_rad_vals, self.rho_km_vals,
-                                  "B_rad_vals", "rho_km_vals", fname)
-        error_check.check_lengths(self.D_km_vals, geo_rho,
-                                  "D_km_vals", "rho_km_vals", fname)
-        error_check.check_lengths(self.rho_dot_kms_vals, geo_rho,
-                                  "D_km_vals", "rho_km_vals", fname)
-
         if verbose:
             print("\tComputing Variables...")
 
@@ -573,7 +515,7 @@ class ExtractCSVData(object):
 
         drdt = dr/dt
 
-        if (np.min(drdt) < 0.0) and (np.max (drdt) > 0.0):
+        if (np.min(drdt) < 0.0) and (np.max(drdt) > 0.0):
            raise ValueError(
                 """
                     \r\tError Encountered: rss_ringoccs
@@ -598,7 +540,11 @@ class ExtractCSVData(object):
             # The rev is ingress, so flip GEO variables.
             self.rho_dot_kms_vals = np.abs(self.rho_dot_kms_vals[::-1])
             self.D_km_vals = self.D_km_vals[::-1]
+            rx_geo = rx_geo[::-1]
+            ry_geo = ry_geo[::-1]
+            rz_geo = rz_geo[::-1]
             geo_rho = geo_rho[::-1]
+            self.f_sky_hz_vals = self.f_sky_hz_vals[::-1]
         elif (drdt > 0.0).all():
             pass
         else:
@@ -696,8 +642,7 @@ class ExtractCSVData(object):
                     \r\tthe ExtractCSVData class. This can still be used with
                     \r\tDiffractionCorrection if write_file=False is set.\n
                     \r\tTo correct, re-run within pipeline directory.\n
-                    \rOriginal error message:\n%s
-                """ % err
+                """
             )
 
             self.rev_info = None

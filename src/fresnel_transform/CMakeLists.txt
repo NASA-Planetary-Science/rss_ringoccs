@@ -1,0 +1,29 @@
+target_sources(
+    librssringoccs
+    PRIVATE rss_ringoccs_fresnel_transform.c
+            rss_ringoccs_fresnel_transform_cubic_interpolation.c
+            rss_ringoccs_fresnel_transform_cubic_interpolation_norm.c
+            rss_ringoccs_fresnel_transform_ellipse.c
+            rss_ringoccs_fresnel_transform_ellipse_norm.c
+            rss_ringoccs_fresnel_transform_legendre_even.c
+            rss_ringoccs_fresnel_transform_legendre_even_norm.c
+            rss_ringoccs_fresnel_transform_legendre_odd.c
+            rss_ringoccs_fresnel_transform_legendre_odd_norm.c
+            rss_ringoccs_fresnel_transform_newton.c
+            rss_ringoccs_fresnel_transform_newton_D.c
+            rss_ringoccs_fresnel_transform_newton_D_norm.c
+            rss_ringoccs_fresnel_transform_newton_D_old.c
+            rss_ringoccs_fresnel_transform_newton_D_old_norm.c
+            rss_ringoccs_fresnel_transform_newton_dD_dphi.c
+            rss_ringoccs_fresnel_transform_newton_dD_dphi_norm.c
+            rss_ringoccs_fresnel_transform_newton_norm.c
+            rss_ringoccs_fresnel_transform_norm.c
+            rss_ringoccs_fresnel_transform_perturbed_newton.c
+            rss_ringoccs_fresnel_transform_perturbed_newton_norm.c
+            rss_ringoccs_fresnel_transform_quadratic_interpolation.c
+            rss_ringoccs_fresnel_transform_quadratic_interpolation_norm.c
+            rss_ringoccs_fresnel_transform_quartic_D_interpolation.c
+            rss_ringoccs_fresnel_transform_quartic_D_interpolation_norm.c
+            rss_ringoccs_fresnel_transform_quartic_interpolation.c
+            rss_ringoccs_fresnel_transform_quartic_interpolation_norm.c
+)

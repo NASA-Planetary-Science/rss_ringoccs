@@ -53,20 +53,17 @@ def calc_B_deg(et_vals, spacecraft, dsn, nhat_p, kernels=None,
 
     B_deg_vals = np.zeros(npts)
 
+    # Compute spacecraft to dsn position vector
+    targ = dsn
+    abcorr = 'CN'
+    obs = spacecraft
+
     for n in range(npts):
-        # Compute spacecraft to dsn position vector
-        targ = dsn
-        et = et_vals[n]
-        #ref = 'J2000'
-        abcorr = 'CN'
-        obs = spacecraft
-        starg, ltime = spice.spkpos(targ, et, ref, abcorr, obs)
+        starg, ltime = spice.spkpos(targ, et_vals[n], ref, abcorr, obs)
 
         # Calculate B as the complement to the angle made by the
         #   planet pole vector and the spacecraft to DSN vector
-        v1 = starg
-        v2 = nhat_p
-        B_rad = (np.pi/2.) - spice.vsep(v1, v2)
+        B_rad = (np.pi/2.) - spice.vsep(starg, nhat_p)
 
         B_deg_vals[n] = B_rad * spice.dpr()
 
@@ -154,7 +151,6 @@ def calc_beta(B_deg, phi_ora_deg):
     B_eff_deg = calc_B_eff_deg(B_deg, phi_ora_deg)
     beta = 1./(np.tan(B_eff_deg))
     return np.asarray(beta)
-
 
 def calc_elevation_deg(et_vals, target, obs, kernels=None):
     """
@@ -796,8 +792,6 @@ def rad_converge(t_ret_spm_vals, rho_km_vals, phi_rl_deg_vals, semimajor,
         n += 1
 
     return radius_new
-
-
 
 def get_freespace(t_ret_spm_vals, year, doy, rho_km_vals,
         phi_rl_deg_vals, t_oet_spm_vals, atmos_occ_spm_vals, kernels=None,

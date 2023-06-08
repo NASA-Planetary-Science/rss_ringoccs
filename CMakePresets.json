@@ -1,0 +1,128 @@
+{
+  "version": 5,
+  "configurePresets": [
+    {
+      "name": "ci-base",
+      "hidden": true,
+      "binaryDir": "${sourceParentDir}/build/rss_ringoccs",
+      "installDir": "${sourceParentDir}/install/rss_ringoccs",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "ci-linux",
+      "inherits": "ci-base",
+      "generator": "Ninja",
+      "condition": {
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux",
+        "type": "equals"
+      }
+    },
+    {
+      "name": "ci-macos",
+      "inherits": "ci-base",
+      "generator": "Xcode",
+      "condition": {
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin",
+        "type": "equals"
+      },
+      "toolchainFile": "cmake/toolchains/gcc-macos.cmake"
+    },
+    {
+      "name": "ci-windows",
+      "inherits": "ci-base",
+      "architecture": {
+        "strategy": "set",
+        "value": "x64"
+      },
+      "condition": {
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows",
+        "type": "equals"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "ci-base",
+      "hidden": true,
+      "configuration": "Release",
+      "targets": [
+        "install"
+      ]
+    },
+    {
+      "name": "ci-linux",
+      "configurePreset": "ci-linux",
+      "inherits": "ci-base",
+      "condition": {
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux",
+        "type": "equals"
+      }
+    },
+    {
+      "name": "ci-macos",
+      "configurePreset": "ci-macos",
+      "inherits": "ci-base",
+      "condition": {
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin",
+        "type": "equals"
+      }
+    },
+    {
+      "name": "ci-windows",
+      "configurePreset": "ci-windows",
+      "inherits": "ci-base",
+      "condition": {
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows",
+        "type": "equals"
+      }
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "ci-base",
+      "hidden": true,
+      "configuration": "Release"
+    },
+    {
+      "name": "ci-linux",
+      "configurePreset": "ci-linux",
+      "inherits": "ci-base",
+      "condition": {
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux",
+        "type": "equals"
+      }
+    },
+    {
+      "name": "ci-macos",
+      "configurePreset": "ci-macos",
+      "inherits": "ci-base",
+      "condition": {
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin",
+        "type": "equals"
+      }
+    },
+    {
+      "name": "ci-windows",
+      "configurePreset": "ci-windows",
+      "inherits": "ci-base",
+      "environment": {
+        "PATH": "${sourceParentDir}/install/libtmpl/bin${pathListSep}$penv{PATH}"
+      },
+      "condition": {
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows",
+        "type": "equals"
+      }
+    }
+  ]
+}

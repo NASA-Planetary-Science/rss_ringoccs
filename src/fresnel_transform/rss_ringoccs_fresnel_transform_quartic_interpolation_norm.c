@@ -1,4 +1,6 @@
 
+/*  TODO: Fix. Still acts weird for some occultations. */
+
 #include <math.h>
 #include <libtmpl/include/tmpl_math.h>
 #include <libtmpl/include/tmpl_complex.h>
@@ -19,7 +21,7 @@ rssringoccs_Fresnel_Transform_Quartic_Norm(rssringoccs_TAUObj *tau,
     size_t i, ind[4], offset;
 
     /*  The Fresnel kernel and ring azimuth angle.                            */
-    double C[4], abs_norm, real_norm;
+    double C[4], rho[4], abs_norm, real_norm;
     double psi_n[4], psi_half_diff, psi_full_diff;
     double psi, phi;
     double psi_half_mean, psi_full_mean, cos_psi, sin_psi, x;
@@ -29,10 +31,27 @@ rssringoccs_Fresnel_Transform_Quartic_Norm(rssringoccs_TAUObj *tau,
     const double rcpr_w_sq = rcpr_w * rcpr_w;
     const double rcpr_w_cb = rcpr_w_sq * rcpr_w;
     const double rcpr_w_qr = rcpr_w_sq * rcpr_w_sq;
+
+    const size_t quarter = (n_pts - 1) >> 2U;
     ind[0] = 0U;
-    ind[1] = (n_pts - 1U) >> 2U;
-    ind[2] = 3U*ind[1];
     ind[3] = n_pts - 1U;
+
+    /*  Special case when the input is one more than a multiple of 4.         */
+    if ((n_pts - 1U) & 3U)
+    {
+        ind[1] = 1U + quarter;
+        ind[2] = 1U + 3U*quarter;
+    }
+    else
+    {
+        ind[1] = quarter;
+        ind[2] = 3U*quarter;
+    }
+
+    rho[0] = tau->rho_km_vals[center] - 0.5*tau->w_km_vals[center];
+    rho[1] = tau->rho_km_vals[center] - 0.25*tau->w_km_vals[center];
+    rho[2] = tau->rho_km_vals[center] + 0.25*tau->w_km_vals[center];
+    rho[3] = tau->rho_km_vals[center] + 0.5*tau->w_km_vals[center];
 
     /*  Initialize T_out and norm to zero so we can loop over later.          */
     tau->T_out[center] = tmpl_CDouble_Zero;
@@ -48,7 +67,7 @@ rssringoccs_Fresnel_Transform_Quartic_Norm(rssringoccs_TAUObj *tau,
         phi = tmpl_Double_Stationary_Cyl_Fresnel_Psi_Newton(
             tau->k_vals[center],                /* Wavenumber. */
             tau->rho_km_vals[center],           /* Dummy radius. */
-            tau->rho_km_vals[offset + ind[i]],  /* Ring radius. */
+            rho[i],                             /* Ring radius. */
             tau->phi_rad_vals[offset + ind[i]], /* Dummy azimuthal angle. */
             tau->phi_rad_vals[offset + ind[i]], /* Ring azimuthal angle. */
             tau->B_rad_vals[center],            /* Ring opening angle. */
@@ -60,7 +79,7 @@ rssringoccs_Fresnel_Transform_Quartic_Norm(rssringoccs_TAUObj *tau,
         psi_n[i] = tmpl_Double_Cyl_Fresnel_Psi(
             tau->k_vals[center],                /* Wavenumber. */
             tau->rho_km_vals[center],           /* Dummy radius. */
-            tau->rho_km_vals[offset + ind[i]],  /* Ring radius. */
+            rho[i],                             /* Ring radius. */
             phi,                                /* Stationary azimuth. */
             tau->phi_rad_vals[offset + ind[i]], /* Ring azimuth. */
             tau->B_rad_vals[center],            /* Ring opening. */

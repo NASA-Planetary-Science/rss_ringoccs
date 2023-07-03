@@ -187,22 +187,12 @@ rssringoccs_Extract_CSV_Data(const char *geo,
         return csv_data;
     }
 
-    cal_f_sky_hz_vals = malloc(sizeof(*cal_f_sky_hz_vals)*cal_dat->n_elements);
+    /*  Steal the pointer to avoid a call to malloc. It is destroyed in the   *
+     *  end anyways, so no harm done.                                         */
+    cal_f_sky_hz_vals = cal_dat->f_sky_pred_vals;
 
-    if (cal_f_sky_hz_vals == NULL)
-    {
-        csv_data->error_occurred = tmpl_True;
-        csv_data->error_message = tmpl_strdup(
-            "Error Encountered: rss_ringoccs\n"
-            "\trssringoccs_Extract_CSV_Data\n\n"
-            "malloc returned NULL for cal_f_sky_hz_vals. Aborting.\n"
-        );
-        rssringoccs_Destroy_GeoCSV(&geo_dat);
-        rssringoccs_Destroy_DLPCSV(&dlp_dat);
-        rssringoccs_Destroy_CalCSV(&cal_dat);
-        return csv_data;
-    }
-
+    /*  The sky frequency is the difference of the predicted and residual     *
+     *  frequencies. Loop through the arrays and compute the difference.      */
     for (n = 0UL; n < cal_dat->n_elements; ++n)
         cal_f_sky_hz_vals[n] = cal_dat->f_sky_pred_vals[n] - 
                                cal_dat->f_sky_resid_fit_vals[n];
@@ -387,6 +377,13 @@ rssringoccs_Extract_CSV_Data(const char *geo,
                                 geo_dat->n_elements,
                                 csv_data->rho_km_vals,
                                 csv_data->rz_km_vals,
+                                csv_data->n_elements);
+
+    tmpl_Double_Sorted_Interp1d(cal_dat->t_oet_spm_vals,
+                                cal_f_sky_hz_vals,
+                                cal_dat->n_elements,
+                                csv_data->t_oet_spm_vals,
+                                csv_data->f_sky_hz_vals,
                                 csv_data->n_elements);
 
     /*  Free the Geo, Cal, DLP, and TAU structs.                              */

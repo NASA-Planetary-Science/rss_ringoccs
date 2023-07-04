@@ -1,5 +1,5 @@
 /******************************************************************************
- *                                 LICENSE                                    *
+ *                                  LICENSE                                   *
  ******************************************************************************
  *  This file is part of rss_ringoccs.                                        *
  *                                                                            *
@@ -16,37 +16,45 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
-#include "crss_ringoccs.h"
 
-void ExtractCSVData_dealloc(PyCSVObj *self)
+/*  NULL is defined here.                                                     */
+#include <stddef.h>
+
+/*  Booleans provided here.                                                   */
+#include <libtmpl/include/tmpl_bool.h>
+
+/*  tmpl_strdup function declared here.                                       */
+#include <libtmpl/include/tmpl_string.h>
+
+/*  Function prototype and typedefs for structs given here.                   */
+#include "../crssringoccs.h"
+
+void
+crssringoccs_Get_Py_Vars_From_Tau_Self(rssringoccs_TAUObj *tau,
+                                       PyDiffrecObj *self)
 {
-    Py_XDECREF(self->B_rad_vals);
-    Py_XDECREF(self->D_km_vals);
-    Py_XDECREF(self->f_sky_hz_vals);
-    Py_XDECREF(self->p_norm_vals);
-    Py_XDECREF(self->phase_rad_vals);
-    Py_XDECREF(self->phi_rad_vals);
-    Py_XDECREF(self->phi_rl_rad_vals);
-    Py_XDECREF(self->raw_tau_threshold_vals);
-    Py_XDECREF(self->rev_info);
-    Py_XDECREF(self->rho_corr_pole_km_vals);
-    Py_XDECREF(self->rho_corr_timing_km_vals);
-    Py_XDECREF(self->rho_dot_kms_vals);
-    Py_XDECREF(self->rho_km_vals);
-    Py_XDECREF(self->t_oet_spm_vals);
-    Py_XDECREF(self->t_ret_spm_vals);
-    Py_XDECREF(self->t_set_spm_vals);
-    Py_XDECREF(self->tau_vals);
-    Py_XDECREF(self->history);
-    Py_XDECREF(self->input_vars);
-    Py_XDECREF(self->input_kwds);
-    Py_XDECREF(self->rx_km_vals);
-    Py_XDECREF(self->ry_km_vals);
-    Py_XDECREF(self->rz_km_vals);
-    Py_XDECREF(self->tau_rho);
-    Py_XDECREF(self->tau_phase);
-    Py_XDECREF(self->tau_power);
-    Py_XDECREF(self->tau_vals);
-    Py_TYPE(self)->tp_free((PyObject *) self);
-}
+    if (tau == NULL)
+        return;
 
+    if (tau->error_occurred)
+        return;
+
+    if (self == NULL)
+    {
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_strdup(
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tcrssringoccs_Get_Py_Vars_From_Tau_Self\n\n"
+            "\rInput self is NULL. Aborting.n"
+        );
+        return;
+    }
+
+    tau->sigma    = self->sigma;
+    tau->bfac     = self->bfac;
+    tau->ecc      = self->ecc;
+    tau->peri     = self->peri;
+    tau->use_fwd  = self->use_fwd;
+    tau->use_norm = self->use_norm;
+    tau->verbose  = self->verbose;
+}

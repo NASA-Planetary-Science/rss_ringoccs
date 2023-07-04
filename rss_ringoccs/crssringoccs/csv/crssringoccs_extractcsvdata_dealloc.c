@@ -1,5 +1,5 @@
 /******************************************************************************
- *                                 LICENSE                                    *
+ *                                  LICENSE                                   *
  ******************************************************************************
  *  This file is part of rss_ringoccs.                                        *
  *                                                                            *
@@ -16,13 +16,37 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
-#include "crss_ringoccs.h"
+#include "../crssringoccs.h"
 
-/*  This function frees the memory allocated to a pointer by malloc when the  *
- *  corresponding variable is destroyed at the Python level. Without this you *
- *  will have serious memory leaks, so do not remove!                         */
-void capsule_cleanup(PyObject *capsule)
+void ExtractCSVData_dealloc(PyCSVObj *self)
 {
-    void *memory = PyCapsule_GetPointer(capsule, NULL);
-    free(memory);
+    Py_XDECREF(self->B_rad_vals);
+    Py_XDECREF(self->D_km_vals);
+    Py_XDECREF(self->f_sky_hz_vals);
+    Py_XDECREF(self->p_norm_vals);
+    Py_XDECREF(self->phase_rad_vals);
+    Py_XDECREF(self->phi_rad_vals);
+    Py_XDECREF(self->phi_rl_rad_vals);
+    Py_XDECREF(self->raw_tau_threshold_vals);
+    Py_XDECREF(self->rev_info);
+    Py_XDECREF(self->rho_corr_pole_km_vals);
+    Py_XDECREF(self->rho_corr_timing_km_vals);
+    Py_XDECREF(self->rho_dot_kms_vals);
+    Py_XDECREF(self->rho_km_vals);
+    Py_XDECREF(self->t_oet_spm_vals);
+    Py_XDECREF(self->t_ret_spm_vals);
+    Py_XDECREF(self->t_set_spm_vals);
+    Py_XDECREF(self->tau_vals);
+    Py_XDECREF(self->history);
+    Py_XDECREF(self->input_vars);
+    Py_XDECREF(self->input_kwds);
+    Py_XDECREF(self->rx_km_vals);
+    Py_XDECREF(self->ry_km_vals);
+    Py_XDECREF(self->rz_km_vals);
+    Py_XDECREF(self->tau_rho);
+    Py_XDECREF(self->tau_phase);
+    Py_XDECREF(self->tau_power);
+    Py_XDECREF(self->tau_vals);
+    Py_TYPE(self)->tp_free((PyObject *) self);
 }
+

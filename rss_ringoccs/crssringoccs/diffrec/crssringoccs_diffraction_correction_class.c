@@ -1,5 +1,5 @@
 /******************************************************************************
- *                                 LICENSE                                    *
+ *                                  LICENSE                                   *
  ******************************************************************************
  *  This file is part of rss_ringoccs.                                        *
  *                                                                            *
@@ -16,7 +16,7 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
-#include "crss_ringoccs.h"
+#include "../crssringoccs.h"
 
 static PyMemberDef diffrec_members[] = {
     {
@@ -229,4 +229,3 @@ PyTypeObject DiffrecType = {
     .tp_members = diffrec_members,
     .tp_methods = DiffractionCorrection_methods,
 };
-

@@ -1,5 +1,5 @@
 /******************************************************************************
- *                                 LICENSE                                    *
+ *                                  LICENSE                                   *
  ******************************************************************************
  *  This file is part of rss_ringoccs.                                        *
  *                                                                            *
@@ -16,7 +16,18 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
-#include "crss_ringoccs.h"
+
+/*  NULL and free are defined here.                                           */
+#include <stdlib.h>
+
+/*  Booleans provided here.                                                   */
+#include <libtmpl/include/tmpl_bool.h>
+
+/*  tmpl_strdup function declared here.                                       */
+#include <libtmpl/include/tmpl_string.h>
+
+/*  Function prototype and typedefs for structs given here.                   */
+#include "../crssringoccs.h"
 
 /*  The init function for the dirrection correction class. This is the        *
  *  equivalent of the __init__ function defined in a normal python class.     */
@@ -183,7 +194,7 @@ int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
     if (self->verbose)
         puts("\tDiffraction Correction: Converting Py DLP to C DLP...");
 
-    dlp = rssringoccs_Py_DLP_to_C_DLP(DLPInst);
+    dlp = crssringoccs_Py_DLP_to_C_DLP(DLPInst);
 
     if (dlp == NULL)
     {
@@ -228,7 +239,7 @@ int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
     if (self->verbose)
         puts("\tDiffraction Correction: Passing Py variables to tau...");
 
-    rssringoccs_Get_Py_Vars_From_Tau_Self(tau, self);
+    crssringoccs_Get_Py_Vars_From_Tau_Self(tau, self);
     rssringoccs_Get_Py_Perturb(tau, perturb);
     rssringoccs_Get_Py_Range(tau, rngreq);
     rssringoccs_Tau_Set_WType(self->wtype, tau);
@@ -242,7 +253,7 @@ int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
     if (self->verbose)
         puts("\tDiffraction Correction: Converting C tau to Py tau...");
 
-    rssringoccs_C_Tau_to_Py_Tau(self, tau);
+    crssringoccs_C_Tau_to_Py_Tau(self, tau);
 
     if (tau == NULL)
     {

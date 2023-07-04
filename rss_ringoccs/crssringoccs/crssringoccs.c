@@ -16,7 +16,7 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
-#include "crss_ringoccs.h"
+#include "crssringoccs.h"
 
 /*  Numpy header files.                                                       */
 #include <numpy/ndarraytypes.h>
@@ -69,4 +69,3 @@ PyMODINIT_FUNC PyInit_crssringoccs(void)
     import_array();
     return m;
 }
-

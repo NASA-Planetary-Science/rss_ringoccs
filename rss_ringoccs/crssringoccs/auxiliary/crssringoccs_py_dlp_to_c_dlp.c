@@ -1,5 +1,5 @@
 /******************************************************************************
- *                                 LICENSE                                    *
+ *                                  LICENSE                                   *
  ******************************************************************************
  *  This file is part of rss_ringoccs.                                        *
  *                                                                            *
@@ -16,14 +16,24 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
-#include "crss_ringoccs.h"
+
+/*  NULL is defined here.                                                     */
+#include <stddef.h>
+
+/*  Booleans provided here.                                                   */
+#include <libtmpl/include/tmpl_bool.h>
+
+/*  tmpl_strdup function declared here.                                       */
+#include <libtmpl/include/tmpl_string.h>
+
+/*  Function prototype and typedefs for structs given here.                   */
+#include "../crssringoccs.h"
 
 /*  Numpy header files.                                                       */
 #include <numpy/ndarraytypes.h>
 #include <numpy/ufuncobject.h>
 
-rssringoccs_DLPObj *
-rssringoccs_Py_DLP_to_C_DLP(PyObject *py_dlp)
+rssringoccs_DLPObj *crssringoccs_Py_DLP_to_C_DLP(PyObject *py_dlp)
 {
     PyObject *tmp;
     PyObject *arr;
@@ -47,7 +57,7 @@ rssringoccs_Py_DLP_to_C_DLP(PyObject *py_dlp)
         dlp->error_occurred = tmpl_True;
         dlp->error_message = tmpl_strdup(
             "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tdiffrec.DiffractionCorrection\n\n"
+            "\r\tcrssringoccs_Py_DLP_to_C_DLP\n\n"
             "\rInput DLP Instance is NULL.\n"
         );
         return dlp;

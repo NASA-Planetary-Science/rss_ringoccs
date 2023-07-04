@@ -1,5 +1,5 @@
 /******************************************************************************
- *                                 LICENSE                                    *
+ *                                  LICENSE                                   *
  ******************************************************************************
  *  This file is part of rss_ringoccs.                                        *
  *                                                                            *
@@ -16,7 +16,7 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
-#include "crss_ringoccs.h"
+#include "../crssringoccs.h"
 
 /*  Deallocating function for the DiffractionCorrection class.                */
 void Diffrec_dealloc(PyDiffrecObj *self)
@@ -54,4 +54,3 @@ void Diffrec_dealloc(PyDiffrecObj *self)
     Py_XDECREF(self->rz_km_vals);
     Py_TYPE(self)->tp_free((PyObject *) self);
 }
-

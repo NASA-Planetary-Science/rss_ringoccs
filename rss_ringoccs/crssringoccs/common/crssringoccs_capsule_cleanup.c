@@ -1,5 +1,5 @@
 /******************************************************************************
- *                                 LICENSE                                    *
+ *                                  LICENSE                                   *
  ******************************************************************************
  *  This file is part of rss_ringoccs.                                        *
  *                                                                            *
@@ -16,35 +16,24 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
-#include "crss_ringoccs.h"
 
-void
-rssringoccs_Get_Py_Vars_From_Tau_Self(rssringoccs_TAUObj *tau,
-                                      PyDiffrecObj *self)
+/*  NULL and free are given here.                                             */
+#include <stdlib.h>
+
+/*  Booleans provided here.                                                   */
+#include <libtmpl/include/tmpl_bool.h>
+
+/*  tmpl_strdup function declared here.                                       */
+#include <libtmpl/include/tmpl_string.h>
+
+/*  Function prototype and typedefs for structs given here.                   */
+#include "../crssringoccs.h"
+
+/*  This function frees the memory allocated to a pointer by malloc when the  *
+ *  corresponding variable is destroyed at the Python level. Without this you *
+ *  will have serious memory leaks, so do not remove!                         */
+void crssringoccs_capsule_cleanup(PyObject *capsule)
 {
-    if (tau == NULL)
-        return;
-
-    if (tau->error_occurred)
-        return;
-
-    if (self == NULL)
-    {
-        tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_strdup(
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_C_Tau_to_Py_Tau\n\n"
-            "\rInput self is NULL. Aborting.n"
-        );
-        return;
-    }
-
-    tau->sigma    = self->sigma;
-    tau->bfac     = self->bfac;
-    tau->ecc      = self->ecc;
-    tau->peri     = self->peri;
-    tau->use_fwd  = self->use_fwd;
-    tau->use_norm = self->use_norm;
-    tau->verbose  = self->verbose;
+    void *memory = PyCapsule_GetPointer(capsule, NULL);
+    free(memory);
 }
-

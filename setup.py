@@ -25,11 +25,19 @@ if (platform.system() == "Darwin"):
 
 srclist = []
 
-for file in os.listdir("rss_ringoccs/crssringoccs"):
+for file in os.listdir("rss_ringoccs/crssringoccs/auxiliary/"):
+    srclist.append("rss_ringoccs/crssringoccs/auxiliary/%s" % file)
 
-    # Only add .c files.
-    if (file[-1] == "c"):
-        srclist.append("rss_ringoccs/crssringoccs/%s" % file)
+for file in os.listdir("rss_ringoccs/crssringoccs/common/"):
+    srclist.append("rss_ringoccs/crssringoccs/common/%s" % file)
+
+for file in os.listdir("rss_ringoccs/crssringoccs/csv/"):
+    srclist.append("rss_ringoccs/crssringoccs/csv/%s" % file)
+
+for file in os.listdir("rss_ringoccs/crssringoccs/diffrec/"):
+    srclist.append("rss_ringoccs/crssringoccs/diffrec/%s" % file)
+
+srclist.append("rss_ringoccs/crssringoccs/crssringoccs.c")
 
 setup(
     name = "rss_ringoccs",

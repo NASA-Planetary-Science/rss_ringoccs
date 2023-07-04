@@ -25,7 +25,7 @@
  *  Author:     Ryan Maguire, Wellesley College                               *
  *  Date:       June 22, 2019                                                 *
  ******************************************************************************/
-#include "crss_ringoccs.h"
+#include "../crssringoccs.h"
 
 static PyMemberDef extractcsvdata_members[] = {
     {
@@ -159,4 +159,3 @@ PyTypeObject ExtractCSVDataType = {
     .tp_members = extractcsvdata_members,
     .tp_methods = ExtractCSVData_methods,
 };
-

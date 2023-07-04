@@ -1,5 +1,5 @@
 /******************************************************************************
- *                                 LICENSE                                    *
+ *                                  LICENSE                                   *
  ******************************************************************************
  *  This file is part of rss_ringoccs.                                        *
  *                                                                            *
@@ -16,7 +16,15 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
-#include "crss_ringoccs.h"
+
+/*  NULL is defined here.                                                     */
+#include <stddef.h>
+
+/*  Booleans provided here.                                                   */
+#include <libtmpl/include/tmpl_bool.h>
+
+/*  Function prototype and typedefs for structs given here.                   */
+#include "../crssringoccs.h"
 
 /*  The init function for the dirrection correction class. This is the        *
  *  equivalent of the __init__ function defined in a normal python class.     */
@@ -104,7 +112,7 @@ int ExtractCSVData_init(PyCSVObj *self, PyObject *args, PyObject *kwds)
         return -1;
     }
 
-    rssringoccs_C_CSV_to_Py_CSV(self, csv);
+    crssringoccs_C_CSV_to_Py_CSV(self, csv);
     csv_tmp = Py_BuildValue(
         "{s:s,s:s,s:s}",
         "geo", geo_str,

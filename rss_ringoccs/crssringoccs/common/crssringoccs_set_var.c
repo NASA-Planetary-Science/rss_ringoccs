@@ -1,5 +1,5 @@
 /******************************************************************************
- *                                 LICENSE                                    *
+ *                                  LICENSE                                   *
  ******************************************************************************
  *  This file is part of rss_ringoccs.                                        *
  *                                                                            *
@@ -25,19 +25,22 @@
  *  Author:     Ryan Maguire, Wellesley College                               *
  *  Date:       June 22, 2019                                                 *
  ******************************************************************************/
-#include "crss_ringoccs.h"
+#include "../crssringoccs.h"
 
 /*  Numpy header files.                                                       */
 #include <numpy/ndarraytypes.h>
 #include <numpy/ufuncobject.h>
 
-void set_var(PyObject **py_ptr, double **ptr, unsigned long int len)
+/*  Creates a numpy array from a double array.                                */
+void crssringoccs_set_var(PyObject **py_ptr, double *ptr, size_t len)
 {
     PyObject *arr, *tmp, *capsule;
-    long pylength = (long)len;
+    npy_intp pylength = (npy_intp)len;
 
+    /*  Numpy's _import_array function must be called before using the API.   */
     if (PyArray_API == NULL)
     {
+        /*  If the import fails we can't safe use the tools. Abort.           */
         if (_import_array() < 0)
         {
             PyErr_Print();
@@ -47,16 +50,28 @@ void set_var(PyObject **py_ptr, double **ptr, unsigned long int len)
         }
     }
 
-    if (*ptr != NULL)
+    /*  If the pointer has memory allocated to it, create a numpy array.      */
+    if (ptr != NULL)
     {
-        arr = PyArray_SimpleNewFromData(1, &pylength, NPY_DOUBLE, *ptr);
-        capsule = PyCapsule_New((void *) (*ptr), NULL, capsule_cleanup);
+        /*  Numpy API function for creating numpy arrays from existing data.  */
+        arr = PyArray_SimpleNewFromData(1, &pylength, NPY_DOUBLE, ptr);
+
+        /*  Create a capsule for this pointer so it is free'd when the numpy  *
+         *  array is destroyed. Avoids memory leaks for the end-user.         */
+        capsule = PyCapsule_New(ptr, NULL, crssringoccs_capsule_cleanup);
+
+        /*  Link the array to the capsule. "del arr" in Python now free's the *
+         *  memory allocated for the C pointer.                               */
         PyArray_SetBaseObject((PyArrayObject *)arr, capsule);
+
+        /*  Reference counting incrementing for Python.                       */
         tmp = *py_ptr;
         Py_INCREF(arr);
         *py_ptr = arr;
         Py_XDECREF(tmp);
     }
+
+    /*  Otherwise set the variable to a "None" object.                        */
     else
     {
         tmp = *py_ptr;
@@ -65,4 +80,4 @@ void set_var(PyObject **py_ptr, double **ptr, unsigned long int len)
         Py_XDECREF(tmp);
     }
 }
-
+/*  End of crssringoccs_set_var.                                              */

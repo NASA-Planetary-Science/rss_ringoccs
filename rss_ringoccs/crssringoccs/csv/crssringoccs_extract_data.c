@@ -1,5 +1,5 @@
 /******************************************************************************
- *                                 LICENSE                                    *
+ *                                  LICENSE                                   *
  ******************************************************************************
  *  This file is part of rss_ringoccs.                                        *
  *                                                                            *
@@ -16,7 +16,15 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
-#include "crss_ringoccs.h"
+
+/*  malloc and NULL are defined here.                                         */
+#include <stdlib.h>
+
+/*  Booleans provided here.                                                   */
+#include <libtmpl/include/tmpl_bool.h>
+
+/*  Function prototype and typedefs for structs given here.                   */
+#include "../crssringoccs.h"
 
 /*  Numpy header files.                                                       */
 #include <numpy/ndarraytypes.h>
@@ -132,4 +140,3 @@ extract_data(rssringoccs_DLPObj *dlp, PyObject *py_dlp, const char *var_name)
     /*  If every passed, set ptr to point to the data inside the array arr.   */
     return (double *)PyArray_DATA((PyArrayObject *)arr);
 }
-

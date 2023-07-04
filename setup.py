@@ -31,11 +31,11 @@ for file in os.listdir("rss_ringoccs/crssringoccs/auxiliary/"):
 for file in os.listdir("rss_ringoccs/crssringoccs/common/"):
     srclist.append("rss_ringoccs/crssringoccs/common/%s" % file)
 
-for file in os.listdir("rss_ringoccs/crssringoccs/csv/"):
-    srclist.append("rss_ringoccs/crssringoccs/csv/%s" % file)
+for file in os.listdir("rss_ringoccs/crssringoccs/extract_csv_data/"):
+    srclist.append("rss_ringoccs/crssringoccs/extract_csv_data/%s" % file)
 
-for file in os.listdir("rss_ringoccs/crssringoccs/diffrec/"):
-    srclist.append("rss_ringoccs/crssringoccs/diffrec/%s" % file)
+for file in os.listdir("rss_ringoccs/crssringoccs/diffraction_correction/"):
+    srclist.append("rss_ringoccs/crssringoccs/diffraction_correction/%s" % file)
 
 srclist.append("rss_ringoccs/crssringoccs/crssringoccs.c")
 

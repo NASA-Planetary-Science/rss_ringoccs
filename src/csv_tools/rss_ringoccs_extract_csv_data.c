@@ -16,14 +16,22 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
+ *  Purpose:                                                                  *
+ *      Extracts the data from CSV files to mimic a DLP object. This object   *
+ *      can then be used for diffraction reconstruction.                      *
+ ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
  *  Date:       December 31, 2020                                             *
  ******************************************************************************/
 
+/*  Booleans, interpolation, math routines, and more.                         */
 #include <libtmpl/include/tmpl.h>
+
+/*  Prototype for the function and typedefs for structs.                      */
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
+
+/*  free and malloc are found here.                                           */
 #include <stdlib.h>
-#include <math.h>
 
 /*  Macro function for safely allocating memory for the variables. This       *
  *  checks if malloc fails, and does not simply assume it passed.             */
@@ -45,6 +53,7 @@
         return csv_data;                                                       \
     }
 
+/*  Extracts all data from CSV (.TAB) files and creates a DLP-like struct.    */
 rssringoccs_CSVData *
 rssringoccs_Extract_CSV_Data(const char *geo,
                              const char *cal,
@@ -62,10 +71,13 @@ rssringoccs_Extract_CSV_Data(const char *geo,
     rssringoccs_CSVData *csv_data;
 
     /*  Variable for indexing.                                                */
-    unsigned long int n;
+    size_t n;
+
+    /*  Constant for zero of type "size_t".                                   */
+    const size_t zero = (size_t)0;
 
     /*  Variables for checking the geometry of the occultation.               */
-    double min_dr_dt, max_dr_dt, temp, raw_mu;
+    double min_dr_dt, max_dr_dt, temp, raw_mu, log_power;
     double *cal_f_sky_hz_vals;
 
     /*  Allocate memory for the CSV object.                                   */
@@ -96,9 +108,8 @@ rssringoccs_Extract_CSV_Data(const char *geo,
     csv_data->t_oet_spm_vals = NULL;
     csv_data->t_ret_spm_vals = NULL;
     csv_data->t_set_spm_vals = NULL;
-    csv_data->tau_rho = NULL;
-    csv_data->tau_power = NULL;
     csv_data->tau_phase = NULL;
+    csv_data->tau_power = NULL;
     csv_data->tau_vals = NULL;
     csv_data->error_message = NULL;
     csv_data->error_occurred = tmpl_False;
@@ -111,20 +122,24 @@ rssringoccs_Extract_CSV_Data(const char *geo,
     {
         csv_data->error_occurred = tmpl_True;
         csv_data->error_message = tmpl_strdup(
-            "Error Encountered: rss_ringoccs\n"
+            "\nError Encountered: rss_ringoccs\n"
             "\trssringoccs_Extract_CSV_Data\n\n"
             "rssringoccs_Get_Geo returned NULL for geo_dat. Aborting.\n"
         );
         return csv_data;
     }
-    else if (geo_dat->n_elements == 0U)
+
+    /*  If the CSV is empty there is something wrong with the geo string.     */
+    else if (geo_dat->n_elements == zero)
     {
         csv_data->error_occurred = tmpl_True;
         csv_data->error_message = tmpl_strdup(
-            "Error Encountered: rss_ringoccs\n"
+            "\nError Encountered: rss_ringoccs\n"
             "\trssringoccs_Extract_CSV_Data\n\n"
             "rssringoccs_Get_Geo returned an empty struct. Aborting.\n"
         );
+
+        /*  The Geo object was allocated memory. Free before aborting.        */
         rssringoccs_Destroy_GeoCSV(&geo_dat);
         return csv_data;
     }
@@ -137,21 +152,28 @@ rssringoccs_Extract_CSV_Data(const char *geo,
     {
         csv_data->error_occurred = tmpl_True;
         csv_data->error_message = tmpl_strdup(
-            "Error Encountered: rss_ringoccs\n"
+            "\nError Encountered: rss_ringoccs\n"
             "\trssringoccs_Extract_CSV_Data\n\n"
             "rssringoccs_Get_DLP returned NULL for dlp_dat. Aborting.\n"
         );
+
+        /*  The Geo object was successfully created. Destroy it to avoid      *
+         *  memory leaks and then abort the computation.                      */
         rssringoccs_Destroy_GeoCSV(&geo_dat);
         return csv_data;
     }
-    else if (dlp_dat->n_elements == 0U)
+
+    /*  Similar check as geo, make sure the DLP object isn't empty.           */
+    else if (dlp_dat->n_elements == zero)
     {
         csv_data->error_occurred = tmpl_True;
         csv_data->error_message = tmpl_strdup(
-            "Error Encountered: rss_ringoccs\n"
+            "\nError Encountered: rss_ringoccs\n"
             "\trssringoccs_Extract_CSV_Data\n\n"
             "rssringoccs_Get_DLP returned an empty struct. Aborting.\n"
         );
+
+        /*  Both Geo and DLP have memory allocated to them. Free them.        */
         rssringoccs_Destroy_GeoCSV(&geo_dat);
         rssringoccs_Destroy_DLPCSV(&dlp_dat);
         return csv_data;
@@ -165,22 +187,29 @@ rssringoccs_Extract_CSV_Data(const char *geo,
     {
         csv_data->error_occurred = tmpl_True;
         csv_data->error_message = tmpl_strdup(
-            "Error Encountered: rss_ringoccs\n"
+            "\nError Encountered: rss_ringoccs\n"
             "\trssringoccs_Extract_CSV_Data\n\n"
             "rssringoccs_Get_Cal returned NULL for cal_dat. Aborting.\n"
         );
+
+        /*  Geo and DLP were successfully created. They need to be freed to   *
+         *  avoid memory leaks. Destroy both objects and then abort.          */
         rssringoccs_Destroy_GeoCSV(&geo_dat);
         rssringoccs_Destroy_DLPCSV(&dlp_dat);
         return csv_data;
     }
-    else if (cal_dat->n_elements == 0U)
+
+    /*  Ensure the created object isn't empty.                                */
+    else if (cal_dat->n_elements == zero)
     {
         csv_data->error_occurred = tmpl_True;
         csv_data->error_message = tmpl_strdup(
-            "Error Encountered: rss_ringoccs\n"
+            "\nError Encountered: rss_ringoccs\n"
             "\trssringoccs_Extract_CSV_Data\n\n"
             "rssringoccs_Get_Cal returned an empty struct. Aborting.\n"
         );
+
+        /*  Free the three CSV objects before aborting.                       */
         rssringoccs_Destroy_GeoCSV(&geo_dat);
         rssringoccs_Destroy_DLPCSV(&dlp_dat);
         rssringoccs_Destroy_CalCSV(&cal_dat);
@@ -193,9 +222,8 @@ rssringoccs_Extract_CSV_Data(const char *geo,
 
     /*  The sky frequency is the difference of the predicted and residual     *
      *  frequencies. Loop through the arrays and compute the difference.      */
-    for (n = 0UL; n < cal_dat->n_elements; ++n)
-        cal_f_sky_hz_vals[n] = cal_dat->f_sky_pred_vals[n] - 
-                               cal_dat->f_sky_resid_fit_vals[n];
+    for (n = zero; n < cal_dat->n_elements; ++n)
+        cal_f_sky_hz_vals[n] -= cal_dat->f_sky_resid_fit_vals[n];
 
     /*  Extract the data from the TAU.TAB file.                               */
     if (tau)
@@ -207,23 +235,30 @@ rssringoccs_Extract_CSV_Data(const char *geo,
         {
             csv_data->error_occurred = tmpl_True;
             csv_data->error_message = tmpl_strdup(
-                "Error Encountered: rss_ringoccs\n"
+                "\nError Encountered: rss_ringoccs\n"
                 "\trssringoccs_Extract_CSV_Data\n\n"
                 "rssringoccs_Get_Tau returned NULL for tau_dat. Aborting.\n"
             );
+
+            /*  Free all data before aborting.                                */
             rssringoccs_Destroy_GeoCSV(&geo_dat);
             rssringoccs_Destroy_DLPCSV(&dlp_dat);
             rssringoccs_Destroy_CalCSV(&cal_dat);
             return csv_data;
         }
-        else if (tau_dat->n_elements == 0U)
+
+        /*  Ensure the Tau object isn't empty.                                */
+        else if (tau_dat->n_elements == zero)
         {
             csv_data->error_occurred = tmpl_True;
             csv_data->error_message = tmpl_strdup(
-                "Error Encountered: rss_ringoccs\n"
+                "\nError Encountered: rss_ringoccs\n"
                 "\trssringoccs_Extract_CSV_Data\n\n"
                 "rssringoccs_Get_TAU returned an empty struct. Aborting.\n"
             );
+
+            /*  Geo, Cal, and DLP were successfully created, and Tau has      *
+             *  memory allocated. Free all memory to avoid leaks.             */
             rssringoccs_Destroy_GeoCSV(&geo_dat);
             rssringoccs_Destroy_DLPCSV(&dlp_dat);
             rssringoccs_Destroy_CalCSV(&cal_dat);
@@ -231,6 +266,10 @@ rssringoccs_Extract_CSV_Data(const char *geo,
             return csv_data;
         }
     }
+
+    /*  If Tau data is not to be extracted, avoid free'ing non-malloced       *
+     *  memory by setting this to NULL. The "destroy" function will not       *
+     *  attempt to free a NULL pointer.                                       */
     else
         tau_dat = NULL;
 
@@ -240,48 +279,77 @@ rssringoccs_Extract_CSV_Data(const char *geo,
 
     /*  The MALLOC_CSV_VAR macro contains an if-then statement with           *
      *  braces {} hence there is no need for a semi-colon at the end.         */
-    MALLOC_CSV_VAR(rho_km_vals)
-    MALLOC_CSV_VAR(raw_tau_vals)
+    MALLOC_CSV_VAR(B_rad_vals)
+    MALLOC_CSV_VAR(D_km_vals)
+    MALLOC_CSV_VAR(f_sky_hz_vals)
     MALLOC_CSV_VAR(p_norm_vals)
+    MALLOC_CSV_VAR(raw_tau_vals)
     MALLOC_CSV_VAR(phase_rad_vals)
     MALLOC_CSV_VAR(phi_rad_vals)
-    MALLOC_CSV_VAR(B_rad_vals)
-    MALLOC_CSV_VAR(t_oet_spm_vals)
-    MALLOC_CSV_VAR(t_ret_spm_vals)
-    MALLOC_CSV_VAR(t_set_spm_vals)
-    MALLOC_CSV_VAR(rho_corr_pole_km_vals)
-    MALLOC_CSV_VAR(rho_corr_timing_km_vals)
     MALLOC_CSV_VAR(phi_rl_rad_vals)
     MALLOC_CSV_VAR(raw_tau_threshold_vals)
-    MALLOC_CSV_VAR(f_sky_hz_vals)
-    MALLOC_CSV_VAR(D_km_vals)
+    MALLOC_CSV_VAR(rho_corr_pole_km_vals)
+    MALLOC_CSV_VAR(rho_corr_timing_km_vals)
     MALLOC_CSV_VAR(rho_dot_kms_vals)
+    MALLOC_CSV_VAR(rho_km_vals)
     MALLOC_CSV_VAR(rx_km_vals)
     MALLOC_CSV_VAR(ry_km_vals)
     MALLOC_CSV_VAR(rz_km_vals)
+    MALLOC_CSV_VAR(t_oet_spm_vals)
+    MALLOC_CSV_VAR(t_ret_spm_vals)
+    MALLOC_CSV_VAR(t_set_spm_vals)
 
-    /*  Extract the DLP variables and store them in the CSV struct.           */
-    for (n = 0U; n < csv_data->n_elements; ++n)
+    /*  If Tau data is to be extracted, reserve memory for the variables.     */
+    if (tau)
     {
-        csv_data->rho_km_vals[n] = dlp_dat->rho_km_vals[n];
-        csv_data->raw_tau_vals[n] = dlp_dat->raw_tau_vals[n];
-        csv_data->phase_rad_vals[n]
-            = tmpl_Deg_to_Rad*dlp_dat->phase_deg_vals[n];
-        csv_data->phi_rad_vals[n]
-            = tmpl_Deg_to_Rad*dlp_dat->phi_ora_deg_vals[n];
-        csv_data->B_rad_vals[n] = tmpl_Deg_to_Rad*dlp_dat->B_deg_vals[n];
-        csv_data->t_ret_spm_vals[n] = dlp_dat->t_ret_spm_vals[n];
-        csv_data->t_set_spm_vals[n] = dlp_dat->t_set_spm_vals[n];
-        csv_data->t_oet_spm_vals[n] = dlp_dat->t_oet_spm_vals[n];
-        csv_data->rho_corr_pole_km_vals[n] = dlp_dat->rho_corr_pole_km_vals[n];
-        csv_data->rho_corr_timing_km_vals[n]
-            = dlp_dat->rho_corr_timing_km_vals[n];
-        csv_data->phi_rl_rad_vals[n]
-            = tmpl_Deg_to_Rad*dlp_dat->phi_rl_deg_vals[n];
-        csv_data->raw_tau_threshold_vals[n]
-            = dlp_dat->raw_tau_threshold_vals[n];
-        raw_mu = sin(fabs(csv_data->B_rad_vals[n]));
-        csv_data->p_norm_vals[n] = exp(-csv_data->raw_tau_vals[n] / raw_mu);
+        MALLOC_CSV_VAR(tau_phase)
+        MALLOC_CSV_VAR(tau_power)
+        MALLOC_CSV_VAR(tau_vals)
+    }
+
+    /*  The references to these variables can be stolen to avoid copying.     */
+    csv_data->rho_km_vals = dlp_dat->rho_km_vals;
+    csv_data->raw_tau_vals = dlp_dat->raw_tau_vals;
+    csv_data->t_ret_spm_vals = dlp_dat->t_ret_spm_vals;
+    csv_data->t_set_spm_vals = dlp_dat->t_set_spm_vals;
+    csv_data->t_oet_spm_vals = dlp_dat->t_oet_spm_vals;
+    csv_data->rho_corr_pole_km_vals = dlp_dat->rho_corr_pole_km_vals;
+    csv_data->rho_corr_timing_km_vals = dlp_dat->rho_corr_timing_km_vals;
+    csv_data->raw_tau_threshold_vals = dlp_dat->raw_tau_threshold_vals;
+
+    /*  These variables will be converted to degrees to radians in a bit.     */
+    csv_data->phase_rad_vals = dlp_dat->phase_deg_vals;
+    csv_data->phi_rad_vals = dlp_dat->phi_ora_deg_vals;
+    csv_data->B_rad_vals = dlp_dat->B_deg_vals;
+    csv_data->phi_rl_rad_vals = dlp_dat->phi_rl_deg_vals;
+
+    /*  Angles need to be converted to radians.                               */
+    for (n = zero; n < csv_data->n_elements; ++n)
+    {
+        csv_data->phase_rad_vals[n] *= tmpl_Deg_to_Rad;
+        csv_data->phi_rad_vals[n] *= tmpl_Deg_to_Rad;
+        csv_data->B_rad_vals[n] *= tmpl_Deg_to_Rad;
+        csv_data->phi_rl_rad_vals[n] *= tmpl_Deg_to_Rad;
+    }
+
+    /*  The new TAB files have normalized power included.                     */
+    if (!use_deprecated)
+        csv_data->p_norm_vals = dlp_dat->p_norm_vals;
+
+    /*  Otherwise we need to compute the power from the optical depth.        */
+    else
+    {
+        /*  Loop through the elements of the DLP tau variable and compute the *
+         *  normalize diffracted power.                                       */
+        for (n = zero; n < csv_data->n_elements; ++n)
+        {
+            /*  tmpl_Double_Sind computes sine of an argument in degrees.     */
+            raw_mu = tmpl_Double_Sind(tmpl_Double_Abs(dlp_dat->B_deg_vals[n]));
+            log_power = -csv_data->raw_tau_vals[n] / raw_mu;
+
+            /*  Normalize diffracted power can be computed from optical depth.*/
+            csv_data->p_norm_vals[n] = tmpl_Double_Exp(log_power);
+        }
     }
 
     temp = (csv_data->rho_km_vals[1] - csv_data->rho_km_vals[0]) /
@@ -386,10 +454,40 @@ rssringoccs_Extract_CSV_Data(const char *geo,
                                 csv_data->f_sky_hz_vals,
                                 csv_data->n_elements);
 
-    /*  Free the Geo, Cal, DLP, and TAU structs.                              */
+    /*  Interpolate the Tau data if requested.                                */
+    if (tau)
+    {
+        tmpl_Double_Sorted_Interp1d(tau_dat->rho_km_vals,
+                                    tau_dat->power_vals,
+                                    tau_dat->n_elements,
+                                    csv_data->rho_km_vals,
+                                    csv_data->tau_power,
+                                    csv_data->n_elements);
+
+        tmpl_Double_Sorted_Interp1d(tau_dat->rho_km_vals,
+                                    tau_dat->phase_deg_vals,
+                                    tau_dat->n_elements,
+                                    csv_data->rho_km_vals,
+                                    csv_data->tau_phase,
+                                    csv_data->n_elements);
+
+        tmpl_Double_Sorted_Interp1d(tau_dat->rho_km_vals,
+                                    tau_dat->tau_vals,
+                                    tau_dat->n_elements,
+                                    csv_data->rho_km_vals,
+                                    csv_data->tau_vals,
+                                    csv_data->n_elements);
+    }
+
+    /*  Free the Geo, Cal, and TAU structs. The CSV struct stole several      *
+     *  pointers from the DLP struct, so do not destroy this.                 */
     rssringoccs_Destroy_GeoCSV(&geo_dat);
-    rssringoccs_Destroy_DLPCSV(&dlp_dat);
     rssringoccs_Destroy_CalCSV(&cal_dat);
     rssringoccs_Destroy_TauCSV(&tau_dat);
+
+    /*  The members of the DLP struct cannot be freed, the CSV struct has the *
+     *  same pointers. We can, however, free the pointer itself. We will not  *
+     *  lose references to its members since csv_data has these.              */
+    free(dlp_dat);
     return csv_data;
 }

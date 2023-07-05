@@ -86,7 +86,6 @@ typedef struct PyCSVObj_Def {
     PyObject_HEAD
     PyObject *B_rad_vals;
     PyObject *D_km_vals;
-    PyObject *tau_vals;
     PyObject *f_sky_hz_vals;
     PyObject *p_norm_vals;
     PyObject *phase_rad_vals;
@@ -107,9 +106,9 @@ typedef struct PyCSVObj_Def {
     PyObject *rx_km_vals;
     PyObject *ry_km_vals;
     PyObject *rz_km_vals;
-    PyObject *tau_rho;
     PyObject *tau_phase;
     PyObject *tau_power;
+    PyObject *tau_vals;
 } PyCSVObj;
 
 extern void crssringoccs_set_var(PyObject **py_ptr, double *ptr, size_t len);

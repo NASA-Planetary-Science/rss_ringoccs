@@ -43,7 +43,6 @@ void ExtractCSVData_dealloc(PyCSVObj *self)
     Py_XDECREF(self->rx_km_vals);
     Py_XDECREF(self->ry_km_vals);
     Py_XDECREF(self->rz_km_vals);
-    Py_XDECREF(self->tau_rho);
     Py_XDECREF(self->tau_phase);
     Py_XDECREF(self->tau_power);
     Py_XDECREF(self->tau_vals);

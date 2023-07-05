@@ -64,12 +64,14 @@ void crssringoccs_C_CSV_to_Py_CSV(PyCSVObj *py_csv, rssringoccs_CSVData *csv)
     SET_VAR(t_oet_spm_vals);
     SET_VAR(t_ret_spm_vals);
     SET_VAR(t_set_spm_vals);
-    SET_VAR(tau_vals);
     SET_VAR(rx_km_vals);
     SET_VAR(ry_km_vals);
     SET_VAR(rz_km_vals);
     SET_VAR(raw_tau_threshold_vals);
     SET_VAR(rho_corr_pole_km_vals);
     SET_VAR(rho_corr_timing_km_vals);
+    SET_VAR(tau_power);
+    SET_VAR(tau_phase);
+    SET_VAR(tau_vals);
 }
 /*  End of crssringoccs_C_CSV_to_Py_CSV.                                      */

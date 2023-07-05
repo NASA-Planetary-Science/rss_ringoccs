@@ -113,6 +113,14 @@ static PyMemberDef extractcsvdata_members[] = {
         "Optical depth"
     },
     {
+        "tau_power", T_OBJECT_EX, offsetof(PyCSVObj, tau_power), 0,
+        "Optical power"
+    },
+    {
+        "tau_phase", T_OBJECT_EX, offsetof(PyCSVObj, tau_phase), 0,
+        "Optical phase"
+    },
+    {
         "history", T_OBJECT_EX, offsetof(PyCSVObj, history), 0,
         "History of the tau instance"
     },

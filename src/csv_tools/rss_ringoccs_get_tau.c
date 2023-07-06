@@ -20,11 +20,19 @@
  *  Date:       December 31, 2020                                             *
  ******************************************************************************/
 
-#include <libtmpl/include/tmpl_string.h>
-#include <libtmpl/include/tmpl_bool.h>
+/*  Booleans, interpolation, math routines, and more.                         */
+#include <libtmpl/include/tmpl.h>
+
+/*  Typedefs for CSV structs and function prototype given here.               */
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
+
+/*  malloc and free are found here.                                           */
 #include <stdlib.h>
+
+/*  Functions for reading and writing files.                                  */
 #include <stdio.h>
+
+/*  strtok function provided here.                                            */
 #include <string.h>
 
 rssringoccs_TauCSV *rssringoccs_Get_Tau(const char *filename,

@@ -17,8 +17,7 @@
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
 
-#include <math.h>
-#include <libtmpl/include/tmpl_complex.h>
+#include <libtmpl/include/tmpl.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
 /******************************************************************************
@@ -92,8 +91,7 @@ rssringoccs_Fresnel_Transform(rssringoccs_TAUObj *tau, double *x_arr,
         x = x_arr[m]*rcpr_F2;
 
         /*  Use Euler's Theorem to compute exp(-ix). Scale by window function.*/
-        cos_x = cos(x);
-        sin_x = sin(x);
+        tmpl_Double_SinCos(x, &sin_x, &cos_x);
         arg = tmpl_CDouble_Rect(cos_x, -sin_x);
         exp_negative_ix = tmpl_CDouble_Multiply_Real(w_func[m], arg);
 

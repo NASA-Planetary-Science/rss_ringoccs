@@ -16,8 +16,7 @@ import spiceypy as spice
 import numpy as np
 from scipy.interpolate import interp1d
 
-def calc_B_deg(et_vals, spacecraft, dsn, nhat_p, kernels=None,
-        ref='J2000'):
+def calc_B_deg(et_vals, spacecraft, dsn, nhat_p, kernels=None, ref='J2000'):
     """
     This calculates ring opening angle, or the observed ring elevation,
     as the complement to the angle made by the planet pole vector and

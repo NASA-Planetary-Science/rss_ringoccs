@@ -17,10 +17,7 @@
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
 
-#include <math.h>
-#include <libtmpl/include/tmpl_math.h>
-#include <libtmpl/include/tmpl_complex.h>
-#include <libtmpl/include/tmpl_cyl_fresnel_optics.h>
+#include <libtmpl/include/tmpl.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
 void
@@ -33,7 +30,7 @@ rssringoccs_Fresnel_Transform_Ellipse_Norm(rssringoccs_TAUObj *tau,
     size_t m, offset;
 
     /*  The Fresnel kernel and the stationary ring azimuth angle.             */
-    double psi, phi, cos_psi, sin_psi, abs_norm, real_norm, D;
+    double psi, phi, abs_norm, real_norm, D;
     double ecc_factor, ecc_cos_factor, semi_major, rho;
     tmpl_ComplexDouble exp_psi, norm, integrand;
 
@@ -50,7 +47,7 @@ rssringoccs_Fresnel_Transform_Ellipse_Norm(rssringoccs_TAUObj *tau,
     for (m = 0; m < n_pts; ++m)
     {
         /*  Calculate the stationary value of psi with respect to phi.        */
-        ecc_cos_factor = 1.0 + tau->ecc * cos(tau->phi_rad_vals[center] - tau->peri);
+        ecc_cos_factor = 1.0 + tau->ecc * tmpl_Double_Cos(tau->phi_rad_vals[center] - tau->peri);
         semi_major     = tau->rho_km_vals[center] * ecc_cos_factor / ecc_factor;
 
         /*  Calculate the stationary value of psi with respect to phi.        */
@@ -78,7 +75,7 @@ rssringoccs_Fresnel_Transform_Ellipse_Norm(rssringoccs_TAUObj *tau,
             tau->rz_km_vals[center]
         );
 
-        ecc_cos_factor = 1.0 + tau->ecc * cos(phi - tau->peri);
+        ecc_cos_factor = 1.0 + tau->ecc * tmpl_Double_Cos(phi - tau->peri);
         rho = semi_major * ecc_factor / ecc_cos_factor;
 
         /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
@@ -92,9 +89,7 @@ rssringoccs_Fresnel_Transform_Ellipse_Norm(rssringoccs_TAUObj *tau,
             D
         );
 
-        cos_psi = w_func[m]*cos(psi);
-        sin_psi = w_func[m]*sin(psi);
-        exp_psi = tmpl_CDouble_Rect(cos_psi, -sin_psi);
+        exp_psi = tmpl_CDouble_Polar(w_func[m], -psi);
 
         /*  Compute the norm using a Riemann sum as well.                     */
         norm = tmpl_CDouble_Add(norm, exp_psi);

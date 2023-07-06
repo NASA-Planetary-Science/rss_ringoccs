@@ -1,6 +1,4 @@
-#include <math.h>
-#include <libtmpl/include/tmpl_complex.h>
-#include <libtmpl/include/tmpl_cyl_fresnel_optics.h>
+#include <libtmpl/include/tmpl.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
 void
@@ -14,7 +12,7 @@ rssringoccs_Fresnel_Transform_Cubic(rssringoccs_TAUObj *tau,
 
     /*  The Fresnel kernel and ring azimuth angle.                            */
     double C[3], factor, rcpr_w, rcpr_w_sq, psi_n[4], x;
-    double psi, phi, sin_psi, cos_psi;
+    double psi, phi;
     double psi_half_mean, psi_half_diff;
     double psi_full_mean, psi_full_diff;
     tmpl_ComplexDouble exp_psi, integrand;
@@ -78,9 +76,7 @@ rssringoccs_Fresnel_Transform_Cubic(rssringoccs_TAUObj *tau,
         psi = psi*x + C[0];
         psi = psi*x;
 
-        cos_psi = w_func[i]*cos(psi);
-        sin_psi = w_func[i]*sin(psi);
-        exp_psi = tmpl_CDouble_Rect(cos_psi, -sin_psi);
+        exp_psi = tmpl_CDouble_Polar(w_func[i], -psi);
         integrand = tmpl_CDouble_Multiply(exp_psi, tau->T_in[offset]);
         tau->T_out[center] = tmpl_CDouble_Add(tau->T_out[center], integrand);
         offset += 1;

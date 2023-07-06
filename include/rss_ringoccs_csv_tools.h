@@ -31,7 +31,7 @@
 #include <libtmpl/include/tmpl_bool.h>
 
 /*  size_t typedef is given here.                                             */
-#include <stdlib.h>
+#include <stddef.h>
 
 /*  Data structure for the GEO.TAB files on the PDS.                          */
 typedef struct rssringoccs_GeoCSV_Def {

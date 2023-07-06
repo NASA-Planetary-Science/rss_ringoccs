@@ -491,10 +491,6 @@ class ExtractCSVData(object):
             self.D_km_vals = np.array(geo_dat.D_km_vals)
             errmess = "rho_dot_kms_vals"
             self.rho_dot_kms_vals = np.array(geo_dat.rho_dot_kms_vals)
-            rx_geo = np.array(geo_dat.rx_km_vals)
-            ry_geo = np.array(geo_dat.ry_km_vals)
-            rz_geo = np.array(geo_dat.rz_km_vals)
-
             errmess = "cal_spm"
             cal_spm = np.array(cal_dat.spm_vals)
         except (ValueError, TypeError, NameError, AttributeError):
@@ -829,10 +825,13 @@ class GetUranusData(object):
             )
         elif (drdt < 0.0).all():
 
-            # The rev is ingress, so flip GEO variables.
-            self.rho_dot_kms_vals = np.abs(self.rho_dot_kms_vals[::-1])
-            self.D_km_vals = self.D_km_vals[::-1]
+            # The rev is ingress, so flip GEO variables. Required for interpolation below
+            self.rho_dot_kms_vals = np.abs(self.rho_dot_kms_vals)
+            rx_geo = rx_geo[::-1]
+            ry_geo = ry_geo[::-1]
+            rz_geo = rz_geo[::-1]
             geo_rho = geo_rho[::-1]
+
         elif (drdt > 0.0).all():
             pass
         else:
@@ -898,4 +897,4 @@ class GetUranusData(object):
         }
 
         if verbose:
-            printf("Data Extraction Complete.")
+            print("Data Extraction Complete.")

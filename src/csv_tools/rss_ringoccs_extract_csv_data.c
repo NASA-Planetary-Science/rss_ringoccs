@@ -80,7 +80,7 @@ rssringoccs_Extract_CSV_Data(const char *geo,
     const size_t zero = (size_t)0;
 
     /*  Variables for checking the geometry of the occultation.               */
-    double min_dr_dt, max_dr_dt, temp, raw_mu, log_power;
+    double min_dr_dt, max_dr_dt, temp, mu, log_power;
     double *cal_f_sky_hz_vals;
 
     /*  Allocate memory for the CSV object.                                   */
@@ -340,25 +340,12 @@ rssringoccs_Extract_CSV_Data(const char *geo,
 
     /*  The MALLOC_CSV_VAR macro contains an if-then statement with           *
      *  braces {} hence there is no need for a semi-colon at the end.         */
-    MALLOC_CSV_VAR(B_rad_vals)
     MALLOC_CSV_VAR(D_km_vals)
     MALLOC_CSV_VAR(f_sky_hz_vals)
-    MALLOC_CSV_VAR(p_norm_vals)
-    MALLOC_CSV_VAR(raw_tau_vals)
-    MALLOC_CSV_VAR(phase_rad_vals)
-    MALLOC_CSV_VAR(phi_rad_vals)
-    MALLOC_CSV_VAR(phi_rl_rad_vals)
-    MALLOC_CSV_VAR(raw_tau_threshold_vals)
-    MALLOC_CSV_VAR(rho_corr_pole_km_vals)
-    MALLOC_CSV_VAR(rho_corr_timing_km_vals)
     MALLOC_CSV_VAR(rho_dot_kms_vals)
-    MALLOC_CSV_VAR(rho_km_vals)
     MALLOC_CSV_VAR(rx_km_vals)
     MALLOC_CSV_VAR(ry_km_vals)
     MALLOC_CSV_VAR(rz_km_vals)
-    MALLOC_CSV_VAR(t_oet_spm_vals)
-    MALLOC_CSV_VAR(t_ret_spm_vals)
-    MALLOC_CSV_VAR(t_set_spm_vals)
 
     /*  If Tau data is to be extracted, reserve memory for the variables.     */
     if (tau)
@@ -378,7 +365,30 @@ rssringoccs_Extract_CSV_Data(const char *geo,
     csv_data->rho_corr_timing_km_vals = dlp_dat->rho_corr_timing_km_vals;
     csv_data->raw_tau_threshold_vals = dlp_dat->raw_tau_threshold_vals;
 
-    /*  These variables will be converted to degrees to radians in a bit.     */
+    /*  The new TAB files have normalized power included.                     */
+    if (!use_deprecated)
+        csv_data->p_norm_vals = dlp_dat->p_norm_vals;
+
+    /*  Otherwise we need to compute the power from the optical depth.        */
+    else
+    {
+        /*  Need to allocate memory for p_norm_vals.                          */
+        MALLOC_CSV_VAR(p_norm_vals)
+
+        /*  Loop through the elements of the DLP tau variable and compute the *
+         *  normalize diffracted power.                                       */
+        for (n = zero; n < csv_data->n_elements; ++n)
+        {
+            /*  tmpl_Double_Sind computes sine of an argument in degrees.     */
+            mu = tmpl_Double_Sind(tmpl_Double_Abs(dlp_dat->B_deg_vals[n]));
+            log_power = -csv_data->raw_tau_vals[n] / mu;
+
+            /*  Normalize diffracted power can be computed from optical depth.*/
+            csv_data->p_norm_vals[n] = tmpl_Double_Exp(log_power);
+        }
+    }
+
+    /*  These variables will be converted to degrees to radians.              */
     csv_data->phase_rad_vals = dlp_dat->phase_deg_vals;
     csv_data->phi_rad_vals = dlp_dat->phi_ora_deg_vals;
     csv_data->B_rad_vals = dlp_dat->B_deg_vals;
@@ -391,26 +401,6 @@ rssringoccs_Extract_CSV_Data(const char *geo,
         csv_data->phi_rad_vals[n] *= tmpl_Deg_to_Rad;
         csv_data->B_rad_vals[n] *= tmpl_Deg_to_Rad;
         csv_data->phi_rl_rad_vals[n] *= tmpl_Deg_to_Rad;
-    }
-
-    /*  The new TAB files have normalized power included.                     */
-    if (!use_deprecated)
-        csv_data->p_norm_vals = dlp_dat->p_norm_vals;
-
-    /*  Otherwise we need to compute the power from the optical depth.        */
-    else
-    {
-        /*  Loop through the elements of the DLP tau variable and compute the *
-         *  normalize diffracted power.                                       */
-        for (n = zero; n < csv_data->n_elements; ++n)
-        {
-            /*  tmpl_Double_Sind computes sine of an argument in degrees.     */
-            raw_mu = tmpl_Double_Sind(tmpl_Double_Abs(dlp_dat->B_deg_vals[n]));
-            log_power = -csv_data->raw_tau_vals[n] / raw_mu;
-
-            /*  Normalize diffracted power can be computed from optical depth.*/
-            csv_data->p_norm_vals[n] = tmpl_Double_Exp(log_power);
-        }
     }
 
     temp = (csv_data->rho_km_vals[1] - csv_data->rho_km_vals[0]) /
@@ -518,12 +508,30 @@ rssringoccs_Extract_CSV_Data(const char *geo,
     /*  Interpolate the Tau data if requested.                                */
     if (tau)
     {
-        tmpl_Double_Sorted_Interp1d(tau_dat->rho_km_vals,
-                                    tau_dat->power_vals,
-                                    tau_dat->n_elements,
-                                    csv_data->rho_km_vals,
-                                    csv_data->tau_power,
-                                    csv_data->n_elements);
+        if (use_deprecated)
+        {
+            tmpl_Double_Sorted_Interp1d(tau_dat->rho_km_vals,
+                                        tau_dat->tau_vals,
+                                        tau_dat->n_elements,
+                                        csv_data->rho_km_vals,
+                                        csv_data->tau_power,
+                                        csv_data->n_elements);
+
+            for (n = zero; n < csv_data->n_elements; ++n)
+            {
+                mu = tmpl_Double_Sin(tmpl_Double_Abs(csv_data->B_rad_vals[n]));
+                log_power = -csv_data->tau_power[n] / mu;
+                csv_data->tau_power[n] = tmpl_Double_Exp(log_power);
+            }
+        }
+        else
+            tmpl_Double_Sorted_Interp1d(tau_dat->rho_km_vals,
+                                        tau_dat->power_vals,
+                                        tau_dat->n_elements,
+                                        csv_data->rho_km_vals,
+                                        csv_data->tau_power,
+                                        csv_data->n_elements);
+
 
         tmpl_Double_Sorted_Interp1d(tau_dat->rho_km_vals,
                                     tau_dat->phase_deg_vals,

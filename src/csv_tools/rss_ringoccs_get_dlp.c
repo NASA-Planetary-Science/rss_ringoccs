@@ -129,18 +129,7 @@ rssringoccs_Get_DLP(const char *filename, tmpl_Bool use_deprecated)
         return dlp;
     }
 
-    /*  Count the number of lines in the CSV.                                 */
-    while (!feof(fp))
-    {
-        ch = fgetc(fp);
-        if(ch == '\n')
-            dlp->n_elements++;
-    }
-
-    /*  Reset the file back to the start.                                     */
-    rewind(fp);
-
-    /*  And count the number of columns.                                      */
+    /*  Count the number of columns.                                          */
     line = fgets(buffer, sizeof(buffer), fp);
 
     /*  DLP.TAB files are comma separeted, so count the number of commas.     */
@@ -155,9 +144,6 @@ rssringoccs_Get_DLP(const char *filename, tmpl_Bool use_deprecated)
         if (column_count > 13U)
             break;
     }
-
-    /*  Reset the file back to the start.                                     */
-    rewind(fp);
 
     /*  If use_deprecated was set to true, column_count must be 12. Check.    */
     if ((column_count != 12) && (use_deprecated))
@@ -186,6 +172,20 @@ rssringoccs_Get_DLP(const char *filename, tmpl_Bool use_deprecated)
         fclose(fp);
         return dlp;
     }
+
+    /*  Reset the file back to the start.                                     */
+    rewind(fp);
+
+    /*  Count the number of lines in the CSV.                                 */
+    while (!feof(fp))
+    {
+        ch = fgetc(fp);
+        if(ch == '\n')
+            dlp->n_elements++;
+    }
+
+    /*  Reset the file back to the start.                                     */
+    rewind(fp);
 
     /*  Use the MALLOC_DLP_VAR macro function to allocate memory and check    *
      *  for errors. This macro ends with an if-then statement, and ends in    *

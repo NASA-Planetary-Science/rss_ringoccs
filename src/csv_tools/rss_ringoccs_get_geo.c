@@ -135,18 +135,7 @@ rssringoccs_Get_Geo(const char *filename, tmpl_Bool use_deprecated)
         return geo;
     }
 
-    /*  Count the number of lines in the CSV.                                 */
-    while (!feof(fp))
-    {
-        ch = fgetc(fp);
-        if(ch == '\n')
-            geo->n_elements++;
-    }
-
-    /*  Reset the file back to the start.                                     */
-    rewind(fp);
-
-    /*  And count the number of columns.                                      */
+    /*  Count the number of columns.                                          */
     line = fgets(buffer, sizeof(buffer), fp);
 
     /*  GEO.TAB files are comma separeted, so count the number of commas.     */
@@ -161,9 +150,6 @@ rssringoccs_Get_Geo(const char *filename, tmpl_Bool use_deprecated)
         if (column_count > 19U)
             break;
     }
-
-    /*  Reset the file back to the start.                                     */
-    rewind(fp);
 
     /*  If use_deprecated was set to true, column_count must be 18. Check.    */
     if ((column_count != 18U) && (use_deprecated))
@@ -192,6 +178,20 @@ rssringoccs_Get_Geo(const char *filename, tmpl_Bool use_deprecated)
         fclose(fp);
         return geo;
     }
+
+    /*  Reset the file back to the start.                                     */
+    rewind(fp);
+
+    /*  Count the number of lines in the CSV.                                 */
+    while (!feof(fp))
+    {
+        ch = fgetc(fp);
+        if(ch == '\n')
+            geo->n_elements++;
+    }
+
+    /*  Reset the file back to the start.                                     */
+    rewind(fp);
 
     /*  Use the MALLOC_GEO_VAR macro function to allocate memory and check    *
      *  for errors. This macro ends with an if-then statement, and ends in    *

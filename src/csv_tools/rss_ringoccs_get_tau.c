@@ -49,12 +49,7 @@ rssringoccs_TauCSV *rssringoccs_Get_Tau(const char *filename,
 
     /*  Check if malloc failed.                                               */
     if (tau == NULL)
-    {
-        puts("Error Encountered: rss_ringoccs\n"
-             "\trssringoccs_Get_Tau\n\n"
-             "Malloc failed and returned NULL for tau. Returning.\n");
         return NULL;
-    }
 
     /*  Initialize the pointers in the tau struct to NULL. The function       *
      *  rssringoccs_Destroy_TauCSV_Members will check which members are NULL  *
@@ -74,6 +69,8 @@ rssringoccs_TauCSV *rssringoccs_Get_Tau(const char *filename,
     tau->t_set_spm_vals = NULL;
     tau->B_deg_vals = NULL;
     tau->error_message = NULL;
+    tau->error_occurred = tmpl_False;
+    tau->n_elements = (size_t)0;
 
     /*  Try to open the input file.                                           */
     fp = fopen(filename, "r");
@@ -91,17 +88,6 @@ rssringoccs_TauCSV *rssringoccs_Get_Tau(const char *filename,
         return tau;
     }
 
-    /*  Count the number of lines in the CSV.                                 */
-    line_count = 0;
-    while(!feof(fp))
-    {
-        ch = fgetc(fp);
-        if(ch == '\n')
-            line_count++;
-    }
-    rewind(fp);
-    tau->n_elements = line_count;
-
     /*  And count the number of columns.                                      */
     column_count = 0;
     line = fgets(buffer,sizeof(buffer), fp);
@@ -111,9 +97,8 @@ rssringoccs_TauCSV *rssringoccs_Get_Tau(const char *filename,
         record = strtok(NULL, ",");
         column_count++;
     }
-    rewind(fp);
 
-    /*  If use_deprecated was set to true, column_count must be 18. Check.    */
+    /*  If use_deprecated was set to true, column_count must be 12. Check.    */
     if ((column_count != 12) && (use_deprecated))
     {
         tau->error_occurred = tmpl_True;
@@ -123,10 +108,11 @@ rssringoccs_TauCSV *rssringoccs_Get_Tau(const char *filename,
             "use_deprecated is set to true but the input CSV does not have\n"
             "12 columns. Aborting computation.\n"
         );
+        fclose(fp);
         return tau;
     }
 
-    /*  And if use_deprecated is false, we need 19 column. Check this.        */
+    /*  And if use_deprecated is false, we need 13 column. Check this.        */
     else if ((column_count != 13) && (!use_deprecated))
     {
         tau->error_occurred = tmpl_True;
@@ -136,8 +122,21 @@ rssringoccs_TauCSV *rssringoccs_Get_Tau(const char *filename,
             "use_deprecated is set to false but the input CSV does not have\n"
             "13 columns. Aborting computation.\n"
         );
+        fclose(fp);
         return tau;
     }
+
+    /*  Count the number of lines in the CSV.                                 */
+    rewind(fp);
+    line_count = 0;
+    while(!feof(fp))
+    {
+        ch = fgetc(fp);
+        if(ch == '\n')
+            line_count++;
+    }
+    rewind(fp);
+    tau->n_elements = line_count;
 
     /*  Allocate memory for t_oet_spm_vals and check for error.               */
     tau->t_oet_spm_vals = malloc(sizeof(*tau->t_oet_spm_vals) * line_count);

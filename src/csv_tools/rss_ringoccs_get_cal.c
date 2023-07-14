@@ -118,18 +118,7 @@ rssringoccs_CalCSV *rssringoccs_Get_Cal(const char *filename)
         return cal;
     }
 
-    /*  Count the number of lines in the CSV.                                 */
-    while (!feof(fp))
-    {
-        ch = fgetc(fp);
-        if (ch == '\n')
-            cal->n_elements++;
-    }
-
-    /*  Reset the file back to the start.                                     */
-    rewind(fp);
-
-    /*  And count the number of columns.                                      */
+    /*  Count the number of columns.                                          */
     line = fgets(buffer, sizeof(buffer), fp);
 
     /*  CAL.TAB files are comma separeted, so count the number of commas.     */
@@ -145,9 +134,6 @@ rssringoccs_CalCSV *rssringoccs_Get_Cal(const char *filename)
             break;
     }
 
-    /*  Reset the file back to the start.                                     */
-    rewind(fp);
-
     /*  There should be 4 columns. Check this.                                */
     if (column_count != 4U)
     {
@@ -160,6 +146,20 @@ rssringoccs_CalCSV *rssringoccs_Get_Cal(const char *filename)
         fclose(fp);
         return cal;
     }
+
+    /*  Reset the file back to the start.                                     */
+    rewind(fp);
+
+    /*  Count the number of lines in the CSV.                                 */
+    while (!feof(fp))
+    {
+        ch = fgetc(fp);
+        if (ch == '\n')
+            cal->n_elements++;
+    }
+
+    /*  Reset the file back to the start.                                     */
+    rewind(fp);
 
     /*  Use the MALLOC_CAL_VAR macro function to allocate memory and check    *
      *  for errors. This macro ends with an if-then statement, and ends in    *

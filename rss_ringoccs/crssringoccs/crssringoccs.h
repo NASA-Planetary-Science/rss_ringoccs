@@ -88,6 +88,7 @@ typedef struct PyCSVObj_Def {
     PyObject *D_km_vals;
     PyObject *f_sky_hz_vals;
     PyObject *p_norm_vals;
+    PyObject *raw_tau_vals;
     PyObject *phase_rad_vals;
     PyObject *phi_rad_vals;
     PyObject *phi_rl_rad_vals;

@@ -65,6 +65,10 @@ static PyMemberDef extractcsvdata_members[] = {
         "Raw power data"
     },
     {
+        "raw_tau_vals", T_OBJECT_EX, offsetof(PyCSVObj, raw_tau_vals), 0,
+        "Raw optical depth"
+    },
+    {
         "phi_rad_vals", T_OBJECT_EX, offsetof(PyCSVObj, phi_rad_vals), 0,
         "Ring azimuth angle"
     },

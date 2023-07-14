@@ -24,6 +24,7 @@ void ExtractCSVData_dealloc(PyCSVObj *self)
     Py_XDECREF(self->D_km_vals);
     Py_XDECREF(self->f_sky_hz_vals);
     Py_XDECREF(self->p_norm_vals);
+    Py_XDECREF(self->raw_tau_vals);
     Py_XDECREF(self->phase_rad_vals);
     Py_XDECREF(self->phi_rad_vals);
     Py_XDECREF(self->phi_rl_rad_vals);

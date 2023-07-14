@@ -57,6 +57,7 @@ void crssringoccs_C_CSV_to_Py_CSV(PyCSVObj *py_csv, rssringoccs_CSVData *csv)
     SET_VAR(D_km_vals);
     SET_VAR(f_sky_hz_vals);
     SET_VAR(p_norm_vals);
+    SET_VAR(raw_tau_vals);
     SET_VAR(phase_rad_vals);
     SET_VAR(phi_rad_vals);
     SET_VAR(phi_rl_rad_vals);

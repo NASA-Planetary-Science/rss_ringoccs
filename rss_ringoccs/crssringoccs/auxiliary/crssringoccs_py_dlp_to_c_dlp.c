@@ -29,6 +29,11 @@
 /*  Function prototype and typedefs for structs given here.                   */
 #include "../crssringoccs.h"
 
+/*  Avoid warnings about deprecated Numpy API versions.                       */
+#ifndef NPY_NO_DEPRECATED_API
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+#endif
+
 /*  Numpy header files.                                                       */
 #include <numpy/ndarraytypes.h>
 #include <numpy/ufuncobject.h>

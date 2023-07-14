@@ -78,8 +78,6 @@ rssringoccs_CalCSV *rssringoccs_Get_Cal(const char *filename)
     /*  Variables used for parsing the contents of the CSV.                   */
     char *record, *line;
 
-    /*  Variable for storing the output of fgetc.                             */
-    int ch;
     unsigned int column_count = 0U;
     size_t n = 0;
 
@@ -151,12 +149,7 @@ rssringoccs_CalCSV *rssringoccs_Get_Cal(const char *filename)
     rewind(fp);
 
     /*  Count the number of lines in the CSV.                                 */
-    while (!feof(fp))
-    {
-        ch = fgetc(fp);
-        if (ch == '\n')
-            cal->n_elements++;
-    }
+    cal->n_elements = rssringoccs_count_lines(fp);
 
     /*  Reset the file back to the start.                                     */
     rewind(fp);

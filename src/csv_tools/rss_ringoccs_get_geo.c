@@ -79,9 +79,6 @@ rssringoccs_Get_Geo(const char *filename, tmpl_Bool use_deprecated)
     /*  Variables for parsing the contents of the CSV file.                   */
     char *record, *line;
 
-    /*  Variable for storing the output of fgetc.                             */
-    int ch;
-
     unsigned int column_count = 0U;
     size_t n = 0;
 
@@ -183,12 +180,7 @@ rssringoccs_Get_Geo(const char *filename, tmpl_Bool use_deprecated)
     rewind(fp);
 
     /*  Count the number of lines in the CSV.                                 */
-    while (!feof(fp))
-    {
-        ch = fgetc(fp);
-        if(ch == '\n')
-            geo->n_elements++;
-    }
+    geo->n_elements = rssringoccs_count_lines(fp);
 
     /*  Reset the file back to the start.                                     */
     rewind(fp);

@@ -240,8 +240,9 @@ int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
         puts("\tDiffraction Correction: Passing Py variables to tau...");
 
     crssringoccs_Get_Py_Vars_From_Tau_Self(tau, self);
-    rssringoccs_Get_Py_Perturb(tau, perturb);
-    rssringoccs_Get_Py_Range(tau, rngreq);
+    crssringoccs_Get_Py_Perturb(tau, perturb);
+    crssringoccs_Get_Py_Range(tau, rngreq);
+
     rssringoccs_Tau_Set_WType(self->wtype, tau);
     rssringoccs_Tau_Set_Psitype(self->psitype, tau);
 

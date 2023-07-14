@@ -124,9 +124,10 @@ extern void
 crssringoccs_C_Tau_to_Py_Tau(PyDiffrecObj *py_tau, rssringoccs_TAUObj *tau);
 
 extern void
-rssringoccs_Get_Py_Perturb(rssringoccs_TAUObj *tau, PyObject *perturb);
+crssringoccs_Get_Py_Perturb(rssringoccs_TAUObj *tau, PyObject *perturb);
 
-extern void rssringoccs_Get_Py_Range(rssringoccs_TAUObj *tau, PyObject *rngreq);
+extern void
+crssringoccs_Get_Py_Range(rssringoccs_TAUObj *tau, PyObject *rngreq);
 
 extern void
 crssringoccs_Get_Py_Vars_From_Tau_Self(rssringoccs_TAUObj *tau,

@@ -29,7 +29,7 @@
 /*  Function prototype and typedefs for structs given here.                   */
 #include "../crssringoccs.h"
 
-void rssringoccs_Get_Py_Perturb(rssringoccs_TAUObj *tau, PyObject *perturb)
+void crssringoccs_Get_Py_Perturb(rssringoccs_TAUObj *tau, PyObject *perturb)
 {
     PyObject *iter;
     PyObject *next;

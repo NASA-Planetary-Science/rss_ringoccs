@@ -29,7 +29,7 @@
 /*  Function prototype and typedefs for structs given here.                   */
 #include "../crssringoccs.h"
 
-void rssringoccs_Get_Py_Range(rssringoccs_TAUObj *tau, PyObject *rngreq)
+void crssringoccs_Get_Py_Range(rssringoccs_TAUObj *tau, PyObject *rngreq)
 {
     PyObject *iter;
     PyObject *next;

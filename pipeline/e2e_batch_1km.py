@@ -1,11 +1,9 @@
 import sys
-sys.path.append('../')
+import time
+import traceback
 import rss_ringoccs as rss
 from rss_ringoccs.tools.history import write_history_dict
 from rss_ringoccs.tools.write_output_files import write_output_files
-sys.path.remove('../')
-import traceback
-import time
 
 # ***** Pipeline inputs *****
 ### Global inputs
@@ -98,10 +96,18 @@ for ind in range(nfiles):
 
         # Invert profile for full occultation
         if dlp_inst_ing is not None:
-            tau_inst = rss.diffrec.DiffractionCorrection(dlp_inst_ing, res_km,
-                rng=inversion_range, res_factor=res_factor, psitype=psitype,
-                wtype=wtype, use_fwd=fwd, use_norm=norm, bfac=bfac,
-                verbose=verbose)
+            tau_inst = rss.DiffractionCorrection(
+                dlp_inst_ing,
+                res_km,
+                rng = inversion_range,
+                res_factor = res_factor,
+                psitype = psitype,
+                wtype = wtype,
+                use_fwd = fwd,
+                use_norm = norm,
+                bfac = bfac,
+                verbose = verbose
+            )
 
             rss.tools.plot_summary_doc_v2(geo_inst, cal_inst,
                                           dlp_inst_ing, tau_inst)
@@ -113,10 +119,17 @@ for ind in range(nfiles):
                     outfiles = write_output_files(tau_inst)
 
         if dlp_inst_egr is not None:
-            tau_inst = rss.diffrec.DiffractionCorrection(
-                dlp_inst_egr, res_km, rng=inversion_range,
-                res_factor=res_factor, psitype=psitype, wtype=wtype,
-                use_norm=norm, bfac=bfac, verbose=verbose)
+            tau_inst = rss.DiffractionCorrection(
+                dlp_inst_egr,
+                res_km,
+                rng = inversion_range,
+                res_factor = res_factor,
+                psitype = psitype,
+                wtype = wtype,
+                use_norm = norm,
+                bfac = bfac,
+                verbose = verbose
+            )
 
             if write_file:
                     tau_inst.history = write_history_dict(rec.input_vars,

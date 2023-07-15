@@ -145,7 +145,7 @@ def derlt(sc_code, etsc, rs_code, et):
 
     [S1, _lt] = spice.spkez(sc_code, etsc, ref, abcorr, SSB)
     [S2, _lt] = spice.spkez(rs_code, et, ref, abcorr, SSB)
-    S12 = spice.vsubg(S2, S1, 6)
+    S12 = spice.vsubg(S2, S1)
 
     R1 = spice.vnorm(S1[0:3])
     R2 = spice.vnorm(S2[0:3])
@@ -204,7 +204,7 @@ def derpt(et, code):
         body = ID_SSB[i]
         # ith body's ephemerides with respect to barycenter
         [SJ, _lt] = spice.spkez(body, et, ref, abcorr, SSB)
-        SIJ = spice.vsubg(SJ, SI, 6)
+        SIJ = spice.vsubg(SJ, SI)
         RIJ = spice.vnorm(SIJ[0:3])
         # potential of Barycenter
         PHII += GM_SSB[i]/RIJ

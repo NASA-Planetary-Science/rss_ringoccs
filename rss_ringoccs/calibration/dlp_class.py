@@ -390,10 +390,10 @@ class DiffractionLimitedProfile(object):
         spm_full = rsr_inst.spm_vals
         spm_geo = geo_inst.t_oet_spm_vals
 
-#        spm_cal = cal_inst.t_oet_spm_vals
-#        f_sky_pred_cal = cal_inst.f_sky_hz_vals
-#        p_free_cal = cal_inst.p_free_vals
-#        IQ_c = cal_inst.IQ_c
+        # spm_cal = cal_inst.t_oet_spm_vals
+        # f_sky_pred_cal = cal_inst.f_sky_hz_vals
+        # p_free_cal = cal_inst.p_free_vals
+        # IQ_c = cal_inst.IQ_c
         # Check if spm_geo and spm_full start/end at same time,
         #   if not, reduce spm_full to spm_geo boundaries
         #if (min(spm_geo) != np.floor(min(spm_full))) or (

@@ -289,7 +289,7 @@ class Normalization(object):
 
         for spm_limits in gaps_spm_copy:
             # Boolean mask including only spm values within gap
-            ind = [(spm>=spm_limits[0])&(spm<=spm_limits[1])]
+            ind = np.where((spm>=spm_limits[0])&(spm<=spm_limits[1]))
             # find median corrected power within space
             pcm = np.nanmedian(pc_norm[ind])
             if pcm < 0.5 or pcm > 1.25 :

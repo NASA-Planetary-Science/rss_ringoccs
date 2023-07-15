@@ -71,12 +71,17 @@ class calc_freq_offset(object):
         for spm_mid in np.arange(self.spm_min,self.spm_max+delta_t_cent,
                 delta_t_cent):
             # set indices using boolean mask over a range of SPM
-            ind = [(self.spm_vals>=spm_mid-self.dt_freq)&
-                    (self.spm_vals<spm_mid+self.dt_freq)]
+            ind = np.where(
+                (self.spm_vals >= spm_mid-self.dt_freq) &
+                (self.spm_vals < spm_mid+self.dt_freq)
+            )
+
             # make sure data are included in range
-            if len(self.spm_vals[ind]) > 2 :
+            if len(self.spm_vals[tuple(ind)]) > 2:
+
                 # get average SPM in window
                 spms += [spm_mid]
+
                 # get frequency of peak in power spectrum
                 freqs += [self.__find_peak_freq(self.spm_vals[ind],
                                                 self.IQ_m[ind])]

@@ -117,8 +117,7 @@ class FreqOffsetFit(object):
         # Create boolean mask where True is within occultation range and
         #    False is outside the occultation range -- this is generalized
         #    to work for diametric and chord occultations
-        inds = [(self.raw_rho>6.5e4)&(self.raw_rho<1.75e5)]
-        #occ_inds = [(self.raw_rho>7e4)&(self.raw_rho<1.4e5)]
+        inds = np.where((self.raw_rho > 6.5e4) & (self.raw_rho < 1.75e5))
 
         # If spm limits are provided in the right format, use those
         # to select a portion of the occultation

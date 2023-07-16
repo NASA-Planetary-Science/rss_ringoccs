@@ -17,7 +17,6 @@ Notes:
 """
 
 from . import pds3_write_series_v2 as pds3
-import numpy as np
 import time
 
 def write_cal_series_data(cal_inst, out_file):

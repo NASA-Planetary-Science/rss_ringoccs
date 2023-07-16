@@ -20,10 +20,10 @@ matplotlib.rcParams['agg.path.chunksize'] = 10000
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from scipy.signal import savgol_filter
-from .sys_tools import latex_summary_doc
-from .write_output_files import construct_filepath
 import time
 import spiceypy as spice
+from rss_ringoccs.tools.sys_tools import latex_summary_doc
+from rss_ringoccs.tools.write_output_files import construct_filepath
 
 sat_radius =  60268.
 rings_km = [74490., 91983., 117516., 122052., 136774., 139826.]
@@ -704,7 +704,7 @@ def plot_tau_overview(pdf, geo_inst, tau_inst):
     ax1.spines['left'].set_color('blue')
     ax1.set_xlim(xlim1)
     ax1.set_ylim(ylim1)
-    ax1.grid(b=True)
+    ax1.grid(axis='both')
 
     ax2.plot(rho_tau/1000., elev_deg, color='magenta', linewidth=0.8)
     ax2.set_xlim(xlim1)
@@ -885,8 +885,3 @@ def plot_summary_doc_v2(geo_inst, cal_inst, dlp_inst, tau_inst):
 
 
     return None
-
-
-
-
-

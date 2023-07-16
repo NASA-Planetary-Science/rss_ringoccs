@@ -1,7 +1,7 @@
 """
 
 :Purpose: 
-    Write GEO data and label files in PDS3 format.
+    Write GEO data file in PDS3 format but no label file for Uranus 
 
 :Dependencies:
     #. numpy
@@ -687,9 +687,9 @@ def get_geo_series_info(rev_info, geo_inst, series_name, prof_dir):
             }
     return str_lbl
 
-def write_geo_series(rev_info, geo_inst, title, outdir, prof_dir,write_label_file=True):
+def write_uranus_geo_series(rev_info, geo_inst, title, outdir, prof_dir,write_label_file=False):
     """
-    This function writes a GEO series, which includes a data and label file.
+    This function writes a GEO series, which includes a data and label file. Label file turned off for Uranus
 
     Arguments
         :rev_info (*dict*): Dictionary with keys: rsr_file, band, year, doy, dsn

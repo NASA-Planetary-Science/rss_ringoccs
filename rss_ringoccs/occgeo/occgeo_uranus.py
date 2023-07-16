@@ -3,7 +3,7 @@ occgeo_uranus.py
 
 :Purpose:
 
-    Calculate occultation geometry for RSS ring events.
+    Calculate Uranus occultation geometry for RSS ring events.
 
 :Notes:
     #. kernels list must include:
@@ -24,7 +24,7 @@ occgeo_uranus.py
 """
 from ..tools.spm_to_et import spm_to_et
 from ..tools.et_to_spm import et_to_spm
-from ..tools.write_output_files import write_output_files
+from ..tools.write_uranus_output_files import write_uranus_output_files
 from ..tools.history import write_history_dict
 
 from . import calc_occ_geometry as cog
@@ -36,7 +36,7 @@ import spiceypy as spice
 import numpy as np
 import sys
 
-class Geometry(object):
+class Uranus_Geometry(object):
 
     """
     :Purpose:
@@ -139,18 +139,18 @@ class Geometry(object):
                 }
 
         if verbose:
-            print('Calculating occultation geometry...')
+            print('Calculating Uranus occultation geometry...')
 
 
         if type(planet) != str:
-            raise ValueError('ERROR (Geometry): Input planet is NOT a string!')
+            raise ValueError('ERROR (Uranus_Geometry): Input planet is NOT a string!')
 
         if type(spacecraft) != str:
-            raise ValueError('ERROR (Geometry): Input spacecraft is NOT '
+            raise ValueError('ERROR (Uranus_Geometry): Input spacecraft is NOT '
                             + 'a string!')
 
         if not isinstance(pt_per_sec, (int, float)):
-            raise ValueError('ERROR (Geometry): Input pt_per_sec is NOT an int '
+            raise ValueError('ERROR (Uranus_Geometry): Input pt_per_sec is NOT an int '
                                 + 'or float!')
 
 
@@ -256,6 +256,13 @@ class Geometry(object):
         self.vx_kms_vals = np.stack(R_sc_dot_kms_vals)[:, 0]
         self.vy_kms_vals = np.stack(R_sc_dot_kms_vals)[:, 1]
         self.vz_kms_vals = np.stack(R_sc_dot_kms_vals)[:, 2]
+
+# I think this is not working! - all seem to be the same as the first entry
+        print('min,max self.rx_km_vals',min(self.rx_km_vals),max(self.rx_km_vals))
+        print('min,max self.ry_km_vals',min(self.ry_km_vals),max(self.ry_km_vals))
+        print('min,max self.rz_km_vals',min(self.rz_km_vals),max(self.rz_km_vals))
+
+
         self.kernels = kernels
         self.elev_deg_vals = np.asarray(elev_deg_vals)
         self.naif_toolkit_version = self.__get_naif_version()
@@ -275,7 +282,7 @@ class Geometry(object):
 
         # Write output data and label file if set
         if write_file:
-            write_output_files(self)
+            write_uranus_output_files(self)
 
     def __get_naif_version(self):
         """

@@ -14,7 +14,6 @@ Purpose:
 from .advanced_tools import CompareTau
 from .spm_to_et import spm_to_et
 from .et_to_spm import et_to_spm
-from .CSV_tools import ExtractCSVData
 from .history import write_history_dict as write_history_dict
 from .history import date_to_rev as date_to_rev
 from .history import get_rev_info as get_rev_info

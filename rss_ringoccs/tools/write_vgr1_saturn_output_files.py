@@ -1,6 +1,6 @@
 """
 
-write_uranus_output_files.py
+write_vgr1_saturn_output_files.py
 
 :Purpose:
     Functions relating to writing an output file.
@@ -16,18 +16,17 @@ write_uranus_output_files.py
 
 """
 import sys
-import os
+from .pds3_geo_series import write_geo_series
+from .pds3_tau_series import write_tau_series
 from time import strftime
 import rss_ringoccs as rss
-from .pds3_uranus_geo_series import write_uranus_geo_series
-from .pds3_tau_series import write_tau_series
+import os
 
-chord_revnums = ['053', '054', '056', '057', '058', '060', '063', '064',
-                    '067', '079', '081', '082', '084', '089', '253']
+#
+func_typ = {'GEO': write_geo_series,
+        'TAU': write_tau_series}
 
-func_typ = {'GEO': write_uranus_geo_series, 'TAU': write_tau_series}
-
-def write_uranus_output_files(inst):
+def write_vgr1_saturn_output_files(inst):
     """
     Write output (geo, cal, dlp, tau) *.TAB and *.LBL files, depending on
     instance given.
@@ -40,13 +39,16 @@ def write_uranus_output_files(inst):
     rev_info = inst.rev_info
 
     # Check for instance type and write that specific file
-    if isinstance(inst, rss.occgeo.occgeo_uranus.Uranus_Geometry):
+    filtyp='NONE'
+    if isinstance(inst, rss.occgeo.Geometry):
         filtyp = 'GEO'
 
-    elif isinstance(inst, rss.DiffractionCorrection):
+
+    elif isinstance(inst, rss.diffrec.DiffractionCorrection):
         filtyp = 'TAU_' + str(int(inst.input_res * 1000)).zfill(5) + 'M'
     else:
-        raise TypeError('invalid instance for write_output_files.')
+        print('invalid instance!')
+    print('Got filtyp=',filtyp)
 
     construct_output_filename(rev_info, inst, filtyp)
     return None
@@ -55,32 +57,19 @@ def construct_filepath(rev_info, filtyp):
     title_out = []
     outdir_out = []
 
-    pd1 = rev_info['prof_dir']
-    pd1 = [pd1]
-    pd2 = ''
-
     doy = rev_info['doy']
     band = rev_info['band']
-    year = rev_info['year']
     dsn = rev_info['dsn'].split('-')[-1]
-    rev = rev_info['rev_num']
-    ring = rev_info['ring']
 
-    if rev in chord_revnums:
-        if 'DLP' in filtyp or 'TAU' in filtyp or 'Summary' in filtyp:
-            pd2 = 'C'
+    filestr = ('VGR1_Saturn_' + str(band) + str(dsn))
 
-    for dd in pd1:
-        filestr = ('VGR2_' + str(band) + str(dsn) + '_' + dd + '_URING_'
-                    + ring )
-
-        dirstr = ('../output/' + dd + '/' + ring + '/')
+    dirstr = ('../output/VGR1_Saturn/')
 
         # Create output file name without file extension
-        curday = strftime('%Y%m%d')
-        out1 = dirstr + filestr + '_' + filtyp.upper() + '_' + curday
+    curday = strftime('%Y%m%d')
+    out1 = dirstr + filestr + '_' + filtyp.upper() + '_' + curday
 
-        if os.path.isdir(dirstr):
+    if os.path.isdir(dirstr):
 
             # Check for most recent file and order them by date
             dirfiles = [x for x in os.listdir(dirstr) if
@@ -100,10 +89,7 @@ def construct_filepath(rev_info, filtyp):
                     seq_num = (str(sqn1[-1] + 1))[-4:]
 
             out2 = out1 + '_' + seq_num
-
-
-
-        else:
+    else:
             print('\tCreating directory:\n\t\t' + dirstr)
             #os.mkdir(dirstr)
             os.system('[ ! -d ' + dirstr + ' ] && mkdir -p ' + dirstr)
@@ -111,10 +97,10 @@ def construct_filepath(rev_info, filtyp):
             seq_num = '0001'
             out2 = out1 + '_' + seq_num
 
-        title = out2.split('/')[-1]
-        outdir = '/'.join(out2.split('/')[0:-1]) + '/'
-        title_out.append(title)
-        outdir_out.append(outdir)
+    title = out2.split('/')[-1]
+    outdir = '/'.join(out2.split('/')[0:-1]) + '/'
+    title_out.append(title)
+    outdir_out.append(outdir)
     return title_out, outdir_out
 
 
@@ -126,7 +112,7 @@ def construct_output_filename(rev_info, inst, filtyp):
         title = titles[n]
         outdir = outdirs[n]
         func_typ[filtyp[0:3]](rev_info, inst, title, outdir,
-                rev_info['prof_dir'])
+                rev_info['prof_dir'],write_label_file=False)
 
     return None
 

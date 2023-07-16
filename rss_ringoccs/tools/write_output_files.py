@@ -21,11 +21,7 @@ from .pds3_tau_series import write_tau_series
 #from .pds3_spectro_image import write_spectro_image
 import time
 from time import strftime
-
-sys.path.append('../../')
 import rss_ringoccs as rss
-sys.path.remove('../../')
-
 import os
 
 
@@ -64,7 +60,7 @@ def write_output_files(inst, add_text=None):
     elif isinstance(inst, rss.calibration.DiffractionLimitedProfile):
         filtyp = 'DLP_' + str(int(inst.dr_km * 1000 * 2)).zfill(4) + 'M' + add
 
-    elif isinstance(inst, rss.diffrec.DiffractionCorrection):
+    elif isinstance(inst, rss.DiffractionCorrection):
         filtyp = 'TAU_' + str(int(inst.input_res * 1000)).zfill(5) + 'M' + add
     #elif isinstance(inst, rss.scatter.Scatter):
     #    filtyp = 'SCATTER_' + inst.band + (inst.dsn).split('-')[1] + add

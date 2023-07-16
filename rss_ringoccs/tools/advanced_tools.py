@@ -1,6 +1,6 @@
 import numpy
-import rss_ringoccs as rss
-from rss_ringoccs.tools import CSV_tools, error_check, history
+import rss_ringoccs
+from rss_ringoccs.tools import error_check, history
 
 
 class CompareTau(object):
@@ -37,11 +37,23 @@ class CompareTau(object):
         # Check that range and psitype are legal inputs.
         rng = error_check.check_range_input(rng, fname)
 
-        data = CSV_tools.ExtractCSVData(geo, cal, dlp, tau=tau, verbose=verbose)
+        data = rss_ringoccs.ExtractCSVData(
+            geo, cal, dlp, tau = tau, verbose = verbose
+        )
+
         rec = rss.DiffractionCorrection(
-            data, res, rng=rng, wtype=wtype, use_fwd=fwd, use_norm=norm,
-            bfac=bfac, sigma=sigma, psitype=psitype, res_factor=res_factor,
-            verbose=verbose, perturb=perturb
+            data,
+            res,
+            rng = rng,
+            wtype = wtype,
+            use_fwd = fwd,
+            use_norm = norm,
+            bfac = bfac,
+            sigma = sigma,
+            psitype = psitype,
+            res_factor = res_factor,
+            verbose = verbose,
+            perturb = perturb
         )
 
         self.rho_km_vals = rec.rho_km_vals
@@ -117,9 +129,14 @@ class FindOptimalResolution(object):
         self.ideal_res = numpy.zeros((nwins))
         eres = sres + (nres-1)*dres
         res = sres
-        data = CSV_tools.ExtractCSVData(geo, cal, dlp, tau=tau, verbose=verbose)
-        rec = rss.DiffractionCorrection(data, res, rng=rng,
-                                                           wtype="kb35")
+        data = rss_ringoccs.ExtractCSVData(
+            geo, cal, dlp, tau=tau, verbose = verbose
+        )
+
+        rec = rss_ringoccs.DiffractionCorrection(
+            data, res, rng = rng, wtype="kb35"
+        )
+
         start = int(numpy.min((data.tau_rho-numpy.min(rec.rho_km_vals)>=0).nonzero()))
         fin = int(numpy.max((numpy.max(rec.rho_km_vals)-data.tau_rho>=0).nonzero()))
         tau_power = data.power_vals[start:fin+1]
@@ -187,8 +204,8 @@ class ModelFromGEO(object):
             opacity = 0.0
 
         # Get the data from the selected CSV files.
-        data = CSV_tools.get_geo(geo, verbose=verbose,
-                                 use_deprecate=use_deprecate)
+        data = CSV_tools.get_geo(geo, verbose = verbose,
+                                 use_deprecate = use_deprecate)
 
         # If modeling from real data, check the inputs.
         if ((type(data_pow) == type(None)) and

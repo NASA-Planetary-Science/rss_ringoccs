@@ -67,13 +67,13 @@ void crssringoccs_set_var(PyObject **py_ptr, double *ptr, size_t len)
 
         /*  Link the array to the capsule. "del arr" in Python now free's the *
          *  memory allocated for the C pointer.                               */
-        PyArray_SetBaseObject((PyArrayObject *)arr, capsule);
+        if (PyArray_SetBaseObject((PyArrayObject *)arr, capsule) == -1)
+        {
+            Py_DECREF(arr);
+            return;
+        }
 
-        /*  Reference counting incrementing for Python.                       */
-        tmp = *py_ptr;
-        Py_INCREF(arr);
-        *py_ptr = arr;
-        Py_XDECREF(tmp);
+        *py_ptr = Py_BuildValue("N", arr);
     }
 
     /*  Otherwise set the variable to a "None" object.                        */

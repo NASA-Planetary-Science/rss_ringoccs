@@ -17,11 +17,11 @@
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
 
-/*  malloc and NULL are defined here.                                         */
-#include <stdlib.h>
+/*  NULL and size_t given here.                                               */
+#include <stddef.h>
 
-/*  Booleans provided here.                                                   */
-#include <libtmpl/include/tmpl_bool.h>
+/*  Booleans and string tools provided here.                                  */
+#include <libtmpl/include/tmpl.h>
 
 /*  Function prototype and typedefs for structs given here.                   */
 #include "../crssringoccs.h"
@@ -40,7 +40,8 @@ extract_data(rssringoccs_DLPObj *dlp, PyObject *py_dlp, const char *var_name)
 {
     PyObject *tmp;
     PyObject *arr;
-    unsigned long len;
+    size_t len;
+    char buffer[512];
 
     if (dlp == NULL)
         return NULL;
@@ -65,15 +66,15 @@ extract_data(rssringoccs_DLPObj *dlp, PyObject *py_dlp, const char *var_name)
     if (!PyObject_HasAttrString(py_dlp, var_name))
     {
         dlp->error_occurred = tmpl_True;
-        dlp->error_message = malloc(sizeof(*dlp->error_message) * 256);
         sprintf(
-            dlp->error_message,
+            buffer,
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\tdiffrec.DiffractionCorrection\n\n"
             "\rInput DLP Instance is missing the following attribute:\n"
             "\r\t%s\n\n",
             var_name
         );
+        dlp->error_message = tmpl_strdup(buffer);
         return NULL;
     }
     else
@@ -82,7 +83,6 @@ extract_data(rssringoccs_DLPObj *dlp, PyObject *py_dlp, const char *var_name)
     if (!PyArray_Check(tmp))
     {
         dlp->error_occurred = tmpl_True;
-        dlp->error_message = malloc(sizeof(*dlp->error_message) * 256);
         sprintf(
             dlp->error_message,
             "\n\rError Encountered: rss_ringoccs\n"
@@ -90,6 +90,7 @@ extract_data(rssringoccs_DLPObj *dlp, PyObject *py_dlp, const char *var_name)
             "\r%s must be a numpy array.\n",
             var_name
         );
+        dlp->error_message = tmpl_strdup(buffer);
         return NULL;
     }
     else
@@ -101,14 +102,14 @@ extract_data(rssringoccs_DLPObj *dlp, PyObject *py_dlp, const char *var_name)
     if (!arr)
     {
         dlp->error_occurred = tmpl_True;
-        dlp->error_message = malloc(sizeof(*dlp->error_message) * 256);
         sprintf(
-            dlp->error_message,
+            buffer,
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\tdiffrec.DiffractionCorrection\n\n"
             "\r%s must be a numpy array.\n",
             var_name
         );
+        dlp->error_message = tmpl_strdup(buffer);
         return NULL;
     }
 
@@ -116,14 +117,14 @@ extract_data(rssringoccs_DLPObj *dlp, PyObject *py_dlp, const char *var_name)
     else if (PyArray_NDIM((PyArrayObject *)arr) != 1)
     {
         dlp->error_occurred = tmpl_True;
-        dlp->error_message = malloc(sizeof(*dlp->error_message) * 256);
         sprintf(
-            dlp->error_message,
+            buffer,
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\tdiffrec.DiffractionCorrection\n\n"
             "\r%s must be a one-dimensional numpy array.\n",
             var_name
         );
+        dlp->error_message = tmpl_strdup(buffer);
         return NULL;
     }
 
@@ -131,14 +132,14 @@ extract_data(rssringoccs_DLPObj *dlp, PyObject *py_dlp, const char *var_name)
     else if (len != dlp->arr_size)
     {
         dlp->error_occurred = tmpl_True;
-        dlp->error_message = malloc(sizeof(*dlp->error_message) * 256);
         sprintf(
-            dlp->error_message,
+            buffer,
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\tdiffrec.DiffractionCorrection\n\n"
             "\r%s and rho_km_vals have a different number of elements.\n",
             var_name
         );
+        dlp->error_message = tmpl_strdup(buffer);
         return NULL;
     }
 

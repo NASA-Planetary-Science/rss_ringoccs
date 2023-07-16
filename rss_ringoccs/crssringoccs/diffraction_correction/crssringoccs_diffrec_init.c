@@ -38,6 +38,8 @@
         Py_XDECREF(tmp);                                                       \
     } while(0)
 
+#define DESTROY_VAR(var) if (var) {free(var); var = NULL;}
+
 /*  The init function for the dirrection correction class. This is the        *
  *  equivalent of the __init__ function defined in a normal python class.     */
 int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
@@ -294,8 +296,13 @@ int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
         return -1;
     }
 
-    free(tau->psitype);
-    free(tau->wtype);
+    /*  These variables are not copied to the Py object and must be freed.    */
+    DESTROY_VAR(tau->psitype);
+    DESTROY_VAR(tau->wtype);
+    DESTROY_VAR(tau->k_vals);
+    DESTROY_VAR(tau->T_in);
+    DESTROY_VAR(tau->T_out);
+    DESTROY_VAR(tau->T_fwd);
 
     /*  We are now freeing the C tau object. The data pointers are still      *
      *  accessible via the self PyObject. Note, we are freeing the pointer to *

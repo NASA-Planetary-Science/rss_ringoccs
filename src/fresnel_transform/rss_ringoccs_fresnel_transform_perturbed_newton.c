@@ -1,9 +1,9 @@
 /******************************************************************************
- *                                 LICENSE                                    *
+ *                                  LICENSE                                   *
  ******************************************************************************
  *  This file is part of rss_ringoccs.                                        *
  *                                                                            *
- *  rss_ringoccs is free software: you can redistribute it and/or modify it   *
+ *  rss_ringoccs is free software: you can redistribute it and/or modify      *
  *  it under the terms of the GNU General Public License as published by      *
  *  the Free Software Foundation, either version 3 of the License, or         *
  *  (at your option) any later version.                                       *
@@ -16,10 +16,7 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
-
-#include <math.h>
-#include <libtmpl/include/tmpl_complex.h>
-#include <libtmpl/include/tmpl_cyl_fresnel_optics.h>
+#include <libtmpl/include/tmpl.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
 /******************************************************************************
@@ -77,14 +74,15 @@
  ******************************************************************************/
 void
 rssringoccs_Fresnel_Transform_Perturbed_Newton(rssringoccs_TAUObj *tau,
-                                               double *w_func,
-                                               size_t n_pts, size_t center)
+                                               const double *w_func,
+                                               size_t n_pts,
+                                               size_t center)
 {
     /*  Declare all necessary variables. i and j are used for indexing.       */
     size_t m, offset;
 
     /*  The Fresnel kernel and ring azimuth angle.                            */
-    double psi, phi, x, poly, cos_psi, sin_psi, factor;
+    double psi, phi, x, poly, factor;
     tmpl_ComplexDouble exp_psi, integrand;
 
     /*  Initialize T_out and norm to zero so we can loop over later.          */
@@ -135,9 +133,7 @@ rssringoccs_Fresnel_Transform_Perturbed_Newton(rssringoccs_TAUObj *tau,
         psi  += poly;
 
         /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
-        cos_psi = w_func[m]*cos(psi);
-        sin_psi = w_func[m]*sin(psi);
-        exp_psi = tmpl_CDouble_Rect(cos_psi, -sin_psi);
+        exp_psi = tmpl_CDouble_Polar(w_func[m], -psi);
 
         /*  Compute the transform with a Riemann sum. If the T_in pointer     *
          *  does not contain at least 2*n_pts+1 points, n_pts to the left and *

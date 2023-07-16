@@ -1,6 +1,6 @@
 #include <libtmpl/include/tmpl.h>
-#include <libtmpl/include/tmpl_cyl_fresnel_optics.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
+#include <stddef.h>
 
 #define ONE_THIRD (0.3333333333333333333333333333)
 #define FOUR_THIRDS (1.33333333333333333333333333)
@@ -8,12 +8,13 @@
 #define SIXTY_FOUR_THIRDS (21.3333333333333333333333333)
 
 void
-rssringoccs_Fresnel_Transform_Quartic_D_Norm(rssringoccs_TAUObj *tau,
-                                             double *w_func,
-                                             size_t n_pts, size_t center)
+rssringoccs_Fresnel_Transform_Newton_D_Quartic_Norm(rssringoccs_TAUObj *tau,
+                                                    const double *w_func,
+                                                    size_t n_pts,
+                                                    size_t center)
 {
     /*  Variable for indexing.                                                */
-    size_t i;
+    size_t n;
 
     /*  The Fresnel kernel and ring azimuth angle.                            */
     double C[4], abs_norm, real_norm;
@@ -49,38 +50,38 @@ rssringoccs_Fresnel_Transform_Quartic_D_Norm(rssringoccs_TAUObj *tau,
     tau->T_out[center] = tmpl_CDouble_Zero;
     norm = tmpl_CDouble_Zero;
 
-    for (i = 0; i < 4; ++i)
+    for (n = (size_t)0; n < (size_t)4; ++n)
     {
-        phi = tmpl_Double_Stationary_Cyl_Fresnel_Psi_D_Newton_Old(
-            tau->k_vals[center]*tau->D_km_vals[center],
-            tau->rho_km_vals[center],
-            rho[i],
-            phi0[i],
-            phi0[i],
-            tau->B_rad_vals[center],
-            tau->rx_km_vals[center],
-            tau->ry_km_vals[center],
-            tau->rz_km_vals[center],
-            tau->EPS,
-            tau->toler
+        phi = tmpl_Double_Stationary_Cyl_Fresnel_Psi_D_Newton(
+            tau->k_vals[center],        /*  Wavenumber.                       */
+            tau->rho_km_vals[center],   /*  Ring radius.                      */
+            rho[n],                     /*  Dummy radius.                     */
+            phi0[n],                    /*  Initial stationary azimuth guess. */
+            phi0[n],                    /*  Dummy azimuthal angle.            */
+            tau->B_rad_vals[center],    /*  Ring opening angle.               */
+            tau->rx_km_vals[center],    /*  x-coordinate of spacecraft.       */
+            tau->ry_km_vals[center],    /*  y-coordinate of spacecraft.       */
+            tau->rz_km_vals[center],    /*  z-coordinate of spacecraft.       */
+            tau->EPS,                   /*  Epsilon error for Newton's method.*/
+            tau->toler                  /*  Maximum number of iterations.     */
         );
 
         D = tmpl_Double_Cyl_Fresnel_Observer_Distance(
-            rho[i],                     /* Ring radius. */
-            phi,                        /* Stationary azimuth angle. */
-            tau->rx_km_vals[center],    /* Cassini x coordinate. */
-            tau->ry_km_vals[center],    /* Cassini y coordinate. */
-            tau->rz_km_vals[center]     /* Cassini z coordinate. */
+            rho[n],                     /* Ring radius.                       */
+            phi,                        /* Stationary azimuth angle.          */
+            tau->rx_km_vals[center],    /* Cassini x coordinate.              */
+            tau->ry_km_vals[center],    /* Cassini y coordinate.              */
+            tau->rz_km_vals[center]     /* Cassini z coordinate.              */
         );
 
-        psi_n[i] = tmpl_Double_Cyl_Fresnel_Psi_Alt(
-            tau->k_vals[center]*tau->D_km_vals[center],
-            tau->rho_km_vals[center],
-            rho[i],
-            phi,
-            phi0[i],
-            tau->B_rad_vals[center],
-            D
+        psi_n[n] = tmpl_Double_Cyl_Fresnel_Psi(
+            tau->k_vals[center],        /*  Wavenumber.                       */
+            tau->rho_km_vals[center],   /*  Ring radius.                      */
+            rho[n],                     /*  Dummy radius.                     */
+            phi,                        /*  Stationary azimuthal angle.       */
+            phi0[n],                    /*  Dummy azimuthal angle.            */
+            tau->B_rad_vals[center],    /*  Ring opening angle.               */
+            D                           /*  Ring-Spacecraft distance.         */
         );
     }
 
@@ -94,16 +95,16 @@ rssringoccs_Fresnel_Transform_Quartic_D_Norm(rssringoccs_TAUObj *tau,
     C[2] = (psi_full_diff - 2.0*psi_half_diff) * rcpr_w_cb * SIXTEEN_THIRDS;
     C[3] = (psi_full_mean - 4.0*psi_half_mean) * rcpr_w_qr * SIXTY_FOUR_THIRDS;
 
-    for (i = 0; i<n_pts; ++i)
+    for (n = (size_t)0; n < n_pts; ++n)
     {
         x = tau->rho_km_vals[center] - tau->rho_km_vals[offset];
         psi = x*(C[0] + x*(C[1] + x*(C[2] + x*C[3])));
 
-        exp_psi = tmpl_CDouble_Polar(w_func[i], -psi);
+        exp_psi = tmpl_CDouble_Polar(w_func[n], -psi);
         integrand = tmpl_CDouble_Multiply(exp_psi, tau->T_in[offset]);
         tmpl_CDouble_AddTo(&tau->T_out[center], &integrand);
         tmpl_CDouble_AddTo(&norm, &exp_psi);
-        offset += 1;
+        offset++;
     }
 
     /*  The integral in the numerator of norm evaluates to F sqrt(2). Use     *

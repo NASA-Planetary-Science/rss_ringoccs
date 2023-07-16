@@ -1,19 +1,36 @@
-
-#include <math.h>
-#include <libtmpl/include/tmpl_complex.h>
-#include <libtmpl/include/tmpl_cyl_fresnel_optics.h>
+/******************************************************************************
+ *                                  LICENSE                                   *
+ ******************************************************************************
+ *  This file is part of rss_ringoccs.                                        *
+ *                                                                            *
+ *  rss_ringoccs is free software: you can redistribute it and/or modify      *
+ *  it under the terms of the GNU General Public License as published by      *
+ *  the Free Software Foundation, either version 3 of the License, or         *
+ *  (at your option) any later version.                                       *
+ *                                                                            *
+ *  rss_ringoccs is distributed in the hope that it will be useful,           *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+ *  GNU General Public License for more details.                              *
+ *                                                                            *
+ *  You should have received a copy of the GNU General Public License         *
+ *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
+ ******************************************************************************/
+#include <libtmpl/include/tmpl.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
 void
-rssringoccs_Fresnel_Transform_Quartic_D(rssringoccs_TAUObj *tau, double *w_func,
-                                        size_t n_pts, size_t center)
+rssringoccs_Fresnel_Transform_Newton_D_Quartic(rssringoccs_TAUObj *tau,
+                                               const double *w_func,
+                                               size_t n_pts,
+                                               size_t center)
 {
     /*  Declare all necessary variables. i and j are used for indexing.       */
     size_t i, ind[4], offset;
 
     /*  The Fresnel kernel and ring azimuth angle.                            */
     double C[4], factor, rcpr_w, rcpr_w_sq, psi_n[4], D, x;
-    double psi, phi, sin_psi, cos_psi;
+    double psi, phi;
     double psi_half_mean, psi_half_diff;
     double psi_full_mean, psi_full_diff;
     tmpl_ComplexDouble exp_psi, integrand;
@@ -90,9 +107,7 @@ rssringoccs_Fresnel_Transform_Quartic_D(rssringoccs_TAUObj *tau, double *w_func,
         psi = psi*x + C[0];
         psi = psi*x;
 
-        cos_psi = w_func[i]*cos(psi);
-        sin_psi = w_func[i]*sin(psi);
-        exp_psi = tmpl_CDouble_Rect(cos_psi, -sin_psi);
+        exp_psi = tmpl_CDouble_Polar(w_func[i], -psi);
         integrand = tmpl_CDouble_Multiply(exp_psi, tau->T_in[offset]);
         tau->T_out[center] = tmpl_CDouble_Add(tau->T_out[center], integrand);
         offset += 1;

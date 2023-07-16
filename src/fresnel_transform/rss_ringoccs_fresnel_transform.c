@@ -1,9 +1,9 @@
 /******************************************************************************
- *                                 LICENSE                                    *
+ *                                  LICENSE                                   *
  ******************************************************************************
  *  This file is part of rss_ringoccs.                                        *
  *                                                                            *
- *  rss_ringoccs is free software: you can redistribute it and/or modify it   *
+ *  rss_ringoccs is free software: you can redistribute it and/or modify      *
  *  it under the terms of the GNU General Public License as published by      *
  *  the Free Software Foundation, either version 3 of the License, or         *
  *  (at your option) any later version.                                       *
@@ -16,7 +16,6 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
-
 #include <libtmpl/include/tmpl.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
@@ -58,15 +57,18 @@
  *          The diffraction corrected profile.                                *
  ******************************************************************************/
 void
-rssringoccs_Fresnel_Transform(rssringoccs_TAUObj *tau, double *x_arr,
-                              double *w_func, size_t n_pts, size_t center)
+rssringoccs_Fresnel_Transform(rssringoccs_TAUObj *tau,
+                              const double *x_arr,
+                              const double *w_func,
+                              size_t n_pts,
+                              size_t center)
 {
     /*  Declare all necessary variables. i and j are used for indexing.       */
     size_t m, n;
 
     /*  rcpr_F and rcpr_F2 are the reciprocal of the Fresnel scale, and the   *
      *  square of this. x is used as the argument of the Fresnel kernel.      */
-    double x, rcpr_F, rcpr_F2, cos_x, sin_x, factor;
+    double x, rcpr_F, rcpr_F2, factor;
 
     /*  exp_negative_ix is used for the Fresnel kernel.                       */
     tmpl_ComplexDouble exp_negative_ix, integrand, arg;
@@ -91,9 +93,7 @@ rssringoccs_Fresnel_Transform(rssringoccs_TAUObj *tau, double *x_arr,
         x = x_arr[m]*rcpr_F2;
 
         /*  Use Euler's Theorem to compute exp(-ix). Scale by window function.*/
-        tmpl_Double_SinCos(x, &sin_x, &cos_x);
-        arg = tmpl_CDouble_Rect(cos_x, -sin_x);
-        exp_negative_ix = tmpl_CDouble_Multiply_Real(w_func[m], arg);
+        exp_negative_ix = tmpl_CDouble_Polar(w_func[m], -x);
 
         /*  Take advantage of the symmetry of the quadratic approximation.    *
          *  This cuts the number of computations roughly in half. If the T_in *
@@ -103,7 +103,7 @@ rssringoccs_Fresnel_Transform(rssringoccs_TAUObj *tau, double *x_arr,
         integrand = tmpl_CDouble_Add(tau->T_in[center - n],
                                      tau->T_in[center + n]);
         integrand = tmpl_CDouble_Multiply(exp_negative_ix, integrand);
-        tau->T_out[center] = tmpl_CDouble_Add(tau->T_out[center], integrand);
+        tmpl_CDouble_AddTo(&tau->T_out[center], &integrand);
         n--;
     }
 

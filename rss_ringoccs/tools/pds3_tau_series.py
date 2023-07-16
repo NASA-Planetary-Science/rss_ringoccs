@@ -130,8 +130,7 @@ def get_tau_series_info(rev_info, tau_inst, series_name, prof_dir):
     alignment_column        = 37
     series_alignment_column = 28
 
-    # record_bytes, bytes_list, start_bytes_list = pds3.get_record_bytes(formats)
-    record_bytes, bytes_list, start_bytes_list = get_record_bytes(formats)
+    record_bytes, bytes_list, start_bytes_list = pds3.get_record_bytes(formats)
 
     col_num = list(range(1, ncol+1))
 

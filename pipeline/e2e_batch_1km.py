@@ -74,25 +74,45 @@ for ind in range(nfiles):
         print(rsr_file)
 
         # Create instance with rsr file contents
-        rsr_inst = rss.rsr_reader.RSRReader(rsr_file, verbose=verbose,
-                decimate_16khz_to_1khz=decimate_16khz_to_1khz)
+        rsr_inst = rss.rsr_reader.RSRReader(
+            rsr_file,
+            verbose = verbose,
+            decimate_16khz_to_1khz = decimate_16khz_to_1khz
+        )
 
         # Create instance with geometry parameters
-        geo_inst = rss.occgeo.Geometry(rsr_inst, planet, spacecraft,
-                kernels, verbose=verbose, write_file=write_file)
+        geo_inst = rss.occgeo.Geometry(
+            rsr_inst,
+            planet,
+            spacecraft,
+            kernels,
+            verbose = verbose,
+            write_file = write_file
+        )
 
         # Create instance with calibrated data
-        cal_inst = rss.calibration.Calibration(rsr_inst, geo_inst,
-                verbose=verbose, write_file=write_file,
-                pnf_order=pnf_order, interact=interact)
+        cal_inst = rss.calibration.Calibration(
+            rsr_inst,
+            geo_inst,
+            verbose = verbose,
+            write_file = write_file,
+            pnf_order = pnf_order,
+            interact=interact
+        )
 
         # Create instance with diffraction-limited profile and other
         #   inputs needed for diffraction correction
         dlp_inst_ing, dlp_inst_egr = (
-                rss.calibration.DiffractionLimitedProfile.create_dlps(
-                    rsr_inst, geo_inst, cal_inst, dr_km_desired,
-                    profile_range=profile_range,
-                    write_file=write_file, verbose=verbose))
+            rss.calibration.DiffractionLimitedProfile.create_dlps(
+                rsr_inst,
+                geo_inst,
+                cal_inst,
+                dr_km_desired,
+                profile_range = profile_range,
+                write_file = write_file,
+                verbose = verbose
+            )
+        )
 
         # Invert profile for full occultation
         if dlp_inst_ing is not None:
@@ -109,14 +129,15 @@ for ind in range(nfiles):
                 verbose = verbose
             )
 
-            rss.tools.plot_summary_doc_v2(geo_inst, cal_inst,
-                                          dlp_inst_ing, tau_inst)
+            tau_inst.history = write_history_dict(tau_inst.input_vars,
+                                                  tau_inst.input_kwds,
+                                                  __file__)
 
-            if write_file:
-                    tau_inst.history = write_history_dict(rec.input_vars,
-                                                          rec.input_kwds,
-                                                          __file__)
-                    outfiles = write_output_files(tau_inst)
+            tau_inst.outfiles = write_output_files(tau_inst)
+
+            rss.tools.plot_summary_doc_v2(
+                geo_inst, cal_inst, dlp_inst_ing, tau_inst
+            )
 
         if dlp_inst_egr is not None:
             tau_inst = rss.DiffractionCorrection(
@@ -131,14 +152,15 @@ for ind in range(nfiles):
                 verbose = verbose
             )
 
-            if write_file:
-                    tau_inst.history = write_history_dict(rec.input_vars,
-                                                          rec.input_kwds,
-                                                          __file__)
-                    outfiles = write_output_files(tau_inst)
+            tau_inst.history = write_history_dict(tau_inst.input_vars,
+                                                  tau_inst.input_kwds,
+                                                  __file__)
 
-            rss.tools.plot_summary_doc_v2(geo_inst, cal_inst,
-                                          dlp_inst_egr, tau_inst)
+            tau_inst.outfiles = write_output_files(tau_inst)
+
+            rss.tools.plot_summary_doc_v2(
+                geo_inst, cal_inst, dlp_inst_egr, tau_inst
+            )
 
         et = time.time()
         run_time = str((et-st)/60.)

@@ -141,6 +141,10 @@ static PyMemberDef diffrec_members[] = {
         "History of the tau instance"
     },
     {
+        "outfiles", T_OBJECT_EX, offsetof(PyDiffrecObj, outfiles), 0,
+        "TAB files for the Tau object."
+    },
+    {
         "input_vars", T_OBJECT_EX, offsetof(PyDiffrecObj, input_vars), 0,
         "Dictionary of input arguments used to create this instance."
     },

@@ -29,6 +29,15 @@
 /*  Function prototype and typedefs for structs given here.                   */
 #include "../crssringoccs.h"
 
+/*  Macro for safely creating None objects.                                   */
+#define MAKE_NONE(var)                                                         \
+    do {                                                                       \
+        PyObject *tmp = self->var;                                             \
+        Py_INCREF(Py_None);                                                    \
+        self->var = Py_None;                                                   \
+        Py_XDECREF(tmp);                                                       \
+    } while(0)
+
 /*  The init function for the dirrection correction class. This is the        *
  *  equivalent of the __init__ function defined in a normal python class.     */
 int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
@@ -332,6 +341,8 @@ int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
     Py_INCREF(dlp_tmp);
     self->input_kwds = dlp_tmp;
     Py_XDECREF(tmp);
+
+    self->outfiles = NULL;
 
     return 1;
 }

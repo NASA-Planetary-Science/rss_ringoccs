@@ -47,6 +47,7 @@ void Diffrec_dealloc(PyDiffrecObj *self)
     Py_XDECREF(self->tau_fwd_vals);
     Py_XDECREF(self->w_km_vals);
     Py_XDECREF(self->history);
+    Py_XDECREF(self->outfiles);
     Py_XDECREF(self->input_vars);
     Py_XDECREF(self->input_kwds);
     Py_XDECREF(self->rx_km_vals);

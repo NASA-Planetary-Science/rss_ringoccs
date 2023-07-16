@@ -79,6 +79,7 @@ typedef struct PyDiffrecObj_Def {
     double sigma;                     /*  Allen deviation of spacecraft.      */
     const char *psitype;              /*  Requested reconstruction method.    */
     const char *wtype;                /*  Requested window type.              */
+    const char *outfiles;             /*  TAB files for this Tau object.      */
 } PyDiffrecObj;
 
 /*  The CSV struct containing all of the data for diffraction reconstruction. */

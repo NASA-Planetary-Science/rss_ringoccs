@@ -91,7 +91,7 @@ typedef struct rssringoccs_TAUObj_Def {
     rssringoccs_HistoryObj *history;
 } rssringoccs_TAUObj;
 
-typedef void (*rssringoccs_FresT)(rssringoccs_TAUObj *, double *,
+typedef void (*rssringoccs_FresT)(rssringoccs_TAUObj *, const double *,
                                   size_t, size_t);
 
 extern void rssringoccs_Reconstruction(rssringoccs_TAUObj *tau);

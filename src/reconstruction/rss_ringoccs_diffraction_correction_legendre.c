@@ -53,8 +53,10 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
     /*  Create function pointers for window function and Fresnel transform.   */
     rssringoccs_window_func fw = tau->window_func;
 
-    void (*FresT)(rssringoccs_TAUObj *, double *, double *, double *,
-                  size_t, size_t);
+    void (*FresT)(
+        rssringoccs_TAUObj *, const double *, const double *, const double *,
+        size_t, size_t
+    );
 
     /*  This should remain at false.                                          */
     tau->error_occurred = tmpl_False;
@@ -84,9 +86,9 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
     if (tau->use_norm)
     {
         if (IsEven)
-            FresT = rssringoccs_Fresnel_Transform_Legendre_Norm_Even;
+            FresT = rssringoccs_Fresnel_Transform_Legendre_Even_Norm;
         else
-            FresT = rssringoccs_Fresnel_Transform_Legendre_Norm_Odd;
+            FresT = rssringoccs_Fresnel_Transform_Legendre_Odd_Norm;
     }
     else
     {

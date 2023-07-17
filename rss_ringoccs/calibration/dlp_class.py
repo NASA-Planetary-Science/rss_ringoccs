@@ -321,8 +321,8 @@ class DiffractionLimitedProfile(object):
 
         # spacecraft position relative to planetocentric frame.
         rx_km_vals_interp = np.interp(spm_desired, spm_geo, rx_km_geo)
-        ry_km_vals_interp = np.interp(spm_desired, spm_geo, rx_km_geo)
-        rz_km_vals_interp = np.interp(spm_desired, spm_geo, rx_km_geo)
+        ry_km_vals_interp = np.interp(spm_desired, spm_geo, ry_km_geo)
+        rz_km_vals_interp = np.interp(spm_desired, spm_geo, rz_km_geo)
 
         # FILLERS FOR RADIUS CORRECTION
         rho_corr_pole_km_vals = np.zeros(len(spm_desired))

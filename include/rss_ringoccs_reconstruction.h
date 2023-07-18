@@ -32,17 +32,17 @@ typedef enum {
 
 /*  Structure that contains all of the necessary data.                        */
 typedef struct rssringoccs_TAUObj_Def {
-    tmpl_ComplexDouble *T_in;
-    tmpl_ComplexDouble *T_out;
-    tmpl_ComplexDouble *T_fwd;
+    tmpl_ComplexDouble *T_in; /* TODO: Replace p_norm_vals, etc., with just this. */
+    tmpl_ComplexDouble *T_out; /* TODO: Replace power_vals, etc., with just this. */
+    tmpl_ComplexDouble *T_fwd; /* TODO: Replace power_fwd_vals, etc., with this. */
     double *rho_km_vals;
     double *F_km_vals;
-    double *phi_rad_vals;
-    double *k_vals;
+    double *phi_rad_vals; /* TODO: Make degrees. */
+    double *k_vals; /* TODO: Remove. */
     double *f_sky_hz_vals;
     double *rho_dot_kms_vals;
     double *raw_tau_threshold_vals;
-    double *B_rad_vals;
+    double *B_rad_vals; /* TODO: Make degrees. */
     double *D_km_vals;
     double *w_km_vals;
     double *t_oet_spm_vals;
@@ -51,15 +51,15 @@ typedef struct rssringoccs_TAUObj_Def {
     double *rho_corr_pole_km_vals;
     double *rho_corr_timing_km_vals;
     double *tau_threshold_vals;
-    double *phi_rl_rad_vals;
-    double *p_norm_vals;
-    double *p_norm_fwd_vals;
-    double *power_vals;
-    double *phase_rad_vals;
-    double *phase_fwd_vals;
-    double *phase_vals;
-    double *tau_fwd_vals;
-    double *tau_vals;
+    double *phi_rl_rad_vals; /* TODO: Make degrees. */
+    double *p_norm_vals; /* TODO: Remove. */
+    double *p_norm_fwd_vals; /* TODO: Remove. */
+    double *power_vals; /* TODO: Remove. */
+    double *phase_rad_vals; /* TODO: Make degrees, also remove. */
+    double *phase_fwd_vals; /* TODO: Make degrees, remove. */
+    double *phase_vals; /* TODO: Remove. */
+    double *tau_fwd_vals; /* TODO: Remove. */
+    double *tau_vals; /* TODO: Remove. */
     double *rx_km_vals;
     double *ry_km_vals;
     double *rz_km_vals;
@@ -88,7 +88,7 @@ typedef struct rssringoccs_TAUObj_Def {
     char *wtype;
     char *psitype;
     unsigned int order;
-    rssringoccs_HistoryObj *history;
+    rssringoccs_HistoryObj *history; /* TODO: Remove. */
 } rssringoccs_TAUObj;
 
 typedef void (*rssringoccs_FresT)(rssringoccs_TAUObj *, const double *,

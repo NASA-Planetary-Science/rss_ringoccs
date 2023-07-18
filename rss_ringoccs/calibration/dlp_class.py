@@ -101,7 +101,6 @@ class DiffractionLimitedProfile(object):
         spm_full = rsr_inst.spm_vals
         IQ_m = rsr_inst.IQ_m
 
-
         spm_geo = geo_inst.t_oet_spm_vals
         rho_km_geo = geo_inst.rho_km_vals
         rho_dot_kms_geo = geo_inst.rho_dot_kms_vals
@@ -117,8 +116,6 @@ class DiffractionLimitedProfile(object):
         ry_km_geo = geo_inst.ry_km_vals
         rz_km_geo = geo_inst.rz_km_vals
         prof_dir = geo_inst.rev_info['prof_dir']
-
-
 
         spm_cal = cal_inst.t_oet_spm_vals
         f_sky_pred_cal = cal_inst.f_sky_hz_vals
@@ -320,6 +317,7 @@ class DiffractionLimitedProfile(object):
         t_set_spm_vals_interp = np.interp(spm_desired, spm_geo, t_set_geo)
 
         # spacecraft position relative to planetocentric frame.
+
         rx_km_vals_interp = np.interp(spm_desired, spm_geo, rx_km_geo)
         ry_km_vals_interp = np.interp(spm_desired, spm_geo, ry_km_geo)
         rz_km_vals_interp = np.interp(spm_desired, spm_geo, rz_km_geo)
@@ -389,6 +387,7 @@ class DiffractionLimitedProfile(object):
 
         spm_full = rsr_inst.spm_vals
         spm_geo = geo_inst.t_oet_spm_vals
+
 
         # spm_cal = cal_inst.t_oet_spm_vals
         # f_sky_pred_cal = cal_inst.f_sky_hz_vals
@@ -479,6 +478,10 @@ class DiffractionLimitedProfile(object):
                         cal_inst.f_offset_fit_vals[ind_cal_egr:])
 
             # split geometry attributes
+
+            geo_ing.rx_km_vals = geo_inst.rx_km_vals[:ind_geo_ing]
+            geo_ing.ry_km_vals = geo_inst.ry_km_vals[:ind_geo_ing]
+            geo_ing.rz_km_vals = geo_inst.rz_km_vals[:ind_geo_ing]
             geo_ing.rho_km_vals = geo_inst.rho_km_vals[:ind_geo_ing]
             geo_ing.rho_dot_kms_vals = geo_inst.rho_dot_kms_vals[:ind_geo_ing]
             geo_ing.t_oet_spm_vals = geo_inst.t_oet_spm_vals[:ind_geo_ing]
@@ -509,11 +512,12 @@ class DiffractionLimitedProfile(object):
                 geo_egr.ul_phi_rl_deg_vals = geo_inst.ul_phi_rl_deg_vals[ind_geo_egr:]
                 geo_egr.ul_phi_ora_deg_vals = geo_inst.ul_phi_ora_deg_vals[ind_geo_egr:]
 
-
             dlp_ing = cls(rsr_ing, geo_ing, cal_ing, dr_km, verbose=verbose,
                     write_file=write_file, profile_range=profile_range)
 
-
+            geo_egr.rx_km_vals = geo_inst.rx_km_vals[ind_geo_egr:]
+            geo_egr.ry_km_vals = geo_inst.ry_km_vals[ind_geo_egr:]
+            geo_egr.rz_km_vals = geo_inst.rz_km_vals[ind_geo_egr:]
             geo_egr.rho_km_vals = geo_inst.rho_km_vals[ind_geo_egr:]
             geo_egr.rho_dot_kms_vals = geo_inst.rho_dot_kms_vals[ind_geo_egr:]
             geo_egr.t_oet_spm_vals = geo_inst.t_oet_spm_vals[ind_geo_egr:]

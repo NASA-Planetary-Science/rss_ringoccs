@@ -133,11 +133,12 @@ for ind in range(nfiles):
                                                   tau_inst.input_kwds,
                                                   __file__)
 
-            tau_inst.outfiles = write_output_files(tau_inst)
+            if write_file:
+                tau_inst.outfiles = write_output_files(tau_inst)
 
-            rss.tools.plot_summary_doc_v2(
-                geo_inst, cal_inst, dlp_inst_ing, tau_inst
-            )
+                rss.tools.plot_summary_doc_v2(
+                    geo_inst, cal_inst, dlp_inst_ing, tau_inst
+                )
 
         if dlp_inst_egr is not None:
             tau_inst = rss.DiffractionCorrection(
@@ -156,11 +157,12 @@ for ind in range(nfiles):
                                                   tau_inst.input_kwds,
                                                   __file__)
 
-            tau_inst.outfiles = write_output_files(tau_inst)
+            if write_file:
+                tau_inst.outfiles = write_output_files(tau_inst)
 
-            rss.tools.plot_summary_doc_v2(
-                geo_inst, cal_inst, dlp_inst_egr, tau_inst
-            )
+                rss.tools.plot_summary_doc_v2(
+                    geo_inst, cal_inst, dlp_inst_egr, tau_inst
+                )
 
         et = time.time()
         run_time = str((et-st)/60.)

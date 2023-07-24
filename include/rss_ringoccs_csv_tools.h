@@ -174,34 +174,5 @@ extern void rssringoccs_Destroy_CSV_Members(rssringoccs_CSVData *csv);
 
 extern void rssringoccs_Destroy_CSV(rssringoccs_CSVData **csv);
 
-#define BUFFER_SIZE 1024
-static inline size_t rssringoccs_count_lines(FILE* file)
-{
-    char buffer[BUFFER_SIZE];
-    const size_t zero = (size_t)0;
-    size_t counter = zero;
-    size_t n, chars_read;
-
-    for(;;)
-    {
-        chars_read = fread(buffer, 1, BUFFER_SIZE, file);
-
-        if (ferror(file))
-            return zero;
-
-        for(n = 0; n < chars_read; n++)
-        {
-            if (buffer[n] == '\n')
-                counter++;
-        }
-
-        if (feof(file))
-            break;
-    }
-
-    return counter;
-}
-#undef BUFFER_SIZE
-
 #endif
 /*  End of include guard.                                                     */

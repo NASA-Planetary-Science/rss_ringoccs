@@ -174,10 +174,7 @@ rssringoccs_Get_DLP(const char *filename, tmpl_Bool use_deprecated)
     rewind(fp);
 
     /*  Count the number of lines in the CSV.                                 */
-    dlp->n_elements = rssringoccs_count_lines(fp);
-
-    /*  Reset the file back to the start.                                     */
-    rewind(fp);
+    dlp->n_elements = tmpl_Line_Count(fp);
 
     /*  Use the MALLOC_DLP_VAR macro function to allocate memory and check    *
      *  for errors. This macro ends with an if-then statement, and ends in    *

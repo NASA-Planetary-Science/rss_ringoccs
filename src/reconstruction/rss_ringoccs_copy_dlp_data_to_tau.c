@@ -102,6 +102,7 @@
 #include <libtmpl/include/tmpl_math.h>
 #include <libtmpl/include/tmpl_string.h>
 #include <libtmpl/include/tmpl_special_functions_real.h>
+#include <libtmpl/include/tmpl_optics.h>
 
 #include <rss_ringoccs/include/rss_ringoccs_calibration.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
@@ -247,40 +248,40 @@ void rssringoccs_Copy_DLP_Data_To_Tau(rssringoccs_DLPObj *dlp,
      *  This macro allocates memory for the members of the tau object and     *
      *  checks for errors.                                                    */
     MALLOC_TAU_VAR(rho_km_vals)
-    MALLOC_TAU_VAR(phi_rad_vals)
-    MALLOC_TAU_VAR(f_sky_hz_vals)
+    MALLOC_TAU_VAR(phi_deg_vals)
+    MALLOC_TAU_VAR(k_vals)
     MALLOC_TAU_VAR(rho_dot_kms_vals)
-    MALLOC_TAU_VAR(raw_tau_threshold_vals)
-    MALLOC_TAU_VAR(B_rad_vals)
+    MALLOC_TAU_VAR(B_deg_vals)
     MALLOC_TAU_VAR(D_km_vals)
     MALLOC_TAU_VAR(t_oet_spm_vals)
     MALLOC_TAU_VAR(t_ret_spm_vals)
     MALLOC_TAU_VAR(t_set_spm_vals)
     MALLOC_TAU_VAR(rho_corr_pole_km_vals)
     MALLOC_TAU_VAR(rho_corr_timing_km_vals)
-    MALLOC_TAU_VAR(phi_rl_rad_vals)
+    MALLOC_TAU_VAR(phi_rl_deg_vals)
     MALLOC_TAU_VAR(p_norm_vals)
-    MALLOC_TAU_VAR(phase_rad_vals)
+    MALLOC_TAU_VAR(phase_deg_vals)
     MALLOC_TAU_VAR(rx_km_vals)
     MALLOC_TAU_VAR(ry_km_vals)
     MALLOC_TAU_VAR(rz_km_vals)
+    MALLOC_TAU_VAR(T_in);
 
     /*  Loop through the entries of all of the pointers and set the nth value *
      *  of a tau member to the nth value of the corresponding dlp member.     */
     for (n=0; n<dlp->arr_size; ++n)
     {
         tau->rho_km_vals[n] = dlp->rho_km_vals[n];
-        tau->phi_rad_vals[n] = dlp->phi_rad_vals[n];
-        tau->B_rad_vals[n] = dlp->B_rad_vals[n];
+        tau->phi_deg_vals[n] = dlp->phi_deg_vals[n];
+        tau->B_deg_vals[n] = dlp->B_deg_vals[n];
         tau->D_km_vals[n] = dlp->D_km_vals[n];
-        tau->f_sky_hz_vals[n] = dlp->f_sky_hz_vals[n];
+        tau->k_vals[n] = dlp->f_sky_hz_vals[n];
         tau->rho_dot_kms_vals[n] = dlp->rho_dot_kms_vals[n];
         tau->t_oet_spm_vals[n] = dlp->t_oet_spm_vals[n];
         tau->t_ret_spm_vals[n] = dlp->t_ret_spm_vals[n];
         tau->t_set_spm_vals[n] = dlp->t_set_spm_vals[n];
         tau->rho_corr_pole_km_vals[n] = dlp->rho_corr_pole_km_vals[n];
         tau->rho_corr_timing_km_vals[n] = dlp->rho_corr_timing_km_vals[n];
-        tau->phi_rl_rad_vals[n] = dlp->phi_rl_rad_vals[n];
+        tau->phi_rl_deg_vals[n] = dlp->phi_rl_deg_vals[n];
         tau->p_norm_vals[n] = dlp->p_norm_vals[n];
         tau->raw_tau_threshold_vals[n] = dlp->raw_tau_threshold_vals[n];
         tau->rx_km_vals[n] = dlp->rx_km_vals[n];

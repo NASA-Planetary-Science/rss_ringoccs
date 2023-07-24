@@ -11,8 +11,8 @@
 /*  Structure that contains all of the necessary data.                        */
 typedef struct rssringoccs_DLPObj_Def {
     double *rho_km_vals;
-    double *phi_rad_vals;
-    double *B_rad_vals;
+    double *phi_deg_vals;
+    double *B_deg_vals;
     double *D_km_vals;
     double *f_sky_hz_vals;
     double *rho_dot_kms_vals;
@@ -21,9 +21,9 @@ typedef struct rssringoccs_DLPObj_Def {
     double *t_set_spm_vals;
     double *rho_corr_pole_km_vals;
     double *rho_corr_timing_km_vals;
-    double *phi_rl_rad_vals;
+    double *phi_rl_deg_vals;
     double *p_norm_vals;
-    double *phase_rad_vals;
+    double *phase_deg_vals;
     double *raw_tau_threshold_vals;
     double *rx_km_vals;
     double *ry_km_vals;
@@ -34,6 +34,7 @@ typedef struct rssringoccs_DLPObj_Def {
 } rssringoccs_DLPObj;
 
 typedef struct rssringoccs_CalcFreqOffsetObj_Def {
+
     /*  Observed event time at full sampling.                                 */
     double *t_oet_spm_vals;
 

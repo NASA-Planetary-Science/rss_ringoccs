@@ -83,9 +83,9 @@ rssringoccs_Fresnel_Transform(rssringoccs_TAUObj *tau,
 
     /*  Division is more expensive than multiplication, so store the          *
      *  reciprocal of F as a variable and compute with that.                  */
-    rcpr_F  = 1.0/tau->F_km_vals[center];
+    rcpr_F = 1.0 / tau->F_km_vals[center];
     rcpr_F2 = rcpr_F*rcpr_F;
-    factor  = 0.5*tau->dx_km*rcpr_F;
+    factor = 0.5*tau->dx_km*rcpr_F;
 
     /*  Use a Riemann Sum to approximate the Fresnel Inverse Integral.        */
     for (m = 0; m<n_pts; ++m)

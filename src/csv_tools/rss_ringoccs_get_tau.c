@@ -127,10 +127,8 @@ rssringoccs_TauCSV *rssringoccs_Get_Tau(const char *filename,
 
     /*  Count the number of lines in the CSV.                                 */
     rewind(fp);
-    tau->n_elements = rssringoccs_count_lines(fp);
 
-    /*  Reset the file back to the start.                                     */
-    rewind(fp);
+    tau->n_elements = tmpl_Line_Count(fp);
 
     /*  Allocate memory for t_oet_spm_vals and check for error.               */
     tau->t_oet_spm_vals = malloc(sizeof(*tau->t_oet_spm_vals)*tau->n_elements);

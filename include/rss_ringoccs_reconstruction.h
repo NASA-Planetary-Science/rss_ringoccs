@@ -7,111 +7,18 @@
 #include <libtmpl/include/tmpl_complex.h>
 #include <rss_ringoccs/include/rss_ringoccs_calibration.h>
 #include <rss_ringoccs/include/rss_ringoccs_history.h>
+#include <rss_ringoccs/include/rss_ringoccs_tau.h>
 
 /*  size_t typedef is given here.                                             */
 #include <stdlib.h>
-
-typedef double (*rssringoccs_window_func)(double, double);
-
-typedef enum {
-    rssringoccs_DR_Fresnel,
-    rssringoccs_DR_Legendre,
-    rssringoccs_DR_Newton,
-    rssringoccs_DR_NewtonD,
-    rssringoccs_DR_NewtonDOld,
-    rssringoccs_DR_NewtonDPhi,
-    rssringoccs_DR_NewtonPerturb,
-    rssringoccs_DR_Quadratic,
-    rssringoccs_DR_Cubic,
-    rssringoccs_DR_Quartic,
-    rssringoccs_DR_QuarticD,
-    rssringoccs_DR_SimpleFFT,
-    rssringoccs_DR_Elliptical,
-    rssringoccs_DR_None
-} rssringoccs_Psitype_Enum;
-
-/*  Structure that contains all of the necessary data.                        */
-typedef struct rssringoccs_TAUObj_Def {
-    tmpl_ComplexDouble *T_in; /* TODO: Replace p_norm_vals, etc., with just this. */
-    tmpl_ComplexDouble *T_out; /* TODO: Replace power_vals, etc., with just this. */
-    tmpl_ComplexDouble *T_fwd; /* TODO: Replace power_fwd_vals, etc., with this. */
-    double *rho_km_vals;
-    double *F_km_vals;
-    double *phi_rad_vals; /* TODO: Make degrees. */
-    double *k_vals; /* TODO: Remove. */
-    double *f_sky_hz_vals;
-    double *rho_dot_kms_vals;
-    double *raw_tau_threshold_vals;
-    double *B_rad_vals; /* TODO: Make degrees. */
-    double *D_km_vals;
-    double *w_km_vals;
-    double *t_oet_spm_vals;
-    double *t_ret_spm_vals;
-    double *t_set_spm_vals;
-    double *rho_corr_pole_km_vals;
-    double *rho_corr_timing_km_vals;
-    double *tau_threshold_vals;
-    double *phi_rl_rad_vals; /* TODO: Make degrees. */
-    double *p_norm_vals; /* TODO: Remove. */
-    double *p_norm_fwd_vals; /* TODO: Remove. */
-    double *power_vals; /* TODO: Remove. */
-    double *phase_rad_vals; /* TODO: Make degrees, also remove. */
-    double *phase_fwd_vals; /* TODO: Make degrees, remove. */
-    double *phase_vals; /* TODO: Remove. */
-    double *tau_fwd_vals; /* TODO: Remove. */
-    double *tau_vals; /* TODO: Remove. */
-    double *rx_km_vals;
-    double *ry_km_vals;
-    double *rz_km_vals;
-    double dx_km;
-    double normeq;
-    double sigma;
-    double ecc;
-    double peri;
-    double res;
-    double perturb[5];
-    double rng_list[2];
-    double rng_req[2];
-    double EPS;
-    unsigned int toler;
-    size_t start;
-    size_t n_used;
-    size_t arr_size;
-    rssringoccs_window_func window_func;
-    rssringoccs_Psitype_Enum psinum;
-    tmpl_Bool use_norm;
-    tmpl_Bool use_fwd;
-    tmpl_Bool bfac;
-    tmpl_Bool verbose;
-    tmpl_Bool error_occurred;
-    char *error_message;
-    char *wtype;
-    char *psitype;
-    unsigned int order;
-    rssringoccs_HistoryObj *history; /* TODO: Remove. */
-} rssringoccs_TAUObj;
 
 typedef void (*rssringoccs_FresT)(rssringoccs_TAUObj *, const double *,
                                   size_t, size_t);
 
 extern void rssringoccs_Reconstruction(rssringoccs_TAUObj *tau);
 
-extern void
-rssringoccs_Tau_Set_WType(const char *wtype, rssringoccs_TAUObj *tau);
-
-extern void
-rssringoccs_Tau_Set_Psitype(const char *psitype, rssringoccs_TAUObj* tau);
-
-extern void
-rssringoccs_Tau_Set_Range_From_String(const char *range,
-                                      rssringoccs_TAUObj* tau);
-
 extern rssringoccs_TAUObj *
 rssringoccs_Create_TAUObj(rssringoccs_DLPObj *dlp, double res);
-
-extern void
-rssringoccs_Copy_DLP_Data_To_Tau(rssringoccs_DLPObj *dlp,
-                                 rssringoccs_TAUObj *tau);
 
 extern void
 rssringoccs_Tau_Check_Data_Range(rssringoccs_TAUObj *dlp);
@@ -134,16 +41,12 @@ rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau);
 extern void
 rssringoccs_Tau_Finish(rssringoccs_TAUObj* tau);
 
-extern void
-rssringoccs_Destroy_Tau_Members(rssringoccs_TAUObj *tau);
 
-extern void
-rssringoccs_Destroy_Tau(rssringoccs_TAUObj **tau);
 
 extern void
 rssringoccs_Tau_Reset_Window(double *x_arr, double *w_func, double dx,
                              double width, size_t nw_pts,
-                             rssringoccs_window_func fw);
+                             rssringoccs_Window_Function fw);
 
 /*  Functions that compute the Fresnel Transform on a TAUObj instance.        */
 extern void

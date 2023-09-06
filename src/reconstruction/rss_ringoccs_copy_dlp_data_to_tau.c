@@ -75,22 +75,7 @@
  *          The rssringoccs_TAUObj is defined here and the function           *
  *          prototypes for reconstruction are found here as well.             *
  ******************************************************************************
- *                            A NOTE ON COMMENTS                              *
- ******************************************************************************
- *  It is anticipated that many users of this code will have experience in    *
- *  either Python or IDL, but not C. Many comments are left to explain as     *
- *  much as possible. Vagueness or unclear code should be reported to:        *
- *  https://github.com/NASA-Planetary-Science/rss_ringoccs/issues             *
- ******************************************************************************
- *                            A FRIENDLY WARNING                              *
- ******************************************************************************
- *  This code is compatible with the C89/C90 standard. The setup script that  *
- *  is used to compile this in config_librssringoccs.sh uses gcc and has the  *
- *  -pedantic and -std=c89 flags to check for compliance. If you edit this to *
- *  use C99 features (built-in complex, built-in booleans, C++ style comments *
- *  and etc.), or GCC extensions, you will need to edit the config script.    *
- ******************************************************************************
- *  Author:     Ryan Maguire, Wellesley College                               *
+ *  Author:     Ryan Maguire                                                  *
  *  Date:       January 1, 2021                                               *
  ******************************************************************************/
 
@@ -103,7 +88,7 @@
 #include <libtmpl/include/tmpl_string.h>
 #include <libtmpl/include/tmpl_special_functions_real.h>
 #include <libtmpl/include/tmpl_optics.h>
-
+#include <libtmpl/include/tmpl_cyl_fresnel_optics.h>
 #include <rss_ringoccs/include/rss_ringoccs_calibration.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 
@@ -165,33 +150,34 @@
  *  of the values of a given member in the tau object fall within [-2pi, 2pi].*
  *  Note, it implicitly has min and max defined. These are declared at the    *
  *  top of the rssringoccs_Copy_DLP_Data_To_Tau function.                     */
-#define TAU_CHECK_TWO_PI(var)                                                  \
+#define TAU_CHECK_360(var)                                                     \
     /*  Compute the minimum and maximum of var.                              */\
     tmpl_Double_Array_MinMax(tau->var, tau->arr_size, &min, &max);             \
                                                                                \
     /*  Check if var falls within the interval [-2pi, 2pi].                  */\
-    if ((min < -tmpl_Two_Pi) || (max > tmpl_Two_Pi))                           \
+    if ((min < -360.0) || (max > 360.0))                                       \
     {                                                                          \
         tau->error_occurred = tmpl_True;                                       \
         tau->error_message = tmpl_strdup(                                      \
             "\n\rError Encountered: rss_ringoccs\n"                            \
             "\r\trssringoccs_Copy_DLP_Data_To_Tau\n\n"                         \
-            "\r"#var" has values outside of [-2pi, 2pi]. Returning.\n"         \
+            "\r"#var" has values outside of [-360, 360]. Returning.\n"         \
         );                                                                     \
         return;                                                                \
     }
 /*  End of the __TAU_CHECK_TWO_PI__ macro.                                    */
 
 /*  Function for copying the relevant DLP data to a tau object.               */
-void rssringoccs_Copy_DLP_Data_To_Tau(rssringoccs_DLPObj *dlp,
-                                      rssringoccs_TAUObj *tau)
+void
+rssringoccs_Copy_DLP_Data_To_Tau(const rssringoccs_DLPObj *dlp,
+                                 rssringoccs_TAUObj *tau)
 {
     /*  Declare necessary variables. C89 requires this at the top.            */
     size_t n;
 
     /*  These variables are used in the __TAU_CHECK_TWO_PI__ macro. Do not    *
      *  remove their declarations.                                            */
-    double min, max;
+    double min, max, lambda_sky;
 
     /*  If the tau pointer is NULL, we can't access it. Return.               */
     if (tau == NULL)
@@ -259,12 +245,11 @@ void rssringoccs_Copy_DLP_Data_To_Tau(rssringoccs_DLPObj *dlp,
     MALLOC_TAU_VAR(rho_corr_pole_km_vals)
     MALLOC_TAU_VAR(rho_corr_timing_km_vals)
     MALLOC_TAU_VAR(phi_rl_deg_vals)
-    MALLOC_TAU_VAR(p_norm_vals)
-    MALLOC_TAU_VAR(phase_deg_vals)
     MALLOC_TAU_VAR(rx_km_vals)
     MALLOC_TAU_VAR(ry_km_vals)
     MALLOC_TAU_VAR(rz_km_vals)
     MALLOC_TAU_VAR(T_in);
+    MALLOC_TAU_VAR(F_km_vals)
 
     /*  Loop through the entries of all of the pointers and set the nth value *
      *  of a tau member to the nth value of the corresponding dlp member.     */
@@ -274,7 +259,6 @@ void rssringoccs_Copy_DLP_Data_To_Tau(rssringoccs_DLPObj *dlp,
         tau->phi_deg_vals[n] = dlp->phi_deg_vals[n];
         tau->B_deg_vals[n] = dlp->B_deg_vals[n];
         tau->D_km_vals[n] = dlp->D_km_vals[n];
-        tau->k_vals[n] = dlp->f_sky_hz_vals[n];
         tau->rho_dot_kms_vals[n] = dlp->rho_dot_kms_vals[n];
         tau->t_oet_spm_vals[n] = dlp->t_oet_spm_vals[n];
         tau->t_ret_spm_vals[n] = dlp->t_ret_spm_vals[n];
@@ -282,14 +266,26 @@ void rssringoccs_Copy_DLP_Data_To_Tau(rssringoccs_DLPObj *dlp,
         tau->rho_corr_pole_km_vals[n] = dlp->rho_corr_pole_km_vals[n];
         tau->rho_corr_timing_km_vals[n] = dlp->rho_corr_timing_km_vals[n];
         tau->phi_rl_deg_vals[n] = dlp->phi_rl_deg_vals[n];
-        tau->p_norm_vals[n] = dlp->p_norm_vals[n];
-        tau->raw_tau_threshold_vals[n] = dlp->raw_tau_threshold_vals[n];
         tau->rx_km_vals[n] = dlp->rx_km_vals[n];
         tau->ry_km_vals[n] = dlp->ry_km_vals[n];
         tau->rz_km_vals[n] = dlp->rz_km_vals[n];
 
-        /*  The phase needs to be negated due to mathematical conventions.    */
-        tau->phase_rad_vals[n] = -dlp->phase_rad_vals[n];
+        /*  Compute the complex amplitude, T_hat_vals.                        */
+        tau->T_in[n] = tmpl_CDouble_Polar(
+            tmpl_Double_Sqrt(dlp->p_norm_vals[n]), -dlp->phase_deg_vals[n]
+        );
+
+        /*  Compute the wavelength lambda.                                    */
+        lambda_sky = tmpl_Double_Frequency_To_Wavelength(dlp->f_sky_hz_vals[n]);
+
+        /*  Use the wagelength to compute the wavenumber.                     */
+        tau->k_vals[n] = tmpl_Double_Wavelength_To_Wavenumber(lambda_sky);
+
+        /*  And finally, compute the Fresnel scale.                           */
+        tau->F_km_vals[n] = tmpl_Double_Cyl_Fresnel_Scale_Deg(
+            lambda_sky, tau->D_km_vals[n],
+            tau->phi_deg_vals[n], tau->B_deg_vals[n]
+        );
     }
 
     /*  Compute dx_km from the first and zeroth entries of rho_km_vals.       */
@@ -328,14 +324,11 @@ void rssringoccs_Copy_DLP_Data_To_Tau(rssringoccs_DLPObj *dlp,
      *  braces {}. Hence we do not need a semi-colon at the end.              */
     TAU_CHECK_NON_NEGATIVE(rho_km_vals)
     TAU_CHECK_NON_NEGATIVE(D_km_vals)
-    TAU_CHECK_NON_NEGATIVE(f_sky_hz_vals)
-    TAU_CHECK_NON_NEGATIVE(p_norm_vals)
 
     /*  Check that the following variables for angles fall within [-2pi, 2pi].*
      *  Like the other two macros, the __TAU_CHECK_TWO_PI__ macro ends with   *
      *  braces {} so we do not need a semi-colon at the end of these lines.   */
-    TAU_CHECK_TWO_PI(B_rad_vals)
-    TAU_CHECK_TWO_PI(phi_rad_vals)
-    TAU_CHECK_TWO_PI(phase_rad_vals)
+    TAU_CHECK_360(B_deg_vals)
+    TAU_CHECK_360(phi_deg_vals)
 }
 /*  End of rssringoccs_Copy_DLP_Data_To_Tau.                                  */

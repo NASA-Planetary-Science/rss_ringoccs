@@ -215,7 +215,7 @@ rssringoccs_Tau_Set_Range_From_String(const char *range,
                                       rssringoccs_TAUObj* tau);
 
 extern void
-rssringoccs_Copy_DLP_Data_To_Tau(rssringoccs_DLPObj *dlp,
+rssringoccs_Copy_DLP_Data_To_Tau(const rssringoccs_DLPObj *dlp,
                                  rssringoccs_TAUObj *tau);
 
 #endif

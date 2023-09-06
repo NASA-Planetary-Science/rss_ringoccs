@@ -12,13 +12,14 @@
 /*  size_t typedef is given here.                                             */
 #include <stdlib.h>
 
-typedef void (*rssringoccs_FresT)(rssringoccs_TAUObj *, const double *,
-                                  size_t, size_t);
+typedef void (*rssringoccs_FresT)(
+    rssringoccs_TAUObj *, const double *, size_t, size_t
+);
 
 extern void rssringoccs_Reconstruction(rssringoccs_TAUObj *tau);
 
 extern rssringoccs_TAUObj *
-rssringoccs_Create_TAUObj(rssringoccs_DLPObj *dlp, double res);
+rssringoccs_Create_TAUObj(const rssringoccs_DLPObj *dlp, double res);
 
 extern void
 rssringoccs_Tau_Check_Data_Range(rssringoccs_TAUObj *dlp);
@@ -33,15 +34,10 @@ extern void
 rssringoccs_Tau_Check_Occ_Type(rssringoccs_TAUObj *tau);
 
 extern void
-rssringoccs_Tau_Compute_Vars(rssringoccs_TAUObj *tau);
-
-extern void
 rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau);
 
 extern void
 rssringoccs_Tau_Finish(rssringoccs_TAUObj* tau);
-
-
 
 extern void
 rssringoccs_Tau_Reset_Window(double *x_arr, double *w_func, double dx,

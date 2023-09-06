@@ -50,6 +50,7 @@ void rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj *tau)
 
     /*  Check that the pointers to the data are not NULL.                     */
     rssringoccs_Tau_Check_Data(tau);
+
     if (tau->error_occurred)
         return;
 
@@ -65,6 +66,7 @@ void rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj *tau)
 
     /* Check to ensure you have enough data to the left.                      */
     rssringoccs_Tau_Check_Data_Range(tau);
+
     if (tau->error_occurred)
         return;
 
@@ -79,13 +81,13 @@ void rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj *tau)
             FresT = rssringoccs_Fresnel_Transform_Newton_dD_dphi_Norm;
         else if (tau->psinum == rssringoccs_DR_NewtonPerturb)
             FresT = rssringoccs_Fresnel_Transform_Perturbed_Newton_Norm;
-        else if (tau->psinum == rssringoccs_DR_Elliptical)
+        else if (tau->psinum == rssringoccs_DR_NewtonElliptical)
             FresT = rssringoccs_Fresnel_Transform_Newton_Elliptical_Norm;
-        else if (tau->psinum == rssringoccs_DR_Quadratic)
+        else if (tau->psinum == rssringoccs_DR_NewtonQuadratic)
             FresT = rssringoccs_Fresnel_Transform_Newton_Quadratic_Norm;
-        else if (tau->psinum == rssringoccs_DR_Quartic)
+        else if (tau->psinum == rssringoccs_DR_NewtonQuartic)
             FresT = rssringoccs_Fresnel_Transform_Newton_Quartic_Norm;
-        else if (tau->psinum == rssringoccs_DR_QuarticD)
+        else if (tau->psinum == rssringoccs_DR_NewtonD)
             FresT = rssringoccs_Fresnel_Transform_Newton_D_Quartic_Norm;
         else
             FresT = rssringoccs_Fresnel_Transform_Newton_D_Old_Norm;
@@ -100,13 +102,13 @@ void rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj *tau)
             FresT = rssringoccs_Fresnel_Transform_Newton_dD_dphi;
         else if (tau->psinum == rssringoccs_DR_NewtonPerturb)
             FresT = rssringoccs_Fresnel_Transform_Perturbed_Newton;
-        else if (tau->psinum == rssringoccs_DR_Elliptical)
+        else if (tau->psinum == rssringoccs_DR_NewtonElliptical)
             FresT = rssringoccs_Fresnel_Transform_Newton_Elliptical;
-        else if (tau->psinum == rssringoccs_DR_Quadratic)
+        else if (tau->psinum == rssringoccs_DR_NewtonQuadratic)
             FresT = rssringoccs_Fresnel_Transform_Newton_Quadratic;
-        else if (tau->psinum == rssringoccs_DR_Quartic)
+        else if (tau->psinum == rssringoccs_DR_NewtonQuartic)
             FresT = rssringoccs_Fresnel_Transform_Newton_Quartic;
-        else if (tau->psinum == rssringoccs_DR_QuarticD)
+        else if (tau->psinum == rssringoccs_DR_NewtonD)
             FresT = rssringoccs_Fresnel_Transform_Newton_D_Quartic;
         else
             FresT = rssringoccs_Fresnel_Transform_Newton_D_Old;

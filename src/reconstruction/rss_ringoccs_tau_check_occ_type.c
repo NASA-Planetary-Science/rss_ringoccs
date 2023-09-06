@@ -62,22 +62,7 @@
  *          The rssringoccs_TAUObj is defined here and the function           *
  *          prototypes for reconstruction are found here as well.             *
  ******************************************************************************
- *                            A NOTE ON COMMENTS                              *
- ******************************************************************************
- *  It is anticipated that many users of this code will have experience in    *
- *  either Python or IDL, but not C. Many comments are left to explain as     *
- *  much as possible. Vagueness or unclear code should be reported to:        *
- *  https://github.com/NASA-Planetary-Science/rss_ringoccs/issues             *
- ******************************************************************************
- *                            A FRIENDLY WARNING                              *
- ******************************************************************************
- *  This code is compatible with the C89/C90 standard. The setup script that  *
- *  is used to compile this in config_librssringoccs.sh uses gcc and has the  *
- *  -pedantic and -std=c89 flags to check for compliance. If you edit this to *
- *  use C99 features (built-in complex, built-in booleans, C++ style comments *
- *  and etc.), or GCC extensions, you will need to edit the config script.    *
- ******************************************************************************
- *  Author:     Ryan Maguire, Wellesley College                               *
+ *  Author:     Ryan Maguire                                                  *
  *  Date:       January 2, 2021                                               *
  ******************************************************************************/
 
@@ -223,26 +208,22 @@ void rssringoccs_Tau_Check_Occ_Type(rssringoccs_TAUObj *tau)
     else if (tau->dx_km < 0.0)
     {
         tmpl_Double_Array_Reverse(tau->rho_km_vals,      tau->arr_size);
-        tmpl_Double_Array_Reverse(tau->phi_rad_vals,     tau->arr_size);
-        tmpl_Double_Array_Reverse(tau->B_rad_vals,       tau->arr_size);
+        tmpl_Double_Array_Reverse(tau->phi_deg_vals,     tau->arr_size);
+        tmpl_Double_Array_Reverse(tau->B_deg_vals,       tau->arr_size);
         tmpl_Double_Array_Reverse(tau->D_km_vals,        tau->arr_size);
-        tmpl_Double_Array_Reverse(tau->phase_rad_vals,   tau->arr_size);
-        tmpl_Double_Array_Reverse(tau->p_norm_vals,      tau->arr_size);
-        tmpl_Double_Array_Reverse(tau->f_sky_hz_vals,    tau->arr_size);
         tmpl_Double_Array_Reverse(tau->rho_dot_kms_vals, tau->arr_size);
         tmpl_Double_Array_Reverse(tau->t_oet_spm_vals,   tau->arr_size);
         tmpl_Double_Array_Reverse(tau->t_ret_spm_vals,   tau->arr_size);
         tmpl_Double_Array_Reverse(tau->t_set_spm_vals,   tau->arr_size);
-        tmpl_Double_Array_Reverse(tau->phi_rl_rad_vals,  tau->arr_size);
+        tmpl_Double_Array_Reverse(tau->phi_rl_deg_vals,  tau->arr_size);
         tmpl_Double_Array_Reverse(tau->rx_km_vals,       tau->arr_size);
         tmpl_Double_Array_Reverse(tau->ry_km_vals,       tau->arr_size);
         tmpl_Double_Array_Reverse(tau->rz_km_vals,       tau->arr_size);
-        tmpl_Double_Array_Reverse(tau->raw_tau_threshold_vals, tau->arr_size);
         tmpl_Double_Array_Reverse(tau->rho_corr_pole_km_vals, tau->arr_size);
         tmpl_Double_Array_Reverse(tau->rho_corr_timing_km_vals, tau->arr_size);
 
         for(n=0; n<tau->arr_size; ++n)
-            tau->rho_dot_kms_vals[n] = fabs(tau->rho_dot_kms_vals[n]);
+            tau->rho_dot_kms_vals[n] = tmpl_Double_Abs(tau->rho_dot_kms_vals[n]);
 
         tau->dx_km = -tau->dx_km;
     }

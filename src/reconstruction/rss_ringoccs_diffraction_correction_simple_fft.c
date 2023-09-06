@@ -102,9 +102,9 @@ void rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau)
                 tau->k_vals[center],
                 tau->rho_km_vals[center],
                 tau->rho_km_vals[current_point],
-                tau->phi_rad_vals[current_point],
-                tau->phi_rad_vals[current_point],
-                tau->B_rad_vals[center],
+                tau->phi_deg_vals[current_point],
+                tau->phi_deg_vals[current_point],
+                tau->B_deg_vals[center],
                 tau->rx_km_vals[center],
                 tau->ry_km_vals[center],
                 tau->rz_km_vals[center],
@@ -125,8 +125,8 @@ void rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau)
                 tau->rho_km_vals[center],
                 tau->rho_km_vals[current_point],
                 phi,
-                tau->phi_rad_vals[current_point],
-                tau->B_rad_vals[center],
+                tau->phi_deg_vals[current_point],
+                tau->B_deg_vals[center],
                 D
             );
 

@@ -105,12 +105,6 @@
  *      Computes the Fresnel inverse transform using Newton-Raphson to        *
  *      compute the stationary value of the Fresnel kernel.                   *
  ******************************************************************************
- *                            A FRIENDLY WARNING                              *
- ******************************************************************************
- *  This code uses complex numbers throughout, and is compatible with the C99 *
- *  standard. To use this code, make sure your compiler supports C99 or more  *
- *  recent standards of the C Programming Language.                           *
- ******************************************************************************
  *                               DEPENDENCIES                                 *
  ******************************************************************************
  *  1.) complex.h:                                                            *
@@ -231,7 +225,8 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj *tau)
     /*  Declare the window function pointer and allocate memory for it. The   *
      *  type rssringoccs_window_func was declared at the start of this file.  *
      *  Be sure to free this at the end!                                      */
-    rssringoccs_window_func fw = tau->window_func;
+    rssringoccs_Window_Function fw = tau->window_func;
+
     void (*FresT)(
         rssringoccs_TAUObj *, const double *, const double *, size_t, size_t
     );

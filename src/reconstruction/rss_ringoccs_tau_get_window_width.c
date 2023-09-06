@@ -122,9 +122,9 @@ void rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau)
 
         for(n = 0; n < tau->n_used; ++n)
         {
-            F         = tau->F_km_vals[n + tau->start];
-            omega     = tmpl_Two_Pi * tau->f_sky_hz_vals[n+tau->start];
-            alpha[n]  = omega * tau->sigma;
+            F = tau->F_km_vals[n + tau->start];
+            omega = tmpl_Speed_Of_Light_KMS * tau->k_vals[n+tau->start];
+            alpha[n] = omega * tau->sigma;
             alpha[n] *= alpha[n] * 0.5 / tau->rho_dot_kms_vals[n];
             P_vals[n] = tau->res/(alpha[n]*F*F);
         }

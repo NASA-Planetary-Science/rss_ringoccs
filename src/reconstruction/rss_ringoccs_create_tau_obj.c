@@ -100,7 +100,7 @@
 /*  Function for allocating memory for a Tau object and setting the default   *
  *  values for all of the keywords.                                           */
 rssringoccs_TAUObj *
-rssringoccs_Create_TAUObj(rssringoccs_DLPObj *dlp, double res)
+rssringoccs_Create_TAUObj(const rssringoccs_DLPObj *dlp, double res)
 {
     /*  Declare necessary variables. C89 requires this at the top.            */
     rssringoccs_TAUObj *tau;
@@ -123,12 +123,10 @@ rssringoccs_Create_TAUObj(rssringoccs_DLPObj *dlp, double res)
     tau->T_fwd = NULL;
     tau->rho_km_vals = NULL;
     tau->F_km_vals = NULL;
-    tau->phi_rad_vals = NULL;
+    tau->phi_deg_vals = NULL;
     tau->k_vals = NULL;
-    tau->f_sky_hz_vals = NULL;
     tau->rho_dot_kms_vals = NULL;
-    tau->raw_tau_threshold_vals = NULL;
-    tau->B_rad_vals = NULL;
+    tau->B_deg_vals = NULL;
     tau->D_km_vals = NULL;
     tau->w_km_vals = NULL;
     tau->t_oet_spm_vals = NULL;
@@ -137,21 +135,10 @@ rssringoccs_Create_TAUObj(rssringoccs_DLPObj *dlp, double res)
     tau->rho_corr_pole_km_vals = NULL;
     tau->rho_corr_timing_km_vals = NULL;
     tau->tau_threshold_vals = NULL;
-    tau->phi_rl_rad_vals = NULL;
-    tau->p_norm_vals = NULL;
-    tau->p_norm_fwd_vals = NULL;
-    tau->power_vals = NULL;
-    tau->phase_rad_vals = NULL;
-    tau->phase_fwd_vals = NULL;
-    tau->phase_vals = NULL;
-    tau->tau_fwd_vals = NULL;
-    tau->tau_vals = NULL;
-    tau->wtype = NULL;
-    tau->psitype = NULL;
+    tau->phi_rl_deg_vals = NULL;
     tau->rx_km_vals = NULL;
     tau->ry_km_vals = NULL;
     tau->rz_km_vals = NULL;
-    tau->history = NULL;
 
     /*  Set the error_occurred member to false and the error_message to NULL. *
      *  If no errors occur during processing, these variables will remain     *
@@ -202,46 +189,14 @@ rssringoccs_Create_TAUObj(rssringoccs_DLPObj *dlp, double res)
     tau->use_norm = tmpl_True;
     tau->use_fwd  = tmpl_False;
 
-    /*  The default window is the modified Kaiser-Bessel with 2.0 alpha.      */
-    tau->wtype = tmpl_strdup("kbmd20");
-
-    /*  Check that rssringoccs_strdup did not fail.                           */
-    if (tau->wtype == NULL)
-    {
-        tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_strdup(
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_Create_TAUObj\n\n"
-            "\rrssringoccs_strdup failed to set tau->wtype. Returning.\n"
-        );
-        return tau;
-    }
-
     /*  Set normeq to the value corresponding to "kbmd20".                    */
     tau->normeq = KBMD20NormEQ;
 
     /*  Set the window function to kbmd20. This can be changed later.         */
     tau->window_func = tmpl_Double_Modified_Kaiser_Bessel_2_0;
 
-    /*  And the default psitype is Fresnel processing using quartic           *
-     *  Legendre polynomials.                                                 */
-    tau->psitype = tmpl_strdup("fresnel4");
-
-    /*  Check that rssringoccs_strdup did not fail.                           */
-    if (tau->psitype == NULL)
-    {
-        tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_strdup(
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_Create_TAUObj\n\n"
-            "\rrssringoccs_strdup failed to set tau->psitype. Returning.\n"
-        );
-
-        return tau;
-    }
-
     /*  Set the order and psinum corresponding to "fresnel4".                 */
-    tau->order  = 4;
+    tau->order = 4;
     tau->psinum = rssringoccs_DR_Legendre;
 
     /*  The default sigma (Allen Deviation) is the Cassini value.             */
@@ -249,7 +204,7 @@ rssringoccs_Create_TAUObj(rssringoccs_DLPObj *dlp, double res)
 
     /*  Set the default values for eccentricity and peripase. We always       *
      *  assume circular orbits. The user must specify otherwise.              */
-    tau->ecc  = 0.0;
+    tau->ecc = 0.0;
     tau->peri = 0.0;
 
     /*  By default we do not perturb psi by polynomials. Set these to 0.      */
@@ -276,20 +231,20 @@ rssringoccs_Create_TAUObj(rssringoccs_DLPObj *dlp, double res)
      *      dx_km                                                             *
      *      arr_size                                                          *
      *      rho_km_vals                                                       *
-     *      phi_rad_vals                                                      *
+     *      phi_deg_vals                                                      *
      *      f_sky_hz_vals                                                     *
      *      rho_dot_kms_vals                                                  *
      *      raw_tau_threshold_vals                                            *
-     *      B_rad_vals                                                        *
+     *      B_deg_vals                                                        *
      *      D_km_vals                                                         *
      *      t_oet_spm_vals                                                    *
      *      t_ret_spm_vals                                                    *
      *      t_set_spm_vals                                                    *
      *      rho_corr_pole_km_vals                                             *
      *      rho_corr_timing_km_vals                                           *
-     *      phi_rl_rad_vals                                                   *
+     *      phi_rl_deg_vals                                                   *
      *      p_norm_vals                                                       *
-     *      phase_rad_vals                                                    *
+     *      phase_deg_vals                                                    *
      *      rx_km_vals                                                        *
      *      ry_km_vals                                                        *
      *      rz_km_vals                                                        *

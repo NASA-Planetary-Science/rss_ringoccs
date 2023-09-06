@@ -34,6 +34,40 @@ static void resize_carray(tmpl_ComplexDouble **ptr, size_t start, size_t len)
     *ptr = temp;
 }
 
+#if 1
+
+void rssringoccs_Tau_Finish(rssringoccs_TAUObj* tau)
+{
+    if (tau == NULL)
+        return;
+
+    if (tau->error_occurred)
+        return;
+
+    resize_carray(&tau->T_in, tau->start, tau->n_used);
+    resize_carray(&tau->T_out, tau->start, tau->n_used);
+    resize_array(&tau->rho_km_vals, tau->start, tau->n_used);
+    resize_array(&tau->F_km_vals, tau->start, tau->n_used);
+    resize_array(&tau->phi_deg_vals, tau->start, tau->n_used);
+    resize_array(&tau->k_vals, tau->start, tau->n_used);
+    resize_array(&tau->rho_dot_kms_vals, tau->start, tau->n_used);
+    resize_array(&tau->B_deg_vals, tau->start, tau->n_used);
+    resize_array(&tau->D_km_vals, tau->start, tau->n_used);
+    resize_array(&tau->w_km_vals, tau->start, tau->n_used);
+    resize_array(&tau->t_oet_spm_vals, tau->start, tau->n_used);
+    resize_array(&tau->t_ret_spm_vals, tau->start, tau->n_used);
+    resize_array(&tau->t_set_spm_vals, tau->start, tau->n_used);
+    resize_array(&tau->rho_corr_pole_km_vals, tau->start, tau->n_used);
+    resize_array(&tau->rho_corr_timing_km_vals, tau->start, tau->n_used);
+    resize_array(&tau->phi_rl_deg_vals, tau->start, tau->n_used);
+    tau->arr_size = tau->n_used;
+
+    if (tau->use_fwd)
+        resize_carray(&tau->T_fwd, tau->start, tau->n_used);
+}
+
+#else
+
 void rssringoccs_Tau_Finish(rssringoccs_TAUObj* tau)
 {
     double mu, factor;
@@ -109,3 +143,5 @@ void rssringoccs_Tau_Finish(rssringoccs_TAUObj* tau)
 
     tau->arr_size = len;
 }
+
+#endif

@@ -54,6 +54,7 @@ $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)/src/history/
 	mkdir -p $(BUILD_DIR)/src/occultation_geometry/
 	mkdir -p $(BUILD_DIR)/src/reconstruction/
+	mkdir -p $(BUILD_DIR)/src/tau/
 
 clean:
 	rm -rf $(BUILD_DIR)

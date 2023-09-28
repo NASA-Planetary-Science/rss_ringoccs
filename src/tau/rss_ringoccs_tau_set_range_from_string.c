@@ -33,7 +33,7 @@ rssringoccs_Tau_Set_Range_From_String(const char *range,
     if (range == NULL)
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_strdup(
+        tau->error_message = tmpl_String_Duplicate(
             "\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Get_Range_From_String\n\n"
             "\rInput string is NULL. Returning.\n"
@@ -42,9 +42,9 @@ rssringoccs_Tau_Set_Range_From_String(const char *range,
     }
 
 
-    range_str = tmpl_strdup(range);
-    tmpl_Remove_Spaces(range_str);
-    tmpl_Make_Lower(range_str);
+    range_str = tmpl_String_Duplicate(range);
+    tmpl_String_Remove_Whitespace(range_str);
+    tmpl_String_Make_Lower_Case(range_str);
 
     if (strcmp(range_str, "all") == 0)
     {
@@ -165,7 +165,7 @@ rssringoccs_Tau_Set_Range_From_String(const char *range,
         strcat(errmes1, errmes2);
 
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_strdup(errmes1);
+        tau->error_message = tmpl_String_Duplicate(errmes1);
         tau->rng_list[0] = -1.0;
         tau->rng_list[1] = -1.0;
     }

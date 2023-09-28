@@ -51,7 +51,7 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
     double *x_arr, *w_func, *legendre_p, *alt_legendre_p, *fresnel_ker_coeffs;
 
     /*  Create function pointers for window function and Fresnel transform.   */
-    rssringoccs_window_func fw = tau->window_func;
+    rssringoccs_Window_Function fw = tau->window_func;
 
     void (*FresT)(
         rssringoccs_TAUObj *, const double *, const double *, const double *,
@@ -150,9 +150,8 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
     {
         /*  Compute some geometric information, and the scaling coefficient   *
          *  for the Legendre polynomial expansion.                            */
-        cosb            = cos(tau->B_rad_vals[center]);
-        cosp            = cos(tau->phi_rad_vals[center]);
-        sinp            = sin(tau->phi_rad_vals[center]);
+        cosb = tmpl_Double_Cosd(tau->B_deg_vals[center]);
+        tmpl_Double_SinCosd(tau->phi_deg_vals[center], &sinp, &cosp);
         Legendre_Coeff  = cosb*sinp;
         Legendre_Coeff *= Legendre_Coeff;
         Legendre_Coeff  = 0.5*Legendre_Coeff/(1.0-Legendre_Coeff);

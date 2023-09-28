@@ -9,46 +9,67 @@
 #include <libtmpl/include/tmpl_bool.h>
 #include <libtmpl/include/tmpl_string.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
+#include <rss_ringoccs/include/rss_ringoccs_tau.h>
 
 void
 rssringoccs_Tau_Set_Psitype(const char *psitype, rssringoccs_TAUObj* tau)
 {
+    char *tau_psitype;
+
     if (tau == NULL)
         return;
 
     if (tau->error_occurred)
         return;
 
-    if (tau->psitype != NULL)
-        free(tau->psitype);
+    if (psitype == NULL)
+    {
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_String_Duplicate(
+            "\rError Encountered: rss_ringoccs\n"
+            "\r\trssringoccs_Tau_Set_Psitype\n\n"
+            "\rInput string is NULL. Returning.\n"
+        );
+        return;
+    }
 
-    tau->psitype = tmpl_strdup(psitype);
-    tmpl_Remove_Spaces(tau->psitype);
-    tmpl_Make_Lower(tau->psitype);
+    tau_psitype = tmpl_String_Duplicate(psitype);
 
-    if (strcmp(tau->psitype, "newton") == 0)
+    if (tau_psitype == NULL)
+    {
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tmpl_String_Duplicate(
+            "\rError Encountered: rss_ringoccs\n"
+            "\r\trssringoccs_Tau_Set_Psitype\n\n"
+            "\rtmpl_String_Duplicate returned NULL. Returning.\n"
+        );
+        return;
+    }
+
+    tmpl_String_Remove_Whitespace(tau_psitype);
+    tmpl_String_Make_Lower_Case(tau_psitype);
+
+    if (strcmp(tau_psitype, "newton") == 0)
         tau->psinum = rssringoccs_DR_Newton;
-    else if (strcmp(tau->psitype, "newtond") == 0)
+    else if (strcmp(tau_psitype, "newtond") == 0)
         tau->psinum = rssringoccs_DR_NewtonD;
-    else if (strcmp(tau->psitype, "newtondold") == 0)
+    else if (strcmp(tau_psitype, "newtondold") == 0)
         tau->psinum = rssringoccs_DR_NewtonDOld;
-    else if (strcmp(tau->psitype, "newtondphi") == 0)
+    else if (strcmp(tau_psitype, "newtondphi") == 0)
         tau->psinum = rssringoccs_DR_NewtonDPhi;
-    else if (strcmp(tau->psitype, "newtonperturb") == 0)
+    else if (strcmp(tau_psitype, "newtonperturb") == 0)
         tau->psinum = rssringoccs_DR_NewtonPerturb;
-    else if (strcmp(tau->psitype, "ellipse") == 0)
-        tau->psinum = rssringoccs_DR_Elliptical;
-    else if (strcmp(tau->psitype, "simplefft") == 0)
-        tau->psinum = rssringoccs_DR_SimpleFFT;
-    else if (strcmp(tau->psitype, "quadratic") == 0)
-        tau->psinum = rssringoccs_DR_Quadratic;
-    else if (strcmp(tau->psitype, "cubic") == 0)
-        tau->psinum = rssringoccs_DR_Cubic;
-    else if (strcmp(tau->psitype, "quartic") == 0)
-        tau->psinum = rssringoccs_DR_Quartic;
-    else if (strcmp(tau->psitype, "quarticd") == 0)
-        tau->psinum = rssringoccs_DR_QuarticD;
-    else if (strcmp(tau->psitype, "fresnel") == 0)
+    else if (strcmp(tau_psitype, "ellipse") == 0)
+        tau->psinum = rssringoccs_DR_NewtonElliptical;
+    else if (strcmp(tau_psitype, "simplefft") == 0)
+        tau->psinum = rssringoccs_DR_NewtonSimpleFFT;
+    else if (strcmp(tau_psitype, "quadratic") == 0)
+        tau->psinum = rssringoccs_DR_NewtonQuadratic;
+    else if (strcmp(tau_psitype, "quartic") == 0)
+        tau->psinum = rssringoccs_DR_NewtonQuartic;
+    else if (strcmp(tau_psitype, "quarticd") == 0)
+        tau->psinum = rssringoccs_DR_NewtonDQuartic;
+    else if (strcmp(tau_psitype, "fresnel") == 0)
         tau->psinum = rssringoccs_DR_Fresnel;
 
     /*  strncmp is a C standard library function that compares the first n    *
@@ -56,9 +77,9 @@ rssringoccs_Tau_Set_Psitype(const char *psitype, rssringoccs_TAUObj* tau)
      *  are "fresnel", but the string is not exactly "fresnel", try to parse  *
      *  the rest of it and extract a value. For example, if                   *
      *  tau.psitype = "fresnel4", try to extract the "4".                     */
-    else if (strncmp(tau->psitype, "fresnel", 7) == 0)
+    else if (strncmp(tau_psitype, "fresnel", 7) == 0)
     {
-        const char *fresnelnum = &tau->psitype[7];
+        const char *fresnelnum = &tau_psitype[7];
         tau->order = (unsigned char)atol(fresnelnum);
         tau->psinum = rssringoccs_DR_Legendre;
 
@@ -106,4 +127,6 @@ rssringoccs_Tau_Set_Psitype(const char *psitype, rssringoccs_TAUObj* tau)
         tau->error_occurred = tmpl_True;
         tau->error_message = tmpl_strdup(errmes1);
     }
+
+    free(tau_psitype);
 }

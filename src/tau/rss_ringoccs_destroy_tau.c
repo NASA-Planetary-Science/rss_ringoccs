@@ -22,6 +22,7 @@
 
 #include <stdlib.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
+#include <rss_ringoccs/include/rss_ringoccs_tau.h>
 
 void rssringoccs_Destroy_Tau(rssringoccs_TAUObj **tau)
 {
@@ -30,7 +31,7 @@ void rssringoccs_Destroy_Tau(rssringoccs_TAUObj **tau)
     if (tau_inst == NULL)
         return;
 
-    rssringoccs_Destroy_Tau_Members(tau_inst);
+    rssringoccs_Tau_Destroy_Members(tau_inst);
 
     if (tau_inst->error_message != NULL)
     {

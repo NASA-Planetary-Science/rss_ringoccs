@@ -34,7 +34,7 @@
  ******************************************************************************/
 void rssringoccs_Tau_Reset_Window(double *x_arr, double *w_func, double dx,
                                   double width, size_t nw_pts,
-                                  rssringoccs_window_func fw)
+                                  rssringoccs_Window_Function fw)
 {
     /*  Create a variable for indexing.                                       */
     size_t n;

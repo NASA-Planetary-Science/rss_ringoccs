@@ -87,7 +87,10 @@ typedef enum {
     rssringoccs_DR_NewtonEllipticalQuadratic = 25,
     rssringoccs_DR_NewtonEllipticalQuartic = 26,
     rssringoccs_DR_NewtonEllipticalSextic = 27,
-    rssringoccs_DR_NewtonEllipticalOctic = 28
+    rssringoccs_DR_NewtonEllipticalOctic = 28,
+
+    /*  Indicates an error.                                                   */
+    rssringoccs_DR_None = 100
 } rssringoccs_Psitype_Enum;
 
 /*  Structure that contains all of the necessary data.                        */

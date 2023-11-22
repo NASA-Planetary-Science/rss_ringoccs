@@ -6,7 +6,7 @@
 #include <libtmpl/include/tmpl_window_functions.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 
-void rssringoccs_Tau_Set_WType(const char *wtype, rssringoccs_TAUObj *tau)
+void rssringoccs_Tau_Set_Window_Type(const char *wtype, rssringoccs_TAUObj *tau)
 {
     char *tau_wtype;
 

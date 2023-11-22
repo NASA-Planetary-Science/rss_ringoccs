@@ -31,7 +31,7 @@
 
 void
 crssringoccs_Get_Py_Vars_From_Tau_Self(rssringoccs_TAUObj *tau,
-                                       PyDiffrecObj *self)
+                                       const PyDiffrecObj *self)
 {
     if (tau == NULL)
         return;

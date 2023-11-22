@@ -169,8 +169,8 @@
 
 /*  Function for copying the relevant DLP data to a tau object.               */
 void
-rssringoccs_Copy_DLP_Data_To_Tau(const rssringoccs_DLPObj *dlp,
-                                 rssringoccs_TAUObj *tau)
+rssringoccs_Tau_Copy_DLP_Data(const rssringoccs_DLPObj *dlp,
+                              rssringoccs_TAUObj *tau)
 {
     /*  Declare necessary variables. C89 requires this at the top.            */
     size_t n;
@@ -272,7 +272,7 @@ rssringoccs_Copy_DLP_Data_To_Tau(const rssringoccs_DLPObj *dlp,
 
         /*  Compute the complex amplitude, T_hat_vals.                        */
         tau->T_in[n] = tmpl_CDouble_Polar(
-            tmpl_Double_Sqrt(dlp->p_norm_vals[n]), -dlp->phase_deg_vals[n]
+            tmpl_Double_Sqrt(dlp->p_norm_vals[n]), -dlp->phase_deg_vals[n] * tmpl_Deg_to_Rad
         );
 
         /*  Compute the wavelength lambda.                                    */
@@ -331,4 +331,4 @@ rssringoccs_Copy_DLP_Data_To_Tau(const rssringoccs_DLPObj *dlp,
     TAU_CHECK_360(B_deg_vals)
     TAU_CHECK_360(phi_deg_vals)
 }
-/*  End of rssringoccs_Copy_DLP_Data_To_Tau.                                  */
+/*  End of rssringoccs_Tau_Copy_DLP_Data.                                     */

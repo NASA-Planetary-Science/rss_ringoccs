@@ -36,7 +36,9 @@
 #include <numpy/ufuncobject.h>
 
 double *
-extract_data(rssringoccs_DLPObj *dlp, PyObject *py_dlp, const char *var_name)
+crssringoccs_Extract_Data(rssringoccs_DLPObj *dlp,
+                          PyObject *py_dlp,
+                          const char *var_name)
 {
     PyObject *tmp;
     PyObject *arr;
@@ -74,9 +76,11 @@ extract_data(rssringoccs_DLPObj *dlp, PyObject *py_dlp, const char *var_name)
             "\r\t%s\n\n",
             var_name
         );
-        dlp->error_message = tmpl_strdup(buffer);
+
+        dlp->error_message = tmpl_String_Duplicate(buffer);
         return NULL;
     }
+
     else
         tmp = PyObject_GetAttrString(py_dlp, var_name);
 
@@ -90,7 +94,8 @@ extract_data(rssringoccs_DLPObj *dlp, PyObject *py_dlp, const char *var_name)
             "\r%s must be a numpy array.\n",
             var_name
         );
-        dlp->error_message = tmpl_strdup(buffer);
+
+        dlp->error_message = tmpl_String_Duplicate(buffer);
         return NULL;
     }
     else
@@ -109,7 +114,8 @@ extract_data(rssringoccs_DLPObj *dlp, PyObject *py_dlp, const char *var_name)
             "\r%s must be a numpy array.\n",
             var_name
         );
-        dlp->error_message = tmpl_strdup(buffer);
+
+        dlp->error_message = tmpl_String_Duplicate(buffer);
         return NULL;
     }
 
@@ -124,7 +130,8 @@ extract_data(rssringoccs_DLPObj *dlp, PyObject *py_dlp, const char *var_name)
             "\r%s must be a one-dimensional numpy array.\n",
             var_name
         );
-        dlp->error_message = tmpl_strdup(buffer);
+
+        dlp->error_message = tmpl_String_Duplicate(buffer);
         return NULL;
     }
 
@@ -139,7 +146,8 @@ extract_data(rssringoccs_DLPObj *dlp, PyObject *py_dlp, const char *var_name)
             "\r%s and rho_km_vals have a different number of elements.\n",
             var_name
         );
-        dlp->error_message = tmpl_strdup(buffer);
+
+        dlp->error_message = tmpl_String_Duplicate(buffer);
         return NULL;
     }
 

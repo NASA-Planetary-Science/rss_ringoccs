@@ -34,11 +34,13 @@
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #endif
 
+#define EXTRACT_VAR(var) dlp->var = crssringoccs_Extract_Data(dlp, py_dlp, #var)
+
 /*  Numpy header files.                                                       */
 #include <numpy/ndarraytypes.h>
 #include <numpy/ufuncobject.h>
 
-rssringoccs_DLPObj *crssringoccs_Py_DLP_to_C_DLP(PyObject *py_dlp)
+rssringoccs_DLPObj *crssringoccs_Py_DLP_To_C_DLP(PyObject *py_dlp)
 {
     PyObject *tmp;
     PyObject *arr;
@@ -136,22 +138,22 @@ rssringoccs_DLPObj *crssringoccs_Py_DLP_to_C_DLP(PyObject *py_dlp)
     dlp->rho_km_vals = (double *)PyArray_DATA((PyArrayObject *)arr);
     dlp->arr_size = PyArray_DIMS((PyArrayObject *)arr)[0];
 
-    dlp->p_norm_vals = extract_data(dlp, py_dlp, "p_norm_vals");
-    dlp->phase_rad_vals = extract_data(dlp, py_dlp, "phase_rad_vals");
-    dlp->phi_rad_vals = extract_data(dlp, py_dlp, "phi_rad_vals");
-    dlp->phi_rl_rad_vals = extract_data(dlp, py_dlp, "phi_rl_rad_vals");
-    dlp->B_rad_vals = extract_data(dlp, py_dlp, "B_rad_vals");
-    dlp->D_km_vals = extract_data(dlp, py_dlp, "D_km_vals");
-    dlp->f_sky_hz_vals = extract_data(dlp, py_dlp, "f_sky_hz_vals");
-    dlp->rho_dot_kms_vals = extract_data(dlp, py_dlp, "rho_dot_kms_vals");
-    dlp->t_oet_spm_vals = extract_data(dlp, py_dlp, "t_oet_spm_vals");
-    dlp->t_ret_spm_vals = extract_data(dlp, py_dlp, "t_ret_spm_vals");
-    dlp->t_set_spm_vals = extract_data(dlp, py_dlp, "t_set_spm_vals");
-    dlp->rx_km_vals = extract_data(dlp, py_dlp, "rx_km_vals");
-    dlp->ry_km_vals = extract_data(dlp, py_dlp, "ry_km_vals");
-    dlp->rz_km_vals = extract_data(dlp, py_dlp, "rz_km_vals");
-    dlp->rho_corr_pole_km_vals = extract_data(dlp, py_dlp, "rho_corr_pole_km_vals");
-    dlp->rho_corr_timing_km_vals = extract_data(dlp, py_dlp, "rho_corr_timing_km_vals");
-    dlp->raw_tau_threshold_vals = extract_data(dlp, py_dlp, "raw_tau_threshold_vals");
+    EXTRACT_VAR(p_norm_vals);
+    EXTRACT_VAR(phase_deg_vals);
+    EXTRACT_VAR(phi_deg_vals);
+    EXTRACT_VAR(phi_rl_deg_vals);
+    EXTRACT_VAR(B_deg_vals);
+    EXTRACT_VAR(D_km_vals);
+    EXTRACT_VAR(f_sky_hz_vals);
+    EXTRACT_VAR(rho_dot_kms_vals);
+    EXTRACT_VAR(t_oet_spm_vals);
+    EXTRACT_VAR(t_ret_spm_vals);
+    EXTRACT_VAR(t_set_spm_vals);
+    EXTRACT_VAR(rx_km_vals);
+    EXTRACT_VAR(ry_km_vals);
+    EXTRACT_VAR(rz_km_vals);
+    EXTRACT_VAR(rho_corr_pole_km_vals);
+    EXTRACT_VAR(rho_corr_timing_km_vals);
+    EXTRACT_VAR(raw_tau_threshold_vals);
     return dlp;
 }

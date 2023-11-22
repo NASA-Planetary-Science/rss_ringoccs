@@ -175,11 +175,9 @@
  *  2020/09/06 (Ryan Maguire):                                                *
  *      Removed FFTW dependence. Replaced with new rss_ringoccs FFT routine.  *
  ******************************************************************************/
-#include <math.h>
 #include <stdlib.h>
-#include <libtmpl/include/tmpl_math.h>
-#include <libtmpl/include/tmpl_bool.h>
-#include <libtmpl/include/tmpl_string.h>
+#include <libtmpl/include/tmpl.h>
+#include <stdio.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 
@@ -246,6 +244,7 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj *tau)
 
     /*  Check that the pointers to the data are not NULL.                     */
     rssringoccs_Tau_Check_Data(tau);
+
     if (tau->error_occurred)
         return;
 
@@ -276,6 +275,7 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj *tau)
 
     /* Check to ensure you have enough data to the left.                      */
     rssringoccs_Tau_Check_Data_Range(tau);
+
     if (tau->error_occurred)
         return;
 
@@ -314,7 +314,7 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj *tau)
     rssringoccs_Tau_Reset_Window(x_arr, w_func, dx, w_init, nw_pts, fw);
 
     /* Compute Window Functions, and compute pi/2 * x^2                       */
-    for(m=0; m<nw_pts; ++m)
+    for (m = 0; m < nw_pts; ++m)
     {
         /*  The independent variable is pi/2 * ((rho-rho0)/F)^2. Compute      *
          *  part of this. The 1/F^2 part is introduced later.                 */
@@ -324,40 +324,37 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj *tau)
         x_arr[m] *= fwd_factor;
     }
 
-    /*  Compute the Fresnel transform across the input data.              */
+    /*  Compute the Fresnel transform across the input data.                  */
     for (m=0; m<=tau->n_used; ++m)
     {
-        /*  If the window width has deviated more the 2*dx, reset         *
-         *  variables. fabs is the absolute value function for double     *
-         *  precision variables and is defined in the built-in math.h.    */
-        if (fabs(w_init - tau->w_km_vals[center]) >= two_dx)
+        /*  If the window width has deviated more the 2*dx, reset values.     */
+        if (tmpl_Double_Abs(w_init - tau->w_km_vals[center]) >= two_dx)
         {
-            /* Reset w_init and recompute window function.                */
+            /* Reset w_init and recompute window function.                    */
             w_init = tau->w_km_vals[center];
             nw_pts = ((size_t)(w_init / two_dx)) + 1UL;
 
-            /*  Reallocate memory, since the sizes of the arrays changed. */
+            /*  Reallocate memory, since the sizes of the arrays changed.     */
             w_func = realloc(w_func, sizeof(double)*nw_pts);
             x_arr  = realloc(x_arr, sizeof(double)*nw_pts);
 
-            /*  Reset the x_arr array to range between -W/2 and zero.     */
-            rssringoccs_Tau_Reset_Window(x_arr, w_func, dx,
-                                         w_init, nw_pts, fw);
+            /*  Reset the x_arr array to range between -W/2 and zero.         */
+            rssringoccs_Tau_Reset_Window(x_arr, w_func, dx, w_init, nw_pts, fw);
 
-            /* Compute Window Functions, and compute pi/2 * x^2.          */
+            /* Compute Window Functions, and compute pi/2 * x^2.              */
             for(n=0; n<nw_pts; ++n)
             {
                 x_arr[n] *= tmpl_Pi_By_Two*x_arr[n];
 
-                /*  Again, if forward calculation is set, negate x_arr.   */
+                /*  Again, if forward calculation is set, negate x_arr.       */
                 x_arr[n] *= fwd_factor;
             }
         }
 
-        /*  Compute the Fresnel Transform about the current point.        */
+        /*  Compute the Fresnel Transform about the current point.            */
         FresT(tau, x_arr, w_func, nw_pts, center);
 
-        /*  Move the pointers to the next point.                          */
+        /*  Move the pointers to the next point.                              */
         center += 1;
     }
 

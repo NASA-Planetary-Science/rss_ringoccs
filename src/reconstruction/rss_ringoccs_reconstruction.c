@@ -1,5 +1,6 @@
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <libtmpl/include/tmpl_bool.h>
 #include <libtmpl/include/tmpl_string.h>
 #include <libtmpl/include/tmpl_complex.h>

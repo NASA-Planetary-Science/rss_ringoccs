@@ -12,7 +12,7 @@
 #include <rss_ringoccs/include/rss_ringoccs_tau.h>
 
 void
-rssringoccs_Tau_Set_Psitype(const char *psitype, rssringoccs_TAUObj* tau)
+rssringoccs_Tau_Set_Psi_Type(const char *psitype, rssringoccs_TAUObj* tau)
 {
     char *tau_psitype;
 

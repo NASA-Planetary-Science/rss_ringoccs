@@ -92,14 +92,14 @@ rssringoccs_Extract_CSV_Data(const char *geo,
 
     /*  Initialize the members to NULL. This will prevent functions from      *
      *  trying to free pointers that weren't malloc'd in the event of error.  */
-    csv_data->B_rad_vals = NULL;
+    csv_data->B_deg_vals = NULL;
     csv_data->D_km_vals = NULL;
     csv_data->f_sky_hz_vals = NULL;
     csv_data->p_norm_vals = NULL;
     csv_data->raw_tau_vals = NULL;
-    csv_data->phase_rad_vals = NULL;
-    csv_data->phi_rad_vals = NULL;
-    csv_data->phi_rl_rad_vals = NULL;
+    csv_data->phase_deg_vals = NULL;
+    csv_data->phi_deg_vals = NULL;
+    csv_data->phi_rl_deg_vals = NULL;
     csv_data->raw_tau_threshold_vals = NULL;
     csv_data->rho_corr_pole_km_vals = NULL;
     csv_data->rho_corr_timing_km_vals = NULL;
@@ -388,20 +388,11 @@ rssringoccs_Extract_CSV_Data(const char *geo,
         }
     }
 
-    /*  These variables will be converted to degrees to radians.              */
-    csv_data->phase_rad_vals = dlp_dat->phase_deg_vals;
-    csv_data->phi_rad_vals = dlp_dat->phi_ora_deg_vals;
-    csv_data->B_rad_vals = dlp_dat->B_deg_vals;
-    csv_data->phi_rl_rad_vals = dlp_dat->phi_rl_deg_vals;
-
-    /*  Angles need to be converted to radians.                               */
-    for (n = zero; n < csv_data->n_elements; ++n)
-    {
-        csv_data->phase_rad_vals[n] *= tmpl_Deg_to_Rad;
-        csv_data->phi_rad_vals[n] *= tmpl_Deg_to_Rad;
-        csv_data->B_rad_vals[n] *= tmpl_Deg_to_Rad;
-        csv_data->phi_rl_rad_vals[n] *= tmpl_Deg_to_Rad;
-    }
+    /*  Various angles from the dlp file. Steal the reference.                */
+    csv_data->phase_deg_vals = dlp_dat->phase_deg_vals;
+    csv_data->phi_deg_vals = dlp_dat->phi_ora_deg_vals;
+    csv_data->B_deg_vals = dlp_dat->B_deg_vals;
+    csv_data->phi_rl_deg_vals = dlp_dat->phi_rl_deg_vals;
 
     temp = (csv_data->rho_km_vals[1] - csv_data->rho_km_vals[0]) /
            (csv_data->t_set_spm_vals[1] - csv_data->t_set_spm_vals[0]);
@@ -519,7 +510,7 @@ rssringoccs_Extract_CSV_Data(const char *geo,
 
             for (n = zero; n < csv_data->n_elements; ++n)
             {
-                mu = tmpl_Double_Sin(tmpl_Double_Abs(csv_data->B_rad_vals[n]));
+                mu = tmpl_Double_Sind(tmpl_Double_Abs(csv_data->B_deg_vals[n]));
                 log_power = -csv_data->tau_power[n] / mu;
                 csv_data->tau_power[n] = tmpl_Double_Exp(log_power);
             }

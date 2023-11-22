@@ -30,7 +30,8 @@
 #include "../crssringoccs.h"
 
 /*  Macro for the crssringoccs_set_var function to shorten the syntax.        */
-#define SET_VAR(a) crssringoccs_set_var(&py_tau->a, tau->a, tau->arr_size)
+#define SET_VAR(a) crssringoccs_Set_Var(&py_tau->a, tau->a, tau->arr_size)
+#define SET_CVAR(a) crssringoccs_Set_CVar(&py_tau->a, tau->a, tau->arr_size)
 
 /*  Macro for safely creating None objects.                                   */
 #define MAKE_NONE(var)                                                         \
@@ -42,7 +43,7 @@
     } while(0)
 
 /*  Converts a C Tau struct to a Python Tau Object.                           */
-void crssringoccs_C_Tau_to_Py_Tau(PyDiffrecObj *py_tau, rssringoccs_TAUObj *tau)
+void crssringoccs_C_Tau_To_Py_Tau(PyDiffrecObj *py_tau, rssringoccs_TAUObj *tau)
 {
     /*  If the C version of the object is NULL there is nothing to do.        */
     if (tau == NULL)
@@ -58,55 +59,44 @@ void crssringoccs_C_Tau_to_Py_Tau(PyDiffrecObj *py_tau, rssringoccs_TAUObj *tau)
         tau->error_occurred = tmpl_True;
 
         /*  Create an error message so the user knows what went wrong.        */
-        tau->error_message = tmpl_strdup(
+        tau->error_message = tmpl_String_Duplicate(
             "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tcrssringoccs_C_Tau_to_Py_Tau\n\n"
+            "\r\tcrssringoccs_C_Tau_To_Py_Tau\n\n"
             "\rInput py_tau is NULL. Aborting.n"
         );
         return;
     }
 
     /*  Set every variable in the Python object from the C Tau struct.        */
+    SET_CVAR(T_in);
+    SET_CVAR(T_out);
     SET_VAR(rho_km_vals);
-    SET_VAR(B_rad_vals);
-    SET_VAR(D_km_vals);
     SET_VAR(F_km_vals);
-    SET_VAR(f_sky_hz_vals);
-    SET_VAR(p_norm_vals);
-    SET_VAR(phase_rad_vals);
-    SET_VAR(phase_vals);
-    SET_VAR(phi_rad_vals);
-    SET_VAR(phi_rl_rad_vals);
-    SET_VAR(power_vals);
+    SET_VAR(phi_deg_vals);
+    SET_VAR(k_vals);
     SET_VAR(rho_dot_kms_vals);
+    SET_VAR(B_deg_vals);
+    SET_VAR(D_km_vals);
+    SET_VAR(w_km_vals);
     SET_VAR(t_oet_spm_vals);
     SET_VAR(t_ret_spm_vals);
     SET_VAR(t_set_spm_vals);
-    SET_VAR(tau_vals);
-    SET_VAR(w_km_vals);
-    SET_VAR(rx_km_vals);
-    SET_VAR(ry_km_vals);
-    SET_VAR(rz_km_vals);
-    SET_VAR(raw_tau_threshold_vals);
     SET_VAR(rho_corr_pole_km_vals);
     SET_VAR(rho_corr_timing_km_vals);
     SET_VAR(tau_threshold_vals);
+    SET_VAR(phi_rl_deg_vals);
+    SET_VAR(rx_km_vals);
+    SET_VAR(ry_km_vals);
+    SET_VAR(rz_km_vals);
 
     /*  If forward modeling was not performed, set these as None objects.     */
     if (tau->T_fwd == NULL)
-    {
-        MAKE_NONE(p_norm_fwd_vals);
-        MAKE_NONE(phase_fwd_vals);
-        MAKE_NONE(tau_fwd_vals);
-    }
+        MAKE_NONE(T_fwd);
+
     else
-    {
-        SET_VAR(p_norm_fwd_vals);
-        SET_VAR(phase_fwd_vals);
-        SET_VAR(tau_fwd_vals);
-    }
+        SET_CVAR(T_fwd);
 }
-/*  End of crssringoccs_C_Tau_to_Py_Tau.                                      */
+/*  End of crssringoccs_C_Tau_To_Py_Tau.                                      */
 
 /*  Undefine these in case someone wants to #include this file.               */
 #undef SET_VAR

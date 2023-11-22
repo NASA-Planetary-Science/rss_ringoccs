@@ -35,15 +35,15 @@ rssringoccs_Fresnel_Transform_Newton_D_Quartic_Norm(rssringoccs_TAUObj *tau,
         tau->rho_km_vals[center] + 0.5*tau->w_km_vals[center]
     };
 
-    const double num = tau->phi_rad_vals[offset + n_pts - 1] - tau->phi_rad_vals[offset];
+    const double num = tau->phi_deg_vals[offset + n_pts - 1] - tau->phi_deg_vals[offset];
     const double den = tau->rho_km_vals[offset + n_pts - 1] - tau->rho_km_vals[offset];
     const double slope = num / den;
 
     const double phi0[4] = {
-        (rho[0] - tau->rho_km_vals[offset])*slope + tau->phi_rad_vals[offset],
-        (rho[1] - tau->rho_km_vals[offset])*slope + tau->phi_rad_vals[offset],
-        (rho[2] - tau->rho_km_vals[offset])*slope + tau->phi_rad_vals[offset],
-        (rho[3] - tau->rho_km_vals[offset])*slope + tau->phi_rad_vals[offset]
+        (rho[0] - tau->rho_km_vals[offset])*slope + tau->phi_deg_vals[offset],
+        (rho[1] - tau->rho_km_vals[offset])*slope + tau->phi_deg_vals[offset],
+        (rho[2] - tau->rho_km_vals[offset])*slope + tau->phi_deg_vals[offset],
+        (rho[3] - tau->rho_km_vals[offset])*slope + tau->phi_deg_vals[offset]
     };
 
     /*  Initialize T_out and norm to zero so we can loop over later.          */
@@ -58,7 +58,7 @@ rssringoccs_Fresnel_Transform_Newton_D_Quartic_Norm(rssringoccs_TAUObj *tau,
             rho[n],                     /*  Dummy radius.                     */
             phi0[n],                    /*  Initial stationary azimuth guess. */
             phi0[n],                    /*  Dummy azimuthal angle.            */
-            tau->B_rad_vals[center],    /*  Ring opening angle.               */
+            tau->B_deg_vals[center],    /*  Ring opening angle.               */
             tau->rx_km_vals[center],    /*  x-coordinate of spacecraft.       */
             tau->ry_km_vals[center],    /*  y-coordinate of spacecraft.       */
             tau->rz_km_vals[center],    /*  z-coordinate of spacecraft.       */
@@ -80,7 +80,7 @@ rssringoccs_Fresnel_Transform_Newton_D_Quartic_Norm(rssringoccs_TAUObj *tau,
             rho[n],                     /*  Dummy radius.                     */
             phi,                        /*  Stationary azimuthal angle.       */
             phi0[n],                    /*  Dummy azimuthal angle.            */
-            tau->B_rad_vals[center],    /*  Ring opening angle.               */
+            tau->B_deg_vals[center],    /*  Ring opening angle.               */
             D                           /*  Ring-Spacecraft distance.         */
         );
     }

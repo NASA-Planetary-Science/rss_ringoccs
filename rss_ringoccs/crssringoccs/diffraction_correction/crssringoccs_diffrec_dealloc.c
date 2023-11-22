@@ -21,20 +21,14 @@
 /*  Deallocating function for the DiffractionCorrection class.                */
 void Diffrec_dealloc(PyDiffrecObj *self)
 {
-    Py_XDECREF(self->B_rad_vals);
+    Py_XDECREF(self->T_in);
+    Py_XDECREF(self->T_out);
+    Py_XDECREF(self->T_fwd);
+    Py_XDECREF(self->B_deg_vals);
     Py_XDECREF(self->D_km_vals);
     Py_XDECREF(self->F_km_vals);
-    Py_XDECREF(self->f_sky_hz_vals);
-    Py_XDECREF(self->p_norm_fwd_vals);
-    Py_XDECREF(self->p_norm_vals);
-    Py_XDECREF(self->phase_fwd_vals);
-    Py_XDECREF(self->phase_rad_vals);
-    Py_XDECREF(self->phase_vals);
-    Py_XDECREF(self->phi_rad_vals);
-    Py_XDECREF(self->phi_rl_rad_vals);
-    Py_XDECREF(self->power_vals);
-    Py_XDECREF(self->raw_tau_threshold_vals);
-    Py_XDECREF(self->rev_info);
+    Py_XDECREF(self->phi_deg_vals);
+    Py_XDECREF(self->phi_rl_deg_vals);
     Py_XDECREF(self->rho_corr_pole_km_vals);
     Py_XDECREF(self->rho_corr_timing_km_vals);
     Py_XDECREF(self->rho_dot_kms_vals);
@@ -43,10 +37,7 @@ void Diffrec_dealloc(PyDiffrecObj *self)
     Py_XDECREF(self->t_ret_spm_vals);
     Py_XDECREF(self->t_set_spm_vals);
     Py_XDECREF(self->tau_threshold_vals);
-    Py_XDECREF(self->tau_vals);
-    Py_XDECREF(self->tau_fwd_vals);
     Py_XDECREF(self->w_km_vals);
-    Py_XDECREF(self->history);
     Py_XDECREF(self->outfiles);
     Py_XDECREF(self->input_vars);
     Py_XDECREF(self->input_kwds);

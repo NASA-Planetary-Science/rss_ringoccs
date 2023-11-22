@@ -102,14 +102,14 @@ rssringoccs_Fresnel_Transform_Newton_Quadratic(rssringoccs_TAUObj *tau,
 
     /*  Linear interpolation to compute the corresponding azimuth angles.     *
      *  Compute the slope of rho vs phi.                                      */
-    const double num = tau->phi_rad_vals[end] - tau->phi_rad_vals[start];
+    const double num = tau->phi_deg_vals[end] - tau->phi_deg_vals[start];
     const double den = tau->rho_km_vals[end] - tau->rho_km_vals[start];
     const double slope = num / den;
 
     /*  Compute phi using the slope-intercept formula of the line.            */
     const double phi0[4] = {
-        (rho[0] - tau->rho_km_vals[offset])*slope + tau->phi_rad_vals[offset],
-        (rho[1] - tau->rho_km_vals[offset])*slope + tau->phi_rad_vals[offset]
+        (rho[0] - tau->rho_km_vals[offset])*slope + tau->phi_deg_vals[offset],
+        (rho[1] - tau->rho_km_vals[offset])*slope + tau->phi_deg_vals[offset]
     };
 
     /*  Initialize T_out and norm to zero so we can loop over later.          */
@@ -125,7 +125,7 @@ rssringoccs_Fresnel_Transform_Newton_Quadratic(rssringoccs_TAUObj *tau,
             rho[n],                     /*  Dummy radius.                     */
             phi0[n],                    /*  Initial stationary azimuth guess. */
             phi0[n],                    /*  Dummy azimuthal angle.            */
-            tau->B_rad_vals[center],    /*  Ring opening angle.               */
+            tau->B_deg_vals[center],    /*  Ring opening angle.               */
             tau->rx_km_vals[center],    /*  x-coordinate of spacecraft.       */
             tau->ry_km_vals[center],    /*  y-coordinate of spacecraft.       */
             tau->rz_km_vals[center],    /*  z-coordinate of spacecraft.       */
@@ -149,7 +149,7 @@ rssringoccs_Fresnel_Transform_Newton_Quadratic(rssringoccs_TAUObj *tau,
             rho[n],                     /*  Dummy radius.                     */
             phi,                        /*  Stationary azimuthal angle.       */
             phi0[n],                    /*  Dummy azimuthal angle.            */
-            tau->B_rad_vals[center],    /*  Ring opening angle.               */
+            tau->B_deg_vals[center],    /*  Ring opening angle.               */
             D                           /*  Ring-Spacecraft distance.         */
         );
     }

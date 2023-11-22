@@ -24,11 +24,7 @@ static PyMemberDef diffrec_members[] = {
         "Ring radius."
     },
     {
-        "phase_rad_vals", T_OBJECT_EX, offsetof(PyDiffrecObj, phase_rad_vals),
-        0, "Raw diffracted phase."
-    },
-    {
-        "B_rad_vals", T_OBJECT_EX, offsetof(PyDiffrecObj, B_rad_vals), 0,
+        "B_deg_vals", T_OBJECT_EX, offsetof(PyDiffrecObj, B_deg_vals), 0,
         "Ring inclination angle."
     },
     {
@@ -52,45 +48,24 @@ static PyMemberDef diffrec_members[] = {
         "Fresnel scale."
     },
     {
-        "f_sky_hz_vals", T_OBJECT_EX, offsetof(PyDiffrecObj, f_sky_hz_vals), 0,
-        "Frequency of the input signal"
-    },
-    {
-        "p_norm_fwd_vals", T_OBJECT_EX, offsetof(PyDiffrecObj, p_norm_fwd_vals),
-        0, "Forward modeling of power"
-    },
-    {
-        "p_norm_vals", T_OBJECT_EX, offsetof(PyDiffrecObj, p_norm_vals), 0,
-        "Raw power data"
-    },
-    {
-        "phase_fwd_vals", T_OBJECT_EX, offsetof(PyDiffrecObj, phase_fwd_vals),
-        0, "Forward modeling of phase"
-    },
-    {
-        "phase_vals", T_OBJECT_EX, offsetof(PyDiffrecObj, phase_vals), 0,
-        "Diffraction corrected phase"
-    },
-    {
-        "phi_rad_vals", T_OBJECT_EX, offsetof(PyDiffrecObj, phi_rad_vals), 0,
+        "phi_deg_vals", T_OBJECT_EX, offsetof(PyDiffrecObj, phi_deg_vals), 0,
         "Ring azimuth angle"
     },
     {
-        "phi_rl_rad_vals", T_OBJECT_EX, offsetof(PyDiffrecObj, phi_rl_rad_vals),
+        "phi_rl_deg_vals", T_OBJECT_EX, offsetof(PyDiffrecObj, phi_rl_deg_vals),
         0, "Ring longitude angle"
     },
     {
-        "power_vals", T_OBJECT_EX, offsetof(PyDiffrecObj, power_vals), 0,
-        "Diffraction corrected power"
+        "T_in", T_OBJECT_EX, offsetof(PyDiffrecObj, T_in), 0,
+        "Diffraction profile."
     },
     {
-        "raw_tau_threshold_vals", T_OBJECT_EX,
-        offsetof(PyDiffrecObj, raw_tau_threshold_vals), 0,
-        "Raw threshold optical depth"
+        "T_out", T_OBJECT_EX, offsetof(PyDiffrecObj, T_out), 0,
+        "Diffraction corrected profile."
     },
     {
-        "rev_info", T_OBJECT_EX, offsetof(PyDiffrecObj, rev_info), 0,
-        "Information about the occultation"
+        "T_fwd", T_OBJECT_EX, offsetof(PyDiffrecObj, T_fwd), 0,
+        "Forward modeling profile."
     },
     {
         "rho_corr_pole_km_vals", T_OBJECT_EX,
@@ -125,20 +100,8 @@ static PyMemberDef diffrec_members[] = {
         "Diffraction corrected threshold optical depth"
     },
     {
-        "tau_vals", T_OBJECT_EX, offsetof(PyDiffrecObj, tau_vals), 0,
-        "Optical depth"
-    },
-    {
-        "tau_fwd_vals", T_OBJECT_EX, offsetof(PyDiffrecObj, tau_fwd_vals), 0,
-        "Optical depth"
-    },
-    {
         "w_km_vals", T_OBJECT_EX, offsetof(PyDiffrecObj, w_km_vals), 0,
         "window width as a function of ring radius"
-    },
-    {
-        "history", T_OBJECT_EX, offsetof(PyDiffrecObj, history), 0,
-        "History of the tau instance"
     },
     {
         "outfiles", T_OBJECT_EX, offsetof(PyDiffrecObj, outfiles), 0,

@@ -47,7 +47,7 @@ rssringoccs_Fresnel_Transform_Newton_Elliptical_Norm(rssringoccs_TAUObj *tau,
     for (m = 0; m < n_pts; ++m)
     {
         /*  Calculate the stationary value of psi with respect to phi.        */
-        ecc_cos_factor = 1.0 + tau->ecc * tmpl_Double_Cos(tau->phi_rad_vals[center] - tau->peri);
+        ecc_cos_factor = 1.0 + tau->ecc * tmpl_Double_Cos(tau->phi_deg_vals[center] - tau->peri);
         semi_major     = tau->rho_km_vals[center] * ecc_cos_factor / ecc_factor;
 
         /*  Calculate the stationary value of psi with respect to phi.        */
@@ -55,9 +55,9 @@ rssringoccs_Fresnel_Transform_Newton_Elliptical_Norm(rssringoccs_TAUObj *tau,
             tau->k_vals[center],
             tau->rho_km_vals[center],
             tau->rho_km_vals[offset],
-            tau->phi_rad_vals[offset],
-            tau->phi_rad_vals[offset],
-            tau->B_rad_vals[center],
+            tau->phi_deg_vals[offset],
+            tau->phi_deg_vals[offset],
+            tau->B_deg_vals[center],
             tau->ecc,
             tau->peri,
             tau->rx_km_vals[center],
@@ -84,8 +84,8 @@ rssringoccs_Fresnel_Transform_Newton_Elliptical_Norm(rssringoccs_TAUObj *tau,
             rho,
             tau->rho_km_vals[offset],
             phi,
-            tau->phi_rad_vals[offset],
-            tau->B_rad_vals[center],
+            tau->phi_deg_vals[offset],
+            tau->B_deg_vals[center],
             D
         );
 

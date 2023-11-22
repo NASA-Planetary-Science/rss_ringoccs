@@ -114,14 +114,14 @@ typedef struct rssringoccs_TauCSV_Def {
 /*  Data structure that contains all of the data from all four CSV formats    *
  *  interpolated so that the values are a function of radius, not time.       */
 typedef struct rssringoccs_CSVData_Def {
-    double *B_rad_vals;
+    double *B_deg_vals;
     double *D_km_vals;
     double *f_sky_hz_vals;
     double *p_norm_vals;
     double *raw_tau_vals;
-    double *phase_rad_vals;
-    double *phi_rad_vals;
-    double *phi_rl_rad_vals;
+    double *phase_deg_vals;
+    double *phi_deg_vals;
+    double *phi_rl_deg_vals;
     double *raw_tau_threshold_vals;
     double *rho_corr_pole_km_vals;
     double *rho_corr_timing_km_vals;

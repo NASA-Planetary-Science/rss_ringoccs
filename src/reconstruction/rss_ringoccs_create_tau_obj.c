@@ -250,7 +250,7 @@ rssringoccs_Create_TAUObj(const rssringoccs_DLPObj *dlp, double res)
      *      rz_km_vals                                                        *
      *  This function also checks that the arrays have valid entries.         *
      **************************************************************************/
-    rssringoccs_Copy_DLP_Data_To_Tau(dlp, tau);
+    rssringoccs_Tau_Copy_DLP_Data(dlp, tau);
     return tau;
 }
 /*  rssringoccs_Create_TAUObj.                                                */

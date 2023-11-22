@@ -73,10 +73,11 @@ int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
     PyObject *DLPInst;
     PyObject *tmp;
     PyObject *dlp_tmp;
-    PyObject *rngreq;
-    PyObject *perturb;
 
     /*  Set the default keyword options.                                      */
+
+    /*  Default polynomial perturbation is off.                               */
+    PyObject *perturb = NULL;
 
     /*  The kbmd20 is a new window, a modifed Kaiser-Bessel with alpha set to *
      *  two pi. The modification ensures the window goes to zero at its edges *
@@ -96,7 +97,7 @@ int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
     self->psitype = "fresnel4";
 
     /*  Default range is "all", denoting [1.0, 400000.0]. We'll set later.    */
-    rngreq = PyUnicode_FromString("all");
+    PyObject *rngreq = PyUnicode_FromString("all");
 
     /*  By default, forward computations are not run, FFTs are not used, and  *
      *  the run is silent (verbose is off).                                   */
@@ -122,9 +123,6 @@ int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
      *  the eccentricity and the periapse to zero.                            */
     self->ecc = 0.0;
     self->peri = 0.0;
-
-    /*  Default polynomial perturbation is off.                               */
-    perturb = NULL;
 
     /*  Extract the inputs and keywords supplied by the user. If the data     *
      *  cannot be extracted, raise a type error and return to caller. A short *
@@ -179,33 +177,11 @@ int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
         puts("\tDiffraction Correction: Retrieving history from DLP...");
     }
 
-    if (!PyObject_HasAttrString(DLPInst, "rev_info"))
-    {
-        PyErr_Format(
-            PyExc_AttributeError,
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tdiffrec.DiffractionCorrection\n\n"
-            "\rInput DLP Instance is missing the following attribute:\n"
-            "\r\trev_info\n\n"
-        );
-        return -1;
-    }
-    else
-        dlp_tmp = PyObject_GetAttrString(DLPInst, "rev_info");
-
-    /*  Store the dlp history inside of the DiffractionCorrection class. This *
-     *  tmp, Py_INCREF, Py_XDECREF method is recommended in the Python C-API  *
-     *  documentation as a means of safely storing the variable.              */
-    tmp = self->rev_info;
-    Py_INCREF(dlp_tmp);
-    self->rev_info = dlp_tmp;
-    Py_XDECREF(tmp);
-
     /*  If verbose was set, print a status update.                            */
     if (self->verbose)
         puts("\tDiffraction Correction: Converting Py DLP to C DLP...");
 
-    dlp = crssringoccs_Py_DLP_to_C_DLP(DLPInst);
+    dlp = crssringoccs_Py_DLP_To_C_DLP(DLPInst);
 
     if (dlp == NULL)
     {
@@ -213,7 +189,7 @@ int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
             PyExc_RuntimeError,
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\tdiffrec.DiffractionCorrection\n\n"
-            "\rFailed to pass variables to C. rssringoccs_Py_DLP_to_C_DLP\n"
+            "\rFailed to pass variables to C. rssringoccs_Py_DLP_To_C_DLP\n"
             "\rreturned NULL. Returning.\n\n"
         );
         return -1;
@@ -227,7 +203,7 @@ int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
                 PyExc_RuntimeError,
                 "\n\rError Encountered: rss_ringoccs\n"
                 "\r\tdiffrec.DiffractionCorrection\n\n"
-                "\rFailed to pass variables to C. rssringoccs_Py_DLP_to_C_DLP\n"
+                "\rFailed to pass variables to C. rssringoccs_Py_DLP_To_C_DLP\n"
                 "\rreturned a dlp with error_occurred set to True. No\n"
                 "\rerror message was set. Returning.\n\n"
             );
@@ -254,8 +230,8 @@ int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
     crssringoccs_Get_Py_Perturb(tau, perturb);
     crssringoccs_Get_Py_Range(tau, rngreq);
 
-    rssringoccs_Tau_Set_WType(self->wtype, tau);
-    rssringoccs_Tau_Set_Psitype(self->psitype, tau);
+    rssringoccs_Tau_Set_Window_Type(self->wtype, tau);
+    rssringoccs_Tau_Set_Psi_Type(self->psitype, tau);
 
     if (self->verbose)
         puts("\tDiffraction Correction: Running reconstruction...");
@@ -265,7 +241,7 @@ int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
     if (self->verbose)
         puts("\tDiffraction Correction: Converting C tau to Py tau...");
 
-    crssringoccs_C_Tau_to_Py_Tau(self, tau);
+    crssringoccs_C_Tau_To_Py_Tau(self, tau);
 
     if (tau == NULL)
     {
@@ -292,17 +268,9 @@ int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
         else
             PyErr_Format(PyExc_RuntimeError, "%s\n", tau->error_message);
 
-        rssringoccs_Destroy_Tau(&tau);
+        rssringoccs_Tau_Destroy(&tau);
         return -1;
     }
-
-    /*  These variables are not copied to the Py object and must be freed.    */
-    DESTROY_VAR(tau->psitype);
-    DESTROY_VAR(tau->wtype);
-    DESTROY_VAR(tau->k_vals);
-    DESTROY_VAR(tau->T_in);
-    DESTROY_VAR(tau->T_out);
-    DESTROY_VAR(tau->T_fwd);
 
     /*  We are now freeing the C tau object. The data pointers are still      *
      *  accessible via the self PyObject. Note, we are freeing the pointer to *

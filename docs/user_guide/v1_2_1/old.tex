@@ -1,0 +1,198 @@
+\subsection{Python object-orientated programming}
+    The \texttt{rss\_ringoccs} package is written in Python
+    in part because it is a strongly but intuitively
+    object-oriented language. To that end, users who are
+    not well-versed in object-oriented programming,
+    particularly in a Python context, will need to
+    familiarize themselves with terms associated
+    with the use of objects in Python. A \textit{class}
+    is a skeletal framework of functions and variables,
+    the latter of which exist as either undefined or
+    default properties referred to \textit{attributes}.
+    When a class is called by a user (an act referred to
+    as \textit{instantiation}), this creates an
+    \textit{instance} of this class
+    with attributes unique to this specific creation
+    of the class. For more details on object-oriented
+    programming, we recommend online resources such as\\
+    \url{https://realpython.com/%
+         python3-object-oriented-programming/}.
+            \par\hfill\par
+            \textbf{DiffractionCorrection Arguments}
+            \begin{table}[H]
+                \centering
+                \begin{tabular}{lp{5in}}
+                    norm\_inst:&\\
+                    &An instance of the NormDiff class which
+                     contains all of the necessary variables
+                     to perform diffraction reconstruction.
+                     This includes the geometry of the
+                     occultation, the diffracted raw power,
+                     and the phase.\\
+                    res:&\\
+                    &The user-requested resolution,
+                     specified in kilometers, of the reconstructed
+                     profiles. This is a positive floating point
+                     number. It is bounded below by twice
+                     the sample spacing that is contained in the
+                     NormDiff class, in adherence to the
+                     sampling theorem. Requests for smaller
+                     resolutions will produce an error message.\\
+                \end{tabular}
+            \end{table}
+            \textbf{DiffractionCorrection Keywords}
+            \begin{table}[H]
+                \centering
+                \begin{tabular}{lp{5in}}
+                    rng:&\\
+                    &The requested ring plane radial range for diffraction reconstruction. This
+                     can be either a list or a string, depending on
+                     the planet. Preferred inputs are lists of the
+                     form $\textrm{rng}=[a,b]$,
+                     where $a$ is the (positive) inner limit to the radial range (in km) 
+                     for reconstruction, and $b$ is the outer limit (again, in km).
+                     For Saturn, several regions
+                     of interest are already specified and can be
+                     loaded in as strings. For example,
+                     rng=``maxwell'' is a valid input and will
+                     result in a reconstruction over the radial range of the Maxwell ringlet: 
+                     $[87410,87610]$. Currently acceptable strings
+                     are: `all', `cringripples', `encke',
+                     `janusepimetheus', `maxwell', `titan', `huygens'.
+                   \\
+                    wtype:&\\
+                    &A string specifying the requested
+                     window/tapering function to be applied during the
+                     reconstruction process. By default a
+                     Kaiser-Bessel function with $\alpha$ parameter
+                     set to 2.5 is used. The user may select any
+                     of the following: `rect', `coss',
+                     `kb20', `kb25', `kb35', `kbmd20', `kbmd25', which
+                     stand for rectangular window,
+                     squared cosine window, and various
+                     Kaiser-Bessel windows. The `kbmd' windows are
+                     modified versions of the Kaiser-Bessel functions.
+                     The standard ones do not tend to zero at the
+                     edge of the window, but rather converge to
+                     $1/I_{0}(\alpha\pi)$, where $I_{0}$ is the
+                     modified Bessel function.
+                     For large $\alpha$ this is essentially
+                     zero, but for small values this discontinuity
+                     in the window can cause unwanted fringe effects.
+                     The modification simply makes the function
+                     zero at the edges, while still evaluating to
+                     1 at the center.\\
+                    fwd:&\\
+                    &A Boolean for determining whether or not
+                     a forward calculation will be performed at
+                     the end of reconstruction. If the reconstruction
+                     went well, this forward model should match the
+                     data to the extent of smoothing effects caused
+                     by the finite positive resolution that was
+                     requested. Default is set to False.\\
+    
+                \end{tabular}
+            \end{table}
+            \newpage
+            \textbf{DiffractionCorrection Keywords (Cont.)}
+            \begin{table}[H]
+                \centering
+                \begin{tabular}{lp{5in}}
+                 
+                     norm:&\\
+                    &A Boolean for determining whether or not to
+                     normalize the reconstruction by the window width.
+                     The reconstruction is defined as:
+                     \begin{equation*}
+                         T(\rho)
+                         =\frac{1-i}{2F}
+                          \int_{-W/2}^{W/2}\hat{T}(\rho_{0})
+                          w(\rho-\rho_{0})e^{-i\psi(\rho,\rho_{0})}
+                          d\rho_{0},
+                     \end{equation*}
+                     where $\hat{T}$ is the diffracted data,
+                     $\exp(-i\psi)$ is the Fresnel Kernel,
+                     $w$ is the window function, and $W$ is the
+                     window width. A quick look at
+                     this equation shows that as the window width
+                     goes to zero, so does the reconstruction. That
+                     means for large resolutions (10-km, or so),
+                     the reconstruction will be a small fraction
+                     of the input data. To correct this
+                     we offer the ability to normalize the
+                     reconstruction by the following factor:
+                     \begin{equation*}
+                         N
+                         =\frac{\int_{-\infty}^{\infty}e^{i\psi}d\rho}
+                          {\int_{-W/2}^{W/2}we^{i\psi}d\rho}
+                     \end{equation*}
+                     Default is set to True.\\
+                    bfac:&\\
+                    &A Boolean for determining how to compute the
+                     window width about a particular point. The
+                     standard definition of the window width is
+                     $W=2F^{2}/\Delta{R}$,
+                     where $F$ is the Fresnel Scale and $\Delta{R}$ is
+                     the requested resolution. However, when the
+                     Allen deviation is large, or when the velocity
+                     of ring intercept point ($d\rho/dt$) is small,
+                     the resolution is defined as:
+                     \begin{equation*}
+                         \Delta{R}
+                         =\frac{2F^{2}}{W}\frac{b^2/2}{\exp(-b)+b-1},
+                     \end{equation*}
+                    where $b=\omega^{2}\sigma^{2}W/2\dot{\rho}$.
+                     Here, $\omega$ is the angular frequency,
+                     $\sigma$ is the Allen deviation, and $\dot{\rho}$
+                     is the ring intercept velocity. Solving
+                     for $W$ then becomes a process of inverting this
+                     equation, which we perform using LambertW functions.
+                     Setting bfac=True will compute the window width
+                     taking into account this ``b'' factor, setting
+                     bfac=False uses the standard $W=2F^{2}/\Delta{R}$.
+                     Default is True. For all Cassini RSS observations that used the USO, the Allen deviation is sufficiently small that $b<<1$.\\
+                    sigma:&\\
+                    &The Allen deviation. This is a positive floating
+                     point number. If bfac=False is set, this parameter
+                     is ignored. See bfac for more documentation.\\
+                    fft:&\\
+                     &A Boolean for determining whether or not to use
+                      FFT's for the computation. When the Fresnel kernel
+                      (see the equation listed under the ``norm''
+                      keyword) is of the form
+                      $\exp(i\psi(\rho-\rho_{0}))$, the convolution
+                      theorem may be applied to compute the
+                      reconstruction. This can greatly reduce
+                      computation time. Default is False.\\
+                    psitype:&\\
+                    &A string that will determine how the Fresnel kernel
+                     will be approximated (see the equation listed under
+                     then ``norm'' keyword). Currently there are several
+                     options: `full', `mtr2', `mtr3', `mtr4', and
+                     'fresnel', none of which are case-sensitive.
+                     The MTR options compute the polynomial
+                     approximations found in MTR86.
+                     ``Full'' uses no approximation and $\psi$ will be
+                     computed outright. ``Fresnel'' uses the
+                     classic quadratic Fresnel approximation,
+                     which sets
+                     $\psi=\frac{\pi}{2}(\frac{\rho-\rho_{0}}{F})^{2}$.
+                     Because of the simplicity of the computation,
+                     `fresnel' is by far the fastest in
+                     reconstruction time. For many
+                     occultations, such as Cassini's rev007,
+                     the difference between using `fresnel' and `full'
+                     is extremely small.
+                     For more pathological
+                     data sets, such as rev133 (with a very small ring opening angle), there are significant
+                     differences. The user must be alert to note when
+                     various approximations are valid.
+                     Default is psitype=`full'.\\
+                    write\_file:&\\
+                    &A Boolean for determining if the *.TAU file will
+                     be written.\\
+                    verbose:&\\
+                    &Boolean for printing out status reports on
+                     the reconstruction. Default is False.
+                \end{tabular}
+            \end{table}

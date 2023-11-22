@@ -105,9 +105,9 @@ rssringoccs_Fresnel_Transform_Perturbed_Newton(rssringoccs_TAUObj *tau,
             tau->k_vals[center],        /* Wavenumber. */
             tau->rho_km_vals[center],   /* Dummy radius. */
             tau->rho_km_vals[offset],   /* Ring radius. */
-            tau->phi_rad_vals[offset],  /* Dummy azimuthal angle. */
-            tau->phi_rad_vals[offset],  /* Ring azimuth angle. */
-            tau->B_rad_vals[center],    /* Ring opening angle. */
+            tau->phi_deg_vals[offset],  /* Dummy azimuthal angle. */
+            tau->phi_deg_vals[offset],  /* Ring azimuth angle. */
+            tau->B_deg_vals[center],    /* Ring opening angle. */
             tau->D_km_vals[center],     /* Observer distance. */
             tau->EPS,                   /* Allowed error. */
             tau->toler                  /* Max number of iterations. */
@@ -119,8 +119,8 @@ rssringoccs_Fresnel_Transform_Perturbed_Newton(rssringoccs_TAUObj *tau,
             tau->rho_km_vals[center],   /* Dummy radius. */
             tau->rho_km_vals[offset],   /* Ring radius. */
             phi,                        /* Stationary azimuth angle. */
-            tau->phi_rad_vals[offset],  /* Ring azimuth angle. */
-            tau->B_rad_vals[center],    /* Ring opening angle. */
+            tau->phi_deg_vals[offset],  /* Ring azimuth angle. */
+            tau->B_deg_vals[center],    /* Ring opening angle. */
             tau->D_km_vals[center]      /* Observer distance. */
         );
 

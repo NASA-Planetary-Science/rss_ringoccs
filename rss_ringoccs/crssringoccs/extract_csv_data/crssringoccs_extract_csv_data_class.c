@@ -33,11 +33,11 @@ static PyMemberDef extractcsvdata_members[] = {
         "Ring radius."
     },
     {
-        "phase_rad_vals", T_OBJECT_EX, offsetof(PyCSVObj, phase_rad_vals),
+        "phase_deg_vals", T_OBJECT_EX, offsetof(PyCSVObj, phase_deg_vals),
         0, "Raw diffracted phase."
     },
     {
-        "B_rad_vals", T_OBJECT_EX, offsetof(PyCSVObj, B_rad_vals), 0,
+        "B_deg_vals", T_OBJECT_EX, offsetof(PyCSVObj, B_deg_vals), 0,
         "Ring inclination angle."
     },
     {
@@ -69,11 +69,11 @@ static PyMemberDef extractcsvdata_members[] = {
         "Raw optical depth"
     },
     {
-        "phi_rad_vals", T_OBJECT_EX, offsetof(PyCSVObj, phi_rad_vals), 0,
+        "phi_deg_vals", T_OBJECT_EX, offsetof(PyCSVObj, phi_deg_vals), 0,
         "Ring azimuth angle"
     },
     {
-        "phi_rl_rad_vals", T_OBJECT_EX, offsetof(PyCSVObj, phi_rl_rad_vals),
+        "phi_rl_deg_vals", T_OBJECT_EX, offsetof(PyCSVObj, phi_rl_deg_vals),
         0, "Ring longitude angle"
     },
     {

@@ -20,14 +20,14 @@
 
 void ExtractCSVData_dealloc(PyCSVObj *self)
 {
-    Py_XDECREF(self->B_rad_vals);
+    Py_XDECREF(self->B_deg_vals);
     Py_XDECREF(self->D_km_vals);
     Py_XDECREF(self->f_sky_hz_vals);
     Py_XDECREF(self->p_norm_vals);
     Py_XDECREF(self->raw_tau_vals);
-    Py_XDECREF(self->phase_rad_vals);
-    Py_XDECREF(self->phi_rad_vals);
-    Py_XDECREF(self->phi_rl_rad_vals);
+    Py_XDECREF(self->phase_deg_vals);
+    Py_XDECREF(self->phi_deg_vals);
+    Py_XDECREF(self->phi_rl_deg_vals);
     Py_XDECREF(self->raw_tau_threshold_vals);
     Py_XDECREF(self->rev_info);
     Py_XDECREF(self->rho_corr_pole_km_vals);

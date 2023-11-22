@@ -32,7 +32,7 @@
 /*  This function frees the memory allocated to a pointer by malloc when the  *
  *  corresponding variable is destroyed at the Python level. Without this you *
  *  will have serious memory leaks, so do not remove!                         */
-void crssringoccs_capsule_cleanup(PyObject *capsule)
+void crssringoccs_Capsule_Cleanup(PyObject *capsule)
 {
     void *memory = PyCapsule_GetPointer(capsule, NULL);
     free(memory);

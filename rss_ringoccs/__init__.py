@@ -89,7 +89,7 @@
         ..  http://mathworld.wolfram.com/Erf.html
 """
 
-from crssringoccs import ExtractCSVData, DiffractionCorrection
+from .crssringoccs import ExtractCSVData, DiffractionCorrection
 from . import tools
 from . import rsr_reader
 from . import occgeo

@@ -30,7 +30,7 @@
 #include "../crssringoccs.h"
 
 /*  Macro for the crssringoccs_set_var function to shorten the syntax.        */
-#define SET_VAR(a) crssringoccs_set_var(&py_csv->a, csv->a, csv->n_elements)
+#define SET_VAR(a) crssringoccs_Set_Var(&py_csv->a, csv->a, csv->n_elements)
 
 /*  Converts a C CSV struct to a Python CSV object.                           */
 void crssringoccs_C_CSV_to_Py_CSV(PyCSVObj *py_csv, rssringoccs_CSVData *csv)
@@ -53,14 +53,14 @@ void crssringoccs_C_CSV_to_Py_CSV(PyCSVObj *py_csv, rssringoccs_CSVData *csv)
     }
 
     SET_VAR(rho_km_vals);
-    SET_VAR(B_rad_vals);
+    SET_VAR(B_deg_vals);
     SET_VAR(D_km_vals);
     SET_VAR(f_sky_hz_vals);
     SET_VAR(p_norm_vals);
     SET_VAR(raw_tau_vals);
-    SET_VAR(phase_rad_vals);
-    SET_VAR(phi_rad_vals);
-    SET_VAR(phi_rl_rad_vals);
+    SET_VAR(phase_deg_vals);
+    SET_VAR(phi_deg_vals);
+    SET_VAR(phi_rl_deg_vals);
     SET_VAR(rho_dot_kms_vals);
     SET_VAR(t_oet_spm_vals);
     SET_VAR(t_ret_spm_vals);

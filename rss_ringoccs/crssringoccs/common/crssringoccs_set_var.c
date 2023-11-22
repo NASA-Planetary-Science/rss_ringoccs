@@ -37,7 +37,7 @@
 #include <numpy/ufuncobject.h>
 
 /*  Creates a numpy array from a double array.                                */
-void crssringoccs_set_var(PyObject **py_ptr, double *ptr, size_t len)
+void crssringoccs_Set_Var(PyObject **py_ptr, double *ptr, size_t len)
 {
     PyObject *arr, *tmp, *capsule;
     npy_intp pylength = (npy_intp)len;
@@ -63,7 +63,7 @@ void crssringoccs_set_var(PyObject **py_ptr, double *ptr, size_t len)
 
         /*  Create a capsule for this pointer so it is free'd when the numpy  *
          *  array is destroyed. Avoids memory leaks for the end-user.         */
-        capsule = PyCapsule_New(ptr, NULL, crssringoccs_capsule_cleanup);
+        capsule = PyCapsule_New(ptr, NULL, crssringoccs_Capsule_Cleanup);
 
         /*  Link the array to the capsule. "del arr" in Python now free's the *
          *  memory allocated for the C pointer.                               */

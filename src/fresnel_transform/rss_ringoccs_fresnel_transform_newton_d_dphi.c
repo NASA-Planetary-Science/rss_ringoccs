@@ -48,9 +48,9 @@ rssringoccs_Fresnel_Transform_Newton_dD_dphi(rssringoccs_TAUObj *tau,
             tau->k_vals[offset],        /* Wavenumber. */
             tau->rho_km_vals[center],   /* Dummy ring radius. */
             tau->rho_km_vals[offset],   /* Ring radius. */
-            tau->phi_rad_vals[offset],  /* Dummy azimuth angle. */
-            tau->phi_rad_vals[offset],  /* Ring azimuth angle. */
-            tau->B_rad_vals[offset],    /* Ring opening angle. */
+            tau->phi_deg_vals[offset],  /* Dummy azimuth angle. */
+            tau->phi_deg_vals[offset],  /* Ring azimuth angle. */
+            tau->B_deg_vals[offset],    /* Ring opening angle. */
             tau->rx_km_vals[center],    /* Cassini x coordinate. */
             tau->ry_km_vals[center],    /* Cassini y coordinate. */
             tau->rz_km_vals[center],    /* Cassini z coordinate. */
@@ -72,8 +72,8 @@ rssringoccs_Fresnel_Transform_Newton_dD_dphi(rssringoccs_TAUObj *tau,
             tau->rho_km_vals[center],   /* Dummy ring radius. */
             tau->rho_km_vals[offset],   /* Ring radius. */
             phi,                        /* Stationary azimuth angle. */
-            tau->phi_rad_vals[offset],  /* Ring azimuth angle. */
-            tau->B_rad_vals[center],    /* Ring opening angle. */
+            tau->phi_deg_vals[offset],  /* Ring azimuth angle. */
+            tau->B_deg_vals[center],    /* Ring opening angle. */
             D                           /* Observer distance. */
         );
 

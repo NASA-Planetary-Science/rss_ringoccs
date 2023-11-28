@@ -11,6 +11,23 @@
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 #include <rss_ringoccs/include/rss_ringoccs_tau.h>
 
+static const char rssringoccs_psi_err_mes[800] =
+    "\n\rError Encountered: rss_ringoccs\n"
+    "\r\trssringoccs_Tau_Set_Psitype\n\n"
+    "\rIllegal string for psitype. Allowed strings:\n"
+    "\r\tnewton:     Newton-Raphson method\n"
+    "\r\tnewtond:    Newton-Raphson with D perturbation.\n"
+    "\r\tnewtondold: Newton-Raphson with the old D algorithm.\n"
+    "\r\tnewtondphi: Newton-Raphson with dD/dphi perturbation.\n"
+    "\r\tsimplefft:  A single FFT of the entire data set.\n"
+    "\r\tquadratic:  Quadratic interpolation of newton-raphson."
+    "\r\tcubic:      Cubic interpolation of newton-raphson."
+    "\r\tquartic:    Quartic interpolation of newton-raphson."
+    "\r\tquarticd:   Quartic interpolation with D perturbation."
+    "\r\tellipse:    Newton-Raphson with elliptical perturbation.\n"
+    "\r\tfresnel:    Quadratic Fresnel approximation\n"
+    "\r\tfresneln:   Legendre polynomial approximation with 1<n<256\n";
+
 void
 rssringoccs_Tau_Set_Psi_Type(const char *psitype, rssringoccs_TAUObj* tau)
 {
@@ -98,34 +115,10 @@ rssringoccs_Tau_Set_Psi_Type(const char *psitype, rssringoccs_TAUObj* tau)
     }
     else
     {
-        char errmes1[1024];
-        const char *errmes2 =
-            "\r\tquadratic:  Quadratic interpolation of newton-raphson."
-            "\r\tcubic:      Cubic interpolation of newton-raphson."
-            "\r\tquartic:    Quartic interpolation of newton-raphson."
-            "\r\tquarticd:   Quartic interpolation with D perturbation."
-            "\r\tellipse:    Newton-Raphson with elliptical perturbation.\n"
-            "\r\tfresnel:    Quadratic Fresnel approximation\n"
-            "\r\tfresneln:   Legendre polynomial approximation with 1<n<256\n";
-
-        strcpy(
-            errmes1,
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_Tau_Set_Psitype\n\n"
-            "\rIllegal string for psitype. Allowed strings:\n"
-            "\r\tnewton:     Newton-Raphson method\n"
-            "\r\tnewtond:    Newton-Raphson with D perturbation.\n"
-            "\r\tnewtondold: Newton-Raphson with the old D algorithm.\n"
-            "\r\tnewtondphi: Newton-Raphson with dD/dphi perturbation.\n"
-            "\r\tsimplefft:  A single FFT of the entire data set.\n"
-        );
-
-        strcat(errmes1, errmes2);
-
         tau->order = 0;
         tau->psinum = rssringoccs_DR_None;
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_strdup(errmes1);
+        tau->error_message = tmpl_String_Duplicate(rssringoccs_psi_err_mes);
     }
 
     free(tau_psitype);

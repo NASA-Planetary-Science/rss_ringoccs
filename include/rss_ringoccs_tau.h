@@ -27,14 +27,13 @@
 #ifndef RSS_RINGOCCS_TAU_H
 #define RSS_RINGOCCS_TAU_H
 
-/*  Booleans given here.                                                      */
-#include <libtmpl/include/tmpl_bool.h>
-
-/*  Complex numbers provided here.                                            */
-#include <libtmpl/include/tmpl_complex.h>
+/*  Booleans and complex numbers given here.                                  */
+#include <libtmpl/include/tmpl.h>
 
 /*  size_t typedef provided here.                                             */
 #include <stddef.h>
+
+#include <rss_ringoccs/include/rss_ringoccs_calibration.h>
 
 /*  Window function, input is x-parameter and window width.                   */
 typedef double (*rssringoccs_Window_Function)(double, double);
@@ -143,6 +142,41 @@ typedef struct rssringoccs_TAUObj_Def {
 
 /******************************************************************************
  *  Function:                                                                 *
+ *      rssringoccs_Tau_Copy_DLP_Members                                      *
+ *  Purpose:                                                                  *
+ *      Copies members that dlp and tau objects have in common from a dlp     *
+ *      object in to a tau object.                                            *
+ *  Arguments:                                                                *
+ *      tau (rssringoccs_TAUObj *):                                           *
+ *          The Tau object. DLP members will be copied here.                  *
+ *      dlp (const rssringoccs_DLPObj *):                                     *
+ *          The DLP object whose members are being copied.                    *
+ *  Outputs:                                                                  *
+ *      None (void).                                                          *
+ ******************************************************************************/
+extern void
+rssringoccs_Tau_Copy_DLP_Members(rssringoccs_TAUObj *tau,
+                                 const rssringoccs_DLPObj *dlp);
+
+/******************************************************************************
+ *  Function:                                                                 *
+ *      rssringoccs_Tau_Compute_Data_From_DLP_Members                         *
+ *  Purpose:                                                                  *
+ *      Computes several Tau variables from the given DLP data.               *
+ *  Arguments:                                                                *
+ *      tau (rssringoccs_TAUObj *):                                           *
+ *          The Tau object.                                                   *
+ *      dlp (const rssringoccs_DLPObj *):                                     *
+ *          The DLP object.                                                   *
+ *  Outputs:                                                                  *
+ *      None (void).                                                          *
+ ******************************************************************************/
+extern void
+rssringoccs_Tau_Compute_Data_From_DLP_Members(rssringoccs_TAUObj *tau,
+                                              const rssringoccs_DLPObj *dlp);
+
+/******************************************************************************
+ *  Function:                                                                 *
  *      rssringoccs_Tau_Destroy                                               *
  *  Purpose:                                                                  *
  *      Frees all data associated with a Tau object.                          *
@@ -167,6 +201,54 @@ extern void rssringoccs_Tau_Destroy(rssringoccs_TAUObj **tau);
  *      None (void).                                                          *
  ******************************************************************************/
 extern void rssringoccs_Tau_Destroy_Members(rssringoccs_TAUObj *tau);
+
+/******************************************************************************
+ *  Function:                                                                 *
+ *      rssringoccs_Tau_Init                                                  *
+ *  Purpose:                                                                  *
+ *      Initialize a tau struct so that it's members are NULL.                *
+ *  Arguments:                                                                *
+ *      tau (rssringoccs_TAUObj *):                                           *
+ *          The Tau object whose members are to initialized.                  *
+ *  Outputs:                                                                  *
+ *      None (void).                                                          *
+ *  Notes:                                                                    *
+ *      Functions that allocate memory for a Tau object check if the members  *
+ *      are NULL before working with them. If the pointer is not NULL it is   *
+ *      assumed memory was successfully allocated for the variable. Always    *
+ *      call this function on a new tau object first.                         *
+ ******************************************************************************/
+extern void rssringoccs_Tau_Init(rssringoccs_TAUObj *tau);
+
+/******************************************************************************
+ *  Function:                                                                 *
+ *      rssringoccs_Tau_Malloc_Members                                        *
+ *  Purpose:                                                                  *
+ *      Allocates memory for the Tau variables.                               *
+ *  Arguments:                                                                *
+ *      tau (rssringoccs_TAUObj *):                                           *
+ *          The Tau object whose members are to be allocated memory.          *
+ *  Outputs:                                                                  *
+ *      None (void).                                                          *
+ *  Notes:                                                                    *
+ *      It is assumed tau->arr_size has been set and that tau is not NULL.    *
+ ******************************************************************************/
+extern void rssringoccs_Tau_Malloc_Members(rssringoccs_TAUObj *tau);
+
+/******************************************************************************
+ *  Function:                                                                 *
+ *      rssringoccs_Tau_Has_Errors                                            *
+ *  Purpose:                                                                  *
+ *      Checks a Tau object for possible errors.                              *
+ *  Arguments:                                                                *
+ *      tau (rssringoccs_TAUObj *):                                           *
+ *          The Tau object to be checked.                                     *
+ *  Outputs:                                                                  *
+ *      has_errors (tmpl_Bool):                                               *
+ *          A Boolean. True if the Tau object contains errors. Otherwise the  *
+ *          function returns False.                                           *
+ ******************************************************************************/
+extern tmpl_Bool rssringoccs_Tau_Has_Errors(rssringoccs_TAUObj *tau);
 
 /******************************************************************************
  *  Function:                                                                 *

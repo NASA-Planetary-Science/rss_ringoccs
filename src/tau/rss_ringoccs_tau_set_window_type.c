@@ -86,7 +86,7 @@ void rssringoccs_Tau_Set_Window_Type(const char *wtype, rssringoccs_TAUObj *tau)
     else
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_strdup(
+        tau->error_message = tmpl_String_Duplicate(
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Set_WType\n\n"
             "\r\tIllegal string for wtype. Allowed strings are:\n"

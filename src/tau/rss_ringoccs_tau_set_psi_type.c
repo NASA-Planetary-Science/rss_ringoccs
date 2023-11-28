@@ -11,9 +11,9 @@
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 #include <rss_ringoccs/include/rss_ringoccs_tau.h>
 
-static const char rssringoccs_psi_err_mes[800] =
+static const char rssringoccs_psi_err_mes[744] =
     "\n\rError Encountered: rss_ringoccs\n"
-    "\r\trssringoccs_Tau_Set_Psitype\n\n"
+    "\r\trssringoccs_Tau_Set_Psi_Type\n\n"
     "\rIllegal string for psitype. Allowed strings:\n"
     "\r\tnewton:     Newton-Raphson method\n"
     "\r\tnewtond:    Newton-Raphson with D perturbation.\n"
@@ -103,7 +103,7 @@ rssringoccs_Tau_Set_Psi_Type(const char *psitype, rssringoccs_TAUObj* tau)
         if (tau->order == 0)
         {
             tau->error_occurred = tmpl_True;
-            tau->error_message = tmpl_strdup(
+            tau->error_message = tmpl_String_Duplicate(
                 "\n\rError Encountered: rss_ringoccs\n"
                 "\r\trssringoccs_Tau_Set_Psitype\n\n"
                 "\rCould not parse psitype. atol returned zero. Your input\n"

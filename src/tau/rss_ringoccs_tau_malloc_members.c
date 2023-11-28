@@ -16,7 +16,7 @@
     if (tau->var != NULL)                                                      \
     {                                                                          \
         tau->error_occurred = tmpl_True;                                       \
-        tau->error_message = tmpl_strdup(                                      \
+        tau->error_message = tmpl_String_Duplicate(                            \
             "\n\rError Encountered: rss_ringoccs\n"                            \
             "\r\trssringoccs_Tau_Malloc_Members\n\n"                           \
             "\r"#var" is not NULL. It is likely you've already set the data\n" \
@@ -32,7 +32,7 @@
     if (tau->var == NULL)                                                      \
     {                                                                          \
         tau->error_occurred = tmpl_True;                                       \
-        tau->error_message = tmpl_strdup(                                      \
+        tau->error_message = tmpl_String_Duplicate(                            \
             "\n\rError Encountered: rss_ringoccs\n"                            \
             "\r\trssringoccs_Tau_Malloc_Members\n\n"                           \
             "\rMalloc failed and returned NULL for "#var". Returning.\n\n"     \

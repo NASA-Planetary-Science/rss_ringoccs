@@ -221,7 +221,7 @@ int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
     if (self->verbose)
         puts("\tDiffraction Correction: Creating C Tau object...");
 
-    tau = rssringoccs_Create_TAUObj(dlp, self->input_res * self->res_factor);
+    tau = rssringoccs_Tau_Create_From_DLP(dlp, self->input_res * self->res_factor);
 
     if (self->verbose)
         puts("\tDiffraction Correction: Passing Py variables to tau...");

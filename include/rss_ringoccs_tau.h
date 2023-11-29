@@ -33,6 +33,7 @@
 /*  size_t typedef provided here.                                             */
 #include <stddef.h>
 
+/*  DLP object is typedef'd here.                                             */
 #include <rss_ringoccs/include/rss_ringoccs_calibration.h>
 
 /*  Window function, input is x-parameter and window width.                   */
@@ -140,8 +141,45 @@ typedef struct rssringoccs_TAUObj_Def {
     unsigned int order;
 } rssringoccs_TAUObj;
 
+/******************************************************************************
+ *  Function:                                                                 *
+ *      rssringoccs_Tau_Create_From_DLP                                       *
+ *  Purpose:                                                                  *
+ *      Creates a Tau object using the data in a DLP objects.                 *
+ *  Arguments:                                                                *
+ *      dlp (const rssringoccs_DLPObj *):                                     *
+ *          The DLP object whose members are being copied.                    *
+ *      res (double):                                                         *
+ *          The requested resolution, in kilometers.                          *
+ *  Outputs:                                                                  *
+ *      tau (rssringoccs_TAUObj *):                                           *
+ *          The output Tau object.                                            *
+ *  Notes:                                                                    *
+ *      malloc is called to allocate memory for the output pointer and the    *
+ *      members in the Tau object. If malloc fails to allocate memory for the *
+ *      tau pointer, then NULL is returned. If malloc fails to allocate       *
+ *      memory for any of the members of the Tau objects, the error_occurred  *
+ *      Boolean is set to true. Check both of these before accessing data.    *
+ ******************************************************************************/
 extern rssringoccs_TAUObj *
 rssringoccs_Tau_Create_From_DLP(const rssringoccs_DLPObj *dlp, double res);
+
+/******************************************************************************
+ *  Function:                                                                 *
+ *      rssringoccs_Tau_Copy_DLP_Data                                         *
+ *  Purpose:                                                                  *
+ *      Copies data and computes variables for a Tau object from DLP data.    *
+ *  Arguments:                                                                *
+ *      tau (rssringoccs_TAUObj *):                                           *
+ *          The Tau object. DLP members will be copied here.                  *
+ *      dlp (const rssringoccs_DLPObj *):                                     *
+ *          The DLP object whose members are being copied.                    *
+ *  Outputs:                                                                  *
+ *      None (void).                                                          *
+ ******************************************************************************/
+extern void
+rssringoccs_Tau_Copy_DLP_Data(const rssringoccs_DLPObj *dlp,
+                              rssringoccs_TAUObj *tau);
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -314,10 +352,6 @@ rssringoccs_Tau_Set_Range_From_String(const char *range,
  ******************************************************************************/
 extern void
 rssringoccs_Tau_Set_Window_Type(const char *wtype, rssringoccs_TAUObj *tau);
-
-extern void
-rssringoccs_Tau_Copy_DLP_Data(const rssringoccs_DLPObj *dlp,
-                              rssringoccs_TAUObj *tau);
 
 #endif
 /*  End of include guard.                                                     */

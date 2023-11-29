@@ -114,6 +114,7 @@ rssringoccs_Tau_Copy_DLP_Data(const rssringoccs_DLPObj *dlp,
             "\r\trssringoccs_Copy_DLP_Data\n\n"
             "Input dlp pointer is NULL. Returning.\n"
         );
+
         return;
     }
 
@@ -127,6 +128,7 @@ rssringoccs_Tau_Copy_DLP_Data(const rssringoccs_DLPObj *dlp,
             "\r\trssringoccs_Copy_DLP_Data\n\n"
             "\rInput dlp pointer has the error_occurred member set to True.\n"
         );
+
         return;
     }
 
@@ -144,6 +146,7 @@ rssringoccs_Tau_Copy_DLP_Data(const rssringoccs_DLPObj *dlp,
             "\rInput arrays have less than 2 points. It is impossible to\n"
             "\rperform reconstrunction. Returning.\n"
         );
+
         return;
     }
 

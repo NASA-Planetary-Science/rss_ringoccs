@@ -18,9 +18,6 @@ typedef void (*rssringoccs_FresT)(
 
 extern void rssringoccs_Reconstruction(rssringoccs_TAUObj *tau);
 
-extern rssringoccs_TAUObj *
-rssringoccs_Create_TAUObj(const rssringoccs_DLPObj *dlp, double res);
-
 extern void
 rssringoccs_Tau_Check_Data_Range(rssringoccs_TAUObj *dlp);
 
@@ -56,8 +53,5 @@ rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj *tau);
 
 extern void
 rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau);
-
-extern void
-rssringoccs_Write_TAU_History(rssringoccs_TAUObj *tau);
 
 #endif

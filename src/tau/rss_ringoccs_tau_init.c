@@ -49,5 +49,8 @@ void rssringoccs_Tau_Init(rssringoccs_TAUObj *tau)
     tau->arr_size = zero;
     tau->start = zero;
     tau->n_used = zero;
+
+    /*  Set the remaining variables to their defaults.                        */
+    rssringoccs_Tau_Set_Default_Values(tau);
 }
 /*  End of rssringoccs_Tau_Init.                                              */

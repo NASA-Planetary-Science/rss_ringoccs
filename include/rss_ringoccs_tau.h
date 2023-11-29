@@ -140,6 +140,9 @@ typedef struct rssringoccs_TAUObj_Def {
     unsigned int order;
 } rssringoccs_TAUObj;
 
+extern rssringoccs_TAUObj *
+rssringoccs_Tau_Create_From_DLP(const rssringoccs_DLPObj *dlp, double res);
+
 /******************************************************************************
  *  Function:                                                                 *
  *      rssringoccs_Tau_Copy_DLP_Members                                      *
@@ -252,6 +255,19 @@ extern tmpl_Bool rssringoccs_Tau_Has_Errors(rssringoccs_TAUObj *tau);
 
 /******************************************************************************
  *  Function:                                                                 *
+ *      rssringoccs_Tau_Set_Default_Values                                    *
+ *  Purpose:                                                                  *
+ *      Sets the default values for several parameters.                       *
+ *  Arguments:                                                                *
+ *      tau (rssringoccs_TAUObj *):                                           *
+ *          The Tau object whose values are to be set.                        *
+ *  Outputs:                                                                  *
+ *      None (void).                                                          *
+ ******************************************************************************/
+extern void rssringoccs_Tau_Set_Default_Values(rssringoccs_TAUObj* tau);
+
+/******************************************************************************
+ *  Function:                                                                 *
  *      rssringoccs_Tau_Set_Psi_Type                                          *
  *  Purpose:                                                                  *
  *      Sets the reconstruction method corresponding to a string.             *
@@ -265,22 +281,6 @@ extern tmpl_Bool rssringoccs_Tau_Has_Errors(rssringoccs_TAUObj *tau);
  ******************************************************************************/
 extern void
 rssringoccs_Tau_Set_Psi_Type(const char *psitype, rssringoccs_TAUObj* tau);
-
-/******************************************************************************
- *  Function:                                                                 *
- *      rssringoccs_Tau_Set_Window_Type                                       *
- *  Purpose:                                                                  *
- *      Sets the window function in a Tau object corresponding to a string.   *
- *  Arguments:                                                                *
- *      wtype (const char *):                                                 *
- *          A string containing the requested window funtion.                 *
- *      tau (rssringoccs_TAUObj *):                                           *
- *          The Tau object whose window function is to be set.                *
- *  Outputs:                                                                  *
- *      None (void).                                                          *
- ******************************************************************************/
-extern void
-rssringoccs_Tau_Set_Window_Type(const char *wtype, rssringoccs_TAUObj *tau);
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -298,6 +298,22 @@ rssringoccs_Tau_Set_Window_Type(const char *wtype, rssringoccs_TAUObj *tau);
 extern void
 rssringoccs_Tau_Set_Range_From_String(const char *range,
                                       rssringoccs_TAUObj* tau);
+
+/******************************************************************************
+ *  Function:                                                                 *
+ *      rssringoccs_Tau_Set_Window_Type                                       *
+ *  Purpose:                                                                  *
+ *      Sets the window function in a Tau object corresponding to a string.   *
+ *  Arguments:                                                                *
+ *      wtype (const char *):                                                 *
+ *          A string containing the requested window funtion.                 *
+ *      tau (rssringoccs_TAUObj *):                                           *
+ *          The Tau object whose window function is to be set.                *
+ *  Outputs:                                                                  *
+ *      None (void).                                                          *
+ ******************************************************************************/
+extern void
+rssringoccs_Tau_Set_Window_Type(const char *wtype, rssringoccs_TAUObj *tau);
 
 extern void
 rssringoccs_Tau_Copy_DLP_Data(const rssringoccs_DLPObj *dlp,

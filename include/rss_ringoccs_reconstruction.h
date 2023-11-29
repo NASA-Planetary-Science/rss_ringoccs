@@ -12,9 +12,10 @@
 /*  size_t typedef is given here.                                             */
 #include <stdlib.h>
 
-typedef void (*rssringoccs_FresT)(
-    rssringoccs_TAUObj *, const double *, size_t, size_t
-);
+/*  Fresnel transform. Inputs are Tau data, window data, the number of points *
+ *  in the window, and the center of the window (its index in the data).      */
+typedef void
+(*rssringoccs_FresT)(rssringoccs_TAUObj *, const double *, size_t, size_t);
 
 extern void rssringoccs_Reconstruction(rssringoccs_TAUObj *tau);
 

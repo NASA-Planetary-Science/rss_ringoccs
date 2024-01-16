@@ -43,5 +43,5 @@ FUNCTION FORWARD_RESOLUTION, ALDEV
     DEN = EXP(-ALDEV) + ALDEV - 1.0
 
     ; The resolution factor is the ratio of these terms.
-    RETURN, NUM / DEV
+    RETURN, NUM / DEN
 END

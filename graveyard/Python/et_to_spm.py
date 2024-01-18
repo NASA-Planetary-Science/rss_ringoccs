@@ -18,7 +18,7 @@
 #   along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.     #
 ################################################################################
 #   Purpose:                                                                   #
-#       Convert ephemeris time to seconds past midnight (SPM)..                #
+#       Convert ephemeris time to seconds past midnight (SPM).                 #
 ################################################################################
 #   Author: Jolene Fong                                                        #
 #   Date:   2018/03/13                                                         #

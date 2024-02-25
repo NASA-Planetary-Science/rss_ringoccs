@@ -23,6 +23,9 @@
 ;   Date:   2017                                                               ;
 ;------------------------------------------------------------------------------;
 
+; Tells the compiler that integers should be 32 bits, not 16.
+COMPILE_OPT IDL2
+
 ; The data file.
 RAWFILE = 'VG_2803_peer_review/S_RINGS/RAWDATA/RS1R1BDP.DAT'
 
@@ -50,7 +53,6 @@ CLOSE, 1
 ; The variables we care about.
 TAU_RAW = DATA_RAW[0, *]
 TAU_PDS_RAW = DATA_RAW[4, *]
-PHASE_RAW_CYCLE = DATA_RAW[1, *]
 
 ; Ring opening angle, in radians.
 B_ANGLE = 84.07460 * !PI / 180.0

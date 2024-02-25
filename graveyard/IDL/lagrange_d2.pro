@@ -37,11 +37,14 @@
 ; Function for approximating second derivates using a five-point stencil.
 FUNCTION LAGRANGE_D2, FUNC, DX
 
+    ; Tells the compiler that integers should be 32 bits, not 16.
+    COMPILE_OPT IDL2
+
     ; Error checking codes.
     ON_ERROR, 2
 
     ; Info about the data in the func variable.
-    SIZE_FUNC = SIZE(F)
+    SIZE_FUNC = SIZE(FUNC)
 
     ; The input should be 5xN where N is any positive integer.
     IF (SIZE_FUNC[0] NE 2) OR (SIZE_FUNC[1] NE 5) THEN BEGIN

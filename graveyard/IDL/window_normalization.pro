@@ -41,6 +41,9 @@
 ;------------------------------------------------------------------------------;
 FUNCTION WINDOW_NORMALIZATION, RHO, W_FUNC, F_SCALE
 
+    ; Tells the compiler that integers should be 32 bits, not 16.
+    COMPILE_OPT IDL2
+
     ; Error checking code.
     ON_ERROR, 2
 

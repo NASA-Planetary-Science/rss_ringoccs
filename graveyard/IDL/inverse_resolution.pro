@@ -39,6 +39,9 @@
 ; Function for computing the inverse of x / (exp(-x) + x - 1).
 FUNCTION INVERSE_RESOLUTION, XIN
 
+    ; Tells the compiler that integers should be 32 bits, not 16.
+    COMPILE_OPT IDL2
+
     ; The inverse uses Exp and Lambert W. Compute these terms.
     P1 = XIN / (1.0 - XIN)
     P2 = P1 * EXP(P1)

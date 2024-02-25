@@ -34,6 +34,9 @@
 ; Computes the product of the window function and the Fresnel kernel.
 FUNCTION WINDOW_KERNEL, WINDOW_ARRAY, PSI_ARRAY
 
+    ; Tells the compiler that integers should be 32 bits, not 16.
+    COMPILE_OPT IDL2
+
     ; Error checking codes.
     ON_ERROR, 2
 

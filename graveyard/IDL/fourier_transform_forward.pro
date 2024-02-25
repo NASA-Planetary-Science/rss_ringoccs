@@ -34,6 +34,9 @@
 ; Function for computing the Fourier transform of a data set.
 FUNCTION FOURIER_TRANSFORM_FORWARD, X_IN, F
 
+    ; Tells the compiler that integers should be 32 bits, not 16.
+    COMPILE_OPT IDL2
+
     ; Step size between samples. Assumed uniform.
     DX = X_IN[1] - X_IN[0]
 

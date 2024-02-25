@@ -45,6 +45,9 @@
 ; Computes the Fresnel kernel from geometric data.
 FUNCTION FRESNEL_KERNEL, R, R0, PHI, PHI0, D, B
 
+    ; Tells the compiler that integers should be 32 bits, not 16.
+    COMPILE_OPT IDL2
+
     ; Error checking code.
     ON_ERROR, 2
 

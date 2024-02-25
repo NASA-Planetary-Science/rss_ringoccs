@@ -35,6 +35,9 @@
 ; Function for computing the Lambert W function.
 FUNCTION LAMBERTW, XIN
 
+    ; Tells the compiler that integers should be 32 bits, not 16.
+    COMPILE_OPT IDL2
+
     ; Error checking code.
     ON_ERROR, 2
 
@@ -57,7 +60,8 @@ FUNCTION LAMBERTW, XIN
 
     ; For any points with real part larger than e use x0 = log(x) - log(log(x)).
     IF (MIN(BIG_IND) NE -1) THEN BEGIN
-        ; We can avoid a call to log by precomputing log(x).
+
+        ; We can avoid an extra call to log by precomputing log(x).
         LOG_XIN_BIG = ALOG(X0[BIG_IND])
 
         ; log(x) - log(log(x)) now needs only one more log call.

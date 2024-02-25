@@ -34,6 +34,9 @@
 ; Function for computing the inverse Fourier transform of a data set.
 FUNCTION FOURIER_TRANSFORM_INVERSE, X_IN, F_HAT
 
+    ; Tells the compiler that integers should be 32 bits, not 16.
+    COMPILE_OPT IDL2
+
     ; Step size between samples. Assumed uniform.
     DX = X_IN[1] - X_IN[0]
 

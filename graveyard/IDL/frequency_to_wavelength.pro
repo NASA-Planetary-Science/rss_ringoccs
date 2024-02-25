@@ -32,6 +32,9 @@
 ; Function for converting frequency to wavelength for light in a vacuum.
 FUNCTION FREQUENCY_TO_WAVELENGTH, FREQUENCY
 
+    ; Tells the compiler that integers should be 32 bits, not 16.
+    COMPILE_OPT IDL2
+
     ; Error checking code.
     ON_ERROR, 2
 

@@ -42,6 +42,9 @@
 ; Computes the Newton iterate factor for the Fresnel kernel.
 FUNCTION FRESNEL_KERNEL_NEWTON_FACTOR, R, R0, PHI0, B
 
+    ; Tells the compiler that integers should be 32 bits, not 16.
+    COMPILE_OPT IDL2
+
     ; Output is scaled by the "normalized" radius.
     SCALE = (R - R0) / R0
 

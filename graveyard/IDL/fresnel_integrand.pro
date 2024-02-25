@@ -39,6 +39,9 @@
 ; Computes the Fresnel integrand T_HAT of the Fresnel transform.
 FUNCTION FRESNEL_INTEGRAND, POWER, FRESNEL_KERNEL
 
+    ; Tells the compiler that integers should be 32 bits, not 16.
+    COMPILE_OPT IDL2
+
     ; The integrand is ||P|| * e^{-i psi}.
     EXP_MINUS_IPSI = EXP(COMPLEX(0.0, -FRESNEL_KERNEL))
     T_HAT = SQRT(ABS(POWER)) * EXP_MINUS_IPSI

@@ -36,10 +36,13 @@
 ; Interpolates the Fresnel kernel and returns the complex form.
 FUNCTION FRESNEL_KERNEL_INTERPOLATE, XVALS, XINTERP, FRESNEL_PSI
 
+    ; Tells the compiler that integers should be 32 bits, not 16.
+    COMPILE_OPT IDL2
+
     ; Interpolate the data against the desired set of points.
     PSI_INTERP = INTERPOL(FRESNEL_PSI, XINTERP, XVALS)
 
     ; Compute the complex Fresnel kernel and return.
-    FRESNEL_KERNEL = EXP(COMPLEX(0.0, FRESNEL_PSI))
+    FRESNEL_KERNEL = EXP(COMPLEX(0.0, PSI_INTERP))
     RETURN, FRESNEL_KERNEL
 END

@@ -32,6 +32,9 @@
 ; Function for determining the data type of an input.
 FUNCTION IDL_TYPE, VAR
 
+    ; Tells the compiler that integers should be 32 bits, not 16.
+    COMPILE_OPT IDL2
+
     ; The size function has the data type in the second-to-last entry.
     SIZE_VAR = SIZE(VAR)
 

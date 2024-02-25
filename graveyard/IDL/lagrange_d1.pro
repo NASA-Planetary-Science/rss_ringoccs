@@ -37,6 +37,9 @@
 ; Function for approximating derivates using a five-point Lagrange stencil.
 FUNCTION LAGRANGE_D1, FUNC, DX
 
+    ; Tells the compiler that integers should be 32 bits, not 16.
+    COMPILE_OPT IDL2
+
     ; Error checking codes.
     ON_ERROR, 2
 

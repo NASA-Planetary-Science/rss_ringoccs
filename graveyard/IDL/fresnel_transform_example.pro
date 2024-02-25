@@ -23,6 +23,9 @@
 ;   Date:   2017                                                               ;
 ;------------------------------------------------------------------------------;
 
+; Tells the compiler that integers should be 32 bits, not 16.
+COMPILE_OPT IDL2
+
 ; Number of points for the x-axis.
 NUMBER_OF_POINTS = 1024
 HALF_NUMBER_OF_POINTS = NUMBER_OF_POINTS / 2
@@ -51,7 +54,6 @@ LAMBDA = 1.0
 
 ; Compute the Frensel Scale.
 F_SQ = LAMBDA * Z * 0.5
-F = SQRT(F_SQ)
 
 ; Perform Fourier transform.
 U_HAT = SHIFT(FFT(U, 1), HALF_NUMBER_OF_POINTS)

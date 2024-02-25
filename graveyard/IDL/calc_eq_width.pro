@@ -40,6 +40,9 @@
 ; Calculate the normalized equivalent width of a windowing function.
 FUNCTION CALC_EQ_WIDTH, WINDOW_ARRAY
 
+    ; Tells the compiler that integers should be 32 bits, not 16.
+    COMPILE_OPT IDL2
+
     ; Only the positive values of the array contribute to the integrals.
     WINDOW_ARRAY_POSITIVE_INDICES = WHERE(WINDOW_ARRAY GT 0.d0)
 

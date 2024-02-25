@@ -35,6 +35,9 @@
 ; Function for computing the inverse of x / (exp(-x) + x - 1).
 FUNCTION FORWARD_RESOLUTION, ALDEV
 
+    ; Tells the compiler that integers should be 32 bits, not 16.
+    COMPILE_OPT IDL2
+
     ; Error checking code.
     ON_ERROR, 2
 

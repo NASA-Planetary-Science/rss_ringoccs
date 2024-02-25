@@ -35,6 +35,9 @@
 ; Function for converting a number to a string.
 FUNCTION NUMBER_TO_STRING, NUMBER, FORMAT = FORMAT
 
+    ; Tells the compiler that integers should be 32 bits, not 16.
+    COMPILE_OPT IDL2
+
     ; Error checking code.
     ON_ERROR, 2
 

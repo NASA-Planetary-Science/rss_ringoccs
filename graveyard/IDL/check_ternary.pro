@@ -30,6 +30,9 @@
 ;------------------------------------------------------------------------------;
 FUNCTION CHECK_TERNARY, VAR
 
+    ; Tells the compiler that integers should be 32 bits, not 16.
+    COMPILE_OPT IDL2
+
     ; The data type of the input. Should be an integer type.
     VAR_TYPE = IDL_TYPE(VAR)
 

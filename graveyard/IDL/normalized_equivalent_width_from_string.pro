@@ -35,6 +35,9 @@
 ; Returns the normalized equivalent width for pre-computed window functions.
 FUNCTION NORMALIZED_EQUIVALENT_WIDTH_FROM_STRING, WTYPE
 
+    ; Tells the compiler that integers should be 32 bits, not 16.
+    COMPILE_OPT IDL2
+
     ; Error checking code.
     ON_ERROR, 2
 

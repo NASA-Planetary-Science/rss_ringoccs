@@ -48,6 +48,9 @@
 ; Computes the Fresnel scale from real-valued inputs.
 FUNCTION FRESNEL_SCALE, LAMBDA, D, PHI, B, DEG = DEG
 
+    ; Tells the compiler that integers should be 32 bits, not 16.
+    COMPILE_OPT IDL2
+
     ; Error checking code.
     ON_ERROR,2
 

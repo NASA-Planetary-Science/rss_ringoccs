@@ -39,6 +39,9 @@
 ; Computes the Lambert W function using Halley's method.
 FUNCTION LAMBERTW_HALLEY, XIN, X0, TOL
 
+    ; Tells the compiler that integers should be 32 bits, not 16.
+    COMPILE_OPT IDL2
+
     ; Error checking code.
     ON_ERROR, 2
 

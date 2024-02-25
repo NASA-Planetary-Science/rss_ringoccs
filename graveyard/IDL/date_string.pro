@@ -31,6 +31,9 @@
 ; Returns the current date in yyyy_mm_dd format.
 FUNCTION DATE_STRING
 
+    ; Tells the compiler that integers should be 32 bits, not 16.
+    COMPILE_OPT IDL2
+
     ; The Julian time can be computed from the built-in SYSTIME function.
     JULIAN_TIME = SYSTIME(/JULIAN)
 

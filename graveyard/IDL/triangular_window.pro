@@ -32,6 +32,9 @@
 ; Function for creating a triangular window for a data set.
 FUNCTION TRIANGULAR_WINDOW, XIN
 
+    ; Tells the compiler that integers should be 32 bits, not 16.
+    COMPILE_OPT IDL2
+
     ; Error checking code.
     ON_ERROR, 2
 

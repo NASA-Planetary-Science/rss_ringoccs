@@ -39,6 +39,9 @@
 ; Numerical differentiation using five-point stencils.
 FUNCTION LAGRANGE_D1_FROM_FUNC, FUNC, XIN, DX
 
+    ; Tells the compiler that integers should be 32 bits, not 16.
+    COMPILE_OPT IDL2
+
     ; Error checking code.
     ON_ERROR, 2
 

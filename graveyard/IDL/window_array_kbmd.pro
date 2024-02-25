@@ -36,6 +36,9 @@
 ; Computes the modified Kaiser-Bessel window function with positive alpha.
 FUNCTION WINDOW_ARRAY_KBMD, WIDTH, DX, ALPHA
 
+    ; Tells the compiler that integers should be 32 bits, not 16.
+    COMPILE_OPT IDL2
+
     ; Error checking code.
     ON_ERROR, 2
 

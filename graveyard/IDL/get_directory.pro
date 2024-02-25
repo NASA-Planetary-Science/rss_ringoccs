@@ -32,6 +32,9 @@
 ; Returns a string that is the path to a directory and checks for errors.
 FUNCTION GET_DIRECTORY, DIRECTORY_STRING
 
+    ; Tells the compiler that integers should be 32 bits, not 16.
+    COMPILE_OPT IDL2
+
     ; Error checking code.
     ON_ERROR, 2
 

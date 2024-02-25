@@ -32,6 +32,9 @@
 ; Function for checking if a variable is complex-valued.
 FUNCTION CHECK_COMPLEX, VAR
 
+    ; Tells the compiler that integers should be 32 bits, not 16.
+    COMPILE_OPT IDL2
+
     ; The type of the input.
     VAR_TYPE = IDL_TYPE(VAR)
 

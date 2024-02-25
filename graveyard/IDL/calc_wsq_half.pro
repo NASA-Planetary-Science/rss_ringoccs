@@ -40,6 +40,9 @@
 ; Computes the numerator of the normalized equivalent width.
 FUNCTION CALC_WSQ_HALF, WINDOW_ARRAY
 
+    ; Tells the compiler that integers should be 32 bits, not 16.
+    COMPILE_OPT IDL2
+
     ; Only positive values in the array are needed.
     WINDOW_ARRAY_POSITIVE_INDICES = WHERE(WINDOW_ARRAY GT 0.d0)
 

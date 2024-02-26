@@ -17,50 +17,56 @@
 ;   along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.     ;
 ;------------------------------------------------------------------------------;
 ;   Purpose:                                                                   ;
-;       Calculates the factor in the first iterate of Newton's method          ;
-;       for the Fresnel kernel. This is an entirely geometric quantity.        ;
+;       Computes the partial derivative of the Fresnel kernel with respect to  ;
+;       the dummy azimuthal angle phi from precomputed trig values.            ;
 ;   Arguments:                                                                 ;
 ;       R (real, array-like):                                                  ;
-;           The radius, dummy variable.                                        ;
+;           The dummy ring radius.                                             ;
 ;       R0 (real, array-like):                                                 ;
-;           Radius of the ring intercept point.                                ;
-;       PHI0 (real, array-like):                                               ;
-;           The ring azimuth angle.                                            ;
-;       B (real, array-like):                                                  ;
-;           The ring opening angle.                                            ;
+;           Ring radius of the point.                                          ;
+;       D (real, array-like):                                                  ;
+;           Distance to the point in the plane.                                ;
+;       COSB (real, array-like):                                               ;
+;           Cosine of the ring opening angle.                                  ;
+;       COSPHI (real, array-like):                                             ;
+;           Cosine of the dummy azimuth angle.                                 ;
+;       SINPHI (real, array-like):                                             ;
+;           Sine of the dummy azimuth angle.                                   ;
+;       COSPHI0 (real, array-like):                                            ;
+;           Cosine of the azimuth angle.                                       ;
+;       SINPHI0 (real, array-like):                                            ;
+;           Sine of the azimuth angle.                                         ;
 ;   Output:                                                                    ;
-;       FACTOR (real, array-like):                                             ;
-;           The first iterator of Newton's method for the Fresnel scale.       ;
+;       PSI_D1 (real, array-like):                                             ;
+;           The derivate d psi / d phi.                                        ;
 ;   References:                                                                ;
 ;       1.) Marouf, Tyler, Rosen, 1986                                         ;
 ;           Profiling Saturn's Rings by Radio Occultation.                     ;
 ;------------------------------------------------------------------------------;
 ;   Author: Ryan Maguire                                                       ;
-;   Date:   2018/04/10                                                         ;
+;   Date:   2017                                                               ;
 ;------------------------------------------------------------------------------;
-
-; Computes the Newton iterate factor for the Fresnel kernel.
-FUNCTION FRESNEL_KERNEL_NEWTON_FACTOR, R, R0, PHI0, B
+FUNCTION FRESNEL_KERNEL_D1_TRIG, R, R0, D, COSB, COSPHI, SINPHI, COSPHI0, SINPHI0
 
     ; Tells the compiler that integers should be 32 bits, not 16.
     COMPILE_OPT IDL2
 
-    ; Output is scaled by the "normalized" radius.
-    SCALE = (R - R0) / R0
+    ; Error checking code.
+    ON_ERROR, 2
 
-    ; Precompute trigonmetric quantities to save on repetition.
-    COS_B = COS(B)
-    COS_B_SQ = COS_B * COS_B
-    COS_P = COS(PHI0)
-    SIN_P = SIN(PHI0)
-    SIN_P_SQ = SIN_P * SIN_P
+    ; Precompute divisions to save a bit of time.
+    RCPR_D = 1.0 / D
+    RCPR_D_SQ = RCPR_D * RCPR_D
 
-    ; The numerator and denominator of the Newton factor.
-    NUM = COS_B_SQ * COS_P * SIN_P
-    DEN = 1.0 - COS_B_SQ * SIN_P_SQ
+    ; Xi and Eta factors for the kernel, from precomputed trig values.
+    XI = COSB * (R0*COSPHI0 - R*COSPHI) * RCPR_D
+    ETA = (R0*R0 + R*R - 2.0*R*R0*(SINPHI*SINPHI0+COSPHI*COSPHI0)) * RCPR_D_SQ
 
-    ; The factor is the product of the normalized radius and the ratio of the
-    ; two geometric quantities we've computed above. Return this.
-    FACTOR = SCALE * NUM / DEN
-    RETURN, FACTOR
+    ; Factors for the derivative.
+    T1 = R * COSB * SINPHI * RCPR_D
+    T2 = 2.0 * R * R0*(SINPHI*COSPHI0 - SINPHI0*COSPHI) * RCPR_D_SQ
+
+    ; Compute the derivative.
+    PSI_D1 = (2.0*T1 + T2) / (2.0*SQRT(1.0 + 2.0*XI + ETA)) - T1
+    RETURN, PSI_D1
 END

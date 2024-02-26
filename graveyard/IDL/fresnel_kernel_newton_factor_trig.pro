@@ -17,50 +17,48 @@
 ;   along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.     ;
 ;------------------------------------------------------------------------------;
 ;   Purpose:                                                                   ;
-;       Calculates the factor in the first iterate of Newton's method          ;
-;       for the Fresnel kernel. This is an entirely geometric quantity.        ;
+;       Computes the Newton iterate for the Fresnel kernel from pre-computed   ;
+;       trigonometric values.                                                  ;
 ;   Arguments:                                                                 ;
 ;       R (real, array-like):                                                  ;
-;           The radius, dummy variable.                                        ;
+;           The dummy ring radius.                                             ;
 ;       R0 (real, array-like):                                                 ;
-;           Radius of the ring intercept point.                                ;
-;       PHI0 (real, array-like):                                               ;
-;           The ring azimuth angle.                                            ;
-;       B (real, array-like):                                                  ;
-;           The ring opening angle.                                            ;
+;           Ring radius of the point.                                          ;
+;       COSB (real, array-like):                                               ;
+;           Cosine of the ring opening angle.                                  ;
+;       COSPHI0 (real, array-like):                                            ;
+;           Cosine of the azimuth angle.                                       ;
+;       SINPHI0 (real, array-like):                                            ;
+;           Sine of the azimuth angle.                                         ;
 ;   Output:                                                                    ;
 ;       FACTOR (real, array-like):                                             ;
-;           The first iterator of Newton's method for the Fresnel scale.       ;
+;           The Newton iterate for the Fresnel kernel.                         ;
 ;   References:                                                                ;
 ;       1.) Marouf, Tyler, Rosen, 1986                                         ;
 ;           Profiling Saturn's Rings by Radio Occultation.                     ;
 ;------------------------------------------------------------------------------;
 ;   Author: Ryan Maguire                                                       ;
-;   Date:   2018/04/10                                                         ;
+;   Date:   2017                                                               ;
 ;------------------------------------------------------------------------------;
 
 ; Computes the Newton iterate factor for the Fresnel kernel.
-FUNCTION FRESNEL_KERNEL_NEWTON_FACTOR, R, R0, PHI0, B
+FUNCTION FRESNEL_KERNEL_NEWTON_FACTOR_TRIG, R, R0, COSB, COSPHI0, SINPHI0
 
     ; Tells the compiler that integers should be 32 bits, not 16.
     COMPILE_OPT IDL2
 
-    ; Output is scaled by the "normalized" radius.
-    SCALE = (R - R0) / R0
+    ; Error checking code.
+    ON_ERROR, 2
 
     ; Precompute trigonmetric quantities to save on repetition.
-    COS_B = COS(B)
-    COS_B_SQ = COS_B * COS_B
-    COS_P = COS(PHI0)
-    SIN_P = SIN(PHI0)
-    SIN_P_SQ = SIN_P * SIN_P
+    COSB_SQ = COSB * COSB
+    SINPHI0_SQ = SINPHI0 * SINPHI0
 
-    ; The numerator and denominator of the Newton factor.
-    NUM = COS_B_SQ * COS_P * SIN_P
-    DEN = 1.0 - COS_B_SQ * SIN_P_SQ
+    ; Numerator and denominator for the Newton iterate.
+    NUM = (R - R0) * COSB_SQ*COSPHI0*SINPHI0
+    DEN = (1.0 - COSB_SQ*SINPHI0_SQ) * R0
 
-    ; The factor is the product of the normalized radius and the ratio of the
-    ; two geometric quantities we've computed above. Return this.
-    FACTOR = SCALE * NUM / DEN
+    ; Compute and return.
+    FACTOR = NUM / DEN
     RETURN, FACTOR
 END

@@ -51,7 +51,7 @@ FUNCTION FRESNEL_KERNEL_STATIONARY_PRECOMPUTED, KD, COS_B, R, R0, D, PHI0, PHI_S
     COMPILE_OPT IDL2
 
     ; Error checking code.
-    ON_ERROR,2
+    ON_ERROR, 2
 
     ; Array for the output Fresnel kernel.
     PSI_VALS = FLTARR(5, N_ELEMENTS(R))

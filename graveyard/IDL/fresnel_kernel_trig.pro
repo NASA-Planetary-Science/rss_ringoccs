@@ -53,7 +53,7 @@ FUNCTION FRESNEL_KERNEL_TRIG, R, R0, D, COSB, COSPHI, SINPHI, COSPHI0, SINPHI0
     COMPILE_OPT IDL2
 
     ; Error checking code.
-    ON_ERROR,2
+    ON_ERROR, 2
 
     ; Precompute divisions to save a bit of time.
     RCPR_D = 1.0 / D

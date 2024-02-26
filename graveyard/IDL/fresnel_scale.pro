@@ -52,7 +52,7 @@ FUNCTION FRESNEL_SCALE, LAMBDA, D, PHI, B, DEG = DEG
     COMPILE_OPT IDL2
 
     ; Error checking code.
-    ON_ERROR,2
+    ON_ERROR, 2
 
     ; The wavelength should be real-valued (and positive).
     IF (CHECK_REAL(LAMBDA) EQ 0L) THEN BEGIN

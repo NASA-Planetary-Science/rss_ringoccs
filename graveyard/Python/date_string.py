@@ -44,3 +44,19 @@ def date_string():
 
     # The time module has just the function for this. Simply need the format.
     return time.strftime("%Y%m%d%H%M%S")
+
+def date_string_with_underscores():
+    """
+        Function:
+            date_string_with_underscores
+        Purpose:
+            Creates a date string of the form "yyyy_mm_dd_HH_MM_SS"
+        Arguments:
+            None.
+        Outputs:
+            date (str):
+                The current date "year/month/day/hour/minute/second"
+        Dependencies:
+            [1] time
+    """
+    return time.strftime("%Y_%m_%d_%H_%M_%S")

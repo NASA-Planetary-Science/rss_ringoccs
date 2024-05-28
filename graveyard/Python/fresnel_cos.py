@@ -124,4 +124,5 @@ def fresnel_cos(x_in):
     # If the input is an array of real numbers, return a real-valued array.
     if is_real.all():
         return numpy.real(f_cos)
+
     return f_cos

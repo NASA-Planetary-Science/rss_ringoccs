@@ -28,7 +28,7 @@
 #           The scipy.special module contains Bessel functions that are used.  #
 ################################################################################
 #   Author: Ryan Maguire                                                       #
-#   Date:   2018                                                               #
+#   Date:   2018/05/15                                                         #
 ################################################################################
 """
 import numpy

@@ -59,7 +59,7 @@ def kb25(w_in, bin_width, check_error = True):
                     y = I0(alpha * sqrt(1 - 4x^2/w^2)) / I0(alpha)
                 where w is the window width.
             [2] We automatically multiply the alpha parameter by pi,
-                so the kb20 window function has an alpha value of
+                so the kb25 window function has an alpha value of
                 alpha = 2.5 * pi
             [3] The endpoints of the Kaiser-Bessel function tend to
                 zero faster than (1 + 2*alpha) / exp(alpha)

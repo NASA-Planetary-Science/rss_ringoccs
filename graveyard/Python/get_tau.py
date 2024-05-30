@@ -18,7 +18,7 @@
 #   along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.     #
 ################################################################################
 #   Purpose:                                                                   #
-#       Extracts DLP data from a CSV file.                                     #
+#       Extracts reconstructed data from a CSV file.                           #
 ################################################################################
 #   Author: Ryan Maguire                                                       #
 #   Date:   2018                                                               #
@@ -32,29 +32,29 @@
 import pandas
 
 # The names for the columns in the order that they appear.
-DLP_NAMES = [
+TAU_NAMES = [
     "rho_km_vals",
-    "rho_corr_pole_km_vals",
-    "rho_corr_timing_km_vals",
+    "rho_km_pole_corr_vals",
+    "rho_km_offsett_vals",
     "phi_rl_deg_vals",
     "phi_ora_deg_vals",
     "raw_tau_vals",
     "phase_deg_vals",
     "raw_tau_threshold_vals",
-    "t_oet_spm_vals",
+    "spm_vals",
     "t_ret_spm_vals",
     "t_set_spm_vals",
     "B_deg_vals"
 ]
 
-def get_dlp(dlp, verbose = True):
+def get_tau(tau, verbose = True):
     """
         Function:
-            get_dlp
+            get_tau
         Purpose:
-            Extracts DLP data from a CSV file.
+            Extracts reconstructed data from a CSV file.
         Arguments:
-            dlp (str):
+            tau (str):
                 The path to the CSV file.
         Keywords:
             verbose (bool):
@@ -68,18 +68,18 @@ def get_dlp(dlp, verbose = True):
             2024/05/30: Ryan Maguire
                 Cleaned up and added to the graveyard directory.
     """
-    if not isinstance(dlp, str):
-        raise TypeError("dlp must be a string: '/path/to/dlp'")
+    if not isinstance(tau, str):
+        raise TypeError("tau must be a string: '/path/to/tau'")
 
     if not isinstance(verbose, bool):
         raise TypeError("verbose must be Boolean: True/False")
 
     if verbose:
-        print("\tExtracting DLP Data...")
+        print("\tExtracting Tau Data...")
 
-    csv_data = pandas.read_csv(dlp, delimiter = ',', names = DLP_NAMES)
+    csv_data = pandas.read_csv(tau, delimiter = ',', names = TAU_NAMES)
 
     if verbose:
-        print("\tDLP Data Complete.")
+        print("\tTau Data Complete.")
 
     return csv_data

@@ -24,10 +24,9 @@
 #   Date:   2018/03/13                                                         #
 ################################################################################
 """
-
-import pdb
 import numpy
 import spiceypy
+from .get_spm_from_et import get_spm_from_et
 
 def et_to_spm(et_vals, kernels = None, ref_doy = None):
     """
@@ -41,25 +40,12 @@ def et_to_spm(et_vals, kernels = None, ref_doy = None):
         spiceypy.kclear()
         spiceypy.furnsh(kernels)
 
-    try:
-        npts = len(et_vals)
-    except TypeError:
-        et_vals = [et_vals]
-        npts = len(et_vals)
+    npts = numpy.size(et_vals)
+    spm_vals = [0] * npts
 
-    spm_vals = []
-
+    # Compute the SPM values from the ET ones.
     for ind in range(npts):
-
-        # Convert ET to UTC string.
-        utc_str = spiceypy.et2utc(et_vals[ind], "ISOD", 16)
-
-        # Extract hour, minute, and second from UTC string.
-        hour = float(utc_str[9:11])
-        minute = float(utc_str[12:14])
-        second = float(utc_str[15:])
-        spm = hour*3600. + minute*60. + second
-        spm_vals.append(spm)
+        spm_vals[ind] = get_spm_from_et(et_vals[ind])
 
     # Check if event goes through midnight.
     dr_vals = spm_vals - numpy.roll(spm_vals, 1)
@@ -79,13 +65,10 @@ def et_to_spm(et_vals, kernels = None, ref_doy = None):
 
         # Check if ref_doy is the same as current reference doy.
         utc_start = spiceypy.et2utc(et_vals[0], "ISOD", 16)
-        doy_start = (utc_start[5:8])
+        doy_start = utc_start[5:8]
         days_past = int(doy_start) - int(ref_doy)
 
         if days_past < 0:
-            print("TROUBLE! Reference doy is after the first entry of et_vals!")
-            pdb.set_trace()
-        else:
-            spm_vals = numpy.asarray(spm_vals) + days_past*24.*60.*60.
+            raise ValueError("Reference DOY after first entry of et_vals.")
 
-    return numpy.array(spm_vals)
+    return numpy.asarray(spm_vals) + days_past*86400.0

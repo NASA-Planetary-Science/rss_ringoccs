@@ -25,28 +25,7 @@
 ################################################################################
 """
 import pandas
-
-# The names for the columns in the order that they appear.
-GEO_NAMES = [
-    "t_oet_spm_vals",
-    "t_ret_spm_vals",
-    "t_set_spm_vals",
-    "rho_km_vals",
-    "phi_rl_deg_vals",
-    "phi_ora_deg_vals",
-    "B_deg_vals",
-    "D_km_vals",
-    "rho_dot_kms_vals",
-    "phi_rl_dot_kms_vals",
-    "F_km_vals",
-    "R_imp_km_vals",
-    "rx_km_vals",
-    "ry_km_vals",
-    "rz_km_vals",
-    "vx_kms_vals",
-    "vy_kms_vals",
-    "vz_kms_vals"
-]
+from .geo_columns import GEO_NAMES
 
 def get_geo(geo, verbose = True):
     """

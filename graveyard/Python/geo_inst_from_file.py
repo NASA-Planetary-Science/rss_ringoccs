@@ -41,6 +41,7 @@
 # pylint: disable = invalid-name
 import numpy
 import pandas
+from .geo_columns import GEO_NAMES
 from .write_history_dict import write_history_dict
 
 class GeoInstanceFromFile:
@@ -83,30 +84,9 @@ class GeoInstanceFromFile:
                     Full path name of the geometry file.
         """
 
-        col_names = [
-            "t_oet_spm_vals",
-            "t_ret_spm_vals",
-            "t_set_spm_vals",
-            "rho_km_vals",
-            "phi_rl_deg_vals",
-            "phi_ora_deg_vals",
-            "B_deg_vals",
-            "D_km_vals",
-            "rho_dot_kms_vals",
-            "phi_rl_dot_kms_vals",
-            "F_km_vals",
-            "R_imp_km_vals",
-            "rx_km_vals",
-            "ry_km_vals",
-            "rz_km_vals",
-            "vx_kms_vals",
-            "vy_kms_vals",
-            "vz_kms_vals"
-        ]
-
         self.set_attributes_to_none()
 
-        geo = pandas.read_csv(geo_file, header = None, names = col_names)
+        geo = pandas.read_csv(geo_file, header = None, names = GEO_NAMES)
 
         self.t_oet_spm_vals = numpy.asarray(geo["t_oet_spm_vals"])
         self.t_ret_spm_vals = numpy.asarray(geo["t_ret_spm_vals"])

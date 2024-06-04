@@ -24,7 +24,9 @@
 #   Date:   2018/07/12                                                         #
 ################################################################################
 """
-
+# Pylint claims year_where = (year_vals == year) uses superfluous parenthesis.
+# But year_where = year_vals == year is confusing syntax. Ignore this warning.
+# pylint: disable = superfluous-parens
 import numpy
 import pandas
 

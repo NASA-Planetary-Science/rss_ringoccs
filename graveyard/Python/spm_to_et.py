@@ -31,7 +31,7 @@
 #       Allow float inputs for SPM.                                            #
 ################################################################################
 """
-
+# Disabling a few pylint warnings.
 import numpy
 import spiceypy
 
@@ -70,18 +70,9 @@ def spm_to_et(spm, doy, year, kernels = None):
     spiceypy.furnsh(kernels)
 
     hours = (spm / 3600.0).astype(int)
-    remainder_spm = (spm - hours*3600.0).astype(int)
-    minutes = (remainder_spm / 60.0).astype(int)
+    minutes = ((spm - hours*3600.0).astype(int) / 60.0).astype(int)
     seconds = spm - hours*3600.0 - minutes*60.0
-
-    try:
-        n_pts = len(spm)
-    except TypeError:
-        n_pts = len([spm])
-        hours = [hours]
-        minutes = [minutes]
-        seconds = [seconds]
-
+    n_pts = numpy.size(spm)
     et_sec_vals = numpy.zeros(n_pts)
 
     # Check for leap year
@@ -90,22 +81,23 @@ def spm_to_et(spm, doy, year, kernels = None):
     else:
         days_per_year = 365
 
-    for i in range(n_pts):
+    for ind in range(n_pts):
 
         # Adjust if hour makes it go on to next day
-        doy_adjusted = doy + hours[i]/24
+        doy_adjusted = doy + hours[ind]/24
 
         # Adjust if day goes on to next year
-        this_year = (year +
-                numpy.floor((doy_adjusted - 1)/days_per_year)).astype(int)
-        this_doy = (1 + (doy_adjusted-1) % days_per_year).astype(int)
+        this_year = (
+            year + numpy.floor((doy_adjusted - 1) / days_per_year)
+        ).astype(int)
+        this_doy = (1 + (doy_adjusted - 1) % days_per_year).astype(int)
 
         utc_str = (
             str(this_year) + '-' + str(this_doy).zfill(3) + 'T' +
-            str(hours[i] % 24).zfill(2) + ':' +
-            str(minutes[i]).zfill(2) + ':' + '{:2.13f}'.format(seconds[i])
+            str(hours[ind] % 24).zfill(2) + ':' +
+            str(minutes[ind]).zfill(2) + ':' + f"{seconds[ind]:2.13F}"
         )
 
-        et_sec_vals[i] = spiceypy.utc2et(utc_str)
+        et_sec_vals[ind] = spiceypy.utc2et(utc_str)
 
     return et_sec_vals

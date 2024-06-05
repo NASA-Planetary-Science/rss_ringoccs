@@ -50,7 +50,7 @@
     if (geo->var == NULL)                                                      \
     {                                                                          \
         geo->error_occurred = tmpl_True;                                       \
-        geo->error_message = tmpl_strdup(                                      \
+        geo->error_message = tmpl_String_Duplicate(                            \
             "Error Encountered: rss_ringoccs\n"                                \
             "\ttrssringoccs_Get_Cal\n\n"                                       \
             "Malloc returned NULL. Failed to allocate memory for " #var ".\n"  \
@@ -122,7 +122,7 @@ rssringoccs_Get_Geo(const char *filename, tmpl_Bool use_deprecated)
     if (fp == NULL)
     {
         geo->error_occurred = tmpl_True;
-        geo->error_message = tmpl_strdup(
+        geo->error_message = tmpl_String_Duplicate(
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_Get_Geo\n\n"
             "fopen returned NULL. Failed to open file for reading.\n"
@@ -152,7 +152,7 @@ rssringoccs_Get_Geo(const char *filename, tmpl_Bool use_deprecated)
     if ((column_count != 18U) && (use_deprecated))
     {
         geo->error_occurred = tmpl_True;
-        geo->error_message = tmpl_strdup(
+        geo->error_message = tmpl_String_Duplicate(
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_Get_Geo\n\n"
             "use_deprecated is set to true but the input CSV does not have\n"
@@ -167,7 +167,7 @@ rssringoccs_Get_Geo(const char *filename, tmpl_Bool use_deprecated)
     else if ((column_count != 19U) && (!use_deprecated))
     {
         geo->error_occurred = tmpl_True;
-        geo->error_message = tmpl_strdup(
+        geo->error_message = tmpl_String_Duplicate(
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_Get_Geo\n\n"
             "use_deprecated is set to false but the input CSV does not have\n"

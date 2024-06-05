@@ -54,7 +54,7 @@ typedef struct rssringoccs_GeoCSV_Def {
     double *vx_kms_vals;
     double *vy_kms_vals;
     double *vz_kms_vals;
-    double *obs_spacecract_lat_deg_vals;
+    double *obs_spacecraft_lat_deg_vals;
     size_t n_elements;
     tmpl_Bool error_occurred;
     char *error_message;

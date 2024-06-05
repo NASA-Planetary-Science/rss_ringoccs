@@ -78,7 +78,6 @@ rssringoccs_Get_Geo(const char *filename, tmpl_Bool use_deprecated)
 
     /*  Variables for parsing the contents of the CSV file.                   */
     char *record, *line;
-
     unsigned int column_count = 0U;
     size_t n = 0;
 
@@ -111,9 +110,9 @@ rssringoccs_Get_Geo(const char *filename, tmpl_Bool use_deprecated)
     geo->vx_kms_vals = NULL;
     geo->vy_kms_vals = NULL;
     geo->vz_kms_vals = NULL;
-    geo->obs_spacecract_lat_deg_vals = NULL;
+    geo->obs_spacecraft_lat_deg_vals = NULL;
     geo->error_message = NULL;
-    geo->n_elements = 0UL;
+    geo->n_elements = 0;
     geo->error_occurred = tmpl_False;
 
     /*  Try to open the input file.                                           */
@@ -129,6 +128,7 @@ rssringoccs_Get_Geo(const char *filename, tmpl_Bool use_deprecated)
             "fopen returned NULL. Failed to open file for reading.\n"
             "It is likely the filename is incorrect or does not exist.\n"
         );
+
         return geo;
     }
 
@@ -158,6 +158,7 @@ rssringoccs_Get_Geo(const char *filename, tmpl_Bool use_deprecated)
             "use_deprecated is set to true but the input CSV does not have\n"
             "18 columns. Aborting computation.\n"
         );
+
         fclose(fp);
         return geo;
     }
@@ -172,6 +173,7 @@ rssringoccs_Get_Geo(const char *filename, tmpl_Bool use_deprecated)
             "use_deprecated is set to false but the input CSV does not have\n"
             "19 columns. Aborting computation.\n"
         );
+
         fclose(fp);
         return geo;
     }
@@ -205,10 +207,10 @@ rssringoccs_Get_Geo(const char *filename, tmpl_Bool use_deprecated)
     MALLOC_GEO_VAR(vz_kms_vals)
 
     /*  If we're using the older deprecated format, there are 19 columns.     *
-     *  Allocate memory for obs_spacecract_lat_deg_vals.                      */
+     *  Allocate memory for obs_spacecraft_lat_deg_vals.                      */
     if (!use_deprecated)
     {
-        MALLOC_GEO_VAR(obs_spacecract_lat_deg_vals)
+        MALLOC_GEO_VAR(obs_spacecraft_lat_deg_vals)
     }
 
     /*  Read in all of the data.                                              */
@@ -273,7 +275,7 @@ rssringoccs_Get_Geo(const char *filename, tmpl_Bool use_deprecated)
         if (!use_deprecated)
         {
             record = strtok(NULL, ",");
-            geo->obs_spacecract_lat_deg_vals[n] = atof(record);
+            geo->obs_spacecraft_lat_deg_vals[n] = atof(record);
         }
 
         line = fgets(buffer, sizeof(buffer), fp);

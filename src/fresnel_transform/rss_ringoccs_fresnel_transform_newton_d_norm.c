@@ -45,7 +45,7 @@ rssringoccs_Fresnel_Transform_Newton_D_Norm(rssringoccs_TAUObj *tau,
     for (m = 0; m<n_pts; ++m)
     {
         /*  Calculate the stationary value of psi with respect to phi.        */
-        phi = tmpl_Double_Stationary_Cyl_Fresnel_Psi_D_Newton(
+        phi = tmpl_Double_Stationary_Cyl_Fresnel_Psi_D_Newton_Deg(
             tau->k_vals[center],        /* Wavenumber. */
             tau->rho_km_vals[center],   /* Dummy ring radius. */
             tau->rho_km_vals[offset],   /* Ring radius. */
@@ -59,7 +59,7 @@ rssringoccs_Fresnel_Transform_Newton_D_Norm(rssringoccs_TAUObj *tau,
             tau->toler                  /* Maximum number of iterations. */
         );
 
-        D = tmpl_Double_Cyl_Fresnel_Observer_Distance(
+        D = tmpl_Double_Cyl_Fresnel_Observer_Distance_Deg(
             tau->rho_km_vals[offset],   /* Ring radius. */
             phi,                        /* Stationary azimuth angle. */
             tau->rx_km_vals[center],    /* Cassini x coordinate. */
@@ -68,7 +68,7 @@ rssringoccs_Fresnel_Transform_Newton_D_Norm(rssringoccs_TAUObj *tau,
         );
 
         /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
-        psi = tmpl_Double_Cyl_Fresnel_Psi(
+        psi = tmpl_Double_Cyl_Fresnel_Psi_Deg(
             tau->k_vals[center],        /* Wavenumber. */
             tau->rho_km_vals[center],   /* Dummy ring radius. */
             tau->rho_km_vals[offset],   /* Ring radius. */

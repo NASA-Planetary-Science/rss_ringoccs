@@ -67,7 +67,7 @@ class CreateCalInst:
             rsr_inst:
                 Instace of the RSRReader class
         """
-        cal = numpy.loadtxt(cal_file, delimiter=',')
+        cal = numpy.loadtxt(cal_file, delimiter = ',')
 
         t_oet_spm_vals = cal[:, 0]
         f_sky_hz_vals = cal[:, 1]

@@ -19,7 +19,6 @@
  *  Author:     Ryan Maguire                                                  *
  *  Date:       November 11, 2022                                             *
  ******************************************************************************/
-
 #include <libtmpl/include/tmpl.h>
 #include <rss_ringoccs/include/rss_ringoccs_occultation_geometry.h>
 

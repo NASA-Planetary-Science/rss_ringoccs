@@ -20,6 +20,8 @@
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
 #include <stdio.h>
 #include <stdlib.h>
+#define FILENAME \
+"../Test_Data/Rev007/Rev007E/Rev007E_RSS_2005_123_X43_E/RSS_2005_123_X43_E_CAL.TAB"
 
 static void write_val(FILE *fp, double x, double y)
 {
@@ -33,7 +35,7 @@ int main(void)
     unsigned long int n;
     FILE *fp;
 
-    cal = rssringoccs_Get_Cal("../Test_Data/Rev007E_X43_Maxwell_CAL.TAB");
+    cal = rssringoccs_Get_Cal(FILENAME);
 
     if (cal == NULL)
     {

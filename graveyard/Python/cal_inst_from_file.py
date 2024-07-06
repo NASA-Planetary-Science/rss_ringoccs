@@ -44,19 +44,21 @@ import numpy
 
 class CreateCalInst:
     """
-    Purpose:
-        Make a calibration instance using a calibration file
-    Attributes:
-        t_oet_spm_vals (numpy.ndarray): SPM values from calibration file
-        f_sky_hz_vals (numpy.ndarray): Predicted sky frequency values from
-            calibration file
-        f_sky_resid_fit_vals (numpy.ndarray): Fit to residual frequency from
-            calibration file
-        p_free_vals (numpy.ndarray): Freespace power spline fit values from
-            calibration file
-        f_offset_fit_vals (numpy.ndarray): Fit to frequency offset from
-            calibration files
-        history (dict): Dictionary with information of the run
+        Purpose:
+            Make a calibration instance using a calibration file
+        Attributes:
+            t_oet_spm_vals (numpy.ndarray):
+                SPM values from calibration file
+            f_sky_hz_vals (numpy.ndarray):
+                Predicted sky frequency values from calibration file
+            f_sky_resid_fit_vals (numpy.ndarray):
+                Fit to residual frequency from calibration file
+            p_free_vals (numpy.ndarray):
+                Freespace power spline fit values from calibration file
+            f_offset_fit_vals (numpy.ndarray):
+                Fit to frequency offset from calibration files
+            history (dict):
+                Dictionary with information of the run
     """
 
     def __init__(self, cal_file, rsr_inst):

@@ -24,7 +24,7 @@
 # Ignore this very silly warning.
 # pylint: disable = too-many-arguments
 import numpy
-from . resolution_inverse import resolution_inverse
+from .resolution_inverse import resolution_inverse
 
 def window_width_and_prange(res, normeq, fsky, fres, rho_dot, sigma, bfac=True):
     """

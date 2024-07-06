@@ -26,10 +26,10 @@ SRC_DIRS := ./src
 
 ifdef OMP
 CFLAGS := $(EXTRA_FLAGS) -fopenmp -I../ -O3 -fPIC -flto -DNDEBUG -c
-LFLAGS := $(EXTRA_LFLAGS) -fopenmp -O3 -flto -shared -lm -ltmpl
+LFLAGS := $(EXTRA_LFLAGS) -fopenmp -O3 -flto -shared -lm -ltmpl -lcspice -lcsupport
 else
 CFLAGS := $(EXTRA_FLAGS) -I../ -O3 -fPIC -flto -DNDEBUG -c
-LFLAGS := $(EXTRA_LFLAGS) -O3 -flto -shared -lm -ltmpl
+LFLAGS := $(EXTRA_LFLAGS) -O3 -flto -shared -lm -ltmpl #-lcspice -lcsupport
 endif
 
 CWARN := -Wall -Wextra -Wpedantic

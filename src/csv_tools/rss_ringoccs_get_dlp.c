@@ -50,7 +50,7 @@
     if (dlp->var == NULL)                                                      \
     {                                                                          \
         dlp->error_occurred = tmpl_True;                                       \
-        dlp->error_message = tmpl_strdup(                                      \
+        dlp->error_message = tmpl_String_Duplicate(                            \
             "Error Encountered: rss_ringoccs\n"                                \
             "\ttrssringoccs_Get_DLP\n\n"                                       \
             "Malloc returned NULL. Failed to allocate memory for " #var ".\n"  \
@@ -78,7 +78,6 @@ rssringoccs_Get_DLP(const char *filename, tmpl_Bool use_deprecated)
 
     /*  Variables for parsing the contents of the CSV file.                   */
     char *record, *line;
-
     unsigned int column_count = 0U;
     size_t n = 0;
 
@@ -107,7 +106,7 @@ rssringoccs_Get_DLP(const char *filename, tmpl_Bool use_deprecated)
     dlp->t_set_spm_vals = NULL;
     dlp->B_deg_vals = NULL;
     dlp->error_message = NULL;
-    dlp->n_elements = 0UL;
+    dlp->n_elements = 0;
     dlp->error_occurred = tmpl_False;
 
     /*  Try to open the input file.                                           */
@@ -117,12 +116,13 @@ rssringoccs_Get_DLP(const char *filename, tmpl_Bool use_deprecated)
     if (fp == NULL)
     {
         dlp->error_occurred = tmpl_True;
-        dlp->error_message = tmpl_strdup(
+        dlp->error_message = tmpl_String_Duplicate(
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_Get_DLP\n\n"
             "fopen returned NULL. Failed to open file for reading.\n"
             "It is likely the filename is incorrect or does not exist.\n"
         );
+
         return dlp;
     }
 
@@ -146,12 +146,13 @@ rssringoccs_Get_DLP(const char *filename, tmpl_Bool use_deprecated)
     if ((column_count != 12) && (use_deprecated))
     {
         dlp->error_occurred = tmpl_True;
-        dlp->error_message = tmpl_strdup(
+        dlp->error_message = tmpl_String_Duplicate(
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_Get_DLP\n\n"
             "use_deprecated is set to true but the input CSV does not have\n"
             "12 columns. Aborting computation.\n"
         );
+
         fclose(fp);
         return dlp;
     }
@@ -160,12 +161,13 @@ rssringoccs_Get_DLP(const char *filename, tmpl_Bool use_deprecated)
     else if ((column_count != 13) && (!use_deprecated))
     {
         dlp->error_occurred = tmpl_True;
-        dlp->error_message = tmpl_strdup(
+        dlp->error_message = tmpl_String_Duplicate(
             "Error Encountered: rss_ringoccs\n"
             "\ttrssringoccs_Get_DLP\n\n"
             "use_deprecated is set to false but the input CSV does not have\n"
             "13 columns. Aborting computation.\n"
         );
+
         fclose(fp);
         return dlp;
     }
@@ -191,7 +193,6 @@ rssringoccs_Get_DLP(const char *filename, tmpl_Bool use_deprecated)
     MALLOC_DLP_VAR(raw_tau_vals)
     MALLOC_DLP_VAR(phase_deg_vals)
     MALLOC_DLP_VAR(raw_tau_threshold_vals)
-
 
     /*  If we're using the older deprecated format, there are 13 columns.     *
      *  Allocate memory for p_norm_vals as well.                              */

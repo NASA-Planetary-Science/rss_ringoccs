@@ -40,7 +40,7 @@
     if (csv_data->var == NULL)                                                 \
     {                                                                          \
         csv_data->error_occurred = tmpl_True;                                  \
-        csv_data->error_message = tmpl_strdup(                                 \
+        csv_data->error_message = tmpl_String_Duplicate(                       \
             "Error Encountered: rss_ringoccs\n"                                \
             "\trssringoccs_Extract_CSV_Data\n\n"                               \
             "Malloc returned NULL for csv_data member. Aborting.\n"            \
@@ -62,13 +62,17 @@ rssringoccs_Extract_CSV_Data(const char *geo,
                              tmpl_Bool use_deprecated)
 {
     /*  Pointers for the Geo, Cal, DLP, and Tau CSV objects.                  */
-    rssringoccs_GeoCSV *geo_dat;
-    rssringoccs_DLPCSV *dlp_dat;
-    rssringoccs_CalCSV *cal_dat;
-    rssringoccs_TauCSV *tau_dat;
+    rssringoccs_GeoCSV *geo_dat = NULL;
+    rssringoccs_DLPCSV *dlp_dat = NULL;
+    rssringoccs_CalCSV *cal_dat = NULL;
+
+    /*  If Tau data is not to be extracted, avoid free'ing non-malloced       *
+     *  memory by setting this to NULL. The "destroy" function will not       *
+     *  attempt to free a NULL pointer.                                       */
+    rssringoccs_TauCSV *tau_dat = NULL;
 
     /*  Buffer for error messages.                                            */
-    char err_mes[512];
+    char err_mes[1024];
 
     /*  A pointer to the CSV object.                                          */
     rssringoccs_CSVData *csv_data;
@@ -114,6 +118,7 @@ rssringoccs_Extract_CSV_Data(const char *geo,
     csv_data->tau_phase = NULL;
     csv_data->tau_power = NULL;
     csv_data->tau_vals = NULL;
+    csv_data->n_elements = zero;
     csv_data->error_message = NULL;
     csv_data->error_occurred = tmpl_False;
 
@@ -124,32 +129,37 @@ rssringoccs_Extract_CSV_Data(const char *geo,
     if (geo_dat == NULL)
     {
         csv_data->error_occurred = tmpl_True;
-        csv_data->error_message = tmpl_strdup(
+        csv_data->error_message = tmpl_String_Duplicate(
             "\nError Encountered: rss_ringoccs\n"
             "\trssringoccs_Extract_CSV_Data\n\n"
             "rssringoccs_Get_Geo returned NULL for geo_dat. Aborting.\n"
         );
+
         return csv_data;
     }
 
     /*  If the CSV is empty there is something wrong with the geo string.     */
-    else if (geo_dat->n_elements == zero)
+    if (geo_dat->n_elements == zero)
     {
         csv_data->error_occurred = tmpl_True;
 
         if (geo_dat->error_message)
         {
-            sprintf(err_mes,
-                    "\nError Encountered: rss_ringoccs\n"
-                    "\trssringoccs_Extract_CSV_Data\n\n"
-                    "rssringoccs_Get_Geo returned an empty struct. Aborting.\n"
-                    "rssringoccs_Get_Geo set the following message:\n\n%s",
-                    geo_dat->error_message);
-            csv_data->error_message = tmpl_strdup(err_mes);
+            sprintf(
+                err_mes,
+                "\nError Encountered: rss_ringoccs\n"
+                "\trssringoccs_Extract_CSV_Data\n\n"
+                "rssringoccs_Get_Geo returned an empty struct. Aborting.\n"
+                "rssringoccs_Get_Geo set the following message:\n\n%s",
+                geo_dat->error_message
+            );
+
+            csv_data->error_message = tmpl_String_Duplicate(err_mes);
         }
+
         else
         {
-            csv_data->error_message = tmpl_strdup(
+            csv_data->error_message = tmpl_String_Duplicate(
                 "\nError Encountered: rss_ringoccs\n"
                 "\trssringoccs_Extract_CSV_Data\n\n"
                 "rssringoccs_Get_Geo returned an empty struct. Aborting.\n"
@@ -168,7 +178,7 @@ rssringoccs_Extract_CSV_Data(const char *geo,
     if (dlp_dat == NULL)
     {
         csv_data->error_occurred = tmpl_True;
-        csv_data->error_message = tmpl_strdup(
+        csv_data->error_message = tmpl_String_Duplicate(
             "\nError Encountered: rss_ringoccs\n"
             "\trssringoccs_Extract_CSV_Data\n\n"
             "rssringoccs_Get_DLP returned NULL for dlp_dat. Aborting.\n"
@@ -181,23 +191,27 @@ rssringoccs_Extract_CSV_Data(const char *geo,
     }
 
     /*  Similar check as geo, make sure the DLP object isn't empty.           */
-    else if (dlp_dat->n_elements == zero)
+    if (dlp_dat->n_elements == zero)
     {
         csv_data->error_occurred = tmpl_True;
 
         if (dlp_dat->error_message)
         {
-            sprintf(err_mes,
-                    "\nError Encountered: rss_ringoccs\n"
-                    "\trssringoccs_Extract_CSV_Data\n\n"
-                    "rssringoccs_Get_DLP returned an empty struct. Aborting.\n"
-                    "rssringoccs_Get_DLP set the following message:\n\n%s",
-                    dlp_dat->error_message);
-            csv_data->error_message = tmpl_strdup(err_mes);
+            sprintf(
+                err_mes,
+                "\nError Encountered: rss_ringoccs\n"
+                "\trssringoccs_Extract_CSV_Data\n\n"
+                "rssringoccs_Get_DLP returned an empty struct. Aborting.\n"
+                "rssringoccs_Get_DLP set the following message:\n\n%s",
+                dlp_dat->error_message
+            );
+
+            csv_data->error_message = tmpl_String_Duplicate(err_mes);
         }
+
         else
         {
-            csv_data->error_message = tmpl_strdup(
+            csv_data->error_message = tmpl_String_Duplicate(
                 "\nError Encountered: rss_ringoccs\n"
                 "\trssringoccs_Extract_CSV_Data\n\n"
                 "rssringoccs_Get_DLP returned an empty struct. Aborting.\n"
@@ -217,7 +231,7 @@ rssringoccs_Extract_CSV_Data(const char *geo,
     if (cal_dat == NULL)
     {
         csv_data->error_occurred = tmpl_True;
-        csv_data->error_message = tmpl_strdup(
+        csv_data->error_message = tmpl_String_Duplicate(
             "\nError Encountered: rss_ringoccs\n"
             "\trssringoccs_Extract_CSV_Data\n\n"
             "rssringoccs_Get_Cal returned NULL for cal_dat. Aborting.\n"
@@ -231,23 +245,27 @@ rssringoccs_Extract_CSV_Data(const char *geo,
     }
 
     /*  Ensure the created object isn't empty.                                */
-    else if (cal_dat->n_elements == zero)
+    if (cal_dat->n_elements == zero)
     {
         csv_data->error_occurred = tmpl_True;
 
         if (cal_dat->error_message)
         {
-            sprintf(err_mes,
-                    "\nError Encountered: rss_ringoccs\n"
-                    "\trssringoccs_Extract_CSV_Data\n\n"
-                    "rssringoccs_Get_Cal returned an empty struct. Aborting.\n"
-                    "rssringoccs_Get_Cal set the following message:\n\n%s",
-                    cal_dat->error_message);
-            csv_data->error_message = tmpl_strdup(err_mes);
+            sprintf(
+                err_mes,
+                "\nError Encountered: rss_ringoccs\n"
+                "\trssringoccs_Extract_CSV_Data\n\n"
+                "rssringoccs_Get_Cal returned an empty struct. Aborting.\n"
+                "rssringoccs_Get_Cal set the following message:\n\n%s",
+                cal_dat->error_message
+            );
+
+            csv_data->error_message = tmpl_String_Duplicate(err_mes);
         }
+
         else
         {
-            csv_data->error_message = tmpl_strdup(
+            csv_data->error_message = tmpl_String_Duplicate(
                 "\nError Encountered: rss_ringoccs\n"
                 "\trssringoccs_Extract_CSV_Data\n\n"
                 "rssringoccs_Get_Cal returned an empty struct. Aborting.\n"
@@ -261,15 +279,6 @@ rssringoccs_Extract_CSV_Data(const char *geo,
         return csv_data;
     }
 
-    /*  Steal the pointer to avoid a call to malloc. It is destroyed in the   *
-     *  end anyways, so no harm done.                                         */
-    cal_f_sky_hz_vals = cal_dat->f_sky_pred_vals;
-
-    /*  The sky frequency is the difference of the predicted and residual     *
-     *  frequencies. Loop through the arrays and compute the difference.      */
-    for (n = zero; n < cal_dat->n_elements; ++n)
-        cal_f_sky_hz_vals[n] -= cal_dat->f_sky_resid_fit_vals[n];
-
     /*  Extract the data from the TAU.TAB file.                               */
     if (tau)
     {
@@ -279,7 +288,7 @@ rssringoccs_Extract_CSV_Data(const char *geo,
         if (tau_dat == NULL)
         {
             csv_data->error_occurred = tmpl_True;
-            csv_data->error_message = tmpl_strdup(
+            csv_data->error_message = tmpl_String_Duplicate(
                 "\nError Encountered: rss_ringoccs\n"
                 "\trssringoccs_Extract_CSV_Data\n\n"
                 "rssringoccs_Get_Tau returned NULL for tau_dat. Aborting.\n"
@@ -293,7 +302,7 @@ rssringoccs_Extract_CSV_Data(const char *geo,
         }
 
         /*  Ensure the Tau object isn't empty.                                */
-        else if (tau_dat->n_elements == zero)
+        if (tau_dat->n_elements == zero)
         {
             csv_data->error_occurred = tmpl_True;
 
@@ -307,11 +316,13 @@ rssringoccs_Extract_CSV_Data(const char *geo,
                     "rssringoccs_Get_Tau set the following message:\n\n%s",
                     tau_dat->error_message
                 );
-                csv_data->error_message = tmpl_strdup(err_mes);
+
+                csv_data->error_message = tmpl_String_Duplicate(err_mes);
             }
+
             else
             {
-                csv_data->error_message = tmpl_strdup(
+                csv_data->error_message = tmpl_String_Duplicate(
                     "\nError Encountered: rss_ringoccs\n"
                     "\trssringoccs_Extract_CSV_Data\n\n"
                     "rssringoccs_Get_Tau returned an empty struct. Aborting.\n"
@@ -328,11 +339,14 @@ rssringoccs_Extract_CSV_Data(const char *geo,
         }
     }
 
-    /*  If Tau data is not to be extracted, avoid free'ing non-malloced       *
-     *  memory by setting this to NULL. The "destroy" function will not       *
-     *  attempt to free a NULL pointer.                                       */
-    else
-        tau_dat = NULL;
+    /*  Steal the pointer to avoid a call to malloc. It is destroyed in the   *
+     *  end anyways, so no harm done.                                         */
+    cal_f_sky_hz_vals = cal_dat->f_sky_pred_vals;
+
+    /*  The sky frequency is the difference of the predicted and residual     *
+     *  frequencies. Loop through the arrays and compute the difference.      */
+    for (n = zero; n < cal_dat->n_elements; ++n)
+        cal_f_sky_hz_vals[n] -= cal_dat->f_sky_resid_fit_vals[n];
 
     /*  Grab the number of elements from the DLP CSV. This will be the number *
      *  of elements in the output.                                            */
@@ -365,6 +379,12 @@ rssringoccs_Extract_CSV_Data(const char *geo,
     csv_data->rho_corr_timing_km_vals = dlp_dat->rho_corr_timing_km_vals;
     csv_data->raw_tau_threshold_vals = dlp_dat->raw_tau_threshold_vals;
 
+    /*  Various angles from the dlp file. Steal the reference.                */
+    csv_data->phase_deg_vals = dlp_dat->phase_deg_vals;
+    csv_data->phi_deg_vals = dlp_dat->phi_ora_deg_vals;
+    csv_data->B_deg_vals = dlp_dat->B_deg_vals;
+    csv_data->phi_rl_deg_vals = dlp_dat->phi_rl_deg_vals;
+
     /*  The new TAB files have normalized power included.                     */
     if (!use_deprecated)
         csv_data->p_norm_vals = dlp_dat->p_norm_vals;
@@ -388,12 +408,6 @@ rssringoccs_Extract_CSV_Data(const char *geo,
         }
     }
 
-    /*  Various angles from the dlp file. Steal the reference.                */
-    csv_data->phase_deg_vals = dlp_dat->phase_deg_vals;
-    csv_data->phi_deg_vals = dlp_dat->phi_ora_deg_vals;
-    csv_data->B_deg_vals = dlp_dat->B_deg_vals;
-    csv_data->phi_rl_deg_vals = dlp_dat->phi_rl_deg_vals;
-
     temp = (csv_data->rho_km_vals[1] - csv_data->rho_km_vals[0]) /
            (csv_data->t_set_spm_vals[1] - csv_data->t_set_spm_vals[0]);
 
@@ -401,7 +415,7 @@ rssringoccs_Extract_CSV_Data(const char *geo,
     max_dr_dt = temp;
 
     /*  Find the minimum and maximum of drho/dt.                              */
-    for (n = 1U; n < csv_data->n_elements - 1U; ++n)
+    for (n = 1; n < csv_data->n_elements - 1; ++n)
     {
         temp = (csv_data->rho_km_vals[n+1U] - csv_data->rho_km_vals[n])   /
                (csv_data->t_set_spm_vals[n+1U] - csv_data->t_set_spm_vals[n]);
@@ -417,36 +431,42 @@ rssringoccs_Extract_CSV_Data(const char *geo,
     if ((min_dr_dt < 0.0) && (max_dr_dt > 0.0))
     {
         csv_data->error_occurred = tmpl_True;
-        csv_data->error_message = tmpl_strdup(
+        csv_data->error_message = tmpl_String_Duplicate(
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_Extract_CSV_Data\n\n"
             "\rdrho/dt has positive and negative values. Check your DLP file.\n"
             "\rIt is likely a chord occultation and needs to be split into\n"
             "\ringress and egress portions.\n"
         );
+
         rssringoccs_Destroy_GeoCSV(&geo_dat);
         rssringoccs_Destroy_DLPCSV(&dlp_dat);
         rssringoccs_Destroy_CalCSV(&cal_dat);
         rssringoccs_Destroy_TauCSV(&tau_dat);
         rssringoccs_Destroy_CSV_Members(csv_data);
+        return csv_data;
     }
-    else if ((min_dr_dt == 0.0) || (max_dr_dt == 0.0))
+
+    if ((min_dr_dt == 0.0) || (max_dr_dt == 0.0))
     {
         csv_data->error_occurred = tmpl_True;
-        csv_data->error_message = tmpl_strdup(
+        csv_data->error_message = tmpl_String_Duplicate(
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_Extract_CSV_Data\n\n"
             "\rdrho/dt has zero-valued elements. Check your DLP file.\n"
             "\rIt is likely a chord occultation and needs to be split into\n"
             "\ringress and egress portions.\n"
         );
+
         rssringoccs_Destroy_GeoCSV(&geo_dat);
         rssringoccs_Destroy_DLPCSV(&dlp_dat);
         rssringoccs_Destroy_CalCSV(&cal_dat);
         rssringoccs_Destroy_TauCSV(&tau_dat);
         rssringoccs_Destroy_CSV_Members(csv_data);
+        return csv_data;
     }
-    else if (max_dr_dt < 0.0)
+
+    if (max_dr_dt < 0.0)
     {
         tmpl_Double_Array_Reverse(geo_dat->rho_km_vals, geo_dat->n_elements);
         tmpl_Double_Array_Reverse(geo_dat->rho_dot_kms_vals,
@@ -454,59 +474,55 @@ rssringoccs_Extract_CSV_Data(const char *geo,
         tmpl_Double_Array_Reverse(geo_dat->D_km_vals, geo_dat->n_elements);
     }
 
-    tmpl_Double_Sorted_Interp1d(geo_dat->rho_km_vals,
-                                geo_dat->D_km_vals,
-                                geo_dat->n_elements,
-                                csv_data->rho_km_vals,
-                                csv_data->D_km_vals,
-                                csv_data->n_elements);
+    tmpl_Double_Sorted_Interp1d(
+        geo_dat->rho_km_vals, geo_dat->D_km_vals, geo_dat->n_elements,
+        csv_data->rho_km_vals, csv_data->D_km_vals, csv_data->n_elements
+    );
 
-    tmpl_Double_Sorted_Interp1d(geo_dat->rho_km_vals,
-                                geo_dat->rho_dot_kms_vals,
-                                geo_dat->n_elements,
-                                csv_data->rho_km_vals,
-                                csv_data->rho_dot_kms_vals,
-                                csv_data->n_elements);
+    tmpl_Double_Sorted_Interp1d(
+        geo_dat->rho_km_vals, geo_dat->rho_dot_kms_vals, geo_dat->n_elements,
+        csv_data->rho_km_vals, csv_data->rho_dot_kms_vals, csv_data->n_elements
+    );
 
-    tmpl_Double_Sorted_Interp1d(geo_dat->rho_km_vals,
-                                geo_dat->rx_km_vals,
-                                geo_dat->n_elements,
-                                csv_data->rho_km_vals,
-                                csv_data->rx_km_vals,
-                                csv_data->n_elements);
+    tmpl_Double_Sorted_Interp1d(
+        geo_dat->rho_km_vals, geo_dat->rx_km_vals, geo_dat->n_elements,
+        csv_data->rho_km_vals, csv_data->rx_km_vals, csv_data->n_elements
+    );
 
-    tmpl_Double_Sorted_Interp1d(geo_dat->rho_km_vals,
-                                geo_dat->ry_km_vals,
-                                geo_dat->n_elements,
-                                csv_data->rho_km_vals,
-                                csv_data->ry_km_vals,
-                                csv_data->n_elements);
+    tmpl_Double_Sorted_Interp1d(
+        geo_dat->rho_km_vals, geo_dat->ry_km_vals, geo_dat->n_elements,
+        csv_data->rho_km_vals, csv_data->ry_km_vals, csv_data->n_elements
+    );
 
-    tmpl_Double_Sorted_Interp1d(geo_dat->rho_km_vals,
-                                geo_dat->rz_km_vals,
-                                geo_dat->n_elements,
-                                csv_data->rho_km_vals,
-                                csv_data->rz_km_vals,
-                                csv_data->n_elements);
+    tmpl_Double_Sorted_Interp1d(
+        geo_dat->rho_km_vals, geo_dat->rz_km_vals, geo_dat->n_elements,
+        csv_data->rho_km_vals, csv_data->rz_km_vals, csv_data->n_elements
+    );
 
-    tmpl_Double_Sorted_Interp1d(cal_dat->t_oet_spm_vals,
-                                cal_f_sky_hz_vals,
-                                cal_dat->n_elements,
-                                csv_data->t_oet_spm_vals,
-                                csv_data->f_sky_hz_vals,
-                                csv_data->n_elements);
+    tmpl_Double_Sorted_Interp1d(
+        cal_dat->t_oet_spm_vals, cal_f_sky_hz_vals, cal_dat->n_elements,
+        csv_data->t_oet_spm_vals, csv_data->f_sky_hz_vals, csv_data->n_elements
+    );
 
     /*  Interpolate the Tau data if requested.                                */
     if (tau)
     {
+        tmpl_Double_Sorted_Interp1d(
+            tau_dat->rho_km_vals, tau_dat->phase_deg_vals, tau_dat->n_elements,
+            csv_data->rho_km_vals, csv_data->tau_phase, csv_data->n_elements
+        );
+
+        tmpl_Double_Sorted_Interp1d(
+            tau_dat->rho_km_vals, tau_dat->tau_vals, tau_dat->n_elements,
+            csv_data->rho_km_vals, csv_data->tau_vals, csv_data->n_elements
+        );
+
         if (use_deprecated)
         {
-            tmpl_Double_Sorted_Interp1d(tau_dat->rho_km_vals,
-                                        tau_dat->tau_vals,
-                                        tau_dat->n_elements,
-                                        csv_data->rho_km_vals,
-                                        csv_data->tau_power,
-                                        csv_data->n_elements);
+            tmpl_Double_Sorted_Interp1d(
+                tau_dat->rho_km_vals, tau_dat->tau_vals, tau_dat->n_elements,
+                csv_data->rho_km_vals, csv_data->tau_power, csv_data->n_elements
+            );
 
             for (n = zero; n < csv_data->n_elements; ++n)
             {
@@ -515,28 +531,14 @@ rssringoccs_Extract_CSV_Data(const char *geo,
                 csv_data->tau_power[n] = tmpl_Double_Exp(log_power);
             }
         }
+
         else
-            tmpl_Double_Sorted_Interp1d(tau_dat->rho_km_vals,
-                                        tau_dat->power_vals,
-                                        tau_dat->n_elements,
-                                        csv_data->rho_km_vals,
-                                        csv_data->tau_power,
-                                        csv_data->n_elements);
-
-
-        tmpl_Double_Sorted_Interp1d(tau_dat->rho_km_vals,
-                                    tau_dat->phase_deg_vals,
-                                    tau_dat->n_elements,
-                                    csv_data->rho_km_vals,
-                                    csv_data->tau_phase,
-                                    csv_data->n_elements);
-
-        tmpl_Double_Sorted_Interp1d(tau_dat->rho_km_vals,
-                                    tau_dat->tau_vals,
-                                    tau_dat->n_elements,
-                                    csv_data->rho_km_vals,
-                                    csv_data->tau_vals,
-                                    csv_data->n_elements);
+        {
+            tmpl_Double_Sorted_Interp1d(
+                tau_dat->rho_km_vals, tau_dat->power_vals, tau_dat->n_elements,
+                csv_data->rho_km_vals, csv_data->tau_power, csv_data->n_elements
+            );
+        }
     }
 
     /*  Free the Geo, Cal, and TAU structs. The CSV struct stole several      *

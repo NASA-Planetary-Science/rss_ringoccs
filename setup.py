@@ -53,7 +53,7 @@ setup(
                 "/usr/local/include"
             ],
             library_dirs=["/usr/local/lib"],
-            libraries=["tmpl", "rssringoccs"]
+            libraries = ["tmpl", "rssringoccs"]
         )
     ],
     packages=[

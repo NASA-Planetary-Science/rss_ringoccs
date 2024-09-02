@@ -94,7 +94,7 @@ from . import tools
 from . import rsr_reader
 from . import occgeo
 from . import calibration
-# from . import scatter
+from . import scatter
 
 """
 History:

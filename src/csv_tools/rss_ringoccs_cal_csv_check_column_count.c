@@ -31,7 +31,7 @@
 /*  rssringoccs_CalCSV typedef here, and function prototype given.            */
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
 
-/*  Function for checking the number of columns in a Geo CSV file.            */
+/*  Function for checking the number of columns in a Cal CSV file.            */
 void rssringoccs_CalCSV_Check_Column_Count(rssringoccs_CalCSV *cal, FILE *fp)
 {
     /*  Declare necessary variables. C89 requires this at the top.            */

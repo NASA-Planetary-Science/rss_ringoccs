@@ -23,7 +23,7 @@
  *  Date:       September 1, 2024                                             *
  ******************************************************************************/
 
-/*  fgets and NULL found here.                                                */
+/*  fgets, rewind, and NULL found here.                                       */
 #include <stdio.h>
 
 /*  strtok provided here.                                                     */
@@ -120,5 +120,8 @@ void rssringoccs_CalCSV_Read_Data(rssringoccs_CalCSV *cal, FILE *fp)
         line = fgets(buffer, sizeof(buffer), fp);
         ++n;
     }
+
+    /*  Reset the file pointer back to the start of the file.                 */
+    rewind(fp);
 }
 /*  End of rssringoccs_CalCSV_Read_Data.                                      */

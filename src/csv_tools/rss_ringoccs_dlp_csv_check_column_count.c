@@ -32,9 +32,7 @@
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
 
 /*  Function for checking the number of columns in a DLP CSV file.            */
-void
-rssringoccs_DLPCSV_Check_Column_Count(rssringoccs_DLPCSV *dlp,
-                                      tmpl_Bool use_deprecated, FILE *fp)
+void rssringoccs_DLPCSV_Check_Column_Count(rssringoccs_DLPCSV *dlp, FILE *fp)
 {
     /*  Declare necessary variables. C89 requires this at the top.            */
     size_t column_count;
@@ -65,7 +63,7 @@ rssringoccs_DLPCSV_Check_Column_Count(rssringoccs_DLPCSV *dlp,
     column_count = tmpl_CSV_Column_Count(fp);
 
     /*  If use_deprecated was set to true, column_count must be 12. Check.    */
-    if ((column_count != 12) && (use_deprecated))
+    if ((column_count != 12) && (dlp->use_deprecated))
     {
         dlp->error_occurred = tmpl_True;
         dlp->error_message = tmpl_String_Duplicate(
@@ -77,7 +75,7 @@ rssringoccs_DLPCSV_Check_Column_Count(rssringoccs_DLPCSV *dlp,
     }
 
     /*  And if use_deprecated is false, we need 13 column. Check this.        */
-    else if ((column_count != 13) && (!use_deprecated))
+    else if ((column_count != 13) && (!dlp->use_deprecated))
     {
         dlp->error_occurred = tmpl_True;
         dlp->error_message = tmpl_String_Duplicate(

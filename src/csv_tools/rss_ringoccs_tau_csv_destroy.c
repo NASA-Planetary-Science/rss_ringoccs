@@ -17,7 +17,7 @@
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
  *  Purpose:                                                                  *
- *      Function for free'ing a Cal CSV object and free'ing all of the        *
+ *      Function for free'ing a Tau CSV object and free'ing all of the        *
  *      pointers contained inside the struct.                                 *
  ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
@@ -27,43 +27,42 @@
 /*  free is found here, as is NULL.                                           */
 #include <stdlib.h>
 
-/*  rssringoccs_CalCSV typedef here, and function prototype given.            */
+/*  rssringoccs_TauCSV typedef here, and function prototype given.            */
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
 
-/*  Function for freeing the memory in a CalCSV object.                       */
-void rssringoccs_Destroy_CalCSV(rssringoccs_CalCSV **cal)
+/*  Function for freeing the memory of a TauCSV object.                       */
+void rssringoccs_TauCSV_Destroy(rssringoccs_TauCSV **tau)
 {
-    /*  Used for the pointer to the CSV object.                               */
-    rssringoccs_CalCSV *cal_inst;
+    /*  Variable for a pointer to the TauCSV object.                          */
+    rssringoccs_TauCSV *tau_inst;
 
-    /*  If the input pointer is NULL, simply return.                          */
-    if (cal == NULL)
+    /*  If the input pointer is NULL, there is nothing to free.               */
+    if (tau == NULL)
         return;
 
-    /*  Otherwise, get a pointer to the CalCSV object.                        */
-    cal_inst = *cal;
+    /*  Otherwise, get a pointer to the TauCSV object.                        */
+    tau_inst = *tau;
 
-    /*  If this is NULL, there's no need to free it. Return.                  */
-    if (cal_inst == NULL)
+    /*  If this pointer is NULL, there is nothing to free.                    */
+    if (tau_inst == NULL)
         return;
 
-    /*  Free all of the pointers inside the CalCSV object.                    */
-    rssringoccs_Destroy_CalCSV_Members(cal_inst);
+    /*  Free all of the members of the TauCSV object.                         */
+    rssringoccs_TauCSV_Destroy_Members(tau_inst);
 
-    /*  If an error occurred along the way, the error_message variable is     *
-     *  malloced and a string is stored. Check if we need to free this.       */
-    if (cal_inst->error_message != NULL)
+    /*  If an error occurred, the error_message variable is malloced and a    *
+     *  string is stored in it. Free this pointer if this is the case.        */
+    if (tau_inst->error_message != NULL)
     {
-        free(cal_inst->error_message);
+        free(tau_inst->error_message);
 
-        /*  To avoid freeing twice, reset the pointer to NULL.                */
-        cal_inst->error_message = NULL;
+        /*  Set the pointer to NULL to prevent freeing it twice.              */
+        tau_inst->error_message = NULL;
     }
 
-    /*  Free the pointer to the object and set it to NULL to avoid freeing    *
-     *  this object twice.                                                    */
-    free(cal_inst);
-    *cal = NULL;
+    /*  Free the TauCSV pointer and set to NULL to prevent freeing it twice.  */
+    free(tau_inst);
+    *tau = NULL;
     return;
 }
-/*  End of rssringoccs_Destroy_CalCSV.                                        */
+/*  End of rssringoccs_Destroy_TauCSV.                                        */

@@ -4,7 +4,7 @@ try:
 except ImportError:
     from distutils.core import setup, Extension
 
-import os, platform
+import os, platform, subprocess
 
 # Numpy is needed for the get_include function which tells us where various
 # header files, like numpy/arrayobject.h, live.
@@ -39,6 +39,8 @@ for file in os.listdir("rss_ringoccs/crssringoccs/diffraction_correction/"):
 
 srclist.append("rss_ringoccs/crssringoccs/crssringoccs.c")
 
+subprocess.call(["make", "-j", "BUILD_STATIC=1"])
+
 setup(
     name = "rss_ringoccs",
     version = "1.3",
@@ -50,10 +52,13 @@ setup(
             srclist,
             include_dirs=[
                 numpy.get_include(),
-                "/usr/local/include"
+                "./",
+                "../"
             ],
-            library_dirs=["/usr/local/lib"],
-            libraries = ["tmpl", "rssringoccs"]
+            extra_objects = [
+                "./librssringoccs.a",
+                "./libtmpl/libtmpl.a"
+            ]
         )
     ],
     packages=[
@@ -65,4 +70,3 @@ setup(
         "rss_ringoccs.tools"
     ]
 )
-

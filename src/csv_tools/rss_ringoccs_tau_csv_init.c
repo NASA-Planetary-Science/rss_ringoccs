@@ -17,52 +17,51 @@
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
  *  Purpose:                                                                  *
- *      Function for free'ing a Tau CSV object and free'ing all of the        *
- *      pointers contained inside the struct.                                 *
+ *      Initialize all members of the Tau CSV object to their zero values.    *
  ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
- *  Date:       December 31, 2020                                             *
+ *  Date:       September 1, 2024                                             *
  ******************************************************************************/
 
 /*  free is found here, as is NULL.                                           */
-#include <stdlib.h>
+#include <stddef.h>
+
+/*  Booleans provided here.                                                   */
+#include <libtmpl/include/tmpl_bool.h>
 
 /*  rssringoccs_TauCSV typedef here, and function prototype given.            */
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
 
-/*  Function for freeing the memory of a TauCSV object.                       */
-void rssringoccs_Destroy_TauCSV(rssringoccs_TauCSV **tau)
+/* Sets all variables in a Tau CSV to their default values.                   */
+void rssringoccs_TauCSV_Init(rssringoccs_TauCSV *tau)
 {
-    /*  Variable for a pointer to the TauCSV object.                          */
-    rssringoccs_TauCSV *tau_inst;
-
-    /*  If the input pointer is NULL, there is nothing to free.               */
-    if (tau == NULL)
+    /*  If the pointer is NULL, there's nothing to do. Simply return.         */
+    if (!tau)
         return;
 
-    /*  Otherwise, get a pointer to the TauCSV object.                        */
-    tau_inst = *tau;
+    /*  All arrays should be empty, for now.                                  */
+    tau->rho_km_vals = NULL;
+    tau->rho_corr_pole_km_vals = NULL;
+    tau->rho_corr_timing_km_vals = NULL;
+    tau->phi_rl_deg_vals = NULL;
+    tau->phi_ora_deg_vals = NULL;
+    tau->power_vals = NULL;
+    tau->tau_vals = NULL;
+    tau->phase_deg_vals = NULL;
+    tau->tau_threshold_vals = NULL;
+    tau->t_oet_spm_vals = NULL;
+    tau->t_ret_spm_vals = NULL;
+    tau->t_set_spm_vals = NULL;
+    tau->B_deg_vals = NULL;
+    tau->error_message = NULL;
+    tau->error_occurred = tmpl_False;
+    tau->n_elements = 0;
 
-    /*  If this pointer is NULL, there is nothing to free.                    */
-    if (tau_inst == NULL)
-        return;
+    /*  And no error has occurred, yet.                                       */
+    tau->error_message = NULL;
+    tau->error_occurred = tmpl_False;
 
-    /*  Free all of the members of the TauCSV object.                         */
-    rssringoccs_Destroy_TauCSV_Members(tau_inst);
-
-    /*  If an error occurred, the error_message variable is malloced and a    *
-     *  string is stored in it. Free this pointer if this is the case.        */
-    if (tau_inst->error_message != NULL)
-    {
-        free(tau_inst->error_message);
-
-        /*  Set the pointer to NULL to prevent freeing it twice.              */
-        tau_inst->error_message = NULL;
-    }
-
-    /*  Free the TauCSV pointer and set to NULL to prevent freeing it twice.  */
-    free(tau_inst);
-    *tau = NULL;
-    return;
+    /*  By default, do not use the deprecated file structure.                 */
+    tau->use_deprecated = tmpl_False;
 }
-/*  End of rssringoccs_Destroy_TauCSV.                                        */
+/*  End of rssringoccs_TauCSV_Init.                                           */

@@ -38,19 +38,18 @@ rssringoccs_Fresnel_Transform_Newton_D_Old_Norm(rssringoccs_TAUObj *tau,
 
     /*  Symmetry is lost without the Legendre polynomials, or Fresnel         *
      *  quadratic. Must compute everything from -W/2 to W/2.                  */
-    offset = center - (n_pts - 1UL) / 2UL;
+    offset = center - ((n_pts-1) >> 1);
 
     /*  Use a Riemann Sum to approximate the Fresnel Inverse Integral.        */
     for (m = 0; m<n_pts; ++m)
     {
         /*  Calculate the stationary value of psi with respect to phi.        */
         phi = tmpl_Double_Stationary_Cyl_Fresnel_Psi_D_Newton_Deg(
-            /* Weighted wavenumber, unitless. */
-            tau->k_vals[center]*tau->D_km_vals[center],
+            tau->k_vals[center],        /* Wavenumber. */
             tau->rho_km_vals[center],   /* Dummy ring radius. */
             tau->rho_km_vals[offset],   /* Ring radius. */
             tau->phi_deg_vals[offset],  /* Dummy azimuth angle. */
-            tau->phi_deg_vals[offset],  /* Azimuth angle. */
+            tau->phi_deg_vals[offset],  /* Ring azimuth angle. */
             tau->B_deg_vals[center],    /* Ring opening angle. */
             tau->rx_km_vals[center],    /* Cassini x coordinate. */
             tau->ry_km_vals[center],    /* Cassini y coordinate. */

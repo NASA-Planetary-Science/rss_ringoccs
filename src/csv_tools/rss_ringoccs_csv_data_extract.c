@@ -45,12 +45,8 @@
             "\trssringoccs_Extract_CSV_Data\n\n"                               \
             "Malloc returned NULL for csv_data member. Aborting.\n"            \
         );                                                                     \
-        rssringoccs_Destroy_GeoCSV(&geo_dat);                                  \
-        rssringoccs_Destroy_DLPCSV(&dlp_dat);                                  \
-        rssringoccs_Destroy_CalCSV(&cal_dat);                                  \
-        rssringoccs_Destroy_TauCSV(&tau_dat);                                  \
-        rssringoccs_Destroy_CSV_Members(csv_data);                             \
-        return csv_data;                                                       \
+                                                                               \
+        goto FAIL;                                                             \
     }
 
 /*  Extracts all data from CSV (.TAB) files and creates a DLP-like struct.    */
@@ -86,6 +82,7 @@ rssringoccs_Extract_CSV_Data(const char *geo,
     /*  Variables for checking the geometry of the occultation.               */
     double min_dr_dt, max_dr_dt, temp, mu, log_power;
     double *cal_f_sky_hz_vals;
+    size_t geo_increment;
 
     /*  Allocate memory for the CSV object.                                   */
     csv_data = malloc(sizeof(*csv_data));
@@ -123,7 +120,7 @@ rssringoccs_Extract_CSV_Data(const char *geo,
     csv_data->error_occurred = tmpl_False;
 
     /*  Extract the data from the GEO.TAB file.                               */
-    geo_dat = rssringoccs_Get_Geo(geo, use_deprecated);
+    geo_dat = rssringoccs_GeoCSV_Extract(geo, use_deprecated);
 
     /*  Check for errors.                                                     */
     if (geo_dat == NULL)
@@ -132,7 +129,7 @@ rssringoccs_Extract_CSV_Data(const char *geo,
         csv_data->error_message = tmpl_String_Duplicate(
             "\nError Encountered: rss_ringoccs\n"
             "\trssringoccs_Extract_CSV_Data\n\n"
-            "rssringoccs_Get_Geo returned NULL for geo_dat. Aborting.\n"
+            "rssringoccs_GeoCSV_Extract returned NULL for geo_dat. Aborting.\n"
         );
 
         return csv_data;
@@ -149,8 +146,8 @@ rssringoccs_Extract_CSV_Data(const char *geo,
                 err_mes,
                 "\nError Encountered: rss_ringoccs\n"
                 "\trssringoccs_Extract_CSV_Data\n\n"
-                "rssringoccs_Get_Geo returned an empty struct. Aborting.\n"
-                "rssringoccs_Get_Geo set the following message:\n\n%s",
+                "rssringoccs_GeoCSV_Extract returned an empty struct.\n"
+                "rssringoccs_GeoCSV_Extract set the following message:\n\n%s",
                 geo_dat->error_message
             );
 
@@ -162,17 +159,17 @@ rssringoccs_Extract_CSV_Data(const char *geo,
             csv_data->error_message = tmpl_String_Duplicate(
                 "\nError Encountered: rss_ringoccs\n"
                 "\trssringoccs_Extract_CSV_Data\n\n"
-                "rssringoccs_Get_Geo returned an empty struct. Aborting.\n"
+                "rssringoccs_GeoCSV_Extract returned an empty struct.\n"
             );
         }
 
         /*  The Geo object was allocated memory. Free before aborting.        */
-        rssringoccs_Destroy_GeoCSV(&geo_dat);
+        rssringoccs_GeoCSV_Destroy(&geo_dat);
         return csv_data;
     }
 
     /*  Extract the data from the DLP.TAB file.                               */
-    dlp_dat = rssringoccs_Get_DLP(dlp, use_deprecated);
+    dlp_dat = rssringoccs_DLPCSV_Extract(dlp, use_deprecated);
 
     /*  Check for errors.                                                     */
     if (dlp_dat == NULL)
@@ -181,12 +178,12 @@ rssringoccs_Extract_CSV_Data(const char *geo,
         csv_data->error_message = tmpl_String_Duplicate(
             "\nError Encountered: rss_ringoccs\n"
             "\trssringoccs_Extract_CSV_Data\n\n"
-            "rssringoccs_Get_DLP returned NULL for dlp_dat. Aborting.\n"
+            "rssringoccs_DLPCSV_Extract returned NULL for dlp_dat. Aborting.\n"
         );
 
         /*  The Geo object was successfully created. Destroy it to avoid      *
          *  memory leaks and then abort the computation.                      */
-        rssringoccs_Destroy_GeoCSV(&geo_dat);
+        rssringoccs_GeoCSV_Destroy(&geo_dat);
         return csv_data;
     }
 
@@ -201,8 +198,8 @@ rssringoccs_Extract_CSV_Data(const char *geo,
                 err_mes,
                 "\nError Encountered: rss_ringoccs\n"
                 "\trssringoccs_Extract_CSV_Data\n\n"
-                "rssringoccs_Get_DLP returned an empty struct. Aborting.\n"
-                "rssringoccs_Get_DLP set the following message:\n\n%s",
+                "rssringoccs_DLPCSV_Extract returned an empty struct.\n"
+                "rssringoccs_DLPCSV_Extract set the following message:\n\n%s",
                 dlp_dat->error_message
             );
 
@@ -214,18 +211,18 @@ rssringoccs_Extract_CSV_Data(const char *geo,
             csv_data->error_message = tmpl_String_Duplicate(
                 "\nError Encountered: rss_ringoccs\n"
                 "\trssringoccs_Extract_CSV_Data\n\n"
-                "rssringoccs_Get_DLP returned an empty struct. Aborting.\n"
+                "rssringoccs_DLPCSV_Extract returned an empty struct.\n"
             );
         }
 
         /*  Both Geo and DLP have memory allocated to them. Free them.        */
-        rssringoccs_Destroy_GeoCSV(&geo_dat);
-        rssringoccs_Destroy_DLPCSV(&dlp_dat);
+        rssringoccs_GeoCSV_Destroy(&geo_dat);
+        rssringoccs_DLPCSV_Destroy(&dlp_dat);
         return csv_data;
     }
 
     /*  Extract the data from the CAL.TAB file.                               */
-    cal_dat = rssringoccs_Get_Cal(cal);
+    cal_dat = rssringoccs_CalCSV_Extract(cal);
 
     /*  Check for errors.                                                     */
     if (cal_dat == NULL)
@@ -234,13 +231,13 @@ rssringoccs_Extract_CSV_Data(const char *geo,
         csv_data->error_message = tmpl_String_Duplicate(
             "\nError Encountered: rss_ringoccs\n"
             "\trssringoccs_Extract_CSV_Data\n\n"
-            "rssringoccs_Get_Cal returned NULL for cal_dat. Aborting.\n"
+            "rssringoccs_CalCSV_Extract returned NULL for cal_dat. Aborting.\n"
         );
 
         /*  Geo and DLP were successfully created. They need to be freed to   *
          *  avoid memory leaks. Destroy both objects and then abort.          */
-        rssringoccs_Destroy_GeoCSV(&geo_dat);
-        rssringoccs_Destroy_DLPCSV(&dlp_dat);
+        rssringoccs_GeoCSV_Destroy(&geo_dat);
+        rssringoccs_DLPCSV_Destroy(&dlp_dat);
         return csv_data;
     }
 
@@ -255,8 +252,8 @@ rssringoccs_Extract_CSV_Data(const char *geo,
                 err_mes,
                 "\nError Encountered: rss_ringoccs\n"
                 "\trssringoccs_Extract_CSV_Data\n\n"
-                "rssringoccs_Get_Cal returned an empty struct. Aborting.\n"
-                "rssringoccs_Get_Cal set the following message:\n\n%s",
+                "rssringoccs_CalCSV_Extract returned an empty struct.\n"
+                "rssringoccs_CalCSV_Extract set the following message:\n\n%s",
                 cal_dat->error_message
             );
 
@@ -268,21 +265,21 @@ rssringoccs_Extract_CSV_Data(const char *geo,
             csv_data->error_message = tmpl_String_Duplicate(
                 "\nError Encountered: rss_ringoccs\n"
                 "\trssringoccs_Extract_CSV_Data\n\n"
-                "rssringoccs_Get_Cal returned an empty struct. Aborting.\n"
+                "rssringoccs_CalCSV_Extract returned an empty struct.\n"
             );
         }
 
         /*  Free the three CSV objects before aborting.                       */
-        rssringoccs_Destroy_GeoCSV(&geo_dat);
-        rssringoccs_Destroy_DLPCSV(&dlp_dat);
-        rssringoccs_Destroy_CalCSV(&cal_dat);
+        rssringoccs_GeoCSV_Destroy(&geo_dat);
+        rssringoccs_DLPCSV_Destroy(&dlp_dat);
+        rssringoccs_CalCSV_Destroy(&cal_dat);
         return csv_data;
     }
 
     /*  Extract the data from the TAU.TAB file.                               */
     if (tau)
     {
-        tau_dat = rssringoccs_Get_Tau(tau, use_deprecated);
+        tau_dat = rssringoccs_TauCSV_Extract(tau, use_deprecated);
 
         /*  Check for errors.                                                 */
         if (tau_dat == NULL)
@@ -291,14 +288,10 @@ rssringoccs_Extract_CSV_Data(const char *geo,
             csv_data->error_message = tmpl_String_Duplicate(
                 "\nError Encountered: rss_ringoccs\n"
                 "\trssringoccs_Extract_CSV_Data\n\n"
-                "rssringoccs_Get_Tau returned NULL for tau_dat. Aborting.\n"
+                "rssringoccs_TauCSV_Extract returned NULL for tau_dat.\n"
             );
 
-            /*  Free all data before aborting.                                */
-            rssringoccs_Destroy_GeoCSV(&geo_dat);
-            rssringoccs_Destroy_DLPCSV(&dlp_dat);
-            rssringoccs_Destroy_CalCSV(&cal_dat);
-            return csv_data;
+            goto FAIL;
         }
 
         /*  Ensure the Tau object isn't empty.                                */
@@ -312,8 +305,8 @@ rssringoccs_Extract_CSV_Data(const char *geo,
                     err_mes,
                     "\nError Encountered: rss_ringoccs\n"
                     "\trssringoccs_Extract_CSV_Data\n\n"
-                    "rssringoccs_Get_Tau returned an empty struct. Aborting.\n"
-                    "rssringoccs_Get_Tau set the following message:\n\n%s",
+                    "rssringoccs_TauCSV_Extract returned an empty struct.\n"
+                    "rssringoccs_TauCSV_Extract set the following message:\n\n%s",
                     tau_dat->error_message
                 );
 
@@ -325,17 +318,13 @@ rssringoccs_Extract_CSV_Data(const char *geo,
                 csv_data->error_message = tmpl_String_Duplicate(
                     "\nError Encountered: rss_ringoccs\n"
                     "\trssringoccs_Extract_CSV_Data\n\n"
-                    "rssringoccs_Get_Tau returned an empty struct. Aborting.\n"
+                    "rssringoccs_TauCSV_Extract returned an empty struct.\n"
                 );
             }
 
             /*  Geo, Cal, and DLP were successfully created, and Tau has      *
              *  memory allocated. Free all memory to avoid leaks.             */
-            rssringoccs_Destroy_GeoCSV(&geo_dat);
-            rssringoccs_Destroy_DLPCSV(&dlp_dat);
-            rssringoccs_Destroy_CalCSV(&cal_dat);
-            rssringoccs_Destroy_TauCSV(&tau_dat);
-            return csv_data;
+            goto FAIL;
         }
     }
 
@@ -439,12 +428,7 @@ rssringoccs_Extract_CSV_Data(const char *geo,
             "\ringress and egress portions.\n"
         );
 
-        rssringoccs_Destroy_GeoCSV(&geo_dat);
-        rssringoccs_Destroy_DLPCSV(&dlp_dat);
-        rssringoccs_Destroy_CalCSV(&cal_dat);
-        rssringoccs_Destroy_TauCSV(&tau_dat);
-        rssringoccs_Destroy_CSV_Members(csv_data);
-        return csv_data;
+        goto FAIL;
     }
 
     if ((min_dr_dt == 0.0) || (max_dr_dt == 0.0))
@@ -458,13 +442,10 @@ rssringoccs_Extract_CSV_Data(const char *geo,
             "\ringress and egress portions.\n"
         );
 
-        rssringoccs_Destroy_GeoCSV(&geo_dat);
-        rssringoccs_Destroy_DLPCSV(&dlp_dat);
-        rssringoccs_Destroy_CalCSV(&cal_dat);
-        rssringoccs_Destroy_TauCSV(&tau_dat);
-        rssringoccs_Destroy_CSV_Members(csv_data);
-        return csv_data;
+        goto FAIL;
     }
+
+    geo_increment = 0;
 
     if (max_dr_dt < 0.0)
     {
@@ -472,7 +453,37 @@ rssringoccs_Extract_CSV_Data(const char *geo,
         tmpl_Double_Array_Reverse(geo_dat->rho_dot_kms_vals,
                                   geo_dat->n_elements);
         tmpl_Double_Array_Reverse(geo_dat->D_km_vals, geo_dat->n_elements);
+        tmpl_Double_Array_Reverse(geo_dat->rx_km_vals, geo_dat->n_elements);
+        tmpl_Double_Array_Reverse(geo_dat->ry_km_vals, geo_dat->n_elements);
+        tmpl_Double_Array_Reverse(geo_dat->rz_km_vals, geo_dat->n_elements);
+
+        while (geo_dat->rho_dot_kms_vals[geo_increment] >= 0.0)
+        {
+            if (geo_increment >= geo_dat->n_elements)
+                break;
+
+            ++geo_increment;
+        }
     }
+
+    else if (min_dr_dt > 0.0)
+    {
+        while (geo_dat->rho_dot_kms_vals[geo_increment] <= 0.0)
+        {
+            if (geo_increment >= geo_dat->n_elements)
+                break;
+
+            ++geo_increment;
+        }
+    }
+
+    geo_dat->rho_km_vals += geo_increment;
+    geo_dat->rho_dot_kms_vals += geo_increment;
+    geo_dat->D_km_vals += geo_increment;
+    geo_dat->rx_km_vals += geo_increment;
+    geo_dat->ry_km_vals += geo_increment;
+    geo_dat->rz_km_vals += geo_increment;
+    geo_dat->n_elements -= geo_increment;
 
     tmpl_Double_Sorted_Interp1d(
         geo_dat->rho_km_vals, geo_dat->D_km_vals, geo_dat->n_elements,
@@ -541,15 +552,31 @@ rssringoccs_Extract_CSV_Data(const char *geo,
         }
     }
 
+    geo_dat->rho_km_vals -= geo_increment;
+    geo_dat->rho_dot_kms_vals -= geo_increment;
+    geo_dat->D_km_vals -= geo_increment;
+    geo_dat->rx_km_vals -= geo_increment;
+    geo_dat->ry_km_vals -= geo_increment;
+    geo_dat->rz_km_vals -= geo_increment;
+    geo_dat->n_elements += geo_increment;
+
     /*  Free the Geo, Cal, and TAU structs. The CSV struct stole several      *
      *  pointers from the DLP struct, so do not destroy this.                 */
-    rssringoccs_Destroy_GeoCSV(&geo_dat);
-    rssringoccs_Destroy_CalCSV(&cal_dat);
-    rssringoccs_Destroy_TauCSV(&tau_dat);
+    rssringoccs_GeoCSV_Destroy(&geo_dat);
+    rssringoccs_CalCSV_Destroy(&cal_dat);
+    rssringoccs_TauCSV_Destroy(&tau_dat);
 
     /*  The members of the DLP struct cannot be freed, the CSV struct has the *
      *  same pointers. We can, however, free the pointer itself. We will not  *
      *  lose references to its members since csv_data has these.              */
     free(dlp_dat);
+    return csv_data;
+
+FAIL:
+    rssringoccs_GeoCSV_Destroy(&geo_dat);
+    rssringoccs_DLPCSV_Destroy(&dlp_dat);
+    rssringoccs_CalCSV_Destroy(&cal_dat);
+    rssringoccs_TauCSV_Destroy(&tau_dat);
+    rssringoccs_Destroy_CSV_Members(csv_data);
     return csv_data;
 }

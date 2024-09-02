@@ -17,7 +17,7 @@
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
  *  Purpose:                                                                  *
- *      Free all of the pointers in a GeoCSV object.                          *
+ *      Free all of the pointers in a TauCSV object.                          *
  ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
  *  Date:       December 31, 2020                                             *
@@ -26,47 +26,41 @@
 /*  free is found here, as is NULL.                                           */
 #include <stdlib.h>
 
-/*  rssringoccs_GeoCSV typedef here, and function prototype given.            */
+/*  rssringoccs_TauCSV typedef here, and function prototype given.            */
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
 
 /*  Check if this macro name is available.                                    */
-#ifdef DESTROY_GEO_VAR
-#undef DESTROY_GEO_VAR
+#ifdef DESTROY_TAU_VAR
+#undef DESTROY_TAU_VAR
 #endif
 
-/*  Macro for freeing and nullifying the members of the geo CSV structs.      */
-#define DESTROY_GEO_VAR(var) if (var != NULL){free(var); var = NULL;}
+/*  Macro for freeing and nullifying the members of the Tau CSV structs.      */
+#define DESTROY_TAU_VAR(var) if (var != NULL){free(var); var = NULL;}
 
-/*  Free's all members of a rssringoccs_GeoCSV pointer except the             *
+/*  Free's all members of a rssringoccs_TauCSV pointer except the             *
  *  error_message. Members are set to NULL after freeing.                     */
-void rssringoccs_Destroy_GeoCSV_Members(rssringoccs_GeoCSV *geo)
+void rssringoccs_TauCSV_Destroy_Members(rssringoccs_TauCSV *tau)
 {
     /*  If the pointer is NULL, there's nothing to do. Simply return.         */
-    if (geo == NULL)
+    if (tau == NULL)
         return;
 
     /*  Destroy every variable except the error_message.                      */
-    DESTROY_GEO_VAR(geo->t_oet_spm_vals)
-    DESTROY_GEO_VAR(geo->t_ret_spm_vals)
-    DESTROY_GEO_VAR(geo->t_set_spm_vals)
-    DESTROY_GEO_VAR(geo->rho_km_vals)
-    DESTROY_GEO_VAR(geo->phi_rl_deg_vals)
-    DESTROY_GEO_VAR(geo->phi_ora_deg_vals)
-    DESTROY_GEO_VAR(geo->B_deg_vals)
-    DESTROY_GEO_VAR(geo->D_km_vals)
-    DESTROY_GEO_VAR(geo->rho_dot_kms_vals)
-    DESTROY_GEO_VAR(geo->phi_rl_dot_kms_vals)
-    DESTROY_GEO_VAR(geo->F_km_vals)
-    DESTROY_GEO_VAR(geo->R_imp_km_vals)
-    DESTROY_GEO_VAR(geo->rx_km_vals)
-    DESTROY_GEO_VAR(geo->ry_km_vals)
-    DESTROY_GEO_VAR(geo->rz_km_vals)
-    DESTROY_GEO_VAR(geo->vx_kms_vals)
-    DESTROY_GEO_VAR(geo->vy_kms_vals)
-    DESTROY_GEO_VAR(geo->vz_kms_vals)
-    DESTROY_GEO_VAR(geo->obs_spacecraft_lat_deg_vals)
+    DESTROY_TAU_VAR(tau->rho_km_vals)
+    DESTROY_TAU_VAR(tau->rho_corr_pole_km_vals)
+    DESTROY_TAU_VAR(tau->rho_corr_timing_km_vals)
+    DESTROY_TAU_VAR(tau->phi_rl_deg_vals)
+    DESTROY_TAU_VAR(tau->phi_ora_deg_vals)
+    DESTROY_TAU_VAR(tau->power_vals)
+    DESTROY_TAU_VAR(tau->tau_vals)
+    DESTROY_TAU_VAR(tau->phase_deg_vals)
+    DESTROY_TAU_VAR(tau->tau_threshold_vals)
+    DESTROY_TAU_VAR(tau->t_oet_spm_vals)
+    DESTROY_TAU_VAR(tau->t_ret_spm_vals)
+    DESTROY_TAU_VAR(tau->t_set_spm_vals)
+    DESTROY_TAU_VAR(tau->B_deg_vals)
 }
-/*  End of rssringoccs_Destroy_GeoCSV_Members.                                */
+/*  End of rssringoccs_TauCSV_Destroy_Members.                                */
 
 /*  Undefine the macro function.                                              */
-#undef DESTROY_GEO_VAR
+#undef DESTROY_TAU_VAR

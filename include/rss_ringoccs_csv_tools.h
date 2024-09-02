@@ -56,6 +56,7 @@ typedef struct rssringoccs_GeoCSV_Def {
     double *vz_kms_vals;
     double *obs_spacecraft_lat_deg_vals;
     size_t n_elements;
+    tmpl_Bool use_deprecated;
     tmpl_Bool error_occurred;
     char *error_message;
 } rssringoccs_GeoCSV;
@@ -76,6 +77,7 @@ typedef struct rssringoccs_DLPCSV_Def {
     double *t_set_spm_vals;
     double *B_deg_vals;
     size_t n_elements;
+    tmpl_Bool use_deprecated;
     tmpl_Bool error_occurred;
     char *error_message;
 } rssringoccs_DLPCSV;
@@ -107,6 +109,7 @@ typedef struct rssringoccs_TauCSV_Def {
     double *t_set_spm_vals;
     double *B_deg_vals;
     size_t n_elements;
+    tmpl_Bool use_deprecated;
     tmpl_Bool error_occurred;
     char *error_message;
 } rssringoccs_TauCSV;
@@ -141,27 +144,68 @@ typedef struct rssringoccs_CSVData_Def {
     char *error_message;
 } rssringoccs_CSVData;
 
-extern rssringoccs_GeoCSV *
-rssringoccs_Get_Geo(const char *filename, tmpl_Bool use_deprecated);
+/******************************************************************************
+ *                               Cal CSV Tools                                *
+ ******************************************************************************/
+extern rssringoccs_CalCSV *rssringoccs_CalCSV_Extract(const char *filename);
 
-extern void rssringoccs_Destroy_GeoCSV_Members(rssringoccs_GeoCSV *geo);
-extern void rssringoccs_Destroy_GeoCSV(rssringoccs_GeoCSV **geo);
+extern void
+rssringoccs_CalCSV_Check_Column_Count(rssringoccs_CalCSV *cal, FILE *fp);
 
+extern void rssringoccs_CalCSV_Destroy_Members(rssringoccs_CalCSV *cal);
+
+extern void rssringoccs_CalCSV_Destroy(rssringoccs_CalCSV **cal);
+
+extern void rssringoccs_CalCSV_Init(rssringoccs_CalCSV *cal);
+
+extern void rssringoccs_CalCSV_Malloc(rssringoccs_CalCSV *cal, FILE *fp);
+
+extern void rssringoccs_CalCSV_Read_Data(rssringoccs_CalCSV *cal, FILE *fp);
+
+/******************************************************************************
+ *                               DLP CSV Tools                                *
+ ******************************************************************************/
 extern rssringoccs_DLPCSV *
-rssringoccs_Get_DLP(const char *filename, tmpl_Bool use_deprecated);
+rssringoccs_DLPCSV_Extract(const char *filename, tmpl_Bool use_deprecated);
 
-extern void rssringoccs_Destroy_DLPCSV_Members(rssringoccs_DLPCSV *dlp);
-extern void rssringoccs_Destroy_DLPCSV(rssringoccs_DLPCSV **dlp);
+extern void
+rssringoccs_DLPCSV_Check_Column_Count(rssringoccs_DLPCSV *dlp, FILE *fp);
 
-extern rssringoccs_CalCSV *rssringoccs_Get_Cal(const char *filename);
-extern void rssringoccs_Destroy_CalCSV_Members(rssringoccs_CalCSV *cal);
-extern void rssringoccs_Destroy_CalCSV(rssringoccs_CalCSV **cal);
+extern void rssringoccs_DLPCSV_Destroy_Members(rssringoccs_DLPCSV *dlp);
+extern void rssringoccs_DLPCSV_Destroy(rssringoccs_DLPCSV **dlp);
+extern void rssringoccs_DLPCSV_Init(rssringoccs_DLPCSV *dlp);
+extern void rssringoccs_DLPCSV_Malloc(rssringoccs_DLPCSV *dlp, FILE *fp);
+extern void rssringoccs_DLPCSV_Read_Data(rssringoccs_DLPCSV *dlp, FILE *fp);
 
+/******************************************************************************
+ *                               Geo CSV Tools                                *
+ ******************************************************************************/
+extern rssringoccs_GeoCSV *
+rssringoccs_GeoCSV_Extract(const char *filename, tmpl_Bool use_deprecated);
+
+extern void
+rssringoccs_GeoCSV_Check_Column_Count(rssringoccs_GeoCSV *geo, FILE *fp);
+
+extern void rssringoccs_GeoCSV_Destroy_Members(rssringoccs_GeoCSV *geo);
+extern void rssringoccs_GeoCSV_Destroy(rssringoccs_GeoCSV **geo);
+extern void rssringoccs_GeoCSV_Init(rssringoccs_GeoCSV *geo);
+extern void rssringoccs_GeoCSV_Malloc(rssringoccs_GeoCSV *geo, FILE *fp);
+extern void rssringoccs_GeoCSV_Read_Data(rssringoccs_GeoCSV *geo, FILE *fp);
+
+/******************************************************************************
+ *                               Tau CSV Tools                                *
+ ******************************************************************************/
 extern rssringoccs_TauCSV *
-rssringoccs_Get_Tau(const char *filename, tmpl_Bool use_deprecated);
+rssringoccs_TauCSV_Extract(const char *filename, tmpl_Bool use_deprecated);
 
-extern void rssringoccs_Destroy_TauCSV_Members(rssringoccs_TauCSV *dlp);
-extern void rssringoccs_Destroy_TauCSV(rssringoccs_TauCSV **dlp);
+extern void
+rssringoccs_TauCSV_Check_Column_Count(rssringoccs_TauCSV *geo, FILE *fp);
+
+extern void rssringoccs_TauCSV_Destroy_Members(rssringoccs_TauCSV *geo);
+extern void rssringoccs_TauCSV_Destroy(rssringoccs_TauCSV **geo);
+extern void rssringoccs_TauCSV_Init(rssringoccs_TauCSV *geo);
+extern void rssringoccs_TauCSV_Malloc(rssringoccs_TauCSV *geo, FILE *fp);
+extern void rssringoccs_TauCSV_Read_Data(rssringoccs_TauCSV *geo, FILE *fp);
 
 extern rssringoccs_CSVData *
 rssringoccs_Extract_CSV_Data(const char *geo,

@@ -31,7 +31,7 @@ Notes:
 ###
 import numpy as np
 import os
-from scipy.integrate import simps
+from scipy.integrate import simpson as simps
 import PyMieScatt as ps
 ###
 ###   ~~ SUGGESTED INPUT MODEL OPTIONS ~~

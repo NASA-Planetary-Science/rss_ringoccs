@@ -17,10 +17,10 @@
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
  *  Purpose:                                                                  *
- *      Function for allocating memory for a DLP CSV object.                  *
+ *      Function for reading data from a CSV file into a DLP CSV object.      *
  ******************************************************************************
  *  Author:     Ryan Maguire, Wellesley College                               *
- *  Date:       December 31, 2020                                             *
+ *  Date:       September 1, 2024                                             *
  ******************************************************************************/
 
 /*  fgets, rewind, and NULL found here.                                       */

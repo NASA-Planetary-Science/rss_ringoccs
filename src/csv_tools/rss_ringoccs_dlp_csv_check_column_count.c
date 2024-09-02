@@ -59,7 +59,7 @@ void rssringoccs_DLPCSV_Check_Column_Count(rssringoccs_DLPCSV *dlp, FILE *fp)
         return;
     }
 
-    /*  libtmpl has tools for couting columns. Use this.                      */
+    /*  libtmpl has tools for counting columns. Use this.                     */
     column_count = tmpl_CSV_Column_Count(fp);
 
     /*  If use_deprecated was set to true, column_count must be 12. Check.    */

@@ -39,7 +39,7 @@
 /*  rssringoccs_CalCSV typedef here, and function prototype given.            */
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
 
-/*  Function of allocating memory to a Cal CSV based on a CSV file pointer.   */
+/*  Function for reading data from a Cal CSV into a Cal object.               */
 void rssringoccs_CalCSV_Read_Data(rssringoccs_CalCSV *cal, FILE *fp)
 {
     /*  Buffer for reading the characters in a line from the CSV.             */
@@ -87,7 +87,7 @@ void rssringoccs_CalCSV_Read_Data(rssringoccs_CalCSV *cal, FILE *fp)
         cal->error_message = tmpl_String_Duplicate(
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_CalCSV_Read_Data\n\n"
-            "n_elements is zero, nothing to malloc. Aborting.\n"
+            "n_elements is zero, nothing to read. Aborting.\n"
         );
 
         return;

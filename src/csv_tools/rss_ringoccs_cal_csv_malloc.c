@@ -59,7 +59,7 @@
         return;                                                                \
     }
 
-/*  Function of allocating memory to a Cal CSV based on a CSV file pointer.   */
+/*  Function for allocating memory to a Cal CSV based on a CSV file pointer.  */
 void rssringoccs_CalCSV_Malloc(rssringoccs_CalCSV *cal, FILE *fp)
 {
     /*  If the input Cal object is NULL there is nothing to do. Return.       */

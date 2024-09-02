@@ -3,3 +3,4 @@ numpy
 pymiescatt
 scipy
 matplotlib
+spiceypy

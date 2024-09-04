@@ -117,6 +117,10 @@ typedef struct rssringoccs_TauCSV_Def {
 /*  Data structure that contains all of the data from all four CSV formats    *
  *  interpolated so that the values are a function of radius, not time.       */
 typedef struct rssringoccs_CSVData_Def {
+    rssringoccs_GeoCSV *geo;
+    rssringoccs_CalCSV *cal;
+    rssringoccs_DLPCSV *dlp;
+    rssringoccs_TauCSV *tau;
     double *B_deg_vals;
     double *D_km_vals;
     double *f_sky_hz_vals;
@@ -140,6 +144,9 @@ typedef struct rssringoccs_CSVData_Def {
     double *tau_power;
     double *tau_vals;
     size_t n_elements;
+    size_t geo_increment;
+    size_t geo_decrement;
+    tmpl_Bool use_deprecated;
     tmpl_Bool error_occurred;
     char *error_message;
 } rssringoccs_CSVData;
@@ -153,13 +160,9 @@ extern void
 rssringoccs_CalCSV_Check_Column_Count(rssringoccs_CalCSV *cal, FILE *fp);
 
 extern void rssringoccs_CalCSV_Destroy_Members(rssringoccs_CalCSV *cal);
-
 extern void rssringoccs_CalCSV_Destroy(rssringoccs_CalCSV **cal);
-
 extern void rssringoccs_CalCSV_Init(rssringoccs_CalCSV *cal);
-
 extern void rssringoccs_CalCSV_Malloc(rssringoccs_CalCSV *cal, FILE *fp);
-
 extern void rssringoccs_CalCSV_Read_Data(rssringoccs_CalCSV *cal, FILE *fp);
 
 /******************************************************************************
@@ -207,16 +210,38 @@ extern void rssringoccs_TauCSV_Init(rssringoccs_TauCSV *geo);
 extern void rssringoccs_TauCSV_Malloc(rssringoccs_TauCSV *geo, FILE *fp);
 extern void rssringoccs_TauCSV_Read_Data(rssringoccs_TauCSV *geo, FILE *fp);
 
+/******************************************************************************
+ *                               CSV Data Tools                               *
+ ******************************************************************************/
+extern void
+rssringoccs_CSVData_Extract_Geo(rssringoccs_CSVData *csv, const char *geo_file);
+
+extern void
+rssringoccs_CSVData_Extract_Cal(rssringoccs_CSVData *csv, const char *cal_file);
+
+extern void
+rssringoccs_CSVData_Extract_DLP(rssringoccs_CSVData *csv, const char *dlp_file);
+
+extern void
+rssringoccs_CSVData_Extract_Tau(rssringoccs_CSVData *csv, const char *tau_file);
+
+extern void rssringoccs_CSVData_Init(rssringoccs_CSVData *csv);
+extern void rssringoccs_CSVData_Destroy_Members(rssringoccs_CSVData *csv);
+extern void rssringoccs_CSVData_Destroy(rssringoccs_CSVData **csv);
+extern void rssringoccs_CSVData_Malloc(rssringoccs_CSVData *csv);
+extern void rssringoccs_CSVData_Steal_DLP_Data(rssringoccs_CSVData *csv);
+extern void rssringoccs_CSVData_Reverse_Geo_Variables(rssringoccs_CSVData *csv);
+extern void rssringoccs_CSVData_Interpolate_Geo(rssringoccs_CSVData *csv);
+extern void rssringoccs_CSVData_Interpolate_Cal(rssringoccs_CSVData *csv);
+extern void rssringoccs_CSVData_Interpolate_Tau(rssringoccs_CSVData *csv);
+extern void rssringoccs_CSVData_Check_Chord_Occ(rssringoccs_CSVData *csv);
+
 extern rssringoccs_CSVData *
-rssringoccs_Extract_CSV_Data(const char *geo,
-                             const char *cal,
-                             const char *dlp,
-                             const char *tau,
-                             tmpl_Bool use_deprecated);
-
-extern void rssringoccs_Destroy_CSV_Members(rssringoccs_CSVData *csv);
-
-extern void rssringoccs_Destroy_CSV(rssringoccs_CSVData **csv);
+rssringoccs_CSVData_Extract(const char *geo,
+                            const char *cal,
+                            const char *dlp,
+                            const char *tau,
+                            tmpl_Bool use_deprecated);
 
 #endif
 /*  End of include guard.                                                     */

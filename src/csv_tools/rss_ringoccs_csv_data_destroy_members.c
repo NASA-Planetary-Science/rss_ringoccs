@@ -39,7 +39,7 @@
 
 /*  Free's all members of a rssringoccs_CSVData pointer except the            *
  *  error_message. Members are set to NULL after freeing.                     */
-void rssringoccs_Destroy_CSV_Members(rssringoccs_CSVData *csv)
+void rssringoccs_CSVData_Destroy_Members(rssringoccs_CSVData *csv)
 {
     /*  If the pointer is NULL, there's nothing to do. Simply return.         */
     if (csv == NULL)
@@ -68,6 +68,12 @@ void rssringoccs_Destroy_CSV_Members(rssringoccs_CSVData *csv)
     DESTROY_CSV_VAR(csv->tau_phase)
     DESTROY_CSV_VAR(csv->tau_power)
     DESTROY_CSV_VAR(csv->tau_vals)
+
+    /*  Destroy the CSV data if they exist.                                   */
+    rssringoccs_GeoCSV_Destroy(&(csv->geo));
+    rssringoccs_CalCSV_Destroy(&(csv->cal));
+    rssringoccs_DLPCSV_Destroy(&(csv->dlp));
+    rssringoccs_TauCSV_Destroy(&(csv->tau));
 }
 /*  End of rssringoccs_Destroy_CSV_Members.                                   */
 

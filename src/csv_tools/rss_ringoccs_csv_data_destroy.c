@@ -31,7 +31,7 @@
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
 
 /*  Function for freeing the memory in a CSV object.                          */
-void rssringoccs_Destroy_CSV(rssringoccs_CSVData **csv)
+void rssringoccs_CSVData_Destroy(rssringoccs_CSVData **csv)
 {
     /*  Used for the pointer to the CSV object.                               */
     rssringoccs_CSVData *csv_inst;
@@ -48,7 +48,7 @@ void rssringoccs_Destroy_CSV(rssringoccs_CSVData **csv)
         return;
 
     /*  Free all of the pointers inside the CSV object.                       */
-    rssringoccs_Destroy_CSV_Members(csv_inst);
+    rssringoccs_CSVData_Destroy_Members(csv_inst);
 
     /*  If an error occurred along the way, the error_message variable is     *
      *  malloced and a string is stored. Check if we need to free this.       */
@@ -66,4 +66,4 @@ void rssringoccs_Destroy_CSV(rssringoccs_CSVData **csv)
     *csv = NULL;
     return;
 }
-/*  End of rssringoccs_Destroy_CSV.                                           */
+/*  End of rssringoccs_CSVData_Destroy.                                       */

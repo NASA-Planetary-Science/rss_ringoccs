@@ -86,7 +86,7 @@ int ExtractCSVData_init(PyCSVObj *self, PyObject *args, PyObject *kwds)
         return -1;
     }
 
-    csv = rssringoccs_Extract_CSV_Data(geo_str, cal_str, dlp_str, tau_str, dpr);
+    csv = rssringoccs_CSVData_Extract(geo_str, cal_str, dlp_str, tau_str, dpr);
 
     if (csv == NULL)
     {
@@ -97,12 +97,13 @@ int ExtractCSVData_init(PyCSVObj *self, PyObject *args, PyObject *kwds)
             "\rFailed to pass variables to C. rssringoccs_Py_DLP_to_C_DLP\n"
             "\rreturned NULL. Returning.\n\n"
         );
-        rssringoccs_Destroy_CSV(&csv);
+        rssringoccs_CSVData_Destroy(&csv);
         return -1;
     }
 
     if (csv->error_occurred)
     {
+        puts(csv->error_message);
         if (csv->error_message == NULL)
         {
             PyErr_Format(
@@ -117,7 +118,7 @@ int ExtractCSVData_init(PyCSVObj *self, PyObject *args, PyObject *kwds)
         else
             PyErr_Format(PyExc_RuntimeError, "%s", csv->error_message);
 
-        rssringoccs_Destroy_CSV(&csv);
+        rssringoccs_CSVData_Destroy(&csv);
         return -1;
     }
 

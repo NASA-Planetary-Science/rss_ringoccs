@@ -1,11 +1,6 @@
+#include <rss_ringoccs/include/rss_ringoccs_cspice.h>
 #include <rss_ringoccs/include/rss_ringoccs_occultation_geometry.h>
 #include <libtmpl/include/tmpl.h>
-
-extern void kclear_c(void);
-extern void furnsh_c(const char *kernels);
-extern void
-spkpos_c(const char *targ, double et, const char *ref, const char *abcorr,
-         const char *obs, double ptarg[3], double *lt);
 
 double
 rssringoccs_Double_Ring_Opening_Angle(const double time,

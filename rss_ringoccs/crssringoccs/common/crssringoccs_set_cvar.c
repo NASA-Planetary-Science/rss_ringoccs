@@ -37,9 +37,10 @@
 #include <numpy/ufuncobject.h>
 
 /*  Creates a numpy array from a double array.                                */
-void crssringoccs_Set_CVar(PyObject **py_ptr,
-                           tmpl_ComplexDouble *ptr,
-                           size_t len)
+void
+crssringoccs_Create_Complex_Numpy_Array(PyObject **py_ptr,
+                                        tmpl_ComplexDouble *ptr,
+                                        size_t len)
 {
     PyObject *arr, *tmp, *capsule;
     npy_intp pylength = (npy_intp)len;

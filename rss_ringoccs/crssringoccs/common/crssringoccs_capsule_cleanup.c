@@ -36,4 +36,5 @@ void crssringoccs_Capsule_Cleanup(PyObject *capsule)
 {
     void *memory = PyCapsule_GetPointer(capsule, NULL);
     free(memory);
+    memory = NULL;
 }

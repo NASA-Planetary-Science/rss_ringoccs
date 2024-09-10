@@ -17,62 +17,72 @@
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
 
-/*  NULL is defined here.                                                     */
-#include <stddef.h>
-
-/*  Booleans provided here.                                                   */
+/*  libtmpl provides Booleans and tmpl_String_Duplicate.                      */
 #include <libtmpl/include/tmpl_bool.h>
-
-/*  tmpl_strdup function declared here.                                       */
 #include <libtmpl/include/tmpl_string.h>
 
+/*  rssringoccs_CSVData data type typedef'd here.                             */
+#include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
+
 /*  Function prototype and typedefs for structs given here.                   */
+#include "crssringoccs_extract_csv_data.h"
+
+/*  The numpy-array constructor is declared here.                             */
 #include "../crssringoccs.h"
 
 /*  Macro for the crssringoccs_set_var function to shorten the syntax.        */
-#define SET_VAR(a) crssringoccs_Set_Var(&py_csv->a, csv->a, csv->n_elements)
+#define CREATE_NUMPY_ARRAY(a) \
+crssringoccs_Create_Real_Numpy_Array(&py_csv->a, csv->a, csv->n_elements)
 
-/*  Converts a C CSV struct to a Python CSV object.                           */
-void crssringoccs_C_CSV_to_Py_CSV(PyCSVObj *py_csv, rssringoccs_CSVData *csv)
+/*  Steals the references to the data in a rssringoccs_CSVData object and     *
+ *  creates numpy arrays from them. The data is stored in an instance of the  *
+ *  ExtractCSVData class.                                                     */
+void
+crssringoccs_ExtractCSVData_Steal(crssringoccs_PyCSVObj *py_csv,
+                                  rssringoccs_CSVData *csv)
 {
-    if (csv == NULL)
+    if (!csv || !py_csv)
         return;
 
     if (csv->error_occurred)
         return;
 
-    if (py_csv == NULL)
+    if (!py_csv)
     {
         csv->error_occurred = tmpl_True;
-        csv->error_message = tmpl_strdup(
+        csv->error_message = tmpl_String_Duplicate(
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\tcrssringoccs_C_CSV_to_Py_CSV\n\n"
             "\rInput py_csv is NULL. Aborting.n"
         );
+
         return;
     }
 
-    SET_VAR(rho_km_vals);
-    SET_VAR(B_deg_vals);
-    SET_VAR(D_km_vals);
-    SET_VAR(f_sky_hz_vals);
-    SET_VAR(p_norm_vals);
-    SET_VAR(raw_tau_vals);
-    SET_VAR(phase_deg_vals);
-    SET_VAR(phi_deg_vals);
-    SET_VAR(phi_rl_deg_vals);
-    SET_VAR(rho_dot_kms_vals);
-    SET_VAR(t_oet_spm_vals);
-    SET_VAR(t_ret_spm_vals);
-    SET_VAR(t_set_spm_vals);
-    SET_VAR(rx_km_vals);
-    SET_VAR(ry_km_vals);
-    SET_VAR(rz_km_vals);
-    SET_VAR(raw_tau_threshold_vals);
-    SET_VAR(rho_corr_pole_km_vals);
-    SET_VAR(rho_corr_timing_km_vals);
-    SET_VAR(tau_power);
-    SET_VAR(tau_phase);
-    SET_VAR(tau_vals);
+    CREATE_NUMPY_ARRAY(rho_km_vals);
+    CREATE_NUMPY_ARRAY(B_deg_vals);
+    CREATE_NUMPY_ARRAY(D_km_vals);
+    CREATE_NUMPY_ARRAY(f_sky_hz_vals);
+    CREATE_NUMPY_ARRAY(p_norm_vals);
+    CREATE_NUMPY_ARRAY(raw_tau_vals);
+    CREATE_NUMPY_ARRAY(phase_deg_vals);
+    CREATE_NUMPY_ARRAY(phi_deg_vals);
+    CREATE_NUMPY_ARRAY(phi_rl_deg_vals);
+    CREATE_NUMPY_ARRAY(rho_dot_kms_vals);
+    CREATE_NUMPY_ARRAY(t_oet_spm_vals);
+    CREATE_NUMPY_ARRAY(t_ret_spm_vals);
+    CREATE_NUMPY_ARRAY(t_set_spm_vals);
+    CREATE_NUMPY_ARRAY(rx_km_vals);
+    CREATE_NUMPY_ARRAY(ry_km_vals);
+    CREATE_NUMPY_ARRAY(rz_km_vals);
+    CREATE_NUMPY_ARRAY(raw_tau_threshold_vals);
+    CREATE_NUMPY_ARRAY(rho_corr_pole_km_vals);
+    CREATE_NUMPY_ARRAY(rho_corr_timing_km_vals);
+    CREATE_NUMPY_ARRAY(tau_power);
+    CREATE_NUMPY_ARRAY(tau_phase);
+    CREATE_NUMPY_ARRAY(tau_vals);
 }
 /*  End of crssringoccs_C_CSV_to_Py_CSV.                                      */
+
+/*  Undefine everything in case someone wants to #include this file.          */
+#undef CREATE_NUMPY_ARRAY

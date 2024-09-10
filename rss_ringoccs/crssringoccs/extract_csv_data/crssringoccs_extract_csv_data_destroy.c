@@ -16,9 +16,9 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
-#include "../crssringoccs.h"
+#include "crssringoccs_extract_csv_data.h"
 
-void ExtractCSVData_dealloc(PyCSVObj *self)
+void crssringoccs_ExtractCSVData_Destroy(crssringoccs_PyCSVObj *self)
 {
     Py_XDECREF(self->B_deg_vals);
     Py_XDECREF(self->D_km_vals);
@@ -37,7 +37,6 @@ void ExtractCSVData_dealloc(PyCSVObj *self)
     Py_XDECREF(self->t_oet_spm_vals);
     Py_XDECREF(self->t_ret_spm_vals);
     Py_XDECREF(self->t_set_spm_vals);
-    Py_XDECREF(self->tau_vals);
     Py_XDECREF(self->history);
     Py_XDECREF(self->input_vars);
     Py_XDECREF(self->input_kwds);
@@ -47,6 +46,5 @@ void ExtractCSVData_dealloc(PyCSVObj *self)
     Py_XDECREF(self->tau_phase);
     Py_XDECREF(self->tau_power);
     Py_XDECREF(self->tau_vals);
-    Py_TYPE(self)->tp_free((PyObject *) self);
+    Py_TYPE(self)->tp_free((PyObject *)self);
 }
-

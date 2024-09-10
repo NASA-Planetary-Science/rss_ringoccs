@@ -24,7 +24,7 @@
 #include <libtmpl/include/tmpl_bool.h>
 
 /*  Function prototype and typedefs for structs given here.                   */
-#include "../crssringoccs.h"
+#include "crssringoccs_extract_csv_data.h"
 
 /*  Macro for safely creating None objects.                                   */
 #define MAKE_NONE(var)                                                         \
@@ -37,9 +37,12 @@
 
 /*  The init function for the dirrection correction class. This is the        *
  *  equivalent of the __init__ function defined in a normal python class.     */
-int ExtractCSVData_init(PyCSVObj *self, PyObject *args, PyObject *kwds)
+int
+crssringoccs_ExtractCSVData_Init(crssringoccs_PyCSVObj *self,
+                                 PyObject *args,
+                                 PyObject *kwds)
 {
-    rssringoccs_CSVData *csv;
+    rssringoccs_CSVData *csv = NULL;
     tmpl_Bool dpr = tmpl_False;
 
     /*  The list of the keywords accepted by the DiffractionCorrection class. *
@@ -67,13 +70,24 @@ int ExtractCSVData_init(PyCSVObj *self, PyObject *args, PyObject *kwds)
      *  symbold means everything after is optional. s is a string, p is a     *
      *  Boolean (p for "predicate"). b is an integer, and the colon : denotes *
      *  that the input list has ended.                                        */
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|sss$ps:", kwlist, &geo_str,
-                                     &cal_str, &dlp_str, &dpr, &tau_str))
+    int success = PyArg_ParseTupleAndKeywords(
+        args,
+        kwds,
+        "|sss$ps:",
+        kwlist,
+        &geo_str,
+        &cal_str,
+        &dlp_str,
+        &dpr,
+        &tau_str
+    );
+
+    if (!success)
     {
         PyErr_Format(
             PyExc_TypeError,
             "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tcsvtools.ExtractCSVData\n\n"
+            "\r\tExtractCSVData\n\n"
             "\rCould not parse input variables.\n\n"
             "\rInputs:\n"
             "\r\tgeo:           Location of a GEO.TAB file (str)\n"
@@ -88,41 +102,49 @@ int ExtractCSVData_init(PyCSVObj *self, PyObject *args, PyObject *kwds)
 
     csv = rssringoccs_CSVData_Extract(geo_str, cal_str, dlp_str, tau_str, dpr);
 
-    if (csv == NULL)
+    if (!csv)
     {
         PyErr_Format(
             PyExc_RuntimeError,
             "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tdiffrec.DiffractionCorrection\n\n"
-            "\rFailed to pass variables to C. rssringoccs_Py_DLP_to_C_DLP\n"
-            "\rreturned NULL. Returning.\n\n"
+            "\r\tExtractCSVData\n\n"
+            "\rrssringoccs_CSVData_Extract returned NULL. Aborting.\n"
         );
-        rssringoccs_CSVData_Destroy(&csv);
+
         return -1;
     }
 
     if (csv->error_occurred)
     {
-        puts(csv->error_message);
-        if (csv->error_message == NULL)
+        if (!csv->error_message)
         {
             PyErr_Format(
                 PyExc_RuntimeError,
                 "\n\rError Encountered: rss_ringoccs\n"
-                "\r\tdiffrec.DiffractionCorrection\n\n"
-                "\rFailed to pass variables to C. rssringoccs_Py_DLP_to_C_DLP\n"
-                "\rreturned a dlp with error_occurred set to True. No\n"
-                "\rerror message was set. Returning.\n\n"
+                "\r\tExtractCSVData\n\n"
+                "\rrssringoccs_CSVData_Extract returned with error_occurred\n"
+                "\rset to True. No error message was set. Aborting.\n"
             );
         }
         else
-            PyErr_Format(PyExc_RuntimeError, "%s", csv->error_message);
+        {
+            PyErr_Format(
+                PyExc_RuntimeError,
+                "\n\rError Encountered: rss_ringoccs\n"
+                "\r\tExtractCSVData\n\n"
+                "\rrssringoccs_CSVData_Extract returned with error_occurred\n"
+                "\rset to True. The following error message was set:\n\n"
+                "%s",
+                csv->error_message
+            );
+        }
 
         rssringoccs_CSVData_Destroy(&csv);
         return -1;
     }
 
-    crssringoccs_C_CSV_to_Py_CSV(self, csv);
+    crssringoccs_ExtractCSVData_Steal(self, csv);
+
     csv_tmp = Py_BuildValue(
         "{s:s,s:s,s:s}",
         "geo", geo_str,

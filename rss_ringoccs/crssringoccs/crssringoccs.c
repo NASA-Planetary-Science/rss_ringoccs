@@ -17,6 +17,7 @@
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
 #include "crssringoccs.h"
+#include "extract_csv_data/crssringoccs_extract_csv_data.h"
 
 /*  Avoid warnings about deprecated Numpy API versions.                       */
 #ifndef NPY_NO_DEPRECATED_API
@@ -50,8 +51,11 @@ PyMODINIT_FUNC PyInit_crssringoccs(void)
         return NULL;
 
     Py_INCREF(&ExtractCSVDataType);
-    pymod_addobj = PyModule_AddObject(m, "ExtractCSVData",
-                                      (PyObject *) &ExtractCSVDataType);
+    pymod_addobj = PyModule_AddObject(
+        m,
+        "ExtractCSVData",
+        (PyObject *)&ExtractCSVDataType
+    );
 
     if (pymod_addobj < 0)
     {

@@ -1,10 +1,46 @@
+"""
+################################################################################
+#                                   LICENSE                                    #
+################################################################################
+#   This file is part of rss_ringoccs.                                         #
+#                                                                              #
+#   rss_ringoccs is free software: you can redistribute it and/or              #
+#   modify it under the terms of the GNU General Public License as published   #
+#   by the Free Software Foundation, either version 3 of the License, or       #
+#   (at your option) any later version.                                        #
+#                                                                              #
+#   rss_ringoccs is distributed in the hope that it will be useful             #
+#   but WITHOUT ANY WARRANTY# without even the implied warranty of             #
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              #
+#   GNU General Public License for more details.                               #
+#                                                                              #
+#   You should have received a copy of the GNU General Public License          #
+#   along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.     #
+################################################################################
+#   Purpose:                                                                   #
+#       Compiles all of the C code and build the python package rss_ringoccs.  #
+################################################################################
+#                                 DEPENDENCIES                                 #
+################################################################################
+#   1.) numpy                                                                  #
+#           Used for working with homogeneous arrays.                          #
+#   2.) setuptools                                                             #
+#           Replaces distutils since this has been deprecated.                 #
+################################################################################
+#   Author: Ryan Maguire                                                       #
+#   Date:   2024/09/09                                                         #
+################################################################################
+"""
+
 # Python is swapping distutils with setuptools.
 try:
     from setuptools import setup, Extension
 except ImportError:
     from distutils.core import setup, Extension
 
-import os, platform, subprocess
+import os
+import platform
+import subprocess
 
 # Numpy is needed for the get_include function which tells us where various
 # header files, like numpy/arrayobject.h, live.
@@ -20,23 +56,25 @@ import numpy
 # CFLAG fixed the issue.
 
 #   We only need this fix for macOS, so check what operating system is used.
-if (platform.system() == "Darwin"):
-    os.environ["CFLAGS"] = "-mmacosx-version-min=%s" % platform.mac_ver()[0]
+if platform.system() == "Darwin":
+    os.environ["CFLAGS"] = f"-mmacosx-version-min={platform.mac_ver()[0]}"
 
 srclist = []
 
-for file in os.listdir("rss_ringoccs/crssringoccs/auxiliary/"):
-    srclist.append("rss_ringoccs/crssringoccs/auxiliary/%s" % file)
+def add_directory(directory):
+    """
+        Function for adding all of the C files in a
+        given directory to the list of files to be compiled.
+    """
+    full_path = f'rss_ringoccs/crssringoccs/{directory}/'
+    for file in os.listdir(full_path):
+        if file[-1] == "c":
+            srclist.append(f'{full_path}{file}')
 
-for file in os.listdir("rss_ringoccs/crssringoccs/common/"):
-    srclist.append("rss_ringoccs/crssringoccs/common/%s" % file)
-
-for file in os.listdir("rss_ringoccs/crssringoccs/extract_csv_data/"):
-    srclist.append("rss_ringoccs/crssringoccs/extract_csv_data/%s" % file)
-
-for file in os.listdir("rss_ringoccs/crssringoccs/diffraction_correction/"):
-    srclist.append("rss_ringoccs/crssringoccs/diffraction_correction/%s" % file)
-
+add_directory("auxiliary")
+add_directory("common")
+add_directory("extract_csv_data")
+add_directory("diffraction_correction")
 srclist.append("rss_ringoccs/crssringoccs/crssringoccs.c")
 
 subprocess.call(["make", "-j", "BUILD_STATIC=1"])

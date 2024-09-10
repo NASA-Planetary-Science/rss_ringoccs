@@ -37,20 +37,24 @@
 #include <numpy/ufuncobject.h>
 
 /*  Creates a numpy array from a double array.                                */
-void crssringoccs_Set_Var(PyObject **py_ptr, double *ptr, size_t len)
+void
+crssringoccs_Create_Real_Numpy_Array(PyObject **py_ptr, double *ptr, size_t len)
 {
     PyObject *arr, *tmp, *capsule;
     npy_intp pylength = (npy_intp)len;
 
     /*  Numpy's _import_array function must be called before using the API.   */
-    if (PyArray_API == NULL)
+    if (!PyArray_API)
     {
         /*  If the import fails we can't safe use the tools. Abort.           */
         if (_import_array() < 0)
         {
             PyErr_Print();
-            PyErr_SetString(PyExc_ImportError,
-                            "numpy.core.multiarray failed to import");
+            PyErr_SetString(
+                PyExc_ImportError,
+                "numpy.core.multiarray failed to import"
+            );
+
             return;
         }
     }

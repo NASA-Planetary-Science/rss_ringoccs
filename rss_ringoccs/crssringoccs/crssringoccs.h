@@ -74,44 +74,16 @@ typedef struct PyDiffrecObj_Def {
     const char *psitype;
 } PyDiffrecObj;
 
-/*  The CSV struct containing all of the data for diffraction reconstruction. */
-typedef struct PyCSVObj_Def {
-    PyObject_HEAD
-    PyObject *B_deg_vals;
-    PyObject *D_km_vals;
-    PyObject *f_sky_hz_vals;
-    PyObject *p_norm_vals;
-    PyObject *raw_tau_vals;
-    PyObject *phase_deg_vals;
-    PyObject *phi_deg_vals;
-    PyObject *phi_rl_deg_vals;
-    PyObject *raw_tau_threshold_vals;
-    PyObject *rev_info;
-    PyObject *input_vars;
-    PyObject *input_kwds;
-    PyObject *rho_corr_pole_km_vals;
-    PyObject *rho_corr_timing_km_vals;
-    PyObject *rho_dot_kms_vals;
-    PyObject *rho_km_vals;
-    PyObject *t_oet_spm_vals;
-    PyObject *t_ret_spm_vals;
-    PyObject *t_set_spm_vals;
-    PyObject *history;
-    PyObject *rx_km_vals;
-    PyObject *ry_km_vals;
-    PyObject *rz_km_vals;
-    PyObject *tau_phase;
-    PyObject *tau_power;
-    PyObject *tau_vals;
-} PyCSVObj;
 
-extern void crssringoccs_Set_Var(PyObject **py_ptr,
-                                 double *ptr,
-                                 size_t len);
+extern void
+crssringoccs_Create_Real_Numpy_Array(PyObject **py_ptr,
+                                     double *ptr,
+                                     size_t len);
 
-extern void crssringoccs_Set_CVar(PyObject **py_ptr,
-                                  tmpl_ComplexDouble *ptr,
-                                  size_t len);
+extern void
+crssringoccs_Create_Complex_Numpy_Array(PyObject **py_ptr,
+                                        tmpl_ComplexDouble *ptr,
+                                        size_t len);
 
 extern void crssringoccs_Capsule_Cleanup(PyObject *capsule);
 
@@ -140,19 +112,3 @@ extern void Diffrec_dealloc(PyDiffrecObj *self);
 extern int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds);
 
 extern PyTypeObject DiffrecType;
-
-
-
-
-
-
-
-extern void
-crssringoccs_C_CSV_to_Py_CSV(PyCSVObj *py_csv, rssringoccs_CSVData *csv);
-
-extern void ExtractCSVData_dealloc(PyCSVObj *self);
-
-extern int
-ExtractCSVData_init(PyCSVObj *self, PyObject *args, PyObject *kwds);
-
-extern PyTypeObject ExtractCSVDataType;

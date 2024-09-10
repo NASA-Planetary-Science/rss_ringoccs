@@ -30,8 +30,11 @@
 #include "../crssringoccs.h"
 
 /*  Macro for the crssringoccs_set_var function to shorten the syntax.        */
-#define SET_VAR(a) crssringoccs_Set_Var(&py_tau->a, tau->a, tau->arr_size)
-#define SET_CVAR(a) crssringoccs_Set_CVar(&py_tau->a, tau->a, tau->arr_size)
+#define SET_VAR(a) \
+crssringoccs_Create_Real_Numpy_Array(&py_tau->a, tau->a, tau->arr_size)
+
+#define SET_CVAR(a) \
+crssringoccs_Create_Complex_Numpy_Array(&py_tau->a, tau->a, tau->arr_size)
 
 /*  Macro for safely creating None objects.                                   */
 #define MAKE_NONE(var)                                                         \

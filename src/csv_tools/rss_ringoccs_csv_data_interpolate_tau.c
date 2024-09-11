@@ -63,7 +63,7 @@ void rssringoccs_CSVData_Interpolate_Tau(rssringoccs_CSVData *csv)
 
     tmpl_Double_Sorted_Interp1d(
         csv->tau->rho_km_vals, csv->tau->phase_deg_vals, csv->tau->n_elements,
-        csv->rho_km_vals, csv->tau_phase, csv->n_elements
+        csv->rho_km_vals, csv->tau_phase_deg_vals, csv->n_elements
     );
 
     tmpl_Double_Sorted_Interp1d(
@@ -75,15 +75,15 @@ void rssringoccs_CSVData_Interpolate_Tau(rssringoccs_CSVData *csv)
     {
         tmpl_Double_Sorted_Interp1d(
             csv->tau->rho_km_vals, csv->tau->tau_vals, csv->tau->n_elements,
-            csv->rho_km_vals, csv->tau_power, csv->n_elements
+            csv->rho_km_vals, csv->tau_power_vals, csv->n_elements
         );
 
         for (n = 0; n < csv->n_elements; ++n)
         {
             const double abs_B = tmpl_Double_Abs(csv->B_deg_vals[n]);
             const double mu = tmpl_Double_Sind(abs_B);
-            const double log_power = -csv->tau_power[n] / mu;
-            csv->tau_power[n] = tmpl_Double_Exp(log_power);
+            const double log_power = -csv->tau_power_vals[n] / mu;
+            csv->tau_power_vals[n] = tmpl_Double_Exp(log_power);
         }
     }
 
@@ -91,7 +91,7 @@ void rssringoccs_CSVData_Interpolate_Tau(rssringoccs_CSVData *csv)
     {
         tmpl_Double_Sorted_Interp1d(
             csv->tau->rho_km_vals, csv->tau->power_vals, csv->tau->n_elements,
-            csv->rho_km_vals, csv->tau_power, csv->n_elements
+            csv->rho_km_vals, csv->tau_power_vals, csv->n_elements
         );
     }
 }

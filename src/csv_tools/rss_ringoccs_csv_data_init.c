@@ -59,8 +59,8 @@ void rssringoccs_CSVData_Init(rssringoccs_CSVData *csv)
     csv->t_oet_spm_vals = NULL;
     csv->t_ret_spm_vals = NULL;
     csv->t_set_spm_vals = NULL;
-    csv->tau_phase = NULL;
-    csv->tau_power = NULL;
+    csv->tau_phase_deg_vals = NULL;
+    csv->tau_power_vals = NULL;
     csv->tau_vals = NULL;
     csv->n_elements = 0;
 

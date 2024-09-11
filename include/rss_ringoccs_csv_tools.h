@@ -140,8 +140,8 @@ typedef struct rssringoccs_CSVData_Def {
     double *t_oet_spm_vals;
     double *t_ret_spm_vals;
     double *t_set_spm_vals;
-    double *tau_phase;
-    double *tau_power;
+    double *tau_phase_deg_vals;
+    double *tau_power_vals;
     double *tau_vals;
     size_t n_elements;
     size_t geo_increment;

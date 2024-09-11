@@ -41,8 +41,8 @@ void crssringoccs_ExtractCSVData_Destroy(crssringoccs_PyCSVObj *self)
     Py_XDECREF(self->rx_km_vals);
     Py_XDECREF(self->ry_km_vals);
     Py_XDECREF(self->rz_km_vals);
-    Py_XDECREF(self->tau_phase);
-    Py_XDECREF(self->tau_power);
+    Py_XDECREF(self->tau_phase_deg_vals);
+    Py_XDECREF(self->tau_power_vals);
     Py_XDECREF(self->tau_vals);
     Py_TYPE(self)->tp_free((PyObject *)self);
 }

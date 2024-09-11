@@ -56,8 +56,8 @@ void rssringoccs_CSVData_Malloc(rssringoccs_CSVData *csv)
     /*  If Tau data is to be extracted, reserve memory for the variables.     */
     if (csv->tau)
     {
-        MALLOC_CSV_VAR(tau_phase)
-        MALLOC_CSV_VAR(tau_power)
+        MALLOC_CSV_VAR(tau_phase_deg_vals)
+        MALLOC_CSV_VAR(tau_power_vals)
         MALLOC_CSV_VAR(tau_vals)
     }
 }

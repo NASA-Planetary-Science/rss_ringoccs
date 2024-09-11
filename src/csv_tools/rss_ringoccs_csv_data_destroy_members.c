@@ -65,8 +65,8 @@ void rssringoccs_CSVData_Destroy_Members(rssringoccs_CSVData *csv)
     DESTROY_CSV_VAR(csv->t_oet_spm_vals)
     DESTROY_CSV_VAR(csv->t_ret_spm_vals)
     DESTROY_CSV_VAR(csv->t_set_spm_vals)
-    DESTROY_CSV_VAR(csv->tau_phase)
-    DESTROY_CSV_VAR(csv->tau_power)
+    DESTROY_CSV_VAR(csv->tau_phase_deg_vals)
+    DESTROY_CSV_VAR(csv->tau_power_vals)
     DESTROY_CSV_VAR(csv->tau_vals)
 
     /*  Destroy the CSV data if they exist.                                   */

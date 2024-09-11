@@ -78,8 +78,8 @@ crssringoccs_ExtractCSVData_Steal(crssringoccs_PyCSVObj *py_csv,
     CREATE_NUMPY_ARRAY(raw_tau_threshold_vals);
     CREATE_NUMPY_ARRAY(rho_corr_pole_km_vals);
     CREATE_NUMPY_ARRAY(rho_corr_timing_km_vals);
-    CREATE_NUMPY_ARRAY(tau_power);
-    CREATE_NUMPY_ARRAY(tau_phase);
+    CREATE_NUMPY_ARRAY(tau_power_vals);
+    CREATE_NUMPY_ARRAY(tau_phase_deg_vals);
     CREATE_NUMPY_ARRAY(tau_vals);
 }
 /*  End of crssringoccs_C_CSV_to_Py_CSV.                                      */

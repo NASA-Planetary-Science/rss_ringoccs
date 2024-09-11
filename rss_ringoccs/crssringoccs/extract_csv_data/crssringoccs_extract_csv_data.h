@@ -37,8 +37,8 @@ typedef struct PyCSVObj_Def {
     PyObject *rx_km_vals;
     PyObject *ry_km_vals;
     PyObject *rz_km_vals;
-    PyObject *tau_phase;
-    PyObject *tau_power;
+    PyObject *tau_phase_deg_vals;
+    PyObject *tau_power_vals;
     PyObject *tau_vals;
 } crssringoccs_PyCSVObj;
 

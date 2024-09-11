@@ -52,7 +52,7 @@ static PyMemberDef crssringoccs_ExtractCSVData_Members[] = {
         offsetof(crssringoccs_PyCSVObj, phase_deg_vals),
         0,
         "Raw diffracted phase, in degrees. The diffracted transmittance\n"
-        "is a point in the complex plane. This represents the angle\n"
+        "is a point in the complex plane. This variable represents the angle\n"
         "this point makes with the positive real axis. It varies\n"
         "as a function of the ring radius, rho_km_vals."
     },
@@ -76,7 +76,7 @@ static PyMemberDef crssringoccs_ExtractCSVData_Members[] = {
         0,
         "Spacecraft to ring-intercept point distance, in kilometers. This\n"
         "is the distance between the point in the plane the data point\n"
-        "represents, and position of the observation at the time of\n"
+        "represents, and position of the observer at the time of\n"
         "observation. Note that it can take up to a second for light\n"
         "to travel from the observer (i.e. Cassini) to the ring plane.\n"
         "Because of this, the location of the observation at the time of\n"
@@ -182,89 +182,131 @@ static PyMemberDef crssringoccs_ExtractCSVData_Members[] = {
         0,
         "Ring longitude angle, in degrees."
     },
+
     {
         "raw_tau_threshold_vals",
         T_OBJECT_EX,
         offsetof(crssringoccs_PyCSVObj, raw_tau_threshold_vals),
         0,
-        "Raw threshold optical depth"
+        "Raw threshold optical depth. Unitless."
     },
+
     {
         "rev_info",
         T_OBJECT_EX,
         offsetof(crssringoccs_PyCSVObj, rev_info),
         0,
-        "Information about the occultation"
+        "Information about the occultation. This is set to 'None' since\n"
+        "the ExtractCSVData class is not provided an RSR instance to fetch\n"
+        "the rev info from. It is kept for the sake of compatibility with\n"
+        "other classes (namely DiffractionCorrection)."
     },
+
     {
         "rho_corr_pole_km_vals",
         T_OBJECT_EX,
         offsetof(crssringoccs_PyCSVObj, rho_corr_pole_km_vals),
         0,
-        "Ring radius with pole correction."
+        "Ring radius with pole correction, in kilometers."
     },
+
     {
         "rho_corr_timing_km_vals",
         T_OBJECT_EX,
         offsetof(crssringoccs_PyCSVObj, rho_corr_timing_km_vals),
         0,
-        "Ring radius with timing correction."
+        "Ring radius with timing correction, in kilometers."
     },
+
     {
         "rho_dot_kms_vals",
         T_OBJECT_EX,
         offsetof(crssringoccs_PyCSVObj, rho_dot_kms_vals),
         0,
-        "Time derivative of the ring radius."
+        "Time derivative of the ring radius, in kilometers per second.\n"
+        "This is the radial time derivative, the amount of change in\n"
+        "rho over a small amount of time. It is kept as a function of rho\n"
+        "and not as a function of time."
     },
+
     {
         "t_oet_spm_vals",
         T_OBJECT_EX,
         offsetof(crssringoccs_PyCSVObj, t_oet_spm_vals),
         0,
-        "Observed event time in seconds past midnight"
+        "Observed event time in seconds past midnight. This is the\n"
+        "time the signal was received on Earth."
     },
+
     {
         "t_ret_spm_vals",
         T_OBJECT_EX,
         offsetof(crssringoccs_PyCSVObj, t_ret_spm_vals),
         0,
-        "Ring event time in seconds past midnight"
+        "Ring event time in seconds past midnight. This is the moment of\n"
+        "time when the signal crossed the ring plane."
     },
+
     {
         "t_set_spm_vals",
         T_OBJECT_EX,
         offsetof(crssringoccs_PyCSVObj, t_set_spm_vals),
         0,
-        "Spacecraft event time in seconds past midnight"
+        "Spacecraft event time in seconds past midnight. This is when the\n"
+        "signal left the spacecraft. For many data sets with Cassini and\n"
+        "Saturn there is about a 1 light second distance between the\n"
+        "spacecraft and the ring intercept point, meaning\n"
+        "t_ret_spm_vals - t_set_spm_vals ~ 1 second."
     },
+
     {
         "tau_vals",
         T_OBJECT_EX,
         offsetof(crssringoccs_PyCSVObj, tau_vals),
         0,
-        "Optical depth"
+        "Corrected optical depth, unitless. Set to 'None' if a tau file\n"
+        "is not provided. This is the scaled logarithmic power, but with\n"
+        "diffraction correction applied."
     },
+
     {
-        "tau_power",
+        "tau_power_vals",
         T_OBJECT_EX,
-        offsetof(crssringoccs_PyCSVObj, tau_power),
+        offsetof(crssringoccs_PyCSVObj, tau_power_vals),
         0,
-        "Optical power"
+        "Normalized optical power, unitless and corrected for diffraction\n"
+        "effects. This is the output of the Fresnel inversion process on\n"
+        "the diffracted data."
     },
+
     {
-        "tau_phase",
-        T_OBJECT_EX, offsetof(crssringoccs_PyCSVObj, tau_phase),
+        "tau_phase_deg_vals",
+        T_OBJECT_EX, offsetof(crssringoccs_PyCSVObj, tau_phase_deg_vals),
         0,
-        "Optical phase"
+        "Diffraction corrected phase, in degrees. The diffraction corrected\n"
+        "complex transmittance is a point in the complex plane.\n"
+        "This is the angle, in degrees, the point makes with the\n"
+        "real axis."
     },
+
     {
         "history",
         T_OBJECT_EX,
         offsetof(crssringoccs_PyCSVObj, history),
         0,
-        "History of the tau instance"
+        "History of the object. This includes the following data:\n"
+        "rss_ringoccs Version.\n"
+        "libtmpl Version.\n"
+        "Python Version.\n"
+        "Host Name.\n"
+        "User Name.\n"
+        "Run Date.\n"
+        "Operating System.\n"
+        "Positional Arguments (geo, cal, dlp).\n"
+        "Keyword Arguments (tau, use_deprecated).\n"
     },
+
+    /*  Terminator for the class.                                             */
     {
         NULL
     }
@@ -310,7 +352,7 @@ PyTypeObject ExtractCSVDataType = {
         "\r\t\t\tThe geometry and calibration data is interpolated against\n"
         "\r\t\t\tthe DLP data. This assumes the DLP and CAL file represent\n"
         "\r\t\t\ta single occultation. For chord occultations, this means\n"
-        "\r\t\t\tthe data must be separated into two portion, ingress and\n"
+        "\r\t\t\tthe data must be separated into two portions, ingress and\n"
         "\r\t\t\tegress. For GEO files the data does not need to be\n"
         "\r\t\t\tand the DLP file will be used to determine the occultation\n"
         "\r\t\t\ttype. The corresponding data will be extracted from GEO.\n"
@@ -322,7 +364,7 @@ PyTypeObject ExtractCSVDataType = {
         "\r\t\t\tBy default, it is assumed the new formats are being used.\n"
         "\r\t\t\tThat is, use_deprecate is set to False as a default\n"
         "\r\t\t\tparameter. If older data sets are used (pre-2018), you must\n"
-        "\r\t\t\tset use_deprecate = False.\n",
+        "\r\t\t\tset use_deprecate = True.\n",
     .tp_basicsize = sizeof(crssringoccs_PyCSVObj),
     .tp_itemsize = 0,
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,

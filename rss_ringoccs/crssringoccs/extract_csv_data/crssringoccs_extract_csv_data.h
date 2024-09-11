@@ -7,6 +7,9 @@
 #include <Python.h>
 #include <structmember.h>
 
+/*  Booleans provided here.                                                   */
+#include <libtmpl/include/tmpl_bool.h>
+
 /*  And a bunch of headers from this project.                                 */
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
 
@@ -23,8 +26,6 @@ typedef struct PyCSVObj_Def {
     PyObject *phi_rl_deg_vals;
     PyObject *raw_tau_threshold_vals;
     PyObject *rev_info;
-    PyObject *input_vars;
-    PyObject *input_kwds;
     PyObject *rho_corr_pole_km_vals;
     PyObject *rho_corr_timing_km_vals;
     PyObject *rho_dot_kms_vals;
@@ -51,6 +52,14 @@ extern int
 crssringoccs_ExtractCSVData_Init(crssringoccs_PyCSVObj *self,
                                  PyObject *args,
                                  PyObject *kwds);
+
+extern void
+crssringoccs_ExtractCSVData_Create_History(crssringoccs_PyCSVObj *self,
+                                           const char *geo_str,
+                                           const char *cal_str,
+                                           const char *dlp_str,
+                                           const char *tau_str,
+                                           tmpl_Bool use_deprecate);
 
 extern PyTypeObject ExtractCSVDataType;
 

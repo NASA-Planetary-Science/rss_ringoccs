@@ -34,6 +34,7 @@
 
 
 static PyMemberDef crssringoccs_ExtractCSVData_Members[] = {
+
     /*  Ring radius, primary independent variable for the all of the data.    */
     {
         "rho_km_vals",
@@ -82,61 +83,104 @@ static PyMemberDef crssringoccs_ExtractCSVData_Members[] = {
         "observation and the location of the observer at the event time\n"
         "(when the light reaches the rings) can differ significantly."
     },
+
+    /*  x-component of the spacecraft.                                        */
     {
         "rx_km_vals",
         T_OBJECT_EX,
         offsetof(crssringoccs_PyCSVObj, rx_km_vals),
         0,
-        "x coordinate of the spacecraft in planetocentric frame."
+        "x coordinate of the spacecraft in the planetocentric frame,\n"
+        "in kilometers. The spacecraft lies at the point\n"
+        "(rx_km_vals, ry_km_val, rz_km_vals) in space. The planetocentric\n"
+        "frame takes the core of the planet as the center and the rotation\n"
+        "axis as the z-axis. The x and y axis are chosen using a right-hand\n"
+        "rule convention. See MTR86 for details."
     },
+
+    /*  y-component of the spacecraft.                                        */
     {
         "ry_km_vals",
         T_OBJECT_EX,
         offsetof(crssringoccs_PyCSVObj, ry_km_vals),
         0,
-        "y coordinate of the spacecraft in planetocentric frame."
+        "y coordinate of the spacecraft in the planetocentric frame,\n"
+        "in kilometers. The spacecraft lies at the point\n"
+        "(rx_km_vals, ry_km_val, rz_km_vals) in space. The planetocentric\n"
+        "frame takes the core of the planet as the center and the rotation\n"
+        "axis as the z-axis. The x and y axis are chosen using a right-hand\n"
+        "rule convention. See MTR86 for details."
     },
+
+    /*  y-component of the spacecraft.                                        */
     {
         "rz_km_vals",
         T_OBJECT_EX,
         offsetof(crssringoccs_PyCSVObj, rz_km_vals),
         0,
-        "z coordinate of the spacecraft in planetocentric frame."
+        "y coordinate of the spacecraft in the planetocentric frame,\n"
+        "in kilometers. The spacecraft lies at the point\n"
+        "(rx_km_vals, ry_km_val, rz_km_vals) in space. The planetocentric\n"
+        "frame takes the core of the planet as the center and the rotation\n"
+        "axis as the z-axis. The x and y axis are chosen using a right-hand\n"
+        "rule convention. See MTR86 for details."
     },
+
+    /*  Frequency of the incoming radio signal.                               */
     {
         "f_sky_hz_vals",
         T_OBJECT_EX,
         offsetof(crssringoccs_PyCSVObj, f_sky_hz_vals),
         0,
-        "Frequency of the input signal"
+        "Frequency of the input signal, in Hertz.\n"
+        "This is computed as the difference of the predicted\n"
+        "frequency and the residual frequency."
     },
+
+    /*  Diffracted power.                                                     */
     {
         "p_norm_vals",
         T_OBJECT_EX,
         offsetof(crssringoccs_PyCSVObj, p_norm_vals),
         0,
-        "Raw power data"
+        "Raw power data, unitless. This has been normalized so that\n"
+        "the free-space region has power 1. Since the wavelength of\n"
+        "the incoming light is so large, the planetary rings cause\n"
+        "diffraction to occur. The measured signal is thus the diffracted\n"
+        "power. p_norm_vals contains this data, and not the diffraction\n"
+        "corrected profile."
     },
+
+    /*  Diffracted optical depth.                                             */
     {
         "raw_tau_vals",
         T_OBJECT_EX,
         offsetof(crssringoccs_PyCSVObj, raw_tau_vals),
         0,
-        "Raw optical depth"
+        "Raw optical depth, unitless. This is scaled logarithm of the\n"
+        "diffracted power p_norm_vals, where power is scaled by\n"
+        "a geometric factor involving the ring opening angle."
     },
+
+    /*  Polar angle for the point of interest.                                */
     {
         "phi_deg_vals",
         T_OBJECT_EX,
         offsetof(crssringoccs_PyCSVObj, phi_deg_vals),
         0,
-        "Ring azimuth angle"
+        "Ring azimuth angle, in degrees. This is the polar angle of the\n"
+        "point of interest. The ordered pair (rho_km_vals, phi_deg_vals)\n"
+        "uniquely specifies the location of the ring-intercept point\n"
+        "in the ring plane."
     },
+
+    /*  Longitudinal angle.                                                   */
     {
         "phi_rl_deg_vals",
         T_OBJECT_EX,
         offsetof(crssringoccs_PyCSVObj, phi_rl_deg_vals),
         0,
-        "Ring longitude angle"
+        "Ring longitude angle, in degrees."
     },
     {
         "raw_tau_threshold_vals",
@@ -220,20 +264,6 @@ static PyMemberDef crssringoccs_ExtractCSVData_Members[] = {
         offsetof(crssringoccs_PyCSVObj, history),
         0,
         "History of the tau instance"
-    },
-    {
-        "input_vars",
-        T_OBJECT_EX,
-        offsetof(crssringoccs_PyCSVObj, input_vars),
-        0,
-        "Dictionary of input arguments used to create this instance."
-    },
-    {
-        "input_kwds",
-        T_OBJECT_EX,
-        offsetof(crssringoccs_PyCSVObj, input_kwds),
-        0,
-        "Dictionary of input keywords used to create this instance."
     },
     {
         NULL

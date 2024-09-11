@@ -38,8 +38,6 @@ void crssringoccs_ExtractCSVData_Destroy(crssringoccs_PyCSVObj *self)
     Py_XDECREF(self->t_ret_spm_vals);
     Py_XDECREF(self->t_set_spm_vals);
     Py_XDECREF(self->history);
-    Py_XDECREF(self->input_vars);
-    Py_XDECREF(self->input_kwds);
     Py_XDECREF(self->rx_km_vals);
     Py_XDECREF(self->ry_km_vals);
     Py_XDECREF(self->rz_km_vals);

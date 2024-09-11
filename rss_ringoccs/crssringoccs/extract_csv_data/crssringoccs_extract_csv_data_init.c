@@ -17,6 +17,11 @@
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
 
+/*  The Python-C API is given here. The Python documentation recommends       *
+ *  including Python.h before anything (even standard library headers).       */
+#define PY_SSIZE_T_CLEAN
+#include <Python.h>
+
 /*  NULL is defined here.                                                     */
 #include <stddef.h>
 
@@ -26,15 +31,6 @@
 /*  Function prototype and typedefs for structs given here.                   */
 #include "crssringoccs_extract_csv_data.h"
 
-/*  Macro for safely creating None objects.                                   */
-#define MAKE_NONE(var)                                                         \
-    do {                                                                       \
-        PyObject *tmp = self->var;                                             \
-        Py_INCREF(Py_None);                                                    \
-        self->var = Py_None;                                                   \
-        Py_XDECREF(tmp);                                                       \
-    } while(0)
-
 /*  The init function for the dirrection correction class. This is the        *
  *  equivalent of the __init__ function defined in a normal python class.     */
 int
@@ -42,16 +38,22 @@ crssringoccs_ExtractCSVData_Init(crssringoccs_PyCSVObj *self,
                                  PyObject *args,
                                  PyObject *kwds)
 {
+    /*  Variable for the output CSV object.                                   */
     rssringoccs_CSVData *csv = NULL;
+
+    /*  Boolean for using the old file formats. Default is false.             */
     tmpl_Bool dpr = tmpl_False;
 
-    /*  The list of the keywords accepted by the DiffractionCorrection class. *
-     *  dlp and res are REQUIRED inputs, the rest are optional. If the user   *
-     *  does not provide these optional keywords, we must set them ourselves. */
+    /*  The list of the keywords accepted by the ExtractCSVData class. The    *
+     *  file paths 'geo', 'cal', and 'dlp' are required. The 'tau' path is    *
+     *  optional, and by default use_deprecate is set to False.               */
     static char *kwlist[] = {"geo", "cal", "dlp", "use_deprecate", "tau", NULL};
 
     /*  Python objects needed throughout the computation.                     */
-    PyObject *tmp, *csv_tmp;
+    PyObject *tmp;
+
+    /*  Initialize the strings for the file paths to NULL. This helps the     *
+     *  inner C routines detect errors.                                       */
     const char *geo_str = NULL;
     const char *cal_str = NULL;
     const char *dlp_str = NULL;
@@ -59,17 +61,16 @@ crssringoccs_ExtractCSVData_Init(crssringoccs_PyCSVObj *self,
 
     /*  Extract the inputs and keywords supplied by the user. If the data     *
      *  cannot be extracted, raise a type error and return to caller. A short *
-     *  explaination of PyArg_ParseTupleAndKeywords. The inputs args and kwds *
+     *  explanation of PyArg_ParseTupleAndKeywords. The inputs args and kwds  *
      *  are somewhat straight-forward, they're the arguments and keywords     *
      *  passed by the string. The cryptic string is not straight-forward. The *
      *  | symbol means everything after need not be positional, and we can    *
      *  specify arguments and keywords by name when calling                   *
-     *  DiffractionCorrection, for example                                    *
-     *  DiffractionCorrect(..., wtype="blah"). O indicates a Python object,   *
-     *  and d is a Python float. This is the DLP and res variables. The $     *
-     *  symbold means everything after is optional. s is a string, p is a     *
-     *  Boolean (p for "predicate"). b is an integer, and the colon : denotes *
-     *  that the input list has ended.                                        */
+     *  ExtractCSVData, for example ExtractCSVData(..., tau = "TAU.TAB").     *
+     *  s indicates a string, which are the paths to the GEO, CAL, and DLP    *
+     *  files. The $ symbol means everything after is optional. p is a        *
+     *  Boolean (p for "predicate"), this is the use_deprecate keyword. The   *
+     *  colon : denotes that the input list has ended.                        */
     int success = PyArg_ParseTupleAndKeywords(
         args,
         kwds,
@@ -100,8 +101,11 @@ crssringoccs_ExtractCSVData_Init(crssringoccs_PyCSVObj *self,
         return -1;
     }
 
+    /*  All of the heavy lifting is done via the C routines.                  */
     csv = rssringoccs_CSVData_Extract(geo_str, cal_str, dlp_str, tau_str, dpr);
 
+    /*  Several things can fail in this process. Firstly, malloc can fail     *
+     *  and return a NULL pointer. Check for this.                            */
     if (!csv)
     {
         PyErr_Format(
@@ -114,8 +118,11 @@ crssringoccs_ExtractCSVData_Init(crssringoccs_PyCSVObj *self,
         return -1;
     }
 
+    /*  Many errors can occur while parsing the data. Check the flag.         */
     if (csv->error_occurred)
     {
+        /*  Malloc may have failed to allocate memory for the error message.  *
+         *  If so, print a generic error.                                     */
         if (!csv->error_message)
         {
             PyErr_Format(
@@ -126,6 +133,9 @@ crssringoccs_ExtractCSVData_Init(crssringoccs_PyCSVObj *self,
                 "\rset to True. No error message was set. Aborting.\n"
             );
         }
+
+        /*  Otherwise print the error message set in the C routine. This can  *
+         *  greatly help with debugging.                                      */
         else
         {
             PyErr_Format(
@@ -139,36 +149,25 @@ crssringoccs_ExtractCSVData_Init(crssringoccs_PyCSVObj *self,
             );
         }
 
+        /*  Since the function did not return NULL, it is likely that memmory *
+         *  was allocated to some variables inside the struct. Free them.     */
         rssringoccs_CSVData_Destroy(&csv);
         return -1;
     }
 
+    /*  To avoid duplicating memory, the Python object simply steals the data *
+     *  inside the C object.                                                  */
     crssringoccs_ExtractCSVData_Steal(self, csv);
 
-    csv_tmp = Py_BuildValue(
-        "{s:s,s:s,s:s}",
-        "geo", geo_str,
-        "cal", cal_str,
-        "dlp", dlp_str
+    /*  Log how this object was created. Add the history object.              */
+    crssringoccs_ExtractCSVData_Create_History(
+        self, geo_str, cal_str, dlp_str, tau_str, dpr
     );
-
-    tmp = self->input_vars;
-    Py_INCREF(csv_tmp);
-    self->input_vars = csv_tmp;
-    Py_XDECREF(tmp);
-
-    tmp = self->input_kwds;
-    Py_INCREF(Py_None);
-    self->input_kwds = Py_None;
-    Py_XDECREF(tmp);
 
     tmp = self->rev_info;
     Py_INCREF(Py_None);
     self->rev_info = Py_None;
     Py_XDECREF(tmp);
-
-    /*  TODO: Handle history correctly. It's none for now to avoid segfaults. */
-    MAKE_NONE(history);
 
     return 1;
 }

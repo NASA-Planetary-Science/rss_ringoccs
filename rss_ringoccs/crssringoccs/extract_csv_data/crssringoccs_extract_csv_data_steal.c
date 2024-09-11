@@ -52,7 +52,7 @@ crssringoccs_ExtractCSVData_Steal(crssringoccs_PyCSVObj *py_csv,
         csv->error_occurred = tmpl_True;
         csv->error_message = tmpl_String_Duplicate(
             "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tcrssringoccs_C_CSV_to_Py_CSV\n\n"
+            "\r\tcrssringoccs_ExtractCSVData_Steal\n\n"
             "\rInput py_csv is NULL. Aborting.n"
         );
 

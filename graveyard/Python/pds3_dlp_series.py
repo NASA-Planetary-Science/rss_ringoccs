@@ -18,7 +18,7 @@
 #   along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.     #
 ################################################################################
 #   Purpose:                                                                   #
-#       Creates na LBL file from DLP data.                                     #
+#       Creates an LBL file from DLP data.                                     #
 ################################################################################
 #   Author: Jolene Fong                                                        #
 #   Date:   2018/07/23                                                         #

@@ -87,17 +87,14 @@
         ..  https://en.wikipedia.org/wiki/Error_function
         ..  http://mathworld.wolfram.com/FresnelIntegrals.html
         ..  http://mathworld.wolfram.com/Erf.html
+History:
+    Created: Team Cassini - 2018/06/14 2:20 P.M.
+    Nov 26 2018 - sflury - doc strings updated to match sphinx formatting
 """
 
-from crssringoccs import ExtractCSVData, DiffractionCorrection
+from crssringoccs import *
 from . import tools
 from . import rsr_reader
 from . import occgeo
 from . import calibration
 from . import scatter
-
-"""
-History:
-    Created: Team Cassini - 2018/06/14 2:20 P.M.
-    Nov 26 2018 - sflury - doc strings updated to match sphinx formatting
-"""

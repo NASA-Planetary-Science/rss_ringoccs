@@ -18,16 +18,9 @@
  ******************************************************************************/
 #include "../crssringoccs.h"
 
-PyTypeObject crssringoccs_DiffractionCorrection = {
-    PyVarObject_HEAD_INIT(NULL, 0)
-    .tp_name = "DiffractionCorrection",
-    .tp_doc = "Diffraction Correction class.",
-    .tp_basicsize = sizeof(crssringoccs_PyDiffrecObj),
-    .tp_itemsize = 0,
-    .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
-    .tp_new = PyType_GenericNew,
-    .tp_init = (initproc)crssringoccs_DiffractionCorrection_Init,
-    .tp_dealloc = (destructor)crssringoccs_DiffractionCorrection_Destroy,
-    .tp_members = crssringoccs_DiffractionCorrection_Members,
-    .tp_methods = crssringoccs_DiffractionCorrection_Methods
+PyMethodDef crssringoccs_PyCSVObj_Methods[] =
+{
+    {
+        NULL
+    }
 };

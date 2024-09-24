@@ -46,7 +46,9 @@ crssringoccs_Create_Complex_Numpy_Array(&py_tau->a, tau->a, tau->arr_size)
     } while(0)
 
 /*  Converts a C Tau struct to a Python Tau Object.                           */
-void crssringoccs_C_Tau_To_Py_Tau(PyDiffrecObj *py_tau, rssringoccs_TAUObj *tau)
+void
+crssringoccs_C_Tau_To_Py_Tau(crssringoccs_PyDiffrecObj *py_tau,
+                             rssringoccs_TAUObj *tau)
 {
     /*  If the C version of the object is NULL there is nothing to do.        */
     if (tau == NULL)

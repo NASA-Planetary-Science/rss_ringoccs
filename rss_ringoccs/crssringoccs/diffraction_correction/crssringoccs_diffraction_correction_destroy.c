@@ -19,7 +19,8 @@
 #include "../crssringoccs.h"
 
 /*  Deallocating function for the DiffractionCorrection class.                */
-void Diffrec_dealloc(PyDiffrecObj *self)
+void
+crssringoccs_DiffractionCorrection_Destroy(crssringoccs_PyDiffrecObj *self)
 {
     Py_XDECREF(self->T_in);
     Py_XDECREF(self->T_out);

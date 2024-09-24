@@ -16,10 +16,14 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
+#ifndef CRSSRINGOCCS_H
+#define CRSSRINGOCCS_H
 
 /*  The Python-C API is given here. The Python documentation recommends       *
  *  including Python.h before anything (even standard library headers).       */
+#ifndef PY_SSIZE_T_CLEAN
 #define PY_SSIZE_T_CLEAN
+#endif
 #include <Python.h>
 #include <structmember.h>
 
@@ -35,7 +39,7 @@
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
 
 /*  The definition of the DiffractionCorrection class as a C struct.          */
-typedef struct PyDiffrecObj_Def {
+typedef struct crssringoccs_PyDiffrecObj_Def {
     PyObject_HEAD
     PyObject *T_in;                   /*  Input complex transmittance.        */
     PyObject *T_out;                  /*  Reconstructed complex transmittance.*/
@@ -72,7 +76,192 @@ typedef struct PyDiffrecObj_Def {
     const char *outfiles;             /*  TAB files for this Tau object.      */
     const char *wtype;
     const char *psitype;
-} PyDiffrecObj;
+} crssringoccs_PyDiffrecObj;
+
+/*  The CSV struct containing all of the data for diffraction reconstruction. */
+typedef struct crssringoccs_PyCSVObj_Def {
+    PyObject_HEAD
+    PyObject *B_deg_vals;
+    PyObject *D_km_vals;
+    PyObject *f_sky_hz_vals;
+    PyObject *p_norm_vals;
+    PyObject *raw_tau_vals;
+    PyObject *phase_deg_vals;
+    PyObject *phi_deg_vals;
+    PyObject *phi_rl_deg_vals;
+    PyObject *raw_tau_threshold_vals;
+    PyObject *rev_info;
+    PyObject *rho_corr_pole_km_vals;
+    PyObject *rho_corr_timing_km_vals;
+    PyObject *rho_dot_kms_vals;
+    PyObject *rho_km_vals;
+    PyObject *t_oet_spm_vals;
+    PyObject *t_ret_spm_vals;
+    PyObject *t_set_spm_vals;
+    PyObject *history;
+    PyObject *rx_km_vals;
+    PyObject *ry_km_vals;
+    PyObject *rz_km_vals;
+    PyObject *tau_phase_deg_vals;
+    PyObject *tau_power_vals;
+    PyObject *tau_vals;
+} crssringoccs_PyCSVObj;
+
+/******************************************************************************
+ *  Function:                                                                 *
+ *      crssringoccs_PyCSVObj_Destroy                                         *
+ *  Purpose:                                                                  *
+ *      Decrements all of the Python objects in the PyCSVObj struct. If no    *
+ *      other references to the objects exists, they are free'd from memory.  *
+ *  Arguments:                                                                *
+ *      self (crssringoccs_PyCSVObj *):                                       *
+ *          A pointer to the PyCSVObj that is to be destroyed.                *
+ *  Output:                                                                   *
+ *      None (void).                                                          *
+ *  Source Code:                                                              *
+ *      rss_ringoccs/crssringoccs/py_csv_obj/                                 *
+ *              crssringoccs_py_csv_obj_destroy.c                             *
+ ******************************************************************************/
+extern void crssringoccs_PyCSVObj_Destroy(crssringoccs_PyCSVObj *self);
+
+/******************************************************************************
+ *  Constant:                                                                 *
+ *      crssringoccs_PyCSVObj_Members                                         *
+ *  Purpose:                                                                  *
+ *      Describes all of the atttributes in the PyCSVObj for the Python       *
+ *      interpreter.                                                          *
+ *  Source Code:                                                              *
+ *      rss_ringoccs/crssringoccs/py_csv_obj/                                 *
+ *              crssringoccs_py_csv_obj_members.c                             *
+ ******************************************************************************/
+extern PyMemberDef crssringoccs_PyCSVObj_Members[];
+
+/******************************************************************************
+ *  Constant:                                                                 *
+ *      crssringoccs_PyCSVObj_Members                                         *
+ *  Purpose:                                                                  *
+ *      Describes all of the methods in the PyCSVObj for the Python           *
+ *      interpreter.                                                          *
+ *  Notes:                                                                    *
+ *      PyCSVObj has no methods. This array only contains a NULL terminator.  *
+ *  Source Code:                                                              *
+ *      rss_ringoccs/crssringoccs/py_csv_obj/                                 *
+ *              crssringoccs_py_csv_obj_members.c                             *
+ ******************************************************************************/
+extern PyMethodDef crssringoccs_PyCSVObj_Methods[];
+
+/******************************************************************************
+ *  Function:                                                                 *
+ *      crssringoccs_ExtractCSVData_Steal                                     *
+ *  Purpose:                                                                  *
+ *      Steals data from a C struct and passes it to a Python object.         *
+ *  Arguments:                                                                *
+ *      py_csv (crssringoccs_PyCSVObj *):                                     *
+ *          The Python object.                                                *
+ *      csv (rssringoccs_CSVData *):                                          *
+ *          The C struct containing the CSV data.                             *
+ *  Output:                                                                   *
+ *      None (void).                                                          *
+ *  Source Code:                                                              *
+ *      rss_ringoccs/crssringoccs/extract_csv_data/                           *
+ *          crssringoccs_extract_csv_data_steal.c                             *
+ ******************************************************************************/
+extern void
+crssringoccs_ExtractCSVData_Steal(crssringoccs_PyCSVObj *py_csv,
+                                  rssringoccs_CSVData *csv);
+
+/******************************************************************************
+ *  Function:                                                                 *
+ *      crssringoccs_ExtractCSVData_Init                                      *
+ *  Purpose:                                                                  *
+ *      Implements the __init__ method for the ExtractCSVData class.          *
+ *  Arguments:                                                                *
+ *      self (crssringoccs_PyCSVObj *):                                       *
+ *          The Python object being initialized.                              *
+ *      args (PyObject *):                                                    *
+ *          The arguments to the ExtractCSVData class. These are the          *
+ *          filenames to the CSV data.                                        *
+ *      kwds (PyObject *):                                                    *
+ *          The keywords to the ExtractCSVData class. These are the           *
+ *          tau filename and the use_deprecate Boolean.                       *
+ *  Output:                                                                   *
+ *      None (void).                                                          *
+ *  Source Code:                                                              *
+ *      rss_ringoccs/crssringoccs/extract_csv_data/                           *
+ *          crssringoccs_extract_csv_data_init.c                              *
+ ******************************************************************************/
+extern int
+crssringoccs_ExtractCSVData_Init(crssringoccs_PyCSVObj *self,
+                                 PyObject *args,
+                                 PyObject *kwds);
+
+/******************************************************************************
+ *  Function:                                                                 *
+ *      crssringoccs_ExtractCSVData_Create_History                            *
+ *  Purpose:                                                                  *
+ *      Creates the history dictionary for the ExtractCSVData class.          *
+ *  Arguments:                                                                *
+ *      self (crssringoccs_PyCSVObj *):                                       *
+ *          The Python CSV object.                                            *
+ *      geo_str (const char *):                                               *
+ *          The path to the geo file.                                         *
+ *      cal_str (const char *):                                               *
+ *          The path to the cal file.                                         *
+ *      dlp_str (const char *):                                               *
+ *          The path to the dlp file.                                         *
+ *      tau_str (const char *):                                               *
+ *          The path to the tau file.                                         *
+ *      use_deprecate (tmpl_Bool):                                            *
+ *          The Boolean for using the older format.                           *
+ *  Output:                                                                   *
+ *      None (void).                                                          *
+ *  Source Code:                                                              *
+ *      rss_ringoccs/crssringoccs/extract_csv_data/                           *
+ *          crssringoccs_extract_csv_data_create_history.c                    *
+ ******************************************************************************/
+extern void
+crssringoccs_ExtractCSVData_Create_History(crssringoccs_PyCSVObj *self,
+                                           const char *geo_str,
+                                           const char *cal_str,
+                                           const char *dlp_str,
+                                           const char *tau_str,
+                                           tmpl_Bool use_deprecate);
+
+/******************************************************************************
+ *  Constant:                                                                 *
+ *      crssringoccs_ExtractCSVData                                           *
+ *  Purpose:                                                                  *
+ *      The ExtractCSVData class for python.                                  *
+ *  Source Code:                                                              *
+ *      rss_ringoccs/crssringoccs/extract_csv_data/                           *
+ *              crssringoccs_get_uranus_data_class.c                          *
+ ******************************************************************************/
+extern PyTypeObject crssringoccs_ExtractCSVData;
+
+/*  Data structure for the GEO.TAB files on the PDS.                          */
+typedef struct PyGeoObj_Def {
+    PyObject_HEAD
+    PyObject *t_oet_spm_vals;
+    PyObject *t_ret_spm_vals;
+    PyObject *t_set_spm_vals;
+    PyObject *rho_km_vals;
+    PyObject *phi_rl_deg_vals;
+    PyObject *phi_ora_deg_vals;
+    PyObject *B_deg_vals;
+    PyObject *D_km_vals;
+    PyObject *rho_dot_kms_vals;
+    PyObject *phi_rl_dot_kms_vals;
+    PyObject *F_km_vals;
+    PyObject *R_imp_km_vals;
+    PyObject *rx_km_vals;
+    PyObject *ry_km_vals;
+    PyObject *rz_km_vals;
+    PyObject *vx_kms_vals;
+    PyObject *vy_kms_vals;
+    PyObject *vz_kms_vals;
+    PyObject *obs_spacecraft_lat_deg_vals;
+    PyObject *history;
+} rssringoccs_PyGeoObj;
 
 
 extern void
@@ -95,7 +284,8 @@ crssringoccs_Extract_Data(rssringoccs_DLPObj *dlp,
 extern rssringoccs_DLPObj *crssringoccs_Py_DLP_To_C_DLP(PyObject *py_dlp);
 
 extern void
-crssringoccs_C_Tau_To_Py_Tau(PyDiffrecObj *py_tau, rssringoccs_TAUObj *tau);
+crssringoccs_C_Tau_To_Py_Tau(crssringoccs_PyDiffrecObj *py_tau,
+                             rssringoccs_TAUObj *tau);
 
 extern void
 crssringoccs_Get_Py_Perturb(rssringoccs_TAUObj *tau, PyObject *perturb);
@@ -105,10 +295,40 @@ crssringoccs_Get_Py_Range(rssringoccs_TAUObj *tau, PyObject *rngreq);
 
 extern void
 crssringoccs_Get_Py_Vars_From_Tau_Self(rssringoccs_TAUObj *tau,
-                                       const PyDiffrecObj *self);
+                                       const crssringoccs_PyDiffrecObj *self);
 
-extern void Diffrec_dealloc(PyDiffrecObj *self);
+extern PyMemberDef crssringoccs_DiffractionCorrection_Members[];
 
-extern int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds);
+extern PyMethodDef crssringoccs_DiffractionCorrection_Methods[];
 
-extern PyTypeObject DiffrecType;
+extern void
+crssringoccs_DiffractionCorrection_Destroy(crssringoccs_PyDiffrecObj *self);
+
+extern int
+crssringoccs_DiffractionCorrection_Init(crssringoccs_PyDiffrecObj *self,
+                                        PyObject *args,
+                                        PyObject *kwds);
+
+extern PyTypeObject crssringoccs_DiffractionCorrection;
+
+extern void
+crssringoccs_GetUranusData_Steal(crssringoccs_PyCSVObj *py_csv,
+                                 rssringoccs_UranusCSVData *csv);
+
+extern void crssringoccs_GetUranusData_Destroy(crssringoccs_PyCSVObj *self);
+
+extern int
+crssringoccs_GetUranusData_Init(crssringoccs_PyCSVObj *self,
+                                PyObject *args,
+                                PyObject *kwds);
+
+extern void
+crssringoccs_GetUranusData_Create_History(crssringoccs_PyCSVObj *self,
+                                          const char *geo_str,
+                                          const char *dlp_str,
+                                          const char *tau_str,
+                                          tmpl_Bool dlp_in_radians);
+
+extern PyTypeObject GetUranusDataType;
+
+#endif

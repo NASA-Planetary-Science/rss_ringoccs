@@ -151,6 +151,67 @@ typedef struct rssringoccs_CSVData_Def {
     char *error_message;
 } rssringoccs_CSVData;
 
+/*  Voyager / Uranus DLP files. Differ from the Cassini / Saturn ones.        */
+typedef struct rssringoccs_UranusDLPCSV_Def {
+    double *rho_km_vals;
+    double *rho_corr_pole_km_vals;
+    double *rho_corr_timing_km_vals;
+    double *phi_rl_deg_vals;
+    double *phi_deg_vals;
+    double *p_norm_vals;
+    double *raw_tau_vals;
+    double *phase_deg_vals;
+    double *raw_tau_threshold_vals;
+    double *t_oet_spm_vals;
+    double *t_ret_spm_vals;
+    double *t_set_spm_vals;
+    double *B_deg_vals;
+    double *rho_dot_kms_vals;
+    double *F_km_vals;
+    double *D_km_vals;
+    double *f_sky_hz_vals;
+    size_t n_elements;
+    tmpl_Bool in_radians;
+    tmpl_Bool error_occurred;
+    char *error_message;
+} rssringoccs_UranusDLPCSV;
+
+/*  Data structure that contains all of the data from all four CSV formats    *
+ *  interpolated so that the values are a function of radius, not time.       */
+typedef struct rssringoccs_UranusCSVData_Def {
+    rssringoccs_GeoCSV *geo;
+    rssringoccs_UranusDLPCSV *dlp;
+    rssringoccs_TauCSV *tau;
+    double *B_deg_vals;
+    double *D_km_vals;
+    double *f_sky_hz_vals;
+    double *p_norm_vals;
+    double *raw_tau_vals;
+    double *phase_deg_vals;
+    double *phi_deg_vals;
+    double *phi_rl_deg_vals;
+    double *raw_tau_threshold_vals;
+    double *rho_corr_pole_km_vals;
+    double *rho_corr_timing_km_vals;
+    double *rho_dot_kms_vals;
+    double *rho_km_vals;
+    double *rx_km_vals;
+    double *ry_km_vals;
+    double *rz_km_vals;
+    double *t_oet_spm_vals;
+    double *t_ret_spm_vals;
+    double *t_set_spm_vals;
+    double *tau_phase_deg_vals;
+    double *tau_power_vals;
+    double *tau_vals;
+    size_t n_elements;
+    size_t geo_increment;
+    size_t geo_decrement;
+    tmpl_Bool dlp_in_radians;
+    tmpl_Bool error_occurred;
+    char *error_message;
+} rssringoccs_UranusCSVData;
+
 /******************************************************************************
  *                               Cal CSV Tools                                *
  ******************************************************************************/
@@ -242,6 +303,79 @@ rssringoccs_CSVData_Extract(const char *geo,
                             const char *dlp,
                             const char *tau,
                             tmpl_Bool use_deprecated);
+
+/******************************************************************************
+ *                            Uranus DLP CSV Tools                            *
+ ******************************************************************************/
+extern rssringoccs_UranusDLPCSV *
+rssringoccs_UranusDLPCSV_Extract(const char *filename, tmpl_Bool in_radians);
+
+extern void
+rssringoccs_UranusDLPCSV_Check_Column_Count(rssringoccs_UranusDLPCSV *dlp,
+                                            FILE *fp);
+
+extern void
+rssringoccs_UranusDLPCSV_Destroy_Members(rssringoccs_UranusDLPCSV *dlp);
+
+extern void
+rssringoccs_UranusDLPCSV_Destroy(rssringoccs_UranusDLPCSV **dlp);
+
+extern void
+rssringoccs_UranusDLPCSV_Init(rssringoccs_UranusDLPCSV *dlp);
+
+extern void
+rssringoccs_UranusDLPCSV_Malloc(rssringoccs_UranusDLPCSV *dlp, FILE *fp);
+
+extern void
+rssringoccs_UranusDLPCSV_Read_Data(rssringoccs_UranusDLPCSV *dlp, FILE *fp);
+
+/******************************************************************************
+ *                           Uranus CSV Data Tools                            *
+ ******************************************************************************/
+extern void
+rssringoccs_UranusCSVData_Extract_Geo(rssringoccs_UranusCSVData *csv,
+                                      const char *geo_file);
+
+extern void
+rssringoccs_UranusCSVData_Extract_DLP(rssringoccs_UranusCSVData *csv,
+                                      const char *dlp_file);
+
+extern void
+rssringoccs_UranusCSVData_Extract_Tau(rssringoccs_UranusCSVData *csv,
+                                      const char *tau_file);
+
+extern void
+rssringoccs_UranusCSVData_Init(rssringoccs_UranusCSVData *csv);
+
+extern void
+rssringoccs_UranusCSVData_Destroy_Members(rssringoccs_UranusCSVData *csv);
+
+extern void
+rssringoccs_UranusCSVData_Destroy(rssringoccs_UranusCSVData **csv);
+
+extern void
+rssringoccs_UranusCSVData_Malloc(rssringoccs_UranusCSVData *csv);
+
+extern void
+rssringoccs_UranusCSVData_Steal_DLP_Data(rssringoccs_UranusCSVData *csv);
+
+extern void
+rssringoccs_UranusCSVData_Reverse_Geo_Variables(rssringoccs_UranusCSVData *csv);
+
+extern void
+rssringoccs_UranusCSVData_Interpolate_Geo(rssringoccs_UranusCSVData *csv);
+
+extern void
+rssringoccs_UranusCSVData_Interpolate_Tau(rssringoccs_UranusCSVData *csv);
+
+extern void
+rssringoccs_UranusCSVData_Check_Chord_Occ(rssringoccs_UranusCSVData *csv);
+
+extern rssringoccs_UranusCSVData *
+rssringoccs_UranusCSVData_Extract(const char *geo,
+                                  const char *dlp,
+                                  const char *tau,
+                                  tmpl_Bool dlp_in_radians);
 
 #endif
 /*  End of include guard.                                                     */

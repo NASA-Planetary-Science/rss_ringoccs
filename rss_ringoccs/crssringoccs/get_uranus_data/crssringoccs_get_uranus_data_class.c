@@ -15,17 +15,29 @@
  *                                                                            *
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
+ ******************************************************************************
+ *                    crssringoccs_extract_csv_data_class                     *
+ ******************************************************************************
+ *  Purpose:                                                                  *
+ *      Defines the GetUranusData class for rss_ringoccs. This is used to     *
+ *      extract geometry (Geo), calibration (Cal), diffraction-limited (DLP), *
+ *      and reconstructed (Tau) data from CSV (or .TAB) files and create a    *
+ *      Python object out of them. This way the data is more easily worked    *
+ *      with as numpy arrays.                                                 *
+ ******************************************************************************
+ *  Author:     Ryan Maguire, Wellesley College                               *
+ *  Date:       June 22, 2019                                                 *
  ******************************************************************************/
 #include "../crssringoccs.h"
 
-PyTypeObject crssringoccs_ExtractCSVData = {
+PyTypeObject GetUranusDataType = {
     PyVarObject_HEAD_INIT(NULL, 0)
-    .tp_name = "ExtractCSVData",
+    .tp_name = "GetUranusData",
     .tp_doc =
         "\r\tPurpose:\n"
         "\r\t\tExtracts data from the column separated TAB files and\n"
         "\r\t\tcreates numpy arrays out of them. All of the data is collected\n"
-        "\r\t\tinto a single class, an instance of ExtractCSVData.\n"
+        "\r\t\tinto a single class, an instance of GetUranusData.\n"
         "\r\tArguments:\n"
         "\r\t\tgeo (str):\n"
         "\r\t\t\tPath to the geometry file (GEO.TAB).\n"
@@ -45,7 +57,7 @@ PyTypeObject crssringoccs_ExtractCSVData = {
         "\r\t\t\tThe tau file is not required. If provided, its values\n"
         "\r\t\t\tare interpolated against the values in the DLP file.\n"
         "\r\t\t\tThis is useful for comparing reconstructions made\n"
-        "\r\t\t\tdirectly with the ExtractCSVData class (by passing it\n"
+        "\r\t\t\tdirectly with the GetUranusData class (by passing it\n"
         "\r\t\t\tto DiffractionCorrection) with reconstructions on the PDS.\n"
         "\r\t\t2.)\n"
         "\r\t\t\tThe geometry and calibration data is interpolated against\n"
@@ -68,7 +80,7 @@ PyTypeObject crssringoccs_ExtractCSVData = {
     .tp_itemsize = 0,
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
     .tp_new = PyType_GenericNew,
-    .tp_init = (initproc)crssringoccs_ExtractCSVData_Init,
+    .tp_init = (initproc)crssringoccs_GetUranusData_Init,
     .tp_dealloc = (destructor)crssringoccs_PyCSVObj_Destroy,
     .tp_members = crssringoccs_PyCSVObj_Members,
     .tp_methods = crssringoccs_PyCSVObj_Methods

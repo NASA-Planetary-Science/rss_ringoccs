@@ -16,9 +16,9 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
-#include "crssringoccs_extract_csv_data.h"
+#include "../crssringoccs.h"
 
-void crssringoccs_ExtractCSVData_Destroy(crssringoccs_PyCSVObj *self)
+void crssringoccs_PyCSVObj_Destroy(crssringoccs_PyCSVObj *self)
 {
     Py_XDECREF(self->B_deg_vals);
     Py_XDECREF(self->D_km_vals);

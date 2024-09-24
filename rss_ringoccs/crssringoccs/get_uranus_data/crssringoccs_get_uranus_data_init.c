@@ -16,27 +16,24 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
-
 #include "../crssringoccs.h"
-
 
 /*  The init function for the dirrection correction class. This is the        *
  *  equivalent of the __init__ function defined in a normal python class.     */
 int
-crssringoccs_ExtractCSVData_Init(crssringoccs_PyCSVObj *self,
-                                 PyObject *args,
-                                 PyObject *kwds)
+crssringoccs_GetUranusData_Init(crssringoccs_PyCSVObj *self,
+                                PyObject *args,
+                                PyObject *kwds)
 {
     /*  Variable for the output CSV object.                                   */
-    rssringoccs_CSVData *csv = NULL;
+    rssringoccs_UranusCSVData *csv = NULL;
 
-    /*  Boolean for using the old file formats. Default is false.             */
-    tmpl_Bool dpr = tmpl_False;
+    tmpl_Bool dlp_in_radians = tmpl_False;
 
     /*  The list of the keywords accepted by the ExtractCSVData class. The    *
      *  file paths 'geo', 'cal', and 'dlp' are required. The 'tau' path is    *
      *  optional, and by default use_deprecate is set to False.               */
-    static char *kwlist[] = {"geo", "cal", "dlp", "use_deprecate", "tau", NULL};
+    static char *kwlist[] = {"geo", "dlp", "tau", "dlp_in_radians", NULL};
 
     /*  Python objects needed throughout the computation.                     */
     PyObject *tmp;
@@ -44,7 +41,6 @@ crssringoccs_ExtractCSVData_Init(crssringoccs_PyCSVObj *self,
     /*  Initialize the strings for the file paths to NULL. This helps the     *
      *  inner C routines detect errors.                                       */
     const char *geo_str = NULL;
-    const char *cal_str = NULL;
     const char *dlp_str = NULL;
     const char *tau_str = NULL;
 
@@ -63,13 +59,12 @@ crssringoccs_ExtractCSVData_Init(crssringoccs_PyCSVObj *self,
     int success = PyArg_ParseTupleAndKeywords(
         args,
         kwds,
-        "|sss$ps:",
+        "|ss$sp:",
         kwlist,
         &geo_str,
-        &cal_str,
         &dlp_str,
-        &dpr,
-        &tau_str
+        &tau_str,
+        &dlp_in_radians
     );
 
     if (!success)
@@ -91,7 +86,9 @@ crssringoccs_ExtractCSVData_Init(crssringoccs_PyCSVObj *self,
     }
 
     /*  All of the heavy lifting is done via the C routines.                  */
-    csv = rssringoccs_CSVData_Extract(geo_str, cal_str, dlp_str, tau_str, dpr);
+    csv = rssringoccs_UranusCSVData_Extract(
+        geo_str, dlp_str, tau_str, dlp_in_radians
+    );
 
     /*  Several things can fail in this process. Firstly, malloc can fail     *
      *  and return a NULL pointer. Check for this.                            */
@@ -140,17 +137,17 @@ crssringoccs_ExtractCSVData_Init(crssringoccs_PyCSVObj *self,
 
         /*  Since the function did not return NULL, it is likely that memmory *
          *  was allocated to some variables inside the struct. Free them.     */
-        rssringoccs_CSVData_Destroy(&csv);
+        rssringoccs_UranusCSVData_Destroy(&csv);
         return -1;
     }
 
     /*  To avoid duplicating memory, the Python object simply steals the data *
      *  inside the C object.                                                  */
-    crssringoccs_ExtractCSVData_Steal(self, csv);
+    crssringoccs_GetUranusData_Steal(self, csv);
 
     /*  Log how this object was created. Add the history object.              */
-    crssringoccs_ExtractCSVData_Create_History(
-        self, geo_str, cal_str, dlp_str, tau_str, dpr
+    crssringoccs_GetUranusData_Create_History(
+        self, geo_str, dlp_str, tau_str, dlp_in_radians
     );
 
     tmp = self->rev_info;

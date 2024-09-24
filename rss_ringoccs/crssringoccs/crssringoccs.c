@@ -17,7 +17,6 @@
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
 #include "crssringoccs.h"
-#include "extract_csv_data/crssringoccs_extract_csv_data.h"
 
 /*  Avoid warnings about deprecated Numpy API versions.                       */
 #ifndef NPY_NO_DEPRECATED_API
@@ -30,51 +29,104 @@
 
 static PyModuleDef moduledef = {
     PyModuleDef_HEAD_INIT,
-    .m_name = "custom",
+    .m_name = "crssringoccs",
     .m_doc = "Module containing C Tools for rss_ringoccs.",
     .m_size = -1,
 };
 
 PyMODINIT_FUNC PyInit_crssringoccs(void)
 {
-    PyObject *m;
+    PyObject *module = NULL;
+    PyObject *all = NULL;
     int pymod_addobj;
-    if (PyType_Ready(&DiffrecType) < 0)
+
+    if (PyType_Ready(&crssringoccs_DiffractionCorrection) < 0)
         return NULL;
 
-    if (PyType_Ready(&ExtractCSVDataType) < 0)
+    if (PyType_Ready(&crssringoccs_ExtractCSVData) < 0)
         return NULL;
 
-    m = PyModule_Create(&moduledef);
-
-    if (m == NULL)
+    if (PyType_Ready(&GetUranusDataType) < 0)
         return NULL;
 
-    Py_INCREF(&ExtractCSVDataType);
+    module = PyModule_Create(&moduledef);
+
+    if (!module)
+        return NULL;
+
+    Py_INCREF(&crssringoccs_ExtractCSVData);
     pymod_addobj = PyModule_AddObject(
-        m,
+        module,
         "ExtractCSVData",
-        (PyObject *)&ExtractCSVDataType
+        (PyObject *)&crssringoccs_ExtractCSVData
     );
 
     if (pymod_addobj < 0)
     {
-        Py_DECREF(&ExtractCSVDataType);
-        Py_DECREF(m);
+        Py_DECREF(&crssringoccs_ExtractCSVData);
+        Py_DECREF(module);
         return NULL;
     }
 
-    Py_INCREF(&DiffrecType);
-    pymod_addobj = PyModule_AddObject(m, "DiffractionCorrection",
-                                      (PyObject *) &DiffrecType);
+    Py_INCREF(&GetUranusDataType);
+    pymod_addobj = PyModule_AddObject(
+        module,
+        "GetUranusData",
+        (PyObject *)&GetUranusDataType
+    );
 
     if (pymod_addobj < 0)
     {
-        Py_DECREF(&DiffrecType);
-        Py_DECREF(m);
+        Py_DECREF(&crssringoccs_ExtractCSVData);
+        Py_DECREF(&GetUranusDataType);
+        Py_DECREF(module);
+        return NULL;
+    }
+
+    Py_INCREF(&crssringoccs_DiffractionCorrection);
+    pymod_addobj = PyModule_AddObject(
+        module,
+        "DiffractionCorrection",
+        (PyObject *)&crssringoccs_DiffractionCorrection
+    );
+
+    if (pymod_addobj < 0)
+    {
+        Py_DECREF(&crssringoccs_ExtractCSVData);
+        Py_DECREF(&GetUranusDataType);
+        Py_DECREF(&crssringoccs_DiffractionCorrection);
+        Py_DECREF(module);
+        return NULL;
+    }
+
+    all = Py_BuildValue(
+        "[s, s, s]",
+        "DiffractionCorrection",
+        "ExtractCSVData",
+        "GetUranusData"
+    );
+
+    if (!all)
+    {
+        Py_DECREF(&crssringoccs_ExtractCSVData);
+        Py_DECREF(&GetUranusDataType);
+        Py_DECREF(&crssringoccs_DiffractionCorrection);
+        Py_DECREF(module);
+        Py_CLEAR(module);
+        return NULL;
+    }
+
+    pymod_addobj = PyModule_AddObject(module, "__all__", all);
+
+    if (pymod_addobj < 0)
+    {
+        Py_DECREF(&crssringoccs_ExtractCSVData);
+        Py_DECREF(&GetUranusDataType);
+        Py_DECREF(&crssringoccs_DiffractionCorrection);
+        Py_DECREF(module);
         return NULL;
     }
 
     import_array();
-    return m;
+    return module;
 }

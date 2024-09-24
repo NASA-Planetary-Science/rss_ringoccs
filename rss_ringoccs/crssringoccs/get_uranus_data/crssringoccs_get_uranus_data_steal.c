@@ -16,16 +16,7 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
-
-/*  libtmpl provides Booleans and tmpl_String_Duplicate.                      */
-#include <libtmpl/include/tmpl_bool.h>
-#include <libtmpl/include/tmpl_string.h>
-
-/*  rssringoccs_CSVData data type typedef'd here.                             */
-#include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
-
 #include "../crssringoccs.h"
-
 
 /*  Macro for the crssringoccs_set_var function to shorten the syntax.        */
 #define CREATE_NUMPY_ARRAY(a) \
@@ -35,8 +26,8 @@ crssringoccs_Create_Real_Numpy_Array(&py_csv->a, csv->a, csv->n_elements)
  *  creates numpy arrays from them. The data is stored in an instance of the  *
  *  ExtractCSVData class.                                                     */
 void
-crssringoccs_ExtractCSVData_Steal(crssringoccs_PyCSVObj *py_csv,
-                                  rssringoccs_CSVData *csv)
+crssringoccs_GetUranusData_Steal(crssringoccs_PyCSVObj *py_csv,
+                                 rssringoccs_UranusCSVData *csv)
 {
     if (!csv || !py_csv)
         return;

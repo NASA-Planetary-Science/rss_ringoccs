@@ -42,7 +42,10 @@
 
 /*  The init function for the dirrection correction class. This is the        *
  *  equivalent of the __init__ function defined in a normal python class.     */
-int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
+int
+crssringoccs_DiffractionCorrection_Init(crssringoccs_PyDiffrecObj *self,
+                                        PyObject *args,
+                                        PyObject *kwds)
 {
     /*  Declare variables for a DLP and Tau object.                           */
     rssringoccs_DLPObj *dlp;
@@ -321,4 +324,3 @@ int Diffrec_init(PyDiffrecObj *self, PyObject *args, PyObject *kwds)
 
     return 1;
 }
-

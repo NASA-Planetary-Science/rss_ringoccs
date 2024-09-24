@@ -1,17 +1,22 @@
 #include "../crssringoccs.h"
 
+/*  sprintf routine provided here.                                            */
+#include <stdio.h>
+
+/*  Booleans provided here.                                                   */
+#include <libtmpl/include/tmpl_bool.h>
+
 /*  Functions for creating the history (user name, OS, date, etc.).           */
 #include <libtmpl/include/tmpl_calendar.h>
 #include <libtmpl/include/tmpl_utility.h>
 #include <rss_ringoccs/include/rss_ringoccs_history.h>
 
 void
-crssringoccs_ExtractCSVData_Create_History(crssringoccs_PyCSVObj *self,
-                                           const char *geo_str,
-                                           const char *cal_str,
-                                           const char *dlp_str,
-                                           const char *tau_str,
-                                           tmpl_Bool use_deprecate)
+crssringoccs_GetUranusData_Create_History(crssringoccs_PyCSVObj *self,
+                                          const char *geo_str,
+                                          const char *dlp_str,
+                                          const char *tau_str,
+                                          tmpl_Bool dlp_in_radians)
 {
     /*  Python objects needed throughout the computation.                     */
     PyObject *tmp, *input_variables, *input_keywords, *history, *py_bool;
@@ -31,13 +36,12 @@ crssringoccs_ExtractCSVData_Create_History(crssringoccs_PyCSVObj *self,
 
     /*  Python booleans are a type of PyObject. They can be created by        *
      *  casting our Boolean to a long int as follows.                         */
-    py_bool = PyBool_FromLong((long int)use_deprecate);
+    py_bool = PyBool_FromLong((long int)dlp_in_radians);
 
     /*  Create a dictionary (Python object) with the input arguments.         */
     input_variables = Py_BuildValue(
-        "{s:s,s:s,s:s}",
+        "{s:s,s:s}",
         "geo", geo_str,
-        "cal", cal_str,
         "dlp", dlp_str
     );
 
@@ -48,7 +52,7 @@ crssringoccs_ExtractCSVData_Create_History(crssringoccs_PyCSVObj *self,
     input_keywords = Py_BuildValue(
         "{s:s,s:N}",
         "tau", tau_str,
-        "use_deprecate", py_bool
+        "dlp_in_radians", py_bool
     );
 
     /*  Create the history object, which is a Python dictionary.              */
@@ -71,4 +75,4 @@ crssringoccs_ExtractCSVData_Create_History(crssringoccs_PyCSVObj *self,
     self->history = history;
     Py_XDECREF(tmp);
 }
-/*  End of crssringoccs_ExtractCSVData_Create_History.                        */
+/*  End of crssringoccs_GetUranusData_Create_History.                         */

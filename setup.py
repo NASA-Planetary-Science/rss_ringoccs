@@ -74,7 +74,9 @@ def add_directory(directory):
 add_directory("auxiliary")
 add_directory("common")
 add_directory("extract_csv_data")
+add_directory("get_uranus_data")
 add_directory("diffraction_correction")
+add_directory("py_csv_obj")
 srclist.append("rss_ringoccs/crssringoccs/crssringoccs.c")
 
 subprocess.call(["make", "-j", "BUILD_STATIC=1"])

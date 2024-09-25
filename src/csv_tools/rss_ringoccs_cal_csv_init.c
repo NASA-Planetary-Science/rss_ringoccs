@@ -44,10 +44,13 @@ void rssringoccs_CalCSV_Init(rssringoccs_CalCSV *cal)
     cal->f_sky_pred_vals = NULL;
     cal->f_sky_resid_fit_vals = NULL;
     cal->p_free_vals = NULL;
-    cal->n_elements = (size_t)0;
+    cal->n_elements = 0;
 
     /*  And no error has occurred, yet.                                       */
     cal->error_message = NULL;
     cal->error_occurred = tmpl_False;
+
+    /*  No history yet. Set this to NULL.                                     */
+    cal->history = NULL;
 }
 /*  End of rssringoccs_CalCSV_Init.                                           */

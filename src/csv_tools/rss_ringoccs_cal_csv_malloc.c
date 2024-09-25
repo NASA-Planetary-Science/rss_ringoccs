@@ -50,7 +50,7 @@
         cal->error_message = tmpl_strdup(                                      \
             "Error Encountered: rss_ringoccs\n"                                \
             "\trssringoccs_CalCSV_Malloc\n\n"                                  \
-            "Malloc returned NULL. Failed to allocate memory for " #var ".\n"  \
+            "malloc returned NULL. Failed to allocate memory for " #var ".\n"  \
             "Aborting computation and returning.\n"                            \
         );                                                                     \
                                                                                \

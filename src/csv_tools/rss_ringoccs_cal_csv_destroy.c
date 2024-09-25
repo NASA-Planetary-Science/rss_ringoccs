@@ -64,6 +64,5 @@ void rssringoccs_CalCSV_Destroy(rssringoccs_CalCSV **cal)
      *  this object twice.                                                    */
     free(cal_inst);
     *cal = NULL;
-    return;
 }
 /*  End of rssringoccs_CalCSV_Destroy.                                        */

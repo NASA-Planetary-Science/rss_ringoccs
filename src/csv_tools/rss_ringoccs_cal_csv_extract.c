@@ -65,7 +65,7 @@ rssringoccs_CalCSV *rssringoccs_CalCSV_Extract(const char *filename)
     if (!fp)
     {
         cal->error_occurred = tmpl_True;
-        cal->error_message = tmpl_strdup(
+        cal->error_message = tmpl_String_Duplicate(
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_CalCSV_Extract\n\n"
             "fopen returned NULL. Failed to open file for reading.\n"

@@ -46,11 +46,14 @@ void rssringoccs_CalCSV_Destroy_Members(rssringoccs_CalCSV *cal)
     if (!cal)
         return;
 
-    /*  Destroy every variable except the error_message.                      */
+    /*  Destroy every variable except the error_message. Note that the macro  *
+     *  DESTROY_CAL_VAR ends with curly braces, so no need for a semi-colon   *
+     *  at the end of these lines.                                            */
     DESTROY_CAL_VAR(cal->t_oet_spm_vals)
     DESTROY_CAL_VAR(cal->f_sky_pred_vals)
     DESTROY_CAL_VAR(cal->f_sky_resid_fit_vals)
     DESTROY_CAL_VAR(cal->p_free_vals)
+    DESTROY_CAL_VAR(cal->history);
 }
 /*  End of rssringoccs_CalCSV_Destroy_Members.                                */
 

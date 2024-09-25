@@ -31,6 +31,9 @@
 /*  rssringoccs_CalCSV typedef here, and function prototype given.            */
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
 
+/*  size_t typedef given here.                                                */
+#include <stddef.h>
+
 /*  Function for checking the number of columns in a Cal CSV file.            */
 void rssringoccs_CalCSV_Check_Column_Count(rssringoccs_CalCSV *cal, FILE *fp)
 {

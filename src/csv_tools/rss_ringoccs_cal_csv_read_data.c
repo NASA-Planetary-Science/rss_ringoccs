@@ -39,6 +39,12 @@
 /*  rssringoccs_CalCSV typedef here, and function prototype given.            */
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
 
+/*  Macro for reading data from the Cal CSV file and converting it to a       *
+ *  double. The result is stored in the corresponding variable in the struct. */
+#define CAL_READ_VAR(var)                                                      \
+    record = strtok(NULL, ",");                                                \
+    var[n] = atof(record)
+
 /*  Function for reading data from a Cal CSV into a Cal object.               */
 void rssringoccs_CalCSV_Read_Data(rssringoccs_CalCSV *cal, FILE *fp)
 {
@@ -107,14 +113,11 @@ void rssringoccs_CalCSV_Read_Data(rssringoccs_CalCSV *cal, FILE *fp)
         record = strtok(line, ",");
         cal->t_oet_spm_vals[n] = atof(record);
 
-        record = strtok(NULL, ",");
-        cal->f_sky_pred_vals[n] = atof(record);
-
-        record = strtok(NULL, ",");
-        cal->f_sky_resid_fit_vals[n] = atof(record);
-
-        record = strtok(NULL, ",");
-        cal->p_free_vals[n] = atof(record);
+        /*  The CAL_READ_VAR macro looks at the next column in the CSV and    *
+         *  converts the data into a double, storing it in the struct.        */
+        CAL_READ_VAR(cal->f_sky_pred_vals);
+        CAL_READ_VAR(cal->f_sky_resid_fit_vals);
+        CAL_READ_VAR(cal->p_free_vals);
 
         /*  Read the next row in the CSV and increment the index.             */
         line = fgets(buffer, sizeof(buffer), fp);
@@ -125,3 +128,6 @@ void rssringoccs_CalCSV_Read_Data(rssringoccs_CalCSV *cal, FILE *fp)
     rewind(fp);
 }
 /*  End of rssringoccs_CalCSV_Read_Data.                                      */
+
+/*  Undefine everything in case someone wants to #include this file.          */
+#undef CAL_READ_VAR

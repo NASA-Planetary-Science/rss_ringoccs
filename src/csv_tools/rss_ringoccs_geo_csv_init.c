@@ -67,5 +67,8 @@ void rssringoccs_GeoCSV_Init(rssringoccs_GeoCSV *geo)
 
     /*  By default, do not use the deprecated file structure.                 */
     geo->use_deprecated = tmpl_False;
+
+    /*  No history yet. Set this to NULL.                                     */
+    geo->history = NULL;
 }
 /*  End of rssringoccs_GeoCSV_Init.                                           */

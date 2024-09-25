@@ -65,6 +65,7 @@ void rssringoccs_GeoCSV_Destroy_Members(rssringoccs_GeoCSV *geo)
     DESTROY_GEO_VAR(geo->vy_kms_vals)
     DESTROY_GEO_VAR(geo->vz_kms_vals)
     DESTROY_GEO_VAR(geo->obs_spacecraft_lat_deg_vals)
+    DESTROY_GEO_VAR(geo->history)
 }
 /*  End of rssringoccs_GeoCSV_Destroy_Members.                                */
 

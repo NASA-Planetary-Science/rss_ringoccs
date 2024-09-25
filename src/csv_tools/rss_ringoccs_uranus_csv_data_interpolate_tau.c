@@ -8,7 +8,6 @@
 void rssringoccs_UranusCSVData_Interpolate_Tau(rssringoccs_UranusCSVData *csv)
 {
     char err_mes[1024];
-    size_t n;
 
     if (!csv)
         return;

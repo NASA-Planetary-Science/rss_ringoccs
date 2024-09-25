@@ -11,7 +11,7 @@ crssringoccs_ExtractCSVData_Create_History(crssringoccs_PyCSVObj *self,
                                            const char *cal_str,
                                            const char *dlp_str,
                                            const char *tau_str,
-                                           tmpl_Bool use_deprecate)
+                                           tmpl_Bool use_deprecated)
 {
     /*  Python objects needed throughout the computation.                     */
     PyObject *tmp, *input_variables, *input_keywords, *history, *py_bool;
@@ -31,7 +31,7 @@ crssringoccs_ExtractCSVData_Create_History(crssringoccs_PyCSVObj *self,
 
     /*  Python booleans are a type of PyObject. They can be created by        *
      *  casting our Boolean to a long int as follows.                         */
-    py_bool = PyBool_FromLong((long int)use_deprecate);
+    py_bool = PyBool_FromLong((long int)use_deprecated);
 
     /*  Create a dictionary (Python object) with the input arguments.         */
     input_variables = Py_BuildValue(
@@ -48,7 +48,7 @@ crssringoccs_ExtractCSVData_Create_History(crssringoccs_PyCSVObj *self,
     input_keywords = Py_BuildValue(
         "{s:s,s:N}",
         "tau", tau_str,
-        "use_deprecate", py_bool
+        "use_deprecated", py_bool
     );
 
     /*  Create the history object, which is a Python dictionary.              */

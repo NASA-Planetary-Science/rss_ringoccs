@@ -30,6 +30,8 @@
 /*  Boolean data types defined here.                                          */
 #include <libtmpl/include/tmpl_bool.h>
 
+#include <rss_ringoccs/include/rss_ringoccs_history.h>
+
 /*  size_t typedef is given here.                                             */
 #include <stddef.h>
 #include <stdio.h>
@@ -56,6 +58,7 @@ typedef struct rssringoccs_GeoCSV_Def {
     double *vz_kms_vals;
     double *obs_spacecraft_lat_deg_vals;
     size_t n_elements;
+    rssringoccs_History *history;
     tmpl_Bool use_deprecated;
     tmpl_Bool error_occurred;
     char *error_message;
@@ -77,6 +80,7 @@ typedef struct rssringoccs_DLPCSV_Def {
     double *t_set_spm_vals;
     double *B_deg_vals;
     size_t n_elements;
+    rssringoccs_History *history;
     tmpl_Bool use_deprecated;
     tmpl_Bool error_occurred;
     char *error_message;
@@ -89,6 +93,7 @@ typedef struct rssringoccs_CalCSV_Def {
     double *f_sky_resid_fit_vals;
     double *p_free_vals;
     size_t n_elements;
+    rssringoccs_History *history;
     tmpl_Bool error_occurred;
     char *error_message;
 } rssringoccs_CalCSV;
@@ -109,6 +114,7 @@ typedef struct rssringoccs_TauCSV_Def {
     double *t_set_spm_vals;
     double *B_deg_vals;
     size_t n_elements;
+    rssringoccs_History *history;
     tmpl_Bool use_deprecated;
     tmpl_Bool error_occurred;
     char *error_message;
@@ -144,6 +150,7 @@ typedef struct rssringoccs_CSVData_Def {
     double *tau_power_vals;
     double *tau_vals;
     size_t n_elements;
+    rssringoccs_History *history;
     size_t geo_increment;
     size_t geo_decrement;
     tmpl_Bool use_deprecated;
@@ -171,6 +178,7 @@ typedef struct rssringoccs_UranusDLPCSV_Def {
     double *D_km_vals;
     double *f_sky_hz_vals;
     size_t n_elements;
+    rssringoccs_History *history;
     tmpl_Bool in_radians;
     tmpl_Bool error_occurred;
     char *error_message;
@@ -205,6 +213,7 @@ typedef struct rssringoccs_UranusCSVData_Def {
     double *tau_power_vals;
     double *tau_vals;
     size_t n_elements;
+    rssringoccs_History *history;
     size_t geo_increment;
     size_t geo_decrement;
     tmpl_Bool dlp_in_radians;
@@ -255,6 +264,9 @@ extern void rssringoccs_GeoCSV_Destroy(rssringoccs_GeoCSV **geo);
 extern void rssringoccs_GeoCSV_Init(rssringoccs_GeoCSV *geo);
 extern void rssringoccs_GeoCSV_Malloc(rssringoccs_GeoCSV *geo, FILE *fp);
 extern void rssringoccs_GeoCSV_Read_Data(rssringoccs_GeoCSV *geo, FILE *fp);
+
+extern void
+rssringoccs_GeoCSV_Write_History(rssringoccs_GeoCSV *geo, const char *filename);
 
 /******************************************************************************
  *                               Tau CSV Tools                                *

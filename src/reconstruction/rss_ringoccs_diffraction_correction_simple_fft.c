@@ -98,7 +98,7 @@ void rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau)
 
         if (fabs(window_func_x) <= w_thresh)
         {
-            phi = tmpl_Double_Stationary_Cyl_Fresnel_Psi_D_Newton(
+            phi = tmpl_Double_Stationary_Cyl_Fresnel_Psi_D_Newton_Deg(
                 tau->k_vals[center],
                 tau->rho_km_vals[center],
                 tau->rho_km_vals[current_point],
@@ -112,7 +112,7 @@ void rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau)
                 tau->toler
             );
 
-            D = tmpl_Double_Cyl_Fresnel_Observer_Distance(
+            D = tmpl_Double_Cyl_Fresnel_Observer_Distance_Deg(
                 tau->rho_km_vals[current_point],   /* Ring radius. */
                 phi,                               /* Stationary azimuth. */
                 tau->rx_km_vals[center],           /* Cassini x coordinate. */
@@ -120,7 +120,7 @@ void rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau)
                 tau->rz_km_vals[center]            /* Cassini z coordinate. */
             );
 
-            psi = -tmpl_Double_Cyl_Fresnel_Psi(
+            psi = -tmpl_Double_Cyl_Fresnel_Psi_Deg(
                 tau->k_vals[center],
                 tau->rho_km_vals[center],
                 tau->rho_km_vals[current_point],

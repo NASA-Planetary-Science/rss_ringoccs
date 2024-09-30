@@ -221,6 +221,37 @@ typedef struct rssringoccs_UranusCSVData_Def {
     char *error_message;
 } rssringoccs_UranusCSVData;
 
+/*  Struct for the Merged CSV files (DLPM.TAB). This combines DLP, GEO, and   *
+ *  CAL data, and can optionally contain TAU data as well.                    */
+typedef struct rssringoccs_MergedCSVData_Def {
+    double *B_deg_vals;
+    double *D_km_vals;
+    double *f_sky_hz_vals;
+    double *p_norm_vals;
+    double *raw_tau_vals;
+    double *phase_deg_vals;
+    double *phi_deg_vals;
+    double *phi_rl_deg_vals;
+    double *raw_tau_threshold_vals;
+    double *rho_corr_pole_km_vals;
+    double *rho_corr_timing_km_vals;
+    double *rho_dot_kms_vals;
+    double *rho_km_vals;
+    double *rx_km_vals;
+    double *ry_km_vals;
+    double *rz_km_vals;
+    double *t_oet_spm_vals;
+    double *t_ret_spm_vals;
+    double *t_set_spm_vals;
+    double *tau_phase_deg_vals;
+    double *tau_power_vals;
+    double *tau_vals;
+    size_t n_elements;
+    rssringoccs_History *history;
+    tmpl_Bool error_occurred;
+    char *error_message;
+} rssringoccs_MergedCSVData;
+
 /******************************************************************************
  *                               Cal CSV Tools                                *
  ******************************************************************************/
@@ -282,6 +313,31 @@ extern void rssringoccs_TauCSV_Destroy(rssringoccs_TauCSV **geo);
 extern void rssringoccs_TauCSV_Init(rssringoccs_TauCSV *geo);
 extern void rssringoccs_TauCSV_Malloc(rssringoccs_TauCSV *geo, FILE *fp);
 extern void rssringoccs_TauCSV_Read_Data(rssringoccs_TauCSV *geo, FILE *fp);
+
+/******************************************************************************
+ *                              Merged CSV Tools                              *
+ ******************************************************************************/
+extern rssringoccs_MergedCSVData *
+rssringoccs_MergedCSVData_Extract(const char *filename);
+
+extern void
+rssringoccs_MergedCSVData_Check_Column_Count(rssringoccs_MergedCSVData *dlpm,
+                                             FILE *fp);
+
+extern void
+rssringoccs_MergedCSVData_Destroy_Members(rssringoccs_MergedCSVData *dlp);
+
+extern void
+rssringoccs_MergedCSVData_Destroy(rssringoccs_MergedCSVData **dlp);
+
+extern void
+rssringoccs_MergedCSVData_Init(rssringoccs_MergedCSVData *dlp);
+
+extern void
+rssringoccs_MergedCSVData_Malloc(rssringoccs_MergedCSVData *dlp, FILE *fp);
+
+extern void
+rssringoccs_MergedCSVData_Read_Data(rssringoccs_MergedCSVData *dlp, FILE *fp);
 
 /******************************************************************************
  *                               CSV Data Tools                               *

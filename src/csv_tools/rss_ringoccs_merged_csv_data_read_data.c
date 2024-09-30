@@ -119,7 +119,14 @@ rssringoccs_MergedCSVData_Read_Data(rssringoccs_MergedCSVData *dlpm, FILE *fp)
     /*  If the CSV has a header, skip this. The first word of the header      *
      *  would be either 'B_deg_vals' or 'b_deg_vals'. Check for the letter B. */
     if ((line[0] == 'B') || (line[0] == 'b'))
+    {
         line = fgets(buffer, sizeof(buffer), fp);
+
+        /*  Since the starting row does not represent actual data, the number *
+         *  of lines is equal to the number of elements plus one. Decrement   *
+         *  the n_elements variable to set the correct value.                 */
+        --dlpm->n_elements;
+    }
 
     /*  Loop through the lines in the CSV file and read them into the struct. */
     while (line != NULL)

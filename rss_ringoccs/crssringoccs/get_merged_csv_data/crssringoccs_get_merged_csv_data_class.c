@@ -44,7 +44,7 @@ PyTypeObject crssringoccs_GetMergedCSVData = {
         "\r\t\t1.)\n"
         "\r\t\t\tDLPM CSV files should have all of the data already\n"
         "\r\t\t\tinterpolated against rho_km_vals. The variables should be\n"
-        "\r\t\t\tfunctions of rho_km_vals as well.\n"
+        "\r\t\t\tfunctions of rho_km_vals as well.\n",
     .tp_basicsize = sizeof(crssringoccs_PyCSVObj),
     .tp_itemsize = 0,
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,

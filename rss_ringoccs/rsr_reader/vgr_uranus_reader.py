@@ -4,7 +4,6 @@ Purpose: Read Uranus data files.
 NOTE: Uranus data files are on our local TC2017/data directory!!
 NOTE: 1 second gaps between egress UC0482 and UC0483 tapes
 """
-import pdb
 import numpy as np
 from scipy.fftpack import hilbert
 import os
@@ -144,4 +143,3 @@ class VGRUranusReader(object):
             data_out = [item for sublist in data_raw_full for item in sublist]
             data = np.reshape(data_out, (int(nrecords*rec_data_bytes/nchan),nchan))[:,channel]
             return data
-

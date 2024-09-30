@@ -8,7 +8,6 @@
     #. time
     #. os
     #. platform
-    #. pandas
     #. numpy
 """
 import sys

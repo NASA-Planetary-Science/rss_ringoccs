@@ -37,8 +37,6 @@
         #. time
         #. sys
         #. subprocess
-        #. pdb
-        #. pandas
         #. matplotlib
         #. os
         #. platform

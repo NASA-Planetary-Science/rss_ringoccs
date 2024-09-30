@@ -405,7 +405,6 @@ class Uranus_Geometry(object):
 
         if len(ind) > 1:
             print('WARNING! ring radius changes direction twice!')
-            pdb.set_trace()
         elif len(ind) == 0:
             ind = None
         else:

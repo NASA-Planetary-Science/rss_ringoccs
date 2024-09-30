@@ -10,9 +10,7 @@
         #. numpy
         #. scipy
         #. sys
-        #. pdb
         #. matplotlib
-
 """
 
 from .calc_freq_offset import calc_freq_offset

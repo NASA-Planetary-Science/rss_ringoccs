@@ -46,7 +46,10 @@ PyMODINIT_FUNC PyInit_crssringoccs(void)
     if (PyType_Ready(&crssringoccs_ExtractCSVData) < 0)
         return NULL;
 
-    if (PyType_Ready(&GetUranusDataType) < 0)
+    if (PyType_Ready(&crssringoccs_GetUranusData) < 0)
+        return NULL;
+
+    if (PyType_Ready(&crssringoccs_GetMergedCSVData) < 0)
         return NULL;
 
     module = PyModule_Create(&moduledef);
@@ -68,17 +71,17 @@ PyMODINIT_FUNC PyInit_crssringoccs(void)
         return NULL;
     }
 
-    Py_INCREF(&GetUranusDataType);
+    Py_INCREF(&crssringoccs_GetUranusData);
     pymod_addobj = PyModule_AddObject(
         module,
         "GetUranusData",
-        (PyObject *)&GetUranusDataType
+        (PyObject *)&crssringoccs_GetUranusData
     );
 
     if (pymod_addobj < 0)
     {
         Py_DECREF(&crssringoccs_ExtractCSVData);
-        Py_DECREF(&GetUranusDataType);
+        Py_DECREF(&crssringoccs_GetUranusData);
         Py_DECREF(module);
         return NULL;
     }
@@ -93,23 +96,41 @@ PyMODINIT_FUNC PyInit_crssringoccs(void)
     if (pymod_addobj < 0)
     {
         Py_DECREF(&crssringoccs_ExtractCSVData);
-        Py_DECREF(&GetUranusDataType);
+        Py_DECREF(&crssringoccs_GetUranusData);
         Py_DECREF(&crssringoccs_DiffractionCorrection);
         Py_DECREF(module);
         return NULL;
     }
 
+    Py_INCREF(&crssringoccs_GetMergedCSVData);
+    pymod_addobj = PyModule_AddObject(
+        module,
+        "GetMergedCSVData",
+        (PyObject *)&crssringoccs_GetMergedCSVData
+    );
+
+    if (pymod_addobj < 0)
+    {
+        Py_DECREF(&crssringoccs_ExtractCSVData);
+        Py_DECREF(&crssringoccs_GetUranusData);
+        Py_DECREF(&crssringoccs_DiffractionCorrection);
+        Py_DECREF(&crssringoccs_GetMergedCSVData);
+        Py_DECREF(module);
+        return NULL;
+    }
+
     all = Py_BuildValue(
-        "[s, s, s]",
+        "[s, s, s, s]",
         "DiffractionCorrection",
         "ExtractCSVData",
-        "GetUranusData"
+        "GetUranusData",
+        "GetMergedCSVData"
     );
 
     if (!all)
     {
         Py_DECREF(&crssringoccs_ExtractCSVData);
-        Py_DECREF(&GetUranusDataType);
+        Py_DECREF(&crssringoccs_GetUranusData);
         Py_DECREF(&crssringoccs_DiffractionCorrection);
         Py_DECREF(module);
         Py_CLEAR(module);
@@ -121,7 +142,7 @@ PyMODINIT_FUNC PyInit_crssringoccs(void)
     if (pymod_addobj < 0)
     {
         Py_DECREF(&crssringoccs_ExtractCSVData);
-        Py_DECREF(&GetUranusDataType);
+        Py_DECREF(&crssringoccs_GetUranusData);
         Py_DECREF(&crssringoccs_DiffractionCorrection);
         Py_DECREF(module);
         return NULL;

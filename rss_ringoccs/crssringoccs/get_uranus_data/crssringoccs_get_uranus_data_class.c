@@ -30,7 +30,7 @@
  ******************************************************************************/
 #include "../crssringoccs.h"
 
-PyTypeObject GetUranusDataType = {
+PyTypeObject crssringoccs_GetUranusData = {
     PyVarObject_HEAD_INIT(NULL, 0)
     .tp_name = "GetUranusData",
     .tp_doc =

@@ -89,11 +89,14 @@ class DiffractionLimitedProfile(object):
         #. All *np.ndarray* attributes are sampled at dr_km radial spacing.
     """
     def __init__(self, rsr_inst, geo_inst, cal_inst, dr_km, verbose=False,
-            write_file=True, profile_range=[65000., 150000.]):
+            write_file=True, profile_range=[65000., 150000.],
+            local_path_to_output=None):
 
 
         if verbose:
             print('Preparing diffraction-limited profile...')
+
+        #print('local_path_to_output=',local_path_to_output)
 
         self.add_info = {}
 
@@ -236,7 +239,7 @@ class DiffractionLimitedProfile(object):
                 add_info=self.add_info)
 
         if write_file:
-            self.outfiles = write_output_files(self)
+            self.outfiles = write_output_files(self,local_path_to_output=local_path_to_output)
 
 
 
@@ -353,7 +356,8 @@ class DiffractionLimitedProfile(object):
 
     @classmethod
     def create_dlps(cls, rsr_inst, geo_inst, cal_inst, dr_km,
-        verbose=False, write_file=False, profile_range=[65000., 150000.]):
+        verbose=False, write_file=False, profile_range=[65000., 150000.],
+        local_path_to_output=None):
         """
         Create ingress and egress instances of DiffractionLimitedProfile.
 
@@ -414,12 +418,14 @@ class DiffractionLimitedProfile(object):
         if prof_dir == '"INGRESS"':
             dlp_egr = None
             dlp_ing = cls(rsr_inst, geo_inst, cal_inst, dr_km, verbose=verbose,
-                    write_file=write_file, profile_range=profile_range)
+                    write_file=write_file, profile_range=profile_range,
+                    local_path_to_output=local_path_to_output)
 
         elif prof_dir == '"EGRESS"':
             dlp_ing = None
             dlp_egr = cls(rsr_inst, geo_inst, cal_inst, dr_km, verbose=verbose,
-                    write_file=write_file, profile_range=profile_range)
+                    write_file=write_file, profile_range=profile_range,
+                    local_path_to_output=local_path_to_output)
 
         elif prof_dir == '"BOTH"':
             # split ingress and egress
@@ -513,7 +519,8 @@ class DiffractionLimitedProfile(object):
                 geo_egr.ul_phi_ora_deg_vals = geo_inst.ul_phi_ora_deg_vals[ind_geo_egr:]
 
             dlp_ing = cls(rsr_ing, geo_ing, cal_ing, dr_km, verbose=verbose,
-                    write_file=write_file, profile_range=profile_range)
+                    write_file=write_file, profile_range=profile_range,
+                    local_path_to_output=local_path_to_output)
 
             geo_egr.rx_km_vals = geo_inst.rx_km_vals[ind_geo_egr:]
             geo_egr.ry_km_vals = geo_inst.ry_km_vals[ind_geo_egr:]
@@ -535,7 +542,8 @@ class DiffractionLimitedProfile(object):
                 geo_egr.rev_info['prof_dir'] = '"EGRESS"'
             geo_egr.rev_info['DIR'] = 'CHORD'
             dlp_egr = cls(rsr_egr, geo_egr, cal_egr, dr_km, verbose=verbose,
-                    write_file=write_file, profile_range=profile_range)
+                    write_file=write_file, profile_range=profile_range,
+                    local_path_to_output=local_path_to_output)
         else:
             raise ValueError('ERROR (create_dlps()): Invalid profile '
                 + 'direction given!')

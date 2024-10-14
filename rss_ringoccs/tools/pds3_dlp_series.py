@@ -90,7 +90,7 @@ def write_dlp_series_data(dlp_inst, out_file):
                 '\r\n'))
             
     f.close()
-    print('\tDLP data written to: ' + out_file)
+    print('DLP data written to: ' + out_file)
 
 
     return None

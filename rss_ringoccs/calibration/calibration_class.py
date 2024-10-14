@@ -79,7 +79,7 @@ class Calibration(object):
     """
 
     def __init__(self, rsr_inst, geo_inst, pnf_order=3, fof_lims = None,
-                 verbose=False, write_file=True, interact=False):
+                 verbose=False, write_file=True, local_path_to_output=None,interact=False):
 
         if not isinstance(geo_inst, Geometry):
             sys.exit('ERROR (Calibration): geo_inst input needs to be an '
@@ -124,6 +124,7 @@ class Calibration(object):
         # Calculate frequency offset fit
         # Use default offset frequency fit
         fit_inst = FreqOffsetFit(rsr_inst, geo_inst, verbose=verbose,
+                local_path_to_output=local_path_to_output,
                 write_file=write_file, fof_lims=fof_lims)
 
         # Get corrected I's and Q's
@@ -133,6 +134,7 @@ class Calibration(object):
         # Normalize observed power by the freespace signal
         norm_inst = Normalization(rsr_inst.spm_vals, self.IQ_c, geo_inst,
                 order=pnf_order,verbose=verbose,interact=interact,
+                local_path_to_output=local_path_to_output,
                 write_file=write_file)
 
         spm_cal = geo_inst.t_oet_spm_vals
@@ -184,7 +186,7 @@ class Calibration(object):
 
 
         if write_file:
-            self.outfiles = write_output_files(self)
+            self.outfiles = write_output_files(self,local_path_to_output=local_path_to_output)
 
 
     def correct_IQ(self,spm_vals,IQ_m,f_spm,f_offset_fit):

@@ -60,6 +60,9 @@ class Geometry(object):
         :nhat_p (*list*): Unit vector in pole direction, in rectangular
                           coordinates. If None, it will be calculated
                           using contents of the planetary constants kernel.
+        :local_path_to_tables (*str*): local path to tables/
+        :local_path_to_output (*str*): local path to output/
+
 
     Attributes
         :t_oet_spm_vals (*np.ndarray*): Observed event time in seconds
@@ -130,9 +133,10 @@ class Geometry(object):
 
     """
     def __init__(self, rsr_inst, planet, spacecraft, kernels, pt_per_sec=1.,
-            ref='J2000', ring_frame=None, nhat_p=None, verbose=False,
+            ref='J2000', ring_frame=None, nhat_p=None, 
+            local_path_to_output=None,
+            local_path_to_tables=None,verbose=False,
             write_file=True):
-
 
         self.verbose = verbose
         self.add_info = {}
@@ -152,6 +156,9 @@ class Geometry(object):
         if not isinstance(pt_per_sec, (int, float)):
             raise ValueError('ERROR (Geometry): Input pt_per_sec is NOT an int '
                                 + 'or float!')
+## DEBUG
+#        print('occgeo: local_path_to_tables:',local_path_to_tables)
+#        print('occgeo: local_path_to_output:',local_path_to_output)
 
         ## Extract information from rsr instance
         year = rsr_inst.year
@@ -367,6 +374,11 @@ class Geometry(object):
         self.vx_kms_vals = np.array(vx_kms_vals)
         self.vy_kms_vals = np.array(vy_kms_vals)
         self.vz_kms_vals = np.array(vz_kms_vals)
+        
+        # DEBUG
+        #print('in occgeo.py:')
+        #print('len(self.t_oet_spm_vals), len(t_oet_spm_vals) = ',len(self.t_oet_spm_vals), len(t_oet_spm_vals))
+        #print('len(self.rx_km_vals), len(rx_km_vals) = ',len(self.rx_km_vals), len(rx_km_vals))
 
         self.kernels = kernels
         self.elev_deg_vals = np.asarray(elev_deg_vals)
@@ -411,11 +423,13 @@ class Geometry(object):
         self.freespace_km, self.freespace_spm = cog.get_freespace(
                 t_ret_spm_vals, year, doy, rho_km_vals,
                 phi_rl_deg_vals, t_oet_spm_vals, self.atmos_occ_spm_vals,
-                split_ind=self.split_ind, kernels=kernels)
+                split_ind=self.split_ind, local_path_to_tables=local_path_to_tables,
+                kernels=kernels)
 
         # Write output data and label file if set
         if write_file:
-            self.outfiles = write_output_files(self)
+            self.outfiles = write_output_files(self,local_path_to_output=local_path_to_output,
+                            local_path_to_tables=local_path_to_tables)
 
 
 

@@ -102,7 +102,7 @@ def write_geo_series_data(geo_inst, out_file):
 
     f.close()
 
-    print('\tGEO data written to: ' + out_file)
+    print('GEO data written to: ' + out_file)
     return None
 
 
@@ -326,7 +326,6 @@ def get_geo_series_info(rev_info, geo_inst, series_name, prof_dir):
             + 'Richard G. French,' + sd
             + 'Astronomy Department, Wellesley College;' + sd
             + 'Wellesley, MA 02481-8203;' + sd
-            + '(781) 283-3747;' + sd
             + 'rfrench@wellesley.edu."')
 
     # Extract history information
@@ -352,7 +351,8 @@ def get_geo_series_info(rev_info, geo_inst, series_name, prof_dir):
             , 'hist name': 'Geometry history'
             , 'User Name': HIST_USER_NAME
             , 'Host Name': HIST_HOST_NAME
-            #, 'Run Date': HIST_RUN_DATE
+# NOT SURE WHY THIS WAS COMMENTED OUT! rgf
+            , 'Run Date': HIST_RUN_DATE
             , 'Python Version': HIST_PYTHON_VERSION
             , 'rss_ringoccs Version': HIST_RSSOCC_VERSION
             , 'Operating System': HIST_OPERATING_SYSTEM

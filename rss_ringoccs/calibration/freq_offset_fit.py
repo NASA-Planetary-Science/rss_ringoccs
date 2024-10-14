@@ -61,7 +61,7 @@ class FreqOffsetFit(object):
     """
 
     def __init__(self, rsr_inst, geo_inst, f_uso_x=8427222034.34050,
-            verbose=False, write_file=False, fof_lims=None):
+            verbose=False, local_path_to_output=None,write_file=False, fof_lims=None):
 
 
         # Check inputs for validity
@@ -171,7 +171,8 @@ class FreqOffsetFit(object):
         if write_file:
             self.plotFORFit(f_spm,f_offset,f_offset_fit,self.__mask,
                             spm_min,spm_max,geo_inst.t_oet_spm_vals[0],
-                            geo_inst.t_oet_spm_vals[-1])
+                            geo_inst.t_oet_spm_vals[-1],
+                            local_path_to_output=local_path_to_output)
 
         # set attributes
         self.f_offset_fit = f_offset_fit
@@ -595,7 +596,8 @@ class FreqOffsetFit(object):
         return f_offset_fit,chi2
 
     # Create and save a plot of the freq offset fit
-    def plotFORFit(self,spm,f_offset,fit,mask,spm_min,spm_max,occ_min,occ_max):
+    def plotFORFit(self,spm,f_offset,fit,mask,spm_min,spm_max,occ_min,occ_max,
+         local_path_to_output=None):
         """
         :Purpose:
             Plot results of the automated frequency offset
@@ -613,7 +615,8 @@ class FreqOffsetFit(object):
             :spm_max (*float*): end of occultation in SPM
         """
         #generate plot file names
-        filenames,outdirs = construct_filepath(self.rev_info,'FORFIT')
+        filenames,outdirs = construct_filepath(self.rev_info,'FORFIT',
+                            local_path_to_output=local_path_to_output)
         # set up subplot
         ax = plt.figure().add_subplot(111)
         # frequency offsets used for fit
@@ -639,5 +642,5 @@ class FreqOffsetFit(object):
             plt.title(file)
             outfile = dir + file + '.PDF'
             plt.savefig(outfile)
-            print('\tFrequency offset fit plot saved to: ' + outfile)
+            print('Frequency offset fit plot saved to: ' + outfile)
         plt.close()

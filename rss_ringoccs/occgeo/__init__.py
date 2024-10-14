@@ -6,5 +6,5 @@
 """
 
 from .occgeo import Geometry
-from . occgeo_uranus import Uranus_Geometry
+#from . occgeo_uranus import Uranus_Geometry
 from . import calc_occ_geometry

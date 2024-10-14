@@ -168,7 +168,7 @@ class RSRReader(object):
         + __sh_field_names + __data_field_names)
 
     def __init__(self, rsr_file, decimate_16khz_to_1khz=True, 
-                 apply_bias_correction=True,verbose=False):
+                 apply_bias_correction=True,NoOp=False,verbose=False):
 
         if not isinstance(verbose, bool):
             print('WARNING (RSRReader): verbose input should be Boolean. '
@@ -532,10 +532,11 @@ class RSRReader(object):
             n_pts = len(IQ_m)
             dt = 1.0 / float(1000)
             spm_vals = spm_vals[0] + dt * np.arange(n_pts)
-        elif decimate_16khz_to_1khz & (self.sample_rate_khz == 1) and (
-                verbose is True):
-            print('\nWARNING (RSRReader.get_IQ): Cannot decimate a 1 kHz file '
-                + 'any further. Skipping extra decimation\n')
+# unnecessary WARNING
+        #elif decimate_16khz_to_1khz & (self.sample_rate_khz == 1) and (
+        #        verbose is True):
+        #    print('\nWARNING (RSRReader.get_IQ): Cannot decimate a 1 kHz file '
+        #        + 'any further. Skipping extra decimation\n')
 
         self.spm_vals = spm_vals
         self.IQ_m = IQ_m

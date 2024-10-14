@@ -31,7 +31,8 @@ func_typ = {'GEO': write_geo_series,
         'TAU': write_tau_series}
         #'SPECTRO': write_spectro_image}
 
-def write_output_files(inst, add_text=None):
+def write_output_files(inst, add_text=None,rev_info=None,local_path_to_tables='../tables/',
+                       local_path_to_output = '../output/',verbose=False):
     """
     Write output (geo, cal, dlp, tau) *.TAB and *.LBL files, depending on 
     instance given.
@@ -43,8 +44,12 @@ def write_output_files(inst, add_text=None):
 
     Keyword Arguments
         :add_text (*str*): Additional string to be added to filename.
+        :rev_info (*object*): use this rev_info instead of inst.rev_info
         
     """
+    if verbose:
+        print('write_output_files: local_path_to_output:',local_path_to_output)
+        print('write_output_files: local_path_to_tables:',local_path_to_tables)
     if add_text is not None:
         add = add_text
     else:
@@ -62,16 +67,24 @@ def write_output_files(inst, add_text=None):
 
     elif isinstance(inst, rss.DiffractionCorrection):
         filtyp = 'TAU_' + str(int(inst.input_res * 1000)).zfill(5) + 'M' + add
+        if verbose:
+            print('TAU filtyp:',filtyp)
     #elif isinstance(inst, rss.scatter.Scatter):
     #    filtyp = 'SCATTER_' + inst.band + (inst.dsn).split('-')[1] + add
     else:
         raise TypeError('invalid instance for write_output_files.')
 
-    rev_info = inst.rev_info
-    outfiles = construct_output_filename(rev_info, inst, filtyp)
+    if rev_info == None: # use inst.rev_info unless supplied by call
+        rev_info = inst.rev_info
+    if verbose:
+        print('rev_info:',rev_info)
+    outfiles = construct_output_filename(rev_info, inst, filtyp,local_path_to_output=local_path_to_output)
+    if verbose:
+        print('outfiles:',outfiles)
+        print('add:',add)
     return outfiles
 
-def construct_filepath(rev_info, filtyp):
+def construct_filepath(rev_info, filtyp,local_path_to_output = '../output/',verbose=False):
     """
     Construct output filepath 
 
@@ -94,6 +107,8 @@ def construct_filepath(rev_info, filtyp):
     else:
         pd1 = [pd1]
         pd2 = ''
+    if verbose:
+        print('construct_filepath: pd1,pd2:',pd1,pd2)
 
 
     doy = rev_info['doy']
@@ -104,6 +119,8 @@ def construct_filepath(rev_info, filtyp):
     else:
         dsn = rev_info['dsn'].split('-')[-1]
     rev = rev_info['rev_num']
+    if verbose:
+        print('construct_filepath: dsn,rev,local_path_to_output',dsn,rev,local_path_to_output)
 
 
     if 'DIR' in rev_info:
@@ -112,23 +129,31 @@ def construct_filepath(rev_info, filtyp):
 
     if 'PER' in rev_info:
         pd2 = 'P' + pd2
+    if verbose:
+        print('construct_filepath: now pd2 =',pd2)
 
     for dd in pd1:
         filestr = ('RSS_' + str(year) + '_' + str(doy) + '_' + str(band) +
             str(dsn) + '_' + dd)
 
-        dirstr = ('../output/Rev' + rev + '/Rev' + rev + pd2 + dd 
+        dirstr = (local_path_to_output+'Rev' + rev + '/Rev' + rev + pd2 + dd 
                 + '/' + 'Rev' + rev + pd2 + dd + '_' + filestr + '/')
+        if verbose:
+            print('construct_filepath: dd,filestr,dirstr =',dd,filestr,dirstr)
 
         # Create output file name without file extension
         curday = strftime('%Y%m%d')
         out1 = dirstr + filestr + '_' + filtyp.upper() + '_' + curday
+        if verbose:
+            print('construct_filepath: curday,out1 =',curday,out1)
 
         if os.path.exists(dirstr):
 
             # Check for most recent file and order them by date
             dirfiles = [x for x in os.listdir(dirstr) if
                     x.startswith('.')==False]
+            if verbose:
+                print('construct_filepath: path exists,len(dirfiles, dirfiles = ',len(dirfiles),dirfiles)
 
 
             if len(dirfiles) == 0:
@@ -136,31 +161,43 @@ def construct_filepath(rev_info, filtyp):
             else:
                 sqn0 = [x.split('_')[-2]+x.split('_')[-1][0:4] for x in dirfiles
                         if (filtyp.upper() in x) and (x.split('_')[-2]==curday)]
+                if verbose:
+                    print('construct_filepath: sqn0:',sqn0)
                 if len(sqn0) == 0:
                     seq_num = '0001'
                 else:
                     sqn1 = [int(x) for x in sqn0]
-
-                    seq_num = (str(sqn1[-1] + 1))[-4:]
+                    sqn1max = max(sqn1)
+# BUG sqn1 is not sorted!
+#                    seq_num = (str(sqn1[-1] + 1))[-4:]
+                    seq_num = (str(sqn1max + 1))[-4:]
+                    if verbose:
+                        print('construct_filepath: sqn1, sqn1max,seq_num:',sqn1,type(sqn1),sqn1max,seq_num)
 
             out2 = out1 + '_' + seq_num
-
-
+            if verbose:
+                print('construct_filepath: out2,out1,seq_num:',out2,out1,seq_num)
 
         else:
             os.system('[ ! -d ' + dirstr + ' ] && mkdir -p ' + dirstr)
+            if verbose:
+                print('construct_filepath: mkdir -p dirstr:',dirstr)
 
             seq_num = '0001'
             out2 = out1 + '_' + seq_num
+            if verbose:
+                print('construct_filepath: out2, out1, seq_num:',out2,out1,seq_num)
 
         title = out2.split('/')[-1]
         outdir = '/'.join(out2.split('/')[0:-1]) + '/'
         title_out.append(title)
         outdir_out.append(outdir)
+        if verbose:
+            print('construct_filepath: title,outdir,title_out,outdir_out\n',title,outdir,title_out,outdir_out)
     return title_out, outdir_out
         
 
-def construct_output_filename(rev_info, inst, filtyp):
+def construct_output_filename(rev_info, inst, filtyp,local_path_to_output='../output/',verbose=False):
     """
     Construct output filepath 
 
@@ -176,7 +213,9 @@ def construct_output_filename(rev_info, inst, filtyp):
         :outfiles (*list*): List of output filepaths
     """
 
-    titles, outdirs = construct_filepath(rev_info, filtyp)
+    titles, outdirs = construct_filepath(rev_info, filtyp,local_path_to_output=local_path_to_output,verbose=verbose)
+    if verbose:
+        print('construct_output_filename: titles, outdirs:',titles,outdirs)
     ndirs = len(titles)
     outfiles = []
     for n in range(ndirs):

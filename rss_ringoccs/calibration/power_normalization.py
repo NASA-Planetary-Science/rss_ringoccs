@@ -58,6 +58,7 @@ class Normalization(object):
 
     def __init__(self, spm_raw, IQ_c, geo_inst, order=3,
             fittype='poly', interact=False, verbose=False,
+            local_path_to_output=None,
             write_file=False):
 
 
@@ -114,7 +115,8 @@ class Normalization(object):
         # plot final fit for user reference
         if write_file:
             self.plot_power_profile(spm_down,p_obs_down,new_gaps,
-                                    self.order,save=True)
+                                    self.order,
+                   local_path_to_output=local_path_to_output,save=True)
 
     def hfit_med(self, p_obs_down):
 
@@ -403,7 +405,8 @@ class Normalization(object):
         self.chi_squared = chi2
         return None
 
-    def plot_power_profile(self,spm,pow,gaps,order,save=False):
+    def plot_power_profile(self,spm,pow,gaps,order,
+        local_path_to_output=None,save=False):
         """
         Purpose:
             Plot results of the freespace power for total profile and
@@ -491,14 +494,15 @@ class Normalization(object):
         fig.text(0.4,0.925,'PolyOrder: '+str(order))
         if save:
             #generate plot file names
-            filenames,outdirs = construct_filepath(self.rev_info,'FSPFIT')
+            filenames,outdirs = construct_filepath(self.rev_info,'FSPFIT',
+                    local_path_to_output=local_path_to_output)
             # output
             for file,dir in zip(filenames,outdirs):
                 outfile = dir + file + '.PDF'
                 fig.text(0.125,0.96,file,fontsize=15)
                 plt.savefig(outfile)
                 fig.texts[-1].set_visible(False)
-                print('\tPower normalization plot saved to: ' + outfile)
+                print('Power normalization plot saved to: ' + outfile)
             plt.close('all')
         else:
             plt.show(block=False)

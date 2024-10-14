@@ -36,20 +36,26 @@ def write_tau_series_data(tau_inst, out_file):
                 + '%14.6F,' + '%14.6F,' + '%12.6F,'
                 + '%14.6F,'*3 + '%12.6F,' + '%12.6F' + '%s')
         for n in range(npts):
+            if(type(tau_inst.tau_threshold_vals) == type(None)):
+                tau_threshold_val = 0.0
+            else:
+                tau_threshold_val = tau_inst.tau_threshold_vals[n]
             f.write(format_str % (
                 tau_inst.rho_km_vals[n],
                 tau_inst.rho_corr_pole_km_vals[n],
                 tau_inst.rho_corr_timing_km_vals[n],
                 np.degrees(tau_inst.phi_rl_rad_vals[n]),
                 np.degrees(tau_inst.phi_rad_vals[n]),
-                tau_inst.power_vals[n],
-                tau_inst.tau_vals[n],
-                np.degrees(tau_inst.phase_vals[n]),
-                tau_inst.tau_threshold_vals[n],
+                tau_inst.phi_rl_deg_vals[n],
+                tau_inst.phi_deg_vals[n],
+                tau_inst.T_out[n]**2,
+                -np.log(tau_inst.T_out[n]**2)*np.abs(np.sin(np.radians(tau_inst.B_deg_vals[n]))),
+                np.degrees(np.arctan2(np.imag(-tau_inst.T_out[n]),np.real(tau_inst.T_out[n]))),
+                tau_threshold_val,
                 tau_inst.t_oet_spm_vals[n],
                 tau_inst.t_ret_spm_vals[n],
                 tau_inst.t_set_spm_vals[n],
-                np.degrees(tau_inst.B_rad_vals[n]),
+                tau_inst.B_deg_vals[n],
                 tau_inst.t_ul_spm_vals[n],
                 tau_inst.t_ul_ret_spm_vals[n],
                 tau_inst.ul_rho_km_vals[n],
@@ -61,26 +67,30 @@ def write_tau_series_data(tau_inst, out_file):
                 + '%14.6E,' + '%14.6E,' + '%12.6F,' + '%14.6E,' + '%14.6F,'
                 + '%14.6F,' + '%14.6F,' + '%12.6F' + '%s')
         for n in range(npts):
+            if(type(tau_inst.tau_threshold_vals) == type(None)):
+                tau_threshold_val = 0.0
+            else:
+                tau_threshold_val = tau_inst.tau_threshold_vals[n]
             f.write(format_str % (
                 tau_inst.rho_km_vals[n],
                 tau_inst.rho_corr_pole_km_vals[n],
                 tau_inst.rho_corr_timing_km_vals[n],
-                np.degrees(tau_inst.phi_rl_rad_vals[n]),
-                np.degrees(tau_inst.phi_rad_vals[n]),
-                tau_inst.power_vals[n],
-                tau_inst.tau_vals[n],
-                np.degrees(tau_inst.phase_vals[n]),
-                tau_inst.tau_threshold_vals[n],
+                tau_inst.phi_rl_deg_vals[n],
+                tau_inst.phi_deg_vals[n],
+                tau_inst.T_out[n]**2,
+                -np.log(tau_inst.T_out[n]**2)*np.abs(np.sin(np.radians(tau_inst.B_deg_vals[n]))),
+                np.degrees(np.arctan2(np.imag(-tau_inst.T_out[n]),np.real(tau_inst.T_out[n]))),
+                tau_threshold_val,
                 tau_inst.t_oet_spm_vals[n],
                 tau_inst.t_ret_spm_vals[n],
                 tau_inst.t_set_spm_vals[n],
-                np.degrees(tau_inst.B_rad_vals[n]),
+                tau_inst.B_deg_vals[n],
                 '\r\n'))
 
             
     f.close()
 
-    print('\tTAU data written to: ' + out_file)
+    print('TAU data written to: ' + out_file)
 
 
     return None
@@ -206,20 +216,22 @@ def get_tau_series_info(rev_info, tau_inst, series_name, prof_dir):
             sampling_parameter_arr) + '   <km>'
     MINIMUM_RING_RADIUS = str(round(min(tau_inst.rho_km_vals),4)) + '   <km>'
     MAXIMUM_RING_RADIUS = str(round(max(tau_inst.rho_km_vals),4)) + '   <km>'
-    MINIMUM_RING_LONGITUDE = str(round(min(np.degrees(tau_inst.phi_rl_rad_vals))
+    MINIMUM_RING_LONGITUDE = str(round(min(tau_inst.phi_rl_deg_vals)
                                 , 4)) + '   <deg>'
-    MAXIMUM_RING_LONGITUDE = str(round(max(np.degrees(tau_inst.phi_rl_rad_vals))
+    MAXIMUM_RING_LONGITUDE = str(round(max(tau_inst.phi_rl_deg_vals)
                                 , 4)) + '   <deg>'
     MINIMUM_OBSERVED_RING_AZIMUTH = str(
-            round(min(np.degrees(tau_inst.phi_rad_vals)),4)) + '   <deg>'
+            round(min(tau_inst.phi_deg_vals),4)) + '   <deg>'
     MAXIMUM_OBSERVED_RING_AZIMUTH = str(
-            round(max(np.degrees(tau_inst.phi_rad_vals)),4)) + '   <deg>'
+            round(max(tau_inst.phi_deg_vals),4)) + '   <deg>'
     MINIMUM_OBSERVED_RING_ELEVATION = str(
-            round(min(np.degrees(tau_inst.B_rad_vals)), 4)) + '   <deg>'
+            round(min(tau_inst.B_deg_vals), 4)) + '   <deg>'
     MAXIMUM_OBSERVED_RING_ELEVATION = str(
-            round(max(np.degrees(tau_inst.B_rad_vals)), 4)) + '   <deg>'
-    LOWEST_DETECTABLE_OPACITY = str(min(tau_inst.tau_threshold_vals))
-    HIGHEST_DETECTABLE_OPACITY = str(max(tau_inst.tau_threshold_vals))
+            round(max(tau_inst.B_deg_vals), 4)) + '   <deg>'
+    #LOWEST_DETECTABLE_OPACITY = str(min(tau_inst.tau_threshold_vals))
+    #HIGHEST_DETECTABLE_OPACITY = str(max(tau_inst.tau_threshold_vals))
+    LOWEST_DETECTABLE_OPACITY = str(0.00)
+    HIGHEST_DETECTABLE_OPACITY = str(0.00)
 
 
     NAIF_TOOLKIT_VERSION = ''
@@ -418,21 +430,22 @@ def get_tau_series_info(rev_info, tau_inst, series_name, prof_dir):
 
 
             
-    HIST_USER_NAME = tau_inst.history['User Name']
-    HIST_HOST_NAME = tau_inst.history['Host Name']
-    HIST_RUN_DATE = tau_inst.history['Run Date']
-    HIST_PYTHON_VERSION = tau_inst.history['Python Version']
-    HIST_OPERATING_SYSTEM = tau_inst.history['Operating System']
-    HIST_SOURCE_DIR = tau_inst.history['Source Directory']
-    HIST_SOURCE_FILE = tau_inst.history['Source File']
-    HIST_INPUT_VARIABLES = tau_inst.history['Positional Args']
-    HIST_INPUT_KEYWORDS = tau_inst.history['Keyword Args']
-    HIST_ADD_INFO = tau_inst.history['Additional Info']
-    HIST_RSSOCC_VERSION = tau_inst.history['rss_ringoccs Version']
-    HIST_description = ('This is a record of the processing steps'
+    if hasattr(tau_inst, 'history'):
+        HIST_USER_NAME = tau_inst.history['User Name']
+        HIST_HOST_NAME = tau_inst.history['Host Name']
+        HIST_RUN_DATE = tau_inst.history['Run Date']
+        HIST_PYTHON_VERSION = tau_inst.history['Python Version']
+        HIST_OPERATING_SYSTEM = tau_inst.history['Operating System']
+        HIST_SOURCE_DIR = tau_inst.history['Source Directory']
+        HIST_SOURCE_FILE = tau_inst.history['Source File']
+        HIST_INPUT_VARIABLES = tau_inst.history['Positional Args']
+        HIST_INPUT_KEYWORDS = tau_inst.history['Keyword Args']
+        HIST_ADD_INFO = tau_inst.history['Additional Info']
+        HIST_RSSOCC_VERSION = tau_inst.history['rss_ringoccs Version']
+        HIST_description = ('This is a record of the processing steps'
                         + sd + 'and inputs used to generate this file.')
 
-    HISTORY_dict = {
+        HISTORY_dict = {
             'key_order0': ['User Name', 'Host Name', 'Operating System',
                         'Python Version', 'rss_ringoccs Version']
             ,'key_order1': ['Source Directory','Source File',
@@ -718,17 +731,31 @@ def get_tau_series_info(rev_info, tau_inst, series_name, prof_dir):
     object_values.append(object_descriptions)
 
 
-    str_lbl = {
-        'string_delimiter': sd,
-        'alignment_column': alignment_column,
-        'series_alignment_column': series_alignment_column,
-        'keywords_values': keywords_values,
-        'keywords_NAIF_TOOLKIT_VERSION': NAIF_TOOLKIT_VERSION_dict,
-        'description': FILE_DESCRIPTION,
-        'keywords_series': SERIES_dict,
-        'object_keys': object_keys,
-        'object_values': object_values,
-        'history': HISTORY_dict
+    if hasattr(tau_inst, 'history'):
+        str_lbl = {
+            'string_delimiter': sd,
+            'alignment_column': alignment_column,
+            'series_alignment_column': series_alignment_column,
+            'keywords_values': keywords_values,
+            'keywords_NAIF_TOOLKIT_VERSION': NAIF_TOOLKIT_VERSION_dict,
+            'description': FILE_DESCRIPTION,
+            'keywords_series': SERIES_dict,
+            'object_keys': object_keys,
+            'object_values': object_values,
+            'history': HISTORY_dict
+        }
+    else:
+        str_lbl = {
+            'string_delimiter': sd,
+            'alignment_column': alignment_column,
+            'series_alignment_column': series_alignment_column,
+            'keywords_values': keywords_values,
+            'keywords_NAIF_TOOLKIT_VERSION': NAIF_TOOLKIT_VERSION_dict,
+            'description': FILE_DESCRIPTION,
+            'keywords_series': SERIES_dict,
+            'object_keys': object_keys,
+            'object_values': object_values,
+            'history': ''
         }
     return str_lbl
 

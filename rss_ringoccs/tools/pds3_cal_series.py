@@ -40,7 +40,7 @@ def write_cal_series_data(cal_inst, out_file):
             '\r\n'))
 
     f.close()
-    print('\tCAL data written to: ' + out_file)
+    print('CAL data written to: ' + out_file)
 
     return None
 

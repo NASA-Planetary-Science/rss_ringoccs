@@ -223,7 +223,7 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj *tau)
     /*  Declare the window function pointer and allocate memory for it. The   *
      *  type rssringoccs_window_func was declared at the start of this file.  *
      *  Be sure to free this at the end!                                      */
-    rssringoccs_Window_Function fw = tau->window_func;
+    rssringoccs_WindowFunction fw = tau->window_func;
 
     void (*FresT)(
         rssringoccs_TAUObj *, const double *, const double *, size_t, size_t

@@ -56,7 +56,7 @@ rssringoccs_Fresnel_Transform_Legendre_Odd_Norm(rssringoccs_TAUObj *tau,
         /*  Compute psi using Horner's Method for Polynomial Computation.     */
         psi_odd  = coeffs[tau->order-1];
         psi_even = coeffs[tau->order-2];
-        for (k = 2U; k<tau->order-1; k += 2U)
+        for (k = 3U; k<tau->order-1; k += 2U)
         {
             psi_odd  = psi_odd*x2  + coeffs[tau->order-k-1];
             psi_even = psi_even*x2 + coeffs[tau->order-k-2];

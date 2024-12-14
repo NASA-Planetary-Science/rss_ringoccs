@@ -46,7 +46,7 @@ void rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj *tau)
     double *w_func;
 
     /*  Declare a function pointer for the transform function.                */
-    rssringoccs_FresT FresT;
+    rssringoccs_FresnelTransform fresnel_transform;
 
     /*  Check that the pointers to the data are not NULL.                     */
     rssringoccs_Tau_Check_Data(tau);
@@ -74,44 +74,44 @@ void rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj *tau)
     if (tau->use_norm)
     {
         if (tau->psinum == rssringoccs_DR_Newton)
-            FresT = rssringoccs_Fresnel_Transform_Newton_Norm;
+            fresnel_transform = rssringoccs_Fresnel_Transform_Newton_Norm;
         else if (tau->psinum == rssringoccs_DR_NewtonD)
-            FresT = rssringoccs_Fresnel_Transform_Newton_D_Norm;
+            fresnel_transform = rssringoccs_Fresnel_Transform_Newton_D_Norm;
         else if (tau->psinum == rssringoccs_DR_NewtonDPhi)
-            FresT = rssringoccs_Fresnel_Transform_Newton_dD_dphi_Norm;
+            fresnel_transform = rssringoccs_Fresnel_Transform_Newton_dD_dphi_Norm;
         else if (tau->psinum == rssringoccs_DR_NewtonPerturb)
-            FresT = rssringoccs_Fresnel_Transform_Perturbed_Newton_Norm;
+            fresnel_transform = rssringoccs_Fresnel_Transform_Perturbed_Newton_Norm;
         else if (tau->psinum == rssringoccs_DR_NewtonElliptical)
-            FresT = rssringoccs_Fresnel_Transform_Newton_Elliptical_Norm;
+            fresnel_transform = rssringoccs_Fresnel_Transform_Newton_Elliptical_Norm;
         else if (tau->psinum == rssringoccs_DR_NewtonQuadratic)
-            FresT = rssringoccs_Fresnel_Transform_Newton_Quadratic_Norm;
+            fresnel_transform = rssringoccs_Fresnel_Transform_Newton_Quadratic_Norm;
         else if (tau->psinum == rssringoccs_DR_NewtonQuartic)
-            FresT = rssringoccs_Fresnel_Transform_Newton_Quartic_Norm;
+            fresnel_transform = rssringoccs_Fresnel_Transform_Newton_Quartic_Norm;
         else if (tau->psinum == rssringoccs_DR_NewtonD)
-            FresT = rssringoccs_Fresnel_Transform_Newton_D_Quartic_Norm;
+            fresnel_transform = rssringoccs_Fresnel_Transform_Newton_D_Quartic_Norm;
         else
-            FresT = rssringoccs_Fresnel_Transform_Newton_D_Old_Norm;
+            fresnel_transform = rssringoccs_Fresnel_Transform_Newton_D_Old_Norm;
     }
     else
     {
         if (tau->psinum == rssringoccs_DR_Newton)
-            FresT = rssringoccs_Fresnel_Transform_Newton;
+            fresnel_transform = rssringoccs_Fresnel_Transform_Newton;
         else if (tau->psinum == rssringoccs_DR_NewtonD)
-            FresT = rssringoccs_Fresnel_Transform_Newton_D;
+            fresnel_transform = rssringoccs_Fresnel_Transform_Newton_D;
         else if (tau->psinum == rssringoccs_DR_NewtonDPhi)
-            FresT = rssringoccs_Fresnel_Transform_Newton_dD_dphi;
+            fresnel_transform = rssringoccs_Fresnel_Transform_Newton_dD_dphi;
         else if (tau->psinum == rssringoccs_DR_NewtonPerturb)
-            FresT = rssringoccs_Fresnel_Transform_Perturbed_Newton;
+            fresnel_transform = rssringoccs_Fresnel_Transform_Perturbed_Newton;
         else if (tau->psinum == rssringoccs_DR_NewtonElliptical)
-            FresT = rssringoccs_Fresnel_Transform_Newton_Elliptical;
+            fresnel_transform = rssringoccs_Fresnel_Transform_Newton_Elliptical;
         else if (tau->psinum == rssringoccs_DR_NewtonQuadratic)
-            FresT = rssringoccs_Fresnel_Transform_Newton_Quadratic;
+            fresnel_transform = rssringoccs_Fresnel_Transform_Newton_Quadratic;
         else if (tau->psinum == rssringoccs_DR_NewtonQuartic)
-            FresT = rssringoccs_Fresnel_Transform_Newton_Quartic;
+            fresnel_transform = rssringoccs_Fresnel_Transform_Newton_Quartic;
         else if (tau->psinum == rssringoccs_DR_NewtonD)
-            FresT = rssringoccs_Fresnel_Transform_Newton_D_Quartic;
+            fresnel_transform = rssringoccs_Fresnel_Transform_Newton_D_Quartic;
         else
-            FresT = rssringoccs_Fresnel_Transform_Newton_D_Old;
+            fresnel_transform = rssringoccs_Fresnel_Transform_Newton_D_Old;
     }
 
     /*  Allocate memory for these required variables.                         */
@@ -160,7 +160,7 @@ void rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj *tau)
         }
 
         /*  Compute the fresnel tranform about the current point.         */
-        FresT(tau, w_func, nw_pts, center);
+        fresnel_transform(tau, w_func, nw_pts, center);
 
         /*  Increment pointers using pointer arithmetic.                  */
         center += 1;

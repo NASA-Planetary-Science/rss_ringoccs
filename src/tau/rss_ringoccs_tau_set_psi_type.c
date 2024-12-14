@@ -154,8 +154,38 @@ rssringoccs_Tau_Set_Psi_Type(const char *psitype, rssringoccs_TAUObj* tau)
                 "\rinvalid entry after, or a zero.\n\n"
             );
 
-            return;
+            tau->order = 0U;
+            goto FINISH;
         }
+
+        /*  Fresnel1 is invalid. Check for this.                              */
+        else if (tau->order == 1)
+        {
+            tau->error_occurred = tmpl_True;
+            tau->error_message = tmpl_String_Duplicate(
+                "\n\rError Encountered: rss_ringoccs\n"
+                "\r\trssringoccs_Tau_Set_Psi_Type\n\n"
+                "\rfresnel1 is not allowed since the constant and linear\n"
+                "\rterms of the Fresnel kernel are zero. Please choose\n"
+                "\r'fresneln' with n > 1.\n\n"
+            );
+
+            tau->order = 0U;
+            goto FINISH;
+        }
+
+        /*  'fresnel2' is treated as 'fresnel'.                               */
+        else if (tau->order == 2)
+        {
+            tau->psinum = rssringoccs_DR_Fresnel;
+            tau->order = 0U;
+            goto FINISH;
+        }
+
+        /*  tau->order stores the number of coefficients needed. The constant *
+         *  and linear terms of the expansion are zero, so a degree n         *
+         *  expansion needs n - 1 terms. Decrement the order by 1.            */
+        --tau->order;
     }
 
     /*  If we get here we have an invalid string. Set an error.               */
@@ -166,6 +196,8 @@ rssringoccs_Tau_Set_Psi_Type(const char *psitype, rssringoccs_TAUObj* tau)
         tau->error_occurred = tmpl_True;
         tau->error_message = tmpl_String_Duplicate(rssringoccs_psi_err_mes);
     }
+
+FINISH:
 
     /*  tmpl_String_Duplicate calls malloc so we need to free this memory.    */
     tmpl_String_Destroy(&tau_psitype);

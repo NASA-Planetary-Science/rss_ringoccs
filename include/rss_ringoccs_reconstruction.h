@@ -15,7 +15,22 @@
 /*  Fresnel transform. Inputs are Tau data, window data, the number of points *
  *  in the window, and the center of the window (its index in the data).      */
 typedef void
-(*rssringoccs_FresT)(rssringoccs_TAUObj *, const double *, size_t, size_t);
+(*rssringoccs_FresnelTransform)(
+    rssringoccs_TAUObj *,
+    const double *,
+    size_t,
+    size_t
+);
+
+typedef void (*rssringoccs_LegendreTransform)(
+    rssringoccs_TAUObj *,
+    const double *,
+    const double *,
+    const double *,
+    size_t,
+    size_t
+);
+
 
 extern void rssringoccs_Reconstruction(rssringoccs_TAUObj *tau);
 
@@ -40,7 +55,7 @@ rssringoccs_Tau_Finish(rssringoccs_TAUObj* tau);
 extern void
 rssringoccs_Tau_Reset_Window(double *x_arr, double *w_func, double dx,
                              double width, size_t nw_pts,
-                             rssringoccs_Window_Function fw);
+                             rssringoccs_WindowFunction fw);
 
 /*  Functions that compute the Fresnel Transform on a TAUObj instance.        */
 extern void

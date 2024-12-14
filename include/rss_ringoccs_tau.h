@@ -37,7 +37,7 @@
 #include <rss_ringoccs/include/rss_ringoccs_calibration.h>
 
 /*  Window function, input is x-parameter and window width.                   */
-typedef double (*rssringoccs_Window_Function)(double, double);
+typedef double (*rssringoccs_WindowFunction)(double, double);
 
 /*  All of the types of reconstruction.                                       */
 typedef enum {
@@ -130,7 +130,7 @@ typedef struct rssringoccs_TAUObj_Def {
     size_t start;
     size_t n_used;
     size_t arr_size;
-    rssringoccs_Window_Function window_func;
+    rssringoccs_WindowFunction window_func;
     rssringoccs_Psitype_Enum psinum;
     tmpl_Bool use_norm;
     tmpl_Bool use_fwd;

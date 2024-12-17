@@ -27,6 +27,8 @@
 #ifndef RSS_RINGOCCS_FRESNEL_TRANFORM_H
 #define RSS_RINGOCCS_FRESNEL_TRANFORM_H
 
+#include <libtmpl/include/tmpl_config.h>
+
 /*  rssringoccs_TAUObj typedef provided here.                                 */
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 
@@ -34,110 +36,142 @@
 #include <stddef.h>
 
 extern void
-rssringoccs_Fresnel_Transform(rssringoccs_TAUObj *tau,
-                              const double *x_arr,
-                              const double *w_func,
-                              size_t n_pts,
-                              size_t center);
+rssringoccs_Fresnel_Transform(
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const double * TMPL_RESTRICT const x_arr,
+    const double * TMPL_RESTRICT const w_func,
+    size_t n_pts,
+    size_t center
+);
 
 extern void
-rssringoccs_Fresnel_Transform_Norm(rssringoccs_TAUObj *tau,
-                                   const double *x_arr,
-                                   const double *w_func,
-                                   size_t n_pts,
-                                   size_t center);
+rssringoccs_Fresnel_Transform_Norm(
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const double * TMPL_RESTRICT const x_arr,
+    const double * TMPL_RESTRICT const w_func,
+    size_t n_pts,
+    size_t center
+);
 
 extern void
-rssringoccs_Fresnel_Transform_Legendre_Even(rssringoccs_TAUObj *tau,
-                                            const double *x_arr,
-                                            const double *w_func,
-                                            const double *coeffs,
-                                            size_t n_pts,
-                                            size_t center);
+rssringoccs_Fresnel_Transform_Legendre_Even(
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const double * TMPL_RESTRICT const x_arr,
+    const double * TMPL_RESTRICT const w_func,
+    const double * TMPL_RESTRICT const coeffs,
+    size_t n_pts,
+    size_t center
+);
 
 extern void
-rssringoccs_Fresnel_Transform_Legendre_Even_Norm(rssringoccs_TAUObj *tau,
-                                                 const double *x_arr,
-                                                 const double *w_func,
-                                                 const double *coeffs,
-                                                 size_t n_pts,
-                                                 size_t center);
+rssringoccs_Fresnel_Transform_Legendre_Even_Norm(
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const double * TMPL_RESTRICT const x_arr,
+    const double * TMPL_RESTRICT const w_func,
+    const double * TMPL_RESTRICT const coeffs,
+    size_t n_pts,
+    size_t center
+);
 
 extern void
-rssringoccs_Fresnel_Transform_Legendre_Odd(rssringoccs_TAUObj *tau,
-                                           const double *x_arr,
-                                           const double *w_func,
-                                           const double *coeffs,
-                                           size_t n_pts,
-                                           size_t center);
+rssringoccs_Fresnel_Transform_Legendre_Odd(
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const double * TMPL_RESTRICT const x_arr,
+    const double * TMPL_RESTRICT const w_func,
+    const double * TMPL_RESTRICT const coeffs,
+    size_t n_pts,
+    size_t center
+);
 
 extern void
-rssringoccs_Fresnel_Transform_Legendre_Odd_Norm(rssringoccs_TAUObj *tau,
-                                                const double *x_arr,
-                                                const double *w_func,
-                                                const double *coeffs,
-                                                size_t n_pts,
-                                                size_t center);
+rssringoccs_Fresnel_Transform_Legendre_Odd_Norm(
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const double * TMPL_RESTRICT const x_arr,
+    const double * TMPL_RESTRICT const w_func,
+    const double * TMPL_RESTRICT const coeffs,
+    size_t n_pts,
+    size_t center
+);
 
 extern void
-rssringoccs_Fresnel_Transform_Newton(rssringoccs_TAUObj *tau,
-                                     const double *w_func,
-                                     size_t n_pts,
-                                     size_t center);
+rssringoccs_Fresnel_Transform_Newton(
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const double * TMPL_RESTRICT const w_func,
+    size_t n_pts,
+    size_t center
+);
 
 extern void
-rssringoccs_Fresnel_Transform_Newton_Norm(rssringoccs_TAUObj *tau,
-                                          const double *w_func,
-                                          size_t n_pts,
-                                          size_t center);
+rssringoccs_Fresnel_Transform_Newton_Norm(
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const double * TMPL_RESTRICT const w_func,
+    size_t n_pts,
+    size_t center
+);
 
 extern void
-rssringoccs_Fresnel_Transform_Newton_D(rssringoccs_TAUObj *tau,
-                                       const double *w_func,
-                                       size_t n_pts,
-                                       size_t center);
+rssringoccs_Fresnel_Transform_Newton_D(
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const double * TMPL_RESTRICT const w_func,
+    size_t n_pts,
+    size_t center
+);
 
 extern void
-rssringoccs_Fresnel_Transform_Newton_D_Norm(rssringoccs_TAUObj *tau,
-                                            const double *w_func,
-                                            size_t n_pts,
-                                            size_t center);
+rssringoccs_Fresnel_Transform_Newton_D_Norm(
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const double * TMPL_RESTRICT const w_func,
+    size_t n_pts,
+    size_t center
+);
 
 extern void
-rssringoccs_Fresnel_Transform_Newton_D_Old(rssringoccs_TAUObj *tau,
-                                          const double *w_func,
-                                          size_t n_pts,
-                                          size_t center);
+rssringoccs_Fresnel_Transform_Newton_D_Old(
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const double * TMPL_RESTRICT const w_func,
+    size_t n_pts,
+    size_t center
+);
 
 extern void
-rssringoccs_Fresnel_Transform_Newton_D_Old_Norm(rssringoccs_TAUObj *tau,
-                                                const double *w_func,
-                                                size_t n_pts,
-                                                size_t center);
+rssringoccs_Fresnel_Transform_Newton_D_Old_Norm(
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const double * TMPL_RESTRICT const w_func,
+    size_t n_pts,
+    size_t center
+);
 
 extern void
-rssringoccs_Fresnel_Transform_Newton_dD_dphi(rssringoccs_TAUObj *tau,
-                                         const double *w_func,
-                                         size_t n_pts,
-                                         size_t center);
+rssringoccs_Fresnel_Transform_Newton_dD_dphi(
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const double * TMPL_RESTRICT const w_func,
+    size_t n_pts,
+    size_t center
+);
 
 extern void
-rssringoccs_Fresnel_Transform_Newton_dD_dphi_Norm(rssringoccs_TAUObj *tau,
-                                                  const double *w_func,
-                                                  size_t n_pts,
-                                                  size_t center);
+rssringoccs_Fresnel_Transform_Newton_dD_dphi_Norm(
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const double * TMPL_RESTRICT const w_func,
+    size_t n_pts,
+    size_t center
+);
 
 extern void
-rssringoccs_Fresnel_Transform_Perturbed_Newton(rssringoccs_TAUObj *tau,
-                                               const double *w_func,
-                                               size_t n_pts,
-                                               size_t center);
+rssringoccs_Fresnel_Transform_Perturbed_Newton(
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const double * TMPL_RESTRICT const w_func,
+    size_t n_pts,
+    size_t center
+);
 
 extern void
-rssringoccs_Fresnel_Transform_Perturbed_Newton_Norm(rssringoccs_TAUObj *tau,
-                                                    const double *w_func,
-                                                    size_t n_pts,
-                                                    size_t center);
+rssringoccs_Fresnel_Transform_Perturbed_Newton_Norm(
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const double * TMPL_RESTRICT const w_func,
+    size_t n_pts,
+    size_t center
+);
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -162,10 +196,12 @@ rssringoccs_Fresnel_Transform_Perturbed_Newton_Norm(rssringoccs_TAUObj *tau,
  *      src/fresnel_transform/rss_ringoccs_fresnel_transform_quadratic.c      *
  ******************************************************************************/
 extern void
-rssringoccs_Fresnel_Transform_Newton_Quadratic(rssringoccs_TAUObj *tau,
-                                               const double *w_func,
-                                               size_t n_pts,
-                                               size_t center);
+rssringoccs_Fresnel_Transform_Newton_Quadratic(
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const double * TMPL_RESTRICT const w_func,
+    size_t n_pts,
+    size_t center
+);
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -190,46 +226,60 @@ rssringoccs_Fresnel_Transform_Newton_Quadratic(rssringoccs_TAUObj *tau,
  *      src/fresnel_transform/rss_ringoccs_fresnel_transform_quadratic_norm.c *
  ******************************************************************************/
 extern void
-rssringoccs_Fresnel_Transform_Newton_Quadratic_Norm(rssringoccs_TAUObj *tau,
-                                                    const double *w_func,
-                                                    size_t n_pts,
-                                                    size_t center);
+rssringoccs_Fresnel_Transform_Newton_Quadratic_Norm(
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const double * TMPL_RESTRICT const w_func,
+    size_t n_pts,
+    size_t center
+);
 
 extern void
-rssringoccs_Fresnel_Transform_Newton_Quartic(rssringoccs_TAUObj *tau,
-                                             const double *w_func,
-                                             size_t n_pts,
-                                             size_t center);
+rssringoccs_Fresnel_Transform_Newton_Quartic(
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const double * TMPL_RESTRICT const w_func,
+    size_t n_pts,
+    size_t center
+);
 
 extern void
-rssringoccs_Fresnel_Transform_Newton_Quartic_Norm(rssringoccs_TAUObj *tau,
-                                                  const double *w_func,
-                                                  size_t n_pts,
-                                                  size_t center);
+rssringoccs_Fresnel_Transform_Newton_Quartic_Norm(
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const double * TMPL_RESTRICT const w_func,
+    size_t n_pts,
+    size_t center
+);
 
 extern void
-rssringoccs_Fresnel_Transform_Newton_D_Quartic(rssringoccs_TAUObj *tau,
-                                               const double *w_func,
-                                               size_t n_pts,
-                                               size_t center);
+rssringoccs_Fresnel_Transform_Newton_D_Quartic(
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const double * TMPL_RESTRICT const w_func,
+    size_t n_pts,
+    size_t center
+);
 
 extern void
-rssringoccs_Fresnel_Transform_Newton_D_Quartic_Norm(rssringoccs_TAUObj *tau,
-                                                    const double *w_func,
-                                                    size_t n_pts,
-                                                    size_t center);
+rssringoccs_Fresnel_Transform_Newton_D_Quartic_Norm(
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const double * TMPL_RESTRICT const w_func,
+    size_t n_pts,
+    size_t center
+);
 
 extern void
-rssringoccs_Fresnel_Transform_Newton_Elliptical(rssringoccs_TAUObj *tau,
-                                                const double *w_func,
-                                                size_t n_pts,
-                                                size_t center);
+rssringoccs_Fresnel_Transform_Newton_Elliptical(
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const double * TMPL_RESTRICT const w_func,
+    size_t n_pts,
+    size_t center
+);
 
 extern void
-rssringoccs_Fresnel_Transform_Newton_Elliptical_Norm(rssringoccs_TAUObj *tau,
-                                                     const double *w_func,
-                                                     size_t n_pts,
-                                                     size_t center);
+rssringoccs_Fresnel_Transform_Newton_Elliptical_Norm(
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const double * TMPL_RESTRICT const w_func,
+    size_t n_pts,
+    size_t center
+);
 
 #endif
 /*  End of include guard.                                                     */

@@ -1,3 +1,4 @@
+#include <libtmpl/include/tmpl_compat_cast.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 
 /******************************************************************************
@@ -32,17 +33,28 @@
  *          are defined using km/s, and the CSV files which contain the       *
  *          occultation data store values in kilometers.                      *
  ******************************************************************************/
-void rssringoccs_Tau_Reset_Window(double *x_arr, double *w_func, double dx,
-                                  double width, size_t nw_pts,
-                                  rssringoccs_WindowFunction fw)
+void
+rssringoccs_Tau_Reset_Window(double * TMPL_RESTRICT const x_arr,
+                             double * TMPL_RESTRICT const w_func,
+                             double dx,
+                             double width,
+                             size_t nw_pts,
+                             rssringoccs_WindowFunction window)
 {
     /*  Create a variable for indexing.                                       */
     size_t n;
 
+    /*  The nth element in the x array is (n - nw) * dx, cast to double. We   *
+     *  perform the cast first since size_t is unsigned, hence if n - nw is   *
+     *  negative, the computation will wrap around to a very large number and *
+     *  give us a gibberish result.                                           */
+    const double offset = TMPL_CAST(nw_pts, double);
+
     /* Loop over n, computing the window function and the x_arr variable.     */
     for(n = 0U; n < nw_pts; ++n)
     {
-        x_arr[n]  = ((double)n - (double)nw_pts)*dx;
-        w_func[n] = fw(x_arr[n], width);
+        const double index = TMPL_CAST(n, double);
+        x_arr[n] = (index - offset)*dx;
+        w_func[n] = window(x_arr[n], width);
     }
 }

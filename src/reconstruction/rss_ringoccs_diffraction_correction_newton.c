@@ -46,7 +46,7 @@ void rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj *tau)
     double *w_func;
 
     /*  Declare a function pointer for the transform function.                */
-    rssringoccs_FresnelTransform fresnel_transform;
+    rssringoccs_FresnelNewtonTransform fresnel_transform;
 
     /*  Check that the pointers to the data are not NULL.                     */
     rssringoccs_Tau_Check_Data(tau);

@@ -71,66 +71,71 @@
  *          The diffraction corrected profile.                                *
  ******************************************************************************/
 void
-rssringoccs_Fresnel_Transform_Legendre_Odd(rssringoccs_TAUObj *tau,
-                                           const double *x_arr,
-                                           const double *w_func,
-                                           const double *coeffs,
-                                           size_t n_pts, size_t center)
+rssringoccs_Fresnel_Transform_Legendre_Odd(
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const double * TMPL_RESTRICT const x_arr,
+    const double * TMPL_RESTRICT const w_func,
+    const double * TMPL_RESTRICT const coeffs,
+    size_t n_pts,
+    size_t center
+)
 {
-    /*  Declare all necessary variables. i, j, and k are used for indexing.   */
-    size_t i, j;
+    /*  Declare all necessary variables. n, m, and k are used for indexing.   */
+    size_t n;
+    size_t m = n_pts;
     unsigned int k;
 
     /*  Variables for the Fresnel kernel and ring radii.                      */
-    double x, x2, psi;
-    double psi_even, psi_odd;
+    double psi;
     tmpl_ComplexDouble exp_negative_psi, exp_positive_psi, integrand;
 
     /*  Division is more expension than division, so store the reciprocal     *
      *  of D as a variable and compute with that.                             */
     const double rcpr_D = 1.0 / tau->D_km_vals[center];
-    const double factor = 0.5*tau->dx_km/tau->F_km_vals[center];
+    const double factor = 0.5 * tau->dx_km / tau->F_km_vals[center];
+    const double kD = tau->k_vals[center]*tau->D_km_vals[center];
 
     /*  Initialize T_out to zero so we can loop over later.                   */
     tau->T_out[center] = tmpl_CDouble_Zero;
-    j = n_pts;
 
     /*  Use a Riemann Sum to approximate the Fresnel Inverse Integral.        */
-    for (i = 0; i<n_pts; ++i)
+    for (n = 0; n < n_pts; ++n)
     {
-        x  = x_arr[i]*rcpr_D;
-        x2 = x*x;
+        const double x = x_arr[n]*rcpr_D;
+        const double x2 = x*x;
+        const double kD_times_x2 = kD * x2;
 
         /*  Compute psi using Horner's Method for Polynomial Computation.     */
-        psi_odd  = coeffs[tau->order - 1];
-        psi_even = coeffs[tau->order - 2];
-        for (k=2; k<tau->order-1; k += 2)
+        double psi_odd = coeffs[tau->order - 1];
+        double psi_even = coeffs[tau->order - 2];
+
+        for (k = 3; k < tau->order - 1; k += 2)
         {
-            psi_odd  = psi_odd*x2  + coeffs[tau->order - k - 1];
-            psi_even = psi_even*x2 + coeffs[tau->order - k - 2];
+            psi_odd = psi_odd*x2  + coeffs[tau->order - k];
+            psi_even = psi_even*x2 + coeffs[tau->order - k - 1];
         }
 
         /*  The leading term is x^2, so multiply by this and kD.              */
-        psi_even *= tau->k_vals[center]*tau->D_km_vals[center] * x2;
-        psi_odd  *= tau->k_vals[center]*tau->D_km_vals[center] * x2 * x;
+        psi_even *= kD_times_x2;
+        psi_odd *= kD_times_x2 * x;
 
         /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
         psi = psi_even - psi_odd;
-        exp_negative_psi = tmpl_CDouble_Polar(w_func[i], -psi);
+        exp_negative_psi = tmpl_CDouble_Polar(w_func[n], -psi);
 
         /*  Compute the right side of exp(-ipsi) using Euler's Formula.       */
         psi = psi_even + psi_odd;
-        exp_positive_psi = tmpl_CDouble_Polar(w_func[i], -psi);
+        exp_positive_psi = tmpl_CDouble_Polar(w_func[n], -psi);
 
         /*  Compute the transform with a Riemann sum. If the T_in pointer     *
          *  does not contain at least 2*n_pts+1 points, n_pts to the left and *
          *  right of the center, then this will create a segmentation fault.  */
-        integrand = tmpl_CDouble_Multiply(exp_negative_psi, tau->T_in[center-j]);
+        integrand = tmpl_CDouble_Multiply(exp_negative_psi, tau->T_in[center-m]);
         tmpl_CDouble_AddTo(&tau->T_out[center], &integrand);
 
-        integrand = tmpl_CDouble_Multiply(exp_positive_psi, tau->T_in[center+j]);
+        integrand = tmpl_CDouble_Multiply(exp_positive_psi, tau->T_in[center+m]);
         tmpl_CDouble_AddTo(&tau->T_out[center], &integrand);
-        j--;
+        m--;
     }
 
     /*  Add the central point in the Riemann sum. This is center of the       *

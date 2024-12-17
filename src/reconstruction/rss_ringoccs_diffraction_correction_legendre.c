@@ -38,7 +38,7 @@
  *  Called Functions:                                                         *
  *      None.                                                                 *
  *  Method:                                                                   *
- *                                                                            *
+ *      The Fresnel transform is given by:                                    *
  *  Notes:                                                                    *
  *      1.) This function assumes tau->order > 1. Degree zero and degree one  *
  *          reconstructions are not allowed since these polynomials are zero. *
@@ -87,7 +87,8 @@
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 #include <stdlib.h>
 
-static const rssringoccs_LegendreTransform legendre_transform_list[4] = {
+static const rssringoccs_FresnelLegendreTransform
+legendre_transform_list[4] = {
     rssringoccs_Fresnel_Transform_Legendre_Odd,
     rssringoccs_Fresnel_Transform_Legendre_Even,
     rssringoccs_Fresnel_Transform_Legendre_Odd_Norm,
@@ -111,11 +112,11 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
      *  check if malloc fails and avoid freeing non-malloced pointers.        */
     double *x_arr = NULL;
     double *w_func = NULL;
-    double *fresnel_ker_coeffs = NULL;
+    double *coeffs = NULL;
 
     /*  Create function pointers for window function and Legendre transforms. */
     rssringoccs_WindowFunction fw;
-    rssringoccs_LegendreTransform legendre_transform;
+    rssringoccs_FresnelLegendreTransform legendre_transform;
 
     /*  Make sure the input is not NULL before checking its data.             */
     if (!tau)
@@ -154,7 +155,7 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
      *      1.) Even Degree without Window Normalization.                     *
      *      2.) Odd Degree with Window Normalization.                         *
      *      3.) Even Degree with Window Normalization.                        *
-     *  The use_norm attribute is a Boolean, zero or one, as is the is_even   *
+     *  The use_norm member is a Boolean, zero or one, as is the is_even      *
      *  variable. The index above can be compute by is_even + 2*use_norm.     */
     index = TMPL_CAST(is_even, size_t) + 2 * TMPL_CAST(tau->use_norm, size_t);
     legendre_transform = legendre_transform_list[index];
@@ -181,17 +182,17 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
     w_func = malloc(sizeof(*w_func) * nw_pts);
 
     /*  And finally for the coefficients of the Fresnel-Legendre polynomial.  */
-    fresnel_ker_coeffs = malloc(sizeof(*fresnel_ker_coeffs) * tau->order);
+    coeffs = malloc(sizeof(*coeffs) * tau->order);
 
     /*  Check if malloc failed. It returns NULL on failure.                   */
-    if (!x_arr || !w_func || !fresnel_ker_coeffs)
+    if (!x_arr || !w_func || !coeffs)
     {
         /*  malloc failed. Return with error, and free any successfully       *
          *  allocated data.                                                   */
         tau->error_occurred = tmpl_True;
         tau->error_message = tmpl_String_Duplicate(
             "\n\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_Diffraction_Correction_Legendre\n\n"
+            "\r\trssringoccs_Diffraction_Correction_Fast_Legendre\n\n"
             "\rmalloc failed and returned NULL. Aborting.\n\n"
         );
 
@@ -202,7 +203,7 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
          *  calls free if the pointer is not NULL. Use this on each variable. */
         RSSRINGOCCS_DESTROY_VARIABLE(x_arr);
         RSSRINGOCCS_DESTROY_VARIABLE(w_func);
-        RSSRINGOCCS_DESTROY_VARIABLE(fresnel_ker_coeffs);
+        RSSRINGOCCS_DESTROY_VARIABLE(coeffs);
 
         return;
     }
@@ -213,6 +214,41 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
     /* Loop through each point and begin the reconstruction.                  */
     for (n = 0; n < tau->n_used; ++n)
     {
+        /*  Check if we need to resize the window. This happens once          *
+         *  |w - w0| > 2 * dx occurs, where w is the current window width,    *
+         *  and w0 is the value of w_init.                                    */
+        const int resize = rssringoccs_Tau_Resize_Half_Window(
+            tau, &x_arr, &w_func, w_init, two_dx, center
+        );
+
+        /*  If we did need a resize, there are a few things that could have   *
+         *  gone wrong with memory reallocation, and a few things we'll need  *
+         *  to reset if all of the memory management succeeded.               */
+        if (resize)
+        {
+            /*  It is possible realloc failed during the call to              *
+             *  rssringoccs_Tau_Resize_Half_Window. This function sets the    *
+             *  error_occurred Boolean to True should this occur, and also    *
+             *  frees the memory and sets the pointers to NULL. Simply abort  *
+             *  the computation if any error occurred.                        */
+            if (tau->error_occurred)
+            {
+                /*  The x_arr and w_func data are handled by the previous     *
+                 *  function call on error. We still need to free the data    *
+                 *  allocated for the Fresnel coefficients.                   */
+                free(coeffs);
+                return;
+            }
+
+            /*  Reset the threshold value for the window width to the current *
+             *  window size. We will update again once the required window    *
+             *  grows beyond 2 * dx the size of the current window.           */
+            w_init = tau->w_km_vals[center];
+
+            /*  Similarly, reset the number of points in the window.          */
+            nw_pts = TMPL_CAST(w_init / two_dx, size_t) + 1;
+        }
+
         /*  Compute some geometric information, and the scaling coefficient   *
          *  for the Legendre polynomial expansion.                            */
         cosb = tmpl_Double_Cosd(tau->B_deg_vals[center]);
@@ -222,76 +258,27 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
         beta *= beta;
         beta *= 0.5 / (1.0 - beta);
 
-        /*  The Fresnel-Legendre coefficients can be computed using an        *
-         *  upwards recursion in terms of the Legendre polynomials, and the   *
-         *  Chebyshev polynomials of the second kind. We have:                *
+        /*  Initialize T_out to zero so we can loop over later.               */
+        tau->T_out[center] = tmpl_CDouble_Zero;
+
+        /*  The Fresnel-Legendre coefficients are computed using an upwards   *
+         *  recursion in terms of the Legendre polynomials, and the Chebyshev *
+         *  polynomials of the second kind. We have:                          *
          *                                                                    *
-         *                 P (x) - x P   (x)      -                     -     *
+         *                 P (a) - a P   (a)      -                     -     *
          *                  n         n+1        |                       |    *
-         *      L (x, y) = ----------------- - y |  U   (x) - 2 P   (x)  |    *
+         *      L (a, b) = ----------------- - b |  U   (a) - 2 P   (a)  |    *
          *       n               n + 2           |   n+2         n+2     |    *
          *                                        -                     -     *
          *                                                                    *
          *  Where Pn is the nth Legendre polynomial, Un is the nth Chebyshev  *
-         *  polynomial of the second kind, and we have used alpha = x and     *
-         *  beta = y in order for the equation to fit onto the screen. This   *
+         *  polynomial of the second kind, and we have used alpha = a and     *
+         *  beta = b in order for the equation to fit onto the screen. This   *
          *  is computed by libtmpl in upwards iterative fashion.              */
-        tmpl_Double_Fresnel_Legendre_L(
-            fresnel_ker_coeffs,         /*  Pointer to the coefficient array. */
-            alpha,                      /*  Independent variable for poly.    */
-            beta,                       /*  Scale factor for poly.            */
-            tau->order                  /*  Size of fresnel_ker_coeffs array. */
-        );
-
-        /*  If the window width changes significantly, recompute w_func.      */
-        if (tmpl_Double_Abs(w_init - tau->w_km_vals[center]) >= two_dx)
-        {
-            /*  Temporary pointers for realloc. This will help avoid leaks.   */
-            void *x_tmp, *w_tmp;
-
-            /* Reset w_init and recompute window function.                    */
-            w_init = tau->w_km_vals[center];
-            nw_pts = (size_t)(w_init / two_dx) + 1UL;
-
-            /*  Reallocate x_arr and w_func since the sizes changed.          */
-            x_tmp = realloc(x_arr, sizeof(*x_arr) * nw_pts);
-            w_tmp = realloc(w_func, sizeof(*w_func) * nw_pts);
-
-            /*  Check to make sure realloc didn't fail.                       */
-            if (!x_tmp || !w_tmp)
-            {
-                /*  Abort the computation with an error message.              */
-                tau->error_occurred = tmpl_True;
-                tau->error_message = tmpl_String_Duplicate(
-                    "\n\rError Encountered: rss_ringoccs\n"
-                    "\r\trssringoccs_Diffraction_Correction_Legendre\n\n"
-                    "\rrealloc failed and returned NULL. Aborting.\n\n"
-                );
-
-                /*  Free all variables allocated by malloc.                   */
-                free(x_arr);
-                free(w_func);
-                free(fresnel_ker_coeffs);
-                return;
-            }
-
-            /*  If we get here, realloc succeeded. Swap the variables.        */
-            x_arr = x_tmp;
-            w_func = w_tmp;
-
-            /*  Recompute x_arr and w_func for the new sizes.                 */
-            rssringoccs_Tau_Reset_Window(x_arr, w_func, dx, w_init, nw_pts, fw);
-        }
+        tmpl_Double_Fresnel_Legendre_L(coeffs, alpha, beta, tau->order);
 
         /*  Compute the Legendre tranform about the current point.            */
-        legendre_transform(
-            tau,                /*  All of the reconstruction data.           */
-            x_arr,              /*  The expression (r - r0) / D as r varies.  */
-            w_func,             /*  The window function as a function of x.   */
-            fresnel_ker_coeffs, /*  The Fresnel-Legendre coefficients.        */
-            nw_pts,             /*  The number of points in the window.       */
-            center              /*  The r index for the center of the window. */
-        );
+        legendre_transform(tau, x_arr, w_func, coeffs, nw_pts, center);
 
         /*  Move on to the next point in the data.                            */
         center += 1;
@@ -300,5 +287,8 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
     /*  Free all variables allocated by malloc.                               */
     free(x_arr);
     free(w_func);
-    free(fresnel_ker_coeffs);
+    free(coeffs);
 }
+
+/*  Undefine everything in case someone wants to #include this file.          */
+#undef RSSRINGOCCS_DESTROY_VARIABLE

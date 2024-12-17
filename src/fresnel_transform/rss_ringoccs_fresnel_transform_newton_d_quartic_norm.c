@@ -1,4 +1,7 @@
-#include <libtmpl/include/tmpl.h>
+#include <libtmpl/include/tmpl_config.h>
+#include <libtmpl/include/tmpl_compat_cast.h>
+#include <libtmpl/include/tmpl_complex.h>
+#include <libtmpl/include/tmpl_cyl_fresnel_optics.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 #include <stddef.h>
 
@@ -8,16 +11,23 @@
 #define SIXTY_FOUR_THIRDS (21.3333333333333333333333333)
 
 void
-rssringoccs_Fresnel_Transform_Newton_D_Quartic_Norm(rssringoccs_TAUObj *tau,
-                                                    const double *w_func,
-                                                    size_t n_pts,
-                                                    size_t center)
+rssringoccs_Fresnel_Transform_Newton_D_Quartic_Norm(
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const double * TMPL_RESTRICT const w_func,
+    size_t n_pts,
+    size_t center
+)
 {
     /*  Variable for indexing.                                                */
     size_t n;
 
+    /*  Cast constants to size_t to avoid implicit conversion.                */
+    const size_t zero = TMPL_CAST(0, size_t);
+    const size_t one = TMPL_CAST(1, size_t);
+    const size_t four = TMPL_CAST(4, size_t);
+
     /*  The Fresnel kernel and ring azimuth angle.                            */
-    double C[4], abs_norm, real_norm;
+    double C[4], abs_norm, real_norm, rho[4], phi0[4];
     double psi_n[4], psi_half_diff, psi_full_diff, psi, phi;
     double psi_half_mean, psi_full_mean, D, x;
     tmpl_ComplexDouble exp_psi, norm, integrand;
@@ -27,30 +37,26 @@ rssringoccs_Fresnel_Transform_Newton_D_Quartic_Norm(rssringoccs_TAUObj *tau,
     const double rcpr_w_cb = rcpr_w_sq * rcpr_w;
     const double rcpr_w_qr = rcpr_w_sq * rcpr_w_sq;
     size_t offset = center - ((n_pts-1) >> 1U);
+    const size_t index = offset + n_pts - one;
 
-    const double rho[4] = {
-        tau->rho_km_vals[center] - 0.5*tau->w_km_vals[center],
-        tau->rho_km_vals[center] - 0.25*tau->w_km_vals[center],
-        tau->rho_km_vals[center] + 0.25*tau->w_km_vals[center],
-        tau->rho_km_vals[center] + 0.5*tau->w_km_vals[center]
-    };
-
-    const double num = tau->phi_deg_vals[offset + n_pts - 1] - tau->phi_deg_vals[offset];
-    const double den = tau->rho_km_vals[offset + n_pts - 1] - tau->rho_km_vals[offset];
+    const double num = tau->phi_deg_vals[index] - tau->phi_deg_vals[offset];
+    const double den = tau->rho_km_vals[index] - tau->rho_km_vals[offset];
     const double slope = num / den;
 
-    const double phi0[4] = {
-        (rho[0] - tau->rho_km_vals[offset])*slope + tau->phi_deg_vals[offset],
-        (rho[1] - tau->rho_km_vals[offset])*slope + tau->phi_deg_vals[offset],
-        (rho[2] - tau->rho_km_vals[offset])*slope + tau->phi_deg_vals[offset],
-        (rho[3] - tau->rho_km_vals[offset])*slope + tau->phi_deg_vals[offset]
-    };
+    rho[0] = tau->rho_km_vals[center] - 0.5*tau->w_km_vals[center];
+    rho[1] = tau->rho_km_vals[center] - 0.25*tau->w_km_vals[center];
+    rho[2] = tau->rho_km_vals[center] + 0.25*tau->w_km_vals[center];
+    rho[3] = tau->rho_km_vals[center] + 0.5*tau->w_km_vals[center];
+    phi0[0] = (rho[0]-tau->rho_km_vals[offset])*slope+tau->phi_deg_vals[offset];
+    phi0[1] = (rho[1]-tau->rho_km_vals[offset])*slope+tau->phi_deg_vals[offset],
+    phi0[1] = (rho[2]-tau->rho_km_vals[offset])*slope+tau->phi_deg_vals[offset];
+    phi0[1] = (rho[3]-tau->rho_km_vals[offset])*slope+tau->phi_deg_vals[offset];
 
     /*  Initialize T_out and norm to zero so we can loop over later.          */
     tau->T_out[center] = tmpl_CDouble_Zero;
     norm = tmpl_CDouble_Zero;
 
-    for (n = (size_t)0; n < (size_t)4; ++n)
+    for (n = zero; n < four; ++n)
     {
         phi = tmpl_Double_Stationary_Cyl_Fresnel_Psi_D_Newton(
             tau->k_vals[center],        /*  Wavenumber.                       */

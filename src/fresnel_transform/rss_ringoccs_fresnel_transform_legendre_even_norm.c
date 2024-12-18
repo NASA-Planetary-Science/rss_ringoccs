@@ -99,7 +99,6 @@ rssringoccs_Fresnel_Transform_Legendre_Even_Norm(
          *  is a multiplicative factor of kD * x^2 for psi. Compute this.     */
         const double kD_times_x2 = kD * x2;
 
-
         /*  The current diffraction data points. One for the left side of the *
          *  window, and one for the right. These correspond to negative x and *
          *  positive x, respectively.                                         */
@@ -146,9 +145,9 @@ rssringoccs_Fresnel_Transform_Legendre_Even_Norm(
         psi_odd *= x;
 
         /*  Recalling that x is negative, to compute the left side of the sum *
-         *  (where x is negative), we just need to do psi_even + psi_odd. We  *
+         *  (where x is negative), we just need to do psi_even - psi_odd. We  *
          *  also need the scale factor kD x^2. Finish the computation for psi.*/
-        psi = kD_times_x2 * (psi_even + psi_odd);
+        psi = kD_times_x2 * (psi_even - psi_odd);
 
         /*  Accounting for the window function, we have w(-x) exp(-i psi(-x)).*
          *  Since window functions are real-valued and non-negative, this is  *
@@ -157,7 +156,7 @@ rssringoccs_Fresnel_Transform_Legendre_Even_Norm(
 
         /*  The right side of the window has x positive (r > r0). psi_even is *
          *  not changed by this, but psi_odd flips in sign. Compute.          */
-        psi = kD_times_x2 * (psi_even - psi_odd);
+        psi = kD_times_x2 * (psi_even + psi_odd);
 
         /*  Window functions are symmetric: w(-x) = w(x). We can compute via  *
          *  the polar form method with the same element of the window array.  */

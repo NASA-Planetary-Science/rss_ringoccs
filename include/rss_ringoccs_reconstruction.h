@@ -2,10 +2,8 @@
 #ifndef RSS_RINGOCCS_RECONSTRUCTION_H
 #define RSS_RINGOCCS_RECONSTRUCTION_H
 
-/*  Various functions, complex variables, and more found here.                */
 #include <libtmpl/include/tmpl_config.h>
 #include <libtmpl/include/tmpl_bool.h>
-#include <libtmpl/include/tmpl_complex.h>
 #include <rss_ringoccs/include/rss_ringoccs_calibration.h>
 #include <rss_ringoccs/include/rss_ringoccs_history.h>
 #include <rss_ringoccs/include/rss_ringoccs_tau.h>
@@ -42,8 +40,7 @@ typedef void (*rssringoccs_FresnelTransform)(
 
 extern void rssringoccs_Reconstruction(rssringoccs_TAUObj *tau);
 
-extern void
-rssringoccs_Tau_Check_Data_Range(rssringoccs_TAUObj *dlp);
+
 
 extern void
 rssringoccs_Tau_Check_Data(rssringoccs_TAUObj *tau);

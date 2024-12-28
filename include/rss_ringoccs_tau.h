@@ -27,8 +27,11 @@
 #ifndef RSS_RINGOCCS_TAU_H
 #define RSS_RINGOCCS_TAU_H
 
-/*  Booleans and complex numbers given here.                                  */
-#include <libtmpl/include/tmpl.h>
+/*  Booleans (True / False) provided here.                                    */
+#include <libtmpl/include/tmpl_bool.h>
+
+/*  Complex numbers and functions provided here.                              */
+#include <libtmpl/include/tmpl_complex_double.h>
 
 /*  size_t typedef provided here.                                             */
 #include <stddef.h>
@@ -140,6 +143,23 @@ typedef struct rssringoccs_TAUObj_Def {
     char *error_message;
     unsigned int order;
 } rssringoccs_TAUObj;
+
+/******************************************************************************
+ *  Function:                                                                 *
+ *      rssringoccs_Tau_Check_Data_Range                                      *
+ *  Purpose:                                                                  *
+ *      Checks if there is enough data to process a data set.                 *
+ *  Arguments:                                                                *
+ *      tau (rssringoccs_TAUObj * const):                                     *
+ *          The TAU object we are checking.                                   *
+ *  Outputs:                                                                  *
+ *      None (void).                                                          *
+ *  Notes:                                                                    *
+ *      This function sets the error_occurred Boolean to true and stores a    *
+ *      message in error_message on failure, which uses malloc. The user      *
+ *      should check these parameters after calling this function.            *
+ ******************************************************************************/
+extern void rssringoccs_Tau_Check_Data_Range(rssringoccs_TAUObj * const tau);
 
 /******************************************************************************
  *  Function:                                                                 *

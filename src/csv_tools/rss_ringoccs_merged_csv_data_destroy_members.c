@@ -46,28 +46,28 @@ void rssringoccs_MergedCSVData_Destroy_Members(rssringoccs_MergedCSVData *dlpm)
         return;
 
     /*  Destroy every variable except the error_message.                      */
-    DESTROY_DLPM_VAR(dlpm->B_deg_vals);
-    DESTROY_DLPM_VAR(dlpm->D_km_vals);
-    DESTROY_DLPM_VAR(dlpm->f_sky_hz_vals);
-    DESTROY_DLPM_VAR(dlpm->p_norm_vals);
-    DESTROY_DLPM_VAR(dlpm->raw_tau_vals);
-    DESTROY_DLPM_VAR(dlpm->phase_deg_vals);
-    DESTROY_DLPM_VAR(dlpm->phi_deg_vals);
-    DESTROY_DLPM_VAR(dlpm->phi_rl_deg_vals);
-    DESTROY_DLPM_VAR(dlpm->raw_tau_threshold_vals);
-    DESTROY_DLPM_VAR(dlpm->rho_corr_pole_km_vals);
-    DESTROY_DLPM_VAR(dlpm->rho_corr_timing_km_vals);
-    DESTROY_DLPM_VAR(dlpm->rho_dot_kms_vals);
-    DESTROY_DLPM_VAR(dlpm->rho_km_vals);
-    DESTROY_DLPM_VAR(dlpm->rx_km_vals);
-    DESTROY_DLPM_VAR(dlpm->ry_km_vals);
-    DESTROY_DLPM_VAR(dlpm->rz_km_vals);
-    DESTROY_DLPM_VAR(dlpm->t_oet_spm_vals);
-    DESTROY_DLPM_VAR(dlpm->t_ret_spm_vals);
-    DESTROY_DLPM_VAR(dlpm->t_set_spm_vals);
-    DESTROY_DLPM_VAR(dlpm->tau_phase_deg_vals);
-    DESTROY_DLPM_VAR(dlpm->tau_power_vals);
-    DESTROY_DLPM_VAR(dlpm->tau_vals);
+    DESTROY_DLPM_VAR(dlpm->B_deg_vals)
+    DESTROY_DLPM_VAR(dlpm->D_km_vals)
+    DESTROY_DLPM_VAR(dlpm->f_sky_hz_vals)
+    DESTROY_DLPM_VAR(dlpm->p_norm_vals)
+    DESTROY_DLPM_VAR(dlpm->raw_tau_vals)
+    DESTROY_DLPM_VAR(dlpm->phase_deg_vals)
+    DESTROY_DLPM_VAR(dlpm->phi_deg_vals)
+    DESTROY_DLPM_VAR(dlpm->phi_rl_deg_vals)
+    DESTROY_DLPM_VAR(dlpm->raw_tau_threshold_vals)
+    DESTROY_DLPM_VAR(dlpm->rho_corr_pole_km_vals)
+    DESTROY_DLPM_VAR(dlpm->rho_corr_timing_km_vals)
+    DESTROY_DLPM_VAR(dlpm->rho_dot_kms_vals)
+    DESTROY_DLPM_VAR(dlpm->rho_km_vals)
+    DESTROY_DLPM_VAR(dlpm->rx_km_vals)
+    DESTROY_DLPM_VAR(dlpm->ry_km_vals)
+    DESTROY_DLPM_VAR(dlpm->rz_km_vals)
+    DESTROY_DLPM_VAR(dlpm->t_oet_spm_vals)
+    DESTROY_DLPM_VAR(dlpm->t_ret_spm_vals)
+    DESTROY_DLPM_VAR(dlpm->t_set_spm_vals)
+    DESTROY_DLPM_VAR(dlpm->tau_phase_deg_vals)
+    DESTROY_DLPM_VAR(dlpm->tau_power_vals)
+    DESTROY_DLPM_VAR(dlpm->tau_vals)
 }
 /*  End of rssringoccs_MergedCSVData_Destroy_Members.                         */
 

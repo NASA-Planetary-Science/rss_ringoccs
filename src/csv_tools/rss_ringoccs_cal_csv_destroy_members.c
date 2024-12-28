@@ -53,7 +53,7 @@ void rssringoccs_CalCSV_Destroy_Members(rssringoccs_CalCSV *cal)
     DESTROY_CAL_VAR(cal->f_sky_pred_vals)
     DESTROY_CAL_VAR(cal->f_sky_resid_fit_vals)
     DESTROY_CAL_VAR(cal->p_free_vals)
-    DESTROY_CAL_VAR(cal->history);
+    DESTROY_CAL_VAR(cal->history)
 }
 /*  End of rssringoccs_CalCSV_Destroy_Members.                                */
 

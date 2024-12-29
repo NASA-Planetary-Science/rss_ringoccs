@@ -1,11 +1,30 @@
-/*  NULL pointers are given here.                                             */
-#include <stddef.h>
 
-/*  Optical and math functions provided by this library.                      */
-#include <libtmpl/include/tmpl.h>
+/*  Booleans (True / False) provided here.                                    */
+#include <libtmpl/include/tmpl_bool.h>
+
+/*  Macros for C vs. C++ compatibility with casting data types.               */
+#include <libtmpl/include/tmpl_compat_cast.h>
+
+/*  Cylindrical Fresnel optics routines found here.                           */
+#include <libtmpl/include/tmpl_cyl_fresnel_optics.h>
+
+/*  Complex numbers and functions provided here.                              */
+#include <libtmpl/include/tmpl_complex.h>
+
+/*  sqrt function declared here.                                              */
+#include <libtmpl/include/tmpl_math.h>
+
+/*  Wavelength and Wavenumber conversion functions found here.                */
+#include <libtmpl/include/tmpl_optics.h>
+
+/*  Portable version of strdup provided here.                                 */
+#include <libtmpl/include/tmpl_string.h>
 
 /*  Header file with the Tau definition and function prototype.               */
 #include <rss_ringoccs/include/rss_ringoccs_tau.h>
+
+/*  size_t typedef provided here.                                             */
+#include <stddef.h>
 
 /*  Function for computing several Tau variables from DLP data.               */
 void
@@ -14,7 +33,7 @@ rssringoccs_Tau_Compute_Data_From_DLP_Members(rssringoccs_TAUObj *tau,
 {
 
     /*  Constant for zero cast to type "size_t".                              */
-    const size_t zero = (size_t)0;
+    const size_t zero = TMPL_CAST(0, size_t);
 
     /*  Variable for indexing over the data.                                  */
     size_t n;

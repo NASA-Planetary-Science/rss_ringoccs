@@ -19,9 +19,8 @@
 
 /*  Complex numbers provided here.                                            */
 #include <libtmpl/include/tmpl_complex.h>
+#include <libtmpl/include/tmpl_math_constants.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
-
-#define RSSRINGOCCS_RCPR_SQRT_TWO (+7.0710678118654752440084436210484903928E-01)
 
 void
 rssringoccs_Fresnel_Transform_Norm(rssringoccs_TAUObj *tau,
@@ -103,7 +102,7 @@ rssringoccs_Fresnel_Transform_Norm(rssringoccs_TAUObj *tau,
     norm.dat[1] *= 2.0;
 
     /*  Compute the real scale factor, 1 / (sqrt(2) |norm|).                  */
-    scale_factor = RSSRINGOCCS_RCPR_SQRT_TWO / tmpl_CDouble_Abs(norm);
+    scale_factor = tmpl_Double_Rcpr_Sqrt_Two / tmpl_CDouble_Abs(norm);
 
     /*  Multiply result by the coefficient found in the Fresnel inverse.      *
      *  The 1 / F term is omitted, since the F in the norm cancels this.      */

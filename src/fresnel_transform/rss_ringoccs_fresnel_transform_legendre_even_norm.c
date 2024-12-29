@@ -15,12 +15,130 @@
  *                                                                            *
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
+ ******************************************************************************
+ *                rss_ringoccs_diffraction_correction_fresnel                 *
+ ******************************************************************************
+ *  Purpose:                                                                  *
+ *      Uses the quadratic Fresnel transform for diffraction correction.      *
+ ******************************************************************************
+ *                             DEFINED FUNCTIONS                              *
+ ******************************************************************************
+ *  Function Name:                                                            *
+ *      rssringoccs_Fresnel_Transform_Legendre_Even_Norm                      *
+ *  Purpose:                                                                  *
+ *      Performs diffraction correction using Fresnel approximation.          *
+ *  Arguments:                                                                *
+ *      tau (double * const):                                                 *
+ *          The geometry and diffraction data for the reconstruction. The     *
+ *          output reconstruction is stored in the T_out member of tau.       *
+ *  Output:                                                                   *
+ *      None (void).                                                          *
+ *  Called Functions:                                                         *
+ *      None.                                                                 *
+ *  Method:                                                                   *
+ *      The inverse Fresnel transform is given by:                            *
+ *                                                                            *
+ *                         infinity                                           *
+ *                            -                                               *
+ *                   1 + i   | |                                              *
+ *          T(rho) = -----   |   T_hat(r0) w(r - r0) exp(-i psi(r, r0)) dr0   *
+ *                     2F  | |                                                *
+ *                          -                                                 *
+ *                        -infinity                                           *
+ *                                                                            *
+ *      where T_hat is the diffracted data, w is the window function, r is    *
+ *      the ring intercept point, and r0 is a dummy variable of integration.  *
+ *      psi is the Fresnel Kernel, and exp is the exponential function. The   *
+ *      scale factor F is the Fresnel scale which is dependent on the         *
+ *      geometry of the occultation.                                          *
+ *                                                                            *
+ *      In ideal scenarios, the Fresnel kernel may be approximated by a       *
+ *      simple quadratic:                                                     *
+ *                                                                            *
+ *                     -      - 2                                             *
+ *                pi  | r - r0 |                                              *
+ *          psi = --- | ------ |                                              *
+ *                 2  |    F   |                                              *
+ *                     -      -                                               *
+ *                                                                            *
+ *      The above integral is then computed via a Riemann sum using this new  *
+ *      expression for psi.                                                   *
+ *                                                                            *
+ *      As the resolution get's too high, say 10 km or larger, the window     *
+ *      width quickly shrinks to zero and the integral will be approximately  *
+ *      zero. To account for this, the option to normalize the integral by    *
+ *      the window width is offered. The normalization is defined as follows: *
+ *                                                                            *
+ *                    |  infinity                 |                           *
+ *                    |     -                     |                           *
+ *                    |    | |                    |                           *
+ *                    |    |    exp(-i psi(x)) dx |                           *
+ *                    |  | |                      |                           *
+ *                    |   -                       |                           *
+ *                    | -infinity                 |                           *
+ *          norm =  ---------------------------------                         *
+ *                  |   W / 2                       |                         *
+ *                  |     -                         |                         *
+ *                  |    | |                        |                         *
+ *                  |    |    w(x)exp(-i psi(x)) dx |                         *
+ *                  |  | |                          |                         *
+ *                  |   -                           |                         *
+ *                  | -W / 2                        |                         *
+ *                                                                            *
+ *      This has the effect of making the integral in free-space regions,     *
+ *      which are regions that are not affected by diffraction, evaluate to   *
+ *      one, regardless of what (positive) resolution is chosen.              *
+ *  Notes:                                                                    *
+ *      1.) This code uses the Fresnel approximation which has been known to  *
+ *          fail for several different occultations, especially ones of very  *
+ *          low angle (small B values). Take this into consideration when     *
+ *          performing any analysis.                                          *
+ *      2.) While this may be inaccurate for certain occultations, it is      *
+ *          immensely fast, capable of processing the entire Rev007 E         *
+ *          occultation accurately in less than a second at 1km resolution.   *
+ *  References:                                                               *
+ *      1.) Maguire, R., French, R. (2024)                                    *
+ *          "Applications of Legendre Polynomials for Fresnel Inversion       *
+ *              and Occultation Observations"                                 *
+ *      2.) Marouf, E., Tyler, G., Rosen, P. (June 1986)                      *
+ *          "Profiling Saturn's Rings by Radio Occultation"                   *
+ *          Icarus Vol. 68, Pages 120-166.                                    *
+ *      3.) Goodman, J. (2005)                                                *
+ *          "Introduction to Fourier Optics"                                  *
+ *          McGraw-Hill Series in Electrical and Computer Engineering.        *
+ ******************************************************************************
+ *                                DEPENDENCIES                                *
+ ******************************************************************************
+ *  1.) complex.h:                                                            *
+ *      A standard library header file where complex types are defined and    *
+ *      various functions for manipulating complex values. This is available  *
+ *      in the C99 standard and higher (C11, C18).                            *
+ *  2.) string.h:                                                             *
+ *      A standard library header file used for dealing with strings. This is *
+ *      primarily used for checking the psitype and wtype inputs.             *
+ *  3.) stdbool.h:                                                            *
+ *      A standard library header file used for dealing with Booleans. It     *
+ *      provides the alias bool for the built-in _Bool type. It also provides *
+ *      true and false macros. Requires C99 or higher.                        *
+ ******************************************************************************
+ *  Author:     Ryan Maguire                                                  *
+ *  Date:       June 21, 2019                                                 *
+ ******************************************************************************
+ *                                History                                     *
+ ******************************************************************************
+ *  2019/06/21 (Ryan Maguire):                                                *
+ *      Initial commit.                                                       *
+ *  2020/07/28 (Ryan Maguire):                                                *
+ *      Clarified comments, fixed bug in error checks.                        *
+ *  2020/08/22 (Ryan Maguire):                                                *
+ *      Added FFT routine.                                                    *
+ *  2020/09/06 (Ryan Maguire):                                                *
+ *      Removed FFTW dependence. Replaced with new rss_ringoccs FFT routine.  *
  ******************************************************************************/
 #include <libtmpl/include/tmpl_config.h>
+#include <libtmpl/include/tmpl_math_constants.h>
 #include <libtmpl/include/tmpl_complex.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
-
-#define RSSRINGOCCS_RCPR_SQRT_TWO (+7.0710678118654752440084436210484903928E-01)
 
 void
 rssringoccs_Fresnel_Transform_Legendre_Even_Norm(
@@ -145,9 +263,9 @@ rssringoccs_Fresnel_Transform_Legendre_Even_Norm(
         psi_odd *= x;
 
         /*  Recalling that x is negative, to compute the left side of the sum *
-         *  (where x is negative), we just need to do psi_even - psi_odd. We  *
+         *  (where x is negative), we just need to do psi_even + psi_odd. We  *
          *  also need the scale factor kD x^2. Finish the computation for psi.*/
-        psi = kD_times_x2 * (psi_even - psi_odd);
+        psi = kD_times_x2 * (psi_even + psi_odd);
 
         /*  Accounting for the window function, we have w(-x) exp(-i psi(-x)).*
          *  Since window functions are real-valued and non-negative, this is  *
@@ -156,7 +274,7 @@ rssringoccs_Fresnel_Transform_Legendre_Even_Norm(
 
         /*  The right side of the window has x positive (r > r0). psi_even is *
          *  not changed by this, but psi_odd flips in sign. Compute.          */
-        psi = kD_times_x2 * (psi_even + psi_odd);
+        psi = kD_times_x2 * (psi_even - psi_odd);
 
         /*  Window functions are symmetric: w(-x) = w(x). We can compute via  *
          *  the polar form method with the same element of the window array.  */
@@ -195,7 +313,7 @@ rssringoccs_Fresnel_Transform_Legendre_Even_Norm(
     /*  The integral in the numerator of norm evaluates to F sqrt(2). Use     *
      *  this in the calculation of the normalization. The cabs function       *
      *  computes the absolute value of complex number (defined in complex.h). */
-    scale_factor = RSSRINGOCCS_RCPR_SQRT_TWO / tmpl_CDouble_Abs(norm);
+    scale_factor = tmpl_Double_Rcpr_Sqrt_Two / tmpl_CDouble_Abs(norm);
 
     /*  Multiply result by the coefficient found in the Fresnel inverse.      */
     integrand = tmpl_CDouble_Rect(scale_factor, scale_factor);

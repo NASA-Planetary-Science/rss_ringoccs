@@ -1,6 +1,7 @@
 #include <libtmpl/include/tmpl_config.h>
 #include <libtmpl/include/tmpl_compat_cast.h>
 #include <libtmpl/include/tmpl_complex.h>
+#include <libtmpl/include/tmpl_math_constants.h>
 #include <libtmpl/include/tmpl_cyl_fresnel_optics.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 #include <stddef.h>
@@ -48,9 +49,9 @@ rssringoccs_Fresnel_Transform_Newton_D_Quartic_Norm(
     rho[2] = tau->rho_km_vals[center] + 0.25*tau->w_km_vals[center];
     rho[3] = tau->rho_km_vals[center] + 0.5*tau->w_km_vals[center];
     phi0[0] = (rho[0]-tau->rho_km_vals[offset])*slope+tau->phi_deg_vals[offset];
-    phi0[1] = (rho[1]-tau->rho_km_vals[offset])*slope+tau->phi_deg_vals[offset],
-    phi0[1] = (rho[2]-tau->rho_km_vals[offset])*slope+tau->phi_deg_vals[offset];
-    phi0[1] = (rho[3]-tau->rho_km_vals[offset])*slope+tau->phi_deg_vals[offset];
+    phi0[1] = (rho[1]-tau->rho_km_vals[offset])*slope+tau->phi_deg_vals[offset];
+    phi0[2] = (rho[2]-tau->rho_km_vals[offset])*slope+tau->phi_deg_vals[offset];
+    phi0[3] = (rho[3]-tau->rho_km_vals[offset])*slope+tau->phi_deg_vals[offset];
 
     /*  Initialize T_out and norm to zero so we can loop over later.          */
     tau->T_out[center] = tmpl_CDouble_Zero;
@@ -117,10 +118,10 @@ rssringoccs_Fresnel_Transform_Newton_D_Quartic_Norm(
      *  this in the calculation of the normalization. The cabs function       *
      *  computes the absolute value of complex number (defined in complex.h). */
     abs_norm = tmpl_CDouble_Abs(norm);
-    real_norm = tmpl_Sqrt_Two / abs_norm;
+    real_norm = tmpl_Double_Rcpr_Sqrt_Two / abs_norm;
 
     /*  Multiply result by the coefficient found in the Fresnel inverse.      *
      *  The 1/F term is omitted, since the F in the norm cancels this.        */
-    integrand = tmpl_CDouble_Rect(0.5*real_norm, 0.5*real_norm);
+    integrand = tmpl_CDouble_Rect(real_norm, real_norm);
     tau->T_out[center] = tmpl_CDouble_Multiply(integrand, tau->T_out[center]);
 }

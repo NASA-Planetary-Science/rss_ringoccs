@@ -95,10 +95,9 @@ rssringoccs_Fresnel_Transform_Newton_Quadratic(rssringoccs_TAUObj *tau,
 
     /*  For quadratic interpolation we use the two extreme endpoints. The     *
      *  center value of psi is exactly zero, giving us three data points.     */
-    const double rho[2] = {
-        tau->rho_km_vals[center] - 0.5*tau->w_km_vals[center],
-        tau->rho_km_vals[center] + 0.5*tau->w_km_vals[center]
-    };
+    const double rhol = tau->rho_km_vals[center] - 0.5*tau->w_km_vals[center];
+    const double rhor = tau->rho_km_vals[center] + 0.5*tau->w_km_vals[center];
+    double rho[2];
 
     /*  Linear interpolation to compute the corresponding azimuth angles.     *
      *  Compute the slope of rho vs phi.                                      */
@@ -107,10 +106,15 @@ rssringoccs_Fresnel_Transform_Newton_Quadratic(rssringoccs_TAUObj *tau,
     const double slope = num / den;
 
     /*  Compute phi using the slope-intercept formula of the line.            */
-    const double phi0[4] = {
-        (rho[0] - tau->rho_km_vals[offset])*slope + tau->phi_deg_vals[offset],
-        (rho[1] - tau->rho_km_vals[offset])*slope + tau->phi_deg_vals[offset]
-    };
+    const double phi0l = (rhol - tau->rho_km_vals[offset])*slope + tau->phi_deg_vals[offset];
+    const double phi0r = (rhor - tau->rho_km_vals[offset])*slope + tau->phi_deg_vals[offset];
+    double phi0[2];
+
+    /*  Initialize the rho and phi0 arrays.                                   */
+    rho[0] = rhol;
+    rho[1] = rhor;
+    phi0[0] = phi0l;
+    phi0[1] = phi0r;
 
     /*  Initialize T_out and norm to zero so we can loop over later.          */
     tau->T_out[center] = tmpl_CDouble_Zero;

@@ -97,10 +97,10 @@ rssringoccs_Fresnel_Transform_Perturbed_Newton_Norm(rssringoccs_TAUObj *tau,
      *  this in the calculation of the normalization. The cabs function       *
      *  computes the absolute value of complex number (defined in complex.h). */
     abs_norm = tmpl_CDouble_Abs(norm);
-    real_norm = tmpl_Sqrt_Two / abs_norm;
+    real_norm = tmpl_Double_Rcpr_Sqrt_Two / abs_norm;
 
     /*  Multiply result by the coefficient found in the Fresnel inverse.      *
      *  The 1/F term is omitted, since the F in the norm cancels this.        */
-    integrand = tmpl_CDouble_Rect(0.5*real_norm, 0.5*real_norm);
+    integrand = tmpl_CDouble_Rect(real_norm, real_norm);
     tau->T_out[center] = tmpl_CDouble_Multiply(integrand, tau->T_out[center]);
 }

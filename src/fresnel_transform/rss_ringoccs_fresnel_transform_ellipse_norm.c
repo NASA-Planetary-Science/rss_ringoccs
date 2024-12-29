@@ -17,6 +17,7 @@
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
 #include <libtmpl/include/tmpl.h>
+#include <libtmpl/include/tmpl_math_constants.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
 void
@@ -106,7 +107,7 @@ rssringoccs_Fresnel_Transform_Newton_Elliptical_Norm(rssringoccs_TAUObj *tau,
      *  this in the calculation of the normalization. The cabs function       *
      *  computes the absolute value of complex number (defined in complex.h). */
     abs_norm = tmpl_CDouble_Abs(norm);
-    real_norm = tmpl_Sqrt_Two / abs_norm;
+    real_norm = tmpl_Double_Sqrt_Two / abs_norm;
 
     /*  Multiply result by the coefficient found in the Fresnel inverse.      *
      *  The 1/F term is omitted, since the F in the norm cancels this.        */

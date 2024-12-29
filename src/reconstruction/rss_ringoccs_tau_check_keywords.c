@@ -80,6 +80,7 @@
 #include <stdlib.h>
 #include <libtmpl/include/tmpl_bool.h>
 #include <libtmpl/include/tmpl_math.h>
+#include <libtmpl/include/tmpl_math_constants.h>
 #include <libtmpl/include/tmpl_string.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 
@@ -119,7 +120,7 @@ void rssringoccs_Tau_Check_Keywords(rssringoccs_TAUObj *tau)
     }
 
     /*  The periapse is allowed to be between -2pi and 2pi, inclusive.        */
-    else if (tau->peri < -tmpl_Two_Pi)
+    else if (tau->peri < -tmpl_Double_Two_Pi)
     {
         tau->error_occurred = tmpl_True;
         tau->error_message = tmpl_strdup(
@@ -129,7 +130,7 @@ void rssringoccs_Tau_Check_Keywords(rssringoccs_TAUObj *tau)
         );
         return;
     }
-    else if (tau->peri > tmpl_Two_Pi)
+    else if (tau->peri > tmpl_Double_Two_Pi)
     {
         tau->error_occurred = tmpl_True;
         tau->error_message = tmpl_strdup(

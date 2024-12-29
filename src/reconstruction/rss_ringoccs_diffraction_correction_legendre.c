@@ -83,6 +83,7 @@
 #include <libtmpl/include/tmpl_math.h>
 #include <libtmpl/include/tmpl_orthogonal_polynomial_real.h>
 #include <libtmpl/include/tmpl_compat_cast.h>
+#include <libtmpl/include/tmpl_string.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 #include <stdlib.h>

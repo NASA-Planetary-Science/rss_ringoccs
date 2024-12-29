@@ -64,7 +64,7 @@
  *      The above integral is then computed via a Riemann sum using this new  *
  *      expression for psi.                                                   *
  *                                                                            *
- *      As the resolution get's too high, say 10 km or larger, the window     *
+ *      As the resolution gets too high, say 10 km or larger, the window      *
  *      width quickly shrinks to zero and the integral will be approximately  *
  *      zero. To account for this, the option to normalize the integral by    *
  *      the window width is offered. The normalization is defined as follows: *
@@ -109,58 +109,82 @@
  ******************************************************************************
  *                                DEPENDENCIES                                *
  ******************************************************************************
- *  1.) complex.h:                                                            *
- *      A standard library header file where complex types are defined and    *
- *      various functions for manipulating complex values. This is available  *
- *      in the C99 standard and higher (C11, C18).                            *
- *  2.) string.h:                                                             *
- *      A standard library header file used for dealing with strings. This is *
- *      primarily used for checking the psitype and wtype inputs.             *
- *  3.) stdbool.h:                                                            *
- *      A standard library header file used for dealing with Booleans. It     *
- *      provides the alias bool for the built-in _Bool type. It also provides *
- *      true and false macros. Requires C99 or higher.                        *
+ *  1.) tmpl_bool.h:                                                          *
+ *          Header file providing Booleans (True and False).                  *
+ *  2.) tmpl_compat_cast.h:                                                   *
+ *          Macros for casting with compatibility for both C and C++.         *
+ *  3.) tmpl_compat_stdlib.h:                                                 *
+ *          Macros for malloc and free, with C vs. C++ compatibility.         *
+ *  4.) tmpl_string.h:                                                        *
+ *          Provides POSIX functions like strdup in a portable manner.        *
+ *  5.) rssringoccs_fresnel_trasnform.h:                                      *
+ *          Header file where the Riemann sums for various types of Frensel   *
+ *          transforms are provided. These routines perform the inner most    *
+ *          for-loop in the Fresnel transforms.                               *
+ *  6.) rss_ringoccs_tau.h:                                                   *
+ *          Header file where the rssringoccs_TAUObj type is provided.        *
+ *  7.) rssringoccs_reconstruction.h:                                         *
+ *          Header file with the function prototype.                          *
  ******************************************************************************
  *  Author:     Ryan Maguire                                                  *
  *  Date:       June 21, 2019                                                 *
  ******************************************************************************
- *                                History                                     *
+ *                              Revision History                              *
  ******************************************************************************
- *  2019/06/21 (Ryan Maguire):                                                *
+ *  2019/06/21: Ryan Maguire                                                  *
  *      Initial commit.                                                       *
- *  2020/07/28 (Ryan Maguire):                                                *
+ *  2020/07/28: Ryan Maguire                                                  *
  *      Clarified comments, fixed bug in error checks.                        *
- *  2020/08/22 (Ryan Maguire):                                                *
+ *  2020/08/22: Ryan Maguire                                                  *
  *      Added FFT routine.                                                    *
- *  2020/09/06 (Ryan Maguire):                                                *
+ *  2020/09/06: Ryan Maguire                                                  *
  *      Removed FFTW dependence. Replaced with new rss_ringoccs FFT routine.  *
+ *  2024/12/23: Ryan Maguire                                                  *
+ *      Restructured the code. Added references, cleaned up comments and      *
+ *      includes.                                                             *
  ******************************************************************************/
-#include <libtmpl/include/tmpl.h>
-#include <libtmpl/include/tmpl_compat_cast.h>
-#include <libtmpl/include/tmpl_string.h>
-#include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
-#include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
-#include <stdlib.h>
 
+/*  Booleans (True / False) provided here.                                    */
+#include <libtmpl/include/tmpl_bool.h>
+
+/*  Macros for C vs. C++ compatibility with casting data types.               */
+#include <libtmpl/include/tmpl_compat_cast.h>
+
+/*  Macros for C vs. C++ compatibility with malloc with free.                 */
+#include <libtmpl/include/tmpl_compat_stdlib.h>
+
+/*  Portable version of strdup provided here.                                 */
+#include <libtmpl/include/tmpl_string.h>
+
+/*  The Riemann summation routines are found here.                            */
+#include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
+
+/*  rssringoccs_TAUObj typedef given here.                                    */
+#include <rss_ringoccs/include/rss_ringoccs_tau.h>
+
+/*  Function prototype provided here.                                         */
+#include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
+
+/*  The inner most for-loop is a Riemann sum for the Fresnel trasnform. The   *
+ *  user has the option to normalize this by the window width. There are      *
+ *  thus two transforms: without normalization, and with normalizaiton.       */
 static const rssringoccs_FresnelTransform fresnel_transform_list[2] = {
     rssringoccs_Fresnel_Transform,
     rssringoccs_Fresnel_Transform_Norm
 };
 
-/*  Helper macro for freeing pointers. We check if the pointer is NULL first. */
-#define RSSRINGOCCS_DESTROY_VARIABLE(var) if (var) free(var)
-
 /*  The value pi / 2. Used in the definition of the Fresnel approximation.    */
 #define RSSRINGOCCS_PI_BY_TWO (+1.570796326794896619231321691639751442098584699)
 
+/*  Performs the Fresnel transform on the data contained in tau.              */
 void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj *tau)
 {
     /*  m and n used for indexing, nw_pts is number of points in window, and  *
      *  center is the index for the center of the window of integration.      */
     size_t m, n, nw_pts, center;
 
-    /*  w_init is window width (km), dx and two_dx are sample spacing (km).   */
-    double w_init, dx, two_dx;
+    /*  w_width is window width (km), dx and two_dx are sample spacing (km).  */
+    double w_width, dx, two_dx;
 
     /*  Pointers for the independent variable and the window function.        */
     double *x_arr = NULL;
@@ -213,14 +237,14 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj *tau)
     center = tau->start;
 
     /*  Compute necessary data for the start of the inversion.                */
-    w_init = tau->w_km_vals[center];
+    w_width = tau->w_km_vals[center];
     dx = tau->dx_km;
     two_dx = 2.0*dx;
-    nw_pts = TMPL_CAST(w_init / two_dx, size_t) + 1;
+    nw_pts = TMPL_CAST(w_width / two_dx, size_t) + 1;
 
     /*  Allocate memory for the independent variable and the window function. */
-    x_arr = malloc(sizeof(*x_arr)  * nw_pts);
-    w_func = malloc(sizeof(*w_func) * nw_pts);
+    x_arr = TMPL_MALLOC(double *, nw_pts);
+    w_func = TMPL_MALLOC(double *, nw_pts);
 
     /*  Check if malloc failed. It returns NULL on failure.                   */
     if (!x_arr || !w_func)
@@ -236,14 +260,14 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj *tau)
         /*  It is possible that malloc succeeded for one variable and not the *
          *  other. We initialized both pointers to NULL at the start of this  *
          *  function, so we can safely free memory using the following macro. */
-        RSSRINGOCCS_DESTROY_VARIABLE(x_arr);
-        RSSRINGOCCS_DESTROY_VARIABLE(w_func);
+        TMPL_FREE(x_arr)
+        TMPL_FREE(w_func)
 
         return;
     }
 
     /*  Initialize the window array and the independent variable.             */
-    rssringoccs_Tau_Reset_Window(x_arr, w_func, dx, w_init, nw_pts, window);
+    rssringoccs_Tau_Reset_Window(x_arr, w_func, dx, w_width, nw_pts, window);
 
     /*  We have computed the window function and the independent variable x,  *
      *  which is (r - r0). We need +- (pi/2) (r - r0)^2. The 1 / F^2 factor   *
@@ -256,9 +280,9 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj *tau)
     {
         /*  Check if we need to resize the window. This happens once          *
          *  |w - w0| > 2 * dx occurs, where w is the current window width,    *
-         *  and w0 is the value of w_init.                                    */
+         *  and w0 is the value of w_width.                                   */
         const int resize = rssringoccs_Tau_Resize_Half_Window(
-            tau, &x_arr, &w_func, w_init, two_dx, center
+            tau, &x_arr, &w_func, w_width, two_dx, center
         );
 
         /*  If we did need a resize, there are a few things that could have   *
@@ -277,10 +301,10 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj *tau)
             /*  Reset the threshold value for the window width to the current *
              *  window size. We will update again once the required window    *
              *  grows beyond 2 * dx the size of the current window.           */
-            w_init = tau->w_km_vals[center];
+            w_width = tau->w_km_vals[center];
 
             /*  Similarly, reset the number of points in the window.          */
-            nw_pts = TMPL_CAST(w_init / two_dx, size_t) + 1;
+            nw_pts = TMPL_CAST(w_width / two_dx, size_t) + 1;
 
             /*  The rssringoccs_Tau_Resize_Half_Window function calls the     *
              *  rssringoccs_Tau_Reset_Window routine, which recomputes the    *
@@ -303,5 +327,4 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj *tau)
 }
 
 /*  Undefine everything in case someone wants to #include this file.          */
-#undef RSSRINGOCCS_DESTROY_VARIABLE
 #undef RSSRINGOCCS_PI_BY_TWO

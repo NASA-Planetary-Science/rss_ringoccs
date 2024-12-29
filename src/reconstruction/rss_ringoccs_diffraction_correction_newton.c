@@ -87,7 +87,7 @@ void rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj *tau)
             fresnel_transform = rssringoccs_Fresnel_Transform_Newton_Quadratic_Norm;
         else if (tau->psinum == rssringoccs_DR_NewtonQuartic)
             fresnel_transform = rssringoccs_Fresnel_Transform_Newton_Quartic_Norm;
-        else if (tau->psinum == rssringoccs_DR_NewtonD)
+        else if (tau->psinum == rssringoccs_DR_NewtonDQuartic)
             fresnel_transform = rssringoccs_Fresnel_Transform_Newton_D_Quartic_Norm;
         else
             fresnel_transform = rssringoccs_Fresnel_Transform_Newton_D_Old_Norm;

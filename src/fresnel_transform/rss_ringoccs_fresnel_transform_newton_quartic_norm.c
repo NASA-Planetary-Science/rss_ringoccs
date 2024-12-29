@@ -12,7 +12,7 @@
 #define SIXTY_FOUR_THIRDS (21.3333333333333333333333333)
 
 void
-rssringoccs_Fresnel_Transform_Newton_D_Quartic_Norm(
+rssringoccs_Fresnel_Transform_Newton_Quartic_Norm(
     rssringoccs_TAUObj * TMPL_RESTRICT const tau,
     const double * TMPL_RESTRICT const w_func,
     size_t n_pts,
@@ -30,7 +30,7 @@ rssringoccs_Fresnel_Transform_Newton_D_Quartic_Norm(
     /*  The Fresnel kernel and ring azimuth angle.                            */
     double C[4], abs_norm, real_norm, rho[4], phi0[4];
     double psi_n[4], psi_half_diff, psi_full_diff, psi, phi;
-    double psi_half_mean, psi_full_mean, D, x;
+    double psi_half_mean, psi_full_mean, x;
     tmpl_ComplexDouble exp_psi, norm, integrand;
 
     const double rcpr_w = 1.0 / tau->w_km_vals[center];
@@ -59,36 +59,26 @@ rssringoccs_Fresnel_Transform_Newton_D_Quartic_Norm(
 
     for (n = zero; n < four; ++n)
     {
-        phi = tmpl_Double_Stationary_Cyl_Fresnel_Psi_Newton(
+        phi = tmpl_Double_Stationary_Cyl_Fresnel_Psi_Newton_Deg(
             tau->k_vals[center],        /*  Wavenumber.                       */
             tau->rho_km_vals[center],   /*  Ring radius.                      */
             rho[n],                     /*  Dummy radius.                     */
             phi0[n],                    /*  Initial stationary azimuth guess. */
             phi0[n],                    /*  Dummy azimuthal angle.            */
             tau->B_deg_vals[center],    /*  Ring opening angle.               */
-            tau->rx_km_vals[center],    /*  x-coordinate of spacecraft.       */
-            tau->ry_km_vals[center],    /*  y-coordinate of spacecraft.       */
-            tau->rz_km_vals[center],    /*  z-coordinate of spacecraft.       */
+            tau->D_km_vals[center],     /*  Distance to spacecraft.           */
             tau->EPS,                   /*  Epsilon error for Newton's method.*/
             tau->toler                  /*  Maximum number of iterations.     */
         );
 
-        D = tmpl_Double_Cyl_Fresnel_Observer_Distance(
-            rho[n],                     /* Ring radius.                       */
-            phi,                        /* Stationary azimuth angle.          */
-            tau->rx_km_vals[center],    /* Cassini x coordinate.              */
-            tau->ry_km_vals[center],    /* Cassini y coordinate.              */
-            tau->rz_km_vals[center]     /* Cassini z coordinate.              */
-        );
-
-        psi_n[n] = tmpl_Double_Cyl_Fresnel_Psi(
+        psi_n[n] = tmpl_Double_Cyl_Fresnel_Psi_Deg(
             tau->k_vals[center],        /*  Wavenumber.                       */
             tau->rho_km_vals[center],   /*  Ring radius.                      */
             rho[n],                     /*  Dummy radius.                     */
             phi,                        /*  Stationary azimuthal angle.       */
             phi0[n],                    /*  Dummy azimuthal angle.            */
             tau->B_deg_vals[center],    /*  Ring opening angle.               */
-            D                           /*  Ring-Spacecraft distance.         */
+            tau->D_km_vals[center]      /*  Distance to spacecraft.           */
         );
     }
 

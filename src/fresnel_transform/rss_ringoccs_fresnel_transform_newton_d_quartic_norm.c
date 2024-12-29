@@ -59,7 +59,7 @@ rssringoccs_Fresnel_Transform_Newton_D_Quartic_Norm(
 
     for (n = zero; n < four; ++n)
     {
-        phi = tmpl_Double_Stationary_Cyl_Fresnel_Psi_D_Newton(
+        phi = tmpl_Double_Stationary_Cyl_Fresnel_Psi_D_Newton_Deg(
             tau->k_vals[center],        /*  Wavenumber.                       */
             tau->rho_km_vals[center],   /*  Ring radius.                      */
             rho[n],                     /*  Dummy radius.                     */
@@ -73,7 +73,7 @@ rssringoccs_Fresnel_Transform_Newton_D_Quartic_Norm(
             tau->toler                  /*  Maximum number of iterations.     */
         );
 
-        D = tmpl_Double_Cyl_Fresnel_Observer_Distance(
+        D = tmpl_Double_Cyl_Fresnel_Observer_Distance_Deg(
             rho[n],                     /* Ring radius.                       */
             phi,                        /* Stationary azimuth angle.          */
             tau->rx_km_vals[center],    /* Cassini x coordinate.              */
@@ -81,7 +81,7 @@ rssringoccs_Fresnel_Transform_Newton_D_Quartic_Norm(
             tau->rz_km_vals[center]     /* Cassini z coordinate.              */
         );
 
-        psi_n[n] = tmpl_Double_Cyl_Fresnel_Psi(
+        psi_n[n] = tmpl_Double_Cyl_Fresnel_Psi_Deg(
             tau->k_vals[center],        /*  Wavenumber.                       */
             tau->rho_km_vals[center],   /*  Ring radius.                      */
             rho[n],                     /*  Dummy radius.                     */

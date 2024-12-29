@@ -16,6 +16,7 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
+#include <libtmpl/include/tmpl_string.h>
 #include "../crssringoccs.h"
 
 /*  Macro for the crssringoccs_set_var function to shorten the syntax.        */

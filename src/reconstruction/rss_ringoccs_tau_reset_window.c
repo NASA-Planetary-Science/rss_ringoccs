@@ -1,4 +1,4 @@
-#include <libtmpl/include/tmpl_compat_cast.h>
+#include <libtmpl/include/compat/tmpl_cast.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 
 /******************************************************************************

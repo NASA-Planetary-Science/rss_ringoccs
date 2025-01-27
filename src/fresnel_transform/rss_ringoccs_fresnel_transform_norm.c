@@ -19,7 +19,7 @@
 
 /*  Complex numbers provided here.                                            */
 #include <libtmpl/include/tmpl_complex.h>
-#include <libtmpl/include/tmpl_math_constants.h>
+#include <libtmpl/include/constants/tmpl_math_constants.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
 void

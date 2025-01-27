@@ -1,5 +1,5 @@
 #include <rss_ringoccs/include/rss_ringoccs_history.h>
-#include <libtmpl/include/tmpl_helper.h>
+#include <libtmpl/include/helper/tmpl_array_size.h>
 #include <stdio.h>
 
 static const char *rss_ringoccs_history_string =

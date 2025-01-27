@@ -3,7 +3,7 @@
 #include <libtmpl/include/tmpl_bool.h>
 
 /*  Macros for C vs. C++ compatibility with casting data types.               */
-#include <libtmpl/include/tmpl_compat_cast.h>
+#include <libtmpl/include/compat/tmpl_cast.h>
 
 /*  Cylindrical Fresnel optics routines found here.                           */
 #include <libtmpl/include/tmpl_cyl_fresnel_optics.h>

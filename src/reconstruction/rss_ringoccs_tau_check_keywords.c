@@ -80,7 +80,7 @@
 #include <stdlib.h>
 #include <libtmpl/include/tmpl_bool.h>
 #include <libtmpl/include/tmpl_math.h>
-#include <libtmpl/include/tmpl_math_constants.h>
+#include <libtmpl/include/constants/tmpl_math_constants.h>
 #include <libtmpl/include/tmpl_string.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 

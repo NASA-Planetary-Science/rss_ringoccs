@@ -54,7 +54,7 @@
  ******************************************************************************
  *  1.) tmpl_bool.h:                                                          *
  *          Header file providing Booleans (True and False).                  *
- *  2.) tmpl_compat_cast.h:                                                   *
+ *  2.) compat/tmpl_cast.h:                                                   *
  *          Macros for casting with compatibility for both C and C++.         *
  *  4.) tmpl_string.h:                                                        *
  *          Provides POSIX functions like strdup in a portable manner.        *
@@ -76,7 +76,7 @@
 #include <libtmpl/include/tmpl_bool.h>
 
 /*  Macros for C vs. C++ compatibility with casting data types.               */
-#include <libtmpl/include/tmpl_compat_cast.h>
+#include <libtmpl/include/compat/tmpl_cast.h>
 
 /*  Portable version of strdup provided here.                                 */
 #include <libtmpl/include/tmpl_string.h>

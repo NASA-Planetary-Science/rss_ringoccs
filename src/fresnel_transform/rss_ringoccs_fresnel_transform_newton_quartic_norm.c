@@ -1,7 +1,7 @@
 #include <libtmpl/include/tmpl_config.h>
-#include <libtmpl/include/tmpl_compat_cast.h>
+#include <libtmpl/include/compat/tmpl_cast.h>
 #include <libtmpl/include/tmpl_complex.h>
-#include <libtmpl/include/tmpl_math_constants.h>
+#include <libtmpl/include/constants/tmpl_math_constants.h>
 #include <libtmpl/include/tmpl_cyl_fresnel_optics.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 #include <stddef.h>

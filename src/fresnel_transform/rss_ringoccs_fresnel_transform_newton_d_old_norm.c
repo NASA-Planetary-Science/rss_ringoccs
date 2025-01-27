@@ -17,7 +17,7 @@
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
 #include <libtmpl/include/tmpl.h>
-#include <libtmpl/include/tmpl_math_constants.h>
+#include <libtmpl/include/constants/tmpl_math_constants.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
 void

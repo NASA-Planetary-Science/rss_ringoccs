@@ -1,6 +1,3 @@
-
-
-
 #include <rss_ringoccs/include/rss_ringoccs_history.h>
 #include <libtmpl/include/tmpl_string.h>
 #include <stdlib.h>

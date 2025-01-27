@@ -111,5 +111,3 @@ rssringoccs_Fresnel_Transform_Norm(rssringoccs_TAUObj *tau,
     tau->T_out[center].dat[0] = real;
     tau->T_out[center].dat[1] = imag;
 }
-
-#undef RSSRINGOCCS_RCPR_SQRT_TWO

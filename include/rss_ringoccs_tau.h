@@ -31,7 +31,7 @@
 #include <libtmpl/include/tmpl_bool.h>
 
 /*  Complex numbers and functions provided here.                              */
-#include <libtmpl/include/tmpl_complex_double.h>
+#include <libtmpl/include/types/tmpl_complex_double.h>
 
 /*  size_t typedef provided here.                                             */
 #include <stddef.h>

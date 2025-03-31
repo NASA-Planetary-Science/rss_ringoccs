@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools", "numpy", "scipy", "matplotlib", "spiceypy"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rss_ringoccs"
+description = "Library for processing RSS ring occultation data."
+version = "v1.3-beta"
+readme = "README.md"
+license = {file = "LICENSE"}
+keywords = ["cassini", "radio science", "astronomy", "planetary rings"]
+requires-python = ">= 3.7"
+authors = [
+    {name = "Ryan Maguire", email = "rmaguire@protonmail.com"}
+]
+maintainers = [
+    {name = "Ryan Maguire", email = "rmaguire@protonmail.com"}
+]

@@ -7,8 +7,6 @@ Purpose:
 """
 
 import numpy as np
-import warnings
-warnings.simplefilter('ignore', np.RankWarning)
 import matplotlib.pyplot as plt
 from scipy.interpolate import splrep, splev
 from scipy.signal import argrelmax

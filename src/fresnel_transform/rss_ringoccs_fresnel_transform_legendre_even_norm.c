@@ -36,14 +36,21 @@
  *          diffraction limited data, and this function will write the newly  *
  *          reconstructed data to the T_out array.                            *
  *      x_arr (const double * TMPL_RESTRICT const):                           *
- *          The array r[n] - r[center], where r is the radius.                *
+ *          The array r[n] - r[center], where r is the radius. n = 0 hence    *
+ *          corresponds to the left-most edge of the window, n = n_pts + 1    *
+ *          represents the center of the window.                              *
+ *      w_func (const double * TMPL_RESTRICT const):                          *
+ *          The window function, pre-computed across the current window. The  *
+ *          index w_func[n] corresponds to the window at x_arr[n] (see above).*
  *      coeffs (const double * TMPL_RESTRICT const):                          *
  *          The coefficients for the Legendre approximation.                  *
  *      n_pts (size_t):                                                       *
- *          The number of points in the window. This must be an odd number.   *
+ *          The number of points in the x_arr and w_func arrays. There are    *
+ *          2 * n_pts + 1 points total in the window, n_pts to the left of    *
+ *          the center, n_pts to the right, and the center itself.            *
  *      center (size_t):                                                      *
- *          The index for the center of the window. There must be (n - 1) / 2 *
- *          points to the left and right of center in the data.               *
+ *          The index for the center of the window. There must be             *
+ *          n_pts points to the left and right of the center in the data.     *
  *  Output:                                                                   *
  *      None (void).                                                          *
  *  Called Functions:                                                         *
@@ -98,7 +105,7 @@
  *      This function uses even degree approximations from pre-computed L_n   *
  *      values. This is given by the coeffs array, coeffs[n] = L_n(A, B).     *
  *                                                                            *
- *      As the resolution gets too high, say 10 km or larger, the window      *
+ *      As the resolution gets too coarse, say 10 km or larger, the window    *
  *      width quickly shrinks to zero and the integral will be approximately  *
  *      zero. To account for this, we normalize the integral by the window    *
  *      width. The normalization is defined as follows:                       *
@@ -373,8 +380,8 @@ rssringoccs_Fresnel_Transform_Legendre_Even_Norm(
         integrand = tmpl_CDouble_Multiply(w_exp_minus_psi_right, T_right);
         tmpl_CDouble_AddTo(&tau->T_out[center], &integrand);
 
-        /*  n is the index for the w_func data, m is the index for the x      *
-         *  variable and T_hat. n is incremented, m is decremented since we   *
+        /*  n is the index for the w_func and x_arr data, m is the index for  *
+         *  the T_hat variable. n is incremented, m is decremented since we   *
          *  start at the edge of the window and move towards the center.      */
         m--;
     }

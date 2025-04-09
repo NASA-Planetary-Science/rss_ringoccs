@@ -16,21 +16,34 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
- *                rss_ringoccs_diffraction_correction_fresnel                 *
+ *             rss_ringoccs_fresnel_transform_legendre_even_norm              *
  ******************************************************************************
  *  Purpose:                                                                  *
- *      Uses the quadratic Fresnel transform for diffraction correction.      *
+ *      Uses even degree Legendre polynomials to approximate the Fresnel      *
+ *      kernel at the stationary azimuth angle and perform diffraction        *
+ *      correction, normalizing the output by the window width.               *
  ******************************************************************************
  *                             DEFINED FUNCTIONS                              *
  ******************************************************************************
  *  Function Name:                                                            *
  *      rssringoccs_Fresnel_Transform_Legendre_Even_Norm                      *
  *  Purpose:                                                                  *
- *      Performs diffraction correction using Fresnel approximation.          *
+ *      Performs diffraction correction using even degree Legendre            *
+ *      polynomials. The output is normalized by the window width.            *
  *  Arguments:                                                                *
- *      tau (double * const):                                                 *
- *          The geometry and diffraction data for the reconstruction. The     *
- *          output reconstruction is stored in the T_out member of tau.       *
+ *      tau (rssringoccs_TAUObj * TMPL_RESTRICT const):                       *
+ *          A pointer to a Tau object. This contains all of the geometry and  *
+ *          diffraction limited data, and this function will write the newly  *
+ *          reconstructed data to the T_out array.                            *
+ *      x_arr (const double * TMPL_RESTRICT const):                           *
+ *          The array r[n] - r[center], where r is the radius.                *
+ *      coeffs (const double * TMPL_RESTRICT const):                          *
+ *          The coefficients for the Legendre approximation.                  *
+ *      n_pts (size_t):                                                       *
+ *          The number of points in the window. This must be an odd number.   *
+ *      center (size_t):                                                      *
+ *          The index for the center of the window. There must be (n - 1) / 2 *
+ *          points to the left and right of center in the data.               *
  *  Output:                                                                   *
  *      None (void).                                                          *
  *  Called Functions:                                                         *
@@ -52,22 +65,43 @@
  *      scale factor F is the Fresnel scale which is dependent on the         *
  *      geometry of the occultation.                                          *
  *                                                                            *
- *      In ideal scenarios, the Fresnel kernel may be approximated by a       *
- *      simple quadratic:                                                     *
+ *      The azimuth angle corresponding to r is the value phi_s such that     *
+ *      d psi / d phi = 0, the stationary azimuth angle. The function         *
+ *      psi(r, r0) can be approximated as a sum using Legendre polynomials    *
+ *      and Chebyshev polynomials of the second kind. We have:                *
  *                                                                            *
- *                     -      - 2                                             *
- *                pi  | r - r0 |                                              *
- *          psi = --- | ------ |                                              *
- *                 2  |    F   |                                              *
- *                     -      -                                               *
+ *                                             N                              *
+ *                     P (A) - A P   (A)     -----                            *
+ *                      n         n+1        \                                *
+ *          L (A, B) = ----------------- - B /     P     (A) P (A)            *
+ *           n               n + 2           -----  n+k-1     k               *
+ *                                           n = 0                            *
  *                                                                            *
- *      The above integral is then computed via a Riemann sum using this new  *
- *      expression for psi.                                                   *
  *                                                                            *
- *      As the resolution get's too high, say 10 km or larger, the window     *
+ *                     P (A) - A P   (A)      -                     -         *
+ *                      n         n+1        |  U   (A) - 2 P   (A)  |        *
+ *                   = ----------------- - B |   n+2         n+2     |        *
+ *                           n + 2            -                     -         *
+ *                                                                            *
+ *      where P_n is the nth Legendre polynomial and U_n is the nth           *
+ *      Chebyshev polynomial of the second kind. A and B are defined in terms *
+ *      of the geometry of the occultation. psi is then approximated by:      *
+ *                                                                            *
+ *                            N                         n + 2                 *
+ *                          -----            -        -                       *
+ *                          \               |  r - r0  |                      *
+ *          psi(r, r0) = kD /      L (A, B) |  ------  |                      *
+ *                          -----   n        -    D   -                       *
+ *                          n = 0                                             *
+ *                                                                            *
+ *      Where D is the distance between the spacecraft and the ring point.    *
+ *      This function uses even degree approximations from pre-computed L_n   *
+ *      values. This is given by the coeffs array, coeffs[n] = L_n(A, B).     *
+ *                                                                            *
+ *      As the resolution gets too high, say 10 km or larger, the window      *
  *      width quickly shrinks to zero and the integral will be approximately  *
- *      zero. To account for this, the option to normalize the integral by    *
- *      the window width is offered. The normalization is defined as follows: *
+ *      zero. To account for this, we normalize the integral by the window    *
+ *      width. The normalization is defined as follows:                       *
  *                                                                            *
  *                    |  infinity                 |                           *
  *                    |     -                     |                           *
@@ -89,57 +123,93 @@
  *      which are regions that are not affected by diffraction, evaluate to   *
  *      one, regardless of what (positive) resolution is chosen.              *
  *  Notes:                                                                    *
- *      1.) This code uses the Fresnel approximation which has been known to  *
- *          fail for several different occultations, especially ones of very  *
- *          low angle (small B values). Take this into consideration when     *
- *          performing any analysis.                                          *
- *      2.) While this may be inaccurate for certain occultations, it is      *
- *          immensely fast, capable of processing the entire Rev007 E         *
- *          occultation accurately in less than a second at 1km resolution.   *
+ *      1.) This function assumes that the first iteration of Newton's method *
+ *          with guess point phi = phi0 is sufficient for finding the         *
+ *          stationary azimuth angle, the angle phi_s with d psi / d phi = 0. *
+ *          For low ring opening angles B we require more iterations, often   *
+ *          3 or 4, in order to converge to the root. In these scenarios the  *
+ *          Legendre approximation fails.                                     *
+ *      2.) There are geometries where the quadratic Fresnel approximation is *
+ *          better than the higher order Legendre approximations. This is     *
+ *          because the quadratic Fresnel approximation is indeed the         *
+ *          quadratic term of the true stationary Fresnel kernel, psi with    *
+ *          phi = phi_s, but the Legendre approximation only works when the   *
+ *          first Newton iterate for phi accurately approximates phi_s.       *
  *  References:                                                               *
- *      1.) Maguire, R., French, R. (2024)                                    *
- *          "Applications of Legendre Polynomials for Fresnel Inversion       *
- *              and Occultation Observations"                                 *
+ *      1.) Maguire, R., French, R. (2025)                                    *
+ *          Applications of Legendre Polynomials for Fresnel Inversion        *
+ *              and Occultation Observations                                  *
+ *                                                                            *
+ *          Derivation of the Legendre approximation is given. This function  *
+ *          implements the mathematics in this paper.                         *
+ *                                                                            *
  *      2.) Marouf, E., Tyler, G., Rosen, P. (June 1986)                      *
- *          "Profiling Saturn's Rings by Radio Occultation"                   *
+ *          Profiling Saturn's Rings by Radio Occultation                     *
  *          Icarus Vol. 68, Pages 120-166.                                    *
+ *                                                                            *
+ *          This paper describes the theory of diffraction as applied to      *
+ *          planetary ring systems. rss_ringoccs implements many of the       *
+ *          ideas found in this article.                                      *
+ *                                                                            *
  *      3.) Goodman, J. (2005)                                                *
- *          "Introduction to Fourier Optics"                                  *
+ *          Introduction to Fourier Optics                                    *
  *          McGraw-Hill Series in Electrical and Computer Engineering.        *
+ *                                                                            *
+ *          Covers most of the theory behind diffraction and the application  *
+ *          of Fourier analysis to optics. The Fresnel transform is given an  *
+ *          in-depth treatise in this book.                                   *
+ *                                                                            *
+ *      4.) McQuarrie, Donald (2003),                                         *
+ *          Mathematical Methods for Scientists and Engineers                 *
+ *          University Science Books, ISBN 1-891389-29-7                      *
+ *                                                                            *
+ *          Excellent introductory text on mathematical physics. A detailed   *
+ *          discussion of orthogonal polynomials can be found in Chapter 14:  *
+ *          Orthogonal Polynomials and Sturm-Liouville Problems.              *
+ *                                                                            *
+ *      5.) Arfken, G., Weber, H., Harris, F. (2013)                          *
+ *          Mathematical Methods for Physicists, Seventh Edition              *
+ *          Academic Press, Elsevier                                          *
+ *                                                                            *
+ *          Standard textbook on mathematical physics, often used in          *
+ *          introductory graduate courses. See Chapter 18: More Special       *
+ *          Functions, Section 4: Chebyshev Polynomials                       *
  ******************************************************************************
  *                                DEPENDENCIES                                *
  ******************************************************************************
- *  1.) complex.h:                                                            *
- *      A standard library header file where complex types are defined and    *
- *      various functions for manipulating complex values. This is available  *
- *      in the C99 standard and higher (C11, C18).                            *
- *  2.) string.h:                                                             *
- *      A standard library header file used for dealing with strings. This is *
- *      primarily used for checking the psitype and wtype inputs.             *
- *  3.) stdbool.h:                                                            *
- *      A standard library header file used for dealing with Booleans. It     *
- *      provides the alias bool for the built-in _Bool type. It also provides *
- *      true and false macros. Requires C99 or higher.                        *
+ *  1.) tmpl_config.h:                                                        *
+ *          Header file providing TMPL_RESTRICT.                              *
+ *  2.) tmpl_math_constants.h:                                                *
+ *          Math constants, such as sqrt(2) and pi, are defined here.         *
+ *  3.) tmpl_complex.h:                                                       *
+ *          Complex numbers declared here, as are arithmetic functions.       *
+ *  4.) rss_ringoccs_fresnel_transform.h:                                     *
+ *          Prototype for the function given here.                            *
  ******************************************************************************
  *  Author:     Ryan Maguire                                                  *
  *  Date:       June 21, 2019                                                 *
  ******************************************************************************
  *                                History                                     *
  ******************************************************************************
- *  2019/06/21 (Ryan Maguire):                                                *
- *      Initial commit.                                                       *
- *  2020/07/28 (Ryan Maguire):                                                *
- *      Clarified comments, fixed bug in error checks.                        *
- *  2020/08/22 (Ryan Maguire):                                                *
- *      Added FFT routine.                                                    *
- *  2020/09/06 (Ryan Maguire):                                                *
- *      Removed FFTW dependence. Replaced with new rss_ringoccs FFT routine.  *
+ *  2025/04/09 (Ryan Maguire):                                                *
+ *      Cleaned up comments, added references, improved organization.         *
  ******************************************************************************/
+
+/*  TMPL_RESTRICT defined here. This expands to "restrict" if the C99, or     *
+ *  higher, standard is supported, and nothing otherwise. This allows         *
+ *  rss_ringoccs to be compiled using C89 compilers.                          */
 #include <libtmpl/include/tmpl_config.h>
+
+/*  Common math constants, such as sqrt(2), provided here.                    */
 #include <libtmpl/include/constants/tmpl_math_constants.h>
+
+/*  Complex numbers and functions provided here.                              */
 #include <libtmpl/include/tmpl_complex.h>
+
+/*  Function prototype provided here.                                         */
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
+/*  Perform diffraction correction using even degree Legendre polynomials.    */
 void
 rssringoccs_Fresnel_Transform_Legendre_Even_Norm(
     rssringoccs_TAUObj * TMPL_RESTRICT const tau,
@@ -288,9 +358,13 @@ rssringoccs_Fresnel_Transform_Legendre_Even_Norm(
         tmpl_CDouble_AddTo(&norm, &w_exp_minus_psi_right);
 
         /*  The integrand for the left part of the window is:                 *
+         *                                                                    *
          *      T_hat(-x) w(-x) exp(-i psi(-x))                               *
+         *                                                                    *
          *  The integrand for the right part of the window is similar:        *
-         *      T_hat(-x) w(-x) exp(-i psi(-x))                               *
+         *                                                                    *
+         *      T_hat(+x) w(+x) exp(-i psi(+x))                               *
+         *                                                                    *
          *  We sum this into T_out to compute the Riemann sum. The "dx"       *
          *  factor is once again ignored for now.                             */
         integrand = tmpl_CDouble_Multiply(w_exp_minus_psi_left, T_left);
@@ -305,17 +379,16 @@ rssringoccs_Fresnel_Transform_Legendre_Even_Norm(
         m--;
     }
 
-    /*  Add the central point in the Riemann sum. This is center of the       *
+    /*  Add the central point in the Riemann sum. This is the center of the   *
      *  window function. That is, where w_func = 1.                           */
     tmpl_CDouble_AddTo(&tau->T_out[center], &tau->T_in[center]);
     tmpl_CDouble_AddTo_Real(&norm, 1.0);
 
-    /*  The integral in the numerator of norm evaluates to F sqrt(2). Use     *
-     *  this in the calculation of the normalization. The cabs function       *
-     *  computes the absolute value of complex number (defined in complex.h). */
+    /*  The integral in the numerator of the scale factor is F sqrt(2), the   *
+     *  denominator is F |norm|, so the ratio is sqrt(2) / |norm|.            */
     scale_factor = tmpl_Double_Rcpr_Sqrt_Two / tmpl_CDouble_Abs(norm);
 
-    /*  Multiply result by the coefficient found in the Fresnel inverse.      */
+    /*  Multiply the result by the coefficient found in the Fresnel inverse.  */
     integrand = tmpl_CDouble_Rect(scale_factor, scale_factor);
     tau->T_out[center] = tmpl_CDouble_Multiply(integrand, tau->T_out[center]);
 }

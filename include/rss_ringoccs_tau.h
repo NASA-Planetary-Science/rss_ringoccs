@@ -94,7 +94,7 @@ typedef enum {
 
     /*  Indicates an error.                                                   */
     rssringoccs_DR_None = 100
-} rssringoccs_Psitype_Enum;
+} rssringoccs_PsiType;
 
 /*  Structure that contains all of the necessary data.                        */
 typedef struct rssringoccs_TAUObj_Def {
@@ -134,7 +134,7 @@ typedef struct rssringoccs_TAUObj_Def {
     size_t n_used;
     size_t arr_size;
     rssringoccs_WindowFunction window_func;
-    rssringoccs_Psitype_Enum psinum;
+    rssringoccs_PsiType psinum;
     tmpl_Bool use_norm;
     tmpl_Bool use_fwd;
     tmpl_Bool bfac;

@@ -16,20 +16,18 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
- *         rss_ringoccs_fresnel_transform_normalized_even_polynomial          *
+ *               rss_ringoccs_fresnel_transform_even_polynomial               *
  ******************************************************************************
  *  Purpose:                                                                  *
  *      Uses even degree polynomials to approximate the Fresnel kernel at the *
- *      stationary azimuth angle and perform diffraction correction,          *
- *      normalizing the output by the window width.                           *
+ *      stationary azimuth angle and perform diffraction correction.          *
  ******************************************************************************
  *                             DEFINED FUNCTIONS                              *
  ******************************************************************************
  *  Function Name:                                                            *
- *      rssringoccs_Fresnel_Transform_Normalized_Even_Polynomial              *
+ *      rssringoccs_Fresnel_Transform_Even_Polynomial                         *
  *  Purpose:                                                                  *
  *      Performs diffraction correction using even degree polynomials.        *
- *      The output is normalized by the window width.                         *
  *  Arguments:                                                                *
  *      tau (rssringoccs_TAUObj * TMPL_RESTRICT const):                       *
  *          A pointer to a Tau object. This contains all of the geometry and  *
@@ -139,31 +137,6 @@
  *      psi_even and psi_odd are computed using Horner's method for the left  *
  *      side of the window, and then psi is computed using these formulas.    *
  *      The final integral is then computed using a Riemann sum.              *
- *                                                                            *
- *      As the resolution gets too coarse, say 10 km or larger, the window    *
- *      width quickly shrinks to zero and the integral will be approximately  *
- *      zero. To account for this, we normalize the integral by the window    *
- *      width. The normalization is defined as follows:                       *
- *                                                                            *
- *                    |  infinity                 |                           *
- *                    |     -                     |                           *
- *                    |    | |                    |                           *
- *                    |    |    exp(-i psi(x)) dx |                           *
- *                    |  | |                      |                           *
- *                    |   -                       |                           *
- *                    | -infinity                 |                           *
- *          norm =  ---------------------------------                         *
- *                  |   W / 2                       |                         *
- *                  |     -                         |                         *
- *                  |    | |                        |                         *
- *                  |    |    w(x)exp(-i psi(x)) dx |                         *
- *                  |  | |                          |                         *
- *                  |   -                           |                         *
- *                  | -W / 2                        |                         *
- *                                                                            *
- *      This has the effect of making the integral in free-space regions,     *
- *      which are regions that are not affected by diffraction, evaluate to   *
- *      one, regardless of what (positive) resolution is chosen.              *
  *  Notes:                                                                    *
  *      1.) The Legendre approximation assumes the first iteration of         *
  *          Newton's method with guess phi = phi0 is sufficient for finding   *
@@ -181,6 +154,8 @@
  *          calling this function with pointers that point to valid data.     *
  *      4.) This function may also be used with the Lagrange interpolating    *
  *          polynomials that are described in the appendix of MTR86.          *
+ *      5.) This function does not normalize by the window width, meaning for *
+ *          very coarse resolutions the Riemann sum will be roughly zero.     *
  *  References:                                                               *
  *      1.) Maguire, R., French, R. (2025)                                    *
  *          Applications of Legendre Polynomials for Fresnel Inversion        *
@@ -225,11 +200,9 @@
  ******************************************************************************
  *  1.) tmpl_config.h:                                                        *
  *          Header file providing TMPL_RESTRICT.                              *
- *  2.) tmpl_math_constants.h:                                                *
- *          Math constants, such as sqrt(2) and pi, are defined here.         *
- *  3.) tmpl_complex.h:                                                       *
+ *  2.) tmpl_complex.h:                                                       *
  *          Complex numbers declared here, as are arithmetic functions.       *
- *  4.) rss_ringoccs_fresnel_transform.h:                                     *
+ *  3.) rss_ringoccs_fresnel_transform.h:                                     *
  *          Prototype for the function given here.                            *
  ******************************************************************************
  *  Author:     Ryan Maguire                                                  *
@@ -249,9 +222,6 @@
  *  rss_ringoccs to be compiled using C89 compilers.                          */
 #include <libtmpl/include/tmpl_config.h>
 
-/*  Common math constants, such as sqrt(2), provided here.                    */
-#include <libtmpl/include/constants/tmpl_math_constants.h>
-
 /*  Complex numbers and functions provided here.                              */
 #include <libtmpl/include/tmpl_complex.h>
 
@@ -260,7 +230,7 @@
 
 /*  Perform diffraction correction using even degree polynomials.             */
 void
-rssringoccs_Fresnel_Transform_Normalized_Even_Polynomial(
+rssringoccs_Fresnel_Transform_Even_Polynomial(
     rssringoccs_TAUObj * TMPL_RESTRICT const tau,
     const double * TMPL_RESTRICT const x_arr,
     const double * TMPL_RESTRICT const w_func,
@@ -280,14 +250,6 @@ rssringoccs_Fresnel_Transform_Normalized_Even_Polynomial(
     /*  psi is the Fresnel kernel, computed using a polynomial approximation. */
     double psi;
 
-    /*  This is the multiplicative factor in front of the integral. The total *
-     *  factor is (1 + i) / 2F, where F is the Fresnel scale. Since we are    *
-     *  normalizing by the window width, the actual scale factor is           *
-     *  (1 + i) sqrt(2) / |norm|, where norm is the complex normalization     *
-     *  factor obtained by integrating w * exp(-i psi) over a free space      *
-     *  region, w being the window function.                                  */
-    double scale_factor;
-
     /*  We will use symmetry to simplify and speed up the calculation. We     *
      *  have psi = L0 x^2 + L1 x^3 + L3 X^4 + ..., replacing x with -x, which *
      *  is equivalent to replacing (r - r0) / D with (r0 - r) / D, leads to   *
@@ -303,9 +265,8 @@ rssringoccs_Fresnel_Transform_Normalized_Even_Polynomial(
     /*  Dummy variable of integration. This will hold T_hat * w * exp(-i psi).*/
     tmpl_ComplexDouble integrand;
 
-    /*  The complex normalization factor, which is the free space integral.   *
-     *  We will compute this using a Riemann sum. Initialize to zero to start.*/
-    tmpl_ComplexDouble norm = tmpl_CDouble_Zero;
+    /*  Multiplicative factor that appears outside of the integral.           */
+    const double scale_factor = 0.5 * tau->dx_km / tau->F_km_vals[center];
 
     /*  Division is more expension than division, so store the reciprocal     *
      *  of D as a variable and compute with that.                             */
@@ -399,13 +360,6 @@ rssringoccs_Fresnel_Transform_Normalized_Even_Polynomial(
          *  the polar form method with the same element of the window array.  */
         w_exp_minus_psi_right = tmpl_CDouble_Polar(w_func[n], -psi);
 
-        /*  The complex normalization is the integral over free space. This   *
-         *  is computed via a Riemann sum. Add both the left and right sides, *
-         *  w(+/- x) exp(-i psi(+/- x)), to the norm factor. The "dx" term is *
-         *  factored into the Riemann sum at the end of this for-loop.        */
-        tmpl_CDouble_AddTo(&norm, &w_exp_minus_psi_left);
-        tmpl_CDouble_AddTo(&norm, &w_exp_minus_psi_right);
-
         /*  The integrand for the left part of the window is:                 *
          *                                                                    *
          *      T_hat(-x) w(-x) exp(-i psi(-x))                               *
@@ -415,7 +369,7 @@ rssringoccs_Fresnel_Transform_Normalized_Even_Polynomial(
          *      T_hat(+x) w(+x) exp(-i psi(+x))                               *
          *                                                                    *
          *  We sum this into T_out to compute the Riemann sum. The "dx"       *
-         *  factor is once again ignored for now.                             */
+         *  term is contained in the scale_factor variable above.             */
         integrand = tmpl_CDouble_Multiply(w_exp_minus_psi_left, T_left);
         tmpl_CDouble_AddTo(&tau->T_out[center], &integrand);
 
@@ -431,26 +385,9 @@ rssringoccs_Fresnel_Transform_Normalized_Even_Polynomial(
     /*  Add the central point in the Riemann sum. This is the center of the   *
      *  window function. That is, where w_func = 1.                           */
     tmpl_CDouble_AddTo(&tau->T_out[center], &tau->T_in[center]);
-    tmpl_CDouble_AddTo_Real(&norm, 1.0);
 
-    /*  The integral in the numerator of the scale factor is F sqrt(2),       *
-     *  the denominator is |norm| dx, so the ratio is sqrt(2) F / |norm| dx.  *
-     *  Since the dx is on the bottom, this will cancel the dx that occurs in *
-     *  the Riemann sum for T_out. The complex scale factor for the Fresnel   *
-     *  transform (the constant term outside the integral) is (1 + i) / 2 F.  *
-     *  We therefore have:                                                    *
-     *                                                                        *
-     *      1 + i numer      1 + i sqrt(2) F                                  *
-     *      ----- ----- dx = ----- --------- dx                               *
-     *       2 F  demom       2 F  |norm| dx                                  *
-     *                                                                        *
-     *                            1 + i                                       *
-     *                     = --------------                                   *
-     *                       sqrt(2) |norm|                                   *
-     *                                                                        *
-     *  Compute this and scale the result to finish the calculation.          */
-    scale_factor = tmpl_Double_Rcpr_Sqrt_Two / tmpl_CDouble_Abs(norm);
+    /*  Multiply result by the coefficient found in the Fresnel inverse.      */
     integrand = tmpl_CDouble_Rect(scale_factor, scale_factor);
     tau->T_out[center] = tmpl_CDouble_Multiply(integrand, tau->T_out[center]);
 }
-/*  End of rssringoccs_Fresnel_Transform_Normalized_Even_Polynomial.          */
+/*  End of rssringoccs_Fresnel_Transform_Even_Polynomial.                     */

@@ -81,12 +81,13 @@
  *      Added license, fixed comments.                                        *
  ******************************************************************************/
 #include <libtmpl/include/tmpl_math.h>
+#include <libtmpl/include/compat/tmpl_malloc.h>
+#include <libtmpl/include/compat/tmpl_free.h>
 #include <libtmpl/include/tmpl_orthogonal_polynomial_real.h>
 #include <libtmpl/include/compat/tmpl_cast.h>
 #include <libtmpl/include/tmpl_string.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
-#include <stdlib.h>
 
 static const rssringoccs_FresnelLegendreTransform
 legendre_transform_list[4] = {
@@ -95,8 +96,6 @@ legendre_transform_list[4] = {
     rssringoccs_Fresnel_Transform_Legendre_Odd_Norm,
     rssringoccs_Fresnel_Transform_Normalized_Even_Polynomial
 };
-
-#define RSSRINGOCCS_DESTROY_VARIABLE(var) if (var) free(var)
 
 void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
 {
@@ -179,11 +178,11 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
     fw = tau->window_func;
 
     /*  Allocate memory for the independent variable and window function.     */
-    x_arr = malloc(sizeof(*x_arr) * nw_pts);
-    w_func = malloc(sizeof(*w_func) * nw_pts);
+    x_arr = TMPL_MALLOC(double, nw_pts);
+    w_func = TMPL_MALLOC(double, nw_pts);
 
     /*  And finally for the coefficients of the Fresnel-Legendre polynomial.  */
-    coeffs = malloc(sizeof(*coeffs) * tau->order);
+    coeffs = TMPL_MALLOC(double, tau->order);
 
     /*  Check if malloc failed. It returns NULL on failure.                   */
     if (!x_arr || !w_func || !coeffs)
@@ -200,11 +199,11 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
         /*  It is possible that malloc succeeded for some variables, and not  *
          *  for others. Since we initialized these pointers to NULL, if a     *
          *  pointer is not NULL, then malloc was successful in this case and  *
-         *  we need to free it. The RSSRINGOCCS_DESTROY_VARIABLE macro only   *
-         *  calls free if the pointer is not NULL. Use this on each variable. */
-        RSSRINGOCCS_DESTROY_VARIABLE(x_arr);
-        RSSRINGOCCS_DESTROY_VARIABLE(w_func);
-        RSSRINGOCCS_DESTROY_VARIABLE(coeffs);
+         *  we need to free it. The TMPL_FREE macro only calls free if the    *
+         *  pointer is not NULL. Use this on each variable.                   */
+        TMPL_FREE(x_arr);
+        TMPL_FREE(w_func);
+        TMPL_FREE(coeffs);
 
         return;
     }
@@ -237,7 +236,7 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
                 /*  The x_arr and w_func data are handled by the previous     *
                  *  function call on error. We still need to free the data    *
                  *  allocated for the Fresnel coefficients.                   */
-                free(coeffs);
+                TMPL_FREE(coeffs);
                 return;
             }
 
@@ -283,10 +282,7 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
     }
 
     /*  Free all variables allocated by malloc.                               */
-    free(x_arr);
-    free(w_func);
-    free(coeffs);
+    TMPL_FREE(x_arr);
+    TMPL_FREE(w_func);
+    TMPL_FREE(coeffs);
 }
-
-/*  Undefine everything in case someone wants to #include this file.          */
-#undef RSSRINGOCCS_DESTROY_VARIABLE

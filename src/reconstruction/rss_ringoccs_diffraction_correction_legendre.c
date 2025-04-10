@@ -91,7 +91,7 @@
 static const rssringoccs_FresnelLegendreTransform
 legendre_transform_list[4] = {
     rssringoccs_Fresnel_Transform_Legendre_Odd,
-    rssringoccs_Fresnel_Transform_Legendre_Even,
+    rssringoccs_Fresnel_Transform_Even_Polynomial,
     rssringoccs_Fresnel_Transform_Legendre_Odd_Norm,
     rssringoccs_Fresnel_Transform_Normalized_Even_Polynomial
 };

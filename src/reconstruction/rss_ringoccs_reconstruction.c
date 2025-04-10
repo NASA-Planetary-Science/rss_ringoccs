@@ -30,11 +30,11 @@ void rssringoccs_Reconstruction(rssringoccs_TAUObj *tau)
     temp_fwd = tau->use_fwd;
     tau->use_fwd = tmpl_False;
 
-    if      (tau->psinum == rssringoccs_DR_Fresnel)
+    if      (tau->psinum == rssringoccs_PsiType_Fresnel)
         rssringoccs_Diffraction_Correction_Fresnel(tau);
-    else if (tau->psinum == rssringoccs_DR_Legendre)
+    else if (tau->psinum == rssringoccs_PsiType_Legendre)
         rssringoccs_Diffraction_Correction_Legendre(tau);
-    else if (tau->psinum == rssringoccs_DR_NewtonSimpleFFT)
+    else if (tau->psinum == rssringoccs_PsiType_NewtonSimpleFFT)
         rssringoccs_Diffraction_Correction_SimpleFFT(tau);
     else
         rssringoccs_Diffraction_Correction_Newton(tau);
@@ -78,11 +78,11 @@ void rssringoccs_Reconstruction(rssringoccs_TAUObj *tau)
         {
             tau->start = tau->start + nw_pts;
             tau->n_used = tau->n_used - 2*nw_pts;
-            if      (tau->psinum == rssringoccs_DR_Fresnel)
+            if      (tau->psinum == rssringoccs_PsiType_Fresnel)
                 rssringoccs_Diffraction_Correction_Fresnel(tau);
-            else if (tau->psinum == rssringoccs_DR_Legendre)
+            else if (tau->psinum == rssringoccs_PsiType_Legendre)
                 rssringoccs_Diffraction_Correction_Legendre(tau);
-            else if (tau->psinum == rssringoccs_DR_NewtonSimpleFFT)
+            else if (tau->psinum == rssringoccs_PsiType_NewtonSimpleFFT)
                 rssringoccs_Diffraction_Correction_SimpleFFT(tau);
             else
                 rssringoccs_Diffraction_Correction_Newton(tau);

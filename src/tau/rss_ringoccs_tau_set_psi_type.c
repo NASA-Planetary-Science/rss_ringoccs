@@ -77,29 +77,29 @@ rssringoccs_Tau_Set_Psi_Type(const char *psitype, rssringoccs_TAUObj* tau)
     /*  Standard Newton-Raphson method of finding the stationary azimuth      *
      *  angle for the Fresnel kernel.                                         */
     if (tmpl_String_Are_Equal(tau_psitype, "newton"))
-        tau->psinum = rssringoccs_DR_Newton;
+        tau->psinum = rssringoccs_PsiType_Newton;
 
     /*  Newton-Raphson method with corrections for the change in the distance *
      *  between the spacecraft and the ring intercept point over the window.  */
     else if (tmpl_String_Are_Equal(tau_psitype, "newtond"))
-        tau->psinum = rssringoccs_DR_NewtonD;
+        tau->psinum = rssringoccs_PsiType_NewtonD;
 
     /*  Similar to "newtond", but using the old method.                       */
     else if (tmpl_String_Are_Equal(tau_psitype, "newtondold"))
-        tau->psinum = rssringoccs_DR_NewtonDOld;
+        tau->psinum = rssringoccs_PsiType_NewtonDOld;
 
     /*  Newton-Raphson method with corrections for dpsi/dphi accounted for.   */
     else if (tmpl_String_Are_Equal(tau_psitype, "newtondphi"))
-        tau->psinum = rssringoccs_DR_NewtonDPhi;
+        tau->psinum = rssringoccs_PsiType_NewtonDPhi;
 
     /*  Newton-Raphson method, but allowing for arbitrary quartic             *
      *  perturbations to the Fresnel kernel.                                  */
     else if (tmpl_String_Are_Equal(tau_psitype, "newtonperturb"))
-        tau->psinum = rssringoccs_DR_NewtonPerturb;
+        tau->psinum = rssringoccs_PsiType_NewtonPerturb;
 
     /*  Newton-Rapshon method but for elliptical rings instead of cylindrical.*/
     else if (tmpl_String_Are_Equal(tau_psitype, "ellipse"))
-        tau->psinum = rssringoccs_DR_NewtonElliptical;
+        tau->psinum = rssringoccs_PsiType_NewtonElliptical;
 
     /*  Computes the reconstruction using a single FFT across the entire data *
      *  set. Only works if the geometry does not very too much across the     *
@@ -108,23 +108,23 @@ rssringoccs_Tau_Set_Psi_Type(const char *psitype, rssringoccs_TAUObj* tau)
      *  the O(N^2) time the usual Newton-Raphson method runs in. Expect very  *
      *  poor results if the range of the data set is very large.              */
     else if (tmpl_String_Are_Equal(tau_psitype, "simplefft"))
-        tau->psinum = rssringoccs_DR_NewtonSimpleFFT;
+        tau->psinum = rssringoccs_PsiType_NewtonSimpleFFT;
 
     /*  Quadratic interpolation to the Newton-Raphson method.                 */
     else if (tmpl_String_Are_Equal(tau_psitype, "quadratic"))
-        tau->psinum = rssringoccs_DR_NewtonQuadratic;
+        tau->psinum = rssringoccs_PsiType_NewtonQuadratic;
 
     /*  Quartic interpolation to the Newton-Raphson method.                   */
     else if (tmpl_String_Are_Equal(tau_psitype, "quartic"))
-        tau->psinum = rssringoccs_DR_NewtonQuartic;
+        tau->psinum = rssringoccs_PsiType_NewtonQuartic;
 
     /*  Quartic interpolation to the Newton-Raphson method with D correction. */
     else if (tmpl_String_Are_Equal(tau_psitype, "quarticd"))
-        tau->psinum = rssringoccs_DR_NewtonDQuartic;
+        tau->psinum = rssringoccs_PsiType_NewtonDQuartic;
 
     /*  Standard quadratic Fresnel approximation.                             */
     else if (tmpl_String_Are_Equal(tau_psitype, "fresnel"))
-        tau->psinum = rssringoccs_DR_Fresnel;
+        tau->psinum = rssringoccs_PsiType_Fresnel;
 
     /*  strncmp is a C standard library function that compares the first n    *
      *  elements of two strings. If the first seven elements of tau.psitype   *
@@ -139,7 +139,7 @@ rssringoccs_Tau_Set_Psi_Type(const char *psitype, rssringoccs_TAUObj* tau)
 
         /*  Convert the string to an integer.                                 */
         tau->order = tmpl_String_To_UChar(fresnelnum);
-        tau->psinum = rssringoccs_DR_Legendre;
+        tau->psinum = rssringoccs_PsiType_Legendre;
 
         /*  Zero is not a valid input (like "fresnel0"), and atol returns 0   *
          *  if it could not parse the input. Treat this as an error.          */
@@ -177,7 +177,7 @@ rssringoccs_Tau_Set_Psi_Type(const char *psitype, rssringoccs_TAUObj* tau)
         /*  'fresnel2' is treated as 'fresnel'.                               */
         else if (tau->order == 2)
         {
-            tau->psinum = rssringoccs_DR_Fresnel;
+            tau->psinum = rssringoccs_PsiType_Fresnel;
             tau->order = 0U;
             goto FINISH;
         }
@@ -192,7 +192,7 @@ rssringoccs_Tau_Set_Psi_Type(const char *psitype, rssringoccs_TAUObj* tau)
     else
     {
         tau->order = 0;
-        tau->psinum = rssringoccs_DR_None;
+        tau->psinum = rssringoccs_PsiType_None;
         tau->error_occurred = tmpl_True;
         tau->error_message = tmpl_String_Duplicate(rssringoccs_psi_err_mes);
     }

@@ -2,17 +2,6 @@
 #include <libtmpl/include/helper/tmpl_array_size.h>
 #include <stdio.h>
 
-static const char *rss_ringoccs_history_string =
-    "rss_ringoccs Version: %s\n"
-    "libtmpl Version:      %s\n"
-    "C Version:            %s\n"
-    "Host Name:            %s\n"
-    "User Name:            %s\n"
-    "Run Date:             %s\n"
-    "Operating System:     %s\n"
-    "Input Arguments:\n";
-
-
 void
 rssringoccs_History_Print(const rssringoccs_History * const history)
 {
@@ -23,7 +12,14 @@ rssringoccs_History_Print(const rssringoccs_History * const history)
     }
 
     printf(
-        rss_ringoccs_history_string,
+        "rss_ringoccs Version: %s\n"
+        "libtmpl Version:      %s\n"
+        "C Version:            %s\n"
+        "Host Name:            %s\n"
+        "User Name:            %s\n"
+        "Run Date:             %s\n"
+        "Operating System:     %s\n"
+        "Input Arguments:\n",
         history->rss_ringoccs_version,
         history->libtmpl_version,
         history->c_version,
@@ -53,7 +49,7 @@ rssringoccs_History_Print(const rssringoccs_History * const history)
             if (n >= var_len)
                 break;
         }
-    };
+    }
 
     puts("Input Keywords:");
 
@@ -77,5 +73,5 @@ rssringoccs_History_Print(const rssringoccs_History * const history)
             if (n >= var_len)
                 break;
         }
-    };
+    }
 }

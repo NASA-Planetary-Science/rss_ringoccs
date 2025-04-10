@@ -16,20 +16,20 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
- *             rss_ringoccs_fresnel_transform_legendre_even_norm              *
+ *         rss_ringoccs_fresnel_transform_normalized_even_polynomial          *
  ******************************************************************************
  *  Purpose:                                                                  *
- *      Uses even degree Legendre polynomials to approximate the Fresnel      *
- *      kernel at the stationary azimuth angle and perform diffraction        *
- *      correction, normalizing the output by the window width.               *
+ *      Uses even degree polynomials to approximate the Fresnel kernel at the *
+ *      stationary azimuth angle and perform diffraction correction,          *
+ *      normalizing the output by the window width.                           *
  ******************************************************************************
  *                             DEFINED FUNCTIONS                              *
  ******************************************************************************
  *  Function Name:                                                            *
- *      rssringoccs_Fresnel_Transform_Legendre_Even_Norm                      *
+ *      rssringoccs_Fresnel_Transform_Normalized_Even_Polynomial              *
  *  Purpose:                                                                  *
- *      Performs diffraction correction using even degree Legendre            *
- *      polynomials. The output is normalized by the window width.            *
+ *      Performs diffraction correction using even degree polynomials.        *
+ *      The output is normalized by the window width.                         *
  *  Arguments:                                                                *
  *      tau (rssringoccs_TAUObj * TMPL_RESTRICT const):                       *
  *          A pointer to a Tau object. This contains all of the geometry and  *
@@ -41,9 +41,12 @@
  *          represents the center of the window.                              *
  *      w_func (const double * TMPL_RESTRICT const):                          *
  *          The window function, pre-computed across the current window. The  *
- *          index w_func[n] corresponds to the window at x_arr[n] (see above).*
+ *          value w_func[n] corresponds to the window at x_arr[n] (see above).*
  *      coeffs (const double * TMPL_RESTRICT const):                          *
- *          The coefficients for the Legendre approximation.                  *
+ *          The coefficients for the polynomial approximation. There must be  *
+ *          at least tau->order elements to the array. coeffs[0] represents   *
+ *          the constant coefficients, coeffs[tau->order - 1] corresponds to  *
+ *          the coefficients of the highest order term.                       *
  *      n_pts (size_t):                                                       *
  *          The number of points in the x_arr and w_func arrays. There are    *
  *          2 * n_pts + 1 points total in the window, n_pts to the left of    *
@@ -54,7 +57,17 @@
  *  Output:                                                                   *
  *      None (void).                                                          *
  *  Called Functions:                                                         *
- *      None.                                                                 *
+ *      tmpl_complex.h:                                                       *
+ *          tmpl_CDouble_Polar:                                               *
+ *              Computes z = r * exp(i theta), with theta in radians.         *
+ *          tmpl_CDouble_AddTo:                                               *
+ *              Performs z += w, in-place.                                    *
+ *          tmpl_CDouble_AddTo_Real:                                          *
+ *              Performs z += r, in-place.                                    *
+ *          tmpl_CDouble_Multiply:                                            *
+ *              Complex multiplication, z = w0 * w1.                          *
+ *          tmpl_CDouble_Rect:                                                *
+ *              Creates a complex number from two real ones, z = x + iy.      *
  *  Method:                                                                   *
  *      The inverse Fresnel transform is given by:                            *
  *                                                                            *
@@ -71,6 +84,11 @@
  *      psi is the Fresnel Kernel, and exp is the exponential function. The   *
  *      scale factor F is the Fresnel scale which is dependent on the         *
  *      geometry of the occultation.                                          *
+ *                                                                            *
+ *      This function uses a user-provided polynomial approximation for the   *
+ *      Fresnel kernel. It is most commonly used with Legendre polynomials    *
+ *      and Chebyshev polynomials of the second kind, but you may use         *
+ *      whatever you want.                                                    *
  *                                                                            *
  *      The azimuth angle corresponding to r is the value phi_s such that     *
  *      d psi / d phi = 0, the stationary azimuth angle. The function         *
@@ -102,8 +120,25 @@
  *                          n = 0                                             *
  *                                                                            *
  *      Where D is the distance between the spacecraft and the ring point.    *
- *      This function uses even degree approximations from pre-computed L_n   *
- *      values. This is given by the coeffs array, coeffs[n] = L_n(A, B).     *
+ *      We commonly use this function by setting coeffs[n] = L_n(A, B).       *
+ *      Note, this is not required. The coeffs array may be arbitrary.        *
+ *                                                                            *
+ *      The evaluation of the polynomial is done using Horner's method. Since *
+ *      (-x)^n = x^n for even n and (-x)^m = -x^m for odd m we may use        *
+ *      symmetry to cut the computation roughly in half. That is, we          *
+ *      compute the odd part of the polynomial, psi_odd, and the even part,   *
+ *      psi_even, as rho varies from rho0 - W/2 to rho0, W being the window   *
+ *      width, rho0 being the center of the window. On the left we have:      *
+ *                                                                            *
+ *          psi = psi_even + psi_odd                                          *
+ *                                                                            *
+ *      On the right, since the sign of rho - rho0 flips, we have:            *
+ *                                                                            *
+ *          psi = psi_even - psi_odd                                          *
+ *                                                                            *
+ *      psi_even and psi_odd are computed using Horner's method for the left  *
+ *      side of the window, and then psi is computed using these formulas.    *
+ *      The final integral is then computed using a Riemann sum.              *
  *                                                                            *
  *      As the resolution gets too coarse, say 10 km or larger, the window    *
  *      width quickly shrinks to zero and the integral will be approximately  *
@@ -130,25 +165,29 @@
  *      which are regions that are not affected by diffraction, evaluate to   *
  *      one, regardless of what (positive) resolution is chosen.              *
  *  Notes:                                                                    *
- *      1.) This function assumes that the first iteration of Newton's method *
- *          with guess point phi = phi0 is sufficient for finding the         *
- *          stationary azimuth angle, the angle phi_s with d psi / d phi = 0. *
- *          For low ring opening angles B we require more iterations, often   *
- *          3 or 4, in order to converge to the root. In these scenarios the  *
- *          Legendre approximation fails.                                     *
+ *      1.) The Legendre approximation assumes the first iteration of         *
+ *          Newton's method with guess phi = phi0 is sufficient for finding   *
+ *          the stationary azimuth angle, the angle phi_s with                *
+ *          d psi / d phi = 0. For low ring opening angles B we require more  *
+ *          iterations, often 3 or 4, in order to converge to the root. In    *
+ *          these scenarios the Legendre approximation fails.                 *
  *      2.) There are geometries where the quadratic Fresnel approximation is *
  *          better than the higher order Legendre approximations. This is     *
  *          because the quadratic Fresnel approximation is indeed the         *
  *          quadratic term of the true stationary Fresnel kernel, psi with    *
  *          phi = phi_s, but the Legendre approximation only works when the   *
  *          first Newton iterate for phi accurately approximates phi_s.       *
+ *      3.) There are no checks for NULL pointers. You are responsible for    *
+ *          calling this function with pointers that point to valid data.     *
+ *      4.) This function may also be used with the Lagrange interpolating    *
+ *          polynomials that are described in the appendix of MTR86.          *
  *  References:                                                               *
  *      1.) Maguire, R., French, R. (2025)                                    *
  *          Applications of Legendre Polynomials for Fresnel Inversion        *
  *              and Occultation Observations                                  *
  *                                                                            *
  *          Derivation of the Legendre approximation is given. This function  *
- *          implements the mathematics in this paper.                         *
+ *          implements some of the mathematics in this paper.                 *
  *                                                                            *
  *      2.) Marouf, E., Tyler, G., Rosen, P. (June 1986)                      *
  *          Profiling Saturn's Rings by Radio Occultation                     *
@@ -200,6 +239,9 @@
  ******************************************************************************
  *  2025/04/09 (Ryan Maguire):                                                *
  *      Cleaned up comments, added references, improved organization.         *
+ *  2025/04/10 (Ryan Maguire):                                                *
+ *      Changed function name to allow for arbitrary polynomials. This still  *
+ *      works with the Legendre approximation, but other methods may be used. *
  ******************************************************************************/
 
 /*  TMPL_RESTRICT defined here. This expands to "restrict" if the C99, or     *
@@ -216,9 +258,9 @@
 /*  Function prototype provided here.                                         */
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
-/*  Perform diffraction correction using even degree Legendre polynomials.    */
+/*  Perform diffraction correction using even degree polynomials.             */
 void
-rssringoccs_Fresnel_Transform_Legendre_Even_Norm(
+rssringoccs_Fresnel_Transform_Normalized_Even_Polynomial(
     rssringoccs_TAUObj * TMPL_RESTRICT const tau,
     const double * TMPL_RESTRICT const x_arr,
     const double * TMPL_RESTRICT const w_func,
@@ -235,7 +277,7 @@ rssringoccs_Fresnel_Transform_Legendre_Even_Norm(
      *  index the coefficients.                                               */
     unsigned int k;
 
-    /*  psi is the Fresnel kernel, computed using Legendre polynomials.       */
+    /*  psi is the Fresnel kernel, computed using a polynomial approximation. */
     double psi;
 
     /*  This is the multiplicative factor in front of the integral. The total *
@@ -252,8 +294,8 @@ rssringoccs_Fresnel_Transform_Legendre_Even_Norm(
      *  psi = L0 x^2 - L1 x^3 + L3 x^4 - ..., the odd terms become negative   *
      *  and the even terms stay the same. We compute the sum of the even      *
      *  terms as psi_even, and the sum of the odd terms as psi_odd. The left  *
-     *  side (negative x) is then psi = psi_even - psi_odd, and the right     *
-     *  side (positive x) is psi = psi_even + psi_odd. Using such symmetry    *
+     *  side (negative x) is then psi = psi_even + psi_odd, and the right     *
+     *  side (positive x) is psi = psi_even - psi_odd. Using such symmetry    *
      *  cuts the size of the for loop in half and saves us some time. These   *
      *  variables are for exp(-i psi(-x)) and exp(-i psi(+x)), respectively.  */
     tmpl_ComplexDouble w_exp_minus_psi_left, w_exp_minus_psi_right;
@@ -312,7 +354,7 @@ rssringoccs_Fresnel_Transform_Legendre_Even_Norm(
         for (k = 3; k < tau->order - 1; k += 2)
         {
             psi_even = psi_even*x2 + coeffs[tau->order - k];
-            psi_odd = psi_odd*x2  + coeffs[tau->order - k - 1];
+            psi_odd = psi_odd*x2 + coeffs[tau->order - k - 1];
         }
 
         /*  There zeroth coefficient is for the x^2 term which is part of the *
@@ -391,11 +433,24 @@ rssringoccs_Fresnel_Transform_Legendre_Even_Norm(
     tmpl_CDouble_AddTo(&tau->T_out[center], &tau->T_in[center]);
     tmpl_CDouble_AddTo_Real(&norm, 1.0);
 
-    /*  The integral in the numerator of the scale factor is F sqrt(2), the   *
-     *  denominator is F |norm|, so the ratio is sqrt(2) / |norm|.            */
+    /*  The integral in the numerator of the scale factor is F sqrt(2),       *
+     *  the denominator is |norm| dx, so the ratio is sqrt(2) F / |norm| dx.  *
+     *  Since the dx is on the bottom, this will cancel the dx that occurs in *
+     *  the Riemann sum for T_out. The complex scale factor for the Fresnel   *
+     *  transform (the constant term outside the integral) is (1 + i) / 2 F.  *
+     *  We therefore have:                                                    *
+     *                                                                        *
+     *      1 + i numer      1 + i sqrt(2) F                                  *
+     *      ----- ----- dx = ----- --------- dx                               *
+     *       2 F  demom       2 F  |norm| dx                                  *
+     *                                                                        *
+     *                            1 + i                                       *
+     *                     = --------------                                   *
+     *                       sqrt(2) |norm|                                   *
+     *                                                                        *
+     *  Compute this and scale the result to finish the calculation.          */
     scale_factor = tmpl_Double_Rcpr_Sqrt_Two / tmpl_CDouble_Abs(norm);
-
-    /*  Multiply the result by the coefficient found in the Fresnel inverse.  */
     integrand = tmpl_CDouble_Rect(scale_factor, scale_factor);
     tau->T_out[center] = tmpl_CDouble_Multiply(integrand, tau->T_out[center]);
 }
+/*  End of rssringoccs_Fresnel_Transform_Normalized_Even_Polynomial.          */

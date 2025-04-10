@@ -93,7 +93,7 @@ legendre_transform_list[4] = {
     rssringoccs_Fresnel_Transform_Legendre_Odd,
     rssringoccs_Fresnel_Transform_Legendre_Even,
     rssringoccs_Fresnel_Transform_Legendre_Odd_Norm,
-    rssringoccs_Fresnel_Transform_Legendre_Even_Norm
+    rssringoccs_Fresnel_Transform_Normalized_Even_Polynomial
 };
 
 #define RSSRINGOCCS_DESTROY_VARIABLE(var) if (var) free(var)
@@ -258,9 +258,6 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
         beta = cosb * sinp;
         beta *= beta;
         beta *= 0.5 / (1.0 - beta);
-
-        /*  Initialize T_out to zero so we can loop over later.               */
-        tau->T_out[center] = tmpl_CDouble_Zero;
 
         /*  The Fresnel-Legendre coefficients are computed using an upwards   *
          *  recursion in terms of the Legendre polynomials, and the Chebyshev *

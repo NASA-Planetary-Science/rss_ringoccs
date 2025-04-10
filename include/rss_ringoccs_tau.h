@@ -43,58 +43,58 @@
 typedef double (*rssringoccs_WindowFunction)(double, double);
 
 /*  All of the types of reconstruction.                                       */
-typedef enum {
+enum rssringoccs_PsiType {
 
     /*  Fresnel quadratic approximation.                                      */
-    rssringoccs_DR_Fresnel = 0,
+    rssringoccs_PsiType_Fresnel,
 
     /*  Legendre polynomials, higher order Fresnel approximations.            */
-    rssringoccs_DR_Legendre = 1,
+    rssringoccs_PsiType_Legendre,
 
     /*  Newton-Raphson method, and various interpolating methods.             */
-    rssringoccs_DR_Newton = 2,
-    rssringoccs_DR_NewtonQuadratic = 3,
-    rssringoccs_DR_NewtonQuartic = 4,
-    rssringoccs_DR_NewtonSextic = 5,
-    rssringoccs_DR_NewtonOctic = 6,
+    rssringoccs_PsiType_Newton,
+    rssringoccs_PsiType_NewtonQuadratic,
+    rssringoccs_PsiType_NewtonQuartic,
+    rssringoccs_PsiType_NewtonSextic,
+    rssringoccs_PsiType_NewtonOctic,
 
     /*  Newton-Raphson method with D correction, and interpolations.          */
-    rssringoccs_DR_NewtonD = 7,
-    rssringoccs_DR_NewtonDQuadratic = 8,
-    rssringoccs_DR_NewtonDQuartic = 9,
-    rssringoccs_DR_NewtonDSextic = 10,
-    rssringoccs_DR_NewtonDOctic = 11,
+    rssringoccs_PsiType_NewtonD,
+    rssringoccs_PsiType_NewtonDQuadratic,
+    rssringoccs_PsiType_NewtonDQuartic,
+    rssringoccs_PsiType_NewtonDSextic,
+    rssringoccs_PsiType_NewtonDOctic,
 
     /*  Newton-Raphson method with the old D correction, and interpolations.  */
-    rssringoccs_DR_NewtonDOld = 12,
-    rssringoccs_DR_NewtonDOldQuadratic = 13,
-    rssringoccs_DR_NewtonDOldQuartic = 14,
-    rssringoccs_DR_NewtonDOldSextic = 15,
-    rssringoccs_DR_NewtonDOldOctic = 16,
+    rssringoccs_PsiType_NewtonDOld,
+    rssringoccs_PsiType_NewtonDOldQuadratic,
+    rssringoccs_PsiType_NewtonDOldQuartic,
+    rssringoccs_PsiType_NewtonDOldSextic,
+    rssringoccs_PsiType_NewtonDOldOctic,
 
     /*  Newton-Raphson with dD / dphi correction, and interpolations.         */
-    rssringoccs_DR_NewtonDPhi = 17,
-    rssringoccs_DR_NewtonDPhiQuadratic = 18,
-    rssringoccs_DR_NewtonDPhiQuartic = 19,
-    rssringoccs_DR_NewtonDPhiSextic = 20,
-    rssringoccs_DR_NewtonDPhiOctic = 21,
+    rssringoccs_PsiType_NewtonDPhi,
+    rssringoccs_PsiType_NewtonDPhiQuadratic,
+    rssringoccs_PsiType_NewtonDPhiQuartic,
+    rssringoccs_PsiType_NewtonDPhiSextic,
+    rssringoccs_PsiType_NewtonDPhiOctic,
 
     /*  Newton-Raphson with arbitrary quartic perturbation polynomial.        */
-    rssringoccs_DR_NewtonPerturb = 22,
+    rssringoccs_PsiType_NewtonPerturb,
 
     /*  Newton-Raphson, using a single FFT across the entire data set.        */
-    rssringoccs_DR_NewtonSimpleFFT = 23,
+    rssringoccs_PsiType_NewtonSimpleFFT,
 
     /*  Newton-Raphson with elliptical corrections, and interpolations.       */
-    rssringoccs_DR_NewtonElliptical = 24,
-    rssringoccs_DR_NewtonEllipticalQuadratic = 25,
-    rssringoccs_DR_NewtonEllipticalQuartic = 26,
-    rssringoccs_DR_NewtonEllipticalSextic = 27,
-    rssringoccs_DR_NewtonEllipticalOctic = 28,
+    rssringoccs_PsiType_NewtonElliptical,
+    rssringoccs_PsiType_NewtonEllipticalQuadratic,
+    rssringoccs_PsiType_NewtonEllipticalQuartic,
+    rssringoccs_PsiType_NewtonEllipticalSextic,
+    rssringoccs_PsiType_NewtonEllipticalOctic,
 
     /*  Indicates an error.                                                   */
-    rssringoccs_DR_None = 100
-} rssringoccs_PsiType;
+    rssringoccs_PsiType_None
+};
 
 /*  Structure that contains all of the necessary data.                        */
 typedef struct rssringoccs_TAUObj_Def {
@@ -134,7 +134,7 @@ typedef struct rssringoccs_TAUObj_Def {
     size_t n_used;
     size_t arr_size;
     rssringoccs_WindowFunction window_func;
-    rssringoccs_PsiType psinum;
+    enum rssringoccs_PsiType psinum;
     tmpl_Bool use_norm;
     tmpl_Bool use_fwd;
     tmpl_Bool bfac;

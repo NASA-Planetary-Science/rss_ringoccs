@@ -150,8 +150,9 @@
 /*  Macros for C vs. C++ compatibility with casting data types.               */
 #include <libtmpl/include/compat/tmpl_cast.h>
 
-/*  Macros for C vs. C++ compatibility with malloc with free.                 */
-#include <libtmpl/include/compat/tmpl_stdlib.h>
+/*  Macros for C vs. C++ compatibility with malloc and free.                  */
+#include <libtmpl/include/compat/tmpl_malloc.h>
+#include <libtmpl/include/compat/tmpl_free.h>
 
 /*  Portable version of strdup provided here.                                 */
 #include <libtmpl/include/tmpl_string.h>
@@ -260,8 +261,8 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj *tau)
         /*  It is possible that malloc succeeded for one variable and not the *
          *  other. We initialized both pointers to NULL at the start of this  *
          *  function, so we can safely free memory using the following macro. */
-        TMPL_FREE(x_arr)
-        TMPL_FREE(w_func)
+        TMPL_FREE(x_arr);
+        TMPL_FREE(w_func);
 
         return;
     }
@@ -322,8 +323,8 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj *tau)
     }
 
     /*  Free the variables allocated by malloc.                               */
-    free(x_arr);
-    free(w_func);
+    TMPL_FREE(x_arr);
+    TMPL_FREE(w_func);
 }
 
 /*  Undefine everything in case someone wants to #include this file.          */

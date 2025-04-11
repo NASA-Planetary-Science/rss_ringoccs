@@ -38,15 +38,20 @@
  *      x_arr (const double * TMPL_RESTRICT const):                           *
  *          The array r[n] - r[center], where r is the radius. n = 0 hence    *
  *          corresponds to the left-most edge of the window, n = n_pts + 1    *
- *          represents the center of the window.                              *
+ *          represents the center of the window. The length of the array is   *
+ *          given by n_pts, so x_arr holds only the left half of the window.  *
  *      w_func (const double * TMPL_RESTRICT const):                          *
  *          The window function, pre-computed across the current window. The  *
  *          value w_func[n] corresponds to the window at x_arr[n] (see above).*
  *      coeffs (const double * TMPL_RESTRICT const):                          *
- *          The coefficients for the polynomial approximation. There must be  *
- *          at least tau->order elements in the array. coeffs[0] represents   *
- *          the constant coefficient, coeffs[tau->order - 1] corresponds to   *
- *          the coefficient of the highest order term.                        *
+ *          The coefficients for the polynomial approximation, which is in    *
+ *          terms of (r - r0) / D. There must be at least tau->order elements *
+ *          in the array. coeffs[0] represents the constant coefficient,      *
+ *          coeffs[tau->order - 1] corresponds to the coefficient of the      *
+ *          highest order term. Note that the polynomial will be scaled by    *
+ *          ((r - r0) / D)^2 at the end since the zeroth and first order      *
+ *          terms for the Fresnel kernel are zero. That is, the constant and  *
+ *          linear terms vanish.                                              *
  *      n_pts (size_t):                                                       *
  *          The number of points in the x_arr and w_func arrays. There are    *
  *          2 * n_pts + 1 points total in the window, n_pts to the left of    *
@@ -71,15 +76,15 @@
  *  Method:                                                                   *
  *      The inverse Fresnel transform is given by:                            *
  *                                                                            *
- *                         infinity                                           *
+ *                           infinity                                         *
+ *                              -                                             *
+ *                     1 + i   | |                                            *
+ *          T_out(r) = -----   |   T_in(r0) w(r - r0) exp(-i psi(r, r0)) dr0  *
+ *                       2F  | |                                              *
  *                            -                                               *
- *                   1 + i   | |                                              *
- *          T(rho) = -----   |   T_hat(r0) w(r - r0) exp(-i psi(r, r0)) dr0   *
- *                     2F  | |                                                *
- *                          -                                                 *
- *                        -infinity                                           *
+ *                          -infinity                                         *
  *                                                                            *
- *      where T_hat is the diffracted data, w is the window function, r is    *
+ *      where T_in is the diffracted data, w is the window function, r is     *
  *      the ring intercept point, and r0 is a dummy variable of integration.  *
  *      psi is the Fresnel Kernel, and exp is the exponential function. The   *
  *      scale factor F is the Fresnel scale which is dependent on the         *
@@ -300,14 +305,14 @@ rssringoccs_Fresnel_Transform_Normalized_Even_Polynomial(
      *  variables are for exp(-i psi(-x)) and exp(-i psi(+x)), respectively.  */
     tmpl_ComplexDouble w_exp_minus_psi_left, w_exp_minus_psi_right;
 
-    /*  Dummy variable of integration. This will hold T_hat * w * exp(-i psi).*/
+    /*  Dummy variable of integration. This will hold T_in * w * exp(-i psi). */
     tmpl_ComplexDouble integrand;
 
     /*  The complex normalization factor, which is the free space integral.   *
      *  We will compute this using a Riemann sum. Initialize to zero to start.*/
     tmpl_ComplexDouble norm = tmpl_CDouble_Zero;
 
-    /*  Division is more expension than division, so store the reciprocal     *
+    /*  Division is more expensive than division, so store the reciprocal     *
      *  of D as a variable and compute with that.                             */
     const double rcpr_D = 1.0 / tau->D_km_vals[center];
 
@@ -357,8 +362,8 @@ rssringoccs_Fresnel_Transform_Normalized_Even_Polynomial(
             psi_odd = psi_odd*x2 + coeffs[tau->order - k - 1];
         }
 
-        /*  The zeroth coefficient is for the x^2 term which is part of the   *
-         *  even expansion. Perform the final iteration of Horner's method.   */
+        /*  The for-loop misses the lowest order term which belongs to the    *
+         *  even part of the polynomial. Finish performing Horner's method.   */
         psi_even = psi_even*x2 + coeffs[0];
 
         /*  Scale by x to finish the computation of psi_odd. That is, we have *
@@ -382,8 +387,10 @@ rssringoccs_Fresnel_Transform_Normalized_Even_Polynomial(
         psi_odd *= x;
 
         /*  Recalling that x is negative, to compute the left side of the sum *
-         *  (where x is negative), we just need to do psi_even + psi_odd. We  *
-         *  also need the scale factor kD x^2. Finish the computation for psi.*/
+         *  (where x is negative), we just need to do psi_even + psi_odd. The *
+         *  constant and linear terms of the polynomial for psi are always    *
+         *  zero, so we scale the result by x^2. Similarly, the Fresnel       *
+         *  kernel contains a k*D factor. Multiply by k*D*x^2 to finish.      */
         psi = kD_times_x2 * (psi_even + psi_odd);
 
         /*  Accounting for the window function, we have w(-x) exp(-i psi(-x)).*
@@ -408,11 +415,11 @@ rssringoccs_Fresnel_Transform_Normalized_Even_Polynomial(
 
         /*  The integrand for the left part of the window is:                 *
          *                                                                    *
-         *      T_hat(-x) w(-x) exp(-i psi(-x))                               *
+         *      T_in(-x) w(-x) exp(-i psi(-x))                                *
          *                                                                    *
          *  The integrand for the right part of the window is similar:        *
          *                                                                    *
-         *      T_hat(+x) w(+x) exp(-i psi(+x))                               *
+         *      T_in(+x) w(+x) exp(-i psi(+x))                                *
          *                                                                    *
          *  We sum this into T_out to compute the Riemann sum. The "dx"       *
          *  factor is once again ignored for now.                             */
@@ -423,7 +430,7 @@ rssringoccs_Fresnel_Transform_Normalized_Even_Polynomial(
         tmpl_CDouble_AddTo(&tau->T_out[center], &integrand);
 
         /*  n is the index for the w_func and x_arr data, m is the index for  *
-         *  the T_hat variable. n is incremented, m is decremented since we   *
+         *  the T_in variable. n is incremented, m is decremented since we    *
          *  start at the edge of the window and move towards the center.      */
         m--;
     }

@@ -99,81 +99,81 @@ void rssringoccs_Tau_Check_Keywords(rssringoccs_TAUObj *tau)
     if (tau->res <= 0.0)
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_strdup(
+        tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Check_Keywords\n\n"
-            "\rInput res (resolution, in km) is not positive. Returning.\n\n"
-        );
+            "\rInput resolution is not positive.\n\n";
+
         return;
     }
 
     /*  The Allen deviation must be positive.                                 */
-    else if (tau->sigma <= 0.0)
+    if (tau->sigma <= 0.0)
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_strdup(
+        tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Check_Keywords\n\n"
-            "\rInput sigma (Allen deviation) is not positive. Returning.\n\n"
-        );
+            "\rInput sigma (Allen deviation) is not positive.\n\n";
+
         return;
     }
 
     /*  The periapse is allowed to be between -2pi and 2pi, inclusive.        */
-    else if (tau->peri < -tmpl_Double_Two_Pi)
+    if (tau->peri < -tmpl_Double_Two_Pi)
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_strdup(
+        tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Check_Keywords\n\n"
-            "\rInput peri (periapse, in radians) less than -2pi. Returning.\n\n"
-        );
+            "\rInput periapse less than -2pi.\n\n";
+
         return;
     }
-    else if (tau->peri > tmpl_Double_Two_Pi)
+
+    if (tau->peri > tmpl_Double_Two_Pi)
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_strdup(
+        tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Check_Keywords\n\n"
-            "\rInput peri (periapse, in radians) greater than 2pi.\n"
-            "\rReturning.\n\n"
-        );
+            "\rInput periapse greater than 2pi.\n\n";
+
         return;
     }
 
     /*  Eccentricity can be positive or zero. No negative values allowed.     */
-    else if (tau->ecc < 0.0)
+    if (tau->ecc < 0.0)
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_strdup(
+        tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Check_Keywords\n\n"
-            "\rInput ecc (eccentricity) is negative. Returning.\n\n"
-        );
+            "\rInput eccentricity is negative.\n\n";
+
         return;
     }
 
     /*  Lastly, check the requested range values.                             */
-    else if (tau->rng_list[0] < 0.0)
+    if (tau->rng_list[0] < 0.0)
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_strdup(
+        tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Check_Keywords\n\n"
-            "\rStarting value for range is negative. Returning.\n\n"
-        );
+            "\rStarting value for range is negative.\n\n";
+
         return;
     }
-    else if (tau->rng_list[0] > tau->rng_list[1])
+
+    if (tau->rng_list[0] > tau->rng_list[1])
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_strdup(
+        tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Check_Keywords\n\n"
-            "\rStarting value for range is greater than final value.\n"
-            "\rReturning.\n\n"
-        );
+            "\rStarting value for range is greater than final value.\n\n";
+
         return;
     }
 }

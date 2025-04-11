@@ -252,11 +252,10 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj *tau)
     {
         /*  If we get here, malloc failed. Abort with error.                  */
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_String_Duplicate(
+        tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Diffraction_Correction_Fresnel\n\n"
-            "\rMalloc failed and returned NULL. Aborting.\n\n"
-        );
+            "\rMalloc failed and returned NULL. Aborting.\n\n";
 
         /*  It is possible that malloc succeeded for one variable and not the *
          *  other. We initialized both pointers to NULL at the start of this  *

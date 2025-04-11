@@ -120,11 +120,11 @@ void rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj *tau)
     if (!(w_func))
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_strdup(
+        tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n\n"
             "\r\tDiffractionCorrectionFresnel\n\n"
-            "\rMalloc failed and returned NULL for w_func. Returning.\n\n"
-        );
+            "\rMalloc failed and returned NULL for w_func. Returning.\n\n";
+
         return;
     }
 

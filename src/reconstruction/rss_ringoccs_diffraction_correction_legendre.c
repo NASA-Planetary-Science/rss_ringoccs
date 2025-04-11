@@ -190,11 +190,10 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
         /*  malloc failed. Return with error, and free any successfully       *
          *  allocated data.                                                   */
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_String_Duplicate(
+        tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Diffraction_Correction_Fast_Legendre\n\n"
-            "\rmalloc failed and returned NULL. Aborting.\n\n"
-        );
+            "\rmalloc failed and returned NULL. Aborting.\n\n";
 
         /*  It is possible that malloc succeeded for some variables, and not  *
          *  for others. Since we initialized these pointers to NULL, if a     *

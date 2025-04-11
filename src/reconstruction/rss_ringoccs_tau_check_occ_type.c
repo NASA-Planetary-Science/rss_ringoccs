@@ -67,7 +67,6 @@
  ******************************************************************************/
 
 #include <stdlib.h>
-#include <math.h>
 #include <libtmpl/include/tmpl_bool.h>
 #include <libtmpl/include/tmpl_math.h>
 #include <libtmpl/include/tmpl_string.h>
@@ -96,11 +95,11 @@ void rssringoccs_Tau_Check_Occ_Type(rssringoccs_TAUObj *tau)
     if (tau->rho_dot_kms_vals == NULL)
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_strdup(
+        tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Check_Occ_Type\n\n"
-            "\rInput rho_dot_kms_vals is NULL. Returning.\n"
-        );
+            "\rInput rho_dot_kms_vals is NULL.\n\n";
+
         return;
     }
 
@@ -108,12 +107,11 @@ void rssringoccs_Tau_Check_Occ_Type(rssringoccs_TAUObj *tau)
     if (tau->arr_size <= 1)
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_strdup(
+        tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Check_Occ_Type\n\n"
-            "\rInput arrays have less than 2 points. It is impossible to\n"
-            "\rperform reconstrunction. Returning.\n"
-        );
+            "\rInput arrays have less than 2 points.\n\n";
+
         return;
     }
 
@@ -121,11 +119,11 @@ void rssringoccs_Tau_Check_Occ_Type(rssringoccs_TAUObj *tau)
     if (tau->dx_km == 0.0)
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_strdup(
+        tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Check_Occ_Type\n\n"
-            "\rdx_km is zero. Impossible to determine occ type. Returning.\n"
-        );
+            "\rdx_km is zero. Impossible to determine occultation type.\n\n";
+
         return;
     }
 
@@ -138,7 +136,7 @@ void rssringoccs_Tau_Check_Occ_Type(rssringoccs_TAUObj *tau)
     if ((min < 0.0) && (max > 0.0))
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_strdup(
+        tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Check_Occ_Type\n\n"
             "\r\tdrho/dt has positive and negative values.\n"
@@ -147,18 +145,18 @@ void rssringoccs_Tau_Check_Occ_Type(rssringoccs_TAUObj *tau)
             "\r\tone event at a time. That is, ingress or egress.\n\n"
             "\r\tTO CORRECT THIS:\n"
             "\r\t\tSplit the input into two parts: Ingress and Engress\n"
-            "\r\t\tand perform diffraction correction twice.\n\n"
-        );
+            "\r\t\tand perform diffraction correction on each part.\n\n";
+
         return;
     }
 
     /*  If there are entries of rho_dot_kms_vals that are zero, again it is   *
      *  likely that the data comes from a chord occultation and the file was  *
      *  improperly split into egress and ingress portions. Return error.      */
-    else if ((min == 0.0) || (max == 0.0))
+    if ((min == 0.0) || (max == 0.0))
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_strdup(
+        tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Check_Occ_Type\n\n"
             "\r\tdrho/dt has zero valued elements.\n"
@@ -167,36 +165,37 @@ void rssringoccs_Tau_Check_Occ_Type(rssringoccs_TAUObj *tau)
             "\r\tone event at a time. That is, ingress or egress.\n\n"
             "\r\tTO CORRECT THIS:\n"
             "\r\t\tSplit the input into two parts: Ingress and Engress\n"
-            "\r\t\tand perform diffraction correction twice.\n\n"
-        );
-        return;
-    }
+            "\r\t\tand perform diffraction correction on each part.\n\n";
 
-    /*  If rho_dot_kms_vals is negative but dx_km is positive, then we have   *
-     *  an ingress occultation and need to compute with the absolute value    *
-     *  of rho_dot_kms_vals. Compute this and store in the tau object.        */
-    else if ((tau->dx_km > 0.0) && (max < 0.0))
-    {
-        for(n=0; n<tau->arr_size; ++n)
-            tau->rho_dot_kms_vals[n] = fabs(tau->rho_dot_kms_vals[n]);
+        return;
     }
 
     /*  If dx_km is negative and rho_dot_kms_vals is positive, there is most  *
      *  likely an error. Rather than assuming what the occultation is and     *
      *  proceeding with fingers cross, return an error. The user should fix   *
      *  DLP data so the dx_km is positive.                                    */
-    else if ((tau->dx_km < 0.0) && (min > 0.0))
+    if ((tau->dx_km < 0.0) && (min > 0.0))
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_strdup(
+        tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Check_Occ_Type\n\n"
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\tdiffrec.DiffractionCorrection\n\n"
             "\r\trho_km_vals is decreasing yet rho_dot_kms_vals\n"
-            "\r\tis positiive. Check DLP data for errors.\n\n"
-        );
+            "\r\tis positiive. Check DLP data for errors.\n\n";
+
         return;
+    }
+
+    /*  If rho_dot_kms_vals is negative but dx_km is positive, then we have   *
+     *  an ingress occultation and need to compute with the absolute value    *
+     *  of rho_dot_kms_vals. Compute this and store in the tau object.        */
+    if ((tau->dx_km > 0.0) && (max < 0.0))
+    {
+        for(n = 0; n < tau->arr_size; ++n)
+            tau->rho_dot_kms_vals[n] =
+                tmpl_Double_Abs(tau->rho_dot_kms_vals[n]);
     }
 
     /*  If dx_km is negative, and if rho_dot_kms_vals is not zero or positive *
@@ -222,10 +221,11 @@ void rssringoccs_Tau_Check_Occ_Type(rssringoccs_TAUObj *tau)
         tmpl_Double_Array_Reverse(tau->rho_corr_pole_km_vals, tau->arr_size);
         tmpl_Double_Array_Reverse(tau->rho_corr_timing_km_vals, tau->arr_size);
 
-        for(n=0; n<tau->arr_size; ++n)
-            tau->rho_dot_kms_vals[n] = tmpl_Double_Abs(tau->rho_dot_kms_vals[n]);
+        for(n = 0; n < tau->arr_size; ++n)
+            tau->rho_dot_kms_vals[n] =
+                tmpl_Double_Abs(tau->rho_dot_kms_vals[n]);
 
-        tau->dx_km = -tau->dx_km;
+        tau->dx_km = tmpl_Double_Abs(tau->dx_km);
     }
 }
 /*  End of rssringoccs_Tau_Check_Occ_Type.                                    */

@@ -94,11 +94,10 @@
     if (tau->var == NULL)                                                      \
     {                                                                          \
         tau->error_occurred = tmpl_True;                                       \
-        tau->error_message = tmpl_strdup(                                      \
+        tau->error_message =                                                   \
             "\n\rError Encountered: rss_ringoccs\n"                            \
             "\r\trssringoccs_Check_Tau_Data\n\n"                               \
-            "\rInput tau has "#var" set to NULL. Returning.\n\n"               \
-        );                                                                     \
+            "\rInput tau has "#var" set to NULL. Returning.\n\n";              \
         return;                                                                \
     }
 /*  End of CHECK_DATA_MEMBER macro.                                           */

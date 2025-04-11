@@ -67,29 +67,29 @@ void rssringoccs_Reconstruction(rssringoccs_TAUObj *tau)
         if (tau->n_used <= 2*nw_pts)
         {
             tau->error_occurred = tmpl_True;
-            tau->error_message = tmpl_strdup(
+            tau->error_message =
                 "\n\rError Encountered: rss_ringoccs\n"
                 "\r\trssringoccs_Reconstruction\n\n"
                 "\rNot enough data available to perform the forward model.\n"
-                "\rReturning with T_fwd pointer set to an array of zeroes.\n"
-            );
-        }
-        else
-        {
-            tau->start = tau->start + nw_pts;
-            tau->n_used = tau->n_used - 2*nw_pts;
-            if      (tau->psinum == rssringoccs_PsiType_Fresnel)
-                rssringoccs_Diffraction_Correction_Fresnel(tau);
-            else if (tau->psinum == rssringoccs_PsiType_Legendre)
-                rssringoccs_Diffraction_Correction_Legendre(tau);
-            else if (tau->psinum == rssringoccs_PsiType_NewtonSimpleFFT)
-                rssringoccs_Diffraction_Correction_SimpleFFT(tau);
-            else
-                rssringoccs_Diffraction_Correction_Newton(tau);
+                "\rReturning with T_fwd pointer set to an array of zeroes.\n";
 
-            tau->start = temp_start;
-            tau->n_used = temp_n_used;
+            return;
         }
+
+        tau->start = tau->start + nw_pts;
+        tau->n_used = tau->n_used - 2*nw_pts;
+
+        if (tau->psinum == rssringoccs_PsiType_Fresnel)
+            rssringoccs_Diffraction_Correction_Fresnel(tau);
+        else if (tau->psinum == rssringoccs_PsiType_Legendre)
+            rssringoccs_Diffraction_Correction_Legendre(tau);
+        else if (tau->psinum == rssringoccs_PsiType_NewtonSimpleFFT)
+            rssringoccs_Diffraction_Correction_SimpleFFT(tau);
+        else
+            rssringoccs_Diffraction_Correction_Newton(tau);
+
+        tau->start = temp_start;
+        tau->n_used = temp_n_used;
 
         /*  Unnegate k_vals to its original values.                           */
         for (n = 0; n <= tau->n_used; ++n)

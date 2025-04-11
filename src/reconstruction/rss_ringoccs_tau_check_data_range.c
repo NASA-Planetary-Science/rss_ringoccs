@@ -115,11 +115,10 @@ void rssringoccs_Tau_Check_Data_Range(rssringoccs_TAUObj * const tau)
     if (tau->dx_km <= 0.0)
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_String_Duplicate(
+        tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Check_Data_Range\n\n"
-            "\rtau->dx_km is not positive. Returning.\n"
-        );
+            "\rtau->dx_km is not positive. Returning.\n";
 
         return;
     }
@@ -148,13 +147,12 @@ void rssringoccs_Tau_Check_Data_Range(rssringoccs_TAUObj * const tau)
         if (n < nw_pts)
         {
             tau->error_occurred = tmpl_True;
-            tau->error_message = tmpl_String_Duplicate(
+            tau->error_message =
                 "\n\rError Encountered: rss_ringoccs\n"
                 "\r\trssringoccs_Tau_Check_Data_Range\n\n"
                 "\rNot enough data to perform diffraction correction. The\n"
                 "\rrequested region has points with a window width that go\n"
-                "\rbeyond the minimum radius available. Returning.\n"
-            );
+                "\rbeyond the minimum radius available. Returning.\n";
 
             return;
         }
@@ -168,13 +166,12 @@ void rssringoccs_Tau_Check_Data_Range(rssringoccs_TAUObj * const tau)
         if (current_max > tau->arr_size)
         {
             tau->error_occurred = tmpl_True;
-            tau->error_message = tmpl_String_Duplicate(
+            tau->error_message =
                 "\n\rError Encountered: rss_ringoccs\n"
                 "\r\trssringoccs_Tau_Check_Data_Range\n\n"
                 "\rNot enough data to perform diffraction correction. The\n"
                 "\rrequested region has points with a window width that go\n"
-                "\rbeyond the maximum radius available. Returning.\n"
-            );
+                "\rbeyond the maximum radius available. Returning.\n";
 
             return;
         }

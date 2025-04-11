@@ -65,8 +65,6 @@
  *              Computes z = r * exp(i theta), with theta in radians.         *
  *          tmpl_CDouble_AddTo:                                               *
  *              Performs z += w, in-place.                                    *
- *          tmpl_CDouble_AddTo_Real:                                          *
- *              Performs z += r, in-place.                                    *
  *          tmpl_CDouble_Multiply:                                            *
  *              Complex multiplication, z = w0 * w1.                          *
  *          tmpl_CDouble_Rect:                                                *
@@ -273,8 +271,8 @@ rssringoccs_Fresnel_Transform_Even_Polynomial(
     /*  Multiplicative factor that appears outside of the integral.           */
     const double scale_factor = 0.5 * tau->dx_km / tau->F_km_vals[center];
 
-    /*  Division is more expensive than division, so store the reciprocal     *
-     *  of D as a variable and compute with that.                             */
+    /*  Division is more expensive than multiplication, so store the          *
+     *  reciprocal of D as a variable and compute with that.                  */
     const double rcpr_D = 1.0 / tau->D_km_vals[center];
 
     /*  The factor k * D is used frequently. Save some redundant computations *

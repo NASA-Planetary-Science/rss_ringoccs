@@ -312,8 +312,8 @@ rssringoccs_Fresnel_Transform_Normalized_Even_Polynomial(
      *  We will compute this using a Riemann sum. Initialize to zero to start.*/
     tmpl_ComplexDouble norm = tmpl_CDouble_Zero;
 
-    /*  Division is more expensive than division, so store the reciprocal     *
-     *  of D as a variable and compute with that.                             */
+    /*  Division is more expensive than multiplication, so store the          *
+     *  reciprocal of D as a variable and compute with that.                  */
     const double rcpr_D = 1.0 / tau->D_km_vals[center];
 
     /*  The factor k * D is used frequently. Save some redundant computations *

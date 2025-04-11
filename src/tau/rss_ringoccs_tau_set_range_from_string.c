@@ -33,11 +33,11 @@ rssringoccs_Tau_Set_Range_From_String(const char *range,
     if (range == NULL)
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_String_Duplicate(
+        tau->error_message =
             "\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Get_Range_From_String\n\n"
-            "\rInput string is NULL. Returning.\n"
-        );
+            "\rInput string is NULL.\n\n";
+
         return;
     }
 
@@ -46,13 +46,13 @@ rssringoccs_Tau_Set_Range_From_String(const char *range,
     tmpl_String_Remove_Whitespace(range_str);
     tmpl_String_Make_Lower_Case(range_str);
 
-    if (strcmp(range_str, "all") == 0)
+    if (tmpl_String_Are_Equal(range_str, "all"))
     {
         tau->rng_list[0] = 1.0;
         tau->rng_list[1] = 400000.0;
     }
-    else if ((strcmp(range_str, "besselbarnard") == 0) ||
-             (strcmp(range_str, "bessel-barnard") == 0))
+    else if ((tmpl_String_Are_Equal(range_str, "besselbarnard")) ||
+             (tmpl_String_Are_Equal(range_str, "bessel-barnard")))
     {
         tau->rng_list[0] = 120210.0;
         tau->rng_list[1] = 120330.0;
@@ -60,7 +60,7 @@ rssringoccs_Tau_Set_Range_From_String(const char *range,
 
     /*  This region is only interesting for low-inclination occultations,     *
      *  such as (Cassini) Rev133 and revs of similar occultation number.      */
-    else if (strcmp(range_str, "cringripples") == 0)
+    else if (tmpl_String_Are_Equal(range_str, "cringripples"))
     {
         tau->rng_list[0] = 77690.0;
         tau->rng_list[1] = 77760.0;
@@ -68,37 +68,37 @@ rssringoccs_Tau_Set_Range_From_String(const char *range,
 
     /*  Excellent test-case for most occultations since the Encke gap acts    *
      *  like a near perfect square well. Examining this region is worthwhile. */
-    else if ((strcmp(range_str, "encke") == 0) ||
-             (strcmp(range_str, "enckegap") == 0))
+    else if ((tmpl_String_Are_Equal(range_str, "encke")) ||
+             (tmpl_String_Are_Equal(range_str, "enckegap")))
     {
         tau->rng_list[0] = 132900.0;
         tau->rng_list[1] = 134200.0;
     }
-    else if ((strcmp(range_str, "herschel") == 0) ||
-             (strcmp(range_str, "herschelgap") == 0))
+    else if ((tmpl_String_Are_Equal(range_str, "herschel")) ||
+             (tmpl_String_Are_Equal(range_str, "herschelgap")))
     {
         tau->rng_list[0] = 118100.0;
         tau->rng_list[1] = 118380.0;
     }
-    else if ((strcmp(range_str, "huygens") == 0) ||
-             (strcmp(range_str, "huygensringlet") == 0))
+    else if ((tmpl_String_Are_Equal(range_str, "huygens")) ||
+             (tmpl_String_Are_Equal(range_str, "huygensringlet")))
     {
         tau->rng_list[0] = 117650.0;
         tau->rng_list[1] = 117950.0;
     }
-    else if (strcmp(range_str, "janusepimetheus") == 0)
+    else if (tmpl_String_Are_Equal(range_str, "janusepimetheus"))
     {
         tau->rng_list[0] = 96200.0;
         tau->rng_list[1] = 96800.0;
     }
-    else if ((strcmp(range_str, "jeffreys") == 0) ||
-             (strcmp(range_str, "jeffreysgap") == 0))
+    else if ((tmpl_String_Are_Equal(range_str, "jeffreys")) ||
+             (tmpl_String_Are_Equal(range_str, "jeffreysgap")))
     {
         tau->rng_list[0] = 118900.0;
         tau->rng_list[1] = 119000.0;
     }
-    else if ((strcmp(range_str, "kuiper") == 0) ||
-             (strcmp(range_str, "kuipergap") == 0))
+    else if ((tmpl_String_Are_Equal(range_str, "kuiper")) ||
+             (tmpl_String_Are_Equal(range_str, "kuipergap")))
     {
         tau->rng_list[0] = 119300.0;
         tau->rng_list[1] = 119500.0;
@@ -108,14 +108,14 @@ rssringoccs_Tau_Set_Range_From_String(const char *range,
      *  examine and test routines on. The excellent geometry of Rev007 means  *
      *  one can get very accurate results on the Maxwell ringlet using any of *
      *  the reconstruction methods.                                           */
-    else if ((strcmp(range_str, "maxwell") == 0) ||
-             (strcmp(range_str, "maxwellringlet") == 0))
+    else if ((tmpl_String_Are_Equal(range_str, "maxwell")) ||
+             (tmpl_String_Are_Equal(range_str, "maxwellringlet")))
     {
         tau->rng_list[0] = 87410.0;
         tau->rng_list[1] = 87610.0;
     }
-    else if ((strcmp(range_str, "russell") == 0) ||
-             (strcmp(range_str, "russellgap") == 0))
+    else if ((tmpl_String_Are_Equal(range_str, "russell")) ||
+             (tmpl_String_Are_Equal(range_str, "russellgap")))
     {
         tau->rng_list[0] = 118550.0;
         tau->rng_list[1] = 118660.0;
@@ -123,16 +123,28 @@ rssringoccs_Tau_Set_Range_From_String(const char *range,
 
     /*  A very steep gap, excellent for testing the resolution of the         *
      *  reconstruction.                                                       */
-    else if ((strcmp(range_str, "titan") == 0) ||
-             (strcmp(range_str, "titanringlet") == 0))
+    else if ((tmpl_String_Are_Equal(range_str, "titan")) ||
+             (tmpl_String_Are_Equal(range_str, "titanringlet")))
     {
         tau->rng_list[0] = 77870.0;
         tau->rng_list[1] = 77930.0;
     }
     else
     {
-        char errmes1[1024];
-        const char *errmes2 =
+        tau->error_occurred = tmpl_True;
+        tau->error_message =
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\trssringoccs_Tau_Get_Range_From_String\n\n"
+            "\rIllegal string for range. Allowed strings are:\n"
+            "\r\tall               [1.0, 400000.0]\n"
+            "\r\tbesselbarnard     [120210.0, 120330.0]\n"
+            "\r\tbessel-barnard    [120210.0, 120330.0]\n"
+            "\r\tcringripples      [77690.0, 77760.0]\n"
+            "\r\tencke             [132900.0, 134200.0]\n"
+            "\r\tenckegap          [132900.0, 134200.0]\n"
+            "\r\therschel          [118100.0, 118380.0]\n"
+            "\r\therschelgap       [118100.0, 118380.0]\n"
+            "\r\thuygens           [117650.0, 117950.0]\n"
             "\r\thuygensringlet    [117650.0, 117950.0]\n"
             "\r\tjanusepimetheus   [96200.0, 96800.0]\n"
             "\r\tjeffreys          [118900.0, 119000.0]\n"
@@ -146,26 +158,6 @@ rssringoccs_Tau_Set_Range_From_String(const char *range,
             "\r\ttitan             [77870.0, 77930.0]\n"
             "\r\ttitanringlet      [77870.0, 77930.0\n\n";
 
-        strcpy(
-            errmes1,
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_Tau_Get_Range_From_String\n\n"
-            "\rIllegal string for range. Allowed strings are:\n"
-            "\r\tall               [1.0, 400000.0]\n"
-            "\r\tbesselbarnard     [120210.0, 120330.0]\n"
-            "\r\tbessel-barnard    [120210.0, 120330.0]\n"
-            "\r\tcringripples      [77690.0, 77760.0]\n"
-            "\r\tencke             [132900.0, 134200.0]\n"
-            "\r\tenckegap          [132900.0, 134200.0]\n"
-            "\r\therschel          [118100.0, 118380.0]\n"
-            "\r\therschelgap       [118100.0, 118380.0]\n"
-            "\r\thuygens           [117650.0, 117950.0]\n"
-        );
-
-        strcat(errmes1, errmes2);
-
-        tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_String_Duplicate(errmes1);
         tau->rng_list[0] = -1.0;
         tau->rng_list[1] = -1.0;
     }

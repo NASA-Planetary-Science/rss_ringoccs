@@ -109,11 +109,10 @@ rssringoccs_Tau_Copy_DLP_Data(const rssringoccs_DLPObj *dlp,
     if (dlp == NULL)
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_String_Duplicate(
+        tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Copy_DLP_Data\n\n"
-            "Input dlp pointer is NULL. Returning.\n"
-        );
+            "Input dlp pointer is NULL. Returning.\n";
 
         return;
     }
@@ -123,11 +122,10 @@ rssringoccs_Tau_Copy_DLP_Data(const rssringoccs_DLPObj *dlp,
     if (dlp->error_occurred)
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_String_Duplicate(
+        tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Copy_DLP_Data\n\n"
-            "\rInput dlp pointer has the error_occurred member set to True.\n"
-        );
+            "\rInput dlp pointer has the error_occurred member set to True.\n";
 
         return;
     }
@@ -140,12 +138,11 @@ rssringoccs_Tau_Copy_DLP_Data(const rssringoccs_DLPObj *dlp,
     if (tau->arr_size <= 1)
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_String_Duplicate(
+        tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Copy_DLP_Data\n\n"
             "\rInput arrays have less than 2 points. It is impossible to\n"
-            "\rperform reconstrunction. Returning.\n"
-        );
+            "\rperform reconstrunction. Returning.\n\n";
 
         return;
     }

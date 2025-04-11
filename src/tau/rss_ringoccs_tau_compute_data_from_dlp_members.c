@@ -53,11 +53,10 @@ rssringoccs_Tau_Compute_Data_From_DLP_Members(rssringoccs_TAUObj *tau,
     if (!dlp)
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_String_Duplicate(
+        tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Compute_Data_From_DLP_Members\n\n"
-            "\rInput DLP object is NULL. Aborting.\n\n"
-        );
+            "\rInput DLP object is NULL. Aborting.\n\n";
 
         return;
     }
@@ -67,11 +66,10 @@ rssringoccs_Tau_Compute_Data_From_DLP_Members(rssringoccs_TAUObj *tau,
     if (dlp->error_occurred)
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_String_Duplicate(
+        tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Compute_Data_From_DLP_Members\n\n"
-            "\rInput DLP object has error_occurred = True.\n\n"
-        );
+            "\rInput DLP object has error_occurred = True.\n\n";
 
         return;
     }
@@ -81,11 +79,10 @@ rssringoccs_Tau_Compute_Data_From_DLP_Members(rssringoccs_TAUObj *tau,
     if (dlp->arr_size != tau->arr_size)
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_String_Duplicate(
+        tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Compute_Data_From_DLP_Members\n\n"
-            "\rDLP array size is not equal to Tau array size.\n\n"
-        );
+            "\rDLP array size is not equal to Tau array size.\n\n";
 
         return;
     }

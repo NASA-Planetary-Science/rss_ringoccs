@@ -19,12 +19,8 @@
  *  Author:     Ryan Maguire, Wellesley College                               *
  *  Date:       January 5, 2020                                               *
  ******************************************************************************/
-
-#include <stdlib.h>
+#include <libtmpl/include/compat/tmpl_free.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
-
-/*  Macro for freeing and nullifying the members of the geo CSV structs.      */
-#define DESTROY_TAU_VAR(var) if (var != NULL){free(var); var = NULL;}
 
 /*  Function for freeing all member of a tau object except the error message. */
 void rssringoccs_Tau_Destroy_Members(rssringoccs_TAUObj *tau)
@@ -33,27 +29,27 @@ void rssringoccs_Tau_Destroy_Members(rssringoccs_TAUObj *tau)
     if (tau == NULL)
         return;
 
-    /*  Use the DESTROY_TAU_VAR macro to free and NULLify all pointers.       */
-    DESTROY_TAU_VAR(tau->rho_km_vals)
-    DESTROY_TAU_VAR(tau->F_km_vals)
-    DESTROY_TAU_VAR(tau->phi_deg_vals)
-    DESTROY_TAU_VAR(tau->k_vals)
-    DESTROY_TAU_VAR(tau->rho_dot_kms_vals)
-    DESTROY_TAU_VAR(tau->B_deg_vals)
-    DESTROY_TAU_VAR(tau->D_km_vals)
-    DESTROY_TAU_VAR(tau->w_km_vals)
-    DESTROY_TAU_VAR(tau->t_oet_spm_vals)
-    DESTROY_TAU_VAR(tau->t_ret_spm_vals)
-    DESTROY_TAU_VAR(tau->t_set_spm_vals)
-    DESTROY_TAU_VAR(tau->rho_corr_pole_km_vals)
-    DESTROY_TAU_VAR(tau->rho_corr_timing_km_vals)
-    DESTROY_TAU_VAR(tau->tau_threshold_vals)
-    DESTROY_TAU_VAR(tau->phi_rl_deg_vals)
-    DESTROY_TAU_VAR(tau->rx_km_vals)
-    DESTROY_TAU_VAR(tau->ry_km_vals)
-    DESTROY_TAU_VAR(tau->rz_km_vals)
-    DESTROY_TAU_VAR(tau->T_in)
-    DESTROY_TAU_VAR(tau->T_out)
-    DESTROY_TAU_VAR(tau->T_fwd)
+    /*  Use the TMPL_FREE macro to free and Nullify all pointers.             */
+    TMPL_FREE(tau->rho_km_vals);
+    TMPL_FREE(tau->F_km_vals);
+    TMPL_FREE(tau->phi_deg_vals);
+    TMPL_FREE(tau->k_vals);
+    TMPL_FREE(tau->rho_dot_kms_vals);
+    TMPL_FREE(tau->B_deg_vals);
+    TMPL_FREE(tau->D_km_vals);
+    TMPL_FREE(tau->w_km_vals);
+    TMPL_FREE(tau->t_oet_spm_vals);
+    TMPL_FREE(tau->t_ret_spm_vals);
+    TMPL_FREE(tau->t_set_spm_vals);
+    TMPL_FREE(tau->rho_corr_pole_km_vals);
+    TMPL_FREE(tau->rho_corr_timing_km_vals);
+    TMPL_FREE(tau->tau_threshold_vals);
+    TMPL_FREE(tau->phi_rl_deg_vals);
+    TMPL_FREE(tau->rx_km_vals);
+    TMPL_FREE(tau->ry_km_vals);
+    TMPL_FREE(tau->rz_km_vals);
+    TMPL_FREE(tau->T_in);
+    TMPL_FREE(tau->T_out);
+    TMPL_FREE(tau->T_fwd);
 }
 /*  End of rssringoccs_Tau_Destroy_Members.                                   */

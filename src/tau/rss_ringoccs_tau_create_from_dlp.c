@@ -25,11 +25,10 @@ rssringoccs_Tau_Create_From_DLP(const rssringoccs_DLPObj *dlp, double res)
     if (!dlp)
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_String_Duplicate(
+        tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Create_From_DLP\n\n"
-            "\rInput dlp is NULL. Returning.\n"
-        );
+            "\rInput dlp is NULL. Returning.\n";
 
         return tau;
     }
@@ -39,11 +38,10 @@ rssringoccs_Tau_Create_From_DLP(const rssringoccs_DLPObj *dlp, double res)
     if (dlp->error_occurred)
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_String_Duplicate(
+        tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Create_From_DLP\n\n"
-            "\rInput dlp has error_occurred set to true. Returning.\n"
-        );
+            "\rInput dlp has error_occurred set to true.\n\n";
 
         return tau;
     }
@@ -55,11 +53,10 @@ rssringoccs_Tau_Create_From_DLP(const rssringoccs_DLPObj *dlp, double res)
     if (tau->res <= 0.0)
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_String_Duplicate(
+        tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Create_From_DLP\n\n"
-            "\rInput res is not positive. Returning.\n"
-        );
+            "\rInput res is not positive. Returning.\n\n";
 
         return tau;
     }

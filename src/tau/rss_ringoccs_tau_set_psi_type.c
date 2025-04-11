@@ -40,11 +40,10 @@ rssringoccs_Tau_Set_Psi_Type(const char *psitype, rssringoccs_TAUObj* tau)
     if (psitype == NULL)
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_String_Duplicate(
+        tau->error_message =
             "\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Set_Psi_Type\n\n"
-            "\rInput string is NULL. Returning.\n\n"
-        );
+            "\rInput string is NULL. Returning.\n\n";
 
         return;
     }
@@ -58,11 +57,10 @@ rssringoccs_Tau_Set_Psi_Type(const char *psitype, rssringoccs_TAUObj* tau)
     if (!tau_psitype)
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_String_Duplicate(
+        tau->error_message =
             "\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Set_Psi_Type\n\n"
-            "\rtmpl_String_Duplicate returned NULL. Returning.\n\n"
-        );
+            "\rtmpl_String_Duplicate returned NULL.\n\n";
 
         return;
     }
@@ -146,13 +144,12 @@ rssringoccs_Tau_Set_Psi_Type(const char *psitype, rssringoccs_TAUObj* tau)
         if (tau->order == 0)
         {
             tau->error_occurred = tmpl_True;
-            tau->error_message = tmpl_String_Duplicate(
+            tau->error_message =
                 "\n\rError Encountered: rss_ringoccs\n"
                 "\r\trssringoccs_Tau_Set_Psi_Type\n\n"
                 "\rCould not parse psitype. tmpl_String_To_UChar returned\n"
                 "\rzero. Your input has 'fresnel' in it but either has an\n"
-                "\rinvalid entry after, or a zero.\n\n"
-            );
+                "\rinvalid entry after, or a zero.\n\n";
 
             tau->order = 0U;
             goto FINISH;
@@ -162,13 +159,12 @@ rssringoccs_Tau_Set_Psi_Type(const char *psitype, rssringoccs_TAUObj* tau)
         else if (tau->order == 1)
         {
             tau->error_occurred = tmpl_True;
-            tau->error_message = tmpl_String_Duplicate(
+            tau->error_message =
                 "\n\rError Encountered: rss_ringoccs\n"
                 "\r\trssringoccs_Tau_Set_Psi_Type\n\n"
                 "\rfresnel1 is not allowed since the constant and linear\n"
                 "\rterms of the Fresnel kernel are zero. Please choose\n"
-                "\r'fresneln' with n > 1.\n\n"
-            );
+                "\r'fresneln' with n > 1.\n\n";
 
             tau->order = 0U;
             goto FINISH;
@@ -194,7 +190,7 @@ rssringoccs_Tau_Set_Psi_Type(const char *psitype, rssringoccs_TAUObj* tau)
         tau->order = 0;
         tau->psinum = rssringoccs_PsiType_None;
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_String_Duplicate(rssringoccs_psi_err_mes);
+        tau->error_message = rssringoccs_psi_err_mes;
     }
 
 FINISH:

@@ -16,12 +16,11 @@
     if (tau->var != NULL)                                                      \
     {                                                                          \
         tau->error_occurred = tmpl_True;                                       \
-        tau->error_message = tmpl_String_Duplicate(                            \
+        tau->error_message =                                                   \
             "\n\rError Encountered: rss_ringoccs\n"                            \
             "\r\trssringoccs_Tau_Malloc_Members\n\n"                           \
             "\r"#var" is not NULL. It is likely you've already set the data\n" \
-            "\rfor this tau object. Returning.\n"                              \
-        );                                                                     \
+            "\rfor this tau object. Returning.\n";                             \
         return;                                                                \
     }                                                                          \
                                                                                \
@@ -32,11 +31,10 @@
     if (tau->var == NULL)                                                      \
     {                                                                          \
         tau->error_occurred = tmpl_True;                                       \
-        tau->error_message = tmpl_String_Duplicate(                            \
+        tau->error_message =                                                   \
             "\n\rError Encountered: rss_ringoccs\n"                            \
             "\r\trssringoccs_Tau_Malloc_Members\n\n"                           \
-            "\rMalloc failed and returned NULL for "#var". Returning.\n\n"     \
-        );                                                                     \
+            "\rMalloc failed and returned NULL for "#var".\n\n";               \
         return;                                                                \
     }
 /*  End of the MALLOC_TAU_VAR macro.                                          */
@@ -55,11 +53,10 @@ void rssringoccs_Tau_Malloc_Members(rssringoccs_TAUObj *tau)
     if (tau->arr_size == zero)
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_String_Duplicate(
+        tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Malloc_Members\n\n"
-            "\rInput tau has arr_size = zero. Nothing to allocate.\n\n"
-        );
+            "\rInput tau has arr_size = zero. Nothing to allocate.\n\n";
 
         return;
     }

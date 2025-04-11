@@ -19,11 +19,11 @@ void rssringoccs_Tau_Set_Window_Type(const char *wtype, rssringoccs_TAUObj *tau)
     if (wtype == NULL)
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_String_Duplicate(
+        tau->error_message =
             "\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Set_WType\n\n"
-            "\rInput string is NULL. Returning.\n"
-        );
+            "\rInput string is NULL.\n\n";
+
         return;
     }
 
@@ -32,11 +32,11 @@ void rssringoccs_Tau_Set_Window_Type(const char *wtype, rssringoccs_TAUObj *tau)
     if (tau_wtype == NULL)
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_String_Duplicate(
+        tau->error_message =
             "\rError Encountered: rss_ringoccs\n"
             "\r\rrssringoccs_Tau_Set_WType\n\n"
-            "\rtmpl_String_Duplicate returned NULL. Returning.\n"
-        );
+            "\rtmpl_String_Duplicate returned NULL.\n\n";
+
         return;
     }
 
@@ -86,7 +86,7 @@ void rssringoccs_Tau_Set_Window_Type(const char *wtype, rssringoccs_TAUObj *tau)
     else
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_String_Duplicate(
+        tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Set_WType\n\n"
             "\r\tIllegal string for wtype. Allowed strings are:\n"
@@ -97,8 +97,8 @@ void rssringoccs_Tau_Set_Window_Type(const char *wtype, rssringoccs_TAUObj *tau)
             "\r\t\tkb35:    Kaiser-Bessel with alpha=3.5 pi\n"
             "\r\t\tkbmd20:  Modified Kaiser-Bessel with alpha=2.0 pi\n"
             "\r\t\tkbmd25:  Modified Kaiser-Bessel with alpha=2.5 pi\n"
-            "\r\t\tkbmd35:  Modified Kaiser-Bessel with alpha=3.5 pi\n"
-        );
+            "\r\t\tkbmd35:  Modified Kaiser-Bessel with alpha=3.5 pi\n";
+
         tau->normeq = -1.0;
     }
 

@@ -19,28 +19,23 @@
  *  Author:     Ryan Maguire, Wellesley College                               *
  *  Date:       January 5, 2020                                               *
  ******************************************************************************/
-
-#include <stdlib.h>
+#include <libtmpl/include/compat/tmpl_free.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 #include <rss_ringoccs/include/rss_ringoccs_tau.h>
 
 void rssringoccs_Tau_Destroy(rssringoccs_TAUObj **tau)
 {
-    rssringoccs_TAUObj *tau_inst = *tau;
+    rssringoccs_TAUObj *tau_inst;
 
-    if (tau_inst == NULL)
+    if (!tau)
+        return;
+
+    tau_inst = *tau;
+
+    if (!tau_inst)
         return;
 
     rssringoccs_Tau_Destroy_Members(tau_inst);
-
-    if (tau_inst->error_message != NULL)
-    {
-        free(tau_inst->error_message);
-        tau_inst->error_message = NULL;
-    }
-
-    free(tau_inst);
-    *tau = NULL;
-    return;
+    TMPL_FREE(tau_inst);
 }
 /*  End of rssringoccs_Tau_Destroy.                                           */

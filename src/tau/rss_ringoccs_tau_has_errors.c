@@ -20,12 +20,10 @@
     if (tmpl_Double_Array_Min(tau->var, tau->arr_size) < 0.0)                  \
     {                                                                          \
         tau->error_occurred = tmpl_True;                                       \
-        tau->error_message = tmpl_String_Duplicate(                            \
+        tau->error_message =                                                   \
             "\n\rError Encountered: rss_ringoccs\n"                            \
             "\r\trssringoccs_Tau_Has_Errors\n\n"                               \
-            "\r"#var" has negative valued entries. Returning.\n"               \
-        );                                                                     \
-                                                                               \
+            "\r"#var" has negative valued entries.\n\n";                       \
         return tmpl_True;                                                      \
     }
 /*  End of the TAU_CHECK_NON_NEGATIVE macro.                                  */
@@ -43,12 +41,10 @@
     if ((min < -360.0) || (max > 360.0))                                       \
     {                                                                          \
         tau->error_occurred = tmpl_True;                                       \
-        tau->error_message = tmpl_String_Duplicate(                            \
+        tau->error_message =                                                   \
             "\n\rError Encountered: rss_ringoccs\n"                            \
             "\r\trssringoccs_Tau_Has_Errors\n\n"                               \
-            "\r"#var" has values outside of [-360, 360]. Returning.\n"         \
-        );                                                                     \
-                                                                               \
+            "\r"#var" has values outside of [-360, 360].\n\n";                 \
         return tmpl_True;                                                      \
     }
 /*  End of the TAU_CHECK_TWO_PI macro.                                        */
@@ -69,11 +65,10 @@ tmpl_Bool rssringoccs_Tau_Has_Errors(rssringoccs_TAUObj *tau)
     if (tau->dx_km == 0.0)
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_String_Duplicate(
+        tau->error_message =
             "\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Has_Errors\n\n"
-            "\rdx_km = rho_km_vals[1] - rho_km_vals[0] = 0. Returning.\n"
-        );
+            "\rdx_km = rho_km_vals[1] - rho_km_vals[0] = 0.\n\n";
 
         return tmpl_True;
     }
@@ -82,15 +77,14 @@ tmpl_Bool rssringoccs_Tau_Has_Errors(rssringoccs_TAUObj *tau)
      *  res is a legal value, compare it with twice the absolute value of     *
      *  dx_km. To avoid floating round-off error (which has happened to the   *
      *  Cassini team, hence this edit) set the value to 1.99 instead of 2.0.  */
-    else if (tau->res < 1.99 * tmpl_Double_Abs(tau->dx_km))
+    if (tau->res < 1.99 * tmpl_Double_Abs(tau->dx_km))
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_String_Duplicate(
+        tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Has_Errors\n\n"
             "\rResolution is less than twice the sample space.\n"
-            "\rThis will result in an inaccurate reconstruction. Returning.\n"
-        );
+            "\rThis will result in an inaccurate reconstruction.\n\n";
 
         return tmpl_True;
     }

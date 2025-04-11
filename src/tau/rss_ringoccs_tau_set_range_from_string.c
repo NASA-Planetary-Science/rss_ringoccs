@@ -156,7 +156,7 @@ rssringoccs_Tau_Set_Range_From_String(const char *range,
             "\r\trussell           [118550.0, 118660.0]\n"
             "\r\trussellgap        [118550.0, 118660.0]\n"
             "\r\ttitan             [77870.0, 77930.0]\n"
-            "\r\ttitanringlet      [77870.0, 77930.0\n\n";
+            "\r\ttitanringlet      [77870.0, 77930.0]\n\n";
 
         tau->rng_list[0] = -1.0;
         tau->rng_list[1] = -1.0;

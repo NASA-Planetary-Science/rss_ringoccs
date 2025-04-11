@@ -55,12 +55,12 @@ void crssringoccs_Get_Py_Perturb(rssringoccs_TAUObj *tau, PyObject *perturb)
         if (PyList_Size(perturb) != 5)
         {
             tau->error_occurred = tmpl_True;
-            tau->error_message = tmpl_strdup(
+            tau->error_message =
                 "\rError Encountered: rss_ringoccs\n"
                 "\r\trssringoccs_Get_Py_Perturb\n\n"
                 "\rInput perturb is a list but does not have 5 entries.\n"
-                "\rperturb must be a list of five real numbers.\n"
-            );
+                "\rperturb must be a list of five real numbers.\n";
+
             return;
         }
 
@@ -84,12 +84,12 @@ void crssringoccs_Get_Py_Perturb(rssringoccs_TAUObj *tau, PyObject *perturb)
             else
             {
                 tau->error_occurred = tmpl_True;
-                tau->error_message = tmpl_strdup(
+                tau->error_message =
                     "\rError Encountered: rss_ringoccs\n"
                     "\r\trssringoccs_Get_Py_Perturb\n\n"
                     "\rInput perturb has entries that are not real numbers.\n"
-                    "\rAll five entries for the perturb list must be numbers.\n"
-                );
+                    "\rAll entries for the perturb list must be numbers.\n";
+
                 return;
             }
         }
@@ -99,11 +99,11 @@ void crssringoccs_Get_Py_Perturb(rssringoccs_TAUObj *tau, PyObject *perturb)
     else
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_strdup(
+        tau->error_message =
             "\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Get_Py_Perturb\n\n"
-            "\rInput perturb is not a list.\n"
-        );
+            "\rInput perturb is not a list.\n";
+
         return;
     }
 }

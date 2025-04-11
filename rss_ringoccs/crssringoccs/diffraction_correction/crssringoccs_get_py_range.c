@@ -44,11 +44,11 @@ void crssringoccs_Get_Py_Range(rssringoccs_TAUObj *tau, PyObject *rngreq)
     if (rngreq == NULL)
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_strdup(
+        tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_C_Tau_to_Py_Tau\n\n"
-            "\rInput rngreq is NULL. Aborting.n"
-        );
+            "\rInput rngreq is NULL. Aborting.\n\n";
+
         return;
     }
 
@@ -73,12 +73,12 @@ void crssringoccs_Get_Py_Range(rssringoccs_TAUObj *tau, PyObject *rngreq)
         if (PyList_Size(rngreq) != 2)
         {
             tau->error_occurred = tmpl_True;
-            tau->error_message = tmpl_strdup(
+            tau->error_message =
                 "\rError Encountered: rss_ringoccs\n"
                 "\r\trssringoccs_Get_Py_Range\n\n"
                 "\rInput range is a list but does not have 2 entries.\n"
-                "\rrng must be a list of two real numbers.\n"
-            );
+                "\rrng must be a list of two real numbers.\n\n";
+
             return;
         }
 
@@ -96,12 +96,12 @@ void crssringoccs_Get_Py_Range(rssringoccs_TAUObj *tau, PyObject *rngreq)
             else
             {
                 tau->error_occurred = tmpl_True;
-                tau->error_message = tmpl_strdup(
+                tau->error_message =
                     "\rError Encountered: rss_ringoccs\n"
                     "\r\trssringoccs_Get_Py_Range\n\n"
                     "\rInput rng has entries that are not real numbers.\n"
-                    "\rBoth entries for the rng list must be numbers.\n"
-                );
+                    "\rBoth entries for the rng list must be numbers.\n\n";
+
                 return;
             }
         }
@@ -111,7 +111,7 @@ void crssringoccs_Get_Py_Range(rssringoccs_TAUObj *tau, PyObject *rngreq)
     else
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_strdup(
+        tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Get_Py_Range\n\n"
             "\rrng must be a list of two real numbers or a string.\n"
@@ -136,8 +136,8 @@ void crssringoccs_Get_Py_Range(rssringoccs_TAUObj *tau, PyObject *rngreq)
             "\r\trussell           [118550.0, 118660.0]\n"
             "\r\trussellgap        [118550.0, 118660.0]\n"
             "\r\ttitan             [77870.0, 77930.0]\n"
-            "\r\ttitanringlet      [77870.0, 77930.0\n\n"
-        );
+            "\r\ttitanringlet      [77870.0, 77930.0]\n\n";
+
         return;
     }
 }

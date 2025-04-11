@@ -92,12 +92,12 @@ void rssringoccs_Tau_Set_Window_Type(const char *wtype, rssringoccs_TAUObj *tau)
             "\r\tIllegal string for wtype. Allowed strings are:\n"
             "\r\t\trect:    Rectangular Window\n"
             "\r\t\tcoss:    Squared Cosine Window\n"
-            "\r\t\tkb20:    Kaiser-Bessel with alpha=2.0 pi\n"
-            "\r\t\tkb25:    Kaiser-Bessel with alpha=2.5 pi\n"
-            "\r\t\tkb35:    Kaiser-Bessel with alpha=3.5 pi\n"
-            "\r\t\tkbmd20:  Modified Kaiser-Bessel with alpha=2.0 pi\n"
-            "\r\t\tkbmd25:  Modified Kaiser-Bessel with alpha=2.5 pi\n"
-            "\r\t\tkbmd35:  Modified Kaiser-Bessel with alpha=3.5 pi\n";
+            "\r\t\tkb20:    Kaiser-Bessel with alpha = 2.0 pi\n"
+            "\r\t\tkb25:    Kaiser-Bessel with alpha = 2.5 pi\n"
+            "\r\t\tkb35:    Kaiser-Bessel with alpha = 3.5 pi\n"
+            "\r\t\tkbmd20:  Modified Kaiser-Bessel with alpha = 2.0 pi\n"
+            "\r\t\tkbmd25:  Modified Kaiser-Bessel with alpha = 2.5 pi\n"
+            "\r\t\tkbmd35:  Modified Kaiser-Bessel with alpha = 3.5 pi\n\n";
 
         tau->normeq = -1.0;
     }

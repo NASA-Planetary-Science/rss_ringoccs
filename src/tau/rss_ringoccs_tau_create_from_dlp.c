@@ -18,7 +18,7 @@ rssringoccs_Tau_Create_From_DLP(const rssringoccs_DLPObj *dlp, double res)
     if (!tau)
         return NULL;
 
-    /*  Initialize all values to the zero values or their defaults.           */
+    /*  Initialize all members to their zero values or their defaults.        */
     rssringoccs_Tau_Init(tau);
 
     /*  Check if the input dlp is NULL. This is treated as an error.          */
@@ -28,7 +28,7 @@ rssringoccs_Tau_Create_From_DLP(const rssringoccs_DLPObj *dlp, double res)
         tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Create_From_DLP\n\n"
-            "\rInput dlp is NULL. Returning.\n";
+            "\rInput dlp is NULL.\n\n";
 
         return tau;
     }
@@ -46,26 +46,29 @@ rssringoccs_Tau_Create_From_DLP(const rssringoccs_DLPObj *dlp, double res)
         return tau;
     }
 
-    /*  Set the resolution variable to the user-provided input.               */
-    tau->res = res;
-
     /*  Check that the resolution is a legal value.                           */
-    if (tau->res <= 0.0)
+    if (res <= 0.0)
     {
         tau->error_occurred = tmpl_True;
         tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Create_From_DLP\n\n"
-            "\rInput res is not positive. Returning.\n\n";
+            "\rInput resolution is not positive.\n\n";
 
         return tau;
     }
+
+    /*  Set the resolution variable to the user-provided input.               */
+    tau->res = res;
 
     /*  Most of the variables for the Tau object can be computed directly     *
      *  from the data in the DLP object. The only variables that are not set  *
      *  after this function is called (and are still their zero values or     *
      *  NULL) are the reconstruction and forward modeling variables.          */
     rssringoccs_Tau_Copy_DLP_Data(dlp, tau);
+
+    /*  Check the data for possible errors before returning.                  */
+    rssringoccs_Tau_Check_Geometry(tau);
     return tau;
 }
 /*  End of rssringoccs_Tau_Create_From_DLP.                                   */

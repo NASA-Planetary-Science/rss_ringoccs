@@ -27,6 +27,9 @@
 #ifndef RSS_RINGOCCS_TAU_H
 #define RSS_RINGOCCS_TAU_H
 
+/*  TMPL_RESTRICT given here.                                                 */
+#include <libtmpl/include/tmpl_config.h>
+
 /*  Booleans (True / False) provided here.                                    */
 #include <libtmpl/include/tmpl_bool.h>
 
@@ -198,8 +201,10 @@ rssringoccs_Tau_Create_From_DLP(const rssringoccs_DLPObj *dlp, double res);
  *      None (void).                                                          *
  ******************************************************************************/
 extern void
-rssringoccs_Tau_Copy_DLP_Data(const rssringoccs_DLPObj *dlp,
-                              rssringoccs_TAUObj *tau);
+rssringoccs_Tau_Copy_DLP_Data(
+    const rssringoccs_DLPObj * TMPL_RESTRICT const dlp,
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau
+);
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -298,18 +303,81 @@ extern void rssringoccs_Tau_Malloc_Members(rssringoccs_TAUObj *tau);
 
 /******************************************************************************
  *  Function:                                                                 *
- *      rssringoccs_Tau_Has_Errors                                            *
+ *      rssringoccs_Tau_Check_Azimuth_Angle                                   *
+ *  Purpose:                                                                  *
+ *      Checks the phi_deg_vals array in a tau object for common errors.      *
+ *  Arguments:                                                                *
+ *      tau (rssringoccs_TAUObj * const):                                     *
+ *          The Tau object to be checked.                                     *
+ *  Outputs:                                                                  *
+ *      None (void).                                                          *
+ ******************************************************************************/
+extern void rssringoccs_Tau_Check_Azimuth_Angle(rssringoccs_TAUObj * const tau);
+
+/******************************************************************************
+ *  Function:                                                                 *
+ *      rssringoccs_Tau_Check_Displacement                                    *
+ *  Purpose:                                                                  *
+ *      Checks the dx_km value in a tau object for common errors.             *
+ *  Arguments:                                                                *
+ *      tau (rssringoccs_TAUObj * const):                                     *
+ *          The Tau object to be checked.                                     *
+ *  Outputs:                                                                  *
+ *      None (void).                                                          *
+ ******************************************************************************/
+extern void rssringoccs_Tau_Check_Displacement(rssringoccs_TAUObj * const tau);
+
+/******************************************************************************
+ *  Function:                                                                 *
+ *      rssringoccs_Tau_Check_Opening_Angle                                   *
+ *  Purpose:                                                                  *
+ *      Checks the B_deg_vals array in a tau object for common errors.        *
+ *  Arguments:                                                                *
+ *      tau (rssringoccs_TAUObj * const):                                     *
+ *          The Tau object to be checked.                                     *
+ *  Outputs:                                                                  *
+ *      None (void).                                                          *
+ ******************************************************************************/
+extern void rssringoccs_Tau_Check_Opening_Angle(rssringoccs_TAUObj * const tau);
+
+/******************************************************************************
+ *  Function:                                                                 *
+ *      rssringoccs_Tau_Check_Ring_Distance                                   *
+ *  Purpose:                                                                  *
+ *      Checks the D_km_vals array in a tau object for common errors.         *
+ *  Arguments:                                                                *
+ *      tau (rssringoccs_TAUObj * const):                                     *
+ *          The Tau object to be checked.                                     *
+ *  Outputs:                                                                  *
+ *      None (void).                                                          *
+ ******************************************************************************/
+extern void rssringoccs_Tau_Check_Ring_Distance(rssringoccs_TAUObj * const tau);
+
+/******************************************************************************
+ *  Function:                                                                 *
+ *      rssringoccs_Tau_Check_Ring_Radius                                     *
+ *  Purpose:                                                                  *
+ *      Checks the rho_km_vals array in a tau object for common errors.       *
+ *  Arguments:                                                                *
+ *      tau (rssringoccs_TAUObj * const):                                     *
+ *          The Tau object to be checked.                                     *
+ *  Outputs:                                                                  *
+ *      None (void).                                                          *
+ ******************************************************************************/
+extern void rssringoccs_Tau_Check_Ring_Radius(rssringoccs_TAUObj * const tau);
+
+/******************************************************************************
+ *  Function:                                                                 *
+ *      rssringoccs_Tau_Check_Geometry                                        *
  *  Purpose:                                                                  *
  *      Checks a Tau object for possible errors.                              *
  *  Arguments:                                                                *
  *      tau (rssringoccs_TAUObj *):                                           *
  *          The Tau object to be checked.                                     *
  *  Outputs:                                                                  *
- *      has_errors (tmpl_Bool):                                               *
- *          A Boolean. True if the Tau object contains errors. Otherwise the  *
- *          function returns False.                                           *
+ *      None (void).                                                          *
  ******************************************************************************/
-extern tmpl_Bool rssringoccs_Tau_Has_Errors(rssringoccs_TAUObj *tau);
+extern void rssringoccs_Tau_Check_Geometry(rssringoccs_TAUObj *tau);
 
 /******************************************************************************
  *  Function:                                                                 *

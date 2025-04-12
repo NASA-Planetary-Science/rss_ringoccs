@@ -41,7 +41,7 @@
  *      loop through the indices copying the values from the                  *
  *      rssringoccs_DLPObj pointer.                                           *
  *  NOTES:                                                                    *
- *      1.) This function sets the tau->error_occured Boolean to true on      *
+ *      1.) This function sets the tau->error_occurred Boolean to true on     *
  *          error. It is the user's responsibility to check that this Boolean *
  *          is false after using this function. Trying to access the pointers *
  *          in a rssringoccs_TAUObj may result in a segmentation fault        *
@@ -80,25 +80,20 @@
  ******************************************************************************/
 
 /*  Include all necessary headers.                                            */
-#include <stdlib.h>
-#include <math.h>
-
+#include <libtmpl/include/tmpl_config.h>
 #include <libtmpl/include/tmpl_bool.h>
-#include <libtmpl/include/tmpl_math.h>
-#include <libtmpl/include/tmpl_string.h>
-#include <libtmpl/include/tmpl_special_functions_real.h>
-#include <libtmpl/include/tmpl_optics.h>
-#include <libtmpl/include/tmpl_cyl_fresnel_optics.h>
 #include <rss_ringoccs/include/rss_ringoccs_calibration.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 
 /*  Function for copying the relevant DLP data to a tau object.               */
 void
-rssringoccs_Tau_Copy_DLP_Data(const rssringoccs_DLPObj *dlp,
-                              rssringoccs_TAUObj *tau)
+rssringoccs_Tau_Copy_DLP_Data(
+    const rssringoccs_DLPObj * TMPL_RESTRICT const dlp,
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau
+)
 {
     /*  If the tau pointer is NULL, we can't access it. Return.               */
-    if (tau == NULL)
+    if (!tau)
         return;
 
     /*  Exit the function if tau has its error_occurred member set to true.   */
@@ -106,13 +101,13 @@ rssringoccs_Tau_Copy_DLP_Data(const rssringoccs_DLPObj *dlp,
         return;
 
     /*  If the dlp pointer is NULL, raise and error and return.               */
-    if (dlp == NULL)
+    if (!dlp)
     {
         tau->error_occurred = tmpl_True;
         tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_Copy_DLP_Data\n\n"
-            "Input dlp pointer is NULL. Returning.\n";
+            "\r\trssringoccs_Tau_Copy_DLP_Data\n\n"
+            "\rInput dlp pointer is NULL.\n\n";
 
         return;
     }
@@ -124,8 +119,21 @@ rssringoccs_Tau_Copy_DLP_Data(const rssringoccs_DLPObj *dlp,
         tau->error_occurred = tmpl_True;
         tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_Copy_DLP_Data\n\n"
-            "\rInput dlp pointer has the error_occurred member set to True.\n";
+            "\r\trssringoccs_Tau_Copy_DLP_Data\n\n"
+            "\rInput dlp error_occurred set to True.\n";
+
+        return;
+    }
+
+    /*  If arr_size is less than 2, we can't do any processing and we can't   *
+     *  compute dx_km. Return with error.                                     */
+    if (dlp->arr_size <= 1)
+    {
+        tau->error_occurred = tmpl_True;
+        tau->error_message =
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\trssringoccs_Tau_Copy_DLP_Data\n\n"
+            "\rdlp->arr_size < 2, arrays have less than 2 points.\n\n";
 
         return;
     }
@@ -133,26 +141,13 @@ rssringoccs_Tau_Copy_DLP_Data(const rssringoccs_DLPObj *dlp,
     /*  The arr_size for tau is the same as the dlp. Set this.                */
     tau->arr_size = dlp->arr_size;
 
-    /*  If arr_size is less than 2, we can't do any processing and we can't   *
-     *  compute dx_km. Return with error.                                     */
-    if (tau->arr_size <= 1)
-    {
-        tau->error_occurred = tmpl_True;
-        tau->error_message =
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_Copy_DLP_Data\n\n"
-            "\rInput arrays have less than 2 points. It is impossible to\n"
-            "\rperform reconstrunction. Returning.\n\n";
-
-        return;
-    }
-
     /*  Allocate memory for the tau variables.                                */
     rssringoccs_Tau_Malloc_Members(tau);
 
-    /*  The previous function calls malloc. Check if this failed.             */
+    /*  Check for errors before continuing. The previous function calls       *
+     *  malloc and it may possibly fail to allocate memory.                   */
     if (tau->error_occurred)
-        return; /* TODO: Add additional error message here. */
+        return;
 
     /*  Several variables for Tau are exactly the same as the DLP ones. These *
      *  can be copied verbatim into the newly allocated memory for Tau.       */
@@ -163,9 +158,5 @@ rssringoccs_Tau_Copy_DLP_Data(const rssringoccs_DLPObj *dlp,
 
     /*  Lastly, compute dx from the first and zeroth entries of rho_km_vals.  */
     tau->dx_km = tau->rho_km_vals[1] - tau->rho_km_vals[0];
-
-    /*  Check the data for possible errors before trying to process.          */
-    if (rssringoccs_Tau_Has_Errors(tau))
-        return; /* TODO: Add another error message here. */
 }
 /*  End of rssringoccs_Tau_Copy_DLP_Data.                                     */

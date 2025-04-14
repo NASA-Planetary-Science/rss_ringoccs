@@ -37,7 +37,7 @@
  *          reconstructed data to the T_out array.                            *
  *      x_arr (const double * TMPL_RESTRICT const):                           *
  *          The array r[n] - r[center], where r is the radius. n = 0 hence    *
- *          corresponds to the left-most edge of the window, n = n_pts + 1    *
+ *          corresponds to the left-most edge of the window, n = n_pts        *
  *          represents the center of the window. The length of the array is   *
  *          given by n_pts, so x_arr holds only the left half of the window.  *
  *      w_func (const double * TMPL_RESTRICT const):                          *
@@ -45,7 +45,8 @@
  *          value w_func[n] corresponds to the window at x_arr[n] (see above).*
  *      coeffs (const double * TMPL_RESTRICT const):                          *
  *          The coefficients for the polynomial approximation, which is in    *
- *          terms of (r - r0) / D. There must be at least tau->order elements *
+ *          terms of (r - r0) / D, where D is the distance between the rings  *
+ *          and the spacecraft. There must be at least tau->order elements    *
  *          in the array. coeffs[0] represents the constant coefficient,      *
  *          coeffs[tau->order - 1] corresponds to the coefficient of the      *
  *          highest order term. Note that the polynomial will be scaled by    *
@@ -96,16 +97,16 @@
  *      whatever you want.                                                    *
  *                                                                            *
  *      The azimuth angle corresponding to r is the value phi_s such that     *
- *      d psi / d phi = 0, the stationary azimuth angle. The function         *
- *      psi(r, r0) can be approximated as a sum using Legendre polynomials    *
- *      and Chebyshev polynomials of the second kind. We have:                *
+ *      d psi / d phi = 0; this is called the stationary azimuth angle. The   *
+ *      function psi(r, r0) can be approximated as a sum using Legendre       *
+ *      polynomials and Chebyshev polynomials of the second kind. We have:    *
  *                                                                            *
- *                                             N                              *
+ *                                             n                              *
  *                     P (A) - A P   (A)     -----                            *
  *                      n         n+1        \                                *
  *          L (A, B) = ----------------- - B /     P     (A) P (A)            *
- *           n               n + 2           -----  n+k-1     k               *
- *                                           n = 0                            *
+ *           n               n + 2           -----  n+m-1     m               *
+ *                                           m = 0                            *
  *                                                                            *
  *                                                                            *
  *                     P (A) - A P   (A)      -                     -         *
@@ -278,9 +279,9 @@ rssringoccs_Fresnel_Transform_Normalized_Even_Polynomial(
     size_t n;
     size_t m = n_pts;
 
-    /*  k is used for polynomial evaluation using Horner's method. This will  *
-     *  index the coefficients.                                               */
-    unsigned int k;
+    /*  ind is used for polynomial evaluation using Horner's method. This     *
+     *  will index the coefficients.                                          */
+    unsigned int ind;
 
     /*  psi is the Fresnel kernel, computed using a polynomial approximation. */
     double psi;
@@ -356,10 +357,10 @@ rssringoccs_Fresnel_Transform_Normalized_Even_Polynomial(
         double psi_odd = coeffs[tau->order - 2];
 
         /*  Perform Horner's method.                                          */
-        for (k = 3; k < tau->order - 1; k += 2)
+        for (ind = 3; ind < tau->order - 1; ind += 2)
         {
-            psi_even = psi_even*x2 + coeffs[tau->order - k];
-            psi_odd = psi_odd*x2 + coeffs[tau->order - k - 1];
+            psi_even = psi_even*x2 + coeffs[tau->order - ind];
+            psi_odd = psi_odd*x2 + coeffs[tau->order - ind - 1];
         }
 
         /*  The for-loop misses the lowest order term which belongs to the    *

@@ -42,14 +42,17 @@ rssringoccs_Fresnel_Transform_Newton_Elliptical_Norm(rssringoccs_TAUObj *tau,
     /*  Symmetry is lost without the Legendre polynomials, or Fresnel         *
      *  quadratic. Must compute everything from -W/2 to W/2.                  */
     offset = center - ((n_pts-1) >> 1);
-    ecc_factor = 1.0 - tau->ecc*tau->ecc;
+    ecc_factor = 1.0 - tau->eccentricity*tau->eccentricity;
 
     /*  Use a Riemann Sum to approximate the Fresnel Inverse Integral.        */
     for (m = 0; m < n_pts; ++m)
     {
         /*  Calculate the stationary value of psi with respect to phi.        */
-        ecc_cos_factor = 1.0 + tau->ecc * tmpl_Double_Cos(tau->phi_deg_vals[center] - tau->peri);
-        semi_major     = tau->rho_km_vals[center] * ecc_cos_factor / ecc_factor;
+        ecc_cos_factor = 1.0 +
+            tau->eccentricity *
+                tmpl_Double_Cos(tau->phi_deg_vals[center] - tau->periapse);
+
+        semi_major = tau->rho_km_vals[center] * ecc_cos_factor / ecc_factor;
 
         /*  Calculate the stationary value of psi with respect to phi.        */
         phi = tmpl_Double_Stationary_Elliptical_Fresnel_Psi_Newton(
@@ -59,8 +62,8 @@ rssringoccs_Fresnel_Transform_Newton_Elliptical_Norm(rssringoccs_TAUObj *tau,
             tau->phi_deg_vals[offset],
             tau->phi_deg_vals[offset],
             tau->B_deg_vals[center],
-            tau->ecc,
-            tau->peri,
+            tau->eccentricity,
+            tau->periapse,
             tau->rx_km_vals[center],
             tau->ry_km_vals[center],
             tau->rz_km_vals[center],
@@ -76,7 +79,8 @@ rssringoccs_Fresnel_Transform_Newton_Elliptical_Norm(rssringoccs_TAUObj *tau,
             tau->rz_km_vals[center]
         );
 
-        ecc_cos_factor = 1.0 + tau->ecc * tmpl_Double_Cos(phi - tau->peri);
+        ecc_cos_factor = 1.0 +
+            tau->eccentricity * tmpl_Double_Cos(phi - tau->periapse);
         rho = semi_major * ecc_factor / ecc_cos_factor;
 
         /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */

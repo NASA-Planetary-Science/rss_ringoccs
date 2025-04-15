@@ -17,14 +17,8 @@
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
 
-/*  NULL is defined here.                                                     */
-#include <stddef.h>
-
 /*  Booleans provided here.                                                   */
 #include <libtmpl/include/tmpl_bool.h>
-
-/*  tmpl_strdup function declared here.                                       */
-#include <libtmpl/include/tmpl_string.h>
 
 /*  Function prototype and typedefs for structs given here.                   */
 #include "../crssringoccs.h"
@@ -33,28 +27,28 @@ void
 crssringoccs_Get_Py_Vars_From_Tau_Self(rssringoccs_TAUObj *tau,
                                        const crssringoccs_PyDiffrecObj *self)
 {
-    if (tau == NULL)
+    if (!tau)
         return;
 
     if (tau->error_occurred)
         return;
 
-    if (self == NULL)
+    if (!self)
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_strdup(
+        tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\tcrssringoccs_Get_Py_Vars_From_Tau_Self\n\n"
-            "\rInput self is NULL. Aborting.n"
-        );
+            "\rInput self is NULL.n";
+
         return;
     }
 
-    tau->sigma    = self->sigma;
-    tau->bfac     = self->bfac;
-    tau->ecc      = self->ecc;
-    tau->peri     = self->peri;
-    tau->use_fwd  = self->use_fwd;
+    tau->sigma = self->sigma;
+    tau->bfac = self->bfac;
+    tau->eccentricity = self->eccentricity;
+    tau->periapse = self->periapse;
+    tau->use_fwd = self->use_fwd;
     tau->use_norm = self->use_norm;
-    tau->verbose  = self->verbose;
+    tau->verbose = self->verbose;
 }

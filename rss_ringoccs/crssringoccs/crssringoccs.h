@@ -68,10 +68,10 @@ typedef struct crssringoccs_PyDiffrecObj_Def {
     tmpl_Bool use_fwd;                /*  Boolean for forward modeling.       */
     tmpl_Bool use_norm;               /*  Boolean for window normalization.   */
     tmpl_Bool verbose;                /*  Boolean for printing messages.      */
-    double ecc;                       /*  Eccentricity, elliptical rings only.*/
-    double input_res;                 /*  Input resolution, in kilometers.    */
-    double peri;                      /*  Periapse, elliptical rings only.    */
-    double res_factor;                /*  Resolution scale factor, unitless.  */
+    double input_resolution_km;       /*  Input resolution, in kilometers.    */
+    double resolution_factor;         /*  Resolution scale factor, unitless.  */
+    double eccentricity;              /*  Eccentricity, elliptical rings only.*/
+    double periapse;                  /*  Periapse, elliptical rings only.    */
     double sigma;                     /*  Allen deviation of spacecraft.      */
     const char *outfiles;             /*  TAB files for this Tau object.      */
     const char *wtype;

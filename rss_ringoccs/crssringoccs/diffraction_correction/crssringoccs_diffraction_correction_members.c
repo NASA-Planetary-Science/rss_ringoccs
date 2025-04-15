@@ -207,30 +207,30 @@ PyMemberDef crssringoccs_DiffractionCorrection_Members[] = {
         "Forward modeling Boolean"
     },
     {
-        "ecc",
+        "eccentricity",
         T_DOUBLE,
-        offsetof(crssringoccs_PyDiffrecObj, ecc),
+        offsetof(crssringoccs_PyDiffrecObj, eccentricity),
         0,
         "Eccentricity of Rings"
     },
     {
-        "peri",
+        "periapse",
         T_DOUBLE,
-        offsetof(crssringoccs_PyDiffrecObj, peri),
+        offsetof(crssringoccs_PyDiffrecObj, periapse),
         0,
         "Periapse of Rings, azimuth angle in radians."
     },
     {
-        "input_res",
+        "input_resolution_km",
         T_DOUBLE,
-        offsetof(crssringoccs_PyDiffrecObj, input_res),
+        offsetof(crssringoccs_PyDiffrecObj, input_resolution_km),
         0,
         "User requested input resolution."
     },
     {
-        "res_factor",
+        "resolution_factor",
         T_DOUBLE,
-        offsetof(crssringoccs_PyDiffrecObj, res_factor),
+        offsetof(crssringoccs_PyDiffrecObj, resolution_factor),
         0,
         "User requested scale factor for the input resolution."
     },

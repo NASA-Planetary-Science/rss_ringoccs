@@ -50,13 +50,14 @@ crssringoccs_DiffractionCorrection_Init(crssringoccs_PyDiffrecObj *self,
     /*  Declare variables for a DLP and Tau object.                           */
     rssringoccs_DLPObj *dlp;
     rssringoccs_TAUObj *tau;
+    double resolution;
 
     /*  The list of the keywords accepted by the DiffractionCorrection class. *
      *  dlp and res are REQUIRED inputs, the rest are optional. If the user   *
      *  does not provide these optional keywords, we must set them ourselves. */
     static char *kwlist[] = {
         "dlp",
-        "res",
+        "resolution",
         "rng",
         "wtype",
         "use_fwd",
@@ -65,9 +66,9 @@ crssringoccs_DiffractionCorrection_Init(crssringoccs_PyDiffrecObj *self,
         "bfac",
         "sigma",
         "psitype",
-        "res_factor",
-        "ecc",
-        "peri",
+        "resolution_factor",
+        "eccentricity",
+        "periapse",
         "perturb",
         NULL
     };
@@ -117,15 +118,15 @@ crssringoccs_DiffractionCorrection_Init(crssringoccs_PyDiffrecObj *self,
     /*  The default sigma value is the one for Cassini.                       */
     self->sigma = 2.0e-13;
 
-    /*  If res_factor was not set, set to 0.75. This value was specified by   *
-     *  Essam Marouf as necessary to ensure the reconstruction matches the    *
-     *  PDS results. No justification is known to me.                         */
-    self->res_factor = 0.75;
+    /*  If resolution_factor was not set, set to 0.75. This value was         *
+     *  specified by Essam Marouf as necessary to ensure the reconstruction   *
+     *  matches the PDS results. No justification is known to me.             */
+    self->resolution_factor = 0.75;
 
     /*  The default geometry assumes the rings are circular, so we set both   *
      *  the eccentricity and the periapse to zero.                            */
-    self->ecc = 0.0;
-    self->peri = 0.0;
+    self->eccentricity = 0.0;
+    self->periapse = 0.0;
 
     /*  Extract the inputs and keywords supplied by the user. If the data     *
      *  cannot be extracted, raise a type error and return to caller. A short *
@@ -140,14 +141,18 @@ crssringoccs_DiffractionCorrection_Init(crssringoccs_PyDiffrecObj *self,
      *  symbold means everything after is optional. s is a string, p is a     *
      *  Boolean (p for "predicate"). b is an integer, and the colon : denotes *
      *  that the input list has ended.                                        */
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|Od$OsppppdsdddO:", kwlist,
-                                     &DLPInst,          &self->input_res,
-                                     &rngreq,           &self->wtype,
-                                     &self->use_fwd,    &self->use_norm,
-                                     &self->verbose,    &self->bfac,
-                                     &self->sigma,      &self->psitype,
-                                     &self->res_factor, &self->ecc,
-                                     &self->peri,       &perturb))
+    const int success = PyArg_ParseTupleAndKeywords(
+        args, kwds, "|Od$OsppppdsdddO:", kwlist,
+        &DLPInst,                 &self->input_resolution_km,
+        &rngreq,                  &self->wtype,
+        &self->use_fwd,           &self->use_norm,
+        &self->verbose,           &self->bfac,
+        &self->sigma,             &self->psitype,
+        &self->resolution_factor, &self->eccentricity,
+        &self->periapse,          &perturb
+    );
+
+    if (!success)
     {
         PyErr_Format(
             PyExc_TypeError,
@@ -171,6 +176,7 @@ crssringoccs_DiffractionCorrection_Init(crssringoccs_PyDiffrecObj *self,
             "\r\tperi      \tPeriapse of rings (bool).\n"
             "\r\tperturb   \tRequested perturbation to Fresnel kernel (list).\n"
         );
+
         return -1;
     }
 
@@ -224,7 +230,8 @@ crssringoccs_DiffractionCorrection_Init(crssringoccs_PyDiffrecObj *self,
     if (self->verbose)
         puts("\tDiffraction Correction: Creating C Tau object...");
 
-    tau = rssringoccs_Tau_Create_From_DLP(dlp, self->input_res * self->res_factor);
+    resolution = self->input_resolution_km * self->resolution_factor;
+    tau = rssringoccs_Tau_Create_From_DLP(dlp, resolution);
 
     if (self->verbose)
         puts("\tDiffraction Correction: Passing Py variables to tau...");
@@ -290,8 +297,8 @@ crssringoccs_DiffractionCorrection_Init(crssringoccs_PyDiffrecObj *self,
 
     dlp_tmp = Py_BuildValue(
         "{s:O,s:d}",
-        "dlp_inst", PyObject_GetAttrString(DLPInst, "history"),
-        "res",      self->input_res
+        "dlp_inst",            PyObject_GetAttrString(DLPInst, "history"),
+        "input_resolution_km", self->input_resolution_km
     );
 
     tmp = self->input_vars;
@@ -304,15 +311,15 @@ crssringoccs_DiffractionCorrection_Init(crssringoccs_PyDiffrecObj *self,
 
     dlp_tmp = Py_BuildValue(
         "{s:O,s:s,s:s,s:d,s:d,s:d,s:d,s:O,s:O}",
-        "rng",        rngreq,
-        "wtype",      self->wtype,
-        "psitype",    self->psitype,
-        "sigma",      self->sigma,
-        "ecc",        self->ecc,
-        "peri",       self->peri,
-        "res_factor", self->res_factor,
-        "use_norm",   PyBool_FromLong(self->use_norm),
-        "bfac",       PyBool_FromLong(self->bfac)
+        "rng",                 rngreq,
+        "wtype",               self->wtype,
+        "psitype",             self->psitype,
+        "sigma",               self->sigma,
+        "eccentricity",        self->eccentricity,
+        "periapse",            self->periapse,
+        "resolution_factor",   self->resolution_factor,
+        "use_norm",            PyBool_FromLong(self->use_norm),
+        "bfac",                PyBool_FromLong(self->bfac)
     );
 
     tmp = self->input_kwds;

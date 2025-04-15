@@ -59,7 +59,7 @@ rssringoccs_Tau_Create_From_DLP(const rssringoccs_DLPObj *dlp, double res)
     }
 
     /*  Set the resolution variable to the user-provided input.               */
-    tau->res = res;
+    tau->resolution_km = res;
 
     /*  Most of the variables for the Tau object can be computed directly     *
      *  from the data in the DLP object. The only variables that are not set  *

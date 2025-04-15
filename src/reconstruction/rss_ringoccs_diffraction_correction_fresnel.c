@@ -26,9 +26,9 @@
  *  Function Name:                                                            *
  *      rssringoccs_Diffraction_Correction_Fresnel                            *
  *  Purpose:                                                                  *
- *      Performs diffraction correction using Fresnel approximation.          *
+ *      Performs diffraction correction using the Fresnel approximation.      *
  *  Arguments:                                                                *
- *      tau (double * const):                                                 *
+ *      tau (rssringoccs_TAUObj * const):                                     *
  *          The geometry and diffraction data for the reconstruction. The     *
  *          output reconstruction is stored in the T_out member of tau.       *
  *  Output:                                                                   *
@@ -38,15 +38,15 @@
  *  Method:                                                                   *
  *      The inverse Fresnel transform is given by:                            *
  *                                                                            *
- *                         infinity                                           *
+ *                           infinity                                         *
+ *                              -                                             *
+ *                     1 + i   | |                                            *
+ *          T_out(r) = -----   |   T_in(r0) w(r - r0) exp(-i psi(r, r0)) dr0  *
+ *                       2F  | |                                              *
  *                            -                                               *
- *                   1 + i   | |                                              *
- *          T(rho) = -----   |   T_hat(r0) w(r - r0) exp(-i psi(r, r0)) dr0   *
- *                     2F  | |                                                *
- *                          -                                                 *
- *                        -infinity                                           *
+ *                          -infinity                                         *
  *                                                                            *
- *      where T_hat is the diffracted data, w is the window function, r is    *
+ *      where T_in is the diffracted data, w is the window function, r is     *
  *      the ring intercept point, and r0 is a dummy variable of integration.  *
  *      psi is the Fresnel Kernel, and exp is the exponential function. The   *
  *      scale factor F is the Fresnel scale which is dependent on the         *
@@ -64,10 +64,10 @@
  *      The above integral is then computed via a Riemann sum using this new  *
  *      expression for psi.                                                   *
  *                                                                            *
- *      As the resolution gets too high, say 10 km or larger, the window      *
+ *      As the resolution gets too coarse, say 10 km or larger, the window    *
  *      width quickly shrinks to zero and the integral will be approximately  *
- *      zero. To account for this, the option to normalize the integral by    *
- *      the window width is offered. The normalization is defined as follows: *
+ *      zero. To account for this, we normalize the integral by the window    *
+ *      width. The normalization is defined as follows:                       *
  *                                                                            *
  *                    |  infinity                 |                           *
  *                    |     -                     |                           *
@@ -97,15 +97,27 @@
  *          immensely fast, capable of processing the entire Rev007 E         *
  *          occultation accurately in less than a second at 1km resolution.   *
  *  References:                                                               *
- *      1.) Maguire, R., French, R. (2024)                                    *
- *          "Applications of Legendre Polynomials for Fresnel Inversion       *
- *              and Occultation Observations"                                 *
+ *      1.) Maguire, R., French, R. (2025)                                    *
+ *          Applications of Legendre Polynomials for Fresnel Inversion        *
+ *              and Occultation Observations                                  *
+ *                                                                            *
+ *          A full derivation of the Fresnel approximation is given here.     *
+ *                                                                            *
  *      2.) Marouf, E., Tyler, G., Rosen, P. (June 1986)                      *
- *          "Profiling Saturn's Rings by Radio Occultation"                   *
+ *          Profiling Saturn's Rings by Radio Occultation                     *
  *          Icarus Vol. 68, Pages 120-166.                                    *
+ *                                                                            *
+ *          This paper describes the theory of diffraction as applied to      *
+ *          planetary ring systems. rss_ringoccs implements many of the       *
+ *          ideas found in this article.                                      *
+ *                                                                            *
  *      3.) Goodman, J. (2005)                                                *
- *          "Introduction to Fourier Optics"                                  *
+ *          Introduction to Fourier Optics                                    *
  *          McGraw-Hill Series in Electrical and Computer Engineering.        *
+ *                                                                            *
+ *          Covers most of the theory behind diffraction and the application  *
+ *          of Fourier analysis to optics. The Fresnel transform is given an  *
+ *          in-depth treatise in this book.                                   *
  ******************************************************************************
  *                                DEPENDENCIES                                *
  ******************************************************************************
@@ -113,18 +125,22 @@
  *          Header file providing Booleans (True and False).                  *
  *  2.) compat/tmpl_cast.h:                                                   *
  *          Macros for casting with compatibility for both C and C++.         *
- *  3.) tmpl_compat_stdlib.h:                                                 *
- *          Macros for malloc and free, with C vs. C++ compatibility.         *
- *  4.) tmpl_string.h:                                                        *
- *          Provides POSIX functions like strdup in a portable manner.        *
- *  5.) rssringoccs_fresnel_trasnform.h:                                      *
- *          Header file where the Riemann sums for various types of Frensel   *
- *          transforms are provided. These routines perform the inner most    *
- *          for-loop in the Fresnel transforms.                               *
+ *  3.) tmpl_free.h:                                                          *
+ *          Provides a macro for free with C vs. C++ compatibility.           *
+ *  4.) tmpl_malloc.h:                                                        *
+ *          Provides a macro for malloc with C vs. C++ compatibility.         *
+ *  5.) tmpl_math_constants.h:                                                *
+ *          Contains common mathematical constants, such as multiples of pi.  *
  *  6.) rss_ringoccs_tau.h:                                                   *
  *          Header file where the rssringoccs_TAUObj type is provided.        *
- *  7.) rssringoccs_reconstruction.h:                                         *
+ *  7.) rss_ringoccs_fresnel_transform.h:                                     *
+ *          Header file where the Riemann sums for various types of Fresnel   *
+ *          transforms are provided. These routines perform the inner most    *
+ *          for-loop in the Fresnel transforms.                               *
+ *  8.) rss_ringoccs_reconstruction.h:                                        *
  *          Header file with the function prototype.                          *
+ *  9.) stddef.h:                                                             *
+ *          Standard header file providing the size_t typedef.                *
  ******************************************************************************
  *  Author:     Ryan Maguire                                                  *
  *  Date:       June 21, 2019                                                 *
@@ -141,7 +157,10 @@
  *      Removed FFTW dependence. Replaced with new rss_ringoccs FFT routine.  *
  *  2024/12/23: Ryan Maguire                                                  *
  *      Restructured the code. Added references, cleaned up comments and      *
- *      includes.                                                             *
+ *      includes. FFT method moved to its own file.                           *
+ *  2025/04/15: Ryan Maguire                                                  *
+ *      General cleanup, changing error_message to a const char pointer, no   *
+ *      longer requires a call to tmpl_String_Duplicate. Fixed some typos.    *
  ******************************************************************************/
 
 /*  Booleans (True / False) provided here.                                    */
@@ -154,38 +173,39 @@
 #include <libtmpl/include/compat/tmpl_malloc.h>
 #include <libtmpl/include/compat/tmpl_free.h>
 
-/*  Portable version of strdup provided here.                                 */
-#include <libtmpl/include/tmpl_string.h>
-
-/*  The Riemann summation routines are found here.                            */
-#include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
+/*  Provides common multiples of pi, including pi / 2.                        */
+#include <libtmpl/include/constants/tmpl_math_constants.h>
 
 /*  rssringoccs_TAUObj typedef given here.                                    */
 #include <rss_ringoccs/include/rss_ringoccs_tau.h>
 
+/*  The Riemann summation routines are found here.                            */
+#include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
+
 /*  Function prototype provided here.                                         */
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 
-/*  The inner most for-loop is a Riemann sum for the Fresnel trasnform. The   *
+/*  size_t provided here, data type used for indexing arrays.                 */
+#include <stddef.h>
+
+/*  The inner most for-loop is a Riemann sum for the Fresnel transform. The   *
  *  user has the option to normalize this by the window width. There are      *
- *  thus two transforms: without normalization, and with normalizaiton.       */
-static const rssringoccs_FresnelTransform fresnel_transform_list[2] = {
+ *  thus two transforms: without normalization, and with normalization.       */
+static const rssringoccs_FresnelTransform
+rssringoccs_fresnel_transform_list[2] = {
     rssringoccs_Fresnel_Transform,
     rssringoccs_Fresnel_Transform_Norm
 };
 
-/*  The value pi / 2. Used in the definition of the Fresnel approximation.    */
-#define RSSRINGOCCS_PI_BY_TWO (+1.570796326794896619231321691639751442098584699)
-
 /*  Performs the Fresnel transform on the data contained in tau.              */
-void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj *tau)
+void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj * const tau)
 {
-    /*  m and n used for indexing, nw_pts is number of points in window, and  *
-     *  center is the index for the center of the window of integration.      */
-    size_t m, n, nw_pts, center;
+    /*  m and n used for indexing, n_pts is number of points in the arrays,   *
+     *  and center is the index for the center of the window of integration.  */
+    size_t m, n, n_pts, center;
 
-    /*  w_width is window width (km), dx and two_dx are sample spacing (km).  */
-    double w_width, dx, two_dx;
+    /*  w_init is window width (km), two_dx is double the sample spacing (km).*/
+    double w_init, two_dx;
 
     /*  Pointers for the independent variable and the window function.        */
     double *x_arr = NULL;
@@ -197,8 +217,7 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj *tau)
      *  will be set later on to the desired transform (forward or inverse).   */
     double factor;
 
-    /*  Function pointers for the window function and the Fresnel transform.  */
-    rssringoccs_WindowFunction window;
+    /*  The user has two options for transforms. We'll set this later.        */
     rssringoccs_FresnelTransform fresnel_transform;
 
     /*  Check that the input is not NULL before atttempting to access it.     */
@@ -216,36 +235,36 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj *tau)
      *  Fresnel kernel is +/- (pi/2) ((r - r0) / F)^2. The scale factor is    *
      *  thus +/- pi/2, depending on the desired transform. Set this.          */
     if (tau->use_fwd)
-        factor = -RSSRINGOCCS_PI_BY_TWO;
+        factor = -tmpl_Double_Pi_By_Two;
     else
-        factor = +RSSRINGOCCS_PI_BY_TWO;
+        factor = +tmpl_Double_Pi_By_Two;
 
     /*  Check that the pointers to the data are not NULL.                     */
-    rssringoccs_Tau_Check_Data(tau);
+    rssringoccs_Tau_Check_Core_Data(tau);
 
-    /* Check to ensure you have enough data to process.                       */
+    /*  Check to ensure you have enough data to process.                      */
     rssringoccs_Tau_Check_Data_Range(tau);
 
     /*  The previous functions set the error_occurred Boolean on error. Check.*/
     if (tau->error_occurred)
         return;
 
-    /*  Select the Fresnel transform and retrieve the window function.        */
-    fresnel_transform = fresnel_transform_list[tau->use_norm];
-    window = tau->window_func;
+    /*  Select the desired transform. For the Fresnel method there are only   *
+     *  two options: with or without normalization. tau contains a Boolean,   *
+     *  "use_norm", which can be used to index the table above. Use this.     */
+    fresnel_transform = rssringoccs_fresnel_transform_list[tau->use_norm];
 
     /*  Retrieve the starting point from the TAUObj struct.                   */
     center = tau->start;
 
     /*  Compute necessary data for the start of the inversion.                */
-    w_width = tau->w_km_vals[center];
-    dx = tau->dx_km;
-    two_dx = 2.0*dx;
-    nw_pts = TMPL_CAST(w_width / two_dx, size_t) + 1;
+    w_init = tau->w_km_vals[center];
+    two_dx = 2.0 * tau->dx_km;
+    n_pts = TMPL_CAST(w_init / two_dx, size_t) + 1;
 
     /*  Allocate memory for the independent variable and the window function. */
-    x_arr = TMPL_MALLOC(double *, nw_pts);
-    w_func = TMPL_MALLOC(double *, nw_pts);
+    x_arr = TMPL_MALLOC(double, n_pts);
+    w_func = TMPL_MALLOC(double, n_pts);
 
     /*  Check if malloc failed. It returns NULL on failure.                   */
     if (!x_arr || !w_func)
@@ -267,22 +286,28 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj *tau)
     }
 
     /*  Initialize the window array and the independent variable.             */
-    rssringoccs_Tau_Reset_Window(x_arr, w_func, dx, w_width, nw_pts, window);
+    rssringoccs_Tau_Reset_Window(
+        tau,                    /*  Tau object containing the window function.*/
+        x_arr,                  /*  The independent variable, r[n]-r[center]. */
+        w_func,                 /*  The window array as a function of x_arr.  */
+        n_pts,                  /*  Number of points in the x_arr array.      */
+        center                  /*  Index for the center of the window.       */
+    );
 
     /*  We have computed the window function and the independent variable x,  *
      *  which is (r - r0). We need +- (pi/2) (r - r0)^2. The 1 / F^2 factor   *
      *  is introduced later inside the fresnel_transform function.            */
-    for (m = 0; m < nw_pts; ++m)
+    for (m = 0; m < n_pts; ++m)
         x_arr[m] *= factor * x_arr[m];
 
     /*  Compute the Fresnel transform across the input data.                  */
     for (n = 0; n <= tau->n_used; ++n)
     {
         /*  Check if we need to resize the window. This happens once          *
-         *  |w - w0| > 2 * dx occurs, where w is the current window width,    *
-         *  and w0 is the value of w_width.                                   */
+         *  |w - w0| > 2 * dx occurs, where w is the window width of the      *
+         *  current index, and w0 is the width of the window being used.      */
         const int resize = rssringoccs_Tau_Resize_Half_Window(
-            tau, &x_arr, &w_func, w_width, two_dx, center
+            tau, &x_arr, &w_func, w_init, two_dx, center
         );
 
         /*  If we did need a resize, there are a few things that could have   *
@@ -301,21 +326,21 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj *tau)
             /*  Reset the threshold value for the window width to the current *
              *  window size. We will update again once the required window    *
              *  grows beyond 2 * dx the size of the current window.           */
-            w_width = tau->w_km_vals[center];
+            w_init = tau->w_km_vals[center];
 
             /*  Similarly, reset the number of points in the window.          */
-            nw_pts = TMPL_CAST(w_width / two_dx, size_t) + 1;
+            n_pts = TMPL_CAST(w_init / two_dx, size_t) + 1;
 
             /*  The rssringoccs_Tau_Resize_Half_Window function calls the     *
              *  rssringoccs_Tau_Reset_Window routine, which recomputes the    *
              *  expression (r - r0) across the new window. We need the        *
              *  expression +/- (pi/2) (r - r0)^2. Compute this.               */
-            for (m = 0; m < nw_pts; ++m)
+            for (m = 0; m < n_pts; ++m)
                 x_arr[m] *= factor * x_arr[m];
         }
 
         /*  Compute the Fresnel Transform about the current point.            */
-        fresnel_transform(tau, x_arr, w_func, nw_pts, center);
+        fresnel_transform(tau, x_arr, w_func, n_pts, center);
 
         /*  Move the pointers to the next point.                              */
         center += 1;
@@ -325,6 +350,3 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj *tau)
     TMPL_FREE(x_arr);
     TMPL_FREE(w_func);
 }
-
-/*  Undefine everything in case someone wants to #include this file.          */
-#undef RSSRINGOCCS_PI_BY_TWO

@@ -115,7 +115,6 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
     double *coeffs = NULL;
 
     /*  Create function pointers for window function and Legendre transforms. */
-    rssringoccs_WindowFunction fw;
     rssringoccs_FresnelLegendreTransform legendre_transform;
 
     /*  Make sure the input is not NULL before checking its data.             */
@@ -127,7 +126,7 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
         return;
 
     /*  Check that the pointers to the data are not NULL.                     */
-    rssringoccs_Tau_Check_Data(tau);
+    rssringoccs_Tau_Check_Core_Data(tau);
 
     /* Check to ensure you have enough data to process.                       */
     rssringoccs_Tau_Check_Data_Range(tau);
@@ -175,7 +174,6 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
     dx = tau->rho_km_vals[center + 1] - tau->rho_km_vals[center];
     two_dx = 2.0 * dx;
     nw_pts = TMPL_CAST(w_init / two_dx, size_t) + 1;
-    fw = tau->window_func;
 
     /*  Allocate memory for the independent variable and window function.     */
     x_arr = TMPL_MALLOC(double, nw_pts);
@@ -207,8 +205,14 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
         return;
     }
 
-    /*  Initialize the window function and the indpendent variable "x".       */
-    rssringoccs_Tau_Reset_Window(x_arr, w_func, dx, w_init, nw_pts, fw);
+    /*  Initialize the window array and the independent variable.             */
+    rssringoccs_Tau_Reset_Window(
+        tau,                    /*  Tau object containing the window function.*/
+        x_arr,                  /*  The independent variable, r[n]-r[center]. */
+        w_func,                 /*  The window array as a function of x_arr.  */
+        nw_pts,                 /*  Number of points in the x_arr array.      */
+        center                  /*  Index for the center of the window.       */
+    );
 
     /* Loop through each point and begin the reconstruction.                  */
     for (n = 0; n < tau->n_used; ++n)

@@ -49,7 +49,7 @@ void rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj *tau)
     rssringoccs_FresnelNewtonTransform fresnel_transform;
 
     /*  Check that the pointers to the data are not NULL.                     */
-    rssringoccs_Tau_Check_Data(tau);
+    rssringoccs_Tau_Check_Core_Data(tau);
 
     if (tau->error_occurred)
         return;

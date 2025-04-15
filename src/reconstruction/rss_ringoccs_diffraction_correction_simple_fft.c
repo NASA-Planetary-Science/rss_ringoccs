@@ -51,12 +51,11 @@ void rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau)
     tmpl_ComplexDouble arg;
 
     /*  Check that the pointers to the data are not NULL.                     */
-    rssringoccs_Tau_Check_Data(tau);
-    if (tau->error_occurred)
-        return;
+    rssringoccs_Tau_Check_Core_Data(tau);
 
     /* Check to ensure you have enough data to the left.                      */
     rssringoccs_Tau_Check_Data_Range(tau);
+
     if (tau->error_occurred)
         return;
 

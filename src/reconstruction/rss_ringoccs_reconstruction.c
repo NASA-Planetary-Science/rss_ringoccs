@@ -25,7 +25,8 @@ void rssringoccs_Reconstruction(rssringoccs_TAUObj *tau)
     rssringoccs_Tau_Check_Data_Range(tau);
 
     tau->T_out = calloc(tau->arr_size, sizeof(*tau->T_out));
-    rssringoccs_Tau_Check_Data(tau);
+
+    rssringoccs_Tau_Check_Core_Data(tau);
 
     temp_fwd = tau->use_fwd;
     tau->use_fwd = tmpl_False;

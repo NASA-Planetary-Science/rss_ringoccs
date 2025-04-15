@@ -37,6 +37,10 @@
  *      tmpl_math.h:                                                          *
  *          tmpl_Double_Array_MinMax:                                         *
  *              Computes the min and max of a double array.                   *
+ *          tmpl_Double_Is_Inf:                                               *
+ *              Checks if a double is +/- infinity.                           *
+ *          tmpl_Double_Is_NaN:                                               *
+ *              Checks if a double is NaN (Not-a-Number).                     *
  *  Notes:                                                                    *
  *      1.) It is assumed that the ring azimuth angle has been allocated      *
  *          memory and the data has been initialized. If phi_deg_vals is NULL,*
@@ -105,6 +109,30 @@ void rssringoccs_Tau_Check_Azimuth_Angle(rssringoccs_TAUObj * const tau)
 
     /*  Compute the minimum and maximum of phi_deg_vals.                      */
     tmpl_Double_Array_MinMax(tau->phi_deg_vals, tau->arr_size, &min, &max);
+
+    /*  Neither of these should be NaN (Not-a-Number). Treat this as an error.*/
+    if (tmpl_Double_Is_NaN(min) || tmpl_Double_Is_NaN(max))
+    {
+        tau->error_occurred = tmpl_True;
+        tau->error_message =
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\trssringoccs_Tau_Check_Azimuth_Angle\n\n"
+            "\rAzimuth angle (phi) contains NaN values.\n\n";
+
+        return;
+    }
+
+    /*  Similarly, neither should be infinite. Treat this as an error too.    */
+    if (tmpl_Double_Is_Inf(min) || tmpl_Double_Is_Inf(max))
+    {
+        tau->error_occurred = tmpl_True;
+        tau->error_message =
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\trssringoccs_Tau_Check_Azimuth_Angle\n\n"
+            "\rAzimuth angle (phi) contains infinite values.\n\n";
+
+        return;
+    }
 
     /*  The data should be reduced mod 360 since the angle is in degrees. If  *
      *  min(phi_deg_vals) < -360, then an error likely occurred.              */

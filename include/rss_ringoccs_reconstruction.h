@@ -40,39 +40,6 @@ typedef void (*rssringoccs_FresnelTransform)(
 
 extern void rssringoccs_Reconstruction(rssringoccs_TAUObj *tau);
 
-
-
-extern void
-rssringoccs_Tau_Check_Data(rssringoccs_TAUObj *tau);
-
-extern void
-rssringoccs_Tau_Check_Keywords(rssringoccs_TAUObj *tau);
-
-extern void
-rssringoccs_Tau_Check_Occ_Type(rssringoccs_TAUObj *tau);
-
-extern void
-rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau);
-
-extern void
-rssringoccs_Tau_Finish(rssringoccs_TAUObj* tau);
-
-extern void
-rssringoccs_Tau_Reset_Window(double * TMPL_RESTRICT const x_arr,
-                             double * TMPL_RESTRICT const w_func,
-                             double dx,
-                             double width,
-                             size_t nw_pts,
-                             rssringoccs_WindowFunction fw);
-
-extern int
-rssringoccs_Tau_Resize_Half_Window(rssringoccs_TAUObj * const tau,
-                                   double ** const x_ptr,
-                                   double ** const w_ptr,
-                                   double width,
-                                   double two_dx,
-                                   size_t center);
-
 /*  Functions that compute the Fresnel Transform on a TAUObj instance.        */
 extern void
 rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj *tau);

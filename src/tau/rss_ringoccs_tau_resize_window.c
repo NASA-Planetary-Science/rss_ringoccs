@@ -1,3 +1,4 @@
+#include <libtmpl/include/tmpl_config.h>
 #include <libtmpl/include/compat/tmpl_cast.h>
 #include <libtmpl/include/compat/tmpl_free.h>
 #include <libtmpl/include/tmpl_math.h>
@@ -6,12 +7,14 @@
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 
 int
-rssringoccs_Tau_Resize_Half_Window(rssringoccs_TAUObj * const tau,
-                                   double ** const x_ptr,
-                                   double ** const w_ptr,
-                                   double width,
-                                   double two_dx,
-                                   size_t center)
+rssringoccs_Tau_Resize_Half_Window(
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    double ** TMPL_RESTRICT const x_ptr,
+    double ** TMPL_RESTRICT const w_ptr,
+    const double width,
+    const double two_dx,
+    const size_t center
+)
 {
     /*  Do not attempt to access a NULL pointer. Check for this.              */
     if (!tau)
@@ -122,7 +125,7 @@ rssringoccs_Tau_Resize_Half_Window(rssringoccs_TAUObj * const tau,
 
         /*  Recompute x_ptr and w_ptr for the new sizes.                      */
         rssringoccs_Tau_Reset_Window(
-            *x_ptr, *w_ptr, 0.5 * two_dx, w_init, nw_pts, tau->window_func
+            tau, *x_ptr, *w_ptr, nw_pts, center
         );
 
         return 1;

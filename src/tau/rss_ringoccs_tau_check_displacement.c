@@ -36,6 +36,10 @@
  *      tmpl_math.h:                                                          *
  *          tmpl_Double_Abs:                                                  *
  *              Computes the absolute value of a real number.                 *
+ *          tmpl_Double_Is_Inf:                                               *
+ *              Checks if a double is +/- infinity.                           *
+ *          tmpl_Double_Is_NaN:                                               *
+ *              Checks if a double is NaN (Not-a-Number).                     *
  *  Notes:                                                                    *
  *      1.) If the error_occurred Boolean was previously set to true, this    *
  *          function does nothing and skips all checks.                       *
@@ -80,9 +84,33 @@ void rssringoccs_Tau_Check_Displacement(rssringoccs_TAUObj * const tau)
     if (tau->error_occurred)
         return;
 
-    /*  This function should only be called after the rho_km_vals array was   *
-     *  allocated memory and the data initialized. NULL pointers are hence    *
-     *  treated as errors.                                                    */
+    /*  Displacement should be finite. Treat infinity as an error.            */
+    if (tmpl_Double_Is_Inf(tau->dx_km))
+    {
+        tau->error_occurred = tmpl_True;
+        tau->error_message =
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\trssringoccs_Tau_Check_Displacement\n\n"
+            "\rdx_km is infinite.\n\n";
+
+        return;
+    }
+
+    /*  Similarly the displacement should not be NaN (Not-a-Number). Check.   */
+    if (tmpl_Double_Is_NaN(tau->dx_km))
+    {
+        tau->error_occurred = tmpl_True;
+        tau->error_message =
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\trssringoccs_Tau_Check_Displacement\n\n"
+            "\rdx_km is NaN (Not-a-Number).\n\n";
+
+        return;
+    }
+
+    /*  The sample spacing needs to be non-zero. For one, there is a finite   *
+     *  amount of data available, and secondly we divide by dx_km to compute  *
+     *  the length of the window array. Avoid divide-by-zero, check for this. */
     if (tau->dx_km == 0.0)
     {
         tau->error_occurred = tmpl_True;

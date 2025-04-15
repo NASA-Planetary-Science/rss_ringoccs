@@ -18,11 +18,11 @@ void rssringoccs_Tau_Set_Default_Values(rssringoccs_TAUObj* tau)
 
     /*  Saturn geometry is assumed perfectly cylindrical for most             *
      *  computations. This is very accurate for most resolutions.             */
-    tau->ecc = 0.0;
-    tau->peri = 0.0;
+    tau->eccentricity = 0.0;
+    tau->periapse = 0.0;
 
     /*  Default resolution for the PDS is 1 kilometer.                        */
-    tau->res = 1.0;
+    tau->resolution_km = 1.0;
 
     /*  By default no perturbation is introduced to the Fresnel kernel.       */
     tau->perturb[0] = 0.0;

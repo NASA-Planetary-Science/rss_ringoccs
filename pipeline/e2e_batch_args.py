@@ -30,12 +30,12 @@ interact = False                    # Manually update power normalization fit
 ### DiffractionLimitedProfile
 dr_km_desired = 0.25                # Radial spacing between points (or
                                     #       half of desired DLP resolution)
-profile_range = [65000., 150000.]   # Lower and upper radial bounds to the 
+profile_range = [65000., 150000.]   # Lower and upper radial bounds to the
                                     #       output diffraction profile
 
 ### DiffractionCorrection
 res_km = 1.0                        # Reconstruction resolution
-res_factor = 0.75                   # Factor to be multiplied to resolution
+resolution_factor = 0.75            # Factor to be multiplied to resolution
                                     #       to follow MTR86 definition
 inversion_range = profile_range     # Lower and upper radial bounds to inversion
 psitype = 'Fresnel4'                # Psi type

@@ -35,7 +35,7 @@ profile_range = [65000., 150000.]   # Lower and upper radial bounds to the
 
 ### DiffractionCorrection
 res_km = 1.0                        # Reconstruction resolution
-res_factor = 0.75                   # Factor to be multiplied to resolution
+resolution_factor = 0.75            # Factor to be multiplied to resolution
                                     #       to follow MTR86 definition
 inversion_range = profile_range     # Lower and upper radial bounds to inversion
 psitype = 'Fresnel4'                # Psi type
@@ -93,25 +93,46 @@ for ind in range(nfiles):
                     rsr_inst, geo_inst, cal_inst, dr_km_desired,
                     profile_range=profile_range,
                     write_file=write_file, verbose=verbose))
+
         # Invert profile for full occultation
         if dlp_inst_ing is not None:
-            tau_inst = (rss.diffrec.DiffractionCorrection(
-                    dlp_inst_ing, res_km,
-                    rng=inversion_range, res_factor=res_factor,
-                    psitype=psitype, wtype=wtype, fwd=fwd,
-                    norm=norm, bfac=bfac, write_file=write_file,
-                    verbose=verbose))
-            rss.tools.plot_summary_doc_v2(geo_inst, cal_inst, dlp_inst_ing,
-                    tau_inst)
+            tau_inst = rss.DiffractionCorrection(
+                dlp_inst_ing,
+                args.res_km,
+                rng = args.inversion_range,
+                resolution_factor = args.resolution_factor,
+                psitype = args.psitype,
+                wtype = args.wtype,
+                use_fwd = args.fwd,
+                use_norm = args.norm,
+                bfac = args.bfac,
+                write_file = args.write_file,
+                verbose = args.verbose
+            )
+
+            rss.tools.plot_summary_doc_v2(
+                geo_inst, cal_inst, dlp_inst_ing, tau_inst
+            )
+
         if dlp_inst_egr is not None:
-            tau_inst = (rss.diffrec.DiffractionCorrection(
-                    dlp_inst_egr, res_km,
-                    rng=inversion_range, res_factor=res_factor,
-                    psitype=psitype, wtype=wtype, fwd=fwd,
-                    norm=norm, bfac=bfac, write_file=write_file,
-                    verbose=verbose))
-            rss.tools.plot_summary_doc_v2(geo_inst, cal_inst, dlp_inst_egr,
-                    tau_inst)
+
+            tau_inst = rss.DiffractionCorrection(
+                dlp_inst_egr,
+                args.res_km,
+                rng = args.inversion_range,
+                resolution_factor = args.resolution_factor,
+                psitype = args.psitype,
+                wtype = args.wtype,
+                use_fwd = args.fwd,
+                use_norm = args.norm,
+                bfac = args.bfac,
+                write_file = args.write_file,
+                verbose = args.verbose
+            )
+
+            rss.tools.plot_summary_doc_v2(
+                geo_inst, cal_inst, dlp_inst_egr, tau_inst
+            )
 
         et = time.time()
         run_time = str((et-st)/60.)

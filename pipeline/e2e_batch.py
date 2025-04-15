@@ -9,16 +9,16 @@ import time
 # Create new error file
 err_file = sys.argv[0].split('.')[0] + time.strftime("_%Y%m%d-%H%M%S") + '.err'
 fail_file = open('../output/' + err_file, 'w')
-files = [args.mpath+line.strip('\n') for line in open(
-                args.rsr_file_list,'r').readlines()]
-
-
+files = [
+    args.mpath + line.strip('\n')
+    for line in open(args.rsr_file_list,'r').readlines()
+]
 
 nfiles = len(files)
 init_time = time.time()
 
 for ind in range(nfiles):
-    
+
     print('\nn='+str(ind))
     rsr_file = files[ind]
 
@@ -29,22 +29,22 @@ for ind in range(nfiles):
 
     try:
         st = time.time()
-    
+
         # print RSR file
         print(rsr_file)
         # Create instance with rsr file contents
         rsr_inst = rss.rsr_reader.RSRReader(rsr_file, verbose=args.verbose,
                 decimate_16khz_to_1khz=args.decimate_16khz_to_1khz)
-            
+
         # Create instance with geometry parameters
         geo_inst = rss.occgeo.Geometry(rsr_inst, args.planet, args.spacecraft,
                 args.kernels, verbose=args.verbose, write_file=args.write_file)
-            
+
         # Create instance with calibrated data
-        cal_inst = rss.calibration.Calibration(rsr_inst, geo_inst, 
-                verbose=args.verbose, write_file=args.write_file, 
+        cal_inst = rss.calibration.Calibration(rsr_inst, geo_inst,
+                verbose=args.verbose, write_file=args.write_file,
                 pnf_order=args.pnf_order, interact=args.interact)
-        
+
         # Create instance with diffraction-limited profile and other
         #   inputs needed for diffraction correction
         dlp_inst_ing, dlp_inst_egr = (
@@ -54,24 +54,45 @@ for ind in range(nfiles):
                     write_file=args.write_file, verbose=args.verbose))
         # Invert profile for full occultation
         if dlp_inst_ing is not None:
-            tau_inst = (rss.DiffractionCorrection(
-                    dlp_inst_ing, args.res_km,
-                    rng=args.inversion_range, res_factor=args.res_factor,
-                    psitype=args.psitype, wtype=args.wtype, fwd=args.fwd,
-                    norm=args.norm, bfac=args.bfac, write_file=args.write_file,
-                    verbose=args.verbose))
-            rss.tools.plot_summary_doc_v2(geo_inst, cal_inst, dlp_inst_ing,
-                    tau_inst)
+
+            tau_inst = rss.DiffractionCorrection(
+                dlp_inst_ing,
+                args.res_km,
+                rng = args.inversion_range,
+                resolution_factor = args.resolution_factor,
+                psitype = args.psitype,
+                wtype = args.wtype,
+                use_fwd = args.fwd,
+                use_norm = args.norm,
+                bfac = args.bfac,
+                write_file = args.write_file,
+                verbose = args.verbose
+            )
+
+            rss.tools.plot_summary_doc_v2(
+                geo_inst, cal_inst, dlp_inst_ing, tau_inst
+            )
+
         if dlp_inst_egr is not None:
-            tau_inst = (rss.DiffractionCorrection(
-                    dlp_inst_egr, args.res_km,
-                    rng=args.inversion_range, res_factor=args.res_factor,
-                    psitype=args.psitype, wtype=args.wtype, fwd=args.fwd,
-                    norm=args.norm, bfac=args.bfac, write_file=args.write_file,
-                    verbose=args.verbose))
-            rss.tools.plot_summary_doc_v2(geo_inst, cal_inst, dlp_inst_egr,
-                    tau_inst)
-        
+
+            tau_inst = rss.DiffractionCorrection(
+                dlp_inst_egr,
+                args.res_km,
+                rng = args.inversion_range,
+                resolution_factor = args.resolution_factor,
+                psitype = args.psitype,
+                wtype = args.wtype,
+                use_fwd = args.fwd,
+                use_norm = args.norm,
+                bfac = args.bfac,
+                write_file = args.write_file,
+                verbose = args.verbose
+            )
+
+            rss.tools.plot_summary_doc_v2(
+                geo_inst, cal_inst, dlp_inst_egr, tau_inst
+            )
+
         et = time.time()
         run_time = str((et-st)/60.)
         print('File processing time (min): ' + str(run_time))

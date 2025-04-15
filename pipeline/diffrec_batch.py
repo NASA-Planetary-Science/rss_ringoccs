@@ -61,18 +61,26 @@ for n,dir in enumerate(occdirs):
 
                 # build DLP instance
                 t1 = time.time()
-                dlp_inst = rss.tools.ExtractCSVData(geo_file, cal_file, dlp_file,
-                        verbose=args.verbose)
+                dlp_inst = rss.ExtractCSVData(geo_file, cal_file, dlp_file)
                 t2 = time.time()
                 read_time += t2-t1
+
                 # diffraction reconstruction
                 t1 = time.time()
-                tau_inst = rss.diffrec.DiffractionCorrection(
-                    dlp_inst, args.res_km,
-                    rng=args.inversion_range, res_factor=args.res_factor,
-                    psitype=args.psitype, wtype=args.wtype, fwd=args.fwd,
-                    norm=args.norm, bfac=args.bfac, write_file=True,
-                    verbose=args.verbose)
+                tau_inst = rss.DiffractionCorrection(
+                    dlp_inst,
+                    args.res_km,
+                    rng = args.inversion_range,
+                    resolution_factor = args.resolution_factor,
+                    psitype = args.psitype,
+                    wtype = args.wtype,
+                    use_fwd = args.fwd,
+                    use_norm = args.norm,
+                    bfac = args.bfac,
+                    write_file = True,
+                    verbose = args.verbose
+                )
+
                 t2 = time.time()
 
                 diffcorr_time += t2-t1

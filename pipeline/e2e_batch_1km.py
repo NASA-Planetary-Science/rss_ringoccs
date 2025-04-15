@@ -34,7 +34,7 @@ profile_range = [65000., 150000.]   # Lower and upper radial bounds to the
 
 ### DiffractionCorrection
 res_km = 1.0                        # Reconstruction resolution
-res_factor = 0.75                   # Factor to be multiplied to resolution
+resolution_factor = 0.75            # Factor to be multiplied to resolution
                                     #       to follow MTR86 definition
 inversion_range = profile_range     # Lower and upper radial bounds to inversion
 psitype = 'Fresnel4'                # Psi type
@@ -120,7 +120,7 @@ for ind in range(nfiles):
                 dlp_inst_ing,
                 res_km,
                 rng = inversion_range,
-                res_factor = res_factor,
+                resolution_factor = resolution_factor,
                 psitype = psitype,
                 wtype = wtype,
                 use_fwd = fwd,
@@ -145,7 +145,7 @@ for ind in range(nfiles):
                 dlp_inst_egr,
                 res_km,
                 rng = inversion_range,
-                res_factor = res_factor,
+                resolution_factor = resolution_factor,
                 psitype = psitype,
                 wtype = wtype,
                 use_norm = norm,

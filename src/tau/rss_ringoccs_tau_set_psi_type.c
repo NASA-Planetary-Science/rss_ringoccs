@@ -5,6 +5,77 @@
 /*  Function prototype and Tau object typedef given here.                     */
 #include <rss_ringoccs/include/rss_ringoccs_tau.h>
 
+/*  The error message for psi-type is longer than the length required by the  *
+ *  C89 standard, which is 509 characters. One way to get around this in a    *
+ *  portable manner is to use a char array instead of a string literal.       *
+ *  The following arrays prints out the following:                            *
+ *                                                                            *
+ *      Error Encountered: rss_ringoccs                                       *
+ *          rssringoccs_Tau_Set_Psi_Type                                      *
+ *                                                                            *
+ *      Illegal string for psitype. Allowed strings:                          *
+ *          newton:     Newton-Raphson method                                 *
+ *          newtond:    Newton-Raphson with D perturbation.                   *
+ *          newtondold: Newton-Raphson with the old D algorithm.              *
+ *          newtondphi: Newton-Raphson with dD/dphi perturbation.             *
+ *          simplefft:  A single FFT of the entire data set.                  *
+ *          ellipse:    Newton-Raphson with elliptical perturbation.          *
+ *          fresnel:    Quadratic Fresnel approximation                       *
+ *          fresneln:   Legendre polynomial approximation with 1<n<256        */
+static const char rssringoccs_psi_type_error_message[745] = {
+    '\n', '\r', 'E', 'r', 'r', 'o', 'r', ' ', 'E', 'n', 'c', 'o', 'u', 'n',
+    't', 'e', 'r', 'e', 'd', ':', ' ', 'r', 's', 's', '_', 'r', 'i', 'n', 'g',
+    'o', 'c', 'c', 's', '\n', '\r', '\t', 'r', 's', 's', 'r', 'i', 'n', 'g',
+    'o', 'c', 'c', 's', '_', 'T', 'a', 'u', '_', 'S', 'e', 't', '_', 'P', 's',
+    'i', '_', 'T', 'y', 'p', 'e', '\n', '\n', '\r', 'I', 'l', 'l', 'e', 'g',
+    'a', 'l', ' ', 's', 't', 'r', 'i', 'n', 'g', ' ', 'f', 'o', 'r', ' ', 'p',
+    's', 'i', 't', 'y', 'p', 'e', '.', ' ', 'A', 'l', 'l', 'o', 'w', 'e', 'd',
+    ' ', 's', 't', 'r', 'i', 'n', 'g', 's', ':', '\n', '\r', '\t', 'n', 'e',
+    'w', 't', 'o', 'n', ':', ' ', ' ', ' ', ' ', ' ', 'N', 'e', 'w', 't', 'o',
+    'n', '-', 'R', 'a', 'p', 'h', 's', 'o', 'n', ' ', 'm', 'e', 't', 'h', 'o',
+    'd', '\n', '\r', '\t', 'n', 'e', 'w', 't', 'o', 'n', 'd', ':', ' ', ' ',
+    ' ', ' ', 'N', 'e', 'w', 't', 'o', 'n', '-', 'R', 'a', 'p', 'h', 's', 'o',
+    'n', ' ', 'w', 'i', 't', 'h', ' ', 'D', ' ', 'p', 'e', 'r', 't', 'u', 'r',
+    'b', 'a', 't', 'i', 'o', 'n', '.', '\n', '\r', '\t', 'n', 'e', 'w', 't',
+    'o', 'n', 'd', 'o', 'l', 'd', ':', ' ', 'N', 'e', 'w', 't', 'o', 'n', '-',
+    'R', 'a', 'p', 'h', 's', 'o', 'n', ' ', 'w', 'i', 't', 'h', ' ', 't', 'h',
+    'e', ' ', 'o', 'l', 'd', ' ', 'D', ' ', 'a', 'l', 'g', 'o', 'r', 'i', 't',
+    'h', 'm', '.', '\n', '\r', '\t', 'n', 'e', 'w', 't', 'o', 'n', 'd', 'p',
+    'h', 'i', ':', ' ', 'N', 'e', 'w', 't', 'o', 'n', '-', 'R', 'a', 'p', 'h',
+    's', 'o', 'n', ' ', 'w', 'i', 't', 'h', ' ', 'd', 'D', '/', 'd', 'p', 'h',
+    'i', ' ', 'p', 'e', 'r', 't', 'u', 'r', 'b', 'a', 't', 'i', 'o', 'n', '.',
+    '\n', '\r', '\t', 's', 'i', 'm', 'p', 'l', 'e', 'f', 'f', 't', ':', ' ',
+    ' ', 'A', ' ', 's', 'i', 'n', 'g', 'l', 'e', ' ', 'F', 'F', 'T', ' ', 'o',
+    'f', ' ', 't', 'h', 'e', ' ', 'e', 'n', 't', 'i', 'r', 'e', ' ', 'd', 'a',
+    't', 'a', ' ', 's', 'e', 't', '.', '\n', '\r', '\t', 'q', 'u', 'a', 'd',
+    'r', 'a', 't', 'i', 'c', ':', ' ', ' ', 'Q', 'u', 'a', 'd', 'r', 'a', 't',
+    'i', 'c', ' ', 'i', 'n', 't', 'e', 'r', 'p', 'o', 'l', 'a', 't', 'i', 'o',
+    'n', ' ', 'o', 'f', ' ', 'n', 'e', 'w', 't', 'o', 'n', '-', 'r', 'a', 'p',
+    'h', 's', 'o', 'n', '.', '\r', '\t', 'c', 'u', 'b', 'i', 'c', ':', ' ',
+    ' ', ' ', ' ', ' ', ' ', 'C', 'u', 'b', 'i', 'c', ' ', 'i', 'n', 't', 'e',
+    'r', 'p', 'o', 'l', 'a', 't', 'i', 'o', 'n', ' ', 'o', 'f', ' ', 'n', 'e',
+    'w', 't', 'o', 'n', '-', 'r', 'a', 'p', 'h', 's', 'o', 'n', '.', '\r',
+    '\t', 'q', 'u', 'a', 'r', 't', 'i', 'c', ':', ' ', ' ', ' ', ' ', 'Q',
+    'u', 'a', 'r', 't', 'i', 'c', ' ', 'i', 'n', 't', 'e', 'r', 'p', 'o', 'l',
+    'a', 't', 'i', 'o', 'n', ' ', 'o', 'f', ' ', 'n', 'e', 'w', 't', 'o', 'n',
+    '-', 'r', 'a', 'p', 'h', 's', 'o', 'n', '.', '\r', '\t', 'q', 'u', 'a',
+    'r', 't', 'i', 'c', 'd', ':', ' ', ' ', ' ', 'Q', 'u', 'a', 'r', 't', 'i',
+    'c', ' ', 'i', 'n', 't', 'e', 'r', 'p', 'o', 'l', 'a', 't', 'i', 'o', 'n',
+    ' ', 'w', 'i', 't', 'h', ' ', 'D', ' ', 'p', 'e', 'r', 't', 'u', 'r', 'b',
+    'a', 't', 'i', 'o', 'n', '.', '\r', '\t', 'e', 'l', 'l', 'i', 'p', 's',
+    'e', ':', ' ', ' ', ' ', ' ', 'N', 'e', 'w', 't', 'o', 'n', '-', 'R', 'a',
+    'p', 'h', 's', 'o', 'n', ' ', 'w', 'i', 't', 'h', ' ', 'e', 'l', 'l', 'i',
+    'p', 't', 'i', 'c', 'a', 'l', ' ', 'p', 'e', 'r', 't', 'u', 'r', 'b', 'a',
+    't', 'i', 'o', 'n', '.', '\n', '\r', '\t', 'f', 'r', 'e', 's', 'n', 'e',
+    'l', ':', ' ', ' ', ' ', ' ', 'Q', 'u', 'a', 'd', 'r', 'a', 't', 'i', 'c',
+    ' ', 'F', 'r', 'e', 's', 'n', 'e', 'l', ' ', 'a', 'p', 'p', 'r', 'o', 'x',
+    'i', 'm', 'a', 't', 'i', 'o', 'n', '\n', '\r', '\t', 'f', 'r', 'e', 's',
+    'n', 'e', 'l', 'n', ':', ' ', ' ', ' ', 'L', 'e', 'g', 'e', 'n', 'd', 'r',
+    'e', ' ', 'p', 'o', 'l', 'y', 'n', 'o', 'm', 'i', 'a', 'l', ' ', 'a', 'p',
+    'p', 'r', 'o', 'x', 'i', 'm', 'a', 't', 'i', 'o', 'n', ' ', 'w', 'i', 't',
+    'h', ' ', '1', '<', 'n', '<', '2', '5', '6', '\n', '\0'
+};
+
 void
 rssringoccs_Tau_Set_Psi_Type(const char *psitype, rssringoccs_TAUObj* tau)
 {
@@ -172,22 +243,7 @@ rssringoccs_Tau_Set_Psi_Type(const char *psitype, rssringoccs_TAUObj* tau)
         tau->order = 0;
         tau->psinum = rssringoccs_PsiType_None;
         tau->error_occurred = tmpl_True;
-        tau->error_message =
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_Tau_Set_Psi_Type\n\n"
-            "\rIllegal string for psitype. Allowed strings:\n"
-            "\r\tnewton:     Newton-Raphson method\n"
-            "\r\tnewtond:    Newton-Raphson with D perturbation.\n"
-            "\r\tnewtondold: Newton-Raphson with the old D algorithm.\n"
-            "\r\tnewtondphi: Newton-Raphson with dD/dphi perturbation.\n"
-            "\r\tsimplefft:  A single FFT of the entire data set.\n"
-            "\r\tquadratic:  Quadratic interpolation of newton-raphson."
-            "\r\tcubic:      Cubic interpolation of newton-raphson."
-            "\r\tquartic:    Quartic interpolation of newton-raphson."
-            "\r\tquarticd:   Quartic interpolation with D perturbation."
-            "\r\tellipse:    Newton-Raphson with elliptical perturbation.\n"
-            "\r\tfresnel:    Quadratic Fresnel approximation\n"
-            "\r\tfresneln:   Legendre polynomial approximation with 1<n<256\n";
+        tau->error_message = rssringoccs_psi_type_error_message;
     }
 
 FINISH:

@@ -84,19 +84,7 @@ void rssringoccs_Tau_Check_Displacement(rssringoccs_TAUObj * const tau)
     if (tau->error_occurred)
         return;
 
-    /*  Displacement should be finite. Treat infinity as an error.            */
-    if (tmpl_Double_Is_Inf(tau->dx_km))
-    {
-        tau->error_occurred = tmpl_True;
-        tau->error_message =
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_Tau_Check_Displacement\n\n"
-            "\rdx_km is infinite.\n\n";
-
-        return;
-    }
-
-    /*  Similarly the displacement should not be NaN (Not-a-Number). Check.   */
+    /*  The displacement should be real. Check for NaN (Not-a-Number).        */
     if (tmpl_Double_Is_NaN(tau->dx_km))
     {
         tau->error_occurred = tmpl_True;
@@ -104,6 +92,18 @@ void rssringoccs_Tau_Check_Displacement(rssringoccs_TAUObj * const tau)
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Check_Displacement\n\n"
             "\rdx_km is NaN (Not-a-Number).\n\n";
+
+        return;
+    }
+
+    /*  Displacement should also be finite. Treat infinity as an error.       */
+    if (tmpl_Double_Is_Inf(tau->dx_km))
+    {
+        tau->error_occurred = tmpl_True;
+        tau->error_message =
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\trssringoccs_Tau_Check_Displacement\n\n"
+            "\rdx_km is infinite.\n\n";
 
         return;
     }
@@ -123,10 +123,10 @@ void rssringoccs_Tau_Check_Displacement(rssringoccs_TAUObj * const tau)
     }
 
     /*  dx_km may be negative if this is an ingress occultation. To check if  *
-     *  res is a legal value, compare it with twice the absolute value of     *
-     *  dx_km. To avoid floating round-off error (which has happened to the   *
-     *  Cassini team, hence this edit) set the value to 1.99 instead of 2.0.  */
-    if (tau->res < 1.99 * tmpl_Double_Abs(tau->dx_km))
+     *  the resolution is a legal value, compare it with twice the magnitude  *
+     *  of dx_km. To avoid floating round-off error (which has happened to    *
+     *  the Cassini team, hence this edit) set the value to 1.99 times dx.    */
+    if (tau->resolution_km < 1.99 * tmpl_Double_Abs(tau->dx_km))
     {
         tau->error_occurred = tmpl_True;
         tau->error_message =

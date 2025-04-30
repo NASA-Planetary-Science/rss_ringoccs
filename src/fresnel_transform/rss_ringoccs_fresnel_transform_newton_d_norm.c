@@ -20,6 +20,32 @@
 #include <libtmpl/include/constants/tmpl_math_constants.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
+#include <stdio.h>
+
+
+static double
+my_psi(double k, double rho, double rho0,
+       double phi, double phi0, double D,
+       double rx, double ry, double rz)
+{
+    const double rho0x = rho0 * tmpl_Double_Cosd(phi0);
+    const double rho0y = rho0 * tmpl_Double_Sind(phi0);
+
+    const double rhox = rho * tmpl_Double_Cosd(phi);
+    const double rhoy = rho * tmpl_Double_Sind(phi);
+
+    const double dx0 = rho0x - rx;
+    const double dy0 = rho0y - ry;
+
+    const double dx = rhox - rx;
+    const double dy = rhoy - ry;
+
+    const double mag = tmpl_Double_Hypot3(dx, dy, rz);
+    const double dot = -(rz*rz + dx*dx0 + dy*dy0) / D;
+
+    return k * (mag + dot);
+}
+
 void
 rssringoccs_Fresnel_Transform_Newton_D_Norm(rssringoccs_TAUObj *tau,
                                             const double *w_func,
@@ -62,21 +88,23 @@ rssringoccs_Fresnel_Transform_Newton_D_Norm(rssringoccs_TAUObj *tau,
 
         D = tmpl_Double_Cyl_Fresnel_Observer_Distance_Deg(
             tau->rho_km_vals[offset],   /* Ring radius. */
-            phi,                        /* Stationary azimuth angle. */
-            tau->rx_km_vals[center],    /* Cassini x coordinate. */
-            tau->ry_km_vals[center],    /* Cassini y coordinate. */
-            tau->rz_km_vals[center]     /* Cassini z coordinate. */
+            tau->phi_deg_vals[offset],  /* Stationary azimuth angle. */
+            tau->rx_km_vals[offset],    /* Cassini x coordinate. */
+            tau->ry_km_vals[offset],    /* Cassini y coordinate. */
+            tau->rz_km_vals[offset]     /* Cassini z coordinate. */
         );
 
         /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
-        psi = tmpl_Double_Cyl_Fresnel_Psi_Deg(
+        psi = my_psi(
             tau->k_vals[center],        /* Wavenumber. */
             tau->rho_km_vals[center],   /* Dummy ring radius. */
             tau->rho_km_vals[offset],   /* Ring radius. */
             phi,                        /* Stationary azimuth angle. */
             tau->phi_deg_vals[offset],  /* Ring azimuth angle. */
-            tau->B_deg_vals[center],    /* Ring opening angle. */
-            D                           /* Observer distance. */
+            D,                          /* Observer distance. */
+            tau->rx_km_vals[offset],    /* Cassini x coordinate. */
+            tau->ry_km_vals[offset],    /* Cassini y coordinate. */
+            tau->rz_km_vals[offset]     /* Cassini z coordinate. */
         );
 
         exp_psi = tmpl_CDouble_Polar(w_func[m], -psi);

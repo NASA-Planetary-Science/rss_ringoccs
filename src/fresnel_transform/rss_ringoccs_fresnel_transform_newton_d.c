@@ -58,8 +58,8 @@ rssringoccs_Fresnel_Transform_Newton_D(rssringoccs_TAUObj *tau,
             tau->toler                  /* Maximum number of iterations. */
         );
 
-        D = tmpl_Double_Cyl_Fresnel_Observer_Distance(
-            tau->rho_km_vals[offset],   /* Ring radius. */
+        D = tmpl_Double_Cyl_Fresnel_Observer_Distance_Deg(
+            tau->rho_km_vals[center],   /* Ring radius. */
             phi,                        /* Stationary azimuth angle. */
             tau->rx_km_vals[center],    /* Cassini x coordinate. */
             tau->ry_km_vals[center],    /* Cassini y coordinate. */
@@ -67,7 +67,7 @@ rssringoccs_Fresnel_Transform_Newton_D(rssringoccs_TAUObj *tau,
         );
 
         /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
-        psi = tmpl_Double_Cyl_Fresnel_Psi(
+        psi = tmpl_Double_Cyl_Fresnel_Psi_Deg(
             tau->k_vals[center],        /* Wavenumber. */
             tau->rho_km_vals[center],   /* Dummy ring radius. */
             tau->rho_km_vals[offset],   /* Ring radius. */

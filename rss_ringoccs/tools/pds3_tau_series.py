@@ -6,11 +6,17 @@
 :Dependencies:
     #. numpy
     #. time
+    #. os
 """
 
 import numpy as np
 import time
+import os
+import platform
+import shutil
+
 from . import pds3_write_series_v2 as pds3
+from . import write_output_files
 
 def write_tau_series_data(tau_inst, out_file):
     """
@@ -95,7 +101,7 @@ def write_tau_series_data(tau_inst, out_file):
 
     return None
 
-def get_tau_series_info(rev_info, tau_inst, series_name, prof_dir):
+def get_tau_series_info(rev_info, tau_inst, series_name, prof_dir,history=None):
     """
     This returns the information needed to write a TAU label file.
 
@@ -174,7 +180,8 @@ def get_tau_series_info(rev_info, tau_inst, series_name, prof_dir):
     PRODUCT_TYPE = 'RING_PROFILE'
     PRODUCT_CREATION_TIME = current_time_ISOD
     PRODUCER_ID = '"TC2017"'
-    SOURCE_PRODUCT_ID = '"' + rsr_file.upper() + '"'
+    #SOURCE_PRODUCT_ID = '"' + rsr_file.upper() + '"'
+    SOURCE_PRODUCT_ID = rsr_file.upper() # this already has "  " I think
 
 
     INSTRUMENT_HOST_NAME = '"CASSINI ORBITER"'
@@ -210,10 +217,12 @@ def get_tau_series_info(rev_info, tau_inst, series_name, prof_dir):
 
     WAVELENGTH = wavelength_dict[band]
 
-    RADIAL_RESOLUTION = str(float(pds3.get_sampling_interval(
-        sampling_parameter_arr))*2.) + '   <km>'
-    RADIAL_SAMPLING_INTERVAL = pds3.get_sampling_interval(
-            sampling_parameter_arr) + '   <km>'
+    #RADIAL_RESOLUTION = str(float(pds3.get_sampling_interval(
+    #    sampling_parameter_arr))*2.) + '   <km>'
+    #RADIAL_SAMPLING_INTERVAL = pds3.get_sampling_interval(
+    #        sampling_parameter_arr) + '   <km>'
+    RADIAL_RESOLUTION = f'{float((pds3.get_sampling_interval(sampling_parameter_arr)))*2.:.4f}' + '   <km>'
+    RADIAL_SAMPLING_INTERVAL = f'{float(pds3.get_sampling_interval( sampling_parameter_arr)):.4f}' + '   <km>'
     MINIMUM_RING_RADIUS = str(round(min(tau_inst.rho_km_vals),4)) + '   <km>'
     MAXIMUM_RING_RADIUS = str(round(max(tau_inst.rho_km_vals),4)) + '   <km>'
     MINIMUM_RING_LONGITUDE = str(round(min(tau_inst.phi_rl_deg_vals)
@@ -430,18 +439,25 @@ def get_tau_series_info(rev_info, tau_inst, series_name, prof_dir):
 
 
             
+    HAS_HISTORY = False
     if hasattr(tau_inst, 'history'):
-        HIST_USER_NAME = tau_inst.history['User Name']
-        HIST_HOST_NAME = tau_inst.history['Host Name']
-        HIST_RUN_DATE = tau_inst.history['Run Date']
-        HIST_PYTHON_VERSION = tau_inst.history['Python Version']
-        HIST_OPERATING_SYSTEM = tau_inst.history['Operating System']
-        HIST_SOURCE_DIR = tau_inst.history['Source Directory']
-        HIST_SOURCE_FILE = tau_inst.history['Source File']
-        HIST_INPUT_VARIABLES = tau_inst.history['Positional Args']
-        HIST_INPUT_KEYWORDS = tau_inst.history['Keyword Args']
-        HIST_ADD_INFO = tau_inst.history['Additional Info']
-        HIST_RSSOCC_VERSION = tau_inst.history['rss_ringoccs Version']
+        this_history = tau_inst.history
+        HAS_HISTORY = True
+    elif history != None:
+        this_history = history
+        HAS_HISTORY = True
+    if HAS_HISTORY:
+        HIST_USER_NAME = this_history['User Name']
+        HIST_HOST_NAME = this_history['Host Name']
+        HIST_RUN_DATE = this_history['Run Date']
+        HIST_PYTHON_VERSION = this_history['Python Version']
+        HIST_OPERATING_SYSTEM = this_history['Operating System']
+        HIST_SOURCE_DIR = this_history['Source Directory']
+        HIST_SOURCE_FILE = this_history['Source File']
+        HIST_INPUT_VARIABLES = this_history['Positional Args']
+        HIST_INPUT_KEYWORDS = this_history['Keyword Args']
+        HIST_ADD_INFO = this_history['Additional Info']
+        HIST_RSSOCC_VERSION = this_history['rss_ringoccs Version']
         HIST_description = ('This is a record of the processing steps'
                         + sd + 'and inputs used to generate this file.')
 
@@ -731,7 +747,8 @@ def get_tau_series_info(rev_info, tau_inst, series_name, prof_dir):
     object_values.append(object_descriptions)
 
 
-    if hasattr(tau_inst, 'history'):
+#    if hasattr(tau_inst, 'history'):
+    if HAS_HISTORY:
         str_lbl = {
             'string_delimiter': sd,
             'alignment_column': alignment_column,
@@ -757,12 +774,91 @@ def get_tau_series_info(rev_info, tau_inst, series_name, prof_dir):
             'object_values': object_values,
             'history': ''
         }
+    #print('in pds3_tau_series: str_lbl:',str_lbl)
+    #print('in pds3_tau_series: HAS_HISTORY:',HAS_HISTORY)
     return str_lbl
 
-
-def write_tau_series(rev_info, tau_inst, title, outdir, prof_dir):
+def write_tau_files_from_inst(tau_inst,geo_inst,cal_inst,dlp_inst,tstart,tend,
+                   res_km,inversion_range,res_factor,psitype,wtype,program,
+                   local_path_to_output='../output/',verbose=True):
     """
-    This function writes a DLP series, which includes a data and label file.
+    write TAU *.LBL and *.TAB files, including version with psitype appended to root name
+    tau_inst,geo_inst,cal_inst,dlp_inst: required instances of tau, geo, cal, dlp
+    tstart,tend: SPM of start and end times
+    res_km: recontruction resolution
+    inversion_range: (rmin, rmax) radial range in km of reconstruction range of inversion
+    res_factor: reconstruction scale factor to match PDS convention
+    wtype: processing window type
+    program: program name
+    local_path_to_output: local path to rss_ringoccs/output/ directory
+
+    returns the path to the TAU TAB file created.
+    """
+
+    tau_history=set_tau_history_from_inst(tau_inst,geo_inst,cal_inst,dlp_inst,tstart,tend,
+                    res_km,inversion_range,res_factor,psitype,wtype,program)
+#    print('prior to call of write_output_files: tau_history',tau_history)
+# write the file - need to add keyword rev_info since missing from tau_inst.
+    rev_info = dlp_inst.rev_info
+    outfiles = write_output_files.write_output_files(tau_inst,rev_info=rev_info,
+            history=tau_history,local_path_to_output=local_path_to_output)
+
+# copy output files with psitype added
+    for suffix in ['.LBL','.TAB']:
+        sourcefile = outfiles[0]+suffix
+        destfile = outfiles[0]+'_'+psitype+suffix
+        shutil.copy(sourcefile,destfile)
+        if verbose:
+            print('Copied\n',os.path.basename(sourcefile),'\nto\n',os.path.basename(destfile))
+    return destfile # return the tau_file
+
+def set_tau_history_from_inst(tau_inst,geo_inst,cal_inst,dlp_inst,tstart,tend,
+                    res_km,inversion_range,res_factor,psitype,wtype,program,rssocc_version='1.3-beta'):
+    """
+    Construct tau_inst.history by harvesting information from geo, cal, dlp instances
+    """
+    dlp_label_file = dlp_inst.outfiles[0]+'.LBL' # get history from DLP LBL file
+    f = open(dlp_label_file, "r")
+    contents = f.read().splitlines() # strips \n at end of each line
+    f.close()
+    for i,line in enumerate(contents):
+        if line.startswith("rsr_inst history:"):
+            istart = i
+        if line.startswith('"'):
+            istop = i
+            break
+    prior_history = contents[istart:istop]
+    geo_file = geo_inst.outfiles[0]+'.TAB'
+    cal_file = cal_inst.outfiles[0]+'.TAB'
+    dlp_file = dlp_inst.outfiles[0]+'.TAB'
+
+    try:
+        user_name = os.getlogin()
+    except:
+        user_name = 'UNKNOWN'
+    try:
+        host_name = os.uname()[1]
+    except:
+        host_name = 'UNKNOWN'
+    run_date = time.ctime() + ' ' + time.tzname[0]
+    python_version = platform.python_version()
+    operating_system = os.uname()[0]+' '+platform.platform()
+    dtminutes = (tend-tstart)/60
+    sdtminutes = f'{dtminutes:0.2f} minutes'
+    tau_history = {'Positional Args':{'GEO file':geo_file,'CAL file':cal_file,'DLP file':dlp_file,\
+        'res_km':str(res_km)},'rss_ringoccs Version': rssocc_version,\
+        'Keyword Args':{'rng':str(inversion_range),'res_factor':str(res_factor),'psitype':psitype,'wtype':wtype},\
+        'Run Date':run_date,'Source File':program,'Source Directory':os.getcwd(),\
+        'User Name':user_name,'Host Name':host_name,'Python Version':python_version,\
+        'Operating System':operating_system,\
+        'Additional Info':{'Prior history':prior_history,\
+        'Diffraction reconstrution time':sdtminutes}}
+    return tau_history
+
+
+def write_tau_series(rev_info, tau_inst, title, outdir, prof_dir,history=None,add_suffix=None):
+    """
+    This function writes a TAU series, which includes a data and label file.
 
     Args:
         rev_info (dict): Dictionary with keys: rsr_file, band, year, doy, dsn
@@ -773,11 +869,16 @@ def write_tau_series(rev_info, tau_inst, title, outdir, prof_dir):
                            onto series_name
         outdir (str): Path to output directory
         prof_dir (str): Direction of ring occultation for this tau_inst
+    Keywords:
+	history (dict): tau_history
 
     """
-
-    outfile_tab = outdir + title.upper() + '.TAB'
-    outfile_lbl = outdir + title.upper() + '.LBL'
+    if add_suffix is not None:
+        add = add_suffix
+    else:
+        add = ''
+    outfile_tab = outdir + title.upper() + '.TAB'+add
+    outfile_lbl = outdir + title.upper() + '.LBL'+add
 
     series_name = '"' + outfile_tab.split('/')[-1] + '"'
 
@@ -786,9 +887,140 @@ def write_tau_series(rev_info, tau_inst, title, outdir, prof_dir):
     write_tau_series_data(tau_inst, outfile_tab)
 
     # Get label file information
-    str_lbl = get_tau_series_info(rev_info, tau_inst, series_name, prof_dir)
+    str_lbl = get_tau_series_info(rev_info, tau_inst, series_name, prof_dir,history=history)
 
     # Write label file
     pds3.pds3_write_series_lbl(str_lbl, outfile_lbl)
 
     return None
+
+def rsr_filename_from_dlp(dlp_file):
+    dlp_labelfile = dlp_file[0:dlp_file.index('TAB')]+'LBL'
+    found = False
+    if os.path.exists(dlp_labelfile):
+        match_string = 'SOURCE_PRODUCT_ID'
+        with open(dlp_labelfile,'r') as file:
+            for line in file:
+                if match_string in line:
+                    rsr_file = '"' + line.split('"')[1] + '"'
+                    found = True
+                    break
+    if not found:
+        rsr_file = '"Unknown"'
+    return rsr_file
+
+def planetary_occultation_flag_from_dlp(dlp_file):
+    dlp_labelfile = dlp_file[0:dlp_file.index('TAB')]+'LBL'
+    found = False
+    if os.path.exists(dlp_labelfile):
+        match_string = 'PLANETARY_OCCULTATION_FLAG'
+        with open(dlp_labelfile,'r') as file:
+            for line in file:
+                if match_string in line:
+                    planetary_occultation_flag = '"' + line.split('"')[1] + '"'
+                    found = True
+                    break
+    if not found:
+        planetary_occultation_flag = '"Unknown"'
+    return planetary_occultation_flag
+
+def ring_occultation_direction_from_dlp(dlp_file):
+    dlp_labelfile = dlp_file[0:dlp_file.index('TAB')]+'LBL'
+    found = False
+    if os.path.exists(dlp_labelfile):
+        match_string = 'RING_OCCULTATION_DIRECTION'
+        with open(dlp_labelfile,'r') as file:
+            for line in file:
+                if match_string in line:
+                    ring_occultation_direction = '"' + line.split('"')[1] + '"'
+                    found = True
+                    break
+    if not found:
+        ring_occultation_direction = '"Unknown"'
+    return ring_occultation_direction
+
+def ring_profile_direction_from_dlp(dlp_file):
+    dlp_labelfile = dlp_file[0:dlp_file.index('TAB')]+'LBL'
+    found = False
+    if os.path.exists(dlp_labelfile):
+        match_string = 'RING_PROFILE_DIRECTION'
+        with open(dlp_labelfile,'r') as file:
+            for line in file:
+                if match_string in line:
+                    ring_profile_direction = '"' + line.split('"')[1] + '"'
+                    found = True
+                    break
+    if not found:
+        ring_profile_direction = '"Unknown"'
+    return ring_profile_direction
+
+def get_rev_info_from_dlp(dlp_file):
+    basename = os.path.basename(dlp_file)
+    year = basename[4:8]
+    doy = basename[9:12]
+    dsn = basename[14:16]
+    band = '"' + basename[13] + '"'
+    occ_dir = basename[17]
+    rev_num = dlp_file[dlp_file.index('Rev')+3:dlp_file.index('Rev')+6]
+    
+    #print(year,doy,dsn,band,occ_dir,rev_num)
+    
+    rev_info = {
+          "rsr_file": rsr_filename_from_dlp(dlp_file)
+        , "band":band
+        , "year":year
+        , "doy":doy
+        , "dsn":dsn
+        , "occ_dir":ring_occultation_direction_from_dlp(dlp_file)
+        , "prof_dir":ring_profile_direction_from_dlp(dlp_file)
+        , "rev_num":rev_num
+        , "planetary_occ_flag": planetary_occultation_flag_from_dlp(dlp_file)}
+    return rev_info
+
+def set_tau_history_from_csv(tau_inst,geo_file,cal_file,dlp_file,tstart,tend,
+                    res_km,inversion_range,res_factor,psitype,wtype,program,rssocc_version='1.3-beta'):
+    """
+    Construct tau_inst.history by harvesting information from geo, cal, dlp instances
+    """
+    dlp_label_file = dlp_file[0:dlp_file.index('TAB')]+'LBL' # get history from DLP LBL file
+    f = open(dlp_label_file, "r")
+    contents = f.read().splitlines() # strips \n at end of each line
+    f.close()
+    for i,line in enumerate(contents):
+        if line.startswith("rsr_inst history:"):
+            istart = i
+        if line.startswith('"'):
+            istop = i
+            break
+    prior_history = contents[istart:istop]
+    try:
+        user_name = os.getlogin()
+    except:
+        user_name = 'UNKNOWN'
+    try:
+        host_name = os.uname()[1]
+    except:
+        host_name = 'UNKNOWN'
+    run_date = time.ctime() + ' ' + time.tzname[0]
+    python_version = platform.python_version()
+    operating_system = os.uname()[0]+' '+platform.platform()
+    dtminutes = (tend-tstart)/60
+    sdtminutes = f'{dtminutes:0.2f} minutes'
+    tau_history = {'Positional Args':{'GEO file':geo_file,'CAL file':cal_file,'DLP file':dlp_file,\
+        'res_km':str(res_km)},'rss_ringoccs Version': rssocc_version,\
+        'Keyword Args':{'rng':str(inversion_range),'res_factor':str(res_factor),'psitype':psitype,'wtype':wtype},\
+        'Run Date':run_date,'Source File':program,'Source Directory':os.getcwd(),\
+        'User Name':user_name,'Host Name':host_name,'Python Version':python_version,\
+        'Operating System':operating_system,\
+        'Additional Info':{'Prior history':prior_history,\
+        'Diffraction reconstrution time':sdtminutes}}
+    return tau_history
+
+def add_psitype_to_taufiles(outfiles,psitype,verbose=False):
+    for outfile in outfiles:
+        for suffix in ['.LBL','.TAB']:
+            oldfile = outfile + suffix
+            newfile = outfile + '_'+psitype+suffix
+            shutil.copyfile(oldfile,newfile)
+            if verbose:
+                print('Copied',os.path.basename(oldfile),'to',newfile)

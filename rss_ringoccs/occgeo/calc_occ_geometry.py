@@ -189,7 +189,9 @@ def calc_elevation_deg(et_vals, target, obs, kernels=None):
 
         # Compute Earth to observer position vector in J2000
         #   without light correction
-        abcorr = 'NONE'
+#        abcorr = 'NONE'
+# temporary change
+        abcorr = 'CN'
         planet = 'EARTH'
 
         ptarg2, ltime2 = spice.spkpos(obs, et, ref, abcorr, planet)
@@ -417,12 +419,13 @@ def calc_rho_vec_km(et_vals, planet, spacecraft, dsn, ref='J2000', kernels=None,
     name = planet_naif_radii
     dvals = new_radii
     spice.pdpool(name, dvals)
+    iau_planet = 'IAU_'+planet.upper()
     if ring_frame is None:
-        iau_planet = 'IAU_'+planet.upper()
         frame = iau_planet
     else:
         frame = ring_frame
 
+    print('frame',frame)
 
     for n in range(npts):
         et = et_vals[n]
@@ -441,13 +444,15 @@ def calc_rho_vec_km(et_vals, planet, spacecraft, dsn, ref='J2000', kernels=None,
 
         method = 'Ellipsoid'
         target = planet
-        #fixref = iau_planet
+        # fixref = iau_planet
         fixref = frame
+    #    fixref = iau_planet
         abcorr = 'CN'
         obsrvr = dsn
         #dref = 'J2000'
         dref = ref
         dvec = nhat_sc2dsn
+        #print('about to call sincpt...fixref=',fixref)
         spoint, trgepc, srfvec = spice.sincpt(method, target, et, fixref, abcorr, obsrvr, dref, dvec)
 
         t_ret_et_vals[n] = trgepc
@@ -537,7 +542,9 @@ def calc_sc_state(et_vals, spacecraft, planet, dsn, nhat_p, ref='J2000',
         #   with no light-time correction
         targ = spacecraft
         #ref = 'J2000'
-        abcorr = 'NONE'
+       ##### abcorr = 'NONE'
+# temporaryy
+        abcorr = 'CN'
         obs = planet
         starg0, ltime0 = spice.spkezr(targ, et, ref, abcorr, obs)
 

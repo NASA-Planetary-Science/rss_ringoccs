@@ -187,7 +187,28 @@ class Geometry(object):
         # Retrieve Saturn pole unit vector
 
         if nhat_p is None:
-            nhat_p = cog.get_pole(t_set_et_vals[0], planet)
+            if ring_frame == 'IAU_SATURN':
+                nhat_p = cog.get_pole(t_set_et_vals[0], planet)
+                print('nhat_p = ',nhat_p)
+            else:
+                UTC0 = str(rsr_inst.year)+'-'+f'{rsr_inst.doy:03d}T'
+                print("UTC0",UTC0)
+                ET0  = spice.str2et(UTC0)
+                ETmid  = ET0 + (spm_start + spm_end)/2.
+                UTCmid = spice.et2utc(ETmid,'C',0)
+                print("UTCmid",UTCmid)
+                mmRP2ref = spice.pxform(ring_frame,ref,ETmid)
+                zpole  = [0,0,1.]
+                nhat_planet = cog.get_pole(t_set_et_vals[0], planet)
+                nhat_p  = spice.mxv(mmRP2ref,zpole)
+                print('nhat_planet, nhat_ringplane:',nhat_planet,nhat_p)
+                inclination = spice.vsep(nhat_planet,nhat_p)
+                print('ring inclination (radians)',inclination)
+
+
+
+	
+
 
         # Calculate spacecraft state vector
         R_sc_km_vals, R_sc_dot_kms_vals = cog.calc_sc_state(t_set_et_vals,

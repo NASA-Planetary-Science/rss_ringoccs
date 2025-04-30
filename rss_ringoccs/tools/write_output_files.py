@@ -32,7 +32,8 @@ func_typ = {'GEO': write_geo_series,
         #'SPECTRO': write_spectro_image}
 
 def write_output_files(inst, add_text=None,rev_info=None,local_path_to_tables='../tables/',
-                       local_path_to_output = '../output/',verbose=False):
+                       add_suffix=None,
+                       history=None,local_path_to_output = '../output/',verbose=False):
     """
     Write output (geo, cal, dlp, tau) *.TAB and *.LBL files, depending on 
     instance given.
@@ -45,6 +46,7 @@ def write_output_files(inst, add_text=None,rev_info=None,local_path_to_tables='.
     Keyword Arguments
         :add_text (*str*): Additional string to be added to filename.
         :rev_info (*object*): use this rev_info instead of inst.rev_info
+        :history (*object*): use this history instead of inst.history
         
     """
     if verbose:
@@ -54,6 +56,10 @@ def write_output_files(inst, add_text=None,rev_info=None,local_path_to_tables='.
         add = add_text
     else:
         add = ''
+    if add_suffix is not None:
+        add_sfx = add_suffix
+    else:
+        add_sfx = None
 
     # Check for instance type and write that specific file
     if isinstance(inst, rss.occgeo.Geometry):
@@ -78,13 +84,13 @@ def write_output_files(inst, add_text=None,rev_info=None,local_path_to_tables='.
         rev_info = inst.rev_info
     if verbose:
         print('rev_info:',rev_info)
-    outfiles = construct_output_filename(rev_info, inst, filtyp,local_path_to_output=local_path_to_output)
+    outfiles = construct_output_filename(rev_info, inst, filtyp,history=history,local_path_to_output=local_path_to_output,add_suffix=add_sfx,verbose=verbose)
     if verbose:
         print('outfiles:',outfiles)
         print('add:',add)
     return outfiles
 
-def construct_filepath(rev_info, filtyp,local_path_to_output = '../output/',verbose=False):
+def construct_filepath(rev_info, filtyp,local_path_to_output = '../output/',add_suffix=None, verbose=False):
     """
     Construct output filepath 
 
@@ -100,13 +106,29 @@ def construct_filepath(rev_info, filtyp,local_path_to_output = '../output/',verb
     title_out = []
     outdir_out = []
 
-    pd1 = (rev_info['prof_dir'].split('"')[1])[0]
-    if pd1 == 'B':
-        pd1 = ['I','E']
-        pd2 = 'C'
+# this does not work universally. If profile direction is BOTH and occ direction
+# is INGRESS or EGRESS, this would add a C for Chord to the tau file
+# need to know if this is a chord occultation or not
+# Hard-wiring this based on rev number
+    #verbose = True # temporary
+    #print('rev_info:',rev_info)
+    if 'TAU' in filtyp:
+        pd1 = (rev_info['prof_dir'].split('"')[1])[0]
+        rev_number_int = int(rev_info['rev_num'])
+        if (rev_number_int >= 53) and (rev_number_int <= 89):
+            pd2 = 'C'
+        else:
+            pd2 = ''
     else:
-        pd1 = [pd1]
-        pd2 = ''
+        pd1 = (rev_info['prof_dir'].split('"')[1])[0]
+        #pd1 = (rev_info['occ_dir'].split('"')[1])[0]
+
+        if pd1 == 'B':
+            pd1 = ['I','E']
+            pd2 = 'C'
+        else:
+            pd1 = [pd1]
+            pd2 = ''
     if verbose:
         print('construct_filepath: pd1,pd2:',pd1,pd2)
 
@@ -122,6 +144,8 @@ def construct_filepath(rev_info, filtyp,local_path_to_output = '../output/',verb
     if verbose:
         print('construct_filepath: dsn,rev,local_path_to_output',dsn,rev,local_path_to_output)
 
+# 2025 Apr 23 - the following two entries are not in the standard Cassini rev_info
+# These may be Voyager Canberra and Perth
 
     if 'DIR' in rev_info:
         if 'DLP' in filtyp or 'TAU' in filtyp or 'Summary' in filtyp:
@@ -197,7 +221,7 @@ def construct_filepath(rev_info, filtyp,local_path_to_output = '../output/',verb
     return title_out, outdir_out
         
 
-def construct_output_filename(rev_info, inst, filtyp,local_path_to_output='../output/',verbose=False):
+def construct_output_filename(rev_info, inst, filtyp,history=None,add_suffix=None,local_path_to_output='../output/',verbose=False):
     """
     Construct output filepath 
 
@@ -222,8 +246,13 @@ def construct_output_filename(rev_info, inst, filtyp,local_path_to_output='../ou
         title = titles[n]
         outdir = outdirs[n]
         outfiles.append(outdir + title)
-        func_typ[filtyp[0:3]](rev_info, inst, title, outdir,
-                rev_info['prof_dir'])
+        filetype = filtyp[0:3]
+        if filetype != 'TAU':
+            func_typ[filetype](rev_info, inst, title, outdir,rev_info['prof_dir'])
+        else:
+            #print('write_output_files: history=',history)
+#            print('TP1:add_suffix',add_suffix)
+            func_typ['TAU'](rev_info, inst, title, outdir,rev_info['prof_dir'],history=history,add_suffix=add_suffix)
 
     return outfiles
 

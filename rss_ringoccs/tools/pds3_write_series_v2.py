@@ -429,7 +429,8 @@ def get_sampling_interval(sampling_param):
     else:
         print('WARNING (pds3_write_series_v2): Sampling interval is not constant!\n\tdr_start, dr_end = ', dr_start, dr_end, ' Using dr_start.')
 
-    return str(dr)
+#    return str(dr)
+    return f'{dr:0.4f}'
 
 def get_spm_ref_time(year, doy):
     return year + '-' + doy + 'T00:00:00'

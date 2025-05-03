@@ -163,7 +163,17 @@ class DiffractionLimitedProfile(object):
 
         ind2 = list(rho_km_desired).index(min(list(rho_km_desired),
                     key=lambda x:abs(x-profile_range[1])))
+#        print("TP1")
+#        print("min, max rho_km_desired:",np.min(rho_km_desired),np.max(rho_km_desired))
         rho_km_desired = rho_km_desired[ind1:ind2+1]
+#        print("after slicing: min, max rho_km_desired:",np.min(rho_km_desired),np.max(rho_km_desired))
+#        print("ind1,ind2=",ind1,ind2)
+
+# try another way
+        L = np.where((rho_km_desired >= profile_range[0]) & (rho_km_desired <= profile_range[1]))
+#        print('min,max L:',np.min(L),np.max(L))
+	
+
         IQ_c_desired = IQ_c_desired[ind1:ind2+1]
 
         # interpolate coef to convert rho to SPm

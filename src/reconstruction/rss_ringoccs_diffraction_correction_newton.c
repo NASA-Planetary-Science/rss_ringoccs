@@ -75,43 +75,23 @@ void rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj *tau)
     {
         if (tau->psinum == rssringoccs_PsiType_Newton)
             fresnel_transform = rssringoccs_Fresnel_Transform_Newton_Norm;
-        else if (tau->psinum == rssringoccs_PsiType_NewtonD)
-            fresnel_transform = rssringoccs_Fresnel_Transform_Newton_D_Norm;
-        else if (tau->psinum == rssringoccs_PsiType_NewtonDPhi)
-            fresnel_transform = rssringoccs_Fresnel_Transform_Newton_dD_dphi_Norm;
         else if (tau->psinum == rssringoccs_PsiType_NewtonPerturb)
             fresnel_transform = rssringoccs_Fresnel_Transform_Perturbed_Newton_Norm;
         else if (tau->psinum == rssringoccs_PsiType_NewtonElliptical)
             fresnel_transform = rssringoccs_Fresnel_Transform_Newton_Elliptical_Norm;
-        else if (tau->psinum == rssringoccs_PsiType_NewtonQuadratic)
-            fresnel_transform = rssringoccs_Fresnel_Transform_Newton_Quadratic_Norm;
-        else if (tau->psinum == rssringoccs_PsiType_NewtonQuartic)
-            fresnel_transform = rssringoccs_Fresnel_Transform_Newton_Quartic_Norm;
-        else if (tau->psinum == rssringoccs_PsiType_NewtonDQuartic)
-            fresnel_transform = rssringoccs_Fresnel_Transform_Newton_D_Quartic_Norm;
         else
-            fresnel_transform = rssringoccs_Fresnel_Transform_Newton_D_Old_Norm;
+            fresnel_transform = rssringoccs_Fresnel_Transform_Newton_Quartic_Norm;
     }
     else
     {
         if (tau->psinum == rssringoccs_PsiType_Newton)
             fresnel_transform = rssringoccs_Fresnel_Transform_Newton;
-        else if (tau->psinum == rssringoccs_PsiType_NewtonD)
-            fresnel_transform = rssringoccs_Fresnel_Transform_Newton_D;
-        else if (tau->psinum == rssringoccs_PsiType_NewtonDPhi)
-            fresnel_transform = rssringoccs_Fresnel_Transform_Newton_dD_dphi;
         else if (tau->psinum == rssringoccs_PsiType_NewtonPerturb)
             fresnel_transform = rssringoccs_Fresnel_Transform_Perturbed_Newton;
         else if (tau->psinum == rssringoccs_PsiType_NewtonElliptical)
             fresnel_transform = rssringoccs_Fresnel_Transform_Newton_Elliptical;
-        else if (tau->psinum == rssringoccs_PsiType_NewtonQuadratic)
-            fresnel_transform = rssringoccs_Fresnel_Transform_Newton_Quadratic;
-        else if (tau->psinum == rssringoccs_PsiType_NewtonQuartic)
-            fresnel_transform = rssringoccs_Fresnel_Transform_Newton_Quartic;
-        else if (tau->psinum == rssringoccs_PsiType_NewtonD)
-            fresnel_transform = rssringoccs_Fresnel_Transform_Newton_D_Quartic;
         else
-            fresnel_transform = rssringoccs_Fresnel_Transform_Newton_D_Old;
+            fresnel_transform = rssringoccs_Fresnel_Transform_Newton_Quartic;
     }
 
     /*  Allocate memory for these required variables.                         */

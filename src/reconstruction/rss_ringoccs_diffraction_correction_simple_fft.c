@@ -13,11 +13,11 @@
  *  Purpose:                                                                  *
  *      Compute the Fresnel transform using an FFT about the center of the    *
  *      data. This is the fastest method, but assumes the geometry about the  *
- *      midpoint is an accurate representation of the entire occultation.
+ *      midpoint is an accurate representation of the entire occultation.     *
  *  Arguments:                                                                *
  *      dlp (DLPObj *):                                                       *
  *          An instance of the DLPObj structure defined in                    *
- *          _diffraction_correction.h. This contains all of the necessary    *
+ *          _diffraction_correction.h. This contains all of the necessary     *
  *          data for diffraction correction, including the geometry of the    *
  *          occultation and actual power and phase data.                      *
  *  Output:                                                                   *
@@ -41,7 +41,7 @@ void rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau)
 
     /*  Some variables needed for reconstruction.                             */
     double w_init, psi, phi, window_func_x, factor, rcpr_F;
-    double w_thresh, arg_norm, D;
+    double w_thresh, arg_norm;
     tmpl_ComplexDouble *ker;
     tmpl_ComplexDouble *fft_ker;
     tmpl_ComplexDouble *fft_in;
@@ -97,36 +97,26 @@ void rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau)
 
         if (fabs(window_func_x) <= w_thresh)
         {
-            phi = tmpl_Double_Stationary_Cyl_Fresnel_Psi_D_Newton_Deg(
+            phi = tmpl_Double_Ideal_Stationary_Cyl_Fresnel_Phi_Newton_Deg(
                 tau->k_vals[center],
                 tau->rho_km_vals[center],
                 tau->rho_km_vals[current_point],
                 tau->phi_deg_vals[current_point],
                 tau->phi_deg_vals[current_point],
                 tau->B_deg_vals[center],
-                tau->rx_km_vals[center],
-                tau->ry_km_vals[center],
-                tau->rz_km_vals[center],
+                tau->D_km_vals[center],
                 tau->EPS,
                 tau->toler
             );
 
-            D = tmpl_Double_Cyl_Fresnel_Observer_Distance_Deg(
-                tau->rho_km_vals[current_point],   /* Ring radius. */
-                phi,                               /* Stationary azimuth. */
-                tau->rx_km_vals[center],           /* Cassini x coordinate. */
-                tau->ry_km_vals[center],           /* Cassini y coordinate. */
-                tau->rz_km_vals[center]            /* Cassini z coordinate. */
-            );
-
-            psi = -tmpl_Double_Cyl_Fresnel_Psi_Deg(
+            psi = -tmpl_Double_Ideal_Cyl_Fresnel_Psi_Deg(
                 tau->k_vals[center],
                 tau->rho_km_vals[center],
                 tau->rho_km_vals[current_point],
                 phi,
                 tau->phi_deg_vals[current_point],
                 tau->B_deg_vals[center],
-                D
+                tau->D_km_vals[center]
             );
 
             /*  If forward tranform is set, negate the Fresnel kernel.        */

@@ -58,7 +58,7 @@ rssringoccs_Fresnel_Transform_Newton_Norm(rssringoccs_TAUObj *tau,
         );
 
         /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
-        psi = tmpl_Double_Cyl_Fresnel_Psi_Deg(
+        psi = tmpl_Double_Ideal_Cyl_Fresnel_Psi_Deg(
             tau->k_vals[center],        /* Wavenumber. */
             tau->rho_km_vals[center],   /* Dummy radius. */
             tau->rho_km_vals[offset],   /* Ring radius. */

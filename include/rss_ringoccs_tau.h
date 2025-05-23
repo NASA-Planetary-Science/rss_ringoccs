@@ -61,27 +61,6 @@ enum rssringoccs_PsiType {
     rssringoccs_PsiType_NewtonSextic,
     rssringoccs_PsiType_NewtonOctic,
 
-    /*  Newton-Raphson method with D correction, and interpolations.          */
-    rssringoccs_PsiType_NewtonD,
-    rssringoccs_PsiType_NewtonDQuadratic,
-    rssringoccs_PsiType_NewtonDQuartic,
-    rssringoccs_PsiType_NewtonDSextic,
-    rssringoccs_PsiType_NewtonDOctic,
-
-    /*  Newton-Raphson method with the old D correction, and interpolations.  */
-    rssringoccs_PsiType_NewtonDOld,
-    rssringoccs_PsiType_NewtonDOldQuadratic,
-    rssringoccs_PsiType_NewtonDOldQuartic,
-    rssringoccs_PsiType_NewtonDOldSextic,
-    rssringoccs_PsiType_NewtonDOldOctic,
-
-    /*  Newton-Raphson with dD / dphi correction, and interpolations.         */
-    rssringoccs_PsiType_NewtonDPhi,
-    rssringoccs_PsiType_NewtonDPhiQuadratic,
-    rssringoccs_PsiType_NewtonDPhiQuartic,
-    rssringoccs_PsiType_NewtonDPhiSextic,
-    rssringoccs_PsiType_NewtonDPhiOctic,
-
     /*  Newton-Raphson with arbitrary quartic perturbation polynomial.        */
     rssringoccs_PsiType_NewtonPerturb,
 

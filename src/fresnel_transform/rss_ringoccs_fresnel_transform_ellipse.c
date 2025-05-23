@@ -80,7 +80,7 @@ rssringoccs_Fresnel_Transform_Newton_Elliptical(rssringoccs_TAUObj *tau,
         rho = semi_major * ecc_factor / ecc_cos_factor;
 
         /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
-        psi = tmpl_Double_Cyl_Fresnel_Psi(
+        psi = tmpl_Double_Ideal_Cyl_Fresnel_Psi_Deg(
             tau->k_vals[center],
             rho,
             tau->rho_km_vals[offset],

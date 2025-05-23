@@ -45,7 +45,7 @@ rssringoccs_Fresnel_Transform_Newton_Norm(rssringoccs_TAUObj *tau,
     for (m = 0; m<n_pts; ++m)
     {
         /*  Calculate the stationary value of psi with respect to phi.        */
-        phi = tmpl_Double_Stationary_Cyl_Fresnel_Psi_Newton_Deg(
+        phi = tmpl_Double_Ideal_Stationary_Cyl_Fresnel_Phi_Newton_Deg(
             tau->k_vals[center],        /* Wavenumber. */
             tau->rho_km_vals[center],   /* Dummy radius. */
             tau->rho_km_vals[offset],   /* Ring radius. */

@@ -101,7 +101,7 @@ rssringoccs_Fresnel_Transform_Perturbed_Newton(rssringoccs_TAUObj *tau,
             tau->D_km_vals[center];
 
         /*  Calculate the stationary value of psi with respect to phi.        */
-        phi = tmpl_Double_Stationary_Cyl_Fresnel_Psi_Newton(
+        phi = tmpl_Double_Ideal_Stationary_Cyl_Fresnel_Phi_Newton_Deg(
             tau->k_vals[center],        /* Wavenumber. */
             tau->rho_km_vals[center],   /* Dummy radius. */
             tau->rho_km_vals[offset],   /* Ring radius. */
@@ -114,7 +114,7 @@ rssringoccs_Fresnel_Transform_Perturbed_Newton(rssringoccs_TAUObj *tau,
         );
 
         /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
-        psi = tmpl_Double_Cyl_Fresnel_Psi(
+        psi = tmpl_Double_Ideal_Cyl_Fresnel_Psi_Deg(
             tau->k_vals[center],        /* Wavenumber. */
             tau->rho_km_vals[center],   /* Dummy radius. */
             tau->rho_km_vals[offset],   /* Ring radius. */

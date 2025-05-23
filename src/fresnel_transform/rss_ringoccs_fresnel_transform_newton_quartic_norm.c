@@ -59,7 +59,7 @@ rssringoccs_Fresnel_Transform_Newton_Quartic_Norm(
 
     for (n = zero; n < four; ++n)
     {
-        phi = tmpl_Double_Stationary_Cyl_Fresnel_Psi_Newton_Deg(
+        phi = tmpl_Double_Ideal_Stationary_Cyl_Fresnel_Phi_Newton_Deg(
             tau->k_vals[center],        /*  Wavenumber.                       */
             tau->rho_km_vals[center],   /*  Ring radius.                      */
             rho[n],                     /*  Dummy radius.                     */
@@ -71,7 +71,7 @@ rssringoccs_Fresnel_Transform_Newton_Quartic_Norm(
             tau->toler                  /*  Maximum number of iterations.     */
         );
 
-        psi_n[n] = tmpl_Double_Cyl_Fresnel_Psi_Deg(
+        psi_n[n] = tmpl_Double_Ideal_Cyl_Fresnel_Psi_Deg(
             tau->k_vals[center],        /*  Wavenumber.                       */
             tau->rho_km_vals[center],   /*  Ring radius.                      */
             rho[n],                     /*  Dummy radius.                     */

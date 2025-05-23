@@ -54,7 +54,7 @@ rssringoccs_Fresnel_Transform_Newton_Quartic(rssringoccs_TAUObj *tau,
      /*  Use a Riemann Sum to approximate the Fresnel Inverse Integral.       */
     for (i = 0; i < 4; ++i)
     {
-        phi = tmpl_Double_Stationary_Cyl_Fresnel_Psi_Newton(
+        phi = tmpl_Double_Ideal_Stationary_Cyl_Fresnel_Phi_Newton_Deg(
             tau->k_vals[center],                /* Wavenumber. */
             tau->rho_km_vals[center],           /* Dummy radius. */
             tau->rho_km_vals[offset + ind[i]],  /* Ring radius. */
@@ -66,7 +66,7 @@ rssringoccs_Fresnel_Transform_Newton_Quartic(rssringoccs_TAUObj *tau,
             tau->toler                          /* Max number of iterations. */
         );
 
-        psi_n[i] = tmpl_Double_Cyl_Fresnel_Psi(
+        psi_n[i] = tmpl_Double_Ideal_Cyl_Fresnel_Psi_Deg(
             tau->k_vals[center],                /* Wavenumber. */
             tau->rho_km_vals[center],           /* Dummy radius. */
             tau->rho_km_vals[offset + ind[i]],  /* Ring radius. */

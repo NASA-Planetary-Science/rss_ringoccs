@@ -22,30 +22,6 @@
 
 #include <stdio.h>
 
-
-static double
-my_psi(double k, double rho, double rho0,
-       double phi, double phi0, double D,
-       double rx, double ry, double rz)
-{
-    const double rho0x = rho0 * tmpl_Double_Cosd(phi0);
-    const double rho0y = rho0 * tmpl_Double_Sind(phi0);
-
-    const double rhox = rho * tmpl_Double_Cosd(phi);
-    const double rhoy = rho * tmpl_Double_Sind(phi);
-
-    const double dx0 = rho0x - rx;
-    const double dy0 = rho0y - ry;
-
-    const double dx = rhox - rx;
-    const double dy = rhoy - ry;
-
-    const double mag = tmpl_Double_Hypot3(dx, dy, rz);
-    const double dot = -(rz*rz + dx*dx0 + dy*dy0) / D;
-
-    return k * (mag + dot);
-}
-
 void
 rssringoccs_Fresnel_Transform_Newton_D_Norm(rssringoccs_TAUObj *tau,
                                             const double *w_func,
@@ -71,6 +47,17 @@ rssringoccs_Fresnel_Transform_Newton_D_Norm(rssringoccs_TAUObj *tau,
     /*  Use a Riemann Sum to approximate the Fresnel Inverse Integral.        */
     for (m = 0; m<n_pts; ++m)
     {
+        const tmpl_TwoVectorDouble rho0 = tmpl_2DDouble_Polard(
+            tau->rho_km_vals[offset],
+            tau->phi_deg_vals[offset]
+        );
+
+        const tmpl_ThreeVectorDouble R = tmpl_3DDouble_Rect(
+            tau->rx_km_vals[center],
+            tau->ry_km_vals[center],
+            tau->rz_km_vals[centsr]
+        );
+
         /*  Calculate the stationary value of psi with respect to phi.        */
         phi = tmpl_Double_Stationary_Cyl_Fresnel_Psi_D_Newton_Deg(
             tau->k_vals[center],        /* Wavenumber. */
@@ -95,7 +82,7 @@ rssringoccs_Fresnel_Transform_Newton_D_Norm(rssringoccs_TAUObj *tau,
         );
 
         /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
-        psi = my_psi(
+        psi = tmpl_Double_Cyl_Fresnel_Psi_Deg(
             tau->k_vals[center],        /* Wavenumber. */
             tau->rho_km_vals[center],   /* Dummy ring radius. */
             tau->rho_km_vals[offset],   /* Ring radius. */

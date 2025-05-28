@@ -56,14 +56,12 @@ rssringoccs_Fresnel_Transform_Newton(
          *  ring intercept point. Instead we compute using the full Fresnel   *
          *  kernel. To do this requires rho, rho0, and R as vectors in their  *
          *  Cartesian coordinates. Compute this.                              */
-        const tmpl_TwoVectorDouble rho0 = tmpl_2DDouble_Polar(
-            tau->rho_km_vals[offset],
-            tau->phi_deg_vals[offset] * tmpl_Double_Deg_To_Rad
+        const tmpl_TwoVectorDouble rho0 = tmpl_2DDouble_Polard(
+            tau->rho_km_vals[offset], tau->phi_deg_vals[offset]
         );
 
-        const tmpl_TwoVectorDouble rho = tmpl_2DDouble_Polar(
-            tau->rho_km_vals[center],
-            tau->phi_deg_vals[offset] * tmpl_Double_Deg_To_Rad
+        const tmpl_TwoVectorDouble rho = tmpl_2DDouble_Polard(
+            tau->rho_km_vals[center], tau->phi_deg_vals[offset]
         );
 
         const tmpl_ThreeVectorDouble R = tmpl_3DDouble_Rect(

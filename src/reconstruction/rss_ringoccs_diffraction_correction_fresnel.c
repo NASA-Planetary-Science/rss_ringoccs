@@ -194,7 +194,7 @@
 static const rssringoccs_FresnelTransform
 rssringoccs_fresnel_transform_list[2] = {
     rssringoccs_Fresnel_Transform,
-    rssringoccs_Fresnel_Transform_Norm
+    rssringoccs_Fresnel_Transform_Normalized
 };
 
 /*  Performs the Fresnel transform on the data contained in tau.              */

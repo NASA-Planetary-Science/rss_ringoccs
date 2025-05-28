@@ -1,104 +1,121 @@
-/******************************************************************************
- *                                  LICENSE                                   *
- ******************************************************************************
- *  This file is part of rss_ringoccs.                                        *
- *                                                                            *
- *  rss_ringoccs is free software: you can redistribute it and/or modify      *
- *  it under the terms of the GNU General Public License as published by      *
- *  the Free Software Foundation, either version 3 of the License, or         *
- *  (at your option) any later version.                                       *
- *                                                                            *
- *  rss_ringoccs is distributed in the hope that it will be useful,           *
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of            *
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
- *  GNU General Public License for more details.                              *
- *                                                                            *
- *  You should have received a copy of the GNU General Public License         *
- *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
- ******************************************************************************/
-#include <libtmpl/include/tmpl.h>
+#include <libtmpl/include/tmpl_config.h>
+#include <libtmpl/include/tmpl_complex.h>
+#include <libtmpl/include/constants/tmpl_math_constants.h>
+#include <libtmpl/include/tmpl_cyl_fresnel_optics.h>
+#include <libtmpl/include/tmpl_vec2.h>
+#include <libtmpl/include/tmpl_vec3.h>
+#include <libtmpl/include/compat/tmpl_cast.h>
+#include <libtmpl/include/compat/tmpl_free.h>
+
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
+#include <stddef.h>
+
+#define ONE_THIRD (3.333333333333333333333333333333E-01)
+#define FOUR_THIRDS (1.333333333333333333333333333333E+00)
+#define SIXTEEN_THIRDS (5.333333333333333333333333333333E+00)
+#define SIXTY_FOUR_THIRDS (2.133333333333333333333333333333E+01)
 
 void
-rssringoccs_Fresnel_Transform_Newton_Quartic(rssringoccs_TAUObj *tau,
-                                             const double *w_func,
-                                             size_t n_pts,
-                                             size_t center)
+rssringoccs_Fresnel_Transform_Newton_Quartic(
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const double * TMPL_RESTRICT const w_func,
+    size_t n_pts,
+    size_t center
+)
 {
-    /*  Declare all necessary variables. i and j are used for indexing.       */
-    size_t i, ind[4], offset;
+    /*  Variable for indexing.                                                */
+    size_t n, ind[4];
 
-    /*  The Fresnel kernel and ring azimuth angle.                            */
-    double C[4], factor, rcpr_w, rcpr_w_sq, psi_n[4], x;
-    double psi, phi;
-    double psi_half_mean, psi_half_diff;
-    double psi_full_mean, psi_full_diff;
-    tmpl_ComplexDouble exp_psi, integrand;
+    double x, xsq, width, rcpr_width;
+    double psi_odd, psi_even;
+    double psi_left, psi_right;
+    tmpl_ComplexDouble w_exp_minus_psi_left, w_exp_minus_psi_right;
+    tmpl_ComplexDouble T_left, T_right, integrand;
 
-    rcpr_w = 1.0 / tau->w_km_vals[center];
-    rcpr_w_sq = rcpr_w * rcpr_w;
-    factor = 0.5 * tau->dx_km / tau->F_km_vals[center];
+    /*  Cast constants to size_t to avoid implicit conversion.                */
+    const size_t zero = TMPL_CAST(0, size_t);
+    const size_t one = TMPL_CAST(1, size_t);
+    const size_t four = TMPL_CAST(4, size_t);
 
-    ind[0] = 0;
-    ind[1] = (n_pts-1)/4;
-    ind[2] = 3*(n_pts-1)/4;
-    ind[3] = n_pts - 1;
+    double coeffs[4];
+    double psi[4], half_diff, full_diff, half_mean, full_mean;
 
-    /*  Initialize T_out and norm to zero so we can loop over later.          */
-    tau->T_out[center] = tmpl_CDouble_Zero;
+    const size_t half_n_pts = (n_pts - one) >> 1;
+    const size_t shift = half_n_pts >> 1;
+    const size_t l_ind = center - half_n_pts;
+    const size_t r_ind = center + half_n_pts;
 
-    /*  Symmetry is lost without the Legendre polynomials, or Fresnel         *
-     *  quadratic. Must compute everything from -W/2 to W/2.                  */
-    offset = center - (n_pts - 1UL) / 2UL;
+    const double scale = 0.5 * tau->dx_km / tau->F_km_vals[center];
 
-     /*  Use a Riemann Sum to approximate the Fresnel Inverse Integral.       */
-    for (i = 0; i < 4; ++i)
+    ind[0] = center - 2 * shift;
+    ind[1] = center - shift;
+    ind[2] = center + shift;
+    ind[3] = center + 2 * shift;
+
+    width = tau->rho_km_vals[ind[3]] - tau->rho_km_vals[ind[0]];
+    rcpr_width = 1.0 / width;
+
+    tau->T_out[center] = tau->T_in[center];
+
+    for (n = zero; n < four; ++n)
     {
-        phi = tmpl_Double_Ideal_Stationary_Cyl_Fresnel_Phi_Newton_Deg(
-            tau->k_vals[center],                /* Wavenumber. */
-            tau->rho_km_vals[center],           /* Dummy radius. */
-            tau->rho_km_vals[offset + ind[i]],  /* Ring radius. */
-            tau->phi_deg_vals[offset + ind[i]], /* Dummy azimuthal angle. */
-            tau->phi_deg_vals[offset + ind[i]], /* Ring azimuthal angle. */
-            tau->B_deg_vals[center],            /* Ring opening angle. */
-            tau->D_km_vals[center],             /* Observer distance. */
-            tau->EPS,                           /* Allowed error. */
-            tau->toler                          /* Max number of iterations. */
+        const tmpl_TwoVectorDouble rho0 = tmpl_2DDouble_Polard(
+            tau->rho_km_vals[ind[n]], tau->phi_deg_vals[ind[n]]
         );
 
-        psi_n[i] = tmpl_Double_Ideal_Cyl_Fresnel_Psi_Deg(
-            tau->k_vals[center],                /* Wavenumber. */
-            tau->rho_km_vals[center],           /* Dummy radius. */
-            tau->rho_km_vals[offset + ind[i]],  /* Ring radius. */
-            phi,                                /* Stationary azimuth. */
-            tau->phi_deg_vals[offset + ind[i]], /* Ring azimuth. */
-            tau->B_deg_vals[center],            /* Ring opening. */
-            tau->D_km_vals[center]              /* Observer distance. */
+        const tmpl_TwoVectorDouble rho = tmpl_2DDouble_Polard(
+            tau->rho_km_vals[center], tau->phi_deg_vals[ind[n]]
+        );
+
+        const tmpl_ThreeVectorDouble R = tmpl_3DDouble_Rect(
+            tau->rx_km_vals[ind[n]],
+            tau->ry_km_vals[ind[n]],
+            tau->rz_km_vals[ind[n]]
+        );
+
+        psi[n] = tmpl_Double_Stationary_Cyl_Fresnel_Psi(
+            tau->k_vals[center], &rho, &rho0, &R, tau->EPS, tau->toler
         );
     }
 
-    psi_half_mean = (psi_n[1] + psi_n[2]) * 0.5;
-    psi_full_mean = (psi_n[0] + psi_n[3]) * 0.5;
-    psi_half_diff = psi_n[1] - psi_n[2];
-    psi_full_diff = psi_n[0] - psi_n[3];
+    half_mean = (psi[1] + psi[2]) * 0.5;
+    full_mean = (psi[0] + psi[3]) * 0.5;
+    half_diff = psi[1] - psi[2];
+    full_diff = psi[0] - psi[3];
 
-    C[0] = (8*psi_half_diff - psi_full_diff) * rcpr_w * 0.333333333333333333333;
-    C[1] = (16*psi_half_mean-psi_full_mean)*rcpr_w_sq*1.33333333333333333333333;
-    C[2] = (psi_full_diff-2.0*psi_half_diff)*rcpr_w_sq*rcpr_w*5.333333333333333;
-    C[3] = (psi_full_mean-4.0*psi_half_mean)*rcpr_w_sq*rcpr_w_sq*21.33333333333;
+    coeffs[0] = (8.0 * half_diff - full_diff) * ONE_THIRD;
+    coeffs[1] = (16.0 * half_mean - full_mean) * FOUR_THIRDS;
+    coeffs[2] = (full_diff - 2.0 * half_diff) * SIXTEEN_THIRDS;
+    coeffs[3] = (full_mean - 4.0 * half_mean) * SIXTY_FOUR_THIRDS;
 
-    for (i = 0; i<n_pts; ++i)
+    for (n = zero; n < half_n_pts; ++n)
     {
-        x = tau->rho_km_vals[center] - tau->rho_km_vals[offset];
-        psi = x*(C[0] + x*(C[1] + x*(C[2] + x*C[3])));
+        x = (tau->rho_km_vals[center] - tau->rho_km_vals[l_ind + n])*rcpr_width;
+        xsq = x * x;
 
-        exp_psi = tmpl_CDouble_Polar(w_func[i], -psi);
-        integrand = tmpl_CDouble_Multiply(exp_psi, tau->T_in[offset]);
+        psi_odd = x * (coeffs[0] + xsq * coeffs[2]);
+        psi_even = xsq * (coeffs[1] + xsq * coeffs[3]);
+        psi_left = psi_even + psi_odd;
+        psi_right = psi_even - psi_odd;
+
+        w_exp_minus_psi_left = tmpl_CDouble_Polar(w_func[n], -psi_left);
+        w_exp_minus_psi_right = tmpl_CDouble_Polar(w_func[n], -psi_right);
+
+        T_left = tau->T_in[l_ind + n];
+        T_right = tau->T_in[r_ind - n];
+
+        integrand = tmpl_CDouble_Multiply(w_exp_minus_psi_left, T_left);
         tmpl_CDouble_AddTo(&tau->T_out[center], &integrand);
-        offset += 1;
+
+        integrand = tmpl_CDouble_Multiply(w_exp_minus_psi_right, T_right);
+        tmpl_CDouble_AddTo(&tau->T_out[center], &integrand);
     }
 
-    /*  Multiply result by the coefficient found in the Fresnel inverse.      */
-    integrand = tmpl_CDouble_Rect(factor, factor);
+    integrand = tmpl_CDouble_Rect(scale, scale);
     tau->T_out[center] = tmpl_CDouble_Multiply(integrand, tau->T_out[center]);
 }
+
+#undef ONE_THIRD
+#undef FOUR_THIRDS
+#undef SIXTEEN_THIRDS
+#undef SIXTY_FOUR_THIRDS

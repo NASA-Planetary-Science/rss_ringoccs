@@ -220,11 +220,17 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj * const tau)
     /*  The user has two options for transforms. We'll set this later.        */
     rssringoccs_FresnelTransform fresnel_transform;
 
-    /*  Check that the input is not NULL before atttempting to access it.     */
+    /*  Check that the input is not NULL before attempting to access it.      */
     if (!tau)
         return;
 
-    /*  If an error occurred before this function was called, abort.          */
+    /*  Check that the pointers to the data are not NULL.                     */
+    rssringoccs_Tau_Check_Core_Data(tau);
+
+    /*  Check to ensure you have enough data to process.                      */
+    rssringoccs_Tau_Check_Data_Range(tau);
+
+    /*  The previous functions set the error_occurred Boolean on error. Check.*/
     if (tau->error_occurred)
         return;
 
@@ -238,16 +244,6 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj * const tau)
         factor = -tmpl_Double_Pi_By_Two;
     else
         factor = +tmpl_Double_Pi_By_Two;
-
-    /*  Check that the pointers to the data are not NULL.                     */
-    rssringoccs_Tau_Check_Core_Data(tau);
-
-    /*  Check to ensure you have enough data to process.                      */
-    rssringoccs_Tau_Check_Data_Range(tau);
-
-    /*  The previous functions set the error_occurred Boolean on error. Check.*/
-    if (tau->error_occurred)
-        return;
 
     /*  Select the desired transform. For the Fresnel method there are only   *
      *  two options: with or without normalization. tau contains a Boolean,   *
@@ -287,11 +283,11 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj * const tau)
 
     /*  Initialize the window array and the independent variable.             */
     rssringoccs_Tau_Reset_Window(
-        tau,                    /*  Tau object containing the window function.*/
-        x_arr,                  /*  The independent variable, r[n]-r[center]. */
-        w_func,                 /*  The window array as a function of x_arr.  */
-        n_pts,                  /*  Number of points in the x_arr array.      */
-        center                  /*  Index for the center of the window.       */
+        tau,        /*  Tau object containing the window function.            */
+        x_arr,      /*  The independent variable, r[n] - r[center].           */
+        w_func,     /*  The window array as a function of x_arr.              */
+        n_pts,      /*  Number of points in the x_arr array.                  */
+        center      /*  Index for the center of the window.                   */
     );
 
     /*  We have computed the window function and the independent variable x,  *
@@ -310,7 +306,7 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj * const tau)
             tau, &x_arr, &w_func, w_init, two_dx, center
         );
 
-        /*  If we did need a resize, there are a few things that could have   *
+        /*  If we did need to resize, there are a few things that could have  *
          *  gone wrong with memory reallocation, and a few things we'll need  *
          *  to reset if all of the memory management succeeded.               */
         if (resize)
@@ -350,3 +346,4 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj * const tau)
     TMPL_FREE(x_arr);
     TMPL_FREE(w_func);
 }
+/*  End of rssringoccs_Diffraction_Correction_Fresnel.                        */

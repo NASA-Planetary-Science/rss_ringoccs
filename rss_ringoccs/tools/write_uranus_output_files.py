@@ -44,7 +44,7 @@ def write_uranus_output_files(inst):
         filtyp = 'GEO'
 
     elif isinstance(inst, rss.DiffractionCorrection):
-        filtyp = 'TAU_' + str(int(inst.input_res * 1000)).zfill(5) + 'M'
+        filtyp = 'TAU_' + str(int(inst.input_resolution_km * 1000)).zfill(5) + 'M'
     else:
         raise TypeError('invalid instance for write_output_files.')
 

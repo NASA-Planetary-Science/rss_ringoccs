@@ -45,7 +45,7 @@ def write_vgr1_saturn_output_files(inst):
 
 
     elif isinstance(inst, rss.diffrec.DiffractionCorrection):
-        filtyp = 'TAU_' + str(int(inst.input_res * 1000)).zfill(5) + 'M'
+        filtyp = 'TAU_' + str(int(inst.input_resolution_km * 1000)).zfill(5) + 'M'
     else:
         print('invalid instance!')
     print('Got filtyp=',filtyp)

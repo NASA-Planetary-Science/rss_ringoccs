@@ -743,7 +743,7 @@ def plot_tau(pdf, tau_inst):
     rho_km = tau_inst.rho_km_vals
     tau = tau_inst.tau_vals
     tau_thresh = tau_inst.tau_threshold_vals
-    res_km = str(round(tau_inst.input_res,3))
+    res_km = str(round(tau_inst.input_resolution_km,3))
     band = str(tau_inst.rev_info['band'].split('"')[1])
     if band=='K':
         band='Ka'
@@ -802,7 +802,7 @@ def plot_phase(pdf, tau_inst):
     Returns
         :pdf (*obj*): Input pdf with an additional page for plot.
     """
-    res_km = str(round(tau_inst.input_res,3))
+    res_km = str(round(tau_inst.input_resolution_km,3))
     band = str(tau_inst.rev_info['band'].split('"')[1])
     if band=='K':
         band='Ka'
@@ -880,7 +880,7 @@ def plot_summary_doc_v2(geo_inst, cal_inst, dlp_inst, tau_inst):
     geofile = geo_inst.outfiles[0].split('/')[-1] + '.TAB'
     calfile = cal_inst.outfiles[0].split('/')[-1] + '.TAB'
     taufile = tau_inst.outfiles[0].split('/')[-1] + '.TAB'
-    latex_summary_doc(outfig, tau_inst.input_res, geofile, calfile, taufile)
+    latex_summary_doc(outfig, tau_inst.input_resolution_km, geofile, calfile, taufile)
     print('\tSummary PDF saved to: ' + outfig)
 
 

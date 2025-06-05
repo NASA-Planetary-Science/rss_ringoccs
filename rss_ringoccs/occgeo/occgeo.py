@@ -187,7 +187,7 @@ class Geometry(object):
         # Retrieve Saturn pole unit vector
 
         if nhat_p is None:
-            if ring_frame == 'IAU_SATURN':
+            if ring_frame == 'IAU_SATURN' or ring_frame == None:
                 nhat_p = cog.get_pole(t_set_et_vals[0], planet)
                 print('nhat_p = ',nhat_p)
             else:

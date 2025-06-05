@@ -72,7 +72,7 @@ def write_output_files(inst, add_text=None,rev_info=None,local_path_to_tables='.
         filtyp = 'DLP_' + str(int(inst.dr_km * 1000 * 2)).zfill(4) + 'M' + add
 
     elif isinstance(inst, rss.DiffractionCorrection):
-        filtyp = 'TAU_' + str(int(inst.input_res * 1000)).zfill(5) + 'M' + add
+        filtyp = 'TAU_' + str(int(inst.input_resolution_km * 1000)).zfill(5) + 'M' + add
         if verbose:
             print('TAU filtyp:',filtyp)
     #elif isinstance(inst, rss.scatter.Scatter):

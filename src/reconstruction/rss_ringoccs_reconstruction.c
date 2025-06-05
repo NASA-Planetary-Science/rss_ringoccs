@@ -1,22 +1,17 @@
-
-#include <stdlib.h>
-#include <stdio.h>
 #include <libtmpl/include/tmpl_bool.h>
 #include <libtmpl/include/tmpl_string.h>
 #include <libtmpl/include/tmpl_complex.h>
+#include <libtmpl/include/compat/tmpl_malloc.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
+#include <stdlib.h>
 
 void rssringoccs_Reconstruction(rssringoccs_TAUObj *tau)
 {
-    tmpl_ComplexDouble *temp_T_in;
     tmpl_Bool temp_fwd;
-    size_t n, temp_start, temp_n_used, nw_pts;
+    size_t temp_start, temp_n_used, nw_pts;
     double w_left, w_right, w_max;
 
-    if (tau == NULL)
-        return;
-
-    if (tau->error_occurred)
+    if (!tau)
         return;
 
     rssringoccs_Tau_Check_Keywords(tau);
@@ -24,34 +19,28 @@ void rssringoccs_Reconstruction(rssringoccs_TAUObj *tau)
     rssringoccs_Tau_Get_Window_Width(tau);
     rssringoccs_Tau_Check_Data_Range(tau);
 
-    tau->T_out = calloc(tau->arr_size, sizeof(*tau->T_out));
+    if (tau->error_occurred)
+        return;
+
+    tau->T_out = TMPL_MALLOC(tmpl_ComplexDouble, tau->arr_size);
 
     rssringoccs_Tau_Check_Core_Data(tau);
+
+    if (tau->error_occurred)
+        return;
 
     temp_fwd = tau->use_fwd;
     tau->use_fwd = tmpl_False;
 
-    if      (tau->psinum == rssringoccs_PsiType_Fresnel)
-        rssringoccs_Diffraction_Correction_Fresnel(tau);
-    else if (tau->psinum == rssringoccs_PsiType_Legendre)
-        rssringoccs_Diffraction_Correction_Legendre(tau);
-    else if (tau->psinum == rssringoccs_PsiType_NewtonSimpleFFT)
-        rssringoccs_Diffraction_Correction_SimpleFFT(tau);
-    else
-        rssringoccs_Diffraction_Correction_Newton(tau);
+    rssringoccs_Diffraction_Correction(tau);
 
     tau->use_fwd = temp_fwd;
 
     if (tau->use_fwd)
     {
-        temp_T_in  = tau->T_in;
-        tau->T_in  = tau->T_out;
+        tmpl_ComplexDouble * const temp_T_in = tau->T_in;
+        tau->T_in = tau->T_out;
         tau->T_out = calloc(tau->arr_size, sizeof(*tau->T_out));
-
-        /*  If forward tranform is set, negate the k_vals variable. This has  *
-         *  the equivalent effect of computing the forward calculation later. */
-        for (n = 0; n <= tau->n_used; ++n)
-            tau->k_vals[tau->start + n] *= -1.0;
 
         w_left  = tau->w_km_vals[tau->start];
         w_right = tau->w_km_vals[tau->start + tau->n_used];
@@ -80,26 +69,13 @@ void rssringoccs_Reconstruction(rssringoccs_TAUObj *tau)
         tau->start = tau->start + nw_pts;
         tau->n_used = tau->n_used - 2*nw_pts;
 
-        if (tau->psinum == rssringoccs_PsiType_Fresnel)
-            rssringoccs_Diffraction_Correction_Fresnel(tau);
-        else if (tau->psinum == rssringoccs_PsiType_Legendre)
-            rssringoccs_Diffraction_Correction_Legendre(tau);
-        else if (tau->psinum == rssringoccs_PsiType_NewtonSimpleFFT)
-            rssringoccs_Diffraction_Correction_SimpleFFT(tau);
-        else
-            rssringoccs_Diffraction_Correction_Newton(tau);
+        rssringoccs_Diffraction_Correction(tau);
 
         tau->start = temp_start;
         tau->n_used = temp_n_used;
-
-        /*  Unnegate k_vals to its original values.                           */
-        for (n = 0; n <= tau->n_used; ++n)
-            tau->k_vals[tau->start + n] *= -1.0;
-
         tau->T_fwd = tau->T_out;
         tau->T_out = tau->T_in;
         tau->T_in  = temp_T_in;
-
     }
 
     rssringoccs_Tau_Finish(tau);

@@ -9,11 +9,12 @@ static const char * const rssringoccs_psi_type_error_message =
     "\rError Encountered: rss_ringoccs\n"
     "\r\trssringoccs_Tau_Set_Psi_Type\n\n"
     "\rIllegal string for psitype. Allowed strings:\n"
-    "\r\tnewton:     Newton-Raphson method\n"
+    "\r\tnewton:     Newton-Raphson method.\n"
+    "\r\tnewton4:    Newton-Raphson method, quartic interpolation.\n"
     "\r\tsimplefft:  A single FFT of the entire data set.\n"
     "\r\tellipse:    Newton-Raphson with elliptical perturbation.\n"
-    "\r\tfresnel:    Quadratic Fresnel approximation\n"
-    "\r\tfresneln:   Legendre polynomial approximation with 1<n<256\n";
+    "\r\tfresnel:    Quadratic Fresnel approximation.\n"
+    "\r\tfresneln:   Legendre polynomial approximation with 1<n<256.\n";
 
 void
 rssringoccs_Tau_Set_Psi_Type(const char *psitype, rssringoccs_TAUObj* tau)
@@ -88,7 +89,7 @@ rssringoccs_Tau_Set_Psi_Type(const char *psitype, rssringoccs_TAUObj* tau)
         tau->psinum = rssringoccs_PsiType_NewtonSimpleFFT;
 
     /*  Quartic interpolation to the Newton-Raphson method.                   */
-    else if (tmpl_String_Are_Equal(tau_psitype, "quartic"))
+    else if (tmpl_String_Are_Equal(tau_psitype, "newton4"))
         tau->psinum = rssringoccs_PsiType_NewtonQuartic;
 
     /*  Standard quadratic Fresnel approximation.                             */
@@ -122,12 +123,11 @@ rssringoccs_Tau_Set_Psi_Type(const char *psitype, rssringoccs_TAUObj* tau)
                 "\rzero. Your input has 'fresnel' in it but either has an\n"
                 "\rinvalid entry after, or a zero.\n\n";
 
-            tau->order = 0U;
             goto FINISH;
         }
 
         /*  Fresnel1 is invalid. Check for this.                              */
-        else if (tau->order == 1)
+        if (tau->order == 1)
         {
             tau->error_occurred = tmpl_True;
             tau->error_message =
@@ -142,7 +142,7 @@ rssringoccs_Tau_Set_Psi_Type(const char *psitype, rssringoccs_TAUObj* tau)
         }
 
         /*  'fresnel2' is treated as 'fresnel'.                               */
-        else if (tau->order == 2)
+        if (tau->order == 2)
         {
             tau->psinum = rssringoccs_PsiType_Fresnel;
             tau->order = 0U;

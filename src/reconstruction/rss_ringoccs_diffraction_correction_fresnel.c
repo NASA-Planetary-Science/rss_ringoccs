@@ -194,7 +194,7 @@
 static const rssringoccs_FresnelTransform
 rssringoccs_fresnel_transform_list[2] = {
     rssringoccs_Fresnel_Transform,
-    rssringoccs_Fresnel_Transform_Norm
+    rssringoccs_Fresnel_Transform_Normalized
 };
 
 /*  Performs the Fresnel transform on the data contained in tau.              */
@@ -211,33 +211,12 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj * const tau)
     double *x_arr = NULL;
     double *w_func = NULL;
 
-    /*  The forward transform can be computed by negating the Fresnel kernel. *
-     *  That is, integrating T_hat(r0) w(r - r0) exp(i psi(r, r0)), instead   *
-     *  of integrating T_hat(r0) w(r - r0) exp(-i psi(r, r0)). This variable  *
-     *  will be set later on to the desired transform (forward or inverse).   */
-    double factor;
-
     /*  The user has two options for transforms. We'll set this later.        */
     rssringoccs_FresnelTransform fresnel_transform;
 
-    /*  Check that the input is not NULL before atttempting to access it.     */
+    /*  Check that the input is not NULL before attempting to access it.      */
     if (!tau)
         return;
-
-    /*  If an error occurred before this function was called, abort.          */
-    if (tau->error_occurred)
-        return;
-
-    /*  Set the desired transform. The key difference in the integral is the  *
-     *  sign of the Fresnel kernel. The scale factor outside of the integral  *
-     *  is also different, (1 - i) / 2F as opposed to (1 + i) / 2F, but this  *
-     *  can be handled after the integration is complete. The quadratic       *
-     *  Fresnel kernel is +/- (pi/2) ((r - r0) / F)^2. The scale factor is    *
-     *  thus +/- pi/2, depending on the desired transform. Set this.          */
-    if (tau->use_fwd)
-        factor = -tmpl_Double_Pi_By_Two;
-    else
-        factor = +tmpl_Double_Pi_By_Two;
 
     /*  Check that the pointers to the data are not NULL.                     */
     rssringoccs_Tau_Check_Core_Data(tau);
@@ -287,18 +266,18 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj * const tau)
 
     /*  Initialize the window array and the independent variable.             */
     rssringoccs_Tau_Reset_Window(
-        tau,                    /*  Tau object containing the window function.*/
-        x_arr,                  /*  The independent variable, r[n]-r[center]. */
-        w_func,                 /*  The window array as a function of x_arr.  */
-        n_pts,                  /*  Number of points in the x_arr array.      */
-        center                  /*  Index for the center of the window.       */
+        tau,        /*  Tau object containing the window function.            */
+        x_arr,      /*  The independent variable, r[n] - r[center].           */
+        w_func,     /*  The window array as a function of x_arr.              */
+        n_pts,      /*  Number of points in the x_arr array.                  */
+        center      /*  Index for the center of the window.                   */
     );
 
     /*  We have computed the window function and the independent variable x,  *
-     *  which is (r - r0). We need +- (pi/2) (r - r0)^2. The 1 / F^2 factor   *
+     *  which is (r - r0). We need (pi/2) (r - r0)^2. The 1 / F^2 factor      *
      *  is introduced later inside the fresnel_transform function.            */
     for (m = 0; m < n_pts; ++m)
-        x_arr[m] *= factor * x_arr[m];
+        x_arr[m] *= tmpl_Double_Pi_By_Two * x_arr[m];
 
     /*  Compute the Fresnel transform across the input data.                  */
     for (n = 0; n <= tau->n_used; ++n)
@@ -310,7 +289,7 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj * const tau)
             tau, &x_arr, &w_func, w_init, two_dx, center
         );
 
-        /*  If we did need a resize, there are a few things that could have   *
+        /*  If we did need to resize, there are a few things that could have  *
          *  gone wrong with memory reallocation, and a few things we'll need  *
          *  to reset if all of the memory management succeeded.               */
         if (resize)
@@ -334,9 +313,9 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj * const tau)
             /*  The rssringoccs_Tau_Resize_Half_Window function calls the     *
              *  rssringoccs_Tau_Reset_Window routine, which recomputes the    *
              *  expression (r - r0) across the new window. We need the        *
-             *  expression +/- (pi/2) (r - r0)^2. Compute this.               */
+             *  expression (pi/2) (r - r0)^2. Compute this.                   */
             for (m = 0; m < n_pts; ++m)
-                x_arr[m] *= factor * x_arr[m];
+                x_arr[m] *= tmpl_Double_Pi_By_Two * x_arr[m];
         }
 
         /*  Compute the Fresnel Transform about the current point.            */
@@ -350,3 +329,4 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj * const tau)
     TMPL_FREE(x_arr);
     TMPL_FREE(w_func);
 }
+/*  End of rssringoccs_Diffraction_Correction_Fresnel.                        */

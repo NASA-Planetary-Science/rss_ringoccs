@@ -23,7 +23,7 @@ typedef void
 
 typedef void (*rssringoccs_FresnelLegendreTransform)(
     rssringoccs_TAUObj * TMPL_RESTRICT const, /*  Reconstruction data.        */
-    const double * TMPL_RESTRICT const,       /*  The array (r - r0) / D.     */
+    const double * TMPL_RESTRICT const,       /*  The array r - r0.           */
     const double * TMPL_RESTRICT const,       /*  Tapering / window array.    */
     const double * TMPL_RESTRICT const,       /*  Polynomial coefficients.    */
     size_t,                                   /*  Number of points in window. */
@@ -52,5 +52,7 @@ rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj *tau);
 
 extern void
 rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau);
+
+extern void rssringoccs_Diffraction_Correction(rssringoccs_TAUObj *tau);
 
 #endif

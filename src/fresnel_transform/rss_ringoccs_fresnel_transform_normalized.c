@@ -23,42 +23,45 @@
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
 void
-rssringoccs_Fresnel_Transform_Norm(rssringoccs_TAUObj *tau,
-                                   const double * TMPL_RESTRICT x_arr,
-                                   const double * TMPL_RESTRICT w_func,
-                                   size_t n_pts,
-                                   size_t center)
+rssringoccs_Fresnel_Transform_Normalized(
+    rssringoccs_TAUObj * const tau,
+    const double * TMPL_RESTRICT const x_arr,
+    const double * TMPL_RESTRICT const w_func,
+    size_t n_pts,
+    size_t center
+)
 {
     /*  Declare all necessary variables. m and n are used for indexing.       */
     size_t m, n;
 
     /*  The scale factor for the integral, which is 1 / 2F times the          *
      *  magnitude of the complex normalization.                               */
-    double scale_factor;
+    double scale;
 
     /*  Variables for the real and imaginary parts of the output.             */
     double real, imag;
 
-    /*  Variable for the quadratic approximation to the Fresnel kernel.       */
-    double psi;
-
     /*  Division is more expensive than multiplication, so store the          *
      *  reciprocal of F as a variable and compute with that.                  */
-    const double rcpr_F = 1.0 / tau->F_km_vals[center];
-    const double rcpr_F2 = rcpr_F * rcpr_F;
+    const double rcpr_fresnel_scale = 1.0 / tau->F_km_vals[center];
 
-    /*  exp_negative_ipsi is the complex exponentiation Fresnel kernel, norm  *
-     *  is the normalization, and integrand is a helper variable used for     *
-     *  computing the Fresnel transform via a Riemann sum.                    */
-    tmpl_ComplexDouble exp_negative_ipsi, norm, integrand;
+    /*  The forward transform can be computed by negating the psi factor. Set *
+     *  the sign to 1 for the inverse transform and -1 for the forward one.   */
+    const double sign = (tau->use_fwd ? -1.0 : 1.0);
+    const double psi_factor = sign * rcpr_fresnel_scale * rcpr_fresnel_scale;
 
-    /*  At the center of the window, we have r = r0, and hence w(r - r0) = 1  *
+    /*  exp_negative_ipsi is the complex exponentiation Fresnel kernel, and   *
+     *  and integrand is a helper variable used for computing the Fresnel     *
+     *  transform via a Riemann sum.                                          */
+    tmpl_ComplexDouble exp_negative_ipsi, integrand;
+
+    /*  Initialize norm to zero, so we can loop over later.                   */
+    tmpl_ComplexDouble norm = tmpl_CDouble_Zero;
+
+    /*  At the center of the window we have r = r0, and hence w(r - r0) = 1   *
      *  and psi(r, r0) = 0, meaning exp(i psi) = 1. The contribution to the   *
      *  Riemann sum is just T_in[center]. Initialize the output to this value.*/
     tau->T_out[center] = tau->T_in[center];
-
-    /*  Initialize norm to zero, so we can loop over later.                   */
-    norm = tmpl_CDouble_Zero;
 
     /*  From symmetry we need only compute over the range r0 to r0 + W/2. We  *
      *  start the offset at n_pts and decrement this to zero.                 */
@@ -68,8 +71,8 @@ rssringoccs_Fresnel_Transform_Norm(rssringoccs_TAUObj *tau,
     for (m = 0; m < n_pts; ++m)
     {
         /*  The x array passed to us contains (pi/2)(r - r0)^2. The Fresnel   *
-         *  approximation is psi = (pi/2) * (r - r0)^2 / F^2. Scale by 1/F^2. */
-        psi = x_arr[m] * rcpr_F2;
+         *  approximation is psi = (pi/2) * (r - r0)^2 / F^2.                 */
+        const double psi = psi_factor * x_arr[m];
 
         /*  w(r - r0) exp(-i psi(r, r0)) is in polar form. Compute using this.*/
         exp_negative_ipsi = tmpl_CDouble_Polar(w_func[m], -psi);
@@ -87,7 +90,7 @@ rssringoccs_Fresnel_Transform_Norm(rssringoccs_TAUObj *tau,
          *  scale the result by K(t), where t is the appropriate index for    *
          *  the data points. This cuts the computation roughly in half.       */
         integrand = tmpl_CDouble_Add(tau->T_in[center-n], tau->T_in[center+n]);
-        integrand = tmpl_CDouble_Multiply(exp_negative_ipsi, integrand);
+        tmpl_CDouble_MultiplyBy(&integrand, &exp_negative_ipsi);
         tmpl_CDouble_AddTo(&tau->T_out[center], &integrand);
 
         /*  Decrement the offset index to the next point.                     */
@@ -102,12 +105,13 @@ rssringoccs_Fresnel_Transform_Norm(rssringoccs_TAUObj *tau,
     norm.dat[1] *= 2.0;
 
     /*  Compute the real scale factor, 1 / (sqrt(2) |norm|).                  */
-    scale_factor = tmpl_Double_Rcpr_Sqrt_Two / tmpl_CDouble_Abs(norm);
+    scale = tmpl_Double_Rcpr_Sqrt_Two / tmpl_CDouble_Abs(norm);
 
     /*  Multiply result by the coefficient found in the Fresnel inverse.      *
      *  The 1 / F term is omitted, since the F in the norm cancels this.      */
-    real = scale_factor*(tau->T_out[center].dat[0] - tau->T_out[center].dat[1]);
-    imag = scale_factor*(tau->T_out[center].dat[0] + tau->T_out[center].dat[1]);
+    real = scale * (tau->T_out[center].dat[0] - tau->T_out[center].dat[1]);
+    imag = scale * (tau->T_out[center].dat[0] + tau->T_out[center].dat[1]);
     tau->T_out[center].dat[0] = real;
     tau->T_out[center].dat[1] = imag;
 }
+/*  End of rssringoccs_Fresnel_Transform_Normalized.                          */

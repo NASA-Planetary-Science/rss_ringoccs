@@ -54,22 +54,24 @@ enum rssringoccs_PsiType {
     /*  Legendre polynomials, higher order Fresnel approximations.            */
     rssringoccs_PsiType_Legendre,
 
-    /*  Newton-Raphson method, and various interpolating methods.             */
+    /*  Newton-Raphson, using a single FFT across the entire data set.        */
+    rssringoccs_PsiType_NewtonSimpleFFT,
+
+    /*  Newton-Raphson method, slow but accurate, no interpolation performed. */
     rssringoccs_PsiType_Newton,
-    rssringoccs_PsiType_NewtonQuadratic,
-    rssringoccs_PsiType_NewtonQuartic,
-    rssringoccs_PsiType_NewtonSextic,
-    rssringoccs_PsiType_NewtonOctic,
+
+    /*  Newton-Raphson with elliptical corrections, and interpolations.       */
+    rssringoccs_PsiType_NewtonElliptical,
 
     /*  Newton-Raphson with arbitrary quartic perturbation polynomial.        */
     rssringoccs_PsiType_NewtonPerturb,
 
-    /*  Newton-Raphson, using a single FFT across the entire data set.        */
-    rssringoccs_PsiType_NewtonSimpleFFT,
+    /*  Even degree interpolations for the Newton-Raphson method.             */
+    rssringoccs_PsiType_NewtonQuartic,
+    rssringoccs_PsiType_NewtonSextic,
+    rssringoccs_PsiType_NewtonOctic,
 
-    /*  Newton-Raphson with elliptical corrections, and interpolations.       */
-    rssringoccs_PsiType_NewtonElliptical,
-    rssringoccs_PsiType_NewtonEllipticalQuadratic,
+    /*  Even degree interpolations for the elliptic Newton-Raphson method.    */
     rssringoccs_PsiType_NewtonEllipticalQuartic,
     rssringoccs_PsiType_NewtonEllipticalSextic,
     rssringoccs_PsiType_NewtonEllipticalOctic,

@@ -33,6 +33,7 @@ rssringoccs_Fresnel_Transform_Newton_Norm(rssringoccs_TAUObj *tau,
     /*  The Fresnel kernel and the stationary ring azimuth angle.             */
     double real_norm, abs_norm;
     tmpl_ComplexDouble integrand;
+    const double sign = (tau->use_fwd ? -1.0 : 1.0);
 
     /*  Initialize T_out and norm to zero so we can loop over later.          */
     tmpl_ComplexDouble norm = tmpl_CDouble_Zero;
@@ -65,7 +66,7 @@ rssringoccs_Fresnel_Transform_Newton_Norm(rssringoccs_TAUObj *tau,
         );
 
         /*  Compute the Fresnel kernel at the stationary azimuth angle, phi_s.*/
-        const double psi = tmpl_Double_Stationary_Cyl_Fresnel_Psi(
+        const double psi = sign * tmpl_Double_Stationary_Cyl_Fresnel_Psi(
             tau->k_vals[center], &rho, &rho0, &R, tau->EPS, tau->toler
         );
 

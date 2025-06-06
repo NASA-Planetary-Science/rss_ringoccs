@@ -47,7 +47,7 @@ OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 
 .PHONY: clean install uninstall all libtmpl
 
-all: $(BUILD_DIR) $(TARGET_LIB) $(LIBTMPL)
+all: $(TARGET_LIB) $(LIBTMPL)
 
 $(TARGET_LIB_SHARED): $(OBJS) $(LIBTMPL)
 	@echo "Building librssringoccs.so ..."
@@ -58,16 +58,8 @@ $(TARGET_LIB_STATIC): $(OBJS) $(LIBTMPL)
 	@-$(AR) rcs $@ $(OBJS)
 
 $(BUILD_DIR)/%.c.o: %.c $(LIBTMPL)
+	@mkdir -p $(@D)
 	$(CC) $(CWARN) $(CFLAGS) $< -o $@
-
-$(BUILD_DIR):
-	mkdir -p $(BUILD_DIR)/src/csv_tools/
-	mkdir -p $(BUILD_DIR)/src/fresnel_kernel/
-	mkdir -p $(BUILD_DIR)/src/fresnel_transform/
-	mkdir -p $(BUILD_DIR)/src/history/
-	mkdir -p $(BUILD_DIR)/src/occultation_geometry/
-	mkdir -p $(BUILD_DIR)/src/reconstruction/
-	mkdir -p $(BUILD_DIR)/src/tau/
 
 $(LIBTMPL):
 	$(MAKE) -C libtmpl/ BUILD_STATIC=1

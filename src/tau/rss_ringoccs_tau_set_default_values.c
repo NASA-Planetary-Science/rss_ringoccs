@@ -59,9 +59,8 @@ void rssringoccs_Tau_Set_Default_Values(rssringoccs_TAUObj* tau)
     /*  The normalized equivalent width of the selected window function.      */
     tau->normeq = KBMD20NormEQ;
 
-    /*  Default reconstruction method: Quartic interpolation of the           *
-     *  Newton-Raphson method with dpsi/dphi perturbation taken into account. */
-    tau->psinum = rssringoccs_PsiType_NewtonQuartic;
+    /*  Default reconstruction method: Octic Newton-Raphson interpolation.    */
+    tau->psinum = rssringoccs_PsiType_Newton8;
 
     /*  The order is only needed if the Legendre polynomial method is chosen. *
      *  Set this to zero.                                                     */

@@ -77,7 +77,7 @@ rssringoccs_Tau_Set_Psi_Type(const char *psitype, rssringoccs_TAUObj* tau)
 
     /*  Newton-Rapshon method but for elliptical rings instead of cylindrical.*/
     else if (tmpl_String_Are_Equal(tau_psitype, "ellipse"))
-        tau->psinum = rssringoccs_PsiType_NewtonElliptical;
+        tau->psinum = rssringoccs_PsiType_EllipticNewton;
 
     /*  Computes the reconstruction using a single FFT across the entire data *
      *  set. Only works if the geometry does not very too much across the     *
@@ -90,11 +90,15 @@ rssringoccs_Tau_Set_Psi_Type(const char *psitype, rssringoccs_TAUObj* tau)
 
     /*  Quartic interpolation to the Newton-Raphson method.                   */
     else if (tmpl_String_Are_Equal(tau_psitype, "newton4"))
-        tau->psinum = rssringoccs_PsiType_NewtonQuartic;
+        tau->psinum = rssringoccs_PsiType_Newton4;
 
     /*  Octic interpolation to the Newton-Raphson method.                     */
     else if (tmpl_String_Are_Equal(tau_psitype, "newton8"))
-        tau->psinum = rssringoccs_PsiType_NewtonOctic;
+        tau->psinum = rssringoccs_PsiType_Newton8;
+
+    /*  Octic interpolation to the Newton-Raphson method.                     */
+    else if (tmpl_String_Are_Equal(tau_psitype, "newton16"))
+        tau->psinum = rssringoccs_PsiType_Newton16;
 
     /*  Standard quadratic Fresnel approximation.                             */
     else if (tmpl_String_Are_Equal(tau_psitype, "fresnel"))

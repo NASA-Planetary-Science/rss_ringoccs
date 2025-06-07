@@ -92,6 +92,10 @@ rssringoccs_Tau_Set_Psi_Type(const char *psitype, rssringoccs_TAUObj* tau)
     else if (tmpl_String_Are_Equal(tau_psitype, "newton4"))
         tau->psinum = rssringoccs_PsiType_NewtonQuartic;
 
+    /*  Octic interpolation to the Newton-Raphson method.                     */
+    else if (tmpl_String_Are_Equal(tau_psitype, "newton8"))
+        tau->psinum = rssringoccs_PsiType_NewtonOctic;
+
     /*  Standard quadratic Fresnel approximation.                             */
     else if (tmpl_String_Are_Equal(tau_psitype, "fresnel"))
         tau->psinum = rssringoccs_PsiType_Fresnel;

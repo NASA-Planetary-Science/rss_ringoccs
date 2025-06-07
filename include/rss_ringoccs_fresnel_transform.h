@@ -260,7 +260,7 @@ rssringoccs_Fresnel_Transform_Normalized_Perturbed_Newton(
 );
 
 extern void
-rssringoccs_Fresnel_Transform_Newton_Quartic(
+rssringoccs_Fresnel_Transform_Newton4(
     rssringoccs_TAUObj * TMPL_RESTRICT const tau,
     const double * TMPL_RESTRICT const x_arr,
     const double * TMPL_RESTRICT const w_func,
@@ -269,7 +269,7 @@ rssringoccs_Fresnel_Transform_Newton_Quartic(
 );
 
 extern void
-rssringoccs_Fresnel_Transform_Normalized_Newton_Quartic(
+rssringoccs_Fresnel_Transform_Normalized_Newton4(
     rssringoccs_TAUObj * TMPL_RESTRICT const tau,
     const double * TMPL_RESTRICT const x_arr,
     const double * TMPL_RESTRICT const w_func,
@@ -278,7 +278,7 @@ rssringoccs_Fresnel_Transform_Normalized_Newton_Quartic(
 );
 
 extern void
-rssringoccs_Fresnel_Transform_Normalized_Newton_Octic(
+rssringoccs_Fresnel_Transform_Normalized_Newton8(
     rssringoccs_TAUObj * TMPL_RESTRICT const tau,
     const double * TMPL_RESTRICT const x_arr,
     const double * TMPL_RESTRICT const w_func,

@@ -6,12 +6,12 @@
 #include <libtmpl/include/tmpl_vec3.h>
 #include <libtmpl/include/compat/tmpl_cast.h>
 #include <libtmpl/include/compat/tmpl_free.h>
-
+#include <rss_ringoccs/include/rss_ringoccs_tau.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 #include <stddef.h>
 
 void
-rssringoccs_Fresnel_Transform_Newton_Quartic(
+rssringoccs_Fresnel_Transform_Normalized_Newton4(
     rssringoccs_TAUObj * TMPL_RESTRICT const tau,
     const double * TMPL_RESTRICT const x_arr,
     const double * TMPL_RESTRICT const w_func,
@@ -19,7 +19,10 @@ rssringoccs_Fresnel_Transform_Newton_Quartic(
     size_t center
 )
 {
-    size_t n, ind[4];
+    size_t n;
+    size_t ind[4];
+
+    double scale_factor;
     tmpl_ComplexDouble w_exp_minus_psi_left, w_exp_minus_psi_right;
     tmpl_ComplexDouble T_left, T_right, integrand;
 
@@ -30,17 +33,16 @@ rssringoccs_Fresnel_Transform_Newton_Quartic(
     const size_t l_ind = center - nw_pts;
     const size_t r_ind = center + nw_pts;
 
-    const double scale = 0.5 * tau->dx_km / tau->F_km_vals[center];
-
     const double width_actual = 4.0 * tau->dx_km * TMPL_CAST(shift, double);
     const double rcpr_width_actual = 1.0 / width_actual;
+
+    tmpl_ComplexDouble norm = tmpl_CDouble_One;
+    tau->T_out[center] = tau->T_in[center];
 
     ind[0] = center - 2 * shift;
     ind[1] = center - shift;
     ind[2] = center + shift;
     ind[3] = center + 2 * shift;
-
-    tau->T_out[center] = tau->T_in[center];
 
     for (n = 0; n < 4; ++n)
     {
@@ -89,6 +91,9 @@ rssringoccs_Fresnel_Transform_Newton_Quartic(
         T_left = tau->T_in[l_ind + n];
         T_right = tau->T_in[r_ind - n];
 
+        tmpl_CDouble_AddTo(&norm, &w_exp_minus_psi_left);
+        tmpl_CDouble_AddTo(&norm, &w_exp_minus_psi_right);
+
         integrand = tmpl_CDouble_Multiply(w_exp_minus_psi_left, T_left);
         tmpl_CDouble_AddTo(&tau->T_out[center], &integrand);
 
@@ -96,6 +101,7 @@ rssringoccs_Fresnel_Transform_Newton_Quartic(
         tmpl_CDouble_AddTo(&tau->T_out[center], &integrand);
     }
 
-    integrand = tmpl_CDouble_Rect(scale, scale);
+    scale_factor = tmpl_Double_Rcpr_Sqrt_Two / tmpl_CDouble_Abs(norm);
+    integrand = tmpl_CDouble_Rect(scale_factor, scale_factor);
     tau->T_out[center] = tmpl_CDouble_Multiply(integrand, tau->T_out[center]);
 }

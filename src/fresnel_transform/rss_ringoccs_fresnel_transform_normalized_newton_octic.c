@@ -69,7 +69,7 @@ z * (coeffs[0] + z##sq*(coeffs[2] + z##sq*(coeffs[4] + z##sq*coeffs[6])))
 z##sq * (coeffs[1] + z##sq*(coeffs[3] + z##sq*(coeffs[5] + z##sq*coeffs[7])))
 
 void
-rssringoccs_Fresnel_Transform_Normalized_Newton_Octic(
+rssringoccs_Fresnel_Transform_Normalized_Newton8(
     rssringoccs_TAUObj * TMPL_RESTRICT const tau,
     const double * TMPL_RESTRICT const x_arr,
     const double * TMPL_RESTRICT const w_func,

@@ -73,10 +73,12 @@
  *          The diffraction corrected profile.                                *
  ******************************************************************************/
 void
-rssringoccs_Fresnel_Transform_Perturbed_Newton(rssringoccs_TAUObj *tau,
-                                               const double *w_func,
-                                               size_t n_pts,
-                                               size_t center)
+rssringoccs_Fresnel_Transform_Perturbed_Newton(
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const double * TMPL_RESTRICT const w_func,
+    size_t n_pts,
+    size_t center
+)
 {
     /*  Declare all necessary variables. i and j are used for indexing.       */
     size_t m, offset;

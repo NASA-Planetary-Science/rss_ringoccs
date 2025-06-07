@@ -11,6 +11,8 @@ static const char * const rssringoccs_psi_type_error_message =
     "\rIllegal string for psitype. Allowed strings:\n"
     "\r\tnewton:     Newton-Raphson method.\n"
     "\r\tnewton4:    Newton-Raphson method, quartic interpolation.\n"
+    "\r\tnewton8:    Newton-Raphson method, octic interpolation.\n"
+    "\r\tnewton16:   Newton-Raphson method, hexadecic interpolation.\n"
     "\r\tsimplefft:  A single FFT of the entire data set.\n"
     "\r\tellipse:    Newton-Raphson with elliptical perturbation.\n"
     "\r\tfresnel:    Quadratic Fresnel approximation.\n"

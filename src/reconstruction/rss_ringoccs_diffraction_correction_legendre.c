@@ -173,7 +173,7 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
     w_init = tau->w_km_vals[center];
     dx = tau->rho_km_vals[center + 1] - tau->rho_km_vals[center];
     two_dx = 2.0 * dx;
-    nw_pts = TMPL_CAST(w_init / two_dx, size_t) + 1;
+    nw_pts = TMPL_CAST(w_init / two_dx, size_t);
 
     /*  Allocate memory for the independent variable and window function.     */
     x_arr = TMPL_MALLOC(double, nw_pts);
@@ -249,7 +249,7 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
             w_init = tau->w_km_vals[center];
 
             /*  Similarly, reset the number of points in the window.          */
-            nw_pts = TMPL_CAST(w_init / two_dx, size_t) + 1;
+            nw_pts = TMPL_CAST(w_init / two_dx, size_t);
         }
 
         /*  Compute some geometric information, and the scaling coefficient   *

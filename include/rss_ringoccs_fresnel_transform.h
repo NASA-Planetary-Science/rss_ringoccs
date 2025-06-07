@@ -286,6 +286,15 @@ rssringoccs_Fresnel_Transform_Normalized_Newton8(
     size_t center
 );
 
+extern void
+rssringoccs_Fresnel_Transform_Normalized_Newton16(
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const double * TMPL_RESTRICT const x_arr,
+    const double * TMPL_RESTRICT const w_func,
+    size_t n_pts,
+    size_t center
+);
+
 extern const rssringoccs_FresnelNewtonTransform
 rssringoccs_newton_transform_table[2][2][3];
 

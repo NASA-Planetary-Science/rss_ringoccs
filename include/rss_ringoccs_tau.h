@@ -61,20 +61,20 @@ enum rssringoccs_PsiType {
     rssringoccs_PsiType_Newton,
 
     /*  Newton-Raphson with elliptical corrections, and interpolations.       */
-    rssringoccs_PsiType_NewtonElliptical,
+    rssringoccs_PsiType_EllipticNewton,
 
     /*  Newton-Raphson with arbitrary quartic perturbation polynomial.        */
     rssringoccs_PsiType_NewtonPerturb,
 
     /*  Even degree interpolations for the Newton-Raphson method.             */
-    rssringoccs_PsiType_NewtonQuartic,
-    rssringoccs_PsiType_NewtonSextic,
-    rssringoccs_PsiType_NewtonOctic,
+    rssringoccs_PsiType_Newton4,
+    rssringoccs_PsiType_Newton8,
+    rssringoccs_PsiType_Newton16,
 
     /*  Even degree interpolations for the elliptic Newton-Raphson method.    */
-    rssringoccs_PsiType_NewtonEllipticalQuartic,
-    rssringoccs_PsiType_NewtonEllipticalSextic,
-    rssringoccs_PsiType_NewtonEllipticalOctic,
+    rssringoccs_PsiType_EllipticNewton4,
+    rssringoccs_PsiType_EllipticNewton8,
+    rssringoccs_PsiType_EllipticNewton16,
 
     /*  Indicates an error.                                                   */
     rssringoccs_PsiType_None

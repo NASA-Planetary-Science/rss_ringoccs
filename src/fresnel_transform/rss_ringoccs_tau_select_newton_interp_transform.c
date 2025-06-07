@@ -37,7 +37,7 @@ rssringoccs_Tau_Select_Newton_Interp_Transform(rssringoccs_TAUObj * const tau)
         return NULL;
     }
 
-    if (tau->psinum < rssringoccs_PsiType_NewtonQuartic)
+    if (tau->psinum < rssringoccs_PsiType_Newton4)
     {
         tau->error_occurred = tmpl_True;
         tau->error_message =
@@ -52,7 +52,7 @@ rssringoccs_Tau_Select_Newton_Interp_Transform(rssringoccs_TAUObj * const tau)
     fwd = TMPL_CAST(tau->use_fwd, size_t);
     norm = TMPL_CAST(tau->use_norm, size_t);
     num = TMPL_CAST(tau->psinum, size_t);
-    start = TMPL_CAST(rssringoccs_PsiType_NewtonQuartic, size_t);
+    start = TMPL_CAST(rssringoccs_PsiType_Newton4, size_t);
     num -= start;
 
     return rssringoccs_newton_interp_transform_table[fwd][norm][num];

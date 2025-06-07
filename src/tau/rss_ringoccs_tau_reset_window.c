@@ -37,7 +37,7 @@ void
 rssringoccs_Tau_Reset_Window(rssringoccs_TAUObj * TMPL_RESTRICT const tau,
                              double * TMPL_RESTRICT const x_arr,
                              double * TMPL_RESTRICT const w_func,
-                             const size_t n_pts,
+                             const size_t nw_pts,
                              const size_t center)
 {
     /*  Create a variable for indexing.                                       */
@@ -47,10 +47,10 @@ rssringoccs_Tau_Reset_Window(rssringoccs_TAUObj * TMPL_RESTRICT const tau,
      *  perform the cast first since size_t is unsigned, hence if n - nw is   *
      *  negative, the computation will wrap around to a very large number and *
      *  give us a gibberish result.                                           */
-    const double offset = TMPL_CAST(n_pts, double);
+    const double offset = TMPL_CAST(nw_pts, double);
 
     /* Loop over n, computing the window function and the x_arr variable.     */
-    for(n = 0; n < n_pts; ++n)
+    for (n = 0; n < nw_pts; ++n)
     {
         const double index = TMPL_CAST(n, double);
         x_arr[n] = (index - offset) * tau->dx_km;

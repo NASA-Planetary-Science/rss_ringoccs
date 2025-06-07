@@ -71,7 +71,7 @@ rssringoccs_Tau_Resize_Half_Window(
 
         /*  Reset the window size and recompute the number of points needed.  */
         w_init = tau->w_km_vals[center];
-        nw_pts = TMPL_CAST(w_init / two_dx, size_t) + 1;
+        nw_pts = TMPL_CAST(w_init / two_dx, size_t);
 
         /*  Reallocate memory for x and w since the sizes changed.            */
         x_tmp = realloc(x_arr, sizeof(*x_arr) * nw_pts);

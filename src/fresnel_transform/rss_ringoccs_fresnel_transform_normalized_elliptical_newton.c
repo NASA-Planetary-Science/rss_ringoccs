@@ -21,10 +21,12 @@
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
 void
-rssringoccs_Fresnel_Transform_Newton_Elliptical_Norm(rssringoccs_TAUObj *tau,
-                                                     const double *w_func,
-                                                     size_t n_pts,
-                                                     size_t center)
+rssringoccs_Fresnel_Transform_Normalized_Elliptical_Newton(
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const double * TMPL_RESTRICT const  w_func,
+    size_t n_pts,
+    size_t center
+)
 {
 
     /*  Declare all necessary variables. i and j are used for indexing.       */

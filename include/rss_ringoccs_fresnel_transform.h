@@ -30,10 +30,37 @@
 #include <libtmpl/include/tmpl_config.h>
 
 /*  rssringoccs_TAUObj typedef provided here.                                 */
-#include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
+#include <rss_ringoccs/include/rss_ringoccs_tau.h>
 
 /*  size_t typedef given here.                                                */
 #include <stddef.h>
+
+/*  Fresnel transform. Inputs are Tau data, window data, the number of points *
+ *  in the window, and the center of the window (its index in the data).      */
+typedef void
+(*rssringoccs_FresnelNewtonTransform)(
+    rssringoccs_TAUObj * TMPL_RESTRICT const, /*  Reconstruction data.        */
+    const double * TMPL_RESTRICT const,       /*  Tapering / window array.    */
+    size_t,                                   /*  Number of points in window. */
+    size_t                                    /*  Index for center of window. */
+);
+
+typedef void (*rssringoccs_FresnelLegendreTransform)(
+    rssringoccs_TAUObj * TMPL_RESTRICT const, /*  Reconstruction data.        */
+    const double * TMPL_RESTRICT const,       /*  The array r - r0.           */
+    const double * TMPL_RESTRICT const,       /*  Tapering / window array.    */
+    const double * TMPL_RESTRICT const,       /*  Polynomial coefficients.    */
+    size_t,                                   /*  Number of points in window. */
+    size_t                                    /*  Index for center of window. */
+);
+
+typedef void (*rssringoccs_FresnelTransform)(
+    rssringoccs_TAUObj * TMPL_RESTRICT const, /*  Reconstruction data.        */
+    const double * TMPL_RESTRICT const,       /*  The array (r - r0) / D.     */
+    const double * TMPL_RESTRICT const,       /*  Tapering / window array.    */
+    size_t,                                   /*  Number of points in window. */
+    size_t                                    /*  Index for center of window. */
+);
 
 extern void
 rssringoccs_Fresnel_Transform(
@@ -193,7 +220,23 @@ rssringoccs_Fresnel_Transform_Newton(
 );
 
 extern void
-rssringoccs_Fresnel_Transform_Newton_Norm(
+rssringoccs_Fresnel_Transform_Normalized_Newton(
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const double * TMPL_RESTRICT const w_func,
+    size_t n_pts,
+    size_t center
+);
+
+extern void
+rssringoccs_Fresnel_Transform_Elliptical_Newton(
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const double * TMPL_RESTRICT const w_func,
+    size_t n_pts,
+    size_t center
+);
+
+extern void
+rssringoccs_Fresnel_Transform_Normalized_Elliptical_Newton(
     rssringoccs_TAUObj * TMPL_RESTRICT const tau,
     const double * TMPL_RESTRICT const w_func,
     size_t n_pts,
@@ -209,7 +252,7 @@ rssringoccs_Fresnel_Transform_Perturbed_Newton(
 );
 
 extern void
-rssringoccs_Fresnel_Transform_Perturbed_Newton_Norm(
+rssringoccs_Fresnel_Transform_Normalized_Perturbed_Newton(
     rssringoccs_TAUObj * TMPL_RESTRICT const tau,
     const double * TMPL_RESTRICT const w_func,
     size_t n_pts,
@@ -219,34 +262,41 @@ rssringoccs_Fresnel_Transform_Perturbed_Newton_Norm(
 extern void
 rssringoccs_Fresnel_Transform_Newton_Quartic(
     rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const double * TMPL_RESTRICT const x_arr,
     const double * TMPL_RESTRICT const w_func,
     size_t n_pts,
     size_t center
 );
 
 extern void
-rssringoccs_Fresnel_Transform_Newton_Quartic_Norm(
+rssringoccs_Fresnel_Transform_Normalized_Newton_Quartic(
     rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const double * TMPL_RESTRICT const x_arr,
     const double * TMPL_RESTRICT const w_func,
     size_t n_pts,
     size_t center
 );
 
 extern void
-rssringoccs_Fresnel_Transform_Newton_Elliptical(
+rssringoccs_Fresnel_Transform_Normalized_Newton_Octic(
     rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const double * TMPL_RESTRICT const x_arr,
     const double * TMPL_RESTRICT const w_func,
     size_t n_pts,
     size_t center
 );
 
-extern void
-rssringoccs_Fresnel_Transform_Newton_Elliptical_Norm(
-    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
-    const double * TMPL_RESTRICT const w_func,
-    size_t n_pts,
-    size_t center
-);
+extern const rssringoccs_FresnelNewtonTransform
+rssringoccs_newton_transform_table[2][2][3];
+
+extern const rssringoccs_FresnelTransform
+rssringoccs_newton_interp_transform_table[2][2][6];
+
+extern rssringoccs_FresnelNewtonTransform
+rssringoccs_Tau_Select_Newton_Transform(rssringoccs_TAUObj * const tau);
+
+extern rssringoccs_FresnelTransform
+rssringoccs_Tau_Select_Newton_Interp_Transform(rssringoccs_TAUObj * const tau);
 
 #endif
 /*  End of include guard.                                                     */

@@ -444,11 +444,6 @@ rssringoccs_Tau_Set_Range_From_String(const char *range,
 extern void
 rssringoccs_Tau_Set_Window_Type(const char *wtype, rssringoccs_TAUObj *tau);
 
-
-
-
-
-
 extern void
 rssringoccs_Tau_Check_Keywords(rssringoccs_TAUObj *tau);
 
@@ -467,6 +462,12 @@ rssringoccs_Tau_Reset_Window(rssringoccs_TAUObj * TMPL_RESTRICT const tau,
                              double * TMPL_RESTRICT const w_func,
                              const size_t n_pts,
                              const size_t center);
+
+extern void
+rssringoccs_Tau_Compute_Window(rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+                               double * TMPL_RESTRICT const w_func,
+                               const size_t nw_pts,
+                               const size_t center);
 
 extern int
 rssringoccs_Tau_Resize_Half_Window(

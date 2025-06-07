@@ -21,10 +21,12 @@
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
 void
-rssringoccs_Fresnel_Transform_Newton_Norm(rssringoccs_TAUObj *tau,
-                                          const double *w_func,
-                                          size_t n_pts,
-                                          size_t center)
+rssringoccs_Fresnel_Transform_Normalized_Newton(
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const double * TMPL_RESTRICT const w_func,
+    size_t n_pts,
+    size_t center
+)
 {
     /*  m is used for indexing the Riemann sum, offset is the index for the   *
      *  off-center point in the window, the dummy variable of integration.    */

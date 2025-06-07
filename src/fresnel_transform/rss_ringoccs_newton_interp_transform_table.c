@@ -19,8 +19,8 @@ rssringoccs_newton_interp_transform_table[2][2][6] = {
         /*  Inverse transforms with normalizing by the window width.          */
         {
             rssringoccs_Fresnel_Transform_Normalized_Newton4,
-            NULL,
             rssringoccs_Fresnel_Transform_Normalized_Newton8,
+            rssringoccs_Fresnel_Transform_Normalized_Newton16,
             NULL,
             NULL,
             NULL

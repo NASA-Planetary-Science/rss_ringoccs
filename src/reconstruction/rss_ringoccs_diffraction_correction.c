@@ -23,7 +23,7 @@ void rssringoccs_Diffraction_Correction(rssringoccs_TAUObj *tau)
         rssringoccs_Diffraction_Correction_Newton(tau);
 
     else if (tau->psinum < rssringoccs_PsiType_None)
-        rssringoccs_Diffraction_Correction_Newton(tau);
+        rssringoccs_Diffraction_Correction_Polynomial_Newton(tau);
 
     else
     {

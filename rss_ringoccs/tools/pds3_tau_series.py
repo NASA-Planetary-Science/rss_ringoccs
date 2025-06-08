@@ -239,9 +239,16 @@ def get_tau_series_info(rev_info, tau_inst, series_name, prof_dir,history=None):
             round(max(tau_inst.B_deg_vals), 4)) + '   <deg>'
     #LOWEST_DETECTABLE_OPACITY = str(min(tau_inst.tau_threshold_vals))
     #HIGHEST_DETECTABLE_OPACITY = str(max(tau_inst.tau_threshold_vals))
-    LOWEST_DETECTABLE_OPACITY = str(0.00)
-    HIGHEST_DETECTABLE_OPACITY = str(0.00)
+    #LOWEST_DETECTABLE_OPACITY = str(0.00)
+    #HIGHEST_DETECTABLE_OPACITY = str(0.00)
+    mu0 = np.abs(np.sin(np.radians(np.nanmean(tau_inst.B_deg_vals))))
+    tau_max = np.nanmean(tau_inst.tau_threshold_vals)
+    tau_min = mu0 * np.exp(-tau_max/(2*mu0))
+    LOWEST_DETECTABLE_OPACITY = f'{tau_min:0.6f}'
+    HIGHEST_DETECTABLE_OPACITY = f'{tau_max:0.6f}'
 
+    #print("DEBUG: LOWEST_DETECTABLE_OPACITY",LOWEST_DETECTABLE_OPACITY)
+    #print("DEBUG: HIGHEST_DETECTABLE_OPACITY",HIGHEST_DETECTABLE_OPACITY)
 
     NAIF_TOOLKIT_VERSION = ''
     SPICE_FILE_NAME = ''

@@ -225,9 +225,16 @@ def get_dlp_series_info(rev_info, dlp_inst, series_name, prof_dir):
             round(min(np.degrees(dlp_inst.B_rad_vals)), 4)) + '   <deg>'
     MAXIMUM_OBSERVED_RING_ELEVATION = str(
             round(max(np.degrees(dlp_inst.B_rad_vals)), 4)) + '   <deg>'
-    LOWEST_DETECTABLE_OPACITY = str(min(dlp_inst.raw_tau_threshold_vals))
-    HIGHEST_DETECTABLE_OPACITY = str(max(dlp_inst.raw_tau_threshold_vals))
-
+    #LOWEST_DETECTABLE_OPACITY = str(min(dlp_inst.raw_tau_threshold_vals))
+    #HIGHEST_DETECTABLE_OPACITY = str(max(dlp_inst.raw_tau_threshold_vals))
+    LOWEST_DETECTABLE_OPACITY = str(0.00)
+    HIGHEST_DETECTABLE_OPACITY = str(0.00)
+# tau_inst not available, so set these to zero - they are stored in TAU.LBL
+    #mu0 = np.abs(np.sin(np.radians(np.nanmean(tau_inst.B_deg_vals))))
+    #tau_max = np.nanmean(tau_inst.tau_threshold_vals)
+    #tau_min = mu0 * np.exp(-tau_max/(2*mu0))
+    #LOWEST_DETECTABLE_OPACITY = f'{tau_min:0.6f}'
+    #HIGHEST_DETECTABLE_OPACITY = f'{tau_max:0.6f}'
 
     NAIF_TOOLKIT_VERSION = ''
     SPICE_FILE_NAME = ''

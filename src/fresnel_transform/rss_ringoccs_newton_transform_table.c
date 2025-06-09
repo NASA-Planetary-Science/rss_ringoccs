@@ -32,7 +32,7 @@ rssringoccs_newton_transform_table[2][2][3] = {
 
         /*  Forward transform with normalizing by the window width.           */
         {
-            NULL,
+            rssringoccs_Fresnel_Transform_Normalized_Forward_Newton,
             NULL,
             NULL
         }

@@ -18,7 +18,7 @@
  ******************************************************************************/
 #include <libtmpl/include/tmpl_config.h>
 #include <libtmpl/include/tmpl_complex.h>
-#include <libtmpl/include/tmpl_cyl_fresnel_diffraction.h>
+#include <libtmpl/include/tmpl_cyl_fresnel_optics.h>
 #include <libtmpl/include/tmpl_vec2.h>
 #include <libtmpl/include/tmpl_vec3.h>
 

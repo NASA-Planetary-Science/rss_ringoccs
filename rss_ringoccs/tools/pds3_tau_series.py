@@ -242,8 +242,9 @@ def get_tau_series_info(rev_info, tau_inst, series_name, prof_dir,history=None):
     #LOWEST_DETECTABLE_OPACITY = str(0.00)
     #HIGHEST_DETECTABLE_OPACITY = str(0.00)
     mu0 = np.abs(np.sin(np.radians(np.nanmean(tau_inst.B_deg_vals))))
-    tau_max = np.nanmean(tau_inst.tau_threshold_vals)
-    tau_min = mu0 * np.exp(-tau_max/(2*mu0))
+    # 2025 Jun 11 - rfrench
+    tau_max = 0. # Brandon found error here np.nanmean(tau_inst.tau_threshold_vals)
+    tau_min = 0. # mu0 * np.exp(-tau_max/(2*mu0))
     LOWEST_DETECTABLE_OPACITY = f'{tau_min:0.6f}'
     HIGHEST_DETECTABLE_OPACITY = f'{tau_max:0.6f}'
 

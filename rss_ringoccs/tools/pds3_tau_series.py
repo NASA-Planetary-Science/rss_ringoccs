@@ -243,8 +243,14 @@ def get_tau_series_info(rev_info, tau_inst, series_name, prof_dir,history=None):
     #HIGHEST_DETECTABLE_OPACITY = str(0.00)
     mu0 = np.abs(np.sin(np.radians(np.nanmean(tau_inst.B_deg_vals))))
     # 2025 Jun 11 - rfrench
-    tau_max = 0. # Brandon found error here np.nanmean(tau_inst.tau_threshold_vals)
-    tau_min = 0. # mu0 * np.exp(-tau_max/(2*mu0))
+#    tau_max = 0. # Brandon found error here np.nanmean(tau_inst.tau_threshold_vals)
+#    print('TP1: dir(tau_inst)',dir(tau_inst))
+#    print('TP2: tau_inst.tau_threshold_vals',tau_inst.tau_threshold_vals)
+# The problem was that the ipynb notebook they were using did not
+# compute the threshold optical depth, so tau_inst.tau_threshold_vals
+# was NONE
+    tau_max = np.nanmean(tau_inst.tau_threshold_vals)
+    tau_min = mu0 * np.exp(-tau_max/(2*mu0))
     LOWEST_DETECTABLE_OPACITY = f'{tau_min:0.6f}'
     HIGHEST_DETECTABLE_OPACITY = f'{tau_max:0.6f}'
 

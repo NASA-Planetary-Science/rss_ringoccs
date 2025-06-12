@@ -36,6 +36,7 @@ def write_tau_series_data(tau_inst, out_file):
 
     f = open(out_file, 'w')
 
+    print('Using new pds3_tau_series')
     if hasattr(tau_inst, 'ul_rho_km_vals'):
         format_str = ('%14.6F,' + '%10.6F,' + '%10.6F,' + '%12.6F,' + '%12.6F,'
                 + '%14.6E,' + '%14.6E,' + '%12.6F,' + '%14.6E,' + '%14.6F,'
@@ -54,8 +55,11 @@ def write_tau_series_data(tau_inst, out_file):
                 np.degrees(tau_inst.phi_rad_vals[n]),
                 tau_inst.phi_rl_deg_vals[n],
                 tau_inst.phi_deg_vals[n],
-                tau_inst.T_out[n]**2,
-                -np.log(tau_inst.T_out[n]**2)*np.abs(np.sin(np.radians(tau_inst.B_deg_vals[n]))),
+# added np.abs()
+                np.abs(tau_inst.T_out[n]**2),
+                #tau_inst.T_out[n]**2,
+                -np.log(np.abs(tau_inst.T_out[n]**2))*np.abs(np.sin(np.radians(tau_inst.B_deg_vals[n]))),
+                #-np.log(tau_inst.T_out[n]**2)*np.abs(np.sin(np.radians(tau_inst.B_deg_vals[n]))),
                 np.degrees(np.arctan2(np.imag(-tau_inst.T_out[n]),np.real(tau_inst.T_out[n]))),
                 tau_threshold_val,
                 tau_inst.t_oet_spm_vals[n],
@@ -83,8 +87,11 @@ def write_tau_series_data(tau_inst, out_file):
                 tau_inst.rho_corr_timing_km_vals[n],
                 tau_inst.phi_rl_deg_vals[n],
                 tau_inst.phi_deg_vals[n],
-                tau_inst.T_out[n]**2,
-                -np.log(tau_inst.T_out[n]**2)*np.abs(np.sin(np.radians(tau_inst.B_deg_vals[n]))),
+                #tau_inst.T_out[n]**2,
+                #-np.log(tau_inst.T_out[n]**2)*np.abs(np.sin(np.radians(tau_inst.B_deg_vals[n]))),
+                np.abs(tau_inst.T_out[n]**2),
+                #-np.log(tau_inst.T_out[n]**2)*np.abs(np.sin(np.radians(tau_inst.B_deg_vals[n]))),
+                -np.log(np.abs(tau_inst.T_out[n]**2))*np.abs(np.sin(np.radians(tau_inst.B_deg_vals[n]))),
                 np.degrees(np.arctan2(np.imag(-tau_inst.T_out[n]),np.real(tau_inst.T_out[n]))),
                 tau_threshold_val,
                 tau_inst.t_oet_spm_vals[n],

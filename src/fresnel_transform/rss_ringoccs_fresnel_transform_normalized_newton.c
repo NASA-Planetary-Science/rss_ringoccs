@@ -16,37 +16,58 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
-#include <libtmpl/include/tmpl.h>
-#include <libtmpl/include/constants/tmpl_math_constants.h>
+
+/*  TMPL_RESTRICT macro provided here.                                        */
+#include <libtmpl/include/tmpl_config.h>
+
+/*  Double precision complex numbers and routines given here.                 */
+#include <libtmpl/include/tmpl_complex.h>
+
+/*  Functions for the Fresnel kernel and Fresnel optics found here.           */
+#include <libtmpl/include/tmpl_cyl_fresnel_optics.h>
+
+/*  2D and 3D vector typedefs, used for the geometry of the inversion.        */
+#include <libtmpl/include/tmpl_vec2.h>
+#include <libtmpl/include/tmpl_vec3.h>
+
+/*  rssringoccs_TAUObj typedef provided here.                                 */
+#include <rss_ringoccs/include/rss_ringoccs_tau.h>
+
+/*  Function prototype / forward declaration found here.                      */
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
+/*  Inverse Fresnel transform via Newton-Raphson with window normalization.   */
 void
 rssringoccs_Fresnel_Transform_Normalized_Newton(
     rssringoccs_TAUObj * TMPL_RESTRICT const tau,
     const double * TMPL_RESTRICT const w_func,
-    size_t n_pts,
+    size_t nw_pts,
     size_t center
 )
 {
-    /*  m is used for indexing the Riemann sum, offset is the index for the   *
+    /*  n is used for indexing the Riemann sum, offset is the index for the   *
      *  off-center point in the window, the dummy variable of integration.    */
-    size_t m, offset;
+    size_t n, offset;
 
-    /*  The Fresnel kernel and the stationary ring azimuth angle.             */
-    double real_norm, abs_norm;
+    /*  Scale factor for the window normalization, which is the reciprocal of *
+     *  the magnitude of the free space integral across the window.           */
+    double scale;
+
+    /*  The integrand for the Riemann sum. For the inverse transform this is  *
+     *  the product of the tapering function, the transmittance, and the      *
+     *  (positive) stationary complex exponentiated Fresnel kernel.           */
     tmpl_ComplexDouble integrand;
-    const double sign = (tau->use_fwd ? -1.0 : 1.0);
 
     /*  Initialize T_out and norm to zero so we can loop over later.          */
     tmpl_ComplexDouble norm = tmpl_CDouble_Zero;
     tau->T_out[center] = tmpl_CDouble_Zero;
 
     /*  Symmetry is lost without the Legendre polynomials, or Fresnel         *
-     *  quadratic. Must compute everything from -W/2 to W/2.                  */
-    offset = center - ((n_pts - 1) >> 1);
+     *  quadratic. We must compute everything from -W / 2 to +W / 2.          */
+    offset = center - ((nw_pts - 1) >> 1);
 
     /*  Use a Riemann Sum to approximate the Fresnel Inverse Integral.        */
-    for (m = 0; m < n_pts; ++m)
+    for (n = 0; n < nw_pts; ++n)
     {
         /*  This function does not assume the ideal geometry present in MTR86 *
          *  where u . y = 0, u being the vector from the spacecraft to the    *
@@ -67,34 +88,86 @@ rssringoccs_Fresnel_Transform_Normalized_Newton(
             tau->rz_km_vals[offset]
         );
 
-        /*  Compute the Fresnel kernel at the stationary azimuth angle, phi_s.*/
-        const double psi = sign * tmpl_Double_Stationary_Cyl_Fresnel_Psi(
-            tau->k_vals[center], &rho, &rho0, &R, tau->EPS, tau->toler
+        /*  Compute the Fresnel kernel at the stationary azimuth angle, phi_s.*
+         *  Note, this function returns the scale factor that is present from *
+         *  the stationary phase approximation. The general integral is:      *
+         *                                                                    *
+         *                          -    -                                    *
+         *      ^         sin(B)   | |  | |        exp(i  psi)                *
+         *      T(rho0) = ------   |    |   T(rho) ----------- drho           *
+         *                lambda | |  | |          | R - rho |                *
+         *                        -    -                                      *
+         *                                                                    *
+         *  Where rho is a vector in this expression. Writing                 *
+         *  rho = (r cos(phi), r sin(phi)), drho = r dr dphi, and assuming    *
+         *  circular symmetry, T(rho) = T(r), we obtain:                      *
+         *                                                                    *
+         *                         inf         2 pi                           *
+         *                          -           -                             *
+         *      ^         sin(B)   | |         | | exp(i  psi)                *
+         *      T(rho0) = ------   |  r T(r)   |   ----------- dphi dr        *
+         *                lambda | |         | |   | R - rho |                *
+         *                        -           -                               *
+         *                        0           0                               *
+         *                                                                    *
+         *  The phi integral is handled via stationary phase, producing:      *
+         *                                                                    *
+         *                                                                    *
+         *        2 pi                                                        *
+         *         -                          _________                       *
+         *        | | exp(i  psi)            / 2 pi     exp(i (psi_s - pi/4)) *
+         *        |   ----------- dphi ~=   / --------- -------------------   *
+         *      | |   | R - rho |         \/  |psi_s''|    | R - rho_s |      *
+         *       -                                                            *
+         *       0                                                            *
+         *                                                                    *
+         *  Where phi_s is the stationary azimuth angle, psi_s and psi_s''    *
+         *  the evaluation of psi and psi'' at phi = phi_s, respectively, and *
+         *  where rho_s = (r cos(phi_s), r sin(phi_s)). The stationary        *
+         *  cylindrical Fresnel kernel is r times this expression. This       *
+         *  function computes this quantity.                                  */
+        tmpl_ComplexDouble ker = tmpl_Double_Stationary_Cyl_Fresnel_Kernel(
+            tau->k_vals[offset], &rho, &rho0, &R, tau->EPS, tau->toler
         );
 
-        /*  The complex exponentiated Fresnel kernel is simply exp(-i psi).   *
-         *  This is scaled by the window function and integrated over.        */
-        const tmpl_ComplexDouble exp_psi = tmpl_CDouble_Polar(w_func[m], -psi);
+        /*  The inverse transform is approximated by negating the Fresnel     *
+         *  phase, psi. We have:                                              *
+         *                                                                    *
+         *                   -             _________                          *
+         *                  | | ^         / 2 pi     exp(-i (psi_s-pi/4))     *
+         *      T(rho) ~=   |   T(r0) r  / --------- -------------------- dr0 *
+         *                | |          \/  |psi_s''|     | R - rho_s |        *
+         *                 -                                                  *
+         *                                                                    *
+         *  The kernel for the inverse transform is hence simply the complex  *
+         *  conjugate of the kernel for the forward transform. Compute this.  */
+        tmpl_CDouble_ConjugateSelf(&ker);
 
-        /*  Compute the norm using a Riemann sum as well.                     */
-        tmpl_CDouble_AddTo(&norm, &exp_psi);
+        /*  Lastly, scale the kernel by the window function.                  */
+        tmpl_CDouble_MultiplyBy_Real(&ker, w_func[n]);
 
-        /*  Compute the transform with a Riemann sum. If the T_in pointer     *
-         *  does not contain at least 2*n_pts+1 points, n_pts to the left and *
-         *  right of the center, then this will create a segmentation fault.  */
-        integrand = tmpl_CDouble_Multiply(exp_psi, tau->T_in[offset]);
+        /*  The normalization factor is the free space integral, which is     *
+         *  also computed using a Riemann sum.                                */
+        tmpl_CDouble_AddTo(&norm, &ker);
+
+        /*  The integrand is the product of the complex data, T_in, and the   *
+         *  Fresnel kernel (scaled by the tapering function). Add this to     *
+         *  the Riemann sum.                                                  */
+        integrand = tmpl_CDouble_Multiply(ker, tau->T_in[offset]);
         tmpl_CDouble_AddTo(&tau->T_out[center], &integrand);
+
+        /*  We are moving left-to-right in the data, increment the offset.    */
         offset += 1;
     }
 
-    /*  The integral in the numerator of norm evaluates to F sqrt(2). Use     *
-     *  this in the calculation of the normalization. The cabs function       *
-     *  computes the absolute value of complex number (defined in complex.h). */
-    abs_norm = tmpl_CDouble_Abs(norm);
-    real_norm = tmpl_Double_Rcpr_Sqrt_Two / abs_norm;
+    /*  By Babinet's principle, the free space integral is 1. We are          *
+     *  integrating over a finite data set, and have introduced a tapering    *
+     *  function. The normalization factor is the magnitude of the free space *
+     *  integral across the entire real line divided by the tapered integral  *
+     *  across the window, which is hence 1 / | norm |. Compute this.         */
+    scale = 1.0 / tmpl_CDouble_Abs(norm);
 
-    /*  Multiply result by the coefficient found in the Fresnel inverse.      *
-     *  The 1/F term is omitted, since the F in the norm cancels this.        */
-    integrand = tmpl_CDouble_Rect(real_norm, real_norm);
-    tau->T_out[center] = tmpl_CDouble_Multiply(integrand, tau->T_out[center]);
+    /*  Scale the Riemann sum by the normalization factor to conclude.        */
+    tmpl_CDouble_MultiplyBy_Real(&tau->T_out[center], scale);
 }
+/*  End of rssringoccs_Fresnel_Transform_Normalized_Newton.                   */

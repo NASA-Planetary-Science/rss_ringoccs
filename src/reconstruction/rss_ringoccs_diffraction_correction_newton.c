@@ -9,7 +9,7 @@
 /*  Performs the Newton transform on a Tau object.                            */
 void rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj * const tau)
 {
-    /*  Variables for indexing the inner most loop.                           */
+    /*  Variable for indexing the inner most loop.                            */
     size_t n;
 
     /*  Variable for the number of points in the window, and the index of the *
@@ -32,8 +32,13 @@ void rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj * const tau)
      *  beneficial to precompute the tapering function once and use that.     */
     double *w_func = NULL;
 
-    /*  Dummy variable for realloc. Used to avoid memory leaks.               */
-    void *tmp = NULL;
+    /*  When the window width is large, or the sample spacing is very fine,   *
+     *  repeated calls to realloc, which resizes the window array, start to   *
+     *  bottleneck the computation. It is faster to compute the maximum width *
+     *  required for the entire computation and then make one call to malloc. *
+     *  These variables are for the largest window width required.            */
+    double w_max;
+    size_t nw_max;
 
     /*  Variable for the actual transform used. We'll select it later.        */
     rssringoccs_FresnelNewtonTransform newton_transform;
@@ -99,8 +104,11 @@ void rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj * const tau)
     }
 
     /*  Create an array for the pre-computed tapering function.               */
-    w_func = TMPL_MALLOC(double, nw_pts);
+    w_max = tmpl_Double_Array_Max(tau->w_km_vals + tau->start, tau->n_used);
+    nw_max = (TMPL_CAST(w_max / two_dx, size_t) << 1) + 1;
+    w_func = TMPL_MALLOC(double, nw_max);
 
+    /*  Malloc returns NULL on failure. Check for this.                       */
     if (!w_func)
     {
         tau->error_occurred = tmpl_True;
@@ -112,7 +120,12 @@ void rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj * const tau)
         return;
     }
 
-    /*  Compute the values in the window function for the entire array.       */
+    /*  Compute the values in the window function. Note, w_func almost surely *
+     *  has more than nw_pts allocated to it, it has nw_max allocated. This   *
+     *  function sets the first nw_pts in the array, the remaining points are *
+     *  uninitialized. This makes no difference, all of the routines used     *
+     *  take in the nw_pts variable as a parameter and do not read beyond     *
+     *  that length in the w_func array.                                      */
     rssringoccs_Tau_Compute_Window(tau, w_func, nw_pts, center);
 
     /*  Loop through all of the points in the processing range and run the    *
@@ -130,27 +143,6 @@ void rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj * const tau)
             /* Reset w_init and recompute window function.                    */
             w_init = tau->w_km_vals[center];
             nw_pts = (TMPL_CAST(w_init / two_dx, size_t) << 1) + 1;
-
-            /*  Reallocate memory since the sizes have changed.               */
-            tmp = realloc(w_func, sizeof(*w_func) * nw_pts);
-
-            /*  Make sure realloc did not fail. It returns NULL on failure.   */
-            if (!tmp)
-            {
-                tau->error_occurred = tmpl_True;
-                tau->error_message =
-                    "\n\rError Encountered: rss_ringoccs\n"
-                    "\r\trssringoccs_Diffraction_Correction_Newton\n\n"
-                    "\rrealloc returned NULL for w_func.\n";
-
-                /*  The w_func array still points to allocated memory. Free   *
-                 *  this before returning to avoid memory leaks.              */
-                TMPL_FREE(w_func);
-                return;
-            }
-
-            /*  realloc was successful. Reset the pointer for the window.     */
-            w_func = tmp;
 
             /*  Compute the window function for the new window width.         */
             rssringoccs_Tau_Compute_Window(tau, w_func, nw_pts, center);

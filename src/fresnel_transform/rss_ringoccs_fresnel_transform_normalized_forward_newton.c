@@ -16,15 +16,27 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
+
+/*  TMPL_RESTRICT macro provided here.                                        */
 #include <libtmpl/include/tmpl_config.h>
+
+/*  Double precision complex numbers and routines given here.                 */
 #include <libtmpl/include/tmpl_complex.h>
+
+/*  Functions for the Fresnel kernel and Fresnel optics found here.           */
 #include <libtmpl/include/tmpl_cyl_fresnel_optics.h>
+
+/*  2D and 3D vector typedefs, used for the geometry of the inversion.        */
 #include <libtmpl/include/tmpl_vec2.h>
 #include <libtmpl/include/tmpl_vec3.h>
 
-#include <libtmpl/include/constants/tmpl_math_constants.h>
+/*  rssringoccs_TAUObj typedef provided here.                                 */
+#include <rss_ringoccs/include/rss_ringoccs_tau.h>
+
+/*  Function prototype / forward declaration found here.                      */
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
+/*  Forward Fresnel transform via Newton-Raphson with window normalization.   */
 void
 rssringoccs_Fresnel_Transform_Normalized_Forward_Newton(
     rssringoccs_TAUObj * TMPL_RESTRICT const tau,
@@ -37,13 +49,13 @@ rssringoccs_Fresnel_Transform_Normalized_Forward_Newton(
      *  off-center point in the window, the dummy variable of integration.    */
     size_t n, offset;
 
-    /*  The magnitude of the normalization factor, which is the free space    *
-     *  integral, and the scale factor, which is sqrt(2) / |norm|.            */
-    double abs_norm, scale;
+    /*  Scale factor for the window normalization, which is the reciprocal of *
+     *  the magnitude of the free space integral across the window.           */
+    double scale;
 
     /*  The integrand for the Riemann sum. For the forward transform this is  *
      *  the product of the tapering function, the transmittance, and the      *
-     *  complex exponentiated Fresnel kernel, exp(i psi).                     */
+     *  (positive) stationary complex exponentiated Fresnel kernel.           */
     tmpl_ComplexDouble integrand;
 
     /*  This function does not assume the ideal geometry present in MTR86     *
@@ -82,47 +94,73 @@ rssringoccs_Fresnel_Transform_Normalized_Forward_Newton(
             tau->rho_km_vals[offset], tau->phi_deg_vals[center]
         );
 
-        /*  Compute the Fresnel kernel at the stationary azimuth angle, phi_s.*/
-        const double psi = tmpl_Double_Stationary_Cyl_Fresnel_Psi(
-            tau->k_vals[center], &rho, &rho0, &R, tau->EPS, tau->toler
+        /*  Compute the Fresnel kernel at the stationary azimuth angle, phi_s.*
+         *  Note, this function returns the scale factor that is present from *
+         *  the stationary phase approximation. The general integral is:      *
+         *                                                                    *
+         *                          -    -                                    *
+         *      ^         sin(B)   | |  | |        exp(i  psi)                *
+         *      T(rho0) = ------   |    |   T(rho) ----------- drho           *
+         *                lambda | |  | |          | R - rho |                *
+         *                        -    -                                      *
+         *                                                                    *
+         *  Where rho is a vector in this expression. Writing                 *
+         *  rho = (r cos(phi), r sin(phi)), drho = r dr dphi, and assuming    *
+         *  circular symmetry, T(rho) = T(r), we obtain:                      *
+         *                                                                    *
+         *                         inf         2 pi                           *
+         *                          -           -                             *
+         *      ^         sin(B)   | |         | | exp(i  psi)                *
+         *      T(rho0) = ------   |  r T(r)   |   ----------- dphi dr        *
+         *                lambda | |         | |   | R - rho |                *
+         *                        -           -                               *
+         *                        0           0                               *
+         *                                                                    *
+         *  The phi integral is handled via stationary phase, producing:      *
+         *                                                                    *
+         *                                                                    *
+         *        2 pi                                                        *
+         *         -                          _________                       *
+         *        | | exp(i  psi)            / 2 pi     exp(i (psi_s - pi/4)) *
+         *        |   ----------- dphi ~=   / --------- -------------------   *
+         *      | |   | R - rho |         \/  |psi_s''|    | R - rho_s |      *
+         *       -                                                            *
+         *       0                                                            *
+         *                                                                    *
+         *  Where phi_s is the stationary azimuth angle, psi_s and psi_s''    *
+         *  the evaluation of psi and psi'' at phi = phi_s, respectively, and *
+         *  where rho_s = (r cos(phi_s), r sin(phi_s)). The stationary        *
+         *  cylindrical Fresnel kernel is r times this expression. This       *
+         *  function computes this quantity.                                  */
+        tmpl_ComplexDouble ker = tmpl_Double_Stationary_Cyl_Fresnel_Kernel(
+            tau->k_vals[offset], &rho, &rho0, &R, tau->EPS, tau->toler
         );
 
-        /*  The complex exponentiated Fresnel kernel is simply exp(i psi).    *
-         *  This is scaled by the window function and integrated over.        */
-        const tmpl_ComplexDouble exp_psi = tmpl_CDouble_Polar(w_func[n], psi);
+        /*  Lastly, scale the kernel by the window function.                  */
+        tmpl_CDouble_MultiplyBy_Real(&ker, w_func[n]);
 
-        /*  Compute the norm using a Riemann sum as well.                     */
-        tmpl_CDouble_AddTo(&norm, &exp_psi);
+        /*  The normalization factor is the free space integral, which is     *
+         *  also computed using a Riemann sum.                                */
+        tmpl_CDouble_AddTo(&norm, &ker);
 
-        /*  The integrand is w(r - r0) T_hat[r] exp(i psi(rho, rho)). Compute.*/
-        integrand = tmpl_CDouble_Multiply(exp_psi, tau->T_in[offset]);
-
-        /*  We are performing a simple Riemann sum. Add the integrand.        */
+        /*  The integrand is the product of the complex data, T_in, and the   *
+         *  Fresnel kernel (scaled by the tapering function). Add this to     *
+         *  the Riemann sum.                                                  */
+        integrand = tmpl_CDouble_Multiply(ker, tau->T_in[offset]);
         tmpl_CDouble_AddTo(&tau->T_out[center], &integrand);
 
-        /*  We are computing left-to-right, increment to the next point.      */
+        /*  We are moving left-to-right in the data, increment the offset.    */
         offset += 1;
     }
 
-    /*  The integral in the numerator of the scale factor is F sqrt(2),       *
-     *  the denominator is |norm| dx, so the ratio is sqrt(2) F / |norm| dx.  *
-     *  Since the dx is on the bottom, this will cancel the dx that occurs in *
-     *  the Riemann sum for T_out. The complex scale factor for the Fresnel   *
-     *  transform (the constant term outside the integral) is (1 - i) / 2 F.  *
-     *  We therefore have:                                                    *
-     *                                                                        *
-     *      1 - i numer      1 - i sqrt(2) F                                  *
-     *      ----- ----- dx = ----- --------- dx                               *
-     *       2 F  demom       2 F  |norm| dx                                  *
-     *                                                                        *
-     *                            1 - i                                       *
-     *                     = --------------                                   *
-     *                       sqrt(2) |norm|                                   *
-     *                                                                        *
-     *  Compute this and scale the result to finish the calculation.          */
-    abs_norm = tmpl_CDouble_Abs(norm);
-    scale = tmpl_Double_Rcpr_Sqrt_Two / abs_norm;
-    integrand = tmpl_CDouble_Rect(scale, -scale);
-    tmpl_CDouble_MultiplyBy(&tau->T_out[center], &integrand);
+    /*  By Babinet's principle, the free space integral is 1. We are          *
+     *  integrating over a finite data set, and have introduced a tapering    *
+     *  function. The normalization factor is the magnitude of the free space *
+     *  integral across the entire real line divided by the tapered integral  *
+     *  across the window, which is hence 1 / | norm |. Compute this.         */
+    scale = 1.0 / tmpl_CDouble_Abs(norm);
+
+    /*  Scale the Riemann sum by the normalization factor to conclude.        */
+    tmpl_CDouble_MultiplyBy_Real(&tau->T_out[center], scale);
 }
-/*  rssringoccs_Fresnel_Transform_Normalized_Forward_Newton.                  */
+/*  End of rssringoccs_Fresnel_Transform_Normalized_Forward_Newton.           */

@@ -1,9 +1,10 @@
 #include <libtmpl/include/tmpl_bool.h>
-#include <libtmpl/include/tmpl_string.h>
 #include <libtmpl/include/tmpl_complex.h>
 #include <libtmpl/include/compat/tmpl_malloc.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 #include <stdlib.h>
+
+#if 1
 
 void rssringoccs_Reconstruction(rssringoccs_TAUObj *tau)
 {
@@ -81,3 +82,31 @@ void rssringoccs_Reconstruction(rssringoccs_TAUObj *tau)
     rssringoccs_Tau_Finish(tau);
     return;
 }
+
+#else
+
+#include <rss_ringoccs/include/rss_ringoccs_model.h>
+
+void rssringoccs_Reconstruction(rssringoccs_TAUObj *tau)
+{
+    rssringoccs_ModelParameters parameters;
+
+    if (!tau)
+        return;
+
+    rssringoccs_Tau_Check_Keywords(tau);
+    rssringoccs_Tau_Check_Occ_Type(tau);
+    rssringoccs_Tau_Get_Window_Width(tau);
+    rssringoccs_Tau_Check_Data_Range(tau);
+
+    parameters.model = rssringoccs_Model_LeftEdge;
+    parameters.peak_opacity = 1.0;
+    parameters.geometry.edge.center = 87500.0;
+
+    rssringoccs_Tau_Model_Left_Straightedge(tau, &parameters);
+
+    rssringoccs_Tau_Finish(tau);
+    return;
+}
+
+#endif

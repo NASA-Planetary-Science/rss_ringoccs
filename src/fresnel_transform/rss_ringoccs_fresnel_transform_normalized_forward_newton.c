@@ -36,6 +36,8 @@
 /*  Function prototype / forward declaration found here.                      */
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
+#if 0
+
 /*  Forward Fresnel transform via Newton-Raphson with window normalization.   */
 void
 rssringoccs_Fresnel_Transform_Normalized_Forward_Newton(
@@ -164,3 +166,84 @@ rssringoccs_Fresnel_Transform_Normalized_Forward_Newton(
     tmpl_CDouble_MultiplyBy_Real(&tau->T_out[center], scale);
 }
 /*  End of rssringoccs_Fresnel_Transform_Normalized_Forward_Newton.           */
+
+#else
+
+/*  Inverse Fresnel transform via Newton-Raphson with window normalization.   */
+void
+rssringoccs_Fresnel_Transform_Normalized_Forward_Newton(
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const double * TMPL_RESTRICT const w_func,
+    size_t nw_pts,
+    size_t center
+)
+{
+    size_t n;
+    double slope;
+    double current_psi, next_psi;
+    size_t offset = center - ((nw_pts - 1) >> 1);
+    const double factor = 0.5 / tau->F_km_vals[center];
+    const double threshold = 1.0E-8;
+
+    tmpl_ComplexDouble integrand, left, right;
+
+    const tmpl_TwoVectorDouble rho0 = tmpl_2DDouble_Polard(
+        tau->rho_km_vals[center], tau->phi_deg_vals[center]
+    );
+
+    const tmpl_ThreeVectorDouble R = tmpl_3DDouble_Rect(
+        tau->rx_km_vals[center],
+        tau->ry_km_vals[center],
+        tau->rz_km_vals[center]
+    );
+
+    tmpl_TwoVectorDouble rho = tmpl_2DDouble_Polard(
+        tau->rho_km_vals[offset], tau->phi_deg_vals[center]
+    );
+
+    current_psi = tmpl_Double_Stationary_Cyl_Fresnel_Psi(
+        tau->k_vals[center], &rho, &rho0, &R, tau->EPS, tau->toler
+    );
+
+    tau->T_out[center] = tmpl_CDouble_Zero;
+
+    for (n = 0; n < nw_pts - 1; ++n)
+    {
+        rho = tmpl_2DDouble_Polard(
+            tau->rho_km_vals[offset + 1], tau->phi_deg_vals[center]
+        );
+
+        next_psi = tmpl_Double_Stationary_Cyl_Fresnel_Psi(
+            tau->k_vals[center], &rho, &rho0, &R, tau->EPS, tau->toler
+        );
+
+        slope = (next_psi - current_psi) / tau->dx_km;
+
+        if (tmpl_Double_Abs(slope) < threshold)
+        {
+            integrand = tmpl_CDouble_Polar(tau->dx_km * w_func[n], current_psi);
+            tmpl_CDouble_MultiplyBy(&integrand, &tau->T_in[offset]);
+        }
+
+        else
+        {
+            left = tmpl_CDouble_Expi(current_psi);
+            right = tmpl_CDouble_Expi(next_psi);
+            integrand = tmpl_CDouble_Subtract(right, left);
+            tmpl_CDouble_MultiplyBy_Imag(&integrand, -w_func[n] / slope);
+            tmpl_CDouble_MultiplyBy(&integrand, &tau->T_in[offset]);
+        }
+
+        tmpl_CDouble_AddTo(&tau->T_out[center], &integrand);
+
+        offset += 1;
+
+        current_psi = next_psi;
+    }
+
+    integrand = tmpl_CDouble_Rect(factor, -factor);
+    tau->T_out[center] = tmpl_CDouble_Multiply(integrand, tau->T_out[center]);
+}
+/*  End of rssringoccs_Fresnel_Transform_Normalized_Newton.                   */
+
+#endif

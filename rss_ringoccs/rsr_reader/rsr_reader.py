@@ -43,6 +43,30 @@ class RSRReader(object):
             will be True for any subsequent calls from the instance until
             you explicitly set it to False. This keyword is linked to the
             private attribute __decimate_16khz_to_1khz
+        :decimate_16khz_to_2khz (*bool*):
+            Optional Boolean argument which, if
+            set to True, decimates 16kHz files down to 2kHz sampling rate.
+            Note that this is a sticky keyword - if you set it to True, it
+            will be True for any subsequent calls from the instance until
+            you explicitly set it to False. This keyword is linked to the
+            private attribute __decimate_16khz_to_2khz.
+            If this keyword is set, it overrules decimate_16khz_to_1khz
+        :decimate_16khz_to_4khz (*bool*):
+            Optional Boolean argument which, if
+            set to True, decimates 16kHz files down to 4kHz sampling rate.
+            Note that this is a sticky keyword - if you set it to True, it
+            will be True for any subsequent calls from the instance until
+            you explicitly set it to False. This keyword is linked to the
+            private attribute __decimate_16khz_to_4khz.
+            If this keyword is set, it overrules decimate_16khz_to_1,2khz
+        :decimate_16khz_to_8khz (*bool*):
+            Optional Boolean argument which, if
+            set to True, decimates 16kHz files down to 8kHz sampling rate.
+            Note that this is a sticky keyword - if you set it to True, it
+            will be True for any subsequent calls from the instance until
+            you explicitly set it to False. This keyword is linked to the
+            private attribute __decimate_16khz_to_8khz.
+            If this keyword is set, it overrules decimate_16khz_to_1,2,4khz
         :apply_bias_correction (*bool*):
             Optional Boolean argument which, if set to True (the default)
             will apply a bias correction to the RSR data by returning
@@ -80,6 +104,9 @@ class RSRReader(object):
 
     Notes:
         #. Setting ``decimate_16khz_to_1khz=True`` for a 1kHz file will be ignored
+        #. Setting ``decimate_16khz_to_2khz=True`` for a 1kHz file will be ignored
+        #. Setting ``decimate_16khz_to_4khz=True`` for a 1kHz file will be ignored
+        #. Setting ``decimate_16khz_to_8khz=True`` for a 1kHz file will be ignored
         #. 16kHz files will take a few minutes to read and decimate
     """
 
@@ -167,7 +194,8 @@ class RSRReader(object):
     __field_names = (__sfdu_field_names + __ha_field_names + __ph_field_names
         + __sh_field_names + __data_field_names)
 
-    def __init__(self, rsr_file, decimate_16khz_to_1khz=True, 
+    def __init__(self, rsr_file, decimate_16khz_to_1khz=True, decimate_16khz_to_2khz=False,
+    		 decimate_16khz_to_4khz=False, decimate_16khz_to_8khz=False,
                  apply_bias_correction=True,NoOp=False,verbose=False):
 
         if not isinstance(verbose, bool):
@@ -183,6 +211,27 @@ class RSRReader(object):
                 + 'Python booleans instead')
             decimate_16khz_to_1khz = False
             
+        if not isinstance(decimate_16khz_to_2khz, bool):
+            print('WARNING (RSRReader.get_IQ): Expected Boolean input for '
+                + 'decimate_16khz_to_2khz keyword. Ignoring input. If you\'re '
+                + 'trying to use 1 or 0, then you should use the built-in '
+                + 'Python booleans instead')
+            decimate_16khz_to_2khz = False
+            
+        if not isinstance(decimate_16khz_to_4khz, bool):
+            print('WARNING (RSRReader.get_IQ): Expected Boolean input for '
+                + 'decimate_16khz_to_4khz keyword. Ignoring input. If you\'re '
+                + 'trying to use 1 or 0, then you should use the built-in '
+                + 'Python booleans instead')
+            decimate_16khz_to_4khz = False
+            
+        if not isinstance(decimate_16khz_to_8khz, bool):
+            print('WARNING (RSRReader.get_IQ): Expected Boolean input for '
+                + 'decimate_16khz_to_8khz keyword. Ignoring input. If you\'re '
+                + 'trying to use 1 or 0, then you should use the built-in '
+                + 'Python booleans instead')
+            decimate_16khz_to_8khz = False
+            
         if not isinstance(apply_bias_correction, bool):
             print('WARNING (RSRReader.get_IQ): Expected Boolean input for '
                 + 'apply_bias_correction keyword. Set to True. '
@@ -196,6 +245,9 @@ class RSRReader(object):
 
         # Default argment for __set_IQ 
         self.__decimate_16khz_to_1khz = decimate_16khz_to_1khz
+        self.__decimate_16khz_to_2khz = decimate_16khz_to_2khz
+        self.__decimate_16khz_to_4khz = decimate_16khz_to_4khz
+        self.__decimate_16khz_to_8khz = decimate_16khz_to_8khz
         self.__apply_bias_correction = apply_bias_correction
 
         # Record information about the run
@@ -508,6 +560,9 @@ class RSRReader(object):
 
 
         decimate_16khz_to_1khz = self.__decimate_16khz_to_1khz
+        decimate_16khz_to_2khz = self.__decimate_16khz_to_2khz
+        decimate_16khz_to_4khz = self.__decimate_16khz_to_4khz
+        decimate_16khz_to_8khz = self.__decimate_16khz_to_8khz
 
         spm_range = [min(spm_vals), max(spm_vals)]
         self.__set_sfdu_unpack(spm_range)
@@ -520,8 +575,47 @@ class RSRReader(object):
         i_end = self.__end_sfdu + 1
         IQ_m = self.__loop(i_start,i_end,apply_bias_correction=apply_bias_correction)
 
-        # Decimate 16kHz file to 1kHz spacing if specified
-        if decimate_16khz_to_1khz & (self.sample_rate_khz == 16):
+        # Decimate 16kHz file to 8kHz spacing if specified - overrides decimate_16khz_to_1khz
+        if decimate_16khz_to_8khz & (self.sample_rate_khz == 16):
+
+            if verbose:
+                print('\tDecimating to 8kHz sampling...')
+
+            IQ_m = decimate(IQ_m, 2, zero_phase=True) # NB
+
+            n_pts = len(IQ_m)
+            dt = 1.0 / float(8000) # NB
+            spm_vals = spm_vals[0] + dt * np.arange(n_pts)
+
+
+        # Decimate 16kHz file to 4kHz spacing if specified - overrides decimate_16khz_to_1khz
+        elif decimate_16khz_to_4khz & (self.sample_rate_khz == 16):
+
+            if verbose:
+                print('\tDecimating to 4kHz sampling...')
+
+            IQ_m = decimate(IQ_m, 4, zero_phase=True) # NB
+
+            n_pts = len(IQ_m)
+            dt = 1.0 / float(4000) # NB
+            spm_vals = spm_vals[0] + dt * np.arange(n_pts)
+
+
+        # Decimate 16kHz file to 2kHz spacing if specified - overrides decimate_16khz_to_1khz
+        elif decimate_16khz_to_2khz & (self.sample_rate_khz == 16):
+
+            if verbose:
+                print('\tDecimating to 2kHz sampling...')
+
+            IQ_m = decimate(IQ_m, 4, zero_phase=True)
+            IQ_m = decimate(IQ_m, 2, zero_phase=True) # NB
+
+            n_pts = len(IQ_m)
+            dt = 1.0 / float(2000) # NB
+            spm_vals = spm_vals[0] + dt * np.arange(n_pts)
+
+        # Decimate 16kHz file to 1kHz spacing if specified 
+        elif decimate_16khz_to_1khz & (self.sample_rate_khz == 16):
 
             if verbose:
                 print('\tDecimating to 1kHz sampling...')
@@ -532,6 +626,12 @@ class RSRReader(object):
             n_pts = len(IQ_m)
             dt = 1.0 / float(1000)
             spm_vals = spm_vals[0] + dt * np.arange(n_pts)
+
+        elif self.sample_rate_khz == 16:
+
+            if verbose:
+                print('\t*** WARNING - not decimating 16kHz file...')
+
 # unnecessary WARNING
         #elif decimate_16khz_to_1khz & (self.sample_rate_khz == 1) and (
         #        verbose is True):
@@ -625,7 +725,8 @@ class RSRReader(object):
         """
         input_var_dict = {'rsr_file': self.rsr_file}
         input_kw_dict = {
-            'decimate_16khz_to_1khz': self.__decimate_16khz_to_1khz}
+            'decimate_16khz_to_1khz': self.__decimate_16khz_to_1khz,
+            'decimate_16khz_to_2khz': self.__decimate_16khz_to_2khz}
 
         self.history = write_history_dict(input_var_dict, input_kw_dict,
                __file__)
@@ -638,4 +739,6 @@ Revisions:
         Remove multiprocessing, which failed with Python3.6 and later
         add apply_bias_correction keyword, tested against Dick Simpson's
         Fortran code.
+    2025 Jul 20 - rfrench@wellesley.edu
+        Add decimate_16khz_to_2khz keyword for higher resolution reconstructions
 """

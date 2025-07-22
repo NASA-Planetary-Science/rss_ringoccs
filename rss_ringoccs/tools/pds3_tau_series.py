@@ -36,7 +36,7 @@ def write_tau_series_data(tau_inst, out_file):
 
     f = open(out_file, 'w')
 
-    print('Using new pds3_tau_series')
+    #print('Using new pds3_tau_series')
     if hasattr(tau_inst, 'ul_rho_km_vals'):
         format_str = ('%14.6F,' + '%10.6F,' + '%10.6F,' + '%12.6F,' + '%12.6F,'
                 + '%14.6E,' + '%14.6E,' + '%12.6F,' + '%14.6E,' + '%14.6F,'

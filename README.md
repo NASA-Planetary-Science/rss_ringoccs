@@ -111,10 +111,10 @@ citing rss_ringoccs using the DOI:10.5281/zenodo.2548947
 
 | Version     | Date                  |
 |-------------|-----------------------|
-| 1.3-beta    | Current Master Branch |
-| 1.2         | January 11, 2021      |
-| 1.1         | July 1, 2019          |
-| 1.1-beta    | February 5, 2019      |
+| 1.3-beta    | January 12, 2021      |
+| 1.2.1       | Septmber 7, 2019      |
+| 1.2         | July 3, 2019          |
+| 1.1         | February 5, 2019      |
 | 1.0         | September 30, 2018    |
 | Pre-Release | April 22, 2018        |
 

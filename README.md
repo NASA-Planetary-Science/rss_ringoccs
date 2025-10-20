@@ -1,21 +1,9 @@
 # rss_ringoccs
-The master branch is currently v1.3-beta. rss_ringoccs is unable to run on the
-latest releases of Python (3.8 or 3.9) and it is recommended that 3.6 is used.
-There is active work in rewriting the project C89/C90 compliant code to allow
-for future use and ease of backwards and forward compatibility.
-
 rss_ringoccs is a suite of open-source C and Python-based analysis tools for
 Cassini Radio Science (RSS) ring occultations. It was developed by Team Cassini
 at Wellesley College (Sophia Flury, Jolene Fong, Ryan Maguire, and Glenn
 Steranka) under the direction of Richard French, Cassini RSS Team Leader, with
 funding provided by the NASA/JPL Cassini project.
-
-Version 1.2 was offically released on July 1, 2019.
-
-Version 1.2.1 was a development version that incorporated changes between
-Versions 1.2 and 1.3.
-
-Version 1.3-beta was officially released on January 12, 2021
 
 ## Introduction
 The Cassini Radio Science Subsystem (RSS) was used during the Cassini orbital
@@ -44,6 +32,38 @@ achieved the state-of-the-art in every respect. We encourage users to augment
 our algorithms and to report on those improvements, so that they can be
 incorporated in future editions of rss_ringoccs.
 
+## Building
+
+`rss_ringoccs` has a few dependencies:
+
+1. A `C` compiler (`gcc`, `clang`, `tcc`, `pcc`, and `MSVC` all work fine).
+2. `python3` (we have tested versions `3.7` to `3.12`).
+3. `libtmpl`
+4. `setuptools`
+5. `numpy`
+6. `scipy`
+7. `spiceypy`
+8. `GNU Make`
+
+`libtmpl` is provided as a submodule, and the Python dependencies can be
+found in the `requirements.txt` file. Note, while the `C` code does compile
+on Windows, some of the Python code assumes a unix-like operating system.
+Windows is not currently supported by `rss_ringoccs`.
+
+To build `rss_ringoccs` in a virtual environment, do the following:
+
+```bash
+git clone --recursive http://github.com/NASA-Planetary-Science/rss_ringoccs.git
+cd rss_ringoccs/
+
+python3 -m venv .venv
+source .venv/bin/activate
+
+python3 -m pip install --upgrade pip
+python3 -m pip install -r requirements.txt
+python3 -m pip install .
+```
+
 ## Installation and Documentation
 Detailed installation instructions and full documentation are contained the
 `rss_ringoccs User Guide` at https://github.com/NASA-Planetary-Science/rss_ringoccs/tree/master/docs/rss_ringoccs_User_Guide_V1.3.pdf.
@@ -70,7 +90,7 @@ be found in the  `./tables/` directory. This batch script implementation of the
 pipeline is located in the `./pipeline/` directory. We suggest running the batch
 script using the `yes` command as shown here:
 ```cd rss_ringoccs_master/pipeline
-yes | python e2e_batch.py 
+yes | python e2e_batch.py
 ```
 The `rss_ringoccs User Guide` includes several additional examples of end-to-end
 processing scripts, as well as instructions to enable users to construct their
@@ -82,9 +102,21 @@ we encourage you to post a issue to
 https://github.com/NASA-Planetary-Science/rss_ringoccs/issues. We will attempt
 to respond promptly, and ther users will benefit. Alternatively, you can write
 email directly to Richard French: rfrench_at_wellesley.edu.
+
 ## Citing rss_ringoccs
-If you use rss_ringoccs as the basis of a publication, please consider 
+If you use rss_ringoccs as the basis of a publication, please consider
 citing rss_ringoccs using the DOI:10.5281/zenodo.2548947
+
+## Version History
+
+| Version     | Date                  |
+|-------------|-----------------------|
+| 1.3-beta    | Current Master Branch |
+| 1.2         | January 11, 2021      |
+| 1.1         | July 1, 2019          |
+| 1.1-beta    | February 5, 2019      |
+| 1.0         | September 30, 2018    |
+| Pre-Release | April 22, 2018        |
 
 ## Acknowledgements
 This work was supported by the NASA/JPL Cassini mission. We are especially

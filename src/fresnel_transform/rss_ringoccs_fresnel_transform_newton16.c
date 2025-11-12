@@ -200,7 +200,7 @@
     )
 
 void
-rssringoccs_Fresnel_Transform_Normalized_Newton16(
+rssringoccs_Fresnel_Transform_Newton16(
     rssringoccs_TAUObj * TMPL_RESTRICT const tau,
     const double * TMPL_RESTRICT const x_arr,
     const double * TMPL_RESTRICT const w_func,
@@ -213,6 +213,7 @@ rssringoccs_Fresnel_Transform_Normalized_Newton16(
     double scale_factor;
     tmpl_ComplexDouble w_exp_minus_psi_left, w_exp_minus_psi_right;
     tmpl_ComplexDouble T_left, T_right, integrand;
+    tmpl_CylFresnelGeometryDouble geo;
 
     double coeffs[16], diff[8], mean[8], psi[16];
 
@@ -245,22 +246,22 @@ rssringoccs_Fresnel_Transform_Normalized_Newton16(
 
     for (n = 0; n < 16; ++n)
     {
-        const tmpl_TwoVectorDouble rho0 = tmpl_2DDouble_Polard(
-            tau->rho_km_vals[ind[n]], tau->phi_deg_vals[ind[n]]
-        );
-
-        const tmpl_TwoVectorDouble rho = tmpl_2DDouble_Polard(
-            tau->rho_km_vals[center], tau->phi_deg_vals[ind[n]]
-        );
-
-        const tmpl_ThreeVectorDouble R = tmpl_3DDouble_Rect(
+        geo.position = tmpl_3DDouble_Rect(
             tau->rx_km_vals[ind[n]],
             tau->ry_km_vals[ind[n]],
             tau->rz_km_vals[ind[n]]
         );
 
+        geo.intercept = tmpl_2DDouble_Polard(
+            tau->rho_km_vals[ind[n]], tau->phi_deg_vals[ind[n]]
+        );
+
+        geo.dummy = tmpl_2DDouble_Polard(
+            tau->rho_km_vals[center], tau->phi_deg_vals[ind[n]]
+        );
+
         psi[n] = tmpl_Double_Stationary_Cyl_Fresnel_Psi(
-            tau->k_vals[center], &rho, &rho0, &R, tau->EPS, tau->toler
+            tau->k_vals[center], &geo, tau->EPS, tau->toler
         );
     }
 

@@ -67,14 +67,20 @@ typedef struct rssringoccs_ModelParameters_Def {
     } geometry;
 } rssringoccs_ModelParameters;
 
-void
+extern void
 rssringoccs_Tau_Model_Left_Straightedge(
     rssringoccs_TAUObj * TMPL_RESTRICT const tau,
     const rssringoccs_ModelParameters * TMPL_RESTRICT const parameters
 );
 
-void
+extern void
 rssringoccs_Tau_Model_Right_Straightedge(
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const rssringoccs_ModelParameters * TMPL_RESTRICT const parameters
+);
+
+extern void
+rssringoccs_Tau_Model_Sine_Wave(
     rssringoccs_TAUObj * TMPL_RESTRICT const tau,
     const rssringoccs_ModelParameters * TMPL_RESTRICT const parameters
 );

@@ -60,7 +60,7 @@ z * (coeffs[0] + z##sq*(coeffs[2] + z##sq*(coeffs[4] + z##sq*coeffs[6])))
 z##sq * (coeffs[1] + z##sq*(coeffs[3] + z##sq*(coeffs[5] + z##sq*coeffs[7])))
 
 void
-rssringoccs_Fresnel_Transform_Normalized_Newton8(
+rssringoccs_Fresnel_Transform_Newton8(
     rssringoccs_TAUObj * TMPL_RESTRICT const tau,
     const double * TMPL_RESTRICT const x_arr,
     const double * TMPL_RESTRICT const w_func,
@@ -73,6 +73,7 @@ rssringoccs_Fresnel_Transform_Normalized_Newton8(
     double scale_factor;
     tmpl_ComplexDouble w_exp_minus_psi_left, w_exp_minus_psi_right;
     tmpl_ComplexDouble T_left, T_right, integrand;
+    tmpl_CylFresnelGeometryDouble geo;
 
     double coeffs[8], diff[4], mean[4], psi[8];
 
@@ -98,22 +99,22 @@ rssringoccs_Fresnel_Transform_Normalized_Newton8(
 
     for (n = 0; n < 8; ++n)
     {
-        const tmpl_TwoVectorDouble rho0 = tmpl_2DDouble_Polard(
-            tau->rho_km_vals[ind[n]], tau->phi_deg_vals[ind[n]]
-        );
-
-        const tmpl_TwoVectorDouble rho = tmpl_2DDouble_Polard(
-            tau->rho_km_vals[center], tau->phi_deg_vals[ind[n]]
-        );
-
-        const tmpl_ThreeVectorDouble R = tmpl_3DDouble_Rect(
+        geo.position = tmpl_3DDouble_Rect(
             tau->rx_km_vals[ind[n]],
             tau->ry_km_vals[ind[n]],
             tau->rz_km_vals[ind[n]]
         );
 
+        geo.intercept = tmpl_2DDouble_Polard(
+            tau->rho_km_vals[ind[n]], tau->phi_deg_vals[ind[n]]
+        );
+
+        geo.dummy = tmpl_2DDouble_Polard(
+            tau->rho_km_vals[center], tau->phi_deg_vals[ind[n]]
+        );
+
         psi[n] = tmpl_Double_Stationary_Cyl_Fresnel_Psi(
-            tau->k_vals[center], &rho, &rho0, &R, tau->EPS, tau->toler
+            tau->k_vals[center], &geo, tau->EPS, tau->toler
         );
     }
 
@@ -152,8 +153,11 @@ rssringoccs_Fresnel_Transform_Normalized_Newton8(
         T_left = tau->T_in[l_ind + n];
         T_right = tau->T_in[r_ind - n];
 
-        tmpl_CDouble_AddTo(&norm, &w_exp_minus_psi_left);
-        tmpl_CDouble_AddTo(&norm, &w_exp_minus_psi_right);
+        if (tau->use_norm)
+        {
+            tmpl_CDouble_AddTo(&norm, &w_exp_minus_psi_left);
+            tmpl_CDouble_AddTo(&norm, &w_exp_minus_psi_right);
+        }
 
         integrand = tmpl_CDouble_Multiply(w_exp_minus_psi_left, T_left);
         tmpl_CDouble_AddTo(&tau->T_out[center], &integrand);
@@ -162,7 +166,10 @@ rssringoccs_Fresnel_Transform_Normalized_Newton8(
         tmpl_CDouble_AddTo(&tau->T_out[center], &integrand);
     }
 
-    scale_factor = tmpl_Double_Rcpr_Sqrt_Two / tmpl_CDouble_Abs(norm);
-    integrand = tmpl_CDouble_Rect(scale_factor, scale_factor);
-    tau->T_out[center] = tmpl_CDouble_Multiply(integrand, tau->T_out[center]);
+    if (tau->use_norm)
+    {
+        scale_factor = tmpl_Double_Rcpr_Sqrt_Two / tmpl_CDouble_Abs(norm);
+        integrand = tmpl_CDouble_Rect(scale_factor, scale_factor);
+        tmpl_CDouble_MultiplyBy(&tau->T_out[center], &integrand);
+    }
 }

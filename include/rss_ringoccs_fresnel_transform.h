@@ -28,6 +28,7 @@
 #define RSS_RINGOCCS_FRESNEL_TRANFORM_H
 
 #include <libtmpl/include/tmpl_config.h>
+#include <libtmpl/include/types/tmpl_complex_double.h>
 
 /*  rssringoccs_TAUObj typedef provided here.                                 */
 #include <rss_ringoccs/include/rss_ringoccs_tau.h>
@@ -35,31 +36,18 @@
 /*  size_t typedef given here.                                                */
 #include <stddef.h>
 
-/*  Fresnel transform. Inputs are Tau data, window data, the number of points *
- *  in the window, and the center of the window (its index in the data).      */
-typedef void
-(*rssringoccs_FresnelNewtonTransform)(
-    rssringoccs_TAUObj * TMPL_RESTRICT const, /*  Reconstruction data.        */
-    const double * TMPL_RESTRICT const,       /*  Tapering / window array.    */
-    size_t,                                   /*  Number of points in window. */
-    size_t                                    /*  Index for center of window. */
-);
+extern tmpl_ComplexDouble
+rssringoccs_Fresnel_Kernel(const rssringoccs_TAUObj * const tau,
+                           size_t offset,
+                           size_t center);
 
-typedef void (*rssringoccs_FresnelLegendreTransform)(
-    rssringoccs_TAUObj * TMPL_RESTRICT const, /*  Reconstruction data.        */
-    const double * TMPL_RESTRICT const,       /*  The array r - r0.           */
-    const double * TMPL_RESTRICT const,       /*  Tapering / window array.    */
-    const double * TMPL_RESTRICT const,       /*  Polynomial coefficients.    */
-    size_t,                                   /*  Number of points in window. */
-    size_t                                    /*  Index for center of window. */
-);
-
-typedef void (*rssringoccs_FresnelTransform)(
-    rssringoccs_TAUObj * TMPL_RESTRICT const, /*  Reconstruction data.        */
-    const double * TMPL_RESTRICT const,       /*  The array (r - r0) / D.     */
-    const double * TMPL_RESTRICT const,       /*  Tapering / window array.    */
-    size_t,                                   /*  Number of points in window. */
-    size_t                                    /*  Index for center of window. */
+extern void
+rssringoccs_Fresnel_Phase_And_Weight(
+    const rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    size_t offset,
+    size_t center,
+    double * TMPL_RESTRICT const weight,
+    double * TMPL_RESTRICT const psi
 );
 
 extern void
@@ -211,8 +199,35 @@ rssringoccs_Fresnel_Transform_Legendre_Odd_Norm(
     size_t center
 );
 
+/******************************************************************************
+ *  Function:                                                                 *
+ *      rssringoccs_Fresnel_Transform_Newton_Riemann                          *
+ *  Purpose:                                                                  *
+ *      Performs diffraction reconstruction using Newton's method with a left *
+ *      Riemann sum for numerical integration.                                *
+ *  Arguments:                                                                *
+ *      tau (rssringoccs_TAUObj * TMPL_RESTRICT const):                       *
+ *          A pointer to a Tau object. This contains all of the geometery and *
+ *          diffraction data. This function writes the newly corrected data   *
+ *          to tau->T_out[center] (see below for the description of center).  *
+ *      w_funct (const double * TMPL_RESTRICT const):                         *
+ *          The pre-computed window function as a function of x_arr. That is, *
+ *          w_func[n] is the value of the window function at x_arr[n].        *
+ *      n_pts (size_t):                                                       *
+ *          The number of points in the window.                               *
+ *      center (size_t):                                                      *
+ *          The index corresponding to the center of the window. There must   *
+ *          be n_pts to the left and right of center in the data.             *
+ *  Output:                                                                   *
+ *      None (void).                                                          *
+ *  Notes:                                                                    *
+ *      1.) The Riemann sum produces poor results when the Fresnel phase has  *
+ *          a large derivative with respect to rho. That is, when dpsi / drho *
+ *          is large (say, larger than 2 cycles per bin), this method         *
+ *          produces a poor reconstruction. Use the Filon methods instead.    *
+ ******************************************************************************/
 extern void
-rssringoccs_Fresnel_Transform_Newton(
+rssringoccs_Fresnel_Transform_Newton_Riemann(
     rssringoccs_TAUObj * TMPL_RESTRICT const tau,
     const double * TMPL_RESTRICT const w_func,
     size_t n_pts,
@@ -220,15 +235,7 @@ rssringoccs_Fresnel_Transform_Newton(
 );
 
 extern void
-rssringoccs_Fresnel_Transform_Normalized_Newton(
-    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
-    const double * TMPL_RESTRICT const w_func,
-    size_t n_pts,
-    size_t center
-);
-
-extern void
-rssringoccs_Fresnel_Transform_Normalized_Forward_Newton(
+rssringoccs_Fresnel_Transform_Newton_Linear_Filon(
     rssringoccs_TAUObj * TMPL_RESTRICT const tau,
     const double * TMPL_RESTRICT const w_func,
     size_t n_pts,
@@ -244,23 +251,7 @@ rssringoccs_Fresnel_Transform_Elliptical_Newton(
 );
 
 extern void
-rssringoccs_Fresnel_Transform_Normalized_Elliptical_Newton(
-    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
-    const double * TMPL_RESTRICT const w_func,
-    size_t n_pts,
-    size_t center
-);
-
-extern void
 rssringoccs_Fresnel_Transform_Perturbed_Newton(
-    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
-    const double * TMPL_RESTRICT const w_func,
-    size_t n_pts,
-    size_t center
-);
-
-extern void
-rssringoccs_Fresnel_Transform_Normalized_Perturbed_Newton(
     rssringoccs_TAUObj * TMPL_RESTRICT const tau,
     const double * TMPL_RESTRICT const w_func,
     size_t n_pts,
@@ -277,7 +268,7 @@ rssringoccs_Fresnel_Transform_Newton4(
 );
 
 extern void
-rssringoccs_Fresnel_Transform_Normalized_Newton4(
+rssringoccs_Fresnel_Transform_Newton8(
     rssringoccs_TAUObj * TMPL_RESTRICT const tau,
     const double * TMPL_RESTRICT const x_arr,
     const double * TMPL_RESTRICT const w_func,
@@ -286,34 +277,13 @@ rssringoccs_Fresnel_Transform_Normalized_Newton4(
 );
 
 extern void
-rssringoccs_Fresnel_Transform_Normalized_Newton8(
+rssringoccs_Fresnel_Transform_Newton16(
     rssringoccs_TAUObj * TMPL_RESTRICT const tau,
     const double * TMPL_RESTRICT const x_arr,
     const double * TMPL_RESTRICT const w_func,
     size_t n_pts,
     size_t center
 );
-
-extern void
-rssringoccs_Fresnel_Transform_Normalized_Newton16(
-    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
-    const double * TMPL_RESTRICT const x_arr,
-    const double * TMPL_RESTRICT const w_func,
-    size_t n_pts,
-    size_t center
-);
-
-extern const rssringoccs_FresnelNewtonTransform
-rssringoccs_newton_transform_table[2][2][3];
-
-extern const rssringoccs_FresnelTransform
-rssringoccs_newton_interp_transform_table[2][2][6];
-
-extern rssringoccs_FresnelNewtonTransform
-rssringoccs_Tau_Select_Newton_Transform(rssringoccs_TAUObj * const tau);
-
-extern rssringoccs_FresnelTransform
-rssringoccs_Tau_Select_Newton_Interp_Transform(rssringoccs_TAUObj * const tau);
 
 #endif
 /*  End of include guard.                                                     */

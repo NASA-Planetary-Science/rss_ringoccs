@@ -17,12 +17,13 @@
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
 #include <libtmpl/include/tmpl.h>
+#include <libtmpl/include/constants/tmpl_math_constants.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
 void
 rssringoccs_Fresnel_Transform_Elliptical_Newton(
     rssringoccs_TAUObj * TMPL_RESTRICT const tau,
-    const double * TMPL_RESTRICT const w_func,
+    const double * TMPL_RESTRICT const  w_func,
     size_t n_pts,
     size_t center
 )
@@ -30,13 +31,14 @@ rssringoccs_Fresnel_Transform_Elliptical_Newton(
     /*  Declare all necessary variables. i and j are used for indexing.       */
     size_t m, offset;
 
-    /*  The Fresnel kernel and ring azimuth angle.                            */
-    double psi, phi, factor, D, ecc_cos_factor, semi_major, ecc_factor, rho;
-    tmpl_ComplexDouble exp_psi, integrand;
+    /*  The Fresnel kernel and the stationary ring azimuth angle.             */
+    double psi, phi, abs_norm, real_norm, D;
+    double ecc_factor, ecc_cos_factor, semi_major, rho;
+    tmpl_ComplexDouble exp_psi, norm, integrand;
 
     /*  Initialize T_out and norm to zero so we can loop over later.          */
     tau->T_out[center] = tmpl_CDouble_Zero;
-    factor = 0.5 * tau->dx_km / tau->F_km_vals[center];
+    norm = tmpl_CDouble_Zero;
 
     /*  Symmetry is lost without the Legendre polynomials, or Fresnel         *
      *  quadratic. Must compute everything from -W/2 to W/2.                  */
@@ -49,8 +51,9 @@ rssringoccs_Fresnel_Transform_Elliptical_Newton(
         /*  Calculate the stationary value of psi with respect to phi.        */
         ecc_cos_factor = 1.0 +
             tau->eccentricity *
-                tmpl_Double_Cosd(tau->phi_deg_vals[center] - tau->periapse);
-        semi_major     = tau->rho_km_vals[center] * ecc_cos_factor / ecc_factor;
+                tmpl_Double_Cos(tau->phi_deg_vals[center] - tau->periapse);
+
+        semi_major = tau->rho_km_vals[center] * ecc_cos_factor / ecc_factor;
 
         /*  Calculate the stationary value of psi with respect to phi.        */
         phi = tmpl_Double_Stationary_Elliptical_Fresnel_Psi_Newton(
@@ -94,6 +97,9 @@ rssringoccs_Fresnel_Transform_Elliptical_Newton(
 
         exp_psi = tmpl_CDouble_Polar(w_func[m], -psi);
 
+        /*  Compute the norm using a Riemann sum as well.                     */
+        norm = tmpl_CDouble_Add(norm, exp_psi);
+
         /*  Compute the transform with a Riemann sum. If the T_in pointer     *
          *  does not contain at least 2*n_pts+1 points, n_pts to the left and *
          *  right of the center, then this will create a segmentation fault.  */
@@ -102,7 +108,14 @@ rssringoccs_Fresnel_Transform_Elliptical_Newton(
         offset += 1;
     }
 
-    /*  Multiply result by the coefficient found in the Fresnel inverse.      */
-    integrand = tmpl_CDouble_Rect(factor, factor);
+    /*  The integral in the numerator of norm evaluates to F sqrt(2). Use     *
+     *  this in the calculation of the normalization. The cabs function       *
+     *  computes the absolute value of complex number (defined in complex.h). */
+    abs_norm = tmpl_CDouble_Abs(norm);
+    real_norm = tmpl_Double_Sqrt_Two / abs_norm;
+
+    /*  Multiply result by the coefficient found in the Fresnel inverse.      *
+     *  The 1/F term is omitted, since the F in the norm cancels this.        */
+    integrand = tmpl_CDouble_Rect(0.5*real_norm, 0.5*real_norm);
     tau->T_out[center] = tmpl_CDouble_Multiply(integrand, tau->T_out[center]);
 }

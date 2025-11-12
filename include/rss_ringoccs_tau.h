@@ -58,7 +58,13 @@ enum rssringoccs_PsiType {
     rssringoccs_PsiType_NewtonSimpleFFT,
 
     /*  Newton-Raphson method, slow but accurate, no interpolation performed. */
-    rssringoccs_PsiType_Newton,
+    rssringoccs_PsiType_NewtonRiemann,
+
+    /*  Newton-Raphson with a linear Filon-like quadrature method.            */
+    rssringoccs_PsiType_NewtonLinearFilon,
+
+    /*  Newton-Raphson with a quadratic Filon-like quadrature method.         */
+    rssringoccs_PsiType_NewtonQuadraticFilon,
 
     /*  Newton-Raphson with elliptical corrections, and interpolations.       */
     rssringoccs_PsiType_EllipticNewton,
@@ -127,6 +133,45 @@ typedef struct rssringoccs_TAUObj_Def {
     const char *error_message;
     unsigned int order;
 } rssringoccs_TAUObj;
+
+/*  Fresnel transform. Inputs are Tau data, window data, the number of points *
+ *  in the window, and the center of the window (its index in the data).      */
+typedef void
+(*rssringoccs_FresnelNewtonTransform)(
+    rssringoccs_TAUObj * TMPL_RESTRICT const, /*  Reconstruction data.        */
+    const double * TMPL_RESTRICT const,       /*  Tapering / window array.    */
+    size_t,                                   /*  Number of points in window. */
+    size_t                                    /*  Index for center of window. */
+);
+
+typedef void (*rssringoccs_FresnelLegendreTransform)(
+    rssringoccs_TAUObj * TMPL_RESTRICT const, /*  Reconstruction data.        */
+    const double * TMPL_RESTRICT const,       /*  The array r - r0.           */
+    const double * TMPL_RESTRICT const,       /*  Tapering / window array.    */
+    const double * TMPL_RESTRICT const,       /*  Polynomial coefficients.    */
+    size_t,                                   /*  Number of points in window. */
+    size_t                                    /*  Index for center of window. */
+);
+
+typedef void (*rssringoccs_FresnelTransform)(
+    rssringoccs_TAUObj * TMPL_RESTRICT const, /*  Reconstruction data.        */
+    const double * TMPL_RESTRICT const,       /*  The array (r - r0) / D.     */
+    const double * TMPL_RESTRICT const,       /*  Tapering / window array.    */
+    size_t,                                   /*  Number of points in window. */
+    size_t                                    /*  Index for center of window. */
+);
+
+extern const rssringoccs_FresnelNewtonTransform
+rssringoccs_newton_transform_table[5];
+
+extern const rssringoccs_FresnelTransform
+rssringoccs_newton_interp_transform_table[6];
+
+extern rssringoccs_FresnelNewtonTransform
+rssringoccs_Tau_Select_Newton_Transform(rssringoccs_TAUObj * const tau);
+
+extern rssringoccs_FresnelTransform
+rssringoccs_Tau_Select_Newton_Interp_Transform(rssringoccs_TAUObj * const tau);
 
 /******************************************************************************
  *  Function:                                                                 *

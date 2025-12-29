@@ -277,7 +277,7 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj * const tau)
      *  which is (r - r0). We need (pi/2) (r - r0)^2. The 1 / F^2 factor      *
      *  is introduced later inside the fresnel_transform function.            */
     for (m = 0; m < nw_pts; ++m)
-        x_arr[m] *= tmpl_Double_Pi_By_Two * x_arr[m];
+        x_arr[m] *= tmpl_double_pi_by_two * x_arr[m];
 
     /*  Compute the Fresnel transform across the input data.                  */
     for (n = 0; n <= tau->n_used; ++n)
@@ -315,7 +315,7 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj * const tau)
              *  expression (r - r0) across the new window. We need the        *
              *  expression (pi/2) (r - r0)^2. Compute this.                   */
             for (m = 0; m < nw_pts; ++m)
-                x_arr[m] *= tmpl_Double_Pi_By_Two * x_arr[m];
+                x_arr[m] *= tmpl_double_pi_by_two * x_arr[m];
         }
 
         /*  Compute the Fresnel Transform about the current point.            */

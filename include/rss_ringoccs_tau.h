@@ -42,9 +42,6 @@
 /*  DLP object is typedef'd here.                                             */
 #include <rss_ringoccs/include/rss_ringoccs_calibration.h>
 
-/*  Window function, input is x-parameter and window width.                   */
-typedef double (*rssringoccs_WindowFunction)(double, double);
-
 /*  Tau object typedef provided here.                                         */
 #include <rss_ringoccs/include/types/rss_ringoccs_tauobj.h>
 

@@ -5,50 +5,8 @@
 /*  Function prototype and Tau object typedef given here.                     */
 #include <rss_ringoccs/include/rss_ringoccs_tau.h>
 
-static const char * const rssringoccs_psi_type_error_message =
-    "\rError Encountered: rss_ringoccs\n"
-    "\r\trssringoccs_Tau_Set_Psi_Type\n\n"
-    "\rIllegal string for psitype. Allowed strings:\n"
-    "\r\tNewton:\n"
-    "\r\t\tNewton-Raphson method using a Riemann sum for the integral.\n"
-    "\r\t\tThis is inaccurate for data sets where d psi / d rho is large,\n"
-    "\r\t\tand the Filon method should be used instead.\n"
-    "\r\tNewton Linear Filon:\n"
-    "\r\t\tNewton-Raphson method using a modified linear Filon quadrature\n"
-    "\r\t\tfor the integral. This is slower than using Riemann sums, but\n"
-    "\r\t\tfar more accurate.\n"
-    "\r\tNewton Quadratic Filon:\n"
-    "\r\t\tNewton-Raphson method using a modified quadratic Filon quadrature.\n"
-    "\r\t\tThis is the most accurate method, but it is also the slowest.\n"
-    "\r\tNewton 4:\n"
-    "\r\t\tNewton-Raphson method using a quadratic Filon quadrature with a\n"
-    "\r\t\tquartic interpolation of the Fresnel phase across the window.\n"
-    "\r\tNewton 8:\n"
-    "\r\t\tNewton-Raphson method using a quadratic Filon quadrature with an\n"
-    "\r\t\toctic interpolation of the Fresnel phase across the window.\n"
-    "\r\tNewton 16:\n"
-    "\r\t\tNewton-Raphson method using a quadratic Filon quadrature with a\n"
-    "\r\t\thexadecic interpolation of the Fresnel phase across the window.\n"
-    "\r\tSimple FFT:\n"
-    "\r\t\tUse a single FFT of the entire data set. This is very fast, but\n"
-    "\r\t\tit assumes the geometry is nearly constant for the entire data\n"
-    "\r\t\tset. Only use this for small ranges, or sets with stable geometry.\n"
-    "\r\tEllipse:\n"
-    "\r\t\tNewton-Raphson with elliptical perturbation. This is useful for\n"
-    "\r\t\telliptical rings.\n"
-    "\r\tFresnel:\n"
-    "\r\t\tClassic quadratic Fresnel approximation. This is the fastest\n"
-    "\r\t\tmethod, but it is not applicable to many data sets.\n"
-    "\r\t\tRev007 from Cassini and the Voyager 2 Uranus data are examples\n"
-    "\r\t\tof ideal sets. For Cassini's Rev133 this method is unusable.\n"
-    "\r\tFresnel n:\n"
-    "\r\t\tLegendre polynomial approximation with 3 < n < 256. Like the\n"
-    "\r\t\tFresnel method, this is only applicable to certain data sets.\n"
-    "\r\t\tUse this when the opening angle is large. It is nearly as fast as\n"
-    "\r\t\tthe Fresnel method, but more accurate when it is applicable.\n\n"
-    "\rNote:\n"
-    "\r\tInput strings are neither case nor space sensitive. You may add\n"
-    "\r\tor remove spaces, and use upper case or lower case letters.\n";
+/*  Error message listing all of the legal psitypes.                          */
+static const char rssringoccs_psi_type_error_message[2278];
 
 void
 rssringoccs_Tau_Set_Psi_Type(const char *psitype, rssringoccs_TAUObj* tau)
@@ -218,3 +176,167 @@ FINISH:
     tmpl_String_Destroy(&tau_psitype);
 }
 /*  End of rssringoccs_Tau_Set_Psi_Type.                                      */
+
+/*  The string for the error message. C89 compilers are required to support   *
+ *  string literals of up to ~500 characters. The psitype error message is    *
+ *  over 2000 characters long, so we provide it as a char array. This makes   *
+ *  it infinitely less readable, but portable. The array below was created    *
+ *  using a short C program, it was not typed out by hand.                    */
+static const char rssringoccs_psi_type_error_message[2278] = {
+    '\r', 'E', 'r', 'r', 'o', 'r', ' ', 'E', 'n', 'c', 'o', 'u', 'n', 't',
+    'e', 'r', 'e', 'd', ':', ' ', 'r', 's', 's', '_', 'r', 'i', 'n', 'g', 'o',
+    'c', 'c', 's', '\n', '\r', '\t', 'r', 's', 's', 'r', 'i', 'n', 'g', 'o',
+    'c', 'c', 's', '_', 'T', 'a', 'u', '_', 'S', 'e', 't', '_', 'P', 's', 'i',
+    '_', 'T', 'y', 'p', 'e', '\n', '\n', '\r', 'I', 'l', 'l', 'e', 'g', 'a',
+    'l', ' ', 's', 't', 'r', 'i', 'n', 'g', ' ', 'f', 'o', 'r', ' ', 'p', 's',
+    'i', 't', 'y', 'p', 'e', '.', ' ', 'A', 'l', 'l', 'o', 'w', 'e', 'd', ' ',
+    's', 't', 'r', 'i', 'n', 'g', 's', ':', '\n', '\r', '\t', 'N', 'e', 'w',
+    't', 'o', 'n', ':', '\n', '\r', '\t', '\t', 'N', 'e', 'w', 't', 'o', 'n',
+    '-', 'R', 'a', 'p', 'h', 's', 'o', 'n', ' ', 'm', 'e', 't', 'h', 'o', 'd',
+    ' ', 'u', 's', 'i', 'n', 'g', ' ', 'a', ' ', 'R', 'i', 'e', 'm', 'a', 'n',
+    'n', ' ', 's', 'u', 'm', ' ', 'f', 'o', 'r', ' ', 't', 'h', 'e', ' ', 'i',
+    'n', 't', 'e', 'g', 'r', 'a', 'l', '.', '\n', '\r', '\t', '\t', 'T', 'h',
+    'i', 's', ' ', 'i', 's', ' ', 'i', 'n', 'a', 'c', 'c', 'u', 'r', 'a', 't',
+    'e', ' ', 'f', 'o', 'r', ' ', 'd', 'a', 't', 'a', ' ', 's', 'e', 't', 's',
+    ' ', 'w', 'h', 'e', 'r', 'e', ' ', 'd', ' ', 'p', 's', 'i', ' ', '/', ' ',
+    'd', ' ', 'r', 'h', 'o', ' ', 'i', 's', ' ', 'l', 'a', 'r', 'g', 'e', ',',
+    '\n', '\r', '\t', '\t', 'a', 'n', 'd', ' ', 't', 'h', 'e', ' ', 'F', 'i',
+    'l', 'o', 'n', ' ', 'm', 'e', 't', 'h', 'o', 'd', ' ', 's', 'h', 'o', 'u',
+    'l', 'd', ' ', 'b', 'e', ' ', 'u', 's', 'e', 'd', ' ', 'i', 'n', 's', 't',
+    'e', 'a', 'd', '.', '\n', '\r', '\t', 'N', 'e', 'w', 't', 'o', 'n', ' ',
+    'L', 'i', 'n', 'e', 'a', 'r', ' ', 'F', 'i', 'l', 'o', 'n', ':', '\n',
+    '\r', '\t', '\t', 'N', 'e', 'w', 't', 'o', 'n', '-', 'R', 'a', 'p', 'h',
+    's', 'o', 'n', ' ', 'm', 'e', 't', 'h', 'o', 'd', ' ', 'u', 's', 'i', 'n',
+    'g', ' ', 'a', ' ', 'm', 'o', 'd', 'i', 'f', 'i', 'e', 'd', ' ', 'l', 'i',
+    'n', 'e', 'a', 'r', ' ', 'F', 'i', 'l', 'o', 'n', ' ', 'q', 'u', 'a', 'd',
+    'r', 'a', 't', 'u', 'r', 'e', '\n', '\r', '\t', '\t', 'f', 'o', 'r', ' ',
+    't', 'h', 'e', ' ', 'i', 'n', 't', 'e', 'g', 'r', 'a', 'l', '.', ' ', 'T',
+    'h', 'i', 's', ' ', 'i', 's', ' ', 's', 'l', 'o', 'w', 'e', 'r', ' ', 't',
+    'h', 'a', 'n', ' ', 'u', 's', 'i', 'n', 'g', ' ', 'R', 'i', 'e', 'm', 'a',
+    'n', 'n', ' ', 's', 'u', 'm', 's', ',', ' ', 'b', 'u', 't', '\n', '\r',
+    '\t', '\t', 'f', 'a', 'r', ' ', 'm', 'o', 'r', 'e', ' ', 'a', 'c', 'c',
+    'u', 'r', 'a', 't', 'e', '.', '\n', '\r', '\t', 'N', 'e', 'w', 't', 'o',
+    'n', ' ', 'Q', 'u', 'a', 'd', 'r', 'a', 't', 'i', 'c', ' ', 'F', 'i', 'l',
+    'o', 'n', ':', '\n', '\r', '\t', '\t', 'N', 'e', 'w', 't', 'o', 'n', '-',
+    'R', 'a', 'p', 'h', 's', 'o', 'n', ' ', 'm', 'e', 't', 'h', 'o', 'd', ' ',
+    'u', 's', 'i', 'n', 'g', ' ', 'a', ' ', 'm', 'o', 'd', 'i', 'f', 'i', 'e',
+    'd', ' ', 'q', 'u', 'a', 'd', 'r', 'a', 't', 'i', 'c', ' ', 'F', 'i', 'l',
+    'o', 'n', ' ', 'q', 'u', 'a', 'd', 'r', 'a', 't', 'u', 'r', 'e', '.', '\n',
+    '\r', '\t', '\t', 'T', 'h', 'i', 's', ' ', 'i', 's', ' ', 't', 'h', 'e',
+    ' ', 'm', 'o', 's', 't', ' ', 'a', 'c', 'c', 'u', 'r', 'a', 't', 'e', ' ',
+    'm', 'e', 't', 'h', 'o', 'd', ',', ' ', 'b', 'u', 't', ' ', 'i', 't', ' ',
+    'i', 's', ' ', 'a', 'l', 's', 'o', ' ', 't', 'h', 'e', ' ', 's', 'l', 'o',
+    'w', 'e', 's', 't', '.', '\n', '\r', '\t', 'N', 'e', 'w', 't', 'o', 'n',
+    ' ', 'P', 'e', 'r', 't', 'u', 'r', 'b', ':', '\n', '\r', '\t', '\t', 'S',
+    'a', 'm', 'e', ' ', 'a', 's', ' ', 'N', 'e', 'w', 't', 'o', 'n', ' ', 'Q',
+    'u', 'a', 'd', 'r', 'a', 't', 'i', 'c', ' ', 'F', 'i', 'l', 'o', 'n', ',',
+    ' ', 'b', 'u', 't', ' ', 'a', 'n', ' ', 'a', 'r', 'b', 'i', 't', 'r', 'a',
+    'r', 'y', ' ', 'q', 'u', 'a', 'r', 't', 'i', 'c', ' ', 'i', 's', '\n',
+    '\r', '\t', '\t', 'a', 'l', 'l', 'o', 'w', 'e', 'd', ' ', 'f', 'o', 'r',
+    ' ', 'p', 'e', 'r', 't', 'u', 'r', 'b', 'i', 'n', 'g', ' ', 't', 'h', 'e',
+    ' ', 's', 't', 'a', 't', 'i', 'o', 'n', 'a', 'r', 'y', ' ', 'F', 'r', 'e',
+    's', 'n', 'e', 'l', ' ', 'p', 'h', 'a', 's', 'e', ' ', '(', 'p', 's', 'i',
+    ')', '.', '\n', '\r', '\t', '\t', 'T', 'h', 'i', 's', ' ', 'm', 'a', 'y',
+    ' ', 'b', 'e', ' ', 's', 'e', 't', ' ', 'a', 't', ' ', 't', 'h', 'e', ' ',
+    'p', 'y', 't', 'h', 'o', 'n', ' ', 'l', 'e', 'v', 'e', 'l', ' ', 'u', 's',
+    'i', 'n', 'g', ' ', 't', 'h', 'e', ' ', 'p', 'e', 'r', 't', 'u', 'r', 'b',
+    ' ', 'k', 'e', 'y', 'w', 'o', 'r', 'd', '.', '\n', '\r', '\t', 'N', 'e',
+    'w', 't', 'o', 'n', ' ', '4', ':', '\n', '\r', '\t', '\t', 'N', 'e', 'w',
+    't', 'o', 'n', '-', 'R', 'a', 'p', 'h', 's', 'o', 'n', ' ', 'm', 'e', 't',
+    'h', 'o', 'd', ' ', 'u', 's', 'i', 'n', 'g', ' ', 'a', ' ', 'q', 'u', 'a',
+    'd', 'r', 'a', 't', 'i', 'c', ' ', 'F', 'i', 'l', 'o', 'n', ' ', 'q', 'u',
+    'a', 'd', 'r', 'a', 't', 'u', 'r', 'e', ' ', 'w', 'i', 't', 'h', ' ', 'a',
+    '\n', '\r', '\t', '\t', 'q', 'u', 'a', 'r', 't', 'i', 'c', ' ', 'i', 'n',
+    't', 'e', 'r', 'p', 'o', 'l', 'a', 't', 'i', 'o', 'n', ' ', 'o', 'f', ' ',
+    't', 'h', 'e', ' ', 'F', 'r', 'e', 's', 'n', 'e', 'l', ' ', 'p', 'h', 'a',
+    's', 'e', ' ', 'a', 'c', 'r', 'o', 's', 's', ' ', 't', 'h', 'e', ' ', 'w',
+    'i', 'n', 'd', 'o', 'w', '.', '\n', '\r', '\t', 'N', 'e', 'w', 't', 'o',
+    'n', ' ', '8', ':', '\n', '\r', '\t', '\t', 'N', 'e', 'w', 't', 'o', 'n',
+    '-', 'R', 'a', 'p', 'h', 's', 'o', 'n', ' ', 'm', 'e', 't', 'h', 'o', 'd',
+    ' ', 'u', 's', 'i', 'n', 'g', ' ', 'a', ' ', 'q', 'u', 'a', 'd', 'r', 'a',
+    't', 'i', 'c', ' ', 'F', 'i', 'l', 'o', 'n', ' ', 'q', 'u', 'a', 'd', 'r',
+    'a', 't', 'u', 'r', 'e', ' ', 'w', 'i', 't', 'h', ' ', 'a', 'n', '\n',
+    '\r', '\t', '\t', 'o', 'c', 't', 'i', 'c', ' ', 'i', 'n', 't', 'e', 'r',
+    'p', 'o', 'l', 'a', 't', 'i', 'o', 'n', ' ', 'o', 'f', ' ', 't', 'h', 'e',
+    ' ', 'F', 'r', 'e', 's', 'n', 'e', 'l', ' ', 'p', 'h', 'a', 's', 'e', ' ',
+    'a', 'c', 'r', 'o', 's', 's', ' ', 't', 'h', 'e', ' ', 'w', 'i', 'n', 'd',
+    'o', 'w', '.', '\n', '\r', '\t', 'N', 'e', 'w', 't', 'o', 'n', ' ', '1',
+    '6', ':', '\n', '\r', '\t', '\t', 'N', 'e', 'w', 't', 'o', 'n', '-', 'R',
+    'a', 'p', 'h', 's', 'o', 'n', ' ', 'm', 'e', 't', 'h', 'o', 'd', ' ', 'u',
+    's', 'i', 'n', 'g', ' ', 'a', ' ', 'q', 'u', 'a', 'd', 'r', 'a', 't', 'i',
+    'c', ' ', 'F', 'i', 'l', 'o', 'n', ' ', 'q', 'u', 'a', 'd', 'r', 'a', 't',
+    'u', 'r', 'e', ' ', 'w', 'i', 't', 'h', ' ', 'a', '\n', '\r', '\t', '\t',
+    'h', 'e', 'x', 'a', 'd', 'e', 'c', 'i', 'c', ' ', 'i', 'n', 't', 'e', 'r',
+    'p', 'o', 'l', 'a', 't', 'i', 'o', 'n', ' ', 'o', 'f', ' ', 't', 'h', 'e',
+    ' ', 'F', 'r', 'e', 's', 'n', 'e', 'l', ' ', 'p', 'h', 'a', 's', 'e', ' ',
+    'a', 'c', 'r', 'o', 's', 's', ' ', 't', 'h', 'e', ' ', 'w', 'i', 'n', 'd',
+    'o', 'w', '.', '\n', '\r', '\t', 'S', 'i', 'm', 'p', 'l', 'e', ' ', 'F',
+    'F', 'T', ':', '\n', '\r', '\t', '\t', 'U', 's', 'e', ' ', 'a', ' ', 's',
+    'i', 'n', 'g', 'l', 'e', ' ', 'F', 'F', 'T', ' ', 'o', 'f', ' ', 't', 'h',
+    'e', ' ', 'e', 'n', 't', 'i', 'r', 'e', ' ', 'd', 'a', 't', 'a', ' ', 's',
+    'e', 't', '.', ' ', 'T', 'h', 'i', 's', ' ', 'i', 's', ' ', 'v', 'e', 'r',
+    'y', ' ', 'f', 'a', 's', 't', ',', ' ', 'b', 'u', 't', '\n', '\r', '\t',
+    '\t', 'i', 't', ' ', 'a', 's', 's', 'u', 'm', 'e', 's', ' ', 't', 'h',
+    'e', ' ', 'g', 'e', 'o', 'm', 'e', 't', 'r', 'y', ' ', 'i', 's', ' ', 'n',
+    'e', 'a', 'r', 'l', 'y', ' ', 'c', 'o', 'n', 's', 't', 'a', 'n', 't', ' ',
+    'f', 'o', 'r', ' ', 't', 'h', 'e', ' ', 'e', 'n', 't', 'i', 'r', 'e', ' ',
+    'd', 'a', 't', 'a', '\n', '\r', '\t', '\t', 's', 'e', 't', '.', ' ', 'O',
+    'n', 'l', 'y', ' ', 'u', 's', 'e', ' ', 't', 'h', 'i', 's', ' ', 'f', 'o',
+    'r', ' ', 's', 'm', 'a', 'l', 'l', ' ', 'r', 'a', 'n', 'g', 'e', 's', ',',
+    ' ', 'o', 'r', ' ', 's', 'e', 't', 's', ' ', 'w', 'i', 't', 'h', ' ', 's',
+    't', 'a', 'b', 'l', 'e', ' ', 'g', 'e', 'o', 'm', 'e', 't', 'r', 'y', '.',
+    '\n', '\r', '\t', 'E', 'l', 'l', 'i', 'p', 's', 'e', ':', '\n', '\r', '\t',
+    '\t', 'N', 'e', 'w', 't', 'o', 'n', '-', 'R', 'a', 'p', 'h', 's', 'o',
+    'n', ' ', 'm', 'e', 't', 'h', 'o', 'd', ' ', 'u', 's', 'i', 'n', 'g', ' ',
+    't', 'h', 'e', ' ', 'e', 'l', 'l', 'i', 'p', 't', 'i', 'c', 'a', 'l', ' ',
+    'p', 'e', 'r', 't', 'u', 'r', 'b', 'a', 't', 'i', 'o', 'n', '.', ' ', 'T',
+    'h', 'i', 's', ' ', 'i', 's', '\n', '\r', '\t', '\t', 'u', 's', 'e', 'f',
+    'u', 'l', ' ', 'f', 'o', 'r', ' ', 'e', 'l', 'l', 'i', 'p', 't', 'i', 'c',
+    'a', 'l', ' ', 'r', 'i', 'n', 'g', 's', '.', '\n', '\r', '\t', 'F', 'r',
+    'e', 's', 'n', 'e', 'l', ':', '\n', '\r', '\t', '\t', 'C', 'l', 'a', 's',
+    's', 'i', 'c', ' ', 'q', 'u', 'a', 'd', 'r', 'a', 't', 'i', 'c', ' ', 'F',
+    'r', 'e', 's', 'n', 'e', 'l', ' ', 'a', 'p', 'p', 'r', 'o', 'x', 'i', 'm',
+    'a', 't', 'i', 'o', 'n', '.', ' ', 'T', 'h', 'i', 's', ' ', 'i', 's', ' ',
+    't', 'h', 'e', ' ', 'f', 'a', 's', 't', 'e', 's', 't', '\n', '\r', '\t',
+    '\t', 'm', 'e', 't', 'h', 'o', 'd', ',', ' ', 'b', 'u', 't', ' ', 'i',
+    't', ' ', 'i', 's', ' ', 'n', 'o', 't', ' ', 'a', 'p', 'p', 'l', 'i', 'c',
+    'a', 'b', 'l', 'e', ' ', 't', 'o', ' ', 'm', 'a', 'n', 'y', ' ', 'd', 'a',
+    't', 'a', ' ', 's', 'e', 't', 's', '.', '\n', '\r', '\t', '\t', 'R', 'e',
+    'v', '0', '0', '7', ' ', 'f', 'r', 'o', 'm', ' ', 'C', 'a', 's', 's', 'i',
+    'n', 'i', ' ', 'a', 'n', 'd', ' ', 't', 'h', 'e', ' ', 'V', 'o', 'y', 'a',
+    'g', 'e', 'r', ' ', '2', ' ', 'U', 'r', 'a', 'n', 'u', 's', ' ', 'd', 'a',
+    't', 'a', ' ', 'a', 'r', 'e', ' ', 'e', 'x', 'a', 'm', 'p', 'l', 'e', 's',
+    '\n', '\r', '\t', '\t', 'o', 'f', ' ', 'i', 'd', 'e', 'a', 'l', ' ', 's',
+    'e', 't', 's', '.', ' ', 'F', 'o', 'r', ' ', 'C', 'a', 's', 's', 'i', 'n',
+    'i', '\'', 's', ' ', 'R', 'e', 'v', '1', '3', '3', ' ', 't', 'h', 'i',
+    's', ' ', 'm', 'e', 't', 'h', 'o', 'd', ' ', 'i', 's', ' ', 'u', 'n', 'u',
+    's', 'a', 'b', 'l', 'e', '.', '\n', '\r', '\t', 'F', 'r', 'e', 's', 'n',
+    'e', 'l', ' ', 'n', ':', '\n', '\r', '\t', '\t', 'L', 'e', 'g', 'e', 'n',
+    'd', 'r', 'e', ' ', 'p', 'o', 'l', 'y', 'n', 'o', 'm', 'i', 'a', 'l', ' ',
+    'a', 'p', 'p', 'r', 'o', 'x', 'i', 'm', 'a', 't', 'i', 'o', 'n', ' ', 'w',
+    'i', 't', 'h', ' ', '3', ' ', '<', ' ', 'n', ' ', '<', ' ', '2', '5', '6',
+    '.', ' ', 'L', 'i', 'k', 'e', ' ', 't', 'h', 'e', '\n', '\r', '\t', '\t',
+    'F', 'r', 'e', 's', 'n', 'e', 'l', ' ', 'm', 'e', 't', 'h', 'o', 'd', ',',
+    ' ', 't', 'h', 'i', 's', ' ', 'i', 's', ' ', 'o', 'n', 'l', 'y', ' ', 'a',
+    'p', 'p', 'l', 'i', 'c', 'a', 'b', 'l', 'e', ' ', 't', 'o', ' ', 'c', 'e',
+    'r', 't', 'a', 'i', 'n', ' ', 'd', 'a', 't', 'a', ' ', 's', 'e', 't', 's',
+    '.', '\n', '\r', '\t', '\t', 'U', 's', 'e', ' ', 't', 'h', 'i', 's', ' ',
+    'w', 'h', 'e', 'n', ' ', 't', 'h', 'e', ' ', 'o', 'p', 'e', 'n', 'i', 'n',
+    'g', ' ', 'a', 'n', 'g', 'l', 'e', ' ', 'i', 's', ' ', 'l', 'a', 'r', 'g',
+    'e', '.', ' ', 'I', 't', ' ', 'i', 's', ' ', 'n', 'e', 'a', 'r', 'l', 'y',
+    ' ', 'a', 's', ' ', 'f', 'a', 's', 't', ' ', 'a', 's', '\n', '\r', '\t',
+    '\t', 't', 'h', 'e', ' ', 'F', 'r', 'e', 's', 'n', 'e', 'l', ' ', 'm',
+    'e', 't', 'h', 'o', 'd', ',', ' ', 'b', 'u', 't', ' ', 'm', 'o', 'r', 'e',
+    ' ', 'a', 'c', 'c', 'u', 'r', 'a', 't', 'e', ' ', 'w', 'h', 'e', 'n', ' ',
+    'i', 't', ' ', 'i', 's', ' ', 'a', 'p', 'p', 'l', 'i', 'c', 'a', 'b', 'l',
+    'e', '.', '\n', '\n', '\r', 'N', 'o', 't', 'e', ':', '\n', '\r', '\t',
+    'I', 'n', 'p', 'u', 't', ' ', 's', 't', 'r', 'i', 'n', 'g', 's', ' ', 'a',
+    'r', 'e', ' ', 'n', 'e', 'i', 't', 'h', 'e', 'r', ' ', 'c', 'a', 's', 'e',
+    ' ', 'n', 'o', 'r', ' ', 's', 'p', 'a', 'c', 'e', ' ', 's', 'e', 'n', 's',
+    'i', 't', 'i', 'v', 'e', '.', ' ', 'Y', 'o', 'u', ' ', 'm', 'a', 'y', ' ',
+    'a', 'd', 'd', '\n', '\r', '\t', 'o', 'r', ' ', 'r', 'e', 'm', 'o', 'v',
+    'e', ' ', 's', 'p', 'a', 'c', 'e', 's', ',', ' ', 'a', 'n', 'd', ' ', 'u',
+    's', 'e', ' ', 'u', 'p', 'p', 'e', 'r', ' ', 'c', 'a', 's', 'e', ' ', 'o',
+    'r', ' ', 'l', 'o', 'w', 'e', 'r', ' ', 'c', 'a', 's', 'e', ' ', 'l', 'e',
+    't', 't', 'e', 'r', 's', '.', '\n', '\0'
+};

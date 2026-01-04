@@ -125,8 +125,8 @@
 
 tmpl_ComplexDouble
 rssringoccs_Fresnel_Kernel(const rssringoccs_TAUObj * const tau,
-                           const size_t offset,
-                           const size_t center)
+                           const size_t center,
+                           const size_t offset)
 {
     tmpl_ComplexDouble ker;
     tmpl_CylFresnelGeometryDouble geo;

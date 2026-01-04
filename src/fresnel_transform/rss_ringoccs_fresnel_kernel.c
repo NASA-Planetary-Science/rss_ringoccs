@@ -60,7 +60,7 @@
  *      libtmpl for the main computation. If the forward transform is being   *
  *      used, then conjugate the end result.                                  *
  *  Notes:                                                                    *
- *      1.) There are no checks for NULL points. It is assumed tau is valid.  *
+ *      1.) There are no checks for NULL pointers. It is assumed tau is valid.*
  *                                                                            *
  *      2.) There are no checks for errors. This function is called inside    *
  *          the main for-loop of the various transforms. It is the users      *
@@ -97,14 +97,14 @@
  *          Header providing complex numbers types and functions.             *
  *  4.) tmpl_vec2.h:                                                          *
  *          Header file with 2D vectors and vector functions.                 *
- *  4.) tmpl_vec2.h:                                                          *
+ *  4.) tmpl_vec3.h:                                                          *
  *          Header file providing 3D vector types and routines.               *
  ******************************************************************************
  *  Author:     Ryan Maguire                                                  *
  *  Date:       November 12, 2025                                             *
  ******************************************************************************/
 
-/*  Geometry object with rho, rho, and the spacecraft position vector.        */
+/*  Geometry object with rho, rho0, and the spacecraft position vector.       */
 #include <libtmpl/include/types/tmpl_cyl_fresnel_geometry_double.h>
 
 /*  Function for computing the stationary Fresnel phase provided here.        */
@@ -119,17 +119,36 @@
 /*  3D vector types and functions given here.                                 */
 #include <libtmpl/include/tmpl_vec3.h>
 
+/*  Typedef for the Tau Object is found here.                                 */
+#include <rss_ringoccs/include/types/rss_ringoccs_tauobj.h>
 
-#include <rss_ringoccs/include/rss_ringoccs_tau.h>
-#include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
+/*  Function prototype / forward declaration.                                 */
+extern tmpl_ComplexDouble
+rssringoccs_Fresnel_Kernel(const rssringoccs_TAUObj * const tau,
+                           const size_t center,
+                           const size_t offset);
 
+/*  Function for computing the stationary Fresnel kernel from a Tau object.   */
 tmpl_ComplexDouble
 rssringoccs_Fresnel_Kernel(const rssringoccs_TAUObj * const tau,
                            const size_t center,
                            const size_t offset)
 {
+    /*  Variable for the output, the Fresnel kernel.                          */
     tmpl_ComplexDouble ker;
+
+    /*  Variable for the geometry. This contains the ring intercept point     *
+     *  (rho0), the dummy variable (rho), and the spacecraft position vector  *
+     *  (R). The meaning of rho and rho0 depend on whether this is a forward  *
+     *  transform or an inverse transform.                                    */
     tmpl_CylFresnelGeometryDouble geo;
+
+    /*  The interpretation between rho and rho0 swaps when using the inverse  *
+     *  transform. For the forward transform we have rho0 is the ring         *
+     *  intercept point and rho is the dummy variable of integration. For the *
+     *  inverse transform it is the exact opposite. The only difference in    *
+     *  the code is which index is used for which variable. Set the indices   *
+     *  accordingly depending on whether this is a forward transform.         */
     const size_t val0 = (tau->use_fwd ? center : offset);
     const size_t val1 = (tau->use_fwd ? offset : center);
 
@@ -143,10 +162,13 @@ rssringoccs_Fresnel_Kernel(const rssringoccs_TAUObj * const tau,
         tau->rz_km_vals[val0]
     );
 
+    /*  The intercept point lies in the ring plane, we can compute using      *
+     *  polar coordinates (with the angle in degrees).                        */
     geo.intercept = tmpl_2DDouble_Polard(
         tau->rho_km_vals[val0], tau->phi_deg_vals[val0]
     );
 
+    /*  The dummy variable of integration also lies in the ring plane.        */
     geo.dummy = tmpl_2DDouble_Polard(
         tau->rho_km_vals[val1], tau->phi_deg_vals[val0]
     );
@@ -162,7 +184,7 @@ rssringoccs_Fresnel_Kernel(const rssringoccs_TAUObj * const tau,
      *       -                                                                *
      *       0                                                                *
      *                                                                        *
-     *  libtmpl has tools to compute this using Newton's Method. Return this. */
+     *  libtmpl has tools to compute this using Newton's Method. Compute.     */
     ker = tmpl_Double_Stationary_Cyl_Fresnel_Kernel(
         tau->k_vals[val0],
         &geo,
@@ -185,3 +207,4 @@ rssringoccs_Fresnel_Kernel(const rssringoccs_TAUObj * const tau,
 
     return ker;
 }
+/*  End of rssringoccs_Fresnel_Kernel.                                        */

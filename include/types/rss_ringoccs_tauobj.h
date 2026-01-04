@@ -27,6 +27,9 @@
 #ifndef RSS_RINGOCCS_TYPES_TAUOBJ_H
 #define RSS_RINGOCCS_TYPES_TAUOBJ_H
 
+/*  Typedef for window functions (function pointers f:R^2 -> R).              */
+#include <libtmpl/include/types/tmpl_window_function_double.h>
+
 /*  The psitype enum is defined here.                                         */
 #include <rss_ringoccs/include/types/rss_ringoccs_psitype.h>
 
@@ -69,7 +72,7 @@ typedef struct rssringoccs_TAUObj_Def {
     size_t start;
     size_t n_used;
     size_t arr_size;
-    rssringoccs_WindowFunction window_func;
+    tmpl_WindowFunctionDouble window_func;
     enum rssringoccs_PsiType psinum;
     tmpl_Bool use_norm;
     tmpl_Bool use_fwd;

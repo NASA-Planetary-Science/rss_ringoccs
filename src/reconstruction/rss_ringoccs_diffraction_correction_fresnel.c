@@ -188,15 +188,6 @@
 /*  size_t provided here, data type used for indexing arrays.                 */
 #include <stddef.h>
 
-/*  The inner most for-loop is a Riemann sum for the Fresnel transform. The   *
- *  user has the option to normalize this by the window width. There are      *
- *  thus two transforms: without normalization, and with normalization.       */
-static const rssringoccs_FresnelTransform
-rssringoccs_fresnel_transform_list[2] = {
-    rssringoccs_Fresnel_Transform,
-    rssringoccs_Fresnel_Transform_Normalized
-};
-
 /*  Performs the Fresnel transform on the data contained in tau.              */
 void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj * const tau)
 {
@@ -211,9 +202,6 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj * const tau)
     double *x_arr = NULL;
     double *w_func = NULL;
 
-    /*  The user has two options for transforms. We'll set this later.        */
-    rssringoccs_FresnelTransform fresnel_transform;
-
     /*  Check that the input is not NULL before attempting to access it.      */
     if (!tau)
         return;
@@ -227,11 +215,6 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj * const tau)
     /*  The previous functions set the error_occurred Boolean on error. Check.*/
     if (tau->error_occurred)
         return;
-
-    /*  Select the desired transform. For the Fresnel method there are only   *
-     *  two options: with or without normalization. tau contains a Boolean,   *
-     *  "use_norm", which can be used to index the table above. Use this.     */
-    fresnel_transform = rssringoccs_fresnel_transform_list[tau->use_norm];
 
     /*  Retrieve the starting point from the TAUObj struct.                   */
     center = tau->start;
@@ -275,7 +258,7 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj * const tau)
 
     /*  We have computed the window function and the independent variable x,  *
      *  which is (r - r0). We need (pi/2) (r - r0)^2. The 1 / F^2 factor      *
-     *  is introduced later inside the fresnel_transform function.            */
+     *  is introduced later inside the Fresnel transform function.            */
     for (m = 0; m < nw_pts; ++m)
         x_arr[m] *= tmpl_double_pi_by_two * x_arr[m];
 
@@ -319,7 +302,7 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj * const tau)
         }
 
         /*  Compute the Fresnel Transform about the current point.            */
-        fresnel_transform(tau, x_arr, w_func, nw_pts, center);
+        rssringoccs_Fresnel_Transform(tau, x_arr, w_func, nw_pts, center);
 
         /*  Move the pointers to the next point.                              */
         center += 1;

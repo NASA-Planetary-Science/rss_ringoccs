@@ -18,7 +18,7 @@ extern void
 rssringoccs_Tau_Set_Psi_Type(const char * TMPL_RESTRICT const psitype,
                              rssringoccs_TAUObj * TMPL_RESTRICT const tau);
 
-/*  Error message listing all of the legal psitypes.                          */
+/*  Error message for the legal psitypes. Defined at the bottom of this file. */
 static const char rssringoccs_psi_type_error_message[2278];
 
 /*  Function for setting the psitype in a Tau object from a string.           */

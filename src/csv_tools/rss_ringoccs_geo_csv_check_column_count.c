@@ -23,9 +23,8 @@
  *  Date:       September 1, 2024                                             *
  ******************************************************************************/
 
-/*  libtmpl provides Booleans, string duplicate, and CSV reading tools.       */
+/*  libtmpl provides Booleans and CSV reading tools.                          */
 #include <libtmpl/include/tmpl_bool.h>
-#include <libtmpl/include/tmpl_string.h>
 #include <libtmpl/include/tmpl_utility.h>
 
 /*  rssringoccs_GeoCSV typedef here, and function prototype given.            */
@@ -50,11 +49,10 @@ void rssringoccs_GeoCSV_Check_Column_Count(rssringoccs_GeoCSV *geo, FILE *fp)
     if (!fp)
     {
         geo->error_occurred = tmpl_True;
-        geo->error_message = tmpl_String_Duplicate(
+        geo->error_message =
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_GeoCSV_Check_Column_Count\n\n"
-            "Input file is NULL. Aborting.\n"
-        );
+            "Input file is NULL. Aborting.\n";
 
         return;
     }
@@ -66,24 +64,22 @@ void rssringoccs_GeoCSV_Check_Column_Count(rssringoccs_GeoCSV *geo, FILE *fp)
     if ((column_count != 18U) && (geo->use_deprecated))
     {
         geo->error_occurred = tmpl_True;
-        geo->error_message = tmpl_String_Duplicate(
+        geo->error_message =
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_GeoCSV_Check_Column_Count\n\n"
             "use_deprecated is set to true but the input CSV does not have\n"
-            "18 columns. Aborting computation.\n"
-        );
+            "18 columns. Aborting computation.\n";
     }
 
     /*  And if use_deprecated is false, we need 19 column. Check this.        */
     else if ((column_count != 19U) && (!geo->use_deprecated))
     {
         geo->error_occurred = tmpl_True;
-        geo->error_message = tmpl_String_Duplicate(
+        geo->error_message =
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_GeoCSV_Check_Column_Count\n\n"
             "use_deprecated is set to false but the input CSV does not have\n"
-            "19 columns. Aborting computation.\n"
-        );
+            "19 columns. Aborting computation.\n";
     }
 }
 /*  End of rssringoccs_GeoCSV_Check_Column_Count.                             */

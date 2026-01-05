@@ -17,15 +17,15 @@
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
  *  Purpose:                                                                  *
- *      Provides a struct for the data in a GEO.TAB file.                     *
+ *      Provides a struct for the data in a CAL.TAB file.                     *
  ******************************************************************************
  *  Author:     Ryan Maguire                                                  *
  *  Date:       January 5, 2026                                               *
  ******************************************************************************/
 
 /*  Include guard to prevent including this file.                             */
-#ifndef RSS_RINGOCCS_TYPES_GEOCSV_H
-#define RSS_RINGOCCS_TYPES_GEOCSV_H
+#ifndef RSS_RINGOCCS_TYPES_CALCSV_H
+#define RSS_RINGOCCS_TYPES_CALCSV_H
 
 /*  Booleans found here.                                                      */
 #include <libtmpl/include/tmpl_bool.h>
@@ -36,33 +36,17 @@
 /*  size_t typedef provided here.                                             */
 #include <stddef.h>
 
-/*  Data structure for the GEO.TAB files on the PDS.                          */
-typedef struct rssringoccs_GeoCSV_Def {
+/*  Data structure for the CAL.TAB files on the PDS.                          */
+typedef struct rssringoccs_CalCSV_Def {
     double *t_oet_spm_vals;
-    double *t_ret_spm_vals;
-    double *t_set_spm_vals;
-    double *rho_km_vals;
-    double *phi_rl_deg_vals;
-    double *phi_ora_deg_vals;
-    double *B_deg_vals;
-    double *D_km_vals;
-    double *rho_dot_kms_vals;
-    double *phi_rl_dot_kms_vals;
-    double *F_km_vals;
-    double *R_imp_km_vals;
-    double *rx_km_vals;
-    double *ry_km_vals;
-    double *rz_km_vals;
-    double *vx_kms_vals;
-    double *vy_kms_vals;
-    double *vz_kms_vals;
-    double *obs_spacecraft_lat_deg_vals;
+    double *f_sky_pred_vals;
+    double *f_sky_resid_fit_vals;
+    double *p_free_vals;
     size_t n_elements;
     rssringoccs_History *history;
-    tmpl_Bool use_deprecated;
     tmpl_Bool error_occurred;
     const char *error_message;
-} rssringoccs_GeoCSV;
+} rssringoccs_CalCSV;
 
 #endif
 /*  End of include guard.                                                     */

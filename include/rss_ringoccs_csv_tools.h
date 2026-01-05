@@ -31,6 +31,8 @@
 #include <libtmpl/include/tmpl_bool.h>
 
 #include <rss_ringoccs/include/types/rss_ringoccs_history.h>
+
+#include <rss_ringoccs/include/types/rss_ringoccs_calcsv.h>
 #include <rss_ringoccs/include/types/rss_ringoccs_geocsv.h>
 
 /*  size_t typedef is given here.                                             */
@@ -58,18 +60,6 @@ typedef struct rssringoccs_DLPCSV_Def {
     tmpl_Bool error_occurred;
     char *error_message;
 } rssringoccs_DLPCSV;
-
-/*  Data structure for the CAL.TAB files on the PDS.                          */
-typedef struct rssringoccs_CalCSV_Def {
-    double *t_oet_spm_vals;
-    double *f_sky_pred_vals;
-    double *f_sky_resid_fit_vals;
-    double *p_free_vals;
-    size_t n_elements;
-    rssringoccs_History *history;
-    tmpl_Bool error_occurred;
-    char *error_message;
-} rssringoccs_CalCSV;
 
 /*  Data structure for the TAU.TAB files on the PDS.                          */
 typedef struct rssringoccs_TauCSV_Def {

@@ -27,6 +27,9 @@
 #ifndef RSS_RINGOCCS_TYPES_TAUOBJ_H
 #define RSS_RINGOCCS_TYPES_TAUOBJ_H
 
+/*  Complex numbers found here.                                               */
+#include <libtmpl/include/types/tmpl_complex_double.h>
+
 /*  Typedef for window functions (function pointers f:R^2 -> R).              */
 #include <libtmpl/include/types/tmpl_window_function_double.h>
 

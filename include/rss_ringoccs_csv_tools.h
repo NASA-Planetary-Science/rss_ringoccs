@@ -33,33 +33,14 @@
 #include <rss_ringoccs/include/types/rss_ringoccs_history.h>
 
 #include <rss_ringoccs/include/types/rss_ringoccs_calcsv.h>
+#include <rss_ringoccs/include/types/rss_ringoccs_dlpcsv.h>
 #include <rss_ringoccs/include/types/rss_ringoccs_geocsv.h>
 
 /*  size_t typedef is given here.                                             */
 #include <stddef.h>
 #include <stdio.h>
 
-/*  Data structure for the DLP.TAB files on the PDS.                          */
-typedef struct rssringoccs_DLPCSV_Def {
-    double *rho_km_vals;
-    double *rho_corr_pole_km_vals;
-    double *rho_corr_timing_km_vals;
-    double *phi_rl_deg_vals;
-    double *phi_ora_deg_vals;
-    double *p_norm_vals;
-    double *raw_tau_vals;
-    double *phase_deg_vals;
-    double *raw_tau_threshold_vals;
-    double *t_oet_spm_vals;
-    double *t_ret_spm_vals;
-    double *t_set_spm_vals;
-    double *B_deg_vals;
-    size_t n_elements;
-    rssringoccs_History *history;
-    tmpl_Bool use_deprecated;
-    tmpl_Bool error_occurred;
-    char *error_message;
-} rssringoccs_DLPCSV;
+
 
 /*  Data structure for the TAU.TAB files on the PDS.                          */
 typedef struct rssringoccs_TauCSV_Def {

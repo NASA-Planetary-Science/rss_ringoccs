@@ -23,20 +23,11 @@
  *  Date:       December 31, 2020                                             *
  ******************************************************************************/
 
-/*  free is found here, as is NULL.                                           */
-#include <stdlib.h>
+/*  Macro for freeing a pointer and setting it to NULL.                       */
+#include <libtmpl/include/compat/tmpl_free.h>
 
 /*  rssringoccs_CalCSV typedef here, and function prototype given.            */
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
-
-/*  Check if this macro name has been defined. Clear it if so, as we'll be    *
- *  using this macro to free the variables in the CAL struct.                 */
-#ifdef DESTROY_CAL_VAR
-#undef DESTROY_CAL_VAR
-#endif
-
-/*  Macro for freeing and nullifying the members of the cal CSV structs.      */
-#define DESTROY_CAL_VAR(var) if (var != NULL){free(var); var = NULL;}
 
 /*  Free's all members of an rssringoccs_CalCSV pointer except the            *
  *  error_message. Members are set to NULL after freeing.                     */
@@ -46,16 +37,11 @@ void rssringoccs_CalCSV_Destroy_Members(rssringoccs_CalCSV *cal)
     if (!cal)
         return;
 
-    /*  Destroy every variable except the error_message. Note that the macro  *
-     *  DESTROY_CAL_VAR ends with curly braces, so no need for a semi-colon   *
-     *  at the end of these lines.                                            */
-    DESTROY_CAL_VAR(cal->t_oet_spm_vals)
-    DESTROY_CAL_VAR(cal->f_sky_pred_vals)
-    DESTROY_CAL_VAR(cal->f_sky_resid_fit_vals)
-    DESTROY_CAL_VAR(cal->p_free_vals)
-    DESTROY_CAL_VAR(cal->history)
+    /*  Destroy every variable except the error_message.                      */
+    TMPL_FREE(cal->t_oet_spm_vals);
+    TMPL_FREE(cal->f_sky_pred_vals);
+    TMPL_FREE(cal->f_sky_resid_fit_vals);
+    TMPL_FREE(cal->p_free_vals);
+    TMPL_FREE(cal->history);
 }
 /*  End of rssringoccs_CalCSV_Destroy_Members.                                */
-
-/*  Undefine everything in case someone wants to #include this file.          */
-#undef DESTROY_CAL_VAR

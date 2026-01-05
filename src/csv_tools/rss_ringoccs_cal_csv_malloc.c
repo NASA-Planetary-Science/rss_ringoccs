@@ -26,9 +26,8 @@
 /*  malloc is found here.                                                     */
 #include <stdlib.h>
 
-/*  libtmpl provides Booleans, string duplicate, and line count.              */
+/*  libtmpl provides Booleans and line count.                                 */
 #include <libtmpl/include/tmpl_bool.h>
-#include <libtmpl/include/tmpl_string.h>
 #include <libtmpl/include/tmpl_utility.h>
 
 /*  rssringoccs_CalCSV typedef here, and function prototype given.            */
@@ -43,21 +42,21 @@
 /*  Macro function for safely allocating memory for the variables. This       *
  *  checks if malloc fails, and does not simply assume it passed.             */
 #define MALLOC_CAL_VAR(var)                                                    \
-    cal->var = malloc(sizeof(*cal->var) * cal->n_elements);                    \
-    if (!cal->var)                                                             \
-    {                                                                          \
-        cal->error_occurred = tmpl_True;                                       \
-        cal->error_message = tmpl_strdup(                                      \
-            "Error Encountered: rss_ringoccs\n"                                \
-            "\trssringoccs_CalCSV_Malloc\n\n"                                  \
-            "malloc returned NULL. Failed to allocate memory for " #var ".\n"  \
-            "Aborting computation and returning.\n"                            \
-        );                                                                     \
+    do {                                                                       \
+        cal->var = malloc(sizeof(*cal->var) * cal->n_elements);                \
+        if (!cal->var)                                                         \
+        {                                                                      \
+            cal->error_occurred = tmpl_True;                                   \
+            cal->error_message =                                               \
+                "Error Encountered: rss_ringoccs\n"                            \
+                "\trssringoccs_CalCSV_Malloc\n\n"                              \
+                "malloc failed to allocate memory for " #var ".\n";            \
                                                                                \
-        /*  Free the variables that have been malloc'd so far.               */\
-        rssringoccs_CalCSV_Destroy_Members(cal);                               \
-        return;                                                                \
-    }
+            /*  Free the variables that have been malloc'd so far.           */\
+            rssringoccs_CalCSV_Destroy_Members(cal);                           \
+            return;                                                            \
+        }                                                                      \
+    } while (0)
 
 /*  Function for allocating memory to a Cal CSV based on a CSV file pointer.  */
 void rssringoccs_CalCSV_Malloc(rssringoccs_CalCSV *cal, FILE *fp)
@@ -75,11 +74,10 @@ void rssringoccs_CalCSV_Malloc(rssringoccs_CalCSV *cal, FILE *fp)
     if (!fp)
     {
         cal->error_occurred = tmpl_True;
-        cal->error_message = tmpl_String_Duplicate(
+        cal->error_message =
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_CalCSV_Malloc\n\n"
-            "Input file is NULL. Aborting.\n"
-        );
+            "Input file is NULL.\n";
 
         return;
     }
@@ -92,22 +90,20 @@ void rssringoccs_CalCSV_Malloc(rssringoccs_CalCSV *cal, FILE *fp)
     if (cal->n_elements == (size_t)0)
     {
         cal->error_occurred = tmpl_True;
-        cal->error_message = tmpl_String_Duplicate(
+        cal->error_message =
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_CalCSV_Malloc\n\n"
-            "n_elements is zero, nothing to malloc. Aborting.\n"
-        );
+            "n_elements is zero, nothing to malloc.\n";
 
         return;
     }
 
     /*  Use the MALLOC_CAL_VAR macro function to allocate memory and check    *
-     *  for errors. This macro ends with an if-then statement, and ends in    *
-     *  curly braces {}, hence no need for a semi-colon here.                 */
-    MALLOC_CAL_VAR(t_oet_spm_vals)
-    MALLOC_CAL_VAR(f_sky_pred_vals)
-    MALLOC_CAL_VAR(f_sky_resid_fit_vals)
-    MALLOC_CAL_VAR(p_free_vals)
+     *  for errors.                                                           */
+    MALLOC_CAL_VAR(t_oet_spm_vals);
+    MALLOC_CAL_VAR(f_sky_pred_vals);
+    MALLOC_CAL_VAR(f_sky_resid_fit_vals);
+    MALLOC_CAL_VAR(p_free_vals);
 }
 /*  End of rssringoccs_CalCSV_Malloc.                                         */
 

@@ -29,9 +29,8 @@
 /*  malloc found here.                                                        */
 #include <stdlib.h>
 
-/*  libtmpl provides Booleans and string duplicate.                           */
+/*  libtmpl provides Booleans.                                                */
 #include <libtmpl/include/tmpl_bool.h>
-#include <libtmpl/include/tmpl_string.h>
 
 /*  Typedefs for CSV structs and function prototype given here.               */
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
@@ -66,15 +65,14 @@ rssringoccs_GeoCSV_Extract(const char *filename, tmpl_Bool use_deprecated)
     fp = fopen(filename, "r");
 
     /*  If fopen returned NULL, the file likely does not exist. Return error. */
-    if (fp == NULL)
+    if (!fp)
     {
         geo->error_occurred = tmpl_True;
-        geo->error_message = tmpl_String_Duplicate(
+        geo->error_message =
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_GeoCSV_Extract\n\n"
             "fopen returned NULL. Failed to open file for reading.\n"
-            "It is likely the filename is incorrect or does not exist.\n"
-        );
+            "It is likely the filename is incorrect or does not exist.\n";
 
         return geo;
     }

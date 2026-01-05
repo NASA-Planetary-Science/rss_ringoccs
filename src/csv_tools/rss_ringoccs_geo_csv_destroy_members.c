@@ -39,7 +39,7 @@
 
 /*  Free's all members of a rssringoccs_GeoCSV pointer except the             *
  *  error_message. Members are set to NULL after freeing.                     */
-void rssringoccs_GeoCSV_Destroy_Members(rssringoccs_GeoCSV *geo)
+void rssringoccs_GeoCSV_Destroy_Members(rssringoccs_GeoCSV * const geo)
 {
     /*  If the pointer is NULL, there's nothing to do. Simply return.         */
     if (!geo)

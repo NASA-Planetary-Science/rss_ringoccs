@@ -87,7 +87,7 @@ setup(
     version = "1.3",
     description = "C Tools for rss_ringoccs",
     author = "Ryan Maguire",
-    ext_modules=[
+    ext_modules = [
         Extension(
             "crssringoccs",
             srclist,
@@ -102,7 +102,7 @@ setup(
             ]
         )
     ],
-    packages=[
+    packages = [
         "rss_ringoccs",
         "rss_ringoccs.calibration",
         "rss_ringoccs.occgeo",

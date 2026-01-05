@@ -1,15 +1,30 @@
+/*  TMPL_RESTRICT macro provided here.                                        */
+#include <libtmpl/include/tmpl_config.h>
 
-/*  String manipulation tools and Booleans provided here.                     */
-#include <libtmpl/include/tmpl.h>
+/*  Booleans provided here.                                                   */
+#include <libtmpl/include/tmpl_bool.h>
 
-/*  Function prototype and Tau object typedef given here.                     */
-#include <rss_ringoccs/include/rss_ringoccs_tau.h>
+/*  String manipulation functions found here.                                 */
+#include <libtmpl/include/tmpl_string.h>
+
+/*  The psitype enum, with all possible psitypes, is found here.              */
+#include <rss_ringoccs/include/types/rss_ringoccs_psitype.h>
+
+/*  Tau object typedef given here.                                            */
+#include <rss_ringoccs/include/types/rss_ringoccs_tauobj.h>
+
+/*  Function prototype / forward declaration.                                 */
+extern void
+rssringoccs_Tau_Set_Psi_Type(const char * TMPL_RESTRICT const psitype,
+                             rssringoccs_TAUObj * TMPL_RESTRICT const tau);
 
 /*  Error message listing all of the legal psitypes.                          */
 static const char rssringoccs_psi_type_error_message[2278];
 
+/*  Function for setting the psitype in a Tau object from a string.           */
 void
-rssringoccs_Tau_Set_Psi_Type(const char *psitype, rssringoccs_TAUObj* tau)
+rssringoccs_Tau_Set_Psi_Type(const char * TMPL_RESTRICT const psitype,
+                             rssringoccs_TAUObj * TMPL_RESTRICT const tau)
 {
     char *tau_psitype;
 
@@ -22,7 +37,7 @@ rssringoccs_Tau_Set_Psi_Type(const char *psitype, rssringoccs_TAUObj* tau)
         return;
 
     /*  If the input string is NULL treat this as an error.                   */
-    if (psitype == NULL)
+    if (!psitype)
     {
         tau->error_occurred = tmpl_True;
         tau->error_message =

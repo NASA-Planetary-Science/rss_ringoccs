@@ -24,11 +24,20 @@
  *  Date:       December 31, 2020                                             *
  ******************************************************************************/
 
-/*  free is found here, as is NULL.                                           */
-#include <stdlib.h>
+/*  Macro for freeing a pointer and setting it to NULL.                       */
+#include <libtmpl/include/compat/tmpl_free.h>
 
-/*  rssringoccs_DLPCSV typedef here, and function prototype given.            */
-#include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
+/*  rssringoccs_DLPCSV typedef provided here.                                 */
+#include <rss_ringoccs/include/types/rss_ringoccs_dlpcsv.h>
+
+/*  NULL macro defined here.                                                  */
+#include <stddef.h>
+
+/*  Function prototype / forward declaration.                                 */
+extern void rssringoccs_DLPCSV_Destroy(rssringoccs_DLPCSV ** const dlp);
+
+/*  Tell the compiler about the main destructor function.                     */
+extern void rssringoccs_DLPCSV_Destroy_Members(rssringoccs_DLPCSV * const dlp);
 
 /*  Function for freeing the memory in a DLPCSV object.                       */
 void rssringoccs_DLPCSV_Destroy(rssringoccs_DLPCSV **dlp)
@@ -50,20 +59,12 @@ void rssringoccs_DLPCSV_Destroy(rssringoccs_DLPCSV **dlp)
     /*  Free all of the members inside the DLP object.                        */
     rssringoccs_DLPCSV_Destroy_Members(dlp_inst);
 
-    /*  If an error occurred, the error_message variable is malloced and a    *
-     *  string is stored inside of it. Free this pointer if this is true.     */
-    if (dlp_inst->error_message != NULL)
-    {
-        free(dlp_inst->error_message);
-
-        /*  Set the pointer to NULL to avoid freeing it twice.                */
-        dlp_inst->error_message = NULL;
-    }
+    /*  The error_message member is a pointer to a constant string, it does   *
+     *  not need to be freed. Set the pointer to NULL to avoid reading it.    */
+    dlp_inst->error_message = NULL;
 
     /*  Free the DLPCSV object pointer and set it to NULL to prevent trying   *
      *  to free the pointer twice.                                            */
-    free(dlp_inst);
-    *dlp = NULL;
-    return;
+    TMPL_FREE(*dlp);
 }
 /*  End of rssringoccs_DLPCSV_Destroy.                                        */

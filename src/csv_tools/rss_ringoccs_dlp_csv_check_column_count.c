@@ -23,9 +23,8 @@
  *  Date:       September 1, 2024                                             *
  ******************************************************************************/
 
-/*  libtmpl provides Booleans, string duplicate, and CSV reading tools.       */
+/*  libtmpl provides Booleans and CSV reading tools.                          */
 #include <libtmpl/include/tmpl_bool.h>
-#include <libtmpl/include/tmpl_string.h>
 #include <libtmpl/include/tmpl_utility.h>
 
 /*  rssringoccs_DLPCSV typedef here, and function prototype given.            */
@@ -50,11 +49,10 @@ void rssringoccs_DLPCSV_Check_Column_Count(rssringoccs_DLPCSV *dlp, FILE *fp)
     if (!fp)
     {
         dlp->error_occurred = tmpl_True;
-        dlp->error_message = tmpl_String_Duplicate(
+        dlp->error_message =
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_DLPCSV_Check_Column_Count\n\n"
-            "Input file is NULL. Aborting.\n"
-        );
+            "Input file is NULL.\n";
 
         return;
     }
@@ -66,24 +64,20 @@ void rssringoccs_DLPCSV_Check_Column_Count(rssringoccs_DLPCSV *dlp, FILE *fp)
     if ((column_count != 12) && (dlp->use_deprecated))
     {
         dlp->error_occurred = tmpl_True;
-        dlp->error_message = tmpl_String_Duplicate(
+        dlp->error_message =
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_DLPCSV_Check_Column_Count\n\n"
-            "use_deprecated is set to true but the input CSV does not have\n"
-            "12 columns. Aborting computation.\n"
-        );
+            "use_deprecated is true but the CSV does not have 12 columns.\n";
     }
 
     /*  And if use_deprecated is false, we need 13 column. Check this.        */
     else if ((column_count != 13) && (!dlp->use_deprecated))
     {
         dlp->error_occurred = tmpl_True;
-        dlp->error_message = tmpl_String_Duplicate(
+        dlp->error_message =
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_DLPCSV_Check_Column_Count\n\n"
-            "use_deprecated is set to false but the input CSV does not have\n"
-            "13 columns. Aborting computation.\n"
-        );
+            "use_deprecated is false but the CSV does not have 13 columns.\n";
     }
 }
 /*  End of rssringoccs_DLPCSV_Check_Column_Count.                             */

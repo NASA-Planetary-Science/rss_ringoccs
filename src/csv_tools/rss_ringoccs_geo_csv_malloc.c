@@ -26,9 +26,8 @@
 /*  malloc is found here.                                                     */
 #include <stdlib.h>
 
-/*  libtmpl provided Booleans, string duplicate, and line count.              */
+/*  libtmpl provided Boolean and line count.                                  */
 #include <libtmpl/include/tmpl_bool.h>
-#include <libtmpl/include/tmpl_string.h>
 #include <libtmpl/include/tmpl_utility.h>
 
 /*  rssringoccs_GeoCSV typedef here, and function prototype given.            */
@@ -42,21 +41,21 @@
 /*  Macro function for safely allocating memory for the variables. This       *
  *  checks if malloc fails, and does not simply assume it passed.             */
 #define MALLOC_GEO_VAR(var)                                                    \
-    geo->var = malloc(sizeof(*geo->var) * geo->n_elements);                    \
-    if (geo->var == NULL)                                                      \
-    {                                                                          \
-        geo->error_occurred = tmpl_True;                                       \
-        geo->error_message = tmpl_String_Duplicate(                            \
-            "Error Encountered: rss_ringoccs\n"                                \
-            "\trssringoccs_GeoCSV_Malloc\n\n"                                  \
-            "Malloc returned NULL. Failed to allocate memory for " #var ".\n"  \
-            "Aborting computation and returning.\n"                            \
-        );                                                                     \
+    do {                                                                       \
+        geo->var = malloc(sizeof(*geo->var) * geo->n_elements);                \
+        if (geo->var == NULL)                                                  \
+        {                                                                      \
+            geo->error_occurred = tmpl_True;                                   \
+            geo->error_message =                                               \
+                "Error Encountered: rss_ringoccs\n"                            \
+                "\trssringoccs_GeoCSV_Malloc\n\n"                              \
+                "Malloc failed to allocate memory for " #var ".\n";            \
                                                                                \
-        /*  Free the variables that have been malloc'd so far.               */\
-        rssringoccs_GeoCSV_Destroy_Members(geo);                               \
-        return;                                                                \
-    }
+            /*  Free the variables that have been malloc'd so far.           */\
+            rssringoccs_GeoCSV_Destroy_Members(geo);                           \
+            return;                                                            \
+        }                                                                      \
+    } while (0)
 
 /*  Function of allocating memory to a Geo CSV based on a CSV file pointer.   */
 void rssringoccs_GeoCSV_Malloc(rssringoccs_GeoCSV *geo, FILE *fp)
@@ -74,11 +73,10 @@ void rssringoccs_GeoCSV_Malloc(rssringoccs_GeoCSV *geo, FILE *fp)
     if (!fp)
     {
         geo->error_occurred = tmpl_True;
-        geo->error_message = tmpl_String_Duplicate(
+        geo->error_message =
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_GeoCSV_Malloc\n\n"
-            "Input file is NULL. Aborting.\n"
-        );
+            "Input file is NULL.\n";
 
         return;
     }
@@ -88,46 +86,42 @@ void rssringoccs_GeoCSV_Malloc(rssringoccs_GeoCSV *geo, FILE *fp)
 
     /*  There needs to be at least one row in the CSV file. If not, treat     *
      *  this as an error. It is likely the file is corrupted.                 */
-    if (geo->n_elements == (size_t)0)
+    if (geo->n_elements == 0)
     {
         geo->error_occurred = tmpl_True;
-        geo->error_message = tmpl_String_Duplicate(
+        geo->error_message =
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_GeoCSV_Malloc\n\n"
-            "n_elements is zero, nothing to malloc. Aborting.\n"
-        );
+            "n_elements is zero, nothing to malloc. Aborting.\n";
 
         return;
     }
 
     /*  Use the MALLOC_GEO_VAR macro function to allocate memory and check    *
-     *  for errors. This macro ends with an if-then statement, and ends in    *
-     *  curly braces {}, hence no need for a semi-colon here.                 */
-    MALLOC_GEO_VAR(t_oet_spm_vals)
-    MALLOC_GEO_VAR(t_ret_spm_vals)
-    MALLOC_GEO_VAR(t_set_spm_vals)
-    MALLOC_GEO_VAR(rho_km_vals)
-    MALLOC_GEO_VAR(phi_rl_deg_vals)
-    MALLOC_GEO_VAR(phi_ora_deg_vals)
-    MALLOC_GEO_VAR(B_deg_vals)
-    MALLOC_GEO_VAR(D_km_vals)
-    MALLOC_GEO_VAR(rho_dot_kms_vals)
-    MALLOC_GEO_VAR(phi_rl_dot_kms_vals)
-    MALLOC_GEO_VAR(F_km_vals)
-    MALLOC_GEO_VAR(R_imp_km_vals)
-    MALLOC_GEO_VAR(rx_km_vals)
-    MALLOC_GEO_VAR(ry_km_vals)
-    MALLOC_GEO_VAR(rz_km_vals)
-    MALLOC_GEO_VAR(vx_kms_vals)
-    MALLOC_GEO_VAR(vy_kms_vals)
-    MALLOC_GEO_VAR(vz_kms_vals)
+     *  for errors.                                                           */
+    MALLOC_GEO_VAR(t_oet_spm_vals);
+    MALLOC_GEO_VAR(t_ret_spm_vals);
+    MALLOC_GEO_VAR(t_set_spm_vals);
+    MALLOC_GEO_VAR(rho_km_vals);
+    MALLOC_GEO_VAR(phi_rl_deg_vals);
+    MALLOC_GEO_VAR(phi_ora_deg_vals);
+    MALLOC_GEO_VAR(B_deg_vals);
+    MALLOC_GEO_VAR(D_km_vals);
+    MALLOC_GEO_VAR(rho_dot_kms_vals);
+    MALLOC_GEO_VAR(phi_rl_dot_kms_vals);
+    MALLOC_GEO_VAR(F_km_vals);
+    MALLOC_GEO_VAR(R_imp_km_vals);
+    MALLOC_GEO_VAR(rx_km_vals);
+    MALLOC_GEO_VAR(ry_km_vals);
+    MALLOC_GEO_VAR(rz_km_vals);
+    MALLOC_GEO_VAR(vx_kms_vals);
+    MALLOC_GEO_VAR(vy_kms_vals);
+    MALLOC_GEO_VAR(vz_kms_vals);
 
     /*  If we're using the older deprecated format, there are 19 columns.     *
      *  Allocate memory for obs_spacecraft_lat_deg_vals as well.              */
     if (!geo->use_deprecated)
-    {
-        MALLOC_GEO_VAR(obs_spacecraft_lat_deg_vals)
-    }
+        MALLOC_GEO_VAR(obs_spacecraft_lat_deg_vals);
 }
 /*  End of rssringoccs_GeoCSV_Malloc.                                         */
 

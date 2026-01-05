@@ -23,19 +23,11 @@
  *  Date:       December 31, 2020                                             *
  ******************************************************************************/
 
-/*  free is found here, as is NULL.                                           */
-#include <stdlib.h>
+/*  Macro for freeing a pointer and setting it to NULL.                       */
+#include <libtmpl/include/compat/tmpl_free.h>
 
 /*  rssringoccs_GeoCSV typedef here, and function prototype given.            */
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
-
-/*  Check if this macro name is available.                                    */
-#ifdef DESTROY_GEO_VAR
-#undef DESTROY_GEO_VAR
-#endif
-
-/*  Macro for freeing and nullifying the members of the geo CSV structs.      */
-#define DESTROY_GEO_VAR(var) if (var != NULL){free(var); var = NULL;}
 
 /*  Free's all members of a rssringoccs_GeoCSV pointer except the             *
  *  error_message. Members are set to NULL after freeing.                     */
@@ -46,28 +38,25 @@ void rssringoccs_GeoCSV_Destroy_Members(rssringoccs_GeoCSV * const geo)
         return;
 
     /*  Destroy every variable except the error_message.                      */
-    DESTROY_GEO_VAR(geo->t_oet_spm_vals)
-    DESTROY_GEO_VAR(geo->t_ret_spm_vals)
-    DESTROY_GEO_VAR(geo->t_set_spm_vals)
-    DESTROY_GEO_VAR(geo->rho_km_vals)
-    DESTROY_GEO_VAR(geo->phi_rl_deg_vals)
-    DESTROY_GEO_VAR(geo->phi_ora_deg_vals)
-    DESTROY_GEO_VAR(geo->B_deg_vals)
-    DESTROY_GEO_VAR(geo->D_km_vals)
-    DESTROY_GEO_VAR(geo->rho_dot_kms_vals)
-    DESTROY_GEO_VAR(geo->phi_rl_dot_kms_vals)
-    DESTROY_GEO_VAR(geo->F_km_vals)
-    DESTROY_GEO_VAR(geo->R_imp_km_vals)
-    DESTROY_GEO_VAR(geo->rx_km_vals)
-    DESTROY_GEO_VAR(geo->ry_km_vals)
-    DESTROY_GEO_VAR(geo->rz_km_vals)
-    DESTROY_GEO_VAR(geo->vx_kms_vals)
-    DESTROY_GEO_VAR(geo->vy_kms_vals)
-    DESTROY_GEO_VAR(geo->vz_kms_vals)
-    DESTROY_GEO_VAR(geo->obs_spacecraft_lat_deg_vals)
-    DESTROY_GEO_VAR(geo->history)
+    TMPL_FREE(geo->t_oet_spm_vals);
+    TMPL_FREE(geo->t_ret_spm_vals);
+    TMPL_FREE(geo->t_set_spm_vals);
+    TMPL_FREE(geo->rho_km_vals);
+    TMPL_FREE(geo->phi_rl_deg_vals);
+    TMPL_FREE(geo->phi_ora_deg_vals);
+    TMPL_FREE(geo->B_deg_vals);
+    TMPL_FREE(geo->D_km_vals);
+    TMPL_FREE(geo->rho_dot_kms_vals);
+    TMPL_FREE(geo->phi_rl_dot_kms_vals);
+    TMPL_FREE(geo->F_km_vals);
+    TMPL_FREE(geo->R_imp_km_vals);
+    TMPL_FREE(geo->rx_km_vals);
+    TMPL_FREE(geo->ry_km_vals);
+    TMPL_FREE(geo->rz_km_vals);
+    TMPL_FREE(geo->vx_kms_vals);
+    TMPL_FREE(geo->vy_kms_vals);
+    TMPL_FREE(geo->vz_kms_vals);
+    TMPL_FREE(geo->obs_spacecraft_lat_deg_vals);
+    TMPL_FREE(geo->history);
 }
 /*  End of rssringoccs_GeoCSV_Destroy_Members.                                */
-
-/*  Undefine everything in case someone wants to #include this file.          */
-#undef DESTROY_GEO_VAR

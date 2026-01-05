@@ -52,7 +52,7 @@ void rssringoccs_GeoCSV_Check_Column_Count(rssringoccs_GeoCSV *geo, FILE *fp)
         geo->error_message =
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_GeoCSV_Check_Column_Count\n\n"
-            "Input file is NULL. Aborting.\n";
+            "Input file is NULL.\n";
 
         return;
     }
@@ -67,8 +67,7 @@ void rssringoccs_GeoCSV_Check_Column_Count(rssringoccs_GeoCSV *geo, FILE *fp)
         geo->error_message =
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_GeoCSV_Check_Column_Count\n\n"
-            "use_deprecated is set to true but the input CSV does not have\n"
-            "18 columns. Aborting computation.\n";
+            "use_deprecated is true but the CSV does not have 18 columns.\n";
     }
 
     /*  And if use_deprecated is false, we need 19 column. Check this.        */
@@ -78,8 +77,8 @@ void rssringoccs_GeoCSV_Check_Column_Count(rssringoccs_GeoCSV *geo, FILE *fp)
         geo->error_message =
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_GeoCSV_Check_Column_Count\n\n"
-            "use_deprecated is set to false but the input CSV does not have\n"
-            "19 columns. Aborting computation.\n";
+            "use_deprecated is false but the CSV does not have 19 columns.\n";
+
     }
 }
 /*  End of rssringoccs_GeoCSV_Check_Column_Count.                             */

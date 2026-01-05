@@ -1,7 +1,4 @@
 #include <libtmpl/include/tmpl_bool.h>
-#include <libtmpl/include/tmpl_calendar.h>
-#include <libtmpl/include/tmpl_string.h>
-#include <libtmpl/include/tmpl_utility.h>
 #include <rss_ringoccs/include/rss_ringoccs_history.h>
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
 #include <stdlib.h>

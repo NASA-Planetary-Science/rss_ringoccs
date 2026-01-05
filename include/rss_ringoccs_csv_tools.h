@@ -30,39 +30,12 @@
 /*  Boolean data types defined here.                                          */
 #include <libtmpl/include/tmpl_bool.h>
 
-#include <rss_ringoccs/include/rss_ringoccs_history.h>
+#include <rss_ringoccs/include/types/rss_ringoccs_history.h>
+#include <rss_ringoccs/include/types/rss_ringoccs_geocsv.h>
 
 /*  size_t typedef is given here.                                             */
 #include <stddef.h>
 #include <stdio.h>
-
-/*  Data structure for the GEO.TAB files on the PDS.                          */
-typedef struct rssringoccs_GeoCSV_Def {
-    double *t_oet_spm_vals;
-    double *t_ret_spm_vals;
-    double *t_set_spm_vals;
-    double *rho_km_vals;
-    double *phi_rl_deg_vals;
-    double *phi_ora_deg_vals;
-    double *B_deg_vals;
-    double *D_km_vals;
-    double *rho_dot_kms_vals;
-    double *phi_rl_dot_kms_vals;
-    double *F_km_vals;
-    double *R_imp_km_vals;
-    double *rx_km_vals;
-    double *ry_km_vals;
-    double *rz_km_vals;
-    double *vx_kms_vals;
-    double *vy_kms_vals;
-    double *vz_kms_vals;
-    double *obs_spacecraft_lat_deg_vals;
-    size_t n_elements;
-    rssringoccs_History *history;
-    tmpl_Bool use_deprecated;
-    tmpl_Bool error_occurred;
-    char *error_message;
-} rssringoccs_GeoCSV;
 
 /*  Data structure for the DLP.TAB files on the PDS.                          */
 typedef struct rssringoccs_DLPCSV_Def {

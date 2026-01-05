@@ -146,8 +146,11 @@
 /*  Complex numbers and functions provided here.                              */
 #include <libtmpl/include/tmpl_complex.h>
 
-/*  Typedef for rssringoccs_TAUObj found here.                               */
-#include <rss_ringoccs/include/rss_ringoccs_tau.h>
+/*  Provides common mathematical constants like sqrt(2).                      */
+#include <libtmpl/include/constants/tmpl_math_constants.h>
+
+/*  Typedef for rssringoccs_TAUObj found here.                                */
+#include <rss_ringoccs/include/types/rss_ringoccs_tauobj.h>
 
 /*  Function prototype provided here.                                         */
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
@@ -163,6 +166,12 @@ rssringoccs_Fresnel_Transform(rssringoccs_TAUObj * TMPL_RESTRICT const tau,
     /*  Declare all necessary variables. m and n are used for indexing.       */
     size_t m, n;
 
+    /*  The scale factor for the integral. This is 1 / 2F times the magnitude *
+     *  of the complex normalization when the output is normalized by the     *
+     *  window width, otherwise it is dx / 2F, where F is the Fresnel scale   *
+     *  and dx is the step size between samples in the Riemann sum.           */
+    double scale;
+
     /*  Variables for the real and imaginary parts of the output.             */
     double real, imag;
 
@@ -175,12 +184,13 @@ rssringoccs_Fresnel_Transform(rssringoccs_TAUObj * TMPL_RESTRICT const tau,
     const double sign = (tau->use_fwd ? -1.0 : 1.0);
     const double psi_factor = sign * rcpr_fresnel_scale * rcpr_fresnel_scale;
 
-    /*  The scale factor for the integral is (1 + i) / 2F, and the Riemann    *
-     *  sum contains a dx factor, so the final scale is (1 + i) dx / 2F.      */
-    const double scale = 0.5 * tau->dx_km * rcpr_fresnel_scale;
-
-    /*  exp_negative_ix is used for the Fresnel kernel.                       */
+    /*  exp_negative_ipsi is the complex exponentiation Fresnel kernel, and   *
+     *  integrand is a helper variable used for computing the Fresnel         *
+     *  transform via a Riemann sum.                                          */
     tmpl_ComplexDouble exp_negative_ipsi, integrand;
+
+    /*  Initialize the normalization to zero so we may loop over it later.    */
+    tmpl_ComplexDouble norm = tmpl_CDouble_Zero;
 
     /*  Start with the central point in the Riemann sum. This is the center   *
      *  of the window function, that is, where w_func = 1. This is just T_in  *
@@ -200,6 +210,12 @@ rssringoccs_Fresnel_Transform(rssringoccs_TAUObj * TMPL_RESTRICT const tau,
 
         /*  Use Euler's Theorem to compute exp(-ix). Scale by window function.*/
         exp_negative_ipsi = tmpl_CDouble_Polar(w_func[m], -psi);
+
+        /*  Compute denominator portion of norm using a Riemann Sum. The      *
+         *  numerator has a closed form solution of sqrt(2) F. We can skip    *
+         *  the explicit computation.                                         */
+        if (tau->use_norm)
+            tmpl_CDouble_AddTo(&norm, &exp_negative_ipsi);
 
         /*  Take advantage of the symmetry of the quadratic approximation.    *
          *  This cuts the number of computations roughly in half. That is,    *
@@ -223,6 +239,27 @@ rssringoccs_Fresnel_Transform(rssringoccs_TAUObj * TMPL_RESTRICT const tau,
         /*  Decrement the offset index to the next point. We started at the   *
          *  edge of the window and are moving inwards towards the center.     */
         n--;
+    }
+
+    if (tau->use_norm)
+    {
+        /*  Compute 2 * norm + 1. norm is a complex, do this component-wise.  *
+         *  The times 2 factor is because we cut the above window in half,    *
+         *  using the symmetry that comes from (-x)^2 = x^2. The plus one     *
+         *  comes from the center of the window, which was also skipped in    *
+         *  the for-loop above.                                               */
+        norm.dat[0] = 2.0 * norm.dat[0] + 1.0;
+        norm.dat[1] *= 2.0;
+
+        /*  Compute the real scale factor, 1 / (sqrt(2) |norm|).              */
+        scale = tmpl_Double_Rcpr_Sqrt_Two / tmpl_CDouble_Abs(norm);
+    }
+
+    else
+    {
+        /*  The scale factor for the integral is (1 + i) / 2F and the Riemann *
+         *  sum contains a dx factor, so the final scale is (1 + i) dx / 2F.  */
+        scale = 0.5 * tau->dx_km * rcpr_fresnel_scale;
     }
 
     /*  Multiply result by the coefficient found in the Fresnel inverse.      */

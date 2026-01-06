@@ -302,7 +302,7 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj * const tau)
         }
 
         /*  Compute the Fresnel Transform about the current point.            */
-        rssringoccs_Fresnel_Transform(tau, x_arr, w_func, nw_pts, center);
+        rssringoccs_Fresnel_Transform(tau, x_arr, w_func, center, nw_pts);
 
         /*  Move the pointers to the next point.                              */
         center += 1;

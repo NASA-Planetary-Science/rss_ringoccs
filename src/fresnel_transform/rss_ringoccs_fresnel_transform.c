@@ -19,15 +19,15 @@
  *                       rss_ringoccs_fresnel_transform                       *
  ******************************************************************************
  *  Purpose:                                                                  *
- *      Uses the classic quadratic approximation to compute the inverse       *
- *      Fresnel transform using a Riemann sum.                                *
+ *      Uses the classic quadratic approximation to compute the Frensel       *
+ *      transform using a Riemann sum.                                        *
  ******************************************************************************
  *                             DEFINED FUNCTIONS                              *
  ******************************************************************************
  *  Function Name:                                                            *
  *      rssringoccs_Fresnel_Transform                                         *
  *  Purpose:                                                                  *
- *      Performs diffraction correction using the Fresnel approximation.      *
+ *      Performs the Fresnel transform using the Fresnel approximation.       *
  *  Arguments:                                                                *
  *      tau (rssringoccs_TAUObj * TMPL_RESTRICT const):                       *
  *          A pointer to a Tau object. This contains all of the geometry and  *
@@ -42,13 +42,13 @@
  *      w_func (const double * TMPL_RESTRICT const):                          *
  *          The window function, pre-computed across the current window. The  *
  *          value w_func[n] corresponds to the window at x_arr[n] (see above).*
- *      n_pts (size_t):                                                       *
+ *      center (const size_t):                                                *
+ *          The index for the center of the window. There must be             *
+ *          n_pts points to the left and right of the center in the data.     *
+ *      n_pts (const size_t):                                                 *
  *          The number of points in the x_arr and w_func arrays. There are    *
  *          2 * n_pts + 1 points total in the window, n_pts to the left of    *
  *          the center, n_pts to the right, and the center itself.            *
- *      center (size_t):                                                      *
- *          The index for the center of the window. There must be             *
- *          n_pts points to the left and right of the center in the data.     *
  *  Output:                                                                   *
  *      None (void).                                                          *
  *  Called Functions:                                                         *
@@ -64,19 +64,19 @@
  *  Method:                                                                   *
  *      The inverse Fresnel transform is given by:                            *
  *                                                                            *
- *                           infinity                                         *
- *                              -                                             *
- *                     1 + i   | |                                            *
- *          T_out(r) = -----   |   T_in(r0) w(r - r0) exp(-i psi(r, r0)) dr0  *
- *                       2F  | |                                              *
- *                            -                                               *
- *                          -infinity                                         *
+ *                          infinity                                          *
+ *                             -                                              *
+ *                    1 + i   | |                                             *
+ *          T   (r) = -----   |   T  (r ) w(r - r ) exp(-i psi(r, r )) dr     *
+ *           out       2 F  | |    in  0         0                 0     0    *
+ *                           -                                                *
+ *                           0                                                *
  *                                                                            *
  *      where T_in is the diffracted data, w is the window function, r is     *
- *      the ring intercept point, and r0 is a dummy variable of integration.  *
- *      psi is the Fresnel Kernel, and exp is the exponential function. The   *
- *      scale factor F is the Fresnel scale which is dependent on the         *
- *      geometry of the occultation.                                          *
+ *      the ring intercept point, and r0 is a dummy variable of integration,  *
+ *      psi is the Fresnel phase, and exp is just the exponential function.   *
+ *      The scale factor F is the Fresnel scale which is dependent on the     *
+ *      geometry of the occultation and the wavelength.                       *
  *                                                                            *
  *      In ideal scenarios, the Fresnel kernel may be approximated by a       *
  *      simple quadratic:                                                     *
@@ -89,18 +89,47 @@
  *                                                                            *
  *      The above integral is then computed via a Riemann sum using this new  *
  *      expression for psi.                                                   *
+ *                                                                            *
+ *      As the resolution gets too coarse, say 10 km or larger, the window    *
+ *      width quickly shrinks to zero and the integral will be approximately  *
+ *      zero. To account for this, you may normalize the integral by the      *
+ *      window width. The normalization is defined as follows:                *
+ *                                                                            *
+ *                    |  infinity                 |                           *
+ *                    |     -                     |                           *
+ *                    |    | |                    |                           *
+ *                    |    |    exp(-i psi(x)) dx |                           *
+ *                    |  | |                      |                           *
+ *                    |   -                       |                           *
+ *                    | -infinity                 |                           *
+ *          norm =  ---------------------------------                         *
+ *                  |   W / 2                       |                         *
+ *                  |     -                         |                         *
+ *                  |    | |                        |                         *
+ *                  |    |   w(x) exp(-i psi(x)) dx |                         *
+ *                  |  | |                          |                         *
+ *                  |   -                           |                         *
+ *                  | -W / 2                        |                         *
+ *                                                                            *
+ *      This has the effect of making the integral in free-space regions,     *
+ *      which are regions that are not affected by diffraction, evaluate to   *
+ *      one, regardless of what (positive) resolution is chosen. Set the      *
+ *      use_norm Boolean in the Tau object to true to enable this.            *
  *  Notes:                                                                    *
  *      1.) This code uses the Fresnel approximation which has been known to  *
  *          fail for several different occultations, especially ones of very  *
  *          low angle (small B values). Take this into consideration when     *
  *          performing any analysis.                                          *
+ *                                                                            *
  *      2.) While this may be inaccurate for certain occultations, it is      *
  *          immensely fast, capable of processing the entire Rev007 E         *
- *          occultation accurately in less than a second at 1km resolution.   *
+ *          data set accurately in less than half a second at 1km resolution. *
+ *                                                                            *
  *      3.) There are no checks for NULL pointers. You are responsible for    *
  *          calling this function with pointers that point to valid data.     *
- *      4.) This function does not normalize by the window width, meaning for *
- *          very coarse resolutions the Riemann sum will be roughly zero.     *
+ *                                                                            *
+ *      4.) This function will optionally normalize by the window width. Set  *
+ *          the use_norm Boolean in the Tau object to use this.               *
  *  References:                                                               *
  *      1.) Marouf, E., Tyler, G., Rosen, P. (June 1986)                      *
  *          Profiling Saturn's Rings by Radio Occultation                     *
@@ -124,10 +153,10 @@
  *          Header file providing TMPL_RESTRICT.                              *
  *  2.) tmpl_complex.h:                                                       *
  *          Complex numbers declared here, as are arithmetic functions.       *
- *  3.) rss_ringoccs_tau.h:                                                   *
+ *  3.) tmpl_math_constants.h:                                                *
+ *          Header file providing commonly used mathematical constants.       *
+ *  4.) rss_ringoccs_tauobj.h:                                                *
  *          Tau object typedef provided here.                                 *
- *  4.) rss_ringoccs_fresnel_transform.h:                                     *
- *          Prototype for the function given here.                            *
  ******************************************************************************
  *  Author:     Ryan Maguire                                                  *
  *  Date:       May 4, 2021                                                   *
@@ -152,16 +181,21 @@
 /*  Typedef for rssringoccs_TAUObj found here.                                */
 #include <rss_ringoccs/include/types/rss_ringoccs_tauobj.h>
 
-/*  Function prototype provided here.                                         */
-#include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
+/*  Function prototype / forward declaration.                                 */
+extern void
+rssringoccs_Fresnel_Transform(rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+                              const double * TMPL_RESTRICT const x_arr,
+                              const double * TMPL_RESTRICT const w_func,
+                              const size_t center,
+                              const size_t n_pts);
 
-/*  Perform the quadratic Fresnel transform on a data set.                    */
+/*  Function for performing the quadratic Fresnel transform on a data set.    */
 void
 rssringoccs_Fresnel_Transform(rssringoccs_TAUObj * TMPL_RESTRICT const tau,
                               const double * TMPL_RESTRICT const x_arr,
                               const double * TMPL_RESTRICT const w_func,
-                              size_t n_pts,
-                              size_t center)
+                              const size_t center,
+                              const size_t n_pts)
 {
     /*  Declare all necessary variables. m and n are used for indexing.       */
     size_t m, n;

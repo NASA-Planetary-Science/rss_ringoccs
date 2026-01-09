@@ -15,6 +15,132 @@
  *                                                                            *
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
+ ******************************************************************************
+ *             rss_ringoccs_fresnel_transform_newton_linear_filon             *
+ ******************************************************************************
+ *  Purpose:                                                                  *
+ *      Computes the Fresnel transform using a linear Filon-like quadrature.  *
+ ******************************************************************************
+ *                             DEFINED FUNCTIONS                              *
+ ******************************************************************************
+ *  Function Name:                                                            *
+ *      rssringoccs_Fresnel_Transform_Newton_Linear_Filon                     *
+ *  Purpose:                                                                  *
+ *      Performs the Fresnel transform using the Newton-Raphson method to     *
+ *      compute the stationary Fresnel phase, and a linear Filon-like         *
+ *      quadrature method for the integral.                                   *
+ *  Arguments:                                                                *
+ *      tau (rssringoccs_TAUObj * TMPL_RESTRICT const tau):                   *
+ *          The Tau object with all of the geometry and diffraction data.     *
+ *      w_func (const double * TMPL_RESTRICT const):                          *
+ *          The array for the window / tapering function.                     *
+ *      center (const size_t):                                                *
+ *          The index for the center of the window currently being considered.*
+ *          For the forward transform this is the index for "rho0", and for   *
+ *          the inverse transform this is the index for "rho".                *
+ *      offset (const size_t):                                                *
+ *          The index for the variable of integration which runs across the   *
+ *          window. This is "rho" for the forward transform and "rho0" for    *
+ *          the inverse transform.                                            *
+ *  Output:                                                                   *
+ *      None (void).                                                          *
+ *  Called Functions:                                                         *
+ *  Method:                                                                   *
+ *      The Fresnel transform is defined as follows:                          *
+ *                                                                            *
+ *                                                   -                -       *
+ *                     -                            |     -      pi -  |      *
+ *                    | |                       exp |  i | psi - --- | |      *
+ *                    |              ----------     |     -   s   4 -  |      *
+ *          ^         |             /   2 pi         -                -       *
+ *          T(r ) =   |   r T(r)   / ---------- ------------------------ dr   *
+ *             0    | |          \/  | psi '' |       || R - rho  ||          *
+ *                   -                    s                    s              *
+ *                                                                            *
+ *      where psi is the Fresnel phase:                                       *
+ *                                                                            *
+ *                   -                                          -             *
+ *                  |                    R - rho0                |            *
+ *          psi = k | || R - rho || - -------------- . (R - rho) |            *
+ *                  |                 || R - rho0 ||             |            *
+ *                   -                                          -             *
+ *                                                                            *
+ *      where k is the wavenumber, R is the position vector for the observer, *
+ *      rho0 is the where the line of sight from the observer intersects the  *
+ *      ring plane, and rho is the dummy variable of integration. The r and   *
+ *      r0 variables are given by || rho || and || rho0 ||, respectively.     *
+ *      Lastly, rho_s is the stationary point for psi, the point satisfying:  *
+ *                                                                            *
+ *          d psi                                                             *
+ *          ----- = 0                                                         *
+ *          d phi                                                             *
+ *                                                                            *
+ *      where phi is the (dummy) azimuth angle. psi_s is the value of psi at  *
+ *      rho = rho_s.                                                          *
+ *                                                                            *
+ *      The inverse transform is approximated by swapping the rho and rho0    *
+ *      variables (hence swapping r and r0 as well) and then integrated the   *
+ *      complex conjugate of the integrand:                                   *
+ *                                                                            *
+ *                                                    -                -      *
+ *                     -                             |     -      pi -  |     *
+ *                    | |                        exp | -i | psi - --- | |     *
+ *                    |               ----------     |     -   s   4 -  |     *
+ *                    |     ^        /   2 pi         -                -      *
+ *          T(r) ~=   |   r T(r )   / ---------- ------------------------ dr  *
+ *                  | |        0  \/  | psi '' |       || R - rho  ||       0 *
+ *                   -                     s                     s            *
+ *                                                                            *
+ *      psi_s is computed using Newton-Raphson with initial guess rho = rho0. *
+ *                                                                            *
+ *      For large windows (large W), the highly oscillatory nature of the     *
+ *      complex exponentiated Fresnel phase means we are unable to use the    *
+ *      usual methods of numerical integration, such as the trapezoidal rule  *
+ *      or Simpson's rule. Instead, the integral is done using a modified     *
+ *      Filon quadrature by doing a linear interpolation of psi and T across  *
+ *      each bin. That is, across an interval [Ln, Rn], we interpolate the    *
+ *      weight in the integrand (which is everything except the exponential)  *
+ *      by a r + b, and interpolate psi by c r + d. We may then approximate   *
+ *      the Fresnel transform as follows:                                     *
+ *                                                                            *
+ *                      R                                                     *
+ *                       n                                                    *
+ *                      -                                                     *
+ *                     | |                 -             -                    *
+ *          ^          |   -       -      |    -       -  |                   *
+ *          T (r ) =   |  | a r + b | exp | i | c r + d | | dr                *
+ *           n  0    | |   -       -      |    -       -  |                   *
+ *                    -                    -             -                    *
+ *                    L                                                       *
+ *                     n                                                      *
+ *                                                                            *
+ *                     N                                                      *
+ *                   -----                                                    *
+ *          ^        \     ^                                                  *
+ *          T(r ) ~= /     T (r )                                             *
+ *             0     -----  n  0                                              *
+ *                   n = 0                                                    *
+ *                                                                            *
+ *      Where N is the number of bins in the window.                          *
+ *  Notes:                                                                    *
+ *  References:                                                               *
+ *      1.) Marouf, E., Tyler, G., Rosen, P. (June 1986)                      *
+ *          Profiling Saturn's Rings by Radio Occultation                     *
+ *          Icarus Vol. 68, Pages 120-166.                                    *
+ *                                                                            *
+ *          This paper describes the theory of diffraction as applied to      *
+ *          planetary ring systems. The Fresnel kernel is described here.     *
+ *                                                                            *
+ *      2.) Goodman, J. (2005)                                                *
+ *          Introduction to Fourier Optics                                    *
+ *          McGraw-Hill Series in Electrical and Computer Engineering.        *
+ *                                                                            *
+ *          Covers most of the theory behind diffraction and the application  *
+ *          of Fourier analysis to optics. The Fresnel transform is given an  *
+ *          in-depth treatise in this book.                                   *
+ ******************************************************************************
+ *  Author:     Ryan Maguire                                                  *
+ *  Date:       November 12, 2025                                             *
  ******************************************************************************/
 
 /*  TMPL_RESTRICT macro provided here.                                        */
@@ -40,19 +166,19 @@ void
 rssringoccs_Fresnel_Transform_Newton_Linear_Filon(
     rssringoccs_TAUObj * TMPL_RESTRICT const tau,
     const double * TMPL_RESTRICT const w_func,
-    size_t nw_pts,
-    size_t center
+    const size_t center,
+    const size_t nw_pts
 )
 {
     const double rcpr_dx = 1.0 / tau->dx_km;
-    const double threshold = 0.25 * rcpr_dx;
+    const double threshold = 0.25;
     size_t n, offset;
 
     double weight, scale;
-    double left_psi, right_psi, slope;
+    double left_psi, right_psi, psi_diff, rcpr_slope;
 
     tmpl_ComplexDouble left, right, left_exp_ipsi, right_exp_ipsi;
-    tmpl_ComplexDouble left_in, right_in, integrand, complex_slope;
+    tmpl_ComplexDouble left_in, right_in, integrand, factor, norm;
 
     tau->T_out[center] = tmpl_CDouble_Zero;
 
@@ -69,7 +195,10 @@ rssringoccs_Fresnel_Transform_Newton_Linear_Filon(
 
     tmpl_CDouble_MultiplyBy_Real(&left_in, scale);
 
-    for (n = 0; n < nw_pts - 1; ++n)
+    if (tau->use_norm)
+        norm = tmpl_CDouble_Multiply_Real(0.5 * scale, left_exp_ipsi);
+
+    for (n = 0; n < nw_pts; ++n)
     {
         rssringoccs_Fresnel_Phase_And_Weight(
             tau, offset + 1, center, &weight, &right_psi
@@ -82,9 +211,9 @@ rssringoccs_Fresnel_Transform_Newton_Linear_Filon(
 
         tmpl_CDouble_MultiplyBy_Real(&right_in, scale);
 
-        slope = (right_psi - left_psi) * rcpr_dx;
+        psi_diff = right_psi - left_psi;
 
-        if (tmpl_Double_Abs(slope) < threshold)
+        if (tmpl_Double_Abs(psi_diff) < threshold)
         {
             left = tmpl_CDouble_Multiply(left_in, left_exp_ipsi);
             right = tmpl_CDouble_Multiply(right_in, right_exp_ipsi);
@@ -94,30 +223,46 @@ rssringoccs_Fresnel_Transform_Newton_Linear_Filon(
 
         else
         {
-            const double rcpr_slope = 1.0 / slope;
+            rcpr_slope = tau->dx_km / psi_diff;
 
-            complex_slope = tmpl_CDouble_Subtract(right_in, left_in);
-            tmpl_CDouble_MultiplyBy_Real(&complex_slope, rcpr_dx * rcpr_slope);
+            factor = tmpl_CDouble_Subtract(right_in, left_in);
+            tmpl_CDouble_MultiplyBy_Real(&factor, 1.0 / psi_diff);
 
             left = tmpl_CDouble_Multiply_Imag(1.0, left_in);
-            left = tmpl_CDouble_Subtract(left, complex_slope);
-            tmpl_CDouble_MultiplyBy_Real(&left, rcpr_slope);
+            left = tmpl_CDouble_Subtract(factor, left);
             tmpl_CDouble_MultiplyBy(&left, &left_exp_ipsi);
 
             right = tmpl_CDouble_Multiply_Imag(1.0, right_in);
-            right = tmpl_CDouble_Subtract(right, complex_slope);
-            tmpl_CDouble_MultiplyBy_Real(&right, rcpr_slope);
+            right = tmpl_CDouble_Subtract(factor, right);
             tmpl_CDouble_MultiplyBy(&right, &right_exp_ipsi);
 
-            integrand = tmpl_CDouble_Subtract(left, right);
+            integrand = tmpl_CDouble_Subtract(right, left);
+            tmpl_CDouble_MultiplyBy_Real(&integrand, rcpr_slope);
         }
 
         tmpl_CDouble_AddTo(&tau->T_out[center], &integrand);
+
+        if (tau->use_norm)
+        {
+            integrand = tmpl_CDouble_Multiply_Real(scale, right_exp_ipsi);
+            tmpl_CDouble_AddTo(&norm, &integrand);
+        }
 
         left_psi = right_psi;
         left_exp_ipsi = right_exp_ipsi;
         left_in = right_in;
         ++offset;
+    }
+
+    if (tau->use_norm)
+    {
+        /*  Scale factor computed using Babinet's principle.                  */
+        tmpl_CDouble_MultiplyBy_Real(&integrand, 0.5);
+        norm = tmpl_CDouble_Subtract(norm, integrand);
+        scale = rcpr_dx / tmpl_CDouble_Abs(norm);
+
+        /*  Scale the Riemann sum by the normalization factor to conclude.    */
+        tmpl_CDouble_MultiplyBy_Real(&tau->T_out[center], scale);
     }
 }
 /*  End of rssringoccs_Fresnel_Transform_Newton_Linear_Filon.                 */

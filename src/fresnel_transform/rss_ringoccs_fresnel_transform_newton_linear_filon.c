@@ -121,7 +121,85 @@
  *             0     -----  n  0                                              *
  *                   n = 0                                                    *
  *                                                                            *
- *      Where N is the number of bins in the window.                          *
+ *      Where N is the number of bins in the window. This mimics the standard *
+ *      Filon quadrature method, but we are allowing the slope of the Fresnel *
+ *      phase ("c" in the previous equation) to vary from bin to bin. This    *
+ *      integral can be evaluated exactly. We have:                           *
+ *                                                                            *
+ *                      R                                                     *
+ *                       n                                                    *
+ *                      -                                                     *
+ *                     | |                 -             -                    *
+ *          ^          |   -       -      |    -       -  |                   *
+ *          T (r ) =   |  | a r + b | exp | i | c r + d | | dr                *
+ *           n  0    | |   -       -      |    -       -  |                   *
+ *                    -                    -             -                    *
+ *                    L                                                       *
+ *                     n                                                      *
+ *                         -                                        -         *
+ *                        |      R                     R             |        *
+ *                        |       n                     n            |        *
+ *                        |      -                     -             |        *
+ *                        |     | |                   | |            |        *
+ *                    i d |     |     i c r           |   i c r      |        *
+ *                 = e    | a   |  r e      d r + b   |  e      d r  |        *
+ *                        |   | |                   | |              |        *
+ *                        |    -                     -               |        *
+ *                        |    L                     L               |        *
+ *                        |     n                     n              |        *
+ *                         -                                        -         *
+ *                                                                            *
+ *                         -                                        -         *
+ *                    i d |   i R c                i L c             |        *
+ *                 = e    |  e      (1 - i R c) - e     (1 - i L c)  |        *
+ *                         -                                        -         *
+ *                                      -                  -                  *
+ *                             b   i d |    i R c    i L c  |                 *
+ *                          + --- e    |  e       - e       |                 *
+ *                            i c       -                  _                  *
+ *                                                                            *
+ *      By definition, we have R c + d = psi_R and L c + d = psi_L. The       *
+ *      above simplifies and becomes:                                         *
+ *                                                                            *
+ *                        -      -                     -      -               *
+ *          ^            | i psi  |                   | i psi  |              *
+ *          T (r ) = exp |      R | (1 - i R c) - exp |      L | (1 - i L c)  *
+ *           n            -      -                     -      -               *
+ *                                                                            *
+ *                             -                                 -            *
+ *                            |       -      -          -      -  |           *
+ *                         b  |      | i psi  |        | i psi  | |           *
+ *                      + --- |  exp |      R |  - exp |      L | |           *
+ *                        i c |       -      -          -      -  |           *
+ *                             -                                 -            *
+ *                                                                            *
+ *      Next, we note that 1 / i = -i, and furthermore that, by definition,   *
+ *      we have a R + b = T_R and a L + b = T_L. The previous expression      *
+ *      simplified even further and becomes:                                  *
+ *                                                                            *
+ *                             -          -              -         -          *
+ *          ^         i psi   |  a         |    i psi  |  a         |         *
+ *          T (r ) =       R  |  - - i T   | -       L |  - - i T   |         *
+ *           n  0    e        |  c      R  |   e       |  c      L  |         *
+ *                             -          -             -          -          *
+ *                   ------------------------------------------------         *
+ *                                           c                                *
+ *                                                                            *
+ *      This ratio, a / c, is the ratio of the slopes for psi and T. The dx   *
+ *      term cancels and we have:                                             *
+ *                                                                            *
+ *              T    -   T                                                    *
+ *          a    R        L                                                   *
+ *          - = -----------                                                   *
+ *          c   psi  - psi                                                    *
+ *                 R      L                                                   *
+ *                                                                            *
+ *      Summing the previous expression over all n would approximate the      *
+ *      Fresnel transform provided we have infinite precision. On real        *
+ *      computers, using the previous expression when "c" is small results in *
+ *      catastrophic cancellation, and a poor numerical integral. For bins    *
+ *      where psi_R - psi_L is small (less than 1 / 4 radians), we use the    *
+ *      trapezoidal rule to evaluate the integral.                            *
  *  Notes:                                                                    *
  *  References:                                                               *
  *      1.) Marouf, E., Tyler, G., Rosen, P. (June 1986)                      *

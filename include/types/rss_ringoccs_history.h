@@ -17,31 +17,34 @@
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
  *  Purpose:                                                                  *
- *      Free all of the pointers in a Cal CSV object.                         *
+ *      Provides a struct for tracking the history of a processing pipeline.  *
  ******************************************************************************
- *  Author:     Ryan Maguire, Wellesley College                               *
- *  Date:       December 31, 2020                                             *
+ *  Author:     Ryan Maguire                                                  *
+ *  Date:       January 5, 2026                                               *
  ******************************************************************************/
 
-/*  Macro for freeing a pointer and setting it to NULL.                       */
-#include <libtmpl/include/compat/tmpl_free.h>
+/*  Include guard to prevent including this file.                             */
+#ifndef RSS_RINGOCCS_TYPES_HISTORY_H
+#define RSS_RINGOCCS_TYPES_HISTORY_H
 
-/*  rssringoccs_CalCSV typedef here, and function prototype given.            */
-#include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
+/*  Struct with information about how a data set was processed.               */
+typedef struct rssringoccs_History_Def {
+    const char *rss_ringoccs_version;
+    const char *libtmpl_version;
+    const char *c_version;
+    const char *user_name;
+    const char *host_name;
+    const char *run_date;
+    const char *operating_system;
 
-/*  Free's all members of an rssringoccs_CalCSV pointer except the            *
- *  error_message. Members are set to NULL after freeing.                     */
-void rssringoccs_CalCSV_Destroy_Members(rssringoccs_CalCSV *cal)
-{
-    /*  If the pointer is NULL, there's nothing to do. Simply return.         */
-    if (!cal)
-        return;
+    /*  To avoid having to malloc this array, it is statically sized. The     *
+     *  strings come in pairs "parameter_name: the_parameter", and the array  *
+     *  ends in a NULL terminator. So you can have (17 - 1) / 2 = 8 different *
+     *  arguments, and similarly 8 different keywords. For the rss_ringoccs   *
+     *  structs that have history data, this is always sufficient.            */
+    const char *input_vars[17];
+    const char *input_kwds[17];
+} rssringoccs_History;
 
-    /*  Destroy every variable except the error_message.                      */
-    TMPL_FREE(cal->t_oet_spm_vals);
-    TMPL_FREE(cal->f_sky_pred_vals);
-    TMPL_FREE(cal->f_sky_resid_fit_vals);
-    TMPL_FREE(cal->p_free_vals);
-    TMPL_FREE(cal->history);
-}
-/*  End of rssringoccs_CalCSV_Destroy_Members.                                */
+#endif
+/*  End of include guard.                                                     */

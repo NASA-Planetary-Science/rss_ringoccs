@@ -32,9 +32,8 @@
 /*  atof function found here.                                                 */
 #include <stdlib.h>
 
-/*  libtmpl provides Booleans and string duplicate.                           */
+/*  libtmpl provides Booleans.                                                */
 #include <libtmpl/include/tmpl_bool.h>
-#include <libtmpl/include/tmpl_string.h>
 
 /*  rssringoccs_GeoCSV typedef here, and function prototype given.            */
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
@@ -70,11 +69,10 @@ void rssringoccs_GeoCSV_Read_Data(rssringoccs_GeoCSV *geo, FILE *fp)
     if (!fp)
     {
         geo->error_occurred = tmpl_True;
-        geo->error_message = tmpl_String_Duplicate(
+        geo->error_message =
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_GeoCSV_Read_Data\n\n"
-            "Input file is NULL. Aborting.\n"
-        );
+            "Input file is NULL.\n";
 
         return;
     }
@@ -84,11 +82,10 @@ void rssringoccs_GeoCSV_Read_Data(rssringoccs_GeoCSV *geo, FILE *fp)
     if (geo->n_elements == zero)
     {
         geo->error_occurred = tmpl_True;
-        geo->error_message = tmpl_String_Duplicate(
+        geo->error_message =
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_GeoCSV_Read_Data\n\n"
-            "n_elements is zero, nothing to read. Aborting.\n"
-        );
+            "n_elements is zero, nothing to read.\n";
 
         return;
     }

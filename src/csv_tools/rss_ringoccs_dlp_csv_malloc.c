@@ -26,9 +26,8 @@
 /*  malloc is found here.                                                     */
 #include <stdlib.h>
 
-/*  libtmpl provided Booleans, string duplicate, and line count.              */
+/*  libtmpl provided Booleans and line count.                                 */
 #include <libtmpl/include/tmpl_bool.h>
-#include <libtmpl/include/tmpl_string.h>
 #include <libtmpl/include/tmpl_utility.h>
 
 /*  rssringoccs_DLPCSV typedef here, and function prototype given.            */
@@ -42,21 +41,22 @@
 /*  Macro function for safely allocating memory for the variables. This       *
  *  checks if malloc fails, and does not simply assume it passed.             */
 #define MALLOC_DLP_VAR(var)                                                    \
-    dlp->var = malloc(sizeof(*dlp->var) * dlp->n_elements);                    \
-    if (!dlp->var)                                                             \
-    {                                                                          \
-        dlp->error_occurred = tmpl_True;                                       \
-        dlp->error_message = tmpl_String_Duplicate(                            \
-            "Error Encountered: rss_ringoccs\n"                                \
-            "\trssringoccs_DLPCSV_Malloc\n\n"                                  \
-            "Malloc returned NULL. Failed to allocate memory for " #var ".\n"  \
-            "Aborting computation and returning.\n"                            \
-        );                                                                     \
+    do {                                                                       \
+        dlp->var = malloc(sizeof(*dlp->var) * dlp->n_elements);                \
+        if (!dlp->var)                                                         \
+        {                                                                      \
+            dlp->error_occurred = tmpl_True;                                   \
+            dlp->error_message =                                               \
+                "Error Encountered: rss_ringoccs\n"                            \
+                "\trssringoccs_DLPCSV_Malloc\n\n"                              \
+                "Malloc failed to allocate memory for " #var ".\n"             \
+                "Aborting computation and returning.\n";                       \
                                                                                \
-        /*  Free the variables that have been malloc'd so far.               */\
-        rssringoccs_DLPCSV_Destroy_Members(dlp);                               \
-        return;                                                                \
-    }
+            /*  Free the variables that have been malloc'd so far.           */\
+            rssringoccs_DLPCSV_Destroy_Members(dlp);                           \
+            return;                                                            \
+        }                                                                      \
+    } while (0)
 
 /*  Function for allocating memory to a DLP CSV based on a CSV file pointer.  */
 void rssringoccs_DLPCSV_Malloc(rssringoccs_DLPCSV *dlp, FILE *fp)
@@ -74,11 +74,10 @@ void rssringoccs_DLPCSV_Malloc(rssringoccs_DLPCSV *dlp, FILE *fp)
     if (!fp)
     {
         dlp->error_occurred = tmpl_True;
-        dlp->error_message = tmpl_String_Duplicate(
+        dlp->error_message =
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_DLPCSV_Malloc\n\n"
-            "Input file is NULL. Aborting.\n"
-        );
+            "Input file is NULL.\n";
 
         return;
     }
@@ -88,40 +87,36 @@ void rssringoccs_DLPCSV_Malloc(rssringoccs_DLPCSV *dlp, FILE *fp)
 
     /*  There needs to be at least one row in the CSV file. If not, treat     *
      *  this as an error. It is likely the file is corrupted.                 */
-    if (dlp->n_elements == (size_t)0)
+    if (dlp->n_elements == 0)
     {
         dlp->error_occurred = tmpl_True;
-        dlp->error_message = tmpl_String_Duplicate(
+        dlp->error_message =
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_DLPCSV_Malloc\n\n"
-            "n_elements is zero, nothing to malloc. Aborting.\n"
-        );
+            "n_elements is zero, nothing to malloc.\n";
 
         return;
     }
 
     /*  Use the MALLOC_DLP_VAR macro function to allocate memory and check    *
-     *  for errors. This macro ends with an if-then statement, and ends in    *
-     *  curly braces {}, hence no need for a semi-colon here.                 */
-    MALLOC_DLP_VAR(t_oet_spm_vals)
-    MALLOC_DLP_VAR(t_ret_spm_vals)
-    MALLOC_DLP_VAR(t_set_spm_vals)
-    MALLOC_DLP_VAR(rho_km_vals)
-    MALLOC_DLP_VAR(rho_corr_pole_km_vals)
-    MALLOC_DLP_VAR(rho_corr_timing_km_vals)
-    MALLOC_DLP_VAR(phi_rl_deg_vals)
-    MALLOC_DLP_VAR(phi_ora_deg_vals)
-    MALLOC_DLP_VAR(B_deg_vals)
-    MALLOC_DLP_VAR(raw_tau_vals)
-    MALLOC_DLP_VAR(phase_deg_vals)
-    MALLOC_DLP_VAR(raw_tau_threshold_vals)
+     *  for errors.                                                           */
+    MALLOC_DLP_VAR(t_oet_spm_vals);
+    MALLOC_DLP_VAR(t_ret_spm_vals);
+    MALLOC_DLP_VAR(t_set_spm_vals);
+    MALLOC_DLP_VAR(rho_km_vals);
+    MALLOC_DLP_VAR(rho_corr_pole_km_vals);
+    MALLOC_DLP_VAR(rho_corr_timing_km_vals);
+    MALLOC_DLP_VAR(phi_rl_deg_vals);
+    MALLOC_DLP_VAR(phi_ora_deg_vals);
+    MALLOC_DLP_VAR(B_deg_vals);
+    MALLOC_DLP_VAR(raw_tau_vals);
+    MALLOC_DLP_VAR(phase_deg_vals);
+    MALLOC_DLP_VAR(raw_tau_threshold_vals);
 
     /*  If we're using the older deprecated format, there are 13 columns.     *
      *  Allocate memory for p_norm_vals as well.                              */
     if (!dlp->use_deprecated)
-    {
-        MALLOC_DLP_VAR(p_norm_vals)
-    }
+        MALLOC_DLP_VAR(p_norm_vals);
 }
 /*  End of rssringoccs_DLPCSV_Malloc.                                         */
 

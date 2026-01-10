@@ -17,31 +17,52 @@
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
  *  Purpose:                                                                  *
- *      Free all of the pointers in a Cal CSV object.                         *
+ *      Provides a struct for the data in a GEO.TAB file.                     *
  ******************************************************************************
- *  Author:     Ryan Maguire, Wellesley College                               *
- *  Date:       December 31, 2020                                             *
+ *  Author:     Ryan Maguire                                                  *
+ *  Date:       January 5, 2026                                               *
  ******************************************************************************/
 
-/*  Macro for freeing a pointer and setting it to NULL.                       */
-#include <libtmpl/include/compat/tmpl_free.h>
+/*  Include guard to prevent including this file.                             */
+#ifndef RSS_RINGOCCS_TYPES_GEOCSV_H
+#define RSS_RINGOCCS_TYPES_GEOCSV_H
 
-/*  rssringoccs_CalCSV typedef here, and function prototype given.            */
-#include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
+/*  Booleans found here.                                                      */
+#include <libtmpl/include/tmpl_bool.h>
 
-/*  Free's all members of an rssringoccs_CalCSV pointer except the            *
- *  error_message. Members are set to NULL after freeing.                     */
-void rssringoccs_CalCSV_Destroy_Members(rssringoccs_CalCSV *cal)
-{
-    /*  If the pointer is NULL, there's nothing to do. Simply return.         */
-    if (!cal)
-        return;
+/*  History object typedef is here. Each CSV object gets its own history.     */
+#include <rss_ringoccs/include/types/rss_ringoccs_history.h>
 
-    /*  Destroy every variable except the error_message.                      */
-    TMPL_FREE(cal->t_oet_spm_vals);
-    TMPL_FREE(cal->f_sky_pred_vals);
-    TMPL_FREE(cal->f_sky_resid_fit_vals);
-    TMPL_FREE(cal->p_free_vals);
-    TMPL_FREE(cal->history);
-}
-/*  End of rssringoccs_CalCSV_Destroy_Members.                                */
+/*  size_t typedef provided here.                                             */
+#include <stddef.h>
+
+/*  Data structure for the GEO.TAB files on the PDS.                          */
+typedef struct rssringoccs_GeoCSV_Def {
+    double *t_oet_spm_vals;
+    double *t_ret_spm_vals;
+    double *t_set_spm_vals;
+    double *rho_km_vals;
+    double *phi_rl_deg_vals;
+    double *phi_ora_deg_vals;
+    double *B_deg_vals;
+    double *D_km_vals;
+    double *rho_dot_kms_vals;
+    double *phi_rl_dot_kms_vals;
+    double *F_km_vals;
+    double *R_imp_km_vals;
+    double *rx_km_vals;
+    double *ry_km_vals;
+    double *rz_km_vals;
+    double *vx_kms_vals;
+    double *vy_kms_vals;
+    double *vz_kms_vals;
+    double *obs_spacecraft_lat_deg_vals;
+    size_t n_elements;
+    rssringoccs_History *history;
+    tmpl_Bool use_deprecated;
+    tmpl_Bool error_occurred;
+    const char *error_message;
+} rssringoccs_GeoCSV;
+
+#endif
+/*  End of include guard.                                                     */

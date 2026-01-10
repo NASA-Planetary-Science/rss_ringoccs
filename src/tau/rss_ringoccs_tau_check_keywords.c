@@ -107,7 +107,7 @@ void rssringoccs_Tau_Check_Keywords(rssringoccs_TAUObj *tau)
     }
 
     /*  The periapse is allowed to be between -2pi and 2pi, inclusive.        */
-    if (tau->periapse < -tmpl_Double_Two_Pi)
+    if (tau->periapse < -tmpl_double_two_pi)
     {
         tau->error_occurred = tmpl_True;
         tau->error_message =
@@ -118,7 +118,7 @@ void rssringoccs_Tau_Check_Keywords(rssringoccs_TAUObj *tau)
         return;
     }
 
-    if (tau->periapse > tmpl_Double_Two_Pi)
+    if (tau->periapse > tmpl_double_two_pi)
     {
         tau->error_occurred = tmpl_True;
         tau->error_message =

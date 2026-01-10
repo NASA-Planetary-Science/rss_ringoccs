@@ -33,10 +33,10 @@
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
 
 /* Sets all variables in a Geo CSV to their default values.                   */
-void rssringoccs_GeoCSV_Init(rssringoccs_GeoCSV *geo)
+void rssringoccs_GeoCSV_Init(rssringoccs_GeoCSV * const geo)
 {
     /*  If the pointer is NULL, there's nothing to do. Simply return.         */
-    if (geo == NULL)
+    if (!geo)
         return;
 
     /*  All arrays should be empty, for now.                                  */

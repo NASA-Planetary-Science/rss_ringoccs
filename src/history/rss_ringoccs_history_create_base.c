@@ -3,8 +3,10 @@
 #include <rss_ringoccs/include/rss_ringoccs_history.h>
 #include <stdlib.h>
 
+#ifdef __STDC_VERSION__
 #define RSSRINGOCCS_TO_STRING(x) #x
 #define RSSRINGOCCS_MAKE_STRING(x) RSSRINGOCCS_TO_STRING(x)
+#endif
 
 void
 rssringoccs_History_Create_Base(rssringoccs_History *history)

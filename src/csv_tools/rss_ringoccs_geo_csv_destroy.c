@@ -24,14 +24,23 @@
  *  Date:       December 31, 2020                                             *
  ******************************************************************************/
 
-/*  free is found here, as is NULL.                                           */
-#include <stdlib.h>
+/*  Macro for freeing a pointer and setting it to NULL.                       */
+#include <libtmpl/include/compat/tmpl_free.h>
 
-/*  rssringoccs_GeoCSV typedef here, and function prototype given.            */
-#include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
+/*  rssringoccs_GeoCSV typedef provided here.                                 */
+#include <rss_ringoccs/include/types/rss_ringoccs_geocsv.h>
+
+/*  NULL macro defined here.                                                  */
+#include <stddef.h>
+
+/*  Function prototype / forward declaration.                                 */
+extern void rssringoccs_GeoCSV_Destroy(rssringoccs_GeoCSV ** const geo);
+
+/*  Tell the compiler about the main destructor function.                     */
+extern void rssringoccs_GeoCSV_Destroy_Members(rssringoccs_GeoCSV * const geo);
 
 /*  Function for freeing all of the memory in a GeoCSV struct.                */
-void rssringoccs_GeoCSV_Destroy(rssringoccs_GeoCSV **geo)
+void rssringoccs_GeoCSV_Destroy(rssringoccs_GeoCSV ** const geo)
 {
     /*  Variable for a pointer to the GeoCSV object.                          */
     rssringoccs_GeoCSV *geo_inst;
@@ -50,19 +59,11 @@ void rssringoccs_GeoCSV_Destroy(rssringoccs_GeoCSV **geo)
     /*  Free all of the members in the GeoCSV object.                         */
     rssringoccs_GeoCSV_Destroy_Members(geo_inst);
 
-    /*  If an error occurred, error_message is malloced and a string is       *
-     *  stored in the variable. Free the pointer if this is the case.         */
-    if (geo_inst->error_message != NULL)
-    {
-        free(geo_inst->error_message);
-
-        /*  Set the pointer to NULL to prevent freeing it twice.              */
-        geo_inst->error_message = NULL;
-    }
+    /*  The error_message member is a pointer to a constant string, it does   *
+     *  not need to be freed. Set the pointer to NULL to avoid reading it.    */
+    geo_inst->error_message = NULL;
 
     /*  Free the GeoCSV pointer and set it to NULL to prevent freeing twice.  */
-    free(geo_inst);
-    *geo = NULL;
-    return;
+    TMPL_FREE(*geo);
 }
 /*  End of rssringoccs_GeoCSV_Destroy.                                        */

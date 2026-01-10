@@ -66,7 +66,7 @@ rssringoccs_Fresnel_Transform_Newton_Riemann(
     for (n = 0; n < nw_pts; ++n)
     {
         /*  Compute the full Fresnel kernel, not assuming psi'' is constant.  */
-        ker = rssringoccs_Fresnel_Kernel(tau, offset, center);
+        ker = rssringoccs_Fresnel_Kernel(tau, center, offset);
 
         /*  Lastly, scale the kernel by the window function.                  */
         tmpl_CDouble_MultiplyBy_Real(&ker, w_func[n]);

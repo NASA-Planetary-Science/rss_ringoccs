@@ -53,11 +53,10 @@ void rssringoccs_CalCSV_Check_Column_Count(rssringoccs_CalCSV *cal, FILE *fp)
     if (!fp)
     {
         cal->error_occurred = tmpl_True;
-        cal->error_message = tmpl_String_Duplicate(
+        cal->error_message =
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_CalCSV_Check_Column_Count\n\n"
-            "Input file is NULL. Aborting.\n"
-        );
+            "Input file is NULL.\n";
 
         return;
     }
@@ -69,11 +68,10 @@ void rssringoccs_CalCSV_Check_Column_Count(rssringoccs_CalCSV *cal, FILE *fp)
     if (column_count != 4U)
     {
         cal->error_occurred = tmpl_True;
-        cal->error_message = tmpl_String_Duplicate(
+        cal->error_message =
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_CalCSV_Check_Column_Count\n\n"
-            "Input CSV does not have 4 columns. Aborting computation.\n"
-        );
+            "Input CSV does not have 4 columns.\n";
     }
 }
 /*  End of rssringoccs_CalCSV_Check_Column_Count.                             */

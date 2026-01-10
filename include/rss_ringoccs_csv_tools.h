@@ -30,73 +30,17 @@
 /*  Boolean data types defined here.                                          */
 #include <libtmpl/include/tmpl_bool.h>
 
-#include <rss_ringoccs/include/rss_ringoccs_history.h>
+#include <rss_ringoccs/include/types/rss_ringoccs_history.h>
+
+#include <rss_ringoccs/include/types/rss_ringoccs_calcsv.h>
+#include <rss_ringoccs/include/types/rss_ringoccs_dlpcsv.h>
+#include <rss_ringoccs/include/types/rss_ringoccs_geocsv.h>
 
 /*  size_t typedef is given here.                                             */
 #include <stddef.h>
 #include <stdio.h>
 
-/*  Data structure for the GEO.TAB files on the PDS.                          */
-typedef struct rssringoccs_GeoCSV_Def {
-    double *t_oet_spm_vals;
-    double *t_ret_spm_vals;
-    double *t_set_spm_vals;
-    double *rho_km_vals;
-    double *phi_rl_deg_vals;
-    double *phi_ora_deg_vals;
-    double *B_deg_vals;
-    double *D_km_vals;
-    double *rho_dot_kms_vals;
-    double *phi_rl_dot_kms_vals;
-    double *F_km_vals;
-    double *R_imp_km_vals;
-    double *rx_km_vals;
-    double *ry_km_vals;
-    double *rz_km_vals;
-    double *vx_kms_vals;
-    double *vy_kms_vals;
-    double *vz_kms_vals;
-    double *obs_spacecraft_lat_deg_vals;
-    size_t n_elements;
-    rssringoccs_History *history;
-    tmpl_Bool use_deprecated;
-    tmpl_Bool error_occurred;
-    char *error_message;
-} rssringoccs_GeoCSV;
 
-/*  Data structure for the DLP.TAB files on the PDS.                          */
-typedef struct rssringoccs_DLPCSV_Def {
-    double *rho_km_vals;
-    double *rho_corr_pole_km_vals;
-    double *rho_corr_timing_km_vals;
-    double *phi_rl_deg_vals;
-    double *phi_ora_deg_vals;
-    double *p_norm_vals;
-    double *raw_tau_vals;
-    double *phase_deg_vals;
-    double *raw_tau_threshold_vals;
-    double *t_oet_spm_vals;
-    double *t_ret_spm_vals;
-    double *t_set_spm_vals;
-    double *B_deg_vals;
-    size_t n_elements;
-    rssringoccs_History *history;
-    tmpl_Bool use_deprecated;
-    tmpl_Bool error_occurred;
-    char *error_message;
-} rssringoccs_DLPCSV;
-
-/*  Data structure for the CAL.TAB files on the PDS.                          */
-typedef struct rssringoccs_CalCSV_Def {
-    double *t_oet_spm_vals;
-    double *f_sky_pred_vals;
-    double *f_sky_resid_fit_vals;
-    double *p_free_vals;
-    size_t n_elements;
-    rssringoccs_History *history;
-    tmpl_Bool error_occurred;
-    char *error_message;
-} rssringoccs_CalCSV;
 
 /*  Data structure for the TAU.TAB files on the PDS.                          */
 typedef struct rssringoccs_TauCSV_Def {

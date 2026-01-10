@@ -55,17 +55,8 @@ rssringoccs_Fresnel_Transform(
     rssringoccs_TAUObj * TMPL_RESTRICT const tau,
     const double * TMPL_RESTRICT const x_arr,
     const double * TMPL_RESTRICT const w_func,
-    size_t n_pts,
-    size_t center
-);
-
-extern void
-rssringoccs_Fresnel_Transform_Normalized(
-    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
-    const double * TMPL_RESTRICT const x_arr,
-    const double * TMPL_RESTRICT const w_func,
-    size_t n_pts,
-    size_t center
+    const size_t center,
+    const size_t n_pts
 );
 
 /******************************************************************************

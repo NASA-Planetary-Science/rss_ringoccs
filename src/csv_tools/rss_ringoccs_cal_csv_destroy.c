@@ -24,14 +24,23 @@
  *  Date:       December 31, 2020                                             *
  ******************************************************************************/
 
-/*  free is found here, as is NULL.                                           */
-#include <stdlib.h>
+/*  Macro for freeing a pointer and setting it to NULL.                       */
+#include <libtmpl/include/compat/tmpl_free.h>
 
-/*  rssringoccs_CalCSV typedef here, and function prototype given.            */
-#include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
+/*  rssringoccs_CalCSV typedef provided here.                                 */
+#include <rss_ringoccs/include/types/rss_ringoccs_calcsv.h>
+
+/*  NULL macro defined here.                                                  */
+#include <stddef.h>
+
+/*  Function prototype / forward declaration.                                 */
+extern void rssringoccs_CalCSV_Destroy(rssringoccs_CalCSV ** const cal);
+
+/*  Tell the compiler about the main destructor function.                     */
+extern void rssringoccs_CalCSV_Destroy_Members(rssringoccs_CalCSV * const cal);
 
 /*  Function for freeing the memory in a CalCSV object.                       */
-void rssringoccs_CalCSV_Destroy(rssringoccs_CalCSV **cal)
+void rssringoccs_CalCSV_Destroy(rssringoccs_CalCSV ** const cal)
 {
     /*  Used for the pointer to the CSV object.                               */
     rssringoccs_CalCSV *cal_inst;
@@ -50,19 +59,11 @@ void rssringoccs_CalCSV_Destroy(rssringoccs_CalCSV **cal)
     /*  Free all of the pointers inside the CalCSV object.                    */
     rssringoccs_CalCSV_Destroy_Members(cal_inst);
 
-    /*  If an error occurred along the way, the error_message variable is     *
-     *  malloced and a string is stored. Check if we need to free this.       */
-    if (cal_inst->error_message != NULL)
-    {
-        free(cal_inst->error_message);
+    /*  The error_message member is a pointer to a constant string, it does   *
+     *  not need to be freed. Set the pointer to NULL to avoid reading it.    */
+    cal_inst->error_message = NULL;
 
-        /*  To avoid freeing twice, reset the pointer to NULL.                */
-        cal_inst->error_message = NULL;
-    }
-
-    /*  Free the pointer to the object and set it to NULL to avoid freeing    *
-     *  this object twice.                                                    */
-    free(cal_inst);
-    *cal = NULL;
+    /*  Free the CalCSV pointer and set it to NULL to prevent freeing twice.  */
+    TMPL_FREE(*cal);
 }
 /*  End of rssringoccs_CalCSV_Destroy.                                        */

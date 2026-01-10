@@ -4,4 +4,4 @@
 *.hpp linguist-language=C++
 *.pro linguist-language=IDL
 *.py linguist-language=Python
-graveyard/** linguist-vendored=false
+graveyard/** linguist-vendored

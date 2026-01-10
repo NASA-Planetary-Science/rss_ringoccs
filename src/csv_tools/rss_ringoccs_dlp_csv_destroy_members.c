@@ -23,44 +23,33 @@
  *  Date:       December 31, 2020                                             *
  ******************************************************************************/
 
-/*  free is found here, as is NULL.                                           */
-#include <stdlib.h>
+/*  Macro for freeing a pointer and setting it to NULL.                       */
+#include <libtmpl/include/compat/tmpl_free.h>
 
 /*  rssringoccs_DLPCSV typedef here, and function prototype given.            */
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
 
-/*  Check if this macro name is available.                                    */
-#ifdef DESTROY_DLP_VAR
-#undef DESTROY_DLP_VAR
-#endif
-
-/*  Macro for freeing and nullifying the members of the dlp CSV struct.       */
-#define DESTROY_DLP_VAR(var) if (var != NULL){free(var); var = NULL;}
-
 /*  Free's all members of a rssringoccs_DLPCSV pointer except the             *
  *  error_message. Members are set to NULL after freeing.                     */
-void rssringoccs_DLPCSV_Destroy_Members(rssringoccs_DLPCSV *dlp)
+void rssringoccs_DLPCSV_Destroy_Members(rssringoccs_DLPCSV * const dlp)
 {
     /*  If the pointer is NULL, there's nothing to do. Simply return.         */
     if (!dlp)
         return;
 
     /*  Destroy every variable except the error_message.                      */
-    DESTROY_DLP_VAR(dlp->rho_km_vals)
-    DESTROY_DLP_VAR(dlp->rho_corr_pole_km_vals)
-    DESTROY_DLP_VAR(dlp->rho_corr_timing_km_vals)
-    DESTROY_DLP_VAR(dlp->phi_rl_deg_vals)
-    DESTROY_DLP_VAR(dlp->phi_ora_deg_vals)
-    DESTROY_DLP_VAR(dlp->p_norm_vals)
-    DESTROY_DLP_VAR(dlp->raw_tau_vals)
-    DESTROY_DLP_VAR(dlp->phase_deg_vals)
-    DESTROY_DLP_VAR(dlp->raw_tau_threshold_vals)
-    DESTROY_DLP_VAR(dlp->t_oet_spm_vals)
-    DESTROY_DLP_VAR(dlp->t_ret_spm_vals)
-    DESTROY_DLP_VAR(dlp->t_set_spm_vals)
-    DESTROY_DLP_VAR(dlp->B_deg_vals)
+    TMPL_FREE(dlp->rho_km_vals);
+    TMPL_FREE(dlp->rho_corr_pole_km_vals);
+    TMPL_FREE(dlp->rho_corr_timing_km_vals);
+    TMPL_FREE(dlp->phi_rl_deg_vals);
+    TMPL_FREE(dlp->phi_ora_deg_vals);
+    TMPL_FREE(dlp->p_norm_vals);
+    TMPL_FREE(dlp->raw_tau_vals);
+    TMPL_FREE(dlp->phase_deg_vals);
+    TMPL_FREE(dlp->raw_tau_threshold_vals);
+    TMPL_FREE(dlp->t_oet_spm_vals);
+    TMPL_FREE(dlp->t_ret_spm_vals);
+    TMPL_FREE(dlp->t_set_spm_vals);
+    TMPL_FREE(dlp->B_deg_vals);
 }
 /*  End of rssringoccs_DLPCSV_Destroy_Members.                                */
-
-/*  Undefine everything in case someone wants to #include this file.          */
-#undef DESTROY_DLP_VAR

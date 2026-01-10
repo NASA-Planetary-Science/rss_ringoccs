@@ -36,6 +36,27 @@ class RSRReader(object):
             directory of the GitHub clone
 
     Keyword Arguments
+        :decimate_50khz_to_1khz (*bool*):
+            Optional Boolean argument which, if
+            set to True, decimates 50kHz files down to 1kHz sampling rate.
+            Note that this is a sticky keyword - if you set it to True, it
+            will be True for any subsequent calls from the instance until
+            you explicitly set it to False. This keyword is linked to the
+            private attribute __decimate_50khz_to_1khz
+        :decimate_50khz_to_5khz (*bool*):
+            Optional Boolean argument which, if
+            set to True, decimates 50kHz files down to 5kHz sampling rate.
+            Note that this is a sticky keyword - if you set it to True, it
+            will be True for any subsequent calls from the instance until
+            you explicitly set it to False. This keyword is linked to the
+            private attribute __decimate_50khz_to_5khz
+        :decimate_50khz_to_1khz (*bool*):
+            Optional Boolean argument which, if
+            set to True, decimates 50kHz files down to 1kHz sampling rate.
+            Note that this is a sticky keyword - if you set it to True, it
+            will be True for any subsequent calls from the instance until
+            you explicitly set it to False. This keyword is linked to the
+            private attribute __decimate_50khz_to_1khz
         :decimate_16khz_to_1khz (*bool*):
             Optional Boolean argument which, if
             set to True, decimates 16kHz files down to 1kHz sampling rate.
@@ -244,6 +265,10 @@ class RSRReader(object):
         self.rsr_file = rsr_file
 
         # Default argment for __set_IQ 
+        self.__decimate_50khz_to_1khz = decimate_50khz_to_1khz
+        self.__decimate_50khz_to_5khz = decimate_50khz_to_5khz
+        self.__decimate_50khz_to_10khz = decimate_50khz_to_10khz
+        self.__decimate_16khz_to_4khz = decimate_50khz_to_4khz
         self.__decimate_16khz_to_1khz = decimate_16khz_to_1khz
         self.__decimate_16khz_to_2khz = decimate_16khz_to_2khz
         self.__decimate_16khz_to_4khz = decimate_16khz_to_4khz
@@ -369,6 +394,9 @@ class RSRReader(object):
         elif self.sample_rate_khz == 16:
             start_spm_ind = np.argmin(abs(self.__spm_16khz - spm_range[0]))
             end_spm_ind = np.argmin(abs(self.__spm_16khz - spm_range[1]))
+        elif self.sample_rate_khz == 50:
+            start_spm_ind = np.argmin(abs(self.__spm_50khz - spm_range[0]))
+            end_spm_ind = np.argmin(abs(self.__spm_50khz - spm_range[1]))
         start_sfdu = int(start_spm_ind / self.__n_pts_per_sfdu)
         end_sfdu = int(end_spm_ind / self.__n_pts_per_sfdu)
         if end_sfdu > self.__n_sfdu:
@@ -434,9 +462,11 @@ class RSRReader(object):
             spm_vals = self.spm_vals
         elif self.sample_rate_khz == 16:
             spm_vals = self.__spm_16khz
+        elif self.sample_rate_khz == 50:
+            spm_vals = self.__spm_50khz
         else:
             print('ERROR (RSRReader.f_sky_pred()): Sample rate must be either'
-                + '16kHz or 1kHz')
+                + '50 kHz or 16kHz or 1kHz')
             sys.exit()
 
         # Default 1 second spacing over range of spm_vals
@@ -452,7 +482,7 @@ class RSRReader(object):
 
         # SPM is often just a little off from what it's supposed to be, so need
         #     to later round to a certain number of decimals. 16 kHz files have
-        #     more decimals
+        #     more decimals - apply this to 50 kHz as well
         if self.sample_rate_khz == 1:
             round_decimal = 4
         else:
@@ -557,12 +587,17 @@ class RSRReader(object):
         # Record what original SPM values were
         if self.sample_rate_khz == 16:
             self.__spm_16khz = spm_vals
+        elif self.sample_rate_khz == 50:
+            self.__spm_50khz = spm_vals
 
 
         decimate_16khz_to_1khz = self.__decimate_16khz_to_1khz
         decimate_16khz_to_2khz = self.__decimate_16khz_to_2khz
         decimate_16khz_to_4khz = self.__decimate_16khz_to_4khz
         decimate_16khz_to_8khz = self.__decimate_16khz_to_8khz
+        decimate_50khz_to_1khz = self.__decimate_50khz_to_1khz
+        decimate_50khz_to_5khz = self.__decimate_50khz_to_5khz
+        decimate_50khz_to_10khz = self.__decimate_50khz_to_10khz
 
         spm_range = [min(spm_vals), max(spm_vals)]
         self.__set_sfdu_unpack(spm_range)
@@ -575,11 +610,58 @@ class RSRReader(object):
         i_end = self.__end_sfdu + 1
         IQ_m = self.__loop(i_start,i_end,apply_bias_correction=apply_bias_correction)
 
-        # Decimate 16kHz file to 8kHz spacing if specified - overrides decimate_16khz_to_1khz
-        if decimate_16khz_to_8khz & (self.sample_rate_khz == 16):
+        if decimate_50khz_to_25khz & (self.sample_rate_khz == 50):
 
             if verbose:
-                print('\tDecimating to 8kHz sampling...')
+                print('\tDecimating 50 kHz to 25kHz sampling...')
+
+            IQ_m = decimate(IQ_m, 2, zero_phase=True) # NB
+
+            n_pts = len(IQ_m)
+            dt = 1.0 / float(25000) # NB after decimation
+            spm_vals = spm_vals[0] + dt * np.arange(n_pts)
+
+        elif decimate_50khz_to_10khz & (self.sample_rate_khz == 50):
+
+            if verbose:
+                print('\tDecimating 50 kHz to 10kHz sampling...')
+
+            IQ_m = decimate(IQ_m, 5, zero_phase=True) # NB
+
+            n_pts = len(IQ_m)
+            dt = 1.0 / float(10000) # NB after decimation
+            spm_vals = spm_vals[0] + dt * np.arange(n_pts)
+
+        elif decimate_50khz_to_5khz & (self.sample_rate_khz == 50):
+
+            if verbose:
+                print('\tDecimating 50 kHz to 5kHz sampling...')
+
+            IQ_m = decimate(IQ_m, 5, zero_phase=True) # NB
+            IQ_m = decimate(IQ_m, 2, zero_phase=True) # NB
+
+            n_pts = len(IQ_m)
+            dt = 1.0 / float(5000) # NB after decimation
+            spm_vals = spm_vals[0] + dt * np.arange(n_pts)
+
+        elif decimate_50khz_to_1khz & (self.sample_rate_khz == 50):
+
+            if verbose:
+                print('\tDecimating 50 kHz to 1kHz sampling...')
+
+            IQ_m = decimate(IQ_m, 5, zero_phase=True) # NB
+            IQ_m = decimate(IQ_m, 5, zero_phase=True) # NB
+            IQ_m = decimate(IQ_m, 2, zero_phase=True) # NB
+
+            n_pts = len(IQ_m)
+            dt = 1.0 / float(1000) # NB after decimation
+            spm_vals = spm_vals[0] + dt * np.arange(n_pts)
+
+        # Decimate 16kHz file to 8kHz spacing if specified - overrides decimate_16khz_to_1khz
+        elif decimate_16khz_to_8khz & (self.sample_rate_khz == 16):
+
+            if verbose:
+                print('\tDecimating 16 kHz to 8kHz sampling...')
 
             IQ_m = decimate(IQ_m, 2, zero_phase=True) # NB
 
@@ -592,7 +674,7 @@ class RSRReader(object):
         elif decimate_16khz_to_4khz & (self.sample_rate_khz == 16):
 
             if verbose:
-                print('\tDecimating to 4kHz sampling...')
+                print('\tDecimating 16 kHz to 4kHz sampling...')
 
             IQ_m = decimate(IQ_m, 4, zero_phase=True) # NB
 
@@ -605,7 +687,7 @@ class RSRReader(object):
         elif decimate_16khz_to_2khz & (self.sample_rate_khz == 16):
 
             if verbose:
-                print('\tDecimating to 2kHz sampling...')
+                print('\tDecimating 16 kHz to 2kHz sampling...')
 
             IQ_m = decimate(IQ_m, 4, zero_phase=True)
             IQ_m = decimate(IQ_m, 2, zero_phase=True) # NB
@@ -618,7 +700,7 @@ class RSRReader(object):
         elif decimate_16khz_to_1khz & (self.sample_rate_khz == 16):
 
             if verbose:
-                print('\tDecimating to 1kHz sampling...')
+                print('\tDecimating 16 kHz to 1kHz sampling...')
 
             IQ_m = decimate(IQ_m, 4, zero_phase=True)
             IQ_m = decimate(IQ_m, 4, zero_phase=True)
@@ -626,6 +708,11 @@ class RSRReader(object):
             n_pts = len(IQ_m)
             dt = 1.0 / float(1000)
             spm_vals = spm_vals[0] + dt * np.arange(n_pts)
+
+        elif self.sample_rate_khz == 50:
+
+            if verbose:
+                print('\t*** WARNING - not decimating 50kHz file...')
 
         elif self.sample_rate_khz == 16:
 
@@ -726,7 +813,13 @@ class RSRReader(object):
         input_var_dict = {'rsr_file': self.rsr_file}
         input_kw_dict = {
             'decimate_16khz_to_1khz': self.__decimate_16khz_to_1khz,
-            'decimate_16khz_to_2khz': self.__decimate_16khz_to_2khz}
+            'decimate_16khz_to_2khz': self.__decimate_16khz_to_2khz
+            'decimate_16khz_to_4khz': self.__decimate_16khz_to_4khz,
+            'decimate_16khz_to_8khz': self.__decimate_16khz_to_8khz,
+            'decimate_50khz_to_1khz': self.__decimate_50khz_to_1khz,
+            'decimate_50khz_to_5khz': self.__decimate_50khz_to_5khz,
+            'decimate_50khz_to_10khz': self.__decimate_50khz_to_10khz,
+}
 
         self.history = write_history_dict(input_var_dict, input_kw_dict,
                __file__)
@@ -740,5 +833,8 @@ Revisions:
         add apply_bias_correction keyword, tested against Dick Simpson's
         Fortran code.
     2025 Jul 20 - rfrench@wellesley.edu
+        Add decimate_16khz_to_2khz keyword for higher resolution reconstructions
+    2026 Jan 06 - rfrench@wellesley.edu
+        Added decimate_16khz_to_??khz  and decimage_50khz_to_??khz
         Add decimate_16khz_to_2khz keyword for higher resolution reconstructions
 """

@@ -276,13 +276,13 @@ rssringoccs_Fresnel_Transform_Newton_Linear_Filon(
     if (tau->use_norm)
         norm = tmpl_CDouble_Multiply_Real(0.5 * scale, left_exp_ipsi);
 
-    for (n = 0; n < nw_pts; ++n)
+    for (n = 0; n < nw_pts - 1; ++n)
     {
         rssringoccs_Fresnel_Phase_And_Weight(
             tau, offset + 1, center, &weight, &right_psi
         );
 
-        scale = weight * w_func[n+1];
+        scale = weight * w_func[n + 1];
         right_exp_ipsi = tmpl_CDouble_Expi(right_psi);
 
         right_in = tau->T_in[offset + 1];

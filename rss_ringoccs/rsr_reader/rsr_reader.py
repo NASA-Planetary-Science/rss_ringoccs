@@ -813,7 +813,7 @@ class RSRReader(object):
         input_var_dict = {'rsr_file': self.rsr_file}
         input_kw_dict = {
             'decimate_16khz_to_1khz': self.__decimate_16khz_to_1khz,
-            'decimate_16khz_to_2khz': self.__decimate_16khz_to_2khz
+            'decimate_16khz_to_2khz': self.__decimate_16khz_to_2khz,
             'decimate_16khz_to_4khz': self.__decimate_16khz_to_4khz,
             'decimate_16khz_to_8khz': self.__decimate_16khz_to_8khz,
             'decimate_50khz_to_1khz': self.__decimate_50khz_to_1khz,
@@ -835,6 +835,6 @@ Revisions:
     2025 Jul 20 - rfrench@wellesley.edu
         Add decimate_16khz_to_2khz keyword for higher resolution reconstructions
     2026 Jan 06 - rfrench@wellesley.edu
-        Added decimate_16khz_to_??khz  and decimage_50khz_to_??khz
+        Added decimate_16khz_to_??khz  and decimate_50khz_to_??khz
         Add decimate_16khz_to_2khz keyword for higher resolution reconstructions
 """

@@ -64,6 +64,40 @@ python3 -m pip install -r requirements.txt
 python3 -m pip install .
 ```
 
+## Cleaning / Uninstalling
+
+Uninstalling `rss_ringoccs` can be done using pip:
+
+```bash
+python3 -m pip uninstall rss_ringoccs
+```
+
+To clean build files, run:
+
+```bash
+make clean && make clean BUILD_STATIC=1
+```
+
+Additionally, if you installed the `C` library `librssringoccs`
+using `sudo make install`, do:
+
+```bash
+sudo make uninstall && sudo make uninstall BUILD_STATIC=1
+```
+
+To remove Python egg files, type:
+
+```bash
+rm -rf rss_ringoccs.egg-info
+```
+
+Lastly, if you created a virtual environment using `python3 -m venv .venv`,
+remove this via:
+
+```bash
+rm -rf .venv
+```
+
 ## Installation and Documentation
 Detailed installation instructions and full documentation are contained the
 `rss_ringoccs User Guide` at https://github.com/NASA-Planetary-Science/rss_ringoccs/tree/master/docs/rss_ringoccs_User_Guide_V1.3.pdf.

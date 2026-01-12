@@ -244,12 +244,12 @@ void
 rssringoccs_Fresnel_Transform_Newton_Linear_Filon(
     rssringoccs_TAUObj * TMPL_RESTRICT const tau,
     const double * TMPL_RESTRICT const w_func,
-    const size_t center,
-    const size_t nw_pts
+    const size_t nw_pts,
+    const size_t center
 )
 {
     const double rcpr_dx = 1.0 / tau->dx_km;
-    const double threshold = 0.25;
+    const double threshold = 0.125;
     size_t n, offset;
 
     double weight, scale;
@@ -263,7 +263,7 @@ rssringoccs_Fresnel_Transform_Newton_Linear_Filon(
     offset = center - ((nw_pts - 1) >> 1);
 
     rssringoccs_Fresnel_Phase_And_Weight(
-        tau, offset, center, &weight, &left_psi
+        tau, center, offset, &weight, &left_psi
     );
 
     scale = weight * w_func[0];
@@ -279,7 +279,7 @@ rssringoccs_Fresnel_Transform_Newton_Linear_Filon(
     for (n = 0; n < nw_pts - 1; ++n)
     {
         rssringoccs_Fresnel_Phase_And_Weight(
-            tau, offset + 1, center, &weight, &right_psi
+            tau, center, offset + 1, &weight, &right_psi
         );
 
         scale = weight * w_func[n + 1];

@@ -36,16 +36,80 @@
 /*  size_t typedef given here.                                                */
 #include <stddef.h>
 
+/******************************************************************************
+ *  Function:                                                                 *
+ *      rssringoccs_Fresnel_Kernel                                            *
+ *  Purpose:                                                                  *
+ *      Computes the Fresnel kernel from the geometry data in a Tau object.   *
+ *  Arguments:                                                                *
+ *      tau (const rssringoccs_TAUObj * const):                               *
+ *          The Tau object with the geometry and diffraction data.            *
+ *      center (const size_t):                                                *
+ *          The index for the center of the window of integration.            *
+ *      offset (const size_t):                                                *
+ *          The index for the dummy variable of integration.                  *
+ *  Output:                                                                   *
+ *      kernel (tmpl_ComplexDouble).                                          *
+ *  Notes:                                                                    *
+ *      1.) There are no checks for NULL pointers. It is assumed tau is valid.*
+ *                                                                            *
+ *      2.) There are no checks for errors. This function is called inside    *
+ *          the main for-loop of the various transforms. It is the users      *
+ *          obligation to ensure the input data is valid.                     *
+ *                                                                            *
+ *      3.) There are no checks that the center and offset arguments          *
+ *          correspond to indices for the actual data.                        *
+ *                                                                            *
+ *      4.) It is assumed that the input Tau object has all of its angles in  *
+ *          degrees. This should always be the case, regardless.              *
+ ******************************************************************************/
 extern tmpl_ComplexDouble
 rssringoccs_Fresnel_Kernel(const rssringoccs_TAUObj * const tau,
-                           size_t offset,
-                           size_t center);
+                           const size_t center,
+                           const size_t offset);
 
+/******************************************************************************
+ *  Function:                                                                 *
+ *      rssringoccs_Fresnel_Phase_And_Weight                                  *
+ *  Purpose:                                                                  *
+ *      Computes the Fresnel kernel from the geometry data in a Tau object.   *
+ *      The output is in polar form (magnitude, angle).                       *
+ *  Arguments:                                                                *
+ *      tau (const rssringoccs_TAUObj * const):                               *
+ *          The Tau object with the geometry and diffraction data.            *
+ *      center (const size_t):                                                *
+ *          The index for the center of the window of integration.            *
+ *      offset (const size_t):                                                *
+ *          The index for the dummy variable of integration.                  *
+ *      weight (double * TMPL_RESTRICT const weight):                         *
+ *          The scale factor for the Fresnel kernel.                          *
+ *      psi (double * TMPL_RESTRICT const):                                   *
+ *          The Fresnel phase, the part that is complex exponentiated.        *
+ *          This is in radians.                                               *
+ *  Output:                                                                   *
+ *      None (void).                                                          *
+ *  Notes:                                                                    *
+ *      1.) There are no checks for NULL pointers. It is assumed tau is valid.*
+ *                                                                            *
+ *      2.) There are no checks for errors. This function is called inside    *
+ *          the main for-loop of the various transforms. It is the users      *
+ *          obligation to ensure the input data is valid.                     *
+ *                                                                            *
+ *      3.) There are no checks that the center and offset arguments          *
+ *          correspond to indices for the actual data.                        *
+ *                                                                            *
+ *      4.) It is assumed that the input Tau object has all of its angles in  *
+ *          degrees. This should always be the case, regardless.              *
+ *                                                                            *
+ *      5.) Note, the output angle is in radians, not degrees. This is        *
+ *          because the Newton-Raphson method used to compute the Fresnel     *
+ *          phase works in radians (implemented in libtmpl).                  *
+ ******************************************************************************/
 extern void
 rssringoccs_Fresnel_Phase_And_Weight(
     const rssringoccs_TAUObj * TMPL_RESTRICT const tau,
-    size_t offset,
-    size_t center,
+    const size_t center,
+    const size_t offset,
     double * TMPL_RESTRICT const weight,
     double * TMPL_RESTRICT const psi
 );

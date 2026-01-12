@@ -10,8 +10,8 @@
 void
 rssringoccs_Fresnel_Phase_And_Weight(
     const rssringoccs_TAUObj * TMPL_RESTRICT const tau,
-    size_t offset,
-    size_t center,
+    const size_t center,
+    const size_t offset,
     double * TMPL_RESTRICT const weight,
     double * TMPL_RESTRICT const psi
 )

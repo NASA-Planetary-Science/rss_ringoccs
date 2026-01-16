@@ -24,7 +24,7 @@
  *                             DEFINED FUNCTIONS                              *
  ******************************************************************************
  *  Function Name:                                                            *
- *      rssringoccs_Fresnel_Transform_Newton_Linear_Filon                     *
+ *      rssringoccs_Fresnel_Transform_Newton_Filon11                          *
  *  Purpose:                                                                  *
  *      Performs the Fresnel transform using the Newton-Raphson method to     *
  *      compute the stationary Fresnel phase, and a linear Filon-like         *
@@ -149,10 +149,10 @@
  *                        |     n                     n              |        *
  *                         -                                        -         *
  *                                                                            *
- *                         -                                        -         *
- *                    i d |   i R c                i L c             |        *
- *                 = e    |  e      (1 - i R c) - e     (1 - i L c)  |        *
- *                         -                                        -         *
+ *                           -                                        -       *
+ *                      i d |   i R c                i L c             |      *
+ *                 = a e    |  e      (1 - i R c) - e     (1 - i L c)  |      *
+ *                           -                                        -       *
  *                                      -                  -                  *
  *                             b   i d |    i R c    i L c  |                 *
  *                          + --- e    |  e       - e       |                 *
@@ -224,57 +224,44 @@
 /*  TMPL_RESTRICT macro provided here.                                        */
 #include <libtmpl/include/tmpl_config.h>
 
-/*  Abs function provided here.                                               */
-#include <libtmpl/include/tmpl_math.h>
-
 /*  Double precision complex numbers and routines given here.                 */
 #include <libtmpl/include/tmpl_complex.h>
 
-/*  Functions for the Fresnel kernel and Fresnel optics found here.           */
-#include <libtmpl/include/tmpl_cyl_fresnel_optics.h>
+/*  Numerical integration tools found here.                                   */
+#include <libtmpl/include/tmpl_integration.h>
 
 /*  rssringoccs_TAUObj typedef provided here.                                 */
-#include <rss_ringoccs/include/rss_ringoccs_tau.h>
+#include <rss_ringoccs/include/types/rss_ringoccs_tauobj.h>
 
 /*  Function prototype / forward declaration found here.                      */
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 
 /*  Inverse Fresnel transform via Newton-Raphson with window normalization.   */
 void
-rssringoccs_Fresnel_Transform_Newton_Linear_Filon(
+rssringoccs_Fresnel_Transform_Newton_Filon11(
     rssringoccs_TAUObj * TMPL_RESTRICT const tau,
     const double * TMPL_RESTRICT const w_func,
     const size_t nw_pts,
     const size_t center
 )
 {
-    const double rcpr_dx = 1.0 / tau->dx_km;
-    const double threshold = 0.125;
-    size_t n, offset;
-
     double weight, scale;
-    double left_psi, right_psi, psi_diff, rcpr_slope;
+    double left_psi, right_psi;
 
-    tmpl_ComplexDouble left, right, left_exp_ipsi, right_exp_ipsi;
-    tmpl_ComplexDouble left_in, right_in, integrand, factor, norm;
+    tmpl_ComplexDouble left, right, integrand;
+
+    size_t offset = center - (nw_pts >> 1);
+    size_t n;
 
     tau->T_out[center] = tmpl_CDouble_Zero;
 
-    offset = center - ((nw_pts - 1) >> 1);
 
     rssringoccs_Fresnel_Phase_And_Weight(
         tau, center, offset, &weight, &left_psi
     );
 
     scale = weight * w_func[0];
-    left_exp_ipsi = tmpl_CDouble_Expi(left_psi);
-
-    left_in = tau->T_in[offset];
-
-    tmpl_CDouble_MultiplyBy_Real(&left_in, scale);
-
-    if (tau->use_norm)
-        norm = tmpl_CDouble_Multiply_Real(0.5 * scale, left_exp_ipsi);
+    left = tmpl_CDouble_Multiply_Real(scale, tau->T_in[offset]);
 
     for (n = 0; n < nw_pts - 1; ++n)
     {
@@ -283,64 +270,16 @@ rssringoccs_Fresnel_Transform_Newton_Linear_Filon(
         );
 
         scale = weight * w_func[n + 1];
-        right_exp_ipsi = tmpl_CDouble_Expi(right_psi);
-
-        right_in = tau->T_in[offset + 1];
-
-        tmpl_CDouble_MultiplyBy_Real(&right_in, scale);
-
-        psi_diff = right_psi - left_psi;
-
-        if (tmpl_Double_Abs(psi_diff) < threshold)
-        {
-            left = tmpl_CDouble_Multiply(left_in, left_exp_ipsi);
-            right = tmpl_CDouble_Multiply(right_in, right_exp_ipsi);
-            integrand = tmpl_CDouble_Add(left, right);
-            tmpl_CDouble_MultiplyBy_Real(&integrand, 0.5 * tau->dx_km);
-        }
-
-        else
-        {
-            rcpr_slope = tau->dx_km / psi_diff;
-
-            factor = tmpl_CDouble_Subtract(right_in, left_in);
-            tmpl_CDouble_MultiplyBy_Real(&factor, 1.0 / psi_diff);
-
-            left = tmpl_CDouble_Multiply_Imag(1.0, left_in);
-            left = tmpl_CDouble_Subtract(factor, left);
-            tmpl_CDouble_MultiplyBy(&left, &left_exp_ipsi);
-
-            right = tmpl_CDouble_Multiply_Imag(1.0, right_in);
-            right = tmpl_CDouble_Subtract(factor, right);
-            tmpl_CDouble_MultiplyBy(&right, &right_exp_ipsi);
-
-            integrand = tmpl_CDouble_Subtract(right, left);
-            tmpl_CDouble_MultiplyBy_Real(&integrand, rcpr_slope);
-        }
+        right = tmpl_CDouble_Multiply_Real(scale, tau->T_in[offset]);
+        integrand = tmpl_CDouble_Filon11_Integrand(
+            left, right, left_psi, right_psi, tau->dx_km
+        );
 
         tmpl_CDouble_AddTo(&tau->T_out[center], &integrand);
 
-        if (tau->use_norm)
-        {
-            integrand = tmpl_CDouble_Multiply_Real(scale, right_exp_ipsi);
-            tmpl_CDouble_AddTo(&norm, &integrand);
-        }
-
         left_psi = right_psi;
-        left_exp_ipsi = right_exp_ipsi;
-        left_in = right_in;
+        left = right;
         ++offset;
     }
-
-    if (tau->use_norm)
-    {
-        /*  Scale factor computed using Babinet's principle.                  */
-        tmpl_CDouble_MultiplyBy_Real(&integrand, 0.5);
-        norm = tmpl_CDouble_Subtract(norm, integrand);
-        scale = rcpr_dx / tmpl_CDouble_Abs(norm);
-
-        /*  Scale the Riemann sum by the normalization factor to conclude.    */
-        tmpl_CDouble_MultiplyBy_Real(&tau->T_out[center], scale);
-    }
 }
-/*  End of rssringoccs_Fresnel_Transform_Newton_Linear_Filon.                 */
+/*  End of rssringoccs_Fresnel_Transform_Newton_Filon11.                      */

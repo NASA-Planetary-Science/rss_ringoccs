@@ -217,6 +217,8 @@ class RSRReader(object):
 
     def __init__(self, rsr_file, decimate_16khz_to_1khz=True, decimate_16khz_to_2khz=False,
     		 decimate_16khz_to_4khz=False, decimate_16khz_to_8khz=False,
+    		 decimate_50khz_to_1khz=False, decimate_50khz_to_5khz=False,
+    		 decimate_50khz_to_10khz=False, decimate_50khz_to_25khz=False,
                  apply_bias_correction=True,NoOp=False,verbose=False):
 
         if not isinstance(verbose, bool):
@@ -253,6 +255,34 @@ class RSRReader(object):
                 + 'Python booleans instead')
             decimate_16khz_to_8khz = False
             
+        if not isinstance(decimate_50khz_to_1khz, bool):
+            print('WARNING (RSRReader.get_IQ): Expected Boolean input for '
+                + 'decimate_50khz_to_1khz keyword. Ignoring input. If you\'re '
+                + 'trying to use 1 or 0, then you should use the built-in '
+                + 'Python booleans instead')
+            decimate_50khz_to_1khz = False
+
+        if not isinstance(decimate_50khz_to_5khz, bool):
+            print('WARNING (RSRReader.get_IQ): Expected Boolean input for '
+                + 'decimate_50khz_to_5khz keyword. Ignoring input. If you\'re '
+                + 'trying to use 1 or 0, then you should use the built-in '
+                + 'Python booleans instead')
+            decimate_50khz_to_5khz = False
+
+        if not isinstance(decimate_50khz_to_10khz, bool):
+            print('WARNING (RSRReader.get_IQ): Expected Boolean input for '
+                + 'decimate_50khz_to_10khz keyword. Ignoring input. If you\'re '
+                + 'trying to use 1 or 0, then you should use the built-in '
+                + 'Python booleans instead')
+            decimate_50khz_to_10khz = False
+
+        if not isinstance(decimate_50khz_to_25khz, bool):
+            print('WARNING (RSRReader.get_IQ): Expected Boolean input for '
+                + 'decimate_50khz_to_25khz keyword. Ignoring input. If you\'re '
+                + 'trying to use 1 or 0, then you should use the built-in '
+                + 'Python booleans instead')
+            decimate_50khz_to_25khz = False
+            
         if not isinstance(apply_bias_correction, bool):
             print('WARNING (RSRReader.get_IQ): Expected Boolean input for '
                 + 'apply_bias_correction keyword. Set to True. '
@@ -268,7 +298,7 @@ class RSRReader(object):
         self.__decimate_50khz_to_1khz = decimate_50khz_to_1khz
         self.__decimate_50khz_to_5khz = decimate_50khz_to_5khz
         self.__decimate_50khz_to_10khz = decimate_50khz_to_10khz
-        self.__decimate_16khz_to_4khz = decimate_50khz_to_4khz
+        self.__decimate_50khz_to_25khz = decimate_50khz_to_25khz
         self.__decimate_16khz_to_1khz = decimate_16khz_to_1khz
         self.__decimate_16khz_to_2khz = decimate_16khz_to_2khz
         self.__decimate_16khz_to_4khz = decimate_16khz_to_4khz
@@ -598,6 +628,7 @@ class RSRReader(object):
         decimate_50khz_to_1khz = self.__decimate_50khz_to_1khz
         decimate_50khz_to_5khz = self.__decimate_50khz_to_5khz
         decimate_50khz_to_10khz = self.__decimate_50khz_to_10khz
+        decimate_50khz_to_25khz = self.__decimate_50khz_to_25khz
 
         spm_range = [min(spm_vals), max(spm_vals)]
         self.__set_sfdu_unpack(spm_range)
@@ -819,6 +850,7 @@ class RSRReader(object):
             'decimate_50khz_to_1khz': self.__decimate_50khz_to_1khz,
             'decimate_50khz_to_5khz': self.__decimate_50khz_to_5khz,
             'decimate_50khz_to_10khz': self.__decimate_50khz_to_10khz,
+            'decimate_50khz_to_25khz': self.__decimate_50khz_to_25khz,
 }
 
         self.history = write_history_dict(input_var_dict, input_kw_dict,

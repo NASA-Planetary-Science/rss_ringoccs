@@ -290,7 +290,15 @@ rssringoccs_Fresnel_Transform_Newton_Riemann(
 );
 
 extern void
-rssringoccs_Fresnel_Transform_Newton_Linear_Filon(
+rssringoccs_Fresnel_Transform_Newton_Filon01(
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const double * TMPL_RESTRICT const w_func,
+    size_t n_pts,
+    size_t center
+);
+
+extern void
+rssringoccs_Fresnel_Transform_Newton_Filon11(
     rssringoccs_TAUObj * TMPL_RESTRICT const tau,
     const double * TMPL_RESTRICT const w_func,
     size_t n_pts,

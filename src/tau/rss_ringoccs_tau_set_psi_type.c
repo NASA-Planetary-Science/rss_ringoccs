@@ -74,14 +74,14 @@ rssringoccs_Tau_Set_Psi_Type(const char * TMPL_RESTRICT const psitype,
 
     /*  Standard Newton-Raphson method of finding the stationary azimuth      *
      *  angle for the Fresnel kernel.                                         */
-    if (tmpl_String_Are_Equal(tau_psitype, "newton"))
+    if (tmpl_String_Are_Equal(tau_psitype, "newtonriemann"))
         tau->psinum = rssringoccs_PsiType_NewtonRiemann;
 
-    else if (tmpl_String_Are_Equal(tau_psitype, "newtonlinearfilon"))
-        tau->psinum = rssringoccs_PsiType_NewtonLinearFilon;
+    else if (tmpl_String_Are_Equal(tau_psitype, "newtonfilon01"))
+        tau->psinum = rssringoccs_PsiType_NewtonFilon01;
 
-    else if (tmpl_String_Are_Equal(tau_psitype, "newtonquadraticfilon"))
-        tau->psinum = rssringoccs_PsiType_NewtonQuadraticFilon;
+    else if (tmpl_String_Are_Equal(tau_psitype, "newtonfilon11"))
+        tau->psinum = rssringoccs_PsiType_NewtonFilon11;
 
     /*  Newton-Raphson method, but allowing for arbitrary quartic             *
      *  perturbations to the Fresnel kernel.                                  */

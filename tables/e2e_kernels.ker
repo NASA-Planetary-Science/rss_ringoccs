@@ -1,3 +1,5 @@
+\begintext
+Updated 2026 Jan 16 rfrench@wellesley.edu
 \begindata
 
 PATH_VALUES		= ( '../kernels/naif/CASSINI/kernels/spk'
@@ -196,34 +198,3 @@ KERNELS_TO_LOAD = (		'$A/050606R_SCPSE_05114_05132.bsp'
 
 
 \begintext
-
-KERNELS_TO_LOAD = ( '$A/*' spacecraft trajectory kernels,
-						from spk_pck_list.csv, which was derived from:
-						https://naif.jpl.nasa.gov/pub/naif/pds/data/co-s_j_e_v-spice-6-v1.0/cosp_1000/data/pck/pckinfo.txt
-				    '$B/*' leapseconds kernel
-					'$C/*' planet and lunar ephemeris kernels
-					'$D/*' earth stations kernels
-					'$E/*' earth planetary constants
-						 - Sa planetary constants file NOT included
-					'$F/*' - ESSAM's PLANETARY CONSTANTS FILE
-						'$A/050606R_SCPSE_05114_05132.bsp'
-						'$E/earth_000101_180901_180610.bpc'
-                        '$C/de421.bsp'
-                        '$E/earth_000101_090604_090313.bpc' )
-                        '$B/naif0009.tls'
-						'$D/earthstns_itrf93_050714.bsp'
-					)
-
-						'$E/earth_000101_180901_180610.bpc'
-                        '$F/cpck26Feb2009.tpc'
-                        '$B/naif0009.tls'
-                        '$D/earthstns_itrf93_050714.bsp'
-                        '$C/de421.bsp'
-						'$E/earth_000101_180905_180614.bpc')
-							- no longer available on NAIF website, use most
-								recent version (earth_000101_180912_180621.bpc)
-			
-						'$E/earth_000101_180912_180621.bpc')
-							- also no longer available
-						- use permanent earth pck file: pub/naif/CASSINI/kernels/pck/earth_000101_180919_180629.bpc
-

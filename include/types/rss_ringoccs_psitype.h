@@ -42,11 +42,11 @@ enum rssringoccs_PsiType {
     /*  Newton-Raphson method, slow but accurate, no interpolation performed. */
     rssringoccs_PsiType_NewtonRiemann,
 
-    /*  Newton-Raphson with a linear Filon-like quadrature method.            */
-    rssringoccs_PsiType_NewtonLinearFilon,
+    /*  Newton-Raphson with constant T linear psi Filon quadrature method.    */
+    rssringoccs_PsiType_NewtonFilon01,
 
-    /*  Newton-Raphson with a quadratic Filon-like quadrature method.         */
-    rssringoccs_PsiType_NewtonQuadraticFilon,
+    /*  Newton-Raphson with linear T linear psi Filon quadrature method.      */
+    rssringoccs_PsiType_NewtonFilon11,
 
     /*  Newton-Raphson with elliptical corrections, and interpolations.       */
     rssringoccs_PsiType_EllipticNewton,

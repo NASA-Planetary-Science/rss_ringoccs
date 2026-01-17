@@ -50,12 +50,16 @@ found in the `requirements.txt` file. Note, while the `C` code does compile
 on Windows, some of the Python code assumes a unix-like operating system.
 Windows is not currently supported by `rss_ringoccs`.
 
-To build `rss_ringoccs` in a virtual environment, do the following:
+To obtain `rss_ringoccs`, clone the repository:
 
 ```bash
 git clone --recursive http://github.com/NASA-Planetary-Science/rss_ringoccs.git
 cd rss_ringoccs/
+```
 
+To build `rss_ringoccs` in a virtual environment, do the following:
+
+```bash
 python3 -m venv .venv
 source .venv/bin/activate
 
@@ -63,6 +67,15 @@ python3 -m pip install --upgrade pip
 python3 -m pip install -r requirements.txt
 python3 -m pip install .
 ```
+
+This project regularly updates, as does `libtmpl`. To rebuild, follow the
+cleaning instruction below, and then pull the latest changes with:
+
+```bash
+git pull --recurse-submodules
+```
+
+You may then re-build the latest changes using the previous commands.
 
 ## Cleaning / Uninstalling
 

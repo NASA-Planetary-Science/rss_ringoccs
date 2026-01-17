@@ -111,18 +111,11 @@ remove this via:
 rm -rf .venv
 ```
 
-## Installation and Documentation
-Detailed installation instructions and full documentation are contained the
-`rss_ringoccs User Guide` at https://github.com/NASA-Planetary-Science/rss_ringoccs/tree/master/docs/rss_ringoccs_User_Guide_V1.3.pdf.
-
-For experienced users, we provide a `rss_ringoccs Quick Start` guide located at
-https://github.com/NASA-Planetary-Science/rss_ringoccs/tree/master/docs/rss_ringoccs_Quick_Start_V1.3.pdf
-
+## Release notes
+`rss_ringoccs` has changed dramatically over the years from a project that
+was primarily written in `Python`, to one that is now mostly written in `C`.
 Release notes are contained in
 https://github.com/NASA-Planetary-Science/rss_ringoccs/blob/master/ReleaseNotes.md
-
-Source code documentation is found at
-https://rss-ringoccs.readthedocs.io/en/master/
 
 ## Batch Data Processing
 Once `rss_ringoccs` has been installed and the necessary data and

@@ -245,10 +245,10 @@ rssringoccs_Fresnel_Transform_Newton_Filon11(
     const size_t center
 )
 {
-    double weight, scale;
+    double weight, left_scale, right_scale;
     double left_psi, right_psi;
 
-    tmpl_ComplexDouble left, right, integrand;
+    tmpl_ComplexDouble left, right, integrand, norm;
 
     size_t offset = center - (nw_pts >> 1);
     size_t n;
@@ -259,8 +259,11 @@ rssringoccs_Fresnel_Transform_Newton_Filon11(
         tau, center, offset, &weight, &left_psi
     );
 
-    scale = weight * w_func[0];
-    left = tmpl_CDouble_Multiply_Real(scale, tau->T_in[offset]);
+    left_scale = weight * w_func[0];
+    left = tmpl_CDouble_Multiply_Real(left_scale, tau->T_in[offset]);
+
+    if (tau->use_norm)
+        norm = tmpl_CDouble_Zero;
 
     for (n = 0; n < nw_pts - 1; ++n)
     {
@@ -268,8 +271,8 @@ rssringoccs_Fresnel_Transform_Newton_Filon11(
             tau, center, offset + 1, &weight, &right_psi
         );
 
-        scale = weight * w_func[n + 1];
-        right = tmpl_CDouble_Multiply_Real(scale, tau->T_in[offset + 1]);
+        right_scale = weight * w_func[n + 1];
+        right = tmpl_CDouble_Multiply_Real(right_scale, tau->T_in[offset + 1]);
 
         integrand = tmpl_CDouble_Filon11_Integrand(
             left, right, left_psi, right_psi, tau->dx_km
@@ -277,9 +280,33 @@ rssringoccs_Fresnel_Transform_Newton_Filon11(
 
         tmpl_CDouble_AddTo(&tau->T_out[center], &integrand);
 
+        if (tau->use_norm)
+        {
+            integrand = tmpl_Double_Filon11_Integrand(
+                left_scale, right_scale, left_psi, right_psi, tau->dx_km
+            );
+
+            tmpl_CDouble_AddTo(&norm, &integrand);
+        }
+
+        left_scale = right_scale;
         left_psi = right_psi;
         left = right;
         ++offset;
+    }
+
+    /*  By Babinet's principle, the free space integral is 1. We are          *
+     *  integrating over a finite data set, and have introduced a tapering    *
+     *  function. The normalization factor is the magnitude of the free space *
+     *  integral across the entire real line divided by the tapered integral  *
+     *  across the window, which is hence 1 / | norm |. Compute this.         */
+    if (tau->use_norm)
+    {
+        /*  Scale factor computed using Babinet's principle.                  */
+        const double scale = 1.0 / tmpl_CDouble_Abs(norm);
+
+        /*  Scale the Riemann sum by the normalization factor to conclude.    */
+        tmpl_CDouble_MultiplyBy_Real(&tau->T_out[center], scale);
     }
 }
 /*  End of rssringoccs_Fresnel_Transform_Newton_Filon11.                      */

@@ -60,10 +60,10 @@ rssringoccs_Fresnel_Transform_Newton_Riemann(
 
     /*  Symmetry is lost without the Legendre polynomials, or Fresnel         *
      *  quadratic. We must compute everything from -W / 2 to +W / 2.          */
-    offset = center - ((nw_pts - 1) >> 1);
+    offset = center - (nw_pts >> 1);
 
     /*  Use a Riemann Sum to approximate the Fresnel Inverse Integral.        */
-    for (n = 0; n < nw_pts; ++n)
+    for (n = 0; n < nw_pts - 1; ++n)
     {
         /*  Compute the full Fresnel kernel, not assuming psi'' is constant.  */
         ker = rssringoccs_Fresnel_Kernel(tau, center, offset);

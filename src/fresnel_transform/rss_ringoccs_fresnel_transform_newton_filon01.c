@@ -36,7 +36,6 @@ rssringoccs_Fresnel_Transform_Newton_Filon01(
     );
 
     scale = weight * w_func[0];
-
     left = tmpl_CDouble_Multiply_Real(scale, tau->T_in[offset]);
 
     for (n = 0; n < nw_pts - 1; ++n)

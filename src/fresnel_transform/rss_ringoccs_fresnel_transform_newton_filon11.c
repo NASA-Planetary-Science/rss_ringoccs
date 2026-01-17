@@ -255,7 +255,6 @@ rssringoccs_Fresnel_Transform_Newton_Filon11(
 
     tau->T_out[center] = tmpl_CDouble_Zero;
 
-
     rssringoccs_Fresnel_Phase_And_Weight(
         tau, center, offset, &weight, &left_psi
     );
@@ -270,7 +269,8 @@ rssringoccs_Fresnel_Transform_Newton_Filon11(
         );
 
         scale = weight * w_func[n + 1];
-        right = tmpl_CDouble_Multiply_Real(scale, tau->T_in[offset]);
+        right = tmpl_CDouble_Multiply_Real(scale, tau->T_in[offset + 1]);
+
         integrand = tmpl_CDouble_Filon11_Integrand(
             left, right, left_psi, right_psi, tau->dx_km
         );

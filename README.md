@@ -68,7 +68,7 @@ python3 -m pip install -r requirements.txt
 python3 -m pip install .
 ```
 
-This project regularly updates, as does `libtmpl`. To rebuild, follow the
+This project updates regularly, as does `libtmpl`. To rebuild, follow the
 cleaning instruction below, and then pull the latest changes with:
 
 ```bash

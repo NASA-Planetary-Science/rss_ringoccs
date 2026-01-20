@@ -509,7 +509,6 @@ def calc_sc_state(et_vals, spacecraft, planet, dsn, nhat_p, ref='J2000',
         :dsn (*str*): Deep Space Network observing station ID
         :nhat_p (*np.ndarray*): 1x3 array unit vector in planet pole direction.
 
-
     Keyword Arguments
         :kernels (*str* or *list*): Path to NAIF kernel(s)
         :ref (*str*): Reference frame to be used in spiceypy calls. Default
@@ -612,7 +611,6 @@ def calc_uplink_geo(ul_dsn, t_set_et_vals, spacecraft, planet, nhat_p,
 
     ul_phi_rl_deg_vals, ul_phi_ora_deg_vals = calc_phi_deg(
             t_set_et_vals, ul_rho_vec_km, spacecraft, ul_dsn, nhat_p, ref=ref)
-
 
     return t_ul_et_vals, t_ul_ret_vals, ul_rho_km_vals, ul_phi_rl_deg_vals, ul_phi_ora_deg_vals
 
@@ -848,7 +846,6 @@ def get_freespace(t_ret_spm_vals, year, doy, rho_km_vals,
         gaps_spm_ing1 = [[x[1],x[0]] for x in gaps_spm_ing]
         gaps_spm_ing = np.asarray(gaps_spm_ing1[::-1])
 
-
         # Use egress portion of occultation
         t_ret_egr, t_oet_egr, phi_rl_egr, rho_egr = split_chord_arr(
                 t_ret_spm_vals, t_oet_spm_vals, atmos_occ_spm_vals,
@@ -862,7 +859,6 @@ def get_freespace(t_ret_spm_vals, year, doy, rho_km_vals,
         # Convert ring radius to seconds past midnight
         rho_to_spm_egr = interp1d(rho_egr, t_oet_egr, fill_value='extrapolate')
         gaps_spm_egr = rho_to_spm_egr(gaps_km_egr)
-
 
         gaps_km = {'INGRESS': gaps_km_ing,
                 'EGRESS': gaps_km_egr}
@@ -886,7 +882,6 @@ def get_freespace(t_ret_spm_vals, year, doy, rho_km_vals,
             raise ValueError('(get_freespace.py): Entire signal is '
             + 'occulted by planet!')
 
-
         # Get freespace regions in km from Saturn center
         gaps_km = get_freespace_km(t_ret_out, year, doy, rho_out,
                 phi_rl_out,local_path_to_tables=local_path_to_tables)
@@ -894,7 +889,6 @@ def get_freespace(t_ret_spm_vals, year, doy, rho_km_vals,
         # Convert fsp in km to spm
         rho_to_spm = interp1d(rho_out, t_oet_out, fill_value='extrapolate')
         gaps_spm = rho_to_spm(gaps_km).tolist()
-
 
         # reverse list for ingress occ so that gaps_spm in increasing order
         if (rho_out[1]-rho_out[0]) < 0:
@@ -940,8 +934,6 @@ def split_chord_arr(t_ret_spm_vals, t_oet_spm_vals,
     if (dr_1 < 0 and dr_2 < 0) or (dr_1 > 0 and dr_2 > 0):
         raise ValueError('(calc_occ_geometry.py): Chord changed directions twice')
 
-
-
     # Split egress portion
     if profdir == '"EGRESS"':
         # if dr_1<0, then beginning of occ is ingress.
@@ -957,7 +949,6 @@ def split_chord_arr(t_ret_spm_vals, t_oet_spm_vals,
             phi_rl_deg_split = phi_rl_deg_vals[:ind]
             rho_km_split = rho_km_vals[:ind]
 
-
     # Split ingress portion
 
     if profdir == '"INGRESS"':
@@ -972,7 +963,6 @@ def split_chord_arr(t_ret_spm_vals, t_oet_spm_vals,
             t_oet_spm_split = t_oet_spm_vals[ind:]
             phi_rl_deg_split = phi_rl_deg_vals[ind:]
             rho_km_split = rho_km_vals[ind:]
-
 
     # Remove any part of the occultation that is blocked by atmosphere
     t_ret_out, t_oet_out, phi_rl_out, rho_out = remove_blocked(
@@ -1016,7 +1006,6 @@ def remove_blocked(t_oet_spm_vals, atmos_occ_spm_vals, t_ret_spm_vals,
         if t_oet_spm_vals[i] not in atmos_occ_spm_vals:
             mask_not_blocked[i] = True
 
-
     t_ret_out = t_ret_spm_vals[mask_not_blocked]
     t_oet_out = t_oet_spm_vals[mask_not_blocked]
     phi_rl_out = phi_rl_deg_vals[mask_not_blocked]
@@ -1059,8 +1048,6 @@ def get_freespace_km(ret_spm, year, doy, rho_km, phi_rl_deg,local_path_to_tables
         add_fsp0 = [[min(rho_km), fsp0_km]]
     else:
         add_fsp0 = []
-
-
 
     # Add free-space beyond ring system to free-space gaps in rings
     freespace_km = (add_fsp0 + find_gaps(ret_spm, year, doy, rho_km, phi_rl_deg,

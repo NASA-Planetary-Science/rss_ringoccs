@@ -189,8 +189,8 @@ def calc_elevation_deg(et_vals, target, obs, kernels=None):
 
         # Compute Earth to observer position vector in J2000
         #   without light correction
-#        abcorr = 'NONE'
-# temporary change
+        # abcorr = 'NONE'
+        # temporary change, using 'CN' instead.
         abcorr = 'CN'
         planet = 'EARTH'
 
@@ -542,8 +542,8 @@ def calc_sc_state(et_vals, spacecraft, planet, dsn, nhat_p, ref='J2000',
         #   with no light-time correction
         targ = spacecraft
         #ref = 'J2000'
-       ##### abcorr = 'NONE'
-# temporaryy
+        ##### abcorr = 'NONE'
+        # temporaryy
         abcorr = 'CN'
         obs = planet
         starg0, ltime0 = spice.spkezr(targ, et, ref, abcorr, obs)
@@ -597,7 +597,7 @@ def calc_set_et(et_vals, spacecraft, dsn, kernels=None):
 def calc_uplink_geo(ul_dsn, t_set_et_vals, spacecraft, planet, nhat_p,
         ref='J2000'):
     sc_code = spice.bodn2c(spacecraft)
-    
+
     ul_dsn_code = spice.bodn2c(ul_dsn)
 
     t_ul_et_vals_list = []
@@ -939,7 +939,7 @@ def split_chord_arr(t_ret_spm_vals, t_oet_spm_vals,
     # verify that direction changes
     if (dr_1 < 0 and dr_2 < 0) or (dr_1 > 0 and dr_2 > 0):
         raise ValueError('(calc_occ_geometry.py): Chord changed directions twice')
-    
+
 
 
     # Split egress portion

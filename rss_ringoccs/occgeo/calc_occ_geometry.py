@@ -19,6 +19,7 @@ from scipy.interpolate import interp1d
 DEGREES_PER_RADIAN = 57.2957795130823208767981548141051703324054724665643215E+00
 RADIANS_PER_DEGREE = 1.74532925199432957692369076848861271344287188854172546E-02
 SECONDS_PER_DAY = 86400.0
+SPEED_OF_LIGHT_KILOMETERS_PER_SECOND = 2.99792458E+05
 
 def calc_B_deg(et_vals, spacecraft, dsn, nhat_p, kernels=None, ref='J2000'):
     """
@@ -83,8 +84,7 @@ def calc_D_km(t1, t2):
     Returns
         :D_km_vals (*np.ndarray*): Array of light distance in km.
     """
-    D_km_vals = abs(t1-t2) * spice.clight()
-    return D_km_vals
+    return abs(t1 - t2) * SPEED_OF_LIGHT_KILOMETERS_PER_SECOND
 
 def calc_F_km(D_km_vals, f_sky_hz_vals, B_deg_vals, phi_ora_deg_vals):
     """
@@ -107,7 +107,7 @@ def calc_F_km(D_km_vals, f_sky_hz_vals, B_deg_vals, phi_ora_deg_vals):
         #. Reference: [MTR1986]_ Equation 6
     """
 
-    lambda_sky = spice.clight() / f_sky_hz_vals
+    lambda_sky = SPEED_OF_LIGHT_KILOMETERS_PER_SECOND / f_sky_hz_vals
     phi_ora_rad = phi_ora_deg_vals * RADIANS_PER_DEGREE
     B_rad = B_deg_vals * RADIANS_PER_DEGREE
     D_km = D_km_vals

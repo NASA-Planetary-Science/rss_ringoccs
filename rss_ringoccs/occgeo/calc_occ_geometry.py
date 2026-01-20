@@ -16,7 +16,8 @@ import spiceypy as spice
 import numpy as np
 from scipy.interpolate import interp1d
 
-DEGREES_PER_RADIAN = 57.2957795130823208767981548141051703324054724665643215492
+DEGREES_PER_RADIAN = 57.2957795130823208767981548141051703324054724665643215E+00
+RADIANS_PER_DEGREE = 1.74532925199432957692369076848861271344287188854172546E-02
 
 def calc_B_deg(et_vals, spacecraft, dsn, nhat_p, kernels=None, ref='J2000'):
     """
@@ -106,8 +107,8 @@ def calc_F_km(D_km_vals, f_sky_hz_vals, B_deg_vals, phi_ora_deg_vals):
     """
 
     lambda_sky = spice.clight() / f_sky_hz_vals
-    phi_ora_rad = spice.rpd() * phi_ora_deg_vals
-    B_rad = spice.rpd() * B_deg_vals
+    phi_ora_rad = phi_ora_deg_vals * RADIANS_PER_DEGREE
+    B_rad = B_deg_vals * RADIANS_PER_DEGREE
     D_km = D_km_vals
 
     # Eq. 6 of MTR1986
@@ -1158,8 +1159,8 @@ def get_pole(et, planet, kernels=None):
 
     # Convert to rectangular coordinates
     inrange = 1.
-    re = rap * spice.rpd()
-    dec = dep * spice.rpd()
+    re = rap * RADIANS_PER_DEGREE
+    dec = dep * RADIANS_PER_DEGREE
     nhat_p = spice.radrec(inrange, re, dec)
 
     return nhat_p

@@ -12,12 +12,12 @@ rssringoccs_Double_Ring_Opening_Angle_Deg(
     const char * TMPL_RESTRICT const ref
 )
 {
-    const char * const abcor = "CN";
-    double ltime, opening_radians;
+    const char * const abcorr = "CN";
+    double ltime, opening_angle;
     tmpl_ThreeVectorDouble ptarg;
 
-    spkpos_c(dsn, time, ref, abcor, spacecraft, ptarg.dat, &ltime);
+    spkpos_c(dsn, time, ref, abcorr, spacecraft, ptarg.dat, &ltime);
 
-    opening_radians = tmpl_double_pi_by_two - tmpl_3DDouble_Angle(&ptarg, nhat);
-    return opening_radians * tmpl_double_rad_to_deg;
+    opening_angle = tmpl_double_pi_by_two - tmpl_3DDouble_Angle(&ptarg, nhat);
+    return opening_angle * tmpl_double_rad_to_deg;
 }

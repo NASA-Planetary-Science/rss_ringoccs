@@ -16,6 +16,8 @@ import spiceypy as spice
 import numpy as np
 from scipy.interpolate import interp1d
 
+DEGREES_PER_RADIAN = 57.2957795130823208767981548141051703324054724665643215492
+
 def calc_B_deg(et_vals, spacecraft, dsn, nhat_p, kernels=None, ref='J2000'):
     """
     This calculates ring opening angle, or the observed ring elevation,
@@ -64,7 +66,7 @@ def calc_B_deg(et_vals, spacecraft, dsn, nhat_p, kernels=None, ref='J2000'):
         #   planet pole vector and the spacecraft to DSN vector
         B_rad = (np.pi/2.) - spice.vsep(starg, nhat_p)
 
-        B_deg_vals[n] = B_rad * spice.dpr()
+        B_deg_vals[n] = B_rad * DEGREES_PER_RADIAN
 
     return B_deg_vals
 
@@ -198,7 +200,7 @@ def calc_elevation_deg(et_vals, target, obs, kernels=None):
 
         # Calculate elevation as the complement to the angle
         #   between ptarg1 (obs->target) and ptarg2 (Earth->obs)
-        elev_deg_vals[n] = 90. - spice.vsep(ptarg1, ptarg2)*spice.dpr()
+        elev_deg_vals[n] = 90. - spice.vsep(ptarg1, ptarg2) * DEGREES_PER_RADIAN
 
     return elev_deg_vals
 
@@ -317,7 +319,7 @@ def calc_phi_deg(et_vals, rho_vec_km_vals, spacecraft, dsn, nhat_p, ref='J2000',
         # Convert coordinates to RA and DEC for inertial longitude
         radius_vec_rl, ra_vec_rl, dec_vec_rl = spice.recrad(vec_rl)
 
-        phi_rl_deg = ra_vec_rl * spice.dpr()
+        phi_rl_deg = ra_vec_rl * DEGREES_PER_RADIAN
         phi_rl_deg_vals[n] = phi_rl_deg
 
         # Calculate observed ring azimuth by rotating pm to direction of
@@ -330,7 +332,7 @@ def calc_phi_deg(et_vals, rho_vec_km_vals, spacecraft, dsn, nhat_p, ref='J2000',
         # Convert coordinates to RA and DEC for ORA
         radius_vec_ora, ra_vec_ora, dec_vec_ora = spice.recrad(vec_ora)
 
-        phi_ora_deg_vals[n] = (phi_rl_deg - ra_vec_ora*spice.dpr()
+        phi_ora_deg_vals[n] = (phi_rl_deg - ra_vec_ora * DEGREES_PER_RADIAN
                 + 720.) % 360.
 
     return phi_rl_deg_vals, phi_ora_deg_vals

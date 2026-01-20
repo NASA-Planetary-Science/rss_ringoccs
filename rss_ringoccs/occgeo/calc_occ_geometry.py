@@ -18,6 +18,7 @@ from scipy.interpolate import interp1d
 
 DEGREES_PER_RADIAN = 57.2957795130823208767981548141051703324054724665643215E+00
 RADIANS_PER_DEGREE = 1.74532925199432957692369076848861271344287188854172546E-02
+SECONDS_PER_DAY = 86400.0
 
 def calc_B_deg(et_vals, spacecraft, dsn, nhat_p, kernels=None, ref='J2000'):
     """
@@ -1151,7 +1152,7 @@ def get_pole(et, planet, kernels=None):
     dim2, pole_DEC = spice.bodvrd(bodynm, item, maxn)
 
     # Calculate pole ra and dec using quadratic terms
-    dt_centuries = et / (spice.spd()*365.25*100.)
+    dt_centuries = et / (SECONDS_PER_DAY * 365.25 * 100.0)
     rap = (pole_RA[0] + dt_centuries*pole_RA[1]
             + dt_centuries**2*pole_RA[2])
     dep = (pole_DEC[0] + dt_centuries*pole_DEC[1]

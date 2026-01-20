@@ -58,12 +58,10 @@ def calc_B_deg(et_vals, spacecraft, dsn, nhat_p, kernels=None, ref='J2000'):
     B_deg_vals = np.zeros(npts)
 
     # Compute spacecraft to dsn position vector
-    targ = dsn
     abcorr = 'CN'
-    obs = spacecraft
 
     for n in range(npts):
-        starg, ltime = spice.spkpos(targ, et_vals[n], ref, abcorr, obs)
+        starg, ltime = spice.spkpos(dsn, et_vals[n], ref, abcorr, spacecraft)
 
         # Calculate B as the complement to the angle made by the
         #   planet pole vector and the spacecraft to DSN vector
@@ -171,6 +169,8 @@ def calc_elevation_deg(et_vals, target, obs, kernels=None):
     Returns
         :elev_deg_vals (*np.ndarray*): Array of elevation angles in degrees.
     """
+    abcorr = 'CN'
+    planet = 'EARTH'
     npts = len(et_vals)
     elev_deg_vals = np.zeros(npts)
     if obs == '398958':
@@ -185,23 +185,14 @@ def calc_elevation_deg(et_vals, target, obs, kernels=None):
     for n in range(npts):
         et = et_vals[n]
 
-        # Compute observer to target position vector in J2000
-        #   with light-correction
-
-        abcorr = 'CN'
+        # Compute observer to target position vector in J2000.
         ptarg1, ltime1 = spice.spkpos(target, et, ref, abcorr, obs)
 
-        # Compute Earth to observer position vector in J2000
-        #   without light correction
-        # abcorr = 'NONE'
-        # temporary change, using 'CN' instead.
-        abcorr = 'CN'
-        planet = 'EARTH'
-
+        # Compute Earth to observer position vector in J2000.
         ptarg2, ltime2 = spice.spkpos(obs, et, ref, abcorr, planet)
 
         # Calculate elevation as the complement to the angle
-        #   between ptarg1 (obs->target) and ptarg2 (Earth->obs)
+        #   between ptarg1 (obs -> target) and ptarg2 (Earth -> obs)
         elev_deg_vals[n] = 90. - spice.vsep(ptarg1, ptarg2) * DEGREES_PER_RADIAN
 
     return elev_deg_vals

@@ -16,6 +16,11 @@ import spiceypy as spice
 import numpy as np
 from scipy.interpolate import interp1d
 
+DEGREES_PER_RADIAN = 57.2957795130823208767981548141051703324054724665643215E+00
+RADIANS_PER_DEGREE = 1.74532925199432957692369076848861271344287188854172546E-02
+SECONDS_PER_DAY = 86400.0
+SPEED_OF_LIGHT_KILOMETERS_PER_SECOND = 2.99792458E+05
+
 def calc_B_deg(et_vals, spacecraft, dsn, nhat_p, kernels=None, ref='J2000'):
     """
     This calculates ring opening angle, or the observed ring elevation,
@@ -53,18 +58,16 @@ def calc_B_deg(et_vals, spacecraft, dsn, nhat_p, kernels=None, ref='J2000'):
     B_deg_vals = np.zeros(npts)
 
     # Compute spacecraft to dsn position vector
-    targ = dsn
     abcorr = 'CN'
-    obs = spacecraft
 
     for n in range(npts):
-        starg, ltime = spice.spkpos(targ, et_vals[n], ref, abcorr, obs)
+        starg, ltime = spice.spkpos(dsn, et_vals[n], ref, abcorr, spacecraft)
 
         # Calculate B as the complement to the angle made by the
         #   planet pole vector and the spacecraft to DSN vector
         B_rad = (np.pi/2.) - spice.vsep(starg, nhat_p)
 
-        B_deg_vals[n] = B_rad * spice.dpr()
+        B_deg_vals[n] = B_rad * DEGREES_PER_RADIAN
 
     return B_deg_vals
 
@@ -79,8 +82,7 @@ def calc_D_km(t1, t2):
     Returns
         :D_km_vals (*np.ndarray*): Array of light distance in km.
     """
-    D_km_vals = abs(t1-t2) * spice.clight()
-    return D_km_vals
+    return abs(t1 - t2) * SPEED_OF_LIGHT_KILOMETERS_PER_SECOND
 
 def calc_F_km(D_km_vals, f_sky_hz_vals, B_deg_vals, phi_ora_deg_vals):
     """
@@ -103,9 +105,9 @@ def calc_F_km(D_km_vals, f_sky_hz_vals, B_deg_vals, phi_ora_deg_vals):
         #. Reference: [MTR1986]_ Equation 6
     """
 
-    lambda_sky = spice.clight() / f_sky_hz_vals
-    phi_ora_rad = spice.rpd() * phi_ora_deg_vals
-    B_rad = spice.rpd() * B_deg_vals
+    lambda_sky = SPEED_OF_LIGHT_KILOMETERS_PER_SECOND / f_sky_hz_vals
+    phi_ora_rad = phi_ora_deg_vals * RADIANS_PER_DEGREE
+    B_rad = B_deg_vals * RADIANS_PER_DEGREE
     D_km = D_km_vals
 
     # Eq. 6 of MTR1986
@@ -167,6 +169,8 @@ def calc_elevation_deg(et_vals, target, obs, kernels=None):
     Returns
         :elev_deg_vals (*np.ndarray*): Array of elevation angles in degrees.
     """
+    abcorr = 'CN'
+    planet = 'EARTH'
     npts = len(et_vals)
     elev_deg_vals = np.zeros(npts)
     if obs == '398958':
@@ -181,24 +185,15 @@ def calc_elevation_deg(et_vals, target, obs, kernels=None):
     for n in range(npts):
         et = et_vals[n]
 
-        # Compute observer to target position vector in J2000
-        #   with light-correction
-
-        abcorr = 'CN'
+        # Compute observer to target position vector in J2000.
         ptarg1, ltime1 = spice.spkpos(target, et, ref, abcorr, obs)
 
-        # Compute Earth to observer position vector in J2000
-        #   without light correction
-#        abcorr = 'NONE'
-# temporary change
-        abcorr = 'CN'
-        planet = 'EARTH'
-
+        # Compute Earth to observer position vector in J2000.
         ptarg2, ltime2 = spice.spkpos(obs, et, ref, abcorr, planet)
 
         # Calculate elevation as the complement to the angle
-        #   between ptarg1 (obs->target) and ptarg2 (Earth->obs)
-        elev_deg_vals[n] = 90. - spice.vsep(ptarg1, ptarg2)*spice.dpr()
+        #   between ptarg1 (obs -> target) and ptarg2 (Earth -> obs)
+        elev_deg_vals[n] = 90. - spice.vsep(ptarg1, ptarg2) * DEGREES_PER_RADIAN
 
     return elev_deg_vals
 
@@ -317,7 +312,7 @@ def calc_phi_deg(et_vals, rho_vec_km_vals, spacecraft, dsn, nhat_p, ref='J2000',
         # Convert coordinates to RA and DEC for inertial longitude
         radius_vec_rl, ra_vec_rl, dec_vec_rl = spice.recrad(vec_rl)
 
-        phi_rl_deg = ra_vec_rl * spice.dpr()
+        phi_rl_deg = ra_vec_rl * DEGREES_PER_RADIAN
         phi_rl_deg_vals[n] = phi_rl_deg
 
         # Calculate observed ring azimuth by rotating pm to direction of
@@ -330,7 +325,7 @@ def calc_phi_deg(et_vals, rho_vec_km_vals, spacecraft, dsn, nhat_p, ref='J2000',
         # Convert coordinates to RA and DEC for ORA
         radius_vec_ora, ra_vec_ora, dec_vec_ora = spice.recrad(vec_ora)
 
-        phi_ora_deg_vals[n] = (phi_rl_deg - ra_vec_ora*spice.dpr()
+        phi_ora_deg_vals[n] = (phi_rl_deg - ra_vec_ora * DEGREES_PER_RADIAN
                 + 720.) % 360.
 
     return phi_rl_deg_vals, phi_ora_deg_vals
@@ -509,7 +504,6 @@ def calc_sc_state(et_vals, spacecraft, planet, dsn, nhat_p, ref='J2000',
         :dsn (*str*): Deep Space Network observing station ID
         :nhat_p (*np.ndarray*): 1x3 array unit vector in planet pole direction.
 
-
     Keyword Arguments
         :kernels (*str* or *list*): Path to NAIF kernel(s)
         :ref (*str*): Reference frame to be used in spiceypy calls. Default
@@ -542,8 +536,8 @@ def calc_sc_state(et_vals, spacecraft, planet, dsn, nhat_p, ref='J2000',
         #   with no light-time correction
         targ = spacecraft
         #ref = 'J2000'
-       ##### abcorr = 'NONE'
-# temporaryy
+        ##### abcorr = 'NONE'
+        # temporaryy
         abcorr = 'CN'
         obs = planet
         starg0, ltime0 = spice.spkezr(targ, et, ref, abcorr, obs)
@@ -597,7 +591,7 @@ def calc_set_et(et_vals, spacecraft, dsn, kernels=None):
 def calc_uplink_geo(ul_dsn, t_set_et_vals, spacecraft, planet, nhat_p,
         ref='J2000'):
     sc_code = spice.bodn2c(spacecraft)
-    
+
     ul_dsn_code = spice.bodn2c(ul_dsn)
 
     t_ul_et_vals_list = []
@@ -612,7 +606,6 @@ def calc_uplink_geo(ul_dsn, t_set_et_vals, spacecraft, planet, nhat_p,
 
     ul_phi_rl_deg_vals, ul_phi_ora_deg_vals = calc_phi_deg(
             t_set_et_vals, ul_rho_vec_km, spacecraft, ul_dsn, nhat_p, ref=ref)
-
 
     return t_ul_et_vals, t_ul_ret_vals, ul_rho_km_vals, ul_phi_rl_deg_vals, ul_phi_ora_deg_vals
 
@@ -848,7 +841,6 @@ def get_freespace(t_ret_spm_vals, year, doy, rho_km_vals,
         gaps_spm_ing1 = [[x[1],x[0]] for x in gaps_spm_ing]
         gaps_spm_ing = np.asarray(gaps_spm_ing1[::-1])
 
-
         # Use egress portion of occultation
         t_ret_egr, t_oet_egr, phi_rl_egr, rho_egr = split_chord_arr(
                 t_ret_spm_vals, t_oet_spm_vals, atmos_occ_spm_vals,
@@ -862,7 +854,6 @@ def get_freespace(t_ret_spm_vals, year, doy, rho_km_vals,
         # Convert ring radius to seconds past midnight
         rho_to_spm_egr = interp1d(rho_egr, t_oet_egr, fill_value='extrapolate')
         gaps_spm_egr = rho_to_spm_egr(gaps_km_egr)
-
 
         gaps_km = {'INGRESS': gaps_km_ing,
                 'EGRESS': gaps_km_egr}
@@ -886,7 +877,6 @@ def get_freespace(t_ret_spm_vals, year, doy, rho_km_vals,
             raise ValueError('(get_freespace.py): Entire signal is '
             + 'occulted by planet!')
 
-
         # Get freespace regions in km from Saturn center
         gaps_km = get_freespace_km(t_ret_out, year, doy, rho_out,
                 phi_rl_out,local_path_to_tables=local_path_to_tables)
@@ -894,7 +884,6 @@ def get_freespace(t_ret_spm_vals, year, doy, rho_km_vals,
         # Convert fsp in km to spm
         rho_to_spm = interp1d(rho_out, t_oet_out, fill_value='extrapolate')
         gaps_spm = rho_to_spm(gaps_km).tolist()
-
 
         # reverse list for ingress occ so that gaps_spm in increasing order
         if (rho_out[1]-rho_out[0]) < 0:
@@ -939,8 +928,6 @@ def split_chord_arr(t_ret_spm_vals, t_oet_spm_vals,
     # verify that direction changes
     if (dr_1 < 0 and dr_2 < 0) or (dr_1 > 0 and dr_2 > 0):
         raise ValueError('(calc_occ_geometry.py): Chord changed directions twice')
-    
-
 
     # Split egress portion
     if profdir == '"EGRESS"':
@@ -957,7 +944,6 @@ def split_chord_arr(t_ret_spm_vals, t_oet_spm_vals,
             phi_rl_deg_split = phi_rl_deg_vals[:ind]
             rho_km_split = rho_km_vals[:ind]
 
-
     # Split ingress portion
 
     if profdir == '"INGRESS"':
@@ -972,7 +958,6 @@ def split_chord_arr(t_ret_spm_vals, t_oet_spm_vals,
             t_oet_spm_split = t_oet_spm_vals[ind:]
             phi_rl_deg_split = phi_rl_deg_vals[ind:]
             rho_km_split = rho_km_vals[ind:]
-
 
     # Remove any part of the occultation that is blocked by atmosphere
     t_ret_out, t_oet_out, phi_rl_out, rho_out = remove_blocked(
@@ -1016,7 +1001,6 @@ def remove_blocked(t_oet_spm_vals, atmos_occ_spm_vals, t_ret_spm_vals,
         if t_oet_spm_vals[i] not in atmos_occ_spm_vals:
             mask_not_blocked[i] = True
 
-
     t_ret_out = t_ret_spm_vals[mask_not_blocked]
     t_oet_out = t_oet_spm_vals[mask_not_blocked]
     phi_rl_out = phi_rl_deg_vals[mask_not_blocked]
@@ -1059,8 +1043,6 @@ def get_freespace_km(ret_spm, year, doy, rho_km, phi_rl_deg,local_path_to_tables
         add_fsp0 = [[min(rho_km), fsp0_km]]
     else:
         add_fsp0 = []
-
-
 
     # Add free-space beyond ring system to free-space gaps in rings
     freespace_km = (add_fsp0 + find_gaps(ret_spm, year, doy, rho_km, phi_rl_deg,
@@ -1161,7 +1143,7 @@ def get_pole(et, planet, kernels=None):
     dim2, pole_DEC = spice.bodvrd(bodynm, item, maxn)
 
     # Calculate pole ra and dec using quadratic terms
-    dt_centuries = et / (spice.spd()*365.25*100.)
+    dt_centuries = et / (SECONDS_PER_DAY * 365.25 * 100.0)
     rap = (pole_RA[0] + dt_centuries*pole_RA[1]
             + dt_centuries**2*pole_RA[2])
     dep = (pole_DEC[0] + dt_centuries*pole_DEC[1]
@@ -1169,8 +1151,8 @@ def get_pole(et, planet, kernels=None):
 
     # Convert to rectangular coordinates
     inrange = 1.
-    re = rap * spice.rpd()
-    dec = dep * spice.rpd()
+    re = rap * RADIANS_PER_DEGREE
+    dec = dep * RADIANS_PER_DEGREE
     nhat_p = spice.radrec(inrange, re, dec)
 
     return nhat_p

@@ -83,6 +83,9 @@ rssringoccs_Tau_Set_Psi_Type(const char * TMPL_RESTRICT const psitype,
     else if (tmpl_String_Are_Equal(tau_psitype, "newtonfilon11"))
         tau->psinum = rssringoccs_PsiType_NewtonFilon11;
 
+    else if (tmpl_String_Are_Equal(tau_psitype, "newtonfilon02"))
+        tau->psinum = rssringoccs_PsiType_NewtonFilon02;
+
     /*  Newton-Raphson method, but allowing for arbitrary quartic             *
      *  perturbations to the Fresnel kernel.                                  */
     else if (tmpl_String_Are_Equal(tau_psitype, "newtonperturb"))

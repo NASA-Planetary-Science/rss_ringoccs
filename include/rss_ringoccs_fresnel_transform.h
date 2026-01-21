@@ -306,6 +306,14 @@ rssringoccs_Fresnel_Transform_Newton_Filon11(
 );
 
 extern void
+rssringoccs_Fresnel_Transform_Newton_Filon02(
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const double * TMPL_RESTRICT const w_func,
+    size_t n_pts,
+    size_t center
+);
+
+extern void
 rssringoccs_Fresnel_Transform_Elliptical_Newton(
     rssringoccs_TAUObj * TMPL_RESTRICT const tau,
     const double * TMPL_RESTRICT const w_func,

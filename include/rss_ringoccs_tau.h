@@ -73,7 +73,7 @@ typedef void (*rssringoccs_FresnelTransform)(
 );
 
 extern const rssringoccs_FresnelNewtonTransform
-rssringoccs_newton_transform_table[6];
+rssringoccs_newton_transform_table[7];
 
 extern const rssringoccs_FresnelTransform
 rssringoccs_newton_interp_transform_table[6];

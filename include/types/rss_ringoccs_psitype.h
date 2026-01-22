@@ -51,6 +51,9 @@ enum rssringoccs_PsiType {
     /*  Newton-Raphson with constant T quadratic psi Filon quadrature method. */
     rssringoccs_PsiType_NewtonFilon02,
 
+    /*  Newton-Raphson with linear T quadratic psi Filon quadrature method.   */
+    rssringoccs_PsiType_NewtonFilon12,
+
     /*  Newton-Raphson with elliptical corrections, and interpolations.       */
     rssringoccs_PsiType_EllipticNewton,
 

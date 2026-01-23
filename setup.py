@@ -83,7 +83,7 @@ srclist.append("rss_ringoccs/crssringoccs/crssringoccs.c")
 
 if shutil.which("cmake"):
     subprocess.run(["cmake", "-S", ".", "-B", "build"], check=True)
-    subprocess.run(["cmake", "--build", "build", "-j"], check=True)
+    subprocess.run(["cmake", "--build", "build", "-j", "--config", "Release"])
 
     extra_objects = [
         "./build/librssringoccs.a",

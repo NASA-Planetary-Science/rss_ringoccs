@@ -43,12 +43,57 @@ incorporated in future editions of rss_ringoccs.
 5. `numpy`
 6. `scipy`
 7. `spiceypy`
-8. `GNU Make`
+8. `CSPICE`
+9. `GNU Make` or `CMake`.
+10. `git` (to download the source code).
 
 `libtmpl` is provided as a submodule, and the Python dependencies can be
-found in the `requirements.txt` file. Note, while the `C` code does compile
-on Windows, some of the Python code assumes a unix-like operating system.
-Windows is not currently supported by `rss_ringoccs`.
+found in the `requirements.txt` file. `CPSICE` can be obtained through
+the [NAIF website]([https://naif.jpl.nasa.gov/naif/toolkit_C.html]).
+**Make sure the CSPICE library files are in your path when building.**
+
+## GNU / Linux
+
+On Debian / Ubuntu-based operating systems, you can install the needed tools
+using:
+
+```bash
+sudo apt install gcc python3 make git
+```
+
+Most GNU / Linux systems have these packages readily available.
+Use your package manager to obtain them.
+
+## FreeBSD
+
+On FreeBSD (and other BSDs) you'll need to use `gmake`
+(the Makefile uses `GNU Make` features, the default FreeBSD make will not work).
+Install the required packages with:
+
+```bash
+sudo pkg install gcc python3 gmake git
+```
+
+## macOS
+
+On `macOS`, install developer tools with:
+
+```bash
+xcode-select --install
+```
+
+## Windows
+
+Lastly, the is some experimental Windows support using `CMake` and `MSVC`
+(other compilers on Windows should work, but have not been tested).
+Visit the following links to obtain the necessary build tools:
+
+    1. [CMake](https://cmake.org/download/)
+    2. [MSVC](https://visualstudio.microsoft.com/vs/features/cplusplus/)
+    3. [Python](https://www.python.org/downloads/windows/)
+    4. [Git for Windows](https://git-scm.com/install/windows)
+
+## Obtaining rss_ringoccs
 
 To obtain `rss_ringoccs`, clone the repository:
 
@@ -56,6 +101,8 @@ To obtain `rss_ringoccs`, clone the repository:
 git clone --recursive http://github.com/NASA-Planetary-Science/rss_ringoccs.git
 cd rss_ringoccs/
 ```
+
+## Compiling (Not Windows)
 
 To build `rss_ringoccs` in a virtual environment, do the following:
 
@@ -67,6 +114,27 @@ python3 -m pip install --upgrade pip
 python3 -m pip install -r requirements.txt
 python3 -m pip install .
 ```
+
+## Compiling (Windows)
+
+For Windows the build instructions are slightly different.
+
+```bash
+py -m venv .venv
+.venv\Scripts\activate.bat
+
+py -m pip install --upgrade pip
+py -m pip install -r requirements.txt
+py -m pip install .
+```
+
+**Note:**
+There are many ways to install Python on Windows, including through
+Microsoft's app store. None of these alternative installations have been
+tested, nor will they be supported by `rss_ringoccs`. Please use the standard
+version from the official Python website.
+
+## Updating
 
 This project updates regularly, as does `libtmpl`. To rebuild, follow the
 cleaning instruction below, and then pull the latest changes with:

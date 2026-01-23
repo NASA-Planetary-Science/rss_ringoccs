@@ -84,6 +84,13 @@ rssringoccs_Tau_Select_Newton_Transform(rssringoccs_TAUObj * const tau);
 extern rssringoccs_FresnelTransform
 rssringoccs_Tau_Select_Newton_Interp_Transform(rssringoccs_TAUObj * const tau);
 
+extern void
+rssringoccs_Tau_Check_Allan_Deviation(rssringoccs_TAUObj * const tau);
+
+extern void rssringoccs_Tau_Check_Eccentricity(rssringoccs_TAUObj * const tau);
+extern void rssringoccs_Tau_Check_Periapse(rssringoccs_TAUObj * const tau);
+extern void rssringoccs_Tau_Check_Range(rssringoccs_TAUObj * const tau);
+
 /******************************************************************************
  *  Function:                                                                 *
  *      rssringoccs_Tau_Check_Azimuth_Angle                                   *

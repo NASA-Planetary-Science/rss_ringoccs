@@ -3,8 +3,8 @@
 
 #include <rss_ringoccs/include/types/rss_ringoccs_history.h>
 
-extern char *
-rssringoccs_Date_to_Rev(unsigned int year, unsigned int doy);
+extern const char *
+rssringoccs_Date_to_Rev(const unsigned int year, const unsigned int doy);
 
 extern const char *rssringoccs_Get_Version(void);
 

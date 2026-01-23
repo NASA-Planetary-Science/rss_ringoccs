@@ -17,14 +17,8 @@
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
 
-/*  NULL is defined here.                                                     */
-#include <stddef.h>
-
 /*  Booleans provided here.                                                   */
 #include <libtmpl/include/tmpl_bool.h>
-
-/*  tmpl_strdup function declared here.                                       */
-#include <libtmpl/include/tmpl_string.h>
 
 /*  Function prototype and typedefs for structs given here.                   */
 #include "../crssringoccs.h"
@@ -51,7 +45,7 @@ crssringoccs_C_Tau_To_Py_Tau(crssringoccs_PyDiffrecObj *py_tau,
                              rssringoccs_TAUObj *tau)
 {
     /*  If the C version of the object is NULL there is nothing to do.        */
-    if (tau == NULL)
+    if (!tau)
         return;
 
     /*  Do not attempt to convert if an error occurred while making tau.      */
@@ -59,16 +53,16 @@ crssringoccs_C_Tau_To_Py_Tau(crssringoccs_PyDiffrecObj *py_tau,
         return;
 
     /*  If the Python object hasn't been allocated memory, abort with error.  */
-    if (py_tau == NULL)
+    if (!py_tau)
     {
         tau->error_occurred = tmpl_True;
 
         /*  Create an error message so the user knows what went wrong.        */
-        tau->error_message = tmpl_String_Duplicate(
+        tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\tcrssringoccs_C_Tau_To_Py_Tau\n\n"
-            "\rInput py_tau is NULL. Aborting.n"
-        );
+            "\rInput py_tau is NULL.n";
+
         return;
     }
 
@@ -95,7 +89,7 @@ crssringoccs_C_Tau_To_Py_Tau(crssringoccs_PyDiffrecObj *py_tau,
     SET_VAR(rz_km_vals);
 
     /*  If forward modeling was not performed, set these as None objects.     */
-    if (tau->T_fwd == NULL)
+    if (!tau->T_fwd)
         MAKE_NONE(T_fwd);
 
     else

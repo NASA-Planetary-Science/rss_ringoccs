@@ -61,7 +61,7 @@ typedef struct rssringoccs_TauCSV_Def {
     rssringoccs_History *history;
     tmpl_Bool use_deprecated;
     tmpl_Bool error_occurred;
-    char *error_message;
+    const char *error_message;
 } rssringoccs_TauCSV;
 
 /*  Data structure that contains all of the data from all four CSV formats    *

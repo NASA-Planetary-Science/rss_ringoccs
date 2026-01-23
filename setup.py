@@ -83,22 +83,28 @@ srclist.append("rss_ringoccs/crssringoccs/crssringoccs.c")
 
 
 if shutil.which("cmake"):
-    subprocess.run(["cmake", "-S", ".", "-B", "build"], check=True)
-    subprocess.run(
-        ["cmake", "--build", "build", "-j", "--config", "Release"],
-        check = True
-    )
 
     if os.name == "nt":
+        setup_list = ["cmake", "-S", ".", "-B", "build", "-DNO_INLINE=ON"]
+
         extra_objects = [
             "./build/Release/rssringoccs.lib",
             "./build/libtmpl/Release/tmpl.lib"
         ]
+
     else:
+        setup_list = ["cmake", "-S", ".", "-B", "build"]
+
         extra_objects = [
             "./build/librssringoccs.a",
             "./build/libtmpl/libtmpl.a"
         ]
+
+    subprocess.run(setup_list, check = True)
+    subprocess.run(
+        ["cmake", "--build", "build", "-j", "--config", "Release"],
+        check = True
+    )
 
 elif shutil.which("gmake"):
     subprocess.run(["gmake", "-j", "BUILD_STATIC=1"], check=True)

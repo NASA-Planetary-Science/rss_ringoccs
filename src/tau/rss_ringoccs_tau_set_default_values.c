@@ -35,8 +35,8 @@ void rssringoccs_Tau_Set_Default_Values(rssringoccs_TAUObj* tau)
      *  For Uranus this is different. To include all possible data sets for   *
      *  all planets we set this to 1 to 400,000. Later functions will then    *
      *  reset these values to the minimum and maximum allowed in the data set.*/
-    tau->rng_req[0] = 1.0;
-    tau->rng_req[1] = 4.0E5;
+    tau->requested_range[0] = 1.0;
+    tau->requested_range[1] = 4.0E5;
 
     /*  Default epsilon precision for the Newton-Raphson method of finding    *
      *  the stationary azimuthal angle for the Fresnel kernel. Setting this   *

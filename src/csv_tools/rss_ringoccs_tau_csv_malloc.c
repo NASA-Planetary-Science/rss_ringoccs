@@ -26,9 +26,8 @@
 /*  malloc is found here.                                                     */
 #include <stdlib.h>
 
-/*  libtmpl provided Booleans, string duplicate, and line count.              */
+/*  libtmpl provided Booleans and line count.                                 */
 #include <libtmpl/include/tmpl_bool.h>
-#include <libtmpl/include/tmpl_string.h>
 #include <libtmpl/include/tmpl_utility.h>
 
 /*  rssringoccs_TauCSV typedef here, and function prototype given.            */
@@ -46,12 +45,10 @@
     if (!tau->var)                                                             \
     {                                                                          \
         tau->error_occurred = tmpl_True;                                       \
-        tau->error_message = tmpl_String_Duplicate(                            \
-            "Error Encountered: rss_ringoccs\n"                                \
+        tau->error_message =                                                   \
+            "\nError Encountered: rss_ringoccs\n"                              \
             "\trssringoccs_TauCSV_Malloc\n\n"                                  \
-            "Malloc returned NULL. Failed to allocate memory for " #var ".\n"  \
-            "Aborting computation and returning.\n"                            \
-        );                                                                     \
+            "malloc returned NULL. Failed to allocate memory for " #var ".\n"; \
                                                                                \
         /*  Free the variables that have been malloc'd so far.               */\
         rssringoccs_TauCSV_Destroy_Members(tau);                               \
@@ -74,11 +71,10 @@ void rssringoccs_TauCSV_Malloc(rssringoccs_TauCSV *tau, FILE *fp)
     if (!fp)
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_String_Duplicate(
+        tau->error_message =
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_TauCSV_Malloc\n\n"
-            "Input file is NULL. Aborting.\n"
-        );
+            "Input file is NULL.\n";
 
         return;
     }
@@ -91,11 +87,10 @@ void rssringoccs_TauCSV_Malloc(rssringoccs_TauCSV *tau, FILE *fp)
     if (tau->n_elements == (size_t)0)
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_String_Duplicate(
+        tau->error_message =
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_TauCSV_Malloc\n\n"
-            "n_elements is zero, nothing to malloc. Aborting.\n"
-        );
+            "n_elements is zero, nothing to malloc.\n";
 
         return;
     }

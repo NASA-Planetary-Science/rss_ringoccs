@@ -1,11 +1,10 @@
-#include <stdlib.h>
-#include <math.h>
 #include <libtmpl/include/tmpl_math.h>
 #include <libtmpl/include/tmpl_string.h>
 #include <libtmpl/include/tmpl_fft.h>
 #include <libtmpl/include/tmpl_cyl_fresnel_optics.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
+#include <stdlib.h>
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -76,8 +75,8 @@ void rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau)
     factor = 0.5*tau->dx_km;
 
     /*  Allocate memory for the Fresnel kernel and other variables.           */
-    ker     = malloc(sizeof(*ker)     * data_size);
-    T_in    = malloc(sizeof(*T_in)    * data_size);
+    ker = malloc(sizeof(*ker) * data_size);
+    T_in = malloc(sizeof(*T_in) * data_size);
 
     /*  We can reuse the memory allocated for the in variables for the out    *
      *  variables. This saves four calls to malloc and redundant memory use.  */
@@ -95,7 +94,7 @@ void rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau)
         window_func_x = tau->rho_km_vals[center] -
                         tau->rho_km_vals[current_point];
 
-        if (fabs(window_func_x) <= w_thresh)
+        if (tmpl_Double_Abs(window_func_x) <= w_thresh)
         {
             phi = tmpl_Double_Ideal_Stationary_Cyl_Fresnel_Phi_Newton_Deg(
                 tau->k_vals[center],

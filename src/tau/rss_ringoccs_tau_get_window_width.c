@@ -26,13 +26,13 @@ void rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau)
     if (tau->error_occurred)
         return;
 
-    if (tau->rng_list[0] <= tau->rho_km_vals[0])
+    if (tau->range[0] <= tau->rho_km_vals[0])
     {
-        tau->rng_list[0] = tau->rho_km_vals[0];
+        tau->range[0] = tau->rho_km_vals[0];
         tau->start = 0;
     }
 
-    else if (tau->rng_list[0] > tau->rho_km_vals[tau->arr_size-1])
+    else if (tau->range[0] > tau->rho_km_vals[tau->arr_size-1])
     {
         tau->error_occurred = tmpl_True;
         tau->error_message =
@@ -47,20 +47,20 @@ void rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau)
     else
     {
         n = 0;
-        while (tau->rho_km_vals[n] < tau->rng_list[0])
+        while (tau->rho_km_vals[n] < tau->range[0])
             n++;
 
-        tau->rng_list[0] = tau->rho_km_vals[n];
+        tau->range[0] = tau->rho_km_vals[n];
         tau->start = n;
     }
 
-    if (tau->rng_list[1] >= tau->rho_km_vals[tau->arr_size-1])
+    if (tau->range[1] >= tau->rho_km_vals[tau->arr_size-1])
     {
-        tau->rng_list[1] = tau->rho_km_vals[tau->arr_size-1];
+        tau->range[1] = tau->rho_km_vals[tau->arr_size-1];
         tau->n_used = tau->arr_size - tau->start;
     }
 
-    else if (tau->rng_list[1] < tau->rho_km_vals[0])
+    else if (tau->range[1] < tau->rho_km_vals[0])
     {
         tau->error_occurred = tmpl_True;
         tau->error_message =
@@ -75,10 +75,10 @@ void rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau)
     else
     {
         n = tau->start;
-        while (tau->rho_km_vals[n] <= tau->rng_list[1])
+        while (tau->rho_km_vals[n] <= tau->range[1])
             n++;
 
-        tau->rng_list[1] = tau->rho_km_vals[n];
+        tau->range[1] = tau->rho_km_vals[n];
         tau->n_used = n - tau->start;
     }
 

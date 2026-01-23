@@ -106,7 +106,7 @@ void rssringoccs_Tau_Set_Default_Values(rssringoccs_TAUObj* tau)
     /*  These values are determined by the DLP data. Set them to their zero   *
      *  values just to have them initialized.                                 */
     tau->dx_km = 0.0;
-    tau->rng_list[0] = 0.0;
-    tau->rng_list[1] = 0.0;
+    tau->range[0] = 0.0;
+    tau->range[1] = 0.0;
 }
 /*  End of rssringoccs_Tau_Set_Default_Values.                                */

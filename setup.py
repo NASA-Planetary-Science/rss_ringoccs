@@ -81,10 +81,6 @@ add_directory("get_uranus_data")
 add_directory("py_csv_obj")
 srclist.append("rss_ringoccs/crssringoccs/crssringoccs.c")
 
-if os.name == "nt":
-    FILE_EXTENSION = ".lib"
-else:
-    FILE_EXTENSION = ".a"
 
 if shutil.which("cmake"):
     subprocess.run(["cmake", "-S", ".", "-B", "build"], check=True)
@@ -93,25 +89,31 @@ if shutil.which("cmake"):
         check = True
     )
 
-    extra_objects = [
-        "./build/librssringoccs" + FILE_EXTENSION,
-        "./build/libtmpl/libtmpl" + FILE_EXTENSION
-    ]
+    if os.name == "nt":
+        extra_objects = [
+            "./build/Release/rssringoccs.lib",
+            "./build/libtmpl/Release/tmpl.lib"
+        ]
+    else:
+        extra_objects = [
+            "./build/librssringoccs.a",
+            "./build/libtmpl/libtmpl.a"
+        ]
 
 elif shutil.which("gmake"):
     subprocess.run(["gmake", "-j", "BUILD_STATIC=1"], check=True)
 
     extra_objects = [
-        "./librssringoccs" + FILE_EXTENSION,
-        "./libtmpl/libtmpl" + FILE_EXTENSION
+        "./librssringoccs.a",
+        "./libtmpl/libtmpl.a"
     ]
 
 elif shutil.which("make"):
     subprocess.run(["make", "-j", "BUILD_STATIC=1"], check=True)
 
     extra_objects = [
-        "./librssringoccs" + FILE_EXTENSION,
-        "./libtmpl/libtmpl" + FILE_EXTENSION
+        "./librssringoccs.a",
+        "./libtmpl/libtmpl.a"
     ]
 
 else:

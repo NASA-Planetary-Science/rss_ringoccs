@@ -52,7 +52,7 @@ found in the `requirements.txt` file. `CPSICE` can be obtained through
 the [NAIF website]([https://naif.jpl.nasa.gov/naif/toolkit_C.html]).
 **Make sure the CSPICE library files are in your path when building.**
 
-## GNU / Linux
+### GNU / Linux
 
 On Debian / Ubuntu-based operating systems, you can install the needed tools
 using:
@@ -64,7 +64,7 @@ sudo apt install gcc python3 make git
 Most GNU / Linux systems have these packages readily available.
 Use your package manager to obtain them.
 
-## FreeBSD
+### FreeBSD
 
 On FreeBSD (and other BSDs) you'll need to use `gmake`
 (the Makefile uses `GNU Make` features, the default FreeBSD make will not work).
@@ -74,7 +74,7 @@ Install the required packages with:
 sudo pkg install gcc python3 gmake git
 ```
 
-## macOS
+### macOS
 
 On `macOS`, install developer tools with:
 
@@ -82,7 +82,7 @@ On `macOS`, install developer tools with:
 xcode-select --install
 ```
 
-## Windows
+### Windows
 
 Lastly, the is some experimental Windows support using `CMake` and `MSVC`
 (other compilers on Windows should work, but have not been tested).
@@ -93,7 +93,7 @@ Visit the following links to obtain the necessary build tools:
     3. [Python](https://www.python.org/downloads/windows/)
     4. [Git for Windows](https://git-scm.com/install/windows)
 
-## Obtaining rss_ringoccs
+### Obtaining rss_ringoccs
 
 To obtain `rss_ringoccs`, clone the repository:
 
@@ -102,7 +102,7 @@ git clone --recursive http://github.com/NASA-Planetary-Science/rss_ringoccs.git
 cd rss_ringoccs/
 ```
 
-## Compiling (Not Windows)
+### Compiling (Not Windows)
 
 To build `rss_ringoccs` in a virtual environment, do the following:
 
@@ -115,7 +115,7 @@ python3 -m pip install -r requirements.txt
 python3 -m pip install .
 ```
 
-## Compiling (Windows)
+### Compiling (Windows)
 
 For Windows the build instructions are slightly different.
 

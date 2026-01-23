@@ -41,6 +41,7 @@ except ImportError:
 import os
 import platform
 import subprocess
+import shutil
 
 # Numpy is needed for the get_include function which tells us where various
 # header files, like numpy/arrayobject.h, live.
@@ -80,7 +81,33 @@ add_directory("get_uranus_data")
 add_directory("py_csv_obj")
 srclist.append("rss_ringoccs/crssringoccs/crssringoccs.c")
 
-subprocess.call(["make", "-j", "BUILD_STATIC=1"])
+if shutil.which("cmake"):
+    subprocess.run(["cmake", "-S", ".", "-B", "build"], check=True)
+    subprocess.run(["cmake", "--build", "build", "-j"], check=True)
+
+    extra_objects = [
+        "./build/librssringoccs.a",
+        "./build/libtmpl/libtmpl.a"
+    ]
+
+elif shutil.which("gmake"):
+    subprocess.run(["gmake", f"-j", "BUILD_STATIC=1"], check=True)
+
+    extra_objects = [
+        "./librssringoccs.a",
+        "./libtmpl/libtmpl.a"
+    ]
+
+elif shutil.which("make"):
+    subprocess.run(["make", f"-j", "BUILD_STATIC=1"], check=True)
+
+    extra_objects = [
+        "./librssringoccs.a",
+        "./libtmpl/libtmpl.a"
+    ]
+
+else:
+    raise FileNotFoundError("Neither CMake nor GNU Make found. Install one.")
 
 setup(
     name = "rss_ringoccs",
@@ -96,10 +123,7 @@ setup(
                 "./",
                 "../"
             ],
-            extra_objects = [
-                "./librssringoccs.a",
-                "./libtmpl/libtmpl.a"
-            ]
+            extra_objects = extra_objects
         )
     ],
     packages = [

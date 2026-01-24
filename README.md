@@ -37,14 +37,14 @@ incorporated in future editions of rss_ringoccs.
 `rss_ringoccs` has a few dependencies:
 
 1. A `C` compiler (`gcc`, `clang`, `tcc`, `pcc`, and `MSVC` all work fine).
-2. `python3` (we have tested versions `3.7` to `3.12`).
+2. `python3` (we have tested versions `3.7` to `3.14`).
 3. `libtmpl`
 4. `setuptools`
 5. `numpy`
 6. `scipy`
 7. `spiceypy`
 8. `CSPICE`
-9. `GNU Make` or `CMake`.
+9. `GNU Make` (Unix-like) or `CMake` (Windows).
 10. `git` (to download the source code).
 
 `libtmpl` is provided as a submodule, and the Python dependencies can be
@@ -52,7 +52,9 @@ found in the `requirements.txt` file. `CPSICE` can be obtained through
 the [NAIF website](https://naif.jpl.nasa.gov/naif/toolkit_C.html).
 **Make sure the CSPICE library files are in your path when building.**
 
-### GNU / Linux
+### Obtaining Dependencies
+
+#### GNU / Linux
 
 On Debian / Ubuntu-based operating systems, you can install the needed tools
 using:
@@ -64,7 +66,7 @@ sudo apt install gcc python3 make git
 Most GNU / Linux systems have these packages readily available.
 Use your package manager to obtain them.
 
-### FreeBSD
+#### FreeBSD
 
 On FreeBSD (and other BSDs) you'll need to use `gmake`
 (the Makefile uses `GNU Make` features, the default FreeBSD make will not work).
@@ -74,7 +76,7 @@ Install the required packages with:
 sudo pkg install gcc python3 gmake git
 ```
 
-### macOS
+#### macOS
 
 On `macOS`, install developer tools with:
 
@@ -82,9 +84,9 @@ On `macOS`, install developer tools with:
 xcode-select --install
 ```
 
-### Windows
+#### Windows
 
-Lastly, the is some experimental Windows support using `CMake` and `MSVC`
+Lastly, there is some experimental Windows support using `CMake` and `MSVC`
 (other compilers on Windows should work, but have not been tested).
 Visit the following links to obtain the necessary build tools:
 

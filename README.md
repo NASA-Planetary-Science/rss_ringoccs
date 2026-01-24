@@ -36,7 +36,7 @@ incorporated in future editions of rss_ringoccs.
 
 `rss_ringoccs` has a few dependencies:
 
-1. A `C` compiler (`gcc`, `clang`, `tcc`, `pcc`, and `MSVC` all work fine).
+1. A `C` compiler (`gcc`, `clang`, `tcc`, `pcc`, `icx`, and `MSVC` work fine).
 2. `python3` (we have tested versions `3.7` to `3.14`).
 3. `libtmpl`
 4. `setuptools`
@@ -95,6 +95,12 @@ Visit the following links to obtain the necessary build tools:
 3. [Python](https://www.python.org/downloads/windows/)
 4. [Git for Windows](https://git-scm.com/install/windows)
 
+**Note:**
+There are many ways to install Python on Windows, including through
+Microsoft's app store. None of these alternative installations have been
+tested, nor will they be supported by `rss_ringoccs`. Please use the standard
+version from the official Python website.
+
 ### Obtaining rss_ringoccs
 
 To obtain `rss_ringoccs`, clone the repository:
@@ -130,12 +136,6 @@ py -m pip install -r requirements.txt
 py -m pip install .
 ```
 
-**Note:**
-There are many ways to install Python on Windows, including through
-Microsoft's app store. None of these alternative installations have been
-tested, nor will they be supported by `rss_ringoccs`. Please use the standard
-version from the official Python website.
-
 ## Updating
 
 This project updates regularly, as does `libtmpl`. To rebuild, follow the
@@ -148,6 +148,8 @@ git pull --recurse-submodules
 You may then re-build the latest changes using the previous commands.
 
 ## Cleaning / Uninstalling
+
+### Not Windows
 
 Uninstalling `rss_ringoccs` can be done using pip:
 
@@ -179,6 +181,16 @@ remove this via:
 
 ```bash
 rm -rf .venv
+```
+
+### Windows
+
+Type the following in the command prompt.
+
+```
+rmdir /s build
+rmdir /s rss_ringoccs.egg-info
+rmdir /s .venv
 ```
 
 ## Release notes

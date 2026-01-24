@@ -49,7 +49,7 @@ incorporated in future editions of rss_ringoccs.
 
 `libtmpl` is provided as a submodule, and the Python dependencies can be
 found in the `requirements.txt` file. `CPSICE` can be obtained through
-the [NAIF website]([https://naif.jpl.nasa.gov/naif/toolkit_C.html]).
+the [NAIF website](https://naif.jpl.nasa.gov/naif/toolkit_C.html).
 **Make sure the CSPICE library files are in your path when building.**
 
 ### GNU / Linux
@@ -88,10 +88,10 @@ Lastly, the is some experimental Windows support using `CMake` and `MSVC`
 (other compilers on Windows should work, but have not been tested).
 Visit the following links to obtain the necessary build tools:
 
-    1. [CMake](https://cmake.org/download/)
-    2. [MSVC](https://visualstudio.microsoft.com/vs/features/cplusplus/)
-    3. [Python](https://www.python.org/downloads/windows/)
-    4. [Git for Windows](https://git-scm.com/install/windows)
+1. [CMake](https://cmake.org/download/)
+2. [MSVC](https://visualstudio.microsoft.com/vs/features/cplusplus/)
+3. [Python](https://www.python.org/downloads/windows/)
+4. [Git for Windows](https://git-scm.com/install/windows)
 
 ### Obtaining rss_ringoccs
 

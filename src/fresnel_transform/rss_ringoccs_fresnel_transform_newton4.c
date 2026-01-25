@@ -1,14 +1,31 @@
 #include <libtmpl/include/tmpl_config.h>
 #include <libtmpl/include/tmpl_complex.h>
 #include <libtmpl/include/constants/tmpl_math_constants.h>
-#include <libtmpl/include/tmpl_cyl_fresnel_optics.h>
-#include <libtmpl/include/tmpl_vec2.h>
-#include <libtmpl/include/tmpl_vec3.h>
+
+/*  Numerical integration tools found here.                                   */
+#include <libtmpl/include/tmpl_integration.h>
+
 #include <libtmpl/include/compat/tmpl_cast.h>
 #include <libtmpl/include/compat/tmpl_free.h>
 #include <rss_ringoccs/include/rss_ringoccs_tau.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 #include <stddef.h>
+
+static void rssringoccs_deg4_interp(double * const out, const double * const in)
+{
+    double mean[2], diff[2];
+
+    mean[0] = (in[1] + in[3]) * 0.5;
+    mean[1] = (in[0] + in[4]) * 0.5;
+    diff[0] = in[3] - in[1];
+    diff[1] = in[4] - in[0];
+
+    out[0] = in[2];
+    out[1] = (8.0 * diff[0] - diff[1]) * (1.0 / 3.0);
+    out[2] = (16.0 * mean[0] - mean[1]) * (4.0 / 3.0);
+    out[3] = (diff[1] - 2.0 * diff[0]) * (16.0 / 3.0);
+    out[4] = (mean[1] - 4.0 * mean[0]) * (64.0 / 3.0);
+}
 
 void
 rssringoccs_Fresnel_Transform_Newton4(
@@ -20,95 +37,107 @@ rssringoccs_Fresnel_Transform_Newton4(
 )
 {
     size_t n;
-    size_t ind[4];
 
-    double scale_factor;
-    tmpl_ComplexDouble w_exp_minus_psi_left, w_exp_minus_psi_right;
-    tmpl_ComplexDouble T_left, T_right, integrand;
-    tmpl_CylFresnelGeometryDouble geo;
+    double x, xsq;
+    tmpl_ComplexDouble l_current, l_next;
+    tmpl_ComplexDouble r_current, r_next;
+    tmpl_ComplexDouble integrand, in_center;
 
-    double coeffs[4];
-    double psi[4], diff[2], mean[2];
+    double psi_coeffs[5], psi[5], w_coeffs[5], weight[5];
+    double psi_odd, psi_even;
+    double psi_l_current, psi_l_next;
+    double psi_r_current, psi_r_next;
+    double w_odd, w_even;
+    double w_l_current, w_l_next;
+    double w_r_current, w_r_next;
 
     const size_t shift = nw_pts >> 1;
     const size_t l_ind = center - nw_pts;
     const size_t r_ind = center + nw_pts;
+    size_t offset = center - 2 * shift;
 
     const double width_actual = 4.0 * tau->dx_km * TMPL_CAST(shift, double);
     const double rcpr_width_actual = 1.0 / width_actual;
 
-    tmpl_ComplexDouble norm = tmpl_CDouble_One;
-    tau->T_out[center] = tau->T_in[center];
+    tau->T_out[center] = tmpl_CDouble_Zero;
 
-    ind[0] = center - 2 * shift;
-    ind[1] = center - shift;
-    ind[2] = center + shift;
-    ind[3] = center + 2 * shift;
-
-    for (n = 0; n < 4; ++n)
+    for (n = 0; n < 5; ++n)
     {
-        geo.position = tmpl_3DDouble_Rect(
-            tau->rx_km_vals[ind[n]],
-            tau->ry_km_vals[ind[n]],
-            tau->rz_km_vals[ind[n]]
+        rssringoccs_Fresnel_Phase_And_Weight(
+            tau, center, offset, &weight[n], &psi[n]
         );
 
-        geo.intercept = tmpl_2DDouble_Polard(
-            tau->rho_km_vals[ind[n]], tau->phi_deg_vals[ind[n]]
-        );
-
-        geo.dummy = tmpl_2DDouble_Polard(
-            tau->rho_km_vals[center], tau->phi_deg_vals[ind[n]]
-        );
-
-        psi[n] = tmpl_Double_Stationary_Cyl_Fresnel_Psi(
-            tau->k_vals[center], &geo, tau->EPS, tau->toler
-        );
+        offset += shift;
     }
 
-    mean[0] = (psi[1] + psi[2]) * 0.5;
-    mean[1] = (psi[0] + psi[3]) * 0.5;
-    diff[0] = psi[2] - psi[1];
-    diff[1] = psi[3] - psi[0];
+    rssringoccs_deg4_interp(psi_coeffs, psi);
+    rssringoccs_deg4_interp(w_coeffs, weight);
 
-    coeffs[0] = (8.0 * diff[0] - diff[1]) * (1.0 / 3.0);
-    coeffs[1] = (16.0 * mean[0] - mean[1]) * (4.0 / 3.0);
-    coeffs[2] = (diff[1] - 2.0 * diff[0]) * (16.0 / 3.0);
-    coeffs[3] = (mean[1] - 4.0 * mean[0]) * (64.0 / 3.0);
+    in_center = tmpl_CDouble_Multiply_Real(weight[2], tau->T_in[center]);
 
-    for (n = 0; n < nw_pts; ++n)
+    x = x_arr[0] * rcpr_width_actual;
+    xsq = x * x;
+
+    psi_odd = x * (psi_coeffs[1] + xsq * psi_coeffs[3]);
+    psi_even = psi_coeffs[0] + xsq * (psi_coeffs[2] + xsq * psi_coeffs[4]);
+    psi_l_current = psi_even + psi_odd;
+    psi_r_current = psi_even - psi_odd;
+
+    w_odd = x * (w_coeffs[1] + xsq * w_coeffs[3]);
+    w_even = w_coeffs[0] + xsq * (w_coeffs[2] + xsq * w_coeffs[4]);
+    w_l_current = (w_even + w_odd) * w_func[0];
+    w_r_current = (w_even - w_odd) * w_func[0];
+
+    l_current = tmpl_CDouble_Multiply_Real(w_l_current, tau->T_in[l_ind]);
+    r_current = tmpl_CDouble_Multiply_Real(w_r_current, tau->T_in[r_ind]);
+
+    for (n = 1; n < nw_pts; ++n)
     {
-        const double x = x_arr[n] * rcpr_width_actual;
-        const double xsq = x * x;
+        x = x_arr[n] * rcpr_width_actual;
+        xsq = x * x;
 
-        const double psi_odd = x * (coeffs[0] + xsq * coeffs[2]);
-        const double psi_even = xsq * (coeffs[1] + xsq * coeffs[3]);
-        const double psi_left = psi_even + psi_odd;
-        const double psi_right = psi_even - psi_odd;
+        psi_odd = x * (psi_coeffs[1] + xsq * psi_coeffs[3]);
+        psi_even = psi_coeffs[0] + xsq * (psi_coeffs[2] + xsq * psi_coeffs[4]);
+        psi_l_next = psi_even + psi_odd;
+        psi_r_next = psi_even - psi_odd;
 
-        w_exp_minus_psi_left = tmpl_CDouble_Polar(w_func[n], -psi_left);
-        w_exp_minus_psi_right = tmpl_CDouble_Polar(w_func[n], -psi_right);
+        w_odd = x * (w_coeffs[1] + xsq * w_coeffs[3]);
+        w_even = w_coeffs[0] + xsq * (w_coeffs[2] + xsq * w_coeffs[4]);
+        w_l_next = (w_even + w_odd) * w_func[n];
+        w_r_next = (w_even - w_odd) * w_func[n];
 
-        T_left = tau->T_in[l_ind + n];
-        T_right = tau->T_in[r_ind - n];
+        l_next = tmpl_CDouble_Multiply_Real(w_l_next, tau->T_in[l_ind + n]);
+        r_next = tmpl_CDouble_Multiply_Real(w_r_next, tau->T_in[r_ind - n]);
 
-        if (tau->use_norm)
-        {
-            tmpl_CDouble_AddTo(&norm, &w_exp_minus_psi_left);
-            tmpl_CDouble_AddTo(&norm, &w_exp_minus_psi_right);
-        }
+        integrand = tmpl_CDouble_Filon11_Integrand(
+            l_current, l_next, psi_l_current, psi_l_next, tau->dx_km
+        );
 
-        integrand = tmpl_CDouble_Multiply(w_exp_minus_psi_left, T_left);
         tmpl_CDouble_AddTo(&tau->T_out[center], &integrand);
 
-        integrand = tmpl_CDouble_Multiply(w_exp_minus_psi_right, T_right);
+        integrand = tmpl_CDouble_Filon11_Integrand(
+            r_next, r_current, psi_r_next, psi_r_current, tau->dx_km
+        );
+
         tmpl_CDouble_AddTo(&tau->T_out[center], &integrand);
+
+        l_current = l_next;
+        r_current = r_next;
+        psi_l_current = psi_l_next;
+        psi_r_current = psi_r_next;
+        w_l_current = w_l_next;
+        w_r_current = w_r_next;
     }
 
-    if (tau->use_norm)
-    {
-        scale_factor = tmpl_Double_Rcpr_Sqrt_Two / tmpl_CDouble_Abs(norm);
-        integrand = tmpl_CDouble_Rect(scale_factor, scale_factor);
-        tmpl_CDouble_MultiplyBy(&tau->T_out[center], &integrand);
-    }
+    integrand = tmpl_CDouble_Filon12_Integrand(
+        l_current,
+        in_center,
+        r_current,
+        psi_l_current,
+        psi[2],
+        psi_r_current,
+        tau->dx_km
+    );
+
+    tmpl_CDouble_AddTo(&tau->T_out[center], &integrand);
 }

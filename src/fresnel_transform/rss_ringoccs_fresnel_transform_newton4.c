@@ -22,9 +22,9 @@ static void rssringoccs_deg4_interp(double * const out, const double * const in)
 
     out[0] = in[2];
     out[1] = (8.0 * diff[0] - diff[1]) * (1.0 / 3.0);
-    out[2] = (16.0 * mean[0] - mean[1]) * (4.0 / 3.0);
+    out[2] = 4.0 * (16.0 * mean[0] - mean[1]) / 3.0 - 20.0 * in[2];
     out[3] = (diff[1] - 2.0 * diff[0]) * (16.0 / 3.0);
-    out[4] = (mean[1] - 4.0 * mean[0]) * (64.0 / 3.0);
+    out[4] = 64.0 * (in[2] + (mean[1] - 4.0 * mean[0]) / 3.0);
 }
 
 void

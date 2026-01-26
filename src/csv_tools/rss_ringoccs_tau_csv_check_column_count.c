@@ -50,11 +50,10 @@ void rssringoccs_TauCSV_Check_Column_Count(rssringoccs_TauCSV *tau, FILE *fp)
     if (!fp)
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_String_Duplicate(
+        tau->error_message =
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_TauCSV_Check_Column_Count\n\n"
-            "Input file is NULL. Aborting.\n"
-        );
+            "Input file is NULL.\n";
 
         return;
     }
@@ -66,24 +65,20 @@ void rssringoccs_TauCSV_Check_Column_Count(rssringoccs_TauCSV *tau, FILE *fp)
     if ((column_count != 12) && (tau->use_deprecated))
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_String_Duplicate(
+        tau->error_message =
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_TauCSV_Check_Column_Count\n\n"
-            "use_deprecated is set to true but the input CSV does not have\n"
-            "12 columns. Aborting computation.\n"
-        );
+            "use_deprecated is true but input CSV does not have 12 columns.\n";
     }
 
     /*  And if use_deprecated is false, we need 13 column. Check this.        */
     else if ((column_count != 13) && (!tau->use_deprecated))
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_String_Duplicate(
+        tau->error_message =
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_TauCSV_Check_Column_Count\n\n"
-            "use_deprecated is set to false but the input CSV does not have\n"
-            "13 columns. Aborting computation.\n"
-        );
+            "use_deprecated is false but input CSV does not have 13 columns.\n";
     }
 }
 /*  End of rssringoccs_TauCSV_Check_Column_Count.                             */

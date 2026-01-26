@@ -1,11 +1,13 @@
-#include <stdlib.h>
-#include <math.h>
+#include <libtmpl/include/compat/tmpl_cast.h>
+#include <libtmpl/include/compat/tmpl_free.h>
+#include <libtmpl/include/compat/tmpl_malloc.h>
 #include <libtmpl/include/tmpl_math.h>
 #include <libtmpl/include/tmpl_string.h>
 #include <libtmpl/include/tmpl_fft.h>
 #include <libtmpl/include/tmpl_cyl_fresnel_optics.h>
 #include <rss_ringoccs/include/rss_ringoccs_fresnel_transform.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
+#include <stdlib.h>
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -37,18 +39,14 @@
 void rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau)
 {
     /*  Variables for indexing. nw_pts is the number of points in the window. */
-    size_t i, nw_pts, center, data_size, shift, current_point, i_shift;
+    size_t i, nw_pts, center, data_size, shift;
 
     /*  Some variables needed for reconstruction.                             */
-    double w_init, psi, phi, window_func_x, factor, rcpr_F;
-    double w_thresh, arg_norm;
+    double w_init, w_thresh;
     tmpl_ComplexDouble *ker;
-    tmpl_ComplexDouble *fft_ker;
     tmpl_ComplexDouble *fft_in;
     tmpl_ComplexDouble *fft_out;
-    tmpl_ComplexDouble *T_in;
     tmpl_ComplexDouble *T_out;
-    tmpl_ComplexDouble arg;
 
     /*  Check that the pointers to the data are not NULL.                     */
     rssringoccs_Tau_Check_Core_Data(tau);
@@ -60,96 +58,62 @@ void rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau)
         return;
 
     /*  Variable for the center of the data set.                              */
-    center = tau->start + tau->n_used/2;
+    center = tau->start + tau->n_used / 2;
 
     /*  Compute some more variables.                                          */
     w_init = tau->w_km_vals[center];
-    nw_pts = (size_t)(w_init / (tau->dx_km * 2.0));
+    nw_pts = (TMPL_CAST(w_init / tau->dx_km, size_t) << 1) + 1;
 
     /*  Number of points in the data set, the start/end point and array size. */
-    data_size = tau->n_used + 2*nw_pts + 1;
+    data_size = tau->n_used + 2 * nw_pts + 1;
 
     /* Variables for shifting and keeping track of indexing.                  */
     shift = data_size / 2;
 
-    /*  Scale factor for the FFT.                                             */
-    factor = 0.5*tau->dx_km;
-
     /*  Allocate memory for the Fresnel kernel and other variables.           */
-    ker     = malloc(sizeof(*ker)     * data_size);
-    T_in    = malloc(sizeof(*T_in)    * data_size);
+    ker = malloc(sizeof(*ker) * data_size);
+    fft_in = malloc(sizeof(*fft_in) * data_size);
 
     /*  We can reuse the memory allocated for the in variables for the out    *
-     *  variables. This saves four calls to malloc and redundant memory use.  */
-    fft_in = T_in;
-    fft_ker = ker;
-    fft_out = fft_in;
-    T_out = T_in;
+     *  variables. This saves us calls to malloc and wasteful memory use.     */
+    fft_out = ker;
+    T_out = fft_in;
 
     w_thresh = 0.5*tau->w_km_vals[center];
 
     /*  Compute the windowing function and Psi.                               */
-    for (i=0; i < data_size; ++i)
+    for (i = 0; i < data_size; ++i)
     {
-        current_point = tau->start + i - nw_pts;
-        window_func_x = tau->rho_km_vals[center] -
-                        tau->rho_km_vals[current_point];
+        const size_t offset = tau->start + i - nw_pts;
+        const double x = tau->rho_km_vals[offset] - tau->rho_km_vals[center];
 
-        if (fabs(window_func_x) <= w_thresh)
+        if (tmpl_Double_Abs(x) <= w_thresh)
         {
-            phi = tmpl_Double_Ideal_Stationary_Cyl_Fresnel_Phi_Newton_Deg(
-                tau->k_vals[center],
-                tau->rho_km_vals[center],
-                tau->rho_km_vals[current_point],
-                tau->phi_deg_vals[current_point],
-                tau->phi_deg_vals[current_point],
-                tau->B_deg_vals[center],
-                tau->D_km_vals[center],
-                tau->EPS,
-                tau->toler
-            );
+            const double taper = tau->window_func(x, tau->w_km_vals[center]);
 
-            psi = -tmpl_Double_Ideal_Cyl_Fresnel_Psi_Deg(
-                tau->k_vals[center],
-                tau->rho_km_vals[center],
-                tau->rho_km_vals[current_point],
-                phi,
-                tau->phi_deg_vals[current_point],
-                tau->B_deg_vals[center],
-                tau->D_km_vals[center]
-            );
-
-            /*  If forward tranform is set, negate the Fresnel kernel.        */
-            if (tau->use_fwd)
-                psi *= -1.0;
-
-            arg_norm = tau->window_func(window_func_x, tau->w_km_vals[center]);
-            ker[i] = tmpl_CDouble_Polar(arg_norm, psi);
+            ker[i] = rssringoccs_Fresnel_Kernel(tau, center, offset);
+            tmpl_CDouble_MultiplyBy_Real(&ker[i], taper * tau->dx_km);
         }
+
         else
             ker[i] = tmpl_CDouble_Zero;
-
-
-        T_in[i] = tau->T_in[current_point];
     }
 
-    tmpl_CDouble_FFT(ker, fft_ker, data_size);
-    tmpl_CDouble_FFT(T_in, fft_in, data_size);
+    tmpl_CDouble_FFT(ker, fft_out, data_size);
+    tmpl_CDouble_FFT(tau->T_in + tau->start - nw_pts, fft_in, data_size);
 
     for (i = 0; i < data_size; ++i)
-        fft_out[i] = tmpl_CDouble_Multiply(fft_ker[i], fft_in[i]);
+        tmpl_CDouble_MultiplyBy(&fft_out[i], &fft_in[i]);
 
     tmpl_CDouble_IFFT(fft_out, T_out, data_size);
 
     for(i = 0; i < tau->n_used; ++i)
     {
-        i_shift = (nw_pts + i + shift) % (data_size);
-        rcpr_F = 1.0/tau->F_km_vals[tau->start + i];
-        arg = tmpl_CDouble_Rect(factor*rcpr_F, factor*rcpr_F);
-        tau->T_out[tau->start + i] = tmpl_CDouble_Multiply(arg, T_out[i_shift]);
+        const size_t i_shift = (nw_pts + i + shift) % (data_size);
+        tau->T_out[tau->start + i] = T_out[i_shift];
     }
 
     /*  Free variables allocated by malloc.                                   */
     free(ker);
-    free(T_in);
+    free(fft_in);
 }

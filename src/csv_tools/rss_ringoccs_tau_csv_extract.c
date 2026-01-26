@@ -67,12 +67,12 @@ rssringoccs_TauCSV_Extract(const char *filename, tmpl_Bool use_deprecated)
     if (!fp)
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_strdup(
+        tau->error_message =
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_Get_Tau\n\n"
             "fopen returned NULL. Failed to open file for reading.\n"
-            "It is likely the filename is incorrect or does not exist.\n"
-        );
+            "It is likely the filename is incorrect or does not exist.\n";
+
         return tau;
     }
 

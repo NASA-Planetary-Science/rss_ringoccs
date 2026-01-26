@@ -45,16 +45,16 @@ crssringoccs_Extract_Data(rssringoccs_DLPObj *dlp,
     size_t len;
     char buffer[512];
 
-    if (dlp == NULL)
+    if (!dlp)
         return NULL;
 
     if (dlp->error_occurred)
         return NULL;
 
-    if (py_dlp == NULL)
+    if (!py_dlp)
         return NULL;
 
-    if (PyArray_API == NULL)
+    if (!PyArray_API)
     {
         if (_import_array() < 0)
         {
@@ -81,8 +81,7 @@ crssringoccs_Extract_Data(rssringoccs_DLPObj *dlp,
         return NULL;
     }
 
-    else
-        tmp = PyObject_GetAttrString(py_dlp, var_name);
+    tmp = PyObject_GetAttrString(py_dlp, var_name);
 
     if (!PyArray_Check(tmp))
     {
@@ -98,8 +97,8 @@ crssringoccs_Extract_Data(rssringoccs_DLPObj *dlp,
         dlp->error_message = tmpl_String_Duplicate(buffer);
         return NULL;
     }
-    else
-        arr = PyArray_FromObject(tmp, NPY_DOUBLE, 1, 1);
+
+    arr = PyArray_FromObject(tmp, NPY_DOUBLE, 1, 1);
 
     len = (unsigned long)PyArray_DIMS((PyArrayObject *)arr)[0];
 

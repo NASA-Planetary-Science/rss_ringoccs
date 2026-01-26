@@ -1,9 +1,9 @@
 /******************************************************************************
- *                                 LICENSE                                    *
+ *                                   LICENSE                                  *
  ******************************************************************************
  *  This file is part of rss_ringoccs.                                        *
  *                                                                            *
- *  rss_ringoccs is free software: you can redistribute it and/or modify it   *
+ *  rss_ringoccs is free software: you can redistribute it and/or modify      *
  *  it under the terms of the GNU General Public License as published by      *
  *  the Free Software Foundation, either version 3 of the License, or         *
  *  (at your option) any later version.                                       *
@@ -24,7 +24,7 @@
  *                             DEFINED FUNCTIONS                              *
  ******************************************************************************
  *  Function Name:                                                            *
- *      rssringoccs_Tau_Check_Keywords:                                       *
+ *      rssringoccs_Tau_Check_Keywords                                        *
  *  Purpose:                                                                  *
  *      Runs an error check on a rssringoccs_TAUObj pointer.                  *
  *  Arguments:                                                                *
@@ -32,136 +32,67 @@
  *          A pointer to a rssringoccs_TAUObj.                                *
  *  Output:                                                                   *
  *      None (void).                                                          *
+ *  Called Functions:                                                         *
+ *      src/tau/                                                              *
+ *          rssringoccs_Tau_Check_Allan_Deviation:                            *
+ *              Checks the Allan deviation (sigma) for errors.                *
+ *          rssringoccs_Tau_Check_Resolution:                                 *
+ *              Checks the requested resolution for simple errors.            *
+ *          rssringoccs_Tau_Check_Eccentricity:                               *
+ *              Checks the eccentricity for errors.                           *
+ *          rssringoccs_Tau_Check_Periapse:                                   *
+ *              Checks the angle of periapse for errors.                      *
+ *          rssringoccs_Tau_Check_Range:                                      *
+ *              Checks the processing range for very simple errors.           *
  *  Method:                                                                   *
- *      Check that the keywords have legal values, setting errors if not.     *
- *  NOTES:                                                                    *
- *      1.) This function sets the tau->error_occured Boolean to true on      *
- *          error. It is the user's responsibility to check that this Boolean *
- *          is false after using this function. Trying to access the pointers *
- *          in a rssringoccs_TAUObj may result in a segmentation fault        *
- *          otherwise.                                                        *
+ *      Check the keywords for the Tau object. There are several:             *
+ *                                                                            *
+ *          1.) Resolution.                                                   *
+ *          2.) Allan deviation (sigma).                                      *
+ *          3.) Periapse.                                                     *
+ *          4.) Eccentricity.                                                 *
+ *          5.) Processing range.                                             *
+ *                                                                            *
+ *      Each property is checked for basic errors (NaN, infinity, etc.).      *
+ *  Notes:                                                                    *
+ *      1.) This function checks for NULL. Nothing is done in this case.      *
+ *                                                                            *
+ *      2.) If the error_occurred Boolean is true, nothing is done.           *
+ *                                                                            *
+ *      3.) This function sets the error_occurred Boolean to true on failure. *
+ *          Inspect this (and the error_message) after calling this function. *
  ******************************************************************************
  *                               DEPENDENCIES                                 *
  ******************************************************************************
- *  1.) stdlib.h:                                                             *
- *          C standard library header. Used for the NULL macro.               *
- *  2.) rss_ringoccs_bool.h:                                                  *
- *          Header file containing rssringoccs_Bool, and True and False.      *
- *  3.) rss_ringoccs_string.h:                                                *
- *          Header file containing routines for manipulating strings. The     *
- *          rssringoccs_strdup function is defined here. strdup is a function *
- *          that comes with POSIX but is not part of the C standard. Because  *
- *          of this, rss_ringoccs provides an implementation of this that     *
- *          only uses C89/C90 compliant code.                                 *
- *  4.) rss_ringoccs_reconstruction.h:                                        *
- *          The rssringoccs_TAUObj is defined here and the function           *
- *          prototypes for reconstruction are found here as well.             *
+ *  1.) tmpl_bool.h:                                                          *
+ *          Header file providing Booleans.                                   *
+ *  2.) rss_ringoccs_tau.h:                                                   *
+ *          Header providing the function prototype and TAUObj type.          *
  ******************************************************************************
- *                            A NOTE ON COMMENTS                              *
- ******************************************************************************
- *  It is anticipated that many users of this code will have experience in    *
- *  either Python or IDL, but not C. Many comments are left to explain as     *
- *  much as possible. Vagueness or unclear code should be reported to:        *
- *  https://github.com/NASA-Planetary-Science/rss_ringoccs/issues             *
- ******************************************************************************
- *                            A FRIENDLY WARNING                              *
- ******************************************************************************
- *  This code is compatible with the C89/C90 standard. The setup script that  *
- *  is used to compile this in config_librssringoccs.sh uses gcc and has the  *
- *  -pedantic and -std=c89 flags to check for compliance. If you edit this to *
- *  use C99 features (built-in complex, built-in booleans, C++ style comments *
- *  and etc.), or GCC extensions, you will need to edit the config script.    *
- ******************************************************************************
- *  Author:     Ryan Maguire, Wellesley College                               *
+ *  Author:     Ryan Maguire                                                  *
  *  Date:       January 4, 2021                                               *
  ******************************************************************************/
 
 /*  Include the necessary header files.                                       */
 #include <libtmpl/include/tmpl_bool.h>
-#include <libtmpl/include/constants/tmpl_math_constants.h>
 #include <rss_ringoccs/include/rss_ringoccs_tau.h>
 
 /*  Function for checking the keyword arguments of a tau object.              */
-void rssringoccs_Tau_Check_Keywords(rssringoccs_TAUObj *tau)
+void rssringoccs_Tau_Check_Keywords(rssringoccs_TAUObj * const tau)
 {
-    /*  If tau is NULL we can't access its members. Return.                   */
+    /*  If tau is NULL, then there is nothing to do. Return.                  */
     if (!tau)
         return;
 
-    /*  Check if the error_occurred member was set to true before proceeding. */
+    /*  Do not attempt to access data in a Tau object that previously had an  *
+     *  error occur. Inspect the Boolean and abort if necessary.              */
     if (tau->error_occurred)
         return;
 
+    rssringoccs_Tau_Check_Allan_Deviation(tau);
     rssringoccs_Tau_Check_Resolution(tau);
-
-    /*  The Allen deviation must be positive.                                 */
-    if (tau->sigma <= 0.0)
-    {
-        tau->error_occurred = tmpl_True;
-        tau->error_message =
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_Tau_Check_Keywords\n\n"
-            "\rInput sigma (Allen deviation) is not positive.\n\n";
-
-        return;
-    }
-
-    /*  The periapse is allowed to be between -2pi and 2pi, inclusive.        */
-    if (tau->periapse < -tmpl_double_two_pi)
-    {
-        tau->error_occurred = tmpl_True;
-        tau->error_message =
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_Tau_Check_Keywords\n\n"
-            "\rInput periapse less than -2pi.\n\n";
-
-        return;
-    }
-
-    if (tau->periapse > tmpl_double_two_pi)
-    {
-        tau->error_occurred = tmpl_True;
-        tau->error_message =
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_Tau_Check_Keywords\n\n"
-            "\rInput periapse greater than 2pi.\n\n";
-
-        return;
-    }
-
-    /*  Eccentricity can be positive or zero. No negative values allowed.     */
-    if (tau->eccentricity < 0.0)
-    {
-        tau->error_occurred = tmpl_True;
-        tau->error_message =
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_Tau_Check_Keywords\n\n"
-            "\rInput eccentricity is negative.\n\n";
-
-        return;
-    }
-
-    /*  Lastly, check the requested range values.                             */
-    if (tau->rng_list[0] < 0.0)
-    {
-        tau->error_occurred = tmpl_True;
-        tau->error_message =
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_Tau_Check_Keywords\n\n"
-            "\rStarting value for range is negative.\n\n";
-
-        return;
-    }
-
-    if (tau->rng_list[0] > tau->rng_list[1])
-    {
-        tau->error_occurred = tmpl_True;
-        tau->error_message =
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_Tau_Check_Keywords\n\n"
-            "\rStarting value for range is greater than final value.\n\n";
-
-        return;
-    }
+    rssringoccs_Tau_Check_Eccentricity(tau);
+    rssringoccs_Tau_Check_Periapse(tau);
+    rssringoccs_Tau_Check_Range(tau);
 }
 /*  End of rssringoccs_Tau_Check_Keywords.                                    */

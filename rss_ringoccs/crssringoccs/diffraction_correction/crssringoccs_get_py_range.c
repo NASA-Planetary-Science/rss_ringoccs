@@ -90,9 +90,9 @@ void crssringoccs_Get_Py_Range(rssringoccs_TAUObj *tau, PyObject *rngreq)
 
             /*  Try to parse the elements. Return with error if this fails.   */
             if (PyLong_Check(next))
-                tau->rng_list[n] = PyLong_AsDouble(next);
+                tau->range[n] = PyLong_AsDouble(next);
             else if (PyFloat_Check(next))
-                tau->rng_list[n] = PyFloat_AsDouble(next);
+                tau->range[n] = PyFloat_AsDouble(next);
             else
             {
                 tau->error_occurred = tmpl_True;

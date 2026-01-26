@@ -32,9 +32,8 @@
 /*  atof function found here.                                                 */
 #include <stdlib.h>
 
-/*  libtmpl provides Booleans and string duplicate.                           */
+/*  libtmpl provides Booleans.                                                */
 #include <libtmpl/include/tmpl_bool.h>
-#include <libtmpl/include/tmpl_string.h>
 
 /*  rssringoccs_TauCSV typedef here, and function prototype given.            */
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
@@ -70,11 +69,10 @@ void rssringoccs_TauCSV_Read_Data(rssringoccs_TauCSV *tau, FILE *fp)
     if (!fp)
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_String_Duplicate(
+        tau->error_message =
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_TauCSV_Read_Data\n\n"
-            "Input file is NULL. Aborting.\n"
-        );
+            "Input file is NULL.\n";
 
         return;
     }
@@ -84,11 +82,10 @@ void rssringoccs_TauCSV_Read_Data(rssringoccs_TauCSV *tau, FILE *fp)
     if (tau->n_elements == zero)
     {
         tau->error_occurred = tmpl_True;
-        tau->error_message = tmpl_String_Duplicate(
+        tau->error_message =
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_TauCSV_Read_Data\n\n"
-            "n_elements is zero, nothing to read. Aborting.\n"
-        );
+            "n_elements is zero, nothing to read.\n";
 
         return;
     }

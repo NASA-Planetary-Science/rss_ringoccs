@@ -19,28 +19,39 @@
 #   Author:     Ryan Maguire                                                   #
 #   Date:       Sepemtber 15, 2022                                             #
 ################################################################################
+
+# Name of the library.
 TARGET_LIB_SHARED := librssringoccs.so
 TARGET_LIB_STATIC := librssringoccs.a
+
+# Path to the libtmpl static library.
+LIBTMPL := ./libtmpl/libtmpl.a
+
+# Directory all of the .o files will be placed in.
+BUILD_DIR = build
+
+# installation prefix
+prefix = /usr/local
+
+# Location of all .c and .S files.
+SRC_DIRS = src
+
+# Compiler to be used. Override this to whatever you choose.
+CC = cc
+
+# Archiver to be used. Only needed if a static build is made.
+AR = ar
+
 ifdef BUILD_STATIC
 TARGET_LIB := $(TARGET_LIB_STATIC)
-AR ?= ar
 else
 TARGET_LIB := $(TARGET_LIB_SHARED)
 endif
 
-BUILD_DIR := ./build
-SRC_DIRS := ./src
-LIBTMPL := ./libtmpl/libtmpl.a
-
-CWARN := -Wall -Wextra -Wpedantic
-CFLAGS := $(EXTRA_FLAGS) -I../ -I./ -O3 -fPIC -flto -DNDEBUG -c
-LFLAGS := $(EXTRA_LFLAGS) -L./libtmpl/ -O3 -flto -shared
-LFLAGS += -lm -l:libtmpl.a -l:libcspice.a -l:libcsupport.a
-
-ifdef OMP
-CFLAGS += -fopenmp
-LFLAGS += -fopenmp
-endif
+CWARN = -Wall -Wextra -Wpedantic
+CFLAGS = $(EXTRA_FLAGS) -I../ -I./ -O3 -fPIC -flto -DNDEBUG -c
+LFLAGS = $(EXTRA_LFLAGS) -L./libtmpl/ -O3 -flto -shared
+LFLAGS += -l:libtmpl.a -l:libcspice.a -l:libcsupport.a
 
 SRCS := $(shell find $(SRC_DIRS) -name "*.c")
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)

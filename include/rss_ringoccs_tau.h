@@ -73,7 +73,7 @@ typedef void (*rssringoccs_FresnelTransform)(
 );
 
 extern const rssringoccs_FresnelNewtonTransform
-rssringoccs_newton_transform_table[5];
+rssringoccs_newton_transform_table[7];
 
 extern const rssringoccs_FresnelTransform
 rssringoccs_newton_interp_transform_table[6];
@@ -83,6 +83,13 @@ rssringoccs_Tau_Select_Newton_Transform(rssringoccs_TAUObj * const tau);
 
 extern rssringoccs_FresnelTransform
 rssringoccs_Tau_Select_Newton_Interp_Transform(rssringoccs_TAUObj * const tau);
+
+extern void
+rssringoccs_Tau_Check_Allan_Deviation(rssringoccs_TAUObj * const tau);
+
+extern void rssringoccs_Tau_Check_Eccentricity(rssringoccs_TAUObj * const tau);
+extern void rssringoccs_Tau_Check_Periapse(rssringoccs_TAUObj * const tau);
+extern void rssringoccs_Tau_Check_Range(rssringoccs_TAUObj * const tau);
 
 /******************************************************************************
  *  Function:                                                                 *

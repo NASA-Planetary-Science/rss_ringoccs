@@ -50,16 +50,6 @@ void rssringoccs_TauCSV_Destroy(rssringoccs_TauCSV **tau)
     /*  Free all of the members of the TauCSV object.                         */
     rssringoccs_TauCSV_Destroy_Members(tau_inst);
 
-    /*  If an error occurred, the error_message variable is malloced and a    *
-     *  string is stored in it. Free this pointer if this is the case.        */
-    if (tau_inst->error_message != NULL)
-    {
-        free(tau_inst->error_message);
-
-        /*  Set the pointer to NULL to prevent freeing it twice.              */
-        tau_inst->error_message = NULL;
-    }
-
     /*  Free the TauCSV pointer and set to NULL to prevent freeing it twice.  */
     free(tau_inst);
     *tau = NULL;

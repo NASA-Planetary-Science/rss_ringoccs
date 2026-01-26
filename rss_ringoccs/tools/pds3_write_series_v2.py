@@ -7,6 +7,7 @@ Purpose: Functions for getting PDS3 label file information and writing PDS3
 
 '''
 import numpy as np
+import os
 import time
 
 def pds3_write_series_lbl(str_lbl, out_lbl_file):

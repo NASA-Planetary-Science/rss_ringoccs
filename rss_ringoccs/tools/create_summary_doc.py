@@ -16,7 +16,7 @@ import warnings
 warnings.filterwarnings("ignore")
 import numpy as np
 import matplotlib
-impor os
+import os
 matplotlib.rcParams['agg.path.chunksize'] = 10000
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages

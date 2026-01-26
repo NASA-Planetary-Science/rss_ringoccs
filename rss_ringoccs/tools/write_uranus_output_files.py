@@ -74,7 +74,9 @@ def construct_filepath(rev_info, filtyp):
         filestr = ('VGR2_' + str(band) + str(dsn) + '_' + dd + '_URING_'
                     + ring )
 
-        dirstr = ('..'+os.sep+'output' os.sep + dd + os.sep + ring + os.sep)
+        dirstr = (
+            '..' + os.sep + 'output' + os.sep + dd + os.sep + ring + os.sep
+        )
 
         # Create output file name without file extension
         curday = strftime('%Y%m%d')

@@ -16,10 +16,12 @@ from .calc_f_sky_recon import calc_f_sky_recon
 from .calc_freq_offset import calc_freq_offset
 from ..tools.write_output_files import construct_filepath
 
+import os
 import sys
-sys.path.append('../../')
+up2levels = '..'+os.sep+'..'+os.sep
+sys.path.append(up2levels)
 import rss_ringoccs as rss
-sys.path.remove('../../')
+sys.path.remove(up2levels)
 
 
 class FreqOffsetFit(object):

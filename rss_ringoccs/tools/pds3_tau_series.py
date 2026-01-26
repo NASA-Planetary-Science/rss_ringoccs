@@ -181,7 +181,7 @@ def get_tau_series_info(rev_info, tau_inst, series_name, prof_dir,history=None):
     FILE_RECORDS = str(len(sampling_parameter_arr))
     SERIES_NAME = series_name
 
-    DATA_SET_ID = '"CO-SR-RSS-?/?-OCC-V0.1"'
+    DATA_SET_ID = '"CO-SR-RSS-?'+os.sep+'?-OCC-V0.1"'
     RING_OBSERVATION_ID = pds3.get_ring_obs_id(year, doy, band, dsn)
     PRODUCT_ID = series_name
     PRODUCT_TYPE = 'RING_PROFILE'
@@ -805,7 +805,7 @@ def get_tau_series_info(rev_info, tau_inst, series_name, prof_dir,history=None):
 
 def write_tau_files_from_inst(tau_inst,geo_inst,cal_inst,dlp_inst,tstart,tend,
                    res_km,inversion_range,res_factor,psitype,wtype,program,
-                   local_path_to_output='../output/',verbose=True):
+                   local_path_to_output='..'+os.sep+'output'+os.sep,verbose=True):
     """
     write TAU *.LBL and *.TAB files, including version with psitype appended to root name
     tau_inst,geo_inst,cal_inst,dlp_inst: required instances of tau, geo, cal, dlp
@@ -905,7 +905,7 @@ def write_tau_series(rev_info, tau_inst, title, outdir, prof_dir,history=None,ad
     outfile_tab = outdir + title.upper() + '.TAB'+add
     outfile_lbl = outdir + title.upper() + '.LBL'+add
 
-    series_name = '"' + outfile_tab.split('/')[-1] + '"'
+    series_name = '"' + outfile_tab.split(os.sep)[-1] + '"'
 
 
     # Write data file

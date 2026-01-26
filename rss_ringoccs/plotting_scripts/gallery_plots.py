@@ -10,10 +10,10 @@ import warnings as wrn # for error suppression
 wrn.filterwarnings('ignore')
 np.seterr(all='ignore')
 # create directory structure if not in place
-if not os.path.isdir('../output/PLOTS'):
-    os.mkdir('../output/PLOTS')
-if not os.path.isdir('../output/PLOTS/GALLERY'):
-    os.mkdir('../output/PLOTS/GALLERY')
+if not os.path.isdir('..'+os.sep+'output'+os.sep+'PLOTS'):
+    os.mkdir('..'+os.sep+'output'+os.sep+'PLOTS')
+if not os.path.isdir('..'+os.sep+'output'+os.sep+'PLOTS'+os.sep+'GALLERY'):
+    os.mkdir('..'+os.sep+'output'+os.sep+'PLOTS'+os.sep+'GALLERY')
 # ring name and location data
 lab = ['6','5','4',r'$\alpha$',r'$\beta$',r'$\eta$',r'$\gamma$',
         r'$\delta$',r'$\varepsilon$']
@@ -44,7 +44,7 @@ for res in ['050','020']:
             rmin = rings_km[dir][ring]-width[dir][ring]
             rmax = rings_km[dir][ring]+width[dir][ring]
 
-            subdir = '../output/'+dir+'/'+ring+'/'
+            subdir = '..'+os.sep+'output'+os.sep+dir+os.sep+ring+os.sep
             file = 'VGR2_X43_'+dir+'_URING_'+ring+'_TAU_00'+res+'M_'+date+'_'+sn+'.TAB'
             tau = np.loadtxt(subdir+file,delimiter=',').T
 
@@ -72,5 +72,5 @@ for res in ['050','020']:
         fig.suptitle('URANUS RINGS DURING '+direct+' RECONSTRUCTED AT '+res+' M')
         fig.tight_layout()
         fig.subplots_adjust(top=0.95)
-        plt.savefig('../output/PLOTS/GALLERY/GALLERY_'+dir+'_'+res+'M.PDF',dpi=128)
+        plt.savefig('..'+os.sep+output'+os.sep+PLOTS'+os.sep+GALLERY'+os.sep+GALLERY_'+dir+'_'+res+'M.PDF',dpi=128)
         plt.close()

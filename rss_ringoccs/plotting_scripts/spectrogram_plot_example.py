@@ -6,26 +6,26 @@ tsn = '0001'         # processing serial number
 res = '050'         # reconstruction resolution
 poly_order = 9      # polynomial order
 ### END USER INPUT
-import os
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+import os
 import sys
-sys.path.append('../pipeline/')
+sys.path.append('..'+os.sep+'pipeline'+os.sep)
 import pipeline_params as pipe
-sys.path.remove('../pipeline/')
-sys.path.append('../')
+sys.path.remove('..'+os.sep+'pipeline'+os.sep)
+sys.path.append('..'+os.sep)
 from rss_ringoccs.scatter.spectro_reader import read_spectro
-sys.path.remove('../')
+sys.path.remove('..'+os.sep)
 ### suppress any annoying warning messages
 import warnings as wrn # for error suppression
 wrn.filterwarnings('ignore')
 np.seterr(all='ignore')
 # create directory structure if not in place
-if not os.path.isdir('../output/PLOTS'):
-    os.mkdir('../output/PLOTS')
+if not os.path.isdir('..'+os.sep+'output'+os.sep+'PLOTS'):
+    os.mkdir('..'+os.sep+'output'+os.sep+'PLOTS')
 # create directory structure if not in place
-if not os.path.isdir('../output/PLOTS/SCATTER'):
-    os.mkdir('../output/PLOTS/SCATTER')
+if not os.path.isdir('..'+os.sep+'output'+os.sep+'PLOTS'+os.sep+'SCATTER'):
+    os.mkdir('..'+os.sep+'output'+os.sep+'PLOTS'+os.sep+'SCATTER')
 # ring name and location data
 lab = ['6','5','4',r'$\alpha$',r'$\beta$',r'$\eta$',r'$\gamma$',
         r'$\delta$',r'$\varepsilon$']
@@ -33,7 +33,7 @@ lab = ['6','5','4',r'$\alpha$',r'$\beta$',r'$\eta$',r'$\gamma$',
 for dir in ['I','E']:
     for i,name in enumerate(pipe.rnames):
         # load in
-        refdir = '../output/'+dir+'/'+name+'/'
+        refdir = '..'+os.sep+'output'+os.sep+dir+os.sep++name+os.sep
         sfile = 'VGR2_X43_'+dir+'_URING_'+name+'_SCATTER_'+sdate+'_'+ssn+'.TAB'
         tfile = 'VGR2_X43_'+dir+'_URING_'+name+'_TAU_00'+res+'M_'+tdate+'_'+tsn+'.TAB'
 
@@ -88,7 +88,7 @@ for dir in ['I','E']:
 
         plt.subplots_adjust(wspace=0.0,hspace=0.0)
 
-        plt.savefig('../output/PLOTS/SCATTER/'+sfile[:-14]+'_TAU.PNG')
+        plt.savefig('..'+os.sep+'output'+os.sep+'PLOTS'+os.sep+'SCATTER'+os.sep+sfile[:-14]+'_TAU.PNG')
         plt.close()
 
         fig,ax = plt.subplots(1,1,sharex=True,figsize=(8,8),dpi=128)
@@ -118,5 +118,5 @@ for dir in ['I','E']:
 
         plt.subplots_adjust(wspace=0.0,hspace=0.0)
 
-        plt.savefig('../output/PLOTS/SCATTER/'+sfile[:-14]+'.PNG')
+        plt.savefig('..'+os.sep+'output'+os.sep+'PLOTS'+os.sep+'SCATTER'+os.sep+sfile[:-14]+'.PNG')
         plt.close()

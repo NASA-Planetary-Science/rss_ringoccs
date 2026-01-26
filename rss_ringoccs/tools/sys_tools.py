@@ -94,7 +94,7 @@ def latex_summary_doc(pdffil, res_km, geo, cal, tau):
     res = error_check.check_type_and_convert(res_km, float, "res_km", fname)
     res = "%sM" % str(int(res_km*1000.0))
 
-    var = pdffil.split("/")[-1]
+    var = pdffil.split(os.sep)[-1]
     var = var.split("_")
     rev = var[0][3:6]
     occ = var[0][6:]
@@ -702,10 +702,10 @@ def latex_summary_doc(pdffil, res_km, geo, cal, tau):
         \end{document}
     """ % (pdffil, rev, doy, res, occ, geo, cal, tau, year, band, dsn)
 
-    texvar = pdffil.split("/")
+    texvar = pdffil.split(os.sep)
 
     if (len(texvar) > 1):
-        out = "%s/" % (texvar[0])
+        out = "%s/" % (texvar[0]) # not clear if this works on windows with /
         for i in range(1, len(texvar)-1):
             out = "%s%s/" % (out, texvar[i])
     else:
@@ -735,4 +735,4 @@ def latex_summary_doc(pdffil, res_km, geo, cal, tau):
     TexSh.close()
 
     make_executable('%s.sh' % TexName)
-    shell_execute(['./%s.sh' % TexName])
+    shell_execute(['.'+os.sep+'%s.sh' % TexName])

@@ -362,7 +362,8 @@ def history_loop_over_long_inputs(f, this_input, this_kwd, varkey, num):
 def get_ring_obs_id(year, doy, band, dsn):
     band = band[1]
     dsn = dsn.split('-')[-1]
-    out_str = '"S/OCC/CO/RSS/' + year + '-' + doy + '/' + band + dsn + '"'
+    #out_str = '"S/OCC/CO/RSS/' + year + '-' + doy + '/' + band + dsn + '"'
+    out_str = '"S'+os.sep+'OCC'+os.sep+'CO'+os.sep+'RSS'+os.sep + year + '-' + doy + os.sep + band + dsn + '"'
     return out_str
 
 def get_ring_profile_direction(rho_vals):

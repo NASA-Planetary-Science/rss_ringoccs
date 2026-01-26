@@ -131,7 +131,7 @@ def get_rev_info(rsr_inst):
     occ_dir = rev_to_occ_info(rev)
 
     rev_info = {
-            "rsr_file":   rsr_inst.rsr_file.split('/')[-1]
+            "rsr_file":   rsr_inst.rsr_file.split(os.sep)[-1]
             , "band":     '"'+str(rsr_inst.band)+'"'
             , "year":     str(rsr_inst.year)
             , "doy":      str(rsr_inst.doy).zfill(3)
@@ -224,8 +224,8 @@ def write_history_dict(input_vars, input_kwds, source_file, add_info=None):
     run_date = time.ctime() + ' ' + time.tzname[0]
     python_version = platform.python_version()
     operating_system = os.uname()[0]
-    src_dir = source_file.rsplit('/',1)[0] +'/'
-    src_file = source_file.split('/')[-1]
+    src_dir = source_file.rsplit(os.sep,1)[0] +os.sep
+    src_file = source_file.split(os.sep)[-1]
     rssocc_version = '1.3-beta'
 
     history = {

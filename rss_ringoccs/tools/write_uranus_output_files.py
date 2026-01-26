@@ -74,7 +74,7 @@ def construct_filepath(rev_info, filtyp):
         filestr = ('VGR2_' + str(band) + str(dsn) + '_' + dd + '_URING_'
                     + ring )
 
-        dirstr = ('../output/' + dd + '/' + ring + '/')
+        dirstr = ('..'+os.sep+'output' os.sep + dd + os.sep + ring + os.sep)
 
         # Create output file name without file extension
         curday = strftime('%Y%m%d')
@@ -111,8 +111,8 @@ def construct_filepath(rev_info, filtyp):
             seq_num = '0001'
             out2 = out1 + '_' + seq_num
 
-        title = out2.split('/')[-1]
-        outdir = '/'.join(out2.split('/')[0:-1]) + '/'
+        title = out2.split(os.sep)[-1]
+        outdir = os.sep.join(out2.split(os.sep)[0:-1]) + os.sep
         title_out.append(title)
         outdir_out.append(outdir)
     return title_out, outdir_out

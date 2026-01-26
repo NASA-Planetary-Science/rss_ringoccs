@@ -19,15 +19,15 @@ class VGRUranusReader(object):
         # check if provided direction is allowed
         if prof_dir.upper() == 'I' :
             file_list = [data_dir + x for x in [
-                    'SCRA_1066/UC0461/F00001.DAT',
-                    'SCRA_1066/UC0462/F00001.DAT',
-                    'SCRA_1067/UC0463/F00001.DAT']]
+                    'SCRA_1066'+os.sep+'UC0461'+os.sep+'F00001.DAT',
+                    'SCRA_1066'+os.sep+'UC0462'+os.sep+'F00001.DAT',
+                    'SCRA_1067'+os.sep+'UC0463'+os.sep+'F00001.DAT']]
         elif prof_dir.upper() == 'E' :
             file_list = [data_dir + x for x in [
-                    'SCRA_1070/UC0482/F00001.DAT',
-                    'SCRA_1070/UC0483/F00001.DAT',
-                    'SCRA_1070/UC0484/F00001.DAT',
-                    'SCRA_1070/UC0485/F00001.DAT']]
+                    'SCRA_1070'+os.sep+'UC0482'+os.sep+'F00001.DAT',
+                    'SCRA_1070'+os.sep+'UC0483'+os.sep+'F00001.DAT',
+                    'SCRA_1070'+os.sep+'UC0484'+os.sep+'F00001.DAT',
+                    'SCRA_1070'+os.sep+'UC0485'+os.sep+'F00001.DAT']]
         else:
             print('Profile direction \''+dir+'\' not recognized.')
             sys.exit()

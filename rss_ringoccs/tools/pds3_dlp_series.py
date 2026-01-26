@@ -164,7 +164,7 @@ def get_dlp_series_info(rev_info, dlp_inst, series_name, prof_dir):
     FILE_RECORDS = str(len(sampling_parameter_arr))
     SERIES_NAME = series_name
 
-    DATA_SET_ID = '"CO-SR-RSS-?/?-OCC-V0.1"'
+    DATA_SET_ID = '"CO-SR-RSS-?'+os.sep+'?-OCC-V0.1"'
     RING_OBSERVATION_ID = pds3.get_ring_obs_id(year, doy, band, dsn)
     PRODUCT_ID = series_name
     PRODUCT_TYPE = 'RING_PROFILE'
@@ -744,7 +744,7 @@ def write_dlp_series(rev_info, dlp_inst, title, outdir, prof_dir):
     outfile_tab = outdir + title.upper() + '.TAB'
     outfile_lbl = outdir + title.upper() + '.LBL'
 
-    series_name = '"' + outfile_tab.split('/')[-1] + '"'
+    series_name = '"' + outfile_tab.split(os.sep)[-1] + '"'
 
     # Write data file
     write_dlp_series_data(dlp_inst, outfile_tab)

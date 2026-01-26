@@ -154,14 +154,14 @@ class ring_fit(object):
             bounds = ([data_lims[0],0,-np.inf,-np.inf,-0.1],[data_lims[1],np.inf,np.inf,np.inf,0.1])
 
         # get occultation info from filepath, assuming PDS and rss_ringoccs heirarchy and naming
-        rev_info = file.split('/')[-2].split('_')
+        rev_info = file.split(os.sep)[-2].split('_')
         rev = rev_info[0][3:6]
         profdir = rev_info[0][6:]
         year  = rev_info[2]
         doy = int(rev_info[3])
         band = rev_info[4][0]
         dsn = 'DSS-'+rev_info[4][1:]
-        res = file.split('/')[-1].split('_')[6][:-1]
+        res = file.split(os.sep)[-1].split('_')[6][:-1]
         if 'KM' in res:
             res = res[:2]+'000'
         elif 'M' in res:
@@ -169,7 +169,7 @@ class ring_fit(object):
         # determine source of profile by length of output file name
         # "TC" for Team Cassini 2017-2019 (TC file contains date+serial)
         # "EM" for Essam Marouf 2018 from NASA/PDS
-        if len(file.split('/')[-1]) >= 40 :
+        if len(file.split(os.sep)[-1]) >= 40 :
             src = 'TC'
         else:
             src = 'EM'
@@ -331,7 +331,7 @@ class ring_fit(object):
             s = '0'+s
 
         # utc format in calender format: eg "1986 APR 12 16:31:09.814"
-        furnsh('../kernels/naif/CASSINI/kernels/lsk/naif0012.tls')
+        furnsh('..'+os.sep+'kernels'+os.sep+'naif'+os.sep+'CASSINI'+os.sep+'kernels'+os.sep+'lsk'+os.sep+'naif0012.tls')
         utc0 = year+'-'+d+'T'+h+':'+m+':'+s
         et = utc2et(utc0)
         utc1 = et2utc(et,'C', 6)

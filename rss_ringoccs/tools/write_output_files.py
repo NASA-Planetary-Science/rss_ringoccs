@@ -31,9 +31,9 @@ func_typ = {'GEO': write_geo_series,
         'TAU': write_tau_series}
         #'SPECTRO': write_spectro_image}
 
-def write_output_files(inst, add_text=None,rev_info=None,local_path_to_tables='../tables/',
+def write_output_files(inst, add_text=None,rev_info=None,local_path_to_tables='..'+os.sep+'tables'+os.sep,
                        add_suffix=None,
-                       history=None,local_path_to_output = '../output/',verbose=False):
+                       history=None,local_path_to_output = '..'+os.sep+'output'+os.sep,verbose=False):
     """
     Write output (geo, cal, dlp, tau) *.TAB and *.LBL files, depending on 
     instance given.
@@ -90,7 +90,7 @@ def write_output_files(inst, add_text=None,rev_info=None,local_path_to_tables='.
         print('add:',add)
     return outfiles
 
-def construct_filepath(rev_info, filtyp,local_path_to_output = '../output/',add_suffix=None, verbose=False):
+def construct_filepath(rev_info, filtyp,local_path_to_output = '..'+os.sep+'output'+os.sep,add_suffix=None, verbose=False):
     """
     Construct output filepath 
 
@@ -160,8 +160,8 @@ def construct_filepath(rev_info, filtyp,local_path_to_output = '../output/',add_
         filestr = ('RSS_' + str(year) + '_' + str(doy) + '_' + str(band) +
             str(dsn) + '_' + dd)
 
-        dirstr = (local_path_to_output+'Rev' + rev + '/Rev' + rev + pd2 + dd 
-                + '/' + 'Rev' + rev + pd2 + dd + '_' + filestr + '/')
+        dirstr = (local_path_to_output+'Rev' + rev + os.sep+'Rev' + rev + pd2 + dd 
+                + os.sep + 'Rev' + rev + pd2 + dd + '_' + filestr + os.sep)
         if verbose:
             print('construct_filepath: dd,filestr,dirstr =',dd,filestr,dirstr)
 
@@ -212,8 +212,8 @@ def construct_filepath(rev_info, filtyp,local_path_to_output = '../output/',add_
             if verbose:
                 print('construct_filepath: out2, out1, seq_num:',out2,out1,seq_num)
 
-        title = out2.split('/')[-1]
-        outdir = '/'.join(out2.split('/')[0:-1]) + '/'
+        title = out2.split(os.sep)[-1]
+        outdir = os.sep.join(out2.split(os.sep)[0:-1]) + os.sep
         title_out.append(title)
         outdir_out.append(outdir)
         if verbose:
@@ -221,7 +221,7 @@ def construct_filepath(rev_info, filtyp,local_path_to_output = '../output/',add_
     return title_out, outdir_out
         
 
-def construct_output_filename(rev_info, inst, filtyp,history=None,add_suffix=None,local_path_to_output='../output/',verbose=False):
+def construct_output_filename(rev_info, inst, filtyp,history=None,add_suffix=None,local_path_to_output='..'+os.sep+'output'+os.sep,verbose=False):
     """
     Construct output filepath 
 

@@ -7,11 +7,11 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 # create directory structure if not in place
-if not os.path.isdir('../output/PLOTS'):
-    os.mkdir('../output/PLOTS')
+if not os.path.isdir('..'+os.sep+'output'+os.sep+'PLOTS'):
+    os.mkdir('..'+os.sep+'output'+os.sep+'PLOTS')
 # create directory structure if not in place
-if not os.path.isdir('../output/PLOTS/GRESH_COMPARE'):
-    os.mkdir('../output/PLOTS/GRESH_COMPARE')
+if not os.path.isdir('..'+os.sep+'output'+os.sep+'PLOTS'+os.sep+'GRESH_COMPARE'):
+    os.mkdir('..'+os.sep+'output'+os.sep+'PLOTS'+os.sep+'GRESH_COMPARE')
 # ring name and location data
 lab = ['6','5','4',r'$\alpha$',r'$\beta$',r'$\eta$',r'$\gamma$',
         r'$\delta$',r'$\varepsilon$']
@@ -28,10 +28,10 @@ for dir in ['I','E']:
     for i,name in enumerate(rnames):
 
         # load in GRESH data
-        gfile = '../data/URINGS_GRESH1989_050M/RU1P2X'+name+dir+'.TAB'
+        gfile = '..'+os.sep+'data'+os.sep+'URINGS_GRESH1989_050M'+os.sep+'RU1P2X'+name+dir+'.TAB'
         rho_dg,tau_dg = np.loadtxt(gfile,usecols=(0,1),delimiter=',').T
         # load in
-        refdir = '../output/'+dir+'/'+name+'/'
+        refdir = '..'+os.set+'output'os.sep+dir+os.sep+name+os.sep
         rfile = 'VGR2_X43_'+dir+'_URING_'+name+'_TAU_'+res+'M_'+date+'_'+sn+'.TAB'
         rho,tau,thresh = np.loadtxt(refdir+rfile,usecols=(0,6,8),delimiter=',').T
 
@@ -55,5 +55,5 @@ for dir in ['I','E']:
         plt.title('Comparison of Gresh 1989 and TC Processing\nfor Uranus ring '+name+' during '+dir)
         plt.legend(frameon=False)
         plt.tight_layout()
-        plt.savefig('../output/PLOTS/GRESH_COMPARE/VGR2_'+dir+'_URING_'+name+'_COMPARE_GRESH1989_'+res+'M.PDF')
+        plt.savefig('..'+os.sep+'output'+os.sep+'PLOTS'+os.sep+'GRESH_COMPARE'+os.sep+'VGR2_'+dir+'_URING_'+name+'_COMPARE_GRESH1989_'+res+'M.PDF')
         plt.close()

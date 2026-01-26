@@ -16,6 +16,7 @@ import warnings
 warnings.filterwarnings("ignore")
 import numpy as np
 import matplotlib
+impor os
 matplotlib.rcParams['agg.path.chunksize'] = 10000
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
@@ -877,9 +878,9 @@ def plot_summary_doc_v2(geo_inst, cal_inst, dlp_inst, tau_inst):
         pdf = plot_tau_overview(pdf, geo_inst, tau_inst)
         pdf = plot_tau(pdf, tau_inst)
         pdf = plot_phase(pdf, tau_inst)
-    geofile = geo_inst.outfiles[0].split('/')[-1] + '.TAB'
-    calfile = cal_inst.outfiles[0].split('/')[-1] + '.TAB'
-    taufile = tau_inst.outfiles[0].split('/')[-1] + '.TAB'
+    geofile = geo_inst.outfiles[0].split(os.sep)[-1] + '.TAB'
+    calfile = cal_inst.outfiles[0].split(os.sep)[-1] + '.TAB'
+    taufile = tau_inst.outfiles[0].split(os.sep)[-1] + '.TAB'
     latex_summary_doc(outfig, tau_inst.input_resolution_km, geofile, calfile, taufile)
     print('\tSummary PDF saved to: ' + outfig)
 

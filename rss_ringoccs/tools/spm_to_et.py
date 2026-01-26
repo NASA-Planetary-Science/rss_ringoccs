@@ -41,7 +41,7 @@ def spm_to_et(spm, doy, year, kernels=None):
 
     # Leap seconds kernel
     if kernels is None:
-        kernels = '../../kernels/naif/CASSINI/kernels/lsk/naif0012.tls'
+        kernels = '..'+os.sep+'..'+os.sep+'kernels'+os.sep+'naif'+os.sep+'CASSINI'+os.sep+'kernels'+os.sep+'lsk'+os.sep+'naif0012.tls'
 
     spice.kclear()
     spice.furnsh(kernels)

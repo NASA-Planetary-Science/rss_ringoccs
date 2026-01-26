@@ -179,7 +179,7 @@ def get_geo_series_info(rev_info, geo_inst, series_name, prof_dir):
     geo_kernels = geo_inst.kernels
     # Remove directory path from kernel list
     if isinstance(geo_kernels, list):
-        geo_kernels = ['"'+x.split('/')[-1]+'"' for x in geo_kernels]
+        geo_kernels = ['"'+x.split('/')[-1]+'"' for x in geo_kernels] # note that kernels list will always have '/' as separator
     else:
         geo_kernels = '"' + geo_kernels + '"'
 
@@ -191,7 +191,7 @@ def get_geo_series_info(rev_info, geo_inst, series_name, prof_dir):
     FILE_RECORDS = str(len(sampling_parameter_arr))
     SERIES_NAME = series_name
 
-    DATA_SET_ID = '"CO-SR-RSS-?/?-OCC-V0.1"'
+    DATA_SET_ID = '"CO-SR-RSS-?'+os.sep+'?-OCC-V0.1"'
     RING_OBSERVATION_ID = pds3.get_ring_obs_id(year, doy, band, dsn)
     PRODUCT_ID = series_name
     PRODUCT_TYPE = 'OCCULTATION_GEOMETRY'
@@ -706,7 +706,7 @@ def write_uranus_geo_series(rev_info, geo_inst, title, outdir, prof_dir,write_la
     """
     outfile_tab = outdir + title.upper() + '.TAB'
     outfile_lbl = outdir + title.upper() + '.LBL'
-    series_name = '"' + outfile_tab.split('/')[-1] + '"'
+    series_name = '"' + outfile_tab.split(os.sep)[-1] + '"'
 
 
     # Write data file

@@ -96,7 +96,7 @@ def get_cal_series_info(rev_info, cal_inst, series_name, prof_dir):
             'Positional Args']['kernels']
     # Remove directory path from kernel list
     if isinstance(geo_kernels, list):
-        geo_kernels = ['"'+x.split('/')[-1]+'"' for x in geo_kernels]
+        geo_kernels = ['"'+x.split(os.sep)[-1]+'"' for x in geo_kernels]
     else:
         geo_kernels = '"' + geo_kernels + '"'
 
@@ -107,7 +107,7 @@ def get_cal_series_info(rev_info, cal_inst, series_name, prof_dir):
     FILE_RECORDS = str(len(sampling_parameter_arr))
     SERIES_NAME = series_name
 
-    DATA_SET_ID = '"CO-SR-RSS-?/?-OCC-V0.1"'
+    DATA_SET_ID = '"CO-SR-RSS-?'+os.sep+'?-OCC-V0.1"'
     RING_OBSERVATION_ID = pds3.get_ring_obs_id(year, doy, band, dsn)
     PRODUCT_ID = series_name
     PRODUCT_TYPE = 'CALIBRATION_PARAMETERS'
@@ -488,7 +488,7 @@ def write_cal_series(rev_info, cal_inst, title, outdir, prof_dir):
     outfile_tab = outdir + title.upper() + '.TAB'
     outfile_lbl = outdir + title.upper() + '.LBL'
 
-    series_name = '"' + outfile_tab.split('/')[-1] + '"' 
+    series_name = '"' + outfile_tab.split(os.sep)[-1] + '"' 
 
     
     # Write data file

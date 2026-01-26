@@ -14,6 +14,7 @@
 """
 import spiceypy as spice
 import numpy as np
+import os
 from scipy.interpolate import interp1d
 
 DEGREES_PER_RADIAN = 57.2957795130823208767981548141051703324054724665643215E+00
@@ -628,7 +629,7 @@ def get_start_jd(year, doy):
 
 def find_gaps(t_ret_spm_vals, year, doy, rho_km_vals, phi_rl_deg_vals,
         niter=int(100), tolerance=0.001, t0=2454467.000000,
-        local_path_to_tables='../tables/',
+        local_path_to_tables='..'+os.sep+'tables'+os.sep,
         gaps_file='gap_orbital_elements.txt', kernels=None):
     """
     Find regions of free-space power (gaps) in the ring system.
@@ -795,7 +796,7 @@ def rad_converge(t_ret_spm_vals, rho_km_vals, phi_rl_deg_vals, semimajor,
 
 def get_freespace(t_ret_spm_vals, year, doy, rho_km_vals,
         phi_rl_deg_vals, t_oet_spm_vals, atmos_occ_spm_vals, kernels=None,
-        split_ind=None,local_path_to_tables='../tables/'):
+        split_ind=None,local_path_to_tables='..'+os.sep+'tables'+os.sep):
     """
     Return list of gap boundaries (inner and outer edge) in distance from
     center of Saturn and in seconds past midnight.
@@ -1008,7 +1009,7 @@ def remove_blocked(t_oet_spm_vals, atmos_occ_spm_vals, t_ret_spm_vals,
 
     return t_ret_out, t_oet_out, phi_rl_out, rho_out
 
-def get_freespace_km(ret_spm, year, doy, rho_km, phi_rl_deg,local_path_to_tables='../tables/'):
+def get_freespace_km(ret_spm, year, doy, rho_km, phi_rl_deg,local_path_to_tables='..'+os.sep+'tables'+os.sep):
     """
     Get all free-space regions, in and outside ring system.
 

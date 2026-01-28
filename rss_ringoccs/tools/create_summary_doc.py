@@ -87,7 +87,7 @@ def plot_bullseye(pdf, dlp_inst):
     plt.axis('equal')
     plt.xlabel('$x$ (1000 km)')
     plt.ylabel('$y$ (1000 km)')
-    plt.title('Mean Observed Ring Elevation $B$ = '+str(B_mean)+'$^\circ$')
+    plt.title('Mean Observed Ring Elevation $B$ = '+str(B_mean)+'$^\\circ$')
     plt.tick_params(axis='both', direction='in', top=True, bottom=True, right=True, left=True)
 
     # Plot rings
@@ -96,7 +96,7 @@ def plot_bullseye(pdf, dlp_inst):
     plt.text(80, -3, 'C')
     plt.text(101, -3, 'B')
     plt.text(125, -3, 'A')
-    plt.xlim([-150., 150.])
+#    plt.xlim([-150., 150.])
     plt.ylim([-150., 150.])
 
     pdf.savefig()
@@ -147,7 +147,7 @@ def plot_occ_earth_view(pdf, geo_inst):
     # Compute transformation between J2000 and planet coordinates
     #   EEQ = Earth Equatorial System
     #   PEQ = Planetary ephemeris system
-    mm_EEQ2PEQ = spice.tipbod(ref, planet, set_et_start)
+    mm_EEQ2PEQ = spice.tipbod(ref, Saturn, set_et_start)
     mm_PEQ2EEQ = np.transpose(mm_EEQ2PEQ)
 
     # planet pole coordinates in J2000
@@ -159,7 +159,7 @@ def plot_occ_earth_view(pdf, geo_inst):
 
 
     # compute earth to planet vector at start of occ
-    ptarg, ltime = spice.spkezp(planet, oet_et_start, ref, 'LT', Earth)
+    ptarg, ltime = spice.spkezp(Saturn, oet_et_start, ref, 'LT', Earth)
     radius_planet, ra_planet, dec_planet = spice.recrad(ptarg)
 
     rap = rapole_planet*spice.dpr() # in degrees
@@ -170,7 +170,7 @@ def plot_occ_earth_view(pdf, geo_inst):
     Bdeg, Pdeg = calc_bp(rap, decp, ra, dec)
 
     # transformations between EEQ, PEQ and sky plane
-    Prad = Pdeg * spice.rpd()
+    Prad = Pdeg[0] * spice.rpd()
     mm_SKY2EEQ = spice.eul2m(-ra_planet, dec_planet, Prad, 3, 2, 1)
     mm_EEQ2SKY = np.transpose(mm_SKY2EEQ)
 
@@ -229,7 +229,7 @@ def plot_occ_earth_view(pdf, geo_inst):
     # Add earth direction
     plt.plot([0.,0.], [-6.1e4*np.sin(Brad), -1.8e5*np.sin(Brad)],
             color='black', linewidth=2.0)
-    plt.text(500, -1.6e5*np.sin(Brad), '$\oplus$', fontsize=15)
+    plt.text(500, -1.6e5*np.sin(Brad), '$\\oplus$', fontsize=15)
 
 
     # add latitude circles every 10 degrees
@@ -406,7 +406,7 @@ def plot_occ_pole_view(pdf, geo_inst):
 
     # add direction to earth
     plt.plot([0.,0.], [-68000., -180000.], 'k-', linewidth=2.3)
-    plt.text(2000., -180000., '$\oplus$', fontsize=15)
+    plt.text(2000., -180000., '$\\oplus$', fontsize=15)
     pdf.savefig()
     plt.close()
     return pdf
@@ -482,8 +482,8 @@ def plot_geo_overview(pdf, geo_inst, tau_inst):
     ax2.plot(rho_km/1000., D_km/sat_radius, 'k')
     
     ax3.set_title('Longitude, Azimuth (deg)',fontweight='bold', fontsize=10)
-    ax3.plot(rho_km/1000., phi_rl_deg, 'b', label = '$\phi_{J2K}$')
-    ax3.plot(rho_km/1000., phi_ora_deg, 'r', label = '$\phi_{E}$')
+    ax3.plot(rho_km/1000., phi_rl_deg, 'b', label = '$\\phi_{J2K}$')
+    ax3.plot(rho_km/1000., phi_ora_deg, 'r', label = '$\\phi_{E}$')
     ax3.legend(loc='upper right')
     
     
@@ -502,7 +502,7 @@ def plot_geo_overview(pdf, geo_inst, tau_inst):
     ax6.plot(rho_km_tau/1000., tau_threshold_vals, label=band.split('"')[1])
     ax6.legend(loc='upper right')
 
-    if 'DIR' in tau_inst.rev_info:
+    if 'DIR' in geo_inst.rev_info:
         # for chords, check direction order
         d0 = rho_km[1] - rho_km[0]
         d1 = rho_km[-1] - rho_km[-2]
@@ -616,7 +616,7 @@ def plot_cal_overview(pdf, cal_inst, dlp_inst):
     axes3[0].tick_params(axis='both', direction='in', top=True, bottom=True,
             left=True, right=True)
     
-    axes3[1].plot(t_oet_spm/1000., F_offset, color='b', linewidth=0.6)
+    axes3[1].plot(t_oet_spm/1000., F_offset, color='b', linewidth=0.8)
     axes3[1].plot(dlp_inst.t_oet_spm_vals/1000., F_offset_fit, color='r',
             linewidth=0.6)
     axes3[1].set_ylabel(ytitle2)
@@ -628,7 +628,7 @@ def plot_cal_overview(pdf, cal_inst, dlp_inst):
     axes3[1].tick_params(axis='both', direction='in', top=True, bottom=True,
             left=True, right=True)
 
-    axes3[2].plot(t_oet_spm_dlp/1000., P_obs_dlp*2.e-9, color='b', linewidth=0.6)
+    axes3[2].plot(t_oet_spm_dlp/1000., P_obs_dlp*2.e-9, color='b', linewidth=0.8)
     axes3[2].plot(t_oet_spm_dlp/1000., P_free_dlp*2.e-9, color='r', linewidth=0.6)
     axes3[2].tick_params(axis='both', direction='in', top=True, bottom=True,
             left=True, right=True)
@@ -639,6 +639,7 @@ def plot_cal_overview(pdf, cal_inst, dlp_inst):
     pdf.savefig()
     plt.close()
     return pdf
+    
 def plot_tau_overview(pdf, geo_inst, tau_inst):
     """
     Add page to pdf with one plot of the entire reconstructed optical
@@ -652,14 +653,13 @@ def plot_tau_overview(pdf, geo_inst, tau_inst):
     Returns
         :pdf (*obj*): Input pdf with an additional page for plot.
     """
-    tau = tau_inst.tau_vals
+    tau = -np.log(np.abs(tau_inst.T_out**2))*np.abs(np.sin(np.radians(tau_inst.B_deg_vals)))
     tau_thresh = tau_inst.tau_threshold_vals
     rho_tau = tau_inst.rho_km_vals
     elev_deg = geo_inst.elev_deg_vals
     rho_geo = geo_inst.rho_km_vals
 
 
-    tau = tau_inst.tau_vals
     window_length = 123
     if len(tau) < window_length:
         window_length = len(tau)-1
@@ -686,10 +686,10 @@ def plot_tau_overview(pdf, geo_inst, tau_inst):
     ylim2 = [0., 90.]
 
     fig, ax1 = plt.subplots(figsize=(11,7))
-    plt.title('Cassini RSS: Rev' + tau_inst.rev_info['rev_num'] + '-'
-            + tau_inst.rev_info['prof_dir'][1:-1] + ', '
-            + tau_inst.rev_info['band'][1:-1]
-            + '-Band, ' + tau_inst.rev_info['dsn'])
+    plt.title('Cassini RSS: Rev' + geo_inst.rev_info['rev_num'] + '-'
+            + geo_inst.rev_info['prof_dir'][1:-1] + ', '
+            + geo_inst.rev_info['band'][1:-1]
+            + '-Band, ' + geo_inst.rev_info['dsn'])
     ax2 = ax1.twinx()
     ax1.tick_params(axis='x', direction='in', top=True, bottom=True)
     ax1.tick_params(axis='y', colors='blue', direction='in', right=True, left=True)
@@ -742,10 +742,10 @@ def plot_tau(pdf, tau_inst):
     """
     # Plot page 5-9 -- optical depth as a funct of ring radius
     rho_km = tau_inst.rho_km_vals
-    tau = tau_inst.tau_vals
+    tau = -np.log(np.abs(tau_inst.T_out**2))*np.abs(np.sin(np.radians(tau_inst.B_deg_vals)))
     tau_thresh = tau_inst.tau_threshold_vals
     res_km = str(round(tau_inst.input_resolution_km,3))
-    band = str(tau_inst.rev_info['band'].split('"')[1])
+    band = str(geo_inst.rev_info['band'].split('"')[1])
     if band=='K':
         band='Ka'
 
@@ -804,20 +804,20 @@ def plot_phase(pdf, tau_inst):
         :pdf (*obj*): Input pdf with an additional page for plot.
     """
     res_km = str(round(tau_inst.input_resolution_km,3))
-    band = str(tau_inst.rev_info['band'].split('"')[1])
+    band = str(geo_inst.rev_info['band'].split('"')[1])
     if band=='K':
         band='Ka'
 
 
     # Plot page 10 -- phase shift as a funct of ring radius
     rho_km = tau_inst.rho_km_vals
-    phi_deg = np.degrees(tau_inst.phase_vals)
+    phi_deg = np.degrees(np.arctan2(np.imag(-tau_inst.T_out),np.real(tau_inst.T_out)))
 
 
 
     title = ('Cassini RSS: Reconstructed ' + band + '-band Phase Shift Profile '
                 +'(' + res_km + ' km Resolution)')
-    ytitle = '$\phi$ (deg.)'
+    ytitle = '$\\phi$ (deg.)'
     xtitle = 'Ring Radius, $\\rho$ (1000 km)'
     ncol = 1
     nrow = 4
@@ -848,7 +848,8 @@ def plot_phase(pdf, tau_inst):
     plt.close()
     return pdf
 
-def plot_summary_doc_v2(geo_inst, cal_inst, dlp_inst, tau_inst):
+def plot_summary_doc_v3(geo_inst, cal_inst, dlp_inst, tau_inst, taufiles):
+# updated 2026 Jan 28 for revvised contents of tau_inst
     """
     Create LaTeX-ed PDF with plots detailing the ring occultation event and
     important processing steps.
@@ -858,19 +859,18 @@ def plot_summary_doc_v2(geo_inst, cal_inst, dlp_inst, tau_inst):
         :cal_inst (*obj*): Instance of Calibration
         :dlp_inst (*obj*): Instance of DiffractionLimitedProfile
         :tau_inst (*obj*): Instance of DiffractionCorrection
-
+        :taufiles (str): file path to TAU files (without .TAB or .LBL suffix)
     """
-    pd1 = (tau_inst.rev_info['prof_dir'].split('"')[1])[0]
-    if 'DIR' in tau_inst.rev_info.keys():
+    pd1 = (geo_inst.rev_info['prof_dir'].split('"')[1])[0]
+    if 'DIR' in geo_inst.rev_info.keys():
         pd1 = 'C' + pd1
-    if 'PER' in tau_inst.rev_info.keys():
+    if 'PER' in geo_inst.rev_info.keys():
         pd1 = 'P' + pd1
-    revstr = tau_inst.rev_info['rev_num'].zfill(3)
-    outtitle, outdir = construct_filepath(tau_inst.rev_info, 'Summary')
+    revstr = geo_inst.rev_info['rev_num'].zfill(3)
+    outtitle, outdir = construct_filepath(geo_inst.rev_info, 'Summary')
     outfig = outdir[0] + 'Rev' + revstr + pd1 + '_' + outtitle[0] + '.pdf'
     with PdfPages(outfig) as pdf:
         pdf = plot_bullseye(pdf, dlp_inst)
-
         pdf = plot_occ_earth_view(pdf, geo_inst)
         pdf = plot_occ_pole_view(pdf, geo_inst)
         pdf = plot_geo_overview(pdf, geo_inst, tau_inst)
@@ -880,7 +880,7 @@ def plot_summary_doc_v2(geo_inst, cal_inst, dlp_inst, tau_inst):
         pdf = plot_phase(pdf, tau_inst)
     geofile = geo_inst.outfiles[0].split(os.sep)[-1] + '.TAB'
     calfile = cal_inst.outfiles[0].split(os.sep)[-1] + '.TAB'
-    taufile = tau_inst.outfiles[0].split(os.sep)[-1] + '.TAB'
+    taufile = taufiles[0].split(os.sep)[-1] + '.TAB'
     latex_summary_doc(outfig, tau_inst.input_resolution_km, geofile, calfile, taufile)
     print('\tSummary PDF saved to: ' + outfig)
 

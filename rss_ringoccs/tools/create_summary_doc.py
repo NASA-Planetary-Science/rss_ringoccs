@@ -728,13 +728,14 @@ def plot_tau_overview(pdf, geo_inst, tau_inst):
     plt.close()
     return pdf
 
-def plot_tau(pdf, tau_inst):
+def plot_tau(pdf, geo_inst,tau_inst):
     """
     Add 17 pages to pdf, with each page containing 4km of the reconstructed
     optical depth profile and threshold optical depth overplotted.
 
     Arguments
         :pdf (*obj*): pdf to save plot to
+        :geo_inst (*obj*): Instance of Geometry
         :tau_inst (*obj*): Instance of DiffractionCorrection
 
     Returns
@@ -791,13 +792,14 @@ def plot_tau(pdf, tau_inst):
         plt.close()
     return pdf
 
-def plot_phase(pdf, tau_inst):
+def plot_phase(pdf, geo_inst, tau_inst):
     """
     Add a page to pdf with reconstructed phase, in degrees, for the entire
     profile.
 
     Arguments
         :pdf (*obj*): pdf to save plot to
+        :geo_inst (*obj*): Instance of Geometry
         :tau_inst (*obj*): Instance of DiffractionCorrection
 
     Returns
@@ -876,8 +878,8 @@ def plot_summary_doc_v3(geo_inst, cal_inst, dlp_inst, tau_inst, taufiles):
         pdf = plot_geo_overview(pdf, geo_inst, tau_inst)
         pdf = plot_cal_overview(pdf, cal_inst, dlp_inst)
         pdf = plot_tau_overview(pdf, geo_inst, tau_inst)
-        pdf = plot_tau(pdf, tau_inst)
-        pdf = plot_phase(pdf, tau_inst)
+        pdf = plot_tau(pdf, geo_inst,tau_inst)
+        pdf = plot_phase(pdf, geo_inst, tau_inst)
     geofile = geo_inst.outfiles[0].split(os.sep)[-1] + '.TAB'
     calfile = cal_inst.outfiles[0].split(os.sep)[-1] + '.TAB'
     taufile = taufiles[0].split(os.sep)[-1] + '.TAB'

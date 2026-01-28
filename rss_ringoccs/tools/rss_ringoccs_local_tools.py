@@ -1,13 +1,13 @@
 # rss_ringoccs_local_tools.py
 
 # Revisions:
-#   2026 Jan 17 - rfrench 
+#   2026 Jan 28- rfrench 
 
 # def append_file_to_file(source_file_path, destination_file_path):
 # def b_MTR33(f0=8427222034.34050,band='X',allan_dev_1sec=2.e-13,rhodot=10,W=100.):
 # def check_substring_in_list(substring, list_):
 # def compute_tau_threshold(cal_file,tau_inst,verbose=False):
-# def compute_PDS_tau_threshold(Rev='Rev007',direction='E',DSN='X43',tau_match='TAU_01KM',resolution=1,
+# def data_from_inst(dlp_inst,verbose=False):
 # def DeltaR_phi_MTR32(b,DeltaR_W=1.):
 # def DeltaR_inf_MTR3(b,Weff,F):
 # def demo_e2e_event(Rev='Rev007',direction='E',DSN='X43',dr_km_desired=0.25,res_km=1.0,res_factor=0.75,
@@ -2042,9 +2042,9 @@ def load_kernels_for_taufile(taufile,silent=True,load_absent_only=True):
             spice.furnsh(kernel)
 
 def merge_sorted_tabfiles(indir,inversion_range,psitype=None,tmp2output=True,
-                          tmp2globaloutput=False,add_inversion_range=False,
+                          tmp2globaloutput=False,add_inversion_range=False,update_radius_corrections = False,
                           clean=False,silent=False):
-    firstfile = glob.glob(indir+'R*.TAB.0001')[0] # assumes ALL files in this directory are to be merged!
+    firstfile = glob.glob(indir+'R*.TAB.*')[0] # assumes ALL files in this directory are to be merged!
     outfile = firstfile[0:-5]
     if not silent:
         print('nominal outfile',outfile)
@@ -2071,9 +2071,11 @@ def merge_sorted_tabfiles(indir,inversion_range,psitype=None,tmp2output=True,
         file_records = contents.count('\n')
     if not silent:
         print("Total lines:", file_records)
-        print("About to update radius corrections...")
-    load_kernels_for_taufile(outfile,silent=True,load_absent_only=True)
-    update_taufile_radius_corrections(outfile,update_dr_pole=True,update_dr_trajectory=True,
+    if update_radius_corrections:
+        if not silent:
+            print("About to update radius corrections...")
+            load_kernels_for_taufile(outfile,silent=True,load_absent_only=True)
+            update_taufile_radius_corrections(outfile,update_dr_pole=True,update_dr_trajectory=True,
                                      fit_number=1,NMAX_POLE = 500,NMAX_TRAJECTORY = 1000,
                                      write_only_if_zero=True,verbose=not silent,
                                      save_original=True)

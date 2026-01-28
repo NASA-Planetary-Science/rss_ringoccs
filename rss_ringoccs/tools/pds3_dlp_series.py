@@ -5,6 +5,7 @@
 
 :Dependencies:
     #. numpy
+    #. os
     #. time
 
 Notes:
@@ -12,6 +13,7 @@ Notes:
         files from CORSS_8001 v2.
 """
 import numpy as np
+import os
 import time
 from . import pds3_write_series_v2 as pds3
 

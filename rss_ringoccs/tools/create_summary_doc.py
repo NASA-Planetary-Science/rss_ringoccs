@@ -730,16 +730,16 @@ def plot_tau_overview(pdf, geo_inst, tau_inst):
 
 def plot_tau(pdf, geo_inst,tau_inst):
     """
-    Add 17 pages to pdf, with each page containing 4km of the reconstructed
+    Add up to 17 pages to pdf, with each page containing 4km of the reconstructed
     optical depth profile and threshold optical depth overplotted.
 
     Arguments
         :pdf (*obj*): pdf to save plot to
-        :geo_inst (*obj*): Instance of Geometry
         :tau_inst (*obj*): Instance of DiffractionCorrection
 
     Returns
         :pdf (*obj*): Input pdf with an additional page for plot.
+        :npages_tau (*str*): number of pages in PDF from this routine
     """
     # Plot page 5-9 -- optical depth as a funct of ring radius
     rho_km = tau_inst.rho_km_vals
@@ -748,17 +748,22 @@ def plot_tau(pdf, geo_inst,tau_inst):
     res_km = str(round(tau_inst.input_resolution_km,3))
     band = str(geo_inst.rev_info['band'].split('"')[1])
     if band=='K':
-        band='Ka'
-
-    
+        band='Ka' 
     title = ('Cassini RSS: Reconstructed ' + band + '-band Normal Optical Depth Profile'
             + ' (' + res_km + ' km Resolution)')
     ncol = 1
     nrow = 4
-
     
-    rho_min = 74.
-    rho_max = 155.
+    # rho_min = 74.
+    # rho_max = 155.
+
+    rho_min = rho_km[0]/1000.
+    rho_max = rho_km[-1]/1000.
+
+    kkm_per_row = 1.
+    kkm_per_page = nrow * kkm_per_row
+
+    npages = max([1,np.ceil((rho_max-rho_min)/kkm_per_page).astype(int)])
 
     ylim_max = round((max(tau_thresh) * 1.25))
     ylim = [ylim_max+0.5, -0.5]
@@ -766,7 +771,7 @@ def plot_tau(pdf, geo_inst,tau_inst):
     yticks=range(0, yticks_max+1)
 
     
-    for page in range(17):
+    for page in range(npages):
         fig, ax = plt.subplots(nrow, ncol, figsize=(8.5,11))
         plt.setp(ax, yticks=yticks)#yticks=[0,1,2,3,4,5])
          #plt.locator_params(axis='y', nbins=6)
@@ -775,7 +780,7 @@ def plot_tau(pdf, geo_inst,tau_inst):
             ax[n].plot(rho_km/1000., tau_thresh, color='r', linestyle='--')
             ax[n].plot(rho_km/1000., tau, color='b', linewidth=0.8)
             ax[n].tick_params(axis='both', direction='in', top=True, bottom=True, left=True, right=True)
-            r2 = rho_min + 1.
+            r2 = rho_min + kkm_per_row
             ax[n].set_xlim(rho_min, r2)
             ax[n].set_ylim(ylim)
             ax[n].grid(True)
@@ -783,14 +788,90 @@ def plot_tau(pdf, geo_inst,tau_inst):
             if n==0:
                 ax[n].set_title(title)
             if n==(nrow-1):
-                ax[n].set_xlabel('Ring Radius, $\\rho$ (1000 km)')
-                
-            
+                ax[n].set_xlabel('Ring Radius, $\\rho$ (1000 km)')           
             rho_min = r2
         plt.tight_layout()
         pdf.savefig()
         plt.close()
-    return pdf
+    return pdf,npages
+
+def plot_tau_zoom(pdf, geo_inst,tau_inst,psitype,res_km,taufile_PDS=None):
+    """
+    Add zoomed tau profile, optical depth plotted upward.
+
+    Arguments
+        :pdf (*obj*): pdf to save plot to
+        :tau_inst (*obj*): Instance of DiffractionCorrection
+
+    Returns
+        :pdf (*obj*): Input pdf with an additional page for plot.
+    """
+    plt.close() 
+    if taufile_PDS != None:
+        include_PDS=True
+        rho_km_PDS,tau_PDS = np.loadtxt(taufile_PDS,delimiter=',',usecols=[0,6]).T
+    else:
+        include_PDS=False
+    rho_km = tau_inst.rho_km_vals
+    tau = -np.log(np.abs(tau_inst.T_out**2))*np.abs(np.sin(np.radians(tau_inst.B_deg_vals)))
+    tau_thresh = tau_inst.tau_threshold_vals
+    res_km = str(round(tau_inst.input_resolution_km,3))
+    band = str(geo_inst.rev_info['band'].split('"')[1])
+    if band=='K':
+        band='Ka'   
+    title = ('Cassini RSS: Reconstructed ' + band + '-band Normal Optical Depth Profile'
+            + ' (' + res_km + ' km Resolution)')
+    ncol = 1
+    nrow = 4  
+    # rho_min = 74.
+    # rho_max = 155.
+    kkm_per_row = 0.2
+
+    rho_min = min(rho_km)/1000.
+    rho_max = max(rho_km)/1000.
+    npages = max([np.ceil((rho_max-rho_min)/(nrow*kkm_per_row)).astype(int),1])
+
+    ylim_max = round((max(tau_thresh) * 1.25))
+    ylim = [ylim_max+0.5, -0.1]
+    yticks_max = int(np.floor(ylim_max))
+    yticks=range(0, yticks_max+1)
+ 
+    for page in range(npages):
+        fig, ax = plt.subplots(nrow, ncol, figsize=(8.5,11))
+        for n in range(nrow):
+            r2 = rho_min + kkm_per_row
+            xlim = (rho_min,r2)
+            ax[n].set_xlim(xlim)
+            
+            ax[n].grid(True)
+            ax[n].tick_params(axis='both', direction='in', top=True, bottom=True, left=True, right=True)
+            ax[n].set_ylabel('$\\tau$')
+
+            L = np.where((rho_km/1000.>= xlim[0]) & (rho_km/1000. <= xlim[1]))[0]
+            #print("xlim,len(L)",xlim,len(L))
+            if len(L) >0:
+                ylim_max = (max(tau[L]) * 1.25)
+                ylim = [-0.1*ylim_max,ylim_max]
+                ax[n].set_ylim(ylim)
+                if include_PDS:
+                    LPDS = np.where((rho_km_PDS/1000.>= xlim[0]) & (rho_km_PDS/1000. <= xlim[1]))[0]
+                    ax[n].plot(rho_km_PDS[LPDS]/1000., tau_PDS[LPDS], color='purple', linewidth=0.8,label='CORSS_8001 1km res')   
+                ax[n].axhline(y=0, color='c')
+                ax[n].plot(rho_km[L]/1000., tau_thresh[L], color='r', linestyle='--')
+                ax[n].plot(rho_km[L]/1000., tau[L], color='b', linewidth=0.8,label='rss_ringoccs ' + str(res_km)+'km res '+psitype)
+            else:
+                ax[n].set_ylim(-.1,1)
+            if n==0:
+                ax[n].set_title(title)
+            if n==(nrow-1):
+                ax[n].set_xlabel('Ring Radius, $\\rho$ (1000 km)')
+            ax[n].legend()
+                            
+            rho_min = r2
+        plt.tight_layout()
+        pdf.savefig()
+        plt.close()
+    return pdf,npages
 
 def plot_phase(pdf, geo_inst, tau_inst):
     """
@@ -814,8 +895,6 @@ def plot_phase(pdf, geo_inst, tau_inst):
     # Plot page 10 -- phase shift as a funct of ring radius
     rho_km = tau_inst.rho_km_vals
     phi_deg = np.degrees(np.arctan2(np.imag(-tau_inst.T_out),np.real(tau_inst.T_out)))
-
-
 
     title = ('Cassini RSS: Reconstructed ' + band + '-band Phase Shift Profile '
                 +'(' + res_km + ' km Resolution)')
@@ -850,8 +929,8 @@ def plot_phase(pdf, geo_inst, tau_inst):
     plt.close()
     return pdf
 
-def plot_summary_doc_v3(geo_inst, cal_inst, dlp_inst, tau_inst, taufiles):
-# updated 2026 Jan 28 for revvised contents of tau_inst
+def plot_summary_doc_v4(geo_inst, cal_inst, dlp_inst, tau_inst, taufiles, psitype, res_km, taufile_PDS=None):
+# updated 2026 Jan 28 for revised contents of tau_inst
     """
     Create LaTeX-ed PDF with plots detailing the ring occultation event and
     important processing steps.
@@ -862,6 +941,9 @@ def plot_summary_doc_v3(geo_inst, cal_inst, dlp_inst, tau_inst, taufiles):
         :dlp_inst (*obj*): Instance of DiffractionLimitedProfile
         :tau_inst (*obj*): Instance of DiffractionCorrection
         :taufiles (str): file path to TAU files (without .TAB or .LBL suffix)
+        :psitype (str): inversion method
+        :res_km (float): reconstruction resolution
+        :taufile_PDS (str): pathname to CORSS_8001 PDS 1 km tau profile for comparison with rss_ringoccs
     """
     pd1 = (geo_inst.rev_info['prof_dir'].split('"')[1])[0]
     if 'DIR' in geo_inst.rev_info.keys():
@@ -878,12 +960,13 @@ def plot_summary_doc_v3(geo_inst, cal_inst, dlp_inst, tau_inst, taufiles):
         pdf = plot_geo_overview(pdf, geo_inst, tau_inst)
         pdf = plot_cal_overview(pdf, cal_inst, dlp_inst)
         pdf = plot_tau_overview(pdf, geo_inst, tau_inst)
-        pdf = plot_tau(pdf, geo_inst,tau_inst)
+        pdf,npages_tau = plot_tau(pdf, geo_inst,tau_inst)
+        pdf,npages_tauzoom = plot_tau_zoom(pdf, geo_inst, tau_inst,psitype,res_km,taufile_PDS=taufile_PDS)
         pdf = plot_phase(pdf, geo_inst, tau_inst)
     geofile = geo_inst.outfiles[0].split(os.sep)[-1] + '.TAB'
     calfile = cal_inst.outfiles[0].split(os.sep)[-1] + '.TAB'
     taufile = taufiles[0].split(os.sep)[-1] + '.TAB'
-    latex_summary_doc(outfig, tau_inst.input_resolution_km, geofile, calfile, taufile)
+    latex_summary_doc(outfig, tau_inst.input_resolution_km, geofile, calfile, taufile,npages_tau, npages_tauzoom)
     print('\tSummary PDF saved to: ' + outfig)
 
 

@@ -34,6 +34,7 @@
 # def get_all_SC_kernels(kernels_list = global_path_to_tables+'e2e_kernels.ker',
 # def get_CORSS_8001_file(CORSS_8001_filepath,local_path_to_data=global_path_to_data, 
 # def get_CORSS_8001_TABfiles(CORSS_8001_all_filepaths=None,Rev=None,\
+# def get_CORSS_8001_TAUfile(rev_info,local_path_to_data = global_path_to_data):
 # def get_CORSS_8001_XKa_TABfiles(CORSS_8001_all_filepaths=None,Rev=None,\
 # def get_dBHz(_16kHz=True,Rev='007',direction='I',DSN='X43',
 # def get_dBHz_from_rsr_file(rsr_file,
@@ -1772,6 +1773,7 @@ def get_CORSS_8001_TABfiles(CORSS_8001_all_filepaths=None,Rev=None,\
         return filepaths[0]
     else:
         return filepaths
+        
 
 def get_CORSS_8001_XKa_TABfiles(CORSS_8001_all_filepaths=None,Rev=None,\
                             DSN=None,direction=None,local_path_to_data=global_path_to_data,
@@ -1796,7 +1798,12 @@ def get_CORSS_8001_XKa_TABfiles(CORSS_8001_all_filepaths=None,Rev=None,\
     else:
         return filepaths
 
-        
+def get_CORSS_8001_TAUfile(rev_info,local_path_to_data = global_path_to_data):
+    Rev = rev_info['rev_num']
+    DSN = rev_info['band'][1]+rev_info['dsn'][4:]
+    direction = rev_info['prof_dir'][1]
+    return local_path_to_data+get_CORSS_8001_TABfiles(Rev=Rev,DSN=DSN,direction=direction)
+
 def get_dBHz(_16kHz=True,Rev='007',direction='I',DSN='X43',
              snr0_file='snr0_rsr_all_files_before_USO_failure.csv',
                   local_path_to_tables=global_path_to_tables,verbose=False):

@@ -45,7 +45,7 @@
 # def get_psitype(labelfile):
 # def get_rev_info_from_tau(taufile,rsr_file='"UNKNOWN"'):
 # def get_RSRfiles_from_web(RSRfiles,local_path_to_data=global_path_to_data,force=False,silent=False):
-# def get_trajetory_correction_coefficients(rev_info,fit_number=1,verbose=False,
+# def get_trajectory_correction_coefficients(rev_info,fit_number=1,verbose=False,
 # def is_res_km_valid(dlp_file,res_factor,res_km):
 # def kernels_for_demo(verbose=False): 
 # def kernel_is_loaded(kernel):
@@ -1950,7 +1950,7 @@ def get_RSRfiles_from_web(RSRfiles,local_path_to_data=global_path_to_data,force=
     webURL = web="https://atmos.nmsu.edu/pdsd/archive/data/"
     return get_files_from_web(RSRfiles,local_path_to_data,webURL,force=force,silent=silent)
 
-def get_trajetory_correction_coefficients(rev_info,fit_number=1,verbose=False,local_path_to_local_tables=global_path_to_local_tables):
+def get_trajectory_correction_coefficients(rev_info,fit_number=1,verbose=False,local_path_to_local_tables=global_path_to_local_tables):
 
     assert (fit_number==1 or fit_number==7),'radius_correction_pole: illegal fit_number '+str(fit_number)
     
@@ -3012,7 +3012,7 @@ def radius_correction_trajectory(tau_file,fit_number=1,NMAX=1000,verbose=False):
 # calculate revised radius scale
     rho_km_vals_corr_ = calc_rho_km(et_vals_, planet, spacecraft, dsn)
 # obtain trajectory correction coefficients from fit output file
-    dt_corr,alpha,r0 = get_trajetory_correction_coefficients(rev_info,fit_number,verbose=verbose)
+    dt_corr,alpha,r0 = get_trajectory_correction_coefficients(rev_info,fit_number,verbose=verbose)
 #    dt_corr = -0.021 # all numbers are rounded in NCFIV!
 # compute radius correction
     rdot_ = np.gradient(rho_km_vals_corr_,et_vals_)
@@ -3094,7 +3094,7 @@ def radius_correction_trajectory_from_tau_inst(dlp_file,tau_inst,fit_number=1,NM
 # calculate revised radius scale
     rho_km_vals_corr_ = calc_rho_km(et_vals_, planet, spacecraft, dsn)
 # obtain trajectory correction coefficients from fit output file
-    dt_corr,alpha,r0 = get_trajetory_correction_coefficients(rev_info,fit_number,verbose=verbose)
+    dt_corr,alpha,r0 = get_trajectory_correction_coefficients(rev_info,fit_number,verbose=verbose)
 #    dt_corr = -0.021 # all numbers are rounded in NCFIV!
 # compute radius correction
     rdot_ = np.gradient(rho_km_vals_corr_,et_vals_)

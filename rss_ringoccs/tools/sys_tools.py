@@ -85,6 +85,9 @@ def make_executable(path):
     os.chmod(path, mode)
 
 def latex_summary_doc(pdffil, res_km, geo, cal, tau, npages_tau, npages_tauzoom):
+
+    print('latex_summary_doc: npages_tau,npages_tau_zoom',npages_tau,npages_tauzoom)
+
     fname = "tools.sys_tools.latex_summary_doc"
     error_check.check_type(pdffil, str, "pdffil", fname)
     error_check.check_type(geo, str, "geo", fname)
@@ -385,8 +388,7 @@ def latex_summary_doc(pdffil, res_km, geo, cal, tau, npages_tau, npages_tauzoom)
     textblockTAU = r"""
             \newpage
             \begin{figure}[H]
-                \centering
-                \resizebox{\textwidth}{!}{
+                \centering \resizebox{\textwidth}{!}{
                     \includegraphics[
                         page=XXX,
                         width=\textwidth,
@@ -404,7 +406,7 @@ def latex_summary_doc(pdffil, res_km, geo, cal, tau, npages_tau, npages_tauzoom)
             \end{figure}"""
 
     textblock=LaTeXFile 
-    for pageno in range(8,8+npages_tau):
+    for pageno in range(7,7+npages_tau):
         textblock=textblock+textblockTAU.replace('page=XXX','page='+str(pageno))
 
     textblockTAUzoom = r"""
@@ -427,7 +429,7 @@ def latex_summary_doc(pdffil, res_km, geo, cal, tau, npages_tau, npages_tauzoom)
                          upward, to match the convention adopted for most 
                          Cassini occultation publications.}
             \end{figure}"""
-    for pageno in range(8+npages_tau,8+npages_tau+npages_tauzoom):
+    for pageno in range(7+npages_tau,7+npages_tau+npages_tauzoom):
         textblock=textblock+textblockTAUzoom.replace('page=XXX','page='+str(pageno))
 
     textblockPHASE= r"""
@@ -448,7 +450,7 @@ def latex_summary_doc(pdffil, res_km, geo, cal, tau, npages_tau, npages_tauzoom)
             \end{figure}
         \end{document}"""
 
-    LaTeXFile=textblock+textblockPHASE.replace('page=XXX','page='+str(8+npages_tau+npages_tauzoom))
+    LaTeXFile=textblock+textblockPHASE.replace('page=XXX','page='+str(7+npages_tau+npages_tauzoom))
 
     texvar = pdffil.split(os.sep)
 
@@ -470,12 +472,11 @@ def latex_summary_doc(pdffil, res_km, geo, cal, tau, npages_tau, npages_tauzoom)
         #!/bin/bash
         pdflatex %s.tex > tex.out
         pdflatex %s.tex > tex.out
-        rm tex.out
-        cp %s.pdf %s
+        mv  %s.pdf %s
         rm %s.log
         rm %s.aux
         pwd
-        ls %s.tex
+        rm %s.tex
         rm %s.sh
     """ % (TexName, TexName, TexName, out, TexName, TexName, TexName, TexName)
 

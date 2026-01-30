@@ -475,7 +475,7 @@ def latex_summary_doc(pdffil, res_km, geo, cal, tau, npages_tau, npages_tauzoom)
         mv  %s.pdf %s
         rm %s.log
         rm %s.aux
-        pwd
+        rm tex.out
         rm %s.tex
         rm %s.sh
     """ % (TexName, TexName, TexName, out, TexName, TexName, TexName, TexName)

@@ -483,7 +483,7 @@ def latex_summary_doc(pdffil, res_km, geo, cal, tau, npages_tau, npages_tauzoom)
     TexSh = open("%s.sh" % TexName,'w')
     TexSh.write(TexScript)
     TexSh.close()
-    print(TexName+'.sh')
+    #print(TexName+'.sh')
 
     make_executable('%s.sh' % TexName)
     shell_execute(['.'+os.sep+'%s.sh' % TexName])

@@ -612,7 +612,8 @@ class Geometry(object):
         elif len(ind) == 0:
             ind = None
         else:
-            ind = int(ind[0]) + 2
+#            print('DEBUG: ind, ind[0], ind[0][0]',ind,ind[0],ind[0][0])
+            ind = int(ind[0][0]) + 2
 
         return ind
 

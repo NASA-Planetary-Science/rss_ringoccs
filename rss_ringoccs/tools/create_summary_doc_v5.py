@@ -1452,13 +1452,21 @@ reslocs_sav=None,wavefile=None):
         :res_km (float): reconstruction resolution
         :taufile_PDS (str): pathname to CORSS_8001 PDS 1 km tau profile for comparison with rss_ringoccs
     """
-    pd1 = (geo_inst.rev_info['prof_dir'].split('"')[1])[0]
-    if 'DIR' in geo_inst.rev_info.keys():
+    #pd1 = (geo_inst.rev_info['prof_dir'].split('"')[1])[0]
+    #if 'DIR' in geo_inst.rev_info.keys():
+    #    pd1 = 'C' + pd1
+    #if 'PER' in geo_inst.rev_info.keys():
+    #    pd1 = 'P' + pd1
+    #revstr = geo_inst.rev_info['rev_num'].zfill(3)
+    #outtitle, outdir = construct_filepath(geo_inst.rev_info, 'Summary')
+
+    pd1 = (dlp_inst.rev_info['prof_dir'].split('"')[1])[0]
+    if 'DIR' in dlp_inst.rev_info.keys():
         pd1 = 'C' + pd1
-    if 'PER' in geo_inst.rev_info.keys():
+    if 'PER' in dlp_inst.rev_info.keys():
         pd1 = 'P' + pd1
-    revstr = geo_inst.rev_info['rev_num'].zfill(3)
-    outtitle, outdir = construct_filepath(geo_inst.rev_info, 'Summary')
+    revstr = dlp_inst.rev_info['rev_num'].zfill(3)
+    outtitle, outdir = construct_filepath(dlp_inst.rev_info, 'Summary')
     outfig = outdir[0] + 'Rev' + revstr + pd1 + '_' + outtitle[0] + '.pdf'
     geo_file = geo_inst.outfiles[0]+'.TAB'
     cal_file = cal_inst.outfiles[0]+'.TAB'

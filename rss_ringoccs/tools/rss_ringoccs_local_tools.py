@@ -1802,7 +1802,13 @@ def get_CORSS_8001_TAUfile(rev_info,local_path_to_data = global_path_to_data):
     Rev = rev_info['rev_num']
     DSN = rev_info['band'][1]+rev_info['dsn'][4:]
     direction = rev_info['prof_dir'][1]
-    return local_path_to_data+get_CORSS_8001_TABfiles(Rev=Rev,DSN=DSN,direction=direction)
+    taufilepath = get_CORSS_8001_TABfiles(Rev=Rev,DSN=DSN,direction=direction)
+    if len(taufilepath) == 0:
+        print('No CORSS_8001 file for ',Rev,DSN,direction)
+        print('taufilepath:',taufilepath)
+        return None
+    else:
+        return local_path_to_data+taufilepath
 
 def get_dBHz(_16kHz=True,Rev='007',direction='I',DSN='X43',
              snr0_file='snr0_rsr_all_files_before_USO_failure.csv',

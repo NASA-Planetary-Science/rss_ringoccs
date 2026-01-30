@@ -86,7 +86,7 @@ def make_executable(path):
 
 def latex_summary_doc(pdffil, res_km, geo, cal, tau, npages_tau, npages_tauzoom):
 
-    print('latex_summary_doc: npages_tau,npages_tau_zoom',npages_tau,npages_tauzoom)
+    #print('latex_summary_doc: npages_tau,npages_tau_zoom',npages_tau,npages_tauzoom)
 
     fname = "tools.sys_tools.latex_summary_doc"
     error_check.check_type(pdffil, str, "pdffil", fname)

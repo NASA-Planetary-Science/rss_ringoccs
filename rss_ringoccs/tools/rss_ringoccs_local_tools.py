@@ -1,8 +1,9 @@
 # rss_ringoccs_local_tools.py
 
 # Revisions:
-#   2026 Jan 28- rfrench 
+#   2026 Jan 31- rfrench 
 
+# def add_inversion_range_psitype(tabfile,lblfile,inversion_range,psitype,add_inversion_range=add_inversion_range,add_psitype=add_psitype,verbose=verbose)
 # def append_file_to_file(source_file_path, destination_file_path):
 # def b_MTR33(f0=8427222034.34050,band='X',allan_dev_1sec=2.e-13,rhodot=10,W=100.):
 # def check_substring_in_list(substring, list_):
@@ -23,8 +24,8 @@
 # def demo_Rev133I_X25_W7494_loop(show=False,_16kHz=False,
 # def differential_opacity_plot(rev ='007',ID='Rev007E_rgf',direc ='E',
 # def dtau_int(a,dQ,q=3.1):
-#def event_name_from_rev_info(rev_info): 
-#def event_name_from_taufilepath(taufilepath):    
+# def event_name_from_rev_info(rev_info): 
+# def event_name_from_taufilepath(taufilepath):    
 # def featurelist_to_dict(infile = global_path_to_local_tables + 'my_feature_list_short_Cring.csv'):
 # def find_first_nan_index(arr):
 # def find_index(my_list, my_string,verbose=False):
@@ -39,6 +40,7 @@
 # def get_dBHz(_16kHz=True,Rev='007',direction='I',DSN='X43',
 # def get_dBHz_from_rsr_file(rsr_file,
 # def get_files_from_web(files,local_path,webURL,force=False,silent=True):
+# def get_kernels_by_year_doy(year,doy,kernels,kernels_Rev123,kernels_Rev125,kernels_Rev133,verbose=False):
 # def get_kernels_from_web(kernels,local_path_to_kernels=global_path_to_kernels,force=False,silent=False):
 # get_loaded_kernels(basename=True)
 # def get_processor_info():
@@ -163,6 +165,37 @@ import time
 import traceback
 import types
 from wcmatch import glob
+
+def add_inversion_range_psitype(tabfile,lblfile,inversion_range,psitype,add_inversion_range=True,add_psitype=True,verbose=False):
+# these need to be full pathnames for tabfile,lblfile
+    if add_inversion_range:
+        newtabfile = tabfile.replace('M_','M_'+f'{int(inversion_range[0]):06d}-{int(inversion_range[1]):06d}_')
+        newlblfile = lblfile.replace('M_','M_'+f'{int(inversion_range[0]):06d}-{int(inversion_range[1]):06d}_')
+    if add_psitype:
+        newtabfile = newtabfile.replace('.TAB','_'+psitype.lower()+'.TAB')
+        newlblfile = newlblfile.replace('.LBL','_'+psitype.lower()+'.LBL')
+                    
+    cp_cmd = 'cp '+tabfile+' '+newtabfile
+    os.system(cp_cmd)
+    if verbose:
+        print(cp_cmd)
+
+    cp_cmd = 'cp '+lblfile+' '+newlblfile
+    os.system(cp_cmd)
+    if verbose:
+        print(cp_cmd)
+
+def add_inversion_range_psitype_to_summary(summarypdf,inversion_range,psitype,add_inversion_range=True,add_psitype=True,verbose=False):
+# need full pathname for summarypdf
+    if add_inversion_range:
+        newsummarypdf = summarypdf.replace('M_','M_'+f'{int(inversion_range[0]):06d}-{int(inversion_range[1]):06d}_')
+    if add_psitype:
+        newsummarypdf = newsummarypdf.replace('.PDF','_'+psitype.lower()+'.PDF')
+                    
+    cp_cmd = 'cp '+summarypdf+' '+newsummarypdf
+    os.system(cp_cmd)
+    if verbose:
+        print(cp_cmd)
 
 def append_file_to_file(source_file_path, destination_file_path):
     """Appends the content of the source file to the destination file."""
@@ -1799,7 +1832,7 @@ def get_CORSS_8001_XKa_TABfiles(CORSS_8001_all_filepaths=None,Rev=None,\
         return filepaths
 
 def get_CORSS_8001_TAUfile(rev_info,local_path_to_data = global_path_to_data):
-    Rev = rev_info['rev_num']
+    Rev = 'Rev'+rev_info['rev_num']
     DSN = rev_info['band'][1]+rev_info['dsn'][4:]
     direction = rev_info['prof_dir'][1]
     taufilepath = get_CORSS_8001_TABfiles(Rev=Rev,DSN=DSN,direction=direction)
@@ -1808,6 +1841,7 @@ def get_CORSS_8001_TAUfile(rev_info,local_path_to_data = global_path_to_data):
         print('taufilepath:',taufilepath)
         return None
     elif type(taufilepath) is list:
+        print('debug: taufilepath',taufilepath,flush=True)
         return local_path_to_data+taufilepath[0]
     elif type(taufilepath) is str:
         return local_path_to_data+taufilepath
@@ -1879,6 +1913,31 @@ def get_files_from_web(files,local_path,webURL,force=False,silent=True):
         else:
             print("TROUBLE! ",localdirfile,' does not exist')
     return local_files
+
+def get_kernels_by_year_doy(year,doy,kernels,kernels_Rev123,kernels_Rev125,kernels_Rev133,verbose=False):
+# in calling program, define:
+# year = rsr_inst.year
+# doy = rsr_inst.doy
+# kernels = local_path_to_tables+'e2e_kernels.ker'  # Path to meta-kernel or list of paths to necessary kernel files
+# kernels_Rev123 = local_path_to_tables+'e2e_kernels_Rev123.ker'  # Path to meta-kernel or list of paths to
+# kernels_Rev125 = local_path_to_tables+'e2e_kernels_Rev125.ker'  # Path to meta-kernel or list of paths to
+# kernels_Rev133 = local_path_to_tables+'e2e_kernels_Rev133+.ker'  # Path to meta-kernel or list of paths to
+
+    if year == 2009 and doy in [359,360]:
+        these_kernels =  kernels_Rev123
+    elif year == 2010 and doy == 26:
+        these_kernels = kernels_Rev125
+    elif (year >= 2010) or (year==2010 and doy >= 169):
+        these_kernels = kernels_Rev133
+    else:
+        these_kernels = kernels
+    if verbose: # print the loaded tpc file, the only kernel that differs
+        with open(these_kernels,'r') as f:
+            contents= f.readlines()
+        for line in contents:
+            if 'tpc' in line:
+                print('loaded planetary constants file',line.strip())
+    return these_kernels
 
 
 def get_kernels_from_web(kernels,local_path_to_kernels=global_path_to_kernels,force=False,silent=False):

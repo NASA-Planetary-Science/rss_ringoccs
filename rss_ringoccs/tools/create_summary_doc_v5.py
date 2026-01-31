@@ -1498,7 +1498,7 @@ reslocs_sav=None,wavefile=None):
     
     print('\tSummary PDF saved to: ' + outfig)
 
-    return None
+    return outfig
 
 def plot_tau_zoom_tau_file_satres(pdf, geo_inst,tau_file,psitype,res_km,taufile_PDS=None,include_resonances=False,
                                    max_res_order = 3,

@@ -195,11 +195,9 @@ def add_inversion_range_psitype_to_summary(summarypdf,taufile,inversion_range,ps
         if add_inversion_range:
             res_string = taufile[taufile.index('TAU_')+4:taufile.index('TAU_')+11]
             newsummarypdf = newsummarypdf.replace('SUMMARY_','SUMMARY_'+res_string+f'{int(inversion_range[0]):06d}-{int(inversion_range[1]):06d}_')
-#            print('newsummarypdf:',newsummarypdf)
 
         if add_psitype:
             newsummarypdf = newsummarypdf.replace('.pdf','_'+psitype.lower()+'.pdf')
-#            print('newsummarypdf:',newsummarypdf)
                     
 # use subprocess, which waits until completion, unlike os.cmd()
         cmd = ['cp',summarypdf,newsummarypdf]
@@ -212,10 +210,11 @@ def add_inversion_range_psitype_to_summary(summarypdf,taufile,inversion_range,ps
             if verbose:
                 print('subprocess command:\n',cmd)
             result = subprocess.run(cmd,capture_output=True, text=True)
-    elif verbose:
-        print('Summary pdf filename not modified')
-
-#    print('Finished with add_inversion_range_psitype_to_summary()')
+        return newsummarypdf
+    else:
+        return summarypdf
+        if verbose:
+            print('Summary pdf filename not modified')
 
 def append_file_to_file(source_file_path, destination_file_path):
     """Appends the content of the source file to the destination file."""

@@ -4,6 +4,7 @@
 #   2026 Jan 31- rfrench 
 
 # def add_inversion_range_psitype(tabfile,lblfile,inversion_range,psitype,add_inversion_range=add_inversion_range,add_psitype=add_psitype,verbose=verbose)
+# def add_inversion_range_psitype_to_summary(summarypdf,taufile,inversion_range,psitype,add_inversion_range=True,add_psitype=True,verbose=False,replace=False):
 # def append_file_to_file(source_file_path, destination_file_path):
 # def b_MTR33(f0=8427222034.34050,band='X',allan_dev_1sec=2.e-13,rhodot=10,W=100.):
 # def check_substring_in_list(substring, list_):
@@ -185,17 +186,32 @@ def add_inversion_range_psitype(tabfile,lblfile,inversion_range,psitype,add_inve
     if verbose:
         print(cp_cmd)
 
-def add_inversion_range_psitype_to_summary(summarypdf,inversion_range,psitype,add_inversion_range=True,add_psitype=True,verbose=False):
+def add_inversion_range_psitype_to_summary(summarypdf,taufile,inversion_range,psitype,add_inversion_range=True,add_psitype=True,verbose=False,replace=False):
 # need full pathname for summarypdf
-    if add_inversion_range:
-        newsummarypdf = summarypdf.replace('M_','M_'+f'{int(inversion_range[0]):06d}-{int(inversion_range[1]):06d}_')
-    if add_psitype:
-        newsummarypdf = newsummarypdf.replace('.PDF','_'+psitype.lower()+'.PDF')
-                    
-    cp_cmd = 'cp '+summarypdf+' '+newsummarypdf
-    os.system(cp_cmd)
     if verbose:
-        print(cp_cmd)
+        print('summarypdf:',summarypdf)
+    if add_inversion_range or add_psitype:
+        newsummarypdf = summarypdf
+        if add_inversion_range:
+            res_string = taufile[taufile.index('TAU_')+4:taufile.index('TAU_')+11]
+            newsummarypdf = newsummarypdf.replace('SUMMARY_','SUMMARY_'+res_string+f'{int(inversion_range[0]):06d}-{int(inversion_range[1]):06d}_')
+        if add_psitype:
+            newsummarypdf = newsummarypdf.replace('.pdf','_'+psitype.lower()+'.pdf')
+                    
+        cmd = 'cp '+summarypdf+' '+newsummarypdf
+        if verbose:
+            print(cmd)
+        os.system(cmd)
+
+        if replace:
+            cmd = 'rm -f '+summarypdf
+            if verbose:
+                print(cmd)
+            os.system(cmd)
+    elif verbose:
+        print('Summary pdf filename not modified')
+
+    print('Finished with add_inversion_range_psitype_to_summary()')
 
 def append_file_to_file(source_file_path, destination_file_path):
     """Appends the content of the source file to the destination file."""

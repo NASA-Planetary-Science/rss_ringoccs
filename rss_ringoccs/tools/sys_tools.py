@@ -16,7 +16,7 @@ import time
 
 from . import error_check
 
-def shell_execute(script):
+def shell_execute(script,wait=True):
     """
         Purpose:
             Execute a shell script from within Python.
@@ -58,7 +58,14 @@ def shell_execute(script):
         error_check.check_type(x, str, "script[i]", fname)
         string = "%s %s" % (string, x)
 
-    return subprocess.Popen([string],shell=True)
+    process =  subprocess.Popen([string],shell=True)
+
+    if wait:
+        print('waiting for process to finish...')
+        exit_code = process.wait()
+        print('Process is done')
+
+    return process
 
 def date_string():
     """

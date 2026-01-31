@@ -63,7 +63,7 @@ def shell_execute(script,wait=True):
     if wait:
         print('waiting for process to finish...')
         exit_code = process.wait()
-        print('Process is done')
+        print('process is done')
 
     return process
 

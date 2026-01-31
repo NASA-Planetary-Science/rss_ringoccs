@@ -16,6 +16,6 @@
 #   You should have received a copy of the GNU General Public License          #
 #   along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.     #
 ################################################################################
-. get_rsr_data.sh
+. _get_rsr_data.sh
 InputFile="../tables/rsr_1kHz_files_after_USO_failure_withuplink.txt"
-get_rsr_data "$InputFile"
+_get_rsr_data "$InputFile"

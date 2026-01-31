@@ -1,3 +1,9 @@
+#!/bin/bash
+if [ ! "$BASH_VERSION" ] ; then
+    echo "Please use BASH to run this script ($0)" 1>&2
+    exit 1
+fi
+
 ################################################################################
 #                                    LICENSE                                   #
 ################################################################################
@@ -16,6 +22,6 @@
 #   You should have received a copy of the GNU General Public License          #
 #   along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.     #
 ################################################################################
-. get_rsr_data.sh
+. _get_rsr_data.sh
 InputFile="../tables/rsr_1kHz_files_before_USO_failure.txt"
-get_rsr_data "$InputFile"
+_get_rsr_data "$InputFile"

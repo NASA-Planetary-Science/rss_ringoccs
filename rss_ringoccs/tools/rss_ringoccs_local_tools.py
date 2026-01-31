@@ -1807,8 +1807,12 @@ def get_CORSS_8001_TAUfile(rev_info,local_path_to_data = global_path_to_data):
         print('No CORSS_8001 file for ',Rev,DSN,direction)
         print('taufilepath:',taufilepath)
         return None
-    else:
+    elif type(taufilepath) is list:
+        return local_path_to_data+taufilepath[0]
+    elif type(taufilepath) is str:
         return local_path_to_data+taufilepath
+    else:
+        raise Exception("Unrecognized taufilepath type")
 
 def get_dBHz(_16kHz=True,Rev='007',direction='I',DSN='X43',
              snr0_file='snr0_rsr_all_files_before_USO_failure.csv',

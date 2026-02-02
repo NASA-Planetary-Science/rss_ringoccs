@@ -27,8 +27,6 @@ option(BUILD_SHARED_LIBS "Build shared library" OFF)
 
 add_subdirectory(libtmpl)
 
-set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_SAVED})
-
 find_library(CSPICE_LIB NAMES cspice libcspice REQUIRED)
 find_library(CSUPPORT_LIB NAMES csupport libcsupport REQUIRED)
 
@@ -36,6 +34,7 @@ file(GLOB_RECURSE SOURCES "src/*.c")
 add_library(rssringoccs ${SOURCES})
 
 target_include_directories(
+    rssringoccs PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/>
     rssringoccs PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
 )
 

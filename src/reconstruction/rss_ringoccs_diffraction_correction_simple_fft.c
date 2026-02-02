@@ -39,7 +39,7 @@
 void rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau)
 {
     /*  Variables for indexing. nw_pts is the number of points in the window. */
-    size_t i, nw_pts, center, data_size, shift;
+    size_t i, nw_pts, center, data_size, shift, start;
 
     /*  Some variables needed for reconstruction.                             */
     double w_init, w_thresh;
@@ -63,9 +63,10 @@ void rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau)
     /*  Compute some more variables.                                          */
     w_init = tau->w_km_vals[center];
     nw_pts = (TMPL_CAST(w_init / tau->dx_km, size_t) << 1) + 1;
+    start = tau->start - (nw_pts - 1) / 2;
 
     /*  Number of points in the data set, the start/end point and array size. */
-    data_size = tau->n_used + 2 * nw_pts + 1;
+    data_size = tau->n_used + nw_pts - 1;
 
     /* Variables for shifting and keeping track of indexing.                  */
     shift = data_size / 2;
@@ -84,7 +85,7 @@ void rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau)
     /*  Compute the windowing function and Psi.                               */
     for (i = 0; i < data_size; ++i)
     {
-        const size_t offset = tau->start + i - nw_pts;
+        const size_t offset = start + i ;
         const double x = tau->rho_km_vals[offset] - tau->rho_km_vals[center];
 
         if (tmpl_Double_Abs(x) <= w_thresh)
@@ -100,7 +101,7 @@ void rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau)
     }
 
     tmpl_CDouble_FFT(ker, fft_out, data_size);
-    tmpl_CDouble_FFT(tau->T_in + tau->start - nw_pts, fft_in, data_size);
+    tmpl_CDouble_FFT(tau->T_in + start, fft_in, data_size);
 
     for (i = 0; i < data_size; ++i)
         tmpl_CDouble_MultiplyBy(&fft_out[i], &fft_in[i]);
@@ -109,7 +110,7 @@ void rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau)
 
     for(i = 0; i < tau->n_used; ++i)
     {
-        const size_t i_shift = (nw_pts + i + shift) % (data_size);
+        const size_t i_shift = ((nw_pts-1)/2 + i + shift) % (data_size);
         tau->T_out[tau->start + i] = T_out[i_shift];
     }
 

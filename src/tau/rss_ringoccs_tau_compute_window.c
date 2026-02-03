@@ -2,10 +2,12 @@
 #include <rss_ringoccs/include/rss_ringoccs_tau.h>
 
 void
-rssringoccs_Tau_Compute_Window(rssringoccs_TAUObj * TMPL_RESTRICT const tau,
-                               double * TMPL_RESTRICT const w_func,
-                               const size_t nw_pts,
-                               const size_t center)
+rssringoccs_Tau_Compute_Window(
+    const rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    double * TMPL_RESTRICT const w_func,
+    const size_t nw_pts,
+    const size_t center
+)
 {
     /*  The index for the offset (the left-most edge of the window) is just   *
      *  half the number of points in the window away to the left. Compute.    */

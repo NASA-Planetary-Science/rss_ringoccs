@@ -427,10 +427,12 @@ rssringoccs_Tau_Reset_Window(const rssringoccs_TAUObj * TMPL_RESTRICT const tau,
                              const size_t center);
 
 extern void
-rssringoccs_Tau_Compute_Window(rssringoccs_TAUObj * TMPL_RESTRICT const tau,
-                               double * TMPL_RESTRICT const w_func,
-                               const size_t nw_pts,
-                               const size_t center);
+rssringoccs_Tau_Compute_Window(
+    const rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    double * TMPL_RESTRICT const w_func,
+    const size_t nw_pts,
+    const size_t center
+);
 
 extern int
 rssringoccs_Tau_Resize_Half_Window(

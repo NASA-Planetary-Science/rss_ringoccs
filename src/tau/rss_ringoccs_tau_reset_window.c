@@ -34,7 +34,7 @@
  *          occultation data store values in kilometers.                      *
  ******************************************************************************/
 void
-rssringoccs_Tau_Reset_Window(rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+rssringoccs_Tau_Reset_Window(const rssringoccs_TAUObj * TMPL_RESTRICT const tau,
                              double * TMPL_RESTRICT const x_arr,
                              double * TMPL_RESTRICT const w_func,
                              const size_t nw_pts,

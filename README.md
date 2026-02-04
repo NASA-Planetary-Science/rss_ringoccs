@@ -105,7 +105,7 @@ version from the official Python website.
 
 It is **HIGHLY** recommended that you compile `rss_ringoccs` with OpenMP
 support. The inner for-loops for the processing can be parallelized,
-resulting in a significant speed (about 30x on a 32-core CPU).
+resulting in a significant speed boost (about 30x on a 32-core CPU).
 
 Parallelizing does require more memory due to thread safety issues
 (`n` cores requires `n` times the memory allocated for arrays so that each

@@ -126,7 +126,12 @@ void rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj * const tau)
              *  and use that.                                                 */
             double *w_func = TMPL_MALLOC(double, nw_max);
 
-            /*  Malloc returns NULL on failure. Check for this.               */
+            /*  Malloc returns NULL on failure. Check for this. Different     *
+             *  threads share access to the tau object, ensure that if one    *
+             *  thread fails, then all of them abort.                         */
+#ifdef _OPENMP
+#pragma omp critical
+#endif
             if (!w_func)
             {
                 tau->error_occurred = tmpl_True;
@@ -134,14 +139,11 @@ void rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj * const tau)
                     "\n\rError Encountered: rss_ringoccs\n"
                     "\r\trssringoccs_Diffraction_Correction_Newton\n\n"
                     "\rmalloc returned NULL for w_func.\n";
-
-                /*  In-case OpenMP support is enabled, we can not break out   *
-                 *  of this scope and simply return to the caller. Jump ahead *
-                 *  to the cleanup stage, which is after the for-loop.        */
-                goto CLEANUP;
             }
 
-            /*  Other threads should abort if one of the others failed.       */
+            /*  In-case OpenMP support is enabled, we can not break out       *
+             *  of this scope and simply return to the caller. Jump ahead     *
+             *  to the cleanup stage, which is after the for-loop.            */
             if (tau->error_occurred)
                 goto CLEANUP;
 
@@ -161,7 +163,7 @@ void rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj * const tau)
              *  variables. The functions in the inner-most for-loop are both  *
              *  thread-safe and reentrant, we may parallelize the computation.*/
 #ifdef _OPENMP
-#pragma omp for schedule(dynamic)
+#pragma omp for schedule(static)
 #endif
             for (n = 0; n < tau->n_used; ++n)
             {

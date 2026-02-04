@@ -116,7 +116,7 @@ enable OpenMP.
 
 #### OpenMP (GNU / Linux)
 
-If you are using `GCC`, you are done. OpenMP support is baked in.
+If you are using `gcc`, you are done. OpenMP support is baked in.
 If you are using LLVM's `clang` on Debian GNU/Linux (or similar), install via:
 
 ```bash
@@ -125,7 +125,7 @@ sudo apt install libomp-dev
 
 Similar installation instructions exist for other distributions.
 If you are using a compiler other than `gcc` or `clang`, consult the compilers
-manual to see if it supports OpenMP and then `-fopenmp` flag.
+manual to see if it supports OpenMP and the `-fopenmp` flag.
 
 #### OpenMP (FreeBSD)
 

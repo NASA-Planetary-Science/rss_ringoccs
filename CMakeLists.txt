@@ -43,11 +43,22 @@ target_include_directories(
 include(CheckIPOSupported)
 check_ipo_supported(RESULT IPO_SUPPORTED)
 
-# Check for -march=native support
-include(CheckCCompilerFlag)
-check_c_compiler_flag("-march=native" COMPILER_SUPPORTS_MARCH_NATIVE)
+# Check for OMP support.
+if (OMP)
+    find_package(OpenMP)
+    if (OpenMP_C_FOUND)
+        message(STATUS "rss_ringoccs compiling with OpenMP support.")
+    else()
+        message(WARNING "OpenMP support requested but not found.")
+    endif()
+endif()
 
 if (NOT MSVC)
+
+    # Check for -march=native support
+    include(CheckCCompilerFlag)
+    check_c_compiler_flag("-march=native" COMPILER_SUPPORTS_MARCH_NATIVE)
+
     target_compile_options(
         rssringoccs PRIVATE -Wall -Wextra -Wpedantic -O3 -fPIC
     )
@@ -56,17 +67,18 @@ if (NOT MSVC)
     if (COMPILER_SUPPORTS_MARCH_NATIVE)
         target_compile_options(rssringoccs PRIVATE -march=native)
     endif()
+
+    # Add OMP flags if necessary.
+    if (OpenMP_C_FOUND)
+        target_compile_options(rssringoccs PRIVATE -fopenmp)
+        target_link_libraries(rssringoccs PRIVATE OpenMP::OpenMP_C)
+    endif()
 else()
     target_compile_options(rssringoccs PRIVATE /W4 /O2)
-endif()
 
-if (OMP)
-    find_package(OpenMP)
     if (OpenMP_C_FOUND)
-        message(STATUS "rss_ringoccs compiling with OpenMP support.")
-        target_link_libraries(tmpl PRIVATE OpenMP::OpenMP_C)
-    else()
-        message(WARNING "OpenMP support requested but not found.")
+        target_compile_options(rssringoccs PRIVATE /openmp)
+        target_link_libraries(rssringoccs PRIVATE OpenMP::OpenMP_C)
     endif()
 endif()
 

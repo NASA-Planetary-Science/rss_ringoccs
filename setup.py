@@ -89,7 +89,7 @@ def openmp_args():
 
     # OpenMP support is also possible on macOS (but tricky to set up).
     if platform.system() == "Darwin":
-        return ["-Xpreprocessor", "-fopenmp"], ["-lomp"]
+        return ["-Xpreprocessor", "-fopenmp"], ["-fopenmp"]
 
     # On GNU / Linux, GCC has OpenMP support by default, and LLVM's clang
     # has support as well (but you may need to install libomp to use it).

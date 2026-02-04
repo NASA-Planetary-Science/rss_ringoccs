@@ -81,11 +81,22 @@ add_directory("get_uranus_data")
 add_directory("py_csv_obj")
 srclist.append("rss_ringoccs/crssringoccs/crssringoccs.c")
 
+use_openmp = os.environ.get('USE_OPENMP') == '1'
+
+if use_openmp:
+    openmp_args = ["-fopenmp"]
+else:
+    openmp_args = None
 
 if shutil.which("cmake"):
 
     if os.name == "nt":
-        setup_list = ["cmake", "-S", ".", "-B", "build", "-DNO_INLINE=ON"]
+        if use_openmp:
+            setup_list = ["cmake", "-S", ".", "-B", "build", "-DNO_INLINE=ON"]
+        else:
+            setup_list = [
+                "cmake", "-S", ".", "-B", "build", "-DNO_INLINE=ON", "-DOMP=ON"
+            ]
 
         extra_objects = [
             "./build/Release/rssringoccs.lib",
@@ -93,7 +104,10 @@ if shutil.which("cmake"):
         ]
 
     else:
-        setup_list = ["cmake", "-S", ".", "-B", "build"]
+        if use_openmp:
+            setup_list = ["cmake", "-S", ".", "-B", "build", "-DOMP=ON"]
+        else:
+            setup_list = ["cmake", "-S", ".", "-B", "build"]
 
         extra_objects = [
             "./build/librssringoccs.a",
@@ -140,8 +154,8 @@ setup(
                 "../"
             ],
             extra_objects = extra_objects,
-            extra_compile_args = ["-fopenmp"],
-            extra_link_args = ["-fopenmp"]
+            extra_compile_args = openmp_args,
+            extra_link_args = openmp_args
         )
     ],
     packages = [

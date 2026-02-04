@@ -153,7 +153,19 @@ for details.
 
 #### OpenMP (macOS)
 
-TODO: Fill this in.
+    1. Install [Homebrew](https://brew.sh/).
+    2. Install `CMake` and `gcc` using homebrew:
+    ```bash
+        brew install cmake gcc
+    ```
+    3. Set your `CC` environment variable to the `homebrew` version of `gcc`:
+    ```bash
+        export CC=/opt/homebrew/bin/gcc-15
+    ```
+    Replace this file path with whichever version you installed.
+
+    **NOTE:** Do *not* use `/use/bin/gcc`. On macOS this is still Apple's
+    version of `clang`. OpenMP support will not compile if you use this version.
 
 ### Obtaining rss_ringoccs
 

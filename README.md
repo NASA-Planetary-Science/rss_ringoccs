@@ -101,6 +101,60 @@ Microsoft's app store. None of these alternative installations have been
 tested, nor will they be supported by `rss_ringoccs`. Please use the standard
 version from the official Python website.
 
+### OpenMP Support
+
+It is **HIGHLY** recommended that you compile `rss_ringoccs` with OpenMP
+support. The inner for-loops for the processing can be parallelized,
+resulting in a significant speed (about 30x on a 32-core CPU).
+
+Parallelizing does require more memory due to thread safety issues
+(`n` cores requires `n` times the memory allocated for arrays so that each
+thread has its own private data).
+Because of this, if you have limited memory (say, less than 8GB of memory)
+and intend to perform high resolution processing, then you should **not**
+enable OpenMP.
+
+#### OpenMP (GNU / Linux)
+
+If you are using `GCC`, you are done. OpenMP support is baked in.
+If you are using LLVM's `clang` on Debian GNU/Linux (or similar), install via:
+
+```bash
+sudo apt install libomp-dev
+```
+
+Similar installation instructions exist for other distributions.
+If you are using a compiler other than `gcc` or `clang`, consult the compilers
+manual to see if it supports OpenMP and then `-fopenmp` flag.
+
+#### OpenMP (FreeBSD)
+
+Install either `gcc` or a recent version of LLVM:
+
+```bash
+sudo pkg install gcc
+```
+
+or
+
+```bash
+sudo pkg install llvm21
+```
+
+#### OpenMP (Windows)
+
+Microsoft's `MSVC` has support for OpenMP.
+If you are using `gcc` via MinGW or something similar, OpenMP support is
+also available automatically. With LLVM's `clang` you need to make sure
+`libomp` is installed and in your `PATH`.
+See
+[https://clang.llvm.org/docs/OpenMPSupport.html](https://clang.llvm.org/docs/OpenMPSupport.html)
+for details.
+
+#### OpenMP (macOS)
+
+TODO: Fill this in.
+
 ### Obtaining rss_ringoccs
 
 To obtain `rss_ringoccs`, clone the repository:
@@ -120,6 +174,12 @@ source .venv/bin/activate
 
 python3 -m pip install --upgrade pip
 python3 -m pip install -r requirements.txt
+USE_OPENMP=1 python3 -m pip install .
+```
+
+If you do not have OpenMP support, replace this last line with:
+
+```bash
 python3 -m pip install .
 ```
 
@@ -128,6 +188,7 @@ python3 -m pip install .
 For Windows the build instructions are slightly different.
 
 ```bash
+set USE_OPENMP=1
 py -m venv .venv
 .venv\Scripts\activate.bat
 
@@ -135,6 +196,9 @@ py -m pip install --upgrade pip
 py -m pip install -r requirements.txt
 py -m pip install .
 ```
+
+If you do not have OpenMP support, do not add the `set USE_OPENMP=1`
+line at the top.
 
 ## Updating
 

@@ -53,6 +53,11 @@ CFLAGS = $(EXTRA_FLAGS) -I../ -I./ -O3 -fPIC -flto -DNDEBUG -c
 LFLAGS = $(EXTRA_LFLAGS) -L./libtmpl/ -O3 -flto -shared
 LFLAGS += -l:libtmpl.a -l:libcspice.a -l:libcsupport.a
 
+ifdef OMP
+CFLAGS += -fopenmp
+LFLAGS += -fopenmp
+endif
+
 SRCS := $(shell find $(SRC_DIRS) -name "*.c")
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 

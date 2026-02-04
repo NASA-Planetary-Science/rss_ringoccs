@@ -32,20 +32,23 @@
 ################################################################################
 """
 
+import os
+import platform
+import subprocess
+import shutil
+
 # Python is swapping distutils with setuptools.
 try:
     from setuptools import setup, Extension
 except ImportError:
     from distutils.core import setup, Extension
 
-import os
-import platform
-import subprocess
-import shutil
-
 # Numpy is needed for the get_include function which tells us where various
 # header files, like numpy/arrayobject.h, live.
 import numpy
+
+# Check if OpenMP support has been requested.
+USE_OPENMP = os.environ.get('USE_OPENMP') == '1'
 
 # This seems to be needed to ensure Python uses the correct gcc. Without this
 # You may get a linker warning, for example:
@@ -72,6 +75,91 @@ def add_directory(directory):
         if file[-1] == "c":
             srclist.append(f'{full_path}{file}')
 
+def openmp_args():
+    """
+        Returns the list of arguments needed by
+        the C compiler to enable OpenMP support.
+    """
+    if not USE_OPENMP:
+        return [], []
+
+    # Microsoft's MSVC compiler supports OpenMP 2.0.
+    if os.name == "nt":
+        return ["/openmp"], []
+
+    # OpenMP support is also possible on macOS (but tricky to set up).
+    if platform.system() == "Darwin":
+        return ["-Xpreprocessor", "-fopenmp"], ["-lomp"]
+
+    # On GNU / Linux, GCC has OpenMP support by default, and LLVM's clang
+    # has support as well (but you may need to install libomp to use it).
+    return ["-fopenmp"], ["-fopenmp"]
+
+def static_library_paths():
+    """
+        Generates both librssringoccs.a and libtmpl.a and returns
+        (rssringoccs.lib and tmpl.lib on Windows), and returns the
+        paths to these generated files.
+    """
+
+    # Windows users are required to use CMake. GNU, Linux, FreeBSD, and
+    # macOS users may also use CMake.
+    if shutil.which("cmake"):
+
+        build_dir = "build"
+        cmake_args = ["cmake", "-S", ".", "-B", build_dir]
+
+        # Additional flags are needed if OpenMP support is requested.
+        if USE_OPENMP:
+            cmake_args.append("-DOMP=ON")
+
+        # Currently the MSVC build fails when inline support is enabled.
+        # Turn this off until the cause can be identified.
+        if os.name == "nt":
+            cmake_args.append("-DNO_INLINE=ON")
+
+        # Run CMake to generate the build files.
+        subprocess.run(cmake_args, check = True)
+
+        # Run the build process and compile librssringoccs and libtmpl.
+        subprocess.run(
+            ["cmake", "--build", build_dir, "--config", "Release", "-j"],
+            check=True,
+        )
+
+        # Path for Windows users, note the '\' instead of '/'.
+        if os.name == "nt":
+            return [
+                build_dir + "\\Release\\rssringoccs.lib",
+                build_dir + "\\libtmpl\\Release\\tmpl.lib"
+            ]
+
+        # Path for everyone else.
+        return [
+            build_dir + "/librssringoccs.a",
+            build_dir + "/libtmpl/libtmpl.a"
+        ]
+
+    # GNU Make is 'gmake' on FreeBSD. Check for this first.
+    if shutil.which("gmake"):
+        command = ["gmake", "-j", "BUILD_STATIC=1"]
+
+    # GNU Make is simply 'make' on GNU / Linux and macOS.
+    elif shutil.which("make"):
+        command = ["make", "-j", "BUILD_STATIC=1"]
+
+    else:
+        raise RuntimeError("Neither CMake nor GNU Make found. Install one.")
+
+    # gmake and make have nearly identical build steps. The only difference
+    # is the name of the command. This is saved in the 'command' variable.
+    if USE_OPENMP:
+        command.append("OMP=1")
+
+    subprocess.run(command, check = True)
+    return ["./librssringoccs.a", "./libtmpl/libtmpl.a"]
+
+# Add all of the crssringoccs files (the C-Python API wrapper) to the build.
 add_directory("auxiliary")
 add_directory("common")
 add_directory("diffraction_correction")
@@ -81,63 +169,8 @@ add_directory("get_uranus_data")
 add_directory("py_csv_obj")
 srclist.append("rss_ringoccs/crssringoccs/crssringoccs.c")
 
-use_openmp = os.environ.get('USE_OPENMP') == '1'
-
-if use_openmp:
-    openmp_args = ["-fopenmp"]
-else:
-    openmp_args = None
-
-if shutil.which("cmake"):
-
-    if os.name == "nt":
-        if use_openmp:
-            setup_list = ["cmake", "-S", ".", "-B", "build", "-DNO_INLINE=ON"]
-        else:
-            setup_list = [
-                "cmake", "-S", ".", "-B", "build", "-DNO_INLINE=ON", "-DOMP=ON"
-            ]
-
-        extra_objects = [
-            "./build/Release/rssringoccs.lib",
-            "./build/libtmpl/Release/tmpl.lib"
-        ]
-
-    else:
-        if use_openmp:
-            setup_list = ["cmake", "-S", ".", "-B", "build", "-DOMP=ON"]
-        else:
-            setup_list = ["cmake", "-S", ".", "-B", "build"]
-
-        extra_objects = [
-            "./build/librssringoccs.a",
-            "./build/libtmpl/libtmpl.a"
-        ]
-
-    subprocess.run(setup_list, check = True)
-    subprocess.run(
-        ["cmake", "--build", "build", "-j", "--config", "Release"],
-        check = True
-    )
-
-elif shutil.which("gmake"):
-    subprocess.run(["gmake", "-j", "BUILD_STATIC=1"], check=True)
-
-    extra_objects = [
-        "./librssringoccs.a",
-        "./libtmpl/libtmpl.a"
-    ]
-
-elif shutil.which("make"):
-    subprocess.run(["make", "-j", "BUILD_STATIC=1"], check=True)
-
-    extra_objects = [
-        "./librssringoccs.a",
-        "./libtmpl/libtmpl.a"
-    ]
-
-else:
-    raise FileNotFoundError("Neither CMake nor GNU Make found. Install one.")
+extra_objects = static_library_paths()
+compile_args, linker_args = openmp_args()
 
 setup(
     name = "rss_ringoccs",
@@ -154,8 +187,8 @@ setup(
                 "../"
             ],
             extra_objects = extra_objects,
-            extra_compile_args = openmp_args,
-            extra_link_args = openmp_args
+            extra_compile_args = compile_args,
+            extra_link_args = linker_args
         )
     ],
     packages = [

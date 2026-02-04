@@ -24,6 +24,7 @@ cmake_minimum_required(VERSION 3.14)
 project(rss_ringoccs C)
 
 option(BUILD_SHARED_LIBS "Build shared library" OFF)
+option(OMP "Enable OpenMP support" OFF)
 
 add_subdirectory(libtmpl)
 
@@ -52,11 +53,21 @@ if (NOT MSVC)
     )
 
     # Add -march=native if supported
-    if(COMPILER_SUPPORTS_MARCH_NATIVE)
+    if (COMPILER_SUPPORTS_MARCH_NATIVE)
         target_compile_options(rssringoccs PRIVATE -march=native)
     endif()
 else()
     target_compile_options(rssringoccs PRIVATE /W4 /O2)
+endif()
+
+if (OMP)
+    find_package(OpenMP)
+    if (OpenMP_C_FOUND)
+        message(STATUS "rss_ringoccs compiling with OpenMP support.")
+        target_link_libraries(tmpl PRIVATE OpenMP::OpenMP_C)
+    else()
+        message(WARNING "OpenMP support requested but not found.")
+    endif()
 endif()
 
 # Enable link-time optimization if supported.

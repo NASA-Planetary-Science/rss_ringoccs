@@ -113,11 +113,6 @@ def static_library_paths():
         if USE_OPENMP:
             cmake_args.append("-DOMP=ON")
 
-        # Currently the MSVC build fails when inline support is enabled.
-        # Turn this off until the cause can be identified.
-        if os.name == "nt":
-            cmake_args.append("-DNO_INLINE=ON")
-
         # Run CMake to generate the build files.
         subprocess.run(cmake_args, check = True)
 

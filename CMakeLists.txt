@@ -28,8 +28,8 @@ option(OMP "Enable OpenMP support" OFF)
 
 add_subdirectory(libtmpl)
 
-find_library(CSPICE_LIB NAMES cspice libcspice REQUIRED)
-find_library(CSUPPORT_LIB NAMES csupport libcsupport REQUIRED)
+find_library(CSPICE_LIB NAMES cspice REQUIRED)
+find_library(CSUPPORT_LIB NAMES csupport REQUIRED)
 
 file(GLOB_RECURSE SOURCES "src/*.c")
 add_library(rssringoccs ${SOURCES})

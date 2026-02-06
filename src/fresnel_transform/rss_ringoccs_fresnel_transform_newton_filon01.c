@@ -25,7 +25,8 @@ rssringoccs_Fresnel_Transform_Newton_Filon01(
     double weight, left_scale, right_scale;
     double left_psi, right_psi;
 
-    tmpl_ComplexDouble left, right, integrand, midpoint, norm;
+    tmpl_ComplexDouble left, right, integrand, midpoint;
+    tmpl_ComplexDouble norm = tmpl_CDouble_Zero;
     size_t offset = center - (nw_pts >> 1);
     size_t n;
 
@@ -37,9 +38,6 @@ rssringoccs_Fresnel_Transform_Newton_Filon01(
 
     left_scale = weight * w_func[0];
     left = tmpl_CDouble_Multiply_Real(left_scale, tau->T_in[offset]);
-
-    if (tau->use_norm)
-        norm = tmpl_CDouble_Zero;
 
     for (n = 0; n < nw_pts - 1; ++n)
     {

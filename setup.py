@@ -99,8 +99,12 @@ def openmp_args():
             return ["-fopenmp"], ["-fopenmp"]
 
         # Apple's Clang on macOS requires -Xpreprocessor. Omiting results
-        # in an "unsupported option: -fopenmp" error.
-        return ["-Xpreprocessor", "-fopenmp"], ["-Xpreprocessor", "-fopenmp"]
+        # in an "unsupported option: -fopenmp" error. We also need to add
+        # the path to libomp. The user should specify this directly using
+        # export CPATH="...". Use brew --prefix as a fallback if this is
+        # not set.
+        lflag = "-L" + os.environ.get("CPATH", "$(brew --prefix libomp)/lib")
+        return ["-Xpreprocessor", "-fopenmp"], [lflag, "-lomp"]
 
     # On GNU / Linux, GCC has OpenMP support by default, and LLVM's clang
     # has support as well (but you may need to install libomp to use it).

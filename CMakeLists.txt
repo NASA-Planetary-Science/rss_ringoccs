@@ -71,11 +71,12 @@ if (NOT MSVC)
 
     # Add OMP flags if necessary.
     if (OpenMP_C_FOUND)
-        if (AppleClang)
-            target_compile_options(rssringoccs PRIVATE -Xpreprocessor -fopenmp)
-        else()
-            target_compile_options(rssringoccs PRIVATE -fopenmp)
-        endif()
+
+        target_compile_options(
+            rssringoccs PRIVATE
+            $<$<CXX_COMPILER_ID:AppleClang>:-Xpreprocessor>
+            -fopenmp
+        )
 
         target_link_libraries(rssringoccs PRIVATE OpenMP::OpenMP_C)
     endif()

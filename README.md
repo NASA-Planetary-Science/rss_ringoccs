@@ -9,7 +9,21 @@
         5. [Building (macOS)](#building-macos)
             1. [OpenMP using gcc](#openmp-using-gcc)
             2. [OpenMP using Apple's clang](#openmp-using-apples-clang)
-            3. [Building](#building-1)
+            3. [Compiling on macOS](#compiling-on-macos)
+        6. [Building (Windows)](#building-windows)
+            1. [OpenMP using MSVC](#openmp-using-msvc)
+            2. [Compilong on Windows](#compiling-on-windows)
+    3. [Updating](#updating)
+    4. [Cleaning / Uninstalling](#cleaning--uninstalling)
+        1. [Using pip and GNU Make](#using-pip-and-gnu-make)
+        2. [Cleaning on Windows](#cleaning-on-windows)
+    5. [Release Notes](#release-notes)
+    6. [Batch Data Processing](#batch-data-processing)
+    7. [Getting Help](#getting-help)
+    8. [Citing rss_ringoccs](#citing-rss_ringoccs)
+    9. [Version History](#version-history)
+    10. [Acknowledgements](#acknowledgements)
+    11. [License](#license)
 
 # rss_ringoccs
 rss_ringoccs is a suite of open-source C and Python-based analysis tools for
@@ -163,7 +177,7 @@ Install the required packages with:
 sudo pkg install gcc python3 gmake git
 ```
 
-Or
+or
 
 ```bash
 sudo pkg install gcc python3 cmake git
@@ -245,7 +259,7 @@ This route is much more of a pain, especially since you need to make sure
 either `CMake` or `GMake` are able to search for `libomp`. We do not recommend
 this method.
 
-#### Building
+#### Compiling on macOS
 
 You may then build `rss_ringoccs` as follows:
 
@@ -279,7 +293,7 @@ Microsoft's app store. None of these alternative installations have been
 tested, nor will they be supported by `rss_ringoccs`. Please use the standard
 version from the official Python website.
 
-#### OpenMP (Windows)
+#### OpenMP using MSVC
 
 Microsoft's `MSVC` has support for OpenMP.
 If you are using `gcc` via MinGW or something similar, OpenMP support is
@@ -289,7 +303,7 @@ See
 [https://clang.llvm.org/docs/OpenMPSupport.html](https://clang.llvm.org/docs/OpenMPSupport.html)
 for details.
 
-#### Compiling (Windows)
+#### Compiling on Windows
 
 For Windows the build instructions are slightly different.
 
@@ -319,7 +333,7 @@ You may then re-build the latest changes using the previous commands.
 
 ## Cleaning / Uninstalling
 
-### Not Windows
+### Using pip and GNU Make
 
 Uninstalling `rss_ringoccs` can be done using pip:
 
@@ -335,7 +349,7 @@ remove this via:
 rm -rf .venv
 ```
 
-### Windows
+### Cleaning on Windows
 
 Type the following in the command prompt.
 
@@ -370,7 +384,7 @@ The `rss_ringoccs User Guide` includes several additional examples of end-to-end
 processing scripts, as well as instructions to enable users to construct their
 own batch end-to-end scripts.
 
-## Help
+## Getting Help
 If you have trouble with installation or execution of the rss_ringoccs package,
 we encourage you to post a issue to
 https://github.com/NASA-Planetary-Science/rss_ringoccs/issues. We will attempt
@@ -397,3 +411,17 @@ This work was supported by the NASA/JPL Cassini mission. We are especially
 grateful  to Linda Spilker and Kathryn Weld for their encouragement and support,
 and to  RSS Team Member Essam Marouf for developing the diffraction
 reconstruction technique that underlies this work.
+
+# License
+    rss_ringoccs is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    rss_ringoccs is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.

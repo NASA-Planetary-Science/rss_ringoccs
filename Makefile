@@ -82,7 +82,9 @@ $(LIBTMPL):
 
 clean:
 	rm -rf $(BUILD_DIR)
-	rm -f $(TARGET_LIB)
+	rm -f $(TARGET_LIB_SHARED)
+	rm -f $(TARGET_LIB_STATIC)
+	rm -rf rss_ringoccs.egg-info
 	$(MAKE) -C libtmpl/ clean BUILD_STATIC=1
 
 install:

@@ -80,13 +80,6 @@ $(BUILD_DIR)/%.c.o: %.c $(LIBTMPL)
 $(LIBTMPL):
 	$(MAKE) -C libtmpl/ BUILD_STATIC=1
 
-clean:
-	rm -rf $(BUILD_DIR)
-	rm -f $(TARGET_LIB_SHARED)
-	rm -f $(TARGET_LIB_STATIC)
-	rm -rf rss_ringoccs.egg-info
-	$(MAKE) -C libtmpl/ clean BUILD_STATIC=1
-
 install:
 	mkdir -p /usr/local/lib/
 	mkdir -p /usr/local/include/rss_ringoccs/
@@ -96,10 +89,16 @@ install:
 	mkdir -p /usr/local/include/libtmpl/
 	cp -r ./libtmpl/include /usr/local/include/libtmpl/
 
-uninstall:
+clean:
 	rm -rf $(BUILD_DIR)
-	rm -f $(TARGET_LIB)
+	rm -f $(TARGET_LIB_SHARED)
+	rm -f $(TARGET_LIB_STATIC)
+	rm -rf rss_ringoccs.egg-info
+	$(MAKE) -C libtmpl/ clean BUILD_STATIC=1
+
+uninstall: clean
 	rm -rf /usr/local/include/rss_ringoccs/
 	rm -rf /usr/local/include/libtmpl/
-	rm -f /usr/local/lib/$(TARGET_LIB)
+	rm -f /usr/local/lib/$(TARGET_LIB_SHARED)
+	rm -f /usr/local/lib/$(TARGET_LIB_STATIC)
 	$(MAKE) -C libtmpl/ uninstall

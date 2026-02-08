@@ -1,10 +1,15 @@
 # Table of Contents
-1. [libtmpl](#rss_ringoccs)
+1. [rss_ringoccs](#rss_ringoccs)
     1. [Introduction](#introduction)
     2. [Building](#building)
-        1. [OpenMP Support](#ppenmp-Support)
+        1. [OpenMP Support](#openmp-Support)
         2. [Obtaining rss_ringoccs](#obtaining-rss_ringoccs)
         3. [Building (GNU / Linux)](#building-gnu--linux)
+        4. [Building (FreeBSD)](#building-freebsd)
+        5. [Building (macOS)](#building-macos)
+            1. [OpenMP using gcc](#openmp-using-gcc)
+            2. [OpenMP using Apple's clang](#openmp-using-apples-clang)
+            3. [Building](#building-1)
 
 # rss_ringoccs
 rss_ringoccs is a suite of open-source C and Python-based analysis tools for
@@ -203,7 +208,7 @@ xcode-select --install
 Enabling OpenMP is definitely more challenging on macOS then the other
 supported operating systems, but it can be done using Homebrew.
 
-#### OpenMP on macOS Using GCC
+#### OpenMP using GCC
 
 Perhaps the easiest method is to simply use a different compiler.
 Apple's `C` compiler does not support OpenMP out of the box.
@@ -223,7 +228,7 @@ Replace this file path with whichever version you installed.
 **NOTE:** Do *not* use `/use/bin/gcc`. On macOS this is still Apple's
 version of `clang`. OpenMP support will not compile if you use this version.
 
-#### OpenMP on macOS Using Apple's C Compiler
+#### OpenMP using Apple's clang
 
 It is possible to use Apple's `C` compiler with OpenMP, but you'll need to
 provide `libomp` yourself. To do this, try the following.

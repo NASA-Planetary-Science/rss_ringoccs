@@ -1,17 +1,17 @@
 # Table of Contents
-[rss_ringoccs](#rssringoccs)
-[Building](#building)
+1. [libtmpl](#rss_ringoccs)
+    1. [Introduction](#introduction)
+    2. [Building](#building)
+        1. [OpenMP Support](#ppenmp-Support)
+        2. [Obtaining rss_ringoccs](#obtaining-rss_ringoccs)
+        3. [Building (GNU / Linux)](#building-gnu--linux)
 
-
-<a name="rssringoccs"/>
 # rss_ringoccs
 rss_ringoccs is a suite of open-source C and Python-based analysis tools for
 Cassini Radio Science (RSS) ring occultations. It was developed by Team Cassini
 at Wellesley College (Sophia Flury, Jolene Fong, Ryan Maguire, and Glenn
 Steranka) under the direction of Richard French, Cassini RSS Team Leader, with
 funding provided by the NASA/JPL Cassini project.
-
-<a name="introduction"/>
 ## Introduction
 The Cassini Radio Science Subsystem (RSS) was used during the Cassini orbital
 tour of Saturn to observe a superb series of ring occultations that resulted in
@@ -38,8 +38,6 @@ already present on NASA's PDS Ring-Moons Node, but we make no claim to having
 achieved the state-of-the-art in every respect. We encourage users to augment
 our algorithms and to report on those improvements, so that they can be
 incorporated in future editions of rss_ringoccs.
-
-<a name="building"/>
 
 ## Building
 
@@ -72,7 +70,7 @@ found in the `requirements.txt` file.
     You do not need to copy the CSPICE header files to `/usr/local/include`
     or any similar directory.
 
-#### OpenMP Support
+### OpenMP Support
 
 It is **HIGHLY** recommended that you compile `rss_ringoccs` with OpenMP
 support. The inner for-loops in the processing steps can be parallelized,
@@ -93,7 +91,7 @@ Note that OpenMP is not a required dependency and both `librssringoccs` and
 Instructions for installing with OpenMP support are provided for each
 supported platform below.
 
-#### Obtaining rss_ringoccs
+### Obtaining rss_ringoccs
 
 To obtain `rss_ringoccs`, clone the repository:
 
@@ -367,7 +365,7 @@ The `rss_ringoccs User Guide` includes several additional examples of end-to-end
 processing scripts, as well as instructions to enable users to construct their
 own batch end-to-end scripts.
 
-## How to (Get) Help
+## Help
 If you have trouble with installation or execution of the rss_ringoccs package,
 we encourage you to post a issue to
 https://github.com/NASA-Planetary-Science/rss_ringoccs/issues. We will attempt

@@ -39,7 +39,7 @@ incorporated in future editions of rss_ringoccs.
 1. A `C` compiler (`gcc`, `clang`, `tcc`, `pcc`, `icx`, and `MSVC` work fine).
 2. `python3` (we have tested versions `3.7` to `3.14`).
 3. `libtmpl`
-4. `setuptools`
+4. `setuptools` (or `distutils` if you are using `python 3.10` or older).
 5. `numpy`
 6. `scipy`
 7. `spiceypy`
@@ -48,13 +48,45 @@ incorporated in future editions of rss_ringoccs.
 10. `git` (to download the source code).
 
 `libtmpl` is provided as a submodule, and the Python dependencies can be
-found in the `requirements.txt` file. `CPSICE` can be obtained through
-the [NAIF website](https://naif.jpl.nasa.gov/naif/toolkit_C.html).
+found in the `requirements.txt` file.
+
+`CPSICE` can be obtained through the
+[NAIF website](https://naif.jpl.nasa.gov/naif/toolkit_C.html).
 **Make sure the CSPICE library files are in your path when building.**
+For non-Windows users, this can be achieved by placing
+the files `cspice.a` and `csupport.a` in `/usr/local/lib`.
+**Note**, `librssringoccs` provides a thin header file with declarations for
+all of the CSPICE functions that are needed (`rss_ringoccs` only needs a few).
+You do
 
-### Obtaining Dependencies
+#### OpenMP Support
 
-#### GNU / Linux
+It is **HIGHLY** recommended that you compile `rss_ringoccs` with OpenMP
+support. The inner for-loops in the processing steps can be parallelized,
+resulting in a significant speed boost (about 30x on a 32-core CPU).
+
+Parallelizing does require more memory due to thread safety issues
+(`n` cores requires `n` times the memory allocated for arrays so that each
+thread has its own private data). This increase is relatively small, the
+highest resolution reconstructions attempted so far required about 2GB of
+memory with 32 threads all firing at once.
+
+Because of this, if you have limited memory (say, less than 8GB of RAM)
+and intend to perform high resolution processing, then you should **not**
+enable OpenMP.
+
+#### Obtaining rss_ringoccs
+
+To obtain `rss_ringoccs`, clone the repository:
+
+```bash
+git clone --recursive http://github.com/NASA-Planetary-Science/rss_ringoccs.git
+cd rss_ringoccs/
+```
+
+This will also clone `libtmpl`, which is the primary `C` depenedency.
+
+### Building (GNU / Linux)
 
 On Debian / Ubuntu-based operating systems, you can install the needed tools
 using:
@@ -63,20 +95,88 @@ using:
 sudo apt install gcc python3 make git
 ```
 
-Most GNU / Linux systems have these packages readily available.
-Use your package manager to obtain them.
+If you prefer to use `CMake`, simply do:
 
-#### FreeBSD
+```bash
+sudo apt install gcc python3 cmake git
+```
 
+Most other GNU / Linux systems have these packages readily available.
+Use your package manager to obtain them (`pacman`, `yum`, etc.).
+
+If you are using `gcc`, then OpenMP support is already included.
+If you are using LLVM's `clang` on Debian GNU / Linux (or similar), install via:
+
+```bash
+sudo apt install libomp-dev
+```
+
+Similar installation instructions exist for other distributions.
+If you are using a compiler other than `gcc` or `clang`, consult the compilers
+manual to see if it supports OpenMP and the `-fopenmp` flag.
+
+To build, run the following:
+
+```bash
+export USE_OPENMP=1
+
+python3 -m venv .venv
+source .venv/bin/activate
+
+python3 -m pip install --upgrade pip
+python3 -m pip install -r requirements.txt
+python3 -m pip install .
+```
+
+If you do not want OpenMP support enable, omit the `export USE_OPENMP=1` line.
+
+### Building (FreeBSD)
+
+The build instructions for FreeBSD are almost identical to GNU / Linux systems.
 On FreeBSD (and other BSDs) you'll need to use `gmake`
-(the Makefile uses `GNU Make` features, the default FreeBSD make will not work).
+(the Makefile uses `GNU Make` features, the default FreeBSD make will not work)
+or `CMake`. The build system does **not** support BSD `make`.
 Install the required packages with:
 
 ```bash
 sudo pkg install gcc python3 gmake git
 ```
 
-#### macOS
+Or
+
+```bash
+sudo pkg install gcc python3 cmake git
+```
+
+To enable OpenMP support, either install `gcc` or a recent version of LLVM:
+
+```bash
+sudo pkg install gcc
+export CC=gcc
+```
+
+or
+
+```bash
+sudo pkg install llvm21
+```
+
+You may then build `rss_ringoccs` as follows:
+
+```bash
+export USE_OPENMP=1
+
+python3 -m venv .venv
+source .venv/bin/activate
+
+python3 -m pip install --upgrade pip
+python3 -m pip install -r requirements.txt
+python3 -m pip install .
+```
+
+If you do not want OpenMP support enable, omit the `export USE_OPENMP=1` line.
+
+### Building (macOS)
 
 On `macOS`, install developer tools with:
 
@@ -84,7 +184,64 @@ On `macOS`, install developer tools with:
 xcode-select --install
 ```
 
-#### Windows
+Enabling OpenMP is definitely more challenging on macOS then the other
+supported operating systems, but it can be done using Homebrew.
+
+#### OpenMP on macOS Using GCC
+
+Perhaps the easiest method is to simply use a different compiler.
+Apple's `C` compiler does not support OpenMP out of the box.
+
+1. Install [Homebrew](https://brew.sh/).
+2. Install `CMake` and `gcc` using homebrew:
+```bash
+    brew install cmake gcc
+```
+3. Set your `CC` environment variable to the `homebrew` version of `gcc`:
+```bash
+    export CC=$(brew --prefix)/bin/gcc-15
+```
+
+Replace this file path with whichever version you installed.
+
+**NOTE:** Do *not* use `/use/bin/gcc`. On macOS this is still Apple's
+version of `clang`. OpenMP support will not compile if you use this version.
+
+#### OpenMP on macOS Using Apple's C Compiler
+
+It is possible to use Apple's `C` compiler with OpenMP, but you'll need to
+provide `libomp` yourself. To do this, try the following.
+
+1. Install [Homebrew](https://brew.sh/).
+2. Install `CMake` and `libomp` using homebrew:
+```bash
+    brew install cmake libomp
+```
+3. Set your `C` environment flags to include `libomp` in their search path.
+4. Edit `setup.py` to include the `-lomp` linker flag.
+
+This route is much more of a pain, especially since you need to make sure
+either `CMake` or `GMake` are able to search for `libomp`. We do not recommend
+this method.
+
+#### Building
+
+You may then build `rss_ringoccs` as follows:
+
+```bash
+export USE_OPENMP=1
+
+python3 -m venv .venv
+source .venv/bin/activate
+
+python3 -m pip install --upgrade pip
+python3 -m pip install -r requirements.txt
+python3 -m pip install .
+```
+
+If you do not want OpenMP support enable, omit the `export USE_OPENMP=1` line.
+
+### Building (Windows)
 
 Lastly, there is some experimental Windows support using `CMake` and `MSVC`
 (other compilers on Windows should work, but have not been tested).
@@ -101,46 +258,6 @@ Microsoft's app store. None of these alternative installations have been
 tested, nor will they be supported by `rss_ringoccs`. Please use the standard
 version from the official Python website.
 
-### OpenMP Support
-
-It is **HIGHLY** recommended that you compile `rss_ringoccs` with OpenMP
-support. The inner for-loops for the processing can be parallelized,
-resulting in a significant speed boost (about 30x on a 32-core CPU).
-
-Parallelizing does require more memory due to thread safety issues
-(`n` cores requires `n` times the memory allocated for arrays so that each
-thread has its own private data).
-Because of this, if you have limited memory (say, less than 8GB of memory)
-and intend to perform high resolution processing, then you should **not**
-enable OpenMP.
-
-#### OpenMP (GNU / Linux)
-
-If you are using `gcc`, you are done. OpenMP support is baked in.
-If you are using LLVM's `clang` on Debian GNU/Linux (or similar), install via:
-
-```bash
-sudo apt install libomp-dev
-```
-
-Similar installation instructions exist for other distributions.
-If you are using a compiler other than `gcc` or `clang`, consult the compilers
-manual to see if it supports OpenMP and the `-fopenmp` flag.
-
-#### OpenMP (FreeBSD)
-
-Install either `gcc` or a recent version of LLVM:
-
-```bash
-sudo pkg install gcc
-```
-
-or
-
-```bash
-sudo pkg install llvm21
-```
-
 #### OpenMP (Windows)
 
 Microsoft's `MSVC` has support for OpenMP.
@@ -150,50 +267,6 @@ also available automatically. With LLVM's `clang` you need to make sure
 See
 [https://clang.llvm.org/docs/OpenMPSupport.html](https://clang.llvm.org/docs/OpenMPSupport.html)
 for details.
-
-#### OpenMP (macOS)
-
-1. Install [Homebrew](https://brew.sh/).
-2. Install `CMake` and `gcc` using homebrew:
-```bash
-    brew install cmake gcc
-```
-3. Set your `CC` environment variable to the `homebrew` version of `gcc`:
-```bash
-    export CC=/opt/homebrew/bin/gcc-15
-```
-Replace this file path with whichever version you installed.
-
-**NOTE:** Do *not* use `/use/bin/gcc`. On macOS this is still Apple's
-version of `clang`. OpenMP support will not compile if you use this version.
-
-### Obtaining rss_ringoccs
-
-To obtain `rss_ringoccs`, clone the repository:
-
-```bash
-git clone --recursive http://github.com/NASA-Planetary-Science/rss_ringoccs.git
-cd rss_ringoccs/
-```
-
-### Compiling (Not Windows)
-
-To build `rss_ringoccs` in a virtual environment, do the following:
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-
-python3 -m pip install --upgrade pip
-python3 -m pip install -r requirements.txt
-USE_OPENMP=1 python3 -m pip install .
-```
-
-If you do not have OpenMP support, replace this last line with:
-
-```bash
-python3 -m pip install .
-```
 
 ### Compiling (Windows)
 

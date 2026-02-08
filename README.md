@@ -248,7 +248,7 @@ python3 -m pip install -r requirements.txt
 python3 -m pip install .
 ```
 
-If you do not want OpenMP support enable, omit the `export USE_OPENMP=1` line.
+If you do not want OpenMP support enabled, omit the `export USE_OPENMP=1` line.
 
 ### Building (Windows)
 
@@ -277,7 +277,7 @@ See
 [https://clang.llvm.org/docs/OpenMPSupport.html](https://clang.llvm.org/docs/OpenMPSupport.html)
 for details.
 
-### Compiling (Windows)
+#### Compiling (Windows)
 
 For Windows the build instructions are slightly different.
 
@@ -313,28 +313,10 @@ Uninstalling `rss_ringoccs` can be done using pip:
 
 ```bash
 python3 -m pip uninstall rss_ringoccs
+make clean
 ```
 
-To clean build files, run:
-
-```bash
-make clean && make clean BUILD_STATIC=1
-```
-
-Additionally, if you installed the `C` library `librssringoccs`
-using `sudo make install`, do:
-
-```bash
-sudo make uninstall && sudo make uninstall BUILD_STATIC=1
-```
-
-To remove Python egg files, type:
-
-```bash
-rm -rf rss_ringoccs.egg-info
-```
-
-Lastly, if you created a virtual environment using `python3 -m venv .venv`,
+Ff you created a virtual environment using `python3 -m venv .venv`,
 remove this via:
 
 ```bash

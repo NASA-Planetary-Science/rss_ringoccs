@@ -44,8 +44,8 @@ rssringoccs_Tau_Resize_Half_Window(
         void *x_tmp, *w_tmp;
 
         /*  Pointers to the arrays for x and the window function.             */
-        double * x_arr = *x_ptr;
-        double * w_func = *w_ptr;
+        double *x_arr = *x_ptr;
+        double *w_func = *w_ptr;
 
         /*  Variables for the window size (in km) and half the number of      *
          *  points that fit inside the window.                                */
@@ -73,49 +73,64 @@ rssringoccs_Tau_Resize_Half_Window(
         w_init = tau->w_km_vals[center];
         nw_pts = TMPL_CAST(w_init / two_dx, size_t);
 
-        /*  Reallocate memory for x and w since the sizes changed.            */
+        /*  Reallocate memory for the x array since the sizes changed.        */
         x_tmp = realloc(x_arr, sizeof(*x_arr) * nw_pts);
-        w_tmp = realloc(w_func, sizeof(*w_func) * nw_pts);
 
         /*  Check to make sure realloc didn't fail.                           */
-        if (!x_tmp || !w_tmp)
+        if (!x_tmp)
         {
             /*  Abort the computation with an error message.                  */
             tau->error_occurred = tmpl_True;
             tau->error_message =
                 "\n\rError Encountered: rss_ringoccs\n"
                 "\r\trssringoccs_Tau_Check_And_Resize_Window\n\n"
-                "\rrealloc failed and returned NULL. Aborting.\n\n";
-
-            /*  Free all variables allocated by malloc. Since we only know    *
-             *  realloc failed for either x_arr or w_func, but not which one, *
-             *  we need to check before freeing. Freeing a pointer after a    *
-             *  successful call to realloc is undefined behavior. First check *
-             *  if x_tmp passed. If it did, free x_tmp instead of x_ptr.      */
-            TMPL_FREE(x_tmp);
+                "\rrealloc failed and returned NULL for x_arr.\n\n";
 
             /*  If we get here, realloc failed for x_arr. This means we can   *
              *  safely free x_arr. x_tmp is just a NULL pointer, do not       *
              *  attempt to free it.                                           */
             TMPL_FREE(x_arr);
 
-            /*  Same check for w_func. It is possible that realloc failed for *
-             *  x_ptr, but worked for w_func. Checking w_tmp tells us the     *
-             *  answer. If w_tmp is NULL, realloc failed for w_func meaning   *
-             *  we should free w_func. If w_tmp is not NULL, then realloc was *
-             *  successful and we must free w_tmp. Check this.                */
-            TMPL_FREE(w_tmp);
-
-            /*  If we get here, realloc failed for w_func. We may safely free *
-             *  w_func. w_tmp is just a NULL pointer, do not free it.         */
+            /*  We have not attempted to realloc w_func yet, meaning this     *
+             *  pointer still points to the initial data. Free this.          */
             TMPL_FREE(w_func);
 
-            /*  At this point, the memory allocated to w_ptr and x_ptr have   *
-             *  been freed. Set these to NULL to prevent the possibility of   *
-             *  freeing these pointers twice.                                 */
+            /*  The memory for x_arr and w_func has been freed, set the       *
+             *  input pointers to NULL to avoid double free's later.          */
             *x_ptr = NULL;
             *w_ptr = NULL;
 
+            /*  realloc failed, which is treated as an error. Return 1.       */
+            return 1;
+        }
+
+        /*  Similarly, reallocate memory for the window function.             */
+        w_tmp = realloc(w_func, sizeof(*w_func) * nw_pts);
+
+        /*  Check to make sure realloc didn't fail.                           */
+        if (!w_tmp)
+        {
+            /*  Abort the computation with an error message.                  */
+            tau->error_occurred = tmpl_True;
+            tau->error_message =
+                "\n\rError Encountered: rss_ringoccs\n"
+                "\r\trssringoccs_Tau_Check_And_Resize_Window\n\n"
+                "\rrealloc failed and returned NULL for w_func.\n\n";
+
+            /*  realloc succeeded with x_arr, but failed with w_func. The     *
+             *  temporary pointer hence points to the valid data, free this.  */
+            TMPL_FREE(x_tmp);
+
+            /*  realloc failed for w_tmp, meaning w_tmp is NULL and w_func    *
+             *  points to valid data. Free this.                              */
+            TMPL_FREE(w_func);
+
+            /*  The memory for x_arr and w_func has been freed, set the       *
+             *  input pointers to NULL to avoid double free's later.          */
+            *x_ptr = NULL;
+            *w_ptr = NULL;
+
+            /*  realloc failed, which is treated as an error. Return 1.       */
             return 1;
         }
 
@@ -128,6 +143,7 @@ rssringoccs_Tau_Resize_Half_Window(
             tau, *x_ptr, *w_ptr, nw_pts, center
         );
 
+        /*  Window resize was needed, return 1.                               */
         return 1;
     }
 

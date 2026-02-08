@@ -4,4 +4,10 @@
 *.hpp linguist-language=C++
 *.pro linguist-language=IDL
 *.py linguist-language=Python
+examples/** linguist-vendored
 graveyard/** linguist-vendored
+kernels/** linguist-vendored
+output/** linguist-vendored
+pipeline/** linguist-vendored
+tables/** linguist-vendored
+tests/** linguist-vendored

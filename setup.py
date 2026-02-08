@@ -91,7 +91,7 @@ def openmp_args():
     if platform.system() == "Darwin":
 
         # The required flags for Apple's clang and GCC differ.
-        cc = os.environ.get("CC")
+        cc = os.environ.get("CC", "")
 
         # GCC on macOS does not need -Xpreprocessor. Adding it breaks the
         # linker when building with OpenMP support.

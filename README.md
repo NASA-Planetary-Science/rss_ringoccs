@@ -239,7 +239,7 @@ Apple's `C` compiler does not support OpenMP out of the box.
 
 Replace this file path with whichever version you installed.
 
-**NOTE:** Do *not* use `/use/bin/gcc`. On macOS this is still Apple's
+**NOTE:** Do *not* use `/usr/bin/gcc`. On macOS this is still Apple's
 version of `clang`. OpenMP support will not compile if you use this version.
 
 #### OpenMP using Apple's clang
@@ -255,8 +255,8 @@ provide `libomp` yourself. To do this, try the following.
 3. Set your `C` environment flags to include `libomp` in their search path:
 ```bash
     export CMAKE_PREFIX_PATH="$(brew --prefix libomp)"
+    export CFLAGS="-I$(brew --prefix libomp)/include"
 ```
-4. Edit `setup.py` to include the `-lomp` linker flag.
 
 This route is much more of a pain, especially since you need to make sure
 either `CMake` or `GMake` are able to search for `libomp`. We do not recommend

@@ -44,7 +44,7 @@ incorporated in future editions of rss_ringoccs.
 6. `scipy`
 7. `spiceypy`
 8. `CSPICE`
-9. `GNU Make` (Unix-like) or `CMake` (Windows).
+9. `GNU Make` (Unix-like) or `CMake` (Windows or Unix-like).
 10. `git` (to download the source code).
 
 `libtmpl` is provided as a submodule, and the Python dependencies can be
@@ -52,16 +52,16 @@ found in the `requirements.txt` file.
 
 `CPSICE` can be obtained through the
 [NAIF website](https://naif.jpl.nasa.gov/naif/toolkit_C.html).
-
-**Make sure the CSPICE library files are in your path when building.**
-For non-Windows users, this can be achieved by placing
-the files `cspice.a` and `csupport.a` in `/usr/local/lib`. For Windows users
-this can be done by adding the extract `cspice\lib` directory to your `PATH`.
-
-**Note**, `librssringoccs` provides a small header file with declarations for
-all of the CSPICE functions that are needed (`rss_ringoccs` only needs a few).
-You do not need to copy the CSPICE header files to `/usr/local/include`
-or any similar directory.
+1.  Make sure the CSPICE library files are in your path when building.
+    For non-Windows users, this can be achieved by placing
+    the files `cspice.a` and `csupport.a` in `/usr/local/lib`.
+    For Windows users this can be done by adding the extracted `cspice\lib`
+    directory to your `PATH`.
+2.  `librssringoccs` provides a small header file with declarations for
+    all of the CSPICE functions that are needed
+    (`rss_ringoccs` only needs a few).
+    You do not need to copy the CSPICE header files to `/usr/local/include`
+    or any similar directory.
 
 #### OpenMP Support
 

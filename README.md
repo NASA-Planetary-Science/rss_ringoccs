@@ -255,7 +255,7 @@ provide `libomp` yourself. To do this, try the following.
 ```bash
 brew install cmake libomp
 ```
-3. Set your `C` environment flags to include `libomp` in their search path:
+3. Set the following environment variables to include `libomp`:
 ```bash
 export CMAKE_PREFIX_PATH="$(brew --prefix libomp)"
 export CPATH="$(brew --prefix libomp)/lib"

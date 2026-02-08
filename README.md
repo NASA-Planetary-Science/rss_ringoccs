@@ -213,6 +213,9 @@ If you do not want OpenMP support enabled, omit the `export USE_OPENMP=1` line.
 
 ### Building (macOS)
 
+**Note** the following commands assume `zsh` or `bash` is is being used.
+`csh` has not been tested, nor have any other shells.
+
 On `macOS`, install developer tools with:
 
 ```bash

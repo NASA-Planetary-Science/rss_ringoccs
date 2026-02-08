@@ -19,11 +19,11 @@
         2. [Cleaning on Windows](#cleaning-on-windows)
     5. [Release Notes](#release-notes)
     6. [Batch Data Processing](#batch-data-processing)
-    7. [Getting Help](#getting-help)
-    8. [Citing rss_ringoccs](#citing-rss_ringoccs)
-    9. [Version History](#version-history)
-    10. [Acknowledgements](#acknowledgements)
-    11. [License](#license)
+    7. [Citing rss_ringoccs](#citing-rss_ringoccs)
+2. [Getting Help](#getting-help)
+3. [Version History](#version-history)
+4. [Acknowledgements](#acknowledgements)
+5. [License](#license)
 
 # rss_ringoccs
 rss_ringoccs is a suite of open-source C and Python-based analysis tools for
@@ -384,18 +384,18 @@ The `rss_ringoccs User Guide` includes several additional examples of end-to-end
 processing scripts, as well as instructions to enable users to construct their
 own batch end-to-end scripts.
 
-## Getting Help
+## Citing rss_ringoccs
+If you use rss_ringoccs as the basis of a publication, please consider
+citing rss_ringoccs using the DOI:10.5281/zenodo.2548947
+
+# Getting Help
 If you have trouble with installation or execution of the rss_ringoccs package,
 we encourage you to post a issue to
 https://github.com/NASA-Planetary-Science/rss_ringoccs/issues. We will attempt
 to respond promptly, and ther users will benefit. Alternatively, you can write
 email directly to Richard French: rfrench_at_wellesley.edu.
 
-## Citing rss_ringoccs
-If you use rss_ringoccs as the basis of a publication, please consider
-citing rss_ringoccs using the DOI:10.5281/zenodo.2548947
-
-## Version History
+# Version History
 
 | Version     | Date                  |
 |-------------|-----------------------|
@@ -406,7 +406,7 @@ citing rss_ringoccs using the DOI:10.5281/zenodo.2548947
 | 1.0         | September 30, 2018    |
 | Pre-Release | April 22, 2018        |
 
-## Acknowledgements
+# Acknowledgements
 This work was supported by the NASA/JPL Cassini mission. We are especially
 grateful  to Linda Spilker and Kathryn Weld for their encouragement and support,
 and to  RSS Team Member Essam Marouf for developing the diffraction

@@ -12,7 +12,7 @@
             3. [Compiling on macOS](#compiling-on-macos)
         6. [Building (Windows)](#building-windows)
             1. [OpenMP using MSVC](#openmp-using-msvc)
-            2. [Compilong on Windows](#compiling-on-windows)
+            2. [Compiling on Windows](#compiling-on-windows)
     3. [Updating](#updating)
     4. [Cleaning / Uninstalling](#cleaning--uninstalling)
         1. [Using pip and GNU Make](#using-pip-and-gnu-make)
@@ -335,14 +335,14 @@ You may then re-build the latest changes using the previous commands.
 
 ### Using pip and GNU Make
 
-Uninstalling `rss_ringoccs` can be done using pip:
+Uninstalling `rss_ringoccs` can be done using pip ang GNU Make:
 
 ```bash
 python3 -m pip uninstall rss_ringoccs
 make clean
 ```
 
-Ff you created a virtual environment using `python3 -m venv .venv`,
+If you created a virtual environment using `python3 -m venv .venv`,
 remove this via:
 
 ```bash

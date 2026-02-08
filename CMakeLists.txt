@@ -74,7 +74,7 @@ if (NOT MSVC)
 
         target_compile_options(
             rssringoccs PRIVATE
-            $<$<CXX_COMPILER_ID:AppleClang>:-Xpreprocessor>
+            $<$<C_COMPILER_ID:AppleClang>:-Xpreprocessor>
             -fopenmp
         )
 

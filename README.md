@@ -234,7 +234,7 @@ Apple's `C` compiler does not support OpenMP out of the box.
 ```
 3. Set your `CC` environment variable to the `homebrew` version of `gcc`:
 ```bash
-    export CC=$(brew --prefix)/bin/gcc-15
+    export CC=$(brew --prefix gcc)/bin/gcc-15
 ```
 
 Replace this file path with whichever version you installed.
@@ -252,7 +252,10 @@ provide `libomp` yourself. To do this, try the following.
 ```bash
     brew install cmake libomp
 ```
-3. Set your `C` environment flags to include `libomp` in their search path.
+3. Set your `C` environment flags to include `libomp` in their search path:
+```bash
+    export CMAKE_PREFIX_PATH="$(brew --prefix libomp)"
+```
 4. Edit `setup.py` to include the `-lomp` linker flag.
 
 This route is much more of a pain, especially since you need to make sure

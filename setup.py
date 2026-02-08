@@ -89,7 +89,18 @@ def openmp_args():
 
     # OpenMP support is also possible on macOS (but tricky to set up).
     if platform.system() == "Darwin":
-        return ["-Xpreprocessor", "-fopenmp"], ["-fopenmp"]
+
+        # The required flags for Apple's clang and GCC differ.
+        cc = os.environ.get("CC")
+
+        # GCC on macOS does not need -Xpreprocessor. Adding it breaks the
+        # linker when building with OpenMP support.
+        if "gcc" in cc:
+            return ["-fopenmp"], ["-fopenmp"]
+
+        # Apple's Clang on macOS requires -Xpreprocessor. Omiting results
+        # in an "unsupported option: -fopenmp" error.
+        return ["-Xpreprocessor", "-fopenmp"], ["-Xpreprocessor", "-fopenmp"]
 
     # On GNU / Linux, GCC has OpenMP support by default, and LLVM's clang
     # has support as well (but you may need to install libomp to use it).

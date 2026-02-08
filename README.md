@@ -79,6 +79,11 @@ Because of this, if you have limited memory (say, less than 8GB of RAM)
 and intend to perform high resolution processing, then you should **not**
 enable OpenMP.
 
+Note that OpenMP is not a required dependency and both `librssringoccs` and
+`libtmpl` will compile with or without OpenMP enabled.
+Instructions for installing with OpenMP support are provided for each
+supported platform below.
+
 #### Obtaining rss_ringoccs
 
 To obtain `rss_ringoccs`, clone the repository:
@@ -132,7 +137,7 @@ python3 -m pip install -r requirements.txt
 python3 -m pip install .
 ```
 
-If you do not want OpenMP support enable, omit the `export USE_OPENMP=1` line.
+If you do not want OpenMP support enabled, omit the `export USE_OPENMP=1` line.
 
 ### Building (FreeBSD)
 
@@ -178,7 +183,7 @@ python3 -m pip install -r requirements.txt
 python3 -m pip install .
 ```
 
-If you do not want OpenMP support enable, omit the `export USE_OPENMP=1` line.
+If you do not want OpenMP support enabled, omit the `export USE_OPENMP=1` line.
 
 ### Building (macOS)
 

@@ -26,6 +26,16 @@
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 #include <stddef.h>
 
+static size_t next_pow_2(size_t n)
+{
+    size_t power = 1;
+
+    while (power < n)
+        power <<= 1;
+
+    return power;
+}
+
 void rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau)
 {
     /*  Variable for indexing for-loops.                                      */
@@ -35,7 +45,7 @@ void rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau)
     size_t nw_pts, half_nw_pts;
 
     /*  Variables for indexing the data and processing region.                */
-    size_t center, shift, start, data_size;
+    size_t center, shift, start, data_size, arr_size;
 
     /*  Some variables needed for reconstruction.                             */
     double w_init, w_thresh;
@@ -62,24 +72,25 @@ void rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau)
     half_nw_pts = TMPL_CAST(w_init / tau->dx_km, size_t);
     nw_pts = 2 * half_nw_pts + 1;
 
-    /*  The integral needs half a window to the left of the starting point,   *
-     *  and half a window to the right of the end point. Shift the start back.*/
-    start = tau->start - half_nw_pts;
-
     /*  The amount of data that the FFTs process is given by the total number *
      *  of points in the data, plus the half-windows to either side.          */
     data_size = tau->n_used + nw_pts - 1;
+    arr_size = next_pow_2(2 * data_size - 1);
 
     /*  Shift factor for converting the FFT data back into natural order.     */
     shift = data_size >> 1;
 
+    /*  The integral needs half a window to the left of the starting point,   *
+     *  and half a window to the right of the end point. Shift the start back.*/
+    start = center - shift;
+
     /*  Allocate memory for the Fresnel kernel and the FFT of the input       *
      *  complex diffracted data.                                              */
-    ker = TMPL_MALLOC(tmpl_ComplexDouble, data_size);
-    fft_in = TMPL_MALLOC(tmpl_ComplexDouble, data_size);
+    ker = TMPL_MALLOC(tmpl_ComplexDouble, arr_size);
+    T_in = TMPL_MALLOC(tmpl_ComplexDouble, arr_size);
 
     /*  Check if either call to malloc failed.                                */
-    if (!ker || !fft_in)
+    if (!ker || !T_in)
     {
         tau->error_occurred = tmpl_True;
         tau->error_message =
@@ -90,16 +101,16 @@ void rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau)
         /*  ker and fft_in are either NULL, or point to valid data allocated  *
          *  with malloc. In either case we may pass the pointers to free.     */
         TMPL_FREE(ker);
-        TMPL_FREE(fft_in);
+        TMPL_FREE(T_in);
         return;
     }
 
     /*  We can reuse the memory allocated to the in variables for the out     *
      *  variables. This saves us calls to malloc and wasteful memory use.     */
     fft_ker = ker;
+    fft_in = T_in;
     fft_out = fft_ker;
-    T_out = fft_in;
-    T_in = tau->T_in + start;
+    T_out = fft_out;
 
     /*  Threshold for computing the Fresnel kernel. Outside of this region    *
      *  the tapering function is zero and kills off the Fresnel kernel, so    *
@@ -126,38 +137,46 @@ void rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau)
         {
             /*  Compute the product w(x) * exp(i psi(x)) * dx.                */
             const double taper = tau->window_func(x, w_init);
-            ker[n] = rssringoccs_Fresnel_Kernel(tau, center, offset);
+            ker[n] = rssringoccs_Fresnel_Kernel(tau, offset, center);
             tmpl_CDouble_MultiplyBy_Real(&ker[n], taper * tau->dx_km);
         }
 
         else
             ker[n] = tmpl_CDouble_Zero;
+
+        T_in[n] = tau->T_in[offset];
+    }
+
+    for (n = data_size; n < arr_size; ++n)
+    {
+        ker[n] = tmpl_CDouble_Zero;
+        T_in[n] = tmpl_CDouble_Zero;
     }
 
     /*  By the convolution theorem, FFT(conv(T, ker)) = FFT(T) * FFT(ker).    *
      *  Compute the FFTs of the complex diffraction data and the kernel.      */
-    tmpl_CDouble_FFT(T_in, fft_in, data_size);
-    tmpl_CDouble_FFT(ker, fft_ker, data_size);
+    tmpl_CDouble_FFT(T_in, fft_in, arr_size);
+    tmpl_CDouble_FFT(ker, fft_ker, arr_size);
 
     /*  Loop through and compute the point-wise product FFT(T) * FFT(ker).    *
      *  Note, we set fft_out to point to the same data as fft_ker, so this    *
      *  computation reads fft_out = fft_ker * fft_in, or fft_ker *= fft_in.   */
-    for (n = 0; n < data_size; ++n)
+    for (n = 0; n < arr_size; ++n)
         tmpl_CDouble_MultiplyBy(&fft_out[n], &fft_in[n]);
 
     /*  The original convulation can be obtained by using the inverse FFT on  *
      *  the pointwise product of the two FFTs.                                */
-    tmpl_CDouble_IFFT(fft_out, T_out, data_size);
+    tmpl_CDouble_IFFT(fft_out, T_out, arr_size);
 
     /*  Shift the data back so that is in natural order.                      */
     for(n = 0; n < tau->n_used; ++n)
     {
-        const size_t i_shift = (half_nw_pts + n + shift) % data_size;
+        const size_t i_shift = (half_nw_pts + n + shift) % arr_size;
         tau->T_out[tau->start + n] = T_out[i_shift];
     }
 
     /*  Free variables allocated by malloc.                                   */
     TMPL_FREE(ker);
-    TMPL_FREE(fft_in);
+    TMPL_FREE(T_in);
 }
 /*  End of rssringoccs_Diffraction_Correction_SimpleFFT.                      */

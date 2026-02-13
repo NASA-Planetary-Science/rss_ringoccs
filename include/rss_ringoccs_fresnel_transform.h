@@ -114,6 +114,16 @@ rssringoccs_Fresnel_Phase_And_Weight(
     double * TMPL_RESTRICT const psi
 );
 
+extern double
+rssringoccs_Fast_Fresnel_Phase_And_Weight(
+    const rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const size_t center,
+    const size_t offset,
+    const double phi_guess,
+    double * TMPL_RESTRICT const weight,
+    double * TMPL_RESTRICT const psi
+);
+
 extern void
 rssringoccs_Fresnel_Transform(
     rssringoccs_TAUObj * TMPL_RESTRICT const tau,

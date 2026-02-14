@@ -83,27 +83,27 @@ void rssringoccs_UranusCSVData_Interpolate_Geo(rssringoccs_UranusCSVData *csv)
     ry = csv->geo->ry_km_vals + csv->geo_increment;
     rz = csv->geo->rz_km_vals + csv->geo_increment;
 
-    tmpl_Double_Sorted_Interp1d(
+    tmpl_Double_Sorted_Linear_Interp1d(
         rho, D, length,
         csv->rho_km_vals, csv->D_km_vals, csv->n_elements
     );
 
-    tmpl_Double_Sorted_Interp1d(
+    tmpl_Double_Sorted_Linear_Interp1d(
         rho, rho_dot, length,
         csv->rho_km_vals, csv->rho_dot_kms_vals, csv->n_elements
     );
 
-    tmpl_Double_Sorted_Interp1d(
+    tmpl_Double_Sorted_Linear_Interp1d(
         rho, rx, length,
         csv->rho_km_vals, csv->rx_km_vals, csv->n_elements
     );
 
-    tmpl_Double_Sorted_Interp1d(
+    tmpl_Double_Sorted_Linear_Interp1d(
         rho, ry, length,
         csv->rho_km_vals, csv->ry_km_vals, csv->n_elements
     );
 
-    tmpl_Double_Sorted_Interp1d(
+    tmpl_Double_Sorted_Linear_Interp1d(
         rho, rz, length,
         csv->rho_km_vals, csv->rz_km_vals, csv->n_elements
     );

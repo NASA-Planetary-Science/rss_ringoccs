@@ -61,19 +61,19 @@ void rssringoccs_CSVData_Interpolate_Tau(rssringoccs_CSVData *csv)
         return;
     }
 
-    tmpl_Double_Sorted_Interp1d(
+    tmpl_Double_Sorted_Linear_Interp1d(
         csv->tau->rho_km_vals, csv->tau->phase_deg_vals, csv->tau->n_elements,
         csv->rho_km_vals, csv->tau_phase_deg_vals, csv->n_elements
     );
 
-    tmpl_Double_Sorted_Interp1d(
+    tmpl_Double_Sorted_Linear_Interp1d(
         csv->tau->rho_km_vals, csv->tau->tau_vals, csv->tau->n_elements,
         csv->rho_km_vals, csv->tau_vals, csv->n_elements
     );
 
     if (csv->use_deprecated)
     {
-        tmpl_Double_Sorted_Interp1d(
+        tmpl_Double_Sorted_Linear_Interp1d(
             csv->tau->rho_km_vals, csv->tau->tau_vals, csv->tau->n_elements,
             csv->rho_km_vals, csv->tau_power_vals, csv->n_elements
         );
@@ -89,7 +89,7 @@ void rssringoccs_CSVData_Interpolate_Tau(rssringoccs_CSVData *csv)
 
     else
     {
-        tmpl_Double_Sorted_Interp1d(
+        tmpl_Double_Sorted_Linear_Interp1d(
             csv->tau->rho_km_vals, csv->tau->power_vals, csv->tau->n_elements,
             csv->rho_km_vals, csv->tau_power_vals, csv->n_elements
         );

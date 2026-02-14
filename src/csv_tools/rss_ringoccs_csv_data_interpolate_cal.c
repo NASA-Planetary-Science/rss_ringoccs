@@ -70,7 +70,7 @@ void rssringoccs_CSVData_Interpolate_Cal(rssringoccs_CSVData *csv)
     for (n = 0; n < csv->cal->n_elements; ++n)
         freq[n] -= csv->cal->f_sky_resid_fit_vals[n];
 
-    tmpl_Double_Sorted_Interp1d(
+    tmpl_Double_Sorted_Linear_Interp1d(
         csv->cal->t_oet_spm_vals, freq, csv->cal->n_elements,
         csv->t_oet_spm_vals, csv->f_sky_hz_vals, csv->n_elements
     );

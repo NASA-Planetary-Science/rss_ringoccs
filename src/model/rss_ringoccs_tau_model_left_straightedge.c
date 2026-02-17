@@ -17,7 +17,7 @@ rssringoccs_Tau_Model_Left_Straightedge(
 {
     tmpl_ComplexDouble transmittance;
     size_t n, nw_pts;
-    double w_max;
+    double w_max, left, right, center;
     tmpl_Bool use_fwd;
 
     if (!tau)
@@ -55,9 +55,26 @@ rssringoccs_Tau_Model_Left_Straightedge(
     if (tau->error_occurred)
         return;
 
-    transmittance = tmpl_CDouble_Rect(parameters->peak_opacity, 0.0);
+    w_max = tmpl_Double_Array_Max(tau->w_km_vals, tau->arr_size);
+    nw_pts = TMPL_CAST(w_max / tau->dx_km, size_t);
 
-    if (parameters->geometry.edge.center <= tau->rho_km_vals[0])
+    if (tau->n_used <= 2 * nw_pts)
+    {
+        tau->error_occurred = tmpl_True;
+        tau->error_message =
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\trssringoccs_Tau_Model_Left_Straightedge\n\n"
+            "\rNot enough data available to perform the forward model.\n";
+
+        return;
+    }
+
+    transmittance = tmpl_CDouble_Rect(parameters->peak_opacity, 0.0);
+    left = tau->rho_km_vals[0];
+    right = tau->rho_km_vals[tau->arr_size - 1];
+    center = parameters->geometry.edge.center;
+
+    if (center <= left)
     {
         for (n = 0; n < tau->arr_size; ++n)
             tau->T_in[n] = tmpl_CDouble_Zero;
@@ -65,49 +82,38 @@ rssringoccs_Tau_Model_Left_Straightedge(
         return;
     }
 
-    if (tau->rho_km_vals[tau->arr_size - 1] <= parameters->geometry.edge.center)
+    else if (right <= center)
     {
         for (n = 0; n < tau->arr_size; ++n)
             tau->T_in[n] = transmittance;
-
-        return;
     }
 
-    n = 0;
-
-    while (tau->rho_km_vals[n] < parameters->geometry.edge.center)
+    else
     {
-        tau->T_in[n] = transmittance;
-        ++n;
+        for (n = 0; n < tau->arr_size; ++n)
+        {
+            if (tau->rho_km_vals[n] < center)
+                tau->T_in[n] = transmittance;
+            else
+                tau->T_in[n] = tmpl_CDouble_Zero;
+        }
     }
-
-    for (; n < tau->arr_size; ++n)
-        tau->T_in[n] = tmpl_CDouble_Zero;
 
     use_fwd = tau->use_fwd;
     tau->use_fwd = tmpl_True;
+
+    for (n = 0; n < tau->arr_size; ++n)
+        tau->w_km_vals[n] *= 2.0;
+
     rssringoccs_Diffraction_Correction(tau);
+
+    for (n = 0; n < tau->arr_size; ++n)
+        tau->w_km_vals[n] *= 0.5;
 
     for (n = 0; n < tau->arr_size; ++n)
     {
         tau->T_in[n] = tau->T_out[n];
         tau->T_out[n] = tmpl_CDouble_Zero;
-    }
-
-    w_max = tmpl_Double_Array_Max(tau->w_km_vals, tau->arr_size);
-
-    nw_pts = TMPL_CAST(w_max / (tau->dx_km * 2.0), size_t);
-
-    if (tau->n_used <= 2*nw_pts)
-    {
-        tau->error_occurred = tmpl_True;
-        tau->error_message =
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_Reconstruction\n\n"
-            "\rNot enough data available to perform the forward model.\n"
-            "\rReturning with T_fwd pointer set to an array of zeroes.\n";
-
-        return;
     }
 
     tau->start = tau->start + nw_pts;

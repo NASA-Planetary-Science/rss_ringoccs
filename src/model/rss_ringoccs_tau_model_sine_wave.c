@@ -54,27 +54,11 @@ rssringoccs_Tau_Model_Sine_Wave(
     if (tau->error_occurred)
         return;
 
-    for (n = 0; n < tau->arr_size; ++n)
-    {   const double x = tau->rho_km_vals[n] - parameters->geometry.edge.center;
-        const double y = tmpl_Double_Sin(3.0 * x);
-        tau->T_in[n] = tmpl_CDouble_Rect(y * y, 0.0);
-    }
-
-    use_fwd = tau->use_fwd;
-    tau->use_fwd = tmpl_True;
-    rssringoccs_Diffraction_Correction(tau);
-
-    for (n = 0; n < tau->arr_size; ++n)
-    {
-        tau->T_in[n] = tau->T_out[n];
-        tau->T_out[n] = tmpl_CDouble_Zero;
-    }
-
-    w_max = tmpl_Double_Array_Max(tau->w_km_vals, tau->arr_size);
+    w_max = 2.0 * tmpl_Double_Array_Max(tau->w_km_vals, tau->arr_size);
 
     nw_pts = TMPL_CAST(w_max / (tau->dx_km * 2.0), size_t);
 
-    if (tau->n_used <= 2*nw_pts)
+    if (tau->n_used <= 2 * nw_pts)
     {
         tau->error_occurred = tmpl_True;
         tau->error_message =
@@ -86,8 +70,33 @@ rssringoccs_Tau_Model_Sine_Wave(
         return;
     }
 
+    for (n = 0; n < tau->arr_size; ++n)
+    {
+        const double x = tau->rho_km_vals[n] - parameters->geometry.edge.center;
+        const double y = tmpl_Double_Sin(x);
+        tau->T_in[n] = tmpl_CDouble_Rect(y * y, 0.0);
+        tau->T_out[n] = tmpl_CDouble_Zero;
+    }
+
+    use_fwd = tau->use_fwd;
+    tau->use_fwd = tmpl_True;
+
+    for (n = 0; n < tau->arr_size; ++n)
+        tau->w_km_vals[n] *= 2.0;
+
+    rssringoccs_Diffraction_Correction(tau);
+
+    for (n = 0; n < tau->arr_size; ++n)
+        tau->w_km_vals[n] *= 0.5;
+
+    for (n = 0; n < tau->arr_size; ++n)
+    {
+        tau->T_in[n] = tau->T_out[n];
+        tau->T_out[n] = tmpl_CDouble_Zero;
+    }
+
     tau->start = tau->start + nw_pts;
-    tau->n_used = tau->n_used - 2*nw_pts;
+    tau->n_used = tau->n_used - 2 * nw_pts;
     tau->use_fwd = tmpl_False;
 
     rssringoccs_Diffraction_Correction(tau);

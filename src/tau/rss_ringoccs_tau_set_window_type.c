@@ -71,7 +71,7 @@ void rssringoccs_Tau_Set_Window_Type(const char *wtype, rssringoccs_TAUObj *tau)
     else if (strcmp(tau_wtype, "kbmd20") == 0)
     {
         tau->normeq = KBMD20NormEQ;
-        tau->window_func = tmpl_Double_Modified_Kaiser_Bessel_2_0;
+        tau->window_func = tmpl_Double_KBMD20;
     }
     else if (strcmp(tau_wtype, "kbmd25") == 0)
     {

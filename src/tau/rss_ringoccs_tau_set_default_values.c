@@ -43,18 +43,18 @@ void rssringoccs_Tau_Set_Default_Values(rssringoccs_TAUObj* tau)
      *  to a larger value may result in poor reconstructions for the most     *
      *  extreme geometries (like Rev133 for Cassini data). Setting it lower   *
      *  doesn't yield much of an improvement either.                          */
-    tau->EPS = 1.0E-6;
+    tau->EPS = 1.0E-8;
 
     /*  Maximum number of iterations allowed in the Newton-Raphson method.    *
      *  The MTR paper says 4 iterations is enough for the Voyager data. For   *
-     *  Cassini the geometry can be a little more extreme and so 6 iterations *
-     *  may be required (like Rev133, for example). We set the max to 6.      */
-    tau->toler = 6U;
+     *  Cassini the geometry can be a little more extreme and so 8 iterations *
+     *  may be required (like Rev133, for example). We set the max to 10.     */
+    tau->toler = 10U;
 
     /*  The default window is the Modified Kaiser-Bessel window with alpha    *
      *  parameter set to 2 pi. The modification makes it so that the edge of  *
      *  windows is precisely zero, instead of 1 / I_0(2 pi) ~ 0.01.           */
-    tau->window_func = tmpl_Double_Modified_Kaiser_Bessel_2_0;
+    tau->window_func = tmpl_Double_KBMD20;
 
     /*  The normalized equivalent width of the selected window function.      */
     tau->normeq = KBMD20NormEQ;

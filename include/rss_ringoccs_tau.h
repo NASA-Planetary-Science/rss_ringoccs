@@ -237,17 +237,17 @@ rssringoccs_Tau_Create_From_DLP(const rssringoccs_DLPObj *dlp, double res);
  *  Purpose:                                                                  *
  *      Copies data and computes variables for a Tau object from DLP data.    *
  *  Arguments:                                                                *
- *      tau (rssringoccs_TAUObj *):                                           *
- *          The Tau object. DLP members will be copied here.                  *
- *      dlp (const rssringoccs_DLPObj *):                                     *
- *          The DLP object whose members are being copied.                    *
+ *      tau (rssringoccs_TAUObj * TMPL_RESTRICT const):                       *
+ *          The Tau object.                                                   *
+ *      dlp (const rssringoccs_DLPObj * TMPL_RESTRICT const):                 *
+ *          The DLP object.                                                   *
  *  Outputs:                                                                  *
  *      None (void).                                                          *
  ******************************************************************************/
 extern void
 rssringoccs_Tau_Copy_DLP_Data(
-    const rssringoccs_DLPObj * TMPL_RESTRICT const dlp,
-    rssringoccs_TAUObj * TMPL_RESTRICT const tau
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const rssringoccs_DLPObj * TMPL_RESTRICT const dlp
 );
 
 /******************************************************************************
@@ -270,20 +270,59 @@ rssringoccs_Tau_Copy_DLP_Members(rssringoccs_TAUObj *tau,
 
 /******************************************************************************
  *  Function:                                                                 *
- *      rssringoccs_Tau_Compute_Data_From_DLP_Members                         *
+ *      rssringoccs_Tau_Compute_Fresnel_Scale                                 *
  *  Purpose:                                                                  *
- *      Computes several Tau variables from the given DLP data.               *
+ *      Computes the Fresnel scale for a Tau object using the data in a DLP.  *
  *  Arguments:                                                                *
- *      tau (rssringoccs_TAUObj *):                                           *
+ *      tau (rssringoccs_TAUObj * TMPL_RESTRICT const):                       *
  *          The Tau object.                                                   *
- *      dlp (const rssringoccs_DLPObj *):                                     *
+ *      dlp (const rssringoccs_DLPObj * TMPL_RESTRICT const):                 *
  *          The DLP object.                                                   *
  *  Outputs:                                                                  *
  *      None (void).                                                          *
+ *  Notes:                                                                    *
+ *      1.) This function checks for NULL pointers before trying to access    *
+ *          data. The error_occurred Boolean is set to true if one of the     *
+ *          required variables is NULL.                                       *
+ *                                                                            *
+ *      2.) Both the tau and dlp pointers are declared with TMPL_RESTRICT. On *
+ *          compilers supporting the C99 standard, this expands to "restrict" *
+ *          meaning tau and dlp must point to different objects. This should  *
+ *          be true regardless in order to properly use this function.        *
  ******************************************************************************/
 extern void
-rssringoccs_Tau_Compute_Data_From_DLP_Members(rssringoccs_TAUObj *tau,
-                                              const rssringoccs_DLPObj *dlp);
+rssringoccs_Tau_Compute_Fresnel_Scale(
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const rssringoccs_DLPObj * TMPL_RESTRICT const dlp
+);
+
+/******************************************************************************
+ *  Function:                                                                 *
+ *      rssringoccs_Tau_Compute_Complex_Diffraction                           *
+ *  Purpose:                                                                  *
+ *      Computes the complex diffracted transmittance using the data in a DLP.*
+ *  Arguments:                                                                *
+ *      tau (rssringoccs_TAUObj * TMPL_RESTRICT const):                       *
+ *          The Tau object.                                                   *
+ *      dlp (const rssringoccs_DLPObj * TMPL_RESTRICT const):                 *
+ *          The DLP object.                                                   *
+ *  Outputs:                                                                  *
+ *      None (void).                                                          *
+ *  Notes:                                                                    *
+ *      1.) This function checks for NULL pointers before trying to access    *
+ *          data. The error_occurred Boolean is set to true if one of the     *
+ *          required variables is NULL.                                       *
+ *                                                                            *
+ *      2.) Both the tau and dlp pointers are declared with TMPL_RESTRICT. On *
+ *          compilers supporting the C99 standard, this expands to "restrict" *
+ *          meaning tau and dlp must point to different objects. This should  *
+ *          be true regardless in order to properly use this function.        *
+ ******************************************************************************/
+extern void
+rssringoccs_Tau_Compute_Complex_Diffraction(
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const rssringoccs_DLPObj * TMPL_RESTRICT const dlp
+);
 
 /******************************************************************************
  *  Function:                                                                 *

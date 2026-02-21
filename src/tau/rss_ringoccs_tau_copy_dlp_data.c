@@ -88,8 +88,8 @@
 /*  Function for copying the relevant DLP data to a tau object.               */
 void
 rssringoccs_Tau_Copy_DLP_Data(
-    const rssringoccs_DLPObj * TMPL_RESTRICT const dlp,
-    rssringoccs_TAUObj * TMPL_RESTRICT const tau
+    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+    const rssringoccs_DLPObj * TMPL_RESTRICT const dlp
 )
 {
     /*  If the tau pointer is NULL, we can't access it. Return.               */
@@ -154,7 +154,8 @@ rssringoccs_Tau_Copy_DLP_Data(
     rssringoccs_Tau_Copy_DLP_Members(tau, dlp);
 
     /*  Other variables need to be computed from the DLP data. Do this.       */
-    rssringoccs_Tau_Compute_Data_From_DLP_Members(tau, dlp);
+    rssringoccs_Tau_Compute_Fresnel_Scale(tau, dlp);
+    rssringoccs_Tau_Compute_Complex_Diffraction(tau, dlp);
 
     /*  Lastly, compute dx from the first and zeroth entries of rho_km_vals.  */
     tau->dx_km = tau->rho_km_vals[1] - tau->rho_km_vals[0];

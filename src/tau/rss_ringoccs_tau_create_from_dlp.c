@@ -65,7 +65,7 @@ rssringoccs_Tau_Create_From_DLP(const rssringoccs_DLPObj *dlp, double res)
      *  from the data in the DLP object. The only variables that are not set  *
      *  after this function is called (and are still their zero values or     *
      *  NULL) are the reconstruction and forward modeling variables.          */
-    rssringoccs_Tau_Copy_DLP_Data(dlp, tau);
+    rssringoccs_Tau_Copy_DLP_Data(tau, dlp);
 
     /*  Check the data for possible errors before returning.                  */
     rssringoccs_Tau_Check_Geometry(tau);

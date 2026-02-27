@@ -123,7 +123,7 @@ void rssringoccs_Tau_Check_Data_Range(rssringoccs_TAUObj * const tau)
 
     /*  The data should be correctly oriented by the time this function is    *
      *  called, meaning dx_km must be positive.                               */
-    if (tau->dx_km <= 0.0)
+    if (tau->dlp->dx_km <= 0.0)
     {
         tau->error_occurred = tmpl_True;
         tau->error_message =
@@ -141,7 +141,7 @@ void rssringoccs_Tau_Check_Data_Range(rssringoccs_TAUObj * const tau)
     /*  Set the rcpr_two_dx value from the tau object. Division is more       *
      *  expensive computationally than multiplication, so we store the        *
      *  reciprocal of 2 * dx and compute with this.                           */
-    rcpr_two_dx = 0.5 / tau->dx_km;
+    rcpr_two_dx = 0.5 / tau->dlp->dx_km;
 
     /*  Loop through every point, check window width, and ensure you have     *
      *  enough data to the left and right for data processing.                */
@@ -174,7 +174,7 @@ void rssringoccs_Tau_Check_Data_Range(rssringoccs_TAUObj * const tau)
 
         /*  If current_max goes between the size of the array, we have        *
          *  illegal values. Return with error.                                */
-        if (current_max > tau->arr_size)
+        if (current_max > tau->dlp->arr_size)
         {
             tau->error_occurred = tmpl_True;
             tau->error_message =

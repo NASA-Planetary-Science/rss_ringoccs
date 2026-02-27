@@ -35,6 +35,7 @@ void rssringoccs_DLP_Init(rssringoccs_DLPObj * const dlp)
     dlp->ry_km_vals = NULL;
     dlp->rz_km_vals = NULL;
 
+    /*  The rho_km_vals pointer is currently NULL, set the displacement to 0. */
     dlp->dx_km = 0.0;
 
     /*  Set the indexing variables to be zero as well.                        */

@@ -51,7 +51,7 @@ rssringoccs_Fresnel_Transform_Newton_Filon01(
         midpoint = tmpl_CDouble_Midpoint(left, right);
 
         integrand = tmpl_CDouble_Filon01_Integrand(
-            midpoint, left_psi, right_psi, tau->dx_km
+            midpoint, left_psi, right_psi, tau->dlp->dx_km
         );
 
         tmpl_CDouble_AddTo(&tau->T_out[center], &integrand);
@@ -60,7 +60,7 @@ rssringoccs_Fresnel_Transform_Newton_Filon01(
         {
             const double average = 0.5 * (left_scale + right_scale);
             integrand = tmpl_Double_Filon01_Integrand(
-                average, left_psi, right_psi, tau->dx_km
+                average, left_psi, right_psi, tau->dlp->dx_km
             );
 
             tmpl_CDouble_AddTo(&norm, &integrand);

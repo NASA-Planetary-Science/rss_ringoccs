@@ -103,6 +103,6 @@ rssringoccs_Fresnel_Transform_Newton_Riemann(
     /*  If the integral is not normalized, we simply need to scale by the     *
      *  "dx" factor that is included in the Riemann sum.                      */
     else
-        tmpl_CDouble_MultiplyBy_Real(&tau->T_out[center], tau->dx_km);
+        tmpl_CDouble_MultiplyBy_Real(&tau->T_out[center], tau->dlp->dx_km);
 }
 /*  End of rssringoccs_Fresnel_Transform_Newton_Riemann.                      */

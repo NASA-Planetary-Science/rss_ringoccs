@@ -293,7 +293,7 @@ rssringoccs_Fresnel_Transform(rssringoccs_TAUObj * TMPL_RESTRICT const tau,
     {
         /*  The scale factor for the integral is (1 + i) / 2F and the Riemann *
          *  sum contains a dx factor, so the final scale is (1 + i) dx / 2F.  */
-        scale = 0.5 * tau->dx_km * rcpr_fresnel_scale;
+        scale = 0.5 * tau->dlp->dx_km * rcpr_fresnel_scale;
     }
 
     /*  Multiply result by the coefficient found in the Fresnel inverse.      */

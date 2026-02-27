@@ -273,7 +273,7 @@ rssringoccs_Fresnel_Transform_Newton_Filon11(
         right = tmpl_CDouble_Multiply_Real(right_scale, tau->T_in[offset + 1]);
 
         integrand = tmpl_CDouble_Filon11_Integrand(
-            left, right, left_psi, right_psi, tau->dx_km
+            left, right, left_psi, right_psi, tau->dlp->dx_km
         );
 
         tmpl_CDouble_AddTo(&tau->T_out[center], &integrand);
@@ -281,7 +281,7 @@ rssringoccs_Fresnel_Transform_Newton_Filon11(
         if (tau->use_norm)
         {
             integrand = tmpl_Double_Filon11_Integrand(
-                left_scale, right_scale, left_psi, right_psi, tau->dx_km
+                left_scale, right_scale, left_psi, right_psi, tau->dlp->dx_km
             );
 
             tmpl_CDouble_AddTo(&norm, &integrand);

@@ -64,7 +64,7 @@ rssringoccs_Fresnel_Transform_Newton_Filon12(
             left_psi,
             mid_psi,
             right_psi,
-            tau->dx_km
+            tau->dlp->dx_km
         );
 
         tmpl_CDouble_AddTo(&tau->T_out[center], &integrand);

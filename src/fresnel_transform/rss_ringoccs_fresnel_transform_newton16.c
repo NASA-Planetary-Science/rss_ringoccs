@@ -221,7 +221,7 @@ rssringoccs_Fresnel_Transform_Newton16(
     const size_t l_ind = center - nw_pts;
     const size_t r_ind = center + nw_pts;
 
-    const double width_actual = 16.0 * tau->dx_km * TMPL_CAST(shift, double);
+    const double width_actual = 16.0*tau->dlp->dx_km*TMPL_CAST(shift, double);
     const double rcpr_width_actual = 1.0 / width_actual;
 
     tmpl_ComplexDouble norm = tmpl_CDouble_One;

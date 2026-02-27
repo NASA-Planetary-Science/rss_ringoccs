@@ -56,7 +56,7 @@ rssringoccs_Fresnel_Transform_Newton4(
     const size_t r_ind = center + nw_pts;
     size_t offset = center - 2 * shift;
 
-    const double width_actual = 4.0 * tau->dx_km * TMPL_CAST(shift, double);
+    const double width_actual = 4.0*tau->dlp->dx_km*TMPL_CAST(shift, double);
     const double rcpr_width_actual = 1.0 / width_actual;
 
     tau->T_out[center] = tmpl_CDouble_Zero;
@@ -110,13 +110,13 @@ rssringoccs_Fresnel_Transform_Newton4(
         r_next = tmpl_CDouble_Multiply_Real(w_r_next, tau->T_in[r_ind - n]);
 
         integrand = tmpl_CDouble_Filon11_Integrand(
-            l_current, l_next, psi_l_current, psi_l_next, tau->dx_km
+            l_current, l_next, psi_l_current, psi_l_next, tau->dlp->dx_km
         );
 
         tmpl_CDouble_AddTo(&tau->T_out[center], &integrand);
 
         integrand = tmpl_CDouble_Filon11_Integrand(
-            r_next, r_current, psi_r_next, psi_r_current, tau->dx_km
+            r_next, r_current, psi_r_next, psi_r_current, tau->dlp->dx_km
         );
 
         tmpl_CDouble_AddTo(&tau->T_out[center], &integrand);
@@ -136,7 +136,7 @@ rssringoccs_Fresnel_Transform_Newton4(
         psi_l_current,
         psi[2],
         psi_r_current,
-        tau->dx_km
+        tau->dlp->dx_km
     );
 
     tmpl_CDouble_AddTo(&tau->T_out[center], &integrand);

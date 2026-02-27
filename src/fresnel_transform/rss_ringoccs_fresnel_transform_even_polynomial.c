@@ -270,7 +270,7 @@ rssringoccs_Fresnel_Transform_Even_Polynomial(
     tmpl_ComplexDouble integrand;
 
     /*  Multiplicative factor that appears outside of the integral.           */
-    const double scale_factor = 0.5 * tau->dx_km / tau->F_km_vals[center];
+    const double scale_factor = 0.5 * tau->dlp->dx_km / tau->F_km_vals[center];
 
     /*  Division is more expensive than multiplication, so store the          *
      *  reciprocal of D as a variable and compute with that.                  */

@@ -60,9 +60,7 @@ typedef struct rssringoccs_ModelParameters_Def {
             double center;
         } edge;
         struct {
-            double left;
-            double right;
-            size_t number_of_waves;
+            double frequency;
         } wave;
     } geometry;
 } rssringoccs_ModelParameters;

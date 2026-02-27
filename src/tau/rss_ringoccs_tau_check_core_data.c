@@ -19,14 +19,14 @@
  *                      rss_ringoccs_tau_check_core_data                      *
  ******************************************************************************
  *  Purpose:                                                                  *
- *      Checks the core pointers in a tau object to see if they are NULL.     *
+ *      Checks the core pointers in a Tau object to see if they are NULL.     *
  ******************************************************************************
  *                             DEFINED FUNCTIONS                              *
  ******************************************************************************
  *  Function Name:                                                            *
  *      rssringoccs_Tau_Check_Core_Data                                       *
  *  Purpose:                                                                  *
- *      Runs an error check on a tau object, ensuring the core arrays are not *
+ *      Runs an error check on a tau object, ensuring the core variables are  *
  *      not NULL.                                                             *
  *  Arguments:                                                                *
  *      tau (rssringoccs_TAUObj * const):                                     *
@@ -42,13 +42,14 @@
  *          error. It is the user's responsibility to check that this Boolean *
  *          is false after using this function. Trying to access the pointers *
  *          in a tau object may result in a segmentation fault otherwise.     *
- *      2.) No data is freed if an error occurs. The caller must do this.     *
+ *                                                                            *
+ *      2.) No data is free'd if an error occurs. The caller must do this.    *
  ******************************************************************************
  *                               DEPENDENCIES                                 *
  ******************************************************************************
  *  1.) tmpl_bool.h:                                                          *
  *          Header file providing Booleans (True and False).                  *
- *  2.) rss_ringoccs_tau.h:                                                   *
+ *  2.) rss_ringoccs_tauobj.h:                                                *
  *          Header file where the rssringoccs_TAUObj type is provided.        *
  ******************************************************************************
  *  Author:     Ryan Maguire                                                  *
@@ -63,23 +64,27 @@
 /*  Booleans provided here.                                                   */
 #include <libtmpl/include/tmpl_bool.h>
 
-/*  Header file with the Tau definition and function prototype.               */
-#include <rss_ringoccs/include/rss_ringoccs_tau.h>
+/*  Header file with the Tau object definition.                               */
+#include <rss_ringoccs/include/types/rss_ringoccs_tauobj.h>
+
+/*  Function prototype / forward declaration.                                 */
+extern void rssringoccs_Tau_Check_Core_Data(rssringoccs_TAUObj * const tau);
 
 /*  Macro for checking the data in a tau object. This is to save repetitive   *
  *  code, it simply checks if a certain pointer in tau is NULL. The #var      *
- *  preprocessor directive treats var as a string literal. Note that since    *
- *  this macro ends with braces, we do not need semi-colons when calling it.  */
+ *  preprocessor directive treats var as a string literal.                    */
 #define RSSRINGOCCS_TAU_CHECK_DATA_MEMBER(var)                                 \
-    if (!tau->var)                                                             \
-    {                                                                          \
-        tau->error_occurred = tmpl_True;                                       \
-        tau->error_message =                                                   \
-            "\n\rError Encountered: rss_ringoccs\n"                            \
-            "\r\trssringoccs_Tau_Check_Core_Data\n\n"                          \
-            "\rInput tau has "#var" set to NULL.\n\n";                         \
-        return;                                                                \
-    }
+    do {                                                                       \
+        if (!tau->var)                                                         \
+        {                                                                      \
+            tau->error_occurred = tmpl_True;                                   \
+            tau->error_message =                                               \
+                "\n\rError Encountered: rss_ringoccs\n"                        \
+                "\r\trssringoccs_Tau_Check_Core_Data\n\n"                      \
+                "\rInput tau has "#var" set to NULL.\n\n";                     \
+            return;                                                            \
+        }                                                                      \
+    } while(0)
 /*  End of RSSRINGOCCS_TAU_CHECK_DATA_MEMBER macro.                           */
 
 /*  Function for checking the core pointers in a tau object.                  */
@@ -93,24 +98,14 @@ void rssringoccs_Tau_Check_Core_Data(rssringoccs_TAUObj * const tau)
     if (tau->error_occurred)
         return;
 
-    /*  The following are the core pointers in a tau object, the data that is *
-     *  explicitly needed for diffraction correction. If any of them are NULL *
-     *  this is to be treated as an error. Note that the macro defined above, *
-     *  RSSRINGOCCS_TAU_CHECK_DATA_MEMBER, contains an if-then with braces.   *
-     *  Because of this we do not need semi-colons at the end of these lines. */
-    RSSRINGOCCS_TAU_CHECK_DATA_MEMBER(T_in)
-    RSSRINGOCCS_TAU_CHECK_DATA_MEMBER(T_out)
-    RSSRINGOCCS_TAU_CHECK_DATA_MEMBER(rho_km_vals)
-    RSSRINGOCCS_TAU_CHECK_DATA_MEMBER(F_km_vals)
-    RSSRINGOCCS_TAU_CHECK_DATA_MEMBER(phi_deg_vals)
-    RSSRINGOCCS_TAU_CHECK_DATA_MEMBER(k_vals)
-    RSSRINGOCCS_TAU_CHECK_DATA_MEMBER(rho_dot_kms_vals)
-    RSSRINGOCCS_TAU_CHECK_DATA_MEMBER(B_deg_vals)
-    RSSRINGOCCS_TAU_CHECK_DATA_MEMBER(D_km_vals)
-    RSSRINGOCCS_TAU_CHECK_DATA_MEMBER(w_km_vals)
-    RSSRINGOCCS_TAU_CHECK_DATA_MEMBER(rx_km_vals)
-    RSSRINGOCCS_TAU_CHECK_DATA_MEMBER(ry_km_vals)
-    RSSRINGOCCS_TAU_CHECK_DATA_MEMBER(rz_km_vals)
+    /*  Inspect each of the following variables. None of these should be NULL.*/
+    RSSRINGOCCS_TAU_CHECK_DATA_MEMBER(dlp);
+    RSSRINGOCCS_TAU_CHECK_DATA_MEMBER(T_in);
+    RSSRINGOCCS_TAU_CHECK_DATA_MEMBER(T_out);
+    RSSRINGOCCS_TAU_CHECK_DATA_MEMBER(F_km_vals);
+    RSSRINGOCCS_TAU_CHECK_DATA_MEMBER(k_vals);
+    RSSRINGOCCS_TAU_CHECK_DATA_MEMBER(w_km_vals);
+    RSSRINGOCCS_TAU_CHECK_DATA_MEMBER(tau_threshold_vals);
 }
 /*  End of rssringoccs_Tau_Check_Core_Data.                                   */
 

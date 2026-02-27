@@ -108,7 +108,7 @@ void rssringoccs_Tau_Check_Azimuth_Angle(rssringoccs_TAUObj * const tau)
     }
 
     /*  Compute the minimum and maximum of phi_deg_vals.                      */
-    tmpl_Double_Array_MinMax(tau->phi_deg_vals, tau->arr_size, &min, &max);
+    tmpl_Double_Array_MinMax(dlp->phi_deg_vals, dlp->arr_size, &min, &max);
 
     /*  Neither of these should be NaN (Not-a-Number). Treat this as an error.*/
     if (tmpl_Double_Is_NaN(min) || tmpl_Double_Is_NaN(max))

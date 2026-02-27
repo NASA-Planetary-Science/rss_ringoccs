@@ -189,7 +189,7 @@ rssringoccs_Fresnel_Kernel(const rssringoccs_TAUObj * const tau,
         tau->k_vals[val0],
         &geo,
         tau->root_finding_epsilon,
-        tau->toler
+        tau->root_finding_max_iters
     );
 
     /*  The inverse transform is approximated by negating the Fresnel phase:  *

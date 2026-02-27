@@ -54,7 +54,7 @@ void rssringoccs_Tau_Set_Default_Values(rssringoccs_TAUObj* tau)
      *  may include points with d^2 psi / d phi^2 = 0. Newton's method will   *
      *  diverge here, but Halley's method still converges, but needs more     *
      *  iterations. We set the maximum number of iterations to 16 to be safe. */
-    tau->toler = 16U;
+    tau->root_finding_max_iters = 16U;
 
     /*  The default window is the Modified Kaiser-Bessel window with alpha    *
      *  parameter set to 2 pi. The modification makes it so that the edge of  *

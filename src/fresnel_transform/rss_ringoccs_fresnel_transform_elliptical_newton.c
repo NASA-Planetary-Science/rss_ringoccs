@@ -69,7 +69,7 @@ rssringoccs_Fresnel_Transform_Elliptical_Newton(
             tau->ry_km_vals[center],
             tau->rz_km_vals[center],
             tau->root_finding_epsilon,
-            tau->toler
+            tau->root_finding_max_iters
         );
 
         D = tmpl_Double_Cyl_Fresnel_Observer_Distance(

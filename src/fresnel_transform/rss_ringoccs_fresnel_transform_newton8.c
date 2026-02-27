@@ -117,7 +117,7 @@ rssringoccs_Fresnel_Transform_Newton8(
             tau->k_vals[center],
             &geo,
             tau->root_finding_epsilon,
-            tau->toler
+            tau->root_finding_max_iters
         );
     }
 

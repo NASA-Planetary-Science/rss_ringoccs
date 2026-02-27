@@ -59,7 +59,7 @@ rssringoccs_Fresnel_Transform_Perturbed_Newton(
             tau->B_deg_vals[center],    /* Ring opening angle. */
             tau->D_km_vals[center],     /* Observer distance. */
             tau->root_finding_epsilon,  /* Allowed error. */
-            tau->toler                  /* Max number of iterations. */
+            tau->root_finding_max_iters /* Max number of iterations. */
         );
 
         /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */

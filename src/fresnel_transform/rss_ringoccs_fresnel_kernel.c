@@ -157,20 +157,20 @@ rssringoccs_Fresnel_Kernel(const rssringoccs_TAUObj * const tau,
      *  intercept point. Instead we compute using the full Fresnel kernel.    *
      *  This requires each vector in their Cartesian coordinates.             */
     geo.position = tmpl_3DDouble_Rect(
-        tau->rx_km_vals[val0],
-        tau->ry_km_vals[val0],
-        tau->rz_km_vals[val0]
+        tau->dlp->rx_km_vals[val0],
+        tau->dlp->ry_km_vals[val0],
+        tau->dlp->rz_km_vals[val0]
     );
 
     /*  The intercept point lies in the ring plane, we can compute using      *
      *  polar coordinates (with the angle in degrees).                        */
     geo.intercept = tmpl_2DDouble_Polard(
-        tau->rho_km_vals[val0], tau->phi_deg_vals[val0]
+        tau->dlp->rho_km_vals[val0], tau->dlp->phi_deg_vals[val0]
     );
 
     /*  The dummy variable of integration also lies in the ring plane.        */
     geo.dummy = tmpl_2DDouble_Polard(
-        tau->rho_km_vals[val1], tau->phi_deg_vals[val0]
+        tau->dlp->rho_km_vals[val1], tau->dlp->phi_deg_vals[val0]
     );
 
     /*  The full Fresnel kernel is given by the stationary phase method:      *

@@ -51,33 +51,33 @@ rssringoccs_Fresnel_Transform_Elliptical_Newton(
         /*  Calculate the stationary value of psi with respect to phi.        */
         ecc_cos_factor = 1.0 +
             tau->eccentricity *
-                tmpl_Double_Cos(tau->phi_deg_vals[center] - tau->periapse);
+                tmpl_Double_Cos(tau->dlp->phi_deg_vals[center] - tau->periapse);
 
-        semi_major = tau->rho_km_vals[center] * ecc_cos_factor / ecc_factor;
+        semi_major = tau->dlp->rho_km_vals[center] * ecc_cos_factor/ecc_factor;
 
         /*  Calculate the stationary value of psi with respect to phi.        */
         phi = tmpl_Double_Stationary_Elliptical_Fresnel_Psi_Newton(
             tau->k_vals[center],
-            tau->rho_km_vals[center],
-            tau->rho_km_vals[offset],
-            tau->phi_deg_vals[offset],
-            tau->phi_deg_vals[offset],
-            tau->B_deg_vals[center],
+            tau->dlp->rho_km_vals[center],
+            tau->dlp->rho_km_vals[offset],
+            tau->dlp->phi_deg_vals[offset],
+            tau->dlp->phi_deg_vals[offset],
+            tau->dlp->B_deg_vals[center],
             tau->eccentricity,
             tau->periapse,
-            tau->rx_km_vals[center],
-            tau->ry_km_vals[center],
-            tau->rz_km_vals[center],
+            tau->dlp->rx_km_vals[center],
+            tau->dlp->ry_km_vals[center],
+            tau->dlp->rz_km_vals[center],
             tau->root_finding_epsilon,
             tau->root_finding_max_iters
         );
 
         D = tmpl_Double_Cyl_Fresnel_Observer_Distance(
-            tau->rho_km_vals[offset],
+            tau->dlp->rho_km_vals[offset],
             phi,
-            tau->rx_km_vals[center],
-            tau->ry_km_vals[center],
-            tau->rz_km_vals[center]
+            tau->dlp->rx_km_vals[center],
+            tau->dlp->ry_km_vals[center],
+            tau->dlp->rz_km_vals[center]
         );
 
         ecc_cos_factor = 1.0 +
@@ -88,10 +88,10 @@ rssringoccs_Fresnel_Transform_Elliptical_Newton(
         psi = tmpl_Double_Ideal_Cyl_Fresnel_Psi_Deg(
             tau->k_vals[center],
             rho,
-            tau->rho_km_vals[offset],
+            tau->dlp->rho_km_vals[offset],
             phi,
-            tau->phi_deg_vals[offset],
-            tau->B_deg_vals[center],
+            tau->dlp->phi_deg_vals[offset],
+            tau->dlp->B_deg_vals[center],
             D
         );
 

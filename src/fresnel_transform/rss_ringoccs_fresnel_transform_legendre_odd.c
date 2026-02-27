@@ -91,9 +91,9 @@ rssringoccs_Fresnel_Transform_Legendre_Odd(
 
     /*  Division is more expension than division, so store the reciprocal     *
      *  of D as a variable and compute with that.                             */
-    const double rcpr_D = 1.0 / tau->D_km_vals[center];
+    const double rcpr_D = 1.0 / tau->dlp->D_km_vals[center];
     const double factor = 0.5 * tau->dx_km / tau->F_km_vals[center];
-    const double kD = tau->k_vals[center]*tau->D_km_vals[center];
+    const double kD = tau->k_vals[center]*tau->dlp->D_km_vals[center];
 
     /*  Initialize T_out to zero so we can loop over later.                   */
     tau->T_out[center] = tmpl_CDouble_Zero;

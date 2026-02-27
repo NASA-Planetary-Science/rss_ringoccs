@@ -39,7 +39,7 @@
  *          tmpl_Double_Is_NaN:                                               *
  *              Checks if a double is Not-a-Number.                           *
  *  Method:                                                                   *
- *      Check the eccentricity for simple errors:                             *
+ *      Check the periapse for simple errors:                                 *
  *          1.) Check that sigma is not NaN.                                  *
  *          2.) Make sure that sigma is not infinity.                         *
  *          3.) The periapse should be between -2 pi and 2 pi.                *

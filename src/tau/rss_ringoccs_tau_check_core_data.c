@@ -45,7 +45,7 @@
  *                                                                            *
  *      2.) No data is free'd if an error occurs. The caller must do this.    *
  ******************************************************************************
- *                               DEPENDENCIES                                 *
+ *                                DEPENDENCIES                                *
  ******************************************************************************
  *  1.) tmpl_bool.h:                                                          *
  *          Header file providing Booleans (True and False).                  *

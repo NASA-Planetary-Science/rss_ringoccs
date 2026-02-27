@@ -16,10 +16,10 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
- *                    rss_ringoccs_tau_check_keywords                         *
+ *                      rss_ringoccs_tau_check_keywords                       *
  ******************************************************************************
  *  Purpose:                                                                  *
- *      Checks all of the keywords specified by a user for the tau object.    *
+ *      Checks all of the keywords specified by a user for the Tau object.    *
  ******************************************************************************
  *                             DEFINED FUNCTIONS                              *
  ******************************************************************************
@@ -28,7 +28,7 @@
  *  Purpose:                                                                  *
  *      Runs an error check on a rssringoccs_TAUObj pointer.                  *
  *  Arguments:                                                                *
- *      tau (rssringoccs_TAUObj *):                                           *
+ *      tau (rssringoccs_TAUObj * const):                                     *
  *          A pointer to a rssringoccs_TAUObj.                                *
  *  Output:                                                                   *
  *      None (void).                                                          *
@@ -62,7 +62,7 @@
  *      3.) This function sets the error_occurred Boolean to true on failure. *
  *          Inspect this (and the error_message) after calling this function. *
  ******************************************************************************
- *                               DEPENDENCIES                                 *
+ *                                DEPENDENCIES                                *
  ******************************************************************************
  *  1.) tmpl_bool.h:                                                          *
  *          Header file providing Booleans.                                   *
@@ -75,6 +75,8 @@
 
 /*  Include the necessary header files.                                       */
 #include <libtmpl/include/tmpl_bool.h>
+
+/*  Tau object and helper functions provided here.                            */
 #include <rss_ringoccs/include/rss_ringoccs_tau.h>
 
 /*  Function for checking the keyword arguments of a tau object.              */
@@ -89,6 +91,7 @@ void rssringoccs_Tau_Check_Keywords(rssringoccs_TAUObj * const tau)
     if (tau->error_occurred)
         return;
 
+    /*  Run error checks on all of the keywords in the Tau object.            */
     rssringoccs_Tau_Check_Allan_Deviation(tau);
     rssringoccs_Tau_Check_Resolution(tau);
     rssringoccs_Tau_Check_Eccentricity(tau);

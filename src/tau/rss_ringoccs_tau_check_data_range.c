@@ -51,7 +51,7 @@
  *          memory and initialized. If w_km_vals is NULL, this will be        *
  *          treated as an error.                                              *
  ******************************************************************************
- *                               DEPENDENCIES                                 *
+ *                                DEPENDENCIES                                *
  ******************************************************************************
  *  1.) tmpl_bool.h:                                                          *
  *          Header file providing Booleans (True and False).                  *

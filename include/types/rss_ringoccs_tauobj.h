@@ -27,6 +27,9 @@
 #ifndef RSS_RINGOCCS_TYPES_TAUOBJ_H
 #define RSS_RINGOCCS_TYPES_TAUOBJ_H
 
+/*  Booleans (True and False) are given here.                                 */
+#include <libtmpl/include/tmpl_bool.h>
+
 /*  Complex numbers found here.                                               */
 #include <libtmpl/include/types/tmpl_complex_double.h>
 

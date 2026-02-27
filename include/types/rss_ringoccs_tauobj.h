@@ -23,7 +23,7 @@
  *  Date:       December 28, 2025                                             *
  ******************************************************************************/
 
-/*  Include guard to prevent including this file.                             */
+/*  Include guard to prevent including this file twice.                       */
 #ifndef RSS_RINGOCCS_TYPES_TAUOBJ_H
 #define RSS_RINGOCCS_TYPES_TAUOBJ_H
 
@@ -36,32 +36,21 @@
 /*  The psitype enum is defined here.                                         */
 #include <rss_ringoccs/include/types/rss_ringoccs_psitype.h>
 
+/*  DLP object typedef provided here.                                         */
+#include <rss_ringoccs/include/types/rss_ringoccs_dlpobj.h>
+
 /*  Structure that contains all of the necessary data. This includes geometry *
  *  data, diffraction data, diffraction corrected data, and forward modeling  *
  *  data.                                                                     */
 typedef struct rssringoccs_TAUObj_Def {
+    rssringoccs_DLPObj *dlp;
     tmpl_ComplexDouble *T_in;
     tmpl_ComplexDouble *T_out;
     tmpl_ComplexDouble *T_fwd;
-    double *rho_km_vals;
     double *F_km_vals;
-    double *phi_deg_vals;
     double *k_vals;
-    double *rho_dot_kms_vals;
-    double *B_deg_vals;
-    double *D_km_vals;
     double *w_km_vals;
-    double *t_oet_spm_vals;
-    double *t_ret_spm_vals;
-    double *t_set_spm_vals;
-    double *rho_corr_pole_km_vals;
-    double *rho_corr_timing_km_vals;
     double *tau_threshold_vals;
-    double *phi_rl_deg_vals;
-    double *rx_km_vals;
-    double *ry_km_vals;
-    double *rz_km_vals;
-    double dx_km;
     double normeq;
     double sigma;
     double eccentricity;
@@ -73,7 +62,6 @@ typedef struct rssringoccs_TAUObj_Def {
     unsigned int root_finding_max_iters;
     size_t start;
     size_t n_used;
-    size_t arr_size;
     tmpl_WindowFunctionDouble window_func;
     enum rssringoccs_PsiType psinum;
     tmpl_Bool use_norm;

@@ -100,17 +100,17 @@ rssringoccs_Fresnel_Transform_Newton8(
     for (n = 0; n < 8; ++n)
     {
         geo.position = tmpl_3DDouble_Rect(
-            tau->rx_km_vals[ind[n]],
-            tau->ry_km_vals[ind[n]],
-            tau->rz_km_vals[ind[n]]
+            tau->dlp->rx_km_vals[ind[n]],
+            tau->dlp->ry_km_vals[ind[n]],
+            tau->dlp->rz_km_vals[ind[n]]
         );
 
         geo.intercept = tmpl_2DDouble_Polard(
-            tau->rho_km_vals[ind[n]], tau->phi_deg_vals[ind[n]]
+            tau->dlp->rho_km_vals[ind[n]], tau->dlp->phi_deg_vals[ind[n]]
         );
 
         geo.dummy = tmpl_2DDouble_Polard(
-            tau->rho_km_vals[center], tau->phi_deg_vals[ind[n]]
+            tau->dlp->rho_km_vals[center], tau->dlp->phi_deg_vals[ind[n]]
         );
 
         psi[n] = tmpl_Double_Stationary_Cyl_Fresnel_Psi(

@@ -30,7 +30,7 @@ rssringoccs_Fresnel_Transform_Newton_Filon12(
     size_t offset = center - (nw_pts >> 1);
     size_t n;
 
-    double phi_s = tau->phi_deg_vals[offset];
+    double phi_s = tau->dlp->phi_deg_vals[offset];
 
     tau->T_out[center] = tmpl_CDouble_Zero;
 

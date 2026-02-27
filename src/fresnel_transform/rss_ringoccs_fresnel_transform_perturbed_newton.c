@@ -46,31 +46,31 @@ rssringoccs_Fresnel_Transform_Perturbed_Newton(
     for (m = 0; m < n_pts; ++m)
     {
         /*  Factor for the polynomial perturbation.                           */
-        x = (tau->rho_km_vals[center]-tau->rho_km_vals[offset]) /
-            tau->D_km_vals[center];
+        x = (tau->dlp->rho_km_vals[center] - tau->dlp->rho_km_vals[offset]) /
+            tau->dlp->D_km_vals[center];
 
         /*  Calculate the stationary value of psi with respect to phi.        */
         phi = tmpl_Double_Ideal_Stationary_Cyl_Fresnel_Phi_Newton_Deg(
-            tau->k_vals[center],        /* Wavenumber. */
-            tau->rho_km_vals[center],   /* Dummy radius. */
-            tau->rho_km_vals[offset],   /* Ring radius. */
-            tau->phi_deg_vals[offset],  /* Dummy azimuthal angle. */
-            tau->phi_deg_vals[offset],  /* Ring azimuth angle. */
-            tau->B_deg_vals[center],    /* Ring opening angle. */
-            tau->D_km_vals[center],     /* Observer distance. */
-            tau->root_finding_epsilon,  /* Allowed error. */
-            tau->root_finding_max_iters /* Max number of iterations. */
+            tau->k_vals[center],            /* Wavenumber. */
+            tau->dlp->rho_km_vals[center],  /* Dummy radius. */
+            tau->dlp->rho_km_vals[offset],  /* Ring radius. */
+            tau->dlp->phi_deg_vals[offset], /* Dummy azimuthal angle. */
+            tau->dlp->phi_deg_vals[offset], /* Ring azimuth angle. */
+            tau->dlp->B_deg_vals[center],   /* Ring opening angle. */
+            tau->dlp->D_km_vals[center],    /* Observer distance. */
+            tau->root_finding_epsilon,      /* Allowed error. */
+            tau->root_finding_max_iters     /* Max number of iterations. */
         );
 
         /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */
         psi = tmpl_Double_Ideal_Cyl_Fresnel_Psi_Deg(
-            tau->k_vals[center],        /* Wavenumber. */
-            tau->rho_km_vals[center],   /* Dummy radius. */
-            tau->rho_km_vals[offset],   /* Ring radius. */
-            phi,                        /* Stationary azimuth angle. */
-            tau->phi_deg_vals[offset],  /* Ring azimuth angle. */
-            tau->B_deg_vals[center],    /* Ring opening angle. */
-            tau->D_km_vals[center]      /* Observer distance. */
+            tau->k_vals[center],            /* Wavenumber. */
+            tau->dlp->rho_km_vals[center],  /* Dummy radius. */
+            tau->dlp->rho_km_vals[offset],  /* Ring radius. */
+            phi,                            /* Stationary azimuth angle. */
+            tau->dlp->phi_deg_vals[offset], /* Ring azimuth angle. */
+            tau->dlp->B_deg_vals[center],   /* Ring opening angle. */
+            tau->dlp->D_km_vals[center]     /* Observer distance. */
         );
 
         /*  Use Horner's method to compute the polynomial.                    */
@@ -78,7 +78,7 @@ rssringoccs_Fresnel_Transform_Perturbed_Newton(
         poly  = poly*x + tau->perturb[2];
         poly  = poly*x + tau->perturb[1];
         poly  = poly*x + tau->perturb[0];
-        poly *= tau->k_vals[center] * tau->D_km_vals[center];
+        poly *= tau->k_vals[center] * tau->dlp->D_km_vals[center];
         psi  += poly;
 
         /*  Compute the left side of exp(-ipsi) using Euler's Formula.        */

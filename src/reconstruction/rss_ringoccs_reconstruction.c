@@ -2,6 +2,7 @@
 #include <libtmpl/include/tmpl_complex.h>
 #include <libtmpl/include/compat/tmpl_calloc.h>
 #include <libtmpl/include/compat/tmpl_malloc.h>
+#include <rss_ringoccs/include/rss_ringoccs_dlp.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 #include <stdlib.h>
 
@@ -16,20 +17,30 @@ void rssringoccs_Reconstruction(rssringoccs_TAUObj *tau)
     if (!tau)
         return;
 
+    rssringoccs_DLP_Check_Core_Data(tau->dlp);
+    rssringoccs_DLP_Check_Geometry(tau->dlp);
+    rssringoccs_DLP_Check_Occ_Type(tau->dlp);
+
+    if (tau->dlp->error_occurred)
+    {
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tau->dlp->error_message;
+    }
+
     rssringoccs_Tau_Check_Keywords(tau);
-    rssringoccs_Tau_Check_Occ_Type(tau);
     rssringoccs_Tau_Get_Window_Width(tau);
+
+    /*  Check that the pointers to the data are not NULL.                     */
+    rssringoccs_Tau_Check_Core_Data(tau);
+
+    /*  Check to ensure you have enough data to process.                      */
     rssringoccs_Tau_Check_Data_Range(tau);
 
+    /*  The previous functions set the error_occurred Boolean on failure.     */
     if (tau->error_occurred)
         return;
 
     tau->T_out = TMPL_MALLOC(tmpl_ComplexDouble, tau->dlp->arr_size);
-
-    rssringoccs_Tau_Check_Core_Data(tau);
-
-    if (tau->error_occurred)
-        return;
 
     temp_fwd = tau->use_fwd;
     tau->use_fwd = tmpl_False;

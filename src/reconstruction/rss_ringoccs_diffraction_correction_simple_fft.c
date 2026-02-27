@@ -46,13 +46,11 @@ void rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau)
     tmpl_ComplexDouble *T_in, *ker, *T_out;
     tmpl_ComplexDouble *fft_in, *fft_ker, *fft_out;
 
-    /*  Check that the pointers to the data are not NULL.                     */
-    rssringoccs_Tau_Check_Core_Data(tau);
+    /*  Check that tau isn't NULL before trying to access its members.        */
+    if (!tau)
+        return;
 
-    /* Check to ensure you have enough data around the central data point.    */
-    rssringoccs_Tau_Check_Data_Range(tau);
-
-    /*  The previous functions set the error_occurred Boolean on failure.     */
+    /*  If an error occurred before we got to this function, abort.           */
     if (tau->error_occurred)
         return;
 

@@ -45,14 +45,7 @@ rssringoccs_Diffraction_Correction_Polynomial_Newton(
     if (!tau)
         return;
 
-    /*  Check that the pointers to the data are not NULL.                     */
-    rssringoccs_Tau_Check_Core_Data(tau);
-
-    /* Check to ensure you have enough data to process the transform.         */
-    rssringoccs_Tau_Check_Data_Range(tau);
-
-    /*  The previous functions set the error_occurred Boolean to true on      *
-     *  error. Do not proceed if an error occurred, check for this.           */
+    /*  If an error occurred before we got to this function, abort.           */
     if (tau->error_occurred)
         return;
 

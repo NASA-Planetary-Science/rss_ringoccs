@@ -125,16 +125,6 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
     if (tau->error_occurred)
         return;
 
-    /*  Check that the pointers to the data are not NULL.                     */
-    rssringoccs_Tau_Check_Core_Data(tau);
-
-    /* Check to ensure you have enough data to process.                       */
-    rssringoccs_Tau_Check_Data_Range(tau);
-
-    /*  The above routines set the error_occurred flag on error. Check.       */
-    if (tau->error_occurred)
-        return;
-
     /*  The "is_even" Boolean tells us whether the degree of the polynomial   *
      *  is even, not the number of coefficients. Thus, if a quartic           *
      *  Legendre polynomial is desired, is_even will be true. The number of   *

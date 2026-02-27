@@ -80,7 +80,6 @@ void rssringoccs_Reconstruction(rssringoccs_TAUObj *tau)
         tau->T_in  = temp_T_in;
     }
 
-    rssringoccs_Tau_Finish(tau);
     return;
 }
 
@@ -106,7 +105,6 @@ void rssringoccs_Reconstruction(rssringoccs_TAUObj *tau)
 
     rssringoccs_Tau_Model_Left_Straightedge(tau, &parameters);
 
-    rssringoccs_Tau_Finish(tau);
     return;
 }
 

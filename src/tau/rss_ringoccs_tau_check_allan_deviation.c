@@ -53,7 +53,7 @@
  *          Icarus Vol. 68, Pages 120-166.                                    *
  *                                                                            *
  *          The Allan deviation for Voyager is described here. Cassini uses   *
- *          the same definition.                                              *
+ *          the same definition but a different sigma value.                  *
  ******************************************************************************
  *                                DEPENDENCIES                                *
  ******************************************************************************
@@ -69,7 +69,7 @@
  ******************************************************************************
  *                                History                                     *
  ******************************************************************************
- *  2025/04/10 (Ryan Maguire):                                                *
+ *  2026/02/27: Ryan Maguire                                                  *
  *      Simple clean-up, added doc-string.                                    *
  ******************************************************************************/
 
@@ -128,7 +128,7 @@ void rssringoccs_Tau_Check_Allan_Deviation(rssringoccs_TAUObj * const tau)
         tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Check_Allan_Deviation\n\n"
-            "\rInput sigma (Allan deviation) is not positive.\n\n";
+            "\rAllan deviation is not positive.\n\n";
 
         return;
     }

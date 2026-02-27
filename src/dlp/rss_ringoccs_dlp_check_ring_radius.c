@@ -16,20 +16,20 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
- *                 rss_ringoccs_tau_check_ring_intercept_point                *
+ *                 rss_ringoccs_dlp_check_ring_intercept_point                *
  ******************************************************************************
  *  Purpose:                                                                  *
- *      Checks for errors in the ring radius found in a tau object.           *
+ *      Checks for errors in the ring radius found in a dlp object.           *
  ******************************************************************************
  *                             DEFINED FUNCTIONS                              *
  ******************************************************************************
  *  Function Name:                                                            *
- *      rssringoccs_Tau_Check_Ring_Radius                                     *
+ *      rssringoccs_DLP_Check_Ring_Radius                                     *
  *  Purpose:                                                                  *
  *      Checks for a few common errors found in the ring radius.              *
  *  Arguments:                                                                *
- *      tau (rssringoccs_TAUObj * const):                                     *
- *          A pointer to a tau object.                                        *
+ *      dlp (rssringoccs_DLPObj * const):                                     *
+ *          A pointer to a dlp object.                                        *
  *  Output:                                                                   *
  *      None (void).                                                          *
  *  Called Functions:                                                         *
@@ -40,7 +40,7 @@
  *      1.) It is assumed that the ring radius has been allocated memory      *
  *          and the data has been initialized. If rho_km_vals is NULL, the    *
  *          error_occurred Boolean will be set to True.                       *
- *      2.) This function checks for NULL pointers. If tau is NULL, nothing   *
+ *      2.) This function checks for NULL pointers. If dlp is NULL, nothing   *
  *          is done. If rho_km_vals is NULL, an error message is set.         *
  *      3.) If the error_occurred Boolean was previously set to true, this    *
  *          function does nothing and skips all checks.                       *
@@ -58,8 +58,8 @@
  *          Header file providing Booleans.                                   *
  *  2.) tmpl_math.h:                                                          *
  *          tmpl_Double_Array_Min declared here.                              *
- *  3.) rss_ringoccs_tau.h:                                                   *
- *          Tau definition and prototype for the function given here.         *
+ *  3.) rss_ringoccs_dlp.h:                                                   *
+ *          DLP definition and prototype for the function given here.         *
  ******************************************************************************
  *  Author:     Ryan Maguire                                                  *
  *  Date:       April 11, 2025                                                *
@@ -71,50 +71,50 @@
 /*  tmpl_Double_Array_Min declared here, computes the minimum of an array.    */
 #include <libtmpl/include/tmpl_math.h>
 
-/*  Header file with the Tau definition and function prototype.               */
-#include <rss_ringoccs/include/rss_ringoccs_tau.h>
+/*  Header file with the DLP definition and function prototype.               */
+#include <rss_ringoccs/include/rss_ringoccs_dlp.h>
 
-/*  Checks the ring radius in a tau object for errors.                        */
-void rssringoccs_Tau_Check_Ring_Radius(rssringoccs_TAUObj * const tau)
+/*  Checks the ring radius in a dlp object for errors.                        */
+void rssringoccs_DLP_Check_Ring_Radius(rssringoccs_DLPObj * const dlp)
 {
     /*  Variable for the minimum of the rho_km_vals array.                    */
     double min;
 
     /*  If the input is NULL there is nothing to be done.                     */
-    if (!tau)
+    if (!dlp)
         return;
 
     /*  Do not attempt to inspect the data if an error has already occurred.  */
-    if (tau->error_occurred)
+    if (dlp->error_occurred)
         return;
 
     /*  This function should only be called after the rho_km_vals array was   *
      *  allocated memory and the data initialized. NULL pointers are hence    *
      *  treated as errors.                                                    */
-    if (!tau->rho_km_vals)
+    if (!dlp->rho_km_vals)
     {
-        tau->error_occurred = tmpl_True;
-        tau->error_message =
+        dlp->error_occurred = tmpl_True;
+        dlp->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_Tau_Check_Ring_Radius\n\n"
+            "\r\trssringoccs_DLP_Check_Ring_Radius\n\n"
             "\rrho_km_vals is NULL.\n\n";
 
         return;
     }
 
     /*  Compute the minimum of rho_km_vals. This must be positive.            */
-    min = tmpl_Double_Array_Min(tau->rho_km_vals, tau->arr_size);
+    min = tmpl_Double_Array_Min(dlp->rho_km_vals, dlp->arr_size);
 
     /*  rho_km_vals is a distance and it must be positive. Check for this.    */
     if (min <= 0.0)
     {
-        tau->error_occurred = tmpl_True;
-        tau->error_message =
+        dlp->error_occurred = tmpl_True;
+        dlp->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_Tau_Check_Ring_Radius\n\n"
+            "\r\trssringoccs_DLP_Check_Ring_Radius\n\n"
             "\rRing radius (rho_km_vals) has non-positive values.\n\n";
 
         return;
     }
 }
-/*  End of rssringoccs_Tau_Check_Ring_Radius.                                 */
+/*  End of rssringoccs_DLP_Check_Ring_Radius.                                 */

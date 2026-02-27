@@ -16,21 +16,21 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
- *                    rss_ringoccs_tau_check_azimuth_angle                    *
+ *                    rss_ringoccs_dlp_check_azimuth_angle                    *
  ******************************************************************************
  *  Purpose:                                                                  *
- *      Checks for errors in the ring azimuth angle found in a tau object.    *
+ *      Checks for errors in the ring azimuth angle found in a DLP object.    *
  ******************************************************************************
  *                             DEFINED FUNCTIONS                              *
  ******************************************************************************
  *  Function Name:                                                            *
- *      rssringoccs_Tau_Check_Azimuth_Angle                                   *
+ *      rssringoccs_DLP_Check_Azimuth_Angle                                   *
  *  Purpose:                                                                  *
  *      Checks for a few common errors found in the ring azimuth angle of     *
- *      a tau object.                                                         *
+ *      a dlp object.                                                         *
  *  Arguments:                                                                *
- *      tau (rssringoccs_TAUObj * const):                                     *
- *          A pointer to a tau object.                                        *
+ *      dlp (rssringoccs_DLPObj * const):                                     *
+ *          A pointer to a DLP object.                                        *
  *  Output:                                                                   *
  *      None (void).                                                          *
  *  Called Functions:                                                         *
@@ -45,7 +45,7 @@
  *      1.) It is assumed that the ring azimuth angle has been allocated      *
  *          memory and the data has been initialized. If phi_deg_vals is NULL,*
  *          the error_occurred Boolean will be set to True.                   *
- *      2.) This function checks for NULL pointers. If tau is NULL, nothing   *
+ *      2.) This function checks for NULL pointers. If dlp is NULL, nothing   *
  *          is done. If phi_deg_vals is NULL, an error message is set.        *
  *      3.) If the error_occurred Boolean was previously set to true, this    *
  *          function does nothing and skips all checks.                       *
@@ -63,11 +63,16 @@
  *          Header file providing Booleans.                                   *
  *  2.) tmpl_math.h:                                                          *
  *          tmpl_Double_Array_MinMax declared here.                           *
- *  3.) rss_ringoccs_tau.h:                                                   *
- *          Tau definition and prototype for the function given here.         *
+ *  3.) rss_ringoccs_dlp.h:                                                   *
+ *          DLP definition and prototype for the function given here.         *
  ******************************************************************************
  *  Author:     Ryan Maguire                                                  *
  *  Date:       April 11, 2025                                                *
+ ******************************************************************************
+ *                              Revision History                              *
+ ******************************************************************************
+ *  2026/02/27: Ryan Maguire                                                  *
+ *      Made this a DLP error check, moved to the dlp folder.                 *
  ******************************************************************************/
 
 /*  Booleans provided here.                                                   */
@@ -76,32 +81,32 @@
 /*  tmpl_Double_Array_MinMax declared here, computes min and max of an array. */
 #include <libtmpl/include/tmpl_math.h>
 
-/*  Header file with the Tau definition and function prototype.               */
-#include <rss_ringoccs/include/rss_ringoccs_tau.h>
+/*  Header file with the DLP definition and function prototype.               */
+#include <rss_ringoccs/include/rss_ringoccs_dlp.h>
 
-/*  Checks the ring azimuth angle in a tau object for simple errors.          */
-void rssringoccs_Tau_Check_Azimuth_Angle(rssringoccs_TAUObj * const tau)
+/*  Checks the ring azimuth angle in a dlp object for simple errors.          */
+void rssringoccs_DLP_Check_Azimuth_Angle(rssringoccs_DLPObj * const dlp)
 {
     /*  Variables for the min and max of the phi_deg_vals array.              */
     double min, max;
 
     /*  If the input is NULL there is nothing to be done.                     */
-    if (!tau)
+    if (!dlp)
         return;
 
     /*  Do not attempt to inspect the data if an error has already occurred.  */
-    if (tau->error_occurred)
+    if (dlp->error_occurred)
         return;
 
     /*  This function should only be called after the phi_deg_vals array was  *
      *  allocated memory and the data initialized. NULL pointers are hence    *
      *  treated as errors.                                                    */
-    if (!tau->phi_deg_vals)
+    if (!dlp->phi_deg_vals)
     {
-        tau->error_occurred = tmpl_True;
-        tau->error_message =
+        dlp->error_occurred = tmpl_True;
+        dlp->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_Tau_Check_Azimuth_Angle\n\n"
+            "\r\trssringoccs_DLP_Check_Azimuth_Angle\n\n"
             "\rphi_deg_vals is NULL.\n\n";
 
         return;
@@ -113,10 +118,10 @@ void rssringoccs_Tau_Check_Azimuth_Angle(rssringoccs_TAUObj * const tau)
     /*  Neither of these should be NaN (Not-a-Number). Treat this as an error.*/
     if (tmpl_Double_Is_NaN(min) || tmpl_Double_Is_NaN(max))
     {
-        tau->error_occurred = tmpl_True;
-        tau->error_message =
+        dlp->error_occurred = tmpl_True;
+        dlp->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_Tau_Check_Azimuth_Angle\n\n"
+            "\r\trssringoccs_DLP_Check_Azimuth_Angle\n\n"
             "\rAzimuth angle (phi) contains NaN values.\n\n";
 
         return;
@@ -125,10 +130,10 @@ void rssringoccs_Tau_Check_Azimuth_Angle(rssringoccs_TAUObj * const tau)
     /*  Similarly, neither should be infinite. Treat this as an error too.    */
     if (tmpl_Double_Is_Inf(min) || tmpl_Double_Is_Inf(max))
     {
-        tau->error_occurred = tmpl_True;
-        tau->error_message =
+        dlp->error_occurred = tmpl_True;
+        dlp->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_Tau_Check_Azimuth_Angle\n\n"
+            "\r\trssringoccs_DLP_Check_Azimuth_Angle\n\n"
             "\rAzimuth angle (phi) contains infinite values.\n\n";
 
         return;
@@ -138,10 +143,10 @@ void rssringoccs_Tau_Check_Azimuth_Angle(rssringoccs_TAUObj * const tau)
      *  min(phi_deg_vals) < -360, then an error likely occurred.              */
     if (min < -360.0)
     {
-        tau->error_occurred = tmpl_True;
-        tau->error_message =
+        dlp->error_occurred = tmpl_True;
+        dlp->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_Tau_Check_Azimuth_Angle\n\n"
+            "\r\trssringoccs_DLP_Check_Azimuth_Angle\n\n"
             "\rAzimuth angle (phi) has values less than -360 degrees.\n\n";
 
         return;
@@ -150,11 +155,11 @@ void rssringoccs_Tau_Check_Azimuth_Angle(rssringoccs_TAUObj * const tau)
     /*  Similarly, the maximum angle should not be larger than 360.           */
     if (max > 360.0)
     {
-        tau->error_occurred = tmpl_True;
-        tau->error_message =
+        dlp->error_occurred = tmpl_True;
+        dlp->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_Tau_Check_Azimuth_Angle\n\n"
+            "\r\trssringoccs_DLP_Check_Azimuth_Angle\n\n"
             "\rAzimuth angle (phi) has angles greater than +360 degrees.\n\n";
     }
 }
-/*  End of rssringoccs_Tau_Check_Azimuth_Angle.                               */
+/*  End of rssringoccs_DLP_Check_Azimuth_Angle.                               */

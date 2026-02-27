@@ -1,9 +1,9 @@
 /******************************************************************************
- *                                 LICENSE                                    *
+ *                                  LICENSE                                   *
  ******************************************************************************
  *  This file is part of rss_ringoccs.                                        *
  *                                                                            *
- *  rss_ringoccs is free software: you can redistribute it and/or modify it   *
+ *  rss_ringoccs is free software: you can redistribute it and/or modify      *
  *  it under the terms of the GNU General Public License as published by      *
  *  the Free Software Foundation, either version 3 of the License, or         *
  *  (at your option) any later version.                                       *
@@ -16,26 +16,25 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
- *  Author:     Ryan Maguire, Wellesley College                               *
+ *  Author:     Ryan Maguire                                                  *
  *  Date:       January 5, 2020                                               *
  ******************************************************************************/
 #include <libtmpl/include/compat/tmpl_free.h>
-#include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
-#include <rss_ringoccs/include/rss_ringoccs_tau.h>
+#include <rss_ringoccs/include/rss_ringoccs_dlp.h>
 
-void rssringoccs_Tau_Destroy(rssringoccs_TAUObj **tau)
+void rssringoccs_DLP_Destroy(rssringoccs_DLPObj **dlp)
 {
-    rssringoccs_TAUObj *tau_inst;
+    rssringoccs_DLPObj *dlp_inst;
 
-    if (!tau)
+    if (!dlp)
         return;
 
-    tau_inst = *tau;
+    dlp_inst = *dlp;
 
-    if (!tau_inst)
+    if (!dlp_inst)
         return;
 
-    rssringoccs_Tau_Destroy_Members(tau_inst);
-    TMPL_FREE(tau_inst);
+    rssringoccs_DLP_Destroy_Members(dlp_inst);
+    TMPL_FREE(dlp_inst);
 }
-/*  End of rssringoccs_Tau_Destroy.                                           */
+/*  End of rssringoccs_DLP_Destroy.                                           */

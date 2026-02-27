@@ -1,19 +1,19 @@
-/*  Header file with the Tau definition and function prototype.               */
-#include <rss_ringoccs/include/rss_ringoccs_tau.h>
+/*  Header file with the DLP definition and function prototype.               */
+#include <rss_ringoccs/include/rss_ringoccs_dlp.h>
 
-/*  Function for checking Tau parameters for possible errors.                 */
-void rssringoccs_Tau_Check_Geometry(rssringoccs_TAUObj * const tau)
+/*  Function for checking DLP parameters for possible errors.                 */
+void rssringoccs_DLP_Check_Geometry(rssringoccs_DLPObj * const dlp)
 {
-    if (!tau)
+    if (!dlp)
         return;
 
-    if (tau->error_occurred)
+    if (dlp->error_occurred)
         return;
 
-    rssringoccs_Tau_Check_Azimuth_Angle(tau);
-    rssringoccs_Tau_Check_Displacement(tau);
-    rssringoccs_Tau_Check_Opening_Angle(tau);
-    rssringoccs_Tau_Check_Ring_Distance(tau);
-    rssringoccs_Tau_Check_Ring_Radius(tau);
+    rssringoccs_DLP_Check_Azimuth_Angle(dlp);
+    rssringoccs_DLP_Check_Displacement(dlp);
+    rssringoccs_DLP_Check_Opening_Angle(dlp);
+    rssringoccs_DLP_Check_Ring_Distance(dlp);
+    rssringoccs_DLP_Check_Ring_Radius(dlp);
 }
-/*  End of rssringoccs_Tau_Check_Geometry.                                    */
+/*  End of rssringoccs_DLP_Check_Geometry.                                    */

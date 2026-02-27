@@ -1,9 +1,9 @@
 /******************************************************************************
- *                                 LICENSE                                    *
+ *                                  LICENSE                                   *
  ******************************************************************************
  *  This file is part of rss_ringoccs.                                        *
  *                                                                            *
- *  rss_ringoccs is free software: you can redistribute it and/or modify it   *
+ *  rss_ringoccs is free software: you can redistribute it and/or modify      *
  *  it under the terms of the GNU General Public License as published by      *
  *  the Free Software Foundation, either version 3 of the License, or         *
  *  (at your option) any later version.                                       *
@@ -16,40 +16,37 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
- *  Author:     Ryan Maguire, Wellesley College                               *
+ *  Author:     Ryan Maguire                                                  *
  *  Date:       January 5, 2020                                               *
  ******************************************************************************/
 #include <libtmpl/include/compat/tmpl_free.h>
-#include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
+#include <rss_ringoccs/include/rss_ringoccs_dlp.h>
 
-/*  Function for freeing all member of a tau object except the error message. */
-void rssringoccs_Tau_Destroy_Members(rssringoccs_TAUObj *tau)
+/*  Function for freeing all member of a dlp object except the error message. */
+void rssringoccs_DLP_Destroy_Members(rssringoccs_DLPObj * const dlp)
 {
     /*  If the input pointer is NULL, do not try to access it. Just return.   */
-    if (tau == NULL)
+    if (!dlp)
         return;
 
     /*  Use the TMPL_FREE macro to free and Nullify all pointers.             */
-    TMPL_FREE(tau->rho_km_vals);
-    TMPL_FREE(tau->F_km_vals);
-    TMPL_FREE(tau->phi_deg_vals);
-    TMPL_FREE(tau->k_vals);
-    TMPL_FREE(tau->rho_dot_kms_vals);
-    TMPL_FREE(tau->B_deg_vals);
-    TMPL_FREE(tau->D_km_vals);
-    TMPL_FREE(tau->w_km_vals);
-    TMPL_FREE(tau->t_oet_spm_vals);
-    TMPL_FREE(tau->t_ret_spm_vals);
-    TMPL_FREE(tau->t_set_spm_vals);
-    TMPL_FREE(tau->rho_corr_pole_km_vals);
-    TMPL_FREE(tau->rho_corr_timing_km_vals);
-    TMPL_FREE(tau->tau_threshold_vals);
-    TMPL_FREE(tau->phi_rl_deg_vals);
-    TMPL_FREE(tau->rx_km_vals);
-    TMPL_FREE(tau->ry_km_vals);
-    TMPL_FREE(tau->rz_km_vals);
-    TMPL_FREE(tau->T_in);
-    TMPL_FREE(tau->T_out);
-    TMPL_FREE(tau->T_fwd);
+    TMPL_FREE(dlp->rho_km_vals);
+    TMPL_FREE(dlp->phi_deg_vals);
+    TMPL_FREE(dlp->B_deg_vals);
+    TMPL_FREE(dlp->D_km_vals);
+    TMPL_FREE(dlp->f_sky_hz_vals);
+    TMPL_FREE(dlp->rho_dot_kms_vals);
+    TMPL_FREE(dlp->t_oet_spm_vals);
+    TMPL_FREE(dlp->t_ret_spm_vals);
+    TMPL_FREE(dlp->t_set_spm_vals);
+    TMPL_FREE(dlp->rho_corr_pole_km_vals);
+    TMPL_FREE(dlp->rho_corr_timing_km_vals);
+    TMPL_FREE(dlp->phi_rl_deg_vals);
+    TMPL_FREE(dlp->p_norm_vals);
+    TMPL_FREE(dlp->phase_deg_vals);
+    TMPL_FREE(dlp->raw_tau_threshold_vals);
+    TMPL_FREE(dlp->rx_km_vals);
+    TMPL_FREE(dlp->ry_km_vals);
+    TMPL_FREE(dlp->rz_km_vals);
 }
-/*  End of rssringoccs_Tau_Destroy_Members.                                   */
+/*  End of rssringoccs_DLP_Destroy_Members.                                   */

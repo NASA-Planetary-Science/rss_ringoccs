@@ -4,85 +4,85 @@
 /*  Booleans provided by this library.                                        */
 #include <libtmpl/include/tmpl.h>
 
-/*  Header file with the Tau definition and function prototype.               */
-#include <rss_ringoccs/include/rss_ringoccs_tau.h>
+/*  Header file with the DLP definition and function prototype.               */
+#include <rss_ringoccs/include/rss_ringoccs_dlp.h>
 
-/*  Use this macro to save on repetitive code. It checks if tau->var is NULL, *
- *  attempts to malloc memory for tau->var if it is, and then checks to see   *
+/*  Use this macro to save on repetitive code. It checks if dlp->var is NULL, *
+ *  attempts to malloc memory for dlp->var if it is, and then checks to see   *
  *  if malloc failed.                                                         */
-#define MALLOC_TAU_VAR(var)                                                    \
+#define MALLOC_DLP_VAR(var)                                                    \
+    do {                                                                       \
+        /*  Check if the variable is not NULL. It should be at the start.    */\
+        if (dlp->var)                                                          \
+        {                                                                      \
+            dlp->error_occurred = tmpl_True;                                   \
+            dlp->error_message =                                               \
+                "\n\rError Encountered: rss_ringoccs\n"                        \
+                "\r\trssringoccs_DLP_Malloc_Members\n\n"                       \
+                "\r"#var" is not NULL. It is likely you've already set the\n"  \
+                "\rdata for this DLP object.\n\n";                             \
+            return;                                                            \
+        }                                                                      \
                                                                                \
-    /*  Check if the variable is not NULL. It should be at the start.        */\
-    if (tau->var != NULL)                                                      \
-    {                                                                          \
-        tau->error_occurred = tmpl_True;                                       \
-        tau->error_message =                                                   \
-            "\n\rError Encountered: rss_ringoccs\n"                            \
-            "\r\trssringoccs_Tau_Malloc_Members\n\n"                           \
-            "\r"#var" is not NULL. It is likely you've already set the data\n" \
-            "\rfor this tau object. Returning.\n";                             \
-        return;                                                                \
-    }                                                                          \
+        /*  Allocate memory for the variable.                                */\
+        dlp->var = malloc(sizeof(*dlp->var) * dlp->arr_size);                  \
                                                                                \
-    /*  Allocate memory for the variable.                                    */\
-    tau->var = malloc(sizeof(*tau->var) * tau->arr_size);                      \
-                                                                               \
-    /*  Check if malloc failed.                                              */\
-    if (tau->var == NULL)                                                      \
-    {                                                                          \
-        tau->error_occurred = tmpl_True;                                       \
-        tau->error_message =                                                   \
-            "\n\rError Encountered: rss_ringoccs\n"                            \
-            "\r\trssringoccs_Tau_Malloc_Members\n\n"                           \
-            "\rMalloc failed and returned NULL for "#var".\n\n";               \
-        return;                                                                \
-    }
-/*  End of the MALLOC_TAU_VAR macro.                                          */
+        /*  Check if malloc failed.                                          */\
+        if (!dlp->var)                                                         \
+        {                                                                      \
+            dlp->error_occurred = tmpl_True;                                   \
+            dlp->error_message =                                               \
+                "\n\rError Encountered: rss_ringoccs\n"                        \
+                "\r\trssringoccs_DLP_Malloc_Members\n\n"                       \
+                "\rMalloc failed and returned NULL for "#var".\n\n";           \
+            return;                                                            \
+        }                                                                      \
+    } while (0)
+/*  End of the MALLOC_DLP_VAR macro.                                          */
 
-/*  Function for allocating memory for all of the tau variables.              */
-void rssringoccs_Tau_Malloc_Members(rssringoccs_TAUObj *tau)
+/*  Function for allocating memory for all of the dlp variables.              */
+void rssringoccs_DLP_Malloc_Members(rssringoccs_DLPObj *dlp)
 {
-    const size_t zero = (size_t)0;
-
-    if (!tau)
+    if (!dlp)
         return;
 
-    if (tau->error_occurred)
+    if (dlp->error_occurred)
         return;
 
-    if (tau->arr_size == zero)
+    if (dlp->arr_size == 0)
     {
-        tau->error_occurred = tmpl_True;
-        tau->error_message =
+        dlp->error_occurred = tmpl_True;
+        dlp->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_Tau_Malloc_Members\n\n"
-            "\rInput tau has arr_size = zero. Nothing to allocate.\n\n";
+            "\r\trssringoccs_DLP_Malloc_Members\n\n"
+            "\rInput dlp has arr_size = 0, nothing to allocate.\n\n";
 
         return;
     }
 
-    /*  The MALLOC_TAU_VAR macro ends with an if statement and so has         *
+    /*  The MALLOC_DLP_VAR macro ends with an if statement and so has         *
      *  braces {}. Because of this, we do not need a semi-colon at the end.   *
-     *  This macro allocates memory for the members of the tau object and     *
+     *  This macro allocates memory for the members of the DLP object and     *
      *  checks for errors.                                                    */
-    MALLOC_TAU_VAR(rho_km_vals)
-    MALLOC_TAU_VAR(phi_deg_vals)
-    MALLOC_TAU_VAR(k_vals)
-    MALLOC_TAU_VAR(rho_dot_kms_vals)
-    MALLOC_TAU_VAR(B_deg_vals)
-    MALLOC_TAU_VAR(D_km_vals)
-    MALLOC_TAU_VAR(t_oet_spm_vals)
-    MALLOC_TAU_VAR(t_ret_spm_vals)
-    MALLOC_TAU_VAR(t_set_spm_vals)
-    MALLOC_TAU_VAR(rho_corr_pole_km_vals)
-    MALLOC_TAU_VAR(rho_corr_timing_km_vals)
-    MALLOC_TAU_VAR(phi_rl_deg_vals)
-    MALLOC_TAU_VAR(rx_km_vals)
-    MALLOC_TAU_VAR(ry_km_vals)
-    MALLOC_TAU_VAR(rz_km_vals)
-    MALLOC_TAU_VAR(T_in)
-    MALLOC_TAU_VAR(F_km_vals)
+    MALLOC_DLP_VAR(rho_km_vals);
+    MALLOC_DLP_VAR(phi_deg_vals);
+    MALLOC_DLP_VAR(B_deg_vals);
+    MALLOC_DLP_VAR(D_km_vals);
+    MALLOC_DLP_VAR(f_sky_hz_vals);
+    MALLOC_DLP_VAR(rho_dot_kms_vals);
+    MALLOC_DLP_VAR(t_oet_spm_vals);
+    MALLOC_DLP_VAR(t_ret_spm_vals);
+    MALLOC_DLP_VAR(t_set_spm_vals);
+    MALLOC_DLP_VAR(rho_corr_pole_km_vals);
+    MALLOC_DLP_VAR(rho_corr_timing_km_vals);
+    MALLOC_DLP_VAR(phi_rl_deg_vals);
+    MALLOC_DLP_VAR(p_norm_vals);
+    MALLOC_DLP_VAR(phase_deg_vals);
+    MALLOC_DLP_VAR(raw_tau_threshold_vals);
+    MALLOC_DLP_VAR(rx_km_vals);
+    MALLOC_DLP_VAR(ry_km_vals);
+    MALLOC_DLP_VAR(rz_km_vals);
 }
-/*  End of rssringoccs_Tau_Malloc_Members.                                    */
+/*  End of rssringoccs_DLP_Malloc_Members.                                    */
 
-#undef MALLOC_TAU_VAR
+#undef MALLOC_DLP_VAR

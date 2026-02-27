@@ -68,7 +68,7 @@ void rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau)
         /*  Window width needed for the central point, and the number of      *
          *  points in a single window.                                        */
         const double w_init = tau->w_km_vals[center];
-        const size_t half_nw_pts = TMPL_CAST(w_init / tau->dx_km, size_t);
+        const size_t half_nw_pts = TMPL_CAST(w_init / tau->dlp->dx_km, size_t);
         const size_t nw_pts = 2 * half_nw_pts + 1;
 
         /*  Threshold for computing the Fresnel kernel. Outside of this       *
@@ -143,7 +143,7 @@ void rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau)
                 /*  Compute the product w(x) * exp(i psi(x)) * dx.            */
                 const double taper = tau->window_func(x, w_init);
                 ker[n] = rssringoccs_Fresnel_Kernel(tau, offset, center);
-                tmpl_CDouble_MultiplyBy_Real(&ker[n], taper * tau->dx_km);
+                tmpl_CDouble_MultiplyBy_Real(&ker[n], taper * tau->dlp->dx_km);
             }
 
             else

@@ -52,7 +52,7 @@ void rssringoccs_Reconstruction(rssringoccs_TAUObj *tau)
         else
             w_max = w_left;
 
-        nw_pts = (size_t) (w_max / (tau->dx_km * 2.0));
+        nw_pts = (size_t) (w_max / (2.0 * tau->dlp->dx_km));
         temp_start = tau->start;
         temp_n_used = tau->n_used;
 

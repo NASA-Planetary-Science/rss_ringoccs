@@ -106,7 +106,7 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
     tmpl_Bool is_even;
 
     /*  Various other variables needed throughout.                            */
-    double w_init, dx, two_dx, cosb, sinp, cosp, alpha, beta;
+    double w_init, two_dx, cosb, sinp, cosp, alpha, beta;
 
     /*  Pointers for arrays. Initialize them to NULL so that we may easily    *
      *  check if malloc fails and avoid freeing non-malloced pointers.        */
@@ -171,8 +171,7 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
     /*  Compute necessary data for the start of the inversion.                */
     center = tau->start;
     w_init = tau->w_km_vals[center];
-    dx = tau->dlp->rho_km_vals[center + 1] - tau->dlp->rho_km_vals[center];
-    two_dx = 2.0 * dx;
+    two_dx = 2.0 * tau->dlp->dx_km;
     nw_pts = TMPL_CAST(w_init / two_dx, size_t);
 
     /*  Allocate memory for the independent variable and window function.     */

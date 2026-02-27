@@ -27,7 +27,7 @@ rssringoccs_Diffraction_Correction_Polynomial_Newton(
 
     /*  The distance, dx, between samples. 2 * dx is used frequently enough,  *
      *  we'll store this value in a variable as well.                         */
-    double dx, two_dx;
+    double two_dx;
 
     /*  Pointer to a double array for the tapering function. The value        *
      *  w_func[n] corresponds to the evaluation of w(x[n]) at the nth point   *
@@ -67,8 +67,7 @@ rssringoccs_Diffraction_Correction_Polynomial_Newton(
     /*  The rho_km_vals array is required to have equally spaced samples. The *
      *  displacement between bins can be computed from the difference of any  *
      *  two successive points.                                                */
-    dx = tau->dlp->rho_km_vals[center + 1] - tau->dlp->rho_km_vals[center];
-    two_dx = 2.0 * dx;
+    two_dx = 2.0 * tau->dlp->dx_km;
 
     /*  The windows must contain an odd number of samples, half to the left   *
      *  of the center, half to the right, and the center itself. From the     *

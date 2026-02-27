@@ -332,7 +332,7 @@ void rssringoccs_Diffraction_Correction_Fresnel(rssringoccs_TAUObj * const tau)
 #endif
     {
         /*  Twice the sample spacing (distance between points), in km.        */
-        const double two_dx = 2.0 * tau->dx_km;
+        const double two_dx = 2.0 * tau->dlp->dx_km;
 
         /*  When the window width is large, or the sample spacing is very     *
          *  fine, repeated calls to realloc, which resizes the window array,  *

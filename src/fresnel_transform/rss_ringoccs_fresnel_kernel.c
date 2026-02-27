@@ -188,7 +188,7 @@ rssringoccs_Fresnel_Kernel(const rssringoccs_TAUObj * const tau,
     ker = tmpl_Double_Stationary_Cyl_Fresnel_Kernel(
         tau->k_vals[val0],
         &geo,
-        tau->EPS,
+        tau->root_finding_epsilon,
         tau->toler
     );
 

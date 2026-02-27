@@ -58,7 +58,7 @@ rssringoccs_Fresnel_Transform_Perturbed_Newton(
             tau->phi_deg_vals[offset],  /* Ring azimuth angle. */
             tau->B_deg_vals[center],    /* Ring opening angle. */
             tau->D_km_vals[center],     /* Observer distance. */
-            tau->EPS,                   /* Allowed error. */
+            tau->root_finding_epsilon,  /* Allowed error. */
             tau->toler                  /* Max number of iterations. */
         );
 

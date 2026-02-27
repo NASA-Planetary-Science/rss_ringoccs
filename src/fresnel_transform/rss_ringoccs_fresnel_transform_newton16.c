@@ -261,7 +261,10 @@ rssringoccs_Fresnel_Transform_Newton16(
         );
 
         psi[n] = tmpl_Double_Stationary_Cyl_Fresnel_Psi(
-            tau->k_vals[center], &geo, tau->EPS, tau->toler
+            tau->k_vals[center],
+            &geo,
+            tau->root_finding_epsilon,
+            tau->toler
         );
     }
 

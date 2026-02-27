@@ -38,18 +38,23 @@ void rssringoccs_Tau_Set_Default_Values(rssringoccs_TAUObj* tau)
     tau->requested_range[0] = 1.0;
     tau->requested_range[1] = 4.0E5;
 
-    /*  Default epsilon precision for the Newton-Raphson method of finding    *
+    /*  Default precision for Newton-Raphson / Halley's method of finding     *
      *  the stationary azimuthal angle for the Fresnel kernel. Setting this   *
      *  to a larger value may result in poor reconstructions for the most     *
      *  extreme geometries (like Rev133 for Cassini data). Setting it lower   *
      *  doesn't yield much of an improvement either.                          */
-    tau->EPS = 1.0E-8;
+    tau->root_finding_epsilon = 1.0E-12;
 
-    /*  Maximum number of iterations allowed in the Newton-Raphson method.    *
-     *  The MTR paper says 4 iterations is enough for the Voyager data. For   *
-     *  Cassini the geometry can be a little more extreme and so 8 iterations *
-     *  may be required (like Rev133, for example). We set the max to 10.     */
-    tau->toler = 10U;
+    /*  Maximum number of iterations allowed when using either Newton's       *
+     *  or Halley's method for finding the stationary values for the Fresnel  *
+     *  phase, psi. The MTR86 paper says 4 iterations is enough for the       *
+     *  Voyager data. For Cassini the geometry can be a little more extreme   *
+     *  and so 8 iterations or more may be required (Rev133, for example).    *
+     *  When the resolution gets extremely fine, the window of integration    *
+     *  may include points with d^2 psi / d phi^2 = 0. Newton's method will   *
+     *  diverge here, but Halley's method still converges, but needs more     *
+     *  iterations. We set the maximum number of iterations to 16 to be safe. */
+    tau->toler = 16U;
 
     /*  The default window is the Modified Kaiser-Bessel window with alpha    *
      *  parameter set to 2 pi. The modification makes it so that the edge of  *

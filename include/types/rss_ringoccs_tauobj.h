@@ -70,7 +70,7 @@ typedef struct rssringoccs_TAUObj_Def {
     double perturb[5];
     double range[2];
     double requested_range[2];
-    double EPS;
+    double root_finding_epsilon;
     unsigned int toler;
     size_t start;
     size_t n_used;
@@ -88,4 +88,3 @@ typedef struct rssringoccs_TAUObj_Def {
 
 #endif
 /*  End of include guard.                                                     */
-

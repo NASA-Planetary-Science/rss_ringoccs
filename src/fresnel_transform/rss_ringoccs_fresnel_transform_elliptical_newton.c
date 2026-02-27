@@ -68,7 +68,7 @@ rssringoccs_Fresnel_Transform_Elliptical_Newton(
             tau->rx_km_vals[center],
             tau->ry_km_vals[center],
             tau->rz_km_vals[center],
-            tau->EPS,
+            tau->root_finding_epsilon,
             tau->toler
         );
 

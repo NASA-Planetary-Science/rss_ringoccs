@@ -55,7 +55,7 @@ rssringoccs_Fast_Fresnel_Phase_And_Weight(
     phi_s = tmpl_Double_Stationary_Cyl_Fresnel_Phase_And_Weight(
         tau->k_vals[val0],
         &geo,
-        tau->EPS,
+        tau->root_finding_epsilon,
         tau->toler,
         weight,
         psi

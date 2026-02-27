@@ -23,7 +23,7 @@
  *  Date:       January 5, 2026                                               *
  ******************************************************************************/
 
-/*  Include guard to prevent including this file.                             */
+/*  Include guard to prevent including this file twice.                       */
 #ifndef RSS_RINGOCCS_TYPES_GEOCSV_H
 #define RSS_RINGOCCS_TYPES_GEOCSV_H
 

@@ -23,7 +23,7 @@
  *  Date:       December 28, 2025                                             *
  ******************************************************************************/
 
-/*  Include guard to prevent including this file.                             */
+/*  Include guard to prevent including this file twice.                       */
 #ifndef RSS_RINGOCCS_TYPES_PSITYPE_H
 #define RSS_RINGOCCS_TYPES_PSITYPE_H
 

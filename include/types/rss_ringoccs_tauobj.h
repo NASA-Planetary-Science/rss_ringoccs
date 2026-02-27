@@ -69,7 +69,6 @@ typedef struct rssringoccs_TAUObj_Def {
     double resolution_km;
     double perturb[5];
     double range[2];
-    double requested_range[2];
     double root_finding_epsilon;
     unsigned int root_finding_max_iters;
     size_t start;

@@ -1,5 +1,6 @@
 #include <libtmpl/include/tmpl_bool.h>
 #include <libtmpl/include/tmpl_complex.h>
+#include <libtmpl/include/compat/tmpl_calloc.h>
 #include <libtmpl/include/compat/tmpl_malloc.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 #include <stdlib.h>
@@ -23,7 +24,7 @@ void rssringoccs_Reconstruction(rssringoccs_TAUObj *tau)
     if (tau->error_occurred)
         return;
 
-    tau->T_out = TMPL_MALLOC(tmpl_ComplexDouble, tau->arr_size);
+    tau->T_out = TMPL_MALLOC(tmpl_ComplexDouble, tau->dlp->arr_size);
 
     rssringoccs_Tau_Check_Core_Data(tau);
 
@@ -41,7 +42,7 @@ void rssringoccs_Reconstruction(rssringoccs_TAUObj *tau)
     {
         tmpl_ComplexDouble * const temp_T_in = tau->T_in;
         tau->T_in = tau->T_out;
-        tau->T_out = calloc(tau->arr_size, sizeof(*tau->T_out));
+        tau->T_out = TMPL_CALLOC(tmpl_ComplexDouble, tau->dlp->arr_size);
 
         w_left  = tau->w_km_vals[tau->start];
         w_right = tau->w_km_vals[tau->start + tau->n_used];

@@ -1,4 +1,5 @@
 #include <libtmpl/include/tmpl_bool.h>
+#include <libtmpl/include/tmpl_complex.h>
 #include <libtmpl/include/tmpl_math.h>
 #include <rss_ringoccs/include/types/rss_ringoccs_tauobj.h>
 #include <rss_ringoccs/include/rss_ringoccs_model.h>

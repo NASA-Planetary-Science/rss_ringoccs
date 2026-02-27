@@ -67,7 +67,7 @@ rssringoccs_Diffraction_Correction_Polynomial_Newton(
     /*  The rho_km_vals array is required to have equally spaced samples. The *
      *  displacement between bins can be computed from the difference of any  *
      *  two successive points.                                                */
-    dx = tau->rho_km_vals[center + 1] - tau->rho_km_vals[center];
+    dx = tau->dlp->rho_km_vals[center + 1] - tau->dlp->rho_km_vals[center];
     two_dx = 2.0 * dx;
 
     /*  The windows must contain an odd number of samples, half to the left   *

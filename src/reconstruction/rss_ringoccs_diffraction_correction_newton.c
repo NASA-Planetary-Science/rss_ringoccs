@@ -59,7 +59,7 @@ void rssringoccs_Diffraction_Correction_Newton(rssringoccs_TAUObj * const tau)
         /*  The rho_km_vals array is required to have equally spaced samples. *
          *  The displacement between bins can be computed from the difference *
          *  of any two successive points.                                     */
-        const double dx = tau->rho_km_vals[1] - tau->rho_km_vals[0];
+        const double dx = tau->dlp->rho_km_vals[1] - tau->dlp->rho_km_vals[0];
         const double two_dx = 2.0 * dx;
 
         /*  When the window width is large, or the sample spacing is very     *

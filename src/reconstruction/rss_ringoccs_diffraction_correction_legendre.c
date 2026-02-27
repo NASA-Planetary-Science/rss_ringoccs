@@ -171,7 +171,7 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
     /*  Compute necessary data for the start of the inversion.                */
     center = tau->start;
     w_init = tau->w_km_vals[center];
-    dx = tau->rho_km_vals[center + 1] - tau->rho_km_vals[center];
+    dx = tau->dlp->rho_km_vals[center + 1] - tau->dlp->rho_km_vals[center];
     two_dx = 2.0 * dx;
     nw_pts = TMPL_CAST(w_init / two_dx, size_t);
 
@@ -254,8 +254,8 @@ void rssringoccs_Diffraction_Correction_Legendre(rssringoccs_TAUObj *tau)
 
         /*  Compute some geometric information, and the scaling coefficient   *
          *  for the Legendre polynomial expansion.                            */
-        cosb = tmpl_Double_Cosd(tau->B_deg_vals[center]);
-        tmpl_Double_SinCosd(tau->phi_deg_vals[center], &sinp, &cosp);
+        cosb = tmpl_Double_Cosd(tau->dlp->B_deg_vals[center]);
+        tmpl_Double_SinCosd(tau->dlp->phi_deg_vals[center], &sinp, &cosp);
         alpha = cosb * cosp;
         beta = cosb * sinp;
         beta *= beta;

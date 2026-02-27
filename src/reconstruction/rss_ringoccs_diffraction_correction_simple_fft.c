@@ -134,7 +134,8 @@ void rssringoccs_Diffraction_Correction_SimpleFFT(rssringoccs_TAUObj *tau)
 
             /*  The Fresnel phase can be expanded in term of rho - rho0. This *
             *  expression is also the input for the window function.          */
-            const double x = tau->rho_km_vals[offset]-tau->rho_km_vals[center];
+            const double x =
+                tau->dlp->rho_km_vals[offset] - tau->dlp->rho_km_vals[center];
 
             /*  Once |rho - rho| exceeds the window width, the output is zero.*/
             if (tmpl_Double_Abs(x) <= w_thresh)

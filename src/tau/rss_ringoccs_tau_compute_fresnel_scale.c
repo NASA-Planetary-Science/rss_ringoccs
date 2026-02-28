@@ -28,10 +28,8 @@
  *  Purpose:                                                                  *
  *      Computes the Fresnel scale for a Tau object using the data in a DLP.  *
  *  Arguments:                                                                *
- *      tau (rssringoccs_TAUObj * TMPL_RESTRICT const):                       *
+ *      tau (rssringoccs_TAUObj * const):                                     *
  *          The Tau object.                                                   *
- *      dlp (const rssringoccs_DLPObj * TMPL_RESTRICT const):                 *
- *          The DLP object.                                                   *
  *  Outputs:                                                                  *
  *      None (void).                                                          *
  *  Called Functions:                                                         *
@@ -53,11 +51,6 @@
  *      1.) This function checks for NULL pointers before trying to access    *
  *          data. The error_occurred Boolean is set to true if one of the     *
  *          required variables is NULL.                                       *
- *                                                                            *
- *      2.) Both the tau and dlp pointers are declared with TMPL_RESTRICT. On *
- *          compilers supporting the C99 standard, this expands to "restrict" *
- *          meaning tau and dlp must point to different objects. This should  *
- *          be true regardless in order to properly use this function.        *
  *  References:                                                               *
  *      1.) Marouf, E., Tyler, G., Rosen, P. (June 1986)                      *
  *          Profiling Saturn's Rings by Radio Occultation                     *
@@ -68,17 +61,15 @@
  ******************************************************************************
  *                                DEPENDENCIES                                *
  ******************************************************************************
- *  1.) tmpl_config.h:                                                        *
- *          Header file containing the TMPL_RESTRICT macro.                   *
- *  2.) tmpl_bool.h:                                                          *
+ *  1.) tmpl_bool.h:                                                          *
  *          Header file providing Booleans (True, False).                     *
- *  3.) tmpl_cyl_fresnel_optics.h:                                            *
+ *  2.) tmpl_cyl_fresnel_optics.h:                                            *
  *          Header file providing tools for Fresnel optics.                   *
- *  4.) tmpl_optics.h:                                                        *
+ *  3.) tmpl_optics.h:                                                        *
  *          Header file providing basic optics routines.                      *
- *  5.) rss_ringoccs_tau.h:                                                   *
+ *  4.) rss_ringoccs_tau.h:                                                   *
  *          Header providing the TAU and DLP typedefs, and function prototype.*
- *  6.) stddef.h:                                                             *
+ *  5.) stddef.h:                                                             *
  *          Standard library header providing the size_t typedef.             *
  ******************************************************************************
  *  Author:     Ryan Maguire                                                  *
@@ -92,10 +83,10 @@
  *  2026/02/21: Ryan Maguire                                                  *
  *      Added checks for NULL pointers in the geometry, moved the T_in        *
  *      computation to its own function, changed function name.               *
+ *  2026/02/27: Ryan Maguire                                                  *
+ *      Changed function signature, the Tau object now has a pointer to a DLP *
+ *      object as a member, we do not need DLP as a function parameter.       *
  ******************************************************************************/
-
-/*  TMPL_RESTRICT given here.                                                 */
-#include <libtmpl/include/tmpl_config.h>
 
 /*  Booleans (True / False) provided here.                                    */
 #include <libtmpl/include/tmpl_bool.h>
@@ -113,11 +104,7 @@
 #include <stddef.h>
 
 /*  Function for computing the Fresnel scale from a given DLP object.         */
-void
-rssringoccs_Tau_Compute_Fresnel_Scale(
-    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
-    const rssringoccs_DLPObj * TMPL_RESTRICT const dlp
-)
+void rssringoccs_Tau_Compute_Fresnel_Scale(rssringoccs_TAUObj * const tau)
 {
     /*  Variable for indexing over the data.                                  */
     size_t n;
@@ -131,7 +118,7 @@ rssringoccs_Tau_Compute_Fresnel_Scale(
         return;
 
     /*  The DLP object should not be NULL. Check for this.                    */
-    if (!dlp)
+    if (!tau->dlp)
     {
         tau->error_occurred = tmpl_True;
         tau->error_message =
@@ -144,7 +131,7 @@ rssringoccs_Tau_Compute_Fresnel_Scale(
 
     /*  If the input DLP had an error occur previously, treat this as an      *
      *  error. Store an error message in the Tau object.                      */
-    if (dlp->error_occurred)
+    if (tau->dlp->error_occurred)
     {
         tau->error_occurred = tmpl_True;
         tau->error_message =
@@ -155,22 +142,9 @@ rssringoccs_Tau_Compute_Fresnel_Scale(
         return;
     }
 
-    /*  The DLP and Tau object should have the same number of elements        *
-     *  allocated for each of their members. Check for this.                  */
-    if (dlp->arr_size != tau->arr_size)
-    {
-        tau->error_occurred = tmpl_True;
-        tau->error_message =
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_Tau_Compute_Fresnel_Scale\n\n"
-            "\rDLP array size is not equal to Tau array size.\n\n";
-
-        return;
-    }
-
     /*  The Fresnel scale needs the frequency variable from the DLP. Ensure   *
      *  that it is not NULL before accessing.                                 */
-    if (!dlp->f_sky_hz_vals)
+    if (!tau->dlp->f_sky_hz_vals)
     {
         tau->error_occurred = tmpl_True;
         tau->error_message =
@@ -182,7 +156,7 @@ rssringoccs_Tau_Compute_Fresnel_Scale(
     }
 
     /*  Similarly, the spacecraft-to-ring-intercept-point distance is needed. */
-    if (!dlp->D_km_vals)
+    if (!tau->dlp->D_km_vals)
     {
         tau->error_occurred = tmpl_True;
         tau->error_message =
@@ -194,7 +168,7 @@ rssringoccs_Tau_Compute_Fresnel_Scale(
     }
 
     /*  Next check the azimuth angle, phi.                                    */
-    if (!dlp->phi_deg_vals)
+    if (!tau->dlp->phi_deg_vals)
     {
         tau->error_occurred = tmpl_True;
         tau->error_message =
@@ -206,7 +180,7 @@ rssringoccs_Tau_Compute_Fresnel_Scale(
     }
 
     /*  Lastly, the ring opening angle, B.                                    */
-    if (!dlp->B_deg_vals)
+    if (!tau->dlp->B_deg_vals)
     {
         tau->error_occurred = tmpl_True;
         tau->error_message =
@@ -244,10 +218,10 @@ rssringoccs_Tau_Compute_Fresnel_Scale(
     }
 
     /*  Loop through and compute the Fresnel scale from the data in dlp.      */
-    for (n = 0; n < tau->arr_size; ++n)
+    for (n = 0; n < tau->dlp->arr_size; ++n)
     {
         /*  Compute the wavelength lambda.                                    */
-        const double frequency = dlp->f_sky_hz_vals[n];
+        const double frequency = tau->dlp->f_sky_hz_vals[n];
         const double lambda = tmpl_Double_Frequency_To_Wavelength(frequency);
 
         /*  Use the wavelength to compute the wavenumber.                     */
@@ -255,10 +229,10 @@ rssringoccs_Tau_Compute_Fresnel_Scale(
 
         /*  And finally, compute the Fresnel scale.                           */
         tau->F_km_vals[n] = tmpl_Double_Cyl_Fresnel_Scale_Deg(
-            lambda,                 /*  Wavelength.                           */
-            tau->D_km_vals[n],      /*  Spacecraft-to-Ring-Plane Distance.    */
-            tau->phi_deg_vals[n],   /*  Ring azimuth angle (degrees).         */
-            tau->B_deg_vals[n]      /*  Ring opening angle (degrees).         */
+            lambda,                     /*  Wavelength.                       */
+            tau->dlp->D_km_vals[n],     /*  Spacecraft-to-Ring-Plane Distance.*/
+            tau->dlp->phi_deg_vals[n],  /*  Ring azimuth angle (degrees).     */
+            tau->dlp->B_deg_vals[n]     /*  Ring opening angle (degrees).     */
         );
     }
 }

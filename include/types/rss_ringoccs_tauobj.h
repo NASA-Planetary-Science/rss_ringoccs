@@ -70,7 +70,6 @@ typedef struct rssringoccs_TAUObj_Def {
     tmpl_Bool use_norm;
     tmpl_Bool use_fwd;
     tmpl_Bool bfac;
-    tmpl_Bool verbose;
     tmpl_Bool error_occurred;
     const char *error_message;
     unsigned int order;

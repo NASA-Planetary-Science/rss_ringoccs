@@ -61,6 +61,7 @@ typedef struct rssringoccs_DLPObj_Type {
      *  counting to avoid duplicating the data. This object is destroyed once *
      *  the reference counter hits zero.                                      */
     size_t reference_count;
+    tmpl_Bool verbose;
     tmpl_Bool error_occurred;
     const char *error_message;
 } rssringoccs_DLPObj;

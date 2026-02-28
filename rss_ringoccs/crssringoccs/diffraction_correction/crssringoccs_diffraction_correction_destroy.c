@@ -45,5 +45,7 @@ crssringoccs_DiffractionCorrection_Destroy(crssringoccs_PyDiffrecObj *self)
     Py_XDECREF(self->rx_km_vals);
     Py_XDECREF(self->ry_km_vals);
     Py_XDECREF(self->rz_km_vals);
+    rssringoccs_Tau_Destroy(&self->tau);
+
     Py_TYPE(self)->tp_free((PyObject *) self);
 }

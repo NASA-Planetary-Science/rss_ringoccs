@@ -117,5 +117,21 @@ void rssringoccs_Tau_Check_Resolution(rssringoccs_TAUObj * const tau)
 
         return;
     }
+
+    /*  dx_km may be negative if this is an ingress occultation. To check if  *
+     *  the resolution is a legal value, compare it with twice the magnitude  *
+     *  of dx_km. To avoid floating round-off error (which has happened to    *
+     *  the Cassini team, hence this edit) set the value to 1.99 times dx.    */
+    if (tau->resolution_km < 1.99 * tmpl_Double_Abs(tau->dlp->dx_km))
+    {
+        tau->error_occurred = tmpl_True;
+        tau->error_message =
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\trssringoccs_Tau_Check_Resolution\n\n"
+            "\rResolution is less than twice the sample spacing.\n"
+            "\rThis will result in an inaccurate reconstruction.\n\n";
+
+        return;
+    }
 }
 /*  End of rssringoccs_Tau_Check_Resolution.                                  */

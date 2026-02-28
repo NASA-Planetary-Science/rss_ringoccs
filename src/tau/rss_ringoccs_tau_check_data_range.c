@@ -35,7 +35,9 @@
  *  Output:                                                                   *
  *      None (void).                                                          *
  *  Called Functions:                                                         *
- *      None.                                                                 *
+ *      stdio.h:                                                              *
+ *          puts:                                                             *
+ *              Prints a string to the screen.                                *
  *  Method:                                                                   *
  *      Loop through the requested reconstruction region and see if there is  *
  *      enough data to the left and right of each point to perform the        *
@@ -61,6 +63,8 @@
  *          Header file where the rssringoccs_TAUObj type is provided.        *
  *  4.) stddef.h:                                                             *
  *          Standard library header file containing size_t typedef.           *
+ *  5.) stdio.h:                                                              *
+ *          Standard library header file providing the puts function.         *
  ******************************************************************************
  *  Author:     Ryan Maguire                                                  *
  *  Date:       January 1, 2021                                               *
@@ -85,6 +89,9 @@
 /*  size_t typedef found here.                                                */
 #include <stddef.h>
 
+/*  puts function found here, used for printing a status message if requested.*/
+#include <stdio.h>
+
 /*  Function for checking the data range of a rssringoccs_TAUObj pointer.     */
 void rssringoccs_Tau_Check_Data_Range(rssringoccs_TAUObj * const tau)
 {
@@ -108,6 +115,10 @@ void rssringoccs_Tau_Check_Data_Range(rssringoccs_TAUObj * const tau)
     /*  If an error occurred before calling this function, abort.             */
     if (tau->error_occurred)
         return;
+
+    /*  Print a status message if the user requested one.                     */
+    if (tau->verbose)
+        puts("\r\tTAU: Checking windows against the available data range...");
 
     /*  w_km_vals should have been allocated memory and initialized already.  */
     if (!tau->w_km_vals)

@@ -126,7 +126,7 @@ void rssringoccs_Tau_Compute_Fresnel_Scale(rssringoccs_TAUObj * const tau)
         return;
 
     /*  Print a status message if the user requested one.                     */
-    if (tau->verbose)
+    if (tau->dlp->verbose)
         puts("\r\tTAU: Computing Fresnel scale...");
 
     /*  The DLP object should not be NULL. Check for this.                    */

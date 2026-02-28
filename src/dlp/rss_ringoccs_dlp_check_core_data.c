@@ -26,8 +26,7 @@
  *  Function Name:                                                            *
  *      rssringoccs_DLP_Check_Core_Data                                       *
  *  Purpose:                                                                  *
- *      Runs an error check on a dlp object, ensuring the core arrays are not *
- *      not NULL.                                                             *
+ *      Runs an error check on a dlp object, ensuring the arrays are not NULL.*
  *  Arguments:                                                                *
  *      dlp (rssringoccs_DLPObj * const):                                     *
  *          A pointer to a dlp object.                                        *
@@ -42,14 +41,17 @@
  *          error. It is the user's responsibility to check that this Boolean *
  *          is false after using this function. Trying to access the pointers *
  *          in a dlp object may result in a segmentation fault otherwise.     *
- *      2.) No data is freed if an error occurs. The caller must do this.     *
+ *                                                                            *
+ *      2.) No data is free'd if an error occurs. The caller must do this.    *
  ******************************************************************************
- *                               DEPENDENCIES                                 *
+ *                                DEPENDENCIES                                *
  ******************************************************************************
  *  1.) tmpl_bool.h:                                                          *
  *          Header file providing Booleans (True and False).                  *
- *  2.) rss_ringoccs_dlp.h:                                                   *
+ *  2.) rss_ringoccs_dlpobj.h:                                                *
  *          Header file where the rssringoccs_DLPObj type is provided.        *
+ *  3.) stdio.h:                                                              *
+ *          Standard library header file providing the puts function.         *
  ******************************************************************************
  *  Author:     Ryan Maguire                                                  *
  *  Date:       January 1, 2021                                               *
@@ -66,22 +68,29 @@
 #include <libtmpl/include/tmpl_bool.h>
 
 /*  Header file with the DLP definition and function prototype.               */
-#include <rss_ringoccs/include/rss_ringoccs_dlp.h>
+#include <rss_ringoccs/include/types/rss_ringoccs_dlpobj.h>
+
+/*  puts function found here, used for printing a status message if requested.*/
+#include <stdio.h>
+
+/*  Function prototype / forward declaration.                                 */
+extern void rssringoccs_DLP_Check_Core_Data(rssringoccs_DLPObj * const dlp);
 
 /*  Macro for checking the data in a dlp object. This is to save repetitive   *
  *  code, it simply checks if a certain pointer in dlp is NULL. The #var      *
- *  preprocessor directive treats var as a string literal. Note that since    *
- *  this macro ends with braces, we do not need semi-colons when calling it.  */
+ *  preprocessor directive treats var as a string literal.                    */
 #define RSSRINGOCCS_DLP_CHECK_DATA_MEMBER(var)                                 \
-    if (!dlp->var)                                                             \
-    {                                                                          \
-        dlp->error_occurred = tmpl_True;                                       \
-        dlp->error_message =                                                   \
-            "\n\rError Encountered: rss_ringoccs\n"                            \
-            "\r\trssringoccs_DLP_Check_Core_Data\n\n"                          \
-            "\rInput dlp has "#var" set to NULL.\n\n";                         \
-        return;                                                                \
-    }
+    do {                                                                       \
+        if (!dlp->var)                                                         \
+        {                                                                      \
+            dlp->error_occurred = tmpl_True;                                   \
+            dlp->error_message =                                               \
+                "\n\rError Encountered: rss_ringoccs\n"                        \
+                "\r\trssringoccs_DLP_Check_Core_Data\n\n"                      \
+                "\rInput dlp has "#var" set to NULL.\n\n";                     \
+            return;                                                            \
+        }                                                                      \
+    } while (0)
 /*  End of RSSRINGOCCS_DLP_CHECK_DATA_MEMBER macro.                           */
 
 /*  Function for checking the core pointers in a dlp object.                  */
@@ -95,19 +104,21 @@ void rssringoccs_DLP_Check_Core_Data(rssringoccs_DLPObj * const dlp)
     if (dlp->error_occurred)
         return;
 
+    /*  Print a status message if the user requested one.                     */
+    if (dlp->verbose)
+        puts("\r\tDLP: Checking core data for NULL pointers...");
+
     /*  The following are the core pointers in a dlp object, the data that is *
      *  explicitly needed for diffraction correction. If any of them are NULL *
-     *  this is to be treated as an error. Note that the macro defined above, *
-     *  RSSRINGOCCS_DLP_CHECK_DATA_MEMBER, contains an if-then with braces.   *
-     *  Because of this we do not need semi-colons at the end of these lines. */
-    RSSRINGOCCS_DLP_CHECK_DATA_MEMBER(rho_km_vals)
-    RSSRINGOCCS_DLP_CHECK_DATA_MEMBER(phi_deg_vals)
-    RSSRINGOCCS_DLP_CHECK_DATA_MEMBER(rho_dot_kms_vals)
-    RSSRINGOCCS_DLP_CHECK_DATA_MEMBER(B_deg_vals)
-    RSSRINGOCCS_DLP_CHECK_DATA_MEMBER(D_km_vals)
-    RSSRINGOCCS_DLP_CHECK_DATA_MEMBER(rx_km_vals)
-    RSSRINGOCCS_DLP_CHECK_DATA_MEMBER(ry_km_vals)
-    RSSRINGOCCS_DLP_CHECK_DATA_MEMBER(rz_km_vals)
+     *  this is to be treated as an error.                                    */
+    RSSRINGOCCS_DLP_CHECK_DATA_MEMBER(rho_km_vals);
+    RSSRINGOCCS_DLP_CHECK_DATA_MEMBER(phi_deg_vals);
+    RSSRINGOCCS_DLP_CHECK_DATA_MEMBER(rho_dot_kms_vals);
+    RSSRINGOCCS_DLP_CHECK_DATA_MEMBER(B_deg_vals);
+    RSSRINGOCCS_DLP_CHECK_DATA_MEMBER(D_km_vals);
+    RSSRINGOCCS_DLP_CHECK_DATA_MEMBER(rx_km_vals);
+    RSSRINGOCCS_DLP_CHECK_DATA_MEMBER(ry_km_vals);
+    RSSRINGOCCS_DLP_CHECK_DATA_MEMBER(rz_km_vals);
 }
 /*  End of rssringoccs_DLP_Check_Core_Data.                                   */
 

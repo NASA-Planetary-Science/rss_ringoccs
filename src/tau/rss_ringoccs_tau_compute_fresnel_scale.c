@@ -41,6 +41,9 @@
  *      tmpl_cyl_fresnel_optics.h:                                            *
  *          tmpl_Double_Cyl_Fresnel_Scale_Deg:                                *
  *              Computes the Cylindrical Fresnel scale with angles in degrees.*
+ *      stdio.h:                                                              *
+ *          puts:                                                             *
+ *              Prints a string to the screen.                                *
  *  Method:                                                                   *
  *      The DLP object has the (sky) frequency of the wave and the geometry   *
  *      of the occultation observation. From this the wavenumber, k, and the  *
@@ -71,6 +74,8 @@
  *          Header providing the TAU and DLP typedefs, and function prototype.*
  *  5.) stddef.h:                                                             *
  *          Standard library header providing the size_t typedef.             *
+ *  6.) stdio.h:                                                              *
+ *          Standard library header file providing the puts function.         *
  ******************************************************************************
  *  Author:     Ryan Maguire                                                  *
  *  Date:       November 28, 2023                                             *
@@ -103,6 +108,9 @@
 /*  size_t typedef provided here.                                             */
 #include <stddef.h>
 
+/*  puts function found here, used for printing a status message if requested.*/
+#include <stdio.h>
+
 /*  Function for computing the Fresnel scale from a given DLP object.         */
 void rssringoccs_Tau_Compute_Fresnel_Scale(rssringoccs_TAUObj * const tau)
 {
@@ -116,6 +124,10 @@ void rssringoccs_Tau_Compute_Fresnel_Scale(rssringoccs_TAUObj * const tau)
     /*  Similarly if an error occurred before this function was called.       */
     if (tau->error_occurred)
         return;
+
+    /*  Print a status message if the user requested one.                     */
+    if (tau->verbose)
+        puts("\r\tTAU: Computing Fresnel scale...");
 
     /*  The DLP object should not be NULL. Check for this.                    */
     if (!tau->dlp)

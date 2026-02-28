@@ -69,17 +69,15 @@
  ******************************************************************************
  *                                DEPENDENCIES                                *
  ******************************************************************************
- *  1.) tmpl_config.h:                                                        *
- *          Header file containing the TMPL_RESTRICT macro.                   *
- *  2.) tmpl_bool.h:                                                          *
+ *  1.) tmpl_bool.h:                                                          *
  *          Header file providing Booleans (True, False).                     *
- *  3.) tmpl_complex.h:                                                       *
+ *  2.) tmpl_complex.h:                                                       *
  *          Header file providing complex numbers and functions.              *
- *  4.) tmpl_math.h:                                                          *
+ *  3.) tmpl_math.h:                                                          *
  *          Header file providing the square root function.                   *
- *  5.) rss_ringoccs_tau.h:                                                   *
+ *  4.) rss_ringoccs_tau.h:                                                   *
  *          Header providing the TAU and DLP typedefs, and function prototype.*
- *  6.) stddef.h:                                                             *
+ *  5.) stddef.h:                                                             *
  *          Standard library header providing the size_t typedef.             *
  ******************************************************************************
  *  Author:     Ryan Maguire                                                  *
@@ -93,10 +91,10 @@
  *  2026/02/21: Ryan Maguire                                                  *
  *      Added checks for NULL pointers in the geometry, moved the T_in        *
  *      computation to its own function, changed function name.               *
+ *  2026/02/27: Ryan Maguire                                                  *
+ *      Changed function signature, the Tau object now has a pointer to a DLP *
+ *      object as a member, we do not need DLP as a function parameter.       *
  ******************************************************************************/
-
-/*  TMPL_RESTRICT given here.                                                 */
-#include <libtmpl/include/tmpl_config.h>
 
 /*  Booleans (True / False) provided here.                                    */
 #include <libtmpl/include/tmpl_bool.h>
@@ -114,11 +112,7 @@
 #include <stddef.h>
 
 /*  Function for computing the diffracted transmittance from a DLP object.    */
-void
-rssringoccs_Tau_Compute_Complex_Diffraction(
-    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
-    const rssringoccs_DLPObj * TMPL_RESTRICT const dlp
-)
+void rssringoccs_Tau_Compute_Complex_Diffraction(rssringoccs_TAUObj * const tau)
 {
     /*  Variable for indexing over the data.                                  */
     size_t n;
@@ -132,64 +126,51 @@ rssringoccs_Tau_Compute_Complex_Diffraction(
         return;
 
     /*  The DLP object should not be NULL. Check for this.                    */
-    if (!dlp)
+    if (!tau->dlp)
     {
         tau->error_occurred = tmpl_True;
         tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Compute_Complex_Diffraction\n\n"
-            "\rInput DLP object is NULL.\n\n";
+            "\rtau->dlp is NULL.\n\n";
 
         return;
     }
 
     /*  If the input DLP had an error occur previously, treat this as an      *
      *  error. Store an error message in the Tau object.                      */
-    if (dlp->error_occurred)
+    if (tau->dlp->error_occurred)
     {
         tau->error_occurred = tmpl_True;
         tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Compute_Complex_Diffraction\n\n"
-            "\rInput DLP object has error_occurred = True.\n\n";
-
-        return;
-    }
-
-    /*  The DLP and Tau object should have the same number of elements        *
-     *  allocated for each of their members. Check for this.                  */
-    if (dlp->arr_size != tau->arr_size)
-    {
-        tau->error_occurred = tmpl_True;
-        tau->error_message =
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_Tau_Compute_Complex_Diffraction\n\n"
-            "\rDLP array size is not equal to Tau array size.\n\n";
+            "\rtau->dlp has error_occurred = True.\n\n";
 
         return;
     }
 
     /*  The complex diffracted transmittance, T_in, needs the diffracted      *
      *  power and phase from the DLP. Make sure these are not NULL.           */
-    if (!dlp->p_norm_vals)
+    if (!tau->dlp->p_norm_vals)
     {
         tau->error_occurred = tmpl_True;
         tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Compute_Complex_Diffraction\n\n"
-            "\rdlp->p_norm_vals is NULL.\n\n";
+            "\rtau->dlp->p_norm_vals is NULL.\n\n";
 
         return;
     }
 
     /*  Same check for the phase angle.                                       */
-    if (!dlp->phase_deg_vals)
+    if (!tau->dlp->phase_deg_vals)
     {
         tau->error_occurred = tmpl_True;
         tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Tau_Compute_Complex_Diffraction\n\n"
-            "\rdlp->phase_deg_vals is NULL.\n\n";
+            "\rtau->dlp->phase_deg_vals is NULL.\n\n";
 
         return;
     }
@@ -209,14 +190,14 @@ rssringoccs_Tau_Compute_Complex_Diffraction(
     }
 
     /*  Loop through and compute the transmittance from the data in dlp.      */
-    for (n = 0; n < tau->arr_size; ++n)
+    for (n = 0; n < tau->dlp->arr_size; ++n)
     {
         /*  Extract the power and the phase. By convention, the phase angle   *
          *  for the Tau object (used for diffraction correction) is negative  *
          *  the phase angle stored in the DLP. This ensures that the Fresnel  *
          *  transforms use the correct sign.                                  */
-        const double power = dlp->p_norm_vals[n];
-        const double phase = -dlp->phase_deg_vals[n];
+        const double power = tau->dlp->p_norm_vals[n];
+        const double phase = -tau->dlp->phase_deg_vals[n];
 
         /*  power = | T |^2, hence | T | = sqrt(power). Compute.              */
         const double modulus = tmpl_Double_Sqrt(power);

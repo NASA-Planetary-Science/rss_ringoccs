@@ -26,10 +26,14 @@
 
 #include "../crssringoccs.h"
 
-
-/*  Macro for the crssringoccs_set_var function to shorten the syntax.        */
+/*  Macro for the crssringoccs_Create_Real_Numpy_Array function.              */
 #define CREATE_NUMPY_ARRAY(a) \
-crssringoccs_Create_Real_Numpy_Array(&py_csv->a, csv->a, csv->n_elements)
+crssringoccs_Create_Real_Numpy_Array(                                          \
+    &py_csv->a,                                                                \
+    csv->a,                                                                    \
+    crssringoccs_Capsule_Cleanup,                                              \
+    csv->n_elements                                                            \
+)
 
 /*  Steals the references to the data in a rssringoccs_CSVData object and     *
  *  creates numpy arrays from them. The data is stored in an instance of the  *

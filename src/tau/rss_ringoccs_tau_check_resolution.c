@@ -16,17 +16,17 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
- *                     rss_ringoccs_tau_check_displacement                    *
+ *                      rss_ringoccs_tau_check_resolution                     *
  ******************************************************************************
  *  Purpose:                                                                  *
- *      Checks for errors in the displacement found in a tau object.          *
+ *      Checks for errors in the resolution found in a tau object.            *
  ******************************************************************************
  *                             DEFINED FUNCTIONS                              *
  ******************************************************************************
  *  Function Name:                                                            *
- *      rssringoccs_Tau_Check_Displacement                                    *
+ *      rssringoccs_Tau_Check_Resolution                                      *
  *  Purpose:                                                                  *
- *      Checks for a few common errors found in the displacement.             *
+ *      Checks for a few simple errors found in the resolution.               *
  *  Arguments:                                                                *
  *      tau (rssringoccs_TAUObj * const):                                     *
  *          A pointer to a tau object.                                        *
@@ -38,6 +38,9 @@
  *              Checks if a double is +/- infinity.                           *
  *          tmpl_Double_Is_NaN:                                               *
  *              Checks if a double is NaN (Not-a-Number).                     *
+ *      stdio.h:                                                              *
+ *          puts:                                                             *
+ *              Prints a string to the screen.                                *
  *  Notes:                                                                    *
  *      1.) If the error_occurred Boolean was previously set to true, this    *
  *          function does nothing and skips all checks.                       *
@@ -60,6 +63,11 @@
  ******************************************************************************
  *  Author:     Ryan Maguire                                                  *
  *  Date:       April 11, 2025                                                *
+ ******************************************************************************
+ *                              Revision History                              *
+ ******************************************************************************
+ *  2026/02/28: Ryan Maguire                                                  *
+ *      Fixed typos in doc-string, added status message when verbose is on.   *
  ******************************************************************************/
 
 /*  Booleans provided here.                                                   */
@@ -71,6 +79,9 @@
 /*  Header file with the Tau definition and function prototype.               */
 #include <rss_ringoccs/include/rss_ringoccs_tau.h>
 
+/*  puts function found here, used for printing a status message if requested.*/
+#include <stdio.h>
+
 /*  Checks the resolution in a tau object for errors.                         */
 void rssringoccs_Tau_Check_Resolution(rssringoccs_TAUObj * const tau)
 {
@@ -81,6 +92,10 @@ void rssringoccs_Tau_Check_Resolution(rssringoccs_TAUObj * const tau)
     /*  Do not attempt to inspect the data if an error has already occurred.  */
     if (tau->error_occurred)
         return;
+
+    /*  Print a status message if the user requested one.                     */
+    if (tau->verbose)
+        puts("\r\tTAU: Checking resolution for simple errors...");
 
     /*  The resolution should be a real number. Check for NaN (Not-a-Number). */
     if (tmpl_Double_Is_NaN(tau->resolution_km))

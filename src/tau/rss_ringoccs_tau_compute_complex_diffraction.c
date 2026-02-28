@@ -41,6 +41,9 @@
  *      tmpl_math.h:                                                          *
  *          tmpl_Double_Sqrt:                                                 *
  *              Computes the square root of a real number.                    *
+ *      stdio.h:                                                              *
+ *          puts:                                                             *
+ *              Prints a string to the screen.                                *
  *  Method:                                                                   *
  *      The DLP object contains the raw power and the phase. The complex      *
  *      diffracted transmittance can be computed from this:                   *
@@ -79,6 +82,8 @@
  *          Header providing the TAU and DLP typedefs, and function prototype.*
  *  5.) stddef.h:                                                             *
  *          Standard library header providing the size_t typedef.             *
+ *  6.) stdio.h:                                                              *
+ *          Standard library header file providing the puts function.         *
  ******************************************************************************
  *  Author:     Ryan Maguire                                                  *
  *  Date:       November 28, 2023                                             *
@@ -111,6 +116,9 @@
 /*  size_t typedef provided here.                                             */
 #include <stddef.h>
 
+/*  puts function found here, used for printing a status message if requested.*/
+#include <stdio.h>
+
 /*  Function for computing the diffracted transmittance from a DLP object.    */
 void rssringoccs_Tau_Compute_Complex_Diffraction(rssringoccs_TAUObj * const tau)
 {
@@ -124,6 +132,10 @@ void rssringoccs_Tau_Compute_Complex_Diffraction(rssringoccs_TAUObj * const tau)
     /*  Similarly if an error occurred before this function was called.       */
     if (tau->error_occurred)
         return;
+
+    /*  Print a status message if the user requested one.                     */
+    if (tau->verbose)
+        puts("\r\tTAU: Compute complex diffraction profile (T_hat)...");
 
     /*  The DLP object should not be NULL. Check for this.                    */
     if (!tau->dlp)

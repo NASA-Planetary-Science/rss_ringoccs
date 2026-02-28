@@ -34,12 +34,13 @@
  *      None (void).                                                          *
  *  Called Functions:                                                         *
  *      tmpl_math.h:                                                          *
- *          tmpl_Double_Abs:                                                  *
- *              Computes the absolute value of a real number.                 *
  *          tmpl_Double_Is_Inf:                                               *
  *              Checks if a double is +/- infinity.                           *
  *          tmpl_Double_Is_NaN:                                               *
  *              Checks if a double is NaN (Not-a-Number).                     *
+ *      stdio.h:                                                              *
+ *          puts:                                                             *
+ *              Prints a string to the screen.                                *
  *  Notes:                                                                    *
  *      1.) If the error_occurred Boolean was previously set to true, this    *
  *          function does nothing and skips all checks.                       *
@@ -56,9 +57,11 @@
  *  1.) tmpl_bool.h:                                                          *
  *          Header file providing Booleans.                                   *
  *  2.) tmpl_math.h:                                                          *
- *          tmpl_Double_Abs declared here.                                    *
- *  3.) rss_ringoccs_dlp.h:                                                   *
- *          DLP definition and prototype for the function given here.         *
+ *          Header providing Is_NaN and Is_Inf functions.                     *
+ *  3.) rss_ringoccs_dlpobj.h:                                                *
+ *          DLP object definition given here.                                 *
+ *  4.) stdio.h:                                                              *
+ *          Standard library header file providing the puts function.         *
  ******************************************************************************
  *  Author:     Ryan Maguire                                                  *
  *  Date:       April 11, 2025                                                *
@@ -70,8 +73,14 @@
 /*  tmpl_Double_Abs declared here.                                            */
 #include <libtmpl/include/tmpl_math.h>
 
-/*  Header file with the DLP definition and function prototype.               */
-#include <rss_ringoccs/include/rss_ringoccs_dlp.h>
+/*  Header file with the DLPObj definition.                                   */
+#include <rss_ringoccs/include/types/rss_ringoccs_dlpobj.h>
+
+/*  puts function found here, used for printing a status message if requested.*/
+#include <stdio.h>
+
+/*  Forward declaration / function prototype.                                 */
+extern void rssringoccs_DLP_Check_Displacement(rssringoccs_DLPObj * const dlp);
 
 /*  Checks the displacement in a dlp object for errors.                       */
 void rssringoccs_DLP_Check_Displacement(rssringoccs_DLPObj * const dlp)
@@ -83,6 +92,10 @@ void rssringoccs_DLP_Check_Displacement(rssringoccs_DLPObj * const dlp)
     /*  Do not attempt to inspect the data if an error has already occurred.  */
     if (dlp->error_occurred)
         return;
+
+    /*  Print a status message if the user requested one.                     */
+    if (dlp->verbose)
+        puts("\r\tDLP: Checking displacement (dx) for simple errors...");
 
     /*  The displacement should be real. Check for NaN (Not-a-Number).        */
     if (tmpl_Double_Is_NaN(dlp->dx_km))

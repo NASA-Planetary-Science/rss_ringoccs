@@ -117,7 +117,7 @@ void rssringoccs_Tau_Check_Data_Range(rssringoccs_TAUObj * const tau)
         return;
 
     /*  Print a status message if the user requested one.                     */
-    if (tau->verbose)
+    if (tau->dlp->verbose)
         puts("\r\tTAU: Checking windows against the available data range...");
 
     /*  w_km_vals should have been allocated memory and initialized already.  */

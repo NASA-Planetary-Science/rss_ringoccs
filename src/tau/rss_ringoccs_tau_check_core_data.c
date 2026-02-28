@@ -106,7 +106,7 @@ void rssringoccs_Tau_Check_Core_Data(rssringoccs_TAUObj * const tau)
         return;
 
     /*  Print a status message if the user requested one.                     */
-    if (tau->verbose)
+    if (tau->dlp->verbose)
         puts("\r\tTAU: Checking core data for NULL pointers...");
 
     /*  Inspect each of the following variables. None of these should be NULL.*/

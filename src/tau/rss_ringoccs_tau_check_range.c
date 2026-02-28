@@ -96,7 +96,7 @@ void rssringoccs_Tau_Check_Range(rssringoccs_TAUObj * const tau)
         return;
 
     /*  Print a status message if the user requested one.                     */
-    if (tau->verbose)
+    if (tau->dlp->verbose)
         puts("\r\tTAU: Checking range array for simple errors...");
 
     /*  Range values should be real numbers. Check for NaN (Not-a-Number).    */

@@ -105,7 +105,7 @@ void rssringoccs_Tau_Check_Eccentricity(rssringoccs_TAUObj * const tau)
         return;
 
     /*  Print a status message if the user requested one.                     */
-    if (tau->verbose)
+    if (tau->dlp->verbose)
         puts("\r\tTAU: Checking eccentricity for simple errors...");
 
     /*  Eccentricity should be a real number. Check for NaN (Not-a-Number).   */

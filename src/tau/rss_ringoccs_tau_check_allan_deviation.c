@@ -106,7 +106,7 @@ void rssringoccs_Tau_Check_Allan_Deviation(rssringoccs_TAUObj * const tau)
         return;
 
     /*  Print a status message if the user requested one.                     */
-    if (tau->verbose)
+    if (tau->dlp->verbose)
         puts("\r\tTAU: Checking Allan deviation for simple errors...");
 
     /*  Sigma should be a real number. Check for NaN (Not-a-Number).          */

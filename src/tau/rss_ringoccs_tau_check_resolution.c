@@ -94,7 +94,7 @@ void rssringoccs_Tau_Check_Resolution(rssringoccs_TAUObj * const tau)
         return;
 
     /*  Print a status message if the user requested one.                     */
-    if (tau->verbose)
+    if (tau->dlp->verbose)
         puts("\r\tTAU: Checking resolution for simple errors...");
 
     /*  The resolution should be a real number. Check for NaN (Not-a-Number). */

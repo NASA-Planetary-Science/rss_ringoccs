@@ -25,7 +25,7 @@ rssringoccs_Tau_Reset_Fresnel_Window(
     for (n = 0; n < nw_pts; ++n)
     {
         const double index = TMPL_CAST(n, double);
-        x_arr[n] = (index - offset) * tau->dx_km;
+        x_arr[n] = (index - offset) * tau->dlp->dx_km;
         w_func[n] = tau->window_func(x_arr[n], tau->w_km_vals[center]);
 
         /*  We have computed the window function and the independent variable *

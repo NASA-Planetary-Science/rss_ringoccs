@@ -9,6 +9,9 @@ rssringoccs_Tau_Compute_Window(
     const size_t center
 )
 {
+    /*  Pointer for the rho array in the DLP object.                          */
+    const double * const rho = tau->dlp->rho_km_vals;
+
     /*  The index for the offset (the left-most edge of the window) is just   *
      *  half the number of points in the window away to the left. Compute.    */
     const size_t offset = center - (nw_pts >> 1);
@@ -27,7 +30,7 @@ rssringoccs_Tau_Compute_Window(
         /*  The tapering function is a function of (rho - rho0), where rho is *
          *  the radius of the current point, and rho0 is the radius of the    *
          *  central point. Compute this.                                      */
-        const double x = tau->rho_km_vals[ind] - tau->rho_km_vals[center];
+        const double x = rho[ind] - rho[center];
 
         /*  The Tau object contains a function pointer to the selected window *
          *  function. Compute using this.                                     */

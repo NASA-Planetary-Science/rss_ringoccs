@@ -34,7 +34,9 @@
  *  Output:                                                                   *
  *      None (void).                                                          *
  *  Called Functions:                                                         *
- *      None.                                                                 *
+ *      stdio.h:                                                              *
+ *          puts:                                                             *
+ *              Prints a string to the screen.                                *
  *  Method:                                                                   *
  *      Check the relevant members to see if they are NULL.                   *
  *  Notes:                                                                    *
@@ -51,6 +53,8 @@
  *          Header file providing Booleans (True and False).                  *
  *  2.) rss_ringoccs_tauobj.h:                                                *
  *          Header file where the rssringoccs_TAUObj type is provided.        *
+ *  3.) stdio.h:                                                              *
+ *          Standard library header file providing the puts function.         *
  ******************************************************************************
  *  Author:     Ryan Maguire                                                  *
  *  Date:       January 1, 2021                                               *
@@ -66,6 +70,9 @@
 
 /*  Header file with the Tau object definition.                               */
 #include <rss_ringoccs/include/types/rss_ringoccs_tauobj.h>
+
+/*  puts function found here, used for printing a status message if requested.*/
+#include <stdio.h>
 
 /*  Function prototype / forward declaration.                                 */
 extern void rssringoccs_Tau_Check_Core_Data(rssringoccs_TAUObj * const tau);
@@ -97,6 +104,10 @@ void rssringoccs_Tau_Check_Core_Data(rssringoccs_TAUObj * const tau)
     /*  If an error occurred before calling this function, abort.             */
     if (tau->error_occurred)
         return;
+
+    /*  Print a status message if the user requested one.                     */
+    if (tau->verbose)
+        puts("\r\tTAU: Checking core data for NULL pointers...");
 
     /*  Inspect each of the following variables. None of these should be NULL.*/
     RSSRINGOCCS_TAU_CHECK_DATA_MEMBER(dlp);

@@ -4,7 +4,9 @@
 #include <libtmpl/include/compat/tmpl_malloc.h>
 #include <rss_ringoccs/include/rss_ringoccs_dlp.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
-#include <stdlib.h>
+
+/*  puts function found here, used for printing a status message if requested.*/
+#include <stdio.h>
 
 #if 1
 
@@ -17,33 +19,35 @@ void rssringoccs_Reconstruction(rssringoccs_TAUObj *tau)
     if (!tau)
         return;
 
-    rssringoccs_DLP_Check_Core_Data(tau->dlp);
-    rssringoccs_DLP_Check_Geometry(tau->dlp);
-    rssringoccs_DLP_Check_Occ_Type(tau->dlp);
+    if (tau->error_occurred)
+        return;
 
-    if (tau->dlp->error_occurred)
-    {
-        tau->error_occurred = tmpl_True;
-        tau->error_message = tau->dlp->error_message;
-    }
+    /*  At this point the tau object should've been initialized, and so the   *
+     *  T_out variable should be NULL. Allocate memory for it.                */
+    tau->T_out = TMPL_MALLOC(tmpl_ComplexDouble, tau->dlp->arr_size);
 
-    rssringoccs_Tau_Check_Keywords(tau);
+    /*  Compute the window width as a function of the radius, rho.            */
     rssringoccs_Tau_Get_Window_Width(tau);
+
+    /*  Check to ensure you have enough data to process.                      */
+    rssringoccs_Tau_Check_Data_Range(tau);
 
     /*  Check that the pointers to the data are not NULL.                     */
     rssringoccs_Tau_Check_Core_Data(tau);
 
-    /*  Check to ensure you have enough data to process.                      */
-    rssringoccs_Tau_Check_Data_Range(tau);
+    /*  Check to make sure the Tau object has valid parameters.               */
+    rssringoccs_Tau_Check_Keywords(tau);
 
     /*  The previous functions set the error_occurred Boolean on failure.     */
     if (tau->error_occurred)
         return;
 
-    tau->T_out = TMPL_MALLOC(tmpl_ComplexDouble, tau->dlp->arr_size);
-
     temp_fwd = tau->use_fwd;
     tau->use_fwd = tmpl_False;
+
+    /*  Print a status message if the user requested one.                     */
+    if (tau->dlp->verbose)
+        puts("\r\tTAU: Performing diffraction correction...");
 
     rssringoccs_Diffraction_Correction(tau);
 
@@ -81,6 +85,10 @@ void rssringoccs_Reconstruction(rssringoccs_TAUObj *tau)
 
         tau->start = tau->start + nw_pts;
         tau->n_used = tau->n_used - 2*nw_pts;
+
+        /*  Print a status message if the user requested one.                 */
+        if (tau->dlp->verbose)
+            puts("\r\tTAU: Performing forward calculation...");
 
         rssringoccs_Diffraction_Correction(tau);
 

@@ -13,7 +13,7 @@ void rssringoccs_Tau_Set_Default_Values(rssringoccs_TAUObj* tau)
     if (tau->error_occurred)
         return;
 
-    /*  The Allen Deviation for the Cassini spacecraft.                       */
+    /*  The Allan Deviation for the Cassini spacecraft.                       */
     tau->sigma = 2.0E-13;
 
     /*  Saturn geometry is assumed perfectly cylindrical for most             *
@@ -76,7 +76,7 @@ void rssringoccs_Tau_Set_Default_Values(rssringoccs_TAUObj* tau)
     tau->use_fwd = tmpl_False;
 
     /*  The resolution is given as a function of the Fresnel scale, window    *
-     *  width, and Allen deviation. The Allen deviation term can be inverted  *
+     *  width, and Allan deviation. The Allan deviation term can be inverted  *
      *  in terms of the Lambert W function (provided by libtmpl). This        *
      *  inversion factor is called the "b-factor". Computing it makes         *
      *  the computation ever-so-slightly slower. For Cassini it is not needed,*
@@ -87,10 +87,6 @@ void rssringoccs_Tau_Set_Default_Values(rssringoccs_TAUObj* tau)
      *  the default is to use the b-factor.                                   */
     tau->bfac = tmpl_True;
 
-    /*  Several functions will print messages throughout the computation if   *
-     *  the verbose Boolean is set to True. Default is silent, set to False.  */
-    tau->verbose = tmpl_False;
-
     /*  Boolean for keeping track of errors. This starts as false. Every      *
      *  function that takes in a Tau object will check if this is True and    *
      *  abort the computation if so.                                          */
@@ -100,10 +96,6 @@ void rssringoccs_Tau_Set_Default_Values(rssringoccs_TAUObj* tau)
      *  know where the computation went wrong. Default is a NULL pointer for  *
      *  no message at all.                                                    */
     tau->error_message = NULL;
-
-    /*  These values are determined by the DLP data. Set them to their zero   *
-     *  values just to have them initialized.                                 */
-    tau->dx_km = 0.0;
 
     /*  Default range is "all". For Saturn this is about 70,000 to 140,000 km.*
      *  For Uranus this is different. To include all possible data sets for   *

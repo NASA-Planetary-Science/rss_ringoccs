@@ -38,6 +38,9 @@
  *              Checks if a double is infinity.                               *
  *          tmpl_Double_Is_NaN:                                               *
  *              Checks if a double is Not-a-Number.                           *
+ *      stdio.h:                                                              *
+ *          puts:                                                             *
+ *              Prints a string to the screen.                                *
  *  Method:                                                                   *
  *      Check the periapse for simple errors:                                 *
  *          1.) Check that sigma is not NaN.                                  *
@@ -63,6 +66,8 @@
  *          Header providing Is_NaN and Is_Inf functions.                     *
  *  3.) rss_ringoccs_tauobj.h:                                                *
  *          Tau object typedef provided here.                                 *
+ *  4.) stdio.h:                                                              *
+ *          Standard library header file providing the puts function.         *
  ******************************************************************************
  *  Author:     Ryan Maguire                                                  *
  *  Date:       January 23, 2026                                              *
@@ -82,6 +87,9 @@
 /*  Header file with the Tau definition.                                      */
 #include <rss_ringoccs/include/types/rss_ringoccs_tauobj.h>
 
+/*  puts function found here, used for printing a status message if requested.*/
+#include <stdio.h>
+
 /*  Forward declaration / function prototype.                                 */
 extern void rssringoccs_Tau_Check_Periapse(rssringoccs_TAUObj * const tau);
 
@@ -95,6 +103,10 @@ void rssringoccs_Tau_Check_Periapse(rssringoccs_TAUObj * const tau)
     /*  Do not attempt to inspect the data if an error has already occurred.  */
     if (tau->error_occurred)
         return;
+
+    /*  Print a status message if the user requested one.                     */
+    if (tau->verbose)
+        puts("\r\tTAU: Checking periapse for simple errors...");
 
     /*  The periapse should be a real number. Check for NaN (Not-a-Number).   */
     if (tmpl_Double_Is_NaN(tau->periapse))

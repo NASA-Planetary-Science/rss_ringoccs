@@ -41,12 +41,17 @@
  *              Checks if a double is +/- infinity.                           *
  *          tmpl_Double_Is_NaN:                                               *
  *              Checks if a double is NaN (Not-a-Number).                     *
+ *      stdio.h:                                                              *
+ *          puts:                                                             *
+ *              Prints a string to the screen.                                *
  *  Notes:                                                                    *
  *      1.) It is assumed that the ring azimuth angle has been allocated      *
  *          memory and the data has been initialized. If phi_deg_vals is NULL,*
  *          the error_occurred Boolean will be set to True.                   *
+ *                                                                            *
  *      2.) This function checks for NULL pointers. If dlp is NULL, nothing   *
  *          is done. If phi_deg_vals is NULL, an error message is set.        *
+ *                                                                            *
  *      3.) If the error_occurred Boolean was previously set to true, this    *
  *          function does nothing and skips all checks.                       *
  *  References:                                                               *
@@ -63,8 +68,10 @@
  *          Header file providing Booleans.                                   *
  *  2.) tmpl_math.h:                                                          *
  *          tmpl_Double_Array_MinMax declared here.                           *
- *  3.) rss_ringoccs_dlp.h:                                                   *
- *          DLP definition and prototype for the function given here.         *
+ *  3.) rss_ringoccs_dlpobj.h:                                                *
+ *          DLP definition given here.                                        *
+ *  4.) stdio.h:                                                              *
+ *          Standard library header file providing the puts function.         *
  ******************************************************************************
  *  Author:     Ryan Maguire                                                  *
  *  Date:       April 11, 2025                                                *
@@ -81,8 +88,14 @@
 /*  tmpl_Double_Array_MinMax declared here, computes min and max of an array. */
 #include <libtmpl/include/tmpl_math.h>
 
-/*  Header file with the DLP definition and function prototype.               */
-#include <rss_ringoccs/include/rss_ringoccs_dlp.h>
+/*  Header file with the DLPObj typedef.                                      */
+#include <rss_ringoccs/include/types/rss_ringoccs_dlpobj.h>
+
+/*  puts function found here, used for printing a status message if requested.*/
+#include <stdio.h>
+
+/*  Forward declaration / function prototype.                                 */
+extern void rssringoccs_DLP_Check_Azimuth_Angle(rssringoccs_DLPObj * const dlp);
 
 /*  Checks the ring azimuth angle in a dlp object for simple errors.          */
 void rssringoccs_DLP_Check_Azimuth_Angle(rssringoccs_DLPObj * const dlp)
@@ -97,6 +110,10 @@ void rssringoccs_DLP_Check_Azimuth_Angle(rssringoccs_DLPObj * const dlp)
     /*  Do not attempt to inspect the data if an error has already occurred.  */
     if (dlp->error_occurred)
         return;
+
+    /*  Print a status message if the user requested one.                     */
+    if (dlp->verbose)
+        puts("\r\tDLP: Checking azimuth angle for simple errors...");
 
     /*  This function should only be called after the phi_deg_vals array was  *
      *  allocated memory and the data initialized. NULL pointers are hence    *

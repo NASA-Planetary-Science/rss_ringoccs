@@ -105,7 +105,6 @@ void rssringoccs_Tau_Check_Core_Data(rssringoccs_TAUObj * const tau)
     RSSRINGOCCS_TAU_CHECK_DATA_MEMBER(F_km_vals);
     RSSRINGOCCS_TAU_CHECK_DATA_MEMBER(k_vals);
     RSSRINGOCCS_TAU_CHECK_DATA_MEMBER(w_km_vals);
-    RSSRINGOCCS_TAU_CHECK_DATA_MEMBER(tau_threshold_vals);
 }
 /*  End of rssringoccs_Tau_Check_Core_Data.                                   */
 

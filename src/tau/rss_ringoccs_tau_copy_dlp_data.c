@@ -79,18 +79,25 @@
  *  Date:       January 1, 2021                                               *
  ******************************************************************************/
 
-/*  Include all necessary headers.                                            */
+/*  TMPL_RESTRICT macro provided here.                                        */
 #include <libtmpl/include/tmpl_config.h>
+
+/*  Booleans provided here.                                                   */
 #include <libtmpl/include/tmpl_bool.h>
-#include <rss_ringoccs/include/rss_ringoccs_calibration.h>
-#include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
+
+/*  DLP object is typedef'd here.                                             */
+#include <rss_ringoccs/include/rss_ringoccs_dlp.h>
+
+/*  TAU object and helper functions provided here.                            */
+#include <rss_ringoccs/include/rss_ringoccs_tau.h>
+
+/*  puts function found here, used for printing a status message if requested.*/
+#include <stdio.h>
 
 /*  Function for copying the relevant DLP data to a tau object.               */
 void
-rssringoccs_Tau_Copy_DLP_Data(
-    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
-    const rssringoccs_DLPObj * TMPL_RESTRICT const dlp
-)
+rssringoccs_Tau_Copy_DLP_Data(rssringoccs_TAUObj * TMPL_RESTRICT const tau,
+                              rssringoccs_DLPObj * TMPL_RESTRICT const dlp)
 {
     /*  If the tau pointer is NULL, we can't access it. Return.               */
     if (!tau)
@@ -125,6 +132,23 @@ rssringoccs_Tau_Copy_DLP_Data(
         return;
     }
 
+    /*  Print a status message if the user requested one.                     */
+    if (dlp->verbose)
+        puts("\r\tTAU: Adding new DLP reference to the Tau object...");
+
+    /*  If the data in the DLP object has been initialized, then the          *
+     *  reference count should be at least 1. Check for this.                 */
+    if (dlp->reference_count == 0)
+    {
+        tau->error_occurred = tmpl_True;
+        tau->error_message =
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\trssringoccs_Tau_Copy_DLP_Data\n\n"
+            "\rDLP reference count is zero. No data to copy.\n\n";
+
+        return;
+    }
+
     /*  If arr_size is less than 2, we can't do any processing and we can't   *
      *  compute dx_km. Return with error.                                     */
     if (dlp->arr_size <= 1)
@@ -138,26 +162,21 @@ rssringoccs_Tau_Copy_DLP_Data(
         return;
     }
 
-    /*  The arr_size for tau is the same as the dlp. Set this.                */
-    tau->arr_size = dlp->arr_size;
-
-    /*  Allocate memory for the tau variables.                                */
-    rssringoccs_Tau_Malloc_Members(tau);
-
-    /*  Check for errors before continuing. The previous function calls       *
-     *  malloc and it may possibly fail to allocate memory.                   */
-    if (tau->error_occurred)
-        return;
-
     /*  Several variables for Tau are exactly the same as the DLP ones. These *
      *  can be copied verbatim into the newly allocated memory for Tau.       */
-    rssringoccs_Tau_Copy_DLP_Members(tau, dlp);
+    tau->dlp = dlp;
+    ++dlp->reference_count;
 
-    /*  Other variables need to be computed from the DLP data. Do this.       */
-    rssringoccs_Tau_Compute_Fresnel_Scale(tau, dlp);
-    rssringoccs_Tau_Compute_Complex_Diffraction(tau, dlp);
+    /*  Run error checks on the DLP data.                                     */
+    rssringoccs_DLP_Check_Core_Data(tau->dlp);
+    rssringoccs_DLP_Check_Geometry(tau->dlp);
+    rssringoccs_DLP_Check_Occ_Type(tau->dlp);
 
-    /*  Lastly, compute dx from the first and zeroth entries of rho_km_vals.  */
-    tau->dx_km = tau->rho_km_vals[1] - tau->rho_km_vals[0];
+    /*  Copy the DLP error message into the Tau object if an error occurred.  */
+    if (tau->dlp->error_occurred)
+    {
+        tau->error_occurred = tmpl_True;
+        tau->error_message = tau->dlp->error_message;
+    }
 }
 /*  End of rssringoccs_Tau_Copy_DLP_Data.                                     */

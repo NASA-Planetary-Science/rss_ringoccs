@@ -93,9 +93,9 @@ void rssringoccs_Tau_Check_Keywords(rssringoccs_TAUObj * const tau)
 
     /*  Run error checks on all of the keywords in the Tau object.            */
     rssringoccs_Tau_Check_Allan_Deviation(tau);
-    rssringoccs_Tau_Check_Resolution(tau);
     rssringoccs_Tau_Check_Eccentricity(tau);
     rssringoccs_Tau_Check_Periapse(tau);
     rssringoccs_Tau_Check_Range(tau);
+    rssringoccs_Tau_Check_Resolution(tau);
 }
 /*  End of rssringoccs_Tau_Check_Keywords.                                    */

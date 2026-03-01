@@ -5,11 +5,15 @@
 #include <libtmpl/include/tmpl.h>
 
 /*  Header file with the Tau definition and function prototype.               */
+#include <rss_ringoccs/include/types/rss_ringoccs_dlpobj.h>
 #include <rss_ringoccs/include/rss_ringoccs_tau.h>
+
+/*  puts function found here, used for printing a status message if requested.*/
+#include <stdio.h>
 
 /*  Function for creating a Tau object from DLP data and a resolution.        */
 rssringoccs_TAUObj *
-rssringoccs_Tau_Create_From_DLP(const rssringoccs_DLPObj *dlp, double res)
+rssringoccs_Tau_Create_From_DLP(rssringoccs_DLPObj * const dlp, double res)
 {
     /*  Try to allocate memory for a new tau object.                          */
     rssringoccs_TAUObj *tau = malloc(sizeof(*tau));
@@ -46,6 +50,10 @@ rssringoccs_Tau_Create_From_DLP(const rssringoccs_DLPObj *dlp, double res)
         return tau;
     }
 
+    /*  Print a status message if the user requested one.                     */
+    if (dlp->verbose)
+        puts("\r\tTAU: Creating new Tau object from the DLP object...");
+
     /*  Check that the resolution is a legal value.                           */
     if (res <= 0.0)
     {
@@ -67,8 +75,15 @@ rssringoccs_Tau_Create_From_DLP(const rssringoccs_DLPObj *dlp, double res)
      *  NULL) are the reconstruction and forward modeling variables.          */
     rssringoccs_Tau_Copy_DLP_Data(tau, dlp);
 
-    /*  Check the data for possible errors before returning.                  */
-    rssringoccs_Tau_Check_Geometry(tau);
+    /*  Allocate memory for the tau variables.                                */
+    rssringoccs_Tau_Malloc_Members(tau);
+
+    /*  Other variables need to be computed from the DLP data. Do this.       */
+    rssringoccs_Tau_Compute_Fresnel_Scale(tau);
+    rssringoccs_Tau_Compute_Complex_Diffraction(tau);
+
+    /*  The previous functions set tau->error_occurred on error. The user     *
+     *  should inspect this before using the returned Tau object.             */
     return tau;
 }
 /*  End of rssringoccs_Tau_Create_From_DLP.                                   */

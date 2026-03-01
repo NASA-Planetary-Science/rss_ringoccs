@@ -25,17 +25,13 @@
 
 void rssringoccs_Tau_Destroy(rssringoccs_TAUObj **tau)
 {
-    rssringoccs_TAUObj *tau_inst;
-
     if (!tau)
         return;
 
-    tau_inst = *tau;
-
-    if (!tau_inst)
+    if (!(*tau))
         return;
 
-    rssringoccs_Tau_Destroy_Members(tau_inst);
-    TMPL_FREE(tau_inst);
+    rssringoccs_Tau_Destroy_Members(*tau);
+    TMPL_FREE(*tau);
 }
 /*  End of rssringoccs_Tau_Destroy.                                           */

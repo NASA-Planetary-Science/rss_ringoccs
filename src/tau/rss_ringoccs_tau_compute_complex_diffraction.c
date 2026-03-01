@@ -135,7 +135,7 @@ void rssringoccs_Tau_Compute_Complex_Diffraction(rssringoccs_TAUObj * const tau)
 
     /*  Print a status message if the user requested one.                     */
     if (tau->dlp->verbose)
-        puts("\r\tTAU: Compute complex diffraction profile (T_hat)...");
+        puts("\r\tTAU: Computing complex diffraction profile (T_hat)...");
 
     /*  The DLP object should not be NULL. Check for this.                    */
     if (!tau->dlp)

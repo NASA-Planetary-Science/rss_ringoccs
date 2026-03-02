@@ -37,6 +37,9 @@
  *      tmpl_math.h:                                                          *
  *          tmpl_Double_Array_MinMax:                                         *
  *              Computes the min and max of a double array.                   *
+ *      stdio.h:                                                              *
+ *          puts:                                                             *
+ *              Prints a string to the screen.                                *
  *  Notes:                                                                    *
  *      1.) It is assumed that the ring opening angle has been allocated      *
  *          memory and the data has been initialized. If B_deg_vals is NULL,  *
@@ -61,6 +64,8 @@
  *          tmpl_Double_Array_MinMax declared here.                           *
  *  3.) rss_ringoccs_dlp.h:                                                   *
  *          DLP definition and prototype for the function given here.         *
+ *  4.) stdio.h:                                                              *
+ *          Standard library header file providing the puts function.         *
  ******************************************************************************
  *  Author:     Ryan Maguire                                                  *
  *  Date:       April 11, 2025                                                *
@@ -75,6 +80,9 @@
 /*  Header file with the DLP definition and function prototype.               */
 #include <rss_ringoccs/include/rss_ringoccs_dlp.h>
 
+/*  puts function found here, used for printing a status message if requested.*/
+#include <stdio.h>
+
 /*  Checks the ring opening angle in a dlp object for simple errors.          */
 void rssringoccs_DLP_Check_Opening_Angle(rssringoccs_DLPObj * const dlp)
 {
@@ -88,6 +96,10 @@ void rssringoccs_DLP_Check_Opening_Angle(rssringoccs_DLPObj * const dlp)
     /*  Do not attempt to inspect the data if an error has already occurred.  */
     if (dlp->error_occurred)
         return;
+
+    /*  Print a status message if the user requested one.                     */
+    if (dlp->verbose)
+        puts("\r\tDLP: Checking opening angle for simple errors...");
 
     /*  This function should only be called after the B_deg_vals array was    *
      *  allocated memory and the data initialized. NULL pointers are hence    *

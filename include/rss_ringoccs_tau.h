@@ -40,7 +40,7 @@
 #include <stddef.h>
 
 /*  DLP object is typedef'd here.                                             */
-#include <rss_ringoccs/include/rss_ringoccs_calibration.h>
+#include <rss_ringoccs/include/types/rss_ringoccs_dlpobj.h>
 
 /*  Tau object typedef provided here.                                         */
 #include <rss_ringoccs/include/types/rss_ringoccs_tauobj.h>
@@ -84,25 +84,19 @@ rssringoccs_Tau_Select_Newton_Transform(rssringoccs_TAUObj * const tau);
 extern rssringoccs_FresnelTransform
 rssringoccs_Tau_Select_Newton_Interp_Transform(rssringoccs_TAUObj * const tau);
 
-extern void
-rssringoccs_Tau_Check_Allan_Deviation(rssringoccs_TAUObj * const tau);
-
-extern void rssringoccs_Tau_Check_Eccentricity(rssringoccs_TAUObj * const tau);
-extern void rssringoccs_Tau_Check_Periapse(rssringoccs_TAUObj * const tau);
-extern void rssringoccs_Tau_Check_Range(rssringoccs_TAUObj * const tau);
-
 /******************************************************************************
  *  Function:                                                                 *
- *      rssringoccs_Tau_Check_Azimuth_Angle                                   *
+ *      rssringoccs_Tau_Check_Allan_Deviation                                 *
  *  Purpose:                                                                  *
- *      Checks the phi_deg_vals array in a tau object for common errors.      *
+ *      Checks sigma, the Allan deviation, for simple errors.                 *
  *  Arguments:                                                                *
  *      tau (rssringoccs_TAUObj * const):                                     *
- *          The Tau object to be checked.                                     *
+ *          The tau object we are checking.                                   *
  *  Outputs:                                                                  *
  *      None (void).                                                          *
  ******************************************************************************/
-extern void rssringoccs_Tau_Check_Azimuth_Angle(rssringoccs_TAUObj * const tau);
+extern void
+rssringoccs_Tau_Check_Allan_Deviation(rssringoccs_TAUObj * const tau);
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -132,42 +126,55 @@ extern void rssringoccs_Tau_Check_Data_Range(rssringoccs_TAUObj * const tau);
 
 /******************************************************************************
  *  Function:                                                                 *
- *      rssringoccs_Tau_Check_Displacement                                    *
+ *      rssringoccs_Tau_Check_Eccentricity                                    *
  *  Purpose:                                                                  *
- *      Checks the dx_km value in a tau object for common errors.             *
+ *      Checks the eccentricity in the Tau object.                            *
+ *  Arguments:                                                                *
+ *      tau (rssringoccs_TAUObj * const):                                     *
+ *          The tau object we are checking.                                   *
+ *  Outputs:                                                                  *
+ *      None (void).                                                          *
+ ******************************************************************************/
+extern void rssringoccs_Tau_Check_Eccentricity(rssringoccs_TAUObj * const tau);
+
+/******************************************************************************
+ *  Function:                                                                 *
+ *      rssringoccs_Tau_Check_Keywords                                        *
+ *  Purpose:                                                                  *
+ *      Checks all of the core keywords (periapse, eccentricity, etc).        *
+ *  Arguments:                                                                *
+ *      tau (rssringoccs_TAUObj * const):                                     *
+ *          The tau object we are checking.                                   *
+ *  Outputs:                                                                  *
+ *      None (void).                                                          *
+ ******************************************************************************/
+extern void rssringoccs_Tau_Check_Keywords(rssringoccs_TAUObj * const tau);
+
+/******************************************************************************
+ *  Function:                                                                 *
+ *      rssringoccs_Tau_Check_Periapse                                        *
+ *  Purpose:                                                                  *
+ *      Checks the periapse in the Tau object.                                *
+ *  Arguments:                                                                *
+ *      tau (rssringoccs_TAUObj * const):                                     *
+ *          The tau object we are checking.                                   *
+ *  Outputs:                                                                  *
+ *      None (void).                                                          *
+ ******************************************************************************/
+extern void rssringoccs_Tau_Check_Periapse(rssringoccs_TAUObj * const tau);
+
+/******************************************************************************
+ *  Function:                                                                 *
+ *      rssringoccs_Tau_Check_Range                                           *
+ *  Purpose:                                                                  *
+ *      Checks the range member in a Tau object for simple errors.            *
  *  Arguments:                                                                *
  *      tau (rssringoccs_TAUObj * const):                                     *
  *          The Tau object to be checked.                                     *
  *  Outputs:                                                                  *
  *      None (void).                                                          *
  ******************************************************************************/
-extern void rssringoccs_Tau_Check_Displacement(rssringoccs_TAUObj * const tau);
-
-/******************************************************************************
- *  Function:                                                                 *
- *      rssringoccs_Tau_Check_Geometry                                        *
- *  Purpose:                                                                  *
- *      Checks a Tau object for possible errors.                              *
- *  Arguments:                                                                *
- *      tau (rssringoccs_TAUObj *):                                           *
- *          The Tau object to be checked.                                     *
- *  Outputs:                                                                  *
- *      None (void).                                                          *
- ******************************************************************************/
-extern void rssringoccs_Tau_Check_Geometry(rssringoccs_TAUObj *tau);
-
-/******************************************************************************
- *  Function:                                                                 *
- *      rssringoccs_Tau_Check_Opening_Angle                                   *
- *  Purpose:                                                                  *
- *      Checks the B_deg_vals array in a tau object for common errors.        *
- *  Arguments:                                                                *
- *      tau (rssringoccs_TAUObj * const):                                     *
- *          The Tau object to be checked.                                     *
- *  Outputs:                                                                  *
- *      None (void).                                                          *
- ******************************************************************************/
-extern void rssringoccs_Tau_Check_Opening_Angle(rssringoccs_TAUObj * const tau);
+extern void rssringoccs_Tau_Check_Range(rssringoccs_TAUObj * const tau);
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -184,29 +191,39 @@ extern void rssringoccs_Tau_Check_Resolution(rssringoccs_TAUObj * const tau);
 
 /******************************************************************************
  *  Function:                                                                 *
- *      rssringoccs_Tau_Check_Ring_Distance                                   *
+ *      rssringoccs_Tau_Compute_Fresnel_Scale                                 *
  *  Purpose:                                                                  *
- *      Checks the D_km_vals array in a tau object for common errors.         *
+ *      Computes the Fresnel scale for a Tau object using the data in a DLP.  *
  *  Arguments:                                                                *
  *      tau (rssringoccs_TAUObj * const):                                     *
- *          The Tau object to be checked.                                     *
+ *          The Tau object.                                                   *
  *  Outputs:                                                                  *
  *      None (void).                                                          *
+ *  Notes:                                                                    *
+ *      1.) This function checks for NULL pointers before trying to access    *
+ *          data. The error_occurred Boolean is set to true if one of the     *
+ *          required variables is NULL.                                       *
  ******************************************************************************/
-extern void rssringoccs_Tau_Check_Ring_Distance(rssringoccs_TAUObj * const tau);
+extern void
+rssringoccs_Tau_Compute_Fresnel_Scale(rssringoccs_TAUObj * const tau);
 
 /******************************************************************************
  *  Function:                                                                 *
- *      rssringoccs_Tau_Check_Ring_Radius                                     *
+ *      rssringoccs_Tau_Compute_Complex_Diffraction                           *
  *  Purpose:                                                                  *
- *      Checks the rho_km_vals array in a tau object for common errors.       *
+ *      Computes the complex diffracted transmittance using the data in a DLP.*
  *  Arguments:                                                                *
  *      tau (rssringoccs_TAUObj * const):                                     *
- *          The Tau object to be checked.                                     *
+ *          The Tau object.                                                   *
  *  Outputs:                                                                  *
  *      None (void).                                                          *
+ *  Notes:                                                                    *
+ *      1.) This function checks for NULL pointers before trying to access    *
+ *          data. The error_occurred Boolean is set to true if one of the     *
+ *          required variables is NULL.                                       *
  ******************************************************************************/
-extern void rssringoccs_Tau_Check_Ring_Radius(rssringoccs_TAUObj * const tau);
+extern void
+rssringoccs_Tau_Compute_Complex_Diffraction(rssringoccs_TAUObj * const tau);
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -229,7 +246,7 @@ extern void rssringoccs_Tau_Check_Ring_Radius(rssringoccs_TAUObj * const tau);
  *      Boolean is set to true. Check both of these before accessing data.    *
  ******************************************************************************/
 extern rssringoccs_TAUObj *
-rssringoccs_Tau_Create_From_DLP(const rssringoccs_DLPObj *dlp, double res);
+rssringoccs_Tau_Create_From_DLP(rssringoccs_DLPObj * const dlp, double res);
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -245,84 +262,8 @@ rssringoccs_Tau_Create_From_DLP(const rssringoccs_DLPObj *dlp, double res);
  *      None (void).                                                          *
  ******************************************************************************/
 extern void
-rssringoccs_Tau_Copy_DLP_Data(
-    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
-    const rssringoccs_DLPObj * TMPL_RESTRICT const dlp
-);
-
-/******************************************************************************
- *  Function:                                                                 *
- *      rssringoccs_Tau_Copy_DLP_Members                                      *
- *  Purpose:                                                                  *
- *      Copies members that dlp and tau objects have in common from a dlp     *
- *      object in to a tau object.                                            *
- *  Arguments:                                                                *
- *      tau (rssringoccs_TAUObj *):                                           *
- *          The Tau object. DLP members will be copied here.                  *
- *      dlp (const rssringoccs_DLPObj *):                                     *
- *          The DLP object whose members are being copied.                    *
- *  Outputs:                                                                  *
- *      None (void).                                                          *
- ******************************************************************************/
-extern void
-rssringoccs_Tau_Copy_DLP_Members(rssringoccs_TAUObj *tau,
-                                 const rssringoccs_DLPObj *dlp);
-
-/******************************************************************************
- *  Function:                                                                 *
- *      rssringoccs_Tau_Compute_Fresnel_Scale                                 *
- *  Purpose:                                                                  *
- *      Computes the Fresnel scale for a Tau object using the data in a DLP.  *
- *  Arguments:                                                                *
- *      tau (rssringoccs_TAUObj * TMPL_RESTRICT const):                       *
- *          The Tau object.                                                   *
- *      dlp (const rssringoccs_DLPObj * TMPL_RESTRICT const):                 *
- *          The DLP object.                                                   *
- *  Outputs:                                                                  *
- *      None (void).                                                          *
- *  Notes:                                                                    *
- *      1.) This function checks for NULL pointers before trying to access    *
- *          data. The error_occurred Boolean is set to true if one of the     *
- *          required variables is NULL.                                       *
- *                                                                            *
- *      2.) Both the tau and dlp pointers are declared with TMPL_RESTRICT. On *
- *          compilers supporting the C99 standard, this expands to "restrict" *
- *          meaning tau and dlp must point to different objects. This should  *
- *          be true regardless in order to properly use this function.        *
- ******************************************************************************/
-extern void
-rssringoccs_Tau_Compute_Fresnel_Scale(
-    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
-    const rssringoccs_DLPObj * TMPL_RESTRICT const dlp
-);
-
-/******************************************************************************
- *  Function:                                                                 *
- *      rssringoccs_Tau_Compute_Complex_Diffraction                           *
- *  Purpose:                                                                  *
- *      Computes the complex diffracted transmittance using the data in a DLP.*
- *  Arguments:                                                                *
- *      tau (rssringoccs_TAUObj * TMPL_RESTRICT const):                       *
- *          The Tau object.                                                   *
- *      dlp (const rssringoccs_DLPObj * TMPL_RESTRICT const):                 *
- *          The DLP object.                                                   *
- *  Outputs:                                                                  *
- *      None (void).                                                          *
- *  Notes:                                                                    *
- *      1.) This function checks for NULL pointers before trying to access    *
- *          data. The error_occurred Boolean is set to true if one of the     *
- *          required variables is NULL.                                       *
- *                                                                            *
- *      2.) Both the tau and dlp pointers are declared with TMPL_RESTRICT. On *
- *          compilers supporting the C99 standard, this expands to "restrict" *
- *          meaning tau and dlp must point to different objects. This should  *
- *          be true regardless in order to properly use this function.        *
- ******************************************************************************/
-extern void
-rssringoccs_Tau_Compute_Complex_Diffraction(
-    rssringoccs_TAUObj * TMPL_RESTRICT const tau,
-    const rssringoccs_DLPObj * TMPL_RESTRICT const dlp
-);
+rssringoccs_Tau_Copy_DLP_Data(rssringoccs_TAUObj * const tau,
+                              rssringoccs_DLPObj * const dlp);
 
 /******************************************************************************
  *  Function:                                                                 *
@@ -447,16 +388,7 @@ extern void
 rssringoccs_Tau_Set_Window_Type(const char *wtype, rssringoccs_TAUObj *tau);
 
 extern void
-rssringoccs_Tau_Check_Keywords(rssringoccs_TAUObj *tau);
-
-extern void
-rssringoccs_Tau_Check_Occ_Type(rssringoccs_TAUObj *tau);
-
-extern void
 rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau);
-
-extern void
-rssringoccs_Tau_Finish(rssringoccs_TAUObj* tau);
 
 extern void
 rssringoccs_Tau_Reset_Fresnel_Window(

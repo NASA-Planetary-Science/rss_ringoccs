@@ -13,6 +13,9 @@
 /*  Tau object typedef given here.                                            */
 #include <rss_ringoccs/include/types/rss_ringoccs_tauobj.h>
 
+/*  puts function found here, used for printing a status message if requested.*/
+#include <stdio.h>
+
 /*  Function prototype / forward declaration.                                 */
 extern void
 rssringoccs_Tau_Set_Psi_Type(const char * TMPL_RESTRICT const psitype,
@@ -35,6 +38,10 @@ rssringoccs_Tau_Set_Psi_Type(const char * TMPL_RESTRICT const psitype,
     /*  Similarly if an error occurred before this function was called, abort.*/
     if (tau->error_occurred)
         return;
+
+    /*  Print a status message if the user requested one.                     */
+    if (tau->dlp->verbose)
+        puts("\r\tTAU: Setting requested psitype...");
 
     /*  If the input string is NULL treat this as an error.                   */
     if (!psitype)

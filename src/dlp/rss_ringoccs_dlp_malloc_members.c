@@ -7,6 +7,9 @@
 /*  Header file with the DLP definition and function prototype.               */
 #include <rss_ringoccs/include/rss_ringoccs_dlp.h>
 
+/*  puts function found here, used for printing a status message if requested.*/
+#include <stdio.h>
+
 /*  Use this macro to save on repetitive code. It checks if dlp->var is NULL, *
  *  attempts to malloc memory for dlp->var if it is, and then checks to see   *
  *  if malloc failed.                                                         */
@@ -48,6 +51,10 @@ void rssringoccs_DLP_Malloc_Members(rssringoccs_DLPObj *dlp)
 
     if (dlp->error_occurred)
         return;
+
+    /*  Print a status message if the user requested one.                     */
+    if (dlp->verbose)
+        puts("\r\tDLP: Allocating memory for core arrays...");
 
     if (dlp->arr_size == 0)
     {

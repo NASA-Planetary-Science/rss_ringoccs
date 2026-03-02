@@ -42,6 +42,10 @@ void rssringoccs_DLP_Init(rssringoccs_DLPObj * const dlp)
     dlp->arr_size = 0;
     dlp->reference_count = 0;
 
+    /*  Several functions will print messages throughout the computation if   *
+     *  the verbose Boolean is set to True. Default is silent, set to False.  */
+    dlp->verbose = tmpl_False;
+
     /*  Fresh DLP object, set the error variables to their zero values.       */
     dlp->error_occurred = tmpl_False;
     dlp->error_message = NULL;

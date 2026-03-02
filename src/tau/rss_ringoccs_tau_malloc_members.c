@@ -1,11 +1,14 @@
-/*  NULL pointer and malloc are given here.                                   */
-#include <stdlib.h>
-
 /*  Booleans provided by this library.                                        */
-#include <libtmpl/include/tmpl.h>
+#include <libtmpl/include/tmpl_bool.h>
 
 /*  Header file with the Tau definition and function prototype.               */
 #include <rss_ringoccs/include/rss_ringoccs_tau.h>
+
+/*  NULL pointer and malloc are given here.                                   */
+#include <stdlib.h>
+
+/*  puts function found here, used for printing a status message if requested.*/
+#include <stdio.h>
 
 /*  Use this macro to save on repetitive code. It checks if tau->var is NULL, *
  *  attempts to malloc memory for tau->var if it is, and then checks to see   *
@@ -25,7 +28,7 @@
     }                                                                          \
                                                                                \
     /*  Allocate memory for the variable.                                    */\
-    tau->var = malloc(sizeof(*tau->var) * tau->arr_size);                      \
+    tau->var = malloc(sizeof(*tau->var) * tau->dlp->arr_size);                 \
                                                                                \
     /*  Check if malloc failed.                                              */\
     if (tau->var == NULL)                                                      \
@@ -42,15 +45,17 @@
 /*  Function for allocating memory for all of the tau variables.              */
 void rssringoccs_Tau_Malloc_Members(rssringoccs_TAUObj *tau)
 {
-    const size_t zero = (size_t)0;
-
     if (!tau)
         return;
 
     if (tau->error_occurred)
         return;
 
-    if (tau->arr_size == zero)
+    /*  Print a status message if the user requested one.                     */
+    if (tau->dlp->verbose)
+        puts("\r\tTAU: Allocating memory for core arrays...");
+
+    if (tau->dlp->arr_size == 0)
     {
         tau->error_occurred = tmpl_True;
         tau->error_message =
@@ -65,21 +70,7 @@ void rssringoccs_Tau_Malloc_Members(rssringoccs_TAUObj *tau)
      *  braces {}. Because of this, we do not need a semi-colon at the end.   *
      *  This macro allocates memory for the members of the tau object and     *
      *  checks for errors.                                                    */
-    MALLOC_TAU_VAR(rho_km_vals)
-    MALLOC_TAU_VAR(phi_deg_vals)
     MALLOC_TAU_VAR(k_vals)
-    MALLOC_TAU_VAR(rho_dot_kms_vals)
-    MALLOC_TAU_VAR(B_deg_vals)
-    MALLOC_TAU_VAR(D_km_vals)
-    MALLOC_TAU_VAR(t_oet_spm_vals)
-    MALLOC_TAU_VAR(t_ret_spm_vals)
-    MALLOC_TAU_VAR(t_set_spm_vals)
-    MALLOC_TAU_VAR(rho_corr_pole_km_vals)
-    MALLOC_TAU_VAR(rho_corr_timing_km_vals)
-    MALLOC_TAU_VAR(phi_rl_deg_vals)
-    MALLOC_TAU_VAR(rx_km_vals)
-    MALLOC_TAU_VAR(ry_km_vals)
-    MALLOC_TAU_VAR(rz_km_vals)
     MALLOC_TAU_VAR(T_in)
     MALLOC_TAU_VAR(F_km_vals)
 }

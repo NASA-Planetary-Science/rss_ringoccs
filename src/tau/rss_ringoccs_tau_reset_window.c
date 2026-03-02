@@ -53,7 +53,7 @@ rssringoccs_Tau_Reset_Window(const rssringoccs_TAUObj * TMPL_RESTRICT const tau,
     for (n = 0; n < nw_pts; ++n)
     {
         const double index = TMPL_CAST(n, double);
-        x_arr[n] = (index - offset) * tau->dx_km;
+        x_arr[n] = (index - offset) * tau->dlp->dx_km;
         w_func[n] = tau->window_func(x_arr[n], tau->w_km_vals[center]);
     }
 }

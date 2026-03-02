@@ -20,6 +20,7 @@
  *  Date:       January 5, 2020                                               *
  ******************************************************************************/
 #include <libtmpl/include/compat/tmpl_free.h>
+#include <rss_ringoccs/include/rss_ringoccs_dlp.h>
 #include <rss_ringoccs/include/rss_ringoccs_tau.h>
 
 /*  Function for freeing all member of a tau object except the error message. */
@@ -37,5 +38,9 @@ void rssringoccs_Tau_Destroy_Members(rssringoccs_TAUObj * const tau)
     TMPL_FREE(tau->k_vals);
     TMPL_FREE(tau->w_km_vals);
     TMPL_FREE(tau->tau_threshold_vals);
+
+    /*  Lastly, release the DLP object and set the pointer to NULL.           */
+    rssringoccs_DLP_Release(tau->dlp);
+    tau->dlp = NULL;
 }
 /*  End of rssringoccs_Tau_Destroy_Members.                                   */

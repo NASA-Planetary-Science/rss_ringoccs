@@ -22,19 +22,15 @@
 #include <libtmpl/include/compat/tmpl_free.h>
 #include <rss_ringoccs/include/rss_ringoccs_dlp.h>
 
-void rssringoccs_DLP_Destroy(rssringoccs_DLPObj **dlp)
+void rssringoccs_DLP_Destroy(rssringoccs_DLPObj ** const dlp)
 {
-    rssringoccs_DLPObj *dlp_inst;
-
     if (!dlp)
         return;
 
-    dlp_inst = *dlp;
-
-    if (!dlp_inst)
+    if (!(*dlp))
         return;
 
-    rssringoccs_DLP_Destroy_Members(dlp_inst);
-    TMPL_FREE(dlp_inst);
+    rssringoccs_DLP_Destroy_Members(*dlp);
+    TMPL_FREE(*dlp);
 }
 /*  End of rssringoccs_DLP_Destroy.                                           */

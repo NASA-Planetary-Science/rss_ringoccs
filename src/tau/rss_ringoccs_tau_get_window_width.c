@@ -6,9 +6,11 @@
 #include <libtmpl/include/tmpl_where.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 #include <stdlib.h>
+
+/*  puts function found here, used for printing a status message if requested.*/
 #include <stdio.h>
 
-void rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau)
+void rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj * const tau)
 {
     /*  Declare long pointer-to-pointer which stores the indices where        *
      *  F_km_vals is non-zero in the first slot (Prange[0]), and the size of  *
@@ -20,19 +22,23 @@ void rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau)
     double w_fac, omega, F;
     double *alpha, *P_vals, *rho_legal;
 
-    if (tau == NULL)
+    if (!tau)
         return;
 
-    if (tau->error_occurred)
+    if (tau->dlp->error_occurred)
         return;
 
-    if (tau->range[0] <= tau->rho_km_vals[0])
+    /*  Print a status message if the user requested one.                     */
+    if (tau->dlp->verbose)
+        puts("\r\tTAU: Computing window width for each data point...");
+
+    if (tau->range[0] <= tau->dlp->rho_km_vals[0])
     {
-        tau->range[0] = tau->rho_km_vals[0];
+        tau->range[0] = tau->dlp->rho_km_vals[0];
         tau->start = 0;
     }
 
-    else if (tau->range[0] > tau->rho_km_vals[tau->arr_size-1])
+    else if (tau->range[0] > tau->dlp->rho_km_vals[tau->dlp->arr_size - 1])
     {
         tau->error_occurred = tmpl_True;
         tau->error_message =
@@ -47,20 +53,20 @@ void rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau)
     else
     {
         n = 0;
-        while (tau->rho_km_vals[n] < tau->range[0])
+        while (tau->dlp->rho_km_vals[n] < tau->range[0])
             n++;
 
-        tau->range[0] = tau->rho_km_vals[n];
+        tau->range[0] = tau->dlp->rho_km_vals[n];
         tau->start = n;
     }
 
-    if (tau->range[1] >= tau->rho_km_vals[tau->arr_size-1])
+    if (tau->range[1] >= tau->dlp->rho_km_vals[tau->dlp->arr_size - 1])
     {
-        tau->range[1] = tau->rho_km_vals[tau->arr_size-1];
-        tau->n_used = tau->arr_size - tau->start;
+        tau->range[1] = tau->dlp->rho_km_vals[tau->dlp->arr_size - 1];
+        tau->n_used = tau->dlp->arr_size - tau->start;
     }
 
-    else if (tau->range[1] < tau->rho_km_vals[0])
+    else if (tau->range[1] < tau->dlp->rho_km_vals[0])
     {
         tau->error_occurred = tmpl_True;
         tau->error_message =
@@ -75,10 +81,10 @@ void rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau)
     else
     {
         n = tau->start;
-        while (tau->rho_km_vals[n] <= tau->range[1])
+        while (tau->dlp->rho_km_vals[n] <= tau->range[1])
             n++;
 
-        tau->range[1] = tau->rho_km_vals[n];
+        tau->range[1] = tau->dlp->rho_km_vals[n];
         tau->n_used = n - tau->start;
     }
 
@@ -98,7 +104,7 @@ void rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau)
     /*  Use calloc to both allocate memory for tau.w_km_vals (like malloc)    *
      *  and initialize the data to zero (unlike malloc). This is similar to   *
      *  numpy.zeros(tau.arr_size) in Python.                                  */
-    tau->w_km_vals = calloc(tau->arr_size, sizeof(double));
+    tau->w_km_vals = calloc(tau->dlp->arr_size, sizeof(double));
 
     if (tau->bfac)
     {
@@ -111,7 +117,7 @@ void rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau)
             F = tau->F_km_vals[n + tau->start];
             omega = tmpl_Speed_Of_Light_KMS * tau->k_vals[n+tau->start];
             alpha[n] = omega * tau->sigma;
-            alpha[n] *= alpha[n] * 0.5 / tau->rho_dot_kms_vals[n];
+            alpha[n] *= alpha[n] * 0.5 / tau->dlp->rho_dot_kms_vals[n];
             P_vals[n] = tau->resolution_km / (alpha[n]*F*F);
         }
 
@@ -145,12 +151,12 @@ void rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau)
     for(n = 0; n < tau->n_used; ++n)
     {
         rho_legal[n] =
-            tau->rho_km_vals[tau->start + n] -
+            tau->dlp->rho_km_vals[tau->start + n] -
                 0.5 * tau->w_km_vals[tau->start + n];
     }
 
     wrange = tmpl_Where_Greater_Double(rho_legal, tau->n_used,
-                                       tau->rho_km_vals[0]);
+                                       tau->dlp->rho_km_vals[0]);
     wrange_Index = wrange[0];
     wrange_Size = *wrange[1];
 
@@ -181,12 +187,12 @@ void rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau)
     for(n = 0; n < tau->n_used; ++n)
     {
         rho_legal[n] =
-            tau->rho_km_vals[tau->start + n] +
+            tau->dlp->rho_km_vals[tau->start + n] +
                 0.5 * tau->w_km_vals[tau->start + n];
     }
 
     wrange = tmpl_Where_Lesser_Double(rho_legal, tau->n_used,
-                                      tau->rho_km_vals[tau->arr_size-1]);
+                                      tau->dlp->rho_km_vals[tau->dlp->arr_size-1]);
 
     wrange_Index = wrange[0];
     wrange_Size = *wrange[1];
@@ -212,7 +218,7 @@ void rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau)
     free(wrange_Index);
     free(wrange);
 
-    if (tau->start > tau->arr_size)
+    if (tau->start > tau->dlp->arr_size)
     {
         tau->error_occurred = tmpl_True;
         tau->error_message =
@@ -223,7 +229,7 @@ void rssringoccs_Tau_Get_Window_Width(rssringoccs_TAUObj* tau)
         return;
     }
 
-    if ((tau->start + tau->n_used) > tau->arr_size)
+    if ((tau->start + tau->n_used) > tau->dlp->arr_size)
     {
         tau->error_occurred = tmpl_True;
         tau->error_message =

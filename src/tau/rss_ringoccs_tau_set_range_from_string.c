@@ -6,6 +6,9 @@
 #include <libtmpl/include/tmpl_bool.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 
+/*  puts function found here, used for printing a status message if requested.*/
+#include <stdio.h>
+
 /*  Error message for the legal psitypes. Defined at the bottom of this file. */
 static const char rssringoccs_range_string_error_message[969];
 
@@ -33,6 +36,10 @@ rssringoccs_Tau_Set_Range_From_String(const char *range,
     if (tau->error_occurred)
         return;
 
+    /*  Print a status message if the user requested one.                     */
+    if (tau->dlp->verbose)
+        puts("\r\tTAU: Setting the requested processing range...");
+
     if (range == NULL)
     {
         tau->error_occurred = tmpl_True;
@@ -43,7 +50,6 @@ rssringoccs_Tau_Set_Range_From_String(const char *range,
 
         return;
     }
-
 
     range_str = tmpl_String_Duplicate(range);
     tmpl_String_Remove_Whitespace(range_str);

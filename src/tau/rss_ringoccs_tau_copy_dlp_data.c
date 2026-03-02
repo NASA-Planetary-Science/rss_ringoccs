@@ -164,8 +164,19 @@ rssringoccs_Tau_Copy_DLP_Data(rssringoccs_TAUObj * TMPL_RESTRICT const tau,
 
     /*  Several variables for Tau are exactly the same as the DLP ones. These *
      *  can be copied verbatim into the newly allocated memory for Tau.       */
-    tau->dlp = dlp;
-    ++dlp->reference_count;
+    tau->dlp = rssringoccs_DLP_New_Reference(dlp);
+
+    /*  The reference incrementer returns NULL on failure. Check for this.    */
+    if (!tau->dlp)
+    {
+        tau->error_occurred = tmpl_True;
+        tau->error_message =
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\trssringoccs_Tau_Copy_DLP_Data\n\n"
+            "\rrssringoccs_DLP_New_Reference returned NULL.\n\n";
+
+        return;
+    }
 
     /*  Run error checks on the DLP data.                                     */
     rssringoccs_DLP_Check_Core_Data(tau->dlp);

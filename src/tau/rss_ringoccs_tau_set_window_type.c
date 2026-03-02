@@ -6,6 +6,10 @@
 #include <libtmpl/include/tmpl_window_functions.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 
+
+/*  puts function found here, used for printing a status message if requested.*/
+#include <stdio.h>
+
 void rssringoccs_Tau_Set_Window_Type(const char *wtype, rssringoccs_TAUObj *tau)
 {
     char *tau_wtype;
@@ -15,6 +19,10 @@ void rssringoccs_Tau_Set_Window_Type(const char *wtype, rssringoccs_TAUObj *tau)
 
     if (tau->error_occurred)
         return;
+
+    /*  Print a status message if the user requested one.                     */
+    if (tau->dlp->verbose)
+        puts("\r\tTAU: Setting requested window type...");
 
     if (wtype == NULL)
     {

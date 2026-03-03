@@ -69,6 +69,13 @@ PyMemberDef crssringoccs_DiffractionCorrection_Members[] = {
         "Fresnel scale."
     },
     {
+        "k_vals",
+        T_OBJECT_EX,
+        offsetof(crssringoccs_PyDiffrecObj, k_vals),
+        0,
+        "Wavenumber."
+    },
+    {
         "phi_deg_vals",
         T_OBJECT_EX,
         offsetof(crssringoccs_PyDiffrecObj, phi_deg_vals),

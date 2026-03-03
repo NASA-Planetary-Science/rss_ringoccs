@@ -17,24 +17,17 @@
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
 
-/*  NULL and free are given here.                                             */
-#include <stdlib.h>
-
-/*  Booleans provided here.                                                   */
-#include <libtmpl/include/tmpl_bool.h>
-
-/*  tmpl_strdup function declared here.                                       */
-#include <libtmpl/include/tmpl_string.h>
-
 /*  Function prototype and typedefs for structs given here.                   */
 #include "../crssringoccs.h"
 
-/*  This function frees the memory allocated to a pointer by malloc when the  *
- *  corresponding variable is destroyed at the Python level. Without this you *
- *  will have serious memory leaks, so do not remove!                         */
+/*  TMPL_FREE macro provided here.                                            */
+#include <libtmpl/include/compat/tmpl_free.h>
+
+/*  This function free's memory stored in certain Python objects, like numpy  *
+ *  arrays. When the reference count for the object hits zero, this function  *
+ *  is called and the buffer (allocated with malloc) is then free'd.          */
 void crssringoccs_Capsule_Cleanup(PyObject *capsule)
 {
     void *memory = PyCapsule_GetPointer(capsule, NULL);
-    free(memory);
-    memory = NULL;
+    TMPL_FREE(memory);
 }

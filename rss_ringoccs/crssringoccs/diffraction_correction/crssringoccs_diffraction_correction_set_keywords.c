@@ -16,39 +16,29 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
-
-/*  Booleans provided here.                                                   */
-#include <libtmpl/include/tmpl_bool.h>
-
-/*  Function prototype and typedefs for structs given here.                   */
 #include "../crssringoccs.h"
 
 void
-crssringoccs_Get_Py_Vars_From_Tau_Self(rssringoccs_TAUObj *tau,
-                                       const crssringoccs_PyDiffrecObj *self)
+crssringoccs_DiffractionCorrection_Set_Keywords(
+    crssringoccs_PyDiffrecObj * const self
+)
 {
-    if (!tau)
-        return;
-
-    if (tau->error_occurred)
-        return;
-
     if (!self)
-    {
-        tau->error_occurred = tmpl_True;
-        tau->error_message =
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tcrssringoccs_Get_Py_Vars_From_Tau_Self\n\n"
-            "\rInput self is NULL.n";
-
         return;
-    }
 
-    tau->sigma = self->sigma;
-    tau->bfac = self->bfac;
-    tau->eccentricity = self->eccentricity;
-    tau->periapse = self->periapse;
-    tau->use_fwd = self->use_fwd;
-    tau->use_norm = self->use_norm;
-    tau->verbose = self->verbose;
+    if (!self->tau)
+        return;
+
+    if (self->tau->error_occurred)
+        return;
+
+    if (self->verbose)
+        puts("\r\tDiffractionCorrection: Passing keywords to C struct...");
+
+    self->tau->sigma = self->sigma;
+    self->tau->bfac = self->bfac;
+    self->tau->eccentricity = self->eccentricity;
+    self->tau->periapse = self->periapse;
+    self->tau->use_fwd = self->use_fwd;
+    self->tau->use_norm = self->use_norm;
 }

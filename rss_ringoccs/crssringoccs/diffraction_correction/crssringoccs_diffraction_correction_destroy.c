@@ -22,29 +22,32 @@
 void
 crssringoccs_DiffractionCorrection_Destroy(crssringoccs_PyDiffrecObj *self)
 {
-    Py_XDECREF(self->T_in);
-    Py_XDECREF(self->T_out);
-    Py_XDECREF(self->T_fwd);
-    Py_XDECREF(self->B_deg_vals);
-    Py_XDECREF(self->D_km_vals);
-    Py_XDECREF(self->F_km_vals);
-    Py_XDECREF(self->phi_deg_vals);
-    Py_XDECREF(self->phi_rl_deg_vals);
-    Py_XDECREF(self->rho_corr_pole_km_vals);
-    Py_XDECREF(self->rho_corr_timing_km_vals);
-    Py_XDECREF(self->rho_dot_kms_vals);
-    Py_XDECREF(self->rho_km_vals);
-    Py_XDECREF(self->t_oet_spm_vals);
-    Py_XDECREF(self->t_ret_spm_vals);
-    Py_XDECREF(self->t_set_spm_vals);
-    Py_XDECREF(self->tau_threshold_vals);
-    Py_XDECREF(self->w_km_vals);
-    Py_XDECREF(self->outfiles);
-    Py_XDECREF(self->input_vars);
-    Py_XDECREF(self->input_kwds);
-    Py_XDECREF(self->rx_km_vals);
-    Py_XDECREF(self->ry_km_vals);
-    Py_XDECREF(self->rz_km_vals);
+    Py_CLEAR(self->T_in);
+    Py_CLEAR(self->T_out);
+    Py_CLEAR(self->T_fwd);
+    Py_CLEAR(self->k_vals);
+    Py_CLEAR(self->B_deg_vals);
+    Py_CLEAR(self->D_km_vals);
+    Py_CLEAR(self->F_km_vals);
+    Py_CLEAR(self->phi_deg_vals);
+    Py_CLEAR(self->phi_rl_deg_vals);
+    Py_CLEAR(self->rho_corr_pole_km_vals);
+    Py_CLEAR(self->rho_corr_timing_km_vals);
+    Py_CLEAR(self->rho_dot_kms_vals);
+    Py_CLEAR(self->rho_km_vals);
+    Py_CLEAR(self->t_oet_spm_vals);
+    Py_CLEAR(self->t_ret_spm_vals);
+    Py_CLEAR(self->t_set_spm_vals);
+    Py_CLEAR(self->tau_threshold_vals);
+    Py_CLEAR(self->w_km_vals);
+    Py_CLEAR(self->rx_km_vals);
+    Py_CLEAR(self->ry_km_vals);
+    Py_CLEAR(self->rz_km_vals);
+    Py_CLEAR(self->input_vars);
+    Py_CLEAR(self->input_kwds);
+    Py_CLEAR(self->rngreq);
+    Py_CLEAR(self->perturb);
+
     rssringoccs_Tau_Destroy(&self->tau);
 
     Py_TYPE(self)->tp_free((PyObject *) self);

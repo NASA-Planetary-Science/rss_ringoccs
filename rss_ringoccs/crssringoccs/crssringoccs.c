@@ -23,9 +23,10 @@
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #endif
 
+#define PY_ARRAY_UNIQUE_SYMBOL crssringoccs
+
 /*  Numpy header files.                                                       */
-#include <numpy/ndarraytypes.h>
-#include <numpy/ufuncobject.h>
+#include <numpy/ndarrayobject.h>
 
 static PyModuleDef moduledef = {
     PyModuleDef_HEAD_INIT,
@@ -39,6 +40,9 @@ PyMODINIT_FUNC PyInit_crssringoccs(void)
     PyObject *module = NULL;
     PyObject *all = NULL;
     int pymod_addobj;
+
+    if (PyArray_ImportNumPyAPI() < 0)
+        return NULL;
 
     if (PyType_Ready(&crssringoccs_DiffractionCorrection) < 0)
         return NULL;
@@ -148,6 +152,5 @@ PyMODINIT_FUNC PyInit_crssringoccs(void)
         return NULL;
     }
 
-    import_array();
     return module;
 }

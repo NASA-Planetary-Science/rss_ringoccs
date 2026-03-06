@@ -274,4 +274,3 @@ if [ $INPLACE == 1 ]; then
     echo "    directories using the -I and -L option as follows:"
     echo "        gcc -I$(pwd)/../ -L$(pwd)/ file.c -o file.out -lrssringoccs"
 fi
-

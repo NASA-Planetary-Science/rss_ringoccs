@@ -77,7 +77,8 @@ crssringoccs_DiffractionCorrection_Create_Keyword_Dictionary(
             "\r\tcrssringoccs_DiffractionCorrection_Create_Keyword_Dictionary"
             "\n\n\rPy_BuildValue returned NULL.\n\n";
 
-        Py_CLEAR(dlp_history);
+        Py_CLEAR(normalize);
+        Py_CLEAR(bfac);
         return;
     }
 

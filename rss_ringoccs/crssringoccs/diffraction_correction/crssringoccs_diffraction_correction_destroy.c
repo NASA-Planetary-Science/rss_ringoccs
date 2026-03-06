@@ -52,3 +52,4 @@ crssringoccs_DiffractionCorrection_Destroy(crssringoccs_PyDiffrecObj *self)
 
     Py_TYPE(self)->tp_free((PyObject *) self);
 }
+/*  End of crssringoccs_DiffractionCorrection_Destroy.                        */

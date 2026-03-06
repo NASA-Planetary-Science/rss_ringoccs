@@ -29,42 +29,51 @@
 /*  Function prototype and typedefs for structs given here.                   */
 #include "../crssringoccs.h"
 
-void crssringoccs_Get_Py_Perturb(rssringoccs_TAUObj *tau, PyObject *perturb)
+void
+crssringoccs_DiffractionCorrection_Set_Perturb(
+    crssringoccs_PyDiffrecObj * const self
+)
 {
     PyObject *iter;
     PyObject *next;
     unsigned int n;
 
-    if (tau == NULL)
+    if (!self)
         return;
 
-    if (tau->error_occurred)
+    if (!self->tau)
         return;
+
+    if (self->tau->error_occurred)
+        return;
+
+    if (self->verbose)
+        puts("\r\tDiffractionCorrection: Passing 'perturb' to C struct...");
 
     /*  Check that the input perturb is a list with 5 elements.               */
-    if (!perturb)
+    if (!self->perturb)
     {
-        for (n=0; n<5; ++n)
-            tau->perturb[n] = 0.0;
+        for (n = 0; n < 5; ++n)
+            self->tau->perturb[n] = 0.0;
     }
 
     /*  If the user supplied a perturb list, parse it and extract values.     */
-    else if (PyList_Check(perturb))
+    else if (PyList_Check(self->perturb))
     {
         /*  If the list is not the correct size, raise an error.              */
-        if (PyList_Size(perturb) != 5)
+        if (PyList_Size(self->perturb) != 5)
         {
-            tau->error_occurred = tmpl_True;
-            tau->error_message =
+            self->tau->error_occurred = tmpl_True;
+            self->tau->error_message =
                 "\rError Encountered: rss_ringoccs\n"
-                "\r\trssringoccs_Get_Py_Perturb\n\n"
+                "\r\tcrssringoccs_DiffractionCorrection_Set_Perturb\n\n"
                 "\rInput perturb is a list but does not have 5 entries.\n"
                 "\rperturb must be a list of five real numbers.\n";
 
             return;
         }
 
-        iter = PyObject_GetIter(perturb);
+        iter = PyObject_GetIter(self->perturb);
 
         /*  Loop over the elements of the list, see if they can be converted  *
          *  to doubles, and store them in the tau->perturb variable.          */
@@ -74,34 +83,38 @@ void crssringoccs_Get_Py_Perturb(rssringoccs_TAUObj *tau, PyObject *perturb)
 
             /*  If the element is an integer, convert to double and save it.  */
             if (PyLong_Check(next))
-                tau->perturb[n] = PyLong_AsDouble(next);
+                self->tau->perturb[n] = PyLong_AsDouble(next);
 
             /*  Convert from Python float to C double with PyFloat_AsDouble.  */
             else if (PyFloat_Check(next))
-                tau->perturb[n] = PyFloat_AsDouble(next);
+                self->tau->perturb[n] = PyFloat_AsDouble(next);
 
             /*  Invalid data type for one of the entries. Return with error.  */
             else
             {
-                tau->error_occurred = tmpl_True;
-                tau->error_message =
+                self->tau->error_occurred = tmpl_True;
+                self->tau->error_message =
                     "\rError Encountered: rss_ringoccs\n"
-                    "\r\trssringoccs_Get_Py_Perturb\n\n"
+                    "\r\tcrssringoccs_DiffractionCorrection_Set_Perturb\n\n"
                     "\rInput perturb has entries that are not real numbers.\n"
                     "\rAll entries for the perturb list must be numbers.\n";
 
                 return;
             }
+
+            Py_CLEAR(next);
         }
+
+        Py_CLEAR(iter);
     }
 
     /*  The input was not a list. Return with error.                          */
     else
     {
-        tau->error_occurred = tmpl_True;
-        tau->error_message =
+        self->tau->error_occurred = tmpl_True;
+        self->tau->error_message =
             "\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_Get_Py_Perturb\n\n"
+            "\r\tcrssringoccs_DiffractionCorrection_Set_Perturb\n\n"
             "\rInput perturb is not a list.\n";
 
         return;

@@ -29,60 +29,79 @@
 /*  Function prototype and typedefs for structs given here.                   */
 #include "../crssringoccs.h"
 
-void crssringoccs_Get_Py_Range(rssringoccs_TAUObj *tau, PyObject *rngreq)
+void
+crssringoccs_DiffractionCorrection_Set_Range(
+    crssringoccs_PyDiffrecObj * const self
+)
 {
     PyObject *iter;
     PyObject *next;
     unsigned int n;
 
-    if (tau == NULL)
+    if (!self)
+
+    if (!self->tau)
         return;
 
-    if (tau->error_occurred)
+    if (self->tau->error_occurred)
         return;
 
-    if (rngreq == NULL)
+    if (self->verbose)
+        puts("\r\tDiffractionCorrection: Passing 'rng' to C struct...");
+
+    if (!self->rngreq)
     {
-        tau->error_occurred = tmpl_True;
-        tau->error_message =
-            "\n\rError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_C_Tau_to_Py_Tau\n\n"
-            "\rInput rngreq is NULL. Aborting.\n\n";
+        self->rngreq = PyUnicode_FromString("all");
 
-        return;
+        if (!self->rngreq)
+        {
+            self->tau->error_occurred = tmpl_True;
+            self->tau->error_message =
+                "\n\rError Encountered: rss_ringoccs\n"
+                "\r\tcrssringoccs_DiffractionCorrection_Set_Range\n\n"
+                "\rInput rngreq is NULL. Aborting.\n\n";
+
+            return;
+        }
     }
 
     /*  If the rng variable is a string, make sure it is a legal value and    *
      *  try to extract the corresponding values in kilometers.                */
-    if (PyBytes_Check(rngreq))
-        rssringoccs_Tau_Set_Range_From_String(PyBytes_AsString(rngreq), tau);
+    if (PyBytes_Check(self->rngreq))
+    {
+        const char * const range_string = PyBytes_AsString(self->rngreq);
+        rssringoccs_Tau_Set_Range_From_String(range_string, self->tau);
+    }
 
     /*  If the rng variable is a unicode object (type of string from python)  *
      *  make sure it is a legal value and try to extract the corresponding    *
      *  values in kilometers.                                                 */
-    else if (PyUnicode_Check(rngreq))
+    else if (PyUnicode_Check(self->rngreq))
+    {
 
         /*  Convert the Python string to a C string via PyUnicode_AsUTF8. The *
          *  C API recommends not altering the string, so we create a copy of  *
          *  it using strcpy (from string.h).                                  */
-        rssringoccs_Tau_Set_Range_From_String(PyUnicode_AsUTF8(rngreq), tau);
+        const char * const range_string = PyUnicode_AsUTF8(self->rngreq);
+        rssringoccs_Tau_Set_Range_From_String(range_string, self->tau);
+    }
 
     /*  If the requested range is a list, try to parse the elements.          */
-    else if (PyList_Check(rngreq))
+    else if (PyList_Check(self->rngreq))
     {
-        if (PyList_Size(rngreq) != 2)
+        if (PyList_Size(self->rngreq) != 2)
         {
-            tau->error_occurred = tmpl_True;
-            tau->error_message =
+            self->tau->error_occurred = tmpl_True;
+            self->tau->error_message =
                 "\rError Encountered: rss_ringoccs\n"
-                "\r\trssringoccs_Get_Py_Range\n\n"
+                "\r\tcrssringoccs_DiffractionCorrection_Set_Range\n\n"
                 "\rInput range is a list but does not have 2 entries.\n"
                 "\rrng must be a list of two real numbers.\n\n";
 
             return;
         }
 
-        iter = PyObject_GetIter(rngreq);
+        iter = PyObject_GetIter(self->rngreq);
 
         for (n = 0; n < 2; ++n)
         {
@@ -90,28 +109,32 @@ void crssringoccs_Get_Py_Range(rssringoccs_TAUObj *tau, PyObject *rngreq)
 
             /*  Try to parse the elements. Return with error if this fails.   */
             if (PyLong_Check(next))
-                tau->range[n] = PyLong_AsDouble(next);
+                self->tau->range[n] = PyLong_AsDouble(next);
             else if (PyFloat_Check(next))
-                tau->range[n] = PyFloat_AsDouble(next);
+                self->tau->range[n] = PyFloat_AsDouble(next);
             else
             {
-                tau->error_occurred = tmpl_True;
-                tau->error_message =
+                self->tau->error_occurred = tmpl_True;
+                self->tau->error_message =
                     "\rError Encountered: rss_ringoccs\n"
-                    "\r\trssringoccs_Get_Py_Range\n\n"
+                    "\r\tcrssringoccs_DiffractionCorrection_Set_Range\n\n"
                     "\rInput rng has entries that are not real numbers.\n"
                     "\rBoth entries for the rng list must be numbers.\n\n";
 
                 return;
             }
+
+            Py_CLEAR(next);
         }
+
+        Py_CLEAR(iter);
     }
 
     /*  Illegal rng requested. Return with error.                             */
     else
     {
-        tau->error_occurred = tmpl_True;
-        tau->error_message =
+        self->tau->error_occurred = tmpl_True;
+        self->tau->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\trssringoccs_Get_Py_Range\n\n"
             "\rrng must be a list of two real numbers or a string.\n"

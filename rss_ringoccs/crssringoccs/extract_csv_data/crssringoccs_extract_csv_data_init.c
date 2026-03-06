@@ -160,5 +160,3 @@ crssringoccs_ExtractCSVData_Init(crssringoccs_PyCSVObj *self,
 
     return 1;
 }
-
-#undef MAKE_NONE

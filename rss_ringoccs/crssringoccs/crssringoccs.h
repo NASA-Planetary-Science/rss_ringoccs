@@ -34,13 +34,17 @@
 #include <libtmpl/include/tmpl_bool.h>
 
 /*  And a bunch of headers from this project.                                 */
-#include <rss_ringoccs/include/rss_ringoccs_calibration.h>
+#include <rss_ringoccs/include/types/rss_ringoccs_dlpobj.h>
+#include <rss_ringoccs/include/types/rss_ringoccs_tauobj.h>
+#include <rss_ringoccs/include/rss_ringoccs_dlp.h>
+#include <rss_ringoccs/include/rss_ringoccs_tau.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
 
 /*  The definition of the DiffractionCorrection class as a C struct.          */
 typedef struct crssringoccs_PyDiffrecObj_Def {
     PyObject_HEAD
+    rssringoccs_TAUObj *tau;          /*  Tau object with all of the C data.  */
     PyObject *T_in;                   /*  Input complex transmittance.        */
     PyObject *T_out;                  /*  Reconstructed complex transmittance.*/
     PyObject *T_fwd;                  /*  Forward model complex transmittance.*/
@@ -50,8 +54,6 @@ typedef struct crssringoccs_PyDiffrecObj_Def {
     PyObject *F_km_vals;              /*  Fresnel scale.                      */
     PyObject *phi_deg_vals;           /*  Ring azimuth angle.                 */
     PyObject *phi_rl_deg_vals;        /*  Ring longitude angle.               */
-    PyObject *input_vars;             /*  Input parameters for the class.     */
-    PyObject *input_kwds;             /*  Input keywords for the class.       */
     PyObject *rho_corr_pole_km_vals;  /*  Pole corrected ring radius.         */
     PyObject *rho_corr_timing_km_vals;/*  Timing corrected ring radius.       */
     PyObject *rho_dot_kms_vals;       /*  Ring radial velocity.               */
@@ -64,6 +66,10 @@ typedef struct crssringoccs_PyDiffrecObj_Def {
     PyObject *rx_km_vals;             /*  x component of spacecraft.          */
     PyObject *ry_km_vals;             /*  y component of spacecraft.          */
     PyObject *rz_km_vals;             /*  z component of spacecraft.          */
+    PyObject *input_vars;             /*  Input parameters for the class.     */
+    PyObject *input_kwds;             /*  Input keywords for the class.       */
+    PyObject *rngreq;                 /*  Requested range, Python keyword.    */
+    PyObject *perturb;                /*  Polynomial perturbation for psi.    */
     tmpl_Bool bfac;                   /*  Boolean for b factor in resolution. */
     tmpl_Bool use_fwd;                /*  Boolean for forward modeling.       */
     tmpl_Bool use_norm;               /*  Boolean for window normalization.   */
@@ -265,37 +271,57 @@ typedef struct PyGeoObj_Def {
 
 
 extern void
-crssringoccs_Create_Real_Numpy_Array(PyObject **py_ptr,
-                                     double *ptr,
-                                     size_t len);
+crssringoccs_Create_Real_Numpy_Array(PyObject ** const py_ptr,
+                                     double * const ptr,
+                                     void (*cleanup)(PyObject *),
+                                     const size_t len);
 
 extern void
-crssringoccs_Create_Complex_Numpy_Array(PyObject **py_ptr,
-                                        tmpl_ComplexDouble *ptr,
-                                        size_t len);
+crssringoccs_Create_Complex_Numpy_Array(PyObject ** const py_ptr,
+                                        tmpl_ComplexDouble * const ptr,
+                                        void (*cleanup)(PyObject *),
+                                        const size_t len);
 
-extern void crssringoccs_Capsule_Cleanup(PyObject *capsule);
+extern void crssringoccs_Capsule_Cleanup(PyObject * const capsule);
 
 extern double *
-crssringoccs_Extract_Data(rssringoccs_DLPObj *dlp,
-                          PyObject *py_dlp,
-                          const char *var_name);
+crssringoccs_DLP_Extract_Data(rssringoccs_DLPObj * const dlp,
+                              PyObject * const object,
+                              const char * const var_name);
 
-extern rssringoccs_DLPObj *crssringoccs_Py_DLP_To_C_DLP(PyObject *py_dlp);
-
-extern void
-crssringoccs_C_Tau_To_Py_Tau(crssringoccs_PyDiffrecObj *py_tau,
-                             rssringoccs_TAUObj *tau);
+extern rssringoccs_DLPObj *
+crssringoccs_PyObject_To_DLP(PyObject * const object);
 
 extern void
-crssringoccs_Get_Py_Perturb(rssringoccs_TAUObj *tau, PyObject *perturb);
+crssringoccs_DiffractionCorrection_Set_Perturb(
+    crssringoccs_PyDiffrecObj * const self
+);
 
 extern void
-crssringoccs_Get_Py_Range(rssringoccs_TAUObj *tau, PyObject *rngreq);
+crssringoccs_DiffractionCorrection_Set_Range(
+    crssringoccs_PyDiffrecObj * const self
+);
 
 extern void
-crssringoccs_Get_Py_Vars_From_Tau_Self(rssringoccs_TAUObj *tau,
-                                       const crssringoccs_PyDiffrecObj *self);
+crssringoccs_DiffractionCorrection_Set_Keywords(
+    crssringoccs_PyDiffrecObj * const self
+);
+
+extern void
+crssringoccs_DiffractionCorrection_Create_Argument_Dictionary(
+    crssringoccs_PyDiffrecObj * const self,
+    PyObject * const dlp
+);
+
+extern void
+crssringoccs_DiffractionCorrection_Create_Keyword_Dictionary(
+    crssringoccs_PyDiffrecObj * const self
+);
+
+extern void
+crssringoccs_DiffractionCorrection_Finish(
+    crssringoccs_PyDiffrecObj * const self, PyObject * const dlp
+);
 
 extern PyMemberDef crssringoccs_DiffractionCorrection_Members[];
 
@@ -303,6 +329,11 @@ extern PyMethodDef crssringoccs_DiffractionCorrection_Methods[];
 
 extern void
 crssringoccs_DiffractionCorrection_Destroy(crssringoccs_PyDiffrecObj *self);
+
+extern PyObject *
+crssringoccs_DiffractionCorrection_New(PyTypeObject *type,
+                                       PyObject *args,
+                                       PyObject *kwds);
 
 extern int
 crssringoccs_DiffractionCorrection_Init(crssringoccs_PyDiffrecObj *self,

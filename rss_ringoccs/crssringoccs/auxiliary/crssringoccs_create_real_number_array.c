@@ -22,42 +22,21 @@
  *      Defines the DiffractionCorrection class for rss_ringoccs. This uses   *
  *      the C-Python API to build an extension module containing the class.   *
  ******************************************************************************
- *  Author:     Ryan Maguire, Wellesley College                               *
+ *  Author:     Ryan Maguire                                                  *
  *  Date:       June 22, 2019                                                 *
  ******************************************************************************/
 #include "../crssringoccs.h"
-
-/*  Avoid warnings about deprecated Numpy API versions.                       */
-#ifndef NPY_NO_DEPRECATED_API
-#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
-#endif
-
-/*  Numpy header files.                                                       */
-#include <numpy/ndarraytypes.h>
-#include <numpy/ufuncobject.h>
+#include "../crssringoccs_numpy_api.h"
 
 /*  Creates a numpy array from a double array.                                */
 void
-crssringoccs_Create_Real_Numpy_Array(PyObject **py_ptr, double *ptr, size_t len)
+crssringoccs_Create_Real_Numpy_Array(PyObject ** const py_ptr,
+                                     double * const ptr,
+                                     void (*cleanup)(PyObject *),
+                                     const size_t len)
 {
     PyObject *arr, *tmp, *capsule;
     npy_intp pylength = (npy_intp)len;
-
-    /*  Numpy's _import_array function must be called before using the API.   */
-    if (!PyArray_API)
-    {
-        /*  If the import fails we can't safe use the tools. Abort.           */
-        if (_import_array() < 0)
-        {
-            PyErr_Print();
-            PyErr_SetString(
-                PyExc_ImportError,
-                "numpy.core.multiarray failed to import"
-            );
-
-            return;
-        }
-    }
 
     /*  If the pointer has memory allocated to it, create a numpy array.      */
     if (ptr != NULL)
@@ -65,16 +44,19 @@ crssringoccs_Create_Real_Numpy_Array(PyObject **py_ptr, double *ptr, size_t len)
         /*  Numpy API function for creating numpy arrays from existing data.  */
         arr = PyArray_SimpleNewFromData(1, &pylength, NPY_DOUBLE, ptr);
 
-        /*  Create a capsule for this pointer so it is free'd when the numpy  *
-         *  array is destroyed. Avoids memory leaks for the end-user.         */
-        capsule = PyCapsule_New(ptr, NULL, crssringoccs_Capsule_Cleanup);
-
-        /*  Link the array to the capsule. "del arr" in Python now free's the *
-         *  memory allocated for the C pointer.                               */
-        if (PyArray_SetBaseObject((PyArrayObject *)arr, capsule) == -1)
+        if (cleanup)
         {
-            Py_DECREF(arr);
-            return;
+            /*  Create a capsule for this pointer so it is free'd when the    *
+             *  array is destroyed. Avoids memory leaks for the end-user.     */
+            capsule = PyCapsule_New(ptr, NULL, cleanup);
+
+            /*  Link the array to the capsule. "del arr" in Python now free's *
+             *  the memory allocated for the C pointer.                       */
+            if (PyArray_SetBaseObject((PyArrayObject *)arr, capsule) == -1)
+            {
+                Py_CLEAR(arr);
+                return;
+            }
         }
 
         *py_ptr = Py_BuildValue("N", arr);
@@ -89,4 +71,4 @@ crssringoccs_Create_Real_Numpy_Array(PyObject **py_ptr, double *ptr, size_t len)
         Py_XDECREF(tmp);
     }
 }
-/*  End of crssringoccs_set_var.                                              */
+/*  End of crssringoccs_Create_Numpy_Array.                                   */

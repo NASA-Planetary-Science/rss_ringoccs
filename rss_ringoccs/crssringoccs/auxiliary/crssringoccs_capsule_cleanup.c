@@ -26,7 +26,7 @@
 /*  This function free's memory stored in certain Python objects, like numpy  *
  *  arrays. When the reference count for the object hits zero, this function  *
  *  is called and the buffer (allocated with malloc) is then free'd.          */
-void crssringoccs_Capsule_Cleanup(PyObject *capsule)
+void crssringoccs_Capsule_Cleanup(PyObject * const capsule)
 {
     void *memory = PyCapsule_GetPointer(capsule, NULL);
     TMPL_FREE(memory);

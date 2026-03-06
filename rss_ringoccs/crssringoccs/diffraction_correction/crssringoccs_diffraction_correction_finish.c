@@ -23,22 +23,44 @@
 /*  Function prototype and typedefs for structs given here.                   */
 #include "../crssringoccs.h"
 
+#include <stdio.h>
+
 /*  Macro for the crssringoccs_set_var function to shorten the syntax.        */
 #define SET_REAL_VAR(a)                                                        \
-crssringoccs_Create_Real_Numpy_Array(                                          \
-    &self->a,                                                                  \
-    self->tau->a + self->tau->start,                                           \
-    NULL,                                                                      \
-    self->tau->n_used                                                          \
-)
+    do {                                                                       \
+        if (self->tau->a)                                                      \
+            crssringoccs_Create_Real_Numpy_Array(                              \
+                &self->a,                                                      \
+                self->tau->a + self->tau->start,                               \
+                NULL,                                                          \
+                self->tau->n_used                                              \
+            );                                                                 \
+        else                                                                   \
+            crssringoccs_Create_Real_Numpy_Array(                              \
+                &self->a,                                                      \
+                NULL,                                                          \
+                NULL,                                                          \
+                0                                                              \
+            );                                                                 \
+    } while (0)
 
 #define SET_COMPLEX_VAR(a)                                                     \
-crssringoccs_Create_Complex_Numpy_Array(                                       \
-    &self->a,                                                                  \
-    self->tau->a + self->tau->start,                                           \
-    NULL,                                                                      \
-    self->tau->n_used                                                          \
-)
+    do {                                                                       \
+        if (self->tau->a)                                                      \
+            crssringoccs_Create_Complex_Numpy_Array(                           \
+                &self->a,                                                      \
+                self->tau->a + self->tau->start,                               \
+                NULL,                                                          \
+                self->tau->n_used                                              \
+            );                                                                 \
+        else                                                                   \
+            crssringoccs_Create_Complex_Numpy_Array(                           \
+                &self->a,                                                      \
+                NULL,                                                          \
+                NULL,                                                          \
+                0                                                              \
+            );                                                                 \
+    } while (0)
 
 #define SET_DLP_VAR(a)                                                         \
     do {                                                                       \
@@ -46,15 +68,6 @@ crssringoccs_Create_Complex_Numpy_Array(                                       \
         self->a = PyObject_GetItem(tmp, slice);                                \
         Py_CLEAR(tmp);                                                         \
     } while (0)
-
-/*  Macro for safely creating None objects.                                   */
-#define MAKE_NONE(var)                                                         \
-    do {                                                                       \
-        PyObject *tmp = self->var;                                             \
-        Py_INCREF(Py_None);                                                    \
-        self->var = Py_None;                                                   \
-        Py_XDECREF(tmp);                                                       \
-    } while(0)
 
 /*  Converts a C Tau struct to a Python Tau Object.                           */
 void
@@ -74,6 +87,9 @@ crssringoccs_DiffractionCorrection_Finish(crssringoccs_PyDiffrecObj *self,
 
     if (self->tau->error_occurred)
         return;
+
+    if (self->verbose)
+        puts("\r\tDiffractionCorrection: Creating numpy arrays from data...");
 
     start = PyLong_FromSize_t(self->tau->start);
     end = PyLong_FromSize_t(self->tau->start + self->tau->n_used);
@@ -115,11 +131,12 @@ crssringoccs_DiffractionCorrection_Finish(crssringoccs_PyDiffrecObj *self,
     /*  Set every variable in the Python object from the C Tau struct.        */
     SET_COMPLEX_VAR(T_in);
     SET_COMPLEX_VAR(T_out);
+    SET_COMPLEX_VAR(T_fwd);
 
     SET_REAL_VAR(F_km_vals);
     SET_REAL_VAR(k_vals);
     SET_REAL_VAR(w_km_vals);
-    MAKE_NONE(tau_threshold_vals);
+    SET_REAL_VAR(tau_threshold_vals);
 
     SET_DLP_VAR(rho_km_vals);
     SET_DLP_VAR(phi_deg_vals);
@@ -136,21 +153,14 @@ crssringoccs_DiffractionCorrection_Finish(crssringoccs_PyDiffrecObj *self,
     SET_DLP_VAR(ry_km_vals);
     SET_DLP_VAR(rz_km_vals);
 
-    /*  If forward modeling was not performed, set these as None objects.     */
-    if (!self->tau->T_fwd)
-        MAKE_NONE(T_fwd);
-    else
-        SET_COMPLEX_VAR(T_fwd);
-
     CLEANUP:
         Py_CLEAR(slice);
         Py_CLEAR(start);
         Py_CLEAR(end);
 }
-/*  End of crssringoccs_C_Tau_To_Py_Tau.                                      */
+/*  End of crssringoccs_DiffractionCorrection_Finish.                         */
 
 /*  Undefine these in case someone wants to #include this file.               */
 #undef SET_REAL_VAR
 #undef SET_COMPLEX_VAR
 #undef SET_DLP_VAR
-#undef MAKE_NONE

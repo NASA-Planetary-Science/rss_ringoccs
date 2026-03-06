@@ -38,8 +38,6 @@
         Py_XDECREF(tmp);                                                       \
     } while(0)
 
-#define DESTROY_VAR(var) if (var) {free(var); var = NULL;}
-
 /*  The init function for the dirrection correction class. This is the        *
  *  equivalent of the __init__ function defined in a normal python class.     */
 int
@@ -47,15 +45,18 @@ crssringoccs_DiffractionCorrection_Init(crssringoccs_PyDiffrecObj *self,
                                         PyObject *args,
                                         PyObject *kwds)
 {
-    /*  Declare variables for a DLP and Tau object.                           */
     rssringoccs_DLPObj *dlp;
-    rssringoccs_TAUObj *tau;
+
+    /*  Python objects needed throughout the computation.                     */
+    PyObject *obj;
+
+    /*  Declare variables for a DLP and Tau object.                           */
     double resolution;
 
     /*  The list of the keywords accepted by the DiffractionCorrection class. *
      *  dlp and res are REQUIRED inputs, the rest are optional. If the user   *
      *  does not provide these optional keywords, we must set them ourselves. */
-    static char *kwlist[] = {
+    char * kwlist[] = {
         "dlp",
         "resolution",
         "rng",
@@ -73,61 +74,6 @@ crssringoccs_DiffractionCorrection_Init(crssringoccs_PyDiffrecObj *self,
         NULL
     };
 
-    /*  Python objects needed throughout the computation.                     */
-    PyObject *DLPInst;
-    PyObject *tmp;
-    PyObject *dlp_tmp;
-
-    /*  Set the default keyword options.                                      */
-
-    /*  Default polynomial perturbation is off.                               */
-    PyObject *perturb = NULL;
-
-    /*  The kbmd20 is a new window, a modifed Kaiser-Bessel with alpha set to *
-     *  two pi. The modification ensures the window goes to zero at its edges *
-     *  while evaluating to one at the center, unlike the actual              *
-     *  Kaiser-Bessel which is discontinuous at the edge of the window. The   *
-     *  two pi factor is mostly guess work since it accurately reproduces the *
-     *  PDS results. The real window used for that data is not known too me.  *
-     *  The actual code for the window functions is in special_functions/     */
-    self->wtype = "kbmd20";
-
-    /*  Fresnel 4 is a new option, not mentioned in any of the papers but     *
-     *  documented in our accompanying PDF. It uses Legendre polynomials to   *
-     *  approximate the Fresnel kernel. It essentially takes Fresnels         *
-     *  quadratic method to the next step, a quartic, hence the name. It is   *
-     *  extremely fast (all of Rev007 takes less than a second) and very      *
-     *  accurate for all but the most extreme occultations (like Rev133).     */
-    self->psitype = "fresnel4";
-
-    /*  Default range is "all", denoting [1.0, 400000.0]. We'll set later.    */
-    PyObject *rngreq = PyUnicode_FromString("all");
-
-    /*  By default, forward computations are not run, FFTs are not used, and  *
-     *  the run is silent (verbose is off).                                   */
-    self->use_fwd = tmpl_False;
-    self->verbose = tmpl_False;
-
-    /*  Using the bfac guarantees accurate window sizes in the case of a poor *
-     *  Allen deviation. Window normalization is also recommended since the   *
-     *  integral is scaled by the width of the window, and hence for small    *
-     *  window sizes the result might return close to zero.                   */
-    self->bfac = tmpl_True;
-    self->use_norm = tmpl_True;
-
-    /*  The default sigma value is the one for Cassini.                       */
-    self->sigma = 2.0e-13;
-
-    /*  If resolution_factor was not set, set to 0.75. This value was         *
-     *  specified by Essam Marouf as necessary to ensure the reconstruction   *
-     *  matches the PDS results. No justification is known to me.             */
-    self->resolution_factor = 0.75;
-
-    /*  The default geometry assumes the rings are circular, so we set both   *
-     *  the eccentricity and the periapse to zero.                            */
-    self->eccentricity = 0.0;
-    self->periapse = 0.0;
-
     /*  Extract the inputs and keywords supplied by the user. If the data     *
      *  cannot be extracted, raise a type error and return to caller. A short *
      *  explaination of PyArg_ParseTupleAndKeywords. The inputs args and kwds *
@@ -143,13 +89,13 @@ crssringoccs_DiffractionCorrection_Init(crssringoccs_PyDiffrecObj *self,
      *  that the input list has ended.                                        */
     const int success = PyArg_ParseTupleAndKeywords(
         args, kwds, "|Od$OsppppdsdddO:", kwlist,
-        &DLPInst,                 &self->input_resolution_km,
-        &rngreq,                  &self->wtype,
+        &obj,                     &self->input_resolution_km,
+        &self->rngreq,            &self->wtype,
         &self->use_fwd,           &self->use_norm,
         &self->verbose,           &self->bfac,
         &self->sigma,             &self->psitype,
         &self->resolution_factor, &self->eccentricity,
-        &self->periapse,          &perturb
+        &self->periapse,          &self->perturb
     );
 
     if (!success)
@@ -160,7 +106,7 @@ crssringoccs_DiffractionCorrection_Init(crssringoccs_PyDiffrecObj *self,
             "\r\tDiffractionCorrection\n\n"
             "\rCould not parse input variables.\n\n"
             "\rInputs:\n"
-            "\r\tDLPInst:           An instance of the DLP Class.\n"
+            "\r\tobj:               A Python object with all of the DLP data.\n"
             "\r\tresolution:        Requested resolution in km (float).\n\n"
             "\rKeywords:\n"
             "\r\trng:               Requested range (str or list).\n"
@@ -181,153 +127,71 @@ crssringoccs_DiffractionCorrection_Init(crssringoccs_PyDiffrecObj *self,
     }
 
     if (self->verbose)
-    {
-        puts("Diffraction Correction:");
-        puts("\tDiffraction Correction: Retrieving history from DLP...");
-    }
+        puts(
+            "\rDiffraction Correction:\n"
+            "\r\tDiffractionCorrection: Passing Python object to C..."
+        );
 
-    /*  If verbose was set, print a status update.                            */
-    if (self->verbose)
-        puts("\tDiffraction Correction: Converting Py DLP to C DLP...");
+    dlp = crssringoccs_PyObject_To_DLP(obj);
 
-    dlp = crssringoccs_Py_DLP_To_C_DLP(DLPInst);
-
-    if (dlp == NULL)
+    if (!dlp)
     {
         PyErr_Format(
             PyExc_RuntimeError,
             "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tdiffrec.DiffractionCorrection\n\n"
+            "\r\tDiffractionCorrection\n\n"
             "\rFailed to pass variables to C. rssringoccs_Py_DLP_To_C_DLP\n"
             "\rreturned NULL. Returning.\n\n"
         );
+
         return -1;
     }
 
     if (dlp->error_occurred)
     {
-        if (dlp->error_message == NULL)
-        {
-            PyErr_Format(
-                PyExc_RuntimeError,
-                "\n\rError Encountered: rss_ringoccs\n"
-                "\r\tdiffrec.DiffractionCorrection\n\n"
-                "\rFailed to pass variables to C. rssringoccs_Py_DLP_To_C_DLP\n"
-                "\rreturned a dlp with error_occurred set to True. No\n"
-                "\rerror message was set. Returning.\n\n"
-            );
-        }
-        else
-        {
-            PyErr_Format(PyExc_RuntimeError, "%s", dlp->error_message);
-            free(dlp->error_message);
-        }
+        PyErr_Format(PyExc_RuntimeError, "%s", dlp->error_message);
         free(dlp);
         return -1;
     }
 
-    /*  If verbose was set, print a status update.                            */
-    if (self->verbose)
-        puts("\tDiffraction Correction: Creating C Tau object...");
+    /*  Lastly, copy the verbose Boolean.                                     */
+    dlp->verbose = self->verbose;
 
     resolution = self->input_resolution_km * self->resolution_factor;
-    tau = rssringoccs_Tau_Create_From_DLP(dlp, resolution);
+    self->tau = rssringoccs_Tau_Create_From_DLP(dlp, resolution);
 
-    if (self->verbose)
-        puts("\tDiffraction Correction: Passing Py variables to tau...");
-
-    crssringoccs_Get_Py_Vars_From_Tau_Self(tau, self);
-    crssringoccs_Get_Py_Perturb(tau, perturb);
-    crssringoccs_Get_Py_Range(tau, rngreq);
-
-    rssringoccs_Tau_Set_Window_Type(self->wtype, tau);
-    rssringoccs_Tau_Set_Psi_Type(self->psitype, tau);
-
-    if (self->verbose)
-        puts("\tDiffraction Correction: Running reconstruction...");
-
-    rssringoccs_Reconstruction(tau);
-
-    if (self->verbose)
-        puts("\tDiffraction Correction: Converting C tau to Py tau...");
-
-    crssringoccs_C_Tau_To_Py_Tau(self, tau);
-
-    if (tau == NULL)
+    if (!self->tau)
     {
         PyErr_Format(
             PyExc_RuntimeError,
             "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tdiffrec.DiffractionCorrection\n\n"
-            "\rrssringoccs_Create_TAUObj returned NULL for tau. Returning.\n\n"
+            "\r\tDiffractionCorrection\n\n"
+            "\rrssringoccs_Tau_Create_From_DLP returned NULL.\n"
         );
 
+        free(dlp);
         return -1;
     }
 
-    if (tau->error_occurred)
+    crssringoccs_DiffractionCorrection_Set_Keywords(self);
+    crssringoccs_DiffractionCorrection_Set_Perturb(self);
+    crssringoccs_DiffractionCorrection_Set_Range(self);
+
+    rssringoccs_Tau_Set_Window_Type(self->wtype, self->tau);
+    rssringoccs_Tau_Set_Psi_Type(self->psitype, self->tau);
+    rssringoccs_Reconstruction(self->tau);
+
+    crssringoccs_DiffractionCorrection_Create_Argument_Dictionary(self, obj);
+    crssringoccs_DiffractionCorrection_Create_Keyword_Dictionary(self);
+    crssringoccs_DiffractionCorrection_Finish(self, obj);
+
+    if (self->tau->error_occurred)
     {
-        if (tau->error_message == NULL)
-            PyErr_Format(
-                PyExc_RuntimeError,
-                "\n\rError Encountered: rss_ringoccs\n"
-                "\r\tdiffrec.DiffractionCorrection\n\n"
-                "\rtau returned with error_occurred set to true but no\n"
-                "\rerror message. Returning.\n\n"
-            );
-        else
-            PyErr_Format(PyExc_RuntimeError, "%s\n", tau->error_message);
-
-        rssringoccs_Tau_Destroy(&tau);
+        PyErr_Format(PyExc_RuntimeError, "%s\n", self->tau->error_message);
+        rssringoccs_Tau_Destroy(&self->tau);
+        free(dlp);
         return -1;
     }
-
-    /*  We are now freeing the C tau object. The data pointers are still      *
-     *  accessible via the self PyObject. Note, we are freeing the pointer to *
-     *  the rssringoccs_TAUObj and NOT the pointers inside the object. The    *
-     *  data is still available in self.                                      */
-    free(tau);
-
-    /*  Similarly, we free the DLP. This does not free the data from the      *
-     *  input DLP PyObject. Those are also still available.                   */
-    free(dlp);
-
-    if (self->verbose)
-        puts("\tDiffraction Correction: Building arguments dictionary...");
-
-    dlp_tmp = Py_BuildValue(
-        "{s:O,s:d}",
-        "dlp_inst",            PyObject_GetAttrString(DLPInst, "history"),
-        "input_resolution_km", self->input_resolution_km
-    );
-
-    tmp = self->input_vars;
-    Py_INCREF(dlp_tmp);
-    self->input_vars = dlp_tmp;
-    Py_XDECREF(tmp);
-
-    if (self->verbose)
-        puts("\tDiffraction Correction: Building keywords dictionary...");
-
-    dlp_tmp = Py_BuildValue(
-        "{s:O,s:s,s:s,s:d,s:d,s:d,s:d,s:O,s:O}",
-        "rng",                 rngreq,
-        "wtype",               self->wtype,
-        "psitype",             self->psitype,
-        "sigma",               self->sigma,
-        "eccentricity",        self->eccentricity,
-        "periapse",            self->periapse,
-        "resolution_factor",   self->resolution_factor,
-        "use_norm",            PyBool_FromLong(self->use_norm),
-        "bfac",                PyBool_FromLong(self->bfac)
-    );
-
-    tmp = self->input_kwds;
-    Py_INCREF(dlp_tmp);
-    self->input_kwds = dlp_tmp;
-    Py_XDECREF(tmp);
-
-    self->outfiles = NULL;
 
     return 1;
 }

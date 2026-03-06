@@ -30,12 +30,10 @@ rssringoccs_Fresnel_Transform_Newton_Filon12(
     size_t offset = center - (nw_pts >> 1);
     size_t n;
 
-    double phi_s = tau->dlp->phi_deg_vals[offset];
-
     tau->T_out[center] = tmpl_CDouble_Zero;
 
-    phi_s = rssringoccs_Fast_Fresnel_Phase_And_Weight(
-        tau, center, offset, phi_s, &weight, &left_psi
+    rssringoccs_Fresnel_Phase_And_Weight(
+        tau, center, offset, &weight, &left_psi
     );
 
     left_scale = weight * w_func[0];
@@ -43,15 +41,15 @@ rssringoccs_Fresnel_Transform_Newton_Filon12(
 
     for (n = 0; n < nw_pts - 2; n += 2)
     {
-        phi_s = rssringoccs_Fast_Fresnel_Phase_And_Weight(
-            tau, center, offset + 1, phi_s, &weight, &mid_psi
+        rssringoccs_Fresnel_Phase_And_Weight(
+            tau, center, offset + 1, &weight, &mid_psi
         );
 
         mid_scale = weight * w_func[n + 1];
         mid = tmpl_CDouble_Multiply_Real(mid_scale, tau->T_in[offset + 1]);
 
-        phi_s = rssringoccs_Fast_Fresnel_Phase_And_Weight(
-            tau, center, offset + 2, phi_s, &weight, &right_psi
+        rssringoccs_Fresnel_Phase_And_Weight(
+            tau, center, offset + 2, &weight, &right_psi
         );
 
         right_scale = weight * w_func[n + 2];

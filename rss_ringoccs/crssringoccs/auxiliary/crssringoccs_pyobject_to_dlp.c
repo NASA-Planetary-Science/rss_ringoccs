@@ -17,56 +17,43 @@
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************/
 
-/*  NULL is defined here.                                                     */
-#include <stddef.h>
+/*  Function prototype and typedefs for structs given here.                   */
+#include "../crssringoccs.h"
+#include "../crssringoccs_numpy_api.h"
 
 /*  Booleans provided here.                                                   */
 #include <libtmpl/include/tmpl_bool.h>
 
-/*  tmpl_strdup function declared here.                                       */
-#include <libtmpl/include/tmpl_string.h>
+/*  NULL macro is given here.                                                 */
+#include <stddef.h>
 
-/*  Function prototype and typedefs for structs given here.                   */
-#include "../crssringoccs.h"
+#define EXTRACT_VAR(var) \
+    dlp->var = crssringoccs_DLP_Extract_Data(dlp, object, #var)
 
-/*  Avoid warnings about deprecated Numpy API versions.                       */
-#ifndef NPY_NO_DEPRECATED_API
-#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
-#endif
-
-#define EXTRACT_VAR(var) dlp->var = crssringoccs_Extract_Data(dlp, py_dlp, #var)
-
-/*  Numpy header files.                                                       */
-#include <numpy/ndarraytypes.h>
-#include <numpy/ufuncobject.h>
-
-rssringoccs_DLPObj *crssringoccs_Py_DLP_To_C_DLP(PyObject *py_dlp)
+rssringoccs_DLPObj *crssringoccs_PyObject_To_DLP(PyObject * const object)
 {
-    PyObject *tmp;
-    PyObject *arr;
-    rssringoccs_DLPObj *dlp;
+    PyObject *tmp = NULL;
+    PyArrayObject *arr = NULL;
+    rssringoccs_DLPObj *dlp = NULL;
 
-    if (PyArray_API == NULL)
-        import_array();
-
-    if (py_dlp == NULL)
+    if (!object)
         return NULL;
 
     dlp = malloc(sizeof(*dlp));
-    if (dlp == NULL)
+
+    if (!dlp)
         return dlp;
 
-    dlp->error_occurred = tmpl_False;
-    dlp->error_message = NULL;
+    rssringoccs_DLP_Init(dlp);
 
-    if (py_dlp == NULL)
+    if (!object)
     {
         dlp->error_occurred = tmpl_True;
-        dlp->error_message = tmpl_strdup(
+        dlp->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tcrssringoccs_Py_DLP_to_C_DLP\n\n"
-            "\rInput DLP Instance is NULL.\n"
-        );
+            "\r\tcrssringoccs_PyObject_To_DLP\n\n"
+            "\rInput PyObject is NULL.\n";
+
         return dlp;
     }
 
@@ -77,66 +64,77 @@ rssringoccs_DLPObj *crssringoccs_Py_DLP_To_C_DLP(PyObject *py_dlp)
      *  convert the arrays to double and retrieve a pointer to the data.      *
      *  First, we need to make sure rho_km_vals is a legal numpy array and    *
      *  extract the length of it. Check that rho_km_vals exists in DLPInst.   */
-    if (!PyObject_HasAttrString(py_dlp, "rho_km_vals"))
+    if (!PyObject_HasAttrString(object, "rho_km_vals"))
     {
         dlp->error_occurred = tmpl_True;
-        dlp->error_message = tmpl_strdup(
+        dlp->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tdiffrec.DiffractionCorrection\n\n"
+            "\r\tcrssringoccs_PyObject_To_DLP\n\n"
             "\rInput DLP Instance is missing the following attribute:\n"
-            "\r\trho_km_vals\n\n"
-        );
+            "\r\trho_km_vals\n\n";
+
         return dlp;
     }
 
     /*  If it exists, get a pointer to it.                                    */
-    else
-        tmp = PyObject_GetAttrString(py_dlp, "rho_km_vals");
+    tmp = PyObject_GetAttrString(object, "rho_km_vals");
 
     /*  Now make sure rho_km_vals is a numpy array.                           */
     if (!PyArray_Check(tmp))
     {
         dlp->error_occurred = tmpl_True;
-        dlp->error_message = tmpl_strdup(
+        dlp->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tdiffrec.DiffractionCorrection\n\n"
-            "\rrho_km_vals must be a numpy array.\n"
-        );
+            "\r\tcrssringoccs_PyObject_To_DLP\n\n"
+            "\rrho_km_vals must be a numpy array.\n";
+
         return dlp;
     }
 
     /*  If rho_km_vals is a numpy array, try to convert it to double.         */
-    else
-        arr = PyArray_FromObject(tmp, NPY_DOUBLE, 1, 1);
+    arr = (PyArrayObject *)tmp;
 
-    /*  If PyArray_FromObject failed arr should be NULL. If so, raise error. */
-    if (!arr)
+    if (PyArray_TYPE(arr) != NPY_DOUBLE)
     {
         dlp->error_occurred = tmpl_True;
-        dlp->error_message = tmpl_strdup(
+        dlp->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tdiffrec.DiffractionCorrection\n\n"
-            "\rCould not convert rho_km_vals to double array. Input is most\n"
-            "\rlikely complex numbers or contains a string.\n\n"
-        );
-        return dlp;
+            "\r\tcrssringoccs_PyObject_To_DLP\n\n"
+            "\r\trho_km_vals must be an array of floats.\n\n";
+
+        Py_CLEAR(tmp);
+        return NULL;
     }
 
-    /*  Currently we only allow for one dimensional inputs.                   */
-    else if (PyArray_NDIM((PyArrayObject *)arr) != 1)
+    if (PyArray_NDIM(arr) != 1)
     {
         dlp->error_occurred = tmpl_True;
-        dlp->error_message = tmpl_strdup(
+        dlp->error_message =
             "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tdiffrec.DiffractionCorrection\n\n"
-            "\rrho_km_vals must be a one-dimensional numpy array.\n"
-        );
-        return dlp;
+            "\r\tcrssringoccs_PyObject_To_DLP\n\n"
+            "\r\trho_km_vals must be a one dimensional numpy array.\n\n";
+
+        Py_CLEAR(tmp);
+        return NULL;
+    }
+
+    if (!PyArray_ISCARRAY(arr))
+    {
+        dlp->error_occurred = tmpl_True;
+        dlp->error_message =
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tcrssringoccs_PyObject_To_DLP\n\n"
+            "\r\trho_km_vals must be a contiguous (C-style) numpy array.\n\n";
+
+        Py_CLEAR(tmp);
+        return NULL;
     }
 
     /*  If every passed, set tau.rho_km_vals to point to the data inside arr. */
-    dlp->rho_km_vals = (double *)PyArray_DATA((PyArrayObject *)arr);
-    dlp->arr_size = PyArray_DIMS((PyArrayObject *)arr)[0];
+    dlp->rho_km_vals = (double *)PyArray_DATA(arr);
+    dlp->arr_size = PyArray_DIMS(arr)[0];
+
+    Py_CLEAR(tmp);
 
     EXTRACT_VAR(p_norm_vals);
     EXTRACT_VAR(phase_deg_vals);
@@ -155,5 +153,7 @@ rssringoccs_DLPObj *crssringoccs_Py_DLP_To_C_DLP(PyObject *py_dlp)
     EXTRACT_VAR(rho_corr_pole_km_vals);
     EXTRACT_VAR(rho_corr_timing_km_vals);
     EXTRACT_VAR(raw_tau_threshold_vals);
-    return dlp;
+    dlp->dx_km = dlp->rho_km_vals[1] - dlp->rho_km_vals[0];
+
+    return rssringoccs_DLP_New_Reference(dlp);
 }

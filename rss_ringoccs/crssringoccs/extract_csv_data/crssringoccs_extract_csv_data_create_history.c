@@ -69,6 +69,10 @@ crssringoccs_ExtractCSVData_Create_History(crssringoccs_PyCSVObj *self,
     tmp = self->history;
     Py_INCREF(history);
     self->history = history;
-    Py_XDECREF(tmp);
+
+    Py_CLEAR(tmp);
+    Py_CLEAR(input_variables);
+    Py_CLEAR(input_keywords);
+    Py_CLEAR(history);
 }
 /*  End of crssringoccs_ExtractCSVData_Create_History.                        */

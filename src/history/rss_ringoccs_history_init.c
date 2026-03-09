@@ -10,7 +10,7 @@
 #endif
 
 void
-rssringoccs_History_Create_Base(rssringoccs_History * const history)
+rssringoccs_History_Init(rssringoccs_History * const history)
 {
     size_t n;
 

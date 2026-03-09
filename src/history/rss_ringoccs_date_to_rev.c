@@ -48,7 +48,7 @@ static const unsigned int rssringoccs_doy_vals[84] = {
 };
 
 const char *
-rssringoccs_Date_to_Rev(unsigned int year, unsigned int doy)
+rssringoccs_Date_To_Rev(unsigned int year, unsigned int doy)
 {
     size_t number_of_revs, n;
 

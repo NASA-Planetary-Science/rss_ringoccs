@@ -25,7 +25,7 @@ rssringoccs_GeoCSV_Write_History(rssringoccs_GeoCSV *geo, const char *filename)
         return;
     }
 
-    rssringoccs_History_Create_Base(geo->history);
+    rssringoccs_History_Init(geo->history);
 
     geo->history->input_vars[0] = "filename";
     geo->history->input_vars[1] = filename;

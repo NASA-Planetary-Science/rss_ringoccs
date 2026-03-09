@@ -58,7 +58,7 @@ crssringoccs_GetUranusData_Create_History(crssringoccs_PyCSVObj *self,
     /*  Create the history object, which is a Python dictionary.              */
     history = Py_BuildValue(
         "{s:s,s:s,s:s,s:s,s:s,s:s,s:s,s:N,s:N}",
-        "rss_ringoccs Version", rssringoccs_Get_Version(),
+        "rss_ringoccs Version", rssringoccs_Version(),
         "libtmpl Version", tmpl_Version(),
         "Python Version", python_version_string,
         "Host Name", tmpl_Host_Name(),

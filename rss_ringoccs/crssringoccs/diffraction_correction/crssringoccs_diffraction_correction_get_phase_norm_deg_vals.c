@@ -29,6 +29,9 @@
 /*  Complex numbers and functions given here.                                 */
 #include <libtmpl/include/tmpl_complex.h>
 
+/*  Radians to degrees conversion found here.                                 */
+#include <libtmpl/include/constants/tmpl_math_constants.h>
+
 /*  NULL macro found here.                                                    */
 #include <stddef.h>
 
@@ -69,6 +72,7 @@ crssringoccs_DiffractionCorrection_Get_Phase_Norm_Deg_Vals(PyObject *op,
         self->phase_norm_deg_vals = Py_None;
         Py_CLEAR(tmp);
 
+        Py_INCREF(self->phase_norm_deg_vals);
         return self->phase_norm_deg_vals;
     }
 
@@ -89,7 +93,10 @@ crssringoccs_DiffractionCorrection_Get_Phase_Norm_Deg_Vals(PyObject *op,
 
         /*  We have T_hat = sqrt(power) * exp(i phase). From this, the phase  *
          *  is given by the argument of T_in. Compute this.                   */
-        diffracted_phase[n] = tmpl_CDouble_Argument(transmittance);
+        const double phase_rad = tmpl_CDouble_Argument(transmittance);
+
+        /*  Convert from radians to degrees.                                  */
+        diffracted_phase[n] = phase_rad * tmpl_double_rad_to_deg;
     }
 
     /*  Wrap the data in a numpy array for ease of use.                       */

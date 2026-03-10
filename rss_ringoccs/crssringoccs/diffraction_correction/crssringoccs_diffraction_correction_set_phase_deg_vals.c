@@ -19,46 +19,37 @@
  *  Author:     Ryan Maguire                                                  *
  *  Date:       March 10, 2026                                                *
  ******************************************************************************/
+
+/*  Function prototype and typedefs for structs given here.                   */
 #include "../crssringoccs.h"
 
-PyGetSetDef crssringoccs_DiffractionCorrection_GetSetters[] =
+int
+crssringoccs_DiffractionCorrection_Set_Phase_Deg_Vals(PyObject *op,
+                                                      PyObject *value,
+                                                      void *closure)
 {
+    /*  Variable for the diffraction correction class instance.               */
+    crssringoccs_PyDiffrecObj *self;
+
+    /*  A NULL pointer for the first argument should be treated as an error.  */
+    if (!op)
     {
-        "p_norm_vals",
-        crssringoccs_DiffractionCorrection_Get_P_Norm_Vals,
-        crssringoccs_DiffractionCorrection_Set_P_Norm_Vals,
-        "Normalized diffracted power from the input DLP object.",
-        NULL
-    },
-    {
-        "power_vals",
-        crssringoccs_DiffractionCorrection_Get_Power_Vals,
-        crssringoccs_DiffractionCorrection_Set_Power_Vals,
-        "Reconstructed power from the input data.",
-        NULL
-    },
-    {
-        "p_fwd_vals",
-        crssringoccs_DiffractionCorrection_Get_P_Fwd_Vals,
-        crssringoccs_DiffractionCorrection_Set_P_Fwd_Vals,
-        "Forward model power computed from the reconstructed data.",
-        NULL
-    },
-    {
-        "phase_norm_deg_vals",
-        crssringoccs_DiffractionCorrection_Get_Phase_Norm_Deg_Vals,
-        crssringoccs_DiffractionCorrection_Set_Phase_Norm_Deg_Vals,
-        "Normalized diffracted phase from the input DLP object.",
-        NULL
-    },
-    {
-        "phase_deg_vals",
-        crssringoccs_DiffractionCorrection_Get_Phase_Deg_Vals,
-        crssringoccs_DiffractionCorrection_Set_Phase_Deg_Vals,
-        "Reconstructed phase computed from the reconstructed data.",
-        NULL
-    },
-    {
-        NULL
+        PyErr_Format(
+            PyExc_RuntimeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tcrssringoccs_DiffractionCorrection_Set_Phase_Deg_Vals\n\n"
+            "\rInput 'op' is NULL.\n\n"
+        );
+
+        return -1;
     }
-};
+
+    /*  Get a pointer to the actual DiffractionCorrection instance.           */
+    self = (crssringoccs_PyDiffrecObj *)op;
+
+    /*  Set phase_deg_vals to the input value. There are no checks for what   *
+     *  type of object this is, the user is free to set it to anything.       */
+    Py_XSETREF(self->phase_deg_vals, Py_XNewRef(value));
+    return 0;
+}
+/*  End of crssringoccs_DiffractionCorrection_Set_Phase_Deg_Vals     .        */

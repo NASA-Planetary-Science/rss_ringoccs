@@ -68,6 +68,7 @@ crssringoccs_DiffractionCorrection_Get_Power_Vals(PyObject *op, void *closure)
         self->power_vals = Py_None;
         Py_CLEAR(tmp);
 
+        Py_INCREF(self->power_vals);
         return self->power_vals;
     }
 

@@ -68,6 +68,7 @@ crssringoccs_DiffractionCorrection_Get_P_Fwd_Vals(PyObject *op, void *closure)
         self->p_fwd_vals = Py_None;
         Py_CLEAR(tmp);
 
+        Py_INCREF(self->p_fwd_vals);
         return self->p_fwd_vals;
     }
 

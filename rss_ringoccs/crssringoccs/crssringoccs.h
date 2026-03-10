@@ -70,6 +70,24 @@ typedef struct crssringoccs_PyDiffrecObj_Def {
     PyObject *input_kwds;             /*  Input keywords for the class.       */
     PyObject *rngreq;                 /*  Requested range, Python keyword.    */
     PyObject *perturb;                /*  Polynomial perturbation for psi.    */
+
+    /*  The following members are created with setter functions at the Python *
+     *  level. The are initialized to NULL and left alone unless the user     *
+     *  explicitly requests them. All of these are computable from the other  *
+     *  members in this struct, hence we avoid computing them unless this is  *
+     *  explicitly desired to avoid wasting memory.                           */
+    PyObject *p_norm_vals;            /*  Normalized DLP power values.        */
+    PyObject *power_vals;             /*  Reconstructed power values.         */
+    PyObject *p_fwd_vals;             /*  Forward model power values.         */
+    PyObject *phase_norm_deg_vals;    /*  Normalized DLP phase values.        */
+    PyObject *phase_deg_vals;         /*  Reconstructed phase values.         */
+    PyObject *phase_fwd_deg_vals;     /*  Forward model phase values.         */
+    PyObject *tau_norm_vals;          /*  Normalized DLP optical depth values.*/
+    PyObject *tau_vals;               /*  Reconstructed optical depth values. */
+    PyObject *tau_fwd_vals;           /*  Forward model optical depth values. */
+
+    /*  The remaining members are not arrays, but hold the keywords and       *
+     *  arguments passed to the DiffractionCorrection class when initialized. */
     tmpl_Bool bfac;                   /*  Boolean for b factor in resolution. */
     tmpl_Bool use_fwd;                /*  Boolean for forward modeling.       */
     tmpl_Bool use_norm;               /*  Boolean for window normalization.   */
@@ -80,8 +98,8 @@ typedef struct crssringoccs_PyDiffrecObj_Def {
     double periapse;                  /*  Periapse, elliptical rings only.    */
     double sigma;                     /*  Allen deviation of spacecraft.      */
     const char *outfiles;             /*  TAB files for this Tau object.      */
-    const char *wtype;
-    const char *psitype;
+    const char *wtype;                /*  Requested window type.              */
+    const char *psitype;              /*  Requested reconstruction algorithm. */
 } crssringoccs_PyDiffrecObj;
 
 /*  The CSV struct containing all of the data for diffraction reconstruction. */
@@ -323,9 +341,29 @@ crssringoccs_DiffractionCorrection_Finish(
     crssringoccs_PyDiffrecObj * const self, PyObject * const dlp
 );
 
-extern PyMemberDef crssringoccs_DiffractionCorrection_Members[];
+extern PyObject *
+crssringoccs_DiffractionCorrection_Get_P_Norm_Vals(PyObject *op, void *closure);
 
-extern PyMethodDef crssringoccs_DiffractionCorrection_Methods[];
+extern PyObject *
+crssringoccs_DiffractionCorrection_Get_Power_Vals(PyObject *op, void *closure);
+
+extern PyObject *
+crssringoccs_DiffractionCorrection_Get_P_Fwd_Vals(PyObject *op, void *closure);
+
+extern int
+crssringoccs_DiffractionCorrection_Set_P_Norm_Vals(PyObject *op,
+                                                   PyObject *value,
+                                                   void *closure);
+
+extern int
+crssringoccs_DiffractionCorrection_Set_Power_Vals(PyObject *op,
+                                                  PyObject *value,
+                                                  void *closure);
+
+extern int
+crssringoccs_DiffractionCorrection_Set_P_Fwd_Vals(PyObject *op,
+                                                  PyObject *value,
+                                                  void *closure);
 
 extern void
 crssringoccs_DiffractionCorrection_Destroy(crssringoccs_PyDiffrecObj *self);
@@ -340,6 +378,9 @@ crssringoccs_DiffractionCorrection_Init(crssringoccs_PyDiffrecObj *self,
                                         PyObject *args,
                                         PyObject *kwds);
 
+extern PyGetSetDef crssringoccs_DiffractionCorrection_GetSetters[];
+extern PyMemberDef crssringoccs_DiffractionCorrection_Members[];
+extern PyMethodDef crssringoccs_DiffractionCorrection_Methods[];
 extern PyTypeObject crssringoccs_DiffractionCorrection;
 
 extern void

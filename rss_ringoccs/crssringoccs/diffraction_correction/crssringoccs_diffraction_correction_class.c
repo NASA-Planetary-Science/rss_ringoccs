@@ -28,6 +28,7 @@ PyTypeObject crssringoccs_DiffractionCorrection = {
     .tp_new = crssringoccs_DiffractionCorrection_New,
     .tp_init = (initproc)crssringoccs_DiffractionCorrection_Init,
     .tp_dealloc = (destructor)crssringoccs_DiffractionCorrection_Destroy,
+    .tp_getset = crssringoccs_DiffractionCorrection_GetSetters,
     .tp_members = crssringoccs_DiffractionCorrection_Members,
     .tp_methods = crssringoccs_DiffractionCorrection_Methods
 };

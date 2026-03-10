@@ -2,7 +2,6 @@
 #include <libtmpl/include/compat/tmpl_cast.h>
 #include <libtmpl/include/compat/tmpl_free.h>
 #include <libtmpl/include/tmpl_math.h>
-#include <libtmpl/include/tmpl_string.h>
 #include <rss_ringoccs/include/rss_ringoccs_tau.h>
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 
@@ -60,11 +59,10 @@ rssringoccs_Tau_Resize_Half_Window(
         {
             /*  Exit with an error message.                                   */
             tau->error_occurred = tmpl_True;
-            tau->error_message = tmpl_String_Duplicate(
+            tau->error_message =
                 "\n\rError Encountered: rss_ringoccs\n"
                 "\r\trssringoccs_Tau_Check_And_Resize_Window\n\n"
-                "\rInput pointers are pointing to NULL pointers. Aborting.\n\n"
-            );
+                "\rInput pointers are pointing to NULL pointers. Aborting.\n\n";
 
             return 1;
         }

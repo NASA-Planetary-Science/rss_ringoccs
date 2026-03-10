@@ -47,6 +47,15 @@ crssringoccs_DiffractionCorrection_Destroy(crssringoccs_PyDiffrecObj *self)
     Py_CLEAR(self->input_kwds);
     Py_CLEAR(self->rngreq);
     Py_CLEAR(self->perturb);
+    Py_CLEAR(self->p_norm_vals);
+    Py_CLEAR(self->power_vals);
+    Py_CLEAR(self->p_fwd_vals);
+    Py_CLEAR(self->phase_norm_deg_vals);
+    Py_CLEAR(self->phase_deg_vals);
+    Py_CLEAR(self->phase_fwd_deg_vals);
+    Py_CLEAR(self->tau_norm_vals);
+    Py_CLEAR(self->tau_vals);
+    Py_CLEAR(self->tau_fwd_vals);
 
     rssringoccs_Tau_Destroy(&self->tau);
 

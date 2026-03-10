@@ -80,6 +80,13 @@ PyGetSetDef crssringoccs_DiffractionCorrection_GetSetters[] =
         NULL
     },
     {
+        "tau_fwd_vals",
+        crssringoccs_DiffractionCorrection_Get_Tau_Fwd_Vals,
+        crssringoccs_DiffractionCorrection_Set_Tau_Fwd_Vals,
+        "Forward model optical depth computed from the reconstructed data.",
+        NULL
+    },
+    {
         NULL
     }
 };

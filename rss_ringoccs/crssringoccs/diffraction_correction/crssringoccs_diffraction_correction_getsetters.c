@@ -45,6 +45,13 @@ PyGetSetDef crssringoccs_DiffractionCorrection_GetSetters[] =
         NULL
     },
     {
+        "phase_norm_deg_vals",
+        crssringoccs_DiffractionCorrection_Get_Phase_Norm_Deg_Vals,
+        crssringoccs_DiffractionCorrection_Set_Phase_Norm_Deg_Vals,
+        "Normalized diffracted phase from the input DLP object.",
+        NULL
+    },
+    {
         NULL
     }
 };

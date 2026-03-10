@@ -23,9 +23,6 @@
 /*  Booleans provided here.                                                   */
 #include <libtmpl/include/tmpl_bool.h>
 
-/*  tmpl_strdup function declared here.                                       */
-#include <libtmpl/include/tmpl_string.h>
-
 /*  Function prototype and typedefs for structs given here.                   */
 #include "../crssringoccs.h"
 

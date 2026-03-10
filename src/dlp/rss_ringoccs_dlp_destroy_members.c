@@ -17,10 +17,17 @@
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
  *  Author:     Ryan Maguire                                                  *
- *  Date:       January 5, 2020                                               *
+ *  Date:       February 27, 2026                                             *
  ******************************************************************************/
+
+/*  TMPL_FREE macro provided here, free's and nullifies a pointer.            */
 #include <libtmpl/include/compat/tmpl_free.h>
-#include <rss_ringoccs/include/rss_ringoccs_dlp.h>
+
+/*  DLP object typedef found here.                                            */
+#include <rss_ringoccs/include/types/rss_ringoccs_dlpobj.h>
+
+/*  Function prototype / forward declaration.                                 */
+extern void rssringoccs_DLP_Destroy_Members(rssringoccs_DLPObj * const dlp);
 
 /*  Function for freeing all member of a dlp object except the error message. */
 void rssringoccs_DLP_Destroy_Members(rssringoccs_DLPObj * const dlp)

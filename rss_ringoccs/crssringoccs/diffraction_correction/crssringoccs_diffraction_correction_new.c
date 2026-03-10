@@ -68,6 +68,20 @@ crssringoccs_DiffractionCorrection_New(PyTypeObject *type,
     self->ry_km_vals = NULL;
     self->rz_km_vals = NULL;
 
+    /*  These members are only accessible using the getter and setter         *
+     *  functions. They are computable from the members above, and hence are  *
+     *  not allocated memory unless the user explicitly requests them. They   *
+     *  remain NULL until a getter function is used.                          */
+    self->p_norm_vals = NULL;
+    self->power_vals = NULL;
+    self->p_fwd_vals = NULL;
+    self->phase_norm_deg_vals = NULL;
+    self->phase_deg_vals = NULL;
+    self->phase_fwd_deg_vals = NULL;
+    self->tau_norm_vals = NULL;
+    self->tau_vals = NULL;
+    self->tau_fwd_vals = NULL;
+
     /*  The DiffractionCorrection class has a few more attributes that are    *
      *  Python objects. These can be lists, dictionaries, or strings. Each of *
      *  these are set when init is called, initialize them to NULL.           */

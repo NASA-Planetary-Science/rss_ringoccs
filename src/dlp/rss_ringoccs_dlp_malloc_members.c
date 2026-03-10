@@ -1,14 +1,39 @@
-/*  NULL pointer and malloc are given here.                                   */
-#include <stdlib.h>
+/******************************************************************************
+ *                                  LICENSE                                   *
+ ******************************************************************************
+ *  This file is part of rss_ringoccs.                                        *
+ *                                                                            *
+ *  rss_ringoccs is free software: you can redistribute it and/or modify      *
+ *  it under the terms of the GNU General Public License as published by      *
+ *  the Free Software Foundation, either version 3 of the License, or         *
+ *  (at your option) any later version.                                       *
+ *                                                                            *
+ *  rss_ringoccs is distributed in the hope that it will be useful,           *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             *
+ *  GNU General Public License for more details.                              *
+ *                                                                            *
+ *  You should have received a copy of the GNU General Public License         *
+ *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
+ ******************************************************************************
+ *  Author:     Ryan Maguire                                                  *
+ *  Date:       February 27, 2026                                             *
+ ******************************************************************************/
 
-/*  Booleans provided by this library.                                        */
-#include <libtmpl/include/tmpl.h>
+/*  Booleans provided here.                                                   */
+#include <libtmpl/include/tmpl_bool.h>
 
-/*  Header file with the DLP definition and function prototype.               */
-#include <rss_ringoccs/include/rss_ringoccs_dlp.h>
+/*  TMPL_MALLOC macro found here, providing C vs. C++ compatibility.          */
+#include <libtmpl/include/compat/tmpl_malloc.h>
+
+/*  Header file with the DLP object definition.                               */
+#include <rss_ringoccs/include/types/rss_ringoccs_dlpobj.h>
 
 /*  puts function found here, used for printing a status message if requested.*/
 #include <stdio.h>
+
+/*  Forward declaration / function prototype.                                 */
+extern void rssringoccs_DLP_Malloc_Members(rssringoccs_DLPObj * const dlp);
 
 /*  Use this macro to save on repetitive code. It checks if dlp->var is NULL, *
  *  attempts to malloc memory for dlp->var if it is, and then checks to see   *
@@ -28,7 +53,7 @@
         }                                                                      \
                                                                                \
         /*  Allocate memory for the variable.                                */\
-        dlp->var = malloc(sizeof(*dlp->var) * dlp->arr_size);                  \
+        dlp->var = TMPL_MALLOC(double, dlp->arr_size);                         \
                                                                                \
         /*  Check if malloc failed.                                          */\
         if (!dlp->var)                                                         \
@@ -44,7 +69,7 @@
 /*  End of the MALLOC_DLP_VAR macro.                                          */
 
 /*  Function for allocating memory for all of the dlp variables.              */
-void rssringoccs_DLP_Malloc_Members(rssringoccs_DLPObj *dlp)
+void rssringoccs_DLP_Malloc_Members(rssringoccs_DLPObj * const dlp)
 {
     if (!dlp)
         return;
@@ -67,10 +92,7 @@ void rssringoccs_DLP_Malloc_Members(rssringoccs_DLPObj *dlp)
         return;
     }
 
-    /*  The MALLOC_DLP_VAR macro ends with an if statement and so has         *
-     *  braces {}. Because of this, we do not need a semi-colon at the end.   *
-     *  This macro allocates memory for the members of the DLP object and     *
-     *  checks for errors.                                                    */
+    /*  Allocate memory for each of the arrays in a DLP object.               */
     MALLOC_DLP_VAR(rho_km_vals);
     MALLOC_DLP_VAR(phi_deg_vals);
     MALLOC_DLP_VAR(B_deg_vals);
@@ -92,4 +114,5 @@ void rssringoccs_DLP_Malloc_Members(rssringoccs_DLPObj *dlp)
 }
 /*  End of rssringoccs_DLP_Malloc_Members.                                    */
 
+/*  Undefine this in case someone wants to #include this file.                */
 #undef MALLOC_DLP_VAR

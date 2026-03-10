@@ -95,7 +95,7 @@ crssringoccs_DiffractionCorrection_Get_Tau_Norm_Vals(PyObject *op,
         /*  The scale factor is given by the opening angle.                   */
         const double opening = self->tau->dlp->B_deg_vals[index];
         const double opening_magnitude = tmpl_Double_Abs(opening);
-        const double mu = tmpl_Double_Sin(opening_magnitude);
+        const double mu = tmpl_Double_Sind(opening_magnitude);
 
         /*  The optical depth is related to the power via p = exp(-tau / mu). *
          *  The optical depth is thus tau = -mu ln(p). Compute this.          */

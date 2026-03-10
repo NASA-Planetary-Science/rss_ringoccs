@@ -69,7 +69,14 @@ PyGetSetDef crssringoccs_DiffractionCorrection_GetSetters[] =
         "tau_norm_vals",
         crssringoccs_DiffractionCorrection_Get_Tau_Norm_Vals,
         crssringoccs_DiffractionCorrection_Set_Tau_Norm_Vals,
-        "Forward model phase computed from the reconstructed data.",
+        "Normalized diffracted optical depth from the input DLP object.",
+        NULL
+    },
+    {
+        "tau_vals",
+        crssringoccs_DiffractionCorrection_Get_Tau_Vals,
+        crssringoccs_DiffractionCorrection_Set_Tau_Vals,
+        "Reconstructed optical depth computed from the reconstructed data.",
         NULL
     },
     {

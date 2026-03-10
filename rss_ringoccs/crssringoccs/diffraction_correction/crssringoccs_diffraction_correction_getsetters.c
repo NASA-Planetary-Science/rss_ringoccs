@@ -66,6 +66,13 @@ PyGetSetDef crssringoccs_DiffractionCorrection_GetSetters[] =
         NULL
     },
     {
+        "tau_norm_vals",
+        crssringoccs_DiffractionCorrection_Get_Tau_Norm_Vals,
+        crssringoccs_DiffractionCorrection_Set_Tau_Norm_Vals,
+        "Forward model phase computed from the reconstructed data.",
+        NULL
+    },
+    {
         NULL
     }
 };

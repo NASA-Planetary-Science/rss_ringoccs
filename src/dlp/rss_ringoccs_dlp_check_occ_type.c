@@ -63,6 +63,13 @@
  ******************************************************************************
  *  Author:     Ryan Maguire                                                  *
  *  Date:       January 2, 2021                                               *
+ ******************************************************************************
+ *                              Revision History                              *
+ ******************************************************************************
+ *  2025/04/15: Ryan Maguire                                                  *
+ *      Moved routine from the reconstruction folder into the tau directory.  *
+ *  2026/02/27: Ryan Maguire                                                  *
+ *      Made this a DLP error check, moved to the dlp folder.                 *
  ******************************************************************************/
 
 /*  Booleans provided here.                                                   */

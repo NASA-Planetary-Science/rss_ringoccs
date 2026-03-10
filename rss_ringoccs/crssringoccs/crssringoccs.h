@@ -365,6 +365,33 @@ crssringoccs_DiffractionCorrection_Set_P_Fwd_Vals(PyObject *op,
                                                   PyObject *value,
                                                   void *closure);
 
+extern PyObject *
+crssringoccs_DiffractionCorrection_Get_Phase_Norm_Deg_Vals(PyObject *op,
+                                                           void *closure);
+
+extern PyObject *
+crssringoccs_DiffractionCorrection_Get_Phase_Deg_Vals(PyObject *op,
+                                                      void *closure);
+
+extern PyObject *
+crssringoccs_DiffractionCorrection_Get_Phase_Fwd_Deg_Vals(PyObject *op,
+                                                          void *closure);
+
+extern int
+crssringoccs_DiffractionCorrection_Set_Phase_Norm_Deg_Vals(PyObject *op,
+                                                           PyObject *value,
+                                                           void *closure);
+
+extern int
+crssringoccs_DiffractionCorrection_Set_Phase_Deg_Vals(PyObject *op,
+                                                      PyObject *value,
+                                                      void *closure);
+
+extern int
+crssringoccs_DiffractionCorrection_Set_Phase_Fwd_Deg_Vals(PyObject *op,
+                                                          PyObject *value,
+                                                          void *closure);
+
 extern void
 crssringoccs_DiffractionCorrection_Destroy(crssringoccs_PyDiffrecObj *self);
 

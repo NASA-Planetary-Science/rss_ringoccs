@@ -55,23 +55,28 @@ crssringoccs_DiffractionCorrection_Get_Phase_Fwd_Deg_Vals(PyObject *op,
     /*  Get a pointer to the actual DiffractionCorrection instance.           */
     self = (crssringoccs_PyDiffrecObj *)op;
 
-    /*  If we have already computed phase_fwd_deg_vals, increment the         *
-     *  reference counter and return this object to the caller.               */
-    if (self->phase_fwd_deg_vals)
+    /*  If the Tau variable has not been initialized, there is no data to     *
+     *  process. Return None in this case.                                    */
+    if (!self->tau)
     {
+        MAKE_NONE(self->phase_fwd_deg_vals);
         Py_INCREF(self->phase_fwd_deg_vals);
         return self->phase_fwd_deg_vals;
     }
 
     /*  The real-valued phase_fwd_deg_vals array is computed from the complex *
-     *   T_fwd array. If T_fwd is NULL, set phase_fwd_deg_vals to None.       */
-    if (!self->tau->T_fwd)
+     *  T_fwd array. If T_fwd is NULL, set phase_fwd_deg_vals to None.        */
+    if (!self->tau->T_out)
     {
-        PyObject *tmp = self->phase_fwd_deg_vals;
-        Py_INCREF(Py_None);
-        self->phase_fwd_deg_vals = Py_None;
-        Py_CLEAR(tmp);
+        MAKE_NONE(self->phase_fwd_deg_vals);
+        Py_INCREF(self->phase_fwd_deg_vals);
+        return self->phase_fwd_deg_vals;
+    }
 
+    /*  If we have already computed phase_fwd_deg_vals, increment the         *
+     *  reference counter and return this object to the caller.               */
+    if (self->power_vals)
+    {
         Py_INCREF(self->phase_fwd_deg_vals);
         return self->phase_fwd_deg_vals;
     }

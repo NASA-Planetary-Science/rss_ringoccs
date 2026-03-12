@@ -75,7 +75,7 @@ crssringoccs_DiffractionCorrection_Get_Phase_Fwd_Deg_Vals(PyObject *op,
 
     /*  If we have already computed phase_fwd_deg_vals, increment the         *
      *  reference counter and return this object to the caller.               */
-    if (self->power_vals)
+    if (self->phase_fwd_deg_vals)
     {
         Py_INCREF(self->phase_fwd_deg_vals);
         return self->phase_fwd_deg_vals;

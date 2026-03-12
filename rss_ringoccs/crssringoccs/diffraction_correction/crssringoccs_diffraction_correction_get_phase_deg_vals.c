@@ -23,6 +23,9 @@
 /*  Function prototype and typedefs for structs given here.                   */
 #include "../crssringoccs.h"
 
+/*  TMPL_FREE macro found here, providing C vs. C++ compatibility.            */
+#include <libtmpl/include/compat/tmpl_free.h>
+
 /*  TMPL_MALLOC macro found here, providing C vs. C++ compatibility.          */
 #include <libtmpl/include/compat/tmpl_malloc.h>
 

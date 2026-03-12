@@ -5,6 +5,22 @@
 #include <libtmpl/include/tmpl_utility.h>
 #include <rss_ringoccs/include/rss_ringoccs_history.h>
 
+
+#define RSSRINGOCCS_TO_STRING(x) #x
+#define RSSRINGOCCS_MAKE_STRING(x) RSSRINGOCCS_TO_STRING(x)
+
+static const char * const crssringoccs_python_version =
+    RSSRINGOCCS_MAKE_STRING(PY_MAJOR_VERSION)
+    "."
+    RSSRINGOCCS_MAKE_STRING(PY_MINOR_VERSION);
+
+#ifndef __STDC_VERSION__
+    const char * const crssringoccs_c_version = "Unknown";
+#else
+    const char * const crssringoccs_c_version =
+        RSSRINGOCCS_MAKE_STRING(__STDC_VERSION__);
+#endif
+
 void
 crssringoccs_ExtractCSVData_Create_History(crssringoccs_PyCSVObj *self,
                                            const char *geo_str,
@@ -14,24 +30,32 @@ crssringoccs_ExtractCSVData_Create_History(crssringoccs_PyCSVObj *self,
                                            tmpl_Bool use_deprecated)
 {
     /*  Python objects needed throughout the computation.                     */
-    PyObject *tmp, *input_variables, *input_keywords, *history, *py_bool;
-
-    /*  Character array for the Python version. We'll use sprintf on this     *
-     *  later with the macros provided in Python.h.                           */
-    char python_version_string[16];
+    PyObject *input_variables = NULL;
+    PyObject *input_keywords = NULL;
+    PyObject *history = NULL;
+    PyObject *py_use_deprecated = NULL;
 
     /*  If the tau variable was not set, set the string to "None" to prevent  *
      *  segfaults from trying to access a NULL pointer.                       */
     if (!tau_str)
         tau_str = "None";
 
-    /*  Python.h provided macros for the major and minor versioning of        *
-     *  Python. To create a string out of this we use sprintf.                */
-    sprintf(python_version_string, "%d.%d", PY_MAJOR_VERSION, PY_MINOR_VERSION);
-
     /*  Python booleans are a type of PyObject. They can be created by        *
      *  casting our Boolean to a long int as follows.                         */
-    py_bool = PyBool_FromLong((long int)use_deprecated);
+    py_use_deprecated = PyBool_FromLong(use_deprecated);
+
+    /*  Check for errors, this object should no longer be NULL.               */
+    if (!py_use_deprecated)
+    {
+        PyErr_Format(
+            PyExc_RuntimeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tcrssringoccs_ExtractCSVData_Create_History\n\n"
+            "\rPyBool_FromLong returned NULL.\n\n"
+        );
+
+        return;
+    }
 
     /*  Create a dictionary (Python object) with the input arguments.         */
     input_variables = Py_BuildValue(
@@ -41,22 +65,46 @@ crssringoccs_ExtractCSVData_Create_History(crssringoccs_PyCSVObj *self,
         "dlp", dlp_str
     );
 
-    /*  Create a dictionary with the optional keywords. The Boolean is a      *
-     *  PyOBject. "N" means we do not create a new reference to it, as        *
-     *  opposed to "O" which does. This means when we destroy the history     *
-     *  object, the py_bool object is deleted as well.                        */
+    /*  Check that the dictionary was successfully created.                   */
+    if (!input_variables)
+    {
+        PyErr_Format(
+            PyExc_RuntimeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tcrssringoccs_ExtractCSVData_Create_History\n\n"
+            "\rPy_BuildValue returned NULL for input_variables.\n\n"
+        );
+
+        goto CLEANUP;
+    }
+
+    /*  Create a dictionary with the optional keywords.                       */
     input_keywords = Py_BuildValue(
-        "{s:s,s:N}",
+        "{s:s,s:O}",
         "tau", tau_str,
-        "use_deprecated", py_bool
+        "use_deprecated", py_use_deprecated
     );
+
+    /*  Check that the dictionary was successfully created.                   */
+    if (!input_keywords)
+    {
+        PyErr_Format(
+            PyExc_RuntimeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tcrssringoccs_ExtractCSVData_Create_History\n\n"
+            "\rPy_BuildValue returned NULL for input_keywords.\n\n"
+        );
+
+        goto CLEANUP;
+    }
 
     /*  Create the history object, which is a Python dictionary.              */
     history = Py_BuildValue(
-        "{s:s,s:s,s:s,s:s,s:s,s:s,s:s,s:N,s:N}",
+        "{s:s,s:s,s:s,s:s,s:s,s:s,s:s,s:s,s:O,s:O}",
         "rss_ringoccs Version", rssringoccs_Version(),
         "libtmpl Version", tmpl_Version(),
-        "Python Version", python_version_string,
+        "Python Version", crssringoccs_python_version,
+        "C Version", crssringoccs_c_version,
         "Host Name", tmpl_Host_Name(),
         "User Name", tmpl_User_Name(),
         "Run Date", tmpl_Local_Calendar_Date_And_Time(),
@@ -65,14 +113,28 @@ crssringoccs_ExtractCSVData_Create_History(crssringoccs_PyCSVObj *self,
         "Keyword Args", input_keywords
     );
 
-    /*  Begin reference counting for the new history object.                  */
-    tmp = self->history;
-    Py_INCREF(history);
-    self->history = history;
+    /*  Check that the dictionary was successfully created.                   */
+    if (!history)
+    {
+        PyErr_Format(
+            PyExc_RuntimeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tcrssringoccs_ExtractCSVData_Create_History\n\n"
+            "\rPy_BuildValue returned NULL for history.\n\n"
+        );
 
-    Py_CLEAR(tmp);
-    Py_CLEAR(input_variables);
-    Py_CLEAR(input_keywords);
-    Py_CLEAR(history);
+        goto CLEANUP;
+    }
+
+    /*  Begin reference counting for the new history object.                  */
+    Py_XSETREF(self->history, history);
+
+    CLEANUP:
+        Py_CLEAR(py_use_deprecated);
+        Py_CLEAR(input_variables);
+        Py_CLEAR(input_keywords);
 }
 /*  End of crssringoccs_ExtractCSVData_Create_History.                        */
+
+#undef RSSRINGOCCS_TO_STRING
+#undef RSSRINGOCCS_MAKE_STRING

@@ -66,7 +66,7 @@ crssringoccs_DiffractionCorrection_Get_Phase_Fwd_Deg_Vals(PyObject *op,
 
     /*  The real-valued phase_fwd_deg_vals array is computed from the complex *
      *  T_fwd array. If T_fwd is NULL, set phase_fwd_deg_vals to None.        */
-    if (!self->tau->T_out)
+    if (!self->tau->T_fwd)
     {
         MAKE_NONE(self->phase_fwd_deg_vals);
         Py_INCREF(self->phase_fwd_deg_vals);

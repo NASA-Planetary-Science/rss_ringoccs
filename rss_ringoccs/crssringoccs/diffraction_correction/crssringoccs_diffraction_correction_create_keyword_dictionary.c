@@ -82,7 +82,6 @@ crssringoccs_DiffractionCorrection_Create_Keyword_Dictionary(
         return;
     }
 
-
     tmp = self->input_kwds;
     Py_INCREF(input_kwds);
     self->input_kwds = input_kwds;

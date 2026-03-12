@@ -40,6 +40,17 @@ crssringoccs_DiffractionCorrection_Create_Argument_Dictionary(
     if (self->verbose)
         puts("\r\tDiffractionCorrection: Creating argument dictionary...");
 
+    if (!dlp)
+    {
+        self->tau->error_occurred = tmpl_True;
+        self->tau->error_message =
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tcrssringoccs_DiffractionCorrection_Create_Argument_Dictionary"
+            "\n\n\rInput DLP object is NULL.\n\n";
+
+        return;
+    }
+
     if (!PyObject_HasAttrString(dlp, "history"))
     {
         self->tau->error_occurred = tmpl_True;

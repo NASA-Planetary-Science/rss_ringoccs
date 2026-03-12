@@ -51,10 +51,11 @@ crssringoccs_DiffractionCorrection_Get_Power_Vals(PyObject *op, void *closure)
     /*  Get a pointer to the actual DiffractionCorrection instance.           */
     self = (crssringoccs_PyDiffrecObj *)op;
 
-    /*  If we have already computed power_vals, increment the reference       *
-     *  counter and return this object to the caller.                         */
-    if (self->power_vals)
+    /*  If the Tau variable has not been initialized, there is no data to     *
+     *  process. Return None in this case.                                    */
+    if (!self->tau)
     {
+        MAKE_NONE(self->power_vals);
         Py_INCREF(self->power_vals);
         return self->power_vals;
     }
@@ -63,11 +64,15 @@ crssringoccs_DiffractionCorrection_Get_Power_Vals(PyObject *op, void *closure)
      *  array. If T_out is NULL, set power_vals to None.                      */
     if (!self->tau->T_out)
     {
-        PyObject *tmp = self->power_vals;
-        Py_INCREF(Py_None);
-        self->power_vals = Py_None;
-        Py_CLEAR(tmp);
+        MAKE_NONE(self->power_vals);
+        Py_INCREF(self->power_vals);
+        return self->power_vals;
+    }
 
+    /*  If we have already computed power_vals, increment the reference       *
+     *  counter and return this object to the caller.                         */
+    if (self->power_vals)
+    {
         Py_INCREF(self->power_vals);
         return self->power_vals;
     }

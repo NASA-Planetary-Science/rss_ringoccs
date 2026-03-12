@@ -51,23 +51,28 @@ crssringoccs_DiffractionCorrection_Get_P_Norm_Vals(PyObject *op, void *closure)
     /*  Get a pointer to the actual DiffractionCorrection instance.           */
     self = (crssringoccs_PyDiffrecObj *)op;
 
-    /*  If we have already computed p_norm_vals, increment the reference      *
-     *  counter and return this object to the caller.                         */
-    if (self->p_norm_vals)
+    /*  If the Tau variable has not been initialized, there is no data to     *
+     *  process. Return None in this case.                                    */
+    if (!self->tau)
     {
+        MAKE_NONE(self->p_norm_vals);
         Py_INCREF(self->p_norm_vals);
         return self->p_norm_vals;
     }
 
-    /*  The real-valued p_norm_vals array is computed from the complex T_in   *
-     *  array. If T_in is NULL, set p_norm_vals to None.                      */
-    if (!self->tau->T_in)
+    /*  The real-valued p_norm_vals array is computed from the complex T_out  *
+     *  array. If T_out is NULL, set p_norm_vals to None.                     */
+    if (!self->tau->T_out)
     {
-        PyObject *tmp = self->p_norm_vals;
-        Py_INCREF(Py_None);
-        self->p_norm_vals = Py_None;
-        Py_CLEAR(tmp);
+        MAKE_NONE(self->p_norm_vals);
+        Py_INCREF(self->p_norm_vals);
+        return self->p_norm_vals;
+    }
 
+    /*  If we have already computed p_norm_vals, increment the reference      *
+     *  counter and return this object to the caller.                         */
+    if (self->p_norm_vals)
+    {
         Py_INCREF(self->p_norm_vals);
         return self->p_norm_vals;
     }

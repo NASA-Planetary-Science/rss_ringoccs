@@ -60,9 +60,9 @@ crssringoccs_DiffractionCorrection_Get_P_Norm_Vals(PyObject *op, void *closure)
         return self->p_norm_vals;
     }
 
-    /*  The real-valued p_norm_vals array is computed from the complex T_out  *
-     *  array. If T_out is NULL, set p_norm_vals to None.                     */
-    if (!self->tau->T_out)
+    /*  The real-valued p_norm_vals array is computed from the complex T_in   *
+     *  array. If T_in is NULL, set p_norm_vals to None.                      */
+    if (!self->tau->T_in)
     {
         MAKE_NONE(self->p_norm_vals);
         Py_INCREF(self->p_norm_vals);

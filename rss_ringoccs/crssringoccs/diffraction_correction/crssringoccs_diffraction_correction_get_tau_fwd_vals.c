@@ -52,10 +52,11 @@ crssringoccs_DiffractionCorrection_Get_Tau_Fwd_Vals(PyObject *op,
     /*  Get a pointer to the actual DiffractionCorrection instance.           */
     self = (crssringoccs_PyDiffrecObj *)op;
 
-    /*  If we have already computed tau_fwd_vals, increment the reference     *
-     *  counter and return this object to the caller.                         */
-    if (self->tau_fwd_vals)
+    /*  If the Tau variable has not been initialized, there is no data to     *
+     *  process. Return None in this case.                                    */
+    if (!self->tau)
     {
+        MAKE_NONE(self->tau_fwd_vals);
         Py_INCREF(self->tau_fwd_vals);
         return self->tau_fwd_vals;
     }
@@ -64,11 +65,15 @@ crssringoccs_DiffractionCorrection_Get_Tau_Fwd_Vals(PyObject *op,
      *  array. If T_fwd is NULL, set tau_fwd_vals to None.                    */
     if (!self->tau->T_fwd)
     {
-        PyObject *tmp = self->tau_fwd_vals;
-        Py_INCREF(Py_None);
-        self->tau_fwd_vals = Py_None;
-        Py_CLEAR(tmp);
+        MAKE_NONE(self->tau_fwd_vals);
+        Py_INCREF(self->tau_fwd_vals);
+        return self->tau_fwd_vals;
+    }
 
+    /*  If we have already computed tau_fwd_vals, increment the reference     *
+     *  counter and return this object to the caller.                         */
+    if (self->tau_fwd_vals)
+    {
         Py_INCREF(self->tau_fwd_vals);
         return self->tau_fwd_vals;
     }

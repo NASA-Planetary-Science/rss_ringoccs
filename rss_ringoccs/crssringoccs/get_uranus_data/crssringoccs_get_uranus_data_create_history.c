@@ -19,7 +19,7 @@ crssringoccs_GetUranusData_Create_History(crssringoccs_PyCSVObj *self,
                                           tmpl_Bool dlp_in_radians)
 {
     /*  Python objects needed throughout the computation.                     */
-    PyObject *tmp, *input_variables, *input_keywords, *history, *py_bool;
+    PyObject *input_variables, *input_keywords, *history, *py_bool;
 
     /*  Character array for the Python version. We'll use sprintf on this     *
      *  later with the macros provided in Python.h.                           */
@@ -70,9 +70,6 @@ crssringoccs_GetUranusData_Create_History(crssringoccs_PyCSVObj *self,
     );
 
     /*  Begin reference counting for the new history object.                  */
-    tmp = self->history;
-    Py_INCREF(history);
-    self->history = history;
-    Py_XDECREF(tmp);
+    Py_XSETREF(self->history, history);
 }
 /*  End of crssringoccs_GetUranusData_Create_History.                         */

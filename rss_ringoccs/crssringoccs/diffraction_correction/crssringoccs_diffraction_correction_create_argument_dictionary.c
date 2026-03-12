@@ -24,7 +24,6 @@ crssringoccs_DiffractionCorrection_Create_Argument_Dictionary(
     PyObject * const dlp
 )
 {
-    PyObject *tmp = NULL;
     PyObject *input_vars = NULL;
     PyObject *dlp_history = NULL;
 
@@ -99,10 +98,7 @@ crssringoccs_DiffractionCorrection_Create_Argument_Dictionary(
         return;
     }
 
-    tmp = self->input_vars;
-    self->input_vars = input_vars;
-
-    Py_CLEAR(tmp);
+    Py_XSETREF(self->input_vars, input_vars);
     Py_CLEAR(dlp_history);
 }
 /*  End of crssringoccs_DiffractionCorrection_Create_Argument_Dictionary.     */

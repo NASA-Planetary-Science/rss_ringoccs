@@ -118,3 +118,6 @@ crssringoccs_DiffractionCorrection_Get_P_Fwd_Vals(PyObject *op, void *closure)
     return self->p_fwd_vals;
 }
 /*  End of crssringoccs_DiffractionCorrection_Get_P_Fwd_Vals.                 */
+
+/*  Undefine everything in case someone wants to #include this file.          */
+#undef MAKE_NONE

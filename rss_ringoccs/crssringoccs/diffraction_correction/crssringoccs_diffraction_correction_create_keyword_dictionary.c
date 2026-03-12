@@ -24,7 +24,6 @@ crssringoccs_DiffractionCorrection_Create_Keyword_Dictionary(
 )
 {
     PyObject *input_kwds = NULL;
-    PyObject *tmp = NULL;
     PyObject *normalize = NULL;
     PyObject *bfac = NULL;
 
@@ -82,11 +81,7 @@ crssringoccs_DiffractionCorrection_Create_Keyword_Dictionary(
         return;
     }
 
-    tmp = self->input_kwds;
-    Py_INCREF(input_kwds);
-    self->input_kwds = input_kwds;
-
-    Py_CLEAR(tmp);
+    Py_XSETREF(self->input_kwds, input_kwds);
     Py_CLEAR(normalize);
     Py_CLEAR(bfac);
 }

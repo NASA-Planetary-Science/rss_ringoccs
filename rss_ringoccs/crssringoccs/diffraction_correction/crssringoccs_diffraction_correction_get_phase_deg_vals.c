@@ -115,6 +115,15 @@ crssringoccs_DiffractionCorrection_Get_Phase_Deg_Vals(PyObject *op,
         self->tau->n_used               /*  Number of points in the array.    */
     );
 
+    /*  Check if numpy was able to create an array wrapper for the data.      */
+    if (!self->phase_deg_vals)
+    {
+        /*  crssringoccs_Create_Real_Numpy_Array sets a Python error if it    *
+         *  cannot create the wrapper. Free the data and return NULL.         */
+        TMPL_FREE(phase);
+        return NULL;
+    }
+
     /*  We are returning a reference to this new array. Increment the counter.*/
     Py_INCREF(self->phase_deg_vals);
     return self->phase_deg_vals;

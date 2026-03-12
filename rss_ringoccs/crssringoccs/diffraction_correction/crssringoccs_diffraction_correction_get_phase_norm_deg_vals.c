@@ -120,7 +120,7 @@ crssringoccs_DiffractionCorrection_Get_Phase_Norm_Deg_Vals(PyObject *op,
     {
         /*  crssringoccs_Create_Real_Numpy_Array sets a Python error if it    *
          *  cannot create the wrapper. Free the data and return NULL.         */
-        TMPL_FREE(self->phase_norm_deg_vals);
+        TMPL_FREE(diffracted_phase);
         return NULL;
     }
 

@@ -123,7 +123,7 @@ crssringoccs_DiffractionCorrection_Get_Tau_Norm_Vals(PyObject *op,
     {
         /*  crssringoccs_Create_Real_Numpy_Array sets a Python error if it    *
          *  cannot create the wrapper. Free the data and return NULL.         */
-        TMPL_FREE(self->tau_norm_vals);
+        TMPL_FREE(diffracted_optical_depth);
         return NULL;
     }
 

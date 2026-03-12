@@ -113,7 +113,7 @@ crssringoccs_DiffractionCorrection_Get_P_Fwd_Vals(PyObject *op, void *closure)
     {
         /*  crssringoccs_Create_Real_Numpy_Array sets a Python error if it    *
          *  cannot create the wrapper. Free the data and return NULL.         */
-        TMPL_FREE(self->p_fwd_vals);
+        TMPL_FREE(model_power);
         return NULL;
     }
 

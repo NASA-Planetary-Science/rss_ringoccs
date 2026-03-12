@@ -32,6 +32,14 @@
 /*  NULL macro found here.                                                    */
 #include <stddef.h>
 
+#define MAKE_NONE(var)                                                         \
+    do {                                                                       \
+        PyObject *tmp = var;                                                   \
+        Py_INCREF(Py_None);                                                    \
+        var = Py_None;                                                         \
+        Py_CLEAR(tmp);                                                         \
+    } while (0)
+
 PyObject *
 crssringoccs_DiffractionCorrection_Get_P_Fwd_Vals(PyObject *op, void *closure)
 {
@@ -51,23 +59,28 @@ crssringoccs_DiffractionCorrection_Get_P_Fwd_Vals(PyObject *op, void *closure)
     /*  Get a pointer to the actual DiffractionCorrection instance.           */
     self = (crssringoccs_PyDiffrecObj *)op;
 
-    /*  If we have already computed p_fwd_vals, increment the reference       *
-     *  counter and return this object to the caller.                         */
-    if (self->p_fwd_vals)
+    /*  If the Tau variable has not been initialized, there is no data to     *
+     *  process. Return None in this case.                                    */
+    if (!self->tau)
     {
+        MAKE_NONE(self->p_fwd_vals);
         Py_INCREF(self->p_fwd_vals);
         return self->p_fwd_vals;
     }
 
-    /*  The real-valued p_fwd_vals array is computed from the complex T_fwd  *
+    /*  The real-valued p_fwd_vals array is computed from the complex T_fwd   *
      *  array. If T_fwd is NULL, set p_fwd_vals to None.                      */
     if (!self->tau->T_fwd)
     {
-        PyObject *tmp = self->p_fwd_vals;
-        Py_INCREF(Py_None);
-        self->p_fwd_vals = Py_None;
-        Py_CLEAR(tmp);
+        MAKE_NONE(self->p_fwd_vals);
+        Py_INCREF(self->p_fwd_vals);
+        return self->p_fwd_vals;
+    }
 
+    /*  If we have already computed p_fwd_vals, increment the reference       *
+     *  counter and return this object to the caller.                         */
+    if (self->p_fwd_vals)
+    {
         Py_INCREF(self->p_fwd_vals);
         return self->p_fwd_vals;
     }

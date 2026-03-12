@@ -100,7 +100,6 @@ crssringoccs_DiffractionCorrection_Create_Argument_Dictionary(
     }
 
     tmp = self->input_vars;
-    Py_INCREF(input_vars);
     self->input_vars = input_vars;
 
     Py_CLEAR(tmp);

@@ -41,6 +41,15 @@
 #include <rss_ringoccs/include/rss_ringoccs_reconstruction.h>
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
 
+/*  Macro for setting a variable to the Python "None" type.                   */
+#define MAKE_NONE(var)                                                         \
+    do {                                                                       \
+        PyObject *tmp = var;                                                   \
+        Py_INCREF(Py_None);                                                    \
+        var = Py_None;                                                         \
+        Py_CLEAR(tmp);                                                         \
+    } while (0)
+
 /*  The definition of the DiffractionCorrection class as a C struct.          */
 typedef struct crssringoccs_PyDiffrecObj_Def {
     PyObject_HEAD

@@ -32,14 +32,6 @@
 /*  NULL macro found here.                                                    */
 #include <stddef.h>
 
-#define MAKE_NONE(var)                                                         \
-    do {                                                                       \
-        PyObject *tmp = var;                                                   \
-        Py_INCREF(Py_None);                                                    \
-        var = Py_None;                                                         \
-        Py_CLEAR(tmp);                                                         \
-    } while (0)
-
 PyObject *
 crssringoccs_DiffractionCorrection_Get_P_Fwd_Vals(PyObject *op, void *closure)
 {
@@ -118,6 +110,3 @@ crssringoccs_DiffractionCorrection_Get_P_Fwd_Vals(PyObject *op, void *closure)
     return self->p_fwd_vals;
 }
 /*  End of crssringoccs_DiffractionCorrection_Get_P_Fwd_Vals.                 */
-
-/*  Undefine everything in case someone wants to #include this file.          */
-#undef MAKE_NONE

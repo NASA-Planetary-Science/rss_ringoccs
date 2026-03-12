@@ -65,6 +65,15 @@
 #define SET_DLP_VAR(a)                                                         \
     do {                                                                       \
         PyObject *tmp = PyObject_GetAttrString(dlp, #a);                       \
+        if (!tmp)                                                              \
+        {                                                                      \
+            self->tau->error_occurred = tmpl_True;                             \
+            self->tau->error_message =                                         \
+                "\n\rError Encountered: rss_ringoccs\n"                        \
+                "\r\tcrssringoccs_DiffractionCorrection_Finish\n\n"            \
+                "\rPyObject_GetAttrString returned NULL for "#a".\n\n";        \
+            goto CLEANUP;                                                      \
+        }                                                                      \
         self->a = PyObject_GetItem(tmp, slice);                                \
         Py_CLEAR(tmp);                                                         \
     } while (0)
@@ -90,6 +99,17 @@ crssringoccs_DiffractionCorrection_Finish(crssringoccs_PyDiffrecObj *self,
 
     if (self->verbose)
         puts("\r\tDiffractionCorrection: Creating numpy arrays from data...");
+
+    if (!dlp)
+    {
+        self->tau->error_occurred = tmpl_True;
+        self->tau->error_message =
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tcrssringoccs_DiffractionCorrection_Finish\n\n"
+            "\rInput DLP object is NULL.\n\n";
+
+        return;
+    }
 
     start = PyLong_FromSize_t(self->tau->start);
     end = PyLong_FromSize_t(self->tau->start + self->tau->n_used);

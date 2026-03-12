@@ -55,10 +55,11 @@ crssringoccs_DiffractionCorrection_Get_Phase_Norm_Deg_Vals(PyObject *op,
     /*  Get a pointer to the actual DiffractionCorrection instance.           */
     self = (crssringoccs_PyDiffrecObj *)op;
 
-    /*  If we have already computed phase_norm_deg_vals, increment the        *
-     *  reference counter and return this object to the caller.               */
-    if (self->phase_norm_deg_vals)
+    /*  If the Tau variable has not been initialized, there is no data to     *
+     *  process. Return None in this case.                                    */
+    if (!self->tau)
     {
+        MAKE_NONE(self->phase_norm_deg_vals);
         Py_INCREF(self->phase_norm_deg_vals);
         return self->phase_norm_deg_vals;
     }
@@ -67,11 +68,15 @@ crssringoccs_DiffractionCorrection_Get_Phase_Norm_Deg_Vals(PyObject *op,
      *  complex T_in array. If T_in is NULL, set phase_norm_deg_vals to None. */
     if (!self->tau->T_in)
     {
-        PyObject *tmp = self->phase_norm_deg_vals;
-        Py_INCREF(Py_None);
-        self->phase_norm_deg_vals = Py_None;
-        Py_CLEAR(tmp);
+        MAKE_NONE(self->phase_norm_deg_vals);
+        Py_INCREF(self->phase_norm_deg_vals);
+        return self->phase_norm_deg_vals;
+    }
 
+    /*  If we have already computed phase_norm_deg_vals, increment the        *
+     *  reference counter and return this object to the caller.               */
+    if (self->phase_norm_deg_vals)
+    {
         Py_INCREF(self->phase_norm_deg_vals);
         return self->phase_norm_deg_vals;
     }

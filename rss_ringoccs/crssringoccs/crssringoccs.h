@@ -185,7 +185,7 @@ extern PyMethodDef crssringoccs_PyCSVObj_Methods[];
 
 /******************************************************************************
  *  Function:                                                                 *
- *      crssringoccs_ExtractCSVData_Steal                                     *
+ *      crssringoccs_CassiniCSVData_Steal                                     *
  *  Purpose:                                                                  *
  *      Steals data from a C struct and passes it to a Python object.         *
  *  Arguments:                                                                *
@@ -196,43 +196,43 @@ extern PyMethodDef crssringoccs_PyCSVObj_Methods[];
  *  Output:                                                                   *
  *      None (void).                                                          *
  *  Source Code:                                                              *
- *      rss_ringoccs/crssringoccs/extract_csv_data/                           *
- *          crssringoccs_extract_csv_data_steal.c                             *
+ *      rss_ringoccs/crssringoccs/cassini_csv_data/                           *
+ *          crssringoccs_cassini_csv_data_steal.c                             *
  ******************************************************************************/
 extern void
-crssringoccs_ExtractCSVData_Steal(crssringoccs_PyCSVObj *py_csv,
+crssringoccs_CassiniCSVData_Steal(crssringoccs_PyCSVObj *py_csv,
                                   rssringoccs_CSVData *csv);
 
 /******************************************************************************
  *  Function:                                                                 *
- *      crssringoccs_ExtractCSVData_Init                                      *
+ *      crssringoccs_CassiniCSVData_Init                                      *
  *  Purpose:                                                                  *
- *      Implements the __init__ method for the ExtractCSVData class.          *
+ *      Implements the __init__ method for the CassiniCSVData class.          *
  *  Arguments:                                                                *
  *      self (crssringoccs_PyCSVObj *):                                       *
  *          The Python object being initialized.                              *
  *      args (PyObject *):                                                    *
- *          The arguments to the ExtractCSVData class. These are the          *
+ *          The arguments to the CassiniCSVData class. These are the          *
  *          filenames to the CSV data.                                        *
  *      kwds (PyObject *):                                                    *
- *          The keywords to the ExtractCSVData class. These are the           *
+ *          The keywords to the CassiniCSVData class. These are the           *
  *          tau filename and the use_deprecate Boolean.                       *
  *  Output:                                                                   *
  *      None (void).                                                          *
  *  Source Code:                                                              *
- *      rss_ringoccs/crssringoccs/extract_csv_data/                           *
- *          crssringoccs_extract_csv_data_init.c                              *
+ *      rss_ringoccs/crssringoccs/cassini_csv_data/                           *
+ *          crssringoccs_cassini_csv_data_init.c                              *
  ******************************************************************************/
 extern int
-crssringoccs_ExtractCSVData_Init(crssringoccs_PyCSVObj *self,
+crssringoccs_CassiniCSVData_Init(crssringoccs_PyCSVObj *self,
                                  PyObject *args,
                                  PyObject *kwds);
 
 /******************************************************************************
  *  Function:                                                                 *
- *      crssringoccs_ExtractCSVData_Create_History                            *
+ *      crssringoccs_CassiniCSVData_Create_History                            *
  *  Purpose:                                                                  *
- *      Creates the history dictionary for the ExtractCSVData class.          *
+ *      Creates the history dictionary for the CassiniCSVData class.          *
  *  Arguments:                                                                *
  *      self (crssringoccs_PyCSVObj *):                                       *
  *          The Python CSV object.                                            *
@@ -249,11 +249,11 @@ crssringoccs_ExtractCSVData_Init(crssringoccs_PyCSVObj *self,
  *  Output:                                                                   *
  *      None (void).                                                          *
  *  Source Code:                                                              *
- *      rss_ringoccs/crssringoccs/extract_csv_data/                           *
- *          crssringoccs_extract_csv_data_create_history.c                    *
+ *      rss_ringoccs/crssringoccs/cassini_csv_data/                           *
+ *          crssringoccs_cassini_csv_data_create_history.c                    *
  ******************************************************************************/
 extern void
-crssringoccs_ExtractCSVData_Create_History(crssringoccs_PyCSVObj *self,
+crssringoccs_CassiniCSVData_Create_History(crssringoccs_PyCSVObj *self,
                                            const char *geo_str,
                                            const char *cal_str,
                                            const char *dlp_str,
@@ -262,14 +262,14 @@ crssringoccs_ExtractCSVData_Create_History(crssringoccs_PyCSVObj *self,
 
 /******************************************************************************
  *  Constant:                                                                 *
- *      crssringoccs_ExtractCSVData                                           *
+ *      crssringoccs_CassiniCSVData                                           *
  *  Purpose:                                                                  *
- *      The ExtractCSVData class for python.                                  *
+ *      The CassiniCSVData class for python.                                  *
  *  Source Code:                                                              *
- *      rss_ringoccs/crssringoccs/extract_csv_data/                           *
- *              crssringoccs_get_uranus_data_class.c                          *
+ *      rss_ringoccs/crssringoccs/cassini_csv_data/                           *
+ *              crssringoccs_cassini_csv_data_class.c                         *
  ******************************************************************************/
-extern PyTypeObject crssringoccs_ExtractCSVData;
+extern PyTypeObject crssringoccs_CassiniCSVData;
 
 /*  Data structure for the GEO.TAB files on the PDS.                          */
 typedef struct PyGeoObj_Def {

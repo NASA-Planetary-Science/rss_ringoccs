@@ -447,22 +447,22 @@ extern PyMethodDef crssringoccs_DiffractionCorrection_Methods[];
 extern PyTypeObject crssringoccs_DiffractionCorrection;
 
 extern void
-crssringoccs_GetUranusData_Steal(crssringoccs_PyCSVObj *py_csv,
-                                 rssringoccs_UranusCSVData *csv);
+crssringoccs_VoyagerCSVData_Steal(crssringoccs_PyCSVObj *py_csv,
+                                  rssringoccs_UranusCSVData *csv);
 
 extern int
-crssringoccs_GetUranusData_Init(crssringoccs_PyCSVObj *self,
-                                PyObject *args,
-                                PyObject *kwds);
+crssringoccs_VoyagerCSVData_Init(crssringoccs_PyCSVObj *self,
+                                 PyObject *args,
+                                 PyObject *kwds);
 
 extern void
-crssringoccs_GetUranusData_Create_History(crssringoccs_PyCSVObj *self,
-                                          const char *geo_str,
-                                          const char *dlp_str,
-                                          const char *tau_str,
-                                          tmpl_Bool dlp_in_radians);
+crssringoccs_VoyagerCSVData_Create_History(crssringoccs_PyCSVObj *self,
+                                           const char *geo_str,
+                                           const char *dlp_str,
+                                           const char *tau_str,
+                                           tmpl_Bool dlp_in_radians);
 
-extern PyTypeObject crssringoccs_GetUranusData;
+extern PyTypeObject crssringoccs_VoyagerCSVData;
 
 extern void
 crssringoccs_MergedCSVData_Steal(crssringoccs_PyCSVObj *py_csv,

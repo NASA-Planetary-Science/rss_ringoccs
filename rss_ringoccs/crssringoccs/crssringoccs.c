@@ -62,8 +62,8 @@ struct crssringoccs_PythonType crssringoccs_TypeList[4] = {
      *  files (GEO, CAL, DLP), but the DLP.TAB file must be in the format     *
      *  used for the Voyager data.                                            */
     {
-        &crssringoccs_GetUranusData,
-        "GetUranusData"
+        &crssringoccs_VoyagerCSVData,
+        "VoyagerCSVData"
     },
 
     /*  MergedCSVData class, reads in a single Merged DLP file (DLPM.TAB) and *
@@ -154,7 +154,7 @@ PyMODINIT_FUNC PyInit_crssringoccs(void)
         "[s, s, s, s]",
         "DiffractionCorrection",
         "CassiniCSVData",
-        "GetUranusData",
+        "VoyagerCSVData",
         "MergedCSVData"
     );
 

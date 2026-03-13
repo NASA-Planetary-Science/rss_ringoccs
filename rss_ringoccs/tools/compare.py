@@ -1,23 +1,26 @@
-from rss_ringoccs import diffrec
-from .CSV_tools import ExtractCSVData
+import rss_ringoccs
 import numpy as np
 from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 from scipy import interpolate
 
-def compare(NormDiff, geo, cal, dlp, tau, outfile, res=0.75, rng="all",
+def compare(dlp_inst, geo, cal, dlp, tau, outfile, res=0.75, rng="all",
             wtype="kbmd20", norm=True, bfac=True, sigma=2.e-13, verbose=True,
-            psitype="Fresnel8"):
+            psitype="NewtonFilon12"):
 
     # Retrieve the data from the input CSV files.
-    data = CSV_tools.ExtractCSVData(geo, cal, dlp, tau=tau, verbose=verbose)
+    data = rss_ringoccs.CassiniCSVData(
+        geo, cal, dlp, tau = tau, verbose = verbose
+    )
 
     # Perform diffraction reconstruction on the raw data.
-    rec = diffrec.DiffractionCorrection(NormDiff, res, rng=rng, wtype=wtype,
-                                        fwd=True, norm=norm, bfac=bfac,
-                                        sigma=sigma, verbose=verbose,
-                                        psitype=psitype, write_file=False)
+    rec = rss_ringoccs.DiffractionCorrection(
+        dlp_inst, res, rng=rng, wtype=wtype,
+        fwd=True, norm=norm, bfac=bfac,
+        sigma=sigma, verbose=verbose,
+        psitype=psitype, write_file=False
+    )
 
     # Compute the range for the x-axis.
     rmin = np.min(rec.rho_km_vals)
@@ -298,7 +301,7 @@ def galleryplots(rev, geo, cal, dlp, tau=None, res=[1.0], rng="all",
     sigma = error_check.check_type_and_convert(sigma, float, "sigma", fname)
     res_factor = error_check.check_type_and_convert(res_factor, float,
                                                     "res_factor", fname)
-    
+
     error_check.check_positive(sigma, "sigma", fname)
     error_check.check_positive(res_factor, "res_factor", fname)
 
@@ -313,12 +316,14 @@ def galleryplots(rev, geo, cal, dlp, tau=None, res=[1.0], rng="all",
 
     for x in res:
         error_check.check_positive(x, "res", fname)
-    
+
     if tau:
         error_check.check_type(tau, str, "tau", fname)
 
     # Extract the data from the given CSV files.
-    data = CSV_tools.ExtractCSVData(geo, cal, dlp, tau=tau, verbose=verbose)
+    data = rss_ringoccs.CassiniCSVData(
+        geo, cal, dlp, tau = tau, verbose = verbose
+    )
 
     # Total number of plots, and total number of pages.
     N_Plots = len(res)
@@ -343,12 +348,13 @@ def galleryplots(rev, geo, cal, dlp, tau=None, res=[1.0], rng="all",
                 sres = str(res[i_res])+"km Reconstruction"
 
                 # Use the DiffractionCorrection class to get the output data.
-                rec = diffrec.DiffractionCorrection(data, res[i_res],
-                                                    wtype=wtype, rng=rng,
-                                                    psitype=psitype, norm=norm,
-                                                    bfac=bfac, sigma=sigma,
-                                                    res_factor=res_factor,
-                                                    verbose=verbose)
+                rec = rss_ringoccs.DiffractionCorrection(
+                    data, res[i_res],
+                    wtype = wtype, rng = rng, psitype = psitype,
+                    use_norm = norm, bfac = bfac, sigma = sigma,
+                    resolution_factor = res_factor, verbose = verbose
+                )
+
                 plt.subplot(gs[i, 0])
 
                 # Set up the tick parameters for the y axis.
@@ -411,12 +417,13 @@ def galleryplots(rev, geo, cal, dlp, tau=None, res=[1.0], rng="all",
                 sres = str(res[i_res])+"km Reconstruction"
 
                 # Perform diffraction correction on the last sets.
-                rec = diffrec.DiffractionCorrection(data, res[i_res],
-                                                    wtype=wtype, rng=rng,
-                                                    psitype=psitype, norm=norm,
-                                                    bfac=bfac, sigma=sigma,
-                                                    res_factor=res_factor,
-                                                    verbose=verbose)
+                rec = rss_ringoccs.DiffractionCorrection(
+                    data, res[i_res],
+                    wtype = wtype, rng = rng, psitype = psitype,
+                    use_norm = norm, bfac = bfac, sigma = sigma,
+                    resolution_factor = res_factor, verbose = verbose
+                )
+
                 plt.subplot(gs[i, 0])
 
                 # Set tick parameters for the y axis.
@@ -440,7 +447,7 @@ def galleryplots(rev, geo, cal, dlp, tau=None, res=[1.0], rng="all",
                 else:
                     plt.tick_params(axis='x', which='both', bottom=False,
                                     top=False, labelbottom=False)
-                
+
                 # Add labels to the y-axis.
                 plt.ylabel("Normalized Power")
 
@@ -450,14 +457,14 @@ def galleryplots(rev, geo, cal, dlp, tau=None, res=[1.0], rng="all",
                 # If a tau file is provided, plot the results it contains.
                 if tau:
                     plt.plot(data.tau_rho, data.power_vals, 'r', label="PDS")
-                
+
                 # Set the range for the x and y axes.
                 rmin = np.min(rec.rho_km_vals)
                 rmax = np.max(rec.rho_km_vals)
                 plt.xlim(rmin, rmax)
                 plt.ylim(ymin, ymax)
                 plt.legend()
-            
+
             # Save the plots and close the PDF.
             pdf.savefig(bbox_inches="tight", pad_inches=1)
             plt.close()

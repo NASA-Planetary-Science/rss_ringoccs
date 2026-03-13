@@ -18,7 +18,7 @@
  ******************************************************************************/
 #include "../crssringoccs.h"
 
-PyTypeObject crssringoccs_ExtractCSVData = {
+PyTypeObject crssringoccs_CassiniCSVData = {
     PyVarObject_HEAD_INIT(NULL, 0)
     .tp_name = "CassiniCSVData",
     .tp_doc =

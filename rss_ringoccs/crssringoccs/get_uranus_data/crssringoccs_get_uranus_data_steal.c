@@ -30,7 +30,7 @@ crssringoccs_Create_Real_Numpy_Array(                                          \
 
 /*  Steals the references to the data in a rssringoccs_CSVData object and     *
  *  creates numpy arrays from them. The data is stored in an instance of the  *
- *  ExtractCSVData class.                                                     */
+ *  VoyagerCSVData class.                                                     */
 void
 crssringoccs_GetUranusData_Steal(crssringoccs_PyCSVObj *py_csv,
                                  rssringoccs_UranusCSVData *csv)
@@ -46,7 +46,7 @@ crssringoccs_GetUranusData_Steal(crssringoccs_PyCSVObj *py_csv,
         csv->error_occurred = tmpl_True;
         csv->error_message = tmpl_String_Duplicate(
             "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tcrssringoccs_ExtractCSVData_Steal\n\n"
+            "\r\tcrssringoccs_VoyagerCSVData_Steal\n\n"
             "\rInput py_csv is NULL. Aborting.n"
         );
 

@@ -61,7 +61,7 @@ for n,dir in enumerate(occdirs):
 
                 # build DLP instance
                 t1 = time.time()
-                dlp_inst = rss.ExtractCSVData(geo_file, cal_file, dlp_file)
+                dlp_inst = rss.CassiniCSVData(geo_file, cal_file, dlp_file)
                 t2 = time.time()
                 read_time += t2-t1
 

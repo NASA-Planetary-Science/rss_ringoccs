@@ -6,9 +6,9 @@
 
 program = 'batch_parallel_CSVtoTAU_template-20260130a'
 
-description = '$DESCRIPTION$' # to make it easier to trace what this run was 
+description = '$DESCRIPTION$' # to make it easier to trace what this run was
 
-from rss_ringoccs_local_tools import * 
+from rss_ringoccs_local_tools import *
 
 def processing_range_required(inversion_range,rkm,F,res_factor,res_km):
     if(inversion_range[0] <np.min(rkm)) or (inversion_range[1] > np.max(rkm)):
@@ -18,8 +18,8 @@ def processing_range_required(inversion_range,rkm,F,res_factor,res_km):
     min_proc_range_req = int(np.floor(inversion_range[0]-fWofrkm(inversion_range[0])/2))
     max_proc_range_req = int(np.ceil(inversion_range[1]+fWofrkm(inversion_range[1])/2))
     proc_range_req = [min_proc_range_req,max_proc_range_req]
-    return proc_range_req 
-    
+    return proc_range_req
+
 def is_processing_range_valid(inversion_range,rkm,F,res_factor,res_km,verbose=False):
     proc_range_req = processing_range_required(inversion_range,rkm,F,res_factor,res_km)
     proc_range_avail = [np.min(rkm),np.max(rkm)]
@@ -35,9 +35,9 @@ def is_processing_range_valid_from_GEO_DLP_files(inversion_range,GEOfilepath,DLP
     if 'I_GEO' in geo_file:
         direc = 'I'
         L = np.where((rdot<0) & (rkm >= np.min(rkmDLP)) & (rkm <= np.max(rkmDLP)))[0]
-    elif 'E_GEO' in geo_file: 
+    elif 'E_GEO' in geo_file:
         direc = 'E'
-        L = np.where((rdot>0) & (rkm >= np.min(rkmDLP)) & (rkm <= np.max(rkmDLP)))[0]    
+        L = np.where((rdot>0) & (rkm >= np.min(rkmDLP)) & (rkm <= np.max(rkmDLP)))[0]
     else:
         raise Exception("Unable to parse direction from GEOfilepath")
     return is_processing_range_valid(inversion_range,rkm[L],F[L],res_factor,res_km)
@@ -52,14 +52,14 @@ def update_inversion_range(inversion_range,geo_file,dlp_file,res_factor,res_km):
     if 'I_GEO' in geo_file:
         direc = 'I'
         L = np.where((rdot<0) & (rkm >= np.min(rkmDLP)) & (rkm <= np.max(rkmDLP)))[0]
-    elif 'E_GEO' in geo_file: 
+    elif 'E_GEO' in geo_file:
         direc = 'E'
         L = np.where((rdot>0) & (rkm >= np.min(rkmDLP)) & (rkm <= np.max(rkmDLP)))[0]
     else:
         raise Exception("Unable to parse direction from GEOfilepath")
     inversion_range_updated = np.zeros(2,dtype=int)
     rkmL = rkm[L]
-    
+
     FL = F[L]
 #    print('FL',FL)
     # plt.plot(FL)
@@ -75,7 +75,7 @@ def update_inversion_range(inversion_range,geo_file,dlp_file,res_factor,res_km):
         print('Illegal update to',inversion_range,':',inversion_range_updated)
         raise Exception('No part of requested inversion range can be processed for this event')
     return inversion_range_updated
-    
+
 init_time = time.time()
 
 $RES_FACTOR$ # res_factor = 0.75 # so resolution agrees with PDS
@@ -93,7 +93,7 @@ min_dlp_res = min_required_dlp_res_km(res_km,res_factor)*1000 # meters
 
 # There is a standard set of DLP files at the following resolutions
 # Choose the one with the coarsest allowable resolution to speed up
-# execution 
+# execution
 
 if min_dlp_res <20:
     dlp_res='DLP_*10M_'
@@ -102,7 +102,7 @@ elif min_dlp_res <40:
 elif min_dlp_res <50:
     dlp_res='DLP_*40M_'
 elif min_dlp_res <100:
-    dlp_res='DLP_*50M_' 
+    dlp_res='DLP_*50M_'
 elif min_dlp_res <200:
     dlp_res='DLP_*100M_'
 elif min_dlp_res <500:
@@ -112,7 +112,7 @@ else:
 
 output_creation_date = '$OUTPUT_CREATION_DATE$' # ex: '2025122*' # Date of DLP file
 
-search_string = output_creation_date+'_0001.TAB' 
+search_string = output_creation_date+'_0001.TAB'
 alt_search_string = output_creation_date+'_0002.TAB'
 
 rev = '$REV$'
@@ -136,7 +136,7 @@ results_all = []
 #bands = np.array(run['bands'])
 
 string = band + dsn+'_'+direc
-# find the correct output directory that contains GEO/TAB/DLP for this rev, direction, band, dsn 
+# find the correct output directory that contains GEO/TAB/DLP for this rev, direction, band, dsn
 for this_dir in dirs:
     if string in this_dir:
         # if not silent:
@@ -145,7 +145,7 @@ for this_dir in dirs:
             print('now search in ',this_dir,'for GEO,CAL,DLP')
         GEO_glob = SEP+'*GEO*'+search_string
         CAL_glob =  SEP+'*CAL*'+search_string
-        DLP_glob =  SEP+'*'+dlp_res+search_string        
+        DLP_glob =  SEP+'*'+dlp_res+search_string
         try:
             geo_file = glob.glob(this_dir + GEO_glob)[0]
         except:
@@ -178,7 +178,7 @@ for this_dir in dirs:
 
         # update the inversion range based on the available range in the DLP file and the
         # required window sizes for the resolution res_km of this run
-        
+
         inversion_range_orig = [int('$INVERSION_RANGE_MIN$'),int('$INVERSION_RANGE_MAX$')]
         inversion_range = inversion_range_orig
 
@@ -212,19 +212,19 @@ for this_dir in dirs:
             print(os.path.basename(geo_file))
             print(os.path.basename(cal_file))
             print(os.path.basename(dlp_file))
-            
+
         $TRIM_DLP$ # trim_dlp = True or False
         if trim_dlp:
             dlp_file= trim_dlp_file(dlp_file,processing_range,
                                     verbose=not silent,write=True,overwrite=False)
-        title = name + ' Rev' + rev + direc 
+        title = name + ' Rev' + rev + direc
         this_start_time = time.time()
-        data = rss_ringoccs.ExtractCSVData(geo_file, cal_file, dlp_file)
+        data = rss_ringoccs.CassiniCSVData(geo_file, cal_file, dlp_file)
         this_stop_time = time.time()
         if drho_km != 0:
             data.rho_km_vals += drho_km
         psitype = psitypes[0]
-        
+
 $MAX_WORKERS$ # max_workers = cpu_count()
 
 #drange is the chunck size in km of the inversion_ranged processed by each cpu
@@ -238,18 +238,18 @@ def task(ind):
     try:
         this_inversion_range = [int(min_ranges[ind]),int(max_ranges[ind])]
         this_start_time = time.time()
-        
+
         tau_inst = rss_ringoccs.DiffractionCorrection(
                data, res_km, rng=this_inversion_range, resolution_factor=res_factor,
                psitype=psitype, wtype=wtype, verbose=False)
-        
+
         tau_inst.tau_threshold_vals = compute_tau_threshold(cal_file,tau_inst)
-        
+
         this_stop_time = time.time()
-        
+
         print("Diffraction-correction processing time for this chunk:",
              this_stop_time - this_start_time,"seconds")
-        
+
         rev_info = get_rev_info_from_dlp(dlp_file)
 
         if include_history:
@@ -261,7 +261,7 @@ def task(ind):
                     tau_history = {
             'key_order0': ['User Name', 'Host Name', 'Operating System',
                         'Python Version', 'rss_ringoccs Version']
-            ,'key_order1': ['Source Directory','Source File', 
+            ,'key_order1': ['Source Directory','Source File',
                         'Positional Args', 'Keyword Args', 'Additional Info']
             , 'hist name': 'DiffractionReconstruction history'
             , 'User Name': ''
@@ -276,7 +276,7 @@ def task(ind):
             , 'Keyword Args': ''
             , 'Additional Info': ''
             , 'description': ''
-            }           
+            }
 
         outfiles = write_output_files.write_output_files(tau_inst,rev_info=rev_info,
                 add_suffix = f'.{ind+1:04d}',# add index+1 to filename so that it is unique
@@ -325,7 +325,7 @@ def main():
          for arg in as_completed(futures):
 #            report the number of remaining tasks
              print(f'About {len(executor._pending_work_items)} tasks remain')
-#       submit many tasks  
+#       submit many tasks
     search_dir = global_path_to_local_tmp +'/Rev'+rev+'/Rev'+rev+'*'+direc+'/'+'*'+band+dsn+'*'+direc+'/'
     #print('\nin main(): search_dir = ',search_dir)
     indir = glob.glob(search_dir)[0]
@@ -336,10 +336,10 @@ def main():
     print('\nMerged TAU files saved in \n',outdir,flush=True)
     for file in (outfile,outlblfile,outfile_psitype,outlblfile_psitype):
         print(os.path.basename(file),flush=True)
-    
+
     print('All Done!', flush=True)
     os.system('date')
-    
+
     final_time = time.time()
     total_batch_time = (final_time - init_time)/60.
     print('Total processing time: ' + f'{total_batch_time:0.2f} minutes')

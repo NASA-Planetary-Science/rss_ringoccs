@@ -30,7 +30,7 @@ crssringoccs_Create_Real_Numpy_Array(                                          \
 
 /*  Steals the references to the data in a rssringoccs_CSVData object and     *
  *  creates numpy arrays from them. The data is stored in an instance of the  *
- *  ExtractCSVData class.                                                     */
+ *  MergedCSVData class.                                                      */
 void
 crssringoccs_GetMergedCSVData_Steal(crssringoccs_PyCSVObj *py_csv,
                                     rssringoccs_MergedCSVData *csv)

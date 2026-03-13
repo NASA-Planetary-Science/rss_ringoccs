@@ -29,7 +29,7 @@ crssringoccs_GetMergedCSVData_Init(crssringoccs_PyCSVObj *self,
     /*  Variable for the output CSV object.                                   */
     rssringoccs_MergedCSVData *csv = NULL;
 
-    /*  The list of the keywords accepted by the ExtractCSVData class. The    *
+    /*  The list of the keywords accepted by the MergedCSVData class. The     *
      *  file paths 'geo', 'cal', and 'dlp' are required. The 'tau' path is    *
      *  optional, and by default use_deprecate is set to False.               */
     static char *kwlist[] = {"dlpm", NULL};
@@ -48,7 +48,7 @@ crssringoccs_GetMergedCSVData_Init(crssringoccs_PyCSVObj *self,
      *  passed by the string. The cryptic string is not straight-forward. The *
      *  | symbol means everything after need not be positional, and we can    *
      *  specify arguments and keywords by name when calling                   *
-     *  ExtractCSVData, for example ExtractCSVData(..., tau = "TAU.TAB").     *
+     *  MergedCSVData, for example MergedCSVData(..., tau = "TAU.TAB").       *
      *  s indicates a string, which are the paths to the GEO, CAL, and DLP    *
      *  files. The $ symbol means everything after is optional. p is a        *
      *  Boolean (p for "predicate"), this is the use_deprecate keyword. The   *
@@ -85,7 +85,7 @@ crssringoccs_GetMergedCSVData_Init(crssringoccs_PyCSVObj *self,
             PyExc_RuntimeError,
             "\n\rError Encountered: rss_ringoccs\n"
             "\r\tGetMergedCSVData\n\n"
-            "\rrssringoccs_CSVData_Extract returned NULL. Aborting.\n"
+            "\rrssringoccs_MergedCSVData_Extract returned NULLrting.\n"
         );
 
         return -1;
@@ -94,33 +94,15 @@ crssringoccs_GetMergedCSVData_Init(crssringoccs_PyCSVObj *self,
     /*  Many errors can occur while parsing the data. Check the flag.         */
     if (csv->error_occurred)
     {
-        /*  Malloc may have failed to allocate memory for the error message.  *
-         *  If so, print a generic error.                                     */
-        if (!csv->error_message)
-        {
-            PyErr_Format(
-                PyExc_RuntimeError,
-                "\n\rError Encountered: rss_ringoccs\n"
-                "\r\tGetMergedCSVData\n\n"
-                "\rrssringoccs_CSVData_Extract returned with error_occurred\n"
-                "\rset to True. No error message was set. Aborting.\n"
-            );
-        }
-
-        /*  Otherwise print the error message set in the C routine. This can  *
-         *  greatly help with debugging.                                      */
-        else
-        {
-            PyErr_Format(
-                PyExc_RuntimeError,
-                "\n\rError Encountered: rss_ringoccs\n"
-                "\r\tGetMergedCSVData\n\n"
-                "\rrssringoccs_CSVData_Extract returned with error_occurred\n"
-                "\rset to True. The following error message was set:\n\n"
-                "%s",
-                csv->error_message
-            );
-        }
+        PyErr_Format(
+            PyExc_RuntimeError,
+            "\n\rError Encountered: rss_ringoccs\n"
+            "\r\tGetMergedCSVData\n\n"
+            "\rrssringoccs_MergedCSVData_Extract returned with error_occurred\n"
+            "\rset to True. The following error message was set:\n\n"
+            "%s",
+            csv->error_message
+        );
 
         /*  Since the function did not return NULL, it is likely that memmory *
          *  was allocated to some variables inside the struct. Free them.     */

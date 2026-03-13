@@ -172,7 +172,7 @@ def static_library_paths():
 # Add all of the crssringoccs files (the C-Python API wrapper) to the build.
 add_directory("auxiliary")
 add_directory("diffraction_correction")
-add_directory("extract_csv_data")
+add_directory("cassini_csv_data")
 add_directory("get_merged_csv_data")
 add_directory("get_uranus_data")
 add_directory("py_csv_obj")

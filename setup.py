@@ -173,8 +173,8 @@ def static_library_paths():
 add_directory("auxiliary")
 add_directory("diffraction_correction")
 add_directory("cassini_csv_data")
-add_directory("get_merged_csv_data")
-add_directory("get_uranus_data")
+add_directory("merged_csv_data")
+add_directory("uranus_data")
 add_directory("py_csv_obj")
 srclist.append("rss_ringoccs/crssringoccs/crssringoccs.c")
 

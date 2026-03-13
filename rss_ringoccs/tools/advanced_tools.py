@@ -37,7 +37,7 @@ class CompareTau(object):
         # Check that range and psitype are legal inputs.
         rng = error_check.check_range_input(rng, fname)
 
-        data = rss_ringoccs.ExtractCSVData(
+        data = rss_ringoccs.CassiniCSVData(
             geo, cal, dlp, tau = tau, verbose = verbose
         )
 
@@ -51,7 +51,7 @@ class CompareTau(object):
             bfac = bfac,
             sigma = sigma,
             psitype = psitype,
-            res_factor = res_factor,
+            resolution_factor = res_factor,
             verbose = verbose,
             perturb = perturb
         )
@@ -129,7 +129,7 @@ class FindOptimalResolution(object):
         self.ideal_res = numpy.zeros((nwins))
         eres = sres + (nres-1)*dres
         res = sres
-        data = rss_ringoccs.ExtractCSVData(
+        data = rss_ringoccs.CassiniCSVData(
             geo, cal, dlp, tau=tau, verbose = verbose
         )
 
@@ -701,7 +701,7 @@ class ModelFromGEO(object):
                 T_in, self.rho_km_vals, F, self.w_km_vals, perturb,
                 start, n_used, wtype, norm, True, psitype,
                 self.phi_rad_vals, kD_vals, self.B_rad_vals, self.D_km_vals,
-                interp, eccentricity, periapse 
+                interp, eccentricity, periapse
             )
         else:
             T_hat = T_hat[start:start+n_used+1]

@@ -175,7 +175,7 @@ add_directory("cassini_csv_data")
 add_directory("diffraction_correction")
 add_directory("merged_csv_data")
 add_directory("py_csv_obj")
-add_directory("uranus_data")
+add_directory("voyager_csv_data")
 srclist.append("rss_ringoccs/crssringoccs/crssringoccs.c")
 
 extra_objects = static_library_paths()

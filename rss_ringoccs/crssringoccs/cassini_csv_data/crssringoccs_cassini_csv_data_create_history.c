@@ -22,7 +22,7 @@ static const char * const crssringoccs_python_version =
 #endif
 
 void
-crssringoccs_ExtractCSVData_Create_History(crssringoccs_PyCSVObj *self,
+crssringoccs_CassiniCSVData_Create_History(crssringoccs_PyCSVObj *self,
                                            const char *geo_str,
                                            const char *cal_str,
                                            const char *dlp_str,
@@ -50,7 +50,7 @@ crssringoccs_ExtractCSVData_Create_History(crssringoccs_PyCSVObj *self,
         PyErr_Format(
             PyExc_RuntimeError,
             "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tcrssringoccs_ExtractCSVData_Create_History\n\n"
+            "\r\tcrssringoccs_CassiniCSVData_Create_History\n\n"
             "\rPyBool_FromLong returned NULL.\n\n"
         );
 
@@ -71,7 +71,7 @@ crssringoccs_ExtractCSVData_Create_History(crssringoccs_PyCSVObj *self,
         PyErr_Format(
             PyExc_RuntimeError,
             "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tcrssringoccs_ExtractCSVData_Create_History\n\n"
+            "\r\tcrssringoccs_CassiniCSVData_Create_History\n\n"
             "\rPy_BuildValue returned NULL for input_variables.\n\n"
         );
 
@@ -91,7 +91,7 @@ crssringoccs_ExtractCSVData_Create_History(crssringoccs_PyCSVObj *self,
         PyErr_Format(
             PyExc_RuntimeError,
             "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tcrssringoccs_ExtractCSVData_Create_History\n\n"
+            "\r\tcrssringoccs_CassiniCSVData_Create_History\n\n"
             "\rPy_BuildValue returned NULL for input_keywords.\n\n"
         );
 
@@ -119,7 +119,7 @@ crssringoccs_ExtractCSVData_Create_History(crssringoccs_PyCSVObj *self,
         PyErr_Format(
             PyExc_RuntimeError,
             "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tcrssringoccs_ExtractCSVData_Create_History\n\n"
+            "\r\tcrssringoccs_CassiniCSVData_Create_History\n\n"
             "\rPy_BuildValue returned NULL for history.\n\n"
         );
 
@@ -134,7 +134,7 @@ crssringoccs_ExtractCSVData_Create_History(crssringoccs_PyCSVObj *self,
         Py_CLEAR(input_variables);
         Py_CLEAR(input_keywords);
 }
-/*  End of crssringoccs_ExtractCSVData_Create_History.                        */
+/*  End of crssringoccs_CassiniCSVData_Create_History.                        */
 
 #undef RSSRINGOCCS_TO_STRING
 #undef RSSRINGOCCS_MAKE_STRING

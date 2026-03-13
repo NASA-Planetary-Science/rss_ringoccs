@@ -29,7 +29,7 @@ plot_center_km = 87515. # radius to center plot at
 
 # ***** End user input *****
 
-dlp_inst = rss.tools.ExtractCSVData(geo_file, cal_file, dlp_file,
+dlp_inst = rss.CassiniCSVData(geo_file, cal_file, dlp_file,
         verbose=verbose)
 
 nres = len(res_list)

@@ -23,7 +23,7 @@
 /*  The init function for the dirrection correction class. This is the        *
  *  equivalent of the __init__ function defined in a normal python class.     */
 int
-crssringoccs_ExtractCSVData_Init(crssringoccs_PyCSVObj *self,
+crssringoccs_CassiniCSVData_Init(crssringoccs_PyCSVObj *self,
                                  PyObject *args,
                                  PyObject *kwds)
 {
@@ -33,7 +33,7 @@ crssringoccs_ExtractCSVData_Init(crssringoccs_PyCSVObj *self,
     /*  Boolean for using the old file formats. Default is false.             */
     tmpl_Bool dpr = tmpl_False;
 
-    /*  The list of the keywords accepted by the ExtractCSVData class. The    *
+    /*  The list of the keywords accepted by the CassiniCSVData class. The    *
      *  file paths 'geo', 'cal', and 'dlp' are required. The 'tau' path is    *
      *  optional, and by default use_deprecate is set to False.               */
     static char *kwlist[] = {"geo", "cal", "dlp", "use_deprecate", "tau", NULL};
@@ -55,7 +55,7 @@ crssringoccs_ExtractCSVData_Init(crssringoccs_PyCSVObj *self,
      *  passed by the string. The cryptic string is not straight-forward. The *
      *  | symbol means everything after need not be positional, and we can    *
      *  specify arguments and keywords by name when calling                   *
-     *  ExtractCSVData, for example ExtractCSVData(..., tau = "TAU.TAB").     *
+     *  CassiniCSVData, for example CassiniCSVData(..., tau = "TAU.TAB").     *
      *  s indicates a string, which are the paths to the GEO, CAL, and DLP    *
      *  files. The $ symbol means everything after is optional. p is a        *
      *  Boolean (p for "predicate"), this is the use_deprecate keyword. The   *
@@ -77,7 +77,7 @@ crssringoccs_ExtractCSVData_Init(crssringoccs_PyCSVObj *self,
         PyErr_Format(
             PyExc_TypeError,
             "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tExtractCSVData\n\n"
+            "\r\tCassiniCSVData\n\n"
             "\rCould not parse input variables.\n\n"
             "\rInputs:\n"
             "\r\tgeo:           Location of a GEO.TAB file (str)\n"
@@ -100,7 +100,7 @@ crssringoccs_ExtractCSVData_Init(crssringoccs_PyCSVObj *self,
         PyErr_Format(
             PyExc_RuntimeError,
             "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tExtractCSVData\n\n"
+            "\r\tCassiniCSVData\n\n"
             "\rrssringoccs_CSVData_Extract returned NULL. Aborting.\n"
         );
 
@@ -117,7 +117,7 @@ crssringoccs_ExtractCSVData_Init(crssringoccs_PyCSVObj *self,
             PyErr_Format(
                 PyExc_RuntimeError,
                 "\n\rError Encountered: rss_ringoccs\n"
-                "\r\tExtractCSVData\n\n"
+                "\r\tCassiniCSVData\n\n"
                 "\rrssringoccs_CSVData_Extract returned with error_occurred\n"
                 "\rset to True. No error message was set. Aborting.\n"
             );
@@ -130,7 +130,7 @@ crssringoccs_ExtractCSVData_Init(crssringoccs_PyCSVObj *self,
             PyErr_Format(
                 PyExc_RuntimeError,
                 "\n\rError Encountered: rss_ringoccs\n"
-                "\r\tExtractCSVData\n\n"
+                "\r\tCassiniCSVData\n\n"
                 "\rrssringoccs_CSVData_Extract returned with error_occurred\n"
                 "\rset to True. The following error message was set:\n\n"
                 "%s",
@@ -146,10 +146,10 @@ crssringoccs_ExtractCSVData_Init(crssringoccs_PyCSVObj *self,
 
     /*  To avoid duplicating memory, the Python object simply steals the data *
      *  inside the C object.                                                  */
-    crssringoccs_ExtractCSVData_Steal(self, csv);
+    crssringoccs_CassiniCSVData_Steal(self, csv);
 
     /*  Log how this object was created. Add the history object.              */
-    crssringoccs_ExtractCSVData_Create_History(
+    crssringoccs_CassiniCSVData_Create_History(
         self, geo_str, cal_str, dlp_str, tau_str, dpr
     );
 

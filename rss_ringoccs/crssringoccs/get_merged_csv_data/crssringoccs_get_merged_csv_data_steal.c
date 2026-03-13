@@ -32,8 +32,8 @@ crssringoccs_Create_Real_Numpy_Array(                                          \
  *  creates numpy arrays from them. The data is stored in an instance of the  *
  *  MergedCSVData class.                                                      */
 void
-crssringoccs_GetMergedCSVData_Steal(crssringoccs_PyCSVObj *py_csv,
-                                    rssringoccs_MergedCSVData *csv)
+crssringoccs_MergedCSVData_Steal(crssringoccs_PyCSVObj *py_csv,
+                                 rssringoccs_MergedCSVData *csv)
 {
     if (!csv || !py_csv)
         return;

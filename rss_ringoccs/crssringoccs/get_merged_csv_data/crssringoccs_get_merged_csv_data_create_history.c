@@ -12,8 +12,8 @@
 #include <rss_ringoccs/include/rss_ringoccs_history.h>
 
 void
-crssringoccs_GetMergedCSVData_Create_History(crssringoccs_PyCSVObj *self,
-                                             const char *dlpm_str)
+crssringoccs_MergedCSVData_Create_History(crssringoccs_PyCSVObj *self,
+                                          const char *dlpm_str)
 {
     /*  Python objects needed throughout the computation.                     */
     PyObject *input_variables, *input_keywords, *history;

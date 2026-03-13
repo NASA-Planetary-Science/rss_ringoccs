@@ -19,10 +19,10 @@
 #include "../crssringoccs.h"
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
 
-/*  The init function for the GetMergedCSVData class. This is the             *
+/*  The init function for the MergedCSVData class. This is the                *
  *  equivalent of the __init__ method defined in a normal python class.       */
 int
-crssringoccs_GetMergedCSVData_Init(crssringoccs_PyCSVObj *self,
+crssringoccs_MergedCSVData_Init(crssringoccs_PyCSVObj *self,
                                 PyObject *args,
                                 PyObject *kwds)
 {
@@ -66,7 +66,7 @@ crssringoccs_GetMergedCSVData_Init(crssringoccs_PyCSVObj *self,
         PyErr_Format(
             PyExc_TypeError,
             "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tGetMergedCSVData\n\n"
+            "\r\tMergedCSVData\n\n"
             "\rCould not parse input variables.\n\n"
             "\rInputs:\n"
             "\r\tdlpm:          Location of a DLPM.TAB file (str)\n"
@@ -84,7 +84,7 @@ crssringoccs_GetMergedCSVData_Init(crssringoccs_PyCSVObj *self,
         PyErr_Format(
             PyExc_RuntimeError,
             "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tGetMergedCSVData\n\n"
+            "\r\tMergedCSVData\n\n"
             "\rrssringoccs_MergedCSVData_Extract returned NULLrting.\n"
         );
 
@@ -97,7 +97,7 @@ crssringoccs_GetMergedCSVData_Init(crssringoccs_PyCSVObj *self,
         PyErr_Format(
             PyExc_RuntimeError,
             "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tGetMergedCSVData\n\n"
+            "\r\tMergedCSVData\n\n"
             "\rrssringoccs_MergedCSVData_Extract returned with error_occurred\n"
             "\rset to True. The following error message was set:\n\n"
             "%s",
@@ -112,10 +112,10 @@ crssringoccs_GetMergedCSVData_Init(crssringoccs_PyCSVObj *self,
 
     /*  To avoid duplicating memory, the Python object simply steals the data *
      *  inside the C object.                                                  */
-    crssringoccs_GetMergedCSVData_Steal(self, csv);
+    crssringoccs_MergedCSVData_Steal(self, csv);
 
     /*  Log how this object was created. Add the history object.              */
-    crssringoccs_GetMergedCSVData_Create_History(self, dlpm_str);
+    crssringoccs_MergedCSVData_Create_History(self, dlpm_str);
 
     tmp = self->rev_info;
     Py_INCREF(Py_None);

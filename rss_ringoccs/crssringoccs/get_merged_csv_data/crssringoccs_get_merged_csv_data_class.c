@@ -16,27 +16,27 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
- *                   crssringoccs_get_merged_csv_data_class                   *
+ *                     crssringoccs_merged_csv_data_class                     *
  ******************************************************************************
  *  Purpose:                                                                  *
- *      Defines the GetMergedCSVData class for rss_ringoccs. This is used to  *
+ *      Defines the MergedCSVData class for rss_ringoccs. This is used to     *
  *      extract data from the merged DLP files (DLPM.TAB) and convert them    *
- *      into a Python object (the GetMergedCSVData class).                    *
+ *      into a Python object (the MergedCSVData class).                       *
  ******************************************************************************
- *  Author:     Ryan Maguire, Wellesley College                               *
- *  Date:       June 22, 2019                                                 *
+ *  Author:     Ryan Maguire                                                  *
+ *  Date:       September 30, 2024                                            *
  ******************************************************************************/
 #include "../crssringoccs.h"
 
-PyTypeObject crssringoccs_GetMergedCSVData = {
+PyTypeObject crssringoccs_MergedCSVData = {
     PyVarObject_HEAD_INIT(NULL, 0)
-    .tp_name = "GetMergedCSVData",
+    .tp_name = "MergedCSVData",
     .tp_doc =
         "\r\tPurpose:\n"
         "\r\t\tExtracts data from a column separated DLPM.TAB file and\n"
         "\r\t\tcreates a Python object consisting of each column as an\n"
         "\r\tattribute. All of the data is collected\n"
-        "\r\t\tinto a single class, an instance of GetUranusData.\n"
+        "\r\t\tinto a single class, an instance of MergedCSVData.\n"
         "\r\tArguments:\n"
         "\r\t\tdlpm (str):\n"
         "\r\t\t\tPath to the merged DLP file (DLPM.TAB).\n"
@@ -49,7 +49,7 @@ PyTypeObject crssringoccs_GetMergedCSVData = {
     .tp_itemsize = 0,
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
     .tp_new = PyType_GenericNew,
-    .tp_init = (initproc)crssringoccs_GetMergedCSVData_Init,
+    .tp_init = (initproc)crssringoccs_MergedCSVData_Init,
     .tp_dealloc = (destructor)crssringoccs_PyCSVObj_Destroy,
     .tp_members = crssringoccs_PyCSVObj_Members,
     .tp_methods = crssringoccs_PyCSVObj_Methods

@@ -465,18 +465,18 @@ crssringoccs_GetUranusData_Create_History(crssringoccs_PyCSVObj *self,
 extern PyTypeObject crssringoccs_GetUranusData;
 
 extern void
-crssringoccs_GetMergedCSVData_Steal(crssringoccs_PyCSVObj *py_csv,
-                                    rssringoccs_MergedCSVData *csv);
+crssringoccs_MergedCSVData_Steal(crssringoccs_PyCSVObj *py_csv,
+                                 rssringoccs_MergedCSVData *csv);
 
 extern int
-crssringoccs_GetMergedCSVData_Init(crssringoccs_PyCSVObj *self,
-                                   PyObject *args,
-                                   PyObject *kwds);
+crssringoccs_MergedCSVData_Init(crssringoccs_PyCSVObj *self,
+                                PyObject *args,
+                                PyObject *kwds);
 
 extern void
-crssringoccs_GetMergedCSVData_Create_History(crssringoccs_PyCSVObj *self,
-                                             const char *dlpm_str);
+crssringoccs_MergedCSVData_Create_History(crssringoccs_PyCSVObj *self,
+                                          const char *dlpm_str);
 
-extern PyTypeObject crssringoccs_GetMergedCSVData;
+extern PyTypeObject crssringoccs_MergedCSVData;
 
 #endif

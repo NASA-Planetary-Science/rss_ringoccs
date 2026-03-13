@@ -25,12 +25,12 @@
  *      Python object out of them. This way the data is more easily worked    *
  *      with as numpy arrays.                                                 *
  ******************************************************************************
- *  Author:     Ryan Maguire, Wellesley College                               *
- *  Date:       June 22, 2019                                                 *
+ *  Author:     Ryan Maguire                                                  *
+ *  Date:       September 24, 2024                                            *
  ******************************************************************************/
 #include "../crssringoccs.h"
 
-PyTypeObject crssringoccs_GetUranusData = {
+PyTypeObject crssringoccs_VoyagerCSVData = {
     PyVarObject_HEAD_INIT(NULL, 0)
     .tp_name = "VoyagerCSVData",
     .tp_doc =
@@ -80,7 +80,7 @@ PyTypeObject crssringoccs_GetUranusData = {
     .tp_itemsize = 0,
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
     .tp_new = PyType_GenericNew,
-    .tp_init = (initproc)crssringoccs_GetUranusData_Init,
+    .tp_init = (initproc)crssringoccs_VoyagerCSVData_Init,
     .tp_dealloc = (destructor)crssringoccs_PyCSVObj_Destroy,
     .tp_members = crssringoccs_PyCSVObj_Members,
     .tp_methods = crssringoccs_PyCSVObj_Methods

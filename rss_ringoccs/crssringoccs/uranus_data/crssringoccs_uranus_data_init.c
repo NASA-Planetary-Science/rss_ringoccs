@@ -21,9 +21,9 @@
 /*  The init function for the dirrection correction class. This is the        *
  *  equivalent of the __init__ function defined in a normal python class.     */
 int
-crssringoccs_GetUranusData_Init(crssringoccs_PyCSVObj *self,
-                                PyObject *args,
-                                PyObject *kwds)
+crssringoccs_VoyagerCSVData_Init(crssringoccs_PyCSVObj *self,
+                                 PyObject *args,
+                                 PyObject *kwds)
 {
     /*  Variable for the output CSV object.                                   */
     rssringoccs_UranusCSVData *csv = NULL;
@@ -125,10 +125,10 @@ crssringoccs_GetUranusData_Init(crssringoccs_PyCSVObj *self,
 
     /*  To avoid duplicating memory, the Python object simply steals the data *
      *  inside the C object.                                                  */
-    crssringoccs_GetUranusData_Steal(self, csv);
+    crssringoccs_VoyagerCSVData_Steal(self, csv);
 
     /*  Log how this object was created. Add the history object.              */
-    crssringoccs_GetUranusData_Create_History(
+    crssringoccs_VoyagerCSVData_Create_History(
         self, geo_str, dlp_str, tau_str, dlp_in_radians
     );
 

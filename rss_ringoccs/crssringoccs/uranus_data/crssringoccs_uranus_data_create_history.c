@@ -12,11 +12,11 @@
 #include <rss_ringoccs/include/rss_ringoccs_history.h>
 
 void
-crssringoccs_GetUranusData_Create_History(crssringoccs_PyCSVObj *self,
-                                          const char *geo_str,
-                                          const char *dlp_str,
-                                          const char *tau_str,
-                                          tmpl_Bool dlp_in_radians)
+crssringoccs_VoyagerCSVData_Create_History(crssringoccs_PyCSVObj *self,
+                                           const char *geo_str,
+                                           const char *dlp_str,
+                                           const char *tau_str,
+                                           tmpl_Bool dlp_in_radians)
 {
     /*  Python objects needed throughout the computation.                     */
     PyObject *input_variables, *input_keywords, *history, *py_bool;
@@ -72,4 +72,4 @@ crssringoccs_GetUranusData_Create_History(crssringoccs_PyCSVObj *self,
     /*  Begin reference counting for the new history object.                  */
     Py_XSETREF(self->history, history);
 }
-/*  End of crssringoccs_GetUranusData_Create_History.                         */
+/*  End of crssringoccs_VoyagerCSVData_Create_History.                        */

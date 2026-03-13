@@ -32,8 +32,8 @@ crssringoccs_Create_Real_Numpy_Array(                                          \
  *  creates numpy arrays from them. The data is stored in an instance of the  *
  *  VoyagerCSVData class.                                                     */
 void
-crssringoccs_GetUranusData_Steal(crssringoccs_PyCSVObj *py_csv,
-                                 rssringoccs_UranusCSVData *csv)
+crssringoccs_VoyagerCSVData_Steal(crssringoccs_PyCSVObj *py_csv,
+                                  rssringoccs_UranusCSVData *csv)
 {
     if (!csv || !py_csv)
         return;

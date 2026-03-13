@@ -182,7 +182,7 @@ PyMemberDef crssringoccs_PyCSVObj_Members[] = {
         offsetof(crssringoccs_PyCSVObj, rev_info),
         0,
         "Information about the occultation. This is set to 'None' since\n"
-        "the ExtractCSVData class is not provided an RSR instance to fetch\n"
+        "the CSV Data classes are not provided an RSR instance to fetch\n"
         "the rev info from. It is kept for the sake of compatibility with\n"
         "other classes (namely DiffractionCorrection)."
     },

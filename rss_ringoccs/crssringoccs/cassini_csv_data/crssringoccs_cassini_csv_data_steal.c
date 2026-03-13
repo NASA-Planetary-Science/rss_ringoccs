@@ -37,9 +37,9 @@ crssringoccs_Create_Real_Numpy_Array(                                          \
 
 /*  Steals the references to the data in a rssringoccs_CSVData object and     *
  *  creates numpy arrays from them. The data is stored in an instance of the  *
- *  ExtractCSVData class.                                                     */
+ *  CassiniCSVData class.                                                     */
 void
-crssringoccs_ExtractCSVData_Steal(crssringoccs_PyCSVObj *py_csv,
+crssringoccs_CassiniCSVData_Steal(crssringoccs_PyCSVObj *py_csv,
                                   rssringoccs_CSVData *csv)
 {
     if (!csv || !py_csv)
@@ -53,7 +53,7 @@ crssringoccs_ExtractCSVData_Steal(crssringoccs_PyCSVObj *py_csv,
         csv->error_occurred = tmpl_True;
         csv->error_message = tmpl_String_Duplicate(
             "\n\rError Encountered: rss_ringoccs\n"
-            "\r\tcrssringoccs_ExtractCSVData_Steal\n\n"
+            "\r\tcrssringoccs_CassiniCSVData_Steal\n\n"
             "\rInput py_csv is NULL. Aborting.n"
         );
 
@@ -83,7 +83,7 @@ crssringoccs_ExtractCSVData_Steal(crssringoccs_PyCSVObj *py_csv,
     CREATE_NUMPY_ARRAY(tau_phase_deg_vals);
     CREATE_NUMPY_ARRAY(tau_vals);
 }
-/*  End of crssringoccs_C_CSV_to_Py_CSV.                                      */
+/*  End of crssringoccs_CassiniCSVData_Steal.                                 */
 
 /*  Undefine everything in case someone wants to #include this file.          */
 #undef CREATE_NUMPY_ARRAY

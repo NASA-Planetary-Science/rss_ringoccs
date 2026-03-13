@@ -171,11 +171,11 @@ def static_library_paths():
 
 # Add all of the crssringoccs files (the C-Python API wrapper) to the build.
 add_directory("auxiliary")
-add_directory("diffraction_correction")
 add_directory("cassini_csv_data")
+add_directory("diffraction_correction")
 add_directory("merged_csv_data")
-add_directory("uranus_data")
 add_directory("py_csv_obj")
+add_directory("uranus_data")
 srclist.append("rss_ringoccs/crssringoccs/crssringoccs.c")
 
 extra_objects = static_library_paths()

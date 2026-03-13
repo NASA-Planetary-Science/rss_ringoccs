@@ -1,7 +1,7 @@
 # rss_ringoccs_local_tools.py
 
 # Revisions:
-#   2026 Jan 31- rfrench 
+#   2026 Jan 31- rfrench
 
 # def add_inversion_range_psitype(tabfile,lblfile,inversion_range,psitype,add_inversion_range=add_inversion_range,add_psitype=add_psitype,verbose=verbose)
 # def add_inversion_range_psitype_to_summary(summarypdf,taufile,inversion_range,psitype,add_inversion_range=True,add_psitype=True,verbose=False,replace=False):
@@ -25,8 +25,8 @@
 # def demo_Rev133I_X25_W7494_loop(show=False,_16kHz=False,
 # def differential_opacity_plot(rev ='007',ID='Rev007E_rgf',direc ='E',
 # def dtau_int(a,dQ,q=3.1):
-# def event_name_from_rev_info(rev_info): 
-# def event_name_from_taufilepath(taufilepath):    
+# def event_name_from_rev_info(rev_info):
+# def event_name_from_taufilepath(taufilepath):
 # def featurelist_to_dict(infile = global_path_to_local_tables + 'my_feature_list_short_Cring.csv'):
 # def find_first_nan_index(arr):
 # def find_index(my_list, my_string,verbose=False):
@@ -34,7 +34,7 @@
 # def format_time(name,rev,band,dsn,direc,dlp_res_used,psitype,res_km,tstart,tend,MINUTES=False):
 # def get_all_RSR_files(local_path_to_tables=global_path_to_tables,force=False,download=True,silent=False):
 # def get_all_SC_kernels(kernels_list = global_path_to_tables+'e2e_kernels.ker',
-# def get_CORSS_8001_file(CORSS_8001_filepath,local_path_to_data=global_path_to_data, 
+# def get_CORSS_8001_file(CORSS_8001_filepath,local_path_to_data=global_path_to_data,
 # def get_CORSS_8001_TABfiles(CORSS_8001_all_filepaths=None,Rev=None,\
 # def get_CORSS_8001_TAUfile(rev_info,local_path_to_data = global_path_to_data):
 # def get_CORSS_8001_XKa_TABfiles(CORSS_8001_all_filepaths=None,Rev=None,\
@@ -50,9 +50,9 @@
 # def get_RSRfiles_from_web(RSRfiles,local_path_to_data=global_path_to_data,force=False,silent=False):
 # def get_trajectory_correction_coefficients(rev_info,fit_number=1,verbose=False,
 # def is_res_km_valid(dlp_file,res_factor,res_km):
-# def kernels_for_demo(verbose=False): 
+# def kernels_for_demo(verbose=False):
 # def kernel_is_loaded(kernel):
-# def load_kernels_for_taufile(taufile,silent=True,load_absent_only=True): 
+# def load_kernels_for_taufile(taufile,silent=True,load_absent_only=True):
 # def merge_sorted_tabfiles(indir,psitype=None,tmp2output=True,
 # def min_required_dlp_res_km(res_km,res_factor):
 # def min_required_dr_km_desired(res_km,resolution_factor):
@@ -74,13 +74,13 @@
 # def rkm_tau_from_TAUfile(path_to_tau_file)::
 # def rkm_tau_tanBeff_from_TAUfile(path_to_tau_file):
 # def rkm_tau_drs_tanBeff_from_TAUfile(path_to_tau_file):
-# def RSRfiles_for_demo(_16kHz=True): 
+# def RSRfiles_for_demo(_16kHz=True):
 # def runloop(figfile=None,PRINT_TIME=False,include_history=False,verbose=False,xlim_run=(None,None),
 # def set_tau_history(tau_inst,geo_inst,cal_inst,dlp_inst,tstart,tend,
 # def set_tau_history_from_inst(tau_inst,geo_inst,cal_inst,dlp_inst,tstart,tend,
 # def spm2date(year,doy,spmval):
 # def subdivide_inversion_range(inversion_range, drange):
-# def tau_from_CSV(geo_file,cal_file,dlp_file,Rev,direction,DSN,res_km=1.0,res_factor=0.75,   
+# def tau_from_CSV(geo_file,cal_file,dlp_file,Rev,direction,DSN,res_km=1.0,res_factor=0.75,
 # def tau_from_tau_inst(tau_inst):
 # def tau_int(a,Q,q=3.1):
 # def trim_dlp_file(dlp_file,processing_range,path_to_output=global_path_to_local_output,
@@ -88,7 +88,7 @@
 # def update_taufile_radius_corrections(taufile,update_dr_pole=True,update_dr_trajectory=True,
 # def write_tau_files(tau_inst,geo_inst,cal_inst,dlp_inst,dlp_file,tstart,tend,
 # def write_tau_files_from_inst(tau_inst,geo_inst,cal_inst,dlp_inst,tstart,tend,
-                              
+
 import rss_ringoccs_global_paths # required to allow program to run from other directories
 
 global global_path_to_rss_ringoccs
@@ -175,7 +175,7 @@ def add_inversion_range_psitype(tabfile,lblfile,inversion_range,psitype,add_inve
     if add_psitype:
         newtabfile = newtabfile.replace('.TAB','_'+psitype.lower()+'.TAB')
         newlblfile = newlblfile.replace('.LBL','_'+psitype.lower()+'.LBL')
-                    
+
     cp_cmd = 'cp '+tabfile+' '+newtabfile
     os.system(cp_cmd)
     if verbose:
@@ -198,7 +198,7 @@ def add_inversion_range_psitype_to_summary(summarypdf,taufile,inversion_range,ps
 
         if add_psitype:
             newsummarypdf = newsummarypdf.replace('.pdf','_'+psitype.lower()+'.pdf')
-                    
+
 # use subprocess, which waits until completion, unlike os.cmd()
         cmd = ['cp',summarypdf,newsummarypdf]
         if verbose:
@@ -227,7 +227,7 @@ def append_file_to_file(source_file_path, destination_file_path):
         print(f"Error: One or both files not found.")
     except Exception as e:
         print(f"An error occurred: {e}")
-        
+
 def b_MTR33(f0=8427222034.34050,band='X',allan_dev_1sec=2.e-13,rhodot=10,W=100.):
     '''
     MTR86 eq 33
@@ -304,7 +304,7 @@ def calc_rho_vec_km(et_vals, planet, spacecraft, dsn, ref='J2000', kernels=None,
     npts = len(et_vals)
     rho_vec_km_vals = []
     t_ret_et_vals = np.zeros(npts)
-    
+
     # Replace Saturn radii in kernel pool with values that represent a
     #   flat ellipsoid, which we will use as the ring plane
     body = planet_id
@@ -315,7 +315,7 @@ def calc_rho_vec_km(et_vals, planet, spacecraft, dsn, ref='J2000', kernels=None,
     new_radii = [1.e6, 1.e6, 1.e-5]
 
     # Construct naif radii code in form: 'BODY699_RADII'
-    
+
     planet_naif_radii = 'BODY'+str(planet_id)+'_RADII'
 
     name = planet_naif_radii
@@ -392,7 +392,7 @@ def check_substring_in_list(substring, list_):
     if substring in element:
       return True
   return False
-    
+
 def compute_tau_threshold(cal_file,tau_inst,verbose=False):
     '''
     Compute tau threshold using independently calculated dBHz and other information from PDS files.
@@ -411,11 +411,11 @@ def compute_tau_threshold(cal_file,tau_inst,verbose=False):
                 print(line)
                 print("rsr_file:",rsr_file)
             break
-    
+
     if verbose:
         print(cal_file)
         print(rsr_file)
-        
+
     dCAL = np.genfromtxt(CALfile,delimiter=',')
     oetCAL = dCAL[:,0]
     pwrCAL = dCAL[:,3]
@@ -424,13 +424,13 @@ def compute_tau_threshold(cal_file,tau_inst,verbose=False):
     dBHz = get_dBHz_from_rsr_file(rsr_file)
     if verbose:
         print('got dBHz = ',dBHz)
-    
+
     pwrCAL *= 10.**(dBHz/10)
-    SNR0 = pwrCAL    
-    
-    rTAU = tau_inst.rho_km_vals 
-    tauTAU = tau_from_tau_inst(tau_inst) 
-    oetTAU = tau_inst.t_oet_spm_vals 
+    SNR0 = pwrCAL
+
+    rTAU = tau_inst.rho_km_vals
+    tauTAU = tau_from_tau_inst(tau_inst)
+    oetTAU = tau_inst.t_oet_spm_vals
     BdegTAU = tau_inst.B_deg_vals
     resolution = tau_inst.input_resolution_km
     resolution_factor = tau_inst.resolution_factor
@@ -457,8 +457,8 @@ def compute_tau_threshold(cal_file,tau_inst,verbose=False):
     # plt.show()
     DeltaRW = resolution * resolution_factor# processing resolution
     #tauth_calc = -mu*np.log(1.205*0.32*1.65/(pwrCAL) * np.abs(rhodotCAL) / DeltaRW)
-    
-    tauth_calc = mu * np.log(1.571733936879165 * SNR0 * DeltaRW / np.abs(rhodotCAL)) 
+
+    tauth_calc = mu * np.log(1.571733936879165 * SNR0 * DeltaRW / np.abs(rhodotCAL))
     # print('tauth_calc:',tauth_calc)
     # print('rhodotCAL:',rhodotCAL)
 
@@ -470,35 +470,35 @@ def compute_tau_threshold(cal_file,tau_inst,verbose=False):
     # plt.show()
 
     return tauth_compare
-    
+
 def compute_PDS_tau_threshold(Rev='Rev007',direction='E',DSN='X43',tau_match='TAU_01KM',resolution=1,
             xlim=(None,None),ylim=(None,None),res_factor=0.75,figsize=(8,6),plot=True,verbose=False):
     '''
     Compute tau threshold using independently calculated dBHz and other information from PDS files.
     Plot the results if requested.
     '''
-    # make sure we have TAU, CAL LBL and TAB files 
+    # make sure we have TAU, CAL LBL and TAB files
     CORSS_8001_TAUfile = get_CORSS_8001_TABfiles(Rev=Rev,DSN=DSN,direction=direction)
     if verbose:
         print('CORSS_8001_TAUfile',CORSS_8001_TAUfile)
     local_CORSS_8001_TAUfile = global_path_to_data + CORSS_8001_TAUfile
     CORSS_8001_TAU_LBL = get_CORSS_8001_file(CORSS_8001_TAUfile.replace('TAB','LBL'),silent=True)
-    
+
     temp = CORSS_8001_TAUfile.replace(tau_match,'CAL')
     temp = temp.replace('TAB','LBL')
     CORSS_8001_CALfile = get_CORSS_8001_file(CORSS_8001_TAUfile.replace(tau_match,'CAL'),silent=True)
     CORSS_8001_CAL_LBL = get_CORSS_8001_file(temp,silent=True)
-    
+
     dTAU = np.genfromtxt(local_CORSS_8001_TAUfile,delimiter=',')
-    rTAU = dTAU[:,0] 
-    tauTAU = dTAU[:,6] 
-    tauthTAU = dTAU[:,8] 
-    oetTAU = dTAU[:,9] 
-    retTAU = dTAU[:,10] 
+    rTAU = dTAU[:,0]
+    tauTAU = dTAU[:,6]
+    tauthTAU = dTAU[:,8]
+    oetTAU = dTAU[:,9]
+    retTAU = dTAU[:,10]
     BdegTAU = dTAU[:,12]
     mu = np.abs(np.sin(np.radians(BdegTAU[0])))
     rhodotTAU = np.gradient(rTAU,oetTAU,edge_order=2) # ignore difference from retTAU
-    
+
     if verbose:
         print(CORSS_8001_CALfile)
     dCAL = np.genfromtxt(CORSS_8001_CALfile,delimiter=',')
@@ -529,8 +529,8 @@ def compute_PDS_tau_threshold(Rev='Rev007',direction='E',DSN='X43',tau_match='TA
     # plt.show()
     DeltaRW = resolution * res_factor# processing resolution
     #tauth_calc = -mu*np.log(1.205*0.32*1.65/(pwrCAL) * np.abs(rhodotCAL) / DeltaRW)
-    
-    tauth_calc = mu * np.log(1.571733936879165 * SNR0 * DeltaRW / np.abs(rhodotCAL)) 
+
+    tauth_calc = mu * np.log(1.571733936879165 * SNR0 * DeltaRW / np.abs(rhodotCAL))
     # print('tauth_calc:',tauth_calc)
     # print('rhodotCAL:',rhodotCAL)
 
@@ -548,7 +548,7 @@ def compute_PDS_tau_threshold(Rev='Rev007',direction='E',DSN='X43',tau_match='TA
         ax.set_title(os.path.basename(CORSS_8001_TAUfile))
         plt.show()
     return rTAU,tauthTAU,tauth_compare
-    
+
 def data_from_inst(dlp_inst,verbose=False):
     # if verbose:
     #     all_attributes = dir(geo_inst)
@@ -560,7 +560,7 @@ def data_from_inst(dlp_inst,verbose=False):
     #             print(at,len(getattr(geo_inst,at)))
     #         except:
     #             print(at)
-    
+
     #     all_attributes = dir(cal_inst)
     # #    print(f"All attributes: {all_attributes}\n")
     #     cal_attributes = [attr for attr in all_attributes if not attr.startswith('__')]
@@ -768,7 +768,7 @@ def demo_e2e_event(Rev='Rev007',direction='E',DSN='X43',dr_km_desired=0.25,res_k
     profile_range=[85000., 90000.],inversion_range=[87475,87560],psitype='fresnel',
     ring_frame='IAU_SATURN',ylim_tau=(None,None),
     wtype='kbmd20',include_CORSS_8001=True,plot=True,plot_phase=False,local_path_to_data =global_path_to_data,
-    adjust_phase=True,y_offset=0,dy_offset=0,local_path_to_kernels = global_path_to_kernels, 
+    adjust_phase=True,y_offset=0,dy_offset=0,local_path_to_kernels = global_path_to_kernels,
     local_path_to_tables=global_path_to_tables,local_path_to_output=global_path_to_output,
     local_path_to_demo_figs=global_path_to_demo_figs,save_figfile=True,_16kHz=False,
     decimate_16khz_to_1khz=False,decimate_16khz_to_2khz=False,
@@ -789,8 +789,8 @@ def demo_e2e_event(Rev='Rev007',direction='E',DSN='X43',dr_km_desired=0.25,res_k
             return -1
 
     band = DSN[0]
-    
-    planet = 'Saturn' 
+
+    planet = 'Saturn'
     spacecraft = 'Cassini'
     pnf_order = 3 # polynomial order for normalizing power vs time
     CORSS_8001_filepath =get_CORSS_8001_TABfiles(CORSS_8001_all_filepaths=None,Rev=Rev,\
@@ -840,8 +840,8 @@ def demo_e2e_event(Rev='Rev007',direction='E',DSN='X43',dr_km_desired=0.25,res_k
 
     # Create instance with calibrated data
 
-    cal_inst = rss.calibration.Calibration(rsr_inst, geo_inst, 
-                    verbose=verbose, write_file=True, 
+    cal_inst = rss.calibration.Calibration(rsr_inst, geo_inst,
+                    verbose=verbose, write_file=True,
                     local_path_to_output=global_path_to_output,
                     pnf_order=pnf_order, interact=False)
     cal_file = cal_inst.outfiles[0] + '.TAB'
@@ -860,15 +860,15 @@ def demo_e2e_event(Rev='Rev007',direction='E',DSN='X43',dr_km_desired=0.25,res_k
         dlp_inst = dlp_inst_ing
     elif direction == 'E':
         dlp_inst = dlp_inst_egr
-        
+
     dlp_file = dlp_inst.outfiles[0]+'.TAB'
-    
+
     # create version of dlp instance required for diffraction reconstruction
     # This version reads the just-created GEO,CAL,DLP files to confirm they are valid
 
     if PerformInversion:
         if use_CSVs:
-            data = rss.ExtractCSVData(geo_file, cal_file, dlp_file)
+            data = rss.CassiniCSVData(geo_file, cal_file, dlp_file)
             #print('demo_e2e_event:',data.history)
         else:
             data = data_from_inst(geo_inst,cal_inst,dlp_inst,geo_file,cal_file_dlp_file)
@@ -884,12 +884,12 @@ def demo_e2e_event(Rev='Rev007',direction='E',DSN='X43',dr_km_desired=0.25,res_k
         if compute_tau_threshold_:
             tau_inst.tau_threshold_vals = compute_tau_threshold(cal_file,tau_inst)
 
-        if compute_dr_pole:           
+        if compute_dr_pole:
             rho_corr_pole_km_vals,junk,junk=\
                 radius_correction_pole_from_tau_inst(dlp_file,tau_inst,
                         fit_number=fit_number,verbose=verbose)
             tau_inst.rho_corr_pole_km_vals = rho_corr_pole_km_vals
-            
+
         if compute_dr_trajectory:
             rho_corr_timing_km_vals,junk,junk = \
                     radius_correction_trajectory_from_tau_inst(dlp_file,tau_inst,
@@ -920,8 +920,8 @@ def demo_e2e_event(Rev='Rev007',direction='E',DSN='X43',dr_km_desired=0.25,res_k
             results['figfile'] = figfile
 
         return(results)
-    else:        
-        data = rss.ExtractCSVData(geo_file, cal_file, dlp_file) # just for debugging
+    else:
+        data = rss.CassiniCSVData(geo_file, cal_file, dlp_file) # just for debugging
         return data,geo_file,cal_file,dlp_file,geo_inst,cal_inst,dlp_inst
 
 def demo_e2e_event_loop(Rev='Rev007',direction='E',DSN='X43',
@@ -939,7 +939,7 @@ def demo_e2e_event_loop(Rev='Rev007',direction='E',DSN='X43',
                 decimate_50khz_to_1khz=False,
     wtype='kbmd20',include_CORSS_8001=True,plot=True,plot_phase=False,local_path_to_data = '../data/',
     local_path_to_tables='../tables/',save_figfile=True,
-    adjust_phase=True,y_offset=0,dy_offset=0,local_path_to_kernels = '../kernels/',title=None,               
+    adjust_phase=True,y_offset=0,dy_offset=0,local_path_to_kernels = '../kernels/',title=None,
     verbose=True,silent=False,show=True,program='demo_e2e_event',use_CSVs=True,PerformInversion=True,
     compute_tau_threshold_ = True, compute_dr_pole=True, compute_dr_trajectory=True,fit_number=1):
 
@@ -950,15 +950,15 @@ def demo_e2e_event_loop(Rev='Rev007',direction='E',DSN='X43',
         else:
             high_resolution = False
         _16kHz=high_resolution
-        
+
     assert dr_km_desired<=min_required_dr_km_desired(res_km,resolution_factor),\
     'dr_km_desired '+str(dr_km_desired)+' is greater than '+str(min_required_dr_km_desired(res_km,resolution_factor))
 
 #    verbose = True # set to False to suppress progress reports
 #    silent = False # set to True to get confirmation that files exist, else False
 #    show = True # set to False to suppress showing of plot at end (figfile still produced)
-    
-    planet = 'Saturn' 
+
+    planet = 'Saturn'
     spacecraft = 'Cassini'
     pnf_order = 3 # polynomial order for normalizing power vs time
     CORSS_8001_filepath =get_CORSS_8001_XKa_TABfiles(CORSS_8001_all_filepaths=None,Rev=Rev,\
@@ -971,7 +971,7 @@ def demo_e2e_event_loop(Rev='Rev007',direction='E',DSN='X43',
     else:
         psitypes = psitype # a list already
     npsitypes = len(psitypes)
-    
+
     if (type(res_km) == type(1.0)) or (type(res_km) == type(1)):
         res_kms = [res_km] # make it a list to enable loop below
     else:
@@ -1121,8 +1121,8 @@ def demo_e2e_event_loop(Rev='Rev007',direction='E',DSN='X43',
 
     # Create instance with calibrated data
 
-    cal_inst = rss.calibration.Calibration(rsr_inst, geo_inst, 
-                    verbose=verbose, write_file=True, 
+    cal_inst = rss.calibration.Calibration(rsr_inst, geo_inst,
+                    verbose=verbose, write_file=True,
                     local_path_to_output=global_path_to_output,
                     pnf_order=pnf_order, interact=False)
     cal_file = cal_inst.outfiles[0] + '.TAB'
@@ -1141,21 +1141,21 @@ def demo_e2e_event_loop(Rev='Rev007',direction='E',DSN='X43',
         dlp_inst = dlp_inst_ing
     elif direction == 'E':
         dlp_inst = dlp_inst_egr
-        
+
     dlp_file = dlp_inst.outfiles[0]+'.TAB'
-    
+
     if PerformInversion:
     # create version of dlp instance required for diffraction reconstruction
     # This version reads the just-created GEO,CAL,DLP files to confirm they are valid
 
         if use_CSVs:
-            data = rss.ExtractCSVData(geo_file, cal_file, dlp_file)
+            data = rss.CassiniCSVData(geo_file, cal_file, dlp_file)
         else:
             data = data_from_inst(geo_inst,cal_inst,dlp_inst,geo_file,cal_file,dlp_file)
-    
+
         results_list = []
         for psitype,resolution_factor,res_km,wtype in zip(psitypes,resolution_factors,res_kms,wtypes):
-        
+
         # create instance of retrieved optical depth profile
             tstart = time.time()
             tau_inst = rss.DiffractionCorrection(
@@ -1165,10 +1165,10 @@ def demo_e2e_event_loop(Rev='Rev007',direction='E',DSN='X43',
 
             if compute_tau_threshold_:
                 tau_inst.tau_threshold_vals = compute_tau_threshold(cal_file,tau_inst)
-    
+
             if compute_dr_pole:
                 tau_inst.rho_corr_pole_km_vals = radius_correction_pole_from_tau_inst(dlp_file,tau_inst,fit_number=fit_number,verbose=verbose)
-    
+
             if compute_dr_trajectory:
                 tau_inst.rho_corr_timing_km_vals =radius_correction_trajectory_from_tau_inst(dlp_file,tau_inst,
                                                                                              fit_number=fit_number,verbose=verbose)
@@ -1176,11 +1176,11 @@ def demo_e2e_event_loop(Rev='Rev007',direction='E',DSN='X43',
             # print('TP1:tau_inst.tau_threshold_vals[0:10]',tau_inst.tau_threshold_vals[0:10])
             # print('TP1:tau_inst.rho_corr_pole_km_vals[0:10]',tau_inst.rho_corr_pole_km_vals[0:10])
             # print('TP1:tau_inst.rho_corr_timing_km_vals[0:10]',tau_inst.rho_corr_timing_km_vals[0:10])
-            
+
             tau_file = write_tau_files(tau_inst,geo_inst,cal_inst,dlp_inst,dlp_file,tstart,tend,
                            res_km,inversion_range,resolution_factor,psitype,wtype,program,
                             local_path_to_output = global_path_to_output)
-        
+
          # plot results and save figfile
             figfile = None
             results = {'figfile':figfile,'rsr_file':rsr_file,'geo_file':geo_file,'cal_file':cal_file,'dlp_file':dlp_file,
@@ -1192,11 +1192,11 @@ def demo_e2e_event_loop(Rev='Rev007',direction='E',DSN='X43',
                           adjust_phase=adjust_phase,dy_offset=dy_offset,show=show,title=title,
                           save_figfile=save_figfile)
                 results['figfile'] = figfile
-                
+
             results_list.append(results)
         return(results_list)
     else:
-        data = rss.ExtractCSVData(geo_file, cal_file, dlp_file) # just for debugging
+        data = rss.CassiniCSVData(geo_file, cal_file, dlp_file) # just for debugging
         return data,geo_file,cal_file,dlp_file,geo_inst,cal_inst,dlp_inst
 
 def demo_Rev007_X43E_Maxwell(show=False,_16kHz=False,
@@ -1221,11 +1221,11 @@ def demo_Rev007_X43E_Maxwell(show=False,_16kHz=False,
     '''
     Demonstration of end-to-end processing for Maxwell ringlet Rev007_X43E
     '''
-    
+
     results = demo_e2e_event(Rev=Rev,direction=direction,DSN=DSN,
         dr_km_desired=dr_km_desired,res_km=res_km,res_factor=res_factor,
         profile_range=profile_range,inversion_range=inversion_range,psitype=psitype,
-        wtype=wtype,include_CORSS_8001=True,plot=plot,plot_phase=plot_phase, 
+        wtype=wtype,include_CORSS_8001=True,plot=plot,plot_phase=plot_phase,
         ylim_tau=ylim_tau,
         verbose=verbose,silent=silent,show=show,_16kHz=_16kHz,use_CSVs=use_CSVs,
         local_path_to_kernels=global_path_to_kernels,local_path_to_data=global_path_to_data,
@@ -1257,11 +1257,11 @@ def demo_Rev007_X43E_Maxwell_loop(show=False,_16kHz=False,
     '''
     Demonstration of end-to-end processing for Maxwell ringlet Rev007_X43E for multiple resolutions
     '''
-    
+
     results = demo_e2e_event_loop(Rev=Rev,direction=direction,DSN=DSN,
         dr_km_desired=dr_km_desired,res_km=res_km,res_factor=res_factor,
         profile_range=profile_range,inversion_range=inversion_range,psitype=psitype,
-        wtype=wtype,include_CORSS_8001=True,plot=plot,plot_phase=plot_phase, 
+        wtype=wtype,include_CORSS_8001=True,plot=plot,plot_phase=plot_phase,
         ylim_tau=ylim_tau,
         verbose=verbose,silent=silent,show=show,_16kHz=_16kHz,
         decimate_16khz_to_1khz=decimate_16khz_to_1khz,decimate_16khz_to_2khz=decimate_16khz_to_2khz,
@@ -1295,13 +1295,13 @@ def demo_Rev007_X43I_Maxwell(show=False,_16kHz=False,
     results = demo_e2e_event(Rev=Rev,direction=direction,DSN=DSN,
         dr_km_desired=dr_km_desired,res_km=res_km,res_factor=res_factor,
         profile_range=profile_range,inversion_range=inversion_range,psitype=psitype,
-        wtype=wtype,include_CORSS_8001=True,plot=plot,plot_phase=plot_phase, 
+        wtype=wtype,include_CORSS_8001=True,plot=plot,plot_phase=plot_phase,
         ylim_tau=ylim_tau,
         verbose=verbose,silent=silent,show=show,_16kHz=_16kHz,use_CSVs=use_CSVs,
         local_path_to_kernels=global_path_to_kernels,local_path_to_data=global_path_to_data,
         local_path_to_tables=global_path_to_tables,local_path_to_output=global_path_to_output)
     return results
-    
+
 def demo_Fring(Rev = 'Rev054',direction = 'I',DSN='K55',show=False,dr_km_desired=0.075,psitype='fresnel',
                res_km=1.0,res_factor=0.75,profile_range=[138000.,142000.],inversion_range=[140040,140100.],
                wtype='kbmd20',include_CORSS_8001=True,silent=False,program='demo_Fring',
@@ -1314,7 +1314,7 @@ def demo_Fring(Rev = 'Rev054',direction = 'I',DSN='K55',show=False,dr_km_desired
         dr_km_desired=dr_km_desired,res_km=res_km,res_factor=res_factor,
         profile_range=profile_range,inversion_range=inversion_range,psitype=psitype,
         wtype=wtype,ring_frame=ring_frame,
-        include_CORSS_8001=include_CORSS_8001,plot=plot,plot_phase=plot_phase, 
+        include_CORSS_8001=include_CORSS_8001,plot=plot,plot_phase=plot_phase,
         ylim_tau=ylim_tau,
         verbose=verbose,silent=silent,show=show,_16kHz=_16kHz,adjust_phase=adjust_phase,
         local_path_to_kernels=global_path_to_kernels,local_path_to_data=global_path_to_data,
@@ -1333,7 +1333,7 @@ def demo_StrangeRinglet(Rev = 'Rev067',direction = 'E',DSN='X14',show=False,dr_k
         dr_km_desired=dr_km_desired,res_km=res_km,res_factor=res_factor,
         profile_range=profile_range,inversion_range=inversion_range,psitype=psitype,
         wtype=wtype,ring_frame=ring_frame,
-        include_CORSS_8001=include_CORSS_8001,plot=plot,plot_phase=plot_phase, 
+        include_CORSS_8001=include_CORSS_8001,plot=plot,plot_phase=plot_phase,
         ylim_tau=ylim_tau,
         verbose=verbose,silent=silent,show=show,_16kHz=_16kHz,adjust_phase=adjust_phase,
         local_path_to_kernels=global_path_to_kernels,local_path_to_data=global_path_to_data,
@@ -1366,11 +1366,11 @@ def demo_Rev133I_X25_Cripples_loop(show=False,
     '''
     Demonstration of end-to-end processing for inner C ring ripple region Rev133_X25I for multiple resolutions
     '''
-    
+
     results = demo_e2e_event_loop(Rev=Rev,direction=direction,DSN=DSN,
         dr_km_desired=dr_km_desired,res_km=res_km,res_factor=res_factor,
         profile_range=profile_range,inversion_range=inversion_range,psitype=psitype,
-        wtype=wtype,include_CORSS_8001=True,plot=plot,plot_phase=plot_phase, 
+        wtype=wtype,include_CORSS_8001=True,plot=plot,plot_phase=plot_phase,
         ylim_tau=ylim_tau,
         verbose=verbose,silent=silent,show=show,_16kHz=_16kHz,
         decimate_16khz_to_1khz=decimate_16khz_to_1khz,decimate_16khz_to_2khz=decimate_16khz_to_2khz,
@@ -1404,11 +1404,11 @@ def demo_Rev125I_X34_Cripples_loop(show=False,
     '''
     Demonstration of end-to-end processing for inner C ring ripple region RSS_125I_X34 for multiple resolutions
     '''
-    
+
     results = demo_e2e_event_loop(Rev=Rev,direction=direction,DSN=DSN,
         dr_km_desired=dr_km_desired,res_km=res_km,res_factor=res_factor,
         profile_range=profile_range,inversion_range=inversion_range,psitype=psitype,
-        wtype=wtype,include_CORSS_8001=True,plot=plot,plot_phase=plot_phase, 
+        wtype=wtype,include_CORSS_8001=True,plot=plot,plot_phase=plot_phase,
         ylim_tau=ylim_tau,
         verbose=verbose,silent=silent,show=show,_16kHz=_16kHz,
         decimate_16khz_to_1khz=decimate_16khz_to_1khz,decimate_16khz_to_2khz=decimate_16khz_to_2khz,
@@ -1442,11 +1442,11 @@ def demo_Rev007E_X43_W7493_loop(show=False,_16kHz=False,
     '''
     Demonstration of end-to-end processing for W74.93 wave Rev007_X43E for multiple resolutions
     '''
-    
+
     results = demo_e2e_event_loop(Rev=Rev,direction=direction,DSN=DSN,
         dr_km_desired=dr_km_desired,res_km=res_km,res_factor=res_factor,
         profile_range=profile_range,inversion_range=inversion_range,psitype=psitype,
-        wtype=wtype,include_CORSS_8001=True,plot=plot,plot_phase=plot_phase, 
+        wtype=wtype,include_CORSS_8001=True,plot=plot,plot_phase=plot_phase,
         ylim_tau=ylim_tau,
         verbose=verbose,silent=silent,show=show,_16kHz=_16kHz,
         decimate_16khz_to_1khz=decimate_16khz_to_1khz,decimate_16khz_to_2khz=decimate_16khz_to_2khz,
@@ -1484,11 +1484,11 @@ def demo_Rev133I_X25_W7494_loop(show=False,_16kHz=False,
     Demonstration of end-to-end processing for W74.93 wave Rev133I_X43 for multiple resolutions
     '''
     print("TP2: demo_Rev133I_X25_W7494_loop _16kHz=",_16kHz)
-    
+
     results = demo_e2e_event_loop(Rev=Rev,direction=direction,DSN=DSN,
         dr_km_desired=dr_km_desired,res_km=res_km,res_factor=res_factor,
         profile_range=profile_range,inversion_range=inversion_range,psitype=psitype,
-        wtype=wtype,include_CORSS_8001=True,plot=plot,plot_phase=plot_phase, 
+        wtype=wtype,include_CORSS_8001=True,plot=plot,plot_phase=plot_phase,
         ylim_tau=ylim_tau,PerformInversion=PerformInversion,
         verbose=verbose,silent=silent,show=show,_16kHz=_16kHz,
         decimate_16khz_to_1khz=decimate_16khz_to_1khz,decimate_16khz_to_2khz=decimate_16khz_to_2khz,
@@ -1517,43 +1517,43 @@ def differential_opacity_plot(rev ='007',ID='Rev007E_rgf',direc ='E',
         dcol = [dcol[i] for i in range(len(dcol)) if i in Lwhich]
         rho_min_vals = [rho_min_vals[i] for i in range(len(rho_min_vals)) if i in Lwhich]
         rho_max_vals = [rho_max_vals[i] for i in range(len(rho_max_vals)) if i in Lwhich]
-    #print('debug:profile',profile)    
+    #print('debug:profile',profile)
     wildcard = global_path_to_data + 'CORSS_8001/data/Rev'+rev+'/Rev*'+direc+'/*/*'+TAUmatch
-    
+
     # END OF USER INPUT
-    
+
     q_vals,m_vals,tau_ratio_KX,tau_ratio_XS,markers,lines,colors,labels = \
         particle_size_models(q_vals=q_vals,m_vals=m_vals)
-    
+
     paths = glob.glob(wildcard,flags=glob.BRACE)
     files = [os.path.basename(pathi) for pathi in paths]
-    
+
     # storage lists
     dc = []
     nfiles = len(files)
-    
+
     nprofiles = len(profile)
     tau_k = np.full((nprofiles,Nmax),np.nan)
     tau_x = np.full((nprofiles,Nmax),np.nan)
     tau_s = np.full((nprofiles,Nmax),np.nan)
-    
+
     # read in data and bin
     for ifile in range(nfiles):
-    
+
         rho,tau = np.loadtxt(paths[ifile],delimiter=',',usecols=(0,6)).T
-    
+
         # iterate over all profiles
         jprofile = 0
         for rho_min,rho_max,p in zip(rho_min_vals,rho_max_vals,profile):
-    
+
             tau_vals = []
-    
+
             # bin up data in binsize km bins, adjusting edges by edge_adjust to avoid zero contributions near edges
             for rhoi in np.arange(rho_min+edge_adjust,rho_max-edge_adjust,binsize):
-    
+
                 # bin within limits and within binsize km of bin center
                 bins = [(rho>rhoi-binsize/2)&(rho<rhoi+binsize/2)&(rho>rho_min)&(rho<rho_max)][0]
-    
+
                 # store
                 if len(bins)>0:
                     # idiom to set taui to np.nan if tau[bins] is entirely nan
@@ -1574,11 +1574,11 @@ def differential_opacity_plot(rev ='007',ID='Rev007E_rgf',direc ='E',
                     istart = find_first_nan_index(tau_s[jprofile,:])
                     tau_s[jprofile,istart:istart+ntau] = tau_vals
             jprofile += 1
-    
+
     # d tau / tau
     dt_kx = 100.*(tau_k-tau_x)/tau_x
     dt_xs = 100.*(tau_x-tau_s)/tau_x
-    
+
     '''
         ~~ Plot results! ~~
     '''
@@ -1589,7 +1589,7 @@ def differential_opacity_plot(rev ='007',ID='Rev007E_rgf',direc ='E',
     out.write(",".join(str(item) for item in headers)+'\n')
     # loop over features
    # print('rho_min_vals',rho_min_vals)
-    
+
     for jprofile in np.argsort(rho_min_vals):
     #    print('profile',profile[jprofile])
         #print('profile,jprofile,profile[jprofile]',profile,jprofile,profile[jprofile])
@@ -1618,24 +1618,24 @@ def differential_opacity_plot(rev ='007',ID='Rev007E_rgf',direc ='E',
     # text label offsets
     xoff = [-10,-10,-2,-15,3,3,3]
     yoff = [-4,-4,-4,-2,0,0,0]
-    
+
     # iterate over all model power laws
     for m in m_vals:
         for i in range(len(labels)):
-    
+
         # model grid
             if i == 0 or i == 5:
                 pkwargs = {'color':colors[i],'ls':lines[i],'label':labels[i],'lw':1}
             else:
                 pkwargs = {'color':colors[i],'ls':lines[i],'lw':1}
             plt.plot(100.*tau_ratio_KX[i],100.*tau_ratio_XS[i],**pkwargs)
-        
+
             # q label
             if i < int(len(a_max_vals)*len(q_vals)/2):
                 tx = 100.*tau_ratio_KX[i][0]+5
                 ty = 100.*tau_ratio_XS[i][0]-2
                 plt.text(tx,ty,'q='+str(q_vals[i]),clip_on=True)
-        
+
             # a_min labels
             if i == np.min([len(labels)-1,3]):
                 pkwargs = {'color':colors[i],'ls':lines[i],'label':labels[i],'lw':1}
@@ -1651,12 +1651,12 @@ def differential_opacity_plot(rev ='007',ID='Rev007E_rgf',direc ='E',
                     tx = 100.*tau_ratio_KX[i][j]+xoff[int(j/50)]
                     ty = 100.*tau_ratio_XS[i][j]+yoff[int(j/50)]
                     plt.text(tx,ty,lt,zorder=5,clip_on=True)
-        
+
             # a_min markers
             pkwargs = {'color':'none','ls':'none','marker':markers[i],'markeredgecolor':colors[i]}
             for j in range(0,len(tau_ratio_KX[i]),50):
                 plt.plot(100.*tau_ratio_KX[i][j],100.*tau_ratio_XS[i][j],**pkwargs)
-        
+
         plt.xlim(-30,100)
         plt.ylim(ylim)
         plt.xlabel(r'$\Delta\tau_{Ka-X} / \tau_X$ as %')
@@ -1672,7 +1672,7 @@ def differential_opacity_plot(rev ='007',ID='Rev007E_rgf',direc ='E',
 def dtau_int(a,dQ,q=3.1):
     return a**2. * dQ * n(a,q)
 
-def event_name_from_rev_info(rev_info): # ex:  'RSS_133E_X43' as used in C ring ripples paper  
+def event_name_from_rev_info(rev_info): # ex:  'RSS_133E_X43' as used in C ring ripples paper
     event_name = 'RSS_'+rev_info['rev_num']+rev_info['prof_dir'][1]+'_'+rev_info['band'][1]+rev_info['dsn']
     return event_name
 
@@ -1680,7 +1680,7 @@ def event_name_from_taufilepath(taufilepath):
     rev_info = get_rev_info_from_tau(taufilepath)
     return event_name_from_rev_info(rev_info)
 
-    
+
 def featurelist_to_dict(infile = global_path_to_local_tables + 'my_feature_list_short_Cring.csv'):
 # NB this fails for full feature list with ID in first column such as 14a in venv2 kernel
     dict_features = np.genfromtxt(infile, delimiter= ',',dtype=None,names=True,encoding=None)
@@ -1722,7 +1722,7 @@ def find_index(my_list, my_string,verbose=False):
     except ValueError:
         print('Unable to find index value for',my_string)
         return -1
-        
+
 def flatten_extend(matrix):
     '''
     Flattens a matrix into a 1D list
@@ -1731,7 +1731,7 @@ def flatten_extend(matrix):
     for row in matrix:
         flat_list.extend(row)
     return flat_list
-    
+
 def format_time(name,rev,band,dsn,direc,dlp_res_used,psitype,res_km,tstart,tend,MINUTES=False):
     '''
     Construct formatted execution time
@@ -1777,7 +1777,7 @@ def get_all_SC_kernels(kernels_list = global_path_to_tables+'e2e_kernels.ker',
         except: # this line does not contain a Cassini S/C ephemeris
             continue
 
-def get_CORSS_8001_file(CORSS_8001_filepath,local_path_to_data=global_path_to_data,force=False,silent=False): 
+def get_CORSS_8001_file(CORSS_8001_filepath,local_path_to_data=global_path_to_data,force=False,silent=False):
     '''
     Grab Cassini PDS RSS files from web
     '''
@@ -1825,7 +1825,7 @@ def get_CORSS_8001_TABfiles(CORSS_8001_all_filepaths=None,Rev=None,\
         return filepaths[0]
     else:
         return filepaths
-        
+
 
 def get_CORSS_8001_XKa_TABfiles(CORSS_8001_all_filepaths=None,Rev=None,\
                             DSN=None,direction=None,local_path_to_data=global_path_to_data,
@@ -1885,7 +1885,7 @@ def get_dBHz(_16kHz=True,Rev='007',direction='I',DSN='X43',
             if verbose:
                 print('Found snr0=',dBHz,'for',os.path.basename(rsr_file))
             break
-    return dBHz 
+    return dBHz
 
 def get_dBHz_from_rsr_file(rsr_file,
              snr0_file='snr0_rsr_all_files_before_USO_failure.csv',
@@ -1893,7 +1893,7 @@ def get_dBHz_from_rsr_file(rsr_file,
     '''
     Get SNR in dBHz by matching rsr filename to tabulated results
     '''
-    
+
     f = open(local_path_to_tables + snr0_file, "r")
     contents = f.read().splitlines() # strips \n at end of each line
     f.close()
@@ -1904,8 +1904,8 @@ def get_dBHz_from_rsr_file(rsr_file,
             if verbose:
                 print('Found snr0=',dBHz,'for',os.path.basename(rsr_file))
             break
-    return dBHz 
-       
+    return dBHz
+
 def get_files_from_web(files,local_path,webURL,force=False,silent=True):
     '''
     Utility routine to get requested files from web URL
@@ -1966,19 +1966,19 @@ def get_kernels_from_web(kernels,local_path_to_kernels=global_path_to_kernels,fo
     '''
     webURL = "https://naif.jpl.nasa.gov/pub/"
     return get_files_from_web(kernels,local_path_to_kernels,webURL,force=force,silent=silent)
-    
+
 def get_loaded_kernels(basename=True):
     count = spice.ktotal('ALL')
     files = []
     for i in range(count):
-    
+
         file, ftype, srcfil, handle =   spice.kdata( i, 'ALL')
         if basename:
             files.append(os.path.basename(file))
         else:
             files.append(file)
     return files
-    
+
 def get_processor_info():
     '''
     Get processor information for several possible system platforms
@@ -2020,7 +2020,7 @@ def get_rev_info_from_tau(taufile,rsr_file='"UNKNOWN"'):
     rev_num = fields[-4][3:]
     #print(direc,rev_num)
     assert (direc == 'I' or direc == 'E'),"Illegal direction "+direc
-    
+
     if direc == 'E':
         prof_dir = '"EGRESS"'
     elif direc == 'I':
@@ -2030,7 +2030,7 @@ def get_rev_info_from_tau(taufile,rsr_file='"UNKNOWN"'):
                'occ_dir':occ_dir,'prof_dir':prof_dir,'rev_num':rev_num,'planetary_occ_flag':planetary_occ_flag}
     #print('\n',rev_info)
     return rev_info
-    
+
 def get_RSRfiles_from_web(RSRfiles,local_path_to_data=global_path_to_data,force=False,silent=False):
     '''
     Grab RSR files from web
@@ -2041,7 +2041,7 @@ def get_RSRfiles_from_web(RSRfiles,local_path_to_data=global_path_to_data,force=
 def get_trajectory_correction_coefficients(rev_info,fit_number=1,verbose=False,local_path_to_local_tables=global_path_to_local_tables):
 
     assert (fit_number==1 or fit_number==7),'radius_correction_pole: illegal fit_number '+str(fit_number)
-    
+
     if fit_number == 1:
         fit_output_file = local_path_to_local_tables + 'ringfit_v1.8.Sa025S-RF-V5574.out'
     elif fit_number == 7: # weighted fit with multiple entries, final one overwrites previous, which is correct
@@ -2071,7 +2071,7 @@ def get_trajectory_correction_coefficients(rev_info,fit_number=1,verbose=False,l
                     print(line)
                     print(line.split()[4])
                 alpha = float(line.split()[4])
-    r0 = 100000.        
+    r0 = 100000.
     return dt,alpha,r0
 
 def is_res_km_valid(dlp_file,res_factor,res_km):
@@ -2081,20 +2081,20 @@ def is_res_km_valid(dlp_file,res_factor,res_km):
     min_valid_res_km_ = min_valid_res_km(dlp_file,res_factor)
     if res_km < min_valid_res_km_:
         raise Exception(f"Requested res_km {res_km} is less than minimum allowed value {min_valid_res_km_:0.3f} for {dlp_file}")
-        
+
 def kernel_is_loaded(kernel):
     kernels_loaded = get_loaded_kernels(basename=True)
     if os.path.basename(kernel) in kernels_loaded:
         return True
     else:
         return False
-        
-def kernels_for_demo(verbose=False): 
-    ''' 
+
+def kernels_for_demo(verbose=False):
+    '''
     Grab Rev007 and F ring and Strange ringlet kernels
     '''
     kernels = [
-        'naif/CASSINI/kernels/spk/050606R_SCPSE_05114_05132.bsp', # Rev007 
+        'naif/CASSINI/kernels/spk/050606R_SCPSE_05114_05132.bsp', # Rev007
         'naif/CASSINI/kernels/pck/cpck26Feb2009.tpc',
         'naif/CASSINI/kernels/lsk/naif0012.tls',
         'naif/generic_kernels/spk/planets/de430.bsp',
@@ -2110,13 +2110,13 @@ def kernels_for_demo(verbose=False):
     if verbose:
         print('kernels to be loaded:',kernels)
     return kernels
-    
-def load_kernels_for_taufile(taufile,silent=True,load_absent_only=True): 
+
+def load_kernels_for_taufile(taufile,silent=True,load_absent_only=True):
     '''
     Load the necessary kernels to compute values contained in a taufile
     '''
     rev_info = get_rev_info_from_tau(taufile)
-    
+
     Rev=rev_info['rev_num']
     DSN=rev_info['dsn']
     direction = rev_info['prof_dir'][1]
@@ -2226,7 +2226,7 @@ def merge_sorted_tabfiles(indir,inversion_range,psitype=None,tmp2output=True,
         if 'MINIMUM_SAMPLING_PARAMETER' in line_out:
             label_out[iline] = '  MINIMUM_SAMPLING_PARAMETER  = '+f'{np.min(ring_radius):10.3f} '
         if 'MAXIMUM_SAMPLING_PARAMETER' in line_out:
-            label_out[iline] = '  MAXIMUM_SAMPLING_PARAMETER  = '+f'{np.max(ring_radius):10.3f} '        
+            label_out[iline] = '  MAXIMUM_SAMPLING_PARAMETER  = '+f'{np.max(ring_radius):10.3f} '
         if 'MINIMUM_RING_LONGITUDE' in line_out:
             label_out[iline] = 'MINIMUM_RING_LONGITUDE               = '+f'{np.min(ring_longitude):8.4f}   <deg> '
         if 'MAXIMUM_RING_LONGITUDE' in line_out:
@@ -2240,17 +2240,17 @@ def merge_sorted_tabfiles(indir,inversion_range,psitype=None,tmp2output=True,
         if 'PRODUCT_ID                           =' in line_out:
             label_out[iline] = 'PRODUCT_ID                           = "' + os.path.basename(outfile) + '" '
         if 'START_TIME                           =' in line_out:
-            label_out[iline] = 'START_TIME                           = '+ spm2date(year,doy,oet[0]) +' ' 
+            label_out[iline] = 'START_TIME                           = '+ spm2date(year,doy,oet[0]) +' '
         if 'STOP_TIME                            =' in line_out:
-            label_out[iline] = 'STOP_TIME                            = '+ spm2date(year,doy,oet[-1]) +' ' 
+            label_out[iline] = 'STOP_TIME                            = '+ spm2date(year,doy,oet[-1]) +' '
         if 'RING_EVENT_START_TIME                =' in line_out:
-            label_out[iline] = 'RING_EVENT_START_TIME                = '+ spm2date(year,doy,ret[0]) +' ' 
+            label_out[iline] = 'RING_EVENT_START_TIME                = '+ spm2date(year,doy,ret[0]) +' '
         if 'RING_EVENT_STOP_TIME                 =' in line_out:
-            label_out[iline] = 'RING_EVENT_STOP_TIME                 = '+ spm2date(year,doy,ret[-1]) +' ' 
+            label_out[iline] = 'RING_EVENT_STOP_TIME                 = '+ spm2date(year,doy,ret[-1]) +' '
         if 'SPACECRAFT_EVENT_START_TIME          =' in line_out:
-            label_out[iline] = 'SPACECRAFT_EVENT_START_TIME          = '+ spm2date(year,doy,scet[0]) +' ' 
+            label_out[iline] = 'SPACECRAFT_EVENT_START_TIME          = '+ spm2date(year,doy,scet[0]) +' '
         if 'SPACECRAFT_EVENT_STOP_TIME           =' in line_out:
-            label_out[iline] = 'SPACECRAFT_EVENT_STOP_TIME           = '+ spm2date(year,doy,scet[-1]) +' ' 
+            label_out[iline] = 'SPACECRAFT_EVENT_STOP_TIME           = '+ spm2date(year,doy,scet[-1]) +' '
         iline += 1
 
     outlblfile = outfile[0:-4]+'.LBL'
@@ -2323,7 +2323,7 @@ def merge_sorted_tabfiles(indir,inversion_range,psitype=None,tmp2output=True,
         os.system(cp_cmd)
         if not silent:
             print(cp_cmd)
-           
+
         outlblfile_psitype_updated = outfile_psitype_updated.replace('.TAB','.LBL')
         cp_cmd = 'cp '+inlblfile_psitype+' '+outdir + os.path.basename(outlblfile_psitype_updated)
         outlblfile_psitype = outlblfile_psitype_updated
@@ -2331,7 +2331,7 @@ def merge_sorted_tabfiles(indir,inversion_range,psitype=None,tmp2output=True,
         os.system(cp_cmd)
         if not silent:
             print(cp_cmd)
-          
+
         if not silent:
             print('\n')
     if clean:
@@ -2342,15 +2342,15 @@ def merge_sorted_tabfiles(indir,inversion_range,psitype=None,tmp2output=True,
             mv_cmd = 'mv '+ o+' '+path
             os.system(mv_cmd)
         print('merge_sorted_tau_files: temporary TAU files moved to '+path)
-       
+
     return outfile,outlblfile,outfile_psitype,outlblfile_psitype,outdir
-    
+
 def min_required_dlp_res_km(res_km,res_factor):
     '''
     Return minimum required DLP resolution for a requested res_km and res_factor
     '''
     return res_km * res_factor
-  
+
 def min_required_dr_km_desired(res_km,resolution_factor):
     return res_km * resolution_factor/2
 
@@ -2363,7 +2363,7 @@ def min_valid_res_km(dlp_file,res_factor):
     dlp_res_km = float(dlp_file[dlp_file.index('DLP_')+4:dlp_file.index('DLP_')+8])/1000.
     # print('dlp_res_km',dlp_res_km)
     return dlp_res_km / res_factor
-    
+
 def MTR86_Fig10(figsize=(6,7),figfile = global_path_to_local_figs+'MTR86_Fig10.jpg'):
     bvals = np.logspace(-1,1,100)
     fig,ax=plt.subplots(figsize=figsize)
@@ -2381,12 +2381,12 @@ def MTR86_Fig10(figsize=(6,7),figfile = global_path_to_local_figs+'MTR86_Fig10.j
     W = 100
     Weff = W/1.65
     rhodot = 10.
-    
+
     DeltaR_W = 2*F**2/Weff
     ratio1 = DeltaR_phi_MTR32(bvals,DeltaR_W=DeltaR_W)/DeltaR_W
     ax.plot(bvals,ratio1,color='k')
     ax.text(3.5,4,r'$\frac{\Delta R_\phi}{\Delta R_W}$',fontsize=16)
-    
+
     Rinfty = DeltaR_inf_MTR3(bvals,Weff,F)
     ratio2 = DeltaR_phi_MTR32(bvals,DeltaR_W=DeltaR_W)/Rinfty
     ax.plot(bvals,ratio2,color='k')
@@ -2422,7 +2422,7 @@ def MTR86_Fig11(figsize=(6,6),figfile = global_path_to_local_figs+'MTR86_Fig11.j
     WepsI = 1.65*WeffepsI
     WeffepsE = 2*F_epsE**2/DeltaR_Wvals
     WepsE = 1.65*WeffepsE
-    
+
     f0=8415e6
     bvalsC = b_MTR33(f0=f0,allan_dev_1sec=allan_dev_1sec,rhodot=rhodotC,W=WC)
     DeltaR_phi_C = DeltaR_phi_MTR32(bvalsC,DeltaR_W=DeltaR_Wvals)
@@ -2432,10 +2432,10 @@ def MTR86_Fig11(figsize=(6,6),figfile = global_path_to_local_figs+'MTR86_Fig11.j
 
     bvalsepsI = b_MTR33(f0=f0,allan_dev_1sec=allan_dev_1sec,rhodot=rhodoteps,W=WepsI)
     DeltaR_phi_epsI = DeltaR_phi_MTR32(bvalsepsI,DeltaR_W=DeltaR_Wvals)
-    
+
     bvalsepsE = b_MTR33(f0=f0,allan_dev_1sec=allan_dev_1sec,rhodot=rhodoteps,W=WepsE)
     DeltaR_phi_epsE = DeltaR_phi_MTR32(bvalsepsE,DeltaR_W=DeltaR_Wvals)
-    
+
     fig,ax=plt.subplots(figsize=figsize)
     ax.set_xlabel(r'$\Delta R_W=2F^2/W_{eff}$ (m)')
     ax.set_ylabel(r'$\Delta R_\phi$ (m)')
@@ -2464,7 +2464,7 @@ def MTR86_Fig11(figsize=(6,6),figfile = global_path_to_local_figs+'MTR86_Fig11.j
     ax.text(20,120,'OUTER A',rotation=10)
     ax.text(20, 80,'INNER C',rotation=12)
     ax.text(12,70,'SATURN',rotation=90)
-    
+
     p=ax.plot(DeltaR_Wvals_m[LsolidepsI], DeltaR_phi_epsI[LsolidepsI]*1000,label=r'ENTER - $\epsilon$',color='k')
     ax.plot(DeltaR_Wvals_m[LdashedepsI], DeltaR_phi_epsI[LdashedepsI]*1000,linestyle='dashed',color=p[0].get_color())
     p=ax.plot(DeltaR_Wvals_m[LsolidepsE], DeltaR_phi_epsE[LsolidepsE]*1000,label=r'EXIT - $\epsilon$',color='k')
@@ -2473,12 +2473,12 @@ def MTR86_Fig11(figsize=(6,6),figfile = global_path_to_local_figs+'MTR86_Fig11.j
     ax.text(17,37,r'EXIT$-\epsilon$',rotation=30)
     ax.text(17,29,r'EXIT$-\epsilon$',rotation=35)
     ax.text(12,22,'URANUS',rotation=90)
-    
+
     #ax.legend()
     plt.savefig(figfile)
     print(figfile)
     plt.show()
-    
+
 def MTR86_Fig11_Cassini(figsize=(6,6),title='MTR86 Fig. 11 Cassini Rev137E',figfile = global_path_to_local_figs+'MTR86_Fig11_Cassini.jpg'):
     DeltaR_Wvals_m = np.logspace(1.2,3,1000)
     DeltaR_Wvals = DeltaR_Wvals_m /1000 # km
@@ -2499,20 +2499,20 @@ def MTR86_Fig11_Cassini(figsize=(6,6),title='MTR86 Fig. 11 Cassini Rev137E',figf
     rhodotC = 5.74
     F_outerA = 16.79
     rhodotA = 7.24
-    
+
     allan_dev_1sec = 2e-13 # John Armstrong email
 
     WeffC = 2*F_innerC**2/DeltaR_Wvals
     WC = 1.65*WeffC
     WeffA = 2*F_outerA**2/DeltaR_Wvals
     WA = 1.65*WeffA
-    
+
     bvalsC = b_MTR33(allan_dev_1sec=allan_dev_1sec,rhodot=rhodotC,W=WC)
     DeltaR_phi_C = DeltaR_phi_MTR32(bvalsC,DeltaR_W=DeltaR_Wvals)
 
     bvalsA = b_MTR33(allan_dev_1sec=allan_dev_1sec,rhodot=rhodotA,W=WA)
     DeltaR_phi_A = DeltaR_phi_MTR32(bvalsA,DeltaR_W=DeltaR_Wvals)
- 
+
     fig,ax=plt.subplots(figsize=figsize)
     ax.set_xlabel(r'$\Delta R_W=2F^2/W_{eff}$ (m)')
     ax.set_ylabel(r'$\Delta R_\phi$ (m)')
@@ -2537,7 +2537,7 @@ def MTR86_Fig11_Cassini(figsize=(6,6),title='MTR86 Fig. 11 Cassini Rev137E',figf
     # ax.text(20,120,'OUTER A',rotation=10)
     # ax.text(20, 80,'INNER C',rotation=12)
     # ax.text(12,70,'Cassini',rotation=90)
-    
+
     ax.legend()
     plt.savefig(figfile)
     print(figfile)
@@ -2551,7 +2551,7 @@ def particle_size_models(w_K = 9e6,w_X = 3.6e7,w_S = 13.e7,q_vals = [2.8,3.0,3.2
     '''
     ~~ Compute Model Grids ~~
     '''
-    
+
     # storage lists for plotting
     tau_ratio_KX = [] # (tau_K - tau_X)/tau_x
     tau_ratio_XS = [] # (tau_X - tau_S)/tau_X
@@ -2559,10 +2559,10 @@ def particle_size_models(w_K = 9e6,w_X = 3.6e7,w_S = 13.e7,q_vals = [2.8,3.0,3.2
     colors = []  # colors for plot lines
     markers = [] # markers for plot symbols
     lines = []   # line style for plot lines
-    
+
     # compute efficiencies for difference particle compositions
     for m,ms,ls in zip(m_vals,['o','s'],['-','--']):
-    
+
         ## Get differential Mie extinction efficiencies for full range of radii
         # set PyMieScatt keywargs
         drange = (2*a_min_vals[0],2*a_max_vals[-1])
@@ -2576,21 +2576,21 @@ def particle_size_models(w_K = 9e6,w_X = 3.6e7,w_S = 13.e7,q_vals = [2.8,3.0,3.2
         dQ_XS = Q_X - Q_S
         # particle radii from diameters
         a_vals = d/2
-    
+
         # compute integrals for different radii ranges
         for a_max,c in zip(a_max_vals,['0.0','0.6']):
-    
+
             # compute integrals for different power law slopes
             for qi in q_vals:
-    
+
                 # new empty lists for storage
                 Tau_X = []
                 DeltaTau_KX = []
                 DeltaTau_XS = []
-    
+
                 # compute dtau/tau for a range of minimum particle radii
                 for a_min in a_min_vals:
-    
+
                     # clipping mask array based on particle radius
                     rclip = np.where((a_vals>=a_min)&(a_vals<=a_max))[0]
                     # compute tau integral with Simpson's rule and store
@@ -2598,23 +2598,23 @@ def particle_size_models(w_K = 9e6,w_X = 3.6e7,w_S = 13.e7,q_vals = [2.8,3.0,3.2
                     # compute Delta tau integrals with Simpson's rule and store in lists
                     DeltaTau_KX += [simpson(dtau_int(a_vals[rclip],dQ_KX[rclip],q=qi),x=a_vals[rclip])]
                     DeltaTau_XS += [simpson(dtau_int(a_vals[rclip],dQ_XS[rclip],q=qi),x=a_vals[rclip])]
-    
+
                 # convert lists to numpy arrays
                 Tau_X = np.array(Tau_X)
                 DeltaTau_KX = np.array(DeltaTau_KX)
                 DeltaTau_XS = np.array(DeltaTau_XS)
-    
+
                 # store arrays for plotting
                 tau_ratio_KX += [DeltaTau_KX/Tau_X]
                 tau_ratio_XS += [DeltaTau_XS/Tau_X]
-    
+
                 # store plotting parameters for later
                 markers += [ms]
                 lines += [ls]
                 colors += [c]
                 labels += [r'$a_{max}=$'+str(a_max/1e9)+' m']#[r'$\overline{m}=$'+str(np.real(m))+r', $a_{max}=$'+str(a_max/1e9)+' m']
     return q_vals,m_vals,tau_ratio_KX,tau_ratio_XS,markers,lines,colors,labels
-    
+
 def pick_SC_kernel(CORSS_TABfile,kernels_list = global_path_to_tables+'e2e_kernels.ker',verbose=False):
     '''
     Pick a Cassini S/C ephemeris file from tabulated list, parsing CORSS_TABfile for date of event
@@ -2628,7 +2628,7 @@ def pick_SC_kernel(CORSS_TABfile,kernels_list = global_path_to_tables+'e2e_kerne
 
     if verbose:
         print(CORSS_TABfile)
-    
+
     with open(kernels_list,'r') as f:
         kernels_all  = f.read().splitlines() # strips \n at end of each line.
     for kernel in kernels_all:
@@ -2647,7 +2647,7 @@ def pick_SC_kernel(CORSS_TABfile,kernels_list = global_path_to_tables+'e2e_kerne
         except: # this line does not contain a Cassini S/C ephemeris
             continue
     return 'naif/CASSINI/kernels/spk/' + kernel_found
-    
+
 def pick_RSR_file(_16kHz=False,Rev='Rev007',direction='E',DSN='X43',
                   local_path_to_tables=global_path_to_tables,force=False,download=False,silent=True):
     '''
@@ -2671,7 +2671,7 @@ def pick_RSR_file(_16kHz=False,Rev='Rev007',direction='E',DSN='X43',
             Rev=Rev,DSN=DSN,direction=direction,silent=True)
     if not silent:
         print("CORSS_TABfile",CORSS_TABfile)
-    
+
     rsr_file = 'No matching RSR file found for this event'
     if len(CORSS_TABfile) != 0:
         event= os.path.basename(CORSS_TABfile)
@@ -2683,7 +2683,7 @@ def pick_RSR_file(_16kHz=False,Rev='Rev007',direction='E',DSN='X43',
                 get_RSRfiles_from_web(rsr_file,force=force,silent=True) # make sure we have it
                 return rsr_file
 # this can fail for chord occ if searching for egress, since RSR file for chord occ is ingress
-    if direction =='E' and CORSS_TABfile.index('CE') >0: # 'CE' indicates chord egress      
+    if direction =='E' and CORSS_TABfile.index('CE') >0: # 'CE' indicates chord egress
         string = 'I' + event[4:8]+event[9:12] # search for ingress instead
         for rsr_file in RSR_files:
             if (string.upper() in rsr_file.upper()) and (DSN.upper() in rsr_file.upper()):
@@ -2715,7 +2715,7 @@ def pick_RSR_file(_16kHz=False,Rev='Rev007',direction='E',DSN='X43',
     print('RSR file not found for',Rev,direction,DSN)
     return None
 
-    
+
 def plot_comparisons(program,results,show=False,y_offset=0.1,dy_offset=0.,plot_phase=False,tau=None,
                      adjust_phase=False,xlim=(None,None),ylim_tau=(None,None),ylim_phase=(None,None),
                      plot_tau_threshold=True,
@@ -2726,11 +2726,11 @@ def plot_comparisons(program,results,show=False,y_offset=0.1,dy_offset=0.,plot_p
     """
     loop over results dictionaries and plot tau(r), including CORSS_8001 comparison if supplied
     results dict contains required information about DLP, TAB and CORSS_8001 and reconstruction info
-    
+
     program: string - name of calling program, used as prefix for figure filename
-    results: dict of results returned from 
-    y_offset applies this offset to plotted variable 
-    dy_offset applies this offset to succesive plots in results array 
+    results: dict of results returned from
+    y_offset applies this offset to plotted variable
+    dy_offset applies this offset to succesive plots in results array
     plot_phase plots phase instead of optical depth
     adjust_phase aligns phase of first point of plotted reconstruction with corresponding phase from CORSS_8001,
     since an arbitrary constant phase does not affect the reconstruction and this permits an easier comparison
@@ -2741,11 +2741,11 @@ def plot_comparisons(program,results,show=False,y_offset=0.1,dy_offset=0.,plot_p
     figfilename has unique data string unless thisfigfilename keyword is set
     """
     os.makedirs(path_to_figs, exist_ok=True) # check to see if required figs directory exists
-        
+
     if type(results) == type({'a':0}):
         results= [results] # ensure it is a list of results, needed for loop below even if only one results supplied
     try:
-        rr = results[0] 
+        rr = results[0]
     except:
         if verbose:
             print("Error in results in plot_comparisons") # happens when requested data range not present
@@ -2765,7 +2765,7 @@ def plot_comparisons(program,results,show=False,y_offset=0.1,dy_offset=0.,plot_p
         plot_title = plot_title +'   '+title
 
     if plot_phase:
-        index = 7 
+        index = 7
         ylabel= 'Phase (deg)'
         if adjust_phase:
             ylabel = 'Adjusted '+ ylabel
@@ -2775,7 +2775,7 @@ def plot_comparisons(program,results,show=False,y_offset=0.1,dy_offset=0.,plot_p
         ylabel = 'Normal optical depth'
         fig_suffix = '_tau_'
     plt.figure(figsize=figsize)
-        
+
     if title != None:
         plt.title(title)
     plt.grid(axis='x',linestyle='--')
@@ -2805,7 +2805,7 @@ def plot_comparisons(program,results,show=False,y_offset=0.1,dy_offset=0.,plot_p
             tau_threshold = d[:,8]
 
        # print('*** in plot_comparisons: len(rkm),len(tau_threshold):',len(rkm),len(tau_threshold))
-        
+
         yvals = tau + y_offset
         if i == 0 and rr['CORSS_8001_filepath'] != None and include_CORSS_8001 == True:
             local_CORSS_8001_TAUfile = get_CORSS_8001_file(rr['CORSS_8001_filepath'],\
@@ -2824,7 +2824,7 @@ def plot_comparisons(program,results,show=False,y_offset=0.1,dy_offset=0.,plot_p
                 dymatch = 0
             yvals = (yvals+dymatch + 360+180)%360 - 180
         if i==0:
-            p=plt.plot(rkm,yvals,label=label,linewidth=lw_RSS_RINGOCCS)               
+            p=plt.plot(rkm,yvals,label=label,linewidth=lw_RSS_RINGOCCS)
         else:
             p=plt.plot(rkm,yvals+i*dy_offset,linewidth=0.75,label=label)
         if not plot_phase and plot_tau_threshold:
@@ -2859,9 +2859,9 @@ def plot_comparisons(program,results,show=False,y_offset=0.1,dy_offset=0.,plot_p
     plt.xlabel('Radius (km)')
     plt.ylabel(ylabel)
 
-    # timestamped figure filename 
+    # timestamped figure filename
     if this_figfilename == None:
-            figfile = path_to_figs+program+fig_suffix+time.strftime("%Y-%m-%d_%H:%M:%S")+'.png' 
+            figfile = path_to_figs+program+fig_suffix+time.strftime("%Y-%m-%d_%H:%M:%S")+'.png'
     else:
         figfile = path_to_figs + this_figfilename
     if save_figfile:
@@ -2870,7 +2870,7 @@ def plot_comparisons(program,results,show=False,y_offset=0.1,dy_offset=0.,plot_p
     if show:
         plt.show()
     return figfile
-    
+
 def printnow(CRbefore=True,CRafter=True):
     '''
     Print current time in nice format.
@@ -2893,7 +2893,7 @@ def print_featurelist(d):
     print('Features:')
     print('index   name            a_res   dr_min  dr_max')
     for index,name,a_res,dr_min,dr_max in zip(d['index'],d['name'],d['a_res'],d['dr_min'],d['dr_max']):
-        print(f'{index:3d}  {name:15}  {a_res:9.1f} {dr_min:4.0f}    {dr_max:4.0f}')                                 
+        print(f'{index:3d}  {name:15}  {a_res:9.1f} {dr_min:4.0f}    {dr_max:4.0f}')
 
 def radius_correction_pole(tau_file,fit_number=1,verbose=False,NMAX=500):
     '''
@@ -2906,13 +2906,13 @@ def radius_correction_pole(tau_file,fit_number=1,verbose=False,NMAX=500):
     et_vals = ETdate + spm_OET_taufile
     planet ='Saturn'
     spacecraft = 'Cassini'
-    dsn = 'DSS-'+rev_info['dsn'] 
+    dsn = 'DSS-'+rev_info['dsn']
     Npts = len(rho_km_vals_taufile)
     if Npts > NMAX:
         et_vals_ = np.linspace(et_vals[0],et_vals[-1],NMAX)
     else:
         et_vals_ = et_vals
-        
+
 # recalculate rho_km_vals - these should be very close to rkm_taufile values
     rho_km_vals_ = calc_rho_km(et_vals_, planet, spacecraft, dsn)
 
@@ -2961,13 +2961,13 @@ def radius_correction_pole(tau_file,fit_number=1,verbose=False,NMAX=500):
     else:
         drho_km_vals_corr = drho_km_vals_corr_
         rho_km_vals_corr = rho_km_vals_corr_
-        
+
 # restore original pole direction
     spice.pdpool('BODY699_POLE_RA',BODY699_POLE_RA)
     spice.pdpool('BODY699_POLE_DEC',BODY699_POLE_DEC)
-    
+
     return drho_km_vals_corr,rho_km_vals_calc,rho_km_vals_corr
-    
+
 def radius_correction_pole_from_tau_inst(dlp_file,tau_inst,fit_number=1,verbose=False,NMAX=500):
     '''
     Compute radius correction due to difference in pole between nominal kernel and NCFIV fits 1 or 7
@@ -2980,13 +2980,13 @@ def radius_correction_pole_from_tau_inst(dlp_file,tau_inst,fit_number=1,verbose=
     et_vals = ETdate + spm_OET_taufile
     planet ='Saturn'
     spacecraft = 'Cassini'
-    dsn = 'DSS-'+rev_info['dsn'] 
+    dsn = 'DSS-'+rev_info['dsn']
     Npts = len(rho_km_vals_taufile)
     if Npts > NMAX:
         et_vals_ = np.linspace(et_vals[0],et_vals[-1],NMAX)
     else:
         et_vals_ = et_vals
-        
+
 # recalculate rho_km_vals - these should be very close to rkm_taufile values
     rho_km_vals_ = calc_rho_km(et_vals_, planet, spacecraft, dsn)
 
@@ -3035,13 +3035,13 @@ def radius_correction_pole_from_tau_inst(dlp_file,tau_inst,fit_number=1,verbose=
     else:
         drho_km_vals_corr = drho_km_vals_corr_
         rho_km_vals_corr = rho_km_vals_corr_
-        
+
 # restore original pole direction
     spice.pdpool('BODY699_POLE_RA',BODY699_POLE_RA)
     spice.pdpool('BODY699_POLE_DEC',BODY699_POLE_DEC)
-    
+
     return drho_km_vals_corr,rho_km_vals_calc,rho_km_vals_corr
-    
+
 def radius_correction_trajectory(tau_file,fit_number=1,NMAX=1000,verbose=False):
     '''
     Compute radius correction due to trajectory error from NCFIV fits 1 or 7.
@@ -3054,14 +3054,14 @@ def radius_correction_trajectory(tau_file,fit_number=1,NMAX=1000,verbose=False):
     et_vals = ETdate + spm_OET_taufile
     planet ='Saturn'
     spacecraft = 'Cassini'
-    dsn = 'DSS-'+rev_info['dsn'] 
-    
+    dsn = 'DSS-'+rev_info['dsn']
+
     Npts = len(rho_km_vals_taufile)
     if Npts > NMAX:
         et_vals_ = np.linspace(et_vals[0],et_vals[-1],NMAX)
     else:
         et_vals_ = et_vals
-        
+
 # recalculate rho_km_vals - these should be very close to rkm_taufile values
     rho_km_vals_ = calc_rho_km(et_vals_, planet, spacecraft, dsn)
 
@@ -3115,13 +3115,13 @@ def radius_correction_trajectory(tau_file,fit_number=1,NMAX=1000,verbose=False):
     else:
         drho_km_vals_corr = drho_km_vals_corr_
         rho_km_vals_corr = rho_km_vals_corr_
-        
+
 # restore original pole direction
     spice.pdpool('BODY699_POLE_RA',BODY699_POLE_RA)
     spice.pdpool('BODY699_POLE_DEC',BODY699_POLE_DEC)
-    
+
     return drho_km_vals_corr,rho_km_vals_calc,rho_km_vals_corr
-    
+
 def radius_correction_trajectory_from_tau_inst(dlp_file,tau_inst,fit_number=1,NMAX=1000,verbose=False):
     '''
     Compute radius correction due to trajectory error from NCFIV fits 1 or 7
@@ -3136,14 +3136,14 @@ def radius_correction_trajectory_from_tau_inst(dlp_file,tau_inst,fit_number=1,NM
     et_vals = ETdate + spm_OET_taufile
     planet ='Saturn'
     spacecraft = 'Cassini'
-    dsn = 'DSS-'+rev_info['dsn'] 
-# the following code copied from   radius_correction_trajectory()  
+    dsn = 'DSS-'+rev_info['dsn']
+# the following code copied from   radius_correction_trajectory()
     Npts = len(rho_km_vals_taufile)
     if Npts > NMAX:
         et_vals_ = np.linspace(et_vals[0],et_vals[-1],NMAX)
     else:
         et_vals_ = et_vals
-        
+
 # recalculate rho_km_vals - these should be very close to rkm_taufile values
     rho_km_vals_ = calc_rho_km(et_vals_, planet, spacecraft, dsn)
 
@@ -3197,13 +3197,13 @@ def radius_correction_trajectory_from_tau_inst(dlp_file,tau_inst,fit_number=1,NM
     else:
         drho_km_vals_corr = drho_km_vals_corr_
         rho_km_vals_corr = rho_km_vals_corr_
-        
+
 # restore original pole direction
     spice.pdpool('BODY699_POLE_RA',BODY699_POLE_RA)
     spice.pdpool('BODY699_POLE_DEC',BODY699_POLE_DEC)
-    
+
     return drho_km_vals_corr,rho_km_vals_calc,rho_km_vals_corr
-    
+
 
 def rkm_tau_from_TAUfile(path_to_tau_file):
     data = np.loadtxt(path_to_tau_file,delimiter=',')
@@ -3221,7 +3221,7 @@ def rkm_tau_drs_tanBeff_from_TAUfile(path_to_tau_file):
     B = data[:,-1]
     tanBeff = np.tan(np.radians(B))/np.cos(np.radians(phi))
     return rkm, tau, drpole,drtraj,tanBeff
-    
+
 def rkm_tau_tanBeff_from_TAUfile(path_to_tau_file):
     data = np.loadtxt(path_to_tau_file,delimiter=',')
     rkm = data[:,0]
@@ -3230,8 +3230,8 @@ def rkm_tau_tanBeff_from_TAUfile(path_to_tau_file):
     B = data[:,-1]
     tanBeff = np.tan(np.radians(B))/np.cos(np.radians(phi))
     return rkm, tau, tanBeff
-    
-def RSRfiles_for_demo(_16kHz=True): 
+
+def RSRfiles_for_demo(_16kHz=True):
     '''
     Grab Rev007E K34,X34,X43 16 kHz files to enable high-resolution reconstructions
     '''
@@ -3248,15 +3248,15 @@ def RSRfiles_for_demo(_16kHz=True):
             'co-s-rss-1-sroc1-v10/cors_0727/SROC1_123/RSR/S10SROE2005123_0740NNNX43RD.2A1'
         ]
     return RSRfiles
-    
+
 def runloop(figfile=None,PRINT_TIME=False,include_history=False,verbose=False,xlim_run=(None,None),
             ylim_tau=(None,None),y_offset=0.1,dy_offset=0.,NoOp=False,
-           include_CORSS_8001 = True,save_figfile = True): 
+           include_CORSS_8001 = True,save_figfile = True):
     '''
     Perform end-to-end loop over requested features. Makes use of available variables.
     '''
     tstart_all = time.time()
-    results_complete = []  
+    results_complete = []
     outfiles_complete = []
     if verbose:
         print('runloop: Lfeatures',Lfeatures)
@@ -3310,11 +3310,11 @@ def runloop(figfile=None,PRINT_TIME=False,include_history=False,verbose=False,xl
             # print('search_dir:',search_dir)
             # print('dirs:',dirs)
             results_all = []
-           
+
             bands = np.array(run['bands'])
             if bands[0] == 'ALL':
                 bands = bands_ALL
-    
+
             for band in bands:
                 tstart_band = time.time()
                 dsns = np.array(run['dsns'])
@@ -3368,7 +3368,7 @@ def runloop(figfile=None,PRINT_TIME=False,include_history=False,verbose=False,xl
                             string = os.path.basename(dlp_file)
                             index = string.index('DLP')
                             dlp_res_used = string[index:index+9]
-                                    
+
                         # get radial range of dlp_file to see if reqested range is present
                             dlp_contents = np.loadtxt(dlp_file,delimiter=',')
                             rmin_dlp = dlp_contents[0,0]
@@ -3382,11 +3382,11 @@ def runloop(figfile=None,PRINT_TIME=False,include_history=False,verbose=False,xl
                             # print(os.path.basename(cal_file))
                             # print(os.path.basename(dlp_file))
                             # print('reading geo, cal, dlp files...')
-                            title = name + ' RSS_' + rev + direc 
+                            title = name + ' RSS_' + rev + direc
                             if verbose:
                                 print('Extracting CSV data...')
                                 print(geo_file,cal_file,dlp_file)
-                            data = rss_ringoccs.ExtractCSVData(geo_file, cal_file, dlp_file)
+                            data = rss_ringoccs.CassiniCSVData(geo_file, cal_file, dlp_file)
                             #print('dir(data)',dir(data))
                             if verbose:
                                 print('Finished extracting CSV data')
@@ -3402,10 +3402,10 @@ def runloop(figfile=None,PRINT_TIME=False,include_history=False,verbose=False,xl
                                     tstart_wtype = time.time()
                                     for res_km in res_kms:
                                         tstart_res = time.time()
-                                        
+
                                         if verbose:
                                             print(psitype,res_km,'...')
-                                        
+
                                         if subdivide:
                                             nranges,min_ranges,max_ranges = subdivide_inversion_range(inversion_range,drange)
                                         else:
@@ -3416,7 +3416,7 @@ def runloop(figfile=None,PRINT_TIME=False,include_history=False,verbose=False,xl
                                         for min_range, max_range in zip(min_ranges,max_ranges):
                                             this_inversion_range = [min_range,max_range]
                                             #print('this_inversion_range',this_inversion_range)
-                                            tstart_diffrac = tstart_res 
+                                            tstart_diffrac = tstart_res
                                             try: # may fail due to data not available for this request
                                                 tau_inst = rss_ringoccs.DiffractionCorrection(
                                                    data, res_km, rng=this_inversion_range, resolution_factor=res_factor,
@@ -3456,11 +3456,11 @@ def runloop(figfile=None,PRINT_TIME=False,include_history=False,verbose=False,xl
                                                 if subdivide:
                                                     this_path_to_output = global_path_to_local_tmp
                                                 else:
-                                                    this_path_to_output = global_path_to_local_output 
+                                                    this_path_to_output = global_path_to_local_output
                                                 #print('dir(tau_inst)',dir(tau_inst))
                                                 # compute tau_threshold
                                                 tau_inst.tau_threshold_vals = compute_tau_threshold(cal_file,tau_inst)
-                                                
+
                                                 outfiles = write_output_files.write_output_files(tau_inst,rev_info=rev_info,
                                                         history=tau_history,local_path_to_output = this_path_to_output)
                                                 outfiles_to_merge.append(outfiles)
@@ -3530,13 +3530,13 @@ def runloop(figfile=None,PRINT_TIME=False,include_history=False,verbose=False,xl
                     pass
         tend_feature= time.time()
         if PRINT_TIME and outfiles_complete != []:
-            print(name + ' processing time: '+f'{(tend_feature-tstart_feature)/60:0.2f} min')      
+            print(name + ' processing time: '+f'{(tend_feature-tstart_feature)/60:0.2f} min')
     tend_all = time.time()
     if PRINT_TIME and outfiles_complete != []:
         print('Total processing time: '+f'{(tend_all-tstart_all)/60:0.2f} min')
         print(get_processor_info())
     return outfiles_complete # results_complete
-    
+
 def set_tau_history(tau_inst,geo_inst,cal_inst,dlp_inst,tstart,tend,
                     res_km,inversion_range,res_factor,psitype,wtype,program):
     """
@@ -3566,13 +3566,13 @@ def set_tau_history(tau_inst,geo_inst,cal_inst,dlp_inst,tstart,tend,
                                               'res_km':str(res_km)}
         tau_inst.history['Keyword Args']= {'rng':str(inversion_range),'res_factor':str(res_factor),
                 'psitype':psitype,'wtype':wtype}
-    
+
         user_name = os.getlogin()
         host_name = os.uname()[1]
         run_date = time.ctime() + ' ' + time.tzname[0]
         python_version = platform.python_version()
         operating_system = os.uname()[0]+' '+platform.platform()
-    
+
         tau_inst.history['Run Date']=run_date
         tau_inst.history['Source File']=program
         tau_inst.history['Source Directory']=os.getcwd()
@@ -3587,7 +3587,7 @@ def set_tau_history(tau_inst,geo_inst,cal_inst,dlp_inst,tstart,tend,
     except:
         print('WARNING: Unable to update TAU file history')
     return tau_inst # updated tau_inst with possibly-updated history fields defined
-    
+
 def set_tau_history_from_inst(tau_inst,geo_inst,cal_inst,dlp_inst,tstart,tend,
                     res_km,inversion_range,res_factor,psitype,wtype,program,rssocc_version='1.3-beta'):
     """
@@ -3630,14 +3630,14 @@ def set_tau_history_from_inst(tau_inst,geo_inst,cal_inst,dlp_inst,tstart,tend,
         'Additional Info':{'Prior history':prior_history,\
         'Diffraction reconstrution time':sdtminutes}}
     return tau_history
-    
+
 def spm2date(year,doy,spmval):
     hrs = int(spmval//3600)
     mins= int(spmval//60 % 60)
     secs= int(spmval % 60)
     datestring = year + '-' + doy + 'T' + f'{hrs:02d}:{mins:02d}:{secs:02d}'
     return datestring
-    
+
 def subdivide_inversion_range(inversion_range, drange):
 
     min_ranges = []
@@ -3656,8 +3656,8 @@ def subdivide_inversion_range(inversion_range, drange):
             condition=True
         nranges += 1
     return nranges,min_ranges,max_ranges
-    
-def tau_from_CSV(geo_file,cal_file,dlp_file,Rev,direction,DSN,res_km=1.0,res_factor=0.75,   
+
+def tau_from_CSV(geo_file,cal_file,dlp_file,Rev,direction,DSN,res_km=1.0,res_factor=0.75,
     inversion_range=[87475,87560],psitype='fresnel',
     wtype='kbmd20',CORSS_8001_filepath=None,include_CORSS_8001=False,plot=True,local_path_to_data =global_path_to_data,
     y_offset=0,dy_offset=0, local_path_to_demo_figs=global_path_to_demo_figs,save_figfile=True,
@@ -3666,7 +3666,7 @@ def tau_from_CSV(geo_file,cal_file,dlp_file,Rev,direction,DSN,res_km=1.0,res_fac
     verbose=True,show=True,program='demo_tau_from_CSV'):
 
     is_res_km_valid(dlp_file,res_factor,res_km) # returns exception if invalid requesed res_km
-    data = rss.ExtractCSVData(geo_file, cal_file, dlp_file)
+    data = rss.CassiniCSVData(geo_file, cal_file, dlp_file)
     tau_inst = rss.DiffractionCorrection(data, res_km, rng=inversion_range, res_factor=res_factor,
            psitype=psitype, wtype=wtype, verbose=verbose)
 #added 2026 Jan 02
@@ -3688,7 +3688,7 @@ def tau_from_CSV(geo_file,cal_file,dlp_file,Rev,direction,DSN,res_km=1.0,res_fac
                                    path_to_figs=global_path_to_demo_figs,save_figfile=save_figfile)
         results['figfile'] = figfile
     return results
-    
+
 def tau_from_tau_inst(tau_inst):
     '''
     Compute optical depth from tau_inst
@@ -3696,12 +3696,12 @@ def tau_from_tau_inst(tau_inst):
     pwr = np.abs(tau_inst.T_out)**2
     mu = np.sin(np.radians(np.abs(tau_inst.B_deg_vals)))
     tau = -mu * np.log(pwr)
-    return tau 
-    
+    return tau
+
 # integrand of tau
 def tau_int(a,Q,q=3.1):
     return a**2. * Q * n(a,q)
-    
+
 def trim_dlp_file(dlp_file,processing_range,path_to_output=global_path_to_local_output,overwrite=False,write=True,verbose=False):
     dirname = os.path.dirname(dlp_file)
     basename = os.path.basename(dlp_file)
@@ -3735,7 +3735,7 @@ def trim_dlp_file(dlp_file,processing_range,path_to_output=global_path_to_local_
     #     if verbose:
     #         print('write and (not os.path.exists(path) or overwrite)',write and (not os.path.exists(path) or overwrite))
     return trimmed_dlp_file
-        
+
 def update_file_version(pathtofile):
 #    print('updating version number')
 #    print('input filename',pathtofile)
@@ -3799,9 +3799,9 @@ def update_taufile_radius_corrections(taufile,update_dr_pole=True,update_dr_traj
                 print(newline)
 
             # assert i<5,'Halt after 5'
-                
+
             f.write(newline)
-               
+
 # write TAU *.LBL and *.TAB files, including version with psitype appended to root name
 def write_tau_files(tau_inst,geo_inst,cal_inst,dlp_inst,dlp_file,tstart,tend,
                    res_km,inversion_range,res_factor,psitype,wtype,program,
@@ -3820,12 +3820,12 @@ def write_tau_files(tau_inst,geo_inst,cal_inst,dlp_inst,dlp_file,tstart,tend,
     returns the path to the TAU TAB file created.
     """
 # update the history in the label file if possible
-    
+
 #    print('write_tau_files:local_path_to_output',local_path_to_output)
 
     set_tau_history(tau_inst,geo_inst,cal_inst,dlp_inst,tstart,tend,
                     res_km,inversion_range,res_factor,psitype,wtype,program)
-# write the file - need to add keyword rev_info since missing from 
+# write the file - need to add keyword rev_info since missing from
     rev_info = dlp_inst.rev_info
     outfiles = rss.tools.write_output_files.write_output_files(tau_inst,rev_info=rev_info,
             local_path_to_output=local_path_to_output)
@@ -3837,7 +3837,7 @@ def write_tau_files(tau_inst,geo_inst,cal_inst,dlp_inst,dlp_file,tstart,tend,
         shutil.copy(sourcefile,destfile)
         if verbose:
             print('Copied\n',os.path.basename(sourcefile),'\nto\n',os.path.basename(destfile))
-    return destfile # return the tau_file 
+    return destfile # return the tau_file
 
 def write_tau_files_from_inst(tau_inst,geo_inst,cal_inst,dlp_inst,tstart,tend,
                    res_km,inversion_range,res_factor,psitype,wtype,program,

@@ -24,8 +24,8 @@
  *  Date:       December 31, 2020                                             *
  ******************************************************************************/
 
-/*  Booleans, interpolation, math routines, and more.                         */
-#include <libtmpl/include/tmpl.h>
+/*  TMPL_FREE macro provided here.                                            */
+#include <libtmpl/include/compat/tmpl_free.h>
 
 /*  Prototype for the function and typedefs for structs.                      */
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
@@ -77,11 +77,12 @@ rssringoccs_UranusCSVData_Extract(const char *geo,
     rssringoccs_GeoCSV_Destroy(&(csv->geo));
     rssringoccs_TauCSV_Destroy(&(csv->tau));
 
-    free(csv->dlp->F_km_vals);
-    csv->dlp->F_km_vals = NULL;
+    /*  Check if an error occurred before trying to access data.              */
+    if (csv->error_occurred)
+        return csv;
 
-    free(csv->dlp);
-    csv->dlp = NULL;
+    TMPL_FREE(csv->dlp->F_km_vals);
+    TMPL_FREE(csv->dlp);
 
     return csv;
 }

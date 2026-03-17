@@ -38,12 +38,12 @@
 
 /*  Data structure for the CAL.TAB files on the PDS.                          */
 typedef struct rssringoccs_CalCSV_Type {
+    rssringoccs_History *history;
     double *t_oet_spm_vals;
     double *f_sky_pred_vals;
     double *f_sky_resid_fit_vals;
     double *p_free_vals;
     size_t n_elements;
-    rssringoccs_History *history;
     tmpl_Bool error_occurred;
     const char *error_message;
 } rssringoccs_CalCSV;

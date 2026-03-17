@@ -23,9 +23,8 @@
  *  Date:       September 1, 2024                                             *
  ******************************************************************************/
 
-/*  libtmpl provides Booleans, string duplicate, and CSV reading tools.       */
+/*  libtmpl provides Booleans and CSV reading tools.                          */
 #include <libtmpl/include/tmpl_bool.h>
-#include <libtmpl/include/tmpl_string.h>
 #include <libtmpl/include/tmpl_utility.h>
 
 /*  rssringoccs_CalCSV typedef here, and function prototype given.            */

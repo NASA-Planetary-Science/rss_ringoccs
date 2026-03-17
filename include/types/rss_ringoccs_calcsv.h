@@ -37,7 +37,7 @@
 #include <stddef.h>
 
 /*  Data structure for the CAL.TAB files on the PDS.                          */
-typedef struct rssringoccs_CalCSV_Def {
+typedef struct rssringoccs_CalCSV_Type {
     double *t_oet_spm_vals;
     double *f_sky_pred_vals;
     double *f_sky_resid_fit_vals;

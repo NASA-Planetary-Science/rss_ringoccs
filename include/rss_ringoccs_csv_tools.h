@@ -35,34 +35,11 @@
 #include <rss_ringoccs/include/types/rss_ringoccs_calcsv.h>
 #include <rss_ringoccs/include/types/rss_ringoccs_dlpcsv.h>
 #include <rss_ringoccs/include/types/rss_ringoccs_geocsv.h>
+#include <rss_ringoccs/include/types/rss_ringoccs_taucsv.h>
 
 /*  size_t typedef is given here.                                             */
 #include <stddef.h>
 #include <stdio.h>
-
-
-
-/*  Data structure for the TAU.TAB files on the PDS.                          */
-typedef struct rssringoccs_TauCSV_Def {
-    double *rho_km_vals;
-    double *rho_corr_pole_km_vals;
-    double *rho_corr_timing_km_vals;
-    double *phi_rl_deg_vals;
-    double *phi_ora_deg_vals;
-    double *power_vals;
-    double *tau_vals;
-    double *phase_deg_vals;
-    double *tau_threshold_vals;
-    double *t_oet_spm_vals;
-    double *t_ret_spm_vals;
-    double *t_set_spm_vals;
-    double *B_deg_vals;
-    size_t n_elements;
-    rssringoccs_History *history;
-    tmpl_Bool use_deprecated;
-    tmpl_Bool error_occurred;
-    const char *error_message;
-} rssringoccs_TauCSV;
 
 /*  Data structure that contains all of the data from all four CSV formats    *
  *  interpolated so that the values are a function of radius, not time.       */

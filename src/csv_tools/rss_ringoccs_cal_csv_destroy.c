@@ -16,18 +16,66 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
+ *                    rss_ringoccs_cal_csv_destroy_members                    *
+ ******************************************************************************
  *  Purpose:                                                                  *
  *      Function for free'ing a Cal CSV object and free'ing all of the        *
  *      pointers contained inside the struct.                                 *
  ******************************************************************************
- *  Author:     Ryan Maguire, Wellesley College                               *
+ *                             DEFINED FUNCTIONS                              *
+ ******************************************************************************
+ *  Function Name:                                                            *
+ *      rssringoccs_CalCSV_Destroy                                            *
+ *  Purpose:                                                                  *
+ *      Destroys all of the data associated with a Calibration CSV.           *
+ *  Arguments:                                                                *
+ *      cal (rssringoccs_CalCSV ** const):                                    *
+ *          A pointer to the Calibration CSV object we are destroying.        *
+ *  Output:                                                                   *
+ *      None (void).                                                          *
+ *  Called Functions:                                                         *
+ *      src/csv_tools/                                                        *
+ *          rssringoccs_CalCSV_Destroy_Members:                               *
+ *              Free's the individual members in a Calibration CSV object.    *
+ *      stdlib.h:                                                             *
+ *          free:                                                             *
+ *              free's memory allocated by malloc, calloc, or realloc.        *
+ *  Method:                                                                   *
+ *      Use rssringoccs_CalCSV_Destroy_Members to free all of the members in  *
+ *      the Cal CSV, and then free the Cal CSV object itself.                 *
+ *  Notes:                                                                    *
+ *      1.) This function checks for NULL pointers. If cal = NULL, nothing is *
+ *          done. Members of the Cal CSV object that are NULL are skipped.    *
+ *                                                                            *
+ *      2.) To prevent double free's, the members of the Cal CSV object are   *
+ *          set to NULL after free'ing. cal itself is set to NULL as well.    *
+ *                                                                            *
+ *      3.) error_message is declared const char *, it is never free'd.       *
+ *          Instead, we simply set this pointer to NULL.                      *
+ ******************************************************************************
+ *                                DEPENDENCIES                                *
+ ******************************************************************************
+ *  1.) tmpl_free.h:                                                          *
+ *          Header file providing the TMPL_FREE macro.                        *
+ *  3.) rss_ringoccs_calcsv.h:                                                *
+ *          Header file containing the rssringoccs_CalCSV typedef.            *
+ ******************************************************************************
+ *  Author:     Ryan Maguire                                                  *
  *  Date:       December 31, 2020                                             *
+ ******************************************************************************
+ *                              Revision History                              *
+ ******************************************************************************
+ *  2026/03/17: Ryan Maguire                                                  *
+ *      Added docstring, cleaned up a bit.                                    *
  ******************************************************************************/
 
-/*  Macro for freeing a pointer and setting it to NULL.                       */
+/*  Booleans (True and False) provided here.                                  */
+#include <libtmpl/include/tmpl_bool.h>
+
+/*  Provides the TMPL_FREE macro for freeing a pointer and setting it to NULL.*/
 #include <libtmpl/include/compat/tmpl_free.h>
 
-/*  rssringoccs_CalCSV typedef provided here.                                 */
+/*  rssringoccs_CalCSV typedef found here.                                    */
 #include <rss_ringoccs/include/types/rss_ringoccs_calcsv.h>
 
 /*  NULL macro defined here.                                                  */
@@ -42,26 +90,21 @@ extern void rssringoccs_CalCSV_Destroy_Members(rssringoccs_CalCSV * const cal);
 /*  Function for freeing the memory in a CalCSV object.                       */
 void rssringoccs_CalCSV_Destroy(rssringoccs_CalCSV ** const cal)
 {
-    /*  Used for the pointer to the CSV object.                               */
-    rssringoccs_CalCSV *cal_inst;
-
     /*  If the input pointer is NULL, simply return.                          */
     if (!cal)
         return;
 
-    /*  Otherwise, get a pointer to the CalCSV object.                        */
-    cal_inst = *cal;
-
     /*  If this is NULL, there's no need to free it. Return.                  */
-    if (!cal_inst)
+    if (!(*cal))
         return;
 
     /*  Free all of the pointers inside the CalCSV object.                    */
-    rssringoccs_CalCSV_Destroy_Members(cal_inst);
+    rssringoccs_CalCSV_Destroy_Members(*cal);
 
     /*  The error_message member is a pointer to a constant string, it does   *
      *  not need to be freed. Set the pointer to NULL to avoid reading it.    */
-    cal_inst->error_message = NULL;
+    (*cal)->error_occurred = tmpl_False;
+    (*cal)->error_message = NULL;
 
     /*  Free the CalCSV pointer and set it to NULL to prevent freeing twice.  */
     TMPL_FREE(*cal);

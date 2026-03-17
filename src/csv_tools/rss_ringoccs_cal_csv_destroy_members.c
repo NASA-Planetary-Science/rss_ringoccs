@@ -16,32 +16,75 @@
  *  You should have received a copy of the GNU General Public License         *
  *  along with rss_ringoccs.  If not, see <https://www.gnu.org/licenses/>.    *
  ******************************************************************************
+ *                    rss_ringoccs_cal_csv_destroy_members                    *
+ ******************************************************************************
  *  Purpose:                                                                  *
  *      Free all of the pointers in a Cal CSV object.                         *
  ******************************************************************************
- *  Author:     Ryan Maguire, Wellesley College                               *
+ *                             DEFINED FUNCTIONS                              *
+ ******************************************************************************
+ *  Function Name:                                                            *
+ *      rssringoccs_CalCSV_Destroy_Members                                    *
+ *  Purpose:                                                                  *
+ *      Free's the memory in a Cal CSV and sets the members to NULL.          *
+ *  Arguments:                                                                *
+ *      cal (rssringoccs_CalCSV * const):                                     *
+ *          A pointer to the Calibration CSV object we are destroying.        *
+ *  Output:                                                                   *
+ *      None (void).                                                          *
+ *  Called Functions:                                                         *
+ *      stdlib.h:                                                             *
+ *          free:                                                             *
+ *              free's memory allocated by malloc, calloc, or realloc.        *
+ *  Method:                                                                   *
+ *      Use the TMPL_FREE macro to free the data and set the pointers to NULL.*
+ *  Notes:                                                                    *
+ *      1.) This function checks for NULL pointers. If cal = NULL, nothing is *
+ *          done. Members of the Cal CSV object that are NULL are skipped.    *
+ *                                                                            *
+ *      2.) To prevent double free's, the members of the Cal CSV object are   *
+ *          set to NULL after free'ing.                                       *
+ *                                                                            *
+ *      3.) error_message is declared const char *, it is never free'd.       *
+ ******************************************************************************
+ *                                DEPENDENCIES                                *
+ ******************************************************************************
+ *  1.) tmpl_free.h:                                                          *
+ *          Header file providing the TMPL_FREE macro.                        *
+ *  3.) rss_ringoccs_calcsv.h:                                                *
+ *          Header file containing the rssringoccs_CalCSV typedef.            *
+ ******************************************************************************
+ *  Author:     Ryan Maguire                                                  *
  *  Date:       December 31, 2020                                             *
+ ******************************************************************************
+ *                              Revision History                              *
+ ******************************************************************************
+ *  2026/03/17: Ryan Maguire                                                  *
+ *      Added docstring, cleaned up a bit.                                    *
  ******************************************************************************/
 
-/*  Macro for freeing a pointer and setting it to NULL.                       */
+/*  Provides the TMPL_FREE macro for freeing a pointer and setting it to NULL.*/
 #include <libtmpl/include/compat/tmpl_free.h>
 
-/*  rssringoccs_CalCSV typedef here, and function prototype given.            */
-#include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
+/*  rssringoccs_CalCSV typedef found here.                                    */
+#include <rss_ringoccs/include/types/rss_ringoccs_calcsv.h>
 
-/*  Free's all members of an rssringoccs_CalCSV pointer except the            *
+/*  Forward declaration / function prototype.                                 */
+extern void rssringoccs_CalCSV_Destroy_Members(rssringoccs_CalCSV * const cal);
+
+/*  Free's all members of an rssringoccs_CalCSV object except the             *
  *  error_message. Members are set to NULL after freeing.                     */
-void rssringoccs_CalCSV_Destroy_Members(rssringoccs_CalCSV *cal)
+void rssringoccs_CalCSV_Destroy_Members(rssringoccs_CalCSV * const cal)
 {
     /*  If the pointer is NULL, there's nothing to do. Simply return.         */
     if (!cal)
         return;
 
-    /*  Destroy every variable except the error_message.                      */
+    /*  Free every pointer except the error message (which is declared const).*/
+    TMPL_FREE(cal->history);
     TMPL_FREE(cal->t_oet_spm_vals);
     TMPL_FREE(cal->f_sky_pred_vals);
     TMPL_FREE(cal->f_sky_resid_fit_vals);
     TMPL_FREE(cal->p_free_vals);
-    TMPL_FREE(cal->history);
 }
 /*  End of rssringoccs_CalCSV_Destroy_Members.                                */

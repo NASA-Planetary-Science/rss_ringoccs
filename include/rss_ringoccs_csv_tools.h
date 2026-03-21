@@ -76,7 +76,7 @@ typedef struct rssringoccs_CSVData_Def {
     size_t geo_decrement;
     tmpl_Bool use_deprecated;
     tmpl_Bool error_occurred;
-    char *error_message;
+    const char *error_message;
 } rssringoccs_CSVData;
 
 /*  Voyager / Uranus DLP files. Differ from the Cassini / Saturn ones.        */
@@ -102,7 +102,7 @@ typedef struct rssringoccs_UranusDLPCSV_Def {
     rssringoccs_History *history;
     tmpl_Bool in_radians;
     tmpl_Bool error_occurred;
-    char *error_message;
+    const char *error_message;
 } rssringoccs_UranusDLPCSV;
 
 /*  Data structure that contains all of the data from all four CSV formats    *
@@ -139,7 +139,7 @@ typedef struct rssringoccs_UranusCSVData_Def {
     size_t geo_decrement;
     tmpl_Bool dlp_in_radians;
     tmpl_Bool error_occurred;
-    char *error_message;
+    const char *error_message;
 } rssringoccs_UranusCSVData;
 
 /*  Struct for the Merged CSV files (DLPM.TAB). This combines DLP, GEO, and   *
@@ -170,7 +170,7 @@ typedef struct rssringoccs_MergedCSVData_Def {
     size_t n_elements;
     rssringoccs_History *history;
     tmpl_Bool error_occurred;
-    char *error_message;
+    const char *error_message;
 } rssringoccs_MergedCSVData;
 
 /******************************************************************************

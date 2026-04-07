@@ -59,7 +59,7 @@ void rssringoccs_Tau_Set_Window_Type(const char *wtype, rssringoccs_TAUObj *tau)
     else if (strcmp(tau_wtype, "coss") == 0)
     {
         tau->normeq = CossNormEQ;
-        tau->window_func = tmpl_Double_Coss_Window;
+        tau->window_func = tmpl_Double_Coss;
     }
     else if (strcmp(tau_wtype, "kb20") == 0)
     {

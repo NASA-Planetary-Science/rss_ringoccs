@@ -27,6 +27,9 @@
 #ifndef RSS_RINGOCCS_CSV_TOOLS_H
 #define RSS_RINGOCCS_CSV_TOOLS_H
 
+/*  TMPL_RESTRICT macro found here.                                           */
+#include <libtmpl/include/tmpl_config.h>
+
 /*  Boolean data types defined here.                                          */
 #include <libtmpl/include/tmpl_bool.h>
 
@@ -179,7 +182,10 @@ typedef struct rssringoccs_MergedCSVData_Def {
 extern rssringoccs_CalCSV *rssringoccs_CalCSV_Extract(const char *filename);
 
 extern void
-rssringoccs_CalCSV_Check_Column_Count(rssringoccs_CalCSV *cal, FILE *fp);
+rssringoccs_CalCSV_Check_Column_Count(
+    rssringoccs_CalCSV * TMPL_RESTRICT const cal,
+    FILE * TMPL_RESTRICT const fp
+);
 
 extern void rssringoccs_CalCSV_Destroy_Members(rssringoccs_CalCSV *cal);
 extern void rssringoccs_CalCSV_Destroy(rssringoccs_CalCSV **cal);

@@ -28,9 +28,9 @@
  *  Purpose:                                                                  *
  *      Checks the number of columns in a Calibration CSV file.               *
  *  Arguments:                                                                *
- *      cal (rssringoccs_CalCSV * const):                                     *
+ *      cal (rssringoccs_CalCSV * TMPL_RESTRICT const):                       *
  *          A pointer to the Calibration CSV object we are inspecting.        *
- *      fp (FILE * const):                                                    *
+ *      fp (FILE * TMPL_RESTRICT const):                                      *
  *          The file pointer for the CSV file.                                *
  *  Output:                                                                   *
  *      None (void).                                                          *
@@ -53,16 +53,23 @@
  *      3.) The error_occurred Boolean is set to True if either the input     *
  *          file is NULL, or if the column count is not 4. Inspect this after *
  *          calling this function.                                            *
+ *                                                                            *
+ *      4.) Both parameters are declared with the TMPL_RESTRICT macro. When   *
+ *          compilers supporting C99 (or higher) are used, this expands to    *
+ *          "restrict." Because of this, cal and fp must pointer to different *
+ *          objects. This should be the case regardless to properly use this. *
  ******************************************************************************
  *                                DEPENDENCIES                                *
  ******************************************************************************
- *  1.) tmpl_bool.h:                                                          *
+ *  1.) tmpl_config.h:                                                        *
+ *          Header providing the TMPL_RESTRICT macro.                         *
+ *  2.) tmpl_bool.h:                                                          *
  *          Header file providing Booleans.                                   *
- *  2.) tmpl_utility.h:                                                       *
+ *  3.) tmpl_utility.h:                                                       *
  *          CSV tools, including column count, given here.                    *
- *  3.) rss_ringoccs_calcsv.h:                                                *
+ *  4.) rss_ringoccs_calcsv.h:                                                *
  *          Header file containing the rssringoccs_CalCSV typedef.            *
- *  4.) stdio.h:                                                              *
+ *  5.) stdio.h:                                                              *
  *          Standard library header providing the FILE and size_t types.      *
  ******************************************************************************
  *  Author:     Ryan Maguire                                                  *
@@ -72,7 +79,12 @@
  ******************************************************************************
  *  2026/03/17: Ryan Maguire                                                  *
  *      Added docstring, cleaned up a bit.                                    *
+ *  2026/03/26: Ryan Maguire                                                  *
+ *      Added the TMPL_RESTRICT macro to the parameters.                      *
  ******************************************************************************/
+
+/*  TMPL_RESTRICT macro found here.                                           */
+#include <libtmpl/include/tmpl_config.h>
 
 /*  Booleans (True and False) provided here.                                  */
 #include <libtmpl/include/tmpl_bool.h>
@@ -88,8 +100,10 @@
 
 /*  Forward declaration / function prototype.                                 */
 extern void
-rssringoccs_CalCSV_Check_Column_Count(rssringoccs_CalCSV * const cal,
-                                      FILE * const fp);
+rssringoccs_CalCSV_Check_Column_Count(
+    rssringoccs_CalCSV * TMPL_RESTRICT const cal,
+    FILE * TMPL_RESTRICT const fp
+);
 
 /*  Function for checking the number of columns in a Cal CSV file.            */
 void
@@ -113,9 +127,9 @@ rssringoccs_CalCSV_Check_Column_Count(rssringoccs_CalCSV * const cal,
     {
         cal->error_occurred = tmpl_True;
         cal->error_message =
-            "\r\nError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_CalCSV_Check_Column_Count\n\n"
-            "\rInput file is NULL.\n\n";
+            "\nError Encountered: rss_ringoccs\n"
+            "\trssringoccs_CalCSV_Check_Column_Count\n\n"
+            "Input file is NULL.\n\n";
 
         return;
     }
@@ -128,9 +142,9 @@ rssringoccs_CalCSV_Check_Column_Count(rssringoccs_CalCSV * const cal,
     {
         cal->error_occurred = tmpl_True;
         cal->error_message =
-            "\r\nError Encountered: rss_ringoccs\n"
-            "\r\trssringoccs_CalCSV_Check_Column_Count\n\n"
-            "\rInput CSV does not have 4 columns.\n\n";
+            "\nError Encountered: rss_ringoccs\n"
+            "\trssringoccs_CalCSV_Check_Column_Count\n\n"
+            "Input CSV does not have 4 columns.\n\n";
     }
 }
 /*  End of rssringoccs_CalCSV_Check_Column_Count.                             */

@@ -48,7 +48,7 @@
         {                                                                      \
             cal->error_occurred = tmpl_True;                                   \
             cal->error_message =                                               \
-                "Error Encountered: rss_ringoccs\n"                            \
+                "\nError Encountered: rss_ringoccs\n"                          \
                 "\trssringoccs_CalCSV_Malloc\n\n"                              \
                 "malloc failed to allocate memory for " #var ".\n\n";          \
                                                                                \
@@ -75,7 +75,7 @@ void rssringoccs_CalCSV_Malloc(rssringoccs_CalCSV *cal, FILE *fp)
     {
         cal->error_occurred = tmpl_True;
         cal->error_message =
-            "Error Encountered: rss_ringoccs\n"
+            "\nError Encountered: rss_ringoccs\n"
             "\trssringoccs_CalCSV_Malloc\n\n"
             "Input file is NULL.\n\n";
 
@@ -91,7 +91,7 @@ void rssringoccs_CalCSV_Malloc(rssringoccs_CalCSV *cal, FILE *fp)
     {
         cal->error_occurred = tmpl_True;
         cal->error_message =
-            "Error Encountered: rss_ringoccs\n"
+            "\nError Encountered: rss_ringoccs\n"
             "\trssringoccs_CalCSV_Malloc\n\n"
             "n_elements is zero, nothing to malloc.\n\n";
 

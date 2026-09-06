@@ -76,7 +76,7 @@ void rssringoccs_CalCSV_Read_Data(rssringoccs_CalCSV *cal, FILE *fp)
     {
         cal->error_occurred = tmpl_True;
         cal->error_message =
-            "Error Encountered: rss_ringoccs\n"
+            "\nError Encountered: rss_ringoccs\n"
             "\trssringoccs_CalCSV_Read_Data\n\n"
             "Input file is NULL.\n\n";
 
@@ -89,7 +89,7 @@ void rssringoccs_CalCSV_Read_Data(rssringoccs_CalCSV *cal, FILE *fp)
     {
         cal->error_occurred = tmpl_True;
         cal->error_message =
-            "Error Encountered: rss_ringoccs\n"
+            "\nError Encountered: rss_ringoccs\n"
             "\trssringoccs_CalCSV_Read_Data\n\n"
             "n_elements is zero, nothing to read.\n\n";
 

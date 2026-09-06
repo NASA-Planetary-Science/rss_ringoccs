@@ -1,11 +1,9 @@
 #include <libtmpl/include/tmpl_bool.h>
-#include <libtmpl/include/tmpl_string.h>
 #include <libtmpl/include/tmpl_interpolate.h>
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
 
 void rssringoccs_CSVData_Interpolate_Geo(rssringoccs_CSVData *csv)
 {
-    char err_mes[1024];
     double *rho, *rho_dot, *D, *rx, *ry, *rz;
     size_t length, decrease;
 
@@ -18,11 +16,10 @@ void rssringoccs_CSVData_Interpolate_Geo(rssringoccs_CSVData *csv)
     if (!csv->geo)
     {
         csv->error_occurred = tmpl_True;
-        csv->error_message = tmpl_String_Duplicate(
+        csv->error_message =
             "\nError Encountered: rss_ringoccs\n"
             "\trssringoccs_CSVData_Interpolate_Geo\n\n"
-            "csv->geo is NULL. Aborting\n"
-        );
+            "csv->geo is NULL.\n\n";
 
         return;
     }
@@ -30,32 +27,10 @@ void rssringoccs_CSVData_Interpolate_Geo(rssringoccs_CSVData *csv)
     if (csv->geo->error_occurred)
     {
         csv->error_occurred = tmpl_True;
-
-        /*  Keep track of error messages. Copy the previous geo message.      */
-        if (csv->geo->error_message)
-        {
-            sprintf(
-                err_mes,
-                "\nError Encountered: rss_ringoccs\n"
-                "\trssringoccs_CSVData_Interpolate_Geo\n\n"
-                "csv->geo has 'error_occurred' set to True.\n"
-                "csv->geo set the following message:\n\n%s",
-                csv->geo->error_message
-            );
-
-            csv->error_message = tmpl_String_Duplicate(err_mes);
-        }
-
-        /*  If the function failed and no error message was set, it is likely *
-         *  malloc failed. Give a generic message.                            */
-        else
-        {
-            csv->error_message = tmpl_String_Duplicate(
-                "\nError Encountered: rss_ringoccs\n"
-                "\trssringoccs_CSVData_Interpolate_Geo\n\n"
-                "csv->geo has 'error_occurred' set to True.\n"
-            );
-        }
+        csv->error_message =
+            "\nError Encountered: rss_ringoccs\n"
+            "\trssringoccs_CSVData_Interpolate_Geo\n\n"
+            "csv->geo has error_occurred set to True.\n\n";
 
         return;
     }
@@ -65,11 +40,11 @@ void rssringoccs_CSVData_Interpolate_Geo(rssringoccs_CSVData *csv)
     if (csv->geo->n_elements < decrease)
     {
         csv->error_occurred = tmpl_True;
-        csv->error_message = tmpl_String_Duplicate(
+        csv->error_message =
             "\nError Encountered: rss_ringoccs\n"
             "\trssringoccs_CSVData_Interpolate_Geo\n\n"
-            "csv->geo->n_elements less than sum of increment and decrement.\n"
-        );
+            "csv->geo->n_elements < increment + decrement.\n"
+            "No data to interpolate.\n\n"
 
         return;
     }

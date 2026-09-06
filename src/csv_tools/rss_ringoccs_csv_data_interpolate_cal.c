@@ -1,12 +1,9 @@
-#include <stdio.h>
 #include <libtmpl/include/tmpl_bool.h>
-#include <libtmpl/include/tmpl_string.h>
 #include <libtmpl/include/tmpl_interpolate.h>
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
 
 void rssringoccs_CSVData_Interpolate_Cal(rssringoccs_CSVData *csv)
 {
-    char err_mes[1024];
     double *freq;
     size_t n;
 
@@ -19,11 +16,10 @@ void rssringoccs_CSVData_Interpolate_Cal(rssringoccs_CSVData *csv)
     if (!csv->cal)
     {
         csv->error_occurred = tmpl_True;
-        csv->error_message = tmpl_String_Duplicate(
+        csv->error_message =
             "\nError Encountered: rss_ringoccs\n"
             "\trssringoccs_CSVData_Interpolate_Cal\n\n"
-            "csv->cal is NULL. Aborting\n"
-        );
+            "csv->cal is NULL.\n\n";
 
         return;
     }
@@ -31,32 +27,10 @@ void rssringoccs_CSVData_Interpolate_Cal(rssringoccs_CSVData *csv)
     if (csv->cal->error_occurred)
     {
         csv->error_occurred = tmpl_True;
-
-        /*  Keep track of error messages. Copy the previous cal message.      */
-        if (csv->cal->error_message)
-        {
-            sprintf(
-                err_mes,
-                "\nError Encountered: rss_ringoccs\n"
-                "\trssringoccs_CSVData_Interpolate_Cal\n\n"
-                "csv->cal has 'error_occurred' set to True.\n"
-                "csv->cal set the following message:\n\n%s",
-                csv->cal->error_message
-            );
-
-            csv->error_message = tmpl_String_Duplicate(err_mes);
-        }
-
-        /*  If the function failed and no error message was set, it is likely *
-         *  malloc failed. Give a generic message.                            */
-        else
-        {
-            csv->error_message = tmpl_String_Duplicate(
-                "\nError Encountered: rss_ringoccs\n"
-                "\trssringoccs_CSVData_Interpolate_Cal\n\n"
-                "csv->cal has 'error_occurred' set to True.\n"
-            );
-        }
+        csv->error_message =
+            "\nError Encountered: rss_ringoccs\n"
+            "\trssringoccs_CSVData_Interpolate_Cal\n\n"
+            "csv->cal has error_occurred set to True.\n\n";
 
         return;
     }

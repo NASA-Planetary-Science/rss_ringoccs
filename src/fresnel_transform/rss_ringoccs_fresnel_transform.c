@@ -286,7 +286,7 @@ rssringoccs_Fresnel_Transform(rssringoccs_TAUObj * TMPL_RESTRICT const tau,
         norm.dat[1] *= 2.0;
 
         /*  Compute the real scale factor, 1 / (sqrt(2) |norm|).              */
-        scale = tmpl_Double_Rcpr_Sqrt_Two / tmpl_CDouble_Abs(norm);
+        scale = tmpl_double_rcpr_sqrt_two / tmpl_CDouble_Abs(norm);
     }
 
     else

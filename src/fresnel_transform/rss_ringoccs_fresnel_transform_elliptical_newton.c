@@ -112,7 +112,7 @@ rssringoccs_Fresnel_Transform_Elliptical_Newton(
      *  this in the calculation of the normalization. The cabs function       *
      *  computes the absolute value of complex number (defined in complex.h). */
     abs_norm = tmpl_CDouble_Abs(norm);
-    real_norm = tmpl_Double_Sqrt_Two / abs_norm;
+    real_norm = tmpl_double_sqrt_two / abs_norm;
 
     /*  Multiply result by the coefficient found in the Fresnel inverse.      *
      *  The 1/F term is omitted, since the F in the norm cancels this.        */

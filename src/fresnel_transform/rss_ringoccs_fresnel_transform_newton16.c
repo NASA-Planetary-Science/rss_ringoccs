@@ -329,7 +329,7 @@ rssringoccs_Fresnel_Transform_Newton16(
         tmpl_CDouble_AddTo(&tau->T_out[center], &integrand);
     }
 
-    scale_factor = tmpl_Double_Rcpr_Sqrt_Two / tmpl_CDouble_Abs(norm);
+    scale_factor = tmpl_double_rcpr_sqrt_two / tmpl_CDouble_Abs(norm);
     integrand = tmpl_CDouble_Rect(scale_factor, scale_factor);
     tau->T_out[center] = tmpl_CDouble_Multiply(integrand, tau->T_out[center]);
 }

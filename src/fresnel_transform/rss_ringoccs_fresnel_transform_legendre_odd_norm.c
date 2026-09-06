@@ -101,7 +101,7 @@ rssringoccs_Fresnel_Transform_Legendre_Odd_Norm(
      *  this in the calculation of the normalization. The cabs function       *
      *  computes the absolute value of complex number (defined in complex.h). */
     abs_norm = tmpl_CDouble_Abs(norm);
-    real_norm = tmpl_Double_Rcpr_Sqrt_Two / abs_norm;
+    real_norm = tmpl_double_rcpr_sqrt_two / abs_norm;
 
     /*  Multiply result by the coefficient found in the Fresnel inverse.      */
     integrand = tmpl_CDouble_Rect(real_norm, real_norm);

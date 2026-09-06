@@ -171,7 +171,7 @@ rssringoccs_Fresnel_Transform_Newton8(
 
     if (tau->use_norm)
     {
-        scale_factor = tmpl_Double_Rcpr_Sqrt_Two / tmpl_CDouble_Abs(norm);
+        scale_factor = tmpl_double_rcpr_sqrt_two / tmpl_CDouble_Abs(norm);
         integrand = tmpl_CDouble_Rect(scale_factor, scale_factor);
         tmpl_CDouble_MultiplyBy(&tau->T_out[center], &integrand);
     }

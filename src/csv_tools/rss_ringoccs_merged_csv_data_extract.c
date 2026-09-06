@@ -31,7 +31,6 @@
 
 /*  libtmpl provides Booleans and string duplicate.                           */
 #include <libtmpl/include/tmpl_bool.h>
-#include <libtmpl/include/tmpl_string.h>
 
 /*  Typedefs for CSV structs and function prototype given here.               */
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
@@ -66,12 +65,11 @@ rssringoccs_MergedCSVData_Extract(const char *filename)
     if (!fp)
     {
         dlpm->error_occurred = tmpl_True;
-        dlpm->error_message = tmpl_String_Duplicate(
-            "Error Encountered: rss_ringoccs\n"
+        dlpm->error_message =
+            "\nError Encountered: rss_ringoccs\n"
             "\trssringoccs_MergedCSVData_Extract\n\n"
             "fopen returned NULL. Failed to open file for reading.\n"
-            "It is likely the filename is incorrect or does not exist.\n"
-        );
+            "It is likely the filename is incorrect or does not exist.\n\n";
 
         return dlpm;
     }

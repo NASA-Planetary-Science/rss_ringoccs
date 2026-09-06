@@ -46,12 +46,10 @@
     if (!var)                                                                  \
     {                                                                          \
         dlpm->error_occurred = tmpl_True;                                      \
-        dlpm->error_message = tmpl_String_Duplicate(                           \
+        dlpm->error_message =                                                  \
             "Error Encountered: rss_ringoccs\n"                                \
             "\trssringoccs_MergedCSVData_Malloc\n\n"                           \
-            "Malloc returned NULL. Failed to allocate memory for " #var ".\n"  \
-            "Aborting computation and returning.\n"                            \
-        );                                                                     \
+            "malloc failed to allocate memory for " #var ".\n\n";              \
                                                                                \
         /*  Free the variables that have been malloc'd so far.               */\
         rssringoccs_MergedCSVData_Destroy_Members(dlpm);                       \
@@ -74,11 +72,10 @@ void rssringoccs_MergedCSVData_Malloc(rssringoccs_MergedCSVData *dlpm, FILE *fp)
     if (!fp)
     {
         dlpm->error_occurred = tmpl_True;
-        dlpm->error_message = tmpl_String_Duplicate(
-            "Error Encountered: rss_ringoccs\n"
+        dlpm->error_message =
+            "\nError Encountered: rss_ringoccs\n"
             "\trssringoccs_MergedCSVData_Malloc\n\n"
-            "Input file is NULL. Aborting.\n"
-        );
+            "Input file is NULL.\n\n";
 
         return;
     }
@@ -88,14 +85,13 @@ void rssringoccs_MergedCSVData_Malloc(rssringoccs_MergedCSVData *dlpm, FILE *fp)
 
     /*  There needs to be at least one row in the CSV file. If not, treat     *
      *  this as an error. It is likely the file is corrupted.                 */
-    if (dlpm->n_elements == (size_t)0)
+    if (dlpm->n_elements == 0)
     {
         dlpm->error_occurred = tmpl_True;
-        dlpm->error_message = tmpl_String_Duplicate(
-            "Error Encountered: rss_ringoccs\n"
+        dlpm->error_message =
+            "\nError Encountered: rss_ringoccs\n"
             "\trssringoccs_MergedCSVData_Malloc\n\n"
-            "n_elements is zero, nothing to malloc. Aborting.\n"
-        );
+            "n_elements is zero, nothing to malloc.\n\n";
 
         return;
     }

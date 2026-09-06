@@ -77,11 +77,10 @@ rssringoccs_MergedCSVData_Read_Data(rssringoccs_MergedCSVData *dlpm, FILE *fp)
     if (!fp)
     {
         dlpm->error_occurred = tmpl_True;
-        dlpm->error_message = tmpl_String_Duplicate(
+        dlpm->error_message =
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_MergedCSVData_Read_Data\n\n"
-            "Input file is NULL. Aborting.\n"
-        );
+            "Input file is NULL.\n\n";
 
         return;
     }
@@ -91,11 +90,10 @@ rssringoccs_MergedCSVData_Read_Data(rssringoccs_MergedCSVData *dlpm, FILE *fp)
     if (dlpm->n_elements == zero)
     {
         dlpm->error_occurred = tmpl_True;
-        dlpm->error_message = tmpl_String_Duplicate(
+        dlpm->error_message =
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_MergedCSVData_Read_Data\n\n"
-            "n_elements is zero, nothing to read. Aborting.\n"
-        );
+            "n_elements is zero, nothing to read.\n\n";
 
         return;
     }
@@ -107,11 +105,10 @@ rssringoccs_MergedCSVData_Read_Data(rssringoccs_MergedCSVData *dlpm, FILE *fp)
     if (!line)
     {
         dlpm->error_occurred = tmpl_True;
-        dlpm->error_message = tmpl_String_Duplicate(
-            "Error Encountered: rss_ringoccs\n"
+        dlpm->error_message =
+            "\nError Encountered: rss_ringoccs\n"
             "\trssringoccs_MergedCSVData_Read_Data\n\n"
-            "fgets returned NULL, no data to read. Aborting.\n"
-        );
+            "fgets returned NULL, no data to read.\n\n";
 
         return;
     }

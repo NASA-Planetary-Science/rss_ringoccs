@@ -78,7 +78,7 @@ void rssringoccs_CalCSV_Read_Data(rssringoccs_CalCSV *cal, FILE *fp)
         cal->error_message =
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_CalCSV_Read_Data\n\n"
-            "Input file is NULL.\n";
+            "Input file is NULL.\n\n";
 
         return;
     }
@@ -91,7 +91,7 @@ void rssringoccs_CalCSV_Read_Data(rssringoccs_CalCSV *cal, FILE *fp)
         cal->error_message =
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_CalCSV_Read_Data\n\n"
-            "n_elements is zero, nothing to read.\n";
+            "n_elements is zero, nothing to read.\n\n";
 
         return;
     }
@@ -99,7 +99,7 @@ void rssringoccs_CalCSV_Read_Data(rssringoccs_CalCSV *cal, FILE *fp)
     /*  Read in the data and start copying it to the Cal object.              */
     line = fgets(buffer, sizeof(buffer), fp);
 
-    while (line != NULL)
+    while (line)
     {
         /*  The order in the CSV is:                                          *
          *      time:                   t_oet_spm_vals                        *

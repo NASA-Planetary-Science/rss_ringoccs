@@ -25,7 +25,6 @@
 
 /*  libtmpl provides Booleans, string duplicate, and CSV reading tools.       */
 #include <libtmpl/include/tmpl_bool.h>
-#include <libtmpl/include/tmpl_string.h>
 #include <libtmpl/include/tmpl_utility.h>
 
 /*  rssringoccs_DLPCSV typedef here, and function prototype given.            */
@@ -52,11 +51,10 @@ rssringoccs_MergedCSVData_Check_Column_Count(rssringoccs_MergedCSVData *dlpm,
     if (!fp)
     {
         dlpm->error_occurred = tmpl_True;
-        dlpm->error_message = tmpl_String_Duplicate(
-            "Error Encountered: rss_ringoccs\n"
+        dlpm->error_message =
+            "\nError Encountered: rss_ringoccs\n"
             "\trssringoccs_MergedCSVData_Check_Column_Count\n\n"
-            "Input file is NULL. Aborting.\n"
-        );
+            "Input file is NULL.\n\n";
 
         return;
     }
@@ -68,11 +66,10 @@ rssringoccs_MergedCSVData_Check_Column_Count(rssringoccs_MergedCSVData *dlpm,
     if (column_count != 19)
     {
         dlpm->error_occurred = tmpl_True;
-        dlpm->error_message = tmpl_String_Duplicate(
-            "Error Encountered: rss_ringoccs\n"
+        dlpm->error_message =
+            "\nError Encountered: rss_ringoccs\n"
             "\trssringoccs_MergedCSVData_Check_Column_Count\n\n"
-            "DLPM CSV file does not have 19 columns. Aborting.\n"
-        );
+            "DLPM CSV file does not have 19 columns.\n\n";
     }
 }
 /*  End of rssringoccs_MergeCSVData_Check_Column_Count.                       */

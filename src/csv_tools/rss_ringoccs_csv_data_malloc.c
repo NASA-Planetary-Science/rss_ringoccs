@@ -2,7 +2,6 @@
 
 /*  libtmpl provides Booleans and string duplicate.                           */
 #include <libtmpl/include/tmpl_bool.h>
-#include <libtmpl/include/tmpl_string.h>
 
 /*  Prototype for the function and typedefs for structs.                      */
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
@@ -10,16 +9,14 @@
 /*  Macro function for safely allocating memory for the variables. This       *
  *  checks if malloc fails, and does not simply assume it passed.             */
 #define MALLOC_CSV_VAR(var)                                                    \
-    csv->var = malloc(sizeof(*csv->var)*csv->n_elements);                      \
-    if (csv->var == NULL)                                                      \
+    csv->var = malloc(sizeof(*csv->var) * csv->n_elements);                    \
+    if (!csv->var)                                                             \
     {                                                                          \
         csv->error_occurred = tmpl_True;                                       \
-        csv->error_message = tmpl_String_Duplicate(                            \
-            "Error Encountered: rss_ringoccs\n"                                \
+        csv->error_message =                                                   \
+            "\nError Encountered: rss_ringoccs\n"                              \
             "\trssringoccs_CSVData_Malloc\n\n"                                 \
-            "Malloc returned NULL for csv member. Aborting.\n"                 \
-        );                                                                     \
-                                                                               \
+            "malloc returned NULL for " #var ".\n\n";                          \
         rssringoccs_CSVData_Destroy_Members(csv);                              \
         return;                                                                \
     }
@@ -35,11 +32,10 @@ void rssringoccs_CSVData_Malloc(rssringoccs_CSVData *csv)
     if (csv->n_elements == (size_t)0)
     {
         csv->error_occurred = tmpl_True;
-        csv->error_message = tmpl_String_Duplicate(
-            "Error Encountered: rss_ringoccs\n"
+        csv->error_message =
+            "\nError Encountered: rss_ringoccs\n"
             "\trssringoccs_CSVData_Malloc\n\n"
-            "n_elements is zero, nothing to malloc. Aborting.\n"
-        );
+            "n_elements is zero, nothing to malloc.\n\n";
 
         return;
     }

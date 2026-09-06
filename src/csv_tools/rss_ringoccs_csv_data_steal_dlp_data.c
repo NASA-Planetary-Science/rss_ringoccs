@@ -1,13 +1,8 @@
-
-/*  Functions for reading and writing files.                                  */
-#include <stdio.h>
-
 /*  malloc provided here.                                                     */
 #include <stdlib.h>
 
 /*  libtmpl provides Booleans, string duplicate, and math tools.              */
 #include <libtmpl/include/tmpl_bool.h>
-#include <libtmpl/include/tmpl_string.h>
 #include <libtmpl/include/tmpl_math.h>
 
 /*  Prototype for the function and typedefs for structs.                      */
@@ -15,9 +10,6 @@
 
 void rssringoccs_CSVData_Steal_DLP_Data(rssringoccs_CSVData *csv)
 {
-    /*  Buffer for an error message, should an error occur.                   */
-    char err_mes[1024];
-
     size_t n;
     const size_t zero = (size_t)0;
 
@@ -30,11 +22,10 @@ void rssringoccs_CSVData_Steal_DLP_Data(rssringoccs_CSVData *csv)
     if (!csv->dlp)
     {
         csv->error_occurred = tmpl_True;
-        csv->error_message = tmpl_String_Duplicate(
+        csv->error_message =
             "\nError Encountered: rss_ringoccs\n"
             "\trssringoccs_CSVData_Steal_DLP_Data\n\n"
-            "csv->dlp is NULL. Aborting\n"
-        );
+            "csv->dlp is NULL.\n\n";
 
         return;
     }
@@ -42,32 +33,10 @@ void rssringoccs_CSVData_Steal_DLP_Data(rssringoccs_CSVData *csv)
     if (csv->dlp->error_occurred)
     {
         csv->error_occurred = tmpl_True;
-
-        /*  Keep track of error messages. Copy the previous geo message.      */
-        if (csv->dlp->error_message)
-        {
-            sprintf(
-                err_mes,
-                "\nError Encountered: rss_ringoccs\n"
-                "\trssringoccs_CSVData_Steal_DLP_Data\n\n"
-                "csv->dlp has 'error_occurred' set to True.\n"
-                "csv->dlp set the following message:\n\n%s",
-                csv->dlp->error_message
-            );
-
-            csv->error_message = tmpl_String_Duplicate(err_mes);
-        }
-
-        /*  If the function failed and no error message was set, it is likely *
-         *  malloc failed. Give a generic message.                            */
-        else
-        {
-            csv->error_message = tmpl_String_Duplicate(
-                "\nError Encountered: rss_ringoccs\n"
-                "\trssringoccs_CSVData_Steal_DLP_Data\n\n"
-                "csv->dlp has 'error_occurred' set to True.\n"
-            );
-        }
+        csv->error_message =
+            "\nError Encountered: rss_ringoccs\n"
+            "\trssringoccs_CSVData_Steal_DLP_Data\n\n"
+            "csv->dlp has error_occurred set to True.\n\n";
 
         return;
     }
@@ -101,11 +70,10 @@ void rssringoccs_CSVData_Steal_DLP_Data(rssringoccs_CSVData *csv)
         if (!csv->p_norm_vals)
         {
             csv->error_occurred = tmpl_True;
-            csv->error_message = tmpl_String_Duplicate(
+            csv->error_message =
                 "\nError Encountered: rss_ringoccs\n"
                 "\trssringoccs_CSVData_Steal_DLP_Data\n\n"
-                "malloc returned NULL for p_norm_vals.\n"
-            );
+                "malloc returned NULL for p_norm_vals.\n\n";
 
             return;
         }

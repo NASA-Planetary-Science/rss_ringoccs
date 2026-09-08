@@ -42,7 +42,7 @@ void rssringoccs_UranusCSVData_Destroy(rssringoccs_UranusCSVData **csv)
         return;
 
     /*  Free all of the pointers inside the CSV object.                       */
-    rssringoccs_CSVData_Destroy_Members(*csv);
+    rssringoccs_UranusCSVData_Destroy_Members(*csv);
 
     /*  Free the pointer to the object and set it to NULL to avoid freeing    *
      *  this object twice.                                                    */

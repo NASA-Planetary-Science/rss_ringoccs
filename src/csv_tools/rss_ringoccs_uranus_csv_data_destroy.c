@@ -24,8 +24,8 @@
  *  Date:       December 31, 2020                                             *
  ******************************************************************************/
 
-/*  free is found here, as is NULL.                                           */
-#include <stdlib.h>
+/*  Macro for freeing a pointer and setting it to NULL.                       */
+#include <libtmpl/include/compat/tmpl_free.h>
 
 /*  rssringoccs_CSVData typedef here, and function prototype given.           */
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>

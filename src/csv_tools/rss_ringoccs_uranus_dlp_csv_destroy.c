@@ -24,8 +24,8 @@
  *  Date:       September 24, 2024                                            *
  ******************************************************************************/
 
-/*  free is found here, as is NULL.                                           */
-#include <stdlib.h>
+/*  Macro for freeing a pointer and setting it to NULL.                       */
+#include <libtmpl/include/compat/tmpl_free.h>
 
 /*  rssringoccs_UranusDLPCSV typedef here, and function prototype given.      */
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
@@ -52,8 +52,6 @@ void rssringoccs_UranusDLPCSV_Destroy(rssringoccs_UranusDLPCSV **dlp)
 
     /*  Free the DLPCSV object pointer and set it to NULL to prevent trying   *
      *  to free the pointer twice.                                            */
-    free(dlp_inst);
-    *dlp = NULL;
-    return;
+    TMPL_FREE(*dlp);
 }
 /*  End of rssringoccs_UranusDLPCSV_Destroy_Members.                          */

@@ -50,16 +50,6 @@ void rssringoccs_UranusDLPCSV_Destroy(rssringoccs_UranusDLPCSV **dlp)
     /*  Free all of the members inside the DLP object.                        */
     rssringoccs_UranusDLPCSV_Destroy_Members(dlp_inst);
 
-    /*  If an error occurred, the error_message variable is malloced and a    *
-     *  string is stored inside of it. Free this pointer if this is true.     */
-    if (dlp_inst->error_message != NULL)
-    {
-        free(dlp_inst->error_message);
-
-        /*  Set the pointer to NULL to avoid freeing it twice.                */
-        dlp_inst->error_message = NULL;
-    }
-
     /*  Free the DLPCSV object pointer and set it to NULL to prevent trying   *
      *  to free the pointer twice.                                            */
     free(dlp_inst);

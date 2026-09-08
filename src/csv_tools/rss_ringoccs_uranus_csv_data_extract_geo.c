@@ -2,9 +2,8 @@
 /*  Functions for reading and writing files.                                  */
 #include <stdio.h>
 
-/*  libtmpl provides Booleans and string duplicate.                           */
+/*  libtmpl provides Booleans.                                                */
 #include <libtmpl/include/tmpl_bool.h>
-#include <libtmpl/include/tmpl_string.h>
 
 /*  Prototype for the function and typedefs for structs.                      */
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
@@ -13,9 +12,6 @@ void
 rssringoccs_UranusCSVData_Extract_Geo(rssringoccs_UranusCSVData *csv,
                                       const char *geo_file)
 {
-    /*  Buffer for an error message, should an error occur.                   */
-    char err_mes[1024];
-
     /*  If the input pointer is NULL, there is nothing to do.                 */
     if (!csv)
         return;
@@ -31,11 +27,10 @@ rssringoccs_UranusCSVData_Extract_Geo(rssringoccs_UranusCSVData *csv,
     if (!csv->geo)
     {
         csv->error_occurred = tmpl_True;
-        csv->error_message = tmpl_String_Duplicate(
+        csv->error_message =
             "\nError Encountered: rss_ringoccs\n"
             "\trssringoccs_UranusCSVData_Extract_Geo\n\n"
-            "rssringoccs_GeoCSV_Extract returned NULL. Aborting.\n"
-        );
+            "rssringoccs_GeoCSV_Extract returned NULL.\n\n";
 
         return;
     }
@@ -44,32 +39,10 @@ rssringoccs_UranusCSVData_Extract_Geo(rssringoccs_UranusCSVData *csv,
     if (csv->geo->error_occurred)
     {
         csv->error_occurred = tmpl_True;
-
-        /*  Keep track of error messages. Copy the previous geo message.      */
-        if (csv->geo->error_message)
-        {
-            sprintf(
-                err_mes,
-                "\nError Encountered: rss_ringoccs\n"
-                "\trssringoccs_UranusCSVData_Extract_Geo\n\n"
-                "rssringoccs_GeoCSV_Extract returned with error.\n"
-                "rssringoccs_GeoCSV_Extract set the following message:\n\n%s",
-                csv->geo->error_message
-            );
-
-            csv->error_message = tmpl_String_Duplicate(err_mes);
-        }
-
-        /*  If the function failed and no error message was set, it is likely *
-         *  malloc failed. Give a generic message.                            */
-        else
-        {
-            csv->error_message = tmpl_String_Duplicate(
-                "\nError Encountered: rss_ringoccs\n"
-                "\trssringoccs_UranusCSVData_Extract_Geo\n\n"
-                "rssringoccs_GeoCSV_Extract returned with error.\n"
-            );
-        }
+        csv->error_message =
+            "\nError Encountered: rss_ringoccs\n"
+            "\trssringoccs_UranusCSVData_Extract_Geo\n\n"
+            "rssringoccs_GeoCSV_Extract returned with error.\n\n";
 
         /*  Free all data and abort.                                          */
         rssringoccs_UranusCSVData_Destroy_Members(csv);
@@ -80,31 +53,10 @@ rssringoccs_UranusCSVData_Extract_Geo(rssringoccs_UranusCSVData *csv,
     if (csv->geo->n_elements == 0)
     {
         csv->error_occurred = tmpl_True;
-
-        /*  Zero elements should have been treated as an error. Check.        */
-        if (csv->geo->error_message)
-        {
-            sprintf(
-                err_mes,
-                "\nError Encountered: rss_ringoccs\n"
-                "\trssringoccs_UranusCSVData_Extract_Geo\n\n"
-                "rssringoccs_GeoCSV_Extract returned an empty struct.\n"
-                "rssringoccs_GeoCSV_Extract set the following message:\n\n%s",
-                csv->geo->error_message
-            );
-
-            csv->error_message = tmpl_String_Duplicate(err_mes);
-        }
-
-        /*  Otherwise, treat it as an error now.                              */
-        else
-        {
-            csv->error_message = tmpl_String_Duplicate(
-                "\nError Encountered: rss_ringoccs\n"
-                "\trssringoccs_UranusCSVData_Extract_Geo\n\n"
-                "rssringoccs_GeoCSV_Extract returned an empty struct.\n"
-            );
-        }
+        csv->error_message =
+            "\nError Encountered: rss_ringoccs\n"
+            "\trssringoccs_UranusCSVData_Extract_Geo\n\n"
+            "rssringoccs_GeoCSV_Extract returned an empty struct.\n\n";
 
         /*  Free all data and abort.                                          */
         rssringoccs_UranusCSVData_Destroy_Members(csv);

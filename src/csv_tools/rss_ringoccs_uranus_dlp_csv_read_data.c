@@ -32,9 +32,8 @@
 /*  atof function found here.                                                 */
 #include <stdlib.h>
 
-/*  libtmpl provides Booleans and string duplicate.                           */
+/*  libtmpl provides Booleans.                                                */
 #include <libtmpl/include/tmpl_bool.h>
-#include <libtmpl/include/tmpl_string.h>
 
 /*  rssringoccs_DLPCSV typedef here, and function prototype given.            */
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
@@ -78,11 +77,10 @@ void rssringoccs_UranusDLPCSV_Read_Data(rssringoccs_UranusDLPCSV *dlp, FILE *fp)
     if (!fp)
     {
         dlp->error_occurred = tmpl_True;
-        dlp->error_message = tmpl_String_Duplicate(
+        dlp->error_message =
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_UranusDLPCSV_Read_Data\n\n"
-            "Input file is NULL. Aborting.\n"
-        );
+            "Input file is NULL.\n\n";
 
         return;
     }
@@ -92,11 +90,10 @@ void rssringoccs_UranusDLPCSV_Read_Data(rssringoccs_UranusDLPCSV *dlp, FILE *fp)
     if (dlp->n_elements == zero)
     {
         dlp->error_occurred = tmpl_True;
-        dlp->error_message = tmpl_String_Duplicate(
+        dlp->error_message =
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_UranusDLPCSV_Read_Data\n\n"
-            "n_elements is zero, nothing to read. Aborting.\n"
-        );
+            "n_elements is zero, nothing to read.\n\n";
 
         return;
     }

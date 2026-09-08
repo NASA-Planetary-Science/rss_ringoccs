@@ -41,27 +41,27 @@ void rssringoccs_MergedCSVData_Destroy_Members(rssringoccs_MergedCSVData *dlpm)
         return;
 
     /*  Destroy every variable except the error_message.                      */
-    TMPL_FREE(dlpm->B_deg_vals)
-    TMPL_FREE(dlpm->D_km_vals)
-    TMPL_FREE(dlpm->f_sky_hz_vals)
-    TMPL_FREE(dlpm->p_norm_vals)
-    TMPL_FREE(dlpm->raw_tau_vals)
-    TMPL_FREE(dlpm->phase_deg_vals)
-    TMPL_FREE(dlpm->phi_deg_vals)
-    TMPL_FREE(dlpm->phi_rl_deg_vals)
-    TMPL_FREE(dlpm->raw_tau_threshold_vals)
-    TMPL_FREE(dlpm->rho_corr_pole_km_vals)
-    TMPL_FREE(dlpm->rho_corr_timing_km_vals)
-    TMPL_FREE(dlpm->rho_dot_kms_vals)
-    TMPL_FREE(dlpm->rho_km_vals)
-    TMPL_FREE(dlpm->rx_km_vals)
-    TMPL_FREE(dlpm->ry_km_vals)
-    TMPL_FREE(dlpm->rz_km_vals)
-    TMPL_FREE(dlpm->t_oet_spm_vals)
-    TMPL_FREE(dlpm->t_ret_spm_vals)
-    TMPL_FREE(dlpm->t_set_spm_vals)
-    TMPL_FREE(dlpm->tau_phase_deg_vals)
-    TMPL_FREE(dlpm->tau_power_vals)
-    TMPL_FREE(dlpm->tau_vals)
+    TMPL_FREE(dlpm->B_deg_vals);
+    TMPL_FREE(dlpm->D_km_vals);
+    TMPL_FREE(dlpm->f_sky_hz_vals);
+    TMPL_FREE(dlpm->p_norm_vals);
+    TMPL_FREE(dlpm->raw_tau_vals);
+    TMPL_FREE(dlpm->phase_deg_vals);
+    TMPL_FREE(dlpm->phi_deg_vals);
+    TMPL_FREE(dlpm->phi_rl_deg_vals);
+    TMPL_FREE(dlpm->raw_tau_threshold_vals);
+    TMPL_FREE(dlpm->rho_corr_pole_km_vals);
+    TMPL_FREE(dlpm->rho_corr_timing_km_vals);
+    TMPL_FREE(dlpm->rho_dot_kms_vals);
+    TMPL_FREE(dlpm->rho_km_vals);
+    TMPL_FREE(dlpm->rx_km_vals);
+    TMPL_FREE(dlpm->ry_km_vals);
+    TMPL_FREE(dlpm->rz_km_vals);
+    TMPL_FREE(dlpm->t_oet_spm_vals);
+    TMPL_FREE(dlpm->t_ret_spm_vals);
+    TMPL_FREE(dlpm->t_set_spm_vals);
+    TMPL_FREE(dlpm->tau_phase_deg_vals);
+    TMPL_FREE(dlpm->tau_power_vals);
+    TMPL_FREE(dlpm->tau_vals);
 }
 /*  End of rssringoccs_MergedCSVData_Destroy_Members.                         */

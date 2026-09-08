@@ -1,8 +1,7 @@
 #include <stdlib.h>
 
-/*  libtmpl provides Booleans and string duplicate.                           */
+/*  libtmpl provides Booleans.                                                */
 #include <libtmpl/include/tmpl_bool.h>
-#include <libtmpl/include/tmpl_string.h>
 
 /*  Prototype for the function and typedefs for structs.                      */
 #include <rss_ringoccs/include/rss_ringoccs_csv_tools.h>
@@ -14,11 +13,10 @@
     if (csv->var == NULL)                                                      \
     {                                                                          \
         csv->error_occurred = tmpl_True;                                       \
-        csv->error_message = tmpl_String_Duplicate(                            \
+        csv->error_message =                                                   \
             "Error Encountered: rss_ringoccs\n"                                \
             "\trssringoccs_UranusCSVData_Malloc\n\n"                           \
-            "Malloc returned NULL for csv member. Aborting.\n"                 \
-        );                                                                     \
+            "malloc returned NULL for csv member.\n\n";                        \
                                                                                \
         rssringoccs_UranusCSVData_Destroy_Members(csv);                        \
         return;                                                                \
@@ -32,14 +30,13 @@ void rssringoccs_UranusCSVData_Malloc(rssringoccs_UranusCSVData *csv)
     if (csv->error_occurred)
         return;
 
-    if (csv->n_elements == (size_t)0)
+    if (csv->n_elements == 0)
     {
         csv->error_occurred = tmpl_True;
-        csv->error_message = tmpl_String_Duplicate(
+        csv->error_message =
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_UranusCSVData_Malloc\n\n"
-            "n_elements is zero, nothing to malloc. Aborting.\n"
-        );
+            "n_elements is zero, nothing to malloc.\n\n";
 
         return;
     }

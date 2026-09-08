@@ -23,9 +23,8 @@
  *  Date:       September 24, 2024                                            *
  ******************************************************************************/
 
-/*  libtmpl provides Booleans, string duplicate, and CSV reading tools.       */
+/*  libtmpl provides Booleans and CSV reading tools.                          */
 #include <libtmpl/include/tmpl_bool.h>
-#include <libtmpl/include/tmpl_string.h>
 #include <libtmpl/include/tmpl_utility.h>
 
 /*  rssringoccs_DLPCSV typedef here, and function prototype given.            */
@@ -52,11 +51,10 @@ rssringoccs_UranusDLPCSV_Check_Column_Count(rssringoccs_UranusDLPCSV *dlp,
     if (!fp)
     {
         dlp->error_occurred = tmpl_True;
-        dlp->error_message = tmpl_String_Duplicate(
+        dlp->error_message =
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_UranusDLPCSV_Check_Column_Count\n\n"
-            "Input file is NULL. Aborting.\n"
-        );
+            "Input file is NULL.\n\n";
 
         return;
     }
@@ -70,11 +68,10 @@ rssringoccs_UranusDLPCSV_Check_Column_Count(rssringoccs_UranusDLPCSV *dlp,
     if (column_count != 17)
     {
         dlp->error_occurred = tmpl_True;
-        dlp->error_message = tmpl_String_Duplicate(
+        dlp->error_message =
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_UranusDLPCSV_Check_Column_Count\n\n"
-            "Uranus DLP CSVs must have 17 columns. Aborting.\n"
-        );
+            "Uranus DLP CSVs must have 17 columns.\n\n";
     }
 }
 /*  End of rssringoccs_UranusDLPCSV_Check_Column_Count.                       */

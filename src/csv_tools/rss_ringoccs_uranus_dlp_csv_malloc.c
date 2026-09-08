@@ -26,9 +26,8 @@
 /*  malloc is found here.                                                     */
 #include <stdlib.h>
 
-/*  libtmpl provided Booleans, string duplicate, and line count.              */
+/*  libtmpl provided Booleans and line count.                                 */
 #include <libtmpl/include/tmpl_bool.h>
-#include <libtmpl/include/tmpl_string.h>
 #include <libtmpl/include/tmpl_utility.h>
 
 /*  rssringoccs_DLPCSV typedef here, and function prototype given.            */
@@ -46,12 +45,10 @@
     if (!dlp->var)                                                             \
     {                                                                          \
         dlp->error_occurred = tmpl_True;                                       \
-        dlp->error_message = tmpl_String_Duplicate(                            \
+        dlp->error_message =                                                   \
             "Error Encountered: rss_ringoccs\n"                                \
             "\trssringoccs_UranusDLPCSV_Malloc\n\n"                            \
-            "Malloc returned NULL. Failed to allocate memory for " #var ".\n"  \
-            "Aborting computation and returning.\n"                            \
-        );                                                                     \
+            "malloc failed to allocate memory for " #var ".\n\n";              \
                                                                                \
         /*  Free the variables that have been malloc'd so far.               */\
         rssringoccs_UranusDLPCSV_Destroy_Members(dlp);                         \
@@ -74,11 +71,10 @@ void rssringoccs_UranusDLPCSV_Malloc(rssringoccs_UranusDLPCSV *dlp, FILE *fp)
     if (!fp)
     {
         dlp->error_occurred = tmpl_True;
-        dlp->error_message = tmpl_String_Duplicate(
+        dlp->error_message =
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_UranusDLPCSV_Malloc\n\n"
-            "Input file is NULL. Aborting.\n"
-        );
+            "Input file is NULL.\n\n";
 
         return;
     }
@@ -88,14 +84,13 @@ void rssringoccs_UranusDLPCSV_Malloc(rssringoccs_UranusDLPCSV *dlp, FILE *fp)
 
     /*  There needs to be at least one row in the CSV file. If not, treat     *
      *  this as an error. It is likely the file is corrupted.                 */
-    if (dlp->n_elements == (size_t)0)
+    if (dlp->n_elements == 0)
     {
         dlp->error_occurred = tmpl_True;
-        dlp->error_message = tmpl_String_Duplicate(
+        dlp->error_message =
             "Error Encountered: rss_ringoccs\n"
             "\trssringoccs_UranusDLPCSV_Malloc\n\n"
-            "n_elements is zero, nothing to malloc. Aborting.\n"
-        );
+            "n_elements is zero, nothing to malloc.\n\n";
 
         return;
     }

@@ -44,7 +44,7 @@ void rssringoccs_CSVData_Interpolate_Geo(rssringoccs_CSVData *csv)
             "\nError Encountered: rss_ringoccs\n"
             "\trssringoccs_CSVData_Interpolate_Geo\n\n"
             "csv->geo->n_elements < increment + decrement.\n"
-            "No data to interpolate.\n\n"
+            "No data to interpolate.\n\n";
 
         return;
     }

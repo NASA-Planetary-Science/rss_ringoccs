@@ -33,37 +33,19 @@
 /*  Function for freeing the memory in a CSV object.                          */
 void rssringoccs_UranusCSVData_Destroy(rssringoccs_UranusCSVData **csv)
 {
-    /*  Used for the pointer to the CSV object.                               */
-    rssringoccs_UranusCSVData *csv_inst;
-
     /*  If the input pointer is NULL, simply return.                          */
-    if (csv == NULL)
+    if (!csv)
         return;
 
-    /*  Otherwise, get a pointer to the CSV object.                           */
-    csv_inst = *csv;
-
-    /*  If this is NULL, there's no need to free it. Return.                  */
-    if (csv_inst == NULL)
+    /*  If the pointer is NULL, there's no need to free it. Return.           */
+    if (!(*csv))
         return;
 
     /*  Free all of the pointers inside the CSV object.                       */
-    rssringoccs_UranusCSVData_Destroy_Members(csv_inst);
-
-    /*  If an error occurred along the way, the error_message variable is     *
-     *  malloced and a string is stored. Check if we need to free this.       */
-    if (csv_inst->error_message != NULL)
-    {
-        free(csv_inst->error_message);
-
-        /*  To avoid freeing twice, reset the pointer to NULL.                */
-        csv_inst->error_message = NULL;
-    }
+    rssringoccs_CSVData_Destroy_Members(*csv);
 
     /*  Free the pointer to the object and set it to NULL to avoid freeing    *
      *  this object twice.                                                    */
-    free(csv_inst);
-    *csv = NULL;
-    return;
+    TMPL_FREE(*csv);
 }
 /*  End of rssringoccs_UranusCSVData_Destroy.                                 */

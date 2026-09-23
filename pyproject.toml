@@ -12,29 +12,14 @@ keywords = ["cassini", "radio science", "astronomy", "planetary rings"]
 requires-python = ">= 3.7"
 dependencies = ["numpy", "scipy", "matplotlib", "spiceypy"]
 authors = [
-    {
-        name = "Ryan Maguire",
-        email = "rmaguire@spacescience.org"
-    },
-    {
-        name = "Richard French",
-        email = "rfrench@wellesley.edu"
-    },
-    {
-        name = "Jolene Fong"
-    },
-    {
-        name = "Sophia Flury"
-    },
-    {
-        name = "Glenn Steranka"
-    }
+    {name = "Ryan Maguire", email = "rmaguire@spacescience.org"},
+    {name = "Richard French", email = "rfrench@wellesley.edu"},
+    {name = "Jolene Fong"},
+    {name = "Sophia Flury"},
+    {name = "Glenn Steranka"}
 ]
 maintainers = [
-    {
-        name = "Ryan Maguire",
-        email = "rmaguire@spacescience.org"
-    }
+    {name = "Ryan Maguire", email = "rmaguire@spacescience.org"}
 ]
 
 [tool.scikit-build]

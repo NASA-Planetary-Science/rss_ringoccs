@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools", "numpy", "scipy", "matplotlib", "spiceypy"]
-build-backend = "setuptools.build_meta"
+requires = ["scikit-build-core>=0.10", "numpy"]
+build-backend = "scikit_build_core.build"
 
 [project]
 name = "rss_ringoccs"
@@ -10,9 +10,42 @@ readme = "README.md"
 license = {file = "LICENSE"}
 keywords = ["cassini", "radio science", "astronomy", "planetary rings"]
 requires-python = ">= 3.7"
+dependencies = ["numpy", "scipy", "matplotlib", "spiceypy"]
 authors = [
-    {name = "Ryan Maguire", email = "rmaguire@protonmail.com"}
+    {
+        name = "Ryan Maguire",
+        email = "rmaguire@spacescience.org"
+    },
+    {
+        name = "Richard French",
+        email = "rfrench@wellesley.edu"
+    },
+    {
+        name = "Jolene Fong"
+    },
+    {
+        name = "Sophia Flury"
+    },
+    {
+        name = "Glenn Steranka"
+    }
 ]
 maintainers = [
-    {name = "Ryan Maguire", email = "rmaguire@protonmail.com"}
+    {
+        name = "Ryan Maguire",
+        email = "rmaguire@spacescience.org"
+    }
 ]
+
+[tool.scikit-build]
+minimum-version = "build-system.requires"
+install.components = ["python"]
+wheel.packages = ["rss_ringoccs"]
+wheel.exclude = [
+    "rss_ringoccs/crssringoccs/**",
+    "rss_ringoccs/plotting_scripts/**",
+    "rss_ringoccs/tools/pdf_merge.sh",
+]
+
+[tool.scikit-build.cmake.define]
+OMP = {env = "USE_OPENMP", default = "OFF"}

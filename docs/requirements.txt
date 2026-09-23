@@ -1,6 +1,0 @@
-numpy
-scipy
-spiceypy
-matplotlib
-mayavi
-PyMieScatt

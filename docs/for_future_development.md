@@ -1,21 +1,12 @@
 # Brief overview and ideas for future development of `rss_ringoccs` v1.3
 
-## Accessibility
-
-- The `rss_ringoccs` software is currently hosted on GitHub repository, available by clone or by download
-- Data and kernel reference files live on NASA/PDS node server — will need to curl (or wget if supported) to obtain these (very large). Scripts are provided for this purpose.
-- **Lien:** make software installable via pip or conda — should help address many of the issues encountered in attempting to use outside of the source directory because this would enable the pipeline to run anywhere. Possible issues to address: location of input files (RSR and kernels), configuration scripts, and 
-
-## The rss_ringoccs pipeline
-The source code for the `rss_ringoccs` software is stored in the `./rss_ringoccs/` directory within the top-level directory cloned or downloaded from GitHub.
-
 ### RSRReader class
     Contact: J Fong
 - Stored in `./rss_ringoccs/rsr_reader/` 
 - Files are binary in a NASA PDS format — must be custom-read
 - Code is hard-wired to follow NASA Planetary Data System formatting — will parse a header and then read in subsequent data
 - **Lien:**
-    -  Recover uplink DSN station from header for post-USO occultations
+    - Recover uplink DSN station from header for post-USO occultations
     - Determine nature of post-USO files ending in “5”
     - Investigate files which lack proper coefficients for computing predicted sky frequencies (stored in header but sometimes are NaN, e.g. Rev 82)
 
@@ -66,14 +57,6 @@ The source code for the `rss_ringoccs` software is stored in the `./rss_ringoccs
 - **Lien:**
     - Computing upper and lower uncertainty limits for tau thresh and stationary phase following MTR Eqn 27 for inclusion in the DLP TAB or LBL file
     - Proximal orbit support?
-
-### DiffractionCorrection 
-    Contact: R Maguire
-- Stored in `./rss_ringoccs/diffrec/`
-- This is the crowning achievement of the ring occultation radio science experiment: only with the complex signal can diffraction effects be reduced or eliminated. The Fresnel transform requires the signal phase in order to perform this correction, the phase coming from arctan(Q/I).
-- The approach to solving the Fresnel transform follows MTR86. This deviates from MTR86 in computing the phase. While MTR86 uses a second order approximation to the phase term ψ (see their Appendix A), DiffractionCorrection allows for higher order approximations of ψ (following MTR86 Appendix A for a fourth-order approximation) and a full solution using Newton-Raphson root-finding (i.e., finding where dψ/dφ = 0 with φ being the stationary phase computed from the calibrated complex signal) to determine the complete expression.
-- Unlike the rest of rss_ringoccs, DiffractionCorrection is written in C and wrapped in python to allow for a more hospitable computation time.
-
 
 ### Scatter
     Contact: S Flury
@@ -174,3 +157,4 @@ Tables of reference information are stored in the `./tables/` directory. These i
     - Elaboration on installation, configuration, and getting started
     - science/technical justification/explanation for pipeline steps
     - Detailed textual explanation of each step
+

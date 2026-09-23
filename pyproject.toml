@@ -34,3 +34,4 @@ wheel.exclude = [
 
 [tool.scikit-build.cmake.define]
 OMP = {env = "USE_OPENMP", default = "OFF"}
+NATIVE = {env = "USE_NATIVE", default = "OFF"}

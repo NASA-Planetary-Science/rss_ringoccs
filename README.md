@@ -58,23 +58,29 @@ achieved the state-of-the-art in every respect. We encourage users to augment
 our algorithms and to report on those improvements, so that they can be
 incorporated in future editions of rss_ringoccs.
 
-## Building
+## Setup
 
 `rss_ringoccs` has a few dependencies:
 
 1. A `C` compiler (`gcc`, `clang`, `tcc`, `pcc`, `icx`, and `MSVC` work fine).
 2. `python3` (we have tested versions `3.7` to `3.14`).
 3. `libtmpl`
-4. `setuptools` (or `distutils` if you are using `python 3.10` or older).
-5. `numpy`
-6. `scipy`
-7. `spiceypy`
-8. `CSPICE`
-9. `GNU Make` (Unix-like) or `CMake` (Windows or Unix-like).
+4. One of the following Python build systems.
+    4a. `scikit-build-core` (default)
+    4b. `setuptools`
+    4c. `distutils` (only if you are using `python 3.10` or older).
+5. One of the following C build systems.
+    5a. `CMake`.
+    5b. `GNU Make`.
+6. `numpy`
+7. `scipy`
+8. `spiceypy`
+9. `CSPICE`
 10. `git` (to download the source code).
 
-`libtmpl` is provided as a submodule, and the Python dependencies can be
-found in the `requirements.txt` file.
+`libtmpl` is provided as a submodule.
+Python dependencies are managed by `pyproject.toml` (default) or
+`requirements.txt` (older Python versions).
 
 `CPSICE` can be obtained through the
 [NAIF website](https://naif.jpl.nasa.gov/naif/toolkit_C.html).
@@ -120,6 +126,37 @@ cd rss_ringoccs/
 ```
 
 This will also clone `libtmpl`, which is the primary `C` depenedency.
+
+## Building
+
+If newer versions of Python (`>=3.10`) and pip (`>=20.3`) are available, then
+the build process simplifies considerably. 
+For Unix-like environments running bash, use
+
+```bash
+export USE_NATIVE=ON
+export USE_OPENMP=ON
+pip install .
+```
+
+For Windows users running `CMD.exe`, type
+
+```bash
+SET USE_NATIVE=ON
+SET USE_OPENMP=ON
+pip install .
+```
+
+Notes:
+1. If you do **not** have OpenMP support, omit the `USE_OPENMP` flag.
+
+2. If you would like the compiled objects to be portable and shared across
+   different computers, omit the `USE_NATIVE` flag. This is not advised since
+   allowing native CPU instructions may greatly improve performance. It is
+   better to build `rss_ringoccs` separately on different devices, rather than
+   copying and pasting builds.
+
+## Building (Older Python Versions)
 
 ### Building (GNU / Linux)
 

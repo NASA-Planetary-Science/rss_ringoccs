@@ -19,81 +19,54 @@
 #   Author:     Ryan Maguire                                                   #
 #   Date:       January 23, 2026                                               #
 ################################################################################
-cmake_minimum_required(VERSION 3.14)
-
+cmake_minimum_required(VERSION 3.15)
 project(rss_ringoccs C)
 
 option(BUILD_SHARED_LIBS "Build shared library" OFF)
+option(NATIVE "Enable native CPU instructions" OFF)
 option(OMP "Enable OpenMP support" OFF)
 
+# The Python extension always links librssringoccs and libtmpl statically.
+if (SKBUILD)
+    set(BUILD_SHARED_LIBS OFF)
+endif()
+
+# libtmpl is provided as a submodule. Add this library to the build process.
 add_subdirectory(libtmpl)
 
+# librssringoccs also requires CSPICE from NAIF. Note, librssringoccs does
+# not require the CSPICE headers, but it does require the compiled library.
 set(CMAKE_FIND_LIBRARY_PREFIXES "")
 find_library(CSPICE_LIB NAMES cspice libcspice REQUIRED)
 find_library(CSUPPORT_LIB NAMES csupport libcsupport REQUIRED)
 
-file(GLOB_RECURSE SOURCES "src/*.c")
+################################################################################
+#                                librssringoccs                                #
+################################################################################
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "src/*.c")
 add_library(rssringoccs ${SOURCES})
+get_filename_component(RSSRINGOCCS_DIR_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME)
 
+if (RSSRINGOCCS_DIR_NAME STREQUAL "rss_ringoccs")
+    get_filename_component(
+        RSSRINGOCCS_INCLUDE_ROOT ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY
+    )
+else()
+    set(RSSRINGOCCS_INCLUDE_ROOT ${CMAKE_CURRENT_BINARY_DIR}/include_root)
+    file(
+        COPY include/
+        DESTINATION ${RSSRINGOCCS_INCLUDE_ROOT}/rss_ringoccs/include
+    )
+endif()
+
+# Add libtmpl and rss_ringoccs headers to the include path.
 target_include_directories(
-    rssringoccs PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/>
-    rssringoccs PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
+    rssringoccs PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<BUILD_INTERFACE:${RSSRINGOCCS_INCLUDE_ROOT}>
 )
 
-# Check for link-time optimization (LTO) support.
-include(CheckIPOSupported)
-check_ipo_supported(RESULT IPO_SUPPORTED)
-
-# Check for OMP support.
-if (OMP)
-    find_package(OpenMP)
-    if (OpenMP_C_FOUND)
-        message(STATUS "rss_ringoccs compiling with OpenMP support.")
-    else()
-        message(WARNING "OpenMP support requested but not found.")
-    endif()
-endif()
-
-if (NOT MSVC)
-
-    # Check for -march=native support
-    include(CheckCCompilerFlag)
-    check_c_compiler_flag("-march=native" COMPILER_SUPPORTS_MARCH_NATIVE)
-
-    target_compile_options(
-        rssringoccs PRIVATE -Wall -Wextra -Wpedantic -O3 -fPIC
-    )
-
-    # Add -march=native if supported
-    if (COMPILER_SUPPORTS_MARCH_NATIVE)
-        target_compile_options(rssringoccs PRIVATE -march=native)
-    endif()
-
-    # Add OMP flags if necessary.
-    if (OpenMP_C_FOUND)
-
-        target_compile_options(
-            rssringoccs PRIVATE
-            $<$<C_COMPILER_ID:AppleClang>:-Xpreprocessor>
-            -fopenmp
-        )
-
-        target_link_libraries(rssringoccs PRIVATE OpenMP::OpenMP_C)
-    endif()
-else()
-    target_compile_options(rssringoccs PRIVATE /W4 /O2)
-
-    if (OpenMP_C_FOUND)
-        target_compile_options(rssringoccs PRIVATE /openmp)
-        target_link_libraries(rssringoccs PRIVATE OpenMP::OpenMP_C)
-    endif()
-endif()
-
-# Enable link-time optimization if supported.
-if(IPO_SUPPORTED)
-    set_property(TARGET rssringoccs PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
-endif()
-
+# librssringoccs requires libtmpl and CSPICE. Link these libraries.
 target_link_libraries(
     rssringoccs PRIVATE
     tmpl
@@ -101,6 +74,56 @@ target_link_libraries(
     ${CSUPPORT_LIB}
 )
 
+# Add optimization flags and warnings.
+if (MSVC)
+    target_compile_options(rssringoccs PRIVATE /W4 /O2)
+else()
+    target_compile_options(
+        rssringoccs PRIVATE -Wall -Wextra -Wpedantic -O3 -fPIC
+    )
+endif()
+
+# libtmpl provides SIMD versions of many routines if the relevant instructions
+# are available on the CPU. Enable native CPU instructions if requested.
+if (NATIVE)
+    if (NOT MSVC)
+        include(CheckCCompilerFlag)
+        check_c_compiler_flag("-march=native" COMPILER_SUPPORTS_MARCH_NATIVE)
+        check_c_compiler_flag("-mcpu=native" COMPILER_SUPPORTS_MCPU_NATIVE)
+
+        if (COMPILER_SUPPORTS_MARCH_NATIVE)
+            target_compile_options(rssringoccs PRIVATE -march=native)
+        elseif (COMPILER_SUPPORTS_MCPU_NATIVE)
+            target_compile_options(rssringoccs PRIVATE -mcpu=native)
+        endif()
+    endif()
+endif()
+
+# Enable OpenMP if requested. This is highly recommended for rss_ringoccs.
+# The computationally heavy portions are parallelized when
+# OpenMP support is available.
+if (OMP)
+    find_package(OpenMP)
+
+    if (OpenMP_C_FOUND)
+        message(STATUS "rss_ringoccs compiling with OpenMP support.")
+        target_link_libraries(rssringoccs PRIVATE OpenMP::OpenMP_C)
+    else()
+        message(WARNING "OpenMP support requested but not found.")
+    endif()
+endif()
+
+# Enable link-time optimization (LTO) if supported.
+include(CheckIPOSupported)
+check_ipo_supported(RESULT IPO_SUPPORTED)
+
+if (IPO_SUPPORTED)
+    set_property(TARGET rssringoccs PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif()
+
+# The user may want to install only the C components, and skip the Python
+# parts. This can be accomplished by using CMake directly without pip.
+# cmake --install will then install the C library only.
 install(
     TARGETS rssringoccs
     ARCHIVE DESTINATION lib
@@ -108,4 +131,28 @@ install(
     RUNTIME DESTINATION bin
 )
 
-install(DIRECTORY include/ DESTINATION include/rss_ringoccs)
+install(DIRECTORY include/ DESTINATION include/rss_ringoccs/include)
+
+################################################################################
+#                       crssringoccs (Python extension)                        #
+################################################################################
+if (SKBUILD)
+    find_package(
+        Python REQUIRED COMPONENTS Interpreter Development.Module NumPy
+    )
+
+    file(
+        GLOB_RECURSE CRSSRINGOCCS_SOURCES CONFIGURE_DEPENDS
+        "rss_ringoccs/crssringoccs/*.c"
+    )
+
+    # crssringoccs makes use of the C-Python API and the Numpy API. It also
+    # calls librssringoccs and libtmpl, two C libraries. Link all of these
+    # requirements into crssringoccs.
+    python_add_library(crssringoccs MODULE WITH_SOABI ${CRSSRINGOCCS_SOURCES})
+    target_link_libraries(crssringoccs PRIVATE rssringoccs tmpl Python::NumPy)
+
+    # The C extension module crssringoccs needs to be installed to
+    # site packages for the Python part of rss_ringoccs to function properly.
+    install(TARGETS crssringoccs LIBRARY DESTINATION . COMPONENT python)
+endif()

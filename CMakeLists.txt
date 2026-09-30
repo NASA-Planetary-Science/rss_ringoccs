@@ -152,6 +152,14 @@ if (SKBUILD)
     python_add_library(crssringoccs MODULE WITH_SOABI ${CRSSRINGOCCS_SOURCES})
     target_link_libraries(crssringoccs PRIVATE rssringoccs tmpl Python::NumPy)
 
+    # librssringoccs and libtmpl are built with LTO, so their static libraries
+    # contain compiler IR rather than machine code. Link the module with LTO.
+    if (IPO_SUPPORTED)
+        set_property(
+            TARGET crssringoccs PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE
+        )
+    endif()
+
     # The C extension module crssringoccs needs to be installed to
     # site packages for the Python part of rss_ringoccs to function properly.
     install(TARGETS crssringoccs LIBRARY DESTINATION . COMPONENT python)

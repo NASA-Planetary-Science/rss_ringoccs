@@ -12,13 +12,13 @@
     4. [Building (Legacy)](#building-legacy)
         1. [Building (GNU / Linux, FreeBSD, macOS)](#building-gnu--linux-freebsd-macos)
         2. [Building (Windows)](#building-windows)
-    3. [Updating](#updating)
-    4. [Cleaning / Uninstalling](#cleaning--uninstalling)
+    5. [Updating](#updating)
+    6. [Cleaning / Uninstalling](#cleaning--uninstalling)
         1. [Using pip and GNU Make](#using-pip-and-gnu-make)
         2. [Cleaning on Windows](#cleaning-on-windows)
-    5. [Release Notes](#release-notes)
-    6. [Batch Data Processing](#batch-data-processing)
-    7. [Citing rss_ringoccs](#citing-rss_ringoccs)
+    7. [Release Notes](#release-notes)
+    8. [Batch Data Processing](#batch-data-processing)
+    9. [Citing rss_ringoccs](#citing-rss_ringoccs)
 2. [Getting Help](#getting-help)
 3. [Version History](#version-history)
 4. [Acknowledgements](#acknowledgements)
@@ -37,12 +37,12 @@ tour of Saturn to observe a superb series of ring occultations that resulted in
 high-resolution, high-SNR radial profiles of Saturn's rings at three radio
 wavelengths: 13 cm (S band), 3.6 cm (X band), and 0.9 cm (Ka band). Radial
 optical depth profiles of the rings at 1- and 10-km resolution produced by the
-Cassini RSS team, using state of the art signal processing techniques to remove
+Cassini RSS team, using state-of-the-art signal processing techniques to remove
 diffraction effects, are available on NASA's Planetary Data System (PDS). These
 archived products are likely to be quite adequate for many ring scientists, but
 for those who wish to generate their own diffraction-reconstructed ring profiles
-from Cassini RSS observations, we offer rss_ringoccs: a suite of Python-based
-analysis tools for Cassini Radio Science (RSS) ring occultations.
+from Cassini RSS observations, we offer rss_ringoccs: a suite of C and
+Python-based analysis tools for Cassini Radio Science (RSS) ring occultations.
 
 The purpose of rss_ringoccs is to enable scientists to produce "on demand"
 radial optical depth profiles of Saturn's rings from the raw RSS data, without
@@ -54,7 +54,7 @@ employed. Our emphasis has been on clarity, sometimes at the expense of
 programming efficiency and execution time. rss_ringoccs does an excellent job
 of reproducing existing 1 km-resolution RSS processed ring occultation data
 already present on NASA's PDS Ring-Moons Node, but we make no claim to having
-achieved the state-of-the-art in every respect. We encourage users to augment
+achieved the state of the art in every respect. We encourage users to augment
 our algorithms and to report on those improvements, so that they can be
 incorporated in future editions of rss_ringoccs.
 
@@ -62,26 +62,27 @@ incorporated in future editions of rss_ringoccs.
 
 `rss_ringoccs` has a few dependencies:
 
-1. A `C` compiler (`gcc`, `clang`, `tcc`, `pcc`, `icx`, and `MSVC` work fine).
-2. `python3` (we have tested versions `3.7` to `3.14`).
+1. A `C` compiler (`gcc`, `clang`, `pcc`, `icx`, and `MSVC` work fine).
+2. `python3`, version `3.10` or newer.
 3. `libtmpl`
-4. One of the following Python build systems.
-    4a. `scikit-build-core` (default)
-    4b. `setuptools`
-    4c. `distutils` (only if you are using `python 3.10` or older).
-5. One of the following C build systems.
-    5a. `CMake`.
-    5b. `GNU Make`.
+4. One of the following Python build systems:
+    * `scikit-build-core` (default)
+    * `setuptools`
+    * `distutils` (only if you are using Python 3.11 or older).
+5. One of the following C build systems:
+    * `CMake`
+    * `GNU Make`
 6. `numpy`
 7. `scipy`
-8. `spiceypy`
-9. `CSPICE`
-10. `git` (to download the source code).
+8. `matplotlib`
+9. `spiceypy`
+10. `CSPICE`
+11. `git` (to download the source code).
 
-`libtmpl` is provided as a submodule and the python dependencies are managed by
+`libtmpl` is provided as a submodule and the Python dependencies are managed by
 `pyproject.toml` (default) or `requirements.txt` (older Python versions).
 
-`CPSICE` can be obtained through [NAIF](https://naif.jpl.nasa.gov/naif/toolkit_C.html).
+`CSPICE` can be obtained through [NAIF](https://naif.jpl.nasa.gov/naif/toolkit_C.html).
 1.  Make sure the CSPICE library files are in your path when building.
     For non-Windows users, this can be achieved by placing the files `cspice.a`
     and `csupport.a` in `/usr/local/lib`. For Windows users this can be done by
@@ -93,13 +94,13 @@ incorporated in future editions of rss_ringoccs.
 
 ### Installing Dependencies
 
-Most dependencies are managed automatically. Only Python, a C compiler, and git
-are directly needed. Install using
+Most dependencies are managed automatically. Only Python, a C compiler, git,
+and CSPICE (see above) need to be installed by hand. Install using
 
-* Debian / Ubuntu: `sudo apt install gcc python3 git`
-* Fedora: `sudo dnf install gcc python3 git`
+* Debian / Ubuntu: `sudo apt install gcc python3 python3-dev python3-venv git`
+* Fedora: `sudo dnf install gcc python3 python3-devel git`
 * Arch Linux: `sudo pacman -S gcc python git`
-* FreeBSD: `sudo pkg install gcc python3 git`
+* FreeBSD: `sudo pkg install gcc python3 cmake ninja git`
 * macOS: `xcode-select --install`
 * Windows: Install directly from the following websites:
   * [MSVC](https://visualstudio.microsoft.com/vs/features/cplusplus/)
@@ -115,11 +116,12 @@ It is **HIGHLY** recommended that you compile `rss_ringoccs` with OpenMP
 support. The inner for-loops in the processing steps can be parallelized,
 resulting in a significant speed boost (about 30x on a 32-core CPU).
 
-Parallelizing does require more memory due to thread safety issues. This
-increase is relatively small. The highest resolution reconstructions attempted
-so far required about 2GB of memory with 32 threads all firing at once. Because
-of this, if you have limited memory (say, less than 8GB of RAM) and intend to
-perform high resolution processing, then you should **not** enable OpenMP.
+Parallelizing does require more memory, since each thread needs its own copy
+of some arrays. The increase is modest: the highest resolution reconstructions
+attempted so far required about 2GB of memory with 32 threads all firing at
+once. If you have limited memory (say, less than 8GB of RAM) and intend to
+perform high resolution processing, either do **not** enable OpenMP, or limit
+the number of threads with the `OMP_NUM_THREADS` environment variable.
 
 Note that OpenMP is not a required dependency and both `librssringoccs` and
 `libtmpl` will compile with or without OpenMP enabled.
@@ -131,21 +133,21 @@ distributions and on FreeBSD, `clang` supports OpenMP, but the library needs to
 be provided. Install this using
 
 * Debian / Ubuntu: `sudo apt install libomp-dev`
-* Fedora: `sudo dnf install libomp`
+* Fedora: `sudo dnf install libomp-devel`
 * Arch Linux: `sudo pacman -S openmp`
-* FreeBSD: `sudo pkg install llvm21`
+* FreeBSD: `sudo pkg install llvm21`, then `export CC=clang21`
 
-Similar installation instructions exist for other distributions. non-GNU based
+Similar installation instructions exist for other distributions. Non-GNU-based
 Linux distributions and other BSDs will likely work just fine, but these have
 not been tested.
 
-If you are using a compiler other than `gcc` or `clang`, consult the compilers
+If you are using a compiler other than `gcc` or `clang`, consult the compiler's
 manual to see if it supports OpenMP.
 
 #### Installing OpenMP (macOS)
 
 Apple's version of `clang` does not support OpenMP out of the box, but support
-can be enabled using HomeBrew. There are two methods that we have tested.
+can be enabled using Homebrew. There are two methods that we have tested.
 
 ##### OpenMP using GCC
 
@@ -153,16 +155,17 @@ Perhaps the easiest method is to simply use a different compiler.
 Apple's `C` compiler does not support OpenMP out of the box, but `gcc` does.
 
 1. Install [Homebrew](https://brew.sh/).
-2. Install `CMake` and `gcc` using homebrew:
+2. Install `CMake` and `gcc` using Homebrew:
 ```bash
 brew install cmake gcc
 ```
-3. Set your `CC` environment variable to the `homebrew` version of `gcc`:
+3. Set your `CC` environment variable to the Homebrew version of `gcc`:
 ```bash
-export CC=$(brew --prefix gcc)/bin/gcc-15
+export CC=$(brew --prefix gcc)/bin/gcc-16
 ```
 
-Replace this file path with whichever version you installed.
+Replace this file path with whichever version you installed
+(`ls $(brew --prefix gcc)/bin/gcc-*` lists them).
 
 **NOTE:** Do *not* use `/usr/bin/gcc`. On macOS this is still Apple's
 version of `clang`. OpenMP support will not compile if you use this version.
@@ -173,18 +176,17 @@ It is possible to use Apple's `C` compiler with OpenMP, but you'll need to
 provide `libomp` yourself. To do this, try the following.
 
 1. Install [Homebrew](https://brew.sh/).
-2. Install `CMake` and `libomp` using homebrew:
+2. Install `CMake` and `libomp` using Homebrew:
 ```bash
 brew install cmake libomp
 ```
 3. Set the following environment variables to include `libomp`:
 ```bash
 export CMAKE_PREFIX_PATH="$(brew --prefix libomp)"
-export CPATH="$(brew --prefix libomp)/lib"
 export CFLAGS="-I$(brew --prefix libomp)/include"
 ```
 
-### Installing OpenMP (Windows)
+#### Installing OpenMP (Windows)
 
 Microsoft's `MSVC` has support for OpenMP.
 If you are using `gcc` via MinGW or something similar, OpenMP support is
@@ -199,34 +201,44 @@ for details.
 To obtain `rss_ringoccs`, clone the repository:
 
 ```bash
-git clone --recursive http://github.com/NASA-Planetary-Science/rss_ringoccs.git
+git clone --recursive https://github.com/NASA-Planetary-Science/rss_ringoccs.git
 cd rss_ringoccs/
 ```
 
-This will also clone `libtmpl`, which is the primary `C` depenedency.
+This will also clone `libtmpl`, which is the primary `C` dependency.
 
 ## Building (Modern)
 
 For older versions of `pip` that do not support `pyproject.toml`, see
-[Building (Legacy)](#building-older-python-versions).
+[Building (Legacy)](#building-legacy).
 
 After [installing dependencies](#installing-dependencies) and [enabling OpenMP](#openmp-support)
 (optional, but **HIGHLY** recommended), for Unix-like environments running
 `bash`, use
 
 ```bash
+python3 -m venv .venv
+source .venv/bin/activate
+
 export USE_NATIVE=ON
 export USE_OPENMP=ON
-pip install .
+python3 -m pip install .
 ```
 
 For Windows users running `CMD`, type
 
-```bash
-SET USE_NATIVE=ON
-SET USE_OPENMP=ON
-pip install .
+```bat
+py -m venv .venv
+.venv\Scripts\activate.bat
+
+set USE_NATIVE=ON
+set USE_OPENMP=ON
+py -m pip install .
 ```
+
+The virtual environment (`.venv`) keeps `rss_ringoccs` separate from your
+system's Python. Many Linux distributions and Homebrew refuse `pip install`
+outside of one.
 
 Notes:
 1. If you do **not** have OpenMP support, omit the `USE_OPENMP` flag.
@@ -241,7 +253,7 @@ Notes:
 
 There are `setup.py` and `requirements.txt` files provided that allow
 `rss_ringoccs` to build using older versions of Python and `pip`.
-If you have Python 3.10 or high, and `pip` 20.3 or higher, please use the
+If you have Python 3.10 or higher, and `pip` 20.3 or higher, please use the
 [default instructions](#building-modern). For older versions, use these steps.
 
 ### Building (GNU / Linux, FreeBSD, macOS)
@@ -265,7 +277,7 @@ If you prefer to use `CMake`, do
 
 Most other GNU / Linux systems have these packages readily available.
 Use your package manager to obtain them.
-non-GNU based Linux distributions and other BSDs may also work,
+Non-GNU-based Linux distributions and other BSDs may also work,
 but have not been tested.
 
 To build, run the following:
@@ -282,7 +294,7 @@ python3 -m pip install -r requirements.txt
 python3 -m pip install .
 ```
 
-If you do not want OpenMP support enabled, omit the `export USE_OPENMP=1` line.
+If you do not want OpenMP support enabled, omit the `export USE_OPENMP=ON` line.
 
 ### Building (Windows)
 
@@ -305,7 +317,7 @@ version from the official Python website.
 
 For Windows the build instructions are slightly different.
 
-```bash
+```bat
 set USE_OPENMP=1
 py -m venv .venv
 .venv\Scripts\activate.bat
@@ -321,7 +333,7 @@ line at the top.
 ## Updating
 
 This project updates regularly, as does `libtmpl`. To rebuild, follow the
-cleaning instruction below, and then pull the latest changes with:
+cleaning instructions below, and then pull the latest changes with:
 
 ```bash
 git pull --recurse-submodules
@@ -333,7 +345,7 @@ You may then re-build the latest changes using the previous commands.
 
 ### Using pip and GNU Make
 
-Uninstalling `rss_ringoccs` can be done using pip ang GNU Make:
+Uninstalling `rss_ringoccs` can be done using pip and GNU Make:
 
 ```bash
 python3 -m pip uninstall rss_ringoccs
@@ -351,13 +363,13 @@ rm -rf .venv
 
 Type the following in the command prompt.
 
-```
+```bat
 rmdir /s build
 rmdir /s rss_ringoccs.egg-info
 rmdir /s .venv
 ```
 
-## Release notes
+## Release Notes
 `rss_ringoccs` has changed dramatically over the years from a project that
 was primarily written in `Python`, to one that is now mostly written in `C`.
 Release notes are contained in
@@ -365,17 +377,19 @@ https://github.com/NASA-Planetary-Science/rss_ringoccs/blob/master/ReleaseNotes.
 
 ## Batch Data Processing
 Once `rss_ringoccs` has been installed and the necessary data and
-ephemeris/geometry files have been downloaded to local storage, as describd in
-the `rss_ringoccs User Guide`, users should first test `rss_ringoccs` using the
+ephemeris/geometry files have been downloaded to local storage, as described in
+the [rss_ringoccs User Guide](docs/rss_ringoccs_user_guide_v1_3.pdf), users
+should first test `rss_ringoccs` using the
 documented example scripts. Once all is well, users will be able to process a
 set of Cassini RSS ring observations in batch mode. To simplify and expedite the
 use of `rss_ringoccs`, we provide a Python script that performs the end-to-end
 pipeline for a list of files contained in a reference ASCII text file. The
 default list is the 1 kHz Cassini RSR files prior to the USO failure, which can
-be found in the  `./tables/` directory. This batch script implementation of the
+be found in the `./tables/` directory. This batch script implementation of the
 pipeline is located in the `./pipeline/` directory. We suggest running the batch
 script using the `yes` command as shown here:
-```cd rss_ringoccs_master/pipeline
+```bash
+cd rss_ringoccs/pipeline
 yes | python e2e_batch.py
 ```
 The `rss_ringoccs User Guide` includes several additional examples of end-to-end
@@ -384,13 +398,14 @@ own batch end-to-end scripts.
 
 ## Citing rss_ringoccs
 If you use rss_ringoccs as the basis of a publication, please consider
-citing rss_ringoccs using the DOI:10.5281/zenodo.2548947
+citing rss_ringoccs using the DOI
+[10.5281/zenodo.2548947](https://doi.org/10.5281/zenodo.2548947).
 
 # Getting Help
 If you have trouble with installation or execution of the rss_ringoccs package,
-we encourage you to post a issue to
+we encourage you to open an issue at
 https://github.com/NASA-Planetary-Science/rss_ringoccs/issues. We will attempt
-to respond promptly, and ther users will benefit. Alternatively, you can write
+to respond promptly, and other users will benefit. Alternatively, you can write
 email directly to Richard French: rfrench_at_wellesley.edu.
 
 # Version History
@@ -398,7 +413,7 @@ email directly to Richard French: rfrench_at_wellesley.edu.
 | Version     | Date                  |
 |-------------|-----------------------|
 | 1.3-beta    | January 12, 2021      |
-| 1.2.1       | Septmber 7, 2019      |
+| 1.2.1       | September 7, 2019     |
 | 1.2         | July 3, 2019          |
 | 1.1         | February 5, 2019      |
 | 1.0         | September 30, 2018    |
@@ -406,8 +421,8 @@ email directly to Richard French: rfrench_at_wellesley.edu.
 
 # Acknowledgements
 This work was supported by the NASA/JPL Cassini mission. We are especially
-grateful  to Linda Spilker and Kathryn Weld for their encouragement and support,
-and to  RSS Team Member Essam Marouf for developing the diffraction
+grateful to Linda Spilker and Kathryn Weld for their encouragement and support,
+and to RSS Team Member Essam Marouf for developing the diffraction
 reconstruction technique that underlies this work.
 
 # License
